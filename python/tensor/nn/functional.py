@@ -1,7 +1,6 @@
 import numpy as np
 
 from tensor.tensor import Tensor
-from tensor.losses import cross_entropy as _cross_entropy
 
 
 def relu(x: Tensor):
@@ -62,6 +61,24 @@ def softmax(x: Tensor, axis=-1):
             out_host = out.to_numpy()
             sum_gs = (out.grad * out_host).sum(axis=axis, keepdims=True)
             x.grad += out_host * (out.grad - sum_gs)
+
+    out._backward = _backward
+    return out
+
+
+def log_softmax(x: Tensor, axis=-1):
+    x_data = x.to_numpy()
+    x_max = x_data.max(axis=axis, keepdims=True)
+    exp_x = np.exp(x_data - x_max)
+    denom = exp_x.sum(axis=axis, keepdims=True)
+    log_probs = (x_data - x_max) - np.log(np.maximum(denom, 1e-12))
+    out = Tensor(log_probs, requires_grad=x.requires_grad, _children=(x,), _op="log_softmax", device=x.device)
+
+    def _backward():
+        if x.requires_grad:
+            probs = np.exp(log_probs)
+            sum_g = out.grad.sum(axis=axis, keepdims=True)
+            x.grad += out.grad - probs * sum_g
 
     out._backward = _backward
     return out
@@ -175,12 +192,56 @@ def mse_loss(input: Tensor, target, reduction="mean"):
     if reduction == "mean":
         return out.mean()
     if reduction == "sum":
-        return Tensor(out.to_numpy().sum(), requires_grad=out.requires_grad, _children=(out,), _op="sum", device=out.device)
+        return out.sum()
     return out
 
 
 def cross_entropy(input: Tensor, target):
-    return _cross_entropy(input, target)
+    log_probs = log_softmax(input, axis=-1)
+    return nll_loss(log_probs, target, reduction="mean")
+
+
+def nll_loss(input: Tensor, target, reduction="mean"):
+    # input: log-probabilities
+    target = np.asarray(target, dtype=np.int64)
+    x = input.to_numpy()
+
+    if x.ndim == 1:
+        x = x.reshape(1, -1)
+        target = target.reshape(1,)
+
+    c = x.shape[-1]
+    x_flat = x.reshape(-1, c)
+    target_flat = target.reshape(-1)
+    n = target_flat.shape[0]
+
+    loss_vals = -x_flat[np.arange(n), target_flat]
+    if reduction == "sum":
+        out_data = loss_vals.sum()
+    elif reduction == "none":
+        out_data = loss_vals.reshape(target.shape)
+    else:
+        out_data = loss_vals.mean()
+
+    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, requires_grad=input.requires_grad, _children=(input,), _op="nll_loss", device=input.device)
+
+    def _backward():
+        if input.requires_grad:
+            grad = np.zeros_like(x_flat)
+            grad[np.arange(n), target_flat] = -1.0
+            if reduction == "mean":
+                grad /= n
+                grad = grad.reshape(x.shape)
+                input.grad += grad * out.grad
+            elif reduction == "sum":
+                grad = grad.reshape(x.shape)
+                input.grad += grad * out.grad
+            else:
+                grad = grad.reshape(x.shape)
+                input.grad += grad * out.grad.reshape(target.shape + (1,))
+
+    out._backward = _backward
+    return out
 
 
 __all__ = [
@@ -189,10 +250,12 @@ __all__ = [
     "silu",
     "gelu",
     "softmax",
+    "log_softmax",
     "linear",
     "layer_norm",
     "rms_norm",
     "dropout",
     "mse_loss",
     "cross_entropy",
+    "nll_loss",
 ]

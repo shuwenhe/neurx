@@ -212,11 +212,75 @@ class Tensor:
     def mean(self):
         host = _to_numpy(self.data)
         denom = host.size
-        out = Tensor(np.array(host.mean()), self.requires_grad, (self,), "mean")
+        out = Tensor(np.array(host.mean()), self.requires_grad, (self,), "mean", device=self.device)
 
         def _backward():
             if self.requires_grad:
-                self.grad += (np.ones_like(self.data) / denom) * out.grad
+                self.grad += (np.ones_like(host) / denom) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def sum(self, axis=None, keepdims=False):
+        host = _to_numpy(self.data)
+        out_data = host.sum(axis=axis, keepdims=keepdims)
+        out = Tensor(out_data, self.requires_grad, (self,), "sum", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad
+                if axis is not None and not keepdims:
+                    axes = axis if isinstance(axis, tuple) else (axis,)
+                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
+                    for ax in sorted(axes):
+                        grad = np.expand_dims(grad, axis=ax)
+                self.grad += np.ones_like(host) * grad
+
+        out._backward = _backward
+        return out
+
+    def max(self, axis=None, keepdims=False):
+        host = _to_numpy(self.data)
+        out_data = host.max(axis=axis, keepdims=keepdims)
+        out = Tensor(out_data, self.requires_grad, (self,), "max", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad
+                expanded = out_data
+                if axis is not None and not keepdims:
+                    axes = axis if isinstance(axis, tuple) else (axis,)
+                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
+                    for ax in sorted(axes):
+                        grad = np.expand_dims(grad, axis=ax)
+                        expanded = np.expand_dims(expanded, axis=ax)
+                mask = host == expanded
+                count = mask.sum(axis=axis, keepdims=True) if axis is not None else mask.sum()
+                count = np.maximum(count, 1)
+                self.grad += mask * (grad / count)
+
+        out._backward = _backward
+        return out
+
+    def min(self, axis=None, keepdims=False):
+        host = _to_numpy(self.data)
+        out_data = host.min(axis=axis, keepdims=keepdims)
+        out = Tensor(out_data, self.requires_grad, (self,), "min", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad
+                expanded = out_data
+                if axis is not None and not keepdims:
+                    axes = axis if isinstance(axis, tuple) else (axis,)
+                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
+                    for ax in sorted(axes):
+                        grad = np.expand_dims(grad, axis=ax)
+                        expanded = np.expand_dims(expanded, axis=ax)
+                mask = host == expanded
+                count = mask.sum(axis=axis, keepdims=True) if axis is not None else mask.sum()
+                count = np.maximum(count, 1)
+                self.grad += mask * (grad / count)
 
         out._backward = _backward
         return out
