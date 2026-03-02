@@ -29,3 +29,8 @@ def cross_entropy(logits: Tensor, targets):
 
     out._backward = _backward
     return out
+
+
+def cross_entropy_loss(logits: Tensor, targets):
+    # Backwards-compat alias used by __init__.py
+    return cross_entropy(logits, targets)
