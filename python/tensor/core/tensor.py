@@ -81,6 +81,12 @@ class Tensor:
             return self.shape
         return self.shape[dim]
 
+    def numel(self):
+        n = 1
+        for d in self.shape:
+            n *= d
+        return n
+
     @property
     def dtype(self):
         return _to_numpy(self.data).dtype
@@ -251,6 +257,12 @@ class Tensor:
 
     def detach(self):
         return Tensor(self.to_numpy().copy(), requires_grad=False, device=self.device)
+
+    def clone(self):
+        return Tensor(self.to_numpy().copy(), requires_grad=self.requires_grad, device=self.device)
+
+    def contiguous(self):
+        return self
 
     def to(self, device=None, dtype=None):
         target_device = device or self.device
