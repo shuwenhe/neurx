@@ -1,6 +1,7 @@
 # tensor
 
-A minimal NumPy-based autograd framework extracted from the `llm` project. It now follows a scalable, industrial-style project layout with clear separation between Python front-end, C++ runtime, and CUDA kernels.
+A NumPy-based deep learning framework evolving toward a full-stack production platform.  
+Current state: production foundation is in place (runtime config, diagnostics, package scaffolding), with core kernels and distributed/compile capabilities still in active expansion.
 
 ## Features
 - Autograd `Tensor` with basic ops and `backward()`
@@ -8,6 +9,10 @@ A minimal NumPy-based autograd framework extracted from the `llm` project. It no
 - Optimizer `AdamW` and `clip_grad_norm`
 - Losses `cross_entropy` and `cross_entropy_loss`
 - CUDA extension (starter) with GPU tensor, add/mul, bias add, matmul, layernorm, softmax
+- Runtime platform module (`tensor.platform`) for config, logging, diagnostics (`tensor-doctor`)
+- Data pipeline scaffolding (`tensor.data.Dataset`, `tensor.data.DataLoader`)
+- Distributed runtime scaffolding (`tensor.distributed.detect_distributed_config`)
+- Compile API boundary (`tensor.compile.compile_module`)
 
 ## Project Layout
 ```
@@ -18,9 +23,10 @@ tensor/
       core/            # Python-level tensor, autograd, utils
       nn/              # layers (currently in core/nn.py)
       optim/           # optimizers (currently in core/optim.py)
-      data/            # dataset/dataloader (planned)
-      distributed/     # DDP, collectives (planned)
-      compile/         # JIT/AOT front-end (planned)
+      data/            # dataset/dataloader
+      distributed/     # distributed runtime config/launcher scaffold
+      compile/         # compile API scaffold
+      platform/        # runtime config, logging, diagnostics, errors
   cpp/
     tensor/
       core/            # C++ Tensor, Storage, Memory, Device (planned)
@@ -45,6 +51,24 @@ tensor/
 ## Install (offline-friendly)
 ```bash
 pip install -e /path/to/tensor --no-build-isolation
+```
+
+## Runtime Config
+Environment variables:
+
+- `TENSOR_DEVICE` (`cpu`/`cuda`, default `cpu`)
+- `TENSOR_FALLBACK_TO_CPU` (`1`/`0`, default `1`)
+- `TENSOR_LOG_LEVEL` (`DEBUG/INFO/WARNING/ERROR/CRITICAL`, default `INFO`)
+- `TENSOR_STRICT_CHECKS` (`1`/`0`, default `0`)
+- `TENSOR_DETERMINISTIC` (`1`/`0`, default `0`)
+- `TENSOR_SEED` (optional non-negative integer)
+
+Diagnostics:
+
+```bash
+tensor-doctor
+tensor-doctor --json
+tensor-doctor --require-cuda
 ```
 
 ## CUDA Extension (starter)
@@ -92,6 +116,7 @@ opt.step()
 ## Notes
 - This is not a drop-in replacement for PyTorch; it is intentionally minimal.
 - CUDA support is early and focused on core primitives.
+- See production roadmap: `docs/PRODUCTION_ROADMAP.md`
 
 ## License
 Internal/experimental. Add a license if you plan to distribute.

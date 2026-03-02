@@ -22,4 +22,5 @@ jobs:
           make cuda-install
       - name: CUDA Tests
         run: |
+          tensor-doctor --require-cuda
           make cuda-test
