@@ -1,4 +1,5 @@
 from tensor.nn.modules import *
+from tensor.nn import functional
 
 __all__ = [
     "Parameter",
@@ -18,4 +19,5 @@ __all__ = [
     "MLP",
     "MoE",
     "TransformerBlock",
+    "functional",
 ]
