@@ -64,7 +64,13 @@ cuda_home = _cuda_home()
 include_dirs = [np.get_include()]
 library_dirs = []
 libraries = []
-if cuda_home is not None:
+
+# Allow CPU-only installs when CUDA is missing.
+enable_cuda = os.environ.get("TENSOR_CUDA", "auto").lower()
+use_cuda = enable_cuda not in ("0", "false", "off", "no")
+
+ext_modules = []
+if use_cuda and cuda_home is not None:
     include_dirs.append(str(cuda_home / "include"))
     lib64 = cuda_home / "lib64"
     lib = cuda_home / "lib"
@@ -74,21 +80,22 @@ if cuda_home is not None:
         library_dirs.append(str(lib))
     libraries.append("cudart")
 
-
-ext_modules = [
-    Extension(
-        "tensor.cuda._tensor_cuda",
-        sources=[
-            "cuda/bindings.cpp",
-            "cuda/kernels/kernels.cu",
-        ],
-        include_dirs=include_dirs,
-        language="c++",
-        libraries=libraries,
-        library_dirs=library_dirs,
-        extra_compile_args=["-O3", "-std=c++14"],
-    )
-]
+    ext_modules = [
+        Extension(
+            "tensor.cuda._tensor_cuda",
+            sources=[
+                "cuda/bindings.cpp",
+                "cuda/kernels/kernels.cu",
+            ],
+            include_dirs=include_dirs,
+            language="c++",
+            libraries=libraries,
+            library_dirs=library_dirs,
+            extra_compile_args=["-O3", "-std=c++14"],
+        )
+    ]
+elif use_cuda and cuda_home is None:
+    print("WARNING: CUDA not found. Skipping CUDA extension build.")
 
 setup(
     ext_modules=ext_modules,

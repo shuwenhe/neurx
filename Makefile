@@ -16,13 +16,15 @@ install: dev
 
 dev:
 	$(PIP) install -U pip setuptools wheel
-	$(PIP) install -e . --no-build-isolation
+	$(PIP) install -e .
 
 test:
-	$(PYTEST) -q
+	$(PIP) install -U pytest
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q
 
 cuda-test:
-	$(PYTEST) -q tests/test_cuda_smoke.py
+	$(PIP) install -U pytest
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py
 
 clean:
 	@rm -rf build dist *.egg-info
