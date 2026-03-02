@@ -6,6 +6,7 @@ from tensor.tensor import Tensor
 class Module:
     def __init__(self):
         self.training = True
+        self._buffers = {}
 
     def parameters(self):
         params = []
@@ -83,6 +84,8 @@ class Module:
                 named[name] = param
 
         for name, value in self.__dict__.items():
+            if name == "_buffers":
+                continue
             if isinstance(value, Parameter):
                 add_param(prefix + name, value)
             elif isinstance(value, Module):
@@ -107,21 +110,69 @@ class Module:
     def named_parameters(self):
         return list(self._named_parameters().items())
 
+    def register_buffer(self, name, tensor, persistent=True):
+        self._buffers[name] = {"value": tensor, "persistent": persistent}
+        setattr(self, name, tensor)
+
+    def _named_buffers(self, prefix="", include_non_persistent=True):
+        named = {}
+
+        for name, meta in self._buffers.items():
+            if not include_non_persistent and not meta["persistent"]:
+                continue
+            named[prefix + name] = meta["value"]
+
+        for name, value in self.__dict__.items():
+            if name in ("_buffers",):
+                continue
+            if isinstance(value, Module):
+                child = value._named_buffers(prefix + name + ".", include_non_persistent=include_non_persistent)
+                named.update(child)
+            elif isinstance(value, (list, tuple)):
+                for idx, item in enumerate(value):
+                    if isinstance(item, Module):
+                        child = item._named_buffers(f"{prefix}{name}.{idx}.", include_non_persistent=include_non_persistent)
+                        named.update(child)
+            elif isinstance(value, dict):
+                for key, item in value.items():
+                    if isinstance(item, Module):
+                        child = item._named_buffers(f"{prefix}{name}.{key}.", include_non_persistent=include_non_persistent)
+                        named.update(child)
+        return named
+
+    def named_buffers(self, include_non_persistent=True):
+        return list(self._named_buffers(include_non_persistent=include_non_persistent).items())
+
     def state_dict(self):
         state = {}
         for name, param in self._named_parameters().items():
             state[name] = param.data.copy()
+        for name, buf in self._named_buffers(include_non_persistent=False).items():
+            if hasattr(buf, "data"):
+                state[name] = buf.data.copy()
+            else:
+                state[name] = np.array(buf, copy=True)
         return state
 
     def load_state_dict(self, state, strict=True):
         named = self._named_parameters()
+        buffers = self._named_buffers(include_non_persistent=False)
         missing = []
         for name, param in named.items():
             if name not in state:
                 missing.append(name)
                 continue
             param.data = state[name].copy()
-        unexpected = [name for name in state.keys() if name not in named]
+        for name, buf in buffers.items():
+            if name not in state:
+                missing.append(name)
+                continue
+            if hasattr(buf, "data"):
+                buf.data = state[name].copy()
+            else:
+                buffers[name] = state[name].copy()
+        known = set(named.keys()) | set(buffers.keys())
+        unexpected = [name for name in state.keys() if name not in known]
         if strict and (missing or unexpected):
             raise ValueError(f"state_dict mismatch: missing={missing}, unexpected={unexpected}")
         return {"missing": missing, "unexpected": unexpected}
