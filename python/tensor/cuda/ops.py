@@ -157,7 +157,7 @@ def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_sum_device(a.capsule, a.size, str(a.dtype))
-        return DeviceArray(capsule, (1,), a.dtype)
+        return DeviceArray(capsule, (), a.dtype)
     if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
@@ -202,7 +202,7 @@ def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_mean_device(a.capsule, a.size, str(a.dtype))
-        return DeviceArray(capsule, (1,), a.dtype)
+        return DeviceArray(capsule, (), a.dtype)
     if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
@@ -247,7 +247,7 @@ def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_max_device(a.capsule, a.size, str(a.dtype))
-        return DeviceArray(capsule, (1,), a.dtype)
+        return DeviceArray(capsule, (), a.dtype)
     if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
@@ -292,7 +292,7 @@ def reduce_min(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_min_device(a.capsule, a.size, str(a.dtype))
-        return DeviceArray(capsule, (1,), a.dtype)
+        return DeviceArray(capsule, (), a.dtype)
     if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]

@@ -1,4 +1,4 @@
-.PHONY: help install dev test cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -11,6 +11,9 @@ help:
 	@echo "  bootstrap  Upgrade build tooling in current environment"
 	@echo "  dev        Same as install"
 	@echo "  test       Run tests"
+	@echo "  list       List all API feature points and one-command per-API tests"
+	@echo "  api        Run one API test case. Usage: make api API=tensor.sum"
+	@echo "  api-all    Run all API test cases from tools/api_test_runner.py"
 	@echo "  doctor     Run runtime diagnostics"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
 	@echo "  cuda-test  Run CUDA smoke test (requires CUDA build)"
@@ -29,6 +32,19 @@ ensure-pytest:
 
 test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q
+
+list:
+	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list
+
+api:
+	@if [ -z "$(API)" ]; then \
+		echo "Usage: make api API=tensor.sum"; \
+		exit 2; \
+	fi
+	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --api "$(API)"
+
+api-all:
+	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --all
 
 doctor:
 	tensor-doctor
