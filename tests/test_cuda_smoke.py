@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pytest
 
 from tensor import Tensor
 from tensor.nn import Linear, LayerNorm, Softmax
@@ -26,8 +27,7 @@ def _to_np(x):
 def test_cuda_add_mul_matmul_linear():
     os.environ["TENSOR_DEVICE"] = "cuda"
     if not _cuda_runtime_ok():
-        print("CUDA not available; skipping smoke test.")
-        return
+        pytest.skip("CUDA runtime not available")
     a = Tensor(np.random.randn(1024).astype(np.float32), requires_grad=False)
     b = Tensor(np.random.randn(1024).astype(np.float32), requires_grad=False)
 

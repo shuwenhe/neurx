@@ -55,6 +55,21 @@ CUDA_HOME=/usr pip install -e /path/to/tensor --no-build-isolation
 export TENSOR_DEVICE=cuda
 ```
 
+## Reduction & Indices Semantics
+- `sum/mean/max/min` support `axis`/`dim` and `keepdims`/`keepdim`.
+- `max/min` with `axis` return `(values, indices)`.
+- `argmax/argmin` and `max/min` indices are integer tensors:
+  - CPU input: `int64` on CPU.
+  - CUDA input: `int64` on CUDA.
+- CUDA reduction supports full axes for 2D/3D inputs; last-dim uses dedicated kernels.
+
+## CUDA Benchmark
+Run CUDA operator benchmark and print the slowest case:
+
+```bash
+python tools/benchmark_cuda_ops.py --warmup 10 --iters 50
+```
+
 ## Quick Start
 ```python
 import numpy as np

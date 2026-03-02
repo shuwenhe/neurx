@@ -50,6 +50,10 @@ def test_argmax_argmin():
     a1 = x.argmin(axis=0)
     assert a0.shape == (2,)
     assert a1.shape == (3,)
+    assert a0.device == "cpu"
+    assert a1.device == "cpu"
+    assert a0.to_numpy().dtype == np.int64
+    assert a1.to_numpy().dtype == np.int64
 
 
 def test_max_min_return_indices():
@@ -60,6 +64,17 @@ def test_max_min_return_indices():
     assert i.shape == (2,)
     assert v2.shape == (3,)
     assert i2.shape == (3,)
+    assert i.to_numpy().dtype == np.int64
+    assert i2.to_numpy().dtype == np.int64
+
+
+def test_reduce_dim_keepdim_and_tie_break():
+    x = Tensor(np.array([[1.0, 2.0, 2.0], [4.0, 4.0, 1.0]]))
+    v, i = x.max(dim=1, keepdim=True)
+    assert v.shape == (2, 1)
+    assert i.shape == (2,)
+    # Tie-break should choose the first index.
+    assert np.array_equal(i.to_numpy(), np.array([1, 0], dtype=np.int64))
 
 
 def test_sum_mean_max_min_cuda_consistency():
