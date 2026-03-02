@@ -259,14 +259,16 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def mean(self, axis=None, keepdims=False, dim=None):
+    def mean(self, axis=None, keepdims=False, dim=None, keepdim=None):
         if dim is not None:
             axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
         host = _to_numpy(self.data)
         denom = host.size
-        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
-                out_data = _cuda_ops.reduce_mean(self.data, axis=None, keepdims=False)
+                out_data = _cuda_ops.reduce_mean(self.data, axis=axis, keepdims=keepdims)
                 out = Tensor(out_data, self.requires_grad, (self,), "mean", device="cuda")
             except Exception:
                 out = None
@@ -298,11 +300,13 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def sum(self, axis=None, keepdims=False, dim=None):
+    def sum(self, axis=None, keepdims=False, dim=None, keepdim=None):
         if dim is not None:
             axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
         host = _to_numpy(self.data)
-        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_sum(self.data, axis=axis, keepdims=keepdims)
                 out = Tensor(out_data, self.requires_grad, (self,), "sum", device="cuda")
@@ -328,11 +332,13 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def max(self, axis=None, keepdims=False, dim=None):
+    def max(self, axis=None, keepdims=False, dim=None, keepdim=None):
         if dim is not None:
             axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
         host = _to_numpy(self.data)
-        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_max(self.data, axis=axis, keepdims=keepdims)
                 out = Tensor(out_data, self.requires_grad, (self,), "max", device="cuda")
@@ -363,14 +369,16 @@ class Tensor:
         out._backward = _backward
         if axis is not None:
             idx = host.argmax(axis=axis)
-            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
         return out
 
-    def min(self, axis=None, keepdims=False, dim=None):
+    def min(self, axis=None, keepdims=False, dim=None, keepdim=None):
         if dim is not None:
             axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
         host = _to_numpy(self.data)
-        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_min(self.data, axis=axis, keepdims=keepdims)
                 out = Tensor(out_data, self.requires_grad, (self,), "min", device="cuda")
@@ -401,7 +409,7 @@ class Tensor:
         out._backward = _backward
         if axis is not None:
             idx = host.argmin(axis=axis)
-            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
         return out
 
     def argmax(self, axis=None, dim=None):
@@ -409,14 +417,14 @@ class Tensor:
             axis = dim
         host = _to_numpy(self.data)
         idx = host.argmax(axis=axis)
-        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
 
     def argmin(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
         host = _to_numpy(self.data)
         idx = host.argmin(axis=axis)
-        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
 
     def backward(self):
         if self.data.size != 1:
