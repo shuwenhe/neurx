@@ -7,13 +7,6 @@ extern "C" __global__ void add_f32_kernel(const float* a, const float* b, float*
     }
 }
 
-extern "C" __global__ void add_f64_kernel(const double* a, const double* b, double* out, size_t n) {
-    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        out[idx] = a[idx] + b[idx];
-    }
-}
-
 extern "C" __global__ void mul_f32_kernel(const float* a, const float* b, float* out, size_t n) {
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < n) {
@@ -21,77 +14,33 @@ extern "C" __global__ void mul_f32_kernel(const float* a, const float* b, float*
     }
 }
 
-extern "C" __global__ void mul_f64_kernel(const double* a, const double* b, double* out, size_t n) {
-    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        out[idx] = a[idx] * b[idx];
+extern "C" __global__ void matmul_f32_kernel(const float* a, const float* b, float* out, int m, int k, int n) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    if (row < m && col < n) {
+        float sum = 0.0f;
+        const float* a_row = a + row * k;
+        for (int i = 0; i < k; ++i) {
+            sum += a_row[i] * b[i * n + col];
+        }
+        out[row * n + col] = sum;
     }
 }
 
-extern "C" void cuda_add_float(const float* a, const float* b, float* out, size_t n) {
-    float *d_a = nullptr, *d_b = nullptr, *d_out = nullptr;
-    size_t bytes = n * sizeof(float);
-    cudaMalloc(&d_a, bytes);
-    cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_out, bytes);
-    cudaMemcpy(d_a, a, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, bytes, cudaMemcpyHostToDevice);
+extern "C" void cuda_add_device_float(const float* a, const float* b, float* out, size_t n) {
     dim3 block(256);
     dim3 grid((n + block.x - 1) / block.x);
-    add_f32_kernel<<<grid, block>>>(d_a, d_b, d_out, n);
-    cudaMemcpy(out, d_out, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_out);
+    add_f32_kernel<<<grid, block>>>(a, b, out, n);
 }
 
-extern "C" void cuda_add_double(const double* a, const double* b, double* out, size_t n) {
-    double *d_a = nullptr, *d_b = nullptr, *d_out = nullptr;
-    size_t bytes = n * sizeof(double);
-    cudaMalloc(&d_a, bytes);
-    cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_out, bytes);
-    cudaMemcpy(d_a, a, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, bytes, cudaMemcpyHostToDevice);
+extern "C" void cuda_mul_device_float(const float* a, const float* b, float* out, size_t n) {
     dim3 block(256);
     dim3 grid((n + block.x - 1) / block.x);
-    add_f64_kernel<<<grid, block>>>(d_a, d_b, d_out, n);
-    cudaMemcpy(out, d_out, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_out);
+    mul_f32_kernel<<<grid, block>>>(a, b, out, n);
 }
 
-extern "C" void cuda_mul_float(const float* a, const float* b, float* out, size_t n) {
-    float *d_a = nullptr, *d_b = nullptr, *d_out = nullptr;
-    size_t bytes = n * sizeof(float);
-    cudaMalloc(&d_a, bytes);
-    cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_out, bytes);
-    cudaMemcpy(d_a, a, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, bytes, cudaMemcpyHostToDevice);
-    dim3 block(256);
-    dim3 grid((n + block.x - 1) / block.x);
-    mul_f32_kernel<<<grid, block>>>(d_a, d_b, d_out, n);
-    cudaMemcpy(out, d_out, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_out);
-}
-
-extern "C" void cuda_mul_double(const double* a, const double* b, double* out, size_t n) {
-    double *d_a = nullptr, *d_b = nullptr, *d_out = nullptr;
-    size_t bytes = n * sizeof(double);
-    cudaMalloc(&d_a, bytes);
-    cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_out, bytes);
-    cudaMemcpy(d_a, a, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, bytes, cudaMemcpyHostToDevice);
-    dim3 block(256);
-    dim3 grid((n + block.x - 1) / block.x);
-    mul_f64_kernel<<<grid, block>>>(d_a, d_b, d_out, n);
-    cudaMemcpy(out, d_out, bytes, cudaMemcpyDeviceToHost);
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_out);
+extern "C" void cuda_matmul_device_float(const float* a, const float* b, float* out, int m, int k, int n) {
+    dim3 block(16, 16);
+    dim3 grid((n + block.x - 1) / block.x, (m + block.y - 1) / block.y);
+    matmul_f32_kernel<<<grid, block>>>(a, b, out, m, k, n);
 }
