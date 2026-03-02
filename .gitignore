@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+*.egg
+
+# Build
+build/
+dist/
+
+# C++/CUDA
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.dylib
+*.exp
+*.pdb
+*.ilk
+
+# CUDA
+*.cubin
+*.ptx
+*.fatbin
+*.nvvp
+
+# Misc
+.DS_Store
+.vscode/
+.idea/
+
+# Tests
+.pytest_cache/
