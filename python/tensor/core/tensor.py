@@ -361,6 +361,9 @@ class Tensor:
                 self.grad += mask * (grad / count)
 
         out._backward = _backward
+        if axis is not None:
+            idx = host.argmax(axis=axis)
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
         return out
 
     def min(self, axis=None, keepdims=False, dim=None):
@@ -396,7 +399,24 @@ class Tensor:
                 self.grad += mask * (grad / count)
 
         out._backward = _backward
+        if axis is not None:
+            idx = host.argmin(axis=axis)
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
         return out
+
+    def argmax(self, axis=None, dim=None):
+        if dim is not None:
+            axis = dim
+        host = _to_numpy(self.data)
+        idx = host.argmax(axis=axis)
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
+
+    def argmin(self, axis=None, dim=None):
+        if dim is not None:
+            axis = dim
+        host = _to_numpy(self.data)
+        idx = host.argmin(axis=axis)
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False)
 
     def backward(self):
         if self.data.size != 1:
