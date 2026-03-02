@@ -15,6 +15,7 @@ help:
 install: dev
 
 dev:
+	$(PIP) install -U pip setuptools wheel
 	$(PIP) install -e . --no-build-isolation
 
 test:
