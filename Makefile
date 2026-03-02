@@ -25,7 +25,7 @@ test:
 
 cuda-test:
 	$(PIP) install -U pytest
-	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py
 
 cuda-install:
 	TENSOR_CUDA=1 $(PIP) install -e .
