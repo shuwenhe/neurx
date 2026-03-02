@@ -32,6 +32,7 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+.venv/
 
 # Tests
 .pytest_cache/
