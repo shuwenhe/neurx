@@ -143,6 +143,65 @@ class Module:
     def named_buffers(self, include_non_persistent=True):
         return list(self._named_buffers(include_non_persistent=include_non_persistent).items())
 
+    def buffers(self, include_non_persistent=True):
+        for _, buf in self.named_buffers(include_non_persistent=include_non_persistent):
+            yield buf
+
+    def children(self):
+        for value in self.__dict__.values():
+            if isinstance(value, Module):
+                yield value
+            elif isinstance(value, (list, tuple)):
+                for item in value:
+                    if isinstance(item, Module):
+                        yield item
+            elif isinstance(value, dict):
+                for item in value.values():
+                    if isinstance(item, Module):
+                        yield item
+
+    def named_children(self):
+        for name, value in self.__dict__.items():
+            if isinstance(value, Module):
+                yield name, value
+            elif isinstance(value, (list, tuple)):
+                for idx, item in enumerate(value):
+                    if isinstance(item, Module):
+                        yield f"{name}.{idx}", item
+            elif isinstance(value, dict):
+                for key, item in value.items():
+                    if isinstance(item, Module):
+                        yield f"{name}.{key}", item
+
+    def modules(self):
+        seen = set()
+
+        def walk(module):
+            mid = id(module)
+            if mid in seen:
+                return
+            seen.add(mid)
+            yield module
+            for child in module.children():
+                yield from walk(child)
+
+        yield from walk(self)
+
+    def named_modules(self):
+        seen = set()
+
+        def walk(module, prefix=""):
+            mid = id(module)
+            if mid in seen:
+                return
+            seen.add(mid)
+            yield prefix, module
+            for name, child in module.named_children():
+                child_prefix = f"{prefix}.{name}" if prefix else name
+                yield from walk(child, child_prefix)
+
+        yield from walk(self)
+
     def state_dict(self):
         state = {}
         for name, param in self._named_parameters().items():

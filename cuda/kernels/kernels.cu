@@ -1,4 +1,5 @@
 #include <cuda_runtime.h>
+#include <cub/cub.cuh>
 
 extern "C" __global__ void add_f32_kernel(const float* a, const float* b, float* out, size_t n) {
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -187,4 +188,46 @@ extern "C" void cuda_matmul_device_float(const float* a, const float* b, float* 
     dim3 block(16, 16);
     dim3 grid((n + block.x - 1) / block.x, (m + block.y - 1) / block.y);
     matmul_f32_kernel<<<grid, block>>>(a, b, out, m, k, n);
+}
+
+extern "C" void cuda_reduce_sum_device_float(const float* a, float* out, size_t n) {
+    void* d_temp = nullptr;
+    size_t temp_bytes = 0;
+    cub::DeviceReduce::Sum(d_temp, temp_bytes, a, out, n);
+    cudaMalloc(&d_temp, temp_bytes);
+    cub::DeviceReduce::Sum(d_temp, temp_bytes, a, out, n);
+    cudaFree(d_temp);
+}
+
+extern "C" void cuda_reduce_max_device_float(const float* a, float* out, size_t n) {
+    void* d_temp = nullptr;
+    size_t temp_bytes = 0;
+    cub::DeviceReduce::Max(d_temp, temp_bytes, a, out, n);
+    cudaMalloc(&d_temp, temp_bytes);
+    cub::DeviceReduce::Max(d_temp, temp_bytes, a, out, n);
+    cudaFree(d_temp);
+}
+
+extern "C" void cuda_reduce_min_device_float(const float* a, float* out, size_t n) {
+    void* d_temp = nullptr;
+    size_t temp_bytes = 0;
+    cub::DeviceReduce::Min(d_temp, temp_bytes, a, out, n);
+    cudaMalloc(&d_temp, temp_bytes);
+    cub::DeviceReduce::Min(d_temp, temp_bytes, a, out, n);
+    cudaFree(d_temp);
+}
+
+extern "C" __global__ void scale_f32_kernel(float* a, float scale) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx == 0) {
+        a[0] *= scale;
+    }
+}
+
+extern "C" void cuda_reduce_mean_device_float(const float* a, float* out, size_t n) {
+    cuda_reduce_sum_device_float(a, out, n);
+    float scale = 1.0f / static_cast<float>(n);
+    dim3 block(1);
+    dim3 grid(1);
+    scale_f32_kernel<<<grid, block>>>(out, scale);
 }
