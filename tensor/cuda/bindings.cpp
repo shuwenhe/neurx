@@ -1,103 +1,235 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#include <cuda_runtime.h>
 
 #include <stdexcept>
 #include <string>
 
-extern "C" void cuda_add_float(const float* a, const float* b, float* out, size_t n);
-extern "C" void cuda_add_double(const double* a, const double* b, double* out, size_t n);
-extern "C" void cuda_mul_float(const float* a, const float* b, float* out, size_t n);
-extern "C" void cuda_mul_double(const double* a, const double* b, double* out, size_t n);
+extern "C" void cuda_add_device_float(const float* a, const float* b, float* out, size_t n);
+extern "C" void cuda_mul_device_float(const float* a, const float* b, float* out, size_t n);
+extern "C" void cuda_matmul_device_float(const float* a, const float* b, float* out, int m, int k, int n);
+
+struct DeviceArray {
+    void* ptr;
+    size_t size;
+};
 
 static PyObject* _raise(PyObject* exc_type, const std::string& msg) {
     PyErr_SetString(exc_type, msg.c_str());
     return nullptr;
 }
 
-static PyObject* tensor_cuda_add(PyObject* /*self*/, PyObject* args) {
-    PyArrayObject* a_obj = nullptr;
-    PyArrayObject* b_obj = nullptr;
-    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &a_obj, &PyArray_Type, &b_obj)) {
-        return _raise(PyExc_TypeError, "expected two numpy arrays");
+static void _cuda_check(cudaError_t err, const char* msg) {
+    if (err != cudaSuccess) {
+        std::string out = std::string(msg) + ": " + cudaGetErrorString(err);
+        throw std::runtime_error(out);
     }
-
-    if (PyArray_NDIM(a_obj) != PyArray_NDIM(b_obj)) {
-        return _raise(PyExc_ValueError, "add: ndim mismatch");
-    }
-    for (int i = 0; i < PyArray_NDIM(a_obj); ++i) {
-        if (PyArray_DIM(a_obj, i) != PyArray_DIM(b_obj, i)) {
-            return _raise(PyExc_ValueError, "add: shape mismatch");
-        }
-    }
-
-    int dtype = PyArray_TYPE(a_obj);
-    if (dtype != PyArray_TYPE(b_obj)) {
-        return _raise(PyExc_TypeError, "add: dtype mismatch");
-    }
-
-    npy_intp size = PyArray_SIZE(a_obj);
-    if (dtype != NPY_FLOAT32 && dtype != NPY_FLOAT64) {
-        return _raise(PyExc_TypeError, "add: only float32/float64 supported");
-    }
-
-    PyArrayObject* out_obj = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(a_obj), PyArray_DIMS(a_obj), dtype);
-    if (!out_obj) {
-        return _raise(PyExc_RuntimeError, "add: failed to allocate output");
-    }
-
-    if (dtype == NPY_FLOAT32) {
-        cuda_add_float((float*)PyArray_DATA(a_obj), (float*)PyArray_DATA(b_obj), (float*)PyArray_DATA(out_obj), (size_t)size);
-    } else {
-        cuda_add_double((double*)PyArray_DATA(a_obj), (double*)PyArray_DATA(b_obj), (double*)PyArray_DATA(out_obj), (size_t)size);
-    }
-
-    return (PyObject*)out_obj;
 }
 
-static PyObject* tensor_cuda_mul(PyObject* /*self*/, PyObject* args) {
+static DeviceArray* _get_device_array(PyObject* capsule) {
+    return static_cast<DeviceArray*>(PyCapsule_GetPointer(capsule, "tensor.cuda.DeviceArray"));
+}
+
+static void _capsule_destructor(PyObject* capsule) {
+    auto* arr = _get_device_array(capsule);
+    if (!arr) {
+        return;
+    }
+    cudaFree(arr->ptr);
+    delete arr;
+}
+
+static PyObject* tensor_cuda_to_device(PyObject* /*self*/, PyObject* args) {
     PyArrayObject* a_obj = nullptr;
-    PyArrayObject* b_obj = nullptr;
-    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &a_obj, &PyArray_Type, &b_obj)) {
-        return _raise(PyExc_TypeError, "expected two numpy arrays");
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &a_obj)) {
+        return _raise(PyExc_TypeError, "expected numpy array");
     }
 
-    if (PyArray_NDIM(a_obj) != PyArray_NDIM(b_obj)) {
-        return _raise(PyExc_ValueError, "mul: ndim mismatch");
+    if (PyArray_TYPE(a_obj) != NPY_FLOAT32) {
+        return _raise(PyExc_TypeError, "to_device: only float32 supported");
     }
-    for (int i = 0; i < PyArray_NDIM(a_obj); ++i) {
-        if (PyArray_DIM(a_obj, i) != PyArray_DIM(b_obj, i)) {
-            return _raise(PyExc_ValueError, "mul: shape mismatch");
-        }
-    }
-
-    int dtype = PyArray_TYPE(a_obj);
-    if (dtype != PyArray_TYPE(b_obj)) {
-        return _raise(PyExc_TypeError, "mul: dtype mismatch");
+    if (!PyArray_ISCONTIGUOUS(a_obj)) {
+        return _raise(PyExc_TypeError, "to_device: array must be contiguous");
     }
 
     npy_intp size = PyArray_SIZE(a_obj);
-    if (dtype != NPY_FLOAT32 && dtype != NPY_FLOAT64) {
-        return _raise(PyExc_TypeError, "mul: only float32/float64 supported");
+    size_t bytes = (size_t)size * sizeof(float);
+    void* d_ptr = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_ptr, bytes), "cudaMalloc");
+        _cuda_check(cudaMemcpy(d_ptr, PyArray_DATA(a_obj), bytes, cudaMemcpyHostToDevice), "cudaMemcpy H2D");
+    } catch (const std::exception& e) {
+        if (d_ptr) {
+            cudaFree(d_ptr);
+        }
+        return _raise(PyExc_RuntimeError, e.what());
     }
 
-    PyArrayObject* out_obj = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(a_obj), PyArray_DIMS(a_obj), dtype);
-    if (!out_obj) {
-        return _raise(PyExc_RuntimeError, "mul: failed to allocate output");
+    auto* arr = new DeviceArray{d_ptr, (size_t)size};
+    return PyCapsule_New(arr, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
+static PyObject* tensor_cuda_to_host(PyObject* /*self*/, PyObject* args) {
+    PyObject* capsule = nullptr;
+    PyObject* shape_obj = nullptr;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OO!s", &capsule, &PyTuple_Type, &shape_obj, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, shape, dtype)");
     }
 
-    if (dtype == NPY_FLOAT32) {
-        cuda_mul_float((float*)PyArray_DATA(a_obj), (float*)PyArray_DATA(b_obj), (float*)PyArray_DATA(out_obj), (size_t)size);
-    } else {
-        cuda_mul_double((double*)PyArray_DATA(a_obj), (double*)PyArray_DATA(b_obj), (double*)PyArray_DATA(out_obj), (size_t)size);
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "to_host: only float32 supported");
     }
 
-    return (PyObject*)out_obj;
+    auto* arr = _get_device_array(capsule);
+    if (!arr) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+
+    int ndim = (int)PyTuple_Size(shape_obj);
+    npy_intp dims[8];
+    if (ndim > 8) {
+        return _raise(PyExc_ValueError, "to_host: ndim too large");
+    }
+    npy_intp size = 1;
+    for (int i = 0; i < ndim; ++i) {
+        PyObject* item = PyTuple_GetItem(shape_obj, i);
+        dims[i] = (npy_intp)PyLong_AsLongLong(item);
+        size *= dims[i];
+    }
+    if ((size_t)size != arr->size) {
+        return _raise(PyExc_ValueError, "to_host: size mismatch");
+    }
+
+    PyArrayObject* out = (PyArrayObject*)PyArray_SimpleNew(ndim, dims, NPY_FLOAT32);
+    if (!out) {
+        return _raise(PyExc_RuntimeError, "to_host: failed to allocate");
+    }
+    size_t bytes = (size_t)size * sizeof(float);
+    try {
+        _cuda_check(cudaMemcpy(PyArray_DATA(out), arr->ptr, bytes, cudaMemcpyDeviceToHost), "cudaMemcpy D2H");
+    } catch (const std::exception& e) {
+        Py_DECREF(out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+    return (PyObject*)out;
+}
+
+static PyObject* tensor_cuda_add_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    Py_ssize_t size = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOns", &a_capsule, &b_capsule, &size, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, capsule, size, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "add_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)size != a->size || (size_t)size != b->size) {
+        return _raise(PyExc_ValueError, "add_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)size * sizeof(float)), "cudaMalloc");
+        cuda_add_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, (size_t)size);
+        _cuda_check(cudaGetLastError(), "cuda_add_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)size};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
+static PyObject* tensor_cuda_mul_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    Py_ssize_t size = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOns", &a_capsule, &b_capsule, &size, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, capsule, size, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "mul_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)size != a->size || (size_t)size != b->size) {
+        return _raise(PyExc_ValueError, "mul_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)size * sizeof(float)), "cudaMalloc");
+        cuda_mul_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, (size_t)size);
+        _cuda_check(cudaGetLastError(), "cuda_mul_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)size};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
+static PyObject* tensor_cuda_matmul_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    int m = 0, k = 0, n = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOiiis", &a_capsule, &b_capsule, &m, &k, &n, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, capsule, m, k, n, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "matmul_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)m * (size_t)k != a->size || (size_t)k * (size_t)n != b->size) {
+        return _raise(PyExc_ValueError, "matmul_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        cuda_matmul_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, m, k, n);
+        _cuda_check(cudaGetLastError(), "cuda_matmul_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyMethodDef TensorCudaMethods[] = {
-    {"add", tensor_cuda_add, METH_VARARGS, "CUDA elementwise add"},
-    {"mul", tensor_cuda_mul, METH_VARARGS, "CUDA elementwise multiply"},
+    {"to_device", tensor_cuda_to_device, METH_VARARGS, "Copy numpy array to device"},
+    {"to_host", tensor_cuda_to_host, METH_VARARGS, "Copy device array to numpy"},
+    {"add_device", tensor_cuda_add_device, METH_VARARGS, "CUDA elementwise add (device)"},
+    {"mul_device", tensor_cuda_mul_device, METH_VARARGS, "CUDA elementwise multiply (device)"},
+    {"matmul_device", tensor_cuda_matmul_device, METH_VARARGS, "CUDA matmul (device)"},
     {nullptr, nullptr, 0, nullptr}
 };
 

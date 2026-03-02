@@ -7,10 +7,24 @@ except Exception:
     _cuda_ops = None
 
 
-def _ensure_array(value):
+def _ensure_array(value, dtype=None):
     if isinstance(value, np.ndarray):
-        return value
-    return np.array(value, dtype=np.float64)
+        return value if dtype is None else value.astype(dtype, copy=False)
+    return np.array(value, dtype=dtype or np.float64)
+
+
+def _is_cuda_device(data):
+    return _cuda_ops is not None and isinstance(data, _cuda_ops.DeviceArray)
+
+
+def _shape_of(data):
+    return data.shape if _is_cuda_device(data) else data.shape
+
+
+def _to_numpy(data):
+    if _is_cuda_device(data):
+        return _cuda_ops.to_host(data)
+    return data
 
 
 def _unbroadcast(grad, shape):
@@ -23,35 +37,61 @@ def _unbroadcast(grad, shape):
 
 
 class Tensor:
-    def __init__(self, data, requires_grad=False, _children=(), _op=""):
-        self.data = _ensure_array(data)
+    def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
+        if device is None:
+            if os.environ.get("TENSOR_DEVICE", "cpu").lower() == "cuda":
+                device = "cuda"
+            else:
+                device = "cuda" if _is_cuda_device(data) else "cpu"
+        self.device = device
+
+        if self.device == "cuda":
+            if _cuda_ops is None:
+                raise RuntimeError("CUDA backend not available")
+            if _is_cuda_device(data):
+                self.data = data
+            else:
+                arr = _ensure_array(data, dtype=np.float32)
+                self.data = _cuda_ops.to_device(arr)
+        else:
+            self.data = _ensure_array(data)
+
         self.requires_grad = requires_grad
-        self.grad = np.zeros_like(self.data, dtype=np.float64) if requires_grad else None
+        if requires_grad:
+            if self.device == "cuda":
+                self.grad = np.zeros(_shape_of(self.data), dtype=np.float32)
+            else:
+                self.grad = np.zeros_like(self.data, dtype=np.float64)
+        else:
+            self.grad = None
         self._backward = lambda: None
         self._prev = set(_children)
         self._op = _op
 
     @property
     def shape(self):
-        return self.data.shape
+        return _shape_of(self.data)
 
     def zero_grad(self):
         if self.requires_grad:
-            self.grad = np.zeros_like(self.data, dtype=np.float64)
+            if self.device == "cuda":
+                self.grad = np.zeros(self.shape, dtype=np.float32)
+            else:
+                self.grad = np.zeros_like(self.data, dtype=np.float64)
 
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
-        if _should_use_cuda(self.data, other.data):
-            out_data = _cuda_ops.add(self.data, other.data)
+        if self.device == "cuda" or other.device == "cuda":
+            out_data = _cuda_ops.add(_as_device(self), _as_device(other))
+            out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
         else:
-            out_data = self.data + other.data
-        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+")
+            out = Tensor(self.data + other.data, self.requires_grad or other.requires_grad, (self, other), "+")
 
         def _backward():
             if self.requires_grad:
-                self.grad += _unbroadcast(out.grad, self.data.shape)
+                self.grad += _unbroadcast(out.grad, self.shape)
             if other.requires_grad:
-                other.grad += _unbroadcast(out.grad, other.data.shape)
+                other.grad += _unbroadcast(out.grad, other.shape)
 
         out._backward = _backward
         return out
@@ -77,17 +117,17 @@ class Tensor:
 
     def __mul__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
-        if _should_use_cuda(self.data, other.data):
-            out_data = _cuda_ops.mul(self.data, other.data)
+        if self.device == "cuda" or other.device == "cuda":
+            out_data = _cuda_ops.mul(_as_device(self), _as_device(other))
+            out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "*", device="cuda")
         else:
-            out_data = self.data * other.data
-        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "*")
+            out = Tensor(self.data * other.data, self.requires_grad or other.requires_grad, (self, other), "*")
 
         def _backward():
             if self.requires_grad:
-                self.grad += _unbroadcast(other.data * out.grad, self.data.shape)
+                self.grad += _unbroadcast(_to_numpy(other.data) * out.grad, self.shape)
             if other.requires_grad:
-                other.grad += _unbroadcast(self.data * out.grad, other.data.shape)
+                other.grad += _unbroadcast(_to_numpy(self.data) * out.grad, other.shape)
 
         out._backward = _backward
         return out
@@ -97,21 +137,32 @@ class Tensor:
 
     def __matmul__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
-        out = Tensor(self.data @ other.data, self.requires_grad or other.requires_grad, (self, other), "matmul")
+        if self.device == "cuda" or other.device == "cuda":
+            if len(self.shape) == 2 and len(other.shape) == 2:
+                out_data = _cuda_ops.matmul(_as_device(self), _as_device(other))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "matmul", device="cuda")
+            else:
+                out = Tensor(_to_numpy(self.data) @ _to_numpy(other.data), self.requires_grad or other.requires_grad, (self, other), "matmul")
+        else:
+            out = Tensor(self.data @ other.data, self.requires_grad or other.requires_grad, (self, other), "matmul")
 
         def _backward():
             if self.requires_grad:
-                grad_self = out.grad @ np.swapaxes(other.data, -1, -2)
-                self.grad += _unbroadcast(grad_self, self.data.shape)
+                grad_self = out.grad @ np.swapaxes(_to_numpy(other.data), -1, -2)
+                self.grad += _unbroadcast(grad_self, self.shape)
             if other.requires_grad:
-                grad_other = np.swapaxes(self.data, -1, -2) @ out.grad
-                other.grad += _unbroadcast(grad_other, other.data.shape)
+                grad_other = np.swapaxes(_to_numpy(self.data), -1, -2) @ out.grad
+                other.grad += _unbroadcast(grad_other, other.shape)
 
         out._backward = _backward
         return out
 
     def reshape(self, *shape):
-        out = Tensor(self.data.reshape(*shape), self.requires_grad, (self,), "reshape")
+        if self.device == "cuda":
+            host = _to_numpy(self.data).reshape(*shape)
+            out = Tensor(_cuda_ops.to_device(host.astype(np.float32, copy=False)), self.requires_grad, (self,), "reshape", device="cuda")
+        else:
+            out = Tensor(self.data.reshape(*shape), self.requires_grad, (self,), "reshape")
 
         def _backward():
             if self.requires_grad:
@@ -121,8 +172,9 @@ class Tensor:
         return out
 
     def mean(self):
-        denom = self.data.size
-        out = Tensor(np.array(self.data.mean()), self.requires_grad, (self,), "mean")
+        host = _to_numpy(self.data)
+        denom = host.size
+        out = Tensor(np.array(host.mean()), self.requires_grad, (self,), "mean")
 
         def _backward():
             if self.requires_grad:
@@ -147,25 +199,21 @@ class Tensor:
 
         build(self)
 
-        self.grad = np.ones_like(self.data, dtype=np.float64)
+        if self.device == "cuda":
+            self.grad = np.ones(self.shape, dtype=np.float32)
+        else:
+            self.grad = np.ones_like(self.data, dtype=np.float64)
         for node in reversed(topo):
             node._backward()
 
     def item(self):
+        if self.device == "cuda":
+            return float(_to_numpy(self.data).item())
         return float(self.data.item())
 
 
-def _should_use_cuda(a: np.ndarray, b: np.ndarray) -> bool:
-    if _cuda_ops is None:
-        return False
-    if os.environ.get("TENSOR_DEVICE", "cpu").lower() != "cuda":
-        return False
-    if not isinstance(a, np.ndarray) or not isinstance(b, np.ndarray):
-        return False
-    if a.dtype != b.dtype:
-        return False
-    if a.dtype not in (np.float32, np.float64):
-        return False
-    if a.shape != b.shape:
-        return False
-    return True
+def _as_device(t: "Tensor"):
+    if _is_cuda_device(t.data):
+        return t.data
+    arr = _ensure_array(t.data, dtype=np.float32)
+    return _cuda_ops.to_device(arr)
