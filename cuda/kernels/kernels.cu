@@ -259,7 +259,7 @@ extern "C" __global__ void argmax_lastdim_f32_kernel(const float* x, long long* 
         if (threadIdx.x < stride) {
             float v = smax[threadIdx.x + stride];
             int idx = sidx[threadIdx.x + stride];
-            if (v > smax[threadIdx.x]) {
+            if (v > smax[threadIdx.x] || (v == smax[threadIdx.x] && idx < sidx[threadIdx.x])) {
                 smax[threadIdx.x] = v;
                 sidx[threadIdx.x] = idx;
             }
@@ -293,7 +293,7 @@ extern "C" __global__ void argmin_lastdim_f32_kernel(const float* x, long long* 
         if (threadIdx.x < stride) {
             float v = smin[threadIdx.x + stride];
             int idx = sidx[threadIdx.x + stride];
-            if (v < smin[threadIdx.x]) {
+            if (v < smin[threadIdx.x] || (v == smin[threadIdx.x] && idx < sidx[threadIdx.x])) {
                 smin[threadIdx.x] = v;
                 sidx[threadIdx.x] = idx;
             }
