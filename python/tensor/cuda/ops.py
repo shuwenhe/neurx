@@ -291,7 +291,8 @@ def argmax_lastdim(a: DeviceArray):
     m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
     n = a.shape[-1]
     capsule = _cuda.argmax_lastdim(a.capsule, m, n, str(a.dtype))
-    return DeviceArray(capsule, (m,), np.dtype("int32"))
+    out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+    return DeviceArray(capsule, out_shape, np.dtype("int32"))
 
 
 def argmin_lastdim(a: DeviceArray):
@@ -302,4 +303,5 @@ def argmin_lastdim(a: DeviceArray):
     m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
     n = a.shape[-1]
     capsule = _cuda.argmin_lastdim(a.capsule, m, n, str(a.dtype))
-    return DeviceArray(capsule, (m,), np.dtype("int32"))
+    out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+    return DeviceArray(capsule, out_shape, np.dtype("int32"))
