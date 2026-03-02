@@ -19,4 +19,5 @@ jobs:
           python -m pip install pytest
       - name: Test
         run: |
+          tensor-doctor
           PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q

@@ -1,4 +1,4 @@
-.PHONY: help install dev test cuda-test cuda-install ensure-pytest bootstrap clean
+.PHONY: help install dev test cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -11,6 +11,7 @@ help:
 	@echo "  bootstrap  Upgrade build tooling in current environment"
 	@echo "  dev        Same as install"
 	@echo "  test       Run tests"
+	@echo "  doctor     Run runtime diagnostics"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
 	@echo "  cuda-test  Run CUDA smoke test (requires CUDA build)"
 	@echo "  clean      Remove build artifacts"
@@ -28,6 +29,9 @@ ensure-pytest:
 
 test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q
+
+doctor:
+	tensor-doctor
 
 cuda-test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py
