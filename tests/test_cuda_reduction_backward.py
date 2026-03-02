@@ -18,7 +18,9 @@ def _cuda_runtime_ok() -> bool:
 
 
 def _numeric_grad(fn, x, eps=1e-3):
-    grad = np.zeros_like(x, dtype=np.float32)
+    # Use float64 finite differences for stability, then cast back.
+    x = x.astype(np.float64, copy=True)
+    grad = np.zeros_like(x, dtype=np.float64)
     it = np.nditer(x, flags=["multi_index"], op_flags=["readwrite"])
     while not it.finished:
         idx = it.multi_index
@@ -30,7 +32,7 @@ def _numeric_grad(fn, x, eps=1e-3):
         x[idx] = old
         grad[idx] = (p - n) / (2 * eps)
         it.iternext()
-    return grad
+    return grad.astype(np.float32)
 
 
 def _reduce_value(x, op, axis):
@@ -47,7 +49,7 @@ def _reduce_value(x, op, axis):
 
 def _scalar_objective(x_arr, op, axis):
     val = _reduce_value(x_arr, op, axis)
-    return float(np.asarray(val).sum())
+    return float(np.asarray(val, dtype=np.float64).sum(dtype=np.float64))
 
 
 def _check_case(op, axis):
