@@ -66,6 +66,13 @@ def softmax(x: Tensor, axis=-1):
     return out
 
 
+def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
+    out = x @ weight
+    if bias is not None:
+        out = out + bias
+    return out
+
+
 def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
     if isinstance(normalized_shape, int):
         normalized_shape = (normalized_shape,)
@@ -166,6 +173,7 @@ __all__ = [
     "silu",
     "gelu",
     "softmax",
+    "linear",
     "layer_norm",
     "rms_norm",
     "dropout",
