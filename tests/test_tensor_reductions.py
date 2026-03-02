@@ -52,6 +52,16 @@ def test_argmax_argmin():
     assert a1.shape == (3,)
 
 
+def test_max_min_return_indices():
+    x = Tensor(np.array([[1.0, 3.0, 2.0], [0.0, -1.0, 5.0]]))
+    v, i = x.max(axis=1)
+    v2, i2 = x.min(axis=0)
+    assert v.shape == (2,)
+    assert i.shape == (2,)
+    assert v2.shape == (3,)
+    assert i2.shape == (3,)
+
+
 def test_sum_mean_max_min_cuda_consistency():
     if not _maybe_cuda():
         return
