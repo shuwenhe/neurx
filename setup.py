@@ -79,8 +79,8 @@ ext_modules = [
     Extension(
         "tensor.cuda._tensor_cuda",
         sources=[
-            "tensor/cuda/bindings.cpp",
-            "tensor/cuda/kernels.cu",
+            "cuda/bindings.cpp",
+            "cuda/kernels/kernels.cu",
         ],
         include_dirs=include_dirs,
         language="c++",
