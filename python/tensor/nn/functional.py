@@ -1,6 +1,7 @@
 import numpy as np
 
 from tensor.tensor import Tensor
+from tensor.losses import cross_entropy as _cross_entropy
 
 
 def relu(x: Tensor):
@@ -167,6 +168,21 @@ def dropout(x: Tensor, p=0.5, training=True):
     return out
 
 
+def mse_loss(input: Tensor, target, reduction="mean"):
+    target = target if isinstance(target, Tensor) else Tensor(target)
+    diff = input - target
+    out = diff * diff
+    if reduction == "mean":
+        return out.mean()
+    if reduction == "sum":
+        return Tensor(out.to_numpy().sum(), requires_grad=out.requires_grad, _children=(out,), _op="sum", device=out.device)
+    return out
+
+
+def cross_entropy(input: Tensor, target):
+    return _cross_entropy(input, target)
+
+
 __all__ = [
     "relu",
     "sigmoid",
@@ -177,4 +193,6 @@ __all__ = [
     "layer_norm",
     "rms_norm",
     "dropout",
+    "mse_loss",
+    "cross_entropy",
 ]
