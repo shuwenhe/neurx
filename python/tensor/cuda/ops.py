@@ -141,3 +141,47 @@ def softmax(a: DeviceArray) -> DeviceArray:
         m = b * t
     capsule = _cuda.softmax_device(a.capsule, m, n, str(a.dtype))
     return DeviceArray(capsule, a.shape, a.dtype)
+
+
+def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    if axis is None and not keepdims:
+        capsule = _cuda.reduce_sum_device(a.capsule, a.size, str(a.dtype))
+        return DeviceArray(capsule, (1,), a.dtype)
+    host = to_host(a)
+    out = host.sum(axis=axis, keepdims=keepdims)
+    return to_device(_ensure_array(out.astype(np.float32, copy=False)))
+
+
+def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    if axis is None and not keepdims:
+        capsule = _cuda.reduce_mean_device(a.capsule, a.size, str(a.dtype))
+        return DeviceArray(capsule, (1,), a.dtype)
+    host = to_host(a)
+    out = host.mean(axis=axis, keepdims=keepdims)
+    return to_device(_ensure_array(out.astype(np.float32, copy=False)))
+
+
+def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    if axis is None and not keepdims:
+        capsule = _cuda.reduce_max_device(a.capsule, a.size, str(a.dtype))
+        return DeviceArray(capsule, (1,), a.dtype)
+    host = to_host(a)
+    out = host.max(axis=axis, keepdims=keepdims)
+    return to_device(_ensure_array(out.astype(np.float32, copy=False)))
+
+
+def reduce_min(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    if axis is None and not keepdims:
+        capsule = _cuda.reduce_min_device(a.capsule, a.size, str(a.dtype))
+        return DeviceArray(capsule, (1,), a.dtype)
+    host = to_host(a)
+    out = host.min(axis=axis, keepdims=keepdims)
+    return to_device(_ensure_array(out.astype(np.float32, copy=False)))
