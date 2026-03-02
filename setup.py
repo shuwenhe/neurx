@@ -95,6 +95,8 @@ if use_cuda and cuda_home is not None:
         )
     ]
 elif use_cuda and cuda_home is None:
+    if enable_cuda in ("1", "true", "on", "yes"):
+        raise RuntimeError("CUDA requested but not found. Set CUDA_HOME or CUDA_PATH.")
     print("WARNING: CUDA not found. Skipping CUDA extension build.")
 
 setup(

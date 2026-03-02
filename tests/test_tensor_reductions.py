@@ -18,8 +18,8 @@ def test_sum_mean_max_min_cpu_shapes():
     s2 = x.sum(axis=(0, 2), keepdims=True)
     m0 = x.mean()
     m1 = x.mean(axis=2)
-    mx = x.max(axis=1)
-    mn = x.min(axis=0)
+    mx, midx = x.max(axis=1)
+    mn, nidx = x.min(axis=0)
 
     assert s0.shape == ()
     assert s1.shape == (2, 4)
@@ -28,6 +28,8 @@ def test_sum_mean_max_min_cpu_shapes():
     assert m1.shape == (2, 3)
     assert mx.shape == (2, 4)
     assert mn.shape == (3, 4)
+    assert midx.shape == (2, 4)
+    assert nidx.shape == (3, 4)
 
 
 def test_sum_mean_max_min_cpu_backward():
@@ -36,6 +38,14 @@ def test_sum_mean_max_min_cpu_backward():
     loss.backward()
     assert x.grad is not None
     assert x.grad.shape == x.shape
+
+
+def test_argmax_argmin():
+    x = Tensor(np.array([[1.0, 3.0, 2.0], [0.0, -1.0, 5.0]]))
+    a0 = x.argmax(axis=1)
+    a1 = x.argmin(axis=0)
+    assert a0.shape == (2,)
+    assert a1.shape == (3,)
 
 
 def test_sum_mean_max_min_cuda_consistency():
