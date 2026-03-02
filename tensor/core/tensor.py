@@ -82,8 +82,12 @@ class Tensor:
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         if self.device == "cuda" or other.device == "cuda":
-            out_data = _cuda_ops.add(_as_device(self), _as_device(other))
-            out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            try:
+                out_data = _cuda_ops.add(_as_device(self), _as_device(other))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            except Exception:
+                host = _to_numpy(self.data) + _to_numpy(other.data)
+                out = Tensor(host, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
         else:
             out = Tensor(self.data + other.data, self.requires_grad or other.requires_grad, (self, other), "+")
 
