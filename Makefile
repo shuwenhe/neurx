@@ -47,7 +47,7 @@ api-all:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --all
 
 doctor:
-	tensor-doctor
+	PYTHONPATH=python $(PYTHON) -m tensor.cli
 
 cuda-test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py
