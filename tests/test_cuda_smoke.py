@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-from tensor.core.tensor import Tensor
-from tensor.core.nn import Linear, LayerNorm, Softmax
+from tensor import Tensor
+from tensor.nn import Linear, LayerNorm, Softmax
 from tensor.cuda.ops import DeviceArray, to_host, available
 
 
