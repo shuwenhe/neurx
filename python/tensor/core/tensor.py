@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 try:
@@ -47,18 +46,44 @@ def _normalize_axis(axis, ndim):
     return axis + ndim if axis < 0 else axis
 
 
+def _resolve_default_device(data):
+    if _is_cuda_device(data):
+        return "cuda"
+    try:
+        from tensor.platform import get_runtime_config
+
+        return get_runtime_config().default_device
+    except Exception:
+        return "cpu"
+
+
+def _should_fallback_cuda_to_cpu():
+    try:
+        from tensor.platform import get_runtime_config
+
+        return get_runtime_config().fallback_to_cpu
+    except Exception:
+        return True
+
+
 class Tensor:
     def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
         if device is None:
-            if os.environ.get("TENSOR_DEVICE", "cpu").lower() == "cuda":
-                device = "cuda"
-            else:
-                device = "cuda" if _is_cuda_device(data) else "cpu"
+            device = _resolve_default_device(data)
+        if device == "cuda" and _cuda_ops is None and _should_fallback_cuda_to_cpu():
+            device = "cpu"
         self.device = device
 
         if self.device == "cuda":
             if _cuda_ops is None:
-                raise RuntimeError("CUDA backend not available")
+                try:
+                    from tensor.platform import BackendNotAvailableError
+                except Exception:
+                    BackendNotAvailableError = RuntimeError
+                raise BackendNotAvailableError(
+                    "CUDA backend not available. "
+                    "Set TENSOR_FALLBACK_TO_CPU=1 to auto-fallback or install CUDA extension."
+                )
             if _is_cuda_device(data):
                 self.data = data
                 data_dtype = data.dtype
