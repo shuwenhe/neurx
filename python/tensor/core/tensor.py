@@ -73,6 +73,15 @@ class Tensor:
         return _shape_of(self.data)
 
     @property
+    def ndim(self):
+        return len(self.shape)
+
+    def size(self, dim=None):
+        if dim is None:
+            return self.shape
+        return self.shape[dim]
+
+    @property
     def dtype(self):
         return _to_numpy(self.data).dtype
 
@@ -190,6 +199,9 @@ class Tensor:
 
         out._backward = _backward
         return out
+
+    def view(self, *shape):
+        return self.reshape(*shape)
 
     def mean(self):
         host = _to_numpy(self.data)
