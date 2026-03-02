@@ -203,6 +203,40 @@ extern "C" __global__ void reduce_mean_lastdim_f32_kernel(const float* x, float*
     }
 }
 
+extern "C" __global__ void transpose_2d_f32_kernel(const float* x, float* out, int m, int n) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    if (row < m && col < n) {
+        out[col * m + row] = x[row * n + col];
+    }
+}
+
+extern "C" __global__ void permute_3d_0_2_1_f32_kernel(const float* x, float* out, int b, int t, int c) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total = b * t * c;
+    if (idx < total) {
+        int bi = idx / (t * c);
+        int rem = idx % (t * c);
+        int ti = rem / c;
+        int ci = rem % c;
+        int out_idx = bi * (c * t) + ci * t + ti;
+        out[out_idx] = x[idx];
+    }
+}
+
+extern "C" __global__ void permute_3d_1_2_0_f32_kernel(const float* x, float* out, int b, int t, int c) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total = b * t * c;
+    if (idx < total) {
+        int bi = idx / (t * c);
+        int rem = idx % (t * c);
+        int ti = rem / c;
+        int ci = rem % c;
+        int out_idx = ti * (c * b) + ci * b + bi;
+        out[out_idx] = x[idx];
+    }
+}
+
 extern "C" __global__ void argmax_lastdim_f32_kernel(const float* x, int* out, int m, int n) {
     int row = blockIdx.x;
     if (row >= m) return;
@@ -376,6 +410,26 @@ extern "C" void cuda_reduce_mean_lastdim_device_float(const float* a, float* out
     dim3 grid(m);
     size_t shmem = sizeof(float) * threads;
     reduce_mean_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
+}
+
+extern "C" void cuda_transpose_2d_device_float(const float* a, float* out, int m, int n) {
+    dim3 block(16, 16);
+    dim3 grid((n + block.x - 1) / block.x, (m + block.y - 1) / block.y);
+    transpose_2d_f32_kernel<<<grid, block>>>(a, out, m, n);
+}
+
+extern "C" void cuda_permute_3d_0_2_1_device_float(const float* a, float* out, int b, int t, int c) {
+    int total = b * t * c;
+    dim3 block(256);
+    dim3 grid((total + block.x - 1) / block.x);
+    permute_3d_0_2_1_f32_kernel<<<grid, block>>>(a, out, b, t, c);
+}
+
+extern "C" void cuda_permute_3d_1_2_0_device_float(const float* a, float* out, int b, int t, int c) {
+    int total = b * t * c;
+    dim3 block(256);
+    dim3 grid((total + block.x - 1) / block.x);
+    permute_3d_1_2_0_f32_kernel<<<grid, block>>>(a, out, b, t, c);
 }
 
 extern "C" void cuda_argmax_lastdim_device_int(const float* a, int* out, int m, int n) {

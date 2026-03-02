@@ -368,7 +368,19 @@ class Tensor:
 
         out._backward = _backward
         if axis is not None:
-            idx = host.argmax(axis=axis)
+            if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+                try:
+                    idx = _cuda_ops.argmax_lastdim(self.data)
+                    if self.ndim == 2:
+                        idx = idx
+                    else:
+                        idx = idx
+                except Exception:
+                    idx = host.argmax(axis=axis)
+            else:
+                idx = host.argmax(axis=axis)
+            if isinstance(idx, _cuda_ops.DeviceArray):
+                return out, Tensor(idx, requires_grad=False, device="cuda")
             return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
         return out
 
@@ -408,7 +420,19 @@ class Tensor:
 
         out._backward = _backward
         if axis is not None:
-            idx = host.argmin(axis=axis)
+            if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+                try:
+                    idx = _cuda_ops.argmin_lastdim(self.data)
+                    if self.ndim == 2:
+                        idx = idx
+                    else:
+                        idx = idx
+                except Exception:
+                    idx = host.argmin(axis=axis)
+            else:
+                idx = host.argmin(axis=axis)
+            if isinstance(idx, _cuda_ops.DeviceArray):
+                return out, Tensor(idx, requires_grad=False, device="cuda")
             return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
         return out
 
@@ -416,14 +440,30 @@ class Tensor:
         if dim is not None:
             axis = dim
         host = _to_numpy(self.data)
-        idx = host.argmax(axis=axis)
+        if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+            try:
+                idx = _cuda_ops.argmax_lastdim(self.data)
+            except Exception:
+                idx = host.argmax(axis=axis)
+        else:
+            idx = host.argmax(axis=axis)
+        if isinstance(idx, _cuda_ops.DeviceArray):
+            return Tensor(idx, requires_grad=False, device="cuda")
         return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
 
     def argmin(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
         host = _to_numpy(self.data)
-        idx = host.argmin(axis=axis)
+        if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+            try:
+                idx = _cuda_ops.argmin_lastdim(self.data)
+            except Exception:
+                idx = host.argmin(axis=axis)
+        else:
+            idx = host.argmin(axis=axis)
+        if isinstance(idx, _cuda_ops.DeviceArray):
+            return Tensor(idx, requires_grad=False, device="cuda")
         return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
 
     def backward(self):
