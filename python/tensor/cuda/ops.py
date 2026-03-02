@@ -149,6 +149,15 @@ def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if axis is None and not keepdims:
         capsule = _cuda.reduce_sum_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
+    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+        m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
+        n = a.shape[-1]
+        capsule = _cuda.reduce_sum_lastdim_device(a.capsule, m, n, str(a.dtype))
+        if keepdims:
+            out_shape = (a.shape[0], 1) if len(a.shape) == 2 else (a.shape[0], a.shape[1], 1)
+        else:
+            out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+        return DeviceArray(capsule, out_shape, a.dtype)
     host = to_host(a)
     out = host.sum(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -160,6 +169,15 @@ def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if axis is None and not keepdims:
         capsule = _cuda.reduce_mean_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
+    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+        m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
+        n = a.shape[-1]
+        capsule = _cuda.reduce_mean_lastdim_device(a.capsule, m, n, str(a.dtype))
+        if keepdims:
+            out_shape = (a.shape[0], 1) if len(a.shape) == 2 else (a.shape[0], a.shape[1], 1)
+        else:
+            out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+        return DeviceArray(capsule, out_shape, a.dtype)
     host = to_host(a)
     out = host.mean(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -171,6 +189,15 @@ def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if axis is None and not keepdims:
         capsule = _cuda.reduce_max_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
+    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+        m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
+        n = a.shape[-1]
+        capsule = _cuda.reduce_max_lastdim_device(a.capsule, m, n, str(a.dtype))
+        if keepdims:
+            out_shape = (a.shape[0], 1) if len(a.shape) == 2 else (a.shape[0], a.shape[1], 1)
+        else:
+            out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+        return DeviceArray(capsule, out_shape, a.dtype)
     host = to_host(a)
     out = host.max(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -182,6 +209,15 @@ def reduce_min(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if axis is None and not keepdims:
         capsule = _cuda.reduce_min_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
+    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+        m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
+        n = a.shape[-1]
+        capsule = _cuda.reduce_min_lastdim_device(a.capsule, m, n, str(a.dtype))
+        if keepdims:
+            out_shape = (a.shape[0], 1) if len(a.shape) == 2 else (a.shape[0], a.shape[1], 1)
+        else:
+            out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
+        return DeviceArray(capsule, out_shape, a.dtype)
     host = to_host(a)
     out = host.min(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))

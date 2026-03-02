@@ -115,6 +115,94 @@ extern "C" __global__ void softmax_f32_kernel(const float* x, float* out, int m,
     }
 }
 
+extern "C" __global__ void reduce_sum_lastdim_f32_kernel(const float* x, float* out, int m, int n) {
+    int row = blockIdx.x;
+    if (row >= m) return;
+    extern __shared__ float sdata[];
+    float sum = 0.0f;
+    for (int col = threadIdx.x; col < n; col += blockDim.x) {
+        sum += x[row * n + col];
+    }
+    sdata[threadIdx.x] = sum;
+    __syncthreads();
+    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            sdata[threadIdx.x] += sdata[threadIdx.x + stride];
+        }
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) {
+        out[row] = sdata[0];
+    }
+}
+
+extern "C" __global__ void reduce_max_lastdim_f32_kernel(const float* x, float* out, int m, int n) {
+    int row = blockIdx.x;
+    if (row >= m) return;
+    extern __shared__ float sdata[];
+    float maxv = -1e20f;
+    for (int col = threadIdx.x; col < n; col += blockDim.x) {
+        float v = x[row * n + col];
+        if (v > maxv) maxv = v;
+    }
+    sdata[threadIdx.x] = maxv;
+    __syncthreads();
+    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            float v = sdata[threadIdx.x + stride];
+            if (v > sdata[threadIdx.x]) sdata[threadIdx.x] = v;
+        }
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) {
+        out[row] = sdata[0];
+    }
+}
+
+extern "C" __global__ void reduce_min_lastdim_f32_kernel(const float* x, float* out, int m, int n) {
+    int row = blockIdx.x;
+    if (row >= m) return;
+    extern __shared__ float sdata[];
+    float minv = 1e20f;
+    for (int col = threadIdx.x; col < n; col += blockDim.x) {
+        float v = x[row * n + col];
+        if (v < minv) minv = v;
+    }
+    sdata[threadIdx.x] = minv;
+    __syncthreads();
+    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            float v = sdata[threadIdx.x + stride];
+            if (v < sdata[threadIdx.x]) sdata[threadIdx.x] = v;
+        }
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) {
+        out[row] = sdata[0];
+    }
+}
+
+extern "C" __global__ void reduce_mean_lastdim_f32_kernel(const float* x, float* out, int m, int n) {
+    int row = blockIdx.x;
+    if (row >= m) return;
+    extern __shared__ float sdata[];
+    float sum = 0.0f;
+    for (int col = threadIdx.x; col < n; col += blockDim.x) {
+        sum += x[row * n + col];
+    }
+    sdata[threadIdx.x] = sum;
+    __syncthreads();
+    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadIdx.x < stride) {
+            sdata[threadIdx.x] += sdata[threadIdx.x + stride];
+        }
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) {
+        out[row] = sdata[0] / n;
+    }
+}
+
 extern "C" __global__ void matmul_f32_kernel(const float* a, const float* b, float* out, int m, int k, int n) {
     const int TILE = 16;
     __shared__ float As[TILE][TILE];
@@ -188,6 +276,38 @@ extern "C" void cuda_matmul_device_float(const float* a, const float* b, float* 
     dim3 block(16, 16);
     dim3 grid((n + block.x - 1) / block.x, (m + block.y - 1) / block.y);
     matmul_f32_kernel<<<grid, block>>>(a, b, out, m, k, n);
+}
+
+extern "C" void cuda_reduce_sum_lastdim_device_float(const float* a, float* out, int m, int n) {
+    int threads = 256;
+    dim3 block(threads);
+    dim3 grid(m);
+    size_t shmem = sizeof(float) * threads;
+    reduce_sum_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
+}
+
+extern "C" void cuda_reduce_max_lastdim_device_float(const float* a, float* out, int m, int n) {
+    int threads = 256;
+    dim3 block(threads);
+    dim3 grid(m);
+    size_t shmem = sizeof(float) * threads;
+    reduce_max_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
+}
+
+extern "C" void cuda_reduce_min_lastdim_device_float(const float* a, float* out, int m, int n) {
+    int threads = 256;
+    dim3 block(threads);
+    dim3 grid(m);
+    size_t shmem = sizeof(float) * threads;
+    reduce_min_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
+}
+
+extern "C" void cuda_reduce_mean_lastdim_device_float(const float* a, float* out, int m, int n) {
+    int threads = 256;
+    dim3 block(threads);
+    dim3 grid(m);
+    size_t shmem = sizeof(float) * threads;
+    reduce_mean_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
 }
 
 extern "C" void cuda_reduce_sum_device_float(const float* a, float* out, size_t n) {
