@@ -3,7 +3,7 @@ import sys
 import sysconfig
 from pathlib import Path
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 
 import numpy as np
@@ -100,6 +100,8 @@ elif use_cuda and cuda_home is None:
     print("WARNING: CUDA not found. Skipping CUDA extension build.")
 
 setup(
+    packages=find_packages("python"),
+    package_dir={"": "python"},
     ext_modules=ext_modules,
     cmdclass={"build_ext": BuildExt},
 )
