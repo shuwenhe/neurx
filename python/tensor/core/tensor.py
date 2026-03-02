@@ -72,6 +72,10 @@ class Tensor:
     def shape(self):
         return _shape_of(self.data)
 
+    @property
+    def dtype(self):
+        return _to_numpy(self.data).dtype
+
     def zero_grad(self):
         if self.requires_grad:
             if self.device == "cuda":
@@ -229,6 +233,29 @@ class Tensor:
 
     def to_numpy(self):
         return _to_numpy(self.data)
+
+    def numpy(self):
+        return self.to_numpy()
+
+    def detach(self):
+        return Tensor(self.to_numpy().copy(), requires_grad=False, device=self.device)
+
+    def to(self, device=None, dtype=None):
+        target_device = device or self.device
+        arr = self.to_numpy()
+        if dtype is not None:
+            arr = arr.astype(dtype, copy=False)
+        out = Tensor(arr, requires_grad=self.requires_grad, _children=(self,), _op="to", device=target_device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad
+                if self.device == "cuda":
+                    grad = grad.astype(np.float32, copy=False)
+                self.grad += _unbroadcast(grad, self.shape)
+
+        out._backward = _backward
+        return out
 
 
 def _as_device(t: "Tensor"):
