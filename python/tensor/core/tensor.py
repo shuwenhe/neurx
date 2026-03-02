@@ -209,22 +209,111 @@ class Tensor:
     def view(self, *shape):
         return self.reshape(*shape)
 
-    def mean(self):
+    def flatten(self, start_dim=0, end_dim=-1):
+        shape = list(self.shape)
+        if end_dim < 0:
+            end_dim += len(shape)
+        if start_dim < 0:
+            start_dim += len(shape)
+        if start_dim > end_dim:
+            raise ValueError("start_dim must be <= end_dim")
+        new_dim = 1
+        for d in shape[start_dim:end_dim + 1]:
+            new_dim *= d
+        new_shape = shape[:start_dim] + [new_dim] + shape[end_dim + 1:]
+        return self.reshape(*new_shape)
+
+    def transpose(self, dim0, dim1):
         host = _to_numpy(self.data)
-        denom = host.size
-        out = Tensor(np.array(host.mean()), self.requires_grad, (self,), "mean", device=self.device)
+        axes = list(range(host.ndim))
+        axes[dim0], axes[dim1] = axes[dim1], axes[dim0]
+        if self.device == "cuda":
+            out_data = _cuda_ops.to_device(host.transpose(axes).astype(np.float32, copy=False))
+            out = Tensor(out_data, self.requires_grad, (self,), "transpose", device="cuda")
+        else:
+            out = Tensor(host.transpose(axes), self.requires_grad, (self,), "transpose")
 
         def _backward():
             if self.requires_grad:
-                self.grad += (np.ones_like(host) / denom) * out.grad
+                inv_axes = np.argsort(axes)
+                self.grad += out.grad.transpose(inv_axes)
 
         out._backward = _backward
         return out
 
-    def sum(self, axis=None, keepdims=False):
+    def permute(self, *dims):
         host = _to_numpy(self.data)
-        out_data = host.sum(axis=axis, keepdims=keepdims)
-        out = Tensor(out_data, self.requires_grad, (self,), "sum", device=self.device)
+        if len(dims) != host.ndim:
+            raise ValueError("permute dims must match tensor ndim")
+        if self.device == "cuda":
+            out_data = _cuda_ops.to_device(host.transpose(dims).astype(np.float32, copy=False))
+            out = Tensor(out_data, self.requires_grad, (self,), "permute", device="cuda")
+        else:
+            out = Tensor(host.transpose(dims), self.requires_grad, (self,), "permute")
+
+        def _backward():
+            if self.requires_grad:
+                inv_axes = np.argsort(dims)
+                self.grad += out.grad.transpose(inv_axes)
+
+        out._backward = _backward
+        return out
+
+    def mean(self, axis=None, keepdims=False, dim=None):
+        if dim is not None:
+            axis = dim
+        host = _to_numpy(self.data)
+        denom = host.size
+        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+            try:
+                out_data = _cuda_ops.reduce_mean(self.data, axis=None, keepdims=False)
+                out = Tensor(out_data, self.requires_grad, (self,), "mean", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
+
+        if out is None:
+            out = Tensor(np.array(host.mean(axis=axis, keepdims=keepdims)), self.requires_grad, (self,), "mean", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad
+                if axis is not None and not keepdims:
+                    axes = axis if isinstance(axis, tuple) else (axis,)
+                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
+                    for ax in sorted(axes):
+                        grad = np.expand_dims(grad, axis=ax)
+                if axis is None:
+                    denom = host.size
+                else:
+                    axes = axis if isinstance(axis, tuple) else (axis,)
+                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
+                    denom = 1
+                    for ax in axes:
+                        denom *= host.shape[ax]
+                scale = 1.0 / denom
+                self.grad += (np.ones_like(host) * scale) * grad
+
+        out._backward = _backward
+        return out
+
+    def sum(self, axis=None, keepdims=False, dim=None):
+        if dim is not None:
+            axis = dim
+        host = _to_numpy(self.data)
+        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+            try:
+                out_data = _cuda_ops.reduce_sum(self.data, axis=axis, keepdims=keepdims)
+                out = Tensor(out_data, self.requires_grad, (self,), "sum", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
+
+        if out is None:
+            out_data = host.sum(axis=axis, keepdims=keepdims)
+            out = Tensor(out_data, self.requires_grad, (self,), "sum", device=self.device)
 
         def _backward():
             if self.requires_grad:
@@ -239,10 +328,22 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def max(self, axis=None, keepdims=False):
+    def max(self, axis=None, keepdims=False, dim=None):
+        if dim is not None:
+            axis = dim
         host = _to_numpy(self.data)
-        out_data = host.max(axis=axis, keepdims=keepdims)
-        out = Tensor(out_data, self.requires_grad, (self,), "max", device=self.device)
+        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+            try:
+                out_data = _cuda_ops.reduce_max(self.data, axis=axis, keepdims=keepdims)
+                out = Tensor(out_data, self.requires_grad, (self,), "max", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
+
+        if out is None:
+            out_data = host.max(axis=axis, keepdims=keepdims)
+            out = Tensor(out_data, self.requires_grad, (self,), "max", device=self.device)
 
         def _backward():
             if self.requires_grad:
@@ -262,10 +363,22 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def min(self, axis=None, keepdims=False):
+    def min(self, axis=None, keepdims=False, dim=None):
+        if dim is not None:
+            axis = dim
         host = _to_numpy(self.data)
-        out_data = host.min(axis=axis, keepdims=keepdims)
-        out = Tensor(out_data, self.requires_grad, (self,), "min", device=self.device)
+        if self.device == "cuda" and _cuda_ops is not None and axis is None and not keepdims:
+            try:
+                out_data = _cuda_ops.reduce_min(self.data, axis=axis, keepdims=keepdims)
+                out = Tensor(out_data, self.requires_grad, (self,), "min", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
+
+        if out is None:
+            out_data = host.min(axis=axis, keepdims=keepdims)
+            out = Tensor(out_data, self.requires_grad, (self,), "min", device=self.device)
 
         def _backward():
             if self.requires_grad:
