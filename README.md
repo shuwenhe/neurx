@@ -7,6 +7,7 @@ A minimal NumPy-based autograd framework extracted from the `llm` project. It pr
 - Core layers in `tensor.core.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
 - Optimizer `AdamW` and `clip_grad_norm`
 - Losses `cross_entropy` and `cross_entropy_loss`
+- Optional CUDA extension (starter) for elementwise `add`/`mul`
 - Simple text generation helpers when used via the `llm` project
 
 ## Install (offline-friendly)
@@ -14,6 +15,19 @@ This repo is designed to be installed in editable mode without internet access.
 
 ```bash
 pip install -e /path/to/tensor --no-build-isolation
+```
+
+## CUDA Extension (starter)
+This repo includes a minimal CUDA/C++ extension that accelerates elementwise add/mul as a starting point. It copies data to GPU, runs a kernel, then copies back. This is not yet a full GPU tensor backend.
+
+Build and reinstall:
+```bash
+pip install -e /path/to/tensor --no-build-isolation
+```
+
+Enable CUDA path for add/mul:
+```bash
+export TENSOR_DEVICE=cuda
 ```
 
 ## Quick Start

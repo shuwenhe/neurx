@@ -1,4 +1,10 @@
+import os
 import numpy as np
+
+try:
+    from tensor.cuda import ops as _cuda_ops
+except Exception:
+    _cuda_ops = None
 
 
 def _ensure_array(value):
@@ -35,7 +41,11 @@ class Tensor:
 
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
-        out = Tensor(self.data + other.data, self.requires_grad or other.requires_grad, (self, other), "+")
+        if _should_use_cuda(self.data, other.data):
+            out_data = _cuda_ops.add(self.data, other.data)
+        else:
+            out_data = self.data + other.data
+        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+")
 
         def _backward():
             if self.requires_grad:
@@ -67,7 +77,11 @@ class Tensor:
 
     def __mul__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
-        out = Tensor(self.data * other.data, self.requires_grad or other.requires_grad, (self, other), "*")
+        if _should_use_cuda(self.data, other.data):
+            out_data = _cuda_ops.mul(self.data, other.data)
+        else:
+            out_data = self.data * other.data
+        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "*")
 
         def _backward():
             if self.requires_grad:
@@ -139,3 +153,19 @@ class Tensor:
 
     def item(self):
         return float(self.data.item())
+
+
+def _should_use_cuda(a: np.ndarray, b: np.ndarray) -> bool:
+    if _cuda_ops is None:
+        return False
+    if os.environ.get("TENSOR_DEVICE", "cpu").lower() != "cuda":
+        return False
+    if not isinstance(a, np.ndarray) or not isinstance(b, np.ndarray):
+        return False
+    if a.dtype != b.dtype:
+        return False
+    if a.dtype not in (np.float32, np.float64):
+        return False
+    if a.shape != b.shape:
+        return False
+    return True
