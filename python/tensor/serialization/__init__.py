@@ -1,5 +1,7 @@
 import pickle
 
+from tensor.serialization.checkpoint import load_checkpoint, save_checkpoint
+
 
 def save(obj, path):
     with open(path, "wb") as f:
@@ -14,4 +16,6 @@ def load(path):
 __all__ = [
     "save",
     "load",
+    "save_checkpoint",
+    "load_checkpoint",
 ]

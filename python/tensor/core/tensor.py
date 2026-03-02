@@ -26,6 +26,12 @@ def _to_numpy(data):
     return data
 
 
+def _to_data_on_device(arr, device):
+    if device == "cuda":
+        return _cuda_ops.to_device(arr.astype(np.float32, copy=False))
+    return arr
+
+
 def _unbroadcast(grad, shape):
     while len(grad.shape) > len(shape):
         grad = grad.sum(axis=0)
@@ -215,6 +221,43 @@ class Tensor:
     def __rmul__(self, other):
         return self * other
 
+    def __truediv__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out_device = "cuda" if (self.device == "cuda" or other.device == "cuda") else "cpu"
+        out_data = _to_numpy(self.data) / _to_numpy(other.data)
+        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "/", device=out_device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += _unbroadcast(out.grad / _to_numpy(other.data), self.shape)
+            if other.requires_grad:
+                other.grad += _unbroadcast((-out.grad * _to_numpy(self.data)) / (_to_numpy(other.data) ** 2), other.shape)
+
+        out._backward = _backward
+        return out
+
+    def __rtruediv__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return other / self
+
+    def __pow__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out_device = "cuda" if (self.device == "cuda" or other.device == "cuda") else "cpu"
+        base = _to_numpy(self.data)
+        exp = _to_numpy(other.data)
+        out_data = base ** exp
+        out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "pow", device=out_device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += _unbroadcast(out.grad * exp * (base ** (exp - 1.0)), self.shape)
+            if other.requires_grad:
+                safe_base = np.clip(base, 1e-12, None)
+                other.grad += _unbroadcast(out.grad * out_data * np.log(safe_base), other.shape)
+
+        out._backward = _backward
+        return out
+
     def __matmul__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         if self.device == "cuda" or other.device == "cuda":
@@ -267,6 +310,34 @@ class Tensor:
             new_dim *= d
         new_shape = shape[:start_dim] + [new_dim] + shape[end_dim + 1:]
         return self.reshape(*new_shape)
+
+    def squeeze(self, dim=None):
+        host = _to_numpy(self.data)
+        if dim is None:
+            out_data = np.squeeze(host)
+        else:
+            dim = dim + host.ndim if dim < 0 else dim
+            out_data = np.squeeze(host, axis=dim)
+        out = Tensor(out_data, self.requires_grad, (self,), "squeeze", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad.reshape(self.shape)
+
+        out._backward = _backward
+        return out
+
+    def unsqueeze(self, dim):
+        host = _to_numpy(self.data)
+        dim = dim + host.ndim + 1 if dim < 0 else dim
+        out = Tensor(np.expand_dims(host, axis=dim), self.requires_grad, (self,), "unsqueeze", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += np.squeeze(out.grad, axis=dim)
+
+        out._backward = _backward
+        return out
 
     def transpose(self, dim0, dim1):
         host = _to_numpy(self.data)
@@ -503,6 +574,292 @@ class Tensor:
             return Tensor(idx, requires_grad=False, device="cuda")
         return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device=self.device)
 
+    def std(self, axis=None, keepdims=False, dim=None, keepdim=None, correction=0):
+        if dim is not None:
+            axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
+        axis = _normalize_axis(axis, self.ndim)
+        x = _to_numpy(self.data)
+        out_data = np.std(x, axis=axis, keepdims=keepdims, ddof=correction)
+        out = Tensor(out_data, self.requires_grad, (self,), "std", device=self.device)
+
+        def _backward():
+            if not self.requires_grad:
+                return
+            grad = out.grad
+            axes = tuple(range(self.ndim)) if axis is None else (axis if isinstance(axis, tuple) else (axis,))
+            n = 1
+            for ax in axes:
+                n *= self.shape[ax]
+            denom = max(n - correction, 1)
+            mean = x.mean(axis=axes, keepdims=True)
+            std_keep = np.std(x, axis=axes, keepdims=True, ddof=correction)
+            std_keep = np.maximum(std_keep, 1e-12)
+            if not keepdims and axis is not None:
+                for ax in sorted(axes):
+                    grad = np.expand_dims(grad, axis=ax)
+            self.grad += ((x - mean) / (denom * std_keep)) * grad
+
+        out._backward = _backward
+        return out
+
+    def norm(self, p=2, axis=None, keepdims=False, dim=None, keepdim=None):
+        if dim is not None:
+            axis = dim
+        if keepdim is not None:
+            keepdims = keepdim
+        axis = _normalize_axis(axis, self.ndim)
+        x = _to_numpy(self.data)
+        out_data = np.linalg.norm(x, ord=p, axis=axis, keepdims=keepdims)
+        out = Tensor(out_data, self.requires_grad, (self,), "norm", device=self.device)
+
+        def _backward():
+            if not self.requires_grad:
+                return
+            grad = out.grad
+            axes = tuple(range(self.ndim)) if axis is None else (axis if isinstance(axis, tuple) else (axis,))
+            norm_keep = np.linalg.norm(x, ord=p, axis=axes, keepdims=True)
+            norm_keep = np.maximum(norm_keep, 1e-12)
+            if not keepdims and axis is not None:
+                for ax in sorted(axes):
+                    grad = np.expand_dims(grad, axis=ax)
+            if p == 2:
+                self.grad += (x / norm_keep) * grad
+            else:
+                self.grad += (np.sign(x) * (np.abs(x) ** (p - 1)) / (norm_keep ** (p - 1))) * grad
+
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        x = _to_numpy(self.data)
+        out_data = np.exp(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "exp", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * out_data
+
+        out._backward = _backward
+        return out
+
+    def log(self):
+        x = _to_numpy(self.data)
+        out_data = np.log(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "log", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad / x
+
+        out._backward = _backward
+        return out
+
+    def sqrt(self):
+        x = _to_numpy(self.data)
+        out_data = np.sqrt(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "sqrt", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * 0.5 / np.maximum(out_data, 1e-12)
+
+        out._backward = _backward
+        return out
+
+    def abs(self):
+        x = _to_numpy(self.data)
+        out = Tensor(np.abs(x), self.requires_grad, (self,), "abs", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * np.sign(x)
+
+        out._backward = _backward
+        return out
+
+    def sin(self):
+        x = _to_numpy(self.data)
+        out = Tensor(np.sin(x), self.requires_grad, (self,), "sin", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * np.cos(x)
+
+        out._backward = _backward
+        return out
+
+    def cos(self):
+        x = _to_numpy(self.data)
+        out = Tensor(np.cos(x), self.requires_grad, (self,), "cos", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad -= out.grad * np.sin(x)
+
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        x = _to_numpy(self.data)
+        out_data = np.maximum(x, 0)
+        out = Tensor(out_data, self.requires_grad, (self,), "relu", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * (x > 0)
+
+        out._backward = _backward
+        return out
+
+    def __getitem__(self, idx):
+        x = _to_numpy(self.data)
+        out = Tensor(x[idx], self.requires_grad, (self,), "getitem", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                np.add.at(grad, idx, out.grad)
+                self.grad += grad
+
+        out._backward = _backward
+        return out
+
+    def gather(self, dim, index):
+        idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
+        x = _to_numpy(self.data)
+        out_data = np.take_along_axis(x, idx, axis=dim)
+        out = Tensor(out_data, self.requires_grad, (self,), "gather", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                grid = np.indices(idx.shape)
+                target = []
+                for axis in range(x.ndim):
+                    target.append(idx if axis == dim else grid[axis])
+                np.add.at(grad, tuple(target), out.grad)
+                self.grad += grad
+
+        out._backward = _backward
+        return out
+
+    def scatter(self, dim, index, src):
+        idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
+        src_t = src if isinstance(src, Tensor) else Tensor(src, device=self.device)
+        x = _to_numpy(self.data)
+        src_data = _to_numpy(src_t.data)
+        out_data = x.copy()
+        np.put_along_axis(out_data, idx, src_data, axis=dim)
+        out = Tensor(out_data, self.requires_grad or src_t.requires_grad, (self, src_t), "scatter", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                mask = np.zeros_like(x, dtype=bool)
+                np.put_along_axis(mask, idx, True, axis=dim)
+                self.grad += out.grad * (~mask)
+            if src_t.requires_grad:
+                src_t.grad += np.take_along_axis(out.grad, idx, axis=dim)
+
+        out._backward = _backward
+        return out
+
+    def index_select(self, dim, index):
+        idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
+        x = _to_numpy(self.data)
+        out_data = np.take(x, idx, axis=dim)
+        out = Tensor(out_data, self.requires_grad, (self,), "index_select", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                slicer = [slice(None)] * x.ndim
+                for i, pos in enumerate(idx):
+                    slicer[dim] = pos
+                    grad_slice = [slice(None)] * out.grad.ndim
+                    grad_slice[dim] = i
+                    grad[tuple(slicer)] += out.grad[tuple(grad_slice)]
+                self.grad += grad
+
+        out._backward = _backward
+        return out
+
+    def repeat(self, *sizes):
+        if len(sizes) == 1 and isinstance(sizes[0], (tuple, list)):
+            sizes = tuple(sizes[0])
+        x = _to_numpy(self.data)
+        out = Tensor(np.tile(x, sizes), self.requires_grad, (self,), "repeat", device=self.device)
+        padded_shape = (1,) * (len(sizes) - x.ndim) + x.shape
+        reps = tuple(sizes)
+
+        def _backward():
+            if self.requires_grad:
+                grad = out.grad.reshape([v for pair in zip(reps, padded_shape) for v in pair])
+                for axis in reversed(range(0, 2 * len(reps), 2)):
+                    grad = grad.sum(axis=axis)
+                self.grad += grad.reshape(self.shape)
+
+        out._backward = _backward
+        return out
+
+    def expand(self, *shape):
+        if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+            shape = tuple(shape[0])
+        x = _to_numpy(self.data)
+        target = []
+        for i, d in enumerate(shape):
+            target.append(x.shape[i] if d == -1 else d)
+        out = Tensor(np.broadcast_to(x, tuple(target)), self.requires_grad, (self,), "expand", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += _unbroadcast(out.grad, self.shape)
+
+        out._backward = _backward
+        return out
+
+    def add_(self, other):
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        out = _to_numpy(self.data) + _to_numpy(other_t.data)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def mul_(self, other):
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        out = _to_numpy(self.data) * _to_numpy(other_t.data)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def relu_(self):
+        out = np.maximum(_to_numpy(self.data), 0)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def __gt__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) > _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    def __lt__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) < _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    def __ge__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) >= _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    def __le__(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) <= _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    def eq(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) == _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    def ne(self, other):
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return Tensor(_to_numpy(self.data) != _to_numpy(other.data), requires_grad=False, device="cpu")
+
     def backward(self):
         if self.data.size != 1:
             raise ValueError("backward() requires scalar Tensor")
@@ -562,6 +919,148 @@ class Tensor:
 
         out._backward = _backward
         return out
+
+    def cpu(self):
+        return self.to(device="cpu")
+
+    def cuda(self):
+        return self.to(device="cuda")
+
+    def float(self):
+        return self.to(dtype=np.float32)
+
+    def long(self):
+        return self.to(dtype=np.int64)
+
+
+def where(condition, x, y):
+    cond = condition.to_numpy() if isinstance(condition, Tensor) else np.asarray(condition)
+    x_t = x if isinstance(x, Tensor) else Tensor(x)
+    y_t = y if isinstance(y, Tensor) else Tensor(y)
+    out_device = "cuda" if (x_t.device == "cuda" or y_t.device == "cuda") else "cpu"
+    out_data = np.where(cond, _to_numpy(x_t.data), _to_numpy(y_t.data))
+    out = Tensor(out_data, x_t.requires_grad or y_t.requires_grad, (x_t, y_t), "where", device=out_device)
+
+    def _backward():
+        if x_t.requires_grad:
+            x_t.grad += _unbroadcast(np.where(cond, out.grad, 0), x_t.shape)
+        if y_t.requires_grad:
+            y_t.grad += _unbroadcast(np.where(cond, 0, out.grad), y_t.shape)
+
+    out._backward = _backward
+    return out
+
+
+def cat(tensors, axis=0, dim=None):
+    if dim is not None:
+        axis = dim
+    ts = [t if isinstance(t, Tensor) else Tensor(t) for t in tensors]
+    out_device = "cuda" if any(t.device == "cuda" for t in ts) else "cpu"
+    out_data = np.concatenate([_to_numpy(t.data) for t in ts], axis=axis)
+    out = Tensor(out_data, any(t.requires_grad for t in ts), tuple(ts), "cat", device=out_device)
+    sizes = [t.shape[axis] for t in ts]
+
+    def _backward():
+        if out.grad is None:
+            return
+        start = 0
+        slicer = [slice(None)] * out.grad.ndim
+        for t, s in zip(ts, sizes):
+            if t.requires_grad:
+                slicer[axis] = slice(start, start + s)
+                t.grad += out.grad[tuple(slicer)]
+            start += s
+
+    out._backward = _backward
+    return out
+
+
+def stack(tensors, axis=0, dim=None):
+    if dim is not None:
+        axis = dim
+    ts = [t if isinstance(t, Tensor) else Tensor(t) for t in tensors]
+    out_device = "cuda" if any(t.device == "cuda" for t in ts) else "cpu"
+    out_data = np.stack([_to_numpy(t.data) for t in ts], axis=axis)
+    out = Tensor(out_data, any(t.requires_grad for t in ts), tuple(ts), "stack", device=out_device)
+
+    def _backward():
+        for i, t in enumerate(ts):
+            if t.requires_grad:
+                t.grad += np.take(out.grad, i, axis=axis)
+
+    out._backward = _backward
+    return out
+
+
+def split(tensor, split_size_or_sections, axis=0, dim=None):
+    if dim is not None:
+        axis = dim
+    t = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    x = _to_numpy(t.data)
+    if isinstance(split_size_or_sections, int):
+        n = x.shape[axis]
+        sections = list(range(split_size_or_sections, n, split_size_or_sections))
+    else:
+        sections = np.cumsum(split_size_or_sections)[:-1].tolist()
+    arrays = np.split(x, sections, axis=axis)
+    outputs = []
+    start = 0
+    for arr in arrays:
+        end = start + arr.shape[axis]
+        out = Tensor(arr, t.requires_grad, (t,), "split", device=t.device)
+
+        def _backward(start_idx=start, end_idx=end, out_tensor=out):
+            if t.requires_grad:
+                slicer = [slice(None)] * t.ndim
+                slicer[axis] = slice(start_idx, end_idx)
+                t.grad[tuple(slicer)] += out_tensor.grad
+
+        out._backward = _backward
+        outputs.append(out)
+        start = end
+    return tuple(outputs)
+
+
+def chunk(tensor, chunks, axis=0, dim=None):
+    if dim is not None:
+        axis = dim
+    t = tensor if isinstance(tensor, Tensor) else Tensor(tensor)
+    n = t.shape[axis]
+    chunk_size = int(np.ceil(n / chunks))
+    return split(t, chunk_size, axis=axis)
+
+
+def matmul(a, b):
+    return (a if isinstance(a, Tensor) else Tensor(a)) @ (b if isinstance(b, Tensor) else Tensor(b))
+
+
+def mm(a, b):
+    return matmul(a, b)
+
+
+def bmm(a, b):
+    return matmul(a, b)
+
+
+def inverse(t):
+    x = t if isinstance(t, Tensor) else Tensor(t)
+    return Tensor(np.linalg.inv(_to_numpy(x.data)), requires_grad=False, device=x.device)
+
+
+def svd(t):
+    x = t if isinstance(t, Tensor) else Tensor(t)
+    u, s, vh = np.linalg.svd(_to_numpy(x.data), full_matrices=False)
+    return (
+        Tensor(u, requires_grad=False, device=x.device),
+        Tensor(s, requires_grad=False, device=x.device),
+        Tensor(vh, requires_grad=False, device=x.device),
+    )
+
+
+def eig(t):
+    x = t if isinstance(t, Tensor) else Tensor(t)
+    w, v = np.linalg.eig(_to_numpy(x.data))
+    return Tensor(w, requires_grad=False, device=x.device), Tensor(v, requires_grad=False, device=x.device)
 
 
 def _as_device(t: "Tensor"):
