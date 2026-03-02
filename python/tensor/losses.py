@@ -1,6 +1,6 @@
 import numpy as np
 
-from tensor.core.tensor import Tensor
+from tensor.tensor import Tensor
 
 
 def cross_entropy(logits: Tensor, targets):
