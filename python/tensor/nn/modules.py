@@ -1,6 +1,6 @@
 import numpy as np
 
-from tensor.core.tensor import Tensor
+from tensor.tensor import Tensor
 
 
 class Module:
@@ -25,6 +25,13 @@ class Module:
                     add_param(p)
             elif isinstance(value, (list, tuple)):
                 for item in value:
+                    if isinstance(item, Parameter):
+                        add_param(item)
+                    elif isinstance(item, Module):
+                        for p in item.parameters():
+                            add_param(p)
+            elif isinstance(value, dict):
+                for item in value.values():
                     if isinstance(item, Parameter):
                         add_param(item)
                     elif isinstance(item, Module):
@@ -57,6 +64,64 @@ class Module:
                 for item in value:
                     if isinstance(item, Module):
                         item.eval()
+            elif isinstance(value, dict):
+                for item in value.values():
+                    if isinstance(item, Module):
+                        item.eval()
+
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError("Module.forward is not implemented")
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
+
+    def _named_parameters(self, prefix=""):
+        named = {}
+
+        def add_param(name, param):
+            if name not in named:
+                named[name] = param
+
+        for name, value in self.__dict__.items():
+            if isinstance(value, Parameter):
+                add_param(prefix + name, value)
+            elif isinstance(value, Module):
+                child = value._named_parameters(prefix + name + ".")
+                named.update(child)
+            elif isinstance(value, (list, tuple)):
+                for idx, item in enumerate(value):
+                    if isinstance(item, Parameter):
+                        add_param(f"{prefix}{name}.{idx}", item)
+                    elif isinstance(item, Module):
+                        child = item._named_parameters(f"{prefix}{name}.{idx}.")
+                        named.update(child)
+            elif isinstance(value, dict):
+                for key, item in value.items():
+                    if isinstance(item, Parameter):
+                        add_param(f"{prefix}{name}.{key}", item)
+                    elif isinstance(item, Module):
+                        child = item._named_parameters(f"{prefix}{name}.{key}.")
+                        named.update(child)
+        return named
+
+    def state_dict(self):
+        state = {}
+        for name, param in self._named_parameters().items():
+            state[name] = param.data.copy()
+        return state
+
+    def load_state_dict(self, state, strict=True):
+        named = self._named_parameters()
+        missing = []
+        for name, param in named.items():
+            if name not in state:
+                missing.append(name)
+                continue
+            param.data = state[name].copy()
+        unexpected = [name for name in state.keys() if name not in named]
+        if strict and (missing or unexpected):
+            raise ValueError(f"state_dict mismatch: missing={missing}, unexpected={unexpected}")
+        return {"missing": missing, "unexpected": unexpected}
 
 
 class Parameter(Tensor):

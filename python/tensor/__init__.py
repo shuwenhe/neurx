@@ -1,4 +1,4 @@
-from tensor.core.tensor import Tensor
+from tensor.tensor import Tensor
 from tensor import nn, optim
 from tensor.losses import cross_entropy, cross_entropy_loss
 
