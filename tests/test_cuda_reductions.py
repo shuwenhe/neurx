@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pytest
 
 from tensor import Tensor
 from tensor.cuda.ops import DeviceArray, available, to_host
@@ -31,8 +32,7 @@ def _value_only(v):
 def test_cuda_reductions_match_cpu():
     os.environ["TENSOR_DEVICE"] = "cuda"
     if not _cuda_runtime_ok():
-        print("CUDA not available; skipping reduction test.")
-        return
+        pytest.skip("CUDA runtime not available")
 
     x_np = np.random.randn(2, 3, 4).astype(np.float32)
     x_cuda = Tensor(x_np, device="cuda")
@@ -54,8 +54,7 @@ def test_cuda_reductions_match_cpu():
 def test_cuda_indices_behavior():
     os.environ["TENSOR_DEVICE"] = "cuda"
     if not _cuda_runtime_ok():
-        print("CUDA not available; skipping indices test.")
-        return
+        pytest.skip("CUDA runtime not available")
 
     x_np = np.random.randn(2, 3, 4).astype(np.float32)
     x = Tensor(x_np, device="cuda")
@@ -77,18 +76,34 @@ def test_cuda_indices_behavior():
     assert a_max.shape == (2, 3)
     assert a_min.shape == (2, 3)
 
-    assert i_max.to_numpy().dtype == np.int32
-    assert i_min.to_numpy().dtype == np.int32
-    assert a_max.to_numpy().dtype == np.int32
-    assert a_min.to_numpy().dtype == np.int32
+    assert i_max.to_numpy().dtype == np.int64
+    assert i_min.to_numpy().dtype == np.int64
+    assert a_max.to_numpy().dtype == np.int64
+    assert a_min.to_numpy().dtype == np.int64
 
-    assert np.array_equal(i_max.to_numpy(), x_np.argmax(axis=-1).astype(np.int32))
-    assert np.array_equal(i_min.to_numpy(), x_np.argmin(axis=-1).astype(np.int32))
-    assert np.array_equal(a_max.to_numpy(), x_np.argmax(axis=-1).astype(np.int32))
-    assert np.array_equal(a_min.to_numpy(), x_np.argmin(axis=-1).astype(np.int32))
+    assert np.array_equal(i_max.to_numpy(), x_np.argmax(axis=-1).astype(np.int64))
+    assert np.array_equal(i_min.to_numpy(), x_np.argmin(axis=-1).astype(np.int64))
+    assert np.array_equal(a_max.to_numpy(), x_np.argmax(axis=-1).astype(np.int64))
+    assert np.array_equal(a_min.to_numpy(), x_np.argmin(axis=-1).astype(np.int64))
 
-    # Non-lastdim currently falls back to CPU indices.
-    a_cpu = x.argmax(axis=1)
-    assert a_cpu.device == "cpu"
-    assert a_cpu.to_numpy().dtype == np.int64
-    assert a_cpu.shape == (2, 4)
+    # Non-lastdim should now also keep CUDA device and int64 dtype.
+    a_axis1 = x.argmax(axis=1)
+    assert a_axis1.device == "cuda"
+    assert a_axis1.to_numpy().dtype == np.int64
+    assert a_axis1.shape == (2, 4)
+    assert np.array_equal(a_axis1.to_numpy(), x_np.argmax(axis=1).astype(np.int64))
+
+
+def test_cuda_dim_keepdim_and_tie_break():
+    os.environ["TENSOR_DEVICE"] = "cuda"
+    if not _cuda_runtime_ok():
+        pytest.skip("CUDA runtime not available")
+
+    x_np = np.array([[[1.0, 2.0, 2.0], [4.0, 4.0, 1.0]]], dtype=np.float32)
+    x = Tensor(x_np, device="cuda")
+
+    v, i = x.max(dim=-1, keepdim=True)
+    assert v.shape == (1, 2, 1)
+    assert i.shape == (1, 2)
+    # Numpy tie-break is first index; CUDA path should match.
+    assert np.array_equal(i.to_numpy(), x_np.argmax(axis=-1).astype(np.int64))

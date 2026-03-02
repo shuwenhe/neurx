@@ -5,7 +5,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 extern "C" void cuda_add_device_float(const float* a, const float* b, float* out, size_t n);
 extern "C" void cuda_mul_device_float(const float* a, const float* b, float* out, size_t n);
@@ -22,8 +21,8 @@ extern "C" void cuda_reduce_sum_lastdim_device_float(const float* a, float* out,
 extern "C" void cuda_reduce_mean_lastdim_device_float(const float* a, float* out, int m, int n);
 extern "C" void cuda_reduce_max_lastdim_device_float(const float* a, float* out, int m, int n);
 extern "C" void cuda_reduce_min_lastdim_device_float(const float* a, float* out, int m, int n);
-extern "C" void cuda_argmax_lastdim_device_int(const float* a, int* out, int m, int n);
-extern "C" void cuda_argmin_lastdim_device_int(const float* a, int* out, int m, int n);
+extern "C" void cuda_argmax_lastdim_device_int64(const float* a, long long* out, int m, int n);
+extern "C" void cuda_argmin_lastdim_device_int64(const float* a, long long* out, int m, int n);
 extern "C" void cuda_transpose_2d_device_float(const float* a, float* out, int m, int n);
 extern "C" void cuda_permute_3d_0_2_1_device_float(const float* a, float* out, int b, int t, int c);
 extern "C" void cuda_permute_3d_1_2_0_device_float(const float* a, float* out, int b, int t, int c);
@@ -64,15 +63,21 @@ static PyObject* tensor_cuda_to_device(PyObject* /*self*/, PyObject* args) {
         return _raise(PyExc_TypeError, "expected numpy array");
     }
 
-    if (PyArray_TYPE(a_obj) != NPY_FLOAT32 && PyArray_TYPE(a_obj) != NPY_INT32) {
-        return _raise(PyExc_TypeError, "to_device: only float32/int32 supported");
+    if (PyArray_TYPE(a_obj) != NPY_FLOAT32 && PyArray_TYPE(a_obj) != NPY_INT32 && PyArray_TYPE(a_obj) != NPY_INT64) {
+        return _raise(PyExc_TypeError, "to_device: only float32/int32/int64 supported");
     }
     if (!PyArray_ISCONTIGUOUS(a_obj)) {
         return _raise(PyExc_TypeError, "to_device: array must be contiguous");
     }
 
     npy_intp size = PyArray_SIZE(a_obj);
-    size_t bytes = (size_t)size * (PyArray_TYPE(a_obj) == NPY_INT32 ? sizeof(int) : sizeof(float));
+    size_t elem_size = sizeof(float);
+    if (PyArray_TYPE(a_obj) == NPY_INT32) {
+        elem_size = sizeof(int);
+    } else if (PyArray_TYPE(a_obj) == NPY_INT64) {
+        elem_size = sizeof(long long);
+    }
+    size_t bytes = (size_t)size * elem_size;
     void* d_ptr = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_ptr, bytes), "cudaMalloc");
@@ -96,8 +101,8 @@ static PyObject* tensor_cuda_to_host(PyObject* /*self*/, PyObject* args) {
         return _raise(PyExc_TypeError, "expected (capsule, shape, dtype)");
     }
 
-    if (std::string(dtype_str) != "float32" && std::string(dtype_str) != "int32") {
-        return _raise(PyExc_TypeError, "to_host: only float32/int32 supported");
+    if (std::string(dtype_str) != "float32" && std::string(dtype_str) != "int32" && std::string(dtype_str) != "int64") {
+        return _raise(PyExc_TypeError, "to_host: only float32/int32/int64 supported");
     }
 
     auto* arr = _get_device_array(capsule);
@@ -120,12 +125,23 @@ static PyObject* tensor_cuda_to_host(PyObject* /*self*/, PyObject* args) {
         return _raise(PyExc_ValueError, "to_host: size mismatch");
     }
 
-    int out_type = std::string(dtype_str) == "int32" ? NPY_INT32 : NPY_FLOAT32;
+    int out_type = NPY_FLOAT32;
+    if (std::string(dtype_str) == "int32") {
+        out_type = NPY_INT32;
+    } else if (std::string(dtype_str) == "int64") {
+        out_type = NPY_INT64;
+    }
     PyArrayObject* out = (PyArrayObject*)PyArray_SimpleNew(ndim, dims, out_type);
     if (!out) {
         return _raise(PyExc_RuntimeError, "to_host: failed to allocate");
     }
-    size_t bytes = (size_t)size * (std::string(dtype_str) == "int32" ? sizeof(int) : sizeof(float));
+    size_t elem_size = sizeof(float);
+    if (std::string(dtype_str) == "int32") {
+        elem_size = sizeof(int);
+    } else if (std::string(dtype_str) == "int64") {
+        elem_size = sizeof(long long);
+    }
+    size_t bytes = (size_t)size * elem_size;
     try {
         _cuda_check(cudaMemcpy(PyArray_DATA(out), arr->ptr, bytes, cudaMemcpyDeviceToHost), "cudaMemcpy D2H");
     } catch (const std::exception& e) {
@@ -669,10 +685,10 @@ static PyObject* tensor_cuda_argmax_lastdim(PyObject* /*self*/, PyObject* args) 
         return _raise(PyExc_ValueError, "argmax_lastdim: size mismatch");
     }
 
-    int* d_out = nullptr;
+    long long* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(int)), "cudaMalloc");
-        cuda_argmax_lastdim_device_int((const float*)a->ptr, d_out, m, n);
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        cuda_argmax_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
         _cuda_check(cudaGetLastError(), "cuda_argmax_lastdim");
         _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -702,10 +718,10 @@ static PyObject* tensor_cuda_argmin_lastdim(PyObject* /*self*/, PyObject* args) 
         return _raise(PyExc_ValueError, "argmin_lastdim: size mismatch");
     }
 
-    int* d_out = nullptr;
+    long long* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(int)), "cudaMalloc");
-        cuda_argmin_lastdim_device_int((const float*)a->ptr, d_out, m, n);
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        cuda_argmin_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
         _cuda_check(cudaGetLastError(), "cuda_argmin_lastdim");
         _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -828,8 +844,8 @@ static PyMethodDef TensorCudaMethods[] = {
     {"reduce_mean_lastdim_device", tensor_cuda_reduce_mean_lastdim_device, METH_VARARGS, "CUDA reduce mean last dim (device)"},
     {"reduce_max_lastdim_device", tensor_cuda_reduce_max_lastdim_device, METH_VARARGS, "CUDA reduce max last dim (device)"},
     {"reduce_min_lastdim_device", tensor_cuda_reduce_min_lastdim_device, METH_VARARGS, "CUDA reduce min last dim (device)"},
-    {"argmax_lastdim", tensor_cuda_argmax_lastdim, METH_VARARGS, "CUDA argmax last dim (host indices)"},
-    {"argmin_lastdim", tensor_cuda_argmin_lastdim, METH_VARARGS, "CUDA argmin last dim (host indices)"},
+    {"argmax_lastdim", tensor_cuda_argmax_lastdim, METH_VARARGS, "CUDA argmax last dim (device int64 indices)"},
+    {"argmin_lastdim", tensor_cuda_argmin_lastdim, METH_VARARGS, "CUDA argmin last dim (device int64 indices)"},
     {"transpose_2d", tensor_cuda_transpose_2d, METH_VARARGS, "CUDA transpose 2d"},
     {"permute_3d_0_2_1", tensor_cuda_permute_3d_0_2_1, METH_VARARGS, "CUDA permute 3d (0,2,1)"},
     {"permute_3d_1_2_0", tensor_cuda_permute_3d_1_2_0, METH_VARARGS, "CUDA permute 3d (1,2,0)"},

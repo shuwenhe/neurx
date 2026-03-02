@@ -1,12 +1,11 @@
-name: tests
+name: cuda-tests-optional
 
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  cpu-tests:
-    runs-on: ubuntu-latest
+  cuda-tests:
+    runs-on: [self-hosted, linux, x64, gpu]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,6 +16,10 @@ jobs:
           python -m pip install setuptools wheel
           python -m pip install -e .
           python -m pip install pytest
-      - name: Test
+      - name: CUDA Build
         run: |
-          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+          export CUDA_HOME=${CUDA_HOME:-/usr}
+          make cuda-install
+      - name: CUDA Tests
+        run: |
+          make cuda-test

@@ -237,7 +237,7 @@ extern "C" __global__ void permute_3d_1_2_0_f32_kernel(const float* x, float* ou
     }
 }
 
-extern "C" __global__ void argmax_lastdim_f32_kernel(const float* x, int* out, int m, int n) {
+extern "C" __global__ void argmax_lastdim_f32_kernel(const float* x, long long* out, int m, int n) {
     int row = blockIdx.x;
     if (row >= m) return;
     extern __shared__ float smax[];
@@ -267,11 +267,11 @@ extern "C" __global__ void argmax_lastdim_f32_kernel(const float* x, int* out, i
         __syncthreads();
     }
     if (threadIdx.x == 0) {
-        out[row] = sidx[0];
+        out[row] = static_cast<long long>(sidx[0]);
     }
 }
 
-extern "C" __global__ void argmin_lastdim_f32_kernel(const float* x, int* out, int m, int n) {
+extern "C" __global__ void argmin_lastdim_f32_kernel(const float* x, long long* out, int m, int n) {
     int row = blockIdx.x;
     if (row >= m) return;
     extern __shared__ float smin[];
@@ -301,7 +301,7 @@ extern "C" __global__ void argmin_lastdim_f32_kernel(const float* x, int* out, i
         __syncthreads();
     }
     if (threadIdx.x == 0) {
-        out[row] = sidx[0];
+        out[row] = static_cast<long long>(sidx[0]);
     }
 }
 
@@ -432,7 +432,7 @@ extern "C" void cuda_permute_3d_1_2_0_device_float(const float* a, float* out, i
     permute_3d_1_2_0_f32_kernel<<<grid, block>>>(a, out, b, t, c);
 }
 
-extern "C" void cuda_argmax_lastdim_device_int(const float* a, int* out, int m, int n) {
+extern "C" void cuda_argmax_lastdim_device_int64(const float* a, long long* out, int m, int n) {
     int threads = 256;
     dim3 block(threads);
     dim3 grid(m);
@@ -440,7 +440,7 @@ extern "C" void cuda_argmax_lastdim_device_int(const float* a, int* out, int m, 
     argmax_lastdim_f32_kernel<<<grid, block, shmem>>>(a, out, m, n);
 }
 
-extern "C" void cuda_argmin_lastdim_device_int(const float* a, int* out, int m, int n) {
+extern "C" void cuda_argmin_lastdim_device_int64(const float* a, long long* out, int m, int n) {
     int threads = 256;
     dim3 block(threads);
     dim3 grid(m);

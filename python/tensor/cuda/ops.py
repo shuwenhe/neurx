@@ -29,9 +29,17 @@ def _ensure_array(x: np.ndarray) -> np.ndarray:
         raise TypeError("cuda ops require numpy.ndarray inputs")
     if not x.flags["C_CONTIGUOUS"]:
         x = np.ascontiguousarray(x)
-    if x.dtype not in (np.float32, np.int32):
-        raise TypeError("cuda ops only support float32/int32")
+    if x.dtype not in (np.float32, np.int32, np.int64):
+        raise TypeError("cuda ops only support float32/int32/int64")
     return x
+
+
+def _normalize_axis(axis, ndim):
+    if axis is None:
+        return None
+    if not isinstance(axis, int):
+        return axis
+    return axis + ndim if axis < 0 else axis
 
 
 def to_device(x: np.ndarray) -> DeviceArray:
@@ -146,10 +154,11 @@ def softmax(a: DeviceArray) -> DeviceArray:
 def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if _cuda is None:
         raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_sum_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
-    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
         capsule = _cuda.reduce_sum_lastdim_device(a.capsule, m, n, str(a.dtype))
@@ -163,16 +172,25 @@ def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
             if axis == 0:
                 capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
-                return reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1]), a.dtype)
+                return out
         else:
             if axis == 0:
                 capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
-                return reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1], a.shape[2]), a.dtype)
+                return out
             if axis == 1:
                 capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
-                return reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_sum(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (a.shape[0], 1, a.shape[2]), a.dtype)
+                return out
     host = to_host(a)
     out = host.sum(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -181,10 +199,11 @@ def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
 def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if _cuda is None:
         raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_mean_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
-    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
         capsule = _cuda.reduce_mean_lastdim_device(a.capsule, m, n, str(a.dtype))
@@ -198,16 +217,25 @@ def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
             if axis == 0:
                 capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
-                return reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1]), a.dtype)
+                return out
         else:
             if axis == 0:
                 capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
-                return reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1], a.shape[2]), a.dtype)
+                return out
             if axis == 1:
                 capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
-                return reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_mean(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (a.shape[0], 1, a.shape[2]), a.dtype)
+                return out
     host = to_host(a)
     out = host.mean(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -216,10 +244,11 @@ def reduce_mean(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
 def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if _cuda is None:
         raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_max_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
-    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
         capsule = _cuda.reduce_max_lastdim_device(a.capsule, m, n, str(a.dtype))
@@ -233,16 +262,25 @@ def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
             if axis == 0:
                 capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
-                return reduce_max(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_max(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1]), a.dtype)
+                return out
         else:
             if axis == 0:
                 capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
-                return reduce_max(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_max(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1], a.shape[2]), a.dtype)
+                return out
             if axis == 1:
                 capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
-                return reduce_max(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_max(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (a.shape[0], 1, a.shape[2]), a.dtype)
+                return out
     host = to_host(a)
     out = host.max(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -251,10 +289,11 @@ def reduce_max(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
 def reduce_min(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     if _cuda is None:
         raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
     if axis is None and not keepdims:
         capsule = _cuda.reduce_min_device(a.capsule, a.size, str(a.dtype))
         return DeviceArray(capsule, (1,), a.dtype)
-    if axis in (-1, len(a.shape) - 1) and len(a.shape) in (2, 3):
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
         m = a.shape[0] if len(a.shape) == 2 else a.shape[0] * a.shape[1]
         n = a.shape[-1]
         capsule = _cuda.reduce_min_lastdim_device(a.capsule, m, n, str(a.dtype))
@@ -268,16 +307,25 @@ def reduce_min(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
             if axis == 0:
                 capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
-                return reduce_min(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_min(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1]), a.dtype)
+                return out
         else:
             if axis == 0:
                 capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
-                return reduce_min(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_min(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (1, a.shape[1], a.shape[2]), a.dtype)
+                return out
             if axis == 1:
                 capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
                 tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
-                return reduce_min(tmp, axis=-1, keepdims=keepdims)
+                out = reduce_min(tmp, axis=-1, keepdims=keepdims)
+                if keepdims:
+                    return DeviceArray(out.capsule, (a.shape[0], 1, a.shape[2]), a.dtype)
+                return out
     host = to_host(a)
     out = host.min(axis=axis, keepdims=keepdims)
     return to_device(_ensure_array(out.astype(np.float32, copy=False)))
@@ -292,7 +340,7 @@ def argmax_lastdim(a: DeviceArray):
     n = a.shape[-1]
     capsule = _cuda.argmax_lastdim(a.capsule, m, n, str(a.dtype))
     out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
-    return DeviceArray(capsule, out_shape, np.dtype("int32"))
+    return DeviceArray(capsule, out_shape, np.dtype("int64"))
 
 
 def argmin_lastdim(a: DeviceArray):
@@ -304,4 +352,54 @@ def argmin_lastdim(a: DeviceArray):
     n = a.shape[-1]
     capsule = _cuda.argmin_lastdim(a.capsule, m, n, str(a.dtype))
     out_shape = (a.shape[0],) if len(a.shape) == 2 else (a.shape[0], a.shape[1])
-    return DeviceArray(capsule, out_shape, np.dtype("int32"))
+    return DeviceArray(capsule, out_shape, np.dtype("int64"))
+
+
+def argmax(a: DeviceArray, axis=None):
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
+    if axis is None:
+        host = to_host(a)
+        return to_device(np.asarray(host.argmax(), dtype=np.int64))
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
+        return argmax_lastdim(a)
+    if len(a.shape) == 2 and axis == 0:
+        capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
+        return argmax_lastdim(tmp)
+    if len(a.shape) == 3 and axis == 0:
+        capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
+        return argmax_lastdim(tmp)
+    if len(a.shape) == 3 and axis == 1:
+        capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
+        return argmax_lastdim(tmp)
+    host = to_host(a)
+    return to_device(np.asarray(host.argmax(axis=axis), dtype=np.int64))
+
+
+def argmin(a: DeviceArray, axis=None):
+    if _cuda is None:
+        raise RuntimeError("tensor.cuda backend not available")
+    axis = _normalize_axis(axis, len(a.shape))
+    if axis is None:
+        host = to_host(a)
+        return to_device(np.asarray(host.argmin(), dtype=np.int64))
+    if axis == len(a.shape) - 1 and len(a.shape) in (2, 3):
+        return argmin_lastdim(a)
+    if len(a.shape) == 2 and axis == 0:
+        capsule = _cuda.transpose_2d(a.capsule, a.shape[0], a.shape[1], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[1], a.shape[0]), a.dtype)
+        return argmin_lastdim(tmp)
+    if len(a.shape) == 3 and axis == 0:
+        capsule = _cuda.permute_3d_1_2_0(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[1], a.shape[2], a.shape[0]), a.dtype)
+        return argmin_lastdim(tmp)
+    if len(a.shape) == 3 and axis == 1:
+        capsule = _cuda.permute_3d_0_2_1(a.capsule, a.shape[0], a.shape[1], a.shape[2], str(a.dtype))
+        tmp = DeviceArray(capsule, (a.shape[0], a.shape[2], a.shape[1]), a.dtype)
+        return argmin_lastdim(tmp)
+    host = to_host(a)
+    return to_device(np.asarray(host.argmin(axis=axis), dtype=np.int64))

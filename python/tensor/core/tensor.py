@@ -36,6 +36,17 @@ def _unbroadcast(grad, shape):
     return grad
 
 
+def _normalize_axis(axis, ndim):
+    if axis is None:
+        return None
+    if isinstance(axis, tuple):
+        out = []
+        for a in axis:
+            out.append(a + ndim if a < 0 else a)
+        return tuple(out)
+    return axis + ndim if axis < 0 else axis
+
+
 class Tensor:
     def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
         if device is None:
@@ -50,11 +61,20 @@ class Tensor:
                 raise RuntimeError("CUDA backend not available")
             if _is_cuda_device(data):
                 self.data = data
+                data_dtype = data.dtype
             else:
-                arr = _ensure_array(data, dtype=np.float32)
+                arr = _ensure_array(data)
+                if arr.dtype not in (np.float32, np.int32, np.int64):
+                    arr = arr.astype(np.float32, copy=False)
                 self.data = _cuda_ops.to_device(arr)
+                data_dtype = arr.dtype
         else:
-            self.data = _ensure_array(data)
+            arr = _ensure_array(data)
+            self.data = arr
+            data_dtype = arr.dtype
+
+        if requires_grad and not np.issubdtype(np.dtype(data_dtype), np.floating):
+            raise ValueError("only floating point tensors can require gradients")
 
         self.requires_grad = requires_grad
         if requires_grad:
@@ -264,8 +284,7 @@ class Tensor:
             axis = dim
         if keepdim is not None:
             keepdims = keepdim
-        host = _to_numpy(self.data)
-        denom = host.size
+        axis = _normalize_axis(axis, self.ndim)
         if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_mean(self.data, axis=axis, keepdims=keepdims)
@@ -276,6 +295,7 @@ class Tensor:
             out = None
 
         if out is None:
+            host = _to_numpy(self.data)
             out = Tensor(np.array(host.mean(axis=axis, keepdims=keepdims)), self.requires_grad, (self,), "mean", device=self.device)
 
         def _backward():
@@ -283,19 +303,17 @@ class Tensor:
                 grad = out.grad
                 if axis is not None and not keepdims:
                     axes = axis if isinstance(axis, tuple) else (axis,)
-                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
                     for ax in sorted(axes):
                         grad = np.expand_dims(grad, axis=ax)
                 if axis is None:
-                    denom = host.size
+                    denom = int(np.prod(self.shape))
                 else:
                     axes = axis if isinstance(axis, tuple) else (axis,)
-                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
                     denom = 1
                     for ax in axes:
-                        denom *= host.shape[ax]
+                        denom *= self.shape[ax]
                 scale = 1.0 / denom
-                self.grad += (np.ones_like(host) * scale) * grad
+                self.grad += (np.ones(self.shape, dtype=self.grad.dtype) * scale) * grad
 
         out._backward = _backward
         return out
@@ -305,7 +323,7 @@ class Tensor:
             axis = dim
         if keepdim is not None:
             keepdims = keepdim
-        host = _to_numpy(self.data)
+        axis = _normalize_axis(axis, self.ndim)
         if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_sum(self.data, axis=axis, keepdims=keepdims)
@@ -316,6 +334,7 @@ class Tensor:
             out = None
 
         if out is None:
+            host = _to_numpy(self.data)
             out_data = host.sum(axis=axis, keepdims=keepdims)
             out = Tensor(out_data, self.requires_grad, (self,), "sum", device=self.device)
 
@@ -324,10 +343,9 @@ class Tensor:
                 grad = out.grad
                 if axis is not None and not keepdims:
                     axes = axis if isinstance(axis, tuple) else (axis,)
-                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
                     for ax in sorted(axes):
                         grad = np.expand_dims(grad, axis=ax)
-                self.grad += np.ones_like(host) * grad
+                self.grad += np.ones(self.shape, dtype=self.grad.dtype) * grad
 
         out._backward = _backward
         return out
@@ -337,7 +355,7 @@ class Tensor:
             axis = dim
         if keepdim is not None:
             keepdims = keepdim
-        host = _to_numpy(self.data)
+        axis = _normalize_axis(axis, self.ndim)
         if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_max(self.data, axis=axis, keepdims=keepdims)
@@ -348,16 +366,17 @@ class Tensor:
             out = None
 
         if out is None:
+            host = _to_numpy(self.data)
             out_data = host.max(axis=axis, keepdims=keepdims)
             out = Tensor(out_data, self.requires_grad, (self,), "max", device=self.device)
 
         def _backward():
             if self.requires_grad:
                 grad = out.grad
-                expanded = out_data
+                host = _to_numpy(self.data)
+                expanded = _to_numpy(out.data)
                 if axis is not None and not keepdims:
                     axes = axis if isinstance(axis, tuple) else (axis,)
-                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
                     for ax in sorted(axes):
                         grad = np.expand_dims(grad, axis=ax)
                         expanded = np.expand_dims(expanded, axis=ax)
@@ -368,20 +387,16 @@ class Tensor:
 
         out._backward = _backward
         if axis is not None:
-            if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+            if self.device == "cuda" and _cuda_ops is not None:
                 try:
-                    idx = _cuda_ops.argmax_lastdim(self.data)
-                    if self.ndim == 2:
-                        idx = idx
-                    else:
-                        idx = idx
+                    idx = _cuda_ops.argmax(self.data, axis=axis)
                 except Exception:
-                    idx = host.argmax(axis=axis)
+                    idx = np.asarray(_to_numpy(self.data).argmax(axis=axis), dtype=np.int64)
             else:
-                idx = host.argmax(axis=axis)
-            if isinstance(idx, _cuda_ops.DeviceArray):
+                idx = np.asarray(_to_numpy(self.data).argmax(axis=axis), dtype=np.int64)
+            if _is_cuda_device(idx):
                 return out, Tensor(idx, requires_grad=False, device="cuda")
-            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device=self.device)
         return out
 
     def min(self, axis=None, keepdims=False, dim=None, keepdim=None):
@@ -389,7 +404,7 @@ class Tensor:
             axis = dim
         if keepdim is not None:
             keepdims = keepdim
-        host = _to_numpy(self.data)
+        axis = _normalize_axis(axis, self.ndim)
         if self.device == "cuda" and _cuda_ops is not None:
             try:
                 out_data = _cuda_ops.reduce_min(self.data, axis=axis, keepdims=keepdims)
@@ -400,16 +415,17 @@ class Tensor:
             out = None
 
         if out is None:
+            host = _to_numpy(self.data)
             out_data = host.min(axis=axis, keepdims=keepdims)
             out = Tensor(out_data, self.requires_grad, (self,), "min", device=self.device)
 
         def _backward():
             if self.requires_grad:
                 grad = out.grad
-                expanded = out_data
+                host = _to_numpy(self.data)
+                expanded = _to_numpy(out.data)
                 if axis is not None and not keepdims:
                     axes = axis if isinstance(axis, tuple) else (axis,)
-                    axes = tuple(a if a >= 0 else a + host.ndim for a in axes)
                     for ax in sorted(axes):
                         grad = np.expand_dims(grad, axis=ax)
                         expanded = np.expand_dims(expanded, axis=ax)
@@ -420,51 +436,47 @@ class Tensor:
 
         out._backward = _backward
         if axis is not None:
-            if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+            if self.device == "cuda" and _cuda_ops is not None:
                 try:
-                    idx = _cuda_ops.argmin_lastdim(self.data)
-                    if self.ndim == 2:
-                        idx = idx
-                    else:
-                        idx = idx
+                    idx = _cuda_ops.argmin(self.data, axis=axis)
                 except Exception:
-                    idx = host.argmin(axis=axis)
+                    idx = np.asarray(_to_numpy(self.data).argmin(axis=axis), dtype=np.int64)
             else:
-                idx = host.argmin(axis=axis)
-            if isinstance(idx, _cuda_ops.DeviceArray):
+                idx = np.asarray(_to_numpy(self.data).argmin(axis=axis), dtype=np.int64)
+            if _is_cuda_device(idx):
                 return out, Tensor(idx, requires_grad=False, device="cuda")
-            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
+            return out, Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device=self.device)
         return out
 
     def argmax(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
-        host = _to_numpy(self.data)
-        if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+        axis = _normalize_axis(axis, self.ndim)
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
-                idx = _cuda_ops.argmax_lastdim(self.data)
+                idx = _cuda_ops.argmax(self.data, axis=axis)
             except Exception:
-                idx = host.argmax(axis=axis)
+                idx = np.asarray(_to_numpy(self.data).argmax(axis=axis), dtype=np.int64)
         else:
-            idx = host.argmax(axis=axis)
-        if isinstance(idx, _cuda_ops.DeviceArray):
+            idx = np.asarray(_to_numpy(self.data).argmax(axis=axis), dtype=np.int64)
+        if _is_cuda_device(idx):
             return Tensor(idx, requires_grad=False, device="cuda")
-        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device=self.device)
 
     def argmin(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
-        host = _to_numpy(self.data)
-        if self.device == "cuda" and _cuda_ops is not None and axis in (-1, self.ndim - 1) and self.ndim in (2, 3):
+        axis = _normalize_axis(axis, self.ndim)
+        if self.device == "cuda" and _cuda_ops is not None:
             try:
-                idx = _cuda_ops.argmin_lastdim(self.data)
+                idx = _cuda_ops.argmin(self.data, axis=axis)
             except Exception:
-                idx = host.argmin(axis=axis)
+                idx = np.asarray(_to_numpy(self.data).argmin(axis=axis), dtype=np.int64)
         else:
-            idx = host.argmin(axis=axis)
-        if isinstance(idx, _cuda_ops.DeviceArray):
+            idx = np.asarray(_to_numpy(self.data).argmin(axis=axis), dtype=np.int64)
+        if _is_cuda_device(idx):
             return Tensor(idx, requires_grad=False, device="cuda")
-        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device="cpu")
+        return Tensor(np.asarray(idx, dtype=np.int64), requires_grad=False, device=self.device)
 
     def backward(self):
         if self.data.size != 1:
