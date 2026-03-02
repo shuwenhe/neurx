@@ -8,7 +8,11 @@
 
 extern "C" void cuda_add_device_float(const float* a, const float* b, float* out, size_t n);
 extern "C" void cuda_mul_device_float(const float* a, const float* b, float* out, size_t n);
+extern "C" void cuda_add_bias_device_float(const float* a, const float* b, float* out, int m, int n);
+extern "C" void cuda_add_bias_3d_device_float(const float* a, const float* b, float* out, int bsz, int t, int c);
 extern "C" void cuda_matmul_device_float(const float* a, const float* b, float* out, int m, int k, int n);
+extern "C" void cuda_layernorm_device_float(const float* a, const float* gamma, const float* beta, float* out, int m, int n, float eps);
+extern "C" void cuda_softmax_device_float(const float* a, float* out, int m, int n);
 
 struct DeviceArray {
     void* ptr;
@@ -188,6 +192,78 @@ static PyObject* tensor_cuda_mul_device(PyObject* /*self*/, PyObject* args) {
     return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
 }
 
+static PyObject* tensor_cuda_add_bias_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    int m = 0, n = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOiis", &a_capsule, &b_capsule, &m, &n, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, capsule, m, n, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "add_bias_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)m * (size_t)n != a->size || (size_t)n != b->size) {
+        return _raise(PyExc_ValueError, "add_bias_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        cuda_add_bias_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, m, n);
+        _cuda_check(cudaGetLastError(), "cuda_add_bias_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
+static PyObject* tensor_cuda_add_bias_3d_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    int bsz = 0, t = 0, c = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOiiis", &a_capsule, &b_capsule, &bsz, &t, &c, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, capsule, b, t, c, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "add_bias_3d_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)bsz * (size_t)t * (size_t)c != a->size || (size_t)c != b->size) {
+        return _raise(PyExc_ValueError, "add_bias_3d_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        cuda_add_bias_3d_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, bsz, t, c);
+        _cuda_check(cudaGetLastError(), "cuda_add_bias_3d_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)bsz * (size_t)t * (size_t)c};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
 static PyObject* tensor_cuda_matmul_device(PyObject* /*self*/, PyObject* args) {
     PyObject* a_capsule = nullptr;
     PyObject* b_capsule = nullptr;
@@ -224,12 +300,88 @@ static PyObject* tensor_cuda_matmul_device(PyObject* /*self*/, PyObject* args) {
     return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
 }
 
+static PyObject* tensor_cuda_layernorm_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    PyObject* g_capsule = nullptr;
+    PyObject* b_capsule = nullptr;
+    int m = 0, n = 0;
+    float eps = 1e-5f;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "OOOiifs", &a_capsule, &g_capsule, &b_capsule, &m, &n, &eps, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, gamma, beta, m, n, eps, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "layernorm_device: only float32 supported");
+    }
+
+    auto* a = _get_device_array(a_capsule);
+    auto* g = _get_device_array(g_capsule);
+    auto* b = _get_device_array(b_capsule);
+    if (!a || !g || !b) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)m * (size_t)n != a->size || (size_t)n != g->size || (size_t)n != b->size) {
+        return _raise(PyExc_ValueError, "layernorm_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        cuda_layernorm_device_float((const float*)a->ptr, (const float*)g->ptr, (const float*)b->ptr, (float*)d_out, m, n, eps);
+        _cuda_check(cudaGetLastError(), "cuda_layernorm_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
+static PyObject* tensor_cuda_softmax_device(PyObject* /*self*/, PyObject* args) {
+    PyObject* a_capsule = nullptr;
+    int m = 0, n = 0;
+    const char* dtype_str = nullptr;
+    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    }
+    if (std::string(dtype_str) != "float32") {
+        return _raise(PyExc_TypeError, "softmax_device: only float32 supported");
+    }
+    auto* a = _get_device_array(a_capsule);
+    if (!a) {
+        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+    }
+    if ((size_t)m * (size_t)n != a->size) {
+        return _raise(PyExc_ValueError, "softmax_device: size mismatch");
+    }
+
+    void* d_out = nullptr;
+    try {
+        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        cuda_softmax_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        _cuda_check(cudaGetLastError(), "cuda_softmax_device");
+        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+    } catch (const std::exception& e) {
+        if (d_out) cudaFree(d_out);
+        return _raise(PyExc_RuntimeError, e.what());
+    }
+
+    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
+    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+}
+
 static PyMethodDef TensorCudaMethods[] = {
     {"to_device", tensor_cuda_to_device, METH_VARARGS, "Copy numpy array to device"},
     {"to_host", tensor_cuda_to_host, METH_VARARGS, "Copy device array to numpy"},
     {"add_device", tensor_cuda_add_device, METH_VARARGS, "CUDA elementwise add (device)"},
     {"mul_device", tensor_cuda_mul_device, METH_VARARGS, "CUDA elementwise multiply (device)"},
+    {"add_bias_device", tensor_cuda_add_bias_device, METH_VARARGS, "CUDA add bias (device)"},
+    {"add_bias_3d_device", tensor_cuda_add_bias_3d_device, METH_VARARGS, "CUDA add bias 3d (device)"},
     {"matmul_device", tensor_cuda_matmul_device, METH_VARARGS, "CUDA matmul (device)"},
+    {"layernorm_device", tensor_cuda_layernorm_device, METH_VARARGS, "CUDA layernorm (device)"},
+    {"softmax_device", tensor_cuda_softmax_device, METH_VARARGS, "CUDA softmax (device)"},
     {nullptr, nullptr, 0, nullptr}
 };
 
