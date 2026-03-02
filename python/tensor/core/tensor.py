@@ -82,10 +82,22 @@ class Tensor:
     def __add__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         if self.device == "cuda" or other.device == "cuda":
-            try:
+            if self.shape == other.shape:
                 out_data = _cuda_ops.add(_as_device(self), _as_device(other))
                 out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
-            except Exception:
+            elif len(self.shape) == 2 and len(other.shape) == 1:
+                out_data = _cuda_ops.add_bias(_as_device(self), _as_device(other))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            elif len(self.shape) == 1 and len(other.shape) == 2:
+                out_data = _cuda_ops.add_bias(_as_device(other), _as_device(self))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            elif len(self.shape) == 3 and len(other.shape) == 1:
+                out_data = _cuda_ops.add_bias_3d(_as_device(self), _as_device(other))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            elif len(self.shape) == 1 and len(other.shape) == 3:
+                out_data = _cuda_ops.add_bias_3d(_as_device(other), _as_device(self))
+                out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
+            else:
                 host = _to_numpy(self.data) + _to_numpy(other.data)
                 out = Tensor(host, self.requires_grad or other.requires_grad, (self, other), "+", device="cuda")
         else:
@@ -214,6 +226,9 @@ class Tensor:
         if self.device == "cuda":
             return float(_to_numpy(self.data).item())
         return float(self.data.item())
+
+    def to_numpy(self):
+        return _to_numpy(self.data)
 
 
 def _as_device(t: "Tensor"):

@@ -1,10 +1,6 @@
-from tensor.core.tensor import Tensor
-from tensor.core.nn import *
-from tensor.core.optim import *
-from tensor.core.losses import *
+from tensor.nn.modules import *
 
 __all__ = [
-    "Tensor",
     "Parameter",
     "Module",
     "ModuleList",
@@ -14,6 +10,7 @@ __all__ = [
     "LayerNorm",
     "RMSNorm",
     "Dropout",
+    "Softmax",
     "GELU",
     "Sigmoid",
     "SiLU",
@@ -21,8 +18,4 @@ __all__ = [
     "MLP",
     "MoE",
     "TransformerBlock",
-    "AdamW",
-    "clip_grad_norm",
-    "cross_entropy",
-    "cross_entropy_loss",
 ]

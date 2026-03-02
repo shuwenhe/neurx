@@ -111,27 +111,54 @@ class LayerNorm(Module):
 
     def __call__(self, x):
         # x.shape = (..., normalized_shape)
-        norm_dims = len(self.normalized_shape)
-        norm_axes = tuple(range(x.data.ndim - norm_dims, x.data.ndim))
-        mean = x.data.mean(axis=norm_axes, keepdims=True)
-        var = x.data.var(axis=norm_axes, keepdims=True)
-        x_normalized = (x.data - mean) / np.sqrt(var + self.eps)
-        out_data = x_normalized * self.weight.data + (self.bias.data if self.bias else 0)
+        x_data = x.to_numpy() if hasattr(x, "to_numpy") else x.data
+        if getattr(x, "device", "cpu") == "cuda":
+            try:
+                from tensor.cuda import ops as _cuda_ops
+                w = self.weight
+                b = self.bias if self.bias is not None else Tensor(np.zeros(self.normalized_shape, dtype=np.float32), device="cuda")
+                out_data = _cuda_ops.layernorm(
+                    x.data,
+                    w.data,
+                    b.data,
+                    self.eps,
+                )
+                out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x, self.weight, self.bias) if self.bias else (x, self.weight), _op="layernorm", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
 
-        requires_grad = x.requires_grad or self.weight.requires_grad or (self.bias is not None and self.bias.requires_grad)
-        children = [c for c in [x, self.weight, self.bias] if c is not None and getattr(c, 'requires_grad', False)]
-        out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="layernorm")
+        if out is None:
+            norm_dims = len(self.normalized_shape)
+            norm_axes = tuple(range(x_data.ndim - norm_dims, x_data.ndim))
+            mean = x_data.mean(axis=norm_axes, keepdims=True)
+            var = x_data.var(axis=norm_axes, keepdims=True)
+            x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
+            w = self.weight.to_numpy() if hasattr(self.weight, "to_numpy") else self.weight.data
+            b = self.bias.to_numpy() if (self.bias is not None and hasattr(self.bias, "to_numpy")) else (self.bias.data if self.bias else 0)
+            out_data = x_normalized * w + (b if self.bias else 0)
+
+            requires_grad = x.requires_grad or self.weight.requires_grad or (self.bias is not None and self.bias.requires_grad)
+            children = [c for c in [x, self.weight, self.bias] if c is not None and getattr(c, 'requires_grad', False)]
+            out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="layernorm", device=x.device)
 
         def _backward():
             if not out.grad.any():
                 return
+            norm_dims = len(self.normalized_shape)
+            norm_axes = tuple(range(x_data.ndim - norm_dims, x_data.ndim))
+            mean = x_data.mean(axis=norm_axes, keepdims=True)
+            var = x_data.var(axis=norm_axes, keepdims=True)
+            x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
             reduce_axes = tuple(range(out.grad.ndim - len(self.normalized_shape)))
             if self.weight.requires_grad:
                 self.weight.grad += (out.grad * x_normalized).sum(axis=reduce_axes)
             if self.bias and self.bias.requires_grad:
                 self.bias.grad += out.grad.sum(axis=reduce_axes)
             if x.requires_grad:
-                dxhat = out.grad * self.weight.data
+                w = self.weight.to_numpy() if hasattr(self.weight, "to_numpy") else self.weight.data
+                dxhat = out.grad * w
                 inv_std = 1.0 / np.sqrt(var + self.eps)
                 n = float(np.prod(self.normalized_shape))
                 sum_dxhat = dxhat.sum(axis=norm_axes, keepdims=True)
@@ -174,6 +201,42 @@ class Dropout(Module):
         self.training = True
 
 
+class Softmax(Module):
+    """Softmax（默认对最后一维）"""
+    def __init__(self, axis=-1):
+        super().__init__()
+        self.axis = axis
+
+    def __call__(self, x):
+        if getattr(x, "device", "cpu") == "cuda" and self.axis == -1:
+            try:
+                from tensor.cuda import ops as _cuda_ops
+                out_data = _cuda_ops.softmax(x.data)
+                out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="softmax", device="cuda")
+            except Exception:
+                out = None
+        else:
+            out = None
+
+        if out is None:
+            x_data = x.to_numpy() if hasattr(x, "to_numpy") else x.data
+            x_max = x_data.max(axis=self.axis, keepdims=True)
+            exp_x = np.exp(x_data - x_max)
+            denom = exp_x.sum(axis=self.axis, keepdims=True)
+            out_data = exp_x / np.maximum(denom, 1e-12)
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="softmax", device=x.device)
+
+        def _backward():
+            if x.requires_grad:
+                # softmax backward: s * (g - sum(g*s))
+                out_host = out.to_numpy() if hasattr(out, "to_numpy") else out.data
+                sum_gs = (out.grad * out_host).sum(axis=self.axis, keepdims=True)
+                x.grad += out_host * (out.grad - sum_gs)
+
+        out._backward = _backward
+        return out
+
+
 class RMSNorm(Module):
     """RMSNorm：对最后一个维度进行均方根归一化"""
     def __init__(self, normalized_shape, eps=1e-6, bias=False):
@@ -186,16 +249,19 @@ class RMSNorm(Module):
         self.bias = Parameter(np.zeros(normalized_shape)) if bias else None
 
     def __call__(self, x):
+        x_data = x.to_numpy() if hasattr(x, "to_numpy") else x.data
         norm_dims = len(self.normalized_shape)
-        norm_axes = tuple(range(x.data.ndim - norm_dims, x.data.ndim))
-        mean_sq = (x.data ** 2).mean(axis=norm_axes, keepdims=True)
+        norm_axes = tuple(range(x_data.ndim - norm_dims, x_data.ndim))
+        mean_sq = (x_data ** 2).mean(axis=norm_axes, keepdims=True)
         inv_rms = 1.0 / np.sqrt(mean_sq + self.eps)
-        x_normalized = x.data * inv_rms
-        out_data = x_normalized * self.weight.data + (self.bias.data if self.bias else 0)
+        x_normalized = x_data * inv_rms
+        w = self.weight.to_numpy() if hasattr(self.weight, "to_numpy") else self.weight.data
+        b = self.bias.to_numpy() if (self.bias is not None and hasattr(self.bias, "to_numpy")) else (self.bias.data if self.bias else 0)
+        out_data = x_normalized * w + (b if self.bias else 0)
 
         requires_grad = x.requires_grad or self.weight.requires_grad or (self.bias is not None and self.bias.requires_grad)
         children = [c for c in [x, self.weight, self.bias] if c is not None and getattr(c, 'requires_grad', False)]
-        out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="rmsnorm")
+        out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="rmsnorm", device=x.device)
 
         def _backward():
             if not out.grad.any():

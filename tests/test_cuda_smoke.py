@@ -2,8 +2,19 @@ import os
 import numpy as np
 
 from tensor.core.tensor import Tensor
-from tensor.core.nn import Linear
-from tensor.cuda.ops import DeviceArray, to_host
+from tensor.core.nn import Linear, LayerNorm, Softmax
+from tensor.cuda.ops import DeviceArray, to_host, available
+
+
+def _cuda_runtime_ok() -> bool:
+    if not available():
+        return False
+    try:
+        tmp = Tensor(np.zeros((1,), dtype=np.float32))
+        _ = tmp + tmp
+        return True
+    except Exception:
+        return False
 
 
 def _to_np(x):
@@ -14,6 +25,9 @@ def _to_np(x):
 
 def test_cuda_add_mul_matmul_linear():
     os.environ["TENSOR_DEVICE"] = "cuda"
+    if not _cuda_runtime_ok():
+        print("CUDA not available; skipping smoke test.")
+        return
     a = Tensor(np.random.randn(1024).astype(np.float32), requires_grad=False)
     b = Tensor(np.random.randn(1024).astype(np.float32), requires_grad=False)
 
@@ -31,6 +45,19 @@ def test_cuda_add_mul_matmul_linear():
     layer = Linear(32, 8, bias=True)
     y2 = layer(x)
     assert y2.shape == (16, 8)
+
+    x3 = Tensor(np.random.randn(2, 4, 8).astype(np.float32))
+    b3 = Tensor(np.random.randn(8).astype(np.float32))
+    y3 = x3 + b3
+    assert y3.shape == (2, 4, 8)
+
+    ln = LayerNorm(8)
+    y4 = ln(x3)
+    assert y4.shape == (2, 4, 8)
+
+    sm = Softmax(axis=-1)
+    y5 = sm(x3)
+    assert y5.shape == (2, 4, 8)
 
 
 if __name__ == "__main__":
