@@ -104,6 +104,9 @@ class Module:
                         named.update(child)
         return named
 
+    def named_parameters(self):
+        return list(self._named_parameters().items())
+
     def state_dict(self):
         state = {}
         for name, param in self._named_parameters().items():
