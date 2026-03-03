@@ -317,7 +317,7 @@ class Conv2d(Module):
         
         # Weight shape: (out_channels, in_channels // groups, kernel_h, kernel_w)
         fan_in = (in_channels // groups) * self.kernel_size[0] * self.kernel_size[1]
-        scale = (2.0 / fan_in) ** 0.5
+        scale = (2.0 / fan_in) ** 0.5 * 0.1  # Extra factor to stabilize
         self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, 
                                                  self.kernel_size[0], self.kernel_size[1]) * scale)
         self.bias = Parameter(np.zeros((out_channels,))) if bias else None
@@ -337,8 +337,8 @@ class Conv2d(Module):
         out_h = (in_h + 2 * self.padding[0] - self.dilation[0] * (kernel_h - 1) - 1) // self.stride[0] + 1
         out_w = (in_w + 2 * self.padding[1] - self.dilation[1] * (kernel_w - 1) - 1) // self.stride[1] + 1
         
-        x_data = x.data
-        w_data = self.weight.data
+        x_data = x.data.astype(np.float64)
+        w_data = self.weight.data.astype(np.float64)
         
         # Apply padding
         if self.padding[0] > 0 or self.padding[1] > 0:
@@ -347,7 +347,7 @@ class Conv2d(Module):
                                      (self.padding[1], self.padding[1])), mode='constant')
         
         # Perform convolution
-        out_data = np.zeros((batch_size, out_channels, out_h, out_w), dtype=x_data.dtype)
+        out_data = np.zeros((batch_size, out_channels, out_h, out_w), dtype=np.float64)
         
         if self.groups == 1:
             # Standard convolution
@@ -364,7 +364,7 @@ class Conv2d(Module):
                                            iw_start:iw_end:self.dilation[1]]
                             w_patch = w_data[oc]
                             
-                            out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch)
+                            out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch, dtype=np.float64)
         else:
             # Grouped convolution
             in_ch_per_group = in_channels // self.groups
@@ -389,11 +389,15 @@ class Conv2d(Module):
                                                iw_start:iw_end:self.dilation[1]]
                                 w_patch = w_data[oc]
                                 
-                                out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch)
+                                out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch, dtype=np.float64)
         
         # Add bias
         if self.bias is not None:
-            out_data = out_data + self.bias.data.reshape(1, -1, 1, 1)
+            bias_data = self.bias.data.astype(np.float64)
+            out_data = out_data + bias_data.reshape(1, -1, 1, 1)
+        
+        # Convert back to original dtype
+        out_data = out_data.astype(np.float32)
         
         # Create output tensor with gradient tracking
         out = Tensor(out_data, requires_grad=x.requires_grad or self.weight.requires_grad, 
@@ -403,6 +407,8 @@ class Conv2d(Module):
         def _backward():
             if not out.grad.any():
                 return
+            
+            grad_data = out.grad.astype(np.float64)
             
             # Gradient w.r.t. weight
             if self.weight.requires_grad:
@@ -427,13 +433,13 @@ class Conv2d(Module):
                                     x_patch = x_data_padded[b, :, 
                                                           ih_start:ih_end:self.dilation[0], 
                                                           iw_start:iw_end:self.dilation[1]]
-                                    w_grad[oc] += x_patch * out.grad[b, oc, oh, ow]
+                                    w_grad[oc] += x_patch * grad_data[b, oc, oh, ow]
                 
-                self.weight.grad += w_grad
+                self.weight.grad += w_grad.astype(self.weight.grad.dtype)
             
             # Gradient w.r.t. bias
             if self.bias is not None and self.bias.requires_grad:
-                self.bias.grad += out.grad.sum(axis=(0, 2, 3))
+                self.bias.grad += grad_data.sum(axis=(0, 2, 3)).astype(self.bias.grad.dtype)
             
             # Gradient w.r.t. input
             if x.requires_grad:
@@ -442,7 +448,7 @@ class Conv2d(Module):
                 if self.padding[0] > 0 or self.padding[1] > 0:
                     x_grad_padded = np.zeros((batch_size, in_channels, 
                                              in_h + 2 * self.padding[0], 
-                                             in_w + 2 * self.padding[1]), dtype=x_data.dtype)
+                                             in_w + 2 * self.padding[1]), dtype=np.float64)
                 else:
                     x_grad_padded = x_grad
                 
@@ -456,7 +462,7 @@ class Conv2d(Module):
                                     ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
                                     iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
                                     
-                                    grad_contrib = w_data[oc] * out.grad[b, oc, oh, ow]
+                                    grad_contrib = w_data[oc] * grad_data[b, oc, oh, ow]
                                     
                                     # Handle dilation
                                     for kh in range(kernel_h):
@@ -469,9 +475,9 @@ class Conv2d(Module):
                     x_grad = x_grad_padded[:, :, 
                                          self.padding[0]:self.padding[0]+in_h, 
                                          self.padding[1]:self.padding[1]+in_w]
-                    x.grad += x_grad
+                    x.grad += x_grad.astype(x.grad.dtype)
                 else:
-                    x.grad += x_grad_padded
+                    x.grad += x_grad_padded.astype(x.grad.dtype)
         
         out._backward = _backward
         return out
@@ -1136,3 +1142,609 @@ class TransformerBlock(Module):
         x = x + attn_out
         x = x + self.mlp(self.ln2(x))
         return x, new_cache
+
+# ================ Batch Normalization Layers ================
+
+class BatchNorm1d(Module):
+    """1D Batch Normalization (对样本和特征维度进行归一化)
+    
+    应用于形状为 (batch, features) 或 (batch, features, length) 的张量
+    """
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+        
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+        
+        if track_running_stats:
+            self.register_buffer('running_mean', np.zeros(num_features))
+            self.register_buffer('running_var', np.ones(num_features))
+            self.register_buffer('num_batches_tracked', np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        # x.shape: (batch, features) or (batch, features, length)
+        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
+        
+        if self.training:
+            # 计算批统计
+            if x_data.ndim == 2:
+                # (batch, features)
+                mean = x_data.mean(axis=0, keepdims=True)
+                var = x_data.var(axis=0, keepdims=True)
+                norm_axes = 0
+            else:
+                # (batch, features, length) -> 对batch和length维度计算
+                mean = x_data.mean(axis=(0, 2), keepdims=True)
+                var = x_data.var(axis=(0, 2), keepdims=True)
+                norm_axes = (0, 2)
+            
+            # 更新running stats
+            if self.track_running_stats:
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    self.num_batches_tracked += 1
+                    n = float(self.num_batches_tracked)
+                    exponential_average_factor = self.momentum
+                    self.running_mean = (1 - exponential_average_factor) * self.running_mean + exponential_average_factor * mean.squeeze()
+                    self.running_var = (1 - exponential_average_factor) * self.running_var + exponential_average_factor * var.squeeze()
+        else:
+            # 使用running stats
+            if self.track_running_stats:
+                mean = self.running_mean.reshape(1, -1) if x_data.ndim == 2 else self.running_mean.reshape(1, -1, 1)
+                var = self.running_var.reshape(1, -1) if x_data.ndim == 2 else self.running_var.reshape(1, -1, 1)
+            else:
+                if x_data.ndim == 2:
+                    mean = x_data.mean(axis=0, keepdims=True)
+                    var = x_data.var(axis=0, keepdims=True)
+                else:
+                    mean = x_data.mean(axis=(0, 2), keepdims=True)
+                    var = x_data.var(axis=(0, 2), keepdims=True)
+        
+        # 归一化
+        x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
+        
+        # 缩放和偏移
+        if self.affine:
+            if x_data.ndim == 2:
+                out_data = x_normalized * self.weight.data + self.bias.data
+            else:
+                out_data = x_normalized * self.weight.data.reshape(1, -1, 1) + self.bias.data.reshape(1, -1, 1)
+        else:
+            out_data = x_normalized
+        
+        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,) + ((self.weight, self.bias) if self.affine else ()), _op="batchnorm1d")
+        
+        def _backward():
+            if not x.requires_grad:
+                return
+            
+            grad = out.grad
+            if x_data.ndim == 2:
+                reduce_axes = 0
+                w_shape = self.weight.data.shape
+            else:
+                reduce_axes = (0, 2)
+                w_shape = (1, self.weight.data.shape[0], 1)
+            
+            # 权重和偏置梯度
+            if self.affine:
+                if x_data.ndim == 2:
+                    self.weight.grad += (grad * x_normalized).sum(axis=0)
+                    self.bias.grad += grad.sum(axis=0)
+                else:
+                    self.weight.grad += (grad * x_normalized).sum(axis=(0, 2))
+                    self.bias.grad += grad.sum(axis=(0, 2))
+            
+            # 输入梯度
+            N = float(np.prod([x_data.shape[i] for i in ([0] if x_data.ndim == 2 else [0, 2])]))
+            if self.affine:
+                w = self.weight.data.reshape(w_shape)
+            else:
+                w = 1.0
+            
+            dgamma_dxhat = grad * w if self.affine else grad
+            dxhat = (x_data - mean) / np.sqrt(var + self.eps)
+            
+            dvar = (dgamma_dxhat * dxhat * -0.5 * (var + self.eps) ** -1.5).sum(axis=reduce_axes, keepdims=True)
+            dmean = (dgamma_dxhat * -1.0 / np.sqrt(var + self.eps)).sum(axis=reduce_axes, keepdims=True)
+            dmean += dvar * (-2.0 / N) * (x_data - mean).sum(axis=reduce_axes, keepdims=True)
+            
+            x.grad += dgamma_dxhat / np.sqrt(var + self.eps) + dvar * 2.0 * (x_data - mean) / N + dmean / N
+        
+        out._backward = _backward
+        return out
+
+
+class BatchNorm2d(Module):
+    """2D Batch Normalization (对通道维度进行归一化)
+    
+    应用于形状为 (batch, channels, height, width) 的张量
+    """
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+        
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+        
+        if track_running_stats:
+            self.register_buffer('running_mean', np.zeros(num_features))
+            self.register_buffer('running_var', np.ones(num_features))
+            self.register_buffer('num_batches_tracked', np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        # x.shape: (batch, channels, height, width)
+        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
+        assert x_data.ndim == 4, f"BatchNorm2d expects 4D input, got {x_data.ndim}D"
+        
+        if self.training:
+            # 对batch、height、width维度计算统计（保留channel维度）
+            mean = x_data.mean(axis=(0, 2, 3), keepdims=True)
+            var = x_data.var(axis=(0, 2, 3), keepdims=True)
+            
+            if self.track_running_stats:
+                self.num_batches_tracked += 1
+                exponential_average_factor = self.momentum
+                self.running_mean = (1 - exponential_average_factor) * self.running_mean + exponential_average_factor * mean.squeeze()
+                self.running_var = (1 - exponential_average_factor) * self.running_var + exponential_average_factor * var.squeeze()
+        else:
+            if self.track_running_stats:
+                mean = self.running_mean.reshape(1, -1, 1, 1)
+                var = self.running_var.reshape(1, -1, 1, 1)
+            else:
+                mean = x_data.mean(axis=(0, 2, 3), keepdims=True)
+                var = x_data.var(axis=(0, 2, 3), keepdims=True)
+        
+        # 归一化
+        x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
+        
+        # 缩放和偏移
+        if self.affine:
+            out_data = x_normalized * self.weight.data.reshape(1, -1, 1, 1) + self.bias.data.reshape(1, -1, 1, 1)
+        else:
+            out_data = x_normalized
+        
+        out = Tensor(out_data, requires_grad=x.requires_grad, 
+                    _children=(x,) + ((self.weight, self.bias) if self.affine else ()), 
+                    _op="batchnorm2d")
+        
+        def _backward():
+            if not x.requires_grad:
+                return
+            
+            grad = out.grad
+            
+            if self.affine:
+                self.weight.grad += (grad * x_normalized).sum(axis=(0, 2, 3))
+                self.bias.grad += grad.sum(axis=(0, 2, 3))
+            
+            # 输入梯度
+            w = self.weight.data.reshape(1, -1, 1, 1) if self.affine else 1.0
+            dgamma_dxhat = grad * w
+            N = float(x_data.shape[0] * x_data.shape[2] * x_data.shape[3])
+            
+            dvar = (dgamma_dxhat * (x_data - mean) * -0.5 * (var + self.eps) ** -1.5).sum(axis=(0, 2, 3), keepdims=True)
+            dmean = (dgamma_dxhat * -1.0 / np.sqrt(var + self.eps)).sum(axis=(0, 2, 3), keepdims=True)
+            dmean += dvar * (-2.0 / N) * (x_data - mean).sum(axis=(0, 2, 3), keepdims=True)
+            
+            x.grad += (dgamma_dxhat / np.sqrt(var + self.eps) + 
+                      dvar * 2.0 * (x_data - mean) / N + dmean / N)
+        
+        out._backward = _backward
+        return out
+
+
+# ================ Pooling Layers ================
+
+class MaxPool2d(Module):
+    """2D Maximum Pooling"""
+    def __init__(self, kernel_size, stride=None, padding=0):
+        super().__init__()
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
+        self.stride = stride if stride else self.kernel_size
+        self.stride = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+
+    def __call__(self, x):
+        # x.shape: (batch, channels, height, width)
+        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
+        batch, channels, height, width = x_data.shape
+        
+        # Apply padding
+        if self.padding[0] > 0 or self.padding[1] > 0:
+            x_data = np.pad(x_data, 
+                           ((0, 0), (0, 0), 
+                            (self.padding[0], self.padding[0]),
+                            (self.padding[1], self.padding[1])),
+                           mode='constant', constant_values=-np.inf)
+        
+        # Calculate output dimensions
+        out_h = (x_data.shape[2] - self.kernel_size[0]) // self.stride[0] + 1
+        out_w = (x_data.shape[3] - self.kernel_size[1]) // self.stride[1] + 1
+        
+        # Perform max pooling
+        out_data = np.zeros((batch, channels, out_h, out_w), dtype=x_data.dtype)
+        pool_indices = np.zeros((batch, channels, out_h, out_w, 2), dtype=np.int32)
+        
+        for oh in range(out_h):
+            for ow in range(out_w):
+                h_start = oh * self.stride[0]
+                w_start = ow * self.stride[1]
+                h_end = h_start + self.kernel_size[0]
+                w_end = w_start + self.kernel_size[1]
+                
+                window = x_data[:, :, h_start:h_end, w_start:w_end]
+                window_reshaped = window.reshape(batch, channels, -1)
+                max_vals = window_reshaped.max(axis=2)
+                out_data[:, :, oh, ow] = max_vals
+                
+                # 记录最大值位置
+                max_indices = window_reshaped.argmax(axis=2)
+                pool_indices[:, :, oh, ow, 0] = max_indices // self.kernel_size[1]
+                pool_indices[:, :, oh, ow, 1] = max_indices % self.kernel_size[1]
+        
+        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="maxpool2d")
+        
+        def _backward():
+            if not x.requires_grad:
+                return
+            
+            # 计算输入梯度
+            if self.padding[0] > 0 or self.padding[1] > 0:
+                x_grad_padded = np.zeros_like(x_data)
+            else:
+                x_grad_padded = np.zeros((batch, channels, 
+                                         height + 2*self.padding[0],
+                                         width + 2*self.padding[1]), dtype=x_data.dtype)
+            
+            for oh in range(out_h):
+                for ow in range(out_w):
+                    h_start = oh * self.stride[0]
+                    w_start = ow * self.stride[1]
+                    
+                    h_offset = pool_indices[:, :, oh, ow, 0]
+                    w_offset = pool_indices[:, :, oh, ow, 1]
+                    
+                    for b in range(batch):
+                        for c in range(channels):
+                            h_idx = h_start + h_offset[b, c]
+                            w_idx = w_start + w_offset[b, c]
+                            x_grad_padded[b, c, h_idx, w_idx] += out.grad[b, c, oh, ow]
+            
+            if self.padding[0] > 0 or self.padding[1] > 0:
+                x.grad += x_grad_padded[:, :, 
+                                       self.padding[0]:self.padding[0]+height,
+                                       self.padding[1]:self.padding[1]+width]
+            else:
+                x.grad += x_grad_padded
+        
+        out._backward = _backward
+        return out
+
+
+class AvgPool2d(Module):
+    """2D Average Pooling"""
+    def __init__(self, kernel_size, stride=None, padding=0):
+        super().__init__()
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
+        self.stride = stride if stride else self.kernel_size
+        self.stride = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+
+    def __call__(self, x):
+        # x.shape: (batch, channels, height, width)
+        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
+        batch, channels, height, width = x_data.shape
+        
+        # Apply padding
+        if self.padding[0] > 0 or self.padding[1] > 0:
+            x_data = np.pad(x_data,
+                           ((0, 0), (0, 0),
+                            (self.padding[0], self.padding[0]),
+                            (self.padding[1], self.padding[1])),
+                           mode='constant', constant_values=0)
+        
+        # Calculate output dimensions
+        out_h = (x_data.shape[2] - self.kernel_size[0]) // self.stride[0] + 1
+        out_w = (x_data.shape[3] - self.kernel_size[1]) // self.stride[1] + 1
+        
+        # Perform average pooling
+        out_data = np.zeros((batch, channels, out_h, out_w), dtype=x_data.dtype)
+        
+        for oh in range(out_h):
+            for ow in range(out_w):
+                h_start = oh * self.stride[0]
+                w_start = ow * self.stride[1]
+                h_end = h_start + self.kernel_size[0]
+                w_end = w_start + self.kernel_size[1]
+                
+                window = x_data[:, :, h_start:h_end, w_start:w_end]
+                out_data[:, :, oh, ow] = window.mean(axis=(2, 3))
+        
+        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="avgpool2d")
+        
+        def _backward():
+            if not x.requires_grad:
+                return
+            
+            if self.padding[0] > 0 or self.padding[1] > 0:
+                x_grad_padded = np.zeros_like(x_data)
+            else:
+                x_grad_padded = np.zeros((batch, channels,
+                                         height + 2*self.padding[0],
+                                         width + 2*self.padding[1]), dtype=x_data.dtype)
+            
+            pool_size = self.kernel_size[0] * self.kernel_size[1]
+            
+            for oh in range(out_h):
+                for ow in range(out_w):
+                    h_start = oh * self.stride[0]
+                    w_start = ow * self.stride[1]
+                    h_end = h_start + self.kernel_size[0]
+                    w_end = w_start + self.kernel_size[1]
+                    
+                    grad_val = out.grad[:, :, oh, ow] / pool_size
+                    x_grad_padded[:, :, h_start:h_end, w_start:w_end] += grad_val[:, :, None, None]
+            
+            if self.padding[0] > 0 or self.padding[1] > 0:
+                x.grad += x_grad_padded[:, :,
+                                       self.padding[0]:self.padding[0]+height,
+                                       self.padding[1]:self.padding[1]+width]
+            else:
+                x.grad += x_grad_padded
+        
+        out._backward = _backward
+        return out
+
+
+# ================ Container Modules ================
+
+class Sequential(Module):
+    """顺序容器 - 按顺序应用模块列表"""
+    def __init__(self, *args):
+        super().__init__()
+        if len(args) == 1 and isinstance(args[0], dict):
+            # 从有序字典初始化
+            self._modules_ordered = list(args[0].items())
+        else:
+            # 从Module列表初始化
+            self._modules_ordered = [(str(i), module) for i, module in enumerate(args)]
+        
+        # 同时存储为属性以便参数收集
+        for name, module in self._modules_ordered:
+            setattr(self, name, module)
+
+    def __call__(self, x):
+        for name, module in self._modules_ordered:
+            x = module(x)
+        return x
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return Sequential(*[module for _, module in self._modules_ordered[index]])
+        else:
+            return self._modules_ordered[index][1]
+
+    def __len__(self):
+        return len(self._modules_ordered)
+
+
+# ================ Weight Initialization ================
+
+def _calculate_fan_in_and_fan_out(tensor_shape):
+    """计算扇入和扇出用于Kaiming和Xavier初始化"""
+    if len(tensor_shape) < 2:
+        raise ValueError("Tensor must have at least 2 dimensions")
+    
+    num_input = tensor_shape[1]
+    num_output = tensor_shape[0]
+    
+    if len(tensor_shape) > 2:
+        # Convolutional or higher dimensional
+        receptive_field_size = np.prod(tensor_shape[2:])
+        fan_in = num_input * receptive_field_size
+        fan_out = num_output * receptive_field_size
+    else:
+        fan_in = num_input
+        fan_out = num_output
+    
+    return fan_in, fan_out
+
+
+def kaiming_uniform_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):
+    """Kaiming均匀初始化（原地）"""
+    if not hasattr(tensor, 'data'):
+        tensor_data = tensor
+        is_parameter = False
+    else:
+        tensor_data = tensor.data
+        is_parameter = True
+    
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor_data.shape)
+    
+    if mode == 'fan_in':
+        num = fan_in
+    elif mode == 'fan_out':
+        num = fan_out
+    elif mode == 'fan_avg':
+        num = (fan_in + fan_out) / 2
+    else:
+        raise ValueError(f"Mode {mode} not supported")
+    
+    if nonlinearity == 'leaky_relu':
+        gain = np.sqrt(2.0 / (1 + a ** 2))
+    else:
+        gain = 1.0
+    
+    std = gain / np.sqrt(num)
+    bound = np.sqrt(3.0) * std
+    
+    init_vals = np.random.uniform(-bound, bound, tensor_data.shape)
+    
+    if is_parameter:
+        tensor.data = init_vals.astype(tensor.data.dtype)
+    else:
+        tensor[:] = init_vals
+    
+    return tensor
+
+
+def kaiming_normal_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):
+    """Kaiming正态初始化（原地）"""
+    if not hasattr(tensor, 'data'):
+        tensor_data = tensor
+        is_parameter = False
+    else:
+        tensor_data = tensor.data
+        is_parameter = True
+    
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor_data.shape)
+    
+    if mode == 'fan_in':
+        num = fan_in
+    elif mode == 'fan_out':
+        num = fan_out
+    elif mode == 'fan_avg':
+        num = (fan_in + fan_out) / 2
+    else:
+        raise ValueError(f"Mode {mode} not supported")
+    
+    if nonlinearity == 'leaky_relu':
+        gain = np.sqrt(2.0 / (1 + a ** 2))
+    else:
+        gain = 1.0
+    
+    std = gain / np.sqrt(num)
+    init_vals = np.random.normal(0, std, tensor_data.shape)
+    
+    if is_parameter:
+        tensor.data = init_vals.astype(tensor.data.dtype)
+    else:
+        tensor[:] = init_vals
+    
+    return tensor
+
+
+def xavier_uniform_(tensor, gain=1.0):
+    """Xavier均匀初始化（原地）"""
+    if not hasattr(tensor, 'data'):
+        tensor_data = tensor
+        is_parameter = False
+    else:
+        tensor_data = tensor.data
+        is_parameter = True
+    
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor_data.shape)
+    std = gain * np.sqrt(2.0 / (fan_in + fan_out))
+    bound = np.sqrt(3.0) * std
+    
+    init_vals = np.random.uniform(-bound, bound, tensor_data.shape)
+    
+    if is_parameter:
+        tensor.data = init_vals.astype(tensor.data.dtype)
+    else:
+        tensor[:] = init_vals
+    
+    return tensor
+
+
+def xavier_normal_(tensor, gain=1.0):
+    """Xavier正态初始化（原地）"""
+    if not hasattr(tensor, 'data'):
+        tensor_data = tensor
+        is_parameter = False
+    else:
+        tensor_data = tensor.data
+        is_parameter = True
+    
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor_data.shape)
+    std = gain * np.sqrt(2.0 / (fan_in + fan_out))
+    
+    init_vals = np.random.normal(0, std, tensor_data.shape)
+    
+    if is_parameter:
+        tensor.data = init_vals.astype(tensor.data.dtype)
+    else:
+        tensor[:] = init_vals
+    
+    return tensor
+
+
+# ================ Module Utilities ================
+
+def _add_module_methods():
+    """为Module基类添加额外的方法"""
+    
+    def requires_grad_(self, requires_grad=True):
+        """设置所有参数的requires_grad属性（原地）"""
+        for param in self.parameters():
+            param.requires_grad = requires_grad
+        return self
+    
+    def to(self, device):
+        """将模块移动到指定设备（CPU/CUDA）"""
+        # 简化版本 - 实际应该实现真正的设备转移
+        self.device = device
+        for param in self.parameters():
+            if hasattr(param, 'device'):
+                param.device = device
+        for module in self.modules():
+            if hasattr(module, 'device'):
+                module.device = device
+        return self
+    
+    def cpu(self):
+        """将模块移动到CPU"""
+        return self.to('cpu')
+    
+    def cuda(self):
+        """将模块移动到CUDA"""
+        return self.to('cuda')
+    
+    def double(self):
+        """将参数转换为float64"""
+        for param in self.parameters():
+            if hasattr(param, 'data'):
+                param.data = param.data.astype(np.float64)
+        return self
+    
+    def float(self):
+        """将参数转换为float32"""
+        for param in self.parameters():
+            if hasattr(param, 'data'):
+                param.data = param.data.astype(np.float32)
+        return self
+    
+    Module.requires_grad_ = requires_grad_
+    Module.to = to
+    Module.cpu = cpu
+    Module.cuda = cuda
+    Module.double = double
+    Module.float = float
+
+
+_add_module_methods()
