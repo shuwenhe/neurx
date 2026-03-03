@@ -473,6 +473,170 @@ def batch_norm(
     return out
 
 
+def group_norm(input: Tensor, num_groups: int, weight: Tensor | None = None, bias: Tensor | None = None, eps: float = 1e-5):
+    input = _as_tensor(input)
+    if weight is not None:
+        weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    if x_data.ndim < 2:
+        raise ValueError(f"group_norm expects input with at least 2 dims, got shape {x_data.shape}")
+    if num_groups <= 0:
+        raise ValueError(f"num_groups must be positive, got {num_groups}")
+
+    n, c = x_data.shape[0], x_data.shape[1]
+    if c % num_groups != 0:
+        raise ValueError(f"num_channels ({c}) must be divisible by num_groups ({num_groups})")
+    if weight is not None and weight.shape != (c,):
+        raise ValueError(f"weight must have shape ({c},), got {weight.shape}")
+    if bias is not None and bias.shape != (c,):
+        raise ValueError(f"bias must have shape ({c},), got {bias.shape}")
+
+    group_shape = (n, num_groups, c // num_groups) + x_data.shape[2:]
+    x_grouped = x_data.reshape(group_shape)
+    reduce_axes = tuple(range(2, x_grouped.ndim))
+
+    mean = x_grouped.mean(axis=reduce_axes, keepdims=True)
+    var = x_grouped.var(axis=reduce_axes, keepdims=True)
+    inv_std = 1.0 / np.sqrt(var + eps)
+    x_hat_grouped = (x_grouped - mean) * inv_std
+    x_hat = x_hat_grouped.reshape(x_data.shape)
+
+    param_shape = (1, c) + (1,) * (x_data.ndim - 2)
+    w = weight.to_numpy().reshape(param_shape) if weight is not None else 1.0
+    b = bias.to_numpy().reshape(param_shape) if bias is not None else 0.0
+    out_data = x_hat * w + b
+
+    requires_grad = input.requires_grad or (weight is not None and weight.requires_grad) or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="group_norm", device=input.device)
+
+    def _backward():
+        grad = out.grad
+        reduce_param_axes = tuple(i for i in range(grad.ndim) if i != 1)
+
+        if weight is not None and weight.requires_grad:
+            weight.grad += (grad * x_hat).sum(axis=reduce_param_axes).astype(weight.grad.dtype, copy=False)
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad.sum(axis=reduce_param_axes).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            dxhat = grad * w
+            dxhat_grouped = dxhat.reshape(group_shape)
+            n_group = float(np.prod(group_shape[2:]))
+            sum_dxhat = dxhat_grouped.sum(axis=reduce_axes, keepdims=True)
+            sum_dxhat_xhat = (dxhat_grouped * x_hat_grouped).sum(axis=reduce_axes, keepdims=True)
+            dx_grouped = (inv_std / n_group) * (n_group * dxhat_grouped - sum_dxhat - x_hat_grouped * sum_dxhat_xhat)
+            input.grad += dx_grouped.reshape(x_data.shape).astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def instance_norm(
+    input: Tensor,
+    running_mean=None,
+    running_var=None,
+    weight: Tensor | None = None,
+    bias: Tensor | None = None,
+    use_input_stats: bool = True,
+    momentum: float = 0.1,
+    eps: float = 1e-5,
+):
+    input = _as_tensor(input)
+    if weight is not None:
+        weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    if x_data.ndim < 3:
+        raise ValueError(f"instance_norm expects input with at least 3 dims, got shape {x_data.shape}")
+
+    n, c = x_data.shape[0], x_data.shape[1]
+    if weight is not None and weight.shape != (c,):
+        raise ValueError(f"weight must have shape ({c},), got {weight.shape}")
+    if bias is not None and bias.shape != (c,):
+        raise ValueError(f"bias must have shape ({c},), got {bias.shape}")
+
+    def _as_channel_vector(buf, name):
+        if buf is None:
+            return None
+        if isinstance(buf, Tensor):
+            arr = buf.to_numpy()
+        else:
+            arr = np.asarray(buf)
+        if arr.shape != (c,):
+            raise ValueError(f"{name} must have shape ({c},), got {arr.shape}")
+        return arr
+
+    running_mean_arr = _as_channel_vector(running_mean, "running_mean")
+    running_var_arr = _as_channel_vector(running_var, "running_var")
+
+    spatial_axes = tuple(range(2, x_data.ndim))
+    if use_input_stats:
+        mean = x_data.mean(axis=spatial_axes, keepdims=True)
+        var = x_data.var(axis=spatial_axes, keepdims=True)
+
+        if running_mean_arr is not None and running_var_arr is not None:
+            batch_mean = mean.mean(axis=0, keepdims=True).reshape(c)
+            batch_var = var.mean(axis=0, keepdims=True).reshape(c)
+            updated_mean = (1.0 - momentum) * running_mean_arr + momentum * batch_mean
+            updated_var = (1.0 - momentum) * running_var_arr + momentum * batch_var
+
+            if isinstance(running_mean, Tensor):
+                running_mean.data[...] = updated_mean.astype(running_mean.data.dtype, copy=False)
+            else:
+                running_mean[...] = updated_mean.astype(np.asarray(running_mean).dtype, copy=False)
+            if isinstance(running_var, Tensor):
+                running_var.data[...] = updated_var.astype(running_var.data.dtype, copy=False)
+            else:
+                running_var[...] = updated_var.astype(np.asarray(running_var).dtype, copy=False)
+    else:
+        if running_mean_arr is None or running_var_arr is None:
+            raise ValueError("running_mean and running_var must be provided when use_input_stats=False")
+        shape = (1, c) + (1,) * (x_data.ndim - 2)
+        mean = running_mean_arr.reshape(shape)
+        var = running_var_arr.reshape(shape)
+
+    inv_std = 1.0 / np.sqrt(var + eps)
+    x_hat = (x_data - mean) * inv_std
+
+    param_shape = (1, c) + (1,) * (x_data.ndim - 2)
+    w = weight.to_numpy().reshape(param_shape) if weight is not None else 1.0
+    b = bias.to_numpy().reshape(param_shape) if bias is not None else 0.0
+    out_data = x_hat * w + b
+
+    requires_grad = input.requires_grad or (weight is not None and weight.requires_grad) or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="instance_norm", device=input.device)
+
+    def _backward():
+        grad = out.grad
+        reduce_param_axes = tuple(i for i in range(grad.ndim) if i != 1)
+
+        if weight is not None and weight.requires_grad:
+            weight.grad += (grad * x_hat).sum(axis=reduce_param_axes).astype(weight.grad.dtype, copy=False)
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad.sum(axis=reduce_param_axes).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            dxhat = grad * w
+            if use_input_stats:
+                n_spatial = float(np.prod([x_data.shape[ax] for ax in spatial_axes]))
+                sum_dxhat = dxhat.sum(axis=spatial_axes, keepdims=True)
+                sum_dxhat_xhat = (dxhat * x_hat).sum(axis=spatial_axes, keepdims=True)
+                dx = (inv_std / n_spatial) * (n_spatial * dxhat - sum_dxhat - x_hat * sum_dxhat_xhat)
+            else:
+                dx = dxhat * inv_std
+            input.grad += dx.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
 def conv1d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, padding=0, dilation=1, groups=1):
     input = _as_tensor(input)
     weight = _as_tensor(weight)
@@ -1535,6 +1699,8 @@ __all__ = [
     "log_softmax",
     "linear",
     "batch_norm",
+    "group_norm",
+    "instance_norm",
     "conv1d",
     "max_pool1d",
     "avg_pool1d",

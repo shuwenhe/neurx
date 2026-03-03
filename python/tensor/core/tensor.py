@@ -1,4 +1,5 @@
 import numpy as np
+from contextlib import ContextDecorator
 
 try:
     from tensor.cuda import ops as _cuda_ops
@@ -72,6 +73,42 @@ def _should_fallback_cuda_to_cpu():
         return True
 
 
+_GRAD_ENABLED = True
+
+
+def is_grad_enabled():
+    return _GRAD_ENABLED
+
+
+class _GradMode(ContextDecorator):
+    def __init__(self, mode: bool):
+        self.mode = bool(mode)
+        self.prev = None
+
+    def __enter__(self):
+        global _GRAD_ENABLED
+        self.prev = _GRAD_ENABLED
+        _GRAD_ENABLED = self.mode
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        global _GRAD_ENABLED
+        _GRAD_ENABLED = self.prev
+        return False
+
+
+def set_grad_enabled(mode: bool):
+    return _GradMode(mode)
+
+
+def no_grad():
+    return _GradMode(False)
+
+
+def enable_grad():
+    return _GradMode(True)
+
+
 class Tensor:
     def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
         if device is None:
@@ -104,11 +141,15 @@ class Tensor:
             self.data = arr
             data_dtype = arr.dtype
 
-        if requires_grad and not np.issubdtype(np.dtype(data_dtype), np.floating):
+        effective_requires_grad = bool(requires_grad)
+        if effective_requires_grad and len(_children) > 0 and not _GRAD_ENABLED:
+            effective_requires_grad = False
+
+        if effective_requires_grad and not np.issubdtype(np.dtype(data_dtype), np.floating):
             raise ValueError("only floating point tensors can require gradients")
 
-        self.requires_grad = requires_grad
-        if requires_grad:
+        self.requires_grad = effective_requires_grad
+        if self.requires_grad:
             if self.device == "cuda":
                 self.grad = np.zeros(_shape_of(self.data), dtype=np.float32)
             else:
@@ -116,7 +157,10 @@ class Tensor:
         else:
             self.grad = None
         self._backward = lambda: None
-        self._prev = set(_children)
+        if self.requires_grad:
+            self._prev = {child for child in _children if getattr(child, "requires_grad", False)}
+        else:
+            self._prev = set()
         self._op = _op
 
     @property
