@@ -14,6 +14,11 @@ from tensor.nn.transformer import (
     Transformer,
     BertLike,
 )
+from tensor.nn.rnn import (
+    RNNCell, RNN,
+    LSTMCell, LSTM,
+    GRUCell, GRU,
+)
 from tensor.nn import functional
 from tensor.nn.functional import (
     # Activation functions
