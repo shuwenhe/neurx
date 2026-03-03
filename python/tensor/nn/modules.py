@@ -276,6 +276,207 @@ class Linear(Module):
         return out
 
 
+class Conv2d(Module):
+    """2D Convolutional layer.
+    
+    Applies a 2D convolution over an input signal composed of several input planes.
+    
+    Args:
+        in_channels: Number of channels in the input image
+        out_channels: Number of channels produced by the convolution
+        kernel_size: Size of the convolving kernel (int or tuple)
+        stride: Stride of the convolution (default: 1)
+        padding: Padding added to all four sides of the input (default: 0)
+        dilation: Spacing between kernel elements (default: 1)
+        groups: Number of groups (default: 1)
+        bias: If True, adds a learnable bias (default: True)
+    
+    Example:
+        >>> conv = Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
+        >>> x = tensor.randn(1, 3, 32, 32)
+        >>> out = conv(x)  # shape: (1, 64, 32, 32)
+    """
+    
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, 
+                 dilation=1, groups=1, bias=True):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.stride = stride if isinstance(stride, tuple) else (stride, stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation)
+        self.groups = groups
+        
+        if isinstance(kernel_size, int):
+            self.kernel_size = (kernel_size, kernel_size)
+        else:
+            self.kernel_size = kernel_size
+        
+        assert in_channels % groups == 0, f"in_channels ({in_channels}) must be divisible by groups ({groups})"
+        assert out_channels % groups == 0, f"out_channels ({out_channels}) must be divisible by groups ({groups})"
+        
+        # Weight shape: (out_channels, in_channels // groups, kernel_h, kernel_w)
+        fan_in = (in_channels // groups) * self.kernel_size[0] * self.kernel_size[1]
+        scale = (2.0 / fan_in) ** 0.5
+        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, 
+                                                 self.kernel_size[0], self.kernel_size[1]) * scale)
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+    
+    def __call__(self, x):
+        return self._conv2d_forward(x)
+    
+    def _conv2d_forward(self, x):
+        """Forward pass for Conv2d layer."""
+        # x shape: (batch, in_channels, height, width)
+        # weight shape: (out_channels, in_channels // groups, kernel_h, kernel_w)
+        
+        batch_size, in_channels, in_h, in_w = x.shape
+        out_channels, _, kernel_h, kernel_w = self.weight.shape
+        
+        # Calculate output dimensions
+        out_h = (in_h + 2 * self.padding[0] - self.dilation[0] * (kernel_h - 1) - 1) // self.stride[0] + 1
+        out_w = (in_w + 2 * self.padding[1] - self.dilation[1] * (kernel_w - 1) - 1) // self.stride[1] + 1
+        
+        x_data = x.data
+        w_data = self.weight.data
+        
+        # Apply padding
+        if self.padding[0] > 0 or self.padding[1] > 0:
+            x_data = np.pad(x_data, ((0, 0), (0, 0), 
+                                     (self.padding[0], self.padding[0]), 
+                                     (self.padding[1], self.padding[1])), mode='constant')
+        
+        # Perform convolution
+        out_data = np.zeros((batch_size, out_channels, out_h, out_w), dtype=x_data.dtype)
+        
+        if self.groups == 1:
+            # Standard convolution
+            for b in range(batch_size):
+                for oc in range(out_channels):
+                    for oh in range(out_h):
+                        for ow in range(out_w):
+                            ih_start = oh * self.stride[0]
+                            iw_start = ow * self.stride[1]
+                            ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
+                            iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
+                            
+                            x_patch = x_data[b, :, ih_start:ih_end:self.dilation[0], 
+                                           iw_start:iw_end:self.dilation[1]]
+                            w_patch = w_data[oc]
+                            
+                            out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch)
+        else:
+            # Grouped convolution
+            in_ch_per_group = in_channels // self.groups
+            out_ch_per_group = out_channels // self.groups
+            
+            for b in range(batch_size):
+                for g in range(self.groups):
+                    for oc_local in range(out_ch_per_group):
+                        oc = g * out_ch_per_group + oc_local
+                        for oh in range(out_h):
+                            for ow in range(out_w):
+                                ih_start = oh * self.stride[0]
+                                iw_start = ow * self.stride[1]
+                                ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
+                                iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
+                                
+                                ic_start = g * in_ch_per_group
+                                ic_end = ic_start + in_ch_per_group
+                                
+                                x_patch = x_data[b, ic_start:ic_end, 
+                                               ih_start:ih_end:self.dilation[0], 
+                                               iw_start:iw_end:self.dilation[1]]
+                                w_patch = w_data[oc]
+                                
+                                out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch)
+        
+        # Add bias
+        if self.bias is not None:
+            out_data = out_data + self.bias.data.reshape(1, -1, 1, 1)
+        
+        # Create output tensor with gradient tracking
+        out = Tensor(out_data, requires_grad=x.requires_grad or self.weight.requires_grad, 
+                    _children=(x, self.weight) if self.bias is None else (x, self.weight, self.bias),
+                    _op="conv2d")
+        
+        def _backward():
+            if not out.grad.any():
+                return
+            
+            # Gradient w.r.t. weight
+            if self.weight.requires_grad:
+                w_grad = np.zeros_like(w_data)
+                
+                x_data_padded = x_data
+                if self.padding[0] > 0 or self.padding[1] > 0:
+                    x_data_padded = np.pad(x_data, ((0, 0), (0, 0), 
+                                                    (self.padding[0], self.padding[0]), 
+                                                    (self.padding[1], self.padding[1])), mode='constant')
+                
+                if self.groups == 1:
+                    for b in range(batch_size):
+                        for oc in range(out_channels):
+                            for oh in range(out_h):
+                                for ow in range(out_w):
+                                    ih_start = oh * self.stride[0]
+                                    iw_start = ow * self.stride[1]
+                                    ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
+                                    iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
+                                    
+                                    x_patch = x_data_padded[b, :, 
+                                                          ih_start:ih_end:self.dilation[0], 
+                                                          iw_start:iw_end:self.dilation[1]]
+                                    w_grad[oc] += x_patch * out.grad[b, oc, oh, ow]
+                
+                self.weight.grad += w_grad
+            
+            # Gradient w.r.t. bias
+            if self.bias is not None and self.bias.requires_grad:
+                self.bias.grad += out.grad.sum(axis=(0, 2, 3))
+            
+            # Gradient w.r.t. input
+            if x.requires_grad:
+                x_grad = np.zeros_like(x_data)
+                
+                if self.padding[0] > 0 or self.padding[1] > 0:
+                    x_grad_padded = np.zeros((batch_size, in_channels, 
+                                             in_h + 2 * self.padding[0], 
+                                             in_w + 2 * self.padding[1]), dtype=x_data.dtype)
+                else:
+                    x_grad_padded = x_grad
+                
+                if self.groups == 1:
+                    for b in range(batch_size):
+                        for oc in range(out_channels):
+                            for oh in range(out_h):
+                                for ow in range(out_w):
+                                    ih_start = oh * self.stride[0]
+                                    iw_start = ow * self.stride[1]
+                                    ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
+                                    iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
+                                    
+                                    grad_contrib = w_data[oc] * out.grad[b, oc, oh, ow]
+                                    
+                                    # Handle dilation
+                                    for kh in range(kernel_h):
+                                        for kw in range(kernel_w):
+                                            ih = ih_start + kh * self.dilation[0]
+                                            iw = iw_start + kw * self.dilation[1]
+                                            x_grad_padded[b, :, ih, iw] += grad_contrib[:, kh, kw]
+                
+                if self.padding[0] > 0 or self.padding[1] > 0:
+                    x_grad = x_grad_padded[:, :, 
+                                         self.padding[0]:self.padding[0]+in_h, 
+                                         self.padding[1]:self.padding[1]+in_w]
+                    x.grad += x_grad
+                else:
+                    x.grad += x_grad_padded
+        
+        out._backward = _backward
+        return out
+
+
 class LayerNorm(Module):
     """层归一化：对最后一个维度进行归一化"""
     def __init__(self, normalized_shape, eps=1e-5, bias=True):
