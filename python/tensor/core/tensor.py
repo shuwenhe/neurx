@@ -809,6 +809,44 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def scatter_add(self, dim, index, src):
+        """
+        Adds values from src into self at the indices specified by index along dimension dim.
+        
+        Args:
+            dim: Dimension along which to index
+            index: Indices to scatter to
+            src: Source tensor with values to add
+        
+        Returns:
+            New tensor with scattered additions
+        
+        Example:
+            >>> t = tensor.zeros((3, 5))
+            >>> index = tensor.Tensor([[0, 1, 2, 0]])
+            >>> src = tensor.ones((2, 4))
+            >>> result = t.scatter_add(1, index, src)
+        """
+        idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
+        src_t = src if isinstance(src, Tensor) else Tensor(src, device=self.device)
+        x = _to_numpy(self.data)
+        src_data = _to_numpy(src_t.data)
+        out_data = x.copy()
+        
+        # Use np.add.at for in-place addition at specified indices
+        np.add.at(out_data, tuple(np.ogrid[:out_data.shape[i]] if i != dim else idx for i in range(out_data.ndim)), src_data)
+        
+        out = Tensor(out_data, self.requires_grad or src_t.requires_grad, (self, src_t), "scatter_add", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad
+            if src_t.requires_grad:
+                src_t.grad += np.take_along_axis(out.grad, idx, axis=dim)
+
+        out._backward = _backward
+        return out
+
     def index_select(self, dim, index):
         idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
         x = _to_numpy(self.data)
@@ -1415,6 +1453,82 @@ def full_like(input, fill_value, dtype=None, requires_grad=False, device=None):
     dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
     return full(shape, fill_value, dtype=dtype, requires_grad=requires_grad, device=device)
 
+
+def meshgrid(*tensors, indexing='xy'):
+    """
+    Creates coordinate matrices from coordinate vectors.
+    
+    Args:
+        *tensors: 1D tensors representing coordinates for each dimension
+        indexing: Either 'xy' (Cartesian) or 'ij' (matrix) indexing
+    
+    Returns:
+        Tuple of tensors representing coordinate grids
+    
+    Example:
+        >>> x = tensor.arange(3)
+        >>> y = tensor.arange(4)
+        >>> X, Y = tensor.meshgrid(x, y)
+        >>> X.shape  # (4, 3) with indexing='xy'
+        >>> Y.shape  # (4, 3)
+        
+        >>> # Create a 2D grid for coordinates
+        >>> x = tensor.linspace(-1, 1, 100)
+        >>> y = tensor.linspace(-1, 1, 100)
+        >>> X, Y = tensor.meshgrid(x, y)
+        >>> # Now X and Y are 100x100 grids
+    """
+    if len(tensors) == 0:
+        raise ValueError("meshgrid requires at least one tensor")
+    
+    # Convert all inputs to Tensor if needed
+    tensors = [t if isinstance(t, Tensor) else Tensor(t) for t in tensors]
+    
+    # All tensors should be 1D
+    for i, t in enumerate(tensors):
+        if t.ndim != 1:
+            raise ValueError(f"Expected 1D tensor for meshgrid, got {t.ndim}D tensor at position {i}")
+    
+    if indexing not in ('xy', 'ij'):
+        raise ValueError(f"indexing must be 'xy' or 'ij', got {indexing}")
+    
+    # Get shapes
+    shapes = [t.shape[0] for t in tensors]
+    n = len(tensors)
+    
+    # Determine output shape based on indexing
+    if indexing == 'xy' and n > 1:
+        # Swap first two dimensions for Cartesian indexing
+        output_shape = [shapes[1], shapes[0]] + shapes[2:]
+    else:
+        output_shape = shapes
+    
+    grids = []
+    for i, t in enumerate(tensors):
+        # Create shape for broadcasting
+        view_shape = [1] * n
+        
+        if indexing == 'xy' and n > 1:
+            # For Cartesian indexing
+            if i == 0:
+                view_shape[1] = -1
+            elif i == 1:
+                view_shape[0] = -1
+            else:
+                view_shape[i] = -1
+        else:
+            # For matrix indexing
+            view_shape[i] = -1
+        
+        # Reshape and broadcast
+        data = _to_numpy(t.data).reshape(view_shape)
+        broadcasted = np.broadcast_to(data, output_shape)
+        grids.append(Tensor(broadcasted.copy(), device=t.device))
+    
+    return tuple(grids)
+
+
+def rand_like(input, requires_grad=False, device=None):
 
 def rand_like(input, dtype=None, requires_grad=False, device=None):
     """Create a tensor of random values [0, 1) with the same shape as input.
