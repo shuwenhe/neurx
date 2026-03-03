@@ -34,8 +34,9 @@ from tensor.tensor import (
     rand_like,
     randn_like,
 )
+from tensor.core.einsum import einsum
 from tensor.version import __version__
-from tensor import compile, data, distributed, nn, optim, serialization, training
+from tensor import compile, data, distributed, nn, optim, serialization, training, vision
 from tensor.losses import cross_entropy, cross_entropy_loss
 from tensor.platform import doctor, format_doctor_report, get_runtime_config, runtime_info
 
@@ -53,6 +54,7 @@ __all__ = [
     "inverse",
     "svd",
     "eig",
+    "einsum",
     "no_grad",
     "enable_grad",
     "set_grad_enabled",
@@ -83,6 +85,7 @@ __all__ = [
     "optim",
     "serialization",
     "training",
+    "vision",
     "cross_entropy",
     "cross_entropy_loss",
     "get_runtime_config",
