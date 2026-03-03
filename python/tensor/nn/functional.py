@@ -774,6 +774,145 @@ def conv1d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
     return out
 
 
+def conv_transpose1d(
+    input: Tensor,
+    weight: Tensor,
+    bias: Tensor | None = None,
+    stride=1,
+    padding=0,
+    output_padding=0,
+    groups=1,
+    dilation=1,
+):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 3:
+        raise ValueError(f"conv_transpose1d expects 3D input (N, C, L), got shape {x_data.shape}")
+    if w_data.ndim != 3:
+        raise ValueError(
+            f"conv_transpose1d expects 3D weight (in_channels, out_channels/groups, kL), got shape {w_data.shape}"
+        )
+
+    stride_l = int(_single(stride))
+    pad_l = int(_single(padding))
+    out_pad_l = int(_single(output_padding))
+    dil_l = int(_single(dilation))
+
+    n, in_channels, in_len = x_data.shape
+    if w_data.shape[0] != in_channels:
+        raise ValueError(f"weight first dim ({w_data.shape[0]}) must equal in_channels ({in_channels})")
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+
+    out_ch_per_group = w_data.shape[1]
+    out_channels = out_ch_per_group * groups
+    kernel_l = w_data.shape[2]
+
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+    if out_pad_l < 0:
+        raise ValueError(f"output_padding must be non-negative, got {out_pad_l}")
+
+    out_len = (in_len - 1) * stride_l - 2 * pad_l + dil_l * (kernel_l - 1) + out_pad_l + 1
+    if out_len <= 0:
+        raise ValueError(
+            f"invalid output shape for conv_transpose1d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={stride_l}, padding={pad_l}, output_padding={out_pad_l}, dilation={dil_l}"
+        )
+
+    out_data = np.zeros((n, out_channels, out_len), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for ic_local in range(in_ch_per_group):
+                ic = in_start + ic_local
+                for il in range(in_len):
+                    base_l = il * stride_l - pad_l
+                    x_val = x_data[bi, ic, il]
+                    for kl in range(kernel_l):
+                        ol = base_l + kl * dil_l
+                        if ol < 0 or ol >= out_len:
+                            continue
+                        for oc_local in range(out_ch_per_group):
+                            oc = out_start + oc_local
+                            out_data[bi, oc, ol] += x_val * w_data[ic, oc_local, kl]
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(
+        out_data,
+        requires_grad=requires_grad,
+        _children=tuple(children),
+        _op="conv_transpose1d",
+        device=input.device,
+    )
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for il in range(in_len):
+                            base_l = il * stride_l - pad_l
+                            x_val = x_data[bi, ic, il]
+                            for kl in range(kernel_l):
+                                ol = base_l + kl * dil_l
+                                if ol < 0 or ol >= out_len:
+                                    continue
+                                for oc_local in range(out_ch_per_group):
+                                    oc = out_start + oc_local
+                                    w_grad[ic, oc_local, kl] += x_val * grad_out[bi, oc, ol]
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for il in range(in_len):
+                            base_l = il * stride_l - pad_l
+                            acc = 0.0
+                            for kl in range(kernel_l):
+                                ol = base_l + kl * dil_l
+                                if ol < 0 or ol >= out_len:
+                                    continue
+                                for oc_local in range(out_ch_per_group):
+                                    oc = out_start + oc_local
+                                    acc += grad_out[bi, oc, ol] * w_data[ic, oc_local, kl]
+                            x_grad[bi, ic, il] += acc
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
 def max_pool1d(input: Tensor, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False):
     input = _as_tensor(input)
     x_data = input.to_numpy()
@@ -1047,6 +1186,505 @@ def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
                 x_grad = x_grad_padded[:, :, pad_h:pad_h + in_h, pad_w:pad_w + in_w]
             else:
                 x_grad = x_grad_padded
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def conv_transpose2d(
+    input: Tensor,
+    weight: Tensor,
+    bias: Tensor | None = None,
+    stride=1,
+    padding=0,
+    output_padding=0,
+    groups=1,
+    dilation=1,
+):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 4:
+        raise ValueError(f"conv_transpose2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+    if w_data.ndim != 4:
+        raise ValueError(
+            "conv_transpose2d expects 4D weight (in_channels, out_channels/groups, kH, kW), "
+            f"got shape {w_data.shape}"
+        )
+
+    stride_h, stride_w = _pair(stride)
+    pad_h, pad_w = _pair(padding)
+    out_pad_h, out_pad_w = _pair(output_padding)
+    dil_h, dil_w = _pair(dilation)
+
+    n, in_channels, in_h, in_w = x_data.shape
+    if w_data.shape[0] != in_channels:
+        raise ValueError(f"weight first dim ({w_data.shape[0]}) must equal in_channels ({in_channels})")
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+
+    out_ch_per_group = w_data.shape[1]
+    out_channels = out_ch_per_group * groups
+    kernel_h, kernel_w = w_data.shape[2], w_data.shape[3]
+
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+    if out_pad_h < 0 or out_pad_w < 0:
+        raise ValueError(f"output_padding must be non-negative, got {(out_pad_h, out_pad_w)}")
+
+    out_h = (in_h - 1) * stride_h - 2 * pad_h + dil_h * (kernel_h - 1) + out_pad_h + 1
+    out_w = (in_w - 1) * stride_w - 2 * pad_w + dil_w * (kernel_w - 1) + out_pad_w + 1
+    if out_h <= 0 or out_w <= 0:
+        raise ValueError(
+            f"invalid output shape for conv_transpose2d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={(stride_h, stride_w)}, padding={(pad_h, pad_w)}, output_padding={(out_pad_h, out_pad_w)}, "
+            f"dilation={(dil_h, dil_w)}"
+        )
+
+    out_data = np.zeros((n, out_channels, out_h, out_w), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for ic_local in range(in_ch_per_group):
+                ic = in_start + ic_local
+                for ih in range(in_h):
+                    base_h = ih * stride_h - pad_h
+                    for iw in range(in_w):
+                        base_w = iw * stride_w - pad_w
+                        x_val = x_data[bi, ic, ih, iw]
+                        for kh in range(kernel_h):
+                            oh = base_h + kh * dil_h
+                            if oh < 0 or oh >= out_h:
+                                continue
+                            for kw in range(kernel_w):
+                                ow = base_w + kw * dil_w
+                                if ow < 0 or ow >= out_w:
+                                    continue
+                                for oc_local in range(out_ch_per_group):
+                                    oc = out_start + oc_local
+                                    out_data[bi, oc, oh, ow] += x_val * w_data[ic, oc_local, kh, kw]
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(
+        out_data,
+        requires_grad=requires_grad,
+        _children=tuple(children),
+        _op="conv_transpose2d",
+        device=input.device,
+    )
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for ih in range(in_h):
+                            base_h = ih * stride_h - pad_h
+                            for iw in range(in_w):
+                                base_w = iw * stride_w - pad_w
+                                x_val = x_data[bi, ic, ih, iw]
+                                for kh in range(kernel_h):
+                                    oh = base_h + kh * dil_h
+                                    if oh < 0 or oh >= out_h:
+                                        continue
+                                    for kw in range(kernel_w):
+                                        ow = base_w + kw * dil_w
+                                        if ow < 0 or ow >= out_w:
+                                            continue
+                                        for oc_local in range(out_ch_per_group):
+                                            oc = out_start + oc_local
+                                            w_grad[ic, oc_local, kh, kw] += x_val * grad_out[bi, oc, oh, ow]
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2, 3)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for ih in range(in_h):
+                            base_h = ih * stride_h - pad_h
+                            for iw in range(in_w):
+                                base_w = iw * stride_w - pad_w
+                                acc = 0.0
+                                for kh in range(kernel_h):
+                                    oh = base_h + kh * dil_h
+                                    if oh < 0 or oh >= out_h:
+                                        continue
+                                    for kw in range(kernel_w):
+                                        ow = base_w + kw * dil_w
+                                        if ow < 0 or ow >= out_w:
+                                            continue
+                                        for oc_local in range(out_ch_per_group):
+                                            oc = out_start + oc_local
+                                            acc += grad_out[bi, oc, oh, ow] * w_data[ic, oc_local, kh, kw]
+                                x_grad[bi, ic, ih, iw] += acc
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def conv3d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, padding=0, dilation=1, groups=1):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 5:
+        raise ValueError(f"conv3d expects 5D input (N, C, D, H, W), got shape {x_data.shape}")
+    if w_data.ndim != 5:
+        raise ValueError(
+            f"conv3d expects 5D weight (out_channels, in_channels/groups, kD, kH, kW), got shape {w_data.shape}"
+        )
+
+    stride_d, stride_h, stride_w = _triple(stride)
+    pad_d, pad_h, pad_w = _triple(padding)
+    dil_d, dil_h, dil_w = _triple(dilation)
+
+    n, in_channels, in_d, in_h, in_w = x_data.shape
+    out_channels, in_channels_per_group, kernel_d, kernel_h, kernel_w = w_data.shape
+
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+    if out_channels % groups != 0:
+        raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+    if in_channels_per_group != in_channels // groups:
+        raise ValueError(
+            f"weight second dim ({in_channels_per_group}) must equal in_channels/groups ({in_channels // groups})"
+        )
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+
+    eff_kd = dil_d * (kernel_d - 1) + 1
+    eff_kh = dil_h * (kernel_h - 1) + 1
+    eff_kw = dil_w * (kernel_w - 1) + 1
+    out_d = (in_d + 2 * pad_d - eff_kd) // stride_d + 1
+    out_h = (in_h + 2 * pad_h - eff_kh) // stride_h + 1
+    out_w = (in_w + 2 * pad_w - eff_kw) // stride_w + 1
+    if out_d <= 0 or out_h <= 0 or out_w <= 0:
+        raise ValueError(
+            f"invalid output shape for conv3d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={(stride_d, stride_h, stride_w)}, padding={(pad_d, pad_h, pad_w)}, "
+            f"dilation={(dil_d, dil_h, dil_w)}"
+        )
+
+    if pad_d > 0 or pad_h > 0 or pad_w > 0:
+        x_padded = np.pad(
+            x_data,
+            ((0, 0), (0, 0), (pad_d, pad_d), (pad_h, pad_h), (pad_w, pad_w)),
+            mode="constant",
+        )
+    else:
+        x_padded = x_data
+
+    out_data = np.zeros((n, out_channels, out_d, out_h, out_w), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+    out_ch_per_group = out_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for oc_local in range(out_ch_per_group):
+                oc = out_start + oc_local
+                for od in range(out_d):
+                    id_start = od * stride_d
+                    for oh in range(out_h):
+                        ih_start = oh * stride_h
+                        for ow in range(out_w):
+                            iw_start = ow * stride_w
+                            acc = 0.0
+                            for ic_local in range(in_ch_per_group):
+                                ic = in_start + ic_local
+                                for kd in range(kernel_d):
+                                    id_ = id_start + kd * dil_d
+                                    for kh in range(kernel_h):
+                                        ih = ih_start + kh * dil_h
+                                        for kw in range(kernel_w):
+                                            iw = iw_start + kw * dil_w
+                                            acc += x_padded[bi, ic, id_, ih, iw] * w_data[oc, ic_local, kd, kh, kw]
+                            out_data[bi, oc, od, oh, ow] = acc
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1, 1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="conv3d", device=input.device)
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for od in range(out_d):
+                            id_start = od * stride_d
+                            for oh in range(out_h):
+                                ih_start = oh * stride_h
+                                for ow in range(out_w):
+                                    iw_start = ow * stride_w
+                                    go = grad_out[bi, oc, od, oh, ow]
+                                    for ic_local in range(in_ch_per_group):
+                                        ic = in_start + ic_local
+                                        for kd in range(kernel_d):
+                                            id_ = id_start + kd * dil_d
+                                            for kh in range(kernel_h):
+                                                ih = ih_start + kh * dil_h
+                                                for kw in range(kernel_w):
+                                                    iw = iw_start + kw * dil_w
+                                                    w_grad[oc, ic_local, kd, kh, kw] += x_padded[bi, ic, id_, ih, iw] * go
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2, 3, 4)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad_padded = np.zeros_like(x_padded)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for od in range(out_d):
+                            id_start = od * stride_d
+                            for oh in range(out_h):
+                                ih_start = oh * stride_h
+                                for ow in range(out_w):
+                                    iw_start = ow * stride_w
+                                    go = grad_out[bi, oc, od, oh, ow]
+                                    for ic_local in range(in_ch_per_group):
+                                        ic = in_start + ic_local
+                                        for kd in range(kernel_d):
+                                            id_ = id_start + kd * dil_d
+                                            for kh in range(kernel_h):
+                                                ih = ih_start + kh * dil_h
+                                                for kw in range(kernel_w):
+                                                    iw = iw_start + kw * dil_w
+                                                    x_grad_padded[bi, ic, id_, ih, iw] += w_data[oc, ic_local, kd, kh, kw] * go
+            if pad_d > 0 or pad_h > 0 or pad_w > 0:
+                x_grad = x_grad_padded[:, :, pad_d:pad_d + in_d, pad_h:pad_h + in_h, pad_w:pad_w + in_w]
+            else:
+                x_grad = x_grad_padded
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def conv_transpose3d(
+    input: Tensor,
+    weight: Tensor,
+    bias: Tensor | None = None,
+    stride=1,
+    padding=0,
+    output_padding=0,
+    groups=1,
+    dilation=1,
+):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 5:
+        raise ValueError(f"conv_transpose3d expects 5D input (N, C, D, H, W), got shape {x_data.shape}")
+    if w_data.ndim != 5:
+        raise ValueError(
+            "conv_transpose3d expects 5D weight (in_channels, out_channels/groups, kD, kH, kW), "
+            f"got shape {w_data.shape}"
+        )
+
+    stride_d, stride_h, stride_w = _triple(stride)
+    pad_d, pad_h, pad_w = _triple(padding)
+    out_pad_d, out_pad_h, out_pad_w = _triple(output_padding)
+    dil_d, dil_h, dil_w = _triple(dilation)
+
+    n, in_channels, in_d, in_h, in_w = x_data.shape
+    if w_data.shape[0] != in_channels:
+        raise ValueError(f"weight first dim ({w_data.shape[0]}) must equal in_channels ({in_channels})")
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+
+    out_ch_per_group = w_data.shape[1]
+    out_channels = out_ch_per_group * groups
+    kernel_d, kernel_h, kernel_w = w_data.shape[2], w_data.shape[3], w_data.shape[4]
+
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+    if out_pad_d < 0 or out_pad_h < 0 or out_pad_w < 0:
+        raise ValueError(f"output_padding must be non-negative, got {(out_pad_d, out_pad_h, out_pad_w)}")
+
+    out_d = (in_d - 1) * stride_d - 2 * pad_d + dil_d * (kernel_d - 1) + out_pad_d + 1
+    out_h = (in_h - 1) * stride_h - 2 * pad_h + dil_h * (kernel_h - 1) + out_pad_h + 1
+    out_w = (in_w - 1) * stride_w - 2 * pad_w + dil_w * (kernel_w - 1) + out_pad_w + 1
+    if out_d <= 0 or out_h <= 0 or out_w <= 0:
+        raise ValueError(
+            f"invalid output shape for conv_transpose3d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={(stride_d, stride_h, stride_w)}, padding={(pad_d, pad_h, pad_w)}, "
+            f"output_padding={(out_pad_d, out_pad_h, out_pad_w)}, dilation={(dil_d, dil_h, dil_w)}"
+        )
+
+    out_data = np.zeros((n, out_channels, out_d, out_h, out_w), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for ic_local in range(in_ch_per_group):
+                ic = in_start + ic_local
+                for id_ in range(in_d):
+                    base_d = id_ * stride_d - pad_d
+                    for ih in range(in_h):
+                        base_h = ih * stride_h - pad_h
+                        for iw in range(in_w):
+                            base_w = iw * stride_w - pad_w
+                            x_val = x_data[bi, ic, id_, ih, iw]
+                            for kd in range(kernel_d):
+                                od = base_d + kd * dil_d
+                                if od < 0 or od >= out_d:
+                                    continue
+                                for kh in range(kernel_h):
+                                    oh = base_h + kh * dil_h
+                                    if oh < 0 or oh >= out_h:
+                                        continue
+                                    for kw in range(kernel_w):
+                                        ow = base_w + kw * dil_w
+                                        if ow < 0 or ow >= out_w:
+                                            continue
+                                        for oc_local in range(out_ch_per_group):
+                                            oc = out_start + oc_local
+                                            out_data[bi, oc, od, oh, ow] += x_val * w_data[ic, oc_local, kd, kh, kw]
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1, 1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(
+        out_data,
+        requires_grad=requires_grad,
+        _children=tuple(children),
+        _op="conv_transpose3d",
+        device=input.device,
+    )
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for id_ in range(in_d):
+                            base_d = id_ * stride_d - pad_d
+                            for ih in range(in_h):
+                                base_h = ih * stride_h - pad_h
+                                for iw in range(in_w):
+                                    base_w = iw * stride_w - pad_w
+                                    x_val = x_data[bi, ic, id_, ih, iw]
+                                    for kd in range(kernel_d):
+                                        od = base_d + kd * dil_d
+                                        if od < 0 or od >= out_d:
+                                            continue
+                                        for kh in range(kernel_h):
+                                            oh = base_h + kh * dil_h
+                                            if oh < 0 or oh >= out_h:
+                                                continue
+                                            for kw in range(kernel_w):
+                                                ow = base_w + kw * dil_w
+                                                if ow < 0 or ow >= out_w:
+                                                    continue
+                                                for oc_local in range(out_ch_per_group):
+                                                    oc = out_start + oc_local
+                                                    w_grad[ic, oc_local, kd, kh, kw] += x_val * grad_out[bi, oc, od, oh, ow]
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2, 3, 4)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for id_ in range(in_d):
+                            base_d = id_ * stride_d - pad_d
+                            for ih in range(in_h):
+                                base_h = ih * stride_h - pad_h
+                                for iw in range(in_w):
+                                    base_w = iw * stride_w - pad_w
+                                    acc = 0.0
+                                    for kd in range(kernel_d):
+                                        od = base_d + kd * dil_d
+                                        if od < 0 or od >= out_d:
+                                            continue
+                                        for kh in range(kernel_h):
+                                            oh = base_h + kh * dil_h
+                                            if oh < 0 or oh >= out_h:
+                                                continue
+                                            for kw in range(kernel_w):
+                                                ow = base_w + kw * dil_w
+                                                if ow < 0 or ow >= out_w:
+                                                    continue
+                                                for oc_local in range(out_ch_per_group):
+                                                    oc = out_start + oc_local
+                                                    acc += grad_out[bi, oc, od, oh, ow] * w_data[ic, oc_local, kd, kh, kw]
+                                    x_grad[bi, ic, id_, ih, iw] += acc
             input.grad += x_grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
@@ -1714,9 +2352,13 @@ __all__ = [
     "group_norm",
     "instance_norm",
     "conv1d",
+    "conv_transpose1d",
     "max_pool1d",
     "avg_pool1d",
     "conv2d",
+    "conv_transpose2d",
+    "conv3d",
+    "conv_transpose3d",
     "max_pool2d",
     "avg_pool2d",
     "adaptive_avg_pool2d",

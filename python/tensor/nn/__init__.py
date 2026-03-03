@@ -7,7 +7,8 @@ from tensor.nn.functional import (
     # Normalization
     softmax, log_softmax, layer_norm, rms_norm, batch_norm, group_norm, instance_norm,
     # Operations
-    linear, conv1d, conv2d, max_pool1d, max_pool2d, avg_pool1d, avg_pool2d, adaptive_avg_pool2d, dropout, embedding,
+    linear, conv1d, conv_transpose1d, conv2d, conv_transpose2d, conv3d, conv_transpose3d,
+    max_pool1d, max_pool2d, avg_pool1d, avg_pool2d, adaptive_avg_pool2d, dropout, embedding,
     # Loss functions
     mse_loss, cross_entropy, nll_loss,
     bce_loss, bce_with_logits_loss, l1_loss, smooth_l1_loss, kl_div_loss,
@@ -22,6 +23,10 @@ __all__ = [
     "Linear",
     "Conv1d",
     "Conv2d",
+    "Conv3d",
+    "ConvTranspose1d",
+    "ConvTranspose2d",
+    "ConvTranspose3d",
     "GroupNorm",
     "InstanceNorm1d",
     "InstanceNorm2d",
@@ -45,7 +50,8 @@ __all__ = [
     # Normalization
     "softmax", "log_softmax", "layer_norm", "rms_norm", "batch_norm", "group_norm", "instance_norm",
     # Operations
-    "linear", "conv1d", "conv2d", "max_pool1d", "max_pool2d", "avg_pool1d", "avg_pool2d", "adaptive_avg_pool2d", "dropout", "embedding",
+    "linear", "conv1d", "conv_transpose1d", "conv2d", "conv_transpose2d", "conv3d", "conv_transpose3d",
+    "max_pool1d", "max_pool2d", "avg_pool1d", "avg_pool2d", "adaptive_avg_pool2d", "dropout", "embedding",
     # Loss functions
     "mse_loss", "cross_entropy", "nll_loss",
     "bce_loss", "bce_with_logits_loss", "l1_loss", "smooth_l1_loss", "kl_div_loss",
