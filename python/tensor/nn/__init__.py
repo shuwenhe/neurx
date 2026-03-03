@@ -5,7 +5,7 @@ from tensor.nn.functional import (
     relu, leaky_relu, sigmoid, tanh, elu, selu, prelu, rrelu, hardtanh, hardswish, mish,
     silu, gelu,
     # Normalization
-    softmax, log_softmax, layer_norm, rms_norm, batch_norm,
+    softmax, log_softmax, layer_norm, rms_norm, batch_norm, group_norm, instance_norm,
     # Operations
     linear, conv1d, conv2d, max_pool1d, max_pool2d, avg_pool1d, avg_pool2d, adaptive_avg_pool2d, dropout, embedding,
     # Loss functions
@@ -22,6 +22,9 @@ __all__ = [
     "Linear",
     "Conv1d",
     "Conv2d",
+    "GroupNorm",
+    "InstanceNorm1d",
+    "InstanceNorm2d",
     "MaxPool1d",
     "AvgPool1d",
     "LayerNorm",
@@ -40,7 +43,7 @@ __all__ = [
     "relu", "leaky_relu", "sigmoid", "tanh", "elu", "selu", "prelu", "rrelu", 
     "hardtanh", "hardswish", "mish", "silu", "gelu",
     # Normalization
-    "softmax", "log_softmax", "layer_norm", "rms_norm", "batch_norm",
+    "softmax", "log_softmax", "layer_norm", "rms_norm", "batch_norm", "group_norm", "instance_norm",
     # Operations
     "linear", "conv1d", "conv2d", "max_pool1d", "max_pool2d", "avg_pool1d", "avg_pool2d", "adaptive_avg_pool2d", "dropout", "embedding",
     # Loss functions
