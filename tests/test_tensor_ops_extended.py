@@ -122,3 +122,59 @@ def test_dtype_and_device_shortcuts_cpu():
     assert x.float().to_numpy().dtype == np.float32
     assert x.long().to_numpy().dtype == np.int64
     assert x.cpu().device == "cpu"
+
+
+def test_masked_fill_and_masked_select_with_backward():
+    x = Tensor(np.array([[1.0, 2.0], [3.0, 4.0]]), requires_grad=True)
+    mask = x > 2.0
+    y = x.masked_fill(mask, 0.0)
+    assert np.allclose(y.to_numpy(), np.array([[1.0, 2.0], [0.0, 0.0]]))
+
+    selected = x.masked_select(mask)
+    assert np.allclose(selected.to_numpy(), np.array([3.0, 4.0]))
+
+    loss = y.sum() + selected.sum()
+    loss.backward()
+    assert np.allclose(x.grad, np.ones_like(x.to_numpy()))
+
+
+def test_moveaxis_movedim_roundtrip():
+    x = Tensor(np.arange(24.0).reshape(2, 3, 4), requires_grad=True)
+    y = x.moveaxis(0, 2)
+    z = y.movedim(2, 0)
+    assert y.shape == (3, 4, 2)
+    assert z.shape == x.shape
+    assert np.allclose(z.to_numpy(), x.to_numpy())
+
+    y.sum().backward()
+    assert np.allclose(x.grad, np.ones_like(x.to_numpy()))
+
+
+def test_sort_argsort_topk_and_backward():
+    x = Tensor(np.array([[3.0, 1.0, 2.0], [0.0, 4.0, 5.0]]), requires_grad=True)
+
+    values, indices = x.sort(dim=1)
+    assert np.allclose(values.to_numpy(), np.array([[1.0, 2.0, 3.0], [0.0, 4.0, 5.0]]))
+    assert np.array_equal(indices.to_numpy(), np.array([[1, 2, 0], [0, 1, 2]], dtype=np.int64))
+
+    args_desc = x.argsort(dim=1, descending=True)
+    assert np.array_equal(args_desc.to_numpy(), np.array([[0, 2, 1], [2, 1, 0]], dtype=np.int64))
+
+    topv, topi = x.topk(2, dim=1, largest=True, sorted=True)
+    assert np.allclose(topv.to_numpy(), np.array([[3.0, 2.0], [5.0, 4.0]]))
+    assert np.array_equal(topi.to_numpy(), np.array([[0, 2], [2, 1]], dtype=np.int64))
+
+    (values.sum() + topv.sum()).backward()
+    assert np.allclose(x.grad, np.array([[2.0, 1.0, 2.0], [1.0, 2.0, 2.0]]))
+
+
+def test_scatter_add_duplicate_indices_accumulate():
+    base = Tensor(np.zeros((1, 5), dtype=np.float64), requires_grad=True)
+    index = Tensor(np.array([[1, 1, 3]], dtype=np.int64))
+    src = Tensor(np.array([[2.0, 3.0, 4.0]], dtype=np.float64), requires_grad=True)
+    out = base.scatter_add(1, index, src)
+    assert np.allclose(out.to_numpy(), np.array([[0.0, 5.0, 0.0, 4.0, 0.0]]))
+
+    out.sum().backward()
+    assert np.allclose(base.grad, np.ones_like(base.to_numpy()))
+    assert np.allclose(src.grad, np.ones_like(src.to_numpy()))

@@ -1,16 +1,68 @@
 # Tensor框架分析文档 - 导航索引
 
-## 📚 完整分析文档地图
+## 📚 完整分析文档地图（更新：2026-03-03）
 
-本次分析为你的Tensor框架生成了 **5份详细文档**，共 **2000+ 行**，包含完整代码和详细指导。
+本框架的演进文档涵盖从初始分析到本次功能补齐的完整记录，共 **8+ 份详细文档**，**3500+ 行**，包含代码实现、测试用例和详细指导。
 
 ---
 
-## 🗂️ 文档结构
+## 🆕 最新文档（2026-03-03）
+
+### 🎯 [PYTORCH_GAP_ANALYSIS_2026.md](PYTORCH_GAP_ANALYSIS_2026.md) ⭐⭐⭐
+**更新日期**：2026 年 3 月 3 日  
+**阅读时间**：20-30 分钟  
+**适合**：了解当前对标 PyTorch 的缺口与补齐进展
+
+**包含内容**：
+- ✅ 已有功能完整清单（与 PyTorch 对齐）
+- ✅ 与 PyTorch 的主要缺口（按优先级）
+- ✅ 本次补齐详情（7 个新增 API + scatter_add 优化）
+- ✅ 后续优化路线图（短/中/长期）
+- ✅ API 对齐度评估（综合 75%-80%）
+- ✅ 快速验证命令
+
+**关键数据**：
+```
+核心张量操作对齐度: 85% (↑ 从 60%)
+本次新增: topk/sort/argsort/masked_fill/masked_select/moveaxis/movedim
+性能优化: scatter_add 10x-100x 加速
+```
+
+### 📖 [QUICK_START_NEW_APIS_2026.md](QUICK_START_NEW_APIS_2026.md) ⭐⭐
+**更新日期**：2026 年 3 月 3 日  
+**阅读时间**：25-35 分钟  
+**适合**：立即上手使用新增 API
+
+**包含内容**：
+- ✅ 排序与 Top-K 选择（Beam Search / 排名任务）
+- ✅ 掩码操作（Causal Mask / 序列填充）
+- ✅ 维度操作（多头注意力维度变换）
+- ✅ 高级用例组合（完整 Attention 前向）
+- ✅ 性能对比（scatter_add 优化基准测试）
+- ✅ 与 PyTorch API 对照表
+- ✅ 完整示例：简化 Transformer Block
+
+**典型用例**：
+```python
+# Top-K Beam Search
+top_probs, top_indices = logits.topk(k=5, dim=-1)
+
+# Causal Mask
+attn_scores = scores.masked_fill(causal_mask, float('-inf'))
+
+# Multi-Head Attention 维度重排
+Q_heads = Q_multi.moveaxis(2, 1)  # (B,T,H,D) → (B,H,T,D)
+```
+
+---
+
+## 🗂️ 文档结构（完整版）
 
 ```
-/home/shuwen/neurx/
-├── 📋 README_ANALYSIS.md (本文件) ← 导航中心
+/Users/feifei/neurx/
+├── 🆕 PYTORCH_GAP_ANALYSIS_2026.md ← 对标分析（最新） ⭐⭐⭐
+├── 🆕 QUICK_START_NEW_APIS_2026.md ← 新 API 快速上手 ⭐⭐
+├── 📋 INDEX.md (本文件) ← 导航中心
 ├── 📊 VISUAL_SUMMARY.md (500行) ← 可视化总结 ⭐ 快速浏览
 ├── 🔴 FRAMEWORK_ANALYSIS.md (800行) ← 完整分析
 ├── 💻 IMPLEMENTATION_PLAN.md (1000行) ← 代码实现 ⭐ 最重要
@@ -22,44 +74,85 @@
 
 ## 👉 根据你的需求选择文件
 
-### 场景1: 我想快速了解分析结果 (15分钟)
+### 场景1: 快速了解本次更新（2026-03-03）(15分钟)
 ```
 推荐阅读顺序:
-1. 📋 README_ANALYSIS.md (2分钟)
-2. 📊 VISUAL_SUMMARY.md (8分钟)
-3. 💡 简要总结 (5分钟)
+1. 🆕 PYTORCH_GAP_ANALYSIS_2026.md 第三节 (5分钟)
+2. 🆕 QUICK_START_NEW_APIS_2026.md 第1-3节 (10分钟)
 ```
 
-### 场景2: 我想立即开始实现 (30分钟)
+### 场景2: 我想立即使用新功能 (30分钟)
 ```
 推荐阅读顺序:
-1. 🚀 QUICK_START.md (15分钟) ← 开始这里
-2. 💻 IMPLEMENTATION_PLAN.md (15分钟)
-3. 开始复制代码！
+1. 🆕 QUICK_START_NEW_APIS_2026.md (20分钟) ← 开始这里
+2. 运行测试: pytest tests/test_tensor_ops_extended.py (5分钟)
+3. 修改自己的代码并测试 (5分钟)
 ```
 
-### 场景3: 我想深入理解框架差异 (1小时)
+### 场景3: 我想了解框架完整能力 (1小时)
 ```
 推荐阅读顺序:
-1. 🔴 FRAMEWORK_ANALYSIS.md (20分钟)
-2. 📈 DETAILED_COMPARISON.md (25分钟)
-3. 💻 IMPLEMENTATION_PLAN.md (15分钟)
+1. 📋 INDEX.md (5分钟) ← 你在这里
+2. 🆕 PYTORCH_GAP_ANALYSIS_2026.md (25分钟)
+3. 🔴 FRAMEWORK_ANALYSIS.md (20分钟)
+4. 💻 IMPLEMENTATION_PLAN.md (10分钟)
 ```
 
-### 场景4: 我想全面了解改进方案 (2小时)
+### 场景4: 我想深入研究实现细节 (2小时)
 ```
 推荐阅读顺序:
-1. 📋 README_ANALYSIS.md (10分钟)
-2. 🔴 FRAMEWORK_ANALYSIS.md (30分钟)
-3. 📊 VISUAL_SUMMARY.md (15分钟)
-4. 💻 IMPLEMENTATION_PLAN.md (30分钟)
-5. 🚀 QUICK_START.md (15分钟)
-6. 📈 DETAILED_COMPARISON.md (20分钟)
+1. 🆕 PYTORCH_GAP_ANALYSIS_2026.md (30分钟)
+2. 🆕 QUICK_START_NEW_APIS_2026.md (30分钟)
+3. 源码: python/tensor/core/tensor.py (30分钟)
+4. 测试: tests/test_tensor_ops_extended.py (15分钟)
+5. CUDA 绑定: cuda/bindings.cpp (15分钟)
 ```
 
 ---
 
 ## 📖 各文档详细内容
+
+### 🆕 PYTORCH_GAP_ANALYSIS_2026.md (对标分析) ⭐⭐⭐
+**位置:** [PYTORCH_GAP_ANALYSIS_2026.md](PYTORCH_GAP_ANALYSIS_2026.md)  
+**阅读时间:** 20-30分钟  
+**适合:** 技术决策、路线规划
+
+**包含内容:**
+- ✅ 执行摘要（本次补齐清单）
+- ✅ 已有功能清单（1.1-1.8 节，完整覆盖）
+- ✅ 与 PyTorch 的主要缺口（2.1-2.11 节，按优先级）
+- ✅ 本次补齐详情（3.1-3.2 节，代码片段+性能数据）
+- ✅ 后续优化路线图（短/中/长期，工作量估算）
+- ✅ API 对齐度评估（综合 75%-80%）
+- ✅ 快速验证命令
+
+**关键洞察:**
+```
+综合对齐度: 75% - 80% (↑ 从 60-65%)
+优势领域: 小规模单机训练、ResNet/BERT 架构
+提升方向: CUDA 性能深化、分布式训练、布尔索引
+```
+
+### 🆕 QUICK_START_NEW_APIS_2026.md (新 API 快速上手) ⭐⭐
+**位置:** [QUICK_START_NEW_APIS_2026.md](QUICK_START_NEW_APIS_2026.md)  
+**阅读时间:** 25-35分钟  
+**适合:** 立即编码、功能验证
+
+**包含内容:**
+- ✅ 排序与 Top-K 选择（3 个示例）
+- ✅ 掩码操作（3 个示例）
+- ✅ 维度操作（3 个示例）
+- ✅ 高级用例组合（完整 Attention + Embedding 更新）
+- ✅ 性能对比（scatter_add 基准测试代码）
+- ✅ 与 PyTorch API 对照表
+- ✅ 常见问题解答
+- ✅ 完整示例：简化 Transformer Block
+
+**立即可用的代码:**
+- Beam Search 实现
+- Causal Mask 应用
+- Multi-Head Attention 维度变换
+- Embedding Table 增量更新（向量化版本）
 
 ### 📋 README_ANALYSIS.md (总结)
 **位置:** `/home/shuwen/neurx/README_ANALYSIS.md`  
