@@ -51,6 +51,7 @@ __all__ = [
     "matmul",
     "mm",
     "bmm",
+    "meshgrid",
     "inverse",
     "svd",
     "eig",
