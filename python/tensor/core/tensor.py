@@ -813,19 +813,22 @@ class Tensor:
         """
         Adds values from src into self at the indices specified by index along dimension dim.
         
+        This operation accumulates values from src into self, allowing the same index to be
+        used multiple times (values are added rather than replaced).
+        
         Args:
             dim: Dimension along which to index
-            index: Indices to scatter to
+            index: Indices to scatter to (should have same shape as src)
             src: Source tensor with values to add
         
         Returns:
             New tensor with scattered additions
         
         Example:
-            >>> t = tensor.zeros((3, 5))
-            >>> index = tensor.Tensor([[0, 1, 2, 0]])
-            >>> src = tensor.ones((2, 4))
-            >>> result = t.scatter_add(1, index, src)
+            >>> t = tensor.ones((3, 5))
+            >>> index = tensor.Tensor([[0, 2], [1, 3], [0, 4]])
+            >>> src = tensor.ones((3, 2)) * 2
+            >>> result = t.scatter_add(1, index, src)  # Adds 2.0 at each indexed position
         """
         idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
         src_t = src if isinstance(src, Tensor) else Tensor(src, device=self.device)
@@ -833,15 +836,38 @@ class Tensor:
         src_data = _to_numpy(src_t.data)
         out_data = x.copy()
         
-        # Use np.add.at for in-place addition at specified indices
-        np.add.at(out_data, tuple(np.ogrid[:out_data.shape[i]] if i != dim else idx for i in range(out_data.ndim)), src_data)
+        # Flatten the data along all axes except dim to make indexing simpler
+        # This is similar to how scatter works, but we add instead of replace
+        ndim = out_data.ndim
+        
+        # Move the target dimension to the last position
+        out_data = np.moveaxis(out_data, dim, -1)
+        idx_moved = np.moveaxis(idx, dim, -1)
+        src_moved = np.moveaxis(src_data, dim, -1)
+        
+        # Flatten all dimensions except the last one
+        orig_shape = out_data.shape
+        out_flat = out_data.reshape(-1, orig_shape[-1])
+        idx_flat = idx_moved.reshape(-1, idx_moved.shape[-1])
+        src_flat = src_moved.reshape(-1, src_moved.shape[-1])
+        
+        # Add values at the specified indices
+        for i in range(out_flat.shape[0]):
+            for j in range(idx_flat.shape[1]):
+                out_flat[i, idx_flat[i, j]] += src_flat[i, j]
+        
+        # Reshape back and move axis back
+        out_data = out_flat.reshape(orig_shape)
+        out_data = np.moveaxis(out_data, -1, dim)
         
         out = Tensor(out_data, self.requires_grad or src_t.requires_grad, (self, src_t), "scatter_add", device=self.device)
 
         def _backward():
             if self.requires_grad:
+                # Gradient flows through unchanged
                 self.grad += out.grad
             if src_t.requires_grad:
+                # Gradient is gathered from the scattered positions
                 src_t.grad += np.take_along_axis(out.grad, idx, axis=dim)
 
         out._backward = _backward
@@ -1527,8 +1553,6 @@ def meshgrid(*tensors, indexing='xy'):
     
     return tuple(grids)
 
-
-def rand_like(input, requires_grad=False, device=None):
 
 def rand_like(input, dtype=None, requires_grad=False, device=None):
     """Create a tensor of random values [0, 1) with the same shape as input.
