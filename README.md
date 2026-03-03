@@ -4,18 +4,58 @@ A self-developed deep learning framework is evolving into a full-stack productio
 Current state: production foundation is in place (runtime config, diagnostics, package scaffolding), with core kernels and distributed/compile capabilities still in active expansion.
 
 ## Features
+
+### Core Framework
 - Autograd `Tensor` with basic ops and `backward()`
-- Core layers in `tensor.core.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
-- Optimizer `AdamW` and `clip_grad_norm`
-- Losses `cross_entropy` and `cross_entropy_loss`
+- Core layers in `tensor.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
+- Convolution layers: `Conv1d`, `Conv2d`, `Conv3d` and transpose variants
+- RNN layers: `RNN`, `LSTM`, `GRU` with cell variants
+- Pooling layers: `MaxPool`, `AvgPool`, `AdaptiveAvgPool`, `AdaptiveMaxPool`
+- Batch/Group/Instance normalization
+- Optimizers: `SGD`, `Adam`, `AdamW`, `RMSprop` with learning rate schedulers
+- Losses: `CrossEntropyLoss`, `MSELoss`, `BCELoss`, `NLLLoss`, `L1Loss`, etc.
+- Activation functions: `ReLU`, `GELU`, `SiLU`, `Sigmoid`, `Tanh`, etc.
+
+### 🆕 New in 2026-03-03
+- **Einstein Summation** (`tensor.einsum`) - Complex tensor operations with intuitive notation
+- **Vision Module** (`tensor.vision`) - Computer vision tools and models
+  - Image transforms: `ToTensor`, `Normalize`, `Resize`, `RandomCrop`, `ColorJitter`, etc.
+  - Pre-built models: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`
+- Complete transform pipeline compatible with PIL and numpy arrays
+
+### Infrastructure
 - CUDA extension (starter) with GPU tensor, add/mul, bias add, matmul, layernorm, softmax
 - Runtime platform module (`tensor.platform`) for config, logging, diagnostics (`tensor-doctor`)
-- Serialization helpers including training checkpoint save/load (`tensor.serialization.save_checkpoint`)
+- Serialization helpers including training checkpoint save/load
 - Training runtime helpers: `CheckpointManager`, `TrainingLogger`, `run_training_loop`
 - AMP helpers: `tensor.training.autocast` and `tensor.training.GradScaler`
-- Data pipeline scaffolding (`tensor.data.Dataset`, `tensor.data.DataLoader`)
+- Data pipeline: `Dataset`, `DataLoader`, `TensorDataset`
 - Distributed runtime scaffolding (`tensor.distributed.detect_distributed_config`)
 - Compile API boundary (`tensor.compile.compile_module`)
+
+## Quick Start
+
+```python
+import tensor
+from tensor.vision import transforms, models
+
+# Einstein summation for complex operations
+A = tensor.rand((3, 4))
+B = tensor.rand((4, 5))
+C = tensor.einsum('ij,jk->ik', A, B)  # Matrix multiplication
+
+# Image classification with ResNet
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                        std=[0.229, 0.224, 0.225])
+])
+
+model = models.resnet18(num_classes=10)
+# ... training loop
+```
 
 ## Project Layout
 ```
@@ -23,10 +63,11 @@ tensor/
   python/
     tensor/
       __init__.py
-      core/            # Python-level tensor, autograd, utils
-      nn/              # layers (currently in core/nn.py)
-      optim/           # optimizers (currently in core/optim.py)
+      core/            # Python-level tensor, autograd, einsum
+      nn/              # neural network layers
+      optim/           # optimizers and schedulers
       data/            # dataset/dataloader
+      vision/          # 🆕 computer vision (transforms, models)
       distributed/     # distributed runtime config/launcher scaffold
       compile/         # compile API scaffold
       platform/        # runtime config, logging, diagnostics, errors
@@ -46,7 +87,11 @@ tensor/
     primitives/        # GEMM/conv primitives (planned)
     utils/
   tests/
+    test_new_features.py  # 🆕 tests for einsum and vision modules
   docs/
+    pytorch_comparison_analysis.md  # 🆕 comprehensive gap analysis
+    new_features_guide.md           # 🆕 usage guide for new features
+    SUMMARY.md                      # 🆕 implementation summary
   tools/
   setup.py
   setup.cfg
