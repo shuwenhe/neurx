@@ -1,4 +1,21 @@
-from tensor.core.tensor import Tensor, bmm, cat, chunk, eig, inverse, matmul, mm, split, stack, svd, where
+from tensor.core.tensor import (
+    Tensor,
+    bmm,
+    cat,
+    chunk,
+    eig,
+    inverse,
+    matmul,
+    mm,
+    split,
+    stack,
+    svd,
+    no_grad,
+    enable_grad,
+    set_grad_enabled,
+    is_grad_enabled,
+    where,
+)
 
 __all__ = [
     "Tensor",
@@ -13,4 +30,8 @@ __all__ = [
     "inverse",
     "svd",
     "eig",
+    "no_grad",
+    "enable_grad",
+    "set_grad_enabled",
+    "is_grad_enabled",
 ]
