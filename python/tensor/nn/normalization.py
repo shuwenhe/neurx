@@ -301,3 +301,350 @@ class InstanceNorm(Module):
     
     def extra_repr(self):
         return f'num_features={self.num_features}, eps={self.eps}, affine={self.affine}'
+
+
+class BatchNorm1d(Module):
+    """
+    Batch Normalization over 2D/3D input (N, C) or (N, C, L)
+    
+    批归一化对 mini-batch 进行标准化，加速训练收敛。
+    在训练期间使用批统计，在评估期间使用运行统计。
+    
+    Args:
+        num_features: 特征数（通道数）
+        eps: 数值稳定性常数，默认 1e-5
+        momentum: 运行均值和方差的动量，默认 0.1
+        affine: 是否有可学习的仿射参数（gamma, beta），默认 True
+        track_running_stats: 是否跟踪运行统计，默认 True
+    
+    Shape:
+        - Input: (N, C) 或 (N, C, L)
+        - Output: 同输入
+    
+    参考: https://arxiv.org/abs/1502.03167
+    """
+    
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, 
+                 track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+        self.training = True
+        
+        if self.affine:
+            self.weight = Tensor(np.ones(num_features))
+            self.bias = Tensor(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+        
+        if self.track_running_stats:
+            self.running_mean = Tensor(np.zeros(num_features))
+            self.running_var = Tensor(np.ones(num_features))
+            self.num_batches_tracked = 0
+        else:
+            self.running_mean = None
+            self.running_var = None
+    
+    def forward(self, x):
+        """前向传播"""
+        if isinstance(x, Tensor):
+            x_data = x.data
+        else:
+            x_data = x
+        
+        # 获取形状
+        shape = x_data.shape
+        if len(shape) == 2:  # (N, C)
+            # 形状: (N, C) -> 需要标准化维度 0
+            axes = (0,)
+            reshape_shape = (1, -1)
+        elif len(shape) == 3:  # (N, C, L)
+            # 形状: (N, C, L) -> 需要标准化维度 0 和 2
+            axes = (0, 2)
+            reshape_shape = (1, -1, 1)
+        else:
+            raise ValueError(f"Expected 2D or 3D input, got {len(shape)}D input")
+        
+        if self.training:
+            # 训练模式：使用批统计
+            batch_mean = np.mean(x_data, axis=axes, keepdims=True)
+            batch_var = np.var(x_data, axis=axes, keepdims=True)
+            
+            # 标准化
+            x_normalized = (x_data - batch_mean) / np.sqrt(batch_var + self.eps)
+            
+            # 更新运行统计
+            if self.track_running_stats:
+                batch_mean_squeeze = np.squeeze(batch_mean)
+                batch_var_squeeze = np.squeeze(batch_var)
+                
+                self.running_mean.data = (
+                    (1 - self.momentum) * self.running_mean.data + 
+                    self.momentum * batch_mean_squeeze
+                )
+                self.running_var.data = (
+                    (1 - self.momentum) * self.running_var.data + 
+                    self.momentum * batch_var_squeeze
+                )
+                self.num_batches_tracked += 1
+        else:
+            # 评估模式：使用运行统计
+            if self.track_running_stats:
+                running_mean = self.running_mean.data.reshape(reshape_shape)
+                running_var = self.running_var.data.reshape(reshape_shape)
+                x_normalized = (x_data - running_mean) / np.sqrt(running_var + self.eps)
+            else:
+                # 如果不跟踪运行统计，使用身份变换
+                x_normalized = x_data
+        
+        # 应用仿射变换
+        if self.affine:
+            weight = self.weight.data.reshape(reshape_shape)
+            bias = self.bias.data.reshape(reshape_shape)
+            output = weight * x_normalized + bias
+        else:
+            output = x_normalized
+        
+        return Tensor(output) if isinstance(x, Tensor) else output
+    
+    def train(self, mode=True):
+        """设置训练模式"""
+        self.training = mode
+        return self
+    
+    def eval(self):
+        """设置评估模式"""
+        self.training = False
+        return self
+
+
+class BatchNorm2d(Module):
+    """
+    Batch Normalization over 4D input (N, C, H, W)
+    
+    批归一化对 mini-batch 进行标准化，加速训练收敛。
+    在训练期间使用批统计，在评估期间使用运行统计。
+    
+    Args:
+        num_features: 特征数（通道数）
+        eps: 数值稳定性常数，默认 1e-5
+        momentum: 运行均值和方差的动量，默认 0.1
+        affine: 是否有可学习的仿射参数（gamma, beta），默认 True
+        track_running_stats: 是否跟踪运行统计，默认 True
+    
+    Shape:
+        - Input: (N, C, H, W)
+        - Output: 同输入
+    
+    参考: https://arxiv.org/abs/1502.03167
+    """
+    
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, 
+                 track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+        self.training = True
+        
+        if self.affine:
+            self.weight = Tensor(np.ones(num_features))
+            self.bias = Tensor(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+        
+        if self.track_running_stats:
+            self.running_mean = Tensor(np.zeros(num_features))
+            self.running_var = Tensor(np.ones(num_features))
+            self.num_batches_tracked = 0
+        else:
+            self.running_mean = None
+            self.running_var = None
+    
+    def forward(self, x):
+        """前向传播"""
+        if isinstance(x, Tensor):
+            x_data = x.data
+        else:
+            x_data = x
+        
+        # 验证输入形状
+        if len(x_data.shape) != 4:
+            raise ValueError(f"Expected 4D input (N, C, H, W), got {len(x_data.shape)}D input")
+        
+        # 计算沿 N, H, W 轴的统计
+        axes = (0, 2, 3)
+        reshape_shape = (1, -1, 1, 1)
+        
+        if self.training:
+            # 训练模式：使用批统计
+            batch_mean = np.mean(x_data, axis=axes, keepdims=True)
+            batch_var = np.var(x_data, axis=axes, keepdims=True)
+            
+            # 标准化
+            x_normalized = (x_data - batch_mean) / np.sqrt(batch_var + self.eps)
+            
+            # 更新运行统计
+            if self.track_running_stats:
+                batch_mean_squeeze = np.squeeze(batch_mean)
+                batch_var_squeeze = np.squeeze(batch_var)
+                
+                self.running_mean.data = (
+                    (1 - self.momentum) * self.running_mean.data + 
+                    self.momentum * batch_mean_squeeze
+                )
+                self.running_var.data = (
+                    (1 - self.momentum) * self.running_var.data + 
+                    self.momentum * batch_var_squeeze
+                )
+                self.num_batches_tracked += 1
+        else:
+            # 评估模式：使用运行统计
+            if self.track_running_stats:
+                running_mean = self.running_mean.data.reshape(reshape_shape)
+                running_var = self.running_var.data.reshape(reshape_shape)
+                x_normalized = (x_data - running_mean) / np.sqrt(running_var + self.eps)
+            else:
+                # 如果不跟踪运行统计，使用身份变换
+                x_normalized = x_data
+        
+        # 应用仿射变换
+        if self.affine:
+            weight = self.weight.data.reshape(reshape_shape)
+            bias = self.bias.data.reshape(reshape_shape)
+            output = weight * x_normalized + bias
+        else:
+            output = x_normalized
+        
+        return Tensor(output) if isinstance(x, Tensor) else output
+    
+    def train(self, mode=True):
+        """设置训练模式"""
+        self.training = mode
+        return self
+    
+    def eval(self):
+        """设置评估模式"""
+        self.training = False
+        return self
+
+
+class BatchNorm3d(Module):
+    """
+    Batch Normalization over 5D input (N, C, D, H, W)
+    
+    批归一化对 mini-batch 进行标准化，加速训练收敛。
+    在训练期间使用批统计，在评估期间使用运行统计。
+    
+    Args:
+        num_features: 特征数（通道数）
+        eps: 数值稳定性常数，默认 1e-5
+        momentum: 运行均值和方差的动量，默认 0.1
+        affine: 是否有可学习的仿射参数（gamma, beta），默认 True
+        track_running_stats: 是否跟踪运行统计，默认 True
+    
+    Shape:
+        - Input: (N, C, D, H, W)
+        - Output: 同输入
+    
+    参考: https://arxiv.org/abs/1502.03167
+    """
+    
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, 
+                 track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+        self.training = True
+        
+        if self.affine:
+            self.weight = Tensor(np.ones(num_features))
+            self.bias = Tensor(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+        
+        if self.track_running_stats:
+            self.running_mean = Tensor(np.zeros(num_features))
+            self.running_var = Tensor(np.ones(num_features))
+            self.num_batches_tracked = 0
+        else:
+            self.running_mean = None
+            self.running_var = None
+    
+    def forward(self, x):
+        """前向传播"""
+        if isinstance(x, Tensor):
+            x_data = x.data
+        else:
+            x_data = x
+        
+        # 验证输入形状
+        if len(x_data.shape) != 5:
+            raise ValueError(f"Expected 5D input (N, C, D, H, W), got {len(x_data.shape)}D input")
+        
+        # 计算沿 N, D, H, W 轴的统计
+        axes = (0, 2, 3, 4)
+        reshape_shape = (1, -1, 1, 1, 1)
+        
+        if self.training:
+            # 训练模式：使用批统计
+            batch_mean = np.mean(x_data, axis=axes, keepdims=True)
+            batch_var = np.var(x_data, axis=axes, keepdims=True)
+            
+            # 标准化
+            x_normalized = (x_data - batch_mean) / np.sqrt(batch_var + self.eps)
+            
+            # 更新运行统计
+            if self.track_running_stats:
+                batch_mean_squeeze = np.squeeze(batch_mean)
+                batch_var_squeeze = np.squeeze(batch_var)
+                
+                self.running_mean.data = (
+                    (1 - self.momentum) * self.running_mean.data + 
+                    self.momentum * batch_mean_squeeze
+                )
+                self.running_var.data = (
+                    (1 - self.momentum) * self.running_var.data + 
+                    self.momentum * batch_var_squeeze
+                )
+                self.num_batches_tracked += 1
+        else:
+            # 评估模式：使用运行统计
+            if self.track_running_stats:
+                running_mean = self.running_mean.data.reshape(reshape_shape)
+                running_var = self.running_var.data.reshape(reshape_shape)
+                x_normalized = (x_data - running_mean) / np.sqrt(running_var + self.eps)
+            else:
+                # 如果不跟踪运行统计，使用身份变换
+                x_normalized = x_data
+        
+        # 应用仿射变换
+        if self.affine:
+            weight = self.weight.data.reshape(reshape_shape)
+            bias = self.bias.data.reshape(reshape_shape)
+            output = weight * x_normalized + bias
+        else:
+            output = x_normalized
+        
+        return Tensor(output) if isinstance(x, Tensor) else output
+    
+    def train(self, mode=True):
+        """设置训练模式"""
+        self.training = mode
+        return self
+    
+    def eval(self):
+        """设置评估模式"""
+        self.training = False
+        return self
