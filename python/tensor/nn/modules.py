@@ -280,8 +280,37 @@ class Linear(Module):
         return out
 
 
+def _reverse_sequence(x, batch_first):
+    return x[:, ::-1, :] if batch_first else x[::-1, :, :]
+
+
+def _prepare_recurrent_state(state, expected_layers, hidden_size, batch_size, name):
+    if state is None:
+        return None
+
+    state = state if isinstance(state, Tensor) else Tensor(state)
+    if state.ndim == 2:
+        if expected_layers != 1:
+            raise ValueError(
+                f"{name} with shape (batch, hidden) is only valid when num_layers * num_directions == 1"
+            )
+        state = state.unsqueeze(0)
+
+    if state.ndim != 3:
+        raise ValueError(f"{name} must have 3 dims, got {state.shape}")
+    if state.shape[0] != expected_layers:
+        raise ValueError(
+            f"{name} first dim must be num_layers * num_directions ({expected_layers}), got {state.shape[0]}"
+        )
+    if state.shape[1] != batch_size:
+        raise ValueError(f"{name} batch dim must be {batch_size}, got {state.shape[1]}")
+    if state.shape[2] != hidden_size:
+        raise ValueError(f"{name} hidden dim must be {hidden_size}, got {state.shape[2]}")
+    return state
+
+
 class RNN(Module):
-    """Multi-layer Elman RNN (single-direction)."""
+    """Multi-layer Elman RNN."""
 
     def __init__(
         self,
@@ -295,8 +324,6 @@ class RNN(Module):
         bidirectional=False,
     ):
         super().__init__()
-        if bidirectional:
-            raise NotImplementedError("bidirectional RNN is not supported yet")
         if nonlinearity not in ("tanh", "relu"):
             raise ValueError(f"nonlinearity must be 'tanh' or 'relu', got {nonlinearity}")
         if num_layers <= 0:
@@ -311,55 +338,69 @@ class RNN(Module):
         self.bias = bool(bias)
         self.batch_first = bool(batch_first)
         self.dropout = float(dropout)
-        self.bidirectional = False
+        self.bidirectional = bool(bidirectional)
+        self.num_directions = 2 if self.bidirectional else 1
 
         for layer in range(self.num_layers):
-            layer_input_size = self.input_size if layer == 0 else self.hidden_size
-            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
-            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size * self.num_directions
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+                scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
 
-            w_ih = Parameter(np.random.randn(layer_input_size, self.hidden_size) * scale_ih)
-            w_hh = Parameter(np.random.randn(self.hidden_size, self.hidden_size) * scale_hh)
-            b_ih = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
-            b_hh = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+                w_ih = Parameter(np.random.randn(layer_input_size, self.hidden_size) * scale_ih)
+                w_hh = Parameter(np.random.randn(self.hidden_size, self.hidden_size) * scale_hh)
+                b_ih = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+                b_hh = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
 
-            setattr(self, f"weight_ih_l{layer}", w_ih)
-            setattr(self, f"weight_hh_l{layer}", w_hh)
-            setattr(self, f"bias_ih_l{layer}", b_ih)
-            setattr(self, f"bias_hh_l{layer}", b_hh)
+                setattr(self, f"weight_ih_l{layer}{suffix}", w_ih)
+                setattr(self, f"weight_hh_l{layer}{suffix}", w_hh)
+                setattr(self, f"bias_ih_l{layer}{suffix}", b_ih)
+                setattr(self, f"bias_hh_l{layer}{suffix}", b_hh)
 
     def __call__(self, x, hx=None):
         from . import functional as F
         from tensor.tensor import cat
 
-        if hx is not None:
-            hx = hx if isinstance(hx, Tensor) else Tensor(hx)
-            if hx.ndim == 2:
-                if self.num_layers != 1:
-                    raise ValueError("hx with shape (batch, hidden) is only valid when num_layers=1")
-                hx = hx.unsqueeze(0)
-            if hx.ndim != 3 or hx.shape[0] != self.num_layers:
-                raise ValueError(
-                    f"hx must have shape ({self.num_layers}, batch, {self.hidden_size}), got {hx.shape}"
-                )
-            if hx.shape[2] != self.hidden_size:
-                raise ValueError(f"hx hidden size must be {self.hidden_size}, got {hx.shape[2]}")
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        if x.ndim != 3:
+            raise ValueError(
+                f"input must be 3D with shape (seq, batch, feature) or (batch, seq, feature), got {x.shape}"
+            )
+        if x.shape[2] != self.input_size:
+            raise ValueError(f"input feature dim must be {self.input_size}, got {x.shape[2]}")
+
+        batch_size = x.shape[0] if self.batch_first else x.shape[1]
+        expected_layers = self.num_layers * self.num_directions
+        hx = _prepare_recurrent_state(hx, expected_layers, self.hidden_size, batch_size, "hx")
 
         output = x
         h_states = []
         for layer in range(self.num_layers):
-            layer_hx = hx[layer] if hx is not None else None
-            output, h_n = F.rnn(
-                output,
-                getattr(self, f"weight_ih_l{layer}"),
-                getattr(self, f"weight_hh_l{layer}"),
-                bias_ih=getattr(self, f"bias_ih_l{layer}"),
-                bias_hh=getattr(self, f"bias_hh_l{layer}"),
-                hx=layer_hx,
-                nonlinearity=self.nonlinearity,
-                batch_first=self.batch_first,
-            )
-            h_states.append(h_n)
+            layer_outputs = []
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                layer_hx = None
+                if hx is not None:
+                    layer_hx = hx[layer * self.num_directions + direction]
+
+                layer_input = _reverse_sequence(output, self.batch_first) if direction == 1 else output
+                direction_output, h_n = F.rnn(
+                    layer_input,
+                    getattr(self, f"weight_ih_l{layer}{suffix}"),
+                    getattr(self, f"weight_hh_l{layer}{suffix}"),
+                    bias_ih=getattr(self, f"bias_ih_l{layer}{suffix}"),
+                    bias_hh=getattr(self, f"bias_hh_l{layer}{suffix}"),
+                    hx=layer_hx,
+                    nonlinearity=self.nonlinearity,
+                    batch_first=self.batch_first,
+                )
+                if direction == 1:
+                    direction_output = _reverse_sequence(direction_output, self.batch_first)
+                layer_outputs.append(direction_output)
+                h_states.append(h_n)
+
+            output = layer_outputs[0] if self.num_directions == 1 else cat(layer_outputs, axis=2)
             if self.dropout > 0 and layer < self.num_layers - 1:
                 output = F.dropout(output, p=self.dropout, training=self.training)
 
@@ -367,7 +408,7 @@ class RNN(Module):
 
 
 class LSTM(Module):
-    """Multi-layer LSTM (single-direction)."""
+    """Multi-layer LSTM."""
 
     def __init__(
         self,
@@ -380,8 +421,6 @@ class LSTM(Module):
         bidirectional=False,
     ):
         super().__init__()
-        if bidirectional:
-            raise NotImplementedError("bidirectional LSTM is not supported yet")
         if num_layers <= 0:
             raise ValueError(f"num_layers must be positive, got {num_layers}")
         if dropout < 0 or dropout >= 1:
@@ -393,76 +432,79 @@ class LSTM(Module):
         self.bias = bool(bias)
         self.batch_first = bool(batch_first)
         self.dropout = float(dropout)
-        self.bidirectional = False
+        self.bidirectional = bool(bidirectional)
+        self.num_directions = 2 if self.bidirectional else 1
 
         gate_size = 4 * self.hidden_size
         for layer in range(self.num_layers):
-            layer_input_size = self.input_size if layer == 0 else self.hidden_size
-            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
-            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size * self.num_directions
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+                scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
 
-            w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
-            w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
-            b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
-            b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+                w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
+                w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+                b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+                b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
 
-            setattr(self, f"weight_ih_l{layer}", w_ih)
-            setattr(self, f"weight_hh_l{layer}", w_hh)
-            setattr(self, f"bias_ih_l{layer}", b_ih)
-            setattr(self, f"bias_hh_l{layer}", b_hh)
+                setattr(self, f"weight_ih_l{layer}{suffix}", w_ih)
+                setattr(self, f"weight_hh_l{layer}{suffix}", w_hh)
+                setattr(self, f"bias_ih_l{layer}{suffix}", b_ih)
+                setattr(self, f"bias_hh_l{layer}{suffix}", b_hh)
 
     def __call__(self, x, hx=None):
         from . import functional as F
         from tensor.tensor import cat
+
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        if x.ndim != 3:
+            raise ValueError(
+                f"input must be 3D with shape (seq, batch, feature) or (batch, seq, feature), got {x.shape}"
+            )
+        if x.shape[2] != self.input_size:
+            raise ValueError(f"input feature dim must be {self.input_size}, got {x.shape[2]}")
+
+        batch_size = x.shape[0] if self.batch_first else x.shape[1]
+        expected_layers = self.num_layers * self.num_directions
 
         h0 = None
         c0 = None
         if hx is not None:
             if not isinstance(hx, (tuple, list)) or len(hx) != 2:
                 raise ValueError("hx for LSTM must be a tuple (h0, c0)")
-            h0 = hx[0] if isinstance(hx[0], Tensor) else Tensor(hx[0])
-            c0 = hx[1] if isinstance(hx[1], Tensor) else Tensor(hx[1])
-
-            if h0.ndim == 2:
-                if self.num_layers != 1:
-                    raise ValueError("h0 with shape (batch, hidden) is only valid when num_layers=1")
-                h0 = h0.unsqueeze(0)
-            if c0.ndim == 2:
-                if self.num_layers != 1:
-                    raise ValueError("c0 with shape (batch, hidden) is only valid when num_layers=1")
-                c0 = c0.unsqueeze(0)
-
-            if h0.ndim != 3 or h0.shape[0] != self.num_layers:
-                raise ValueError(
-                    f"h0 must have shape ({self.num_layers}, batch, {self.hidden_size}), got {h0.shape}"
-                )
-            if c0.ndim != 3 or c0.shape[0] != self.num_layers:
-                raise ValueError(
-                    f"c0 must have shape ({self.num_layers}, batch, {self.hidden_size}), got {c0.shape}"
-                )
-            if h0.shape[2] != self.hidden_size or c0.shape[2] != self.hidden_size:
-                raise ValueError(
-                    f"h0/c0 hidden size must be {self.hidden_size}, got {h0.shape[2]} and {c0.shape[2]}"
-                )
+            h0 = _prepare_recurrent_state(hx[0], expected_layers, self.hidden_size, batch_size, "h0")
+            c0 = _prepare_recurrent_state(hx[1], expected_layers, self.hidden_size, batch_size, "c0")
 
         output = x
         h_states = []
         c_states = []
         for layer in range(self.num_layers):
-            layer_hx = None
-            if h0 is not None and c0 is not None:
-                layer_hx = (h0[layer], c0[layer])
-            output, (h_n, c_n) = F.lstm(
-                output,
-                getattr(self, f"weight_ih_l{layer}"),
-                getattr(self, f"weight_hh_l{layer}"),
-                bias_ih=getattr(self, f"bias_ih_l{layer}"),
-                bias_hh=getattr(self, f"bias_hh_l{layer}"),
-                hx=layer_hx,
-                batch_first=self.batch_first,
-            )
-            h_states.append(h_n)
-            c_states.append(c_n)
+            layer_outputs = []
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                layer_hx = None
+                if h0 is not None and c0 is not None:
+                    idx = layer * self.num_directions + direction
+                    layer_hx = (h0[idx], c0[idx])
+
+                layer_input = _reverse_sequence(output, self.batch_first) if direction == 1 else output
+                direction_output, (h_n, c_n) = F.lstm(
+                    layer_input,
+                    getattr(self, f"weight_ih_l{layer}{suffix}"),
+                    getattr(self, f"weight_hh_l{layer}{suffix}"),
+                    bias_ih=getattr(self, f"bias_ih_l{layer}{suffix}"),
+                    bias_hh=getattr(self, f"bias_hh_l{layer}{suffix}"),
+                    hx=layer_hx,
+                    batch_first=self.batch_first,
+                )
+                if direction == 1:
+                    direction_output = _reverse_sequence(direction_output, self.batch_first)
+                layer_outputs.append(direction_output)
+                h_states.append(h_n)
+                c_states.append(c_n)
+
+            output = layer_outputs[0] if self.num_directions == 1 else cat(layer_outputs, axis=2)
             if self.dropout > 0 and layer < self.num_layers - 1:
                 output = F.dropout(output, p=self.dropout, training=self.training)
 
@@ -470,7 +512,7 @@ class LSTM(Module):
 
 
 class GRU(Module):
-    """Multi-layer GRU (single-direction)."""
+    """Multi-layer GRU."""
 
     def __init__(
         self,
@@ -483,8 +525,6 @@ class GRU(Module):
         bidirectional=False,
     ):
         super().__init__()
-        if bidirectional:
-            raise NotImplementedError("bidirectional GRU is not supported yet")
         if num_layers <= 0:
             raise ValueError(f"num_layers must be positive, got {num_layers}")
         if dropout < 0 or dropout >= 1:
@@ -496,55 +536,69 @@ class GRU(Module):
         self.bias = bool(bias)
         self.batch_first = bool(batch_first)
         self.dropout = float(dropout)
-        self.bidirectional = False
+        self.bidirectional = bool(bidirectional)
+        self.num_directions = 2 if self.bidirectional else 1
 
         gate_size = 3 * self.hidden_size
         for layer in range(self.num_layers):
-            layer_input_size = self.input_size if layer == 0 else self.hidden_size
-            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
-            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size * self.num_directions
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+                scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
 
-            w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
-            w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
-            b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
-            b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+                w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
+                w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+                b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+                b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
 
-            setattr(self, f"weight_ih_l{layer}", w_ih)
-            setattr(self, f"weight_hh_l{layer}", w_hh)
-            setattr(self, f"bias_ih_l{layer}", b_ih)
-            setattr(self, f"bias_hh_l{layer}", b_hh)
+                setattr(self, f"weight_ih_l{layer}{suffix}", w_ih)
+                setattr(self, f"weight_hh_l{layer}{suffix}", w_hh)
+                setattr(self, f"bias_ih_l{layer}{suffix}", b_ih)
+                setattr(self, f"bias_hh_l{layer}{suffix}", b_hh)
 
     def __call__(self, x, hx=None):
         from . import functional as F
         from tensor.tensor import cat
 
-        if hx is not None:
-            hx = hx if isinstance(hx, Tensor) else Tensor(hx)
-            if hx.ndim == 2:
-                if self.num_layers != 1:
-                    raise ValueError("hx with shape (batch, hidden) is only valid when num_layers=1")
-                hx = hx.unsqueeze(0)
-            if hx.ndim != 3 or hx.shape[0] != self.num_layers:
-                raise ValueError(
-                    f"hx must have shape ({self.num_layers}, batch, {self.hidden_size}), got {hx.shape}"
-                )
-            if hx.shape[2] != self.hidden_size:
-                raise ValueError(f"hx hidden size must be {self.hidden_size}, got {hx.shape[2]}")
+        x = x if isinstance(x, Tensor) else Tensor(x)
+        if x.ndim != 3:
+            raise ValueError(
+                f"input must be 3D with shape (seq, batch, feature) or (batch, seq, feature), got {x.shape}"
+            )
+        if x.shape[2] != self.input_size:
+            raise ValueError(f"input feature dim must be {self.input_size}, got {x.shape[2]}")
+
+        batch_size = x.shape[0] if self.batch_first else x.shape[1]
+        expected_layers = self.num_layers * self.num_directions
+        hx = _prepare_recurrent_state(hx, expected_layers, self.hidden_size, batch_size, "hx")
 
         output = x
         h_states = []
         for layer in range(self.num_layers):
-            layer_hx = hx[layer] if hx is not None else None
-            output, h_n = F.gru(
-                output,
-                getattr(self, f"weight_ih_l{layer}"),
-                getattr(self, f"weight_hh_l{layer}"),
-                bias_ih=getattr(self, f"bias_ih_l{layer}"),
-                bias_hh=getattr(self, f"bias_hh_l{layer}"),
-                hx=layer_hx,
-                batch_first=self.batch_first,
-            )
-            h_states.append(h_n)
+            layer_outputs = []
+            for direction in range(self.num_directions):
+                suffix = "_reverse" if direction == 1 else ""
+                layer_hx = None
+                if hx is not None:
+                    layer_hx = hx[layer * self.num_directions + direction]
+
+                layer_input = _reverse_sequence(output, self.batch_first) if direction == 1 else output
+                direction_output, h_n = F.gru(
+                    layer_input,
+                    getattr(self, f"weight_ih_l{layer}{suffix}"),
+                    getattr(self, f"weight_hh_l{layer}{suffix}"),
+                    bias_ih=getattr(self, f"bias_ih_l{layer}{suffix}"),
+                    bias_hh=getattr(self, f"bias_hh_l{layer}{suffix}"),
+                    hx=layer_hx,
+                    batch_first=self.batch_first,
+                )
+                if direction == 1:
+                    direction_output = _reverse_sequence(direction_output, self.batch_first)
+                layer_outputs.append(direction_output)
+                h_states.append(h_n)
+
+            output = layer_outputs[0] if self.num_directions == 1 else cat(layer_outputs, axis=2)
             if self.dropout > 0 and layer < self.num_layers - 1:
                 output = F.dropout(output, p=self.dropout, training=self.training)
 
