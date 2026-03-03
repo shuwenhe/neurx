@@ -354,6 +354,113 @@ def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
     return out
 
 
+def batch_norm(
+    input: Tensor,
+    running_mean=None,
+    running_var=None,
+    weight: Tensor | None = None,
+    bias: Tensor | None = None,
+    training: bool = False,
+    momentum: float = 0.1,
+    eps: float = 1e-5,
+):
+    input = _as_tensor(input)
+    if weight is not None:
+        weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    if x_data.ndim < 2:
+        raise ValueError(f"batch_norm expects input with at least 2 dims, got shape {x_data.shape}")
+
+    c = x_data.shape[1]
+    reduce_axes = tuple(i for i in range(x_data.ndim) if i != 1)
+    param_shape = [1] * x_data.ndim
+    param_shape[1] = c
+    param_shape = tuple(param_shape)
+
+    def _as_channel_vector(buf, name):
+        if buf is None:
+            return None
+        if isinstance(buf, Tensor):
+            arr = buf.to_numpy()
+        else:
+            arr = np.asarray(buf)
+        if arr.shape != (c,):
+            raise ValueError(f"{name} must have shape ({c},), got {arr.shape}")
+        return arr
+
+    if weight is not None and weight.shape != (c,):
+        raise ValueError(f"weight must have shape ({c},), got {weight.shape}")
+    if bias is not None and bias.shape != (c,):
+        raise ValueError(f"bias must have shape ({c},), got {bias.shape}")
+
+    running_mean_arr = _as_channel_vector(running_mean, "running_mean")
+    running_var_arr = _as_channel_vector(running_var, "running_var")
+
+    use_batch_stats = training or running_mean_arr is None or running_var_arr is None
+    if use_batch_stats:
+        mean = x_data.mean(axis=reduce_axes, keepdims=True)
+        var = x_data.var(axis=reduce_axes, keepdims=True)
+
+        if training and running_mean_arr is not None and running_var_arr is not None:
+            batch_mean = mean.reshape(c)
+            batch_var = var.reshape(c)
+            updated_mean = (1.0 - momentum) * running_mean_arr + momentum * batch_mean
+            updated_var = (1.0 - momentum) * running_var_arr + momentum * batch_var
+            if isinstance(running_mean, Tensor):
+                running_mean.data[...] = updated_mean.astype(running_mean.data.dtype, copy=False)
+            else:
+                running_mean[...] = updated_mean.astype(np.asarray(running_mean).dtype, copy=False)
+            if isinstance(running_var, Tensor):
+                running_var.data[...] = updated_var.astype(running_var.data.dtype, copy=False)
+            else:
+                running_var[...] = updated_var.astype(np.asarray(running_var).dtype, copy=False)
+    else:
+        mean = running_mean_arr.reshape(param_shape)
+        var = running_var_arr.reshape(param_shape)
+
+    inv_std = 1.0 / np.sqrt(var + eps)
+    x_hat = (x_data - mean) * inv_std
+
+    if weight is not None:
+        w = weight.to_numpy().reshape(param_shape)
+    else:
+        w = 1.0
+    if bias is not None:
+        b = bias.to_numpy().reshape(param_shape)
+    else:
+        b = 0.0
+    out_data = x_hat * w + b
+
+    requires_grad = input.requires_grad or (weight is not None and weight.requires_grad) or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="batch_norm", device=input.device)
+
+    def _backward():
+        grad = out.grad
+
+        if weight is not None and weight.requires_grad:
+            weight.grad += (grad * x_hat).sum(axis=reduce_axes).astype(weight.grad.dtype, copy=False)
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad.sum(axis=reduce_axes).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            dxhat = grad * w
+            if use_batch_stats:
+                n = float(np.prod([x_data.shape[ax] for ax in reduce_axes]))
+                sum_dxhat = dxhat.sum(axis=reduce_axes, keepdims=True)
+                sum_dxhat_xhat = (dxhat * x_hat).sum(axis=reduce_axes, keepdims=True)
+                dx = (inv_std / n) * (n * dxhat - sum_dxhat - x_hat * sum_dxhat_xhat)
+            else:
+                dx = dxhat * inv_std
+            input.grad += dx.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
 def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, padding=0, dilation=1, groups=1):
     input = _as_tensor(input)
     weight = _as_tensor(weight)
@@ -1154,6 +1261,7 @@ __all__ = [
     "softmax",
     "log_softmax",
     "linear",
+    "batch_norm",
     "conv2d",
     "max_pool2d",
     "avg_pool2d",
