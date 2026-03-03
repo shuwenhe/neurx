@@ -798,7 +798,8 @@ class Conv1d(Module):
             raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
 
         fan_in = (in_channels // groups) * self.kernel_size
-        scale = (2.0 / max(1, fan_in)) ** 0.5
+        # Keep a conservative scale to match existing training stability expectations.
+        scale = (2.0 / max(1, fan_in)) ** 0.5 * 0.1
         self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, self.kernel_size) * scale)
         self.bias = Parameter(np.zeros((out_channels,))) if bias else None
 
@@ -817,210 +818,42 @@ class Conv1d(Module):
 
 
 class Conv2d(Module):
-    """2D Convolutional layer.
-    
-    Applies a 2D convolution over an input signal composed of several input planes.
-    
-    Args:
-        in_channels: Number of channels in the input image
-        out_channels: Number of channels produced by the convolution
-        kernel_size: Size of the convolving kernel (int or tuple)
-        stride: Stride of the convolution (default: 1)
-        padding: Padding added to all four sides of the input (default: 0)
-        dilation: Spacing between kernel elements (default: 1)
-        groups: Number of groups (default: 1)
-        bias: If True, adds a learnable bias (default: True)
-    
-    Example:
-        >>> conv = Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
-        >>> x = tensor.randn(1, 3, 32, 32)
-        >>> out = conv(x)  # shape: (1, 64, 32, 32)
-    """
-    
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, 
-                 dilation=1, groups=1, bias=True):
+    """2D Convolutional layer."""
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
         super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
         self.stride = stride if isinstance(stride, tuple) else (stride, stride)
         self.padding = padding if isinstance(padding, tuple) else (padding, padding)
         self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation)
         self.groups = groups
-        
-        if isinstance(kernel_size, int):
-            self.kernel_size = (kernel_size, kernel_size)
-        else:
-            self.kernel_size = kernel_size
-        
-        assert in_channels % groups == 0, f"in_channels ({in_channels}) must be divisible by groups ({groups})"
-        assert out_channels % groups == 0, f"out_channels ({out_channels}) must be divisible by groups ({groups})"
-        
-        # Weight shape: (out_channels, in_channels // groups, kernel_h, kernel_w)
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
         fan_in = (in_channels // groups) * self.kernel_size[0] * self.kernel_size[1]
-        scale = (2.0 / fan_in) ** 0.5 * 0.1  # Extra factor to stabilize
-        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, 
-                                                 self.kernel_size[0], self.kernel_size[1]) * scale)
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        self.weight = Parameter(
+            np.random.randn(out_channels, in_channels // groups, self.kernel_size[0], self.kernel_size[1]) * scale
+        )
         self.bias = Parameter(np.zeros((out_channels,))) if bias else None
-    
+
     def __call__(self, x):
-        return self._conv2d_forward(x)
-    
-    def _conv2d_forward(self, x):
-        """Forward pass for Conv2d layer."""
-        # x shape: (batch, in_channels, height, width)
-        # weight shape: (out_channels, in_channels // groups, kernel_h, kernel_w)
-        
-        batch_size, in_channels, in_h, in_w = x.shape
-        out_channels, _, kernel_h, kernel_w = self.weight.shape
-        
-        # Calculate output dimensions
-        out_h = (in_h + 2 * self.padding[0] - self.dilation[0] * (kernel_h - 1) - 1) // self.stride[0] + 1
-        out_w = (in_w + 2 * self.padding[1] - self.dilation[1] * (kernel_w - 1) - 1) // self.stride[1] + 1
-        
-        x_data = x.data.astype(np.float64)
-        w_data = self.weight.data.astype(np.float64)
-        
-        # Apply padding
-        if self.padding[0] > 0 or self.padding[1] > 0:
-            x_data = np.pad(x_data, ((0, 0), (0, 0), 
-                                     (self.padding[0], self.padding[0]), 
-                                     (self.padding[1], self.padding[1])), mode='constant')
-        
-        # Perform convolution
-        out_data = np.zeros((batch_size, out_channels, out_h, out_w), dtype=np.float64)
-        
-        if self.groups == 1:
-            # Standard convolution
-            for b in range(batch_size):
-                for oc in range(out_channels):
-                    for oh in range(out_h):
-                        for ow in range(out_w):
-                            ih_start = oh * self.stride[0]
-                            iw_start = ow * self.stride[1]
-                            ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
-                            iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
-                            
-                            x_patch = x_data[b, :, ih_start:ih_end:self.dilation[0], 
-                                           iw_start:iw_end:self.dilation[1]]
-                            w_patch = w_data[oc]
-                            
-                            out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch, dtype=np.float64)
-        else:
-            # Grouped convolution
-            in_ch_per_group = in_channels // self.groups
-            out_ch_per_group = out_channels // self.groups
-            
-            for b in range(batch_size):
-                for g in range(self.groups):
-                    for oc_local in range(out_ch_per_group):
-                        oc = g * out_ch_per_group + oc_local
-                        for oh in range(out_h):
-                            for ow in range(out_w):
-                                ih_start = oh * self.stride[0]
-                                iw_start = ow * self.stride[1]
-                                ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
-                                iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
-                                
-                                ic_start = g * in_ch_per_group
-                                ic_end = ic_start + in_ch_per_group
-                                
-                                x_patch = x_data[b, ic_start:ic_end, 
-                                               ih_start:ih_end:self.dilation[0], 
-                                               iw_start:iw_end:self.dilation[1]]
-                                w_patch = w_data[oc]
-                                
-                                out_data[b, oc, oh, ow] = np.sum(x_patch * w_patch, dtype=np.float64)
-        
-        # Add bias
-        if self.bias is not None:
-            bias_data = self.bias.data.astype(np.float64)
-            out_data = out_data + bias_data.reshape(1, -1, 1, 1)
-        
-        # Convert back to original dtype
-        out_data = out_data.astype(np.float32)
-        
-        # Create output tensor with gradient tracking
-        out = Tensor(out_data, requires_grad=x.requires_grad or self.weight.requires_grad, 
-                    _children=(x, self.weight) if self.bias is None else (x, self.weight, self.bias),
-                    _op="conv2d")
-        
-        def _backward():
-            if not out.grad.any():
-                return
-            
-            grad_data = out.grad.astype(np.float64)
-            
-            # Gradient w.r.t. weight
-            if self.weight.requires_grad:
-                w_grad = np.zeros_like(w_data)
-                
-                x_data_padded = x_data
-                if self.padding[0] > 0 or self.padding[1] > 0:
-                    x_data_padded = np.pad(x_data, ((0, 0), (0, 0), 
-                                                    (self.padding[0], self.padding[0]), 
-                                                    (self.padding[1], self.padding[1])), mode='constant')
-                
-                if self.groups == 1:
-                    for b in range(batch_size):
-                        for oc in range(out_channels):
-                            for oh in range(out_h):
-                                for ow in range(out_w):
-                                    ih_start = oh * self.stride[0]
-                                    iw_start = ow * self.stride[1]
-                                    ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
-                                    iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
-                                    
-                                    x_patch = x_data_padded[b, :, 
-                                                          ih_start:ih_end:self.dilation[0], 
-                                                          iw_start:iw_end:self.dilation[1]]
-                                    w_grad[oc] += x_patch * grad_data[b, oc, oh, ow]
-                
-                self.weight.grad += w_grad.astype(self.weight.grad.dtype)
-            
-            # Gradient w.r.t. bias
-            if self.bias is not None and self.bias.requires_grad:
-                self.bias.grad += grad_data.sum(axis=(0, 2, 3)).astype(self.bias.grad.dtype)
-            
-            # Gradient w.r.t. input
-            if x.requires_grad:
-                x_grad = np.zeros_like(x_data)
-                
-                if self.padding[0] > 0 or self.padding[1] > 0:
-                    x_grad_padded = np.zeros((batch_size, in_channels, 
-                                             in_h + 2 * self.padding[0], 
-                                             in_w + 2 * self.padding[1]), dtype=np.float64)
-                else:
-                    x_grad_padded = x_grad
-                
-                if self.groups == 1:
-                    for b in range(batch_size):
-                        for oc in range(out_channels):
-                            for oh in range(out_h):
-                                for ow in range(out_w):
-                                    ih_start = oh * self.stride[0]
-                                    iw_start = ow * self.stride[1]
-                                    ih_end = ih_start + self.dilation[0] * (kernel_h - 1) + 1
-                                    iw_end = iw_start + self.dilation[1] * (kernel_w - 1) + 1
-                                    
-                                    grad_contrib = w_data[oc] * grad_data[b, oc, oh, ow]
-                                    
-                                    # Handle dilation
-                                    for kh in range(kernel_h):
-                                        for kw in range(kernel_w):
-                                            ih = ih_start + kh * self.dilation[0]
-                                            iw = iw_start + kw * self.dilation[1]
-                                            x_grad_padded[b, :, ih, iw] += grad_contrib[:, kh, kw]
-                
-                if self.padding[0] > 0 or self.padding[1] > 0:
-                    x_grad = x_grad_padded[:, :, 
-                                         self.padding[0]:self.padding[0]+in_h, 
-                                         self.padding[1]:self.padding[1]+in_w]
-                    x.grad += x_grad.astype(x.grad.dtype)
-                else:
-                    x.grad += x_grad_padded.astype(x.grad.dtype)
-        
-        out._backward = _backward
-        return out
+        from . import functional as F
+
+        return F.conv2d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups,
+        )
 
 
 class Conv3d(Module):
@@ -2001,6 +1834,56 @@ class BatchNorm2d(Module):
         )
 
 
+class BatchNorm3d(Module):
+    """3D Batch Normalization (N, C, D, H, W)."""
+
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, track_running_stats=True):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+
+        if track_running_stats:
+            self.register_buffer("running_mean", np.zeros(num_features))
+            self.register_buffer("running_var", np.ones(num_features))
+            self.register_buffer("num_batches_tracked", np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim != 5:
+            raise ValueError(f"BatchNorm3d expects 5D input, got {x_data.ndim}D")
+
+        bn_training = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.batch_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            training=bn_training,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
+
+
 class GroupNorm(Module):
     """Group Normalization."""
 
@@ -2134,6 +2017,56 @@ class InstanceNorm2d(Module):
         )
 
 
+class InstanceNorm3d(Module):
+    """Instance Normalization for 3D inputs."""
+
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False, track_running_stats=False):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+
+        if track_running_stats:
+            self.register_buffer("running_mean", np.zeros(num_features))
+            self.register_buffer("running_var", np.ones(num_features))
+            self.register_buffer("num_batches_tracked", np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim != 5:
+            raise ValueError(f"InstanceNorm3d expects 5D input, got {x_data.ndim}D")
+
+        use_input_stats = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.instance_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            use_input_stats=use_input_stats,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
+
+
 # ================ Pooling Layers ================
 
 class MaxPool1d(Module):
@@ -2189,164 +2122,136 @@ class AvgPool1d(Module):
 
 
 class MaxPool2d(Module):
-    """2D Maximum Pooling"""
-    def __init__(self, kernel_size, stride=None, padding=0):
+    """2D Maximum Pooling."""
+
+    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False):
         super().__init__()
-        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
-        self.stride = stride if stride else self.kernel_size
-        self.stride = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
-        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+        self.ceil_mode = ceil_mode
+        self.return_indices = return_indices
 
     def __call__(self, x):
-        # x.shape: (batch, channels, height, width)
-        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
-        batch, channels, height, width = x_data.shape
-        
-        # Apply padding
-        if self.padding[0] > 0 or self.padding[1] > 0:
-            x_data = np.pad(x_data, 
-                           ((0, 0), (0, 0), 
-                            (self.padding[0], self.padding[0]),
-                            (self.padding[1], self.padding[1])),
-                           mode='constant', constant_values=-np.inf)
-        
-        # Calculate output dimensions
-        out_h = (x_data.shape[2] - self.kernel_size[0]) // self.stride[0] + 1
-        out_w = (x_data.shape[3] - self.kernel_size[1]) // self.stride[1] + 1
-        
-        # Perform max pooling
-        out_data = np.zeros((batch, channels, out_h, out_w), dtype=x_data.dtype)
-        pool_indices = np.zeros((batch, channels, out_h, out_w, 2), dtype=np.int32)
-        
-        for oh in range(out_h):
-            for ow in range(out_w):
-                h_start = oh * self.stride[0]
-                w_start = ow * self.stride[1]
-                h_end = h_start + self.kernel_size[0]
-                w_end = w_start + self.kernel_size[1]
-                
-                window = x_data[:, :, h_start:h_end, w_start:w_end]
-                window_reshaped = window.reshape(batch, channels, -1)
-                max_vals = window_reshaped.max(axis=2)
-                out_data[:, :, oh, ow] = max_vals
-                
-                # 记录最大值位置
-                max_indices = window_reshaped.argmax(axis=2)
-                pool_indices[:, :, oh, ow, 0] = max_indices // self.kernel_size[1]
-                pool_indices[:, :, oh, ow, 1] = max_indices % self.kernel_size[1]
-        
-        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="maxpool2d")
-        
-        def _backward():
-            if not x.requires_grad:
-                return
-            
-            # 计算输入梯度
-            if self.padding[0] > 0 or self.padding[1] > 0:
-                x_grad_padded = np.zeros_like(x_data)
-            else:
-                x_grad_padded = np.zeros((batch, channels, 
-                                         height + 2*self.padding[0],
-                                         width + 2*self.padding[1]), dtype=x_data.dtype)
-            
-            for oh in range(out_h):
-                for ow in range(out_w):
-                    h_start = oh * self.stride[0]
-                    w_start = ow * self.stride[1]
-                    
-                    h_offset = pool_indices[:, :, oh, ow, 0]
-                    w_offset = pool_indices[:, :, oh, ow, 1]
-                    
-                    for b in range(batch):
-                        for c in range(channels):
-                            h_idx = h_start + h_offset[b, c]
-                            w_idx = w_start + w_offset[b, c]
-                            x_grad_padded[b, c, h_idx, w_idx] += out.grad[b, c, oh, ow]
-            
-            if self.padding[0] > 0 or self.padding[1] > 0:
-                x.grad += x_grad_padded[:, :, 
-                                       self.padding[0]:self.padding[0]+height,
-                                       self.padding[1]:self.padding[1]+width]
-            else:
-                x.grad += x_grad_padded
-        
-        out._backward = _backward
-        return out
+        from . import functional as F
+
+        return F.max_pool2d(
+            x,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            ceil_mode=self.ceil_mode,
+            return_indices=self.return_indices,
+        )
 
 
 class AvgPool2d(Module):
-    """2D Average Pooling"""
-    def __init__(self, kernel_size, stride=None, padding=0):
+    """2D Average Pooling."""
+
+    def __init__(self, kernel_size, stride=None, padding=0, ceil_mode=False, count_include_pad=True, divisor_override=None):
         super().__init__()
-        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
-        self.stride = stride if stride else self.kernel_size
-        self.stride = self.stride if isinstance(self.stride, tuple) else (self.stride, self.stride)
-        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.ceil_mode = ceil_mode
+        self.count_include_pad = count_include_pad
+        self.divisor_override = divisor_override
 
     def __call__(self, x):
-        # x.shape: (batch, channels, height, width)
-        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
-        batch, channels, height, width = x_data.shape
-        
-        # Apply padding
-        if self.padding[0] > 0 or self.padding[1] > 0:
-            x_data = np.pad(x_data,
-                           ((0, 0), (0, 0),
-                            (self.padding[0], self.padding[0]),
-                            (self.padding[1], self.padding[1])),
-                           mode='constant', constant_values=0)
-        
-        # Calculate output dimensions
-        out_h = (x_data.shape[2] - self.kernel_size[0]) // self.stride[0] + 1
-        out_w = (x_data.shape[3] - self.kernel_size[1]) // self.stride[1] + 1
-        
-        # Perform average pooling
-        out_data = np.zeros((batch, channels, out_h, out_w), dtype=x_data.dtype)
-        
-        for oh in range(out_h):
-            for ow in range(out_w):
-                h_start = oh * self.stride[0]
-                w_start = ow * self.stride[1]
-                h_end = h_start + self.kernel_size[0]
-                w_end = w_start + self.kernel_size[1]
-                
-                window = x_data[:, :, h_start:h_end, w_start:w_end]
-                out_data[:, :, oh, ow] = window.mean(axis=(2, 3))
-        
-        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="avgpool2d")
-        
-        def _backward():
-            if not x.requires_grad:
-                return
-            
-            if self.padding[0] > 0 or self.padding[1] > 0:
-                x_grad_padded = np.zeros_like(x_data)
-            else:
-                x_grad_padded = np.zeros((batch, channels,
-                                         height + 2*self.padding[0],
-                                         width + 2*self.padding[1]), dtype=x_data.dtype)
-            
-            pool_size = self.kernel_size[0] * self.kernel_size[1]
-            
-            for oh in range(out_h):
-                for ow in range(out_w):
-                    h_start = oh * self.stride[0]
-                    w_start = ow * self.stride[1]
-                    h_end = h_start + self.kernel_size[0]
-                    w_end = w_start + self.kernel_size[1]
-                    
-                    grad_val = out.grad[:, :, oh, ow] / pool_size
-                    x_grad_padded[:, :, h_start:h_end, w_start:w_end] += grad_val[:, :, None, None]
-            
-            if self.padding[0] > 0 or self.padding[1] > 0:
-                x.grad += x_grad_padded[:, :,
-                                       self.padding[0]:self.padding[0]+height,
-                                       self.padding[1]:self.padding[1]+width]
-            else:
-                x.grad += x_grad_padded
-        
-        out._backward = _backward
-        return out
+        from . import functional as F
+
+        return F.avg_pool2d(
+            x,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            ceil_mode=self.ceil_mode,
+            count_include_pad=self.count_include_pad,
+            divisor_override=self.divisor_override,
+        )
+
+
+class AdaptiveAvgPool1d(Module):
+    """1D Adaptive Average Pooling."""
+
+    def __init__(self, output_size):
+        super().__init__()
+        self.output_size = output_size
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_avg_pool1d(x, self.output_size)
+
+
+class AdaptiveAvgPool2d(Module):
+    """2D Adaptive Average Pooling."""
+
+    def __init__(self, output_size):
+        super().__init__()
+        self.output_size = output_size
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_avg_pool2d(x, self.output_size)
+
+
+class AdaptiveAvgPool3d(Module):
+    """3D Adaptive Average Pooling."""
+
+    def __init__(self, output_size):
+        super().__init__()
+        self.output_size = output_size
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_avg_pool3d(x, self.output_size)
+
+
+class AdaptiveMaxPool1d(Module):
+    """1D Adaptive Max Pooling."""
+
+    def __init__(self, output_size, return_indices=False):
+        super().__init__()
+        self.output_size = output_size
+        self.return_indices = return_indices
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_max_pool1d(x, self.output_size, return_indices=self.return_indices)
+
+
+class AdaptiveMaxPool2d(Module):
+    """2D Adaptive Max Pooling."""
+
+    def __init__(self, output_size, return_indices=False):
+        super().__init__()
+        self.output_size = output_size
+        self.return_indices = return_indices
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_max_pool2d(x, self.output_size, return_indices=self.return_indices)
+
+
+class AdaptiveMaxPool3d(Module):
+    """3D Adaptive Max Pooling."""
+
+    def __init__(self, output_size, return_indices=False):
+        super().__init__()
+        self.output_size = output_size
+        self.return_indices = return_indices
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.adaptive_max_pool3d(x, self.output_size, return_indices=self.return_indices)
 
 
 # ================ Container Modules ================
