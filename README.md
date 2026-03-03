@@ -1,6 +1,6 @@
 # tensor
 
-A NumPy-based deep learning framework evolving toward a full-stack production platform.  
+A self-developed deep learning framework is evolving into a full-stack production platform.
 Current state: production foundation is in place (runtime config, diagnostics, package scaffolding), with core kernels and distributed/compile capabilities still in active expansion.
 
 ## Features
