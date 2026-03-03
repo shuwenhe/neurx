@@ -2308,32 +2308,134 @@ def avg_pool2d(
     return out
 
 
+def _resolve_adaptive_output_size(output_size, input_spatial_shape):
+    dims = len(input_spatial_shape)
+    if isinstance(output_size, int):
+        resolved = (int(output_size),) * dims
+    elif isinstance(output_size, (tuple, list)):
+        if len(output_size) != dims:
+            raise ValueError(f"output_size for {dims}D adaptive pooling must have {dims} values, got {output_size}")
+        resolved_vals = []
+        for i, size in enumerate(output_size):
+            if size is None:
+                resolved_vals.append(int(input_spatial_shape[i]))
+            else:
+                resolved_vals.append(int(size))
+        resolved = tuple(resolved_vals)
+    else:
+        raise ValueError(f"invalid output_size {output_size}")
+
+    if any(size <= 0 for size in resolved):
+        raise ValueError(f"output_size must be positive, got {output_size}")
+    return resolved
+
+
+def adaptive_avg_pool1d(input: Tensor, output_size):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 3:
+        raise ValueError(f"adaptive_avg_pool1d expects 3D input (N, C, L), got shape {x_data.shape}")
+
+    n, c, in_len = x_data.shape
+    (out_len,) = _resolve_adaptive_output_size(output_size, (in_len,))
+    out_data = np.zeros((n, c, out_len), dtype=x_data.dtype)
+    starts = np.zeros(out_len, dtype=np.int64)
+    ends = np.zeros(out_len, dtype=np.int64)
+
+    for ol in range(out_len):
+        start = int(np.floor(ol * in_len / out_len))
+        end = int(np.ceil((ol + 1) * in_len / out_len))
+        starts[ol] = start
+        ends[ol] = end
+        out_data[:, :, ol] = x_data[:, :, start:end].mean(axis=2)
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_avg_pool1d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for ol in range(out_len):
+                start = starts[ol]
+                end = ends[ol]
+                width = float(max(end - start, 1))
+                x_grad[:, :, start:end] += out.grad[:, :, ol:ol + 1] / width
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def adaptive_max_pool1d(input: Tensor, output_size, return_indices: bool = False):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 3:
+        raise ValueError(f"adaptive_max_pool1d expects 3D input (N, C, L), got shape {x_data.shape}")
+
+    n, c, in_len = x_data.shape
+    (out_len,) = _resolve_adaptive_output_size(output_size, (in_len,))
+    out_data = np.zeros((n, c, out_len), dtype=x_data.dtype)
+    max_indices = np.zeros((n, c, out_len), dtype=np.int64)
+
+    for ol in range(out_len):
+        start = int(np.floor(ol * in_len / out_len))
+        end = int(np.ceil((ol + 1) * in_len / out_len))
+        region = x_data[:, :, start:end]
+        local_idx = region.argmax(axis=2)
+        out_data[:, :, ol] = np.take_along_axis(region, local_idx[..., None], axis=2)[:, :, 0]
+        max_indices[:, :, ol] = local_idx + start
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_max_pool1d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for ol in range(out_len):
+                        idx = max_indices[bi, ci, ol]
+                        x_grad[bi, ci, idx] += out.grad[bi, ci, ol]
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    if not return_indices:
+        return out
+    return out, Tensor(max_indices.astype(np.int64), requires_grad=False, device=input.device)
+
+
 def adaptive_avg_pool2d(input: Tensor, output_size):
     input = _as_tensor(input)
     x_data = input.to_numpy()
     if x_data.ndim != 4:
         raise ValueError(f"adaptive_avg_pool2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
 
-    if isinstance(output_size, int):
-        out_h, out_w = output_size, output_size
-    else:
-        out_h, out_w = output_size
-    if out_h <= 0 or out_w <= 0:
-        raise ValueError(f"output_size must be positive, got {output_size}")
-
     n, c, in_h, in_w = x_data.shape
+    out_h, out_w = _resolve_adaptive_output_size(output_size, (in_h, in_w))
     out_data = np.zeros((n, c, out_h, out_w), dtype=x_data.dtype)
-    regions = []
+
+    h_starts = np.array([int(np.floor(oh * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    h_ends = np.array([int(np.ceil((oh + 1) * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    w_starts = np.array([int(np.floor(ow * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+    w_ends = np.array([int(np.ceil((ow + 1) * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
 
     for oh in range(out_h):
-        h_start = int(np.floor(oh * in_h / out_h))
-        h_end = int(np.ceil((oh + 1) * in_h / out_h))
+        hs = h_starts[oh]
+        he = h_ends[oh]
         for ow in range(out_w):
-            w_start = int(np.floor(ow * in_w / out_w))
-            w_end = int(np.ceil((ow + 1) * in_w / out_w))
-            region = x_data[:, :, h_start:h_end, w_start:w_end]
-            out_data[:, :, oh, ow] = region.mean(axis=(2, 3))
-            regions.append((h_start, h_end, w_start, w_end))
+            ws = w_starts[ow]
+            we = w_ends[ow]
+            out_data[:, :, oh, ow] = x_data[:, :, hs:he, ws:we].mean(axis=(2, 3))
 
     out = Tensor(
         out_data,
@@ -2346,18 +2448,211 @@ def adaptive_avg_pool2d(input: Tensor, output_size):
     def _backward():
         if input.requires_grad:
             x_grad = np.zeros_like(x_data)
-            ridx = 0
             for oh in range(out_h):
+                hs = h_starts[oh]
+                he = h_ends[oh]
                 for ow in range(out_w):
-                    h_start, h_end, w_start, w_end = regions[ridx]
-                    ridx += 1
-                    area = float((h_end - h_start) * (w_end - w_start))
+                    ws = w_starts[ow]
+                    we = w_ends[ow]
+                    area = float(max((he - hs) * (we - ws), 1))
                     grad_slice = out.grad[:, :, oh:oh + 1, ow:ow + 1] / area
-                    x_grad[:, :, h_start:h_end, w_start:w_end] += grad_slice
+                    x_grad[:, :, hs:he, ws:we] += grad_slice
             input.grad += x_grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
     return out
+
+
+def adaptive_max_pool2d(input: Tensor, output_size, return_indices: bool = False):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 4:
+        raise ValueError(f"adaptive_max_pool2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+
+    n, c, in_h, in_w = x_data.shape
+    out_h, out_w = _resolve_adaptive_output_size(output_size, (in_h, in_w))
+    out_data = np.zeros((n, c, out_h, out_w), dtype=x_data.dtype)
+    max_h = np.zeros((n, c, out_h, out_w), dtype=np.int64)
+    max_w = np.zeros((n, c, out_h, out_w), dtype=np.int64)
+
+    h_starts = np.array([int(np.floor(oh * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    h_ends = np.array([int(np.ceil((oh + 1) * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    w_starts = np.array([int(np.floor(ow * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+    w_ends = np.array([int(np.ceil((ow + 1) * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+
+    for oh in range(out_h):
+        hs = h_starts[oh]
+        he = h_ends[oh]
+        h_size = he - hs
+        for ow in range(out_w):
+            ws = w_starts[ow]
+            we = w_ends[ow]
+            w_size = we - ws
+
+            region = x_data[:, :, hs:he, ws:we]
+            flat = region.reshape(n, c, -1)
+            local_idx = flat.argmax(axis=2)
+            out_data[:, :, oh, ow] = np.take_along_axis(flat, local_idx[..., None], axis=2)[:, :, 0]
+            max_h[:, :, oh, ow] = hs + (local_idx // w_size)
+            max_w[:, :, oh, ow] = ws + (local_idx % w_size)
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_max_pool2d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for oh in range(out_h):
+                        for ow in range(out_w):
+                            ih = max_h[bi, ci, oh, ow]
+                            iw = max_w[bi, ci, oh, ow]
+                            x_grad[bi, ci, ih, iw] += out.grad[bi, ci, oh, ow]
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    if not return_indices:
+        return out
+
+    flat_indices = max_h * in_w + max_w
+    return out, Tensor(flat_indices.astype(np.int64), requires_grad=False, device=input.device)
+
+
+def adaptive_avg_pool3d(input: Tensor, output_size):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 5:
+        raise ValueError(f"adaptive_avg_pool3d expects 5D input (N, C, D, H, W), got shape {x_data.shape}")
+
+    n, c, in_d, in_h, in_w = x_data.shape
+    out_d, out_h, out_w = _resolve_adaptive_output_size(output_size, (in_d, in_h, in_w))
+    out_data = np.zeros((n, c, out_d, out_h, out_w), dtype=x_data.dtype)
+
+    d_starts = np.array([int(np.floor(od * in_d / out_d)) for od in range(out_d)], dtype=np.int64)
+    d_ends = np.array([int(np.ceil((od + 1) * in_d / out_d)) for od in range(out_d)], dtype=np.int64)
+    h_starts = np.array([int(np.floor(oh * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    h_ends = np.array([int(np.ceil((oh + 1) * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    w_starts = np.array([int(np.floor(ow * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+    w_ends = np.array([int(np.ceil((ow + 1) * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+
+    for od in range(out_d):
+        ds = d_starts[od]
+        de = d_ends[od]
+        for oh in range(out_h):
+            hs = h_starts[oh]
+            he = h_ends[oh]
+            for ow in range(out_w):
+                ws = w_starts[ow]
+                we = w_ends[ow]
+                out_data[:, :, od, oh, ow] = x_data[:, :, ds:de, hs:he, ws:we].mean(axis=(2, 3, 4))
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_avg_pool3d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for od in range(out_d):
+                ds = d_starts[od]
+                de = d_ends[od]
+                for oh in range(out_h):
+                    hs = h_starts[oh]
+                    he = h_ends[oh]
+                    for ow in range(out_w):
+                        ws = w_starts[ow]
+                        we = w_ends[ow]
+                        volume = float(max((de - ds) * (he - hs) * (we - ws), 1))
+                        grad_slice = out.grad[:, :, od:od + 1, oh:oh + 1, ow:ow + 1] / volume
+                        x_grad[:, :, ds:de, hs:he, ws:we] += grad_slice
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def adaptive_max_pool3d(input: Tensor, output_size, return_indices: bool = False):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 5:
+        raise ValueError(f"adaptive_max_pool3d expects 5D input (N, C, D, H, W), got shape {x_data.shape}")
+
+    n, c, in_d, in_h, in_w = x_data.shape
+    out_d, out_h, out_w = _resolve_adaptive_output_size(output_size, (in_d, in_h, in_w))
+    out_data = np.zeros((n, c, out_d, out_h, out_w), dtype=x_data.dtype)
+    max_d = np.zeros((n, c, out_d, out_h, out_w), dtype=np.int64)
+    max_h = np.zeros((n, c, out_d, out_h, out_w), dtype=np.int64)
+    max_w = np.zeros((n, c, out_d, out_h, out_w), dtype=np.int64)
+
+    d_starts = np.array([int(np.floor(od * in_d / out_d)) for od in range(out_d)], dtype=np.int64)
+    d_ends = np.array([int(np.ceil((od + 1) * in_d / out_d)) for od in range(out_d)], dtype=np.int64)
+    h_starts = np.array([int(np.floor(oh * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    h_ends = np.array([int(np.ceil((oh + 1) * in_h / out_h)) for oh in range(out_h)], dtype=np.int64)
+    w_starts = np.array([int(np.floor(ow * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+    w_ends = np.array([int(np.ceil((ow + 1) * in_w / out_w)) for ow in range(out_w)], dtype=np.int64)
+
+    for od in range(out_d):
+        ds = d_starts[od]
+        de = d_ends[od]
+        d_size = de - ds
+        for oh in range(out_h):
+            hs = h_starts[oh]
+            he = h_ends[oh]
+            h_size = he - hs
+            for ow in range(out_w):
+                ws = w_starts[ow]
+                we = w_ends[ow]
+                w_size = we - ws
+
+                region = x_data[:, :, ds:de, hs:he, ws:we]
+                flat = region.reshape(n, c, -1)
+                local_idx = flat.argmax(axis=2)
+                out_data[:, :, od, oh, ow] = np.take_along_axis(flat, local_idx[..., None], axis=2)[:, :, 0]
+
+                dhw = h_size * w_size
+                max_d[:, :, od, oh, ow] = ds + (local_idx // dhw)
+                rem = local_idx % dhw
+                max_h[:, :, od, oh, ow] = hs + (rem // w_size)
+                max_w[:, :, od, oh, ow] = ws + (rem % w_size)
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_max_pool3d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for od in range(out_d):
+                        for oh in range(out_h):
+                            for ow in range(out_w):
+                                id_ = max_d[bi, ci, od, oh, ow]
+                                ih = max_h[bi, ci, od, oh, ow]
+                                iw = max_w[bi, ci, od, oh, ow]
+                                x_grad[bi, ci, id_, ih, iw] += out.grad[bi, ci, od, oh, ow]
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    if not return_indices:
+        return out
+
+    flat_indices = max_d * (in_h * in_w) + max_h * in_w + max_w
+    return out, Tensor(flat_indices.astype(np.int64), requires_grad=False, device=input.device)
 
 
 def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
@@ -2792,6 +3087,8 @@ __all__ = [
     "gru",
     "max_pool1d",
     "avg_pool1d",
+    "adaptive_avg_pool1d",
+    "adaptive_max_pool1d",
     "conv2d",
     "conv_transpose2d",
     "conv3d",
@@ -2799,6 +3096,9 @@ __all__ = [
     "max_pool2d",
     "avg_pool2d",
     "adaptive_avg_pool2d",
+    "adaptive_max_pool2d",
+    "adaptive_avg_pool3d",
+    "adaptive_max_pool3d",
     "layer_norm",
     "rms_norm",
     "dropout",
