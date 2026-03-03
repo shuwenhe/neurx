@@ -1373,6 +1373,151 @@ class CrossEntropyLoss(Module):
         )
 
 
+class NLLLoss(Module):
+    """Negative Log-Likelihood Loss."""
+
+    def __init__(self, weight=None, ignore_index=-100, reduction="mean"):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        if weight is None:
+            self.weight = None
+        elif isinstance(weight, Tensor):
+            self.weight = weight
+        else:
+            self.weight = Tensor(np.asarray(weight), requires_grad=False)
+        self.ignore_index = int(ignore_index)
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.nll_loss(
+            input,
+            target,
+            weight=self.weight,
+            ignore_index=self.ignore_index,
+            reduction=self.reduction,
+        )
+
+
+class MSELoss(Module):
+    """Mean Squared Error Loss."""
+
+    def __init__(self, reduction="mean"):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.mse_loss(input, target, reduction=self.reduction)
+
+
+class L1Loss(Module):
+    """L1 Loss."""
+
+    def __init__(self, reduction="mean"):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.l1_loss(input, target, reduction=self.reduction)
+
+
+class SmoothL1Loss(Module):
+    """Smooth L1 Loss."""
+
+    def __init__(self, beta=1.0, reduction="mean"):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        self.beta = float(beta)
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.smooth_l1_loss(input, target, reduction=self.reduction, beta=self.beta)
+
+
+class BCELoss(Module):
+    """Binary Cross Entropy Loss."""
+
+    def __init__(self, weight=None, reduction="mean"):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        if weight is None:
+            self.weight = None
+        elif isinstance(weight, Tensor):
+            self.weight = weight
+        else:
+            self.weight = Tensor(np.asarray(weight), requires_grad=False)
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.bce_loss(input, target, weight=self.weight, reduction=self.reduction)
+
+
+class BCEWithLogitsLoss(Module):
+    """Binary Cross Entropy with Logits Loss."""
+
+    def __init__(self, weight=None, reduction="mean", pos_weight=None):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        if weight is None:
+            self.weight = None
+        elif isinstance(weight, Tensor):
+            self.weight = weight
+        else:
+            self.weight = Tensor(np.asarray(weight), requires_grad=False)
+
+        if pos_weight is None:
+            self.pos_weight = None
+        elif isinstance(pos_weight, Tensor):
+            self.pos_weight = pos_weight
+        else:
+            self.pos_weight = Tensor(np.asarray(pos_weight), requires_grad=False)
+        self.reduction = reduction
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.bce_with_logits_loss(
+            input,
+            target,
+            weight=self.weight,
+            reduction=self.reduction,
+            pos_weight=self.pos_weight,
+        )
+
+
+class KLDivLoss(Module):
+    """Kullback-Leibler Divergence Loss."""
+
+    def __init__(self, reduction="mean", log_target=False):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum", "batchmean"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', 'batchmean', got {reduction}")
+        self.reduction = reduction
+        self.log_target = bool(log_target)
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.kl_div_loss(input, target, reduction=self.reduction, log_target=self.log_target)
+
+
 class Softmax(Module):
     """Softmax（默认对最后一维）"""
     def __init__(self, axis=-1):
