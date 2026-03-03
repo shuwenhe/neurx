@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -23,6 +23,8 @@ help:
 	@echo "  test-scatter  Run scatter operations tests"
 	@echo "  test-meshgrid Run meshgrid tests"
 	@echo "  test-scatter-gather Run comprehensive scatter/gather/meshgrid tests"
+	@echo "  test-serialization Run model serialization tests"
+	@echo "  test-checkpoint Run checkpoint manager tests"
 	@echo "  list          List all API feature points and one-command per-API tests"
 	@echo "  api           Run one API test case. Usage: make api API=tensor.sum"
 	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
@@ -87,6 +89,14 @@ test-meshgrid:
 test-scatter-gather:
 	@echo "Running comprehensive scatter/gather/meshgrid tests..."
 	PYTHONPATH=python $(PYTHON) tests/test_scatter_gather.py
+
+test-serialization:
+	@echo "Running model serialization tests..."
+	PYTHONPATH=python $(PYTHON) tests/test_serialization.py
+
+test-checkpoint:
+	@echo "Running checkpoint management tests..."
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_serialization import test_model_checkpoint; sys.exit(0 if test_model_checkpoint() else 1)"
 
 list:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list
