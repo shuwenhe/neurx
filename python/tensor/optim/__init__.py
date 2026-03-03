@@ -13,7 +13,9 @@ from tensor.optim.scheduler import (
 __all__ = [
     "Optimizer",
     "SGD",
+    "Adam",
     "AdamW",
+    "RMSprop",
     "clip_grad_norm",
     # Schedulers
     "StepLR",
