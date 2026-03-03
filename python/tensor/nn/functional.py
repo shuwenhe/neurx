@@ -2804,52 +2804,208 @@ def embedding(input, weight: Tensor, padding_idx=None):
     return out
 
 
-def cross_entropy(input: Tensor, target, reduction="mean"):
-    log_probs = log_softmax(input, axis=-1)
-    return nll_loss(log_probs, target, reduction=reduction)
+def _infer_class_dim_for_loss(x_shape, target_shape, dim=None):
+    ndim = len(x_shape)
+    if ndim == 0:
+        raise ValueError("classification loss expects input with at least 1 dimension")
+
+    if dim is not None:
+        class_dim = dim + ndim if dim < 0 else dim
+        if class_dim < 0 or class_dim >= ndim:
+            raise ValueError(f"dim out of range for input shape {x_shape}: got {dim}")
+        if ndim == 1:
+            if target_shape not in ((), (1,)):
+                raise ValueError(f"for 1D input of shape {x_shape}, target must be scalar or shape (1,), got {target_shape}")
+            return class_dim
+
+        expected = x_shape[:class_dim] + x_shape[class_dim + 1:]
+        if target_shape != expected:
+            raise ValueError(
+                f"target shape must be {expected} when class dim is {class_dim} for input shape {x_shape}, "
+                f"got {target_shape}"
+            )
+        return class_dim
+
+    if ndim == 1:
+        if target_shape not in ((), (1,)):
+            raise ValueError(f"for 1D input of shape {x_shape}, target must be scalar or shape (1,), got {target_shape}")
+        return 0
+
+    # Prefer PyTorch layout (N, C, ...) while keeping legacy last-dim-class compatibility.
+    pytorch_shape = (x_shape[0],) + x_shape[2:]
+    legacy_shape = x_shape[:-1]
+    if target_shape == pytorch_shape:
+        return 1
+    if target_shape == legacy_shape:
+        return ndim - 1
+
+    raise ValueError(
+        f"target shape {target_shape} does not match supported layouts for input shape {x_shape}: "
+        f"(N,C,...) -> {pytorch_shape} or legacy last-dim class -> {legacy_shape}"
+    )
 
 
-def nll_loss(input: Tensor, target, reduction="mean"):
+def cross_entropy(
+    input: Tensor,
+    target,
+    weight=None,
+    ignore_index: int = -100,
+    reduction: str = "mean",
+    label_smoothing: float = 0.0,
+    dim=None,
+):
+    input = _as_tensor(input)
+    if isinstance(target, Tensor):
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+    class_dim = _infer_class_dim_for_loss(input.shape, target_arr.shape, dim=dim)
+    log_probs = log_softmax(input, axis=class_dim)
+    return nll_loss(
+        log_probs,
+        target_arr,
+        weight=weight,
+        ignore_index=ignore_index,
+        reduction=reduction,
+        label_smoothing=label_smoothing,
+        dim=class_dim,
+    )
+
+
+def nll_loss(
+    input: Tensor,
+    target,
+    weight=None,
+    ignore_index: int = -100,
+    reduction: str = "mean",
+    label_smoothing: float = 0.0,
+    dim=None,
+):
     # input: log-probabilities
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target, dtype=np.int64)
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+    target_arr = np.asarray(target_arr, dtype=np.int64)
     x = input.to_numpy()
 
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+    if label_smoothing < 0.0 or label_smoothing >= 1.0:
+        raise ValueError(f"label_smoothing must satisfy 0 <= label_smoothing < 1, got {label_smoothing}")
+
+    class_dim = _infer_class_dim_for_loss(x.shape, target_arr.shape, dim=dim)
+
     if x.ndim == 1:
-        x = x.reshape(1, -1)
-        target = target.reshape(1,)
-
-    c = x.shape[-1]
-    x_flat = x.reshape(-1, c)
-    target_flat = target.reshape(-1)
-    n = target_flat.shape[0]
-
-    loss_vals = -x_flat[np.arange(n), target_flat]
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
-        out_data = loss_vals.reshape(target.shape)
+        c = x.shape[0]
+        x_moved = x.reshape(1, c)
+        target_shape = target_arr.shape
+        target_flat = target_arr.reshape(-1)
     else:
-        out_data = loss_vals.mean()
+        x_moved = np.moveaxis(x, class_dim, -1)
+        c = x_moved.shape[-1]
+        target_shape = target_arr.shape
+        target_flat = target_arr.reshape(-1)
 
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, requires_grad=input.requires_grad, _children=(input,), _op="nll_loss", device=input.device)
+    x_flat = x_moved.reshape(-1, c)
+    valid_mask = target_flat != int(ignore_index)
+    valid_indices = np.nonzero(valid_mask)[0]
+    targets_valid = target_flat[valid_mask]
+
+    weight_arr = None
+    if weight is not None:
+        weight_arr = weight.to_numpy() if isinstance(weight, Tensor) else np.asarray(weight)
+        weight_arr = np.asarray(weight_arr)
+        if weight_arr.shape != (c,):
+            raise ValueError(f"weight must have shape ({c},), got {weight_arr.shape}")
+        weight_arr = weight_arr.astype(x_flat.dtype, copy=False)
+
+    if targets_valid.size > 0:
+        if np.any(targets_valid < 0) or np.any(targets_valid >= c):
+            bad = targets_valid[(targets_valid < 0) | (targets_valid >= c)][0]
+            raise ValueError(f"target contains invalid class index {int(bad)} for input with {c} classes")
+
+    if weight_arr is None:
+        sample_weights = np.ones(targets_valid.shape[0], dtype=x_flat.dtype)
+    else:
+        sample_weights = weight_arr[targets_valid]
+
+    loss_flat = np.zeros(x_flat.shape[0], dtype=x_flat.dtype)
+    if targets_valid.size > 0:
+        logp_valid = x_flat[valid_mask]
+        nll_component = -logp_valid[np.arange(targets_valid.size), targets_valid]
+        if label_smoothing > 0.0:
+            if weight_arr is None:
+                smooth_component = -logp_valid.mean(axis=1)
+            else:
+                smooth_component = -(logp_valid * (weight_arr.reshape(1, -1) / float(c))).sum(axis=1)
+            loss_valid = (1.0 - label_smoothing) * sample_weights * nll_component + label_smoothing * smooth_component
+        else:
+            loss_valid = sample_weights * nll_component
+        loss_flat[valid_mask] = loss_valid
+    else:
+        loss_valid = np.zeros((0,), dtype=x_flat.dtype)
+
+    if reduction == "none":
+        out_data = loss_flat.reshape(target_shape)
+    elif reduction == "sum":
+        out_data = loss_valid.sum()
+    else:
+        if loss_valid.size == 0:
+            out_data = np.array(0.0, dtype=x_flat.dtype)
+        else:
+            denom = sample_weights.sum() if weight_arr is not None else float(loss_valid.size)
+            out_data = loss_valid.sum() / float(max(denom, 1e-12))
+
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="nll_loss",
+        device=input.device,
+    )
 
     def _backward():
-        if input.requires_grad:
-            grad = np.zeros_like(x_flat)
-            grad[np.arange(n), target_flat] = -1.0
-            if reduction == "mean":
-                grad /= n
-                grad = grad.reshape(x.shape)
-                input.grad += grad * out.grad
-            elif reduction == "sum":
-                grad = grad.reshape(x.shape)
-                input.grad += grad * out.grad
+        if not input.requires_grad:
+            return
+
+        grad_flat = np.zeros_like(x_flat, dtype=x_flat.dtype)
+        if targets_valid.size > 0:
+            if label_smoothing > 0.0:
+                if weight_arr is None:
+                    grad_rows = np.full((targets_valid.size, c), -label_smoothing / float(c), dtype=x_flat.dtype)
+                else:
+                    grad_rows = np.broadcast_to(
+                        -label_smoothing * weight_arr.reshape(1, -1) / float(c),
+                        (targets_valid.size, c),
+                    ).copy()
+                grad_rows[np.arange(targets_valid.size), targets_valid] += -(1.0 - label_smoothing) * sample_weights
             else:
-                grad = grad.reshape(x.shape)
-                input.grad += grad * out.grad.reshape(target.shape + (1,))
+                grad_rows = np.zeros((targets_valid.size, c), dtype=x_flat.dtype)
+                grad_rows[np.arange(targets_valid.size), targets_valid] = -sample_weights
+
+            if reduction == "mean":
+                denom = sample_weights.sum() if weight_arr is not None else float(targets_valid.size)
+                if denom > 0:
+                    grad_rows /= float(denom)
+                else:
+                    grad_rows.fill(0.0)
+
+            if reduction == "none":
+                out_grad_flat = np.asarray(out.grad).reshape(-1).astype(x_flat.dtype, copy=False)
+                grad_rows *= out_grad_flat[valid_indices].reshape(-1, 1)
+            else:
+                grad_rows *= np.asarray(out.grad).astype(x_flat.dtype, copy=False)
+
+            grad_flat[valid_mask] = grad_rows
+
+        grad_moved = grad_flat.reshape(x_moved.shape)
+        if x.ndim == 1:
+            grad_input = grad_moved.reshape(x.shape)
+        else:
+            grad_input = np.moveaxis(grad_moved, -1, class_dim)
+        input.grad += grad_input.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
     return out
