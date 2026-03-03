@@ -102,6 +102,29 @@ tensor/
 pip install -e /path/to/tensor --no-build-isolation
 ```
 
+## Testing
+
+Run tests using Makefile commands:
+
+```bash
+# View all available test commands
+make help
+
+# Test new features
+make test-einsum          # Einstein summation
+make test-vision          # Vision transforms
+make test-resnet          # ResNet models
+make test-new-features    # All new features
+
+# Test existing features
+make test-creation        # Tensor creation
+make test-sgd             # SGD optimizer
+make test-conv2d          # Convolution layers
+make test                 # All tests
+```
+
+📖 **See [TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for detailed testing instructions.**
+
 ## Runtime Config
 Environment variables:
 
