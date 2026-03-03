@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -20,6 +20,9 @@ help:
 	@echo "  test-vision   Run vision transforms tests"
 	@echo "  test-resnet   Run ResNet model tests"
 	@echo "  test-new-features Run all new features tests (einsum, vision, resnet)"
+	@echo "  test-scatter  Run scatter operations tests"
+	@echo "  test-meshgrid Run meshgrid tests"
+	@echo "  test-scatter-gather Run comprehensive scatter/gather/meshgrid tests"
 	@echo "  list          List all API feature points and one-command per-API tests"
 	@echo "  api           Run one API test case. Usage: make api API=tensor.sum"
 	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
@@ -72,6 +75,18 @@ test-resnet:
 test-new-features:
 	@echo "Running comprehensive tests for all new features..."
 	PYTHONPATH=python $(PYTHON) tests/test_new_features.py
+
+test-scatter:
+	@echo "Testing scatter operations..."
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_scatter_gather import test_scatter, test_scatter_add; sys.exit(0 if test_scatter() and test_scatter_add() else 1)"
+
+test-meshgrid:
+	@echo "Testing meshgrid..."
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_scatter_gather import test_meshgrid; sys.exit(0 if test_meshgrid() else 1)"
+
+test-scatter-gather:
+	@echo "Running comprehensive scatter/gather/meshgrid tests..."
+	PYTHONPATH=python $(PYTHON) tests/test_scatter_gather.py
 
 list:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list

@@ -7,6 +7,7 @@ Current state: production foundation is in place (runtime config, diagnostics, p
 
 ### Core Framework
 - Autograd `Tensor` with basic ops and `backward()`
+- **High-level tensor operations**: `gather`, `scatter`, `scatter_add`, `meshgrid` for advanced indexing
 - Core layers in `tensor.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
 - Convolution layers: `Conv1d`, `Conv2d`, `Conv3d` and transpose variants
 - RNN layers: `RNN`, `LSTM`, `GRU` with cell variants
@@ -18,6 +19,9 @@ Current state: production foundation is in place (runtime config, diagnostics, p
 
 ### 🆕 New in 2026-03-03
 - **Einstein Summation** (`tensor.einsum`) - Complex tensor operations with intuitive notation
+- **Scatter/Gather Operations** - Advanced indexing for attention, embeddings, and sparse operations
+  - `scatter_add`: Accumulative scatter for gradient accumulation
+  - `meshgrid`: Coordinate grid generation for spatial transformations
 - **Vision Module** (`tensor.vision`) - Computer vision tools and models
   - Image transforms: `ToTensor`, `Normalize`, `Resize`, `RandomCrop`, `ColorJitter`, etc.
   - Pre-built models: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`
@@ -43,6 +47,18 @@ from tensor.vision import transforms, models
 A = tensor.rand((3, 4))
 B = tensor.rand((4, 5))
 C = tensor.einsum('ij,jk->ik', A, B)  # Matrix multiplication
+
+# Scatter operations for embeddings and attention
+embedding_table = tensor.zeros((1000, 128))
+token_ids = tensor.Tensor([[10, 20, 30]])
+updates = tensor.randn((3, 128))
+embedding_table = embedding_table.scatter_add(0, token_ids.T, updates)
+
+# Coordinate grids for spatial transformations
+y = tensor.linspace(-1, 1, 224)
+x = tensor.linspace(-1, 1, 224)
+grid_y, grid_x = tensor.meshgrid(y, x, indexing='ij')
+# Use for optical flow, spatial transformers, etc.
 
 # Image classification with ResNet
 transform = transforms.Compose([
@@ -114,6 +130,9 @@ make help
 make test-einsum          # Einstein summation
 make test-vision          # Vision transforms
 make test-resnet          # ResNet models
+make test-scatter         # Scatter operations
+make test-meshgrid        # Meshgrid coordinate generation
+make test-scatter-gather  # Comprehensive scatter/gather/meshgrid tests
 make test-new-features    # All new features
 
 # Test existing features
