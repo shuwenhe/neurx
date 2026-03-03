@@ -1,4 +1,19 @@
 from tensor.nn.modules import *
+from tensor.nn.normalization import LayerNorm, GroupNorm, InstanceNorm
+from tensor.nn.attention import (
+    ScaledDotProductAttention,
+    MultiheadAttention,
+    AttentionWithPE,
+)
+from tensor.nn.transformer import (
+    FeedForwardNetwork,
+    TransformerEncoderLayer,
+    TransformerEncoder,
+    TransformerDecoderLayer,
+    TransformerDecoder,
+    Transformer,
+    BertLike,
+)
 from tensor.nn import functional
 from tensor.nn.functional import (
     # Activation functions
@@ -68,6 +83,18 @@ __all__ = [
     "GELU",
     "Sigmoid",
     "SiLU",
+    # Attention and Transformer modules
+    "ScaledDotProductAttention",
+    "MultiheadAttention",
+    "AttentionWithPE",
+    "FeedForwardNetwork",
+    "TransformerEncoderLayer",
+    "TransformerEncoder",
+    "TransformerDecoderLayer",
+    "TransformerDecoder",
+    "Transformer",
+    "BertLike",
+    # Legacy names
     "MultiHeadAttention",
     "MLP",
     "MoE",
