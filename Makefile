@@ -1,4 +1,4 @@
-.PHONY: help install dev test list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test test-creation test-sgd list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -7,17 +7,19 @@ PIP_INSTALL_FLAGS ?= --no-build-isolation
 
 help:
 	@echo "Targets:"
-	@echo "  install    Install in editable mode (offline-friendly)"
-	@echo "  bootstrap  Upgrade build tooling in current environment"
-	@echo "  dev        Same as install"
-	@echo "  test       Run tests"
-	@echo "  list       List all API feature points and one-command per-API tests"
-	@echo "  api        Run one API test case. Usage: make api API=tensor.sum"
-	@echo "  api-all    Run all API test cases from tools/api_test_runner.py"
-	@echo "  doctor     Run runtime diagnostics"
+	@echo "  install       Install in editable mode (offline-friendly)"
+	@echo "  bootstrap     Upgrade build tooling in current environment"
+	@echo "  dev           Same as install"
+	@echo "  test          Run all tests"
+	@echo "  test-creation Run tensor creation functions tests"
+	@echo "  test-sgd      Run SGD optimizer tests"
+	@echo "  list          List all API feature points and one-command per-API tests"
+	@echo "  api           Run one API test case. Usage: make api API=tensor.sum"
+	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
+	@echo "  doctor        Run runtime diagnostics"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
-	@echo "  cuda-test  Run CUDA smoke test (requires CUDA build)"
-	@echo "  clean      Remove build artifacts"
+	@echo "  cuda-test     Run CUDA smoke test (requires CUDA build)"
+	@echo "  clean         Remove build artifacts"
 
 install: dev
 
@@ -32,6 +34,12 @@ ensure-pytest:
 
 test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q
+
+test-creation:
+	PYTHONPATH=python $(PYTHON) tests/test_creation.py
+
+test-sgd:
+	PYTHONPATH=python $(PYTHON) tests/test_sgd.py
 
 list:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list
