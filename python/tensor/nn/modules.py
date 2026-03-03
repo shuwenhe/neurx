@@ -207,7 +207,7 @@ class Module:
         for name, param in self._named_parameters().items():
             state[name] = param.data.copy()
         for name, buf in self._named_buffers(include_non_persistent=False).items():
-            if hasattr(buf, "data"):
+            if isinstance(buf, Tensor):
                 state[name] = buf.data.copy()
             else:
                 state[name] = np.array(buf, copy=True)
@@ -226,10 +226,14 @@ class Module:
             if name not in state:
                 missing.append(name)
                 continue
-            if hasattr(buf, "data"):
+            if isinstance(buf, Tensor):
                 buf.data = state[name].copy()
             else:
-                buffers[name] = state[name].copy()
+                loaded = np.array(state[name], copy=True)
+                try:
+                    buf[...] = loaded
+                except Exception:
+                    buffers[name] = loaded
         known = set(named.keys()) | set(buffers.keys())
         unexpected = [name for name in state.keys() if name not in known]
         if strict and (missing or unexpected):
@@ -1175,96 +1179,26 @@ class BatchNorm1d(Module):
             self.num_batches_tracked = None
 
     def __call__(self, x):
-        # x.shape: (batch, features) or (batch, features, length)
-        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
-        
-        if self.training:
-            # 计算批统计
-            if x_data.ndim == 2:
-                # (batch, features)
-                mean = x_data.mean(axis=0, keepdims=True)
-                var = x_data.var(axis=0, keepdims=True)
-                norm_axes = 0
-            else:
-                # (batch, features, length) -> 对batch和length维度计算
-                mean = x_data.mean(axis=(0, 2), keepdims=True)
-                var = x_data.var(axis=(0, 2), keepdims=True)
-                norm_axes = (0, 2)
-            
-            # 更新running stats
-            if self.track_running_stats:
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    self.num_batches_tracked += 1
-                    n = float(self.num_batches_tracked)
-                    exponential_average_factor = self.momentum
-                    self.running_mean = (1 - exponential_average_factor) * self.running_mean + exponential_average_factor * mean.squeeze()
-                    self.running_var = (1 - exponential_average_factor) * self.running_var + exponential_average_factor * var.squeeze()
-        else:
-            # 使用running stats
-            if self.track_running_stats:
-                mean = self.running_mean.reshape(1, -1) if x_data.ndim == 2 else self.running_mean.reshape(1, -1, 1)
-                var = self.running_var.reshape(1, -1) if x_data.ndim == 2 else self.running_var.reshape(1, -1, 1)
-            else:
-                if x_data.ndim == 2:
-                    mean = x_data.mean(axis=0, keepdims=True)
-                    var = x_data.var(axis=0, keepdims=True)
-                else:
-                    mean = x_data.mean(axis=(0, 2), keepdims=True)
-                    var = x_data.var(axis=(0, 2), keepdims=True)
-        
-        # 归一化
-        x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
-        
-        # 缩放和偏移
-        if self.affine:
-            if x_data.ndim == 2:
-                out_data = x_normalized * self.weight.data + self.bias.data
-            else:
-                out_data = x_normalized * self.weight.data.reshape(1, -1, 1) + self.bias.data.reshape(1, -1, 1)
-        else:
-            out_data = x_normalized
-        
-        out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,) + ((self.weight, self.bias) if self.affine else ()), _op="batchnorm1d")
-        
-        def _backward():
-            if not x.requires_grad:
-                return
-            
-            grad = out.grad
-            if x_data.ndim == 2:
-                reduce_axes = 0
-                w_shape = self.weight.data.shape
-            else:
-                reduce_axes = (0, 2)
-                w_shape = (1, self.weight.data.shape[0], 1)
-            
-            # 权重和偏置梯度
-            if self.affine:
-                if x_data.ndim == 2:
-                    self.weight.grad += (grad * x_normalized).sum(axis=0)
-                    self.bias.grad += grad.sum(axis=0)
-                else:
-                    self.weight.grad += (grad * x_normalized).sum(axis=(0, 2))
-                    self.bias.grad += grad.sum(axis=(0, 2))
-            
-            # 输入梯度
-            N = float(np.prod([x_data.shape[i] for i in ([0] if x_data.ndim == 2 else [0, 2])]))
-            if self.affine:
-                w = self.weight.data.reshape(w_shape)
-            else:
-                w = 1.0
-            
-            dgamma_dxhat = grad * w if self.affine else grad
-            dxhat = (x_data - mean) / np.sqrt(var + self.eps)
-            
-            dvar = (dgamma_dxhat * dxhat * -0.5 * (var + self.eps) ** -1.5).sum(axis=reduce_axes, keepdims=True)
-            dmean = (dgamma_dxhat * -1.0 / np.sqrt(var + self.eps)).sum(axis=reduce_axes, keepdims=True)
-            dmean += dvar * (-2.0 / N) * (x_data - mean).sum(axis=reduce_axes, keepdims=True)
-            
-            x.grad += dgamma_dxhat / np.sqrt(var + self.eps) + dvar * 2.0 * (x_data - mean) / N + dmean / N
-        
-        out._backward = _backward
-        return out
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim not in (2, 3):
+            raise ValueError(f"BatchNorm1d expects 2D or 3D input, got {x_data.ndim}D")
+
+        bn_training = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.batch_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            training=bn_training,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
 
 
 class BatchNorm2d(Module):
@@ -1297,65 +1231,26 @@ class BatchNorm2d(Module):
             self.num_batches_tracked = None
 
     def __call__(self, x):
-        # x.shape: (batch, channels, height, width)
-        x_data = x.data if hasattr(x, 'data') else np.asarray(x)
-        assert x_data.ndim == 4, f"BatchNorm2d expects 4D input, got {x_data.ndim}D"
-        
-        if self.training:
-            # 对batch、height、width维度计算统计（保留channel维度）
-            mean = x_data.mean(axis=(0, 2, 3), keepdims=True)
-            var = x_data.var(axis=(0, 2, 3), keepdims=True)
-            
-            if self.track_running_stats:
-                self.num_batches_tracked += 1
-                exponential_average_factor = self.momentum
-                self.running_mean = (1 - exponential_average_factor) * self.running_mean + exponential_average_factor * mean.squeeze()
-                self.running_var = (1 - exponential_average_factor) * self.running_var + exponential_average_factor * var.squeeze()
-        else:
-            if self.track_running_stats:
-                mean = self.running_mean.reshape(1, -1, 1, 1)
-                var = self.running_var.reshape(1, -1, 1, 1)
-            else:
-                mean = x_data.mean(axis=(0, 2, 3), keepdims=True)
-                var = x_data.var(axis=(0, 2, 3), keepdims=True)
-        
-        # 归一化
-        x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
-        
-        # 缩放和偏移
-        if self.affine:
-            out_data = x_normalized * self.weight.data.reshape(1, -1, 1, 1) + self.bias.data.reshape(1, -1, 1, 1)
-        else:
-            out_data = x_normalized
-        
-        out = Tensor(out_data, requires_grad=x.requires_grad, 
-                    _children=(x,) + ((self.weight, self.bias) if self.affine else ()), 
-                    _op="batchnorm2d")
-        
-        def _backward():
-            if not x.requires_grad:
-                return
-            
-            grad = out.grad
-            
-            if self.affine:
-                self.weight.grad += (grad * x_normalized).sum(axis=(0, 2, 3))
-                self.bias.grad += grad.sum(axis=(0, 2, 3))
-            
-            # 输入梯度
-            w = self.weight.data.reshape(1, -1, 1, 1) if self.affine else 1.0
-            dgamma_dxhat = grad * w
-            N = float(x_data.shape[0] * x_data.shape[2] * x_data.shape[3])
-            
-            dvar = (dgamma_dxhat * (x_data - mean) * -0.5 * (var + self.eps) ** -1.5).sum(axis=(0, 2, 3), keepdims=True)
-            dmean = (dgamma_dxhat * -1.0 / np.sqrt(var + self.eps)).sum(axis=(0, 2, 3), keepdims=True)
-            dmean += dvar * (-2.0 / N) * (x_data - mean).sum(axis=(0, 2, 3), keepdims=True)
-            
-            x.grad += (dgamma_dxhat / np.sqrt(var + self.eps) + 
-                      dvar * 2.0 * (x_data - mean) / N + dmean / N)
-        
-        out._backward = _backward
-        return out
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim != 4:
+            raise ValueError(f"BatchNorm2d expects 4D input, got {x_data.ndim}D")
+
+        bn_training = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.batch_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            training=bn_training,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
 
 
 # ================ Pooling Layers ================
