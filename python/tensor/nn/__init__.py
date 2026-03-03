@@ -56,6 +56,7 @@ __all__ = [
     "LayerNorm",
     "RMSNorm",
     "Dropout",
+    "CrossEntropyLoss",
     "Softmax",
     "GELU",
     "Sigmoid",
