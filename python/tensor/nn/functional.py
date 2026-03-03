@@ -3,7 +3,12 @@ import numpy as np
 from tensor.tensor import Tensor
 
 
+def _as_tensor(x):
+    return x if isinstance(x, Tensor) else Tensor(x)
+
+
 def relu(x: Tensor):
+    x = _as_tensor(x)
     x_data = x.to_numpy()
     out_data = np.maximum(x_data, 0)
     out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="relu", device=x.device)
@@ -17,6 +22,7 @@ def relu(x: Tensor):
 
 
 def sigmoid(x: Tensor):
+    x = _as_tensor(x)
     x_data = x.to_numpy()
     out_data = 1.0 / (1.0 + np.exp(-x_data))
     out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="sigmoid", device=x.device)
@@ -30,25 +36,40 @@ def sigmoid(x: Tensor):
 
 
 def silu(x: Tensor):
+    x = _as_tensor(x)
     return x * sigmoid(x)
 
 
-def gelu(x: Tensor):
+def gelu(x: Tensor, approximate: bool = False):
+    x = _as_tensor(x)
     x_data = x.to_numpy()
-    out_data = x_data * (1.0 / (1.0 + np.exp(-1.702 * x_data)))
+    if approximate:
+        out_data = x_data * (1.0 / (1.0 + np.exp(-1.702 * x_data)))
+
+        def _backward():
+            if x.requires_grad:
+                sig = 1.0 / (1.0 + np.exp(-1.702 * x_data))
+                grad_sig = 1.702 * sig * (1 - sig)
+                x.grad += out.grad * (sig + x_data * grad_sig)
+    else:
+        cdf = 0.5 * (1.0 + np.tanh(np.sqrt(2.0 / np.pi) * (x_data + 0.044715 * x_data ** 3)))
+        out_data = x_data * cdf
+
+        def _backward():
+            if x.requires_grad:
+                pdf = np.exp(-0.5 * x_data ** 2) / np.sqrt(2.0 * np.pi)
+                dcdf_dx = pdf * (1.0 + (0.134145 * x_data ** 2)) / (1.0 + (0.1978 * x_data ** 2))
+                x.grad += out.grad * (cdf + x_data * dcdf_dx)
+
     out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="gelu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            sig = 1.0 / (1.0 + np.exp(-1.702 * x_data))
-            grad_sig = 1.702 * sig * (1 - sig)
-            x.grad += out.grad * (sig + x_data * grad_sig)
-
     out._backward = _backward
     return out
 
 
-def softmax(x: Tensor, axis=-1):
+def softmax(x: Tensor, axis=-1, dim=None):
+    x = _as_tensor(x)
+    if dim is not None:
+        axis = dim
     x_data = x.to_numpy()
     x_max = x_data.max(axis=axis, keepdims=True)
     exp_x = np.exp(x_data - x_max)
@@ -66,7 +87,10 @@ def softmax(x: Tensor, axis=-1):
     return out
 
 
-def log_softmax(x: Tensor, axis=-1):
+def log_softmax(x: Tensor, axis=-1, dim=None):
+    x = _as_tensor(x)
+    if dim is not None:
+        axis = dim
     x_data = x.to_numpy()
     x_max = x_data.max(axis=axis, keepdims=True)
     exp_x = np.exp(x_data - x_max)
@@ -85,6 +109,10 @@ def log_softmax(x: Tensor, axis=-1):
 
 
 def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
+    x = _as_tensor(x)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
     out = x @ weight
     if bias is not None:
         out = out + bias
@@ -92,6 +120,11 @@ def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
 
 
 def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
+    x = _as_tensor(x)
+    if weight is not None:
+        weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
     if isinstance(normalized_shape, int):
         normalized_shape = (normalized_shape,)
     x_data = x.to_numpy()
@@ -131,6 +164,11 @@ def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
 
 
 def rms_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-6):
+    x = _as_tensor(x)
+    if weight is not None:
+        weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
     if isinstance(normalized_shape, int):
         normalized_shape = (normalized_shape,)
     x_data = x.to_numpy()
@@ -167,7 +205,10 @@ def rms_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-6):
     return out
 
 
-def dropout(x: Tensor, p=0.5, training=True):
+def dropout(x: Tensor, p=0.5, training=True, inplace=False):
+    x = _as_tensor(x)
+    if inplace:
+        raise NotImplementedError("inplace dropout is not supported")
     if not training or p == 0:
         return x
     if p < 0 or p >= 1:
@@ -196,13 +237,41 @@ def mse_loss(input: Tensor, target, reduction="mean"):
     return out
 
 
-def cross_entropy(input: Tensor, target):
+def embedding(input, weight: Tensor, padding_idx=None):
+    weight = _as_tensor(weight)
+    input_ids = np.asarray(input, dtype=np.int64)
+
+    if padding_idx is not None:
+        padding_idx = int(padding_idx)
+
+    out_data = weight.data[input_ids]
+    out = Tensor(out_data, requires_grad=weight.requires_grad, _children=(weight,), _op="embedding", device=weight.device)
+
+    def _backward():
+        if weight.requires_grad:
+            grad = np.zeros_like(weight.data)
+            if padding_idx is None:
+                np.add.at(grad, input_ids, out.grad)
+            else:
+                valid = input_ids != padding_idx
+                if np.any(valid):
+                    np.add.at(grad, input_ids[valid], out.grad[valid])
+            weight.grad += grad
+
+    out._backward = _backward
+    return out
+
+
+def cross_entropy(input: Tensor, target, reduction="mean"):
     log_probs = log_softmax(input, axis=-1)
-    return nll_loss(log_probs, target, reduction="mean")
+    return nll_loss(log_probs, target, reduction=reduction)
 
 
 def nll_loss(input: Tensor, target, reduction="mean"):
     # input: log-probabilities
+    input = _as_tensor(input)
+    if isinstance(target, Tensor):
+        target = target.to_numpy()
     target = np.asarray(target, dtype=np.int64)
     x = input.to_numpy()
 
@@ -255,6 +324,7 @@ __all__ = [
     "layer_norm",
     "rms_norm",
     "dropout",
+    "embedding",
     "mse_loss",
     "cross_entropy",
     "nll_loss",
