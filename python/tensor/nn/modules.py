@@ -1339,6 +1339,40 @@ class Dropout(Module):
         self.training = True
 
 
+class CrossEntropyLoss(Module):
+    """Cross Entropy Loss compatible with common PyTorch arguments."""
+
+    def __init__(self, weight=None, ignore_index=-100, reduction="mean", label_smoothing=0.0):
+        super().__init__()
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+        if label_smoothing < 0.0 or label_smoothing >= 1.0:
+            raise ValueError(f"label_smoothing must satisfy 0 <= label_smoothing < 1, got {label_smoothing}")
+
+        if weight is None:
+            self.weight = None
+        elif isinstance(weight, Tensor):
+            self.weight = weight
+        else:
+            self.weight = Tensor(np.asarray(weight), requires_grad=False)
+
+        self.ignore_index = int(ignore_index)
+        self.reduction = reduction
+        self.label_smoothing = float(label_smoothing)
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.cross_entropy(
+            input,
+            target,
+            weight=self.weight,
+            ignore_index=self.ignore_index,
+            reduction=self.reduction,
+            label_smoothing=self.label_smoothing,
+        )
+
+
 class Softmax(Module):
     """Softmax（默认对最后一维）"""
     def __init__(self, axis=-1):
