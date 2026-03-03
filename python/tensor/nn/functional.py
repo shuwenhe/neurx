@@ -1489,6 +1489,10 @@ def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
     x_data = input.to_numpy()
     w_data = weight.to_numpy()
     b_data = bias.to_numpy() if bias is not None else None
+    compute_dtype = np.result_type(x_data.dtype, w_data.dtype, np.float64)
+    x_compute = x_data.astype(compute_dtype, copy=False)
+    w_compute = w_data.astype(compute_dtype, copy=False)
+    b_compute = b_data.astype(compute_dtype, copy=False) if b_data is not None else None
 
     if x_data.ndim != 4:
         raise ValueError(f"conv2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
@@ -1527,14 +1531,14 @@ def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
 
     if pad_h > 0 or pad_w > 0:
         x_padded = np.pad(
-            x_data,
+            x_compute,
             ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
             mode="constant",
         )
     else:
-        x_padded = x_data
+        x_padded = x_compute
 
-    out_data = np.zeros((n, out_channels, out_h, out_w), dtype=x_data.dtype)
+    out_data = np.zeros((n, out_channels, out_h, out_w), dtype=compute_dtype)
     in_ch_per_group = in_channels // groups
     out_ch_per_group = out_channels // groups
 
@@ -1555,21 +1559,23 @@ def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
                                 ih = ih_start + kh * dil_h
                                 for kw in range(kernel_w):
                                     iw = iw_start + kw * dil_w
-                                    acc += x_padded[bi, ic, ih, iw] * w_data[oc, ic_local, kh, kw]
+                                    acc += x_padded[bi, ic, ih, iw] * w_compute[oc, ic_local, kh, kw]
                         out_data[bi, oc, oh, ow] = acc
 
-    if b_data is not None:
-        out_data += b_data.reshape(1, -1, 1, 1)
+    if b_compute is not None:
+        out_data += b_compute.reshape(1, -1, 1, 1)
+
+    out_tensor_data = out_data.astype(x_data.dtype, copy=False) if out_data.dtype != x_data.dtype else out_data
 
     requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
     children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
-    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="conv2d", device=input.device)
+    out = Tensor(out_tensor_data, requires_grad=requires_grad, _children=tuple(children), _op="conv2d", device=input.device)
 
     def _backward():
         grad_out = out.grad
 
         if weight.requires_grad:
-            w_grad = np.zeros_like(w_data)
+            w_grad = np.zeros_like(w_compute)
             for bi in range(n):
                 for g in range(groups):
                     in_start = g * in_ch_per_group
@@ -1612,7 +1618,7 @@ def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, 
                                         ih = ih_start + kh * dil_h
                                         for kw in range(kernel_w):
                                             iw = iw_start + kw * dil_w
-                                            x_grad_padded[bi, ic, ih, iw] += w_data[oc, ic_local, kh, kw] * go
+                                            x_grad_padded[bi, ic, ih, iw] += w_compute[oc, ic_local, kh, kw] * go
             if pad_h > 0 or pad_w > 0:
                 x_grad = x_grad_padded[:, :, pad_h:pad_h + in_h, pad_w:pad_w + in_w]
             else:
