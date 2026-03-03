@@ -280,6 +280,180 @@ class Linear(Module):
         return out
 
 
+class RNNCell(Module):
+    """Elman RNN cell."""
+
+    def __init__(self, input_size, hidden_size, bias=True, nonlinearity="tanh"):
+        super().__init__()
+        if nonlinearity not in ("tanh", "relu"):
+            raise ValueError(f"nonlinearity must be 'tanh' or 'relu', got {nonlinearity}")
+
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.nonlinearity = nonlinearity
+        self.bias = bool(bias)
+
+        scale_ih = (1.0 / max(1, self.input_size)) ** 0.5
+        scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+        self.weight_ih = Parameter(np.random.randn(self.input_size, self.hidden_size) * scale_ih)
+        self.weight_hh = Parameter(np.random.randn(self.hidden_size, self.hidden_size) * scale_hh)
+        self.bias_ih = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+        self.bias_hh = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+
+    def __call__(self, input, hx=None):
+        from . import functional as F
+
+        x = input if isinstance(input, Tensor) else Tensor(input)
+        squeeze_output = False
+        if x.ndim == 1:
+            x = x.unsqueeze(0)
+            squeeze_output = True
+        if x.ndim != 2:
+            raise ValueError(f"RNNCell input must be 1D or 2D, got {x.shape}")
+        if x.shape[1] != self.input_size:
+            raise ValueError(f"RNNCell input_size expected {self.input_size}, got {x.shape[1]}")
+
+        if hx is None:
+            h = Tensor(np.zeros((x.shape[0], self.hidden_size), dtype=x.to_numpy().dtype), device=x.device)
+        else:
+            h = hx if isinstance(hx, Tensor) else Tensor(hx)
+            if h.ndim == 1:
+                h = h.unsqueeze(0)
+            if h.ndim != 2:
+                raise ValueError(f"RNNCell hx must be 1D or 2D, got {h.shape}")
+            if h.shape != (x.shape[0], self.hidden_size):
+                raise ValueError(
+                    f"RNNCell hx shape must be ({x.shape[0]}, {self.hidden_size}), got {h.shape}"
+                )
+
+        h_next = F.rnn_cell(
+            x,
+            h,
+            self.weight_ih,
+            self.weight_hh,
+            bias_ih=self.bias_ih,
+            bias_hh=self.bias_hh,
+            nonlinearity=self.nonlinearity,
+        )
+        return h_next.squeeze(0) if squeeze_output else h_next
+
+
+class LSTMCell(Module):
+    """LSTM cell."""
+
+    def __init__(self, input_size, hidden_size, bias=True):
+        super().__init__()
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.bias = bool(bias)
+
+        gate_size = 4 * self.hidden_size
+        scale_ih = (1.0 / max(1, self.input_size)) ** 0.5
+        scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+        self.weight_ih = Parameter(np.random.randn(self.input_size, gate_size) * scale_ih)
+        self.weight_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+        self.bias_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+        self.bias_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+
+    def __call__(self, input, hx=None):
+        from . import functional as F
+
+        x = input if isinstance(input, Tensor) else Tensor(input)
+        squeeze_output = False
+        if x.ndim == 1:
+            x = x.unsqueeze(0)
+            squeeze_output = True
+        if x.ndim != 2:
+            raise ValueError(f"LSTMCell input must be 1D or 2D, got {x.shape}")
+        if x.shape[1] != self.input_size:
+            raise ValueError(f"LSTMCell input_size expected {self.input_size}, got {x.shape[1]}")
+
+        if hx is None:
+            h = Tensor(np.zeros((x.shape[0], self.hidden_size), dtype=x.to_numpy().dtype), device=x.device)
+            c = Tensor(np.zeros((x.shape[0], self.hidden_size), dtype=x.to_numpy().dtype), device=x.device)
+        else:
+            if not isinstance(hx, (tuple, list)) or len(hx) != 2:
+                raise ValueError("LSTMCell hx must be a tuple (h, c)")
+            h = hx[0] if isinstance(hx[0], Tensor) else Tensor(hx[0])
+            c = hx[1] if isinstance(hx[1], Tensor) else Tensor(hx[1])
+            if h.ndim == 1:
+                h = h.unsqueeze(0)
+            if c.ndim == 1:
+                c = c.unsqueeze(0)
+            if h.ndim != 2 or c.ndim != 2:
+                raise ValueError(f"LSTMCell h/c must be 1D or 2D, got {h.shape} and {c.shape}")
+            if h.shape != (x.shape[0], self.hidden_size) or c.shape != (x.shape[0], self.hidden_size):
+                raise ValueError(
+                    f"LSTMCell h/c shape must be ({x.shape[0]}, {self.hidden_size}), got {h.shape} and {c.shape}"
+                )
+
+        h_next, c_next = F.lstm_cell(
+            x,
+            (h, c),
+            self.weight_ih,
+            self.weight_hh,
+            bias_ih=self.bias_ih,
+            bias_hh=self.bias_hh,
+        )
+        if squeeze_output:
+            return h_next.squeeze(0), c_next.squeeze(0)
+        return h_next, c_next
+
+
+class GRUCell(Module):
+    """GRU cell."""
+
+    def __init__(self, input_size, hidden_size, bias=True):
+        super().__init__()
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.bias = bool(bias)
+
+        gate_size = 3 * self.hidden_size
+        scale_ih = (1.0 / max(1, self.input_size)) ** 0.5
+        scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+        self.weight_ih = Parameter(np.random.randn(self.input_size, gate_size) * scale_ih)
+        self.weight_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+        self.bias_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+        self.bias_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+
+    def __call__(self, input, hx=None):
+        from . import functional as F
+
+        x = input if isinstance(input, Tensor) else Tensor(input)
+        squeeze_output = False
+        if x.ndim == 1:
+            x = x.unsqueeze(0)
+            squeeze_output = True
+        if x.ndim != 2:
+            raise ValueError(f"GRUCell input must be 1D or 2D, got {x.shape}")
+        if x.shape[1] != self.input_size:
+            raise ValueError(f"GRUCell input_size expected {self.input_size}, got {x.shape[1]}")
+
+        if hx is None:
+            h = Tensor(np.zeros((x.shape[0], self.hidden_size), dtype=x.to_numpy().dtype), device=x.device)
+        else:
+            h = hx if isinstance(hx, Tensor) else Tensor(hx)
+            if h.ndim == 1:
+                h = h.unsqueeze(0)
+            if h.ndim != 2:
+                raise ValueError(f"GRUCell hx must be 1D or 2D, got {h.shape}")
+            if h.shape != (x.shape[0], self.hidden_size):
+                raise ValueError(
+                    f"GRUCell hx shape must be ({x.shape[0]}, {self.hidden_size}), got {h.shape}"
+                )
+
+        h_next = F.gru_cell(
+            x,
+            h,
+            self.weight_ih,
+            self.weight_hh,
+            bias_ih=self.bias_ih,
+            bias_hh=self.bias_hh,
+        )
+        return h_next.squeeze(0) if squeeze_output else h_next
+
+
 def _reverse_sequence(x, batch_first):
     return x[:, ::-1, :] if batch_first else x[::-1, :, :]
 

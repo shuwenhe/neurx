@@ -100,6 +100,72 @@ def test_functional_gru_backward_shapes():
     assert b_hh.grad.shape == b_hh.shape
 
 
+def test_functional_cells_match_single_step_sequence():
+    x = Tensor(np.random.randn(3, 4).astype(np.float64), requires_grad=True)
+    h = Tensor(np.random.randn(3, 5).astype(np.float64), requires_grad=True)
+    c = Tensor(np.random.randn(3, 5).astype(np.float64), requires_grad=True)
+
+    w_rnn_ih = Tensor(np.random.randn(4, 5).astype(np.float64), requires_grad=True)
+    w_rnn_hh = Tensor(np.random.randn(5, 5).astype(np.float64), requires_grad=True)
+    b_rnn_ih = Tensor(np.random.randn(5).astype(np.float64), requires_grad=True)
+    b_rnn_hh = Tensor(np.random.randn(5).astype(np.float64), requires_grad=True)
+
+    w_lstm_ih = Tensor(np.random.randn(4, 20).astype(np.float64), requires_grad=True)
+    w_lstm_hh = Tensor(np.random.randn(5, 20).astype(np.float64), requires_grad=True)
+    b_lstm_ih = Tensor(np.random.randn(20).astype(np.float64), requires_grad=True)
+    b_lstm_hh = Tensor(np.random.randn(20).astype(np.float64), requires_grad=True)
+
+    w_gru_ih = Tensor(np.random.randn(4, 15).astype(np.float64), requires_grad=True)
+    w_gru_hh = Tensor(np.random.randn(5, 15).astype(np.float64), requires_grad=True)
+    b_gru_ih = Tensor(np.random.randn(15).astype(np.float64), requires_grad=True)
+    b_gru_hh = Tensor(np.random.randn(15).astype(np.float64), requires_grad=True)
+
+    rnn_cell_out = F.rnn_cell(x, h, w_rnn_ih, w_rnn_hh, b_rnn_ih, b_rnn_hh)
+    rnn_seq_out, rnn_hn = F.rnn(x.unsqueeze(0), w_rnn_ih, w_rnn_hh, b_rnn_ih, b_rnn_hh, hx=h)
+    assert np.allclose(rnn_cell_out.to_numpy(), rnn_seq_out[0].to_numpy(), atol=1e-8)
+    assert np.allclose(rnn_cell_out.to_numpy(), rnn_hn[0].to_numpy(), atol=1e-8)
+
+    lstm_cell_h, lstm_cell_c = F.lstm_cell(x, (h, c), w_lstm_ih, w_lstm_hh, b_lstm_ih, b_lstm_hh)
+    lstm_seq_out, (lstm_hn, lstm_cn) = F.lstm(x.unsqueeze(0), w_lstm_ih, w_lstm_hh, b_lstm_ih, b_lstm_hh, hx=(h, c))
+    assert np.allclose(lstm_cell_h.to_numpy(), lstm_seq_out[0].to_numpy(), atol=1e-8)
+    assert np.allclose(lstm_cell_h.to_numpy(), lstm_hn[0].to_numpy(), atol=1e-8)
+    assert np.allclose(lstm_cell_c.to_numpy(), lstm_cn[0].to_numpy(), atol=1e-8)
+
+    gru_cell_out = F.gru_cell(x, h, w_gru_ih, w_gru_hh, b_gru_ih, b_gru_hh)
+    gru_seq_out, gru_hn = F.gru(x.unsqueeze(0), w_gru_ih, w_gru_hh, b_gru_ih, b_gru_hh, hx=h)
+    assert np.allclose(gru_cell_out.to_numpy(), gru_seq_out[0].to_numpy(), atol=1e-8)
+    assert np.allclose(gru_cell_out.to_numpy(), gru_hn[0].to_numpy(), atol=1e-8)
+
+
+def test_cell_modules_backward_and_unbatched_input():
+    rnn_cell = nn.RNNCell(4, 5)
+    lstm_cell = nn.LSTMCell(4, 5)
+    gru_cell = nn.GRUCell(4, 5)
+
+    x_seq = Tensor(np.random.randn(3, 2, 4).astype(np.float64), requires_grad=True)
+    h_rnn = None
+    h_lstm, c_lstm = None, None
+    h_gru = None
+
+    for t in range(3):
+        h_rnn = rnn_cell(x_seq[t], h_rnn)
+        h_lstm, c_lstm = lstm_cell(x_seq[t], (h_lstm, c_lstm) if h_lstm is not None else None)
+        h_gru = gru_cell(x_seq[t], h_gru)
+
+    x_single = Tensor(np.random.randn(4).astype(np.float64), requires_grad=True)
+    y_single = rnn_cell(x_single)
+    assert y_single.shape == (5,)
+
+    loss = h_rnn.sum() + h_lstm.sum() + c_lstm.sum() + h_gru.sum() + y_single.sum()
+    loss.backward()
+
+    assert rnn_cell.weight_ih.grad is not None
+    assert lstm_cell.weight_ih.grad is not None
+    assert gru_cell.weight_ih.grad is not None
+    assert x_seq.grad is not None
+    assert x_single.grad is not None
+
+
 def test_rnn_lstm_gru_modules_multilayer_batch_first_backward():
     x = Tensor(np.random.randn(3, 4, 6).astype(np.float64), requires_grad=True)
 
