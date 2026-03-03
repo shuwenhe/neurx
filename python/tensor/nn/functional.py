@@ -7,6 +7,18 @@ def _as_tensor(x):
     return x if isinstance(x, Tensor) else Tensor(x)
 
 
+def _pair(value):
+    if isinstance(value, tuple):
+        if len(value) != 2:
+            raise ValueError(f"expected a 2-tuple, got {value}")
+        return value
+    if isinstance(value, list):
+        if len(value) != 2:
+            raise ValueError(f"expected a list with 2 values, got {value}")
+        return tuple(value)
+    return (value, value)
+
+
 def relu(x: Tensor):
     x = _as_tensor(x)
     x_data = x.to_numpy()
@@ -16,6 +28,23 @@ def relu(x: Tensor):
     def _backward():
         if x.requires_grad:
             x.grad += out.grad * (x_data > 0)
+
+    out._backward = _backward
+    return out
+
+
+def leaky_relu(x: Tensor, negative_slope: float = 0.01, inplace: bool = False):
+    x = _as_tensor(x)
+    if inplace:
+        raise NotImplementedError("inplace leaky_relu is not supported")
+    x_data = x.to_numpy()
+    out_data = np.where(x_data > 0, x_data, negative_slope * x_data)
+    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="leaky_relu", device=x.device)
+
+    def _backward():
+        if x.requires_grad:
+            grad = np.where(x_data > 0, 1.0, negative_slope)
+            x.grad += out.grad * grad
 
     out._backward = _backward
     return out
@@ -322,6 +351,387 @@ def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
     out = x @ weight
     if bias is not None:
         out = out + bias
+    return out
+
+
+def conv2d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, padding=0, dilation=1, groups=1):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 4:
+        raise ValueError(f"conv2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+    if w_data.ndim != 4:
+        raise ValueError(f"conv2d expects 4D weight (out_channels, in_channels/groups, kH, kW), got shape {w_data.shape}")
+
+    stride_h, stride_w = _pair(stride)
+    pad_h, pad_w = _pair(padding)
+    dil_h, dil_w = _pair(dilation)
+
+    n, in_channels, in_h, in_w = x_data.shape
+    out_channels, in_channels_per_group, kernel_h, kernel_w = w_data.shape
+
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+    if out_channels % groups != 0:
+        raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+    if in_channels_per_group != in_channels // groups:
+        raise ValueError(
+            f"weight second dim ({in_channels_per_group}) must equal in_channels/groups ({in_channels // groups})"
+        )
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+
+    eff_kernel_h = dil_h * (kernel_h - 1) + 1
+    eff_kernel_w = dil_w * (kernel_w - 1) + 1
+    out_h = (in_h + 2 * pad_h - eff_kernel_h) // stride_h + 1
+    out_w = (in_w + 2 * pad_w - eff_kernel_w) // stride_w + 1
+    if out_h <= 0 or out_w <= 0:
+        raise ValueError(
+            f"invalid output shape for conv2d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={(stride_h, stride_w)}, padding={(pad_h, pad_w)}, dilation={(dil_h, dil_w)}"
+        )
+
+    if pad_h > 0 or pad_w > 0:
+        x_padded = np.pad(
+            x_data,
+            ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
+            mode="constant",
+        )
+    else:
+        x_padded = x_data
+
+    out_data = np.zeros((n, out_channels, out_h, out_w), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+    out_ch_per_group = out_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for oc_local in range(out_ch_per_group):
+                oc = out_start + oc_local
+                for oh in range(out_h):
+                    ih_start = oh * stride_h
+                    for ow in range(out_w):
+                        iw_start = ow * stride_w
+                        acc = 0.0
+                        for ic_local in range(in_ch_per_group):
+                            ic = in_start + ic_local
+                            for kh in range(kernel_h):
+                                ih = ih_start + kh * dil_h
+                                for kw in range(kernel_w):
+                                    iw = iw_start + kw * dil_w
+                                    acc += x_padded[bi, ic, ih, iw] * w_data[oc, ic_local, kh, kw]
+                        out_data[bi, oc, oh, ow] = acc
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="conv2d", device=input.device)
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for oh in range(out_h):
+                            ih_start = oh * stride_h
+                            for ow in range(out_w):
+                                iw_start = ow * stride_w
+                                go = grad_out[bi, oc, oh, ow]
+                                for ic_local in range(in_ch_per_group):
+                                    ic = in_start + ic_local
+                                    for kh in range(kernel_h):
+                                        ih = ih_start + kh * dil_h
+                                        for kw in range(kernel_w):
+                                            iw = iw_start + kw * dil_w
+                                            w_grad[oc, ic_local, kh, kw] += x_padded[bi, ic, ih, iw] * go
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2, 3)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad_padded = np.zeros_like(x_padded)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for oh in range(out_h):
+                            ih_start = oh * stride_h
+                            for ow in range(out_w):
+                                iw_start = ow * stride_w
+                                go = grad_out[bi, oc, oh, ow]
+                                for ic_local in range(in_ch_per_group):
+                                    ic = in_start + ic_local
+                                    for kh in range(kernel_h):
+                                        ih = ih_start + kh * dil_h
+                                        for kw in range(kernel_w):
+                                            iw = iw_start + kw * dil_w
+                                            x_grad_padded[bi, ic, ih, iw] += w_data[oc, ic_local, kh, kw] * go
+            if pad_h > 0 or pad_w > 0:
+                x_grad = x_grad_padded[:, :, pad_h:pad_h + in_h, pad_w:pad_w + in_w]
+            else:
+                x_grad = x_grad_padded
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def max_pool2d(input: Tensor, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 4:
+        raise ValueError(f"max_pool2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+
+    kernel_h, kernel_w = _pair(kernel_size)
+    stride_h, stride_w = _pair(stride if stride is not None else kernel_size)
+    pad_h, pad_w = _pair(padding)
+    dil_h, dil_w = _pair(dilation)
+
+    n, c, in_h, in_w = x_data.shape
+    eff_kernel_h = dil_h * (kernel_h - 1) + 1
+    eff_kernel_w = dil_w * (kernel_w - 1) + 1
+
+    if ceil_mode:
+        out_h = int(np.ceil((in_h + 2 * pad_h - eff_kernel_h) / stride_h + 1))
+        out_w = int(np.ceil((in_w + 2 * pad_w - eff_kernel_w) / stride_w + 1))
+    else:
+        out_h = (in_h + 2 * pad_h - eff_kernel_h) // stride_h + 1
+        out_w = (in_w + 2 * pad_w - eff_kernel_w) // stride_w + 1
+    if ceil_mode and out_h > 0 and (out_h - 1) * stride_h >= in_h + pad_h:
+        out_h -= 1
+    if ceil_mode and out_w > 0 and (out_w - 1) * stride_w >= in_w + pad_w:
+        out_w -= 1
+    out_h = max(out_h, 0)
+    out_w = max(out_w, 0)
+
+    x_padded = np.pad(
+        x_data,
+        ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
+        mode="constant",
+        constant_values=-np.inf,
+    )
+
+    out_data = np.empty((n, c, out_h, out_w), dtype=x_data.dtype)
+    max_h = np.full((n, c, out_h, out_w), -1, dtype=np.int64)
+    max_w = np.full((n, c, out_h, out_w), -1, dtype=np.int64)
+
+    for bi in range(n):
+        for ci in range(c):
+            for oh in range(out_h):
+                ih_start = oh * stride_h
+                for ow in range(out_w):
+                    iw_start = ow * stride_w
+                    best_val = -np.inf
+                    best_h = -1
+                    best_w = -1
+                    for kh in range(kernel_h):
+                        ih = ih_start + kh * dil_h
+                        if ih < 0 or ih >= x_padded.shape[2]:
+                            continue
+                        for kw in range(kernel_w):
+                            iw = iw_start + kw * dil_w
+                            if iw < 0 or iw >= x_padded.shape[3]:
+                                continue
+                            v = x_padded[bi, ci, ih, iw]
+                            if v > best_val:
+                                best_val = v
+                                best_h = ih
+                                best_w = iw
+                    out_data[bi, ci, oh, ow] = best_val
+                    max_h[bi, ci, oh, ow] = best_h
+                    max_w[bi, ci, oh, ow] = best_w
+
+    out = Tensor(out_data, requires_grad=input.requires_grad, _children=(input,), _op="max_pool2d", device=input.device)
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for oh in range(out_h):
+                        for ow in range(out_w):
+                            ih = max_h[bi, ci, oh, ow] - pad_h
+                            iw = max_w[bi, ci, oh, ow] - pad_w
+                            if 0 <= ih < in_h and 0 <= iw < in_w:
+                                x_grad[bi, ci, ih, iw] += out.grad[bi, ci, oh, ow]
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+
+    if not return_indices:
+        return out
+
+    indices = (max_h - pad_h) * in_w + (max_w - pad_w)
+    indices[(max_h < pad_h) | (max_h >= pad_h + in_h) | (max_w < pad_w) | (max_w >= pad_w + in_w)] = -1
+    return out, Tensor(indices.astype(np.int64), requires_grad=False, device=input.device)
+
+
+def avg_pool2d(
+    input: Tensor,
+    kernel_size,
+    stride=None,
+    padding=0,
+    ceil_mode=False,
+    count_include_pad=True,
+    divisor_override=None,
+):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 4:
+        raise ValueError(f"avg_pool2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+
+    kernel_h, kernel_w = _pair(kernel_size)
+    stride_h, stride_w = _pair(stride if stride is not None else kernel_size)
+    pad_h, pad_w = _pair(padding)
+
+    n, c, in_h, in_w = x_data.shape
+    eff_kernel_h = kernel_h
+    eff_kernel_w = kernel_w
+    if ceil_mode:
+        out_h = int(np.ceil((in_h + 2 * pad_h - eff_kernel_h) / stride_h + 1))
+        out_w = int(np.ceil((in_w + 2 * pad_w - eff_kernel_w) / stride_w + 1))
+    else:
+        out_h = (in_h + 2 * pad_h - eff_kernel_h) // stride_h + 1
+        out_w = (in_w + 2 * pad_w - eff_kernel_w) // stride_w + 1
+    if ceil_mode and out_h > 0 and (out_h - 1) * stride_h >= in_h + pad_h:
+        out_h -= 1
+    if ceil_mode and out_w > 0 and (out_w - 1) * stride_w >= in_w + pad_w:
+        out_w -= 1
+    out_h = max(out_h, 0)
+    out_w = max(out_w, 0)
+
+    x_padded = np.pad(
+        x_data,
+        ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
+        mode="constant",
+        constant_values=0.0,
+    )
+
+    out_data = np.zeros((n, c, out_h, out_w), dtype=x_data.dtype)
+    divisors = np.zeros((n, c, out_h, out_w), dtype=np.float64)
+
+    for bi in range(n):
+        for ci in range(c):
+            for oh in range(out_h):
+                ih_start = oh * stride_h
+                for ow in range(out_w):
+                    iw_start = ow * stride_w
+                    acc = 0.0
+                    valid = 0
+                    for kh in range(kernel_h):
+                        ih = ih_start + kh
+                        for kw in range(kernel_w):
+                            iw = iw_start + kw
+                            if 0 <= ih < x_padded.shape[2] and 0 <= iw < x_padded.shape[3]:
+                                acc += x_padded[bi, ci, ih, iw]
+                            if pad_h <= ih < pad_h + in_h and pad_w <= iw < pad_w + in_w:
+                                valid += 1
+                    if divisor_override is not None:
+                        div = float(divisor_override)
+                    elif count_include_pad:
+                        div = float(kernel_h * kernel_w)
+                    else:
+                        div = float(max(valid, 1))
+                    divisors[bi, ci, oh, ow] = div
+                    out_data[bi, ci, oh, ow] = acc / div
+
+    out = Tensor(out_data, requires_grad=input.requires_grad, _children=(input,), _op="avg_pool2d", device=input.device)
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for oh in range(out_h):
+                        ih_start = oh * stride_h
+                        for ow in range(out_w):
+                            iw_start = ow * stride_w
+                            go = out.grad[bi, ci, oh, ow] / divisors[bi, ci, oh, ow]
+                            for kh in range(kernel_h):
+                                ih = ih_start + kh - pad_h
+                                if ih < 0 or ih >= in_h:
+                                    continue
+                                for kw in range(kernel_w):
+                                    iw = iw_start + kw - pad_w
+                                    if iw < 0 or iw >= in_w:
+                                        continue
+                                    x_grad[bi, ci, ih, iw] += go
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def adaptive_avg_pool2d(input: Tensor, output_size):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 4:
+        raise ValueError(f"adaptive_avg_pool2d expects 4D input (N, C, H, W), got shape {x_data.shape}")
+
+    if isinstance(output_size, int):
+        out_h, out_w = output_size, output_size
+    else:
+        out_h, out_w = output_size
+    if out_h <= 0 or out_w <= 0:
+        raise ValueError(f"output_size must be positive, got {output_size}")
+
+    n, c, in_h, in_w = x_data.shape
+    out_data = np.zeros((n, c, out_h, out_w), dtype=x_data.dtype)
+    regions = []
+
+    for oh in range(out_h):
+        h_start = int(np.floor(oh * in_h / out_h))
+        h_end = int(np.ceil((oh + 1) * in_h / out_h))
+        for ow in range(out_w):
+            w_start = int(np.floor(ow * in_w / out_w))
+            w_end = int(np.ceil((ow + 1) * in_w / out_w))
+            region = x_data[:, :, h_start:h_end, w_start:w_end]
+            out_data[:, :, oh, ow] = region.mean(axis=(2, 3))
+            regions.append((h_start, h_end, w_start, w_end))
+
+    out = Tensor(
+        out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="adaptive_avg_pool2d",
+        device=input.device,
+    )
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            ridx = 0
+            for oh in range(out_h):
+                for ow in range(out_w):
+                    h_start, h_end, w_start, w_end = regions[ridx]
+                    ridx += 1
+                    area = float((h_end - h_start) * (w_end - w_start))
+                    grad_slice = out.grad[:, :, oh:oh + 1, ow:ow + 1] / area
+                    x_grad[:, :, h_start:h_end, w_start:w_end] += grad_slice
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
     return out
 
 
@@ -729,6 +1139,7 @@ def kl_div_loss(input: Tensor, target, reduction="mean"):
 
 __all__ = [
     "relu",
+    "leaky_relu",
     "sigmoid",
     "tanh",
     "elu",
@@ -743,6 +1154,10 @@ __all__ = [
     "softmax",
     "log_softmax",
     "linear",
+    "conv2d",
+    "max_pool2d",
+    "avg_pool2d",
+    "adaptive_avg_pool2d",
     "layer_norm",
     "rms_norm",
     "dropout",
