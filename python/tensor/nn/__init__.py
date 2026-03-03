@@ -8,6 +8,7 @@ __all__ = [
     "ModuleDict",
     "Embedding",
     "Linear",
+    "Conv2d",
     "LayerNorm",
     "RMSNorm",
     "Dropout",
