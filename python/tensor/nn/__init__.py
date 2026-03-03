@@ -19,6 +19,15 @@ from tensor.nn.rnn import (
     LSTMCell, LSTM,
     GRUCell, GRU,
 )
+from tensor.nn.conv import (
+    Conv1d, Conv2d, Conv3d,
+    ConvTranspose1d, ConvTranspose2d, ConvTranspose3d,
+)
+from tensor.nn.pooling import (
+    MaxPool1d, MaxPool2d, MaxPool3d,
+    AvgPool1d, AvgPool2d, AvgPool3d,
+    AdaptiveMaxPool2d, AdaptiveAvgPool2d,
+)
 from tensor.nn import functional
 from tensor.nn.functional import (
     # Activation functions
@@ -64,9 +73,11 @@ __all__ = [
     "InstanceNorm2d",
     "InstanceNorm3d",
     "MaxPool1d",
-    "AvgPool1d",
     "MaxPool2d",
+    "MaxPool3d",
+    "AvgPool1d",
     "AvgPool2d",
+    "AvgPool3d",
     "AdaptiveAvgPool1d",
     "AdaptiveAvgPool2d",
     "AdaptiveAvgPool3d",
