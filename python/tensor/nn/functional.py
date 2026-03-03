@@ -31,6 +31,18 @@ def _single(value):
     return value
 
 
+def _triple(value):
+    if isinstance(value, tuple):
+        if len(value) != 3:
+            raise ValueError(f"expected a 3-tuple, got {value}")
+        return value
+    if isinstance(value, list):
+        if len(value) != 3:
+            raise ValueError(f"expected a list with 3 values, got {value}")
+        return tuple(value)
+    return (value, value, value)
+
+
 def relu(x: Tensor):
     x = _as_tensor(x)
     x_data = x.to_numpy()
