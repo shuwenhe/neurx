@@ -7,7 +7,7 @@ from tensor.nn.functional import (
     # Normalization
     softmax, log_softmax, layer_norm, rms_norm, batch_norm,
     # Operations
-    linear, conv2d, max_pool2d, avg_pool2d, adaptive_avg_pool2d, dropout, embedding,
+    linear, conv1d, conv2d, max_pool1d, max_pool2d, avg_pool1d, avg_pool2d, adaptive_avg_pool2d, dropout, embedding,
     # Loss functions
     mse_loss, cross_entropy, nll_loss,
     bce_loss, bce_with_logits_loss, l1_loss, smooth_l1_loss, kl_div_loss,
@@ -20,7 +20,10 @@ __all__ = [
     "ModuleDict",
     "Embedding",
     "Linear",
+    "Conv1d",
     "Conv2d",
+    "MaxPool1d",
+    "AvgPool1d",
     "LayerNorm",
     "RMSNorm",
     "Dropout",
@@ -39,7 +42,7 @@ __all__ = [
     # Normalization
     "softmax", "log_softmax", "layer_norm", "rms_norm", "batch_norm",
     # Operations
-    "linear", "conv2d", "max_pool2d", "avg_pool2d", "adaptive_avg_pool2d", "dropout", "embedding",
+    "linear", "conv1d", "conv2d", "max_pool1d", "max_pool2d", "avg_pool1d", "avg_pool2d", "adaptive_avg_pool2d", "dropout", "embedding",
     # Loss functions
     "mse_loss", "cross_entropy", "nll_loss",
     "bce_loss", "bce_with_logits_loss", "l1_loss", "smooth_l1_loss", "kl_div_loss",
