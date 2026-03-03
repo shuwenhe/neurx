@@ -3011,7 +3011,7 @@ def nll_loss(
     return out
 
 
-def bce_loss(input: Tensor, target, reduction="mean"):
+def bce_loss(input: Tensor, target, weight=None, reduction="mean"):
     """Binary Cross Entropy Loss
     
     Computes: -[target * log(input) + (1 - target) * log(1 - input)]
@@ -3019,40 +3019,69 @@ def bce_loss(input: Tensor, target, reduction="mean"):
     """
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target)
-    
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+
     x = input.to_numpy()
+    target_arr = np.asarray(target_arr, dtype=x.dtype)
+    if target_arr.shape != x.shape:
+        raise ValueError(f"target shape must match input shape {x.shape}, got {target_arr.shape}")
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+
+    if weight is None:
+        weight_arr = None
+    else:
+        raw_weight = weight.to_numpy() if isinstance(weight, Tensor) else np.asarray(weight)
+        try:
+            weight_arr = np.broadcast_to(np.asarray(raw_weight, dtype=x.dtype), x.shape)
+        except ValueError as exc:
+            raise ValueError(f"weight with shape {np.asarray(raw_weight).shape} is not broadcastable to {x.shape}") from exc
+
     # Clamp to prevent log(0)
-    x = np.clip(x, 1e-7, 1 - 1e-7)
-    
-    loss_vals = -(target * np.log(x) + (1 - target) * np.log(1 - x))
-    
+    x_clamped = np.clip(x, 1e-7, 1 - 1e-7)
+    loss_vals = -(target_arr * np.log(x_clamped) + (1.0 - target_arr) * np.log(1.0 - x_clamped))
+    if weight_arr is not None:
+        loss_vals = loss_vals * weight_arr
+
     if reduction == "sum":
         out_data = loss_vals.sum()
     elif reduction == "none":
         out_data = loss_vals
     else:  # mean
         out_data = loss_vals.mean()
-    
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, 
-                 requires_grad=input.requires_grad, _children=(input,), 
-                 _op="bce_loss", device=input.device)
-    
+
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="bce_loss",
+        device=input.device,
+    )
+
     def _backward():
-        if input.requires_grad:
-            x_clamped = np.clip(x, 1e-7, 1 - 1e-7)
-            grad = -(target / x_clamped - (1 - target) / (1 - x_clamped))
-            if reduction == "mean":
-                grad = grad / target.size
-            out.grad_data = np.array(out.grad) if isinstance(out.grad, Tensor) else out.grad
-            input.grad += grad * out.grad_data
-    
+        if not input.requires_grad:
+            return
+
+        grad = -(target_arr / x_clamped - (1.0 - target_arr) / (1.0 - x_clamped))
+        if weight_arr is not None:
+            grad = grad * weight_arr
+
+        out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
+        if reduction == "none":
+            grad = grad * out_grad_arr
+        elif reduction == "mean":
+            grad = (grad / grad.size) * out_grad_arr
+        else:
+            grad = grad * out_grad_arr
+        input.grad += grad.astype(input.grad.dtype, copy=False)
+
     out._backward = _backward
     return out
 
 
-def bce_with_logits_loss(input: Tensor, target, reduction="mean"):
+def bce_with_logits_loss(input: Tensor, target, weight=None, reduction="mean", pos_weight=None):
     """Binary Cross Entropy with Logits Loss
     
     Combines sigmoid and BCE into one numerically stable operation.
@@ -3060,35 +3089,85 @@ def bce_with_logits_loss(input: Tensor, target, reduction="mean"):
     """
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target)
-    
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+
     x = input.to_numpy()
-    # Numerically stable: max(x, 0) - x * target + log(1 + exp(-abs(x)))
-    max_x = np.maximum(x, 0)
-    loss_vals = max_x - x * target + np.log(1 + np.exp(-np.abs(x)))
-    
+    target_arr = np.asarray(target_arr, dtype=x.dtype)
+    if target_arr.shape != x.shape:
+        raise ValueError(f"target shape must match input shape {x.shape}, got {target_arr.shape}")
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+
+    if weight is None:
+        weight_arr = None
+    else:
+        raw_weight = weight.to_numpy() if isinstance(weight, Tensor) else np.asarray(weight)
+        try:
+            weight_arr = np.broadcast_to(np.asarray(raw_weight, dtype=x.dtype), x.shape)
+        except ValueError as exc:
+            raise ValueError(f"weight with shape {np.asarray(raw_weight).shape} is not broadcastable to {x.shape}") from exc
+
+    if pos_weight is None:
+        pos_weight_arr = None
+    else:
+        raw_pos_weight = pos_weight.to_numpy() if isinstance(pos_weight, Tensor) else np.asarray(pos_weight)
+        try:
+            pos_weight_arr = np.broadcast_to(np.asarray(raw_pos_weight, dtype=x.dtype), x.shape)
+        except ValueError as exc:
+            raise ValueError(
+                f"pos_weight with shape {np.asarray(raw_pos_weight).shape} is not broadcastable to {x.shape}"
+            ) from exc
+
+    # Stable logsigmoid variants
+    log_sigmoid = -np.logaddexp(0.0, -x)
+    log_one_minus_sigmoid = -np.logaddexp(0.0, x)
+    if pos_weight_arr is None:
+        loss_vals = -(target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
+    else:
+        loss_vals = -(pos_weight_arr * target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
+
+    if weight_arr is not None:
+        loss_vals = loss_vals * weight_arr
+
     if reduction == "sum":
         out_data = loss_vals.sum()
     elif reduction == "none":
         out_data = loss_vals
     else:  # mean
         out_data = loss_vals.mean()
-    
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, 
-                 requires_grad=input.requires_grad, _children=(input,), 
-                 _op="bce_with_logits_loss", device=input.device)
-    
+
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="bce_with_logits_loss",
+        device=input.device,
+    )
+
     def _backward():
-        if input.requires_grad:
-            # Gradient: sigmoid(x) - target
-            sigmoid_x = 1.0 / (1.0 + np.exp(-np.clip(x, -500, 500)))
-            grad = sigmoid_x - target
-            if reduction == "mean":
-                grad = grad / target.size
-            out.grad_data = np.array(out.grad) if isinstance(out.grad, Tensor) else out.grad
-            input.grad += grad * out.grad_data
-    
+        if not input.requires_grad:
+            return
+
+        sigmoid_x = 1.0 / (1.0 + np.exp(-np.clip(x, -500, 500)))
+        if pos_weight_arr is None:
+            grad = sigmoid_x - target_arr
+        else:
+            grad = (1.0 - target_arr) * sigmoid_x - pos_weight_arr * target_arr * (1.0 - sigmoid_x)
+
+        if weight_arr is not None:
+            grad = grad * weight_arr
+
+        out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
+        if reduction == "none":
+            grad = grad * out_grad_arr
+        elif reduction == "mean":
+            grad = (grad / grad.size) * out_grad_arr
+        else:
+            grad = grad * out_grad_arr
+        input.grad += grad.astype(input.grad.dtype, copy=False)
+
     out._backward = _backward
     return out
 
@@ -3100,11 +3179,18 @@ def l1_loss(input: Tensor, target, reduction="mean"):
     """
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target)
-    
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+
     x = input.to_numpy()
-    diff = x - target
+    target_arr = np.asarray(target_arr, dtype=x.dtype)
+    if target_arr.shape != x.shape:
+        raise ValueError(f"target shape must match input shape {x.shape}, got {target_arr.shape}")
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+
+    diff = x - target_arr
     loss_vals = np.abs(diff)
     
     if reduction == "sum":
@@ -3114,18 +3200,27 @@ def l1_loss(input: Tensor, target, reduction="mean"):
     else:  # mean
         out_data = loss_vals.mean()
     
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, 
-                 requires_grad=input.requires_grad, _children=(input,), 
-                 _op="l1_loss", device=input.device)
-    
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="l1_loss",
+        device=input.device,
+    )
+
     def _backward():
-        if input.requires_grad:
-            grad = np.sign(diff)
-            if reduction == "mean":
-                grad = grad / diff.size
-            out.grad_data = np.array(out.grad) if isinstance(out.grad, Tensor) else out.grad
-            input.grad += grad * out.grad_data
-    
+        if not input.requires_grad:
+            return
+        grad = np.sign(diff)
+        out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
+        if reduction == "none":
+            grad = grad * out_grad_arr
+        elif reduction == "mean":
+            grad = (grad / diff.size) * out_grad_arr
+        else:
+            grad = grad * out_grad_arr
+        input.grad += grad.astype(input.grad.dtype, copy=False)
+
     out._backward = _backward
     return out
 
@@ -3139,17 +3234,27 @@ def smooth_l1_loss(input: Tensor, target, reduction="mean", beta=1.0):
     """
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target)
-    
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+
     x = input.to_numpy()
-    diff = x - target
+    target_arr = np.asarray(target_arr, dtype=x.dtype)
+    if target_arr.shape != x.shape:
+        raise ValueError(f"target shape must match input shape {x.shape}, got {target_arr.shape}")
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+    if beta < 0:
+        raise ValueError(f"beta must be non-negative, got {beta}")
+
+    diff = x - target_arr
     abs_diff = np.abs(diff)
-    
-    # Smooth L1: 0.5 * x^2 / beta if |x| < beta, |x| - 0.5 * beta otherwise
-    loss_vals = np.where(abs_diff < beta, 
-                         0.5 * diff * diff / beta,
-                         abs_diff - 0.5 * beta)
+
+    if beta == 0:
+        loss_vals = abs_diff
+    else:
+        # Smooth L1: 0.5 * x^2 / beta if |x| < beta, |x| - 0.5 * beta otherwise
+        loss_vals = np.where(abs_diff < beta, 0.5 * diff * diff / beta, abs_diff - 0.5 * beta)
     
     if reduction == "sum":
         out_data = loss_vals.sum()
@@ -3158,25 +3263,35 @@ def smooth_l1_loss(input: Tensor, target, reduction="mean", beta=1.0):
     else:  # mean
         out_data = loss_vals.mean()
     
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, 
-                 requires_grad=input.requires_grad, _children=(input,), 
-                 _op="smooth_l1_loss", device=input.device)
-    
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="smooth_l1_loss",
+        device=input.device,
+    )
+
     def _backward():
-        if input.requires_grad:
-            grad = np.where(abs_diff < beta,
-                           diff / beta,
-                           np.sign(diff))
-            if reduction == "mean":
-                grad = grad / diff.size
-            out.grad_data = np.array(out.grad) if isinstance(out.grad, Tensor) else out.grad
-            input.grad += grad * out.grad_data
-    
+        if not input.requires_grad:
+            return
+        if beta == 0:
+            grad = np.sign(diff)
+        else:
+            grad = np.where(abs_diff < beta, diff / beta, np.sign(diff))
+        out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
+        if reduction == "none":
+            grad = grad * out_grad_arr
+        elif reduction == "mean":
+            grad = (grad / diff.size) * out_grad_arr
+        else:
+            grad = grad * out_grad_arr
+        input.grad += grad.astype(input.grad.dtype, copy=False)
+
     out._backward = _backward
     return out
 
 
-def kl_div_loss(input: Tensor, target, reduction="mean"):
+def kl_div_loss(input: Tensor, target, reduction="mean", log_target: bool = False):
     """Kullback-Leibler Divergence Loss
     
     Computes KL(target || input) where both are log-probabilities
@@ -3184,37 +3299,58 @@ def kl_div_loss(input: Tensor, target, reduction="mean"):
     """
     input = _as_tensor(input)
     if isinstance(target, Tensor):
-        target = target.to_numpy()
-    target = np.asarray(target)
-    
+        target_arr = target.to_numpy()
+    else:
+        target_arr = np.asarray(target)
+
     x = input.to_numpy()  # log-probabilities
-    target = np.asarray(target)
-    
-    # Avoid log(0)
-    target_clipped = np.clip(target, 1e-10, 1.0)
-    log_target = np.log(target_clipped)
-    
-    loss_vals = target * (log_target - x)
-    
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
+    target_arr = np.asarray(target_arr, dtype=x.dtype)
+    if target_arr.shape != x.shape:
+        raise ValueError(f"target shape must match input shape {x.shape}, got {target_arr.shape}")
+    if reduction not in ("none", "mean", "sum", "batchmean"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', 'batchmean', got {reduction}")
+
+    if log_target:
+        target_prob = np.exp(target_arr)
+        loss_vals = target_prob * (target_arr - x)
+    else:
+        target_prob = target_arr
+        loss_vals = np.where(target_arr > 0, target_arr * (np.log(np.clip(target_arr, 1e-10, None)) - x), 0.0)
+
+    if reduction == "none":
         out_data = loss_vals
-    else:  # mean
+    elif reduction == "sum":
+        out_data = loss_vals.sum()
+    elif reduction == "batchmean":
+        batch = x.shape[0] if x.ndim > 0 else 1
+        out_data = loss_vals.sum() / float(max(batch, 1))
+    else:
         out_data = loss_vals.mean()
-    
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, 
-                 requires_grad=input.requires_grad, _children=(input,), 
-                 _op="kl_div_loss", device=input.device)
-    
+
+    out = Tensor(
+        np.array(out_data) if np.isscalar(out_data) else out_data,
+        requires_grad=input.requires_grad,
+        _children=(input,),
+        _op="kl_div_loss",
+        device=input.device,
+    )
+
     def _backward():
-        if input.requires_grad:
-            grad = -target
-            if reduction == "mean":
-                grad = grad / target.size
-            out.grad_data = np.array(out.grad) if isinstance(out.grad, Tensor) else out.grad
-            input.grad += grad * out.grad_data
-    
+        if not input.requires_grad:
+            return
+        grad = -target_prob
+        out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
+        if reduction == "none":
+            grad = grad * out_grad_arr
+        elif reduction == "mean":
+            grad = (grad / grad.size) * out_grad_arr
+        elif reduction == "batchmean":
+            batch = x.shape[0] if x.ndim > 0 else 1
+            grad = (grad / float(max(batch, 1))) * out_grad_arr
+        else:
+            grad = grad * out_grad_arr
+        input.grad += grad.astype(input.grad.dtype, copy=False)
+
     out._backward = _backward
     return out
 
