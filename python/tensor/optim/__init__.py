@@ -3,6 +3,7 @@ from tensor.optim.optim import *
 
 __all__ = [
     "Optimizer",
+    "SGD",
     "AdamW",
     "clip_grad_norm",
 ]

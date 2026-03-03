@@ -3,6 +3,93 @@ import numpy as np
 from tensor.optim.optimizer import Optimizer
 
 
+class SGD(Optimizer):
+    """Stochastic Gradient Descent optimizer.
+    
+    Args:
+        params: Iterable of parameters to optimize
+        lr: Learning rate (default: 1e-3)
+        momentum: Momentum factor (default: 0)
+        weight_decay: Weight decay (L2 penalty) (default: 0)
+        dampening: Dampening for momentum (default: 0)
+        nesterov: Enable Nesterov momentum (default: False)
+    
+    Example:
+        >>> optimizer = SGD(model.parameters(), lr=0.01, momentum=0.9)
+        >>> optimizer.zero_grad()
+        >>> loss.backward()
+        >>> optimizer.step()
+    """
+    
+    def __init__(self, params, lr=1e-3, momentum=0, weight_decay=0, dampening=0, nesterov=False):
+        super().__init__(params)
+        self.lr = lr
+        self.momentum = momentum
+        self.weight_decay = weight_decay
+        self.dampening = dampening
+        self.nesterov = nesterov
+        
+        if nesterov and (momentum <= 0 or dampening != 0):
+            raise ValueError("Nesterov momentum requires a momentum and zero dampening")
+        
+        # Initialize momentum buffers
+        self.velocity = {id(p): np.zeros_like(p.data) for p in self.params} if momentum != 0 else {}
+    
+    def step(self):
+        """Perform a single optimization step."""
+        for p in self.params:
+            if p.grad is None:
+                continue
+            
+            grad = p.grad
+            
+            # Apply weight decay
+            if self.weight_decay != 0:
+                grad = grad + self.weight_decay * p.data
+            
+            # Apply momentum
+            if self.momentum != 0:
+                pid = id(p)
+                if pid not in self.velocity:
+                    self.velocity[pid] = np.zeros_like(p.data)
+                
+                v = self.velocity[pid]
+                v = self.momentum * v + (1 - self.dampening) * grad
+                self.velocity[pid] = v
+                
+                if self.nesterov:
+                    grad = grad + self.momentum * v
+                else:
+                    grad = v
+            
+            # Update parameters
+            p.data -= self.lr * grad
+    
+    def state_dict(self):
+        """Return the state of the optimizer as a dict."""
+        return {
+            "lr": self.lr,
+            "momentum": self.momentum,
+            "weight_decay": self.weight_decay,
+            "dampening": self.dampening,
+            "nesterov": self.nesterov,
+            "velocity": {i: self.velocity[id(p)].copy() for i, p in enumerate(self.params) if id(p) in self.velocity},
+        }
+    
+    def load_state_dict(self, state):
+        """Load the optimizer state."""
+        self.lr = state.get("lr", self.lr)
+        self.momentum = state.get("momentum", self.momentum)
+        self.weight_decay = state.get("weight_decay", self.weight_decay)
+        self.dampening = state.get("dampening", self.dampening)
+        self.nesterov = state.get("nesterov", self.nesterov)
+        
+        velocity_dict = state.get("velocity", {})
+        for i, p in enumerate(self.params):
+            if i in velocity_dict:
+                self.velocity[id(p)] = velocity_dict[i].copy()
+
+
 class AdamW(Optimizer):
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01):
         super().__init__(params)
