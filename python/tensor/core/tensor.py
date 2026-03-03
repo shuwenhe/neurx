@@ -1068,3 +1068,343 @@ def _as_device(t: "Tensor"):
         return t.data
     arr = _ensure_array(t.data, dtype=np.float32)
     return _cuda_ops.to_device(arr)
+
+
+# ============================================================================
+# Tensor Creation Functions
+# ============================================================================
+
+def zeros(*shape, dtype=None, requires_grad=False, device=None):
+    """Create a tensor filled with zeros.
+    
+    Args:
+        *shape: Shape of the tensor (int or tuple)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.zeros(2, 3)
+        >>> tensor.zeros((2, 3), device='cuda')
+    """
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    dtype = dtype or np.float32
+    data = np.zeros(shape, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def ones(*shape, dtype=None, requires_grad=False, device=None):
+    """Create a tensor filled with ones.
+    
+    Args:
+        *shape: Shape of the tensor (int or tuple)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.ones(2, 3)
+        >>> tensor.ones((2, 3), dtype=np.int32)
+    """
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    dtype = dtype or np.float32
+    data = np.ones(shape, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def full(shape, fill_value, dtype=None, requires_grad=False, device=None):
+    """Create a tensor filled with a specific value.
+    
+    Args:
+        shape: Shape of the tensor
+        fill_value: Value to fill the tensor with
+        dtype: Data type (default: inferred from fill_value)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.full((2, 3), 7.5)
+    """
+    if isinstance(shape, int):
+        shape = (shape,)
+    data = np.full(shape, fill_value, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def empty(*shape, dtype=None, requires_grad=False, device=None):
+    """Create an uninitialized tensor.
+    
+    Args:
+        *shape: Shape of the tensor (int or tuple)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.empty(2, 3)
+    """
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    dtype = dtype or np.float32
+    data = np.empty(shape, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def rand(*shape, dtype=None, requires_grad=False, device=None):
+    """Create a tensor with random values from uniform distribution [0, 1).
+    
+    Args:
+        *shape: Shape of the tensor (int or tuple)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.rand(2, 3)
+        >>> tensor.rand((2, 3), device='cuda')
+    """
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    dtype = dtype or np.float32
+    data = np.random.rand(*shape).astype(dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def randn(*shape, dtype=None, requires_grad=False, device=None):
+    """Create a tensor with random values from standard normal distribution.
+    
+    Args:
+        *shape: Shape of the tensor (int or tuple)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.randn(2, 3)
+        >>> tensor.randn((2, 3), device='cuda')
+    """
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    dtype = dtype or np.float32
+    data = np.random.randn(*shape).astype(dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def randint(low, high, shape, dtype=None, requires_grad=False, device=None):
+    """Create a tensor with random integers from [low, high).
+    
+    Args:
+        low: Lowest integer (inclusive)
+        high: Highest integer (exclusive)
+        shape: Shape of the tensor
+        dtype: Data type (default: int64)
+        requires_grad: Whether to track gradients (typically False for integers)
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.randint(0, 10, (2, 3))
+    """
+    if isinstance(shape, int):
+        shape = (shape,)
+    dtype = dtype or np.int64
+    data = np.random.randint(low, high, size=shape, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def arange(start, end=None, step=1, dtype=None, requires_grad=False, device=None):
+    """Create a 1D tensor with evenly spaced values.
+    
+    Args:
+        start: Start value (or end if end is None)
+        end: End value (exclusive)
+        step: Spacing between values
+        dtype: Data type (default: inferred)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.arange(10)        # [0, 1, 2, ..., 9]
+        >>> tensor.arange(2, 10, 2)  # [2, 4, 6, 8]
+    """
+    if end is None:
+        end = start
+        start = 0
+    data = np.arange(start, end, step, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def linspace(start, end, steps, dtype=None, requires_grad=False, device=None):
+    """Create a 1D tensor with linearly spaced values.
+    
+    Args:
+        start: Start value
+        end: End value (inclusive)
+        steps: Number of values
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.linspace(0, 1, 5)  # [0.0, 0.25, 0.5, 0.75, 1.0]
+    """
+    dtype = dtype or np.float32
+    data = np.linspace(start, end, steps, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def logspace(start, end, steps, base=10.0, dtype=None, requires_grad=False, device=None):
+    """Create a 1D tensor with logarithmically spaced values.
+    
+    Args:
+        start: Start exponent
+        end: End exponent
+        steps: Number of values
+        base: Base of the logarithm (default: 10)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.logspace(0, 3, 4)  # [1, 10, 100, 1000]
+    """
+    dtype = dtype or np.float32
+    data = np.logspace(start, end, steps, base=base, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def eye(n, m=None, dtype=None, requires_grad=False, device=None):
+    """Create a 2D identity matrix.
+    
+    Args:
+        n: Number of rows
+        m: Number of columns (default: same as n)
+        dtype: Data type (default: float32)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.eye(3)
+        >>> tensor.eye(3, 4)
+    """
+    dtype = dtype or np.float32
+    data = np.eye(n, m, dtype=dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def diag(v, k=0, dtype=None, requires_grad=False, device=None):
+    """Create a diagonal matrix from a vector or extract diagonal from matrix.
+    
+    Args:
+        v: 1D or 2D tensor/array
+        k: Diagonal offset (0=main diagonal, positive=above, negative=below)
+        dtype: Data type
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on ('cpu' or 'cuda')
+    
+    Example:
+        >>> tensor.diag([1, 2, 3])
+        >>> tensor.diag(tensor.ones(3, 3), k=1)
+    """
+    v_data = v.to_numpy() if isinstance(v, Tensor) else np.asarray(v)
+    data = np.diag(v_data, k=k)
+    if dtype is not None:
+        data = data.astype(dtype)
+    return Tensor(data, requires_grad=requires_grad, device=device)
+
+
+def zeros_like(input, dtype=None, requires_grad=False, device=None):
+    """Create a tensor of zeros with the same shape as input.
+    
+    Args:
+        input: Input tensor to match shape
+        dtype: Data type (default: same as input)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on (default: same as input)
+    
+    Example:
+        >>> x = tensor.rand(2, 3)
+        >>> tensor.zeros_like(x)
+    """
+    shape = input.shape if isinstance(input, Tensor) else np.asarray(input).shape
+    device = device or (input.device if isinstance(input, Tensor) else None)
+    dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
+    return zeros(*shape, dtype=dtype, requires_grad=requires_grad, device=device)
+
+
+def ones_like(input, dtype=None, requires_grad=False, device=None):
+    """Create a tensor of ones with the same shape as input.
+    
+    Args:
+        input: Input tensor to match shape
+        dtype: Data type (default: same as input)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on (default: same as input)
+    
+    Example:
+        >>> x = tensor.rand(2, 3)
+        >>> tensor.ones_like(x)
+    """
+    shape = input.shape if isinstance(input, Tensor) else np.asarray(input).shape
+    device = device or (input.device if isinstance(input, Tensor) else None)
+    dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
+    return ones(*shape, dtype=dtype, requires_grad=requires_grad, device=device)
+
+
+def full_like(input, fill_value, dtype=None, requires_grad=False, device=None):
+    """Create a tensor filled with a value, matching the shape of input.
+    
+    Args:
+        input: Input tensor to match shape
+        fill_value: Value to fill with
+        dtype: Data type (default: same as input)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on (default: same as input)
+    
+    Example:
+        >>> x = tensor.rand(2, 3)
+        >>> tensor.full_like(x, 7.5)
+    """
+    shape = input.shape if isinstance(input, Tensor) else np.asarray(input).shape
+    device = device or (input.device if isinstance(input, Tensor) else None)
+    dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
+    return full(shape, fill_value, dtype=dtype, requires_grad=requires_grad, device=device)
+
+
+def rand_like(input, dtype=None, requires_grad=False, device=None):
+    """Create a tensor of random values [0, 1) with the same shape as input.
+    
+    Args:
+        input: Input tensor to match shape
+        dtype: Data type (default: same as input)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on (default: same as input)
+    
+    Example:
+        >>> x = tensor.rand(2, 3)
+        >>> tensor.rand_like(x)
+    """
+    shape = input.shape if isinstance(input, Tensor) else np.asarray(input).shape
+    device = device or (input.device if isinstance(input, Tensor) else None)
+    dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
+    return rand(*shape, dtype=dtype, requires_grad=requires_grad, device=device)
+
+
+def randn_like(input, dtype=None, requires_grad=False, device=None):
+    """Create a tensor of random normal values with the same shape as input.
+    
+    Args:
+        input: Input tensor to match shape
+        dtype: Data type (default: same as input)
+        requires_grad: Whether to track gradients
+        device: Device to place tensor on (default: same as input)
+    
+    Example:
+        >>> x = tensor.rand(2, 3)
+        >>> tensor.randn_like(x)
+    """
+    shape = input.shape if isinstance(input, Tensor) else np.asarray(input).shape
+    device = device or (input.device if isinstance(input, Tensor) else None)
+    dtype = dtype or (input.dtype if isinstance(input, Tensor) else np.asarray(input).dtype)
+    return randn(*shape, dtype=dtype, requires_grad=requires_grad, device=device)
