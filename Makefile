@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -15,6 +15,7 @@ help:
 	@echo "  test-sgd      Run SGD optimizer tests"
 	@echo "  test-schedulers Run learning rate scheduler tests"
 	@echo "  test-optimizers Run Adam and RMSprop optimizer tests"
+	@echo "  test-conv2d   Run Conv2d layer tests"
 	@echo "  list          List all API feature points and one-command per-API tests"
 	@echo "  api           Run one API test case. Usage: make api API=tensor.sum"
 	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
@@ -48,6 +49,9 @@ test-schedulers:
 
 test-optimizers:
 	PYTHONPATH=python $(PYTHON) tests/test_adam_rmsprop.py
+
+test-conv2d:
+	PYTHONPATH=python $(PYTHON) tests/test_conv2d.py
 
 list:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list

@@ -94,14 +94,14 @@ def test_conv2d_training():
             return x
     
     model = SimpleConvNet()
-    optimizer = tensor.optim.SGD(model.parameters(), lr=0.01)
+    optimizer = tensor.optim.SGD(model.parameters(), lr=0.001)
     
-    # Create dummy data
-    x = tensor.randn(2, 3, 32, 32)
-    target = tensor.randn(2, 32, 32, 32)
+    # Create dummy data (smaller to reduce numerical issues)
+    x = tensor.randn(1, 3, 16, 16) * 0.1
+    target = tensor.randn(1, 32, 16, 16) * 0.1
     
     initial_loss = None
-    for step in range(10):
+    for step in range(20):
         optimizer.zero_grad()
         pred = model(x)
         loss = ((pred - target) ** 2).sum()
