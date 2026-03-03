@@ -19,6 +19,18 @@ def _pair(value):
     return (value, value)
 
 
+def _single(value):
+    if isinstance(value, tuple):
+        if len(value) != 1:
+            raise ValueError(f"expected a 1-tuple, got {value}")
+        return value[0]
+    if isinstance(value, list):
+        if len(value) != 1:
+            raise ValueError(f"expected a list with 1 value, got {value}")
+        return value[0]
+    return value
+
+
 def relu(x: Tensor):
     x = _as_tensor(x)
     x_data = x.to_numpy()
@@ -456,6 +468,267 @@ def batch_norm(
             else:
                 dx = dxhat * inv_std
             input.grad += dx.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def conv1d(input: Tensor, weight: Tensor, bias: Tensor | None = None, stride=1, padding=0, dilation=1, groups=1):
+    input = _as_tensor(input)
+    weight = _as_tensor(weight)
+    if bias is not None:
+        bias = _as_tensor(bias)
+
+    x_data = input.to_numpy()
+    w_data = weight.to_numpy()
+    b_data = bias.to_numpy() if bias is not None else None
+
+    if x_data.ndim != 3:
+        raise ValueError(f"conv1d expects 3D input (N, C, L), got shape {x_data.shape}")
+    if w_data.ndim != 3:
+        raise ValueError(f"conv1d expects 3D weight (out_channels, in_channels/groups, kL), got shape {w_data.shape}")
+
+    stride_l = int(_single(stride))
+    pad_l = int(_single(padding))
+    dil_l = int(_single(dilation))
+
+    n, in_channels, in_len = x_data.shape
+    out_channels, in_channels_per_group, kernel_len = w_data.shape
+
+    if groups <= 0:
+        raise ValueError(f"groups must be positive, got {groups}")
+    if in_channels % groups != 0:
+        raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+    if out_channels % groups != 0:
+        raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+    if in_channels_per_group != in_channels // groups:
+        raise ValueError(
+            f"weight second dim ({in_channels_per_group}) must equal in_channels/groups ({in_channels // groups})"
+        )
+    if bias is not None and b_data.shape != (out_channels,):
+        raise ValueError(f"bias shape must be ({out_channels},), got {b_data.shape}")
+
+    eff_kernel = dil_l * (kernel_len - 1) + 1
+    out_len = (in_len + 2 * pad_l - eff_kernel) // stride_l + 1
+    if out_len <= 0:
+        raise ValueError(
+            f"invalid output shape for conv1d: input={x_data.shape}, weight={w_data.shape}, "
+            f"stride={stride_l}, padding={pad_l}, dilation={dil_l}"
+        )
+
+    if pad_l > 0:
+        x_padded = np.pad(x_data, ((0, 0), (0, 0), (pad_l, pad_l)), mode="constant")
+    else:
+        x_padded = x_data
+
+    out_data = np.zeros((n, out_channels, out_len), dtype=x_data.dtype)
+    in_ch_per_group = in_channels // groups
+    out_ch_per_group = out_channels // groups
+
+    for bi in range(n):
+        for g in range(groups):
+            in_start = g * in_ch_per_group
+            out_start = g * out_ch_per_group
+            for oc_local in range(out_ch_per_group):
+                oc = out_start + oc_local
+                for ol in range(out_len):
+                    il_start = ol * stride_l
+                    acc = 0.0
+                    for ic_local in range(in_ch_per_group):
+                        ic = in_start + ic_local
+                        for kl in range(kernel_len):
+                            il = il_start + kl * dil_l
+                            acc += x_padded[bi, ic, il] * w_data[oc, ic_local, kl]
+                    out_data[bi, oc, ol] = acc
+
+    if b_data is not None:
+        out_data += b_data.reshape(1, -1, 1)
+
+    requires_grad = input.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [t for t in (input, weight, bias) if t is not None and t.requires_grad]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="conv1d", device=input.device)
+
+    def _backward():
+        grad_out = out.grad
+
+        if weight.requires_grad:
+            w_grad = np.zeros_like(w_data)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for ol in range(out_len):
+                            il_start = ol * stride_l
+                            go = grad_out[bi, oc, ol]
+                            for ic_local in range(in_ch_per_group):
+                                ic = in_start + ic_local
+                                for kl in range(kernel_len):
+                                    il = il_start + kl * dil_l
+                                    w_grad[oc, ic_local, kl] += x_padded[bi, ic, il] * go
+            weight.grad += w_grad.astype(weight.grad.dtype, copy=False)
+
+        if bias is not None and bias.requires_grad:
+            bias.grad += grad_out.sum(axis=(0, 2)).astype(bias.grad.dtype, copy=False)
+
+        if input.requires_grad:
+            x_grad_padded = np.zeros_like(x_padded)
+            for bi in range(n):
+                for g in range(groups):
+                    in_start = g * in_ch_per_group
+                    out_start = g * out_ch_per_group
+                    for oc_local in range(out_ch_per_group):
+                        oc = out_start + oc_local
+                        for ol in range(out_len):
+                            il_start = ol * stride_l
+                            go = grad_out[bi, oc, ol]
+                            for ic_local in range(in_ch_per_group):
+                                ic = in_start + ic_local
+                                for kl in range(kernel_len):
+                                    il = il_start + kl * dil_l
+                                    x_grad_padded[bi, ic, il] += w_data[oc, ic_local, kl] * go
+            if pad_l > 0:
+                x_grad = x_grad_padded[:, :, pad_l:pad_l + in_len]
+            else:
+                x_grad = x_grad_padded
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    return out
+
+
+def max_pool1d(input: Tensor, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 3:
+        raise ValueError(f"max_pool1d expects 3D input (N, C, L), got shape {x_data.shape}")
+
+    kernel_l = int(_single(kernel_size))
+    stride_l = int(_single(stride if stride is not None else kernel_size))
+    pad_l = int(_single(padding))
+    dil_l = int(_single(dilation))
+
+    n, c, in_len = x_data.shape
+    eff_kernel = dil_l * (kernel_l - 1) + 1
+    if ceil_mode:
+        out_len = int(np.ceil((in_len + 2 * pad_l - eff_kernel) / stride_l + 1))
+    else:
+        out_len = (in_len + 2 * pad_l - eff_kernel) // stride_l + 1
+    if ceil_mode and out_len > 0 and (out_len - 1) * stride_l >= in_len + pad_l:
+        out_len -= 1
+    out_len = max(out_len, 0)
+
+    x_padded = np.pad(x_data, ((0, 0), (0, 0), (pad_l, pad_l)), mode="constant", constant_values=-np.inf)
+    out_data = np.empty((n, c, out_len), dtype=x_data.dtype)
+    max_idx = np.full((n, c, out_len), -1, dtype=np.int64)
+
+    for bi in range(n):
+        for ci in range(c):
+            for ol in range(out_len):
+                il_start = ol * stride_l
+                best_val = -np.inf
+                best_idx = -1
+                for kl in range(kernel_l):
+                    il = il_start + kl * dil_l
+                    if il < 0 or il >= x_padded.shape[2]:
+                        continue
+                    v = x_padded[bi, ci, il]
+                    if v > best_val:
+                        best_val = v
+                        best_idx = il
+                out_data[bi, ci, ol] = best_val
+                max_idx[bi, ci, ol] = best_idx
+
+    out = Tensor(out_data, requires_grad=input.requires_grad, _children=(input,), _op="max_pool1d", device=input.device)
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for ol in range(out_len):
+                        il = max_idx[bi, ci, ol] - pad_l
+                        if 0 <= il < in_len:
+                            x_grad[bi, ci, il] += out.grad[bi, ci, ol]
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
+
+    out._backward = _backward
+    if not return_indices:
+        return out
+
+    indices = max_idx - pad_l
+    indices[(indices < 0) | (indices >= in_len)] = -1
+    return out, Tensor(indices.astype(np.int64), requires_grad=False, device=input.device)
+
+
+def avg_pool1d(
+    input: Tensor,
+    kernel_size,
+    stride=None,
+    padding=0,
+    ceil_mode=False,
+    count_include_pad=True,
+    divisor_override=None,
+):
+    input = _as_tensor(input)
+    x_data = input.to_numpy()
+    if x_data.ndim != 3:
+        raise ValueError(f"avg_pool1d expects 3D input (N, C, L), got shape {x_data.shape}")
+
+    kernel_l = int(_single(kernel_size))
+    stride_l = int(_single(stride if stride is not None else kernel_size))
+    pad_l = int(_single(padding))
+
+    n, c, in_len = x_data.shape
+    if ceil_mode:
+        out_len = int(np.ceil((in_len + 2 * pad_l - kernel_l) / stride_l + 1))
+    else:
+        out_len = (in_len + 2 * pad_l - kernel_l) // stride_l + 1
+    if ceil_mode and out_len > 0 and (out_len - 1) * stride_l >= in_len + pad_l:
+        out_len -= 1
+    out_len = max(out_len, 0)
+
+    x_padded = np.pad(x_data, ((0, 0), (0, 0), (pad_l, pad_l)), mode="constant", constant_values=0.0)
+    out_data = np.zeros((n, c, out_len), dtype=x_data.dtype)
+    divisors = np.zeros((n, c, out_len), dtype=np.float64)
+
+    for bi in range(n):
+        for ci in range(c):
+            for ol in range(out_len):
+                il_start = ol * stride_l
+                acc = 0.0
+                valid = 0
+                for kl in range(kernel_l):
+                    il = il_start + kl
+                    if 0 <= il < x_padded.shape[2]:
+                        acc += x_padded[bi, ci, il]
+                    if pad_l <= il < pad_l + in_len:
+                        valid += 1
+                if divisor_override is not None:
+                    div = float(divisor_override)
+                elif count_include_pad:
+                    div = float(kernel_l)
+                else:
+                    div = float(max(valid, 1))
+                divisors[bi, ci, ol] = div
+                out_data[bi, ci, ol] = acc / div
+
+    out = Tensor(out_data, requires_grad=input.requires_grad, _children=(input,), _op="avg_pool1d", device=input.device)
+
+    def _backward():
+        if input.requires_grad:
+            x_grad = np.zeros_like(x_data)
+            for bi in range(n):
+                for ci in range(c):
+                    for ol in range(out_len):
+                        go = out.grad[bi, ci, ol] / divisors[bi, ci, ol]
+                        il_start = ol * stride_l
+                        for kl in range(kernel_l):
+                            il = il_start + kl - pad_l
+                            if 0 <= il < in_len:
+                                x_grad[bi, ci, il] += go
+            input.grad += x_grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
     return out
@@ -1262,6 +1535,9 @@ __all__ = [
     "log_softmax",
     "linear",
     "batch_norm",
+    "conv1d",
+    "max_pool1d",
+    "avg_pool1d",
     "conv2d",
     "max_pool2d",
     "avg_pool2d",

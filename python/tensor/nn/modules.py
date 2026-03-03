@@ -280,6 +280,43 @@ class Linear(Module):
         return out
 
 
+class Conv1d(Module):
+    """1D Convolutional layer."""
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, int) else int(kernel_size[0])
+        self.stride = stride if isinstance(stride, int) else int(stride[0])
+        self.padding = padding if isinstance(padding, int) else int(padding[0])
+        self.dilation = dilation if isinstance(dilation, int) else int(dilation[0])
+        self.groups = groups
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
+        fan_in = (in_channels // groups) * self.kernel_size
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, self.kernel_size) * scale)
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.conv1d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups,
+        )
+
+
 class Conv2d(Module):
     """2D Convolutional layer.
     
@@ -1254,6 +1291,58 @@ class BatchNorm2d(Module):
 
 
 # ================ Pooling Layers ================
+
+class MaxPool1d(Module):
+    """1D Maximum Pooling."""
+
+    def __init__(self, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+        self.ceil_mode = ceil_mode
+        self.return_indices = return_indices
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.max_pool1d(
+            x,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            ceil_mode=self.ceil_mode,
+            return_indices=self.return_indices,
+        )
+
+
+class AvgPool1d(Module):
+    """1D Average Pooling."""
+
+    def __init__(self, kernel_size, stride=None, padding=0, ceil_mode=False, count_include_pad=True, divisor_override=None):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.ceil_mode = ceil_mode
+        self.count_include_pad = count_include_pad
+        self.divisor_override = divisor_override
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.avg_pool1d(
+            x,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            ceil_mode=self.ceil_mode,
+            count_include_pad=self.count_include_pad,
+            divisor_override=self.divisor_override,
+        )
+
 
 class MaxPool2d(Module):
     """2D Maximum Pooling"""
