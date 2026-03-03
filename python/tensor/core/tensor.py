@@ -835,30 +835,20 @@ class Tensor:
         x = _to_numpy(self.data)
         src_data = _to_numpy(src_t.data)
         out_data = x.copy()
-        
-        # Flatten the data along all axes except dim to make indexing simpler
-        # This is similar to how scatter works, but we add instead of replace
-        ndim = out_data.ndim
-        
-        # Move the target dimension to the last position
-        out_data = np.moveaxis(out_data, dim, -1)
-        idx_moved = np.moveaxis(idx, dim, -1)
-        src_moved = np.moveaxis(src_data, dim, -1)
-        
-        # Flatten all dimensions except the last one
-        orig_shape = out_data.shape
-        out_flat = out_data.reshape(-1, orig_shape[-1])
-        idx_flat = idx_moved.reshape(-1, idx_moved.shape[-1])
-        src_flat = src_moved.reshape(-1, src_moved.shape[-1])
-        
-        # Add values at the specified indices
-        for i in range(out_flat.shape[0]):
-            for j in range(idx_flat.shape[1]):
-                out_flat[i, idx_flat[i, j]] += src_flat[i, j]
-        
-        # Reshape back and move axis back
-        out_data = out_flat.reshape(orig_shape)
-        out_data = np.moveaxis(out_data, -1, dim)
+        dim = dim + x.ndim if dim < 0 else dim
+
+        moved_out = np.moveaxis(out_data, dim, -1)
+        moved_idx = np.moveaxis(idx, dim, -1)
+        moved_src = np.moveaxis(src_data, dim, -1)
+
+        flat_out = moved_out.reshape(-1, moved_out.shape[-1])
+        flat_idx = moved_idx.reshape(-1, moved_idx.shape[-1])
+        flat_src = moved_src.reshape(-1, moved_src.shape[-1])
+
+        row_idx = np.repeat(np.arange(flat_out.shape[0]), flat_idx.shape[1])
+        np.add.at(flat_out, (row_idx, flat_idx.reshape(-1)), flat_src.reshape(-1))
+
+        out_data = np.moveaxis(flat_out.reshape(moved_out.shape), -1, dim)
         
         out = Tensor(out_data, self.requires_grad or src_t.requires_grad, (self, src_t), "scatter_add", device=self.device)
 
@@ -893,6 +883,35 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def masked_fill(self, mask, value):
+        x = _to_numpy(self.data)
+        mask_np = mask.to_numpy().astype(bool) if isinstance(mask, Tensor) else np.asarray(mask, dtype=bool)
+        fill_value = value.item() if isinstance(value, Tensor) and value.shape == () else value
+        out_data = np.where(mask_np, fill_value, x)
+        out = Tensor(out_data, self.requires_grad, (self,), "masked_fill", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * (~mask_np)
+
+        out._backward = _backward
+        return out
+
+    def masked_select(self, mask):
+        x = _to_numpy(self.data)
+        mask_np = mask.to_numpy().astype(bool) if isinstance(mask, Tensor) else np.asarray(mask, dtype=bool)
+        out_data = x[mask_np]
+        out = Tensor(out_data, self.requires_grad, (self,), "masked_select", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                grad[mask_np] = out.grad
+                self.grad += grad
+
+        out._backward = _backward
+        return out
+
     def repeat(self, *sizes):
         if len(sizes) == 1 and isinstance(sizes[0], (tuple, list)):
             sizes = tuple(sizes[0])
@@ -910,6 +929,112 @@ class Tensor:
 
         out._backward = _backward
         return out
+
+    def moveaxis(self, source, destination):
+        x = _to_numpy(self.data)
+        out_data = np.moveaxis(x, source, destination)
+        out = Tensor(out_data, self.requires_grad, (self,), "moveaxis", device=self.device)
+
+        src = source if isinstance(source, tuple) else (source,)
+        dst = destination if isinstance(destination, tuple) else (destination,)
+        ndim = x.ndim
+        src = tuple(s + ndim if s < 0 else s for s in src)
+        dst = tuple(d + ndim if d < 0 else d for d in dst)
+
+        order = [i for i in range(ndim) if i not in src]
+        for d, s in sorted(zip(dst, src)):
+            order.insert(d, s)
+        inv_order = np.argsort(order)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad.transpose(inv_order)
+
+        out._backward = _backward
+        return out
+
+    def movedim(self, source, destination):
+        return self.moveaxis(source, destination)
+
+    def argsort(self, axis=-1, descending=False, dim=None):
+        if dim is not None:
+            axis = dim
+        x = _to_numpy(self.data)
+        axis = axis + x.ndim if axis < 0 else axis
+        idx = np.argsort(x, axis=axis)
+        if descending:
+            idx = np.flip(idx, axis=axis)
+        return Tensor(idx.astype(np.int64, copy=False), requires_grad=False, device=self.device)
+
+    def sort(self, axis=-1, descending=False, dim=None):
+        if dim is not None:
+            axis = dim
+        x = _to_numpy(self.data)
+        axis = axis + x.ndim if axis < 0 else axis
+        idx = np.argsort(x, axis=axis)
+        if descending:
+            idx = np.flip(idx, axis=axis)
+        out_data = np.take_along_axis(x, idx, axis=axis)
+        out = Tensor(out_data, self.requires_grad, (self,), "sort", device=self.device)
+        idx_t = Tensor(idx.astype(np.int64, copy=False), requires_grad=False, device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                np.put_along_axis(grad, idx, out.grad, axis=axis)
+                self.grad += grad
+
+        out._backward = _backward
+        return out, idx_t
+
+    def topk(self, k, dim=-1, largest=True, sorted=True):
+        x = _to_numpy(self.data)
+        dim = dim + x.ndim if dim < 0 else dim
+        if k < 0 or k > x.shape[dim]:
+            raise ValueError("topk: k must satisfy 0 <= k <= size(dim)")
+
+        if k == 0:
+            out_shape = list(x.shape)
+            out_shape[dim] = 0
+            empty_vals = np.empty(out_shape, dtype=x.dtype)
+            empty_idx = np.empty(out_shape, dtype=np.int64)
+            return Tensor(empty_vals, self.requires_grad, (self,), "topk", device=self.device), Tensor(
+                empty_idx, requires_grad=False, device=self.device
+            )
+
+        if largest:
+            part_idx = np.argpartition(-x, k - 1, axis=dim)
+        else:
+            part_idx = np.argpartition(x, k - 1, axis=dim)
+
+        slicer = [slice(None)] * x.ndim
+        slicer[dim] = slice(0, k)
+        topk_idx = part_idx[tuple(slicer)]
+        topk_vals = np.take_along_axis(x, topk_idx, axis=dim)
+
+        if sorted:
+            order = np.argsort(-topk_vals if largest else topk_vals, axis=dim)
+            topk_vals = np.take_along_axis(topk_vals, order, axis=dim)
+            topk_idx = np.take_along_axis(topk_idx, order, axis=dim)
+
+        out = Tensor(topk_vals, self.requires_grad, (self,), "topk", device=self.device)
+        idx_t = Tensor(topk_idx.astype(np.int64, copy=False), requires_grad=False, device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = np.zeros_like(x, dtype=self.grad.dtype)
+                np.add.at(
+                    grad,
+                    tuple(
+                        topk_idx if ax == dim else np.indices(topk_idx.shape)[ax]
+                        for ax in range(x.ndim)
+                    ),
+                    out.grad,
+                )
+                self.grad += grad
+
+        out._backward = _backward
+        return out, idx_t
 
     def expand(self, *shape):
         if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
