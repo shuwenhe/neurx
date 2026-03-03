@@ -30,7 +30,11 @@ Current state: production foundation is in place (runtime config, diagnostics, p
 ### Infrastructure
 - CUDA extension (starter) with GPU tensor, add/mul, bias add, matmul, layernorm, softmax
 - Runtime platform module (`tensor.platform`) for config, logging, diagnostics (`tensor-doctor`)
-- Serialization helpers including training checkpoint save/load
+- **Enhanced Serialization** - Advanced model checkpointing and state management
+  - ModelCheckpoint manager with auto-cleanup and best model selection
+  - Compression support (gzip) for 50-80% file size reduction
+  - State dict utilities for transfer learning and model surgery
+  - Optimizer state persistence (SGD, Adam, RMSprop, AdamW)
 - Training runtime helpers: `CheckpointManager`, `TrainingLogger`, `run_training_loop`
 - AMP helpers: `tensor.training.autocast` and `tensor.training.GradScaler`
 - Data pipeline: `Dataset`, `DataLoader`, `TensorDataset`
@@ -133,6 +137,8 @@ make test-resnet          # ResNet models
 make test-scatter         # Scatter operations
 make test-meshgrid        # Meshgrid coordinate generation
 make test-scatter-gather  # Comprehensive scatter/gather/meshgrid tests
+make test-serialization   # Model serialization and checkpointing
+make test-checkpoint      # Checkpoint manager tests
 make test-new-features    # All new features
 
 # Test existing features
