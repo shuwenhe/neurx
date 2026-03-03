@@ -37,6 +37,19 @@ def layer_norm(input, normalized_shape, weight=None, bias=None, eps=1e-5):
     return F.layer_norm(input, normalized_shape, weight=weight, bias=bias, eps=eps)
 
 
+def batch_norm(input, running_mean, running_var, weight=None, bias=None, training=False, momentum=0.1, eps=1e-5):
+    return F.batch_norm(
+        input,
+        running_mean=running_mean,
+        running_var=running_var,
+        weight=weight,
+        bias=bias,
+        training=training,
+        momentum=momentum,
+        eps=eps,
+    )
+
+
 def dropout(input, p=0.5, training=True, inplace=False):
     return F.dropout(input, p=p, training=training, inplace=inplace)
 
@@ -97,6 +110,7 @@ __all__ = [
     "sigmoid",
     "softmax",
     "layer_norm",
+    "batch_norm",
     "dropout",
     "embedding",
     "cross_entropy",
