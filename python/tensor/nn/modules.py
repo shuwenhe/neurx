@@ -1290,6 +1290,139 @@ class BatchNorm2d(Module):
         )
 
 
+class GroupNorm(Module):
+    """Group Normalization."""
+
+    def __init__(self, num_groups, num_channels, eps=1e-5, affine=True):
+        super().__init__()
+        if num_groups <= 0:
+            raise ValueError(f"num_groups must be positive, got {num_groups}")
+        if num_channels % num_groups != 0:
+            raise ValueError(f"num_channels ({num_channels}) must be divisible by num_groups ({num_groups})")
+        self.num_groups = num_groups
+        self.num_channels = num_channels
+        self.eps = eps
+        self.affine = affine
+
+        if affine:
+            self.weight = Parameter(np.ones(num_channels))
+            self.bias = Parameter(np.zeros(num_channels))
+        else:
+            self.weight = None
+            self.bias = None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.group_norm(
+            x,
+            num_groups=self.num_groups,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            eps=self.eps,
+        )
+
+
+class InstanceNorm1d(Module):
+    """Instance Normalization for 1D inputs."""
+
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False, track_running_stats=False):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+
+        if track_running_stats:
+            self.register_buffer("running_mean", np.zeros(num_features))
+            self.register_buffer("running_var", np.ones(num_features))
+            self.register_buffer("num_batches_tracked", np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim != 3:
+            raise ValueError(f"InstanceNorm1d expects 3D input, got {x_data.ndim}D")
+
+        use_input_stats = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.instance_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            use_input_stats=use_input_stats,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
+
+
+class InstanceNorm2d(Module):
+    """Instance Normalization for 2D inputs."""
+
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=False, track_running_stats=False):
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = momentum
+        self.affine = affine
+        self.track_running_stats = track_running_stats
+
+        if affine:
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
+        else:
+            self.weight = None
+            self.bias = None
+
+        if track_running_stats:
+            self.register_buffer("running_mean", np.zeros(num_features))
+            self.register_buffer("running_var", np.ones(num_features))
+            self.register_buffer("num_batches_tracked", np.array(0))
+        else:
+            self.running_mean = None
+            self.running_var = None
+            self.num_batches_tracked = None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        x_data = x.data if hasattr(x, "data") else np.asarray(x)
+        if x_data.ndim != 4:
+            raise ValueError(f"InstanceNorm2d expects 4D input, got {x_data.ndim}D")
+
+        use_input_stats = self.training or not self.track_running_stats
+        if self.training and self.track_running_stats and self.num_batches_tracked is not None:
+            self.num_batches_tracked += 1
+
+        return F.instance_norm(
+            x,
+            running_mean=self.running_mean if self.track_running_stats else None,
+            running_var=self.running_var if self.track_running_stats else None,
+            weight=self.weight if self.affine else None,
+            bias=self.bias if self.affine else None,
+            use_input_stats=use_input_stats,
+            momentum=self.momentum,
+            eps=self.eps,
+        )
+
+
 # ================ Pooling Layers ================
 
 class MaxPool1d(Module):
