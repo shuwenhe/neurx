@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import pytest
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
@@ -128,10 +127,59 @@ def test_rnn_lstm_gru_modules_multilayer_batch_first_backward():
     assert gru.weight_ih_l0.grad is not None
 
 
-def test_bidirectional_not_supported():
-    with pytest.raises(NotImplementedError):
-        nn.RNN(4, 4, bidirectional=True)
-    with pytest.raises(NotImplementedError):
-        nn.LSTM(4, 4, bidirectional=True)
-    with pytest.raises(NotImplementedError):
-        nn.GRU(4, 4, bidirectional=True)
+def test_bidirectional_modules_forward_and_backward():
+    x = Tensor(np.random.randn(2, 5, 4).astype(np.float64), requires_grad=True)
+
+    rnn = nn.RNN(4, 3, num_layers=2, batch_first=True, bidirectional=True, dropout=0.1)
+    lstm = nn.LSTM(4, 3, num_layers=2, batch_first=True, bidirectional=True, dropout=0.1)
+    gru = nn.GRU(4, 3, num_layers=2, batch_first=True, bidirectional=True, dropout=0.1)
+
+    y_rnn, h_rnn = rnn(x)
+    y_lstm, (h_lstm, c_lstm) = lstm(x)
+    y_gru, h_gru = gru(x)
+
+    assert y_rnn.shape == (2, 5, 6)
+    assert y_lstm.shape == (2, 5, 6)
+    assert y_gru.shape == (2, 5, 6)
+    assert h_rnn.shape == (4, 2, 3)
+    assert h_lstm.shape == (4, 2, 3)
+    assert c_lstm.shape == (4, 2, 3)
+    assert h_gru.shape == (4, 2, 3)
+
+    loss = y_rnn.sum() + h_rnn.sum() + y_lstm.sum() + h_lstm.sum() + c_lstm.sum() + y_gru.sum() + h_gru.sum()
+    loss.backward()
+
+    assert rnn.weight_ih_l0_reverse.grad is not None
+    assert lstm.weight_ih_l0_reverse.grad is not None
+    assert gru.weight_ih_l0_reverse.grad is not None
+
+
+def test_bidirectional_hx_cx_shapes():
+    x = Tensor(np.random.randn(5, 2, 4).astype(np.float64), requires_grad=True)
+
+    rnn = nn.RNN(4, 3, num_layers=2, bidirectional=True)
+    h0 = Tensor(np.random.randn(4, 2, 3).astype(np.float64), requires_grad=True)
+    y_rnn, h_rnn = rnn(x, h0)
+    assert y_rnn.shape == (5, 2, 6)
+    assert h_rnn.shape == (4, 2, 3)
+
+    lstm = nn.LSTM(4, 3, num_layers=2, bidirectional=True)
+    h0_l = Tensor(np.random.randn(4, 2, 3).astype(np.float64), requires_grad=True)
+    c0_l = Tensor(np.random.randn(4, 2, 3).astype(np.float64), requires_grad=True)
+    y_lstm, (h_lstm, c_lstm) = lstm(x, (h0_l, c0_l))
+    assert y_lstm.shape == (5, 2, 6)
+    assert h_lstm.shape == (4, 2, 3)
+    assert c_lstm.shape == (4, 2, 3)
+
+    gru = nn.GRU(4, 3, num_layers=2, bidirectional=True)
+    h0_g = Tensor(np.random.randn(4, 2, 3).astype(np.float64), requires_grad=True)
+    y_gru, h_gru = gru(x, h0_g)
+    assert y_gru.shape == (5, 2, 6)
+    assert h_gru.shape == (4, 2, 3)
+
+    loss = y_rnn.sum() + h_rnn.sum() + y_lstm.sum() + h_lstm.sum() + c_lstm.sum() + y_gru.sum() + h_gru.sum()
+    loss.backward()
+    assert h0.grad is not None
+    assert h0_l.grad is not None
+    assert c0_l.grad is not None
+    assert h0_g.grad is not None
