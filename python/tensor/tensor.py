@@ -10,6 +10,10 @@ from tensor.core.tensor import (
     split,
     stack,
     svd,
+    no_grad,
+    enable_grad,
+    set_grad_enabled,
+    is_grad_enabled,
     where,
     # Tensor creation functions
     zeros,
@@ -44,6 +48,10 @@ __all__ = [
     "inverse",
     "svd",
     "eig",
+    "no_grad",
+    "enable_grad",
+    "set_grad_enabled",
+    "is_grad_enabled",
     # Tensor creation functions
     "zeros",
     "ones",
