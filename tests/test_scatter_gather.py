@@ -19,7 +19,7 @@ def test_gather():
     # Test 1: Basic gather
     print("\n1. Basic gather along dimension 1")
     t = tensor.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]], requires_grad=True)
-    index = tensor.Tensor([[0, 2], [1, 0], [2, 1]], dtype=np.int64)
+    index = tensor.Tensor(np.array([[0, 2], [1, 0], [2, 1]], dtype=np.int64))
     result = t.gather(1, index)
     
     print(f"   Input shape: {t.shape}")
@@ -53,7 +53,7 @@ def test_scatter():
     # Test 1: Basic scatter
     print("\n1. Basic scatter along dimension 1")
     t = tensor.zeros((3, 5))
-    index = tensor.Tensor([[0, 2], [1, 3], [0, 4]], dtype=np.int64)
+    index = tensor.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
     src = tensor.ones((3, 2))
     result = t.scatter(1, index, src)
     
@@ -81,7 +81,7 @@ def test_scatter_add():
     # Test 1: Basic scatter_add
     print("\n1. Basic scatter_add along dimension 1")
     t = tensor.ones((3, 5))
-    index = tensor.Tensor([[0, 2], [1, 3], [0, 4]], dtype=np.int64)
+    index = tensor.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
     src = tensor.ones((3, 2)) * 2
     result = t.scatter_add(1, index, src)
     
@@ -194,7 +194,7 @@ def test_use_cases():
     # Use case 1: Attention mechanism with gather
     print("\n1. Attention mechanism - selecting top-k values")
     scores = tensor.rand((2, 8, 10))  # (batch, heads, seq_len)
-    topk_indices = tensor.Tensor(np.array([[[0, 5, 9]] * 8] * 2), dtype=np.int64)  # Top-3 indices
+    topk_indices = tensor.Tensor(np.array([[[0, 5, 9]] * 8] * 2, dtype=np.int64))  # Top-3 indices
     topk_scores = scores.gather(2, topk_indices)
     print(f"   Scores shape: {scores.shape}")
     print(f"   Top-k indices shape: {topk_indices.shape}")
@@ -221,7 +221,7 @@ def test_use_cases():
     embedding_table = tensor.zeros((vocab_size, embed_dim))
     
     # Update embeddings for specific tokens
-    token_ids = tensor.Tensor([[10, 20, 30]], dtype=np.int64).T  # Shape: (3, 1)
+    token_ids = tensor.Tensor(np.array([[10, 20, 30]], dtype=np.int64).T)  # Shape: (3, 1)
     updates = tensor.randn((3, embed_dim))
     
     # This would need proper indexing, but demonstrates the concept

@@ -6,6 +6,7 @@ from tensor.tensor import (
     eig,
     inverse,
     matmul,
+    meshgrid,
     mm,
     split,
     stack,
