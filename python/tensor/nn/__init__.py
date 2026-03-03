@@ -1,5 +1,5 @@
 from tensor.nn.modules import *
-from tensor.nn.normalization import LayerNorm, GroupNorm, InstanceNorm
+from tensor.nn.normalization import LayerNorm, GroupNorm, InstanceNorm, BatchNorm1d, BatchNorm2d, BatchNorm3d
 from tensor.nn.attention import (
     ScaledDotProductAttention,
     MultiheadAttention,
@@ -27,6 +27,38 @@ from tensor.nn.pooling import (
     MaxPool1d, MaxPool2d, MaxPool3d,
     AvgPool1d, AvgPool2d, AvgPool3d,
     AdaptiveMaxPool2d, AdaptiveAvgPool2d,
+)
+from tensor.nn.init import (
+    xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
+    orthogonal, uniform, normal,
+    xavier_uniform_, xavier_normal_, kaiming_uniform_, kaiming_normal_,
+    orthogonal_, uniform_, normal_,
+)
+from tensor.nn.grad_utils import (
+    get_grad_norm, clip_grad_norm_, clip_grad_value_, zero_grad, GradientClipper,
+)
+from tensor.nn.utils import (
+    count_parameters, count_flops, model_size, summary, analyze_network, ModelAnalyzer,
+)
+from tensor.nn.activations import (
+    relu, leaky_relu, elu, selu, sigmoid, tanh, softmax, log_softmax,
+    softplus, softsign, swish, mish, gelu, hardshrink, softshrink, hardtanh,
+    threshold, glu, prelu, rrelu,
+    ReLU, LeakyReLU, ELU, SELU, Sigmoid, Tanh, Softmax, LogSoftmax,
+    Softplus, Softsign, Swish, Mish, GELU, HardShrink, SoftShrink, HardTanh,
+    Threshold, GLU, PReLU, RReLU,
+)
+from tensor.nn.optim_utils import (
+    constant_lr, step_lr, exponential_lr, polynomial_lr, cosine_lr, cosine_restart_lr,
+    linear_warmup_lr, linear_warmup_cosine_lr, cyclic_lr, one_cycle_lr,
+    apply_weight_decay, clip_grad_norm, compute_grad_norm,
+    adam_momentum_update, sgd_momentum_update,
+    LRScheduler, WarmupScheduler, GradientAccumulator,
+)
+from tensor.nn.loss_extended import (
+    focal_loss, focal_loss_multi, hinge_loss, smooth_l1_loss, huber_loss, margin_ranking_loss,
+    kullback_leibler_divergence, jensen_shannon_divergence, wasserstein_loss,
+    triplet_loss, contrastive_loss, ntxent_loss, center_loss, arcface_loss,
 )
 from tensor.nn import functional
 from tensor.nn.functional import (
@@ -110,6 +142,15 @@ __all__ = [
     "TransformerDecoder",
     "Transformer",
     "BertLike",
+    # Weight Initialization (Week 5)
+    "xavier_uniform", "xavier_normal", "kaiming_uniform", "kaiming_normal",
+    "orthogonal", "uniform", "normal",
+    "xavier_uniform_", "xavier_normal_", "kaiming_uniform_", "kaiming_normal_",
+    "orthogonal_", "uniform_", "normal_",
+    # Gradient Operations (Week 5)
+    "get_grad_norm", "clip_grad_norm_", "clip_grad_value_", "zero_grad", "GradientClipper",
+    # Model Analysis (Week 5)
+    "count_parameters", "count_flops", "model_size", "summary", "analyze_network", "ModelAnalyzer",
     # Legacy names
     "MultiHeadAttention",
     "MLP",
