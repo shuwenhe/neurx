@@ -280,6 +280,277 @@ class Linear(Module):
         return out
 
 
+class RNN(Module):
+    """Multi-layer Elman RNN (single-direction)."""
+
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        num_layers=1,
+        nonlinearity="tanh",
+        bias=True,
+        batch_first=False,
+        dropout=0.0,
+        bidirectional=False,
+    ):
+        super().__init__()
+        if bidirectional:
+            raise NotImplementedError("bidirectional RNN is not supported yet")
+        if nonlinearity not in ("tanh", "relu"):
+            raise ValueError(f"nonlinearity must be 'tanh' or 'relu', got {nonlinearity}")
+        if num_layers <= 0:
+            raise ValueError(f"num_layers must be positive, got {num_layers}")
+        if dropout < 0 or dropout >= 1:
+            raise ValueError(f"dropout must satisfy 0 <= dropout < 1, got {dropout}")
+
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.num_layers = int(num_layers)
+        self.nonlinearity = nonlinearity
+        self.bias = bool(bias)
+        self.batch_first = bool(batch_first)
+        self.dropout = float(dropout)
+        self.bidirectional = False
+
+        for layer in range(self.num_layers):
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size
+            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+
+            w_ih = Parameter(np.random.randn(layer_input_size, self.hidden_size) * scale_ih)
+            w_hh = Parameter(np.random.randn(self.hidden_size, self.hidden_size) * scale_hh)
+            b_ih = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+            b_hh = Parameter(np.zeros((self.hidden_size,))) if self.bias else None
+
+            setattr(self, f"weight_ih_l{layer}", w_ih)
+            setattr(self, f"weight_hh_l{layer}", w_hh)
+            setattr(self, f"bias_ih_l{layer}", b_ih)
+            setattr(self, f"bias_hh_l{layer}", b_hh)
+
+    def __call__(self, x, hx=None):
+        from . import functional as F
+        from tensor.tensor import cat
+
+        if hx is not None:
+            hx = hx if isinstance(hx, Tensor) else Tensor(hx)
+            if hx.ndim == 2:
+                if self.num_layers != 1:
+                    raise ValueError("hx with shape (batch, hidden) is only valid when num_layers=1")
+                hx = hx.unsqueeze(0)
+            if hx.ndim != 3 or hx.shape[0] != self.num_layers:
+                raise ValueError(
+                    f"hx must have shape ({self.num_layers}, batch, {self.hidden_size}), got {hx.shape}"
+                )
+            if hx.shape[2] != self.hidden_size:
+                raise ValueError(f"hx hidden size must be {self.hidden_size}, got {hx.shape[2]}")
+
+        output = x
+        h_states = []
+        for layer in range(self.num_layers):
+            layer_hx = hx[layer] if hx is not None else None
+            output, h_n = F.rnn(
+                output,
+                getattr(self, f"weight_ih_l{layer}"),
+                getattr(self, f"weight_hh_l{layer}"),
+                bias_ih=getattr(self, f"bias_ih_l{layer}"),
+                bias_hh=getattr(self, f"bias_hh_l{layer}"),
+                hx=layer_hx,
+                nonlinearity=self.nonlinearity,
+                batch_first=self.batch_first,
+            )
+            h_states.append(h_n)
+            if self.dropout > 0 and layer < self.num_layers - 1:
+                output = F.dropout(output, p=self.dropout, training=self.training)
+
+        return output, cat(h_states, axis=0)
+
+
+class LSTM(Module):
+    """Multi-layer LSTM (single-direction)."""
+
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        num_layers=1,
+        bias=True,
+        batch_first=False,
+        dropout=0.0,
+        bidirectional=False,
+    ):
+        super().__init__()
+        if bidirectional:
+            raise NotImplementedError("bidirectional LSTM is not supported yet")
+        if num_layers <= 0:
+            raise ValueError(f"num_layers must be positive, got {num_layers}")
+        if dropout < 0 or dropout >= 1:
+            raise ValueError(f"dropout must satisfy 0 <= dropout < 1, got {dropout}")
+
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.num_layers = int(num_layers)
+        self.bias = bool(bias)
+        self.batch_first = bool(batch_first)
+        self.dropout = float(dropout)
+        self.bidirectional = False
+
+        gate_size = 4 * self.hidden_size
+        for layer in range(self.num_layers):
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size
+            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+
+            w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
+            w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+            b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+            b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+
+            setattr(self, f"weight_ih_l{layer}", w_ih)
+            setattr(self, f"weight_hh_l{layer}", w_hh)
+            setattr(self, f"bias_ih_l{layer}", b_ih)
+            setattr(self, f"bias_hh_l{layer}", b_hh)
+
+    def __call__(self, x, hx=None):
+        from . import functional as F
+        from tensor.tensor import cat
+
+        h0 = None
+        c0 = None
+        if hx is not None:
+            if not isinstance(hx, (tuple, list)) or len(hx) != 2:
+                raise ValueError("hx for LSTM must be a tuple (h0, c0)")
+            h0 = hx[0] if isinstance(hx[0], Tensor) else Tensor(hx[0])
+            c0 = hx[1] if isinstance(hx[1], Tensor) else Tensor(hx[1])
+
+            if h0.ndim == 2:
+                if self.num_layers != 1:
+                    raise ValueError("h0 with shape (batch, hidden) is only valid when num_layers=1")
+                h0 = h0.unsqueeze(0)
+            if c0.ndim == 2:
+                if self.num_layers != 1:
+                    raise ValueError("c0 with shape (batch, hidden) is only valid when num_layers=1")
+                c0 = c0.unsqueeze(0)
+
+            if h0.ndim != 3 or h0.shape[0] != self.num_layers:
+                raise ValueError(
+                    f"h0 must have shape ({self.num_layers}, batch, {self.hidden_size}), got {h0.shape}"
+                )
+            if c0.ndim != 3 or c0.shape[0] != self.num_layers:
+                raise ValueError(
+                    f"c0 must have shape ({self.num_layers}, batch, {self.hidden_size}), got {c0.shape}"
+                )
+            if h0.shape[2] != self.hidden_size or c0.shape[2] != self.hidden_size:
+                raise ValueError(
+                    f"h0/c0 hidden size must be {self.hidden_size}, got {h0.shape[2]} and {c0.shape[2]}"
+                )
+
+        output = x
+        h_states = []
+        c_states = []
+        for layer in range(self.num_layers):
+            layer_hx = None
+            if h0 is not None and c0 is not None:
+                layer_hx = (h0[layer], c0[layer])
+            output, (h_n, c_n) = F.lstm(
+                output,
+                getattr(self, f"weight_ih_l{layer}"),
+                getattr(self, f"weight_hh_l{layer}"),
+                bias_ih=getattr(self, f"bias_ih_l{layer}"),
+                bias_hh=getattr(self, f"bias_hh_l{layer}"),
+                hx=layer_hx,
+                batch_first=self.batch_first,
+            )
+            h_states.append(h_n)
+            c_states.append(c_n)
+            if self.dropout > 0 and layer < self.num_layers - 1:
+                output = F.dropout(output, p=self.dropout, training=self.training)
+
+        return output, (cat(h_states, axis=0), cat(c_states, axis=0))
+
+
+class GRU(Module):
+    """Multi-layer GRU (single-direction)."""
+
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        num_layers=1,
+        bias=True,
+        batch_first=False,
+        dropout=0.0,
+        bidirectional=False,
+    ):
+        super().__init__()
+        if bidirectional:
+            raise NotImplementedError("bidirectional GRU is not supported yet")
+        if num_layers <= 0:
+            raise ValueError(f"num_layers must be positive, got {num_layers}")
+        if dropout < 0 or dropout >= 1:
+            raise ValueError(f"dropout must satisfy 0 <= dropout < 1, got {dropout}")
+
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+        self.num_layers = int(num_layers)
+        self.bias = bool(bias)
+        self.batch_first = bool(batch_first)
+        self.dropout = float(dropout)
+        self.bidirectional = False
+
+        gate_size = 3 * self.hidden_size
+        for layer in range(self.num_layers):
+            layer_input_size = self.input_size if layer == 0 else self.hidden_size
+            scale_ih = (1.0 / max(1, layer_input_size)) ** 0.5
+            scale_hh = (1.0 / max(1, self.hidden_size)) ** 0.5
+
+            w_ih = Parameter(np.random.randn(layer_input_size, gate_size) * scale_ih)
+            w_hh = Parameter(np.random.randn(self.hidden_size, gate_size) * scale_hh)
+            b_ih = Parameter(np.zeros((gate_size,))) if self.bias else None
+            b_hh = Parameter(np.zeros((gate_size,))) if self.bias else None
+
+            setattr(self, f"weight_ih_l{layer}", w_ih)
+            setattr(self, f"weight_hh_l{layer}", w_hh)
+            setattr(self, f"bias_ih_l{layer}", b_ih)
+            setattr(self, f"bias_hh_l{layer}", b_hh)
+
+    def __call__(self, x, hx=None):
+        from . import functional as F
+        from tensor.tensor import cat
+
+        if hx is not None:
+            hx = hx if isinstance(hx, Tensor) else Tensor(hx)
+            if hx.ndim == 2:
+                if self.num_layers != 1:
+                    raise ValueError("hx with shape (batch, hidden) is only valid when num_layers=1")
+                hx = hx.unsqueeze(0)
+            if hx.ndim != 3 or hx.shape[0] != self.num_layers:
+                raise ValueError(
+                    f"hx must have shape ({self.num_layers}, batch, {self.hidden_size}), got {hx.shape}"
+                )
+            if hx.shape[2] != self.hidden_size:
+                raise ValueError(f"hx hidden size must be {self.hidden_size}, got {hx.shape[2]}")
+
+        output = x
+        h_states = []
+        for layer in range(self.num_layers):
+            layer_hx = hx[layer] if hx is not None else None
+            output, h_n = F.gru(
+                output,
+                getattr(self, f"weight_ih_l{layer}"),
+                getattr(self, f"weight_hh_l{layer}"),
+                bias_ih=getattr(self, f"bias_ih_l{layer}"),
+                bias_hh=getattr(self, f"bias_hh_l{layer}"),
+                hx=layer_hx,
+                batch_first=self.batch_first,
+            )
+            h_states.append(h_n)
+            if self.dropout > 0 and layer < self.num_layers - 1:
+                output = F.dropout(output, p=self.dropout, training=self.training)
+
+        return output, cat(h_states, axis=0)
+
+
 class Conv1d(Module):
     """1D Convolutional layer."""
 
