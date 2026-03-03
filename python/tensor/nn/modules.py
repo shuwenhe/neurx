@@ -524,6 +524,218 @@ class Conv2d(Module):
         return out
 
 
+class Conv3d(Module):
+    """3D Convolutional layer."""
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size, kernel_size)
+        self.stride = stride if isinstance(stride, tuple) else (stride, stride, stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding, padding)
+        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation, dilation)
+        self.groups = groups
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
+        fan_in = (in_channels // groups) * self.kernel_size[0] * self.kernel_size[1] * self.kernel_size[2]
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        self.weight = Parameter(
+            np.random.randn(
+                out_channels,
+                in_channels // groups,
+                self.kernel_size[0],
+                self.kernel_size[1],
+                self.kernel_size[2],
+            )
+            * scale
+        )
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.conv3d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups,
+        )
+
+
+class ConvTranspose1d(Module):
+    """1D Transposed Convolution layer."""
+
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        padding=0,
+        output_padding=0,
+        groups=1,
+        bias=True,
+        dilation=1,
+    ):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, int) else int(kernel_size[0])
+        self.stride = stride if isinstance(stride, int) else int(stride[0])
+        self.padding = padding if isinstance(padding, int) else int(padding[0])
+        self.output_padding = output_padding if isinstance(output_padding, int) else int(output_padding[0])
+        self.groups = groups
+        self.dilation = dilation if isinstance(dilation, int) else int(dilation[0])
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
+        fan_in = (out_channels // groups) * self.kernel_size
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        # PyTorch-compatible layout: (in_channels, out_channels // groups, kernel_size)
+        self.weight = Parameter(np.random.randn(in_channels, out_channels // groups, self.kernel_size) * scale)
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.conv_transpose1d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            output_padding=self.output_padding,
+            groups=self.groups,
+            dilation=self.dilation,
+        )
+
+
+class ConvTranspose2d(Module):
+    """2D Transposed Convolution layer."""
+
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        padding=0,
+        output_padding=0,
+        groups=1,
+        bias=True,
+        dilation=1,
+    ):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
+        self.stride = stride if isinstance(stride, tuple) else (stride, stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
+        self.output_padding = output_padding if isinstance(output_padding, tuple) else (output_padding, output_padding)
+        self.groups = groups
+        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation)
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
+        fan_in = (out_channels // groups) * self.kernel_size[0] * self.kernel_size[1]
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        # PyTorch-compatible layout: (in_channels, out_channels // groups, kH, kW)
+        self.weight = Parameter(
+            np.random.randn(in_channels, out_channels // groups, self.kernel_size[0], self.kernel_size[1]) * scale
+        )
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.conv_transpose2d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            output_padding=self.output_padding,
+            groups=self.groups,
+            dilation=self.dilation,
+        )
+
+
+class ConvTranspose3d(Module):
+    """3D Transposed Convolution layer."""
+
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        padding=0,
+        output_padding=0,
+        groups=1,
+        bias=True,
+        dilation=1,
+    ):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size, kernel_size)
+        self.stride = stride if isinstance(stride, tuple) else (stride, stride, stride)
+        self.padding = padding if isinstance(padding, tuple) else (padding, padding, padding)
+        self.output_padding = (
+            output_padding if isinstance(output_padding, tuple) else (output_padding, output_padding, output_padding)
+        )
+        self.groups = groups
+        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation, dilation)
+
+        if in_channels % groups != 0:
+            raise ValueError(f"in_channels ({in_channels}) must be divisible by groups ({groups})")
+        if out_channels % groups != 0:
+            raise ValueError(f"out_channels ({out_channels}) must be divisible by groups ({groups})")
+
+        fan_in = (out_channels // groups) * self.kernel_size[0] * self.kernel_size[1] * self.kernel_size[2]
+        scale = (2.0 / max(1, fan_in)) ** 0.5
+        # PyTorch-compatible layout: (in_channels, out_channels // groups, kD, kH, kW)
+        self.weight = Parameter(
+            np.random.randn(
+                in_channels,
+                out_channels // groups,
+                self.kernel_size[0],
+                self.kernel_size[1],
+                self.kernel_size[2],
+            )
+            * scale
+        )
+        self.bias = Parameter(np.zeros((out_channels,))) if bias else None
+
+    def __call__(self, x):
+        from . import functional as F
+
+        return F.conv_transpose3d(
+            x,
+            self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            output_padding=self.output_padding,
+            groups=self.groups,
+            dilation=self.dilation,
+        )
+
+
 class LayerNorm(Module):
     """层归一化：对最后一个维度进行归一化"""
     def __init__(self, normalized_shape, eps=1e-5, bias=True):
