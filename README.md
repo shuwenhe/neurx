@@ -190,7 +190,6 @@ xcpu = x.cpu()
 ```
 
 ## Notes
-- This is not a drop-in replacement for PyTorch; it is intentionally minimal.
 - CUDA support is early and focused on core primitives.
 - See production roadmap: `docs/PRODUCTION_ROADMAP.md`
 
