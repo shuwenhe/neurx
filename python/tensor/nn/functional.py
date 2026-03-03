@@ -1,6 +1,6 @@
 import numpy as np
 
-from tensor.tensor import Tensor
+from tensor.tensor import Tensor, stack
 
 
 def _as_tensor(x):
@@ -376,6 +376,276 @@ def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
     if bias is not None:
         out = out + bias
     return out
+
+
+def _rnn_prepare_input(input: Tensor, batch_first: bool):
+    input = _as_tensor(input)
+    if input.ndim != 3:
+        raise ValueError(
+            f"expected input with shape (seq, batch, feature) or (batch, seq, feature), got {input.shape}"
+        )
+    x_seq = input.transpose(0, 1) if batch_first else input
+    return input, x_seq
+
+
+def _rnn_prepare_hidden(h, batch_size, hidden_size, name, device, dtype):
+    if h is None:
+        return Tensor(np.zeros((batch_size, hidden_size), dtype=dtype), device=device)
+
+    h = _as_tensor(h)
+    if h.ndim == 3:
+        if h.shape[0] != 1:
+            raise ValueError(f"{name} first dim must be 1 for functional single-layer API, got {h.shape[0]}")
+        h = h[0]
+    elif h.ndim != 2:
+        raise ValueError(f"{name} must have shape (batch, hidden) or (1, batch, hidden), got {h.shape}")
+
+    if h.shape != (batch_size, hidden_size):
+        raise ValueError(f"{name} shape must be ({batch_size}, {hidden_size}), got {h.shape}")
+    return h
+
+
+def _rnn_stack_or_empty(outputs, batch_size, hidden_size, dtype, device):
+    if len(outputs) == 0:
+        return Tensor(np.zeros((0, batch_size, hidden_size), dtype=dtype), device=device)
+    return stack(outputs, axis=0)
+
+
+def rnn(
+    input: Tensor,
+    weight_ih: Tensor,
+    weight_hh: Tensor,
+    bias_ih: Tensor | None = None,
+    bias_hh: Tensor | None = None,
+    hx: Tensor | None = None,
+    nonlinearity: str = "tanh",
+    batch_first: bool = False,
+):
+    input, x_seq = _rnn_prepare_input(input, batch_first=batch_first)
+    weight_ih = _as_tensor(weight_ih)
+    weight_hh = _as_tensor(weight_hh)
+    if bias_ih is not None:
+        bias_ih = _as_tensor(bias_ih)
+    if bias_hh is not None:
+        bias_hh = _as_tensor(bias_hh)
+
+    seq_len, batch_size, input_size = x_seq.shape
+    if weight_ih.ndim != 2 or weight_hh.ndim != 2:
+        raise ValueError(
+            f"weight_ih/weight_hh must be 2D, got {weight_ih.shape} and {weight_hh.shape}"
+        )
+    hidden_size = weight_hh.shape[1]
+    if weight_ih.shape != (input_size, hidden_size):
+        raise ValueError(f"weight_ih shape must be ({input_size}, {hidden_size}), got {weight_ih.shape}")
+    if weight_hh.shape != (hidden_size, hidden_size):
+        raise ValueError(f"weight_hh shape must be ({hidden_size}, {hidden_size}), got {weight_hh.shape}")
+    if bias_ih is not None and bias_ih.shape != (hidden_size,):
+        raise ValueError(f"bias_ih shape must be ({hidden_size},), got {bias_ih.shape}")
+    if bias_hh is not None and bias_hh.shape != (hidden_size,):
+        raise ValueError(f"bias_hh shape must be ({hidden_size},), got {bias_hh.shape}")
+
+    if nonlinearity == "tanh":
+        act = tanh
+    elif nonlinearity == "relu":
+        act = relu
+    else:
+        raise ValueError(f"nonlinearity must be 'tanh' or 'relu', got {nonlinearity}")
+
+    h_t = _rnn_prepare_hidden(
+        hx,
+        batch_size=batch_size,
+        hidden_size=hidden_size,
+        name="hx",
+        device=input.device,
+        dtype=input.to_numpy().dtype,
+    )
+
+    outputs = []
+    for t in range(seq_len):
+        gates = x_seq[t] @ weight_ih + h_t @ weight_hh
+        if bias_ih is not None:
+            gates = gates + bias_ih
+        if bias_hh is not None:
+            gates = gates + bias_hh
+        h_t = act(gates)
+        outputs.append(h_t)
+
+    output = _rnn_stack_or_empty(outputs, batch_size, hidden_size, input.to_numpy().dtype, input.device)
+    if batch_first:
+        output = output.transpose(0, 1)
+    return output, h_t.unsqueeze(0)
+
+
+def lstm(
+    input: Tensor,
+    weight_ih: Tensor,
+    weight_hh: Tensor,
+    bias_ih: Tensor | None = None,
+    bias_hh: Tensor | None = None,
+    hx: tuple[Tensor, Tensor] | None = None,
+    batch_first: bool = False,
+):
+    input, x_seq = _rnn_prepare_input(input, batch_first=batch_first)
+    weight_ih = _as_tensor(weight_ih)
+    weight_hh = _as_tensor(weight_hh)
+    if bias_ih is not None:
+        bias_ih = _as_tensor(bias_ih)
+    if bias_hh is not None:
+        bias_hh = _as_tensor(bias_hh)
+
+    seq_len, batch_size, input_size = x_seq.shape
+    if weight_ih.ndim != 2 or weight_hh.ndim != 2:
+        raise ValueError(
+            f"weight_ih/weight_hh must be 2D, got {weight_ih.shape} and {weight_hh.shape}"
+        )
+    if weight_ih.shape[0] != input_size:
+        raise ValueError(f"weight_ih first dim must be input_size ({input_size}), got {weight_ih.shape[0]}")
+    if weight_ih.shape[1] % 4 != 0:
+        raise ValueError(f"weight_ih second dim must be multiple of 4, got {weight_ih.shape[1]}")
+
+    hidden_size = weight_ih.shape[1] // 4
+    if weight_hh.shape != (hidden_size, 4 * hidden_size):
+        raise ValueError(
+            f"weight_hh shape must be ({hidden_size}, {4 * hidden_size}), got {weight_hh.shape}"
+        )
+    if bias_ih is not None and bias_ih.shape != (4 * hidden_size,):
+        raise ValueError(f"bias_ih shape must be ({4 * hidden_size},), got {bias_ih.shape}")
+    if bias_hh is not None and bias_hh.shape != (4 * hidden_size,):
+        raise ValueError(f"bias_hh shape must be ({4 * hidden_size},), got {bias_hh.shape}")
+
+    if hx is None:
+        h_t = _rnn_prepare_hidden(
+            None,
+            batch_size=batch_size,
+            hidden_size=hidden_size,
+            name="h0",
+            device=input.device,
+            dtype=input.to_numpy().dtype,
+        )
+        c_t = _rnn_prepare_hidden(
+            None,
+            batch_size=batch_size,
+            hidden_size=hidden_size,
+            name="c0",
+            device=input.device,
+            dtype=input.to_numpy().dtype,
+        )
+    else:
+        if not isinstance(hx, (tuple, list)) or len(hx) != 2:
+            raise ValueError("hx for lstm must be a tuple (h0, c0)")
+        h_t = _rnn_prepare_hidden(
+            hx[0],
+            batch_size=batch_size,
+            hidden_size=hidden_size,
+            name="h0",
+            device=input.device,
+            dtype=input.to_numpy().dtype,
+        )
+        c_t = _rnn_prepare_hidden(
+            hx[1],
+            batch_size=batch_size,
+            hidden_size=hidden_size,
+            name="c0",
+            device=input.device,
+            dtype=input.to_numpy().dtype,
+        )
+
+    outputs = []
+    for t in range(seq_len):
+        gates = x_seq[t] @ weight_ih + h_t @ weight_hh
+        if bias_ih is not None:
+            gates = gates + bias_ih
+        if bias_hh is not None:
+            gates = gates + bias_hh
+
+        i_t = sigmoid(gates[:, :hidden_size])
+        f_t = sigmoid(gates[:, hidden_size:2 * hidden_size])
+        g_t = tanh(gates[:, 2 * hidden_size:3 * hidden_size])
+        o_t = sigmoid(gates[:, 3 * hidden_size:])
+
+        c_t = f_t * c_t + i_t * g_t
+        h_t = o_t * tanh(c_t)
+        outputs.append(h_t)
+
+    output = _rnn_stack_or_empty(outputs, batch_size, hidden_size, input.to_numpy().dtype, input.device)
+    if batch_first:
+        output = output.transpose(0, 1)
+    return output, (h_t.unsqueeze(0), c_t.unsqueeze(0))
+
+
+def gru(
+    input: Tensor,
+    weight_ih: Tensor,
+    weight_hh: Tensor,
+    bias_ih: Tensor | None = None,
+    bias_hh: Tensor | None = None,
+    hx: Tensor | None = None,
+    batch_first: bool = False,
+):
+    input, x_seq = _rnn_prepare_input(input, batch_first=batch_first)
+    weight_ih = _as_tensor(weight_ih)
+    weight_hh = _as_tensor(weight_hh)
+    if bias_ih is not None:
+        bias_ih = _as_tensor(bias_ih)
+    if bias_hh is not None:
+        bias_hh = _as_tensor(bias_hh)
+
+    seq_len, batch_size, input_size = x_seq.shape
+    if weight_ih.ndim != 2 or weight_hh.ndim != 2:
+        raise ValueError(
+            f"weight_ih/weight_hh must be 2D, got {weight_ih.shape} and {weight_hh.shape}"
+        )
+    if weight_ih.shape[0] != input_size:
+        raise ValueError(f"weight_ih first dim must be input_size ({input_size}), got {weight_ih.shape[0]}")
+    if weight_ih.shape[1] % 3 != 0:
+        raise ValueError(f"weight_ih second dim must be multiple of 3, got {weight_ih.shape[1]}")
+
+    hidden_size = weight_ih.shape[1] // 3
+    if weight_hh.shape != (hidden_size, 3 * hidden_size):
+        raise ValueError(
+            f"weight_hh shape must be ({hidden_size}, {3 * hidden_size}), got {weight_hh.shape}"
+        )
+    if bias_ih is not None and bias_ih.shape != (3 * hidden_size,):
+        raise ValueError(f"bias_ih shape must be ({3 * hidden_size},), got {bias_ih.shape}")
+    if bias_hh is not None and bias_hh.shape != (3 * hidden_size,):
+        raise ValueError(f"bias_hh shape must be ({3 * hidden_size},), got {bias_hh.shape}")
+
+    h_t = _rnn_prepare_hidden(
+        hx,
+        batch_size=batch_size,
+        hidden_size=hidden_size,
+        name="hx",
+        device=input.device,
+        dtype=input.to_numpy().dtype,
+    )
+
+    outputs = []
+    for t in range(seq_len):
+        gi = x_seq[t] @ weight_ih
+        gh = h_t @ weight_hh
+        if bias_ih is not None:
+            gi = gi + bias_ih
+        if bias_hh is not None:
+            gh = gh + bias_hh
+
+        i_r = gi[:, :hidden_size]
+        i_z = gi[:, hidden_size:2 * hidden_size]
+        i_n = gi[:, 2 * hidden_size:]
+
+        h_r = gh[:, :hidden_size]
+        h_z = gh[:, hidden_size:2 * hidden_size]
+        h_n = gh[:, 2 * hidden_size:]
+
+        r_t = sigmoid(i_r + h_r)
+        z_t = sigmoid(i_z + h_z)
+        n_t = tanh(i_n + r_t * h_n)
+        h_t = (1.0 - z_t) * n_t + z_t * h_t
+        outputs.append(h_t)
+
+    output = _rnn_stack_or_empty(outputs, batch_size, hidden_size, input.to_numpy().dtype, input.device)
+    if batch_first:
+        output = output.transpose(0, 1)
+    return output, h_t.unsqueeze(0)
 
 
 def batch_norm(
@@ -2353,6 +2623,9 @@ __all__ = [
     "instance_norm",
     "conv1d",
     "conv_transpose1d",
+    "rnn",
+    "lstm",
+    "gru",
     "max_pool1d",
     "avg_pool1d",
     "conv2d",
