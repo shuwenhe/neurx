@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pytest
 
-from tensor import Tensor
-from tensor.cuda.ops import available
+from neurx import Tensor
+from neurx.cuda.ops import available
 
 
 def _cuda_runtime_ok() -> bool:

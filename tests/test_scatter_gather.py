@@ -3,8 +3,8 @@ import sys
 import numpy as np
 
 try:
-    import tensor
-    print("✅ Successfully imported tensor")
+    import neurx
+    print("✅ Successfully imported neurx")
 except Exception as e:
     print(f"❌ Import error: {e}")
     sys.exit(1)
@@ -18,8 +18,8 @@ def test_gather():
     
     # Test 1: Basic gather
     print("\n1. Basic gather along dimension 1")
-    t = tensor.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]], requires_grad=True)
-    index = tensor.Tensor(np.array([[0, 2], [1, 0], [2, 1]], dtype=np.int64))
+    t = neurx.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]], requires_grad=True)
+    index = neurx.Tensor(np.array([[0, 2], [1, 0], [2, 1]], dtype=np.int64))
     result = t.gather(1, index)
     
     print(f"   Input shape: {t.shape}")
@@ -52,9 +52,9 @@ def test_scatter():
     
     # Test 1: Basic scatter
     print("\n1. Basic scatter along dimension 1")
-    t = tensor.zeros((3, 5))
-    index = tensor.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
-    src = tensor.ones((3, 2))
+    t = neurx.zeros((3, 5))
+    index = neurx.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
+    src = neurx.ones((3, 2))
     result = t.scatter(1, index, src)
     
     print(f"   Input shape: {t.shape}")
@@ -80,9 +80,9 @@ def test_scatter_add():
     
     # Test 1: Basic scatter_add
     print("\n1. Basic scatter_add along dimension 1")
-    t = tensor.ones((3, 5))
-    index = tensor.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
-    src = tensor.ones((3, 2)) * 2
+    t = neurx.ones((3, 5))
+    index = neurx.Tensor(np.array([[0, 2], [1, 3], [0, 4]], dtype=np.int64))
+    src = neurx.ones((3, 2)) * 2
     result = t.scatter_add(1, index, src)
     
     print(f"   Input shape: {t.shape}")
@@ -99,8 +99,8 @@ def test_scatter_add():
     
     # Test 2: scatter_add with gradients
     print("\n2. scatter_add backward pass")
-    t_grad = tensor.Tensor([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]], requires_grad=True)
-    src_grad = tensor.Tensor([[1, 1], [1, 1], [1, 1]], requires_grad=True)
+    t_grad = neurx.Tensor([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]], requires_grad=True)
+    src_grad = neurx.Tensor([[1, 1], [1, 1], [1, 1]], requires_grad=True)
     result_grad = t_grad.scatter_add(1, index, src_grad)
     loss = result_grad.sum()
     loss.backward()
@@ -122,9 +122,9 @@ def test_meshgrid():
     
     # Test 1: 2D meshgrid with 'xy' indexing
     print("\n1. 2D meshgrid with 'xy' indexing")
-    x = tensor.arange(3)
-    y = tensor.arange(4)
-    X, Y = tensor.meshgrid(x, y, indexing='xy')
+    x = neurx.arange(3)
+    y = neurx.arange(4)
+    X, Y = neurx.meshgrid(x, y, indexing='xy')
     
     print(f"   x shape: {x.shape}")
     print(f"   y shape: {y.shape}")
@@ -147,7 +147,7 @@ def test_meshgrid():
     
     # Test 2: 2D meshgrid with 'ij' indexing
     print("\n2. 2D meshgrid with 'ij' indexing")
-    X_ij, Y_ij = tensor.meshgrid(x, y, indexing='ij')
+    X_ij, Y_ij = neurx.meshgrid(x, y, indexing='ij')
     
     print(f"   X_ij shape: {X_ij.shape}")
     print(f"   Y_ij shape: {Y_ij.shape}")
@@ -167,10 +167,10 @@ def test_meshgrid():
     
     # Test 3: 3D meshgrid
     print("\n3. 3D meshgrid")
-    x = tensor.arange(2)
-    y = tensor.arange(3)
-    z = tensor.arange(4)
-    X, Y, Z = tensor.meshgrid(x, y, z, indexing='xy')
+    x = neurx.arange(2)
+    y = neurx.arange(3)
+    z = neurx.arange(4)
+    X, Y, Z = neurx.meshgrid(x, y, z, indexing='xy')
     
     print(f"   X shape: {X.shape}")
     print(f"   Y shape: {Y.shape}")
@@ -193,8 +193,8 @@ def test_use_cases():
     
     # Use case 1: Attention mechanism with gather
     print("\n1. Attention mechanism - selecting top-k values")
-    scores = tensor.rand((2, 8, 10))  # (batch, heads, seq_len)
-    topk_indices = tensor.Tensor(np.array([[[0, 5, 9]] * 8] * 2, dtype=np.int64))  # Top-3 indices
+    scores = neurx.rand((2, 8, 10))  # (batch, heads, seq_len)
+    topk_indices = neurx.Tensor(np.array([[[0, 5, 9]] * 8] * 2, dtype=np.int64))  # Top-3 indices
     topk_scores = scores.gather(2, topk_indices)
     print(f"   Scores shape: {scores.shape}")
     print(f"   Top-k indices shape: {topk_indices.shape}")
@@ -205,9 +205,9 @@ def test_use_cases():
     # Use case 2: Coordinate grid for spatial transformations
     print("\n2. Creating coordinate grid for image processing")
     H, W = 224, 224
-    y = tensor.linspace(0, 1, H)
-    x = tensor.linspace(0, 1, W)
-    grid_y, grid_x = tensor.meshgrid(y, x, indexing='ij')
+    y = neurx.linspace(0, 1, H)
+    x = neurx.linspace(0, 1, W)
+    grid_y, grid_x = neurx.meshgrid(y, x, indexing='ij')
     print(f"   Image size: {H}x{W}")
     print(f"   Grid Y shape: {grid_y.shape}")
     print(f"   Grid X shape: {grid_x.shape}")
@@ -218,11 +218,11 @@ def test_use_cases():
     print("\n3. Embedding table update with scatter_add")
     vocab_size = 1000
     embed_dim = 128
-    embedding_table = tensor.zeros((vocab_size, embed_dim))
+    embedding_table = neurx.zeros((vocab_size, embed_dim))
     
     # Update embeddings for specific tokens
-    token_ids = tensor.Tensor(np.array([[10, 20, 30]], dtype=np.int64).T)  # Shape: (3, 1)
-    updates = tensor.randn((3, embed_dim))
+    token_ids = neurx.Tensor(np.array([[10, 20, 30]], dtype=np.int64).T)  # Shape: (3, 1)
+    updates = neurx.randn((3, embed_dim))
     
     # This would need proper indexing, but demonstrates the concept
     print(f"   Embedding table shape: {embedding_table.shape}")

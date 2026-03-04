@@ -13,9 +13,9 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor import Tensor
-import tensor.nn.functional as F
-import tensor.nn as nn
+from neurx import Tensor
+import neurx.nn.functional as F
+import neurx.nn as nn
 import pytest
 
 

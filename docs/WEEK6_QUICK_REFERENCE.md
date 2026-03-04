@@ -4,7 +4,7 @@
 
 ### Basic Activations
 ```python
-from tensor.nn import relu, sigmoid, tanh, softmax
+from neurx.nn import relu, sigmoid, tanh, softmax
 
 # ReLU: max(0, x) - standard hidden layer
 y = relu(x)
@@ -21,7 +21,7 @@ y = softmax(x, axis=-1)  # Sum = 1.0
 
 ### Advanced Activations
 ```python
-from tensor.nn import gelu, swish, mish, elu, selu
+from neurx.nn import gelu, swish, mish, elu, selu
 
 # GELU: Gaussian Error Linear Unit (transformers)
 y = gelu(x, approximate=False)
@@ -41,7 +41,7 @@ y = selu(x)
 
 ### Parametric Activations
 ```python
-from tensor.nn import leaky_relu, prelu, rrelu
+from neurx.nn import leaky_relu, prelu, rrelu
 
 # Leaky ReLU: allows small negative slope
 y = leaky_relu(x, negative_slope=0.01)
@@ -55,7 +55,7 @@ y = rrelu(x, lower=0.125, upper=0.333, training=True)
 
 ### Thresholding Activations
 ```python
-from tensor.nn import hardshrink, softshrink, hardtanh, threshold
+from neurx.nn import hardshrink, softshrink, hardtanh, threshold
 
 # Hard Shrink: |x| > λ ? x : 0
 y = hardshrink(x, lambd=0.5)
@@ -72,7 +72,7 @@ y = threshold(x, threshold=0.5, value=0)
 
 ### Module Classes
 ```python
-from tensor.nn import ReLU, Sigmoid, GELU, Swish, Softmax
+from neurx.nn import ReLU, Sigmoid, GELU, Swish, Softmax
 
 # Use as layer in model
 class MyModel:
@@ -93,7 +93,7 @@ class MyModel:
 
 ### Focal Loss (Class Imbalance)
 ```python
-from tensor.nn import focal_loss, focal_loss_multi
+from neurx.nn import focal_loss, focal_loss_multi
 
 # Binary classification with class imbalance
 loss = focal_loss(predictions, targets, alpha=0.25, gamma=2.0)
@@ -105,7 +105,7 @@ loss = focal_loss_multi(predictions, targets, alpha=0.25, gamma=2.0)
 
 ### Margin-based Losses
 ```python
-from tensor.nn import hinge_loss, smooth_l1_loss, triplet_loss
+from neurx.nn import hinge_loss, smooth_l1_loss, triplet_loss
 
 # SVM loss for ranking
 loss = hinge_loss(predictions, targets, margin=1.0)
@@ -119,7 +119,7 @@ loss = triplet_loss(anchor, positive, negative, margin=1.0)
 
 ### Contrastive Learning Losses
 ```python
-from tensor.nn import contrastive_loss, ntxent_loss, center_loss
+from neurx.nn import contrastive_loss, ntxent_loss, center_loss
 
 # Pairwise similarity learning
 loss = contrastive_loss(emb1, emb2, labels, margin=1.0)
@@ -135,7 +135,7 @@ loss = center_loss(embeddings, labels, centers, alpha=0.5)
 
 ### Distribution Matching Losses
 ```python
-from tensor.nn import kullback_leibler_divergence, wasserstein_loss
+from neurx.nn import kullback_leibler_divergence, wasserstein_loss
 
 # KL divergence: KL(P || Q)
 kl = kullback_leibler_divergence(predictions, targets)
@@ -146,7 +146,7 @@ loss = wasserstein_loss(predictions, targets)
 
 ### Specialized Losses
 ```python
-from tensor.nn import arcface_loss
+from neurx.nn import arcface_loss
 
 # Face recognition with angular margin
 loss = arcface_loss(embeddings, labels, weights, s=64.0, m=0.5)
@@ -159,7 +159,7 @@ loss = arcface_loss(embeddings, labels, weights, s=64.0, m=0.5)
 
 ### Basic Schedules
 ```python
-from tensor.nn import constant_lr, step_lr, exponential_lr
+from neurx.nn import constant_lr, step_lr, exponential_lr
 
 # Fixed learning rate
 schedule = constant_lr(0.001)
@@ -176,7 +176,7 @@ schedule = exponential_lr(0.1, gamma=0.99)
 
 ### Advanced Schedules
 ```python
-from tensor.nn import polynomial_lr, cosine_lr, one_cycle_lr
+from neurx.nn import polynomial_lr, cosine_lr, one_cycle_lr
 
 # Polynomial decay (linear when power=1)
 schedule = polynomial_lr(0.1, total_steps=100, end_lr=0.0, power=2.0)
@@ -190,7 +190,7 @@ schedule = one_cycle_lr(0.01, 0.1, total_steps=1000, pct_start=0.3)
 
 ### Warmup Schedules
 ```python
-from tensor.nn import linear_warmup_lr, linear_warmup_cosine_lr
+from neurx.nn import linear_warmup_lr, linear_warmup_cosine_lr
 
 # Linear warmup to target LR
 schedule = linear_warmup_lr(0.1, warmup_steps=1000)
@@ -222,7 +222,7 @@ for epoch in range(100):
 
 ### Gradient Operations
 ```python
-from tensor.nn import compute_grad_norm, clip_grad_norm, apply_weight_decay
+from neurx.nn import compute_grad_norm, clip_grad_norm, apply_weight_decay
 
 # Compute L2 norm of gradients
 grad_list = [grad1, grad2, grad3]
@@ -237,7 +237,7 @@ updated_params = apply_weight_decay(params, weight_decay=0.01, lr=0.001)
 
 ### Advanced Utilities
 ```python
-from tensor.nn import adam_momentum_update, sgd_momentum_update
+from neurx.nn import adam_momentum_update, sgd_momentum_update
 
 # Single Adam step (manually)
 m, v = adam_momentum_update(
@@ -254,7 +254,7 @@ velocity = sgd_momentum_update(
 
 ### Scheduler Classes
 ```python
-from tensor.nn import LRScheduler, WarmupScheduler, GradientAccumulator
+from neurx.nn import LRScheduler, WarmupScheduler, GradientAccumulator
 
 # Wrap a schedule function
 schedule_fn = cosine_lr(0.1, total_steps=100)
@@ -288,7 +288,7 @@ for batch in dataloader:
 
 ### Training Loop with Activation + Loss + Schedule
 ```python
-from tensor.nn import relu, sigmoid, softmax, focal_loss, cosine_lr
+from neurx.nn import relu, sigmoid, softmax, focal_loss, cosine_lr
 
 # Setup
 schedule = cosine_lr(0.1, total_steps=1000)
@@ -315,7 +315,7 @@ for epoch in range(1000):
 
 ### Metric Learning with Contrastive Loss
 ```python
-from tensor.nn import ntxent_loss, linear_warmup_cosine_lr
+from neurx.nn import ntxent_loss, linear_warmup_cosine_lr
 
 schedule = linear_warmup_cosine_lr(
     initial_lr=0.1, warmup_steps=500, total_steps=5000
@@ -336,7 +336,7 @@ for step in range(5000):
 
 ### Face Recognition Training
 ```python
-from tensor.nn import arcface_loss, linear_warmup_cosine_lr
+from neurx.nn import arcface_loss, linear_warmup_cosine_lr
 
 schedule = linear_warmup_cosine_lr(0.1, 1000, 10000)
 

@@ -3,7 +3,7 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor import Tensor, enable_grad, is_grad_enabled, no_grad, set_grad_enabled
+from neurx import Tensor, enable_grad, is_grad_enabled, no_grad, set_grad_enabled
 
 
 def test_default_grad_enabled():

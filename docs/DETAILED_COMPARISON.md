@@ -481,7 +481,7 @@ CLIP              ❌            ✅           0%     P3
 ### 现状: 缺少基础操作
 ```python
 # ❌ 这些操作在改进前无法正常工作
-import tensor as t
+import neurx as t
 
 x = t.Tensor([[1.0, 2.0]])
 y = x.squeeze()          # ❌ 不存在
@@ -493,7 +493,7 @@ v = x.reshape(1, 2)      # ❌ 不存在
 ### 改进后: P0完成
 ```python
 # ✅ P0改进后，基础操作完整
-import tensor as t
+import neurx as t
 
 x = t.Tensor([[1.0, 2.0]])
 y = x.squeeze()          # ✅ shape: (2,)
@@ -505,8 +505,8 @@ v = x.reshape(2, 1)      # ✅ shape: (2, 1)
 ### 完整框架: P0+P1+P2完成
 ```python
 # ✅ 完整框架支持
-import tensor as t
-from tensor import nn, optim
+import neurx as t
+from neurx import nn, optim
 
 # 创建模型
 model = nn.Sequential(
@@ -522,7 +522,7 @@ optimizer = optim.LAMB(model.parameters(), lr=0.001)
 loss_fn = nn.CrossEntropyLoss()
 
 # 数据处理
-from tensor.data import DataLoader
+from neurx.data import DataLoader
 loader = DataLoader(dataset, batch_size=32)
 
 # 训练循环支持完整特性

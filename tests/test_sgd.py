@@ -2,10 +2,10 @@
 Test SGD optimizer
 """
 import sys
-sys.path.insert(0, '/home/shuwen/tensor/python')
+sys.path.insert(0, '/home/shuwen/neurx/python')
 
-import tensor
-import tensor.nn as nn
+import neurx
+import neurx.nn as nn
 import numpy as np
 
 
@@ -14,13 +14,13 @@ def test_sgd_basic():
     print("Testing SGD (basic)...")
     
     # Create simple linear model
-    W = tensor.randn(3, 2, requires_grad=True)
-    b = tensor.zeros(2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
+    b = neurx.zeros(2, requires_grad=True)
     
-    optimizer = tensor.optim.SGD([W, b], lr=0.1)
+    optimizer = neurx.optim.SGD([W, b], lr=0.1)
     
     # Simple forward and backward
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W + b
     loss = (y ** 2).sum()
     
@@ -43,11 +43,11 @@ def test_sgd_momentum():
     """Test SGD with momentum."""
     print("Testing SGD with momentum...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer = tensor.optim.SGD([W], lr=0.1, momentum=0.9)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer = neurx.optim.SGD([W], lr=0.1, momentum=0.9)
     
     # First step
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W
     loss1 = (y ** 2).sum()
     
@@ -75,10 +75,10 @@ def test_sgd_nesterov():
     """Test SGD with Nesterov momentum."""
     print("Testing SGD with Nesterov momentum...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer = tensor.optim.SGD([W], lr=0.1, momentum=0.9, nesterov=True)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer = neurx.optim.SGD([W], lr=0.1, momentum=0.9, nesterov=True)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W
     loss = (y ** 2).sum()
     
@@ -97,10 +97,10 @@ def test_sgd_weight_decay():
     """Test SGD with weight decay."""
     print("Testing SGD with weight decay...")
     
-    W = tensor.ones(3, 2, requires_grad=True)
-    optimizer = tensor.optim.SGD([W], lr=0.1, weight_decay=0.01)
+    W = neurx.ones(3, 2, requires_grad=True)
+    optimizer = neurx.optim.SGD([W], lr=0.1, weight_decay=0.01)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W
     loss = (y ** 2).sum()
     
@@ -121,8 +121,8 @@ def test_sgd_convergence():
     print("Testing SGD convergence...")
     
     # Minimize f(x) = (x - 3)^2, optimal x = 3
-    x = tensor.Tensor([0.0], requires_grad=True)
-    optimizer = tensor.optim.SGD([x], lr=0.1)
+    x = neurx.Tensor([0.0], requires_grad=True)
+    optimizer = neurx.optim.SGD([x], lr=0.1)
     
     losses = []
     for i in range(100):
@@ -145,14 +145,14 @@ def test_sgd_vs_adamw():
     print("Testing SGD vs AdamW...")
     
     # Create identical models
-    W1 = tensor.randn(3, 2, requires_grad=True)
-    W2 = tensor.Tensor(W1.data.copy(), requires_grad=True)
+    W1 = neurx.randn(3, 2, requires_grad=True)
+    W2 = neurx.Tensor(W1.data.copy(), requires_grad=True)
     
-    sgd = tensor.optim.SGD([W1], lr=0.01)
-    adamw = tensor.optim.AdamW([W2], lr=0.01)
+    sgd = neurx.optim.SGD([W1], lr=0.01)
+    adamw = neurx.optim.AdamW([W2], lr=0.01)
     
-    x = tensor.randn(5, 3)
-    target = tensor.randn(5, 2)
+    x = neurx.randn(5, 3)
+    target = neurx.randn(5, 2)
     
     # Train both
     for _ in range(10):
@@ -178,12 +178,12 @@ def test_sgd_state_dict():
     """Test saving and loading optimizer state."""
     print("Testing SGD state_dict...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer1 = tensor.optim.SGD([W], lr=0.1, momentum=0.9)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer1 = neurx.optim.SGD([W], lr=0.1, momentum=0.9)
     
     # Do some steps
     for _ in range(5):
-        x = tensor.randn(5, 3)
+        x = neurx.randn(5, 3)
         loss = (x @ W ** 2).sum()
         optimizer1.zero_grad()
         loss.backward()
@@ -193,8 +193,8 @@ def test_sgd_state_dict():
     state = optimizer1.state_dict()
     
     # Create new optimizer and load state
-    W2 = tensor.Tensor(W.data.copy(), requires_grad=True)
-    optimizer2 = tensor.optim.SGD([W2], lr=0.05)  # Different lr
+    W2 = neurx.Tensor(W.data.copy(), requires_grad=True)
+    optimizer2 = neurx.optim.SGD([W2], lr=0.05)  # Different lr
     optimizer2.load_state_dict(state)
     
     # Check state loaded correctly
@@ -217,10 +217,10 @@ def test_sgd_with_module():
             return self.linear(x)
     
     model = SimpleModel()
-    optimizer = tensor.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = neurx.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     
-    x = tensor.randn(5, 3)
-    target = tensor.randn(5, 2)
+    x = neurx.randn(5, 3)
+    target = neurx.randn(5, 2)
     
     initial_loss = None
     for i in range(20):
@@ -244,11 +244,11 @@ def test_sgd_zero_grad():
     """Test zero_grad functionality."""
     print("Testing SGD zero_grad...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer = tensor.optim.SGD([W], lr=0.1)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer = neurx.optim.SGD([W], lr=0.1)
     
     # Compute gradients
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     loss = (x @ W ** 2).sum()
     loss.backward()
     

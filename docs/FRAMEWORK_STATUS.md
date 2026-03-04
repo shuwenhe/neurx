@@ -116,7 +116,7 @@ Week 6 测试: 29 个  ✅ 100% 通过
 
 ```
 neurx/
-├── python/tensor/
+├── python/neurx/
 │   ├── nn/
 │   │   ├── __init__.py                 (19 个导出的类)
 │   │   ├── normalization.py            (3 个类)
@@ -237,7 +237,7 @@ python tests/week5_preview.py
 ### 验证框架
 ```bash
 # 检查模块导出
-python -c "from tensor.nn import Conv2d, MaxPool2d, LayerNorm; print('✓ All imports OK')"
+python -c "from neurx.nn import Conv2d, MaxPool2d, LayerNorm; print('✓ All imports OK')"
 
 # 运行简单演示
 python tests/week4_cnn_demo.py
@@ -283,8 +283,8 @@ Week 7 (4/14):  93% → 95% ⏳ 计划中 [Distributed + Advanced Features]
 ## 📞 快速参考
 
 ### 关键文件位置
-- Conv/Pooling: `python/tensor/nn/conv.py` (615 行)
-- Pooling: `python/tensor/nn/pooling.py` (335 行)
+- Conv/Pooling: `python/neurx/nn/conv.py` (615 行)
+- Pooling: `python/neurx/nn/pooling.py` (335 行)
 - 测试: `tests/test_conv_pooling.py` (435 行)
 - 演示: `tests/week4_cnn_demo.py` (320 行)
 

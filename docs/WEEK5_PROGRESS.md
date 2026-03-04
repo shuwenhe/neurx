@@ -22,7 +22,7 @@ Successfully completed Week 5 implementation, advancing the neurx PyTorch-compat
 ## 📦 Implementation Breakdown
 
 ### 1. Weight Initialization Module (200+ lines, 15 functions)
-**File**: `python/tensor/nn/init.py`
+**File**: `python/neurx/nn/init.py`
 
 **Functions**:
 - `xavier_uniform()` / `xavier_uniform_()` - Glorot uniform distribution
@@ -42,7 +42,7 @@ Successfully completed Week 5 implementation, advancing the neurx PyTorch-compat
 ---
 
 ### 2. Gradient Operations Module (150+ lines, 5 items)
-**File**: `python/tensor/nn/grad_utils.py`
+**File**: `python/neurx/nn/grad_utils.py`
 
 **Functions**:
 - `get_grad_norm()` - Compute L2 norm of gradients
@@ -66,7 +66,7 @@ Successfully completed Week 5 implementation, advancing the neurx PyTorch-compat
 ---
 
 ### 3. Model Analysis Module (150+ lines, 6 items)
-**File**: `python/tensor/nn/utils.py`
+**File**: `python/neurx/nn/utils.py`
 
 **Functions**:
 - `count_parameters()` - Sum weight and bias parameters
@@ -91,7 +91,7 @@ Successfully completed Week 5 implementation, advancing the neurx PyTorch-compat
 ---
 
 ### 4. BatchNorm Layers (350+ lines, 3 classes)
-**File**: `python/tensor/nn/normalization.py` (extended)
+**File**: `python/neurx/nn/normalization.py` (extended)
 
 **Classes**:
 
@@ -152,7 +152,7 @@ RESULTS: 21 passed, 0 failed out of 21 tests
 - **Problem**: `register_parameter()` and `register_buffer()` don't exist in Module base class
 - **Root Cause**: Attempted to use PyTorch-style parameter registration
 - **Solution**: Replaced with direct attribute assignment
-- **Files Modified**: `python/tensor/nn/normalization.py`
+- **Files Modified**: `python/neurx/nn/normalization.py`
 - **Tests Fixed**: BatchNorm1d, BatchNorm2d, BatchNorm3d initialization
 - **Result**: 3 affected tests now passing ✅
 
@@ -160,7 +160,7 @@ RESULTS: 21 passed, 0 failed out of 21 tests
 - **Problem**: Function assumed object attributes, test provided dict-based specs
 - **Root Cause**: No conditional logic for different layer representation styles
 - **Solution**: Added isinstance checks for dict vs object access patterns
-- **Files Modified**: `python/tensor/nn/utils.py`
+- **Files Modified**: `python/neurx/nn/utils.py`
 - **Tests Fixed**: count_parameters, model_size
 - **Result**: 2 cascading failures resolved ✅
 
@@ -244,7 +244,7 @@ Total:    108 tests (100% passing)
 
 ## 🔄 Integration Summary
 
-### Module Exports (Updated `python/tensor/nn/__init__.py`)
+### Module Exports (Updated `python/neurx/nn/__init__.py`)
 
 **Added Imports** (26 items):
 - 14 items from init.py (7 functions + 7 in-place variants)

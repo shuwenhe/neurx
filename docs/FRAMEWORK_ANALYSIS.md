@@ -240,7 +240,7 @@
 
 #### P1.1 扩展张量操作 (必做)
 ```python
-# tensor/core/tensor.py 新增方法
+# neurx/core/neurx.py 新增方法
 class Tensor:
     def squeeze(self, dim=None):
         """删除大小为1的维度"""
@@ -279,8 +279,8 @@ class Tensor:
 **实现建议:**
 ```python
 # 在tensor/nn/functional.py中添加函数实现
-def squeeze(tensor, dim=None):
-    data = tensor.to_numpy()
+def squeeze(neurx, dim=None):
+    data = neurx.to_numpy()
     if dim is None:
         out_data = np.squeeze(data)
     else:
@@ -288,17 +288,17 @@ def squeeze(tensor, dim=None):
         dim = dim if dim >= 0 else len(data.shape) + dim
         out_data = np.squeeze(data, axis=dim)
     
-    out = Tensor(out_data, requires_grad=tensor.requires_grad,
-                 _children=(tensor,), _op='squeeze', device=tensor.device)
+    out = Tensor(out_data, requires_grad=neurx.requires_grad,
+                 _children=(neurx,), _op='squeeze', device=neurx.device)
     
     def _backward():
-        if tensor.requires_grad:
+        if neurx.requires_grad:
             grad = out.grad
             if dim is None:
                 grad = np.reshape(grad, data.shape)
             else:
                 grad = np.expand_dims(grad, axis=dim)
-            tensor.grad += grad
+            neurx.grad += grad
     
     out._backward = _backward
     return out
@@ -306,7 +306,7 @@ def squeeze(tensor, dim=None):
 
 #### P1.2 实现核心统计函数 (必做)
 ```python
-# tensor/core/tensor.py
+# neurx/core/neurx.py
 class Tensor:
     def sum(self, dim=None, keepdim=False):
         """求和"""
@@ -335,7 +335,7 @@ class Tensor:
 
 #### P1.3 高级索引支持 (必做)
 ```python
-# 在tensor/core/tensor.py中改进__getitem__
+# 在tensor/core/neurx.py中改进__getitem__
 class Tensor:
     def __getitem__(self, key):
         # 支持:
@@ -353,7 +353,7 @@ class Tensor:
 
 #### P2.1 添加现代优化器 (重要)
 ```python
-# tensor/optim/optim.py
+# neurx/optim/optim.py
 class AdaBound(Optimizer):
     """自适应边界优化器"""
     
@@ -369,7 +369,7 @@ class LARS(Optimizer):
 
 #### P2.2 增强学习率调度 (重要)
 ```python
-# tensor/optim/schedulers.py
+# neurx/optim/schedulers.py
 class SequentialLR(Scheduler):
     """序列调度器"""
     
@@ -386,7 +386,7 @@ class LinearLR(Scheduler):
 
 #### P3.1 模型导出 (中等)
 ```python
-# tensor/serialization/export.py (新建)
+# neurx/serialization/export.py (新建)
 def export_onnx(model, dummy_input, output_path):
     """导出ONNX模型"""
     
@@ -399,7 +399,7 @@ def export_coreml(model, dummy_input, output_path):
 
 #### P3.2 图优化和融合 (中等)
 ```python
-# tensor/compile/optimizer.py (增强)
+# neurx/compile/optimizer.py (增强)
 class GraphOptimizer:
     def fuse_operations(self):
         """融合连续的小操作"""
@@ -417,7 +417,7 @@ class GraphOptimizer:
 
 #### P4.1 视觉模型库 (中等)
 ```python
-# tensor/vision/models/
+# neurx/vision/models/
 # 添加预训练模型
 - MobileNet
 - EfficientNet
@@ -428,7 +428,7 @@ class GraphOptimizer:
 
 #### P4.2 自然语言处理支持 (中等)
 ```python
-# tensor/nn/nlp/ (新建)
+# neurx/nn/nlp/ (新建)
 class Embedding(Module):
     """嵌入层"""
     
@@ -503,7 +503,7 @@ class TokenEmbedding(Module):
 
 ## 🔧 代码示例: 快速实现squeeze
 
-在 `tensor/core/tensor.py` 添加:
+在 `neurx/core/neurx.py` 添加:
 
 ```python
 class Tensor:

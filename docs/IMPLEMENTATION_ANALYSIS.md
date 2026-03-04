@@ -98,7 +98,7 @@
 批量归一化层，用于训练稳定性和收敛速度：
 
 ```python
-from tensor.nn.modules import BatchNorm1d, BatchNorm2d
+from neurx.nn.modules import BatchNorm1d, BatchNorm2d
 
 # 1D批量归一化
 bn1d = BatchNorm1d(num_features=64)
@@ -125,7 +125,7 @@ y = bn2d(x)
 池化层，用于降维和特征提取：
 
 ```python
-from tensor.nn.modules import MaxPool2d, AvgPool2d
+from neurx.nn.modules import MaxPool2d, AvgPool2d
 
 # 最大值池化
 maxpool = MaxPool2d(kernel_size=2, stride=2, padding=0)
@@ -150,7 +150,7 @@ y = avgpool(x)  # shape: (2, 64, 16, 16)
 用于构建顺序网络的容器：
 
 ```python
-from tensor.nn.modules import Sequential, Linear, GELU
+from neurx.nn.modules import Sequential, Linear, GELU
 
 # 构建MLP
 model = Sequential(
@@ -178,7 +178,7 @@ y = model(x)  # 逐层传播
 标准的神经网络初始化方法：
 
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     kaiming_uniform_, kaiming_normal_,
     xavier_uniform_, xavier_normal_,
     Parameter
@@ -209,7 +209,7 @@ kaiming_uniform_(w, mode='fan_out')
 便利的模块操作方法：
 
 ```python
-from tensor.nn.modules import Sequential, Linear
+from neurx.nn.modules import Sequential, Linear
 
 model = Sequential(Linear(10, 20), Linear(20, 5))
 
@@ -286,7 +286,7 @@ model.double()  # float64
 所有新增功能都配有完整的单元测试：
 
 ```bash
-python /home/shuwen/tensor/python/test_new_modules.py
+python /home/shuwen/neurx/python/test_new_modules.py
 ```
 
 测试覆盖：
@@ -306,11 +306,11 @@ python /home/shuwen/tensor/python/test_new_modules.py
 ### 完整的CNN模型
 
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     Sequential, Conv2d, BatchNorm2d, MaxPool2d, 
     Linear, GELU, kaiming_normal_
 )
-from tensor.tensor import Tensor
+from neurx.neurx import Tensor
 import numpy as np
 
 # 定义模型

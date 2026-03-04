@@ -1,57 +1,57 @@
 """
-Test tensor creation functions
+Test neurx creation functions
 """
 import sys
-sys.path.insert(0, '/home/shuwen/tensor/python')
+sys.path.insert(0, '/home/shuwen/neurx/python')
 
-import tensor
+import neurx
 import numpy as np
 
 def test_zeros():
     print("Testing zeros...")
-    t = tensor.zeros(2, 3)
+    t = neurx.zeros(2, 3)
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() == 0)
     print("  ✓ zeros(2, 3) works")
     
-    t2 = tensor.zeros((3, 4), dtype=np.int32)
+    t2 = neurx.zeros((3, 4), dtype=np.int32)
     assert t2.shape == (3, 4)
     print("  ✓ zeros((3, 4), dtype=int32) works")
 
 def test_ones():
     print("Testing ones...")
-    t = tensor.ones(2, 3)
+    t = neurx.ones(2, 3)
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() == 1)
     print("  ✓ ones(2, 3) works")
 
 def test_rand():
     print("Testing rand...")
-    t = tensor.rand(3, 4)
+    t = neurx.rand(3, 4)
     assert t.shape == (3, 4)
     assert np.all(t.to_numpy() >= 0) and np.all(t.to_numpy() < 1)
     print("  ✓ rand(3, 4) works")
 
 def test_randn():
     print("Testing randn...")
-    t = tensor.randn(2, 3)
+    t = neurx.randn(2, 3)
     assert t.shape == (2, 3)
     print("  ✓ randn(2, 3) works")
 
 def test_arange():
     print("Testing arange...")
-    t = tensor.arange(10)
+    t = neurx.arange(10)
     assert t.shape == (10,)
     assert np.array_equal(t.to_numpy(), np.arange(10))
     print("  ✓ arange(10) works")
     
-    t2 = tensor.arange(2, 10, 2)
+    t2 = neurx.arange(2, 10, 2)
     assert np.array_equal(t2.to_numpy(), np.array([2, 4, 6, 8]))
     print("  ✓ arange(2, 10, 2) works")
 
 def test_linspace():
     print("Testing linspace...")
-    t = tensor.linspace(0, 1, 5)
+    t = neurx.linspace(0, 1, 5)
     assert t.shape == (5,)
     expected = np.array([0.0, 0.25, 0.5, 0.75, 1.0], dtype=np.float32)
     assert np.allclose(t.to_numpy(), expected)
@@ -59,44 +59,44 @@ def test_linspace():
 
 def test_eye():
     print("Testing eye...")
-    t = tensor.eye(3)
+    t = neurx.eye(3)
     assert t.shape == (3, 3)
     assert np.array_equal(t.to_numpy(), np.eye(3, dtype=np.float32))
     print("  ✓ eye(3) works")
 
 def test_full():
     print("Testing full...")
-    t = tensor.full((2, 3), 7.5)
+    t = neurx.full((2, 3), 7.5)
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() == 7.5)
     print("  ✓ full((2, 3), 7.5) works")
 
 def test_zeros_like():
     print("Testing zeros_like...")
-    x = tensor.rand(2, 3)
-    t = tensor.zeros_like(x)
+    x = neurx.rand(2, 3)
+    t = neurx.zeros_like(x)
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() == 0)
     print("  ✓ zeros_like works")
 
 def test_ones_like():
     print("Testing ones_like...")
-    x = tensor.rand(2, 3)
-    t = tensor.ones_like(x)
+    x = neurx.rand(2, 3)
+    t = neurx.ones_like(x)
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() == 1)
     print("  ✓ ones_like works")
 
 def test_randint():
     print("Testing randint...")
-    t = tensor.randint(0, 10, (2, 3))
+    t = neurx.randint(0, 10, (2, 3))
     assert t.shape == (2, 3)
     assert np.all(t.to_numpy() >= 0) and np.all(t.to_numpy() < 10)
     print("  ✓ randint(0, 10, (2, 3)) works")
 
 def test_diag():
     print("Testing diag...")
-    t = tensor.diag([1, 2, 3])
+    t = neurx.diag([1, 2, 3])
     assert t.shape == (3, 3)
     expected = np.diag([1, 2, 3]).astype(np.float32)
     assert np.array_equal(t.to_numpy(), expected)
@@ -104,8 +104,8 @@ def test_diag():
 
 def test_gradient():
     print("Testing gradient with created tensors...")
-    x = tensor.randn(3, 4, requires_grad=True)
-    y = tensor.ones(4, 2, requires_grad=True)
+    x = neurx.randn(3, 4, requires_grad=True)
+    y = neurx.ones(4, 2, requires_grad=True)
     z = x @ y
     loss = z.sum()
     loss.backward()

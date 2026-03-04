@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pytest
 
-from tensor import Tensor
-from tensor.cuda.ops import DeviceArray, available, to_host
+from neurx import Tensor
+from neurx.cuda.ops import DeviceArray, available, to_host
 
 
 def _cuda_runtime_ok() -> bool:

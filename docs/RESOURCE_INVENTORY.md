@@ -24,13 +24,13 @@
 ### API Reference
 
 Located in docstrings:
-- `tensor.gather()` - [python/tensor/core/tensor.py](python/tensor/core/tensor.py)
-- `tensor.scatter()` - [python/tensor/core/tensor.py](python/tensor/core/tensor.py)
-- `tensor.scatter_add()` - [python/tensor/core/tensor.py](python/tensor/core/tensor.py)
-- `tensor.meshgrid()` - [python/tensor/__init__.py](python/tensor/__init__.py)
-- `tensor.serialization.ModelCheckpoint` - [python/tensor/serialization/enhanced.py](python/tensor/serialization/enhanced.py)
-- `tensor.serialization.save_tensor_dict()` - [python/tensor/serialization/enhanced.py](python/tensor/serialization/enhanced.py)
-- `tensor.serialization.load_tensor_dict()` - [python/tensor/serialization/enhanced.py](python/tensor/serialization/enhanced.py)
+- `neurx.gather()` - [python/neurx/core/neurx.py](python/neurx/core/neurx.py)
+- `neurx.scatter()` - [python/neurx/core/neurx.py](python/neurx/core/neurx.py)
+- `neurx.scatter_add()` - [python/neurx/core/neurx.py](python/neurx/core/neurx.py)
+- `neurx.meshgrid()` - [python/neurx/__init__.py](python/neurx/__init__.py)
+- `neurx.serialization.ModelCheckpoint` - [python/neurx/serialization/enhanced.py](python/neurx/serialization/enhanced.py)
+- `neurx.serialization.save_tensor_dict()` - [python/neurx/serialization/enhanced.py](python/neurx/serialization/enhanced.py)
+- `neurx.serialization.load_tensor_dict()` - [python/neurx/serialization/enhanced.py](python/neurx/serialization/enhanced.py)
 
 ---
 
@@ -40,11 +40,11 @@ Located in docstrings:
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
-| [python/tensor/core/tensor.py](python/tensor/core/tensor.py) | ~1593 | Tensor class with gather, scatter, scatter_add methods | ✅ Enhanced |
-| [python/tensor/__init__.py](python/tensor/__init__.py) | ~100 | Module exports including meshgrid | ✅ Updated |
-| [python/tensor/serialization/enhanced.py](python/tensor/serialization/enhanced.py) | 250+ | ModelCheckpoint manager and state dict utilities | ✅ New |
-| [python/tensor/serialization/__init__.py](python/tensor/serialization/__init__.py) | ~40 | Serialization module exports | ✅ Updated |
-| [python/tensor/serialization/checkpoint.py](python/tensor/serialization/checkpoint.py) | 126 | Basic checkpoint save/load functions | ✅ Existing |
+| [python/neurx/core/neurx.py](python/neurx/core/neurx.py) | ~1593 | Tensor class with gather, scatter, scatter_add methods | ✅ Enhanced |
+| [python/neurx/__init__.py](python/neurx/__init__.py) | ~100 | Module exports including meshgrid | ✅ Updated |
+| [python/neurx/serialization/enhanced.py](python/neurx/serialization/enhanced.py) | 250+ | ModelCheckpoint manager and state dict utilities | ✅ New |
+| [python/neurx/serialization/__init__.py](python/neurx/serialization/__init__.py) | ~40 | Serialization module exports | ✅ Updated |
+| [python/neurx/serialization/checkpoint.py](python/neurx/serialization/checkpoint.py) | 126 | Basic checkpoint save/load functions | ✅ Existing |
 
 **Total Implementation:** 2,100+ lines
 
@@ -77,7 +77,7 @@ Located in docstrings:
 
 ### Phase 1: Scatter/Gather & Meshgrid
 
-#### Tensor Methods (in `tensor.py`)
+#### Tensor Methods (in `neurx.py`)
 ```python
 def gather(self, dim: int, index: 'Tensor') -> 'Tensor'
     """Gather values along an axis using indices."""
@@ -89,14 +89,14 @@ def scatter_add(self, dim: int, index: 'Tensor', src: 'Tensor') -> 'Tensor'
     """Scatter and add values to specified indices (accumulative)."""
 ```
 
-#### Module Functions (in `tensor/__init__.py`)
+#### Module Functions (in `neurx/__init__.py`)
 ```python
 def meshgrid(*tensors, indexing: str = 'xy') -> list['Tensor']
     """Create coordinate grids from input tensors."""
 ```
 
 #### Features
-- ✅ N-dimensional tensor support
+- ✅ N-dimensional neurx support
 - ✅ Gradient computation support
 - ✅ Duplicate index handling (scatter_add accumulation)
 - ✅ Multiple indexing modes (meshgrid: 'xy', 'ij')
@@ -117,10 +117,10 @@ class ModelCheckpoint:
 #### Utility Functions (in `serialization/enhanced.py`)
 ```python
 def save_tensor_dict(tensors, path, compression='gzip')
-    """Save tensor dictionary with optional compression."""
+    """Save neurx dictionary with optional compression."""
     
 def load_tensor_dict(path)
-    """Load tensor dictionary with auto-format detection."""
+    """Load neurx dictionary with auto-format detection."""
     
 def merge_state_dicts(dicts)
     """Merge multiple state dictionaries."""
@@ -222,10 +222,10 @@ Overall: 71/71 assertions ✅ 100% PASS
 ### Imports & Exports
 
 ```
-tensor/
+neurx/
 ├── __init__.py
 │   └── Exports: meshgrid, gather, scatter, scatter_add
-├── core/tensor.py
+├── core/neurx.py
 │   └── Defines: gather(), scatter(), scatter_add() methods
 ├── functional/
 │   └── util.py (meshgrid alternative location)
@@ -240,15 +240,15 @@ tensor/
 
 ```python
 # Scatter/Gather
-import tensor
-x = tensor.randn(10, 20)
+import neurx
+x = neurx.randn(10, 20)
 x.gather(0, idx)
 x.scatter(0, idx, src)
 x.scatter_add(0, idx, src)
-tensor.meshgrid(x, y)
+neurx.meshgrid(x, y)
 
 # Serialization
-from tensor.serialization import ModelCheckpoint
+from neurx.serialization import ModelCheckpoint
 manager = ModelCheckpoint(save_dir)
 manager.save(state_dict)
 ```
@@ -309,10 +309,10 @@ manager.save(state_dict)
 
 ```
 test_serialization.py
-├── tensor
-├── tensor.nn
-├── tensor.optim
-└── tensor.serialization
+├── neurx
+├── neurx.nn
+├── neurx.optim
+└── neurx.serialization
     ├── enhanced.py
     │   ├── checkpoint.py
     │   ├── pickle, gzip, json
@@ -320,8 +320,8 @@ test_serialization.py
     └── __init__.py
 
 test_scatter_gather.py
-├── tensor
-│   ├── core.tensor
+├── neurx
+│   ├── core.neurx
 │   ├── __init__ (meshgrid)
 │   └── optim
 ├── numpy
@@ -356,7 +356,7 @@ make clean
 x.gather(dim, index)
 x.scatter(dim, index, src)
 x.scatter_add(dim, index, src)
-tensor.meshgrid(x, y, indexing='xy')
+neurx.meshgrid(x, y, indexing='xy')
 
 # Serialization
 ModelCheckpoint(save_dir).save(state_dict, metrics)
@@ -387,7 +387,7 @@ extract_state_dict_subset(state, keys)
 
 1. Add `scatter_mul`, `scatter_min`, `scatter_max` variants
 2. Optimize scatter operations for CUDA
-3. Add support for sparse tensor formats
+3. Add support for sparse neurx formats
 4. Implement distributed checkpoint saving
 
 ---

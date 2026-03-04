@@ -14,7 +14,7 @@
 
 ### Task 1: Implement Activation Functions ✅
 - **Status**: COMPLETED
-- **File**: `python/tensor/nn/activations.py`
+- **File**: `python/neurx/nn/activations.py`
 - **Lines Added**: 350+
 - **APIs Implemented**: 38 (19 functions + 19 classes)
 - **Time Estimate**: 40 minutes
@@ -31,7 +31,7 @@
 
 ### Task 2: Implement Optimizer Utilities ✅
 - **Status**: COMPLETED
-- **File**: `python/tensor/nn/optim_utils.py`
+- **File**: `python/neurx/nn/optim_utils.py`
 - **Lines Added**: 300+
 - **APIs Implemented**: 23 (10 schedules + 6 utilities + 3 classes)
 - **Time Estimate**: 35 minutes
@@ -49,7 +49,7 @@
 
 ### Task 3: Extend Loss Functions ✅
 - **Status**: COMPLETED
-- **File**: `python/tensor/nn/loss_extended.py`
+- **File**: `python/neurx/nn/loss_extended.py`
 - **Lines Added**: 400+
 - **APIs Implemented**: 14 specialized loss functions
 - **Time Estimate**: 45 minutes
@@ -176,7 +176,7 @@ TOTAL                      147 APIs
 
 ### Integration
 
-- **Module Exports**: Updated `python/tensor/nn/__init__.py` with 75 new items
+- **Module Exports**: Updated `python/neurx/nn/__init__.py` with 75 new items
 - **Import Structure**: Organized by category for easy discovery
 - **Backward Compatibility**: All Week 5 APIs remain accessible
 - **Status**: ✅ All 147 APIs properly exported

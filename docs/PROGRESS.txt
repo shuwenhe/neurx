@@ -175,14 +175,14 @@ Week 7 (计划) ⏳   93% → 95% (+2%)   Distributed + Advanced Features
 ================================================================================
 
 核心实现文件:
-  python/tensor/nn/normalization.py    - Week 1 (Norm layers)
-  python/tensor/nn/attention.py        - Week 2 (Attention)
-  python/tensor/nn/transformer.py      - Week 2 (Transformer)
-  python/tensor/nn/rnn.py              - Week 3 (RNN/LSTM/GRU)
-  python/tensor/nn/loss.py             - Week 3 (Loss functions)
-  python/tensor/nn/scheduler.py        - Week 3 (LR schedulers)
-  python/tensor/nn/conv.py             - Week 4 (Convolution) 615 行
-  python/tensor/nn/pooling.py          - Week 4 (Pooling) 335 行
+  python/neurx/nn/normalization.py    - Week 1 (Norm layers)
+  python/neurx/nn/attention.py        - Week 2 (Attention)
+  python/neurx/nn/transformer.py      - Week 2 (Transformer)
+  python/neurx/nn/rnn.py              - Week 3 (RNN/LSTM/GRU)
+  python/neurx/nn/loss.py             - Week 3 (Loss functions)
+  python/neurx/nn/scheduler.py        - Week 3 (LR schedulers)
+  python/neurx/nn/conv.py             - Week 4 (Convolution) 615 行
+  python/neurx/nn/pooling.py          - Week 4 (Pooling) 335 行
 
 测试文件:
   tests/test_conv_pooling.py           - Week 4 (35 个测试) 435 行
@@ -236,7 +236,7 @@ Week 7 (计划) ⏳   93% → 95% (+2%)   Distributed + Advanced Features
   # 输出: 权重初始化、梯度操作、模型分析、BatchNorm 概念演示
 
 验证框架:
-  python -c "from tensor.nn import Conv2d, LayerNorm, MultiheadAttention; print('✓')"
+  python -c "from neurx.nn import Conv2d, LayerNorm, MultiheadAttention; print('✓')"
 
 ================================================================================
                         项目管理

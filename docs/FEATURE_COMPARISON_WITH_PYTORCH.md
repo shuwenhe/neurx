@@ -100,7 +100,7 @@
 ✅ **已实现:**
 - RuntimeConfig (运行时配置)
 - 日志系统 (logging)
-- 诊断工具 (`tensor-doctor`)
+- 诊断工具 (`neurx-doctor`)
 - 错误处理 (自定义异常)
 - 环境变量支持 (TENSOR_DEVICE, TENSOR_LOG_LEVEL 等)
 
@@ -253,7 +253,7 @@
 
 20. **更丰富的张量操作**
     - FFT 操作 (Fast Fourier Transform)
-    - Sparse tensor 支持
+    - Sparse neurx 支持
     - Complex number 支持
     - 更多线性代数操作 (QR, Cholesky 等)
 

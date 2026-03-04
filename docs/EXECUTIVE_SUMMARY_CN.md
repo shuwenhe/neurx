@@ -7,7 +7,7 @@
 ## 🎯 任务完成总结
 
 ### 你的问题
-> 我的 tensor 深度学习框架已经具备了哪些功能，进一步对其 PyTorch 框架实现功能
+> 我的 neurx 深度学习框架已经具备了哪些功能，进一步对其 PyTorch 框架实现功能
 
 ### 我们的解决方案
 ✅ **完整分析** + ✅ **完整实现** + ✅ **完整文档**
@@ -68,7 +68,7 @@
 |------|--------|------|
 | **tensor_api.py** | 13 | 张量属性/方法对齐 |
 | **functional.py** | 9 | torch.nn.functional 兼容 |
-| **weight_conversion.py** | 7 | PyTorch ↔ tensor 权重转换 |
+| **weight_conversion.py** | 7 | PyTorch ↔ neurx 权重转换 |
 | **modules_wrapper.py** | 2 | 模块适配器 |
 
 ---
@@ -78,8 +78,8 @@
 ### 方式 1️⃣: 直接使用兼容 API (最简单)
 
 ```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu, gelu
+from neurx import Tensor
+from neurx.pytorch_compat import linear, relu, gelu
 
 x = Tensor(np.random.randn(2, 10))
 y = linear(x, w, b)
@@ -105,12 +105,12 @@ z = x.to('cuda')  # ✅ PyTorch 对齐
 
 ```python
 # 从 PyTorch 加载
-from tensor.pytorch_compat import load_pytorch_checkpoint
+from neurx.pytorch_compat import load_pytorch_checkpoint
 model = TensorModel()
 load_pytorch_checkpoint(model, 'pytorch_weights.pt')
 
 # 保存为 PyTorch 格式
-from tensor.pytorch_compat import save_pytorch_checkpoint
+from neurx.pytorch_compat import save_pytorch_checkpoint
 save_pytorch_checkpoint(model, 'model_as_pytorch.pt')
 ```
 
@@ -120,11 +120,11 @@ save_pytorch_checkpoint(model, 'model_as_pytorch.pt')
 
 ### 代码 (2,350+ 行)
 ```
-✅ tensor/pytorch_compat/__init__.py           公共 API
-✅ tensor/pytorch_compat/tensor_api.py         API 对齐
-✅ tensor/pytorch_compat/functional.py         函数式接口
-✅ tensor/pytorch_compat/weight_conversion.py  权重转换
-✅ tensor/pytorch_compat/modules_wrapper.py    模块适配
+✅ neurx/pytorch_compat/__init__.py           公共 API
+✅ neurx/pytorch_compat/tensor_api.py         API 对齐
+✅ neurx/pytorch_compat/functional.py         函数式接口
+✅ neurx/pytorch_compat/weight_conversion.py  权重转换
+✅ neurx/pytorch_compat/modules_wrapper.py    模块适配
 ```
 
 ### 文档 (1,300+ 行)
@@ -151,19 +151,19 @@ save_pytorch_checkpoint(model, 'model_as_pytorch.pt')
 
 ### 1. 运行示例 (验证安装)
 ```bash
-python /home/shuwen/tensor/pytorch_compat_examples.py
+python /home/shuwen/neurx/pytorch_compat_examples.py
 ```
 
 ### 2. 查看快速开始
 ```bash
 # 最快入门方式
-cat /home/shuwen/tensor/QUICK_START.md
+cat /home/shuwen/neurx/QUICK_START.md
 ```
 
 ### 3. 阅读完整指南
 ```bash
 # 详细 API 参考
-cat /home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md
+cat /home/shuwen/neurx/PYTORCH_COMPAT_GUIDE.md
 ```
 
 ---
@@ -296,7 +296,7 @@ cat /home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md
 
 ## 🏁 总结
 
-你的 **tensor 深度学习框架** 现已配备：
+你的 **neurx 深度学习框架** 现已配备：
 
 ### 现有基础 🎯
 - ⭐⭐⭐⭐⭐ 完整的自动求导系统
@@ -312,8 +312,8 @@ cat /home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md
 
 ### 立即价值 💰
 ```
-✅ PyTorch 用户可直接使用 tensor 框架
-✅ tensor 框架可加载 PyTorch 预训练模型
+✅ PyTorch 用户可直接使用 neurx 框架
+✅ neurx 框架可加载 PyTorch 预训练模型
 ✅ 两框架可无缝协作
 ✅ 代码迁移零成本
 ```
@@ -323,8 +323,8 @@ cat /home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md
 ## 🚀 快速开始 (3 行代码)
 
 ```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu
+from neurx import Tensor
+from neurx.pytorch_compat import linear, relu
 y = linear(Tensor(x), w, b); y = relu(y)  # 就这么简单！
 ```
 
@@ -345,4 +345,4 @@ y = linear(Tensor(x), w, b); y = relu(y)  # 就这么简单！
 
 ---
 
-祝你的 tensor 框架顺利发展! 🌟
+祝你的 neurx 框架顺利发展! 🌟

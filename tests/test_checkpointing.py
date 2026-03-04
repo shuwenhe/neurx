@@ -5,10 +5,10 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor.nn import Linear
-from tensor.optim import AdamW
-from tensor.serialization import load_checkpoint, save_checkpoint
-from tensor.tensor import Tensor
+from neurx.nn import Linear
+from neurx.optim import AdamW
+from neurx.serialization import load_checkpoint, save_checkpoint
+from neurx.neurx import Tensor
 
 
 def _train_one_step(model, optimizer):

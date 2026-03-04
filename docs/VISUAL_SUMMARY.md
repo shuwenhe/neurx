@@ -113,12 +113,12 @@
 📄 QUICK_START.md                  ← 快速开始 (300行+)
 📄 DETAILED_COMPARISON.md          ← 详细对比 (500行+)
 
-项目位置: /home/shuwen/neurx/python/tensor/
+项目位置: /home/shuwen/neurx/python/neurx/
 
 核心文件:
-├─ core/tensor.py           ← 需要修改 (添加P0操作)
+├─ core/neurx.py           ← 需要修改 (添加P0操作)
 ├─ nn/functional.py         ← 需要修改 (添加反向传播)
-├─ tensor.py                ← 需要修改 (更新导出)
+├─ neurx.py                ← 需要修改 (更新导出)
 ├─ optim/optim.py          ← 需要修改 (添加优化器)
 └─ tests/test_*.py         ← 需要修改 (添加测试)
 ```
@@ -131,7 +131,7 @@
 ```bash
 cd /home/shuwen/neurx/python
 python -c "
-from tensor import Tensor
+from neurx import Tensor
 import numpy as np
 
 x = Tensor(np.ones((2,3)))
@@ -158,8 +158,8 @@ cat /home/shuwen/neurx/IMPLEMENTATION_PLAN.md | head -200
 
 # 推荐: 方案A (快速赢利)
 # 1. 复制 IMPLEMENTATION_PLAN.md 中的代码
-# 2. 添加到 tensor/core/tensor.py
-# 3. 添加到 tensor/nn/functional.py  
+# 2. 添加到 neurx/core/neurx.py
+# 3. 添加到 neurx/nn/functional.py  
 # 4. 运行测试 pytest
 # 5. 提交PR
 ```
@@ -220,7 +220,7 @@ cat /home/shuwen/neurx/IMPLEMENTATION_PLAN.md | head -200
 
 ## 🧠 关键技术决策
 
-### 问题1: 是否需要重写core/tensor.py?
+### 问题1: 是否需要重写core/neurx.py?
 **答:** 否。直接在Tensor类中添加方法即可。
 
 ### 问题2: 反向传播如何实现?
@@ -235,10 +235,10 @@ cat /home/shuwen/neurx/IMPLEMENTATION_PLAN.md | head -200
 ### 问题4: 需要修改哪些文件?
 **答:** 最少修改策略:
 ```
-必改: tensor/core/tensor.py (添加方法)
-必改: tensor/nn/functional.py (添加函数)
-可改: tensor/tensor.py (更新__all__)
-新增: tensor/tests/test_tensor_ops.py (测试)
+必改: neurx/core/neurx.py (添加方法)
+必改: neurx/nn/functional.py (添加函数)
+可改: neurx/neurx.py (更新__all__)
+新增: neurx/tests/test_tensor_ops.py (测试)
 ```
 
 ---
@@ -431,5 +431,5 @@ Week 4+: P2 (部署)
 ---
 
 *分析完成于: 2026-03-03*  
-*框架路径: /home/shuwen/neurx/python/tensor/*  
+*框架路径: /home/shuwen/neurx/python/neurx/*  
 *分析文档: /home/shuwen/neurx/*

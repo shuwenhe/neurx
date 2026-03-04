@@ -13,27 +13,27 @@
 高效的张量运算工具，支持复杂的多维数组操作。
 
 ```python
-import tensor
+import neurx
 
 # 矩阵乘法
-A = tensor.rand((3, 4))
-B = tensor.rand((4, 5))
-C = tensor.einsum('ij,jk->ik', A, B)
+A = neurx.rand((3, 4))
+B = neurx.rand((4, 5))
+C = neurx.einsum('ij,jk->ik', A, B)
 
 # 批量矩阵乘法
-A = tensor.rand((10, 3, 4))
-B = tensor.rand((10, 4, 5))
-C = tensor.einsum('bij,bjk->bik', A, B)
+A = neurx.rand((10, 3, 4))
+B = neurx.rand((10, 4, 5))
+C = neurx.einsum('bij,bjk->bik', A, B)
 
 # 矩阵的迹
-A = tensor.rand((5, 5))
-trace = tensor.einsum('ii', A)
+A = neurx.rand((5, 5))
+trace = neurx.einsum('ii', A)
 
 # 转置
-A_T = tensor.einsum('ij->ji', A)
+A_T = neurx.einsum('ij->ji', A)
 
 # 批量点积
-dots = tensor.einsum('bi,bi->b', A, B)
+dots = neurx.einsum('bi,bi->b', A, B)
 ```
 
 **特性：**
@@ -44,14 +44,14 @@ dots = tensor.einsum('bi,bi->b', A, B)
 
 ---
 
-### 2. **Vision Module (tensor.vision)**
+### 2. **Vision Module (neurx.vision)**
 
 计算机视觉工具包，包含图像变换和预训练模型。
 
-#### 2.1 图像变换 (tensor.vision.transforms)
+#### 2.1 图像变换 (neurx.vision.transforms)
 
 ```python
-from tensor.vision import transforms
+from neurx.vision import transforms
 
 # 基础变换
 transform = transforms.Compose([
@@ -84,10 +84,10 @@ tensor_img = transform(img)
 | `ColorJitter` | 随机颜色抖动 | `ColorJitter(brightness=0.2, contrast=0.2)` |
 | `Compose` | 组合多个变换 | `Compose([transform1, transform2])` |
 
-#### 2.2 预训练模型 (tensor.vision.models)
+#### 2.2 预训练模型 (neurx.vision.models)
 
 ```python
-from tensor.vision import models
+from neurx.vision import models
 
 # 创建ResNet-18模型 (ImageNet分类)
 model = models.resnet18(num_classes=1000)
@@ -118,9 +118,9 @@ output = model(input_tensor)  # input: (N, 3, 224, 224)
 ### 示例1：使用ResNet-18进行CIFAR-10分类
 
 ```python
-import tensor
-from tensor.vision import transforms, models
-from tensor.data import DataLoader, TensorDataset
+import neurx
+from neurx.vision import transforms, models
+from neurx.data import DataLoader, TensorDataset
 
 # 1. 准备数据变换
 train_transform = transforms.Compose([
@@ -135,8 +135,8 @@ train_transform = transforms.Compose([
 model = models.resnet18(num_classes=10)
 
 # 3. 定义优化器和损失函数
-optimizer = tensor.optim.AdamW(model.parameters(), lr=0.001)
-criterion = tensor.nn.CrossEntropyLoss()
+optimizer = neurx.optim.AdamW(model.parameters(), lr=0.001)
+criterion = neurx.nn.CrossEntropyLoss()
 
 # 4. 训练循环
 for epoch in range(10):
@@ -157,27 +157,27 @@ for epoch in range(10):
 ### 示例2：使用einsum进行高级张量操作
 
 ```python
-import tensor
+import neurx
 
 # 注意力机制中的计算
-Q = tensor.rand((32, 8, 64, 64))  # (batch, heads, seq_len, dim)
-K = tensor.rand((32, 8, 64, 64))
-V = tensor.rand((32, 8, 64, 64))
+Q = neurx.rand((32, 8, 64, 64))  # (batch, heads, seq_len, dim)
+K = neurx.rand((32, 8, 64, 64))
+V = neurx.rand((32, 8, 64, 64))
 
 # 计算注意力分数: Q @ K^T
-attn_scores = tensor.einsum('bhqd,bhkd->bhqk', Q, K)
+attn_scores = neurx.einsum('bhqd,bhkd->bhqk', Q, K)
 
 # 应用softmax
-attn_probs = tensor.nn.functional.softmax(attn_scores, axis=-1)
+attn_probs = neurx.nn.functional.softmax(attn_scores, axis=-1)
 
 # 加权求和: attn_probs @ V
-output = tensor.einsum('bhqk,bhkd->bhqd', attn_probs, V)
+output = neurx.einsum('bhqk,bhkd->bhqd', attn_probs, V)
 ```
 
 ### 示例3：数据增强流水线
 
 ```python
-from tensor.vision import transforms
+from neurx.vision import transforms
 
 # 训练集增强
 train_transform = transforms.Compose([
@@ -208,10 +208,10 @@ val_transform = transforms.Compose([
 
 | 功能 | PyTorch | Tensor | 兼容性 |
 |------|---------|--------|--------|
-| `einsum` | `torch.einsum` | `tensor.einsum` | ✅ 高度兼容 |
-| `ToTensor` | `torchvision.transforms.ToTensor` | `tensor.vision.transforms.ToTensor` | ✅ 完全兼容 |
-| `Normalize` | `torchvision.transforms.Normalize` | `tensor.vision.transforms.Normalize` | ✅ 完全兼容 |
-| `ResNet-18` | `torchvision.models.resnet18` | `tensor.vision.models.resnet18` | ✅ 架构兼容 |
+| `einsum` | `torch.einsum` | `neurx.einsum` | ✅ 高度兼容 |
+| `ToTensor` | `torchvision.transforms.ToTensor` | `neurx.vision.transforms.ToTensor` | ✅ 完全兼容 |
+| `Normalize` | `torchvision.transforms.Normalize` | `neurx.vision.transforms.Normalize` | ✅ 完全兼容 |
+| `ResNet-18` | `torchvision.models.resnet18` | `neurx.vision.models.resnet18` | ✅ 架构兼容 |
 
 ### 迁移指南
 
@@ -224,8 +224,8 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 
 # Tensor
-import tensor
-from tensor.vision import transforms, models
+import neurx
+from neurx.vision import transforms, models
 
 # 大部分API保持一致！
 ```
@@ -237,7 +237,7 @@ from tensor.vision import transforms, models
 我们提供了完整的测试套件来验证新功能：
 
 ```bash
-cd /home/shuwen/tensor
+cd /home/shuwen/neurx
 python tests/test_new_features.py
 ```
 
@@ -260,7 +260,7 @@ pip install numpy
 pip install Pillow  # 用于图像处理
 ```
 
-如果不安装Pillow，`tensor.vision.transforms`将无法使用，但其他功能不受影响。
+如果不安装Pillow，`neurx.vision.transforms`将无法使用，但其他功能不受影响。
 
 ---
 
@@ -327,4 +327,4 @@ pip install Pillow  # 用于图像处理
 ---
 
 **最后更新**: 2026-03-03  
-**版本**: 参见 `tensor.__version__`
+**版本**: 参见 `neurx.__version__`

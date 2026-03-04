@@ -1,7 +1,7 @@
 # Tensor 框架 vs PyTorch 功能对标与优化分析
 
 **生成日期**: 2026-03-04  
-**分析范围**: neurx/python/tensor 深度学习框架
+**分析范围**: neurx/python/neurx 深度学习框架
 
 ---
 
@@ -44,7 +44,7 @@
 ✗ 2. 布尔索引: 完整的布尔张量索引支持
 ✗ 3. 就地操作: in-place variants (.add_, .mul_ 等)
 ✗ 4. 视图操作: as_strided, unfold, fold
-✗ 5. 稀疏张量: sparse tensor 支持
+✗ 5. 稀疏张量: sparse neurx 支持
 ✗ 6. 复数张量: complex number support
 ✗ 7. 随机采样: multinomial, negative_sampling
 ✗ 8. FFT 操作: 傅里叶变换
@@ -355,7 +355,7 @@
 #### ✅ 已实现功能
 ```
 ✓ 运行时配置 (platform/)
-✓ 诊断工具 (tensor-doctor)
+✓ 诊断工具 (neurx-doctor)
 ✓ 检查点管理 (checkpoint.py)
 ✓ 日志系统
 ✓ 序列化支持
@@ -420,17 +420,17 @@ Tensor.pow_(scalar)
 Tensor.copy_(other)
 
 # 线性代数基础（估计工作量：5-7 天）
-tensor.linalg.svd()      # SVD 分解
-tensor.linalg.qr()       # QR 分解
-tensor.linalg.cholesky() # Cholesky 分解
-tensor.linalg.inv()      # 矩阵求逆
-tensor.linalg.solve()    # 线性方程求解
-tensor.linalg.eig()      # 特征值分解
+neurx.linalg.svd()      # SVD 分解
+neurx.linalg.qr()       # QR 分解
+neurx.linalg.cholesky() # Cholesky 分解
+neurx.linalg.inv()      # 矩阵求逆
+neurx.linalg.solve()    # 线性方程求解
+neurx.linalg.eig()      # 特征值分解
 
 # 高级索引（估计工作量：3-4 天）
-tensor[tensor > 0]       # 布尔索引
-tensor[[1, 2, 3]]        # 列表索引
-tensor[:, [0, 2]]        # 多维列表索引
+neurx[neurx > 0]       # 布尔索引
+neurx[[1, 2, 3]]        # 列表索引
+neurx[:, [0, 2]]        # 多维列表索引
 ```
 
 #### 1.2 关键神经网络模块
@@ -443,10 +443,10 @@ class EmbeddingBag(Module):
     """包含 offsets, per_sample_weights 的聚合"""
 
 # 插值/上采样（估计工作量：3-4 天）
-tensor.nn.Upsample(scale_factor=2, mode='bilinear')
-tensor.nn.Interpolate()
-tensor.nn.PixelShuffle()
-tensor.nn.PixelUnshuffle()
+neurx.nn.Upsample(scale_factor=2, mode='bilinear')
+neurx.nn.Interpolate()
+neurx.nn.PixelShuffle()
+neurx.nn.PixelUnshuffle()
 
 # 容器框架（估计工作量：2-3 天）
 class Sequential(Module):
@@ -518,12 +518,12 @@ class Subset(Dataset): pass
 #### 2.2 分布式通信原语
 ```python
 # 集合通信（估计工作量：7-10 天）
-dist.all_reduce(tensor)
-dist.all_gather(tensor_list, tensor)
-dist.reduce_scatter(tensor)
-dist.broadcast(tensor, src)
-dist.send(tensor, dst)
-dist.recv(tensor, src)
+dist.all_reduce(neurx)
+dist.all_gather(tensor_list, neurx)
+dist.reduce_scatter(neurx)
+dist.broadcast(neurx, src)
+dist.send(neurx, dst)
+dist.recv(neurx, src)
 dist.barrier()
 
 # 初始化与群组（估计工作量：2-3 天）
@@ -540,7 +540,7 @@ class DistributedDataParallel(Module):
 ```python
 # 动态量化（估计工作量：4-5 天）
 torch.quantization.quantize_dynamic()  # INT8 动态量化
-tensor.qint8()  # 量化张量类型
+neurx.qint8()  # 量化张量类型
 
 # 静态量化（估计工作量：6-8 天）
 class QuantStub(Module): pass

@@ -75,11 +75,11 @@ Transformer 实现所需:
 ### **LayerNorm 特性**
 
 ```python
-from tensor.nn import LayerNorm
+from neurx.nn import LayerNorm
 
 # 基础用法
 ln = LayerNorm(hidden_dim=512)
-x = tensor.randn(batch_size, 512)
+x = neurx.randn(batch_size, 512)
 out = ln(x)  # Shape: (batch_size, 512)
 
 # 特点:
@@ -92,11 +92,11 @@ out = ln(x)  # Shape: (batch_size, 512)
 ### **GroupNorm 特性**
 
 ```python
-from tensor.nn import GroupNorm
+from neurx.nn import GroupNorm
 
 # 将通道分组归一化
 gn = GroupNorm(num_groups=32, num_channels=256)
-x = tensor.randn(batch_size, 256, height, width)
+x = neurx.randn(batch_size, 256, height, width)
 out = gn(x)  # Shape: (batch_size, 256, height, width)
 
 # 特点:
@@ -108,11 +108,11 @@ out = gn(x)  # Shape: (batch_size, 256, height, width)
 ### **InstanceNorm 特性**
 
 ```python
-from tensor.nn import InstanceNorm
+from neurx.nn import InstanceNorm
 
 # 逐实例归一化
 inst_norm = InstanceNorm(num_features=3)  # RGB image
-x = tensor.randn(batch_size, 3, height, width)
+x = neurx.randn(batch_size, 3, height, width)
 out = inst_norm(x)
 
 # 特点:
@@ -128,8 +128,8 @@ out = inst_norm(x)
 ### **在 Transformer 中使用**
 
 ```python
-import tensor
-import tensor.nn as nn
+import neurx
+import neurx.nn as nn
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(self, d_model=512, nhead=8):
@@ -151,7 +151,7 @@ class TransformerEncoderLayer(nn.Module):
         x = x + self.dropout(x2)
         
         x2 = self.norm2(x)  ✅
-        x2 = self.linear2(tensor.relu(self.linear1(x2)))
+        x2 = self.linear2(neurx.relu(self.linear1(x2)))
         x = x + self.dropout(x2)
         return x
 ```
@@ -178,7 +178,7 @@ class TransformerEncoderLayer(nn.Module):
 ### **Day 1-2: MultiheadAttention 实现**
 
 ```
-文件: python/tensor/nn/attention.py
+文件: python/neurx/nn/attention.py
 
 ScaledDotProductAttention (150行):
   □ QK^T 计算
@@ -199,7 +199,7 @@ MultiheadAttention (350行):
 ### **Day 3-4: TransformerEncoderLayer**
 
 ```
-文件: python/tensor/nn/transformer.py
+文件: python/neurx/nn/transformer.py
 
 TransformerEncoderLayer (300行):
   □ Self-attention (用新 MultiheadAttention)
@@ -270,7 +270,7 @@ Integration:  1/1 PASS ✅
 
 - [PYTORCH_FEATURE_GAP_ANALYSIS.md](docs/PYTORCH_FEATURE_GAP_ANALYSIS.md) - 功能差异分析
 - [IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) - 实施计划
-- [python/tensor/nn/normalization.py](python/tensor/nn/normalization.py) - 源代码
+- [python/neurx/nn/normalization.py](python/neurx/nn/normalization.py) - 源代码
 - [tests/test_normalization.py](tests/test_normalization.py) - 测试代码
 
 ---
@@ -298,12 +298,12 @@ python3 tests/test_normalization.py
 ```python
 import sys
 sys.path.insert(0, 'python')
-import tensor
-from tensor.nn import LayerNorm, GroupNorm, InstanceNorm
+import neurx
+from neurx.nn import LayerNorm, GroupNorm, InstanceNorm
 
 # 使用 LayerNorm
 ln = LayerNorm(512)
-x = tensor.randn(8, 512)
+x = neurx.randn(8, 512)
 out = ln(x)
 ```
 

@@ -2,10 +2,10 @@
 Test Conv2d convolutional layer
 """
 import sys
-sys.path.insert(0, '/home/shuwen/tensor/python')
+sys.path.insert(0, '/home/shuwen/neurx/python')
 
-import tensor
-import tensor.nn as nn
+import neurx
+import neurx.nn as nn
 import numpy as np
 
 
@@ -16,7 +16,7 @@ def test_conv2d_basic():
     conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
     
     # Input: (batch=1, channels=3, height=32, width=32)
-    x = tensor.randn(1, 3, 32, 32)
+    x = neurx.randn(1, 3, 32, 32)
     out = conv(x)
     
     # Output should be (batch=1, channels=16, height=32, width=32)
@@ -31,19 +31,19 @@ def test_conv2d_output_shape():
     
     # Test 1: stride=1, padding=0
     conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=0)
-    x = tensor.randn(2, 3, 32, 32)
+    x = neurx.randn(2, 3, 32, 32)
     out = conv(x)
     assert out.shape == (2, 16, 30, 30), f"Expected (2, 16, 30, 30), got {out.shape}"
     
     # Test 2: stride=2, padding=1
     conv = nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1)
-    x = tensor.randn(2, 3, 32, 32)
+    x = neurx.randn(2, 3, 32, 32)
     out = conv(x)
     assert out.shape == (2, 32, 16, 16), f"Expected (2, 32, 16, 16), got {out.shape}"
     
     # Test 3: kernel_size=5, stride=1, padding=2
     conv = nn.Conv2d(3, 64, kernel_size=5, stride=1, padding=2)
-    x = tensor.randn(1, 3, 28, 28)
+    x = neurx.randn(1, 3, 28, 28)
     out = conv(x)
     assert out.shape == (1, 64, 28, 28), f"Expected (1, 64, 28, 28), got {out.shape}"
     
@@ -55,7 +55,7 @@ def test_conv2d_gradient():
     print("Testing Conv2d gradients...")
     
     conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
-    x = tensor.randn(2, 3, 32, 32, requires_grad=True)
+    x = neurx.randn(2, 3, 32, 32, requires_grad=True)
     out = conv(x)
     loss = out.sum()
     
@@ -94,11 +94,11 @@ def test_conv2d_training():
             return x
     
     model = SimpleConvNet()
-    optimizer = tensor.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = neurx.optim.SGD(model.parameters(), lr=0.001)
     
     # Create dummy data (smaller to reduce numerical issues)
-    x = tensor.randn(1, 3, 16, 16) * 0.1
-    target = tensor.randn(1, 32, 16, 16) * 0.1
+    x = neurx.randn(1, 3, 16, 16) * 0.1
+    target = neurx.randn(1, 32, 16, 16) * 0.1
     
     initial_loss = None
     for step in range(20):
@@ -123,7 +123,7 @@ def test_conv2d_no_bias():
     print("Testing Conv2d without bias...")
     
     conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
-    x = tensor.randn(1, 3, 32, 32)
+    x = neurx.randn(1, 3, 32, 32)
     out = conv(x)
     
     assert conv.bias is None, "Bias should be None"
@@ -142,7 +142,7 @@ def test_conv2d_1x1():
     print("Testing 1x1 convolution...")
     
     conv = nn.Conv2d(16, 32, kernel_size=1, stride=1, padding=0)
-    x = tensor.randn(1, 16, 32, 32)
+    x = neurx.randn(1, 16, 32, 32)
     out = conv(x)
     
     assert out.shape == (1, 32, 32, 32), f"Expected (1, 32, 32, 32), got {out.shape}"
@@ -160,7 +160,7 @@ def test_conv2d_large_kernel():
     print("Testing conv with large kernel...")
     
     conv = nn.Conv2d(3, 64, kernel_size=5, stride=1, padding=2)
-    x = tensor.randn(1, 3, 28, 28)
+    x = neurx.randn(1, 3, 28, 28)
     out = conv(x)
     
     assert out.shape == (1, 64, 28, 28), f"Expected (1, 64, 28, 28), got {out.shape}"
@@ -175,7 +175,7 @@ def test_conv2d_multiple_batches():
     conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
     
     for batch_size in [1, 2, 4, 8]:
-        x = tensor.randn(batch_size, 3, 32, 32)
+        x = neurx.randn(batch_size, 3, 32, 32)
         out = conv(x)
         assert out.shape == (batch_size, 16, 32, 32), f"Expected ({batch_size}, 16, 32, 32), got {out.shape}"
     
@@ -190,7 +190,7 @@ def test_conv2d_sequential_layers():
     conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
     conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
     
-    x = tensor.randn(2, 3, 32, 32)
+    x = neurx.randn(2, 3, 32, 32)
     
     x = conv1(x)
     assert x.shape == (2, 16, 32, 32)
@@ -257,13 +257,13 @@ def test_conv2d_with_pooling_pattern():
             return x
     
     model = SimpleCNN()
-    x = tensor.randn(2, 3, 32, 32)
+    x = neurx.randn(2, 3, 32, 32)
     out = model(x)
     
     assert out.shape == (2, 128, 8, 8), f"Expected (2, 128, 8, 8), got {out.shape}"
     
     # Test training
-    target = tensor.randn(2, 128, 8, 8)
+    target = neurx.randn(2, 128, 8, 8)
     loss = ((out - target) ** 2).sum()
     loss.backward()
     

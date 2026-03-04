@@ -23,13 +23,13 @@
 
 ```
 新增文件:
-  python/tensor/nn/conv.py          615 行 (Conv1d/2d/3d + ConvTranspose)
-  python/tensor/nn/pooling.py       335 行 (所有池化层)
+  python/neurx/nn/conv.py          615 行 (Conv1d/2d/3d + ConvTranspose)
+  python/neurx/nn/pooling.py       335 行 (所有池化层)
   tests/test_conv_pooling.py        435 行 (35个测试)
   tests/week4_cnn_demo.py           320 行 (6大功能演示)
 
 修改文件:
-  python/tensor/nn/__init__.py      +添加导出
+  python/neurx/nn/__init__.py      +添加导出
 
 总计: 1,705 行新增代码
 ```
@@ -40,7 +40,7 @@
 
 ### 2.1 卷积层 (Conv)
 
-**文件**: `python/tensor/nn/conv.py` (615 行)
+**文件**: `python/neurx/nn/conv.py` (615 行)
 
 #### Conv1d (1D 卷积)
 - **用途**: 时间序列、音频处理
@@ -81,7 +81,7 @@
 
 ### 2.2 池化层 (Pooling)
 
-**文件**: `python/tensor/nn/pooling.py` (335 行)
+**文件**: `python/neurx/nn/pooling.py` (335 行)
 
 #### MaxPooling
 - MaxPool1d, MaxPool2d, MaxPool3d
@@ -257,8 +257,8 @@ Multi-stage CNN:       ~10ms (batch=4, 3 stages)
 ### 新增文件
 
 ```
-✅ python/tensor/nn/conv.py              615 行
-✅ python/tensor/nn/pooling.py           335 行
+✅ python/neurx/nn/conv.py              615 行
+✅ python/neurx/nn/pooling.py           335 行
 ✅ tests/test_conv_pooling.py            435 行
 ✅ tests/week4_cnn_demo.py               320 行
 ✅ docs/WEEK4_COMPLETION_REPORT.md       本文件
@@ -267,7 +267,7 @@ Multi-stage CNN:       ~10ms (batch=4, 3 stages)
 ### 修改文件
 
 ```
-✅ python/tensor/nn/__init__.py          (添加导出)
+✅ python/neurx/nn/__init__.py          (添加导出)
 ```
 
 ---

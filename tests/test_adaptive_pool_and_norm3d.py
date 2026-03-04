@@ -3,9 +3,9 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor import Tensor
-import tensor.nn as nn
-from tensor.nn import functional as F
+from neurx import Tensor
+import neurx.nn as nn
+from neurx.nn import functional as F
 
 
 def test_adaptive_avg_pool1d_backward_uniform_distribution():

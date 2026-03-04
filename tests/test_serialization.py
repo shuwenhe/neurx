@@ -7,13 +7,13 @@ import shutil
 from pathlib import Path
 
 try:
-    import tensor
-    from tensor import nn, optim
-    from tensor.serialization import (
+    import neurx
+    from neurx import nn, optim
+    from neurx.serialization import (
         save_checkpoint, load_checkpoint, 
         ModelCheckpoint, save_tensor_dict, load_tensor_dict
     )
-    print("✅ Successfully imported tensor serialization modules")
+    print("✅ Successfully imported neurx serialization modules")
 except Exception as e:
     print(f"❌ Import error: {e}")
     sys.exit(1)
@@ -86,7 +86,7 @@ def test_optimizer_state_dict():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     
     # Create dummy loss to trigger optimizer state
-    x = tensor.randn((4, 10))
+    x = neurx.randn((4, 10))
     y = model(x)
     loss = y.sum()
     loss.backward()
@@ -260,16 +260,16 @@ def test_compressed_checkpoint():
 
 
 def test_tensor_dict_io():
-    """Test tensor state dict I/O."""
+    """Test neurx state dict I/O."""
     print("\n" + "="*60)
     print("Testing Tensor Dict I/O")
     print("="*60)
     
     with tempfile.TemporaryDirectory() as tmpdir:
-        print("\n1. Saving tensor dict...")
+        print("\n1. Saving neurx dict...")
         state = {
-            'weight1': tensor.Tensor([[1, 2], [3, 4]]).to_numpy(),
-            'weight2': tensor.Tensor([5, 6, 7]).to_numpy(),
+            'weight1': neurx.Tensor([[1, 2], [3, 4]]).to_numpy(),
+            'weight2': neurx.Tensor([5, 6, 7]).to_numpy(),
         }
         
         path = os.path.join(tmpdir, "state")
@@ -279,7 +279,7 @@ def test_tensor_dict_io():
         assert os.path.exists(path + '.gz'), "Compressed state file should exist"
         print(f"   ✅ Tensor dict saved")
         
-        print("\n2. Loading tensor dict...")
+        print("\n2. Loading neurx dict...")
         loaded = load_tensor_dict(path)
         
         assert 'weight1' in loaded
@@ -296,7 +296,7 @@ def test_state_dict_utils():
     print("Testing State Dict Utilities")
     print("="*60)
     
-    from tensor.serialization import merge_state_dicts, extract_state_dict_subset
+    from neurx.serialization import merge_state_dicts, extract_state_dict_subset
     
     print("\n1. Testing merge_state_dicts...")
     state1 = {'a': 1, 'b': 2}

@@ -241,9 +241,9 @@ For Extension
 📋 FILES CREATED/MODIFIED
 
 New Production Files (2,189 lines)
-✅ python/tensor/nn/activations.py (667 lines, 38 APIs)
-✅ python/tensor/nn/optim_utils.py (507 lines, 23 APIs)
-✅ python/tensor/nn/loss_extended.py (463 lines, 14 APIs)
+✅ python/neurx/nn/activations.py (667 lines, 38 APIs)
+✅ python/neurx/nn/optim_utils.py (507 lines, 23 APIs)
+✅ python/neurx/nn/loss_extended.py (463 lines, 14 APIs)
 ✅ tests/test_week6_activations_loss_optim.py (552 lines, 29 tests)
 
 New Documentation Files (2,000+ lines)
@@ -255,7 +255,7 @@ New Documentation Files (2,000+ lines)
 ✅ demo_week6.py (400+ lines)
 
 Updated Files
-✅ python/tensor/nn/__init__.py (75 new exports)
+✅ python/neurx/nn/__init__.py (75 new exports)
 ✅ FRAMEWORK_STATUS.md (Week 6 progress added)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

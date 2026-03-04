@@ -8,18 +8,18 @@
 ## 1. Implementation Summary
 
 ### Components Delivered
-1. **RNN Module** (`python/tensor/nn/rnn.py` - 600+ lines)
+1. **RNN Module** (`python/neurx/nn/rnn.py` - 600+ lines)
    - RNNCell, RNN (single/multi-layer, bidirectional)
    - LSTMCell, LSTM (single/multi-layer, bidirectional)
    - GRUCell, GRU (single/multi-layer, bidirectional)
    - Batch-first support for all variants
 
-2. **Loss Functions** (`python/tensor/optim/losses.py` - 580+ lines)
+2. **Loss Functions** (`python/neurx/optim/losses.py` - 580+ lines)
    - Classification: CrossEntropyLoss, BCELoss, BCEWithLogitsLoss, NLLLoss
    - Regression: L1Loss, MSELoss, SmoothL1Loss, HuberLoss
    - Advanced: KLDivLoss, PoissonNLLLoss, CTCLoss, MarginRankingLoss, TripletMarginLoss
 
-3. **Learning Rate Schedulers** (`python/tensor/optim/schedulers.py` - 550+ lines)
+3. **Learning Rate Schedulers** (`python/neurx/optim/schedulers.py` - 550+ lines)
    - Basic: StepLR, ExponentialLR, LinearLR, PolynomialLR
    - Advanced: CosineAnnealingLR, CosineAnnealingWarmRestarts, CyclicLR, OneCycleLR
    - Adaptive: ReduceLROnPlateau, WarmupLR, WarmupDecayLR, StepDecayWithWarmup
@@ -250,23 +250,23 @@ LSTM Text Classification Demo:
 
 ## 4. Module Integration
 
-### Updated `python/tensor/nn/__init__.py`
+### Updated `python/neurx/nn/__init__.py`
 ```python
-from tensor.nn.rnn import (
+from neurx.nn.rnn import (
     RNNCell, RNN,
     LSTMCell, LSTM,
     GRUCell, GRU,
 )
 ```
 
-### Updated `python/tensor/optim/__init__.py`
+### Updated `python/neurx/optim/__init__.py`
 ```python
-from tensor.optim.losses import (
+from neurx.optim.losses import (
     CrossEntropyLoss, BCELoss, BCEWithLogitsLoss, L1Loss, MSELoss,
     SmoothL1Loss, KLDivLoss, NLLLoss, HuberLoss, PoissonNLLLoss,
     CTCLoss, MarginRankingLoss, TripletMarginLoss
 )
-from tensor.optim.schedulers import (
+from neurx.optim.schedulers import (
     StepLR, ExponentialLR, CosineAnnealingLR, CosineAnnealingWarmRestarts,
     LinearLR, PolynomialLR, MultiplicativeLR, LambdaLR, ReduceLROnPlateau,
     WarmupLR, WarmupDecayLR, StepDecayWithWarmup, CyclicLR, OneCycleLR
@@ -276,9 +276,9 @@ from tensor.optim.schedulers import (
 ### Import Verification
 ```python
 # All imports working:
-from tensor.nn import LSTM, GRU, RNN
-from tensor.optim import CrossEntropyLoss, BCEWithLogitsLoss
-from tensor.optim import StepLR, CosineAnnealingLR, WarmupLR
+from neurx.nn import LSTM, GRU, RNN
+from neurx.optim import CrossEntropyLoss, BCEWithLogitsLoss
+from neurx.optim import StepLR, CosineAnnealingLR, WarmupLR
 ```
 
 ---
@@ -380,15 +380,15 @@ from tensor.optim import StepLR, CosineAnnealingLR, WarmupLR
 ## 9. Files Created/Modified
 
 ### New Files
-- `python/tensor/nn/rnn.py` (600 lines)
-- `python/tensor/optim/losses.py` (580 lines)
-- `python/tensor/optim/schedulers.py` (550 lines)
+- `python/neurx/nn/rnn.py` (600 lines)
+- `python/neurx/optim/losses.py` (580 lines)
+- `python/neurx/optim/schedulers.py` (550 lines)
 - `tests/test_rnn_losses_schedulers.py` (850 lines)
 - `week3_lstm_demo.py` (340 lines)
 
 ### Modified Files
-- `python/tensor/nn/__init__.py` (+15 lines)
-- `python/tensor/optim/__init__.py` (+25 lines)
+- `python/neurx/nn/__init__.py` (+15 lines)
+- `python/neurx/optim/__init__.py` (+25 lines)
 
 ---
 

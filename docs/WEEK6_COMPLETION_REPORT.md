@@ -18,7 +18,7 @@
 
 ### 1.1 Activation Functions Module (activations.py)
 
-**File**: `python/tensor/nn/activations.py`  
+**File**: `python/neurx/nn/activations.py`  
 **Lines**: 350+ lines  
 **APIs**: 38 (19 functional + 19 class-based)
 
@@ -64,7 +64,7 @@
 
 ### 1.2 Optimizer Utilities Module (optim_utils.py)
 
-**File**: `python/tensor/nn/optim_utils.py`  
+**File**: `python/neurx/nn/optim_utils.py`  
 **Lines**: 300+ lines  
 **APIs**: 23 (10 schedules + 6 utilities + 3 classes)
 
@@ -112,7 +112,7 @@
 
 ### 1.3 Extended Loss Functions Module (loss_extended.py)
 
-**File**: `python/tensor/nn/loss_extended.py`  
+**File**: `python/neurx/nn/loss_extended.py`  
 **Lines**: 400+ lines  
 **APIs**: 14 specialized loss functions
 
@@ -167,7 +167,7 @@
 
 ### 1.4 Module Integration
 
-**File Updated**: `python/tensor/nn/__init__.py`
+**File Updated**: `python/neurx/nn/__init__.py`
 
 **New Imports Added** (75 total):
 - From `activations.py`: 38 items (19 functions + 19 classes)
@@ -413,7 +413,7 @@ RESULTS: 29 passed, 0 failed
 ## 6. File Structure & Organization
 
 ```
-python/tensor/nn/
+python/neurx/nn/
 ├── __init__.py (UPDATED with 75 new exports)
 ├── activations.py (NEW - 350+ lines, 38 APIs)
 ├── optim_utils.py (NEW - 300+ lines, 23 APIs)

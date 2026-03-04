@@ -14,16 +14,16 @@ import math
 import pytest
 from typing import List
 
-from tensor.core.tensor import Tensor
-from tensor.nn.rnn import (
+from neurx.core.neurx import Tensor
+from neurx.nn.rnn import (
     RNNCell, RNN, LSTMCell, LSTM, GRUCell, GRU
 )
-from tensor.optim.losses import (
+from neurx.optim.losses import (
     CrossEntropyLoss, BCELoss, BCEWithLogitsLoss, L1Loss, MSELoss,
     SmoothL1Loss, KLDivLoss, NLLLoss, HuberLoss, PoissonNLLLoss,
     CTCLoss, MarginRankingLoss, TripletMarginLoss
 )
-from tensor.optim.schedulers import (
+from neurx.optim.schedulers import (
     StepLR, ExponentialLR, CosineAnnealingLR, CosineAnnealingWarmRestarts,
     LinearLR, PolynomialLR, MultiplicativeLR, LambdaLR, ReduceLROnPlateau,
     WarmupLR, WarmupDecayLR, StepDecayWithWarmup, CyclicLR, OneCycleLR

@@ -8,12 +8,12 @@
 
 ## Overview
 
-Implemented 8 in-place tensor operations that modify tensors in-place without creating new objects, significantly reducing memory usage and improving performance.
+Implemented 8 in-place neurx operations that modify tensors in-place without creating new objects, significantly reducing memory usage and improving performance.
 
 ## Implemented Operations
 
 ### 1. **add_(other)** - In-place Addition
-- **Signature:** `tensor.add_(other) → self`
+- **Signature:** `neurx.add_(other) → self`
 - **Behavior:** `self = self + other`
 - **Tests:** 5 test cases covering scalars, tensors, broadcasting, 1D/2D
 - **Example:**
@@ -23,7 +23,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 2. **sub_(other)** - In-place Subtraction
-- **Signature:** `tensor.sub_(other) → self`
+- **Signature:** `neurx.sub_(other) → self`
 - **Behavior:** `self = self - other`
 - **Tests:** 4 test cases covering basic operations and negatives
 - **Example:**
@@ -33,7 +33,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 3. **mul_(other)** - In-place Multiplication
-- **Signature:** `tensor.mul_(other) → self`
+- **Signature:** `neurx.mul_(other) → self`
 - **Behavior:** `self = self * other`
 - **Tests:** 5 test cases covering zero multiplication and negatives
 - **Example:**
@@ -43,9 +43,9 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 4. **div_(other)** - In-place Division
-- **Signature:** `tensor.div_(other) → self`
+- **Signature:** `neurx.div_(other) → self`
 - **Behavior:** `self = self / other`
-- **Tests:** 4 test cases covering scalar and tensor division
+- **Tests:** 4 test cases covering scalar and neurx division
 - **Example:**
   ```python
   t = Tensor([2.0, 4.0, 6.0])
@@ -53,7 +53,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 5. **pow_(other)** - In-place Power
-- **Signature:** `tensor.pow_(exponent) → self`
+- **Signature:** `neurx.pow_(exponent) → self`
 - **Behavior:** `self = self ** exponent`
 - **Tests:** 5 test cases covering square, sqrt, zero, negative exponents
 - **Example:**
@@ -63,7 +63,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 6. **copy_(other)** - In-place Copy
-- **Signature:** `tensor.copy_(other) → self`
+- **Signature:** `neurx.copy_(other) → self`
 - **Behavior:** Copy data from other into self (deep copy)
 - **Tests:** 6 test cases including shape validation
 - **Example:**
@@ -74,7 +74,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 7. **fill_(value)** - In-place Fill
-- **Signature:** `tensor.fill_(value) → self`
+- **Signature:** `neurx.fill_(value) → self`
 - **Behavior:** Fill all elements with a single value
 - **Tests:** 5 test cases covering positive, zero, negative values
 - **Example:**
@@ -84,7 +84,7 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
   ```
 
 ### 8. **zero_()** - In-place Zero
-- **Signature:** `tensor.zero_() → self`
+- **Signature:** `neurx.zero_() → self`
 - **Behavior:** Fill all elements with 0
 - **Tests:** 4 test cases covering 1D, 2D, and already-zero tensors
 - **Example:**
@@ -126,16 +126,16 @@ Implemented 8 in-place tensor operations that modify tensors in-place without cr
 ## Performance Impact
 
 ### Memory Efficiency
-- **Before:** Creating temporary tensor for each operation
+- **Before:** Creating temporary neurx for each operation
 - **After:** Modifying data in-place without new allocations
 - **Improvement:** 20-30% memory savings on typical workloads
 
 ### Benchmark Example
 ```python
 import numpy as np
-from tensor import Tensor
+from neurx import Tensor
 
-# Create a large tensor
+# Create a large neurx
 t = Tensor(np.random.randn(10000, 10000).astype(np.float32))
 
 # In-place operations (memory efficient)
@@ -172,11 +172,11 @@ All operations support both:
 
 Device-aware implementation:
 ```python
-# CPU tensor
+# CPU neurx
 t_cpu = Tensor([1.0, 2.0, 3.0], device='cpu')
 t_cpu.add_(5.0)  # Uses NumPy
 
-# CUDA tensor (if available)
+# CUDA neurx (if available)
 t_gpu = Tensor([1.0, 2.0, 3.0], device='cuda')
 t_gpu.add_(5.0)  # Uses CUDA ops
 ```
@@ -184,7 +184,7 @@ t_gpu.add_(5.0)  # Uses CUDA ops
 ## Integration Points
 
 ### Location
-- **Implementation:** `/home/shuwen/neurx/python/tensor/core/tensor.py` (lines 1680-1730)
+- **Implementation:** `/home/shuwen/neurx/python/neurx/core/neurx.py` (lines 1680-1730)
 - **Tests:** `/home/shuwen/neurx/tests/test_inplace_operations.py`
 
 ### Dependencies
@@ -200,7 +200,7 @@ t_gpu.add_(5.0)  # Uses CUDA ops
 
 1. **No Gradient Support:** In-place operations don't propagate gradients (by design for memory efficiency)
 2. **Shape Constraints:** Operations like `copy_()` require exact shape matching
-3. **Device Consistency:** Operations between different devices handled by tensor conversion
+3. **Device Consistency:** Operations between different devices handled by neurx conversion
 
 ## Future Enhancements
 
@@ -251,7 +251,7 @@ t_gpu.add_(5.0)  # Uses CUDA ops
 
 ## Conclusion
 
-Successfully implemented 8 in-place tensor operations with 100% test coverage. These operations provide significant memory savings (20-30%) and are essential for efficient deep learning training loops. The implementation follows PyTorch conventions and integrates seamlessly with the existing tensor framework.
+Successfully implemented 8 in-place neurx operations with 100% test coverage. These operations provide significant memory savings (20-30%) and are essential for efficient deep learning training loops. The implementation follows PyTorch conventions and integrates seamlessly with the existing neurx framework.
 
 **Quick Win Status: ✅ COMPLETE**
 **Estimated ROI:** 20-30% memory optimization + fundamental operations used everywhere

@@ -1,6 +1,6 @@
 import numpy as np
 
-from tensor.data import DataLoader, TensorDataset
+from neurx.data import DataLoader, TensorDataset
 
 
 class ToyDataset:

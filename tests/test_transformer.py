@@ -16,13 +16,13 @@ import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
 import numpy as np
-import tensor
-from tensor.nn.attention import (
+import neurx
+from neurx.nn.attention import (
     ScaledDotProductAttention,
     MultiheadAttention,
     AttentionWithPE,
 )
-from tensor.nn.transformer import (
+from neurx.nn.transformer import (
     FeedForwardNetwork,
     TransformerEncoderLayer,
     TransformerEncoder,
@@ -50,9 +50,9 @@ def test_scaled_dot_product_attention():
     # Test case 1: Basic functionality
     print("Test 1: Basic functionality")
     batch_size, seq_len, d_k = 2, 4, 64
-    Q = tensor.randn(batch_size, seq_len, d_k)
-    K = tensor.randn(batch_size, seq_len, d_k)
-    V = tensor.randn(batch_size, seq_len, d_k)
+    Q = neurx.randn(batch_size, seq_len, d_k)
+    K = neurx.randn(batch_size, seq_len, d_k)
+    V = neurx.randn(batch_size, seq_len, d_k)
     
     output, weights = attn(Q, K, V)
     
@@ -69,7 +69,7 @@ def test_scaled_dot_product_attention():
     print("\nTest 2: Causal masking")
     # Create causal mask
     causal_mask = np.triu(np.full((seq_len, seq_len), -10000), k=1)
-    causal_mask = tensor.ones(batch_size, seq_len, seq_len) * causal_mask
+    causal_mask = neurx.ones(batch_size, seq_len, seq_len) * causal_mask
     
     output_masked, weights_masked = attn(Q, K, V, mask=causal_mask)
     
@@ -83,8 +83,8 @@ def test_scaled_dot_product_attention():
     # Test case 3: Different sequence lengths
     print("\nTest 3: Different sequence lengths for K,V vs Q")
     seq_len_kv = 8
-    K_long = tensor.randn(batch_size, seq_len_kv, d_k)
-    V_long = tensor.randn(batch_size, seq_len_kv, d_k)
+    K_long = neurx.randn(batch_size, seq_len_kv, d_k)
+    V_long = neurx.randn(batch_size, seq_len_kv, d_k)
     
     output_cross, weights_cross = attn(Q, K_long, V_long)
     
@@ -109,9 +109,9 @@ def test_multihead_attention():
     
     # Test case 1: Basic functionality
     print("Test 1: Basic functionality")
-    Q = tensor.randn(batch_size, seq_len, embed_dim)
-    K = tensor.randn(batch_size, seq_len, embed_dim)
-    V = tensor.randn(batch_size, seq_len, embed_dim)
+    Q = neurx.randn(batch_size, seq_len, embed_dim)
+    K = neurx.randn(batch_size, seq_len, embed_dim)
+    V = neurx.randn(batch_size, seq_len, embed_dim)
     
     output, weights = mha(Q, K, V)
     
@@ -129,8 +129,8 @@ def test_multihead_attention():
     
     # Test case 3: Cross-attention
     print("\nTest 3: Cross-attention")
-    K_cross = tensor.randn(batch_size, 8, embed_dim)  # Different length
-    V_cross = tensor.randn(batch_size, 8, embed_dim)
+    K_cross = neurx.randn(batch_size, 8, embed_dim)  # Different length
+    V_cross = neurx.randn(batch_size, 8, embed_dim)
     
     output_cross, weights_cross = mha(Q, K_cross, V_cross)
     
@@ -144,7 +144,7 @@ def test_multihead_attention():
     
     for dim, heads in configs:
         mha_test = MultiheadAttention(embed_dim=dim, num_heads=heads)
-        Q_test = tensor.randn(2, 4, dim)
+        Q_test = neurx.randn(2, 4, dim)
         output_test, _ = mha_test(Q_test, Q_test, Q_test)
         assert output_test.shape == (2, 4, dim), f"Failed for ({dim}, {heads})"
     
@@ -175,9 +175,9 @@ def test_attention_with_pe():
     
     # Test case 1: With positional encoding
     print("Test 1: With positional encoding")
-    Q = tensor.randn(batch_size, seq_len, embed_dim)
-    K = tensor.randn(batch_size, seq_len, embed_dim)
-    V = tensor.randn(batch_size, seq_len, embed_dim)
+    Q = neurx.randn(batch_size, seq_len, embed_dim)
+    K = neurx.randn(batch_size, seq_len, embed_dim)
+    V = neurx.randn(batch_size, seq_len, embed_dim)
     
     output_with_pe, _ = attn_pe(Q, K, V, add_pe=True)
     
@@ -193,9 +193,9 @@ def test_attention_with_pe():
     
     # Test case 3: Long sequences beyond PE length
     print("\nTest 3: Sequence length handling")
-    Q_long = tensor.randn(2, 1000, embed_dim)
-    K_long = tensor.randn(2, 1000, embed_dim)
-    V_long = tensor.randn(2, 1000, embed_dim)
+    Q_long = neurx.randn(2, 1000, embed_dim)
+    K_long = neurx.randn(2, 1000, embed_dim)
+    V_long = neurx.randn(2, 1000, embed_dim)
     
     # Should handle gracefully
     output_long, _ = attn_pe(Q_long, K_long, V_long, add_pe=True)
@@ -224,7 +224,7 @@ def test_transformer_encoder_layer():
     
     # Test case 1: Basic forward pass
     print("Test 1: Basic forward pass")
-    x = tensor.randn(batch_size, seq_len, embed_dim)
+    x = neurx.randn(batch_size, seq_len, embed_dim)
     output = enc_layer(x)
     
     assert output.shape == x.shape, f"Shape mismatch: {output.shape} vs {x.shape}"
@@ -232,7 +232,7 @@ def test_transformer_encoder_layer():
     
     # Test case 2: With attention mask
     print("\nTest 2: With attention mask")
-    mask = tensor.zeros(batch_size, seq_len, seq_len)
+    mask = neurx.zeros(batch_size, seq_len, seq_len)
     output_masked = enc_layer(x, mask=mask)
     
     assert output_masked.shape == x.shape
@@ -272,7 +272,7 @@ def test_transformer_encoder():
     
     # Test case 1: Multi-layer encoding
     print("Test 1: Multi-layer encoding")
-    x = tensor.randn(batch_size, seq_len, embed_dim)
+    x = neurx.randn(batch_size, seq_len, embed_dim)
     output = encoder(x)
     
     assert output.shape == x.shape
@@ -293,7 +293,7 @@ def test_transformer_encoder():
     
     # Test case 3: Gradient flow (shapes)
     print("\nTest 3: Gradient flow capability")
-    x_grad = tensor.randn(batch_size, seq_len, embed_dim)
+    x_grad = neurx.randn(batch_size, seq_len, embed_dim)
     output_grad = encoder(x_grad)
     
     # Check that requires_grad is preserved
@@ -323,11 +323,11 @@ def test_transformer_decoder():
     )
     
     # Create dummy encoder output
-    encoder_output = tensor.randn(batch_size, src_len, embed_dim)
+    encoder_output = neurx.randn(batch_size, src_len, embed_dim)
     
     # Test case 1: Decoding with encoder context
     print("Test 1: Decoding with encoder context")
-    tgt = tensor.randn(batch_size, tgt_len, embed_dim)
+    tgt = neurx.randn(batch_size, tgt_len, embed_dim)
     output = decoder(tgt, encoder_output)
     
     assert output.shape == tgt.shape
@@ -336,7 +336,7 @@ def test_transformer_decoder():
     # Test case 2: Causal masking
     print("\nTest 2: Causal masking in self-attention")
     causal_mask = np.triu(np.full((tgt_len, tgt_len), -10000), k=1)
-    causal_mask = tensor.ones(batch_size, tgt_len, tgt_len) * causal_mask
+    causal_mask = neurx.ones(batch_size, tgt_len, tgt_len) * causal_mask
     
     output_causal = decoder(tgt, encoder_output, self_attn_mask=causal_mask)
     
@@ -345,7 +345,7 @@ def test_transformer_decoder():
     
     # Test case 3: Cross-attention masking
     print("\nTest 3: Cross-attention masking")
-    cross_mask = tensor.zeros(batch_size, tgt_len, src_len)
+    cross_mask = neurx.zeros(batch_size, tgt_len, src_len)
     
     output_cross = decoder(
         tgt, encoder_output,
@@ -381,8 +381,8 @@ def test_full_transformer():
     
     # Test case 1: Encode-decode cycle
     print("Test 1: Encode-decode cycle")
-    src = tensor.randn(batch_size, src_len, embed_dim)
-    tgt = tensor.randn(batch_size, tgt_len, embed_dim)
+    src = neurx.randn(batch_size, src_len, embed_dim)
+    tgt = neurx.randn(batch_size, tgt_len, embed_dim)
     
     output = transformer(src, tgt)
     
@@ -391,9 +391,9 @@ def test_full_transformer():
     
     # Test case 2: Masking
     print("\nTest 2: With masking")
-    src_mask = tensor.zeros(batch_size, src_len, src_len)
+    src_mask = neurx.zeros(batch_size, src_len, src_len)
     tgt_mask = np.triu(np.full((tgt_len, tgt_len), -10000), k=1)
-    tgt_mask = tensor.ones(batch_size, tgt_len, tgt_len) * tgt_mask
+    tgt_mask = neurx.ones(batch_size, tgt_len, tgt_len) * tgt_mask
     
     output_masked = transformer(src, tgt, src_mask=src_mask, tgt_mask=tgt_mask)
     
@@ -402,8 +402,8 @@ def test_full_transformer():
     
     # Test case 3: Variable sequence lengths
     print("\nTest 3: Variable sequence lengths")
-    src_var = tensor.randn(batch_size, 6, embed_dim)
-    tgt_var = tensor.randn(batch_size, 8, embed_dim)
+    src_var = neurx.randn(batch_size, 6, embed_dim)
+    tgt_var = neurx.randn(batch_size, 8, embed_dim)
     
     output_var = transformer(src_var, tgt_var)
     

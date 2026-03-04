@@ -29,17 +29,17 @@
 
 #### 2.1 Einstein Summation (einsum)
 
-**文件**: `python/tensor/core/einsum.py`
+**文件**: `python/neurx/core/einsum.py`
 
 ```python
-import tensor
+import neurx
 
 # 支持的操作
-C = tensor.einsum('ij,jk->ik', A, B)          # 矩阵乘法
-C = tensor.einsum('bij,bjk->bik', A, B)       # 批量矩阵乘法
-trace = tensor.einsum('ii', A)                # 矩阵的迹
-A_T = tensor.einsum('ij->ji', A)              # 转置
-dots = tensor.einsum('bi,bi->b', A, B)        # 批量点积
+C = neurx.einsum('ij,jk->ik', A, B)          # 矩阵乘法
+C = neurx.einsum('bij,bjk->bik', A, B)       # 批量矩阵乘法
+trace = neurx.einsum('ii', A)                # 矩阵的迹
+A_T = neurx.einsum('ij->ji', A)              # 转置
+dots = neurx.einsum('bi,bi->b', A, B)        # 批量点积
 ```
 
 **特性**：
@@ -50,11 +50,11 @@ dots = tensor.einsum('bi,bi->b', A, B)        # 批量点积
 
 ---
 
-#### 2.2 Vision Module (tensor.vision)
+#### 2.2 Vision Module (neurx.vision)
 
 ##### 图像变换 (transforms)
 
-**文件**: `python/tensor/vision/transforms.py`
+**文件**: `python/neurx/vision/transforms.py`
 
 实现的变换（9个）：
 1. `Compose` - 组合多个变换
@@ -69,7 +69,7 @@ dots = tensor.einsum('bi,bi->b', A, B)        # 批量点积
 
 **示例**：
 ```python
-from tensor.vision import transforms
+from neurx.vision import transforms
 
 transform = transforms.Compose([
     transforms.Resize(256),
@@ -82,7 +82,7 @@ transform = transforms.Compose([
 
 ##### 预训练模型 (models)
 
-**文件**: `python/tensor/vision/models/resnet.py`
+**文件**: `python/neurx/vision/models/resnet.py`
 
 实现的模型（5个）：
 1. `resnet18` - ResNet-18 (~11M参数)
@@ -93,7 +93,7 @@ transform = transforms.Compose([
 
 **示例**：
 ```python
-from tensor.vision import models
+from neurx.vision import models
 
 model = models.resnet18(num_classes=10)
 output = model(input_tensor)
@@ -142,13 +142,13 @@ NLP生态:       ████░░░░░░░░░░░░░░░░ 20
 
 1. **测试新功能**
    ```bash
-   cd /home/shuwen/tensor
+   cd /home/shuwen/neurx
    python tests/test_new_features.py
    ```
 
 2. **尝试训练CIFAR-10**
    ```python
-   from tensor.vision import models, transforms
+   from neurx.vision import models, transforms
    model = models.resnet18(num_classes=10)
    # ... 设置训练循环
    ```

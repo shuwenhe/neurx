@@ -8,8 +8,8 @@ from typing import Callable
 
 import numpy as np
 
-from tensor import Tensor, nn, optim
-from tensor.nn import functional as F
+from neurx import Tensor, nn, optim
+from neurx.nn import functional as F
 
 
 _API_CASES: "OrderedDict[str, tuple[str, Callable[[], None]]]" = OrderedDict()
@@ -30,7 +30,7 @@ def _rand(shape, requires_grad=False):
     return Tensor(arr, requires_grad=requires_grad, device="cpu")
 
 
-@register("tensor.add", "Tensor")
+@register("neurx.add", "Tensor")
 def _case_tensor_add():
     a = _rand((2, 3))
     b = _rand((2, 3))
@@ -38,7 +38,7 @@ def _case_tensor_add():
     assert out.shape == (2, 3)
 
 
-@register("tensor.mul", "Tensor")
+@register("neurx.mul", "Tensor")
 def _case_tensor_mul():
     a = _rand((2, 3))
     b = _rand((2, 3))
@@ -46,7 +46,7 @@ def _case_tensor_mul():
     assert out.shape == (2, 3)
 
 
-@register("tensor.matmul", "Tensor")
+@register("neurx.matmul", "Tensor")
 def _case_tensor_matmul():
     a = _rand((4, 3))
     b = _rand((3, 2))
@@ -54,49 +54,49 @@ def _case_tensor_matmul():
     assert out.shape == (4, 2)
 
 
-@register("tensor.reshape", "Tensor")
+@register("neurx.reshape", "Tensor")
 def _case_tensor_reshape():
     x = _rand((2, 3, 4))
     y = x.reshape(6, 4)
     assert y.shape == (6, 4)
 
 
-@register("tensor.flatten", "Tensor")
+@register("neurx.flatten", "Tensor")
 def _case_tensor_flatten():
     x = _rand((2, 3, 4))
     y = x.flatten(1, 2)
     assert y.shape == (2, 12)
 
 
-@register("tensor.transpose", "Tensor")
+@register("neurx.transpose", "Tensor")
 def _case_tensor_transpose():
     x = _rand((2, 3, 4))
     y = x.transpose(1, 2)
     assert y.shape == (2, 4, 3)
 
 
-@register("tensor.permute", "Tensor")
+@register("neurx.permute", "Tensor")
 def _case_tensor_permute():
     x = _rand((2, 3, 4))
     y = x.permute(2, 0, 1)
     assert y.shape == (4, 2, 3)
 
 
-@register("tensor.sum", "Tensor")
+@register("neurx.sum", "Tensor")
 def _case_tensor_sum():
     x = _rand((2, 3, 4))
     y = x.sum(axis=1)
     assert y.shape == (2, 4)
 
 
-@register("tensor.mean", "Tensor")
+@register("neurx.mean", "Tensor")
 def _case_tensor_mean():
     x = _rand((2, 3, 4))
     y = x.mean(axis=2)
     assert y.shape == (2, 3)
 
 
-@register("tensor.max", "Tensor")
+@register("neurx.max", "Tensor")
 def _case_tensor_max():
     x = _rand((2, 3, 4))
     v, i = x.max(axis=1)
@@ -104,7 +104,7 @@ def _case_tensor_max():
     assert i.shape == (2, 4)
 
 
-@register("tensor.min", "Tensor")
+@register("neurx.min", "Tensor")
 def _case_tensor_min():
     x = _rand((2, 3, 4))
     v, i = x.min(axis=1)
@@ -112,21 +112,21 @@ def _case_tensor_min():
     assert i.shape == (2, 4)
 
 
-@register("tensor.argmax", "Tensor")
+@register("neurx.argmax", "Tensor")
 def _case_tensor_argmax():
     x = _rand((2, 3, 4))
     i = x.argmax(axis=2)
     assert i.shape == (2, 3)
 
 
-@register("tensor.argmin", "Tensor")
+@register("neurx.argmin", "Tensor")
 def _case_tensor_argmin():
     x = _rand((2, 3, 4))
     i = x.argmin(axis=2)
     assert i.shape == (2, 3)
 
 
-@register("tensor.backward", "Tensor")
+@register("neurx.backward", "Tensor")
 def _case_tensor_backward():
     x = _rand((3, 4), requires_grad=True)
     y = (x * x).mean()
@@ -135,14 +135,14 @@ def _case_tensor_backward():
     assert x.grad.shape == x.shape
 
 
-@register("tensor.item", "Tensor")
+@register("neurx.item", "Tensor")
 def _case_tensor_item():
     x = _rand((2, 2))
     y = x.mean().item()
     assert isinstance(y, float)
 
 
-@register("tensor.clone", "Tensor")
+@register("neurx.clone", "Tensor")
 def _case_tensor_clone():
     x = _rand((2, 2), requires_grad=True)
     y = x.clone()
@@ -150,7 +150,7 @@ def _case_tensor_clone():
     assert y.requires_grad == x.requires_grad
 
 
-@register("tensor.detach", "Tensor")
+@register("neurx.detach", "Tensor")
 def _case_tensor_detach():
     x = _rand((2, 2), requires_grad=True)
     y = x.detach()
@@ -158,7 +158,7 @@ def _case_tensor_detach():
     assert y.requires_grad is False
 
 
-@register("tensor.to", "Tensor")
+@register("neurx.to", "Tensor")
 def _case_tensor_to():
     x = _rand((2, 2))
     y = x.to(dtype=np.float32, device="cpu")
@@ -166,7 +166,7 @@ def _case_tensor_to():
     assert y.dtype == np.float32
 
 
-@register("tensor.zero_grad", "Tensor")
+@register("neurx.zero_grad", "Tensor")
 def _case_tensor_zero_grad():
     x = _rand((2, 2), requires_grad=True)
     y = (x * x).sum()
@@ -468,7 +468,7 @@ def run_all_cases() -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run or list per-API tests for tensor project.")
+    parser = argparse.ArgumentParser(description="Run or list per-API tests for neurx project.")
     parser.add_argument("--list", action="store_true", help="List all API test commands.")
     parser.add_argument("--api", type=str, default="", help="Run a single API test by name.")
     parser.add_argument("--all", action="store_true", help="Run all API tests in this runner.")

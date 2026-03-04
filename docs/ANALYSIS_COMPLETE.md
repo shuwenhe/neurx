@@ -89,8 +89,8 @@
 
 步骤:
 1. 复制 IMPLEMENTATION_PLAN.md 中的所有代码
-2. 粘贴到 tensor/core/tensor.py (Tensor类)
-3. 粘贴到 tensor/nn/functional.py (函数)
+2. 粘贴到 neurx/core/neurx.py (Tensor类)
+3. 粘贴到 neurx/nn/functional.py (函数)
 4. 运行 pytest 验证
 5. 提交PR
 
@@ -331,8 +331,8 @@ ResNet50 训练 (batch_size=64):
 ### 明天 (开始)
 ```bash
 1. 详细阅读 IMPLEMENTATION_PLAN.md
-2. 复制代码片段到 tensor/core/tensor.py
-3. 复制代码片段到 tensor/nn/functional.py
+2. 复制代码片段到 neurx/core/neurx.py
+3. 复制代码片段到 neurx/nn/functional.py
 4. 运行单元测试
 ```
 
@@ -497,6 +497,6 @@ DETAILED_COMPARISON.md     ← 详细对标分析
 ---
 
 *分析完成于: 2026-03-03*  
-*框架位置: /home/shuwen/neurx/python/tensor/*  
+*框架位置: /home/shuwen/neurx/python/neurx/*  
 *分析文档位置: /home/shuwen/neurx/*  
 *总投入: ~40小时分析和文档编写*
