@@ -7,7 +7,7 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor.nn import (
+from neurx.nn import (
     # Weight Initialization
     xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
     orthogonal, uniform, normal,
@@ -20,7 +20,7 @@ from tensor.nn import (
     # BatchNorm Layers
     BatchNorm1d, BatchNorm2d, BatchNorm3d
 )
-from tensor import Tensor
+from neurx import Tensor
 
 print("=" * 80)
 print("Week 5 Demo: Weight Initialization + Gradient + Analysis + BatchNorm")

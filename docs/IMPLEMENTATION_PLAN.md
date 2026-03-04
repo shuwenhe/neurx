@@ -4,7 +4,7 @@
 
 ### 任务1: 实现基础张量操作 (4小时)
 
-在 `tensor/core/tensor.py` 中添加以下方法:
+在 `neurx/core/neurx.py` 中添加以下方法:
 
 ```python
 class Tensor:
@@ -14,7 +14,7 @@ class Tensor:
     def squeeze(self, dim=None):
         """Remove dimensions of size 1."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.squeeze(self, dim)
         
         data = self.to_numpy()
@@ -33,7 +33,7 @@ class Tensor:
     def unsqueeze(self, dim):
         """Add a dimension of size 1."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.unsqueeze(self, dim)
         
         data = self.to_numpy()
@@ -46,12 +46,12 @@ class Tensor:
         return Tensor(out_data, requires_grad=False, device=self.device)
     
     def reshape(self, *shape):
-        """Change tensor shape (returns new tensor)."""
+        """Change neurx shape (returns new neurx)."""
         if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
             shape = tuple(shape[0])
         
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.reshape(self, shape)
         
         data = self.to_numpy()
@@ -65,7 +65,7 @@ class Tensor:
     def flatten(self, start_dim=0, end_dim=-1):
         """Flatten dimensions."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.flatten(self, start_dim, end_dim)
         
         data = self.to_numpy()
@@ -89,7 +89,7 @@ class Tensor:
     def transpose(self, dim0, dim1):
         """Transpose two dimensions."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.transpose(self, dim0, dim1)
         
         data = self.to_numpy()
@@ -109,7 +109,7 @@ class Tensor:
             dims = tuple(dims[0])
         
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.permute(self, dims)
         
         data = self.to_numpy()
@@ -123,7 +123,7 @@ class Tensor:
     def sum(self, dim=None, keepdim=False):
         """Sum over dimensions."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.sum(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -141,7 +141,7 @@ class Tensor:
     def mean(self, dim=None, keepdim=False):
         """Mean over dimensions."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.mean(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -159,7 +159,7 @@ class Tensor:
     def std(self, dim=None, keepdim=False, unbiased=True):
         """Standard deviation."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.std(self, dim, keepdim, unbiased)
         
         data = self.to_numpy()
@@ -178,7 +178,7 @@ class Tensor:
     def var(self, dim=None, keepdim=False, unbiased=True):
         """Variance."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.var(self, dim, keepdim, unbiased)
         
         data = self.to_numpy()
@@ -198,7 +198,7 @@ class Tensor:
     def max(self, dim=None, keepdim=False):
         """Maximum values (returns value and indices if dim specified)."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.max(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -219,7 +219,7 @@ class Tensor:
     def min(self, dim=None, keepdim=False):
         """Minimum values."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.min(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -240,7 +240,7 @@ class Tensor:
     def argmax(self, dim=None, keepdim=False):
         """Indices of maximum values."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.argmax(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -259,7 +259,7 @@ class Tensor:
     def argmin(self, dim=None, keepdim=False):
         """Indices of minimum values."""
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.argmin(self, dim, keepdim)
         
         data = self.to_numpy()
@@ -277,12 +277,12 @@ class Tensor:
     
     # ==================== 扩展操作 ====================
     def repeat(self, *sizes):
-        """Repeat tensor."""
+        """Repeat neurx."""
         if len(sizes) == 1 and isinstance(sizes[0], (tuple, list)):
             sizes = tuple(sizes[0])
         
         if self.requires_grad:
-            from tensor.nn import functional as F
+            from neurx.nn import functional as F
             return F.repeat(self, sizes)
         
         data = self.to_numpy()
@@ -294,7 +294,7 @@ class Tensor:
         return Tensor(out_data, requires_grad=False, device=self.device)
     
     def expand(self, *sizes):
-        """Expand tensor (broadcasting, no copy)."""
+        """Expand neurx (broadcasting, no copy)."""
         if len(sizes) == 1 and isinstance(sizes[0], (tuple, list)):
             sizes = tuple(sizes[0])
         
@@ -308,12 +308,12 @@ class Tensor:
         try:
             out_data = np.broadcast_to(data, sizes)
         except ValueError as e:
-            raise ValueError(f"Cannot expand tensor of shape {self.shape} to {sizes}: {e}")
+            raise ValueError(f"Cannot expand neurx of shape {self.shape} to {sizes}: {e}")
         
         return Tensor(out_data, requires_grad=False, device=self.device)
     
     def clone(self):
-        """Create a deep copy of tensor."""
+        """Create a deep copy of neurx."""
         data = self.to_numpy().copy()
         return Tensor(data, requires_grad=self.requires_grad, device=self.device)
     
@@ -325,10 +325,10 @@ class Tensor:
 
 ---
 
-### 任务2: 在 `tensor/nn/functional.py` 中添加对应的函数实现
+### 任务2: 在 `neurx/nn/functional.py` 中添加对应的函数实现
 
 ```python
-# 添加到 tensor/nn/functional.py
+# 添加到 neurx/nn/functional.py
 
 def squeeze(x: Tensor, dim=None):
     x = _as_tensor(x)
@@ -665,7 +665,7 @@ def repeat(x: Tensor, sizes):
 
 ### 任务3: 更新 `__init__.py` 导出新函数
 
-在 `tensor/tensor.py` 的 `__all__` 中添加:
+在 `neurx/neurx.py` 的 `__all__` 中添加:
 ```python
 __all__ = [
     # ... existing exports ...
@@ -696,12 +696,12 @@ __all__ = [
 
 ### 任务4: 添加完整单元测试
 
-创建 `tensor/tests/test_tensor_ops.py`:
+创建 `neurx/tests/test_tensor_ops.py`:
 
 ```python
 import numpy as np
 import pytest
-from tensor import Tensor
+from neurx import Tensor
 
 
 class TestDimensionOps:
@@ -836,7 +836,7 @@ if __name__ == "__main__":
 
 ### 任务5: 实现现代优化器
 
-在 `tensor/optim/optim.py` 中添加:
+在 `neurx/optim/optim.py` 中添加:
 
 ```python
 class RAdam(Optimizer):

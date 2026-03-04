@@ -58,7 +58,7 @@
 
 **Day 1-2: LSTM 实现**
 ```
-文件: python/tensor/nn/rnn.py
+文件: python/neurx/nn/rnn.py
 - LSTMCell 核心逻辑 (200行)
   ├─ 输入门 (Input gate)
   ├─ 遗忘门 (Forget gate)
@@ -103,7 +103,7 @@
 
 **Day 1-2: Attention 实现**
 ```
-文件: python/tensor/nn/attention.py
+文件: python/neurx/nn/attention.py
 
 ScaledDotProductAttention (150行):
   ├─ QK^T 计算
@@ -129,7 +129,7 @@ MultiheadAttention (350行):
 
 **Day 3-4: Transformer 层**
 ```
-文件: python/tensor/nn/transformer.py
+文件: python/neurx/nn/transformer.py
 
 PositionalEncoding (100行):
   ├─ 正弦位置编码
@@ -178,7 +178,7 @@ TransformerDecoder (200行):
 
 **Day 1-2: 归一化层**
 ```
-文件: python/tensor/nn/normalization.py
+文件: python/neurx/nn/normalization.py
 
 LayerNorm (400行):
   ├─ 特征维度归一化
@@ -197,7 +197,7 @@ GroupNorm (350行):
 
 **Day 3-4: 损失函数**
 ```
-文件: python/tensor/losses.py (扩展)
+文件: python/neurx/losses.py (扩展)
 
 新增:
 ├─ BCELoss (200行)
@@ -216,7 +216,7 @@ GroupNorm (350行):
 
 **Day 5: 激活函数扩展**
 ```
-python/tensor/nn/functional.py (扩展)
+python/neurx/nn/functional.py (扩展)
 
 新增激活函数:
 ├─ GELU (100行)
@@ -240,7 +240,7 @@ tests/test_activations.py (150行)
 
 **Day 1-2: Embedding层**
 ```
-文件: python/tensor/nn/embedding.py
+文件: python/neurx/nn/embedding.py
 
 Embedding (300行):
   ├─ 词汇表查询
@@ -259,7 +259,7 @@ EmbeddingBag (250行):
 
 **Day 3-4: DataLoader 完善**
 ```
-文件: python/tensor/data/ (完善)
+文件: python/neurx/data/ (完善)
 
 Sampler 类:
 ├─ SequentialSampler (100行)
@@ -283,7 +283,7 @@ DataLoader 优化:
 
 **Day 5: 学习率调度器**
 ```
-文件: python/tensor/optim/scheduler.py (扩展)
+文件: python/neurx/optim/scheduler.py (扩展)
 
 新增调度器:
 ├─ StepLR (120行)
@@ -420,14 +420,14 @@ DataLoader 优化:
 cd /home/shuwen/neurx
 
 # 1. 创建RNN模块
-mkdir -p python/tensor/nn/rnn_impl
-touch python/tensor/nn/rnn.py
+mkdir -p python/neurx/nn/rnn_impl
+touch python/neurx/nn/rnn.py
 
 # 2. 运行测试
 make test-rnn
 
 # 3. 检查覆盖率
-python3 -m pytest tests/test_lstm.py -v --cov=tensor.nn
+python3 -m pytest tests/test_lstm.py -v --cov=neurx.nn
 ```
 
 ---
@@ -453,15 +453,15 @@ python3 -m pytest tests/test_lstm.py -v --cov=tensor.nn
 ## 💾 交付物清单
 
 ### **代码**
-- [ ] python/tensor/nn/rnn.py (RNN系)
-- [ ] python/tensor/nn/attention.py (注意力)
-- [ ] python/tensor/nn/transformer.py (Transformer)
-- [ ] python/tensor/nn/normalization.py (归一化)
-- [ ] python/tensor/nn/embedding.py (嵌入)
-- [ ] python/tensor/losses.py (扩展)
-- [ ] python/tensor/data/ (完善)
-- [ ] python/tensor/optim/scheduler.py (扩展)
-- [ ] python/tensor/vision/models/ (扩展)
+- [ ] python/neurx/nn/rnn.py (RNN系)
+- [ ] python/neurx/nn/attention.py (注意力)
+- [ ] python/neurx/nn/transformer.py (Transformer)
+- [ ] python/neurx/nn/normalization.py (归一化)
+- [ ] python/neurx/nn/embedding.py (嵌入)
+- [ ] python/neurx/losses.py (扩展)
+- [ ] python/neurx/data/ (完善)
+- [ ] python/neurx/optim/scheduler.py (扩展)
+- [ ] python/neurx/vision/models/ (扩展)
 
 ### **测试**
 - [ ] tests/test_rnn.py

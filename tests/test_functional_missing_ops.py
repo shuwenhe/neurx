@@ -3,8 +3,8 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor import Tensor
-from tensor.nn import functional as F
+from neurx import Tensor
+from neurx.nn import functional as F
 
 
 def _numeric_grad(f, x, eps=1e-4):

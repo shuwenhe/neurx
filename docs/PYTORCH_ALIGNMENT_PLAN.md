@@ -162,22 +162,22 @@ Week 5-6:████████████████████░░░�
 ```python
 import sys
 sys.path.insert(0, 'python')
-import tensor
-from tensor.nn import LayerNorm, GroupNorm, InstanceNorm
+import neurx
+from neurx.nn import LayerNorm, GroupNorm, InstanceNorm
 
 # 1️⃣ LayerNorm - Transformer 标准
 ln = LayerNorm(d_model=512)
-x = tensor.randn(batch_size, seq_len, 512)
+x = neurx.randn(batch_size, seq_len, 512)
 output = ln(x)  # ✅ 现在可用!
 
 # 2️⃣ GroupNorm - 小 batch 场景
 gn = GroupNorm(num_groups=32, num_channels=256)
-x = tensor.randn(8, 256, 56, 56)
+x = neurx.randn(8, 256, 56, 56)
 output = gn(x)  # ✅ 现在可用!
 
 # 3️⃣ InstanceNorm - 风格转移
 inst = InstanceNorm(num_features=3)
-x = tensor.randn(8, 3, 224, 224)
+x = neurx.randn(8, 3, 224, 224)
 output = inst(x)  # ✅ 现在可用!
 ```
 
@@ -261,7 +261,7 @@ Vision Models:    20% ⏳ → 目标 90%
 | [IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) | 实施计划详解 | 了解执行步骤 |
 | [PROGRESS_PYTORCH_ALIGNMENT.md](PROGRESS_PYTORCH_ALIGNMENT.md) | 总体进度追踪 | 跟踪进度 |
 | [PROGRESS_NORMALIZATION_2026-03-03.md](docs/PROGRESS_NORMALIZATION_2026-03-03.md) | Week 1 报告 | 查看成果 |
-| [python/tensor/nn/normalization.py](python/tensor/nn/normalization.py) | 源代码 | 查看实现 |
+| [python/neurx/nn/normalization.py](python/neurx/nn/normalization.py) | 源代码 | 查看实现 |
 | [tests/test_normalization.py](tests/test_normalization.py) | 测试代码 | 验证功能 |
 
 ---
@@ -274,7 +274,7 @@ Vision Models:    20% ⏳ → 目标 90%
 3. 浏览 IMPLEMENTATION_ROADMAP.md (20 min)
 
 ### **如果你想看代码:**
-1. 查看 python/tensor/nn/normalization.py (10 min)
+1. 查看 python/neurx/nn/normalization.py (10 min)
 2. 运行 tests/test_normalization.py (2 min)
 3. 研究具体实现 (20+ min)
 
@@ -292,7 +292,7 @@ Vision Models:    20% ⏳ → 目标 90%
 cd /home/shuwen/neurx && python3 tests/test_normalization.py
 
 # 查看实现源代码
-cat python/tensor/nn/normalization.py
+cat python/neurx/nn/normalization.py
 
 # 查看详细分析
 cat docs/PYTORCH_FEATURE_GAP_ANALYSIS.md

@@ -82,7 +82,7 @@ if use_cuda and cuda_home is not None:
 
     ext_modules = [
         Extension(
-            "tensor.cuda._tensor_cuda",
+            "neurx.cuda._tensor_cuda",
             sources=[
                 "cuda/bindings.cpp",
                 "cuda/kernels/kernels.cu",

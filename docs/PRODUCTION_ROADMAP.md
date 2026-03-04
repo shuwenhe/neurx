@@ -1,17 +1,17 @@
 # Production Roadmap
 
-This document defines the execution plan to evolve `tensor` from a minimal framework into a full-stack production platform.
+This document defines the execution plan to evolve `neurx` from a minimal framework into a full-stack production platform.
 
 ## Stage 1 (Completed in this iteration)
 - Runtime platform base:
-  - centralized config (`tensor.platform.config`)
-  - standardized errors (`tensor.platform.errors`)
-  - diagnostics/doctor (`tensor.platform.diagnostics`, `tensor-doctor`)
-  - logging bootstrap (`tensor.platform.logging`)
+  - centralized config (`neurx.platform.config`)
+  - standardized errors (`neurx.platform.errors`)
+  - diagnostics/doctor (`neurx.platform.diagnostics`, `neurx-doctor`)
+  - logging bootstrap (`neurx.platform.logging`)
 - Full-stack package scaffolding:
-  - `tensor.data` with `Dataset` / `DataLoader`
-  - `tensor.distributed` with env-based distributed config
-  - `tensor.compile` with stable compile API boundary
+  - `neurx.data` with `Dataset` / `DataLoader`
+  - `neurx.distributed` with env-based distributed config
+  - `neurx.compile` with stable compile API boundary
 - Core integration:
   - Tensor default device selection now uses runtime config
   - configurable CUDA-to-CPU fallback policy

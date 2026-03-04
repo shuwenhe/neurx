@@ -1,6 +1,6 @@
 # Model Serialization Guide
 
-Comprehensive guide to saving and loading models, optimizers, checkpoints, and state dicts in the tensor framework.
+Comprehensive guide to saving and loading models, optimizers, checkpoints, and state dicts in the neurx framework.
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
@@ -18,9 +18,9 @@ Comprehensive guide to saving and loading models, optimizers, checkpoints, and s
 ### Save and Load a Model
 
 ```python
-import tensor
-from tensor import nn
-from tensor.serialization import save_checkpoint, load_checkpoint
+import neurx
+from neurx import nn
+from neurx.serialization import save_checkpoint, load_checkpoint
 
 # Create model
 class MyModel(nn.Module):
@@ -35,7 +35,7 @@ class MyModel(nn.Module):
         return self.fc2(x)
 
 model = MyModel()
-optimizer = tensor.optim.Adam(model.parameters())
+optimizer = neurx.optim.Adam(model.parameters())
 
 # Save checkpoint with metrics
 save_checkpoint(
@@ -49,7 +49,7 @@ save_checkpoint(
 
 # Load checkpoint
 model2 = MyModel()
-optimizer2 = tensor.optim.Adam(model2.parameters())
+optimizer2 = neurx.optim.Adam(model2.parameters())
 
 checkpoint = load_checkpoint(
     'model_checkpoint.pt',
@@ -76,10 +76,10 @@ state = model.state_dict()
 
 # Save state dict
 state = model.state_dict()
-tensor.serialization.save(state, 'model_state.pkl')
+neurx.serialization.save(state, 'model_state.pkl')
 
 # Load state dict
-state = tensor.serialization.load('model_state.pkl')
+state = neurx.serialization.load('model_state.pkl')
 model.load_state_dict(state)
 ```
 
@@ -118,7 +118,7 @@ model.load_state_dict(partial_state, strict=False)
 A checkpoint is a complete snapshot including model, optimizer, metrics, and metadata:
 
 ```python
-from tensor.serialization import save_checkpoint, load_checkpoint
+from neurx.serialization import save_checkpoint, load_checkpoint
 
 # Save everything
 save_checkpoint(
@@ -153,7 +153,7 @@ print(f"Metadata: {checkpoint['metadata']}")
 
 ```python
 checkpoint = {
-    'format': 'tensor.checkpoint',
+    'format': 'neurx.checkpoint',
     'version': 1,
     'training': {
         'step': 1000,
@@ -176,7 +176,7 @@ checkpoint = {
 ### Creating a Checkpoint Manager
 
 ```python
-from tensor.serialization import ModelCheckpoint
+from neurx.serialization import ModelCheckpoint
 
 # Initialize manager
 manager = ModelCheckpoint(
@@ -268,7 +268,7 @@ checkpoint = manager.save(model=model, epoch=5)
 ### Extracting State Dict Subsets
 
 ```python
-from tensor.serialization import extract_state_dict_subset
+from neurx.serialization import extract_state_dict_subset
 
 state = model.state_dict()
 
@@ -290,7 +290,7 @@ layer1_state = extract_state_dict_subset(
 ### Merging State Dicts
 
 ```python
-from tensor.serialization import merge_state_dicts
+from neurx.serialization import merge_state_dicts
 
 # Combine multiple state dicts
 merged = merge_state_dicts(
@@ -305,7 +305,7 @@ merged = merge_state_dicts(
 For saving just tensors without model class:
 
 ```python
-from tensor.serialization import save_tensor_dict, load_tensor_dict
+from neurx.serialization import save_tensor_dict, load_tensor_dict
 
 state = {
     'weight1': model.fc1.weight.data,
@@ -379,7 +379,7 @@ for epoch in range(max_epochs):
 ```python
 def resume_training(checkpoint_path):
     model = MyModel()
-    optimizer = tensor.optim.Adam(model.parameters())
+    optimizer = neurx.optim.Adam(model.parameters())
     manager = ModelCheckpoint('./checkpoints')
     
     # Load checkpoint
@@ -489,7 +489,7 @@ history = manager.list_checkpoints()
 ### Utility Functions
 
 ```python
-from tensor.serialization import (
+from neurx.serialization import (
     save_tensor_dict,      # Save state dict to file
     load_tensor_dict,      # Load state dict from file
     merge_state_dicts,     # Combine multiple state dicts

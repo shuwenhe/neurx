@@ -14,8 +14,8 @@ import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
 import numpy as np
-import tensor
-from tensor.nn.transformer import BertLike
+import neurx
+from neurx.nn.transformer import BertLike
 
 
 def create_sample_document(vocab_size=5000, max_length=50):

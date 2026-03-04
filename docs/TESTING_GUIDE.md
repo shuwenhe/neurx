@@ -196,9 +196,9 @@ PYTHONPATH=python python tests/test_new_features.py
 make list
 
 # 测试特定API
-make api API=tensor.einsum
-make api API=tensor.vision.transforms.ToTensor
-make api API=tensor.vision.models.resnet18
+make api API=neurx.einsum
+make api API=neurx.vision.transforms.ToTensor
+make api API=neurx.vision.models.resnet18
 
 # 运行所有API测试
 make api-all

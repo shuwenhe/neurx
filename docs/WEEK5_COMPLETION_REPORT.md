@@ -229,7 +229,7 @@
 
 ## ✅ Module Integration
 
-### Updated Exports (python/tensor/nn/__init__.py)
+### Updated Exports (python/neurx/nn/__init__.py)
 
 **Weight Initialization** (8 exports):
 - `xavier_uniform`, `xavier_uniform_`
@@ -329,7 +329,7 @@ RESULTS: 21 passed, 0 failed out of 21 tests
 
 ### File Dependencies
 ```
-python/tensor/nn/
+python/neurx/nn/
 ├── init.py (200+ lines) → exports initialization functions
 ├── grad_utils.py (150+ lines) → exports gradient utilities
 ├── utils.py (150+ lines) → exports model analysis tools
@@ -343,7 +343,7 @@ tests/
 
 ### Import Path
 ```python
-from neurx.python.tensor.nn import (
+from neurx.python.neurx.nn import (
     # Weight initialization
     xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
     orthogonal, uniform, normal,

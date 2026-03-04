@@ -2,10 +2,10 @@
 Test Adam and RMSprop optimizers
 """
 import sys
-sys.path.insert(0, '/home/shuwen/tensor/python')
+sys.path.insert(0, '/home/shuwen/neurx/python')
 
-import tensor
-import tensor.nn as nn
+import neurx
+import neurx.nn as nn
 import numpy as np
 
 
@@ -13,12 +13,12 @@ def test_adam_basic():
     """Test basic Adam optimizer."""
     print("Testing Adam (basic)...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    b = tensor.zeros(2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
+    b = neurx.zeros(2, requires_grad=True)
     
-    optimizer = tensor.optim.Adam([W, b], lr=0.01)
+    optimizer = neurx.optim.Adam([W, b], lr=0.01)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W + b
     loss = (y ** 2).sum()
     
@@ -40,8 +40,8 @@ def test_adam_convergence():
     print("Testing Adam convergence...")
     
     # Minimize f(x) = (x - 5)^2
-    x = tensor.Tensor([0.0], requires_grad=True)
-    optimizer = tensor.optim.Adam([x], lr=0.1)
+    x = neurx.Tensor([0.0], requires_grad=True)
+    optimizer = neurx.optim.Adam([x], lr=0.1)
     
     losses = []
     for i in range(100):
@@ -63,14 +63,14 @@ def test_adam_vs_adamw():
     print("Testing Adam vs AdamW...")
     
     # Create identical models
-    W1 = tensor.randn(3, 2, requires_grad=True)
-    W2 = tensor.Tensor(W1.data.copy(), requires_grad=True)
+    W1 = neurx.randn(3, 2, requires_grad=True)
+    W2 = neurx.Tensor(W1.data.copy(), requires_grad=True)
     
-    adam = tensor.optim.Adam([W1], lr=0.01, weight_decay=0.1)
-    adamw = tensor.optim.AdamW([W2], lr=0.01, weight_decay=0.1)
+    adam = neurx.optim.Adam([W1], lr=0.01, weight_decay=0.1)
+    adamw = neurx.optim.AdamW([W2], lr=0.01, weight_decay=0.1)
     
-    x = tensor.randn(5, 3)
-    target = tensor.randn(5, 2)
+    x = neurx.randn(5, 3)
+    target = neurx.randn(5, 2)
     
     initial_loss1 = None
     initial_loss2 = None
@@ -108,12 +108,12 @@ def test_adam_state_dict():
     """Test Adam state save/load."""
     print("Testing Adam state_dict...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer1 = tensor.optim.Adam([W], lr=0.01)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer1 = neurx.optim.Adam([W], lr=0.01)
     
     # Do some steps
     for _ in range(5):
-        x = tensor.randn(5, 3)
+        x = neurx.randn(5, 3)
         loss = (x @ W ** 2).sum()
         optimizer1.zero_grad()
         loss.backward()
@@ -123,8 +123,8 @@ def test_adam_state_dict():
     state = optimizer1.state_dict()
     
     # Create new optimizer and load state
-    W2 = tensor.Tensor(W.data.copy(), requires_grad=True)
-    optimizer2 = tensor.optim.Adam([W2], lr=0.05)
+    W2 = neurx.Tensor(W.data.copy(), requires_grad=True)
+    optimizer2 = neurx.optim.Adam([W2], lr=0.05)
     optimizer2.load_state_dict(state)
     
     assert optimizer2.lr == 0.01, "Learning rate should be restored"
@@ -137,12 +137,12 @@ def test_rmsprop_basic():
     """Test basic RMSprop optimizer."""
     print("Testing RMSprop (basic)...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    b = tensor.zeros(2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
+    b = neurx.zeros(2, requires_grad=True)
     
-    optimizer = tensor.optim.RMSprop([W, b], lr=0.01)
+    optimizer = neurx.optim.RMSprop([W, b], lr=0.01)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     y = x @ W + b
     loss = (y ** 2).sum()
     
@@ -163,10 +163,10 @@ def test_rmsprop_momentum():
     """Test RMSprop with momentum."""
     print("Testing RMSprop with momentum...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer = tensor.optim.RMSprop([W], lr=0.01, momentum=0.9)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer = neurx.optim.RMSprop([W], lr=0.01, momentum=0.9)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     
     # First step
     loss1 = (x @ W ** 2).sum()
@@ -190,10 +190,10 @@ def test_rmsprop_centered():
     """Test centered RMSprop."""
     print("Testing RMSprop centered...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer = tensor.optim.RMSprop([W], lr=0.01, centered=True)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer = neurx.optim.RMSprop([W], lr=0.01, centered=True)
     
-    x = tensor.randn(5, 3)
+    x = neurx.randn(5, 3)
     loss = (x @ W ** 2).sum()
     
     W_before = W.data.copy()
@@ -212,8 +212,8 @@ def test_rmsprop_convergence():
     print("Testing RMSprop convergence...")
     
     # Minimize f(x) = (x - 3)^2
-    x = tensor.Tensor([0.0], requires_grad=True)
-    optimizer = tensor.optim.RMSprop([x], lr=0.1)
+    x = neurx.Tensor([0.0], requires_grad=True)
+    optimizer = neurx.optim.RMSprop([x], lr=0.1)
     
     losses = []
     for i in range(100):
@@ -234,12 +234,12 @@ def test_rmsprop_state_dict():
     """Test RMSprop state save/load."""
     print("Testing RMSprop state_dict...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
-    optimizer1 = tensor.optim.RMSprop([W], lr=0.01, momentum=0.9)
+    W = neurx.randn(3, 2, requires_grad=True)
+    optimizer1 = neurx.optim.RMSprop([W], lr=0.01, momentum=0.9)
     
     # Do some steps
     for _ in range(5):
-        x = tensor.randn(5, 3)
+        x = neurx.randn(5, 3)
         loss = (x @ W ** 2).sum()
         optimizer1.zero_grad()
         loss.backward()
@@ -249,8 +249,8 @@ def test_rmsprop_state_dict():
     state = optimizer1.state_dict()
     
     # Create new optimizer and load state
-    W2 = tensor.Tensor(W.data.copy(), requires_grad=True)
-    optimizer2 = tensor.optim.RMSprop([W2], lr=0.05)
+    W2 = neurx.Tensor(W.data.copy(), requires_grad=True)
+    optimizer2 = neurx.optim.RMSprop([W2], lr=0.05)
     optimizer2.load_state_dict(state)
     
     assert optimizer2.lr == 0.01, "Learning rate should be restored"
@@ -264,17 +264,17 @@ def test_all_optimizers_comparison():
     print("Testing all optimizers comparison...")
     
     # Create identical starting points
-    W_init = tensor.randn(10, 5)
+    W_init = neurx.randn(10, 5)
     
     optimizers = {
-        'SGD': tensor.optim.SGD([tensor.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
-        'Adam': tensor.optim.Adam([tensor.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
-        'AdamW': tensor.optim.AdamW([tensor.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
-        'RMSprop': tensor.optim.RMSprop([tensor.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
+        'SGD': neurx.optim.SGD([neurx.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
+        'Adam': neurx.optim.Adam([neurx.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
+        'AdamW': neurx.optim.AdamW([neurx.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
+        'RMSprop': neurx.optim.RMSprop([neurx.Tensor(W_init.data.copy(), requires_grad=True)], lr=0.01),
     }
     
-    x = tensor.randn(20, 10)
-    target = tensor.randn(20, 5)
+    x = neurx.randn(20, 10)
+    target = neurx.randn(20, 5)
     
     final_losses = {}
     
@@ -308,12 +308,12 @@ def test_optimizers_with_module():
         def forward(self, x):
             return self.linear(x)
     
-    x = tensor.randn(10, 3)
-    target = tensor.randn(10, 2)
+    x = neurx.randn(10, 3)
+    target = neurx.randn(10, 2)
     
     optimizers_to_test = [
-        ('Adam', tensor.optim.Adam),
-        ('RMSprop', tensor.optim.RMSprop),
+        ('Adam', neurx.optim.Adam),
+        ('RMSprop', neurx.optim.RMSprop),
     ]
     
     for name, opt_class in optimizers_to_test:
@@ -342,20 +342,20 @@ def test_optimizers_with_scheduler():
     """Test optimizers work with schedulers."""
     print("Testing optimizers with schedulers...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     
     optimizers_to_test = [
-        ('Adam', tensor.optim.Adam([W], lr=0.1)),
-        ('RMSprop', tensor.optim.RMSprop([W], lr=0.1)),
+        ('Adam', neurx.optim.Adam([W], lr=0.1)),
+        ('RMSprop', neurx.optim.RMSprop([W], lr=0.1)),
     ]
     
     for name, optimizer in optimizers_to_test:
-        scheduler = tensor.optim.StepLR(optimizer, step_size=5, gamma=0.5)
+        scheduler = neurx.optim.StepLR(optimizer, step_size=5, gamma=0.5)
         
         initial_lr = optimizer.lr
         
         for epoch in range(11):
-            x = tensor.randn(5, 3)
+            x = neurx.randn(5, 3)
             loss = (x @ W ** 2).sum()
             optimizer.zero_grad()
             loss.backward()

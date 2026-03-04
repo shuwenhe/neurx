@@ -143,7 +143,7 @@ TransformerBlock     完整的Transformer块
 
 ### 测试执行
 ```bash
-$ python /home/shuwen/tensor/python/test_new_modules.py
+$ python /home/shuwen/neurx/python/test_new_modules.py
 ============================================================
 TENSOR LIBRARY - NEW MODULES TEST SUITE
 ============================================================
@@ -158,7 +158,7 @@ TENSOR LIBRARY - NEW MODULES TEST SUITE
 
 ### 示例1: 简单MLP
 ```python
-from tensor.nn.modules import Sequential, Linear, BatchNorm1d, GELU
+from neurx.nn.modules import Sequential, Linear, BatchNorm1d, GELU
 
 model = Sequential(
     Linear(10, 64),
@@ -173,7 +173,7 @@ y = model(x)
 
 ### 示例2: CNN特征提取
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     Sequential, Conv2d, BatchNorm2d, 
     MaxPool2d, GELU
 )
@@ -193,7 +193,7 @@ features = Sequential(
 
 ### 示例3: 权重初始化
 ```python
-from tensor.nn.modules import kaiming_normal_
+from neurx.nn.modules import kaiming_normal_
 
 for param in model.parameters():
     if len(param.data.shape) > 1:
@@ -217,8 +217,8 @@ model.cuda().float()
 ## 📂 文件结构
 
 ```
-/home/shuwen/tensor/
-├── python/tensor/nn/
+/home/shuwen/neurx/
+├── python/neurx/nn/
 │   └── modules.py           ✏️ 主实现文件 (+800行)
 ├── python/
 │   └── test_new_modules.py  ✨ 新增：完整单元测试
@@ -283,7 +283,7 @@ model.cuda().float()
 from torch.nn import BatchNorm2d, MaxPool2d, Sequential
 
 # Tensor库 (直接兼容)
-from tensor.nn.modules import BatchNorm2d, MaxPool2d, Sequential
+from neurx.nn.modules import BatchNorm2d, MaxPool2d, Sequential
 
 # 其他代码基本相同
 ```

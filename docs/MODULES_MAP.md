@@ -347,7 +347,7 @@ Transformer          LayerNorm, MultiHeadAttention,
 
 ### Template 1: CNN
 ```python
-from tensor.nn.modules import *
+from neurx.nn.modules import *
 
 model = Sequential(
     Conv2d(3, 64, 3, padding=1),
@@ -364,7 +364,7 @@ model = Sequential(
 
 ### Template 2: Transformer Encoder
 ```python
-from tensor.nn.modules import *
+from neurx.nn.modules import *
 
 block = TransformerBlock(
     n_embd=512,
@@ -377,7 +377,7 @@ block = TransformerBlock(
 
 ### Template 3: MLP Classifier
 ```python
-from tensor.nn.modules import *
+from neurx.nn.modules import *
 
 model = Sequential(
     Linear(784, 512),

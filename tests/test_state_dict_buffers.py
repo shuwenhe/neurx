@@ -3,8 +3,8 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor.nn import Module, Linear
-from tensor.tensor import Tensor
+from neurx.nn import Module, Linear
+from neurx.neurx import Tensor
 
 
 class Toy(Module):

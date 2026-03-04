@@ -1,5 +1,5 @@
 """
-Test suite for in-place tensor operations.
+Test suite for in-place neurx operations.
 
 Tests cover:
 - Basic functionality (correct computation)
@@ -13,7 +13,7 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor import Tensor
+from neurx import Tensor
 import pytest
 
 
@@ -27,14 +27,14 @@ class TestInPlaceAdd:
         assert np.allclose(t.to_numpy(), [6.0, 7.0, 8.0])
     
     def test_add_tensor(self):
-        """Test in-place addition with another tensor."""
+        """Test in-place addition with another neurx."""
         t1 = Tensor([1.0, 2.0, 3.0])
         t2 = Tensor([10.0, 20.0, 30.0])
         t1.add_(t2)
         assert np.allclose(t1.to_numpy(), [11.0, 22.0, 33.0])
     
     def test_add_2d(self):
-        """Test in-place addition on 2D tensor."""
+        """Test in-place addition on 2D neurx."""
         t = Tensor([[1.0, 2.0], [3.0, 4.0]])
         t.add_(Tensor([[10.0, 20.0], [30.0, 40.0]]))
         expected = [[11.0, 22.0], [33.0, 44.0]]
@@ -64,7 +64,7 @@ class TestInPlaceMul:
         assert np.allclose(t.to_numpy(), [2.0, 4.0, 6.0])
     
     def test_mul_tensor(self):
-        """Test in-place multiplication with another tensor."""
+        """Test in-place multiplication with another neurx."""
         t1 = Tensor([1.0, 2.0, 3.0])
         t2 = Tensor([2.0, 3.0, 4.0])
         t1.mul_(t2)
@@ -99,7 +99,7 @@ class TestInPlaceSub:
         assert np.allclose(t.to_numpy(), [3.0, 4.0, 5.0])
     
     def test_sub_tensor(self):
-        """Test in-place subtraction with another tensor."""
+        """Test in-place subtraction with another neurx."""
         t1 = Tensor([10.0, 20.0, 30.0])
         t2 = Tensor([1.0, 2.0, 3.0])
         t1.sub_(t2)
@@ -128,7 +128,7 @@ class TestInPlaceDiv:
         assert np.allclose(t.to_numpy(), [1.0, 2.0, 3.0])
     
     def test_div_tensor(self):
-        """Test in-place division with another tensor."""
+        """Test in-place division with another neurx."""
         t1 = Tensor([10.0, 20.0, 30.0])
         t2 = Tensor([2.0, 4.0, 5.0])
         t1.div_(t2)
@@ -213,7 +213,7 @@ class TestInPlaceCopy:
         assert np.allclose(t1.to_numpy(), [4.0, 5.0, 6.0])
     
     def test_copy_2d(self):
-        """Test in-place copy on 2D tensor."""
+        """Test in-place copy on 2D neurx."""
         t1 = Tensor([[1.0, 2.0], [3.0, 4.0]])
         t2 = Tensor([[10.0, 20.0], [30.0, 40.0]])
         t1.copy_(t2)
@@ -256,7 +256,7 @@ class TestInPlaceFill:
         assert np.allclose(t.to_numpy(), [-5.0, -5.0, -5.0])
     
     def test_fill_2d(self):
-        """Test filling 2D tensor."""
+        """Test filling 2D neurx."""
         t = Tensor([[1.0, 2.0], [3.0, 4.0]])
         t.fill_(42.0)
         expected = [[42.0, 42.0], [42.0, 42.0]]
@@ -273,19 +273,19 @@ class TestInPlaceZero:
     """Test zero_ (in-place zero) operation."""
     
     def test_zero_1d(self):
-        """Test zeroing 1D tensor."""
+        """Test zeroing 1D neurx."""
         t = Tensor([1.0, 2.0, 3.0])
         t.zero_()
         assert np.allclose(t.to_numpy(), [0.0, 0.0, 0.0])
     
     def test_zero_2d(self):
-        """Test zeroing 2D tensor."""
+        """Test zeroing 2D neurx."""
         t = Tensor([[1.0, 2.0], [3.0, 4.0]])
         t.zero_()
         assert np.allclose(t.to_numpy(), [[0.0, 0.0], [0.0, 0.0]])
     
     def test_zero_already_zero(self):
-        """Test zeroing tensor that's already zero."""
+        """Test zeroing neurx that's already zero."""
         t = Tensor([0.0, 0.0, 0.0])
         t.zero_()
         assert np.allclose(t.to_numpy(), [0.0, 0.0, 0.0])
@@ -319,7 +319,7 @@ class TestInPlaceRelu:
         assert np.allclose(t.to_numpy(), [0.0, 0.0, 0.0, 1.0, 2.0])
     
     def test_relu_2d(self):
-        """Test ReLU on 2D tensor."""
+        """Test ReLU on 2D neurx."""
         t = Tensor([[-1.0, 2.0], [3.0, -4.0]])
         t.relu_()
         expected = [[0.0, 2.0], [3.0, 0.0]]
@@ -377,26 +377,26 @@ class TestInPlaceMemoryEfficiency:
         
         # Both should have same result but t1 is modified in-place
         assert np.allclose(t1.to_numpy(), t2_result.to_numpy())
-        assert id(t1) != id(t2_result)  # Non-inplace returns new tensor
+        assert id(t1) != id(t2_result)  # Non-inplace returns new neurx
 
 
 class TestInPlaceEdgeCases:
     """Test edge cases and error conditions."""
     
     def test_empty_tensor(self):
-        """Test operations on empty tensor."""
+        """Test operations on empty neurx."""
         t = Tensor([])
         t.add_(5.0)
         assert t.shape == (0,)
     
     def test_single_element(self):
-        """Test operations on single element tensor."""
+        """Test operations on single element neurx."""
         t = Tensor([5.0])
         t.mul_(2.0)
         assert np.allclose(t.to_numpy(), [10.0])
     
     def test_large_tensor(self):
-        """Test operations on large tensor."""
+        """Test operations on large neurx."""
         t = Tensor(np.random.randn(1000, 1000).astype(np.float32))
         original_shape = t.shape
         t.add_(1.0)

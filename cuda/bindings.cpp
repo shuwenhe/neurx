@@ -45,7 +45,7 @@ static void _cuda_check(cudaError_t err, const char* msg) {
 }
 
 static DeviceArray* _get_device_array(PyObject* capsule) {
-    return static_cast<DeviceArray*>(PyCapsule_GetPointer(capsule, "tensor.cuda.DeviceArray"));
+    return static_cast<DeviceArray*>(PyCapsule_GetPointer(capsule, "neurx.cuda.DeviceArray"));
 }
 
 static void _capsule_destructor(PyObject* capsule) {
@@ -90,7 +90,7 @@ static PyObject* tensor_cuda_to_device(PyObject* /*self*/, PyObject* args) {
     }
 
     auto* arr = new DeviceArray{d_ptr, (size_t)size};
-    return PyCapsule_New(arr, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(arr, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_to_host(PyObject* /*self*/, PyObject* args) {
@@ -184,7 +184,7 @@ static PyObject* tensor_cuda_add_device(PyObject* /*self*/, PyObject* args) {
     }
 
     auto* out = new DeviceArray{d_out, (size_t)size};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_mul_device(PyObject* /*self*/, PyObject* args) {
@@ -220,7 +220,7 @@ static PyObject* tensor_cuda_mul_device(PyObject* /*self*/, PyObject* args) {
     }
 
     auto* out = new DeviceArray{d_out, (size_t)size};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_add_bias_device(PyObject* /*self*/, PyObject* args) {
@@ -256,7 +256,7 @@ static PyObject* tensor_cuda_add_bias_device(PyObject* /*self*/, PyObject* args)
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_add_bias_3d_device(PyObject* /*self*/, PyObject* args) {
@@ -292,7 +292,7 @@ static PyObject* tensor_cuda_add_bias_3d_device(PyObject* /*self*/, PyObject* ar
     }
 
     auto* out = new DeviceArray{d_out, (size_t)bsz * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_matmul_device(PyObject* /*self*/, PyObject* args) {
@@ -328,7 +328,7 @@ static PyObject* tensor_cuda_matmul_device(PyObject* /*self*/, PyObject* args) {
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_layernorm_device(PyObject* /*self*/, PyObject* args) {
@@ -367,7 +367,7 @@ static PyObject* tensor_cuda_layernorm_device(PyObject* /*self*/, PyObject* args
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_softmax_device(PyObject* /*self*/, PyObject* args) {
@@ -400,7 +400,7 @@ static PyObject* tensor_cuda_softmax_device(PyObject* /*self*/, PyObject* args) 
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_sum_device(PyObject* /*self*/, PyObject* args) {
@@ -433,7 +433,7 @@ static PyObject* tensor_cuda_reduce_sum_device(PyObject* /*self*/, PyObject* arg
     }
 
     auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_mean_device(PyObject* /*self*/, PyObject* args) {
@@ -466,7 +466,7 @@ static PyObject* tensor_cuda_reduce_mean_device(PyObject* /*self*/, PyObject* ar
     }
 
     auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_max_device(PyObject* /*self*/, PyObject* args) {
@@ -499,7 +499,7 @@ static PyObject* tensor_cuda_reduce_max_device(PyObject* /*self*/, PyObject* arg
     }
 
     auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_min_device(PyObject* /*self*/, PyObject* args) {
@@ -532,7 +532,7 @@ static PyObject* tensor_cuda_reduce_min_device(PyObject* /*self*/, PyObject* arg
     }
 
     auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* /*self*/, PyObject* args) {
@@ -565,7 +565,7 @@ static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* /*self*/, PyObj
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* /*self*/, PyObject* args) {
@@ -598,7 +598,7 @@ static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* /*self*/, PyOb
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* /*self*/, PyObject* args) {
@@ -631,7 +631,7 @@ static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* /*self*/, PyObj
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* /*self*/, PyObject* args) {
@@ -664,7 +664,7 @@ static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* /*self*/, PyObj
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_argmax_lastdim(PyObject* /*self*/, PyObject* args) {
@@ -697,7 +697,7 @@ static PyObject* tensor_cuda_argmax_lastdim(PyObject* /*self*/, PyObject* args) 
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_argmin_lastdim(PyObject* /*self*/, PyObject* args) {
@@ -730,7 +730,7 @@ static PyObject* tensor_cuda_argmin_lastdim(PyObject* /*self*/, PyObject* args) 
     }
 
     auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_transpose_2d(PyObject* /*self*/, PyObject* args) {
@@ -761,7 +761,7 @@ static PyObject* tensor_cuda_transpose_2d(PyObject* /*self*/, PyObject* args) {
         return _raise(PyExc_RuntimeError, e.what());
     }
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_permute_3d_0_2_1(PyObject* /*self*/, PyObject* args) {
@@ -792,7 +792,7 @@ static PyObject* tensor_cuda_permute_3d_0_2_1(PyObject* /*self*/, PyObject* args
         return _raise(PyExc_RuntimeError, e.what());
     }
     auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyObject* tensor_cuda_permute_3d_1_2_0(PyObject* /*self*/, PyObject* args) {
@@ -823,7 +823,7 @@ static PyObject* tensor_cuda_permute_3d_1_2_0(PyObject* /*self*/, PyObject* args
         return _raise(PyExc_RuntimeError, e.what());
     }
     auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "tensor.cuda.DeviceArray", _capsule_destructor);
+    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
 
 static PyMethodDef TensorCudaMethods[] = {

@@ -103,7 +103,7 @@ Q_heads = Q_multi.moveaxis(2, 1)  # (B,T,H,D) → (B,H,T,D)
 推荐阅读顺序:
 1. 🆕 PYTORCH_GAP_ANALYSIS_2026.md (30分钟)
 2. 🆕 QUICK_START_NEW_APIS_2026.md (30分钟)
-3. 源码: python/tensor/core/tensor.py (30分钟)
+3. 源码: python/neurx/core/neurx.py (30分钟)
 4. 测试: tests/test_tensor_ops_extended.py (15分钟)
 5. CUDA 绑定: cuda/bindings.cpp (15分钟)
 ```
@@ -262,8 +262,8 @@ Q_heads = Q_multi.moveaxis(2, 1)  # (B,T,H,D) → (B,H,T,D)
 **立即行动:**
 ```bash
 1. 复制 IMPLEMENTATION_PLAN.md 中的代码
-2. 粘贴到 tensor/core/tensor.py
-3. 粘贴到 tensor/nn/functional.py
+2. 粘贴到 neurx/core/neurx.py
+3. 粘贴到 neurx/nn/functional.py
 4. 运行 pytest
 5. 提交！
 ```
@@ -552,5 +552,5 @@ P2功能 (部署和优化)
 ---
 
 *分析完成于: 2026-03-03*  
-*框架位置: /home/shuwen/neurx/python/tensor/*  
+*框架位置: /home/shuwen/neurx/python/neurx/*  
 *文档位置: /home/shuwen/neurx/*

@@ -8,18 +8,18 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor.nn.init import (
+from neurx.nn.init import (
     xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
     orthogonal, uniform, normal
 )
-from tensor.nn.grad_utils import (
+from neurx.nn.grad_utils import (
     get_grad_norm, clip_grad_norm_, clip_grad_value_, zero_grad
 )
-from tensor.nn.utils import (
+from neurx.nn.utils import (
     count_parameters, count_flops, model_size, summary, analyze_network
 )
-from tensor.nn.normalization import BatchNorm1d, BatchNorm2d, BatchNorm3d
-from tensor.core import Tensor
+from neurx.nn.normalization import BatchNorm1d, BatchNorm2d, BatchNorm3d
+from neurx.core import Tensor
 
 
 # =====================================================================

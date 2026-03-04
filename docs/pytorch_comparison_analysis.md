@@ -57,14 +57,14 @@ Tensor框架已经具备了深度学习框架的核心基础（自动求导、�
 - ✅ 基本的分布式运行时脚手架
 
 #### 10. **CUDA支持**
-- ✅ GPU tensor
+- ✅ GPU neurx
 - ✅ 基础CUDA算子：add, mul, matmul, layernorm, softmax
 - ✅ 设备管理和CPU回退
 
 #### 11. **平台工具**
 - ✅ 运行时配置
 - ✅ 日志系统
-- ✅ 诊断工具（`tensor-doctor`）
+- ✅ 诊断工具（`neurx-doctor`）
 
 ---
 
@@ -232,30 +232,30 @@ Tensor框架已经具备了深度学习框架的核心基础（自动求导、�
 #### 1. **分布式训练基础**
 ```python
 # 目标：让用户能用多GPU训练
-tensor.distributed.DistributedDataParallel
-tensor.distributed.init_process_group
-tensor.distributed.all_reduce
+neurx.distributed.DistributedDataParallel
+neurx.distributed.init_process_group
+neurx.distributed.all_reduce
 ```
 
 #### 2. **CV基础支持**
 ```python
 # 目标：支持基本的图像任务
-tensor.vision.transforms  # Resize, Normalize, ToTensor
-tensor.vision.models.resnet  # 至少ResNet18/50
+neurx.vision.transforms  # Resize, Normalize, ToTensor
+neurx.vision.models.resnet  # 至少ResNet18/50
 ```
 
 #### 3. **模型保存完善**
 ```python
 # 目标：完整的保存/加载机制
-tensor.save(model.state_dict(), 'model.pth')
-model.load_state_dict(tensor.load('model.pth'))
+neurx.save(model.state_dict(), 'model.pth')
+model.load_state_dict(neurx.load('model.pth'))
 ```
 
 #### 4. **NLP基础支持**
 ```python
 # 目标：支持Transformer训练
-tensor.nn.PositionalEncoding
-tensor.nn.TransformerEncoder/Decoder  # 完整实现
+neurx.nn.PositionalEncoding
+neurx.nn.TransformerEncoder/Decoder  # 完整实现
 ```
 
 ---
@@ -264,26 +264,26 @@ tensor.nn.TransformerEncoder/Decoder  # 完整实现
 
 #### 1. **高级张量操作**
 ```python
-tensor.einsum
-tensor.scatter/gather
-tensor.meshgrid
+neurx.einsum
+neurx.scatter/gather
+neurx.meshgrid
 ```
 
 #### 2. **性能分析工具**
 ```python
-tensor.profiler.profile()
-tensor.cuda.memory_summary()
+neurx.profiler.profile()
+neurx.cuda.memory_summary()
 ```
 
 #### 3. **数据增强**
 ```python
-tensor.vision.transforms.RandomCrop
-tensor.vision.transforms.ColorJitter
+neurx.vision.transforms.RandomCrop
+neurx.vision.transforms.ColorJitter
 ```
 
 #### 4. **ONNX导出**
 ```python
-tensor.onnx.export(model, input, "model.onnx")
+neurx.onnx.export(model, input, "model.onnx")
 ```
 
 ---
@@ -302,11 +302,11 @@ tensor.onnx.export(model, input, "model.onnx")
 
 ### 1. **添加einsum支持**
 
-创建文件 `python/tensor/core/einsum.py`:
+创建文件 `python/neurx/core/einsum.py`:
 
 ```python
 import numpy as np
-from tensor.tensor import Tensor
+from neurx.neurx import Tensor
 
 def einsum(equation: str, *operands):
     """
@@ -314,13 +314,13 @@ def einsum(equation: str, *operands):
     
     Examples:
         # Matrix multiplication
-        tensor.einsum('ij,jk->ik', A, B)
+        neurx.einsum('ij,jk->ik', A, B)
         
         # Batch matrix multiplication
-        tensor.einsum('bij,bjk->bik', A, B)
+        neurx.einsum('bij,bjk->bik', A, B)
         
         # Trace
-        tensor.einsum('ii', A)
+        neurx.einsum('ii', A)
     """
     # Convert all to numpy for computation
     np_operands = [op.to_numpy() if isinstance(op, Tensor) else np.array(op) for op in operands]
@@ -345,20 +345,20 @@ def einsum(equation: str, *operands):
     return out
 ```
 
-在 `python/tensor/__init__.py` 添加:
+在 `python/neurx/__init__.py` 添加:
 ```python
-from tensor.core.einsum import einsum
+from neurx.core.einsum import einsum
 ```
 
 ---
 
 ### 2. **添加DistributedDataParallel**
 
-创建文件 `python/tensor/distributed/ddp.py`:
+创建文件 `python/neurx/distributed/ddp.py`:
 
 ```python
 import os
-from tensor.nn.modules import Module
+from neurx.nn.modules import Module
 
 class DistributedDataParallel(Module):
     """
@@ -395,11 +395,11 @@ class DistributedDataParallel(Module):
 
 ### 3. **添加基础图像变换**
 
-创建文件 `python/tensor/vision/transforms.py`:
+创建文件 `python/neurx/vision/transforms.py`:
 
 ```python
 import numpy as np
-from tensor.tensor import Tensor
+from neurx.neurx import Tensor
 from PIL import Image
 
 class Compose:
@@ -415,7 +415,7 @@ class ToTensor:
     """Convert PIL Image or numpy array to Tensor."""
     def __call__(self, pic):
         if isinstance(pic, Image.Image):
-            # PIL Image -> numpy -> tensor
+            # PIL Image -> numpy -> neurx
             np_img = np.array(pic, dtype=np.float32) / 255.0
         elif isinstance(pic, np.ndarray):
             np_img = pic.astype(np.float32)
@@ -429,19 +429,19 @@ class ToTensor:
         return Tensor(np_img)
 
 class Normalize:
-    """Normalize tensor with mean and std."""
+    """Normalize neurx with mean and std."""
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32).reshape(-1, 1, 1)
         self.std = np.array(std, dtype=np.float32).reshape(-1, 1, 1)
     
-    def __call__(self, tensor):
-        if isinstance(tensor, Tensor):
-            data = tensor.to_numpy()
+    def __call__(self, neurx):
+        if isinstance(neurx, Tensor):
+            data = neurx.to_numpy()
         else:
-            data = np.array(tensor, dtype=np.float32)
+            data = np.array(neurx, dtype=np.float32)
         
         normalized = (data - self.mean) / self.std
-        return Tensor(normalized, device=tensor.device if isinstance(tensor, Tensor) else "cpu")
+        return Tensor(normalized, device=neurx.device if isinstance(neurx, Tensor) else "cpu")
 
 class Resize:
     """Resize image to given size."""
@@ -494,9 +494,9 @@ class RandomHorizontalFlip:
         return img
 ```
 
-在 `python/tensor/vision/__init__.py`:
+在 `python/neurx/vision/__init__.py`:
 ```python
-from tensor.vision import transforms
+from neurx.vision import transforms
 
 __all__ = ['transforms']
 ```
@@ -505,11 +505,11 @@ __all__ = ['transforms']
 
 ### 4. **添加ResNet模型**
 
-创建文件 `python/tensor/vision/models/resnet.py`:
+创建文件 `python/neurx/vision/models/resnet.py`:
 
 ```python
-from tensor.nn import Module, Conv2d, BatchNorm2d, Linear, MaxPool2d
-from tensor.nn.functional import relu
+from neurx.nn import Module, Conv2d, BatchNorm2d, Linear, MaxPool2d
+from neurx.nn.functional import relu
 
 class BasicBlock(Module):
     expansion = 1
@@ -610,9 +610,9 @@ def resnet50(pretrained=False, num_classes=1000):
     raise NotImplementedError("ResNet-50 not yet implemented")
 ```
 
-在 `python/tensor/vision/models/__init__.py`:
+在 `python/neurx/vision/models/__init__.py`:
 ```python
-from tensor.vision.models.resnet import resnet18, resnet50
+from neurx.vision.models.resnet import resnet18, resnet50
 
 __all__ = ['resnet18', 'resnet50']
 ```
@@ -661,7 +661,7 @@ void matmul_cublas(float* A, float* B, float* C,
 
 ### 2. **实现内存池**
 
-创建 `python/tensor/core/memory.py`:
+创建 `python/neurx/core/memory.py`:
 
 ```python
 class CUDAMemoryPool:
@@ -708,7 +708,7 @@ _cuda_memory_pool = CUDAMemoryPool()
 
 ### 3. **添加Profiler**
 
-创建 `python/tensor/profiler.py`:
+创建 `python/neurx/profiler.py`:
 
 ```python
 import time
@@ -803,19 +803,19 @@ def print_summary():
 ### 示例测试（einsum）
 
 ```python
-import tensor
+import neurx
 import torch
 import numpy as np
 
 def test_einsum_matmul():
     # Tensor framework
-    A_t = tensor.rand((5, 3))
-    B_t = tensor.rand((3, 4))
-    C_t = tensor.einsum('ij,jk->ik', A_t, B_t)
+    A_t = neurx.rand((5, 3))
+    B_t = neurx.rand((3, 4))
+    C_t = neurx.einsum('ij,jk->ik', A_t, B_t)
     
     # PyTorch
-    A_pt = torch.tensor(A_t.to_numpy())
-    B_pt = torch.tensor(B_t.to_numpy())
+    A_pt = torch.neurx(A_t.to_numpy())
+    B_pt = torch.neurx(B_t.to_numpy())
     C_pt = torch.einsum('ij,jk->ik', A_pt, B_pt)
     
     # Compare

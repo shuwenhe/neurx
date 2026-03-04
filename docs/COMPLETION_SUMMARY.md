@@ -135,7 +135,7 @@ Tensor库独有:
 
 ### 示例1: 简单MLP
 ```python
-from tensor.nn.modules import Sequential, Linear, BatchNorm1d, GELU
+from neurx.nn.modules import Sequential, Linear, BatchNorm1d, GELU
 
 model = Sequential(
     Linear(10, 64),
@@ -147,7 +147,7 @@ model = Sequential(
 
 ### 示例2: CNN特征提取
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     Sequential, Conv2d, BatchNorm2d, MaxPool2d, GELU
 )
 
@@ -161,7 +161,7 @@ features = Sequential(
 
 ### 示例3: 权重初始化
 ```python
-from tensor.nn.modules import kaiming_normal_
+from neurx.nn.modules import kaiming_normal_
 
 for param in model.parameters():
     if len(param.data.shape) > 1:
@@ -207,18 +207,18 @@ model = model.cuda().float()        # 转移到GPU
 ## 📂 文件改动
 
 ```
-修改文件: /home/shuwen/tensor/python/tensor/nn/modules.py
+修改文件: /home/shuwen/neurx/python/neurx/nn/modules.py
 - 原始行数: 1119
 - 修改行数: 626 行新增
 - 新增类: 9 个
 - 新增函数: 10 个
 
 新增文件:
-✓ /home/shuwen/tensor/python/test_new_modules.py     (测试)
-✓ /home/shuwen/tensor/IMPLEMENTATION_ANALYSIS.md     (文档)
-✓ /home/shuwen/tensor/QUICK_REFERENCE.md             (参考)
-✓ /home/shuwen/tensor/UPGRADE_REPORT.md              (报告)
-✓ /home/shuwen/tensor/MODULES_MAP.md                 (导图)
+✓ /home/shuwen/neurx/python/test_new_modules.py     (测试)
+✓ /home/shuwen/neurx/IMPLEMENTATION_ANALYSIS.md     (文档)
+✓ /home/shuwen/neurx/QUICK_REFERENCE.md             (参考)
+✓ /home/shuwen/neurx/UPGRADE_REPORT.md              (报告)
+✓ /home/shuwen/neurx/MODULES_MAP.md                 (导图)
 ```
 
 ---
@@ -318,8 +318,8 @@ A: 支持CUDA设备转移接口，底层计算使用NumPy。
 
 ## 📞 联系方式
 
-- **项目路径**: `/home/shuwen/tensor`
-- **主文件**: `python/tensor/nn/modules.py`
+- **项目路径**: `/home/shuwen/neurx`
+- **主文件**: `python/neurx/nn/modules.py`
 - **测试文件**: `python/test_new_modules.py`
 - **文档目录**: `./` (MARKDOWN files)
 

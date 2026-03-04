@@ -214,7 +214,7 @@ RNN/LSTM:          ⏳ Week 1 (待补充)
 cd /home/shuwen/neurx
 
 # 查看 LayerNorm 实现
-cat python/tensor/nn/normalization.py | head -100
+cat python/neurx/nn/normalization.py | head -100
 
 # 运行规范化测试
 python3 tests/test_normalization.py
@@ -228,17 +228,17 @@ cat docs/PYTORCH_FEATURE_GAP_ANALYSIS.md
 ```python
 import sys
 sys.path.insert(0, 'python')
-import tensor
-from tensor.nn import LayerNorm, GroupNorm, InstanceNorm
+import neurx
+from neurx.nn import LayerNorm, GroupNorm, InstanceNorm
 
 # LayerNorm - Transformer 标准
 ln = LayerNorm(d_model=512)
-x = tensor.randn(batch, seq_len, 512)
+x = neurx.randn(batch, seq_len, 512)
 out = ln(x)  # ✅ 现在可用!
 
 # GroupNorm - 小 batch
 gn = GroupNorm(32, 256)
-y = tensor.randn(2, 256, 56, 56)
+y = neurx.randn(2, 256, 56, 56)
 out = gn(y)  # ✅ 现在可用!
 ```
 

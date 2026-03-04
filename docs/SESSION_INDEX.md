@@ -37,8 +37,8 @@
 
 #### Phase 2: Enhanced Serialization ✅
 - ✅ Implemented `ModelCheckpoint` - intelligent checkpoint manager
-- ✅ Implemented `save_tensor_dict()` - tensor dictionary serialization
-- ✅ Implemented `load_tensor_dict()` - tensor dictionary deserialization
+- ✅ Implemented `save_tensor_dict()` - neurx dictionary serialization
+- ✅ Implemented `load_tensor_dict()` - neurx dictionary deserialization
 - ✅ Implemented `merge_state_dicts()` - state dictionary merging utility
 - ✅ Implemented `extract_state_dict_subset()` - subset extraction utility
 - ✅ 7 test categories, 100% pass rate
@@ -66,21 +66,21 @@
 
 Quick example:
 ```python
-import tensor
+import neurx
 
 # Gather values
-x = tensor.randn(10, 20)
-idx = tensor.arange(5)
+x = neurx.randn(10, 20)
+idx = neurx.arange(5)
 result = x.gather(0, idx)  # Shape: (5, 20)
 
 # Scatter values
-x.scatter(0, idx, tensor.zeros(5, 20))
+x.scatter(0, idx, neurx.zeros(5, 20))
 
 # Scatter and accumulate
-x.scatter_add(0, idx, tensor.ones(5, 20))
+x.scatter_add(0, idx, neurx.ones(5, 20))
 
 # Create coordinate grids
-X, Y = tensor.meshgrid(tensor.arange(3), tensor.arange(4))
+X, Y = neurx.meshgrid(neurx.arange(3), neurx.arange(4))
 ```
 
 #### "I want to save and load model checkpoints"
@@ -88,7 +88,7 @@ X, Y = tensor.meshgrid(tensor.arange(3), tensor.arange(4))
 
 Quick example:
 ```python
-from tensor.serialization import ModelCheckpoint
+from neurx.serialization import ModelCheckpoint
 
 # Create manager
 manager = ModelCheckpoint(save_dir='/tmp/checkpoints', keep_best=True)
@@ -123,9 +123,9 @@ state = manager.load_best()
 ├── README.md                       ← Updated with new features
 ├── Makefile                        ← Updated with test targets
 │
-├── python/tensor/
+├── python/neurx/
 │   ├── __init__.py                 (updated: export meshgrid)
-│   ├── core/tensor.py              (enhanced: scatter_add, etc.)
+│   ├── core/neurx.py              (enhanced: scatter_add, etc.)
 │   └── serialization/
 │       ├── __init__.py             (updated: new exports)
 │       ├── enhanced.py             ✨ NEW (250+ lines)
@@ -237,12 +237,12 @@ Phase 2 (Serialization):
 ### For scatter/gather users
 - Guide: [SCATTER_GATHER_GUIDE.md](docs/SCATTER_GATHER_GUIDE.md)
 - Tests: [tests/test_scatter_gather.py](tests/test_scatter_gather.py)
-- Implementation: [python/tensor/core/tensor.py](python/tensor/core/tensor.py)
+- Implementation: [python/neurx/core/neurx.py](python/neurx/core/neurx.py)
 
 ### For serialization users
 - Guide: [SERIALIZATION_GUIDE.md](docs/SERIALIZATION_GUIDE.md)
 - Tests: [tests/test_serialization.py](tests/test_serialization.py)
-- Implementation: [python/tensor/serialization/enhanced.py](python/tensor/serialization/enhanced.py)
+- Implementation: [python/neurx/serialization/enhanced.py](python/neurx/serialization/enhanced.py)
 
 ### For framework developers
 - Session summary: [docs/SESSION_SUMMARY_2024-03-03.md](docs/SESSION_SUMMARY_2024-03-03.md)
@@ -265,7 +265,7 @@ Phase 2 (Serialization):
 
 ### Advanced
 1. Read [SESSION_SUMMARY_2024-03-03.md](docs/SESSION_SUMMARY_2024-03-03.md)
-2. Study implementation in [python/tensor/](python/tensor/)
+2. Study implementation in [python/neurx/](python/neurx/)
 3. Review [RESOURCE_INVENTORY.md](RESOURCE_INVENTORY.md) for full context
 
 ---

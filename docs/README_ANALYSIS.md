@@ -113,7 +113,7 @@ ONNX导出               4h        中      高
 1. **测试现状** 
    ```bash
    cd /home/shuwen/neurx/python
-   python -m pytest tensor/nn/test_week7.py -v
+   python -m pytest neurx/nn/test_week7.py -v
    ```
 
 2. **运行分析**
@@ -127,7 +127,7 @@ ONNX导出               4h        中      高
    # 创建 test_current_state.py
    import sys
    sys.path.insert(0, '/home/shuwen/neurx/python')
-   from tensor import Tensor
+   from neurx import Tensor
    import numpy as np
    
    # 当前可用的操作
@@ -152,7 +152,7 @@ ONNX导出               4h        中      高
 # 缺点: 一次改动量大
 
 1. 复制 IMPLEMENTATION_PLAN.md 中的所有代码
-2. 集成到 tensor/core/tensor.py 和 tensor/nn/functional.py
+2. 集成到 neurx/core/neurx.py 和 neurx/nn/functional.py
 3. 运行完整测试
 4. 提交一个大PR
 ```
@@ -316,5 +316,5 @@ ONNX导出               4h        中      高
 ---
 
 **更新时间:** 2026-03-03  
-**分析范围:** /home/shuwen/neurx/python/tensor/  
+**分析范围:** /home/shuwen/neurx/python/neurx/  
 **兼容性目标:** PyTorch 1.x/2.x

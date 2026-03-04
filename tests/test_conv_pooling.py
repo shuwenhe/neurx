@@ -8,11 +8,11 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx')
 
-from python.tensor.nn.conv import Conv1d, Conv2d, Conv3d, ConvTranspose1d, ConvTranspose2d, ConvTranspose3d
-from python.tensor.nn.pooling import (MaxPool1d, MaxPool2d, MaxPool3d, 
+from python.neurx.nn.conv import Conv1d, Conv2d, Conv3d, ConvTranspose1d, ConvTranspose2d, ConvTranspose3d
+from python.neurx.nn.pooling import (MaxPool1d, MaxPool2d, MaxPool3d, 
                                        AvgPool1d, AvgPool2d, AvgPool3d,
                                        AdaptiveMaxPool2d, AdaptiveAvgPool2d)
-from python.tensor.core import Tensor
+from python.neurx.core import Tensor
 
 
 class TestConv1d:

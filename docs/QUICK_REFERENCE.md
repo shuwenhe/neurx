@@ -5,8 +5,8 @@
 ### 1. 批量归一化 (Batch Normalization)
 
 ```python
-from tensor.nn.modules import BatchNorm1d, BatchNorm2d
-from tensor.tensor import Tensor
+from neurx.nn.modules import BatchNorm1d, BatchNorm2d
+from neurx.neurx import Tensor
 import numpy as np
 
 # 1D: 适用于全连接层后
@@ -32,7 +32,7 @@ y = bn2d(x)
 ### 2. 池化层 (Pooling)
 
 ```python
-from tensor.nn.modules import MaxPool2d, AvgPool2d
+from neurx.nn.modules import MaxPool2d, AvgPool2d
 
 # 最大池化：保留每个窗口的最大值
 maxpool = MaxPool2d(kernel_size=2, stride=2, padding=0)
@@ -54,7 +54,7 @@ y = avgpool(x)  # → (2, 64, 32, 32)
 ### 3. Sequential 容器
 
 ```python
-from tensor.nn.modules import Sequential, Linear, GELU, BatchNorm1d
+from neurx.nn.modules import Sequential, Linear, GELU, BatchNorm1d
 
 # 方式1：直接传入模块
 model = Sequential(
@@ -86,7 +86,7 @@ y = model(x)  # 自动逐层传播
 ### 4. 权重初始化
 
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     kaiming_uniform_, kaiming_normal_,
     xavier_uniform_, xavier_normal_,
     Parameter
@@ -121,7 +121,7 @@ xavier_uniform_(w, gain=1.0)  # 均匀分布
 ### 5. Module 工具方法
 
 ```python
-from tensor.nn.modules import Sequential, Linear
+from neurx.nn.modules import Sequential, Linear
 
 model = Sequential(
     Linear(10, 64),
@@ -154,12 +154,12 @@ model.double().to('cuda').requires_grad_(True)
 ## 📚 完整例子：ResNet风格的网络
 
 ```python
-from tensor.nn.modules import (
+from neurx.nn.modules import (
     Sequential, Linear, Conv2d, BatchNorm2d, 
     ReLU, MaxPool2d, AvgPool2d, GELU,
     kaiming_normal_
 )
-from tensor.tensor import Tensor
+from neurx.neurx import Tensor
 import numpy as np
 
 class SimpleResNet(Module):
@@ -245,7 +245,7 @@ model.classifier.requires_grad_(True)
 
 ### 1. 检查形状变化
 ```python
-from tensor.nn.modules import Sequential, Conv2d, MaxPool2d
+from neurx.nn.modules import Sequential, Conv2d, MaxPool2d
 
 model = Sequential(
     Conv2d(3, 64, 3, padding=1),

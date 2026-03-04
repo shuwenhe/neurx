@@ -2,10 +2,10 @@
 Test Learning Rate Schedulers
 """
 import sys
-sys.path.insert(0, '/home/shuwen/tensor/python')
+sys.path.insert(0, '/home/shuwen/neurx/python')
 
-import tensor
-import tensor.optim as optim
+import neurx
+import neurx.optim as optim
 import numpy as np
 
 
@@ -13,7 +13,7 @@ def test_step_lr():
     """Test StepLR scheduler."""
     print("Testing StepLR...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.StepLR(optimizer, step_size=3, gamma=0.1)
     
@@ -34,7 +34,7 @@ def test_exponential_lr():
     """Test ExponentialLR scheduler."""
     print("Testing ExponentialLR...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.ExponentialLR(optimizer, gamma=0.9)
     
@@ -55,7 +55,7 @@ def test_cosine_annealing_lr():
     """Test CosineAnnealingLR scheduler."""
     print("Testing CosineAnnealingLR...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
     
@@ -76,7 +76,7 @@ def test_cosine_annealing_warm_restarts():
     """Test CosineAnnealingWarmRestarts scheduler."""
     print("Testing CosineAnnealingWarmRestarts...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=2)
     
@@ -96,7 +96,7 @@ def test_reduce_lr_on_plateau():
     """Test ReduceLROnPlateau scheduler."""
     print("Testing ReduceLROnPlateau...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
     
@@ -119,7 +119,7 @@ def test_linear_lr():
     """Test LinearLR scheduler."""
     print("Testing LinearLR...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.LinearLR(optimizer, start_factor=0.1, end_factor=1.0, total_iters=5)
     
@@ -140,7 +140,7 @@ def test_lambda_lr():
     """Test LambdaLR scheduler."""
     print("Testing LambdaLR...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     
     # Custom lambda: multiply by 0.95 each epoch
@@ -164,12 +164,12 @@ def test_scheduler_with_training():
     print("Testing scheduler with training...")
     
     # Simple model
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=0.1)
     scheduler = optim.StepLR(optimizer, step_size=5, gamma=0.5)
     
-    x = tensor.randn(10, 3)
-    target = tensor.randn(10, 2)
+    x = neurx.randn(10, 3)
+    target = neurx.randn(10, 2)
     
     lrs = []
     losses = []
@@ -200,7 +200,7 @@ def test_scheduler_state_dict():
     """Test scheduler state save/load."""
     print("Testing scheduler state_dict...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler1 = optim.StepLR(optimizer, step_size=3, gamma=0.1)
     
@@ -226,8 +226,8 @@ def test_multiple_schedulers():
     """Test using multiple schedulers together."""
     print("Testing multiple schedulers...")
     
-    W1 = tensor.randn(3, 2, requires_grad=True)
-    W2 = tensor.randn(2, 1, requires_grad=True)
+    W1 = neurx.randn(3, 2, requires_grad=True)
+    W2 = neurx.randn(2, 1, requires_grad=True)
     
     optimizer1 = optim.SGD([W1], lr=1.0)
     optimizer2 = optim.SGD([W2], lr=0.5)
@@ -251,7 +251,7 @@ def test_warmup_then_decay():
     """Test combining warmup and decay."""
     print("Testing warmup then decay pattern...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     
     # Warmup phase
@@ -280,7 +280,7 @@ def test_reduce_on_plateau_min_lr():
     """Test ReduceLROnPlateau respects min_lr."""
     print("Testing ReduceLROnPlateau min_lr...")
     
-    W = tensor.randn(3, 2, requires_grad=True)
+    W = neurx.randn(3, 2, requires_grad=True)
     optimizer = optim.SGD([W], lr=1.0)
     scheduler = optim.ReduceLROnPlateau(optimizer, mode='min', patience=1, 
                                          factor=0.1, min_lr=0.01)

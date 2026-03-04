@@ -88,7 +88,7 @@
      • 质量验证
 
 实现代码:
-  ✅ python/tensor/nn/normalization.py (400+ lines)
+  ✅ python/neurx/nn/normalization.py (400+ lines)
      • LayerNorm: 120行
      • GroupNorm: 100行
      • InstanceNorm: 90行
@@ -226,7 +226,7 @@ Day 5 (周五):
      ✅ Week 1 详细执行报告
 
 代码文件:
-  • python/tensor/nn/normalization.py (新)
+  • python/neurx/nn/normalization.py (新)
   • tests/test_normalization.py (新)
   • docs/PYTORCH_FEATURE_GAP_ANALYSIS.md
   • docs/IMPLEMENTATION_ROADMAP.md
@@ -251,11 +251,11 @@ Day 5 (周五):
 使用新的规范化层:
   $ python3 << 'PYTHON'
   import sys; sys.path.insert(0, 'python')
-  import tensor
-  from tensor.nn import LayerNorm, GroupNorm, InstanceNorm
+  import neurx
+  from neurx.nn import LayerNorm, GroupNorm, InstanceNorm
   
   ln = LayerNorm(512)
-  x = tensor.randn(8, 512)
+  x = neurx.randn(8, 512)
   out = ln(x)  # ✅ 现在可用!
   PYTHON
 

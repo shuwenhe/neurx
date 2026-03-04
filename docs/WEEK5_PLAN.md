@@ -23,45 +23,45 @@
 
 #### A. 权重初始化 (Weight Initialization)
 
-**文件**: `python/tensor/nn/init.py` (200+ 行)
+**文件**: `python/neurx/nn/init.py` (200+ 行)
 
 实现函数:
 
 ```python
-def xavier_uniform(tensor, gain=1.0):
+def xavier_uniform(neurx, gain=1.0):
     """Xavier 均匀初始化"""
     # 计算 fan_in 和 fan_out
     # 生成 [-limit, limit] 均匀分布
 
-def xavier_normal(tensor, gain=1.0):
+def xavier_normal(neurx, gain=1.0):
     """Xavier 正态初始化"""
     # 计算 fan_in 和 fan_out
     # 生成标准差为 std 的正态分布
 
-def kaiming_uniform(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):
+def kaiming_uniform(neurx, a=0, mode='fan_in', nonlinearity='leaky_relu'):
     """Kaiming 均匀初始化 (for ReLU)"""
     # 使用 fan_in/fan_out 计算
     # 支持不同激活函数
 
-def kaiming_normal(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):
+def kaiming_normal(neurx, a=0, mode='fan_in', nonlinearity='leaky_relu'):
     """Kaiming 正态初始化"""
     # 计算适当的标准差
     # 支持 LeakyReLU 参数
 
-def orthogonal(tensor, gain=1.0):
+def orthogonal(neurx, gain=1.0):
     """正交初始化"""
     # QR 分解获得正交矩阵
     # 适用于循环网络
 
-def uniform(tensor, a, b):
+def uniform(neurx, a, b):
     """均匀分布初始化"""
     # 在 [a, b] 范围内均匀分布
 
-def normal(tensor, mean=0, std=1):
+def normal(neurx, mean=0, std=1):
     """正态分布初始化"""
     # 标准正态分布初始化
 
-def constant(tensor, val):
+def constant(neurx, val):
     """常数初始化"""
     # 用固定值填充
 ```
@@ -70,7 +70,7 @@ def constant(tensor, val):
 
 **代码示例**:
 ```python
-from tensor.nn.init import xavier_uniform, kaiming_normal
+from neurx.nn.init import xavier_uniform, kaiming_normal
 
 # 在 Conv2d 中使用
 conv = Conv2d(3, 16, kernel_size=3)
@@ -83,7 +83,7 @@ kaiming_normal(linear.weight, nonlinearity='relu')
 
 #### B. 梯度操作 (Gradient Operations)
 
-**文件**: `python/tensor/optim/grad_utils.py` (150+ 行)
+**文件**: `python/neurx/optim/grad_utils.py` (150+ 行)
 
 实现函数:
 
@@ -113,7 +113,7 @@ def zero_grad(model):
 
 **代码示例**:
 ```python
-from tensor.optim.grad_utils import clip_grad_norm_
+from neurx.optim.grad_utils import clip_grad_norm_
 
 # 在训练循环中使用
 for epoch in range(num_epochs):
@@ -130,7 +130,7 @@ for epoch in range(num_epochs):
 
 #### C. 模型分析 (Model Analysis)
 
-**文件**: `python/tensor/nn/utils.py` (150+ 行)
+**文件**: `python/neurx/nn/utils.py` (150+ 行)
 
 实现函数:
 
@@ -161,7 +161,7 @@ def model_size(model):
 
 **代码示例**:
 ```python
-from tensor.nn.utils import summary, count_parameters
+from neurx.nn.utils import summary, count_parameters
 
 model = YourModel()
 
@@ -175,7 +175,7 @@ print(f"Total parameters: {total_params:,}")
 
 #### D. BatchNorm 层 (Batch Normalization)
 
-**文件**: `python/tensor/nn/normalization.py` (350+ 行)
+**文件**: `python/neurx/nn/normalization.py` (350+ 行)
 
 实现类:
 
@@ -213,7 +213,7 @@ class BatchNorm3d(Module):
 
 ### Step 1: 权重初始化 (Day 1)
 ```
-1. 创建 python/tensor/nn/init.py
+1. 创建 python/neurx/nn/init.py
 2. 实现 7 个初始化函数
 3. 创建测试套件 (7 个测试)
 4. 验证分布和统计性质
@@ -222,7 +222,7 @@ class BatchNorm3d(Module):
 
 ### Step 2: 梯度操作 (Day 2)
 ```
-1. 创建 python/tensor/optim/grad_utils.py
+1. 创建 python/neurx/optim/grad_utils.py
 2. 实现梯度裁剪和监控函数
 3. 创建测试套件 (4 个测试)
 4. 集成到优化器
@@ -231,7 +231,7 @@ class BatchNorm3d(Module):
 
 ### Step 3: 模型分析 (Day 2-3)
 ```
-1. 创建 python/tensor/nn/utils.py
+1. 创建 python/neurx/nn/utils.py
 2. 实现 summary、count_parameters 等
 3. 创建测试套件 (4 个测试)
 4. 验证输出格式
@@ -240,7 +240,7 @@ class BatchNorm3d(Module):
 
 ### Step 4: BatchNorm 层 (Day 3-4)
 ```
-1. 扩展 python/tensor/nn/normalization.py
+1. 扩展 python/neurx/nn/normalization.py
 2. 实现 BatchNorm1d/2d/3d
 3. 处理训练/评估模式
 4. 创建测试套件 (6 个测试)
@@ -265,14 +265,14 @@ class BatchNorm3d(Module):
 
 ```
 新增文件:
-  python/tensor/nn/init.py              200 行 (7 个函数)
-  python/tensor/optim/grad_utils.py     150 行 (4 个函数)
-  python/tensor/nn/utils.py             150 行 (4 个函数)
+  python/neurx/nn/init.py              200 行 (7 个函数)
+  python/neurx/optim/grad_utils.py     150 行 (4 个函数)
+  python/neurx/nn/utils.py             150 行 (4 个函数)
   tests/test_init_grad_analysis.py      350 行 (21 个测试)
 
 修改文件:
-  python/tensor/nn/normalization.py     +350 行 (BatchNorm)
-  python/tensor/nn/__init__.py          +导出新函数
+  python/neurx/nn/normalization.py     +350 行 (BatchNorm)
+  python/neurx/nn/__init__.py          +导出新函数
 
 总计: ~1,200 行新增代码
 ```
