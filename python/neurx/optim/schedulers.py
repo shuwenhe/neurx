@@ -16,13 +16,30 @@ import math
 from typing import Optional, Callable, List
 
 
+def _ensure_param_groups(optimizer):
+    """Return optimizer.param_groups, creating a single default group when absent."""
+    if hasattr(optimizer, "param_groups") and optimizer.param_groups is not None:
+        return optimizer.param_groups
+    if not hasattr(optimizer, "lr"):
+        raise AttributeError("optimizer must define either param_groups or lr")
+    optimizer.param_groups = [{"lr": float(optimizer.lr)}]
+    return optimizer.param_groups
+
+
+def _sync_optimizer_lr(optimizer):
+    """Keep optimizer.lr aligned with the first param group for simple optimizers."""
+    if hasattr(optimizer, "param_groups") and optimizer.param_groups:
+        optimizer.lr = optimizer.param_groups[0]["lr"]
+
+
 class LRScheduler:
     """Base class for learning rate schedulers."""
     
     def __init__(self, optimizer, last_epoch: int = -1):
         self.optimizer = optimizer
         self.last_epoch = last_epoch
-        self.base_lrs = [group['lr'] for group in optimizer.param_groups]
+        param_groups = _ensure_param_groups(optimizer)
+        self.base_lrs = [group['lr'] for group in param_groups]
         
         # Initialize
         self.step()
@@ -38,8 +55,20 @@ class LRScheduler:
         self.last_epoch = epoch
         
         lrs = self.get_lr()
-        for param_group, lr in zip(self.optimizer.param_groups, lrs):
+        for param_group, lr in zip(_ensure_param_groups(self.optimizer), lrs):
             param_group['lr'] = lr
+        _sync_optimizer_lr(self.optimizer)
+
+    def state_dict(self):
+        return {
+            "last_epoch": self.last_epoch,
+            "base_lrs": list(self.base_lrs),
+        }
+
+    def load_state_dict(self, state):
+        self.last_epoch = int(state.get("last_epoch", self.last_epoch))
+        if "base_lrs" in state:
+            self.base_lrs = list(state["base_lrs"])
 
 
 class StepLR(LRScheduler):
@@ -160,8 +189,16 @@ class LinearLR(LRScheduler):
         last_epoch (int): Last epoch number. Default: -1
     """
     
-    def __init__(self, optimizer, start_factor: float = 1.0, total_iters: int = 5, last_epoch: int = -1):
+    def __init__(
+        self,
+        optimizer,
+        start_factor: float = 1.0,
+        end_factor: float = 1.0,
+        total_iters: int = 5,
+        last_epoch: int = -1,
+    ):
         self.start_factor = start_factor
+        self.end_factor = end_factor
         self.total_iters = total_iters
         super().__init__(optimizer, last_epoch)
     
@@ -169,9 +206,9 @@ class LinearLR(LRScheduler):
         """Compute linearly decayed learning rates."""
         if self.last_epoch == 0:
             return [base_lr * self.start_factor for base_lr in self.base_lrs]
-        
-        progress = self.last_epoch / self.total_iters
-        return [base_lr * (self.start_factor + (1 - self.start_factor) * progress)
+
+        progress = min(max(self.last_epoch / self.total_iters, 0.0), 1.0)
+        return [base_lr * (self.start_factor + (self.end_factor - self.start_factor) * progress)
                 for base_lr in self.base_lrs]
 
 
@@ -314,10 +351,11 @@ class ReduceLROnPlateau:
     
     def _reduce_lr(self):
         """Reduce learning rate."""
-        for param_group in self.optimizer.param_groups:
+        for param_group in _ensure_param_groups(self.optimizer):
             old_lr = param_group['lr']
             new_lr = max(old_lr * self.factor, self.min_lr)
             param_group['lr'] = new_lr
+        _sync_optimizer_lr(self.optimizer)
 
 
 class WarmupLR(LRScheduler):

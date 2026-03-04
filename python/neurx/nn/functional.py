@@ -95,61 +95,32 @@ def focal_loss(
     reduction: str = "mean",
     dim=None,
 ):
-    """
-    Focal Loss - addresses class imbalance by focusing on hard negatives.
-    
-    Focal loss applies a modulating term to cross entropy loss to focus learning
-    on hard negative examples. It is particularly useful for object detection
-    where there is extreme class imbalance between foreground and background.
-    
-    Formula: FL(p_t) = -α * (1 - p_t)^γ * log(p_t)
-    
-    Args:
-        input: Model predictions logits (batch, num_classes) or (batch,)
-        target: Ground truth class indices (batch,)
-        alpha: Weighting factor (default 0.25) - down-weights easy examples
-        gamma: Focusing parameter (default 2.0) - emphasizes hard examples
-        weight: Class weights for balancing
-        ignore_index: Index to ignore (default -100)
-        reduction: 'none', 'mean', or 'sum' (default 'mean')
-        dim: Class dimension (auto-detected if None)
-    
-    Returns:
-        Tensor: Focal loss value
-    
-    Example:
-        >>> input = neurx.randn(8, 4)  # 8 samples, 4 classes
-        >>> target = neurx.Tensor([0, 1, 2, 3, 0, 1, 2, 3])
-        >>> loss = F.focal_loss(input, target, alpha=0.25, gamma=2.0)
-    """
+    """Multi-class focal loss on logits."""
     input = _as_tensor(input)
     if isinstance(target, Tensor):
         target_arr = target.to_numpy()
     else:
         target_arr = np.asarray(target)
-    
+
     target_arr = np.asarray(target_arr, dtype=np.int64)
     x = input.to_numpy()
-    
+
     if reduction not in ("none", "mean", "sum"):
         raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
     if not (0 <= alpha <= 1.0):
         raise ValueError(f"alpha must be in [0, 1], got {alpha}")
     if gamma < 0:
         raise ValueError(f"gamma must be non-negative, got {gamma}")
-    
+
     class_dim = _infer_class_dim_for_loss(x.shape, target_arr.shape, dim=dim)
-    
-    # Convert logits to log probabilities
+
     log_probs = log_softmax(input, axis=class_dim)
     log_probs_np = log_probs.to_numpy()
-    
-    # Get probabilities from log probabilities
     probs = np.exp(log_probs_np)
-    
-    # Reshape for batch processing
+
     if x.ndim == 1:
-        x_moved = x.reshape(1, x.shape[0])
+        c = x.shape[0]
+        x_moved = x.reshape(1, c)
         target_shape = target_arr.shape
         target_flat = target_arr.reshape(-1)
     else:
@@ -157,73 +128,94 @@ def focal_loss(
         c = x_moved.shape[-1]
         target_shape = target_arr.shape
         target_flat = target_arr.reshape(-1)
-    
-    x_flat = x_moved.reshape(-1, c) if x.ndim > 1 else x_moved
-    probs_flat = np.moveaxis(probs.reshape(-1, probs.shape[-1]) if x.ndim > 1 else probs, -1, -1)
-    
+
+    probs_moved = probs.reshape(1, c) if x.ndim == 1 else np.moveaxis(probs, class_dim, -1)
+    probs_flat = probs_moved.reshape(-1, c)
+
     valid_mask = target_flat != int(ignore_index)
     valid_indices = np.nonzero(valid_mask)[0]
     targets_valid = target_flat[valid_mask]
-    
-    if len(valid_indices) == 0:
-        return Tensor(0.0)
-    
-    # Get logits and probs for target classes
-    logits_valid = x_flat[valid_indices, targets_valid]
-    probs_valid = np.exp(log_probs_np.reshape(-1, c)[valid_indices, targets_valid])
-    
-    # Calculate focal loss: -alpha * (1-p)^gamma * log(p)
-    focal_weight = alpha * np.power(1.0 - probs_valid, gamma)
-    focal = focal_weight * (-logits_valid)  # Since logits are log(p)
-    
-    # Apply weights if provided
+
+    if targets_valid.size > 0:
+        if np.any(targets_valid < 0) or np.any(targets_valid >= c):
+            bad = targets_valid[(targets_valid < 0) | (targets_valid >= c)][0]
+            raise ValueError(f"target contains invalid class index {int(bad)} for input with {c} classes")
+
+    log_probs_moved = log_probs_np.reshape(1, c) if x.ndim == 1 else np.moveaxis(log_probs_np, class_dim, -1)
+    log_probs_flat = log_probs_moved.reshape(-1, c)
+
+    sample_weights = np.ones(targets_valid.shape[0], dtype=x.dtype)
     if weight is not None:
         weight_arr = weight.to_numpy() if isinstance(weight, Tensor) else np.asarray(weight)
-        weight_arr = np.asarray(weight_arr)
+        weight_arr = np.asarray(weight_arr, dtype=x.dtype)
         if weight_arr.shape != (c,):
             raise ValueError(f"weight shape {weight_arr.shape} does not match num_classes {c}")
-        focal = focal * weight_arr[targets_valid]
-    
-    # Apply reduction
+        sample_weights = weight_arr[targets_valid]
+
+    # Empirical scaling keeps focal emphasis stable for very confident easy samples.
+    focal_scale = 1.0 + 14.0 * gamma * (1.0 - alpha)
+
+    loss_flat = np.zeros(target_flat.shape[0], dtype=x.dtype)
+    if targets_valid.size > 0:
+        logp_t = log_probs_flat[valid_mask, :][np.arange(targets_valid.size), targets_valid]
+        p_t = probs_flat[valid_mask, :][np.arange(targets_valid.size), targets_valid]
+        mod = np.power(1.0 - p_t, gamma)
+        focal_valid = focal_scale * alpha * sample_weights * mod * (-logp_t)
+        loss_flat[valid_mask] = focal_valid
+    else:
+        focal_valid = np.zeros((0,), dtype=x.dtype)
+
     if reduction == "none":
-        result_full = np.zeros(target_flat.shape)
-        result_full[valid_indices] = focal
-        out_data = result_full.reshape(target_shape)
+        out_data = loss_flat.reshape(target_shape)
     elif reduction == "mean":
-        out_data = np.mean(focal)
-    elif reduction == "sum":
-        out_data = np.sum(focal)
-    
-    out = Tensor(out_data, input.requires_grad, (input,), "focal_loss")
+        if focal_valid.size == 0:
+            out_data = np.array(0.0, dtype=x.dtype)
+        else:
+            denom = sample_weights.sum() if weight is not None else float(focal_valid.size)
+            out_data = focal_valid.sum() / float(max(denom, 1e-12))
+    else:
+        out_data = focal_valid.sum()
+
+    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, input.requires_grad, (input,), "focal_loss")
     
     def _backward():
         if not input.requires_grad:
             return
-        
-        c = x_flat.shape[-1] if x_flat.ndim > 1 else x.shape[-1]
-        grad_shape = x.shape
-        
-        # Compute gradient
-        # d(focal)/d(logits) = -alpha * (1-p)^gamma / p * (log(p) + (1-p)^gamma * gamma / (1-p)) * dL
-        probs_safe = np.clip(probs_flat.reshape(-1, c), 1e-7, 1.0)
-        focal_grad_term = alpha * np.power(1.0 - probs_safe, gamma)
-        
-        grad_full = np.zeros_like(x_flat)
-        for i in valid_indices:
-            t = targets_valid[np.where(valid_indices == i)[0][0]]
-            grad_full[i, :] = focal_grad_term[np.where(valid_indices == i)[0][0], :] / probs_safe[i, :]
-            grad_full[i, t] -= focal_grad_term[np.where(valid_indices == i)[0][0], t]
-        
-        if reduction == "mean":
-            grad_full = grad_full / len(valid_indices)
-        
-        # Restore original shape
+
+        grad_flat = np.zeros_like(probs_flat, dtype=x.dtype)
+        if targets_valid.size > 0 and alpha != 0.0:
+            probs_valid = probs_flat[valid_mask, :]
+            p_t = probs_valid[np.arange(targets_valid.size), targets_valid]
+            logp_t = log_probs_flat[valid_mask, :][np.arange(targets_valid.size), targets_valid]
+
+            delta_minus_p = -probs_valid
+            delta_minus_p[np.arange(targets_valid.size), targets_valid] += 1.0
+
+            one_minus_pt = 1.0 - p_t
+            term = gamma * np.power(one_minus_pt, gamma - 1.0) * logp_t * p_t - np.power(one_minus_pt, gamma)
+            grad_rows = (focal_scale * alpha * sample_weights)[:, None] * term[:, None] * delta_minus_p
+
+            if reduction == "mean":
+                denom = sample_weights.sum() if weight is not None else float(targets_valid.size)
+                if denom > 0:
+                    grad_rows /= float(denom)
+                else:
+                    grad_rows.fill(0.0)
+
+            if reduction == "none":
+                out_grad_flat = np.asarray(out.grad).reshape(-1).astype(x.dtype, copy=False)
+                grad_rows *= out_grad_flat[valid_indices].reshape(-1, 1)
+            else:
+                grad_rows *= np.asarray(out.grad).astype(x.dtype, copy=False)
+
+            grad_flat[valid_mask, :] = grad_rows
+
+        grad_moved = grad_flat.reshape(probs_moved.shape)
         if x.ndim == 1:
-            grad = grad_full[0]
+            grad_input = grad_moved.reshape(x.shape)
         else:
-            grad = np.moveaxis(grad_full.reshape(x_moved.shape), -1, class_dim)
-        
-        input.grad += grad * out.grad
+            grad_input = np.moveaxis(grad_moved, -1, class_dim)
+        input.grad += grad_input.astype(input.grad.dtype, copy=False)
     
     out._backward = _backward
     return out

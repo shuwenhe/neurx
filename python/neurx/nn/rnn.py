@@ -42,6 +42,10 @@ class RNNCell(Module):
         self.W_ih = Tensor(self.W_ih, requires_grad=True)
         self.W_hh = Tensor(self.W_hh, requires_grad=True)
         
+        # Add aliases for compatibility
+        self.weight_ih = self.W_ih
+        self.weight_hh = self.W_hh
+        
         if bias:
             self.b_ih = Tensor(np.zeros(hidden_size), requires_grad=True)
             self.b_hh = Tensor(np.zeros(hidden_size), requires_grad=True)
@@ -106,6 +110,10 @@ class LSTMCell(Module):
         self.W_ih = Tensor(self.W_ih, requires_grad=True)
         self.W_hh = Tensor(self.W_hh, requires_grad=True)
         
+        # Add aliases for compatibility
+        self.weight_ih = self.W_ih
+        self.weight_hh = self.W_hh
+        
         if bias:
             self.b_ih = Tensor(np.zeros(4 * hidden_size), requires_grad=True)
             self.b_hh = Tensor(np.zeros(4 * hidden_size), requires_grad=True)
@@ -117,7 +125,7 @@ class LSTMCell(Module):
         self,
         x: Tensor,
         state: Optional[Tuple[Tensor, Tensor]] = None
-    ) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+    ) -> Tuple[Tensor, Tensor]:
         """
         Apply LSTM cell.
         
@@ -128,7 +136,7 @@ class LSTMCell(Module):
                 - c: cell state of shape (batch_size, hidden_size)
         
         Returns:
-            Tuple[Tensor, Tuple[Tensor, Tensor]]: (output, (h, c)) where output is same as h
+            Tuple[Tensor, Tensor]: (h_new, c_new)
         """
         batch_size = x.shape[0]
         
@@ -170,7 +178,7 @@ class LSTMCell(Module):
         h_new = o_t * np.tanh(c_new.data)
         h_new = Tensor(h_new, requires_grad=True)
         
-        return h_new, (h_new, c_new)
+        return h_new, c_new
 
 
 class GRUCell(Module):
@@ -197,6 +205,10 @@ class GRUCell(Module):
         
         self.W_ih = Tensor(self.W_ih, requires_grad=True)
         self.W_hh = Tensor(self.W_hh, requires_grad=True)
+        
+        # Add aliases for compatibility
+        self.weight_ih = self.W_ih
+        self.weight_hh = self.W_hh
         
         if bias:
             self.b_ih = Tensor(np.zeros(3 * hidden_size), requires_grad=True)
@@ -259,6 +271,8 @@ class RNN(Module):
         bias (bool): Whether to use bias. Default: True
         batch_first (bool): Whether batch is the first dimension. Default: False
         bidirectional (bool): Whether to use bidirectional RNN. Default: False
+        nonlinearity (str): Type of nonlinearity. Default: 'tanh'
+        dropout (float): Dropout rate. Default: 0.0
     """
     
     def __init__(
@@ -268,7 +282,9 @@ class RNN(Module):
         num_layers: int = 1,
         bias: bool = True,
         batch_first: bool = False,
-        bidirectional: bool = False
+        bidirectional: bool = False,
+        nonlinearity: str = 'tanh',
+        dropout: float = 0.0
     ):
         super().__init__()
         self.input_size = input_size
@@ -277,9 +293,12 @@ class RNN(Module):
         self.bias = bias
         self.batch_first = batch_first
         self.bidirectional = bidirectional
+        self.nonlinearity = nonlinearity
+        self.dropout = dropout
         
         # Create RNN cells for each layer
         self.cells = []
+        self.weight_names = {}
         
         for layer in range(num_layers):
             layer_input_size = input_size if layer == 0 else hidden_size
@@ -287,11 +306,21 @@ class RNN(Module):
             # Forward direction
             cell = RNNCell(layer_input_size, hidden_size, bias=bias)
             self.cells.append(cell)
+            setattr(self, f'weight_ih_l{layer}', cell.W_ih)
+            setattr(self, f'weight_hh_l{layer}', cell.W_hh)
+            if bias:
+                setattr(self, f'bias_ih_l{layer}', cell.b_ih)
+                setattr(self, f'bias_hh_l{layer}', cell.b_hh)
             
             # Backward direction (if bidirectional)
             if bidirectional:
                 cell_bwd = RNNCell(layer_input_size, hidden_size, bias=bias)
                 self.cells.append(cell_bwd)
+                setattr(self, f'weight_ih_l{layer}_reverse', cell_bwd.W_ih)
+                setattr(self, f'weight_hh_l{layer}_reverse', cell_bwd.W_hh)
+                if bias:
+                    setattr(self, f'bias_ih_l{layer}_reverse', cell_bwd.b_ih)
+                    setattr(self, f'bias_hh_l{layer}_reverse', cell_bwd.b_hh)
     
     def forward(
         self,
@@ -385,6 +414,7 @@ class LSTM(Module):
         bias (bool): Whether to use bias. Default: True
         batch_first (bool): Whether batch is the first dimension. Default: False
         bidirectional (bool): Whether to use bidirectional LSTM. Default: False
+        dropout (float): Dropout rate. Default: 0.0
     """
     
     def __init__(
@@ -394,7 +424,8 @@ class LSTM(Module):
         num_layers: int = 1,
         bias: bool = True,
         batch_first: bool = False,
-        bidirectional: bool = False
+        bidirectional: bool = False,
+        dropout: float = 0.0
     ):
         super().__init__()
         self.input_size = input_size
@@ -403,6 +434,7 @@ class LSTM(Module):
         self.bias = bias
         self.batch_first = batch_first
         self.bidirectional = bidirectional
+        self.dropout = dropout
         
         # Create LSTM cells for each layer
         self.cells = []
@@ -412,10 +444,20 @@ class LSTM(Module):
             
             cell = LSTMCell(layer_input_size, hidden_size, bias=bias)
             self.cells.append(cell)
+            setattr(self, f'weight_ih_l{layer}', cell.W_ih)
+            setattr(self, f'weight_hh_l{layer}', cell.W_hh)
+            if bias:
+                setattr(self, f'bias_ih_l{layer}', cell.b_ih)
+                setattr(self, f'bias_hh_l{layer}', cell.b_hh)
             
             if bidirectional:
                 cell_bwd = LSTMCell(layer_input_size, hidden_size, bias=bias)
                 self.cells.append(cell_bwd)
+                setattr(self, f'weight_ih_l{layer}_reverse', cell_bwd.W_ih)
+                setattr(self, f'weight_hh_l{layer}_reverse', cell_bwd.W_hh)
+                if bias:
+                    setattr(self, f'bias_ih_l{layer}_reverse', cell_bwd.b_ih)
+                    setattr(self, f'bias_hh_l{layer}_reverse', cell_bwd.b_hh)
     
     def forward(
         self,
@@ -462,19 +504,19 @@ class LSTM(Module):
                 cell_idx = layer * 2 if self.bidirectional else layer
                 state_idx = layer * 2 if self.bidirectional else layer
                 
-                h_new, (h_out, c_out) = self.cells[cell_idx](
+                h_new, c_new = self.cells[cell_idx](
                     x_t,
                     (Tensor(h_list[state_idx], requires_grad=True),
                      Tensor(c_list[state_idx], requires_grad=True))
                 )
-                h_list[state_idx] = h_out.data
-                c_list[state_idx] = c_out.data
+                h_list[state_idx] = h_new.data
+                c_list[state_idx] = c_new.data
                 
                 x_t_next = h_new
                 
                 if self.bidirectional:
                     state_idx_bwd = layer * 2 + 1
-                    _, (h_bwd, c_bwd) = self.cells[cell_idx + 1](
+                    h_bwd, c_bwd = self.cells[cell_idx + 1](
                         x_t,
                         (Tensor(h_list[state_idx_bwd], requires_grad=True),
                          Tensor(c_list[state_idx_bwd], requires_grad=True))
@@ -515,6 +557,7 @@ class GRU(Module):
         bias (bool): Whether to use bias. Default: True
         batch_first (bool): Whether batch is the first dimension. Default: False
         bidirectional (bool): Whether to use bidirectional GRU. Default: False
+        dropout (float): Dropout rate. Default: 0.0
     """
     
     def __init__(
@@ -524,7 +567,8 @@ class GRU(Module):
         num_layers: int = 1,
         bias: bool = True,
         batch_first: bool = False,
-        bidirectional: bool = False
+        bidirectional: bool = False,
+        dropout: float = 0.0
     ):
         super().__init__()
         self.input_size = input_size
@@ -533,6 +577,7 @@ class GRU(Module):
         self.bias = bias
         self.batch_first = batch_first
         self.bidirectional = bidirectional
+        self.dropout = dropout
         
         self.cells = []
         
@@ -541,10 +586,20 @@ class GRU(Module):
             
             cell = GRUCell(layer_input_size, hidden_size, bias=bias)
             self.cells.append(cell)
+            setattr(self, f'weight_ih_l{layer}', cell.W_ih)
+            setattr(self, f'weight_hh_l{layer}', cell.W_hh)
+            if bias:
+                setattr(self, f'bias_ih_l{layer}', cell.b_ih)
+                setattr(self, f'bias_hh_l{layer}', cell.b_hh)
             
             if bidirectional:
                 cell_bwd = GRUCell(layer_input_size, hidden_size, bias=bias)
                 self.cells.append(cell_bwd)
+                setattr(self, f'weight_ih_l{layer}_reverse', cell_bwd.W_ih)
+                setattr(self, f'weight_hh_l{layer}_reverse', cell_bwd.W_hh)
+                if bias:
+                    setattr(self, f'bias_ih_l{layer}_reverse', cell_bwd.b_ih)
+                    setattr(self, f'bias_hh_l{layer}_reverse', cell_bwd.b_hh)
     
     def forward(
         self,

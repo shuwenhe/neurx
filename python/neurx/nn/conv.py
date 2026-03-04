@@ -5,9 +5,10 @@ Compatible with PyTorch API.
 
 import numpy as np
 from ..core import Tensor
+from .modules import Module, Parameter
 
 
-class Conv1d:
+class Conv1d(Module):
     """1D Convolution layer.
     
     Args:
@@ -23,6 +24,7 @@ class Conv1d:
     
     def __init__(self, in_channels, out_channels, kernel_size, 
                  stride=1, padding=0, dilation=1, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size,)
@@ -32,11 +34,11 @@ class Conv1d:
         self.groups = groups
         
         # Weight: (out_channels, in_channels // groups, kernel_size)
-        self.weight = Tensor(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / (in_channels * np.prod(self.kernel_size))), requires_grad=True)
+        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / (in_channels * np.prod(self.kernel_size))))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
@@ -108,7 +110,7 @@ class Conv1d:
         return self.forward(x)
 
 
-class Conv2d:
+class Conv2d(Module):
     """2D Convolution layer.
     
     Args:
@@ -124,6 +126,7 @@ class Conv2d:
     
     def __init__(self, in_channels, out_channels, kernel_size,
                  stride=1, padding=0, dilation=1, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
@@ -134,11 +137,11 @@ class Conv2d:
         
         # Weight: (out_channels, in_channels // groups, kernel_h, kernel_w)
         fan_in = in_channels // groups * np.prod(self.kernel_size)
-        self.weight = Tensor(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / fan_in), requires_grad=True)
+        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / fan_in))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
@@ -204,13 +207,169 @@ class Conv2d:
         if self.bias is not None:
             output = output + self.bias.data[None, :, None, None]
         
-        return Tensor(output, requires_grad=True)
+        # Create output tensor with proper computation graph
+        children = [x]
+        if self.bias is not None:
+            children = [x, self.weight, self.bias]
+        else:
+            children = [x, self.weight]
+        
+        out = Tensor(output, requires_grad=x.requires_grad or self.weight.requires_grad, 
+                    _children=tuple(children), _op="conv2d")
+        
+        # Store computation information for backward pass
+        out._x_padded = x_padded
+        out._padding_h = padding_h
+        out._padding_w = padding_w
+        out._stride_h = stride_h
+        out._stride_w = stride_w
+        out._dilation_h = dilation_h
+        out._dilation_w = dilation_w
+        out._kernel_h = kernel_h
+        out._kernel_w = kernel_w
+        out._batch_size = batch_size
+        out._in_channels = in_channels
+        out._out_height = out_height
+        out._out_width = out_width
+        out._groups = self.groups
+        out._in_ch_per_group = in_ch_per_group
+        out._out_ch_per_group = out_ch_per_group
+        out._x = x
+        out._weight = self.weight
+        out._bias = self.bias
+        out._conv_layer = self  # Store reference to the conv layer
+        
+        def _backward():
+            # Gradient computation for backward pass
+            conv_layer = out._conv_layer
+            if x.requires_grad:
+                # Compute gradient w.r.t. input
+                x.grad += conv_layer._compute_input_grad(out, out_height, out_width, batch_size)
+            
+            if self.weight.requires_grad:
+                # Compute gradient w.r.t. weight
+                self.weight.grad += conv_layer._compute_weight_grad(out, x_padded, out_height, out_width)
+            
+            if self.bias is not None and self.bias.requires_grad:
+                # Compute gradient w.r.t. bias
+                self.bias.grad += conv_layer._compute_bias_grad(out, batch_size)
+        
+        out._backward = _backward
+        return out
+    
+    def _compute_input_grad(self, out, out_height, out_width, batch_size):
+        """Compute gradient with respect to input."""
+        # Need to allocate gradient for padded input, then remove padding
+        padding_h, padding_w = self.padding
+        
+        kernel_h, kernel_w = self.kernel_size
+        stride_h, stride_w = self.stride
+        dilation_h, dilation_w = self.dilation
+        
+        in_ch_per_group = out._in_ch_per_group
+        out_ch_per_group = out._out_ch_per_group
+        
+        # Compute input shape with padding
+        x_shape = out._x.shape
+        x_padded_shape = (x_shape[0], x_shape[1], x_shape[2] + 2*padding_h, x_shape[3] + 2*padding_w)
+        x_grad_padded = np.zeros(x_padded_shape)
+        
+        # For each group
+        for g in range(self.groups):
+            in_ch_start = g * in_ch_per_group
+            in_ch_end = in_ch_start + in_ch_per_group
+            out_ch_start = g * out_ch_per_group
+            out_ch_end = out_ch_start + out_ch_per_group
+            
+            # Compute gradient for this group
+            for oh in range(out_height):
+                for ow in range(out_width):
+                    h_start = oh * stride_h
+                    w_start = ow * stride_w
+                    h_indices = h_start + np.arange(kernel_h) * dilation_h
+                    w_indices = w_start + np.arange(kernel_w) * dilation_w
+                    
+                    # Gradient from output
+                    grad_out = out.grad[:, out_ch_start:out_ch_end, oh, ow]  # (batch, out_ch_per_group)
+                    
+                    # Weight for this position
+                    w_group = self.weight.data[out_ch_start:out_ch_end, :, :, :]  # (out_ch_per_group, in_ch, kh, kw)
+                    
+                    # Compute gradient for input patch
+                    for oc in range(out_ch_per_group):
+                        w = w_group[oc, :, :, :]  # (in_ch, kh, kw)
+                        # Reshape for broadcasting: (batch, 1) * (in_ch, kh, kw) -> (batch, in_ch, kh, kw)
+                        patch_grad = grad_out[:, oc:oc+1, None, None] * w[None, :, :, :]
+                        
+                        # Accumulate to padded input gradient
+                        for i, h_idx in enumerate(h_indices):
+                            for j, w_idx in enumerate(w_indices):
+                                x_grad_padded[:, in_ch_start:in_ch_end, h_idx, w_idx] += patch_grad[:, :, i, j]
+        
+        # Remove padding from gradient
+        if padding_h > 0 or padding_w > 0:
+            x_grad = x_grad_padded[:, :, padding_h:-padding_h if padding_h > 0 else x_grad_padded.shape[2], 
+                                   padding_w:-padding_w if padding_w > 0 else x_grad_padded.shape[3]]
+        else:
+            x_grad = x_grad_padded
+        
+        return x_grad
+    
+    def _compute_weight_grad(self, out, x_padded, out_height, out_width):
+        """Compute gradient with respect to weight."""
+        weight_grad = np.zeros_like(self.weight.data)
+        
+        kernel_h, kernel_w = self.kernel_size
+        stride_h, stride_w = self.stride
+        dilation_h, dilation_w = self.dilation
+        
+        in_ch_per_group = out._in_ch_per_group
+        out_ch_per_group = out._out_ch_per_group
+        
+        # For each group
+        for g in range(self.groups):
+            in_ch_start = g * in_ch_per_group
+            in_ch_end = in_ch_start + in_ch_per_group
+            out_ch_start = g * out_ch_per_group
+            out_ch_end = out_ch_start + out_ch_per_group
+            
+            x_group = x_padded[:, in_ch_start:in_ch_end, :, :]
+            
+            for oh in range(out_height):
+                for ow in range(out_width):
+                    h_start = oh * stride_h
+                    w_start = ow * stride_w
+                    h_indices = h_start + np.arange(kernel_h) * dilation_h
+                    w_indices = w_start + np.arange(kernel_w) * dilation_w
+                    
+                    # Extract patch
+                    patch = x_group[:, :, h_indices[:, None], w_indices[None, :]]  # (batch, in_ch, kh, kw)
+                    
+                    # Gradient from output
+                    grad_out = out.grad[:, out_ch_start:out_ch_end, oh, ow]  # (batch, out_ch_per_group)
+                    
+                    # Compute weight gradient
+                    for oc in range(out_ch_per_group):
+                        # (batch, in_ch, kh, kw) * (batch, 1, 1, 1) -> sum over batch
+                        weight_grad[out_ch_start + oc, :, :, :] += np.sum(
+                            patch * grad_out[:, oc:oc+1, None, None],
+                            axis=0
+                        )
+        
+        return weight_grad
+    
+    def _compute_bias_grad(self, out, batch_size):
+        """Compute gradient with respect to bias."""
+        # Sum gradient over all spatial dimensions and batch
+        bias_grad = np.sum(out.grad, axis=(0, 2, 3))
+        return bias_grad
+    
     
     def __call__(self, x):
         return self.forward(x)
 
 
-class Conv3d:
+class Conv3d(Module):
     """3D Convolution layer.
     
     Args:
@@ -226,6 +385,7 @@ class Conv3d:
     
     def __init__(self, in_channels, out_channels, kernel_size,
                  stride=1, padding=0, dilation=1, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size, kernel_size)
@@ -236,11 +396,11 @@ class Conv3d:
         
         # Weight: (out_channels, in_channels // groups, kernel_d, kernel_h, kernel_w)
         fan_in = in_channels // groups * np.prod(self.kernel_size)
-        self.weight = Tensor(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / fan_in), requires_grad=True)
+        self.weight = Parameter(np.random.randn(out_channels, in_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / fan_in))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
@@ -317,7 +477,7 @@ class Conv3d:
         return self.forward(x)
 
 
-class ConvTranspose2d:
+class ConvTranspose2d(Module):
     """2D Transposed Convolution (Deconvolution) layer.
     
     Args:
@@ -333,6 +493,7 @@ class ConvTranspose2d:
     
     def __init__(self, in_channels, out_channels, kernel_size,
                  stride=1, padding=0, output_padding=0, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
@@ -343,11 +504,11 @@ class ConvTranspose2d:
         
         # Weight: (in_channels, out_channels // groups, kernel_h, kernel_w)
         fan_in = in_channels // groups * np.prod(self.kernel_size)
-        self.weight = Tensor(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / fan_in), requires_grad=True)
+        self.weight = Parameter(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / fan_in))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
@@ -416,11 +577,12 @@ class ConvTranspose2d:
         return self.forward(x)
 
 
-class ConvTranspose1d:
+class ConvTranspose1d(Module):
     """1D Transposed Convolution layer."""
     
     def __init__(self, in_channels, out_channels, kernel_size,
                  stride=1, padding=0, output_padding=0, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size,)
@@ -430,11 +592,11 @@ class ConvTranspose1d:
         self.groups = groups
         
         fan_in = in_channels // groups * np.prod(self.kernel_size)
-        self.weight = Tensor(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / fan_in), requires_grad=True)
+        self.weight = Parameter(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / fan_in))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
@@ -478,11 +640,12 @@ class ConvTranspose1d:
         return self.forward(x)
 
 
-class ConvTranspose3d:
+class ConvTranspose3d(Module):
     """3D Transposed Convolution layer."""
     
     def __init__(self, in_channels, out_channels, kernel_size,
                  stride=1, padding=0, output_padding=0, groups=1, bias=True):
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size, kernel_size)
@@ -492,11 +655,11 @@ class ConvTranspose3d:
         self.groups = groups
         
         fan_in = in_channels // groups * np.prod(self.kernel_size)
-        self.weight = Tensor(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
-                            np.sqrt(2.0 / fan_in), requires_grad=True)
+        self.weight = Parameter(np.random.randn(in_channels, out_channels // groups, *self.kernel_size) * 
+                            np.sqrt(2.0 / fan_in))
         
         if bias:
-            self.bias = Tensor(np.zeros(out_channels), requires_grad=True)
+            self.bias = Parameter(np.zeros(out_channels))
         else:
             self.bias = None
     
