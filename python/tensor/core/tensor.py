@@ -1069,6 +1069,49 @@ class Tensor:
         self.data = _to_data_on_device(out, self.device)
         return self
 
+    def sub_(self, other):
+        """In-place subtraction: self -= other"""
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        out = _to_numpy(self.data) - _to_numpy(other_t.data)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def div_(self, other):
+        """In-place division: self /= other"""
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        out = _to_numpy(self.data) / _to_numpy(other_t.data)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def pow_(self, other):
+        """In-place power: self **= other"""
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        out = _to_numpy(self.data) ** _to_numpy(other_t.data)
+        self.data = _to_data_on_device(out, self.device)
+        return self
+
+    def copy_(self, other):
+        """In-place copy: self = copy of other"""
+        other_t = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        if other_t.shape != self.shape:
+            raise ValueError(f"copy_: shape mismatch {other_t.shape} vs {self.shape}")
+        self.data = _to_data_on_device(_to_numpy(other_t.data).copy(), self.device)
+        return self
+
+    def fill_(self, value):
+        """In-place fill: fill all elements with value"""
+        arr = _to_numpy(self.data)
+        arr.fill(value)
+        self.data = _to_data_on_device(arr, self.device)
+        return self
+
+    def zero_(self):
+        """In-place zero: fill all elements with 0"""
+        arr = _to_numpy(self.data)
+        arr.fill(0.0)
+        self.data = _to_data_on_device(arr, self.device)
+        return self
+
     def __gt__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         return Tensor(_to_numpy(self.data) > _to_numpy(other.data), requires_grad=False, device="cpu")
