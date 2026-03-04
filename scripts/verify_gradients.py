@@ -168,6 +168,34 @@ def main():
     
     # 测试 gelu() 在链式法则中
     verify_gradient("gelu() 链式", lambda t: t.gelu().gelu(), x_shape=(2, 2))
+
+    # 测试 gather()
+    verify_gradient(
+        "gather()",
+        lambda t: t.gather(1, Tensor([[2, 1], [0, 2], [1, 0]])).sum(),
+        x_shape=(3, 3),
+    )
+
+    # 测试 scatter() (对 self 的梯度)
+    verify_gradient(
+        "scatter()",
+        lambda t: t.scatter(1, Tensor([[0, 2], [1, 0], [2, 1]]), Tensor(np.ones((3, 2)))).sum(),
+        x_shape=(3, 3),
+    )
+
+    # 测试 index_select()
+    verify_gradient(
+        "index_select()",
+        lambda t: t.index_select(1, Tensor([2, 0])).sum(),
+        x_shape=(3, 4),
+    )
+
+    # 测试 tril()/triu()
+    verify_gradient("tril()", lambda t: t.tril().sum(), x_shape=(4, 4))
+    verify_gradient("triu()", lambda t: t.triu(1).sum(), x_shape=(4, 4))
+
+    # 测试 norm()
+    verify_gradient("norm(p=2)", lambda t: t.norm(p=2, axis=1).sum(), x_shape=(3, 4))
     
     print("\n" + "="*60)
     print("✅ 所有梯度验证完成!")

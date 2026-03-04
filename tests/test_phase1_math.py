@@ -499,6 +499,354 @@ def test_gelu_multidimensional():
     print("✓ gelu() 多维张量测试通过")
 
 
+# ==================== 索引与矩阵操作测试 ====================
+
+def test_gather_forward():
+    """gather 前向传播测试"""
+    x = Tensor([[1, 2, 3], [4, 5, 6]], requires_grad=False)
+    index = Tensor([[2, 1], [0, 2]])
+    y = x.gather(1, index)
+    expected = np.array([[3, 2], [4, 6]])
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+    print("✓ gather() 前向传播测试通过")
+
+
+def test_gather_backward():
+    """gather 反向传播测试"""
+    x = Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    index = Tensor([[2, 1], [0, 2]])
+    y = x.gather(1, index)
+    y.sum().backward()
+    expected_grad = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0]])
+    np.testing.assert_allclose(x.grad, expected_grad, rtol=1e-6)
+    print("✓ gather() 反向传播测试通过")
+
+
+def test_scatter_forward():
+    """scatter 前向传播测试"""
+    x = Tensor(np.zeros((2, 4)), requires_grad=False)
+    index = Tensor([[0, 2], [1, 3]])
+    src = Tensor([[10.0, 20.0], [30.0, 40.0]], requires_grad=False)
+    y = x.scatter(1, index, src)
+    expected = np.array([[10.0, 0.0, 20.0, 0.0], [0.0, 30.0, 0.0, 40.0]])
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+    print("✓ scatter() 前向传播测试通过")
+
+
+def test_scatter_backward():
+    """scatter 反向传播测试"""
+    x = Tensor(np.ones((2, 4)), requires_grad=True)
+    index = Tensor([[0, 2], [1, 3]])
+    src = Tensor([[10.0, 20.0], [30.0, 40.0]], requires_grad=True)
+    y = x.scatter(1, index, src)
+    y.sum().backward()
+
+    expected_x_grad = np.array([[0.0, 1.0, 0.0, 1.0], [1.0, 0.0, 1.0, 0.0]])
+    expected_src_grad = np.ones((2, 2))
+    np.testing.assert_allclose(x.grad, expected_x_grad, rtol=1e-6)
+    np.testing.assert_allclose(src.grad, expected_src_grad, rtol=1e-6)
+    print("✓ scatter() 反向传播测试通过")
+
+
+def test_scatter_add_forward_with_repeated_indices():
+    """scatter_add 前向测试（重复索引累加）"""
+    x = Tensor(np.zeros((2, 5)), requires_grad=False)
+    index = Tensor([[1, 1, 3], [0, 0, 4]])
+    src = Tensor([[2.0, 3.0, 5.0], [7.0, 11.0, 13.0]], requires_grad=False)
+
+    y = x.scatter_add(1, index, src)
+
+    expected = np.zeros((2, 5))
+    expected[0, 1] = 5.0
+    expected[0, 3] = 5.0
+    expected[1, 0] = 18.0
+    expected[1, 4] = 13.0
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+    print("✓ scatter_add() 重复索引累加测试通过")
+
+
+def test_scatter_add_backward():
+    """scatter_add 反向传播测试"""
+    x = Tensor(np.ones((2, 4)), requires_grad=True)
+    index = Tensor([[0, 2], [1, 3]])
+    src = Tensor([[10.0, 20.0], [30.0, 40.0]], requires_grad=True)
+
+    y = x.scatter_add(1, index, src)
+    y.sum().backward()
+
+    expected_x_grad = np.ones((2, 4))
+    expected_src_grad = np.ones((2, 2))
+    np.testing.assert_allclose(x.grad, expected_x_grad, rtol=1e-6)
+    np.testing.assert_allclose(src.grad, expected_src_grad, rtol=1e-6)
+    print("✓ scatter_add() 反向传播测试通过")
+
+
+def test_scatter_add_pytorch_alignment_repeated_indices():
+    """scatter_add 与 PyTorch 对齐测试（重复索引）"""
+    try:
+        import torch
+    except ImportError:
+        pytest.skip("PyTorch 未安装，跳过 scatter_add 对齐测试")
+
+    x_np = np.zeros((2, 5), dtype=np.float64)
+    idx_np = np.array([[1, 1, 3], [0, 0, 4]], dtype=np.int64)
+    src_np = np.array([[2.0, 3.0, 5.0], [7.0, 11.0, 13.0]], dtype=np.float64)
+
+    x_neurx = Tensor(x_np.copy(), requires_grad=True)
+    idx_neurx = Tensor(idx_np)
+    src_neurx = Tensor(src_np.copy(), requires_grad=True)
+    y_neurx = x_neurx.scatter_add(1, idx_neurx, src_neurx)
+    y_neurx.sum().backward()
+
+    x_torch = torch.tensor(x_np, dtype=torch.float64, requires_grad=True)
+    idx_torch = torch.tensor(idx_np, dtype=torch.int64)
+    src_torch = torch.tensor(src_np, dtype=torch.float64, requires_grad=True)
+    y_torch = x_torch.scatter_add(1, idx_torch, src_torch)
+    y_torch.sum().backward()
+
+    np.testing.assert_allclose(y_neurx.data, y_torch.detach().numpy(), rtol=1e-6)
+    np.testing.assert_allclose(x_neurx.grad, x_torch.grad.numpy(), rtol=1e-6)
+    np.testing.assert_allclose(src_neurx.grad, src_torch.grad.numpy(), rtol=1e-6)
+    print("✓ scatter_add() 与 PyTorch 对齐测试（重复索引）通过")
+
+
+def test_scatter_add_pytorch_alignment_negative_indices():
+    """scatter_add 与 PyTorch 对齐测试（负索引）"""
+    try:
+        import torch
+    except ImportError:
+        pytest.skip("PyTorch 未安装，跳过 scatter_add 对齐测试")
+
+    x_np = np.zeros((2, 4), dtype=np.float64)
+    idx_np = np.array([[-1, -2], [-4, -1]], dtype=np.int64)
+    src_np = np.array([[1.5, 2.5], [3.5, 4.5]], dtype=np.float64)
+
+    x_neurx = Tensor(x_np.copy(), requires_grad=True)
+    idx_neurx = Tensor(idx_np)
+    src_neurx = Tensor(src_np.copy(), requires_grad=True)
+    y_neurx = x_neurx.scatter_add(1, idx_neurx, src_neurx)
+    y_neurx.sum().backward()
+
+    x_torch = torch.tensor(x_np, dtype=torch.float64, requires_grad=True)
+    idx_torch = torch.tensor(idx_np, dtype=torch.int64)
+    src_torch = torch.tensor(src_np, dtype=torch.float64, requires_grad=True)
+    y_torch = x_torch.scatter_add(1, idx_torch, src_torch)
+    y_torch.sum().backward()
+
+    np.testing.assert_allclose(y_neurx.data, y_torch.detach().numpy(), rtol=1e-6)
+    np.testing.assert_allclose(x_neurx.grad, x_torch.grad.numpy(), rtol=1e-6)
+    np.testing.assert_allclose(src_neurx.grad, src_torch.grad.numpy(), rtol=1e-6)
+    print("✓ scatter_add() 与 PyTorch 对齐测试（负索引）通过")
+
+
+def test_scatter_add_error_cases():
+    """scatter_add 边界错误测试"""
+    x = Tensor(np.zeros((2, 3)), requires_grad=False)
+    src = Tensor(np.ones((2, 2)), requires_grad=False)
+
+    with pytest.raises(IndexError):
+        x.scatter_add(1, Tensor([[0, 3], [1, 2]]), src)
+
+    with pytest.raises(IndexError):
+        x.scatter_add(1, Tensor([[-4, 1], [0, 2]]), src)
+
+    print("✓ scatter_add() 边界错误测试通过")
+
+
+def test_scatter_add_multidim_dim_minus1_forward():
+    """scatter_add 多维 + dim=-1 前向测试"""
+    x = Tensor(np.zeros((2, 3, 4)), requires_grad=False)
+    index = Tensor(
+        np.array(
+            [
+                [[0, 1], [1, 1], [3, 0]],
+                [[2, 2], [0, 3], [1, 1]],
+            ]
+        )
+    )
+    src = Tensor(
+        np.array(
+            [
+                [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
+                [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]],
+            ]
+        ),
+        requires_grad=False,
+    )
+
+    y = x.scatter_add(-1, index, src)
+
+    expected = np.zeros((2, 3, 4))
+    expected[0, 0, 0] += 1.0
+    expected[0, 0, 1] += 2.0
+    expected[0, 1, 1] += 3.0 + 4.0
+    expected[0, 2, 3] += 5.0
+    expected[0, 2, 0] += 6.0
+    expected[1, 0, 2] += 7.0 + 8.0
+    expected[1, 1, 0] += 9.0
+    expected[1, 1, 3] += 10.0
+    expected[1, 2, 1] += 11.0 + 12.0
+
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+    print("✓ scatter_add() 多维 dim=-1 前向测试通过")
+
+
+def test_scatter_add_multidim_dim_minus1_backward():
+    """scatter_add 多维 + dim=-1 反向传播测试"""
+    x = Tensor(np.ones((2, 3, 4)), requires_grad=True)
+    index = Tensor(
+        np.array(
+            [
+                [[0, 1], [1, 1], [3, 0]],
+                [[2, 2], [0, 3], [1, 1]],
+            ]
+        )
+    )
+    src = Tensor(
+        np.array(
+            [
+                [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
+                [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]],
+            ]
+        ),
+        requires_grad=True,
+    )
+
+    y = x.scatter_add(-1, index, src)
+    y.sum().backward()
+
+    np.testing.assert_allclose(x.grad, np.ones((2, 3, 4)), rtol=1e-6)
+    np.testing.assert_allclose(src.grad, np.ones((2, 3, 2)), rtol=1e-6)
+    print("✓ scatter_add() 多维 dim=-1 反向传播测试通过")
+
+
+def test_scatter_add_multidim_dim_minus1_pytorch_alignment():
+    """scatter_add 多维 + dim=-1 与 PyTorch 对齐测试"""
+    try:
+        import torch
+    except ImportError:
+        pytest.skip("PyTorch 未安装，跳过 scatter_add 多维 dim=-1 对齐测试")
+
+    x_np = np.zeros((2, 3, 4), dtype=np.float64)
+    idx_np = np.array(
+        [
+            [[0, 1], [1, 1], [3, 0]],
+            [[2, 2], [0, 3], [1, 1]],
+        ],
+        dtype=np.int64,
+    )
+    src_np = np.array(
+        [
+            [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
+            [[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]],
+        ],
+        dtype=np.float64,
+    )
+
+    x_neurx = Tensor(x_np.copy(), requires_grad=True)
+    idx_neurx = Tensor(idx_np)
+    src_neurx = Tensor(src_np.copy(), requires_grad=True)
+    y_neurx = x_neurx.scatter_add(-1, idx_neurx, src_neurx)
+    y_neurx.sum().backward()
+
+    x_torch = torch.tensor(x_np, dtype=torch.float64, requires_grad=True)
+    idx_torch = torch.tensor(idx_np, dtype=torch.int64)
+    src_torch = torch.tensor(src_np, dtype=torch.float64, requires_grad=True)
+    y_torch = x_torch.scatter_add(-1, idx_torch, src_torch)
+    y_torch.sum().backward()
+
+    np.testing.assert_allclose(y_neurx.data, y_torch.detach().numpy(), rtol=1e-6)
+    np.testing.assert_allclose(x_neurx.grad, x_torch.grad.numpy(), rtol=1e-6)
+    np.testing.assert_allclose(src_neurx.grad, src_torch.grad.numpy(), rtol=1e-6)
+    print("✓ scatter_add() 多维 dim=-1 与 PyTorch 对齐测试通过")
+
+
+def test_index_select_forward_and_backward():
+    """index_select 前后向测试"""
+    x = Tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], requires_grad=True)
+    idx = Tensor([2, 0])
+    y = x.index_select(1, idx)
+    expected = np.array([[3.0, 1.0], [6.0, 4.0]])
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+
+    y.sum().backward()
+    expected_grad = np.array([[1.0, 0.0, 1.0], [1.0, 0.0, 1.0]])
+    np.testing.assert_allclose(x.grad, expected_grad, rtol=1e-6)
+    print("✓ index_select() 前后向测试通过")
+
+
+def test_index_select_negative_dim():
+    """index_select 负维度测试"""
+    x = Tensor([[1, 2, 3], [4, 5, 6]], requires_grad=False)
+    idx = Tensor([1, 2])
+    y = x.index_select(-1, idx)
+    expected = np.array([[2, 3], [5, 6]])
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+    print("✓ index_select() 负维度测试通过")
+
+
+def test_tril_triu_forward_backward():
+    """tril/triu 前后向测试"""
+    x_np = np.arange(1, 10, dtype=np.float64).reshape(3, 3)
+
+    x1 = Tensor(x_np.copy(), requires_grad=True)
+    y1 = x1.tril()
+    np.testing.assert_allclose(y1.data, np.tril(x_np), rtol=1e-6)
+    y1.sum().backward()
+    np.testing.assert_allclose(x1.grad, np.tril(np.ones_like(x_np)), rtol=1e-6)
+
+    x2 = Tensor(x_np.copy(), requires_grad=True)
+    y2 = x2.triu(1)
+    np.testing.assert_allclose(y2.data, np.triu(x_np, 1), rtol=1e-6)
+    y2.sum().backward()
+    np.testing.assert_allclose(x2.grad, np.triu(np.ones_like(x_np), 1), rtol=1e-6)
+    print("✓ tril()/triu() 前后向测试通过")
+
+
+def test_norm_forward_and_backward():
+    """norm 前后向测试"""
+    x_np = np.array([[3.0, 4.0], [0.0, 5.0]])
+    x = Tensor(x_np.copy(), requires_grad=True)
+
+    y = x.norm(p=2, axis=1)
+    expected = np.array([5.0, 5.0])
+    np.testing.assert_allclose(y.data, expected, rtol=1e-6)
+
+    y.sum().backward()
+    expected_grad = np.array([[3.0 / 5.0, 4.0 / 5.0], [0.0, 1.0]])
+    np.testing.assert_allclose(x.grad, expected_grad, rtol=1e-6)
+    print("✓ norm() 前后向测试通过")
+
+
+def test_norm_p1_and_inf():
+    """norm p=1 和 p=inf 测试"""
+    x_np = np.array([[1.0, -2.0, 3.0], [4.0, -5.0, 6.0]])
+    x = Tensor(x_np, requires_grad=False)
+
+    y1 = x.norm(p=1, axis=1)
+    np.testing.assert_allclose(y1.data, np.array([6.0, 15.0]), rtol=1e-6)
+
+    yinf = x.norm(p=np.inf, axis=1)
+    np.testing.assert_allclose(yinf.data, np.array([3.0, 6.0]), rtol=1e-6)
+    print("✓ norm() p=1/p=inf 测试通过")
+
+
+def test_index_ops_error_cases():
+    """索引操作异常分支测试"""
+    x = Tensor(np.zeros((2, 3)), requires_grad=False)
+
+    with pytest.raises(IndexError):
+        x.index_select(3, Tensor([0]))
+
+    with pytest.raises(ValueError):
+        x.index_select(1, Tensor([[0, 1]]))
+
+    with pytest.raises(IndexError):
+        x.gather(1, Tensor([[3, 0, 1], [0, 1, 2]]))
+
+    print("✓ 索引操作异常分支测试通过")
+
+
 # ==================== 数值梯度验证 ====================
 
 def numerical_gradient(func, x, eps=1e-5):
@@ -636,6 +984,26 @@ if __name__ == "__main__":
     test_gelu_backward_with_chain_rule()
     test_gelu_vs_relu()
     test_gelu_multidimensional()
+
+    print("\n--- 索引与矩阵操作测试 ---")
+    test_gather_forward()
+    test_gather_backward()
+    test_scatter_forward()
+    test_scatter_backward()
+    test_scatter_add_forward_with_repeated_indices()
+    test_scatter_add_backward()
+    test_scatter_add_pytorch_alignment_repeated_indices()
+    test_scatter_add_pytorch_alignment_negative_indices()
+    test_scatter_add_error_cases()
+    test_scatter_add_multidim_dim_minus1_forward()
+    test_scatter_add_multidim_dim_minus1_backward()
+    test_scatter_add_multidim_dim_minus1_pytorch_alignment()
+    test_index_select_forward_and_backward()
+    test_index_select_negative_dim()
+    test_tril_triu_forward_backward()
+    test_norm_forward_and_backward()
+    test_norm_p1_and_inf()
+    test_index_ops_error_cases()
     
     print("\n" + "=" * 60)
     print("✅ 所有测试通过!")
