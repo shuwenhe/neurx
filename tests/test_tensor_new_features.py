@@ -9,7 +9,8 @@ from neurx.core import (
     index_select, masked_select, masked_fill, where,
     cat, split, chunk, stack,
     sort, argsort, topk, unique, median, cumsum, cumprod, prod,
-    Tensor
+    softmax, log_softmax, take_along_dim,
+    clamp, clip, sign, flip, roll, tile, Tensor
 )
 from neurx.core import linalg
 
@@ -257,6 +258,191 @@ class TestGradients:
         y = cumsum(x)
         
         assert np.allclose(y.to_numpy(), [1, 3, 6])
+
+
+class TestTensorParityOps:
+    """Test high-value PyTorch parity ops."""
+
+    def test_clamp_and_clip(self):
+        x = Tensor([-2.0, -0.5, 0.3, 2.0], requires_grad=True)
+        y = clamp(x, min=-1.0, max=1.0)
+        z = clip(x, min=0.0, max=1.0)
+
+        assert np.allclose(y.to_numpy(), np.array([-1.0, -0.5, 0.3, 1.0]))
+        assert np.allclose(z.to_numpy(), np.array([0.0, 0.0, 0.3, 1.0]))
+
+        y.sum().backward()
+        assert np.allclose(x.grad, np.array([0.0, 1.0, 1.0, 0.0]))
+
+    def test_sign(self):
+        x = Tensor([-2.0, 0.0, 3.0])
+        y = sign(x)
+        assert np.allclose(y.to_numpy(), np.array([-1.0, 0.0, 1.0]))
+
+    def test_flip(self):
+        x = Tensor([[1, 2, 3], [4, 5, 6]])
+        y = flip(x, dims=(1,))
+        assert np.allclose(y.to_numpy(), np.array([[3, 2, 1], [6, 5, 4]]))
+
+    def test_roll(self):
+        x = Tensor([1, 2, 3, 4, 5])
+        y = roll(x, shifts=2)
+        assert np.allclose(y.to_numpy(), np.array([4, 5, 1, 2, 3]))
+
+    def test_tile(self):
+        x = Tensor([[1, 2], [3, 4]])
+        y = tile(x, (2, 1))
+        assert np.allclose(y.to_numpy(), np.array([[1, 2], [3, 4], [1, 2], [3, 4]]))
+
+    def test_boolean_indexing_tensor_mask(self):
+        x = Tensor([1.0, -2.0, 3.0, -4.0], requires_grad=True)
+        y = x[x > 0]
+        assert np.allclose(y.to_numpy(), np.array([1.0, 3.0]))
+
+        y.sum().backward()
+        assert np.allclose(x.grad, np.array([1.0, 0.0, 1.0, 0.0]))
+
+    def test_take_along_dim(self):
+        x = Tensor([[10, 20, 30], [40, 50, 60]])
+        idx = Tensor([[2, 1], [0, 2]])
+        y = take_along_dim(x, idx, dim=1)
+        assert np.allclose(y.to_numpy(), np.array([[30, 20], [40, 60]]))
+
+    def test_tensor_softmax_log_softmax(self):
+        x = Tensor([[1.0, 2.0, 3.0]])
+        sm = x.softmax(dim=1)
+        lsm = x.log_softmax(dim=1)
+
+        assert np.allclose(np.sum(sm.to_numpy(), axis=1), np.array([1.0]), atol=1e-6)
+        assert np.allclose(np.exp(lsm.to_numpy()), sm.to_numpy(), atol=1e-6)
+
+    def test_functional_softmax_log_softmax(self):
+        x = Tensor([[1.0, 2.0, 3.0]])
+        sm = softmax(x, dim=1)
+        lsm = log_softmax(x, dim=1)
+
+        assert np.allclose(np.sum(sm.to_numpy(), axis=1), np.array([1.0]), atol=1e-6)
+        assert np.allclose(np.exp(lsm.to_numpy()), sm.to_numpy(), atol=1e-6)
+
+    def test_boolean_row_mask_2d(self):
+        x = Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]], requires_grad=True)
+        row_mask = Tensor([True, False, True])
+        y = x[row_mask]
+
+        assert y.shape == (2, 3)
+        assert np.allclose(y.to_numpy(), np.array([[1, 2, 3], [7, 8, 9]]))
+
+        y.sum().backward()
+        assert np.allclose(x.grad, np.array([[1, 1, 1], [0, 0, 0], [1, 1, 1]]))
+
+    def test_boolean_full_mask_2d(self):
+        x = Tensor([[1, -2, 3], [-4, 5, -6]], requires_grad=True)
+        mask = x > 0
+        y = x[mask]
+
+        assert y.shape == (3,)
+        assert np.allclose(y.to_numpy(), np.array([1, 3, 5]))
+
+        y.sum().backward()
+        assert np.allclose(x.grad, np.array([[1, 0, 1], [0, 1, 0]]))
+
+    def test_mixed_boolean_and_int_indexing(self):
+        x = Tensor([[10, 11, 12], [20, 21, 22], [30, 31, 32]], requires_grad=True)
+        row_mask = Tensor([True, False, True])
+        col_idx = Tensor([2, 0])
+        y = x[row_mask, col_idx]
+
+        assert y.shape == (2,)
+        assert np.allclose(y.to_numpy(), np.array([12, 30]))
+
+        y.sum().backward()
+        expected_grad = np.zeros((3, 3), dtype=np.float64)
+        expected_grad[0, 2] = 1.0
+        expected_grad[2, 0] = 1.0
+        assert np.allclose(x.grad, expected_grad)
+
+    def test_mixed_boolean_slice_ellipsis(self):
+        x = Tensor(np.arange(24, dtype=np.float64).reshape(2, 3, 4), requires_grad=True)
+        mask = Tensor([True, False, True])
+
+        y1 = x[:, mask, 1:3]
+        assert y1.shape == (2, 2, 2)
+        assert np.allclose(y1.to_numpy(), np.arange(24).reshape(2, 3, 4)[:, [0, 2], 1:3])
+
+        y2 = x[..., 2]
+        assert y2.shape == (2, 3)
+        assert np.allclose(y2.to_numpy(), np.arange(24).reshape(2, 3, 4)[..., 2])
+
+    def test_setitem_boolean_mask(self):
+        x = Tensor([[1.0, -2.0, 3.0], [-4.0, 5.0, -6.0]])
+        mask = x > 0
+        x[mask] = 0.0
+        assert np.allclose(x.to_numpy(), np.array([[0.0, -2.0, 0.0], [-4.0, 0.0, -6.0]]))
+
+    def test_setitem_mixed_boolean_int(self):
+        x = Tensor([[10.0, 11.0, 12.0], [20.0, 21.0, 22.0], [30.0, 31.0, 32.0]])
+        row_mask = Tensor([True, False, True])
+        col_idx = Tensor([2, 0])
+        x[row_mask, col_idx] = Tensor([100.0, 200.0])
+
+        expected = np.array([[10.0, 11.0, 100.0], [20.0, 21.0, 22.0], [200.0, 31.0, 32.0]])
+        assert np.allclose(x.to_numpy(), expected)
+
+    def test_setitem_ellipsis_and_slice(self):
+        x = Tensor(np.arange(24, dtype=np.float64).reshape(2, 3, 4))
+        x[..., 1] = -1.0
+        out = x.to_numpy()
+        assert np.allclose(out[..., 1], -1.0)
+
+    def test_setitem_broadcast_scalar_and_vector(self):
+        x = Tensor(np.zeros((2, 3), dtype=np.float64))
+        x[:, 1] = 5.0
+        assert np.allclose(x.to_numpy(), np.array([[0.0, 5.0, 0.0], [0.0, 5.0, 0.0]]))
+
+        x[0, :] = Tensor([1.0, 2.0, 3.0])
+        assert np.allclose(x.to_numpy()[0], np.array([1.0, 2.0, 3.0]))
+
+    def test_setitem_shape_mismatch_error(self):
+        x = Tensor(np.zeros((2, 3), dtype=np.float64))
+        with pytest.raises((ValueError, IndexError)) as exc_info:
+            x[:, 1] = Tensor([1.0, 2.0, 3.0])
+
+        msg = str(exc_info.value).lower()
+        assert "shape" in msg or "broadcast" in msg or "could not" in msg
+
+    def test_gather_negative_dim(self):
+        x = Tensor([[10, 20, 30], [40, 50, 60]])
+        idx = Tensor([[2, 1], [0, 2]])
+        y = x.gather(-1, idx)
+        assert np.allclose(y.to_numpy(), np.array([[30, 20], [40, 60]]))
+
+    def test_take_along_dim_negative_dim(self):
+        x = Tensor([[10, 20, 30], [40, 50, 60]])
+        idx = Tensor([[2, 1], [0, 2]])
+        y = take_along_dim(x, idx, dim=-1)
+        assert np.allclose(y.to_numpy(), np.array([[30, 20], [40, 60]]))
+
+    def test_gather_dim_out_of_range_error(self):
+        x = Tensor([[1, 2, 3]])
+        idx = Tensor([[0, 1, 2]])
+        with pytest.raises(IndexError) as exc_info:
+            _ = x.gather(3, idx)
+        assert "out of range" in str(exc_info.value).lower()
+
+    def test_gather_index_out_of_bounds_error(self):
+        x = Tensor([[1, 2, 3]])
+        idx = Tensor([[0, 3, 1]])
+        with pytest.raises(IndexError) as exc_info:
+            _ = x.gather(1, idx)
+        msg = str(exc_info.value).lower()
+        assert "out of bounds" in msg or "out of range" in msg
+
+    def test_gather_shape_mismatch_error(self):
+        x = Tensor(np.arange(24, dtype=np.float64).reshape(2, 3, 4))
+        idx = Tensor(np.zeros((2, 2, 4), dtype=np.int64))
+        with pytest.raises(ValueError) as exc_info:
+            _ = x.gather(2, idx)
+        assert "shape" in str(exc_info.value).lower()
 
 
 if __name__ == "__main__":

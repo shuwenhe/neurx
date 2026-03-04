@@ -15,6 +15,15 @@ from neurx.core.neurx import (
     set_grad_enabled,
     is_grad_enabled,
     where,
+    clamp,
+    clip,
+    sign,
+    flip,
+    roll,
+    tile,
+    softmax,
+    log_softmax,
+    take_along_dim,
 )
 
 # Lazy import tensor creation functions to avoid circular imports
@@ -145,6 +154,15 @@ __all__ = [
     
     # Tensor operations
     "where",
+    "clamp",
+    "clip",
+    "sign",
+    "flip",
+    "roll",
+    "tile",
+    "softmax",
+    "log_softmax",
+    "take_along_dim",
     "cat",
     "stack",
     "split",
