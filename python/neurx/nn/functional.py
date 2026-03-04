@@ -114,9 +114,11 @@ def focal_loss(
 
     class_dim = _infer_class_dim_for_loss(x.shape, target_arr.shape, dim=dim)
 
-    log_probs = log_softmax(input, axis=class_dim)
-    log_probs_np = log_probs.to_numpy()
-    probs = np.exp(log_probs_np)
+    x64 = x.astype(np.float64, copy=False)
+    x_shift = x64 - np.max(x64, axis=class_dim, keepdims=True)
+    exp_x = np.exp(x_shift)
+    probs = exp_x / np.sum(exp_x, axis=class_dim, keepdims=True)
+    log_probs_np = x_shift - np.log(np.sum(exp_x, axis=class_dim, keepdims=True))
 
     if x.ndim == 1:
         c = x.shape[0]
@@ -144,10 +146,10 @@ def focal_loss(
     log_probs_moved = log_probs_np.reshape(1, c) if x.ndim == 1 else np.moveaxis(log_probs_np, class_dim, -1)
     log_probs_flat = log_probs_moved.reshape(-1, c)
 
-    sample_weights = np.ones(targets_valid.shape[0], dtype=x.dtype)
+    sample_weights = np.ones(targets_valid.shape[0], dtype=np.float64)
     if weight is not None:
         weight_arr = weight.to_numpy() if isinstance(weight, Tensor) else np.asarray(weight)
-        weight_arr = np.asarray(weight_arr, dtype=x.dtype)
+        weight_arr = np.asarray(weight_arr, dtype=np.float64)
         if weight_arr.shape != (c,):
             raise ValueError(f"weight shape {weight_arr.shape} does not match num_classes {c}")
         sample_weights = weight_arr[targets_valid]
@@ -155,7 +157,7 @@ def focal_loss(
     # Empirical scaling keeps focal emphasis stable for very confident easy samples.
     focal_scale = 1.0 + 14.0 * gamma * (1.0 - alpha)
 
-    loss_flat = np.zeros(target_flat.shape[0], dtype=x.dtype)
+    loss_flat = np.zeros(target_flat.shape[0], dtype=np.float64)
     if targets_valid.size > 0:
         logp_t = log_probs_flat[valid_mask, :][np.arange(targets_valid.size), targets_valid]
         p_t = probs_flat[valid_mask, :][np.arange(targets_valid.size), targets_valid]
@@ -163,26 +165,27 @@ def focal_loss(
         focal_valid = focal_scale * alpha * sample_weights * mod * (-logp_t)
         loss_flat[valid_mask] = focal_valid
     else:
-        focal_valid = np.zeros((0,), dtype=x.dtype)
+        focal_valid = np.zeros((0,), dtype=np.float64)
 
     if reduction == "none":
         out_data = loss_flat.reshape(target_shape)
     elif reduction == "mean":
         if focal_valid.size == 0:
-            out_data = np.array(0.0, dtype=x.dtype)
+            out_data = np.array(0.0, dtype=np.float64)
         else:
             denom = sample_weights.sum() if weight is not None else float(focal_valid.size)
             out_data = focal_valid.sum() / float(max(denom, 1e-12))
     else:
         out_data = focal_valid.sum()
 
-    out = Tensor(np.array(out_data) if np.isscalar(out_data) else out_data, input.requires_grad, (input,), "focal_loss")
+    out_arr = np.array(out_data) if np.isscalar(out_data) else out_data
+    out = Tensor(out_arr, input.requires_grad, (input,), "focal_loss")
     
     def _backward():
         if not input.requires_grad:
             return
 
-        grad_flat = np.zeros_like(probs_flat, dtype=x.dtype)
+        grad_flat = np.zeros_like(probs_flat, dtype=np.float64)
         if targets_valid.size > 0 and alpha != 0.0:
             probs_valid = probs_flat[valid_mask, :]
             p_t = probs_valid[np.arange(targets_valid.size), targets_valid]
@@ -203,10 +206,10 @@ def focal_loss(
                     grad_rows.fill(0.0)
 
             if reduction == "none":
-                out_grad_flat = np.asarray(out.grad).reshape(-1).astype(x.dtype, copy=False)
+                out_grad_flat = np.asarray(out.grad).reshape(-1).astype(np.float64, copy=False)
                 grad_rows *= out_grad_flat[valid_indices].reshape(-1, 1)
             else:
-                grad_rows *= np.asarray(out.grad).astype(x.dtype, copy=False)
+                grad_rows *= np.asarray(out.grad).astype(np.float64, copy=False)
 
             grad_flat[valid_mask, :] = grad_rows
 
@@ -1021,10 +1024,12 @@ def batch_norm(
     def _backward():
         grad = out.grad
 
-        if weight is not None and weight.requires_grad:
-            weight.grad += (grad * x_hat).sum(axis=reduce_axes).astype(weight.grad.dtype, copy=False)
-        if bias is not None and bias.requires_grad:
-            bias.grad += grad.sum(axis=reduce_axes).astype(bias.grad.dtype, copy=False)
+        if weight is not None and weight.requires_grad and weight.grad is not None:
+            grad_weight = (grad * x_hat).sum(axis=reduce_axes)
+            weight.grad += grad_weight.astype(weight.grad.dtype, copy=False)
+        if bias is not None and bias.requires_grad and bias.grad is not None:
+            grad_bias = grad.sum(axis=reduce_axes)
+            bias.grad += grad_bias.astype(bias.grad.dtype, copy=False)
 
         if input.requires_grad:
             dxhat = grad * w

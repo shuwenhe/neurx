@@ -72,7 +72,7 @@ def test_model_state_dict():
     assert state_restored, "State should be restored"
     print(f"   ✅ Model state successfully restored")
     
-    return True
+    return None
 
 
 def test_optimizer_state_dict():
@@ -110,7 +110,7 @@ def test_optimizer_state_dict():
     
     print(f"   ✅ Optimizer state loaded successfully")
     
-    return True
+    return None
 
 
 def test_checkpoint_save_load():
@@ -176,7 +176,7 @@ def test_checkpoint_save_load():
         assert states_match, "Model states should match after load"
         print(f"   ✅ Model state successfully restored")
         
-        return True
+        return None
 
 
 def test_model_checkpoint():
@@ -226,7 +226,7 @@ def test_model_checkpoint():
         assert loaded is not None, "Should load checkpoint"
         print(f"   ✅ Checkpoint loaded")
         
-        return True
+        return None
 
 
 def test_compressed_checkpoint():
@@ -256,7 +256,7 @@ def test_compressed_checkpoint():
         assert loaded is not None, "Should load compressed checkpoint"
         print(f"   ✅ Compressed checkpoint loaded")
         
-        return True
+        return None
 
 
 def test_tensor_dict_io():
@@ -287,7 +287,7 @@ def test_tensor_dict_io():
         assert (loaded['weight1'] == state['weight1']).all()
         print(f"   ✅ Tensor dict loaded and verified")
         
-        return True
+        return None
 
 
 def test_state_dict_utils():
@@ -320,7 +320,7 @@ def test_state_dict_utils():
     assert 'encoder.layer1.weight' in subset and 'encoder.layer1.bias' in subset
     print(f"   ✅ Extract subset working: {len(subset)} keys")
     
-    return True
+    return None
 
 
 def main():
@@ -344,7 +344,8 @@ def main():
     
     for name, test_func in tests:
         try:
-            results[name] = test_func()
+            test_func()
+            results[name] = True
         except Exception as e:
             print(f"\n❌ {name} test failed: {e}")
             import traceback

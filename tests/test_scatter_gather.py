@@ -41,7 +41,7 @@ def test_gather():
     assert t.grad is not None, "gradient not computed"
     print(f"   ✅ PASS")
     
-    return True
+    return None
 
 
 def test_scatter():
@@ -69,7 +69,7 @@ def test_scatter():
     assert result.to_numpy()[1, 1] == 1.0, "scatter failed at [1, 1]"
     print(f"   ✅ PASS")
     
-    return True
+    return None
 
 
 def test_scatter_add():
@@ -111,7 +111,7 @@ def test_scatter_add():
     print(f"   Source gradient shape: {src_grad.grad.shape}")
     print(f"   ✅ PASS")
     
-    return True
+    return None
 
 
 def test_meshgrid():
@@ -182,7 +182,7 @@ def test_meshgrid():
     assert Z.shape == (3, 2, 4), f"Z shape mismatch"
     print(f"   ✅ PASS")
     
-    return True
+    return None
 
 
 def test_use_cases():
@@ -230,7 +230,7 @@ def test_use_cases():
     print(f"   Updates shape: {updates.shape}")
     print(f"   ✅ Concept demonstrated")
     
-    return True
+    return None
 
 
 def main():
@@ -243,7 +243,8 @@ def main():
     
     # Run tests
     try:
-        results['gather'] = test_gather()
+        test_gather()
+        results['gather'] = True
     except Exception as e:
         print(f"\n❌ Gather test failed: {e}")
         import traceback
@@ -251,7 +252,8 @@ def main():
         results['gather'] = False
     
     try:
-        results['scatter'] = test_scatter()
+        test_scatter()
+        results['scatter'] = True
     except Exception as e:
         print(f"\n❌ Scatter test failed: {e}")
         import traceback
@@ -259,7 +261,8 @@ def main():
         results['scatter'] = False
     
     try:
-        results['scatter_add'] = test_scatter_add()
+        test_scatter_add()
+        results['scatter_add'] = True
     except Exception as e:
         print(f"\n❌ Scatter_add test failed: {e}")
         import traceback
@@ -267,7 +270,8 @@ def main():
         results['scatter_add'] = False
     
     try:
-        results['meshgrid'] = test_meshgrid()
+        test_meshgrid()
+        results['meshgrid'] = True
     except Exception as e:
         print(f"\n❌ Meshgrid test failed: {e}")
         import traceback
@@ -275,7 +279,8 @@ def main():
         results['meshgrid'] = False
     
     try:
-        results['use_cases'] = test_use_cases()
+        test_use_cases()
+        results['use_cases'] = True
     except Exception as e:
         print(f"\n❌ Use cases test failed: {e}")
         import traceback

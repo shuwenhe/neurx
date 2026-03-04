@@ -97,8 +97,7 @@ class TestLSTMCell:
         """Test LSTMCell forward pass without initial state."""
         cell = LSTMCell(10, 20)
         x = Tensor(np.random.randn(5, 10))
-        h, (h_out, c_out) = cell(x)
-        assert h.shape == (5, 20)
+        h_out, c_out = cell(x)
         assert h_out.shape == (5, 20)
         assert c_out.shape == (5, 20)
     
@@ -108,8 +107,8 @@ class TestLSTMCell:
         x = Tensor(np.random.randn(5, 10))
         h_prev = Tensor(np.random.randn(5, 20))
         c_prev = Tensor(np.random.randn(5, 20))
-        h, (h_out, c_out) = cell(x, (h_prev, c_prev))
-        assert h.shape == (5, 20)
+        h_out, c_out = cell(x, (h_prev, c_prev))
+        assert h_out.shape == (5, 20)
         assert c_out.shape == (5, 20)
     
     def test_lstm_cell_state_update(self):
@@ -118,13 +117,13 @@ class TestLSTMCell:
         x = Tensor(np.random.randn(5, 10))
         
         # First step
-        h1, (h_out1, c_out1) = cell(x)
+        h_out1, c_out1 = cell(x)
         
         # Second step with previous state
-        h2, (h_out2, c_out2) = cell(x, (h_out1, c_out1))
+        h_out2, c_out2 = cell(x, (h_out1, c_out1))
         
         # States should be different
-        assert not np.allclose(h1.data, h2.data)
+        assert not np.allclose(h_out1.data, h_out2.data)
         assert not np.allclose(c_out1.data, c_out2.data)
 
 
