@@ -94,7 +94,7 @@ def test_conv2d_training():
             return x
     
     model = SimpleConvNet()
-    optimizer = neurx.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = neurx.optim.SGD(model.parameters(), lr=0.0001)
     
     # Create dummy data (smaller to reduce numerical issues)
     x = neurx.randn(1, 3, 16, 16) * 0.1
