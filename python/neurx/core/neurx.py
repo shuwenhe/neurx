@@ -1,5 +1,6 @@
 import numpy as np
 from contextlib import ContextDecorator
+from scipy import special as _scipy_special
 
 try:
     from neurx.cuda import ops as _cuda_ops
@@ -655,23 +656,57 @@ class Tensor:
             keepdims = keepdim
         axis = _normalize_axis(axis, self.ndim)
         x = _to_numpy(self.data)
-        out_data = np.linalg.norm(x, ord=p, axis=axis, keepdims=keepdims)
+        axes = tuple(range(self.ndim)) if axis is None else (axis if isinstance(axis, tuple) else (axis,))
+
+        if p in (None, "fro", "frob", 2):
+            out_data = np.sqrt(np.sum(x * x, axis=axes, keepdims=keepdims))
+            effective_p = 2
+        elif p == 1:
+            out_data = np.sum(np.abs(x), axis=axes, keepdims=keepdims)
+            effective_p = 1
+        elif p == np.inf:
+            out_data = np.max(np.abs(x), axis=axes, keepdims=keepdims)
+            effective_p = np.inf
+        elif p == -np.inf:
+            out_data = np.min(np.abs(x), axis=axes, keepdims=keepdims)
+            effective_p = -np.inf
+        else:
+            out_data = np.sum(np.abs(x) ** p, axis=axes, keepdims=keepdims) ** (1.0 / p)
+            effective_p = p
+
         out = Tensor(out_data, self.requires_grad, (self,), "norm", device=self.device)
 
         def _backward():
             if not self.requires_grad:
                 return
             grad = out.grad
-            axes = tuple(range(self.ndim)) if axis is None else (axis if isinstance(axis, tuple) else (axis,))
-            norm_keep = np.linalg.norm(x, ord=p, axis=axes, keepdims=True)
+            norm_keep = np.maximum(np.sum(x * x, axis=axes, keepdims=True) ** 0.5, 1e-12)
             norm_keep = np.maximum(norm_keep, 1e-12)
             if not keepdims and axis is not None:
                 for ax in sorted(axes):
                     grad = np.expand_dims(grad, axis=ax)
-            if p == 2:
+            if effective_p == 2:
                 self.grad += (x / norm_keep) * grad
+            elif effective_p == 1:
+                self.grad += np.sign(x) * grad
+            elif effective_p == np.inf:
+                abs_x = np.abs(x)
+                max_keep = np.max(abs_x, axis=axes, keepdims=True)
+                mask = abs_x == max_keep
+                denom = np.maximum(mask.sum(axis=axes, keepdims=True), 1)
+                self.grad += (np.sign(x) * mask / denom) * grad
+            elif effective_p == -np.inf:
+                abs_x = np.abs(x)
+                min_keep = np.min(abs_x, axis=axes, keepdims=True)
+                mask = abs_x == min_keep
+                denom = np.maximum(mask.sum(axis=axes, keepdims=True), 1)
+                self.grad += (np.sign(x) * mask / denom) * grad
             else:
-                self.grad += (np.sign(x) * (np.abs(x) ** (p - 1)) / (norm_keep ** (p - 1))) * grad
+                self.grad += (
+                    np.sign(x)
+                    * (np.abs(x) ** (effective_p - 1))
+                    / (norm_keep ** (effective_p - 1))
+                ) * grad
 
         out._backward = _backward
         return out
@@ -709,6 +744,236 @@ class Tensor:
             if self.requires_grad:
                 self.grad += out.grad * 0.5 / np.maximum(out_data, 1e-12)
 
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        """
+        计算元素级的指数 e^x
+        
+        Returns:
+            Tensor: 包含 e^x 的新张量
+        
+        Example:
+            >>> x = Tensor([0, 1, 2])
+            >>> y = x.exp()
+            >>> print(y.data)  # [1., 2.718..., 7.389...]
+        """
+        x = _to_numpy(self.data)
+        out_data = np.exp(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "exp", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                # exp(x) 的导数是 exp(x)
+                self.grad += out.grad * out_data
+
+        out._backward = _backward
+        return out
+
+    def log(self):
+        """
+        计算元素级的自然对数 ln(x)
+        
+        Returns:
+            Tensor: 包含 ln(x) 的新张量
+        
+        Example:
+            >>> x = Tensor([1, 2.718, 7.389])
+            >>> y = x.log()
+            >>> print(y.data)  # [0., 1., 2.]
+        
+        Note:
+            要求 x > 0，对于 x <= 0 的值会产生 NaN 或 -inf
+        """
+        x = _to_numpy(self.data)
+        out_data = np.log(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "log", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                # log(x) 的导数是 1/x
+                # 使用 maximum 避免除以 0
+                self.grad += out.grad / np.maximum(x, 1e-12)
+
+        out._backward = _backward
+        return out
+
+    def log10(self):
+        """
+        计算元素级的常用对数 log10(x)
+        
+        Returns:
+            Tensor: 包含 log10(x) 的新张量
+        
+        Example:
+            >>> x = Tensor([1, 10, 100])
+            >>> y = x.log10()
+            >>> print(y.data)  # [0., 1., 2.]
+        """
+        x = _to_numpy(self.data)
+        out_data = np.log10(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "log10", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                # log10(x) 的导数是 1/(x * ln(10))
+                self.grad += out.grad / (np.maximum(x, 1e-12) * np.log(10))
+
+        out._backward = _backward
+        return out
+
+    def log2(self):
+        """
+        计算元素级的二进制对数 log2(x)
+        
+        Returns:
+            Tensor: 包含 log2(x) 的新张量
+        
+        Example:
+            >>> x = Tensor([1, 2, 4, 8])
+            >>> y = x.log2()
+            >>> print(y.data)  # [0., 1., 2., 3.]
+        """
+        x = _to_numpy(self.data)
+        out_data = np.log2(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "log2", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                # log2(x) 的导数是 1/(x * ln(2))
+                self.grad += out.grad / (np.maximum(x, 1e-12) * np.log(2))
+
+        out._backward = _backward
+        return out
+
+    def sigmoid(self):
+        """Sigmoid 激活函数: σ(x) = 1 / (1 + exp(-x))
+        
+        数据类型安全的实现，避免数值溢出。
+        使用这个技巧: 对于 x > 0，计算 1 / (1 + exp(-x))
+                      对于 x <= 0，计算 exp(x) / (1 + exp(x))
+        
+        梯度: d(sigmoid(x))/dx = sigmoid(x) * (1 - sigmoid(x))
+        
+        示例:
+            >>> x = Tensor([0.0, 1.0, -1.0], requires_grad=True)
+            >>> y = x.sigmoid()
+            >>> print(y.data)  # [0.5, 0.73105858, 0.26894142]
+        """
+        x = _to_numpy(self.data)
+        
+        # 数值稳定实现
+        sigmoid_data = np.where(
+            x >= 0,
+            1.0 / (1.0 + np.exp(-x)),
+            np.exp(x) / (1.0 + np.exp(x))
+        )
+        
+        out = Tensor(sigmoid_data, self.requires_grad, (self,), "sigmoid", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(sigmoid(x))/dx = sigmoid(x) * (1 - sigmoid(x))
+                grad = sigmoid_data * (1 - sigmoid_data)
+                self.grad += out.grad * grad
+        
+        out._backward = _backward
+        return out
+
+    def tanh(self):
+        """Tanh 激活函数: tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
+        
+        在 LSTM 和 RNN 中广泛使用的激活函数。
+        输出范围: (-1, 1)
+        
+        梯度: d(tanh(x))/dx = 1 - tanh²(x)
+        
+        示例:
+            >>> x = Tensor([0.0, 1.0, -1.0], requires_grad=True)
+            >>> y = x.tanh()
+            >>> print(y.data)  # [0.0, 0.76159416, -0.76159416]
+        """
+        x = _to_numpy(self.data)
+        
+        # 使用 numpy 的 tanh 实现（已经数值稳定）
+        tanh_data = np.tanh(x)
+        
+        out = Tensor(tanh_data, self.requires_grad, (self,), "tanh", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(tanh(x))/dx = 1 - tanh²(x)
+                grad = 1.0 - tanh_data ** 2
+                self.grad += out.grad * grad
+        
+        out._backward = _backward
+        return out
+
+    def gelu(self, approximate=False):
+        """GELU (Gaussian Error Linear Unit) 激活函数
+        
+        精确版本: gelu(x) = x * Φ(x) 其中 Φ(x) 是标准高斯 CDF
+        近似版本: gelu(x) ≈ 0.5 * x * (1 + tanh(sqrt(2/π) * (x + 0.044715 * x³)))
+        
+        GELU 在 BERT、GPT 等 Transformer 模型中广泛使用。
+        相比 ReLU，GELU 提供更平滑的激活。
+        
+        参数:
+            approximate (bool): 是否使用快速近似版本（默认：精确版本）
+        
+        梯度: 根据 x * Φ(x) 的链式法则计算
+        
+        示例:
+            >>> x = Tensor([0.0, 1.0, -1.0], requires_grad=True)
+            >>> y = x.gelu()
+            >>> print(y.data)  # 接近 [0.0, 0.8413..., -0.1586...]
+        """
+        x = _to_numpy(self.data)
+        
+        if approximate:
+            # 快速近似: gelu(x) ≈ 0.5*x*(1 + tanh(sqrt(2/π)*(x + 0.044715*x³)))
+            GELU_COEF_A = np.sqrt(2.0 / np.pi)
+            GELU_COEF_B = 0.044715
+            
+            x_cubed = x ** 3
+            tanh_arg = GELU_COEF_A * (x + GELU_COEF_B * x_cubed)
+            gelu_data = 0.5 * x * (1.0 + np.tanh(tanh_arg))
+        else:
+            # 精确版本: gelu(x) = x * Φ(x)
+            # Φ(x) = 0.5 * (1 + erf(x / sqrt(2)))
+            cdf = 0.5 * (1.0 + _scipy_special.erf(x / np.sqrt(2.0)))
+            gelu_data = x * cdf
+        
+        out = Tensor(gelu_data, self.requires_grad, (self,), 
+                     "gelu_approx" if approximate else "gelu", 
+                     device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                if approximate:
+                    # 近似版本的梯度
+                    GELU_COEF_A = np.sqrt(2.0 / np.pi)
+                    GELU_COEF_B = 0.044715
+                    
+                    x_cubed = x ** 3
+                    tanh_arg = GELU_COEF_A * (x + GELU_COEF_B * x_cubed)
+                    tanh_val = np.tanh(tanh_arg)
+                    cosh_arg_sq = 1.0 - tanh_val ** 2
+                    
+                    # d(gelu_approx)/dx = 0.5 * (1 + tanh(...)) + x * 0.5 * cosh²(...)'
+                    sech_sq = cosh_arg_sq  # sech²(x) = 1 - tanh²(x)
+                    factor = GELU_COEF_A * (1.0 + 3.0 * GELU_COEF_B * x ** 2)
+                    grad = 0.5 * (1.0 + tanh_val) + 0.5 * x * sech_sq * factor
+                else:
+                    # 精确版本的梯度: d(x*Φ(x))/dx = Φ(x) + x*φ(x)
+                    # φ(x) = Φ'(x) = (1/sqrt(2π)) * exp(-x²/2)
+                    cdf = 0.5 * (1.0 + _scipy_special.erf(x / np.sqrt(2.0)))
+                    pdf = (1.0 / np.sqrt(2.0 * np.pi)) * np.exp(-x ** 2 / 2.0)
+                    grad = cdf + x * pdf
+                
+                self.grad += out.grad * grad
+        
         out._backward = _backward
         return out
 
@@ -1106,6 +1371,20 @@ class Tensor:
     def index_select(self, dim, index):
         idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
         x = _to_numpy(self.data)
+        dim = dim + x.ndim if dim < 0 else dim
+        if dim < 0 or dim >= x.ndim:
+            raise IndexError(f"index_select: dim {dim} out of range for ndim {x.ndim}")
+        if idx.ndim != 1:
+            raise ValueError("index_select: index must be a 1-D tensor/array")
+        if idx.size > 0:
+            dim_size = x.shape[dim]
+            idx_min = int(np.min(idx))
+            idx_max = int(np.max(idx))
+            if idx_min < -dim_size or idx_max >= dim_size:
+                raise IndexError(
+                    f"index_select: index out of bounds for dim {dim} with size {dim_size} "
+                    f"(min={idx_min}, max={idx_max})"
+                )
         out_data = np.take(x, idx, axis=dim)
         out = Tensor(out_data, self.requires_grad, (self,), "index_select", device=self.device)
 
@@ -1119,6 +1398,32 @@ class Tensor:
                     grad_slice[dim] = i
                     grad[tuple(slicer)] += out.grad[tuple(grad_slice)]
                 self.grad += grad
+
+        out._backward = _backward
+        return out
+
+    def tril(self, diagonal=0):
+        x = _to_numpy(self.data)
+        out_data = np.tril(x, k=diagonal)
+        out = Tensor(out_data, self.requires_grad, (self,), "tril", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                mask = np.tril(np.ones_like(x, dtype=self.grad.dtype), k=diagonal)
+                self.grad += out.grad * mask
+
+        out._backward = _backward
+        return out
+
+    def triu(self, diagonal=0):
+        x = _to_numpy(self.data)
+        out_data = np.triu(x, k=diagonal)
+        out = Tensor(out_data, self.requires_grad, (self,), "triu", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                mask = np.triu(np.ones_like(x, dtype=self.grad.dtype), k=diagonal)
+                self.grad += out.grad * mask
 
         out._backward = _backward
         return out
