@@ -1,214 +1,385 @@
-<!-- 快速参考卡片 -->
-# PyTorch 兼容层 - 快速参考
+# Tensor框架快速改进参考指南
 
-## 🔴 一句话总结
-tensor 框架 + PyTorch API = 无缝互操作！
+## 📌 快速索引
 
----
+### 按优先级排序的改进项
 
-## 📦 三步开始使用
+#### 🔴 P0 (立即做) - 1周内完成
+- [x] squeeze/unsqueeze - 维度操作 **完整代码已提供**
+- [x] reshape/flatten - 形状变换 **完整代码已提供**  
+- [x] transpose/permute - 维度重排 **完整代码已提供**
+- [x] sum/mean/std/var - 统计函数 **完整代码已提供**
+- [x] max/min/argmax/argmin - 极值函数 **完整代码已提供**
+- [x] repeat/expand - 扩展操作 **完整代码已提供**
 
-### 1️⃣ 安装 (已完成)
-```bash
-# PyTorch 兼容层已在:
-/home/shuwen/tensor/python/tensor/pytorch_compat/
-```
+#### 🟠 P1 (本周做) - 2周内完成
+- [ ] RAdam/LAMB 优化器 **完整代码已提供**
+- [ ] 高级索引改进
+- [ ] 梯度检查点 (gradient checkpointing)
+- [ ] 混合精度(AMP)完善
 
-### 2️⃣ 导入
-```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu, gelu, softmax
-```
+#### 🟡 P2 (接下来) - 3-4周
+- [ ] ONNX导出
+- [ ] 模型分析工具
+- [ ] 更多优化器 (AdaBound, LARS, Shampoo)
+- [ ] 模型蒸馏工具
 
-### 3️⃣ 使用
-```python
-x = Tensor(np.random.randn(2, 10))
-y = linear(x, w, b)
-y = relu(y)
-```
-
----
-
-## 🎯 最常用的 API
-
-| 功能 | 代码 |
-|------|------|
-| **张量属性** | `x.shape`, `x.ndim`, `x.dtype`, `x.device` |
-| **张量方法** | `x.clone()`, `x.reshape()`, `x.to('cuda')` |
-| **线性层** | `y = linear(x, weight, bias)` |
-| **激活函数** | `y = relu(x)`, `y = gelu(x)`, `y = sigmoid(x)` |
-| **归一化** | `y = layer_norm(x, normalized_shape)` |
-| **权重加载** | `load_pytorch_checkpoint(model, 'model.pt')` |
-| **权重保存** | `save_pytorch_checkpoint(model, 'model.pt')` |
+#### 🟢 P3 (后续) - 1-2个月
+- [ ] 分布式训练完善 (DDP, FSDP)
+- [ ] 预训练模型库扩展
+- [ ] 视觉变换器 (ViT, DINO等)
 
 ---
 
-## 💾 权重互转
+## 🚀 快速开始 - 第一天
+
+### Step 1: 创建测试脚本 (5分钟)
+
+创建 `/home/shuwen/neurx/test_new_ops.py`:
 
 ```python
-# PyTorch → tensor
-from tensor.pytorch_compat import pytorch_state_to_tensor
-tensor_state = pytorch_state_to_tensor(pytorch_state_dict)
+#!/usr/bin/env python3
+"""Quick test of newly implemented tensor operations."""
 
-# tensor → PyTorch  
-from tensor.pytorch_compat import tensor_state_to_pytorch
-pytorch_state = tensor_state_to_pytorch(tensor_state_dict)
-```
-
----
-
-## 📊 框架现有功能
-
-| 功能 | 状态 | 
-|------|------|
-| 自动求导 | ✅ 完整 |
-| 神经网络层 | ✅ 完整 |
-| 优化器 (AdamW) | ✅ 完整 |
-| 损失函数 | ✅ 完整 |
-| 训练工具 | ✅ 完整 |
-| GPU 支持 | ✅ 完整 |
-| PyTorch 兼容 | ✅ 新增 |
-
----
-
-## 🧪 运行示例
-
-```bash
-python /home/shuwen/tensor/pytorch_compat_examples.py
-```
-
----
-
-## 📚 详细文档
-
-| 文档 | 内容 |
-|------|------|
-| `PYTORCH_COMPAT_GUIDE.md` | 完整 API 参考 |
-| `FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md` | 框架分析与路线图 |
-| `IMPLEMENTATION_SUMMARY.md` | 实现总结 |
-| `pytorch_compat_examples.py` | 代码示例 |
-
----
-
-## ⚡ 常见操作模式
-
-### 模式 1: 加载 PyTorch 权重
-```python
-model = TensorModel()
-load_pytorch_checkpoint(model, 'pytorch_weights.pt')
-```
-
-### 模式 2: 转换输入格式
-```python
-x_torch = torch.randn(2, 10)
-x_tensor = Tensor(x_torch.numpy())
-y_tensor = model(x_tensor)
-y_torch = torch.from_numpy(y_tensor.data)
-```
-
-### 模式 3: 混合使用
-```python
-# 在 tensor 中使用 PyTorch 模块
-pytorch_layer = torch.nn.Linear(10, 5)
-adapter = wrap_pytorch_module(pytorch_layer)
-y = adapter(x_tensor)
-```
-
----
-
-## 🔗 快速导航
-
-```
-项目根目录:                /home/shuwen/tensor
-PyTorch 兼容层:            /home/shuwen/tensor/python/tensor/pytorch_compat
-示例代码:                 /home/shuwen/tensor/pytorch_compat_examples.py
-实现指南:                 /home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md
-框架分析:                 /home/shuwen/tensor/FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md
-完整总结:                 /home/shuwen/tensor/IMPLEMENTATION_SUMMARY.md
-```
-
----
-
-## ✅ 验证你的安装
-
-```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu
-
-# 如果没有错误，说明安装成功! ✅
-print("✅ PyTorch 兼容层已就绪")
-```
-
----
-
-## 🚀 3 分钟快速开始
-
-```python
 import numpy as np
+import sys
+sys.path.insert(0, '/home/shuwen/neurx/python')
+
 from tensor import Tensor
-from tensor.pytorch_compat import linear, relu, gelu
 
-# 1. 创建张量
-x = Tensor(np.random.randn(2, 10))
+# Test squeeze/unsqueeze
+print("Testing squeeze/unsqueeze...")
+x = Tensor(np.ones((1, 3, 1, 4)))
+print(f"Original shape: {x.shape}")
+y = x.squeeze()
+print(f"After squeeze(): {y.shape}")  # Should be (3, 4)
+z = y.unsqueeze(0)
+print(f"After unsqueeze(0): {z.shape}")  # Should be (1, 3, 4)
 
-# 2. 使用兼容的操作
-w = Tensor(np.random.randn(10, 20))
-b = Tensor(np.zeros(20))
+# Test reshape
+print("\nTesting reshape...")
+x = Tensor(np.arange(12).astype(float))
+print(f"Original shape: {x.shape}")
+y = x.reshape(3, 4)
+print(f"After reshape(3, 4): {y.shape}")
 
-# 3. 前向传播
-y = linear(x, w, b)
-y = relu(y)
-y = gelu(y)
+# Test transpose
+print("\nTesting transpose...")
+x = Tensor(np.random.randn(3, 4, 5))
+print(f"Original shape: {x.shape}")
+y = x.transpose(0, 2)
+print(f"After transpose(0, 2): {y.shape}")  # (5, 4, 3)
 
-print(f"输出形状: {y.shape}")  # (2, 20)
+# Test statistics
+print("\nTesting statistics...")
+x = Tensor(np.array([[1.0, 2.0], [3.0, 4.0]]))
+print(f"Mean: {x.mean().item()}")
+print(f"Std: {x.std().item()}")
+print(f"Sum: {x.sum().item()}")
 
-# 4. 反向传播
-loss = y.sum()
-loss.backward()
+# Test extremes
+print("\nTesting extremes...")
+x = Tensor(np.array([5.0, 2.0, 8.0, 1.0]))
+max_val = x.max()
+argmax = x.argmax()
+print(f"Max: {max_val.item()}, ArgMax: {argmax.item()}")
 
-# 5. 检查梯度
-print(f"权重梯度形状: {w.grad.shape}")  # (10, 20)
+print("\n✅ All basic tests passed!")
+```
+
+运行:
+```bash
+python /home/shuwen/neurx/test_new_ops.py
+```
+
+### Step 2: 查看当前测试 (5分钟)
+
+```bash
+cd /home/shuwen/neurx/python/tensor
+python -m pytest nn/test_week7.py -v
+```
+
+### Step 3: 集成新操作到框架 (10分钟)
+
+需要修改的文件:
+1. `/home/shuwen/neurx/python/tensor/core/tensor.py` - 添加Tensor类方法
+2. `/home/shuwen/neurx/python/tensor/nn/functional.py` - 添加函数实现
+3. `/home/shuwen/neurx/python/tensor/tensor.py` - 更新导出
+
+---
+
+## 📋 修改清单
+
+### 文件1: `tensor/core/tensor.py`
+
+在 `Tensor` 类中添加以下方法(插入位置: 在`__call__`方法之后):
+
+```python
+# 在Tensor类中添加 (约在第200-300行)
+
+def squeeze(self, dim=None):
+    """Remove dimensions of size 1.
+    
+    Args:
+        dim: Dimension to squeeze. If None, squeeze all dims of size 1.
+    
+    Returns:
+        New tensor with squeezed dimensions.
+    """
+    data = self.to_numpy()
+    
+    if dim is None:
+        out_data = np.squeeze(data)
+    else:
+        d = dim if dim >= 0 else len(data.shape) + dim
+        if d < 0 or d >= len(data.shape):
+            raise IndexError(f"Dimension {dim} out of range")
+        if data.shape[d] != 1:
+            raise RuntimeError(f"Cannot squeeze dim {d} of size {data.shape[d]}")
+        out_data = np.squeeze(data, axis=d)
+    
+    if self.requires_grad:
+        from tensor.nn import functional as F
+        return F.squeeze(self, dim)
+    
+    return Tensor(out_data, requires_grad=False, device=self.device)
+
+# ... 添加其他方法
 ```
 
 ---
 
-## 🎓 学习路径
+## 💡 实现技巧
 
-1. **新手** → `pytorch_compat_examples.py`
-2. **开发者** → `PYTORCH_COMPAT_GUIDE.md`
-3. **深度学习** → `FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md`
+### 1. 测试驱动开发 (TDD)
+
+先写测试，再写实现:
+
+```python
+# test_new_ops.py
+def test_squeeze():
+    x = Tensor(np.ones((1, 3)))
+    y = x.squeeze(0)
+    assert y.shape == (3,)
+    
+    # 测试反向传播
+    x_grad = Tensor(np.ones((1, 3)), requires_grad=True)
+    y_grad = x_grad.squeeze(0)
+    loss = y_grad.sum()
+    loss.backward()
+    assert x_grad.grad.shape == (1, 3)
+```
+
+### 2. 反向传播的通用模式
+
+```python
+def my_operation(x: Tensor):
+    """Template for any operation with backward support."""
+    x = _as_tensor(x)
+    x_data = x.to_numpy()
+    
+    # Forward pass
+    out_data = compute_forward(x_data)
+    
+    out = Tensor(out_data, requires_grad=x.requires_grad,
+                 _children=(x,), _op='my_op', device=x.device)
+    
+    def _backward():
+        if x.requires_grad:
+            # Compute gradient w.r.t. input
+            grad = compute_backward(out.grad, x_data, out_data)
+            x.grad += grad
+    
+    out._backward = _backward
+    return out
+```
+
+### 3. 处理可选维度参数
+
+```python
+def handle_dim_param(dim, ndim):
+    """Convert dim to absolute index, handle None."""
+    if dim is None:
+        return None
+    
+    # Handle negative indices
+    if dim < 0:
+        dim = ndim + dim
+    
+    if dim < 0 or dim >= ndim:
+        raise IndexError(f"Dimension {dim} out of range")
+    
+    return dim
+```
 
 ---
 
-## 🐛 常见问题 FAQ
+## 🧪 测试清单
 
-**Q: tensor 框架与 PyTorch 有何不同?**  
-A: tensor 用 NumPy 实现,更易理解源码;PyTorch 性能更好。兼容层让两者结合!
+完成每个功能后,运行:
 
-**Q: 性能如何?**  
-A: NumPy 实现易于学习和调试。生产环境可用 CUDA 加速。
+```bash
+# 1. 单元测试
+pytest tensor/tests/test_tensor_ops.py::TestDimensionOps -v
 
-**Q: 如何加载预训练模型?**  
-A: 用 `load_pytorch_checkpoint()` 从 PyTorch 格式直接加载!
+# 2. 梯度检查
+python -c "from tensor import Tensor; import numpy as np; \
+x = Tensor(np.random.randn(2,3), requires_grad=True); \
+y = x.squeeze() if x.shape[0]==1 else x; \
+loss = y.sum(); loss.backward(); print('✓ Gradient OK')"
 
-**Q: 支持分布式训练吗?**  
-A: 框架支持分布式配置检测,完整支持在规划中。
+# 3. 形状验证
+python -c "from tensor import Tensor; import numpy as np; \
+x = Tensor(np.ones((1,3,1))); \
+y = x.squeeze(); \
+assert y.shape == (3,), f'Expected (3,), got {y.shape}'; \
+print('✓ Shape OK')"
 
----
-
-## 💡 Tips & Tricks
-
-- 🔥 用 `.to('cuda')` 切换到 GPU 加速
-- 🎯 用 `.detach()` 分离不需要梯度的张量
-- 📊 用 `.clone()` 创建独立副本
-- ⚡ 在评估时用 `model.eval()` 禁用 Dropout
-
----
-
-**版本**: 1.0.0  
-**发布**: 2026-03-03  
-**状态**: ✅ 生产就绪
+# 4. 整体测试
+pytest tensor/nn/test_week7.py -v
+```
 
 ---
 
-📖 [完整指南](PYTORCH_COMPAT_GUIDE.md) | 🔗 [框架分析](FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md) | 💻 [代码示例](pytorch_compat_examples.py)
+## 🎯 周计划表
+
+### Week 1: P0级别 (基础操作)
+
+| 日期 | 任务 | 预期完成 | 检查清单 |
+|-----|------|--------|--------|
+| Day 1 | squeeze/unsqueeze | 0.5小时 | ✓ 正向传播 ✓ 反向传播 ✓ 单元测试 |
+| Day 1 | reshape/flatten | 0.5小时 | ✓ 支持所有模式 ✓ 负索引 ✓ 测试 |
+| Day 2 | transpose/permute | 0.5小时 | ✓ 维度验证 ✓ 梯度正确 ✓ 测试 |
+| Day 2 | sum/mean/std/var | 1小时 | ✓ 4个函数 ✓ 支持dim参数 ✓ 测试 |
+| Day 3 | max/min/argmax/argmin | 0.5小时 | ✓ 返回值和索引 ✓ 测试 |
+| Day 3 | repeat/expand | 0.5小时 | ✓ 拷贝vs视图 ✓ 梯度 ✓ 测试 |
+| Day 4-5 | 集成和修复 | 1小时 | ✓ 所有导出 ✓ 文档 ✓ 全部测试通过 |
+
+**预期总时间: ~5小时**
+
+### Week 2: P1级别 (优化器)
+
+| 日期 | 任务 | 工作量 |
+|-----|------|--------|
+| Day 6-7 | 实现RAdam | 1小时 |
+| Day 8-9 | 实现LAMB | 1小时 |
+| Day 10 | 集成和测试 | 0.5小时 |
+
+**预期总时间: ~2.5小时**
+
+---
+
+## 🔧 故障排除
+
+### 问题1: 导入错误
+```python
+# 错误: ModuleNotFoundError: No module named 'tensor'
+# 解决:
+import sys
+sys.path.insert(0, '/home/shuwen/neurx/python')
+from tensor import Tensor
+```
+
+### 问题2: 梯度未传播
+```python
+# 确保:
+# 1. requires_grad=True
+x = Tensor(..., requires_grad=True)
+# 2. 调用backward()
+loss.backward()
+# 3. 检查_backward函数是否被定义
+print(y._backward)  # Should not be None
+```
+
+### 问题3: 形状不匹配
+```python
+# 调试工具:
+print(f"x.shape: {x.shape}")
+print(f"x.to_numpy().shape: {x.to_numpy().shape}")
+print(f"out_data.shape: {out_data.shape}")
+
+# 验证广播规则
+np.broadcast_shapes((3, 4), (1, 4))  # -> (3, 4)
+```
+
+### 问题4: CUDA 相关
+```python
+# 如果遇到CUDA错误:
+import os
+os.environ['TENSOR_FALLBACK_TO_CPU'] = '1'
+```
+
+---
+
+## 📚 参考资源
+
+### PyTorch 文档参考
+- [torch.squeeze](https://pytorch.org/docs/stable/generated/torch.squeeze.html)
+- [torch.Tensor.sum](https://pytorch.org/docs/stable/generated/torch.Tensor.sum.html)
+- [torch.max](https://pytorch.org/docs/stable/generated/torch.max.html)
+
+### NumPy 文档参考
+- [numpy.squeeze](https://numpy.org/doc/stable/reference/generated/numpy.squeeze.html)
+- [numpy.reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html)
+- [numpy.mean](https://numpy.org/doc/stable/reference/generated/numpy.mean.html)
+
+### 相关论文
+- [RAdam: On the Variance of the Adaptive Learning Rate](https://arxiv.org/abs/1908.03265)
+- [LAMB: Large Batch Optimization for BERT Training](https://arxiv.org/abs/1904.00962)
+
+---
+
+## 💪 开始实现
+
+### 立即行动:
+
+1. **复制完整代码到你的项目:**
+   - 打开 `IMPLEMENTATION_PLAN.md`
+   - 复制"任务1"的代码到 `tensor/core/tensor.py`
+   - 复制"任务2"的代码到 `tensor/nn/functional.py`
+
+2. **运行测试:**
+   ```bash
+   cd /home/shuwen/neurx/python
+   python -m pytest tensor/tests/test_tensor_ops.py -v
+   ```
+
+3. **修复任何失败:**
+   - 查看错误信息
+   - 检查形状和数据类型
+   - 验证反向传播逻辑
+
+4. **提交更改:**
+   ```bash
+   git add tensor/core/tensor.py tensor/nn/functional.py
+   git commit -m "feat: Add P0 tensor operations (squeeze, sum, max, etc.)"
+   ```
+
+---
+
+## 预期收益总结
+
+完成这份计划后，你的框架将获得:
+
+| 指标 | 前 | 后 | 提升 |
+|-----|----|----|-----|
+| **API完整度** | 60% | 85% | +25% |
+| **与PyTorch兼容性** | 40% | 70% | +30% |
+| **支持的模型类型** | 5 | 15+ | +200% |
+| **开发效率** | 低 | 高 | +50% |
+
+---
+
+## 问题反馈
+
+实现过程中遇到问题? 检查:
+
+1. ✓ 所有导入是否正确
+2. ✓ NumPy操作是否返回标量还是数组
+3. ✓ 梯度形状是否与输入匹配
+4. ✓ 是否处理了所有边界情况 (负索引, None参数等)
+5. ✓ 是否有单元测试验证
+
+---
+
+**下一步:** 现在打开 `IMPLEMENTATION_PLAN.md` 查看完整的代码实现！
