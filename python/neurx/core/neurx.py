@@ -1167,6 +1167,12 @@ class Tensor:
     def to_numpy(self):
         return _to_numpy(self.data)
 
+    def __array__(self, dtype=None):
+        arr = self.to_numpy()
+        if dtype is not None:
+            return arr.astype(dtype, copy=False)
+        return arr
+
     def numpy(self):
         return self.to_numpy()
 

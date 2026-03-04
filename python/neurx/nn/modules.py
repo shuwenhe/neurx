@@ -2151,7 +2151,8 @@ class BatchNorm1d(Module):
         if x_data.ndim not in (2, 3):
             raise ValueError(f"BatchNorm1d expects 2D or 3D input, got {x_data.ndim}D")
 
-        bn_training = self.training or not self.track_running_stats
+        # When track_running_stats=False, always use batch statistics
+        bn_training = self.training if self.track_running_stats else True
         if self.training and self.track_running_stats and self.num_batches_tracked is not None:
             self.num_batches_tracked += 1
 
@@ -2203,7 +2204,8 @@ class BatchNorm2d(Module):
         if x_data.ndim != 4:
             raise ValueError(f"BatchNorm2d expects 4D input, got {x_data.ndim}D")
 
-        bn_training = self.training or not self.track_running_stats
+        # When track_running_stats=False, always use batch statistics
+        bn_training = self.training if self.track_running_stats else True
         if self.training and self.track_running_stats and self.num_batches_tracked is not None:
             self.num_batches_tracked += 1
 

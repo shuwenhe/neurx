@@ -58,12 +58,20 @@ class RNNCell(Module):
         Apply RNN cell.
         
         Args:
-            x (Tensor): Input of shape (batch_size, input_size)
-            h_prev (Optional[Tensor]): Previous hidden state of shape (batch_size, hidden_size)
+            x (Tensor): Input of shape (batch_size, input_size) or (input_size,)
+            h_prev (Optional[Tensor]): Previous hidden state of shape (batch_size, hidden_size) or (hidden_size,)
         
         Returns:
-            Tensor: Hidden state of shape (batch_size, hidden_size)
+            Tensor: Hidden state of shape (batch_size, hidden_size) or (hidden_size,)
         """
+        # Handle unbatched input
+        unbatched = False
+        if x.ndim == 1:
+            unbatched = True
+            x = Tensor(x.data[np.newaxis, :], requires_grad=x.requires_grad)
+            if h_prev is not None:
+                h_prev = Tensor(h_prev.data[np.newaxis, :], requires_grad=h_prev.requires_grad)
+        
         batch_size = x.shape[0]
         
         # Initialize hidden state if not provided
@@ -81,6 +89,10 @@ class RNNCell(Module):
         
         h = np.tanh(gi + gh)
         h = Tensor(h, requires_grad=True)
+        
+        # Remove batch dimension if input was unbatched
+        if unbatched:
+            h = Tensor(h.data[0], requires_grad=True)
         
         return h
 
@@ -301,7 +313,11 @@ class RNN(Module):
         self.weight_names = {}
         
         for layer in range(num_layers):
-            layer_input_size = input_size if layer == 0 else hidden_size
+            # For layer > 0, if bidirectional, input size should be 2 * hidden_size
+            if layer == 0:
+                layer_input_size = input_size
+            else:
+                layer_input_size = hidden_size * (2 if bidirectional else 1)
             
             # Forward direction
             cell = RNNCell(layer_input_size, hidden_size, bias=bias)
@@ -440,7 +456,7 @@ class LSTM(Module):
         self.cells = []
         
         for layer in range(num_layers):
-            layer_input_size = input_size if layer == 0 else hidden_size
+            layer_input_size = input_size if layer == 0 else (hidden_size * (2 if bidirectional else 1))
             
             cell = LSTMCell(layer_input_size, hidden_size, bias=bias)
             self.cells.append(cell)
@@ -582,7 +598,7 @@ class GRU(Module):
         self.cells = []
         
         for layer in range(num_layers):
-            layer_input_size = input_size if layer == 0 else hidden_size
+            layer_input_size = input_size if layer == 0 else (hidden_size * (2 if bidirectional else 1))
             
             cell = GRUCell(layer_input_size, hidden_size, bias=bias)
             self.cells.append(cell)

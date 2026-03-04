@@ -94,12 +94,14 @@ def sigmoid(x):
         array: Output with sigmoid applied (values in [0, 1])
     """
     x = np.asarray(x)
-    # Numerical stability: handle large values
-    return np.where(
-        x >= 0,
-        1 / (1 + np.exp(-x)),
-        np.exp(x) / (1 + np.exp(x))
-    )
+    out = np.empty_like(x, dtype=np.result_type(x, np.float64))
+    pos = x >= 0
+    neg = ~pos
+
+    out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
+    exp_x = np.exp(x[neg])
+    out[neg] = exp_x / (1.0 + exp_x)
+    return out
 
 
 def tanh(x):

@@ -8,6 +8,7 @@ This file tests:
 """
 import sys
 import numpy as np
+import pytest
 
 try:
     import neurx
@@ -73,7 +74,6 @@ def test_einsum():
     print(f"   ✅ PASS")
     
     print("\n✅ All einsum tests passed!")
-    return True
 
 
 def test_vision_transforms():
@@ -85,8 +85,7 @@ def test_vision_transforms():
     try:
         from PIL import Image
     except ImportError:
-        print("⚠️  PIL not installed, skipping vision tests")
-        return False
+        pytest.skip("PIL not installed, skipping vision tests")
     
     # Create a dummy image
     dummy_img = np.random.randint(0, 255, (256, 256, 3), dtype=np.uint8)
@@ -144,7 +143,6 @@ def test_vision_transforms():
     print(f"   ✅ PASS")
     
     print("\n✅ All vision transform tests passed!")
-    return True
 
 
 def test_resnet_models():
@@ -171,7 +169,7 @@ def test_resnet_models():
         print(f"   ❌ FAIL: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        pytest.fail(f"ResNet-18 test failed: {e}")
     
     # Test ResNet-34
     print("\n2. ResNet-34 instantiation")
@@ -181,7 +179,7 @@ def test_resnet_models():
         print(f"   ✅ PASS")
     except Exception as e:
         print(f"   ❌ FAIL: {e}")
-        return False
+        pytest.fail(f"ResNet-34 test failed: {e}")
     
     # Test ResNet-50
     print("\n3. ResNet-50 instantiation")
@@ -191,10 +189,9 @@ def test_resnet_models():
         print(f"   ✅ PASS")
     except Exception as e:
         print(f"   ❌ FAIL: {e}")
-        return False
+        pytest.fail(f"ResNet-50 test failed: {e}")
     
     print("\n✅ All ResNet model tests passed!")
-    return True
 
 
 def main():
@@ -206,9 +203,23 @@ def main():
     results = {}
     
     # Run tests
-    results['einsum'] = test_einsum()
-    results['vision_transforms'] = test_vision_transforms()
-    results['resnet_models'] = test_resnet_models()
+    try:
+        test_einsum()
+        results['einsum'] = True
+    except Exception:
+        results['einsum'] = False
+
+    try:
+        test_vision_transforms()
+        results['vision_transforms'] = True
+    except Exception:
+        results['vision_transforms'] = False
+
+    try:
+        test_resnet_models()
+        results['resnet_models'] = True
+    except Exception:
+        results['resnet_models'] = False
     
     # Summary
     print("\n" + "="*60)

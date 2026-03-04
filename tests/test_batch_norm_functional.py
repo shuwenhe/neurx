@@ -82,14 +82,14 @@ def test_batchnorm1d_module_updates_buffers_and_state_dict_consistent():
     y = bn(x)
     y.sum().backward()
 
-    assert np.linalg.norm(bn.running_mean) > 0
-    assert np.linalg.norm(bn.running_var - np.ones(4)) > 0
+    assert np.linalg.norm(bn.running_mean.data) > 0
+    assert np.linalg.norm(bn.running_var.data - np.ones(4)) > 0
 
     state = bn.state_dict()
     assert "running_mean" in state
     assert "running_var" in state
-    assert np.allclose(state["running_mean"], bn.running_mean)
-    assert np.allclose(state["running_var"], bn.running_var)
+    assert np.allclose(state["running_mean"], bn.running_mean.data)
+    assert np.allclose(state["running_var"], bn.running_var.data)
 
 
 def test_batchnorm1d_track_running_stats_false_uses_batch_stats_in_eval():
