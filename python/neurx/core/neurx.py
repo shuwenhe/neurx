@@ -723,6 +723,47 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def sign(self):
+        x = _to_numpy(self.data)
+        out = Tensor(np.sign(x), self.requires_grad, (self,), "sign", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += np.zeros_like(x, dtype=self.grad.dtype)
+
+        out._backward = _backward
+        return out
+
+    def clamp(self, min=None, max=None):
+        if min is None and max is None:
+            raise ValueError("clamp: at least one of min/max must be specified")
+
+        min_val = min.item() if isinstance(min, Tensor) and min.shape == () else min
+        max_val = max.item() if isinstance(max, Tensor) and max.shape == () else max
+
+        x = _to_numpy(self.data)
+        out_data = x
+        if min_val is not None:
+            out_data = np.maximum(out_data, min_val)
+        if max_val is not None:
+            out_data = np.minimum(out_data, max_val)
+        out = Tensor(out_data, self.requires_grad, (self,), "clamp", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                mask = np.ones_like(x, dtype=self.grad.dtype)
+                if min_val is not None:
+                    mask = mask * (x >= min_val)
+                if max_val is not None:
+                    mask = mask * (x <= max_val)
+                self.grad += out.grad * mask
+
+        out._backward = _backward
+        return out
+
+    def clip(self, min=None, max=None):
+        return self.clamp(min=min, max=max)
+
     def sin(self):
         x = _to_numpy(self.data)
         out = Tensor(np.sin(x), self.requires_grad, (self,), "sin", device=self.device)
@@ -757,8 +798,90 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def softmax(self, dim=-1):
+        x = _to_numpy(self.data)
+        dim = dim + x.ndim if dim < 0 else dim
+        x_shifted = x - np.max(x, axis=dim, keepdims=True)
+        exp_x = np.exp(x_shifted)
+        out_data = exp_x / np.sum(exp_x, axis=dim, keepdims=True)
+        out = Tensor(out_data, self.requires_grad, (self,), "softmax", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                g = out.grad
+                y = out_data
+                self.grad += y * (g - np.sum(g * y, axis=dim, keepdims=True))
+
+        out._backward = _backward
+        return out
+
+    def log_softmax(self, dim=-1):
+        x = _to_numpy(self.data)
+        dim = dim + x.ndim if dim < 0 else dim
+        x_shifted = x - np.max(x, axis=dim, keepdims=True)
+        logsumexp = np.log(np.sum(np.exp(x_shifted), axis=dim, keepdims=True))
+        out_data = x_shifted - logsumexp
+        out = Tensor(out_data, self.requires_grad, (self,), "log_softmax", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                g = out.grad
+                y = np.exp(out_data)
+                self.grad += g - y * np.sum(g, axis=dim, keepdims=True)
+
+        out._backward = _backward
+        return out
+
+    def _normalize_index(self, index):
+        if isinstance(index, Tensor):
+            arr = index.to_numpy()
+            if arr.dtype == np.bool_:
+                return arr.astype(bool, copy=False)
+            if np.issubdtype(arr.dtype, np.floating):
+                if np.all(np.isfinite(arr)) and np.all(arr == np.floor(arr)):
+                    return arr.astype(np.int64, copy=False)
+                raise IndexError("Tensor float indices are invalid; use integer-valued indices or boolean mask")
+            return arr.astype(np.int64, copy=False)
+        if isinstance(index, tuple):
+            return tuple(self._normalize_index(i) for i in index)
+        if isinstance(index, list):
+            return [self._normalize_index(i) for i in index]
+        return index
+
+    def _coerce_mask_like(self, index, shape):
+        def maybe_mask(arr, axis):
+            if (
+                isinstance(arr, np.ndarray)
+                and np.issubdtype(arr.dtype, np.integer)
+                and arr.ndim == 1
+                and axis < len(shape)
+                and arr.shape[0] == shape[axis]
+                and np.all((arr == 0) | (arr == 1))
+            ):
+                return arr.astype(bool, copy=False)
+            return arr
+
+        if isinstance(index, tuple):
+            result = []
+            axis = 0
+            explicit = sum(1 for item in index if item is not Ellipsis and item is not None)
+            for item in index:
+                if item is None:
+                    result.append(item)
+                    continue
+                if item is Ellipsis:
+                    remaining = len(shape) - explicit
+                    axis += max(remaining, 0)
+                    result.append(item)
+                    continue
+                result.append(maybe_mask(item, axis))
+                axis += 1
+            return tuple(result)
+        return maybe_mask(index, 0)
+
     def __getitem__(self, idx):
         x = _to_numpy(self.data)
+        idx = self._coerce_mask_like(self._normalize_index(idx), x.shape)
         out = Tensor(x[idx], self.requires_grad, (self,), "getitem", device=self.device)
 
         def _backward():
@@ -770,9 +893,39 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def __setitem__(self, idx, value):
+        x = _to_numpy(self.data).copy()
+        idx = self._coerce_mask_like(self._normalize_index(idx), x.shape)
+        value_data = _to_numpy(value.data) if isinstance(value, Tensor) else value
+        try:
+            x[idx] = value_data
+        except (ValueError, IndexError, TypeError) as exc:
+            raise ValueError(
+                f"setitem assignment failed for index {idx}: cannot assign value with shape "
+                f"{np.shape(value_data)}"
+            ) from exc
+        self.data = _to_data_on_device(x, self.device)
+
     def gather(self, dim, index):
         idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
         x = _to_numpy(self.data)
+        dim = dim + x.ndim if dim < 0 else dim
+        if dim < 0 or dim >= x.ndim:
+            raise IndexError(f"gather: dim {dim} out of range for ndim {x.ndim}")
+        if idx.ndim != x.ndim:
+            raise ValueError("gather: index must have the same number of dimensions as input")
+        for axis in range(x.ndim):
+            if axis != dim and idx.shape[axis] != x.shape[axis]:
+                raise ValueError("gather: index shape must match input shape on non-gather dimensions")
+        if idx.size > 0:
+            dim_size = x.shape[dim]
+            idx_min = int(np.min(idx))
+            idx_max = int(np.max(idx))
+            if idx_min < 0 or idx_max >= dim_size:
+                raise IndexError(
+                    f"gather: index out of bounds for dim {dim} with size {dim_size} "
+                    f"(min={idx_min}, max={idx_max})"
+                )
         out_data = np.take_along_axis(x, idx, axis=dim)
         out = Tensor(out_data, self.requires_grad, (self,), "gather", device=self.device)
 
@@ -789,11 +942,62 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def take_along_dim(self, indices, dim=-1):
+        return self.gather(dim, indices)
+
     def scatter(self, dim, index, src):
+        """
+        Replaces values in self at the indices specified by index along dimension dim with src.
+        
+        Args:
+            dim: Dimension along which to scatter
+            index: Indices to scatter to (should have same shape as src)
+            src: Source tensor with values to scatter
+        
+        Returns:
+            New tensor with scattered values
+        
+        Raises:
+            IndexError: If dim is out of range or indices are out of bounds
+            ValueError: If shapes don't match
+        """
         idx = index.to_numpy().astype(np.int64) if isinstance(index, Tensor) else np.asarray(index, dtype=np.int64)
         src_t = src if isinstance(src, Tensor) else Tensor(src, device=self.device)
         x = _to_numpy(self.data)
         src_data = _to_numpy(src_t.data)
+        
+        # Validate dimensions
+        dim = dim + x.ndim if dim < 0 else dim
+        if dim < 0 or dim >= x.ndim:
+            raise IndexError(f"scatter: dim {dim} out of range for ndim {x.ndim}")
+        
+        # Validate shapes
+        if idx.ndim != src_data.ndim:
+            raise ValueError(f"scatter: index must have same number of dimensions as src, got {idx.ndim} vs {src_data.ndim}")
+        if idx.shape != src_data.shape:
+            raise ValueError(f"scatter: index shape {idx.shape} must match src shape {src_data.shape}")
+        
+        # Validate non-scatter dimensions
+        for axis in range(x.ndim):
+            if axis != dim:
+                if axis < len(idx.shape) and axis < len(x.shape):
+                    if idx.shape[axis] != x.shape[axis]:
+                        raise ValueError(
+                            f"scatter: index shape mismatch at dim {axis}: "
+                            f"got {idx.shape[axis]}, expected {x.shape[axis]}"
+                        )
+        
+        # Validate index bounds
+        if idx.size > 0:
+            dim_size = x.shape[dim]
+            idx_min = int(np.min(idx))
+            idx_max = int(np.max(idx))
+            if idx_min < -dim_size or idx_max >= dim_size:
+                raise IndexError(
+                    f"scatter: index out of bounds for dim {dim} with size {dim_size} "
+                    f"(min={idx_min}, max={idx_max})"
+                )
+        
         out_data = x.copy()
         np.put_along_axis(out_data, idx, src_data, axis=dim)
         out = Tensor(out_data, self.requires_grad or src_t.requires_grad, (self, src_t), "scatter", device=self.device)
@@ -819,10 +1023,14 @@ class Tensor:
         Args:
             dim: Dimension along which to index
             index: Indices to scatter to (should have same shape as src)
-            src: Source neurx with values to add
+            src: Source tensor with values to add
         
         Returns:
-            New neurx with scattered additions
+            New tensor with scattered additions
+        
+        Raises:
+            IndexError: If dim is out of range or indices are out of bounds
+            ValueError: If shapes don't match
         
         Example:
             >>> t = neurx.ones((3, 5))
@@ -834,8 +1042,40 @@ class Tensor:
         src_t = src if isinstance(src, Tensor) else Tensor(src, device=self.device)
         x = _to_numpy(self.data)
         src_data = _to_numpy(src_t.data)
-        out_data = x.copy()
+        
+        # Validate dimensions
         dim = dim + x.ndim if dim < 0 else dim
+        if dim < 0 or dim >= x.ndim:
+            raise IndexError(f"scatter_add: dim {dim} out of range for ndim {x.ndim}")
+        
+        # Validate shapes
+        if idx.ndim != src_data.ndim:
+            raise ValueError(f"scatter_add: index must have same number of dimensions as src, got {idx.ndim} vs {src_data.ndim}")
+        if idx.shape != src_data.shape:
+            raise ValueError(f"scatter_add: index shape {idx.shape} must match src shape {src_data.shape}")
+        
+        # Validate non-scatter dimensions
+        for axis in range(x.ndim):
+            if axis != dim:
+                if axis < len(idx.shape) and axis < len(x.shape):
+                    if idx.shape[axis] != x.shape[axis]:
+                        raise ValueError(
+                            f"scatter_add: index shape mismatch at dim {axis}: "
+                            f"got {idx.shape[axis]}, expected {x.shape[axis]}"
+                        )
+        
+        # Validate index bounds
+        if idx.size > 0:
+            dim_size = x.shape[dim]
+            idx_min = int(np.min(idx))
+            idx_max = int(np.max(idx))
+            if idx_min < -dim_size or idx_max >= dim_size:
+                raise IndexError(
+                    f"scatter_add: index out of bounds for dim {dim} with size {dim_size} "
+                    f"(min={idx_min}, max={idx_max})"
+                )
+        
+        out_data = x.copy()
 
         moved_out = np.moveaxis(out_data, dim, -1)
         moved_idx = np.moveaxis(idx, dim, -1)
@@ -926,6 +1166,74 @@ class Tensor:
                 for axis in reversed(range(0, 2 * len(reps), 2)):
                     grad = grad.sum(axis=axis)
                 self.grad += grad.reshape(self.shape)
+
+        out._backward = _backward
+        return out
+
+    def tile(self, dims):
+        return self.repeat(dims)
+
+    def flip(self, dims):
+        x = _to_numpy(self.data)
+        if isinstance(dims, int):
+            dims = (dims,)
+        elif isinstance(dims, list):
+            dims = tuple(dims)
+        if not isinstance(dims, tuple):
+            raise TypeError("flip: dims must be int/tuple/list")
+
+        norm_dims = []
+        for dim in dims:
+            dim = dim + x.ndim if dim < 0 else dim
+            if dim < 0 or dim >= x.ndim:
+                raise IndexError(f"flip: dim {dim} out of range for ndim {x.ndim}")
+            norm_dims.append(dim)
+        norm_dims = tuple(norm_dims)
+
+        out = Tensor(np.flip(x, axis=norm_dims), self.requires_grad, (self,), "flip", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += np.flip(out.grad, axis=norm_dims)
+
+        out._backward = _backward
+        return out
+
+    def roll(self, shifts, dims=None):
+        x = _to_numpy(self.data)
+
+        if dims is None:
+            out_data = np.roll(x, shifts)
+            out = Tensor(out_data, self.requires_grad, (self,), "roll", device=self.device)
+
+            def _backward():
+                if self.requires_grad:
+                    self.grad += np.roll(out.grad, -shifts)
+
+            out._backward = _backward
+            return out
+
+        if isinstance(dims, int):
+            dims = (dims,)
+        elif isinstance(dims, list):
+            dims = tuple(dims)
+        if isinstance(shifts, int):
+            shifts = (shifts,)
+        elif isinstance(shifts, list):
+            shifts = tuple(shifts)
+
+        if not isinstance(dims, tuple) or not isinstance(shifts, tuple):
+            raise TypeError("roll: shifts/dims must be int/tuple/list")
+        if len(shifts) != len(dims):
+            raise ValueError("roll: shifts and dims must have the same length")
+
+        norm_dims = tuple(d + x.ndim if d < 0 else d for d in dims)
+        out = Tensor(np.roll(x, shifts, axis=norm_dims), self.requires_grad, (self,), "roll", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                neg_shifts = tuple(-s for s in shifts)
+                self.grad += np.roll(out.grad, neg_shifts, axis=norm_dims)
 
         out._backward = _backward
         return out
@@ -1209,7 +1517,36 @@ class Tensor:
         return self.to(device="cuda")
 
     def float(self):
+        """Convert to float32 (default float type)"""
         return self.to(dtype=np.float32)
+
+    def double(self):
+        """Convert to float64 (double precision)"""
+        return self.to(dtype=np.float64)
+
+    def half(self):
+        """Convert to float16 (half precision) - limited gradient support"""
+        return self.to(dtype=np.float16)
+
+    def float16(self):
+        """Alias for half() - convert to float16"""
+        return self.half()
+
+    def float32(self):
+        """Alias for float() - convert to float32"""
+        return self.float()
+
+    def float64(self):
+        """Alias for double() - convert to float64"""
+        return self.double()
+
+    def int32(self):
+        """Convert to int32"""
+        return self.to(dtype=np.int32)
+
+    def int64(self):
+        """Convert to int64"""
+        return self.to(dtype=np.int64)
 
     def long(self):
         return self.to(dtype=np.int64)
@@ -1231,6 +1568,51 @@ def where(condition, x, y):
 
     out._backward = _backward
     return out
+
+
+def softmax(input, dim=-1):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.softmax(dim=dim)
+
+
+def log_softmax(input, dim=-1):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.log_softmax(dim=dim)
+
+
+def take_along_dim(input, indices, dim=-1):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.take_along_dim(indices, dim=dim)
+
+
+def clamp(input, min=None, max=None):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.clamp(min=min, max=max)
+
+
+def clip(input, min=None, max=None):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.clip(min=min, max=max)
+
+
+def sign(input):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.sign()
+
+
+def flip(input, dims):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.flip(dims)
+
+
+def roll(input, shifts, dims=None):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.roll(shifts, dims=dims)
+
+
+def tile(input, dims):
+    t = input if isinstance(input, Tensor) else Tensor(input)
+    return t.tile(dims)
 
 
 def cat(tensors, axis=0, dim=None):
