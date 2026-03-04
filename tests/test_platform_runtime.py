@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tensor.platform import format_doctor_report, get_runtime_config, runtime_info, doctor
+from neurx.platform import format_doctor_report, get_runtime_config, runtime_info, doctor
 
 
 def test_runtime_config_from_env(monkeypatch):
@@ -29,12 +29,12 @@ def test_runtime_info_has_required_fields():
 def test_doctor_report_format():
     results = doctor(require_cuda=False)
     text = format_doctor_report(results)
-    assert "tensor doctor report" in text
+    assert "neurx doctor report" in text
     assert any(item.name == "python" for item in results)
 
 
 def test_tensor_fallback_to_cpu_when_cuda_unavailable(monkeypatch):
-    from tensor.core import tensor as tensor_core
+    from neurx.core import neurx as tensor_core
 
     monkeypatch.setenv("TENSOR_DEVICE", "cuda")
     monkeypatch.setenv("TENSOR_FALLBACK_TO_CPU", "1")
@@ -46,8 +46,8 @@ def test_tensor_fallback_to_cpu_when_cuda_unavailable(monkeypatch):
 
 
 def test_tensor_cuda_strict_raises_when_unavailable(monkeypatch):
-    from tensor.core import tensor as tensor_core
-    from tensor.platform import BackendNotAvailableError
+    from neurx.core import neurx as tensor_core
+    from neurx.platform import BackendNotAvailableError
 
     monkeypatch.setenv("TENSOR_DEVICE", "cuda")
     monkeypatch.setenv("TENSOR_FALLBACK_TO_CPU", "0")

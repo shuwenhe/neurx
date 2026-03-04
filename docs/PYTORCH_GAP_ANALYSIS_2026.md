@@ -134,7 +134,7 @@
 
 #### 2.7 性能优化
 - **CUDA kernel 深化**：当前仅 `add/mul/matmul/layernorm/softmax`，建议补齐 `conv2d/max_pool2d/batch_norm` 等
-- **算子融合**：JIT 编译器框架已就位 (`tensor.compile`)，需连接底层 kernel fusion
+- **算子融合**：JIT 编译器框架已就位 (`neurx.compile`)，需连接底层 kernel fusion
 - **Profiler**：添加分层性能分析工具（类似 `torch.profiler`）
 
 ### 🟢 P2 低优先级（增强生态）
@@ -163,7 +163,7 @@
 #### 3.1.1 排序与选择
 ```python
 # sort - 沿维度排序，返回 (values, indices)
-values, indices = tensor.sort(t, dim=-1, descending=False)
+values, indices = neurx.sort(t, dim=-1, descending=False)
 
 # argsort - 返回排序后的索引
 indices = t.argsort(dim=-1, descending=False)
@@ -324,5 +324,5 @@ pytest tests/ -k "not cuda" --tb=short       # 跳过 CUDA 相关测试
 ---
 
 **文档生成时间**：2026 年 3 月 3 日  
-**框架版本**：tensor v0.9.x (推测)  
+**框架版本**：neurx v0.9.x (推测)  
 **测试环境**：macOS / Python 3.14 / NumPy 2.2.x

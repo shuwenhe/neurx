@@ -2,9 +2,9 @@ import os
 import numpy as np
 import pytest
 
-from tensor import Tensor
-from tensor.nn import Linear, LayerNorm, Softmax
-from tensor.cuda.ops import DeviceArray, to_host, available
+from neurx import Tensor
+from neurx.nn import Linear, LayerNorm, Softmax
+from neurx.cuda.ops import DeviceArray, to_host, available
 
 
 def _cuda_runtime_ok() -> bool:

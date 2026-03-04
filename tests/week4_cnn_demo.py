@@ -8,9 +8,9 @@ import sys
 sys.path.insert(0, '/home/shuwen/neurx')
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor.core import Tensor
-from tensor.nn.conv import Conv1d, Conv2d, Conv3d, ConvTranspose2d
-from tensor.nn.pooling import MaxPool2d, AvgPool2d, AdaptiveMaxPool2d, AdaptiveAvgPool2d
+from neurx.core import Tensor
+from neurx.nn.conv import Conv1d, Conv2d, Conv3d, ConvTranspose2d
+from neurx.nn.pooling import MaxPool2d, AvgPool2d, AdaptiveMaxPool2d, AdaptiveAvgPool2d
 
 
 def test_conv2d_features():

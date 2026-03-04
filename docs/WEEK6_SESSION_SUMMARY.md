@@ -312,9 +312,9 @@ Based on current framework, Week 7 should focus on:
 
 ### New Production Files
 ```
-✅ python/tensor/nn/activations.py (350+ lines)
-✅ python/tensor/nn/optim_utils.py (300+ lines)
-✅ python/tensor/nn/loss_extended.py (400+ lines)
+✅ python/neurx/nn/activations.py (350+ lines)
+✅ python/neurx/nn/optim_utils.py (300+ lines)
+✅ python/neurx/nn/loss_extended.py (400+ lines)
 ✅ tests/test_week6_activations_loss_optim.py (400+ lines)
 ```
 
@@ -328,7 +328,7 @@ Based on current framework, Week 7 should focus on:
 
 ### Updated Files
 ```
-✅ python/tensor/nn/__init__.py (75 new exports)
+✅ python/neurx/nn/__init__.py (75 new exports)
 ✅ FRAMEWORK_STATUS.md (Week 6 progress added)
 ```
 

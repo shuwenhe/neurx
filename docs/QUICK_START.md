@@ -39,13 +39,13 @@
 
 ```python
 #!/usr/bin/env python3
-"""Quick test of newly implemented tensor operations."""
+"""Quick test of newly implemented neurx operations."""
 
 import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor import Tensor
+from neurx import Tensor
 
 # Test squeeze/unsqueeze
 print("Testing squeeze/unsqueeze...")
@@ -95,22 +95,22 @@ python /home/shuwen/neurx/test_new_ops.py
 ### Step 2: 查看当前测试 (5分钟)
 
 ```bash
-cd /home/shuwen/neurx/python/tensor
+cd /home/shuwen/neurx/python/neurx
 python -m pytest nn/test_week7.py -v
 ```
 
 ### Step 3: 集成新操作到框架 (10分钟)
 
 需要修改的文件:
-1. `/home/shuwen/neurx/python/tensor/core/tensor.py` - 添加Tensor类方法
-2. `/home/shuwen/neurx/python/tensor/nn/functional.py` - 添加函数实现
-3. `/home/shuwen/neurx/python/tensor/tensor.py` - 更新导出
+1. `/home/shuwen/neurx/python/neurx/core/neurx.py` - 添加Tensor类方法
+2. `/home/shuwen/neurx/python/neurx/nn/functional.py` - 添加函数实现
+3. `/home/shuwen/neurx/python/neurx/neurx.py` - 更新导出
 
 ---
 
 ## 📋 修改清单
 
-### 文件1: `tensor/core/tensor.py`
+### 文件1: `neurx/core/neurx.py`
 
 在 `Tensor` 类中添加以下方法(插入位置: 在`__call__`方法之后):
 
@@ -124,7 +124,7 @@ def squeeze(self, dim=None):
         dim: Dimension to squeeze. If None, squeeze all dims of size 1.
     
     Returns:
-        New tensor with squeezed dimensions.
+        New neurx with squeezed dimensions.
     """
     data = self.to_numpy()
     
@@ -139,7 +139,7 @@ def squeeze(self, dim=None):
         out_data = np.squeeze(data, axis=d)
     
     if self.requires_grad:
-        from tensor.nn import functional as F
+        from neurx.nn import functional as F
         return F.squeeze(self, dim)
     
     return Tensor(out_data, requires_grad=False, device=self.device)
@@ -220,23 +220,23 @@ def handle_dim_param(dim, ndim):
 
 ```bash
 # 1. 单元测试
-pytest tensor/tests/test_tensor_ops.py::TestDimensionOps -v
+pytest neurx/tests/test_tensor_ops.py::TestDimensionOps -v
 
 # 2. 梯度检查
-python -c "from tensor import Tensor; import numpy as np; \
+python -c "from neurx import Tensor; import numpy as np; \
 x = Tensor(np.random.randn(2,3), requires_grad=True); \
 y = x.squeeze() if x.shape[0]==1 else x; \
 loss = y.sum(); loss.backward(); print('✓ Gradient OK')"
 
 # 3. 形状验证
-python -c "from tensor import Tensor; import numpy as np; \
+python -c "from neurx import Tensor; import numpy as np; \
 x = Tensor(np.ones((1,3,1))); \
 y = x.squeeze(); \
 assert y.shape == (3,), f'Expected (3,), got {y.shape}'; \
 print('✓ Shape OK')"
 
 # 4. 整体测试
-pytest tensor/nn/test_week7.py -v
+pytest neurx/nn/test_week7.py -v
 ```
 
 ---
@@ -273,11 +273,11 @@ pytest tensor/nn/test_week7.py -v
 
 ### 问题1: 导入错误
 ```python
-# 错误: ModuleNotFoundError: No module named 'tensor'
+# 错误: ModuleNotFoundError: No module named 'neurx'
 # 解决:
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
-from tensor import Tensor
+from neurx import Tensor
 ```
 
 ### 问题2: 梯度未传播
@@ -335,13 +335,13 @@ os.environ['TENSOR_FALLBACK_TO_CPU'] = '1'
 
 1. **复制完整代码到你的项目:**
    - 打开 `IMPLEMENTATION_PLAN.md`
-   - 复制"任务1"的代码到 `tensor/core/tensor.py`
-   - 复制"任务2"的代码到 `tensor/nn/functional.py`
+   - 复制"任务1"的代码到 `neurx/core/neurx.py`
+   - 复制"任务2"的代码到 `neurx/nn/functional.py`
 
 2. **运行测试:**
    ```bash
    cd /home/shuwen/neurx/python
-   python -m pytest tensor/tests/test_tensor_ops.py -v
+   python -m pytest neurx/tests/test_tensor_ops.py -v
    ```
 
 3. **修复任何失败:**
@@ -351,8 +351,8 @@ os.environ['TENSOR_FALLBACK_TO_CPU'] = '1'
 
 4. **提交更改:**
    ```bash
-   git add tensor/core/tensor.py tensor/nn/functional.py
-   git commit -m "feat: Add P0 tensor operations (squeeze, sum, max, etc.)"
+   git add neurx/core/neurx.py neurx/nn/functional.py
+   git commit -m "feat: Add P0 neurx operations (squeeze, sum, max, etc.)"
    ```
 
 ---

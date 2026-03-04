@@ -18,7 +18,7 @@
 #### 1.1 设计规范
 
 ```python
-# 文件位置: python/tensor/core/tensor.py
+# 文件位置: python/neurx/core/neurx.py
 
 class Tensor:
     # 基本原则:
@@ -112,7 +112,7 @@ class Tensor:
 
 import numpy as np
 import pytest
-from tensor import Tensor
+from neurx import Tensor
 
 class TestInPlaceOps:
     def test_add_(self):
@@ -170,12 +170,12 @@ class TestInPlaceOps:
 #### 2.1 基础实现框架
 
 ```python
-# 文件位置: python/tensor/linalg.py
+# 文件位置: python/neurx/linalg.py
 
 """线性代数模块 - 矩阵分解和求解器"""
 
 import numpy as np
-from tensor.tensor import Tensor
+from neurx.neurx import Tensor
 
 class _LinAlgMixin:
     """为 Tensor 添加线性代数方法的 mixin"""
@@ -189,8 +189,8 @@ class _LinAlgMixin:
 class _LinAlgOps:
     """线性代数操作集合"""
     
-    def __init__(self, tensor):
-        self.tensor = tensor
+    def __init__(self, neurx):
+        self.neurx = neurx
     
     def svd(self, full_matrices=True):
         """
@@ -203,21 +203,21 @@ class _LinAlgOps:
             S: (k,) 奇异值
             Vh: (k, n) 矩阵
         """
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if data.ndim != 2:
-            raise ValueError("SVD requires 2D tensor")
+            raise ValueError("SVD requires 2D neurx")
         
         U, S, Vh = np.linalg.svd(data, full_matrices=full_matrices)
         
-        U_tensor = Tensor(U, requires_grad=self.tensor.requires_grad)
-        S_tensor = Tensor(S, requires_grad=self.tensor.requires_grad)
-        Vh_tensor = Tensor(Vh, requires_grad=self.tensor.requires_grad)
+        U_tensor = Tensor(U, requires_grad=self.neurx.requires_grad)
+        S_tensor = Tensor(S, requires_grad=self.neurx.requires_grad)
+        Vh_tensor = Tensor(Vh, requires_grad=self.neurx.requires_grad)
         
         # 定义梯度函数（简化版本）
         def _backward():
             # SVD 的梯度计算较复杂，这里仅提供框架
-            if self.tensor.requires_grad:
+            if self.neurx.requires_grad:
                 # 计算梯度（参考 PyTorch 实现）
                 pass
         
@@ -233,15 +233,15 @@ class _LinAlgOps:
             Q: 正交矩阵
             R: 上三角矩阵
         """
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if data.ndim != 2:
-            raise ValueError("QR requires 2D tensor")
+            raise ValueError("QR requires 2D neurx")
         
         Q, R = np.linalg.qr(data)
         
-        Q_tensor = Tensor(Q, requires_grad=self.tensor.requires_grad)
-        R_tensor = Tensor(R, requires_grad=self.tensor.requires_grad)
+        Q_tensor = Tensor(Q, requires_grad=self.neurx.requires_grad)
+        R_tensor = Tensor(R, requires_grad=self.neurx.requires_grad)
         
         return Q_tensor, R_tensor
     
@@ -254,37 +254,37 @@ class _LinAlgOps:
         
         要求 A 是对称正定矩阵
         """
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if data.ndim != 2:
-            raise ValueError("Cholesky requires 2D tensor")
+            raise ValueError("Cholesky requires 2D neurx")
         
         L = np.linalg.cholesky(data)
         
         if upper:
             L = L.T
         
-        out = Tensor(L, requires_grad=self.tensor.requires_grad)
+        out = Tensor(L, requires_grad=self.neurx.requires_grad)
         return out
     
     def inv(self):
         """矩阵求逆"""
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if data.ndim != 2:
-            raise ValueError("inv requires 2D tensor")
+            raise ValueError("inv requires 2D neurx")
         
         inv_data = np.linalg.inv(data)
         
-        out = Tensor(inv_data, requires_grad=self.tensor.requires_grad, 
-                     parents=(self.tensor,), op="inv")
+        out = Tensor(inv_data, requires_grad=self.neurx.requires_grad, 
+                     parents=(self.neurx,), op="inv")
         
         def _backward():
-            if self.tensor.requires_grad:
+            if self.neurx.requires_grad:
                 # d(inv(A))/dA = -inv(A)^T @ dL/dA @ inv(A)^T
                 grad = out.grad
                 inv_A = inv_data
-                self.tensor.grad += -inv_A.T @ grad @ inv_A.T
+                self.neurx.grad += -inv_A.T @ grad @ inv_A.T
         
         out._backward = _backward
         return out
@@ -299,12 +299,12 @@ class _LinAlgOps:
         Returns:
             X: 解矩阵
         """
-        A = _to_numpy(self.tensor.data)
+        A = _to_numpy(self.neurx.data)
         B_data = _to_numpy(B.data) if isinstance(B, Tensor) else B
         
         X = np.linalg.solve(A, B_data)
         
-        out = Tensor(X, requires_grad=self.tensor.requires_grad or B.requires_grad)
+        out = Tensor(X, requires_grad=self.neurx.requires_grad or B.requires_grad)
         
         return out
     
@@ -314,15 +314,15 @@ class _LinAlgOps:
         
         返回: (特征值, 特征向量)
         """
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if data.ndim != 2:
-            raise ValueError("eig requires 2D tensor")
+            raise ValueError("eig requires 2D neurx")
         
         eigenvalues, eigenvectors = np.linalg.eig(data)
         
-        evals = Tensor(eigenvalues, requires_grad=self.tensor.requires_grad)
-        evecs = Tensor(eigenvectors, requires_grad=self.tensor.requires_grad)
+        evals = Tensor(eigenvalues, requires_grad=self.neurx.requires_grad)
+        evecs = Tensor(eigenvectors, requires_grad=self.neurx.requires_grad)
         
         return evals, evecs
     
@@ -332,7 +332,7 @@ class _LinAlgOps:
         
         ord 可以是 'fro', 2, 1, -1, -2, inf 等
         """
-        data = _to_numpy(self.tensor.data)
+        data = _to_numpy(self.neurx.data)
         
         if dim is None:
             # 全局范数
@@ -341,16 +341,16 @@ class _LinAlgOps:
             # 按维度范数
             norm_val = np.linalg.norm(data, ord=ord, axis=dim, keepdims=keepdim)
         
-        out = Tensor(norm_val, requires_grad=self.tensor.requires_grad)
+        out = Tensor(norm_val, requires_grad=self.neurx.requires_grad)
         return out
 ```
 
 #### 2.2 集成到 Tensor 类
 
 ```python
-# 在 tensor.py 的 Tensor 类中添加
+# 在 neurx.py 的 Tensor 类中添加
 
-from tensor.linalg import _LinAlgMixin
+from neurx.linalg import _LinAlgMixin
 
 class Tensor(_LinAlgMixin):
     # ... 现有代码 ...
@@ -442,7 +442,7 @@ class TestLinAlg:
 #### 3.1 设计与实现
 
 ```python
-# 文件位置: python/tensor/nn/embedding.py
+# 文件位置: python/neurx/nn/embedding.py
 
 class Embedding(Module):
     """

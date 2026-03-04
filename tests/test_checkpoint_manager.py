@@ -4,10 +4,10 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor.nn import Linear
-from tensor.optim import AdamW
-from tensor.training import CheckpointManager
-from tensor.tensor import Tensor
+from neurx.nn import Linear
+from neurx.optim import AdamW
+from neurx.training import CheckpointManager
+from neurx.neurx import Tensor
 
 
 def _step_once(model, optimizer):

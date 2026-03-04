@@ -46,7 +46,7 @@ Welcome to the comprehensive Week 5 implementation documentation for the neurx f
 
 ### Production Code
 ```
-python/tensor/nn/
+python/neurx/nn/
 ├── init.py                    # Weight initialization (200+ lines)
 ├── grad_utils.py              # Gradient operations (150+ lines)
 ├── utils.py                   # Model analysis (150+ lines)
@@ -74,22 +74,22 @@ demo_week5.py  # Working examples of all Week 5 features
 **Want to use Weight Initialization?**
 - Start: [WEEK5_QUICK_REFERENCE.md](WEEK5_QUICK_REFERENCE.md#1️⃣-weight-initialization-15-functions)
 - Details: [WEEK5_COMPLETION_REPORT.md](WEEK5_COMPLETION_REPORT.md#module-1-weight-initialization-init-py---200-lines)
-- Code: [python/tensor/nn/init.py](python/tensor/nn/init.py)
+- Code: [python/neurx/nn/init.py](python/neurx/nn/init.py)
 
 **Want to understand Gradient Operations?**
 - Start: [WEEK5_QUICK_REFERENCE.md](WEEK5_QUICK_REFERENCE.md#2️⃣-gradient-operations-5-items)
 - Details: [WEEK5_COMPLETION_REPORT.md](WEEK5_COMPLETION_REPORT.md#module-2-gradient-operations-grad_utilspy---150-lines)
-- Code: [python/tensor/nn/grad_utils.py](python/tensor/nn/grad_utils.py)
+- Code: [python/neurx/nn/grad_utils.py](python/neurx/nn/grad_utils.py)
 
 **Want to profile your model?**
 - Start: [WEEK5_QUICK_REFERENCE.md](WEEK5_QUICK_REFERENCE.md#3️⃣-model-analysis-6-items)
 - Details: [WEEK5_COMPLETION_REPORT.md](WEEK5_COMPLETION_REPORT.md#module-3-model-analysis-utilspy---150-lines)
-- Code: [python/tensor/nn/utils.py](python/tensor/nn/utils.py)
+- Code: [python/neurx/nn/utils.py](python/neurx/nn/utils.py)
 
 **Want to use BatchNorm?**
 - Start: [WEEK5_QUICK_REFERENCE.md](WEEK5_QUICK_REFERENCE.md#4️⃣-batch-normalization-3-classes)
 - Details: [WEEK5_COMPLETION_REPORT.md](WEEK5_COMPLETION_REPORT.md#module-4-batchnorm-layers-extended-normalizationpy---350-lines)
-- Code: [python/tensor/nn/normalization.py](python/tensor/nn/normalization.py)
+- Code: [python/neurx/nn/normalization.py](python/neurx/nn/normalization.py)
 
 ---
 
@@ -143,7 +143,7 @@ python demo_week5.py
 ### Intermediate
 1. Read [WEEK5_COMPLETION_REPORT.md](WEEK5_COMPLETION_REPORT.md) (20 min)
 2. Review [WEEK5_FILE_MANIFEST.md](WEEK5_FILE_MANIFEST.md) (10 min)
-3. Examine source code in [python/tensor/nn/](python/tensor/nn/) (30 min)
+3. Examine source code in [python/neurx/nn/](python/neurx/nn/) (30 min)
 
 ### Advanced
 1. Study algorithms in [WEEK5_COMPLETION_REPORT.md - Technical Highlights](WEEK5_COMPLETION_REPORT.md#-technical-highlights)
@@ -185,7 +185,7 @@ python demo_week5.py
 All Week 5 modules are fully integrated into neurx:
 
 ```python
-from tensor.nn import (
+from neurx.nn import (
     # Weight initialization (15 functions)
     xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
     orthogonal, uniform, normal,  # Plus in-place variants
@@ -238,7 +238,7 @@ Current: 91% (14,080 lines, 112 APIs, 108 tests)
 
 - **Framework Status**: [FRAMEWORK_STATUS.md](FRAMEWORK_STATUS.md) - Overall framework overview
 - **Week 1-4 Docs**: Check workspace root for WEEK1-4 documentation
-- **Source Code**: [python/tensor/nn/](python/tensor/nn/) - All implementation files
+- **Source Code**: [python/neurx/nn/](python/neurx/nn/) - All implementation files
 
 ---
 

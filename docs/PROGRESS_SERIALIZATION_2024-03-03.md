@@ -9,7 +9,7 @@ Implemented comprehensive model serialization and checkpoint management system w
 ## Completed Tasks ✅
 
 ### 1. Enhanced Serialization Module
-**Location**: `/home/shuwen/neurx/python/tensor/serialization/enhanced.py`
+**Location**: `/home/shuwen/neurx/python/neurx/serialization/enhanced.py`
 
 **Features Implemented**:
 - ✅ **ModelCheckpoint Manager** - Advanced checkpoint management with:
@@ -33,7 +33,7 @@ Implemented comprehensive model serialization and checkpoint management system w
 
 ### 2. Module Integration
 **Files Modified**:
-- `/home/shuwen/neurx/python/tensor/serialization/__init__.py` - Exported new utilities
+- `/home/shuwen/neurx/python/neurx/serialization/__init__.py` - Exported new utilities
 
 **Exports**:
 ```python
@@ -222,12 +222,12 @@ save_tensor_dict(state, 'model.pkl', compress=True)
 ## Files Modified/Created
 
 ### Created
-1. `/home/shuwen/neurx/python/tensor/serialization/enhanced.py` (250 lines)
+1. `/home/shuwen/neurx/python/neurx/serialization/enhanced.py` (250 lines)
 2. `/home/shuwen/neurx/tests/test_serialization.py` (375 lines)
 3. `/home/shuwen/neurx/docs/SERIALIZATION_GUIDE.md` (400+ lines)
 
 ### Modified
-1. `/home/shuwen/neurx/python/tensor/serialization/__init__.py` - Added exports
+1. `/home/shuwen/neurx/python/neurx/serialization/__init__.py` - Added exports
 2. `/home/shuwen/neurx/Makefile` - Added test targets
 
 **Total New Code**: ~1025 lines

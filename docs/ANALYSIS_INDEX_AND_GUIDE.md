@@ -360,7 +360,7 @@ FRAMEWORK_ANALYSIS_AND_OPTIMIZATION.md (全景分析)
 - [深度学习基础](https://d2l.ai/)
 
 ### 内部资源
-- 框架代码: `/home/shuwen/neurx/python/tensor/`
+- 框架代码: `/home/shuwen/neurx/python/neurx/`
 - 测试代码: `/home/shuwen/neurx/tests/`
 - 现有文档: `/home/shuwen/neurx/docs/`
 

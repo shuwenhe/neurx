@@ -1,9 +1,9 @@
 import numpy as np
 
-from tensor import Tensor
-from tensor.compile import CompileOptions, compile_module
-from tensor.distributed import detect_distributed_config, is_distributed
-from tensor.nn import Linear
+from neurx import Tensor
+from neurx.compile import CompileOptions, compile_module
+from neurx.distributed import detect_distributed_config, is_distributed
+from neurx.nn import Linear
 
 
 def test_compile_module_behaves_like_eager():

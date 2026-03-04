@@ -12,7 +12,7 @@
 
 ### 1️⃣ Weight Initialization (15 functions)
 ```python
-from tensor.nn import (
+from neurx.nn import (
     xavier_uniform, xavier_normal, xavier_uniform_, xavier_normal_,
     kaiming_uniform, kaiming_normal, kaiming_uniform_, kaiming_normal_,
     orthogonal, orthogonal_,
@@ -28,7 +28,7 @@ weights = orthogonal((64, 64))        # QR decomposition
 
 ### 2️⃣ Gradient Operations (5 items)
 ```python
-from tensor.nn import (
+from neurx.nn import (
     get_grad_norm,
     clip_grad_norm_,
     clip_grad_value_,
@@ -49,7 +49,7 @@ with GradientClipper(params, max_norm=1.0):
 
 ### 3️⃣ Model Analysis (6 items)
 ```python
-from tensor.nn import (
+from neurx.nn import (
     count_parameters,
     count_flops,
     model_size,
@@ -71,7 +71,7 @@ params = analyzer.get_param_count()
 
 ### 4️⃣ Batch Normalization (3 classes)
 ```python
-from tensor.nn import BatchNorm1d, BatchNorm2d, BatchNorm3d
+from neurx.nn import BatchNorm1d, BatchNorm2d, BatchNorm3d
 
 # 1D BatchNorm (N,C) or (N,C,L)
 bn1d = BatchNorm1d(num_features=16)
@@ -131,7 +131,7 @@ python demo_week5.py
 
 ### Import and Use
 ```python
-from tensor.nn import (
+from neurx.nn import (
     xavier_uniform, kaiming_normal, orthogonal,
     clip_grad_norm_, get_grad_norm,
     count_parameters, analyze_network,

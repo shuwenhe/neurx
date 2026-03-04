@@ -3,7 +3,7 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor import Tensor
+from neurx import Tensor
 
 
 def _maybe_cuda():

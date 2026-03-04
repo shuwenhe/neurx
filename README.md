@@ -1,4 +1,4 @@
-# tensor
+# neurx
 
 A self-developed deep learning framework is evolving into a full-stack production platform.
 Current state: production foundation is in place (runtime config, diagnostics, package scaffolding), with core kernels and distributed/compile capabilities still in active expansion.
@@ -7,8 +7,8 @@ Current state: production foundation is in place (runtime config, diagnostics, p
 
 ### Core Framework
 - Autograd `Tensor` with basic ops and `backward()`
-- **High-level tensor operations**: `gather`, `scatter`, `scatter_add`, `meshgrid` for advanced indexing
-- Core layers in `tensor.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
+- **High-level neurx operations**: `gather`, `scatter`, `scatter_add`, `meshgrid` for advanced indexing
+- Core layers in `neurx.nn` including `Linear`, `LayerNorm`, `RMSNorm`, `MultiHeadAttention`, `MLP`, `MoE`, `Dropout`
 - Convolution layers: `Conv1d`, `Conv2d`, `Conv3d` and transpose variants
 - RNN layers: `RNN`, `LSTM`, `GRU` with cell variants
 - Pooling layers: `MaxPool`, `AvgPool`, `AdaptiveAvgPool`, `AdaptiveMaxPool`
@@ -28,66 +28,66 @@ Current state: production foundation is in place (runtime config, diagnostics, p
   - `moveaxis/movedim`: Flexible dimension reordering
 - **Performance Optimizations**
   - `scatter_add`: 10x-100x speedup via NumPy vectorization (removed Python loops)
-- **Einstein Summation** (`tensor.einsum`) - Complex tensor operations with intuitive notation
+- **Einstein Summation** (`neurx.einsum`) - Complex neurx operations with intuitive notation
 - **Scatter/Gather Operations** - Advanced indexing for attention, embeddings, and sparse operations
   - `scatter_add`: Accumulative scatter for gradient accumulation (now optimized)
   - `meshgrid`: Coordinate grid generation for spatial transformations
-- **Vision Module** (`tensor.vision`) - Computer vision tools and models
+- **Vision Module** (`neurx.vision`) - Computer vision tools and models
   - Image transforms: `ToTensor`, `Normalize`, `Resize`, `RandomCrop`, `ColorJitter`, etc.
   - Pre-built models: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`
 - Complete transform pipeline compatible with PIL and numpy arrays
 
 ### Infrastructure
-- CUDA extension (starter) with GPU tensor, add/mul, bias add, matmul, layernorm, softmax
-- Runtime platform module (`tensor.platform`) for config, logging, diagnostics (`tensor-doctor`)
+- CUDA extension (starter) with GPU neurx, add/mul, bias add, matmul, layernorm, softmax
+- Runtime platform module (`neurx.platform`) for config, logging, diagnostics (`neurx-doctor`)
 - **Enhanced Serialization** - Advanced model checkpointing and state management
   - ModelCheckpoint manager with auto-cleanup and best model selection
   - Compression support (gzip) for 50-80% file size reduction
   - State dict utilities for transfer learning and model surgery
   - Optimizer state persistence (SGD, Adam, RMSprop, AdamW)
 - Training runtime helpers: `CheckpointManager`, `TrainingLogger`, `run_training_loop`
-- AMP helpers: `tensor.training.autocast` and `tensor.training.GradScaler`
+- AMP helpers: `neurx.training.autocast` and `neurx.training.GradScaler`
 - Data pipeline: `Dataset`, `DataLoader`, `TensorDataset`
-- Distributed runtime scaffolding (`tensor.distributed.detect_distributed_config`)
-- Compile API boundary (`tensor.compile.compile_module`)
+- Distributed runtime scaffolding (`neurx.distributed.detect_distributed_config`)
+- Compile API boundary (`neurx.compile.compile_module`)
 
 ## Quick Start
 
 ```python
-import tensor
-from tensor.vision import transforms, models
+import neurx
+from neurx.vision import transforms, models
 
 # 🆕 Sorting & Top-K selection (NEW: 2026-03-03)
-scores = tensor.rand((2, 10))
+scores = neurx.rand((2, 10))
 top_values, top_indices = scores.topk(k=3, dim=-1, largest=True)
 sorted_vals, sorted_idx = scores.sort(dim=-1, descending=True)
 
 # 🆕 Masking for attention & padding (NEW: 2026-03-03)
-x = tensor.randn((2, 8, 512))
-causal_mask = tensor.Tensor([[1, 0, 0], [1, 1, 0], [1, 1, 1]]) == 0
+x = neurx.randn((2, 8, 512))
+causal_mask = neurx.Tensor([[1, 0, 0], [1, 1, 0], [1, 1, 1]]) == 0
 x_masked = x.masked_fill(causal_mask, float('-inf'))
 valid_tokens = x.masked_select(x > 0.5)
 
 # 🆕 Dimension manipulation (NEW: 2026-03-03)
 # Multi-head attention reshaping: (B, T, C) -> (B, H, T, D)
-x = tensor.randn((2, 8, 512))
+x = neurx.randn((2, 8, 512))
 x_reordered = x.moveaxis(1, 2)  # Now (B, C, T)
 
 # Einstein summation for complex operations
-A = tensor.rand((3, 4))
-B = tensor.rand((4, 5))
-C = tensor.einsum('ij,jk->ik', A, B)  # Matrix multiplication
+A = neurx.rand((3, 4))
+B = neurx.rand((4, 5))
+C = neurx.einsum('ij,jk->ik', A, B)  # Matrix multiplication
 
 # Scatter operations for embeddings (NOW 10x+ FASTER)
-embedding_table = tensor.zeros((1000, 128))
-token_ids = tensor.Tensor([[10, 20, 30]])
-updates = tensor.randn((3, 128))
+embedding_table = neurx.zeros((1000, 128))
+token_ids = neurx.Tensor([[10, 20, 30]])
+updates = neurx.randn((3, 128))
 embedding_table = embedding_table.scatter_add(0, token_ids.T, updates)
 
 # Coordinate grids for spatial transformations
-y = tensor.linspace(-1, 1, 224)
-x = tensor.linspace(-1, 1, 224)
-grid_y, grid_x = tensor.meshgrid(y, x, indexing='ij')
+y = neurx.linspace(-1, 1, 224)
+x = neurx.linspace(-1, 1, 224)
+grid_y, grid_x = neurx.meshgrid(y, x, indexing='ij')
 
 # Image classification with ResNet
 transform = transforms.Compose([
@@ -104,11 +104,11 @@ model = models.resnet18(num_classes=10)
 
 ## Project Layout
 ```
-tensor/
+neurx/
   python/
-    tensor/
+    neurx/
       __init__.py
-      core/            # Python-level tensor, autograd, einsum
+      core/            # Python-level neurx, autograd, einsum
       nn/              # neural network layers
       optim/           # optimizers and schedulers
       data/            # dataset/dataloader
@@ -118,7 +118,7 @@ tensor/
       platform/        # runtime config, logging, diagnostics, errors
       training/        # training loop + checkpoint manager + metrics logger
   cpp/
-    tensor/
+    neurx/
       core/            # C++ Tensor, Storage, Memory, Device (planned)
       autograd/        # C++ autograd engine (planned)
       ops/             # operator definitions (planned)
@@ -144,7 +144,7 @@ tensor/
 
 ## Install (offline-friendly)
 ```bash
-pip install -e /path/to/tensor --no-build-isolation
+pip install -e /path/to/neurx --no-build-isolation
 ```
 
 ## Testing
@@ -193,16 +193,16 @@ Environment variables:
 Diagnostics:
 
 ```bash
-tensor-doctor
-tensor-doctor --json
-tensor-doctor --require-cuda
+neurx-doctor
+neurx-doctor --json
+neurx-doctor --require-cuda
 ```
 
 ## CUDA Extension (starter)
 The CUDA extension is built from `cuda/bindings.cpp` and `cuda/kernels/kernels.cu`.
 
 ```bash
-CUDA_HOME=/usr pip install -e /path/to/tensor --no-build-isolation
+CUDA_HOME=/usr pip install -e /path/to/neurx --no-build-isolation
 export TENSOR_DEVICE=cuda
 ```
 
@@ -224,9 +224,9 @@ python tools/benchmark_cuda_ops.py --warmup 10 --iters 50
 ## Quick Start
 ```python
 import numpy as np
-from tensor import Tensor
-from tensor.core.nn import Linear
-from tensor.core.optim import AdamW
+from neurx import Tensor
+from neurx.core.nn import Linear
+from neurx.core.optim import AdamW
 
 x = Tensor(np.random.randn(4, 8), requires_grad=True)
 layer = Linear(8, 4)
@@ -243,7 +243,7 @@ opt.step()
 ## Tensor Ops Examples
 ```python
 import numpy as np
-from tensor import (
+from neurx import (
     Tensor,
     where,
     cat, stack, split, chunk,

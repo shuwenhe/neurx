@@ -11,7 +11,7 @@ help:
 	@echo "  bootstrap     Upgrade build tooling in current environment"
 	@echo "  dev           Same as install"
 	@echo "  test          Run all tests"
-	@echo "  test-creation Run tensor creation functions tests"
+	@echo "  test-creation Run neurx creation functions tests"
 	@echo "  test-sgd      Run SGD optimizer tests"
 	@echo "  test-schedulers Run learning rate scheduler tests"
 	@echo "  test-optimizers Run Adam and RMSprop optimizer tests"
@@ -26,7 +26,7 @@ help:
 	@echo "  test-serialization Run model serialization tests"
 	@echo "  test-checkpoint Run checkpoint manager tests"
 	@echo "  list          List all API feature points and one-command per-API tests"
-	@echo "  api           Run one API test case. Usage: make api API=tensor.sum"
+	@echo "  api           Run one API test case. Usage: make api API=neurx.sum"
 	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
 	@echo "  doctor        Run runtime diagnostics"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
@@ -103,7 +103,7 @@ list:
 
 api:
 	@if [ -z "$(API)" ]; then \
-		echo "Usage: make api API=tensor.sum"; \
+		echo "Usage: make api API=neurx.sum"; \
 		exit 2; \
 	fi
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --api "$(API)"
@@ -112,7 +112,7 @@ api-all:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --all
 
 doctor:
-	PYTHONPATH=python $(PYTHON) -m tensor.cli
+	PYTHONPATH=python $(PYTHON) -m neurx.cli
 
 cuda-test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py

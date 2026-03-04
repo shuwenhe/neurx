@@ -2,7 +2,7 @@
 
 ## 📋 Files Created (New Modules)
 
-### 1. python/tensor/nn/init.py (200+ lines)
+### 1. python/neurx/nn/init.py (200+ lines)
 **Status**: ✅ Created
 **Purpose**: Weight initialization strategies for neural networks
 **Contains**:
@@ -11,7 +11,7 @@
 - 1 helper function (_calculate_fan)
 - Comprehensive docstrings for all functions
 
-### 2. python/tensor/nn/grad_utils.py (150+ lines)
+### 2. python/neurx/nn/grad_utils.py (150+ lines)
 **Status**: ✅ Created
 **Purpose**: Gradient manipulation utilities for training stability
 **Contains**:
@@ -19,7 +19,7 @@
 - 1 context manager class (GradientClipper)
 - Full documentation and usage examples
 
-### 3. python/tensor/nn/utils.py (150+ lines)
+### 3. python/neurx/nn/utils.py (150+ lines)
 **Status**: ✅ Created
 **Purpose**: Model analysis and profiling utilities
 **Contains**:
@@ -41,7 +41,7 @@
 
 ## 📋 Files Modified (Extended Functionality)
 
-### 1. python/tensor/nn/normalization.py
+### 1. python/neurx/nn/normalization.py
 **Status**: ✅ Extended
 **Changes Made**:
 - Added BatchNorm1d class (1D batch normalization)
@@ -58,12 +58,12 @@
 **Lines Added**: ~350 lines
 **Test Coverage**: 6 tests, all passing
 
-### 2. python/tensor/nn/__init__.py
+### 2. python/neurx/nn/__init__.py
 **Status**: ✅ Updated
 **Changes Made**:
-- Added import: `from tensor.nn.init import ...` (14 items)
-- Added import: `from tensor.nn.grad_utils import ...` (5 items)
-- Added import: `from tensor.nn.utils import ...` (6 items)
+- Added import: `from neurx.nn.init import ...` (14 items)
+- Added import: `from neurx.nn.grad_utils import ...` (5 items)
+- Added import: `from neurx.nn.utils import ...` (6 items)
 - Extended existing import: Added BatchNorm1d, BatchNorm2d, BatchNorm3d from normalization
 - Updated __all__ list with all 21 new Week 5 exports
 - Maintained alphabetical ordering and consistency with existing pattern
@@ -214,11 +214,11 @@ Target Week 7:     95%+ (comprehensive PyTorch compatibility)
 ## 📝 File Locations Reference
 
 ### Production Code
-- [python/tensor/nn/init.py](python/tensor/nn/init.py) - Weight initialization
-- [python/tensor/nn/grad_utils.py](python/tensor/nn/grad_utils.py) - Gradient operations
-- [python/tensor/nn/utils.py](python/tensor/nn/utils.py) - Model analysis
-- [python/tensor/nn/normalization.py](python/tensor/nn/normalization.py) - Includes BatchNorm
-- [python/tensor/nn/__init__.py](python/tensor/nn/__init__.py) - Module exports
+- [python/neurx/nn/init.py](python/neurx/nn/init.py) - Weight initialization
+- [python/neurx/nn/grad_utils.py](python/neurx/nn/grad_utils.py) - Gradient operations
+- [python/neurx/nn/utils.py](python/neurx/nn/utils.py) - Model analysis
+- [python/neurx/nn/normalization.py](python/neurx/nn/normalization.py) - Includes BatchNorm
+- [python/neurx/nn/__init__.py](python/neurx/nn/__init__.py) - Module exports
 
 ### Test Code
 - [tests/test_week5_init_grad_analysis_batchnorm.py](tests/test_week5_init_grad_analysis_batchnorm.py) - Week 5 tests
@@ -249,7 +249,7 @@ python demo_week5.py
 
 ### Import and Use
 ```python
-from python.tensor.nn import (
+from python.neurx.nn import (
     # Weight initialization
     xavier_uniform, xavier_normal, kaiming_uniform, kaiming_normal,
     orthogonal, uniform, normal,

@@ -3,9 +3,9 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor import Tensor
-from tensor.nn import BatchNorm1d, BatchNorm2d
-from tensor.nn import functional as F
+from neurx import Tensor
+from neurx.nn import BatchNorm1d, BatchNorm2d
+from neurx.nn import functional as F
 
 
 def test_functional_batch_norm_training_updates_running_stats_and_backward():

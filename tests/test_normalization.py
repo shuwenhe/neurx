@@ -6,8 +6,8 @@ import sys
 sys.path.insert(0, 'python')
 
 import numpy as np
-import tensor
-from tensor.nn import LayerNorm, GroupNorm, InstanceNorm
+import neurx
+from neurx.nn import LayerNorm, GroupNorm, InstanceNorm
 
 
 def test_layer_norm_basic():
@@ -21,7 +21,7 @@ def test_layer_norm_basic():
     
     # Create input (batch_size=32, features=10)
     input_data = np.random.randn(32, 10).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     # Forward pass
     output = ln(x)
@@ -54,7 +54,7 @@ def test_layer_norm_multiple_dims():
     
     # Create input (batch_size=16, d1=64, d2=32)
     input_data = np.random.randn(16, 64, 32).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     # Forward pass
     output = ln(x)
@@ -89,7 +89,7 @@ def test_layer_norm_affine():
     assert np.allclose(ln.bias.data, 0.0), "Bias should be initialized to 0"
     
     input_data = np.random.randn(32, 10).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     output = ln(x)
     
@@ -118,7 +118,7 @@ def test_layer_norm_no_affine():
     assert ln.bias is None, "Bias should be None"
     
     input_data = np.random.randn(32, 10).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     output = ln(x)
     
@@ -145,7 +145,7 @@ def test_group_norm_basic():
     
     # Input shape: (N, C, H, W)
     input_data = np.random.randn(4, 256, 56, 56).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     output = gn(x)
     
@@ -181,7 +181,7 @@ def test_instance_norm_basic():
     
     # Input shape: (N, C, H, W)
     input_data = np.random.randn(8, 3, 32, 32).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     output = in_norm(x)
     
@@ -207,7 +207,7 @@ def test_layer_norm_sequential():
     
     # Create input with shape (batch, seq_len, hidden_dim)
     input_data = np.random.randn(batch_size, seq_len, hidden_dim).astype(np.float32)
-    x = tensor.Tensor(input_data)
+    x = neurx.Tensor(input_data)
     
     output = ln(x)
     
@@ -249,7 +249,7 @@ def test_layer_norm_comparison_with_pytorch():
     ln.weight.data = weight_data.copy()
     ln.bias.data = bias_data.copy()
     
-    x = tensor.Tensor(input_data.copy())
+    x = neurx.Tensor(input_data.copy())
     output = ln(x)
     
     # Manual computation for verification
@@ -276,21 +276,21 @@ def test_all_normalizations_integration():
     
     # Test LayerNorm
     ln = LayerNorm(64)
-    x_ln = tensor.Tensor(np.random.randn(8, 64).astype(np.float32))
+    x_ln = neurx.Tensor(np.random.randn(8, 64).astype(np.float32))
     out_ln = ln(x_ln)
     assert out_ln.shape == (8, 64), "LayerNorm shape mismatch"
     print("  ✅ LayerNorm integration: PASS")
     
     # Test GroupNorm
     gn = GroupNorm(16, 64)  # 64 channels, 16 groups
-    x_gn = tensor.Tensor(np.random.randn(8, 64, 14, 14).astype(np.float32))
+    x_gn = neurx.Tensor(np.random.randn(8, 64, 14, 14).astype(np.float32))
     out_gn = gn(x_gn)
     assert out_gn.shape == (8, 64, 14, 14), "GroupNorm shape mismatch"
     print("  ✅ GroupNorm integration: PASS")
     
     # Test InstanceNorm
     inst_norm = InstanceNorm(3)
-    x_in = tensor.Tensor(np.random.randn(8, 3, 28, 28).astype(np.float32))
+    x_in = neurx.Tensor(np.random.randn(8, 3, 28, 28).astype(np.float32))
     out_in = inst_norm(x_in)
     assert out_in.shape == (8, 3, 28, 28), "InstanceNorm shape mismatch"
     print("  ✅ InstanceNorm integration: PASS")

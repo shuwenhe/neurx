@@ -87,7 +87,7 @@ All Week 6 deliverables with quick navigation.
 ## 🔧 Production Code
 
 ### Activation Functions
-**File**: `python/tensor/nn/activations.py` (350+ lines)
+**File**: `python/neurx/nn/activations.py` (350+ lines)
 
 **Contains**: 38 APIs (19 functions + 19 classes)
 - Functional activations: relu, sigmoid, softmax, gelu, swish, mish, etc.
@@ -107,7 +107,7 @@ hardtanh, threshold, glu, prelu, rrelu
 ---
 
 ### Optimizer Utilities
-**File**: `python/tensor/nn/optim_utils.py` (300+ lines)
+**File**: `python/neurx/nn/optim_utils.py` (300+ lines)
 
 **Contains**: 23 APIs (10 schedules + 6 utilities + 3 classes)
 
@@ -128,7 +128,7 @@ LRScheduler, WarmupScheduler, GradientAccumulator
 ---
 
 ### Extended Loss Functions
-**File**: `python/tensor/nn/loss_extended.py` (400+ lines)
+**File**: `python/neurx/nn/loss_extended.py` (400+ lines)
 
 **Contains**: 14 APIs organized in 5 categories
 
@@ -299,7 +299,7 @@ neurx/
 ├── WEEK6_DOCUMENTATION_INDEX.md    ← This file
 ├── demo_week6.py                   ← Executable demos
 ├── FRAMEWORK_STATUS.md             ← Framework status
-└── python/tensor/nn/
+└── python/neurx/nn/
     ├── activations.py              ← 38 activation APIs
     ├── optim_utils.py              ← 23 optimizer APIs
     ├── loss_extended.py            ← 14 loss APIs

@@ -4,10 +4,10 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor.nn import Linear
-from tensor.optim import AdamW
-from tensor.tensor import Tensor
-from tensor.training import GradScaler, autocast, get_autocast_dtype, is_autocast_enabled
+from neurx.nn import Linear
+from neurx.optim import AdamW
+from neurx.neurx import Tensor
+from neurx.training import GradScaler, autocast, get_autocast_dtype, is_autocast_enabled
 
 
 def test_autocast_context_state():

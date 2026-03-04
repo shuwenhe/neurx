@@ -10,10 +10,10 @@ import sys
 import numpy as np
 
 try:
-    import tensor
-    from tensor import einsum
-    from tensor.vision import transforms, models
-    print("✅ Successfully imported tensor and new modules")
+    import neurx
+    from neurx import einsum
+    from neurx.vision import transforms, models
+    print("✅ Successfully imported neurx and new modules")
 except Exception as e:
     print(f"❌ Import error: {e}")
     sys.exit(1)
@@ -27,10 +27,10 @@ def test_einsum():
     
     # Test 1: Matrix multiplication
     print("\n1. Matrix multiplication: 'ij,jk->ik'")
-    A = tensor.rand((3, 4))
-    B = tensor.rand((4, 5))
+    A = neurx.rand((3, 4))
+    B = neurx.rand((4, 5))
     C = einsum('ij,jk->ik', A, B)
-    C_ref = tensor.matmul(A, B)
+    C_ref = neurx.matmul(A, B)
     
     diff = np.abs(C.to_numpy() - C_ref.to_numpy()).max()
     print(f"   Shape: {A.shape} @ {B.shape} = {C.shape}")
@@ -39,8 +39,8 @@ def test_einsum():
     
     # Test 2: Batch matrix multiplication
     print("\n2. Batch matrix multiplication: 'bij,bjk->bik'")
-    A = tensor.rand((10, 3, 4))
-    B = tensor.rand((10, 4, 5))
+    A = neurx.rand((10, 3, 4))
+    B = neurx.rand((10, 4, 5))
     C = einsum('bij,bjk->bik', A, B)
     
     print(f"   Shape: {A.shape} @ {B.shape} = {C.shape}")
@@ -48,7 +48,7 @@ def test_einsum():
     
     # Test 3: Transpose
     print("\n3. Transpose: 'ij->ji'")
-    A = tensor.rand((3, 4))
+    A = neurx.rand((3, 4))
     A_T = einsum('ij->ji', A)
     
     print(f"   Shape: {A.shape} -> {A_T.shape}")
@@ -56,7 +56,7 @@ def test_einsum():
     
     # Test 4: Trace
     print("\n4. Trace: 'ii'")
-    A = tensor.rand((5, 5))
+    A = neurx.rand((5, 5))
     trace = einsum('ii', A)
     
     print(f"   Shape: {A.shape} -> {trace.shape}")
@@ -65,8 +65,8 @@ def test_einsum():
     
     # Test 5: Batch dot product
     print("\n5. Batch dot product: 'bi,bi->b'")
-    A = tensor.rand((10, 3))
-    B = tensor.rand((10, 3))
+    A = neurx.rand((10, 3))
+    B = neurx.rand((10, 3))
     dots = einsum('bi,bi->b', A, B)
     
     print(f"   Shape: {A.shape} · {B.shape} = {dots.shape}")
@@ -161,7 +161,7 @@ def test_resnet_models():
         print(f"   Number of parameters: {len(model.parameters())}")
         
         # Test forward pass (with small input to save memory)
-        dummy_input = tensor.rand((2, 3, 224, 224))
+        dummy_input = neurx.rand((2, 3, 224, 224))
         print(f"   Testing forward pass with input shape: {dummy_input.shape}")
         output = model(dummy_input)
         print(f"   Output shape: {output.shape}")

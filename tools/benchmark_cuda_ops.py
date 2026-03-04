@@ -3,8 +3,8 @@ import argparse
 import time
 import numpy as np
 
-from tensor import Tensor
-from tensor.cuda.ops import available
+from neurx import Tensor
+from neurx.cuda.ops import available
 
 
 def _cuda_runtime_ok():
@@ -41,7 +41,7 @@ def _bench_case(name, fn, warmup, iters):
 
 
 def main():
-    p = argparse.ArgumentParser(description="CUDA op benchmark for tensor.")
+    p = argparse.ArgumentParser(description="CUDA op benchmark for neurx.")
     p.add_argument("--warmup", type=int, default=10)
     p.add_argument("--iters", type=int, default=50)
     p.add_argument("--batch", type=int, default=32)

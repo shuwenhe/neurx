@@ -9,10 +9,10 @@
 ### 1.1 Beam Search（序列生成）
 
 ```python
-import tensor
+import neurx
 
 # 模拟语言模型输出 logits: (batch_size, vocab_size)
-logits = tensor.randn((4, 10000))  # 4 个候选序列，词表 10000
+logits = neurx.randn((4, 10000))  # 4 个候选序列，词表 10000
 
 # 选择概率最高的 Top-5 候选
 beam_width = 5
@@ -26,7 +26,7 @@ print(f"Corresponding log probs: {top_probs.shape}")       # (4, 5)
 
 ```python
 # 相似度得分: (num_queries, num_docs)
-similarity_scores = tensor.rand((10, 1000))
+similarity_scores = neurx.rand((10, 1000))
 
 # 对每个查询的文档按相似度降序排列
 sorted_scores, sorted_indices = similarity_scores.sort(dim=-1, descending=True)
@@ -41,14 +41,14 @@ print(f"Top-10 relevant docs per query: {top10_docs.shape}")  # (10, 10)
 ```python
 # Temperature scaling + Top-k 采样
 temperature = 0.8
-logits = tensor.randn((1, 50000)) / temperature
+logits = neurx.randn((1, 50000)) / temperature
 
 k = 50
 topk_logits, topk_indices = logits.topk(k=k, dim=-1)
 
 # 从 Top-k 中采样（后续可接 softmax + multinomial）
 probs = topk_logits.exp() / topk_logits.exp().sum(dim=-1, keepdim=True)
-# sampled_idx = tensor.multinomial(probs, num_samples=1)  # 待实现
+# sampled_idx = neurx.multinomial(probs, num_samples=1)  # 待实现
 ```
 
 ---
@@ -58,17 +58,17 @@ probs = topk_logits.exp() / topk_logits.exp().sum(dim=-1, keepdim=True)
 ### 2.1 Causal Mask（自回归注意力）
 
 ```python
-import tensor
+import neurx
 
 seq_len = 8
 # 创建下三角掩码（允许 token 只看到过去）
-mask = tensor.ones((seq_len, seq_len))
+mask = neurx.ones((seq_len, seq_len))
 for i in range(seq_len):
     for j in range(i + 1, seq_len):
         mask[i, j] = 0  # 未来位置设为 0
 
 # 注意力分数 (batch, heads, seq_len, seq_len)
-attn_scores = tensor.randn((2, 4, seq_len, seq_len), requires_grad=True)
+attn_scores = neurx.randn((2, 4, seq_len, seq_len), requires_grad=True)
 
 # 用 -inf 填充掩码位置（softmax 后会变成 0）
 causal_mask = mask == 0
@@ -83,14 +83,14 @@ attn_scores_masked = attn_scores.masked_fill(causal_mask, float('-inf'))
 ```python
 # 变长序列: 实际长度 [5, 3, 7] (max_len=8)
 batch_size, max_len, hidden_dim = 3, 8, 512
-seq_lengths = tensor.Tensor([5, 3, 7])
+seq_lengths = neurx.Tensor([5, 3, 7])
 
 # 创建填充掩码 (batch, max_len)
-positions = tensor.arange(max_len).unsqueeze(0).expand(batch_size, max_len)
+positions = neurx.arange(max_len).unsqueeze(0).expand(batch_size, max_len)
 padding_mask = positions >= seq_lengths.unsqueeze(-1)  # True 表示填充位置
 
 # 隐藏状态
-hidden = tensor.randn((batch_size, max_len, hidden_dim))
+hidden = neurx.randn((batch_size, max_len, hidden_dim))
 
 # 填充位置置零
 hidden_masked = hidden.masked_fill(padding_mask.unsqueeze(-1), 0.0)
@@ -104,7 +104,7 @@ print(f"Total valid tokens: {valid_tokens.shape[0] // hidden_dim}")  # 5+3+7=15
 
 ```python
 # 只保留注意力权重 > 0.1 的连接
-attn_weights = tensor.rand((2, 8, 64, 64))  # (batch, heads, seq, seq)
+attn_weights = neurx.rand((2, 8, 64, 64))  # (batch, heads, seq, seq)
 threshold = 0.1
 
 # 小于阈值的位置置零
@@ -122,14 +122,14 @@ print(f"Sparsity: {significant_weights.numel()} / {attn_weights.numel()}")
 ### 3.1 多头注意力维度变换
 
 ```python
-import tensor
+import neurx
 
 batch_size, seq_len, d_model = 2, 10, 512
 num_heads = 8
 d_k = d_model // num_heads  # 64
 
 # 输入 Q: (batch, seq_len, d_model)
-Q = tensor.randn((batch_size, seq_len, d_model), requires_grad=True)
+Q = neurx.randn((batch_size, seq_len, d_model), requires_grad=True)
 
 # 线性投影后: (batch, seq_len, d_model)
 Q_proj = Q  # 假设已做投影
@@ -154,25 +154,25 @@ output = concat.reshape(batch_size, seq_len, d_model)
 
 ```python
 # 从 PyTorch 格式 (N, C, H, W) 转为 TensorFlow 格式 (N, H, W, C)
-x_nchw = tensor.randn((4, 3, 224, 224))
+x_nchw = neurx.randn((4, 3, 224, 224))
 x_nhwc = x_nchw.moveaxis(1, -1)  # 移动 channel 到最后
 print(x_nhwc.shape)  # (4, 224, 224, 3)
 
 # 转回
 x_nchw_back = x_nhwc.moveaxis(-1, 1)
-assert tensor.allclose(x_nchw, x_nchw_back)  # 待实现 allclose
+assert neurx.allclose(x_nchw, x_nchw_back)  # 待实现 allclose
 ```
 
 ### 3.3 批量矩阵乘法维度调整
 
 ```python
 # 批处理矩阵: (batch, M, K) @ (batch, N, K).T
-A = tensor.randn((10, 32, 64))
-B = tensor.randn((10, 16, 64))
+A = neurx.randn((10, 32, 64))
+B = neurx.randn((10, 16, 64))
 
 # 需要 (batch, M, K) @ (batch, K, N)
 B_transposed = B.moveaxis(-1, -2)  # (10, 64, 16)
-result = tensor.matmul(A, B_transposed)  # (10, 32, 16)
+result = neurx.matmul(A, B_transposed)  # (10, 32, 16)
 ```
 
 ---
@@ -182,21 +182,21 @@ result = tensor.matmul(A, B_transposed)  # (10, 32, 16)
 ### 4.1 完整 Attention 前向（含掩码 + Top-K）
 
 ```python
-import tensor
+import neurx
 
 batch, heads, seq_len, d_k = 2, 8, 16, 64
 
 # Q/K/V: (batch, heads, seq_len, d_k)
-Q = tensor.randn((batch, heads, seq_len, d_k), requires_grad=True)
-K = tensor.randn((batch, heads, seq_len, d_k), requires_grad=True)
-V = tensor.randn((batch, heads, seq_len, d_k), requires_grad=True)
+Q = neurx.randn((batch, heads, seq_len, d_k), requires_grad=True)
+K = neurx.randn((batch, heads, seq_len, d_k), requires_grad=True)
+V = neurx.randn((batch, heads, seq_len, d_k), requires_grad=True)
 
 # 计算注意力分数
 K_T = K.transpose(-1, -2)
 scores = Q @ K_T / (d_k ** 0.5)  # (batch, heads, seq_len, seq_len)
 
 # 1. 应用 causal mask
-causal_mask = tensor.ones((seq_len, seq_len))
+causal_mask = neurx.ones((seq_len, seq_len))
 for i in range(seq_len):
     causal_mask[i, i+1:] = 0
 scores = scores.masked_fill(causal_mask == 0, float('-inf'))
@@ -219,14 +219,14 @@ topk_scores, topk_indices = scores.topk(k=k, dim=-1, largest=True)
 ### 4.2 Embedding Table 增量更新（推荐系统）
 
 ```python
-import tensor
+import neurx
 
 vocab_size, embed_dim = 100000, 128
-embedding_table = tensor.zeros((vocab_size, embed_dim), requires_grad=True)
+embedding_table = neurx.zeros((vocab_size, embed_dim), requires_grad=True)
 
 # 批量更新特定 token 的 embedding（如：在线学习、用户反馈）
-update_ids = tensor.Tensor([10, 25, 10, 50, 25], dtype=tensor.int64).unsqueeze(-1)  # 重复 ID 会累加
-gradients = tensor.randn((5, embed_dim)) * 0.01  # 梯度更新
+update_ids = neurx.Tensor([10, 25, 10, 50, 25], dtype=neurx.int64).unsqueeze(-1)  # 重复 ID 会累加
+gradients = neurx.randn((5, embed_dim)) * 0.01  # 梯度更新
 
 # 高效累加（向量化实现，无 Python 循环）
 embedding_table = embedding_table.scatter_add(0, update_ids, gradients)
@@ -241,7 +241,7 @@ print(f"ID=25 embedding norm: {embedding_table[25].norm().item()}")
 ```python
 # 按序列长度对批次样本排序（减少填充浪费）
 batch_size = 32
-seq_lengths = tensor.randint(5, 50, (batch_size,))  # 随机长度
+seq_lengths = neurx.randint(5, 50, (batch_size,))  # 随机长度
 
 # 降序排列
 sorted_lengths, sorted_indices = seq_lengths.sort(descending=True)
@@ -258,16 +258,16 @@ sorted_lengths, sorted_indices = seq_lengths.sort(descending=True)
 ### 5.1 Embedding 更新基准测试
 
 ```python
-import tensor
+import neurx
 import time
 
 vocab_size, embed_dim = 10000, 512
 batch_size, seq_len = 64, 128
 
 # 模拟场景：大批量序列的 token embedding 梯度累加
-update_indices = tensor.randint(0, vocab_size, (batch_size * seq_len, 1))
-update_values = tensor.randn((batch_size * seq_len, embed_dim))
-embedding_table = tensor.zeros((vocab_size, embed_dim))
+update_indices = neurx.randint(0, vocab_size, (batch_size * seq_len, 1))
+update_values = neurx.randn((batch_size * seq_len, embed_dim))
+embedding_table = neurx.zeros((vocab_size, embed_dim))
 
 # 性能测量
 start = time.time()
@@ -333,8 +333,8 @@ t.moveaxis(source=(0, 2), destination=(2, 0))
 ## 8. 完整示例：简化 Transformer Block
 
 ```python
-import tensor
-from tensor import nn
+import neurx
+from neurx import nn
 
 class SimplifiedAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -392,8 +392,8 @@ class SimplifiedAttention(nn.Module):
 
 # 使用
 model = SimplifiedAttention(d_model=512, num_heads=8)
-x = tensor.randn((2, 10, 512), requires_grad=True)
-causal_mask = tensor.ones((1, 1, 10, 10))  # 简化掩码
+x = neurx.randn((2, 10, 512), requires_grad=True)
+causal_mask = neurx.ones((1, 1, 10, 10))  # 简化掩码
 out = model(x, mask=causal_mask)
 print(f"Output shape: {out.shape}")  # (2, 10, 512)
 ```
@@ -405,10 +405,10 @@ print(f"Output shape: {out.shape}")  # (2, 10, 512)
 1. **功能对比文档**：[PYTORCH_GAP_ANALYSIS_2026.md](PYTORCH_GAP_ANALYSIS_2026.md)
 2. **完整测试套件**：`tests/test_tensor_ops_extended.py`
 3. **框架架构**：[FRAMEWORK_ANALYSIS.md](FRAMEWORK_ANALYSIS.md)
-4. **API 参考**：`python/tensor/core/tensor.py` (源码注释)
+4. **API 参考**：`python/neurx/core/neurx.py` (源码注释)
 
 ---
 
 **文档更新时间**：2026 年 3 月 3 日  
-**适用版本**：tensor v0.9+  
+**适用版本**：neurx v0.9+  
 **问题反馈**：提交 Issue 至项目 GitHub（如适用）

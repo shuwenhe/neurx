@@ -8,17 +8,17 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor.nn.activations import (
+from neurx.nn.activations import (
     relu, leaky_relu, sigmoid, tanh, softmax, gelu, swish, mish,
     ReLU, Sigmoid, Softmax, GELU, Swish
 )
 
-from tensor.nn.optim_utils import (
+from neurx.nn.optim_utils import (
     constant_lr, step_lr, polynomial_lr, cosine_lr, one_cycle_lr,
     linear_warmup_cosine_lr, compute_grad_norm, GradientAccumulator
 )
 
-from tensor.nn.loss_extended import (
+from neurx.nn.loss_extended import (
     focal_loss, hinge_loss, triplet_loss, contrastive_loss, 
     ntxent_loss, kullback_leibler_divergence
 )

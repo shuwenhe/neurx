@@ -69,8 +69,8 @@ make clean
 make list
 
 # 测试特定API
-make api API=tensor.einsum
-make api API=tensor.vision.transforms.ToTensor
+make api API=neurx.einsum
+make api API=neurx.vision.transforms.ToTensor
 
 # 测试所有API
 make api-all

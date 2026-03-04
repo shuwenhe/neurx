@@ -1,6 +1,6 @@
 # Scatter/Gather/Meshgrid Quick Reference
 
-A practical guide to using scatter, gather, scatter_add, and meshgrid operations in the tensor framework.
+A practical guide to using scatter, gather, scatter_add, and meshgrid operations in the neurx framework.
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -34,20 +34,20 @@ These operations provide advanced indexing capabilities essential for:
 
 ## Gather Operation
 
-**Purpose**: Select values from a tensor along a dimension using an index tensor.
+**Purpose**: Select values from a neurx along a dimension using an index neurx.
 
 ### Basic Usage
 ```python
-import tensor
+import neurx
 import numpy as np
 
-# Source tensor
-data = tensor.Tensor([[1, 2, 3], 
+# Source neurx
+data = neurx.Tensor([[1, 2, 3], 
                        [4, 5, 6], 
                        [7, 8, 9]])
 
 # Indices to gather (same shape as output)
-index = tensor.Tensor(np.array([[0, 2],   # From row 0, get columns 0 and 2
+index = neurx.Tensor(np.array([[0, 2],   # From row 0, get columns 0 and 2
                                  [1, 0],   # From row 1, get columns 1 and 0
                                  [2, 1]],  # From row 2, get columns 2 and 1
                                 dtype=np.int64))
@@ -61,32 +61,32 @@ result = data.gather(1, index)
 
 ### Parameters
 - `dim` (int): Dimension along which to gather
-- `index` (Tensor): Index tensor (int64), same ndim as self
+- `index` (Tensor): Index neurx (int64), same ndim as self
 - Returns: Tensor with same shape as index
 
 ### Gradient Behavior
-- Gradients flow back to the source tensor at the gathered positions
-- Index tensor doesn't receive gradients (not differentiable)
+- Gradients flow back to the source neurx at the gathered positions
+- Index neurx doesn't receive gradients (not differentiable)
 
 ---
 
 ## Scatter Operation
 
-**Purpose**: Write values from a source tensor into self at positions specified by indices.
+**Purpose**: Write values from a source neurx into self at positions specified by indices.
 
 ### Basic Usage
 ```python
-# Target tensor (will be modified)
-target = tensor.zeros((3, 5))
+# Target neurx (will be modified)
+target = neurx.zeros((3, 5))
 
 # Indices where to scatter
-index = tensor.Tensor(np.array([[0, 2],   # Row 0: write to columns 0 and 2
+index = neurx.Tensor(np.array([[0, 2],   # Row 0: write to columns 0 and 2
                                  [1, 3],   # Row 1: write to columns 1 and 3
                                  [0, 4]],  # Row 2: write to columns 0 and 4
                                 dtype=np.int64))
 
 # Values to scatter
-source = tensor.ones((3, 2))
+source = neurx.ones((3, 2))
 
 # Scatter along dimension 1
 result = target.scatter(1, index, source)
@@ -108,17 +108,17 @@ result = target.scatter(1, index, source)
 
 ### Basic Usage
 ```python
-# Starting tensor (with existing values)
-target = tensor.ones((3, 5))
+# Starting neurx (with existing values)
+target = neurx.ones((3, 5))
 
 # Indices
-index = tensor.Tensor(np.array([[0, 2],
+index = neurx.Tensor(np.array([[0, 2],
                                  [1, 3],
                                  [0, 4]],
                                 dtype=np.int64))
 
 # Values to add (multiply by 2 for clarity)
-source = tensor.ones((3, 2)) * 2
+source = neurx.ones((3, 2)) * 2
 
 # Scatter-add along dimension 1
 result = target.scatter_add(1, index, source)
@@ -136,7 +136,7 @@ result = target.scatter_add(1, index, source)
 ### Use Case: Gradient Accumulation
 ```python
 # Embedding gradient accumulation
-embedding = tensor.zeros((vocab_size, embed_dim), requires_grad=True)
+embedding = neurx.zeros((vocab_size, embed_dim), requires_grad=True)
 token_ids = get_batch_tokens()  # [batch, seq_len, 1]
 gradients = compute_gradients()  # [batch, seq_len, embed_dim]
 
@@ -153,11 +153,11 @@ embedding = embedding.scatter_add(0, token_ids, gradients)
 ### Basic 2D Grid
 ```python
 # Create coordinate vectors
-x = tensor.arange(3)  # [0, 1, 2]
-y = tensor.arange(4)  # [0, 1, 2, 3]
+x = neurx.arange(3)  # [0, 1, 2]
+y = neurx.arange(4)  # [0, 1, 2, 3]
 
 # Cartesian indexing (xy) - default for plotting
-X, Y = tensor.meshgrid(x, y, indexing='xy')
+X, Y = neurx.meshgrid(x, y, indexing='xy')
 
 # X (4x3):              Y (4x3):
 # [[0, 1, 2],           [[0, 0, 0],
@@ -166,7 +166,7 @@ X, Y = tensor.meshgrid(x, y, indexing='xy')
 #  [0, 1, 2]]            [3, 3, 3]]
 
 # Matrix indexing (ij) - natural array order
-X, Y = tensor.meshgrid(x, y, indexing='ij')
+X, Y = neurx.meshgrid(x, y, indexing='ij')
 
 # X (3x4):              Y (3x4):
 # [[0, 0, 0, 0],        [[0, 1, 2, 3],
@@ -189,11 +189,11 @@ X, Y = tensor.meshgrid(x, y, indexing='ij')
 
 ### 3D and Higher
 ```python
-x = tensor.arange(2)
-y = tensor.arange(3)
-z = tensor.arange(4)
+x = neurx.arange(2)
+y = neurx.arange(3)
+z = neurx.arange(4)
 
-X, Y, Z = tensor.meshgrid(x, y, z, indexing='ij')
+X, Y, Z = neurx.meshgrid(x, y, z, indexing='ij')
 # X.shape = Y.shape = Z.shape = (2, 3, 4)
 ```
 
@@ -220,7 +220,7 @@ attention_output = compute_attention(query, topk_keys, topk_values)
 ### 2. Sparse Gradient Updates
 ```python
 # Update only specific embedding rows
-embedding_table = tensor.zeros((vocab_size, embed_dim))
+embedding_table = neurx.zeros((vocab_size, embed_dim))
 
 # Batch of token IDs [batch_size, seq_len]
 token_ids = tokenizer.encode(text)
@@ -240,12 +240,12 @@ embedding_table = embedding_table.scatter_add(
 ```python
 def create_sampling_grid(H, W):
     """Create normalized coordinate grid [-1, 1] for image sampling."""
-    y = tensor.linspace(-1, 1, H)
-    x = tensor.linspace(-1, 1, W)
-    grid_y, grid_x = tensor.meshgrid(y, x, indexing='ij')
+    y = neurx.linspace(-1, 1, H)
+    x = neurx.linspace(-1, 1, W)
+    grid_y, grid_x = neurx.meshgrid(y, x, indexing='ij')
     
     # Stack to [H, W, 2] for x,y coordinates
-    grid = tensor.stack([grid_x, grid_y], dim=-1)
+    grid = neurx.stack([grid_x, grid_y], dim=-1)
     return grid
 
 def apply_affine_transform(image, theta):
@@ -257,7 +257,7 @@ def apply_affine_transform(image, theta):
     
     # Apply transformation
     grid_flat = grid.view(-1, 2)  # [H*W, 2]
-    grid_transformed = tensor.matmul(grid_flat, theta.T)  # [H*W, 2]
+    grid_transformed = neurx.matmul(grid_flat, theta.T)  # [H*W, 2]
     grid_transformed = grid_transformed.view(H, W, 2)
     
     # Sample from image using transformed coordinates
@@ -273,15 +273,15 @@ def visualize_flow(flow):
     H, W = flow.shape[:2]
     
     # Create coordinate grid
-    y = tensor.arange(H, dtype=flow.dtype)
-    x = tensor.arange(W, dtype=flow.dtype)
-    grid_y, grid_x = tensor.meshgrid(y, x, indexing='ij')
+    y = neurx.arange(H, dtype=flow.dtype)
+    x = neurx.arange(W, dtype=flow.dtype)
+    grid_y, grid_x = neurx.meshgrid(y, x, indexing='ij')
     
     # Compute flow magnitude and angle
     flow_x = flow[:, :, 0]
     flow_y = flow[:, :, 1]
-    magnitude = tensor.sqrt(flow_x**2 + flow_y**2)
-    angle = tensor.atan2(flow_y, flow_x)
+    magnitude = neurx.sqrt(flow_x**2 + flow_y**2)
+    angle = neurx.atan2(flow_y, flow_x)
     
     # Convert to HSV (H=angle, S=1, V=magnitude)
     # ... color conversion code ...
@@ -294,12 +294,12 @@ def visualize_flow(flow):
 def create_2d_positional_encoding(H, W, d_model):
     """Create 2D positional encoding for vision transformers."""
     # Create position grids
-    y_pos = tensor.arange(H)
-    x_pos = tensor.arange(W)
-    grid_y, grid_x = tensor.meshgrid(y_pos, x_pos, indexing='ij')
+    y_pos = neurx.arange(H)
+    x_pos = neurx.arange(W)
+    grid_y, grid_x = neurx.meshgrid(y_pos, x_pos, indexing='ij')
     
     # Flatten positions
-    positions = tensor.stack([
+    positions = neurx.stack([
         grid_y.flatten(),
         grid_x.flatten()
     ], dim=-1)  # [H*W, 2]
@@ -316,10 +316,10 @@ def create_2d_positional_encoding(H, W, d_model):
 ### Index Tensor Types
 ```python
 # ✅ CORRECT: Use int64 dtype for indices
-index = tensor.Tensor(np.array([[0, 1, 2]], dtype=np.int64))
+index = neurx.Tensor(np.array([[0, 1, 2]], dtype=np.int64))
 
 # ❌ WRONG: Float indices will cause errors
-index = tensor.Tensor([[0.0, 1.0, 2.0]])  # Error!
+index = neurx.Tensor([[0.0, 1.0, 2.0]])  # Error!
 ```
 
 ### Scatter vs Scatter-Add
@@ -331,15 +331,15 @@ target.scatter(dim, index, source)
 target.scatter_add(dim, index, source)
 
 # Example: If index has duplicates
-index = tensor.Tensor(np.array([[0, 0]], dtype=np.int64))  # Same index twice
-source = tensor.ones((1, 2))
+index = neurx.Tensor(np.array([[0, 0]], dtype=np.int64))  # Same index twice
+source = neurx.ones((1, 2))
 
 # scatter: Only last write survives
-result1 = tensor.zeros(1, 5).scatter(1, index, source)
+result1 = neurx.zeros(1, 5).scatter(1, index, source)
 # result1[0, 0] = 1.0 (last write)
 
 # scatter_add: Both additions happen
-result2 = tensor.zeros(1, 5).scatter_add(1, index, source)
+result2 = neurx.zeros(1, 5).scatter_add(1, index, source)
 # result2[0, 0] = 2.0 (1.0 + 1.0)
 ```
 
@@ -360,9 +360,9 @@ result2 = tensor.zeros(1, 5).scatter_add(1, index, source)
 ```python
 # Meshgrid can create large tensors
 H, W = 4096, 4096
-y = tensor.arange(H)
-x = tensor.arange(W)
-Y, X = tensor.meshgrid(y, x)  # 2 × 4096² × 8 bytes = ~256 MB
+y = neurx.arange(H)
+x = neurx.arange(W)
+Y, X = neurx.meshgrid(y, x)  # 2 × 4096² × 8 bytes = ~256 MB
 
 # Consider chunking for very large grids
 for y_chunk in range(0, H, chunk_size):
@@ -374,17 +374,17 @@ for y_chunk in range(0, H, chunk_size):
 ### Gradient Flow
 ```python
 # Gather and scatter support gradients
-x = tensor.randn((3, 5), requires_grad=True)
-index = tensor.Tensor(np.array([[0, 2]], dtype=np.int64))
+x = neurx.randn((3, 5), requires_grad=True)
+index = neurx.Tensor(np.array([[0, 2]], dtype=np.int64))
 y = x.gather(1, index)
 loss = y.sum()
 loss.backward()
 # x.grad will have non-zero values at gathered positions
 
 # Meshgrid does not require gradients (coordinate generation)
-y = tensor.arange(100)
-x = tensor.arange(100)
-Y, X = tensor.meshgrid(y, x)
+y = neurx.arange(100)
+x = neurx.arange(100)
+Y, X = neurx.meshgrid(y, x)
 # No gradient tracking needed
 ```
 
@@ -412,7 +412,7 @@ Current implementation is CPU-only. CUDA kernels planned for:
 
 ## Additional Resources
 
-- **Full API Documentation**: See `tensor.Tensor.gather`, `scatter`, `scatter_add`
+- **Full API Documentation**: See `neurx.Tensor.gather`, `scatter`, `scatter_add`
 - **Test Suite**: `tests/test_scatter_gather.py` for comprehensive examples
 - **PyTorch Comparison**: `docs/pytorch_comparison_analysis.md`
 
@@ -427,4 +427,4 @@ Current implementation is CPU-only. CUDA kernels planned for:
 | Accumulate at indices | `scatter_add` |
 | Create coordinate grids | `meshgrid` |
 
-These operations enable advanced tensor manipulations essential for modern deep learning architectures!
+These operations enable advanced neurx manipulations essential for modern deep learning architectures!

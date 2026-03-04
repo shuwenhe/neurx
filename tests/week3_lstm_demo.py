@@ -7,12 +7,12 @@ This is a simplified example showing the integration of Week 3 components.
 """
 
 import numpy as np
-from tensor.core.tensor import Tensor
-from tensor.nn.rnn import LSTM
-from tensor.nn import Linear
-from tensor.optim.optim import SGD
-from tensor.optim.losses import CrossEntropyLoss
-from tensor.optim.schedulers import StepLR
+from neurx.core.neurx import Tensor
+from neurx.nn.rnn import LSTM
+from neurx.nn import Linear
+from neurx.optim.optim import SGD
+from neurx.optim.losses import CrossEntropyLoss
+from neurx.optim.schedulers import StepLR
 
 
 def create_dummy_dataset(num_samples=10, seq_length=5, vocab_size=100, num_classes=3):
@@ -187,7 +187,7 @@ def test_loss_functions():
     print("Testing Loss Functions")
     print("=" * 70)
     
-    from tensor.optim.losses import (
+    from neurx.optim.losses import (
         MSELoss, L1Loss, BCEWithLogitsLoss, CrossEntropyLoss, KLDivLoss
     )
     
@@ -251,7 +251,7 @@ def test_schedulers():
     print("Testing Learning Rate Schedulers")
     print("=" * 70)
     
-    from tensor.optim.schedulers import (
+    from neurx.optim.schedulers import (
         StepLR, ExponentialLR, CosineAnnealingLR, WarmupLR, ReduceLROnPlateau
     )
     

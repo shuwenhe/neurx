@@ -8,21 +8,21 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/shuwen/neurx/python')
 
-from tensor.nn.activations import (
+from neurx.nn.activations import (
     relu, leaky_relu, elu, selu, sigmoid, tanh, softmax, log_softmax,
     softplus, softsign, swish, mish, gelu, hardshrink, softshrink, hardtanh,
     threshold, glu, prelu, rrelu,
     ReLU, LeakyReLU, ELU, SELU, Sigmoid, Tanh, Softmax, LogSoftmax,
 )
 
-from tensor.nn.optim_utils import (
+from neurx.nn.optim_utils import (
     constant_lr, step_lr, exponential_lr, polynomial_lr, cosine_lr,
     linear_warmup_lr, linear_warmup_cosine_lr, cyclic_lr, one_cycle_lr,
     apply_weight_decay, compute_grad_norm, adam_momentum_update,
     LRScheduler, GradientAccumulator,
 )
 
-from tensor.nn.loss_extended import (
+from neurx.nn.loss_extended import (
     focal_loss, focal_loss_multi, hinge_loss, smooth_l1_loss,
     triplet_loss, contrastive_loss, ntxent_loss, center_loss,
     kullback_leibler_divergence, wasserstein_loss,

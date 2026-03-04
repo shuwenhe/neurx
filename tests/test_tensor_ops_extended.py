@@ -1,6 +1,6 @@
 import numpy as np
 
-from tensor import Tensor, bmm, cat, chunk, eig, inverse, matmul, mm, split, stack, svd, where
+from neurx import Tensor, bmm, cat, chunk, eig, inverse, matmul, mm, split, stack, svd, where
 
 
 def test_arithmetic_div_pow_and_backward():

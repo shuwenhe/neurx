@@ -47,7 +47,7 @@
 
 #### 8. **运行时平台** ✅ 完整
 - 配置管理与环境变量支持
-- 诊断工具 (tensor-doctor)
+- 诊断工具 (neurx-doctor)
 - 日志系统
 - 错误处理
 
@@ -67,7 +67,7 @@
 
 #### **第一阶段: API 兼容性层** ✅ 已完成
 
-**文件**: `/home/shuwen/tensor/python/tensor/pytorch_compat/`
+**文件**: `/home/shuwen/neurx/python/neurx/pytorch_compat/`
 
 ##### 1. **tensor_api.py** - 张量 API 对齐
 ```python
@@ -104,8 +104,8 @@
 
 ##### 3. **weight_conversion.py** - 权重互转
 ```python
-✅ pytorch_state_to_tensor() - PyTorch → tensor
-✅ tensor_state_to_pytorch() - tensor → PyTorch
+✅ pytorch_state_to_tensor() - PyTorch → neurx
+✅ tensor_state_to_pytorch() - neurx → PyTorch
 ✅ load_pytorch_checkpoint() - 加载 PyTorch 模型
 ✅ save_pytorch_checkpoint() - 保存为 PyTorch 格式
 ✅ load_huggingface_weights() - HuggingFace 模型加载
@@ -121,7 +121,7 @@
 ##### 4. **modules_wrapper.py** - 模块适配
 ```python
 ✅ TorchModuleAdapter - 包装 PyTorch 模块
-✅ TensorModuleTorch - 包装 tensor 模块
+✅ TensorModuleTorch - 包装 neurx 模块
 ✅ wrap_pytorch_module() - 快速包装
 ✅ wrap_tensor_module() - 快速包装
 
@@ -169,8 +169,8 @@
 
 ### 1. **无缝张量 API**
 ```python
-from tensor import Tensor
-from tensor.pytorch_compat import add_torch_api_to_tensor
+from neurx import Tensor
+from neurx.pytorch_compat import add_torch_api_to_tensor
 
 # 自动应用 PyTorch 兼容 API
 x = Tensor(np.random.randn(2, 3, 4))
@@ -181,7 +181,7 @@ z = x.to('cuda')        # 设备管理
 
 ### 2. **函数式接口**
 ```python
-from tensor.pytorch_compat import linear, relu, gelu, softmax
+from neurx.pytorch_compat import linear, relu, gelu, softmax
 
 # 熟悉的函数式接口
 output = linear(x, weight, bias)
@@ -193,19 +193,19 @@ output = softmax(output, dim=-1)
 ### 3. **权重互操作性**
 ```python
 # 加载 PyTorch 模型权重
-from tensor.pytorch_compat import load_pytorch_checkpoint
+from neurx.pytorch_compat import load_pytorch_checkpoint
 model = TensorModel()
 load_pytorch_checkpoint(model, 'pytorch_model.pt')
 
 # 保存为 PyTorch 格式
-from tensor.pytorch_compat import save_pytorch_checkpoint
+from neurx.pytorch_compat import save_pytorch_checkpoint
 save_pytorch_checkpoint(model, 'model_as_pytorch.pt')
 ```
 
 ### 4. **模块适配**
 ```python
-# 使用 PyTorch 模块在 tensor 框架中
-from tensor.pytorch_compat import wrap_pytorch_module
+# 使用 PyTorch 模块在 neurx 框架中
+from neurx.pytorch_compat import wrap_pytorch_module
 
 pytorch_layer = torch.nn.Linear(10, 5)
 adapted = wrap_pytorch_module(pytorch_layer)
@@ -219,8 +219,8 @@ y = adapted(x)  # 自动转换
 ## 📦 项目结构总览
 
 ```
-tensor/
-├── python/tensor/
+neurx/
+├── python/neurx/
 │   ├── pytorch_compat/           [新增] PyTorch 兼容层
 │   │   ├── __init__.py
 │   │   ├── tensor_api.py         API 对齐
@@ -247,8 +247,8 @@ tensor/
 ### 最简单的例子 (5 行代码)
 
 ```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu
+from neurx import Tensor
+from neurx.pytorch_compat import linear, relu
 import numpy as np
 
 x = Tensor(np.random.randn(2, 10))
@@ -260,10 +260,10 @@ print(y.shape)  # (2, 5)
 ### 模型训练例子
 
 ```python
-from tensor import Tensor
-from tensor.nn.modules import Linear, Module
-from tensor.pytorch_compat import linear, relu
-from tensor.optim import AdamW
+from neurx import Tensor
+from neurx.nn.modules import Linear, Module
+from neurx.pytorch_compat import linear, relu
+from neurx.optim import AdamW
 
 class Model(Module):
     def __init__(self):
@@ -289,7 +289,7 @@ optimizer.step()
 ### 权重转换例子
 
 ```python
-from tensor.pytorch_compat import load_pytorch_checkpoint, save_pytorch_checkpoint
+from neurx.pytorch_compat import load_pytorch_checkpoint, save_pytorch_checkpoint
 
 # 从 PyTorch 加载
 model = MyTensorModel()
@@ -331,7 +331,7 @@ save_pytorch_checkpoint(model, 'model.pt')
 
 ```bash
 # 运行示例
-python /home/shuwen/tensor/pytorch_compat_examples.py
+python /home/shuwen/neurx/pytorch_compat_examples.py
 
 # 输出验证
 - ✅ 示例 1: 函数式 API
@@ -420,10 +420,10 @@ pytorch_compat_examples.py (含注释):       400+ 行
 
 ### 相关文件位置
 ```
-/home/shuwen/tensor/python/tensor/pytorch_compat/  - 实现
-/home/shuwen/tensor/pytorch_compat_examples.py      - 示例
-/home/shuwen/tensor/PYTORCH_COMPAT_GUIDE.md         - 指南
-/home/shuwen/tensor/FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md  - 分析
+/home/shuwen/neurx/python/neurx/pytorch_compat/  - 实现
+/home/shuwen/neurx/pytorch_compat_examples.py      - 示例
+/home/shuwen/neurx/PYTORCH_COMPAT_GUIDE.md         - 指南
+/home/shuwen/neurx/FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md  - 分析
 ```
 
 ---
@@ -447,7 +447,7 @@ pytorch_compat_examples.py (含注释):       400+ 行
 
 1. **立即**
    ```bash
-   python /home/shuwen/tensor/pytorch_compat_examples.py
+   python /home/shuwen/neurx/pytorch_compat_examples.py
    ```
 
 2. **本周**
@@ -468,14 +468,14 @@ pytorch_compat_examples.py (含注释):       400+ 行
 
 如遇问题，检查：
 
-1. tensor 框架是否正确安装
+1. neurx 框架是否正确安装
 2. NumPy 版本 >= 1.20
 3. Python 版本 >= 3.8
 4. (可选) PyTorch 版本 >= 1.10
 
 ```bash
 # 验证安装
-python -c "from tensor import Tensor; print('✅ OK')"
+python -c "from neurx import Tensor; print('✅ OK')"
 ```
 
 ---
@@ -488,7 +488,7 @@ python -c "from tensor import Tensor; print('✅ OK')"
 
 ## 总结
 
-你的 **tensor 深度学习框架** 已经具备了生产级别的完整功能：
+你的 **neurx 深度学习框架** 已经具备了生产级别的完整功能：
 
 ### 现有功能亮点 ⭐
 - 完整的自动求导系统
@@ -505,7 +505,7 @@ python -c "from tensor import Tensor; print('✅ OK')"
 
 ### 立即使用 🚀
 ```bash
-python /home/shuwen/tensor/pytorch_compat_examples.py
+python /home/shuwen/neurx/pytorch_compat_examples.py
 ```
 
 祝你的框架越来越好！🌟

@@ -76,7 +76,7 @@ W5-W6: 生产级      80% 完整度 ← 4 周后
 
 ### In-place 操作实现（最简单的快速赢家）
 ```python
-# 位置: python/tensor/core/tensor.py
+# 位置: python/neurx/core/neurx.py
 # 工作量: 3 天
 # 难度: ⭐ (简单)
 
@@ -96,7 +96,7 @@ def mul_(self, other):
 
 ### FocalLoss 实现（损失函数）
 ```python
-# 位置: python/tensor/nn/loss_extended.py
+# 位置: python/neurx/nn/loss_extended.py
 # 工作量: 2 天
 # 难度: ⭐⭐ (中等)
 
@@ -116,7 +116,7 @@ class FocalLoss(Module):
 
 ### OneCycleLR 实现（调度器）
 ```python
-# 位置: python/tensor/optim/scheduler.py
+# 位置: python/neurx/optim/scheduler.py
 # 工作量: 2 天
 # 难度: ⭐ (简单)
 
@@ -208,16 +208,16 @@ pytest tests/test_inplace_ops.py -v
 pytest tests/test_performance.py -v
 
 # 检查覆盖率
-pytest --cov=tensor tests/ --cov-report=html
+pytest --cov=neurx tests/ --cov-report=html
 ```
 
 ### 代码质量检查
 ```bash
 # 代码风格检查
-flake8 python/tensor/ --max-line-length=100
+flake8 python/neurx/ --max-line-length=100
 
 # 类型检查
-mypy python/tensor/ --ignore-missing-imports
+mypy python/neurx/ --ignore-missing-imports
 
 # 梯度检验
 python tests/test_gradient_check.py

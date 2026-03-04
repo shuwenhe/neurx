@@ -5,8 +5,8 @@
 ### 已创建的文件结构
 
 ```
-tensor/
-└── python/tensor/pytorch_compat/
+neurx/
+└── python/neurx/pytorch_compat/
     ├── __init__.py                 # 公共 API 导出
     ├── tensor_api.py               # Tensor 属性/方法增强
     ├── functional.py               # torch.nn.functional 兼容函数
@@ -23,8 +23,8 @@ pytorch_compat_examples.py          # 使用示例和测试
 ### 1. 导入和基本使用
 
 ```python
-from tensor import Tensor
-from tensor.pytorch_compat import linear, relu, gelu, softmax
+from neurx import Tensor
+from neurx.pytorch_compat import linear, relu, gelu, softmax
 import numpy as np
 
 # 创建张量
@@ -70,7 +70,7 @@ m = x.mean(dim=2)
 ### 3. 权重转换
 
 ```python
-from tensor.pytorch_compat import load_pytorch_checkpoint, save_pytorch_checkpoint
+from neurx.pytorch_compat import load_pytorch_checkpoint, save_pytorch_checkpoint
 
 # 从 PyTorch 加载
 model = MyTensorModel()
@@ -88,7 +88,7 @@ save_pytorch_checkpoint(
 ### 4. 模块适配
 
 ```python
-from tensor.pytorch_compat import wrap_pytorch_module, wrap_tensor_module
+from neurx.pytorch_compat import wrap_pytorch_module, wrap_tensor_module
 
 # 包装 PyTorch 模块
 pytorch_linear = torch.nn.Linear(10, 5)
@@ -97,7 +97,7 @@ adapter = wrap_pytorch_module(pytorch_linear)
 x = Tensor(np.random.randn(2, 10))
 y = adapter(x)  # 自动转换输入/输出
 
-# 包装 tensor 模块
+# 包装 neurx 模块
 tensor_model = MyTensorModel()
 torch_compatible = wrap_tensor_module(tensor_model)
 
@@ -109,7 +109,7 @@ y = torch_compatible(x)  # 返回 torch.Tensor
 
 ## 📚 API 文档
 
-### 函数式接口 (tensor.pytorch_compat.functional)
+### 函数式接口 (neurx.pytorch_compat.functional)
 
 | 函数 | 签名 | 说明 |
 |------|------|------|
@@ -146,7 +146,7 @@ y = torch_compatible(x)  # 返回 torch.Tensor
 | `.sum(dim=None, keepdim=False)` | 方法 | 求和 |
 | `.mean(dim=None, keepdim=False)` | 方法 | 均值 |
 
-### 权重转换 (tensor.pytorch_compat.weight_conversion)
+### 权重转换 (neurx.pytorch_compat.weight_conversion)
 
 | 函数 | 说明 |
 |------|------|
@@ -156,12 +156,12 @@ y = torch_compatible(x)  # 返回 torch.Tensor
 | `tensor_state_to_pytorch(state_dict, layer_mapping=None)` | 反向转换 |
 | `load_huggingface_weights(model, model_name_or_path, device='cpu')` | 从 HF Hub 加载 |
 
-### 模块适配 (tensor.pytorch_compat.modules_wrapper)
+### 模块适配 (neurx.pytorch_compat.modules_wrapper)
 
 | 类 | 说明 |
 |----|------|
-| `TorchModuleAdapter` | 将 PyTorch 模块适配到 tensor 框架 |
-| `TensorModuleTorch` | 将 tensor 模块适配到 PyTorch 接口 |
+| `TorchModuleAdapter` | 将 PyTorch 模块适配到 neurx 框架 |
+| `TensorModuleTorch` | 将 neurx 模块适配到 PyTorch 接口 |
 
 ---
 
@@ -250,7 +250,7 @@ with torch.no_grad():  # 如果与 PyTorch 混合使用
 运行示例测试：
 
 ```bash
-cd /home/shuwen/tensor
+cd /home/shuwen/neurx
 python pytorch_compat_examples.py
 ```
 
@@ -281,7 +281,7 @@ device: cpu
 
 ## 🔄 与 PyTorch 的互操作
 
-### 从 PyTorch 迁移到 tensor
+### 从 PyTorch 迁移到 neurx
 
 ```python
 # PyTorch 代码
@@ -290,8 +290,8 @@ model = torch.nn.Linear(10, 5)
 x = torch.randn(2, 10)
 y = model(x)
 
-# 转换为 tensor
-from tensor.pytorch_compat import load_pytorch_checkpoint, wrap_tensor_module
+# 转换为 neurx
+from neurx.pytorch_compat import load_pytorch_checkpoint, wrap_tensor_module
 
 tensor_model = MyTensorLinear(10, 5)
 load_pytorch_checkpoint(tensor_model, 'pytorch_model.pt')
@@ -300,19 +300,19 @@ x_tensor = Tensor(x.numpy())
 y_tensor = tensor_model(x_tensor)
 ```
 
-### 从 tensor 迁移到 PyTorch
+### 从 neurx 迁移到 PyTorch
 
 ```python
-# tensor 代码
-from tensor import Tensor
-from tensor.nn.modules import Linear
+# neurx 代码
+from neurx import Tensor
+from neurx.nn.modules import Linear
 
 model = Linear(10, 5)
 x = Tensor(np.random.randn(2, 10))
 y = model(x)
 
 # 转换为 PyTorch
-from tensor.pytorch_compat import save_pytorch_checkpoint, wrap_tensor_module
+from neurx.pytorch_compat import save_pytorch_checkpoint, wrap_tensor_module
 
 save_pytorch_checkpoint(model, 'model_as_pytorch.pt')
 
@@ -329,7 +329,7 @@ y_torch = torch_model(x_torch)
 
 **问题**: 加载的权重形状不匹配
 
-**解决**: PyTorch Linear 权重是 (out_features, in_features)，而 tensor 可能期望 (in_features, out_features)。
+**解决**: PyTorch Linear 权重是 (out_features, in_features)，而 neurx 可能期望 (in_features, out_features)。
 
 ```python
 # 自动处理
@@ -388,9 +388,9 @@ print(result['missing'])
 
 如有问题，请参考：
 
-1. **官方文档**: `/home/shuwen/tensor/FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md`
-2. **示例代码**: `/home/shuwen/tensor/pytorch_compat_examples.py`
-3. **测试用例**: `/home/shuwen/tensor/tests/test_pytorch_compat.py` (待创建)
+1. **官方文档**: `/home/shuwen/neurx/FRAMEWORK_ANALYSIS_AND_PYTORCH_ROADMAP.md`
+2. **示例代码**: `/home/shuwen/neurx/pytorch_compat_examples.py`
+3. **测试用例**: `/home/shuwen/neurx/tests/test_pytorch_compat.py` (待创建)
 
 ---
 
@@ -398,7 +398,7 @@ print(result['missing'])
 
 在使用 PyTorch 兼容层时，确保：
 
-- [ ] `tensor` 框架已正确安装
+- [ ] `neurx` 框架已正确安装
 - [ ] NumPy 版本 >= 1.20
 - [ ] Python 版本 >= 3.8
 - [ ] (可选) PyTorch 已安装用于权重转换

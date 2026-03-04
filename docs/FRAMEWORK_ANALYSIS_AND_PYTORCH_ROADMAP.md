@@ -14,7 +14,7 @@
   - 基本的张量操作 (cat, stack, split, chunk 等)
   - 矩阵运算 (mm, bmm, matmul, inverse, svd, eig)
 
-### 2. 神经网络层 (tensor.nn.modules)
+### 2. 神经网络层 (neurx.nn.modules)
 已实现的层:
 
 #### 基础层
@@ -59,20 +59,20 @@
 - `MoE` - 混合专家网络
 - 其他注意力变体
 
-### 3. 优化器 (tensor.optim)
+### 3. 优化器 (neurx.optim)
 | 优化器 | 实现状态 | 特性 |
 |-------|--------|------|
 | `AdamW` | ✅ | Adam with Weight Decay |
 | `clip_grad_norm` | ✅ | 梯度裁剪 |
 | `Optimizer` 基类 | ✅ | 通用优化器接口 |
 
-### 4. 损失函数 (tensor.losses)
+### 4. 损失函数 (neurx.losses)
 | 损失函数 | 实现状态 | 用途 |
 |---------|--------|------|
 | `cross_entropy` | ✅ | 交叉熵损失 |
 | `cross_entropy_loss` | ✅ | 标量损失版本 |
 
-### 5. 训练工具 (tensor.training)
+### 5. 训练工具 (neurx.training)
 | 工具 | 实现状态 | 功能 |
 |-----|--------|------|
 | `run_training_loop` | ✅ | 标准训练循环 |
@@ -81,13 +81,13 @@
 | `autocast` (AMP) | ✅ | 自动混合精度 |
 | `GradScaler` | ✅ | 梯度缩放 |
 
-### 6. 数据管道 (tensor.data)
+### 6. 数据管道 (neurx.data)
 | 组件 | 实现状态 | 功能 |
 |-----|--------|------|
 | `Dataset` | ✅ | 数据集基类 |
 | `DataLoader` | ✅ | 数据加载器 |
 
-### 7. CUDA 扩展 (tensor.cuda)
+### 7. CUDA 扩展 (neurx.cuda)
 | 功能 | 实现状态 | 操作 |
 |-----|--------|------|
 | GPU 张量 | ✅ | 内存管理 |
@@ -96,21 +96,21 @@
 | Softmax | ✅ | GPU 优化 |
 | 归约操作 | ✅ | sum, mean, max, min |
 
-### 8. 运行时平台 (tensor.platform)
+### 8. 运行时平台 (neurx.platform)
 | 组件 | 实现状态 | 功能 |
 |-----|--------|------|
 | `RuntimeConfig` | ✅ | 配置管理 |
 | `doctor` | ✅ | 诊断工具 |
 | 环境变量配置 | ✅ | TENSOR_DEVICE, TENSOR_LOG_LEVEL 等 |
 
-### 9. 编译 API (tensor.compile)
+### 9. 编译 API (neurx.compile)
 | 功能 | 实现状态 | 状态 |
 |-----|--------|------|
 | `compile_module` | ✅ | API 边界定义 |
 | 图编译 | 📋 | 规划中 |
 | 内核融合 | 📋 | 规划中 |
 
-### 10. 分布式 (tensor.distributed)
+### 10. 分布式 (neurx.distributed)
 | 功能 | 实现状态 | 状态 |
 |-----|--------|------|
 | `detect_distributed_config` | ✅ | 配置检测 |
@@ -124,7 +124,7 @@
 
 #### Phase 1.1: 张量 API 对齐
 ```python
-# tensor/pytorch_compat/tensor_api.py
+# neurx/pytorch_compat/tensor_api.py
 - torch.Tensor 兼容的属性访问
 - .shape, .dtype, .device 属性
 - .to(device) 设备转移
@@ -137,7 +137,7 @@
 
 #### Phase 1.2: 操作算子兼容 (torch.nn.functional)
 ```python
-# tensor/pytorch_compat/functional.py
+# neurx/pytorch_compat/functional.py
 - F.linear(input, weight, bias)
 - F.conv2d / F.conv1d (如果支持卷积)
 - F.relu, F.gelu, F.sigmoid, F.softmax
@@ -152,15 +152,15 @@
 
 #### Phase 1.3: 通用 Module 包装
 ```python
-# tensor/pytorch_compat/modules_wrapper.py
+# neurx/pytorch_compat/modules_wrapper.py
 class TorchModuleAdapter(Module):
-    """将 PyTorch 模块自动包装为 tensor 框架兼容"""
+    """将 PyTorch 模块自动包装为 neurx 框架兼容"""
     def forward(self, *args, **kwargs):
         # 自动转换输入/输出
         pass
 
 class TensorModuleTorch(torch.nn.Module):
-    """将 tensor 模块包装为 PyTorch 兼容"""
+    """将 neurx 模块包装为 PyTorch 兼容"""
     def forward(self, *args, **kwargs):
         pass
 ```
@@ -173,9 +173,9 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 2.1: 模型权重转换
 ```python
-# tensor/pytorch_compat/weight_conversion.py
-- 从 PyTorch state_dict 加载到 tensor
-- 从 tensor state_dict 导出为 PyTorch 格式
+# neurx/pytorch_compat/weight_conversion.py
+- 从 PyTorch state_dict 加载到 neurx
+- 从 neurx state_dict 导出为 PyTorch 格式
 - 处理命名约定差异
 - 权重格式对齐 (转置等)
 
@@ -189,7 +189,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 2.2: 模型架构映射
 ```python
-# tensor/pytorch_compat/model_mapping.py
+# neurx/pytorch_compat/model_mapping.py
 预定义映射:
 - Linear ↔ torch.nn.Linear
 - LayerNorm ↔ torch.nn.LayerNorm
@@ -206,7 +206,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 3.1: ONNX 导出
 ```python
-# tensor/pytorch_compat/onnx_export.py
+# neurx/pytorch_compat/onnx_export.py
 - export_to_onnx(model, input_shape, output_path)
 - 支持动态批大小
 - 优化器追踪
@@ -216,7 +216,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 3.2: TorchScript 兼容
 ```python
-# tensor/pytorch_compat/torchscript.py
+# neurx/pytorch_compat/torchscript.py
 - JIT 编译追踪
 - 静态类型注解
 - 序列化格式
@@ -226,7 +226,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 3.3: 量化与剪枝
 ```python
-# tensor/pytorch_compat/quantization.py
+# neurx/pytorch_compat/quantization.py
 - 动态量化
 - 静态量化
 - 结构化剪枝
@@ -240,7 +240,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 4.1: 融合算子
 ```python
-# tensor/pytorch_compat/fused_ops.py
+# neurx/pytorch_compat/fused_ops.py
 - fused_linear_gelu
 - fused_linear_dropout
 - fused_attention
@@ -251,7 +251,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 #### Phase 4.2: 混合精度训练 (AMP)
 ```python
-# tensor/pytorch_compat/amp.py
+# neurx/pytorch_compat/amp.py
 - torch.cuda.amp.autocast() 兼容
 - torch.cuda.amp.GradScaler() 兼容
 ```
@@ -264,7 +264,7 @@ class TensorModuleTorch(torch.nn.Module):
 
 ### 3.1 架构设计
 ```
-tensor/
+neurx/
   pytorch_compat/
     __init__.py                 # 公共 API 导出
     tensor_api.py               # Tensor 属性/方法
@@ -338,11 +338,11 @@ def test_numerical_precision():
 ### 示例 1: 实现 torch.nn.functional.linear
 
 ```python
-# tensor/pytorch_compat/functional.py
+# neurx/pytorch_compat/functional.py
 
 import numpy as np
-from tensor.tensor import Tensor
-from tensor.nn.modules import Linear
+from neurx.neurx import Tensor
+from neurx.nn.modules import Linear
 
 def linear(input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
     """
@@ -378,7 +378,7 @@ def linear(input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
 ### 示例 2: 权重转换
 
 ```python
-# tensor/pytorch_compat/weight_conversion.py
+# neurx/pytorch_compat/weight_conversion.py
 
 def load_pytorch_checkpoint(tensor_model, pytorch_checkpoint_path):
     """从 PyTorch 检查点加载权重"""
@@ -399,7 +399,7 @@ def load_pytorch_checkpoint(tensor_model, pytorch_checkpoint_path):
         
         tensor_state[name] = numpy_param
     
-    # 加载到 tensor 模型
+    # 加载到 neurx 模型
     tensor_model.load_state_dict(tensor_state)
 ```
 
@@ -429,7 +429,7 @@ def load_pytorch_checkpoint(tensor_model, pytorch_checkpoint_path):
 创建一个最小的 PyTorch 兼容层:
 
 ```python
-# tensor/pytorch_compat/__init__.py
+# neurx/pytorch_compat/__init__.py
 
 from .tensor_api import make_torch_compatible
 from .functional import linear, relu, gelu, layer_norm
@@ -442,7 +442,7 @@ __all__ = [
 ]
 
 def make_torch_compatible(tensor_model):
-    """将 tensor 模型包装为 PyTorch 兼容"""
+    """将 neurx 模型包装为 PyTorch 兼容"""
     # 动态添加 PyTorch 风格的方法
     pass
 ```
@@ -452,8 +452,8 @@ def make_torch_compatible(tensor_model):
 ```python
 # tests/test_pytorch_basic.py
 
-import tensor as t
-from tensor.pytorch_compat import linear, load_pytorch_checkpoint
+import neurx as t
+from neurx.pytorch_compat import linear, load_pytorch_checkpoint
 
 def test_linear_forward():
     """测试线性层与 PyTorch 数值一致"""
@@ -470,9 +470,9 @@ def test_linear_forward():
     
     # 验证与 PyTorch 一致
     import torch
-    x_torch = torch.tensor(x.data)
-    w_torch = torch.tensor(w.data.T)  # 转置
-    b_torch = torch.tensor(b.data)
+    x_torch = torch.neurx(x.data)
+    w_torch = torch.neurx(w.data.T)  # 转置
+    b_torch = torch.neurx(b.data)
     y_torch = torch.nn.functional.linear(x_torch, w_torch, b_torch)
     
     np.testing.assert_allclose(y.data, y_torch.numpy(), rtol=1e-5)

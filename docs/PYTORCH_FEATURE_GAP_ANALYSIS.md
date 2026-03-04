@@ -456,7 +456,7 @@ Week 7+ (第三阶段)
 
 ```
 文件结构:
-python/tensor/nn/
+python/neurx/nn/
 ├── rnn.py (新文件)
 │   ├── LSTMCell (200行)
 │   ├── LSTM (300行)
@@ -482,7 +482,7 @@ python/tensor/nn/
 
 ```
 文件结构:
-python/tensor/nn/
+python/neurx/nn/
 ├── attention.py (新文件)
 │   ├── ScaledDotProductAttention (150行)
 │   ├── MultiheadAttention (350行)
@@ -505,7 +505,7 @@ python/tensor/nn/
 
 ```
 文件结构:
-python/tensor/nn/
+python/neurx/nn/
 ├── transformer.py (新文件)
 │   ├── TransformerEncoderLayer (300行)
 │   ├── TransformerEncoder (200行)

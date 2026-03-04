@@ -30,7 +30,7 @@ class InitFunctions:
     def orthogonal(shape):
         """正交初始化"""
         if len(shape) < 2:
-            raise ValueError("Orthogonal init requires at least 2D tensor")
+            raise ValueError("Orthogonal init requires at least 2D neurx")
         # 简化的 QR 分解
         a = np.random.normal(0, 1, shape)
         q, r = np.linalg.qr(a.reshape(-1, shape[-1]))

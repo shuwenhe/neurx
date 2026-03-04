@@ -5,11 +5,11 @@ import numpy as np
 
 os.environ["TENSOR_DEVICE"] = "cpu"
 
-from tensor.data import DataLoader
-from tensor.nn import Linear
-from tensor.optim import AdamW
-from tensor.tensor import Tensor
-from tensor.training import CheckpointManager, GradScaler, TrainingLogger, run_training_loop
+from neurx.data import DataLoader
+from neurx.nn import Linear
+from neurx.optim import AdamW
+from neurx.neurx import Tensor
+from neurx.training import CheckpointManager, GradScaler, TrainingLogger, run_training_loop
 
 
 def _build_batches(n=12, d=3):
