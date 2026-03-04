@@ -414,10 +414,17 @@ def resume_from_checkpoint(checkpoint: Checkpoint) -> Dict[str, Any]:
         Dictionary with resumption state
     """
     
+    learning_rate = None
+    if isinstance(checkpoint.optimizer_state, dict):
+        learning_rate = checkpoint.optimizer_state.get('learning_rate')
+        if learning_rate is None:
+            learning_rate = checkpoint.optimizer_state.get('lr')
+
     return {
         'start_epoch': checkpoint.epoch + 1,
         'weights': checkpoint.weights,
         'optimizer_state': checkpoint.optimizer_state,
+        'learning_rate': learning_rate,
         'last_metrics': checkpoint.metrics,
     }
 

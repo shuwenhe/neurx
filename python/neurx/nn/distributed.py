@@ -38,8 +38,18 @@ class DeviceManager:
         }
         return devices
     
-    def get_device(self) -> str:
-        """Get current device string."""
+    def get_device(self, device_type: Optional[str] = None, device_id: int = 0) -> str:
+        """Get current device string; optionally update current selection."""
+        if device_type is not None:
+            if device_type in ('cpu', 'cuda'):
+                self.device_type = device_type
+                self.device_id = int(device_id)
+            elif device_type in ('gpu',):
+                self.device_type = 'cuda'
+                self.device_id = int(device_id)
+            else:
+                raise ValueError(f"Unsupported device type: {device_type}")
+
         if self.device_type == 'cuda' and self.device_id >= 0:
             return f"{self.device_type}:{self.device_id}"
         return self.device_type
@@ -124,6 +134,9 @@ class DataParallel:
         
         # Concatenate outputs from all devices
         return np.concatenate(outputs, axis=0)
+
+    def __call__(self, inputs: np.ndarray, *args, **kwargs) -> np.ndarray:
+        return self.forward(inputs, *args, **kwargs)
     
     def get_model(self):
         """Get underlying model."""
