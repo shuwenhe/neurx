@@ -1,6 +1,29 @@
 import numpy as np
+from collections import namedtuple
 
 from neurx.neurx import Tensor
+
+
+IncompatibleKeys = namedtuple(
+    "IncompatibleKeys",
+    ["missing_keys", "unexpected_keys", "shape_mismatch", "dtype_mismatch"],
+    defaults=[[], [], [], []]  # 默认空列表
+)
+
+
+def _make_incompatible_keys(
+    missing_keys=None,
+    unexpected_keys=None,
+    shape_mismatch=None,
+    dtype_mismatch=None
+):
+    """创建IncompatibleKeys实例，默认值为空列表。"""
+    return IncompatibleKeys(
+        missing_keys=missing_keys or [],
+        unexpected_keys=unexpected_keys or [],
+        shape_mismatch=shape_mismatch or [],
+        dtype_mismatch=dtype_mismatch or []
+    )
 
 
 class Module:
@@ -44,19 +67,24 @@ class Module:
         for p in self.parameters():
             p.zero_grad()
 
-    def train(self):
-        """切换到训练模式"""
-        self.training = True
+    def train(self, mode=True):
+        """切换到训练模式，返回self以支持链式调用"""
+        self.training = mode
         for value in self.__dict__.values():
             if isinstance(value, Module):
-                value.train()
+                value.train(mode)
             elif isinstance(value, (list, tuple)):
                 for item in value:
                     if isinstance(item, Module):
-                        item.train()
+                        item.train(mode)
+            elif isinstance(value, dict):
+                for item in value.values():
+                    if isinstance(item, Module):
+                        item.train(mode)
+        return self
 
     def eval(self):
-        """切换到评估模式"""
+        """切换到评估模式，返回self以支持链式调用"""
         self.training = False
         for value in self.__dict__.values():
             if isinstance(value, Module):
@@ -69,12 +97,23 @@ class Module:
                 for item in value.values():
                     if isinstance(item, Module):
                         item.eval()
+        return self
 
     def forward(self, *args, **kwargs):
         raise NotImplementedError("Module.forward is not implemented")
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
+    
+    def __repr__(self):
+        """返回模块结构的字符串表示"""
+        class_name = self.__class__.__name__
+        lines = [class_name + "("]
+        for name, child in self.named_children():
+            child_class = child.__class__.__name__
+            lines.append(f"  ({name}): {child_class}()")
+        lines.append(")")
+        return "\n".join(lines)
 
     def _named_parameters(self, prefix=""):
         named = {}
@@ -213,32 +252,133 @@ class Module:
                 state[name] = np.array(buf, copy=True)
         return state
 
-    def load_state_dict(self, state, strict=True):
+    def load_state_dict(self, state, strict=True, auto_convert=False):
+        """加载state_dict，支持自动dtype/shape转换。
+        
+        参数：
+            state: 状态字典
+            strict: 严格模式（不允许missing/unexpected keys）
+            auto_convert: 非strict模式下自动转换shape/dtype不匹配的参数
+        """
         named = self._named_parameters()
         buffers = self._named_buffers(include_non_persistent=False)
         missing = []
+        shape_mismatch = []
+        dtype_mismatch = []
+        
+        # 检测shape/dtype不匹配
+        def _get_shape_dtype(obj):
+            if isinstance(obj, Tensor):
+                return obj.shape, obj.dtype
+            elif isinstance(obj, np.ndarray):
+                return obj.shape, obj.dtype
+            else:
+                arr = np.asarray(obj)
+                return arr.shape, arr.dtype
+        
         for name, param in named.items():
             if name not in state:
                 missing.append(name)
                 continue
-            param.data = state[name].copy()
+            loaded_val = state[name]
+            current_shape, current_dtype = _get_shape_dtype(param.data)
+            loaded_shape, loaded_dtype = _get_shape_dtype(loaded_val)
+            
+            if current_shape != loaded_shape:
+                shape_mismatch.append(
+                    {"name": name, "expected": current_shape, "got": loaded_shape}
+                )
+            if current_dtype != loaded_dtype:
+                dtype_mismatch.append(
+                    {"name": name, "expected": str(current_dtype), "got": str(loaded_dtype)}
+                )
+            
+            # 自动转换逻辑（如果启用）
+            if auto_convert:
+                if current_shape != loaded_shape:
+                    try:
+                        loaded_val = np.reshape(loaded_val, current_shape)
+                        shape_mismatch[-1]['auto_converted'] = True
+                    except (ValueError, RuntimeError, IndexError):
+                        pass
+                
+                if current_dtype != loaded_dtype:
+                    try:
+                        loaded_val = np.asarray(loaded_val, dtype=current_dtype)
+                        dtype_mismatch[-1]['auto_converted'] = True
+                    except (ValueError, TypeError):
+                        pass
+            
+            param.data = loaded_val.copy() if isinstance(loaded_val, np.ndarray) else np.array(loaded_val, copy=True)
+        
         for name, buf in buffers.items():
             if name not in state:
                 missing.append(name)
                 continue
+            loaded_val = state[name]
+            current_shape, current_dtype = _get_shape_dtype(buf)
+            loaded_shape, loaded_dtype = _get_shape_dtype(loaded_val)
+            
+            if current_shape != loaded_shape:
+                shape_mismatch.append(
+                    {"name": name, "expected": current_shape, "got": loaded_shape}
+                )
+            if current_dtype != loaded_dtype:
+                dtype_mismatch.append(
+                    {"name": name, "expected": str(current_dtype), "got": str(loaded_dtype)}
+                )
+            
+            # 自动转换逻辑（如果启用）
+            if auto_convert:
+                if current_shape != loaded_shape:
+                    try:
+                        loaded_val = np.reshape(loaded_val, current_shape)
+                        if len(shape_mismatch) > 0:
+                            shape_mismatch[-1]['auto_converted'] = True
+                    except (ValueError, RuntimeError, IndexError):
+                        pass
+                
+                if current_dtype != loaded_dtype:
+                    try:
+                        loaded_val = np.asarray(loaded_val, dtype=current_dtype)
+                        if len(dtype_mismatch) > 0:
+                            dtype_mismatch[-1]['auto_converted'] = True
+                    except (ValueError, TypeError):
+                        pass
+            
             if isinstance(buf, Tensor):
-                buf.data = state[name].copy()
+                buf.data = loaded_val.copy() if isinstance(loaded_val, np.ndarray) else np.array(loaded_val, copy=True)
             else:
-                loaded = np.array(state[name], copy=True)
+                loaded = np.array(loaded_val, copy=True)
                 try:
                     buf[...] = loaded
                 except Exception:
                     buffers[name] = loaded
+        
         known = set(named.keys()) | set(buffers.keys())
         unexpected = [name for name in state.keys() if name not in known]
-        if strict and (missing or unexpected):
-            raise ValueError(f"state_dict mismatch: missing={missing}, unexpected={unexpected}")
-        return {"missing": missing, "unexpected": unexpected}
+        
+        if strict and (missing or unexpected or shape_mismatch or dtype_mismatch):
+            error_parts = []
+            if missing:
+                error_parts.append(f"missing_keys={missing}")
+            if unexpected:
+                error_parts.append(f"unexpected_keys={unexpected}")
+            if shape_mismatch:
+                error_parts.append(f"shape_mismatch={shape_mismatch}")
+            if dtype_mismatch:
+                error_parts.append(f"dtype_mismatch={dtype_mismatch}")
+            raise RuntimeError(
+                f"Error(s) in loading state_dict for {self.__class__.__name__}: "
+                + ", ".join(error_parts)
+            )
+        
+        return _make_incompatible_keys(
+            missing_keys=missing,
+            unexpected_keys=unexpected,
+            shape_mismatch=shape_mismatch,
+            dtype_mismatch=dtype_mismatch
+        )
 
 
 class Parameter(Tensor):
@@ -2818,53 +2958,129 @@ def xavier_normal_(neurx, gain=1.0):
 
 def _add_module_methods():
     """为Module基类添加额外的方法"""
-    
+
     def requires_grad_(self, requires_grad=True):
         """设置所有参数的requires_grad属性（原地）"""
         for param in self.parameters():
             param.requires_grad = requires_grad
         return self
-    
-    def to(self, device):
-        """将模块移动到指定设备（CPU/CUDA）"""
-        # 简化版本 - 实际应该实现真正的设备转移
-        self.device = device
-        for param in self.parameters():
-            if hasattr(param, 'device'):
-                param.device = device
+
+    def _convert_tensor_like(obj, *, device=None, dtype=None):
+        if isinstance(obj, Parameter):
+            if dtype is not None:
+                target_dtype = np.dtype(dtype)
+                if obj.requires_grad and not np.issubdtype(target_dtype, np.floating):
+                    raise ValueError("Cannot cast Parameter requiring grad to non-floating dtype")
+                obj.data = np.asarray(obj.data).astype(target_dtype, copy=False)
+                if obj.grad is not None:
+                    obj.grad = np.asarray(obj.grad).astype(target_dtype, copy=False)
+            if device is not None:
+                moved = Tensor(np.asarray(obj.data), requires_grad=obj.requires_grad, device=device)
+                obj.data = moved.data
+                obj.device = moved.device
+            return obj
+
+        if isinstance(obj, Tensor):
+            return obj.to(device=device, dtype=dtype)
+
+        if isinstance(obj, np.ndarray):
+            if dtype is not None:
+                return obj.astype(dtype, copy=False)
+            return obj
+
+        return obj
+
+    def _convert_container(value, *, device=None, dtype=None):
+        if isinstance(value, (Module, Parameter, Tensor, np.ndarray)):
+            return _convert_tensor_like(value, device=device, dtype=dtype)
+
+        if isinstance(value, list):
+            for i, item in enumerate(value):
+                value[i] = _convert_container(item, device=device, dtype=dtype)
+            return value
+
+        if isinstance(value, tuple):
+            return tuple(_convert_container(item, device=device, dtype=dtype) for item in value)
+
+        if isinstance(value, dict):
+            for k, item in list(value.items()):
+                value[k] = _convert_container(item, device=device, dtype=dtype)
+            return value
+
+        return value
+
+    def to(self, device=None, dtype=None, non_blocking=False, copy=True):
+        """递归转换模块参数/缓冲区的device与dtype（原地）。
+        
+        参数：
+            device: 目标设备（'cpu'或'cuda'）
+            dtype: 目标dtype（numpy dtype或字符串）
+            non_blocking: PyTorch兼容参数，在NumPy中无效（忽略）
+            copy: 是否创建副本（默认True）。当False时，对numpy数组进行原地转换。
+        """
+        if dtype is None and device is not None and not isinstance(device, str):
+            try:
+                parsed_dtype = np.dtype(device)
+            except Exception:
+                parsed_dtype = None
+            if parsed_dtype is not None:
+                dtype = parsed_dtype
+                device = None
+
         for module in self.modules():
-            if hasattr(module, 'device'):
+            if device is not None:
                 module.device = device
+
+            for name, value in list(module.__dict__.items()):
+                if name in ("training", "_buffers"):
+                    continue
+                if isinstance(value, Module):
+                    continue
+                converted = _convert_container(value, device=device, dtype=dtype)
+                if converted is not value:
+                    setattr(module, name, converted)
+
+            if hasattr(module, "_buffers"):
+                for buf_name, meta in list(module._buffers.items()):
+                    current = getattr(module, buf_name)
+                    converted = _convert_container(current, device=device, dtype=dtype)
+                    setattr(module, buf_name, converted)
+                    meta["value"] = converted
+
         return self
-    
+
     def cpu(self):
         """将模块移动到CPU"""
-        return self.to('cpu')
-    
+        return self.to(device='cpu')
+
     def cuda(self):
         """将模块移动到CUDA"""
-        return self.to('cuda')
-    
+        return self.to(device='cuda')
+
     def double(self):
         """将参数转换为float64"""
-        for param in self.parameters():
-            if hasattr(param, 'data'):
-                param.data = param.data.astype(np.float64)
-        return self
-    
+        return self.to(dtype=np.float64)
+
     def float(self):
         """将参数转换为float32"""
-        for param in self.parameters():
-            if hasattr(param, 'data'):
-                param.data = param.data.astype(np.float32)
-        return self
-    
+        return self.to(dtype=np.float32)
+
+    def half(self):
+        """将参数转换为float16"""
+        return self.to(dtype=np.float16)
+
+    def type(self, dtype):
+        """按dtype转换模块参数（PyTorch风格）"""
+        return self.to(dtype=dtype)
+
     Module.requires_grad_ = requires_grad_
     Module.to = to
     Module.cpu = cpu
     Module.cuda = cuda
     Module.double = double
     Module.float = float
+    Module.half = half
+    Module.type = type
 
 
 _add_module_methods()
