@@ -335,8 +335,9 @@ class BatchNorm1d(Module):
         self.training = True
         
         if self.affine:
-            self.weight = Tensor(np.ones(num_features))
-            self.bias = Tensor(np.zeros(num_features))
+            from .modules import Parameter
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
         else:
             self.weight = None
             self.bias = None
@@ -398,8 +399,10 @@ class BatchNorm1d(Module):
                 running_var = self.running_var.data.reshape(reshape_shape)
                 x_normalized = (x_data - running_mean) / np.sqrt(running_var + self.eps)
             else:
-                # 如果不跟踪运行统计，使用身份变换
-                x_normalized = x_data
+                # 如果不跟踪运行统计，使用批统计即使在eval模式
+                batch_mean = np.mean(x_data, axis=axes, keepdims=True)
+                batch_var = np.var(x_data, axis=axes, keepdims=True)
+                x_normalized = (x_data - batch_mean) / np.sqrt(batch_var + self.eps)
         
         # 应用仿射变换
         if self.affine:
@@ -420,6 +423,18 @@ class BatchNorm1d(Module):
         """设置评估模式"""
         self.training = False
         return self
+    
+    def state_dict(self):
+        """Return state dictionary"""
+        state = {}
+        if self.affine:
+            state['weight'] = self.weight.data
+            state['bias'] = self.bias.data
+        if self.track_running_stats:
+            state['running_mean'] = self.running_mean.data
+            state['running_var'] = self.running_var.data
+            state['num_batches_tracked'] = self.num_batches_tracked
+        return state
 
 
 class BatchNorm2d(Module):
@@ -454,8 +469,9 @@ class BatchNorm2d(Module):
         self.training = True
         
         if self.affine:
-            self.weight = Tensor(np.ones(num_features))
-            self.bias = Tensor(np.zeros(num_features))
+            from .modules import Parameter
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
         else:
             self.weight = None
             self.bias = None
@@ -568,8 +584,9 @@ class BatchNorm3d(Module):
         self.training = True
         
         if self.affine:
-            self.weight = Tensor(np.ones(num_features))
-            self.bias = Tensor(np.zeros(num_features))
+            from .modules import Parameter
+            self.weight = Parameter(np.ones(num_features))
+            self.bias = Parameter(np.zeros(num_features))
         else:
             self.weight = None
             self.bias = None
