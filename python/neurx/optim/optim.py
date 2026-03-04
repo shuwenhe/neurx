@@ -22,7 +22,13 @@ class SGD(Optimizer):
     """
     
     def __init__(self, params, lr=1e-3, momentum=0, weight_decay=0, dampening=0, nesterov=False):
-        super().__init__(params)
+        super().__init__(params, defaults={
+            "lr": lr,
+            "momentum": momentum,
+            "weight_decay": weight_decay,
+            "dampening": dampening,
+            "nesterov": nesterov,
+        })
         self.lr = lr
         self.momentum = momentum
         self.weight_decay = weight_decay
@@ -37,47 +43,54 @@ class SGD(Optimizer):
     
     def step(self):
         """Perform a single optimization step."""
-        for p in self.params:
-            if p.grad is None:
-                continue
-            
-            grad = p.grad
-            
-            # Apply weight decay
-            if self.weight_decay != 0:
-                grad = grad + self.weight_decay * p.data
-            
-            # Apply momentum
-            if self.momentum != 0:
-                pid = id(p)
-                if pid not in self.velocity:
-                    self.velocity[pid] = np.zeros_like(p.data)
-                
-                v = self.velocity[pid]
-                v = self.momentum * v + (1 - self.dampening) * grad
-                self.velocity[pid] = v
-                
-                if self.nesterov:
-                    grad = grad + self.momentum * v
-                else:
-                    grad = v
-            
-            # Update parameters
-            p.data -= self.lr * grad
+        for group in self.param_groups:
+            lr = group.get("lr", self.lr)
+            momentum = group.get("momentum", self.momentum)
+            weight_decay = group.get("weight_decay", self.weight_decay)
+            dampening = group.get("dampening", self.dampening)
+            nesterov = group.get("nesterov", self.nesterov)
+
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+
+                grad = p.grad
+
+                if weight_decay != 0:
+                    grad = grad + weight_decay * p.data
+
+                if momentum != 0:
+                    pid = id(p)
+                    if pid not in self.velocity:
+                        self.velocity[pid] = np.zeros_like(p.data)
+
+                    v = self.velocity[pid]
+                    v = momentum * v + (1 - dampening) * grad
+                    self.velocity[pid] = v
+
+                    if nesterov:
+                        grad = grad + momentum * v
+                    else:
+                        grad = v
+
+                p.data -= lr * grad
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
-        return {
+        state = super().state_dict()
+        state.update({
             "lr": self.lr,
             "momentum": self.momentum,
             "weight_decay": self.weight_decay,
             "dampening": self.dampening,
             "nesterov": self.nesterov,
             "velocity": {i: self.velocity[id(p)].copy() for i, p in enumerate(self.params) if id(p) in self.velocity},
-        }
+        })
+        return state
     
     def load_state_dict(self, state):
         """Load the optimizer state."""
+        super().load_state_dict(state)
         self.lr = state.get("lr", self.lr)
         self.momentum = state.get("momentum", self.momentum)
         self.weight_decay = state.get("weight_decay", self.weight_decay)
@@ -111,7 +124,12 @@ class Adam(Optimizer):
     """
     
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0):
-        super().__init__(params)
+        super().__init__(params, defaults={
+            "lr": lr,
+            "betas": betas,
+            "eps": eps,
+            "weight_decay": weight_decay,
+        })
         self.lr = lr
         self.beta1, self.beta2 = betas
         self.eps = eps
@@ -123,36 +141,33 @@ class Adam(Optimizer):
     def step(self):
         """Perform a single optimization step."""
         self.step_count += 1
-        for p in self.params:
-            if p.grad is None:
-                continue
-            
-            grad = p.grad
-            
-            # Apply weight decay to gradient (standard Adam)
-            if self.weight_decay != 0:
-                grad = grad + self.weight_decay * p.data
-            
-            pid = id(p)
-            
-            # Update biased first moment estimate
-            self.m[pid] = self.beta1 * self.m[pid] + (1 - self.beta1) * grad
-            
-            # Update biased second raw moment estimate
-            self.v[pid] = self.beta2 * self.v[pid] + (1 - self.beta2) * (grad * grad)
-            
-            # Compute bias-corrected first moment estimate
-            m_hat = self.m[pid] / (1 - self.beta1 ** self.step_count)
-            
-            # Compute bias-corrected second raw moment estimate
-            v_hat = self.v[pid] / (1 - self.beta2 ** self.step_count)
-            
-            # Update parameters
-            p.data -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+        for group in self.param_groups:
+            lr = group.get("lr", self.lr)
+            beta1, beta2 = group.get("betas", (self.beta1, self.beta2))
+            eps = group.get("eps", self.eps)
+            weight_decay = group.get("weight_decay", self.weight_decay)
+
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+
+                grad = p.grad
+                if weight_decay != 0:
+                    grad = grad + weight_decay * p.data
+
+                pid = id(p)
+                self.m[pid] = beta1 * self.m[pid] + (1 - beta1) * grad
+                self.v[pid] = beta2 * self.v[pid] + (1 - beta2) * (grad * grad)
+
+                m_hat = self.m[pid] / (1 - beta1 ** self.step_count)
+                v_hat = self.v[pid] / (1 - beta2 ** self.step_count)
+
+                p.data -= lr * m_hat / (np.sqrt(v_hat) + eps)
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
-        return {
+        state = super().state_dict()
+        state.update({
             "lr": self.lr,
             "betas": (self.beta1, self.beta2),
             "eps": self.eps,
@@ -160,10 +175,12 @@ class Adam(Optimizer):
             "step_count": self.step_count,
             "m": [self.m[id(p)].copy() for p in self.params],
             "v": [self.v[id(p)].copy() for p in self.params],
-        }
+        })
+        return state
     
     def load_state_dict(self, state):
         """Load the optimizer state."""
+        super().load_state_dict(state)
         self.lr = state.get("lr", self.lr)
         betas = state.get("betas", (self.beta1, self.beta2))
         self.beta1, self.beta2 = betas
@@ -200,7 +217,14 @@ class RMSprop(Optimizer):
     """
     
     def __init__(self, params, lr=1e-2, alpha=0.99, eps=1e-8, weight_decay=0, momentum=0, centered=False):
-        super().__init__(params)
+        super().__init__(params, defaults={
+            "lr": lr,
+            "alpha": alpha,
+            "eps": eps,
+            "weight_decay": weight_decay,
+            "momentum": momentum,
+            "centered": centered,
+        })
         self.lr = lr
         self.alpha = alpha
         self.eps = eps
@@ -217,41 +241,43 @@ class RMSprop(Optimizer):
     
     def step(self):
         """Perform a single optimization step."""
-        for p in self.params:
-            if p.grad is None:
-                continue
-            
-            grad = p.grad
-            
-            # Apply weight decay
-            if self.weight_decay != 0:
-                grad = grad + self.weight_decay * p.data
-            
-            pid = id(p)
-            
-            # Update square average
-            self.square_avg[pid] = self.alpha * self.square_avg[pid] + (1 - self.alpha) * (grad ** 2)
-            
-            if self.centered:
-                # Update gradient average for centered RMSprop
-                self.grad_avg[pid] = self.alpha * self.grad_avg[pid] + (1 - self.alpha) * grad
-                avg = self.square_avg[pid] - self.grad_avg[pid] ** 2
-            else:
-                avg = self.square_avg[pid]
-            
-            if self.momentum > 0:
-                # Apply momentum
-                buf = self.momentum_buffer[pid]
-                buf = self.momentum * buf + grad / (np.sqrt(avg) + self.eps)
-                self.momentum_buffer[pid] = buf
-                p.data -= self.lr * buf
-            else:
-                # Standard RMSprop update
-                p.data -= self.lr * grad / (np.sqrt(avg) + self.eps)
+        for group in self.param_groups:
+            lr = group.get("lr", self.lr)
+            alpha = group.get("alpha", self.alpha)
+            eps = group.get("eps", self.eps)
+            weight_decay = group.get("weight_decay", self.weight_decay)
+            momentum = group.get("momentum", self.momentum)
+            centered = group.get("centered", self.centered)
+
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+
+                grad = p.grad
+                if weight_decay != 0:
+                    grad = grad + weight_decay * p.data
+
+                pid = id(p)
+                self.square_avg[pid] = alpha * self.square_avg[pid] + (1 - alpha) * (grad ** 2)
+
+                if centered:
+                    self.grad_avg[pid] = alpha * self.grad_avg[pid] + (1 - alpha) * grad
+                    avg = self.square_avg[pid] - self.grad_avg[pid] ** 2
+                else:
+                    avg = self.square_avg[pid]
+
+                if momentum > 0:
+                    buf = self.momentum_buffer[pid]
+                    buf = momentum * buf + grad / (np.sqrt(avg) + eps)
+                    self.momentum_buffer[pid] = buf
+                    p.data -= lr * buf
+                else:
+                    p.data -= lr * grad / (np.sqrt(avg) + eps)
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
-        state = {
+        state = super().state_dict()
+        state.update({
             "lr": self.lr,
             "alpha": self.alpha,
             "eps": self.eps,
@@ -259,7 +285,7 @@ class RMSprop(Optimizer):
             "momentum": self.momentum,
             "centered": self.centered,
             "square_avg": [self.square_avg[id(p)].copy() for p in self.params],
-        }
+        })
         if self.momentum > 0:
             state["momentum_buffer"] = [self.momentum_buffer[id(p)].copy() for p in self.params]
         if self.centered:
@@ -268,6 +294,7 @@ class RMSprop(Optimizer):
     
     def load_state_dict(self, state):
         """Load the optimizer state."""
+        super().load_state_dict(state)
         self.lr = state.get("lr", self.lr)
         self.alpha = state.get("alpha", self.alpha)
         self.eps = state.get("eps", self.eps)
@@ -292,7 +319,12 @@ class RMSprop(Optimizer):
 
 class AdamW(Optimizer):
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01):
-        super().__init__(params)
+        super().__init__(params, defaults={
+            "lr": lr,
+            "betas": betas,
+            "eps": eps,
+            "weight_decay": weight_decay,
+        })
         self.lr = lr
         self.beta1, self.beta2 = betas
         self.eps = eps
@@ -303,24 +335,31 @@ class AdamW(Optimizer):
 
     def step(self):
         self.step_count += 1
-        for p in self.params:
-            if p.grad is None:
-                continue
-            g = p.grad
-            if self.weight_decay != 0:
-                g = g + self.weight_decay * p.data
+        for group in self.param_groups:
+            lr = group.get("lr", self.lr)
+            beta1, beta2 = group.get("betas", (self.beta1, self.beta2))
+            eps = group.get("eps", self.eps)
+            weight_decay = group.get("weight_decay", self.weight_decay)
 
-            pid = id(p)
-            self.m[pid] = self.beta1 * self.m[pid] + (1 - self.beta1) * g
-            self.v[pid] = self.beta2 * self.v[pid] + (1 - self.beta2) * (g * g)
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+                g = p.grad
+                if weight_decay != 0:
+                    g = g + weight_decay * p.data
 
-            m_hat = self.m[pid] / (1 - self.beta1 ** self.step_count)
-            v_hat = self.v[pid] / (1 - self.beta2 ** self.step_count)
+                pid = id(p)
+                self.m[pid] = beta1 * self.m[pid] + (1 - beta1) * g
+                self.v[pid] = beta2 * self.v[pid] + (1 - beta2) * (g * g)
 
-            p.data -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+                m_hat = self.m[pid] / (1 - beta1 ** self.step_count)
+                v_hat = self.v[pid] / (1 - beta2 ** self.step_count)
+
+                p.data -= lr * m_hat / (np.sqrt(v_hat) + eps)
 
     def state_dict(self):
-        return {
+        state = super().state_dict()
+        state.update({
             "lr": self.lr,
             "betas": (self.beta1, self.beta2),
             "eps": self.eps,
@@ -328,9 +367,11 @@ class AdamW(Optimizer):
             "step_count": self.step_count,
             "m": [self.m[id(p)].copy() for p in self.params],
             "v": [self.v[id(p)].copy() for p in self.params],
-        }
+        })
+        return state
 
     def load_state_dict(self, state):
+        super().load_state_dict(state)
         self.lr = state.get("lr", self.lr)
         betas = state.get("betas", (self.beta1, self.beta2))
         self.beta1, self.beta2 = betas

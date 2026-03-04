@@ -125,19 +125,25 @@ def topk(
         if sorted:
             indices = np.argsort(-data, axis=dim)
         else:
-            indices = np.argpartition(-data, k-1, axis=dim)[:k]
+            indices = np.argpartition(-data, k - 1, axis=dim)
     else:
         if sorted:
             indices = np.argsort(data, axis=dim)
         else:
-            indices = np.argpartition(data, k-1, axis=dim)[:k]
-    
-    # Get top k indices
+            indices = np.argpartition(data, k - 1, axis=dim)
+
+    # Keep only first k entries along requested dimension
     slices = [slice(None)] * len(data.shape)
     slices[dim] = slice(0, k)
     indices = indices[tuple(slices)]
-    
+
     values = np.take_along_axis(data, indices, axis=dim)
+
+    # Ensure sorted output within top-k subset when requested
+    if sorted:
+        order = np.argsort(-values if largest else values, axis=dim)
+        values = np.take_along_axis(values, order, axis=dim)
+        indices = np.take_along_axis(indices, order, axis=dim)
     
     values_tensor = Tensor(values, requires_grad=tensor.requires_grad, _children=(tensor,), _op="topk", device=tensor.device)
     indices_tensor = Tensor(indices.astype(np.int64, copy=False), requires_grad=False, device=tensor.device)
