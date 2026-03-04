@@ -1373,6 +1373,44 @@ class CrossEntropyLoss(Module):
         )
 
 
+class FocalLoss(Module):
+    """Focal Loss wrapper over ``neurx.nn.functional.focal_loss``."""
+
+    def __init__(self, alpha=0.25, gamma=2.0, weight=None, ignore_index=-100, reduction="mean"):
+        super().__init__()
+        if not (0 <= alpha <= 1.0):
+            raise ValueError(f"alpha must be in [0, 1], got {alpha}")
+        if gamma < 0:
+            raise ValueError(f"gamma must be non-negative, got {gamma}")
+        if reduction not in ("none", "mean", "sum"):
+            raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+
+        self.alpha = float(alpha)
+        self.gamma = float(gamma)
+        self.ignore_index = int(ignore_index)
+        self.reduction = reduction
+
+        if weight is None:
+            self.weight = None
+        elif isinstance(weight, Tensor):
+            self.weight = weight
+        else:
+            self.weight = Tensor(np.asarray(weight), requires_grad=False)
+
+    def __call__(self, input, target):
+        from . import functional as F
+
+        return F.focal_loss(
+            input,
+            target,
+            alpha=self.alpha,
+            gamma=self.gamma,
+            weight=self.weight,
+            ignore_index=self.ignore_index,
+            reduction=self.reduction,
+        )
+
+
 class NLLLoss(Module):
     """Negative Log-Likelihood Loss."""
 

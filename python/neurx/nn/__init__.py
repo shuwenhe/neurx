@@ -120,6 +120,7 @@ __all__ = [
     "RMSNorm",
     "Dropout",
     "CrossEntropyLoss",
+    "FocalLoss",
     "NLLLoss",
     "MSELoss",
     "L1Loss",
