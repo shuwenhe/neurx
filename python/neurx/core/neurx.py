@@ -1552,8 +1552,20 @@ class Tensor:
         return self.to(dtype=np.int64)
 
 
-def where(condition, x, y):
+def where(condition, x=None, y=None):
     cond = condition.to_numpy() if isinstance(condition, Tensor) else np.asarray(condition)
+
+    if x is None and y is None:
+        # PyTorch-compatible single-argument form:
+        # torch.where(condition) -> tuple of index tensors
+        indices = np.nonzero(cond)
+        if isinstance(indices, tuple):
+            return tuple(Tensor(idx.astype(np.int64, copy=False), requires_grad=False) for idx in indices)
+        return (Tensor(np.asarray(indices).astype(np.int64, copy=False), requires_grad=False),)
+
+    if (x is None) != (y is None):
+        raise ValueError("where expected both x and y when using ternary form")
+
     x_t = x if isinstance(x, Tensor) else Tensor(x)
     y_t = y if isinstance(y, Tensor) else Tensor(y)
     out_device = "cuda" if (x_t.device == "cuda" or y_t.device == "cuda") else "cpu"

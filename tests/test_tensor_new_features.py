@@ -102,6 +102,14 @@ class TestTensorIndexing:
         result = where(cond, x, y)
         expected = np.array([1, 20, 3])
         assert np.allclose(result.to_numpy(), expected)
+
+    def test_where_indices_form(self):
+        cond = Tensor([[True, False, True], [False, True, False]])
+        idx = where(cond)
+        assert isinstance(idx, tuple)
+        assert len(idx) == 2
+        assert np.array_equal(idx[0].to_numpy(), np.array([0, 0, 1]))
+        assert np.array_equal(idx[1].to_numpy(), np.array([0, 2, 1]))
     
     def test_cat(self):
         x = Tensor([1, 2, 3])
@@ -146,6 +154,16 @@ class TestTensorStats:
         values, indices = topk(x, k=3)
         assert len(values.shape) == 1
         assert values.shape[0] == 3
+
+    def test_topk_multidim_unsorted(self):
+        x = Tensor([[1, 9, 3, 7], [8, 2, 6, 4]])
+        values, indices = topk(x, k=2, dim=1, largest=True, sorted=False)
+        assert values.shape == (2, 2)
+        assert indices.shape == (2, 2)
+        expected_sets = [set([9, 7]), set([8, 6])]
+        actual_sets = [set(values.to_numpy()[0].tolist()), set(values.to_numpy()[1].tolist())]
+        assert actual_sets[0] == expected_sets[0]
+        assert actual_sets[1] == expected_sets[1]
     
     def test_unique(self):
         x = Tensor([1, 2, 1, 3, 2])

@@ -98,28 +98,76 @@ def load_checkpoint(
 ) -> dict[str, Any]:
     checkpoint = _load_pickle(path)
 
+    load_report = {
+        "strict": bool(strict),
+        "model": {
+            "loaded": False,
+            "missing_keys": [],
+            "unexpected_keys": [],
+            "shape_mismatch": [],
+            "dtype_mismatch": [],
+            "error": None
+        },
+        "optimizer": {"loaded": False, "error": None},
+        "scaler": {"loaded": False, "error": None},
+    }
+
     model_state = checkpoint.get("model_state")
     if model is not None and model_state is not None:
         if not hasattr(model, "load_state_dict"):
             raise TypeError("model must implement load_state_dict()")
         try:
-            model.load_state_dict(model_state, strict=strict)
-        except TypeError:
-            model.load_state_dict(model_state)
+            try:
+                incompatible = model.load_state_dict(model_state, strict=strict)
+            except TypeError:
+                incompatible = model.load_state_dict(model_state)
+
+            if hasattr(incompatible, "missing_keys"):
+                load_report["model"]["missing_keys"] = list(incompatible.missing_keys)
+                load_report["model"]["unexpected_keys"] = list(incompatible.unexpected_keys)
+                if hasattr(incompatible, "shape_mismatch"):
+                    load_report["model"]["shape_mismatch"] = list(incompatible.shape_mismatch)
+                if hasattr(incompatible, "dtype_mismatch"):
+                    load_report["model"]["dtype_mismatch"] = list(incompatible.dtype_mismatch)
+            elif isinstance(incompatible, dict):
+                load_report["model"]["missing_keys"] = list(incompatible.get("missing", incompatible.get("missing_keys", [])))
+                load_report["model"]["unexpected_keys"] = list(incompatible.get("unexpected", incompatible.get("unexpected_keys", [])))
+                load_report["model"]["shape_mismatch"] = list(incompatible.get("shape_mismatch", []))
+                load_report["model"]["dtype_mismatch"] = list(incompatible.get("dtype_mismatch", []))
+
+            load_report["model"]["loaded"] = True
+        except RuntimeError as exc:
+            load_report["model"]["error"] = str(exc)
+            checkpoint["load_report"] = load_report
+            if strict:
+                raise
 
     optimizer_state = checkpoint.get("optimizer_state")
     if optimizer is not None and optimizer_state is not None:
         if not hasattr(optimizer, "load_state_dict"):
             raise TypeError("optimizer must implement load_state_dict()")
-        optimizer.load_state_dict(optimizer_state)
+        try:
+            optimizer.load_state_dict(optimizer_state)
+            load_report["optimizer"]["loaded"] = True
+        except Exception as exc:
+            load_report["optimizer"]["error"] = str(exc)
+            if strict:
+                raise
 
     scaler_state = checkpoint.get("scaler_state")
     if scaler is not None and scaler_state is not None:
         if not hasattr(scaler, "load_state_dict"):
             raise TypeError("scaler must implement load_state_dict()")
-        scaler.load_state_dict(scaler_state)
+        try:
+            scaler.load_state_dict(scaler_state)
+            load_report["scaler"]["loaded"] = True
+        except Exception as exc:
+            load_report["scaler"]["error"] = str(exc)
+            if strict:
+                raise
 
     if restore_rng_state:
         _restore_rng_state(checkpoint.get("rng_state"))
 
+    checkpoint["load_report"] = load_report
     return checkpoint
