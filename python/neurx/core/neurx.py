@@ -2285,6 +2285,427 @@ class Tensor:
         out._backward = _backward
         return out
 
+    # ============================================================
+    # Phase 3: Advanced Tensor Operations
+    # ============================================================
+    
+    # Phase 3.1: Basic Math Operations
+    
+    def floor(self):
+        """Floor function (round down to nearest integer)
+        
+        Returns:
+            Tensor with floor applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.floor(x)
+        out = Tensor(out_data, requires_grad=False, _children=(self,), _op="floor", device=self.device)
+        
+        # Floor is not differentiable, so no gradient
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def ceil(self):
+        """Ceiling function (round up to nearest integer)
+        
+        Returns:
+            Tensor with ceil applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.ceil(x)
+        out = Tensor(out_data, requires_grad=False, _children=(self,), _op="ceil", device=self.device)
+        
+        # Ceil is not differentiable, so no gradient
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def round(self):
+        """Round to nearest integer
+        
+        Returns:
+            Tensor with round applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.round(x)
+        out = Tensor(out_data, requires_grad=False, _children=(self,), _op="round", device=self.device)
+        
+        # Round is not differentiable, so no gradient
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def lerp(self, other, weight):
+        """Linear interpolation: self * (1 - weight) + other * weight
+        
+        Args:
+            other: Another Tensor
+            weight: Interpolation weight (0 <= weight <= 1)
+        
+        Returns:
+            Interpolated Tensor
+        """
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        w = weight if isinstance(weight, (int, float)) else weight
+        
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        if isinstance(w, Tensor):
+            w_val = _to_numpy(w.data)
+        else:
+            w_val = w
+        
+        out_data = x * (1 - w_val) + other_data * w_val
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self, other), 
+                     _op="lerp", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                if isinstance(w, Tensor):
+                    w_val = _to_numpy(w.data)
+                else:
+                    w_val = w
+                self.grad += out.grad * (1 - w_val)
+            if other.requires_grad:
+                if isinstance(w, Tensor):
+                    w_val = _to_numpy(w.data)
+                else:
+                    w_val = w
+                other.grad += _unbroadcast(out.grad * w_val, other.shape)
+        
+        out._backward = _backward
+        return out
+
+    def where(self, condition, other):
+        """Select elements from self or other based on condition
+        
+        Args:
+            condition: Boolean tensor (same shape as self)
+            other: Tensor to select from when condition is False
+        
+        Returns:
+            Tensor with selected elements
+        """
+        condition = _to_numpy(condition.data) if isinstance(condition, Tensor) else condition
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        out_data = np.where(condition, x, other_data)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self, other),
+                     _op="where", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad * condition
+            if other.requires_grad:
+                other.grad += _unbroadcast(out.grad * ~condition, other.shape)
+        
+        out._backward = _backward
+        return out
+
+    # Phase 3.3: Tensor Operations (Concatenation/Splitting)
+    
+    def split(self, split_size, dim=0):
+        """Split tensor into chunks of given size or at given indices
+        
+        Args:
+            split_size: Size of each split or list of indices to split at
+            dim: Dimension to split along
+        
+        Returns:
+            List of Tensors
+        """
+        x = _to_numpy(self.data)
+        
+        # Handle negative dim
+        if dim < 0:
+            dim = len(self.shape) + dim
+        
+        # Handle list of sizes
+        if isinstance(split_size, (list, tuple)):
+            # If it's a list of sizes, convert to indices
+            indices = []
+            cumsum = 0
+            for size in split_size[:-1]:  # Don't include last one
+                cumsum += size
+                indices.append(cumsum)
+            splits = np.split(x, indices, axis=dim)
+        else:
+            # Handle single size
+            num_splits = (self.shape[dim] + split_size - 1) // split_size
+            indices = [i * split_size for i in range(1, num_splits)]
+            splits = np.split(x, indices, axis=dim)
+        
+        result = [Tensor(s, requires_grad=self.requires_grad, _children=(self,), 
+                        _op="split", device=self.device) for s in splits]
+        
+        # Set backward for all splits
+        def make_backward(split_list):
+            def _backward():
+                if self.requires_grad:
+                    # Concatenate gradients back
+                    grad_parts = [split_list[i].grad for i in range(len(split_list))]
+                    self.grad += np.concatenate(grad_parts, axis=dim)
+            return _backward
+        
+        for r in result:
+            r._backward = make_backward(result)
+        
+        return result
+
+    def chunk(self, chunks, dim=0):
+        """Split tensor into given number of chunks
+        
+        Args:
+            chunks: Number of chunks
+            dim: Dimension to split along
+        
+        Returns:
+            List of Tensors
+        """
+        x = _to_numpy(self.data)
+        
+        # Handle negative dim
+        if dim < 0:
+            dim = len(self.shape) + dim
+        
+        # Calculate split size
+        size = (self.shape[dim] + chunks - 1) // chunks
+        split_list = np.array_split(x, chunks, axis=dim)
+        
+        result = [Tensor(s, requires_grad=self.requires_grad, _children=(self,),
+                        _op="chunk", device=self.device) for s in split_list]
+        
+        # Set backward for all chunks
+        def make_backward(chunk_list):
+            def _backward():
+                if self.requires_grad:
+                    grad_parts = [chunk_list[i].grad for i in range(len(chunk_list))]
+                    self.grad += np.concatenate(grad_parts, axis=dim)
+            return _backward
+        
+        for r in result:
+            r._backward = make_backward(result)
+        
+        return result
+
+    @staticmethod
+    def cat(tensors, dim=0):
+        """Concatenate tensors along a dimension
+        
+        Args:
+            tensors: List of Tensors to concatenate
+            dim: Dimension to concatenate along
+        
+        Returns:
+            Concatenated Tensor
+        """
+        if len(tensors) == 0:
+            raise ValueError("cat expects at least one tensor")
+        
+        # Handle negative dim
+        if dim < 0:
+            dim = len(tensors[0].shape) + dim
+        
+        # Convert to numpy
+        arrays = [_to_numpy(t.data) for t in tensors]
+        out_data = np.concatenate(arrays, axis=dim)
+        
+        # Check if any requires grad
+        requires_grad = any(t.requires_grad for t in tensors)
+        device = tensors[0].device
+        
+        out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(tensors),
+                    _op="cat", device=device)
+        
+        def _backward():
+            # Split gradients back to each tensor
+            splits = np.split(out.grad, [sum(t.shape[dim] for t in tensors[:i+1]) 
+                                         for i in range(len(tensors)-1)], axis=dim)
+            for t, grad in zip(tensors, splits):
+                if t.requires_grad:
+                    t.grad += grad
+        
+        out._backward = _backward
+        return out
+
+    @staticmethod
+    def stack(tensors, dim=0):
+        """Stack tensors along a new dimension
+        
+        Args:
+            tensors: List of Tensors with same shape
+            dim: Dimension to insert
+        
+        Returns:
+            Stacked Tensor
+        """
+        if len(tensors) == 0:
+            raise ValueError("stack expects at least one tensor")
+        
+        # Handle negative dim
+        if dim < 0:
+            dim = len(tensors[0].shape) + 1 + dim
+        
+        # Convert to numpy
+        arrays = [_to_numpy(t.data) for t in tensors]
+        out_data = np.stack(arrays, axis=dim)
+        
+        # Check if any requires grad
+        requires_grad = any(t.requires_grad for t in tensors)
+        device = tensors[0].device
+        
+        out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(tensors),
+                    _op="stack", device=device)
+        
+        def _backward():
+            # Unstack gradients
+            split_grads = np.split(out.grad, len(tensors), axis=dim)
+            for t, grad in zip(tensors, split_grads):
+                if t.requires_grad:
+                    t.grad += np.squeeze(grad, axis=dim)
+        
+        out._backward = _backward
+        return out
+
+    # Phase 3.4: Comparison Operations
+    
+    def gt(self, other):
+        """Greater than comparison
+        
+        Args:
+            other: Tensor or scalar
+        
+        Returns:
+            Boolean Tensor
+        """
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        out_data = x > other_data
+        out = Tensor(out_data.astype(np.float32), requires_grad=False, 
+                    _children=(self, other), _op="gt", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def lt(self, other):
+        """Less than comparison
+        
+        Args:
+            other: Tensor or scalar
+        
+        Returns:
+            Boolean Tensor
+        """
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        out_data = x < other_data
+        out = Tensor(out_data.astype(np.float32), requires_grad=False,
+                    _children=(self, other), _op="lt", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def ge(self, other):
+        """Greater than or equal comparison
+        
+        Args:
+            other: Tensor or scalar
+        
+        Returns:
+            Boolean Tensor
+        """
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        out_data = x >= other_data
+        out = Tensor(out_data.astype(np.float32), requires_grad=False,
+                    _children=(self, other), _op="ge", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def le(self, other):
+        """Less than or equal comparison
+        
+        Args:
+            other: Tensor or scalar
+        
+        Returns:
+            Boolean Tensor
+        """
+        other = other if isinstance(other, Tensor) else Tensor(other, device=self.device)
+        x = _to_numpy(self.data)
+        other_data = _to_numpy(other.data)
+        
+        out_data = x <= other_data
+        out = Tensor(out_data.astype(np.float32), requires_grad=False,
+                    _children=(self, other), _op="le", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def isnan(self):
+        """Check for NaN values
+        
+        Returns:
+            Boolean Tensor
+        """
+        x = _to_numpy(self.data)
+        out_data = np.isnan(x)
+        out = Tensor(out_data.astype(np.float32), requires_grad=False, _children=(self,),
+                    _op="isnan", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
+    def isinf(self):
+        """Check for infinity values
+        
+        Returns:
+            Boolean Tensor
+        """
+        x = _to_numpy(self.data)
+        out_data = np.isinf(x)
+        out = Tensor(out_data.astype(np.float32), requires_grad=False, _children=(self,),
+                    _op="isinf", device=self.device)
+        
+        def _backward():
+            pass
+        
+        out._backward = _backward
+        return out
+
     def backward(self):
         if self.data.size != 1:
             raise ValueError("backward() requires scalar Tensor")
