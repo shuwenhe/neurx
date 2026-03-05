@@ -80,7 +80,7 @@ class DataParallel(Module):
         return self
 
 
-class TestModel(Module):
+class SimpleModel(Module):
     """用于测试的简单模型"""
     def __init__(self, in_features=10, out_features=5):
         super().__init__()
@@ -97,7 +97,7 @@ class TestModel(Module):
 
 def test_auto_convert_dtype_mismatch():
     """验证自动转换dtype不匹配的参数"""
-    model = TestModel(10, 5)
+    model = SimpleModel(10, 5)
     state = model.state_dict()
     
     # 改变state中一个参数的dtype
@@ -112,7 +112,7 @@ def test_auto_convert_dtype_mismatch():
 
 def test_auto_convert_shape_mismatch_reshape():
     """验证自动shape转换（reshape）"""
-    model = TestModel(10, 5)
+    model = SimpleModel(10, 5)
     state = model.state_dict()
     
     # 改变weight的shape（但保持总元素数不变）
@@ -128,8 +128,8 @@ def test_auto_convert_shape_mismatch_reshape():
 
 def test_auto_convert_disabled_by_default():
     """验证auto_convert默认为False"""
-    model1 = TestModel(10, 5)
-    model2 = TestModel(10, 5)
+    model1 = SimpleModel(10, 5)
+    model2 = SimpleModel(10, 5)
     
     state = model1.state_dict()
     # 改变dtype
@@ -146,7 +146,7 @@ def test_auto_convert_disabled_by_default():
 
 def test_module_train_returns_self():
     """验证train()返回self以支持链式调用"""
-    model = TestModel()
+    model = SimpleModel()
     result = model.train(True)
     assert result is model
     assert model.training is True
@@ -158,7 +158,7 @@ def test_module_train_returns_self():
 
 def test_module_eval_returns_self():
     """验证eval()返回self以支持链式调用"""
-    model = TestModel()
+    model = SimpleModel()
     result = model.eval()
     assert result is model
     assert model.training is False
@@ -166,7 +166,7 @@ def test_module_eval_returns_self():
 
 def test_module_train_eval_chain():
     """验证train/eval可链式调用"""
-    model = TestModel()
+    model = SimpleModel()
     model.train().eval().train()
     assert model.training is True
     
@@ -176,11 +176,11 @@ def test_module_train_eval_chain():
 
 def test_module_repr():
     """验证Module的__repr__返回模块结构"""
-    model = TestModel()
+    model = SimpleModel()
     repr_str = repr(model)
     
     # 应该包含模块类名
-    assert 'TestModel' in repr_str
+    assert 'SimpleModel' in repr_str
     assert 'Linear' in repr_str
     assert 'linear1' in repr_str
     assert 'linear2' in repr_str
@@ -191,7 +191,7 @@ def test_module_repr():
 
 def test_module_repr_nested():
     """验证嵌套模块的repr"""
-    model = TestModel()
+    model = SimpleModel()
     repr_str = repr(model)
     
     # 应该显示嵌套结构
@@ -233,7 +233,7 @@ def test_gradient_accumulation_context():
 
 def test_distributed_dataparallel_wrapping():
     """验证DistributedDataParallel包装"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     # 应该能访问module属性
@@ -242,7 +242,7 @@ def test_distributed_dataparallel_wrapping():
 
 def test_distributed_dataparallel_forward():
     """验证DistributedDataParallel的forward转发"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     x = Tensor(np.random.randn(2, 10))
@@ -255,7 +255,7 @@ def test_distributed_dataparallel_forward():
 
 def test_distributed_dataparallel_state_dict():
     """验证DistributedDataParallel的state_dict处理"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     state = ddp_model.state_dict()
@@ -267,14 +267,14 @@ def test_distributed_dataparallel_state_dict():
 
 def test_distributed_dataparallel_load_state_dict():
     """验证DistributedDataParallel的load_state_dict处理"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     # 保存有前缀的state
     state_with_prefix = ddp_model.state_dict()
     
     # 创建新的ddp，加载带前缀的state
-    model2 = TestModel()
+    model2 = SimpleModel()
     ddp_model2 = DistributedDataParallel(model2)
     ddp_model2.load_state_dict(state_with_prefix)
     
@@ -283,7 +283,7 @@ def test_distributed_dataparallel_load_state_dict():
 
 def test_dataparallel_wrapping():
     """验证DataParallel包装（简化版）"""
-    model = TestModel()
+    model = SimpleModel()
     dp_model = DataParallel(model)
     
     # 应该能访问module属性
@@ -292,7 +292,7 @@ def test_dataparallel_wrapping():
 
 def test_dataparallel_forward():
     """验证DataParallel的forward转发"""
-    model = TestModel()
+    model = SimpleModel()
     dp_model = DataParallel(model)
     
     x = Tensor(np.random.randn(2, 10))
@@ -304,7 +304,7 @@ def test_dataparallel_forward():
 
 def test_ddp_train_eval():
     """验证DistributedDataParallel的train/eval"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     ddp_model.eval()
@@ -316,7 +316,7 @@ def test_ddp_train_eval():
 
 def test_ddp_to_device():
     """验证DistributedDataParallel的to方法"""
-    model = TestModel()
+    model = SimpleModel()
     ddp_model = DistributedDataParallel(model)
     
     # to()应该能执行，即使设备转移在NumPy中是no-op
@@ -331,7 +331,7 @@ def test_ddp_to_device():
 
 def test_ddp_with_auto_convert_checkpoint():
     """验证DDP + 自动转换 + checkpoint的整合"""
-    model1 = TestModel(10, 5)
+    model1 = SimpleModel(10, 5)
     ddp_model1 = DistributedDataParallel(model1)
     
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -341,7 +341,7 @@ def test_ddp_with_auto_convert_checkpoint():
         save_checkpoint(ckpt_path, model=ddp_model1)
         
         # 创建不同大小的模型
-        model2 = TestModel(15, 8)
+        model2 = SimpleModel(15, 8)
         ddp_model2 = DistributedDataParallel(model2)
         
         # 加载checkpoint，使用auto_convert
@@ -353,7 +353,7 @@ def test_ddp_with_auto_convert_checkpoint():
 
 def test_training_loop_with_no_grad():
     """验证典型的训练循环与no_grad的使用"""
-    model = TestModel()
+    model = SimpleModel()
     model.train()  # 设置训练模式
     
     x = Tensor(np.random.randn(2, 10), requires_grad=True)

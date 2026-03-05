@@ -1029,6 +1029,152 @@ class Tensor:
     def clip(self, min=None, max=None):
         return self.clamp(min=min, max=max)
 
+    def clamp_min(self, min_val):
+        """Clamp minimum value: max(x, min_val)
+        
+        Args:
+            min_val: Minimum value (scalar or Tensor)
+        
+        Returns:
+            Tensor with values clamped to >= min_val
+        """
+        min_value = min_val.item() if isinstance(min_val, Tensor) and min_val.shape == () else min_val
+        x = _to_numpy(self.data)
+        out_data = np.maximum(x, min_value)
+        out = Tensor(out_data, self.requires_grad, (self,), "clamp_min", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                mask = (x >= min_value).astype(self.grad.dtype)
+                self.grad += out.grad * mask
+        
+        out._backward = _backward
+        return out
+
+    def clamp_max(self, max_val):
+        """Clamp maximum value: min(x, max_val)
+        
+        Args:
+            max_val: Maximum value (scalar or Tensor)
+        
+        Returns:
+            Tensor with values clamped to <= max_val
+        """
+        max_value = max_val.item() if isinstance(max_val, Tensor) and max_val.shape == () else max_val
+        x = _to_numpy(self.data)
+        out_data = np.minimum(x, max_value)
+        out = Tensor(out_data, self.requires_grad, (self,), "clamp_max", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                mask = (x <= max_value).astype(self.grad.dtype)
+                self.grad += out.grad * mask
+        
+        out._backward = _backward
+        return out
+
+    def log1p(self):
+        """Compute log(1 + x) - numerically stable for small x
+        
+        This is useful for numerical stability when x is close to 0.
+        
+        Returns:
+            Tensor containing log(1 + x)
+        
+        Example:
+            >>> x = Tensor([0.0, 0.5, 1.0])
+            >>> y = x.log1p()  # log(1 + x)
+        """
+        x = _to_numpy(self.data)
+        out_data = np.log1p(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "log1p", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(log1p(x))/dx = 1/(1+x)
+                self.grad += out.grad / (1.0 + x)
+        
+        out._backward = _backward
+        return out
+
+    def expm1(self):
+        """Compute exp(x) - 1 - numerically stable for small x
+        
+        This is useful for numerical stability when x is close to 0.
+        For small x, expm1(x) ≈ x, whereas exp(x) - 1 loses precision.
+        
+        Returns:
+            Tensor containing exp(x) - 1
+        
+        Example:
+            >>> x = Tensor([0.0, 0.1, 1.0])
+            >>> y = x.expm1()  # exp(x) - 1
+        """
+        x = _to_numpy(self.data)
+        out_data = np.expm1(x)
+        out = Tensor(out_data, self.requires_grad, (self,), "expm1", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(expm1(x))/dx = exp(x)
+                self.grad += out.grad * np.exp(x)
+        
+        out._backward = _backward
+        return out
+
+    def reciprocal(self):
+        """Compute element-wise reciprocal: 1/x
+        
+        Returns:
+            Tensor containing 1/x for each element
+        
+        Warning:
+            Division by zero is handled by clamping to 1e-12
+        
+        Example:
+            >>> x = Tensor([1.0, 2.0, 4.0])
+            >>> y = x.reciprocal()  # [1.0, 0.5, 0.25]
+        """
+        x = _to_numpy(self.data)
+        x_safe = np.maximum(np.abs(x), 1e-12) * np.sign(x)
+        out_data = 1.0 / x_safe
+        out = Tensor(out_data, self.requires_grad, (self,), "reciprocal", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(1/x)/dx = -1/x²
+                self.grad += out.grad * (-out_data ** 2)
+        
+        out._backward = _backward
+        return out
+
+    def rsqrt(self):
+        """Compute element-wise reciprocal square root: 1/sqrt(x)
+        
+        Returns:
+            Tensor containing 1/sqrt(x) for positive elements
+        
+        Warning:
+            Requires x > 0. Negative values are handled by taking absolute value.
+        
+        Example:
+            >>> x = Tensor([1.0, 4.0, 9.0])
+            >>> y = x.rsqrt()  # [1.0, 0.5, 0.333...]
+        """
+        x = _to_numpy(self.data)
+        x_safe = np.maximum(np.abs(x), 1e-12)
+        sqrt_x = np.sqrt(x_safe)
+        out_data = 1.0 / sqrt_x
+        out = Tensor(out_data, self.requires_grad, (self,), "rsqrt", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # d(1/sqrt(x))/dx = -1/(2*x^(3/2))
+                self.grad += out.grad * (-0.5 / (x_safe ** 1.5))
+        
+        out._backward = _backward
+        return out
+
     def sin(self):
         x = _to_numpy(self.data)
         out = Tensor(np.sin(x), self.requires_grad, (self,), "sin", device=self.device)
@@ -1725,6 +1871,96 @@ class Tensor:
         self.data = _to_data_on_device(arr, self.device)
         return self
 
+    # ========== In-place Mathematical Operations ==========
+
+    def exp_(self):
+        """In-place exponential: e^x"""
+        out_data = np.exp(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def log_(self):
+        """In-place natural logarithm"""
+        x = _to_numpy(self.data)
+        out_data = np.log(np.maximum(x, 1e-12))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def log10_(self):
+        """In-place base-10 logarithm"""
+        x = _to_numpy(self.data)
+        out_data = np.log10(np.maximum(x, 1e-12))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def log2_(self):
+        """In-place base-2 logarithm"""
+        x = _to_numpy(self.data)
+        out_data = np.log2(np.maximum(x, 1e-12))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def sqrt_(self):
+        """In-place square root"""
+        out_data = np.sqrt(np.maximum(_to_numpy(self.data), 0))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def sin_(self):
+        """In-place sine function"""
+        out_data = np.sin(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def cos_(self):
+        """In-place cosine function"""
+        out_data = np.cos(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def tan_(self):
+        """In-place tangent function"""
+        out_data = np.tan(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def tanh_(self):
+        """In-place hyperbolic tangent function"""
+        out_data = np.tanh(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def sigmoid_(self):
+        """In-place sigmoid activation"""
+        x = _to_numpy(self.data)
+        sigmoid_data = np.where(
+            x >= 0,
+            1.0 / (1.0 + np.exp(-x)),
+            np.exp(x) / (1.0 + np.exp(x))
+        )
+        self.data = _to_data_on_device(sigmoid_data, self.device)
+        return self
+
+    def abs_(self):
+        """In-place absolute value"""
+        out_data = np.abs(_to_numpy(self.data))
+        self.data = _to_data_on_device(out_data, self.device)
+        return self
+
+    def clamp_(self, min=None, max=None):
+        """In-place clamp: restrict values to [min, max]"""
+        if min is None and max is None:
+            raise ValueError("clamp_: at least one of min/max must be specified")
+        x = _to_numpy(self.data)
+        if min is not None:
+            min_val = min.item() if isinstance(min, Tensor) else min
+            x = np.maximum(x, min_val)
+        if max is not None:
+            max_val = max.item() if isinstance(max, Tensor) else max
+            x = np.minimum(x, max_val)
+        self.data = _to_data_on_device(x, self.device)
+        return self
+
     def __gt__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         return Tensor(_to_numpy(self.data) > _to_numpy(other.data), requires_grad=False, device="cpu")
@@ -1748,6 +1984,36 @@ class Tensor:
     def ne(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
         return Tensor(_to_numpy(self.data) != _to_numpy(other.data), requires_grad=False, device="cpu")
+
+    # ========== Logical Operations ==========
+
+    def all(self, dim=None, keepdim=False):
+        """Check if all elements are non-zero (true)
+        
+        Args:
+            dim: Dimension along which to reduce (None = all)
+            keepdim: Keep the reduced dimension
+        
+        Returns:
+            Boolean tensor
+        """
+        x = _to_numpy(self.data).astype(bool)
+        result = np.all(x, axis=dim, keepdims=keepdim)
+        return Tensor(result.astype(np.float32), requires_grad=False, device=self.device)
+
+    def any(self, dim=None, keepdim=False):
+        """Check if any element is non-zero (true)
+        
+        Args:
+            dim: Dimension along which to reduce (None = all)
+            keepdim: Keep the reduced dimension
+        
+        Returns:
+            Boolean tensor
+        """
+        x = _to_numpy(self.data).astype(bool)
+        result = np.any(x, axis=dim, keepdims=keepdim)
+        return Tensor(result.astype(np.float32), requires_grad=False, device=self.device)
 
     def backward(self):
         if self.data.size != 1:
