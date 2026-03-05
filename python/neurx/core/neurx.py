@@ -2015,6 +2015,276 @@ class Tensor:
         result = np.any(x, axis=dim, keepdims=keepdim)
         return Tensor(result.astype(np.float32), requires_grad=False, device=self.device)
 
+    # ===== Phase 2: Padding Operations =====
+    
+    def pad(self, pad_width, mode='constant', value=0):
+        """Pad the tensor with specified values
+        
+        Args:
+            pad_width: Padding width for each dimension (tuple of tuples or list)
+                      Format: ((before_1, after_1), ..., (before_n, after_n))
+            mode: Padding mode ('constant', 'reflect', 'replicate', 'circular')
+            value: Fill value for constant padding (default: 0)
+        
+        Returns:
+            Padded tensor with gradient support
+        """
+        x = _to_numpy(self.data)
+        
+        # Normalize pad_width to tuple of tuples
+        if isinstance(pad_width, int):
+            pad_width = ((pad_width, pad_width),) * x.ndim
+        elif isinstance(pad_width, (list, tuple)) and not isinstance(pad_width[0], (list, tuple)):
+            # Convert flat list [1,1,2,2] to ((1,1), (2,2))
+            if len(pad_width) % 2 != 0:
+                raise ValueError("pad_width must have even length")
+            pad_width = tuple((pad_width[i], pad_width[i+1]) for i in range(0, len(pad_width), 2))
+        
+        # Apply padding
+        if mode == 'constant':
+            out_data = np.pad(x, pad_width, mode='constant', constant_values=value)
+        elif mode == 'reflect':
+            out_data = np.pad(x, pad_width, mode='reflect')
+        elif mode == 'replicate' or mode == 'edge':
+            out_data = np.pad(x, pad_width, mode='edge')
+        elif mode == 'circular' or mode == 'wrap':
+            out_data = np.pad(x, pad_width, mode='wrap')
+        else:
+            raise ValueError(f"Unsupported padding mode: {mode}")
+        
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="pad", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Remove padding from gradient
+                slices = tuple(slice(before, out.grad.shape[i] - after) 
+                              for i, (before, after) in enumerate(pad_width))
+                self.grad += out.grad[slices]
+        
+        out._backward = _backward
+        return out
+
+    # ===== Phase 2: Matrix Operations =====
+    
+    def trace(self):
+        """Compute the trace (sum of diagonal elements) of a 2D tensor
+        
+        Returns:
+            Scalar tensor containing the trace
+        """
+        x = _to_numpy(self.data)
+        if x.ndim != 2:
+            raise ValueError(f"trace() requires 2D tensor, got {x.ndim}D")
+        
+        out_data = np.trace(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="trace", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient flows only through diagonal
+                grad = np.zeros_like(x)
+                np.fill_diagonal(grad, out.grad)
+                self.grad += grad
+        
+        out._backward = _backward
+        return out
+    
+    def det(self):
+        """Compute the determinant of a 2D square matrix
+        
+        Returns:
+            Scalar tensor containing the determinant
+        """
+        x = _to_numpy(self.data)
+        if x.ndim != 2 or x.shape[0] != x.shape[1]:
+            raise ValueError(f"det() requires square 2D tensor, got shape {x.shape}")
+        
+        out_data = np.linalg.det(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="det", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: det(A) * A^(-T)
+                inv_transpose = np.linalg.inv(x).T
+                self.grad += out.grad * out_data * inv_transpose
+        
+        out._backward = _backward
+        return out
+    
+    def matrix_rank(self, tol=None):
+        """Compute the rank of a 2D matrix
+        
+        Args:
+            tol: Tolerance for singular values (default: automatic)
+        
+        Returns:
+            Integer rank (as a Tensor for consistency, but no gradient)
+        """
+        x = _to_numpy(self.data)
+        if x.ndim != 2:
+            raise ValueError(f"matrix_rank() requires 2D tensor, got {x.ndim}D")
+        
+        rank = np.linalg.matrix_rank(x, tol=tol)
+        return Tensor(np.array(rank, dtype=np.float32), requires_grad=False, device=self.device)
+
+    # ===== Phase 2: Cumulative Operations =====
+    
+    def cumsum(self, dim=0):
+        """Compute cumulative sum along a dimension
+        
+        Args:
+            dim: Dimension along which to compute cumsum
+        
+        Returns:
+            Tensor with cumulative sum
+        """
+        x = _to_numpy(self.data)
+        dim = _normalize_axis(dim, x.ndim)
+        
+        out_data = np.cumsum(x, axis=dim)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="cumsum", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: reverse cumsum
+                grad = np.flip(np.cumsum(np.flip(out.grad, axis=dim), axis=dim), axis=dim)
+                self.grad += grad
+        
+        out._backward = _backward
+        return out
+    
+    def cumprod(self, dim=0):
+        """Compute cumulative product along a dimension
+        
+        Args:
+            dim: Dimension along which to compute cumprod
+        
+        Returns:
+            Tensor with cumulative product
+        """
+        x = _to_numpy(self.data)
+        dim = _normalize_axis(dim, x.ndim)
+        
+        out_data = np.cumprod(x, axis=dim)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="cumprod", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient computation for cumprod
+                # d/dx[cumprod(x)] = cumprod(x) * cumsum(1/x) from right
+                grad = out.grad.copy()
+                y = out_data
+                
+                # Avoid division by zero
+                x_safe = x.copy()
+                x_safe[x_safe == 0] = 1e-20
+                
+                # Compute gradient: y_i * sum(grad_j / x_j) for j >= i
+                grad_cumsum = np.flip(np.cumsum(np.flip(grad / x_safe, axis=dim), axis=dim), axis=dim)
+                self.grad += y * grad_cumsum
+        
+        out._backward = _backward
+        return out
+
+    # ===== Phase 2: Inverse Trigonometric Functions =====
+    
+    def asin(self):
+        """Compute arcsine (inverse sine) element-wise
+        
+        Returns:
+            Tensor with arcsine applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.arcsin(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="asin", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: 1 / sqrt(1 - x^2)
+                grad_mask = 1.0 / np.sqrt(1.0 - x**2 + 1e-8)
+                self.grad += out.grad * grad_mask
+        
+        out._backward = _backward
+        return out
+    
+    def acos(self):
+        """Compute arccosine (inverse cosine) element-wise
+        
+        Returns:
+            Tensor with arccosine applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.arccos(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="acos", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: -1 / sqrt(1 - x^2)
+                grad_mask = -1.0 / np.sqrt(1.0 - x**2 + 1e-8)
+                self.grad += out.grad * grad_mask
+        
+        out._backward = _backward
+        return out
+    
+    def atan(self):
+        """Compute arctangent (inverse tangent) element-wise
+        
+        Returns:
+            Tensor with arctangent applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.arctan(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="atan", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: 1 / (1 + x^2)
+                grad_mask = 1.0 / (1.0 + x**2)
+                self.grad += out.grad * grad_mask
+        
+        out._backward = _backward
+        return out
+
+    # ===== Phase 2: Hyperbolic Functions =====
+    
+    def sinh(self):
+        """Compute hyperbolic sine element-wise
+        
+        Returns:
+            Tensor with sinh applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.sinh(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="sinh", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: cosh(x)
+                grad_mask = np.cosh(x)
+                self.grad += out.grad * grad_mask
+        
+        out._backward = _backward
+        return out
+    
+    def cosh(self):
+        """Compute hyperbolic cosine element-wise
+        
+        Returns:
+            Tensor with cosh applied
+        """
+        x = _to_numpy(self.data)
+        out_data = np.cosh(x)
+        out = Tensor(out_data, requires_grad=self.requires_grad, _children=(self,), _op="cosh", device=self.device)
+        
+        def _backward():
+            if self.requires_grad:
+                # Gradient: sinh(x)
+                grad_mask = np.sinh(x)
+                self.grad += out.grad * grad_mask
+        
+        out._backward = _backward
+        return out
+
     def backward(self):
         if self.data.size != 1:
             raise ValueError("backward() requires scalar Tensor")
