@@ -399,7 +399,22 @@ class ReLU:
         self.inplace = inplace
     
     def forward(self, x):
-        return relu(x)
+        # Handle Tensor inputs properly
+        if isinstance(x, Tensor):
+            # Apply ReLU operation on Tensor
+            out_data = np.maximum(0, x.data)
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="relu")
+            
+            def _backward():
+                if x.requires_grad:
+                    # Gradient of ReLU: 1 where x > 0, 0 otherwise
+                    grad_mask = (x.data > 0).astype(x.data.dtype)
+                    x.grad += out.grad * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return relu(x)
     
     def __call__(self, x):
         return self.forward(x)
@@ -413,7 +428,19 @@ class LeakyReLU:
         self.inplace = inplace
     
     def forward(self, x):
-        return leaky_relu(x, self.negative_slope)
+        if isinstance(x, Tensor):
+            out_data = np.where(x.data > 0, x.data, self.negative_slope * x.data)
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="leaky_relu")
+            
+            def _backward():
+                if x.requires_grad:
+                    grad_mask = np.where(x.data > 0, 1.0, self.negative_slope).astype(x.data.dtype)
+                    x.grad += out.grad * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return leaky_relu(x, self.negative_slope)
     
     def __call__(self, x):
         return self.forward(x)
@@ -427,7 +454,19 @@ class ELU:
         self.inplace = inplace
     
     def forward(self, x):
-        return elu(x, self.alpha)
+        if isinstance(x, Tensor):
+            out_data = np.where(x.data > 0, x.data, self.alpha * (np.exp(x.data) - 1))
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="elu")
+            
+            def _backward():
+                if x.requires_grad:
+                    grad_mask = np.where(x.data > 0, 1.0, self.alpha * np.exp(x.data)).astype(x.data.dtype)
+                    x.grad += out.grad * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return elu(x, self.alpha)
     
     def __call__(self, x):
         return self.forward(x)
@@ -438,9 +477,24 @@ class SELU:
     
     def __init__(self, inplace=False):
         self.inplace = inplace
+        self.alpha = 1.6732632423543772848170429916717
+        self.scale = 1.0507009873554804934193349852946
     
     def forward(self, x):
-        return selu(x)
+        if isinstance(x, Tensor):
+            raw_out = np.where(x.data > 0, x.data, self.alpha * (np.exp(x.data) - 1))
+            out_data = self.scale * raw_out
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="selu")
+            
+            def _backward():
+                if x.requires_grad:
+                    grad_mask = np.where(x.data > 0, 1.0, self.alpha * np.exp(x.data)).astype(x.data.dtype)
+                    x.grad += out.grad * self.scale * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return selu(x)
     
     def __call__(self, x):
         return self.forward(x)
@@ -450,7 +504,24 @@ class Sigmoid:
     """Sigmoid activation module"""
     
     def forward(self, x):
-        return sigmoid(x)
+        if isinstance(x, Tensor):
+            # Numerically stable sigmoid
+            out_data = np.empty_like(x.data, dtype=np.result_type(x.data, np.float64))
+            pos = x.data >= 0
+            neg = ~pos
+            out_data[pos] = 1.0 / (1.0 + np.exp(-x.data[pos]))
+            out_data[neg] = np.exp(x.data[neg]) / (1.0 + np.exp(x.data[neg]))
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="sigmoid")
+            
+            def _backward():
+                if x.requires_grad:
+                    grad_mask = out_data * (1.0 - out_data)
+                    x.grad += out.grad * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return sigmoid(x)
     
     def __call__(self, x):
         return self.forward(x)
@@ -460,7 +531,19 @@ class Tanh:
     """Tanh activation module"""
     
     def forward(self, x):
-        return tanh(x)
+        if isinstance(x, Tensor):
+            out_data = np.tanh(x.data)
+            out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="tanh")
+            
+            def _backward():
+                if x.requires_grad:
+                    grad_mask = 1.0 - out_data ** 2
+                    x.grad += out.grad * grad_mask
+            
+            out._backward = _backward
+            return out
+        else:
+            return tanh(x)
     
     def __call__(self, x):
         return self.forward(x)
