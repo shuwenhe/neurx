@@ -4,6 +4,7 @@ PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 PYTEST ?= $(PYTHON) -m pytest
 PIP_INSTALL_FLAGS ?= --no-build-isolation
+ROUNDS ?= 3
 
 help:
 	@echo "Targets:"
@@ -136,7 +137,7 @@ cann-train:
 	$(PYTHON) cann/train_launcher.py --config $(CONFIG)
 
 cann-test-310p3:
-	/usr/bin/python3 cann/examples/neurx_310p3_validation.py --python /usr/bin/python3
+	/usr/bin/python3 cann/examples/neurx_310p3_validation.py --python /usr/bin/python3 --rounds $(ROUNDS)
 
 auto-push:
 	$(PYTHON) scripts/auto_push.py --repo . --remote origin
