@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train auto-push clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -29,6 +29,9 @@ help:
 	@echo "  api           Run one API test case. Usage: make api API=neurx.sum"
 	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
 	@echo "  doctor        Run runtime diagnostics"
+	@echo "  cann-doctor   Validate Ascend CANN config without starting training"
+	@echo "  cann-train    Launch Ascend training from cann JSON config"
+	@echo "  auto-push     Watch repository changes and auto commit/push to GitHub"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
 	@echo "  cuda-test     Run CUDA smoke test (requires CUDA build)"
 	@echo "  clean         Remove build artifacts"
@@ -113,6 +116,23 @@ api-all:
 
 doctor:
 	PYTHONPATH=python $(PYTHON) -m neurx.cli
+
+cann-doctor:
+	@if [ -z "$(CONFIG)" ]; then \
+		echo "Usage: make cann-doctor CONFIG=cann/configs/ascend_910b_train.json"; \
+		exit 2; \
+	fi
+	$(PYTHON) cann/train_launcher.py --config $(CONFIG) --dry-run
+
+cann-train:
+	@if [ -z "$(CONFIG)" ]; then \
+		echo "Usage: make cann-train CONFIG=cann/configs/ascend_910b_train.json"; \
+		exit 2; \
+	fi
+	$(PYTHON) cann/train_launcher.py --config $(CONFIG)
+
+auto-push:
+	$(PYTHON) scripts/auto_push.py --repo . --remote origin
 
 cuda-test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py

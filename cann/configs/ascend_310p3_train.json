@@ -1,0 +1,19 @@
+{
+  "name": "neurx-ascend-310p3-training-guard",
+  "mode": "train",
+  "target": {
+    "soc": "Ascend310P3"
+  },
+  "env": {
+    "ASCEND_RT_VISIBLE_DEVICES": "0"
+  },
+  "train": {
+    "workdir": "/app/neurx",
+    "command": [
+      "python3",
+      "cann/examples/torch_npu_train_template.py",
+      "--epochs",
+      "2"
+    ]
+  }
+}
