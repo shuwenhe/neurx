@@ -20,7 +20,14 @@ def _run_neurx_training_loop_test(repo_root: Path, python_bin: str) -> tuple[boo
 
 def _run_neurx_npu_backend_smoke(repo_root: Path, python_bin: str) -> tuple[bool, str]:
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(repo_root / "python")
+    py_paths = [str(repo_root / "python"), str(repo_root)]
+    ascend_home = env.get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")
+    ascend_site = str(Path(ascend_home) / "python" / "site-packages")
+    if Path(ascend_site).exists():
+        py_paths.append(ascend_site)
+    if env.get("PYTHONPATH"):
+        py_paths.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = ":".join(py_paths)
     env["TENSOR_DEVICE"] = "npu"
     code = r'''
 import numpy as np
