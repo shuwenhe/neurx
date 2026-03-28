@@ -98,9 +98,17 @@ def _wrap(tensor) -> DeviceArray:
     return DeviceArray(tensor)
 
 
-def to_device(x: np.ndarray) -> DeviceArray:
+def _ensure_npu_context() -> None:
     if not available():
         raise RuntimeError("neurx.npu backend not available")
+    try:
+        torch.npu.current_device()
+    except Exception:
+        torch.npu.set_device("npu:0")
+
+
+def to_device(x: np.ndarray) -> DeviceArray:
+    _ensure_npu_context()
     x = _ensure_array(x)
     tensor = torch.from_numpy(x)
     tensor = tensor.to("npu")
