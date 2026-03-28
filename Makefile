@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -34,6 +34,7 @@ help:
 	@echo "  cann-train    Launch Ascend training from cann JSON config"
 	@echo "  cann-test-310p3 Run neurx + 310P3 8-card validation smoke"
 	@echo "  cann-test-npu-agnostic Run backend-agnostic tests on TENSOR_DEVICE=npu"
+	@echo "  cann-test-npu-agnostic-stable Run verified-pass NPU backend-agnostic tests"
 	@echo "  auto-push     Watch repository changes and auto commit/push to GitHub"
 	@echo "  install-auto-push-service Install and enable systemd auto-push service"
 	@echo "  status-auto-push-service  Show systemd auto-push service status"
@@ -142,6 +143,9 @@ cann-test-310p3:
 
 cann-test-npu-agnostic:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_tests.txt)
+
+cann-test-npu-agnostic-stable:
+	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_stable.txt)
 
 auto-push:
 	$(PYTHON) scripts/auto_push.py --repo . --remote origin
