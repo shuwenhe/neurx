@@ -1,11 +1,30 @@
+import os
 import numpy as np
 from contextlib import ContextDecorator
 from scipy import special as _scipy_special
 
-try:
-    from neurx.cuda import ops as _cuda_ops
-except Exception:
-    _cuda_ops = None
+def _load_accelerator_ops():
+    preferred = (os.environ.get("TENSOR_DEVICE") or "").strip().lower()
+    if preferred == "npu":
+        try:
+            from cann import npu_ops as accel_ops
+
+            return accel_ops
+        except Exception:
+            return None
+    try:
+        from neurx.cuda import ops as accel_ops
+
+        return accel_ops
+    except Exception:
+        return None
+
+
+_cuda_ops = _load_accelerator_ops()
+
+
+def _accelerator_available() -> bool:
+    return bool(_cuda_ops is not None and hasattr(_cuda_ops, "available") and _cuda_ops.available())
 
 
 def _ensure_array(value, dtype=None):
@@ -114,19 +133,22 @@ class Tensor:
     def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
         if device is None:
             device = _resolve_default_device(data)
-        if device == "cuda" and _cuda_ops is None and _should_fallback_cuda_to_cpu():
+        if device == "npu":
+            # Reuse existing accelerator execution path while selecting Ascend ops at import time.
+            device = "cuda"
+        if device == "cuda" and not _accelerator_available() and _should_fallback_cuda_to_cpu():
             device = "cpu"
         self.device = device
 
         if self.device == "cuda":
-            if _cuda_ops is None:
+            if not _accelerator_available():
                 try:
                     from neurx.platform import BackendNotAvailableError
                 except Exception:
                     BackendNotAvailableError = RuntimeError
                 raise BackendNotAvailableError(
-                    "CUDA backend not available. "
-                    "Set TENSOR_FALLBACK_TO_CPU=1 to auto-fallback or install CUDA extension."
+                    "Accelerator backend not available. "
+                    "Set TENSOR_FALLBACK_TO_CPU=1 to auto-fallback or configure CUDA/CANN runtime."
                 )
             if _is_cuda_device(data):
                 self.data = data
