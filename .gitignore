@@ -36,3 +36,6 @@ dist/
 
 # Tests
 .pytest_cache/
+
+# Auto push
+.auto_push_state/
