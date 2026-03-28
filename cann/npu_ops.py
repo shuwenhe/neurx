@@ -1,3 +1,5 @@
+import os
+import sys
 import numpy as np
 
 try:
@@ -13,6 +15,33 @@ _TORCH_TO_NUMPY_DTYPE = {
     "torch.int32": np.dtype("int32"),
     "torch.int64": np.dtype("int64"),
 }
+
+
+def _prepend_env_path(name: str, value: str) -> None:
+    if not value:
+        return
+    current = os.environ.get(name, "")
+    if not current:
+        os.environ[name] = value
+        return
+    if value in current.split(":"):
+        return
+    os.environ[name] = f"{value}:{current}"
+
+
+def _bootstrap_ascend_env() -> None:
+    ascend_home = os.environ.get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")
+    if not os.path.isdir(ascend_home):
+        return
+
+    py_site = os.path.join(ascend_home, "python", "site-packages")
+    if os.path.isdir(py_site) and py_site not in sys.path:
+        sys.path.insert(0, py_site)
+    _prepend_env_path("PYTHONPATH", py_site)
+
+    _prepend_env_path("LD_LIBRARY_PATH", os.path.join(ascend_home, "lib64"))
+    _prepend_env_path("LD_LIBRARY_PATH", os.path.join(ascend_home, "runtime", "lib64"))
+    _prepend_env_path("LD_LIBRARY_PATH", os.path.join(ascend_home, "compiler", "lib64"))
 
 
 def _torch_dtype_from_numpy(dtype: np.dtype):
@@ -99,6 +128,7 @@ def _wrap(tensor) -> DeviceArray:
 
 
 def _ensure_npu_context() -> None:
+    _bootstrap_ascend_env()
     if not available():
         raise RuntimeError("neurx.npu backend not available")
     try:
