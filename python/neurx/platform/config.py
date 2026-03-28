@@ -16,7 +16,7 @@ _ENV_KEYS = (
 )
 
 _VALID_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}
-_VALID_DEVICES = {"cpu", "cuda"}
+_VALID_DEVICES = {"cpu", "cuda", "npu"}
 
 
 def _parse_bool(name: str, value: str | None, default: bool) -> bool:
