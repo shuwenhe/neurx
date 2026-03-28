@@ -4,9 +4,11 @@ import numpy as np
 
 try:
     import torch
+    import torch.nn.functional as F
     import torch_npu  # noqa: F401
 except Exception:
     torch = None
+    F = None
 
 
 _TORCH_TO_NUMPY_DTYPE = {
@@ -204,6 +206,27 @@ def matmul(a: DeviceArray, b: DeviceArray) -> DeviceArray:
     return _wrap(a.tensor @ b.tensor)
 
 
+def layernorm(a: DeviceArray, gamma: DeviceArray, beta: DeviceArray, eps: float) -> DeviceArray:
+    a = _ensure_device_array(a)
+    gamma = _ensure_device_array(gamma)
+    beta = _ensure_device_array(beta)
+    if a.dtype != gamma.dtype or a.dtype != beta.dtype:
+        raise ValueError("layernorm expects same dtype")
+    if len(a.shape) not in (2, 3):
+        raise ValueError("layernorm expects 2D or 3D input")
+    hidden = a.shape[-1]
+    if gamma.shape != (hidden,) or beta.shape != (hidden,):
+        raise ValueError("layernorm shape mismatch")
+    return _wrap(F.layer_norm(a.tensor, (hidden,), gamma.tensor, beta.tensor, float(eps)))
+
+
+def softmax(a: DeviceArray) -> DeviceArray:
+    a = _ensure_device_array(a)
+    if len(a.shape) not in (2, 3):
+        raise ValueError("softmax expects 2D or 3D input")
+    return _wrap(torch.softmax(a.tensor, dim=-1))
+
+
 def reduce_sum(a: DeviceArray, axis=None, keepdims=False) -> DeviceArray:
     a = _ensure_device_array(a)
     axis = _normalize_axis(axis, len(a.shape))
@@ -244,9 +267,23 @@ def argmax(a: DeviceArray, axis=None):
     return _wrap(torch.argmax(a.tensor, dim=axis).to(torch.int64))
 
 
+def argmax_lastdim(a: DeviceArray):
+    a = _ensure_device_array(a)
+    if len(a.shape) not in (2, 3):
+        raise ValueError("argmax_lastdim expects 2D or 3D input")
+    return _wrap(torch.argmax(a.tensor, dim=-1).to(torch.int64))
+
+
 def argmin(a: DeviceArray, axis=None):
     a = _ensure_device_array(a)
     axis = _normalize_axis(axis, len(a.shape))
     if axis is None:
         return _wrap(torch.argmin(a.tensor).to(torch.int64))
     return _wrap(torch.argmin(a.tensor, dim=axis).to(torch.int64))
+
+
+def argmin_lastdim(a: DeviceArray):
+    a = _ensure_device_array(a)
+    if len(a.shape) not in (2, 3):
+        raise ValueError("argmin_lastdim expects 2D or 3D input")
+    return _wrap(torch.argmin(a.tensor, dim=-1).to(torch.int64))
