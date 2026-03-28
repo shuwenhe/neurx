@@ -1,0 +1,3 @@
+tests/test_creation.py
+tests/test_tensor_ops_extended.py
+tests/test_tensor_phase2_enhancements.py
