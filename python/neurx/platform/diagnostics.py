@@ -32,6 +32,15 @@ def _cuda_available() -> bool:
         return False
 
 
+def _npu_available() -> bool:
+    try:
+        from cann import npu_ops
+
+        return bool(npu_ops.available())
+    except Exception:
+        return False
+
+
 def runtime_info() -> dict[str, object]:
     cfg = get_runtime_config()
     return {
@@ -45,6 +54,7 @@ def runtime_info() -> dict[str, object]:
         "deterministic": cfg.deterministic,
         "seed": cfg.seed,
         "cuda_available": _cuda_available(),
+        "npu_available": _npu_available(),
         "env": {k: os.environ.get(k) for k in ("TENSOR_DEVICE", "TENSOR_FALLBACK_TO_CPU", "TENSOR_LOG_LEVEL")},
     }
 
@@ -63,6 +73,7 @@ def doctor(require_cuda: bool = False) -> list[CheckResult]:
         CheckResult("numpy", True, f"NumPy {info['numpy_version']}"),
         CheckResult("config.default_device", True, str(info["default_device"])),
         CheckResult("cuda.extension", bool(info["cuda_available"]), f"available={info['cuda_available']}"),
+        CheckResult("npu.runtime", bool(info["npu_available"]), f"available={info['npu_available']}"),
     ]
     if require_cuda and not info["cuda_available"]:
         results.append(CheckResult("require_cuda", False, "CUDA is required but unavailable"))
