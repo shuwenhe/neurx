@@ -18,6 +18,36 @@ def _run_neurx_training_loop_test(repo_root: Path, python_bin: str) -> tuple[boo
     return result.returncode == 0, output.strip()
 
 
+def _run_neurx_npu_backend_smoke(repo_root: Path, python_bin: str) -> tuple[bool, str]:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(repo_root / "python")
+    env["TENSOR_DEVICE"] = "npu"
+    code = r'''
+import numpy as np
+from neurx.neurx import Tensor
+from neurx.platform import runtime_info
+
+info = runtime_info()
+print("runtime_device", info.get("default_device"))
+print("npu_available", info.get("npu_available"))
+
+a = Tensor(np.random.randn(8, 16).astype(np.float32), requires_grad=True)
+b = Tensor(np.random.randn(16, 4).astype(np.float32), requires_grad=True)
+out = (a @ b).mean()
+out.backward()
+
+assert a.grad is not None
+assert b.grad is not None
+assert a.grad.shape == (8, 16)
+assert b.grad.shape == (16, 4)
+print("neurx_npu_backend_smoke=OK")
+'''
+    cmd = [python_bin, "-c", code]
+    result = subprocess.run(cmd, cwd=repo_root, env=env, capture_output=True, text=True, check=False)
+    output = (result.stdout or "") + ("\n" + result.stderr if result.stderr else "")
+    return result.returncode == 0, output.strip()
+
+
 def _device_worker(device_id: int, rounds: int) -> tuple[int, bool, str]:
     try:
         import torch
@@ -76,7 +106,11 @@ def main() -> int:
     neurx_ok, neurx_output = _run_neurx_training_loop_test(repo_root, args.python)
     print(neurx_output)
 
-    print("== Step 2: 310P3 multi-card compute smoke ==")
+    print("== Step 2: neurx NPU backend smoke ==")
+    neurx_npu_ok, neurx_npu_output = _run_neurx_npu_backend_smoke(repo_root, args.python)
+    print(neurx_npu_output)
+
+    print("== Step 3: 310P3 multi-card compute smoke ==")
     # Keep runtime in this process too, so device count is explicit in summary.
     npu_count = subprocess.run(
         [
@@ -107,6 +141,7 @@ def main() -> int:
 
     summary = {
         "neurx_training_loop_test_ok": neurx_ok,
+        "neurx_npu_backend_smoke_ok": neurx_npu_ok,
         "npu_device_count": device_count,
         "npu_smoke_ok": smoke["ok"],
         "npu_failures": smoke["failures"],
@@ -114,7 +149,7 @@ def main() -> int:
     print("== Summary ==")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
-    if neurx_ok and smoke["ok"]:
+    if neurx_ok and neurx_npu_ok and smoke["ok"]:
         return 0
     return 1
 
