@@ -1,0 +1,15 @@
+[Unit]
+Description=NeurX Git auto-push watcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/app/neurx
+ExecStart=/usr/bin/env python3 /app/neurx/scripts/auto_push.py --repo /app/neurx --remote origin --interval 2 --debounce 5 --max-file-size-mb 25
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
