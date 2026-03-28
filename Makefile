@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train auto-push clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -32,6 +32,9 @@ help:
 	@echo "  cann-doctor   Validate Ascend CANN config without starting training"
 	@echo "  cann-train    Launch Ascend training from cann JSON config"
 	@echo "  auto-push     Watch repository changes and auto commit/push to GitHub"
+	@echo "  install-auto-push-service Install and enable systemd auto-push service"
+	@echo "  status-auto-push-service  Show systemd auto-push service status"
+	@echo "  stop-auto-push-service    Stop and disable systemd auto-push service"
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
 	@echo "  cuda-test     Run CUDA smoke test (requires CUDA build)"
 	@echo "  clean         Remove build artifacts"
@@ -133,6 +136,15 @@ cann-train:
 
 auto-push:
 	$(PYTHON) scripts/auto_push.py --repo . --remote origin
+
+install-auto-push-service:
+	bash scripts/install_auto_push_service.sh
+
+status-auto-push-service:
+	systemctl status neurx-auto-push.service --no-pager
+
+stop-auto-push-service:
+	systemctl disable --now neurx-auto-push.service
 
 cuda-test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py

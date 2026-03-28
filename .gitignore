@@ -39,3 +39,23 @@ dist/
 
 # Auto push
 .auto_push_state/
+
+# CANN generated artifacts
+cann/__pycache__/
+cann/cache/
+cann/checkpoints/
+cann/compile/
+cann/dumps/
+cann/kernel_meta/
+cann/logs/
+cann/output/
+cann/outputs/
+cann/profiling/
+cann/runs/
+cann/workdir/
+cann/**/*.air
+cann/**/*.bin
+cann/**/*.mindir
+cann/**/*.om
+cann/**/*.pbtxt
+cann/**/*.prof
