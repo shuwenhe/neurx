@@ -259,7 +259,11 @@ class Tensor:
         return other + (-self)
 
     def __neg__(self):
-        out = Tensor(-self.data, self.requires_grad, (self,), "neg")
+        if self.device == "cuda":
+            # DeviceArray does not implement unary '-' directly; negate on host then move back.
+            out = Tensor(-_to_numpy(self.data), self.requires_grad, (self,), "neg", device="cuda")
+        else:
+            out = Tensor(-self.data, self.requires_grad, (self,), "neg")
 
         def _backward():
             if self.requires_grad:
