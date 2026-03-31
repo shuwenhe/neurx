@@ -1,12 +1,181 @@
-"""
-Week 7: Distributed Training and Multi-GPU Support
+"""Distributed training utilities for neurx.
 
-Utilities for distributed training including data parallelism, 
-gradient synchronization, and device management.
+This module provides process-group lifecycle and collective communication
+primitives backed by ``torch.distributed``. On Ascend environments it uses
+HCCL; on CPU it can fall back to Gloo.
 """
+
+from __future__ import annotations
+
+import datetime
+import os
+from typing import Optional, List, Dict, Any
 
 import numpy as np
-from typing import Optional, List, Dict, Any
+
+try:
+    import torch
+    import torch.distributed as _torch_dist
+except Exception:
+    torch = None
+    _torch_dist = None
+
+
+_REDUCE_OPS = {
+    "sum": "SUM",
+    "mean": "SUM",
+    "max": "MAX",
+    "min": "MIN",
+    "prod": "PRODUCT",
+}
+
+
+def _distributed_available() -> bool:
+    return _torch_dist is not None and hasattr(_torch_dist, "is_available") and _torch_dist.is_available()
+
+
+def _env_int(name: str, default: int) -> int:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer, got {value!r}") from exc
+
+
+def _resolve_backend(backend: Optional[str]) -> str:
+    requested = (backend or os.environ.get("TENSOR_DIST_BACKEND") or "").strip().lower()
+    if not requested:
+        requested = "hccl" if _npu_available() else "gloo"
+    if requested == "nccl" and _npu_available():
+        # Keep existing config compatibility while using Ascend backend.
+        requested = "hccl"
+    if requested not in {"hccl", "gloo", "nccl"}:
+        raise ValueError(f"Unsupported backend: {requested}")
+    return requested
+
+
+def _npu_available() -> bool:
+    if torch is None:
+        return False
+    return bool(hasattr(torch, "npu") and torch.npu.is_available())
+
+
+def _current_world_size_from_runtime() -> int:
+    if _distributed_available() and _torch_dist.is_initialized():
+        return int(_torch_dist.get_world_size())
+    return _env_int("WORLD_SIZE", 1)
+
+
+def _to_collective_tensor(arr: np.ndarray, backend: str):
+    if torch is None:
+        raise RuntimeError("torch is required for distributed collectives")
+    np_arr = np.ascontiguousarray(arr)
+    dtype = np_arr.dtype
+    if backend == "hccl":
+        # Ascend HCCL typically expects float16/float32/int32/int64.
+        if dtype == np.float64:
+            np_arr = np_arr.astype(np.float32, copy=False)
+        tensor = torch.from_numpy(np_arr).to("npu")
+    else:
+        tensor = torch.from_numpy(np_arr)
+    return tensor, dtype
+
+
+def _from_collective_tensor(tensor, original_dtype: np.dtype) -> np.ndarray:
+    host = tensor.detach().cpu().numpy()
+    if host.dtype != original_dtype:
+        host = host.astype(original_dtype, copy=False)
+    return host
+
+
+def init_process_group(
+    backend: Optional[str] = None,
+    rank: Optional[int] = None,
+    world_size: Optional[int] = None,
+    init_method: Optional[str] = None,
+    timeout_seconds: int = 1800,
+) -> None:
+    """Initialize distributed process group.
+
+    Uses environment defaults when optional args are omitted:
+    ``RANK``, ``WORLD_SIZE``, ``MASTER_ADDR``, ``MASTER_PORT``.
+    """
+    if not _distributed_available():
+        raise RuntimeError("torch.distributed is unavailable in current runtime")
+    if _torch_dist.is_initialized():
+        return
+
+    resolved_backend = _resolve_backend(backend)
+    resolved_rank = _env_int("RANK", 0) if rank is None else int(rank)
+    resolved_world_size = _env_int("WORLD_SIZE", 1) if world_size is None else int(world_size)
+
+    if resolved_world_size < 1:
+        raise ValueError("world_size must be >= 1")
+    if resolved_rank < 0 or resolved_rank >= resolved_world_size:
+        raise ValueError("rank must satisfy 0 <= rank < world_size")
+
+    if init_method is None:
+        master_addr = os.environ.get("MASTER_ADDR", "127.0.0.1")
+        master_port = os.environ.get("MASTER_PORT", "29500")
+        init_method = f"tcp://{master_addr}:{master_port}"
+
+    if resolved_backend == "hccl":
+        if not _npu_available():
+            raise RuntimeError("HCCL backend requested but torch.npu is unavailable")
+        local_rank = _env_int("LOCAL_RANK", resolved_rank)
+        torch.npu.set_device(f"npu:{local_rank}")
+
+    _torch_dist.init_process_group(
+        backend=resolved_backend,
+        init_method=init_method,
+        rank=resolved_rank,
+        world_size=resolved_world_size,
+        timeout=datetime.timedelta(seconds=int(timeout_seconds)),
+    )
+
+
+def destroy_process_group() -> None:
+    """Destroy current process group if initialized."""
+    if _distributed_available() and _torch_dist.is_initialized():
+        _torch_dist.destroy_process_group()
+
+
+def is_initialized() -> bool:
+    """Return True when torch distributed process group is initialized."""
+    return bool(_distributed_available() and _torch_dist.is_initialized())
+
+
+def all_reduce(array: np.ndarray, operation: str = "sum") -> np.ndarray:
+    """All-reduce a NumPy array across processes.
+
+    Returns reduced values on all ranks.
+    """
+    if not is_initialized() or get_world_size() <= 1:
+        return array
+
+    op_name = operation.strip().lower()
+    if op_name not in _REDUCE_OPS:
+        raise ValueError(f"Unknown operation: {operation}")
+    backend = _torch_dist.get_backend()
+    tensor, original_dtype = _to_collective_tensor(array, backend)
+    reduce_op = getattr(_torch_dist.ReduceOp, _REDUCE_OPS[op_name])
+    _torch_dist.all_reduce(tensor, op=reduce_op)
+    out = _from_collective_tensor(tensor, original_dtype)
+    if op_name == "mean":
+        out = out / float(get_world_size())
+    return out
+
+
+def broadcast(array: np.ndarray, src: int = 0) -> np.ndarray:
+    """Broadcast a NumPy array from ``src`` rank to all ranks."""
+    if not is_initialized() or get_world_size() <= 1:
+        return array
+    backend = _torch_dist.get_backend()
+    tensor, original_dtype = _to_collective_tensor(array, backend)
+    _torch_dist.broadcast(tensor, src=int(src))
+    return _from_collective_tensor(tensor, original_dtype)
 
 
 # ============================================================================
@@ -169,8 +338,11 @@ class DistributedDataParallel:
                  rank: int = 0, world_size: int = 1):
         self.model = model
         self.process_group = process_group
-        self.rank = rank
-        self.world_size = world_size
+        self.rank = int(rank)
+        self.world_size = int(world_size)
+        if is_initialized():
+            self.rank = get_rank()
+            self.world_size = get_world_size()
         
         self.requires_gradient_sync = world_size > 1
     
@@ -192,11 +364,10 @@ class DistributedDataParallel:
         if not self.requires_gradient_sync:
             return gradients
         
-        # Average gradients across all processes
+        # Average gradients across all processes.
         synchronized = {}
         for key, grad in gradients.items():
-            # Simulate AllReduce: average gradients
-            synchronized[key] = grad / self.world_size
+            synchronized[key] = all_reduce(grad, operation='mean')
         
         return synchronized
     
@@ -225,9 +396,11 @@ class GradientSynchronizer:
     """
     
     def __init__(self, world_size: int = 1, backend: str = 'nccl'):
-        self.world_size = world_size
+        self.world_size = int(world_size)
         self.backend = backend
-        self.requires_sync = world_size > 1
+        self.requires_sync = self.world_size > 1
+        if self.requires_sync and not is_initialized():
+            init_process_group(backend=backend, world_size=self.world_size)
     
     def synchronize(self, gradients: Dict[str, np.ndarray],
                    operation: str = 'mean') -> Dict[str, np.ndarray]:
@@ -245,16 +418,9 @@ class GradientSynchronizer:
         if not self.requires_sync:
             return gradients
         
-        synchronized = {}
+        synchronized: Dict[str, np.ndarray] = {}
         for key, grad in gradients.items():
-            if operation == 'mean':
-                synchronized[key] = grad / self.world_size
-            elif operation == 'sum':
-                synchronized[key] = grad * self.world_size
-            elif operation == 'max':
-                synchronized[key] = grad
-            else:
-                raise ValueError(f"Unknown operation: {operation}")
+            synchronized[key] = self.all_reduce(grad, operation=operation)
         
         return synchronized
     
@@ -271,19 +437,9 @@ class GradientSynchronizer:
             Reduced neurx
         """
         
-        if not self.requires_sync:
+        if not self.requires_sync or self.world_size <= 1:
             return neurx
-        
-        if operation == 'sum':
-            return neurx * self.world_size
-        elif operation == 'mean':
-            return neurx / self.world_size
-        elif operation == 'max':
-            return neurx
-        elif operation == 'min':
-            return neurx
-        else:
-            raise ValueError(f"Unknown operation: {operation}")
+        return all_reduce(neurx, operation=operation)
 
 
 # ============================================================================
@@ -355,20 +511,22 @@ def is_distributed() -> bool:
 
 def get_rank() -> int:
     """Get current process rank."""
-    import os
-    return int(os.environ.get('RANK', '0'))
+    if is_initialized():
+        return int(_torch_dist.get_rank())
+    return _env_int('RANK', 0)
 
 
 def get_world_size() -> int:
     """Get total number of processes."""
-    import os
-    return int(os.environ.get('WORLD_SIZE', '1'))
+    if is_initialized():
+        return int(_torch_dist.get_world_size())
+    return _env_int('WORLD_SIZE', 1)
 
 
 def barrier() -> None:
     """Synchronization barrier for all processes."""
-    # In distributed training, this waits for all processes to reach this point
-    pass
+    if is_initialized() and get_world_size() > 1:
+        _torch_dist.barrier()
 
 
 __all__ = [
@@ -377,6 +535,11 @@ __all__ = [
     'DistributedDataParallel',
     'GradientSynchronizer',
     'DistributedSampler',
+    'init_process_group',
+    'destroy_process_group',
+    'is_initialized',
+    'all_reduce',
+    'broadcast',
     'is_distributed',
     'get_rank',
     'get_world_size',
