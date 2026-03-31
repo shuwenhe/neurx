@@ -344,7 +344,7 @@ class DistributedDataParallel:
             self.rank = get_rank()
             self.world_size = get_world_size()
         
-        self.requires_gradient_sync = world_size > 1
+        self.requires_gradient_sync = self.world_size > 1
     
     def forward(self, inputs: np.ndarray) -> np.ndarray:
         """Forward pass."""
@@ -399,8 +399,6 @@ class GradientSynchronizer:
         self.world_size = int(world_size)
         self.backend = backend
         self.requires_sync = self.world_size > 1
-        if self.requires_sync and not is_initialized():
-            init_process_group(backend=backend, world_size=self.world_size)
     
     def synchronize(self, gradients: Dict[str, np.ndarray],
                    operation: str = 'mean') -> Dict[str, np.ndarray]:
