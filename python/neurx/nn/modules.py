@@ -244,10 +244,13 @@ class Module:
     def state_dict(self):
         state = {}
         for name, param in self._named_parameters().items():
-            state[name] = param.data.copy()
+            if isinstance(param, Tensor):
+                state[name] = param.to_numpy().copy()
+            else:
+                state[name] = np.array(param, copy=True)
         for name, buf in self._named_buffers(include_non_persistent=False).items():
             if isinstance(buf, Tensor):
-                state[name] = buf.data.copy()
+                state[name] = buf.to_numpy().copy()
             else:
                 state[name] = np.array(buf, copy=True)
         return state
