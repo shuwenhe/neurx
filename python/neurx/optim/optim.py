@@ -1,5 +1,7 @@
 import numpy as np
 
+from neurx import Tensor
+
 from neurx.optim.optimizer import Optimizer
 
 
@@ -135,8 +137,8 @@ class Adam(Optimizer):
         self.eps = eps
         self.weight_decay = weight_decay
         self.step_count = 0
-        self.m = {id(p): np.zeros_like(p.data) for p in self.params}
-        self.v = {id(p): np.zeros_like(p.data) for p in self.params}
+        self.m = {id(p): np.zeros_like(p.to_numpy()) for p in self.params}
+        self.v = {id(p): np.zeros_like(p.to_numpy()) for p in self.params}
     
     def step(self):
         """Perform a single optimization step."""
@@ -152,8 +154,9 @@ class Adam(Optimizer):
                     continue
 
                 grad = p.grad
+                param = p.to_numpy()
                 if weight_decay != 0:
-                    grad = grad + weight_decay * p.data
+                    grad = grad + weight_decay * param
 
                 pid = id(p)
                 self.m[pid] = beta1 * self.m[pid] + (1 - beta1) * grad
@@ -162,7 +165,11 @@ class Adam(Optimizer):
                 m_hat = self.m[pid] / (1 - beta1 ** self.step_count)
                 v_hat = self.v[pid] / (1 - beta2 ** self.step_count)
 
-                p.data -= lr * m_hat / (np.sqrt(v_hat) + eps)
+                updated = param - lr * m_hat / (np.sqrt(v_hat) + eps)
+                if p.device == "cuda":
+                    p.data = Tensor(updated.astype(np.float32, copy=False), requires_grad=False, device="cuda").data
+                else:
+                    p.data = updated
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
