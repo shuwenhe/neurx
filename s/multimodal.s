@@ -1,17 +1,17 @@
 package neurx.multimodal
 
 struct multimodal_batch {
-    int32 batch_size
-    int32 seq_len
-    []int32 token_ids
+    int batch_size
+    int seq_len
+    []int token_ids
     []f32 image_features
     []f32 audio_features
 }
 
 func new_batch(
-    int32 batch_size,
-    int32 seq_len,
-    []int32 token_ids,
+    int batch_size,
+    int seq_len,
+    []int token_ids,
     []f32 image_features,
     []f32 audio_features
 ) multimodal_batch {
@@ -24,6 +24,6 @@ func new_batch(
     }
 }
 
-func token_count(multimodal_batch batch) int32 {
+func token_count(multimodal_batch batch) int {
     len(batch.token_ids)
 }
