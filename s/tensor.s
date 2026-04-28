@@ -1,16 +1,14 @@
 package neurx.tensor
 
-// Tensor 结构体定义
-struct Tensor {
-    data: []f32
-    shape: []int32
-    requires_grad: bool
-    grad: option[Tensor]
+struct tensor {
+    []f32 data
+    []int32 shape
+    bool requires_grad
+    option[tensor] grad
 }
 
-// 创建新 Tensor
-func new(data: []f32, shape: []int32, requires_grad: bool) Tensor {
-    Tensor {
+func new([]f32 data, []int32 shape, bool requires_grad) tensor {
+    tensor {
         data: data,
         shape: shape,
         requires_grad: requires_grad,
@@ -18,9 +16,7 @@ func new(data: []f32, shape: []int32, requires_grad: bool) Tensor {
     }
 }
 
-// 基础加法算子
-func add(a: Tensor, b: Tensor) Tensor {
-    // TODO: shape 检查与广播
+func add(tensor a, tensor b) tensor {
     let n = len(a.data)
     let mut out = []f32{cap: n}
     for i in 0..n {
@@ -28,5 +24,3 @@ func add(a: Tensor, b: Tensor) Tensor {
     }
     new(out, a.shape, a.requires_grad || b.requires_grad)
 }
-
-// TODO: 实现 sub、mul、div、matmul 等基础算子
