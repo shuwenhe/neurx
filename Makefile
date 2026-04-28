@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
+.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable s-compile-runtime auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -35,6 +35,7 @@ help:
 	@echo "  cann-test-310p3 Run neurx + 310P3 8-card validation smoke"
 	@echo "  cann-test-npu-agnostic Run backend-agnostic tests on TENSOR_DEVICE=npu"
 	@echo "  cann-test-npu-agnostic-stable Run verified-pass NPU backend-agnostic tests"
+	@echo "  s-compile-runtime Compile all neurx/s sources to IR"
 	@echo "  auto-push     Watch repository changes and auto commit/push to GitHub"
 	@echo "  install-auto-push-service Install and enable systemd auto-push service"
 	@echo "  status-auto-push-service  Show systemd auto-push service status"
@@ -146,6 +147,31 @@ cann-test-npu-agnostic:
 
 cann-test-npu-agnostic-stable:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_stable.txt)
+
+s-compile-runtime:
+	@compiler=""; \
+	for candidate in $$(ls -1 /app/s/bin/s_* 2>/dev/null | sort -r); do \
+		if [ ! -x "$$candidate" ]; then \
+			continue; \
+		fi; \
+		$$candidate >/dev/null 2>&1; \
+		rc=$$?; \
+		if [ $$rc -ne 126 ]; then \
+			compiler="$$candidate"; \
+			break; \
+		fi; \
+	done; \
+	if [ -z "$$compiler" ]; then \
+		echo "No runnable S compiler found under /app/s/bin"; \
+		exit 1; \
+	fi; \
+	mkdir -p reports/s_ir; \
+	for src in s/*.s; do \
+		base=$$(basename $$src .s); \
+		echo "Compiling $$src -> reports/s_ir/$$base.ir"; \
+		$$compiler $$src reports/s_ir/$$base.ir || exit 1; \
+	done; \
+	echo "S runtime IR output: reports/s_ir"
 
 auto-push:
 	$(PYTHON) scripts/auto_push.py --repo . --remote origin
