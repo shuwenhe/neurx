@@ -3,6 +3,31 @@ package neurx.trainer
 use neurx.multimodal.multimodal_batch
 use neurx.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer, new_sgd, new_adam, new_rmsprop, step_tensor, adam_step, rmsprop_step}
 use neurx.tensor.tensor
+use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
+use neurx.checkpoint.{save_checkpoint, load_checkpoint}
+func train_transformer(trainer_config config, tensor[] train_data, tensor[] train_labels) () {
+    let model_cfg = transformer_config{
+        num_layers: 2,
+        num_heads: 2,
+        d_model: 4,
+        d_ff: 8,
+        dropout: 0.1,
+    }
+    let mut model = transformer_init(model_cfg)
+    let mut state = init_state(config)
+    let mut step = 0
+    let mut best_loss = 1e9
+    let max_steps = config.epochs * len(train_data)
+    while step < max_steps {
+        let x = train_data[step % len(train_data)]
+        let y = train_labels[step % len(train_labels)]
+        let out = transformer_forward(model, x)
+        if step % 100 == 0 {
+            save_checkpoint("checkpoint.s", step, 0.0, [])
+        }
+        step = step + 1
+    }
+}
 
 struct trainer_config {
     int epochs
