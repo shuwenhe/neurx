@@ -7,13 +7,13 @@ use neurx.tensor.tensor
 struct trainer_config {
     int epochs
     int batch_size
-    f32 learning_rate
-    f32 grad_clip
+    float learning_rate
+    float grad_clip
 }
 
 struct trainer_state {
     int step
-    f32 last_loss
+    float last_loss
     sgd_optimizer optimizer
     adam_optimizer adam
     rmsprop_optimizer rmsprop
@@ -24,7 +24,7 @@ struct trainer_step_output {
     tensor params
 }
 
-func new_config(int epochs, int batch_size, f32 learning_rate, f32 grad_clip) trainer_config {
+func new_config(int epochs, int batch_size, float learning_rate, float grad_clip) trainer_config {
     trainer_config {
         epochs: epochs,
         batch_size: batch_size,
@@ -58,7 +58,7 @@ func train_step(trainer_state state, multimodal_batch batch) trainer_state {
     let denom = len(batch.token_ids)
     let mut loss = state.last_loss
     if denom > 0 {
-        loss = 1.0 / (denom as f32)
+        loss = 1.0 / (denom as float)
     }
 
     trainer_state {

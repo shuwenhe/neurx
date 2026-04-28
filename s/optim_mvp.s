@@ -4,26 +4,26 @@ use neurx.tensor.tensor
 use neurx.tensor.new
 
 struct sgd_optimizer {
-    f32 lr
+    float lr
 }
 
 struct adam_optimizer {
-    f32 lr
-    f32 beta1
-    f32 beta2
-    f32 eps
+    float lr
+    float beta1
+    float beta2
+    float eps
     int step
-    f32 beta1_pow
-    f32 beta2_pow
-    []f32 m
-    []f32 v
+    float beta1_pow
+    float beta2_pow
+    []float m
+    []float v
 }
 
 struct rmsprop_optimizer {
-    f32 lr
-    f32 alpha
-    f32 eps
-    []f32 avg
+    float lr
+    float alpha
+    float eps
+    []float avg
 }
 
 struct adam_step_output {
@@ -36,13 +36,13 @@ struct rmsprop_step_output {
     tensor params
 }
 
-func new_sgd(f32 lr) sgd_optimizer {
+func new_sgd(float lr) sgd_optimizer {
     sgd_optimizer {
         lr: lr,
     }
 }
 
-func new_adam(f32 lr, f32 beta1, f32 beta2, f32 eps) adam_optimizer {
+func new_adam(float lr, float beta1, float beta2, float eps) adam_optimizer {
     adam_optimizer {
         lr: lr,
         beta1: beta1,
@@ -56,7 +56,7 @@ func new_adam(f32 lr, f32 beta1, f32 beta2, f32 eps) adam_optimizer {
     }
 }
 
-func new_rmsprop(f32 lr, f32 alpha, f32 eps) rmsprop_optimizer {
+func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
     rmsprop_optimizer {
         lr: lr,
         alpha: alpha,
@@ -65,7 +65,7 @@ func new_rmsprop(f32 lr, f32 alpha, f32 eps) rmsprop_optimizer {
     }
 }
 
-func inv_sqrt(f32 x) f32 {
+func inv_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
     }
@@ -77,12 +77,12 @@ func inv_sqrt(f32 x) f32 {
     y
 }
 
-func ensure_size([]f32 values, int n) []f32 {
+func ensure_size([]float values, int n) []float {
     if len(values) == n {
         return values
     }
 
-    let mut out = []f32{cap: n}
+    let mut out = []float{cap: n}
     for i in 0..n {
         out.push(0.0)
     }
@@ -91,7 +91,7 @@ func ensure_size([]f32 values, int n) []f32 {
 
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     let n = len(params.data)
-    let mut out = []f32{cap: n}
+    let mut out = []float{cap: n}
 
     for i in 0..n {
         out.push(params.data[i] - optimizer.lr * grads.data[i])
@@ -104,7 +104,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
     let n = len(params.data)
     let mut m = ensure_size(optimizer.m, n)
     let mut v = ensure_size(optimizer.v, n)
-    let mut out = []f32{cap: n}
+    let mut out = []float{cap: n}
 
     let mut step = optimizer.step + 1
     let mut beta1_pow = optimizer.beta1_pow * optimizer.beta1
@@ -147,7 +147,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsprop_step_output {
     let n = len(params.data)
     let mut avg = ensure_size(optimizer.avg, n)
-    let mut out = []f32{cap: n}
+    let mut out = []float{cap: n}
 
     for i in 0..n {
         let g = grads.data[i]

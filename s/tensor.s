@@ -1,13 +1,13 @@
 package neurx.tensor
 
 struct tensor {
-    []f32 data
+    []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
 
-func new([]f32 data, []int shape, bool requires_grad) tensor {
+func new([]float data, []int shape, bool requires_grad) tensor {
     tensor {
         data: data,
         shape: shape,
@@ -18,7 +18,7 @@ func new([]f32 data, []int shape, bool requires_grad) tensor {
 
 func add(tensor a, tensor b) tensor {
     let n = len(a.data)
-    let mut out = []f32{cap: n}
+    let mut out = []float{cap: n}
     for i in 0..n {
         out.push(a.data[i] + b.data[i])
     }

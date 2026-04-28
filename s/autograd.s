@@ -9,7 +9,7 @@ struct grad_record {
 	int id
 	[]int shape
 	bool requires_grad
-	[]f32 grad
+	[]float grad
 }
 
 struct autograd_state {
@@ -22,18 +22,18 @@ func new_state() autograd_state {
 	}
 }
 
-func zeros_like([]f32 data) []f32 {
+func zeros_like([]float data) []float {
 	let n = len(data)
-	let mut out = []f32{cap: n}
+	let mut out = []float{cap: n}
 	for i in 0..n {
 		out.push(0.0)
 	}
 	out
 }
 
-func ones_like([]f32 data) []f32 {
+func ones_like([]float data) []float {
 	let n = len(data)
-	let mut out = []f32{cap: n}
+	let mut out = []float{cap: n}
 	for i in 0..n {
 		out.push(1.0)
 	}
@@ -57,7 +57,7 @@ func register_tensor(autograd_state state, int id, tensor value) autograd_state 
 	}
 }
 
-func set_grad(autograd_state state, int id, []f32 grad) autograd_state {
+func set_grad(autograd_state state, int id, []float grad) autograd_state {
 	let mut records = state.records
 	let n = len(records)
 	for i in 0..n {
@@ -71,7 +71,7 @@ func set_grad(autograd_state state, int id, []f32 grad) autograd_state {
 	}
 }
 
-func accumulate_grad(autograd_state state, int id, []f32 grad) autograd_state {
+func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
 	let mut records = state.records
 	let n = len(records)
 	for i in 0..n {
@@ -90,7 +90,7 @@ func accumulate_grad(autograd_state state, int id, []f32 grad) autograd_state {
 	}
 }
 
-func grad_of(autograd_state state, int id) []f32 {
+func grad_of(autograd_state state, int id) []float {
 	let n = len(state.records)
 	for i in 0..n {
 		if state.records[i].id == id {

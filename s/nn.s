@@ -5,14 +5,14 @@ use neurx.tensor.tensor
 struct linear {
     int in_features
     int out_features
-    []f32 weight
-    []f32 bias
+    []float weight
+    []float bias
 }
 
 func new_linear(int in_features, int out_features) linear {
     let weight_size = in_features * out_features
-    let mut weight = []f32{cap: weight_size}
-    let mut bias = []f32{cap: out_features}
+    let mut weight = []float{cap: weight_size}
+    let mut bias = []float{cap: out_features}
 
     for i in 0..weight_size {
         weight.push(0.0)
@@ -34,7 +34,7 @@ func linear_forward(linear layer, tensor input) tensor {
     let batch = input.shape[0]
     let in_features = layer.in_features
     let out_features = layer.out_features
-    let mut out = []f32{cap: batch * out_features}
+    let mut out = []float{cap: batch * out_features}
 
     for b in 0..batch {
         for j in 0..out_features {
