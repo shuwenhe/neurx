@@ -3,18 +3,18 @@ package neurx.trainer
 use neurx.multimodal.multimodal_batch
 
 struct trainer_config {
-    int32 epochs
-    int32 batch_size
+    int epochs
+    int batch_size
     f32 learning_rate
     f32 grad_clip
 }
 
 struct trainer_state {
-    int32 step
+    int step
     f32 last_loss
 }
 
-func new_config(int32 epochs, int32 batch_size, f32 learning_rate, f32 grad_clip) trainer_config {
+func new_config(int epochs, int batch_size, f32 learning_rate, f32 grad_clip) trainer_config {
     trainer_config {
         epochs: epochs,
         batch_size: batch_size,

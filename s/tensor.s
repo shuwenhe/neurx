@@ -2,12 +2,12 @@ package neurx.tensor
 
 struct tensor {
     []f32 data
-    []int32 shape
+    []int shape
     bool requires_grad
     option[tensor] grad
 }
 
-func new([]f32 data, []int32 shape, bool requires_grad) tensor {
+func new([]f32 data, []int shape, bool requires_grad) tensor {
     tensor {
         data: data,
         shape: shape,
