@@ -4,16 +4,16 @@ struct multimodal_batch {
     int batch_size
     int seq_len
     []int token_ids
-    []f32 image_features
-    []f32 audio_features
+    []float image_features
+    []float audio_features
 }
 
 func new_batch(
     int batch_size,
     int seq_len,
     []int token_ids,
-    []f32 image_features,
-    []f32 audio_features
+    []float image_features,
+    []float audio_features
 ) multimodal_batch {
     multimodal_batch {
         batch_size: batch_size,
