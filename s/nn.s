@@ -3,13 +3,13 @@ package neurx.nn
 use neurx.tensor.tensor
 
 struct linear {
-    int32 in_features
-    int32 out_features
+    int in_features
+    int out_features
     []f32 weight
     []f32 bias
 }
 
-func new_linear(int32 in_features, int32 out_features) linear {
+func new_linear(int in_features, int out_features) linear {
     let weight_size = in_features * out_features
     let mut weight = []f32{cap: weight_size}
     let mut bias = []f32{cap: out_features}
