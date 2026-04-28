@@ -1,13 +1,9 @@
 package neurx.autograd
 
-use neurx.tensor.Tensor
+use neurx.tensor.tensor
 
-// 自动微分节点定义（雏形）
-struct GradFn {
-    // TODO: 记录操作类型、输入、输出等
+struct grad_fn {
 }
 
-// 反向传播入口
-func backward(t: Tensor) () {
-    // TODO: 遍历计算图，递归计算梯度
+func backward(tensor t) () {
 }

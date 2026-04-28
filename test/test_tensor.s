@@ -1,8 +1,7 @@
 package neurx.test_tensor
 
-use neurx.tensor.{Tensor, new, add}
+use neurx.tensor.{tensor, new, add}
 
-// 简单测试入口
 func main() int32 {
     let a = new([1.0, 2.0, 3.0], [3], false)
     let b = new([4.0, 5.0, 6.0], [3], false)
@@ -10,6 +9,5 @@ func main() int32 {
     println("a = ", a.data)
     println("b = ", b.data)
     println("c = a + b = ", c.data)
-    // 期望输出: [5.0, 7.0, 9.0]
     0
 }
