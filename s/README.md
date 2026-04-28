@@ -8,3 +8,12 @@
 - 基础调度与模块接口
 
 所有代码需可通过 s 语言工具链编译，并预留 Python FFI 边界。
+
+当前模块：
+- `tensor.s`: Tensor 结构与基础算子
+- `ops.s`: 算子入口
+- `autograd.s`: 自动微分雏形
+- `schedule.s`: 调度雏形
+- `nn.s`: 线性层与前向接口
+- `multimodal.s`: 多模态 batch 抽象
+- `trainer.s`: 训练配置与 step 状态
