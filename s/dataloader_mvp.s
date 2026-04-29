@@ -42,14 +42,14 @@ func has_next(dataloader_state state) bool {
 }
 
 func next_batch(dataloader_state state) dataloader_step_output {
-    var total = len(state.token_ids)
-    var batch_size = state.config.batch_size
-    var seq_len = state.config.seq_len
+    int total = len(state.token_ids)
+    int batch_size = state.config.batch_size
+    int seq_len = state.config.seq_len
 
-    var input_ids = []int{cap: batch_size * seq_len}
-    var target_ids = []int{cap: batch_size * seq_len}
+    []int input_ids = []int{cap: batch_size * seq_len}
+    []int target_ids = []int{cap: batch_size * seq_len}
 
-    var cursor = state.cursor
+    int cursor = state.cursor
     for b in 0..batch_size {
         if cursor + seq_len + 1 >= total {
             cursor = 0
@@ -62,7 +62,7 @@ func next_batch(dataloader_state state) dataloader_step_output {
         cursor = cursor + seq_len
     }
 
-    var next_state = dataloader_state {
+    dataloader_state next_state = dataloader_state {
         token_ids: state.token_ids,
         cursor: cursor,
         config: state.config,
