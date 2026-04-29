@@ -1,0 +1,6 @@
+SSEED-TARGET-V1
+MOV|op|0|_
+MOV|scheduler|0|_
+FUNC_BEGIN|run|_|_
+PARAM|op_item|_|_
+FUNC_END|run|_|_
