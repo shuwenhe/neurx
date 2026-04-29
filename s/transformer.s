@@ -1,4 +1,4 @@
- 
+package neurx.transformer
 
 struct transformer_config {
     int num_layers
@@ -25,10 +25,10 @@ struct transformer {
 }
 
 func transformer_init(config transformer_config) transformer {
-    let mut layers = []
-    let i = 0
+    transformer_layer[] mut layers = []
+    int i = 0
     while i < config.num_layers {
-        let layer = transformer_layer{
+        transformer_layer layer = transformer_layer {
             w_q: tensor_randn([config.d_model, config.d_model]),
             w_k: tensor_randn([config.d_model, config.d_model]),
             w_v: tensor_randn([config.d_model, config.d_model]),
@@ -36,17 +36,20 @@ func transformer_init(config transformer_config) transformer {
             w_ff1: tensor_randn([config.d_model, config.d_ff]),
             w_ff2: tensor_randn([config.d_ff, config.d_model]),
             b_ff1: tensor_zeros([config.d_ff]),
-            b_ff2: tensor_zeros([config.d_model]),
+            b_ff2: tensor_zeros([config.d_model])
         }
-        layers = array_push(layers, layer)
-        i = i + 1
+        layers.push(layer)
+        i += 1
     }
-    return transformer{config: config, layers: layers}
+    transformer {
+        config: config,
+        layers: layers
+    }
 }
 
 func transformer_forward(m transformer, x tensor) tensor {
-    let i = 0
-    let out = x
+    int i = 0
+    tensor out = x
     while i < m.config.num_layers {
         out = transformer_layer_forward(m.layers[i], out, m.config)
         i = i + 1
@@ -55,23 +58,23 @@ func transformer_forward(m transformer, x tensor) tensor {
 }
 
 func transformer_layer_forward(layer transformer_layer, x tensor, config transformer_config) tensor {
-    let q = matmul(x, layer.w_q)
-    let k = matmul(x, layer.w_k)
-    let v = matmul(x, layer.w_v)
-    let attn = multihead_attention(q, k, v, config.num_heads)
-    let attn_out = matmul(attn, layer.w_o)
-    let x2 = add(x, attn_out)
-    let ff1 = add(matmul(x2, layer.w_ff1), layer.b_ff1)
-    let ff1_act = relu(ff1)
-    let ff2 = add(matmul(ff1_act, layer.w_ff2), layer.b_ff2)
-    let out = add(x2, ff2)
+    tensor q = matmul(x, layer.w_q)
+    tensor k = matmul(x, layer.w_k)
+    tensor v = matmul(x, layer.w_v)
+    tensor attn = multihead_attention(q, k, v, config.num_heads)
+    tensor attn_out = matmul(attn, layer.w_o)
+    tensor x2 = add(x, attn_out)
+    tensor ff1 = add(matmul(x2, layer.w_ff1), layer.b_ff1)
+    tensor ff1_act = relu(ff1)
+    tensor ff2 = add(matmul(ff1_act, layer.w_ff2), layer.b_ff2)
+    tensor out = add(x2, ff2)
     return out
 }
 
-func multihead_attention(q tensor, k tensor, v tensor, num_heads int) tensor {
+func multihead_attention(tensor q, tensor k, tensor v, int num_heads) tensor {
     
-    let attn_scores = matmul(q, transpose(k))
-    let attn_weights = softmax(attn_scores)
-    let attn = matmul(attn_weights, v)
+    tensor attn_scores = matmul(q, transpose(k))
+    tensor attn_weights = softmax(attn_scores)
+    tensor attn = matmul(attn_weights, v)
     return attn
 }
