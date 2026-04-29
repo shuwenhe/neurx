@@ -10,6 +10,7 @@ import numpy as np
 
 from neurx import Tensor, nn, optim
 from neurx.nn import functional as F
+from neurx.core.neurx import _to_numpy
 
 
 _API_CASES: "OrderedDict[str, tuple[str, Callable[[], None]]]" = OrderedDict()
@@ -236,7 +237,7 @@ def _case_nn_dropout():
 def _case_nn_softmax():
     m = nn.Softmax(axis=-1)
     x = _rand((2, 3, 4))
-    out = m(x).to_numpy()
+    out = _to_numpy(m(x))
     assert out.shape == (2, 3, 4)
     assert np.allclose(out.sum(axis=-1), 1.0, atol=1e-6)
 
