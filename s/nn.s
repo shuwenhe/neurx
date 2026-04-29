@@ -10,9 +10,9 @@ struct linear {
 }
 
 func new_linear(int in_features, int out_features) linear {
-    let weight_size = in_features * out_features
-    let mut weight = []float{cap: weight_size}
-    let mut bias = []float{cap: out_features}
+    var weight_size = in_features * out_features
+    var weight = []float{cap: weight_size}
+    var bias = []float{cap: out_features}
 
     for i in 0..weight_size {
         weight.push(0.0)
@@ -31,17 +31,17 @@ func new_linear(int in_features, int out_features) linear {
 }
 
 func linear_forward(linear layer, tensor input) tensor {
-    let batch = input.shape[0]
-    let in_features = layer.in_features
-    let out_features = layer.out_features
-    let mut out = []float{cap: batch * out_features}
+    var batch = input.shape[0]
+    var in_features = layer.in_features
+    var out_features = layer.out_features
+    var out = []float{cap: batch * out_features}
 
     for b in 0..batch {
         for j in 0..out_features {
-            let mut acc = layer.bias[j]
+            var acc = layer.bias[j]
             for i in 0..in_features {
-                let x = input.data[b * in_features + i]
-                let w = layer.weight[j * in_features + i]
+                var x = input.data[b * in_features + i]
+                var w = layer.weight[j * in_features + i]
                 acc = acc + x * w
             }
             out.push(acc)
