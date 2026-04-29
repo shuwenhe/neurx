@@ -17,8 +17,8 @@ func new([]float data, []int shape, bool requires_grad) tensor {
 }
 
 func add(tensor a, tensor b) tensor {
-    let n = len(a.data)
-    let mut out = []float{cap: n}
+    var n = len(a.data)
+    var out = []float{cap: n}
     for i in 0..n {
         out.push(a.data[i] + b.data[i])
     }
