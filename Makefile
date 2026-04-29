@@ -1,14 +1,17 @@
-.PHONY: help install dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable s-compile-runtime auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
+.PHONY: help install install-local dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable s-compile-runtime auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
+
+.DEFAULT_GOAL := install-local
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
 PYTEST ?= $(PYTHON) -m pytest
 PIP_INSTALL_FLAGS ?= --no-build-isolation
 ROUNDS ?= 3
-S_COMPILER ?= $(shell ls -1t /app/s/bin/s_arm64_* 2>/dev/null | head -n 1)
+S_COMPILER ?= /usr/local/bin/s
 
 help:
 	@echo "Targets:"
+	@echo "  install-local Compile S runtime and install neurx package"
 	@echo "  install       Install in editable mode (offline-friendly)"
 	@echo "  bootstrap     Upgrade build tooling in current environment"
 	@echo "  dev           Same as install"
@@ -45,7 +48,10 @@ help:
 	@echo "  cuda-test     Run CUDA smoke test (requires CUDA build)"
 	@echo "  clean         Remove build artifacts"
 
-install: dev
+install: install-local
+
+install-local: s-compile-runtime dev
+	@echo "neurx installed for Python: $(PYTHON)"
 
 bootstrap:
 	$(PIP) install -U pip setuptools wheel
@@ -150,6 +156,12 @@ cann-test-npu-agnostic-stable:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_stable.txt)
 
 s-compile-runtime:
+	@if [ ! -x "$(S_COMPILER)" ]; then \
+		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
+		echo "hint: run 'make -C /app/s' first to install /usr/local/bin/s"; \
+		exit 1; \
+	fi
+	@echo "Using S compiler: $(S_COMPILER)"
 	for src in s/*.s; do \
 	    base=$$(basename $$src .s); \
 	    dir=$$(dirname $$src | sed 's|^s||'); \
