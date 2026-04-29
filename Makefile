@@ -5,6 +5,7 @@ PIP ?= $(PYTHON) -m pip
 PYTEST ?= $(PYTHON) -m pytest
 PIP_INSTALL_FLAGS ?= --no-build-isolation
 ROUNDS ?= 3
+S_COMPILER ?= $(shell ls -1t /app/s/bin/s_arm64_* 2>/dev/null | head -n 1)
 
 help:
 	@echo "Targets:"
@@ -149,13 +150,13 @@ cann-test-npu-agnostic-stable:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_stable.txt)
 
 s-compile-runtime:
-	for src in neurx/s/*.s; do \
-	    base=$(basename $$src .s); \
-	    dir=$(dirname $$src | sed 's|neurx/s||'); \
+	for src in s/*.s; do \
+	    base=$$(basename $$src .s); \
+	    dir=$$(dirname $$src | sed 's|^s||'); \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p reports/s_ir$$dir; \
 	    echo "Compiling $$src -> reports/s_ir$$dir/$$base.ir"; \
-	    /app/s/bin/s_arm64_20260428181359 $$src reports/s_ir$$dir/$$base.ir || exit 1; \
+	    $(S_COMPILER) $$src reports/s_ir$$dir/$$base.ir || exit 1; \
 	done
 
 auto-push:
