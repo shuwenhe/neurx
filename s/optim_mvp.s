@@ -70,7 +70,7 @@ func inv_sqrt(float x) float {
         return 0.0
     }
 
-    var y = 1.0
+    float y = 1.0
     for i in 0..5 {
         y = 0.5 * y * (3.0 - x * y * y)
     }
@@ -82,7 +82,7 @@ func ensure_size([]float values, int n) []float {
         return values
     }
 
-    var out = []float{cap: n}
+    []float out = []float{cap: n}
     for i in 0..n {
         out.push(0.0)
     }
@@ -90,8 +90,8 @@ func ensure_size([]float values, int n) []float {
 }
 
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
-    var n = len(params.data)
-    var out = []float{cap: n}
+    int n = len(params.data)
+    []float out = []float{cap: n}
 
     for i in 0..n {
         out.push(params.data[i] - optimizer.lr * grads.data[i])
@@ -101,32 +101,32 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
 }
 
 func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_output {
-    var n = len(params.data)
-    var m = ensure_size(optimizer.m, n)
-    var v = ensure_size(optimizer.v, n)
-    var out = []float{cap: n}
+    int n = len(params.data)
+    []float m = ensure_size(optimizer.m, n)
+    []float v = ensure_size(optimizer.v, n)
+    []float out = []float{cap: n}
 
-    var step = optimizer.step + 1
-    var beta1_pow = optimizer.beta1_pow * optimizer.beta1
-    var beta2_pow = optimizer.beta2_pow * optimizer.beta2
+    int step = optimizer.step + 1
+    float beta1_pow = optimizer.beta1_pow * optimizer.beta1
+    float beta2_pow = optimizer.beta2_pow * optimizer.beta2
 
-    var bias_c1 = 1.0 - beta1_pow
-    var bias_c2 = 1.0 - beta2_pow
-    var safe_c1 = if bias_c1 > 0.0 { bias_c1 } else { 1.0 }
-    var safe_c2 = if bias_c2 > 0.0 { bias_c2 } else { 1.0 }
+    float bias_c1 = 1.0 - beta1_pow
+    float bias_c2 = 1.0 - beta2_pow
+    float safe_c1 = if bias_c1 > 0.0 { bias_c1 } else { 1.0 }
+    float safe_c2 = if bias_c2 > 0.0 { bias_c2 } else { 1.0 }
 
     for i in 0..n {
-        var g = grads.data[i]
+        float g = grads.data[i]
         m[i] = optimizer.beta1 * m[i] + (1.0 - optimizer.beta1) * g
         v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
 
-        var m_hat = m[i] / safe_c1
-        var v_hat = v[i] / safe_c2
-        var denom = inv_sqrt(v_hat + optimizer.eps)
+        float m_hat = m[i] / safe_c1
+        float v_hat = v[i] / safe_c2
+        float denom = inv_sqrt(v_hat + optimizer.eps)
         out.push(params.data[i] - optimizer.lr * m_hat * denom)
     }
 
-    var next_optimizer = adam_optimizer {
+    adam_optimizer next_optimizer = adam_optimizer {
         lr: optimizer.lr,
         beta1: optimizer.beta1,
         beta2: optimizer.beta2,
@@ -145,18 +145,18 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
 }
 
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsprop_step_output {
-    var n = len(params.data)
-    var avg = ensure_size(optimizer.avg, n)
-    var out = []float{cap: n}
+    int n = len(params.data)
+    []float avg = ensure_size(optimizer.avg, n)
+    []float out = []float{cap: n}
 
     for i in 0..n {
-        var g = grads.data[i]
+        float g = grads.data[i]
         avg[i] = optimizer.alpha * avg[i] + (1.0 - optimizer.alpha) * g * g
-        var denom = inv_sqrt(avg[i] + optimizer.eps)
+        float denom = inv_sqrt(avg[i] + optimizer.eps)
         out.push(params.data[i] - optimizer.lr * g * denom)
     }
 
-    var next_optimizer = rmsprop_optimizer {
+    rmsprop_optimizer next_optimizer = rmsprop_optimizer {
         lr: optimizer.lr,
         alpha: optimizer.alpha,
         eps: optimizer.eps,

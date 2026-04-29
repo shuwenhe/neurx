@@ -1,7 +1,7 @@
 package neurx.main
 
 use neurx.multimodal.multimodal_batch
-use neurx.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer, new_sgd, new_adam, new_rmsprop, step_tensor, adam_step, rmsprop_step}
+use neurx.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer, adam_step_output, rmsprop_step_output, new_sgd, new_adam, new_rmsprop, step_tensor, adam_step, rmsprop_step}
 use neurx.tensor.tensor
 use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint}
@@ -56,9 +56,9 @@ func init_state(trainer_config config) trainer_state {
 }
 
 func train_step(trainer_state state, multimodal_batch batch) trainer_state {
-    var next_step = state.step + 1
-    var denom = len(batch.token_ids)
-    var loss = state.last_loss
+    int next_step = state.step + 1
+    int denom = len(batch.token_ids)
+    float loss = state.last_loss
     if denom > 0 {
         loss = 1.0 / (denom as float)
     }
@@ -73,7 +73,7 @@ func train_step(trainer_state state, multimodal_batch batch) trainer_state {
 }
 
 func apply_sgd(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    var updated_params = step_tensor(state.optimizer, params, grads)
+    tensor updated_params = step_tensor(state.optimizer, params, grads)
     trainer_step_output {
         state: state,
         params: updated_params
@@ -81,8 +81,8 @@ func apply_sgd(trainer_state state, tensor params, tensor grads) trainer_step_ou
 }
 
 func apply_adam(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    var step_output = adam_step(state.adam, params, grads)
-    var next_state = trainer_state {
+    adam_step_output step_output = adam_step(state.adam, params, grads)
+    trainer_state next_state = trainer_state {
         step: state.step,
         last_loss: state.last_loss,
         optimizer: state.optimizer,
@@ -97,8 +97,8 @@ func apply_adam(trainer_state state, tensor params, tensor grads) trainer_step_o
 }
 
 func apply_rmsprop(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    var step_output = rmsprop_step(state.rmsprop, params, grads)
-    var next_state = trainer_state {
+    rmsprop_step_output step_output = rmsprop_step(state.rmsprop, params, grads)
+    trainer_state next_state = trainer_state {
         step: state.step,
         last_loss: state.last_loss,
         optimizer: state.optimizer,
@@ -118,8 +118,8 @@ struct example {
 }
 
 func new_example([]float data, []int shape) example {
-    var n = len(data)
-    var out = []float{cap: n}
+    int n = len(data)
+    []float out = []float{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
@@ -130,8 +130,8 @@ func new_example([]float data, []int shape) example {
 }
 
 func process_example(example ex) example {
-    var n = len(ex.data)
-    var processed = []float{cap: n}
+    int n = len(ex.data)
+    []float processed = []float{cap: n}
     for i in 0..n {
         processed[i] = ex.data[i] * 2.0
     }
