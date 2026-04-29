@@ -23,8 +23,8 @@ func new_state() autograd_state {
 }
 
 func zeros_like([]float data) []float {
-    let n = len(data)
-    let mut out = []float{cap: n}
+    var n = len(data)
+    var out = []float{cap: n}
     for i in 0..n {
         out[i] = 0.0
     }
@@ -32,8 +32,8 @@ func zeros_like([]float data) []float {
 }
 
 func ones_like([]float data) []float {
-    let n = len(data)
-    let mut out = []float{cap: n}
+    var n = len(data)
+    var out = []float{cap: n}
     for i in 0..n {
         out[i] = 1.0
     }
@@ -41,8 +41,8 @@ func ones_like([]float data) []float {
 }
 
 func register_tensor(autograd_state state, int id, tensor value) autograd_state {
-    let mut records = state.records
-    let grad_data = zeros_like(value.data)
+    var records = state.records
+    var grad_data = zeros_like(value.data)
     records.push(
         grad_record {
             id: id,
@@ -58,7 +58,7 @@ func register_tensor(autograd_state state, int id, tensor value) autograd_state 
 }
 
 func set_grad(autograd_state state, int id, []float grad) autograd_state {
-    let mut records = state.records
+    var records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
             records[i].grad = grad
@@ -71,10 +71,10 @@ func set_grad(autograd_state state, int id, []float grad) autograd_state {
 }
 
 func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
-    let mut records = state.records
+    var records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
-            let m = len(records[i].grad)
+            var m = len(records[i].grad)
             if m == len(grad) {
                 for j in 0..m {
                     records[i].grad[j] = records[i].grad[j] + grad[j]
@@ -88,7 +88,7 @@ func accumulate_grad(autograd_state state, int id, []float grad) autograd_state 
 }
 
 func grad_of(autograd_state state, int id) []float {
-    let n = len(state.records)
+    var n = len(state.records)
     for i in 0..n {
         if state.records[i].id == id {
             return state.records[i].grad

@@ -56,9 +56,9 @@ func init_state(trainer_config config) trainer_state {
 }
 
 func train_step(trainer_state state, multimodal_batch batch) trainer_state {
-    let next_step = state.step + 1
-    let denom = len(batch.token_ids)
-    let mut loss = state.last_loss
+    var next_step = state.step + 1
+    var denom = len(batch.token_ids)
+    var loss = state.last_loss
     if denom > 0 {
         loss = 1.0 / (denom as float)
     }
@@ -73,7 +73,7 @@ func train_step(trainer_state state, multimodal_batch batch) trainer_state {
 }
 
 func apply_sgd(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    let updated_params = step_tensor(state.optimizer, params, grads)
+    var updated_params = step_tensor(state.optimizer, params, grads)
     trainer_step_output {
         state: state,
         params: updated_params
@@ -81,8 +81,8 @@ func apply_sgd(trainer_state state, tensor params, tensor grads) trainer_step_ou
 }
 
 func apply_adam(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    let step_output = adam_step(state.adam, params, grads)
-    let next_state = trainer_state {
+    var step_output = adam_step(state.adam, params, grads)
+    var next_state = trainer_state {
         step: state.step,
         last_loss: state.last_loss,
         optimizer: state.optimizer,
@@ -97,8 +97,8 @@ func apply_adam(trainer_state state, tensor params, tensor grads) trainer_step_o
 }
 
 func apply_rmsprop(trainer_state state, tensor params, tensor grads) trainer_step_output {
-    let step_output = rmsprop_step(state.rmsprop, params, grads)
-    let next_state = trainer_state {
+    var step_output = rmsprop_step(state.rmsprop, params, grads)
+    var next_state = trainer_state {
         step: state.step,
         last_loss: state.last_loss,
         optimizer: state.optimizer,
@@ -118,8 +118,8 @@ struct example {
 }
 
 func new_example([]float data, []int shape) example {
-    let n = len(data)
-    let mut out = []float{cap: n}
+    var n = len(data)
+    var out = []float{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
@@ -130,8 +130,8 @@ func new_example([]float data, []int shape) example {
 }
 
 func process_example(example ex) example {
-    let n = len(ex.data)
-    let mut processed = []float{cap: n}
+    var n = len(ex.data)
+    var processed = []float{cap: n}
     for i in 0..n {
         processed[i] = ex.data[i] * 2.0
     }
