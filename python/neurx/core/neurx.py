@@ -1529,6 +1529,83 @@ class Tensor:
         out._runtime_backend = runtime_backend
         return out
 
+    def prelu(self, weight):
+        weight = weight if isinstance(weight, Tensor) else Tensor(weight)
+        x = _to_numpy(self.data)
+        w_data = _to_numpy(weight.data)
+        if w_data.ndim == 0 or w_data.size == 1:
+            slope = float(w_data.reshape(-1)[0])
+        else:
+            raise ValueError("prelu currently supports scalar weight only")
+
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("prelu", x, slope)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            out_data = np.where(x > 0, x, slope * x)
+        else:
+            runtime_backend = "s"
+
+        out = Tensor(out_data, self.requires_grad or weight.requires_grad, (self, weight), "prelu", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                dx = np.where(x > 0, 1.0, slope)
+                self.grad += out.grad * dx
+            if weight.requires_grad:
+                dw = (out.grad * np.where(x > 0, 0.0, x)).sum()
+                weight.grad += np.asarray(dw, dtype=weight.grad.dtype)
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
+
+    def rrelu(self, lower=1.0 / 8.0, upper=1.0 / 3.0, training=False):
+        if lower > upper:
+            raise ValueError("lower must be <= upper")
+
+        x = _to_numpy(self.data)
+        lower = float(lower)
+        upper = float(upper)
+        training = bool(training)
+
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("rrelu", x, lower, upper, training)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            slope = (lower + upper) * 0.5
+            slope_arr = np.random.uniform(lower, upper, size=x.shape) if training else slope
+            out_data = np.where(x > 0, x, slope_arr * x)
+        else:
+            runtime_backend = "s"
+
+        out = Tensor(out_data, self.requires_grad, (self,), "rrelu", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                avg_slope = (lower + upper) * 0.5
+                slope_grad = np.where(
+                    x != 0,
+                    out_data / x,
+                    avg_slope,
+                )
+                grad = np.where(x > 0, 1.0, slope_grad)
+                self.grad += out.grad * grad
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
+
     def softmax(self, dim=-1):
         x = _to_numpy(self.data)
         dim = dim + x.ndim if dim < 0 else dim
