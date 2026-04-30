@@ -1,0 +1,16 @@
+SSEED-TARGET-V1
+MOV|multimodal_batch|0|_
+FUNC_BEGIN|new_batch|_|_
+PARAM|batch_size|_|_
+PARAM|seq_len|_|_
+PARAM|token_ids|_|_
+PARAM|image_features|_|_
+PARAM|audio_features|_|_
+RET|multimodal_batch|_|_
+FUNC_END|new_batch|_|_
+FUNC_BEGIN|token_count|_|_
+PARAM|batch|_|_
+ARG|batch.token_ids|_|_
+CALL|t0|len|1
+RET|t0|_|_
+FUNC_END|token_count|_|_
