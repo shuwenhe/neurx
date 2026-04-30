@@ -384,3 +384,53 @@ def test_functional_hardswish_reuses_tensor_dispatch(monkeypatch):
     expected = np.array([0.0, 3.0])
     assert np.allclose(out.to_numpy(), expected, atol=1e-7)
     assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_prelu_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "prelu")
+    out = Tensor([-2.0, 0.5, 3.0]).prelu(Tensor(0.25))
+    expected = np.array([-0.5, 0.5, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_python_fallback_prelu_when_s_ops_disabled(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "python")
+    out = Tensor([-2.0, 0.5, 3.0]).prelu(Tensor(0.25))
+    expected = np.array([-0.5, 0.5, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "python"
+
+
+def test_functional_prelu_reuses_tensor_dispatch(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    out = F.prelu(Tensor([-2.0, 3.0]), Tensor(0.25))
+    expected = np.array([-0.5, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_rrelu_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "rrelu")
+    out = Tensor([-2.0, 0.5, 3.0]).rrelu(lower=0.1, upper=0.3, training=False)
+    expected = np.array([-0.4, 0.5, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_python_fallback_rrelu_when_s_ops_disabled(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "python")
+    out = Tensor([-2.0, 0.5, 3.0]).rrelu(lower=0.1, upper=0.3, training=False)
+    expected = np.array([-0.4, 0.5, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "python"
+
+
+def test_functional_rrelu_reuses_tensor_dispatch(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    out = F.rrelu(Tensor([-2.0, 3.0]), lower=0.1, upper=0.3, training=False)
+    expected = np.array([-0.4, 3.0])
+    assert np.allclose(out.to_numpy(), expected, atol=1e-7)
+    assert getattr(out, "_runtime_backend", None) == "s"

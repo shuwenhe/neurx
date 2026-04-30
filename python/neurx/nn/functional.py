@@ -223,27 +223,7 @@ def prelu(x: Tensor, weight: Tensor, inplace: bool = False):
     weight = _as_tensor(weight)
     if inplace:
         raise NotImplementedError("inplace prelu is not supported")
-
-    x_data = x.to_numpy()
-    w_data = weight.to_numpy()
-    if w_data.ndim == 0 or w_data.size == 1:
-        slope = float(w_data.reshape(-1)[0])
-    else:
-        raise ValueError("functional prelu currently supports scalar weight only")
-
-    out_data = np.where(x_data > 0, x_data, slope * x_data)
-    out = Tensor(out_data, requires_grad=(x.requires_grad or weight.requires_grad), _children=(x, weight), _op="prelu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            dx = np.where(x_data > 0, 1.0, slope)
-            x.grad += out.grad * dx
-        if weight.requires_grad:
-            dw = (out.grad * np.where(x_data > 0, 0.0, x_data)).sum()
-            weight.grad += np.asarray(dw, dtype=weight.grad.dtype)
-
-    out._backward = _backward
-    return out
+    return x.prelu(weight=weight)
 
 
 def rrelu(
@@ -256,25 +236,7 @@ def rrelu(
     x = _as_tensor(x)
     if inplace:
         raise NotImplementedError("inplace rrelu is not supported")
-    if lower > upper:
-        raise ValueError("lower must be <= upper")
-
-    x_data = x.to_numpy()
-    slope = (lower + upper) * 0.5
-    if training:
-        slope_arr = np.random.uniform(lower, upper, size=x_data.shape)
-    else:
-        slope_arr = slope
-    out_data = np.where(x_data > 0, x_data, slope_arr * x_data)
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="rrelu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            grad = np.where(x_data > 0, 1.0, slope_arr)
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.rrelu(lower=lower, upper=upper, training=training)
 
 
 def hardtanh(x: Tensor, min_val: float = -1.0, max_val: float = 1.0):
