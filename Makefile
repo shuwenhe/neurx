@@ -168,7 +168,7 @@ s-compile-runtime:
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p reports/s_ir$$dir; \
 	    echo "Compiling $$src -> reports/s_ir$$dir/$$base.ir"; \
-	    $(S_COMPILER) $$src reports/s_ir$$dir/$$base.ir || exit 1; \
+	    $(S_COMPILER) ir $$src -o reports/s_ir$$dir/$$base.ir || exit 1; \
 	done
 
 auto-push:
