@@ -45,44 +45,17 @@ def _triple(value):
 
 def relu(x: Tensor):
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    out_data = np.maximum(x_data, 0)
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="relu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            x.grad += out.grad * (x_data > 0)
-
-    out._backward = _backward
-    return out
+    return x.relu()
 
 
 def sigmoid(x: Tensor):
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    out_data = 1.0 / (1.0 + np.exp(-np.clip(x_data, -500, 500)))
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="sigmoid", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            x.grad += out.grad * (out_data * (1.0 - out_data))
-
-    out._backward = _backward
-    return out
+    return x.sigmoid()
 
 
 def tanh(x: Tensor):
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    out_data = np.tanh(x_data)
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="tanh", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            x.grad += out.grad * (1.0 - out_data ** 2)
-
-    out._backward = _backward
-    return out
+    return x.tanh()
 
 
 def focal_loss(
@@ -228,54 +201,21 @@ def leaky_relu(x: Tensor, negative_slope: float = 0.01, inplace: bool = False):
     x = _as_tensor(x)
     if inplace:
         raise NotImplementedError("inplace leaky_relu is not supported")
-    x_data = x.to_numpy()
-    out_data = np.where(x_data > 0, x_data, negative_slope * x_data)
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="leaky_relu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            grad = np.where(x_data > 0, 1.0, negative_slope)
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.leaky_relu(negative_slope=negative_slope)
 
 
 def elu(x: Tensor, alpha: float = 1.0, inplace: bool = False):
     x = _as_tensor(x)
     if inplace:
         raise NotImplementedError("inplace elu is not supported")
-    x_data = x.to_numpy()
-    out_data = np.where(x_data > 0, x_data, alpha * (np.exp(x_data) - 1.0))
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="elu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            grad = np.where(x_data > 0, 1.0, alpha * np.exp(x_data))
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.elu(alpha=alpha)
 
 
 def selu(x: Tensor, inplace: bool = False):
-    alpha = 1.6732632423543772
-    scale = 1.0507009873554805
     x = _as_tensor(x)
     if inplace:
         raise NotImplementedError("inplace selu is not supported")
-    x_data = x.to_numpy()
-    inner = np.where(x_data > 0, x_data, alpha * (np.exp(x_data) - 1.0))
-    out_data = scale * inner
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="selu", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            grad_inner = np.where(x_data > 0, 1.0, alpha * np.exp(x_data))
-            x.grad += out.grad * (scale * grad_inner)
-
-    out._backward = _backward
-    return out
+    return x.selu()
 
 
 def prelu(x: Tensor, weight: Tensor, inplace: bool = False):
@@ -344,19 +284,7 @@ def hardtanh(x: Tensor, min_val: float = -1.0, max_val: float = 1.0):
     在量化场景中很有用
     """
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    out_data = np.clip(x_data, min_val, max_val)
-    
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="hardtanh", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            # 只有在 min_val < x < max_val 时才有梯度
-            grad = ((x_data > min_val) & (x_data < max_val)).astype(np.float32)
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.hardtanh(min_val=min_val, max_val=max_val)
 
 
 def hardswish(x: Tensor, inplace: bool = False):
@@ -366,33 +294,7 @@ def hardswish(x: Tensor, inplace: bool = False):
     HardSwish(x) = x * clip(x + 3, 0, 6) / 6
     """
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    
-    # clip(x + 3, 0, 6) / 6
-    clipped = np.clip(x_data + 3.0, 0.0, 6.0) / 6.0
-    out_data = x_data * clipped
-    
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="hardswish", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            # 分段梯度
-            grad = np.zeros_like(x_data)
-            
-            # 当 x < -3 时，梯度为 0
-            # 当 -3 <= x < 3 时，梯度为 x/3 + clipped = 2x/6 + 1
-            # 当 x >= 3 时，梯度为 1
-            
-            mask_mid = (x_data >= -3) & (x_data < 3)
-            mask_high = x_data >= 3
-            
-            grad[mask_mid] = 2 * x_data[mask_mid] / 6 + 1
-            grad[mask_high] = 1.0
-            
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.hardswish()
 
 
 def mish(x: Tensor):
@@ -401,98 +303,31 @@ def mish(x: Tensor):
     Mish(x) = x * tanh(softplus(x)) = x * tanh(ln(1 + e^x))
     """
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    
-    # 数值稳定的softplus
-    softplus = np.where(x_data > 20, x_data, np.log(1.0 + np.exp(x_data)))
-    tanh_sp = np.tanh(softplus)
-    out_data = x_data * tanh_sp
-    
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="mish", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            # 梯度: tanh(softplus(x)) + x * sech^2(softplus(x)) * sigmoid(x)
-            sigmoid_x = 1.0 / (1.0 + np.exp(-x_data))
-            sech2_sp = 1.0 - tanh_sp ** 2
-            grad = tanh_sp + x_data * sech2_sp * sigmoid_x
-            x.grad += out.grad * grad
-
-    out._backward = _backward
-    return out
+    return x.mish()
 
 
 def silu(x: Tensor):
     x = _as_tensor(x)
-    return x * sigmoid(x)
+    return x.silu()
 
 
 def gelu(x: Tensor, approximate: bool = False):
     x = _as_tensor(x)
-    x_data = x.to_numpy()
-    if approximate:
-        out_data = x_data * (1.0 / (1.0 + np.exp(-1.702 * x_data)))
-
-        def _backward():
-            if x.requires_grad:
-                sig = 1.0 / (1.0 + np.exp(-1.702 * x_data))
-                grad_sig = 1.702 * sig * (1 - sig)
-                x.grad += out.grad * (sig + x_data * grad_sig)
-    else:
-        cdf = 0.5 * (1.0 + np.tanh(np.sqrt(2.0 / np.pi) * (x_data + 0.044715 * x_data ** 3)))
-        out_data = x_data * cdf
-
-        def _backward():
-            if x.requires_grad:
-                pdf = np.exp(-0.5 * x_data ** 2) / np.sqrt(2.0 * np.pi)
-                dcdf_dx = pdf * (1.0 + (0.134145 * x_data ** 2)) / (1.0 + (0.1978 * x_data ** 2))
-                x.grad += out.grad * (cdf + x_data * dcdf_dx)
-
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="gelu", device=x.device)
-    out._backward = _backward
-    return out
+    return x.gelu(approximate=approximate)
 
 
 def softmax(x: Tensor, axis=-1, dim=None):
     x = _as_tensor(x)
     if dim is not None:
         axis = dim
-    x_data = x.to_numpy()
-    x_max = x_data.max(axis=axis, keepdims=True)
-    exp_x = np.exp(x_data - x_max)
-    denom = exp_x.sum(axis=axis, keepdims=True)
-    out_data = exp_x / np.maximum(denom, 1e-12)
-    out = Tensor(out_data, requires_grad=x.requires_grad, _children=(x,), _op="softmax", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            out_host = out.to_numpy()
-            sum_gs = (out.grad * out_host).sum(axis=axis, keepdims=True)
-            x.grad += out_host * (out.grad - sum_gs)
-
-    out._backward = _backward
-    return out
+    return x.softmax(dim=axis)
 
 
 def log_softmax(x: Tensor, axis=-1, dim=None):
     x = _as_tensor(x)
     if dim is not None:
         axis = dim
-    x_data = x.to_numpy()
-    x_max = x_data.max(axis=axis, keepdims=True)
-    exp_x = np.exp(x_data - x_max)
-    denom = exp_x.sum(axis=axis, keepdims=True)
-    log_probs = (x_data - x_max) - np.log(np.maximum(denom, 1e-12))
-    out = Tensor(log_probs, requires_grad=x.requires_grad, _children=(x,), _op="log_softmax", device=x.device)
-
-    def _backward():
-        if x.requires_grad:
-            probs = np.exp(log_probs)
-            sum_g = out.grad.sum(axis=axis, keepdims=True)
-            x.grad += out.grad - probs * sum_g
-
-    out._backward = _backward
-    return out
+    return x.log_softmax(dim=axis)
 
 
 def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):

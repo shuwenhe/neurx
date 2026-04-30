@@ -1,0 +1,12 @@
+SSEED-TARGET-V1
+MOV|checkpoint|0|_
+FUNC_BEGIN|save_checkpoint|_|_
+PARAM|path|_|_
+PARAM|step|_|_
+PARAM|loss|_|_
+PARAM|tensor|_|_
+FUNC_END|save_checkpoint|_|_
+FUNC_BEGIN|load_checkpoint|_|_
+PARAM|path|_|_
+RET|checkpoint|_|_
+FUNC_END|load_checkpoint|_|_
