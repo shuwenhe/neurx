@@ -6,6 +6,7 @@
     "checkpoint.ir",
     "dataloader_mvp.ir",
     "empty.ir",
+    "gpt_model_ops.ir",
     "main.ir",
     "multimodal.ir",
     "nn.ir",
