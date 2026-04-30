@@ -1,0 +1,20 @@
+{
+  "source_root": "/app/neurx/s",
+  "artifact_root": "/app/neurx/python/neurx/compile/_s_runtime",
+  "ir_files": [
+    "autograd.ir",
+    "checkpoint.ir",
+    "dataloader_mvp.ir",
+    "empty.ir",
+    "main.ir",
+    "multimodal.ir",
+    "nn.ir",
+    "ops.ir",
+    "optim_mvp.ir",
+    "s_write_test.ir",
+    "schedule.ir",
+    "simple.ir",
+    "tensor.ir",
+    "transformer.ir"
+  ]
+}

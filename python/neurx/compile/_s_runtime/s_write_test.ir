@@ -1,0 +1,5 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|main|_|_
+ARG|"hello\n"|_|_
+CALL|t0|call|1
+FUNC_END|main|_|_
