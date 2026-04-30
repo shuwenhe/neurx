@@ -65,3 +65,11 @@ func hardtanh(tensor a, float min_val, float max_val) tensor {
 func hardswish(tensor a) tensor {
     hardswish(a)
 }
+
+func prelu(tensor a, float weight) tensor {
+    prelu(a, weight)
+}
+
+func rrelu(tensor a, float lower, float upper, bool training) tensor {
+    rrelu(a, lower, upper, training)
+}

@@ -171,6 +171,22 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         x = np.asarray(args[0])
         clipped = np.clip(x + 3.0, 0.0, 6.0) / 6.0
         return x * clipped
+    if name == "prelu":
+        if len(args) != 2:
+            raise ValueError(f"prelu expects 2 args, got {len(args)}")
+        x = np.asarray(args[0])
+        weight = float(args[1])
+        return np.where(x > 0, x, weight * x)
+    if name == "rrelu":
+        if len(args) != 4:
+            raise ValueError(f"rrelu expects 4 args, got {len(args)}")
+        x = np.asarray(args[0])
+        lower = float(args[1])
+        upper = float(args[2])
+        training = bool(args[3])
+        slope = (lower + upper) * 0.5
+        slope_arr = np.random.uniform(lower, upper, size=x.shape) if training else slope
+        return np.where(x > 0, x, slope_arr * x)
     raise NotImplementedError(f"unsupported intrinsic: {name}")
 
 

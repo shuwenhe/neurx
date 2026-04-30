@@ -49,6 +49,11 @@ from neurx.version import __version__
 from neurx import compile, data, distributed, nn, optim, serialization, training, vision
 from neurx.losses import cross_entropy, cross_entropy_loss
 from neurx.platform import doctor, format_doctor_report, get_runtime_config, runtime_info
+import numpy as np
+
+
+def manual_seed(seed: int) -> None:
+    np.random.seed(int(seed))
 
 __all__ = [
     "__version__",
@@ -79,6 +84,7 @@ __all__ = [
     "enable_grad",
     "set_grad_enabled",
     "is_grad_enabled",
+    "manual_seed",
     # Tensor creation functions
     "zeros",
     "ones",
