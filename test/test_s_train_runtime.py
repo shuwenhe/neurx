@@ -59,10 +59,15 @@ def test_s_train_runtime_compiled_functions_present():
     for function_name in (
         "new_training_loop_state",
         "new_training_run_state",
+        "new_training_pipeline_state",
         "run_training_loop",
         "train_epoch",
         "train_epochs",
         "stop_training_run",
         "resume_training_run",
+        "train_step",
+        "train_steps",
+        "stop_training_pipeline",
+        "resume_training_pipeline",
     ):
         assert runtime.supports_runtime_function("loop", function_name)
