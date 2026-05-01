@@ -34,6 +34,12 @@ func _copy_int([]int data) []int {
     out
 }
 
+func _shape1(int n) []int {
+    []int shape = []int{cap: 1}
+    shape[0] = n
+    shape
+}
+
 func _sorted_pair([]float values, bool descending) tensor {
     int n = len(values)
     []float out = _copy_float(values)
@@ -60,9 +66,10 @@ func _sorted_pair([]float values, bool descending) tensor {
         }
         i = i + 1
     }
+    []int shape = _shape1(n)
     tensor {
         data: out,
-        shape: [n],
+        shape: shape,
         requires_grad: false,
         grad: none,
     }
@@ -103,7 +110,7 @@ func argsort(tensor a, int dim) tensor {
     }
     tensor {
         data: idx,
-        shape: [n],
+        shape: _shape1(n),
         requires_grad: false,
         grad: none,
     }
@@ -122,9 +129,10 @@ func topk(tensor a, int k) tensor {
         out[i] = sorted.data[i]
         i = i + 1
     }
+    []int shape = _shape1(count)
     tensor {
         data: out,
-        shape: [count],
+        shape: shape,
         requires_grad: false,
         grad: none,
     }
@@ -158,7 +166,7 @@ func unique(tensor a) tensor {
     }
     tensor {
         data: trimmed,
-        shape: [count],
+        shape: _shape1(count),
         requires_grad: false,
         grad: none,
     }
@@ -180,7 +188,7 @@ func median(tensor a) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -210,7 +218,7 @@ func mode(tensor a) tensor {
     out[0] = best_value
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -234,7 +242,7 @@ func quantile(tensor a, float q) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -288,7 +296,7 @@ func prod(tensor a, int dim) tensor {
     out[0] = acc
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: false,
         grad: none,
     }
