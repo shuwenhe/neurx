@@ -1,8 +1,8 @@
 package neurx.train.loop
 
-use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, has_next, next_batch, reset_state}
+use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, has_next, next_batch, reset_state, batch_count, dataloader_state_dict, dataloader_load_state_dict}
 use neurx.train.amp.{autocast_state, grad_scaler_state, new_autocast_state, new_grad_scaler, grad_scaler_step}
-use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_save, checkpoint_manager_mark_best}
+use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_should_save, checkpoint_manager_save, checkpoint_manager_mark_best}
 use neurx.train.logging.{training_logger_state, new_training_logger, training_logger_log, training_logger_flush}
 
 struct training_loop_state {
@@ -24,8 +24,18 @@ struct training_pipeline_state {
     grad_scaler_state scaler
     checkpoint_manager_state checkpoint
     autocast_state autocast
+    training_metrics_state metrics
     float last_loss
     float best_score
+}
+
+struct training_metrics_state {
+    int step
+    int epoch
+    int batch_index
+    int valid_tokens
+    float loss
+    float score
 }
 
 func new_training_loop_state() training_loop_state {
@@ -52,8 +62,20 @@ func new_training_pipeline_state([]int token_ids, int batch_size, int seq_len) t
         scaler: new_grad_scaler(1.0, 2.0, 0.5, 2000, true),
         checkpoint: new_checkpoint_manager(5, 100, false),
         autocast: new_autocast_state(false, 0),
+        metrics: new_training_metrics_state(),
         last_loss: 0.0,
         best_score: 0.0,
+    }
+}
+
+func new_training_metrics_state() training_metrics_state {
+    training_metrics_state {
+        step: 0,
+        epoch: 0,
+        batch_index: 0,
+        valid_tokens: 0,
+        loss: 0.0,
+        score: 0.0,
     }
 }
 
@@ -162,6 +184,25 @@ func _score_from_loss(float loss) float {
     loss
 }
 
+func _build_metrics(int step, int epoch, int batch_index, int valid_tokens, float loss, float score) training_metrics_state {
+    training_metrics_state {
+        step: step,
+        epoch: epoch,
+        batch_index: batch_index,
+        valid_tokens: valid_tokens,
+        loss: loss,
+        score: score,
+    }
+}
+
+func training_metrics_state_dict(training_metrics_state state) training_metrics_state {
+    state
+}
+
+func training_metrics_load_state_dict(training_metrics_state state, training_metrics_state other) training_metrics_state {
+    other
+}
+
 func train_step(training_pipeline_state state) training_pipeline_state {
     dataloader_state loader = state.loader
     int epoch_delta = 0
@@ -184,9 +225,13 @@ func train_step(training_pipeline_state state) training_pipeline_state {
     if flush_bucket * 10 == next_step {
         flushed_logger = training_logger_flush(logger, next_step, loop.epoch)
     }
-    checkpoint_manager_state checkpoint = checkpoint_manager_save(state.checkpoint, next_step, loop.epoch)
+    checkpoint_manager_state checkpoint = state.checkpoint
+    if checkpoint_manager_should_save(checkpoint, next_step) {
+        checkpoint = checkpoint_manager_save(checkpoint, next_step, loop.epoch)
+    }
     float score = _score_from_loss(loss)
     checkpoint = checkpoint_manager_mark_best(checkpoint, next_step, loop.epoch, score)
+    training_metrics_state metrics = _build_metrics(next_step, loop.epoch, batch_output.batch.batch_index, batch_output.batch.valid_tokens, loss, score)
     training_pipeline_state {
         loop: loop,
         loader: batch_output.state,
@@ -194,9 +239,18 @@ func train_step(training_pipeline_state state) training_pipeline_state {
         scaler: scaler,
         checkpoint: checkpoint,
         autocast: state.autocast,
+        metrics: metrics,
         last_loss: loss,
         best_score: score,
     }
+}
+
+func training_pipeline_state_dict(training_pipeline_state state) training_pipeline_state {
+    state
+}
+
+func training_pipeline_load_state_dict(training_pipeline_state state, training_pipeline_state other) training_pipeline_state {
+    other
 }
 
 func train_steps(training_pipeline_state state, int steps) training_pipeline_state {
@@ -224,6 +278,7 @@ func stop_training_pipeline(training_pipeline_state state) training_pipeline_sta
         scaler: state.scaler,
         checkpoint: state.checkpoint,
         autocast: state.autocast,
+        metrics: state.metrics,
         last_loss: state.last_loss,
         best_score: state.best_score,
     }
@@ -237,6 +292,25 @@ func resume_training_pipeline(training_pipeline_state state) training_pipeline_s
         scaler: state.scaler,
         checkpoint: state.checkpoint,
         autocast: state.autocast,
+        metrics: state.metrics,
+        last_loss: state.last_loss,
+        best_score: state.best_score,
+    }
+}
+
+func training_pipeline_metrics(training_pipeline_state state) training_metrics_state {
+    state.metrics
+}
+
+func training_pipeline_set_metrics(training_pipeline_state state, training_metrics_state metrics) training_pipeline_state {
+    training_pipeline_state {
+        loop: state.loop,
+        loader: state.loader,
+        logger: state.logger,
+        scaler: state.scaler,
+        checkpoint: state.checkpoint,
+        autocast: state.autocast,
+        metrics: metrics,
         last_loss: state.last_loss,
         best_score: state.best_score,
     }
