@@ -24,6 +24,8 @@ def test_s_ad_runtime_compiled_functions_present():
 
     for function_name in (
         "new_state",
+        "record_count",
+        "has_record",
         "set_grad_enabled",
         "no_grad",
         "enable_grad",
@@ -37,9 +39,17 @@ def test_s_ad_runtime_compiled_functions_present():
         "ones_like",
         "register_tensor",
         "set_grad",
+        "clear_grad",
+        "zero_grad",
         "accumulate_grad",
         "grad_of",
         "backward_seed",
+        "grad_record_state_dict",
+        "grad_record_load_state_dict",
+        "autograd_state_dict",
+        "autograd_load_state_dict",
+        "grad_enabled_state",
+        "grad_accumulation_state",
         "backward",
     ):
         assert runtime.supports_runtime_function("ad", function_name)
