@@ -4,6 +4,7 @@ from neurx.core.neurx import (
     cat,
     chunk,
     eig,
+    meshgrid,
     inverse,
     matmul,
     mm,
@@ -21,6 +22,7 @@ from neurx.core.neurx import (
     flip,
     roll,
     tile,
+    diag,
     softmax,
     log_softmax,
     take_along_dim,
@@ -31,11 +33,12 @@ def __getattr__(name):
     """Lazy loading of tensor creation/manipulation functions"""
     if name in ('zeros', 'ones', 'full', 'zeros_like', 'ones_like', 'full_like',
                 'eye', 'arange', 'linspace', 'logspace', 'rand', 'randn',
-                'randint', 'randperm', 'normal', 'uniform', 'empty', 'empty_like'):
+                'randint', 'randperm', 'normal', 'uniform', 'empty', 'empty_like',
+                'rand_like', 'randn_like'):
         from neurx.core.tensor_creation import (
             zeros, ones, full, zeros_like, ones_like, full_like, eye, arange,
             linspace, logspace, rand, randn, randint, randperm, normal, uniform,
-            empty, empty_like
+            empty, empty_like, rand_like, randn_like
         )
         return locals()[name]
     
@@ -88,6 +91,8 @@ try:
         uniform,
         empty,
         empty_like,
+        rand_like,
+        randn_like,
     )
 except (ImportError, NameError):
     pass
@@ -151,6 +156,8 @@ __all__ = [
     "uniform",
     "empty",
     "empty_like",
+    "rand_like",
+    "randn_like",
     
     # Tensor operations
     "where",
@@ -160,9 +167,11 @@ __all__ = [
     "flip",
     "roll",
     "tile",
+    "diag",
     "softmax",
     "log_softmax",
     "take_along_dim",
+    "meshgrid",
     "cat",
     "stack",
     "split",

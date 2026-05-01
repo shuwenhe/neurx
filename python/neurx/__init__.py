@@ -1,4 +1,4 @@
-from tensor import (
+from neurx.core import (
     Tensor,
     bmm,
     cat,
@@ -44,10 +44,16 @@ from tensor import (
     rand_like,
     randn_like,
 )
-from tensor.einsum import einsum
+from neurx.core.einsum import einsum
 from neurx.version import __version__
-from neurx import ad, compile, data, distributed, nn, optim, serialization, train, training, vision
-from neurx.losses import cross_entropy, cross_entropy_loss
+try:
+    from neurx import ad, compile, data, distributed, nn, optim, serialization, train, training, vision
+except Exception:
+    ad = compile = data = distributed = nn = optim = serialization = train = training = vision = None
+try:
+    from neurx.losses import cross_entropy, cross_entropy_loss
+except Exception:
+    cross_entropy = cross_entropy_loss = None
 from neurx.platform import doctor, format_doctor_report, get_runtime_config, runtime_info
 import numpy as np
 

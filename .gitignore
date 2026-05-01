@@ -10,6 +10,9 @@ __pycache__/
 # Build
 build/
 dist/
+reports/
+kernel_meta/
+logs/
 
 # C++/CUDA
 *.o
@@ -39,6 +42,9 @@ dist/
 
 # Auto push
 .auto_push_state/
+
+# neurx runtime artifacts
+python/neurx/compile/_s_runtime/
 
 # CANN generated artifacts
 cann/__pycache__/
