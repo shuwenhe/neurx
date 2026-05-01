@@ -20,3 +20,5 @@
 - `trainer.s`: 训练配置与 step 状态
 - `opt/optim_mvp.s`: SGD 与学习率最小实现
 - `dataloader_mvp.s`: 最小数据加载器（batch/seq 切片）
+- `dl/dataset.s`: 数据集抽象、切分与拼接
+- `dl/dataloader.s`: 数据加载与 batch 组装

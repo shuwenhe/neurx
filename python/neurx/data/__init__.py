@@ -1,4 +1,4 @@
-from neurx.data.dataloader import (
+from dl.dataloader import (
     DataLoader,
     default_collate,
     Sampler,
@@ -6,7 +6,7 @@ from neurx.data.dataloader import (
     RandomSampler,
     BatchSampler,
 )
-from neurx.data.dataset import Dataset, IterableDataset, TensorDataset, Subset, ConcatDataset, random_split
+from dl.dataset import Dataset, IterableDataset, TensorDataset, Subset, ConcatDataset, random_split
 
 __all__ = [
     "Dataset",
@@ -22,4 +22,3 @@ __all__ = [
     "RandomSampler",
     "BatchSampler",
 ]
-
