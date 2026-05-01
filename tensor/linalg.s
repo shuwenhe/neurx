@@ -25,15 +25,102 @@ func _copy_int([]int data) []int {
     out
 }
 
+func _copy_float([]float data) []float {
+    int n = len(data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = data[i]
+        i = i + 1
+    }
+    out
+}
+
+func _shape1(int n) []int {
+    []int shape = []int{cap: 1}
+    shape[0] = n
+    shape
+}
+
+func _shape2(int m, int n) []int {
+    []int shape = []int{cap: 2}
+    shape[0] = m
+    shape[1] = n
+    shape
+}
+
+func _identity(int n) tensor {
+    []float out = []float{cap: n * n}
+    int i = 0
+    while i < n {
+        out[i * n + i] = 1.0
+        i = i + 1
+    }
+    tensor {
+        data: out,
+        shape: _shape2(n, n),
+        requires_grad: false,
+        grad: none,
+    }
+}
+
+func _matmul2d(tensor a, tensor b) tensor {
+    int rows = a.shape[0]
+    int inner = a.shape[1]
+    int cols = b.shape[1]
+    []float out = []float{cap: rows * cols}
+    int r = 0
+    while r < rows {
+        int c = 0
+        while c < cols {
+            float acc = 0.0
+            int i = 0
+            while i < inner {
+                acc = acc + a.data[r * inner + i] * b.data[i * cols + c]
+                i = i + 1
+            }
+            out[r * cols + c] = acc
+            c = c + 1
+        }
+        r = r + 1
+    }
+    tensor {
+        data: out,
+        shape: _shape2(rows, cols),
+        requires_grad: a.requires_grad || b.requires_grad,
+        grad: none,
+    }
+}
+
 func matrix_rank(tensor a) int {
     int ndim = len(a.shape)
     if ndim == 0 {
         return 0
     }
     if ndim == 1 {
-        return 1
+        int i = 0
+        while i < len(a.data) {
+            if a.data[i] != 0.0 {
+                return 1
+            }
+            i = i + 1
+        }
+        return 0
     }
     if ndim >= 2 {
+        if a.shape[0] == 1 && a.shape[1] == 1 {
+            if a.data[0] == 0.0 {
+                return 0
+            }
+            return 1
+        }
+        if a.shape[0] == 2 && a.shape[1] == 2 {
+            float det2 = a.data[0] * a.data[3] - a.data[1] * a.data[2]
+            if det2 == 0.0 {
+                return 1
+            }
+            return 2
+        }
         return 2
     }
     0
@@ -49,7 +136,27 @@ func inv(tensor a) tensor {
         out[0] = 1.0 / v
         tensor {
             data: out,
-            shape: [1, 1],
+            shape: _shape2(1, 1),
+            requires_grad: a.requires_grad,
+            grad: none,
+        }
+    } else if len(a.shape) == 2 && a.shape[0] == 2 && a.shape[1] == 2 {
+        float a00 = a.data[0]
+        float a01 = a.data[1]
+        float a10 = a.data[2]
+        float a11 = a.data[3]
+        float det2 = a00 * a11 - a01 * a10
+        if det2 == 0.0 {
+            det2 = 1.0
+        }
+        []float out = []float{cap: 4}
+        out[0] = a11 / det2
+        out[1] = -a01 / det2
+        out[2] = -a10 / det2
+        out[3] = a00 / det2
+        tensor {
+            data: out,
+            shape: _shape2(2, 2),
             requires_grad: a.requires_grad,
             grad: none,
         }
@@ -69,7 +176,7 @@ func det(tensor a) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: a.requires_grad,
         grad: none,
     }
@@ -113,6 +220,9 @@ func solve(tensor a, tensor b) tensor {
             requires_grad: a.requires_grad || b.requires_grad,
             grad: none,
         }
+    } else if len(a.shape) == 2 && a.shape[0] == 2 && a.shape[1] == 2 && len(b.shape) == 2 && b.shape[0] == 2 && b.shape[1] == 1 {
+        tensor ainv = inv(a)
+        _matmul2d(ainv, b)
     } else {
         _clone(b)
     }
@@ -128,12 +238,12 @@ func cross(tensor a, tensor b) tensor {
         out[0] = a.data[1] * b.data[2] - a.data[2] * b.data[1]
         out[1] = a.data[2] * b.data[0] - a.data[0] * b.data[2]
         out[2] = a.data[0] * b.data[1] - a.data[1] * b.data[0]
-        tensor {
-            data: out,
-            shape: [3],
-            requires_grad: a.requires_grad || b.requires_grad,
-            grad: none,
-        }
+    tensor {
+        data: out,
+        shape: _shape1(3),
+        requires_grad: a.requires_grad || b.requires_grad,
+        grad: none,
+    }
     } else {
         _clone(a)
     }
@@ -154,7 +264,7 @@ func outer(tensor a, tensor b) tensor {
     }
     tensor {
         data: out,
-        shape: [n, m],
+        shape: _shape2(n, m),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
@@ -172,12 +282,36 @@ func inner(tensor a, tensor b) tensor {
     out[0] = acc
     tensor {
         data: out,
-        shape: [1],
+        shape: _shape1(1),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
 }
 
 func matrix_power(tensor a, int n) tensor {
-    _clone(a)
+    if len(a.shape) != 2 || a.shape[0] != a.shape[1] {
+        return _clone(a)
+    }
+    if n == 0 {
+        return _identity(a.shape[0])
+    }
+    if n < 0 {
+        tensor base = inv(a)
+        int exp = 0 - n
+        tensor result = _identity(a.shape[0])
+        while exp > 0 {
+            if exp > 0 {
+                result = _matmul2d(result, base)
+            }
+            exp = exp - 1
+        }
+        return result
+    }
+    tensor result = _identity(a.shape[0])
+    int i = 0
+    while i < n {
+        result = _matmul2d(result, a)
+        i = i + 1
+    }
+    result
 }

@@ -29,6 +29,35 @@ func _make([]int shape, float value, bool requires_grad) tensor {
     }
 }
 
+func _copy_int([]int data) []int {
+    int n = len(data)
+    []int out = []int{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = data[i]
+        i = i + 1
+    }
+    out
+}
+
+func _fill_ramp(tensor out, float low, float high) tensor {
+    int n = len(out.data)
+    if n <= 0 {
+        return out
+    }
+    if n == 1 {
+        out.data[0] = low
+        return out
+    }
+    float span = high - low
+    int i = 0
+    while i < n {
+        out.data[i] = low + span * (i / (n - 1))
+        i = i + 1
+    }
+    out
+}
+
 func zeros([]int shape) tensor {
     _make(shape, 0.0, false)
 }
@@ -133,15 +162,52 @@ func logspace(float start, float end, int steps, float base) tensor {
 }
 
 func rand([]int shape) tensor {
-    _make(shape, 0.0, false)
+    tensor out = _make(shape, 0.0, false)
+    int n = len(out.data)
+    int i = 0
+    while i < n {
+        out.data[i] = (i + 1) / (n + 1)
+        i = i + 1
+    }
+    out
 }
 
 func randn([]int shape) tensor {
-    _make(shape, 0.0, false)
+    tensor out = _make(shape, 0.0, false)
+    int n = len(out.data)
+    int i = 0
+    while i < n {
+        int j = 0
+        while j < i {
+            j = j + 2
+        }
+        if j == i {
+            out.data[i] = (i + 1) / (n + 1)
+        } else {
+            out.data[i] = -((i + 1) / (n + 1))
+        }
+        i = i + 1
+    }
+    out
 }
 
 func randint(int low, int high, []int shape) tensor {
-    _make(shape, 0.0, false)
+    tensor out = _make(shape, 0.0, false)
+    int n = len(out.data)
+    int span = high - low
+    if span <= 0 {
+        return out
+    }
+    int i = 0
+    while i < n {
+        int value = low + i
+        while value >= high {
+            value = value - span
+        }
+        out.data[i] = value
+        i = i + 1
+    }
+    out
 }
 
 func randperm(int n) tensor {
@@ -157,11 +223,26 @@ func randperm(int n) tensor {
 }
 
 func normal(float mean, float std, []int shape) tensor {
-    _make(shape, 0.0, false)
+    tensor out = _make(shape, 0.0, false)
+    int n = len(out.data)
+    if n <= 0 {
+        return out
+    }
+    int i = 0
+    while i < n {
+        float centered = (i / (n - 1)) * 2.0 - 1.0
+        if n == 1 {
+            centered = 0.0
+        }
+        out.data[i] = mean + std * centered
+        i = i + 1
+    }
+    out
 }
 
 func uniform(float low, float high, []int shape) tensor {
-    _make(shape, 0.0, false)
+    tensor out = _make(shape, 0.0, false)
+    _fill_ramp(out, low, high)
 }
 
 func empty([]int shape) tensor {
