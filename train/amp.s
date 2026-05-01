@@ -1,4 +1,4 @@
-package neurx.training.amp
+package neurx.train.amp
 
 struct autocast_state {
     bool enabled

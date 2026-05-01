@@ -1,4 +1,4 @@
-from neurx.core.neurx import (
+from tensor import (
     Tensor,
     bmm,
     cat,

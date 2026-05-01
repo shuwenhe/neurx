@@ -1,4 +1,4 @@
-package neurx.training.logging
+package neurx.train.logging
 
 struct training_logger_state {
     bool enabled
