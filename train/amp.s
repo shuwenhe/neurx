@@ -3,6 +3,7 @@ package neurx.train.amp
 struct autocast_state {
     bool enabled
     int dtype_code
+    int nesting
 }
 
 struct grad_scaler_state {
@@ -12,17 +13,19 @@ struct grad_scaler_state {
     int growth_interval
     int growth_tracker
     bool enabled
+    bool found_inf
 }
 
 func new_autocast_state(bool enabled, int dtype_code) autocast_state {
     autocast_state {
         enabled: enabled,
         dtype_code: dtype_code,
+        nesting: 0,
     }
 }
 
 func is_autocast_enabled(autocast_state state) bool {
-    state.enabled
+    state.enabled && state.nesting > -1
 }
 
 func get_autocast_dtype(autocast_state state) int {
@@ -33,6 +36,7 @@ func set_autocast_enabled(autocast_state state, bool enabled) autocast_state {
     autocast_state {
         enabled: enabled,
         dtype_code: state.dtype_code,
+        nesting: state.nesting,
     }
 }
 
@@ -40,6 +44,27 @@ func set_autocast_dtype(autocast_state state, int dtype_code) autocast_state {
     autocast_state {
         enabled: state.enabled,
         dtype_code: dtype_code,
+        nesting: state.nesting,
+    }
+}
+
+func autocast_enter(autocast_state state) autocast_state {
+    autocast_state {
+        enabled: state.enabled,
+        dtype_code: state.dtype_code,
+        nesting: state.nesting + 1,
+    }
+}
+
+func autocast_exit(autocast_state state) autocast_state {
+    int nesting = state.nesting - 1
+    if nesting < 0 {
+        nesting = 0
+    }
+    autocast_state {
+        enabled: state.enabled,
+        dtype_code: state.dtype_code,
+        nesting: nesting,
     }
 }
 
@@ -51,6 +76,7 @@ func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor
         growth_interval: growth_interval,
         growth_tracker: 0,
         enabled: enabled,
+        found_inf: false,
     }
 }
 
@@ -65,40 +91,42 @@ func update_scale(grad_scaler_state state, bool found_inf) grad_scaler_state {
     if !state.enabled {
         return state
     }
-    if found_inf {
-        grad_scaler_state {
-            scale: if state.scale * state.backoff_factor > 1.0 { state.scale * state.backoff_factor } else { 1.0 },
-            growth_factor: state.growth_factor,
-            backoff_factor: state.backoff_factor,
-            growth_interval: state.growth_interval,
-            growth_tracker: 0,
-            enabled: state.enabled,
-        }
-    }
+    float next_scale = state.scale
     int next_tracker = state.growth_tracker + 1
-    if next_tracker >= state.growth_interval {
-        grad_scaler_state {
-            scale: state.scale * state.growth_factor,
-            growth_factor: state.growth_factor,
-            backoff_factor: state.backoff_factor,
-            growth_interval: state.growth_interval,
-            growth_tracker: 0,
-            enabled: state.enabled,
+    bool next_found_inf = false
+    if found_inf {
+        next_scale = state.scale * state.backoff_factor
+        if next_scale < 1.0 {
+            next_scale = 1.0
+        }
+        next_tracker = 0
+        next_found_inf = true
+    } else {
+        if next_tracker >= state.growth_interval {
+            next_scale = state.scale * state.growth_factor
+            next_tracker = 0
         }
     }
     grad_scaler_state {
-        scale: state.scale,
+        scale: next_scale,
         growth_factor: state.growth_factor,
         backoff_factor: state.backoff_factor,
         growth_interval: state.growth_interval,
         growth_tracker: next_tracker,
         enabled: state.enabled,
+        found_inf: next_found_inf,
     }
 }
 
 func grad_scaler_step(grad_scaler_state scaler, float loss) grad_scaler_state {
-    del loss
-    scaler
+    bool found_inf = false
+    if loss != loss {
+        found_inf = true
+    }
+    if loss > 1.0e30 {
+        found_inf = true
+    }
+    return update_scale(scaler, found_inf)
 }
 
 func grad_scaler_state_dict(grad_scaler_state state) grad_scaler_state {
