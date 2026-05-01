@@ -22,3 +22,4 @@
 - `dataloader_mvp.s`: 最小数据加载器（batch/seq 切片）
 - `dl/dataset.s`: 数据集抽象、切分与拼接
 - `dl/dataloader.s`: 数据加载与 batch 组装
+- `lf/losses.s`: 损失函数入口与占位实现

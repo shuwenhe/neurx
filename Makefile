@@ -39,7 +39,7 @@ help:
 	@echo "  cann-test-310p3 Run neurx + 310P3 8-card validation smoke"
 	@echo "  cann-test-npu-agnostic Run backend-agnostic tests on TENSOR_DEVICE=npu"
 	@echo "  cann-test-npu-agnostic-stable Run verified-pass NPU backend-agnostic tests"
-	@echo "  s-compile-runtime Compile all neurx/s sources to IR"
+	@echo "  s-compile-runtime Compile all neurx S sources to IR"
 	@echo "  auto-push     Watch repository changes and auto commit/push to GitHub"
 	@echo "  install-auto-push-service Install and enable systemd auto-push service"
 	@echo "  status-auto-push-service  Show systemd auto-push service status"
@@ -163,7 +163,7 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p python/neurx/compile/_s_runtime
-	for src in $$(printf '%s\n' s/*.s ad/*.s nn/*.s opt/*.s dl/*.s); do \
+	for src in $$(printf '%s\n' s/*.s ad/*.s nn/*.s opt/*.s dl/*.s lf/*.s); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename $$src .s); \
 	    dir=$$(dirname $$src); \
@@ -177,6 +177,8 @@ s-compile-runtime:
 	        dir="/opt"; \
 	    elif [ "$$dir" = "dl" ]; then \
 	        dir="/dl"; \
+	    elif [ "$$dir" = "lf" ]; then \
+	        dir="/lf"; \
 	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p reports/s_ir$$dir; \
