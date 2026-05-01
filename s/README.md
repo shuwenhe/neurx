@@ -15,8 +15,8 @@
 - `ops.s`: 算子入口
 - `autograd.s`: 自动微分雏形
 - `schedule.s`: 调度雏形
-- `nn.s`: 线性层与基础 nn 接口
+- `nn/nn.s`: 线性层与基础 nn 接口
 - `multimodal.s`: 多模态 batch 抽象
 - `trainer.s`: 训练配置与 step 状态
-- `optim_mvp.s`: SGD 与学习率最小实现
+- `opt/optim_mvp.s`: SGD 与学习率最小实现
 - `dataloader_mvp.s`: 最小数据加载器（batch/seq 切片）
