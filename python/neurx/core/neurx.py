@@ -1,5 +1,5 @@
-from tensor.neurx import *  # noqa: F401,F403
-from tensor.neurx import (
+from neurx.core._tensor_impl import *  # noqa: F401,F403
+from neurx.core._tensor_impl import (
     _accelerator_available,
     _cuda_ops,
     _ensure_array,
@@ -11,4 +11,3 @@ from tensor.neurx import (
     _to_data_on_device,
     _to_numpy,
 )
-
