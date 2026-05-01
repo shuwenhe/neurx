@@ -1,8 +1,0 @@
-SSEED-TARGET-V1
-MOV|tensor|0|_
-FUNC_BEGIN|einsum|_|_
-PARAM|equation|_|_
-PARAM|a|_|_
-PARAM|b|_|_
-RET|tensor|_|_
-FUNC_END|einsum|_|_

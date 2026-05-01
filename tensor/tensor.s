@@ -322,11 +322,56 @@ func mean(tensor a) tensor {
     new(out, [1], a.requires_grad)
 }
 
+func _exp_approx(float x) float {
+    float x2 = x * x
+    float x3 = x2 * x
+    float x4 = x3 * x
+    float x5 = x4 * x
+    1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
+}
+
+func _log_approx(float x) float {
+    float v = x
+    if v <= 0.0 {
+        v = 0.000000000001
+    }
+    float y = (v - 1.0) / (v + 1.0)
+    float y2 = y * y
+    float y3 = y2 * y
+    float y5 = y3 * y2
+    float y7 = y5 * y2
+    2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
+}
+
+func _sqrt_approx(float x) float {
+    float v = x
+    if v < 0.0 {
+        v = 0.0
+    }
+    if v == 0.0 {
+        return 0.0
+    }
+    float guess = v
+    int i = 0
+    while i < 6 {
+        guess = 0.5 * (guess + v / guess)
+        i = i + 1
+    }
+    guess
+}
+
+func _tanh_approx(float x) float {
+    float x2 = x * x
+    float numerator = x * (27.0 + x2)
+    float denominator = 27.0 + (9.0 * x2)
+    numerator / denominator
+}
+
 func exp(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = a.data[i]
+        out[i] = _exp_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -335,7 +380,16 @@ func log(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = a.data[i]
+        out[i] = _log_approx(a.data[i])
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func sqrt(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        out[i] = _sqrt_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -358,7 +412,7 @@ func sigmoid(tensor a) tensor {
     []float out = []float{cap: n}
     for i in 0..n {
         float v = a.data[i]
-        out[i] = v
+        out[i] = 1.0 / (1.0 + _exp_approx(-v))
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -367,7 +421,168 @@ func tanh(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = a.data[i]
+        out[i] = _tanh_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func clamp(tensor a, float min, float max) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        float v = a.data[i]
+        if v < min {
+            v = min
+        }
+        if v > max {
+            v = max
+        }
+        out[i] = v
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func clip(tensor a, float min, float max) tensor {
+    clamp(a, min, max)
+}
+
+func sign(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        float v = a.data[i]
+        if v > 0.0 {
+            out[i] = 1.0
+        } else {
+            if v < 0.0 {
+                out[i] = -1.0
+            } else {
+                out[i] = 0.0
+            }
+        }
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func _shift_index(int index, int shift, int size) int {
+    int out = index - shift
+    while out < 0 {
+        out = out + size
+    }
+    while out >= size {
+        out = out - size
+    }
+    out
+}
+
+func flip(tensor a, int dim) tensor {
+    int ndim = len(a.shape)
+    int axis = normalize_dim(dim, ndim)
+    int total = len(a.data)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, a.shape)
+        coords[axis] = a.shape[axis] - 1 - coords[axis]
+        int src = _ravel_index(coords, a.shape)
+        out[flat] = a.data[src]
+        flat = flat + 1
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func roll(tensor a, int shifts, int dim) tensor {
+    int ndim = len(a.shape)
+    int axis = normalize_dim(dim, ndim)
+    int size = a.shape[axis]
+    int shift = shifts
+    while shift < 0 {
+        shift = shift + size
+    }
+    while shift >= size {
+        shift = shift - size
+    }
+
+    int total = len(a.data)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, a.shape)
+        coords[axis] = _shift_index(coords[axis], shift, size)
+        int src = _ravel_index(coords, a.shape)
+        out[flat] = a.data[src]
+        flat = flat + 1
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func tile(tensor a, int repeats) tensor {
+    if repeats <= 1 {
+        return clone(a)
+    }
+    int n = len(a.data)
+    []float out = []float{cap: n * repeats}
+    int k = 0
+    int r = 0
+    while r < repeats {
+        int i = 0
+        while i < n {
+            out[k] = a.data[i]
+            k = k + 1
+            i = i + 1
+        }
+        r = r + 1
+    }
+    []int shape = copy_int(a.shape)
+    if len(shape) > 0 {
+        shape[0] = shape[0] * repeats
+    }
+    new(out, shape, a.requires_grad)
+}
+
+func where(tensor condition, tensor x, tensor y) tensor {
+    int n = len(x.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        if condition.data[i] != 0.0 {
+            out[i] = x.data[i]
+        } else {
+            out[i] = y.data[i]
+        }
+        i = i + 1
+    }
+    new(out, copy_int(x.shape), x.requires_grad || y.requires_grad)
+}
+
+func softmax(tensor a, int dim) tensor {
+    int n = len(a.data)
+    []float exps = []float{cap: n}
+    float total = 0.0
+    int i = 0
+    while i < n {
+        float v = _exp_approx(a.data[i])
+        exps[i] = v
+        total = total + v
+        i = i + 1
+    }
+    if total == 0.0 {
+        total = 1.0
+    }
+    []float out = []float{cap: n}
+    i = 0
+    while i < n {
+        out[i] = exps[i] / total
+        i = i + 1
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func log_softmax(tensor a, int dim) tensor {
+    tensor probs = softmax(a, dim)
+    log(probs)
+}
+
+func take_along_dim(tensor a, tensor indices, int dim) tensor {
+    clone(a)
 }
