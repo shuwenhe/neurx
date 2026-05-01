@@ -212,6 +212,22 @@ func transpose(tensor a, int dim0, int dim1) tensor {
     new(out, shape, a.requires_grad)
 }
 
+func _permute_inverse([]int dims) []int {
+    int ndim = len(dims)
+    []int inv = []int{cap: ndim}
+    int i = 0
+    while i < ndim {
+        inv.push(0)
+        i = i + 1
+    }
+    i = 0
+    while i < ndim {
+        inv[dims[i]] = i
+        i = i + 1
+    }
+    inv
+}
+
 func permute(tensor a, []int dims) tensor {
     int ndim = len(dims)
     []int shape = []int{cap: ndim}
@@ -245,60 +261,169 @@ func permute(tensor a, []int dims) tensor {
     new(out, shape, a.requires_grad)
 }
 
-func add(tensor a, tensor b) tensor {
-    int n = len(a.data)
-    []float out = []float{cap: n}
-    for i in 0..n {
-        out.push(a.data[i] + b.data[i])
+func _broadcast_shape([]int a, []int b) []int {
+    int ndim_a = len(a)
+    int ndim_b = len(b)
+    int ndim = ndim_a
+    if ndim_b > ndim {
+        ndim = ndim_b
     }
-    new(out, a.shape, a.requires_grad || b.requires_grad)
+    []int shape = []int{cap: ndim}
+    int i = 0
+    while i < ndim {
+        shape.push(1)
+        i = i + 1
+    }
+    int ia = ndim_a - 1
+    int ib = ndim_b - 1
+    int out = ndim - 1
+    while out >= 0 {
+        int dim_a = 1
+        int dim_b = 1
+        if ia >= 0 {
+            dim_a = a[ia]
+        }
+        if ib >= 0 {
+            dim_b = b[ib]
+        }
+        if dim_a != dim_b && dim_a != 1 && dim_b != 1 {
+            shape[out] = dim_a
+        } else {
+            if dim_a > dim_b {
+                shape[out] = dim_a
+            } else {
+                shape[out] = dim_b
+            }
+        }
+        ia = ia - 1
+        ib = ib - 1
+        out = out - 1
+    }
+    shape
+}
+
+func _broadcast_index([]int coords, []int shape) int {
+    int ndim_coords = len(coords)
+    int ndim_shape = len(shape)
+    int offset = ndim_coords - ndim_shape
+    []int aligned = []int{cap: ndim_shape}
+    int i = 0
+    while i < ndim_shape {
+        aligned.push(0)
+        i = i + 1
+    }
+    i = 0
+    while i < ndim_shape {
+        int coord = coords[i + offset]
+        if shape[i] == 1 {
+            coord = 0
+        }
+        aligned[i] = coord
+        i = i + 1
+    }
+    _ravel_index(aligned, shape)
+}
+
+func _binary_broadcast(tensor a, tensor b, int op) tensor {
+    []int shape = _broadcast_shape(a.shape, b.shape)
+    int total = _shape_prod(shape)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, shape)
+        int ia = _broadcast_index(coords, a.shape)
+        int ib = _broadcast_index(coords, b.shape)
+        float v = 0.0
+        if op == 0 {
+            v = a.data[ia] + b.data[ib]
+        } else {
+            if op == 1 {
+                v = a.data[ia] - b.data[ib]
+            } else {
+                if op == 2 {
+                    v = a.data[ia] * b.data[ib]
+                } else {
+                    v = a.data[ia] / b.data[ib]
+                }
+            }
+        }
+        out[flat] = v
+        flat = flat + 1
+    }
+    new(out, shape, a.requires_grad || b.requires_grad)
+}
+
+func add(tensor a, tensor b) tensor {
+    _binary_broadcast(a, b, 0)
 }
 
 func sub(tensor a, tensor b) tensor {
-    int n = len(a.data)
-    []float out = []float{cap: n}
-    for i in 0..n {
-        out.push(a.data[i] - b.data[i])
-    }
-    new(out, a.shape, a.requires_grad || b.requires_grad)
+    _binary_broadcast(a, b, 1)
 }
 
 func mul(tensor a, tensor b) tensor {
-    int n = len(a.data)
-    []float out = []float{cap: n}
-    for i in 0..n {
-        out.push(a.data[i] * b.data[i])
-    }
-    new(out, a.shape, a.requires_grad || b.requires_grad)
+    _binary_broadcast(a, b, 2)
 }
 
 func div(tensor a, tensor b) tensor {
-    int n = len(a.data)
-    []float out = []float{cap: n}
-    for i in 0..n {
-        out.push(a.data[i] / b.data[i])
-    }
-    new(out, a.shape, a.requires_grad || b.requires_grad)
+    _binary_broadcast(a, b, 3)
 }
 
 func matmul(tensor a, tensor b) tensor {
+    int ndim_a = len(a.shape)
+    int ndim_b = len(b.shape)
+    if ndim_a == 1 && ndim_b == 1 {
+        int n = a.shape[0]
+        float acc = 0.0
+        int i = 0
+        while i < n {
+            acc = acc + a.data[i] * b.data[i]
+            i = i + 1
+        }
+        []float out = []float{cap: 1}
+        out[0] = acc
+        return new(out, [1], a.requires_grad || b.requires_grad)
+    }
+
+    if ndim_a == 2 && ndim_b == 1 {
+        int rows = a.shape[0]
+        int inner = a.shape[1]
+        []float out = []float{cap: rows}
+        int r = 0
+        while r < rows {
+            float acc = 0.0
+            int i = 0
+            while i < inner {
+                acc = acc + a.data[r * inner + i] * b.data[i]
+                i = i + 1
+            }
+            out[r] = acc
+            r = r + 1
+        }
+        return new(out, [rows], a.requires_grad || b.requires_grad)
+    }
+
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
     []float out = []float{cap: rows * cols}
-
-    for r in 0..rows {
-        for c in 0..cols {
+    int r = 0
+    while r < rows {
+        int c = 0
+        while c < cols {
             float acc = 0.0
-            for i in 0..inner {
+            int i = 0
+            while i < inner {
                 float x = a.data[r * inner + i]
                 float y = b.data[i * cols + c]
                 acc = acc + x * y
+                i = i + 1
             }
-            out.push(acc)
+            out[r * cols + c] = acc
+            c = c + 1
         }
+        r = r + 1
     }
-
     new(out, [rows, cols], a.requires_grad || b.requires_grad)
 }
 
@@ -320,6 +445,84 @@ func mean(tensor a) tensor {
     []float out = []float{cap: 1}
     out[0] = total.data[0] / denom
     new(out, [1], a.requires_grad)
+}
+
+func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
+    int ndim = len(a.shape)
+    int axis = normalize_dim(dim, ndim)
+    int axis_size = a.shape[axis]
+    []int out_shape = []int{cap: ndim}
+    int i = 0
+    while i < ndim {
+        if i != axis {
+            out_shape.push(a.shape[i])
+        } else {
+            if keepdim {
+                out_shape.push(1)
+            }
+        }
+        i = i + 1
+    }
+    if len(out_shape) == 0 {
+        out_shape.push(1)
+    }
+    int total = _shape_prod(out_shape)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, out_shape)
+        []int src_coords = []int{cap: ndim}
+        int j = 0
+        int k = 0
+        while j < ndim {
+            src_coords.push(0)
+            j = j + 1
+        }
+        j = 0
+        while j < ndim {
+            if j == axis {
+                if keepdim {
+                    src_coords[j] = 0
+                }
+            } else {
+                src_coords[j] = coords[k]
+                k = k + 1
+            }
+            j = j + 1
+        }
+        float acc = 0.0
+        bool first = true
+        int r = 0
+        while r < axis_size {
+            src_coords[axis] = r
+            float value = a.data[_ravel_index(src_coords, a.shape)]
+            if first {
+                acc = value
+                first = false
+            } else {
+                if mode == 0 {
+                    acc = acc + value
+                } else {
+                    acc = acc + value
+                }
+            }
+            r = r + 1
+        }
+        if mode == 1 {
+            acc = acc / axis_size
+        }
+        out[flat] = acc
+        flat = flat + 1
+    }
+    new(out, out_shape, a.requires_grad)
+}
+
+func sum_dim(tensor a, int dim, bool keepdim) tensor {
+    _reduce_over_dim(a, dim, keepdim, 0)
+}
+
+func mean_dim(tensor a, int dim, bool keepdim) tensor {
+    _reduce_over_dim(a, dim, keepdim, 1)
 }
 
 func _exp_approx(float x) float {
@@ -556,33 +759,101 @@ func where(tensor condition, tensor x, tensor y) tensor {
 }
 
 func softmax(tensor a, int dim) tensor {
-    int n = len(a.data)
-    []float exps = []float{cap: n}
-    float total = 0.0
+    int ndim = len(a.shape)
+    if ndim == 0 {
+        return clone(a)
+    }
+    int axis = normalize_dim(dim, ndim)
+    []int out_shape = copy_int(a.shape)
+    int total = len(a.data)
+    []float out = []float{cap: total}
+    []int coords = []int{cap: ndim}
     int i = 0
-    while i < n {
-        float v = _exp_approx(a.data[i])
-        exps[i] = v
-        total = total + v
+    while i < ndim {
+        coords.push(0)
         i = i + 1
     }
-    if total == 0.0 {
-        total = 1.0
-    }
-    []float out = []float{cap: n}
+
+    int outer = 1
     i = 0
-    while i < n {
-        out[i] = exps[i] / total
+    while i < ndim {
+        if i != axis {
+            outer = outer * a.shape[i]
+        }
         i = i + 1
     }
-    new(out, copy_int(a.shape), a.requires_grad)
+
+    int outer_index = 0
+    while outer_index < outer {
+        []int base = _unravel_index(outer_index, out_shape)
+        int j = 0
+        int k = 0
+        while j < ndim {
+            if j != axis {
+                coords[j] = base[k]
+                k = k + 1
+            }
+            j = j + 1
+        }
+        float max_v = a.data[_ravel_index(coords, a.shape)]
+        int axis_size = a.shape[axis]
+        int aidx = 1
+        while aidx < axis_size {
+            coords[axis] = aidx
+            float v = a.data[_ravel_index(coords, a.shape)]
+            if v > max_v {
+                max_v = v
+            }
+            aidx = aidx + 1
+        }
+        float denom = 0.0
+        aidx = 0
+        while aidx < axis_size {
+            coords[axis] = aidx
+            float shifted = a.data[_ravel_index(coords, a.shape)] - max_v
+            float v = _exp_approx(shifted)
+            out[_ravel_index(coords, a.shape)] = v
+            denom = denom + v
+            aidx = aidx + 1
+        }
+        if denom == 0.0 {
+            denom = 1.0
+        }
+        aidx = 0
+        while aidx < axis_size {
+            coords[axis] = aidx
+            int dst = _ravel_index(coords, a.shape)
+            out[dst] = out[dst] / denom
+            aidx = aidx + 1
+        }
+        outer_index = outer_index + 1
+    }
+    new(out, out_shape, a.requires_grad)
 }
 
 func log_softmax(tensor a, int dim) tensor {
-    tensor probs = softmax(a, dim)
-    log(probs)
+    log(softmax(a, dim))
 }
 
 func take_along_dim(tensor a, tensor indices, int dim) tensor {
-    clone(a)
+    int ndim = len(a.shape)
+    int axis = normalize_dim(dim, ndim)
+    int total = len(indices.data)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, indices.shape)
+        int src_index = 0
+        int i = 0
+        while i < ndim {
+            if i == axis {
+                coords[i] = int(indices.data[flat])
+            }
+            i = i + 1
+        }
+        src_index = _ravel_index(coords, a.shape)
+        out[flat] = a.data[src_index]
+        flat = flat + 1
+    }
+    new(out, copy_int(indices.shape), a.requires_grad || indices.requires_grad)
 }
