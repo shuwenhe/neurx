@@ -13,8 +13,8 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `nn/`: S source for neural network building blocks
 - `opt/`: S source for optimizers
 - `s/`: legacy S entry scripts and notes
-- `reports/s_ir/`: generated S IR artifacts
-- `python/neurx/compile/_s_runtime/`: packaged runtime IR artifacts
+- `build/ir/`: generated S IR artifacts
+- `build/logs/`: generated compiler and runtime logs
 
 ## S Modules
 
@@ -43,4 +43,4 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 
 ## Notes
 
-The S modules are compiled into runtime IR during the `s-compile-runtime` step.
+The S modules are compiled into runtime IR during the `s-compile-runtime` step and written under `build/ir/`.
