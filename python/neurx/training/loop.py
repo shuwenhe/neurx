@@ -5,8 +5,8 @@ from typing import Any
 
 import numpy as np
 
-from neurx.training.amp import autocast
-from neurx.training.logging import TrainingLogger
+from .amp import autocast
+from .logging import TrainingLogger
 
 
 def _infer_batch_size(batch) -> int:
