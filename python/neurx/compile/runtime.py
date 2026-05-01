@@ -631,6 +631,17 @@ def try_invoke_ops_function(function_name: str, *args: Any) -> Any | None:
         return None
 
 
+def try_invoke_tensor_function(function_name: str, *args: Any) -> Any | None:
+    if not ops_runtime_enabled() or not runtime_available():
+        return None
+    if not supports_runtime_function("tensor", function_name):
+        return None
+    try:
+        return invoke_runtime_function("tensor", function_name, *args)
+    except Exception:
+        return None
+
+
 def runtime_available() -> bool:
     return _runtime_manifest_path().exists()
 

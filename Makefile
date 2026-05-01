@@ -163,16 +163,22 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p python/neurx/compile/_s_runtime
-	for src in s/*.s; do \
+	for src in $$(printf '%s\n' s/*.s ad/*.s); do \
+	    [ -e "$$src" ] || continue; \
 	    base=$$(basename $$src .s); \
-	    dir=$$(dirname $$src | sed 's|^s||'); \
+	    dir=$$(dirname $$src); \
+	    if [ "$$dir" = "s" ]; then \
+	        dir=""; \
+	    elif [ "$$dir" = "ad" ]; then \
+	        dir="/ad"; \
+	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p reports/s_ir$$dir; \
 	    echo "Compiling $$src -> reports/s_ir$$dir/$$base.ir"; \
 	    $(S_COMPILER) ir $$src -o reports/s_ir$$dir/$$base.ir || exit 1; \
 	    cp reports/s_ir$$dir/$$base.ir python/neurx/compile/_s_runtime/$$base.ir || exit 1; \
 	done
-	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("python/neurx/compile/_s_runtime"); ir_files = sorted(p.name for p in root.glob("*.ir")); manifest = {"source_root": str(Path("s").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'
+	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("python/neurx/compile/_s_runtime"); ir_files = sorted(p.name for p in root.glob("*.ir")); manifest = {"source_root": str(Path(".").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'
 
 auto-push:
 	$(PYTHON) scripts/auto_push.py --repo . --remote origin
