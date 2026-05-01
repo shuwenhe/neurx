@@ -11,7 +11,7 @@ import numpy as np
 
 
 def _runtime_root() -> Path:
-    return Path(__file__).resolve().parent / "_s_runtime"
+    return Path(__file__).resolve().parents[3] / "build" / "ir"
 
 
 def _runtime_manifest_path() -> Path:
@@ -19,7 +19,12 @@ def _runtime_manifest_path() -> Path:
 
 
 def _module_ir_path(module_name: str) -> Path:
-    return _runtime_root() / f"{module_name}.ir"
+    root = _runtime_root()
+    direct = root / f"{module_name}.ir"
+    if direct.exists():
+        return direct
+    matches = sorted(root.rglob(f"{module_name}.ir"))
+    return matches[0] if matches else direct
 
 
 def ops_runtime_enabled() -> bool:

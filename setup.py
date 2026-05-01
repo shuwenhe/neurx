@@ -102,7 +102,6 @@ elif use_cuda and cuda_home is None:
 setup(
     packages=find_packages("python"),
     package_dir={"": "python"},
-    package_data={"neurx.compile": ["_s_runtime/*.ir", "_s_runtime/manifest.json"]},
     ext_modules=ext_modules,
     cmdclass={"build_ext": BuildExt},
 )
