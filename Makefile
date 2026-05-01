@@ -163,7 +163,7 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p python/neurx/compile/_s_runtime
-	for src in $$(printf '%s\n' s/*.s ad/*.s); do \
+	for src in $$(printf '%s\n' s/*.s ad/*.s nn/*.s opt/*.s); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename $$src .s); \
 	    dir=$$(dirname $$src); \
@@ -171,6 +171,10 @@ s-compile-runtime:
 	        dir=""; \
 	    elif [ "$$dir" = "ad" ]; then \
 	        dir="/ad"; \
+	    elif [ "$$dir" = "nn" ]; then \
+	        dir="/nn"; \
+	    elif [ "$$dir" = "opt" ]; then \
+	        dir="/opt"; \
 	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p reports/s_ir$$dir; \

@@ -1,50 +1,8 @@
-from neurx.optim.optimizer import Optimizer
-from neurx.optim.optim import *
-from neurx.optim.losses import (
-    CrossEntropyLoss, BCELoss, BCEWithLogitsLoss, L1Loss, MSELoss,
-    SmoothL1Loss, KLDivLoss, NLLLoss, HuberLoss, PoissonNLLLoss,
-    CTCLoss, MarginRankingLoss, TripletMarginLoss
-)
-from neurx.optim.schedulers import (
-    StepLR, ExponentialLR, CosineAnnealingLR, CosineAnnealingWarmRestarts,
-    LinearLR, PolynomialLR, MultiplicativeLR, LambdaLR, ReduceLROnPlateau,
-    WarmupLR, WarmupDecayLR, StepDecayWithWarmup, CyclicLR, OneCycleLR
-)
+from ._compat import load_root_opt_package
 
-__all__ = [
-    "Optimizer",
-    "SGD",
-    "Adam",
-    "AdamW",
-    "RMSprop",
-    "clip_grad_norm",
-    # Loss Functions
-    "CrossEntropyLoss",
-    "BCELoss",
-    "BCEWithLogitsLoss",
-    "L1Loss",
-    "MSELoss",
-    "SmoothL1Loss",
-    "KLDivLoss",
-    "NLLLoss",
-    "HuberLoss",
-    "PoissonNLLLoss",
-    "CTCLoss",
-    "MarginRankingLoss",
-    "TripletMarginLoss",
-    # Schedulers
-    "StepLR",
-    "ExponentialLR",
-    "CosineAnnealingLR",
-    "CosineAnnealingWarmRestarts",
-    "LinearLR",
-    "PolynomialLR",
-    "MultiplicativeLR",
-    "LambdaLR",
-    "ReduceLROnPlateau",
-    "WarmupLR",
-    "WarmupDecayLR",
-    "StepDecayWithWarmup",
-    "CyclicLR",
-    "OneCycleLR",
-]
+_mod = load_root_opt_package()
+
+for name in getattr(_mod, "__all__", []):
+    globals()[name] = getattr(_mod, name)
+
+__all__ = list(getattr(_mod, "__all__", []))
