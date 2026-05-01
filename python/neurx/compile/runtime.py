@@ -645,6 +645,8 @@ def runtime_manifest() -> dict[str, Any]:
         }
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     data["available"] = True
+    data.setdefault("artifact_root", str(_runtime_root()))
+    data.setdefault("ir_files", [])
     return data
 
 
