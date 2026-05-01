@@ -34,10 +34,10 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `opt/optim_mvp.s`: minimal SGD and learning rate implementation
 - `dataloader_mvp.s`: minimal dataloader for batch/sequence slicing
 - `dl/dataset.s`: dataset abstraction, splitting, and concatenation
-- `dl/dataloader.s`: data loading and batch assembly
+- `dl/dataloader.s`: data loading, batching, and dataloader state
 - `lf/losses.s`: loss function entry point and core loss implementations
 - `train/amp.s`: autocast and GradScaler state utilities
-- `train/checkpoint_manager.s`: checkpoint manager state tracking
+- `train/checkpoint_manager.s`: checkpoint retention and best-score tracking
 - `train/logging.s`: training logging state and flush tracking
 - `train/loop.s`: training loop and single-step training pipeline state machine
 
