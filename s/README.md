@@ -23,3 +23,7 @@
 - `dl/dataset.s`: 数据集抽象、切分与拼接
 - `dl/dataloader.s`: 数据加载与 batch 组装
 - `lf/losses.s`: 损失函数入口与占位实现
+- `training/amp.s`: autocast 与 GradScaler 雏形
+- `training/checkpoint_manager.s`: checkpoint 管理雏形
+- `training/logging.s`: 训练日志雏形
+- `training/loop.s`: 训练循环雏形
