@@ -1,0 +1,12 @@
+SSEED-TARGET-V1
+MOV|training_logger_state|0|_
+FUNC_BEGIN|new_training_logger|_|_
+PARAM|enabled|_|_
+RET|training_logger_state|_|_
+FUNC_END|new_training_logger|_|_
+FUNC_BEGIN|training_logger_log|_|_
+PARAM|state|_|_
+PARAM|step|_|_
+PARAM|epoch|_|_
+RET|state|_|_
+FUNC_END|training_logger_log|_|_
