@@ -39,7 +39,7 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `train/amp.s`: autocast and GradScaler state utilities
 - `train/checkpoint_manager.s`: checkpoint manager state tracking
 - `train/logging.s`: training logging state and flush tracking
-- `train/loop.s`: training loop state machine
+- `train/loop.s`: training loop and single-step training pipeline state machine
 
 ## Notes
 
