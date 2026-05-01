@@ -10,7 +10,8 @@
 所有代码需可通过 s 语言工具链编译，并预留 Python FFI 边界。
 
 当前模块：
-- `tensor.s`: Tensor 结构与基础算子
+- `ad/ad.s`: 自动微分状态、梯度开关与 backward 雏形
+- `tensor.s`: Tensor 结构、构造与视图辅助函数、逐元素算子与矩阵乘法
 - `ops.s`: 算子入口
 - `autograd.s`: 自动微分雏形
 - `schedule.s`: 调度雏形

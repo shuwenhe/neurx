@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from contextlib import ContextDecorator
 from scipy import special as _scipy_special
+from neurx.ad.context import enable_grad, is_grad_enabled, no_grad, set_grad_enabled
 
 def _load_accelerator_ops():
     preferred = (os.environ.get("TENSOR_DEVICE") or "").strip().lower()
@@ -93,41 +93,25 @@ def _should_fallback_cuda_to_cpu():
         return True
 
 
-_GRAD_ENABLED = True
-
-
-def is_grad_enabled():
-    return _GRAD_ENABLED
-
-
-class _GradMode(ContextDecorator):
-    def __init__(self, mode: bool):
-        self.mode = bool(mode)
-        self.prev = None
-
-    def __enter__(self):
-        global _GRAD_ENABLED
-        self.prev = _GRAD_ENABLED
-        _GRAD_ENABLED = self.mode
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        global _GRAD_ENABLED
-        _GRAD_ENABLED = self.prev
-        return False
-
-
-def set_grad_enabled(mode: bool):
-    return _GradMode(mode)
-
-
-def no_grad():
-    return _GradMode(False)
-
-
-def enable_grad():
-    return _GradMode(True)
-
+def _runtime_tensor_array(value):
+    if value is None:
+        return None
+    if isinstance(value, Tensor):
+        return value.to_numpy()
+    if hasattr(value, "to_numpy"):
+        try:
+            return value.to_numpy()
+        except Exception:
+            pass
+    if hasattr(value, "data"):
+        try:
+            return np.asarray(value.data)
+        except Exception:
+            pass
+    try:
+        return np.asarray(value)
+    except Exception:
+        return None
 
 class Tensor:
     def __init__(self, data, requires_grad=False, _children=(), _op="", device=None):
@@ -165,7 +149,7 @@ class Tensor:
             data_dtype = arr.dtype
 
         effective_requires_grad = bool(requires_grad)
-        if effective_requires_grad and len(_children) > 0 and not _GRAD_ENABLED:
+        if effective_requires_grad and len(_children) > 0 and not is_grad_enabled():
             effective_requires_grad = False
 
         if effective_requires_grad and not np.issubdtype(np.dtype(data_dtype), np.floating):
@@ -450,13 +434,28 @@ class Tensor:
             host = _to_numpy(self.data).reshape(*shape)
             out = Tensor(_cuda_ops.to_device(host.astype(np.float32, copy=False)), self.requires_grad, (self,), "reshape", device="cuda")
         else:
-            out = Tensor(self.data.reshape(*shape), self.requires_grad, (self,), "reshape")
+            runtime_backend = "python"
+            runtime_value = None
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("reshape", self.data, list(shape))
+            except Exception:
+                runtime_value = None
+            runtime_array = _runtime_tensor_array(runtime_value)
+            if runtime_array is not None:
+                out = Tensor(runtime_array.reshape(*shape), self.requires_grad, (self,), "reshape")
+                runtime_backend = "s"
+            else:
+                out = Tensor(self.data.reshape(*shape), self.requires_grad, (self,), "reshape")
 
         def _backward():
             if self.requires_grad:
                 self.grad += out.grad.reshape(self.data.shape)
 
         out._backward = _backward
+        if self.device != "cuda":
+            out._runtime_backend = runtime_backend
         return out
 
     def view(self, *shape):
@@ -470,19 +469,60 @@ class Tensor:
             start_dim += len(shape)
         if start_dim > end_dim:
             raise ValueError("start_dim must be <= end_dim")
+        runtime_backend = "python"
+        runtime_value = None
+        if self.device != "cuda":
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("flatten", self.data, int(start_dim), int(end_dim))
+            except Exception:
+                runtime_value = None
         new_dim = 1
         for d in shape[start_dim:end_dim + 1]:
             new_dim *= d
         new_shape = shape[:start_dim] + [new_dim] + shape[end_dim + 1:]
-        return self.reshape(*new_shape)
+        if runtime_value is not None:
+            runtime_array = _runtime_tensor_array(runtime_value)
+            if runtime_array is not None:
+                out = Tensor(runtime_array.reshape(*new_shape), self.requires_grad, (self,), "flatten", device=self.device)
+                def _backward():
+                    if self.requires_grad:
+                        self.grad += out.grad.reshape(self.shape)
+
+                out._backward = _backward
+                out._runtime_backend = "s"
+                return out
+        out = self.reshape(*new_shape)
+        if self.device != "cuda":
+            out._runtime_backend = runtime_backend
+        return out
 
     def squeeze(self, dim=None):
         host = _to_numpy(self.data)
         if dim is None:
-            out_data = np.squeeze(host)
+            runtime_value = None
+            if self.device != "cuda":
+                try:
+                    from neurx.compile.runtime import try_invoke_tensor_function
+
+                    runtime_value = try_invoke_tensor_function("squeeze", self.data)
+                except Exception:
+                    runtime_value = None
+            runtime_array = _runtime_tensor_array(runtime_value)
+            out_data = np.squeeze(host) if runtime_array is None else runtime_array
         else:
             dim = dim + host.ndim if dim < 0 else dim
-            out_data = np.squeeze(host, axis=dim)
+            runtime_value = None
+            if self.device != "cuda":
+                try:
+                    from neurx.compile.runtime import try_invoke_tensor_function
+
+                    runtime_value = try_invoke_tensor_function("squeeze", self.data, int(dim))
+                except Exception:
+                    runtime_value = None
+            runtime_array = _runtime_tensor_array(runtime_value)
+            out_data = np.squeeze(host, axis=dim) if runtime_array is None else runtime_array
         out = Tensor(out_data, self.requires_grad, (self,), "squeeze", device=self.device)
 
         def _backward():
@@ -490,18 +530,31 @@ class Tensor:
                 self.grad += out.grad.reshape(self.shape)
 
         out._backward = _backward
+        if self.device != "cuda":
+            out._runtime_backend = "s" if 'runtime_array' in locals() and runtime_array is not None else "python"
         return out
 
     def unsqueeze(self, dim):
         host = _to_numpy(self.data)
         dim = dim + host.ndim + 1 if dim < 0 else dim
-        out = Tensor(np.expand_dims(host, axis=dim), self.requires_grad, (self,), "unsqueeze", device=self.device)
+        runtime_value = None
+        if self.device != "cuda":
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("unsqueeze", self.data, int(dim))
+            except Exception:
+                runtime_value = None
+        runtime_array = _runtime_tensor_array(runtime_value)
+        out = Tensor(np.expand_dims(host, axis=dim) if runtime_array is None else runtime_array, self.requires_grad, (self,), "unsqueeze", device=self.device)
 
         def _backward():
             if self.requires_grad:
                 self.grad += np.squeeze(out.grad, axis=dim)
 
         out._backward = _backward
+        if self.device != "cuda":
+            out._runtime_backend = "s" if runtime_array is not None else "python"
         return out
 
     def transpose(self, dim0, dim1):
@@ -512,7 +565,15 @@ class Tensor:
             out_data = _cuda_ops.to_device(host.transpose(axes).astype(np.float32, copy=False))
             out = Tensor(out_data, self.requires_grad, (self,), "transpose", device="cuda")
         else:
-            out = Tensor(host.transpose(axes), self.requires_grad, (self,), "transpose")
+            runtime_value = None
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("transpose", self.data, int(dim0), int(dim1))
+            except Exception:
+                runtime_value = None
+            runtime_array = _runtime_tensor_array(runtime_value)
+            out = Tensor(host.transpose(axes) if runtime_array is None else runtime_array.reshape(tuple(host.shape[i] for i in axes)), self.requires_grad, (self,), "transpose")
 
         def _backward():
             if self.requires_grad:
@@ -520,6 +581,8 @@ class Tensor:
                 self.grad += out.grad.transpose(inv_axes)
 
         out._backward = _backward
+        if self.device != "cuda":
+            out._runtime_backend = "s" if 'runtime_array' in locals() and runtime_array is not None else "python"
         return out
 
     def permute(self, *dims):
@@ -530,7 +593,15 @@ class Tensor:
             out_data = _cuda_ops.to_device(host.transpose(dims).astype(np.float32, copy=False))
             out = Tensor(out_data, self.requires_grad, (self,), "permute", device="cuda")
         else:
-            out = Tensor(host.transpose(dims), self.requires_grad, (self,), "permute")
+            runtime_value = None
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("permute", self.data, list(dims))
+            except Exception:
+                runtime_value = None
+            runtime_array = _runtime_tensor_array(runtime_value)
+            out = Tensor(host.transpose(dims) if runtime_array is None else runtime_array.reshape(tuple(host.shape[d] for d in dims)), self.requires_grad, (self,), "permute")
 
         def _backward():
             if self.requires_grad:
@@ -538,6 +609,8 @@ class Tensor:
                 self.grad += out.grad.transpose(inv_axes)
 
         out._backward = _backward
+        if self.device != "cuda":
+            out._runtime_backend = "s" if 'runtime_array' in locals() and runtime_array is not None else "python"
         return out
 
     def mean(self, axis=None, keepdims=False, dim=None, keepdim=None):
@@ -3331,27 +3404,9 @@ class Tensor:
         return out
 
     def backward(self):
-        if self.data.size != 1:
-            raise ValueError("backward() requires scalar Tensor")
+        from neurx.ad.engine import backward as ad_backward
 
-        topo = []
-        visited = set()
-
-        def build(v):
-            if v not in visited:
-                visited.add(v)
-                for child in v._prev:
-                    build(child)
-                topo.append(v)
-
-        build(self)
-
-        if self.device == "cuda":
-            self.grad = np.ones(self.shape, dtype=np.float32)
-        else:
-            self.grad = np.ones_like(self.data, dtype=np.float64)
-        for node in reversed(topo):
-            node._backward()
+        ad_backward(self)
 
     def item(self):
         if self.device == "cuda":
@@ -3374,7 +3429,24 @@ class Tensor:
         return Tensor(self.to_numpy().copy(), requires_grad=False, device=self.device)
 
     def clone(self):
-        return Tensor(self.to_numpy().copy(), requires_grad=self.requires_grad, device=self.device)
+        runtime_backend = "python"
+        runtime_value = None
+        if self.device != "cuda":
+            try:
+                from neurx.compile.runtime import try_invoke_tensor_function
+
+                runtime_value = try_invoke_tensor_function("clone", self.data)
+            except Exception:
+                runtime_value = None
+        runtime_array = _runtime_tensor_array(runtime_value)
+        if runtime_array is not None:
+            out = Tensor(runtime_array.reshape(self.shape), requires_grad=self.requires_grad, device=self.device)
+            runtime_backend = "s"
+        else:
+            out = Tensor(self.to_numpy().copy(), requires_grad=self.requires_grad, device=self.device)
+        if self.device != "cuda":
+            out._runtime_backend = runtime_backend
+        return out
 
     def contiguous(self):
         return self
