@@ -1,4 +1,4 @@
-from neurx.neurx import (
+from tensor import (
     Tensor,
     bmm,
     cat,
@@ -44,9 +44,9 @@ from neurx.neurx import (
     rand_like,
     randn_like,
 )
-from neurx.core.einsum import einsum
+from tensor.einsum import einsum
 from neurx.version import __version__
-from neurx import ad, compile, data, distributed, nn, optim, serialization, training, vision
+from neurx import ad, compile, data, distributed, nn, optim, serialization, train, training, vision
 from neurx.losses import cross_entropy, cross_entropy_loss
 from neurx.platform import doctor, format_doctor_report, get_runtime_config, runtime_info
 import numpy as np
@@ -108,6 +108,7 @@ __all__ = [
     "ad",
     "distributed",
     "compile",
+    "train",
     "nn",
     "optim",
     "serialization",

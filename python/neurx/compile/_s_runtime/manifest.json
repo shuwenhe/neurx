@@ -12,10 +12,12 @@
     "dataloader.ir",
     "dataloader_mvp.ir",
     "dataset.ir",
+    "einsum.ir",
     "empty.ir",
     "engine.ir",
     "function.ir",
     "gpt_model_ops.ir",
+    "linalg.ir",
     "logging.ir",
     "loop.ir",
     "losses.ir",
@@ -32,6 +34,9 @@
     "schedulers.ir",
     "simple.ir",
     "tensor.ir",
+    "tensor_creation.ir",
+    "tensor_indexing.ir",
+    "tensor_stats.ir",
     "transformer.ir"
   ]
 }

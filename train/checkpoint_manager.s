@@ -1,4 +1,4 @@
-package neurx.training.checkpoint_manager
+package neurx.train.checkpoint_manager
 
 struct checkpoint_manager_state {
     int keep_last_n
