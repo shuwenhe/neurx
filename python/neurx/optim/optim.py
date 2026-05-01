@@ -45,6 +45,7 @@ class SGD(Optimizer):
     
     def step(self):
         """Perform a single optimization step."""
+        runtime_backend = "python"
         for group in self.param_groups:
             lr = group.get("lr", self.lr)
             momentum = group.get("momentum", self.momentum)
@@ -57,6 +58,18 @@ class SGD(Optimizer):
                     continue
 
                 grad = p.grad
+
+                if momentum == 0 and not nesterov and getattr(p, "device", "cpu") != "cuda":
+                    try:
+                        from neurx.compile.runtime import try_invoke_ops_function
+
+                        updated = try_invoke_ops_function("sgd_step", p.data, grad, float(lr), float(weight_decay))
+                    except Exception:
+                        updated = None
+                    if updated is not None:
+                        p.data = updated
+                        runtime_backend = "s"
+                        continue
 
                 if weight_decay != 0:
                     grad = grad + weight_decay * p.data
@@ -76,6 +89,7 @@ class SGD(Optimizer):
                         grad = v
 
                 p.data -= lr * grad
+            self._runtime_backend = runtime_backend
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
@@ -143,6 +157,7 @@ class Adam(Optimizer):
     def step(self):
         """Perform a single optimization step."""
         self.step_count += 1
+        runtime_backend = "python"
         for group in self.param_groups:
             lr = group.get("lr", self.lr)
             beta1, beta2 = group.get("betas", (self.beta1, self.beta2))
@@ -155,6 +170,30 @@ class Adam(Optimizer):
 
                 grad = p.grad
                 param = p.to_numpy()
+                if getattr(p, "device", "cpu") != "cuda":
+                    pid = id(p)
+                    try:
+                        from neurx.compile.runtime import try_invoke_ops_function
+
+                        updated = try_invoke_ops_function(
+                            "adam_step",
+                            param,
+                            grad,
+                            self.m[pid],
+                            self.v[pid],
+                            float(lr),
+                            float(beta1),
+                            float(beta2),
+                            float(eps),
+                            float(weight_decay),
+                            int(self.step_count),
+                        )
+                    except Exception:
+                        updated = None
+                    if updated is not None:
+                        p.data, self.m[pid], self.v[pid] = updated
+                        runtime_backend = "s"
+                        continue
                 if weight_decay != 0:
                     grad = grad + weight_decay * param
 
@@ -170,6 +209,7 @@ class Adam(Optimizer):
                     p.data = Tensor(updated.astype(np.float32, copy=False), requires_grad=False, device="cuda").data
                 else:
                     p.data = updated
+        self._runtime_backend = runtime_backend
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
@@ -248,6 +288,7 @@ class RMSprop(Optimizer):
     
     def step(self):
         """Perform a single optimization step."""
+        runtime_backend = "python"
         for group in self.param_groups:
             lr = group.get("lr", self.lr)
             alpha = group.get("alpha", self.alpha)
@@ -261,10 +302,31 @@ class RMSprop(Optimizer):
                     continue
 
                 grad = p.grad
+                pid = id(p)
+                if momentum == 0 and not centered and getattr(p, "device", "cpu") != "cuda":
+                    try:
+                        from neurx.compile.runtime import try_invoke_ops_function
+
+                        updated = try_invoke_ops_function(
+                            "rmsprop_step",
+                            p.data,
+                            grad,
+                            self.square_avg[pid],
+                            float(lr),
+                            float(alpha),
+                            float(eps),
+                            float(weight_decay),
+                        )
+                    except Exception:
+                        updated = None
+                    if updated is not None:
+                        p.data, self.square_avg[pid] = updated
+                        runtime_backend = "s"
+                        continue
+
                 if weight_decay != 0:
                     grad = grad + weight_decay * p.data
 
-                pid = id(p)
                 self.square_avg[pid] = alpha * self.square_avg[pid] + (1 - alpha) * (grad ** 2)
 
                 if centered:
@@ -280,6 +342,7 @@ class RMSprop(Optimizer):
                     p.data -= lr * buf
                 else:
                     p.data -= lr * grad / (np.sqrt(avg) + eps)
+            self._runtime_backend = runtime_backend
     
     def state_dict(self):
         """Return the state of the optimizer as a dict."""
@@ -342,6 +405,7 @@ class AdamW(Optimizer):
 
     def step(self):
         self.step_count += 1
+        runtime_backend = "python"
         for group in self.param_groups:
             lr = group.get("lr", self.lr)
             beta1, beta2 = group.get("betas", (self.beta1, self.beta2))
@@ -352,10 +416,34 @@ class AdamW(Optimizer):
                 if p.grad is None:
                     continue
                 g = p.grad
+                pid = id(p)
+                if getattr(p, "device", "cpu") != "cuda":
+                    try:
+                        from neurx.compile.runtime import try_invoke_ops_function
+
+                        updated = try_invoke_ops_function(
+                            "adamw_step",
+                            p.data,
+                            g,
+                            self.m[pid],
+                            self.v[pid],
+                            float(lr),
+                            float(beta1),
+                            float(beta2),
+                            float(eps),
+                            float(weight_decay),
+                            int(self.step_count),
+                        )
+                    except Exception:
+                        updated = None
+                    if updated is not None:
+                        p.data, self.m[pid], self.v[pid] = updated
+                        runtime_backend = "s"
+                        continue
+
                 if weight_decay != 0:
                     g = g + weight_decay * p.data
 
-                pid = id(p)
                 self.m[pid] = beta1 * self.m[pid] + (1 - beta1) * g
                 self.v[pid] = beta2 * self.v[pid] + (1 - beta2) * (g * g)
 
@@ -363,6 +451,7 @@ class AdamW(Optimizer):
                 v_hat = self.v[pid] / (1 - beta2 ** self.step_count)
 
                 p.data -= lr * m_hat / (np.sqrt(v_hat) + eps)
+            self._runtime_backend = runtime_backend
 
     def state_dict(self):
         state = super().state_dict()

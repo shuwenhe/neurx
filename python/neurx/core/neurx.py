@@ -267,10 +267,36 @@ class Tensor:
         return self + other
 
     def __sub__(self, other):
-        return self + (-other)
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        runtime_backend = "python"
+        out_data = None
+        if self.device != "cuda" and other.device != "cuda":
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                out_data = try_invoke_ops_function("sub", self.data, other.data)
+            except Exception:
+                out_data = None
+        out_device = "cuda" if (self.device == "cuda" or other.device == "cuda") else "cpu"
+        if out_data is not None:
+            out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "-", device=out_device)
+            runtime_backend = "s"
+        else:
+            out = Tensor(_to_numpy(self.data) - _to_numpy(other.data), self.requires_grad or other.requires_grad, (self, other), "-", device=out_device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += _unbroadcast(out.grad, self.shape)
+            if other.requires_grad:
+                other.grad -= _unbroadcast(out.grad, other.shape)
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
 
     def __rsub__(self, other):
-        return other + (-self)
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        return other - self
 
     def __neg__(self):
         if self.device == "cuda":
@@ -322,8 +348,20 @@ class Tensor:
 
     def __truediv__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
+        runtime_backend = "python"
         out_device = "cuda" if (self.device == "cuda" or other.device == "cuda") else "cpu"
-        out_data = _to_numpy(self.data) / _to_numpy(other.data)
+        out_data = None
+        if out_device == "cpu":
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                out_data = try_invoke_ops_function("div", self.data, other.data)
+            except Exception:
+                out_data = None
+        if out_data is not None:
+            runtime_backend = "s"
+        else:
+            out_data = _to_numpy(self.data) / _to_numpy(other.data)
         out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "/", device=out_device)
 
         def _backward():
@@ -333,6 +371,7 @@ class Tensor:
                 other.grad += _unbroadcast((-out.grad * _to_numpy(self.data)) / (_to_numpy(other.data) ** 2), other.shape)
 
         out._backward = _backward
+        out._runtime_backend = runtime_backend
         return out
 
     def __rtruediv__(self, other):
@@ -341,10 +380,22 @@ class Tensor:
 
     def __pow__(self, other):
         other = other if isinstance(other, Tensor) else Tensor(other)
+        runtime_backend = "python"
         out_device = "cuda" if (self.device == "cuda" or other.device == "cuda") else "cpu"
         base = _to_numpy(self.data)
         exp = _to_numpy(other.data)
-        out_data = base ** exp
+        out_data = None
+        if out_device == "cpu":
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                out_data = try_invoke_ops_function("pow", self.data, other.data)
+            except Exception:
+                out_data = None
+        if out_data is not None:
+            runtime_backend = "s"
+        else:
+            out_data = base ** exp
         out = Tensor(out_data, self.requires_grad or other.requires_grad, (self, other), "pow", device=out_device)
 
         def _backward():
@@ -355,6 +406,7 @@ class Tensor:
                 other.grad += _unbroadcast(out.grad * out_data * np.log(safe_base), other.shape)
 
         out._backward = _backward
+        out._runtime_backend = runtime_backend
         return out
 
     def __matmul__(self, other):
@@ -505,7 +557,21 @@ class Tensor:
 
         if out is None:
             host = _to_numpy(self.data)
-            out = Tensor(np.array(host.mean(axis=axis, keepdims=keepdims)), self.requires_grad, (self,), "mean", device=self.device)
+            out_data = None
+            runtime_backend = "python"
+            if isinstance(axis, int):
+                try:
+                    from neurx.compile.runtime import try_invoke_ops_function
+
+                    out_data = try_invoke_ops_function("mean", self.data, axis, bool(keepdims))
+                except Exception:
+                    out_data = None
+            if out_data is None:
+                out_data = np.array(host.mean(axis=axis, keepdims=keepdims))
+            else:
+                runtime_backend = "s"
+            out = Tensor(out_data, self.requires_grad, (self,), "mean", device=self.device)
+            out._runtime_backend = runtime_backend
 
         def _backward():
             if self.requires_grad:
@@ -544,8 +610,21 @@ class Tensor:
 
         if out is None:
             host = _to_numpy(self.data)
-            out_data = host.sum(axis=axis, keepdims=keepdims)
+            out_data = None
+            runtime_backend = "python"
+            if isinstance(axis, int):
+                try:
+                    from neurx.compile.runtime import try_invoke_ops_function
+
+                    out_data = try_invoke_ops_function("sum", self.data, axis, bool(keepdims))
+                except Exception:
+                    out_data = None
+            if out_data is None:
+                out_data = host.sum(axis=axis, keepdims=keepdims)
+            else:
+                runtime_backend = "s"
             out = Tensor(out_data, self.requires_grad, (self,), "sum", device=self.device)
+            out._runtime_backend = runtime_backend
 
         def _backward():
             if self.requires_grad:
@@ -805,7 +884,18 @@ class Tensor:
 
     def sqrt(self):
         x = _to_numpy(self.data)
-        out_data = np.sqrt(x)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("sqrt", x)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            out_data = np.sqrt(x)
+        else:
+            runtime_backend = "s"
         out = Tensor(out_data, self.requires_grad, (self,), "sqrt", device=self.device)
 
         def _backward():
@@ -813,6 +903,7 @@ class Tensor:
                 self.grad += out.grad * 0.5 / np.maximum(out_data, 1e-12)
 
         out._backward = _backward
+        out._runtime_backend = runtime_backend
         return out
 
     def exp(self):
@@ -828,7 +919,18 @@ class Tensor:
             >>> print(y.data)  # [1., 2.718..., 7.389...]
         """
         x = _to_numpy(self.data)
-        out_data = np.exp(x)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("exp", x)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            out_data = np.exp(x)
+        else:
+            runtime_backend = "s"
         out = Tensor(out_data, self.requires_grad, (self,), "exp", device=self.device)
 
         def _backward():
@@ -837,6 +939,7 @@ class Tensor:
                 self.grad += out.grad * out_data
 
         out._backward = _backward
+        out._runtime_backend = runtime_backend
         return out
 
     def log(self):
@@ -855,7 +958,18 @@ class Tensor:
             要求 x > 0，对于 x <= 0 的值会产生 NaN 或 -inf
         """
         x = _to_numpy(self.data)
-        out_data = np.log(x)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("log", x)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            out_data = np.log(x)
+        else:
+            runtime_backend = "s"
         out = Tensor(out_data, self.requires_grad, (self,), "log", device=self.device)
 
         def _backward():
@@ -865,6 +979,7 @@ class Tensor:
                 self.grad += out.grad / np.maximum(x, 1e-12)
 
         out._backward = _backward
+        out._runtime_backend = runtime_backend
         return out
 
     def log10(self):
@@ -1465,6 +1580,94 @@ class Tensor:
                 )
                 sech2_sp = 1.0 - tanh_sp ** 2
                 grad = tanh_sp + x * sech2_sp * sigmoid_x
+                self.grad += out.grad * grad
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
+
+    def softplus(self, beta=1.0):
+        x = _to_numpy(self.data)
+        beta = float(beta)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("softplus", x, beta)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            beta_x = beta * x
+            out_data = np.where(beta_x > 20, x, np.log1p(np.exp(beta_x)) / beta)
+        else:
+            runtime_backend = "s"
+        out = Tensor(out_data, self.requires_grad, (self,), "softplus", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                beta_x = beta * x
+                sigmoid_x = np.where(
+                    beta_x >= 0,
+                    1.0 / (1.0 + np.exp(-beta_x)),
+                    np.exp(beta_x) / (1.0 + np.exp(beta_x)),
+                )
+                self.grad += out.grad * sigmoid_x
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
+
+    def softsign(self):
+        x = _to_numpy(self.data)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("softsign", x)
+        except Exception:
+            out_data = None
+        if out_data is None:
+            out_data = x / (1.0 + np.abs(x))
+        else:
+            runtime_backend = "s"
+        out = Tensor(out_data, self.requires_grad, (self,), "softsign", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                self.grad += out.grad / ((1.0 + np.abs(x)) ** 2)
+
+        out._backward = _backward
+        out._runtime_backend = runtime_backend
+        return out
+
+    def swish(self, beta=1.0):
+        x = _to_numpy(self.data)
+        beta = float(beta)
+        runtime_backend = "python"
+        out_data = None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("swish", x, beta)
+        except Exception:
+            out_data = None
+        beta_x = beta * x
+        sigmoid_x = np.where(
+            beta_x >= 0,
+            1.0 / (1.0 + np.exp(-beta_x)),
+            np.exp(beta_x) / (1.0 + np.exp(beta_x)),
+        )
+        if out_data is None:
+            out_data = x * sigmoid_x
+        else:
+            runtime_backend = "s"
+        out = Tensor(out_data, self.requires_grad, (self,), "swish", device=self.device)
+
+        def _backward():
+            if self.requires_grad:
+                grad = sigmoid_x + beta * x * sigmoid_x * (1.0 - sigmoid_x)
                 self.grad += out.grad * grad
 
         out._backward = _backward

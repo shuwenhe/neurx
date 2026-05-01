@@ -6,12 +6,128 @@ func add(tensor a, tensor b) tensor {
     add(a, b)
 }
 
+func sub(tensor a, tensor b) tensor {
+    sub(a, b)
+}
+
 func mul(tensor a, tensor b) tensor {
     mul(a, b)
 }
 
+func div(tensor a, tensor b) tensor {
+    div(a, b)
+}
+
+func pow(tensor a, tensor b) tensor {
+    pow(a, b)
+}
+
 func matmul(tensor a, tensor b) tensor {
     matmul(a, b)
+}
+
+func linear(tensor input, tensor weight, tensor bias) tensor {
+    linear(input, weight, bias)
+}
+
+func layer_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
+    layer_norm(input, weight, bias, normalized_dims, eps)
+}
+
+func rms_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
+    rms_norm(input, weight, bias, normalized_dims, eps)
+}
+
+func scaled_dot_product_attention(tensor query, tensor key, tensor value, tensor mask, bool has_mask) tensor {
+    scaled_dot_product_attention(query, key, value, mask, has_mask)
+}
+
+func causal_attention(tensor query, tensor key, tensor value) tensor {
+    causal_attention(query, key, value)
+}
+
+func kv_cache_attention(tensor query, tensor key, tensor value, tensor past_key, tensor past_value, bool has_past) tensor {
+    kv_cache_attention(query, key, value, past_key, past_value, has_past)
+}
+
+func qkv_projection(tensor input, tensor weight, tensor bias, int n_heads) tensor {
+    qkv_projection(input, weight, bias, n_heads)
+}
+
+func rope_apply(tensor input, tensor cos, tensor sin) tensor {
+    rope_apply(input, cos, sin)
+}
+
+func mlp_block(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
+    mlp_block(input, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
+}
+
+func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias, tensor qkv_weight, tensor qkv_bias, tensor out_weight, tensor out_bias, tensor ln2_weight, tensor ln2_bias, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias, float eps, int n_heads) tensor {
+    transformer_block_forward(input, ln1_weight, ln1_bias, qkv_weight, qkv_bias, out_weight, out_bias, ln2_weight, ln2_bias, fc1_weight, fc1_bias, fc2_weight, fc2_bias, eps, n_heads)
+}
+
+func lm_head_logits(tensor hidden, tensor weight, tensor bias) tensor {
+    lm_head_logits(hidden, weight, bias)
+}
+
+func sampling_top_k_top_p(tensor logits, tensor token_ids, float temperature, int top_k, float top_p, float repetition_penalty) tensor {
+    sampling_top_k_top_p(logits, token_ids, temperature, top_k, top_p, repetition_penalty)
+}
+
+func generation_step(tensor logits, tensor token_ids, float temperature, int top_k, float top_p, float repetition_penalty) int {
+    generation_step(logits, token_ids, temperature, top_k, top_p, repetition_penalty)
+}
+
+func embedding_lookup(tensor weight, tensor input_ids, int padding_idx) tensor {
+    embedding_lookup(weight, input_ids, padding_idx)
+}
+
+func exp(tensor a) tensor {
+    exp(a)
+}
+
+func log(tensor a) tensor {
+    log(a)
+}
+
+func sqrt(tensor a) tensor {
+    sqrt(a)
+}
+
+func sum(tensor a, int dim, bool keepdims) tensor {
+    sum(a, dim, keepdims)
+}
+
+func mean(tensor a, int dim, bool keepdims) tensor {
+    mean(a, dim, keepdims)
+}
+
+func mse_loss(tensor input, tensor target, string reduction) tensor {
+    mse_loss(input, target, reduction)
+}
+
+func nll_loss(tensor input, tensor target, int ignore_index, string reduction, float label_smoothing, int dim) tensor {
+    nll_loss(input, target, ignore_index, reduction, label_smoothing, dim)
+}
+
+func cross_entropy(tensor input, tensor target, int ignore_index, string reduction, float label_smoothing, int dim) tensor {
+    cross_entropy(input, target, ignore_index, reduction, label_smoothing, dim)
+}
+
+func sgd_step(tensor param, tensor grad, float lr, float weight_decay) tensor {
+    sgd_step(param, grad, lr, weight_decay)
+}
+
+func adam_step(tensor param, tensor grad, tensor m, tensor v, float lr, float beta1, float beta2, float eps, float weight_decay, int step) tensor {
+    adam_step(param, grad, m, v, lr, beta1, beta2, eps, weight_decay, step)
+}
+
+func adamw_step(tensor param, tensor grad, tensor m, tensor v, float lr, float beta1, float beta2, float eps, float weight_decay, int step) tensor {
+    adamw_step(param, grad, m, v, lr, beta1, beta2, eps, weight_decay, step)
+}
+
+func rmsprop_step(tensor param, tensor grad, tensor square_avg, float lr, float alpha, float eps, float weight_decay) tensor {
+    rmsprop_step(param, grad, square_avg, lr, alpha, eps, weight_decay)
 }
 
 func relu(tensor a) tensor {
@@ -56,6 +172,18 @@ func silu(tensor a) tensor {
 
 func mish(tensor a) tensor {
     mish(a)
+}
+
+func softplus(tensor a, float beta) tensor {
+    softplus(a, beta)
+}
+
+func softsign(tensor a) tensor {
+    softsign(a)
+}
+
+func swish(tensor a, float beta) tensor {
+    swish(a, beta)
 }
 
 func hardtanh(tensor a, float min_val, float max_val) tensor {

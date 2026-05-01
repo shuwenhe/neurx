@@ -268,6 +268,21 @@ def mish(x: Tensor):
     return x.mish()
 
 
+def softplus(x: Tensor, beta: float = 1.0):
+    x = _as_tensor(x)
+    return x.softplus(beta=beta)
+
+
+def softsign(x: Tensor):
+    x = _as_tensor(x)
+    return x.softsign()
+
+
+def swish(x: Tensor, beta: float = 1.0):
+    x = _as_tensor(x)
+    return x.swish(beta=beta)
+
+
 def silu(x: Tensor):
     x = _as_tensor(x)
     return x.silu()
@@ -297,9 +312,38 @@ def linear(x: Tensor, weight: Tensor, bias: Tensor | None = None):
     weight = _as_tensor(weight)
     if bias is not None:
         bias = _as_tensor(bias)
-    out = x @ weight
-    if bias is not None:
-        out = out + bias
+    runtime_backend = "python"
+    out_data = None
+    if x.device != "cuda" and weight.device != "cuda" and (bias is None or bias.device != "cuda"):
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            bias_data = bias.data if bias is not None else np.zeros((weight.shape[-1],), dtype=x.to_numpy().dtype)
+            out_data = try_invoke_ops_function("linear", x.data, weight.data, bias_data)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        out = x @ weight
+        if bias is not None:
+            out = out + bias
+        return out
+    runtime_backend = "s"
+    requires_grad = x.requires_grad or weight.requires_grad or (bias is not None and bias.requires_grad)
+    children = [c for c in (x, weight, bias) if c is not None and getattr(c, "requires_grad", False)]
+    out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="linear", device=x.device)
+
+    def _backward():
+        if x.requires_grad:
+            x.grad += np.matmul(out.grad, np.swapaxes(weight.to_numpy(), -1, -2)).astype(x.grad.dtype, copy=False)
+        if weight.requires_grad:
+            reduce_x_axes = tuple(range(x.to_numpy().ndim - 1))
+            reduce_grad_axes = tuple(range(out.grad.ndim - 1))
+            weight.grad += np.tensordot(x.to_numpy(), out.grad, axes=(reduce_x_axes, reduce_grad_axes)).astype(weight.grad.dtype, copy=False)
+        if bias is not None and bias.requires_grad:
+            bias.grad += out.grad.sum(axis=tuple(range(out.grad.ndim - 1))).astype(bias.grad.dtype, copy=False)
+
+    out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -2605,7 +2649,19 @@ def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
 
     w = weight.to_numpy() if weight is not None else 1.0
     b = bias.to_numpy() if bias is not None else 0.0
-    out_data = x_normalized * w + b
+    runtime_backend = "python"
+    out_data = None
+    if x.device != "cuda" and (weight is None or weight.device != "cuda") and (bias is None or bias.device != "cuda"):
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("layer_norm", x.data, np.asarray(w), np.asarray(b), int(norm_dims), float(eps))
+        except Exception:
+            out_data = None
+    if out_data is None:
+        out_data = x_normalized * w + b
+    else:
+        runtime_backend = "s"
 
     requires_grad = x.requires_grad or (weight is not None and weight.requires_grad) or (bias is not None and bias.requires_grad)
     children = [c for c in [x, weight, bias] if c is not None and getattr(c, "requires_grad", False)]
@@ -2629,6 +2685,7 @@ def layer_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-5):
             x.grad += (inv_std / n) * (n * dxhat - sum_dxhat - x_normalized * sum_dxhat_xhat)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -2649,7 +2706,19 @@ def rms_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-6):
 
     w = weight.to_numpy() if weight is not None else 1.0
     b = bias.to_numpy() if bias is not None else 0.0
-    out_data = x_normalized * w + b
+    runtime_backend = "python"
+    out_data = None
+    if x.device != "cuda" and (weight is None or weight.device != "cuda") and (bias is None or bias.device != "cuda"):
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("rms_norm", x.data, np.asarray(w), np.asarray(b), int(norm_dims), float(eps))
+        except Exception:
+            out_data = None
+    if out_data is None:
+        out_data = x_normalized * w + b
+    else:
+        runtime_backend = "s"
 
     requires_grad = x.requires_grad or (weight is not None and weight.requires_grad) or (bias is not None and bias.requires_grad)
     children = [c for c in [x, weight, bias] if c is not None and getattr(c, "requires_grad", False)]
@@ -2671,6 +2740,7 @@ def rms_norm(x: Tensor, normalized_shape, weight=None, bias=None, eps=1e-6):
             x.grad += dxhat * inv_rms - x_data * (inv_rms ** 3) * mean_dxhat_x
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -2697,12 +2767,44 @@ def dropout(x: Tensor, p=0.5, training=True, inplace=False):
 
 def mse_loss(input: Tensor, target, reduction="mean"):
     target = target if isinstance(target, Tensor) else Tensor(target)
-    diff = input - target
-    out = diff * diff
-    if reduction == "mean":
-        return out.mean()
-    if reduction == "sum":
-        return out.sum()
+    if reduction not in ("none", "mean", "sum"):
+        raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
+    runtime_backend = "python"
+    out_data = None
+    if input.device != "cuda" and target.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("mse_loss", input.data, target.data, reduction)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        diff = input - target
+        out = diff * diff
+        if reduction == "mean":
+            return out.mean()
+        if reduction == "sum":
+            return out.sum()
+        return out
+    runtime_backend = "s"
+    diff_data = input.to_numpy() - target.to_numpy()
+    out = Tensor(out_data, requires_grad=input.requires_grad or target.requires_grad, _children=(input, target), _op="mse_loss", device=input.device)
+
+    def _backward():
+        grad = np.asarray(out.grad)
+        if reduction == "mean":
+            grad_input = (2.0 / float(diff_data.size)) * diff_data * grad
+        elif reduction == "sum":
+            grad_input = 2.0 * diff_data * grad
+        else:
+            grad_input = 2.0 * diff_data * grad
+        if input.requires_grad:
+            input.grad += grad_input.astype(input.grad.dtype, copy=False)
+        if target.requires_grad:
+            target.grad -= grad_input.astype(target.grad.dtype, copy=False)
+
+    out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -2713,7 +2815,22 @@ def embedding(input, weight: Tensor, padding_idx=None):
     if padding_idx is not None:
         padding_idx = int(padding_idx)
 
-    out_data = weight.data[input_ids]
+    runtime_backend = "python"
+    out_data = None
+    if weight.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("embedding_lookup", weight.data, input_ids, -1 if padding_idx is None else padding_idx)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        out_data = weight.data[input_ids]
+        if padding_idx is not None:
+            out_data = np.array(out_data, copy=True)
+            out_data[input_ids == padding_idx] = 0
+    else:
+        runtime_backend = "s"
     out = Tensor(out_data, requires_grad=weight.requires_grad, _children=(weight,), _op="embedding", device=weight.device)
 
     def _backward():
@@ -2728,6 +2845,7 @@ def embedding(input, weight: Tensor, padding_idx=None):
             weight.grad += grad
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -2874,16 +2992,28 @@ def nll_loss(
     else:
         loss_valid = np.zeros((0,), dtype=x_flat.dtype)
 
-    if reduction == "none":
-        out_data = loss_flat.reshape(target_shape)
-    elif reduction == "sum":
-        out_data = loss_valid.sum()
-    else:
-        if loss_valid.size == 0:
-            out_data = np.array(0.0, dtype=x_flat.dtype)
+    runtime_backend = "python"
+    out_data = None
+    if weight_arr is None and input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("nll_loss", input.data, target_arr, int(ignore_index), reduction, float(label_smoothing), int(class_dim))
+        except Exception:
+            out_data = None
+    if out_data is None:
+        if reduction == "none":
+            out_data = loss_flat.reshape(target_shape)
+        elif reduction == "sum":
+            out_data = loss_valid.sum()
         else:
-            denom = sample_weights.sum() if weight_arr is not None else float(loss_valid.size)
-            out_data = loss_valid.sum() / float(max(denom, 1e-12))
+            if loss_valid.size == 0:
+                out_data = np.array(0.0, dtype=x_flat.dtype)
+            else:
+                denom = sample_weights.sum() if weight_arr is not None else float(loss_valid.size)
+                out_data = loss_valid.sum() / float(max(denom, 1e-12))
+    else:
+        runtime_backend = "s"
 
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -2935,6 +3065,7 @@ def nll_loss(
         input.grad += grad_input.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
