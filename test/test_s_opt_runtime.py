@@ -18,7 +18,6 @@ def test_s_opt_runtime_compiled_functions_present():
     for ir_name in (
         "optimizer.ir",
         "optim.ir",
-        "losses.ir",
         "scheduler.ir",
         "schedulers.ir",
         "core_optim.ir",
@@ -30,7 +29,6 @@ def test_s_opt_runtime_compiled_functions_present():
     for ir_name in (
         "optimizer.ir",
         "optim.ir",
-        "losses.ir",
         "scheduler.ir",
         "schedulers.ir",
         "core_optim.ir",
@@ -59,23 +57,6 @@ def test_s_opt_runtime_compiled_functions_present():
         "clip_grad_norm",
     ):
         assert runtime.supports_runtime_function("optim", function_name)
-
-    for function_name in (
-        "cross_entropy_loss",
-        "bce_loss",
-        "bce_with_logits_loss",
-        "l1_loss",
-        "mse_loss",
-        "smooth_l1_loss",
-        "kl_div_loss",
-        "nll_loss",
-        "huber_loss",
-        "poisson_nll_loss",
-        "ctc_loss",
-        "margin_ranking_loss",
-        "triplet_margin_loss",
-    ):
-        assert runtime.supports_runtime_function("losses", function_name)
 
     for function_name in (
         "new_lr_scheduler",
