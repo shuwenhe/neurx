@@ -301,3 +301,73 @@ func matmul(tensor a, tensor b) tensor {
 
     new(out, [rows, cols], a.requires_grad || b.requires_grad)
 }
+
+func sum(tensor a) tensor {
+    float acc = 0.0
+    int i = 0
+    while i < len(a.data) {
+        acc = acc + a.data[i]
+        i = i + 1
+    }
+    []float out = []float{cap: 1}
+    out[0] = acc
+    new(out, [1], a.requires_grad)
+}
+
+func mean(tensor a) tensor {
+    tensor total = sum(a)
+    float denom = len(a.data)
+    []float out = []float{cap: 1}
+    out[0] = total.data[0] / denom
+    new(out, [1], a.requires_grad)
+}
+
+func exp(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        out[i] = a.data[i]
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func log(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        out[i] = a.data[i]
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func relu(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        float v = a.data[i]
+        if v < 0.0 {
+            v = 0.0
+        }
+        out[i] = v
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func sigmoid(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        float v = a.data[i]
+        out[i] = v
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func tanh(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        out[i] = a.data[i]
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
