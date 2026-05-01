@@ -19,7 +19,7 @@ func _make([]int shape, float value, bool requires_grad) tensor {
     int n = _numel(shape)
     []float data = []float{cap: n}
     for i in 0..n {
-        data.push(value)
+        data[i] = value
     }
     tensor {
         data: data,
@@ -55,27 +55,81 @@ func full_like(tensor like, float value) tensor {
 
 func eye(int n, int m) tensor {
     []int shape = []int{cap: 2}
-    shape.push(n)
-    shape.push(m)
-    _make(shape, 0.0, false)
+    shape[0] = n
+    shape[1] = m
+    tensor out = _make(shape, 0.0, false)
+    int diag = n
+    if m < diag {
+        diag = m
+    }
+    int i = 0
+    while i < diag {
+        out.data[i * m + i] = 1.0
+        i = i + 1
+    }
+    out
 }
 
 func arange(int start, int end, int step) tensor {
+    if step == 0 {
+        return _make([0], 0.0, false)
+    }
+    int count = 0
+    int value = start
+    if step > 0 {
+        while value < end {
+            count = count + 1
+            value = value + step
+        }
+    } else {
+        while value > end {
+            count = count + 1
+            value = value + step
+        }
+    }
     []int shape = []int{cap: 1}
-    shape.push(1)
-    _make(shape, 0.0, false)
+    shape[0] = count
+    tensor out = _make(shape, 0.0, false)
+    value = start
+    int i = 0
+    if step > 0 {
+        while value < end {
+            out.data[i] = value
+            value = value + step
+            i = i + 1
+        }
+    } else {
+        while value > end {
+            out.data[i] = value
+            value = value + step
+            i = i + 1
+        }
+    }
+    out
 }
 
 func linspace(float start, float end, int steps) tensor {
     []int shape = []int{cap: 1}
-    shape.push(steps)
-    _make(shape, 0.0, false)
+    shape[0] = steps
+    tensor out = _make(shape, 0.0, false)
+    if steps <= 0 {
+        return out
+    }
+    if steps == 1 {
+        out.data[0] = start
+        return out
+    }
+    float step_size = (end - start) / (steps - 1)
+    int i = 0
+    while i < steps {
+        out.data[i] = start + step_size * i
+        i = i + 1
+    }
+    out
 }
 
 func logspace(float start, float end, int steps, float base) tensor {
-    []int shape = []int{cap: 1}
-    shape.push(steps)
-    _make(shape, 0.0, false)
+    linspace(start, end, steps)
 }
 
 func rand([]int shape) tensor {
@@ -92,8 +146,14 @@ func randint(int low, int high, []int shape) tensor {
 
 func randperm(int n) tensor {
     []int shape = []int{cap: 1}
-    shape.push(n)
-    _make(shape, 0.0, false)
+    shape[0] = n
+    tensor out = _make(shape, 0.0, false)
+    int i = 0
+    while i < n {
+        out.data[i] = i
+        i = i + 1
+    }
+    out
 }
 
 func normal(float mean, float std, []int shape) tensor {
