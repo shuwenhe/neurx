@@ -11,7 +11,12 @@
 
 当前模块：
 - `ad/ad.s`: 自动微分状态、梯度开关与 backward 雏形
-- `tensor.s`: Tensor 结构、构造与视图辅助函数、逐元素算子与矩阵乘法
+- `tensor/tensor.s`: Tensor 结构、构造与视图辅助函数、逐元素算子与矩阵乘法
+- `tensor/tensor_creation.s`: 张量构造与填充值辅助
+- `tensor/tensor_indexing.s`: 索引、拼接与切分辅助
+- `tensor/tensor_stats.s`: 排序与统计辅助
+- `tensor/linalg.s`: 线性代数辅助
+- `tensor/einsum.s`: Einstein 求和入口
 - `ops.s`: 算子入口
 - `autograd.s`: 自动微分雏形
 - `schedule.s`: 调度雏形
@@ -23,7 +28,7 @@
 - `dl/dataset.s`: 数据集抽象、切分与拼接
 - `dl/dataloader.s`: 数据加载与 batch 组装
 - `lf/losses.s`: 损失函数入口与占位实现
-- `training/amp.s`: autocast 与 GradScaler 雏形
-- `training/checkpoint_manager.s`: checkpoint 管理雏形
-- `training/logging.s`: 训练日志雏形
-- `training/loop.s`: 训练循环雏形
+- `train/amp.s`: autocast 与 GradScaler 雏形
+- `train/checkpoint_manager.s`: checkpoint 管理雏形
+- `train/logging.s`: 训练日志雏形
+- `train/loop.s`: 训练循环雏形

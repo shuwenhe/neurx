@@ -15,6 +15,11 @@ def test_s_tensor_runtime_compiled_functions_present():
     runtime = _load_runtime_module()
     status = runtime.runtime_status()
     assert any(Path(path).name == "tensor.ir" for path in status["ir_files"])
+    assert any(Path(path).name == "tensor_creation.ir" for path in status["ir_files"])
+    assert any(Path(path).name == "tensor_indexing.ir" for path in status["ir_files"])
+    assert any(Path(path).name == "tensor_stats.ir" for path in status["ir_files"])
+    assert any(Path(path).name == "linalg.ir" for path in status["ir_files"])
+    assert any(Path(path).name == "einsum.ir" for path in status["ir_files"])
 
     for function_name in (
         "new",
@@ -40,3 +45,13 @@ def test_s_tensor_runtime_compiled_functions_present():
         "matmul",
     ):
         assert runtime.supports_runtime_function("tensor", function_name)
+
+    for module_name, function_names in (
+        ("tensor_creation", ("zeros", "ones", "full", "zeros_like", "ones_like", "full_like", "eye", "arange", "rand", "randn", "empty")),
+        ("tensor_indexing", ("index_select", "masked_select", "masked_fill", "masked_scatter", "nonzero", "repeat_interleave", "cat", "split", "chunk", "stack")),
+        ("tensor_stats", ("sort", "argsort", "topk", "unique", "median", "mode", "quantile", "cumsum", "cumprod", "prod")),
+        ("linalg", ("matrix_rank", "inv", "det", "eig", "eigh", "svd", "qr", "cholesky", "solve", "lstsq", "cross", "outer", "inner", "matrix_power")),
+        ("einsum", ("einsum",)),
+    ):
+        for function_name in function_names:
+            assert runtime.supports_runtime_function(module_name, function_name)

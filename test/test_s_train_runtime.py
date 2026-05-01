@@ -11,7 +11,7 @@ def _load_runtime_module():
     return module
 
 
-def test_s_training_runtime_compiled_functions_present():
+def test_s_train_runtime_compiled_functions_present():
     runtime = _load_runtime_module()
     status = runtime.runtime_status()
     assert status["available"] is True

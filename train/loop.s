@@ -1,4 +1,4 @@
-package neurx.training.loop
+package neurx.train.loop
 
 struct training_loop_state {
     int epoch
