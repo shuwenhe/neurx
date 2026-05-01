@@ -39,9 +39,14 @@ def test_s_train_runtime_compiled_functions_present():
 
     for function_name in (
         "new_checkpoint_manager",
+        "checkpoint_manager_should_save",
         "checkpoint_manager_save",
+        "checkpoint_manager_mark_best",
         "checkpoint_manager_load_latest",
         "checkpoint_manager_load_best",
+        "checkpoint_manager_should_save_best",
+        "checkpoint_manager_state_dict",
+        "checkpoint_manager_load_state_dict",
     ):
         assert runtime.supports_runtime_function("checkpoint_manager", function_name)
 
@@ -60,6 +65,7 @@ def test_s_train_runtime_compiled_functions_present():
         "new_training_loop_state",
         "new_training_run_state",
         "new_training_pipeline_state",
+        "new_training_metrics_state",
         "run_training_loop",
         "train_epoch",
         "train_epochs",
@@ -69,5 +75,11 @@ def test_s_train_runtime_compiled_functions_present():
         "train_steps",
         "stop_training_pipeline",
         "resume_training_pipeline",
+        "training_metrics_state_dict",
+        "training_metrics_load_state_dict",
+        "training_pipeline_state_dict",
+        "training_pipeline_load_state_dict",
+        "training_pipeline_metrics",
+        "training_pipeline_set_metrics",
     ):
         assert runtime.supports_runtime_function("loop", function_name)

@@ -45,8 +45,18 @@ def test_s_dl_runtime_compiled_functions_present():
     for function_name in (
         "default_collate",
         "new_config",
+        "set_drop_last",
+        "set_shuffle",
         "new_state",
+        "reset_state",
+        "with_config",
         "has_next",
+        "batch_count",
         "next_batch",
+        "peek_batch",
+        "drop_last_enabled",
+        "shuffle_enabled",
+        "dataloader_state_dict",
+        "dataloader_load_state_dict",
     ):
         assert runtime.supports_runtime_function("dataloader", function_name)
