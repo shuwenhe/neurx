@@ -41,7 +41,8 @@ class ScaledDotProductAttention(Module):
         query: Tensor,
         key: Tensor,
         value: Tensor,
-        mask: Optional[Tensor] = None
+        mask: Optional[Tensor] = None,
+        is_causal: bool = False,
     ) -> Tuple[Tensor, Tensor]:
         """
         Apply scaled dot-product attention.
@@ -59,6 +60,32 @@ class ScaledDotProductAttention(Module):
                 - weights: Shape (batch_size, seq_len_q, seq_len_k)
         """
         d_k = query.shape[-1]
+
+        if self.dropout_p == 0:
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                if is_causal and mask is None:
+                    runtime_result = try_invoke_ops_function("causal_attention", query.data, key.data, value.data)
+                else:
+                    mask_data = mask.data if mask is not None else np.array(0.0, dtype=query.data.dtype)
+                    runtime_result = try_invoke_ops_function(
+                        "scaled_dot_product_attention",
+                        query.data,
+                        key.data,
+                        value.data,
+                        mask_data,
+                        mask is not None,
+                    )
+            except Exception:
+                runtime_result = None
+            if runtime_result is not None:
+                output_data, attention_weights_data = runtime_result
+                output = Tensor(output_data, requires_grad=True)
+                attention_weights = Tensor(attention_weights_data, requires_grad=True)
+                output._runtime_backend = "s"
+                attention_weights._runtime_backend = "s"
+                return output, attention_weights
         
         # Compute attention scores: QK^T / sqrt(d_k)
         scores = np.matmul(
@@ -68,6 +95,12 @@ class ScaledDotProductAttention(Module):
         scores = Tensor(scores, requires_grad=True)
         
         # Apply mask if provided
+        if is_causal and mask is None:
+            seq_len_q, seq_len_k = scores.shape[-2], scores.shape[-1]
+            row_positions = np.arange(seq_len_q).reshape(-1, 1)
+            col_positions = np.arange(seq_len_k).reshape(1, -1)
+            offset = max(seq_len_k - seq_len_q, 0)
+            mask = Tensor(np.where(col_positions <= (row_positions + offset), 0.0, -1.0e9))
         if mask is not None:
             # Mask should be 0 where we want to attend, -inf where we don't
             scores = scores + mask

@@ -395,18 +395,9 @@ class Embedding(Module):
         self.weight = Parameter(np.random.randn(num_embeddings, embedding_dim) * 0.02)
 
     def __call__(self, input_ids):
-        input_ids = np.asarray(input_ids, dtype=np.int64)
-        out_data = self.weight.data[input_ids]
-        out = Tensor(out_data, requires_grad=self.weight.requires_grad, _children=(self.weight,), _op="embedding")
+        from . import functional as F
 
-        def _backward():
-            if self.weight.requires_grad:
-                grad = np.zeros_like(self.weight.data)
-                np.add.at(grad, input_ids, out.grad)
-                self.weight.grad += grad
-
-        out._backward = _backward
-        return out
+        return F.embedding(input_ids, self.weight)
 
 
 class Linear(Module):
@@ -417,10 +408,9 @@ class Linear(Module):
         self.bias = Parameter(np.zeros((out_features,))) if bias else None
 
     def __call__(self, x):
-        out = x @ self.weight
-        if self.bias is not None:
-            out = out + self.bias
-        return out
+        from . import functional as F
+
+        return F.linear(x, self.weight, self.bias)
 
 
 class RNNCell(Module):
@@ -1418,11 +1408,24 @@ class LayerNorm(Module):
             x_normalized = (x_data - mean) / np.sqrt(var + self.eps)
             w = self.weight.to_numpy() if hasattr(self.weight, "to_numpy") else self.weight.data
             b = self.bias.to_numpy() if (self.bias is not None and hasattr(self.bias, "to_numpy")) else (self.bias.data if self.bias else 0)
-            out_data = x_normalized * w + (b if self.bias else 0)
+            runtime_backend = "python"
+            out_data = None
+            if getattr(x, "device", "cpu") != "cuda":
+                try:
+                    from neurx.compile.runtime import try_invoke_ops_function
+
+                    out_data = try_invoke_ops_function("layer_norm", x.data, w, np.asarray(b if self.bias else 0), int(norm_dims), float(self.eps))
+                except Exception:
+                    out_data = None
+            if out_data is None:
+                out_data = x_normalized * w + (b if self.bias else 0)
+            else:
+                runtime_backend = "s"
 
             requires_grad = x.requires_grad or self.weight.requires_grad or (self.bias is not None and self.bias.requires_grad)
             children = [c for c in [x, self.weight, self.bias] if c is not None and getattr(c, 'requires_grad', False)]
             out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="layernorm", device=x.device)
+            out._runtime_backend = runtime_backend
 
         def _backward():
             if not out.grad.any():
@@ -1755,11 +1758,24 @@ class RMSNorm(Module):
         x_normalized = x_data * inv_rms
         w = self.weight.to_numpy() if hasattr(self.weight, "to_numpy") else self.weight.data
         b = self.bias.to_numpy() if (self.bias is not None and hasattr(self.bias, "to_numpy")) else (self.bias.data if self.bias else 0)
-        out_data = x_normalized * w + (b if self.bias else 0)
+        runtime_backend = "python"
+        out_data = None
+        if getattr(x, "device", "cpu") != "cuda":
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                out_data = try_invoke_ops_function("rms_norm", x.data, w, np.asarray(b if self.bias else 0), int(norm_dims), float(self.eps))
+            except Exception:
+                out_data = None
+        if out_data is None:
+            out_data = x_normalized * w + (b if self.bias else 0)
+        else:
+            runtime_backend = "s"
 
         requires_grad = x.requires_grad or self.weight.requires_grad or (self.bias is not None and self.bias.requires_grad)
         children = [c for c in [x, self.weight, self.bias] if c is not None and getattr(c, 'requires_grad', False)]
         out = Tensor(out_data, requires_grad=requires_grad, _children=tuple(children), _op="rmsnorm", device=x.device)
+        out._runtime_backend = runtime_backend
 
         def _backward():
             if not out.grad.any():
@@ -1919,6 +1935,14 @@ def _rope_cache(seq_len, dim, theta=10000.0, start_pos=0):
 
 def _apply_rope(x, cos, sin):
     # x: (B, nh, T, hd)
+    try:
+        from neurx.compile.runtime import try_invoke_ops_function
+
+        out = try_invoke_ops_function("rope_apply", x, cos, sin)
+    except Exception:
+        out = None
+    if out is not None:
+        return out
     x1 = x[..., ::2]
     x2 = x[..., 1::2]
     cos = cos[None, None, :, :]
@@ -1992,6 +2016,39 @@ class MultiHeadAttention(Module):
             k = _apply_rope(k, cos, sin)
         else:
             cos = sin = None
+
+        can_use_s_cache_attention = (
+            not qkv.requires_grad
+            and (not self.attn_dropout.training or self.attn_dropout.p == 0)
+            and (not self.resid_dropout.training or self.resid_dropout.p == 0)
+            and not self.out_proj.weight.requires_grad
+            and (self.out_proj.bias is None or not self.out_proj.bias.requires_grad)
+        )
+        if can_use_s_cache_attention:
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                empty_key = np.zeros((B, self.n_heads, 0, self.head_dim), dtype=q.dtype)
+                runtime_result = try_invoke_ops_function(
+                    "kv_cache_attention",
+                    q,
+                    k,
+                    v,
+                    past_k if past_k is not None else empty_key,
+                    past_v if past_v is not None else empty_key,
+                    past_k is not None and past_v is not None,
+                )
+            except Exception:
+                runtime_result = None
+            if runtime_result is not None:
+                y, _, next_k, next_v = runtime_result
+                y = y.transpose(0, 2, 1, 3).reshape(B, T, C)
+                y_tensor = Tensor(y, requires_grad=False, device=x.device)
+                y_tensor._runtime_backend = "s"
+                out = self.out_proj(y_tensor)
+                out = self.resid_dropout(out)
+                out._runtime_backend = "s"
+                return out, (next_k, next_v)
 
         if past_k is not None and past_v is not None:
             k = np.concatenate([past_k, k], axis=2)
@@ -2107,6 +2164,27 @@ class MLP(Module):
         self.dropout = Dropout(dropout)
     
     def __call__(self, x):
+        if (
+            not self.use_swiglu
+            and not getattr(x, "requires_grad", False)
+            and not self.fc1.weight.requires_grad
+            and (self.fc1.bias is None or not self.fc1.bias.requires_grad)
+            and not self.fc2.weight.requires_grad
+            and (self.fc2.bias is None or not self.fc2.bias.requires_grad)
+            and (not self.dropout.training or self.dropout.p == 0)
+        ):
+            try:
+                from neurx.compile.runtime import try_invoke_ops_function
+
+                fc1_bias = self.fc1.bias.data if self.fc1.bias is not None else np.zeros((self.fc1.weight.shape[-1],), dtype=x.data.dtype)
+                fc2_bias = self.fc2.bias.data if self.fc2.bias is not None else np.zeros((self.fc2.weight.shape[-1],), dtype=x.data.dtype)
+                out_data = try_invoke_ops_function("mlp_block", x.data, self.fc1.weight.data, fc1_bias, self.fc2.weight.data, fc2_bias)
+            except Exception:
+                out_data = None
+            if out_data is not None:
+                out = Tensor(out_data, requires_grad=False, device=x.device)
+                out._runtime_backend = "s"
+                return out
         if self.use_swiglu:
             gate = self.w1(x)
             value = self.w2(x)
@@ -2227,6 +2305,10 @@ class TransformerBlock(Module):
         rope_theta=10000.0,
     ):
         super().__init__()
+        self.use_moe = use_moe
+        self.use_rmsnorm = use_rmsnorm
+        self.use_swiglu = use_swiglu
+        self.use_rope = use_rope
         norm_cls = RMSNorm if use_rmsnorm else LayerNorm
         self.ln1 = norm_cls(n_embd)
         self.attn = MultiHeadAttention(n_embd, n_heads, dropout, use_rope=use_rope, rope_theta=rope_theta)
@@ -2245,9 +2327,66 @@ class TransformerBlock(Module):
     
     def __call__(self, x):
         # Pre-norm architecture
+        fused = self._try_s_fused_forward(x)
+        if fused is not None:
+            return fused
         x = x + self.attn(self.ln1(x))
         x = x + self.mlp(self.ln2(x))
         return x
+
+    def _try_s_fused_forward(self, x):
+        if (
+            self.use_moe
+            or self.use_rmsnorm
+            or self.use_swiglu
+            or self.use_rope
+            or getattr(x, "requires_grad", False)
+            or self.ln1.weight.requires_grad
+            or (self.ln1.bias is not None and self.ln1.bias.requires_grad)
+            or self.attn.qkv.weight.requires_grad
+            or (self.attn.qkv.bias is not None and self.attn.qkv.bias.requires_grad)
+            or self.attn.out_proj.weight.requires_grad
+            or (self.attn.out_proj.bias is not None and self.attn.out_proj.bias.requires_grad)
+            or self.ln2.weight.requires_grad
+            or (self.ln2.bias is not None and self.ln2.bias.requires_grad)
+            or not isinstance(self.mlp, MLP)
+            or self.mlp.fc1.weight.requires_grad
+            or (self.mlp.fc1.bias is not None and self.mlp.fc1.bias.requires_grad)
+            or self.mlp.fc2.weight.requires_grad
+            or (self.mlp.fc2.bias is not None and self.mlp.fc2.bias.requires_grad)
+            or (self.attn.attn_dropout.training and self.attn.attn_dropout.p > 0)
+            or (self.attn.resid_dropout.training and self.attn.resid_dropout.p > 0)
+            or (self.mlp.dropout.training and self.mlp.dropout.p > 0)
+        ):
+            return None
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function(
+                "transformer_block_forward",
+                x.data,
+                self.ln1.weight.data,
+                self.ln1.bias.data if self.ln1.bias is not None else np.zeros_like(self.ln1.weight.data),
+                self.attn.qkv.weight.data,
+                self.attn.qkv.bias.data if self.attn.qkv.bias is not None else np.zeros((3 * self.attn.n_embd,), dtype=x.data.dtype),
+                self.attn.out_proj.weight.data,
+                self.attn.out_proj.bias.data if self.attn.out_proj.bias is not None else np.zeros((self.attn.n_embd,), dtype=x.data.dtype),
+                self.ln2.weight.data,
+                self.ln2.bias.data if self.ln2.bias is not None else np.zeros_like(self.ln2.weight.data),
+                self.mlp.fc1.weight.data,
+                self.mlp.fc1.bias.data if self.mlp.fc1.bias is not None else np.zeros((self.mlp.fc1.weight.shape[-1],), dtype=x.data.dtype),
+                self.mlp.fc2.weight.data,
+                self.mlp.fc2.bias.data if self.mlp.fc2.bias is not None else np.zeros((self.mlp.fc2.weight.shape[-1],), dtype=x.data.dtype),
+                float(self.ln1.eps),
+                int(self.attn.n_heads),
+            )
+        except Exception:
+            out_data = None
+        if out_data is None:
+            return None
+        out = Tensor(out_data, requires_grad=False, device=x.device)
+        out._runtime_backend = "s"
+        return out
 
     def forward_with_cache(self, x, kv_cache=None):
         x_norm = self.ln1(x)

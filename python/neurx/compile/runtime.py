@@ -65,14 +65,357 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         if len(args) != 2:
             raise ValueError(f"add expects 2 args, got {len(args)}")
         return np.add(args[0], args[1])
+    if name == "sub":
+        if len(args) != 2:
+            raise ValueError(f"sub expects 2 args, got {len(args)}")
+        return np.subtract(args[0], args[1])
     if name == "mul":
         if len(args) != 2:
             raise ValueError(f"mul expects 2 args, got {len(args)}")
         return np.multiply(args[0], args[1])
+    if name == "div":
+        if len(args) != 2:
+            raise ValueError(f"div expects 2 args, got {len(args)}")
+        return np.divide(args[0], args[1])
+    if name == "pow":
+        if len(args) != 2:
+            raise ValueError(f"pow expects 2 args, got {len(args)}")
+        return np.power(args[0], args[1])
     if name == "matmul":
         if len(args) != 2:
             raise ValueError(f"matmul expects 2 args, got {len(args)}")
         return np.matmul(args[0], args[1])
+    if name == "linear":
+        if len(args) != 3:
+            raise ValueError(f"linear expects 3 args, got {len(args)}")
+        return np.matmul(args[0], args[1]) + np.asarray(args[2])
+    if name == "layer_norm":
+        if len(args) != 5:
+            raise ValueError(f"layer_norm expects 5 args, got {len(args)}")
+        x = np.asarray(args[0])
+        weight = np.asarray(args[1])
+        bias = np.asarray(args[2])
+        normalized_dims = int(args[3])
+        eps = float(args[4])
+        norm_axes = tuple(range(x.ndim - normalized_dims, x.ndim))
+        mean = x.mean(axis=norm_axes, keepdims=True)
+        var = x.var(axis=norm_axes, keepdims=True)
+        return (x - mean) / np.sqrt(var + eps) * weight + bias
+    if name == "rms_norm":
+        if len(args) != 5:
+            raise ValueError(f"rms_norm expects 5 args, got {len(args)}")
+        x = np.asarray(args[0])
+        weight = np.asarray(args[1])
+        bias = np.asarray(args[2])
+        normalized_dims = int(args[3])
+        eps = float(args[4])
+        norm_axes = tuple(range(x.ndim - normalized_dims, x.ndim))
+        mean_sq = (x * x).mean(axis=norm_axes, keepdims=True)
+        return x / np.sqrt(mean_sq + eps) * weight + bias
+    if name == "scaled_dot_product_attention":
+        if len(args) != 5:
+            raise ValueError(f"scaled_dot_product_attention expects 5 args, got {len(args)}")
+        query = np.asarray(args[0])
+        key = np.asarray(args[1])
+        value = np.asarray(args[2])
+        mask = np.asarray(args[3])
+        has_mask = bool(args[4])
+        scores = np.matmul(query, np.swapaxes(key, -2, -1)) / math.sqrt(float(query.shape[-1]))
+        if has_mask:
+            scores = scores + mask
+        shifted = scores - np.max(scores, axis=-1, keepdims=True)
+        weights = np.exp(shifted)
+        weights = weights / np.sum(weights, axis=-1, keepdims=True)
+        return np.matmul(weights, value), weights
+    if name == "causal_attention":
+        if len(args) != 3:
+            raise ValueError(f"causal_attention expects 3 args, got {len(args)}")
+        query = np.asarray(args[0])
+        key = np.asarray(args[1])
+        value = np.asarray(args[2])
+        seq_len_q = query.shape[-2]
+        seq_len_k = key.shape[-2]
+        scores = np.matmul(query, np.swapaxes(key, -2, -1)) / math.sqrt(float(query.shape[-1]))
+        row_positions = np.arange(seq_len_q).reshape(-1, 1)
+        col_positions = np.arange(seq_len_k).reshape(1, -1)
+        offset = max(seq_len_k - seq_len_q, 0)
+        causal_mask = col_positions <= (row_positions + offset)
+        scores = np.where(causal_mask, scores, -1.0e9)
+        shifted = scores - np.max(scores, axis=-1, keepdims=True)
+        weights = np.exp(shifted)
+        weights = weights / np.sum(weights, axis=-1, keepdims=True)
+        return np.matmul(weights, value), weights
+    if name == "kv_cache_attention":
+        if len(args) != 6:
+            raise ValueError(f"kv_cache_attention expects 6 args, got {len(args)}")
+        query = np.asarray(args[0])
+        key = np.asarray(args[1])
+        value = np.asarray(args[2])
+        past_key = np.asarray(args[3])
+        past_value = np.asarray(args[4])
+        has_past = bool(args[5])
+        if has_past:
+            key = np.concatenate([past_key, key], axis=2)
+            value = np.concatenate([past_value, value], axis=2)
+        output, weights = _execute_intrinsic("causal_attention", [query, key, value])
+        return output, weights, key, value
+    if name == "qkv_projection":
+        if len(args) != 4:
+            raise ValueError(f"qkv_projection expects 4 args, got {len(args)}")
+        x = np.asarray(args[0])
+        weight = np.asarray(args[1])
+        bias = np.asarray(args[2])
+        n_heads = int(args[3])
+        qkv = np.matmul(x, weight) + bias
+        batch_size, seq_len, three_channels = qkv.shape
+        channels = three_channels // 3
+        head_dim = channels // n_heads
+        qkv = qkv.reshape(batch_size, seq_len, 3, n_heads, head_dim).transpose(2, 0, 3, 1, 4)
+        return qkv[0], qkv[1], qkv[2]
+    if name == "rope_apply":
+        if len(args) != 3:
+            raise ValueError(f"rope_apply expects 3 args, got {len(args)}")
+        x = np.asarray(args[0])
+        cos = np.asarray(args[1])[None, None, :, :]
+        sin = np.asarray(args[2])[None, None, :, :]
+        x1 = x[..., ::2]
+        x2 = x[..., 1::2]
+        out = np.empty_like(x)
+        out[..., ::2] = x1 * cos - x2 * sin
+        out[..., 1::2] = x1 * sin + x2 * cos
+        return out
+    if name == "mlp_block":
+        if len(args) != 5:
+            raise ValueError(f"mlp_block expects 5 args, got {len(args)}")
+        x = np.asarray(args[0])
+        fc1_weight = np.asarray(args[1])
+        fc1_bias = np.asarray(args[2])
+        fc2_weight = np.asarray(args[3])
+        fc2_bias = np.asarray(args[4])
+        hidden = np.matmul(x, fc1_weight) + fc1_bias
+        sigmoid = np.where(
+            hidden >= 0,
+            1.0 / (1.0 + np.exp(-1.702 * hidden)),
+            np.exp(1.702 * hidden) / (1.0 + np.exp(1.702 * hidden)),
+        )
+        hidden = hidden * sigmoid
+        return np.matmul(hidden, fc2_weight) + fc2_bias
+    if name == "transformer_block_forward":
+        if len(args) != 15:
+            raise ValueError(f"transformer_block_forward expects 15 args, got {len(args)}")
+        x = np.asarray(args[0])
+        ln1_weight = np.asarray(args[1])
+        ln1_bias = np.asarray(args[2])
+        qkv_weight = np.asarray(args[3])
+        qkv_bias = np.asarray(args[4])
+        out_weight = np.asarray(args[5])
+        out_bias = np.asarray(args[6])
+        ln2_weight = np.asarray(args[7])
+        ln2_bias = np.asarray(args[8])
+        fc1_weight = np.asarray(args[9])
+        fc1_bias = np.asarray(args[10])
+        fc2_weight = np.asarray(args[11])
+        fc2_bias = np.asarray(args[12])
+        eps = float(args[13])
+        n_heads = int(args[14])
+        mean = x.mean(axis=-1, keepdims=True)
+        var = x.var(axis=-1, keepdims=True)
+        norm1 = (x - mean) / np.sqrt(var + eps) * ln1_weight + ln1_bias
+        q, k, v = _execute_intrinsic("qkv_projection", [norm1, qkv_weight, qkv_bias, n_heads])
+        attn, _ = _execute_intrinsic("causal_attention", [q, k, v])
+        batch_size, _, seq_len, head_dim = attn.shape
+        channels = n_heads * head_dim
+        attn = attn.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, channels)
+        x = x + np.matmul(attn, out_weight) + out_bias
+        mean = x.mean(axis=-1, keepdims=True)
+        var = x.var(axis=-1, keepdims=True)
+        norm2 = (x - mean) / np.sqrt(var + eps) * ln2_weight + ln2_bias
+        return x + _execute_intrinsic("mlp_block", [norm2, fc1_weight, fc1_bias, fc2_weight, fc2_bias])
+    if name == "lm_head_logits":
+        if len(args) != 3:
+            raise ValueError(f"lm_head_logits expects 3 args, got {len(args)}")
+        hidden = np.asarray(args[0])
+        weight = np.asarray(args[1])
+        bias = np.asarray(args[2])
+        return np.matmul(hidden, weight) + bias
+    if name == "sampling_top_k_top_p":
+        if len(args) != 6:
+            raise ValueError(f"sampling_top_k_top_p expects 6 args, got {len(args)}")
+        logits = np.asarray(args[0], dtype=np.float64).copy()
+        token_ids = np.asarray(args[1], dtype=np.int64).reshape(-1)
+        temperature = float(args[2])
+        top_k = int(args[3])
+        top_p = float(args[4])
+        repetition_penalty = float(args[5])
+        if repetition_penalty != 1.0 and token_ids.size > 0:
+            for token_id in np.unique(token_ids):
+                if 0 <= token_id < logits.shape[0]:
+                    if logits[token_id] > 0:
+                        logits[token_id] /= repetition_penalty
+                    else:
+                        logits[token_id] *= repetition_penalty
+        if top_k > 0 and top_k < logits.shape[0]:
+            filtered = np.full_like(logits, -np.inf)
+            top_idx = np.argpartition(logits, -top_k)[-top_k:]
+            filtered[top_idx] = logits[top_idx]
+            logits = filtered
+        if top_p < 1.0:
+            sorted_idx = np.argsort(logits)[::-1]
+            sorted_logits = logits[sorted_idx]
+            finite_mask = np.isfinite(sorted_logits)
+            if np.any(finite_mask):
+                finite_logits = sorted_logits[finite_mask]
+                shifted = finite_logits - np.max(finite_logits)
+                probs = np.exp(shifted)
+                probs = probs / (probs.sum() + 1e-12)
+                cum_probs = np.cumsum(probs)
+                keep_mask = cum_probs <= top_p
+                if not np.any(keep_mask):
+                    keep_mask[0] = True
+                else:
+                    first_exceed = np.argmax(cum_probs > top_p)
+                    if cum_probs[first_exceed] > top_p:
+                        keep_mask[first_exceed] = True
+                keep_idx = sorted_idx[finite_mask][keep_mask]
+                filtered = np.full_like(logits, -np.inf)
+                filtered[keep_idx] = logits[keep_idx]
+                logits = filtered
+        if temperature > 0.0:
+            logits = logits / max(temperature, 1e-12)
+        return logits
+    if name == "generation_step":
+        if len(args) != 6:
+            raise ValueError(f"generation_step expects 6 args, got {len(args)}")
+        filtered = _execute_intrinsic("sampling_top_k_top_p", args)
+        return int(np.argmax(filtered))
+    if name == "embedding_lookup":
+        if len(args) != 3:
+            raise ValueError(f"embedding_lookup expects 3 args, got {len(args)}")
+        weight = np.asarray(args[0])
+        input_ids = np.asarray(args[1], dtype=np.int64)
+        padding_idx = int(args[2])
+        out = weight[input_ids]
+        if padding_idx >= 0:
+            out = np.array(out, copy=True)
+            out[input_ids == padding_idx] = 0
+        return out
+    if name == "exp":
+        if len(args) != 1:
+            raise ValueError(f"exp expects 1 arg, got {len(args)}")
+        return np.exp(args[0])
+    if name == "log":
+        if len(args) != 1:
+            raise ValueError(f"log expects 1 arg, got {len(args)}")
+        return np.log(args[0])
+    if name == "sqrt":
+        if len(args) != 1:
+            raise ValueError(f"sqrt expects 1 arg, got {len(args)}")
+        return np.sqrt(args[0])
+    if name == "sum":
+        if len(args) != 3:
+            raise ValueError(f"sum expects 3 args, got {len(args)}")
+        return np.sum(args[0], axis=int(args[1]), keepdims=bool(args[2]))
+    if name == "mean":
+        if len(args) != 3:
+            raise ValueError(f"mean expects 3 args, got {len(args)}")
+        return np.mean(args[0], axis=int(args[1]), keepdims=bool(args[2]))
+    if name == "mse_loss":
+        if len(args) != 3:
+            raise ValueError(f"mse_loss expects 3 args, got {len(args)}")
+        diff = np.asarray(args[0]) - np.asarray(args[1])
+        loss = diff * diff
+        reduction = str(args[2])
+        if reduction == "mean":
+            return np.array(loss.mean())
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "none":
+            return loss
+        raise ValueError(f"unsupported mse_loss reduction: {reduction}")
+    if name == "nll_loss":
+        if len(args) != 6:
+            raise ValueError(f"nll_loss expects 6 args, got {len(args)}")
+        return _nll_loss_forward(args[0], args[1], int(args[2]), str(args[3]), float(args[4]), int(args[5]))
+    if name == "cross_entropy":
+        if len(args) != 6:
+            raise ValueError(f"cross_entropy expects 6 args, got {len(args)}")
+        x = np.asarray(args[0])
+        target = np.asarray(args[1])
+        ignore_index = int(args[2])
+        reduction = str(args[3])
+        label_smoothing = float(args[4])
+        dim = int(args[5])
+        dim = dim + x.ndim if dim < 0 else dim
+        shifted = x - np.max(x, axis=dim, keepdims=True)
+        log_probs = shifted - np.log(np.sum(np.exp(shifted), axis=dim, keepdims=True))
+        return _nll_loss_forward(log_probs, target, ignore_index, reduction, label_smoothing, dim)
+    if name == "sgd_step":
+        if len(args) != 4:
+            raise ValueError(f"sgd_step expects 4 args, got {len(args)}")
+        param = np.asarray(args[0])
+        grad = np.asarray(args[1])
+        lr = float(args[2])
+        weight_decay = float(args[3])
+        if weight_decay != 0.0:
+            grad = grad + weight_decay * param
+        return param - lr * grad
+    if name == "adam_step":
+        if len(args) != 10:
+            raise ValueError(f"adam_step expects 10 args, got {len(args)}")
+        param = np.asarray(args[0])
+        grad = np.asarray(args[1])
+        m = np.asarray(args[2])
+        v = np.asarray(args[3])
+        lr = float(args[4])
+        beta1 = float(args[5])
+        beta2 = float(args[6])
+        eps = float(args[7])
+        weight_decay = float(args[8])
+        step = int(args[9])
+        if weight_decay != 0.0:
+            grad = grad + weight_decay * param
+        next_m = beta1 * m + (1.0 - beta1) * grad
+        next_v = beta2 * v + (1.0 - beta2) * (grad * grad)
+        m_hat = next_m / (1.0 - beta1 ** step)
+        v_hat = next_v / (1.0 - beta2 ** step)
+        updated = param - lr * m_hat / (np.sqrt(v_hat) + eps)
+        return updated, next_m, next_v
+    if name == "adamw_step":
+        if len(args) != 10:
+            raise ValueError(f"adamw_step expects 10 args, got {len(args)}")
+        param = np.asarray(args[0])
+        grad = np.asarray(args[1])
+        m = np.asarray(args[2])
+        v = np.asarray(args[3])
+        lr = float(args[4])
+        beta1 = float(args[5])
+        beta2 = float(args[6])
+        eps = float(args[7])
+        weight_decay = float(args[8])
+        step = int(args[9])
+        if weight_decay != 0.0:
+            grad = grad + weight_decay * param
+        next_m = beta1 * m + (1.0 - beta1) * grad
+        next_v = beta2 * v + (1.0 - beta2) * (grad * grad)
+        m_hat = next_m / (1.0 - beta1 ** step)
+        v_hat = next_v / (1.0 - beta2 ** step)
+        updated = param - lr * m_hat / (np.sqrt(v_hat) + eps)
+        return updated, next_m, next_v
+    if name == "rmsprop_step":
+        if len(args) != 7:
+            raise ValueError(f"rmsprop_step expects 7 args, got {len(args)}")
+        param = np.asarray(args[0])
+        grad = np.asarray(args[1])
+        square_avg = np.asarray(args[2])
+        lr = float(args[3])
+        alpha = float(args[4])
+        eps = float(args[5])
+        weight_decay = float(args[6])
+        if weight_decay != 0.0:
+            grad = grad + weight_decay * param
+        next_square_avg = alpha * square_avg + (1.0 - alpha) * (grad * grad)
+        updated = param - lr * grad / (np.sqrt(next_square_avg) + eps)
+        return updated, next_square_avg
     if name == "relu":
         if len(args) != 1:
             raise ValueError(f"relu expects 1 arg, got {len(args)}")
@@ -158,6 +501,30 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         x = np.asarray(args[0])
         softplus = np.where(x > 20, x, np.log(1.0 + np.exp(x)))
         return x * np.tanh(softplus)
+    if name == "softplus":
+        if len(args) != 2:
+            raise ValueError(f"softplus expects 2 args, got {len(args)}")
+        x = np.asarray(args[0])
+        beta = float(args[1])
+        beta_x = beta * x
+        return np.where(beta_x > 20, x, np.log1p(np.exp(beta_x)) / beta)
+    if name == "softsign":
+        if len(args) != 1:
+            raise ValueError(f"softsign expects 1 arg, got {len(args)}")
+        x = np.asarray(args[0])
+        return x / (1.0 + np.abs(x))
+    if name == "swish":
+        if len(args) != 2:
+            raise ValueError(f"swish expects 2 args, got {len(args)}")
+        x = np.asarray(args[0])
+        beta = float(args[1])
+        beta_x = beta * x
+        sigmoid_x = np.where(
+            beta_x >= 0,
+            1.0 / (1.0 + np.exp(-beta_x)),
+            np.exp(beta_x) / (1.0 + np.exp(beta_x)),
+        )
+        return x * sigmoid_x
     if name == "hardtanh":
         if len(args) != 3:
             raise ValueError(f"hardtanh expects 3 args, got {len(args)}")
@@ -188,6 +555,45 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         slope_arr = np.random.uniform(lower, upper, size=x.shape) if training else slope
         return np.where(x > 0, x, slope_arr * x)
     raise NotImplementedError(f"unsupported intrinsic: {name}")
+
+
+def _nll_loss_forward(input_data: Any, target_data: Any, ignore_index: int, reduction: str, label_smoothing: float, dim: int) -> Any:
+    x = np.asarray(input_data)
+    target = np.asarray(target_data, dtype=np.int64)
+    dim = dim + x.ndim if dim < 0 else dim
+    if x.ndim == 1:
+        x_moved = x.reshape(1, x.shape[0])
+        target_shape = target.shape
+        target_flat = target.reshape(-1)
+    else:
+        x_moved = np.moveaxis(x, dim, -1)
+        target_shape = target.shape
+        target_flat = target.reshape(-1)
+    class_count = x_moved.shape[-1]
+    x_flat = x_moved.reshape(-1, class_count)
+    valid_mask = target_flat != ignore_index
+    targets_valid = target_flat[valid_mask]
+    loss_flat = np.zeros(x_flat.shape[0], dtype=x_flat.dtype)
+    if targets_valid.size > 0:
+        logp_valid = x_flat[valid_mask]
+        nll_component = -logp_valid[np.arange(targets_valid.size), targets_valid]
+        if label_smoothing > 0.0:
+            smooth_component = -logp_valid.mean(axis=1)
+            loss_valid = (1.0 - label_smoothing) * nll_component + label_smoothing * smooth_component
+        else:
+            loss_valid = nll_component
+        loss_flat[valid_mask] = loss_valid
+    else:
+        loss_valid = np.zeros((0,), dtype=x_flat.dtype)
+    if reduction == "none":
+        return loss_flat.reshape(target_shape)
+    if reduction == "sum":
+        return np.array(loss_valid.sum())
+    if reduction == "mean":
+        if loss_valid.size == 0:
+            return np.array(0.0, dtype=x_flat.dtype)
+        return np.array(loss_valid.mean())
+    raise ValueError(f"unsupported nll_loss reduction: {reduction}")
 
 
 def invoke_runtime_function(module_name: str, function_name: str, *args: Any) -> Any:
