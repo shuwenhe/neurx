@@ -47,12 +47,22 @@ def test_s_train_runtime_compiled_functions_present():
 
     for function_name in (
         "new_training_logger",
+        "training_logger_enable",
+        "training_logger_disable",
         "training_logger_log",
+        "training_logger_flush",
+        "training_logger_state_dict",
+        "training_logger_load_state_dict",
     ):
         assert runtime.supports_runtime_function("logging", function_name)
 
     for function_name in (
         "new_training_loop_state",
+        "new_training_run_state",
         "run_training_loop",
+        "train_epoch",
+        "train_epochs",
+        "stop_training_run",
+        "resume_training_run",
     ):
         assert runtime.supports_runtime_function("loop", function_name)
