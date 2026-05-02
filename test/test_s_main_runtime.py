@@ -76,17 +76,39 @@ def test_s_main_runtime_state_helpers_round_trip():
     assert runtime.invoke_runtime_function("main", "trainer_session_state_dict", session) is session
     assert runtime.invoke_runtime_function("main", "trainer_session_load_state_dict", session, restored) is restored
     pipeline = runtime.invoke_runtime_function("main", "new_trainer_pipeline", session)
-    assert pipeline is session
-    assert runtime.invoke_runtime_function("main", "trainer_pipeline_state_dict", pipeline) is pipeline
-    assert runtime.invoke_runtime_function("main", "trainer_pipeline_load_state_dict", pipeline, restored) is restored
+    assert pipeline["session"] is session
+    assert pipeline["snapshot"]["session"] is session
+    assert pipeline["snapshot"]["checkpoint_state"]["step"] == 3
+    assert pipeline["snapshot"]["checkpoint_state"]["loss"] == 1.25
+    pipeline_state = runtime.invoke_runtime_function("main", "trainer_pipeline_state_dict", pipeline)
+    assert pipeline_state["session"] is session
+    assert pipeline_state["snapshot"]["checkpoint_state"]["step"] == 3
+    assert pipeline_state["snapshot"]["checkpoint_state"]["loss"] == 1.25
+    pipeline_other = {
+        "session": restored,
+        "snapshot": {
+            "session": restored,
+            "checkpoint_state": {"step": 11, "loss": 4.0, "params": []},
+        },
+    }
+    pipeline_loaded = runtime.invoke_runtime_function("main", "trainer_pipeline_load_state_dict", pipeline, pipeline_other)
+    assert pipeline_loaded["session"] is restored
+    assert pipeline_loaded["snapshot"]["checkpoint_state"]["step"] == 11
+    assert pipeline_loaded["snapshot"]["checkpoint_state"]["loss"] == 4.0
     snapshot = runtime.invoke_runtime_function("main", "run_trainer_snapshot", session, {"token_ids": [], "image_features": [], "audio_features": []})
     assert snapshot["session"] is session
     assert snapshot["checkpoint_state"]["step"] == 3
     assert snapshot["checkpoint_state"]["loss"] == 1.25
-    assert runtime.invoke_runtime_function("main", "run_training_pipeline", pipeline, {"token_ids": [], "image_features": [], "audio_features": []}) is pipeline
+    updated_pipeline = runtime.invoke_runtime_function("main", "run_training_pipeline", pipeline, {"token_ids": [], "image_features": [], "audio_features": []})
+    assert updated_pipeline["session"]["state"]["step"] == 4
+    assert updated_pipeline["session"]["state"]["last_loss"] == 1.25
+    assert updated_pipeline["snapshot"]["checkpoint_state"]["step"] == 4
+    assert updated_pipeline["snapshot"]["checkpoint_state"]["loss"] == 1.25
     assert runtime.invoke_runtime_function("main", "stop_trainer_pipeline", pipeline) is pipeline
     assert runtime.invoke_runtime_function("main", "resume_trainer_pipeline", pipeline) is pipeline
-    assert runtime.invoke_runtime_function("main", "pipeline_checkpoint", pipeline) is pipeline
+    checkpoint_state = runtime.invoke_runtime_function("main", "pipeline_checkpoint", pipeline)
+    assert checkpoint_state["step"] == 3
+    assert checkpoint_state["loss"] == 1.25
     ckpt = runtime.invoke_runtime_function("main", "new_trainer_checkpoint", 5, 1.25, [])
     assert ckpt["step"] == 5
     assert ckpt["loss"] == 1.25
@@ -104,5 +126,6 @@ def test_s_main_runtime_state_helpers_round_trip():
     assert saved_pipeline["step"] == 9
     assert saved_pipeline["loss"] == 3.5
     loaded_pipeline = runtime.invoke_runtime_function("main", "load_training_pipeline_checkpoint", "/tmp/nowhere")
-    assert loaded_pipeline["step"] == 0
-    assert loaded_pipeline["loss"] == 0.0
+    assert loaded_pipeline["session"]["state"]["step"] == 0
+    assert loaded_pipeline["snapshot"]["checkpoint_state"]["step"] == 0
+    assert loaded_pipeline["snapshot"]["checkpoint_state"]["loss"] == 0.0
