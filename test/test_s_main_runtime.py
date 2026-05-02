@@ -75,6 +75,18 @@ def test_s_main_runtime_state_helpers_round_trip():
     restored = {"config": {"epochs": 2}, "state": other, "sample": {"data": [2.0], "shape": [1]}}
     assert runtime.invoke_runtime_function("main", "trainer_session_state_dict", session) is session
     assert runtime.invoke_runtime_function("main", "trainer_session_load_state_dict", session, restored) is restored
+    pipeline = runtime.invoke_runtime_function("main", "new_trainer_pipeline", session)
+    assert pipeline is session
+    assert runtime.invoke_runtime_function("main", "trainer_pipeline_state_dict", pipeline) is pipeline
+    assert runtime.invoke_runtime_function("main", "trainer_pipeline_load_state_dict", pipeline, restored) is restored
+    snapshot = runtime.invoke_runtime_function("main", "run_trainer_snapshot", session, {"token_ids": [], "image_features": [], "audio_features": []})
+    assert snapshot["session"] is session
+    assert snapshot["checkpoint_state"]["step"] == 3
+    assert snapshot["checkpoint_state"]["loss"] == 1.25
+    assert runtime.invoke_runtime_function("main", "run_training_pipeline", pipeline, {"token_ids": [], "image_features": [], "audio_features": []}) is pipeline
+    assert runtime.invoke_runtime_function("main", "stop_trainer_pipeline", pipeline) is pipeline
+    assert runtime.invoke_runtime_function("main", "resume_trainer_pipeline", pipeline) is pipeline
+    assert runtime.invoke_runtime_function("main", "pipeline_checkpoint", pipeline) is pipeline
     ckpt = runtime.invoke_runtime_function("main", "new_trainer_checkpoint", 5, 1.25, [])
     assert ckpt["step"] == 5
     assert ckpt["loss"] == 1.25

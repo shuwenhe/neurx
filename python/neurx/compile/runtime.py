@@ -377,6 +377,25 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
             "loss": 0.0,
             "params": [],
         }
+    if name == "new_trainer_snapshot":
+        if len(args) != 1:
+            raise ValueError(f"new_trainer_snapshot expects 1 arg, got {len(args)}")
+        session = args[0]
+        step = 0
+        loss = 0.0
+        if isinstance(session, dict):
+            state = session.get("state", {})
+            if isinstance(state, dict):
+                step = int(state.get("step", 0))
+                loss = float(state.get("last_loss", 0.0))
+        return {
+            "session": session,
+            "checkpoint_state": {
+                "step": step,
+                "loss": loss,
+                "params": [],
+            },
+        }
     if name == "mse_loss":
         if len(args) != 3:
             raise ValueError(f"mse_loss expects 3 args, got {len(args)}")
