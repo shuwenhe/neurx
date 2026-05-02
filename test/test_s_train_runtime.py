@@ -54,6 +54,15 @@ def test_s_train_runtime_compiled_functions_present():
         "checkpoint_manager_should_save_best",
         "checkpoint_manager_state_dict",
         "checkpoint_manager_load_state_dict",
+        "checkpoint_manager_last_saved_step",
+        "checkpoint_manager_last_saved_epoch",
+        "checkpoint_manager_best_step",
+        "checkpoint_manager_best_epoch",
+        "checkpoint_manager_best_score",
+        "checkpoint_manager_save_count",
+        "checkpoint_manager_prune_count",
+        "checkpoint_manager_next_save_step",
+        "checkpoint_manager_has_best",
     ):
         assert runtime.supports_runtime_function("checkpoint_manager", function_name)
 
@@ -65,6 +74,12 @@ def test_s_train_runtime_compiled_functions_present():
         "training_logger_flush",
         "training_logger_state_dict",
         "training_logger_load_state_dict",
+        "training_logger_is_enabled",
+        "training_logger_message_count",
+        "training_logger_last_step",
+        "training_logger_last_epoch",
+        "training_logger_last_flush_step",
+        "training_logger_last_flush_epoch",
     ):
         assert runtime.supports_runtime_function("logging", function_name)
 
@@ -216,6 +231,15 @@ def test_s_train_checkpoint_manager_and_logging_round_trip():
     }
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_state_dict", checkpoint) is checkpoint
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_load_state_dict", checkpoint, checkpoint_other) is checkpoint_other
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_last_saved_step", checkpoint) == 1
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_last_saved_epoch", checkpoint) == 1
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_best_step", checkpoint) == 1
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_best_epoch", checkpoint) == 1
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_best_score", checkpoint) == 0.5
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_save_count", checkpoint) == 2
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_prune_count", checkpoint) == 0
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_next_save_step", checkpoint) == 4
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_has_best", checkpoint) is True
 
     logger = {
         "enabled": True,
@@ -235,3 +259,9 @@ def test_s_train_checkpoint_manager_and_logging_round_trip():
     }
     assert runtime.invoke_runtime_function("logging", "training_logger_state_dict", logger) is logger
     assert runtime.invoke_runtime_function("logging", "training_logger_load_state_dict", logger, logger_other) is logger_other
+    assert runtime.invoke_runtime_function("logging", "training_logger_is_enabled", logger) is True
+    assert runtime.invoke_runtime_function("logging", "training_logger_message_count", logger) == 5
+    assert runtime.invoke_runtime_function("logging", "training_logger_last_step", logger) == 10
+    assert runtime.invoke_runtime_function("logging", "training_logger_last_epoch", logger) == 2
+    assert runtime.invoke_runtime_function("logging", "training_logger_last_flush_step", logger) == 8
+    assert runtime.invoke_runtime_function("logging", "training_logger_last_flush_epoch", logger) == 1
