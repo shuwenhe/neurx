@@ -449,6 +449,61 @@ def test_s_runtime_mse_loss_selected_for_cpu_tensors(monkeypatch):
     assert getattr(out, "_runtime_backend", None) == "s"
 
 
+def test_s_runtime_bce_loss_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "bce_loss")
+    x = Tensor(np.array([0.2, 0.7, 0.9], dtype=np.float64))
+    target = np.array([0.0, 1.0, 1.0], dtype=np.float64)
+    out = F.bce_loss(x, target, reduction="mean")
+    clipped = np.clip(x.to_numpy(), 1e-7, 1 - 1e-7)
+    expected = -(target * np.log(clipped) + (1.0 - target) * np.log(1.0 - clipped)).mean()
+    assert np.allclose(out.to_numpy(), expected)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_bce_with_logits_loss_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "bce_with_logits_loss")
+    logits = Tensor(np.array([0.5, -1.2, 2.0], dtype=np.float64))
+    target = np.array([1.0, 0.0, 1.0], dtype=np.float64)
+    out = F.bce_with_logits_loss(logits, target, reduction="mean")
+    x = logits.to_numpy()
+    expected = (np.maximum(x, 0.0) - x * target + np.log1p(np.exp(-np.abs(x)))).mean()
+    assert np.allclose(out.to_numpy(), expected)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_l1_loss_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "l1_loss")
+    out = F.l1_loss(Tensor([1.0, 2.0, 3.0]), Tensor([1.0, 1.0, 5.0]), reduction="sum")
+    assert np.allclose(out.to_numpy(), np.array(3.0))
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_smooth_l1_loss_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "smooth_l1_loss")
+    pred = Tensor(np.array([0.0, 2.0, -3.0], dtype=np.float64))
+    target = np.array([0.0, 0.0, -1.0], dtype=np.float64)
+    out = F.smooth_l1_loss(pred, target, reduction="mean", beta=1.0)
+    diff = pred.to_numpy() - target
+    expected = np.where(np.abs(diff) < 1.0, 0.5 * diff * diff, np.abs(diff) - 0.5).mean()
+    assert np.allclose(out.to_numpy(), expected)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
+def test_s_runtime_kl_div_loss_selected_for_cpu_tensors(monkeypatch):
+    monkeypatch.setenv("NEURX_S_OPS_BACKEND", "auto")
+    assert supports_runtime_function("ops", "kl_div_loss")
+    inp = Tensor(np.log(np.array([[0.2, 0.8], [0.6, 0.4]], dtype=np.float64)))
+    target = np.array([[0.3, 0.7], [0.5, 0.5]], dtype=np.float64)
+    out = F.kl_div_loss(inp, target, reduction="batchmean", log_target=False)
+    expected = (target * (np.log(np.clip(target, 1e-10, None)) - inp.to_numpy())).sum() / inp.shape[0]
+    assert np.allclose(out.to_numpy(), expected)
+    assert getattr(out, "_runtime_backend", None) == "s"
+
+
 def test_python_fallback_mse_loss_when_s_ops_disabled(monkeypatch):
     monkeypatch.setenv("NEURX_S_OPS_BACKEND", "python")
     out = F.mse_loss(Tensor([1.0, 2.0, 3.0]), Tensor([1.0, 1.0, 5.0]), reduction="sum")

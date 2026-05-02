@@ -3097,18 +3097,30 @@ def bce_loss(input: Tensor, target, weight=None, reduction="mean"):
         except ValueError as exc:
             raise ValueError(f"weight with shape {np.asarray(raw_weight).shape} is not broadcastable to {x.shape}") from exc
 
-    # Clamp to prevent log(0)
-    x_clamped = np.clip(x, 1e-7, 1 - 1e-7)
-    loss_vals = -(target_arr * np.log(x_clamped) + (1.0 - target_arr) * np.log(1.0 - x_clamped))
-    if weight_arr is not None:
-        loss_vals = loss_vals * weight_arr
+    runtime_backend = "python"
+    out_data = None
+    if weight_arr is None and input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
 
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
-        out_data = loss_vals
-    else:  # mean
-        out_data = loss_vals.mean()
+            out_data = try_invoke_ops_function("bce_loss", input.data, target_arr, reduction)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        # Clamp to prevent log(0)
+        x_clamped = np.clip(x, 1e-7, 1 - 1e-7)
+        loss_vals = -(target_arr * np.log(x_clamped) + (1.0 - target_arr) * np.log(1.0 - x_clamped))
+        if weight_arr is not None:
+            loss_vals = loss_vals * weight_arr
+
+        if reduction == "sum":
+            out_data = loss_vals.sum()
+        elif reduction == "none":
+            out_data = loss_vals
+        else:  # mean
+            out_data = loss_vals.mean()
+    else:
+        runtime_backend = "s"
 
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -3122,6 +3134,7 @@ def bce_loss(input: Tensor, target, weight=None, reduction="mean"):
         if not input.requires_grad:
             return
 
+        x_clamped = np.clip(x, 1e-7, 1 - 1e-7)
         grad = -(target_arr / x_clamped - (1.0 - target_arr) / (1.0 - x_clamped))
         if weight_arr is not None:
             grad = grad * weight_arr
@@ -3136,6 +3149,7 @@ def bce_loss(input: Tensor, target, weight=None, reduction="mean"):
         input.grad += grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -3178,23 +3192,35 @@ def bce_with_logits_loss(input: Tensor, target, weight=None, reduction="mean", p
                 f"pos_weight with shape {np.asarray(raw_pos_weight).shape} is not broadcastable to {x.shape}"
             ) from exc
 
-    # Stable logsigmoid variants
-    log_sigmoid = -np.logaddexp(0.0, -x)
-    log_one_minus_sigmoid = -np.logaddexp(0.0, x)
-    if pos_weight_arr is None:
-        loss_vals = -(target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
+    runtime_backend = "python"
+    out_data = None
+    if weight_arr is None and pos_weight_arr is None and input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("bce_with_logits_loss", input.data, target_arr, reduction)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        # Stable logsigmoid variants
+        log_sigmoid = -np.logaddexp(0.0, -x)
+        log_one_minus_sigmoid = -np.logaddexp(0.0, x)
+        if pos_weight_arr is None:
+            loss_vals = -(target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
+        else:
+            loss_vals = -(pos_weight_arr * target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
+
+        if weight_arr is not None:
+            loss_vals = loss_vals * weight_arr
+
+        if reduction == "sum":
+            out_data = loss_vals.sum()
+        elif reduction == "none":
+            out_data = loss_vals
+        else:  # mean
+            out_data = loss_vals.mean()
     else:
-        loss_vals = -(pos_weight_arr * target_arr * log_sigmoid + (1.0 - target_arr) * log_one_minus_sigmoid)
-
-    if weight_arr is not None:
-        loss_vals = loss_vals * weight_arr
-
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
-        out_data = loss_vals
-    else:  # mean
-        out_data = loss_vals.mean()
+        runtime_backend = "s"
 
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -3227,6 +3253,7 @@ def bce_with_logits_loss(input: Tensor, target, weight=None, reduction="mean", p
         input.grad += grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -3248,15 +3275,27 @@ def l1_loss(input: Tensor, target, reduction="mean"):
     if reduction not in ("none", "mean", "sum"):
         raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', got {reduction}")
 
-    diff = x - target_arr
-    loss_vals = np.abs(diff)
-    
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
-        out_data = loss_vals
-    else:  # mean
-        out_data = loss_vals.mean()
+    runtime_backend = "python"
+    out_data = None
+    if input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
+
+            out_data = try_invoke_ops_function("l1_loss", input.data, target_arr, reduction)
+        except Exception:
+            out_data = None
+    if out_data is None:
+        diff = x - target_arr
+        loss_vals = np.abs(diff)
+
+        if reduction == "sum":
+            out_data = loss_vals.sum()
+        elif reduction == "none":
+            out_data = loss_vals
+        else:  # mean
+            out_data = loss_vals.mean()
+    else:
+        runtime_backend = "s"
     
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -3269,6 +3308,7 @@ def l1_loss(input: Tensor, target, reduction="mean"):
     def _backward():
         if not input.requires_grad:
             return
+        diff = x - target_arr
         grad = np.sign(diff)
         out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
         if reduction == "none":
@@ -3280,6 +3320,7 @@ def l1_loss(input: Tensor, target, reduction="mean"):
         input.grad += grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -3305,21 +3346,33 @@ def smooth_l1_loss(input: Tensor, target, reduction="mean", beta=1.0):
     if beta < 0:
         raise ValueError(f"beta must be non-negative, got {beta}")
 
-    diff = x - target_arr
-    abs_diff = np.abs(diff)
+    runtime_backend = "python"
+    out_data = None
+    if input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
 
-    if beta == 0:
-        loss_vals = abs_diff
+            out_data = try_invoke_ops_function("smooth_l1_loss", input.data, target_arr, reduction, float(beta))
+        except Exception:
+            out_data = None
+    if out_data is None:
+        diff = x - target_arr
+        abs_diff = np.abs(diff)
+
+        if beta == 0:
+            loss_vals = abs_diff
+        else:
+            # Smooth L1: 0.5 * x^2 / beta if |x| < beta, |x| - 0.5 * beta otherwise
+            loss_vals = np.where(abs_diff < beta, 0.5 * diff * diff / beta, abs_diff - 0.5 * beta)
+
+        if reduction == "sum":
+            out_data = loss_vals.sum()
+        elif reduction == "none":
+            out_data = loss_vals
+        else:  # mean
+            out_data = loss_vals.mean()
     else:
-        # Smooth L1: 0.5 * x^2 / beta if |x| < beta, |x| - 0.5 * beta otherwise
-        loss_vals = np.where(abs_diff < beta, 0.5 * diff * diff / beta, abs_diff - 0.5 * beta)
-    
-    if reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "none":
-        out_data = loss_vals
-    else:  # mean
-        out_data = loss_vals.mean()
+        runtime_backend = "s"
     
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -3332,6 +3385,8 @@ def smooth_l1_loss(input: Tensor, target, reduction="mean", beta=1.0):
     def _backward():
         if not input.requires_grad:
             return
+        diff = x - target_arr
+        abs_diff = np.abs(diff)
         if beta == 0:
             grad = np.sign(diff)
         else:
@@ -3346,6 +3401,7 @@ def smooth_l1_loss(input: Tensor, target, reduction="mean", beta=1.0):
         input.grad += grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 
@@ -3368,22 +3424,34 @@ def kl_div_loss(input: Tensor, target, reduction="mean", log_target: bool = Fals
     if reduction not in ("none", "mean", "sum", "batchmean"):
         raise ValueError(f"reduction must be one of 'none', 'mean', 'sum', 'batchmean', got {reduction}")
 
-    if log_target:
-        target_prob = np.exp(target_arr)
-        loss_vals = target_prob * (target_arr - x)
-    else:
-        target_prob = target_arr
-        loss_vals = np.where(target_arr > 0, target_arr * (np.log(np.clip(target_arr, 1e-10, None)) - x), 0.0)
+    runtime_backend = "python"
+    out_data = None
+    if input.device != "cuda":
+        try:
+            from neurx.compile.runtime import try_invoke_ops_function
 
-    if reduction == "none":
-        out_data = loss_vals
-    elif reduction == "sum":
-        out_data = loss_vals.sum()
-    elif reduction == "batchmean":
-        batch = x.shape[0] if x.ndim > 0 else 1
-        out_data = loss_vals.sum() / float(max(batch, 1))
+            out_data = try_invoke_ops_function("kl_div_loss", input.data, target_arr, reduction, bool(log_target))
+        except Exception:
+            out_data = None
+    if out_data is None:
+        if log_target:
+            target_prob = np.exp(target_arr)
+            loss_vals = target_prob * (target_arr - x)
+        else:
+            target_prob = target_arr
+            loss_vals = np.where(target_arr > 0, target_arr * (np.log(np.clip(target_arr, 1e-10, None)) - x), 0.0)
+
+        if reduction == "none":
+            out_data = loss_vals
+        elif reduction == "sum":
+            out_data = loss_vals.sum()
+        elif reduction == "batchmean":
+            batch = x.shape[0] if x.ndim > 0 else 1
+            out_data = loss_vals.sum() / float(max(batch, 1))
+        else:
+            out_data = loss_vals.mean()
     else:
-        out_data = loss_vals.mean()
+        runtime_backend = "s"
 
     out = Tensor(
         np.array(out_data) if np.isscalar(out_data) else out_data,
@@ -3396,6 +3464,10 @@ def kl_div_loss(input: Tensor, target, reduction="mean", log_target: bool = Fals
     def _backward():
         if not input.requires_grad:
             return
+        if log_target:
+            target_prob = np.exp(target_arr)
+        else:
+            target_prob = target_arr
         grad = -target_prob
         out_grad_arr = np.asarray(out.grad, dtype=grad.dtype)
         if reduction == "none":
@@ -3410,6 +3482,7 @@ def kl_div_loss(input: Tensor, target, reduction="mean", log_target: bool = Fals
         input.grad += grad.astype(input.grad.dtype, copy=False)
 
     out._backward = _backward
+    out._runtime_backend = runtime_backend
     return out
 
 

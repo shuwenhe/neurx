@@ -324,6 +324,38 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         if len(args) != 3:
             raise ValueError(f"mean expects 3 args, got {len(args)}")
         return np.mean(args[0], axis=int(args[1]), keepdims=bool(args[2]))
+    if name == "new_checkpoint":
+        if len(args) != 3:
+            raise ValueError(f"new_checkpoint expects 3 args, got {len(args)}")
+        return {
+            "step": int(args[0]),
+            "loss": float(args[1]),
+            "params": args[2],
+        }
+    if name == "checkpoint_state_dict":
+        if len(args) != 1:
+            raise ValueError(f"checkpoint_state_dict expects 1 arg, got {len(args)}")
+        return args[0]
+    if name == "checkpoint_load_state_dict":
+        if len(args) != 2:
+            raise ValueError(f"checkpoint_load_state_dict expects 2 args, got {len(args)}")
+        return args[1]
+    if name == "save_checkpoint":
+        if len(args) != 4:
+            raise ValueError(f"save_checkpoint expects 4 args, got {len(args)}")
+        return {
+            "step": int(args[1]),
+            "loss": float(args[2]),
+            "params": args[3],
+        }
+    if name == "load_checkpoint":
+        if len(args) != 1:
+            raise ValueError(f"load_checkpoint expects 1 arg, got {len(args)}")
+        return {
+            "step": 0,
+            "loss": 0.0,
+            "params": [],
+        }
     if name == "mse_loss":
         if len(args) != 3:
             raise ValueError(f"mse_loss expects 3 args, got {len(args)}")
@@ -337,6 +369,91 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         if reduction == "none":
             return loss
         raise ValueError(f"unsupported mse_loss reduction: {reduction}")
+    if name == "bce_loss":
+        if len(args) != 3:
+            raise ValueError(f"bce_loss expects 3 args, got {len(args)}")
+        input_arr = np.asarray(args[0])
+        target_arr = np.asarray(args[1], dtype=input_arr.dtype)
+        reduction = str(args[2])
+        clipped = np.clip(input_arr, 1.0e-7, 1.0 - 1.0e-7)
+        loss = -(target_arr * np.log(clipped) + (1.0 - target_arr) * np.log(1.0 - clipped))
+        if reduction == "mean":
+            return np.array(loss.mean())
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "none":
+            return loss
+        raise ValueError(f"unsupported bce_loss reduction: {reduction}")
+    if name == "bce_with_logits_loss":
+        if len(args) != 3:
+            raise ValueError(f"bce_with_logits_loss expects 3 args, got {len(args)}")
+        input_arr = np.asarray(args[0])
+        target_arr = np.asarray(args[1], dtype=input_arr.dtype)
+        reduction = str(args[2])
+        max_term = np.maximum(input_arr, 0.0)
+        loss = max_term - input_arr * target_arr + np.log1p(np.exp(-np.abs(input_arr)))
+        if reduction == "mean":
+            return np.array(loss.mean())
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "none":
+            return loss
+        raise ValueError(f"unsupported bce_with_logits_loss reduction: {reduction}")
+    if name == "l1_loss":
+        if len(args) != 3:
+            raise ValueError(f"l1_loss expects 3 args, got {len(args)}")
+        loss = np.abs(np.asarray(args[0]) - np.asarray(args[1]))
+        reduction = str(args[2])
+        if reduction == "mean":
+            return np.array(loss.mean())
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "none":
+            return loss
+        raise ValueError(f"unsupported l1_loss reduction: {reduction}")
+    if name == "smooth_l1_loss":
+        if len(args) != 4:
+            raise ValueError(f"smooth_l1_loss expects 4 args, got {len(args)}")
+        input_arr = np.asarray(args[0])
+        target_arr = np.asarray(args[1], dtype=input_arr.dtype)
+        reduction = str(args[2])
+        beta = float(args[3])
+        diff = input_arr - target_arr
+        abs_diff = np.abs(diff)
+        if beta == 0.0:
+            loss = abs_diff
+        else:
+            loss = np.where(abs_diff < beta, 0.5 * diff * diff / beta, abs_diff - 0.5 * beta)
+        if reduction == "mean":
+            return np.array(loss.mean())
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "none":
+            return loss
+        raise ValueError(f"unsupported smooth_l1_loss reduction: {reduction}")
+    if name == "kl_div_loss":
+        if len(args) != 4:
+            raise ValueError(f"kl_div_loss expects 4 args, got {len(args)}")
+        input_arr = np.asarray(args[0])
+        target_arr = np.asarray(args[1], dtype=input_arr.dtype)
+        reduction = str(args[2])
+        log_target = bool(args[3])
+        if log_target:
+            target_prob = np.exp(target_arr)
+            loss = target_prob * (target_arr - input_arr)
+        else:
+            target_prob = target_arr
+            loss = np.where(target_arr > 0.0, target_arr * (np.log(np.clip(target_arr, 1.0e-10, None)) - input_arr), 0.0)
+        if reduction == "none":
+            return loss
+        if reduction == "sum":
+            return np.array(loss.sum())
+        if reduction == "batchmean":
+            batch = input_arr.shape[0] if input_arr.ndim > 0 else 1
+            return np.array(loss.sum() / float(max(batch, 1)))
+        if reduction == "mean":
+            return np.array(loss.mean())
+        raise ValueError(f"unsupported kl_div_loss reduction: {reduction}")
     if name == "nll_loss":
         if len(args) != 6:
             raise ValueError(f"nll_loss expects 6 args, got {len(args)}")
