@@ -79,6 +79,22 @@ func new_training_metrics_state() training_metrics_state {
     }
 }
 
+func training_loop_state_dict(training_loop_state state) training_loop_state {
+    state
+}
+
+func training_loop_load_state_dict(training_loop_state state, training_loop_state other) training_loop_state {
+    other
+}
+
+func training_loop_run_state_dict(training_loop_run_state state) training_loop_run_state {
+    state
+}
+
+func training_loop_run_state_load_state_dict(training_loop_run_state state, training_loop_run_state other) training_loop_run_state {
+    other
+}
+
 func _advance_loop_state(training_loop_state state, int epoch_delta, int step_delta, int valid_tokens) training_loop_state {
     if state.should_stop {
         return state
@@ -250,6 +266,62 @@ func training_pipeline_state_dict(training_pipeline_state state) training_pipeli
 }
 
 func training_pipeline_load_state_dict(training_pipeline_state state, training_pipeline_state other) training_pipeline_state {
+    other
+}
+
+func training_pipeline_loop_state_dict(training_pipeline_state state) training_loop_state {
+    state.loop
+}
+
+func training_pipeline_loop_load_state_dict(training_pipeline_state state, training_loop_state other) training_loop_state {
+    other
+}
+
+func training_pipeline_loader_state_dict(training_pipeline_state state) dataloader_state {
+    state.loader
+}
+
+func training_pipeline_loader_load_state_dict(training_pipeline_state state, dataloader_state other) dataloader_state {
+    other
+}
+
+func training_pipeline_logger_state_dict(training_pipeline_state state) training_logger_state {
+    state.logger
+}
+
+func training_pipeline_logger_load_state_dict(training_pipeline_state state, training_logger_state other) training_logger_state {
+    other
+}
+
+func training_pipeline_scaler_state_dict(training_pipeline_state state) grad_scaler_state {
+    state.scaler
+}
+
+func training_pipeline_scaler_load_state_dict(training_pipeline_state state, grad_scaler_state other) grad_scaler_state {
+    other
+}
+
+func training_pipeline_checkpoint_state_dict(training_pipeline_state state) checkpoint_manager_state {
+    state.checkpoint
+}
+
+func training_pipeline_checkpoint_load_state_dict(training_pipeline_state state, checkpoint_manager_state other) checkpoint_manager_state {
+    other
+}
+
+func training_pipeline_autocast_state_dict(training_pipeline_state state) autocast_state {
+    state.autocast
+}
+
+func training_pipeline_autocast_load_state_dict(training_pipeline_state state, autocast_state other) autocast_state {
+    other
+}
+
+func training_pipeline_metrics_state_dict(training_pipeline_state state) training_metrics_state {
+    state.metrics
+}
+
+func training_pipeline_metrics_load_state_dict(training_pipeline_state state, training_metrics_state other) training_metrics_state {
     other
 }
 

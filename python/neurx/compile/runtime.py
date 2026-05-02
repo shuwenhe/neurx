@@ -324,6 +324,10 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         if len(args) != 3:
             raise ValueError(f"mean expects 3 args, got {len(args)}")
         return np.mean(args[0], axis=int(args[1]), keepdims=bool(args[2]))
+    if name == "len":
+        if len(args) != 1:
+            raise ValueError(f"len expects 1 arg, got {len(args)}")
+        return len(args[0])
     if name == "new_checkpoint":
         if len(args) != 3:
             raise ValueError(f"new_checkpoint expects 3 args, got {len(args)}")
@@ -541,6 +545,56 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         return {
             "session": other.get("session"),
             "checkpoint_state": _execute_intrinsic("checkpoint_load_state_dict", [snapshot.get("checkpoint_state", {}), other.get("checkpoint_state", {})]),
+        }
+    if name == "dataloader_mvp_has_next":
+        if len(args) != 1:
+            raise ValueError(f"dataloader_mvp_has_next expects 1 arg, got {len(args)}")
+        state = args[0]
+        if not isinstance(state, dict):
+            return False
+        token_ids = state.get("token_ids", [])
+        config = state.get("config", {})
+        if not isinstance(config, dict):
+            return False
+        batch_size = int(config.get("batch_size", 0))
+        seq_len = int(config.get("seq_len", 0))
+        return batch_size > 0 and seq_len > 0 and len(token_ids) > seq_len
+    if name == "dataloader_mvp_next_batch":
+        if len(args) != 1:
+            raise ValueError(f"dataloader_mvp_next_batch expects 1 arg, got {len(args)}")
+        state = args[0]
+        if not isinstance(state, dict):
+            return state
+        token_ids = list(state.get("token_ids", []))
+        config = state.get("config", {})
+        if not isinstance(config, dict):
+            config = {}
+        batch_size = int(config.get("batch_size", 0))
+        seq_len = int(config.get("seq_len", 0))
+        total = len(token_ids)
+        cursor = int(state.get("cursor", 0))
+        input_ids: list[int] = []
+        target_ids: list[int] = []
+        if batch_size > 0 and seq_len > 0 and total > seq_len:
+            for _ in range(batch_size):
+                if cursor + seq_len + 1 >= total:
+                    cursor = 0
+                for i in range(seq_len):
+                    input_ids.append(token_ids[cursor + i])
+                    target_ids.append(token_ids[cursor + i + 1])
+                cursor = cursor + seq_len
+        next_state = {
+            "token_ids": token_ids,
+            "cursor": cursor,
+            "config": config,
+        }
+        return {
+            "state": next_state,
+            "batch": {
+                "input_ids": input_ids,
+                "target_ids": target_ids,
+                "valid_tokens": len(input_ids),
+            },
         }
     if name == "mse_loss":
         if len(args) != 3:
@@ -916,7 +970,40 @@ def invoke_runtime_function(module_name: str, function_name: str, *args: Any) ->
         if opcode == "PARAM":
             scope[op[1]] = next(arg_iter)
         elif opcode == "ARG":
-            call_args.append(scope[op[1]])
+            arg_name = op[1]
+            if arg_name in scope:
+                call_args.append(scope[arg_name])
+                continue
+            if arg_name.startswith('"') and arg_name.endswith('"'):
+                call_args.append(arg_name[1:-1])
+                continue
+            if arg_name == "[]":
+                call_args.append([])
+                continue
+            if arg_name in {"true", "false"}:
+                call_args.append(arg_name == "true")
+                continue
+            try:
+                if "." in arg_name:
+                    call_args.append(float(arg_name))
+                else:
+                    call_args.append(int(arg_name))
+                continue
+            except ValueError:
+                pass
+            value: Any = scope
+            resolved = True
+            for part in arg_name.split("."):
+                if isinstance(value, dict) and part in value:
+                    value = value[part]
+                elif hasattr(value, part):
+                    value = getattr(value, part)
+                else:
+                    resolved = False
+                    break
+            if not resolved:
+                raise KeyError(arg_name)
+            call_args.append(value)
         elif opcode == "CALL":
             target = op[1]
             callee = op[2]
@@ -924,7 +1011,22 @@ def invoke_runtime_function(module_name: str, function_name: str, *args: Any) ->
             scope[target] = _execute_intrinsic(callee, call_args[-arity:])
             call_args = []
         elif opcode == "RET":
-            return scope[op[1]]
+            ret_name = op[1]
+            if ret_name in scope:
+                return scope[ret_name]
+            value: Any = scope
+            resolved = True
+            for part in ret_name.split("."):
+                if isinstance(value, dict) and part in value:
+                    value = value[part]
+                elif hasattr(value, part):
+                    value = getattr(value, part)
+                else:
+                    resolved = False
+                    break
+            if resolved:
+                return value
+            return ret_name
     raise RuntimeError(f"runtime function did not return: {module_name}.{function_name}")
 
 
