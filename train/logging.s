@@ -79,3 +79,27 @@ func training_logger_state_dict(training_logger_state state) training_logger_sta
 func training_logger_load_state_dict(training_logger_state state, training_logger_state other) training_logger_state {
     other
 }
+
+func training_logger_is_enabled(training_logger_state state) bool {
+    state.enabled
+}
+
+func training_logger_message_count(training_logger_state state) int {
+    state.message_count
+}
+
+func training_logger_last_step(training_logger_state state) int {
+    state.last_step
+}
+
+func training_logger_last_epoch(training_logger_state state) int {
+    state.last_epoch
+}
+
+func training_logger_last_flush_step(training_logger_state state) int {
+    state.last_flush_step
+}
+
+func training_logger_last_flush_epoch(training_logger_state state) int {
+    state.last_flush_epoch
+}

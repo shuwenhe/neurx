@@ -124,3 +124,39 @@ func checkpoint_manager_should_save_best(checkpoint_manager_state state, float s
     }
     score >= state.best_score
 }
+
+func checkpoint_manager_last_saved_step(checkpoint_manager_state state) int {
+    state.last_saved_step
+}
+
+func checkpoint_manager_last_saved_epoch(checkpoint_manager_state state) int {
+    state.last_saved_epoch
+}
+
+func checkpoint_manager_best_step(checkpoint_manager_state state) int {
+    state.best_step
+}
+
+func checkpoint_manager_best_epoch(checkpoint_manager_state state) int {
+    state.best_epoch
+}
+
+func checkpoint_manager_best_score(checkpoint_manager_state state) float {
+    state.best_score
+}
+
+func checkpoint_manager_save_count(checkpoint_manager_state state) int {
+    state.save_count
+}
+
+func checkpoint_manager_prune_count(checkpoint_manager_state state) int {
+    state.prune_count
+}
+
+func checkpoint_manager_next_save_step(checkpoint_manager_state state) int {
+    state.next_save_step
+}
+
+func checkpoint_manager_has_best(checkpoint_manager_state state) bool {
+    state.has_best
+}
