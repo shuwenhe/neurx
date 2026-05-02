@@ -37,43 +37,50 @@ func new_state([]int token_ids, int batch_size, int seq_len) dataloader_state {
     }
 }
 
+func dataloader_config_state_dict(dataloader_config config) dataloader_config {
+    config
+}
+
+func dataloader_config_load_state_dict(dataloader_config config, dataloader_config other) dataloader_config {
+    other
+}
+
+func dataloader_state_state_dict(dataloader_state state) dataloader_state {
+    state
+}
+
+func dataloader_state_load_state_dict(dataloader_state state, dataloader_state other) dataloader_state {
+    other
+}
+
+func dataloader_batch_state_dict(dataloader_batch batch) dataloader_batch {
+    batch
+}
+
+func dataloader_batch_load_state_dict(dataloader_batch batch, dataloader_batch other) dataloader_batch {
+    other
+}
+
+func dataloader_step_output_state_dict(dataloader_step_output output) dataloader_step_output {
+    output
+}
+
+func dataloader_step_output_load_state_dict(dataloader_step_output output, dataloader_step_output other) dataloader_step_output {
+    other
+}
+
+func dataloader_token_count(dataloader_state state) int {
+    len(state.token_ids)
+}
+
+func dataloader_batch_span(dataloader_config config) int {
+    config.batch_size * config.seq_len
+}
+
 func has_next(dataloader_state state) bool {
-    len(state.token_ids) > state.config.seq_len
+    dataloader_mvp_has_next(state)
 }
 
 func next_batch(dataloader_state state) dataloader_step_output {
-    int total = len(state.token_ids)
-    int batch_size = state.config.batch_size
-    int seq_len = state.config.seq_len
-
-    []int input_ids = []int{cap: batch_size * seq_len}
-    []int target_ids = []int{cap: batch_size * seq_len}
-
-    int cursor = state.cursor
-    for b in 0..batch_size {
-        if cursor + seq_len + 1 >= total {
-            cursor = 0
-        }
-
-        for i in 0..seq_len {
-            input_ids.push(state.token_ids[cursor + i])
-            target_ids.push(state.token_ids[cursor + i + 1])
-        }
-        cursor = cursor + seq_len
-    }
-
-    dataloader_state next_state = dataloader_state {
-        token_ids: state.token_ids,
-        cursor: cursor,
-        config: state.config,
-    }
-
-    dataloader_step_output {
-        state: next_state,
-        batch: dataloader_batch {
-            input_ids: input_ids,
-            target_ids: target_ids,
-            valid_tokens: len(input_ids),
-        },
-    }
+    dataloader_mvp_next_batch(state)
 }

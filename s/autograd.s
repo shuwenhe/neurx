@@ -97,6 +97,10 @@ func grad_of(autograd_state state, int id) []float {
     []
 }
 
+func record_count(autograd_state state) int {
+    len(state.records)
+}
+
 func backward_seed(autograd_state state, int loss_id, tensor loss_tensor) autograd_state {
     if !loss_tensor.requires_grad {
         return state

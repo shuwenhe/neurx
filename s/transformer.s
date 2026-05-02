@@ -94,6 +94,34 @@ func transformer_init(config transformer_config) transformer {
     }
 }
 
+func transformer_config_state_dict(transformer_config config) transformer_config {
+    config
+}
+
+func transformer_config_load_state_dict(transformer_config config, transformer_config other) transformer_config {
+    other
+}
+
+func transformer_layer_state_dict(transformer_layer layer) transformer_layer {
+    _copy_layer(layer)
+}
+
+func transformer_layer_load_state_dict(transformer_layer layer, transformer_layer other) transformer_layer {
+    _copy_layer(other)
+}
+
+func transformer_layers_state_dict(transformer_layer[] layers) transformer_layer[] {
+    _copy_layers(layers)
+}
+
+func transformer_layers_load_state_dict(transformer_layer[] layers, transformer_layer[] other) transformer_layer[] {
+    _copy_layers(other)
+}
+
+func transformer_layer_count(transformer m) int {
+    len(m.layers)
+}
+
 func transformer_state_dict(transformer state) transformer {
     transformer {
         config: state.config,

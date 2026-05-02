@@ -68,6 +68,14 @@ func autocast_exit(autocast_state state) autocast_state {
     }
 }
 
+func autocast_state_dict(autocast_state state) autocast_state {
+    state
+}
+
+func autocast_load_state_dict(autocast_state state, autocast_state other) autocast_state {
+    other
+}
+
 func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor, int growth_interval, bool enabled) grad_scaler_state {
     grad_scaler_state {
         scale: init_scale,

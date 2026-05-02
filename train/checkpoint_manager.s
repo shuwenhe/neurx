@@ -110,17 +110,17 @@ func checkpoint_manager_load_best(checkpoint_manager_state state) checkpoint_man
     state
 }
 
-func checkpoint_manager_should_save_best(checkpoint_manager_state state, float score) bool {
-    if !state.has_best {
-        return true
-    }
-    score >= state.best_score
-}
-
 func checkpoint_manager_state_dict(checkpoint_manager_state state) checkpoint_manager_state {
     state
 }
 
 func checkpoint_manager_load_state_dict(checkpoint_manager_state state, checkpoint_manager_state other) checkpoint_manager_state {
     other
+}
+
+func checkpoint_manager_should_save_best(checkpoint_manager_state state, float score) bool {
+    if !state.has_best {
+        return true
+    }
+    score >= state.best_score
 }
