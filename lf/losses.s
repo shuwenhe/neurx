@@ -35,6 +35,37 @@ func _copy_int([]int data) []int {
     out
 }
 
+func _exp_approx(float x) float {
+    if x > 20.0 {
+        return 485165195.0
+    }
+    if x < -20.0 {
+        return 0.0
+    }
+    float result = 1.0
+    float term = 1.0
+    int i = 1
+    while i <= 10 {
+        term = term * x / i
+        result = result + term
+        i = i + 1
+    }
+    result
+}
+
+func _log_approx(float x) float {
+    float v = x
+    if v <= 0.0 {
+        v = 0.000000000001
+    }
+    float y = (v - 1.0) / (v + 1.0)
+    float y2 = y * y
+    float y3 = y2 * y
+    float y5 = y3 * y2
+    float y7 = y5 * y2
+    2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
+}
+
 func _scalar(float value, bool requires_grad) tensor {
     []float out = []float{cap: 1}
     out[0] = value
@@ -56,12 +87,7 @@ func _abs(float x) float {
 }
 
 func _sigmoid(float x) float {
-    if x >= 0.0 {
-        1.0 / (1.0 + 1.0 / (1.0 + x + (x * x / 2.0)))
-    } else {
-        float pos = 0.0 - x
-        1.0 / (1.0 + (1.0 + pos + (pos * pos / 2.0)))
-    }
+    1.0 / (1.0 + _exp_approx(0.0 - x))
 }
 
 func _softplus(float x) float {
@@ -71,11 +97,7 @@ func _softplus(float x) float {
         if x < -20.0 {
             0.0
         } else {
-            float e = 1.0 + x + (x * x / 2.0) + (x * x * x / 6.0)
-            if e < 0.0 {
-                e = 0.0
-            }
-            e
+            _log_approx(1.0 + _exp_approx(x))
         }
     }
 }
@@ -106,17 +128,17 @@ func bce_loss(tensor input, tensor target) tensor {
     int i = 0
     while i < n {
         float p = input.data[i]
-        if p < 0.000001 {
-            p = 0.000001
+        if p < 0.0000001 {
+            p = 0.0000001
         }
-        if p > 0.999999 {
-            p = 0.999999
+        if p > 0.9999999 {
+            p = 0.9999999
         }
         float t = 0.0
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total - (t * p + (1.0 - t) * (1.0 - p))
+        total = total - (t * _log_approx(p) + (1.0 - t) * _log_approx(1.0 - p))
         i = i + 1
     }
     _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
@@ -128,12 +150,17 @@ func bce_with_logits_loss(tensor input, tensor target) tensor {
     int i = 0
     while i < n {
         float logit = input.data[i]
-        float p = _sigmoid(logit)
         float t = 0.0
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total - (t * p + (1.0 - t) * (1.0 - p))
+        float max_logit = logit
+        if max_logit < 0.0 {
+            max_logit = 0.0
+        }
+        float abs_logit = _abs(logit)
+        float stable = _log_approx(1.0 + _exp_approx(0.0 - abs_logit))
+        total = total + (max_logit - logit * t + stable)
         i = i + 1
     }
     _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
@@ -144,11 +171,11 @@ func l1_loss(tensor input, tensor target) tensor {
     float total = 0.0
     int i = 0
     while i < n {
-        float diff = input.data[i]
+        float t = 0.0
         if i < len(target.data) {
-            diff = diff - target.data[i]
+            t = target.data[i]
         }
-        total = total + _abs(diff)
+        total = total + _abs(input.data[i] - t)
         i = i + 1
     }
     _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
@@ -194,15 +221,13 @@ func kl_div_loss(tensor input, tensor target) tensor {
     float total = 0.0
     int i = 0
     while i < n {
-        float p = input.data[i]
-        if p < 0.000001 {
-            p = 0.000001
-        }
         float t = 0.0
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total + t * (0.0 - p)
+        if t > 0.0 {
+            total = total + t * (_log_approx(t) - input.data[i])
+        }
         i = i + 1
     }
     _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
@@ -226,7 +251,11 @@ func poisson_nll_loss(tensor input, tensor target) tensor {
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total + x - t * _softplus(x)
+        float lambda = _softplus(x)
+        if lambda < 0.0000001 {
+            lambda = 0.0000001
+        }
+        total = total + lambda - t * _log_approx(lambda)
         i = i + 1
     }
     _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)

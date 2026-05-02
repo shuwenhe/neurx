@@ -1,5 +1,52 @@
 package neurx.transformer
 
+use neurx.tensor.tensor
+use neurx.tensor.new
+
+func _copy_float([]float data) []float {
+    int n = len(data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        out[i] = data[i]
+    }
+    out
+}
+
+func _copy_int([]int data) []int {
+    int n = len(data)
+    []int out = []int{cap: n}
+    for i in 0..n {
+        out[i] = data[i]
+    }
+    out
+}
+
+func _copy_tensor(tensor value) tensor {
+    new(_copy_float(value.data), _copy_int(value.shape), value.requires_grad)
+}
+
+func _copy_layer(transformer_layer layer) transformer_layer {
+    transformer_layer {
+        w_q: _copy_tensor(layer.w_q),
+        w_k: _copy_tensor(layer.w_k),
+        w_v: _copy_tensor(layer.w_v),
+        w_o: _copy_tensor(layer.w_o),
+        w_ff1: _copy_tensor(layer.w_ff1),
+        w_ff2: _copy_tensor(layer.w_ff2),
+        b_ff1: _copy_tensor(layer.b_ff1),
+        b_ff2: _copy_tensor(layer.b_ff2),
+    }
+}
+
+func _copy_layers(transformer_layer[] layers) transformer_layer[] {
+    int n = len(layers)
+    transformer_layer[] out = []transformer_layer{cap: n}
+    for i in 0..n {
+        out.push(_copy_layer(layers[i]))
+    }
+    out
+}
+
 struct transformer_config {
     int num_layers
     int num_heads
@@ -44,6 +91,21 @@ func transformer_init(config transformer_config) transformer {
     transformer {
         config: config,
         layers: layers
+    }
+}
+
+func transformer_state_dict(transformer state) transformer {
+    transformer {
+        config: state.config,
+        layers: _copy_layers(state.layers),
+    }
+}
+
+func transformer_load_state_dict(transformer state, transformer other) transformer {
+    del state
+    transformer {
+        config: other.config,
+        layers: _copy_layers(other.layers),
     }
 }
 
