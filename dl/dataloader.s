@@ -38,6 +38,15 @@ func _copy_int([]int values) []int {
     out
 }
 
+func _copy_config(dataloader_config config) dataloader_config {
+    dataloader_config {
+        batch_size: config.batch_size,
+        seq_len: config.seq_len,
+        drop_last: config.drop_last,
+        shuffle: config.shuffle,
+    }
+}
+
 func default_collate([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -86,19 +95,19 @@ func new_state([]int token_ids, int batch_size, int seq_len) dataloader_state {
 
 func reset_state(dataloader_state state) dataloader_state {
     dataloader_state {
-        token_ids: state.token_ids,
+        token_ids: _copy_int(state.token_ids),
         cursor: 0,
         epoch: state.epoch + 1,
-        config: state.config,
+        config: _copy_config(state.config),
     }
 }
 
 func with_config(dataloader_state state, dataloader_config config) dataloader_state {
     dataloader_state {
-        token_ids: state.token_ids,
+        token_ids: _copy_int(state.token_ids),
         cursor: state.cursor,
         epoch: state.epoch,
-        config: config,
+        config: _copy_config(config),
     }
 }
 
@@ -215,9 +224,19 @@ func shuffle_enabled(dataloader_state state) bool {
 }
 
 func dataloader_state_dict(dataloader_state state) dataloader_state {
-    state
+    dataloader_state {
+        token_ids: _copy_int(state.token_ids),
+        cursor: state.cursor,
+        epoch: state.epoch,
+        config: _copy_config(state.config),
+    }
 }
 
 func dataloader_load_state_dict(dataloader_state state, dataloader_state other) dataloader_state {
-    other
+    dataloader_state {
+        token_ids: _copy_int(other.token_ids),
+        cursor: other.cursor,
+        epoch: other.epoch,
+        config: _copy_config(other.config),
+    }
 }
