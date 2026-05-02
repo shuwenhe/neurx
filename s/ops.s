@@ -102,6 +102,22 @@ func mean(tensor a, int dim, bool keepdims) tensor {
     mean(a, dim, keepdims)
 }
 
+func sum_last_dim(tensor a, bool keepdims) tensor {
+    sum(a, -1, keepdims)
+}
+
+func mean_last_dim(tensor a, bool keepdims) tensor {
+    mean(a, -1, keepdims)
+}
+
+func softmax_last_dim(tensor a) tensor {
+    softmax(a, -1)
+}
+
+func log_softmax_last_dim(tensor a) tensor {
+    log_softmax(a, -1)
+}
+
 func mse_loss(tensor input, tensor target, string reduction) tensor {
     mse_loss(input, target, reduction)
 }
