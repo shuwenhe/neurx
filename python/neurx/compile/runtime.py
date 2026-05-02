@@ -341,13 +341,34 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
             raise ValueError(f"checkpoint_load_state_dict expects 2 args, got {len(args)}")
         return args[1]
     if name == "save_checkpoint":
-        if len(args) != 4:
-            raise ValueError(f"save_checkpoint expects 4 args, got {len(args)}")
-        return {
-            "step": int(args[1]),
-            "loss": float(args[2]),
-            "params": args[3],
-        }
+        if len(args) == 4:
+            return {
+                "step": int(args[1]),
+                "loss": float(args[2]),
+                "params": args[3],
+            }
+        if len(args) == 2:
+            payload = args[1]
+            if isinstance(payload, dict):
+                if "checkpoint_state" in payload and isinstance(payload["checkpoint_state"], dict):
+                    payload = payload["checkpoint_state"]
+                elif "snapshot" in payload and isinstance(payload["snapshot"], dict):
+                    snapshot = payload["snapshot"]
+                    payload = snapshot.get("checkpoint_state", snapshot)
+                elif "state" in payload and isinstance(payload["state"], dict):
+                    payload = payload["state"]
+            if isinstance(payload, dict):
+                return {
+                    "step": int(payload.get("step", 0)),
+                    "loss": float(payload.get("loss", 0.0)),
+                    "params": payload.get("params", []),
+                }
+            return {
+                "step": 0,
+                "loss": 0.0,
+                "params": [],
+            }
+        raise ValueError(f"save_checkpoint expects 2 or 4 args, got {len(args)}")
     if name == "load_checkpoint":
         if len(args) != 1:
             raise ValueError(f"load_checkpoint expects 1 arg, got {len(args)}")
