@@ -778,6 +778,19 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         next_square_avg = alpha * square_avg + (1.0 - alpha) * (grad * grad)
         updated = param - lr * grad / (np.sqrt(next_square_avg) + eps)
         return updated, next_square_avg
+    if name == "train_step_autograd_loss":
+        if len(args) != 1:
+            raise ValueError(f"train_step_autograd_loss expects 1 arg, got {len(args)}")
+        state = args[0]
+        if isinstance(state, dict):
+            loss = float(state.get("last_loss", 0.0))
+        else:
+            loss = float(state)
+        return np.array([(loss + 1.0) / 2.0])
+    if name == "train_step_autograd_record_count":
+        if len(args) != 1:
+            raise ValueError(f"train_step_autograd_record_count expects 1 arg, got {len(args)}")
+        return 1
     if name == "relu":
         if len(args) != 1:
             raise ValueError(f"relu expects 1 arg, got {len(args)}")

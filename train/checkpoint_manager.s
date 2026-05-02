@@ -43,8 +43,7 @@ func checkpoint_manager_should_save(checkpoint_manager_state state, int step) bo
     if state.keep_every_n_steps <= 0 {
         return true
     }
-    int bucket = step / state.keep_every_n_steps
-    bucket * state.keep_every_n_steps == step
+    step >= state.next_save_step
 }
 
 func checkpoint_manager_save(checkpoint_manager_state state, int step, int epoch) checkpoint_manager_state {

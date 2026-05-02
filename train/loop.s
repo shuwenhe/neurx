@@ -1,9 +1,12 @@
 package neurx.train.loop
 
+use neurx.autograd
 use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, has_next, next_batch, reset_state, batch_count, dataloader_state_dict, dataloader_load_state_dict}
 use neurx.train.amp.{autocast_state, grad_scaler_state, new_autocast_state, new_grad_scaler, grad_scaler_step}
 use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_should_save, checkpoint_manager_save, checkpoint_manager_mark_best}
 use neurx.train.logging.{training_logger_state, new_training_logger, training_logger_log, training_logger_flush}
+use neurx.ops
+use neurx.tensor.tensor
 
 struct training_loop_state {
     int epoch
@@ -77,6 +80,22 @@ func new_training_metrics_state() training_metrics_state {
         loss: 0.0,
         score: 0.0,
     }
+}
+
+func train_step_autograd_loss(training_pipeline_state state) tensor {
+    training_pipeline_state pipeline = train_step(state)
+    tensor loss_input = neurx.tensor.new([pipeline.last_loss, 1.0], [1, 2], true)
+    ops.mean_last_dim(loss_input, false)
+}
+
+func train_step_autograd_record_count(training_pipeline_state state) int {
+    training_pipeline_state pipeline = train_step(state)
+    tensor loss_input = neurx.tensor.new([pipeline.last_loss, 1.0], [1, 2], true)
+    tensor loss_tensor = ops.mean_last_dim(loss_input, false)
+    autograd.autograd_state autograd_state = autograd.new_state()
+    autograd_state = autograd.register_tensor(autograd_state, pipeline.loop.step, loss_tensor)
+    autograd_state = autograd.backward_seed(autograd_state, pipeline.loop.step, loss_tensor)
+    autograd.record_count(autograd_state)
 }
 
 func training_loop_state_dict(training_loop_state state) training_loop_state {
@@ -216,6 +235,14 @@ func training_metrics_state_dict(training_metrics_state state) training_metrics_
 }
 
 func training_metrics_load_state_dict(training_metrics_state state, training_metrics_state other) training_metrics_state {
+    other
+}
+
+func training_step_trace_state_dict(training_step_trace state) training_step_trace {
+    state
+}
+
+func training_step_trace_load_state_dict(training_step_trace state, training_step_trace other) training_step_trace {
     other
 }
 

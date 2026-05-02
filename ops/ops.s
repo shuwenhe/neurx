@@ -134,6 +134,22 @@ func log_softmax_first_dim(tensor a) tensor {
     log_softmax(a, 0)
 }
 
+func sum_second_dim(tensor a, bool keepdims) tensor {
+    sum(a, 1, keepdims)
+}
+
+func mean_second_dim(tensor a, bool keepdims) tensor {
+    mean(a, 1, keepdims)
+}
+
+func softmax_second_dim(tensor a) tensor {
+    softmax(a, 1)
+}
+
+func log_softmax_second_dim(tensor a) tensor {
+    log_softmax(a, 1)
+}
+
 func mse_loss(tensor input, tensor target, string reduction) tensor {
     mse_loss(input, target, reduction)
 }
