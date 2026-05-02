@@ -34,11 +34,23 @@ def test_s_main_runtime_compiled_functions_present():
         "trainer_session_state_dict",
         "trainer_session_load_state_dict",
         "new_trainer_snapshot",
+        "new_trainer_pipeline",
         "new_trainer_checkpoint",
         "save_trainer_checkpoint",
         "load_trainer_checkpoint",
+        "save_trainer_session_checkpoint",
+        "load_trainer_session_checkpoint",
+        "trainer_pipeline_state_dict",
+        "trainer_pipeline_load_state_dict",
+        "run_training_pipeline",
+        "pipeline_checkpoint",
+        "save_training_pipeline_checkpoint",
+        "load_training_pipeline_checkpoint",
         "trainer_snapshot_state_dict",
         "trainer_snapshot_load_state_dict",
+        "run_trainer_snapshot",
+        "stop_trainer_pipeline",
+        "resume_trainer_pipeline",
         "new_example",
         "process_example",
         "example_state_dict",
@@ -72,3 +84,13 @@ def test_s_main_runtime_state_helpers_round_trip():
     loaded = runtime.invoke_runtime_function("main", "load_trainer_checkpoint", "/tmp/nowhere")
     assert loaded["step"] == 0
     assert loaded["loss"] == 0.0
+    pipeline = {
+        "session": session,
+        "snapshot": {"checkpoint_state": {"step": 9, "loss": 3.5, "params": [1, 2]}},
+    }
+    saved_pipeline = runtime.invoke_runtime_function("main", "save_training_pipeline_checkpoint", "/tmp/nowhere", pipeline)
+    assert saved_pipeline["step"] == 9
+    assert saved_pipeline["loss"] == 3.5
+    loaded_pipeline = runtime.invoke_runtime_function("main", "load_training_pipeline_checkpoint", "/tmp/nowhere")
+    assert loaded_pipeline["step"] == 0
+    assert loaded_pipeline["loss"] == 0.0
