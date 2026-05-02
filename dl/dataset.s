@@ -44,9 +44,57 @@ func _copy_int([]int values) []int {
     out
 }
 
+func _copy_dataset(dataset_state state) dataset_state {
+    dataset_state {
+        items: _copy_float(state.items),
+    }
+}
+
+func _copy_iterable_dataset(iterable_dataset_state state) iterable_dataset_state {
+    iterable_dataset_state {
+        items: _copy_float(state.items),
+    }
+}
+
+func _copy_tensor_dataset(tensor_dataset_state state) tensor_dataset_state {
+    tensor_dataset_state {
+        items: _copy_float(state.items),
+    }
+}
+
+func _copy_subset(subset_state state) subset_state {
+    subset_state {
+        dataset: _copy_dataset(state.dataset),
+        indices: _copy_int(state.indices),
+    }
+}
+
+func _copy_concat(concat_dataset_state state) concat_dataset_state {
+    []dataset_state datasets = []dataset_state{cap: len(state.datasets)}
+    int i = 0
+    while i < len(state.datasets) {
+        datasets[i] = _copy_dataset(state.datasets[i])
+        i = i + 1
+    }
+    concat_dataset_state {
+        datasets: datasets,
+        cumulative_sizes: _copy_int(state.cumulative_sizes),
+    }
+}
+
+func _normalize_index(int index, int total) int {
+    if index < 0 {
+        index = index + total
+    }
+    if index < 0 || index >= total {
+        return -1
+    }
+    index
+}
+
 func new_dataset([]float items) dataset_state {
     dataset_state {
-        items: items,
+        items: _copy_float(items),
     }
 }
 
@@ -55,7 +103,11 @@ func dataset_len(dataset_state state) int {
 }
 
 func dataset_getitem(dataset_state state, int index) float {
-    state.items[index]
+    int normalized = _normalize_index(index, len(state.items))
+    if normalized < 0 {
+        return 0.0
+    }
+    state.items[normalized]
 }
 
 func dataset_slice(dataset_state state, int start, int stop) dataset_state {
@@ -87,7 +139,12 @@ func dataset_take(dataset_state state, []int indices) dataset_state {
     []float items = []float{cap: len(indices)}
     int i = 0
     while i < len(indices) {
-        items[i] = state.items[indices[i]]
+        int normalized = _normalize_index(indices[i], len(state.items))
+        if normalized < 0 {
+            items[i] = 0.0
+        } else {
+            items[i] = state.items[normalized]
+        }
         i = i + 1
     }
     new_dataset(items)
@@ -109,18 +166,17 @@ func dataset_extend(dataset_state state, dataset_state other) dataset_state {
 }
 
 func dataset_state_dict(dataset_state state) dataset_state {
-    dataset_state {
-        items: _copy_float(state.items),
-    }
+    _copy_dataset(state)
 }
 
 func dataset_load_state_dict(dataset_state state, dataset_state other) dataset_state {
-    other
+    del state
+    _copy_dataset(other)
 }
 
 func new_iterable_dataset([]float items) iterable_dataset_state {
     iterable_dataset_state {
-        items: items,
+        items: _copy_float(items),
     }
 }
 
@@ -129,22 +185,25 @@ func iterable_dataset_len(iterable_dataset_state state) int {
 }
 
 func iterable_dataset_getitem(iterable_dataset_state state, int index) float {
-    state.items[index]
+    int normalized = _normalize_index(index, len(state.items))
+    if normalized < 0 {
+        return 0.0
+    }
+    state.items[normalized]
 }
 
 func iterable_dataset_state_dict(iterable_dataset_state state) iterable_dataset_state {
-    iterable_dataset_state {
-        items: _copy_float(state.items),
-    }
+    _copy_iterable_dataset(state)
 }
 
 func iterable_dataset_load_state_dict(iterable_dataset_state state, iterable_dataset_state other) iterable_dataset_state {
-    other
+    del state
+    _copy_iterable_dataset(other)
 }
 
 func new_tensor_dataset([]float items) tensor_dataset_state {
     tensor_dataset_state {
-        items: items,
+        items: _copy_float(items),
     }
 }
 
@@ -153,23 +212,26 @@ func tensor_dataset_len(tensor_dataset_state state) int {
 }
 
 func tensor_dataset_getitem(tensor_dataset_state state, int index) float {
-    state.items[index]
+    int normalized = _normalize_index(index, len(state.items))
+    if normalized < 0 {
+        return 0.0
+    }
+    state.items[normalized]
 }
 
 func tensor_dataset_state_dict(tensor_dataset_state state) tensor_dataset_state {
-    tensor_dataset_state {
-        items: _copy_float(state.items),
-    }
+    _copy_tensor_dataset(state)
 }
 
 func tensor_dataset_load_state_dict(tensor_dataset_state state, tensor_dataset_state other) tensor_dataset_state {
-    other
+    del state
+    _copy_tensor_dataset(other)
 }
 
 func new_subset(dataset_state dataset, []int indices) subset_state {
     subset_state {
-        dataset: dataset,
-        indices: indices,
+        dataset: _copy_dataset(dataset),
+        indices: _copy_int(indices),
     }
 }
 
@@ -178,32 +240,40 @@ func subset_len(subset_state state) int {
 }
 
 func subset_getitem(subset_state state, int index) float {
-    state.dataset.items[state.indices[index]]
+    int normalized = _normalize_index(index, len(state.indices))
+    if normalized < 0 {
+        return 0.0
+    }
+    int dataset_index = _normalize_index(state.indices[normalized], len(state.dataset.items))
+    if dataset_index < 0 {
+        return 0.0
+    }
+    state.dataset.items[dataset_index]
 }
 
 func subset_state_dict(subset_state state) subset_state {
-    subset_state {
-        dataset: dataset_state_dict(state.dataset),
-        indices: _copy_int(state.indices),
-    }
+    _copy_subset(state)
 }
 
 func subset_load_state_dict(subset_state state, subset_state other) subset_state {
-    other
+    del state
+    _copy_subset(other)
 }
 
 func new_concat_dataset([]dataset_state datasets) concat_dataset_state {
     int total = 0
     []int cumulative_sizes = []int{cap: len(datasets)}
+    []dataset_state copied = []dataset_state{cap: len(datasets)}
     int i = 0
     while i < len(datasets) {
         total = total + len(datasets[i].items)
         cumulative_sizes[i] = total
+        copied[i] = _copy_dataset(datasets[i])
         i = i + 1
     }
     concat_dataset_state {
-        datasets: datasets,
-        cumulative_sizes: cumulative_sizes,
+        datasets: copied,
+        cumulative_sizes: _copy_int(cumulative_sizes),
     }
 }
 
@@ -215,6 +285,13 @@ func concat_dataset_len(concat_dataset_state state) int {
 }
 
 func concat_dataset_getitem(concat_dataset_state state, int index) float {
+    int total = concat_dataset_len(state)
+    if index < 0 {
+        index = index + total
+    }
+    if index < 0 || index >= total {
+        return 0.0
+    }
     int dataset_idx = 0
     while dataset_idx < len(state.cumulative_sizes) && index >= state.cumulative_sizes[dataset_idx] {
         dataset_idx = dataset_idx + 1
@@ -227,27 +304,29 @@ func concat_dataset_getitem(concat_dataset_state state, int index) float {
 }
 
 func concat_dataset_state_dict(concat_dataset_state state) concat_dataset_state {
-    []dataset_state datasets = []dataset_state{cap: len(state.datasets)}
-    int i = 0
-    while i < len(state.datasets) {
-        datasets[i] = dataset_state_dict(state.datasets[i])
-        i = i + 1
-    }
-    concat_dataset_state {
-        datasets: datasets,
-        cumulative_sizes: _copy_int(state.cumulative_sizes),
-    }
+    _copy_concat(state)
 }
 
 func concat_dataset_load_state_dict(concat_dataset_state state, concat_dataset_state other) concat_dataset_state {
-    other
+    del state
+    _copy_concat(other)
 }
 
 func random_split(dataset_state dataset, []int lengths, int seed) []subset_state {
     del seed
+    int total = dataset_len(dataset)
+    int sum = 0
+    int i = 0
+    while i < len(lengths) {
+        sum = sum + lengths[i]
+        i = i + 1
+    }
+    if sum != total {
+        return []subset_state{cap: 0}
+    }
     int offset = 0
     []subset_state splits = []subset_state{cap: len(lengths)}
-    int i = 0
+    i = 0
     while i < len(lengths) {
         int length = lengths[i]
         []int indices = []int{cap: length}
