@@ -77,6 +77,46 @@ func dataloader_batch_span(dataloader_config config) int {
     config.batch_size * config.seq_len
 }
 
+func dataloader_config_batch_size(dataloader_config config) int {
+    config.batch_size
+}
+
+func dataloader_config_seq_len(dataloader_config config) int {
+    config.seq_len
+}
+
+func dataloader_state_cursor(dataloader_state state) int {
+    state.cursor
+}
+
+func dataloader_state_tokens(dataloader_state state) []int {
+    state.token_ids
+}
+
+func dataloader_state_config(dataloader_state state) dataloader_config {
+    state.config
+}
+
+func dataloader_batch_input_ids(dataloader_batch batch) []int {
+    batch.input_ids
+}
+
+func dataloader_batch_target_ids(dataloader_batch batch) []int {
+    batch.target_ids
+}
+
+func dataloader_batch_valid_tokens(dataloader_batch batch) int {
+    batch.valid_tokens
+}
+
+func dataloader_step_output_state(dataloader_step_output output) dataloader_state {
+    output.state
+}
+
+func dataloader_step_output_batch(dataloader_step_output output) dataloader_batch {
+    output.batch
+}
+
 func has_next(dataloader_state state) bool {
     dataloader_mvp_has_next(state)
 }
