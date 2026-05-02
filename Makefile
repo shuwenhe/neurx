@@ -187,7 +187,7 @@ s-compile-runtime:
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p build/ir$$dir; \
 	    echo "Compiling $$src -> build/ir$$dir/$$base.ir"; \
-	    $(S_COMPILER) $$src build/ir$$dir/$$base.ir || exit 1; \
+		$(S_COMPILER) ir "$$src" -o build/ir$$dir/$$base.ir || exit 1; \
 	done
 	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("build/ir"); ir_files = sorted(str(p.relative_to(root)) for p in root.rglob("*.ir")); manifest = {"source_root": str(Path(".").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'
 

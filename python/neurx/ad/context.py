@@ -1,22 +1,71 @@
 from __future__ import annotations
 
-from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
+from dataclasses import dataclass
 
-_ROOT = Path(__file__).resolve().parents[3] / "ad" / "context.py"
-_SPEC = spec_from_file_location("neurx_root_ad_context", _ROOT)
-_MODULE = module_from_spec(_SPEC)
-assert _SPEC.loader is not None
-_SPEC.loader.exec_module(_MODULE)
 
-enable_grad = _MODULE.enable_grad
-get_gradient_accumulation = _MODULE.get_gradient_accumulation
-gradient_accumulation = _MODULE.gradient_accumulation
-is_grad_accumulation_enabled = _MODULE.is_grad_accumulation_enabled
-is_grad_enabled = _MODULE.is_grad_enabled
-no_grad = _MODULE.no_grad
-set_detect_anomaly = _MODULE.set_detect_anomaly
-set_grad_enabled = _MODULE.set_grad_enabled
-set_gradient_accumulation = _MODULE.set_gradient_accumulation
+@dataclass
+class grad_mode_state:
+    grad_enabled: bool = True
+    grad_accumulation: bool = False
 
-__all__ = list(_MODULE.__all__)
+
+def new_state() -> grad_mode_state:
+    return grad_mode_state()
+
+
+def set_grad_enabled(state: grad_mode_state, enabled: bool) -> grad_mode_state:
+    return grad_mode_state(
+        grad_enabled=bool(enabled),
+        grad_accumulation=state.grad_accumulation,
+    )
+
+
+def no_grad(state: grad_mode_state) -> grad_mode_state:
+    return set_grad_enabled(state, False)
+
+
+def enable_grad(state: grad_mode_state) -> grad_mode_state:
+    return set_grad_enabled(state, True)
+
+
+def set_gradient_accumulation(state: grad_mode_state, accumulate: bool) -> grad_mode_state:
+    return grad_mode_state(
+        grad_enabled=state.grad_enabled,
+        grad_accumulation=bool(accumulate),
+    )
+
+
+def gradient_accumulation(state: grad_mode_state, enable: bool) -> grad_mode_state:
+    return set_gradient_accumulation(state, enable)
+
+
+def set_detect_anomaly(state: grad_mode_state, enabled: bool) -> grad_mode_state:
+    del enabled
+    return state
+
+
+def is_grad_enabled(state: grad_mode_state) -> bool:
+    return state.grad_enabled
+
+
+def is_grad_accumulation_enabled(state: grad_mode_state) -> bool:
+    return state.grad_accumulation
+
+
+def get_gradient_accumulation(state: grad_mode_state) -> bool:
+    return state.grad_accumulation
+
+
+__all__ = [
+    "grad_mode_state",
+    "new_state",
+    "set_grad_enabled",
+    "no_grad",
+    "enable_grad",
+    "set_gradient_accumulation",
+    "gradient_accumulation",
+    "set_detect_anomaly",
+    "is_grad_enabled",
+    "is_grad_accumulation_enabled",
+    "get_gradient_accumulation",
+]

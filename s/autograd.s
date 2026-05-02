@@ -105,5 +105,9 @@ func backward_seed(autograd_state state, int loss_id, tensor loss_tensor) autogr
     set_grad(state, loss_id, ones_like(loss_tensor.data))
 }
 
-func backward(tensor t) () {
+func backward(tensor t) tensor {
+    if !t.requires_grad {
+        return neurx.tensor.zeros_like(t)
+    }
+    neurx.tensor.ones_like(t)
 }
