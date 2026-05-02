@@ -33,6 +33,16 @@ def test_s_dataloader_mvp_runtime_compiled_functions_present():
         "dataloader_step_output_load_state_dict",
         "dataloader_token_count",
         "dataloader_batch_span",
+        "dataloader_config_batch_size",
+        "dataloader_config_seq_len",
+        "dataloader_state_cursor",
+        "dataloader_state_tokens",
+        "dataloader_state_config",
+        "dataloader_batch_input_ids",
+        "dataloader_batch_target_ids",
+        "dataloader_batch_valid_tokens",
+        "dataloader_step_output_state",
+        "dataloader_step_output_batch",
         "has_next",
         "next_batch",
     ):
@@ -52,16 +62,26 @@ def test_s_dataloader_mvp_runtime_state_helpers_round_trip():
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_state_load_state_dict", state, other_state) is other_state
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_token_count", state) == 7
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_span", config) == 12
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_config_batch_size", config) == 3
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_config_seq_len", config) == 4
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_state_cursor", state) == 2
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_state_tokens", state) is state["token_ids"]
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_state_config", state) is config
 
     batch = {"input_ids": [1, 2, 3], "target_ids": [2, 3, 4], "valid_tokens": 3}
     other_batch = {"input_ids": [4, 5], "target_ids": [5, 6], "valid_tokens": 2}
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_state_dict", batch) is batch
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_load_state_dict", batch, other_batch) is other_batch
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_input_ids", batch) is batch["input_ids"]
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_target_ids", batch) is batch["target_ids"]
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_batch_valid_tokens", batch) == 3
 
     output = {"state": state, "batch": batch}
     other_output = {"state": other_state, "batch": other_batch}
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_step_output_state_dict", output) is output
     assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_step_output_load_state_dict", output, other_output) is other_output
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_step_output_state", output) is state
+    assert runtime.invoke_runtime_function("dataloader_mvp", "dataloader_step_output_batch", output) is batch
 
 
 def test_s_dataloader_mvp_runtime_batch_generation():
