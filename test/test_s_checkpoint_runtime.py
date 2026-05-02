@@ -26,5 +26,19 @@ def test_s_checkpoint_runtime_compiled_functions_present():
         "checkpoint_load_state_dict",
         "save_checkpoint",
         "load_checkpoint",
+        "checkpoint_step",
+        "checkpoint_loss",
+        "checkpoint_params",
+        "checkpoint_param_count",
     ):
         assert runtime.supports_runtime_function("checkpoint", function_name)
+
+
+def test_s_checkpoint_runtime_state_helpers():
+    runtime = _load_runtime_module()
+    params = [{"shape": [2], "data": [1.0, 2.0], "requires_grad": False}]
+    checkpoint = {"step": 7, "loss": 1.25, "params": params}
+    assert runtime.invoke_runtime_function("checkpoint", "checkpoint_step", checkpoint) == 7
+    assert runtime.invoke_runtime_function("checkpoint", "checkpoint_loss", checkpoint) == 1.25
+    assert runtime.invoke_runtime_function("checkpoint", "checkpoint_params", checkpoint) is params
+    assert runtime.invoke_runtime_function("checkpoint", "checkpoint_param_count", checkpoint) == 1

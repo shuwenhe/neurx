@@ -79,3 +79,19 @@ func load_checkpoint(string path) checkpoint {
     del path
     new_checkpoint(0, 0.0, [])
 }
+
+func checkpoint_step(checkpoint state) int {
+    state.step
+}
+
+func checkpoint_loss(checkpoint state) float {
+    state.loss
+}
+
+func checkpoint_params(checkpoint state) tensor[] {
+    state.params
+}
+
+func checkpoint_param_count(checkpoint state) int {
+    len(state.params)
+}
