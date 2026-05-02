@@ -76,6 +76,14 @@ func autocast_load_state_dict(autocast_state state, autocast_state other) autoca
     other
 }
 
+func autocast_is_enabled(autocast_state state) bool {
+    state.enabled
+}
+
+func autocast_depth(autocast_state state) int {
+    state.nesting
+}
+
 func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor, int growth_interval, bool enabled) grad_scaler_state {
     grad_scaler_state {
         scale: init_scale,
@@ -143,4 +151,16 @@ func grad_scaler_state_dict(grad_scaler_state state) grad_scaler_state {
 
 func grad_scaler_load_state_dict(grad_scaler_state state, grad_scaler_state other) grad_scaler_state {
     other
+}
+
+func grad_scaler_is_enabled(grad_scaler_state state) bool {
+    state.enabled
+}
+
+func grad_scaler_get_scale(grad_scaler_state state) float {
+    state.scale
+}
+
+func grad_scaler_found_inf(grad_scaler_state state) bool {
+    state.found_inf
 }
