@@ -121,6 +121,8 @@ def test_s_train_runtime_compiled_functions_present():
         "training_pipeline_load_state_dict",
         "training_pipeline_metrics",
         "training_pipeline_set_metrics",
+        "train_step_autograd_loss",
+        "train_step_autograd_record_count",
     ):
         assert runtime.supports_runtime_function("loop", function_name)
 
@@ -240,6 +242,10 @@ def test_s_train_checkpoint_manager_and_logging_round_trip():
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_prune_count", checkpoint) == 0
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_next_save_step", checkpoint) == 4
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_has_best", checkpoint) is True
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint, 3) is False
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint, 4) is True
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint_other, 7) is False
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint_other, 8) is True
 
     logger = {
         "enabled": True,
@@ -265,3 +271,23 @@ def test_s_train_checkpoint_manager_and_logging_round_trip():
     assert runtime.invoke_runtime_function("logging", "training_logger_last_epoch", logger) == 2
     assert runtime.invoke_runtime_function("logging", "training_logger_last_flush_step", logger) == 8
     assert runtime.invoke_runtime_function("logging", "training_logger_last_flush_epoch", logger) == 1
+
+
+def test_s_train_loop_autograd_closure_round_trip():
+    runtime = _load_runtime_module()
+    pipeline = {
+        "loop": {"epoch": 0, "step": 0, "should_stop": False, "last_valid_tokens": 0},
+        "loader": {"token_ids": [1, 2, 3, 4, 5, 6, 7, 8], "cursor": 0, "config": {"batch_size": 1, "seq_len": 2}},
+        "logger": {"enabled": True, "message_count": 0, "last_step": 0, "last_epoch": 0, "last_flush_step": 0, "last_flush_epoch": 0},
+        "scaler": {"scale": 1.0, "growth_factor": 2.0, "backoff_factor": 0.5, "growth_interval": 2, "growth_tracker": 0, "enabled": True, "found_inf": False},
+        "checkpoint": {"keep_last_n": 4, "keep_every_n_steps": 2, "save_best_only": False, "last_saved_step": -1, "last_saved_epoch": -1, "best_step": -1, "best_epoch": -1, "best_score": 0.0, "save_count": 0, "prune_count": 0, "next_save_step": 2, "has_best": False},
+        "autocast": {"enabled": False, "dtype_code": 0, "nesting": 0},
+        "metrics": {"step": 0, "epoch": 0, "batch_index": 0, "valid_tokens": 0, "loss": 0.0, "score": 0.0},
+        "last_loss": 0.0,
+        "best_score": 0.0,
+    }
+
+    loss_tensor = runtime.invoke_runtime_function("loop", "train_step_autograd_loss", pipeline)
+    record_count = runtime.invoke_runtime_function("loop", "train_step_autograd_record_count", pipeline)
+    assert loss_tensor.shape == (1,)
+    assert record_count == 1
