@@ -30,12 +30,17 @@ def test_s_train_runtime_compiled_functions_present():
         "set_autocast_dtype",
         "autocast_state_dict",
         "autocast_load_state_dict",
+        "autocast_is_enabled",
+        "autocast_depth",
         "new_grad_scaler",
         "scale_loss",
         "update_scale",
         "grad_scaler_step",
         "grad_scaler_state_dict",
         "grad_scaler_load_state_dict",
+        "grad_scaler_is_enabled",
+        "grad_scaler_get_scale",
+        "grad_scaler_found_inf",
     ):
         assert runtime.supports_runtime_function("amp", function_name)
 
@@ -162,6 +167,21 @@ def test_s_train_amp_runtime_state_helpers_round_trip():
     autocast_other = {"enabled": False, "dtype_code": 9, "nesting": 0}
     assert runtime.invoke_runtime_function("amp", "autocast_state_dict", autocast) is autocast
     assert runtime.invoke_runtime_function("amp", "autocast_load_state_dict", autocast, autocast_other) is autocast_other
+    assert runtime.invoke_runtime_function("amp", "autocast_is_enabled", autocast) is True
+    assert runtime.invoke_runtime_function("amp", "autocast_depth", autocast) == 2
+
+    scaler = {
+        "scale": 1024.0,
+        "growth_factor": 2.0,
+        "backoff_factor": 0.5,
+        "growth_interval": 2000,
+        "growth_tracker": 7,
+        "enabled": True,
+        "found_inf": False,
+    }
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_is_enabled", scaler) is True
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_get_scale", scaler) == 1024.0
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_found_inf", scaler) is False
 
 
 def test_s_train_checkpoint_manager_and_logging_round_trip():
