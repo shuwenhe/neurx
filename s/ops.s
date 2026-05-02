@@ -106,6 +106,26 @@ func mse_loss(tensor input, tensor target, string reduction) tensor {
     mse_loss(input, target, reduction)
 }
 
+func bce_loss(tensor input, tensor target, string reduction) tensor {
+    bce_loss(input, target, reduction)
+}
+
+func bce_with_logits_loss(tensor input, tensor target, string reduction) tensor {
+    bce_with_logits_loss(input, target, reduction)
+}
+
+func l1_loss(tensor input, tensor target, string reduction) tensor {
+    l1_loss(input, target, reduction)
+}
+
+func smooth_l1_loss(tensor input, tensor target, string reduction, float beta) tensor {
+    smooth_l1_loss(input, target, reduction, beta)
+}
+
+func kl_div_loss(tensor input, tensor target, string reduction, bool log_target) tensor {
+    kl_div_loss(input, target, reduction, log_target)
+}
+
 func nll_loss(tensor input, tensor target, int ignore_index, string reduction, float label_smoothing, int dim) tensor {
     nll_loss(input, target, ignore_index, reduction, label_smoothing, dim)
 }
