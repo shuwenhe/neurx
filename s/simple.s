@@ -1,3 +1,9 @@
-package test
+package neurx.simple
 
-struct example {}
+func sum2(int a, int b) int {
+    a + b
+}
+
+func product2(int a, int b) int {
+    a * b
+}
