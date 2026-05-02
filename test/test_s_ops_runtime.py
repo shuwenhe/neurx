@@ -50,6 +50,10 @@ def test_s_ops_runtime_compiled_functions_present():
         "mean_last_dim",
         "softmax_last_dim",
         "log_softmax_last_dim",
+        "sum_first_dim",
+        "mean_first_dim",
+        "softmax_first_dim",
+        "log_softmax_first_dim",
         "mse_loss",
         "bce_loss",
         "bce_with_logits_loss",
@@ -100,3 +104,15 @@ def test_s_ops_runtime_last_dim_helpers_round_trip():
     log_softmax_out = runtime.invoke_runtime_function("ops", "log_softmax_last_dim", [[1.0, 2.0, 3.0]])
     assert softmax_out.shape == (1, 3)
     assert log_softmax_out.shape == (1, 3)
+
+
+def test_s_ops_runtime_first_dim_helpers_round_trip():
+    runtime = _load_runtime_module()
+    values = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+    assert runtime.invoke_runtime_function("ops", "sum_first_dim", values, False).tolist() == [5.0, 7.0, 9.0]
+    assert runtime.invoke_runtime_function("ops", "mean_first_dim", values, False).tolist() == [2.5, 3.5, 4.5]
+
+    softmax_out = runtime.invoke_runtime_function("ops", "softmax_first_dim", values)
+    log_softmax_out = runtime.invoke_runtime_function("ops", "log_softmax_first_dim", values)
+    assert softmax_out.shape == (2, 3)
+    assert log_softmax_out.shape == (2, 3)

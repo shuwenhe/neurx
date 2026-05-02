@@ -110,12 +110,28 @@ func mean_last_dim(tensor a, bool keepdims) tensor {
     mean(a, -1, keepdims)
 }
 
+func sum_first_dim(tensor a, bool keepdims) tensor {
+    sum(a, 0, keepdims)
+}
+
+func mean_first_dim(tensor a, bool keepdims) tensor {
+    mean(a, 0, keepdims)
+}
+
 func softmax_last_dim(tensor a) tensor {
     softmax(a, -1)
 }
 
 func log_softmax_last_dim(tensor a) tensor {
     log_softmax(a, -1)
+}
+
+func softmax_first_dim(tensor a) tensor {
+    softmax(a, 0)
+}
+
+func log_softmax_first_dim(tensor a) tensor {
+    log_softmax(a, 0)
 }
 
 func mse_loss(tensor input, tensor target, string reduction) tensor {
