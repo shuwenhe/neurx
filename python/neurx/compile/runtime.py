@@ -377,6 +377,131 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
             "loss": 0.0,
             "params": [],
         }
+    if name == "new_trainer_pipeline":
+        if len(args) != 1:
+            raise ValueError(f"new_trainer_pipeline expects 1 arg, got {len(args)}")
+        session = args[0]
+        return {
+            "session": session,
+            "snapshot": _execute_intrinsic("new_trainer_snapshot", [session]),
+        }
+    if name == "trainer_pipeline_state_dict":
+        if len(args) != 1:
+            raise ValueError(f"trainer_pipeline_state_dict expects 1 arg, got {len(args)}")
+        pipeline = args[0]
+        if not isinstance(pipeline, dict):
+            return pipeline
+        return {
+            "session": pipeline.get("session"),
+            "snapshot": _execute_intrinsic("trainer_snapshot_state_dict", [pipeline.get("snapshot", {})]),
+        }
+    if name == "trainer_pipeline_load_state_dict":
+        if len(args) != 2:
+            raise ValueError(f"trainer_pipeline_load_state_dict expects 2 args, got {len(args)}")
+        pipeline = args[0]
+        other = args[1]
+        if not isinstance(pipeline, dict) or not isinstance(other, dict):
+            return other
+        return {
+            "session": other.get("session"),
+            "snapshot": _execute_intrinsic("trainer_snapshot_load_state_dict", [pipeline.get("snapshot", {}), other.get("snapshot", {})]),
+        }
+    if name == "run_trainer_snapshot":
+        if len(args) != 2:
+            raise ValueError(f"run_trainer_snapshot expects 2 args, got {len(args)}")
+        session = args[0]
+        batch = args[1]
+        next_state = session.get("state", {}) if isinstance(session, dict) else {}
+        if isinstance(session, dict) and isinstance(session.get("state"), dict) and isinstance(batch, dict):
+            token_ids = batch.get("token_ids", [])
+            denom = len(token_ids) if hasattr(token_ids, "__len__") else 0
+            loss = float(next_state.get("last_loss", 0.0))
+            if denom > 0:
+                loss = 1.0 / float(denom)
+            next_state = {
+                "step": int(next_state.get("step", 0)) + 1,
+                "last_loss": loss,
+                "optimizer": next_state.get("optimizer"),
+                "adam": next_state.get("adam"),
+                "rmsprop": next_state.get("rmsprop"),
+            }
+            next_session = {
+                "config": session.get("config"),
+                "state": next_state,
+                "sample": session.get("sample"),
+            }
+            return _execute_intrinsic("new_trainer_snapshot", [next_session])
+        return _execute_intrinsic("new_trainer_snapshot", [session])
+    if name == "run_training_pipeline":
+        if len(args) != 2:
+            raise ValueError(f"run_training_pipeline expects 2 args, got {len(args)}")
+        pipeline = args[0]
+        batch = args[1]
+        if not isinstance(pipeline, dict):
+            return pipeline
+        next_snapshot = _execute_intrinsic("run_trainer_snapshot", [pipeline.get("session", {}), batch])
+        return {
+            "session": next_snapshot.get("session"),
+            "snapshot": next_snapshot,
+        }
+    if name == "stop_trainer_pipeline":
+        if len(args) != 1:
+            raise ValueError(f"stop_trainer_pipeline expects 1 arg, got {len(args)}")
+        return args[0]
+    if name == "resume_trainer_pipeline":
+        if len(args) != 1:
+            raise ValueError(f"resume_trainer_pipeline expects 1 arg, got {len(args)}")
+        return args[0]
+    if name == "pipeline_checkpoint":
+        if len(args) != 1:
+            raise ValueError(f"pipeline_checkpoint expects 1 arg, got {len(args)}")
+        pipeline = args[0]
+        if not isinstance(pipeline, dict):
+            return pipeline
+        return _execute_intrinsic("checkpoint_state_dict", [pipeline.get("snapshot", {}).get("checkpoint_state", {})])
+    if name == "save_trainer_session_checkpoint":
+        if len(args) != 2:
+            raise ValueError(f"save_trainer_session_checkpoint expects 2 args, got {len(args)}")
+        return _execute_intrinsic("save_checkpoint", [args[0], args[1]])
+    if name == "load_trainer_session_checkpoint":
+        if len(args) != 1:
+            raise ValueError(f"load_trainer_session_checkpoint expects 1 arg, got {len(args)}")
+        ckpt = _execute_intrinsic("load_checkpoint", [args[0]])
+        session = {
+            "config": {
+                "epochs": 0,
+                "batch_size": 0,
+                "learning_rate": 0.0,
+                "grad_clip": 0.0,
+            },
+            "state": {
+                "step": 0,
+                "last_loss": 0.0,
+                "optimizer": None,
+                "adam": None,
+                "rmsprop": None,
+            },
+            "sample": {
+                "data": [],
+                "shape": [],
+            },
+        }
+        return {
+            "session": session,
+            "checkpoint_state": ckpt,
+        }
+    if name == "save_training_pipeline_checkpoint":
+        if len(args) != 2:
+            raise ValueError(f"save_training_pipeline_checkpoint expects 2 args, got {len(args)}")
+        return _execute_intrinsic("save_checkpoint", [args[0], args[1]])
+    if name == "load_training_pipeline_checkpoint":
+        if len(args) != 1:
+            raise ValueError(f"load_training_pipeline_checkpoint expects 1 arg, got {len(args)}")
+        snapshot = _execute_intrinsic("load_trainer_session_checkpoint", [args[0]])
+        return {
+            "session": snapshot.get("session"),
+            "snapshot": snapshot,
+        }
     if name == "new_trainer_snapshot":
         if len(args) != 1:
             raise ValueError(f"new_trainer_snapshot expects 1 arg, got {len(args)}")
@@ -395,6 +520,27 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
                 "loss": loss,
                 "params": [],
             },
+        }
+    if name == "trainer_snapshot_state_dict":
+        if len(args) != 1:
+            raise ValueError(f"trainer_snapshot_state_dict expects 1 arg, got {len(args)}")
+        snapshot = args[0]
+        if not isinstance(snapshot, dict):
+            return snapshot
+        return {
+            "session": snapshot.get("session"),
+            "checkpoint_state": _execute_intrinsic("checkpoint_state_dict", [snapshot.get("checkpoint_state", {})]),
+        }
+    if name == "trainer_snapshot_load_state_dict":
+        if len(args) != 2:
+            raise ValueError(f"trainer_snapshot_load_state_dict expects 2 args, got {len(args)}")
+        snapshot = args[0]
+        other = args[1]
+        if not isinstance(snapshot, dict) or not isinstance(other, dict):
+            return other
+        return {
+            "session": other.get("session"),
+            "checkpoint_state": _execute_intrinsic("checkpoint_load_state_dict", [snapshot.get("checkpoint_state", {}), other.get("checkpoint_state", {})]),
         }
     if name == "mse_loss":
         if len(args) != 3:
