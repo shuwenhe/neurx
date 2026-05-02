@@ -59,6 +59,11 @@ struct trainer_snapshot {
     checkpoint checkpoint_state
 }
 
+struct trainer_pipeline {
+    trainer_session session
+    trainer_snapshot snapshot
+}
+
 func new_config(int epochs, int batch_size, float learning_rate, float grad_clip) trainer_config {
     trainer_config {
         epochs: epochs,
@@ -170,6 +175,26 @@ func load_trainer_checkpoint(string path) checkpoint {
     load_checkpoint(path)
 }
 
+func save_trainer_session_checkpoint(string path, trainer_session session) checkpoint {
+    save_checkpoint(path, session.state.step, session.state.last_loss, _empty_tensor_params())
+}
+
+func load_trainer_session_checkpoint(string path) trainer_snapshot {
+    checkpoint ckpt = load_checkpoint(path)
+    trainer_session session = trainer_session {
+        config: new_config(0, 0, 0.0, 0.0),
+        state: new_state(),
+        sample: example {
+            data: []float{cap: 0},
+            shape: []int{cap: 0},
+        },
+    }
+    trainer_snapshot {
+        session: session,
+        checkpoint_state: ckpt,
+    }
+}
+
 func trainer_snapshot_state_dict(trainer_snapshot state) trainer_snapshot {
     trainer_snapshot {
         session: trainer_session_state_dict(state.session),
@@ -181,6 +206,75 @@ func trainer_snapshot_load_state_dict(trainer_snapshot state, trainer_snapshot o
     trainer_snapshot {
         session: trainer_session_load_state_dict(state.session, other.session),
         checkpoint_state: checkpoint_load_state_dict(state.checkpoint_state, other.checkpoint_state),
+    }
+}
+
+func run_trainer_snapshot(trainer_session session, multimodal_batch batch) trainer_snapshot {
+    trainer_state next_state = train_step(session.state, batch)
+    trainer_session next_session = trainer_session {
+        config: trainer_config_state_dict(session.config),
+        state: next_state,
+        sample: process_example(session.sample),
+    }
+    new_trainer_snapshot(next_session)
+}
+
+func new_trainer_pipeline(trainer_session session) trainer_pipeline {
+    trainer_pipeline {
+        session: session,
+        snapshot: new_trainer_snapshot(session),
+    }
+}
+
+func trainer_pipeline_state_dict(trainer_pipeline pipeline) trainer_pipeline {
+    trainer_pipeline {
+        session: trainer_session_state_dict(pipeline.session),
+        snapshot: trainer_snapshot_state_dict(pipeline.snapshot),
+    }
+}
+
+func trainer_pipeline_load_state_dict(trainer_pipeline pipeline, trainer_pipeline other) trainer_pipeline {
+    trainer_pipeline {
+        session: trainer_session_load_state_dict(pipeline.session, other.session),
+        snapshot: trainer_snapshot_load_state_dict(pipeline.snapshot, other.snapshot),
+    }
+}
+
+func run_training_pipeline(trainer_pipeline pipeline, multimodal_batch batch) trainer_pipeline {
+    trainer_snapshot next_snapshot = run_trainer_snapshot(pipeline.session, batch)
+    trainer_pipeline {
+        session: next_snapshot.session,
+        snapshot: next_snapshot,
+    }
+}
+
+func stop_trainer_pipeline(trainer_pipeline pipeline) trainer_pipeline {
+    trainer_pipeline {
+        session: pipeline.session,
+        snapshot: pipeline.snapshot,
+    }
+}
+
+func resume_trainer_pipeline(trainer_pipeline pipeline) trainer_pipeline {
+    trainer_pipeline {
+        session: pipeline.session,
+        snapshot: pipeline.snapshot,
+    }
+}
+
+func pipeline_checkpoint(trainer_pipeline pipeline) checkpoint {
+    checkpoint_state_dict(pipeline.snapshot.checkpoint_state)
+}
+
+func save_training_pipeline_checkpoint(string path, trainer_pipeline pipeline) checkpoint {
+    save_checkpoint(path, pipeline.snapshot.checkpoint_state.step, pipeline.snapshot.checkpoint_state.loss, _empty_tensor_params())
+}
+
+func load_training_pipeline_checkpoint(string path) trainer_pipeline {
+    trainer_snapshot snapshot = load_trainer_session_checkpoint(path)
+    trainer_pipeline {
+        session: snapshot.session,
+        snapshot: snapshot,
     }
 }
 
