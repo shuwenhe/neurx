@@ -526,6 +526,8 @@ def test_s_function_params_round_trip():
     assert chain["params"] == ["op=add"]
     assert chain["inputs"] == []
     assert chain["outputs"] == []
+    assert [eqn["primitive"] for eqn in chain["eqns"]] == ["add"]
+    assert chain["eqns"][0]["params"] == ["op=add"]
     assert chain["ready"] is False
 
     fn_round_trip = runtime.invoke_runtime_function("function", "transform_chain_to_function", chain, "demo_fn2", 3)
