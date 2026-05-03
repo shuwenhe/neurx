@@ -22,6 +22,7 @@ def test_s_tensor_runtime_compiled_functions_present():
     assert any(Path(path).name == "einsum.ir" for path in status["ir_files"])
     assert any(Path(path).name == "shape.ir" for path in status["ir_files"])
     assert any(Path(path).name == "reduce.ir" for path in status["ir_files"])
+    assert any(Path(path).as_posix().endswith("tensor/batch.ir") for path in status["ir_files"])
 
     for function_name in (
         "new",
@@ -103,6 +104,7 @@ def test_s_tensor_runtime_compiled_functions_present():
         ("indexing", ("index_select", "masked_select", "masked_fill", "masked_scatter", "nonzero", "repeat_interleave", "cat", "split", "chunk", "stack", "pad", "slice", "gather")),
         ("shape", ("broadcast_shape", "normalize_axes", "infer_matmul_shape", "expand_shape", "squeeze_shape", "infer_reduce_shape", "concat_shape", "stack_shape", "flatten_shape")),
         ("reduce", ("reduce_sum", "reduce_mean", "reduce_max", "reduce_min", "reduce_prod", "reduce_sum_dim", "reduce_mean_dim", "reduce_max_dim", "reduce_min_dim", "reduce_prod_dim")),
+        ("tensor/batch", ("new_batch_state", "batch_name", "batch_active", "batch_batch_size", "batch_batch_dim", "batch_primitive_count", "batch_param_count", "batch_has_primitive", "batch_has_param", "batch_add_primitive", "batch_add_param", "batch_set_active", "batch_set_batch_size", "batch_set_batch_dim", "batch_clear_primitives", "batch_clear_params", "batch_state_dict", "batch_load_state_dict", "batch_to_transform_chain", "transform_chain_to_batch", "vmap_unary", "vmap_binary", "vmap_ternary", "vmap_add", "vmap_sub", "vmap_mul", "vmap_div", "vmap_maximum", "vmap_minimum", "vmap_matmul", "vmap_sum", "vmap_mean", "vmap_negative", "vmap_abs", "vmap_square", "vmap_reciprocal", "vmap_where")),
         ("stats", ("sort", "argsort", "topk", "unique", "median", "mode", "quantile", "cumsum", "cumprod", "prod")),
         ("linalg", ("matrix_rank", "inv", "det", "eig", "eigh", "svd", "qr", "cholesky", "solve", "lstsq", "cross", "outer", "inner", "matrix_power")),
         ("einsum", ("einsum",)),
@@ -181,6 +183,52 @@ def test_s_tensor_runtime_autograd_helpers():
 
     gather_out = indexing_runtime.invoke_runtime_function("indexing", "gather", indexed, [2, 0])
     assert list(gather_out["data"]) == [30.0, 10.0]
+
+
+def test_s_tensor_batch_runtime_smoke():
+    runtime = _load_runtime_module()
+    state = runtime.invoke_runtime_function("tensor/batch", "new_batch_state", "vmap-demo", 2, 0)
+    assert state["name"] == "vmap-demo"
+    assert state["active"] is False
+    assert state["batch_size"] == 2
+    assert state["batch_dim"] == 0
+
+    state = runtime.invoke_runtime_function("tensor/batch", "batch_add_primitive", state, "vmap")
+    state = runtime.invoke_runtime_function("tensor/batch", "batch_add_param", state, "batch_dim=0")
+    assert state["active"] is True
+    assert state["primitives"] == ["vmap"]
+    assert state["params"] == ["batch_dim=0"]
+
+    chain = runtime.invoke_runtime_function("tensor/batch", "batch_to_transform_chain", state)
+    assert chain["steps"] == ["vmap"]
+    assert chain["params"] == ["batch_dim=0"]
+
+    restored = runtime.invoke_runtime_function("tensor/batch", "transform_chain_to_batch", chain, "vmap-demo", 2, 0)
+    assert restored["primitives"] == ["vmap"]
+    assert restored["params"] == ["batch_dim=0"]
+
+    a = {"data": [1.0, 2.0, 3.0, 4.0], "shape": [2, 2], "requires_grad": True, "grad": None}
+    b = {"data": [5.0, 6.0, 7.0, 8.0], "shape": [2, 2], "requires_grad": True, "grad": None}
+    add_out = runtime.invoke_runtime_function("tensor/batch", "vmap_add", a, b)
+    mul_out = runtime.invoke_runtime_function("tensor/batch", "vmap_mul", a, b)
+    assert list(add_out["data"]) == [6.0, 8.0, 10.0, 12.0]
+    assert list(mul_out["data"]) == [5.0, 12.0, 21.0, 32.0]
+
+    batched_a = {"data": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0], "shape": [2, 2, 2], "requires_grad": True, "grad": None}
+    batched_b = {"data": [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0], "shape": [2, 2, 2], "requires_grad": True, "grad": None}
+    matmul_out = runtime.invoke_runtime_function("tensor/batch", "vmap_matmul", batched_a, batched_b)
+    assert matmul_out["shape"] == [2, 2, 2]
+    assert list(matmul_out["data"]) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+
+    reduce_a = {"data": [1.0, 2.0, 3.0, 5.0], "shape": [2, 2], "requires_grad": True, "grad": None}
+    sum_out = runtime.invoke_runtime_function("tensor/batch", "vmap_sum", reduce_a)
+    mean_out = runtime.invoke_runtime_function("tensor/batch", "vmap_mean", reduce_a)
+    assert list(sum_out["data"]) == [3.0, 8.0]
+    assert list(mean_out["data"]) == [1.5, 4.0]
+
+    cond = {"data": [1.0, 0.0, 0.0, 1.0], "shape": [2, 2], "requires_grad": False, "grad": None}
+    where_out = runtime.invoke_runtime_function("tensor/batch", "vmap_where", cond, a, b)
+    assert list(where_out["data"]) == [1.0, 6.0, 7.0, 4.0]
 
 
 def test_s_tensor_tracer_runtime_smoke():
