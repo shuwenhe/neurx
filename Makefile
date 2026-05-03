@@ -7,7 +7,7 @@ PIP ?= $(PYTHON) -m pip
 PYTEST ?= $(PYTHON) -m pytest
 PIP_INSTALL_FLAGS ?= --no-build-isolation
 ROUNDS ?= 3
-S_COMPILER ?= /usr/local/bin/s
+S_COMPILER ?= /Users/feifei/.local/bin/s
 
 help:
 	@echo "Targets:"
@@ -158,7 +158,7 @@ cann-test-npu-agnostic-stable:
 s-compile-runtime:
 	@if [ ! -x "$(S_COMPILER)" ]; then \
 		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
-		echo "hint: run 'make -C /app/s' first to install /usr/local/bin/s"; \
+		echo "hint: run 'make -C /Users/feifei/s' first to install /Users/feifei/.local/bin/s"; \
 		exit 1; \
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"

@@ -7,7 +7,7 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `python/neurx/`: Python runtime and compatibility surface
 - `tensor/`: S source for tensor primitives and helpers
 - `ad/`: S source for automatic differentiation
-- `engine/`: S source for backward engine entrypoints
+- `engine/`: S source for backward execution and autograd state
 - `dl/`: S source for datasets and dataloading
 - `lf/`: S source for loss functions
 - `train/`: S source for training utilities
@@ -21,7 +21,8 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 ## S Modules
 
 - `ad/ad.s`: automatic differentiation state, grad mode, record tracking, and backward skeleton
-- `engine/engine.s`: backward engine entrypoint
+- `engine/backward.s`: backward engine entrypoint
+- `engine/state.s`: autograd state helpers
 - `tensor/tensor.s`: tensor structure, construction, views, elementwise ops, matmul
 - `tensor/creation.s`: tensor creation and fill helpers
 - `tensor/indexing.s`: indexing, concatenation, and splitting helpers

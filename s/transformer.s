@@ -38,9 +38,9 @@ func _copy_layer(transformer_layer layer) transformer_layer {
     }
 }
 
-func _copy_layers(transformer_layer[] layers) transformer_layer[] {
+func _copy_layers([]transformer_layer layers) []transformer_layer {
     int n = len(layers)
-    transformer_layer[] out = []transformer_layer{cap: n}
+    []transformer_layer out = []transformer_layer{cap: n}
     for i in 0..n {
         out.push(_copy_layer(layers[i]))
     }
@@ -68,11 +68,11 @@ struct transformer_layer {
 
 struct transformer {
     transformer_config config
-    transformer_layer[] layers
+    []transformer_layer layers
 }
 
 func transformer_init(config transformer_config) transformer {
-    transformer_layer[] mut layers = []
+    []transformer_layer mut layers = []
     int i = 0
     while i < config.num_layers {
         transformer_layer layer = transformer_layer {
@@ -110,11 +110,11 @@ func transformer_layer_load_state_dict(transformer_layer layer, transformer_laye
     _copy_layer(other)
 }
 
-func transformer_layers_state_dict(transformer_layer[] layers) transformer_layer[] {
+func transformer_layers_state_dict([]transformer_layer layers) []transformer_layer {
     _copy_layers(layers)
 }
 
-func transformer_layers_load_state_dict(transformer_layer[] layers, transformer_layer[] other) transformer_layer[] {
+func transformer_layers_load_state_dict([]transformer_layer layers, []transformer_layer other) []transformer_layer {
     _copy_layers(other)
 }
 
