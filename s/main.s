@@ -6,7 +6,7 @@ use neurx.tensor.tensor
 use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
 use neurx.checkpoint.{checkpoint, new_checkpoint, checkpoint_state_dict, checkpoint_load_state_dict, save_checkpoint, load_checkpoint}
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -17,7 +17,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -151,7 +151,7 @@ func trainer_session_load_state_dict(trainer_session session, trainer_session ot
     }
 }
 
-func _empty_tensor_params() []tensor {
+func empty_tensor_params() []tensor {
     []tensor params = []tensor{cap: 0}
     params
 }
@@ -159,7 +159,7 @@ func _empty_tensor_params() []tensor {
 func new_trainer_snapshot(trainer_session session) trainer_snapshot {
     trainer_snapshot {
         session: session,
-        checkpoint_state: new_checkpoint(session.state.step, session.state.last_loss, _empty_tensor_params()),
+        checkpoint_state: new_checkpoint(session.state.step, session.state.last_loss, empty_tensor_params()),
     }
 }
 
@@ -176,7 +176,7 @@ func load_trainer_checkpoint(string path) checkpoint {
 }
 
 func save_trainer_session_checkpoint(string path, trainer_session session) checkpoint {
-    save_checkpoint(path, session.state.step, session.state.last_loss, _empty_tensor_params())
+    save_checkpoint(path, session.state.step, session.state.last_loss, empty_tensor_params())
 }
 
 func load_trainer_session_checkpoint(string path) trainer_snapshot {
@@ -217,7 +217,7 @@ func run_trainer_snapshot(trainer_session session, multimodal_batch batch) train
             state: next_state,
             sample: process_example(session.sample),
         },
-        checkpoint_state: new_checkpoint(next_state.step, next_state.last_loss, _empty_tensor_params()),
+        checkpoint_state: new_checkpoint(next_state.step, next_state.last_loss, empty_tensor_params()),
     }
 }
 
@@ -269,7 +269,7 @@ func pipeline_checkpoint(trainer_pipeline pipeline) checkpoint {
 }
 
 func save_training_pipeline_checkpoint(string path, trainer_pipeline pipeline) checkpoint {
-    save_checkpoint(path, pipeline.snapshot.checkpoint_state.step, pipeline.snapshot.checkpoint_state.loss, _empty_tensor_params())
+    save_checkpoint(path, pipeline.snapshot.checkpoint_state.step, pipeline.snapshot.checkpoint_state.loss, empty_tensor_params())
 }
 
 func load_training_pipeline_checkpoint(string path) trainer_pipeline {
@@ -380,20 +380,20 @@ func process_example(example ex) example {
     }
     example {
         data: processed,
-        shape: _copy_int(ex.shape),
+        shape: copy_int(ex.shape),
     }
 }
 
 func example_state_dict(example ex) example {
     example {
-        data: _copy_float(ex.data),
-        shape: _copy_int(ex.shape),
+        data: copy_float(ex.data),
+        shape: copy_int(ex.shape),
     }
 }
 
 func example_load_state_dict(example ex, example other) example {
     example {
-        data: _copy_float(other.data),
-        shape: _copy_int(other.shape),
+        data: copy_float(other.data),
+        shape: copy_int(other.shape),
     }
 }

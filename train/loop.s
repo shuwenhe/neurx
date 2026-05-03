@@ -116,7 +116,7 @@ func training_loop_run_state_load_state_dict(training_loop_run_state state, trai
     other
 }
 
-func _advance_loop_state(training_loop_state state, int epoch_delta, int step_delta, int valid_tokens) training_loop_state {
+func advance_loop_state(training_loop_state state, int epoch_delta, int step_delta, int valid_tokens) training_loop_state {
     if state.should_stop {
         return state
     }
@@ -154,7 +154,7 @@ func run_training_loop(training_loop_state state, int epochs) training_loop_stat
     training_loop_state current = state
     int i = 0
     while i < loops {
-        current = _advance_loop_state(current, 1, 1, current.last_valid_tokens)
+        current = advance_loop_state(current, 1, 1, current.last_valid_tokens)
         i = i + 1
     }
     current
@@ -168,7 +168,7 @@ func train_epoch(training_loop_run_state state) training_loop_run_state {
         epoch_delta = 1
     }
     dataloader_step_output batch_output = next_batch(loader)
-    training_loop_state loop = _advance_loop_state(state.loop, epoch_delta, 1, batch_output.batch.valid_tokens)
+    training_loop_state loop = advance_loop_state(state.loop, epoch_delta, 1, batch_output.batch.valid_tokens)
     training_loop_run_state {
         loop: loop,
         loader: batch_output.state,
@@ -206,7 +206,7 @@ func resume_training_run(training_loop_run_state state) training_loop_run_state 
     }
 }
 
-func _loss_from_valid_tokens(int valid_tokens) float {
+func loss_from_valid_tokens(int valid_tokens) float {
     float loss = 0.0
     if valid_tokens > 0 {
         loss = valid_tokens
@@ -214,14 +214,14 @@ func _loss_from_valid_tokens(int valid_tokens) float {
     loss
 }
 
-func _score_from_loss(float loss) float {
+func score_from_loss(float loss) float {
     if loss < 0.0 {
         return 0.0 - loss
     }
     loss
 }
 
-func _build_metrics(int step, int epoch, int batch_index, int valid_tokens, float loss, float score) training_metrics_state {
+func build_metrics(int step, int epoch, int batch_index, int valid_tokens, float loss, float score) training_metrics_state {
     training_metrics_state {
         step: step,
         epoch: epoch,
@@ -257,8 +257,8 @@ func train_step(training_pipeline_state state) training_pipeline_state {
     }
     dataloader_step_output batch_output = next_batch(loader)
     int next_step = state.loop.step + 1
-    training_loop_state loop = _advance_loop_state(state.loop, epoch_delta, 1, batch_output.batch.valid_tokens)
-    float loss = _loss_from_valid_tokens(batch_output.batch.valid_tokens)
+    training_loop_state loop = advance_loop_state(state.loop, epoch_delta, 1, batch_output.batch.valid_tokens)
+    float loss = loss_from_valid_tokens(batch_output.batch.valid_tokens)
     float scaled_loss = loss
     if state.scaler.enabled {
         scaled_loss = loss * state.scaler.scale
@@ -274,9 +274,9 @@ func train_step(training_pipeline_state state) training_pipeline_state {
     if checkpoint_manager_should_save(checkpoint, next_step) {
         checkpoint = checkpoint_manager_save(checkpoint, next_step, loop.epoch)
     }
-    float score = _score_from_loss(loss)
+    float score = score_from_loss(loss)
     checkpoint = checkpoint_manager_mark_best(checkpoint, next_step, loop.epoch, score)
-    training_metrics_state metrics = _build_metrics(next_step, loop.epoch, batch_output.batch.batch_index, batch_output.batch.valid_tokens, loss, score)
+    training_metrics_state metrics = build_metrics(next_step, loop.epoch, batch_output.batch.batch_index, batch_output.batch.valid_tokens, loss, score)
     training_pipeline_state {
         loop: loop,
         loader: batch_output.state,

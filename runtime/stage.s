@@ -22,7 +22,7 @@ struct stage_state {
     []string control_params
 }
 
-func _copy_strings([]string values) []string {
+func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
     while i < len(values) {
@@ -32,7 +32,7 @@ func _copy_strings([]string values) []string {
     out
 }
 
-func _join_strings([]string values) string {
+func join_strings([]string values) string {
     string out = ""
     int i = 0
     while i < len(values) {
@@ -125,7 +125,7 @@ func stage_has_param(stage_state state, string value) bool {
 }
 
 func stage_add_stage(stage_state state, string value) stage_state {
-    []string stages = _copy_strings(state.stages)
+    []string stages = copy_strings(state.stages)
     stages.push(value)
     stage_state {
         name: state.name,
@@ -136,19 +136,19 @@ func stage_add_stage(stage_state state, string value) stage_state {
         compiled: state.compiled,
         executed: state.executed,
         stages: stages,
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
 func stage_add_param(stage_state state, string value) stage_state {
-    []string params = _copy_strings(state.params)
+    []string params = copy_strings(state.params)
     params.push(value)
     stage_state {
         name: state.name,
@@ -158,15 +158,15 @@ func stage_add_param(stage_state state, string value) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
+        stages: copy_strings(state.stages),
         params: params,
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -179,15 +179,15 @@ func stage_set_jit_enabled(stage_state state, bool enabled) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -200,15 +200,15 @@ func stage_set_lowered(stage_state state, bool lowered) stage_state {
         lowered: lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -221,15 +221,15 @@ func stage_set_compiled(stage_state state, bool compiled) stage_state {
         lowered: state.lowered,
         compiled: compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -242,15 +242,15 @@ func stage_set_executed(stage_state state, bool executed) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -264,14 +264,14 @@ func stage_clear_stages(stage_state state) stage_state {
         compiled: state.compiled,
         executed: state.executed,
         stages: [],
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -284,15 +284,15 @@ func stage_clear_params(stage_state state) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
+        stages: copy_strings(state.stages),
         params: [],
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -347,7 +347,7 @@ func stage_has_control_param(stage_state state, string param) bool {
 }
 
 func stage_add_control_branch(stage_state state, string branch) stage_state {
-    []string branches = _copy_strings(state.control_branches)
+    []string branches = copy_strings(state.control_branches)
     branches.push(branch)
     stage_state {
         name: state.name,
@@ -357,20 +357,20 @@ func stage_add_control_branch(stage_state state, string branch) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: true,
         control_cond_enabled: state.control_cond_enabled || branch == "cond",
         control_loop_enabled: state.control_loop_enabled || branch == "while_loop",
         control_scan_enabled: state.control_scan_enabled || branch == "scan",
         control_iterations: state.control_iterations,
         control_branches: branches,
-        control_params: _copy_strings(state.control_params),
+        control_params: copy_strings(state.control_params),
     }
 }
 
 func stage_add_control_param(stage_state state, string param) stage_state {
-    []string params = _copy_strings(state.control_params)
+    []string params = copy_strings(state.control_params)
     params.push(param)
     stage_state {
         name: state.name,
@@ -380,14 +380,14 @@ func stage_add_control_param(stage_state state, string param) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled || len(state.control_branches) > 0 || len(params) > 0,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
+        control_branches: copy_strings(state.control_branches),
         control_params: params,
     }
 }
@@ -401,15 +401,15 @@ func stage_set_control_enabled(stage_state state, bool enabled) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -422,15 +422,15 @@ func stage_set_control_cond_enabled(stage_state state, bool enabled) stage_state
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled || enabled,
         control_cond_enabled: enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -443,15 +443,15 @@ func stage_set_control_loop_enabled(stage_state state, bool enabled) stage_state
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled || enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -464,15 +464,15 @@ func stage_set_control_scan_enabled(stage_state state, bool enabled) stage_state
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled || enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -485,15 +485,15 @@ func stage_set_control_iterations(stage_state state, int iterations) stage_state
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -506,15 +506,15 @@ func stage_clear_control_branches(stage_state state) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
         control_branches: [],
-        control_params: _copy_strings(state.control_params),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -527,14 +527,14 @@ func stage_clear_control_params(stage_state state) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
+        control_branches: copy_strings(state.control_branches),
         control_params: [],
     }
 }
@@ -548,15 +548,15 @@ func stage_state_dict(stage_state state) stage_state {
         lowered: state.lowered,
         compiled: state.compiled,
         executed: state.executed,
-        stages: _copy_strings(state.stages),
-        params: _copy_strings(state.params),
+        stages: copy_strings(state.stages),
+        params: copy_strings(state.params),
         control_enabled: state.control_enabled,
         control_cond_enabled: state.control_cond_enabled,
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -580,8 +580,8 @@ func stage_control_state_dict(stage_state state) stage_state {
         control_loop_enabled: state.control_loop_enabled,
         control_scan_enabled: state.control_scan_enabled,
         control_iterations: state.control_iterations,
-        control_branches: _copy_strings(state.control_branches),
-        control_params: _copy_strings(state.control_params),
+        control_branches: copy_strings(state.control_branches),
+        control_params: copy_strings(state.control_params),
     }
 }
 
@@ -592,8 +592,8 @@ func stage_to_control_state(stage_state state) control_state {
         loop_enabled: state.control_loop_enabled,
         scan_enabled: state.control_scan_enabled,
         iterations: state.control_iterations,
-        branches: _copy_strings(state.control_branches),
-        params: _copy_strings(state.control_params),
+        branches: copy_strings(state.control_branches),
+        params: copy_strings(state.control_params),
     }
 }
 
@@ -613,8 +613,8 @@ func control_state_to_stage(control_state state, string backend, string mode) st
         control_loop_enabled: state.loop_enabled,
         control_scan_enabled: state.scan_enabled,
         control_iterations: state.iterations,
-        control_branches: _copy_strings(state.branches),
-        control_params: _copy_strings(state.params),
+        control_branches: copy_strings(state.branches),
+        control_params: copy_strings(state.params),
     }
 }
 
@@ -695,8 +695,8 @@ func stage_to_transform_chain(stage_state state) transform_chain {
 }
 
 func transform_chain_to_stage(transform_chain chain, string name, string backend, string mode) stage_state {
-    []string stages = _copy_strings(chain.steps)
-    []string params = _copy_strings(chain.params)
+    []string stages = copy_strings(chain.steps)
+    []string params = copy_strings(chain.params)
     bool control_enabled = false
     bool control_cond_enabled = false
     bool control_loop_enabled = false
@@ -710,7 +710,7 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
         int i = 0
         while i < len(chain.eqns) {
             string primitive = chain.eqns[i].primitive
-            string joined = _join_strings(chain.eqns[i].params)
+            string joined = join_strings(chain.eqns[i].params)
             if primitive == "jit" || primitive == "lower" || primitive == "compile" || primitive == "execute" {
                 stages[i] = primitive
                 params[i] = joined

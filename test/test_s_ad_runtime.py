@@ -260,10 +260,10 @@ def test_s_ad_runtime_compiled_functions_present():
 
     for function_name in (
         "new_state",
-        "_copy_float",
-        "_copy_int",
-        "_copy_record",
-        "_copy_records",
+        "copy_float",
+        "copy_int",
+        "copy_record",
+        "copy_records",
         "set_grad_enabled",
         "no_grad",
         "enable_grad",
@@ -294,6 +294,63 @@ def test_s_ad_runtime_compiled_functions_present():
         assert runtime.supports_runtime_function("engine/state", function_name)
 
     assert runtime.supports_runtime_function("engine/backward", "backward")
+    for function_name in (
+        "new_backward_state",
+        "backward_rule_add",
+        "backward_rule_mul",
+        "backward_rule_sub",
+        "backward_rule_div",
+        "backward_rule_matmul",
+        "backward_rule_sum",
+        "backward_rule_mean",
+        "backward_rule_sum_dim_from_state",
+        "backward_rule_mean_dim_from_state",
+        "backward_rule_sum_dim",
+        "backward_rule_mean_dim",
+        "backward_rule_from_op",
+        "backward_rule_from_state",
+        "backward_execute_state",
+        "backward_apply_rule",
+        "backward_name",
+        "backward_ready",
+        "backward_seeded",
+        "backward_executed",
+        "backward_step_count",
+        "backward_param_count",
+        "backward_input_count",
+        "backward_output_count",
+        "backward_tag_count",
+        "backward_has_step",
+        "backward_has_param",
+        "backward_has_input",
+        "backward_has_output",
+        "backward_has_tag",
+        "backward_add_step",
+        "backward_add_step_with_param",
+        "backward_add_input",
+        "backward_add_output",
+        "backward_add_tag",
+        "backward_clear_steps",
+        "backward_clear_params",
+        "backward_clear_inputs",
+        "backward_clear_outputs",
+        "backward_clear_tags",
+        "backward_set_ready",
+        "backward_set_seeded",
+        "backward_set_executed",
+        "backward_set_upstream",
+        "backward_state_dict",
+        "backward_load_state_dict",
+        "backward_to_tracer",
+        "tracer_to_backward",
+        "backward_to_jaxpr",
+        "jaxpr_to_backward",
+        "backward_seed_state",
+        "backward_pass_state",
+        "backward_pass",
+        "backward",
+    ):
+        assert runtime.supports_runtime_function("engine/backward", function_name)
     for function_name in (
         "new_function",
         "function_name",
@@ -538,3 +595,114 @@ def test_s_function_params_round_trip():
 
     fn = runtime.invoke_runtime_function("function", "clear_function_params", fn)
     assert fn["params"] == []
+
+
+def test_s_engine_backward_runtime_smoke():
+    runtime = _load_runtime_module()
+    state = runtime.invoke_runtime_function("engine/backward", "new_backward_state", "backward")
+    assert state["name"] == "backward"
+    assert state["ready"] is False
+    assert state["seeded"] is False
+    assert state["executed"] is False
+
+    state = runtime.invoke_runtime_function("engine/backward", "backward_add_step", state, "add")
+    state = runtime.invoke_runtime_function("engine/backward", "backward_add_step_with_param", state, "mul", "op=mul")
+    state = runtime.invoke_runtime_function("engine/backward", "backward_add_input", state, "x")
+    state = runtime.invoke_runtime_function("engine/backward", "backward_add_output", state, "y")
+    state = runtime.invoke_runtime_function("engine/backward", "backward_add_tag", state, "backward_pass")
+    assert state["ready"] is True
+    assert state["steps"] == ["add", "mul"]
+    assert state["params"] == ["op=mul"]
+    assert state["inputs"] == ["x"]
+    assert state["outputs"] == ["y"]
+    assert state["tags"] == ["backward_pass"]
+    assert runtime.invoke_runtime_function("engine/backward", "backward_has_step", state, "add") is True
+    assert runtime.invoke_runtime_function("engine/backward", "backward_has_param", state, "op=mul") is True
+    assert runtime.invoke_runtime_function("engine/backward", "backward_has_input", state, "x") is True
+    assert runtime.invoke_runtime_function("engine/backward", "backward_has_output", state, "y") is True
+    assert runtime.invoke_runtime_function("engine/backward", "backward_has_tag", state, "backward_pass") is True
+
+    state_dict = runtime.invoke_runtime_function("engine/backward", "backward_state_dict", state)
+    assert state_dict["name"] == "backward"
+    assert state_dict["steps"] == ["add", "mul"]
+    assert state_dict["params"] == ["op=mul"]
+    assert state_dict["inputs"] == ["x"]
+    assert state_dict["outputs"] == ["y"]
+    assert state_dict["tags"] == ["backward_pass"]
+
+    state_round_trip = runtime.invoke_runtime_function("engine/backward", "backward_load_state_dict", state, state_dict)
+    assert state_round_trip["steps"] == ["add", "mul"]
+    assert state_round_trip["params"] == ["op=mul"]
+    assert state_round_trip["upstream"] == []
+
+    tracer = runtime.invoke_runtime_function("engine/backward", "backward_to_tracer", state)
+    assert tracer["name"] == "backward"
+    assert tracer["ops"] == ["add", "mul"]
+    assert tracer["params"] == ["", "op=mul"]
+    assert tracer["inputs"] == ["x"]
+    assert tracer["outputs"] == ["y"]
+
+    backward_from_tracer = runtime.invoke_runtime_function("engine/backward", "tracer_to_backward", tracer, "backward2")
+    assert backward_from_tracer["name"] == "backward2"
+    assert backward_from_tracer["steps"] == ["add", "mul"]
+    assert backward_from_tracer["params"] == ["", "op=mul"]
+    assert backward_from_tracer["inputs"] == ["x"]
+    assert backward_from_tracer["outputs"] == ["y"]
+
+    jaxpr = runtime.invoke_runtime_function("engine/backward", "backward_to_jaxpr", state)
+    assert jaxpr["name"] == "backward"
+    assert jaxpr["primitives"] == ["add", "mul"]
+    assert jaxpr["params"] == ["", "op=mul"]
+    assert jaxpr["inputs"] == ["x"]
+    assert jaxpr["outputs"] == ["y"]
+
+    backward_from_jaxpr = runtime.invoke_runtime_function("engine/backward", "jaxpr_to_backward", jaxpr)
+    assert backward_from_jaxpr["name"] == "backward"
+    assert backward_from_jaxpr["steps"] == ["add", "mul"]
+    assert backward_from_jaxpr["params"] == ["", "op=mul"]
+    assert backward_from_jaxpr["inputs"] == ["x"]
+    assert backward_from_jaxpr["outputs"] == ["y"]
+
+    a = {"data": [1.0, 2.0], "shape": [2], "requires_grad": True, "grad": None}
+    b = {"data": [3.0, 4.0], "shape": [2], "requires_grad": True, "grad": None}
+    upstream = {"data": [5.0, 6.0], "shape": [2], "requires_grad": False, "grad": None}
+    scalar_upstream = {"data": [5.0], "shape": [1], "requires_grad": False, "grad": None}
+    add_rule = runtime.invoke_runtime_function("engine/backward", "backward_rule_add", a, b, upstream)
+    assert add_rule["op"] == "add"
+    assert add_rule["grad_a"]["data"] == [5.0, 6.0]
+    assert add_rule["grad_b"]["data"] == [5.0, 6.0]
+    from_state_rule = runtime.invoke_runtime_function("engine/backward", "backward_rule_from_state", state, a, b, upstream)
+    assert from_state_rule["op"] == "mul"
+    sum_state = runtime.invoke_runtime_function("engine/backward", "backward_add_step", state, "sum_dim")
+    sum_rule = runtime.invoke_runtime_function("engine/backward", "backward_rule_from_state", sum_state, a, b, scalar_upstream)
+    assert sum_rule["op"] == "sum_dim"
+    assert sum_rule["ready"] is True
+    mean_state = runtime.invoke_runtime_function("engine/backward", "backward_add_step", state, "mean_dim")
+    mean_rule = runtime.invoke_runtime_function("engine/backward", "backward_rule_from_state", mean_state, a, b, scalar_upstream)
+    assert mean_rule["op"] == "mean_dim"
+    assert mean_rule["ready"] is True
+    executed_state = runtime.invoke_runtime_function("engine/backward", "backward_execute_state", state, a, b, upstream)
+    assert executed_state["executed"] is True
+    assert executed_state["seeded"] is True
+    assert executed_state["tags"] == ["mul", "add"]
+    assert executed_state["upstream"] == [5.0, 6.0]
+    applied = runtime.invoke_runtime_function("engine/backward", "backward_apply_rule", state, from_state_rule)
+    assert applied["executed"] is True
+    assert applied["seeded"] is True
+    assert applied["tags"][-1] == "mul"
+    assert applied["upstream"] == [5.0, 6.0]
+
+    loss = {"data": [2.0, 3.0], "shape": [2], "requires_grad": True, "grad": None}
+    seeded = runtime.invoke_runtime_function("engine/backward", "backward_seed_state", state, loss)
+    assert seeded["ready"] is True
+    assert seeded["seeded"] is True
+    assert seeded["upstream"] == [1.0, 1.0]
+
+    executed = runtime.invoke_runtime_function("engine/backward", "backward_pass_state", state, loss)
+    assert executed["executed"] is True
+    assert executed["seeded"] is True
+
+    grad = runtime.invoke_runtime_function("engine/backward", "backward_pass", state, loss)
+    assert grad["data"] == [1.0, 1.0]
+    assert grad["shape"] == [2]
+    assert runtime.invoke_runtime_function("engine/backward", "backward", loss)["data"] == [1.0, 1.0]

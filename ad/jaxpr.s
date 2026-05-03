@@ -23,7 +23,7 @@ struct jaxpr_graph {
     bool linearized
 }
 
-func _copy_strings([]string values) []string {
+func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
     while i < len(values) {
@@ -33,26 +33,26 @@ func _copy_strings([]string values) []string {
     out
 }
 
-func _copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
+func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
     jaxpr_eqn {
         primitive: eqn.primitive,
-        params: _copy_strings(eqn.params),
-        inputs: _copy_strings(eqn.inputs),
-        outputs: _copy_strings(eqn.outputs),
+        params: copy_strings(eqn.params),
+        inputs: copy_strings(eqn.inputs),
+        outputs: copy_strings(eqn.outputs),
     }
 }
 
-func _copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
+func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
     []jaxpr_eqn out = []jaxpr_eqn{cap: len(values)}
     int i = 0
     while i < len(values) {
-        out[i] = _copy_eqn(values[i])
+        out[i] = copy_eqn(values[i])
         i = i + 1
     }
     out
 }
 
-func _join_params([]string params) string {
+func join_params([]string params) string {
     string out = ""
     int i = 0
     while i < len(params) {
@@ -123,17 +123,17 @@ func jaxpr_is_linearized(jaxpr_graph graph) bool {
 }
 
 func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    []string primitives = _copy_strings(graph.primitives)
-    []string param_list = _copy_strings(graph.params)
-    []jaxpr_eqn eqns = _copy_eqns(graph.eqns)
+    []string primitives = copy_strings(graph.primitives)
+    []string param_list = copy_strings(graph.params)
+    []jaxpr_eqn eqns = copy_eqns(graph.eqns)
     primitives.push(primitive)
-    param_list.push(_join_params(params))
+    param_list.push(join_params(params))
     eqns.push(
         jaxpr_eqn {
             primitive: primitive,
-            params: _copy_strings(params),
-            inputs: _copy_strings(inputs),
-            outputs: _copy_strings(outputs),
+            params: copy_strings(params),
+            inputs: copy_strings(inputs),
+            outputs: copy_strings(outputs),
         }
     )
     jaxpr_graph {
@@ -141,8 +141,8 @@ func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params,
         eqn_count: len(primitives),
         primitives: primitives,
         params: param_list,
-        inputs: _copy_strings(graph.inputs),
-        outputs: _copy_strings(graph.outputs),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
         eqns: eqns,
         ready: true,
         linearized: graph.linearized,
@@ -158,32 +158,32 @@ func jaxpr_add_eqn(jaxpr_graph graph, string primitive) jaxpr_graph {
 }
 
 func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
-    []string inputs = _copy_strings(graph.inputs)
+    []string inputs = copy_strings(graph.inputs)
     inputs.push(input)
     jaxpr_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
-        primitives: _copy_strings(graph.primitives),
-        params: _copy_strings(graph.params),
+        primitives: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
         inputs: inputs,
-        outputs: _copy_strings(graph.outputs),
-        eqns: _copy_eqns(graph.eqns),
+        outputs: copy_strings(graph.outputs),
+        eqns: copy_eqns(graph.eqns),
         ready: graph.ready,
         linearized: graph.linearized,
     }
 }
 
 func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
-    []string outputs = _copy_strings(graph.outputs)
+    []string outputs = copy_strings(graph.outputs)
     outputs.push(output)
     jaxpr_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
-        primitives: _copy_strings(graph.primitives),
-        params: _copy_strings(graph.params),
-        inputs: _copy_strings(graph.inputs),
+        primitives: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
         outputs: outputs,
-        eqns: _copy_eqns(graph.eqns),
+        eqns: copy_eqns(graph.eqns),
         ready: graph.ready,
         linearized: graph.linearized,
     }
@@ -193,11 +193,11 @@ func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
     jaxpr_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
-        primitives: _copy_strings(graph.primitives),
-        params: _copy_strings(graph.params),
-        inputs: _copy_strings(graph.inputs),
-        outputs: _copy_strings(graph.outputs),
-        eqns: _copy_eqns(graph.eqns),
+        primitives: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
+        eqns: copy_eqns(graph.eqns),
         ready: graph.ready,
         linearized: graph.linearized,
     }
@@ -211,11 +211,11 @@ func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
     jaxpr_graph {
         name: name,
         eqn_count: tracer.tracer_op_count(state),
-        primitives: _copy_strings(state.ops),
-        params: _copy_strings(state.params),
-        inputs: _copy_strings(state.inputs),
-        outputs: _copy_strings(state.outputs),
-        eqns: _copy_eqns(state.eqns),
+        primitives: copy_strings(state.ops),
+        params: copy_strings(state.params),
+        inputs: copy_strings(state.inputs),
+        outputs: copy_strings(state.outputs),
+        eqns: copy_eqns(state.eqns),
         ready: tracer.tracer_active(state),
         linearized: tracer.tracer_linearized(state),
     }
@@ -227,11 +227,11 @@ func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
         active: graph.ready,
         linearized: graph.linearized,
         op_count: graph.eqn_count,
-        ops: _copy_strings(graph.primitives),
-        params: _copy_strings(graph.params),
-        inputs: _copy_strings(graph.inputs),
-        outputs: _copy_strings(graph.outputs),
-        eqns: _copy_eqns(graph.eqns),
+        ops: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
+        eqns: copy_eqns(graph.eqns),
         tags: [],
     }
 }
@@ -250,18 +250,18 @@ func jaxpr_capture_with_io(jaxpr_graph graph, string primitive, []string params,
 
 func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
     transform_chain {
-        steps: _copy_strings(graph.primitives),
-        params: _copy_strings(graph.params),
-        inputs: _copy_strings(graph.inputs),
-        outputs: _copy_strings(graph.outputs),
-        eqns: _copy_eqns(graph.eqns),
+        steps: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
+        eqns: copy_eqns(graph.eqns),
         ready: graph.ready || len(graph.primitives) > 0,
         linearized: graph.linearized,
     }
 }
 
 func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
-    []jaxpr_eqn eqns = _copy_eqns(chain.eqns)
+    []jaxpr_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
         eqns = []jaxpr_eqn{cap: len(chain.steps)}
         int i = 0
@@ -283,10 +283,10 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
     jaxpr_graph {
         name: name,
         eqn_count: len(eqns),
-        primitives: _copy_strings(chain.steps),
-        params: _copy_strings(chain.params),
-        inputs: _copy_strings(chain.inputs),
-        outputs: _copy_strings(chain.outputs),
+        primitives: copy_strings(chain.steps),
+        params: copy_strings(chain.params),
+        inputs: copy_strings(chain.inputs),
+        outputs: copy_strings(chain.outputs),
         eqns: eqns,
         ready: chain.ready,
         linearized: chain.linearized,

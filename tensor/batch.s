@@ -12,7 +12,7 @@ struct batch_state {
     []string params
 }
 
-func _copy_strings([]string values) []string {
+func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
     while i < len(values) {
@@ -22,7 +22,7 @@ func _copy_strings([]string values) []string {
     out
 }
 
-func _join_strings([]string values) string {
+func join_strings([]string values) string {
     string out = ""
     int i = 0
     while i < len(values) {
@@ -35,7 +35,7 @@ func _join_strings([]string values) string {
     out
 }
 
-func _copy_shape_tail(tensor a) []int {
+func copy_shape_tail(tensor a) []int {
     int ndim = len(a.shape)
     []int shape = []int{cap: ndim}
     int i = 1
@@ -49,7 +49,7 @@ func _copy_shape_tail(tensor a) []int {
     shape
 }
 
-func _slice_axis0(tensor a, int index) tensor {
+func slice_axis0(tensor a, int index) tensor {
     int ndim = len(a.shape)
     if ndim == 0 {
         return neurx.tensor.tensor.clone(a)
@@ -70,15 +70,15 @@ func _slice_axis0(tensor a, int index) tensor {
         i = i + 1
     }
 
-    neurx.tensor.tensor.new(out, _copy_shape_tail(a), a.requires_grad)
+    neurx.tensor.tensor.new(out, copy_shape_tail(a), a.requires_grad)
 }
 
-func _batch_reduce_scalar(tensor a, int mode) tensor {
+func batch_reduce_scalar(tensor a, int mode) tensor {
     int batch = a.shape[0]
     []float out = []float{cap: batch}
     int i = 0
     while i < batch {
-        tensor slice = _slice_axis0(a, i)
+        tensor slice = slice_axis0(a, i)
         tensor reduced = neurx.tensor.tensor.sum(slice)
         if mode == 1 {
             reduced = neurx.tensor.tensor.mean(slice)
@@ -93,7 +93,7 @@ func _batch_reduce_scalar(tensor a, int mode) tensor {
     neurx.tensor.tensor.new(out, [batch], a.requires_grad)
 }
 
-func _batch_matmul(tensor a, tensor b) tensor {
+func batch_matmul(tensor a, tensor b) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
     if ndim_a < 3 && ndim_b < 3 {
@@ -115,10 +115,10 @@ func _batch_matmul(tensor a, tensor b) tensor {
     tensor first_a = a
     tensor first_b = b
     if batch_a {
-        first_a = _slice_axis0(a, 0)
+        first_a = slice_axis0(a, 0)
     }
     if batch_b {
-        first_b = _slice_axis0(b, 0)
+        first_b = slice_axis0(b, 0)
     }
 
     tensor first_out = neurx.tensor.tensor.matmul(first_a, first_b)
@@ -143,10 +143,10 @@ func _batch_matmul(tensor a, tensor b) tensor {
         tensor slice_a = a
         tensor slice_b = b
         if batch_a {
-            slice_a = _slice_axis0(a, batch_index)
+            slice_a = slice_axis0(a, batch_index)
         }
         if batch_b {
-            slice_b = _slice_axis0(b, batch_index)
+            slice_b = slice_axis0(b, batch_index)
         }
         tensor slice_out = neurx.tensor.tensor.matmul(slice_a, slice_b)
         int offset = batch_index * slice_size
@@ -219,7 +219,7 @@ func batch_has_param(batch_state state, string param) bool {
 }
 
 func batch_add_primitive(batch_state state, string primitive) batch_state {
-    []string primitives = _copy_strings(state.primitives)
+    []string primitives = copy_strings(state.primitives)
     primitives.push(primitive)
     batch_state {
         name: state.name,
@@ -227,19 +227,19 @@ func batch_add_primitive(batch_state state, string primitive) batch_state {
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
         primitives: primitives,
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
     }
 }
 
 func batch_add_param(batch_state state, string param) batch_state {
-    []string params = _copy_strings(state.params)
+    []string params = copy_strings(state.params)
     params.push(param)
     batch_state {
         name: state.name,
         active: true,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
-        primitives: _copy_strings(state.primitives),
+        primitives: copy_strings(state.primitives),
         params: params,
     }
 }
@@ -250,8 +250,8 @@ func batch_set_active(batch_state state, bool active) batch_state {
         active: active,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
-        primitives: _copy_strings(state.primitives),
-        params: _copy_strings(state.params),
+        primitives: copy_strings(state.primitives),
+        params: copy_strings(state.params),
     }
 }
 
@@ -261,8 +261,8 @@ func batch_set_batch_size(batch_state state, int batch_size) batch_state {
         active: state.active,
         batch_size: batch_size,
         batch_dim: state.batch_dim,
-        primitives: _copy_strings(state.primitives),
-        params: _copy_strings(state.params),
+        primitives: copy_strings(state.primitives),
+        params: copy_strings(state.params),
     }
 }
 
@@ -272,8 +272,8 @@ func batch_set_batch_dim(batch_state state, int batch_dim) batch_state {
         active: state.active,
         batch_size: state.batch_size,
         batch_dim: batch_dim,
-        primitives: _copy_strings(state.primitives),
-        params: _copy_strings(state.params),
+        primitives: copy_strings(state.primitives),
+        params: copy_strings(state.params),
     }
 }
 
@@ -284,7 +284,7 @@ func batch_clear_primitives(batch_state state) batch_state {
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
         primitives: [],
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
     }
 }
 
@@ -294,7 +294,7 @@ func batch_clear_params(batch_state state) batch_state {
         active: state.active,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
-        primitives: _copy_strings(state.primitives),
+        primitives: copy_strings(state.primitives),
         params: [],
     }
 }
@@ -305,8 +305,8 @@ func batch_state_dict(batch_state state) batch_state {
         active: state.active,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
-        primitives: _copy_strings(state.primitives),
-        params: _copy_strings(state.params),
+        primitives: copy_strings(state.primitives),
+        params: copy_strings(state.params),
     }
 }
 
@@ -316,8 +316,8 @@ func batch_load_state_dict(batch_state state, batch_state other) batch_state {
 
 func batch_to_transform_chain(batch_state state) transform_chain {
     transform_chain {
-        steps: _copy_strings(state.primitives),
-        params: _copy_strings(state.params),
+        steps: copy_strings(state.primitives),
+        params: copy_strings(state.params),
         inputs: [],
         outputs: [],
         eqns: [],
@@ -332,8 +332,8 @@ func transform_chain_to_batch(transform_chain chain, string name, int batch_size
         active: chain.ready,
         batch_size: batch_size,
         batch_dim: batch_dim,
-        primitives: _copy_strings(chain.steps),
-        params: _copy_strings(chain.params),
+        primitives: copy_strings(chain.steps),
+        params: copy_strings(chain.params),
     }
 }
 
@@ -351,10 +351,10 @@ func vmap_unary(string primitive, tensor a) tensor {
         return neurx.tensor.tensor.reciprocal(a)
     }
     if primitive == "sum" {
-        return _batch_reduce_scalar(a, 0)
+        return batch_reduce_scalar(a, 0)
     }
     if primitive == "mean" {
-        return _batch_reduce_scalar(a, 1)
+        return batch_reduce_scalar(a, 1)
     }
     neurx.tensor.tensor.clone(a)
 }
@@ -379,7 +379,7 @@ func vmap_binary(string primitive, tensor a, tensor b) tensor {
         return neurx.tensor.tensor.minimum(a, b)
     }
     if primitive == "matmul" {
-        return _batch_matmul(a, b)
+        return batch_matmul(a, b)
     }
     if primitive == "concatenate" {
         return neurx.tensor.tensor.concatenate(a, b, 0)

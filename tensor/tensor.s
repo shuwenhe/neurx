@@ -148,11 +148,11 @@ func unsqueeze(tensor a, int dim) tensor {
     new(copy_float(a.data), shape, a.requires_grad)
 }
 
-func _shape_prod([]int shape) int {
+func shape_prod([]int shape) int {
     numel(shape)
 }
 
-func _unravel_index(int flat_index, []int shape) []int {
+func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
     int i = 0
@@ -173,7 +173,7 @@ func _unravel_index(int flat_index, []int shape) []int {
     coords
 }
 
-func _ravel_index([]int coords, []int shape) int {
+func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
     int stride = 1
@@ -199,15 +199,15 @@ func transpose(tensor a, int dim0, int dim1) tensor {
     shape[d0] = shape[d1]
     shape[d1] = tmp
 
-    int total = _shape_prod(shape)
+    int total = shape_prod(shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, shape)
+        []int coords = unravel_index(flat, shape)
         int ctmp = coords[d0]
         coords[d0] = coords[d1]
         coords[d1] = ctmp
-        int src = _ravel_index(coords, a.shape)
+        int src = ravel_index(coords, a.shape)
         out.push(a.data[src])
         flat = flat + 1
     }
@@ -215,7 +215,7 @@ func transpose(tensor a, int dim0, int dim1) tensor {
     new(out, shape, a.requires_grad)
 }
 
-func _permute_inverse([]int dims) []int {
+func permute_inverse([]int dims) []int {
     int ndim = len(dims)
     []int inv = []int{cap: ndim}
     int i = 0
@@ -240,11 +240,11 @@ func permute(tensor a, []int dims) tensor {
         i = i + 1
     }
 
-    int total = _shape_prod(shape)
+    int total = shape_prod(shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, shape)
+        []int coords = unravel_index(flat, shape)
         []int src_coords = []int{cap: len(a.shape)}
         int j = 0
         while j < len(a.shape) {
@@ -256,7 +256,7 @@ func permute(tensor a, []int dims) tensor {
             src_coords[dims[j]] = coords[j]
             j = j + 1
         }
-        int src = _ravel_index(src_coords, a.shape)
+        int src = ravel_index(src_coords, a.shape)
         out.push(a.data[src])
         flat = flat + 1
     }
@@ -264,7 +264,7 @@ func permute(tensor a, []int dims) tensor {
     new(out, shape, a.requires_grad)
 }
 
-func _broadcast_shape([]int a, []int b) []int {
+func broadcast_shape([]int a, []int b) []int {
     int ndim_a = len(a)
     int ndim_b = len(b)
     int ndim = ndim_a
@@ -305,7 +305,7 @@ func _broadcast_shape([]int a, []int b) []int {
     shape
 }
 
-func _broadcast_index([]int coords, []int shape) int {
+func broadcast_index([]int coords, []int shape) int {
     int ndim_coords = len(coords)
     int ndim_shape = len(shape)
     int offset = ndim_coords - ndim_shape
@@ -324,18 +324,18 @@ func _broadcast_index([]int coords, []int shape) int {
         aligned[i] = coord
         i = i + 1
     }
-    _ravel_index(aligned, shape)
+    ravel_index(aligned, shape)
 }
 
-func _binary_broadcast(tensor a, tensor b, int op) tensor {
-    []int shape = _broadcast_shape(a.shape, b.shape)
-    int total = _shape_prod(shape)
+func binary_broadcast(tensor a, tensor b, int op) tensor {
+    []int shape = broadcast_shape(a.shape, b.shape)
+    int total = shape_prod(shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, shape)
-        int ia = _broadcast_index(coords, a.shape)
-        int ib = _broadcast_index(coords, b.shape)
+        []int coords = unravel_index(flat, shape)
+        int ia = broadcast_index(coords, a.shape)
+        int ib = broadcast_index(coords, b.shape)
         float v = 0.0
         if op == 0 {
             v = a.data[ia] + b.data[ib]
@@ -373,27 +373,27 @@ func _binary_broadcast(tensor a, tensor b, int op) tensor {
 }
 
 func add(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 0)
+    binary_broadcast(a, b, 0)
 }
 
 func sub(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 1)
+    binary_broadcast(a, b, 1)
 }
 
 func mul(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 2)
+    binary_broadcast(a, b, 2)
 }
 
 func div(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 3)
+    binary_broadcast(a, b, 3)
 }
 
 func maximum(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 4)
+    binary_broadcast(a, b, 4)
 }
 
 func minimum(tensor a, tensor b) tensor {
-    _binary_broadcast(a, b, 5)
+    binary_broadcast(a, b, 5)
 }
 
 func negative(tensor a) tensor {
@@ -418,7 +418,7 @@ func square(tensor a) tensor {
 }
 
 func reciprocal(tensor a) tensor {
-    div(_scalar_tensor(1.0), a)
+    div(scalar_tensor(1.0), a)
 }
 
 func matmul(tensor a, tensor b) tensor {
@@ -499,12 +499,12 @@ func mean(tensor a) tensor {
     new(out, [1], a.requires_grad)
 }
 
-func _scalar_tensor(float value) tensor {
+func scalar_tensor(float value) tensor {
     new([value], [1], false)
 }
 
-func _scale_tensor(tensor value, float scale) tensor {
-    mul(value, _scalar_tensor(scale))
+func scale_tensor(tensor value, float scale) tensor {
+    mul(value, scalar_tensor(scale))
 }
 
 func tensor_backward_add_grad_a(tensor upstream) tensor {
@@ -523,7 +523,7 @@ func tensor_backward_mul_grad_b(tensor a, tensor b, tensor upstream) tensor {
     mul(upstream, a)
 }
 
-func _negate_tensor(tensor value) tensor {
+func negate_tensor(tensor value) tensor {
     sub(zeros_like(value), value)
 }
 
@@ -532,7 +532,7 @@ func tensor_backward_sub_grad_a(tensor upstream) tensor {
 }
 
 func tensor_backward_sub_grad_b(tensor upstream) tensor {
-    _negate_tensor(upstream)
+    negate_tensor(upstream)
 }
 
 func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
@@ -542,14 +542,14 @@ func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
 func tensor_backward_div_grad_b(tensor a, tensor b, tensor upstream) tensor {
     tensor numerator = mul(upstream, a)
     tensor denominator = mul(b, b)
-    _negate_tensor(div(numerator, denominator))
+    negate_tensor(div(numerator, denominator))
 }
 
 func tensor_backward_matmul_grad_a(tensor a, tensor b, tensor upstream) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
     if ndim_a == 1 && ndim_b == 1 {
-        return _scale_tensor(b, upstream.data[0])
+        return scale_tensor(b, upstream.data[0])
     }
     if ndim_a == 2 && ndim_b == 2 {
         return matmul(upstream, transpose(b, 0, 1))
@@ -564,7 +564,7 @@ func tensor_backward_matmul_grad_b(tensor a, tensor b, tensor upstream) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
     if ndim_a == 1 && ndim_b == 1 {
-        return _scale_tensor(a, upstream.data[0])
+        return scale_tensor(a, upstream.data[0])
     }
     if ndim_a == 2 && ndim_b == 2 {
         return matmul(transpose(a, 0, 1), upstream)
@@ -604,10 +604,10 @@ func tensor_backward_mean_dim_grad(tensor a, tensor upstream, int dim, bool keep
     int axis = normalize_dim(dim, len(a.shape))
     float denom = a.shape[axis]
     tensor grad = tensor_backward_sum_dim_grad(a, upstream, dim, keepdim)
-    div(grad, _scalar_tensor(denom))
+    div(grad, scalar_tensor(denom))
 }
 
-func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
+func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
     int axis_size = a.shape[axis]
@@ -626,11 +626,11 @@ func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     if len(out_shape) == 0 {
         out_shape.push(1)
     }
-    int total = _shape_prod(out_shape)
+    int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, out_shape)
+        []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int j = 0
         int k = 0
@@ -655,7 +655,7 @@ func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
         int r = 0
         while r < axis_size {
             src_coords[axis] = r
-            float value = a.data[_ravel_index(src_coords, a.shape)]
+            float value = a.data[ravel_index(src_coords, a.shape)]
             if first {
                 acc = value
                 first = false
@@ -678,14 +678,14 @@ func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
 }
 
 func sum_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_over_dim(a, dim, keepdim, 0)
+    reduce_over_dim(a, dim, keepdim, 0)
 }
 
 func mean_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_over_dim(a, dim, keepdim, 1)
+    reduce_over_dim(a, dim, keepdim, 1)
 }
 
-func _exp_approx(float x) float {
+func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
     float x4 = x3 * x
@@ -693,7 +693,7 @@ func _exp_approx(float x) float {
     1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
 }
 
-func _log_approx(float x) float {
+func log_approx(float x) float {
     float v = x
     if v <= 0.0 {
         v = 0.000000000001
@@ -706,7 +706,7 @@ func _log_approx(float x) float {
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
 }
 
-func _sqrt_approx(float x) float {
+func sqrt_approx(float x) float {
     float v = x
     if v < 0.0 {
         v = 0.0
@@ -723,7 +723,7 @@ func _sqrt_approx(float x) float {
     guess
 }
 
-func _tanh_approx(float x) float {
+func tanh_approx(float x) float {
     float x2 = x * x
     float numerator = x * (27.0 + x2)
     float denominator = 27.0 + (9.0 * x2)
@@ -734,7 +734,7 @@ func exp(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = _exp_approx(a.data[i])
+        out[i] = exp_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -743,7 +743,7 @@ func log(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = _log_approx(a.data[i])
+        out[i] = log_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -752,7 +752,7 @@ func sqrt(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = _sqrt_approx(a.data[i])
+        out[i] = sqrt_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -775,7 +775,7 @@ func sigmoid(tensor a) tensor {
     []float out = []float{cap: n}
     for i in 0..n {
         float v = a.data[i]
-        out[i] = 1.0 / (1.0 + _exp_approx(-v))
+        out[i] = 1.0 / (1.0 + exp_approx(-v))
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -784,7 +784,7 @@ func tanh(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out[i] = _tanh_approx(a.data[i])
+        out[i] = tanh_approx(a.data[i])
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
@@ -827,7 +827,7 @@ func sign(tensor a) tensor {
     new(out, copy_int(a.shape), a.requires_grad)
 }
 
-func _shift_index(int index, int shift, int size) int {
+func shift_index(int index, int shift, int size) int {
     int out = index - shift
     while out < 0 {
         out = out + size
@@ -845,9 +845,9 @@ func flip(tensor a, int dim) tensor {
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, a.shape)
+        []int coords = unravel_index(flat, a.shape)
         coords[axis] = a.shape[axis] - 1 - coords[axis]
-        int src = _ravel_index(coords, a.shape)
+        int src = ravel_index(coords, a.shape)
         out[flat] = a.data[src]
         flat = flat + 1
     }
@@ -870,9 +870,9 @@ func roll(tensor a, int shifts, int dim) tensor {
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, a.shape)
-        coords[axis] = _shift_index(coords[axis], shift, size)
-        int src = _ravel_index(coords, a.shape)
+        []int coords = unravel_index(flat, a.shape)
+        coords[axis] = shift_index(coords[axis], shift, size)
+        int src = ravel_index(coords, a.shape)
         out[flat] = a.data[src]
         flat = flat + 1
     }
@@ -881,12 +881,12 @@ func roll(tensor a, int shifts, int dim) tensor {
 
 func broadcast_to(tensor a, []int shape) tensor {
     []int target = copy_int(shape)
-    int total = _shape_prod(target)
+    int total = shape_prod(target)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, target)
-        int src = _broadcast_index(coords, a.shape)
+        []int coords = unravel_index(flat, target)
+        int src = broadcast_index(coords, a.shape)
         out[flat] = a.data[src]
         flat = flat + 1
     }
@@ -901,17 +901,17 @@ func concatenate(tensor a, tensor b, int dim) tensor {
     }
     []int shape = copy_int(a.shape)
     shape[axis] = a.shape[axis] + b.shape[axis]
-    int total = _shape_prod(shape)
+    int total = shape_prod(shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, shape)
+        []int coords = unravel_index(flat, shape)
         if coords[axis] < a.shape[axis] {
-            int src_a = _ravel_index(coords, a.shape)
+            int src_a = ravel_index(coords, a.shape)
             out[flat] = a.data[src_a]
         } else {
             coords[axis] = coords[axis] - a.shape[axis]
-            int src_b = _ravel_index(coords, b.shape)
+            int src_b = ravel_index(coords, b.shape)
             out[flat] = b.data[src_b]
         }
         flat = flat + 1
@@ -989,7 +989,7 @@ func softmax(tensor a, int dim) tensor {
 
     int outer_index = 0
     while outer_index < outer {
-        []int base = _unravel_index(outer_index, out_shape)
+        []int base = unravel_index(outer_index, out_shape)
         int j = 0
         int k = 0
         while j < ndim {
@@ -999,12 +999,12 @@ func softmax(tensor a, int dim) tensor {
             }
             j = j + 1
         }
-        float max_v = a.data[_ravel_index(coords, a.shape)]
+        float max_v = a.data[ravel_index(coords, a.shape)]
         int axis_size = a.shape[axis]
         int aidx = 1
         while aidx < axis_size {
             coords[axis] = aidx
-            float v = a.data[_ravel_index(coords, a.shape)]
+            float v = a.data[ravel_index(coords, a.shape)]
             if v > max_v {
                 max_v = v
             }
@@ -1014,9 +1014,9 @@ func softmax(tensor a, int dim) tensor {
         aidx = 0
         while aidx < axis_size {
             coords[axis] = aidx
-            float shifted = a.data[_ravel_index(coords, a.shape)] - max_v
-            float v = _exp_approx(shifted)
-            out[_ravel_index(coords, a.shape)] = v
+            float shifted = a.data[ravel_index(coords, a.shape)] - max_v
+            float v = exp_approx(shifted)
+            out[ravel_index(coords, a.shape)] = v
             denom = denom + v
             aidx = aidx + 1
         }
@@ -1026,7 +1026,7 @@ func softmax(tensor a, int dim) tensor {
         aidx = 0
         while aidx < axis_size {
             coords[axis] = aidx
-            int dst = _ravel_index(coords, a.shape)
+            int dst = ravel_index(coords, a.shape)
             out[dst] = out[dst] / denom
             aidx = aidx + 1
         }
@@ -1046,7 +1046,7 @@ func take_along_dim(tensor a, tensor indices, int dim) tensor {
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
-        []int coords = _unravel_index(flat, indices.shape)
+        []int coords = unravel_index(flat, indices.shape)
         int src_index = 0
         int i = 0
         while i < ndim {
@@ -1055,7 +1055,7 @@ func take_along_dim(tensor a, tensor indices, int dim) tensor {
             }
             i = i + 1
         }
-        src_index = _ravel_index(coords, a.shape)
+        src_index = ravel_index(coords, a.shape)
         out[flat] = a.data[src_index]
         flat = flat + 1
     }
@@ -1070,18 +1070,18 @@ func trace_op_with_param(tracer_state state, string op, string param) tracer_sta
     neurx.ad.tracer.tracer_capture_with_param(state, op, param)
 }
 
-func _empty_strings() []string {
+func empty_strings() []string {
     []string out = []string{cap: 0}
     out
 }
 
-func _single_string(string value) []string {
+func single_string(string value) []string {
     []string out = []string{cap: 1}
     out[0] = value
     out
 }
 
-func _pair_strings(string a, string b) []string {
+func pair_strings(string a, string b) []string {
     []string out = []string{cap: 2}
     out[0] = a
     out[1] = b
@@ -1089,52 +1089,52 @@ func _pair_strings(string a, string b) []string {
 }
 
 func trace_add(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "add", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "add", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_mul(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mul", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_matmul(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "matmul", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "matmul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_sum(tracer_state state, tensor a) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum", _empty_strings(), _single_string("arg0"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_mean(tracer_state state, tensor a) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean", _empty_strings(), _single_string("arg0"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_sum_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum_dim", _single_string(param), _single_string("arg0"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
 
 func trace_mean_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean_dim", _single_string(param), _single_string("arg0"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
 
 func trace_broadcast_to(tracer_state state, tensor a, []int shape) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "broadcast_to", _single_string("shape=" + str(shape)), _single_string("arg0"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "broadcast_to", single_string("shape=" + str(shape)), single_string("arg0"), single_string("out0"))
 }
 
 func trace_concatenate(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "concatenate", _single_string("dim=" + str(dim)), _pair_strings("arg0", "arg1"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "concatenate", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_stack(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "stack", _single_string("dim=" + str(dim)), _pair_strings("arg0", "arg1"), _single_string("out0"))
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "stack", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_to_transform_chain(tracer_state state) transform_chain {

@@ -523,6 +523,82 @@ def _control_like(value: Any) -> tuple[str, bool, bool, bool, int, list[str], li
     )
 
 
+def _backward_dict(
+    name: str,
+    ready: bool,
+    seeded: bool,
+    executed: bool,
+    steps: list[str],
+    params: list[str],
+    inputs: list[str],
+    outputs: list[str],
+    tags: list[str],
+    upstream: list[float],
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "ready": bool(ready),
+        "seeded": bool(seeded),
+        "executed": bool(executed),
+        "steps": list(steps),
+        "params": list(params),
+        "inputs": list(inputs),
+        "outputs": list(outputs),
+        "tags": list(tags),
+        "upstream": list(upstream),
+    }
+
+
+def _backward_like(value: Any) -> tuple[str, bool, bool, bool, list[str], list[str], list[str], list[str], list[str], list[float]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            bool(value.get("ready", False)),
+            bool(value.get("seeded", False)),
+            bool(value.get("executed", False)),
+            _string_list(value.get("steps", [])),
+            _string_list(value.get("params", [])),
+            _string_list(value.get("inputs", [])),
+            _string_list(value.get("outputs", [])),
+            _string_list(value.get("tags", [])),
+            [float(v) for v in value.get("upstream", [])],
+        )
+    return (
+        str(getattr(value, "name")),
+        bool(getattr(value, "ready", False)),
+        bool(getattr(value, "seeded", False)),
+        bool(getattr(value, "executed", False)),
+        _string_list(getattr(value, "steps", [])),
+        _string_list(getattr(value, "params", [])),
+        _string_list(getattr(value, "inputs", [])),
+        _string_list(getattr(value, "outputs", [])),
+        _string_list(getattr(value, "tags", [])),
+        [float(v) for v in getattr(value, "upstream", [])],
+    )
+
+
+def _backward_rule_like(value: Any) -> tuple[str, Any, Any, Any, Any, Any, bool]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("op", "")),
+            value.get("primal_a"),
+            value.get("primal_b"),
+            value.get("upstream"),
+            value.get("grad_a"),
+            value.get("grad_b"),
+            bool(value.get("ready", False)),
+        )
+    return (
+        str(getattr(value, "op", "")),
+        getattr(value, "primal_a", None),
+        getattr(value, "primal_b", None),
+        getattr(value, "upstream", None),
+        getattr(value, "grad_a", None),
+        getattr(value, "grad_b", None),
+        bool(getattr(value, "ready", False)),
+    )
+
+
 def _stage_like(value: Any) -> tuple[str, str, str, bool, bool, bool, bool, list[str], list[str]]:
     if isinstance(value, dict):
         return (
@@ -846,6 +922,244 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             chain = _invoke_special_module_function(module_name, "function_transform_chain", args)
             suffix = function_name.removeprefix("function_transform_chain_")
             return _invoke_special_module_function(module_name, f"transform_chain_{suffix}", (chain,))
+    if module_name == "engine/backward":
+        if function_name == "new_backward_state":
+            return _backward_dict(str(args[0]), False, False, False, [], [], [], [], [], [])
+        if function_name == "backward_rule_add":
+            return _tensor_backward_rule_add(args[0], args[1], args[2])
+        if function_name == "backward_rule_mul":
+            return _tensor_backward_rule_mul(args[0], args[1], args[2])
+        if function_name == "backward_rule_sub":
+            return _tensor_backward_rule_sub(args[0], args[1], args[2])
+        if function_name == "backward_rule_div":
+            return _tensor_backward_rule_div(args[0], args[1], args[2])
+        if function_name == "backward_rule_matmul":
+            return _tensor_backward_rule_matmul(args[0], args[1], args[2])
+        if function_name == "backward_rule_sum":
+            return _tensor_backward_rule_sum(args[0], args[1])
+        if function_name == "backward_rule_mean":
+            return _tensor_backward_rule_mean(args[0], args[1])
+        if function_name == "backward_rule_sum_dim":
+            return _tensor_backward_rule_sum_dim(args[0], args[1], int(args[2]), bool(args[3]))
+        if function_name == "backward_rule_mean_dim":
+            return _tensor_backward_rule_mean_dim(args[0], args[1], int(args[2]), bool(args[3]))
+        if function_name == "backward_rule_from_op":
+            op = str(args[0])
+            if op == "add":
+                return _tensor_backward_rule_add(args[1], args[2], args[3])
+            if op == "mul":
+                return _tensor_backward_rule_mul(args[1], args[2], args[3])
+            if op == "sub":
+                return _tensor_backward_rule_sub(args[1], args[2], args[3])
+            if op == "div":
+                return _tensor_backward_rule_div(args[1], args[2], args[3])
+            if op == "matmul":
+                return _tensor_backward_rule_matmul(args[1], args[2], args[3])
+            if op == "sum":
+                return _tensor_backward_rule_sum(args[1], args[3])
+            if op == "mean":
+                return _tensor_backward_rule_mean(args[1], args[3])
+            if op == "sum_dim":
+                return _tensor_backward_rule_sum_dim(args[1], args[3], 0, False)
+            if op == "mean_dim":
+                return _tensor_backward_rule_mean_dim(args[1], args[3], 0, False)
+            return _tensor_backward_rule_add(args[1], args[2], args[3])
+        if function_name == "backward_rule_sum_dim_from_state":
+            return _tensor_backward_rule_sum_dim(args[1], args[2], 0, False)
+        if function_name == "backward_rule_mean_dim_from_state":
+            return _tensor_backward_rule_mean_dim(args[1], args[2], 0, False)
+        if function_name == "backward_rule_from_state":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            op = steps[-1] if steps else "add"
+            if op == "sum_dim":
+                return invoke_runtime_function("engine/backward", "backward_rule_sum_dim_from_state", args[0], args[1], args[3])
+            if op == "mean_dim":
+                return invoke_runtime_function("engine/backward", "backward_rule_mean_dim_from_state", args[0], args[1], args[3])
+            return invoke_runtime_function("engine/backward", "backward_rule_from_op", op, args[1], args[2], args[3])
+        if function_name == "backward_execute_state":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            a = args[1]
+            b = args[2]
+            upstream_tensor = args[3]
+            next_state = _backward_dict(name, True, True, executed, steps, params, inputs, outputs, tags, upstream)
+            for step in reversed(steps):
+                rule = invoke_runtime_function("engine/backward", "backward_rule_from_op", step, a, b, upstream_tensor)
+                next_state = invoke_runtime_function("engine/backward", "backward_apply_rule", next_state, rule)
+            return next_state
+        if function_name == "backward_apply_rule":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            rule = args[1]
+            op, primal_a, primal_b, rule_upstream, grad_a, grad_b, rule_ready = _backward_rule_like(rule)
+            next_state = _backward_dict(name, ready or rule_ready, seeded or rule_ready, executed or rule_ready, steps, params, inputs, outputs, tags, upstream)
+            if op:
+                next_state["tags"] = list(next_state["tags"]) + [op]
+            if rule_upstream is not None:
+                try:
+                    upstream_arr, _, _ = _tensor_like(rule_upstream)
+                    next_state["upstream"] = list(np.asarray(upstream_arr).reshape(-1).tolist())
+                except Exception:
+                    pass
+            next_state["executed"] = bool(rule_ready)
+            next_state["seeded"] = bool(rule_ready)
+            return next_state
+        if function_name == "backward_name":
+            name, _, _, _, _, _, _, _, _, _ = _backward_like(args[0])
+            return name
+        if function_name == "backward_ready":
+            _, ready, _, _, _, _, _, _, _, _ = _backward_like(args[0])
+            return ready
+        if function_name == "backward_seeded":
+            _, _, seeded, _, _, _, _, _, _, _ = _backward_like(args[0])
+            return seeded
+        if function_name == "backward_executed":
+            _, _, _, executed, _, _, _, _, _, _ = _backward_like(args[0])
+            return executed
+        if function_name == "backward_step_count":
+            _, _, _, _, steps, _, _, _, _, _ = _backward_like(args[0])
+            return len(steps)
+        if function_name == "backward_param_count":
+            _, _, _, _, _, params, _, _, _, _ = _backward_like(args[0])
+            return len(params)
+        if function_name == "backward_input_count":
+            _, _, _, _, _, _, inputs, _, _, _ = _backward_like(args[0])
+            return len(inputs)
+        if function_name == "backward_output_count":
+            _, _, _, _, _, _, _, outputs, _, _ = _backward_like(args[0])
+            return len(outputs)
+        if function_name == "backward_tag_count":
+            _, _, _, _, _, _, _, _, tags, _ = _backward_like(args[0])
+            return len(tags)
+        if function_name == "backward_has_step":
+            _, _, _, _, steps, _, _, _, _, _ = _backward_like(args[0])
+            return str(args[1]) in steps
+        if function_name == "backward_has_param":
+            _, _, _, _, _, params, _, _, _, _ = _backward_like(args[0])
+            return str(args[1]) in params
+        if function_name == "backward_has_input":
+            _, _, _, _, _, _, inputs, _, _, _ = _backward_like(args[0])
+            return str(args[1]) in inputs
+        if function_name == "backward_has_output":
+            _, _, _, _, _, _, _, outputs, _, _ = _backward_like(args[0])
+            return str(args[1]) in outputs
+        if function_name == "backward_has_tag":
+            _, _, _, _, _, _, _, _, tags, _ = _backward_like(args[0])
+            return str(args[1]) in tags
+        if function_name == "backward_add_step":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            steps = list(steps)
+            steps.append(str(args[1]))
+            return _backward_dict(name, True, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_add_step_with_param":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            steps = list(steps)
+            params = list(params)
+            steps.append(str(args[1]))
+            params.append(str(args[2]))
+            return _backward_dict(name, True, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_add_input":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            inputs = list(inputs)
+            inputs.append(str(args[1]))
+            return _backward_dict(name, True, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_add_output":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            outputs = list(outputs)
+            outputs.append(str(args[1]))
+            return _backward_dict(name, True, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_add_tag":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            tags = list(tags)
+            tags.append(str(args[1]))
+            return _backward_dict(name, True, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_clear_steps":
+            name, ready, seeded, executed, _, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, executed, [], params, inputs, outputs, tags, upstream)
+        if function_name == "backward_clear_params":
+            name, ready, seeded, executed, steps, _, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, executed, steps, [], inputs, outputs, tags, upstream)
+        if function_name == "backward_clear_inputs":
+            name, ready, seeded, executed, steps, params, _, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, executed, steps, params, [], outputs, tags, upstream)
+        if function_name == "backward_clear_outputs":
+            name, ready, seeded, executed, steps, params, inputs, _, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, executed, steps, params, inputs, [], tags, upstream)
+        if function_name == "backward_clear_tags":
+            name, ready, seeded, executed, steps, params, inputs, outputs, _, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, executed, steps, params, inputs, outputs, [], upstream)
+        if function_name == "backward_set_ready":
+            name, _, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, bool(args[1]), seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_set_seeded":
+            name, ready, _, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, bool(args[1]), executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_set_executed":
+            name, ready, seeded, _, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _backward_dict(name, ready, seeded, bool(args[1]), steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_set_upstream":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, _ = _backward_like(args[0])
+            upstream = [float(v) for v in _string_list(args[1])] if isinstance(args[1], (list, tuple)) else [float(v) for v in np.asarray(args[1]).reshape(-1)]
+            return _backward_dict(name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+        if function_name == "backward_state_dict":
+            return _backward_dict(*_backward_like(args[0]))
+        if function_name == "backward_load_state_dict":
+            return args[1]
+        if function_name == "backward_to_tracer":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _tracer_dict(name, ready, seeded or executed, len(steps), steps, params, tags, inputs, outputs, [])
+        if function_name == "tracer_to_backward":
+            state = args[0]
+            name = str(args[1])
+            ops = _string_list(state.get("ops", [])) if isinstance(state, dict) else _string_list(getattr(state, "ops", []))
+            params = _string_list(state.get("params", [])) if isinstance(state, dict) else _string_list(getattr(state, "params", []))
+            inputs = _string_list(state.get("inputs", [])) if isinstance(state, dict) else _string_list(getattr(state, "inputs", []))
+            outputs = _string_list(state.get("outputs", [])) if isinstance(state, dict) else _string_list(getattr(state, "outputs", []))
+            tags = _string_list(state.get("tags", [])) if isinstance(state, dict) else _string_list(getattr(state, "tags", []))
+            active = bool(state.get("active", False)) if isinstance(state, dict) else bool(getattr(state, "active", False))
+            linearized = bool(state.get("linearized", False)) if isinstance(state, dict) else bool(getattr(state, "linearized", False))
+            return _backward_dict(name, active, linearized, False, ops, params, inputs, outputs, tags, [])
+        if function_name == "backward_to_jaxpr":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            return _jaxpr_dict(name, len(steps), steps, params, inputs, outputs, ready, seeded or executed, [])
+        if function_name == "jaxpr_to_backward":
+            graph = args[0]
+            name = str(graph.get("name", "")) if isinstance(graph, dict) else str(getattr(graph, "name", ""))
+            primitives = _string_list(graph.get("primitives", [])) if isinstance(graph, dict) else _string_list(getattr(graph, "primitives", []))
+            params = _string_list(graph.get("params", [])) if isinstance(graph, dict) else _string_list(getattr(graph, "params", []))
+            inputs = _string_list(graph.get("inputs", [])) if isinstance(graph, dict) else _string_list(getattr(graph, "inputs", []))
+            outputs = _string_list(graph.get("outputs", [])) if isinstance(graph, dict) else _string_list(getattr(graph, "outputs", []))
+            ready = bool(graph.get("ready", False)) if isinstance(graph, dict) else bool(getattr(graph, "ready", False))
+            linearized = bool(graph.get("linearized", False)) if isinstance(graph, dict) else bool(getattr(graph, "linearized", False))
+            return _backward_dict(name, ready, linearized, False, primitives, params, inputs, outputs, [], [])
+        if function_name == "backward_seed_state":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            _, _, loss_requires_grad = _tensor_like(args[1])
+            if not loss_requires_grad:
+                return _backward_dict(name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream)
+            loss_data, loss_shape, _ = _tensor_like(args[1])
+            upstream_values = np.ones_like(loss_data, dtype=float).reshape(-1).tolist()
+            return _backward_dict(name, True, True, executed, steps, params, inputs, outputs, tags, upstream_values)
+        if function_name == "backward_pass_state":
+            name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
+            seeded_state = _invoke_special_module_function(module_name, "backward_seed_state", args)
+            if isinstance(seeded_state, dict):
+                seeded_name, seeded_ready, seeded_seeded, _, seeded_steps, seeded_params, seeded_inputs, seeded_outputs, seeded_tags, seeded_upstream = _backward_like(seeded_state)
+                return _backward_dict(seeded_name, seeded_ready, seeded_seeded, True, seeded_steps, seeded_params, seeded_inputs, seeded_outputs, seeded_tags, seeded_upstream)
+            return seeded_state
+        if function_name == "backward_pass":
+            if len(args) == 1:
+                _, loss_shape, loss_requires_grad = _tensor_like(args[0])
+                loss_data, _, _ = _tensor_like(args[0])
+            else:
+                _, _, _, _, _, _, _, _, _, _ = _backward_like(args[0])
+                _, _, loss_requires_grad = _tensor_like(args[1])
+                loss_data, loss_shape, _ = _tensor_like(args[1])
+            if not loss_requires_grad:
+                return _tensor_dict(np.zeros_like(loss_data, dtype=float), loss_shape, False)
+            return _tensor_dict(np.ones_like(loss_data, dtype=float), loss_shape, False)
+        if function_name == "backward":
+            if len(args) == 1:
+                return _invoke_special_module_function(module_name, "backward_pass", ( _invoke_special_module_function(module_name, "new_backward_state", ("backward",)), args[0]))
+            return _invoke_special_module_function(module_name, "backward_pass", args)
     if module_name == "runtime/stage":
         if function_name == "new_stage_state":
             return _stage_dict(str(args[0]), str(args[1]), str(args[2]), False, False, False, False, [], [], False, False, False, False, 0, [], [])

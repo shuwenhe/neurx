@@ -39,7 +39,7 @@ struct rmsprop_optimizer {
     []float avg
 }
 
-func _ensure_size([]float values, int n) []float {
+func ensure_size([]float values, int n) []float {
     if len(values) == n {
         return values
     }
@@ -52,7 +52,7 @@ func _ensure_size([]float values, int n) []float {
     out
 }
 
-func _inv_sqrt(float x) float {
+func inv_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
     }
@@ -120,8 +120,8 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
 
 func adam_step(adam_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
-    []float m = _ensure_size(optimizer.m, n)
-    []float v = _ensure_size(optimizer.v, n)
+    []float m = ensure_size(optimizer.m, n)
+    []float v = ensure_size(optimizer.v, n)
     []float out = []float{cap: n}
 
     int step = optimizer.step + 1
@@ -143,7 +143,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) tensor {
         v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
         float m_hat = m[i] / bias_c1
         float v_hat = v[i] / bias_c2
-        out[i] = params.data[i] - optimizer.lr * m_hat * _inv_sqrt(v_hat + optimizer.eps)
+        out[i] = params.data[i] - optimizer.lr * m_hat * inv_sqrt(v_hat + optimizer.eps)
         i = i + 1
     }
 
@@ -152,8 +152,8 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) tensor {
 
 func adamw_step(adamw_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
-    []float m = _ensure_size(optimizer.m, n)
-    []float v = _ensure_size(optimizer.v, n)
+    []float m = ensure_size(optimizer.m, n)
+    []float v = ensure_size(optimizer.v, n)
     []float out = []float{cap: n}
 
     int step = optimizer.step + 1
@@ -175,7 +175,7 @@ func adamw_step(adamw_optimizer optimizer, tensor params, tensor grads) tensor {
         v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
         float m_hat = m[i] / bias_c1
         float v_hat = v[i] / bias_c2
-        out[i] = params.data[i] - optimizer.lr * m_hat * _inv_sqrt(v_hat + optimizer.eps)
+        out[i] = params.data[i] - optimizer.lr * m_hat * inv_sqrt(v_hat + optimizer.eps)
         i = i + 1
     }
 
@@ -184,13 +184,13 @@ func adamw_step(adamw_optimizer optimizer, tensor params, tensor grads) tensor {
 
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
-    []float avg = _ensure_size(optimizer.avg, n)
+    []float avg = ensure_size(optimizer.avg, n)
     []float out = []float{cap: n}
     int i = 0
     while i < n {
         float g = grads.data[i]
         avg[i] = optimizer.alpha * avg[i] + (1.0 - optimizer.alpha) * g * g
-        out[i] = params.data[i] - optimizer.lr * g * _inv_sqrt(avg[i] + optimizer.eps)
+        out[i] = params.data[i] - optimizer.lr * g * inv_sqrt(avg[i] + optimizer.eps)
         i = i + 1
     }
     new(out, params.shape, params.requires_grad)
@@ -208,7 +208,7 @@ func clip_grad_norm([]tensor params, float max_norm, float eps) float {
         }
         p = p + 1
     }
-    float norm = _inv_sqrt(total_sq + eps)
+    float norm = inv_sqrt(total_sq + eps)
     if norm > max_norm {
         norm = max_norm
     }
