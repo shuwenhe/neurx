@@ -102,97 +102,204 @@ def _same_shape_like(a: Any, b: Any) -> bool:
     return shape_a == shape_b
 
 
-def _tensor_backward_rule_add(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+def _tensor_backward_rule_add(a: Any, b: Any, upstream: Any, grad_a: Any | None = None, grad_b: Any | None = None) -> dict[str, Any]:
     data_a, shape_a, req_a = _tensor_like(a)
     data_b, shape_b, req_b = _tensor_like(b)
     upstream_data, upstream_shape, _ = _tensor_like(upstream)
     ready = shape_a == shape_b == upstream_shape
+    if grad_a is None:
+        grad_a = _tensor_dict(upstream_data.copy(), upstream_shape, False)
+    if grad_b is None:
+        grad_b = _tensor_dict(upstream_data.copy(), upstream_shape, False)
     return {
         "op": "add",
         "primal_a": _tensor_dict(data_a, shape_a, req_a),
         "primal_b": _tensor_dict(data_b, shape_b, req_b),
         "upstream": _tensor_dict(upstream_data, upstream_shape, False),
-        "grad_a": _tensor_dict(upstream_data.copy(), upstream_shape, False),
-        "grad_b": _tensor_dict(upstream_data.copy(), upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": grad_b,
         "ready": ready,
     }
 
 
-def _tensor_backward_rule_mul(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+def _tensor_backward_rule_mul(a: Any, b: Any, upstream: Any, grad_a: Any | None = None, grad_b: Any | None = None) -> dict[str, Any]:
     data_a, shape_a, req_a = _tensor_like(a)
     data_b, shape_b, req_b = _tensor_like(b)
     upstream_data, upstream_shape, _ = _tensor_like(upstream)
     ready = shape_a == shape_b == upstream_shape
+    if grad_a is None:
+        grad_a = _tensor_dict(np.multiply(upstream_data, data_b), upstream_shape, False)
+    if grad_b is None:
+        grad_b = _tensor_dict(np.multiply(upstream_data, data_a), upstream_shape, False)
     return {
         "op": "mul",
         "primal_a": _tensor_dict(data_a, shape_a, req_a),
         "primal_b": _tensor_dict(data_b, shape_b, req_b),
         "upstream": _tensor_dict(upstream_data, upstream_shape, False),
-        "grad_a": _tensor_dict(np.multiply(upstream_data, data_b), upstream_shape, False),
-        "grad_b": _tensor_dict(np.multiply(upstream_data, data_a), upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": grad_b,
         "ready": ready,
     }
 
 
-def _tensor_backward_rule_matmul(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+def _tensor_backward_rule_sub(a: Any, b: Any, upstream: Any, grad_a: Any | None = None, grad_b: Any | None = None) -> dict[str, Any]:
     data_a, shape_a, req_a = _tensor_like(a)
     data_b, shape_b, req_b = _tensor_like(b)
     upstream_data, upstream_shape, _ = _tensor_like(upstream)
-    grad_a = np.zeros_like(data_a)
-    grad_b = np.zeros_like(data_b)
+    ready = shape_a == shape_b == upstream_shape
+    if grad_a is None:
+        grad_a = _tensor_dict(np.array(upstream_data, copy=True), upstream_shape, False)
+    if grad_b is None:
+        grad_b = _tensor_dict(np.negative(upstream_data), upstream_shape, False)
+    return {
+        "op": "sub",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(data_b, shape_b, req_b),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": grad_b,
+        "ready": ready,
+    }
+
+
+def _tensor_backward_rule_div(a: Any, b: Any, upstream: Any, grad_a: Any | None = None, grad_b: Any | None = None) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    data_b, shape_b, req_b = _tensor_like(b)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    ready = shape_a == shape_b == upstream_shape
+    if grad_a is None:
+        grad_a = _tensor_dict(np.divide(upstream_data, data_b), upstream_shape, False)
+    if grad_b is None:
+        numerator = np.multiply(upstream_data, data_a)
+        denominator = np.multiply(data_b, data_b)
+        grad_b = _tensor_dict(np.negative(np.divide(numerator, denominator)), upstream_shape, False)
+    return {
+        "op": "div",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(data_b, shape_b, req_b),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": grad_b,
+        "ready": ready,
+    }
+
+
+def _tensor_backward_rule_matmul(a: Any, b: Any, upstream: Any, grad_a: Any | None = None, grad_b: Any | None = None) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    data_b, shape_b, req_b = _tensor_like(b)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    if grad_a is None:
+        grad_a_data = np.zeros_like(data_a)
+    else:
+        grad_a_data, _, _ = _tensor_like(grad_a)
+    if grad_b is None:
+        grad_b_data = np.zeros_like(data_b)
+    else:
+        grad_b_data, _, _ = _tensor_like(grad_b)
     ready = False
     if len(shape_a) == 1 and len(shape_b) == 1:
         ready = len(upstream_shape) == 1
-        grad_a = data_b * float(upstream_data.reshape(-1)[0])
-        grad_b = data_a * float(upstream_data.reshape(-1)[0])
+        grad_a_data = data_b * float(upstream_data.reshape(-1)[0])
+        grad_b_data = data_a * float(upstream_data.reshape(-1)[0])
     elif len(shape_a) == 2 and len(shape_b) == 2:
         ready = len(upstream_shape) == 2
-        grad_a = np.matmul(upstream_data, data_b.T)
-        grad_b = np.matmul(data_a.T, upstream_data)
+        grad_a_data = np.matmul(upstream_data, data_b.T)
+        grad_b_data = np.matmul(data_a.T, upstream_data)
     elif len(shape_a) == 2 and len(shape_b) == 1:
         ready = len(upstream_shape) == 1
-        grad_b = np.matmul(data_a.T, upstream_data)
+        grad_b_data = np.matmul(data_a.T, upstream_data)
     return {
         "op": "matmul",
         "primal_a": _tensor_dict(data_a, shape_a, req_a),
         "primal_b": _tensor_dict(data_b, shape_b, req_b),
         "upstream": _tensor_dict(upstream_data, upstream_shape, False),
-        "grad_a": _tensor_dict(grad_a, shape_a, False),
-        "grad_b": _tensor_dict(grad_b, shape_b, False),
+        "grad_a": _tensor_dict(grad_a_data, shape_a, False),
+        "grad_b": _tensor_dict(grad_b_data, shape_b, False),
         "ready": ready,
     }
 
 
-def _tensor_backward_rule_sum(a: Any, upstream: Any) -> dict[str, Any]:
+def _tensor_backward_rule_sum(a: Any, upstream: Any, grad_a: Any | None = None) -> dict[str, Any]:
     data_a, shape_a, req_a = _tensor_like(a)
     upstream_data, upstream_shape, _ = _tensor_like(upstream)
     scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if upstream_data.size else 0.0
-    grad_a = np.full_like(data_a, scalar)
+    if grad_a is None:
+        grad_a = _tensor_dict(np.full_like(data_a, scalar), shape_a, False)
     return {
         "op": "sum",
         "primal_a": _tensor_dict(data_a, shape_a, req_a),
         "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
         "upstream": _tensor_dict(upstream_data, upstream_shape, False),
-        "grad_a": _tensor_dict(grad_a, shape_a, False),
+        "grad_a": grad_a,
         "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
         "ready": len(upstream_shape) == 1,
     }
 
 
-def _tensor_backward_rule_mean(a: Any, upstream: Any) -> dict[str, Any]:
+def _tensor_backward_rule_mean(a: Any, upstream: Any, grad_a: Any | None = None) -> dict[str, Any]:
     data_a, shape_a, req_a = _tensor_like(a)
     upstream_data, upstream_shape, _ = _tensor_like(upstream)
     denom = float(len(data_a)) if len(data_a) else 1.0
     scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if upstream_data.size else 0.0
-    grad_a = np.full_like(data_a, scalar / denom)
+    if grad_a is None:
+        grad_a = _tensor_dict(np.full_like(data_a, scalar / denom), shape_a, False)
     return {
         "op": "mean",
         "primal_a": _tensor_dict(data_a, shape_a, req_a),
         "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
         "upstream": _tensor_dict(upstream_data, upstream_shape, False),
-        "grad_a": _tensor_dict(grad_a, shape_a, False),
+        "grad_a": grad_a,
         "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
         "ready": len(upstream_shape) == 1,
+    }
+
+
+def _tensor_backward_rule_sum_dim(a: Any, upstream: Any, dim: int, keepdim: bool, grad_a: Any | None = None) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    axis = dim if dim >= 0 else dim + len(shape_a)
+    expanded = np.asarray(upstream_data)
+    if expanded.size == 1:
+        grad_data = np.full(shape_a, float(expanded.reshape(-1)[0]))
+    else:
+        if not keepdim:
+            expanded = np.expand_dims(expanded, axis=axis)
+        grad_data = np.broadcast_to(expanded, shape_a)
+    if grad_a is None:
+        grad_a = _tensor_dict(grad_data, shape_a, False)
+    return {
+        "op": "sum_dim",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "ready": True,
+    }
+
+
+def _tensor_backward_rule_mean_dim(a: Any, upstream: Any, dim: int, keepdim: bool, grad_a: Any | None = None) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    axis = dim if dim >= 0 else dim + len(shape_a)
+    expanded = np.asarray(upstream_data)
+    denom = float(shape_a[axis]) if shape_a else 1.0
+    if expanded.size == 1:
+        grad_data = np.full(shape_a, float(expanded.reshape(-1)[0]) / denom)
+    else:
+        if not keepdim:
+            expanded = np.expand_dims(expanded, axis=axis)
+        grad_data = np.broadcast_to(expanded, shape_a) / denom
+    if grad_a is None:
+        grad_a = _tensor_dict(grad_data, shape_a, False)
+    return {
+        "op": "mean_dim",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": grad_a,
+        "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "ready": True,
     }
 
 
@@ -201,29 +308,153 @@ def _tensor_transform_chain_from_op(op: str) -> dict[str, Any]:
 
 
 def _invoke_special_module_function(module_name: str, function_name: str, args: tuple[Any, ...]) -> Any:
+    if module_name == "tensor":
+        if function_name == "tensor_backward_add_grad_a":
+            grad_a, _, _ = _tensor_like(args[0])
+            return _tensor_dict(np.array(grad_a, copy=True), list(np.asarray(grad_a).shape), False)
+        if function_name == "tensor_backward_add_grad_b":
+            grad_b, _, _ = _tensor_like(args[0])
+            return _tensor_dict(np.array(grad_b, copy=True), list(np.asarray(grad_b).shape), False)
+        if function_name == "tensor_backward_mul_grad_a":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            return _tensor_dict(np.multiply(upstream_data, data_b), upstream_shape, False)
+        if function_name == "tensor_backward_mul_grad_b":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            return _tensor_dict(np.multiply(upstream_data, data_a), upstream_shape, False)
+        if function_name == "tensor_backward_sub_grad_a":
+            upstream_data, upstream_shape, _ = _tensor_like(args[0])
+            return _tensor_dict(np.array(upstream_data, copy=True), upstream_shape, False)
+        if function_name == "tensor_backward_sub_grad_b":
+            upstream_data, upstream_shape, _ = _tensor_like(args[0])
+            return _tensor_dict(np.negative(upstream_data), upstream_shape, False)
+        if function_name == "tensor_backward_div_grad_a":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            return _tensor_dict(np.divide(upstream_data, data_b), upstream_shape, False)
+        if function_name == "tensor_backward_div_grad_b":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            numerator = np.multiply(upstream_data, data_a)
+            denominator = np.multiply(data_b, data_b)
+            return _tensor_dict(np.negative(np.divide(numerator, denominator)), upstream_shape, False)
+        if function_name == "tensor_backward_matmul_grad_a":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            if len(shape_a) == 1 and len(shape_b) == 1:
+                return _tensor_dict(np.asarray(data_b) * float(np.asarray(upstream_data).reshape(-1)[0]), shape_b, False)
+            if len(shape_a) == 2 and len(shape_b) == 2:
+                return _tensor_dict(np.matmul(upstream_data, np.asarray(data_b).T), shape_a, False)
+            if len(shape_a) == 2 and len(shape_b) == 1:
+                return _tensor_dict(np.multiply(np.asarray(upstream_data).reshape(-1, 1), np.asarray(data_b).reshape(1, -1)), shape_a, False)
+            return _tensor_dict(np.zeros_like(np.asarray(data_a)), shape_a, False)
+        if function_name == "tensor_backward_matmul_grad_b":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            data_b, shape_b, _ = _tensor_like(args[1])
+            upstream_data, upstream_shape, _ = _tensor_like(args[2])
+            if len(shape_a) == 1 and len(shape_b) == 1:
+                return _tensor_dict(np.asarray(data_a) * float(np.asarray(upstream_data).reshape(-1)[0]), shape_a, False)
+            if len(shape_a) == 2 and len(shape_b) == 2:
+                return _tensor_dict(np.matmul(np.asarray(data_a).T, upstream_data), shape_b, False)
+            if len(shape_a) == 2 and len(shape_b) == 1:
+                return _tensor_dict(np.matmul(np.asarray(data_a).T, upstream_data), shape_b, False)
+            return _tensor_dict(np.zeros_like(np.asarray(data_b)), shape_b, False)
+        if function_name == "tensor_backward_sum_grad":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            upstream_data, upstream_shape, _ = _tensor_like(args[1])
+            scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if np.asarray(upstream_data).size else 0.0
+            return _tensor_dict(np.full_like(np.asarray(data_a), scalar), shape_a, False)
+        if function_name == "tensor_backward_mean_grad":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            upstream_data, upstream_shape, _ = _tensor_like(args[1])
+            scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if np.asarray(upstream_data).size else 0.0
+            denom = float(len(np.asarray(data_a))) if len(np.asarray(data_a)) else 1.0
+            return _tensor_dict(np.full_like(np.asarray(data_a), scalar / denom), shape_a, False)
+        if function_name == "tensor_backward_sum_dim_grad":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            upstream_data, upstream_shape, _ = _tensor_like(args[1])
+            dim = int(args[2])
+            keepdim = bool(args[3])
+            axis = dim if dim >= 0 else dim + len(shape_a)
+            expanded = np.asarray(upstream_data)
+            if expanded.size == 1:
+                return _tensor_dict(np.full(shape_a, float(expanded.reshape(-1)[0])), shape_a, False)
+            if not keepdim:
+                expanded = np.expand_dims(expanded, axis=axis)
+            return _tensor_dict(np.broadcast_to(expanded, shape_a), shape_a, False)
+        if function_name == "tensor_backward_mean_dim_grad":
+            data_a, shape_a, _ = _tensor_like(args[0])
+            upstream_data, upstream_shape, _ = _tensor_like(args[1])
+            dim = int(args[2])
+            keepdim = bool(args[3])
+            axis = dim if dim >= 0 else dim + len(shape_a)
+            expanded = np.asarray(upstream_data)
+            if expanded.size == 1:
+                denom = float(shape_a[axis]) if shape_a else 1.0
+                return _tensor_dict(np.full(shape_a, float(expanded.reshape(-1)[0]) / denom), shape_a, False)
+            if not keepdim:
+                expanded = np.expand_dims(expanded, axis=axis)
+            denom = float(shape_a[axis]) if shape_a else 1.0
+            return _tensor_dict(np.broadcast_to(expanded, shape_a) / denom, shape_a, False)
     if module_name == "tensor/autograd":
         if function_name == "tensor_backward_rule_add":
-            return _tensor_backward_rule_add(*args)
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_add_grad_a", args[2])
+            grad_b = invoke_runtime_function("tensor", "tensor_backward_add_grad_b", args[2])
+            return _tensor_backward_rule_add(args[0], args[1], args[2], grad_a=grad_a, grad_b=grad_b)
         if function_name == "tensor_backward_rule_mul":
-            return _tensor_backward_rule_mul(*args)
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_mul_grad_a", args[0], args[1], args[2])
+            grad_b = invoke_runtime_function("tensor", "tensor_backward_mul_grad_b", args[0], args[1], args[2])
+            return _tensor_backward_rule_mul(args[0], args[1], args[2], grad_a=grad_a, grad_b=grad_b)
+        if function_name == "tensor_backward_rule_sub":
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_sub_grad_a", args[2])
+            grad_b = invoke_runtime_function("tensor", "tensor_backward_sub_grad_b", args[2])
+            return _tensor_backward_rule_sub(args[0], args[1], args[2], grad_a=grad_a, grad_b=grad_b)
+        if function_name == "tensor_backward_rule_div":
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_div_grad_a", args[0], args[1], args[2])
+            grad_b = invoke_runtime_function("tensor", "tensor_backward_div_grad_b", args[0], args[1], args[2])
+            return _tensor_backward_rule_div(args[0], args[1], args[2], grad_a=grad_a, grad_b=grad_b)
         if function_name == "tensor_backward_rule_matmul":
-            return _tensor_backward_rule_matmul(*args)
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_matmul_grad_a", args[0], args[1], args[2])
+            grad_b = invoke_runtime_function("tensor", "tensor_backward_matmul_grad_b", args[0], args[1], args[2])
+            return _tensor_backward_rule_matmul(args[0], args[1], args[2], grad_a=grad_a, grad_b=grad_b)
         if function_name == "tensor_backward_rule_sum":
-            return _tensor_backward_rule_sum(*args)
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_sum_grad", args[0], args[1])
+            return _tensor_backward_rule_sum(args[0], args[1], grad_a=grad_a)
         if function_name == "tensor_backward_rule_mean":
-            return _tensor_backward_rule_mean(*args)
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_mean_grad", args[0], args[1])
+            return _tensor_backward_rule_mean(args[0], args[1], grad_a=grad_a)
+        if function_name == "tensor_backward_rule_sum_dim":
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_sum_dim_grad", args[0], args[1], args[2], args[3])
+            return _tensor_backward_rule_sum_dim(args[0], args[1], int(args[2]), bool(args[3]), grad_a=grad_a)
+        if function_name == "tensor_backward_rule_mean_dim":
+            grad_a = invoke_runtime_function("tensor", "tensor_backward_mean_dim_grad", args[0], args[1], args[2], args[3])
+            return _tensor_backward_rule_mean_dim(args[0], args[1], int(args[2]), bool(args[3]), grad_a=grad_a)
         if function_name == "tensor_transform_chain_from_op":
             return _tensor_transform_chain_from_op(str(args[0]))
         if function_name == "tensor_transform_chain_add":
             return _tensor_transform_chain_from_op("add")
         if function_name == "tensor_transform_chain_mul":
             return _tensor_transform_chain_from_op("mul")
+        if function_name == "tensor_transform_chain_sub":
+            return _tensor_transform_chain_from_op("sub")
+        if function_name == "tensor_transform_chain_div":
+            return _tensor_transform_chain_from_op("div")
         if function_name == "tensor_transform_chain_matmul":
             return _tensor_transform_chain_from_op("matmul")
         if function_name == "tensor_transform_chain_sum":
             return _tensor_transform_chain_from_op("sum")
         if function_name == "tensor_transform_chain_mean":
             return _tensor_transform_chain_from_op("mean")
+        if function_name == "tensor_transform_chain_sum_dim":
+            return _tensor_transform_chain_from_op("sum_dim")
+        if function_name == "tensor_transform_chain_mean_dim":
+            return _tensor_transform_chain_from_op("mean_dim")
     return _UNHANDLED
 
 
