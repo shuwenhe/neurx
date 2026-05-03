@@ -5,10 +5,10 @@ from neurx.platform import format_doctor_report, get_runtime_config, runtime_inf
 
 
 def test_runtime_config_from_env(monkeypatch):
-    monkeypatch.setenv("TENSOR_DEVICE", "cpu")
+    monkeypatch.setenv("TENSOR_DEVICE", "mps")
     monkeypatch.setenv("TENSOR_LOG_LEVEL", "debug")
     cfg = get_runtime_config(reload=True)
-    assert cfg.default_device == "cpu"
+    assert cfg.default_device == "mps"
     assert cfg.log_level == "DEBUG"
 
 
@@ -21,6 +21,7 @@ def test_runtime_info_has_required_fields():
         "numpy_version",
         "default_device",
         "cuda_available",
+        "mps_available",
         "env",
     }
     assert required.issubset(set(info.keys()))
@@ -31,6 +32,15 @@ def test_doctor_report_format():
     text = format_doctor_report(results)
     assert "neurx doctor report" in text
     assert any(item.name == "python" for item in results)
+
+
+def test_doctor_reports_mps(monkeypatch):
+    from neurx.platform import diagnostics
+
+    monkeypatch.setattr(diagnostics, "_mps_available", lambda: True)
+    results = doctor(require_cuda=False, require_mps=True)
+    assert any(item.name == "mps.runtime" and item.passed for item in results)
+    assert any(item.name == "require_mps" and item.passed for item in results)
 
 
 def test_tensor_fallback_to_cpu_when_cuda_unavailable(monkeypatch):
@@ -56,3 +66,11 @@ def test_tensor_cuda_strict_raises_when_unavailable(monkeypatch):
     with pytest.raises(BackendNotAvailableError):
         tensor_core.Tensor(np.ones((2, 2), dtype=np.float32))
 
+
+def test_tensor_mps_device_helpers():
+    from neurx.core import neurx as tensor_core
+
+    t = tensor_core.Tensor(np.ones((2, 2), dtype=np.float32))
+    mps_t = t.mps()
+    assert mps_t.device == "mps"
+    assert mps_t.cpu().device == "cpu"
