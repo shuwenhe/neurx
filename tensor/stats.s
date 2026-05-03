@@ -7,7 +7,7 @@ struct tensor {
     option[tensor] grad
 }
 
-func _clone(tensor a) tensor {
+func clone(tensor a) tensor {
     tensor {
         data: a.data,
         shape: a.shape,
@@ -16,7 +16,7 @@ func _clone(tensor a) tensor {
     }
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     for i in 0..n {
@@ -25,7 +25,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     for i in 0..n {
@@ -34,15 +34,15 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _shape1(int n) []int {
+func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
 
-func _sorted_pair([]float values, bool descending) tensor {
+func sorted_pair([]float values, bool descending) tensor {
     int n = len(values)
-    []float out = _copy_float(values)
+    []float out = copy_float(values)
     int i = 0
     while i < n {
         int best = i
@@ -66,7 +66,7 @@ func _sorted_pair([]float values, bool descending) tensor {
         }
         i = i + 1
     }
-    []int shape = _shape1(n)
+    []int shape = shape1(n)
     tensor {
         data: out,
         shape: shape,
@@ -76,12 +76,12 @@ func _sorted_pair([]float values, bool descending) tensor {
 }
 
 func sort(tensor a, int dim) tensor {
-    _sorted_pair(a.data, false)
+    sorted_pair(a.data, false)
 }
 
 func argsort(tensor a, int dim) tensor {
     int n = len(a.data)
-    []float values = _copy_float(a.data)
+    []float values = copy_float(a.data)
     []float idx = []float{cap: n}
     int i = 0
     while i < n {
@@ -110,14 +110,14 @@ func argsort(tensor a, int dim) tensor {
     }
     tensor {
         data: idx,
-        shape: _shape1(n),
+        shape: shape1(n),
         requires_grad: false,
         grad: none,
     }
 }
 
 func topk(tensor a, int k) tensor {
-    tensor sorted = _sorted_pair(a.data, true)
+    tensor sorted = sorted_pair(a.data, true)
     int n = len(sorted.data)
     int count = k
     if count > n {
@@ -129,7 +129,7 @@ func topk(tensor a, int k) tensor {
         out[i] = sorted.data[i]
         i = i + 1
     }
-    []int shape = _shape1(count)
+    []int shape = shape1(count)
     tensor {
         data: out,
         shape: shape,
@@ -166,7 +166,7 @@ func unique(tensor a) tensor {
     }
     tensor {
         data: trimmed,
-        shape: _shape1(count),
+        shape: shape1(count),
         requires_grad: false,
         grad: none,
     }
@@ -188,7 +188,7 @@ func median(tensor a) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -218,7 +218,7 @@ func mode(tensor a) tensor {
     out[0] = best_value
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -242,7 +242,7 @@ func quantile(tensor a, float q) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: false,
         grad: none,
     }
@@ -260,7 +260,7 @@ func cumsum(tensor a, int dim) tensor {
     }
     tensor {
         data: out,
-        shape: _copy_int(a.shape),
+        shape: copy_int(a.shape),
         requires_grad: false,
         grad: none,
     }
@@ -278,7 +278,7 @@ func cumprod(tensor a, int dim) tensor {
     }
     tensor {
         data: out,
-        shape: _copy_int(a.shape),
+        shape: copy_int(a.shape),
         requires_grad: false,
         grad: none,
     }
@@ -296,7 +296,7 @@ func prod(tensor a, int dim) tensor {
     out[0] = acc
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: false,
         grad: none,
     }

@@ -7,13 +7,13 @@ struct loss {
     string name
 }
 
-func _shape1(int n) []int {
+func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -24,7 +24,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -35,7 +35,7 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _exp_approx(float x) float {
+func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
     }
@@ -53,7 +53,7 @@ func _exp_approx(float x) float {
     result
 }
 
-func _log_approx(float x) float {
+func log_approx(float x) float {
     float v = x
     if v <= 0.0 {
         v = 0.000000000001
@@ -66,38 +66,38 @@ func _log_approx(float x) float {
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
 }
 
-func _scalar(float value, bool requires_grad) tensor {
+func scalar(float value, bool requires_grad) tensor {
     []float out = []float{cap: 1}
     out[0] = value
-    new(out, _shape1(1), requires_grad)
+    new(out, shape1(1), requires_grad)
 }
 
-func _mean_from_sum(float total, int n) float {
+func mean_from_sum(float total, int n) float {
     if n <= 0 {
         return 0.0
     }
     total / n
 }
 
-func _abs(float x) float {
+func abs(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     x
 }
 
-func _sigmoid(float x) float {
-    1.0 / (1.0 + _exp_approx(0.0 - x))
+func sigmoid(float x) float {
+    1.0 / (1.0 + exp_approx(0.0 - x))
 }
 
-func _softplus(float x) float {
+func softplus(float x) float {
     if x > 20.0 {
         x
     } else {
         if x < -20.0 {
             0.0
         } else {
-            _log_approx(1.0 + _exp_approx(x))
+            log_approx(1.0 + exp_approx(x))
         }
     }
 }
@@ -119,7 +119,7 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
         total = total - t * x
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func bce_loss(tensor input, tensor target) tensor {
@@ -138,10 +138,10 @@ func bce_loss(tensor input, tensor target) tensor {
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total - (t * _log_approx(p) + (1.0 - t) * _log_approx(1.0 - p))
+        total = total - (t * log_approx(p) + (1.0 - t) * log_approx(1.0 - p))
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func bce_with_logits_loss(tensor input, tensor target) tensor {
@@ -158,12 +158,12 @@ func bce_with_logits_loss(tensor input, tensor target) tensor {
         if max_logit < 0.0 {
             max_logit = 0.0
         }
-        float abs_logit = _abs(logit)
-        float stable = _log_approx(1.0 + _exp_approx(0.0 - abs_logit))
+        float abs_logit = abs(logit)
+        float stable = log_approx(1.0 + exp_approx(0.0 - abs_logit))
         total = total + (max_logit - logit * t + stable)
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func l1_loss(tensor input, tensor target) tensor {
@@ -175,10 +175,10 @@ func l1_loss(tensor input, tensor target) tensor {
         if i < len(target.data) {
             t = target.data[i]
         }
-        total = total + _abs(input.data[i] - t)
+        total = total + abs(input.data[i] - t)
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func mse_loss(tensor input, tensor target) tensor {
@@ -193,7 +193,7 @@ func mse_loss(tensor input, tensor target) tensor {
         total = total + diff * diff
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func smooth_l1_loss(tensor input, tensor target) tensor {
@@ -205,7 +205,7 @@ func smooth_l1_loss(tensor input, tensor target) tensor {
         if i < len(target.data) {
             diff = diff - target.data[i]
         }
-        float adiff = _abs(diff)
+        float adiff = abs(diff)
         if adiff < 1.0 {
             total = total + 0.5 * diff * diff
         } else {
@@ -213,7 +213,7 @@ func smooth_l1_loss(tensor input, tensor target) tensor {
         }
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func kl_div_loss(tensor input, tensor target) tensor {
@@ -226,11 +226,11 @@ func kl_div_loss(tensor input, tensor target) tensor {
             t = target.data[i]
         }
         if t > 0.0 {
-            total = total + t * (_log_approx(t) - input.data[i])
+            total = total + t * (log_approx(t) - input.data[i])
         }
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func nll_loss(tensor input, tensor target) tensor {
@@ -251,14 +251,14 @@ func poisson_nll_loss(tensor input, tensor target) tensor {
         if i < len(target.data) {
             t = target.data[i]
         }
-        float lambda = _softplus(x)
+        float lambda = softplus(x)
         if lambda < 0.0000001 {
             lambda = 0.0000001
         }
-        total = total + lambda - t * _log_approx(lambda)
+        total = total + lambda - t * log_approx(lambda)
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func ctc_loss(tensor input, tensor target) tensor {
@@ -282,7 +282,7 @@ func margin_ranking_loss(tensor input1, tensor input2, tensor target) tensor {
         total = total + margin
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), input1.requires_grad || input2.requires_grad || target.requires_grad)
+    scalar(mean_from_sum(total, n), input1.requires_grad || input2.requires_grad || target.requires_grad)
 }
 
 func triplet_margin_loss(tensor anchor, tensor positive, tensor negative) tensor {
@@ -292,12 +292,12 @@ func triplet_margin_loss(tensor anchor, tensor positive, tensor negative) tensor
     while i < n {
         float pos = anchor.data[i] - positive.data[i]
         float neg = anchor.data[i] - negative.data[i]
-        float margin = 1.0 + _abs(pos) - _abs(neg)
+        float margin = 1.0 + abs(pos) - abs(neg)
         if margin < 0.0 {
             margin = 0.0
         }
         total = total + margin
         i = i + 1
     }
-    _scalar(_mean_from_sum(total, n), anchor.requires_grad || positive.requires_grad || negative.requires_grad)
+    scalar(mean_from_sum(total, n), anchor.requires_grad || positive.requires_grad || negative.requires_grad)
 }

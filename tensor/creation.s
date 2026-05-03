@@ -7,7 +7,7 @@ struct tensor {
     option[tensor] grad
 }
 
-func _numel([]int shape) int {
+func numel([]int shape) int {
     int n = 1
     for i in 0..len(shape) {
         n = n * shape[i]
@@ -15,8 +15,8 @@ func _numel([]int shape) int {
     n
 }
 
-func _make([]int shape, float value, bool requires_grad) tensor {
-    int n = _numel(shape)
+func make([]int shape, float value, bool requires_grad) tensor {
+    int n = numel(shape)
     []float data = []float{cap: n}
     for i in 0..n {
         data[i] = value
@@ -29,7 +29,7 @@ func _make([]int shape, float value, bool requires_grad) tensor {
     }
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -40,7 +40,7 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _fill_ramp(tensor out, float low, float high) tensor {
+func fill_ramp(tensor out, float low, float high) tensor {
     int n = len(out.data)
     if n <= 0 {
         return out
@@ -59,34 +59,34 @@ func _fill_ramp(tensor out, float low, float high) tensor {
 }
 
 func zeros([]int shape) tensor {
-    _make(shape, 0.0, false)
+    make(shape, 0.0, false)
 }
 
 func ones([]int shape) tensor {
-    _make(shape, 1.0, false)
+    make(shape, 1.0, false)
 }
 
 func full([]int shape, float value) tensor {
-    _make(shape, value, false)
+    make(shape, value, false)
 }
 
 func zeros_like(tensor like) tensor {
-    _make(like.shape, 0.0, like.requires_grad)
+    make(like.shape, 0.0, like.requires_grad)
 }
 
 func ones_like(tensor like) tensor {
-    _make(like.shape, 1.0, like.requires_grad)
+    make(like.shape, 1.0, like.requires_grad)
 }
 
 func full_like(tensor like, float value) tensor {
-    _make(like.shape, value, like.requires_grad)
+    make(like.shape, value, like.requires_grad)
 }
 
 func eye(int n, int m) tensor {
     []int shape = []int{cap: 2}
     shape[0] = n
     shape[1] = m
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int diag = n
     if m < diag {
         diag = m
@@ -101,7 +101,7 @@ func eye(int n, int m) tensor {
 
 func arange(int start, int end, int step) tensor {
     if step == 0 {
-        return _make([0], 0.0, false)
+        return make([0], 0.0, false)
     }
     int count = 0
     int value = start
@@ -118,7 +118,7 @@ func arange(int start, int end, int step) tensor {
     }
     []int shape = []int{cap: 1}
     shape[0] = count
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     value = start
     int i = 0
     if step > 0 {
@@ -140,7 +140,7 @@ func arange(int start, int end, int step) tensor {
 func linspace(float start, float end, int steps) tensor {
     []int shape = []int{cap: 1}
     shape[0] = steps
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     if steps <= 0 {
         return out
     }
@@ -162,7 +162,7 @@ func logspace(float start, float end, int steps, float base) tensor {
 }
 
 func rand([]int shape) tensor {
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int i = 0
     while i < n {
@@ -173,7 +173,7 @@ func rand([]int shape) tensor {
 }
 
 func randn([]int shape) tensor {
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int i = 0
     while i < n {
@@ -192,7 +192,7 @@ func randn([]int shape) tensor {
 }
 
 func randint(int low, int high, []int shape) tensor {
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int span = high - low
     if span <= 0 {
@@ -213,7 +213,7 @@ func randint(int low, int high, []int shape) tensor {
 func randperm(int n) tensor {
     []int shape = []int{cap: 1}
     shape[0] = n
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int i = 0
     while i < n {
         out.data[i] = i
@@ -223,7 +223,7 @@ func randperm(int n) tensor {
 }
 
 func normal(float mean, float std, []int shape) tensor {
-    tensor out = _make(shape, 0.0, false)
+    tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     if n <= 0 {
         return out
@@ -241,14 +241,14 @@ func normal(float mean, float std, []int shape) tensor {
 }
 
 func uniform(float low, float high, []int shape) tensor {
-    tensor out = _make(shape, 0.0, false)
-    _fill_ramp(out, low, high)
+    tensor out = make(shape, 0.0, false)
+    fill_ramp(out, low, high)
 }
 
 func empty([]int shape) tensor {
-    _make(shape, 0.0, false)
+    make(shape, 0.0, false)
 }
 
 func empty_like(tensor like) tensor {
-    _make(like.shape, 0.0, like.requires_grad)
+    make(like.shape, 0.0, like.requires_grad)
 }

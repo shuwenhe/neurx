@@ -15,7 +15,7 @@ struct autograd_state {
     []grad_record records
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -26,7 +26,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -37,20 +37,20 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _copy_record(grad_record record) grad_record {
+func copy_record(grad_record record) grad_record {
     grad_record {
         id: record.id,
-        shape: _copy_int(record.shape),
+        shape: copy_int(record.shape),
         requires_grad: record.requires_grad,
-        grad: _copy_float(record.grad),
+        grad: copy_float(record.grad),
     }
 }
 
-func _copy_records([]grad_record records) []grad_record {
+func copy_records([]grad_record records) []grad_record {
     []grad_record out = []grad_record{cap: len(records)}
     int i = 0
     while i < len(records) {
-        out[i] = _copy_record(records[i])
+        out[i] = copy_record(records[i])
         i = i + 1
     }
     out
@@ -241,7 +241,7 @@ func backward_seed(autograd_state state, int loss_id, tensor loss_tensor) autogr
 }
 
 func grad_record_state_dict(grad_record record) grad_record {
-    _copy_record(record)
+    copy_record(record)
 }
 
 func grad_record_load_state_dict(grad_record record, grad_record other) grad_record {
@@ -252,7 +252,7 @@ func autograd_state_dict(autograd_state state) autograd_state {
     autograd_state {
         grad_enabled: state.grad_enabled,
         grad_accumulation: state.grad_accumulation,
-        records: _copy_records(state.records),
+        records: copy_records(state.records),
     }
 }
 

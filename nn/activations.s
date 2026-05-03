@@ -4,7 +4,7 @@ use neurx.tensor.tensor
 
 // ---- math helpers ----
 
-func _exp_approx(float x) float {
+func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
     }
@@ -22,7 +22,7 @@ func _exp_approx(float x) float {
     result
 }
 
-func _sqrt_approx(float x) float {
+func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
     }
@@ -35,9 +35,9 @@ func _sqrt_approx(float x) float {
     guess
 }
 
-func _tanh_approx(float x) float {
-    float ep = _exp_approx(x)
-    float en = _exp_approx(-x)
+func tanh_approx(float x) float {
+    float ep = exp_approx(x)
+    float en = exp_approx(-x)
     float denom = ep + en
     if denom == 0.0 {
         return 0.0
@@ -45,7 +45,7 @@ func _tanh_approx(float x) float {
     (ep - en) / denom
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -56,7 +56,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -83,7 +83,7 @@ func relu(tensor input) tensor {
         }
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // leaky_relu: x if x > 0 else negative_slope * x
@@ -100,7 +100,7 @@ func leaky_relu(tensor input, float negative_slope) tensor {
         }
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // elu: x if x > 0 else alpha * (exp(x) - 1)
@@ -113,11 +113,11 @@ func elu(tensor input, float alpha) tensor {
         if v > 0.0 {
             out[i] = v
         } else {
-            out[i] = alpha * (_exp_approx(v) - 1.0)
+            out[i] = alpha * (exp_approx(v) - 1.0)
         }
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // sigmoid: 1 / (1 + exp(-x))
@@ -126,10 +126,10 @@ func sigmoid(tensor input) tensor {
     []float out = []float{cap: n}
     int i = 0
     while i < n {
-        out[i] = 1.0 / (1.0 + _exp_approx(-input.data[i]))
+        out[i] = 1.0 / (1.0 + exp_approx(-input.data[i]))
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // tanh activation
@@ -138,10 +138,10 @@ func tanh(tensor input) tensor {
     []float out = []float{cap: n}
     int i = 0
     while i < n {
-        out[i] = _tanh_approx(input.data[i])
+        out[i] = tanh_approx(input.data[i])
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // gelu: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
@@ -154,10 +154,10 @@ func gelu(tensor input) tensor {
         float x = input.data[i]
         float x3 = x * x * x
         float inner = 0.7978845608 * (x + 0.044715 * x3)
-        out[i] = 0.5 * x * (1.0 + _tanh_approx(inner))
+        out[i] = 0.5 * x * (1.0 + tanh_approx(inner))
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // silu / swish: x * sigmoid(x)
@@ -167,10 +167,10 @@ func silu(tensor input) tensor {
     int i = 0
     while i < n {
         float x = input.data[i]
-        out[i] = x / (1.0 + _exp_approx(-x))
+        out[i] = x / (1.0 + exp_approx(-x))
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // softmax along last dimension (1D or flattened row)
@@ -188,7 +188,7 @@ func softmax_1d([]float values) []float {
     float denom = 0.0
     i = 0
     while i < n {
-        float v = _exp_approx(values[i] - max_v)
+        float v = exp_approx(values[i] - max_v)
         out[i] = v
         denom = denom + v
         i = i + 1
@@ -223,7 +223,7 @@ func softmax(tensor input) tensor {
         float denom = 0.0
         c = 0
         while c < cols {
-            float v = _exp_approx(input.data[base + c] - max_v)
+            float v = exp_approx(input.data[base + c] - max_v)
             out[base + c] = v
             denom = denom + v
             c = c + 1
@@ -238,7 +238,7 @@ func softmax(tensor input) tensor {
         }
         r = r + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
 // log_softmax over last dim of 2D tensor
@@ -252,13 +252,13 @@ func log_softmax(tensor input) tensor {
         if v < 1e-12 {
             v = 1e-12
         }
-        out[i] = _log_approx(v)
+        out[i] = log_approx(v)
         i = i + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-func _log_approx(float x) float {
+func log_approx(float x) float {
     if x <= 0.0 {
         return -100.0
     }

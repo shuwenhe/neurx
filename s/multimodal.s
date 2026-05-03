@@ -3,7 +3,7 @@ package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -14,7 +14,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -25,8 +25,8 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _copy_tensor(tensor value) tensor {
-    new(_copy_float(value.data), _copy_int(value.shape), value.requires_grad)
+func copy_tensor(tensor value) tensor {
+    new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
 
 struct multimodal_batch {
@@ -57,9 +57,9 @@ func multimodal_state_dict(multimodal_batch batch) multimodal_batch {
     multimodal_batch {
         batch_size: batch.batch_size,
         seq_len: batch.seq_len,
-        token_ids: _copy_int(batch.token_ids),
-        image_features: _copy_float(batch.image_features),
-        audio_features: _copy_float(batch.audio_features),
+        token_ids: copy_int(batch.token_ids),
+        image_features: copy_float(batch.image_features),
+        audio_features: copy_float(batch.audio_features),
     }
 }
 
@@ -68,9 +68,9 @@ func multimodal_load_state_dict(multimodal_batch batch, multimodal_batch other) 
     multimodal_batch {
         batch_size: other.batch_size,
         seq_len: other.seq_len,
-        token_ids: _copy_int(other.token_ids),
-        image_features: _copy_float(other.image_features),
-        audio_features: _copy_float(other.audio_features),
+        token_ids: copy_int(other.token_ids),
+        image_features: copy_float(other.image_features),
+        audio_features: copy_float(other.audio_features),
     }
 }
 

@@ -27,7 +27,7 @@ struct dataloader_step_output {
     dataloader_batch batch
 }
 
-func _copy_int([]int values) []int {
+func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
@@ -38,7 +38,7 @@ func _copy_int([]int values) []int {
     out
 }
 
-func _copy_config(dataloader_config config) dataloader_config {
+func copy_config(dataloader_config config) dataloader_config {
     dataloader_config {
         batch_size: config.batch_size,
         seq_len: config.seq_len,
@@ -95,19 +95,19 @@ func new_state([]int token_ids, int batch_size, int seq_len) dataloader_state {
 
 func reset_state(dataloader_state state) dataloader_state {
     dataloader_state {
-        token_ids: _copy_int(state.token_ids),
+        token_ids: copy_int(state.token_ids),
         cursor: 0,
         epoch: state.epoch + 1,
-        config: _copy_config(state.config),
+        config: copy_config(state.config),
     }
 }
 
 func with_config(dataloader_state state, dataloader_config config) dataloader_state {
     dataloader_state {
-        token_ids: _copy_int(state.token_ids),
+        token_ids: copy_int(state.token_ids),
         cursor: state.cursor,
         epoch: state.epoch,
-        config: _copy_config(config),
+        config: copy_config(config),
     }
 }
 
@@ -143,7 +143,7 @@ func batch_count(dataloader_state state) int {
     count
 }
 
-func _copy_batch_tokens([]int token_ids, int cursor, int seq_len) []int {
+func copy_batch_tokens([]int token_ids, int cursor, int seq_len) []int {
     []int out = []int{cap: seq_len}
     int i = 0
     while i < seq_len {
@@ -225,18 +225,18 @@ func shuffle_enabled(dataloader_state state) bool {
 
 func dataloader_state_dict(dataloader_state state) dataloader_state {
     dataloader_state {
-        token_ids: _copy_int(state.token_ids),
+        token_ids: copy_int(state.token_ids),
         cursor: state.cursor,
         epoch: state.epoch,
-        config: _copy_config(state.config),
+        config: copy_config(state.config),
     }
 }
 
 func dataloader_load_state_dict(dataloader_state state, dataloader_state other) dataloader_state {
     dataloader_state {
-        token_ids: _copy_int(other.token_ids),
+        token_ids: copy_int(other.token_ids),
         cursor: other.cursor,
         epoch: other.epoch,
-        config: _copy_config(other.config),
+        config: copy_config(other.config),
     }
 }
