@@ -84,13 +84,15 @@ func new_training_metrics_state() training_metrics_state {
 
 func train_step_autograd_loss(training_pipeline_state state) tensor {
     training_pipeline_state pipeline = train_step(state)
-    tensor loss_input = neurx.tensor.new([pipeline.last_loss, 1.0], [1, 2], true)
+    float loss_value = pipeline.last_loss
+    tensor loss_input = neurx.tensor.new([loss_value, 1.0], [1, 2], true)
     ops.mean_last_dim(loss_input, false)
 }
 
 func train_step_autograd_record_count(training_pipeline_state state) int {
     training_pipeline_state pipeline = train_step(state)
-    tensor loss_input = neurx.tensor.new([pipeline.last_loss, 1.0], [1, 2], true)
+    float loss_value = pipeline.last_loss
+    tensor loss_input = neurx.tensor.new([loss_value, 1.0], [1, 2], true)
     tensor loss_tensor = ops.mean_last_dim(loss_input, false)
     autograd.autograd_state autograd_state = autograd.new_state()
     autograd_state = autograd.register_tensor(autograd_state, pipeline.loop.step, loss_tensor)

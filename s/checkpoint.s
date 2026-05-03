@@ -29,7 +29,7 @@ func _copy_tensor(tensor value) tensor {
     new(_copy_float(value.data), _copy_int(value.shape), value.requires_grad)
 }
 
-func _copy_params(tensor[] params) tensor[] {
+func _copy_params([]tensor params) []tensor {
     int n = len(params)
     []tensor out = []tensor{cap: n}
     int i = 0
@@ -43,10 +43,10 @@ func _copy_params(tensor[] params) tensor[] {
 struct checkpoint {
     int step
     float loss
-    tensor[] params
+    []tensor params
 }
 
-func new_checkpoint(int step, float loss, tensor[] params) checkpoint {
+func new_checkpoint(int step, float loss, []tensor params) checkpoint {
     checkpoint {
         step: step,
         loss: loss,
@@ -70,7 +70,7 @@ func checkpoint_load_state_dict(checkpoint state, checkpoint other) checkpoint {
     }
 }
 
-func save_checkpoint(string path, int step, float loss, tensor[] params) () {
+func save_checkpoint(string path, int step, float loss, []tensor params) () {
     del path
     new_checkpoint(step, loss, params)
 }
@@ -88,7 +88,7 @@ func checkpoint_loss(checkpoint state) float {
     state.loss
 }
 
-func checkpoint_params(checkpoint state) tensor[] {
+func checkpoint_params(checkpoint state) []tensor {
     state.params
 }
 
