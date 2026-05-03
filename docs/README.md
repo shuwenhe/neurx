@@ -183,7 +183,7 @@ make test                 # All tests
 ## Runtime Config
 Environment variables:
 
-- `TENSOR_DEVICE` (`cpu`/`cuda`, default `cpu`)
+- `TENSOR_DEVICE` (`cpu`/`cuda`/`mps`, default `cpu`)
 - `TENSOR_FALLBACK_TO_CPU` (`1`/`0`, default `1`)
 - `TENSOR_LOG_LEVEL` (`DEBUG/INFO/WARNING/ERROR/CRITICAL`, default `INFO`)
 - `TENSOR_STRICT_CHECKS` (`1`/`0`, default `0`)
@@ -196,6 +196,7 @@ Diagnostics:
 neurx-doctor
 neurx-doctor --json
 neurx-doctor --require-cuda
+neurx-doctor --require-mps
 ```
 
 ## CUDA Extension (starter)

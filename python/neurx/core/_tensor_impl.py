@@ -118,6 +118,12 @@ class Tensor:
     def cpu(self):
         return self.to("cpu")
 
+    def cuda(self):
+        return self.to("cuda")
+
+    def mps(self):
+        return self.to("mps")
+
     def requires_grad_(self, requires_grad: bool = True):
         self.requires_grad = bool(requires_grad)
         return self
