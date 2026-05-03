@@ -181,12 +181,17 @@ def test_s_train_loop_runtime_state_helpers_round_trip():
 def test_s_train_amp_runtime_state_helpers_round_trip():
     runtime = _load_runtime_module()
     autocast = {"enabled": True, "dtype_code": 7, "nesting": 2}
+    autocast_inactive = {"enabled": True, "dtype_code": 7, "nesting": 0}
+    autocast_active = {"enabled": True, "dtype_code": 7, "nesting": 1}
     autocast_other = {"enabled": False, "dtype_code": 9, "nesting": 0}
+    assert runtime.invoke_runtime_function("amp", "is_autocast_enabled", autocast_inactive) is False
+    assert runtime.invoke_runtime_function("amp", "is_autocast_enabled", autocast_active) is True
     assert runtime.invoke_runtime_function("amp", "autocast_state_dict", autocast) is autocast
     assert runtime.invoke_runtime_function("amp", "autocast_load_state_dict", autocast, autocast_other) is autocast_other
     assert runtime.invoke_runtime_function("amp", "autocast_is_enabled", autocast) is True
     assert runtime.invoke_runtime_function("amp", "autocast_depth", autocast) == 2
 
+    amp_s = Path(__file__).resolve().parents[1] / "train" / "amp.s"
     scaler = {
         "scale": 1024.0,
         "growth_factor": 2.0,
@@ -199,6 +204,40 @@ def test_s_train_amp_runtime_state_helpers_round_trip():
     assert runtime.invoke_runtime_function("amp", "grad_scaler_is_enabled", scaler) is True
     assert runtime.invoke_runtime_function("amp", "grad_scaler_get_scale", scaler) == 1024.0
     assert runtime.invoke_runtime_function("amp", "grad_scaler_found_inf", scaler) is False
+    stepped = runtime.invoke_runtime_function("amp", "grad_scaler_step", scaler, 2.0)
+    stepped_inf = runtime.invoke_runtime_function("amp", "grad_scaler_step", scaler, 1.0e40)
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_get_scale", stepped) == 1024.0
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_found_inf", stepped) is False
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_get_scale", stepped_inf) == 512.0
+    assert runtime.invoke_runtime_function("amp", "grad_scaler_found_inf", stepped_inf) is True
+
+    amp_ir = Path(__file__).resolve().parents[1] / "build" / "ir" / "train" / "amp.ir"
+    amp_s_text = amp_s.read_text(encoding="utf-8")
+    amp_ir_text = amp_ir.read_text(encoding="utf-8")
+    assert "state.enabled && state.nesting > 0" in amp_s_text
+    assert "MOV|t3|0|_" in amp_ir_text
+    assert "MOV|nesting|state.nesting|_" in amp_ir_text
+    assert "ADD|t5|nesting|1" in amp_ir_text
+    assert "SUB|t5|state.nesting|1" in amp_ir_text
+
+    checkpoint = {
+        "keep_last_n": 4,
+        "keep_every_n_steps": 2,
+        "save_best_only": False,
+        "last_saved_step": 1,
+        "last_saved_epoch": 1,
+        "best_step": 1,
+        "best_epoch": 1,
+        "best_score": 0.5,
+        "save_count": 2,
+        "prune_count": 0,
+        "next_save_step": 4,
+        "has_best": True,
+    }
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint, 3) is False
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint, 4) is True
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save_best", checkpoint, 0.5) is False
+    assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save_best", checkpoint, 0.6) is True
 
 
 def test_s_train_checkpoint_manager_and_logging_round_trip():
@@ -246,6 +285,15 @@ def test_s_train_checkpoint_manager_and_logging_round_trip():
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint, 4) is True
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint_other, 7) is False
     assert runtime.invoke_runtime_function("checkpoint_manager", "checkpoint_manager_should_save", checkpoint_other, 8) is True
+
+    checkpoint_ir = Path(__file__).resolve().parents[1] / "build" / "ir" / "train" / "checkpoint_manager.ir"
+    loop_ir = Path(__file__).resolve().parents[1] / "build" / "ir" / "train" / "loop.ir"
+    checkpoint_ir_text = checkpoint_ir.read_text(encoding="utf-8")
+    loop_ir_text = loop_ir.read_text(encoding="utf-8")
+    assert "CMP_GT|t19|score|state.best_score" in checkpoint_ir_text
+    assert "CMP_GT|t21|score|state.best_score" in checkpoint_ir_text
+    assert "CALL|t35|checkpoint_manager_best_score|1" in loop_ir_text
+    assert "MOV|best_score|t35|_" in loop_ir_text
 
     logger = {
         "enabled": True,

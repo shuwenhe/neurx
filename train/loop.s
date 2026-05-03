@@ -3,7 +3,7 @@ package neurx.train.loop
 use neurx.autograd
 use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, has_next, next_batch, reset_state, batch_count, dataloader_state_dict, dataloader_load_state_dict}
 use neurx.train.amp.{autocast_state, grad_scaler_state, new_autocast_state, new_grad_scaler, grad_scaler_step}
-use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_should_save, checkpoint_manager_save, checkpoint_manager_mark_best}
+use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_should_save, checkpoint_manager_save, checkpoint_manager_mark_best, checkpoint_manager_best_score}
 use neurx.train.logging.{training_logger_state, new_training_logger, training_logger_log, training_logger_flush}
 use neurx.ops
 use neurx.tensor.tensor
@@ -284,7 +284,7 @@ func train_step(training_pipeline_state state) training_pipeline_state {
         autocast: state.autocast,
         metrics: metrics,
         last_loss: loss,
-        best_score: score,
+        best_score: checkpoint_manager_best_score(checkpoint),
     }
 }
 
