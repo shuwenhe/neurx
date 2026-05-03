@@ -252,6 +252,7 @@ class UnifiedDeviceManager:
         self.current_device = 'cpu'
         self.pytorch_available = self._check_pytorch()
         self.cuda_available = self._check_cuda()
+        self.mps_available = self._check_mps()
     
     def _check_pytorch(self) -> bool:
         """Check if PyTorch is available."""
@@ -271,6 +272,21 @@ class UnifiedDeviceManager:
             return torch.cuda.is_available()
         except Exception:
             return False
+
+    def _check_mps(self) -> bool:
+        """Check if Apple MPS is available."""
+        if not self.pytorch_available:
+            return False
+
+        try:
+            import torch
+            return bool(
+                hasattr(torch, "backends")
+                and hasattr(torch.backends, "mps")
+                and torch.backends.mps.is_available()
+            )
+        except Exception:
+            return False
     
     def get_device(self, device_type: str = 'cpu', 
                   device_id: int = 0) -> str:
@@ -278,11 +294,11 @@ class UnifiedDeviceManager:
         Get device string for framework.
         
         Args:
-            device_type: 'cpu' or 'gpu'
+            device_type: 'cpu', 'gpu', or 'mps'
             device_id: GPU device ID
         
         Returns:
-            Device string ('cpu' or 'cuda:0')
+            Device string ('cpu', 'cuda:0', or 'mps')
         """
         
         if device_type == 'gpu':
@@ -290,6 +306,12 @@ class UnifiedDeviceManager:
                 self.current_device = f'cuda:{device_id}'
             else:
                 warnings.warn("CUDA not available, falling back to CPU")
+                self.current_device = 'cpu'
+        elif device_type == 'mps':
+            if self.mps_available:
+                self.current_device = 'mps'
+            else:
+                warnings.warn("MPS not available, falling back to CPU")
                 self.current_device = 'cpu'
         else:
             self.current_device = 'cpu'
@@ -334,7 +356,10 @@ class UnifiedDeviceManager:
                 devices['cuda'] = torch.cuda.device_count()
             except Exception:
                 pass
-        
+
+        if self.mps_available:
+            devices['mps'] = 1
+
         return devices
     
     def synchronize(self, device: Optional[str] = None) -> None:
@@ -343,10 +368,13 @@ class UnifiedDeviceManager:
         if device is None:
             device = self.current_device
         
-        if 'cuda' in device and self.pytorch_available:
+        if ('cuda' in device or device == 'mps') and self.pytorch_available:
             try:
                 import torch
-                torch.cuda.synchronize()
+                if 'cuda' in device:
+                    torch.cuda.synchronize()
+                elif hasattr(torch, "mps") and hasattr(torch.mps, "synchronize"):
+                    torch.mps.synchronize()
             except Exception:
                 pass
 

@@ -3155,7 +3155,7 @@ def _add_module_methods():
         """递归转换模块参数/缓冲区的device与dtype（原地）。
         
         参数：
-            device: 目标设备（'cpu'或'cuda'）
+            device: 目标设备（'cpu'、'cuda' 或 'mps'）
             dtype: 目标dtype（numpy dtype或字符串）
             non_blocking: PyTorch兼容参数，在NumPy中无效（忽略）
             copy: 是否创建副本（默认True）。当False时，对numpy数组进行原地转换。
@@ -3199,6 +3199,10 @@ def _add_module_methods():
         """将模块移动到CUDA"""
         return self.to(device='cuda')
 
+    def mps(self):
+        """将模块移动到Apple MPS"""
+        return self.to(device='mps')
+
     def double(self):
         """将参数转换为float64"""
         return self.to(dtype=np.float64)
@@ -3219,6 +3223,7 @@ def _add_module_methods():
     Module.to = to
     Module.cpu = cpu
     Module.cuda = cuda
+    Module.mps = mps
     Module.double = double
     Module.float = float
     Module.half = half

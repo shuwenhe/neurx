@@ -16,7 +16,7 @@ _ENV_KEYS = (
 )
 
 _VALID_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}
-_VALID_DEVICES = {"cpu", "cuda", "npu"}
+_VALID_DEVICES = {"cpu", "cuda", "mps", "npu"}
 
 
 def _parse_bool(name: str, value: str | None, default: bool) -> bool:
@@ -105,4 +105,3 @@ def reset_runtime_config_cache() -> None:
     with _LOCK:
         _CACHED_CFG = None
         _CACHED_ENV_KEY = None
-

@@ -69,6 +69,9 @@ def add_tensor_enhancements(tensor_class):
                 data = _to_numpy(self.data).astype(np.float32)
                 cuda_data = _to_data_on_device(data, "cuda")
                 return tensor_class(cuda_data, requires_grad=self.requires_grad, device="cuda")
+            if device == "mps":
+                data = _to_numpy(self.data)
+                return tensor_class(data, requires_grad=self.requires_grad, device="mps")
             else:  # cpu
                 data = _to_numpy(self.data)
                 return tensor_class(data, requires_grad=self.requires_grad, device="cpu")

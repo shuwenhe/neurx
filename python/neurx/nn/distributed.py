@@ -62,6 +62,16 @@ def _npu_available() -> bool:
     return bool(hasattr(torch, "npu") and torch.npu.is_available())
 
 
+def _mps_available() -> bool:
+    if torch is None:
+        return False
+    return bool(
+        hasattr(torch, "backends")
+        and hasattr(torch.backends, "mps")
+        and torch.backends.mps.is_available()
+    )
+
+
 def _current_world_size_from_runtime() -> int:
     if _distributed_available() and _torch_dist.is_initialized():
         return int(_torch_dist.get_world_size())
@@ -195,7 +205,7 @@ class DeviceManager:
     """
     
     def __init__(self, device_type: str = 'cpu', device_id: int = 0):
-        self.device_type = device_type  # 'cpu' or 'cuda'
+        self.device_type = device_type  # 'cpu', 'cuda', or 'mps'
         self.device_id = device_id
         self.available_devices = self._detect_devices()
     
@@ -204,13 +214,14 @@ class DeviceManager:
         devices = {
             'cpu': [0],  # Always have CPU
             'cuda': [],  # GPU detection would happen here
+            'mps': [0] if _mps_available() else [],
         }
         return devices
     
     def get_device(self, device_type: Optional[str] = None, device_id: int = 0) -> str:
         """Get current device string; optionally update current selection."""
         if device_type is not None:
-            if device_type in ('cpu', 'cuda'):
+            if device_type in ('cpu', 'cuda', 'mps'):
                 self.device_type = device_type
                 self.device_id = int(device_id)
             elif device_type in ('gpu',):
