@@ -1,4 +1,4 @@
-package neurx.ad.engine
+package neurx.engine
 
 use neurx.tensor.tensor
 
