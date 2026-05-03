@@ -12,7 +12,7 @@ struct control_state {
     []string params
 }
 
-func _copy_strings([]string values) []string {
+func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
     while i < len(values) {
@@ -22,7 +22,7 @@ func _copy_strings([]string values) []string {
     out
 }
 
-func _join_strings([]string values) string {
+func join_strings([]string values) string {
     string out = ""
     int i = 0
     while i < len(values) {
@@ -98,7 +98,7 @@ func control_has_param(control_state state, string param) bool {
 }
 
 func control_add_branch(control_state state, string branch) control_state {
-    []string branches = _copy_strings(state.branches)
+    []string branches = copy_strings(state.branches)
     branches.push(branch)
     control_state {
         name: state.name,
@@ -107,12 +107,12 @@ func control_add_branch(control_state state, string branch) control_state {
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
         branches: branches,
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
     }
 }
 
 func control_add_param(control_state state, string param) control_state {
-    []string params = _copy_strings(state.params)
+    []string params = copy_strings(state.params)
     params.push(param)
     control_state {
         name: state.name,
@@ -120,7 +120,7 @@ func control_add_param(control_state state, string param) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
+        branches: copy_strings(state.branches),
         params: params,
     }
 }
@@ -132,8 +132,8 @@ func control_set_cond_enabled(control_state state, bool enabled) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
-        params: _copy_strings(state.params),
+        branches: copy_strings(state.branches),
+        params: copy_strings(state.params),
     }
 }
 
@@ -144,8 +144,8 @@ func control_set_loop_enabled(control_state state, bool enabled) control_state {
         loop_enabled: enabled,
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
-        params: _copy_strings(state.params),
+        branches: copy_strings(state.branches),
+        params: copy_strings(state.params),
     }
 }
 
@@ -156,8 +156,8 @@ func control_set_scan_enabled(control_state state, bool enabled) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
-        params: _copy_strings(state.params),
+        branches: copy_strings(state.branches),
+        params: copy_strings(state.params),
     }
 }
 
@@ -168,8 +168,8 @@ func control_set_iterations(control_state state, int iterations) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: state.scan_enabled,
         iterations: iterations,
-        branches: _copy_strings(state.branches),
-        params: _copy_strings(state.params),
+        branches: copy_strings(state.branches),
+        params: copy_strings(state.params),
     }
 }
 
@@ -181,7 +181,7 @@ func control_clear_branches(control_state state) control_state {
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
         branches: [],
-        params: _copy_strings(state.params),
+        params: copy_strings(state.params),
     }
 }
 
@@ -192,7 +192,7 @@ func control_clear_params(control_state state) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
+        branches: copy_strings(state.branches),
         params: [],
     }
 }
@@ -204,8 +204,8 @@ func control_state_dict(control_state state) control_state {
         loop_enabled: state.loop_enabled,
         scan_enabled: state.scan_enabled,
         iterations: state.iterations,
-        branches: _copy_strings(state.branches),
-        params: _copy_strings(state.params),
+        branches: copy_strings(state.branches),
+        params: copy_strings(state.params),
     }
 }
 
@@ -300,15 +300,15 @@ func control_to_transform_chain(control_state state) transform_chain {
 }
 
 func transform_chain_to_control(transform_chain chain, string name, int iterations) control_state {
-    []string branches = _copy_strings(chain.steps)
-    []string params = _copy_strings(chain.params)
+    []string branches = copy_strings(chain.steps)
+    []string params = copy_strings(chain.params)
     if len(chain.eqns) > 0 {
         branches = []string{cap: len(chain.eqns)}
         params = []string{cap: len(chain.eqns)}
         int i = 0
         while i < len(chain.eqns) {
             branches[i] = chain.eqns[i].primitive
-            params[i] = _join_strings(chain.eqns[i].params)
+            params[i] = join_strings(chain.eqns[i].params)
             i = i + 1
         }
     }

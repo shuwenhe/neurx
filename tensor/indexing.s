@@ -7,7 +7,7 @@ struct tensor {
     option[tensor] grad
 }
 
-func _clone(tensor a) tensor {
+func clone(tensor a) tensor {
     tensor {
         data: a.data,
         shape: a.shape,
@@ -16,7 +16,7 @@ func _clone(tensor a) tensor {
     }
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     for i in 0..n {
@@ -25,7 +25,7 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _shape_prod([]int shape) int {
+func shape_prod([]int shape) int {
     int n = 1
     int i = 0
     while i < len(shape) {
@@ -35,7 +35,7 @@ func _shape_prod([]int shape) int {
     n
 }
 
-func _normalize_dim(int dim, int ndim) int {
+func normalize_dim(int dim, int ndim) int {
     int axis = dim
     if axis < 0 {
         axis = axis + ndim
@@ -43,7 +43,7 @@ func _normalize_dim(int dim, int ndim) int {
     axis
 }
 
-func _unravel_index(int flat_index, []int shape) []int {
+func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
     int i = 0
@@ -63,7 +63,7 @@ func _unravel_index(int flat_index, []int shape) []int {
     coords
 }
 
-func _ravel_index([]int coords, []int shape) int {
+func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
     int stride = 1
@@ -76,7 +76,7 @@ func _ravel_index([]int coords, []int shape) int {
     flat
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -89,7 +89,7 @@ func _copy_float([]float data) []float {
 
 func index_select(tensor a, int dim, []int indices) tensor {
     int ndim = len(a.shape)
-    int axis = _normalize_dim(dim, ndim)
+    int axis = normalize_dim(dim, ndim)
     if ndim == 1 {
         int n = len(indices)
         []float out = []float{cap: n}
@@ -108,7 +108,7 @@ func index_select(tensor a, int dim, []int indices) tensor {
         }
     } else {
         if axis != 0 {
-            return _clone(a)
+            return clone(a)
         }
         int rows = len(indices)
         int row_size = a.shape[1]
@@ -123,7 +123,7 @@ func index_select(tensor a, int dim, []int indices) tensor {
             }
             r = r + 1
         }
-        []int shape = _copy_int(a.shape)
+        []int shape = copy_int(a.shape)
         shape[0] = rows
         tensor {
             data: out,
@@ -167,7 +167,7 @@ func masked_select(tensor a, tensor mask) tensor {
 }
 
 func masked_fill(tensor a, tensor mask, float value) tensor {
-    tensor out = _clone(a)
+    tensor out = clone(a)
     int n = len(out.data)
     int i = 0
     while i < n {
@@ -180,7 +180,7 @@ func masked_fill(tensor a, tensor mask, float value) tensor {
 }
 
 func masked_scatter(tensor a, tensor mask, tensor source) tensor {
-    tensor out = _clone(a)
+    tensor out = clone(a)
     int n = len(out.data)
     int cursor = 0
     int i = 0
@@ -230,7 +230,7 @@ func nonzero(tensor a) tensor {
 
 func repeat_interleave(tensor a, int repeats) tensor {
     if repeats <= 1 {
-        return _clone(a)
+        return clone(a)
     }
     int n = len(a.data)
     []float out = []float{cap: n * repeats}
@@ -269,7 +269,7 @@ func where(tensor condition, tensor x, tensor y) tensor {
     }
     tensor {
         data: out,
-        shape: _copy_int(x.shape),
+        shape: copy_int(x.shape),
         requires_grad: x.requires_grad || y.requires_grad || condition.requires_grad,
         grad: none,
     }
@@ -279,9 +279,9 @@ func cat([]tensor tensors, int dim) tensor {
     if len(tensors) == 0 {
         tensor { data: []float{cap: 0}, shape: []int{cap: 0}, requires_grad: false, grad: none }
     } else {
-        int axis = _normalize_dim(dim, len(tensors[0].shape))
+        int axis = normalize_dim(dim, len(tensors[0].shape))
         if axis != 0 {
-            return _clone(tensors[0])
+            return clone(tensors[0])
         }
         int total = 0
         int i = 0
@@ -301,7 +301,7 @@ func cat([]tensor tensors, int dim) tensor {
             }
             i = i + 1
         }
-        []int shape = _copy_int(tensors[0].shape)
+        []int shape = copy_int(tensors[0].shape)
         shape[axis] = 0
         i = 0
         while i < len(tensors) {
@@ -319,7 +319,7 @@ func cat([]tensor tensors, int dim) tensor {
 
 func split(tensor a, int sections) tensor {
     if sections <= 0 {
-        return _clone(a)
+        return clone(a)
     }
     int n = len(a.data)
     int chunk = n / sections
@@ -351,10 +351,10 @@ func stack([]tensor tensors, int dim) tensor {
         tensor { data: []float{cap: 0}, shape: []int{cap: 0}, requires_grad: false, grad: none }
     } else {
         int base_ndim = len(tensors[0].shape)
-        int axis = _normalize_dim(dim, base_ndim + 1)
+        int axis = normalize_dim(dim, base_ndim + 1)
         int n = len(tensors)
         if axis != 0 {
-            return _clone(tensors[0])
+            return clone(tensors[0])
         }
         int total = 0
         int i = 0

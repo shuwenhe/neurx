@@ -3,7 +3,7 @@ package neurx.tensor.reduce
 use neurx.tensor.tensor
 use neurx.tensor.shape
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -14,7 +14,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _reduce_all(tensor a, int mode) tensor {
+func reduce_all(tensor a, int mode) tensor {
     float acc = 0.0
     if mode == 2 {
         acc = a.data[0]
@@ -66,29 +66,29 @@ func _reduce_all(tensor a, int mode) tensor {
 }
 
 func reduce_sum(tensor a) tensor {
-    _reduce_all(a, 0)
+    reduce_all(a, 0)
 }
 
 func reduce_mean(tensor a) tensor {
-    _reduce_all(a, 1)
+    reduce_all(a, 1)
 }
 
 func reduce_max(tensor a) tensor {
-    _reduce_all(a, 2)
+    reduce_all(a, 2)
 }
 
 func reduce_min(tensor a) tensor {
-    _reduce_all(a, 3)
+    reduce_all(a, 3)
 }
 
 func reduce_prod(tensor a) tensor {
-    _reduce_all(a, 4)
+    reduce_all(a, 4)
 }
 
-func _reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
+func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     int axis = neurx.tensor.shape.normalize_dim(dim, len(a.shape))
     if len(a.shape) == 1 {
-        return _reduce_all(a, mode)
+        return reduce_all(a, mode)
     }
     if axis != 0 {
         return neurx.tensor.tensor.clone(a)
@@ -147,21 +147,21 @@ func _reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
 }
 
 func reduce_sum_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_dim_all(a, dim, keepdim, 0)
+    reduce_dim_all(a, dim, keepdim, 0)
 }
 
 func reduce_mean_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_dim_all(a, dim, keepdim, 1)
+    reduce_dim_all(a, dim, keepdim, 1)
 }
 
 func reduce_max_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_dim_all(a, dim, keepdim, 2)
+    reduce_dim_all(a, dim, keepdim, 2)
 }
 
 func reduce_min_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_dim_all(a, dim, keepdim, 3)
+    reduce_dim_all(a, dim, keepdim, 3)
 }
 
 func reduce_prod_dim(tensor a, int dim, bool keepdim) tensor {
-    _reduce_dim_all(a, dim, keepdim, 4)
+    reduce_dim_all(a, dim, keepdim, 4)
 }

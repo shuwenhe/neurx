@@ -35,20 +35,20 @@ struct linearize_state {
     []dual_record records
 }
 
-func _copy_float([]float data) []float {
-    neurx.engine._copy_float(data)
+func copy_float([]float data) []float {
+    neurx.engine.copy_float(data)
 }
 
-func _copy_int([]int data) []int {
-    neurx.engine._copy_int(data)
+func copy_int([]int data) []int {
+    neurx.engine.copy_int(data)
 }
 
-func _copy_record(grad_record record) grad_record {
-    neurx.engine._copy_record(record)
+func copy_record(grad_record record) grad_record {
+    neurx.engine.copy_record(record)
 }
 
-func _copy_records([]grad_record records) []grad_record {
-    neurx.engine._copy_records(records)
+func copy_records([]grad_record records) []grad_record {
+    neurx.engine.copy_records(records)
 }
 
 func new_state() autograd_state {
@@ -163,22 +163,22 @@ func backward(tensor t) tensor {
     neurx.engine.backward(t)
 }
 
-func _copy_dual_record(dual_record record) dual_record {
+func copy_dual_record(dual_record record) dual_record {
     dual_record {
         id: record.id,
-        shape: _copy_int(record.shape),
+        shape: copy_int(record.shape),
         requires_grad: record.requires_grad,
-        primal: _copy_float(record.primal),
-        tangent: _copy_float(record.tangent),
-        cotangent: _copy_float(record.cotangent),
+        primal: copy_float(record.primal),
+        tangent: copy_float(record.tangent),
+        cotangent: copy_float(record.cotangent),
     }
 }
 
-func _copy_dual_records([]dual_record records) []dual_record {
+func copy_dual_records([]dual_record records) []dual_record {
     []dual_record out = []dual_record{cap: len(records)}
     int i = 0
     while i < len(records) {
-        out[i] = _copy_dual_record(records[i])
+        out[i] = copy_dual_record(records[i])
         i = i + 1
     }
     out
@@ -223,9 +223,9 @@ func linearize_ready(linearize_state state) bool {
 func linearize_tensor(tensor value) dual_record {
     dual_record {
         id: 0,
-        shape: _copy_int(value.shape),
+        shape: copy_int(value.shape),
         requires_grad: value.requires_grad,
-        primal: _copy_float(value.data),
+        primal: copy_float(value.data),
         tangent: zeros_like(value.data),
         cotangent: zeros_like(value.data),
     }
@@ -236,9 +236,9 @@ func register_dual_tensor(linearize_state state, int id, tensor value) linearize
     records.push(
         dual_record {
             id: id,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: zeros_like(value.data),
             cotangent: zeros_like(value.data),
         }
@@ -269,7 +269,7 @@ func linearize_shape_of(linearize_state state, int id) []int {
     int i = 0
     while i < len(state.records) {
         if state.records[i].id == id {
-            return _copy_int(state.records[i].shape)
+            return copy_int(state.records[i].shape)
         }
         i = i + 1
     }
@@ -291,7 +291,7 @@ func linearize_primal_of(linearize_state state, int id) []float {
     int i = 0
     while i < len(state.records) {
         if state.records[i].id == id {
-            return _copy_float(state.records[i].primal)
+            return copy_float(state.records[i].primal)
         }
         i = i + 1
     }
@@ -302,7 +302,7 @@ func linearize_tangent_of(linearize_state state, int id) []float {
     int i = 0
     while i < len(state.records) {
         if state.records[i].id == id {
-            return _copy_float(state.records[i].tangent)
+            return copy_float(state.records[i].tangent)
         }
         i = i + 1
     }
@@ -313,7 +313,7 @@ func linearize_cotangent_of(linearize_state state, int id) []float {
     int i = 0
     while i < len(state.records) {
         if state.records[i].id == id {
-            return _copy_float(state.records[i].cotangent)
+            return copy_float(state.records[i].cotangent)
         }
         i = i + 1
     }
@@ -418,7 +418,7 @@ func linearize_state_dict(linearize_state state) linearize_state {
     linearize_state {
         forward_mode: state.forward_mode,
         reverse_mode: state.reverse_mode,
-        records: _copy_dual_records(state.records),
+        records: copy_dual_records(state.records),
     }
 }
 
@@ -517,9 +517,9 @@ func function_tagged_linearize(function_record f, string tag, tensor value) line
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: jvp_seed_data(value),
             cotangent: ones_like(value.data),
         }
@@ -716,9 +716,9 @@ func function_to_linearize_state(function_record f, tensor value) linearize_stat
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: jvp_seed_data(value),
             cotangent: zeros_like(value.data),
         }
@@ -748,9 +748,9 @@ func function_capture(function_record f, tensor value) linearize_state {
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: jvp_seed_data(value),
             cotangent: zeros_like(value.data),
         }
@@ -767,9 +767,9 @@ func function_jvp_capture(function_record f, tensor value) linearize_state {
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: jvp_seed_data(value),
             cotangent: zeros_like(value.data),
         }
@@ -786,9 +786,9 @@ func function_vjp_capture(function_record f, tensor value) linearize_state {
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: zeros_like(value.data),
             cotangent: ones_like(value.data),
         }
@@ -805,9 +805,9 @@ func function_linearize_capture(function_record f, tensor value) linearize_state
     records.push(
         dual_record {
             id: 0,
-            shape: _copy_int(value.shape),
+            shape: copy_int(value.shape),
             requires_grad: value.requires_grad,
-            primal: _copy_float(value.data),
+            primal: copy_float(value.data),
             tangent: jvp_seed_data(value),
             cotangent: ones_like(value.data),
         }

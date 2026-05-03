@@ -7,7 +7,7 @@ struct tensor {
     option[tensor] grad
 }
 
-func _clone(tensor a) tensor {
+func clone(tensor a) tensor {
     tensor {
         data: a.data,
         shape: a.shape,
@@ -16,7 +16,7 @@ func _clone(tensor a) tensor {
     }
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     for i in 0..n {
@@ -25,7 +25,7 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -36,20 +36,20 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _shape1(int n) []int {
+func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
 
-func _shape2(int m, int n) []int {
+func shape2(int m, int n) []int {
     []int shape = []int{cap: 2}
     shape[0] = m
     shape[1] = n
     shape
 }
 
-func _identity(int n) tensor {
+func identity(int n) tensor {
     []float out = []float{cap: n * n}
     int i = 0
     while i < n {
@@ -58,13 +58,13 @@ func _identity(int n) tensor {
     }
     tensor {
         data: out,
-        shape: _shape2(n, n),
+        shape: shape2(n, n),
         requires_grad: false,
         grad: none,
     }
 }
 
-func _matmul2d(tensor a, tensor b) tensor {
+func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
@@ -86,7 +86,7 @@ func _matmul2d(tensor a, tensor b) tensor {
     }
     tensor {
         data: out,
-        shape: _shape2(rows, cols),
+        shape: shape2(rows, cols),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
@@ -136,7 +136,7 @@ func inv(tensor a) tensor {
         out[0] = 1.0 / v
         tensor {
             data: out,
-            shape: _shape2(1, 1),
+            shape: shape2(1, 1),
             requires_grad: a.requires_grad,
             grad: none,
         }
@@ -156,12 +156,12 @@ func inv(tensor a) tensor {
         out[3] = a00 / det2
         tensor {
             data: out,
-            shape: _shape2(2, 2),
+            shape: shape2(2, 2),
             requires_grad: a.requires_grad,
             grad: none,
         }
     } else {
-        _clone(a)
+        clone(a)
     }
 }
 
@@ -176,30 +176,30 @@ func det(tensor a) tensor {
     out[0] = value
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: a.requires_grad,
         grad: none,
     }
 }
 
 func eig(tensor a) tensor {
-    _clone(a)
+    clone(a)
 }
 
 func eigh(tensor a) tensor {
-    _clone(a)
+    clone(a)
 }
 
 func svd(tensor a) tensor {
-    _clone(a)
+    clone(a)
 }
 
 func qr(tensor a) tensor {
-    _clone(a)
+    clone(a)
 }
 
 func cholesky(tensor a) tensor {
-    _clone(a)
+    clone(a)
 }
 
 func solve(tensor a, tensor b) tensor {
@@ -216,15 +216,15 @@ func solve(tensor a, tensor b) tensor {
         }
         tensor {
             data: out,
-            shape: _copy_int(b.shape),
+            shape: copy_int(b.shape),
             requires_grad: a.requires_grad || b.requires_grad,
             grad: none,
         }
     } else if len(a.shape) == 2 && a.shape[0] == 2 && a.shape[1] == 2 && len(b.shape) == 2 && b.shape[0] == 2 && b.shape[1] == 1 {
         tensor ainv = inv(a)
-        _matmul2d(ainv, b)
+        matmul2d(ainv, b)
     } else {
-        _clone(b)
+        clone(b)
     }
 }
 
@@ -240,12 +240,12 @@ func cross(tensor a, tensor b) tensor {
         out[2] = a.data[0] * b.data[1] - a.data[1] * b.data[0]
     tensor {
         data: out,
-        shape: _shape1(3),
+        shape: shape1(3),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
     } else {
-        _clone(a)
+        clone(a)
     }
 }
 
@@ -264,7 +264,7 @@ func outer(tensor a, tensor b) tensor {
     }
     tensor {
         data: out,
-        shape: _shape2(n, m),
+        shape: shape2(n, m),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
@@ -282,7 +282,7 @@ func inner(tensor a, tensor b) tensor {
     out[0] = acc
     tensor {
         data: out,
-        shape: _shape1(1),
+        shape: shape1(1),
         requires_grad: a.requires_grad || b.requires_grad,
         grad: none,
     }
@@ -290,27 +290,27 @@ func inner(tensor a, tensor b) tensor {
 
 func matrix_power(tensor a, int n) tensor {
     if len(a.shape) != 2 || a.shape[0] != a.shape[1] {
-        return _clone(a)
+        return clone(a)
     }
     if n == 0 {
-        return _identity(a.shape[0])
+        return identity(a.shape[0])
     }
     if n < 0 {
         tensor base = inv(a)
         int exp = 0 - n
-        tensor result = _identity(a.shape[0])
+        tensor result = identity(a.shape[0])
         while exp > 0 {
             if exp > 0 {
-                result = _matmul2d(result, base)
+                result = matmul2d(result, base)
             }
             exp = exp - 1
         }
         return result
     }
-    tensor result = _identity(a.shape[0])
+    tensor result = identity(a.shape[0])
     int i = 0
     while i < n {
-        result = _matmul2d(result, a)
+        result = matmul2d(result, a)
         i = i + 1
     }
     result

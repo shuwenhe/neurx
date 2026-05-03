@@ -4,7 +4,7 @@ use neurx.tensor.tensor
 
 // ---- helpers ----
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -15,7 +15,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -26,14 +26,14 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _shape2(int a, int b) []int {
+func shape2(int a, int b) []int {
     []int s = []int{cap: 2}
     s[0] = a
     s[1] = b
     s
 }
 
-func _shape3(int a, int b, int c) []int {
+func shape3(int a, int b, int c) []int {
     []int s = []int{cap: 3}
     s[0] = a
     s[1] = b
@@ -41,7 +41,7 @@ func _shape3(int a, int b, int c) []int {
     s
 }
 
-func _shape4(int a, int b, int c, int d) []int {
+func shape4(int a, int b, int c, int d) []int {
     []int s = []int{cap: 4}
     s[0] = a
     s[1] = b
@@ -50,7 +50,7 @@ func _shape4(int a, int b, int c, int d) []int {
     s
 }
 
-func _out_size(int in_size, int kernel, int stride, int padding, int dilation) int {
+func out_size(int in_size, int kernel, int stride, int padding, int dilation) int {
     (in_size + 2 * padding - dilation * (kernel - 1) - 1) / stride + 1
 }
 
@@ -107,7 +107,7 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     int stride = layer.stride
     int pad = layer.padding
     int dil = layer.dilation
-    int out_len = _out_size(length, ks, stride, pad, dil)
+    int out_len = out_size(length, ks, stride, pad, dil)
     []float out = []float{cap: batch * out_ch * out_len}
     int b = 0
     while b < batch {
@@ -140,7 +140,7 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
         }
         b = b + 1
     }
-    neurx.tensor.new(out, _shape3(batch, out_ch, out_len), input.requires_grad)
+    neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
 
 // ---- Conv2d ----
@@ -203,8 +203,8 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
     int out_ch = layer.out_channels
     int kh = layer.kernel_h
     int kw = layer.kernel_w
-    int out_h = _out_size(in_h, kh, layer.stride_h, layer.pad_h, layer.dil_h)
-    int out_w = _out_size(in_w, kw, layer.stride_w, layer.pad_w, layer.dil_w)
+    int out_h = out_size(in_h, kh, layer.stride_h, layer.pad_h, layer.dil_h)
+    int out_w = out_size(in_w, kw, layer.stride_w, layer.pad_w, layer.dil_w)
     []float out = []float{cap: batch * out_ch * out_h * out_w}
     int b = 0
     while b < batch {
@@ -246,5 +246,5 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
         }
         b = b + 1
     }
-    neurx.tensor.new(out, _shape4(batch, out_ch, out_h, out_w), input.requires_grad)
+    neurx.tensor.new(out, shape4(batch, out_ch, out_h, out_w), input.requires_grad)
 }

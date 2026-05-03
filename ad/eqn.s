@@ -7,7 +7,7 @@ struct jaxpr_eqn {
     []string outputs
 }
 
-func _copy_strings([]string values) []string {
+func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
     while i < len(values) {
@@ -20,9 +20,9 @@ func _copy_strings([]string values) []string {
 func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
     jaxpr_eqn {
         primitive: eqn.primitive,
-        params: _copy_strings(eqn.params),
-        inputs: _copy_strings(eqn.inputs),
-        outputs: _copy_strings(eqn.outputs),
+        params: copy_strings(eqn.params),
+        inputs: copy_strings(eqn.inputs),
+        outputs: copy_strings(eqn.outputs),
     }
 }
 

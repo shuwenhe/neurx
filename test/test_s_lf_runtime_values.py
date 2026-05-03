@@ -15,5 +15,5 @@ def _load_runtime_module():
 
 def test_s_lf_runtime_helper_values():
     runtime = _load_runtime_module()
-    assert np.isclose(runtime.invoke_runtime_function("losses", "_mean_from_sum", 6.0, 3), 2.0)
-    assert np.isclose(runtime.invoke_runtime_function("losses", "_abs", -3.5), 3.5)
+    assert np.isclose(runtime.invoke_runtime_function("losses", "mean_from_sum", 6.0, 3), 2.0)
+    assert np.isclose(runtime.invoke_runtime_function("losses", "abs", -3.5), 3.5)

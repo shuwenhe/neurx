@@ -1,6 +1,6 @@
 package neurx.tensor.shape
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -20,7 +20,7 @@ func normalize_dim(int dim, int ndim) int {
 }
 
 func normalize_axes([]int axes, int ndim) []int {
-    []int out = _copy_int(axes)
+    []int out = copy_int(axes)
     int i = 0
     while i < len(out) {
         out[i] = normalize_dim(out[i], ndim)
@@ -77,7 +77,7 @@ func broadcast_shape([]int a, []int b) []int {
 func infer_matmul_shape([]int a, []int b) []int {
     int ndim_a = len(a)
     int ndim_b = len(b)
-    []int out = _copy_int(a)
+    []int out = copy_int(a)
     if ndim_a == 1 && ndim_b == 1 {
         out = []int{cap: 1}
         out[0] = 1
@@ -142,7 +142,7 @@ func infer_reduce_shape([]int shape, int dim, bool keepdim) []int {
     int ndim = len(shape)
     int axis = normalize_dim(dim, ndim)
     if keepdim {
-        []int out = _copy_int(shape)
+        []int out = copy_int(shape)
         out[axis] = 1
         return out
     }
@@ -166,7 +166,7 @@ func infer_reduce_shape([]int shape, int dim, bool keepdim) []int {
 func concat_shape([]int a, []int b, int dim) []int {
     int ndim = len(a)
     int axis = normalize_dim(dim, ndim)
-    []int out = _copy_int(a)
+    []int out = copy_int(a)
     if len(b) == len(a) {
         out[axis] = a[axis] + b[axis]
     }
@@ -182,7 +182,7 @@ func flatten_shape([]int shape, int start_dim, int end_dim) []int {
     int start = normalize_dim(start_dim, ndim)
     int end = normalize_dim(end_dim, ndim)
     if start > end {
-        return _copy_int(shape)
+        return copy_int(shape)
     }
     int out_ndim = ndim - (end - start)
     []int out = []int{cap: out_ndim}

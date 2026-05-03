@@ -9,7 +9,7 @@ struct linear {
     []float bias
 }
 
-func _copy_float([]float data) []float {
+func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
@@ -20,7 +20,7 @@ func _copy_float([]float data) []float {
     out
 }
 
-func _copy_int([]int data) []int {
+func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
@@ -31,20 +31,20 @@ func _copy_int([]int data) []int {
     out
 }
 
-func _shape1(int n) []int {
+func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
 
-func _shape2(int m, int n) []int {
+func shape2(int m, int n) []int {
     []int shape = []int{cap: 2}
     shape[0] = m
     shape[1] = n
     shape
 }
 
-func _shape3(int a, int b, int c) []int {
+func shape3(int a, int b, int c) []int {
     []int shape = []int{cap: 3}
     shape[0] = a
     shape[1] = b
@@ -52,7 +52,7 @@ func _shape3(int a, int b, int c) []int {
     shape
 }
 
-func _numel([]int shape) int {
+func numel([]int shape) int {
     int n = 1
     int i = 0
     while i < len(shape) {
@@ -62,7 +62,7 @@ func _numel([]int shape) int {
     n
 }
 
-func _exp_approx(float x) float {
+func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
     float x4 = x3 * x
@@ -70,7 +70,7 @@ func _exp_approx(float x) float {
     1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
 }
 
-func _sqrt_approx(float x) float {
+func sqrt_approx(float x) float {
     float v = x
     if v < 0.0 {
         v = 0.0
@@ -87,11 +87,11 @@ func _sqrt_approx(float x) float {
     guess
 }
 
-func _clone_tensor(tensor a) tensor {
-    neurx.tensor.new(_copy_float(a.data), _copy_int(a.shape), a.requires_grad)
+func clone_tensor(tensor a) tensor {
+    neurx.tensor.new(copy_float(a.data), copy_int(a.shape), a.requires_grad)
 }
 
-func _matmul2d(tensor a, tensor b) tensor {
+func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
@@ -111,10 +111,10 @@ func _matmul2d(tensor a, tensor b) tensor {
         }
         r = r + 1
     }
-    neurx.tensor.new(out, _shape2(rows, cols), a.requires_grad || b.requires_grad)
+    neurx.tensor.new(out, shape2(rows, cols), a.requires_grad || b.requires_grad)
 }
 
-func _softmax_1d([]float values) []float {
+func softmax_1d([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     float max_v = values[0]
@@ -153,7 +153,7 @@ func _softmax_1d([]float values) []float {
     out
 }
 
-func _layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
+func layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     int ndim = len(input.shape)
     int start = ndim - normalized_dims
     if start < 0 {
@@ -191,16 +191,16 @@ func _layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_d
         variance = variance / inner
         j = 0
         while j < inner {
-            float norm = (input.data[base + j] - mean) / _sqrt_approx(variance + eps)
+            float norm = (input.data[base + j] - mean) / sqrt_approx(variance + eps)
             out[base + j] = norm * weight.data[j] + bias.data[j]
             j = j + 1
         }
         o = o + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
 
-func _rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
+func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
     int ndim = len(input.shape)
     int start = ndim - normalized_dims
     if start < 0 {
@@ -232,16 +232,16 @@ func _rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dim
         float denom = mean_sq + eps
         j = 0
         while j < inner {
-            float norm = input.data[base + j] / _sqrt_approx(denom)
+            float norm = input.data[base + j] / sqrt_approx(denom)
             out[base + j] = norm * weight.data[j] + bias.data[j]
             j = j + 1
         }
         o = o + 1
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
 
-func _mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
+func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
     int batch = input.shape[0]
     int in_features = input.shape[1]
     int hidden_features = fc1_bias.shape[0]
@@ -256,7 +256,7 @@ func _mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc
                 acc = acc + input.data[b * in_features + i] * fc1_weight.data[i * hidden_features + j]
                 i = i + 1
             }
-            float gate = 1.0 / (1.0 + _exp_approx(-1.702 * acc))
+            float gate = 1.0 / (1.0 + exp_approx(-1.702 * acc))
             hidden[b * hidden_features + j] = acc * gate
             j = j + 1
         }
@@ -279,10 +279,10 @@ func _mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc
         }
         b = b + 1
     }
-    neurx.tensor.new(out, _shape2(batch, out_features), input.requires_grad || fc1_weight.requires_grad || fc1_bias.requires_grad || fc2_weight.requires_grad || fc2_bias.requires_grad)
+    neurx.tensor.new(out, shape2(batch, out_features), input.requires_grad || fc1_weight.requires_grad || fc1_bias.requires_grad || fc2_weight.requires_grad || fc2_bias.requires_grad)
 }
 
-func _qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) tensor {
+func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) tensor {
     int batch = input.shape[0]
     int seq_len = input.shape[1]
     int channels = input.shape[2]
@@ -308,10 +308,10 @@ func _qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads)
         }
         b = b + 1
     }
-    neurx.tensor.new(out, _shape3(batch, seq_len, proj_channels), input.requires_grad || weight.requires_grad || bias.requires_grad)
+    neurx.tensor.new(out, shape3(batch, seq_len, proj_channels), input.requires_grad || weight.requires_grad || bias.requires_grad)
 }
 
-func _rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
+func rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
@@ -324,10 +324,10 @@ func _rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
         }
         i = i + 2
     }
-    neurx.tensor.new(out, _copy_int(input.shape), input.requires_grad || cos.requires_grad || sin.requires_grad)
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad || cos.requires_grad || sin.requires_grad)
 }
 
-func _embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) tensor {
+func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) tensor {
     int vocab = weight.shape[0]
     int dim = weight.shape[1]
     int n = len(input_ids.data)
@@ -351,7 +351,7 @@ func _embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) te
         }
         i = i + 1
     }
-    neurx.tensor.new(out, _shape2(n, dim), weight.requires_grad || input_ids.requires_grad)
+    neurx.tensor.new(out, shape2(n, dim), weight.requires_grad || input_ids.requires_grad)
 }
 
 func new_linear(int in_features, int out_features) linear {
@@ -377,27 +377,27 @@ func new_linear(int in_features, int out_features) linear {
 }
 
 func linear_forward(linear layer, tensor input) tensor {
-    _matmul2d(input, neurx.tensor.new(layer.weight, _shape2(layer.in_features, layer.out_features), false))
+    matmul2d(input, neurx.tensor.new(layer.weight, shape2(layer.in_features, layer.out_features), false))
 }
 
 func layer_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
-    _layer_norm_impl(input, weight, bias, normalized_dims, eps)
+    layer_norm_impl(input, weight, bias, normalized_dims, eps)
 }
 
 func rms_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {
-    _rms_norm_impl(input, weight, bias, normalized_dims, eps)
+    rms_norm_impl(input, weight, bias, normalized_dims, eps)
 }
 
 func mlp_block(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias) tensor {
-    _mlp_block_impl(input, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
+    mlp_block_impl(input, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
 }
 
 func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias, tensor qkv_weight, tensor qkv_bias, tensor out_weight, tensor out_bias, tensor ln2_weight, tensor ln2_bias, tensor fc1_weight, tensor fc1_bias, tensor fc2_weight, tensor fc2_bias, float eps, int n_heads) tensor {
-    tensor norm1 = _layer_norm_impl(input, ln1_weight, ln1_bias, 1, eps)
-    tensor qkv = _qkv_projection_impl(norm1, qkv_weight, qkv_bias, n_heads)
-    tensor attn = _clone_tensor(qkv)
-    tensor proj = _clone_tensor(attn)
-    tensor resid1 = _clone_tensor(input)
+    tensor norm1 = layer_norm_impl(input, ln1_weight, ln1_bias, 1, eps)
+    tensor qkv = qkv_projection_impl(norm1, qkv_weight, qkv_bias, n_heads)
+    tensor attn = clone_tensor(qkv)
+    tensor proj = clone_tensor(attn)
+    tensor resid1 = clone_tensor(input)
     int i = 0
     while i < len(proj.data) && i < len(out_weight.data) {
         proj.data[i] = proj.data[i] * out_weight.data[i]
@@ -408,15 +408,15 @@ func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias,
         proj.data[i] = proj.data[i] + out_bias.data[i]
         i = i + 1
     }
-    tensor x = _clone_tensor(resid1)
+    tensor x = clone_tensor(resid1)
     i = 0
     while i < len(x.data) && i < len(proj.data) {
         x.data[i] = x.data[i] + proj.data[i]
         i = i + 1
     }
-    tensor norm2 = _layer_norm_impl(x, ln2_weight, ln2_bias, 1, eps)
-    tensor mlp = _mlp_block_impl(norm2, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
-    tensor out = _clone_tensor(x)
+    tensor norm2 = layer_norm_impl(x, ln2_weight, ln2_bias, 1, eps)
+    tensor mlp = mlp_block_impl(norm2, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
+    tensor out = clone_tensor(x)
     i = 0
     while i < len(out.data) && i < len(mlp.data) {
         out.data[i] = out.data[i] + mlp.data[i]
@@ -426,13 +426,13 @@ func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias,
 }
 
 func qkv_projection(tensor input, tensor weight, tensor bias, int n_heads) tensor {
-    _qkv_projection_impl(input, weight, bias, n_heads)
+    qkv_projection_impl(input, weight, bias, n_heads)
 }
 
 func rope_apply(tensor input, tensor cos, tensor sin) tensor {
-    _rope_apply_impl(input, cos, sin)
+    rope_apply_impl(input, cos, sin)
 }
 
 func embedding_lookup(tensor weight, tensor input_ids, int padding_idx) tensor {
-    _embedding_lookup_impl(weight, input_ids, padding_idx)
+    embedding_lookup_impl(weight, input_ids, padding_idx)
 }
