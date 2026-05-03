@@ -163,7 +163,7 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p build/ir
-	for src in $$(printf '%s\n' s/*.s ops/*.s tensor/*.s ad/*.s nn/*.s opt/*.s dl/*.s lf/*.s train/*.s); do \
+	for src in $$(printf '%s\n' s/*.s ops/*.s tensor/*.s ad/*.s nn/*.s opt/*.s dl/*.s lf/*.s train/*.s runtime/*.s); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename $$src .s); \
 	    dir=$$(dirname $$src); \
@@ -185,6 +185,8 @@ s-compile-runtime:
 	        dir="/lf"; \
 	    elif [ "$$dir" = "train" ]; then \
 	        dir="/train"; \
+	    elif [ "$$dir" = "runtime" ]; then \
+	        dir="/runtime"; \
 	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p build/ir$$dir; \
