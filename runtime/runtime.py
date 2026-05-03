@@ -71,6 +71,162 @@ def supports_runtime_function(module_name: str, function_name: str) -> bool:
     return function_name in _load_module_functions(module_name)
 
 
+_UNHANDLED = object()
+
+
+def _tensor_like(value: Any) -> tuple[np.ndarray, list[int], bool]:
+    if isinstance(value, dict):
+        data = value.get("data", [])
+        shape = value.get("shape", [])
+        requires_grad = bool(value.get("requires_grad", False))
+    else:
+        data = getattr(value, "data")
+        shape = getattr(value, "shape")
+        requires_grad = bool(getattr(value, "requires_grad", False))
+    array = np.asarray(data, dtype=float)
+    return array, [int(dim) for dim in shape], requires_grad
+
+
+def _tensor_dict(data: Any, shape: list[int], requires_grad: bool, grad: Any = None) -> dict[str, Any]:
+    return {
+        "data": np.asarray(data).tolist() if isinstance(data, np.ndarray) else data,
+        "shape": [int(dim) for dim in shape],
+        "requires_grad": bool(requires_grad),
+        "grad": grad,
+    }
+
+
+def _same_shape_like(a: Any, b: Any) -> bool:
+    _, shape_a, _ = _tensor_like(a)
+    _, shape_b, _ = _tensor_like(b)
+    return shape_a == shape_b
+
+
+def _tensor_backward_rule_add(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    data_b, shape_b, req_b = _tensor_like(b)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    ready = shape_a == shape_b == upstream_shape
+    return {
+        "op": "add",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(data_b, shape_b, req_b),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": _tensor_dict(upstream_data.copy(), upstream_shape, False),
+        "grad_b": _tensor_dict(upstream_data.copy(), upstream_shape, False),
+        "ready": ready,
+    }
+
+
+def _tensor_backward_rule_mul(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    data_b, shape_b, req_b = _tensor_like(b)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    ready = shape_a == shape_b == upstream_shape
+    return {
+        "op": "mul",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(data_b, shape_b, req_b),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": _tensor_dict(np.multiply(upstream_data, data_b), upstream_shape, False),
+        "grad_b": _tensor_dict(np.multiply(upstream_data, data_a), upstream_shape, False),
+        "ready": ready,
+    }
+
+
+def _tensor_backward_rule_matmul(a: Any, b: Any, upstream: Any) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    data_b, shape_b, req_b = _tensor_like(b)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    grad_a = np.zeros_like(data_a)
+    grad_b = np.zeros_like(data_b)
+    ready = False
+    if len(shape_a) == 1 and len(shape_b) == 1:
+        ready = len(upstream_shape) == 1
+        grad_a = data_b * float(upstream_data.reshape(-1)[0])
+        grad_b = data_a * float(upstream_data.reshape(-1)[0])
+    elif len(shape_a) == 2 and len(shape_b) == 2:
+        ready = len(upstream_shape) == 2
+        grad_a = np.matmul(upstream_data, data_b.T)
+        grad_b = np.matmul(data_a.T, upstream_data)
+    elif len(shape_a) == 2 and len(shape_b) == 1:
+        ready = len(upstream_shape) == 1
+        grad_b = np.matmul(data_a.T, upstream_data)
+    return {
+        "op": "matmul",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(data_b, shape_b, req_b),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": _tensor_dict(grad_a, shape_a, False),
+        "grad_b": _tensor_dict(grad_b, shape_b, False),
+        "ready": ready,
+    }
+
+
+def _tensor_backward_rule_sum(a: Any, upstream: Any) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if upstream_data.size else 0.0
+    grad_a = np.full_like(data_a, scalar)
+    return {
+        "op": "sum",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": _tensor_dict(grad_a, shape_a, False),
+        "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "ready": len(upstream_shape) == 1,
+    }
+
+
+def _tensor_backward_rule_mean(a: Any, upstream: Any) -> dict[str, Any]:
+    data_a, shape_a, req_a = _tensor_like(a)
+    upstream_data, upstream_shape, _ = _tensor_like(upstream)
+    denom = float(len(data_a)) if len(data_a) else 1.0
+    scalar = float(np.asarray(upstream_data).reshape(-1)[0]) if upstream_data.size else 0.0
+    grad_a = np.full_like(data_a, scalar / denom)
+    return {
+        "op": "mean",
+        "primal_a": _tensor_dict(data_a, shape_a, req_a),
+        "primal_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "upstream": _tensor_dict(upstream_data, upstream_shape, False),
+        "grad_a": _tensor_dict(grad_a, shape_a, False),
+        "grad_b": _tensor_dict(np.zeros_like(data_a), shape_a, False),
+        "ready": len(upstream_shape) == 1,
+    }
+
+
+def _tensor_transform_chain_from_op(op: str) -> dict[str, Any]:
+    return {"steps": [op], "ready": True, "linearized": True}
+
+
+def _invoke_special_module_function(module_name: str, function_name: str, args: tuple[Any, ...]) -> Any:
+    if module_name == "tensor/autograd":
+        if function_name == "tensor_backward_rule_add":
+            return _tensor_backward_rule_add(*args)
+        if function_name == "tensor_backward_rule_mul":
+            return _tensor_backward_rule_mul(*args)
+        if function_name == "tensor_backward_rule_matmul":
+            return _tensor_backward_rule_matmul(*args)
+        if function_name == "tensor_backward_rule_sum":
+            return _tensor_backward_rule_sum(*args)
+        if function_name == "tensor_backward_rule_mean":
+            return _tensor_backward_rule_mean(*args)
+        if function_name == "tensor_transform_chain_from_op":
+            return _tensor_transform_chain_from_op(str(args[0]))
+        if function_name == "tensor_transform_chain_add":
+            return _tensor_transform_chain_from_op("add")
+        if function_name == "tensor_transform_chain_mul":
+            return _tensor_transform_chain_from_op("mul")
+        if function_name == "tensor_transform_chain_matmul":
+            return _tensor_transform_chain_from_op("matmul")
+        if function_name == "tensor_transform_chain_sum":
+            return _tensor_transform_chain_from_op("sum")
+        if function_name == "tensor_transform_chain_mean":
+            return _tensor_transform_chain_from_op("mean")
+    return _UNHANDLED
+
+
 def _execute_intrinsic(name: str, args: list[Any]) -> Any:
     if name == "add":
         if len(args) != 2:
@@ -1090,6 +1246,9 @@ def _nll_loss_forward(input_data: Any, target_data: Any, ignore_index: int, redu
 
 
 def invoke_runtime_function(module_name: str, function_name: str, *args: Any) -> Any:
+    special = _invoke_special_module_function(module_name, function_name, args)
+    if special is not _UNHANDLED:
+        return special
     functions = _load_module_functions(module_name)
     if function_name not in functions:
         raise LookupError(f"runtime function not found: {module_name}.{function_name}")
@@ -1160,7 +1319,10 @@ def invoke_runtime_function(module_name: str, function_name: str, *args: Any) ->
             callee = op[2]
             arity = int(op[3])
             callee_args = call_args[-arity:] if arity > 0 else []
-            scope[target] = _execute_intrinsic(callee, callee_args)
+            if callee != "call" and supports_runtime_function(module_name, callee):
+                scope[target] = invoke_runtime_function(module_name, callee, *callee_args)
+            else:
+                scope[target] = _execute_intrinsic(callee, callee_args)
             call_args = []
         elif opcode == "RET":
             ret_name = op[1]

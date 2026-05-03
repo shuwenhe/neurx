@@ -1,7 +1,9 @@
 package neurx.ad
 
 use neurx.tensor.tensor
+use neurx.tensor.autograd
 use neurx.engine
+use neurx.ad.function
 
 struct grad_record {
     int id
@@ -14,6 +16,21 @@ struct autograd_state {
     bool grad_enabled
     bool grad_accumulation
     []grad_record records
+}
+
+struct dual_record {
+    int id
+    []int shape
+    bool requires_grad
+    []float primal
+    []float tangent
+    []float cotangent
+}
+
+struct linearize_state {
+    bool forward_mode
+    bool reverse_mode
+    []dual_record records
 }
 
 func _copy_float([]float data) []float {
@@ -142,4 +159,611 @@ func grad_accumulation_state(autograd_state state) bool {
 
 func backward(tensor t) tensor {
     neurx.engine.backward(t)
+}
+
+func _copy_dual_record(dual_record record) dual_record {
+    dual_record {
+        id: record.id,
+        shape: _copy_int(record.shape),
+        requires_grad: record.requires_grad,
+        primal: _copy_float(record.primal),
+        tangent: _copy_float(record.tangent),
+        cotangent: _copy_float(record.cotangent),
+    }
+}
+
+func _copy_dual_records([]dual_record records) []dual_record {
+    []dual_record out = []dual_record{cap: len(records)}
+    int i = 0
+    while i < len(records) {
+        out[i] = _copy_dual_record(records[i])
+        i = i + 1
+    }
+    out
+}
+
+func new_linearize_state() linearize_state {
+    linearize_state {
+        forward_mode: true,
+        reverse_mode: true,
+        records: [],
+    }
+}
+
+func set_forward_mode(linearize_state state, bool enabled) linearize_state {
+    linearize_state {
+        forward_mode: enabled,
+        reverse_mode: state.reverse_mode,
+        records: state.records,
+    }
+}
+
+func set_reverse_mode(linearize_state state, bool enabled) linearize_state {
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: enabled,
+        records: state.records,
+    }
+}
+
+func forward_mode_enabled(linearize_state state) bool {
+    state.forward_mode
+}
+
+func reverse_mode_enabled(linearize_state state) bool {
+    state.reverse_mode
+}
+
+func linearize_ready(linearize_state state) bool {
+    state.forward_mode || state.reverse_mode
+}
+
+func linearize_tensor(tensor value) dual_record {
+    dual_record {
+        id: 0,
+        shape: _copy_int(value.shape),
+        requires_grad: value.requires_grad,
+        primal: _copy_float(value.data),
+        tangent: zeros_like(value.data),
+        cotangent: zeros_like(value.data),
+    }
+}
+
+func register_dual_tensor(linearize_state state, int id, tensor value) linearize_state {
+    []dual_record records = state.records
+    records.push(
+        dual_record {
+            id: id,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: zeros_like(value.data),
+            cotangent: zeros_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func linearize_record_count(linearize_state state) int {
+    len(state.records)
+}
+
+func linearize_has_record(linearize_state state, int id) bool {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+func linearize_shape_of(linearize_state state, int id) []int {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return _copy_int(state.records[i].shape)
+        }
+        i = i + 1
+    }
+    []
+}
+
+func linearize_requires_grad(linearize_state state, int id) bool {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return state.records[i].requires_grad
+        }
+        i = i + 1
+    }
+    false
+}
+
+func linearize_primal_of(linearize_state state, int id) []float {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return _copy_float(state.records[i].primal)
+        }
+        i = i + 1
+    }
+    []
+}
+
+func linearize_tangent_of(linearize_state state, int id) []float {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return _copy_float(state.records[i].tangent)
+        }
+        i = i + 1
+    }
+    []
+}
+
+func linearize_cotangent_of(linearize_state state, int id) []float {
+    int i = 0
+    while i < len(state.records) {
+        if state.records[i].id == id {
+            return _copy_float(state.records[i].cotangent)
+        }
+        i = i + 1
+    }
+    []
+}
+
+func set_linearize_primal(linearize_state state, int id, []float primal) linearize_state {
+    []dual_record records = state.records
+    int i = 0
+    while i < len(records) {
+        if records[i].id == id {
+            records[i].primal = primal
+        }
+        i = i + 1
+    }
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func set_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
+    []dual_record records = state.records
+    int i = 0
+    while i < len(records) {
+        if records[i].id == id {
+            records[i].tangent = tangent
+        }
+        i = i + 1
+    }
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func set_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
+    []dual_record records = state.records
+    int i = 0
+    while i < len(records) {
+        if records[i].id == id {
+            records[i].cotangent = cotangent
+        }
+        i = i + 1
+    }
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func accumulate_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
+    []dual_record records = state.records
+    int i = 0
+    while i < len(records) {
+        if records[i].id == id {
+            int n = len(records[i].tangent)
+            if n == len(tangent) {
+                int j = 0
+                while j < n {
+                    records[i].tangent[j] = records[i].tangent[j] + tangent[j]
+                    j = j + 1
+                }
+            }
+        }
+        i = i + 1
+    }
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func accumulate_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
+    []dual_record records = state.records
+    int i = 0
+    while i < len(records) {
+        if records[i].id == id {
+            int n = len(records[i].cotangent)
+            if n == len(cotangent) {
+                int j = 0
+                while j < n {
+                    records[i].cotangent[j] = records[i].cotangent[j] + cotangent[j]
+                    j = j + 1
+                }
+            }
+        }
+        i = i + 1
+    }
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: records,
+    }
+}
+
+func linearize_state_dict(linearize_state state) linearize_state {
+    linearize_state {
+        forward_mode: state.forward_mode,
+        reverse_mode: state.reverse_mode,
+        records: _copy_dual_records(state.records),
+    }
+}
+
+func linearize_load_state_dict(linearize_state state, linearize_state other) linearize_state {
+    other
+}
+
+func jvp_seed_data(tensor value) []float {
+    if value.requires_grad {
+        return ones_like(value.data)
+    }
+    zeros_like(value.data)
+}
+
+func vjp_seed_state(linearize_state state, int loss_id, tensor loss_tensor) linearize_state {
+    if !loss_tensor.requires_grad {
+        return state
+    }
+    set_linearize_cotangent(state, loss_id, ones_like(loss_tensor.data))
+}
+
+func linearize_backward_state(linearize_state state, int loss_id, tensor loss_tensor) linearize_state {
+    vjp_seed_state(state, loss_id, loss_tensor)
+}
+
+func function_state(Function f) Function {
+    neurx.ad.function.function_state_dict(f)
+}
+
+func function_linearized(Function f) Function {
+    neurx.ad.function.set_linearized(f, true)
+}
+
+func function_enable_forward(Function f) Function {
+    neurx.ad.function.enable_forward(f)
+}
+
+func function_enable_backward(Function f) Function {
+    neurx.ad.function.enable_backward(f)
+}
+
+func function_enable_apply(Function f) Function {
+    neurx.ad.function.enable_apply(f)
+}
+
+func function_linearize(Function f) Function {
+    neurx.ad.function.linearize(f)
+}
+
+func function_jvp(Function f) Function {
+    neurx.ad.function.jvp(f)
+}
+
+func function_vjp(Function f) Function {
+    neurx.ad.function.vjp(f)
+}
+
+func function_grad(Function f) Function {
+    neurx.ad.function.grad(f)
+}
+
+func function_value_and_grad(Function f) Function {
+    neurx.ad.function.value_and_grad(f)
+}
+
+func function_tag_flow(Function f, string tag) Function {
+    neurx.ad.function.tag_flow(f, tag)
+}
+
+func function_backward_pass(Function f) Function {
+    neurx.ad.function.backward_pass(f)
+}
+
+func function_backward_pass_state(Function f) Function {
+    neurx.ad.function.backward_pass_state(f)
+}
+
+func function_tagged_linearize(Function f, string tag, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: jvp_seed_data(value),
+            cotangent: ones_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: neurx.ad.function.function_ready(neurx.ad.function.tag_flow(f, tag)),
+        reverse_mode: neurx.ad.function.function_is_linearized(neurx.ad.function.backward_pass_state(f)),
+        records: records,
+    }
+}
+
+func function_transform_chain(Function f) transform_chain {
+    neurx.ad.function.function_transform_chain(f)
+}
+
+func transform_chain_to_function(transform_chain chain, string name, int arity) Function {
+    neurx.ad.function.transform_chain_to_function(chain, name, arity)
+}
+
+func function_transform_chain_jvp(Function f) transform_chain {
+    neurx.ad.function.transform_chain_jvp(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_vjp(Function f) transform_chain {
+    neurx.ad.function.transform_chain_vjp(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_grad(Function f) transform_chain {
+    neurx.ad.function.transform_chain_grad(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_value_and_grad(Function f) transform_chain {
+    neurx.ad.function.transform_chain_value_and_grad(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_add(Function f) Function {
+    neurx.ad.function.function_add(f)
+}
+
+func function_mul(Function f) Function {
+    neurx.ad.function.function_mul(f)
+}
+
+func function_matmul(Function f) Function {
+    neurx.ad.function.function_matmul(f)
+}
+
+func function_sum(Function f) Function {
+    neurx.ad.function.function_sum(f)
+}
+
+func function_mean(Function f) Function {
+    neurx.ad.function.function_mean(f)
+}
+
+func function_add_op(Function f) Function {
+    neurx.ad.function.add(f)
+}
+
+func function_mul_op(Function f) Function {
+    neurx.ad.function.mul(f)
+}
+
+func function_matmul_op(Function f) Function {
+    neurx.ad.function.matmul(f)
+}
+
+func function_sum_op(Function f) Function {
+    neurx.ad.function.sum(f)
+}
+
+func function_mean_op(Function f) Function {
+    neurx.ad.function.mean(f)
+}
+
+func function_transform_chain_add(Function f) transform_chain {
+    neurx.ad.function.transform_chain_add(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_mul(Function f) transform_chain {
+    neurx.ad.function.transform_chain_mul(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_matmul(Function f) transform_chain {
+    neurx.ad.function.transform_chain_matmul(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_sum(Function f) transform_chain {
+    neurx.ad.function.transform_chain_sum(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_mean(Function f) transform_chain {
+    neurx.ad.function.transform_chain_mean(neurx.ad.function.function_transform_chain(f))
+}
+
+func backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.ad.function.backward_rule_add(a, b, upstream)
+}
+
+func backward_rule_mul(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.ad.function.backward_rule_mul(a, b, upstream)
+}
+
+func backward_rule_matmul(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.ad.function.backward_rule_matmul(a, b, upstream)
+}
+
+func backward_rule_sum(tensor a, tensor upstream) backward_rule {
+    neurx.ad.function.backward_rule_sum(a, upstream)
+}
+
+func backward_rule_mean(tensor a, tensor upstream) backward_rule {
+    neurx.ad.function.backward_rule_mean(a, upstream)
+}
+
+func tensor_backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
+}
+
+func tensor_backward_rule_mul(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_mul(a, b, upstream)
+}
+
+func tensor_backward_rule_matmul(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_matmul(a, b, upstream)
+}
+
+func tensor_backward_rule_sum(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sum(a, upstream)
+}
+
+func tensor_backward_rule_mean(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_mean(a, upstream)
+}
+
+func tensor_transform_chain_add() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_add()
+}
+
+func tensor_transform_chain_mul() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_mul()
+}
+
+func tensor_transform_chain_matmul() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_matmul()
+}
+
+func tensor_transform_chain_sum() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_sum()
+}
+
+func tensor_transform_chain_mean() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_mean()
+}
+
+func function_ready_for_linearize(Function f, linearize_state state) bool {
+    neurx.ad.function.function_ready(f) && linearize_ready(state)
+}
+
+func function_to_linearize_state(Function f, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: jvp_seed_data(value),
+            cotangent: zeros_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: neurx.ad.function.function_ready(f),
+        reverse_mode: neurx.ad.function.function_is_linearized(f),
+        records: records,
+    }
+}
+
+func linearize_state_to_function(linearize_state state, string name, int arity) Function {
+    Function {
+        name: name,
+        forward_enabled: state.forward_mode,
+        backward_enabled: state.reverse_mode,
+        apply_enabled: state.forward_mode && state.reverse_mode,
+        linearized: true,
+        arity: arity,
+        tags: [],
+    }
+}
+
+func function_capture(Function f, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: jvp_seed_data(value),
+            cotangent: zeros_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: neurx.ad.function.function_ready(f),
+        reverse_mode: neurx.ad.function.function_is_linearized(f),
+        records: records,
+    }
+}
+
+func function_jvp_capture(Function f, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: jvp_seed_data(value),
+            cotangent: zeros_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: true,
+        reverse_mode: neurx.ad.function.function_is_linearized(f),
+        records: records,
+    }
+}
+
+func function_vjp_capture(Function f, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: zeros_like(value.data),
+            cotangent: ones_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: neurx.ad.function.function_ready(f),
+        reverse_mode: true,
+        records: records,
+    }
+}
+
+func function_linearize_capture(Function f, tensor value) linearize_state {
+    []dual_record records = []dual_record{cap: 1}
+    records.push(
+        dual_record {
+            id: 0,
+            shape: _copy_int(value.shape),
+            requires_grad: value.requires_grad,
+            primal: _copy_float(value.data),
+            tangent: jvp_seed_data(value),
+            cotangent: ones_like(value.data),
+        }
+    )
+    linearize_state {
+        forward_mode: true,
+        reverse_mode: true,
+        records: records,
+    }
 }
