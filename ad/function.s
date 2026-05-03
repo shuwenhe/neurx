@@ -7,11 +7,15 @@ struct function_record {
     bool apply_enabled
     bool linearized
     int arity
+    []string params
     []string tags
 }
 
 struct transform_chain {
     []string steps
+    []string params
+    []string inputs
+    []string outputs
     bool ready
     bool linearized
 }
@@ -22,7 +26,7 @@ struct backward_rule {
     tensor primal_b
     tensor upstream
     tensor grad_a
-    tensor grad_b10
+    tensor grad_b
     bool ready
 }
 
@@ -44,6 +48,7 @@ func new_function(string name, int arity) function_record {
         apply_enabled: false,
         linearized: false,
         arity: arity,
+        params: [],
         tags: [],
     }
 }
@@ -51,6 +56,9 @@ func new_function(string name, int arity) function_record {
 func new_transform_chain() transform_chain {
     transform_chain {
         steps: [],
+        params: [],
+        inputs: [],
+        outputs: [],
         ready: false,
         linearized: false,
     }
@@ -188,6 +196,10 @@ func transform_chain_step_count(transform_chain chain) int {
     len(chain.steps)
 }
 
+func transform_chain_param_count(transform_chain chain) int {
+    len(chain.params)
+}
+
 func transform_chain_has_step(transform_chain chain, string step) bool {
     int i = 0
     while i < len(chain.steps) {
@@ -212,6 +224,24 @@ func transform_chain_add_step(transform_chain chain, string step) transform_chai
     steps.push(step)
     transform_chain {
         steps: steps,
+        params: _copy_transform_steps(chain.params),
+        inputs: _copy_transform_steps(chain.inputs),
+        outputs: _copy_transform_steps(chain.outputs),
+        ready: chain.ready || len(steps) > 0,
+        linearized: chain.linearized,
+    }
+}
+
+func transform_chain_add_step_with_param(transform_chain chain, string step, string param) transform_chain {
+    []string steps = _copy_transform_steps(chain.steps)
+    []string params = _copy_transform_steps(chain.params)
+    steps.push(step)
+    params.push(param)
+    transform_chain {
+        steps: steps,
+        params: params,
+        inputs: _copy_transform_steps(chain.inputs),
+        outputs: _copy_transform_steps(chain.outputs),
         ready: chain.ready || len(steps) > 0,
         linearized: chain.linearized,
     }
@@ -244,6 +274,9 @@ func transform_chain_mean(transform_chain chain) transform_chain {
 func transform_chain_set_ready(transform_chain chain, bool ready) transform_chain {
     transform_chain {
         steps: _copy_transform_steps(chain.steps),
+        params: _copy_transform_steps(chain.params),
+        inputs: _copy_transform_steps(chain.inputs),
+        outputs: _copy_transform_steps(chain.outputs),
         ready: ready,
         linearized: chain.linearized,
     }
@@ -252,6 +285,9 @@ func transform_chain_set_ready(transform_chain chain, bool ready) transform_chai
 func transform_chain_set_linearized(transform_chain chain, bool linearized) transform_chain {
     transform_chain {
         steps: _copy_transform_steps(chain.steps),
+        params: _copy_transform_steps(chain.params),
+        inputs: _copy_transform_steps(chain.inputs),
+        outputs: _copy_transform_steps(chain.outputs),
         ready: chain.ready,
         linearized: linearized,
     }
@@ -260,6 +296,9 @@ func transform_chain_set_linearized(transform_chain chain, bool linearized) tran
 func transform_chain_state_dict(transform_chain chain) transform_chain {
     transform_chain {
         steps: _copy_transform_steps(chain.steps),
+        params: _copy_transform_steps(chain.params),
+        inputs: _copy_transform_steps(chain.inputs),
+        outputs: _copy_transform_steps(chain.outputs),
         ready: chain.ready,
         linearized: chain.linearized,
     }
@@ -281,10 +320,25 @@ func function_tag_count(function_record f) int {
     len(f.tags)
 }
 
+func function_param_count(function_record f) int {
+    len(f.params)
+}
+
 func function_has_tag(function_record f, string tag) bool {
     int i = 0
     while i < len(f.tags) {
         if f.tags[i] == tag {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+func function_has_param(function_record f, string param) bool {
+    int i = 0
+    while i < len(f.params) {
+        if f.params[i] == param {
             return true
         }
         i = i + 1
@@ -302,7 +356,23 @@ func add_function_tag(function_record f, string tag) function_record {
         apply_enabled: f.apply_enabled,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: tags,
+    }
+}
+
+func add_function_param(function_record f, string param) function_record {
+    []string params = _copy_strings(f.params)
+    params.push(param)
+    function_record {
+        name: f.name,
+        forward_enabled: f.forward_enabled,
+        backward_enabled: f.backward_enabled,
+        apply_enabled: f.apply_enabled,
+        linearized: f.linearized,
+        arity: f.arity,
+        params: params,
+        tags: _copy_strings(f.tags),
     }
 }
 
@@ -314,7 +384,21 @@ func clear_function_tags(function_record f) function_record {
         apply_enabled: f.apply_enabled,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: [],
+    }
+}
+
+func clear_function_params(function_record f) function_record {
+    function_record {
+        name: f.name,
+        forward_enabled: f.forward_enabled,
+        backward_enabled: f.backward_enabled,
+        apply_enabled: f.apply_enabled,
+        linearized: f.linearized,
+        arity: f.arity,
+        params: [],
+        tags: _copy_strings(f.tags),
     }
 }
 
@@ -326,6 +410,7 @@ func enable_forward(function_record f) function_record {
         apply_enabled: f.apply_enabled,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: _copy_strings(f.tags),
     }
 }
@@ -338,6 +423,7 @@ func enable_backward(function_record f) function_record {
         apply_enabled: f.apply_enabled,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: _copy_strings(f.tags),
     }
 }
@@ -350,6 +436,7 @@ func enable_apply(function_record f) function_record {
         apply_enabled: true,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: _copy_strings(f.tags),
     }
 }
@@ -362,6 +449,7 @@ func set_linearized(function_record f, bool linearized) function_record {
         apply_enabled: f.apply_enabled,
         linearized: linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: _copy_strings(f.tags),
     }
 }
@@ -382,6 +470,7 @@ func function_state_dict(function_record f) function_record {
         apply_enabled: f.apply_enabled,
         linearized: f.linearized,
         arity: f.arity,
+        params: _copy_strings(f.params),
         tags: _copy_strings(f.tags),
     }
 }
@@ -393,6 +482,9 @@ func function_load_state_dict(function_record f, function_record other) function
 func function_transform_chain(function_record f) transform_chain {
     transform_chain {
         steps: _copy_strings(f.tags),
+        params: _copy_strings(f.params),
+        inputs: [],
+        outputs: [],
         ready: function_ready(f),
         linearized: function_is_linearized(f),
     }
@@ -406,6 +498,7 @@ func transform_chain_to_function(transform_chain chain, string name, int arity) 
         apply_enabled: chain.ready && chain.linearized,
         linearized: chain.linearized,
         arity: arity,
+        params: _copy_strings(chain.params),
         tags: _copy_transform_steps(chain.steps),
     }
 }
@@ -471,23 +564,23 @@ func transform_chain_value_and_grad(transform_chain chain) transform_chain {
 }
 
 func function_add(function_record f) function_record {
-    add_function_tag(set_linearized(enable_forward(f), true), "add")
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=add"), "add")
 }
 
 func function_mul(function_record f) function_record {
-    add_function_tag(set_linearized(enable_forward(f), true), "mul")
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=mul"), "mul")
 }
 
 func function_matmul(function_record f) function_record {
-    add_function_tag(set_linearized(enable_forward(f), true), "matmul")
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=matmul"), "matmul")
 }
 
 func function_sum(function_record f) function_record {
-    add_function_tag(set_linearized(enable_forward(f), true), "sum")
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=sum"), "sum")
 }
 
 func function_mean(function_record f) function_record {
-    add_function_tag(set_linearized(enable_forward(f), true), "mean")
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=mean"), "mean")
 }
 
 func add(function_record f) function_record {

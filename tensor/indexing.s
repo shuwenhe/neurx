@@ -389,3 +389,92 @@ func stack([]tensor tensors, int dim) tensor {
         }
     }
 }
+
+func pad(tensor a, int before, int after, float value) tensor {
+    int n = len(a.data)
+    if before < 0 {
+        before = 0
+    }
+    if after < 0 {
+        after = 0
+    }
+    int total = before + n + after
+    []float out = []float{cap: total}
+    int i = 0
+    while i < before {
+        out[i] = value
+        i = i + 1
+    }
+    int cursor = before
+    while cursor < before + n {
+        out[cursor] = a.data[cursor - before]
+        cursor = cursor + 1
+    }
+    i = before + n
+    while i < total {
+        out[i] = value
+        i = i + 1
+    }
+    tensor {
+        data: out,
+        shape: {
+            []int shape = []int{cap: 1}
+            shape[0] = total
+            shape
+        },
+        requires_grad: a.requires_grad,
+        grad: none,
+    }
+}
+
+func slice(tensor a, int start, int end) tensor {
+    int n = len(a.data)
+    int s = start
+    int e = end
+    if s < 0 {
+        s = 0
+    }
+    if e > n {
+        e = n
+    }
+    if e < s {
+        e = s
+    }
+    int total = e - s
+    []float out = []float{cap: total}
+    int i = 0
+    while i < total {
+        out[i] = a.data[s + i]
+        i = i + 1
+    }
+    tensor {
+        data: out,
+        shape: {
+            []int shape = []int{cap: 1}
+            shape[0] = total
+            shape
+        },
+        requires_grad: a.requires_grad,
+        grad: none,
+    }
+}
+
+func gather(tensor a, []int indices) tensor {
+    int n = len(indices)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = a.data[indices[i]]
+        i = i + 1
+    }
+    tensor {
+        data: out,
+        shape: {
+            []int shape = []int{cap: 1}
+            shape[0] = n
+            shape
+        },
+        requires_grad: a.requires_grad,
+        grad: none,
+    }
+}

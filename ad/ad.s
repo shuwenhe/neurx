@@ -1,5 +1,7 @@
 package neurx.ad
 
+use neurx.ad.jaxpr
+use neurx.ad.tracer
 use neurx.tensor.tensor
 use neurx.tensor.autograd
 use neurx.engine
@@ -486,6 +488,22 @@ func function_tag_flow(function_record f, string tag) function_record {
     neurx.ad.function.tag_flow(f, tag)
 }
 
+func function_param_count(function_record f) int {
+    neurx.ad.function.function_param_count(f)
+}
+
+func function_has_param(function_record f, string param) bool {
+    neurx.ad.function.function_has_param(f, param)
+}
+
+func add_function_param(function_record f, string param) function_record {
+    neurx.ad.function.add_function_param(f, param)
+}
+
+func clear_function_params(function_record f) function_record {
+    neurx.ad.function.clear_function_params(f)
+}
+
 func function_backward_pass(function_record f) function_record {
     neurx.ad.function.backward_pass(f)
 }
@@ -720,6 +738,7 @@ func linearize_state_to_function(linearize_state state, string name, int arity) 
         apply_enabled: state.forward_mode && state.reverse_mode,
         linearized: true,
         arity: arity,
+        params: [],
         tags: [],
     }
 }
@@ -798,4 +817,244 @@ func function_linearize_capture(function_record f, tensor value) linearize_state
         reverse_mode: true,
         records: records,
     }
+}
+
+func new_tracer_state(string name) tracer_state {
+    neurx.ad.tracer.new_tracer_state(name)
+}
+
+func tracer_name(tracer_state state) string {
+    neurx.ad.tracer.tracer_name(state)
+}
+
+func tracer_active(tracer_state state) bool {
+    neurx.ad.tracer.tracer_active(state)
+}
+
+func tracer_linearized(tracer_state state) bool {
+    neurx.ad.tracer.tracer_linearized(state)
+}
+
+func tracer_op_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_op_count(state)
+}
+
+func tracer_tag_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_tag_count(state)
+}
+
+func tracer_param_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_param_count(state)
+}
+
+func tracer_input_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_input_count(state)
+}
+
+func tracer_output_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_output_count(state)
+}
+
+func tracer_eqn_count(tracer_state state) int {
+    neurx.ad.tracer.tracer_eqn_count(state)
+}
+
+func tracer_has_op(tracer_state state, string op) bool {
+    neurx.ad.tracer.tracer_has_op(state, op)
+}
+
+func tracer_has_input(tracer_state state, string input) bool {
+    neurx.ad.tracer.tracer_has_input(state, input)
+}
+
+func tracer_has_output(tracer_state state, string output) bool {
+    neurx.ad.tracer.tracer_has_output(state, output)
+}
+
+func tracer_has_eqn(tracer_state state, string primitive) bool {
+    neurx.ad.tracer.tracer_has_eqn(state, primitive)
+}
+
+func tracer_has_tag(tracer_state state, string tag) bool {
+    neurx.ad.tracer.tracer_has_tag(state, tag)
+}
+
+func tracer_add_op(tracer_state state, string op) tracer_state {
+    neurx.ad.tracer.tracer_add_op(state, op)
+}
+
+func tracer_add_op_with_param(tracer_state state, string op, string param) tracer_state {
+    neurx.ad.tracer.tracer_add_op_with_param(state, op, param)
+}
+
+func tracer_add_eqn(tracer_state state, string primitive) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn(state, primitive)
+}
+
+func tracer_add_eqn_with_param(tracer_state state, string primitive, string param) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_param(state, primitive, param)
+}
+
+func tracer_add_eqn_with_io(tracer_state state, string primitive, []string params, []string inputs, []string outputs) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, primitive, params, inputs, outputs)
+}
+
+func tracer_add_input(tracer_state state, string input) tracer_state {
+    neurx.ad.tracer.tracer_add_input(state, input)
+}
+
+func tracer_add_output(tracer_state state, string output) tracer_state {
+    neurx.ad.tracer.tracer_add_output(state, output)
+}
+
+func tracer_add_tag(tracer_state state, string tag) tracer_state {
+    neurx.ad.tracer.tracer_add_tag(state, tag)
+}
+
+func tracer_clear_tags(tracer_state state) tracer_state {
+    neurx.ad.tracer.tracer_clear_tags(state)
+}
+
+func tracer_clear_inputs(tracer_state state) tracer_state {
+    neurx.ad.tracer.tracer_clear_inputs(state)
+}
+
+func tracer_clear_outputs(tracer_state state) tracer_state {
+    neurx.ad.tracer.tracer_clear_outputs(state)
+}
+
+func tracer_clear_eqns(tracer_state state) tracer_state {
+    neurx.ad.tracer.tracer_clear_eqns(state)
+}
+
+func tracer_set_active(tracer_state state, bool active) tracer_state {
+    neurx.ad.tracer.tracer_set_active(state, active)
+}
+
+func tracer_set_linearized(tracer_state state, bool linearized) tracer_state {
+    neurx.ad.tracer.tracer_set_linearized(state, linearized)
+}
+
+func tracer_state_dict(tracer_state state) tracer_state {
+    neurx.ad.tracer.tracer_state_dict(state)
+}
+
+func tracer_load_state_dict(tracer_state state, tracer_state other) tracer_state {
+    neurx.ad.tracer.tracer_load_state_dict(state, other)
+}
+
+func tracer_capture(tracer_state state, string op) tracer_state {
+    neurx.ad.tracer.tracer_capture(state, op)
+}
+
+func tracer_capture_with_param(tracer_state state, string op, string param) tracer_state {
+    neurx.ad.tracer.tracer_capture_with_param(state, op, param)
+}
+
+func tracer_capture_with_io(tracer_state state, string op, []string params, []string inputs, []string outputs) tracer_state {
+    neurx.ad.tracer.tracer_capture_with_io(state, op, params, inputs, outputs)
+}
+
+func tracer_to_transform_chain(tracer_state state) transform_chain {
+    neurx.ad.tracer.tracer_to_transform_chain(state)
+}
+
+func transform_chain_to_tracer(transform_chain chain, string name) tracer_state {
+    neurx.ad.tracer.transform_chain_to_tracer(chain, name)
+}
+
+func new_jaxpr_graph(string name) jaxpr_graph {
+    neurx.ad.jaxpr.new_jaxpr_graph(name)
+}
+
+func jaxpr_name(jaxpr_graph graph) string {
+    neurx.ad.jaxpr.jaxpr_name(graph)
+}
+
+func jaxpr_eqn_count(jaxpr_graph graph) int {
+    neurx.ad.jaxpr.jaxpr_eqn_count(graph)
+}
+
+func jaxpr_primitive_count(jaxpr_graph graph) int {
+    neurx.ad.jaxpr.jaxpr_primitive_count(graph)
+}
+
+func jaxpr_param_count(jaxpr_graph graph) int {
+    neurx.ad.jaxpr.jaxpr_param_count(graph)
+}
+
+func jaxpr_input_count(jaxpr_graph graph) int {
+    neurx.ad.jaxpr.jaxpr_input_count(graph)
+}
+
+func jaxpr_output_count(jaxpr_graph graph) int {
+    neurx.ad.jaxpr.jaxpr_output_count(graph)
+}
+
+func jaxpr_has_primitive(jaxpr_graph graph, string primitive) bool {
+    neurx.ad.jaxpr.jaxpr_has_primitive(graph, primitive)
+}
+
+func jaxpr_ready(jaxpr_graph graph) bool {
+    neurx.ad.jaxpr.jaxpr_ready(graph)
+}
+
+func jaxpr_is_linearized(jaxpr_graph graph) bool {
+    neurx.ad.jaxpr.jaxpr_is_linearized(graph)
+}
+
+func jaxpr_add_eqn(jaxpr_graph graph, string primitive) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_add_eqn(graph, primitive)
+}
+
+func jaxpr_add_eqn_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_add_eqn_with_params(graph, primitive, params)
+}
+
+func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_add_eqn_with_io(graph, primitive, params, inputs, outputs)
+}
+
+func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_add_input(graph, input)
+}
+
+func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_add_output(graph, output)
+}
+
+func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_state_dict(graph)
+}
+
+func jaxpr_load_state_dict(jaxpr_graph graph, jaxpr_graph other) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_load_state_dict(graph, other)
+}
+
+func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_from_tracer(state, name)
+}
+
+func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
+    neurx.ad.jaxpr.jaxpr_to_tracer(graph)
+}
+
+func jaxpr_capture(jaxpr_graph graph, string primitive) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_capture(graph, primitive)
+}
+
+func jaxpr_capture_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_capture_with_params(graph, primitive, params)
+}
+
+func jaxpr_capture_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_capture_with_io(graph, primitive, params, inputs, outputs)
+}
+
+func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
+    neurx.ad.jaxpr.jaxpr_to_transform_chain(graph)
+}
+
+func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
+    neurx.ad.jaxpr.transform_chain_to_jaxpr(chain, name)
 }

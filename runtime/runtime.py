@@ -307,7 +307,353 @@ def _tensor_transform_chain_from_op(op: str) -> dict[str, Any]:
     return {"steps": [op], "ready": True, "linearized": True}
 
 
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value]
+    return []
+
+
+def _tracer_like(value: Any) -> tuple[str, bool, bool, int, list[str], list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            bool(value.get("active", False)),
+            bool(value.get("linearized", False)),
+            int(value.get("op_count", len(value.get("ops", [])))),
+            _string_list(value.get("ops", [])),
+            _string_list(value.get("params", [])),
+            _string_list(value.get("tags", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        bool(getattr(value, "active", False)),
+        bool(getattr(value, "linearized", False)),
+        int(getattr(value, "op_count", len(getattr(value, "ops", [])))),
+        _string_list(getattr(value, "ops", [])),
+        _string_list(getattr(value, "params", [])),
+        _string_list(getattr(value, "tags", [])),
+    )
+
+
+def _tracer_inputs_outputs(value: Any) -> tuple[list[str], list[str]]:
+    if isinstance(value, dict):
+        return _string_list(value.get("inputs", [])), _string_list(value.get("outputs", []))
+    return _string_list(getattr(value, "inputs", [])), _string_list(getattr(value, "outputs", []))
+
+
+def _tracer_eqns(value: Any) -> list[dict[str, Any]]:
+    if isinstance(value, dict):
+        return [
+            {
+                "primitive": str(eqn.get("primitive", "")),
+                "params": _string_list(eqn.get("params", [])),
+                "inputs": _string_list(eqn.get("inputs", [])),
+                "outputs": _string_list(eqn.get("outputs", [])),
+            }
+            for eqn in value.get("eqns", [])
+        ]
+    return [
+        {
+            "primitive": str(getattr(eqn, "primitive", "")),
+            "params": _string_list(getattr(eqn, "params", [])),
+            "inputs": _string_list(getattr(eqn, "inputs", [])),
+            "outputs": _string_list(getattr(eqn, "outputs", [])),
+        }
+        for eqn in getattr(value, "eqns", [])
+    ]
+
+
+def _tracer_dict(name: str, active: bool, linearized: bool, op_count: int, ops: list[str], params: list[str], tags: list[str], inputs: list[str] | None = None, outputs: list[str] | None = None, eqns: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    return {
+        "name": name,
+        "active": bool(active),
+        "linearized": bool(linearized),
+        "op_count": int(op_count),
+        "ops": list(ops),
+        "params": list(params),
+        "inputs": list(inputs or []),
+        "outputs": list(outputs or []),
+        "eqns": list(eqns or []),
+        "tags": list(tags),
+    }
+
+
+def _function_like(value: Any) -> tuple[str, bool, bool, bool, bool, int, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            bool(value.get("forward_enabled", False)),
+            bool(value.get("backward_enabled", False)),
+            bool(value.get("apply_enabled", False)),
+            bool(value.get("linearized", False)),
+            int(value.get("arity", 0)),
+            _string_list(value.get("params", [])),
+            _string_list(value.get("tags", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        bool(getattr(value, "forward_enabled", False)),
+        bool(getattr(value, "backward_enabled", False)),
+        bool(getattr(value, "apply_enabled", False)),
+        bool(getattr(value, "linearized", False)),
+        int(getattr(value, "arity", 0)),
+        _string_list(getattr(value, "params", [])),
+        _string_list(getattr(value, "tags", [])),
+    )
+
+
+def _function_dict(name: str, forward_enabled: bool, backward_enabled: bool, apply_enabled: bool, linearized: bool, arity: int, params: list[str], tags: list[str]) -> dict[str, Any]:
+    return {
+        "name": name,
+        "forward_enabled": bool(forward_enabled),
+        "backward_enabled": bool(backward_enabled),
+        "apply_enabled": bool(apply_enabled),
+        "linearized": bool(linearized),
+        "arity": int(arity),
+        "params": list(params),
+        "tags": list(tags),
+    }
+
+
+def _jaxpr_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], list[str], bool, bool]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            int(value.get("eqn_count", len(value.get("primitives", [])))),
+            _string_list(value.get("primitives", [])),
+            _string_list(value.get("params", [])),
+            _string_list(value.get("inputs", [])),
+            _string_list(value.get("outputs", [])),
+            bool(value.get("ready", False)),
+            bool(value.get("linearized", False)),
+        )
+    return (
+        str(getattr(value, "name")),
+        int(getattr(value, "eqn_count", len(getattr(value, "primitives", [])))),
+        _string_list(getattr(value, "primitives", [])),
+        _string_list(getattr(value, "params", [])),
+        _string_list(getattr(value, "inputs", [])),
+        _string_list(getattr(value, "outputs", [])),
+        bool(getattr(value, "ready", False)),
+        bool(getattr(value, "linearized", False)),
+    )
+
+
+def _jaxpr_eqns(value: Any) -> list[dict[str, Any]]:
+    if isinstance(value, dict):
+        return [
+            {
+                "primitive": str(eqn.get("primitive", "")),
+                "params": _string_list(eqn.get("params", [])),
+                "inputs": _string_list(eqn.get("inputs", [])),
+                "outputs": _string_list(eqn.get("outputs", [])),
+            }
+            for eqn in value.get("eqns", [])
+        ]
+    return [
+        {
+            "primitive": str(getattr(eqn, "primitive", "")),
+            "params": _string_list(getattr(eqn, "params", [])),
+            "inputs": _string_list(getattr(eqn, "inputs", [])),
+            "outputs": _string_list(getattr(eqn, "outputs", [])),
+        }
+        for eqn in getattr(value, "eqns", [])
+    ]
+
+
+def _jaxpr_dict(name: str, eqn_count: int, primitives: list[str], params: list[str], inputs: list[str], outputs: list[str], ready: bool, linearized: bool, eqns: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    return {
+        "name": name,
+        "eqn_count": int(eqn_count),
+        "primitives": list(primitives),
+        "params": list(params),
+        "inputs": list(inputs),
+        "outputs": list(outputs),
+        "eqns": list(eqns or []),
+        "ready": bool(ready),
+        "linearized": bool(linearized),
+    }
+
+
 def _invoke_special_module_function(module_name: str, function_name: str, args: tuple[Any, ...]) -> Any:
+    if module_name == "ad":
+        if function_name in {
+            "new_tracer_state",
+            "tracer_name",
+            "tracer_active",
+            "tracer_linearized",
+            "tracer_op_count",
+            "tracer_tag_count",
+            "tracer_input_count",
+            "tracer_output_count",
+            "tracer_eqn_count",
+            "tracer_has_op",
+            "tracer_has_input",
+            "tracer_has_output",
+            "tracer_has_eqn",
+            "tracer_has_tag",
+            "tracer_add_op",
+            "tracer_add_eqn",
+            "tracer_add_eqn_with_param",
+            "tracer_add_eqn_with_io",
+            "tracer_add_tag",
+            "tracer_clear_tags",
+            "tracer_add_input",
+            "tracer_add_output",
+            "tracer_clear_inputs",
+            "tracer_clear_outputs",
+            "tracer_clear_eqns",
+            "tracer_set_active",
+            "tracer_set_linearized",
+            "tracer_state_dict",
+            "tracer_load_state_dict",
+            "tracer_capture",
+            "tracer_capture_with_io",
+            "tracer_to_transform_chain",
+            "transform_chain_to_tracer",
+        }:
+            return invoke_runtime_function("ad/tracer", function_name, *args)
+        if function_name in {
+            "new_jaxpr_graph",
+            "jaxpr_name",
+            "jaxpr_eqn_count",
+            "jaxpr_primitive_count",
+            "jaxpr_input_count",
+            "jaxpr_output_count",
+            "jaxpr_has_primitive",
+            "jaxpr_ready",
+            "jaxpr_is_linearized",
+            "jaxpr_add_eqn",
+            "jaxpr_add_eqn_with_params",
+            "jaxpr_add_eqn_with_io",
+            "jaxpr_add_input",
+            "jaxpr_add_output",
+            "jaxpr_state_dict",
+            "jaxpr_load_state_dict",
+            "jaxpr_from_tracer",
+            "jaxpr_to_tracer",
+            "jaxpr_capture",
+            "jaxpr_capture_with_params",
+            "jaxpr_capture_with_io",
+            "jaxpr_to_transform_chain",
+            "transform_chain_to_jaxpr",
+        }:
+            return invoke_runtime_function("ad/jaxpr", function_name, *args)
+    if module_name == "function":
+        if function_name == "new_function":
+            return _function_dict(str(args[0]), False, False, False, False, int(args[1]), [], [])
+        if function_name == "function_name":
+            name, _, _, _, _, _, _, _ = _function_like(args[0])
+            return name
+        if function_name == "function_arity":
+            _, _, _, _, _, arity, _, _ = _function_like(args[0])
+            return arity
+        if function_name == "function_tag_count":
+            _, _, _, _, _, _, _, tags = _function_like(args[0])
+            return len(tags)
+        if function_name == "function_param_count":
+            _, _, _, _, _, _, params, _ = _function_like(args[0])
+            return len(params)
+        if function_name == "function_has_tag":
+            _, _, _, _, _, _, _, tags = _function_like(args[0])
+            return str(args[1]) in tags
+        if function_name == "function_has_param":
+            _, _, _, _, _, _, params, _ = _function_like(args[0])
+            return str(args[1]) in params
+        if function_name == "add_function_tag":
+            name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            tags = list(tags)
+            tags.append(str(args[1]))
+            return _function_dict(name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags)
+        if function_name == "add_function_param":
+            name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            params = list(params)
+            params.append(str(args[1]))
+            return _function_dict(name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags)
+        if function_name == "clear_function_tags":
+            name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, _ = _function_like(args[0])
+            return _function_dict(name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, [])
+        if function_name == "clear_function_params":
+            name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, _, tags = _function_like(args[0])
+            return _function_dict(name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, [], tags)
+        if function_name == "enable_forward":
+            name, _, backward_enabled, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            return _function_dict(name, True, backward_enabled, apply_enabled, linearized, arity, params, tags)
+        if function_name == "enable_backward":
+            name, forward_enabled, _, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            return _function_dict(name, forward_enabled, True, apply_enabled, linearized, arity, params, tags)
+        if function_name == "enable_apply":
+            name, forward_enabled, backward_enabled, _, linearized, arity, params, tags = _function_like(args[0])
+            return _function_dict(name, forward_enabled, backward_enabled, True, linearized, arity, params, tags)
+        if function_name == "set_linearized":
+            name, forward_enabled, backward_enabled, apply_enabled, _, arity, params, tags = _function_like(args[0])
+            return _function_dict(name, forward_enabled, backward_enabled, apply_enabled, bool(args[1]), arity, params, tags)
+        if function_name == "function_ready":
+            _, forward_enabled, backward_enabled, apply_enabled, _, _, _, _ = _function_like(args[0])
+            return forward_enabled and backward_enabled and apply_enabled
+        if function_name == "function_is_linearized":
+            _, _, _, _, linearized, _, _, _ = _function_like(args[0])
+            return linearized
+        if function_name == "function_state_dict":
+            return _function_dict(*_function_like(args[0]))
+        if function_name == "function_load_state_dict":
+            return args[1]
+        if function_name == "function_transform_chain":
+            name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            return {
+                "steps": list(tags),
+                "params": list(params),
+                "inputs": [],
+                "outputs": [],
+                "ready": bool(forward_enabled and backward_enabled and apply_enabled),
+                "linearized": bool(linearized),
+            }
+        if function_name == "transform_chain_to_function":
+            chain = args[0]
+            name = str(args[1])
+            arity = int(args[2])
+            steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
+            linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
+            return _function_dict(name, ready, ready or linearized, ready and linearized, linearized, arity, params, steps)
+        if function_name == "tag_flow":
+            return _invoke_special_module_function(module_name, "add_function_tag", args)
+        if function_name == "backward_pass":
+            return _invoke_special_module_function(module_name, "add_function_tag", ( _invoke_special_module_function(module_name, "set_linearized", ( _invoke_special_module_function(module_name, "enable_backward", args), True)), "backward_pass"))
+        if function_name == "backward_pass_state":
+            return _invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_backward", args), True))
+        if function_name == "forward":
+            return _invoke_special_module_function(module_name, "enable_forward", args)
+        if function_name == "backward":
+            return _invoke_special_module_function(module_name, "enable_backward", args)
+        if function_name == "apply":
+            return _invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_apply", (_invoke_special_module_function(module_name, "enable_backward", (_invoke_special_module_function(module_name, "enable_forward", args),)), True)), True))
+        if function_name == "linearize":
+            return _invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_backward", (_invoke_special_module_function(module_name, "enable_forward", args),)), True))
+        if function_name == "jvp":
+            return _invoke_special_module_function(module_name, "add_function_tag", (_invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_forward", args), True)), "jvp"))
+        if function_name == "vjp":
+            return _invoke_special_module_function(module_name, "add_function_tag", (_invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_backward", args), True)), "vjp"))
+        if function_name == "grad":
+            return _invoke_special_module_function(module_name, "add_function_tag", (_invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_backward", (_invoke_special_module_function(module_name, "enable_forward", args),)), True)), "grad"))
+        if function_name == "value_and_grad":
+            return _invoke_special_module_function(module_name, "add_function_tag", (_invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_backward", (_invoke_special_module_function(module_name, "enable_forward", args),)), True)), "value_and_grad"))
+        if function_name in {"function_add", "function_mul", "function_matmul", "function_sum", "function_mean"}:
+            fn = _invoke_special_module_function(module_name, "set_linearized", (_invoke_special_module_function(module_name, "enable_forward", args), True))
+            op = function_name.removeprefix("function_")
+            fn = _invoke_special_module_function(module_name, "add_function_param", (fn, f"op={op}"))
+            return _invoke_special_module_function(module_name, "add_function_tag", (fn, op))
+        if function_name in {"add", "mul", "matmul", "sum", "mean"}:
+            return _invoke_special_module_function(module_name, f"function_{function_name}", args)
+        if function_name in {"function_transform_chain_jvp", "function_transform_chain_vjp", "function_transform_chain_grad", "function_transform_chain_value_and_grad"}:
+            chain = _invoke_special_module_function(module_name, "function_transform_chain", args)
+            suffix = function_name.removeprefix("function_transform_chain_")
+            return _invoke_special_module_function(module_name, f"transform_chain_{suffix}", (chain,))
+        if function_name in {"function_transform_chain_add", "function_transform_chain_mul", "function_transform_chain_matmul", "function_transform_chain_sum", "function_transform_chain_mean"}:
+            chain = _invoke_special_module_function(module_name, "function_transform_chain", args)
+            suffix = function_name.removeprefix("function_transform_chain_")
+            return _invoke_special_module_function(module_name, f"transform_chain_{suffix}", (chain,))
     if module_name == "tensor":
         if function_name == "tensor_backward_add_grad_a":
             grad_a, _, _ = _tensor_like(args[0])
@@ -402,6 +748,443 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 expanded = np.expand_dims(expanded, axis=axis)
             denom = float(shape_a[axis]) if shape_a else 1.0
             return _tensor_dict(np.broadcast_to(expanded, shape_a) / denom, shape_a, False)
+        if function_name == "negative":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            return _tensor_dict(np.negative(data_a), shape_a, req_a)
+        if function_name == "abs":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            return _tensor_dict(np.abs(data_a), shape_a, req_a)
+        if function_name == "square":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            return _tensor_dict(np.square(data_a), shape_a, req_a)
+        if function_name == "reciprocal":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            return _tensor_dict(np.reciprocal(data_a), shape_a, req_a)
+        if function_name == "maximum":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            data_b, shape_b, req_b = _tensor_like(args[1])
+            return _tensor_dict(np.maximum(data_a, data_b), list(np.broadcast_shapes(tuple(shape_a), tuple(shape_b))), req_a or req_b)
+        if function_name == "minimum":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            data_b, shape_b, req_b = _tensor_like(args[1])
+            return _tensor_dict(np.minimum(data_a, data_b), list(np.broadcast_shapes(tuple(shape_a), tuple(shape_b))), req_a or req_b)
+        if function_name == "broadcast_to":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            target_shape = [int(dim) for dim in args[1]]
+            return _tensor_dict(np.broadcast_to(data_a, target_shape), target_shape, req_a)
+        if function_name == "concatenate":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            data_b, shape_b, req_b = _tensor_like(args[1])
+            dim = int(args[2])
+            axis = dim if dim >= 0 else dim + len(shape_a)
+            shape_out = list(shape_a)
+            shape_out[axis] = shape_out[axis] + shape_b[axis]
+            return _tensor_dict(np.concatenate([data_a, data_b], axis=axis), shape_out, req_a or req_b)
+        if function_name == "stack":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            data_b, shape_b, req_b = _tensor_like(args[1])
+            dim = int(args[2])
+            axis = dim if dim >= 0 else dim + len(shape_a) + 1
+            stacked = np.stack([data_a, data_b], axis=axis)
+            return _tensor_dict(stacked, list(stacked.shape), req_a or req_b)
+        if function_name in {
+            "trace_op",
+            "trace_op_with_param",
+            "trace_add",
+            "trace_mul",
+            "trace_matmul",
+            "trace_sum",
+            "trace_mean",
+            "trace_sum_dim",
+            "trace_mean_dim",
+            "trace_broadcast_to",
+            "trace_concatenate",
+            "trace_stack",
+            "trace_to_transform_chain",
+            "trace_to_jaxpr",
+        }:
+            if function_name == "trace_op":
+                state = args[0]
+                op = str(args[1])
+                param = ""
+                inputs = []
+                outputs = []
+                eqns = [{"primitive": op, "params": [], "inputs": [], "outputs": []}]
+            elif function_name == "trace_op_with_param":
+                state = args[0]
+                op = str(args[1])
+                param = str(args[2])
+                inputs = []
+                outputs = []
+                eqns = [{"primitive": op, "params": [param], "inputs": [], "outputs": []}]
+            elif function_name == "trace_add":
+                state = args[0]
+                op = "add"
+                param = ""
+                inputs = ["arg0", "arg1"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_mul":
+                state = args[0]
+                op = "mul"
+                param = ""
+                inputs = ["arg0", "arg1"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_matmul":
+                state = args[0]
+                op = "matmul"
+                param = ""
+                inputs = ["arg0", "arg1"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_sum":
+                state = args[0]
+                op = "sum"
+                param = ""
+                inputs = ["arg0"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_mean":
+                state = args[0]
+                op = "mean"
+                param = ""
+                inputs = ["arg0"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_sum_dim":
+                state = args[0]
+                op = "sum_dim"
+                param = f"dim={int(args[2])};keepdim={bool(args[3])}"
+                inputs = ["arg0"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [param], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_mean_dim":
+                state = args[0]
+                op = "mean_dim"
+                param = f"dim={int(args[2])};keepdim={bool(args[3])}"
+                inputs = ["arg0"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [param], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_broadcast_to":
+                state = args[0]
+                op = "broadcast_to"
+                param = f"shape={list(args[2])}"
+                inputs = ["arg0"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [param], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_concatenate":
+                state = args[0]
+                op = "concatenate"
+                param = f"dim={int(args[3])}"
+                inputs = ["arg0", "arg1"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [param], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_stack":
+                state = args[0]
+                op = "stack"
+                param = f"dim={int(args[3])}"
+                inputs = ["arg0", "arg1"]
+                outputs = ["out0"]
+                eqns = [{"primitive": op, "params": [param], "inputs": inputs, "outputs": outputs}]
+            elif function_name == "trace_to_transform_chain":
+                state = args[0]
+                name, active, linearized, op_count, ops, params, tags = _tracer_like(state)
+                inputs, outputs = _tracer_inputs_outputs(state)
+                return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
+            else:
+                state = args[0]
+                return invoke_runtime_function("ad/jaxpr", "jaxpr_from_tracer", state, str(args[1]))
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(state)
+            tracer_inputs, tracer_outputs = _tracer_inputs_outputs(state)
+            ops = list(ops)
+            params = list(params)
+            ops.append(op)
+            params.append(param)
+            tracer_inputs = list(tracer_inputs)
+            tracer_outputs = list(tracer_outputs)
+            tracer_inputs.extend(inputs)
+            tracer_outputs.extend(outputs)
+            existing_eqns = _tracer_eqns(state)
+            existing_eqns = list(existing_eqns)
+            existing_eqns.extend(eqns)
+            return _tracer_dict(name, True, linearized, len(ops), ops, params, tags, tracer_inputs, tracer_outputs, existing_eqns)
+    if module_name == "ad/tracer":
+        if function_name == "new_tracer_state":
+            return _tracer_dict(str(args[0]), False, False, 0, [], [], [], [], [])
+        if function_name == "tracer_name":
+            name, _, _, _, _, _, _ = _tracer_like(args[0])
+            return name
+        if function_name == "tracer_active":
+            _, active, _, _, _, _, _ = _tracer_like(args[0])
+            return active
+        if function_name == "tracer_linearized":
+            _, _, linearized, _, _, _, _ = _tracer_like(args[0])
+            return linearized
+        if function_name == "tracer_op_count":
+            _, _, _, op_count, _, _, _ = _tracer_like(args[0])
+            return op_count
+        if function_name == "tracer_tag_count":
+            _, _, _, _, _, _, tags = _tracer_like(args[0])
+            return len(tags)
+        if function_name == "tracer_param_count":
+            _, _, _, _, _, params, _ = _tracer_like(args[0])
+            return len(params)
+        if function_name == "tracer_input_count":
+            _, _, _, _, _, inputs, _, _ = _tracer_like(args[0])
+            return len(inputs)
+        if function_name == "tracer_output_count":
+            _, _, _, _, _, _, outputs, _ = _tracer_like(args[0])
+            return len(outputs)
+        if function_name == "tracer_eqn_count":
+            return len(_tracer_eqns(args[0]))
+        if function_name == "tracer_has_op":
+            _, _, _, _, ops, _, _ = _tracer_like(args[0])
+            return str(args[1]) in ops
+        if function_name == "tracer_has_input":
+            _, _, _, _, _, inputs, _, _ = _tracer_like(args[0])
+            return str(args[1]) in inputs
+        if function_name == "tracer_has_output":
+            _, _, _, _, _, _, outputs, _ = _tracer_like(args[0])
+            return str(args[1]) in outputs
+        if function_name == "tracer_has_eqn":
+            return any(eqn["primitive"] == str(args[1]) for eqn in _tracer_eqns(args[0]))
+        if function_name == "tracer_has_param":
+            _, _, _, _, _, params, _ = _tracer_like(args[0])
+            return str(args[1]) in params
+        if function_name == "tracer_has_tag":
+            _, _, _, _, _, _, tags = _tracer_like(args[0])
+            return str(args[1]) in tags
+        if function_name == "tracer_add_op":
+            name, active, linearized, _, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            ops = list(ops)
+            ops.append(str(args[1]))
+            eqns = list(eqns)
+            eqns.append({"primitive": str(args[1]), "params": [], "inputs": [], "outputs": []})
+            return _tracer_dict(name, True, linearized, len(ops), ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_add_op_with_param":
+            name, active, linearized, _, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            ops = list(ops)
+            params = list(params)
+            ops.append(str(args[1]))
+            params.append(str(args[2]))
+            eqns = _tracer_eqns(args[0])
+            eqns = list(eqns)
+            eqns.append({"primitive": str(args[1]), "params": [str(args[2])], "inputs": [], "outputs": []})
+            return _tracer_dict(name, True, linearized, len(ops), ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_add_eqn":
+            return _invoke_special_module_function(module_name, "tracer_add_eqn_with_io", (args[0], args[1], [], [], []))
+        if function_name == "tracer_add_eqn_with_param":
+            return _invoke_special_module_function(module_name, "tracer_add_eqn_with_io", (args[0], args[1], [str(args[2])], [], []))
+        if function_name == "tracer_add_eqn_with_io":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            primitive = str(args[1])
+            eqn_params = _string_list(args[2]) if len(args) > 2 else []
+            eqn_inputs = _string_list(args[3]) if len(args) > 3 else []
+            eqn_outputs = _string_list(args[4]) if len(args) > 4 else []
+            ops = list(ops)
+            params = list(params)
+            eqns = list(eqns)
+            ops.append(primitive)
+            params.append(",".join(eqn_params))
+            inputs = list(inputs) + list(eqn_inputs)
+            outputs = list(outputs) + list(eqn_outputs)
+            eqns.append({"primitive": primitive, "params": list(eqn_params), "inputs": list(eqn_inputs), "outputs": list(eqn_outputs)})
+            return _tracer_dict(name, True, linearized, len(ops), ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_add_input":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            inputs = list(inputs)
+            inputs.append(str(args[1]))
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_add_output":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            outputs = list(outputs)
+            outputs.append(str(args[1]))
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_add_tag":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            tags = list(tags)
+            tags.append(str(args[1]))
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_clear_tags":
+            name, active, linearized, op_count, ops, params, _ = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, params, [], inputs, outputs, eqns)
+        if function_name == "tracer_clear_inputs":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            _, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, [], outputs, eqns)
+        if function_name == "tracer_clear_outputs":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, _ = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, [], eqns)
+        if function_name == "tracer_clear_eqns":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, outputs, [])
+        if function_name == "tracer_clear_params":
+            name, active, linearized, op_count, ops, _, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, [], tags, inputs, outputs, eqns)
+        if function_name == "tracer_set_active":
+            name, _, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, bool(args[1]), linearized, op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_set_linearized":
+            name, active, _, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, bool(args[1]), op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_state_dict":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            eqns = _tracer_eqns(args[0])
+            return _tracer_dict(name, active, linearized, op_count, ops, params, tags, inputs, outputs, eqns)
+        if function_name == "tracer_load_state_dict":
+            return args[1]
+        if function_name == "tracer_capture":
+            return _invoke_special_module_function(module_name, "tracer_add_op", args)
+        if function_name == "tracer_capture_with_param":
+            return _invoke_special_module_function(module_name, "tracer_add_op_with_param", args)
+        if function_name == "tracer_capture_with_io":
+            return _invoke_special_module_function(module_name, "tracer_add_eqn_with_io", args)
+        if function_name == "tracer_to_transform_chain":
+            name, active, linearized, op_count, ops, params, tags = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
+        if function_name == "transform_chain_to_tracer":
+            chain = args[0]
+            name = str(args[1])
+            steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            inputs = _string_list(chain.get("inputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "inputs", []))
+            outputs = _string_list(chain.get("outputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "outputs", []))
+            ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
+            linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
+            eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
+            return _tracer_dict(name, ready, linearized, len(steps), steps, params, [], inputs, outputs, eqns)
+    if module_name == "ad/jaxpr":
+        if function_name == "new_jaxpr_graph":
+            return _jaxpr_dict(str(args[0]), 0, [], [], [], [], False, False, [])
+        if function_name == "jaxpr_name":
+            name, _, _, _, _, _, _, _ = _jaxpr_like(args[0])
+            return name
+        if function_name == "jaxpr_eqn_count":
+            _, eqn_count, _, _, _, _, _, _ = _jaxpr_like(args[0])
+            return eqn_count
+        if function_name == "jaxpr_primitive_count":
+            _, _, primitives, _, _, _, _, _ = _jaxpr_like(args[0])
+            return len(primitives)
+        if function_name == "jaxpr_param_count":
+            _, _, _, params, _, _, _, _ = _jaxpr_like(args[0])
+            return len(params)
+        if function_name == "jaxpr_input_count":
+            _, _, _, _, inputs, _, _, _ = _jaxpr_like(args[0])
+            return len(inputs)
+        if function_name == "jaxpr_output_count":
+            _, _, _, _, _, outputs, _, _ = _jaxpr_like(args[0])
+            return len(outputs)
+        if function_name == "jaxpr_has_primitive":
+            _, _, primitives, _, _, _, _, _ = _jaxpr_like(args[0])
+            return str(args[1]) in primitives
+        if function_name == "jaxpr_ready":
+            _, _, _, _, _, _, ready, _ = _jaxpr_like(args[0])
+            return ready
+        if function_name == "jaxpr_is_linearized":
+            _, _, _, _, _, _, _, linearized = _jaxpr_like(args[0])
+            return linearized
+        if function_name == "jaxpr_add_eqn":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            primitives = list(primitives)
+            primitives.append(str(args[1]))
+            params = list(params)
+            params.append("")
+            eqns = _jaxpr_eqns(args[0])
+            eqns = list(eqns)
+            eqns.append({"primitive": str(args[1]), "params": [], "inputs": [], "outputs": []})
+            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "jaxpr_add_eqn_with_params":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            primitives = list(primitives)
+            params = list(params)
+            primitives.append(str(args[1]))
+            params.append(",".join(str(item) for item in args[2]))
+            eqns = _jaxpr_eqns(args[0])
+            eqns = list(eqns)
+            eqns.append({"primitive": str(args[1]), "params": _string_list(args[2]), "inputs": [], "outputs": []})
+            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "jaxpr_add_eqn_with_io":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            primitives = list(primitives)
+            params = list(params)
+            primitives.append(str(args[1]))
+            param_list = _string_list(args[2]) if len(args) > 2 else []
+            params.append(",".join(param_list))
+            eqns = _jaxpr_eqns(args[0])
+            eqns = list(eqns)
+            eqns.append({
+                "primitive": str(args[1]),
+                "params": list(param_list),
+                "inputs": _string_list(args[3]) if len(args) > 3 else [],
+                "outputs": _string_list(args[4]) if len(args) > 4 else [],
+            })
+            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "jaxpr_add_input":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            inputs = list(inputs)
+            inputs.append(str(args[1]))
+            return _jaxpr_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _jaxpr_eqns(args[0]))
+        if function_name == "jaxpr_add_output":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            outputs = list(outputs)
+            outputs.append(str(args[1]))
+            return _jaxpr_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _jaxpr_eqns(args[0]))
+        if function_name == "jaxpr_state_dict":
+            return _jaxpr_dict(*_jaxpr_like(args[0]), _jaxpr_eqns(args[0]))
+        if function_name == "jaxpr_load_state_dict":
+            return args[1]
+        if function_name == "jaxpr_from_tracer":
+            _, active, linearized, op_count, ops, params, _ = _tracer_like(args[0])
+            inputs, outputs = _tracer_inputs_outputs(args[0])
+            return _jaxpr_dict(str(args[1]), op_count, list(ops), list(params), list(inputs), list(outputs), active or op_count > 0, linearized, _tracer_eqns(args[0]))
+        if function_name == "jaxpr_to_tracer":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return _tracer_dict(name, ready, linearized, eqn_count, list(primitives), list(params), [], list(inputs), list(outputs), _jaxpr_eqns(args[0]))
+        if function_name == "jaxpr_capture":
+            return _invoke_special_module_function(module_name, "jaxpr_add_eqn", args)
+        if function_name == "jaxpr_capture_with_params":
+            return _invoke_special_module_function(module_name, "jaxpr_add_eqn_with_params", args)
+        if function_name == "jaxpr_capture_with_io":
+            return _invoke_special_module_function(module_name, "jaxpr_add_eqn_with_io", args)
+        if function_name == "jaxpr_to_transform_chain":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return {"steps": list(primitives), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "ready": bool(ready or eqn_count > 0), "linearized": bool(linearized)}
+        if function_name == "transform_chain_to_jaxpr":
+            chain = args[0]
+            steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            inputs = _string_list(chain.get("inputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "inputs", []))
+            outputs = _string_list(chain.get("outputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "outputs", []))
+            ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
+            linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
+            eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
+            return _jaxpr_dict(str(args[1]), len(steps), steps, params, inputs, outputs, ready, linearized, eqns)
     if module_name == "tensor/autograd":
         if function_name == "tensor_backward_rule_add":
             grad_a = invoke_runtime_function("tensor", "tensor_backward_add_grad_a", args[2])
@@ -455,6 +1238,143 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             return _tensor_transform_chain_from_op("sum_dim")
         if function_name == "tensor_transform_chain_mean_dim":
             return _tensor_transform_chain_from_op("mean_dim")
+    if module_name == "shape":
+        if function_name == "broadcast_shape":
+            return list(np.broadcast_shapes(tuple(int(x) for x in args[0]), tuple(int(x) for x in args[1])))
+        if function_name == "normalize_axes":
+            axes = [int(x) for x in args[0]]
+            ndim = int(args[1])
+            return [ax + ndim if ax < 0 else ax for ax in axes]
+        if function_name == "infer_matmul_shape":
+            a_shape = [int(x) for x in args[0]]
+            b_shape = [int(x) for x in args[1]]
+            if len(a_shape) == 1 and len(b_shape) == 1:
+                return [1]
+            if len(a_shape) == 1 and len(b_shape) == 2:
+                return [b_shape[1]]
+            if len(a_shape) == 2 and len(b_shape) == 1:
+                return [a_shape[0]]
+            if len(a_shape) == 2 and len(b_shape) == 2:
+                return [a_shape[0], b_shape[1]]
+            return list(a_shape)
+        if function_name == "expand_shape":
+            shape = [int(x) for x in args[0]]
+            dim = int(args[1])
+            axis = dim if dim >= 0 else dim + len(shape) + 1
+            return shape[:axis] + [1] + shape[axis:]
+        if function_name == "squeeze_shape":
+            shape = [int(x) for x in args[0]]
+            squeezed = [dim for dim in shape if dim != 1]
+            return squeezed or [1]
+        if function_name == "infer_reduce_shape":
+            shape = [int(x) for x in args[0]]
+            dim = int(args[1])
+            keepdim = bool(args[2])
+            axis = dim if dim >= 0 else dim + len(shape)
+            if keepdim:
+                out = list(shape)
+                out[axis] = 1
+                return out
+            out = [shape[i] for i in range(len(shape)) if i != axis]
+            return out or [1]
+        if function_name == "concat_shape":
+            a_shape = [int(x) for x in args[0]]
+            b_shape = [int(x) for x in args[1]]
+            dim = int(args[2])
+            axis = dim if dim >= 0 else dim + len(a_shape)
+            out = list(a_shape)
+            if len(a_shape) == len(b_shape):
+                out[axis] = a_shape[axis] + b_shape[axis]
+            return out
+        if function_name == "stack_shape":
+            shape = [int(x) for x in args[0]]
+            dim = int(args[1])
+            axis = dim if dim >= 0 else dim + len(shape) + 1
+            return shape[:axis] + [1] + shape[axis:]
+        if function_name == "flatten_shape":
+            shape = [int(x) for x in args[0]]
+            start = int(args[1])
+            end = int(args[2])
+            ndim = len(shape)
+            start = start + ndim if start < 0 else start
+            end = end + ndim if end < 0 else end
+            if start > end:
+                return list(shape)
+            flat = 1
+            for i in range(start, end + 1):
+                flat *= shape[i]
+            return shape[:start] + [flat] + shape[end + 1:]
+    if module_name == "reduce":
+        def _reduce_all_np(op: str, data: Any) -> dict[str, Any]:
+            arr = np.asarray(data, dtype=float)
+            if op == "sum":
+                result = np.sum(arr)
+            elif op == "mean":
+                result = np.mean(arr) if arr.size else 0.0
+            elif op == "max":
+                result = np.max(arr) if arr.size else 0.0
+            elif op == "min":
+                result = np.min(arr) if arr.size else 0.0
+            elif op == "prod":
+                result = np.prod(arr) if arr.size else 1.0
+            else:
+                raise ValueError(op)
+            return result
+
+        def _reduce_dim_np(op: str, data: Any, shape: list[int], dim: int, keepdim: bool) -> Any:
+            arr = np.asarray(data, dtype=float).reshape(shape)
+            axis = dim if dim >= 0 else dim + arr.ndim
+            if op == "sum":
+                result = np.sum(arr, axis=axis, keepdims=keepdim)
+            elif op == "mean":
+                result = np.mean(arr, axis=axis, keepdims=keepdim)
+            elif op == "max":
+                result = np.max(arr, axis=axis, keepdims=keepdim)
+            elif op == "min":
+                result = np.min(arr, axis=axis, keepdims=keepdim)
+            elif op == "prod":
+                result = np.prod(arr, axis=axis, keepdims=keepdim)
+            else:
+                raise ValueError(op)
+            return result
+
+        if function_name in {"reduce_sum", "reduce_mean", "reduce_max", "reduce_min", "reduce_prod"}:
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            op = function_name.removeprefix("reduce_")
+            reduced = _reduce_all_np(op, data_a)
+            return _tensor_dict(np.asarray([reduced]), [1], req_a)
+        if function_name in {"reduce_sum_dim", "reduce_mean_dim", "reduce_max_dim", "reduce_min_dim", "reduce_prod_dim"}:
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            dim = int(args[1])
+            keepdim = bool(args[2])
+            op = function_name.removeprefix("reduce_").removesuffix("_dim")
+            reduced = _reduce_dim_np(op, data_a, shape_a, dim, keepdim)
+            reduced_arr = np.asarray(reduced)
+            out_shape = list(reduced_arr.shape) if reduced_arr.shape else [1]
+            return _tensor_dict(reduced_arr, out_shape, req_a)
+    if module_name == "indexing":
+        if function_name == "pad":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            before = int(args[1])
+            after = int(args[2])
+            value = float(args[3])
+            before = max(before, 0)
+            after = max(after, 0)
+            padded = np.pad(np.asarray(data_a), (before, after), mode="constant", constant_values=value)
+            return _tensor_dict(padded, [int(padded.shape[0])], req_a)
+        if function_name == "slice":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            start = max(int(args[1]), 0)
+            end = min(int(args[2]), len(data_a))
+            if end < start:
+                end = start
+            sliced = np.asarray(data_a)[start:end]
+            return _tensor_dict(sliced, [int(sliced.shape[0])], req_a)
+        if function_name == "gather":
+            data_a, shape_a, req_a = _tensor_like(args[0])
+            indices = np.asarray(args[1], dtype=np.int64)
+            gathered = np.asarray(data_a)[indices]
+            return _tensor_dict(gathered, [int(gathered.shape[0])], req_a)
     return _UNHANDLED
 
 
