@@ -84,7 +84,7 @@ func jaxpr_name(jaxpr_graph graph) string {
 }
 
 func jaxpr_eqn_count(jaxpr_graph graph) int {
-    len(graph.eqns)
+    graph.eqn_count
 }
 
 func jaxpr_primitive_count(jaxpr_graph graph) int {
@@ -254,31 +254,35 @@ func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
         params: _copy_strings(graph.params),
         inputs: _copy_strings(graph.inputs),
         outputs: _copy_strings(graph.outputs),
+        eqns: _copy_eqns(graph.eqns),
         ready: graph.ready || len(graph.primitives) > 0,
         linearized: graph.linearized,
     }
 }
 
 func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
-    []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(chain.steps)}
-    int i = 0
-    while i < len(chain.steps) {
-        eqns[i] = jaxpr_eqn {
-            primitive: chain.steps[i],
-            params: []string{cap: 0},
-            inputs: [],
-            outputs: [],
+    []jaxpr_eqn eqns = _copy_eqns(chain.eqns)
+    if len(eqns) == 0 {
+        eqns = []jaxpr_eqn{cap: len(chain.steps)}
+        int i = 0
+        while i < len(chain.steps) {
+            eqns[i] = jaxpr_eqn {
+                primitive: chain.steps[i],
+                params: []string{cap: 0},
+                inputs: [],
+                outputs: [],
+            }
+            if i < len(chain.params) && chain.params[i] != "" {
+                []string params = []string{cap: 1}
+                params[0] = chain.params[i]
+                eqns[i].params = params
+            }
+            i = i + 1
         }
-        if i < len(chain.params) && chain.params[i] != "" {
-            []string params = []string{cap: 1}
-            params[0] = chain.params[i]
-            eqns[i].params = params
-        }
-        i = i + 1
     }
     jaxpr_graph {
         name: name,
-        eqn_count: len(chain.steps),
+        eqn_count: len(eqns),
         primitives: _copy_strings(chain.steps),
         params: _copy_strings(chain.params),
         inputs: _copy_strings(chain.inputs),

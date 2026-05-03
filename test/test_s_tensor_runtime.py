@@ -258,6 +258,7 @@ def test_s_tensor_tracer_runtime_smoke():
     assert tracer_chain["params"] == tracer["params"]
     assert tracer_chain["inputs"] == tracer["inputs"]
     assert tracer_chain["outputs"] == tracer["outputs"]
+    assert [eqn["primitive"] for eqn in tracer_chain["eqns"]] == tracer["ops"]
     assert tracer_chain["ready"] is True
 
     jaxpr = runtime.invoke_runtime_function("tensor", "trace_to_jaxpr", tracer, "tensor-graph")

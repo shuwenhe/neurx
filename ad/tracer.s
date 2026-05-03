@@ -417,27 +417,31 @@ func tracer_to_transform_chain(tracer_state state) transform_chain {
         params: _copy_strings(state.params),
         inputs: _copy_strings(state.inputs),
         outputs: _copy_strings(state.outputs),
+        eqns: _copy_eqns(state.eqns),
         ready: state.active || len(state.ops) > 0,
         linearized: state.linearized,
     }
 }
 
 func transform_chain_to_tracer(transform_chain chain, string name) tracer_state {
-    []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(chain.steps)}
-    int i = 0
-    while i < len(chain.steps) {
-        eqns[i] = jaxpr_eqn {
-            primitive: chain.steps[i],
-            params: _copy_strings([]string{cap: 0}),
-            inputs: [],
-            outputs: [],
+    []jaxpr_eqn eqns = _copy_eqns(chain.eqns)
+    if len(eqns) == 0 {
+        eqns = []jaxpr_eqn{cap: len(chain.steps)}
+        int i = 0
+        while i < len(chain.steps) {
+            eqns[i] = jaxpr_eqn {
+                primitive: chain.steps[i],
+                params: _copy_strings([]string{cap: 0}),
+                inputs: [],
+                outputs: [],
+            }
+            if i < len(chain.params) && chain.params[i] != "" {
+                []string params = []string{cap: 1}
+                params[0] = chain.params[i]
+                eqns[i].params = params
+            }
+            i = i + 1
         }
-        if i < len(chain.params) && chain.params[i] != "" {
-            []string params = []string{cap: 1}
-            params[0] = chain.params[i]
-            eqns[i].params = params
-        }
-        i = i + 1
     }
     tracer_state {
         name: name,

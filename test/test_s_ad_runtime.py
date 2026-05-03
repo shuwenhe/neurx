@@ -441,6 +441,7 @@ def test_s_ad_tracer_and_jaxpr_runtime_smoke():
     assert tracer_chain["params"] == ["", "shape=[2]"]
     assert tracer_chain["inputs"] == ["arg0", "arg1"]
     assert tracer_chain["outputs"] == ["out0"]
+    assert [eqn["primitive"] for eqn in tracer_chain["eqns"]] == ["add", "mul", "matmul"]
     assert tracer_chain["ready"] is True
     assert tracer_chain["linearized"] is False
 
@@ -450,6 +451,7 @@ def test_s_ad_tracer_and_jaxpr_runtime_smoke():
     assert tracer_round_trip["params"] == ["", "shape=[2]"]
     assert tracer_round_trip["inputs"] == ["arg0", "arg1"]
     assert tracer_round_trip["outputs"] == ["out0"]
+    assert [eqn["primitive"] for eqn in tracer_round_trip["eqns"]] == ["add", "mul", "matmul"]
     assert tracer_round_trip["op_count"] == 2
 
     jaxpr = runtime.invoke_runtime_function("ad/jaxpr", "new_jaxpr_graph", "graph0")
@@ -472,6 +474,7 @@ def test_s_ad_tracer_and_jaxpr_runtime_smoke():
     jaxpr_chain = runtime.invoke_runtime_function("ad/jaxpr", "jaxpr_to_transform_chain", jaxpr)
     assert jaxpr_chain["steps"] == ["add"]
     assert jaxpr_chain["params"] == [""]
+    assert [eqn["primitive"] for eqn in jaxpr_chain["eqns"]] == ["add"]
     assert jaxpr_chain["ready"] is True
     assert jaxpr_chain["linearized"] is False
 
