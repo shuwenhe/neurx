@@ -1,5 +1,7 @@
 package neurx.ad.function
 
+use neurx.ad.eqn
+
 struct function_record {
     string name
     bool forward_enabled
@@ -16,6 +18,7 @@ struct transform_chain {
     []string params
     []string inputs
     []string outputs
+    []jaxpr_eqn eqns
     bool ready
     bool linearized
 }
@@ -40,6 +43,23 @@ func _copy_strings([]string tags) []string {
     out
 }
 
+func _copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
+    neurx.ad.eqn.copy_eqns(values)
+}
+
+func _join_strings([]string values) string {
+    string out = ""
+    int i = 0
+    while i < len(values) {
+        if i > 0 {
+            out = out + ","
+        }
+        out = out + values[i]
+        i = i + 1
+    }
+    out
+}
+
 func new_function(string name, int arity) function_record {
     function_record {
         name: name,
@@ -59,6 +79,7 @@ func new_transform_chain() transform_chain {
         params: [],
         inputs: [],
         outputs: [],
+        eqns: [],
         ready: false,
         linearized: false,
     }
@@ -227,6 +248,7 @@ func transform_chain_add_step(transform_chain chain, string step) transform_chai
         params: _copy_transform_steps(chain.params),
         inputs: _copy_transform_steps(chain.inputs),
         outputs: _copy_transform_steps(chain.outputs),
+        eqns: _copy_eqns(chain.eqns),
         ready: chain.ready || len(steps) > 0,
         linearized: chain.linearized,
     }
@@ -242,6 +264,7 @@ func transform_chain_add_step_with_param(transform_chain chain, string step, str
         params: params,
         inputs: _copy_transform_steps(chain.inputs),
         outputs: _copy_transform_steps(chain.outputs),
+        eqns: _copy_eqns(chain.eqns),
         ready: chain.ready || len(steps) > 0,
         linearized: chain.linearized,
     }
@@ -277,6 +300,7 @@ func transform_chain_set_ready(transform_chain chain, bool ready) transform_chai
         params: _copy_transform_steps(chain.params),
         inputs: _copy_transform_steps(chain.inputs),
         outputs: _copy_transform_steps(chain.outputs),
+        eqns: _copy_eqns(chain.eqns),
         ready: ready,
         linearized: chain.linearized,
     }
@@ -288,6 +312,7 @@ func transform_chain_set_linearized(transform_chain chain, bool linearized) tran
         params: _copy_transform_steps(chain.params),
         inputs: _copy_transform_steps(chain.inputs),
         outputs: _copy_transform_steps(chain.outputs),
+        eqns: _copy_eqns(chain.eqns),
         ready: chain.ready,
         linearized: linearized,
     }
@@ -299,6 +324,7 @@ func transform_chain_state_dict(transform_chain chain) transform_chain {
         params: _copy_transform_steps(chain.params),
         inputs: _copy_transform_steps(chain.inputs),
         outputs: _copy_transform_steps(chain.outputs),
+        eqns: _copy_eqns(chain.eqns),
         ready: chain.ready,
         linearized: chain.linearized,
     }
@@ -480,17 +506,46 @@ func function_load_state_dict(function_record f, function_record other) function
 }
 
 func function_transform_chain(function_record f) transform_chain {
+    []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(f.tags)}
+    int i = 0
+    while i < len(f.tags) {
+        []string params = []string{cap: 0}
+        if i < len(f.params) && f.params[i] != "" {
+            params = []string{cap: 1}
+            params[0] = f.params[i]
+        }
+        eqns[i] = jaxpr_eqn {
+            primitive: f.tags[i],
+            params: params,
+            inputs: [],
+            outputs: [],
+        }
+        i = i + 1
+    }
     transform_chain {
         steps: _copy_strings(f.tags),
         params: _copy_strings(f.params),
         inputs: [],
         outputs: [],
+        eqns: eqns,
         ready: function_ready(f),
         linearized: function_is_linearized(f),
     }
 }
 
 func transform_chain_to_function(transform_chain chain, string name, int arity) function_record {
+    []string params = _copy_strings(chain.params)
+    []string tags = _copy_strings(chain.steps)
+    if len(chain.eqns) > 0 {
+        params = []string{cap: len(chain.eqns)}
+        tags = []string{cap: len(chain.eqns)}
+        int i = 0
+        while i < len(chain.eqns) {
+            tags[i] = chain.eqns[i].primitive
+            params[i] = _join_strings(chain.eqns[i].params)
+            i = i + 1
+        }
+    }
     function_record {
         name: name,
         forward_enabled: chain.ready,
@@ -498,8 +553,8 @@ func transform_chain_to_function(transform_chain chain, string name, int arity) 
         apply_enabled: chain.ready && chain.linearized,
         linearized: chain.linearized,
         arity: arity,
-        params: _copy_strings(chain.params),
-        tags: _copy_transform_steps(chain.steps),
+        params: params,
+        tags: tags,
     }
 }
 

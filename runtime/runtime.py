@@ -304,7 +304,8 @@ def _tensor_backward_rule_mean_dim(a: Any, upstream: Any, dim: int, keepdim: boo
 
 
 def _tensor_transform_chain_from_op(op: str) -> dict[str, Any]:
-    return {"steps": [op], "ready": True, "linearized": True}
+    eqn = {"primitive": op, "params": [], "inputs": [], "outputs": []}
+    return {"steps": [op], "params": [""], "inputs": [], "outputs": [], "eqns": [eqn], "ready": True, "linearized": True}
 
 
 def _string_list(value: Any) -> list[str]:
@@ -440,6 +441,28 @@ def _jaxpr_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], 
 
 
 def _jaxpr_eqns(value: Any) -> list[dict[str, Any]]:
+    if isinstance(value, dict):
+        return [
+            {
+                "primitive": str(eqn.get("primitive", "")),
+                "params": _string_list(eqn.get("params", [])),
+                "inputs": _string_list(eqn.get("inputs", [])),
+                "outputs": _string_list(eqn.get("outputs", [])),
+            }
+            for eqn in value.get("eqns", [])
+        ]
+    return [
+        {
+            "primitive": str(getattr(eqn, "primitive", "")),
+            "params": _string_list(getattr(eqn, "params", [])),
+            "inputs": _string_list(getattr(eqn, "inputs", [])),
+            "outputs": _string_list(getattr(eqn, "outputs", [])),
+        }
+        for eqn in getattr(value, "eqns", [])
+    ]
+
+
+def _transform_chain_eqns(value: Any) -> list[dict[str, Any]]:
     if isinstance(value, dict):
         return [
             {
@@ -600,11 +623,21 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             return args[1]
         if function_name == "function_transform_chain":
             name, forward_enabled, backward_enabled, apply_enabled, linearized, arity, params, tags = _function_like(args[0])
+            eqns = [
+                {
+                    "primitive": str(tag),
+                    "params": [str(params[i])] if i < len(params) and str(params[i]) else [],
+                    "inputs": [],
+                    "outputs": [],
+                }
+                for i, tag in enumerate(tags)
+            ]
             return {
                 "steps": list(tags),
                 "params": list(params),
                 "inputs": [],
                 "outputs": [],
+                "eqns": eqns,
                 "ready": bool(forward_enabled and backward_enabled and apply_enabled),
                 "linearized": bool(linearized),
             }
@@ -614,6 +647,10 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             arity = int(args[2])
             steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
             params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            eqns = _transform_chain_eqns(chain)
+            if eqns:
+                steps = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
             ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
             linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
             return _function_dict(name, ready, ready or linearized, ready and linearized, linearized, arity, params, steps)
@@ -891,7 +928,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 state = args[0]
                 name, active, linearized, op_count, ops, params, tags = _tracer_like(state)
                 inputs, outputs = _tracer_inputs_outputs(state)
-                return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
+                return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _tracer_eqns(state), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
             else:
                 state = args[0]
                 return invoke_runtime_function("ad/jaxpr", "jaxpr_from_tracer", state, str(args[1]))
@@ -1075,9 +1112,16 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
             inputs = _string_list(chain.get("inputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "inputs", []))
             outputs = _string_list(chain.get("outputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "outputs", []))
+            eqns = _transform_chain_eqns(chain)
+            if eqns:
+                steps = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
+                inputs = [item for eqn in eqns for item in eqn["inputs"]]
+                outputs = [item for eqn in eqns for item in eqn["outputs"]]
             ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
             linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
-            eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
+            if not eqns:
+                eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
             return _tracer_dict(name, ready, linearized, len(steps), steps, params, [], inputs, outputs, eqns)
     if module_name == "ad/jaxpr":
         if function_name == "new_jaxpr_graph":
@@ -1174,16 +1218,23 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             return _invoke_special_module_function(module_name, "jaxpr_add_eqn_with_io", args)
         if function_name == "jaxpr_to_transform_chain":
             name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
-            return {"steps": list(primitives), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "ready": bool(ready or eqn_count > 0), "linearized": bool(linearized)}
+            return {"steps": list(primitives), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _jaxpr_eqns(args[0]), "ready": bool(ready or eqn_count > 0), "linearized": bool(linearized)}
         if function_name == "transform_chain_to_jaxpr":
             chain = args[0]
             steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
             params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
             inputs = _string_list(chain.get("inputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "inputs", []))
             outputs = _string_list(chain.get("outputs", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "outputs", []))
+            eqns = _transform_chain_eqns(chain)
+            if eqns:
+                steps = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
+                inputs = [item for eqn in eqns for item in eqn["inputs"]]
+                outputs = [item for eqn in eqns for item in eqn["outputs"]]
             ready = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
             linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
-            eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
+            if not eqns:
+                eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
             return _jaxpr_dict(str(args[1]), len(steps), steps, params, inputs, outputs, ready, linearized, eqns)
     if module_name == "tensor/autograd":
         if function_name == "tensor_backward_rule_add":
