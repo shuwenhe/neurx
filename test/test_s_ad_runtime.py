@@ -17,12 +17,14 @@ def test_s_ad_runtime_compiled_functions_present():
     assert status["available"] is True
     for ir_name in ("ad.ir", "context.ir", "function.ir"):
         assert any(Path(path).name == ir_name for path in status["ir_files"])
+    assert any(Path(path).as_posix().endswith("tensor/autograd.ir") for path in status["ir_files"])
     assert any(Path(path).as_posix().endswith("engine/backward.ir") for path in status["ir_files"])
     assert any(Path(path).as_posix().endswith("engine/state.ir") for path in status["ir_files"])
 
     runtime_files = [Path(path).name for path in runtime.compiled_runtime_files()]
     for ir_name in ("ad.ir", "context.ir", "function.ir"):
         assert ir_name in runtime_files
+    assert any(Path(path).as_posix().endswith("tensor/autograd.ir") for path in runtime.compiled_runtime_files())
     assert any(Path(path).as_posix().endswith("engine/backward.ir") for path in runtime.compiled_runtime_files())
     assert any(Path(path).as_posix().endswith("engine/state.ir") for path in runtime.compiled_runtime_files())
 
@@ -55,6 +57,73 @@ def test_s_ad_runtime_compiled_functions_present():
         "grad_enabled_state",
         "grad_accumulation_state",
         "backward",
+        "new_linearize_state",
+        "set_forward_mode",
+        "set_reverse_mode",
+        "forward_mode_enabled",
+        "reverse_mode_enabled",
+        "linearize_ready",
+        "linearize_tensor",
+        "register_dual_tensor",
+        "linearize_record_count",
+        "linearize_has_record",
+        "linearize_shape_of",
+        "linearize_requires_grad",
+        "linearize_primal_of",
+        "linearize_tangent_of",
+        "linearize_cotangent_of",
+        "set_linearize_primal",
+        "set_linearize_tangent",
+        "set_linearize_cotangent",
+        "accumulate_linearize_tangent",
+        "accumulate_linearize_cotangent",
+        "linearize_state_dict",
+        "linearize_load_state_dict",
+        "jvp_seed_data",
+        "vjp_seed_state",
+        "linearize_backward_state",
+        "function_state",
+        "function_linearized",
+        "function_enable_forward",
+        "function_enable_backward",
+        "function_enable_apply",
+        "function_linearize",
+        "function_ready_for_linearize",
+        "function_to_linearize_state",
+        "linearize_state_to_function",
+        "function_capture",
+        "function_jvp_capture",
+        "function_vjp_capture",
+        "function_linearize_capture",
+        "function_jvp",
+        "function_vjp",
+        "function_grad",
+        "function_value_and_grad",
+        "function_add",
+        "function_mul",
+        "function_matmul",
+        "function_sum",
+        "function_mean",
+        "function_add_op",
+        "function_mul_op",
+        "function_matmul_op",
+        "function_sum_op",
+        "function_mean_op",
+        "backward_rule_add",
+        "backward_rule_mul",
+        "backward_rule_matmul",
+        "backward_rule_sum",
+        "backward_rule_mean",
+        "tensor_backward_rule_add",
+        "tensor_backward_rule_mul",
+        "tensor_backward_rule_matmul",
+        "tensor_backward_rule_sum",
+        "tensor_backward_rule_mean",
+        "tensor_transform_chain_add",
+        "tensor_transform_chain_mul",
+        "tensor_transform_chain_matmul",
+        "tensor_transform_chain_sum",
+        "tensor_transform_chain_mean",
     ):
         assert runtime.supports_runtime_function("ad", function_name)
 
@@ -108,5 +177,99 @@ def test_s_ad_runtime_compiled_functions_present():
         assert runtime.supports_runtime_function("engine/state", function_name)
 
     assert runtime.supports_runtime_function("engine/backward", "backward")
-    for function_name in ("forward", "backward", "apply"):
+    for function_name in (
+        "new_function",
+        "function_name",
+        "function_arity",
+        "function_tag_count",
+        "function_has_tag",
+        "add_function_tag",
+        "clear_function_tags",
+        "enable_forward",
+        "enable_backward",
+        "enable_apply",
+        "set_linearized",
+        "function_ready",
+        "function_is_linearized",
+        "function_state_dict",
+        "function_load_state_dict",
+        "forward",
+        "backward",
+        "apply",
+        "linearize",
+        "jvp",
+        "vjp",
+        "grad",
+        "value_and_grad",
+        "add",
+        "mul",
+        "matmul",
+        "sum",
+        "mean",
+        "tag_flow",
+        "backward_pass",
+        "backward_pass_state",
+        "function_transform_chain",
+        "transform_chain_to_function",
+        "function_transform_chain_jvp",
+        "function_transform_chain_vjp",
+        "function_transform_chain_grad",
+        "function_transform_chain_value_and_grad",
+        "function_transform_chain_add",
+        "function_transform_chain_mul",
+        "function_transform_chain_matmul",
+        "function_transform_chain_sum",
+        "function_transform_chain_mean",
+        "backward_rule_add",
+        "backward_rule_mul",
+        "backward_rule_matmul",
+        "backward_rule_sum",
+        "backward_rule_mean",
+        "tensor_backward_rule_add",
+        "tensor_backward_rule_mul",
+        "tensor_backward_rule_matmul",
+        "tensor_backward_rule_sum",
+        "tensor_backward_rule_mean",
+        "tensor_transform_chain_add",
+        "tensor_transform_chain_mul",
+        "tensor_transform_chain_matmul",
+        "tensor_transform_chain_sum",
+        "tensor_transform_chain_mean",
+    ):
         assert runtime.supports_runtime_function("function", function_name)
+
+
+def test_s_tensor_autograd_runtime_smoke():
+    runtime = _load_runtime_module()
+    a = {"data": [1.0, 2.0], "shape": [2], "requires_grad": True, "grad": None}
+    b = {"data": [3.0, 4.0], "shape": [2], "requires_grad": True, "grad": None}
+    upstream = {"data": [5.0, 6.0], "shape": [2], "requires_grad": False, "grad": None}
+
+    add_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_add", a, b, upstream)
+    assert add_rule["ready"] is True
+    assert add_rule["grad_a"]["data"] == [5.0, 6.0]
+    assert add_rule["grad_b"]["data"] == [5.0, 6.0]
+
+    mul_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_mul", a, b, upstream)
+    assert mul_rule["ready"] is True
+    assert mul_rule["grad_a"]["data"] == [15.0, 24.0]
+    assert mul_rule["grad_b"]["data"] == [5.0, 12.0]
+
+    chain = runtime.invoke_runtime_function("tensor/autograd", "tensor_transform_chain_add")
+    assert chain["steps"] == ["add"]
+    assert chain["ready"] is True
+    assert chain["linearized"] is True
+
+    for function_name in (
+        "tensor_backward_rule_add",
+        "tensor_backward_rule_mul",
+        "tensor_backward_rule_matmul",
+        "tensor_backward_rule_sum",
+        "tensor_backward_rule_mean",
+        "tensor_transform_chain_add",
+        "tensor_transform_chain_mul",
+        "tensor_transform_chain_matmul",
+        "tensor_transform_chain_sum",
+        "tensor_transform_chain_mean",
+    ):
+        assert runtime.supports_runtime_function("tensor/autograd", function_name)
