@@ -151,7 +151,7 @@ func trainer_session_load_state_dict(trainer_session session, trainer_session ot
     }
 }
 
-func _empty_tensor_params() tensor[] {
+func _empty_tensor_params() []tensor {
     []tensor params = []tensor{cap: 0}
     params
 }
@@ -163,11 +163,11 @@ func new_trainer_snapshot(trainer_session session) trainer_snapshot {
     }
 }
 
-func new_trainer_checkpoint(int step, float loss, tensor[] params) checkpoint {
+func new_trainer_checkpoint(int step, float loss, []tensor params) checkpoint {
     new_checkpoint(step, loss, params)
 }
 
-func save_trainer_checkpoint(string path, int step, float loss, tensor[] params) checkpoint {
+func save_trainer_checkpoint(string path, int step, float loss, []tensor params) checkpoint {
     save_checkpoint(path, step, loss, params)
 }
 
@@ -211,12 +211,14 @@ func trainer_snapshot_load_state_dict(trainer_snapshot state, trainer_snapshot o
 
 func run_trainer_snapshot(trainer_session session, multimodal_batch batch) trainer_snapshot {
     trainer_state next_state = train_step(session.state, batch)
-    trainer_session next_session = trainer_session {
-        config: trainer_config_state_dict(session.config),
-        state: next_state,
-        sample: process_example(session.sample),
+    trainer_snapshot {
+        session: trainer_session {
+            config: trainer_config_state_dict(session.config),
+            state: next_state,
+            sample: process_example(session.sample),
+        },
+        checkpoint_state: new_checkpoint(next_state.step, next_state.last_loss, _empty_tensor_params()),
     }
-    new_trainer_snapshot(next_session)
 }
 
 func new_trainer_pipeline(trainer_session session) trainer_pipeline {
