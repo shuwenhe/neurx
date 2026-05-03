@@ -10,6 +10,7 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `dl/`: S source for datasets and dataloading
 - `lf/`: S source for loss functions
 - `train/`: S source for training utilities
+- `runtime/`: S source for runtime state helpers and I/O adapters
 - `nn/`: S source for neural network building blocks
 - `opt/`: S source for optimizers
 - `s/`: legacy S entry scripts and notes
@@ -40,6 +41,8 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `train/checkpoint_manager.s`: checkpoint retention and best-score tracking
 - `train/logging.s`: training logging state and flush tracking
 - `train/loop.s`: training loop and single-step training pipeline state machine
+- `runtime/runtime.s`: runtime state and discovery helpers
+- `runtime/io.s`: file, JSON, and environment adapters for the runtime layer
 
 ## Notes
 
