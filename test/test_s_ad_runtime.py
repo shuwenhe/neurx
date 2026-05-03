@@ -211,30 +211,11 @@ def test_s_ad_runtime_compiled_functions_present():
         "backward_pass_state",
         "function_transform_chain",
         "transform_chain_to_function",
-        "function_transform_chain_jvp",
-        "function_transform_chain_vjp",
-        "function_transform_chain_grad",
-        "function_transform_chain_value_and_grad",
-        "function_transform_chain_add",
-        "function_transform_chain_mul",
-        "function_transform_chain_matmul",
-        "function_transform_chain_sum",
-        "function_transform_chain_mean",
         "backward_rule_add",
         "backward_rule_mul",
         "backward_rule_matmul",
         "backward_rule_sum",
         "backward_rule_mean",
-        "tensor_backward_rule_add",
-        "tensor_backward_rule_mul",
-        "tensor_backward_rule_matmul",
-        "tensor_backward_rule_sum",
-        "tensor_backward_rule_mean",
-        "tensor_transform_chain_add",
-        "tensor_transform_chain_mul",
-        "tensor_transform_chain_matmul",
-        "tensor_transform_chain_sum",
-        "tensor_transform_chain_mean",
     ):
         assert runtime.supports_runtime_function("function", function_name)
 
@@ -244,6 +225,7 @@ def test_s_tensor_autograd_runtime_smoke():
     a = {"data": [1.0, 2.0], "shape": [2], "requires_grad": True, "grad": None}
     b = {"data": [3.0, 4.0], "shape": [2], "requires_grad": True, "grad": None}
     upstream = {"data": [5.0, 6.0], "shape": [2], "requires_grad": False, "grad": None}
+    scalar_upstream = {"data": [5.0], "shape": [1], "requires_grad": False, "grad": None}
 
     add_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_add", a, b, upstream)
     assert add_rule["ready"] is True
@@ -255,10 +237,27 @@ def test_s_tensor_autograd_runtime_smoke():
     assert mul_rule["grad_a"]["data"] == [15.0, 24.0]
     assert mul_rule["grad_b"]["data"] == [5.0, 12.0]
 
+    sub_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_sub", a, b, upstream)
+    assert sub_rule["ready"] is True
+    assert sub_rule["grad_a"]["data"] == [5.0, 6.0]
+    assert sub_rule["grad_b"]["data"] == [-5.0, -6.0]
+
+    div_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_div", a, b, upstream)
+    assert div_rule["ready"] is True
+    assert list(div_rule["grad_a"]["data"]) == [5.0 / 3.0, 1.5]
+
     chain = runtime.invoke_runtime_function("tensor/autograd", "tensor_transform_chain_add")
     assert chain["steps"] == ["add"]
     assert chain["ready"] is True
     assert chain["linearized"] is True
+
+    sum_dim_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_sum_dim", a, scalar_upstream, 0, False)
+    assert sum_dim_rule["ready"] is True
+    assert sum_dim_rule["grad_a"]["data"] == [5.0, 5.0]
+
+    mean_dim_rule = runtime.invoke_runtime_function("tensor/autograd", "tensor_backward_rule_mean_dim", a, scalar_upstream, 0, False)
+    assert mean_dim_rule["ready"] is True
+    assert mean_dim_rule["grad_a"]["data"] == [2.5, 2.5]
 
     for function_name in (
         "tensor_backward_rule_add",

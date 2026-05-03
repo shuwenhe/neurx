@@ -447,6 +447,114 @@ func mean(tensor a) tensor {
     new(out, [1], a.requires_grad)
 }
 
+func _scalar_tensor(float value) tensor {
+    new([value], [1], false)
+}
+
+func _scale_tensor(tensor value, float scale) tensor {
+    mul(value, _scalar_tensor(scale))
+}
+
+func tensor_backward_add_grad_a(tensor upstream) tensor {
+    clone(upstream)
+}
+
+func tensor_backward_add_grad_b(tensor upstream) tensor {
+    clone(upstream)
+}
+
+func tensor_backward_mul_grad_a(tensor a, tensor b, tensor upstream) tensor {
+    mul(upstream, b)
+}
+
+func tensor_backward_mul_grad_b(tensor a, tensor b, tensor upstream) tensor {
+    mul(upstream, a)
+}
+
+func _negate_tensor(tensor value) tensor {
+    sub(zeros_like(value), value)
+}
+
+func tensor_backward_sub_grad_a(tensor upstream) tensor {
+    clone(upstream)
+}
+
+func tensor_backward_sub_grad_b(tensor upstream) tensor {
+    _negate_tensor(upstream)
+}
+
+func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
+    div(upstream, b)
+}
+
+func tensor_backward_div_grad_b(tensor a, tensor b, tensor upstream) tensor {
+    tensor numerator = mul(upstream, a)
+    tensor denominator = mul(b, b)
+    _negate_tensor(div(numerator, denominator))
+}
+
+func tensor_backward_matmul_grad_a(tensor a, tensor b, tensor upstream) tensor {
+    int ndim_a = len(a.shape)
+    int ndim_b = len(b.shape)
+    if ndim_a == 1 && ndim_b == 1 {
+        return _scale_tensor(b, upstream.data[0])
+    }
+    if ndim_a == 2 && ndim_b == 2 {
+        return matmul(upstream, transpose(b, 0, 1))
+    }
+    if ndim_a == 2 && ndim_b == 1 {
+        return mul(unsqueeze(upstream, 1), unsqueeze(b, 0))
+    }
+    zeros_like(a)
+}
+
+func tensor_backward_matmul_grad_b(tensor a, tensor b, tensor upstream) tensor {
+    int ndim_a = len(a.shape)
+    int ndim_b = len(b.shape)
+    if ndim_a == 1 && ndim_b == 1 {
+        return _scale_tensor(a, upstream.data[0])
+    }
+    if ndim_a == 2 && ndim_b == 2 {
+        return matmul(transpose(a, 0, 1), upstream)
+    }
+    if ndim_a == 2 && ndim_b == 1 {
+        return matmul(transpose(a, 0, 1), upstream)
+    }
+    zeros_like(b)
+}
+
+func tensor_backward_sum_grad(tensor a, tensor upstream) tensor {
+    float scalar = 0.0
+    if len(upstream.data) > 0 {
+        scalar = upstream.data[0]
+    }
+    fill_like(a, scalar)
+}
+
+func tensor_backward_mean_grad(tensor a, tensor upstream) tensor {
+    float scalar = 0.0
+    if len(upstream.data) > 0 {
+        scalar = upstream.data[0]
+    }
+    float denom = len(a.data)
+    fill_like(a, scalar / denom)
+}
+
+func tensor_backward_sum_dim_grad(tensor a, tensor upstream, int dim, bool keepdim) tensor {
+    tensor expanded = upstream
+    if !keepdim {
+        expanded = unsqueeze(upstream, dim)
+    }
+    mul(fill_like(a, 1.0), expanded)
+}
+
+func tensor_backward_mean_dim_grad(tensor a, tensor upstream, int dim, bool keepdim) tensor {
+    int axis = normalize_dim(dim, len(a.shape))
+    float denom = a.shape[axis]
+    tensor grad = tensor_backward_sum_dim_grad(a, upstream, dim, keepdim)
+    div(grad, _scalar_tensor(denom))
+}
+
 func _reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)

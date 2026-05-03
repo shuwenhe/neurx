@@ -1,6 +1,6 @@
 package neurx.ad.function
 
-struct Function {
+struct function_record {
     string name
     bool forward_enabled
     bool backward_enabled
@@ -22,7 +22,7 @@ struct backward_rule {
     tensor primal_b
     tensor upstream
     tensor grad_a
-    tensor grad_b
+    tensor grad_b10
     bool ready
 }
 
@@ -36,8 +36,8 @@ func _copy_strings([]string tags) []string {
     out
 }
 
-func new_function(string name, int arity) Function {
-    Function {
+func new_function(string name, int arity) function_record {
+    function_record {
         name: name,
         forward_enabled: false,
         backward_enabled: false,
@@ -269,19 +269,19 @@ func transform_chain_load_state_dict(transform_chain chain, transform_chain othe
     other
 }
 
-func function_name(Function f) string {
+func function_name(function_record f) string {
     f.name
 }
 
-func function_arity(Function f) int {
+func function_arity(function_record f) int {
     f.arity
 }
 
-func function_tag_count(Function f) int {
+func function_tag_count(function_record f) int {
     len(f.tags)
 }
 
-func function_has_tag(Function f, string tag) bool {
+func function_has_tag(function_record f, string tag) bool {
     int i = 0
     while i < len(f.tags) {
         if f.tags[i] == tag {
@@ -292,10 +292,10 @@ func function_has_tag(Function f, string tag) bool {
     false
 }
 
-func add_function_tag(Function f, string tag) Function {
+func add_function_tag(function_record f, string tag) function_record {
     []string tags = _copy_strings(f.tags)
     tags.push(tag)
-    Function {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: f.backward_enabled,
@@ -306,8 +306,8 @@ func add_function_tag(Function f, string tag) Function {
     }
 }
 
-func clear_function_tags(Function f) Function {
-    Function {
+func clear_function_tags(function_record f) function_record {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: f.backward_enabled,
@@ -318,8 +318,8 @@ func clear_function_tags(Function f) Function {
     }
 }
 
-func enable_forward(Function f) Function {
-    Function {
+func enable_forward(function_record f) function_record {
+    function_record {
         name: f.name,
         forward_enabled: true,
         backward_enabled: f.backward_enabled,
@@ -330,8 +330,8 @@ func enable_forward(Function f) Function {
     }
 }
 
-func enable_backward(Function f) Function {
-    Function {
+func enable_backward(function_record f) function_record {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: true,
@@ -342,8 +342,8 @@ func enable_backward(Function f) Function {
     }
 }
 
-func enable_apply(Function f) Function {
-    Function {
+func enable_apply(function_record f) function_record {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: f.backward_enabled,
@@ -354,8 +354,8 @@ func enable_apply(Function f) Function {
     }
 }
 
-func set_linearized(Function f, bool linearized) Function {
-    Function {
+func set_linearized(function_record f, bool linearized) function_record {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: f.backward_enabled,
@@ -366,16 +366,16 @@ func set_linearized(Function f, bool linearized) Function {
     }
 }
 
-func function_ready(Function f) bool {
+func function_ready(function_record f) bool {
     f.forward_enabled && f.backward_enabled && f.apply_enabled
 }
 
-func function_is_linearized(Function f) bool {
+func function_is_linearized(function_record f) bool {
     f.linearized
 }
 
-func function_state_dict(Function f) Function {
-    Function {
+func function_state_dict(function_record f) function_record {
+    function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
         backward_enabled: f.backward_enabled,
@@ -386,11 +386,11 @@ func function_state_dict(Function f) Function {
     }
 }
 
-func function_load_state_dict(Function f, Function other) Function {
+func function_load_state_dict(function_record f, function_record other) function_record {
     other
 }
 
-func function_transform_chain(Function f) transform_chain {
+func function_transform_chain(function_record f) transform_chain {
     transform_chain {
         steps: _copy_strings(f.tags),
         ready: function_ready(f),
@@ -398,8 +398,8 @@ func function_transform_chain(Function f) transform_chain {
     }
 }
 
-func transform_chain_to_function(transform_chain chain, string name, int arity) Function {
-    Function {
+func transform_chain_to_function(transform_chain chain, string name, int arity) function_record {
+    function_record {
         name: name,
         forward_enabled: chain.ready,
         backward_enabled: chain.ready || chain.linearized,
@@ -410,47 +410,47 @@ func transform_chain_to_function(transform_chain chain, string name, int arity) 
     }
 }
 
-func tag_flow(Function f, string tag) Function {
+func tag_flow(function_record f, string tag) function_record {
     add_function_tag(f, tag)
 }
 
-func backward_pass(Function f) Function {
+func backward_pass(function_record f) function_record {
     add_function_tag(set_linearized(enable_backward(f), true), "backward_pass")
 }
 
-func backward_pass_state(Function f) Function {
+func backward_pass_state(function_record f) function_record {
     set_linearized(enable_backward(f), true)
 }
 
-func forward(Function f) Function {
+func forward(function_record f) function_record {
     enable_forward(f)
 }
 
-func backward(Function f) Function {
+func backward(function_record f) function_record {
     enable_backward(f)
 }
 
-func apply(Function f) Function {
+func apply(function_record f) function_record {
     set_linearized(enable_apply(enable_backward(enable_forward(f))), true)
 }
 
-func linearize(Function f) Function {
+func linearize(function_record f) function_record {
     set_linearized(enable_backward(enable_forward(f)), true)
 }
 
-func jvp(Function f) Function {
+func jvp(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "jvp")
 }
 
-func vjp(Function f) Function {
+func vjp(function_record f) function_record {
     add_function_tag(set_linearized(enable_backward(f), true), "vjp")
 }
 
-func grad(Function f) Function {
+func grad(function_record f) function_record {
     add_function_tag(set_linearized(enable_backward(enable_forward(f)), true), "grad")
 }
 
-func value_and_grad(Function f) Function {
+func value_and_grad(function_record f) function_record {
     add_function_tag(set_linearized(enable_backward(enable_forward(f)), true), "value_and_grad")
 }
 
@@ -470,42 +470,42 @@ func transform_chain_value_and_grad(transform_chain chain) transform_chain {
     transform_chain_set_linearized(transform_chain_set_ready(transform_chain_add_step(chain, "value_and_grad"), true), true)
 }
 
-func function_add(Function f) Function {
+func function_add(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "add")
 }
 
-func function_mul(Function f) Function {
+func function_mul(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "mul")
 }
 
-func function_matmul(Function f) Function {
+func function_matmul(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "matmul")
 }
 
-func function_sum(Function f) Function {
+func function_sum(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "sum")
 }
 
-func function_mean(Function f) Function {
+func function_mean(function_record f) function_record {
     add_function_tag(set_linearized(enable_forward(f), true), "mean")
 }
 
-func add(Function f) Function {
+func add(function_record f) function_record {
     function_add(f)
 }
 
-func mul(Function f) Function {
+func mul(function_record f) function_record {
     function_mul(f)
 }
 
-func matmul(Function f) Function {
+func matmul(function_record f) function_record {
     function_matmul(f)
 }
 
-func sum(Function f) Function {
+func sum(function_record f) function_record {
     function_sum(f)
 }
 
-func mean(Function f) Function {
+func mean(function_record f) function_record {
     function_mean(f)
 }
