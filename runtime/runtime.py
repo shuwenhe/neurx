@@ -19,6 +19,9 @@ def _module_ir_path(module_name: str) -> Path:
     direct = root / f"{module_name}.ir"
     if direct.exists():
         return direct
+    nested = root / module_name / f"{module_name}.ir"
+    if nested.exists():
+        return nested
     matches = sorted(root.rglob(f"{module_name}.ir"))
     return matches[0] if matches else direct
 
@@ -331,6 +334,14 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         if len(args) != 1:
             raise ValueError(f"len expects 1 arg, got {len(args)}")
         return len(args[0])
+    if name == "zeros_like":
+        if len(args) != 1:
+            raise ValueError(f"zeros_like expects 1 arg, got {len(args)}")
+        return np.zeros_like(np.asarray(args[0]))
+    if name == "ones_like":
+        if len(args) != 1:
+            raise ValueError(f"ones_like expects 1 arg, got {len(args)}")
+        return np.ones_like(np.asarray(args[0]))
     if name == "read_text_file":
         if len(args) != 1:
             raise ValueError(f"read_text_file expects 1 arg, got {len(args)}")

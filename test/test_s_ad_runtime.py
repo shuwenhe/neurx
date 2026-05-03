@@ -15,12 +15,14 @@ def test_s_ad_runtime_compiled_functions_present():
     runtime = _load_runtime_module()
     status = runtime.runtime_status()
     assert status["available"] is True
-    for ir_name in ("ad.ir", "context.ir", "engine.ir", "function.ir"):
+    for ir_name in ("ad.ir", "context.ir", "function.ir"):
         assert any(Path(path).name == ir_name for path in status["ir_files"])
+    assert any(Path(path).as_posix().endswith("engine/engine.ir") for path in status["ir_files"])
 
     runtime_files = [Path(path).name for path in runtime.compiled_runtime_files()]
-    for ir_name in ("ad.ir", "context.ir", "engine.ir", "function.ir"):
+    for ir_name in ("ad.ir", "context.ir", "function.ir"):
         assert ir_name in runtime_files
+    assert any(Path(path).as_posix().endswith("engine/engine.ir") for path in runtime.compiled_runtime_files())
 
     for function_name in (
         "new_state",
