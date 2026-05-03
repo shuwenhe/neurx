@@ -929,7 +929,71 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
         slope = (lower + upper) * 0.5
         slope_arr = np.random.uniform(lower, upper, size=x.shape) if training else slope
         return np.where(x > 0, x, slope_arr * x)
+    if name == "update_scale":
+        if len(args) != 2:
+            raise ValueError(f"update_scale expects 2 args, got {len(args)}")
+        state = args[0]
+        found_inf = bool(args[1])
+        if not isinstance(state, dict):
+            return state
+        if not bool(state.get("enabled", True)):
+            return state
+        next_scale = float(state.get("scale", 1.0))
+        next_tracker = int(state.get("growth_tracker", 0)) + 1
+        next_found_inf = False
+        if found_inf:
+            next_scale = next_scale * float(state.get("backoff_factor", 0.5))
+            if next_scale < 1.0:
+                next_scale = 1.0
+            next_tracker = 0
+            next_found_inf = True
+        elif next_tracker >= int(state.get("growth_interval", 1)):
+            next_scale = next_scale * float(state.get("growth_factor", 2.0))
+            next_tracker = 0
+        return {
+            "scale": next_scale,
+            "growth_factor": float(state.get("growth_factor", 2.0)),
+            "backoff_factor": float(state.get("backoff_factor", 0.5)),
+            "growth_interval": int(state.get("growth_interval", 1)),
+            "growth_tracker": next_tracker,
+            "enabled": bool(state.get("enabled", True)),
+            "found_inf": next_found_inf,
+        }
     raise NotImplementedError(f"unsupported intrinsic: {name}")
+
+
+def _resolve_ir_operand(scope: dict[str, Any], operand: str) -> Any:
+    if operand in scope:
+        return scope[operand]
+    if operand.startswith('"') and operand.endswith('"'):
+        return operand[1:-1]
+    if operand == "[]":
+        return []
+    if operand in {"true", "false"}:
+        return operand == "true"
+    try:
+        if "." in operand:
+            return float(operand)
+        return int(operand)
+    except ValueError:
+        pass
+    value: Any = scope
+    for part in operand.split("."):
+        if isinstance(value, dict) and part in value:
+            value = value[part]
+        elif hasattr(value, part):
+            value = getattr(value, part)
+        else:
+            raise KeyError(operand)
+    return value
+
+
+def _bool_from_value(value: Any) -> bool:
+    if isinstance(value, np.ndarray):
+        if value.shape == ():
+            return bool(value.item())
+        return bool(np.all(value))
+    return bool(value)
 
 
 def _nll_loss_forward(input_data: Any, target_data: Any, ignore_index: int, reduction: str, label_smoothing: float, dim: int) -> Any:
@@ -978,68 +1042,81 @@ def invoke_runtime_function(module_name: str, function_name: str, *args: Any) ->
     scope: dict[str, Any] = {}
     call_args: list[Any] = []
     arg_iter = iter(args)
-    for op in functions[function_name]:
+    ops = functions[function_name]
+    labels = {op[1]: idx for idx, op in enumerate(ops) if op and op[0] == "LABEL" and len(op) > 1}
+    pc = 0
+    while pc < len(ops):
+        op = ops[pc]
         opcode = op[0]
         if opcode == "PARAM":
             scope[op[1]] = next(arg_iter)
         elif opcode == "ARG":
             arg_name = op[1]
-            if arg_name in scope:
-                call_args.append(scope[arg_name])
+            call_args.append(_resolve_ir_operand(scope, arg_name))
+        elif opcode == "MOV":
+            target = op[1]
+            source = op[2]
+            scope[target] = _resolve_ir_operand(scope, source)
+        elif opcode in {"ADD", "SUB", "MUL", "DIV"}:
+            target = op[1]
+            left = _resolve_ir_operand(scope, op[2])
+            right = _resolve_ir_operand(scope, op[3])
+            if opcode == "ADD":
+                scope[target] = left + right
+            elif opcode == "SUB":
+                scope[target] = left - right
+            elif opcode == "MUL":
+                scope[target] = left * right
+            else:
+                scope[target] = left / right
+        elif opcode in {"CMP_EQ", "CMP_NE", "CMP_LT", "CMP_LE", "CMP_GT", "CMP_GE"}:
+            target = op[1]
+            left = _resolve_ir_operand(scope, op[2])
+            right = _resolve_ir_operand(scope, op[3])
+            if opcode == "CMP_EQ":
+                scope[target] = left == right
+            elif opcode == "CMP_NE":
+                scope[target] = left != right
+            elif opcode == "CMP_LT":
+                scope[target] = left < right
+            elif opcode == "CMP_LE":
+                scope[target] = left <= right
+            elif opcode == "CMP_GT":
+                scope[target] = left > right
+            else:
+                scope[target] = left >= right
+        elif opcode == "JUMP":
+            label = op[1]
+            if label not in labels:
+                raise KeyError(label)
+            pc = labels[label]
+            continue
+        elif opcode == "JUMP_IF_FALSE":
+            label = op[1]
+            condition = _resolve_ir_operand(scope, op[2])
+            if not _bool_from_value(condition):
+                if label not in labels:
+                    raise KeyError(label)
+                pc = labels[label]
                 continue
-            if arg_name.startswith('"') and arg_name.endswith('"'):
-                call_args.append(arg_name[1:-1])
-                continue
-            if arg_name == "[]":
-                call_args.append([])
-                continue
-            if arg_name in {"true", "false"}:
-                call_args.append(arg_name == "true")
-                continue
-            try:
-                if "." in arg_name:
-                    call_args.append(float(arg_name))
-                else:
-                    call_args.append(int(arg_name))
-                continue
-            except ValueError:
-                pass
-            value: Any = scope
-            resolved = True
-            for part in arg_name.split("."):
-                if isinstance(value, dict) and part in value:
-                    value = value[part]
-                elif hasattr(value, part):
-                    value = getattr(value, part)
-                else:
-                    resolved = False
-                    break
-            if not resolved:
-                raise KeyError(arg_name)
-            call_args.append(value)
+        elif opcode == "LABEL":
+            pass
         elif opcode == "CALL":
             target = op[1]
             callee = op[2]
             arity = int(op[3])
-            scope[target] = _execute_intrinsic(callee, call_args[-arity:])
+            callee_args = call_args[-arity:] if arity > 0 else []
+            scope[target] = _execute_intrinsic(callee, callee_args)
             call_args = []
         elif opcode == "RET":
             ret_name = op[1]
             if ret_name in scope:
                 return scope[ret_name]
-            value: Any = scope
-            resolved = True
-            for part in ret_name.split("."):
-                if isinstance(value, dict) and part in value:
-                    value = value[part]
-                elif hasattr(value, part):
-                    value = getattr(value, part)
-                else:
-                    resolved = False
-                    break
-            if resolved:
-                return value
-            return ret_name
+            try:
+                return _resolve_ir_operand(scope, ret_name)
+            except KeyError:
+                return ret_name
+        pc += 1
     raise RuntimeError(f"runtime function did not return: {module_name}.{function_name}")
 
 

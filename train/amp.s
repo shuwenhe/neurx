@@ -25,7 +25,7 @@ func new_autocast_state(bool enabled, int dtype_code) autocast_state {
 }
 
 func is_autocast_enabled(autocast_state state) bool {
-    state.enabled && state.nesting > -1
+    state.enabled && state.nesting > 0
 }
 
 func get_autocast_dtype(autocast_state state) int {

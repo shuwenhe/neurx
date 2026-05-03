@@ -79,7 +79,7 @@ func checkpoint_manager_mark_best(checkpoint_manager_state state, int step, int 
     int next_best_epoch = state.best_epoch
     float next_best_score = state.best_score
     bool next_has_best = state.has_best
-    if !state.has_best || score >= state.best_score {
+    if !state.has_best || score > state.best_score {
         next_best_step = step
         next_best_epoch = epoch
         next_best_score = score
@@ -121,7 +121,7 @@ func checkpoint_manager_should_save_best(checkpoint_manager_state state, float s
     if !state.has_best {
         return true
     }
-    score >= state.best_score
+    score > state.best_score
 }
 
 func checkpoint_manager_last_saved_step(checkpoint_manager_state state) int {
