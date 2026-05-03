@@ -442,59 +442,59 @@ func linearize_backward_state(linearize_state state, int loss_id, tensor loss_te
     vjp_seed_state(state, loss_id, loss_tensor)
 }
 
-func function_state(Function f) Function {
+func function_state(function_record f) function_record {
     neurx.ad.function.function_state_dict(f)
 }
 
-func function_linearized(Function f) Function {
+func function_linearized(function_record f) function_record {
     neurx.ad.function.set_linearized(f, true)
 }
 
-func function_enable_forward(Function f) Function {
+func function_enable_forward(function_record f) function_record {
     neurx.ad.function.enable_forward(f)
 }
 
-func function_enable_backward(Function f) Function {
+func function_enable_backward(function_record f) function_record {
     neurx.ad.function.enable_backward(f)
 }
 
-func function_enable_apply(Function f) Function {
+func function_enable_apply(function_record f) function_record {
     neurx.ad.function.enable_apply(f)
 }
 
-func function_linearize(Function f) Function {
+func function_linearize(function_record f) function_record {
     neurx.ad.function.linearize(f)
 }
 
-func function_jvp(Function f) Function {
+func function_jvp(function_record f) function_record {
     neurx.ad.function.jvp(f)
 }
 
-func function_vjp(Function f) Function {
+func function_vjp(function_record f) function_record {
     neurx.ad.function.vjp(f)
 }
 
-func function_grad(Function f) Function {
+func function_grad(function_record f) function_record {
     neurx.ad.function.grad(f)
 }
 
-func function_value_and_grad(Function f) Function {
+func function_value_and_grad(function_record f) function_record {
     neurx.ad.function.value_and_grad(f)
 }
 
-func function_tag_flow(Function f, string tag) Function {
+func function_tag_flow(function_record f, string tag) function_record {
     neurx.ad.function.tag_flow(f, tag)
 }
 
-func function_backward_pass(Function f) Function {
+func function_backward_pass(function_record f) function_record {
     neurx.ad.function.backward_pass(f)
 }
 
-func function_backward_pass_state(Function f) Function {
+func function_backward_pass_state(function_record f) function_record {
     neurx.ad.function.backward_pass_state(f)
 }
 
-func function_tagged_linearize(Function f, string tag, tensor value) linearize_state {
+func function_tagged_linearize(function_record f, string tag, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {
@@ -513,87 +513,87 @@ func function_tagged_linearize(Function f, string tag, tensor value) linearize_s
     }
 }
 
-func function_transform_chain(Function f) transform_chain {
+func function_transform_chain(function_record f) transform_chain {
     neurx.ad.function.function_transform_chain(f)
 }
 
-func transform_chain_to_function(transform_chain chain, string name, int arity) Function {
+func transform_chain_to_function(transform_chain chain, string name, int arity) function_record {
     neurx.ad.function.transform_chain_to_function(chain, name, arity)
 }
 
-func function_transform_chain_jvp(Function f) transform_chain {
+func function_transform_chain_jvp(function_record f) transform_chain {
     neurx.ad.function.transform_chain_jvp(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_vjp(Function f) transform_chain {
+func function_transform_chain_vjp(function_record f) transform_chain {
     neurx.ad.function.transform_chain_vjp(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_grad(Function f) transform_chain {
+func function_transform_chain_grad(function_record f) transform_chain {
     neurx.ad.function.transform_chain_grad(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_value_and_grad(Function f) transform_chain {
+func function_transform_chain_value_and_grad(function_record f) transform_chain {
     neurx.ad.function.transform_chain_value_and_grad(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_add(Function f) Function {
+func function_add(function_record f) function_record {
     neurx.ad.function.function_add(f)
 }
 
-func function_mul(Function f) Function {
+func function_mul(function_record f) function_record {
     neurx.ad.function.function_mul(f)
 }
 
-func function_matmul(Function f) Function {
+func function_matmul(function_record f) function_record {
     neurx.ad.function.function_matmul(f)
 }
 
-func function_sum(Function f) Function {
+func function_sum(function_record f) function_record {
     neurx.ad.function.function_sum(f)
 }
 
-func function_mean(Function f) Function {
+func function_mean(function_record f) function_record {
     neurx.ad.function.function_mean(f)
 }
 
-func function_add_op(Function f) Function {
+func function_add_op(function_record f) function_record {
     neurx.ad.function.add(f)
 }
 
-func function_mul_op(Function f) Function {
+func function_mul_op(function_record f) function_record {
     neurx.ad.function.mul(f)
 }
 
-func function_matmul_op(Function f) Function {
+func function_matmul_op(function_record f) function_record {
     neurx.ad.function.matmul(f)
 }
 
-func function_sum_op(Function f) Function {
+func function_sum_op(function_record f) function_record {
     neurx.ad.function.sum(f)
 }
 
-func function_mean_op(Function f) Function {
+func function_mean_op(function_record f) function_record {
     neurx.ad.function.mean(f)
 }
 
-func function_transform_chain_add(Function f) transform_chain {
+func function_transform_chain_add(function_record f) transform_chain {
     neurx.ad.function.transform_chain_add(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_mul(Function f) transform_chain {
+func function_transform_chain_mul(function_record f) transform_chain {
     neurx.ad.function.transform_chain_mul(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_matmul(Function f) transform_chain {
+func function_transform_chain_matmul(function_record f) transform_chain {
     neurx.ad.function.transform_chain_matmul(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_sum(Function f) transform_chain {
+func function_transform_chain_sum(function_record f) transform_chain {
     neurx.ad.function.transform_chain_sum(neurx.ad.function.function_transform_chain(f))
 }
 
-func function_transform_chain_mean(Function f) transform_chain {
+func function_transform_chain_mean(function_record f) transform_chain {
     neurx.ad.function.transform_chain_mean(neurx.ad.function.function_transform_chain(f))
 }
 
@@ -617,6 +617,14 @@ func backward_rule_mean(tensor a, tensor upstream) backward_rule {
     neurx.ad.function.backward_rule_mean(a, upstream)
 }
 
+func tensor_backward_rule_sub(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sub(a, b, upstream)
+}
+
+func tensor_backward_rule_div(tensor a, tensor b, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_div(a, b, upstream)
+}
+
 func tensor_backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
     neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
 }
@@ -637,12 +645,28 @@ func tensor_backward_rule_mean(tensor a, tensor upstream) backward_rule {
     neurx.tensor.autograd.tensor_backward_rule_mean(a, upstream)
 }
 
+func tensor_backward_rule_sum_dim(tensor a, tensor upstream, int dim, bool keepdim) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sum_dim(a, upstream, dim, keepdim)
+}
+
+func tensor_backward_rule_mean_dim(tensor a, tensor upstream, int dim, bool keepdim) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_mean_dim(a, upstream, dim, keepdim)
+}
+
 func tensor_transform_chain_add() transform_chain {
     neurx.tensor.autograd.tensor_transform_chain_add()
 }
 
 func tensor_transform_chain_mul() transform_chain {
     neurx.tensor.autograd.tensor_transform_chain_mul()
+}
+
+func tensor_transform_chain_sub() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_sub()
+}
+
+func tensor_transform_chain_div() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_div()
 }
 
 func tensor_transform_chain_matmul() transform_chain {
@@ -657,11 +681,19 @@ func tensor_transform_chain_mean() transform_chain {
     neurx.tensor.autograd.tensor_transform_chain_mean()
 }
 
-func function_ready_for_linearize(Function f, linearize_state state) bool {
+func tensor_transform_chain_sum_dim() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_sum_dim()
+}
+
+func tensor_transform_chain_mean_dim() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_mean_dim()
+}
+
+func function_ready_for_linearize(function_record f, linearize_state state) bool {
     neurx.ad.function.function_ready(f) && linearize_ready(state)
 }
 
-func function_to_linearize_state(Function f, tensor value) linearize_state {
+func function_to_linearize_state(function_record f, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {
@@ -680,8 +712,8 @@ func function_to_linearize_state(Function f, tensor value) linearize_state {
     }
 }
 
-func linearize_state_to_function(linearize_state state, string name, int arity) Function {
-    Function {
+func linearize_state_to_function(linearize_state state, string name, int arity) function_record {
+    function_record {
         name: name,
         forward_enabled: state.forward_mode,
         backward_enabled: state.reverse_mode,
@@ -692,7 +724,7 @@ func linearize_state_to_function(linearize_state state, string name, int arity) 
     }
 }
 
-func function_capture(Function f, tensor value) linearize_state {
+func function_capture(function_record f, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {
@@ -711,7 +743,7 @@ func function_capture(Function f, tensor value) linearize_state {
     }
 }
 
-func function_jvp_capture(Function f, tensor value) linearize_state {
+func function_jvp_capture(function_record f, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {
@@ -730,7 +762,7 @@ func function_jvp_capture(Function f, tensor value) linearize_state {
     }
 }
 
-func function_vjp_capture(Function f, tensor value) linearize_state {
+func function_vjp_capture(function_record f, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {
@@ -749,7 +781,7 @@ func function_vjp_capture(Function f, tensor value) linearize_state {
     }
 }
 
-func function_linearize_capture(Function f, tensor value) linearize_state {
+func function_linearize_capture(function_record f, tensor value) linearize_state {
     []dual_record records = []dual_record{cap: 1}
     records.push(
         dual_record {

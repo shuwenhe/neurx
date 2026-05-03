@@ -45,6 +45,8 @@ def test_s_tensor_runtime_compiled_functions_present():
         "matmul",
         "sum",
         "mean",
+        "sum_dim",
+        "mean_dim",
         "exp",
         "log",
         "sqrt",
@@ -61,6 +63,14 @@ def test_s_tensor_runtime_compiled_functions_present():
         "softmax",
         "log_softmax",
         "take_along_dim",
+        "tensor_backward_add_grad_a",
+        "tensor_backward_add_grad_b",
+        "tensor_backward_mul_grad_a",
+        "tensor_backward_mul_grad_b",
+        "tensor_backward_matmul_grad_a",
+        "tensor_backward_matmul_grad_b",
+        "tensor_backward_sum_grad",
+        "tensor_backward_mean_grad",
     ):
         assert runtime.supports_runtime_function("tensor", function_name)
 
@@ -73,3 +83,37 @@ def test_s_tensor_runtime_compiled_functions_present():
     ):
         for function_name in function_names:
             assert runtime.supports_runtime_function(module_name, function_name)
+
+
+def test_s_tensor_runtime_autograd_helpers():
+    runtime = _load_runtime_module()
+    a = {"data": [1.0, 2.0], "shape": [2], "requires_grad": True, "grad": None}
+    b = {"data": [3.0, 4.0], "shape": [2], "requires_grad": True, "grad": None}
+    upstream = {"data": [5.0, 6.0], "shape": [2], "requires_grad": False, "grad": None}
+    scalar_upstream = {"data": [5.0], "shape": [1], "requires_grad": False, "grad": None}
+    add_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_add_grad_a", upstream)
+    assert list(add_grad["data"]) == [5.0, 6.0]
+
+    mul_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_mul_grad_a", a, b, upstream)
+    assert list(mul_grad["data"]) == [15.0, 24.0]
+
+    sub_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_sub_grad_b", upstream)
+    assert list(sub_grad["data"]) == [-5.0, -6.0]
+
+    div_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_div_grad_a", a, b, upstream)
+    assert list(div_grad["data"]) == [5.0 / 3.0, 1.5]
+
+    matmul_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_matmul_grad_a", a, b, scalar_upstream)
+    assert list(matmul_grad["data"]) == [15.0, 20.0]
+
+    sum_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_sum_grad", a, scalar_upstream)
+    assert list(sum_grad["data"]) == [5.0, 5.0]
+
+    mean_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_mean_grad", a, {"data": [6.0], "shape": [1], "requires_grad": False, "grad": None})
+    assert list(mean_grad["data"]) == [3.0, 3.0]
+
+    sum_dim_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_sum_dim_grad", a, scalar_upstream, 0, False)
+    assert list(sum_dim_grad["data"]) == [5.0, 5.0]
+
+    mean_dim_grad = runtime.invoke_runtime_function("tensor", "tensor_backward_mean_dim_grad", a, scalar_upstream, 0, False)
+    assert list(mean_dim_grad["data"]) == [2.5, 2.5]
