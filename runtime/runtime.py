@@ -79,6 +79,10 @@ def _tensor_like(value: Any) -> tuple[np.ndarray, list[int], bool]:
         data = value.get("data", [])
         shape = value.get("shape", [])
         requires_grad = bool(value.get("requires_grad", False))
+    elif isinstance(value, (list, tuple, np.ndarray)):
+        data = value
+        shape = list(np.asarray(value).shape)
+        requires_grad = False
     else:
         data = getattr(value, "data")
         shape = getattr(value, "shape")
@@ -416,6 +420,157 @@ def _function_dict(name: str, forward_enabled: bool, backward_enabled: bool, app
     }
 
 
+def _batch_like(value: Any) -> tuple[str, bool, int, int, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            bool(value.get("active", False)),
+            int(value.get("batch_size", 0)),
+            int(value.get("batch_dim", 0)),
+            _string_list(value.get("primitives", [])),
+            _string_list(value.get("params", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        bool(getattr(value, "active", False)),
+        int(getattr(value, "batch_size", 0)),
+        int(getattr(value, "batch_dim", 0)),
+        _string_list(getattr(value, "primitives", [])),
+        _string_list(getattr(value, "params", [])),
+    )
+
+
+def _batch_dict(name: str, active: bool, batch_size: int, batch_dim: int, primitives: list[str], params: list[str]) -> dict[str, Any]:
+    return {
+        "name": name,
+        "active": bool(active),
+        "batch_size": int(batch_size),
+        "batch_dim": int(batch_dim),
+        "primitives": list(primitives),
+        "params": list(params),
+    }
+
+
+def _stage_dict(
+    name: str,
+    backend: str,
+    mode: str,
+    jit_enabled: bool,
+    lowered: bool,
+    compiled: bool,
+    executed: bool,
+    stages: list[str],
+    params: list[str],
+    control_enabled: bool = False,
+    control_cond_enabled: bool = False,
+    control_loop_enabled: bool = False,
+    control_scan_enabled: bool = False,
+    control_iterations: int = 0,
+    control_branches: list[str] | None = None,
+    control_params: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "backend": backend,
+        "mode": mode,
+        "jit_enabled": bool(jit_enabled),
+        "lowered": bool(lowered),
+        "compiled": bool(compiled),
+        "executed": bool(executed),
+        "stages": list(stages),
+        "params": list(params),
+        "control_enabled": bool(control_enabled),
+        "control_cond_enabled": bool(control_cond_enabled),
+        "control_loop_enabled": bool(control_loop_enabled),
+        "control_scan_enabled": bool(control_scan_enabled),
+        "control_iterations": int(control_iterations),
+        "control_branches": list(control_branches or []),
+        "control_params": list(control_params or []),
+    }
+
+
+def _control_dict(name: str, cond_enabled: bool, loop_enabled: bool, scan_enabled: bool, iterations: int, branches: list[str], params: list[str]) -> dict[str, Any]:
+    return {
+        "name": name,
+        "cond_enabled": bool(cond_enabled),
+        "loop_enabled": bool(loop_enabled),
+        "scan_enabled": bool(scan_enabled),
+        "iterations": int(iterations),
+        "branches": list(branches),
+        "params": list(params),
+    }
+
+
+def _control_like(value: Any) -> tuple[str, bool, bool, bool, int, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            bool(value.get("cond_enabled", False)),
+            bool(value.get("loop_enabled", False)),
+            bool(value.get("scan_enabled", False)),
+            int(value.get("iterations", 0)),
+            _string_list(value.get("branches", [])),
+            _string_list(value.get("params", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        bool(getattr(value, "cond_enabled", False)),
+        bool(getattr(value, "loop_enabled", False)),
+        bool(getattr(value, "scan_enabled", False)),
+        int(getattr(value, "iterations", 0)),
+        _string_list(getattr(value, "branches", [])),
+        _string_list(getattr(value, "params", [])),
+    )
+
+
+def _stage_like(value: Any) -> tuple[str, str, str, bool, bool, bool, bool, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            str(value.get("backend", "eager")),
+            str(value.get("mode", "default")),
+            bool(value.get("jit_enabled", False)),
+            bool(value.get("lowered", False)),
+            bool(value.get("compiled", False)),
+            bool(value.get("executed", False)),
+            _string_list(value.get("stages", [])),
+            _string_list(value.get("params", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        str(getattr(value, "backend", "eager")),
+        str(getattr(value, "mode", "default")),
+        bool(getattr(value, "jit_enabled", False)),
+        bool(getattr(value, "lowered", False)),
+        bool(getattr(value, "compiled", False)),
+        bool(getattr(value, "executed", False)),
+        _string_list(getattr(value, "stages", [])),
+        _string_list(getattr(value, "params", [])),
+    )
+
+
+def _stage_control_like(value: Any) -> tuple[bool, bool, bool, bool, int, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            bool(value.get("control_enabled", False)),
+            bool(value.get("control_cond_enabled", False)),
+            bool(value.get("control_loop_enabled", False)),
+            bool(value.get("control_scan_enabled", False)),
+            int(value.get("control_iterations", 0)),
+            _string_list(value.get("control_branches", [])),
+            _string_list(value.get("control_params", [])),
+        )
+    return (
+        bool(getattr(value, "control_enabled", False)),
+        bool(getattr(value, "control_cond_enabled", False)),
+        bool(getattr(value, "control_loop_enabled", False)),
+        bool(getattr(value, "control_scan_enabled", False)),
+        int(getattr(value, "control_iterations", 0)),
+        _string_list(getattr(value, "control_branches", [])),
+        _string_list(getattr(value, "control_params", [])),
+    )
+
+
 def _jaxpr_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], list[str], bool, bool]:
     if isinstance(value, dict):
         return (
@@ -691,6 +846,366 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             chain = _invoke_special_module_function(module_name, "function_transform_chain", args)
             suffix = function_name.removeprefix("function_transform_chain_")
             return _invoke_special_module_function(module_name, f"transform_chain_{suffix}", (chain,))
+    if module_name == "runtime/stage":
+        if function_name == "new_stage_state":
+            return _stage_dict(str(args[0]), str(args[1]), str(args[2]), False, False, False, False, [], [], False, False, False, False, 0, [], [])
+        if function_name == "stage_name":
+            name, _, _, _, _, _, _, _, _ = _stage_like(args[0])
+            return name
+        if function_name == "stage_backend":
+            _, backend, _, _, _, _, _, _, _ = _stage_like(args[0])
+            return backend
+        if function_name == "stage_mode":
+            _, _, mode, _, _, _, _, _, _ = _stage_like(args[0])
+            return mode
+        if function_name == "stage_jit_enabled":
+            _, _, _, jit_enabled, _, _, _, _, _ = _stage_like(args[0])
+            return jit_enabled
+        if function_name == "stage_lowered":
+            _, _, _, _, lowered, _, _, _, _ = _stage_like(args[0])
+            return lowered
+        if function_name == "stage_compiled":
+            _, _, _, _, _, compiled, _, _, _ = _stage_like(args[0])
+            return compiled
+        if function_name == "stage_executed":
+            _, _, _, _, _, _, executed, _, _ = _stage_like(args[0])
+            return executed
+        if function_name == "stage_stage_count":
+            _, _, _, _, _, _, _, stages, _ = _stage_like(args[0])
+            return len(stages)
+        if function_name == "stage_param_count":
+            _, _, _, _, _, _, _, _, params = _stage_like(args[0])
+            return len(params)
+        if function_name == "stage_has_stage":
+            _, _, _, _, _, _, _, stages, _ = _stage_like(args[0])
+            return str(args[1]) in stages
+        if function_name == "stage_has_param":
+            _, _, _, _, _, _, _, _, params = _stage_like(args[0])
+            return str(args[1]) in params
+        if function_name == "stage_add_stage":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            stages = list(stages)
+            stages.append(str(args[1]))
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_add_param":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            params = list(params)
+            params.append(str(args[1]))
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_jit_enabled":
+            name, backend, mode, _, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, bool(args[1]), lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_lowered":
+            name, backend, mode, jit_enabled, _, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, bool(args[1]), compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_compiled":
+            name, backend, mode, jit_enabled, lowered, _, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, bool(args[1]), executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_executed":
+            name, backend, mode, jit_enabled, lowered, compiled, _, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, bool(args[1]), stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_clear_stages":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, _, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, [], params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_clear_params":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, _ = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, [], control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_state_dict":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(
+                name,
+                backend,
+                mode,
+                jit_enabled,
+                lowered,
+                compiled,
+                executed,
+                stages,
+                params,
+                control_enabled,
+                control_cond_enabled,
+                control_loop_enabled,
+                control_scan_enabled,
+                control_iterations,
+                control_branches,
+                control_params,
+            )
+        if function_name == "stage_load_state_dict":
+            return args[1]
+        if function_name == "stage_control_enabled":
+            control_enabled, _, _, _, _, _, _ = _stage_control_like(args[0])
+            return control_enabled
+        if function_name == "stage_control_cond_enabled":
+            _, control_cond_enabled, _, _, _, _, _ = _stage_control_like(args[0])
+            return control_cond_enabled
+        if function_name == "stage_control_loop_enabled":
+            _, _, control_loop_enabled, _, _, _, _ = _stage_control_like(args[0])
+            return control_loop_enabled
+        if function_name == "stage_control_scan_enabled":
+            _, _, _, control_scan_enabled, _, _, _ = _stage_control_like(args[0])
+            return control_scan_enabled
+        if function_name == "stage_control_iterations":
+            _, _, _, _, control_iterations, _, _ = _stage_control_like(args[0])
+            return control_iterations
+        if function_name == "stage_control_branch_count":
+            _, _, _, _, _, control_branches, _ = _stage_control_like(args[0])
+            return len(control_branches)
+        if function_name == "stage_control_param_count":
+            _, _, _, _, _, _, control_params = _stage_control_like(args[0])
+            return len(control_params)
+        if function_name == "stage_has_control_branch":
+            _, _, _, _, _, control_branches, _ = _stage_control_like(args[0])
+            return str(args[1]) in control_branches
+        if function_name == "stage_has_control_param":
+            _, _, _, _, _, _, control_params = _stage_control_like(args[0])
+            return str(args[1]) in control_params
+        if function_name == "stage_add_control_branch":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            control_branches = list(control_branches)
+            control_branches.append(str(args[1]))
+            branch = str(args[1])
+            return _stage_dict(
+                name,
+                backend,
+                mode,
+                jit_enabled,
+                lowered,
+                compiled,
+                executed,
+                stages,
+                params,
+                True,
+                control_cond_enabled or branch == "cond",
+                control_loop_enabled or branch == "while_loop",
+                control_scan_enabled or branch == "scan",
+                control_iterations,
+                control_branches,
+                control_params,
+            )
+        if function_name == "stage_add_control_param":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            control_params = list(control_params)
+            control_params.append(str(args[1]))
+            return _stage_dict(
+                name,
+                backend,
+                mode,
+                jit_enabled,
+                lowered,
+                compiled,
+                executed,
+                stages,
+                params,
+                control_enabled or len(control_branches) > 0 or len(control_params) > 0,
+                control_cond_enabled,
+                control_loop_enabled,
+                control_scan_enabled,
+                control_iterations,
+                control_branches,
+                control_params,
+            )
+        if function_name == "stage_set_control_enabled":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            _, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, bool(args[1]), control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_control_cond_enabled":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, _, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            enabled = bool(args[1])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled or enabled, enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_control_loop_enabled":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, _, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            enabled = bool(args[1])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled or enabled, control_cond_enabled, enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_control_scan_enabled":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, _, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            enabled = bool(args[1])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled or enabled, control_cond_enabled, control_loop_enabled, enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_set_control_iterations":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, _, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, int(args[1]), control_branches, control_params)
+        if function_name == "stage_clear_control_branches":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, _, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, [], control_params)
+        if function_name == "stage_clear_control_params":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, _ = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, [])
+        if function_name == "stage_control_state_dict":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "stage_to_control_state":
+            name, backend, mode, _, _, _, _, _, _ = _stage_like(args[0])
+            _, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _control_dict(name, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "control_state_to_stage":
+            control = args[0]
+            backend = str(args[1])
+            mode = str(args[2])
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params = _control_like(control)
+            return _stage_dict(
+                name,
+                backend,
+                mode,
+                False,
+                False,
+                False,
+                False,
+                [],
+                [],
+                bool(cond_enabled or loop_enabled or scan_enabled or len(branches) > 0 or len(params) > 0),
+                cond_enabled,
+                loop_enabled,
+                scan_enabled,
+                iterations,
+                branches,
+                params,
+            )
+        if function_name == "stage_to_transform_chain":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            eqns = [
+                {
+                    "primitive": stage,
+                    "params": [param] if param else [],
+                    "inputs": [],
+                    "outputs": [],
+                }
+                for stage, param in zip(stages, params)
+            ]
+            for index, branch in enumerate(control_branches):
+                param = control_params[index] if index < len(control_params) else ""
+                eqns.append(
+                    {
+                        "primitive": branch,
+                        "params": [param] if param else [],
+                        "inputs": [],
+                        "outputs": [],
+                    }
+                )
+            if len(control_params) > len(control_branches):
+                for param in control_params[len(control_branches):]:
+                    eqns.append({"primitive": "control_param", "params": [param] if param else [], "inputs": [], "outputs": []})
+            return {
+                "steps": list(stages),
+                "params": list(params),
+                "inputs": [],
+                "outputs": [],
+                "eqns": eqns,
+                "ready": bool(jit_enabled or lowered or compiled or executed or len(stages) > 0 or control_enabled or len(control_branches) > 0),
+                "linearized": bool(lowered or compiled or executed or control_loop_enabled or control_scan_enabled),
+            }
+        if function_name == "transform_chain_to_stage":
+            chain = args[0]
+            name = str(args[1])
+            backend = str(args[2])
+            mode = str(args[3])
+            stages = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            eqns = _transform_chain_eqns(chain)
+            control_enabled = False
+            control_cond_enabled = False
+            control_loop_enabled = False
+            control_scan_enabled = False
+            control_iterations = 0
+            control_branches: list[str] = []
+            control_params: list[str] = []
+            if eqns:
+                stages = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
+                filtered_stages: list[str] = []
+                filtered_params: list[str] = []
+                for eqn in eqns:
+                    primitive = eqn["primitive"]
+                    joined = ",".join(eqn["params"])
+                    if primitive in {"jit", "lower", "compile", "execute"}:
+                        filtered_stages.append(primitive)
+                        filtered_params.append(joined)
+                    elif primitive == "control_param":
+                        control_enabled = True
+                        if joined:
+                            control_params.append(joined)
+                    else:
+                        control_enabled = True
+                        control_branches.append(primitive)
+                        if joined:
+                            control_params.append(joined)
+                        if primitive == "cond":
+                            control_cond_enabled = True
+                        if primitive == "while_loop":
+                            control_loop_enabled = True
+                        if primitive == "scan":
+                            control_scan_enabled = True
+                stages = filtered_stages
+                params = filtered_params
+            jit_enabled = "jit" in stages
+            lowered = "lower" in stages
+            compiled = "compile" in stages
+            executed = "execute" in stages
+            if len(stages) > 0 and not jit_enabled:
+                jit_enabled = True
+            if compiled:
+                lowered = True
+            if executed:
+                lowered = True
+                compiled = True
+            return _stage_dict(name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "jit":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            stages = list(stages)
+            if "jit" not in stages:
+                stages.append("jit")
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, True, lowered, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "lower":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            stages = list(stages)
+            if "jit" not in stages:
+                stages.append("jit")
+            if "lower" not in stages:
+                stages.append("lower")
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, True, True, compiled, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "compile":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            stages = list(stages)
+            if "jit" not in stages:
+                stages.append("jit")
+            if "lower" not in stages:
+                stages.append("lower")
+            if "compile" not in stages:
+                stages.append("compile")
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, True, True, True, executed, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+        if function_name == "execute":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            stages = list(stages)
+            if "jit" not in stages:
+                stages.append("jit")
+            if "lower" not in stages:
+                stages.append("lower")
+            if "compile" not in stages:
+                stages.append("compile")
+            if "execute" not in stages:
+                stages.append("execute")
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _stage_dict(name, backend, mode, True, True, True, True, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
     if module_name == "tensor":
         if function_name == "tensor_backward_add_grad_a":
             grad_a, _, _ = _tensor_like(args[0])
@@ -1236,6 +1751,330 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             if not eqns:
                 eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
             return _jaxpr_dict(str(args[1]), len(steps), steps, params, inputs, outputs, ready, linearized, eqns)
+    if module_name == "tensor/batch":
+        if function_name == "new_batch_state":
+            return _batch_dict(str(args[0]), False, int(args[1]), int(args[2]), [], [])
+        if function_name == "batch_name":
+            name, _, _, _, _, _ = _batch_like(args[0])
+            return name
+        if function_name == "batch_active":
+            _, active, _, _, _, _ = _batch_like(args[0])
+            return active
+        if function_name == "batch_batch_size":
+            _, _, batch_size, _, _, _ = _batch_like(args[0])
+            return batch_size
+        if function_name == "batch_batch_dim":
+            _, _, _, batch_dim, _, _ = _batch_like(args[0])
+            return batch_dim
+        if function_name == "batch_primitive_count":
+            _, _, _, _, primitives, _ = _batch_like(args[0])
+            return len(primitives)
+        if function_name == "batch_param_count":
+            _, _, _, _, _, params = _batch_like(args[0])
+            return len(params)
+        if function_name == "batch_has_primitive":
+            _, _, _, _, primitives, _ = _batch_like(args[0])
+            return str(args[1]) in primitives
+        if function_name == "batch_has_param":
+            _, _, _, _, _, params = _batch_like(args[0])
+            return str(args[1]) in params
+        if function_name == "batch_add_primitive":
+            name, active, batch_size, batch_dim, primitives, params = _batch_like(args[0])
+            primitives = list(primitives)
+            primitives.append(str(args[1]))
+            return _batch_dict(name, True, batch_size, batch_dim, primitives, params)
+        if function_name == "batch_add_param":
+            name, active, batch_size, batch_dim, primitives, params = _batch_like(args[0])
+            params = list(params)
+            params.append(str(args[1]))
+            return _batch_dict(name, True, batch_size, batch_dim, primitives, params)
+        if function_name == "batch_set_active":
+            name, _, batch_size, batch_dim, primitives, params = _batch_like(args[0])
+            return _batch_dict(name, bool(args[1]), batch_size, batch_dim, primitives, params)
+        if function_name == "batch_set_batch_size":
+            name, active, _, batch_dim, primitives, params = _batch_like(args[0])
+            return _batch_dict(name, active, int(args[1]), batch_dim, primitives, params)
+        if function_name == "batch_set_batch_dim":
+            name, active, batch_size, _, primitives, params = _batch_like(args[0])
+            return _batch_dict(name, active, batch_size, int(args[1]), primitives, params)
+        if function_name == "batch_clear_primitives":
+            name, active, batch_size, batch_dim, _, params = _batch_like(args[0])
+            return _batch_dict(name, active, batch_size, batch_dim, [], params)
+        if function_name == "batch_clear_params":
+            name, active, batch_size, batch_dim, primitives, _ = _batch_like(args[0])
+            return _batch_dict(name, active, batch_size, batch_dim, primitives, [])
+        if function_name == "batch_state_dict":
+            name, active, batch_size, batch_dim, primitives, params = _batch_like(args[0])
+            return _batch_dict(name, active, batch_size, batch_dim, primitives, params)
+        if function_name == "batch_load_state_dict":
+            return args[1]
+        if function_name == "batch_to_transform_chain":
+            name, active, batch_size, batch_dim, primitives, params = _batch_like(args[0])
+            return {
+                "steps": list(primitives),
+                "params": list(params),
+                "inputs": [],
+                "outputs": [],
+                "eqns": [{"primitive": primitive, "params": [param] if param else [], "inputs": [], "outputs": []} for primitive, param in zip(primitives, params)],
+                "ready": bool(active or len(primitives) > 0),
+                "linearized": False,
+            }
+        if function_name == "transform_chain_to_batch":
+            chain = args[0]
+            name = str(args[1])
+            batch_size = int(args[2])
+            batch_dim = int(args[3])
+            primitives = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            eqns = _transform_chain_eqns(chain)
+            if eqns:
+                primitives = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
+            active = bool(chain.get("ready", False)) if isinstance(chain, dict) else bool(getattr(chain, "ready", False))
+            return _batch_dict(name, active, batch_size, batch_dim, primitives, params)
+        if function_name == "vmap_unary":
+            primitive = str(args[0])
+            data, shape, req = _tensor_like(args[1])
+            data = np.asarray(data)
+            if primitive == "negative":
+                out = np.negative(data)
+                return _tensor_dict(out, shape, req)
+            if primitive == "abs":
+                out = np.abs(data)
+                return _tensor_dict(out, shape, req)
+            if primitive == "square":
+                out = np.multiply(data, data)
+                return _tensor_dict(out, shape, req)
+            if primitive == "reciprocal":
+                out = np.divide(1.0, data)
+                return _tensor_dict(out, shape, req)
+            if primitive == "sum" or primitive == "mean":
+                if not shape:
+                    return _tensor_dict(np.array(data, copy=True), shape, req)
+                batch = shape[0]
+                if batch <= 0:
+                    return _tensor_dict(np.asarray([]), [0], req)
+                reshaped = data.reshape(batch, -1)
+                if primitive == "sum":
+                    out = reshaped.sum(axis=1)
+                else:
+                    out = reshaped.mean(axis=1)
+                return _tensor_dict(out, [batch], req)
+            return _tensor_dict(data, shape, req)
+        if function_name == "vmap_binary":
+            primitive = str(args[0])
+            data_a, shape_a, req_a = _tensor_like(args[1])
+            data_b, shape_b, req_b = _tensor_like(args[2])
+            np_a = np.asarray(data_a)
+            np_b = np.asarray(data_b)
+            if primitive == "add":
+                out = np.add(np_a, np_b)
+            elif primitive == "sub":
+                out = np.subtract(np_a, np_b)
+            elif primitive == "mul":
+                out = np.multiply(np_a, np_b)
+            elif primitive == "div":
+                out = np.divide(np_a, np_b)
+            elif primitive == "maximum":
+                out = np.maximum(np_a, np_b)
+            elif primitive == "minimum":
+                out = np.minimum(np_a, np_b)
+            elif primitive == "matmul":
+                out = np.matmul(np_a, np_b)
+            elif primitive == "concatenate":
+                out = np.concatenate([np_a, np_b], axis=0)
+            elif primitive == "stack":
+                out = np.stack([np_a, np_b], axis=0)
+            else:
+                out = np.add(np_a, np_b)
+            return _tensor_dict(out, list(np.asarray(out).shape), req_a or req_b)
+        if function_name == "vmap_ternary":
+            primitive = str(args[0])
+            if primitive == "where":
+                cond_data, cond_shape, cond_req = _tensor_like(args[1])
+                x_data, x_shape, x_req = _tensor_like(args[2])
+                y_data, y_shape, y_req = _tensor_like(args[3])
+                out = np.where(np.asarray(cond_data).astype(bool), np.asarray(x_data), np.asarray(y_data))
+                return _tensor_dict(out, list(np.asarray(out).shape), cond_req or x_req or y_req)
+            return _tensor_dict(np.asarray(_tensor_like(args[2])[0]), _tensor_like(args[2])[1], _tensor_like(args[2])[2])
+        if function_name == "vmap_add":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("add", args[0], args[1]))
+        if function_name == "vmap_sub":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("sub", args[0], args[1]))
+        if function_name == "vmap_mul":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("mul", args[0], args[1]))
+        if function_name == "vmap_div":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("div", args[0], args[1]))
+        if function_name == "vmap_maximum":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("maximum", args[0], args[1]))
+        if function_name == "vmap_minimum":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("minimum", args[0], args[1]))
+        if function_name == "vmap_matmul":
+            return _invoke_special_module_function(module_name, "vmap_binary", ("matmul", args[0], args[1]))
+        if function_name == "vmap_sum":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("sum", args[0]))
+        if function_name == "vmap_mean":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("mean", args[0]))
+        if function_name == "vmap_negative":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("negative", args[0]))
+        if function_name == "vmap_abs":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("abs", args[0]))
+        if function_name == "vmap_square":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("square", args[0]))
+        if function_name == "vmap_reciprocal":
+            return _invoke_special_module_function(module_name, "vmap_unary", ("reciprocal", args[0]))
+        if function_name == "vmap_where":
+            return _invoke_special_module_function(module_name, "vmap_ternary", ("where", args[0], args[1], args[2]))
+    if module_name == "runtime/control":
+        if function_name == "new_control_state":
+            return _control_dict(str(args[0]), False, False, False, int(args[1]), [], [])
+        if function_name == "control_name":
+            name, _, _, _, _, _, _ = _control_like(args[0])
+            return name
+        if function_name == "control_cond_enabled":
+            _, cond_enabled, _, _, _, _, _ = _control_like(args[0])
+            return cond_enabled
+        if function_name == "control_loop_enabled":
+            _, _, loop_enabled, _, _, _, _ = _control_like(args[0])
+            return loop_enabled
+        if function_name == "control_scan_enabled":
+            _, _, _, scan_enabled, _, _, _ = _control_like(args[0])
+            return scan_enabled
+        if function_name == "control_iterations":
+            _, _, _, _, iterations, _, _ = _control_like(args[0])
+            return iterations
+        if function_name == "control_branch_count":
+            _, _, _, _, _, branches, _ = _control_like(args[0])
+            return len(branches)
+        if function_name == "control_param_count":
+            _, _, _, _, _, _, params = _control_like(args[0])
+            return len(params)
+        if function_name == "control_has_branch":
+            _, _, _, _, _, branches, _ = _control_like(args[0])
+            return str(args[1]) in branches
+        if function_name == "control_has_param":
+            _, _, _, _, _, _, params = _control_like(args[0])
+            return str(args[1]) in params
+        if function_name == "control_add_branch":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params = _control_like(args[0])
+            branches = list(branches)
+            branches.append(str(args[1]))
+            return _control_dict(name, True, loop_enabled, scan_enabled, iterations, branches, params)
+        if function_name == "control_add_param":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params = _control_like(args[0])
+            params = list(params)
+            params.append(str(args[1]))
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params)
+        if function_name == "control_set_cond_enabled":
+            name, _, loop_enabled, scan_enabled, iterations, branches, params = _control_like(args[0])
+            return _control_dict(name, bool(args[1]), loop_enabled, scan_enabled, iterations, branches, params)
+        if function_name == "control_set_loop_enabled":
+            name, cond_enabled, _, scan_enabled, iterations, branches, params = _control_like(args[0])
+            return _control_dict(name, cond_enabled, bool(args[1]), scan_enabled, iterations, branches, params)
+        if function_name == "control_set_scan_enabled":
+            name, cond_enabled, loop_enabled, _, iterations, branches, params = _control_like(args[0])
+            return _control_dict(name, cond_enabled, loop_enabled, bool(args[1]), iterations, branches, params)
+        if function_name == "control_set_iterations":
+            name, cond_enabled, loop_enabled, scan_enabled, _, branches, params = _control_like(args[0])
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, int(args[1]), branches, params)
+        if function_name == "control_clear_branches":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, _, params = _control_like(args[0])
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, iterations, [], params)
+        if function_name == "control_clear_params":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, _ = _control_like(args[0])
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, [])
+        if function_name == "control_state_dict":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params = _control_like(args[0])
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params)
+        if function_name == "control_load_state_dict":
+            return args[1]
+        if function_name == "control_to_transform_chain":
+            name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params = _control_like(args[0])
+            eqns = [
+                {
+                    "primitive": branch,
+                    "params": [param] if param else [],
+                    "inputs": [],
+                    "outputs": [],
+                }
+                for branch, param in zip(branches, params)
+            ]
+            return {
+                "steps": list(branches),
+                "params": list(params),
+                "inputs": [],
+                "outputs": [],
+                "eqns": eqns,
+                "ready": bool(cond_enabled or loop_enabled or scan_enabled or len(branches) > 0),
+                "linearized": bool(loop_enabled or scan_enabled),
+            }
+        if function_name == "transform_chain_to_control":
+            chain = args[0]
+            name = str(args[1])
+            iterations = int(args[2])
+            branches = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
+            params = _string_list(chain.get("params", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "params", []))
+            eqns = _transform_chain_eqns(chain)
+            if eqns:
+                branches = [eqn["primitive"] for eqn in eqns]
+                params = [",".join(eqn["params"]) for eqn in eqns]
+            cond_enabled = "cond" in branches
+            loop_enabled = "while_loop" in branches
+            scan_enabled = "scan" in branches
+            if len(branches) > 0 and not cond_enabled:
+                cond_enabled = True
+            return _control_dict(name, cond_enabled, loop_enabled, scan_enabled, iterations, branches, params)
+        if function_name in {"cond", "control_select"}:
+            if len(args) == 4:
+                predicate = args[1]
+                true_val = args[2]
+                false_val = args[3]
+            else:
+                predicate = args[0]
+                true_val = args[1]
+                false_val = args[2]
+            if isinstance(predicate, dict):
+                pred_data, _, _ = _tensor_like(predicate)
+                predicate = bool(np.asarray(pred_data).reshape(-1)[0]) if pred_data.size else False
+            return true_val if bool(predicate) else false_val
+        if function_name == "while_loop":
+            if len(args) == 4:
+                value = args[1]
+                steps = int(args[2])
+                op = str(args[3])
+            else:
+                value = args[0]
+                steps = int(args[1])
+                op = str(args[2])
+            current = value
+            i = 0
+            while i < steps:
+                if op == "add":
+                    data, shape, req = _tensor_like(current)
+                    current = _tensor_dict(np.asarray(data) + 1.0, shape, req)
+                elif op == "mul":
+                    data, shape, req = _tensor_like(current)
+                    current = _tensor_dict(np.asarray(data) * 2.0, shape, req)
+                elif op == "negate":
+                    current = invoke_runtime_function("tensor", "negative", current)
+                elif op == "square":
+                    current = invoke_runtime_function("tensor", "square", current)
+                i = i + 1
+            return current
+        if function_name == "scan_sum":
+            value = args[1] if len(args) > 1 else args[0]
+            data, shape, req = _tensor_like(value)
+            arr = np.asarray(data, dtype=float).reshape(-1)
+            out = np.cumsum(arr)
+            return _tensor_dict(out, [len(out)], req)
+        if function_name == "scan_prod":
+            value = args[1] if len(args) > 1 else args[0]
+            data, shape, req = _tensor_like(value)
+            arr = np.asarray(data, dtype=float).reshape(-1)
+            out = np.cumprod(arr)
+            return _tensor_dict(out, [len(out)], req)
+        if function_name == "scan":
+            return _invoke_special_module_function(module_name, "scan_sum", args)
     if module_name == "tensor/autograd":
         if function_name == "tensor_backward_rule_add":
             grad_a = invoke_runtime_function("tensor", "tensor_backward_add_grad_a", args[2])
