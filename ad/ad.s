@@ -1,7 +1,7 @@
 package neurx.ad
 
 use neurx.tensor.tensor
-use neurx.ad.engine
+use neurx.engine
 
 struct grad_record {
     int id
@@ -271,5 +271,5 @@ func grad_accumulation_state(autograd_state state) bool {
 
 func backward(tensor t) tensor {
     // Keep the package-level entrypoint thin and delegate the work to engine.
-    neurx.ad.engine.backward(t)
+    neurx.engine.backward(t)
 }
