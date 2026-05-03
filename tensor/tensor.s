@@ -1,5 +1,8 @@
 package neurx.tensor
 
+use neurx.ad.jaxpr
+use neurx.ad.tracer
+
 struct tensor {
     []float data
     []int shape
@@ -343,7 +346,23 @@ func _binary_broadcast(tensor a, tensor b, int op) tensor {
                 if op == 2 {
                     v = a.data[ia] * b.data[ib]
                 } else {
-                    v = a.data[ia] / b.data[ib]
+                    if op == 3 {
+                        v = a.data[ia] / b.data[ib]
+                    } else {
+                        if op == 4 {
+                            if a.data[ia] > b.data[ib] {
+                                v = a.data[ia]
+                            } else {
+                                v = b.data[ib]
+                            }
+                        } else {
+                            if a.data[ia] < b.data[ib] {
+                                v = a.data[ia]
+                            } else {
+                                v = b.data[ib]
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -367,6 +386,39 @@ func mul(tensor a, tensor b) tensor {
 
 func div(tensor a, tensor b) tensor {
     _binary_broadcast(a, b, 3)
+}
+
+func maximum(tensor a, tensor b) tensor {
+    _binary_broadcast(a, b, 4)
+}
+
+func minimum(tensor a, tensor b) tensor {
+    _binary_broadcast(a, b, 5)
+}
+
+func negative(tensor a) tensor {
+    sub(zeros_like(a), a)
+}
+
+func abs(tensor a) tensor {
+    int n = len(a.data)
+    []float out = []float{cap: n}
+    for i in 0..n {
+        float v = a.data[i]
+        if v < 0.0 {
+            v = -v
+        }
+        out[i] = v
+    }
+    new(out, copy_int(a.shape), a.requires_grad)
+}
+
+func square(tensor a) tensor {
+    mul(a, a)
+}
+
+func reciprocal(tensor a) tensor {
+    div(_scalar_tensor(1.0), a)
 }
 
 func matmul(tensor a, tensor b) tensor {
@@ -827,6 +879,50 @@ func roll(tensor a, int shifts, int dim) tensor {
     new(out, copy_int(a.shape), a.requires_grad)
 }
 
+func broadcast_to(tensor a, []int shape) tensor {
+    []int target = copy_int(shape)
+    int total = _shape_prod(target)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, target)
+        int src = _broadcast_index(coords, a.shape)
+        out[flat] = a.data[src]
+        flat = flat + 1
+    }
+    new(out, target, a.requires_grad)
+}
+
+func concatenate(tensor a, tensor b, int dim) tensor {
+    int ndim = len(a.shape)
+    int axis = normalize_dim(dim, ndim)
+    if len(b.shape) != ndim {
+        return clone(a)
+    }
+    []int shape = copy_int(a.shape)
+    shape[axis] = a.shape[axis] + b.shape[axis]
+    int total = _shape_prod(shape)
+    []float out = []float{cap: total}
+    int flat = 0
+    while flat < total {
+        []int coords = _unravel_index(flat, shape)
+        if coords[axis] < a.shape[axis] {
+            int src_a = _ravel_index(coords, a.shape)
+            out[flat] = a.data[src_a]
+        } else {
+            coords[axis] = coords[axis] - a.shape[axis]
+            int src_b = _ravel_index(coords, b.shape)
+            out[flat] = b.data[src_b]
+        }
+        flat = flat + 1
+    }
+    new(out, shape, a.requires_grad || b.requires_grad)
+}
+
+func stack(tensor a, tensor b, int dim) tensor {
+    concatenate(unsqueeze(a, dim), unsqueeze(b, dim), dim)
+}
+
 func tile(tensor a, int repeats) tensor {
     if repeats <= 1 {
         return clone(a)
@@ -964,4 +1060,87 @@ func take_along_dim(tensor a, tensor indices, int dim) tensor {
         flat = flat + 1
     }
     new(out, copy_int(indices.shape), a.requires_grad || indices.requires_grad)
+}
+
+func trace_op(tracer_state state, string op) tracer_state {
+    neurx.ad.tracer.tracer_capture(state, op)
+}
+
+func trace_op_with_param(tracer_state state, string op, string param) tracer_state {
+    neurx.ad.tracer.tracer_capture_with_param(state, op, param)
+}
+
+func _empty_strings() []string {
+    []string out = []string{cap: 0}
+    out
+}
+
+func _single_string(string value) []string {
+    []string out = []string{cap: 1}
+    out[0] = value
+    out
+}
+
+func _pair_strings(string a, string b) []string {
+    []string out = []string{cap: 2}
+    out[0] = a
+    out[1] = b
+    out
+}
+
+func trace_add(tracer_state state, tensor a, tensor b) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "add", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+}
+
+func trace_mul(tracer_state state, tensor a, tensor b) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mul", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+}
+
+func trace_matmul(tracer_state state, tensor a, tensor b) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "matmul", _empty_strings(), _pair_strings("arg0", "arg1"), _single_string("out0"))
+}
+
+func trace_sum(tracer_state state, tensor a) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum", _empty_strings(), _single_string("arg0"), _single_string("out0"))
+}
+
+func trace_mean(tracer_state state, tensor a) tracer_state {
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean", _empty_strings(), _single_string("arg0"), _single_string("out0"))
+}
+
+func trace_sum_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
+    del a
+    string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum_dim", _single_string(param), _single_string("arg0"), _single_string("out0"))
+}
+
+func trace_mean_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
+    del a
+    string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean_dim", _single_string(param), _single_string("arg0"), _single_string("out0"))
+}
+
+func trace_broadcast_to(tracer_state state, tensor a, []int shape) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "broadcast_to", _single_string("shape=" + str(shape)), _single_string("arg0"), _single_string("out0"))
+}
+
+func trace_concatenate(tracer_state state, tensor a, tensor b, int dim) tracer_state {
+    del a
+    del b
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "concatenate", _single_string("dim=" + str(dim)), _pair_strings("arg0", "arg1"), _single_string("out0"))
+}
+
+func trace_stack(tracer_state state, tensor a, tensor b, int dim) tracer_state {
+    del a
+    del b
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "stack", _single_string("dim=" + str(dim)), _pair_strings("arg0", "arg1"), _single_string("out0"))
+}
+
+func trace_to_transform_chain(tracer_state state) transform_chain {
+    neurx.ad.tracer.tracer_to_transform_chain(state)
+}
+
+func trace_to_jaxpr(tracer_state state, string name) jaxpr_graph {
+    neurx.ad.jaxpr.jaxpr_from_tracer(state, name)
 }
