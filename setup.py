@@ -71,29 +71,7 @@ use_cuda = enable_cuda not in ("0", "false", "off", "no")
 
 ext_modules = []
 if use_cuda and cuda_home is not None:
-    include_dirs.append(str(cuda_home / "include"))
-    lib64 = cuda_home / "lib64"
-    lib = cuda_home / "lib"
-    if lib64.exists():
-        library_dirs.append(str(lib64))
-    elif lib.exists():
-        library_dirs.append(str(lib))
-    libraries.append("cudart")
-
-    ext_modules = [
-        Extension(
-            "neurx.cuda._tensor_cuda",
-            sources=[
-                "cuda/bindings.cpp",
-                "cuda/kernels/kernels.cu",
-            ],
-            include_dirs=include_dirs,
-            language="c++",
-            libraries=libraries,
-            library_dirs=library_dirs,
-            extra_compile_args=["-O3", "-std=c++14"],
-        )
-    ]
+    print("WARNING: CUDA detected but native CUDA extension build is disabled (S-only backends).")
 elif use_cuda and cuda_home is None:
     if enable_cuda in ("1", "true", "on", "yes"):
         raise RuntimeError("CUDA requested but not found. Set CUDA_HOME or CUDA_PATH.")

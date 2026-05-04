@@ -125,12 +125,13 @@ neurx/
       runtime/         # execution engine, streams (planned)
       device/          # CPU/CUDA device abstractions (planned)
       jit/             # graph + kernel fusion (planned)
-  cuda/
-    bindings.cpp
-    kernels/
-      kernels.cu
-    primitives/        # GEMM/conv primitives (planned)
-    utils/
+  backends/
+    cuda/
+      bindings.s
+      kernels/
+        kernels.cu
+      primitives/      # GEMM/conv primitives (planned)
+      utils/
   tests/
     test_new_features.py  # 🆕 tests for einsum and vision modules
   docs/
@@ -199,8 +200,8 @@ neurx-doctor --require-cuda
 neurx-doctor --require-mps
 ```
 
-## CUDA Extension (starter)
-The CUDA extension is built from `cuda/bindings.cpp` and `cuda/kernels/kernels.cu`.
+## CUDA Backend (S)
+The CUDA backend binding entry is at `backends/cuda/bindings.s`.
 
 ```bash
 CUDA_HOME=/usr pip install -e /path/to/neurx --no-build-isolation
