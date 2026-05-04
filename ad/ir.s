@@ -1,4 +1,4 @@
-package neurx.ad.nxir
+package neurx.ad.ir
 
 use neurx.ad.function
 use neurx.ad.eqn

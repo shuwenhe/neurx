@@ -1,6 +1,6 @@
 package neurx.ad
 
-use neurx.ad.nxir
+use neurx.ad.ir
 use neurx.ad.tracer
 use neurx.tensor.tensor
 use neurx.tensor.autograd
@@ -964,97 +964,97 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
 }
 
 func new_jaxpr_graph(string name) jaxpr_graph {
-    neurx.ad.nxir.new_jaxpr_graph(name)
+    neurx.ad.ir.new_jaxpr_graph(name)
 }
 
 func jaxpr_name(jaxpr_graph graph) string {
-    neurx.ad.nxir.jaxpr_name(graph)
+    neurx.ad.ir.jaxpr_name(graph)
 }
 
 func jaxpr_eqn_count(jaxpr_graph graph) int {
-    neurx.ad.nxir.jaxpr_eqn_count(graph)
+    neurx.ad.ir.jaxpr_eqn_count(graph)
 }
 
 func jaxpr_primitive_count(jaxpr_graph graph) int {
-    neurx.ad.nxir.jaxpr_primitive_count(graph)
+    neurx.ad.ir.jaxpr_primitive_count(graph)
 }
 
 func jaxpr_param_count(jaxpr_graph graph) int {
-    neurx.ad.nxir.jaxpr_param_count(graph)
+    neurx.ad.ir.jaxpr_param_count(graph)
 }
 
 func jaxpr_input_count(jaxpr_graph graph) int {
-    neurx.ad.nxir.jaxpr_input_count(graph)
+    neurx.ad.ir.jaxpr_input_count(graph)
 }
 
 func jaxpr_output_count(jaxpr_graph graph) int {
-    neurx.ad.nxir.jaxpr_output_count(graph)
+    neurx.ad.ir.jaxpr_output_count(graph)
 }
 
 func jaxpr_has_primitive(jaxpr_graph graph, string primitive) bool {
-    neurx.ad.nxir.jaxpr_has_primitive(graph, primitive)
+    neurx.ad.ir.jaxpr_has_primitive(graph, primitive)
 }
 
 func jaxpr_ready(jaxpr_graph graph) bool {
-    neurx.ad.nxir.jaxpr_ready(graph)
+    neurx.ad.ir.jaxpr_ready(graph)
 }
 
 func jaxpr_is_linearized(jaxpr_graph graph) bool {
-    neurx.ad.nxir.jaxpr_is_linearized(graph)
+    neurx.ad.ir.jaxpr_is_linearized(graph)
 }
 
 func jaxpr_add_eqn(jaxpr_graph graph, string primitive) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_add_eqn(graph, primitive)
+    neurx.ad.ir.jaxpr_add_eqn(graph, primitive)
 }
 
 func jaxpr_add_eqn_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_add_eqn_with_params(graph, primitive, params)
+    neurx.ad.ir.jaxpr_add_eqn_with_params(graph, primitive, params)
 }
 
 func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_add_eqn_with_io(graph, primitive, params, inputs, outputs)
+    neurx.ad.ir.jaxpr_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
 
 func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_add_input(graph, input)
+    neurx.ad.ir.jaxpr_add_input(graph, input)
 }
 
 func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_add_output(graph, output)
+    neurx.ad.ir.jaxpr_add_output(graph, output)
 }
 
 func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_state_dict(graph)
+    neurx.ad.ir.jaxpr_state_dict(graph)
 }
 
 func jaxpr_load_state_dict(jaxpr_graph graph, jaxpr_graph other) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_load_state_dict(graph, other)
+    neurx.ad.ir.jaxpr_load_state_dict(graph, other)
 }
 
 func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_from_tracer(state, name)
+    neurx.ad.ir.jaxpr_from_tracer(state, name)
 }
 
 func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
-    neurx.ad.nxir.jaxpr_to_tracer(graph)
+    neurx.ad.ir.jaxpr_to_tracer(graph)
 }
 
 func jaxpr_capture(jaxpr_graph graph, string primitive) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_capture(graph, primitive)
+    neurx.ad.ir.jaxpr_capture(graph, primitive)
 }
 
 func jaxpr_capture_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_capture_with_params(graph, primitive, params)
+    neurx.ad.ir.jaxpr_capture_with_params(graph, primitive, params)
 }
 
 func jaxpr_capture_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_capture_with_io(graph, primitive, params, inputs, outputs)
+    neurx.ad.ir.jaxpr_capture_with_io(graph, primitive, params, inputs, outputs)
 }
 
 func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
-    neurx.ad.nxir.jaxpr_to_transform_chain(graph)
+    neurx.ad.ir.jaxpr_to_transform_chain(graph)
 }
 
 func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
-    neurx.ad.nxir.transform_chain_to_jaxpr(chain, name)
+    neurx.ad.ir.transform_chain_to_jaxpr(chain, name)
 }
