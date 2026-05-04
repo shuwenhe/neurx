@@ -1141,6 +1141,6 @@ func trace_to_transform_chain(tracer_state state) transform_chain {
     neurx.ad.tracer.tracer_to_transform_chain(state)
 }
 
-func trace_to_jaxpr(tracer_state state, string name) jaxpr_graph {
-    neurx.ad.ir.jaxpr_from_tracer(state, name)
+func trace_to_jaxpr(tracer_state state, string name) ir_graph {
+    neurx.ad.ir.ir_from_tracer(state, name)
 }

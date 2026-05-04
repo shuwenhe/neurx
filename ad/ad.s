@@ -963,98 +963,98 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
     neurx.ad.tracer.transform_chain_to_tracer(chain, name)
 }
 
-func new_jaxpr_graph(string name) jaxpr_graph {
-    neurx.ad.ir.new_jaxpr_graph(name)
+func new_ir_graph(string name) ir_graph {
+    neurx.ad.ir.new_ir_graph(name)
 }
 
-func jaxpr_name(jaxpr_graph graph) string {
-    neurx.ad.ir.jaxpr_name(graph)
+func ir_name(ir_graph graph) string {
+    neurx.ad.ir.ir_name(graph)
 }
 
-func jaxpr_eqn_count(jaxpr_graph graph) int {
-    neurx.ad.ir.jaxpr_eqn_count(graph)
+func ir_eqn_count(ir_graph graph) int {
+    neurx.ad.ir.ir_eqn_count(graph)
 }
 
-func jaxpr_primitive_count(jaxpr_graph graph) int {
-    neurx.ad.ir.jaxpr_primitive_count(graph)
+func ir_primitive_count(ir_graph graph) int {
+    neurx.ad.ir.ir_primitive_count(graph)
 }
 
-func jaxpr_param_count(jaxpr_graph graph) int {
-    neurx.ad.ir.jaxpr_param_count(graph)
+func ir_param_count(ir_graph graph) int {
+    neurx.ad.ir.ir_param_count(graph)
 }
 
-func jaxpr_input_count(jaxpr_graph graph) int {
-    neurx.ad.ir.jaxpr_input_count(graph)
+func ir_input_count(ir_graph graph) int {
+    neurx.ad.ir.ir_input_count(graph)
 }
 
-func jaxpr_output_count(jaxpr_graph graph) int {
-    neurx.ad.ir.jaxpr_output_count(graph)
+func ir_output_count(ir_graph graph) int {
+    neurx.ad.ir.ir_output_count(graph)
 }
 
-func jaxpr_has_primitive(jaxpr_graph graph, string primitive) bool {
-    neurx.ad.ir.jaxpr_has_primitive(graph, primitive)
+func ir_has_primitive(ir_graph graph, string primitive) bool {
+    neurx.ad.ir.ir_has_primitive(graph, primitive)
 }
 
-func jaxpr_ready(jaxpr_graph graph) bool {
-    neurx.ad.ir.jaxpr_ready(graph)
+func ir_ready(ir_graph graph) bool {
+    neurx.ad.ir.ir_ready(graph)
 }
 
-func jaxpr_is_linearized(jaxpr_graph graph) bool {
-    neurx.ad.ir.jaxpr_is_linearized(graph)
+func ir_is_linearized(ir_graph graph) bool {
+    neurx.ad.ir.ir_is_linearized(graph)
 }
 
-func jaxpr_add_eqn(jaxpr_graph graph, string primitive) jaxpr_graph {
-    neurx.ad.ir.jaxpr_add_eqn(graph, primitive)
+func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
+    neurx.ad.ir.ir_add_eqn(graph, primitive)
 }
 
-func jaxpr_add_eqn_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    neurx.ad.ir.jaxpr_add_eqn_with_params(graph, primitive, params)
+func ir_add_eqn_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+    neurx.ad.ir.ir_add_eqn_with_params(graph, primitive, params)
 }
 
-func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    neurx.ad.ir.jaxpr_add_eqn_with_io(graph, primitive, params, inputs, outputs)
+func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+    neurx.ad.ir.ir_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
 
-func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
-    neurx.ad.ir.jaxpr_add_input(graph, input)
+func ir_add_input(ir_graph graph, string input) ir_graph {
+    neurx.ad.ir.ir_add_input(graph, input)
 }
 
-func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
-    neurx.ad.ir.jaxpr_add_output(graph, output)
+func ir_add_output(ir_graph graph, string output) ir_graph {
+    neurx.ad.ir.ir_add_output(graph, output)
 }
 
-func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
-    neurx.ad.ir.jaxpr_state_dict(graph)
+func ir_state_dict(ir_graph graph) ir_graph {
+    neurx.ad.ir.ir_state_dict(graph)
 }
 
-func jaxpr_load_state_dict(jaxpr_graph graph, jaxpr_graph other) jaxpr_graph {
-    neurx.ad.ir.jaxpr_load_state_dict(graph, other)
+func ir_load_state_dict(ir_graph graph, ir_graph other) ir_graph {
+    neurx.ad.ir.ir_load_state_dict(graph, other)
 }
 
-func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
-    neurx.ad.ir.jaxpr_from_tracer(state, name)
+func ir_from_tracer(tracer_state state, string name) ir_graph {
+    neurx.ad.ir.ir_from_tracer(state, name)
 }
 
-func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
-    neurx.ad.ir.jaxpr_to_tracer(graph)
+func ir_to_tracer(ir_graph graph) tracer_state {
+    neurx.ad.ir.ir_to_tracer(graph)
 }
 
-func jaxpr_capture(jaxpr_graph graph, string primitive) jaxpr_graph {
-    neurx.ad.ir.jaxpr_capture(graph, primitive)
+func ir_capture(ir_graph graph, string primitive) ir_graph {
+    neurx.ad.ir.ir_capture(graph, primitive)
 }
 
-func jaxpr_capture_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    neurx.ad.ir.jaxpr_capture_with_params(graph, primitive, params)
+func ir_capture_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+    neurx.ad.ir.ir_capture_with_params(graph, primitive, params)
 }
 
-func jaxpr_capture_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    neurx.ad.ir.jaxpr_capture_with_io(graph, primitive, params, inputs, outputs)
+func ir_capture_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+    neurx.ad.ir.ir_capture_with_io(graph, primitive, params, inputs, outputs)
 }
 
-func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
-    neurx.ad.ir.jaxpr_to_transform_chain(graph)
+func ir_to_transform_chain(ir_graph graph) transform_chain {
+    neurx.ad.ir.ir_to_transform_chain(graph)
 }
 
-func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
+func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     neurx.ad.ir.transform_chain_to_jaxpr(chain, name)
 }

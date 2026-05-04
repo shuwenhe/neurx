@@ -524,8 +524,8 @@ func tracer_to_backward(tracer_state state, string name) backward_state {
     }
 }
 
-func backward_to_jaxpr(backward_state state) jaxpr_graph {
-    jaxpr_graph {
+func backward_to_jaxpr(backward_state state) ir_graph {
+    ir_graph {
         name: state.name,
         eqn_count: len(state.steps),
         primitives: copy_strings(state.steps),
@@ -538,7 +538,7 @@ func backward_to_jaxpr(backward_state state) jaxpr_graph {
     }
 }
 
-func jaxpr_to_backward(jaxpr_graph graph) backward_state {
+func ir_to_backward(ir_graph graph) backward_state {
     backward_state {
         name: graph.name,
         ready: graph.ready,
