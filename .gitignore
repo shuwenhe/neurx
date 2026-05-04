@@ -65,3 +65,16 @@ cann/**/*.mindir
 cann/**/*.om
 cann/**/*.pbtxt
 cann/**/*.prof
+
+# S build artifacts
+*.ir
+s/*.ir
+ad/*.ir
+tensor/*.ir
+engine/*.ir
+nn/*.ir
+opt/*.ir
+dl/*.ir
+lf/*.ir
+train/*.ir
+runtime/*.ir
