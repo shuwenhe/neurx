@@ -290,7 +290,7 @@ python -c "import neurx; print('CUDA available:', neurx.cuda.is_available())"
 - [NeurX 官方文档](https://github.com/yourusername/neurx)
 - [NeurX 快速安装指南](/QUICK_INSTALL.md)
 - [NeurX 详细安装指南](/docs/INSTALLATION_AND_USAGE_GUIDE.md)
-- [完整的 MNIST 示例](/examples/mnist_classifier.py)
+- [完整的 MNIST 示例](/example/mnist_classifier.py)
 
 ## 📝 项目配置文件说明
 

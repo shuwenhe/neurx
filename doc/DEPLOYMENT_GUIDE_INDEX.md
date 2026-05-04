@@ -68,22 +68,22 @@
 ---
 
 ### 5️⃣ 完整示例项目 (7 个文件)
-**📁 [examples/template_project/](examples/template_project/)**
+**📁 [example/template_project/](example/template_project/)**
 
 可直接使用的完整项目模板，包含：
 
 **配置文件**:
-- ✓ [requirements.txt](examples/template_project/requirements.txt) - 依赖声明
-- ✓ [setup.py](examples/template_project/setup.py) - setuptools 配置
-- ✓ [pyproject.toml](examples/template_project/pyproject.toml) - 现代配置
+- ✓ [requirements.txt](example/template_project/requirements.txt) - 依赖声明
+- ✓ [setup.py](example/template_project/setup.py) - setuptools 配置
+- ✓ [pyproject.toml](example/template_project/pyproject.toml) - 现代配置
 
 **源代码**:
-- ✓ [src/my_project/__init__.py](examples/template_project/src/my_project/__init__.py) - 包初始化
-- ✓ [src/my_project/models/__init__.py](examples/template_project/src/my_project/models/__init__.py) - 模型定义（SimpleClassifier、ConvNet、Transformer）
-- ✓ [src/my_project/train.py](examples/template_project/src/my_project/train.py) - 完整训练脚本
+- ✓ [src/my_project/__init__.py](example/template_project/src/my_project/__init__.py) - 包初始化
+- ✓ [src/my_project/models/__init__.py](example/template_project/src/my_project/models/__init__.py) - 模型定义（SimpleClassifier、ConvNet、Transformer）
+- ✓ [src/my_project/train.py](example/template_project/src/my_project/train.py) - 完整训练脚本
 
 **文档**:
-- ✓ [README.md](examples/template_project/README.md) - 项目使用说明
+- ✓ [README.md](example/template_project/README.md) - 项目使用说明
 
 **何时使用**: 
 - 作为新项目的模板复制
@@ -104,7 +104,7 @@
 ---
 
 ### 场景 2: "我要在新项目中使用 neurx"
-1. 👉 参考 [examples/template_project/](examples/template_project/)
+1. 👉 参考 [example/template_project/](example/template_project/)
 2. 复制整个模板项目
 3. 修改项目名称和配置
 4. 开始开发
@@ -145,11 +145,11 @@
 | 需求 | 文件 | 关键部分 |
 |------|------|--------|
 | 最快出发点 | QUICK_INSTALL.md | 5 秒命令 |
-| 标准项目模板 | examples/template_project/ | 完整结构 |
+| 标准项目模板 | example/template_project/ | 完整结构 |
 | 所有安装方法 | INSTALLATION_AND_USAGE_GUIDE.md | 4 种方法 + FAQ |
 | 企业部署方案 | COMPLETE_DEPLOYMENT_GUIDE.md | 5 种方案 |
 | 项目配置 | PROJECT_SETUP_EXAMPLES.md | 3 种配置文件 |
-| 具体代码示例 | examples/mnist_classifier.py | 完整训练例子 |
+| 具体代码示例 | example/mnist_classifier.py | 完整训练例子 |
 
 ---
 
@@ -165,7 +165,7 @@ pip install -e /home/shuwen/neurx
 
 ```bash
 # 复制模板
-cp -r examples/template_project/ my-neurx-project
+cp -r example/template_project/ my-neurx-project
 cd my-neurx-project
 
 # 安装依赖
@@ -179,10 +179,10 @@ python -m my_project.train
 
 ```bash
 # 运行 MNIST 示例
-python examples/mnist_classifier.py
+python example/mnist_classifier.py
 
 # 运行模板项目
-cd examples/template_project
+cd example/template_project
 pip install -r requirements.txt
 python -m my_project.train
 ```
@@ -282,7 +282,7 @@ python -c "from neurx.nn import Linear; m = Linear(10, 5); print('OK')"
 pytest tests/ -q
 
 # ✓ 运行示例
-python examples/mnist_classifier.py
+python example/mnist_classifier.py
 ```
 
 ---
@@ -304,7 +304,7 @@ python examples/mnist_classifier.py
 1. **快速查询** → [QUICK_INSTALL.md](QUICK_INSTALL.md)
 2. **详细指南** → [INSTALLATION_AND_USAGE_GUIDE.md](docs/INSTALLATION_AND_USAGE_GUIDE.md)
 3. **企业方案** → [COMPLETE_DEPLOYMENT_GUIDE.md](docs/COMPLETE_DEPLOYMENT_GUIDE.md)
-4. **具体代码** → [examples/](examples/) 文件夹
+4. **具体代码** → [example/](example/) 文件夹
 5. **故障排除** → 各指南的"常见问题"部分
 
 ---
@@ -346,7 +346,7 @@ python -c "import neurx; print('Ready!')"
 ### 创建新项目（30 分钟）
 
 ```bash
-cp -r examples/template_project/ my-project
+cp -r example/template_project/ my-project
 cd my-project
 pip install -r requirements.txt
 python -m my_project.train
@@ -372,7 +372,7 @@ python -m my_project.train
 选择一份文档开始吧！ 👇
 
 1. ⚡ [QUICK_INSTALL.md](QUICK_INSTALL.md) - 5 分钟快速开始
-2. 📂 [examples/template_project/](examples/template_project/) - 完整项目模板  
+2. 📂 [example/template_project/](example/template_project/) - 完整项目模板  
 3. 📖 [docs/INSTALLATION_AND_USAGE_GUIDE.md](docs/INSTALLATION_AND_USAGE_GUIDE.md) - 详细指南
 4. 🏢 [docs/COMPLETE_DEPLOYMENT_GUIDE.md](docs/COMPLETE_DEPLOYMENT_GUIDE.md) - 企业部署
 
