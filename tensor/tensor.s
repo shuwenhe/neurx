@@ -1,6 +1,6 @@
 package neurx.tensor
 
-use neurx.ad.nxir
+use neurx.ad.ir
 use neurx.ad.tracer
 
 struct tensor {
@@ -1142,5 +1142,5 @@ func trace_to_transform_chain(tracer_state state) transform_chain {
 }
 
 func trace_to_jaxpr(tracer_state state, string name) jaxpr_graph {
-    neurx.ad.nxir.jaxpr_from_tracer(state, name)
+    neurx.ad.ir.jaxpr_from_tracer(state, name)
 }
