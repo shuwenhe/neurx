@@ -4,21 +4,21 @@ use neurx.ad.function
 use neurx.ad.eqn
 use neurx.ad.tracer
 
-struct jaxpr_eqn {
+struct ir_eqn {
     string primitive
     []string params
     []string inputs
     []string outputs
 }
 
-struct jaxpr_graph {
+struct ir_graph {
     string name
     int eqn_count
     []string primitives
     []string params
     []string inputs
     []string outputs
-    []jaxpr_eqn eqns
+    []ir_eqn eqns
     bool ready
     bool linearized
 }
@@ -33,8 +33,8 @@ func copy_strings([]string values) []string {
     out
 }
 
-func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
-    jaxpr_eqn {
+func copy_eqn(ir_eqn eqn) ir_eqn {
+    ir_eqn {
         primitive: eqn.primitive,
         params: copy_strings(eqn.params),
         inputs: copy_strings(eqn.inputs),
@@ -42,8 +42,8 @@ func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
     }
 }
 
-func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
-    []jaxpr_eqn out = []jaxpr_eqn{cap: len(values)}
+func copy_eqns([]ir_eqn values) []ir_eqn {
+    []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
     while i < len(values) {
         out[i] = copy_eqn(values[i])
@@ -65,8 +65,8 @@ func join_params([]string params) string {
     out
 }
 
-func new_jaxpr_graph(string name) jaxpr_graph {
-    jaxpr_graph {
+func new_ir_graph(string name) ir_graph {
+    ir_graph {
         name: name,
         eqn_count: 0,
         primitives: [],
@@ -79,31 +79,31 @@ func new_jaxpr_graph(string name) jaxpr_graph {
     }
 }
 
-func jaxpr_name(jaxpr_graph graph) string {
+func ir_name(ir_graph graph) string {
     graph.name
 }
 
-func jaxpr_eqn_count(jaxpr_graph graph) int {
+func ir_eqn_count(ir_graph graph) int {
     graph.eqn_count
 }
 
-func jaxpr_primitive_count(jaxpr_graph graph) int {
+func ir_primitive_count(ir_graph graph) int {
     len(graph.primitives)
 }
 
-func jaxpr_param_count(jaxpr_graph graph) int {
+func ir_param_count(ir_graph graph) int {
     len(graph.params)
 }
 
-func jaxpr_input_count(jaxpr_graph graph) int {
+func ir_input_count(ir_graph graph) int {
     len(graph.inputs)
 }
 
-func jaxpr_output_count(jaxpr_graph graph) int {
+func ir_output_count(ir_graph graph) int {
     len(graph.outputs)
 }
 
-func jaxpr_has_primitive(jaxpr_graph graph, string primitive) bool {
+func ir_has_primitive(ir_graph graph, string primitive) bool {
     int i = 0
     while i < len(graph.primitives) {
         if graph.primitives[i] == primitive {
@@ -114,29 +114,29 @@ func jaxpr_has_primitive(jaxpr_graph graph, string primitive) bool {
     false
 }
 
-func jaxpr_ready(jaxpr_graph graph) bool {
+func ir_ready(ir_graph graph) bool {
     graph.ready
 }
 
-func jaxpr_is_linearized(jaxpr_graph graph) bool {
+func ir_is_linearized(ir_graph graph) bool {
     graph.linearized
 }
 
-func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
+func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
     []string primitives = copy_strings(graph.primitives)
     []string param_list = copy_strings(graph.params)
-    []jaxpr_eqn eqns = copy_eqns(graph.eqns)
+    []ir_eqn eqns = copy_eqns(graph.eqns)
     primitives.push(primitive)
     param_list.push(join_params(params))
     eqns.push(
-        jaxpr_eqn {
+        ir_eqn {
             primitive: primitive,
             params: copy_strings(params),
             inputs: copy_strings(inputs),
             outputs: copy_strings(outputs),
         }
     )
-    jaxpr_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: len(primitives),
         primitives: primitives,
@@ -149,18 +149,18 @@ func jaxpr_add_eqn_with_io(jaxpr_graph graph, string primitive, []string params,
     }
 }
 
-func jaxpr_add_eqn_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    jaxpr_add_eqn_with_io(graph, primitive, params, [], [])
+func ir_add_eqn_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+    ir_add_eqn_with_io(graph, primitive, params, [], [])
 }
 
-func jaxpr_add_eqn(jaxpr_graph graph, string primitive) jaxpr_graph {
-    jaxpr_add_eqn_with_params(graph, primitive, [])
+func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
+    ir_add_eqn_with_params(graph, primitive, [])
 }
 
-func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
+func ir_add_input(ir_graph graph, string input) ir_graph {
     []string inputs = copy_strings(graph.inputs)
     inputs.push(input)
-    jaxpr_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
         primitives: copy_strings(graph.primitives),
@@ -173,10 +173,10 @@ func jaxpr_add_input(jaxpr_graph graph, string input) jaxpr_graph {
     }
 }
 
-func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
+func ir_add_output(ir_graph graph, string output) ir_graph {
     []string outputs = copy_strings(graph.outputs)
     outputs.push(output)
-    jaxpr_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
         primitives: copy_strings(graph.primitives),
@@ -189,8 +189,8 @@ func jaxpr_add_output(jaxpr_graph graph, string output) jaxpr_graph {
     }
 }
 
-func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
-    jaxpr_graph {
+func ir_state_dict(ir_graph graph) ir_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
         primitives: copy_strings(graph.primitives),
@@ -203,12 +203,12 @@ func jaxpr_state_dict(jaxpr_graph graph) jaxpr_graph {
     }
 }
 
-func jaxpr_load_state_dict(jaxpr_graph graph, jaxpr_graph other) jaxpr_graph {
+func ir_load_state_dict(ir_graph graph, ir_graph other) ir_graph {
     other
 }
 
-func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
-    jaxpr_graph {
+func ir_from_tracer(tracer_state state, string name) ir_graph {
+    ir_graph {
         name: name,
         eqn_count: tracer.tracer_op_count(state),
         primitives: copy_strings(state.ops),
@@ -221,7 +221,7 @@ func jaxpr_from_tracer(tracer_state state, string name) jaxpr_graph {
     }
 }
 
-func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
+func ir_to_tracer(ir_graph graph) tracer_state {
     tracer_state {
         name: graph.name,
         active: graph.ready,
@@ -236,19 +236,19 @@ func jaxpr_to_tracer(jaxpr_graph graph) tracer_state {
     }
 }
 
-func jaxpr_capture(jaxpr_graph graph, string primitive) jaxpr_graph {
-    jaxpr_add_eqn(graph, primitive)
+func ir_capture(ir_graph graph, string primitive) ir_graph {
+    ir_add_eqn(graph, primitive)
 }
 
-func jaxpr_capture_with_params(jaxpr_graph graph, string primitive, []string params) jaxpr_graph {
-    jaxpr_add_eqn_with_params(graph, primitive, params)
+func ir_capture_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+    ir_add_eqn_with_params(graph, primitive, params)
 }
 
-func jaxpr_capture_with_io(jaxpr_graph graph, string primitive, []string params, []string inputs, []string outputs) jaxpr_graph {
-    jaxpr_add_eqn_with_io(graph, primitive, params, inputs, outputs)
+func ir_capture_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+    ir_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
 
-func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
+func ir_to_transform_chain(ir_graph graph) transform_chain {
     transform_chain {
         steps: copy_strings(graph.primitives),
         params: copy_strings(graph.params),
@@ -260,13 +260,13 @@ func jaxpr_to_transform_chain(jaxpr_graph graph) transform_chain {
     }
 }
 
-func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
-    []jaxpr_eqn eqns = copy_eqns(chain.eqns)
+func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
+    []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
-        eqns = []jaxpr_eqn{cap: len(chain.steps)}
+        eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
         while i < len(chain.steps) {
-            eqns[i] = jaxpr_eqn {
+            eqns[i] = ir_eqn {
                 primitive: chain.steps[i],
                 params: []string{cap: 0},
                 inputs: [],
@@ -280,7 +280,7 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
             i = i + 1
         }
     }
-    jaxpr_graph {
+    ir_graph {
         name: name,
         eqn_count: len(eqns),
         primitives: copy_strings(chain.steps),
@@ -294,17 +294,17 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
 }
 
 
-func optimize_jaxpr(jaxpr_graph graph) jaxpr_graph {
-    []jaxpr_eqn optimized_eqns = []jaxpr_eqn{}
+func optimize_jaxpr(ir_graph graph) ir_graph {
+    []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
     while i < len(graph.eqns) {
-        jaxpr_eqn eqn = graph.eqns[i]
+        ir_eqn eqn = graph.eqns[i]
         if eqn.primitive == "add" && len(eqn.inputs) > 1 && eqn.inputs[0] == eqn.inputs[1] {
             []string params = []string{cap: 1}
             params[0] = "2.0"
             []string inputs = []string{cap: 1}
             inputs[0] = eqn.inputs[0]
-            optimized_eqns.push(jaxpr_eqn {
+            optimized_eqns.push(ir_eqn {
                 primitive: "mul",
                 params: params,
                 inputs: inputs,
@@ -315,7 +315,7 @@ func optimize_jaxpr(jaxpr_graph graph) jaxpr_graph {
         }
         i = i + 1
     }
-    jaxpr_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: len(optimized_eqns),
         primitives: copy_strings(graph.primitives),
@@ -328,7 +328,7 @@ func optimize_jaxpr(jaxpr_graph graph) jaxpr_graph {
     }
 }
 
-func compile_jaxpr(jaxpr_graph graph) string {
+func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {
         return "Graph not ready for compilation"
     }
@@ -341,7 +341,7 @@ func compile_jaxpr(jaxpr_graph graph) string {
     compiled_code
 }
 
-func synchronize_gradients([]jaxpr_eqn eqns, int num_workers) []jaxpr_eqn {
+func synchronize_gradients([]ir_eqn eqns, int num_workers) []ir_eqn {
     int i = 0
     while i < len(eqns) {
         if eqns[i].primitive == "grad" {
@@ -356,10 +356,10 @@ func synchronize_gradients([]jaxpr_eqn eqns, int num_workers) []jaxpr_eqn {
     eqns
 }
 
-func distributed_training(jaxpr_graph graph, int num_workers) jaxpr_graph {
-    []jaxpr_eqn eqns = copy_eqns(graph.eqns)
+func distributed_training(ir_graph graph, int num_workers) ir_graph {
+    []ir_eqn eqns = copy_eqns(graph.eqns)
     eqns = synchronize_gradients(eqns, num_workers)
-    jaxpr_graph {
+    ir_graph {
         name: graph.name,
         eqn_count: len(eqns),
         primitives: copy_strings(graph.primitives),
