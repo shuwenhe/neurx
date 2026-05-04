@@ -309,7 +309,7 @@ neurx/
 │   ├── test_optimization.py        # 优化测试
 │   ├── test_pytorch_compat.py      # 兼容性测试
 │   └── test_gradients.py           # 梯度验证
-├── scripts/
+├── script/
 │   ├── benchmark_baseline.py       # 性能基准
 │   ├── compare_with_pytorch.py     # 兼容性检查
 │   └── verify_gradients.py         # 梯度检查

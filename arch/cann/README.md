@@ -9,8 +9,8 @@
 - `train_launcher.py`: 训练启动器，负责配置解析、环境预检和命令转发。
 - `configs/ascend_910b_train.json`: 可直接作为训练模板的示例配置。
 - `configs/ascend_310p3_train.json`: 310P3 示例配置，启动时会明确阻止训练。
-- `examples/torch_npu_train_template.py`: 基于 `torch` + `torch_npu` 的最小训练模板。
-- `examples/neurx_310p3_validation.py`: `neurx` + 8 卡 310P3 的联调验证脚本。
+- `example/torch_npu_train_template.py`: 基于 `torch` + `torch_npu` 的最小训练模板。
+- `example/neurx_310p3_validation.py`: `neurx` + 8 卡 310P3 的联调验证脚本。
 
 ## 重要说明
 

@@ -291,7 +291,7 @@ Week 4:
 │   ├── test_phase1_indexing.py         ✨ 新增
 │   ├── test_optimization.py            ✨ 新增
 │   └── test_pytorch_compat.py          ✨ 新增
-├── scripts/                            ✨ 新增
+├── script/                            ✨ 新增
 │   ├── benchmark_baseline.py
 │   ├── compare_with_pytorch.py
 │   ├── verify_gradients.py

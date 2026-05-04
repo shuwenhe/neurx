@@ -32,7 +32,7 @@ help:
 	@echo "  test-checkpoint Run checkpoint manager tests"
 	@echo "  list          List all API feature points and one-command per-API tests"
 	@echo "  api           Run one API test case. Usage: make api API=neurx.sum"
-	@echo "  api-all       Run all API test cases from tools/api_test_runner.py"
+	@echo "  api-all       Run all API test cases from tool/api_test_runner.py"
 	@echo "  doctor        Run runtime diagnostics"
 	@echo "  cann-doctor   Validate Ascend CANN config without starting training"
 	@echo "  cann-train    Launch Ascend training from cann JSON config"
@@ -118,17 +118,17 @@ test-checkpoint:
 	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_serialization import test_model_checkpoint; sys.exit(0 if test_model_checkpoint() else 1)"
 
 list:
-	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list
+	PYTHONPATH=python $(PYTHON) tool/api_test_runner.py --list
 
 api:
 	@if [ -z "$(API)" ]; then \
 		echo "Usage: make api API=neurx.sum"; \
 		exit 2; \
 	fi
-	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --api "$(API)"
+	PYTHONPATH=python $(PYTHON) tool/api_test_runner.py --api "$(API)"
 
 api-all:
-	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --all
+	PYTHONPATH=python $(PYTHON) tool/api_test_runner.py --all
 
 doctor:
 	PYTHONPATH=python $(PYTHON) -m neurx.cli
@@ -148,7 +148,7 @@ cann-train:
 	$(PYTHON) cann/train_launcher.py --config $(CONFIG)
 
 cann-test-310p3:
-	/usr/bin/python3 cann/examples/neurx_310p3_validation.py --python /usr/bin/python3 --rounds $(ROUNDS)
+	/usr/bin/python3 cann/example/neurx_310p3_validation.py --python /usr/bin/python3 --rounds $(ROUNDS)
 
 cann-test-npu-agnostic:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat test/npu_backend_agnostic_tests.txt)
@@ -203,10 +203,10 @@ s-compile-runtime:
 	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("build/ir"); ir_files = sorted(str(p.relative_to(root)) for p in root.rglob("*.ir")); manifest = {"source_root": str(Path(".").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'
 
 auto-push:
-	$(PYTHON) scripts/auto_push.py --repo . --remote origin
+	$(PYTHON) script/auto_push.py --repo . --remote origin
 
 install-auto-push-service:
-	bash scripts/install_auto_push_service.sh
+	bash script/install_auto_push_service.sh
 
 status-auto-push-service:
 	systemctl status neurx-auto-push.service --no-pager

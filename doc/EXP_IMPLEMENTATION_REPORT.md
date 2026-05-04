@@ -101,7 +101,7 @@ tests/test_phase1_math.py::test_exp_performance PASSED                   [100%]
 ## 🔬 梯度验证
 
 ### 验证脚本
-- **文件**: `/home/shuwen/neurx/scripts/verify_gradients.py`
+- **文件**: `/home/shuwen/neurx/script/verify_gradients.py`
 - **方法**: 数值梯度 vs 自动微分
 
 ### 验证结果
@@ -129,7 +129,7 @@ tests/test_phase1_math.py::test_exp_performance PASSED                   [100%]
 ## 📝 使用示例
 
 ### 示例脚本
-- **文件**: `/home/shuwen/neurx/scripts/exp_examples.py`
+- **文件**: `/home/shuwen/neurx/script/exp_examples.py`
 - **场景数**: 6 个
 
 ### 示例场景

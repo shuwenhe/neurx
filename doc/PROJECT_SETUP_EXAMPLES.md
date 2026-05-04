@@ -128,7 +128,7 @@ my-ai-project/
 │   ├── __init__.py
 │   ├── test_models.py
 │   └── test_data.py
-├── examples/
+├── example/
 │   └── train_example.py            # 使用示例
 ├── docs/
 │   └── README.md
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
 5. 开始开发
    python -m pytest         # 运行测试
-   python examples/train_example.py  # 运行示例
+   python example/train_example.py  # 运行示例
 
 ---
 
