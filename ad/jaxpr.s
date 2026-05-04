@@ -292,3 +292,82 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) jaxpr_graph {
         linearized: chain.linearized,
     }
 }
+
+
+func optimize_jaxpr(jaxpr_graph graph) jaxpr_graph {
+    []jaxpr_eqn optimized_eqns = []jaxpr_eqn{}
+    int i = 0
+    while i < len(graph.eqns) {
+        jaxpr_eqn eqn = graph.eqns[i]
+        if eqn.primitive == "add" && len(eqn.inputs) > 1 && eqn.inputs[0] == eqn.inputs[1] {
+            []string params = []string{cap: 1}
+            params[0] = "2.0"
+            []string inputs = []string{cap: 1}
+            inputs[0] = eqn.inputs[0]
+            optimized_eqns.push(jaxpr_eqn {
+                primitive: "mul",
+                params: params,
+                inputs: inputs,
+                outputs: copy_strings(eqn.outputs),
+            })
+        } else {
+            optimized_eqns.push(eqn)
+        }
+        i = i + 1
+    }
+    jaxpr_graph {
+        name: graph.name,
+        eqn_count: len(optimized_eqns),
+        primitives: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
+        eqns: optimized_eqns,
+        ready: true,
+        linearized: graph.linearized,
+    }
+}
+
+func compile_jaxpr(jaxpr_graph graph) string {
+    if !graph.ready {
+        return "Graph not ready for compilation"
+    }
+    string compiled_code = ""
+    int i = 0
+    while i < len(graph.eqns) {
+        compiled_code = compiled_code + graph.eqns[i].primitive + "\n"
+        i = i + 1
+    }
+    compiled_code
+}
+
+func synchronize_gradients([]jaxpr_eqn eqns, int num_workers) []jaxpr_eqn {
+    int i = 0
+    while i < len(eqns) {
+        if eqns[i].primitive == "grad" {
+            int j = 0
+            while j < len(eqns[i].params) {
+                eqns[i].params[j] = eqns[i].params[j] + "|sync"
+                j = j + 1
+            }
+        }
+        i = i + 1
+    }
+    eqns
+}
+
+func distributed_training(jaxpr_graph graph, int num_workers) jaxpr_graph {
+    []jaxpr_eqn eqns = copy_eqns(graph.eqns)
+    eqns = synchronize_gradients(eqns, num_workers)
+    jaxpr_graph {
+        name: graph.name,
+        eqn_count: len(eqns),
+        primitives: copy_strings(graph.primitives),
+        params: copy_strings(graph.params),
+        inputs: copy_strings(graph.inputs),
+        outputs: copy_strings(graph.outputs),
+        eqns: eqns,
+        ready: true,
+        linearized: graph.linearized,
+    }
+}

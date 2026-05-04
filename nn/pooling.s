@@ -2,7 +2,7 @@ package neurx.nn.pooling
 
 use neurx.tensor.tensor
 
-// ---- helpers ----
+
 
 func copy_float([]float data) []float {
     int n = len(data)
@@ -47,9 +47,9 @@ func out_size(int in_size, int kernel, int stride, int padding) int {
     (in_size + 2 * padding - kernel) / stride + 1
 }
 
-// ---- MaxPool1d ----
-// input:  (batch, channels, length)
-// output: (batch, channels, out_length)
+
+
+
 
 func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int batch = input.shape[0]
@@ -86,9 +86,9 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
 
-// ---- AvgPool1d ----
-// input:  (batch, channels, length)
-// output: (batch, channels, out_length)
+
+
+
 
 func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int batch = input.shape[0]
@@ -128,9 +128,9 @@ func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
 
-// ---- MaxPool2d ----
-// input:  (batch, channels, H, W)
-// output: (batch, channels, out_H, out_W)
+
+
+
 
 func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     int batch = input.shape[0]
@@ -179,9 +179,9 @@ func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
 
-// ---- AvgPool2d ----
-// input:  (batch, channels, H, W)
-// output: (batch, channels, out_H, out_W)
+
+
+
 
 func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     int batch = input.shape[0]
@@ -233,9 +233,9 @@ func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
 
-// ---- AdaptiveAvgPool2d ----
-// Reduces (batch, channels, H, W) -> (batch, channels, out_h, out_w)
-// by computing adaptive average pooling (PyTorch-compatible)
+
+
+
 
 func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     int batch = input.shape[0]
@@ -251,7 +251,7 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
             while oh < out_h {
                 int ow = 0
                 while ow < out_w {
-                    // Adaptive window: ceil(in / out) sized kernel
+
                     int h_start = oh * in_h / out_h
                     int h_end = (oh + 1) * in_h / out_h
                     int w_start = ow * in_w / out_w
