@@ -489,6 +489,108 @@ def _stage_dict(
     }
 
 
+def _compile_dict(
+    name: str,
+    backend: str,
+    mode: str,
+    captured: bool,
+    lowered: bool,
+    compiled: bool,
+    executed: bool,
+    ready: bool,
+    linearized: bool,
+    dynamic: bool,
+    fullgraph: bool,
+    debug: bool,
+    node_count: int,
+    nodes: list[str],
+    ops: list[str],
+    params: list[str],
+    inputs: list[str],
+    outputs: list[str],
+    edges: list[str],
+    passes: list[str],
+    cache_keys: list[str],
+    tags: list[str],
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "backend": backend,
+        "mode": mode,
+        "captured": bool(captured),
+        "lowered": bool(lowered),
+        "compiled": bool(compiled),
+        "executed": bool(executed),
+        "ready": bool(ready),
+        "linearized": bool(linearized),
+        "dynamic": bool(dynamic),
+        "fullgraph": bool(fullgraph),
+        "debug": bool(debug),
+        "node_count": int(node_count),
+        "nodes": list(nodes),
+        "ops": list(ops),
+        "params": list(params),
+        "inputs": list(inputs),
+        "outputs": list(outputs),
+        "edges": list(edges),
+        "passes": list(passes),
+        "cache_keys": list(cache_keys),
+        "tags": list(tags),
+    }
+
+
+def _compile_like(value: Any) -> tuple[str, str, str, bool, bool, bool, bool, bool, bool, bool, bool, bool, int, list[str], list[str], list[str], list[str], list[str], list[str], list[str], list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            str(value.get("backend", "")),
+            str(value.get("mode", "")),
+            bool(value.get("captured", False)),
+            bool(value.get("lowered", False)),
+            bool(value.get("compiled", False)),
+            bool(value.get("executed", False)),
+            bool(value.get("ready", False)),
+            bool(value.get("linearized", False)),
+            bool(value.get("dynamic", False)),
+            bool(value.get("fullgraph", False)),
+            bool(value.get("debug", False)),
+            int(value.get("node_count", 0)),
+            _string_list(value.get("nodes", [])),
+            _string_list(value.get("ops", [])),
+            _string_list(value.get("params", [])),
+            _string_list(value.get("inputs", [])),
+            _string_list(value.get("outputs", [])),
+            _string_list(value.get("edges", [])),
+            _string_list(value.get("passes", [])),
+            _string_list(value.get("cache_keys", [])),
+            _string_list(value.get("tags", [])),
+        )
+    return (
+        str(getattr(value, "name")),
+        str(getattr(value, "backend", "")),
+        str(getattr(value, "mode", "")),
+        bool(getattr(value, "captured", False)),
+        bool(getattr(value, "lowered", False)),
+        bool(getattr(value, "compiled", False)),
+        bool(getattr(value, "executed", False)),
+        bool(getattr(value, "ready", False)),
+        bool(getattr(value, "linearized", False)),
+        bool(getattr(value, "dynamic", False)),
+        bool(getattr(value, "fullgraph", False)),
+        bool(getattr(value, "debug", False)),
+        int(getattr(value, "node_count", 0)),
+        _string_list(getattr(value, "nodes", [])),
+        _string_list(getattr(value, "ops", [])),
+        _string_list(getattr(value, "params", [])),
+        _string_list(getattr(value, "inputs", [])),
+        _string_list(getattr(value, "outputs", [])),
+        _string_list(getattr(value, "edges", [])),
+        _string_list(getattr(value, "passes", [])),
+        _string_list(getattr(value, "cache_keys", [])),
+        _string_list(getattr(value, "tags", [])),
+    )
+
+
 def _control_dict(name: str, cond_enabled: bool, loop_enabled: bool, scan_enabled: bool, iterations: int, branches: list[str], params: list[str]) -> dict[str, Any]:
     return {
         "name": name,
@@ -1520,6 +1622,207 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 stages.append("execute")
             control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
             return _stage_dict(name, backend, mode, True, True, True, True, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+    if module_name == "runtime/compile":
+        if function_name == "new_compile_state":
+            return _compile_dict(str(args[0]), str(args[1]), str(args[2]), False, False, False, False, False, False, False, False, False, 0, [], [], [], [], [], [], [], [], [])
+        if function_name == "compile_name":
+            name = _compile_like(args[0])[0]
+            return name
+        if function_name == "compile_backend":
+            backend = _compile_like(args[0])[1]
+            return backend
+        if function_name == "compile_mode":
+            mode = _compile_like(args[0])[2]
+            return mode
+        if function_name == "compile_captured":
+            captured = _compile_like(args[0])[3]
+            return captured
+        if function_name == "compile_lowered":
+            lowered = _compile_like(args[0])[4]
+            return lowered
+        if function_name == "compile_compiled":
+            compiled = _compile_like(args[0])[5]
+            return compiled
+        if function_name == "compile_executed":
+            executed = _compile_like(args[0])[6]
+            return executed
+        if function_name == "compile_ready":
+            ready = _compile_like(args[0])[7]
+            return ready
+        if function_name == "compile_is_linearized":
+            linearized = _compile_like(args[0])[8]
+            return linearized
+        if function_name == "compile_node_count":
+            node_count = _compile_like(args[0])[12]
+            return node_count
+        if function_name == "compile_pass_count":
+            passes = _compile_like(args[0])[19]
+            return len(passes)
+        if function_name == "compile_param_count":
+            params = _compile_like(args[0])[15]
+            return len(params)
+        if function_name == "compile_input_count":
+            inputs = _compile_like(args[0])[16]
+            return len(inputs)
+        if function_name == "compile_output_count":
+            outputs = _compile_like(args[0])[17]
+            return len(outputs)
+        if function_name == "compile_edge_count":
+            edges = _compile_like(args[0])[18]
+            return len(edges)
+        if function_name == "compile_has_node":
+            nodes = _compile_like(args[0])[13]
+            return str(args[1]) in nodes
+        if function_name == "compile_has_edge":
+            edges = _compile_like(args[0])[18]
+            return str(args[1]) in edges
+        if function_name == "compile_has_pass":
+            passes = _compile_like(args[0])[19]
+            return str(args[1]) in passes
+        if function_name == "compile_has_cache_key":
+            cache_keys = _compile_like(args[0])[20]
+            return str(args[1]) in cache_keys
+        if function_name == "compile_add_node":
+            return _invoke_special_module_function(module_name, "compile_add_node_with_io", (args[0], args[1], args[2], [], [], []))
+        if function_name == "compile_add_edge":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            edges = list(edges)
+            edges.append(str(args[1]))
+            return _compile_dict(name, backend, mode, True, lowered, compiled, executed, True, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_node_with_io":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            nodes = list(nodes)
+            ops = list(ops)
+            params = list(params)
+            input_list = list(inputs)
+            output_list = list(outputs)
+            nodes.append(str(args[1]))
+            ops.append(str(args[2]))
+            params.append(",".join(_string_list(args[3]) if len(args) > 3 else []))
+            if len(args) > 4:
+                input_list.extend(_string_list(args[4]))
+            if len(args) > 5:
+                output_list.extend(_string_list(args[5]))
+            return _compile_dict(name, backend, mode, True, lowered, compiled, executed, True, linearized, dynamic, fullgraph, debug, len(nodes), nodes, ops, params, input_list, output_list, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_input":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            inputs = list(inputs)
+            inputs.append(str(args[1]))
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready or len(inputs) > 0, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_output":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            outputs = list(outputs)
+            outputs.append(str(args[1]))
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready or len(outputs) > 0, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_pass":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            passes = list(passes)
+            pass_name = str(args[1])
+            passes.append(pass_name)
+            return _compile_dict(name, backend, mode, True, lowered or pass_name in {"jit", "lower"}, compiled or pass_name == "compile", executed or pass_name == "execute", True, linearized or pass_name in {"lower", "compile", "execute"}, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_normalize":
+            return _UNHANDLED
+        if function_name == "compile_shape_specialize":
+            return _UNHANDLED
+        if function_name == "compile_fuse_linear_activation":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            nodes = list(nodes)
+            ops = list(ops)
+            params = list(params)
+            edges = list(edges)
+            tags = list(tags)
+            fused = 0
+            i = 0
+            while i + 1 < len(ops):
+                if ops[i] == "linear" and ops[i + 1] in {"gelu", "relu", "silu", "swish"}:
+                    left_node = nodes[i]
+                    right_node = nodes[i + 1]
+                    fused_op = f"linear+{ops[i + 1]}"
+                    fused_node = f"{left_node}+{right_node}"
+                    ops[i] = fused_op
+                    nodes[i] = fused_node
+                    del nodes[i + 1]
+                    del ops[i + 1]
+                    del params[i + 1]
+                    edges = [
+                        edge.replace(f"->{left_node}", f"->{fused_node}")
+                        .replace(f"->{right_node}", f"->{fused_node}")
+                        .replace(f"{right_node}->", f"{fused_node}->")
+                        for edge in edges
+                    ]
+                    deduped_edges: list[str] = []
+                    for edge in edges:
+                        if edge not in deduped_edges:
+                            deduped_edges.append(edge)
+                    edges = deduped_edges
+                    tags.append(f"fused={fused_op}@{left_node}")
+                    fused += 1
+                    i += 1
+                else:
+                    i += 1
+            node_count = len(nodes)
+            passes = list(passes)
+            passes.append("fuse_linear_activation")
+            tags.append("fused=none" if fused == 0 else f"fused_count={fused}")
+            return _compile_dict(name, backend, mode, True, lowered, compiled, executed, True, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_linearize":
+            return _UNHANDLED
+        if function_name == "compile_lower_graph":
+            return _UNHANDLED
+        if function_name == "compile_set_linearized":
+            return _UNHANDLED
+        if function_name == "compile_add_param":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            params = list(params)
+            params.append(str(args[1]))
+            return _compile_dict(name, backend, mode, True, lowered, compiled, executed, True, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_cache_key":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            cache_keys = list(cache_keys)
+            cache_keys.append(str(args[1]))
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_add_tag":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            tags = list(tags)
+            tags.append(str(args[1]))
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_captured":
+            name, backend, mode, _, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            captured = bool(args[1])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready or captured, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_lowered":
+            name, backend, mode, captured, _, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            lowered = bool(args[1])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized or lowered, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_compiled":
+            name, backend, mode, captured, lowered, _, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            compiled = bool(args[1])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized or compiled, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_executed":
+            name, backend, mode, captured, lowered, compiled, _, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            executed = bool(args[1])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready or executed, linearized or executed, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_dynamic":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, _, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized, bool(args[1]), fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_fullgraph":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, _, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, bool(args[1]), debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_set_debug":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, _, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            return _compile_dict(name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, bool(args[1]), node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags)
+        if function_name == "compile_state_dict":
+            return _compile_dict(*_compile_like(args[0]))
+        if function_name == "compile_load_state_dict":
+            return args[1]
+        if function_name == "compile_to_stage":
+            name, backend, mode, captured, lowered, compiled, executed, ready, linearized, dynamic, fullgraph, debug, node_count, nodes, ops, params, inputs, outputs, edges, passes, cache_keys, tags = _compile_like(args[0])
+            control_enabled = dynamic or fullgraph or debug
+            return _stage_dict(name, backend, mode, ready or captured, lowered or compiled or executed, compiled or executed, executed, passes, params, control_enabled, fullgraph, dynamic, mode == "max-autotune", 1 if dynamic else 0, [], [])
+        if function_name == "stage_to_compile":
+            name, backend, mode, jit_enabled, lowered, compiled, executed, stages, params = _stage_like(args[0])
+            control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
+            return _compile_dict(name, backend, mode, jit_enabled or len(stages) > 0, lowered, compiled, executed, jit_enabled or lowered or compiled or executed or len(stages) > 0, lowered or compiled or executed, control_loop_enabled, control_cond_enabled, False, len(stages), list(stages), list(stages), list(params), [], [], [], list(stages), [], [])
     if module_name == "tensor":
         if function_name == "tensor_backward_add_grad_a":
             grad_a, _, _ = _tensor_like(args[0])
