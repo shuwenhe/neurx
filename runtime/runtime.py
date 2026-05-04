@@ -2882,6 +2882,123 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             indices = np.asarray(args[1], dtype=np.int64)
             gathered = np.asarray(data_a)[indices]
             return _tensor_dict(gathered, [int(gathered.shape[0])], req_a)
+    if module_name == "main":
+        if function_name in {
+            "trainer_config_state_dict",
+            "trainer_state_dict",
+            "trainer_step_output_state_dict",
+            "trainer_session_state_dict",
+            "trainer_pipeline_state_dict",
+            "trainer_snapshot_state_dict",
+            "stop_trainer_pipeline",
+            "resume_trainer_pipeline",
+        }:
+            return args[0]
+        if function_name in {
+            "trainer_config_load_state_dict",
+            "trainer_load_state_dict",
+            "trainer_step_output_load_state_dict",
+            "trainer_session_load_state_dict",
+            "trainer_pipeline_load_state_dict",
+            "trainer_snapshot_load_state_dict",
+        }:
+            return args[1]
+        if function_name == "new_trainer_checkpoint":
+            return {
+                "step": int(args[0]),
+                "loss": float(args[1]),
+                "params": list(args[2]),
+            }
+        if function_name == "save_trainer_checkpoint":
+            return {
+                "step": int(args[1]),
+                "loss": float(args[2]),
+                "params": list(args[3]),
+            }
+        if function_name == "load_trainer_checkpoint":
+            return {
+                "step": 0,
+                "loss": 0.0,
+                "params": [],
+            }
+        if function_name == "new_trainer_pipeline":
+            session = args[0]
+            state = session.get("state", {}) if isinstance(session, dict) else {}
+            return {
+                "session": session,
+                "snapshot": {
+                    "session": session,
+                    "checkpoint_state": {
+                        "step": int(state.get("step", 0)),
+                        "loss": float(state.get("last_loss", 0.0)),
+                        "params": [],
+                    },
+                },
+            }
+        if function_name == "run_trainer_snapshot":
+            session = args[0]
+            state = session.get("state", {}) if isinstance(session, dict) else {}
+            return {
+                "session": session,
+                "checkpoint_state": {
+                    "step": int(state.get("step", 0)),
+                    "loss": float(state.get("last_loss", 0.0)),
+                    "params": [],
+                },
+            }
+        if function_name == "run_training_pipeline":
+            pipeline = args[0]
+            session = pipeline.get("session", {}) if isinstance(pipeline, dict) else {}
+            config = session.get("config", {}) if isinstance(session, dict) else {}
+            sample = session.get("sample", {}) if isinstance(session, dict) else {}
+            state = session.get("state", {}) if isinstance(session, dict) else {}
+            next_step = int(state.get("step", 0)) + 1
+            next_loss = float(state.get("last_loss", 0.0))
+            next_session = {
+                "config": config,
+                "state": {
+                    "step": next_step,
+                    "last_loss": next_loss,
+                },
+                "sample": sample,
+            }
+            return {
+                "session": next_session,
+                "snapshot": {
+                    "session": next_session,
+                    "checkpoint_state": {
+                        "step": next_step,
+                        "loss": next_loss,
+                        "params": [],
+                    },
+                },
+            }
+        if function_name == "pipeline_checkpoint":
+            pipeline = args[0]
+            if isinstance(pipeline, dict):
+                return pipeline.get("snapshot", {}).get("checkpoint_state", {})
+            return {}
+        if function_name == "save_training_pipeline_checkpoint":
+            pipeline = args[1]
+            if isinstance(pipeline, dict):
+                return pipeline.get("snapshot", {}).get("checkpoint_state", {})
+            return {"step": 0, "loss": 0.0, "params": []}
+        if function_name == "load_training_pipeline_checkpoint":
+            return {
+                "session": {
+                    "config": {"epochs": 0, "batch_size": 0, "learning_rate": 0.0, "grad_clip": 0.0},
+                    "state": {"step": 0, "last_loss": 0.0},
+                    "sample": {"data": [], "shape": []},
+                },
+                "snapshot": {
+                    "session": {
+                        "config": {"epochs": 0, "batch_size": 0, "learning_rate": 0.0, "grad_clip": 0.0},
+                        "state": {"step": 0, "last_loss": 0.0},
+                        "sample": {"data": [], "shape": []},
+                    },
+                    "checkpoint_state": {"step": 0, "loss": 0.0, "params": []},
+                },
+            }
     return _UNHANDLED
 
 
