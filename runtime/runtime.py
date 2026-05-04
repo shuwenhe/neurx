@@ -749,7 +749,7 @@ def _stage_control_like(value: Any) -> tuple[bool, bool, bool, bool, int, list[s
     )
 
 
-def _jaxpr_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], list[str], bool, bool]:
+def _ir_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], list[str], bool, bool]:
     if isinstance(value, dict):
         return (
             str(value.get("name", "")),
@@ -773,7 +773,7 @@ def _jaxpr_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], 
     )
 
 
-def _jaxpr_eqns(value: Any) -> list[dict[str, Any]]:
+def _ir_eqns(value: Any) -> list[dict[str, Any]]:
     if isinstance(value, dict):
         return [
             {
@@ -817,7 +817,7 @@ def _transform_chain_eqns(value: Any) -> list[dict[str, Any]]:
     ]
 
 
-def _jaxpr_dict(name: str, eqn_count: int, primitives: list[str], params: list[str], inputs: list[str], outputs: list[str], ready: bool, linearized: bool, eqns: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def _ir_dict(name: str, eqn_count: int, primitives: list[str], params: list[str], inputs: list[str], outputs: list[str], ready: bool, linearized: bool, eqns: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     return {
         "name": name,
         "eqn_count": int(eqn_count),
@@ -870,28 +870,28 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
         }:
             return invoke_runtime_function("ad/tracer", function_name, *args)
         if function_name in {
-            "new_jaxpr_graph",
-            "jaxpr_name",
-            "jaxpr_eqn_count",
-            "jaxpr_primitive_count",
-            "jaxpr_input_count",
-            "jaxpr_output_count",
-            "jaxpr_has_primitive",
-            "jaxpr_ready",
-            "jaxpr_is_linearized",
-            "jaxpr_add_eqn",
-            "jaxpr_add_eqn_with_params",
-            "jaxpr_add_eqn_with_io",
-            "jaxpr_add_input",
-            "jaxpr_add_output",
-            "jaxpr_state_dict",
-            "jaxpr_load_state_dict",
-            "jaxpr_from_tracer",
-            "jaxpr_to_tracer",
-            "jaxpr_capture",
-            "jaxpr_capture_with_params",
-            "jaxpr_capture_with_io",
-            "jaxpr_to_transform_chain",
+            "new_ir_graph",
+            "ir_name",
+            "ir_eqn_count",
+            "ir_primitive_count",
+            "ir_input_count",
+            "ir_output_count",
+            "ir_has_primitive",
+            "ir_ready",
+            "ir_is_linearized",
+            "ir_add_eqn",
+            "ir_add_eqn_with_params",
+            "ir_add_eqn_with_io",
+            "ir_add_input",
+            "ir_add_output",
+            "ir_state_dict",
+            "ir_load_state_dict",
+            "ir_from_tracer",
+            "ir_to_tracer",
+            "ir_capture",
+            "ir_capture_with_params",
+            "ir_capture_with_io",
+            "ir_to_transform_chain",
             "transform_chain_to_jaxpr",
         }:
             return invoke_runtime_function("ad/ir", function_name, *args)
@@ -1221,8 +1221,8 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             return _backward_dict(name, active, linearized, False, ops, params, inputs, outputs, tags, [])
         if function_name == "backward_to_jaxpr":
             name, ready, seeded, executed, steps, params, inputs, outputs, tags, upstream = _backward_like(args[0])
-            return _jaxpr_dict(name, len(steps), steps, params, inputs, outputs, ready, seeded or executed, [])
-        if function_name == "jaxpr_to_backward":
+            return _ir_dict(name, len(steps), steps, params, inputs, outputs, ready, seeded or executed, [])
+        if function_name == "ir_to_backward":
             graph = args[0]
             name = str(graph.get("name", "")) if isinstance(graph, dict) else str(getattr(graph, "name", ""))
             primitives = _string_list(graph.get("primitives", [])) if isinstance(graph, dict) else _string_list(getattr(graph, "primitives", []))
@@ -2063,7 +2063,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _tracer_eqns(state), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
             else:
                 state = args[0]
-                return invoke_runtime_function("ad/ir", "jaxpr_from_tracer", state, str(args[1]))
+                return invoke_runtime_function("ad/ir", "ir_from_tracer", state, str(args[1]))
             name, active, linearized, op_count, ops, params, tags = _tracer_like(state)
             tracer_inputs, tracer_outputs = _tracer_inputs_outputs(state)
             ops = list(ops)
@@ -2256,63 +2256,63 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
             return _tracer_dict(name, ready, linearized, len(steps), steps, params, [], inputs, outputs, eqns)
     if module_name == "ad/ir":
-        if function_name == "new_jaxpr_graph":
-            return _jaxpr_dict(str(args[0]), 0, [], [], [], [], False, False, [])
-        if function_name == "jaxpr_name":
-            name, _, _, _, _, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "new_ir_graph":
+            return _ir_dict(str(args[0]), 0, [], [], [], [], False, False, [])
+        if function_name == "ir_name":
+            name, _, _, _, _, _, _, _ = _ir_like(args[0])
             return name
-        if function_name == "jaxpr_eqn_count":
-            _, eqn_count, _, _, _, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_eqn_count":
+            _, eqn_count, _, _, _, _, _, _ = _ir_like(args[0])
             return eqn_count
-        if function_name == "jaxpr_primitive_count":
-            _, _, primitives, _, _, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_primitive_count":
+            _, _, primitives, _, _, _, _, _ = _ir_like(args[0])
             return len(primitives)
-        if function_name == "jaxpr_param_count":
-            _, _, _, params, _, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_param_count":
+            _, _, _, params, _, _, _, _ = _ir_like(args[0])
             return len(params)
-        if function_name == "jaxpr_input_count":
-            _, _, _, _, inputs, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_input_count":
+            _, _, _, _, inputs, _, _, _ = _ir_like(args[0])
             return len(inputs)
-        if function_name == "jaxpr_output_count":
-            _, _, _, _, _, outputs, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_output_count":
+            _, _, _, _, _, outputs, _, _ = _ir_like(args[0])
             return len(outputs)
-        if function_name == "jaxpr_has_primitive":
-            _, _, primitives, _, _, _, _, _ = _jaxpr_like(args[0])
+        if function_name == "ir_has_primitive":
+            _, _, primitives, _, _, _, _, _ = _ir_like(args[0])
             return str(args[1]) in primitives
-        if function_name == "jaxpr_ready":
-            _, _, _, _, _, _, ready, _ = _jaxpr_like(args[0])
+        if function_name == "ir_ready":
+            _, _, _, _, _, _, ready, _ = _ir_like(args[0])
             return ready
-        if function_name == "jaxpr_is_linearized":
-            _, _, _, _, _, _, _, linearized = _jaxpr_like(args[0])
+        if function_name == "ir_is_linearized":
+            _, _, _, _, _, _, _, linearized = _ir_like(args[0])
             return linearized
-        if function_name == "jaxpr_add_eqn":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+        if function_name == "ir_add_eqn":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
             primitives = list(primitives)
             primitives.append(str(args[1]))
             params = list(params)
             params.append("")
-            eqns = _jaxpr_eqns(args[0])
+            eqns = _ir_eqns(args[0])
             eqns = list(eqns)
             eqns.append({"primitive": str(args[1]), "params": [], "inputs": [], "outputs": []})
-            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
-        if function_name == "jaxpr_add_eqn_with_params":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return _ir_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "ir_add_eqn_with_params":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
             primitives = list(primitives)
             params = list(params)
             primitives.append(str(args[1]))
             params.append(",".join(str(item) for item in args[2]))
-            eqns = _jaxpr_eqns(args[0])
+            eqns = _ir_eqns(args[0])
             eqns = list(eqns)
             eqns.append({"primitive": str(args[1]), "params": _string_list(args[2]), "inputs": [], "outputs": []})
-            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
-        if function_name == "jaxpr_add_eqn_with_io":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return _ir_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "ir_add_eqn_with_io":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
             primitives = list(primitives)
             params = list(params)
             primitives.append(str(args[1]))
             param_list = _string_list(args[2]) if len(args) > 2 else []
             params.append(",".join(param_list))
-            eqns = _jaxpr_eqns(args[0])
+            eqns = _ir_eqns(args[0])
             eqns = list(eqns)
             eqns.append({
                 "primitive": str(args[1]),
@@ -2320,37 +2320,37 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 "inputs": _string_list(args[3]) if len(args) > 3 else [],
                 "outputs": _string_list(args[4]) if len(args) > 4 else [],
             })
-            return _jaxpr_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
-        if function_name == "jaxpr_add_input":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return _ir_dict(name, len(primitives), primitives, params, inputs, outputs, True, linearized, eqns)
+        if function_name == "ir_add_input":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
             inputs = list(inputs)
             inputs.append(str(args[1]))
-            return _jaxpr_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _jaxpr_eqns(args[0]))
-        if function_name == "jaxpr_add_output":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
+            return _ir_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _ir_eqns(args[0]))
+        if function_name == "ir_add_output":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
             outputs = list(outputs)
             outputs.append(str(args[1]))
-            return _jaxpr_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _jaxpr_eqns(args[0]))
-        if function_name == "jaxpr_state_dict":
-            return _jaxpr_dict(*_jaxpr_like(args[0]), _jaxpr_eqns(args[0]))
-        if function_name == "jaxpr_load_state_dict":
+            return _ir_dict(name, eqn_count, primitives, params, inputs, outputs, ready, linearized, _ir_eqns(args[0]))
+        if function_name == "ir_state_dict":
+            return _ir_dict(*_ir_like(args[0]), _ir_eqns(args[0]))
+        if function_name == "ir_load_state_dict":
             return args[1]
-        if function_name == "jaxpr_from_tracer":
+        if function_name == "ir_from_tracer":
             _, active, linearized, op_count, ops, params, _ = _tracer_like(args[0])
             inputs, outputs = _tracer_inputs_outputs(args[0])
-            return _jaxpr_dict(str(args[1]), op_count, list(ops), list(params), list(inputs), list(outputs), active or op_count > 0, linearized, _tracer_eqns(args[0]))
-        if function_name == "jaxpr_to_tracer":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
-            return _tracer_dict(name, ready, linearized, eqn_count, list(primitives), list(params), [], list(inputs), list(outputs), _jaxpr_eqns(args[0]))
-        if function_name == "jaxpr_capture":
-            return _invoke_special_module_function(module_name, "jaxpr_add_eqn", args)
-        if function_name == "jaxpr_capture_with_params":
-            return _invoke_special_module_function(module_name, "jaxpr_add_eqn_with_params", args)
-        if function_name == "jaxpr_capture_with_io":
-            return _invoke_special_module_function(module_name, "jaxpr_add_eqn_with_io", args)
-        if function_name == "jaxpr_to_transform_chain":
-            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _jaxpr_like(args[0])
-            return {"steps": list(primitives), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _jaxpr_eqns(args[0]), "ready": bool(ready or eqn_count > 0), "linearized": bool(linearized)}
+            return _ir_dict(str(args[1]), op_count, list(ops), list(params), list(inputs), list(outputs), active or op_count > 0, linearized, _tracer_eqns(args[0]))
+        if function_name == "ir_to_tracer":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
+            return _tracer_dict(name, ready, linearized, eqn_count, list(primitives), list(params), [], list(inputs), list(outputs), _ir_eqns(args[0]))
+        if function_name == "ir_capture":
+            return _invoke_special_module_function(module_name, "ir_add_eqn", args)
+        if function_name == "ir_capture_with_params":
+            return _invoke_special_module_function(module_name, "ir_add_eqn_with_params", args)
+        if function_name == "ir_capture_with_io":
+            return _invoke_special_module_function(module_name, "ir_add_eqn_with_io", args)
+        if function_name == "ir_to_transform_chain":
+            name, eqn_count, primitives, params, inputs, outputs, ready, linearized = _ir_like(args[0])
+            return {"steps": list(primitives), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _ir_eqns(args[0]), "ready": bool(ready or eqn_count > 0), "linearized": bool(linearized)}
         if function_name == "transform_chain_to_jaxpr":
             chain = args[0]
             steps = _string_list(chain.get("steps", [])) if isinstance(chain, dict) else _string_list(getattr(chain, "steps", []))
@@ -2367,7 +2367,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             linearized = bool(chain.get("linearized", False)) if isinstance(chain, dict) else bool(getattr(chain, "linearized", False))
             if not eqns:
                 eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
-            return _jaxpr_dict(str(args[1]), len(steps), steps, params, inputs, outputs, ready, linearized, eqns)
+            return _ir_dict(str(args[1]), len(steps), steps, params, inputs, outputs, ready, linearized, eqns)
     if module_name == "tensor/batch":
         if function_name == "new_batch_state":
             return _batch_dict(str(args[0]), False, int(args[1]), int(args[2]), [], [])
