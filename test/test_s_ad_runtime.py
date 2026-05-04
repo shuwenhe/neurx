@@ -21,7 +21,7 @@ def test_s_ad_runtime_compiled_functions_present():
     assert any(Path(path).as_posix().endswith("engine/backward.ir") for path in status["ir_files"])
     assert any(Path(path).as_posix().endswith("engine/state.ir") for path in status["ir_files"])
     assert any(Path(path).as_posix().endswith("ad/tracer.ir") for path in status["ir_files"])
-    assert any(Path(path).as_posix().endswith("ad/nxir.ir") for path in status["ir_files"])
+    assert any(Path(path).as_posix().endswith("ad/ir.ir") for path in status["ir_files"])
 
     runtime_files = [Path(path).name for path in runtime.compiled_runtime_files()]
     for ir_name in ("ad.ir", "context.ir", "function.ir"):
@@ -30,7 +30,7 @@ def test_s_ad_runtime_compiled_functions_present():
     assert any(Path(path).as_posix().endswith("engine/backward.ir") for path in runtime.compiled_runtime_files())
     assert any(Path(path).as_posix().endswith("engine/state.ir") for path in runtime.compiled_runtime_files())
     assert any(Path(path).as_posix().endswith("ad/tracer.ir") for path in runtime.compiled_runtime_files())
-    assert any(Path(path).as_posix().endswith("ad/nxir.ir") for path in runtime.compiled_runtime_files())
+    assert any(Path(path).as_posix().endswith("ad/ir.ir") for path in runtime.compiled_runtime_files())
 
     for function_name in (
         "new_state",
@@ -242,7 +242,7 @@ def test_s_ad_runtime_compiled_functions_present():
         "jaxpr_capture_with_io",
         "jaxpr_to_transform_chain",
     ):
-        assert runtime.supports_runtime_function("ad/nxir", function_name)
+        assert runtime.supports_runtime_function("ad/ir", function_name)
 
     for function_name in (
         "new_state",
@@ -511,31 +511,31 @@ def test_s_ad_tracer_and_jaxpr_runtime_smoke():
     assert [eqn["primitive"] for eqn in tracer_round_trip["eqns"]] == ["add", "mul", "matmul"]
     assert tracer_round_trip["op_count"] == 2
 
-    jaxpr = runtime.invoke_runtime_function("ad/nxir", "new_jaxpr_graph", "graph0")
+    jaxpr = runtime.invoke_runtime_function("ad/ir", "new_jaxpr_graph", "graph0")
     assert jaxpr["name"] == "graph0"
     assert jaxpr["eqn_count"] == 0
     assert jaxpr["ready"] is False
 
-    jaxpr = runtime.invoke_runtime_function("ad/nxir", "jaxpr_add_eqn", jaxpr, "add")
+    jaxpr = runtime.invoke_runtime_function("ad/ir", "jaxpr_add_eqn", jaxpr, "add")
     assert jaxpr["eqn_count"] == 1
     assert jaxpr["primitives"] == ["add"]
     assert jaxpr["params"] == [""]
     assert jaxpr["ready"] is True
     assert jaxpr["eqns"][0]["primitive"] == "add"
 
-    jaxpr = runtime.invoke_runtime_function("ad/nxir", "jaxpr_add_input", jaxpr, "x")
-    jaxpr = runtime.invoke_runtime_function("ad/nxir", "jaxpr_add_output", jaxpr, "y")
+    jaxpr = runtime.invoke_runtime_function("ad/ir", "jaxpr_add_input", jaxpr, "x")
+    jaxpr = runtime.invoke_runtime_function("ad/ir", "jaxpr_add_output", jaxpr, "y")
     assert jaxpr["inputs"] == ["x"]
     assert jaxpr["outputs"] == ["y"]
 
-    jaxpr_chain = runtime.invoke_runtime_function("ad/nxir", "jaxpr_to_transform_chain", jaxpr)
+    jaxpr_chain = runtime.invoke_runtime_function("ad/ir", "jaxpr_to_transform_chain", jaxpr)
     assert jaxpr_chain["steps"] == ["add"]
     assert jaxpr_chain["params"] == [""]
     assert [eqn["primitive"] for eqn in jaxpr_chain["eqns"]] == ["add"]
     assert jaxpr_chain["ready"] is True
     assert jaxpr_chain["linearized"] is False
 
-    jaxpr_tracer = runtime.invoke_runtime_function("ad/nxir", "jaxpr_to_tracer", jaxpr)
+    jaxpr_tracer = runtime.invoke_runtime_function("ad/ir", "jaxpr_to_tracer", jaxpr)
     assert jaxpr_tracer["name"] == "graph0"
     assert jaxpr_tracer["ops"] == ["add"]
     assert jaxpr_tracer["params"] == [""]
