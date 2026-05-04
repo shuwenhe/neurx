@@ -1,3 +1,35 @@
+// ---- trace/graph 互转与混合调度接口 ----
+use neurx.ad.tracer
+
+// trace -> ir_graph
+func trace_to_ir(tracer_state state, string name) ir_graph {
+    ir_from_tracer(state, name)
+}
+
+// ir_graph -> trace
+func ir_to_trace(ir_graph graph) tracer_state {
+    ir_to_tracer(graph)
+}
+
+// 动静态混合调度入口
+func hybrid_trace_graph(tracer_state state, string name, bool to_graph) any {
+    if to_graph {
+        return trace_to_ir(state, name)
+    } else {
+        return tracer_state {
+            name: name,
+            active: state.active,
+            linearized: state.linearized,
+            op_count: state.op_count,
+            ops: copy_strings(state.ops),
+            params: copy_strings(state.params),
+            inputs: copy_strings(state.inputs),
+            outputs: copy_strings(state.outputs),
+            eqns: copy_eqns(state.eqns),
+            tags: copy_strings(state.tags),
+        }
+    }
+}
 package neurx.ad.ir
 
 use neurx.ad.function
@@ -294,7 +326,35 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
 }
 
 
-func optimize_jaxpr(ir_graph graph) ir_graph {
+
+// ---- ir_graph 高性能优化 pass 框架 ----
+
+type ir_pass = func(ir_graph) ir_graph
+
+var ir_pass_registry = map[string]ir_pass{}
+
+func register_ir_pass(string name, ir_pass pass) void {
+    ir_pass_registry[name] = pass
+}
+
+func run_ir_pass(ir_graph graph, string pass_name) ir_graph {
+    if pass_name in ir_pass_registry {
+        return ir_pass_registry[pass_name](graph)
+    }
+    return graph
+}
+
+func optimize_ir(ir_graph graph) ir_graph {
+    // 默认串行执行所有已注册 pass，可扩展为 pipeline
+    ir_graph out = graph
+    for name, pass in ir_pass_registry {
+        out = pass(out)
+    }
+    out
+}
+
+// 示例 pass：合并 x + x => 2 * x
+func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
     while i < len(graph.eqns) {
@@ -327,6 +387,9 @@ func optimize_jaxpr(ir_graph graph) ir_graph {
         linearized: graph.linearized,
     }
 }
+
+// 注册默认 pass
+register_ir_pass("simple_fuse_add", simple_fuse_add)
 
 func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {

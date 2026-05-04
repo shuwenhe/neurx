@@ -12,7 +12,7 @@ struct tracer_state {
     []string params
     []string inputs
     []string outputs
-    []jaxpr_eqn eqns
+    []ir_eqn eqns
     []string tags
 }
 
@@ -26,8 +26,8 @@ func copy_strings([]string values) []string {
     out
 }
 
-func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
-    jaxpr_eqn {
+func copy_eqn(ir_eqn eqn) ir_eqn {
+    ir_eqn {
         primitive: eqn.primitive,
         params: copy_strings(eqn.params),
         inputs: copy_strings(eqn.inputs),
@@ -35,8 +35,8 @@ func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
     }
 }
 
-func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
-    []jaxpr_eqn out = []jaxpr_eqn{cap: len(values)}
+func copy_eqns([]ir_eqn values) []ir_eqn {
+    []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
     while i < len(values) {
         out[i] = copy_eqn(values[i])
@@ -245,7 +245,7 @@ func tracer_add_eqn_with_io(tracer_state state, string primitive, []string param
     []string param_list = copy_strings(state.params)
     []string input_list = copy_strings(state.inputs)
     []string output_list = copy_strings(state.outputs)
-    []jaxpr_eqn eqns = copy_eqns(state.eqns)
+    []ir_eqn eqns = copy_eqns(state.eqns)
     ops.push(primitive)
     param_list.push(join_params(params))
     int i = 0
@@ -259,7 +259,7 @@ func tracer_add_eqn_with_io(tracer_state state, string primitive, []string param
         i = i + 1
     }
     eqns.push(
-        jaxpr_eqn {
+        ir_eqn {
             primitive: primitive,
             params: copy_strings(params),
             inputs: eqn_inputs(inputs),
@@ -424,12 +424,12 @@ func tracer_to_transform_chain(tracer_state state) transform_chain {
 }
 
 func transform_chain_to_tracer(transform_chain chain, string name) tracer_state {
-    []jaxpr_eqn eqns = copy_eqns(chain.eqns)
+    []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
-        eqns = []jaxpr_eqn{cap: len(chain.steps)}
+        eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
         while i < len(chain.steps) {
-            eqns[i] = jaxpr_eqn {
+            eqns[i] = ir_eqn {
                 primitive: chain.steps[i],
                 params: copy_strings([]string{cap: 0}),
                 inputs: [],
