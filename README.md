@@ -1,6 +1,6 @@
 # neurx
 
-neurx is a deep learning framework with a Python runtime and an S-language core rewrite.
+neurx is a deep learning framework with S-language write.
 
 ## Layout
 
@@ -8,7 +8,7 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `tensor/`: S source for tensor primitives and helpers
 - `ad/`: S source for automatic differentiation
 - `engine/`: S source for backward execution and autograd state
-- `dl/`: S source for datasets and dataloading
+- `data/`: S source for datasets and dataloading
 - `lf/`: S source for loss functions
 - `train/`: S source for training utilities
 - `runtime/`: S source for runtime state helpers, I/O adapters, stage state, and control-flow helpers
@@ -37,8 +37,8 @@ neurx is a deep learning framework with a Python runtime and an S-language core 
 - `trainer.s`: training config and step state
 - `opt/optim_mvp.s`: minimal SGD and learning rate implementation
 - `dataloader_mvp.s`: minimal dataloader for batch/sequence slicing
-- `dl/dataset.s`: dataset abstraction, slicing, splitting, and concatenation
-- `dl/dataloader.s`: data loading, batching, and dataloader state
+- `data/dataset.s`: dataset abstraction, slicing, splitting, and concatenation
+- `data/dataloader.s`: data loading, batching, and dataloader state
 - `lf/losses.s`: loss function entry point and core loss implementations
 - `train/amp.s`: autocast and GradScaler state utilities
 - `train/checkpoint_manager.s`: checkpoint retention and best-score tracking
