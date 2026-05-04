@@ -1,4 +1,4 @@
-.PHONY: help install install-local dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable s-compile-runtime auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean
+.PHONY: help install install-local dev test test-creation test-sgd test-schedulers test-optimizers test-conv2d test-einsum test-vision test-resnet test-new-features test-scatter test-meshgrid test-scatter-gather test-serialization test-checkpoint list api api-all cuda-test cuda-install ensure-pytest bootstrap doctor cann-doctor cann-train cann-test-310p3 cann-test-npu-agnostic cann-test-npu-agnostic-stable s-compile-runtime auto-push install-auto-push-service status-auto-push-service stop-auto-push-service clean verify-layout
 
 .DEFAULT_GOAL := install-local
 
@@ -47,6 +47,7 @@ help:
 	@echo "  cuda-install  Build/install with CUDA (requires CUDA_HOME or CUDA_PATH)"
 	@echo "  cuda-test     Run CUDA smoke test (requires CUDA build)"
 	@echo "  clean         Remove build artifacts"
+	@echo "  verify-layout Check for forbidden IR/build artifacts in source directories"
 
 install: install-local
 
@@ -221,3 +222,11 @@ cuda-install:
 
 clean:
 	@rm -rf build dist *.egg-info
+
+verify-layout:
+	@echo "Checking for forbidden IR/build artifacts in source directories..."
+	@if find . -type f \( -name '*.ir' -a ! -path './build/*' \) | grep -q .; then \
+		echo 'ERROR: Found .ir files outside build/. Please clean up.'; exit 1; \
+	else \
+		echo 'OK: No forbidden IR files found.'; \
+	fi
