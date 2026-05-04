@@ -7,7 +7,7 @@ PIP ?= $(PYTHON) -m pip
 PYTEST ?= $(PYTHON) -m pytest
 PIP_INSTALL_FLAGS ?= --no-build-isolation
 ROUNDS ?= 3
-S_COMPILER ?= /Users/feifei/.local/bin/s
+S_COMPILER ?= $(shell command -v s 2>/dev/null)
 
 help:
 	@echo "Targets:"
@@ -66,55 +66,55 @@ test: ensure-pytest
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q
 
 test-creation:
-	PYTHONPATH=python $(PYTHON) tests/test_creation.py
+	PYTHONPATH=python $(PYTHON) test/test_creation.py
 
 test-sgd:
-	PYTHONPATH=python $(PYTHON) tests/test_sgd.py
+	PYTHONPATH=python $(PYTHON) test/test_sgd.py
 
 test-schedulers:
-	PYTHONPATH=python $(PYTHON) tests/test_schedulers.py
+	PYTHONPATH=python $(PYTHON) test/test_schedulers.py
 
 test-optimizers:
-	PYTHONPATH=python $(PYTHON) tests/test_adam_rmsprop.py
+	PYTHONPATH=python $(PYTHON) test/test_adam_rmsprop.py
 
 test-conv2d:
-	PYTHONPATH=python $(PYTHON) tests/test_conv2d.py
+	PYTHONPATH=python $(PYTHON) test/test_conv2d.py
 
 test-einsum:
 	@echo "Testing Einstein summation (einsum)..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_new_features import test_einsum; sys.exit(0 if test_einsum() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_new_features import test_einsum; sys.exit(0 if test_einsum() else 1)"
 
 test-vision:
 	@echo "Testing vision transforms..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_new_features import test_vision_transforms; sys.exit(0 if test_vision_transforms() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_new_features import test_vision_transforms; sys.exit(0 if test_vision_transforms() else 1)"
 
 test-resnet:
 	@echo "Testing ResNet models..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_new_features import test_resnet_models; sys.exit(0 if test_resnet_models() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_new_features import test_resnet_models; sys.exit(0 if test_resnet_models() else 1)"
 
 test-new-features:
 	@echo "Running comprehensive tests for all new features..."
-	PYTHONPATH=python $(PYTHON) tests/test_new_features.py
+	PYTHONPATH=python $(PYTHON) test/test_new_features.py
 
 test-scatter:
 	@echo "Testing scatter operations..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_scatter_gather import test_scatter, test_scatter_add; sys.exit(0 if test_scatter() and test_scatter_add() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_scatter_gather import test_scatter, test_scatter_add; sys.exit(0 if test_scatter() and test_scatter_add() else 1)"
 
 test-meshgrid:
 	@echo "Testing meshgrid..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_scatter_gather import test_meshgrid; sys.exit(0 if test_meshgrid() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_scatter_gather import test_meshgrid; sys.exit(0 if test_meshgrid() else 1)"
 
 test-scatter-gather:
 	@echo "Running comprehensive scatter/gather/meshgrid tests..."
-	PYTHONPATH=python $(PYTHON) tests/test_scatter_gather.py
+	PYTHONPATH=python $(PYTHON) test/test_scatter_gather.py
 
 test-serialization:
 	@echo "Running model serialization tests..."
-	PYTHONPATH=python $(PYTHON) tests/test_serialization.py
+	PYTHONPATH=python $(PYTHON) test/test_serialization.py
 
 test-checkpoint:
 	@echo "Running checkpoint management tests..."
-	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'tests'); from test_serialization import test_model_checkpoint; sys.exit(0 if test_model_checkpoint() else 1)"
+	@PYTHONPATH=python $(PYTHON) -c "import sys; sys.path.insert(0, 'test'); from test_serialization import test_model_checkpoint; sys.exit(0 if test_model_checkpoint() else 1)"
 
 list:
 	PYTHONPATH=python $(PYTHON) tools/api_test_runner.py --list
@@ -150,15 +150,15 @@ cann-test-310p3:
 	/usr/bin/python3 cann/examples/neurx_310p3_validation.py --python /usr/bin/python3 --rounds $(ROUNDS)
 
 cann-test-npu-agnostic:
-	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_tests.txt)
+	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat test/npu_backend_agnostic_tests.txt)
 
 cann-test-npu-agnostic-stable:
-	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat tests/npu_backend_agnostic_stable.txt)
+	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat test/npu_backend_agnostic_stable.txt)
 
 s-compile-runtime:
 	@if [ ! -x "$(S_COMPILER)" ]; then \
 		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
-		echo "hint: run 'make -C /Users/feifei/s' first to install /Users/feifei/.local/bin/s"; \
+		echo "hint: install the S compiler and ensure 's' is on PATH, or pass S_COMPILER=/path/to/s"; \
 		exit 1; \
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
@@ -192,8 +192,12 @@ s-compile-runtime:
 	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p build/ir$$dir; \
-	    echo "Compiling $$src -> build/ir$$dir/$$base.ir"; \
-		$(S_COMPILER) ir "$$src" -o build/ir$$dir/$$base.ir || exit 1; \
+		echo "Compiling $$src -> build/ir$$dir/$$base.ir"; \
+		if $(S_COMPILER) --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			$(S_COMPILER) "$$src" build/ir$$dir/$$base.ir || exit 1; \
+		else \
+			$(S_COMPILER) ir "$$src" -o build/ir$$dir/$$base.ir || exit 1; \
+		fi; \
 	done
 	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("build/ir"); ir_files = sorted(str(p.relative_to(root)) for p in root.rglob("*.ir")); manifest = {"source_root": str(Path(".").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'
 
@@ -210,7 +214,7 @@ stop-auto-push-service:
 	systemctl disable --now neurx-auto-push.service
 
 cuda-test: ensure-pytest
-	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q tests/test_cuda_smoke.py tests/test_cuda_reductions.py tests/test_cuda_reduction_backward.py
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(PYTEST) -q test/test_cuda_smoke.py test/test_cuda_reductions.py test/test_cuda_reduction_backward.py
 
 cuda-install:
 	TENSOR_CUDA=1 $(PIP) install -e . $(PIP_INSTALL_FLAGS)

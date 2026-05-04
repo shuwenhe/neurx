@@ -2,7 +2,7 @@ package neurx.nn.conv
 
 use neurx.tensor.tensor
 
-// ---- helpers ----
+
 
 func copy_float([]float data) []float {
     int n = len(data)
@@ -54,10 +54,10 @@ func out_size(int in_size, int kernel, int stride, int padding, int dilation) in
     (in_size + 2 * padding - dilation * (kernel - 1) - 1) / stride + 1
 }
 
-// ---- Conv1d ----
-// weight shape: (out_channels, in_channels, kernel_size)
-// input shape:  (batch, in_channels, length)
-// output shape: (batch, out_channels, out_length)
+
+
+
+
 
 struct conv1d_state {
     int in_channels
@@ -143,10 +143,10 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
 
-// ---- Conv2d ----
-// weight shape: (out_channels, in_channels, kH, kW)
-// input shape:  (batch, in_channels, H, W)
-// output shape: (batch, out_channels, out_H, out_W)
+
+
+
+
 
 struct conv2d_state {
     int in_channels

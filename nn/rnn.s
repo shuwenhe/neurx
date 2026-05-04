@@ -2,7 +2,7 @@ package neurx.nn.rnn
 
 use neurx.tensor.tensor
 
-// ---- math helpers ----
+
 
 func exp_approx(float x) float {
     if x > 20.0 {
@@ -73,9 +73,9 @@ func shape3(int a, int b, int c) []int {
     s
 }
 
-// ---- matmul helpers ----
 
-// mat_vec: (rows x cols) @ (cols,) -> (rows,)
+
+
 func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     []float out = []float{cap: rows}
     int r = 0
@@ -92,7 +92,7 @@ func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     out
 }
 
-// add two equal-length float arrays
+
 func vec_add([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -123,16 +123,16 @@ func zeros(int n) []float {
     out
 }
 
-// ---- RNNCell ----
-// h_t = tanh(W_ih * x_t + b_ih + W_hh * h_{t-1} + b_hh)
+
+
 
 struct rnn_cell_state {
     int input_size
     int hidden_size
-    []float weight_ih   // (hidden_size, input_size)
-    []float weight_hh   // (hidden_size, hidden_size)
-    []float bias_ih     // (hidden_size,)
-    []float bias_hh     // (hidden_size,)
+    []float weight_ih
+    []float weight_hh
+    []float bias_ih
+    []float bias_hh
 }
 
 func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
@@ -146,7 +146,7 @@ func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
     }
 }
 
-// x: (input_size,), h_prev: (hidden_size,) -> h_next: (hidden_size,)
+
 func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     int hs = cell.hidden_size
     []float gi = mat_vec(cell.weight_ih, hs, cell.input_size, x)
@@ -161,12 +161,12 @@ func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     out
 }
 
-// RNN over a sequence: input (seq_len, input_size), initial h (hidden_size,)
-// Returns last hidden state (hidden_size,) and all hidden states (seq_len, hidden_size)
+
+
 
 struct rnn_output {
-    []float last_hidden   // (hidden_size,)
-    []float all_hidden    // (seq_len * hidden_size,)
+    []float last_hidden
+    []float all_hidden
     int seq_len
     int hidden_size
 }
@@ -178,7 +178,7 @@ func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rn
     []float all_h = []float{cap: seq_len * hs}
     int t = 0
     while t < seq_len {
-        // slice x = input[t * is_ .. (t+1) * is_]
+
         []float x = []float{cap: is_}
         int j = 0
         while j < is_ {
@@ -201,22 +201,22 @@ func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rn
     }
 }
 
-// ---- LSTMCell ----
-// Input gate:  i = sigmoid(W_ii * x + b_ii + W_hi * h + b_hi)
-// Forget gate: f = sigmoid(W_if * x + b_if + W_hf * h + b_hf)
-// Cell gate:   g = tanh(W_ig * x + b_ig + W_hg * h + b_hg)
-// Output gate: o = sigmoid(W_io * x + b_io + W_ho * h + b_ho)
-// c_next = f * c + i * g
-// h_next = o * tanh(c_next)
+
+
+
+
+
+
+
 
 struct lstm_cell_state {
     int input_size
     int hidden_size
-    // Combined gates weight: (4*hidden_size, input_size) stored as flat
-    []float weight_ih   // (4*hs, is)
-    []float weight_hh   // (4*hs, hs)
-    []float bias_ih     // (4*hs,)
-    []float bias_hh     // (4*hs,)
+
+    []float weight_ih
+    []float weight_hh
+    []float bias_ih
+    []float bias_hh
 }
 
 func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
@@ -232,8 +232,8 @@ func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
 }
 
 struct lstm_cell_output {
-    []float h_next  // (hidden_size,)
-    []float c_next  // (hidden_size,)
+    []float h_next
+    []float c_next
 }
 
 func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float c_prev) lstm_cell_output {
@@ -242,7 +242,7 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
     []float gi = mat_vec(cell.weight_ih, g, cell.input_size, x)
     []float gh = mat_vec(cell.weight_hh, g, hs, h_prev)
     []float pre = vec_add(vec_add(gi, cell.bias_ih, g), vec_add(gh, cell.bias_hh, g), g)
-    // Split into 4 gates
+
     []float i_gate = []float{cap: hs}
     []float f_gate = []float{cap: hs}
     []float g_gate = []float{cap: hs}
@@ -269,12 +269,12 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
     }
 }
 
-// LSTM over sequence: input (seq_len, input_size), initial h (hidden_size,), initial c (hidden_size,)
+
 
 struct lstm_output {
-    []float last_hidden   // (hidden_size,)
-    []float last_cell     // (hidden_size,)
-    []float all_hidden    // (seq_len * hidden_size,)
+    []float last_hidden
+    []float last_cell
+    []float all_hidden
     int seq_len
     int hidden_size
 }
@@ -312,25 +312,25 @@ func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, 
     }
 }
 
-// ---- GRUCell ----
-// Reset gate:  r = sigmoid(W_ir * x + b_ir + W_hr * h + b_hr)
-// Update gate: z = sigmoid(W_iz * x + b_iz + W_hz * h + b_hz)
-// New gate:    n = tanh(W_in * x + b_in + r * (W_hn * h + b_hn))
-// h_next = (1 - z) * n + z * h
+
+
+
+
+
 
 struct gru_cell_state {
     int input_size
     int hidden_size
-    // Weights for r+z gates combined: (2*hs, is) and (2*hs, hs)
-    []float weight_ih_rz   // (2*hs, is)
-    []float weight_hh_rz   // (2*hs, hs)
-    []float bias_ih_rz     // (2*hs,)
-    []float bias_hh_rz     // (2*hs,)
-    // Weights for n gate
-    []float weight_ih_n    // (hs, is)
-    []float weight_hh_n    // (hs, hs)
-    []float bias_ih_n      // (hs,)
-    []float bias_hh_n      // (hs,)
+
+    []float weight_ih_rz
+    []float weight_hh_rz
+    []float bias_ih_rz
+    []float bias_hh_rz
+
+    []float weight_ih_n
+    []float weight_hh_n
+    []float bias_ih_n
+    []float bias_hh_n
 }
 
 func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
@@ -352,7 +352,7 @@ func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
 func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     int hs = cell.hidden_size
     int rz = 2 * hs
-    // Compute r and z gates
+
     []float gi_rz = mat_vec(cell.weight_ih_rz, rz, cell.input_size, x)
     []float gh_rz = mat_vec(cell.weight_hh_rz, rz, hs, h_prev)
     []float pre_rz = vec_add(vec_add(gi_rz, cell.bias_ih_rz, rz), vec_add(gh_rz, cell.bias_hh_rz, rz), rz)
@@ -364,7 +364,7 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
         z[j] = sigmoid(pre_rz[hs + j])
         j = j + 1
     }
-    // Compute new gate: n = tanh(W_in*x + b_in + r*(W_hn*h + b_hn))
+
     []float gi_n = mat_vec(cell.weight_ih_n, hs, cell.input_size, x)
     []float gh_n = mat_vec(cell.weight_hh_n, hs, hs, h_prev)
     []float n = []float{cap: hs}
@@ -374,7 +374,7 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
         n[j] = tanh_approx(pre_n)
         j = j + 1
     }
-    // h_next = (1 - z) * n + z * h_prev
+
     []float h_next = []float{cap: hs}
     j = 0
     while j < hs {
@@ -384,11 +384,11 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     h_next
 }
 
-// GRU over sequence
+
 
 struct gru_output {
-    []float last_hidden   // (hidden_size,)
-    []float all_hidden    // (seq_len * hidden_size,)
+    []float last_hidden
+    []float all_hidden
     int seq_len
     int hidden_size
 }

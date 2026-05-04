@@ -346,16 +346,27 @@ def is_grad_enabled() -> bool:
     return _grad_enabled
 
 
-def zeros(shape, device: str = "cpu"):
-    return Tensor(np.zeros(shape, dtype=np.float32), device=device)
+def zeros(*shape, device: str = "cpu", dtype=np.float32, requires_grad=False):
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    return Tensor(np.zeros(shape, dtype=dtype), device=device, requires_grad=requires_grad)
 
 
-def ones(shape, device: str = "cpu"):
-    return Tensor(np.ones(shape, dtype=np.float32), device=device)
+def ones(*shape, device: str = "cpu", dtype=np.float32, requires_grad=False):
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    return Tensor(np.ones(shape, dtype=dtype), device=device, requires_grad=requires_grad)
 
 
-def full(shape, value, device: str = "cpu"):
-    return Tensor(np.full(shape, value, dtype=np.float32), device=device)
+def full(*args, device: str = "cpu", dtype=np.float32, value=None, requires_grad=False):
+    # Accept full((2,3), 7.5) or full(2,3, value=7.5)
+    if len(args) == 2 and isinstance(args[0], (tuple, list)):
+        shape, val = tuple(args[0]), args[1]
+    elif value is not None:
+        shape, val = args, value
+    else:
+        raise TypeError("full() requires shape and value")
+    return Tensor(np.full(shape, val, dtype=dtype), device=device, requires_grad=requires_grad)
 
 
 def zeros_like(like: Tensor):
@@ -404,16 +415,22 @@ def logspace(start, end, steps, base=10.0):
     return Tensor(np.logspace(start, end, steps, base=base, dtype=np.float32))
 
 
-def rand(shape):
-    return Tensor(np.random.rand(*shape).astype(np.float32))
+def rand(*shape, requires_grad=False):
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    return Tensor(np.random.rand(*shape).astype(np.float32), requires_grad=requires_grad)
 
 
-def randn(shape):
-    return Tensor(np.random.randn(*shape).astype(np.float32))
+def randn(*shape, requires_grad=False):
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    return Tensor(np.random.randn(*shape).astype(np.float32), requires_grad=requires_grad)
 
 
-def randint(low, high, shape):
-    return Tensor(np.random.randint(low, high, size=shape).astype(np.float32))
+def randint(low, high, *shape, requires_grad=False):
+    if len(shape) == 1 and isinstance(shape[0], (tuple, list)):
+        shape = tuple(shape[0])
+    return Tensor(np.random.randint(low, high, size=shape).astype(np.float32), requires_grad=requires_grad)
 
 
 def randperm(n):
