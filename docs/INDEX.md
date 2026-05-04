@@ -105,7 +105,7 @@ Q_heads = Q_multi.moveaxis(2, 1)  # (B,T,H,D) → (B,H,T,D)
 2. 🆕 QUICK_START_NEW_APIS_2026.md (30分钟)
 3. 源码: python/neurx/core/neurx.py (30分钟)
 4. 测试: tests/test_tensor_ops_extended.py (15分钟)
-5. CUDA 绑定: cuda/bindings.cpp (15分钟)
+5. CUDA 绑定: backends/cuda/bindings.s (15分钟)
 ```
 
 ---

@@ -327,7 +327,7 @@ extern "C" void cuda_conv2d_backward(
 
 #### Python 绑定
 ```cpp
-// 文件: neurx/cuda/bindings.cpp
+文件: neurx/backends/cuda/bindings.s
 
 static PyObject* tensor_cuda_conv2d_forward(PyObject* /*self*/, PyObject* args) {
     PyObject* input_capsule = nullptr;
