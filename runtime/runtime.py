@@ -894,7 +894,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             "jaxpr_to_transform_chain",
             "transform_chain_to_jaxpr",
         }:
-            return invoke_runtime_function("ad/jaxpr", function_name, *args)
+            return invoke_runtime_function("ad/nxir", function_name, *args)
     if module_name == "function":
         if function_name == "new_function":
             return _function_dict(str(args[0]), False, False, False, False, int(args[1]), [], [])
@@ -2063,7 +2063,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 return {"steps": list(ops), "params": list(params), "inputs": list(inputs), "outputs": list(outputs), "eqns": _tracer_eqns(state), "ready": bool(active or op_count > 0), "linearized": bool(linearized)}
             else:
                 state = args[0]
-                return invoke_runtime_function("ad/jaxpr", "jaxpr_from_tracer", state, str(args[1]))
+                return invoke_runtime_function("ad/nxir", "jaxpr_from_tracer", state, str(args[1]))
             name, active, linearized, op_count, ops, params, tags = _tracer_like(state)
             tracer_inputs, tracer_outputs = _tracer_inputs_outputs(state)
             ops = list(ops)
@@ -2255,7 +2255,7 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
             if not eqns:
                 eqns = [{"primitive": step, "params": [param] if param else [], "inputs": [], "outputs": []} for step, param in zip(steps, params)]
             return _tracer_dict(name, ready, linearized, len(steps), steps, params, [], inputs, outputs, eqns)
-    if module_name == "ad/jaxpr":
+    if module_name == "ad/nxir":
         if function_name == "new_jaxpr_graph":
             return _jaxpr_dict(str(args[0]), 0, [], [], [], [], False, False, [])
         if function_name == "jaxpr_name":
