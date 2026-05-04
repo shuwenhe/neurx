@@ -548,8 +548,8 @@ pip install -r requirements.txt
 
 - [NeurX 快速安装指南](/QUICK_INSTALL.md)
 - [NeurX 详细使用指南](/docs/INSTALLATION_AND_USAGE_GUIDE.md)
-- [模板项目](/examples/template_project/)
-- [MNIST 示例](/examples/mnist_classifier.py)
+- [模板项目](/example/template_project/)
+- [MNIST 示例](/example/mnist_classifier.py)
 - [项目分析文档](/docs/PROJECT_SETUP_EXAMPLES.md)
 
 ---

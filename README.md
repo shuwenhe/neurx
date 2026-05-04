@@ -14,7 +14,7 @@ neurx is a deep learning framework with S-language write.
 - `runtime/`: S source for runtime state helpers, I/O adapters, stage state, and control-flow helpers
 - `nn/`: S source for neural network building blocks
 - `opt/`: S source for optimizers
-- `s/`: legacy S entry scripts and notes
+- `s/`: legacy S entry script and notes
 - `build/ir/`: generated S IR artifacts
 - `build/logs/`: generated compiler and runtime logs
 
@@ -56,6 +56,6 @@ The S modules are compiled into runtime IR during the `s-compile-runtime` step a
 
 ## Hardware Backends
 
-- `backends/cuda/`: CUDA/NVIDIA GPU support
-- `backends/cann/`: Ascend NPU support
-- `backends/mps/`: Apple M1/M2 GPU support
+- `arch/cuda/`: CUDA/NVIDIA GPU support
+- `arch/cann/`: Ascend NPU support
+- `arch/mps/`: Apple M1/M2 GPU support
