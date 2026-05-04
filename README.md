@@ -57,5 +57,5 @@ The S modules are compiled into runtime IR during the `s-compile-runtime` step a
 ## Hardware Backends
 
 - `backends/cuda/`: CUDA/NVIDIA GPU support
-- `backends/ascend/`: Ascend NPU support
+- `backends/cann/`: Ascend NPU support
 - `backends/mps/`: Apple M1/M2 GPU support
