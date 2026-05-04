@@ -1,6 +1,6 @@
 package neurx.ad.eqn
 
-struct jaxpr_eqn {
+struct ir_eqn {
     string primitive
     []string params
     []string inputs
@@ -17,8 +17,8 @@ func copy_strings([]string values) []string {
     out
 }
 
-func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
-    jaxpr_eqn {
+func copy_eqn(ir_eqn eqn) ir_eqn {
+    ir_eqn {
         primitive: eqn.primitive,
         params: copy_strings(eqn.params),
         inputs: copy_strings(eqn.inputs),
@@ -26,8 +26,8 @@ func copy_eqn(jaxpr_eqn eqn) jaxpr_eqn {
     }
 }
 
-func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
-    []jaxpr_eqn out = []jaxpr_eqn{cap: len(values)}
+func copy_eqns([]ir_eqn values) []ir_eqn {
+    []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
     while i < len(values) {
         out[i] = copy_eqn(values[i])
