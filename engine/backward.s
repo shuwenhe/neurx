@@ -1,6 +1,6 @@
 package neurx.engine
 
-use neurx.ad.jaxpr
+use neurx.ad.nxir
 use neurx.ad.tracer
 use neurx.tensor.autograd
 use neurx.tensor.tensor

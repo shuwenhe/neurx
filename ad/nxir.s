@@ -1,4 +1,4 @@
-package neurx.ad.jaxpr
+package neurx.ad.nxir
 
 use neurx.ad.function
 use neurx.ad.eqn
