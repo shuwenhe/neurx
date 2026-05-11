@@ -135,20 +135,20 @@ doctor:
 
 cann-doctor:
 	@if [ -z "$(CONFIG)" ]; then \
-		echo "Usage: make cann-doctor CONFIG=cann/configs/ascend_910b_train.json"; \
+		echo "Usage: make cann-doctor CONFIG=arch/cann/configs/ascend_910b_train.json"; \
 		exit 2; \
 	fi
-	$(PYTHON) cann/train_launcher.py --config $(CONFIG) --dry-run
+	$(PYTHON) arch/cann/train_launcher.py --config $(CONFIG) --dry-run
 
 cann-train:
 	@if [ -z "$(CONFIG)" ]; then \
-		echo "Usage: make cann-train CONFIG=cann/configs/ascend_910b_train.json"; \
+		echo "Usage: make cann-train CONFIG=arch/cann/configs/ascend_910b_train.json"; \
 		exit 2; \
 	fi
-	$(PYTHON) cann/train_launcher.py --config $(CONFIG)
+	$(PYTHON) arch/cann/train_launcher.py --config $(CONFIG)
 
 cann-test-310p3:
-	/usr/bin/python3 cann/example/neurx_310p3_validation.py --python /usr/bin/python3 --rounds $(ROUNDS)
+	$(PYTHON) arch/cann/example/neurx_310p3_validation.py --python $(PYTHON) --rounds $(ROUNDS)
 
 cann-test-npu-agnostic:
 	NEURX_TEST_DEVICE=npu TENSOR_DEVICE=npu PYTHONPATH=python:. /usr/bin/python3 -m pytest -q $$(cat test/npu_backend_agnostic_tests.txt)
@@ -164,7 +164,7 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p build/ir
-	for src in $$(printf '%s\n' s/*.s ops/*.s tensor/*.s ad/*.s engine/*.s nn/*.s opt/*.s dl/*.s lf/*.s train/*.s runtime/*.s distributed/*.s); do \
+	for src in $$(printf '%s\n' s/*.s ops/*.s tensor/*.s ad/*.s engine/*.s nn/*.s opt/*.s dl/*.s lf/*.s train/*.s runtime/*.s distributed/*.s platform/*.s compile/*.s); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename $$src .s); \
 	    dir=$$(dirname $$src); \
@@ -192,6 +192,10 @@ s-compile-runtime:
 	        dir="/runtime"; \
 	    elif [ "$$dir" = "distributed" ]; then \
 	        dir="/distributed"; \
+	    elif [ "$$dir" = "platform" ]; then \
+	        dir="/platform"; \
+	    elif [ "$$dir" = "compile" ]; then \
+	        dir="/compile"; \
 	    fi; \
 	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
 	    mkdir -p build/ir$$dir; \
