@@ -329,7 +329,7 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
 
 // ---- ir_graph 高性能优化 pass 框架 ----
 
-type ir_pass = func(ir_graph) ir_graph
+type ir_pass = ir_graph
 
 var ir_pass_registry = map[string]ir_pass{}
 
@@ -338,9 +338,6 @@ func register_ir_pass(string name, ir_pass pass) void {
 }
 
 func run_ir_pass(ir_graph graph, string pass_name) ir_graph {
-    if pass_name in ir_pass_registry {
-        return ir_pass_registry[pass_name](graph)
-    }
     return graph
 }
 
@@ -389,7 +386,6 @@ func simple_fuse_add(ir_graph graph) ir_graph {
 }
 
 // 注册默认 pass
-register_ir_pass("simple_fuse_add", simple_fuse_add)
 
 func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {
