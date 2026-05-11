@@ -5,17 +5,20 @@
     "soc": "Ascend910B1"
   },
   "env": {
-    "ASCEND_RT_VISIBLE_DEVICES": "0"
+    "ASCEND_RT_VISIBLE_DEVICES": "0",
+    "HCCL_CONNECT_TIMEOUT": "7200"
   },
   "train": {
     "workdir": "/app/neurx",
     "command": [
       "python3",
-      "cann/example/torch_npu_train_template.py",
+      "arch/cann/example/torch_npu_train_template.py",
       "--epochs",
       "2",
       "--batch-size",
-      "8"
+      "8",
+      "--device",
+      "npu"
     ]
   }
 }

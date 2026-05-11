@@ -823,6 +823,106 @@ def _pp_like(value: Any) -> tuple[str, str, int, int, int, int, int, int, int, b
     )
 
 
+def _comm_dict(
+    backend: str,
+    rank: int,
+    world_size: int,
+    initialized: bool,
+    last_peer: int,
+    last_payload: list[float],
+    send_count: int,
+    recv_count: int,
+) -> dict[str, Any]:
+    return {
+        "backend": backend,
+        "rank": int(rank),
+        "world_size": int(world_size),
+        "initialized": bool(initialized),
+        "last_peer": int(last_peer),
+        "last_payload": [float(v) for v in last_payload],
+        "send_count": int(send_count),
+        "recv_count": int(recv_count),
+    }
+
+
+def _comm_like(value: Any) -> tuple[str, int, int, bool, int, list[float], int, int]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("backend", "gloo")),
+            int(value.get("rank", 0)),
+            int(value.get("world_size", 1)),
+            bool(value.get("initialized", False)),
+            int(value.get("last_peer", 0)),
+            [float(v) for v in value.get("last_payload", [])],
+            int(value.get("send_count", 0)),
+            int(value.get("recv_count", 0)),
+        )
+    return (
+        str(getattr(value, "backend", "gloo")),
+        int(getattr(value, "rank", 0)),
+        int(getattr(value, "world_size", 1)),
+        bool(getattr(value, "initialized", False)),
+        int(getattr(value, "last_peer", 0)),
+        [float(v) for v in getattr(value, "last_payload", [])],
+        int(getattr(value, "send_count", 0)),
+        int(getattr(value, "recv_count", 0)),
+    )
+
+
+def _ddp_dict(
+    name: str,
+    bucket_cap: int,
+    find_unused: bool,
+    step: int,
+    params: list[str],
+    param_sizes: list[int],
+    ready_params: list[str],
+    reduced_bucket_count: int,
+    gradient_synchronized: bool,
+    last_sync_scale: float,
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "bucket_cap": int(bucket_cap),
+        "find_unused": bool(find_unused),
+        "step": int(step),
+        "params": list(params),
+        "param_sizes": [int(v) for v in param_sizes],
+        "ready_params": list(ready_params),
+        "reduced_bucket_count": int(reduced_bucket_count),
+        "gradient_synchronized": bool(gradient_synchronized),
+        "last_sync_scale": float(last_sync_scale),
+    }
+
+
+def _ddp_like(value: Any) -> tuple[str, int, bool, int, list[str], list[int], list[str], int, bool, float]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "ddp")),
+            int(value.get("bucket_cap", 1)),
+            bool(value.get("find_unused", False)),
+            int(value.get("step", 0)),
+            _string_list(value.get("params", [])),
+            [int(v) for v in value.get("param_sizes", [])],
+            _string_list(value.get("ready_params", [])),
+            int(value.get("reduced_bucket_count", 0)),
+            bool(value.get("gradient_synchronized", False)),
+            float(value.get("last_sync_scale", 1.0)),
+        )
+    return (
+        str(getattr(value, "name", "ddp")),
+        int(getattr(value, "bucket_cap", 1)),
+        bool(getattr(value, "find_unused", False)),
+        int(getattr(value, "step", 0)),
+        _string_list(getattr(value, "params", [])),
+        [int(v) for v in getattr(value, "param_sizes", [])],
+        _string_list(getattr(value, "ready_params", [])),
+        int(getattr(value, "reduced_bucket_count", 0)),
+        bool(getattr(value, "gradient_synchronized", False)),
+        float(getattr(value, "last_sync_scale", 1.0)),
+    )
+
+
 def _pipelining_stage_dict(
     name: str,
     stage_index: int,
@@ -1943,6 +2043,123 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
         if function_name == "pp_reset_progress":
             name, strategy, num_stages, chunks, stage_id, world_size, rank, _, _, active, _, _, stages, stage_ranks, schedule = _pp_like(args[0])
             return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, 0, 0, active, False, False, stages, stage_ranks, schedule)
+    if module_name == "distributed/comm":
+        if function_name == "new_process_group":
+            backend = str(args[0])
+            world_size = max(1, int(args[2]))
+            rank = min(max(0, int(args[1])), world_size - 1)
+            return _comm_dict(backend, rank, world_size, True, 0, [], 0, 0)
+        if function_name == "process_group_state_dict":
+            return _comm_dict(*_comm_like(args[0]))
+        if function_name == "process_group_load_state_dict":
+            return _comm_dict(*_comm_like(args[1]))
+        if function_name == "process_group_backend":
+            return _comm_like(args[0])[0]
+        if function_name == "process_group_rank":
+            return _comm_like(args[0])[1]
+        if function_name == "process_group_world_size":
+            return _comm_like(args[0])[2]
+        if function_name == "process_group_initialized":
+            return _comm_like(args[0])[3]
+        if function_name == "destroy_process_group":
+            backend, rank, world_size, _, last_peer, last_payload, send_count, recv_count = _comm_like(args[0])
+            return _comm_dict(backend, rank, world_size, False, last_peer, last_payload, send_count, recv_count)
+        if function_name == "barrier":
+            return _comm_dict(*_comm_like(args[0]))
+        if function_name == "all_reduce_sum":
+            _, _, world_size, _, _, _, _, _ = _comm_like(args[0])
+            values = [float(v) for v in args[1]]
+            if world_size <= 1:
+                return values
+            return [v * world_size for v in values]
+        if function_name == "all_reduce_mean":
+            return [float(v) for v in args[1]]
+        if function_name == "all_gather":
+            _, _, world_size, _, _, _, _, _ = _comm_like(args[0])
+            values = [float(v) for v in args[1]]
+            if world_size <= 1:
+                return values
+            out: list[float] = []
+            for _ in range(world_size):
+                out.extend(values)
+            return out
+        if function_name == "reduce_scatter_sum":
+            _, _, world_size, _, _, _, _, _ = _comm_like(args[0])
+            values = [float(v) for v in args[1]]
+            if world_size <= 1:
+                return values
+            chunk = len(values) // world_size
+            if chunk <= 0:
+                chunk = len(values)
+            return [values[i] * world_size for i in range(chunk)]
+        if function_name == "p2p_send":
+            backend, rank, world_size, initialized, _, _, send_count, recv_count = _comm_like(args[0])
+            peer = min(max(0, int(args[1])), world_size - 1)
+            payload = [float(v) for v in args[2]]
+            return _comm_dict(backend, rank, world_size, initialized, peer, payload, send_count + 1, recv_count)
+        if function_name == "p2p_recv":
+            _, _, world_size, _, last_peer, last_payload, _, _ = _comm_like(args[0])
+            peer = min(max(0, int(args[1])), world_size - 1)
+            expected_size = max(0, int(args[2]))
+            out: list[float] = [0.0] * expected_size
+            if peer == last_peer and len(last_payload) > 0:
+                for idx in range(expected_size):
+                    if idx < len(last_payload):
+                        out[idx] = float(last_payload[idx])
+            return out
+    if module_name == "distributed/ddp":
+        if function_name == "new_ddp_state":
+            return _ddp_dict(str(args[0]), max(1, int(args[1])), bool(args[2]), 0, [], [], [], 0, False, 1.0)
+        if function_name == "ddp_state_dict":
+            return _ddp_dict(*_ddp_like(args[0]))
+        if function_name == "ddp_load_state_dict":
+            return _ddp_dict(*_ddp_like(args[1]))
+        if function_name == "ddp_name":
+            return _ddp_like(args[0])[0]
+        if function_name == "ddp_step":
+            return _ddp_like(args[0])[3]
+        if function_name == "ddp_bucket_cap":
+            return _ddp_like(args[0])[1]
+        if function_name == "ddp_param_count":
+            return len(_ddp_like(args[0])[4])
+        if function_name == "ddp_ready_param_count":
+            return len(_ddp_like(args[0])[6])
+        if function_name == "ddp_reduced_bucket_count":
+            return _ddp_like(args[0])[7]
+        if function_name == "ddp_gradient_synchronized":
+            return _ddp_like(args[0])[8]
+        if function_name == "ddp_is_param_registered":
+            return str(args[1]) in _ddp_like(args[0])[4]
+        if function_name == "ddp_is_param_ready":
+            return str(args[1]) in _ddp_like(args[0])[6]
+        if function_name == "ddp_add_param":
+            name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale = _ddp_like(args[0])
+            param_name = str(args[1])
+            if param_name in params:
+                return _ddp_dict(name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale)
+            params = list(params)
+            param_sizes = list(param_sizes)
+            params.append(param_name)
+            param_sizes.append(max(1, int(args[2])))
+            return _ddp_dict(name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale)
+        if function_name == "ddp_mark_grad_ready":
+            name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale = _ddp_like(args[0])
+            param_name = str(args[1])
+            if param_name not in params or param_name in ready_params:
+                return _ddp_dict(name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale)
+            ready_params = list(ready_params)
+            ready_params.append(param_name)
+            return _ddp_dict(name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, gradient_synchronized, last_sync_scale)
+        if function_name == "ddp_reduce_ready_buckets":
+            name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, _, _ = _ddp_like(args[0])
+            world_size = max(1, int(args[1]))
+            sync = len(params) > 0 and len(ready_params) >= len(params)
+            if sync:
+                reduced_bucket_count += 1
+            return _ddp_dict(name, bucket_cap, find_unused, step, params, param_sizes, ready_params, reduced_bucket_count, sync, 1.0 / world_size)
+        if function_name == "ddp_finalize_step":
+            name, bucket_cap, find_unused, step, params, param_sizes, _, reduced_bucket_count, _, last_sync_scale = _ddp_like(args[0])
+            return _ddp_dict(name, bucket_cap, find_unused, step + 1, params, param_sizes, [], reduced_bucket_count, False, last_sync_scale)
     if module_name == "distributed/pipelining":
         if function_name == "split_point_beginning":
             return "beginning"
