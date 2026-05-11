@@ -749,6 +749,227 @@ def _stage_control_like(value: Any) -> tuple[bool, bool, bool, bool, int, list[s
     )
 
 
+def _pp_dict(
+    name: str,
+    strategy: str,
+    num_stages: int,
+    chunks: int,
+    stage_id: int,
+    world_size: int,
+    rank: int,
+    microbatch_id: int,
+    step: int,
+    active: bool,
+    warmup_done: bool,
+    flush_done: bool,
+    stages: list[str],
+    stage_ranks: list[int],
+    schedule: list[str],
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "strategy": strategy,
+        "num_stages": int(num_stages),
+        "chunks": int(chunks),
+        "stage_id": int(stage_id),
+        "world_size": int(world_size),
+        "rank": int(rank),
+        "microbatch_id": int(microbatch_id),
+        "step": int(step),
+        "active": bool(active),
+        "warmup_done": bool(warmup_done),
+        "flush_done": bool(flush_done),
+        "stages": list(stages),
+        "stage_ranks": [int(v) for v in stage_ranks],
+        "schedule": list(schedule),
+    }
+
+
+def _pp_like(value: Any) -> tuple[str, str, int, int, int, int, int, int, int, bool, bool, bool, list[str], list[int], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            str(value.get("strategy", "gpipe")),
+            int(value.get("num_stages", 1)),
+            int(value.get("chunks", 1)),
+            int(value.get("stage_id", 0)),
+            int(value.get("world_size", 1)),
+            int(value.get("rank", 0)),
+            int(value.get("microbatch_id", 0)),
+            int(value.get("step", 0)),
+            bool(value.get("active", True)),
+            bool(value.get("warmup_done", False)),
+            bool(value.get("flush_done", False)),
+            _string_list(value.get("stages", [])),
+            [int(v) for v in value.get("stage_ranks", [])],
+            _string_list(value.get("schedule", [])),
+        )
+    return (
+        str(getattr(value, "name", "")),
+        str(getattr(value, "strategy", "gpipe")),
+        int(getattr(value, "num_stages", 1)),
+        int(getattr(value, "chunks", 1)),
+        int(getattr(value, "stage_id", 0)),
+        int(getattr(value, "world_size", 1)),
+        int(getattr(value, "rank", 0)),
+        int(getattr(value, "microbatch_id", 0)),
+        int(getattr(value, "step", 0)),
+        bool(getattr(value, "active", True)),
+        bool(getattr(value, "warmup_done", False)),
+        bool(getattr(value, "flush_done", False)),
+        _string_list(getattr(value, "stages", [])),
+        [int(v) for v in getattr(value, "stage_ranks", [])],
+        _string_list(getattr(value, "schedule", [])),
+    )
+
+
+def _pipelining_stage_dict(
+    name: str,
+    stage_index: int,
+    num_stages: int,
+    rank: int,
+    world_size: int,
+    device: str,
+    first: bool,
+    last: bool,
+    inputs: list[str],
+    outputs: list[str],
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "stage_index": int(stage_index),
+        "num_stages": int(num_stages),
+        "rank": int(rank),
+        "world_size": int(world_size),
+        "device": device,
+        "first": bool(first),
+        "last": bool(last),
+        "inputs": list(inputs),
+        "outputs": list(outputs),
+    }
+
+
+def _pipelining_stage_like(value: Any) -> tuple[str, int, int, int, int, str, bool, bool, list[str], list[str]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            int(value.get("stage_index", 0)),
+            int(value.get("num_stages", 1)),
+            int(value.get("rank", 0)),
+            int(value.get("world_size", 1)),
+            str(value.get("device", "cpu")),
+            bool(value.get("first", False)),
+            bool(value.get("last", False)),
+            _string_list(value.get("inputs", [])),
+            _string_list(value.get("outputs", [])),
+        )
+    return (
+        str(getattr(value, "name", "")),
+        int(getattr(value, "stage_index", 0)),
+        int(getattr(value, "num_stages", 1)),
+        int(getattr(value, "rank", 0)),
+        int(getattr(value, "world_size", 1)),
+        str(getattr(value, "device", "cpu")),
+        bool(getattr(value, "first", False)),
+        bool(getattr(value, "last", False)),
+        _string_list(getattr(value, "inputs", [])),
+        _string_list(getattr(value, "outputs", [])),
+    )
+
+
+def _pipelining_plan_dict(
+    name: str,
+    strategy: str,
+    num_stages: int,
+    chunks: int,
+    split_points: list[str],
+    stages: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "name": name,
+        "strategy": strategy,
+        "num_stages": int(num_stages),
+        "chunks": int(chunks),
+        "split_points": list(split_points),
+        "stages": [
+            _pipelining_stage_dict(*_pipelining_stage_like(stage))
+            for stage in stages
+        ],
+    }
+
+
+def _pipelining_plan_like(value: Any) -> tuple[str, str, int, int, list[str], list[dict[str, Any]]]:
+    if isinstance(value, dict):
+        return (
+            str(value.get("name", "")),
+            str(value.get("strategy", "gpipe")),
+            int(value.get("num_stages", 1)),
+            int(value.get("chunks", 1)),
+            _string_list(value.get("split_points", [])),
+            [
+                _pipelining_stage_dict(*_pipelining_stage_like(stage))
+                for stage in value.get("stages", [])
+            ],
+        )
+    return (
+        str(getattr(value, "name", "")),
+        str(getattr(value, "strategy", "gpipe")),
+        int(getattr(value, "num_stages", 1)),
+        int(getattr(value, "chunks", 1)),
+        _string_list(getattr(value, "split_points", [])),
+        [
+            _pipelining_stage_dict(*_pipelining_stage_like(stage))
+            for stage in getattr(value, "stages", [])
+        ],
+    )
+
+
+def _pipelining_schedule_dict(
+    plan: dict[str, Any],
+    stage_index: int,
+    step: int,
+    microbatch_id: int,
+    ops: list[str],
+    warmup_done: bool,
+    flush_done: bool,
+    active: bool,
+) -> dict[str, Any]:
+    return {
+        "plan": _pipelining_plan_dict(*_pipelining_plan_like(plan)),
+        "stage_index": int(stage_index),
+        "step": int(step),
+        "microbatch_id": int(microbatch_id),
+        "ops": list(ops),
+        "warmup_done": bool(warmup_done),
+        "flush_done": bool(flush_done),
+        "active": bool(active),
+    }
+
+
+def _pipelining_schedule_like(value: Any) -> tuple[dict[str, Any], int, int, int, list[str], bool, bool, bool]:
+    if isinstance(value, dict):
+        return (
+            _pipelining_plan_dict(*_pipelining_plan_like(value.get("plan", {}))),
+            int(value.get("stage_index", 0)),
+            int(value.get("step", 0)),
+            int(value.get("microbatch_id", 0)),
+            _string_list(value.get("ops", [])),
+            bool(value.get("warmup_done", False)),
+            bool(value.get("flush_done", False)),
+            bool(value.get("active", True)),
+        )
+    return (
+        _pipelining_plan_dict(*_pipelining_plan_like(getattr(value, "plan", {}))),
+        int(getattr(value, "stage_index", 0)),
+        int(getattr(value, "step", 0)),
+        int(getattr(value, "microbatch_id", 0)),
+        _string_list(getattr(value, "ops", [])),
+        bool(getattr(value, "warmup_done", False)),
+        bool(getattr(value, "flush_done", False)),
+        bool(getattr(value, "active", True)),
+    )
+
+
 def _ir_like(value: Any) -> tuple[str, int, list[str], list[str], list[str], list[str], bool, bool]:
     if isinstance(value, dict):
         return (
@@ -1622,6 +1843,298 @@ def _invoke_special_module_function(module_name: str, function_name: str, args: 
                 stages.append("execute")
             control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params = _stage_control_like(args[0])
             return _stage_dict(name, backend, mode, True, True, True, True, stages, params, control_enabled, control_cond_enabled, control_loop_enabled, control_scan_enabled, control_iterations, control_branches, control_params)
+    if module_name == "runtime/pp":
+        if function_name == "new_pipeline_parallel_state":
+            num_stages = max(1, int(args[2]))
+            chunks = max(1, int(args[3]))
+            world_size = max(1, int(args[5]))
+            stage_id = min(max(0, int(args[4])), num_stages - 1)
+            rank = min(max(0, int(args[6])), world_size - 1)
+            return _pp_dict(str(args[0]), str(args[1]), num_stages, chunks, stage_id, world_size, rank, 0, 0, True, False, False, [], [], [])
+        if function_name == "pipeline_parallel_state_dict":
+            return _pp_dict(*_pp_like(args[0]))
+        if function_name == "pipeline_parallel_load_state_dict":
+            return _pp_dict(*_pp_like(args[1]))
+        if function_name == "pp_name":
+            return _pp_like(args[0])[0]
+        if function_name == "pp_strategy":
+            return _pp_like(args[0])[1]
+        if function_name == "pp_num_stages":
+            return _pp_like(args[0])[2]
+        if function_name == "pp_chunks":
+            return _pp_like(args[0])[3]
+        if function_name == "pp_stage_id":
+            return _pp_like(args[0])[4]
+        if function_name == "pp_world_size":
+            return _pp_like(args[0])[5]
+        if function_name == "pp_rank":
+            return _pp_like(args[0])[6]
+        if function_name == "pp_microbatch_id":
+            return _pp_like(args[0])[7]
+        if function_name == "pp_step":
+            return _pp_like(args[0])[8]
+        if function_name == "pp_active":
+            return _pp_like(args[0])[9]
+        if function_name == "pp_stage_count":
+            return len(_pp_like(args[0])[12])
+        if function_name == "pp_schedule_count":
+            return len(_pp_like(args[0])[14])
+        if function_name == "pp_is_ready":
+            _, _, num_stages, chunks, _, _, _, _, _, active, _, _, _, _, _ = _pp_like(args[0])
+            return bool(active and num_stages > 0 and chunks > 0)
+        if function_name == "pp_pipeline_depth":
+            _, _, num_stages, chunks, _, _, _, _, _, _, _, _, _, _, _ = _pp_like(args[0])
+            return num_stages + chunks - 1
+        if function_name == "pp_total_slots":
+            _, _, num_stages, chunks, _, _, _, _, _, _, _, _, _, _, _ = _pp_like(args[0])
+            return num_stages + 2 * chunks - 2
+        if function_name == "pp_add_stage":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule = _pp_like(args[0])
+            stages = list(stages)
+            stages.append(str(args[1]))
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_add_stage_rank":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule = _pp_like(args[0])
+            stage_ranks = list(stage_ranks)
+            stage_ranks.append(min(max(0, int(args[1])), world_size - 1))
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_add_schedule_step":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule = _pp_like(args[0])
+            schedule = list(schedule)
+            schedule.append(str(args[1]))
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_assign_default_stage_ranks":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, _, schedule = _pp_like(args[0])
+            stage_ranks = [index % world_size for index in range(num_stages)]
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_stage_owner":
+            _, _, num_stages, _, _, world_size, _, _, _, _, _, _, _, stage_ranks, _ = _pp_like(args[0])
+            stage_idx = int(args[1])
+            if stage_idx < 0:
+                return 0
+            if stage_idx >= num_stages:
+                return world_size - 1
+            if stage_idx < len(stage_ranks):
+                return stage_ranks[stage_idx]
+            return stage_idx % world_size
+        if function_name == "pp_prepare_schedule":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, _, _, stages, stage_ranks, _ = _pp_like(args[0])
+            schedule = ["forward"] * chunks + ["backward"] * chunks
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, False, False, stages, stage_ranks, schedule)
+        if function_name == "pp_next_microbatch":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule = _pp_like(args[0])
+            if not active:
+                return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, active, warmup_done, flush_done, stages, stage_ranks, schedule)
+            next_microbatch = microbatch_id + 1
+            if next_microbatch >= chunks:
+                next_microbatch = 0
+            next_step = step + 1
+            next_warmup_done = warmup_done or next_step >= num_stages - 1
+            total_slots = num_stages + 2 * chunks - 2
+            next_flush_done = flush_done or next_step >= total_slots
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, next_microbatch, next_step, active, next_warmup_done, next_flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_set_active":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, _, warmup_done, flush_done, stages, stage_ranks, schedule = _pp_like(args[0])
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, microbatch_id, step, bool(args[1]), warmup_done, flush_done, stages, stage_ranks, schedule)
+        if function_name == "pp_stop":
+            return _invoke_special_module_function(module_name, "pp_set_active", (args[0], False))
+        if function_name == "pp_resume":
+            return _invoke_special_module_function(module_name, "pp_set_active", (args[0], True))
+        if function_name == "pp_reset_progress":
+            name, strategy, num_stages, chunks, stage_id, world_size, rank, _, _, active, _, _, stages, stage_ranks, schedule = _pp_like(args[0])
+            return _pp_dict(name, strategy, num_stages, chunks, stage_id, world_size, rank, 0, 0, active, False, False, stages, stage_ranks, schedule)
+    if module_name == "distributed/pipelining":
+        if function_name == "split_point_beginning":
+            return "beginning"
+        if function_name == "split_point_end":
+            return "end"
+        if function_name == "pipe_split":
+            return str(args[0])
+        if function_name == "new_pipeline_stage":
+            name = str(args[0])
+            num_stages = max(1, int(args[2]))
+            world_size = max(1, int(args[4]))
+            stage_index = min(max(0, int(args[1])), num_stages - 1)
+            rank = min(max(0, int(args[3])), world_size - 1)
+            return _pipelining_stage_dict(name, stage_index, num_stages, rank, world_size, str(args[5]), stage_index == 0, stage_index == num_stages - 1, [], [])
+        if function_name == "pipeline_stage_state_dict":
+            return _pipelining_stage_dict(*_pipelining_stage_like(args[0]))
+        if function_name == "pipeline_stage_load_state_dict":
+            return _pipelining_stage_dict(*_pipelining_stage_like(args[1]))
+        if function_name == "pipeline_stage_name":
+            return _pipelining_stage_like(args[0])[0]
+        if function_name == "pipeline_stage_index":
+            return _pipelining_stage_like(args[0])[1]
+        if function_name == "pipeline_stage_rank":
+            return _pipelining_stage_like(args[0])[3]
+        if function_name == "pipeline_stage_world_size":
+            return _pipelining_stage_like(args[0])[4]
+        if function_name == "pipeline_stage_is_first":
+            return _pipelining_stage_like(args[0])[6]
+        if function_name == "pipeline_stage_is_last":
+            return _pipelining_stage_like(args[0])[7]
+        if function_name == "pipeline_stage_add_input":
+            name, stage_index, num_stages, rank, world_size, device, first, last, inputs, outputs = _pipelining_stage_like(args[0])
+            inputs = list(inputs)
+            inputs.append(str(args[1]))
+            return _pipelining_stage_dict(name, stage_index, num_stages, rank, world_size, device, first, last, inputs, outputs)
+        if function_name == "pipeline_stage_add_output":
+            name, stage_index, num_stages, rank, world_size, device, first, last, inputs, outputs = _pipelining_stage_like(args[0])
+            outputs = list(outputs)
+            outputs.append(str(args[1]))
+            return _pipelining_stage_dict(name, stage_index, num_stages, rank, world_size, device, first, last, inputs, outputs)
+        if function_name == "new_pipeline_plan":
+            return _pipelining_plan_dict(str(args[0]), str(args[1]), max(1, int(args[2])), max(1, int(args[3])), [], [])
+        if function_name == "pipeline_plan_state_dict":
+            return _pipelining_plan_dict(*_pipelining_plan_like(args[0]))
+        if function_name == "pipeline_plan_load_state_dict":
+            return _pipelining_plan_dict(*_pipelining_plan_like(args[1]))
+        if function_name == "pipeline_name":
+            return _pipelining_plan_like(args[0])[0]
+        if function_name == "pipeline_strategy":
+            return _pipelining_plan_like(args[0])[1]
+        if function_name == "pipeline_num_stages":
+            return _pipelining_plan_like(args[0])[2]
+        if function_name == "pipeline_chunks":
+            return _pipelining_plan_like(args[0])[3]
+        if function_name == "pipeline_split_count":
+            return len(_pipelining_plan_like(args[0])[4])
+        if function_name == "pipeline_stage_count":
+            return len(_pipelining_plan_like(args[0])[5])
+        if function_name == "pipeline_add_split_point":
+            name, strategy, num_stages, chunks, split_points, stages = _pipelining_plan_like(args[0])
+            split_points = list(split_points)
+            split_points.append(str(args[1]))
+            return _pipelining_plan_dict(name, strategy, num_stages, chunks, split_points, stages)
+        if function_name == "build_stage":
+            name, _, num_stages, _, _, _ = _pipelining_plan_like(args[0])
+            stage_index = int(args[1])
+            rank = int(args[2])
+            world_size = int(args[3])
+            stage_name = f"{name}_stage_{stage_index}"
+            return _invoke_special_module_function(module_name, "new_pipeline_stage", (stage_name, stage_index, num_stages, rank, world_size, str(args[4])))
+        if function_name == "pipeline_add_stage":
+            name, strategy, num_stages, chunks, split_points, stages = _pipelining_plan_like(args[0])
+            stages = list(stages)
+            stages.append(_pipelining_stage_dict(*_pipelining_stage_like(args[1])))
+            return _pipelining_plan_dict(name, strategy, num_stages, chunks, split_points, stages)
+        if function_name == "pipeline_with_default_stages":
+            name, strategy, num_stages, chunks, split_points, stages = _pipelining_plan_like(args[0])
+            world_size = max(1, int(args[1]))
+            device = str(args[2])
+            stages = []
+            for i in range(num_stages):
+                stages.append(
+                    _pipelining_stage_dict(
+                        f"{name}_stage_{i}",
+                        i,
+                        num_stages,
+                        i % world_size,
+                        world_size,
+                        device,
+                        i == 0,
+                        i == num_stages - 1,
+                        [],
+                        [],
+                    )
+                )
+            return _pipelining_plan_dict(name, strategy, num_stages, chunks, split_points, stages)
+        if function_name == "pipeline_is_valid":
+            _, _, num_stages, _, split_points, stages = _pipelining_plan_like(args[0])
+            split_ok = len(split_points) in {0, max(0, num_stages - 1)}
+            stage_ok = len(stages) in {0, num_stages}
+            return split_ok and stage_ok
+        if function_name == "schedule_total_slots":
+            _, _, num_stages, chunks, _, _ = _pipelining_plan_like(args[0])
+            return num_stages + 2 * chunks - 2
+        if function_name == "schedule_pipeline_depth":
+            _, _, num_stages, chunks, _, _ = _pipelining_plan_like(args[0])
+            return num_stages + chunks - 1
+        if function_name == "schedule_warmup_steps":
+            _, _, num_stages, chunks, _, _ = _pipelining_plan_like(args[0])
+            stage_index = min(max(0, int(args[1])), max(0, num_stages - 1))
+            warmup = num_stages - stage_index - 1
+            warmup = min(warmup, max(0, chunks - 1))
+            return max(0, warmup)
+        if function_name == "schedule_steady_steps":
+            warmup = int(_invoke_special_module_function(module_name, "schedule_warmup_steps", args))
+            chunks = int(_pipelining_plan_like(args[0])[3])
+            return max(1, chunks - warmup)
+        if function_name == "schedule_flush_steps":
+            return int(_invoke_special_module_function(module_name, "schedule_warmup_steps", args))
+        if function_name == "new_schedule_gpipe":
+            plan = _pipelining_plan_dict(*_pipelining_plan_like(args[0]))
+            stage_index = 0
+            if len(args) > 1:
+                stage_index = int(args[1])
+            chunks = int(plan.get("chunks", 1))
+            ops = ["forward"] * chunks + ["backward"] * chunks
+            return _pipelining_schedule_dict(plan, stage_index, 0, 0, ops, False, False, True)
+        if function_name == "new_schedule_gpipe_for_stage":
+            return _invoke_special_module_function(module_name, "new_schedule_gpipe", args)
+        if function_name == "new_schedule_1f1b":
+            plan = _pipelining_plan_dict(*_pipelining_plan_like(args[0]))
+            stage_index = 0
+            if len(args) > 1:
+                stage_index = int(args[1])
+            warmup = int(_invoke_special_module_function(module_name, "schedule_warmup_steps", (plan, stage_index)))
+            steady = int(_invoke_special_module_function(module_name, "schedule_steady_steps", (plan, stage_index)))
+            flush = int(_invoke_special_module_function(module_name, "schedule_flush_steps", (plan, stage_index)))
+            ops = ["forward"] * warmup + ["fwd_bwd"] * steady + ["backward"] * flush
+            return _pipelining_schedule_dict(plan, stage_index, 0, 0, ops, warmup == 0, False, True)
+        if function_name == "new_schedule_1f1b_for_stage":
+            return _invoke_special_module_function(module_name, "new_schedule_1f1b", args)
+        if function_name == "schedule_state_dict":
+            return _pipelining_schedule_dict(*_pipelining_schedule_like(args[0]))
+        if function_name == "schedule_load_state_dict":
+            return _pipelining_schedule_dict(*_pipelining_schedule_like(args[1]))
+        if function_name == "schedule_stage_index":
+            return _pipelining_schedule_like(args[0])[1]
+        if function_name == "schedule_ops_count":
+            return len(_pipelining_schedule_like(args[0])[4])
+        if function_name == "schedule_total_ops":
+            return len(_pipelining_schedule_like(args[0])[4])
+        if function_name == "schedule_is_active":
+            return _pipelining_schedule_like(args[0])[7]
+        if function_name == "schedule_step_index":
+            return _pipelining_schedule_like(args[0])[2]
+        if function_name == "schedule_microbatch_id":
+            return _pipelining_schedule_like(args[0])[3]
+        if function_name == "schedule_current_op":
+            _, _, step, _, ops, _, _, _ = _pipelining_schedule_like(args[0])
+            if not ops:
+                return ""
+            idx = min(step, len(ops) - 1)
+            return ops[idx]
+        if function_name == "schedule_next":
+            plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, active = _pipelining_schedule_like(args[0])
+            if not active:
+                return _pipelining_schedule_dict(plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, active)
+            chunks = int(plan.get("chunks", 1))
+            num_stages = int(plan.get("num_stages", 1))
+            next_step = step + 1
+            next_micro = microbatch_id + 1
+            if next_micro >= chunks:
+                next_micro = 0
+            warmup_steps = int(_invoke_special_module_function(module_name, "schedule_warmup_steps", (plan, stage_index)))
+            next_warmup = warmup_done or next_step >= warmup_steps
+            next_flush = flush_done or next_step >= len(ops)
+            return _pipelining_schedule_dict(plan, stage_index, next_step, next_micro, ops, next_warmup, next_flush, active)
+        if function_name == "schedule_stop":
+            plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, _ = _pipelining_schedule_like(args[0])
+            return _pipelining_schedule_dict(plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, False)
+        if function_name == "schedule_resume":
+            plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, _ = _pipelining_schedule_like(args[0])
+            return _pipelining_schedule_dict(plan, stage_index, step, microbatch_id, ops, warmup_done, flush_done, True)
+        if function_name == "schedule_reset":
+            plan, stage_index, _, _, ops, _, _, active = _pipelining_schedule_like(args[0])
+            return _pipelining_schedule_dict(plan, stage_index, 0, 0, ops, False, False, active)
+        if function_name == "pipeline":
+            plan = _pipelining_plan_dict(*_pipelining_plan_like(args[0]))
+            strategy = str(plan.get("strategy", "gpipe")).lower()
+            if strategy == "1f1b":
+                return _invoke_special_module_function(module_name, "new_schedule_1f1b", (plan,))
+            return _invoke_special_module_function(module_name, "new_schedule_gpipe", (plan,))
     if module_name == "runtime/compile":
         if function_name == "new_compile_state":
             return _compile_dict(str(args[0]), str(args[1]), str(args[2]), False, False, False, False, False, False, False, False, False, 0, [], [], [], [], [], [], [], [], [])
