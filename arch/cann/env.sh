@@ -33,5 +33,3 @@ export PYTHONPATH="$(prepend_path "${ASCEND_HOME_PATH}/python/site-packages" "${
 export ASCEND_OPP_PATH="${ASCEND_OPP_PATH:-${ASCEND_HOME_PATH}/opp}"
 export ASCEND_AICPU_PATH="${ASCEND_AICPU_PATH:-${ASCEND_HOME_PATH}}"
 export ASCEND_SLOG_PRINT_TO_STDOUT="${ASCEND_SLOG_PRINT_TO_STDOUT:-0}"
-
-echo "Ascend CANN environment initialized from ${ASCEND_HOME_PATH}"
