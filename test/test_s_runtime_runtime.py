@@ -298,3 +298,54 @@ def test_s_runtime_io_env_and_json_helpers(tmp_path, monkeypatch):
 
     assert runtime.invoke_runtime_function(io_module, "runtime_write_json_file", str(json_path), payload) is None
     assert runtime.invoke_runtime_function(io_module, "runtime_read_json_file", str(json_path)) == payload
+
+
+def test_s_runtime_pipeline_parallel_helpers_round_trip():
+    runtime = _load_runtime_module()
+    if not runtime.supports_runtime_function("runtime/pp", "new_pipeline_parallel_state"):
+        return
+
+    state = runtime.invoke_runtime_function(
+        "runtime/pp",
+        "new_pipeline_parallel_state",
+        "pp-demo",
+        "gpipe",
+        4,
+        8,
+        1,
+        4,
+        1,
+    )
+    assert state["name"] == "pp-demo"
+    assert state["strategy"] == "gpipe"
+    assert state["num_stages"] == 4
+    assert state["chunks"] == 8
+    assert state["active"] is True
+
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_assign_default_stage_ranks", state)
+    assert state["stage_ranks"] == [0, 1, 2, 3]
+    assert runtime.invoke_runtime_function("runtime/pp", "pp_stage_owner", state, 2) == 2
+
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_prepare_schedule", state)
+    assert runtime.invoke_runtime_function("runtime/pp", "pp_schedule_count", state) == 16
+    assert state["schedule"][0] == "forward"
+    assert state["schedule"][-1] == "backward"
+
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_add_stage", state, "encoder")
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_add_schedule_step", state, "bubble")
+    assert runtime.invoke_runtime_function("runtime/pp", "pp_stage_count", state) == 1
+    assert state["schedule"][-1] == "bubble"
+
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_next_microbatch", state)
+    assert state["step"] == 1
+    assert state["microbatch_id"] == 1
+
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_stop", state)
+    assert runtime.invoke_runtime_function("runtime/pp", "pp_active", state) is False
+    state = runtime.invoke_runtime_function("runtime/pp", "pp_resume", state)
+    assert runtime.invoke_runtime_function("runtime/pp", "pp_active", state) is True
+
+    snapshot = runtime.invoke_runtime_function("runtime/pp", "pipeline_parallel_state_dict", state)
+    restored = runtime.invoke_runtime_function("runtime/pp", "pipeline_parallel_load_state_dict", state, snapshot)
+    assert restored["step"] == state["step"]
+    assert restored["microbatch_id"] == state["microbatch_id"]
