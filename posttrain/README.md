@@ -6,6 +6,7 @@ This directory hosts posttraining-specific orchestration in S modules.
 - data: posttraining sample and preference batch state
 - loop: posttraining step and stage state machine
 - reward: reward model and preference scoring state
+- rlhf: minimal PPO skeleton for RLHF-style optimization steps
 - checkpoint: posttraining checkpoint scheduling state
 - eval: posttraining evaluation state
 
