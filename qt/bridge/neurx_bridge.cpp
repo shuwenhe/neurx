@@ -112,9 +112,11 @@ QString NeurxBridge::run_agent_probe(const QString& repo_root) const {
         .arg(observation);
 }
 
-QString NeurxBridge::run_agent(const QString& prompt, int max_steps) const {
+QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     const QString root = find_repo_root();
     if (root.isEmpty()) {
+        emit log_message("error", "bridge", "Repository root was not found");
+        emit runtime_status_changed("repo_not_found", "bootstrap");
         return "repo_not_found";
     }
 
@@ -150,17 +152,22 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) const {
 
     const QString stdout_text = run_python_script(root, run_script, {prompt, QString::number(steps)}, 20000);
     if (stdout_text.startsWith("runtime_") || stdout_text == "agent_ir_missing") {
+        emit log_message("warning", "agent", stdout_text);
+        emit runtime_status_changed(stdout_text, "run");
         return stdout_text;
     }
 
     QJsonParseError parse_error;
     const QJsonDocument json = QJsonDocument::fromJson(stdout_text.toUtf8(), &parse_error);
     if (parse_error.error != QJsonParseError::NoError || !json.isObject()) {
-        return QString("runtime_unexpected_output: %1").arg(stdout_text.left(120));
+        const QString unexpected = QString("runtime_unexpected_output: %1").arg(stdout_text.left(120));
+        emit log_message("error", "agent", unexpected);
+        emit runtime_status_changed("unexpected_output", "run");
+        return unexpected;
     }
 
     const QJsonObject obj = json.object();
-    return QString("run_ok steps=%1 finished=%2 action=%3 obs=%4")
+    const QString result = QString("run_ok steps=%1 finished=%2 action=%3 obs=%4")
         .arg(obj.value("steps").toInt(0))
         .arg(obj.value("finished").toBool(false) ? "true" : "false")
         .arg(obj.value("last_action").toString())
@@ -168,12 +175,20 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) const {
         + QString(" status=%1 task=%2")
             .arg(obj.value("status").toString())
             .arg(obj.value("task").toString());
+    emit log_message("info", "agent", result);
+    emit runtime_status_changed(obj.value("status").toString(), obj.value("task").toString());
+    return result;
 }
 
-QString NeurxBridge::ping() const {
+QString NeurxBridge::ping() {
     const QString root = find_repo_root();
     if (root.isEmpty()) {
+        emit log_message("error", "bridge", "Repository root was not found");
+        emit runtime_status_changed("repo_not_found", "bootstrap");
         return "repo_not_found";
     }
-    return run_agent_probe(root);
+    const QString result = run_agent_probe(root);
+    emit log_message("info", "bridge", QString("Ping result: %1").arg(result));
+    emit runtime_status_changed(result, "probe");
+    return result;
 }
