@@ -258,6 +258,28 @@ func hardtanh(tensor a, float min_val, float max_val) tensor {
     hardtanh(a, min_val, max_val)
 }
 
+func serve_should_clarify(bool has_structured_fields, int sanitized_len, int query_hits, bool long_and_repetitive, bool heavily_changed, bool noisy_symbols, bool lacks_query_focus) bool {
+    if has_structured_fields && sanitized_len >= 3 && query_hits > 0 {
+        false
+    }
+    if sanitized_len < 3 {
+        true
+    }
+    if long_and_repetitive {
+        true
+    }
+    if heavily_changed {
+        true
+    }
+    if noisy_symbols {
+        true
+    }
+    if lacks_query_focus {
+        true
+    }
+    false
+}
+
 func hardswish(tensor a) tensor {
     hardswish(a)
 }
