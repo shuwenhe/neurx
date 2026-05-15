@@ -129,18 +129,19 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) const {
         "spec = importlib.util.spec_from_file_location('neurx_runtime', runtime_path)\n"
         "module = importlib.util.module_from_spec(spec)\n"
         "spec.loader.exec_module(module)\n"
-        "need = [('agent', 'new_default_agent'), ('agent', 'run_agent')]\n"
+        "need = [('agent', 'run_agent_with_goal'), ('agent', 'agent_status'), ('agent', 'agent_current_task')]\n"
         "for m, f in need:\n"
         "    if not module.supports_runtime_function(m, f):\n"
         "        print('agent_ir_missing')\n"
         "        raise SystemExit(0)\n"
-        "state = module.invoke_runtime_function('agent', 'new_default_agent', 'qt_request')\n"
-        "done = module.invoke_runtime_function('agent', 'run_agent', state, prompt, max_steps)\n"
+        "done = module.invoke_runtime_function('agent', 'run_agent_with_goal', 'qt_request', prompt, max_steps)\n"
         "payload = {\n"
         "    'steps': int(done.get('steps', 0)),\n"
         "    'finished': bool(done.get('finished', False)),\n"
         "    'last_action': str(done.get('last_action', '')),\n"
         "    'last_observation': str(done.get('last_observation', '')),\n"
+        "    'status': str(done.get('plan', {}).get('status', '')),\n"
+        "    'task': str(done.get('plan', {}).get('current_task', '')),\n"
         "}\n"
         "print(json.dumps(payload))\n";
 
@@ -160,7 +161,10 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) const {
         .arg(obj.value("steps").toInt(0))
         .arg(obj.value("finished").toBool(false) ? "true" : "false")
         .arg(obj.value("last_action").toString())
-        .arg(obj.value("last_observation").toString());
+        .arg(obj.value("last_observation").toString())
+        + QString(" status=%1 task=%2")
+            .arg(obj.value("status").toString())
+            .arg(obj.value("task").toString());
 }
 
 QString NeurxBridge::ping() const {

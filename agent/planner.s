@@ -47,6 +47,7 @@ func agent_plan_next(agent_plan_state state, string observation) agent_plan_stat
     bool finished = false
     bool needs_replan = false
     string status = "running"
+    string next_task = state.current_task
 
     if observation == "done" {
         finished = true
@@ -55,6 +56,20 @@ func agent_plan_next(agent_plan_state state, string observation) agent_plan_stat
     if observation == "tool_unavailable" {
         needs_replan = true
         status = "replan"
+        next_task = "analyze"
+    }
+    if !finished && !needs_replan {
+        if state.current_task == "analyze" {
+            next_task = "retrieve"
+        }
+        if state.current_task == "retrieve" {
+            next_task = "finalize"
+        }
+        if state.current_task == "finalize" {
+            next_task = "complete"
+            finished = true
+            status = "done"
+        }
     }
     if next_count >= state.step_budget && !finished {
         finished = true
@@ -63,7 +78,7 @@ func agent_plan_next(agent_plan_state state, string observation) agent_plan_stat
 
     agent_plan_state {
         goal: state.goal,
-        current_task: state.current_task,
+        current_task: next_task,
         step_budget: state.step_budget,
         step_count: next_count,
         needs_replan: needs_replan,
