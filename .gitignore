@@ -78,3 +78,6 @@ dl/*.ir
 lf/*.ir
 train/*.ir
 runtime/*.ir
+
+# Prebuilt neurx binaries (kept out of git; use CI releases)
+/neurx/bin/
