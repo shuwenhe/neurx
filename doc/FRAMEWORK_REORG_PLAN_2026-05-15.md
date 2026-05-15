@@ -2,103 +2,173 @@
 
 ## Goal
 
-Unify neurx around a framework-first architecture:
+Use a benchmark-driven architecture plan, aligned with the strengths of PyTorch, JAX, TensorFlow, TVM, and DeepSpeed, while keeping new core logic S-language first.
 
-1. Compiler-first execution pipeline (IR -> Pass -> Lowering -> Executor -> Cache)
-2. Clear layer boundaries between core kernels and orchestration flows
-3. Separate training and inference orchestration from runtime/kernel internals
+Primary outcomes:
 
-## Priority Module
+1. High-throughput serving runtime (vLLM/SGLang-style capabilities).
+2. Scalable distributed training runtime (TP plus ZeRO-style optimizer sharding).
+3. Compiler and runtime optimization pipeline (JAX/TVM-style graph and lowering flow).
 
-The highest ROI module is the compile pipeline.
+## Priority Stack (ROI Order)
 
-Implemented S modules:
+1. Serving Runtime (highest ROI now)
+2. Distributed Runtime (training scale)
+3. Compile Optimization (long-term peak performance)
 
-- compile/ir.s
-- compile/pass_manager.s
-- compile/lowering.s
-- compile/executor.s
-- compile/cache.s
-- compile/pipeline.s
+Rationale:
 
-Compiler entry integration:
+1. Serving throughput and latency directly dominate production cost.
+2. TP and ZeRO determine whether larger models can train efficiently.
+3. Compiler passes deliver compounding gains once runtime/data path are stable.
 
-- compile/compiler.s now composes and runs the compile pipeline.
+## S-Language Modules To Build First
+
+### P0: Serving Runtime
+
+1. infer/serve/continuous_batch.s (already scaffolded)
+2. infer/cache/paged_kv_cache.s (already scaffolded)
+3. infer/cache/prefix_cache.s (next)
+4. infer/decode/speculative_decode.s (next)
+5. infer/serve/admission_control.s (next)
+
+### P1: Distributed Runtime
+
+1. distributed/tp.s (tensor parallel state and shard mapping)
+2. distributed/tp_collective.s (TP all-reduce/all-gather contract)
+3. distributed/zero.s (optimizer/grad shard state)
+4. train/parallel/train_parallel.s (compose DP, PP, TP)
+
+### P2: Compiler and Lowering
+
+1. compile/pass_fusion.s
+2. compile/pass_const_fold.s
+3. compile/pass_memory_plan.s
+4. compile/lowering_cuda.s
+5. compile/lowering_cann.s
+6. compile/lowering_mps.s
 
 ## Target Directory Layout
 
 ```text
 neurx/
-  ad/
-  tensor/
-  engine/
-  nn/
-  ops/
+  core/
+    ad/
+    tensor/
+    nn/
+    ops/
+    engine/
 
   compile/
     ir.s
     pass_manager.s
+    pass_fusion.s
+    pass_const_fold.s
+    pass_memory_plan.s
     lowering.s
+    lowering_cuda.s
+    lowering_cann.s
+    lowering_mps.s
     executor.s
     cache.s
     pipeline.s
     compiler.s
-    runtime.s
 
   runtime/
+    runtime.s
+    runtime.py
     io.s
     control.s
     stage.s
-    runtime.s
-    runtime.py
-
-  train/
-  pretrain/
-  posttrain/
-  infer/
+    pp.s
 
   distributed/
-  platform/
+    comm.s
+    launcher.s
+    pipelining.s
+    tp.s
+    tp_collective.s
+    zero.s
 
+  training/
+    train/
+    pretrain/
+    posttrain/
+    diffusion/
+
+  serving/
+    infer/
+      decode/
+      cache/
+      sampling/
+      serve/
+      eval/
+
+  platform/
+  arch/
   python/
   test/
   doc/
   script/
 ```
 
-## Boundary Rules
+## Compatibility Strategy
 
-1. Core kernels remain in ad/tensor/engine/nn/ops.
-2. compile owns graph-level transformation and executable generation state.
-3. runtime owns environment, IO, control-flow, and backend adapters.
-4. pretrain/posttrain/infer own orchestration state machines only.
-5. python is compatibility and tooling glue, not the new core logic host.
+Do not break current imports while migrating:
 
-## Migration Steps
+1. Keep current top-level folders as compatibility entry points.
+2. Add forwarding wrappers from old paths to new layered paths.
+3. Remove old paths only after two stable release cycles.
 
-### Phase 1: Compiler consolidation
+## Phase Plan
 
-1. Keep compile/compiler.s as single framework compile entry.
-2. Move graph transform logic into compile/pass_manager.s.
-3. Keep runtime/compile.s as compatibility state adapter during transition.
+### Phase 1 (Week 1-2): Serving path hardening
 
-### Phase 2: Runtime cleanup
+1. Complete continuous batching lifecycle (enqueue, prefill, decode, finish).
+2. Add prefix cache state and hit/miss accounting.
+3. Add decode scheduler policies (FCFS and shortest-remaining).
+4. Add runtime tests for multi-request progress fairness.
 
-1. Keep only runtime environment and backend adapter functions in runtime/.
-2. Remove compile-overlap helpers from runtime when no callers remain.
+Exit criteria:
 
-### Phase 3: Orchestration alignment
+1. infer pipeline handles multiple concurrent requests.
+2. paged kv and prefix cache counters are test-covered.
 
-1. pretrain and posttrain call unified compile pipeline before execute.
-2. infer decode path consumes compiled artifacts and cache keys.
+### Phase 2 (Week 3-4): TP and ZeRO MVP
 
-### Phase 4: Docs and tests
+1. Implement tensor shard metadata and shard/merge helpers.
+2. Add TP collective calls over existing distributed collectives.
+3. Implement ZeRO state partition for optimizer states.
+4. Wire train loop with configurable parallel strategy.
 
-1. Add compile pipeline tests for pass order, cache key behavior, and execution transitions.
-2. Add architecture map index in doc/README.
+Exit criteria:
 
-## Immediate Next Tasks
+1. Single-node multi-rank TP simulation passes.
+2. optimizer state memory footprint drops in sharded mode.
 
-1. Add adapter functions from pretrain/posttrain/infer to compile/run pipeline.
-2. Add compile pipeline smoke tests in test/.
-3. Add backend target mapping for cuda/cann/mps in compile/lowering.s.
+### Phase 3 (Week 5-6): Compiler pass upgrades
+
+1. Add constant folding and dead-op elimination.
+2. Add fusion pass for linear plus activation, norm plus affine patterns.
+3. Add backend-aware lowering stubs for cuda/cann/mps.
+4. Add pass timing and cache hit telemetry.
+
+Exit criteria:
+
+1. Pass pipeline is deterministic and tested.
+2. compile cache key stability is verified across runs.
+
+## Test Matrix To Add
+
+1. test/test_s_infer_scheduler_runtime.py
+2. test/test_s_infer_prefix_cache_runtime.py
+3. test/test_s_distributed_tp_runtime.py
+4. test/test_s_distributed_zero_runtime.py
+5. test/test_s_compile_pass_runtime.py
+
+## Immediate Next Tasks (Do Now)
+
+1. Add infer/cache/prefix_cache.s with state and accounting helpers.
+2. Add infer/serve/admission_control.s and integrate into infer/infer.s.
+3. Add distributed/tp.s skeleton and runtime function exposure checks.
+4. Add one end-to-end infer runtime test with two concurrent requests.
