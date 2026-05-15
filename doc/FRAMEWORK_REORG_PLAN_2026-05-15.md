@@ -120,6 +120,80 @@ Do not break current imports while migrating:
 2. Add forwarding wrappers from old paths to new layered paths.
 3. Remove old paths only after two stable release cycles.
 
+## Current -> Target Migration Map
+
+This is the concrete reorganization map for the existing repository layout.
+
+### Core execution stack
+
+- `tensor/` -> `core/tensor/`
+- `ad/` -> `core/ad/`
+- `engine/` -> `core/engine/`
+- `nn/` -> `core/nn/`
+- `ops/` -> `core/ops/`
+- `lf/` -> `core/losses/`
+- `opt/` -> `core/optim/`
+- `data/` -> `core/data/`
+- `train/` -> `core/train/`
+- `runtime/` -> `core/runtime/`
+
+### Compilation and lowering
+
+- `compile/` -> `compile/`
+- `s/schedule.s` and `s/autograd.s` -> `compile/` or `core/legacy/` depending on final ownership
+- `runtime/stage.s` -> `compile/pipeline.s`
+
+### Parallel and serving
+
+- `distributed/` -> `runtime/distributed/`
+- `infer/` -> `serving/`
+- `pretrain/` -> `workflows/pretrain/`
+- `posttrain/` -> `workflows/posttrain/`
+- `diffusion/` -> `workflows/diffusion/`
+
+### Platform and backend
+
+- `platform/` -> `runtime/platform/`
+- `arch/cuda/` -> `backends/cuda/`
+- `arch/cann/` -> `backends/cann/`
+- `arch/mps/` -> `backends/mps/`
+
+### Historical and experimental code
+
+- `s/` -> `legacy/s/`
+- `script/` -> `tools/` or `scripts/`
+- `example/` -> `examples/`
+- `tool/` -> `tools/`
+
+## Recommended New Top-Level Layout
+
+```text
+neurx/
+  core/
+    tensor/
+    ad/
+    engine/
+    nn/
+    ops/
+    losses/
+    optim/
+    data/
+    train/
+    runtime/
+  compile/
+  runtime/
+  distributed/
+  serving/
+  workflows/
+  backends/
+  examples/
+  tests/
+  docs/
+  scripts/
+  tools/
+  legacy/
+```
+
 ## Phase Plan
 
 ### Phase 1 (Week 1-2): Serving path hardening
