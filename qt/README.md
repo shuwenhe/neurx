@@ -4,9 +4,10 @@ This directory hosts the Qt-based cross-platform shell for Neurx.
 
 ## Scope
 
-- UI and event-loop shell based on Qt
+- QML UI and event-loop shell based on Qt Quick
 - Platform host integration for desktop/mobile targets
 - Bridge layer that calls into Neurx core modules
+- Selectively migrated UI structure from `/app/neurx-agent/app` without copying its standalone core runtime
 
 ## Suggested Build
 
@@ -27,6 +28,7 @@ See [scripts/README.md](scripts/README.md) for full examples.
 
 - app: Qt app entry and top-level UI bootstrap
 - bridge: ABI/FFI bridge between Qt shell and Neurx core
+- qml: Qt Quick shell views migrated into Neurx
 - platform: platform-specific helpers and lifecycle wrappers
 - tests: Qt shell tests
 - scripts: cross-platform Qt6 setup helpers
