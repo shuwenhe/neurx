@@ -11,6 +11,10 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
 
 qt_add_executable(neurx_qt
     app/main.cpp
+    bridge/AgentListModel.h
+    bridge/AgentListModel.cpp
+    bridge/LogModel.h
+    bridge/LogModel.cpp
     bridge/neurx_bridge.h
     bridge/neurx_bridge.cpp
 )
