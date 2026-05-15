@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
 Item {
@@ -35,14 +34,14 @@ Item {
                 anchors.margins: 16
                 spacing: 6
 
-                Label {
+                Text {
                     text: qsTr("Neurx Agent Shell")
                     color: shell.textPrimary
                     font.pixelSize: 28
                     font.bold: true
                 }
 
-                Label {
+                Text {
                     text: qsTr("Migrated QML shell backed by neurx/agent and the Qt bridge runtime.")
                     color: shell.textMuted
                     wrapMode: Text.WordWrap
@@ -62,14 +61,14 @@ Item {
                 anchors.margins: 16
                 spacing: 8
 
-                Label {
+                Text {
                     text: qsTr("Runtime Status")
                     color: shell.textPrimary
                     font.pixelSize: 16
                     font.bold: true
                 }
 
-                Label {
+                Text {
                     id: runtimeStatus
                     text: Runtime.ping()
                     color: shell.textMuted
@@ -91,14 +90,14 @@ Item {
                 anchors.margins: 16
                 spacing: 10
 
-                Label {
+                Text {
                     text: qsTr("Local Model")
                     color: shell.textPrimary
                     font.pixelSize: 16
                     font.bold: true
                 }
 
-                Label {
+                Text {
                     text: Runtime.localModelSummary
                     color: shell.textMuted
                     wrapMode: Text.WordWrap
@@ -109,18 +108,56 @@ Item {
                     Layout.fillWidth: true
                     spacing: 12
 
-                    CheckBox {
-                        text: qsTr("Use local model")
-                        checked: Runtime.localModelEnabled
-                        onToggled: Runtime.localModelEnabled = checked
+                    Rectangle {
+                        Layout.preferredWidth: 190
+                        Layout.preferredHeight: 34
+                        radius: 10
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: Runtime.localModelBackend === "ollama" ? qsTr("Ollama") : qsTr("OpenAI Compatible")
+                            color: shell.textPrimary
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: Runtime.localModelBackend = Runtime.localModelBackend === "ollama" ? "openai" : "ollama"
+                        }
                     }
 
-                    ComboBox {
-                        id: backendPicker
-                        Layout.preferredWidth: 190
-                        model: [qsTr("OpenAI Compatible"), qsTr("Ollama")]
-                        Component.onCompleted: currentIndex = Runtime.localModelBackend === "ollama" ? 1 : 0
-                        onActivated: Runtime.localModelBackend = currentIndex === 1 ? "ollama" : "openai"
+                    Rectangle {
+                        Layout.preferredWidth: 170
+                        Layout.preferredHeight: 34
+                        radius: 10
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 8
+
+                            Rectangle {
+                                width: 16
+                                height: 16
+                                radius: 3
+                                color: Runtime.localModelEnabled ? shell.accent : "transparent"
+                                border.color: shell.accent
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: qsTr("Use local model")
+                                color: shell.textPrimary
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: Runtime.localModelEnabled = !Runtime.localModelEnabled
+                        }
                     }
                 }
 
@@ -128,28 +165,94 @@ Item {
                     Layout.fillWidth: true
                     spacing: 12
 
-                    TextField {
+                    Rectangle {
                         id: baseUrlField
                         Layout.fillWidth: true
-                        placeholderText: qsTr("http://127.0.0.1:8000")
-                        Component.onCompleted: text = Runtime.localModelBaseUrl
-                        onTextEdited: Runtime.localModelBaseUrl = text
+                        Layout.preferredHeight: 36
+                        radius: 10
+                        color: "#121212"
+                        border.color: shell.border
+
+                        TextInput {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            text: Runtime.localModelBaseUrl
+                            color: shell.textPrimary
+                            selectByMouse: true
+                            selectionColor: shell.accent
+                            selectedTextColor: shell.bg
+                            cursorVisible: activeFocus
+                            onTextEdited: Runtime.localModelBaseUrl = text
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("http://127.0.0.1:8000")
+                            color: shell.textMuted
+                            visible: Runtime.localModelBaseUrl.length === 0
+                        }
                     }
 
-                    TextField {
+                    Rectangle {
                         id: modelField
                         Layout.preferredWidth: 220
-                        placeholderText: qsTr("llama3.1")
-                        Component.onCompleted: text = Runtime.localModelName
-                        onTextEdited: Runtime.localModelName = text
+                        Layout.preferredHeight: 36
+                        radius: 10
+                        color: "#121212"
+                        border.color: shell.border
+
+                        TextInput {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            text: Runtime.localModelName
+                            color: shell.textPrimary
+                            selectByMouse: true
+                            selectionColor: shell.accent
+                            selectedTextColor: shell.bg
+                            cursorVisible: activeFocus
+                            onTextEdited: Runtime.localModelName = text
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("llama3.1")
+                            color: shell.textMuted
+                            visible: Runtime.localModelName.length === 0
+                        }
                     }
 
-                    TextField {
+                    Rectangle {
                         id: chatPathField
                         Layout.preferredWidth: 250
-                        placeholderText: qsTr("/v1/chat/completions")
-                        Component.onCompleted: text = Runtime.localModelChatPath
-                        onTextEdited: Runtime.localModelChatPath = text
+                        Layout.preferredHeight: 36
+                        radius: 10
+                        color: "#121212"
+                        border.color: shell.border
+
+                        TextInput {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            text: Runtime.localModelChatPath
+                            color: shell.textPrimary
+                            selectByMouse: true
+                            selectionColor: shell.accent
+                            selectedTextColor: shell.bg
+                            cursorVisible: activeFocus
+                            onTextEdited: Runtime.localModelChatPath = text
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("/v1/chat/completions")
+                            color: shell.textMuted
+                            visible: Runtime.localModelChatPath.length === 0
+                        }
                     }
                 }
             }
@@ -172,7 +275,7 @@ Item {
                     anchors.margins: 16
                     spacing: 12
 
-                    Label {
+                    Text {
                         text: qsTr("Agents")
                         color: shell.textPrimary
                         font.pixelSize: 18
@@ -202,18 +305,18 @@ Item {
                                 anchors.margins: 12
                                 spacing: 6
 
-                                Label {
+                                Text {
                                     text: name
                                     color: shell.textPrimary
                                     font.bold: true
                                 }
 
-                                Label {
+                                Text {
                                     text: agentId
                                     color: shell.textMuted
                                 }
 
-                                Label {
+                                Text {
                                     text: status
                                     color: shell.accent
                                     elide: Text.ElideRight
@@ -237,26 +340,42 @@ Item {
                     anchors.margins: 18
                     spacing: 14
 
-                    Label {
+                    Text {
                         text: qsTr("Prompt")
                         color: shell.textPrimary
                         font.pixelSize: 16
                         font.bold: true
                     }
 
-                    TextArea {
+                    Rectangle {
                         id: promptInput
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
-                        placeholderText: qsTr("Ask the agent to inspect files, summarize state, or run a minimal workflow")
-                        wrapMode: TextEdit.Wrap
-                        color: shell.textPrimary
-                        selectionColor: shell.accent
-                        selectedTextColor: shell.bg
-                        background: Rectangle {
-                            radius: 12
-                            color: "#121212"
-                            border.color: shell.border
+                        radius: 12
+                        color: "#121212"
+                        border.color: shell.border
+
+                        TextEdit {
+                            id: promptEditor
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            text: ""
+                            wrapMode: TextEdit.Wrap
+                            color: shell.textPrimary
+                            selectionColor: shell.accent
+                            selectedTextColor: shell.bg
+                            focus: true
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.top: parent.top
+                            anchors.topMargin: 10
+                            text: qsTr("Ask the agent to inspect files, summarize state, or run a minimal workflow")
+                            color: shell.textMuted
+                            visible: promptEditor.text.length === 0 && !promptEditor.activeFocus
+                            wrapMode: Text.WordWrap
                         }
                     }
 
@@ -264,74 +383,77 @@ Item {
                         Layout.fillWidth: true
                         spacing: 12
 
-                        Button {
-                            text: qsTr("Run Agent")
-                            onClicked: {
-                                var prompt = promptInput.text.trim()
-                                if (!prompt)
-                                    prompt = "hello"
-                                resultOutput.text = Runtime.run_agent(prompt, 4)
-                            }
+                        Rectangle {
+                            Layout.preferredWidth: 120
+                            Layout.preferredHeight: 36
+                            radius: 10
+                            color: shell.accent
 
-                            background: Rectangle {
-                                radius: 10
-                                color: parent.down ? "#14815b" : shell.accent
-                            }
-
-                            contentItem: Label {
-                                text: parent.text
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Run Agent")
                                 color: shell.bg
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
                                 font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    var prompt = promptEditor.text.trim()
+                                    if (!prompt)
+                                        prompt = "hello"
+                                    resultOutput.text = Runtime.run_agent(prompt, 4)
+                                }
                             }
                         }
 
-                        Button {
-                            text: qsTr("Refresh Status")
-                            onClicked: runtimeStatus.text = Runtime.ping()
+                        Rectangle {
+                            Layout.preferredWidth: 136
+                            Layout.preferredHeight: 36
+                            radius: 10
+                            color: "#202020"
+                            border.color: shell.border
 
-                            background: Rectangle {
-                                radius: 10
-                                color: "#202020"
-                                border.color: shell.border
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Refresh Status")
+                                color: shell.textPrimary
+                                font.bold: true
                             }
 
-                            contentItem: Label {
-                                text: parent.text
-                                color: shell.textPrimary
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: runtimeStatus.text = Runtime.ping()
                             }
                         }
                     }
 
-                    Label {
+                    Text {
                         text: qsTr("Result")
                         color: shell.textPrimary
                         font.pixelSize: 16
                         font.bold: true
                     }
 
-                    ScrollView {
+                    Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 120
+                        radius: 12
+                        color: "#121212"
+                        border.color: shell.border
 
-                        TextArea {
+                        TextEdit {
                             id: resultOutput
+                            anchors.fill: parent
+                            anchors.margins: 10
                             readOnly: true
                             wrapMode: TextEdit.Wrap
                             color: shell.textPrimary
                             text: qsTr("Run the agent to see output here.")
-                            background: Rectangle {
-                                radius: 12
-                                color: "#121212"
-                                border.color: shell.border
-                            }
                         }
                     }
 
-                    Label {
+                    Text {
                         text: qsTr("Runtime Log")
                         color: shell.textPrimary
                         font.pixelSize: 16
@@ -361,25 +483,25 @@ Item {
                                 width: ListView.view.width
                                 spacing: 8
 
-                                Label {
+                                Text {
                                     text: time
                                     color: shell.textMuted
                                     width: 64
                                 }
 
-                                Label {
+                                Text {
                                     text: level
                                     color: level === "error" ? "#ff6b6b" : (level === "warning" ? "#ffb347" : shell.accent)
                                     width: 56
                                 }
 
-                                Label {
+                                Text {
                                     text: tag
                                     color: shell.textPrimary
                                     width: 64
                                 }
 
-                                Label {
+                                Text {
                                     text: message
                                     color: shell.textMuted
                                     width: Math.max(0, parent.width - 220)
