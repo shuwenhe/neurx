@@ -9,7 +9,7 @@ Window {
     height: 640
     minimumWidth: 760
     minimumHeight: 520
-    title: qsTr("Neurx Qt Agent Shell")
+    title: qsTr("Neurx App Shell")
     color: "#111111"
 
     AppShell {
