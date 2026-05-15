@@ -3960,6 +3960,38 @@ def _execute_intrinsic(name: str, args: list[Any]) -> Any:
             raise ValueError(f"generation_step expects 6 args, got {len(args)}")
         filtered = _execute_intrinsic("sampling_top_k_top_p", args)
         return int(np.argmax(filtered))
+    if name == "diffusion_noise_step":
+        if len(args) != 4:
+            raise ValueError(f"diffusion_noise_step expects 4 args, got {len(args)}")
+        beta_start = float(args[0])
+        beta_end = float(args[1])
+        t = int(args[2])
+        timesteps = int(args[3])
+        if timesteps <= 1:
+            return beta_end
+        ratio = float(t) / float(timesteps - 1)
+        return beta_start + (beta_end - beta_start) * ratio
+    if name == "diffusion_denoise_stub":
+        if len(args) != 3:
+            raise ValueError(f"diffusion_denoise_stub expects 3 args, got {len(args)}")
+        noisy_sample = np.asarray(args[0], dtype=np.float64)
+        t = int(args[1])
+        scale = float(args[2])
+        _ = t
+        return noisy_sample * scale
+    if name == "diffusion_ddpm_next_t":
+        if len(args) != 1:
+            raise ValueError(f"diffusion_ddpm_next_t expects 1 arg, got {len(args)}")
+        current_t = int(args[0])
+        return max(current_t - 1, 0)
+    if name == "diffusion_ddim_next_t":
+        if len(args) != 2:
+            raise ValueError(f"diffusion_ddim_next_t expects 2 args, got {len(args)}")
+        current_t = int(args[0])
+        stride = int(args[1])
+        if stride <= 0:
+            stride = 1
+        return max(current_t - stride, 0)
     if name == "embedding_lookup":
         if len(args) != 3:
             raise ValueError(f"embedding_lookup expects 3 args, got {len(args)}")

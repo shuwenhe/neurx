@@ -291,3 +291,19 @@ func prelu(tensor a, float weight) tensor {
 func rrelu(tensor a, float lower, float upper, bool training) tensor {
     rrelu(a, lower, upper, training)
 }
+
+func diffusion_noise_step(float beta_start, float beta_end, int t, int timesteps) float {
+    diffusion_noise_step(beta_start, beta_end, t, timesteps)
+}
+
+func diffusion_denoise_stub([]float noisy_sample, int t, float scale) []float {
+    diffusion_denoise_stub(noisy_sample, t, scale)
+}
+
+func diffusion_ddpm_next_t(int current_t) int {
+    diffusion_ddpm_next_t(current_t)
+}
+
+func diffusion_ddim_next_t(int current_t, int stride) int {
+    diffusion_ddim_next_t(current_t, stride)
+}
