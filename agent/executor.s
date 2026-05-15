@@ -16,16 +16,26 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
     string observation = "tool_unavailable"
     bool ok = false
 
-    if agent_tool_registry_has_enabled(tools, "search") {
-        action = "search"
-        observation = input
-        if task == "finalize" {
-            observation = "done"
-        }
+    if task == "finalize" {
+        action = "finalize"
+        observation = "done"
         ok = true
+    } else if task == "retrieve" {
+        if agent_tool_registry_has_enabled(tools, "retrieve") {
+            action = "retrieve"
+            observation = "retrieved"
+            ok = true
+        }
+    } else {
+        if agent_tool_registry_has_enabled(tools, "search") {
+            action = "search"
+            observation = "analyzed"
+            ok = true
+        }
     }
 
-    agent_memory_state next_memory = agent_memory_write_short(memory, "last_action", action)
+    agent_memory_state next_memory = agent_memory_write_short(memory, "last_input", input)
+    next_memory = agent_memory_write_short(next_memory, "last_action", action)
     next_memory = agent_memory_write_short(next_memory, "last_observation", observation)
 
     agent_execute_result {

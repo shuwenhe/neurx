@@ -32,6 +32,11 @@ def test_s_agent_runtime_smoke():
         ("agent", "new_default_agent"),
         ("agent", "run_agent_once"),
         ("agent", "run_agent"),
+        ("agent", "run_agent_with_goal"),
+        ("agent", "agent_status"),
+        ("agent", "agent_current_task"),
+        ("agent", "agent_step_count"),
+        ("agent", "agent_needs_replan"),
     ):
         assert runtime.supports_runtime_function(module_name, function_name)
 
@@ -39,9 +44,16 @@ def test_s_agent_runtime_smoke():
     stepped = runtime.invoke_runtime_function("agent/runtime", "agent_runtime_step", state, "context")
     assert stepped["steps"] == 1
     assert stepped["last_action"] in ("search", "noop")
+    assert stepped["plan"]["current_task"] in ("retrieve", "analyze")
 
     if runtime.supports_runtime_function("agent", "new_default_agent") and runtime.supports_runtime_function("agent", "run_agent"):
         app = runtime.invoke_runtime_function("agent", "new_default_agent", "ship feature")
         done = runtime.invoke_runtime_function("agent", "run_agent", app, "context", 3)
         assert done["steps"] >= 1
         assert "last_observation" in done
+        assert done["finished"] is True
+        assert done["plan"]["status"] == "done"
+
+    if runtime.supports_runtime_function("agent", "run_agent_with_goal"):
+        result = runtime.invoke_runtime_function("agent", "run_agent_with_goal", "ship feature", "context", 3)
+        assert result["plan"]["current_task"] == "complete"
