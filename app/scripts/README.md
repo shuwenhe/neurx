@@ -5,7 +5,7 @@
 Run:
 
 ```bash
-cd /app/neurx/qt
+cd /app/neurx/app
 bash scripts/setup_qt_env.sh
 source .env.qt
 cmake -S . -B build
@@ -17,7 +17,7 @@ cmake --build build
 Run:
 
 ```powershell
-cd C:\\app\\neurx\\qt
+cd C:\\app\\neurx\\app
 powershell -ExecutionPolicy Bypass -File .\\scripts\\setup_qt_env.ps1
 cmake -S . -B build
 cmake --build build

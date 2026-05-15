@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QUrl>
 
 #include "bridge/AgentListModel.h"
 #include "bridge/LogModel.h"
@@ -8,7 +9,7 @@
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
-    app.setApplicationName("Neurx Qt Agent Shell");
+    app.setApplicationName("Neurx App Shell");
 
     NeurxBridge bridge;
     AgentListModel agent_model;
@@ -24,9 +25,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("AgentModel", &agent_model);
     engine.rootContext()->setContextProperty("LogModel", &log_model);
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-        &app, []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
-    engine.loadFromModule("neurx.qt", "Main");
+    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/neurx/app/Main.qml")));
 
     if (engine.rootObjects().isEmpty()) {
         return -1;

@@ -1,6 +1,6 @@
-# Neurx Qt Shell
+# Neurx App Shell
 
-This directory hosts the Qt-based cross-platform shell for Neurx.
+This directory hosts the Qt-based cross-platform app shell for Neurx.
 
 ## Scope
 
@@ -8,14 +8,14 @@ This directory hosts the Qt-based cross-platform shell for Neurx.
 - Platform host integration for desktop/mobile targets
 - Bridge layer that calls into Neurx core modules
 - Selectively migrated UI structure from `/app/neurx-agent/app` without copying its standalone core runtime
-- Lightweight `AgentListModel` and `LogModel` adapted inside `qt/bridge` for QML panels
+- Lightweight `AgentListModel` and `LogModel` adapted inside `app/bridge` for QML panels
 
 ## Suggested Build
 
 ```bash
 cmake -S . -B build
 cmake --build build
-./build/neurx_qt
+./build/neurx_app
 ```
 
 ## Environment Setup
@@ -28,7 +28,7 @@ See [scripts/README.md](scripts/README.md) for full examples.
 ## Directory Layout
 
 - app: Qt app entry and top-level UI bootstrap
-- bridge: ABI/FFI bridge between Qt shell and Neurx core
+- bridge: ABI/FFI bridge between Qt app shell and Neurx core
 - qml: Qt Quick shell views migrated into Neurx
 - platform: platform-specific helpers and lifecycle wrappers
 - tests: Qt shell tests
