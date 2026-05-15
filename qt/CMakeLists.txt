@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
 
 qt_add_executable(neurx_qt
     app/main.cpp
@@ -15,7 +15,15 @@ qt_add_executable(neurx_qt
     bridge/neurx_bridge.cpp
 )
 
-target_link_libraries(neurx_qt PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+qt_add_qml_module(neurx_qt
+    URI neurx.qt
+    VERSION 1.0
+    QML_FILES
+        qml/Main.qml
+        qml/AppShell.qml
+)
+
+target_link_libraries(neurx_qt PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2)
 
 target_include_directories(neurx_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

@@ -6,6 +6,9 @@
 #include <QJsonObject>
 #include <QProcess>
 
+NeurxBridge::NeurxBridge(QObject* parent)
+    : QObject(parent) {}
+
 QString NeurxBridge::run_python_script(const QString& repo_root, const QString& script, const QStringList& args, int timeout_ms) const {
     const QString python_bin = qEnvironmentVariable("NEURX_PYTHON", "python3");
     QProcess proc;
