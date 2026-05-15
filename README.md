@@ -18,6 +18,21 @@ neurx is a deep learning framework with S-language write.
 - `build/ir/`: generated S IR artifacts
 - `build/logs/`: generated compiler and runtime logs
 
+## Canonical Layering
+
+The current top-level folders are kept for compatibility. The target layout is:
+
+- `core/`: tensor, autograd, engine, nn, ops, losses, optim, data, train, runtime
+- `compile/`: graph, IR, passes, lowering, executor, cache
+- `runtime/`: device/runtime dispatch, IO, logging, errors, stage control
+- `distributed/`: communication, DDP, TP, PP, launcher
+- `serving/`: inference serving, decode, cache, sampling
+- `workflows/`: pretrain, posttrain, diffusion, evaluation
+- `backends/`: CUDA, CANN, MPS backend implementations
+- `examples/`: runnable end-to-end examples
+- `tests/`: regression and integration tests
+- `legacy/`: historical S prototypes and compatibility shims
+
 ## S Modules
 
 - `ad/ad.s`: automatic differentiation state, grad mode, record tracking, and backward skeleton
