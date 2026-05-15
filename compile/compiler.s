@@ -1,6 +1,7 @@
 package neurx.compile.compiler
 
 use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
+use neurx.compile.pipeline
 
 struct compile_options {
     string backend
@@ -19,6 +20,8 @@ struct compiled_module_state {
     bool graph_ready
     int graph_node_count
     int graph_edge_count
+    int pass_count
+    string cache_key
 }
 
 struct compile_result {
@@ -73,6 +76,23 @@ func new_compiled_module_state(string module_name, compile_options options) comp
         graph_ready: true,
         graph_node_count: 1,
         graph_edge_count: 0,
+        pass_count: 0,
+        cache_key: "",
+    }
+}
+
+func pipeline_to_compiled_state(compile_pipeline_state pipeline, string module_name, compile_options options) compiled_module_state {
+    compiled_module_state {
+        module_name: module_name,
+        options: options,
+        compiled: pipeline.state.compiled,
+        lowered: pipeline.state.lowered,
+        executed: pipeline.state.executed,
+        graph_ready: pipeline.state.ready,
+        graph_node_count: len(pipeline.state.nodes),
+        graph_edge_count: len(pipeline.state.edges),
+        pass_count: len(pipeline.state.passes),
+        cache_key: pipeline.cache_key,
     }
 }
 
@@ -82,20 +102,38 @@ func compile_module(string module_name, compile_options options) compile_result 
     if platform_error_active(err) {
         make_compile_result(state, false, err)
     } else {
-        make_compile_result(state, true, clear_error())
+        compile_pipeline_state pipeline = run_compile_pipeline(
+            module_name,
+            options.backend,
+            options.mode,
+            options.dynamic,
+            options.fullgraph,
+            options.debug,
+        )
+        make_compile_result(pipeline_to_compiled_state(pipeline, module_name, options), true, clear_error())
     }
 }
 
 func compiled_module_execute(compiled_module_state state) compiled_module_state {
+    compile_pipeline_state pipeline = run_compile_execute_pipeline(
+        state.module_name,
+        state.options.backend,
+        state.options.mode,
+        state.options.dynamic,
+        state.options.fullgraph,
+        state.options.debug,
+    )
     compiled_module_state {
         module_name: state.module_name,
         options: state.options,
-        compiled: state.compiled,
-        lowered: state.lowered,
-        executed: true,
-        graph_ready: state.graph_ready,
-        graph_node_count: state.graph_node_count,
-        graph_edge_count: state.graph_edge_count,
+        compiled: pipeline.state.compiled,
+        lowered: pipeline.state.lowered,
+        executed: pipeline.state.executed,
+        graph_ready: pipeline.state.ready,
+        graph_node_count: len(pipeline.state.nodes),
+        graph_edge_count: len(pipeline.state.edges),
+        pass_count: len(pipeline.state.passes),
+        cache_key: pipeline.cache_key,
     }
 }
 
