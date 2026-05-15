@@ -1,0 +1,46 @@
+package neurx.agent.executor
+
+use neurx.agent.tool_registry
+use neurx.agent.memory
+
+struct agent_execute_result {
+    agent_tool_registry_state tools
+    agent_memory_state memory
+    string action
+    string observation
+    bool ok
+}
+
+func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memory, string task, string input) agent_execute_result {
+    string action = "noop"
+    string observation = "tool_unavailable"
+    bool ok = false
+
+    if agent_tool_registry_has_enabled(tools, "search") {
+        action = "search"
+        observation = input
+        if task == "finalize" {
+            observation = "done"
+        }
+        ok = true
+    }
+
+    agent_memory_state next_memory = agent_memory_write_short(memory, "last_action", action)
+    next_memory = agent_memory_write_short(next_memory, "last_observation", observation)
+
+    agent_execute_result {
+        tools: tools,
+        memory: next_memory,
+        action: action,
+        observation: observation,
+        ok: ok,
+    }
+}
+
+func agent_execute_result_state_dict(agent_execute_result result) agent_execute_result {
+    result
+}
+
+func agent_execute_result_load_state_dict(agent_execute_result result, agent_execute_result other) agent_execute_result {
+    other
+}

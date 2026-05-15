@@ -5,6 +5,7 @@ use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, ha
 use neurx.train.amp.{autocast_state, grad_scaler_state, new_autocast_state, new_grad_scaler, grad_scaler_step}
 use neurx.train.checkpoint_manager.{checkpoint_manager_state, new_checkpoint_manager, checkpoint_manager_should_save, checkpoint_manager_save, checkpoint_manager_mark_best, checkpoint_manager_best_score}
 use neurx.train.logging.{training_logger_state, new_training_logger, training_logger_log, training_logger_flush}
+use neurx.train.parallel.{train_parallel_state, train_parallel_enabled, train_parallel_all_reduce_grad, train_parallel_world_size}
 use neurx.ops
 use neurx.tensor.tensor
 
@@ -288,6 +289,66 @@ func train_step(training_pipeline_state state) training_pipeline_state {
         last_loss: loss,
         best_score: checkpoint_manager_best_score(checkpoint),
     }
+}
+
+func train_step_with_parallel(training_pipeline_state state, train_parallel_state parallel) training_pipeline_state {
+    training_pipeline_state next = train_step(state)
+    if !train_parallel_enabled(parallel) {
+        return next
+    }
+
+    []float reduced = train_parallel_all_reduce_grad(parallel, [next.last_loss, next.metrics.score])
+    int world_size = train_parallel_world_size(parallel)
+    if world_size <= 0 {
+        world_size = 1
+    }
+
+    float synced_loss = next.last_loss
+    float synced_score = next.metrics.score
+    if len(reduced) > 0 {
+        synced_loss = reduced[0] / world_size
+    }
+    if len(reduced) > 1 {
+        synced_score = reduced[1] / world_size
+    }
+
+    training_metrics_state synced_metrics = build_metrics(
+        next.metrics.step,
+        next.metrics.epoch,
+        next.metrics.batch_index,
+        next.metrics.valid_tokens,
+        synced_loss,
+        synced_score,
+    )
+
+    training_pipeline_state {
+        loop: next.loop,
+        loader: next.loader,
+        logger: next.logger,
+        scaler: next.scaler,
+        checkpoint: next.checkpoint,
+        autocast: next.autocast,
+        metrics: synced_metrics,
+        last_loss: synced_loss,
+        best_score: next.best_score,
+    }
+}
+
+func train_steps_with_parallel(training_pipeline_state state, train_parallel_state parallel, int steps) training_pipeline_state {
+    int loops = steps
+    if loops < 0 {
+        loops = 0
+    }
+    training_pipeline_state current = state
+    int i = 0
+    while i < loops {
+        current = train_step_with_parallel(current, parallel)
+        i = i + 1
+        if current.loop.should_stop {
+            return current
+        }
+    }
+    current
 }
 
 func training_pipeline_state_dict(training_pipeline_state state) training_pipeline_state {

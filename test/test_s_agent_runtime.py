@@ -1,0 +1,47 @@
+from importlib import util
+from pathlib import Path
+
+
+def _load_runtime_module():
+    runtime_path = Path(__file__).resolve().parents[1] / "runtime" / "runtime.py"
+    spec = util.spec_from_file_location("neurx_runtime", runtime_path)
+    module = util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_s_agent_runtime_smoke():
+    runtime = _load_runtime_module()
+
+    if not runtime.supports_runtime_function("agent/runtime", "new_agent_runtime_state"):
+        return
+
+    for module_name, function_name in (
+        ("agent/tool_registry", "new_agent_tool_registry_state"),
+        ("agent/tool_registry", "agent_tool_registry_add"),
+        ("agent/tool_registry", "agent_tool_registry_has_enabled"),
+        ("agent/memory", "new_agent_memory_state"),
+        ("agent/memory", "agent_memory_write_short"),
+        ("agent/planner", "new_agent_plan_state"),
+        ("agent/planner", "agent_plan_next"),
+        ("agent/executor", "agent_execute_step"),
+        ("agent/runtime", "new_agent_runtime_state"),
+        ("agent/runtime", "agent_runtime_step"),
+        ("agent/runtime", "run_agent_steps"),
+        ("agent", "new_default_agent"),
+        ("agent", "run_agent_once"),
+        ("agent", "run_agent"),
+    ):
+        assert runtime.supports_runtime_function(module_name, function_name)
+
+    state = runtime.invoke_runtime_function("agent/runtime", "new_agent_runtime_state", "solve task", "analyze", 2)
+    stepped = runtime.invoke_runtime_function("agent/runtime", "agent_runtime_step", state, "context")
+    assert stepped["steps"] == 1
+    assert stepped["last_action"] in ("search", "noop")
+
+    if runtime.supports_runtime_function("agent", "new_default_agent") and runtime.supports_runtime_function("agent", "run_agent"):
+        app = runtime.invoke_runtime_function("agent", "new_default_agent", "ship feature")
+        done = runtime.invoke_runtime_function("agent", "run_agent", app, "context", 3)
+        assert done["steps"] >= 1
+        assert "last_observation" in done
