@@ -25,6 +25,21 @@ cmake --build build
 
 See [scripts/README.md](scripts/README.md) for full examples.
 
+## Local Model
+
+The app shell can route agent prompts to a local model endpoint before falling back to the existing Neurx runtime.
+
+Supported config fields:
+
+- `NEURX_LLM_ENABLED=1`
+- `NEURX_LLM_BACKEND=openai` or `ollama`
+- `NEURX_LLM_BASE_URL=http://127.0.0.1:8000`
+- `NEURX_LLM_MODEL=llama3.1`
+- `NEURX_LLM_CHAT_PATH=/v1/chat/completions` or `/api/chat`
+- `NEURX_LLM_API_KEY` for OpenAI-compatible servers that require one
+
+The same fields can also be edited from the QML app shell after launch.
+
 ## Directory Layout
 
 - app: Qt app entry and top-level UI bootstrap
