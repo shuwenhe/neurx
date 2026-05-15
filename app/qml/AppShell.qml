@@ -79,6 +79,82 @@ Item {
             }
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 178
+            radius: 14
+            color: shell.surface
+            border.color: shell.border
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 10
+
+                Label {
+                    text: qsTr("Local Model")
+                    color: shell.textPrimary
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+
+                Label {
+                    text: Runtime.localModelSummary
+                    color: shell.textMuted
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    CheckBox {
+                        text: qsTr("Use local model")
+                        checked: Runtime.localModelEnabled
+                        onToggled: Runtime.localModelEnabled = checked
+                    }
+
+                    ComboBox {
+                        id: backendPicker
+                        Layout.preferredWidth: 190
+                        model: [qsTr("OpenAI Compatible"), qsTr("Ollama")]
+                        Component.onCompleted: currentIndex = Runtime.localModelBackend === "ollama" ? 1 : 0
+                        onActivated: Runtime.localModelBackend = currentIndex === 1 ? "ollama" : "openai"
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    TextField {
+                        id: baseUrlField
+                        Layout.fillWidth: true
+                        placeholderText: qsTr("http://127.0.0.1:8000")
+                        Component.onCompleted: text = Runtime.localModelBaseUrl
+                        onTextEdited: Runtime.localModelBaseUrl = text
+                    }
+
+                    TextField {
+                        id: modelField
+                        Layout.preferredWidth: 220
+                        placeholderText: qsTr("llama3.1")
+                        Component.onCompleted: text = Runtime.localModelName
+                        onTextEdited: Runtime.localModelName = text
+                    }
+
+                    TextField {
+                        id: chatPathField
+                        Layout.preferredWidth: 250
+                        placeholderText: qsTr("/v1/chat/completions")
+                        Component.onCompleted: text = Runtime.localModelChatPath
+                        onTextEdited: Runtime.localModelChatPath = text
+                    }
+                }
+            }
+        }
+
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -306,7 +382,7 @@ Item {
                                 Label {
                                     text: message
                                     color: shell.textMuted
-                                    width: ListView.view.width - 220
+                                    width: Math.max(0, parent.width - 220)
                                     wrapMode: Text.Wrap
                                 }
                             }

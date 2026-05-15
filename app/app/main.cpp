@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("AgentModel", &agent_model);
     engine.rootContext()->setContextProperty("LogModel", &log_model);
 
-    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/neurx/app/Main.qml")));
+    engine.loadFromModule("neurx.app", "Main");
 
     if (engine.rootObjects().isEmpty()) {
         return -1;
@@ -33,3 +33,4 @@ int main(int argc, char* argv[]) {
 
     return app.exec();
 }
+`

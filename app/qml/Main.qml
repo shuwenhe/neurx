@@ -5,6 +5,7 @@ import QtQuick.Window
 Window {
     id: root
     visible: true
+    visibility: Window.FullScreen
     width: 960
     height: 640
     minimumWidth: 760
