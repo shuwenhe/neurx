@@ -4,6 +4,7 @@ use neurx.posttrain.config
 use neurx.posttrain.data
 use neurx.posttrain.reward
 use neurx.posttrain.loop
+use neurx.posttrain.rlhf.ppo
 use neurx.train.loop.{training_pipeline_state}
 
 func new_default_posttrain_pipeline(string dataset_name, string sample_mode, string reward_model, string run_name, string root) posttrain_pipeline_state {
@@ -30,6 +31,31 @@ func posttrain_step_from_train(posttrain_pipeline_state state, training_pipeline
         samples = state.loop.cfg.micro_batch_size
     }
     posttrain_pipeline_step(state, reward_value, kl_value, margin, policy_loss, value_loss, samples)
+}
+
+func posttrain_step_with_ppo(posttrain_pipeline_state state, ppo_state ppo, float old_logp, float new_logp, float reward_value, float value_pred, float value_target, float margin, int samples) posttrain_pipeline_state {
+    ppo_step_result ppo_result = ppo_step(
+        ppo,
+        old_logp,
+        new_logp,
+        reward_value,
+        value_pred,
+        value_target,
+        ppo.kl_coef,
+    )
+    int effective_samples = samples
+    if effective_samples <= 0 {
+        effective_samples = state.loop.cfg.micro_batch_size
+    }
+    posttrain_pipeline_step(
+        state,
+        reward_value,
+        ppo_result.state.last_kl,
+        margin,
+        ppo_result.policy_loss,
+        ppo_result.value_loss,
+        effective_samples,
+    )
 }
 
 func run_posttrain_steps(posttrain_pipeline_state state, int steps) posttrain_pipeline_state {
