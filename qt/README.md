@@ -8,6 +8,7 @@ This directory hosts the Qt-based cross-platform shell for Neurx.
 - Platform host integration for desktop/mobile targets
 - Bridge layer that calls into Neurx core modules
 - Selectively migrated UI structure from `/app/neurx-agent/app` without copying its standalone core runtime
+- Lightweight `AgentListModel` and `LogModel` adapted inside `qt/bridge` for QML panels
 
 ## Suggested Build
 
