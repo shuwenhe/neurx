@@ -11,6 +11,57 @@ Item {
     readonly property color textPrimary: "#f3f3f3"
     readonly property color textMuted: "#a0a0a0"
     readonly property color panelAlt: "#151515"
+    readonly property color panelHover: "#202020"
+    readonly property color editorBg: "#0f1115"
+    readonly property color selectionBg: "#173f31"
+
+    property int selectedFileIndex: 1
+    property string selectedFilePath: ""
+
+    ListModel {
+        id: fileModel
+
+        ListElement {
+            label: "main.cpp"
+            path: "app/app/main.cpp"
+            kind: "C++"
+            content: "#include <QGuiApplication>\n#include <QQmlApplicationEngine>\n#include <QQmlContext>\n#include <QUrl>\n\n#include \"bridge/AgentListModel.h\"\n#include \"bridge/LogModel.h\"\n#include \"bridge/neurx_bridge.h\"\n\nint main(int argc, char* argv[]) {\n    QGuiApplication app(argc, argv);\n    app.setApplicationName(\"Neurx App Shell\");\n\n    NeurxBridge bridge;\n    AgentListModel agent_model;\n    LogModel log_model;\n\n    QObject::connect(&bridge, &NeurxBridge::runtime_status_changed,\n        &agent_model, &AgentListModel::set_primary_agent_status);\n    QObject::connect(&bridge, &NeurxBridge::log_message,\n        &log_model, &LogModel::append);\n\n    QQmlApplicationEngine engine;\n    engine.rootContext()->setContextProperty(\"Runtime\", &bridge);\n    engine.rootContext()->setContextProperty(\"AgentModel\", &agent_model);\n    engine.rootContext()->setContextProperty(\"LogModel\", &log_model);\n\n    engine.load(QUrl(QStringLiteral(\"qrc:/neurx/app/qml/Main.qml\")));\n\n    if (engine.rootObjects().isEmpty()) {\n        return -1;\n    }\n\n    return app.exec();\n}"
+        }
+
+        ListElement {
+            label: "Main.qml"
+            path: "app/qml/Main.qml"
+            kind: "QML"
+            content: "import QtQuick\nimport QtQuick.Window\n\nWindow {\n    id: root\n    visible: true\n    visibility: Window.FullScreen\n    width: 960\n    height: 640\n    minimumWidth: 760\n    minimumHeight: 520\n    title: qsTr(\"Neurx Explorer / Editor / Agent\")\n    color: \"#111111\"\n\n    AppShell {\n        anchors.fill: parent\n    }\n}"
+        }
+
+        ListElement {
+            label: "neurx_bridge.cpp"
+            path: "app/bridge/neurx_bridge.cpp"
+            kind: "C++"
+            content: "#include \"neurx_bridge.h\"\n\n// Bridge runtime helpers live here."
+        }
+
+        ListElement {
+            label: "AgentListModel.h"
+            path: "app/bridge/AgentListModel.h"
+            kind: "C++"
+            content: "#pragma once\n\n#include <QAbstractListModel>\n#include <QString>\n#include <QVector>\n\nclass AgentListModel : public QAbstractListModel {\n    Q_OBJECT\n\npublic:\n    enum Roles {\n        IdRole = Qt::UserRole + 1,\n        NameRole,\n        StatusRole,\n    };\n\n    explicit AgentListModel(QObject* parent = nullptr);\n\n    int rowCount(const QModelIndex& parent = QModelIndex()) const override;\n    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;\n    QHash<int, QByteArray> roleNames() const override;\n\npublic slots:\n    void set_primary_agent_status(const QString& status, const QString& task);\n\nprivate:\n    struct AgentEntry {\n        QString id;\n        QString name;\n        QString status;\n    };\n\n    QVector<AgentEntry> entries_;\n};"
+        }
+    }
+
+    function selectFile(index) {
+        if (index < 0 || index >= fileModel.count) {
+            return
+        }
+
+        selectedFileIndex = index
+        var entry = fileModel.get(index)
+        selectedFilePath = entry.path
+        editorText.text = entry.content
+    }
+
+    Component.onCompleted: selectFile(selectedFileIndex)
 
     Rectangle {
         anchors.fill: parent
@@ -24,7 +75,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 92
+            implicitHeight: 94
             radius: 16
             color: shell.surface
             border.color: shell.border
@@ -35,14 +86,14 @@ Item {
                 spacing: 6
 
                 Text {
-                    text: qsTr("Neurx Agent Shell")
+                    text: qsTr("Explorer / Editor / Agent")
                     color: shell.textPrimary
                     font.pixelSize: 28
                     font.bold: true
                 }
 
                 Text {
-                    text: qsTr("Migrated QML shell backed by neurx/agent and the Qt bridge runtime.")
+                    text: qsTr("Left: project explorer. Middle: code editor. Right: live agent workspace.")
                     color: shell.textMuted
                     wrapMode: Text.WordWrap
                 }
@@ -51,208 +102,41 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 84
+            implicitHeight: 54
             radius: 14
             color: shell.surface
             border.color: shell.border
 
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 8
+                anchors.margins: 14
+                spacing: 14
 
                 Text {
-                    text: qsTr("Runtime Status")
+                    text: qsTr("Runtime")
                     color: shell.textPrimary
-                    font.pixelSize: 16
                     font.bold: true
                 }
 
                 Text {
                     id: runtimeStatus
+                    Layout.fillWidth: true
                     text: Runtime.ping()
                     color: shell.textMuted
                     wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 178
-            radius: 14
-            color: shell.surface
-            border.color: shell.border
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 10
-
-                Text {
-                    text: qsTr("Local Model")
-                    color: shell.textPrimary
-                    font.pixelSize: 16
-                    font.bold: true
                 }
 
-                Text {
-                    text: Runtime.localModelSummary
-                    color: shell.textMuted
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
+                Rectangle {
+                    Layout.preferredWidth: 168
+                    Layout.preferredHeight: 28
+                    radius: 10
+                    color: shell.panelAlt
+                    border.color: shell.border
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Rectangle {
-                        Layout.preferredWidth: 190
-                        Layout.preferredHeight: 34
-                        radius: 10
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: Runtime.localModelBackend === "ollama" ? qsTr("Ollama") : qsTr("OpenAI Compatible")
-                            color: shell.textPrimary
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Runtime.localModelBackend = Runtime.localModelBackend === "ollama" ? "openai" : "ollama"
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.preferredWidth: 170
-                        Layout.preferredHeight: 34
-                        radius: 10
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        Row {
-                            anchors.centerIn: parent
-                            spacing: 8
-
-                            Rectangle {
-                                width: 16
-                                height: 16
-                                radius: 3
-                                color: Runtime.localModelEnabled ? shell.accent : "transparent"
-                                border.color: shell.accent
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            Text {
-                                text: qsTr("Use local model")
-                                color: shell.textPrimary
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Runtime.localModelEnabled = !Runtime.localModelEnabled
-                        }
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Rectangle {
-                        id: baseUrlField
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 36
-                        radius: 10
-                        color: "#121212"
-                        border.color: shell.border
-
-                        TextInput {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            text: Runtime.localModelBaseUrl
-                            color: shell.textPrimary
-                            selectByMouse: true
-                            selectionColor: shell.accent
-                            selectedTextColor: shell.bg
-                            cursorVisible: activeFocus
-                            onTextEdited: Runtime.localModelBaseUrl = text
-                        }
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("http://127.0.0.1:8000")
-                            color: shell.textMuted
-                            visible: Runtime.localModelBaseUrl.length === 0
-                        }
-                    }
-
-                    Rectangle {
-                        id: modelField
-                        Layout.preferredWidth: 220
-                        Layout.preferredHeight: 36
-                        radius: 10
-                        color: "#121212"
-                        border.color: shell.border
-
-                        TextInput {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            text: Runtime.localModelName
-                            color: shell.textPrimary
-                            selectByMouse: true
-                            selectionColor: shell.accent
-                            selectedTextColor: shell.bg
-                            cursorVisible: activeFocus
-                            onTextEdited: Runtime.localModelName = text
-                        }
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("llama3.1")
-                            color: shell.textMuted
-                            visible: Runtime.localModelName.length === 0
-                        }
-                    }
-
-                    Rectangle {
-                        id: chatPathField
-                        Layout.preferredWidth: 250
-                        Layout.preferredHeight: 36
-                        radius: 10
-                        color: "#121212"
-                        border.color: shell.border
-
-                        TextInput {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            text: Runtime.localModelChatPath
-                            color: shell.textPrimary
-                            selectByMouse: true
-                            selectionColor: shell.accent
-                            selectedTextColor: shell.bg
-                            cursorVisible: activeFocus
-                            onTextEdited: Runtime.localModelChatPath = text
-                        }
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("/v1/chat/completions")
-                            color: shell.textMuted
-                            visible: Runtime.localModelChatPath.length === 0
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        text: Runtime.localModelEnabled ? qsTr("Local model on") : qsTr("Local model off")
+                        color: shell.textPrimary
                     }
                 }
             }
@@ -264,7 +148,7 @@ Item {
             spacing: 16
 
             Rectangle {
-                Layout.preferredWidth: 250
+                Layout.preferredWidth: 280
                 Layout.fillHeight: true
                 radius: 18
                 color: shell.surface
@@ -276,51 +160,89 @@ Item {
                     spacing: 12
 
                     Text {
-                        text: qsTr("Agents")
+                        text: qsTr("Explorer")
                         color: shell.textPrimary
                         font.pixelSize: 18
                         font.bold: true
                     }
 
-                    ListView {
+                    Text {
+                        text: qsTr("Project files")
+                        color: shell.textMuted
+                    }
+
+                    Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        model: AgentModel
-                        spacing: 10
-                        clip: true
+                        radius: 14
+                        color: shell.panelAlt
+                        border.color: shell.border
 
-                        delegate: Rectangle {
-                            required property string agentId
-                            required property string name
-                            required property string status
+                        ListView {
+                            id: fileView
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            model: fileModel
+                            spacing: 8
+                            clip: true
+                            currentIndex: shell.selectedFileIndex
 
-                            width: ListView.view.width
-                            height: 82
-                            radius: 14
-                            color: shell.panelAlt
-                            border.color: shell.border
+                            delegate: Rectangle {
+                                required property int index
+                                required property string label
+                                required property string path
+                                required property string kind
 
-                            Column {
-                                anchors.fill: parent
-                                anchors.margins: 12
-                                spacing: 6
+                                width: ListView.view.width
+                                height: 72
+                                radius: 12
+                                color: ListView.isCurrentItem ? shell.selectionBg : shell.editorBg
+                                border.color: ListView.isCurrentItem ? shell.accent : shell.border
 
-                                Text {
-                                    text: name
-                                    color: shell.textPrimary
-                                    font.bold: true
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: shell.selectFile(index)
                                 }
 
-                                Text {
-                                    text: agentId
-                                    color: shell.textMuted
-                                }
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 4
 
-                                Text {
-                                    text: status
-                                    color: shell.accent
-                                    elide: Text.ElideRight
-                                    width: parent.width
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 8
+
+                                        Text {
+                                            text: label
+                                            color: shell.textPrimary
+                                            font.bold: true
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 44
+                                            Layout.preferredHeight: 20
+                                            radius: 8
+                                            color: shell.panelAlt
+                                            border.color: shell.border
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: kind
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        text: path
+                                        color: shell.textMuted
+                                        font.pixelSize: 12
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
                                 }
                             }
                         }
@@ -337,8 +259,195 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 18
-                    spacing: 14
+                    anchors.margins: 16
+                    spacing: 12
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        Text {
+                            text: qsTr("Editor")
+                            color: shell.textPrimary
+                            font.pixelSize: 18
+                            font.bold: true
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: selectedFilePath
+                            color: shell.textMuted
+                            elide: Text.ElideRight
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 92
+                            Layout.preferredHeight: 28
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Read only")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        radius: 14
+                        color: shell.editorBg
+                        border.color: shell.border
+                        clip: true
+
+                        Flickable {
+                            id: editorFlick
+                            anchors.fill: parent
+                            anchors.margins: 1
+                            contentWidth: width
+                            contentHeight: editorText.paintedHeight + 24
+                            clip: true
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            TextEdit {
+                                id: editorText
+                                width: editorFlick.width - 32
+                                height: paintedHeight + 2
+                                anchors.left: parent.left
+                                anchors.leftMargin: 16
+                                anchors.top: parent.top
+                                anchors.topMargin: 12
+                                text: ""
+                                wrapMode: TextEdit.NoWrap
+                                selectByMouse: true
+                                color: shell.textPrimary
+                                selectionColor: shell.accent
+                                selectedTextColor: shell.bg
+                                font.family: "Consolas"
+                                font.pixelSize: 14
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Select a file from Explorer to load it into the editor.")
+                                color: shell.textMuted
+                                visible: editorText.text.length === 0
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        Text {
+                            text: qsTr("Status")
+                            color: shell.textMuted
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Editing %1").arg(selectedFilePath)
+                            color: shell.textPrimary
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 342
+                Layout.fillHeight: true
+                radius: 18
+                color: shell.surface
+                border.color: shell.border
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    spacing: 12
+
+                    Text {
+                        text: qsTr("Agent")
+                        color: shell.textPrimary
+                        font.pixelSize: 18
+                        font.bold: true
+                    }
+
+                    Text {
+                        text: qsTr("Live runtime and agent control")
+                        color: shell.textMuted
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 96
+                        radius: 14
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 6
+
+                            Text {
+                                text: qsTr("Active agents")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            ListView {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                model: AgentModel
+                                spacing: 8
+                                clip: true
+
+                                delegate: Rectangle {
+                                    required property string agentId
+                                    required property string name
+                                    required property string status
+
+                                    width: ListView.view.width
+                                    height: 68
+                                    radius: 12
+                                    color: shell.editorBg
+                                    border.color: shell.border
+
+                                    Column {
+                                        anchors.fill: parent
+                                        anchors.margins: 10
+                                        spacing: 4
+
+                                        Text {
+                                            text: name
+                                            color: shell.textPrimary
+                                            font.bold: true
+                                        }
+
+                                        Text {
+                                            text: agentId
+                                            color: shell.textMuted
+                                            font.pixelSize: 12
+                                        }
+
+                                        Text {
+                                            text: status
+                                            color: shell.accent
+                                            elide: Text.ElideRight
+                                            width: parent.width
+                                            font.pixelSize: 12
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     Text {
                         text: qsTr("Prompt")
@@ -350,9 +459,9 @@ Item {
                     Rectangle {
                         id: promptInput
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 150
+                        Layout.preferredHeight: 132
                         radius: 12
-                        color: "#121212"
+                        color: shell.editorBg
                         border.color: shell.border
 
                         TextEdit {
@@ -364,6 +473,7 @@ Item {
                             color: shell.textPrimary
                             selectionColor: shell.accent
                             selectedTextColor: shell.bg
+                            font.pixelSize: 13
                             focus: true
                         }
 
@@ -372,7 +482,7 @@ Item {
                             anchors.leftMargin: 10
                             anchors.top: parent.top
                             anchors.topMargin: 10
-                            text: qsTr("Ask the agent to inspect files, summarize state, or run a minimal workflow")
+                            text: qsTr("Ask the agent to inspect files or summarize state")
                             color: shell.textMuted
                             visible: promptEditor.text.length === 0 && !promptEditor.activeFocus
                             wrapMode: Text.WordWrap
@@ -400,8 +510,9 @@ Item {
                                 anchors.fill: parent
                                 onClicked: {
                                     var prompt = promptEditor.text.trim()
-                                    if (!prompt)
+                                    if (!prompt) {
                                         prompt = "hello"
+                                    }
                                     resultOutput.text = Runtime.run_agent(prompt, 4)
                                 }
                             }
@@ -411,7 +522,7 @@ Item {
                             Layout.preferredWidth: 136
                             Layout.preferredHeight: 36
                             radius: 10
-                            color: "#202020"
+                            color: shell.panelAlt
                             border.color: shell.border
 
                             Text {
@@ -437,9 +548,9 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 120
+                        Layout.preferredHeight: 110
                         radius: 12
-                        color: "#121212"
+                        color: shell.editorBg
                         border.color: shell.border
 
                         TextEdit {
@@ -450,6 +561,7 @@ Item {
                             wrapMode: TextEdit.Wrap
                             color: shell.textPrimary
                             text: qsTr("Run the agent to see output here.")
+                            font.pixelSize: 12
                         }
                     }
 
@@ -487,18 +599,21 @@ Item {
                                     text: time
                                     color: shell.textMuted
                                     width: 64
+                                    font.pixelSize: 12
                                 }
 
                                 Text {
                                     text: level
                                     color: level === "error" ? "#ff6b6b" : (level === "warning" ? "#ffb347" : shell.accent)
                                     width: 56
+                                    font.pixelSize: 12
                                 }
 
                                 Text {
                                     text: tag
                                     color: shell.textPrimary
                                     width: 64
+                                    font.pixelSize: 12
                                 }
 
                                 Text {
@@ -506,6 +621,7 @@ Item {
                                     color: shell.textMuted
                                     width: Math.max(0, parent.width - 220)
                                     wrapMode: Text.Wrap
+                                    font.pixelSize: 12
                                 }
                             }
                         }
