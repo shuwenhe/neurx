@@ -4,11 +4,13 @@ use neurx.agent.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor
+use neurx.agent.trace
 
 struct agent_runtime_state {
     agent_plan_state plan
     agent_memory_state memory
     agent_tool_registry_state tools
+    agent_trace_state trace
     int steps
     bool finished
     string last_action
@@ -24,6 +26,7 @@ func new_agent_runtime_state(string goal, string initial_task, int step_budget) 
         plan: new_agent_plan_state(goal, initial_task, step_budget),
         memory: new_agent_memory_state(),
         tools: tools,
+        trace: new_agent_trace_state(),
         steps: 0,
         finished: false,
         last_action: "",
@@ -38,11 +41,21 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
 
     agent_execute_result result = agent_execute_step(state.tools, state.memory, state.plan.current_task, input)
     agent_plan_state next_plan = agent_plan_next(state.plan, result.observation)
+    agent_trace_state next_trace = agent_trace_append(
+        state.trace,
+        state.steps + 1,
+        state.plan.current_task,
+        input,
+        result.action,
+        result.observation,
+        result.ok,
+    )
 
     agent_runtime_state {
         plan: next_plan,
         memory: result.memory,
         tools: result.tools,
+        trace: next_trace,
         steps: state.steps + 1,
         finished: next_plan.finished,
         last_action: result.action,

@@ -5,6 +5,7 @@ use neurx.agent.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor
+use neurx.agent.trace
 
 func new_default_agent(string goal) agent_runtime_state {
     new_agent_runtime_state(goal, "analyze", 8)
@@ -45,6 +46,26 @@ func agent_step_count(agent_runtime_state state) int {
 
 func agent_needs_replan(agent_runtime_state state) bool {
     state.plan.needs_replan
+}
+
+func agent_trace_entry_count(agent_runtime_state state) int {
+    agent_trace_count(state.trace)
+}
+
+func agent_trace_entry_last_step(agent_runtime_state state) int {
+    agent_trace_last_step(state.trace)
+}
+
+func agent_trace_entry_last_task(agent_runtime_state state) string {
+    agent_trace_last_task(state.trace)
+}
+
+func agent_trace_entry_last_action(agent_runtime_state state) string {
+    agent_trace_last_action(state.trace)
+}
+
+func agent_trace_entry_last_observation(agent_runtime_state state) string {
+    agent_trace_last_observation(state.trace)
 }
 
 func agent_state_dict(agent_runtime_state state) agent_runtime_state {

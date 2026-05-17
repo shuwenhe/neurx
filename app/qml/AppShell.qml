@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 
 Item {
     id: shell
@@ -14,9 +15,23 @@ Item {
     readonly property color panelHover: "#202020"
     readonly property color editorBg: "#0f1115"
     readonly property color selectionBg: "#173f31"
+    readonly property int paneHandleWidth: 10
+    readonly property int paneMinExplorerWidth: 220
+    readonly property int paneMinEditorWidth: 420
+    readonly property int paneMinAgentWidth: 300
+    readonly property int workspaceMargin: 20
+    readonly property var modelPresets: [
+        "qwen2.5:0.5b",
+        "qwen2.5:1.5b",
+        "qwen2.5:3b",
+        "llama3.2:1b",
+        "llama3.2:3b"
+    ]
 
     property int selectedFileIndex: 1
     property string selectedFilePath: ""
+    property int explorerPaneWidth: 280
+    property int agentPaneWidth: 342
 
     ListModel {
         id: fileModel
@@ -61,7 +76,41 @@ Item {
         editorText.text = entry.content
     }
 
-    Component.onCompleted: selectFile(selectedFileIndex)
+    function clamp(value, minValue, maxValue) {
+        if (maxValue < minValue) {
+            return maxValue
+        }
+        return Math.max(minValue, Math.min(maxValue, value))
+    }
+
+    function clampPaneWidths() {
+        var available = Math.max(0, shell.width - (workspaceMargin * 2) - (paneHandleWidth * 2))
+        var minEditor = Math.min(paneMinEditorWidth, available)
+        var maxLeft = Math.max(paneMinExplorerWidth, available - paneMinAgentWidth - minEditor)
+        explorerPaneWidth = clamp(explorerPaneWidth, paneMinExplorerWidth, maxLeft)
+
+        var maxRight = Math.max(paneMinAgentWidth, available - explorerPaneWidth - minEditor)
+        agentPaneWidth = clamp(agentPaneWidth, paneMinAgentWidth, maxRight)
+
+        var editorWidth = available - explorerPaneWidth - agentPaneWidth
+        if (editorWidth < paneMinEditorWidth) {
+            var deficit = paneMinEditorWidth - editorWidth
+            var reduceRight = Math.min(deficit, agentPaneWidth - paneMinAgentWidth)
+            agentPaneWidth -= reduceRight
+            deficit -= reduceRight
+
+            if (deficit > 0) {
+                var reduceLeft = Math.min(deficit, explorerPaneWidth - paneMinExplorerWidth)
+                explorerPaneWidth -= reduceLeft
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        selectFile(selectedFileIndex)
+        clampPaneWidths()
+    }
+    onWidthChanged: clampPaneWidths()
 
     Rectangle {
         anchors.fill: parent
@@ -145,10 +194,10 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 16
+            spacing: 0
 
             Rectangle {
-                Layout.preferredWidth: 280
+                Layout.preferredWidth: shell.explorerPaneWidth
                 Layout.fillHeight: true
                 radius: 18
                 color: shell.surface
@@ -251,7 +300,46 @@ Item {
             }
 
             Rectangle {
-                Layout.fillWidth: true
+                Layout.preferredWidth: shell.paneHandleWidth
+                Layout.fillHeight: true
+                color: shell.bg
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.topMargin: 6
+                    anchors.bottomMargin: 6
+                    radius: 5
+                    color: shell.panelAlt
+                    border.color: shell.border
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.SplitHCursor
+                    property real dragStartX: 0
+                    property int dragStartWidth: 0
+
+                    onPressed: {
+                        dragStartX = mouse.x
+                        dragStartWidth = shell.explorerPaneWidth
+                    }
+
+                    onPositionChanged: {
+                        if (!pressed) {
+                            return
+                        }
+                        var delta = mouse.x - dragStartX
+                        var available = Math.max(0, shell.width - (shell.workspaceMargin * 2) - (shell.paneHandleWidth * 2))
+                        var maxLeft = Math.max(shell.paneMinExplorerWidth, available - shell.paneMinAgentWidth - shell.paneMinEditorWidth)
+                        shell.explorerPaneWidth = shell.clamp(dragStartWidth + delta, shell.paneMinExplorerWidth, maxLeft)
+                        shell.clampPaneWidths()
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.preferredWidth: Math.max(0, shell.width - (shell.workspaceMargin * 2) - shell.explorerPaneWidth - shell.agentPaneWidth - (shell.paneHandleWidth * 2))
                 Layout.fillHeight: true
                 radius: 18
                 color: shell.surface
@@ -360,7 +448,46 @@ Item {
             }
 
             Rectangle {
-                Layout.preferredWidth: 342
+                Layout.preferredWidth: shell.paneHandleWidth
+                Layout.fillHeight: true
+                color: shell.bg
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.topMargin: 6
+                    anchors.bottomMargin: 6
+                    radius: 5
+                    color: shell.panelAlt
+                    border.color: shell.border
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.SplitHCursor
+                    property real dragStartX: 0
+                    property int dragStartWidth: 0
+
+                    onPressed: {
+                        dragStartX = mouse.x
+                        dragStartWidth = shell.agentPaneWidth
+                    }
+
+                    onPositionChanged: {
+                        if (!pressed) {
+                            return
+                        }
+                        var delta = mouse.x - dragStartX
+                        var available = Math.max(0, shell.width - (shell.workspaceMargin * 2) - (shell.paneHandleWidth * 2))
+                        var maxRight = Math.max(shell.paneMinAgentWidth, available - shell.explorerPaneWidth - shell.paneMinEditorWidth)
+                        shell.agentPaneWidth = shell.clamp(dragStartWidth - delta, shell.paneMinAgentWidth, maxRight)
+                        shell.clampPaneWidths()
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.preferredWidth: shell.agentPaneWidth
                 Layout.fillHeight: true
                 radius: 18
                 color: shell.surface
@@ -381,6 +508,80 @@ Item {
                     Text {
                         text: qsTr("Live runtime and agent control")
                         color: shell.textMuted
+                    }
+
+                    Text {
+                        text: qsTr("Model")
+                        color: shell.textPrimary
+                        font.pixelSize: 16
+                        font.bold: true
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 120
+                        radius: 14
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 8
+
+                            ComboBox {
+                                id: modelPicker
+                                Layout.fillWidth: true
+                                model: shell.modelPresets
+                                editable: false
+                                currentIndex: shell.modelPresets.indexOf(Runtime.localModelName) >= 0
+                                    ? shell.modelPresets.indexOf(Runtime.localModelName)
+                                    : -1
+
+                                onActivated: {
+                                    Runtime.localModelName = currentText
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 34
+                                radius: 10
+                                color: shell.editorBg
+                                border.color: shell.border
+
+                                TextInput {
+                                    id: modelNameInput
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    text: Runtime.localModelName
+                                    color: shell.textPrimary
+                                    selectByMouse: true
+                                    selectionColor: shell.accent
+                                    selectedTextColor: shell.bg
+                                    font.pixelSize: 12
+
+                                    onTextEdited: Runtime.localModelName = text
+                                }
+
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: qsTr("Custom model name")
+                                    color: shell.textMuted
+                                    visible: modelNameInput.text.length === 0
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: Runtime.localModelSummary
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                wrapMode: Text.WordWrap
+                            }
+                        }
                     }
 
                     Rectangle {
