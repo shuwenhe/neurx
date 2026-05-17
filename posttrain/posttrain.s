@@ -1,5 +1,6 @@
 package neurx.posttrain
 
+use neurx.reasoning.data
 use neurx.posttrain.config
 use neurx.posttrain.data
 use neurx.posttrain.reward
@@ -12,6 +13,29 @@ use neurx.train.loop.{training_pipeline_state}
 func new_default_posttrain_pipeline(string dataset_name, string sample_mode, string reward_model, string run_name, string root) posttrain_pipeline_state {
     posttrain_config cfg = new_posttrain_config()
     posttrain_data_state data = new_posttrain_data_state(dataset_name, sample_mode)
+    reward_state reward = new_reward_state(reward_model)
+    new_posttrain_pipeline_state(cfg, data, reward, run_name, root)
+}
+
+func reasoning_sample_mode_to_stage(string sample_mode) string {
+    if sample_mode == "preference" {
+        return "dpo"
+    }
+    if sample_mode == "ppo" {
+        return "ppo"
+    }
+    "sft"
+}
+
+func reasoning_trace_to_posttrain_data(reasoning_trace_dataset_state traces, string sample_mode) posttrain_data_state {
+    int source_size = reasoning_trace_dataset_count(traces)
+    posttrain_data_state data = new_reasoning_posttrain_data_state(traces.source, sample_mode, source_size)
+    posttrain_data_mark_source(data, "reasoning_trace", source_size)
+}
+
+func new_reasoning_posttrain_pipeline(reasoning_trace_dataset_state traces, string sample_mode, string reward_model, string run_name, string root) posttrain_pipeline_state {
+    posttrain_config cfg = with_stage(new_posttrain_config(), reasoning_sample_mode_to_stage(sample_mode))
+    posttrain_data_state data = reasoning_trace_to_posttrain_data(traces, sample_mode)
     reward_state reward = new_reward_state(reward_model)
     new_posttrain_pipeline_state(cfg, data, reward, run_name, root)
 }
