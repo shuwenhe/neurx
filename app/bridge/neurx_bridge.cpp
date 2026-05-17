@@ -5,6 +5,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
+#include <QStandardPaths>
+#include <QThread>
+
+namespace {
+constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
+constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
+constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
+}
 
 NeurxBridge::NeurxBridge(QObject* parent)
     : QObject(parent) {
@@ -33,10 +41,25 @@ NeurxBridge::NeurxBridge(QObject* parent)
     }
     if (!env_name.trimmed().isEmpty()) {
         local_model_name_ = env_name.trimmed();
+    } else if (local_model_backend_ == "ollama") {
+        local_model_name_ = kDefaultOllamaModel;
     }
     if (!env_chat_path.trimmed().isEmpty()) {
         local_model_chat_path_ = env_chat_path.trimmed();
     } else {
+        local_model_chat_path_ = local_model_default_chat_path();
+    }
+
+    const bool default_local_setup = env_enabled.trimmed().isEmpty()
+        && env_backend.trimmed().isEmpty()
+        && env_base_url.trimmed().isEmpty()
+        && env_name.trimmed().isEmpty()
+        && env_chat_path.trimmed().isEmpty();
+    if (default_local_setup) {
+        local_model_enabled_ = true;
+        local_model_backend_ = "ollama";
+        local_model_base_url_ = "http://127.0.0.1:11434";
+        local_model_name_ = kDefaultOllamaModel;
         local_model_chat_path_ = local_model_default_chat_path();
     }
 }
@@ -110,6 +133,10 @@ void NeurxBridge::set_local_model_backend(const QString& backend) {
         return;
     }
     local_model_backend_ = normalized;
+    local_ollama_ready_ = false;
+    if (local_model_backend_ == "ollama" && (local_model_name_.isEmpty() || local_model_name_ == "local-model")) {
+        local_model_name_ = kDefaultOllamaModel;
+    }
     if (local_model_chat_path_.isEmpty() || local_model_chat_path_ == "/v1/chat/completions" || local_model_chat_path_ == "/api/chat") {
         local_model_chat_path_ = local_model_default_chat_path();
     }
@@ -139,6 +166,7 @@ void NeurxBridge::set_local_model_name(const QString& name) {
         return;
     }
     local_model_name_ = next;
+    local_ollama_ready_ = false;
     emit localModelConfigChanged();
 }
 
@@ -153,6 +181,112 @@ void NeurxBridge::set_local_model_chat_path(const QString& chat_path) {
     }
     local_model_chat_path_ = next;
     emit localModelConfigChanged();
+}
+
+QString NeurxBridge::run_process(const QString& program, const QStringList& args, int timeout_ms, const QString& working_dir) const {
+    QProcess proc;
+    proc.setProgram(program);
+    proc.setArguments(args);
+    if (!working_dir.isEmpty()) {
+        proc.setWorkingDirectory(working_dir);
+    }
+    proc.start();
+
+    if (!proc.waitForStarted(10000)) {
+        return QString("runtime_exec_failed: failed to start %1").arg(program);
+    }
+
+    if (!proc.waitForFinished(timeout_ms)) {
+        proc.kill();
+        proc.waitForFinished(5000);
+        return QString("runtime_timeout: %1").arg(program);
+    }
+
+    const QString stdout_text = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
+    const QString stderr_text = QString::fromUtf8(proc.readAllStandardError()).trimmed();
+
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        if (!stderr_text.isEmpty()) {
+            return QString("runtime_exec_failed: %1").arg(stderr_text.left(200));
+        }
+        if (!stdout_text.isEmpty()) {
+            return QString("runtime_exec_failed: %1").arg(stdout_text.left(200));
+        }
+        return QString("runtime_exec_failed: %1").arg(program);
+    }
+
+    return stdout_text;
+}
+
+QString NeurxBridge::ollama_command() const {
+    const QString from_path = QStandardPaths::findExecutable("ollama");
+    if (!from_path.isEmpty()) {
+        return from_path;
+    }
+
+#ifdef Q_OS_WIN
+    const QString local_app_data = qEnvironmentVariable("LOCALAPPDATA");
+    if (!local_app_data.isEmpty()) {
+        const QString local_program = QDir(local_app_data).filePath("Programs/Ollama/ollama.exe");
+        if (QFileInfo::exists(local_program)) {
+            return local_program;
+        }
+    }
+#endif
+
+    return QString();
+}
+
+QString NeurxBridge::bootstrap_ollama_model() {
+    QString command = ollama_command();
+
+    if (command.isEmpty()) {
+#ifdef Q_OS_WIN
+        emit log_message("info", "bridge", "Ollama was not found. Installing it now.");
+        const QString install_result = run_process(
+            "powershell.exe",
+            {"-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "irm https://ollama.com/install.ps1 | iex"},
+            kOllamaInstallTimeoutMs);
+        if (install_result.startsWith("runtime_")) {
+            return install_result;
+        }
+#else
+        emit log_message("info", "bridge", "Ollama was not found. Installing it now.");
+        const QString install_result = run_process(
+            "/bin/sh",
+            {"-lc", "curl -fsSL https://ollama.com/install.sh | sh"},
+            kOllamaInstallTimeoutMs);
+        if (install_result.startsWith("runtime_")) {
+            return install_result;
+        }
+#endif
+
+        for (int attempt = 0; attempt < 30; ++attempt) {
+            command = ollama_command();
+            if (!command.isEmpty()) {
+                break;
+            }
+            QThread::msleep(2000);
+        }
+
+        if (command.isEmpty()) {
+            return "runtime_exec_failed: ollama install completed but the CLI was not found";
+        }
+    }
+
+    if (local_model_name_.trimmed().isEmpty() || local_model_name_ == "local-model") {
+        local_model_name_ = kDefaultOllamaModel;
+        emit localModelConfigChanged();
+    }
+
+    emit log_message("info", "bridge", QString("Pulling Ollama model %1").arg(local_model_name_));
+    const QString pull_result = run_process(command, {"pull", local_model_name_}, kOllamaPullTimeoutMs);
+    if (pull_result.startsWith("runtime_")) {
+        return pull_result;
+    }
+
+    local_ollama_ready_ = true;
+    return QString();
 }
 
 QString NeurxBridge::find_repo_root() const {
@@ -333,6 +467,14 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     }
 
     if (local_model_enabled_ && !local_model_base_url_.trimmed().isEmpty() && !local_model_name_.trimmed().isEmpty()) {
+        if (local_model_backend_ == "ollama" && !local_ollama_ready_) {
+            const QString bootstrap_result = bootstrap_ollama_model();
+            if (!bootstrap_result.isEmpty()) {
+                emit log_message("warning", "bridge", QString("Ollama bootstrap failed: %1").arg(bootstrap_result));
+                emit runtime_status_changed("ollama_bootstrap_failed", local_model_name_);
+            }
+        }
+
         const QString local_result = run_local_model_agent(prompt, steps);
         if (!local_result.startsWith("runtime_") && !local_result.startsWith("local_model_config_missing")) {
             QJsonParseError local_parse_error;

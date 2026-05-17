@@ -26,6 +26,9 @@ def test_s_agent_runtime_smoke():
         ("agent/planner", "new_agent_plan_state"),
         ("agent/planner", "agent_plan_next"),
         ("agent/executor", "agent_execute_step"),
+        ("agent/trace", "new_agent_trace_state"),
+        ("agent/trace", "agent_trace_append"),
+        ("agent/trace", "agent_trace_count"),
         ("agent/runtime", "new_agent_runtime_state"),
         ("agent/runtime", "agent_runtime_step"),
         ("agent/runtime", "run_agent_steps"),
@@ -37,6 +40,11 @@ def test_s_agent_runtime_smoke():
         ("agent", "agent_current_task"),
         ("agent", "agent_step_count"),
         ("agent", "agent_needs_replan"),
+        ("agent", "agent_trace_entry_count"),
+        ("agent", "agent_trace_entry_last_step"),
+        ("agent", "agent_trace_entry_last_task"),
+        ("agent", "agent_trace_entry_last_action"),
+        ("agent", "agent_trace_entry_last_observation"),
     ):
         assert runtime.supports_runtime_function(module_name, function_name)
 
@@ -45,6 +53,14 @@ def test_s_agent_runtime_smoke():
     assert stepped["steps"] == 1
     assert stepped["last_action"] in ("search", "noop")
     assert stepped["plan"]["current_task"] in ("retrieve", "analyze")
+    assert stepped["trace"]["count"] == 1
+
+    if runtime.supports_runtime_function("agent", "agent_trace_entry_count"):
+        assert runtime.invoke_runtime_function("agent", "agent_trace_entry_count", stepped) == 1
+        assert runtime.invoke_runtime_function("agent", "agent_trace_entry_last_step", stepped) == 1
+        assert runtime.invoke_runtime_function("agent", "agent_trace_entry_last_task", stepped) == "analyze"
+        assert runtime.invoke_runtime_function("agent", "agent_trace_entry_last_action", stepped) in ("search", "noop")
+        assert runtime.invoke_runtime_function("agent", "agent_trace_entry_last_observation", stepped) in ("analyzed", "tool_unavailable")
 
     if runtime.supports_runtime_function("agent", "new_default_agent") and runtime.supports_runtime_function("agent", "run_agent"):
         app = runtime.invoke_runtime_function("agent", "new_default_agent", "ship feature")
@@ -57,3 +73,4 @@ def test_s_agent_runtime_smoke():
     if runtime.supports_runtime_function("agent", "run_agent_with_goal"):
         result = runtime.invoke_runtime_function("agent", "run_agent_with_goal", "ship feature", "context", 3)
         assert result["plan"]["current_task"] == "complete"
+        assert result["trace"]["count"] >= 1
