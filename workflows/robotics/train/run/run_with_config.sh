@@ -31,19 +31,31 @@ if [[ ! -f "$CONFIG" ]]; then
   exit 1
 fi
 
-BATCH_SIZE="$(awk -F":" '/^batch_size[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
-SEQ_LEN="$(awk -F":" '/^seq_len[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+OBS_DIM="$(awk -F":" '/^obs_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+LATENT_DIM="$(awk -F":" '/^latent_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+ACT_DIM="$(awk -F":" '/^act_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 MAX_STEPS="$(awk -F":" '/^max_steps[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+SAMPLE_COUNT="$(awk -F":" '/^sample_count[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 LEARNING_RATE="$(awk -F":" '/^learning_rate[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 TASK_NAME="$(awk -F":" '/^task_name[[:space:]]*:/ {sub(/^[[:space:]]*/, "", $2); gsub(/^"|"$/, "", $2); print $2; exit}' "$CONFIG" || true)"
+
+# Backward-compatible fallbacks from old MVP keys.
+if [[ -z "$OBS_DIM" ]]; then
+  OBS_DIM="$(awk -F":" '/^batch_size[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+fi
+if [[ -z "$LATENT_DIM" ]]; then
+  LATENT_DIM="$(awk -F":" '/^seq_len[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+fi
 
 if [[ -n "$STEPS_OVERRIDE" ]]; then
   MAX_STEPS="$STEPS_OVERRIDE"
 fi
 
-if [[ -z "$BATCH_SIZE" ]]; then BATCH_SIZE=2; fi
-if [[ -z "$SEQ_LEN" ]]; then SEQ_LEN=4; fi
+if [[ -z "$OBS_DIM" ]]; then OBS_DIM=8; fi
+if [[ -z "$LATENT_DIM" ]]; then LATENT_DIM=16; fi
+if [[ -z "$ACT_DIM" ]]; then ACT_DIM=4; fi
 if [[ -z "$MAX_STEPS" ]]; then MAX_STEPS=16; fi
+if [[ -z "$SAMPLE_COUNT" ]]; then SAMPLE_COUNT=64; fi
 if [[ -z "$LEARNING_RATE" ]]; then LEARNING_RATE=0.001; fi
 if [[ -z "$TASK_NAME" ]]; then TASK_NAME="robotics_workflow_default"; fi
 
@@ -66,7 +78,7 @@ package neurx.workflows.robotics.train.run_tmp
 use neurx.workflows.robotics.train.pipeline_runner.{run_robotics_training_with_params}
 
 func main() int {
-    run_robotics_training_with_params(${BATCH_SIZE}, ${SEQ_LEN}, ${MAX_STEPS}, ${LEARNING_RATE}, "${TASK_NAME}")
+    run_robotics_training_with_params(${OBS_DIM}, ${LATENT_DIM}, ${ACT_DIM}, ${MAX_STEPS}, ${SAMPLE_COUNT}, ${LEARNING_RATE}, "${TASK_NAME}")
     0
 }
 SFILE
@@ -74,4 +86,4 @@ SFILE
 make s-compile-runtime
 s "$TMP_S" "$TMP_IR"
 
-echo "Ran robotics workflow with batch=${BATCH_SIZE}, seq_len=${SEQ_LEN}, steps=${MAX_STEPS}, lr=${LEARNING_RATE}, task=${TASK_NAME}"
+echo "Ran robotics workflow with obs=${OBS_DIM}, latent=${LATENT_DIM}, act=${ACT_DIM}, steps=${MAX_STEPS}, samples=${SAMPLE_COUNT}, lr=${LEARNING_RATE}, task=${TASK_NAME}"
