@@ -45,31 +45,43 @@ if [[ -n "$STEPS_OVERRIDE" ]]; then
   MAX_STEPS="$STEPS_OVERRIDE"
 fi
 
+# Extract other hyperparameters: micro_batch_size, seq_len, lr
+MICRO_BATCH="$(awk -F":" '/^micro_batch_size[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+SEQ_LEN="$(awk -F":" '/^seq_len[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+LR="$(awk -F":" '/^lr[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+
+if [[ -z "$MICRO_BATCH" ]]; then MICRO_BATCH=8; fi
+if [[ -z "$SEQ_LEN" ]]; then SEQ_LEN=16; fi
+if [[ -z "$LR" ]]; then LR=0.00015; fi
+
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [[ -z "$ROOT_DIR" ]]; then
   ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 fi
 cd "$ROOT_DIR"
 
-# create temporary runner S file (use absolute path to avoid cwd issues)
-TMP_S="$ROOT_DIR/workflows/llm/pretrain/run/_tmp_run.s"
-mkdir -p "$(dirname "$TMP_S")"
+# create temporary runner S file outside the repo so it does not get picked up
+# by the main S compile scan.
+TMP_S="$(mktemp /tmp/neurx_llm_pretrain_run.XXXXXX.s)"
+TMP_IR="$(mktemp /tmp/neurx_llm_pretrain_run.XXXXXX.ir)"
+cleanup() {
+  rm -f "$TMP_S" "$TMP_IR"
+}
+trap cleanup EXIT
+
 cat > "$TMP_S" <<SFILE
-package workflows.llm.pretrain.run_tmp
+package neurx.workflows.llm.pretrain.run_tmp
 
-use workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_steps}
+use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_params}
 
-func main() -> int {
-  run_pretrain_steps(${MAX_STEPS})
+func main() int {
+  run_pretrain_with_params(${MICRO_BATCH}, ${SEQ_LEN}, ${LR}, ${MAX_STEPS})
   0
 }
 SFILE
 
 # compile and run the tmp S file
 make s-compile-runtime
-s "$TMP_S" build/ir/workflows/llm/pretrain/_tmp_run.ir
-
-# cleanup
-rm -f "$TMP_S"
+s "$TMP_S" "$TMP_IR"
 
 echo "Ran pretrain workflow with steps=${MAX_STEPS}"
