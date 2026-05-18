@@ -2,5 +2,4 @@
 max_steps: 200
 model_name: "agent-tool-use-mini"
 tool_manifest: "data/agent/tool_use/tools.json"
-output_dir: "agent/tool_use/checkpoints"
-
+output_dir: "artifacts/checkpoints/agent/tool_use"

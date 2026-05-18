@@ -68,7 +68,7 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
         cfg: cfg,
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "pretrain/checkpoints"),
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/gpt_large_pretrain"),
         eval: new_pretrain_eval_state(),
         training: training,
     }
@@ -103,7 +103,7 @@ func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len,
         cfg: cfg,
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "pretrain/checkpoints"),
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/gpt_large_pretrain"),
         eval: new_pretrain_eval_state(),
         training: training,
     }
@@ -189,4 +189,3 @@ func gpt_large_pretrain_run(gpt_large_pretrain_state state, int steps) gpt_large
 func gpt_large_pretrain_complete(gpt_large_pretrain_state state) bool {
     state.loop.finished
 }
-
