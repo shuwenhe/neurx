@@ -9,5 +9,4 @@ Stages:
 
 IO contract:
 - Input: dataset manifest, run config
-- Output: checkpoints and metrics
-
+- Output: checkpoint root under `artifacts/checkpoints/vision/classification` and metrics

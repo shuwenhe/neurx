@@ -9,5 +9,4 @@ Stages:
 
 IO contract:
 - Input: paired image-text manifest, run config
-- Output: checkpoints and evaluation metrics
-
+- Output: checkpoint root under `artifacts/checkpoints/multimodal/vlm` and evaluation metrics

@@ -9,6 +9,6 @@ Stages:
 
 IO contract:
 - Input: dataset manifest (paths), hyperparameters (config)
-- Output: checkpoint tarball directory, eval metrics
+- Output: checkpoint root under `artifacts/checkpoints/gpt_large_pretrain` and eval metrics
 
 This pipeline is intentionally implementation-agnostic. The workflow should call the runtime API or compiled IR rather than invoking CUDA kernels directly.
