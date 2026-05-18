@@ -9,5 +9,4 @@ Stages:
 
 IO contract:
 - Input: clip manifest, run config
-- Output: checkpoints and generated videos
-
+- Output: checkpoint root under `artifacts/checkpoints/diffusion/video` and generated videos

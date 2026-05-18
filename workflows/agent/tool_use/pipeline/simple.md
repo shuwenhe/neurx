@@ -8,5 +8,4 @@ Stages:
 
 IO contract:
 - Input: prompt manifest, tool manifest, run config
-- Output: trajectories and success metrics
-
+- Output: checkpoint root under `artifacts/checkpoints/agent/tool_use`, trajectories and success metrics
