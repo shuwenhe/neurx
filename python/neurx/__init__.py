@@ -1,2 +1,0 @@
-"""NeurX Python compatibility package."""
-
