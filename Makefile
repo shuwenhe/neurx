@@ -164,7 +164,7 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p build/ir
-	for src in $$(find s ops tensor ad engine nn opt dl lf train runtime distributed platform compile reasoning -type f -name '*.s' | sort); do \
+	for src in $$(find s ops data tensor ad engine nn opt lf train runtime distributed serving infer infer/vllm platform compile reasoning -type f -name '*.s' | sort); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename "$$src" .s); \
 	    parent=$$(basename "$$(dirname "$$src")"); \

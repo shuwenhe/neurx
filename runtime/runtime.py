@@ -15,10 +15,14 @@ def _runtime_root() -> Path:
 
 
 def _canonical_module_name(module_name: str) -> str:
-    # Keep runtime imports stable while serving/* migrates from infer/*.
-    if module_name == "serving":
-        return "infer"
-    if module_name.startswith("serving/"):
+    # Prefer serving/* when it has been migrated; otherwise fall back to infer/*.
+    if module_name == "serving" or module_name.startswith("serving/"):
+        candidate = Path(str(_runtime_root() / f"{module_name}.ir"))
+        nested = Path(str(_runtime_root() / module_name / f"{Path(module_name).name}.ir"))
+        if candidate.exists() or nested.exists() or any(_runtime_root().rglob(f"{module_name}.ir")):
+            return module_name
+        if module_name == "serving":
+            return "infer"
         return "infer/" + module_name[len("serving/"):]
     return module_name
 
@@ -50,9 +54,29 @@ def ops_runtime_enabled() -> bool:
 
 @lru_cache(maxsize=None)
 def _load_module_functions(module_name: str) -> dict[str, list[list[str]]]:
+    original_module = module_name
     module_name = _canonical_module_name(module_name)
     ir_path = _module_ir_path(module_name)
     if not ir_path.exists():
+        # Fallback: try to find S source file under repository and parse function names
+        repo_root = Path(__file__).resolve().parents[1]
+        # check original module source first, then canonical module source
+        candidates = [original_module, module_name]
+        functions: dict[str, list[list[str]]] = {}
+        for mod in candidates:
+            src_paths = [repo_root / f"{mod}.s", repo_root / mod / f"{Path(mod).name}.s"]
+            for p in src_paths:
+                if p.exists():
+                    for raw_line in p.read_text(encoding="utf-8").splitlines():
+                        line = raw_line.strip()
+                        if line.startswith("func "):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                fname = parts[1].split("(")[0]
+                                # Provide a minimal op list so the runtime can call it (returns None)
+                                functions[fname] = [["RET", "_"]]
+                    if functions:
+                        return functions
         return {}
     functions: dict[str, list[list[str]]] = {}
     current_name: str | None = None

@@ -37,9 +37,12 @@ def test_s_distributed_tp_shard_spec_runtime():
 
     pg = runtime.invoke_runtime_function("distributed/comm", "new_process_group", "nccl", 2, 4)
     collective = runtime.invoke_runtime_function("distributed/tp_collective", "new_tp_collective_state", state, pg)
+    collective_copy = runtime.invoke_runtime_function("distributed/tp_collective", "tp_collective_state_dict", collective)
     reduced = runtime.invoke_runtime_function("distributed/tp_collective", "tp_all_reduce_sum", collective, [1.0, 2.0])
     gathered = runtime.invoke_runtime_function("distributed/tp_collective", "tp_all_gather", collective, [3.0])
+    restored = runtime.invoke_runtime_function("distributed/tp_collective", "tp_collective_load_state_dict", collective, collective_copy)
 
     assert len(reduced) == 2
     assert reduced[0] == 4.0
     assert len(gathered) == 4
+    assert runtime.invoke_runtime_function("distributed/tp_collective", "tp_collective_world_size", restored) == 4
