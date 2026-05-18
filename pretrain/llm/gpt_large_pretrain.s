@@ -6,6 +6,8 @@ use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps,
 use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_tokens, next_epoch, pretrain_data_state_dict, pretrain_data_load_state_dict}
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
+use neurx.checkpoint.{save_checkpoint}
+use neurx.tensor.tensor
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
@@ -24,6 +26,21 @@ func copy_strings([]string values) []string {
         i = i + 1
     }
     out
+}
+
+func zero_pad_int(int value, int width) string {
+    string digits = string(value)
+    string prefix = ""
+    int missing = width - len(digits)
+    if missing < 0 {
+        missing = 0
+    }
+    int i = 0
+    while i < missing {
+        prefix = prefix + "0"
+        i = i + 1
+    }
+    prefix + digits
 }
 
 func gpt_large_pretrain_documents() []string {
@@ -68,7 +85,7 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
         cfg: cfg,
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/gpt_large_pretrain"),
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/run_20260518_001"),
         eval: new_pretrain_eval_state(),
         training: training,
     }
@@ -103,10 +120,35 @@ func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len,
         cfg: cfg,
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/gpt_large_pretrain"),
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/run_20260518_001"),
         eval: new_pretrain_eval_state(),
         training: training,
     }
+}
+
+func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
+    string run_root = state.checkpoint.root
+    if trim(run_root) == "" {
+        run_root = "artifacts/checkpoints/run_20260518_001"
+    }
+    run_root + "/step_" + zero_pad_int(state.loop.global_step, 7) + "/latest/" + state.checkpoint.run_name
+}
+
+func gpt_large_pretrain_checkpoint_params(gpt_large_pretrain_state state) []tensor {
+    []tensor params = []tensor{cap: 3}
+    params[0] = state.training.token_embedding
+    params[1] = state.training.lm_head_weight
+    params[2] = state.training.lm_head_bias
+    params
+}
+
+func gpt_large_pretrain_save_checkpoint(gpt_large_pretrain_state state) () {
+    save_checkpoint(
+        gpt_large_pretrain_checkpoint_path(state),
+        state.loop.global_step,
+        state.training.last_loss,
+        gpt_large_pretrain_checkpoint_params(state),
+    )
 }
 
 func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pretrain_state {
@@ -183,6 +225,12 @@ func gpt_large_pretrain_run(gpt_large_pretrain_state state, int steps) gpt_large
             return current
         }
     }
+    current
+}
+
+func gpt_large_pretrain_run_and_save(gpt_large_pretrain_state state, int steps) gpt_large_pretrain_state {
+    gpt_large_pretrain_state current = gpt_large_pretrain_run(state, steps)
+    gpt_large_pretrain_save_checkpoint(current)
     current
 }
 
