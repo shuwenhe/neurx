@@ -1,0 +1,10 @@
+# Sample pretrain config for workflows/llm/pretrain
+micro_batch_size: 8
+seq_len: 16
+max_steps: 64
+lr: 0.00015
+warmup_steps: 128
+save_interval: 32
+eval_interval: 16
+dataset_manifest: "data/pretrain/mini_manifest.json"
+output_dir: "pretrain/checkpoints"
