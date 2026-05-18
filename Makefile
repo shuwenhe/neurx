@@ -164,48 +164,22 @@ s-compile-runtime:
 	fi
 	@echo "Using S compiler: $(S_COMPILER)"
 	@mkdir -p build/ir
-	for src in $$(printf '%s\n' s/*.s ops/*.s tensor/*.s ad/*.s engine/*.s nn/*.s opt/*.s dl/*.s lf/*.s train/*.s runtime/*.s distributed/*.s platform/*.s compile/*.s reasoning/*.s); do \
+	for src in $$(find s ops tensor ad engine nn opt dl lf train runtime distributed platform compile reasoning -type f -name '*.s' | sort); do \
 	    [ -e "$$src" ] || continue; \
-	    base=$$(basename $$src .s); \
-	    dir=$$(dirname $$src); \
-	    if [ "$$dir" = "s" ]; then \
-	        dir=""; \
-	    elif [ "$$dir" = "ops" ]; then \
-	        dir=""; \
-	    elif [ "$$dir" = "tensor" ]; then \
-	        dir="/tensor"; \
-	    elif [ "$$dir" = "ad" ]; then \
-	        dir="/ad"; \
-	    elif [ "$$dir" = "engine" ]; then \
-	        dir="/engine"; \
-	    elif [ "$$dir" = "nn" ]; then \
-	        dir="/nn"; \
-	    elif [ "$$dir" = "opt" ]; then \
-	        dir="/opt"; \
-	    elif [ "$$dir" = "dl" ]; then \
-	        dir="/dl"; \
-	    elif [ "$$dir" = "lf" ]; then \
-	        dir="/lf"; \
-	    elif [ "$$dir" = "train" ]; then \
-	        dir="/train"; \
-	    elif [ "$$dir" = "runtime" ]; then \
-	        dir="/runtime"; \
-	    elif [ "$$dir" = "distributed" ]; then \
-	        dir="/distributed"; \
-	    elif [ "$$dir" = "platform" ]; then \
-	        dir="/platform"; \
-	    elif [ "$$dir" = "compile" ]; then \
-	        dir="/compile"; \
-	    elif [ "$$dir" = "reasoning" ]; then \
-	        dir="/reasoning"; \
+	    base=$$(basename "$$src" .s); \
+	    parent=$$(basename "$$(dirname "$$src")"); \
+	    module=$${src%.s}; \
+	    if [ "$$parent" = "$$base" ]; then \
+	        module=$$(dirname "$$src"); \
 	    fi; \
-	    echo "DEBUG: src=$$src, base=$$base, dir=$$dir"; \
-	    mkdir -p build/ir$$dir; \
-		echo "Compiling $$src -> build/ir$$dir/$$base.ir"; \
+	    echo "DEBUG: src=$$src, module=$$module"; \
+	    target_dir=$$(dirname "$$module"); \
+	    mkdir -p "build/ir/$$target_dir"; \
+		echo "Compiling $$src -> build/ir/$$module.ir"; \
 		if $(S_COMPILER) --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			$(S_COMPILER) "$$src" build/ir$$dir/$$base.ir || exit 1; \
+			$(S_COMPILER) "$$src" "build/ir/$$module.ir" || exit 1; \
 		else \
-			$(S_COMPILER) ir "$$src" -o build/ir$$dir/$$base.ir || exit 1; \
+			$(S_COMPILER) ir "$$src" -o "build/ir/$$module.ir" || exit 1; \
 		fi; \
 	done
 	@$(PYTHON) -c 'from pathlib import Path; import json; root = Path("build/ir"); ir_files = sorted(str(p.relative_to(root)) for p in root.rglob("*.ir")); manifest = {"source_root": str(Path(".").resolve()), "artifact_root": str(root.resolve()), "ir_files": ir_files}; manifest_path = root / "manifest.json"; manifest_path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"); print("runtime manifest:", manifest_path, f"({len(ir_files)} ir files)")'

@@ -34,9 +34,9 @@ Rationale:
 
 ### P1: Distributed Runtime
 
-1. distributed/tp.s (tensor parallel state and shard mapping)
-2. distributed/tp_collective.s (TP all-reduce/all-gather contract)
-3. distributed/zero.s (optimizer/grad shard state)
+1. distributed/tp/tp.s (tensor parallel state and shard mapping)
+2. distributed/tp_collective/tp_collective.s (TP all-reduce/all-gather contract)
+3. distributed/zero/zero.s (optimizer/grad shard state)
 4. train/parallel/train_parallel.s (compose DP, PP, TP)
 
 ### P2: Compiler and Lowering
@@ -141,7 +141,7 @@ This is the concrete reorganization map for the existing repository layout.
 
 - `compile/` -> `compile/`
 - `s/schedule.s` and `s/autograd.s` -> `compile/` or `core/legacy/` depending on final ownership
-- `runtime/stage.s` -> `compile/pipeline.s`
+- `runtime/stage/stage.s` -> `compile/pipeline.s`
 
 ### Parallel and serving
 
@@ -244,5 +244,5 @@ Exit criteria:
 
 1. Add infer/cache/prefix_cache.s with state and accounting helpers.
 2. Add infer/serve/admission_control.s and integrate into infer/infer.s.
-3. Add distributed/tp.s skeleton and runtime function exposure checks.
+3. Add distributed/tp/tp.s skeleton and runtime function exposure checks.
 4. Add one end-to-end infer runtime test with two concurrent requests.
