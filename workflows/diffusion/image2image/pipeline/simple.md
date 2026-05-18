@@ -9,5 +9,4 @@ Stages:
 
 IO contract:
 - Input: source image manifest, run config
-- Output: checkpoints and transformed samples
-
+- Output: checkpoint root under `artifacts/checkpoints/diffusion/image2image` and transformed samples

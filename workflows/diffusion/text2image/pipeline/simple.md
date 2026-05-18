@@ -9,5 +9,4 @@ Stages:
 
 IO contract:
 - Input: prompt manifest, run config
-- Output: checkpoints and generated samples
-
+- Output: checkpoint root under `artifacts/checkpoints/diffusion/text2image` and generated samples
