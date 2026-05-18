@@ -8,9 +8,9 @@ Usage: $0 [--config path] [--steps N]
 --config: YAML config file (default: workflows/llm/pretrain/config/sample.yaml)
 --steps:  override steps in config (optional)
 
-This launcher will extract `max_steps` from the YAML, generate a small S runner
-that calls `gpt_large_pretrain_run(state, steps)`, compile the runner IR and
-execute it.
+This launcher extracts `max_steps` from the YAML, generates a small S runner
+that calls `gpt_large_pretrain_run(state, steps)`, compiles the runner IR, and
+executes it.
 EOF
 }
 
@@ -57,12 +57,11 @@ mkdir -p "$(dirname "$TMP_S")"
 cat > "$TMP_S" <<SFILE
 package workflows.llm.pretrain.run_tmp
 
-use neurx.pretrain.llm.gpt_large_pretrain.{new_gpt_large_pretrain_state, gpt_large_pretrain_run}
+use workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_steps}
 
 func main() -> int {
-    gpt_large_pretrain_state s = new_gpt_large_pretrain_state()
-    s = gpt_large_pretrain_run(s, ${MAX_STEPS})
-    0
+  run_pretrain_steps(${MAX_STEPS})
+  0
 }
 SFILE
 
