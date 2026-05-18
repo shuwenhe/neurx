@@ -50,6 +50,10 @@ logs/
 .idea/
 .venv/
 
+# Trained model artifacts
+artifacts/checkpoints/*.ckpt
+artifacts/checkpoints/**/*.ckpt
+
 # Auto push
 .auto_push_state/
 

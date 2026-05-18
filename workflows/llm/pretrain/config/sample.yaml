@@ -7,4 +7,4 @@ warmup_steps: 128
 save_interval: 32
 eval_interval: 16
 dataset_manifest: "data/pretrain/mini_manifest.json"
-output_dir: "pretrain/checkpoints"
+output_dir: "artifacts/checkpoints/gpt_large_pretrain"
