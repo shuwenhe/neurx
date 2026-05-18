@@ -8,14 +8,13 @@ This directory holds runtime-facing orchestration and adapters for neurx.
 - `io/io.s`: text file, JSON, and environment helpers
 - `control/control.s`: conditional execution, loop, and scan state
 - `stage/stage.s`: staged execution state for jit, lower, compile, and execute
-- `compile/compile.s`: compile-state bookkeeping used by the runtime pipeline
+- `compile/runtime/runtime.s`: compile-state bookkeeping used by the runtime pipeline
 
 ## Intended split
 
 - `runtime/dispatch/`: backend and device dispatch
 - `runtime/io/`: file, JSON, and environment adapters
 - `control/control.s`: control-flow state and helpers
-- `runtime/compile/`: compile-state bookkeeping and pipeline integration
 - `runtime/stage/`: staged compilation and execution lifecycle
 - `runtime/errors/`: error propagation and normalization
 - `runtime/logging/`: runtime logging and diagnostics
