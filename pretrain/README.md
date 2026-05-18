@@ -8,6 +8,11 @@ This directory hosts pretraining-specific orchestration in S modules.
 - checkpoint: pretraining checkpoint scheduling state
 - eval: lightweight pretraining evaluation state
 
+Checkpoint artifacts are written under:
+
+- `artifacts/checkpoints/`
+- example file: `artifacts/checkpoints/gpt_large_pretrain.ckpt`
+
 Core tensor, autograd, ops, and runtime logic should remain in framework core modules.
 
 ## LLM Pretraining
