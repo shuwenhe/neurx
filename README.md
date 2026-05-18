@@ -1,20 +1,27 @@
 # neurx
 
-neurx is a deep learning framework with S-language write.
+neurx is a deep learning framework written in S.
 
 ## Layout
 
-- `python/neurx/`: Python runtime and compatibility surface
-- `tensor/`: S source for tensor primitives and helpers
-- `ad/`: S source for automatic differentiation
-- `engine/`: S source for backward execution and autograd state
-- `data/`: S source for datasets and dataloading
-- `lf/`: S source for loss functions
-- `train/`: S source for training utilities
-- `runtime/`: S source for runtime state helpers, I/O adapters, stage state, and control-flow helpers
-- `nn/`: S source for neural network building blocks
-- `opt/`: S source for optimizers
-- `s/`: legacy S entry script and notes
+- `app/neurx/`: app shell, bridge code, and UI entry points
+- `tensor/`: tensor primitives and helpers
+- `ad/`: automatic differentiation
+- `engine/`: backward execution and autograd state
+- `data/`: datasets and dataloading
+- `lf/`: loss functions
+- `train/`: training utilities
+- `runtime/`: runtime state, I/O adapters, stage state, and control-flow helpers
+- `nn/`: neural network building blocks
+- `opt/`: optimizers
+- `compile/`: graph capture, IR, passes, lowering, executor, and cache
+- `distributed/`: communication, DDP, TP, ZeRO, pipeline parallel, and launcher
+- `infer/`: inference serving, decode, cache, and sampling
+- `workflows/`: pretrain, posttrain, diffusion, robotics, and evaluation flows
+- `arch/`: backend-specific support for CUDA, CANN, and MPS
+- `examples/`: runnable examples and templates
+- `doc/`: design notes, implementation reports, and gap analysis
+- `s/`: legacy S entry scripts and prototypes
 - `build/ir/`: generated S IR artifacts
 - `build/logs/`: generated compiler and runtime logs
 
@@ -24,14 +31,21 @@ The current top-level folders are kept for compatibility. The target layout is:
 
 - `core/`: tensor, autograd, engine, nn, ops, losses, optim, data, train, runtime
 - `compile/`: graph, IR, passes, lowering, executor, cache
-- `runtime/`: device/runtime dispatch, IO, logging, errors, stage control
-- `distributed/`: communication, DDP, TP, PP, launcher
-- `serving/`: inference serving, decode, cache, sampling
-- `workflows/`: pretrain, posttrain, diffusion, evaluation
-- `backends/`: CUDA, CANN, MPS backend implementations
+- `runtime/`: device/runtime dispatch, I/O, logging, errors, and stage control
+- `distributed/`: communication, DDP, TP, ZeRO, PP, and launcher
+- `serving/`: inference serving, decode, cache, and sampling
+- `workflows/`: pretrain, posttrain, diffusion, robotics, and evaluation
+- `backends/`: CUDA, CANN, and MPS backend implementations
 - `examples/`: runnable end-to-end examples
 - `tests/`: regression and integration tests
 - `legacy/`: historical S prototypes and compatibility shims
+
+## Recommended Priority
+
+1. Strengthen `compile/` so graph capture, lowering, caching, and execution are a real framework spine.
+2. Expand `distributed/` so DDP, TP, ZeRO, and pipeline parallel share one consistent control plane.
+3. Consolidate `serving/` so decode, sampling, and KV cache are first-class inference primitives.
+4. Rehome compatibility shims into `legacy/` after the new layout stabilizes.
 
 ## S Modules
 
@@ -59,11 +73,19 @@ The current top-level folders are kept for compatibility. The target layout is:
 - `train/checkpoint_manager.s`: checkpoint retention and best-score tracking
 - `train/logging.s`: training logging state and flush tracking
 - `train/loop.s`: training loop and single-step training pipeline state machine
-- `runtime/runtime.s`: runtime state and discovery helpers
-- `runtime/io.s`: file, JSON, and environment adapters for the runtime layer
-- `runtime/stage.s`: staged compile state helpers for jit/lower/compile/execute
-- `runtime/control.s`: control-flow state helpers and simple cond/loop/scan primitives
-- `runtime/control.s`: control-flow state helpers and simple cond/loop/scan primitives
+- `runtime/runtime/runtime.s`: runtime state and discovery helpers
+- `runtime/io/io.s`: file, JSON, and environment adapters for the runtime layer
+- `runtime/stage/stage.s`: staged compile state helpers for jit/lower/compile/execute
+- `runtime/compile/compile.s`: compile-state bookkeeping used by the runtime pipeline
+- `runtime/control/control.s`: control-flow state helpers and simple cond/loop/scan primitives
+- `distributed/comm/comm.s`: process-group and collective primitives
+- `distributed/ddp/ddp.s`: DDP gradient bucket and synchronization state
+- `distributed/tp/tp.s`: tensor-parallel shard mapping
+- `distributed/tp_collective/tp_collective.s`: TP collective wrappers
+- `distributed/pp/pp.s`: pipeline-parallel execution state
+- `distributed/zero/zero.s`: ZeRO-style shard bookkeeping
+- `distributed/pipelining/pipelining.s`: pipeline stage and schedule state
+- `distributed/launcher/launcher.s`: distributed config detection and launcher helpers
 
 ## Notes
 

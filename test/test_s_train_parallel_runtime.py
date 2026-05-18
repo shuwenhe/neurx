@@ -22,7 +22,9 @@ def test_s_train_parallel_tp_collective_smoke():
 
     reduced = runtime.invoke_runtime_function("train/parallel", "train_parallel_all_reduce_grad", state, [1.0, 2.0])
     gathered = runtime.invoke_runtime_function("train/parallel", "train_parallel_all_gather_activation", state, [5.0])
+    ddp_state = runtime.invoke_runtime_function("train/parallel", "train_parallel_state_ddp", state)
 
     assert reduced[0] == 4.0
     assert len(reduced) == 2
     assert len(gathered) == 4
+    assert runtime.invoke_runtime_function("distributed/ddp", "ddp_is_distributed", ddp_state) is True

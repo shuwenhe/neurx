@@ -1,4 +1,4 @@
-package neurx.runtime.pp
+package neurx.distributed.pp
 
 struct pipeline_parallel_state {
     string name

@@ -18,7 +18,7 @@ func new_train_parallel_state(string backend, int world_size, int rank, int shar
     process_group_state pg = new_process_group(backend, rank, world_size)
     tp_state tp = new_tp_state(world_size, rank, shard_dim)
     tp_collective_state collective = new_tp_collective_state(tp, pg)
-    ddp_state ddp = new_ddp_state("train_ddp", 256, false)
+    ddp_state ddp = ddp_attach_process_group(new_ddp_state("train_ddp", 256, false), pg)
     zero_state zero = new_zero_state("train_zero", backend, world_size, rank, shard_dim, 256, "zero-2")
     train_parallel_state {
         pg: pg,
