@@ -1,6 +1,8 @@
-# Sample robotics training workflow config
-batch_size: 2
-seq_len: 4
+# Sample robotics trajectory-training workflow config
+obs_dim: 8
+latent_dim: 16
+act_dim: 4
+sample_count: 64
 max_steps: 16
 learning_rate: 0.001
 task_name: "robotics_pick_place_mvp"
