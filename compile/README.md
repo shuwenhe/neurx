@@ -6,22 +6,23 @@ This directory holds the graph-to-execution spine of neurx.
 
 - `compiler.s`: compile options, validation, and module compile entry points
 - `pipeline.s`: capture, optimize, lower, cache, and execute pipeline state
-- `ir.s`: IR graph and node representation
-- `pass_manager.s`: pass registration and pass application
-- `lowering.s`: lowering plan and lowering state transitions
-- `executor.s`: execution plan and execution state transitions
-- `cache.s`: compile cache state and cache key helpers
-- `runtime.s`: compile-time runtime state integration
+- `ir/ir.s`: IR graph and node representation
+- `passes/pass_manager.s`: pass registration and pass application
+- `lowering/lowering.s`: lowering plan and lowering state transitions
+- `executor/executor.s`: execution plan and execution state transitions
+- `cache/cache.s`: compile cache state and cache key helpers
+- `runtime/runtime.s`: compile-time runtime state integration
 
-## Intended split
+## Layout
 
-- `compile/ir/`: graph, nodes, edges, and capture helpers
-- `compile/passes/`: optimization and rewrite passes
-- `compile/lowering/`: backend lowering and legalization
-- `compile/executor/`: runtime execution handoff
-- `compile/cache/`: compilation cache and artifact lookup
+- `compile/` keeps the public compile facade
+- `compile/ir/` owns graph and node shape state
+- `compile/passes/` owns pass planning and application
+- `compile/lowering/` owns lowering and legalization state
+- `compile/executor/` owns execution handoff
+- `compile/cache/` owns compilation cache helpers
+- `compile/runtime/` owns compile-time runtime helpers
 
 ## Migration rule
 
-Keep the existing files as the compatibility surface until the new submodules are wired in.
-
+Keep `compiler.s` and `pipeline.s` as the compatibility surface while the submodules carry the implementation.

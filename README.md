@@ -76,7 +76,7 @@ The current top-level folders are kept for compatibility. The target layout is:
 - `runtime/runtime/runtime.s`: runtime state and discovery helpers
 - `runtime/io/io.s`: file, JSON, and environment adapters for the runtime layer
 - `runtime/stage/stage.s`: staged compile state helpers for jit/lower/compile/execute
-- `runtime/compile/compile.s`: compile-state bookkeeping used by the runtime pipeline
+- `compile/runtime/runtime.s`: compile-state bookkeeping used by the runtime pipeline
 - `runtime/control/control.s`: control-flow state helpers and simple cond/loop/scan primitives
 - `distributed/comm/comm.s`: process-group and collective primitives
 - `distributed/ddp/ddp.s`: DDP gradient bucket and synchronization state
