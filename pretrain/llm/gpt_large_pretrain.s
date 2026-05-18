@@ -74,6 +74,41 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
     }
 }
 
+func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len, int max_steps, float lr, int log_interval, int eval_interval, int save_interval) gpt_large_pretrain_state {
+    pretrain_config base_cfg = new_gpt_large_pretrain_config()
+    pretrain_config cfg = pretrain_config {
+        global_batch_size: base_cfg.global_batch_size,
+        micro_batch_size: micro_batch_size,
+        seq_len: seq_len,
+        max_steps: max_steps,
+        warmup_steps: base_cfg.warmup_steps,
+        lr: lr,
+        min_lr: base_cfg.min_lr,
+        weight_decay: base_cfg.weight_decay,
+        log_interval: log_interval,
+        eval_interval: eval_interval,
+        save_interval: save_interval,
+        bf16: base_cfg.bf16,
+        grad_checkpoint: base_cfg.grad_checkpoint,
+        optimizer: base_cfg.optimizer,
+        scheduler: base_cfg.scheduler,
+        backend: base_cfg.backend,
+    }
+
+    gpt_large_training_config training_cfg = new_gpt_large_training_config(cfg.micro_batch_size, cfg.seq_len, cfg.max_steps, cfg.lr)
+    gpt_large_training_state training = new_gpt_large_training_state(gpt_large_pretrain_documents(), training_cfg)
+    pretrain_data_state data = new_pretrain_data_state(training.model.dataset, 0, 1)
+    pretrain_loop_state loop = new_pretrain_loop_state(cfg, data)
+    gpt_large_pretrain_state {
+        cfg: cfg,
+        data: data,
+        loop: loop,
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "pretrain/checkpoints"),
+        eval: new_pretrain_eval_state(),
+        training: training,
+    }
+}
+
 func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pretrain_state {
     gpt_large_pretrain_state {
         cfg: pretrain_config_state_dict(state.cfg),
