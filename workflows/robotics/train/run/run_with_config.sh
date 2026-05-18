@@ -7,6 +7,10 @@ Usage: $0 [--config path] [--steps N]
 
 --config: YAML config path (default: workflows/robotics/train/config/sample.yaml)
 --steps: override max_steps from config
+
+Workflow-only standard keys also recognized:
+- eval_every
+- save_every
 EOF
 }
 
@@ -36,6 +40,8 @@ LATENT_DIM="$(awk -F":" '/^latent_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2
 ACT_DIM="$(awk -F":" '/^act_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 MAX_STEPS="$(awk -F":" '/^max_steps[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 SAMPLE_COUNT="$(awk -F":" '/^sample_count[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+EVAL_EVERY="$(awk -F":" '/^eval_every[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+SAVE_EVERY="$(awk -F":" '/^save_every[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 LEARNING_RATE="$(awk -F":" '/^learning_rate[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 TASK_NAME="$(awk -F":" '/^task_name[[:space:]]*:/ {sub(/^[[:space:]]*/, "", $2); gsub(/^"|"$/, "", $2); print $2; exit}' "$CONFIG" || true)"
 
@@ -56,6 +62,8 @@ if [[ -z "$LATENT_DIM" ]]; then LATENT_DIM=16; fi
 if [[ -z "$ACT_DIM" ]]; then ACT_DIM=4; fi
 if [[ -z "$MAX_STEPS" ]]; then MAX_STEPS=16; fi
 if [[ -z "$SAMPLE_COUNT" ]]; then SAMPLE_COUNT=64; fi
+if [[ -z "$EVAL_EVERY" ]]; then EVAL_EVERY=8; fi
+if [[ -z "$SAVE_EVERY" ]]; then SAVE_EVERY=16; fi
 if [[ -z "$LEARNING_RATE" ]]; then LEARNING_RATE=0.001; fi
 if [[ -z "$TASK_NAME" ]]; then TASK_NAME="robotics_workflow_default"; fi
 
@@ -86,4 +94,4 @@ SFILE
 make s-compile-runtime
 s "$TMP_S" "$TMP_IR"
 
-echo "Ran robotics workflow with obs=${OBS_DIM}, latent=${LATENT_DIM}, act=${ACT_DIM}, steps=${MAX_STEPS}, samples=${SAMPLE_COUNT}, lr=${LEARNING_RATE}, task=${TASK_NAME}"
+echo "Ran robotics workflow with obs=${OBS_DIM}, latent=${LATENT_DIM}, act=${ACT_DIM}, steps=${MAX_STEPS}, samples=${SAMPLE_COUNT}, eval_every=${EVAL_EVERY}, save_every=${SAVE_EVERY}, lr=${LEARNING_RATE}, task=${TASK_NAME}"

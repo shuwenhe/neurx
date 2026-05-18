@@ -4,5 +4,7 @@ latent_dim: 16
 act_dim: 4
 sample_count: 64
 max_steps: 16
+eval_every: 8
+save_every: 16
 learning_rate: 0.001
 task_name: "robotics_pick_place_mvp"
