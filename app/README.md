@@ -40,6 +40,7 @@ cmake --build build
 
 - Linux/macOS: run `bash scripts/setup_qt_env.sh`, then `source .env.qt`
 - Windows PowerShell: run `powershell -ExecutionPolicy Bypass -File .\\scripts\\setup_qt_env.ps1`
+- On Debian/Ubuntu, the app also needs the Qt QML runtime modules used by the shell, especially `qml6-module-qtquick-templates`
 
 See [scripts/README.md](scripts/README.md) for full examples.
 

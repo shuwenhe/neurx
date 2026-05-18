@@ -40,7 +40,19 @@ install_qt_linux() {
     if command -v apt-get >/dev/null 2>&1; then
         log "Installing Qt6 for Debian/Ubuntu"
         sudo apt-get update
-        sudo apt-get install -y qt6-base-dev qt6-tools-dev-tools cmake ninja-build pkg-config
+        sudo apt-get install -y \
+            qt6-base-dev \
+            qt6-declarative-dev \
+            qt6-declarative-dev-tools \
+            qt6-tools-dev-tools \
+            qml6-module-qtquick \
+            qml6-module-qtquick-window \
+            qml6-module-qtquick-layouts \
+            qml6-module-qtquick-controls \
+            qml6-module-qtquick-templates \
+            cmake \
+            ninja-build \
+            pkg-config
         return
     fi
 

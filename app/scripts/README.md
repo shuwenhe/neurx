@@ -12,6 +12,8 @@ cmake -S . -B build
 cmake --build build
 ```
 
+On Debian/Ubuntu, the setup script installs the Qt QML runtime modules the shell imports, including `qml6-module-qtquick-templates`.
+
 ## Windows PowerShell
 
 Run:
