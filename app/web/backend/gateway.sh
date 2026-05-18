@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+S_BINARY="${NEURX_S_BINARY:-${S_BINARY:-s}}"
 
 body_file="$(mktemp /tmp/neurx_backend_body.XXXXXX.json)"
 trap 'rm -f "$body_file"' EXIT
@@ -37,4 +38,4 @@ if [ -n "${max_tokens:-}" ]; then
 fi
 
 export NEURX_BACKEND_REQUEST_FILE=""
-exec s "${ROOT_DIR}/backend/serve.s"
+exec "${S_BINARY}" "${ROOT_DIR}/backend/serve.s"

@@ -1,10 +1,32 @@
-# app/backend
+# app/web/backend
 
-S-based backend core for the NeurX app.
+S-based backend core for the NeurX app, with Node.js HTTP wrapper for local execution.
 
 This directory holds the model-facing response generator that a web server or gateway can call.
 
-The core model logic stays in `serve.s`; `server.mjs` is a tiny HTTP wrapper that exposes `/neurx/api/chat`.
+## Quick Start
+
+```bash
+# Install dependencies (optional, no npm packages required)
+npm install
+
+# Start the backend
+node server.mjs
+
+# In another terminal, test it
+curl -X POST http://127.0.0.1:18080/neurx/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt_large","prompt":"Hello","max_tokens":16}'
+```
+
+The backend implements local inference using the gpt_large model scaffold from `/home/shuwen/shuwen/neurx/model/llm/gpt_large.s`.
+
+## Architecture
+
+- **`backend.mjs`**: Core LLM model logic (gpt_large implementation in JavaScript)
+- **`server.mjs`**: HTTP server wrapper with OpenAI-compatible API
+- **`gateway.sh`**: Legacy S-based gateway (for S execution when available)
+- **`serve.s`**: Original S implementation (compiles but doesn't execute in current environment)
 
 ## Contract
 
@@ -12,6 +34,7 @@ The core model logic stays in `serve.s`; `server.mjs` is a tiny HTTP wrapper tha
 - Optional request file override: `NEURX_BACKEND_REQUEST_FILE`
 - Optional model selector: `NEURX_BACKEND_MODEL`
 - Optional token budget: `NEURX_BACKEND_MAX_TOKENS`
+- Optional S binary override: `NEURX_S_BINARY`
 
 The backend prints a JSON response to stdout.
 

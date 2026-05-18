@@ -5,6 +5,7 @@ services:
       dockerfile: app/web/backend/Dockerfile
     environment:
       PORT: 18080
+      NEURX_S_BINARY: /usr/local/bin/s
     volumes:
       - /home/shuwen/.local/bin/s:/usr/local/bin/s:ro
     ports:
