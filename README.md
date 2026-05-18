@@ -17,6 +17,7 @@ neurx is a deep learning framework written in S.
 - `compile/`: graph capture, IR, passes, lowering, executor, and cache
 - `distributed/`: communication, DDP, TP, ZeRO, pipeline parallel, and launcher
 - `infer/`: inference serving, decode, cache, and sampling
+- `model/`: family-level model definitions and composition helpers
 - `workflows/`: pretrain, posttrain, diffusion, robotics, and evaluation flows
 - `arch/`: backend-specific support for CUDA, CANN, and MPS
 - `examples/`: runnable examples and templates
@@ -86,6 +87,15 @@ The current top-level folders are kept for compatibility. The target layout is:
 - `distributed/zero/zero.s`: ZeRO-style shard bookkeeping
 - `distributed/pipelining/pipelining.s`: pipeline stage and schedule state
 - `distributed/launcher/launcher.s`: distributed config detection and launcher helpers
+- `model/README.md`: model-family layout and placement rules
+- `model/core/README.md`: shared model building blocks
+- `model/vision/README.md`: vision families
+- `model/llm/README.md`: language model families
+- `model/diffusion/README.md`: diffusion families
+- `model/multimodal/README.md`: multimodal compositions
+- `model/audio/README.md`: audio and speech families
+- `model/video/README.md`: video families
+- `model/reward/README.md`: reward and preference families
 
 ## Notes
 
