@@ -4,11 +4,11 @@ This note summarizes the current NeurX distributed training path.
 
 ## Current framework layers
 
-- `distributed/comm.s`: process group and collective primitives
-- `distributed/tp.s`: tensor-parallel shard mapping
-- `distributed/tp_collective.s`: TP collectives on top of process groups
-- `distributed/ddp.s`: gradient bucket and sync bookkeeping
-- `distributed/zero.s`: ZeRO-style optimizer and gradient sharding bookkeeping
+- `distributed/comm/comm.s`: process group and collective primitives
+- `distributed/tp/tp.s`: tensor-parallel shard mapping
+- `distributed/tp_collective/tp_collective.s`: TP collectives on top of process groups
+- `distributed/ddp/ddp.s`: gradient bucket and sync bookkeeping
+- `distributed/zero/zero.s`: ZeRO-style optimizer and gradient sharding bookkeeping
 - `train/parallel.s`: composition layer that wires DDP, TP, and ZeRO together
 
 ## What acceleration means here
@@ -44,4 +44,3 @@ The framework should reduce training cost by combining:
 - reduce-scatter for sharded gradients
 - all-gather for parameter reconstruction
 - overlap-friendly training loop hooks
-

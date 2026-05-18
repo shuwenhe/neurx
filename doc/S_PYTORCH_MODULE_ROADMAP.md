@@ -10,7 +10,7 @@ compiler path, and deployment basics.
 
 Target files:
 
-- distributed/comm.s
+- distributed/comm/comm.s
 - distributed/process_group.s
 - distributed/reducer.s
 
@@ -45,7 +45,7 @@ Minimum tests:
 
 Target files:
 
-- distributed/ddp.s
+- distributed/ddp/ddp.s
 
 Core capabilities:
 
@@ -104,8 +104,8 @@ Minimum tests:
 
 Current base exists:
 
-- distributed/pipelining.s
-- runtime/pp.s
+- distributed/pipelining/pipelining.s
+- distributed/pp/pp.s
 
 Next capabilities:
 
@@ -263,9 +263,9 @@ Minimum tests:
 
 Wave A (must-have):
 
-- distributed/comm.s
-- distributed/ddp.s
-- distributed/pipelining.s communication extension
+- distributed/comm/comm.s
+- distributed/ddp/ddp.s
+- distributed/pipelining/pipelining.s communication extension
 
 Wave B (scale-up):
 
