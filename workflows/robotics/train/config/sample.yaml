@@ -1,0 +1,6 @@
+# Sample robotics training workflow config
+batch_size: 2
+seq_len: 4
+max_steps: 16
+learning_rate: 0.001
+task_name: "robotics_pick_place_mvp"
