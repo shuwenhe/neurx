@@ -1,3 +1,4 @@
-LLM inference workflows and pipelines.
+# LLM Inference Workflow
 
-Structure: config/, pipeline/, run/, dataset/
+Decode, batching, and serving entrypoints for LLM inference belong here.
+

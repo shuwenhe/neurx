@@ -1,3 +1,4 @@
-Benchmark workflows and harnesses.
+# Benchmark Workflows
 
-Structure: config/, run/, pipeline/
+Benchmark and regression orchestration belong here.
+

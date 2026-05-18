@@ -1,3 +1,4 @@
-Supervised fine-tuning (SFT) workflows for LLMs.
+# LLM SFT Workflow
 
-Structure: config/, pipeline/, run/, dataset/
+Supervised fine-tuning orchestration for LLMs belongs here.
+

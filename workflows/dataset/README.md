@@ -1,3 +1,4 @@
-Dataset manifests and dataset-building workflows.
+# Dataset Workflows
 
-Structure: manifests/, preprocessing/, tokenizers/
+Shared dataset manifests and preprocessing flows belong here.
+

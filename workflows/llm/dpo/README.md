@@ -1,3 +1,4 @@
-Direct preference optimization (DPO) workflows.
+# LLM DPO Workflow
 
-Structure: config/, pipeline/, run/, dataset/
+Preference optimization orchestration for LLMs belongs here.
+
