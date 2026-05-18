@@ -26,6 +26,7 @@ Primary S entrypoints:
 - `neurx.model.robotics.train.robotics_robot_train_config`
 - `neurx.model.robotics.train.robotics_robot_train_state`
 - `neurx.model.robotics.train.robotics_robot_train_run`
+- `neurx.workflows.robotics.train.pipeline_runner.run_robotics_training_with_params`
 
 Completion semantics:
 - Workflow run is considered successful when `state.finished == true` and `state.metrics.step == max_steps`.
@@ -34,4 +35,4 @@ Current MVP scope:
 - Uses synthetic trajectory generation from model-side training state.
 - Provides fast smoke validation for orchestration and step/metric transitions.
 - Does not yet include real simulator/hardware rollouts in this workflow layer.
-- `eval_every` and `save_every` are standardized workflow-level fields today; they are parsed by the launcher and reserved for future eval/checkpoint hooks.
+- `eval_every` and `save_every` are accepted workflow scheduling hints and are validated by the runner.

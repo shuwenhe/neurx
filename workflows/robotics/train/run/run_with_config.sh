@@ -86,7 +86,7 @@ package neurx.workflows.robotics.train.run_tmp
 use neurx.workflows.robotics.train.pipeline_runner.{run_robotics_training_with_params}
 
 func main() int {
-    run_robotics_training_with_params(${OBS_DIM}, ${LATENT_DIM}, ${ACT_DIM}, ${MAX_STEPS}, ${SAMPLE_COUNT}, ${LEARNING_RATE}, "${TASK_NAME}")
+    run_robotics_training_with_params(${OBS_DIM}, ${LATENT_DIM}, ${ACT_DIM}, ${MAX_STEPS}, ${SAMPLE_COUNT}, ${LEARNING_RATE}, ${EVAL_EVERY}, ${SAVE_EVERY}, "${TASK_NAME}")
     0
 }
 SFILE
