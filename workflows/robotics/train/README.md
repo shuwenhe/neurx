@@ -17,6 +17,8 @@ Primary config keys in `config/sample.yaml`:
 - `act_dim`
 - `sample_count`
 - `max_steps`
+- `eval_every`
+- `save_every`
 - `learning_rate`
 - `task_name`
 
@@ -32,3 +34,4 @@ Current MVP scope:
 - Uses synthetic trajectory generation from model-side training state.
 - Provides fast smoke validation for orchestration and step/metric transitions.
 - Does not yet include real simulator/hardware rollouts in this workflow layer.
+- `eval_every` and `save_every` are standardized workflow-level fields today; they are parsed by the launcher and reserved for future eval/checkpoint hooks.
