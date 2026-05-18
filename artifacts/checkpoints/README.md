@@ -29,3 +29,5 @@ Notes:
 Example artifact path:
 
 - `artifacts/checkpoints/run_20260518_001/step_0001000/latest/gpt_large_pretrain.neurx`
+- `artifacts/checkpoints/llama3_8b/llama3_8b_base.neurx`
+- `artifacts/checkpoints/qwen3/qwen3_base.neurx`
