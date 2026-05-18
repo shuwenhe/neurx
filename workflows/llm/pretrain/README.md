@@ -1,9 +1,11 @@
-LLM pretraining workflows.
+# LLM Pretrain Workflow
 
-Structure:
-- config/: run manifests and hyperparameters
-- pipeline/: pipeline definitions (stages and IO contracts)
-- run/: launch scripts that call the runtime API
-- dataset/: dataset manifests and tokenizer helpers
+This workflow wires together:
 
-Design: Workflows should call into `runtime/` and `train/` primitives rather than directly invoking kernels.
+- config presets
+- pipeline stages
+- launch scripts
+- dataset manifests
+
+The canonical model implementation should be called from `model/llm/`.
+

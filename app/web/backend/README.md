@@ -4,6 +4,8 @@ S-based backend core for the NeurX app.
 
 This directory holds the model-facing response generator that a web server or gateway can call.
 
+The core model logic stays in `serve.s`; `server.mjs` is a tiny HTTP wrapper that exposes `/neurx/api/chat`.
+
 ## Contract
 
 - Input prompt comes from `NEURX_BACKEND_PROMPT`
@@ -44,6 +46,8 @@ The backend emits a JSON document with:
 - `serve.s`: standalone S entrypoint for the LLM backend core
 - `run.sh`: convenience launcher for local smoke tests
 - `gateway.sh`: JSON-to-env gateway suitable for a thin HTTP wrapper or CGI host
+- `server.mjs`: Node HTTP wrapper for local deployment and docker compose
+- `Dockerfile`: backend container image
 
 ## Examples
 
