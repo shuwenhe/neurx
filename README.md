@@ -18,7 +18,7 @@ neurx is a deep learning framework written in S.
 - `distributed/`: communication, DDP, TP, ZeRO, pipeline parallel, and launcher
 - `infer/`: inference serving, decode, cache, and sampling
 - `model/`: family-level model definitions and composition helpers
-- `workflows/`: pretrain, posttrain, diffusion, robotics, and evaluation flows
+- `workflows/`: legacy task orchestration kept for compatibility; new training entrypoints live in `model/`, `pretrain/`, and `posttrain/`
 - `arch/`: backend-specific support for CUDA, CANN, and MPS
 - `examples/`: runnable examples and templates
 - `doc/`: design notes, implementation reports, and gap analysis
@@ -35,7 +35,7 @@ The current top-level folders are kept for compatibility. The target layout is:
 - `runtime/`: device/runtime dispatch, I/O, logging, errors, and stage control
 - `distributed/`: communication, DDP, TP, ZeRO, PP, and launcher
 - `serving/`: inference serving, decode, cache, and sampling
-- `workflows/`: pretrain, posttrain, diffusion, robotics, and evaluation
+- `workflows/`: compatibility orchestration layer, not the place for new model training code
 - `backends/`: CUDA, CANN, and MPS backend implementations
 - `examples/`: runnable end-to-end examples
 - `tests/`: regression and integration tests
@@ -47,6 +47,13 @@ The current top-level folders are kept for compatibility. The target layout is:
 2. Expand `distributed/` so DDP, TP, ZeRO, and pipeline parallel share one consistent control plane.
 3. Consolidate `serving/` so decode, sampling, and KV cache are first-class inference primitives.
 4. Rehome compatibility shims into `legacy/` after the new layout stabilizes.
+
+## Workflows Boundary
+
+- `workflows/` is compatibility-only for older orchestration code.
+- New model training code belongs in `model/`.
+- Shared pretraining and posttraining orchestration belongs in `pretrain/` and `posttrain/`.
+- Do not add new training entrypoints under `workflows/`.
 
 ## S Modules
 
