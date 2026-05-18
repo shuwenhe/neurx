@@ -330,15 +330,18 @@ func load_checkpoint(string path) checkpoint {
 }
 
 func normalize_checkpoint_path(string path) string {
-    string target = path
+    string target = trim(path)
     if target == "" {
         target = "latest"
+    }
+    while has_suffix(target, "/") {
+        target = target[0:len(target) - 1]
     }
     if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
         target = "artifacts/checkpoints/" + target
     }
-    if !has_suffix(target, ".ckpt") && !has_suffix(target, ".txt") {
-        target = target + ".ckpt"
+    if !has_suffix(target, ".neurx") && !has_suffix(target, ".txt") {
+        target = target + ".neurx"
     }
     target
 }
