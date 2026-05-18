@@ -1,5 +1,5 @@
-FROM python:3.11-slim
+FROM debian:stable-slim
 WORKDIR /app
 COPY . /app
-RUN pip install -e /app/../..
-CMD ["/app/bin/serve.sh"]
+RUN apt-get update && apt-get install -y --no-install-recommends bash coreutils && rm -rf /var/lib/apt/lists/*
+CMD ["/bin/bash", "/app/bin/serve.sh"]

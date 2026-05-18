@@ -5,7 +5,7 @@ This directory is the canonical home for NeurX serving runtime modules.
 ## Status
 
 - `serving/serve/admission_control.s` and `serving/serve/continuous_batch.s` now exist as canonical S sources.
-- `serving/serve/serve.s` is the canonical request/response state entrypoint.
+- `serving/serve/serve.s` now owns the canonical request/response state plus the serving control plane.
 - `serving/cache/kv_cache.s`, `serving/cache/paged_kv_cache.s`, `serving/cache/prefix_cache.s`, `serving/decode/decode.s`, and `serving/sampling/sampling.s` are also canonical.
 - `serving/vllm/` now contains the canonical request queue, scheduler, metrics, prefix cache, paged attention, and runtime entrypoint.
 - The runtime bridge prefers `serving/*` IR when available and falls back to `infer/*` for the remaining compatibility modules.
@@ -20,6 +20,7 @@ This directory is the canonical home for NeurX serving runtime modules.
 
 ## Priority Serving Modules
 
+- `serving/serve/serve`
 - `serving/serve/continuous_batch`
 - `serving/cache/paged_kv_cache`
 - `serving/cache/prefix_cache`

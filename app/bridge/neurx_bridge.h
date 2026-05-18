@@ -44,7 +44,6 @@ public:
 private:
     QString find_repo_root() const;
     QString run_agent_probe(const QString& repo_root) const;
-    QString run_python_script(const QString& repo_root, const QString& script, const QStringList& args, int timeout_ms) const;
     QString run_process(const QString& program, const QStringList& args, int timeout_ms, const QString& working_dir = QString()) const;
     QString ollama_command() const;
     QString bootstrap_ollama_model();

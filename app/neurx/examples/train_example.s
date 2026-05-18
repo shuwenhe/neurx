@@ -1,6 +1,6 @@
 // Minimal example to show API usage (pseudocode)
 
-// import neurx bindings
+// load neurx runtime bindings
 
 func main() {
     // init
