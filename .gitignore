@@ -51,8 +51,8 @@ logs/
 .venv/
 
 # Trained model artifacts
-artifacts/checkpoints/*.ckpt
-artifacts/checkpoints/**/*.ckpt
+artifacts/checkpoints/*.neurx
+artifacts/checkpoints/**/*.neurx
 
 # Auto push
 .auto_push_state/
