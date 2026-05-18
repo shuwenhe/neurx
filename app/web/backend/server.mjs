@@ -1,16 +1,18 @@
 import { createServer } from 'node:http';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { processLlmRequest, parseOpenAIRequest } from './backend.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const gatewayPath = process.env.NEURX_BACKEND_GATEWAY || path.join(__dirname, 'gateway.sh');
 const port = Number(process.env.PORT || 18080);
 
 function jsonHeaders() {
   return {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
   };
 }
 
@@ -20,6 +22,13 @@ function send(res, statusCode, body) {
 }
 
 const server = createServer((req, res) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, jsonHeaders());
+    res.end();
+    return;
+  }
+
   if (req.method === 'GET' && (req.url === '/health' || req.url === '/neurx/health')) {
     send(
       res,
@@ -28,7 +37,8 @@ const server = createServer((req, res) => {
         {
           ok: true,
           service: 'neurx-app-backend',
-          gateway: gatewayPath,
+          version: '1.0.0',
+          backend: 'nodejs-gpt-large',
         },
         null,
         2,
@@ -37,78 +47,108 @@ const server = createServer((req, res) => {
     return;
   }
 
-  if (req.method !== 'POST' || req.url !== '/neurx/api/chat') {
-    send(
-      res,
-      404,
-      JSON.stringify(
-        {
-          ok: false,
-          error: 'not found',
-          path: req.url,
-        },
-        null,
-        2,
-      ),
-    );
-    return;
-  }
-
-  const chunks = [];
-  req.on('data', (chunk) => {
-    chunks.push(chunk);
-  });
-  req.on('end', () => {
-    const bodyText = Buffer.concat(chunks).toString('utf8');
-    const result = spawnSync('bash', [gatewayPath], {
-      input: bodyText,
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        NEURX_BACKEND_REQUEST_FILE: '',
-      },
+  if (req.method === 'POST' && req.url === '/neurx/api/chat') {
+    const chunks = [];
+    req.on('data', (chunk) => {
+      chunks.push(chunk);
     });
+    req.on('end', () => {
+      try {
+        const bodyText = Buffer.concat(chunks).toString('utf8');
+        const { model, prompt, maxTokens } = parseOpenAIRequest(bodyText);
+        const response = processLlmRequest(model, prompt, maxTokens);
+        send(res, 200, JSON.stringify(response, null, 2));
+      } catch (err) {
+        send(
+          res,
+          500,
+          JSON.stringify(
+            {
+              ok: false,
+              error: err.message || 'Internal server error',
+            },
+            null,
+            2,
+          ),
+        );
+      }
+    });
+    return;
+  }
 
-    if (result.error) {
-      send(
-        res,
-        500,
-        JSON.stringify(
-          {
-            ok: false,
-            error: String(result.error),
-            gateway: gatewayPath,
+  // Compatibility: also accept v1/chat/completions for OpenAI-like clients
+  if (req.method === 'POST' && req.url === '/v1/chat/completions') {
+    const chunks = [];
+    req.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      try {
+        const bodyText = Buffer.concat(chunks).toString('utf8');
+        const { model, prompt, maxTokens } = parseOpenAIRequest(bodyText);
+        const response = processLlmRequest(model, prompt, maxTokens);
+
+        // Convert to OpenAI-compatible response format
+        const openaiResponse = {
+          id: 'neurx-' + Date.now(),
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: model,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: response.completion,
+              },
+              finish_reason: 'stop',
+            },
+          ],
+          usage: {
+            prompt_tokens: prompt.length / 4,
+            completion_tokens: response.generated_tokens,
+            total_tokens: Math.ceil(prompt.length / 4) + response.generated_tokens,
           },
-          null,
-          2,
-        ),
-      );
-      return;
-    }
+        };
+        send(res, 200, JSON.stringify(openaiResponse, null, 2));
+      } catch (err) {
+        send(
+          res,
+          500,
+          JSON.stringify(
+            {
+              error: {
+                message: err.message || 'Internal server error',
+                type: 'server_error',
+              },
+            },
+            null,
+            2,
+          ),
+        );
+      }
+    });
+    return;
+  }
 
-    if (result.status !== 0) {
-      send(
-        res,
-        500,
-        JSON.stringify(
-          {
-            ok: false,
-            status: result.status,
-            stderr: result.stderr || '',
-            gateway: gatewayPath,
-          },
-          null,
-          2,
-        ),
-      );
-      return;
-    }
-
-    res.writeHead(200, jsonHeaders());
-    res.end(result.stdout || '{}');
-  });
+  send(
+    res,
+    404,
+    JSON.stringify(
+      {
+        ok: false,
+        error: 'not found',
+        path: req.url,
+      },
+      null,
+      2,
+    ),
+  );
 });
 
-server.listen(port, '0.0.0.0', () => {
-  console.log(`neurx backend listening on :${port}`);
+server.listen(port, '127.0.0.1', () => {
+  console.log(`neurx backend listening on http://127.0.0.1:${port}`);
+  console.log(`  - Chat API: POST /neurx/api/chat`);
+  console.log(`  - OpenAI compatible: POST /v1/chat/completions`);
+  console.log(`  - Health check: GET /neurx/health`);
 });

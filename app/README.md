@@ -14,6 +14,22 @@ This directory hosts the Qt-based cross-platform app shell for Neurx.
 
 ## Suggested Build
 
+### Quick Start with Local LLM
+
+To run the Qt app with local NeurX LLM backend (gpt_large):
+
+```bash
+cd app
+bash run_with_llm.sh
+```
+
+This will:
+1. Start the Node.js backend on `http://127.0.0.1:18080`
+2. Build the Qt app (if needed)
+3. Launch the app with LLM enabled
+
+### Manual Build
+
 ```bash
 cmake -S . -B build
 cmake --build build
@@ -48,15 +64,15 @@ The same fields can also be edited from the QML app shell after launch.
 - bridge: ABI/FFI bridge between Qt app shell and Neurx core
 - qml: Qt Quick shell views migrated into Neurx
 - platform: platform-specific helpers and lifecycle wrappers
-- frontend: Next.js browser UI for Neurx LLM access
-- backend: S-based backend core and thin gateway helpers
+- web/frontend: Next.js browser UI for NeurX LLM access
+- web/backend: S-based backend core and thin gateway helpers
 - tests: Qt shell tests
 - scripts: cross-platform Qt6 setup helpers
 
-## App Frontend
+## App Web
 
-The Next.js frontend under `app/frontend/` expects:
+The Next.js frontend under `app/web/frontend/` expects:
 
 - `NEURX_BACKEND_URL=http://127.0.0.1:18080/neurx/api/chat`
 
-The API route forwards chat requests to that backend URL. The URL may point to any host-level service that wraps `app/backend/serve.s`.
+The API route forwards chat requests to that backend URL. The URL may point to any host-level service that wraps `app/web/backend/serve.s`.

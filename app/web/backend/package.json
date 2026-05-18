@@ -1,0 +1,23 @@
+{
+  "name": "neurx-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "NeurX LLM backend - Node.js HTTP wrapper for local model inference",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "neurx",
+    "llm",
+    "backend",
+    "gpt",
+    "local"
+  ],
+  "author": "NeurX",
+  "license": "MIT"
+}
