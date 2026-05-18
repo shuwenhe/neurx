@@ -253,7 +253,7 @@ func gpt_large_next_token(gpt_large_state state, int token_id, int position) int
 }
 
 func gpt_large_summary(gpt_large_state state) string {
-    state.name
+    state.name + "[" + state.architecture + "," + string(state.parameter_count_m) + "M" + ",layers=" + string(state.num_layers) + ",heads=" + string(state.num_heads) + ",ctx=" + string(state.context_window) + "]"
 }
 
 func gpt_large_state_dict(gpt_large_state state) gpt_large_state {
