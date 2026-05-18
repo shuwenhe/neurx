@@ -70,7 +70,7 @@
 - ✓ 完全向后兼容
 - ✓ 无breaking changes
 - ✓ 现有代码无需修改
-- ✓ API与PyTorch对齐
+- ✓ API 与当前 S 运行层保持一致
 
 ## 测试状态
 ```

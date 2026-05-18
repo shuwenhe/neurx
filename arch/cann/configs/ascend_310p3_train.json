@@ -1,6 +1,6 @@
 {
   "name": "neurx-ascend-310p3-8card-training",
-  "mode": "train",
+  "mode": "infer",
   "target": {
     "soc": "Ascend310P3"
   },
@@ -12,22 +12,8 @@
   "train": {
     "workdir": "/app/neurx",
     "command": [
-      "python3",
-      "-m",
-      "torch.distributed.run",
-      "--nproc_per_node",
-      "8",
-      "--master_port",
-      "29530",
-      "arch/cann/example/torch_npu_train_template.py",
-      "--epochs",
-      "1",
-      "--steps-per-epoch",
-      "20",
-      "--batch-size",
-      "8",
-      "--device",
-      "npu"
+      "s",
+      "serving/serve/serve.s"
     ]
   }
 }
