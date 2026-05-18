@@ -18,7 +18,7 @@ neurx is a deep learning framework written in S.
 - `distributed/`: communication, DDP, TP, ZeRO, pipeline parallel, and launcher
 - `infer/`: inference serving, decode, cache, and sampling
 - `model/`: family-level model definitions and composition helpers
-- `workflows/`: legacy task orchestration kept for compatibility; new training entrypoints live in `model/`, `pretrain/`, and `posttrain/`
+- `workflows/`: task orchestration trees for `llm/`, `vision/`, `diffusion/`, `multimodal/`, `agent/`, `benchmark/`, and `dataset/`
 - `arch/`: backend-specific support for CUDA, CANN, and MPS
 - `examples/`: runnable examples and templates
 - `doc/`: design notes, implementation reports, and gap analysis
@@ -35,7 +35,7 @@ The current top-level folders are kept for compatibility. The target layout is:
 - `runtime/`: device/runtime dispatch, I/O, logging, errors, and stage control
 - `distributed/`: communication, DDP, TP, ZeRO, PP, and launcher
 - `serving/`: inference serving, decode, cache, and sampling
-- `workflows/`: compatibility orchestration layer, not the place for new model training code
+- `workflows/`: orchestration layer for active multi-stage pipelines
 - `backends/`: CUDA, CANN, and MPS backend implementations
 - `examples/`: runnable end-to-end examples
 - `tests/`: regression and integration tests
@@ -50,10 +50,11 @@ The current top-level folders are kept for compatibility. The target layout is:
 
 ## Workflows Boundary
 
-- `workflows/` is compatibility-only for older orchestration code.
-- New model training code belongs in `model/`.
-- Shared pretraining and posttraining orchestration belongs in `pretrain/` and `posttrain/`.
-- Do not add new training entrypoints under `workflows/`.
+- `workflows/` is the orchestration layer for active multi-stage pipelines.
+- LLM, vision, diffusion, multimodal, agent, benchmark, and dataset workflows live here.
+- Model definitions still belong in `model/`.
+- Shared reusable training helpers still belong in `train/`, `pretrain/`, and `posttrain/`.
+- Keep workflow code focused on config, pipeline, launch, and dataset wiring.
 
 ## S Modules
 

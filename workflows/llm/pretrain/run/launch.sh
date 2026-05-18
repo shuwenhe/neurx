@@ -2,14 +2,10 @@
 set -euo pipefail
 
 # Minimal launcher for LLM pretrain workflow (local testing)
-# - compiles S runtime and modules
-# - runs the pretrain IR for a short number of steps
+# Reuses the config-driven runner so the workflow shape stays in one place.
 
 ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT_DIR"
 
-# compile runtime and project S modules
-make s-compile-runtime
-
-# run the gpt_large_pretrain S entry (IR is generated under build/ir)
-s pretrain/llm/gpt_large_pretrain.s build/ir/pretrain/llm/gpt_large_pretrain.ir
+"$ROOT_DIR/workflows/llm/pretrain/run/run_with_config.sh" \
+  --config "$ROOT_DIR/workflows/llm/pretrain/config/sample.yaml"
