@@ -1,0 +1,5 @@
+{
+  "model": "gpt_large",
+  "prompt": "Explain how NeurX exposes an S-based LLM backend.",
+  "max_tokens": 16
+}
