@@ -26,6 +26,24 @@ logs/
 *.fatbin
 *.nvvp
 
+# Qt Creator user files
+*.user
+*.user.*
+
+# Node / frontend
+node_modules/
+.next/
+out/
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
 # Misc
 .DS_Store
 .vscode/
