@@ -11,7 +11,7 @@ This directory hosts pretraining-specific orchestration in S modules.
 Checkpoint artifacts are written under:
 
 - `artifacts/checkpoints/`
-- example file: `artifacts/checkpoints/gpt_large_pretrain.neurx`
+- example file: `artifacts/checkpoints/run_20260518_001/step_0001000/latest/gpt_large_pretrain.neurx`
 
 Core tensor, autograd, ops, and runtime logic should remain in framework core modules.
 
