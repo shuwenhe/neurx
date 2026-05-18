@@ -10,12 +10,8 @@ Current NeurX checkpoint snapshots stored under `artifacts/checkpoints/`.
 
 ## Model-family snapshots
 
-- `llama3_8b/llama3_8b_base.neurx`
-- `qwen3/qwen3_base.neurx`
-
 ## Storage convention
 
 - `run_*/` groups a training run.
 - `step_*/` groups a saved step within a run.
 - `latest/` is the mutable alias for the most recent snapshot.
-- Family namespaces like `llama3_8b/` and `qwen3/` are for reusable long-lived checkpoints.
