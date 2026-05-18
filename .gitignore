@@ -1,11 +1,6 @@
-# Python
+# Native cache
 __pycache__/
-*.py[cod]
-*.pyd
 *.so
-*.egg-info/
-.eggs/
-*.egg
 
 # Build
 build/
@@ -37,17 +32,10 @@ logs/
 .idea/
 .venv/
 
-# Tests
-.pytest_cache/
-
 # Auto push
 .auto_push_state/
 
-# neurx runtime artifacts
-python/neurx/compile/_s_runtime/
-
 # CANN generated artifacts
-cann/__pycache__/
 cann/cache/
 cann/checkpoints/
 cann/compile/

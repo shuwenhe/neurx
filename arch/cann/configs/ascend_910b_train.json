@@ -11,14 +11,8 @@
   "train": {
     "workdir": "/app/neurx",
     "command": [
-      "python3",
-      "arch/cann/example/torch_npu_train_template.py",
-      "--epochs",
-      "2",
-      "--batch-size",
-      "8",
-      "--device",
-      "npu"
+      "s",
+      "train/loop.s"
     ]
   }
 }
