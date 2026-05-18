@@ -10,6 +10,10 @@ Layout:
 Quick run:
 - `workflows/robotics/train/run/launch.sh`
 - or `workflows/robotics/train/run/run_with_config.sh --steps 32`
+- observe tick state with `workflows/robotics/train/run/observe_with_config.sh --steps 32`
+
+Current CLI note:
+- In this environment, `s source.s output.ir` validates compilation of the generated workflow entrypoint. It does not execute `main()` directly.
 
 Primary config keys in `config/sample.yaml`:
 - `obs_dim`
