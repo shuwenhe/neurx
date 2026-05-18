@@ -63,6 +63,34 @@ func robotics_workflow_tick_load_state_dict(robotics_workflow_tick_state state, 
     }
 }
 
+func robotics_workflow_training_state(robotics_workflow_tick_state state) robotics_trajectory_train_state {
+    state.training
+}
+
+func robotics_workflow_eval_count(robotics_workflow_tick_state state) int {
+    state.eval_count
+}
+
+func robotics_workflow_save_count(robotics_workflow_tick_state state) int {
+    state.save_count
+}
+
+func robotics_workflow_last_eval_step(robotics_workflow_tick_state state) int {
+    state.last_eval_step
+}
+
+func robotics_workflow_last_save_step(robotics_workflow_tick_state state) int {
+    state.last_save_step
+}
+
+func robotics_workflow_eval_interval(robotics_workflow_tick_state state) int {
+    state.eval_every
+}
+
+func robotics_workflow_save_interval(robotics_workflow_tick_state state) int {
+    state.save_every
+}
+
 func robotics_tick_due(int step, int interval, bool finished) bool {
     if interval <= 0 {
         return false
