@@ -1,4 +1,4 @@
-# app/frontend
+# app/web/frontend
 
 Next.js frontend for the NeurX LLM entry.
 
@@ -23,7 +23,7 @@ When deployed behind Nginx on port `8080`, the public entry page is `http://111.
 ## Run
 
 ```bash
-cd app/frontend
+cd app/web/frontend
 npm install
 npm run dev
 ```
