@@ -1,6 +1,7 @@
 # neurx infer
 
 This directory hosts inference-specific orchestration in S modules.
+It now serves as the compatibility layer while `serving/` becomes the canonical home for migrated runtime modules.
 
 - decode: autoregressive decode state and step runner
 - cache: kv-cache state for incremental decoding

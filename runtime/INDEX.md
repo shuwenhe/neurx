@@ -7,7 +7,6 @@
 - `control.s`
 - `stage.s`
 - `compile.s`
-- `pp.s`
 
 ## New subdirectories
 
@@ -23,5 +22,7 @@
 1. `io.s` -> `runtime/io/io.s`
 2. `control.s` -> `runtime/control/control.s`
 3. `stage.s` -> `runtime/stage/stage.s`
-4. `compile.s` -> `runtime/compile/compile.s` or `compile/`
+4. `compile.s` -> `compile/runtime/runtime.s`
 5. `runtime.s` -> `runtime/runtime/runtime.s`
+
+Pipeline parallel now lives in `distributed/pp/pp.s`.
