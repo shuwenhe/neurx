@@ -29,6 +29,15 @@ Primary S entrypoints:
 - `neurx.workflows.robotics.train.pipeline_runner.run_robotics_training_with_schedule`
 - `neurx.workflows.robotics.train.pipeline_runner.run_robotics_training_schedule_state`
 
+Observable tick-state getters:
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_training_state`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_eval_count`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_save_count`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_last_eval_step`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_last_save_step`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_eval_interval`
+- `neurx.workflows.robotics.train.pipeline_runner.robotics_workflow_save_interval`
+
 Completion semantics:
 - Workflow run is considered successful when `state.finished == true` and `state.metrics.step == max_steps`.
 
