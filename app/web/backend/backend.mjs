@@ -816,52 +816,113 @@ function buildLastToken(state, prompt, maxTokens) {
   return simulateCheckpointGeneration(state, prompt, maxTokens).lastToken;
 }
 
-function buildCompletion(state, model, prompt, tokenTrace, artifact, runtimeLayers) {
-  let completion = 'NeurX S backend is serving a local checkpoint snapshot.';
-  completion += ` model=${model}`;
-  completion += ` summary=${gptLargeSummary(state)}`;
-  completion += ` prompt_len=${prompt.length}`;
-  if (state.checkpoint_loaded) {
-    completion += ` loaded_step=${state.checkpoint_step}`;
-    completion += ` loaded_loss=${state.checkpoint_loss}`;
-    completion += ` loaded_params=${state.checkpoint_param_count}`;
+function buildVerboseCheckpointCompletion(state, model, prompt, tokenTrace, artifact, runtimeLayers) {
+  const requestSummary = extractPromptSummary(prompt);
+  const modelName = artifact.checkpointSnapshot.modelName || model || 'gpt_large';
+  const step = Number.isFinite(artifact.checkpointSnapshot.step) ? artifact.checkpointSnapshot.step : 0;
+
+  let completion = '';
+  if (!requestSummary) {
+    completion = `已连接本地模型 ${modelName}（step=${step}）。请直接提出问题，我会给出简洁回答。`;
+  } else {
+    completion = `已收到你的问题：“${requestSummary}”。我直接给出简洁回答：请继续补充报错、目标行为或相关代码片段，我会据此给出可执行修改建议。`;
   }
-  if (artifact.checkpointFile) {
-    completion += ` checkpoint=${artifact.checkpointFile}`;
-  } else if (artifact.checkpointRoot) {
-    completion += ` checkpoint_root=${artifact.checkpointRoot}`;
+
+  const detailMode = process.env.NEURX_BACKEND_VERBOSE_COMPLETION_DETAILS === '1';
+  if (detailMode) {
+    completion += ` debug model=${modelName}`;
+    completion += ` summary=${gptLargeSummary(state)}`;
+    completion += ` prompt_len=${prompt.length}`;
+    if (state.checkpoint_loaded) {
+      completion += ` loaded_step=${state.checkpoint_step}`;
+      completion += ` loaded_loss=${state.checkpoint_loss}`;
+      completion += ` loaded_params=${state.checkpoint_param_count}`;
+    }
+    if (artifact.checkpointFile) {
+      completion += ` checkpoint=${artifact.checkpointFile}`;
+    } else if (artifact.checkpointRoot) {
+      completion += ` checkpoint_root=${artifact.checkpointRoot}`;
+    }
+    if (artifact.checkpointSnapshot && artifact.checkpointSnapshot.loaded) {
+      completion += ` step=${artifact.checkpointSnapshot.step}`;
+      completion += ` loss=${artifact.checkpointSnapshot.loss}`;
+      completion += ` params=${artifact.checkpointSnapshot.paramCount}`;
+      completion += ` token_bias=${artifact.checkpointSnapshot.tokenBias}`;
+      completion += ` profile_seed=${artifact.checkpointSnapshot.profileSeed}`;
+      if (artifact.checkpointSnapshot.stageSignature) {
+        completion += ` stage_signature=${artifact.checkpointSnapshot.stageSignature.prefill}:${artifact.checkpointSnapshot.stageSignature.decode}:${artifact.checkpointSnapshot.stageSignature.finalize}`;
+      }
+      if (artifact.checkpointSnapshot.stageBiases) {
+        completion += ` stage_biases=${artifact.checkpointSnapshot.stageBiases.prefill}:${artifact.checkpointSnapshot.stageBiases.decode}:${artifact.checkpointSnapshot.stageBiases.finalize}`;
+      }
+      if (Array.isArray(artifact.checkpointSnapshot.layerStates)) {
+        completion += ` layers=${artifact.checkpointSnapshot.layerStates.length}`;
+      }
+      if (Array.isArray(runtimeLayers) && runtimeLayers.length > 0) {
+        completion += ` runtime_layers=${runtimeLayers.length}`;
+        completion += ` runtime_activation=${runtimeLayers.reduce((acc, layer) => acc + (layer.activation || 0), 0)}`;
+        completion += ` runtime_signal=${runtimeLayers.reduce((acc, layer) => acc + (layer.rollingSignal || 0), 0)}`;
+      }
+      if (artifact.checkpointSnapshot.adapterSignature && artifact.checkpointSnapshot.adapterSignature.length > 0) {
+        completion += ` adapters=${artifact.checkpointSnapshot.adapterSignature.join('|')}`;
+      }
+      if (artifact.checkpointSnapshot.modelName) {
+        completion += ` artifact_model=${artifact.checkpointSnapshot.modelName}`;
+      }
+    }
+    if (tokenTrace) {
+      completion += ` token_trace=${tokenTrace}`;
+    }
   }
-  if (artifact.checkpointSnapshot && artifact.checkpointSnapshot.loaded) {
-    completion += ` step=${artifact.checkpointSnapshot.step}`;
-    completion += ` loss=${artifact.checkpointSnapshot.loss}`;
-    completion += ` params=${artifact.checkpointSnapshot.paramCount}`;
-    completion += ` token_bias=${artifact.checkpointSnapshot.tokenBias}`;
-    completion += ` profile_seed=${artifact.checkpointSnapshot.profileSeed}`;
-    if (artifact.checkpointSnapshot.stageSignature) {
-      completion += ` stage_signature=${artifact.checkpointSnapshot.stageSignature.prefill}:${artifact.checkpointSnapshot.stageSignature.decode}:${artifact.checkpointSnapshot.stageSignature.finalize}`;
-    }
-    if (artifact.checkpointSnapshot.stageBiases) {
-      completion += ` stage_biases=${artifact.checkpointSnapshot.stageBiases.prefill}:${artifact.checkpointSnapshot.stageBiases.decode}:${artifact.checkpointSnapshot.stageBiases.finalize}`;
-    }
-    if (Array.isArray(artifact.checkpointSnapshot.layerStates)) {
-      completion += ` layers=${artifact.checkpointSnapshot.layerStates.length}`;
-    }
-    if (Array.isArray(runtimeLayers) && runtimeLayers.length > 0) {
-      completion += ` runtime_layers=${runtimeLayers.length}`;
-      completion += ` runtime_activation=${runtimeLayers.reduce((acc, layer) => acc + (layer.activation || 0), 0)}`;
-      completion += ` runtime_signal=${runtimeLayers.reduce((acc, layer) => acc + (layer.rollingSignal || 0), 0)}`;
-    }
-    if (artifact.checkpointSnapshot.adapterSignature && artifact.checkpointSnapshot.adapterSignature.length > 0) {
-      completion += ` adapters=${artifact.checkpointSnapshot.adapterSignature.join('|')}`;
-    }
-    if (artifact.checkpointSnapshot.modelName) {
-      completion += ` artifact_model=${artifact.checkpointSnapshot.modelName}`;
-    }
-  }
-  if (tokenTrace) {
-    completion += ` token_trace=${tokenTrace}`;
-  }
+
   return completion;
+}
+
+function extractPromptSummary(prompt) {
+  const text = String(prompt || '').trim();
+  if (!text) {
+    return '';
+  }
+
+  const userMarker = 'User prompt:';
+  const markerIdx = text.lastIndexOf(userMarker);
+  if (markerIdx >= 0) {
+    const part = text.slice(markerIdx + userMarker.length).trim();
+    if (part) {
+      return part.split(/\r?\n/)[0].trim();
+    }
+  }
+
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    const line = lines[i];
+    if (line.toLowerCase().startsWith('user:')) {
+      return line.slice(5).trim();
+    }
+  }
+
+  return lines[lines.length - 1] || text;
+}
+
+function buildCompletion(state, model, prompt, tokenTrace, artifact, runtimeLayers) {
+  const verbose = process.env.NEURX_BACKEND_VERBOSE_COMPLETION === '1';
+  if (verbose) {
+    return buildVerboseCheckpointCompletion(state, model, prompt, tokenTrace, artifact, runtimeLayers);
+  }
+
+  const requestSummary = extractPromptSummary(prompt);
+  const modelName = artifact.checkpointSnapshot.modelName || model || 'gpt_large';
+  const step = Number.isFinite(artifact.checkpointSnapshot.step) ? artifact.checkpointSnapshot.step : 0;
+
+  if (!requestSummary) {
+    return `已连接本地模型 ${modelName}（step=${step}）。请描述你的问题，我会给出简洁可执行的建议。`;
+  }
+
+  if (requestSummary.length > 120) {
+    return `已收到你的请求并由本地模型 ${modelName} 处理。请先聚焦一个具体问题（例如报错信息或目标功能），我会给出可执行步骤。`;
+  }
+
+  return `已收到你的请求：“${requestSummary}”。当前由本地模型 ${modelName}（step=${step}）提供回答，请继续给出上下文或代码片段以获得更精确结果。`;
 }
 
 function processLlmRequest(model = 'gpt_large', prompt = '', maxTokens = 16) {
