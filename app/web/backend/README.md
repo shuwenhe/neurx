@@ -34,9 +34,14 @@ The backend implements local inference using the gpt_large model scaffold from `
 - Optional request file override: `NEURX_BACKEND_REQUEST_FILE`
 - Optional model selector: `NEURX_BACKEND_MODEL`
 - Optional token budget: `NEURX_BACKEND_MAX_TOKENS`
+- Optional checkpoint root: `NEURX_BACKEND_CHECKPOINT_ROOT`
+- Optional explicit checkpoint file: `NEURX_BACKEND_CHECKPOINT_FILE`
 - Optional S binary override: `NEURX_S_BINARY`
 
 The backend prints a JSON response to stdout.
+If `NEURX_BACKEND_CHECKPOINT_ROOT` or `NEURX_BACKEND_CHECKPOINT_FILE` is set, the backend also reads the newest `.neurx` snapshot and reports its step, loss, param count, and artifact metadata.
+The parsed parameter payload also contributes a deterministic token bias, profile seed, adapter signature, stage signature, stage biases, layer states, and loss scale so different checkpoints produce different outputs.
+During each request, the backend also derives a runtime layer state from the checkpoint layers and evolves that state as tokens are generated. The response includes this runtime view so the UI can show how the checkpoint is affecting the current inference pass.
 
 ### Request shape
 
@@ -63,6 +68,23 @@ The backend emits a JSON document with:
 - `train_loss`
 - `validation_loss`
 - `ready`
+- `artifact_root`
+- `checkpoint_file`
+- `artifact_ready`
+- `checkpoint_step`
+- `checkpoint_loss`
+- `checkpoint_param_count`
+- `checkpoint_model_name`
+- `checkpoint_loss_scale`
+- `checkpoint_profile_seed`
+- `checkpoint_profile_stride`
+- `checkpoint_adapter_signature`
+- `checkpoint_stage_signature`
+- `checkpoint_stage_biases`
+- `checkpoint_layer_states`
+- `checkpoint_runtime_layer_states`
+
+The `checkpoint_runtime_layer_states` field is the per-request evolved layer view. It includes activation, rolling signal, stage counts, and the derived prompt/decode/finalize energy for each checkpoint layer.
 
 ## Entry
 

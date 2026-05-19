@@ -56,8 +56,12 @@ Supported config fields:
 - `NEURX_LLM_MODEL=llama3.1`
 - `NEURX_LLM_CHAT_PATH=/v1/chat/completions` or `/api/chat`
 - `NEURX_LLM_API_KEY` for OpenAI-compatible servers that require one
+- `NEURX_BACKEND_CHECKPOINT_ROOT=/home/shuwen/shuwen/neurx/artifacts/checkpoints`
+- `NEURX_BACKEND_CHECKPOINT_FILE=/home/shuwen/shuwen/neurx/artifacts/checkpoints/run_20260518_001/step_0001000/latest/gpt_large_pretrain.neurx`
 
 The same fields can also be edited from the QML app shell after launch.
+
+When `run_with_llm.sh` starts the local backend, it will automatically prefer the newest `.neurx` file under `artifacts/checkpoints/` and expose it through the backend response.
 
 ## Directory Layout
 

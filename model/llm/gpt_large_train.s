@@ -272,8 +272,10 @@ func gpt_large_training_state_dict(gpt_large_training_state state) gpt_large_tra
         optimizer: state.optimizer,
         loader: dataloader_state {
             token_ids: copy_int(state.loader.token_ids),
+            indices: copy_int(state.loader.indices),
             cursor: state.loader.cursor,
             epoch: state.loader.epoch,
+            shuffle_seed: state.loader.shuffle_seed,
             config: state.loader.config,
         },
         config: state.config,
@@ -296,8 +298,10 @@ func gpt_large_training_load_state_dict(gpt_large_training_state state, gpt_larg
         optimizer: other.optimizer,
         loader: dataloader_state {
             token_ids: copy_int(other.loader.token_ids),
+            indices: copy_int(other.loader.indices),
             cursor: other.loader.cursor,
             epoch: other.loader.epoch,
+            shuffle_seed: other.loader.shuffle_seed,
             config: other.loader.config,
         },
         config: other.config,
