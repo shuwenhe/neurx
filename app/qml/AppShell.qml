@@ -707,17 +707,15 @@ Item {
                                     }
                                     shell.agentRunning = true
                                     runtimeStatus.text = qsTr("running")
-                                    Qt.callLater(function() {
-                                        try {
-                                            resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
-                                            runtimeStatus.text = qsTr("done")
-                                        } catch (e) {
-                                            resultOutput.text = qsTr("run_agent_failed: ") + e
-                                            runtimeStatus.text = qsTr("failed")
-                                        } finally {
-                                            shell.agentRunning = false
-                                        }
-                                    })
+                                    try {
+                                        resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
+                                        runtimeStatus.text = qsTr("done")
+                                    } catch (e) {
+                                        resultOutput.text = qsTr("run_agent_failed: ") + e
+                                        runtimeStatus.text = qsTr("failed")
+                                    } finally {
+                                        shell.agentRunning = false
+                                    }
                                 }
                             }
                         }
