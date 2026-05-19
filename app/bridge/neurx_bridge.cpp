@@ -341,6 +341,66 @@ QString NeurxBridge::run_agent_probe(const QString& repo_root) const {
     return "s_runtime_ready";
 }
 
+QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
+    if (local_model_backend_ != "openai") {
+        return QString();
+    }
+
+    const QString base_url = local_model_base_url_.trimmed();
+    if (!(base_url.contains("127.0.0.1:18080") || base_url.contains("localhost:18080"))) {
+        return QString();
+    }
+
+    const QString curl = QStandardPaths::findExecutable("curl");
+    if (curl.isEmpty()) {
+        return "runtime_exec_failed: curl not found";
+    }
+
+    QString health_url = base_url;
+    if (health_url.endsWith('/')) {
+        health_url.chop(1);
+    }
+    health_url = health_url + "/neurx/health";
+
+    const QString health_probe = run_process(
+        curl,
+        {"-sS", "--connect-timeout", "1", "--max-time", "2", health_url},
+        5000);
+    if (!health_probe.startsWith("runtime_")) {
+        return QString();
+    }
+
+    const QString node = QStandardPaths::findExecutable("node");
+    if (node.isEmpty()) {
+        return "runtime_exec_failed: node not found";
+    }
+
+    const QString backend_dir = QDir(repo_root).filePath("app/web/backend");
+    const QFileInfo server_file(QDir(backend_dir).filePath("server.mjs"));
+    if (!server_file.exists() || !server_file.isFile()) {
+        return "runtime_exec_failed: backend server.mjs not found";
+    }
+
+    emit log_message("info", "bridge", "Starting local NeurX backend on 127.0.0.1:18080");
+    const bool started = QProcess::startDetached(node, {"server.mjs"}, backend_dir);
+    if (!started) {
+        return "runtime_exec_failed: failed to start local backend";
+    }
+
+    for (int attempt = 0; attempt < 10; ++attempt) {
+        QThread::msleep(300);
+        const QString probe = run_process(
+            curl,
+            {"-sS", "--connect-timeout", "1", "--max-time", "2", health_url},
+            5000);
+        if (!probe.startsWith("runtime_")) {
+            return QString();
+        }
+    }
+
+    return "runtime_timeout: local backend did not become ready";
+}
+
 QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps) const {
     if (!local_model_enabled_) {
         return "local_model_config_missing: disabled";
@@ -541,6 +601,13 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     }
 
     if (local_model_enabled_ && !local_model_base_url_.trimmed().isEmpty() && !local_model_name_.trimmed().isEmpty()) {
+        const QString backend_ready = ensure_local_openai_backend(root);
+        if (!backend_ready.isEmpty()) {
+            emit log_message("warning", "bridge", QString("local backend startup failed: %1").arg(backend_ready));
+            emit runtime_status_changed("local-backend-failed", local_model_name_);
+            return backend_ready;
+        }
+
         const bool allow_ollama_bootstrap = qEnvironmentVariableIntValue("NEURX_AUTO_BOOTSTRAP_OLLAMA") == 1;
         if (local_model_backend_ == "ollama" && !local_ollama_ready_ && allow_ollama_bootstrap) {
             const QString bootstrap_result = bootstrap_ollama_model();
