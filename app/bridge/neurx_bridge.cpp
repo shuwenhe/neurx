@@ -492,6 +492,9 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     normalized.insert("model", model);
     normalized.insert("steps", steps);
     normalized.insert("content", content);
+    if (response.contains("checkpoint_step")) {
+        normalized.insert("checkpoint_step", response.value("checkpoint_step"));
+    }
     if (response.contains("artifact_root")) {
         normalized.insert("artifact_root", response.value("artifact_root"));
     }
@@ -624,11 +627,18 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
             if (local_parse_error.error == QJsonParseError::NoError && local_json.isObject()) {
                 const QJsonObject obj = local_json.object();
                 const QString content = obj.value("content").toString();
-                const QString result = QString("local_ok backend=%1 model=%2 steps=%3\n%4")
+                QString result = QString("local_ok backend=%1 model=%2 steps=%3")
                     .arg(obj.value("backend").toString())
                     .arg(obj.value("model").toString())
-                    .arg(obj.value("steps").toInt(steps))
-                    .arg(content);
+                    .arg(obj.value("steps").toInt(steps));
+                const QString checkpoint_file = obj.value("checkpoint_file").toString();
+                if (!checkpoint_file.isEmpty()) {
+                    result = result + "\ncheckpoint_file=" + checkpoint_file;
+                }
+                if (obj.contains("checkpoint_step")) {
+                    result = result + "\ncheckpoint_step=" + QString::number(obj.value("checkpoint_step").toInt(-1));
+                }
+                result = result + "\n" + content;
                 emit log_message("info", "agent", result);
                 emit runtime_status_changed("local-model", local_model_name_);
                 return result;
