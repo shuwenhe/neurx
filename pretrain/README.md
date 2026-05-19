@@ -8,6 +8,8 @@ This directory hosts pretraining-specific orchestration in S modules.
 - checkpoint: pretraining checkpoint scheduling state
 - eval: lightweight pretraining evaluation state
 
+Checkpoint scheduling state lives here; persistence and serialization should stay in the shared checkpoint/runtime layers.
+
 Checkpoint artifacts are written under:
 
 - `artifacts/checkpoints/`

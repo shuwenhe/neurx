@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QProcess>
 #include <QStandardPaths>
@@ -287,9 +288,106 @@ QString NeurxBridge::run_agent_probe(const QString& repo_root) const {
 }
 
 QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps) const {
-    Q_UNUSED(prompt);
-    Q_UNUSED(max_steps);
-    return "runtime_exec_failed: local_model_bridge_removed";
+    if (!local_model_enabled_) {
+        return "local_model_config_missing: disabled";
+    }
+
+    const QString base_url = local_model_base_url_.trimmed();
+    const QString chat_path = local_model_chat_path_.trimmed();
+    const QString model_name = local_model_name_.trimmed();
+    if (base_url.isEmpty() || chat_path.isEmpty() || model_name.isEmpty()) {
+        return "local_model_config_missing: base_url, chat_path, or model";
+    }
+
+    const QString curl = QStandardPaths::findExecutable("curl");
+    if (curl.isEmpty()) {
+        return "runtime_exec_failed: curl not found";
+    }
+
+    QString url = base_url;
+    if (url.endsWith('/')) {
+        url.chop(1);
+    }
+    QString path = chat_path;
+    if (!path.startsWith('/')) {
+        path.prepend('/');
+    }
+    url = url + path;
+
+    QJsonObject request_json;
+    request_json.insert("model", model_name);
+    QJsonObject user_message;
+    user_message.insert("role", "user");
+    user_message.insert("content", prompt);
+    QJsonArray messages;
+    messages.append(user_message);
+    request_json.insert("messages", messages);
+    request_json.insert("max_tokens", max_steps);
+
+    const QString payload = QString::fromUtf8(QJsonDocument(request_json).toJson(QJsonDocument::Compact));
+    const QString raw = run_process(
+        curl,
+        {"-sS", "-X", "POST", "-H", "Content-Type: application/json", "--data", payload, url},
+        120000);
+    if (raw.startsWith("runtime_")) {
+        return raw;
+    }
+
+    QJsonParseError parse_error;
+    const QJsonDocument response_json = QJsonDocument::fromJson(raw.toUtf8(), &parse_error);
+    if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+        return QString("local_model_parse_failed: %1").arg(raw.left(200));
+    }
+
+    const QJsonObject response = response_json.object();
+    QString content = response.value("content").toString();
+    if (content.isEmpty()) {
+        content = response.value("completion").toString();
+    }
+    if (content.isEmpty() && response.value("choices").isArray()) {
+        const QJsonArray choices = response.value("choices").toArray();
+        if (!choices.isEmpty() && choices.first().isObject()) {
+            const QJsonObject message = choices.first().toObject().value("message").toObject();
+            content = message.value("content").toString();
+        }
+    }
+
+    QString backend = response.value("backend").toString();
+    if (backend.isEmpty()) {
+        backend = response.value("backend_name").toString();
+    }
+    if (backend.isEmpty()) {
+        backend = local_model_backend_;
+    }
+
+    QString model = response.value("model").toString();
+    if (model.isEmpty()) {
+        model = response.value("model_name").toString();
+    }
+    if (model.isEmpty()) {
+        model = model_name;
+    }
+
+    int steps = response.value("steps").toInt(max_steps);
+    if (steps <= 0) {
+        steps = max_steps;
+    }
+
+    QJsonObject normalized;
+    normalized.insert("backend", backend);
+    normalized.insert("model", model);
+    normalized.insert("steps", steps);
+    normalized.insert("content", content);
+    if (response.contains("artifact_root")) {
+        normalized.insert("artifact_root", response.value("artifact_root"));
+    }
+    if (response.contains("checkpoint_file")) {
+        normalized.insert("checkpoint_file", response.value("checkpoint_file"));
+    }
+    if (response.contains("checkpoint_runtime_layer_states")) {
+        normalized.insert("checkpoint_runtime_layer_states", response.value("checkpoint_runtime_layer_states"));
+    }
+    return QString::fromUtf8(QJsonDocument(normalized).toJson(QJsonDocument::Compact));
 }
 
 QString NeurxBridge::local_model_summary() const {
