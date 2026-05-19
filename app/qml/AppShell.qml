@@ -106,6 +106,19 @@ Item {
         }
     }
 
+    function checkpointModelIndex() {
+        if (Runtime.checkpointModelChoices.length === 0) {
+            return shell.modelPresets.indexOf(Runtime.localModelName)
+        }
+
+        for (var i = 0; i < Runtime.checkpointModelChoices.length; ++i) {
+            if (Runtime.checkpointModelChoices[i].value === Runtime.localModelName) {
+                return i
+            }
+        }
+        return -1
+    }
+
     Component.onCompleted: {
         selectFile(selectedFileIndex)
         clampPaneWidths()
@@ -532,14 +545,14 @@ Item {
                             ComboBox {
                                 id: modelPicker
                                 Layout.fillWidth: true
-                                model: shell.modelPresets
+                                model: Runtime.checkpointModelChoices.length > 0 ? Runtime.checkpointModelChoices : shell.modelPresets
                                 editable: false
-                                currentIndex: shell.modelPresets.indexOf(Runtime.localModelName) >= 0
-                                    ? shell.modelPresets.indexOf(Runtime.localModelName)
-                                    : -1
+                                textRole: Runtime.checkpointModelChoices.length > 0 ? "text" : undefined
+                                valueRole: Runtime.checkpointModelChoices.length > 0 ? "value" : undefined
+                                currentIndex: checkpointModelIndex()
 
                                 onActivated: {
-                                    Runtime.localModelName = currentText
+                                    Runtime.localModelName = Runtime.checkpointModelChoices.length > 0 ? currentValue : currentText
                                 }
                             }
 

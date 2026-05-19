@@ -1,6 +1,7 @@
 #include "bridge/neurx_bridge.h"
 
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -8,6 +9,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QThread>
+#include <QVariantMap>
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
@@ -22,6 +24,12 @@ NeurxBridge::NeurxBridge(QObject* parent)
     const QString env_base_url = qEnvironmentVariable("NEURX_LLM_BASE_URL");
     const QString env_name = qEnvironmentVariable("NEURX_LLM_MODEL");
     const QString env_chat_path = qEnvironmentVariable("NEURX_LLM_CHAT_PATH");
+    const QString env_checkpoint_root = qEnvironmentVariable("NEURX_BACKEND_CHECKPOINT_ROOT");
+    const QString env_checkpoint_file = qEnvironmentVariable("NEURX_BACKEND_CHECKPOINT_FILE");
+
+    checkpoint_models_root_ = env_checkpoint_root.trimmed();
+    checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, env_checkpoint_file.trimmed());
+    checkpoint_model_choices_ = checkpoint_choices_for_qml();
 
     if (!env_enabled.isEmpty()) {
         const QString lowered = env_enabled.trimmed().toLower();
@@ -36,17 +44,23 @@ NeurxBridge::NeurxBridge(QObject* parent)
     if (!env_base_url.trimmed().isEmpty()) {
         local_model_base_url_ = env_base_url.trimmed();
     } else {
-        local_model_base_url_ = local_model_backend_ == "ollama"
+        local_model_base_url_ = !checkpoint_model_file_.isEmpty()
+            ? "http://127.0.0.1:18080"
+            : local_model_backend_ == "ollama"
             ? "http://127.0.0.1:11434"
             : "http://127.0.0.1:8000";
     }
     if (!env_name.trimmed().isEmpty()) {
         local_model_name_ = env_name.trimmed();
+    } else if (!checkpoint_model_file_.isEmpty()) {
+        local_model_name_ = checkpoint_model_file_;
     } else if (local_model_backend_ == "ollama") {
         local_model_name_ = kDefaultOllamaModel;
     }
     if (!env_chat_path.trimmed().isEmpty()) {
         local_model_chat_path_ = env_chat_path.trimmed();
+    } else if (!checkpoint_model_file_.isEmpty()) {
+        local_model_chat_path_ = "/neurx/api/chat";
     } else {
         local_model_chat_path_ = local_model_default_chat_path();
     }
@@ -58,10 +72,17 @@ NeurxBridge::NeurxBridge(QObject* parent)
         && env_chat_path.trimmed().isEmpty();
     if (default_local_setup) {
         local_model_enabled_ = true;
-        local_model_backend_ = "ollama";
-        local_model_base_url_ = "http://127.0.0.1:11434";
-        local_model_name_ = kDefaultOllamaModel;
-        local_model_chat_path_ = local_model_default_chat_path();
+        if (!checkpoint_model_file_.isEmpty()) {
+            local_model_backend_ = "openai";
+            local_model_base_url_ = "http://127.0.0.1:18080";
+            local_model_name_ = checkpoint_model_file_;
+            local_model_chat_path_ = "/neurx/api/chat";
+        } else {
+            local_model_backend_ = "ollama";
+            local_model_base_url_ = "http://127.0.0.1:11434";
+            local_model_name_ = kDefaultOllamaModel;
+            local_model_chat_path_ = local_model_default_chat_path();
+        }
     }
 }
 
@@ -107,7 +128,7 @@ void NeurxBridge::set_local_model_backend(const QString& backend) {
         local_model_name_ = kDefaultOllamaModel;
     }
     if (local_model_chat_path_.isEmpty() || local_model_chat_path_ == "/v1/chat/completions" || local_model_chat_path_ == "/api/chat") {
-        local_model_chat_path_ = local_model_default_chat_path();
+        local_model_chat_path_ = !checkpoint_model_file_.isEmpty() ? "/neurx/api/chat" : local_model_default_chat_path();
     }
     emit localModelConfigChanged();
 }
@@ -397,11 +418,80 @@ QString NeurxBridge::local_model_summary() const {
     if (local_model_base_url_.trimmed().isEmpty() || local_model_name_.trimmed().isEmpty()) {
         return "enabled config_missing";
     }
-    return QString("enabled backend=%1 base_url=%2 model=%3 path=%4")
+    return QString("enabled backend=%1 base_url=%2 model=%3 path=%4 checkpoints=%5")
         .arg(local_model_backend_)
         .arg(local_model_base_url_)
         .arg(local_model_name_)
-        .arg(local_model_chat_path_);
+        .arg(local_model_chat_path_)
+        .arg(checkpoint_model_choices_.size());
+}
+
+QString NeurxBridge::checkpoint_models_root() const {
+    return checkpoint_models_root_;
+}
+
+QString NeurxBridge::checkpoint_model_file() const {
+    return checkpoint_model_file_;
+}
+
+QStringList NeurxBridge::scan_checkpoint_files(const QString& root) const {
+    QStringList files;
+    if (root.trimmed().isEmpty()) {
+        return files;
+    }
+
+    QDirIterator iterator(root, {"*.neurx"}, QDir::Files, QDirIterator::Subdirectories);
+    while (iterator.hasNext()) {
+        files.append(QDir::cleanPath(iterator.next()));
+    }
+    files.sort();
+    return files;
+}
+
+QString NeurxBridge::resolve_checkpoint_file(const QString& root, const QString& explicit_file) const {
+    const QString explicit_next = explicit_file.trimmed();
+    if (!explicit_next.isEmpty()) {
+        const QFileInfo explicit_info(explicit_next);
+        if (explicit_info.exists() && explicit_info.isFile() && explicit_next.endsWith(".neurx")) {
+            return QDir::cleanPath(explicit_info.absoluteFilePath());
+        }
+        if (explicit_info.exists() && explicit_info.isDir()) {
+            const QStringList files = scan_checkpoint_files(explicit_info.absoluteFilePath());
+            if (!files.isEmpty()) {
+                return files.constLast();
+            }
+        }
+    }
+
+    const QString trimmed_root = root.trimmed();
+    if (trimmed_root.isEmpty()) {
+        return QString();
+    }
+
+    const QStringList files = scan_checkpoint_files(trimmed_root);
+    if (files.isEmpty()) {
+        return QString();
+    }
+    return files.constLast();
+}
+
+QVariantList NeurxBridge::checkpoint_choices_for_qml() const {
+    QVariantList choices;
+    const QStringList files = scan_checkpoint_files(checkpoint_models_root_);
+    for (const QString& file : files) {
+        const QString relative = checkpoint_models_root_.isEmpty()
+            ? QFileInfo(file).fileName()
+            : QDir(checkpoint_models_root_).relativeFilePath(file);
+        QVariantMap entry;
+        entry.insert("text", relative);
+        entry.insert("value", file);
+        choices.append(entry);
+    }
+    return choices;
+}
+
+QVariantList NeurxBridge::checkpoint_model_choices() const {
+    return checkpoint_model_choices_;
 }
 
 QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
