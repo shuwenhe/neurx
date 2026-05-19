@@ -738,7 +738,25 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     return result;
 }
 
+QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString& filePath) const {
+    const QString text = (prompt + " " + filePath).trimmed().toLower();
+    if (text.contains("fix") || text.contains("bug") || text.contains("error") || text.contains("implement") || text.contains("patch") || text.contains("refactor") || text.contains("code") || text.contains("qml")) {
+        return "code";
+    }
+    if (text.contains("review") || text.contains("audit") || text.contains("check") || text.contains("test")) {
+        return "review";
+    }
+    if (text.contains("search") || text.contains("lookup") || text.contains("find")) {
+        return "search";
+    }
+    return "general";
+}
+
 QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& filePath) {
+    return run_code_assistant_request(prompt, filePath);
+}
+
+QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QString& filePath) const {
     // Post to local backend /neurx/api/agent/suggest with optional file context
     QString url = local_model_base_url_.trimmed();
     if (url.isEmpty()) {
@@ -775,7 +793,57 @@ QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& fi
         << "-s" << "-X" << "POST" << "-H" << "Content-Type: application/json"
         << "--data-binary" << ("@" + tmp.fileName()) << url, 120000);
 
-    return curlResult;
+    if (curlResult.startsWith("runtime_")) {
+        return curlResult;
+    }
+
+    QJsonParseError parse_error;
+    const QJsonDocument response_json = QJsonDocument::fromJson(curlResult.toUtf8(), &parse_error);
+    if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+        return QString("code_assistant_parse_failed: %1").arg(curlResult.left(200));
+    }
+
+    const QJsonObject response = response_json.object();
+    const QJsonObject meta = response.value("meta").toObject();
+    QString result = QString("code_ok route=%1")
+        .arg(agent_route_for_prompt(prompt, filePath));
+    const QString suggestion = response.value("suggestion").toString();
+    if (!suggestion.isEmpty()) {
+        result = result + "\n" + suggestion;
+    }
+    if (meta.contains("checkpoint_file")) {
+        result = result + "\ncheckpoint_file=" + meta.value("checkpoint_file").toString();
+    }
+    if (meta.contains("checkpoint_step")) {
+        result = result + "\ncheckpoint_step=" + QString::number(meta.value("checkpoint_step").toInt(-1));
+    }
+    if (meta.contains("checkpoint_model_name")) {
+        result = result + "\ncheckpoint_model_name=" + meta.value("checkpoint_model_name").toString();
+    }
+    return result;
+}
+
+void NeurxBridge::run_code_assistant_async(const QString& prompt, const QString& filePath) {
+    if (agent_run_active_) {
+        emit log_message("warning", "agent", "agent run already in progress");
+        emit runtime_status_changed("busy", local_model_name_);
+        return;
+    }
+
+    agent_run_active_ = true;
+    emit runtime_status_changed("running", "code-assistant");
+
+    auto* watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        const QString result = watcher->result();
+        watcher->deleteLater();
+        agent_run_active_ = false;
+        emit agentRunFinished(result);
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, prompt, filePath]() {
+        return run_code_assistant(prompt, filePath);
+    }));
 }
 
 void NeurxBridge::run_agent_async(const QString& prompt, int max_steps) {
@@ -799,6 +867,15 @@ void NeurxBridge::run_agent_async(const QString& prompt, int max_steps) {
     watcher->setFuture(QtConcurrent::run([this, prompt, max_steps]() {
         return run_agent(prompt, max_steps);
     }));
+}
+
+void NeurxBridge::run_agent_auto_async(const QString& prompt, const QString& filePath, int max_steps) {
+    const QString route = agent_route_for_prompt(prompt, filePath);
+    if (route == "code" || route == "review") {
+        run_code_assistant_async(prompt, filePath);
+        return;
+    }
+    run_agent_async(prompt, max_steps);
 }
 
 QString NeurxBridge::ping() {
