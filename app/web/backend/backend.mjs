@@ -167,22 +167,45 @@ function resolveCheckpointFile(selector, root, explicitFile) {
   return root ? findLatestCheckpointFile(root) : '';
 }
 
+function inferCheckpointRootFromFile(checkpointFile) {
+  const file = (checkpointFile || '').trim();
+  if (!file) {
+    return '';
+  }
+
+  return path.dirname(path.dirname(path.dirname(path.resolve(file))));
+}
+
 function collectCheckpointModelChoices(root) {
-  const files = scanCheckpointFiles(root);
-  return files.map((entry) => ({
-    label: root ? path.relative(root, entry.path) : path.basename(entry.path),
-    value: entry.path,
-    checkpoint_file: entry.path,
-    checkpoint_root: root,
-    mtime_ms: entry.mtimeMs,
-  }));
+  const latest = findLatestCheckpointFile(root);
+  if (!latest) {
+    return [];
+  }
+
+  let mtimeMs = 0;
+  try {
+    mtimeMs = fs.statSync(latest).mtimeMs;
+  } catch {
+    mtimeMs = 0;
+  }
+
+  return [
+    {
+      label: root ? path.relative(root, latest) : path.basename(latest),
+      value: latest,
+      checkpoint_file: latest,
+      checkpoint_root: root,
+      mtime_ms: mtimeMs,
+    },
+  ];
 }
 
 function resolveArtifactContext(selector = '') {
   const root = (process.env.NEURX_BACKEND_CHECKPOINT_ROOT || '').trim();
   const explicitFile = (process.env.NEURX_BACKEND_CHECKPOINT_FILE || '').trim();
+  const selectorText = (selector || '').trim();
 
-  if (!root && !explicitFile) {
+  if (!root && !explicitFile && !selectorText) {
     return {
       checkpointRoot: '',
       checkpointFile: '',
@@ -190,10 +213,11 @@ function resolveArtifactContext(selector = '') {
     };
   }
 
-  const checkpointFile = resolveCheckpointFile(selector, root, explicitFile);
+  const checkpointFile = resolveCheckpointFile(selectorText, root, explicitFile);
+  const checkpointRoot = root || inferCheckpointRootFromFile(checkpointFile);
 
   return {
-    checkpointRoot: root,
+    checkpointRoot,
     checkpointFile,
     artifactReady: checkpointFile.length > 0,
   };
