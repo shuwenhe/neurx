@@ -13,6 +13,7 @@
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
+constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
 }
@@ -29,6 +30,16 @@ NeurxBridge::NeurxBridge(QObject* parent)
 
     checkpoint_models_root_ = env_checkpoint_root.trimmed();
     checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, env_checkpoint_file.trimmed());
+    if (!checkpoint_models_root_.isEmpty()) {
+        const QDir root_dir(checkpoint_models_root_);
+        const QString run_root = root_dir.filePath(kCheckpointRunName);
+        if (QFileInfo::exists(run_root) && QFileInfo(run_root).isDir()) {
+            checkpoint_models_root_ = QDir(run_root).absolutePath();
+            if (checkpoint_model_file_.isEmpty()) {
+                checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, QString());
+            }
+        }
+    }
     checkpoint_model_choices_ = checkpoint_choices_for_qml();
 
     if (!env_enabled.isEmpty()) {
