@@ -8,9 +8,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QProcess>
+#include <QTemporaryFile>
 #include <QStandardPaths>
 #include <QThread>
 #include <QVariantMap>
+#include <QtConcurrent/QtConcurrentRun>
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
@@ -734,6 +736,69 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     emit log_message("info", "agent", result);
     emit runtime_status_changed("s-runtime", "probe");
     return result;
+}
+
+QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& filePath) {
+    // Post to local backend /neurx/api/agent/suggest with optional file context
+    QString url = local_model_base_url_.trimmed();
+    if (url.isEmpty()) {
+        url = "http://127.0.0.1:18080";
+    }
+    if (!url.endsWith('/')) {
+        url += '/';
+    }
+    url += "neurx/api/agent/suggest";
+
+    QJsonObject payload;
+    payload.insert("prompt", prompt);
+    if (!filePath.trimmed().isEmpty()) {
+        payload.insert("filePath", filePath.trimmed());
+    }
+    if (!local_model_name_.trimmed().isEmpty()) {
+        payload.insert("model", local_model_name_.trimmed());
+    }
+    payload.insert("maxTokens", 128);
+
+    QJsonDocument doc(payload);
+    QByteArray body = doc.toJson(QJsonDocument::Compact);
+
+    QTemporaryFile tmp;
+    tmp.setAutoRemove(true);
+    if (!tmp.open()) {
+        return QString("runtime_exec_failed: could not create temp file");
+    }
+    tmp.write(body);
+    tmp.flush();
+    tmp.close();
+
+    const QString curlResult = run_process("curl", QStringList()
+        << "-s" << "-X" << "POST" << "-H" << "Content-Type: application/json"
+        << "--data-binary" << ("@" + tmp.fileName()) << url, 120000);
+
+    return curlResult;
+}
+
+void NeurxBridge::run_agent_async(const QString& prompt, int max_steps) {
+    if (agent_run_active_) {
+        emit log_message("warning", "agent", "agent run already in progress");
+        emit runtime_status_changed("busy", local_model_name_);
+        return;
+    }
+
+    agent_run_active_ = true;
+    emit runtime_status_changed("running", local_model_name_);
+
+    auto* watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        const QString result = watcher->result();
+        watcher->deleteLater();
+        agent_run_active_ = false;
+        emit agentRunFinished(result);
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, prompt, max_steps]() {
+        return run_agent(prompt, max_steps);
+    }));
 }
 
 QString NeurxBridge::ping() {
