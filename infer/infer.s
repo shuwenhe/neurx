@@ -12,6 +12,7 @@ use neurx.infer.vllm.vllm
 use neurx.infer.eval
 use neurx.ops
 use neurx.tensor.tensor
+use neurx.checkpoint
 
 struct infer_pipeline_state {
     infer_request_state request
@@ -23,6 +24,7 @@ struct infer_pipeline_state {
     admission_control_state admission
     vllm_runtime_state vllm
     infer_eval_state eval
+    checkpoint model_weights
 }
 
 func new_infer_pipeline_state(string request_id, string model, int input_tokens, int max_new_tokens, int layer_count, int max_seq_len) infer_pipeline_state {
@@ -73,6 +75,24 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
         admission: admission,
         vllm: vllm,
         eval: new_infer_eval_state(),
+        model_weights: new_checkpoint(0, 0.0, []),
+    }
+}
+
+func new_infer_pipeline_from_checkpoint(string request_id, string checkpoint_path, int input_tokens, int max_new_tokens, int layer_count, int max_seq_len) infer_pipeline_state {
+    checkpoint weights = load_checkpoint(checkpoint_path)
+    infer_pipeline_state base = new_infer_pipeline_state(request_id, checkpoint_path, input_tokens, max_new_tokens, layer_count, max_seq_len)
+    infer_pipeline_state {
+        request: base.request,
+        response: base.response,
+        decode: base.decode,
+        batch: base.batch,
+        paged_kv: base.paged_kv,
+        prefix_cache: base.prefix_cache,
+        admission: base.admission,
+        vllm: base.vllm,
+        eval: base.eval,
+        model_weights: weights,
     }
 }
 
@@ -107,10 +127,9 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         admission: next_admission,
         vllm: next_vllm,
         eval: state.eval,
+        model_weights: state.model_weights,
     }
-}
-
-func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_id, int input_tokens, int remaining_tokens) infer_pipeline_state {
+}(infer_pipeline_state state, string request_id, int input_tokens, int remaining_tokens) infer_pipeline_state {
     int prefill_tokens = input_tokens
     if prefill_tokens < 0 {
         prefill_tokens = 0
@@ -141,6 +160,7 @@ func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_i
         admission: next_admission,
         vllm: next_vllm,
         eval: state.eval,
+        model_weights: state.model_weights,
     }
 }
 
@@ -174,6 +194,7 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
                 admission: state.admission,
                 vllm: scheduled.state,
                 eval: state.eval,
+                model_weights: state.model_weights,
             }
 
             sampling_state scheduled_sample = scheduled_state.decode.sampling
@@ -219,6 +240,7 @@ func infer_pipeline_set_sampling(infer_pipeline_state state, sampling_state samp
         admission: state.admission,
         vllm: state.vllm,
         eval: state.eval,
+        model_weights: state.model_weights,
     }
 }
 

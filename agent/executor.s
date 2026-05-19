@@ -28,7 +28,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             ok = true
         }
     } else if model_path != "" && agent_tool_registry_has_enabled(tools, "infer") {
-        infer_pipeline_state pipeline = new_infer_pipeline_state(input, model_path, 512, 256, 32, 2048)
+        infer_pipeline_state pipeline = new_infer_pipeline_from_checkpoint(input, model_path, 512, 256, 32, 2048)
         action = "infer"
         observation = infer_pipeline_last_observation(pipeline)
         ok = true
