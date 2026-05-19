@@ -4,6 +4,25 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 S_BINARY="${NEURX_S_BINARY:-${S_BINARY:-s}}"
 
+pick_s_binary() {
+  local candidate="$1"
+  if [ -x "$candidate" ]; then
+    "$candidate" >/tmp/neurx_s_usage.txt 2>&1 || true
+    if grep -q "s run <input.s>" /tmp/neurx_s_usage.txt; then
+      rm -f /tmp/neurx_s_usage.txt
+      echo "$candidate"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+if ! pick_s_binary "$S_BINARY" >/dev/null; then
+  if [ -x "/home/shuwen/shuwen/s/bin/s" ] && pick_s_binary "/home/shuwen/shuwen/s/bin/s" >/dev/null; then
+    S_BINARY="/home/shuwen/shuwen/s/bin/s"
+  fi
+fi
+
 body_file="$(mktemp /tmp/neurx_backend_body.XXXXXX.json)"
 trap 'rm -f "$body_file"' EXIT
 
@@ -38,4 +57,4 @@ if [ -n "${max_tokens:-}" ]; then
 fi
 
 export NEURX_BACKEND_REQUEST_FILE=""
-exec "${S_BINARY}" "${ROOT_DIR}/backend/serve.s"
+exec "${S_BINARY}" run "${ROOT_DIR}/backend/serve.s"
