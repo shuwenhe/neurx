@@ -113,6 +113,22 @@ Item {
         return ""
     }
 
+    function isFailureResult(text) {
+        return text.indexOf("runtime_") === 0
+            || text.indexOf("local_model_") === 0
+            || text.indexOf("repo_not_found") === 0
+    }
+
+    Connections {
+        target: Runtime
+
+        function onAgentRunFinished(result) {
+            resultOutput.text = result
+            runtimeStatus.text = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
+            shell.agentRunning = false
+        }
+    }
+
     Component.onCompleted: {
         selectFile(selectedFileIndex)
         if (Runtime.checkpointModelChoices.length > 0) {
@@ -709,14 +725,46 @@ Item {
                                     shell.runClickSeq += 1
                                     shell.agentRunning = true
                                     runtimeStatus.text = qsTr("running #") + shell.runClickSeq
+                                    resultOutput.text = qsTr("Running agent...")
                                     try {
-                                        resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
-                                        runtimeStatus.text = qsTr("done #") + shell.runClickSeq
+                                        Runtime.run_agent_async(prompt, shell.runSteps)
                                     } catch (e) {
                                         resultOutput.text = qsTr("run_agent_failed: ") + e
                                         runtimeStatus.text = qsTr("failed #") + shell.runClickSeq
-                                    } finally {
                                         shell.agentRunning = false
+                                    } finally {
+                                        // Completion comes from Runtime.agentRunFinished.
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 140
+                            Layout.preferredHeight: 36
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Suggest Code")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    var prompt = promptEditor.text.trim()
+                                    var filePath = shell.selectedFilePath || ""
+                                    runtimeStatus.text = qsTr("suggesting")
+                                    try {
+                                        resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
+                                        runtimeStatus.text = qsTr("suggestion_done")
+                                    } catch (e) {
+                                        resultOutput.text = qsTr("suggest_failed: ") + e
+                                        runtimeStatus.text = qsTr("failed")
                                     }
                                 }
                             }

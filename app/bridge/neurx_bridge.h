@@ -4,6 +4,7 @@
 #include <QVariantList>
 #include <QString>
 #include <QStringList>
+#include <QFutureWatcher>
 
 class NeurxBridge : public QObject {
     Q_OBJECT
@@ -20,11 +21,14 @@ public:
 
     Q_INVOKABLE QString ping();
     Q_INVOKABLE QString run_agent(const QString& prompt, int max_steps);
+    Q_INVOKABLE QString run_code_assistant(const QString& prompt, const QString& filePath);
+    Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE QString local_model_summary() const;
 
 signals:
     void runtime_status_changed(const QString& status, const QString& task);
     void log_message(const QString& level, const QString& tag, const QString& message);
+    void agentRunFinished(const QString& result);
     void localModelConfigChanged();
 
 public:
@@ -71,5 +75,6 @@ private:
     QString checkpoint_models_root_;
     QString checkpoint_model_file_;
     QVariantList checkpoint_model_choices_;
+    bool agent_run_active_ {false};
     mutable bool local_ollama_ready_ {false};
 };
