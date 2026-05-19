@@ -63,6 +63,127 @@ func has_suffix(string value, string suffix) bool {
     true
 }
 
+func last_path_separator_index(string path) int {
+    int i = len(path) - 1
+    while i >= 0 {
+        if path[i] == "/" {
+            return i
+        }
+        i = i - 1
+    }
+    -1
+}
+
+func path_dirname(string path) string {
+    int idx = last_path_separator_index(path)
+    if idx < 0 {
+        return ""
+    }
+    path[0:idx]
+}
+
+func path_basename(string path) string {
+    int idx = last_path_separator_index(path)
+    if idx < 0 {
+        return path
+    }
+    path[idx + 1:len(path)]
+}
+
+func path_join(string left, string right) string {
+    string base = trim(left)
+    string tail = trim(right)
+    if base == "" {
+        return tail
+    }
+    if tail == "" {
+        return base
+    }
+    if has_suffix(base, "/") {
+        return base + tail
+    }
+    base + "/" + tail
+}
+
+func strip_checkpoint_file_tail(string path) string {
+    string current = trim(path)
+    if current == "" {
+        return ""
+    }
+    string leaf = path_basename(current)
+    if has_suffix(leaf, ".neurx") || has_suffix(leaf, ".txt") {
+        current = path_dirname(current)
+    }
+    leaf = path_basename(current)
+    if leaf == "latest" {
+        current = path_dirname(current)
+    }
+    leaf = path_basename(current)
+    if has_prefix(leaf, "step_") {
+        current = path_dirname(current)
+    }
+    current
+}
+
+func checkpoint_manifest_path(string checkpoint_path) string {
+    string root = strip_checkpoint_file_tail(checkpoint_path)
+    if root == "" {
+        return ""
+    }
+    path_join(root, "latest_checkpoint.txt")
+}
+
+func resolve_checkpoint_path(string path) string {
+    string target = trim(path)
+    if target == "" {
+        target = "latest"
+    }
+
+    while has_suffix(target, "/") {
+        target = target[0:len(target) - 1]
+    }
+
+    if runtime_file_exists(target) {
+        return target
+    }
+    if !has_suffix(target, ".neurx") && runtime_file_exists(target + ".neurx") {
+        return target + ".neurx"
+    }
+    if !has_suffix(target, ".txt") && runtime_file_exists(target + ".txt") {
+        return target + ".txt"
+    }
+
+    string manifest = checkpoint_manifest_path(target)
+    if manifest != "" && runtime_file_exists(manifest) {
+        string resolved = trim(runtime_read_text_file(manifest))
+        if resolved != "" && runtime_file_exists(resolved) {
+            return resolved
+        }
+        if resolved != "" && !has_suffix(resolved, ".neurx") && runtime_file_exists(resolved + ".neurx") {
+            return resolved + ".neurx"
+        }
+    }
+
+    if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
+        string relative_target = path_join("artifacts/checkpoints", target)
+        if runtime_file_exists(relative_target) {
+            return relative_target
+        }
+        if !has_suffix(relative_target, ".neurx") && runtime_file_exists(relative_target + ".neurx") {
+            return relative_target + ".neurx"
+        }
+        string relative_manifest = checkpoint_manifest_path(relative_target)
+        if relative_manifest != "" && runtime_file_exists(relative_manifest) {
+            string resolved_relative = trim(runtime_read_text_file(relative_manifest))
+            if resolved_relative != "" && runtime_file_exists(resolved_relative) {
+                return resolved_relative
+            }
+        }
+    }
+
+    target
+}
+
 func split_lines(string text) []string {
     int n = len(text)
     []string lines = []string{cap: 0}
@@ -317,11 +438,17 @@ func checkpoint_load_state_dict(checkpoint state, checkpoint other) checkpoint {
 }
 
 func save_checkpoint(string path, int step, float loss, []tensor params) () {
-    runtime_write_text_file(normalize_checkpoint_path(path), checkpoint_to_text(new_checkpoint(step, loss, params)))
+    string target = normalize_checkpoint_path(path)
+    runtime_write_text_file(target, checkpoint_to_text(new_checkpoint(step, loss, params)))
+
+    string manifest = checkpoint_manifest_path(target)
+    if manifest != "" {
+        runtime_write_text_file(manifest, target)
+    }
 }
 
 func load_checkpoint(string path) checkpoint {
-    string target = normalize_checkpoint_path(path)
+    string target = resolve_checkpoint_path(path)
     if !runtime_file_exists(target) {
         return new_checkpoint(0, 0.0, [])
     }
@@ -337,10 +464,13 @@ func normalize_checkpoint_path(string path) string {
     while has_suffix(target, "/") {
         target = target[0:len(target) - 1]
     }
+    if has_prefix(target, "/") {
+        return target
+    }
     if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
         target = "artifacts/checkpoints/" + target
     }
-    if !has_suffix(target, ".neurx") && !has_suffix(target, ".txt") {
+    if !has_suffix(target, ".neurx") && !has_suffix(target, ".txt") && !has_suffix(path_basename(target), "latest") {
         target = target + ".neurx"
     }
     target

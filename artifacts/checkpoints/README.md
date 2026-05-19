@@ -20,6 +20,7 @@ Notes:
 - `run_YYYYMMDD_NNN/` groups one training run.
 - `step_0001000/` groups a specific saved step snapshot.
 - `latest/` is the mutable alias for the newest checkpoint in that run.
+- `latest_checkpoint.txt` at the run root points to the current `.neurx` file and lets loaders resolve the whole run directory.
 - The serialized checkpoint payload is written as a `.neurx` file inside these namespaces.
 
 Example artifact path:

@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { processLlmRequest, parseOpenAIRequest } from './backend.mjs';
+import { collectCheckpointModelChoices, processLlmRequest, parseOpenAIRequest } from './backend.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 18080);
@@ -41,6 +41,23 @@ const server = createServer((req, res) => {
           backend: 'nodejs-gpt-large',
           checkpoint_root: (process.env.NEURX_BACKEND_CHECKPOINT_ROOT || '').trim(),
           checkpoint_file: (process.env.NEURX_BACKEND_CHECKPOINT_FILE || '').trim(),
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (req.method === 'GET' && (req.url === '/neurx/api/models' || req.url === '/api/models')) {
+    const checkpointRoot = (process.env.NEURX_BACKEND_CHECKPOINT_ROOT || '').trim();
+    send(
+      res,
+      200,
+      JSON.stringify(
+        {
+          checkpoint_root: checkpointRoot,
+          models: collectCheckpointModelChoices(checkpointRoot),
         },
         null,
         2,
