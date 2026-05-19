@@ -29,6 +29,28 @@ NeurxBridge::NeurxBridge(QObject* parent)
     const QString env_checkpoint_file = qEnvironmentVariable("NEURX_BACKEND_CHECKPOINT_FILE");
 
     checkpoint_models_root_ = env_checkpoint_root.trimmed();
+    if (checkpoint_models_root_.isEmpty()) {
+        const QString repo_root = find_repo_root();
+        if (!repo_root.isEmpty()) {
+            const QString inferred = QDir(repo_root).filePath("artifacts/checkpoints");
+            if (QFileInfo::exists(inferred) && QFileInfo(inferred).isDir()) {
+                checkpoint_models_root_ = QDir(inferred).absolutePath();
+            }
+        }
+    }
+    if (checkpoint_models_root_.isEmpty()) {
+        QDir dir(QDir::currentPath());
+        for (int i = 0; i < 8; ++i) {
+            const QString inferred = dir.filePath("artifacts/checkpoints");
+            if (QFileInfo::exists(inferred) && QFileInfo(inferred).isDir()) {
+                checkpoint_models_root_ = QDir(inferred).absolutePath();
+                break;
+            }
+            if (!dir.cdUp()) {
+                break;
+            }
+        }
+    }
     checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, env_checkpoint_file.trimmed());
     if (!checkpoint_models_root_.isEmpty()) {
         const QDir root_dir(checkpoint_models_root_);
