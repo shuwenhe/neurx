@@ -1,5 +1,6 @@
 #include "bridge/neurx_bridge.h"
 
+#include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -57,9 +58,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         const QString run_root = root_dir.filePath(kCheckpointRunName);
         if (QFileInfo::exists(run_root) && QFileInfo(run_root).isDir()) {
             checkpoint_models_root_ = QDir(run_root).absolutePath();
-            if (checkpoint_model_file_.isEmpty()) {
-                checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, QString());
-            }
+            checkpoint_model_file_ = resolve_checkpoint_file(checkpoint_models_root_, env_checkpoint_file.trimmed());
         }
     }
     checkpoint_model_choices_ = checkpoint_choices_for_qml();
@@ -544,6 +543,25 @@ QStringList NeurxBridge::scan_checkpoint_files(const QString& root) const {
     return files;
 }
 
+QString NeurxBridge::resolve_latest_checkpoint_file(const QString& root) const {
+    const QStringList files = scan_checkpoint_files(root);
+    if (files.isEmpty()) {
+        return QString();
+    }
+
+    QString best_file;
+    QDateTime best_time;
+    for (const QString& file : files) {
+        const QFileInfo info(file);
+        const QDateTime modified = info.lastModified();
+        if (best_file.isEmpty() || modified > best_time) {
+            best_file = file;
+            best_time = modified;
+        }
+    }
+    return best_file;
+}
+
 QString NeurxBridge::resolve_checkpoint_file(const QString& root, const QString& explicit_file) const {
     const QString explicit_next = explicit_file.trimmed();
     if (!explicit_next.isEmpty()) {
@@ -568,22 +586,53 @@ QString NeurxBridge::resolve_checkpoint_file(const QString& root, const QString&
     if (files.isEmpty()) {
         return QString();
     }
-    return files.constLast();
+    return resolve_latest_checkpoint_file(trimmed_root);
 }
 
 QVariantList NeurxBridge::checkpoint_choices_for_qml() const {
     QVariantList choices;
-    const QStringList files = scan_checkpoint_files(checkpoint_models_root_);
-    for (const QString& file : files) {
-        const QString relative = checkpoint_models_root_.isEmpty()
-            ? QFileInfo(file).fileName()
-            : QDir(checkpoint_models_root_).relativeFilePath(file);
-        QVariantMap entry;
-        entry.insert("text", relative);
-        entry.insert("value", file);
-        choices.append(entry);
+    const QString latest = resolve_latest_checkpoint_file(checkpoint_models_root_);
+    if (latest.isEmpty()) {
+        return choices;
     }
+
+    const QString relative = checkpoint_models_root_.isEmpty()
+        ? QFileInfo(latest).fileName()
+        : QDir(checkpoint_models_root_).relativeFilePath(latest);
+    QVariantMap entry;
+    entry.insert("text", relative);
+    entry.insert("value", latest);
+    entry.insert("checkpoint_file", latest);
+    entry.insert("checkpoint_root", checkpoint_models_root_);
+    entry.insert("latest", true);
+    choices.append(entry);
     return choices;
+}
+
+void NeurxBridge::refresh_checkpoint_model_state() {
+    if (checkpoint_models_root_.trimmed().isEmpty()) {
+        return;
+    }
+
+    const QString latest = resolve_latest_checkpoint_file(checkpoint_models_root_);
+    if (latest.isEmpty()) {
+        return;
+    }
+
+    checkpoint_model_file_ = latest;
+    checkpoint_model_choices_ = checkpoint_choices_for_qml();
+
+    if (local_model_enabled_ && local_model_backend_ == "openai") {
+        local_model_name_ = latest;
+        if (local_model_base_url_.trimmed().isEmpty()) {
+            local_model_base_url_ = "http://127.0.0.1:18080";
+        }
+        if (local_model_chat_path_.trimmed().isEmpty() || local_model_chat_path_ == "/v1/chat/completions") {
+            local_model_chat_path_ = "/neurx/api/chat";
+        }
+    }
+
+    emit localModelConfigChanged();
 }
 
 QVariantList NeurxBridge::checkpoint_model_choices() const {
@@ -602,6 +651,8 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     if (steps <= 0) {
         steps = 1;
     }
+
+    refresh_checkpoint_model_state();
 
     if (local_model_enabled_ && !local_model_base_url_.trimmed().isEmpty() && !local_model_name_.trimmed().isEmpty()) {
         const QString backend_ready = ensure_local_openai_backend(root);
