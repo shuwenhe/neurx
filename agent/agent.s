@@ -11,12 +11,21 @@ func new_default_agent(string goal) agent_runtime_state {
     new_agent_runtime_state(goal, "analyze", 8)
 }
 
+func new_default_agent_with_model(string goal, string model_path) agent_runtime_state {
+    new_agent_runtime_state_with_model(goal, "analyze", 8, model_path)
+}
+
 func run_agent(agent_runtime_state state, string input, int max_steps) agent_runtime_state {
     run_agent_steps(state, input, max_steps)
 }
 
 func run_agent_with_goal(string goal, string input, int max_steps) agent_runtime_state {
     agent_runtime_state state = new_default_agent(goal)
+    run_agent_steps(state, input, max_steps)
+}
+
+func run_agent_with_local_model(string goal, string model_path, string input, int max_steps) agent_runtime_state {
+    agent_runtime_state state = new_default_agent_with_model(goal, model_path)
     run_agent_steps(state, input, max_steps)
 }
 
