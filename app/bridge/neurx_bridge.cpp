@@ -247,6 +247,55 @@ QString NeurxBridge::run_process(const QString& program, const QStringList& args
     return stdout_text;
 }
 
+QString NeurxBridge::run_http_request(const QString& method, const QString& url, const QString& body_file, int timeout_ms) const {
+    const QString node = QStandardPaths::findExecutable("node");
+    if (node.isEmpty()) {
+        return "runtime_exec_failed: node not found";
+    }
+
+const QString script = R"JS(
+const fs = await import('node:fs');
+const [requestUrl, requestMethod, requestBodyFile] = process.argv.slice(1);
+const target = new URL(requestUrl);
+if (target.hostname === 'localhost') {
+  target.hostname = '127.0.0.1';
+}
+
+const options = { method: requestMethod, headers: {} };
+
+if (requestBodyFile) {
+  options.body = fs.readFileSync(requestBodyFile, 'utf8');
+  options.headers['Content-Type'] = 'application/json';
+}
+
+try {
+  const response = await fetch(target, options);
+  const text = await response.text();
+  if (!response.ok) {
+    console.error(text || `HTTP ${response.status}`);
+    process.exit(1);
+  }
+  process.stdout.write(text);
+} catch (err) {
+  const cause = err && err.cause ? err.cause : null;
+  const detail = cause && (cause.code || cause.message)
+    ? `${err.message || String(err)}: ${cause.code || cause.message}`
+    : (err && err.message ? err.message : String(err));
+  console.error(detail);
+  process.exit(1);
+}
+)JS";
+
+    QStringList args;
+    args << "--input-type=module"
+         << "-e"
+         << script
+         << url
+         << method
+         << body_file;
+    return run_process(node, args, timeout_ms);
+}
+
 QString NeurxBridge::ollama_command() const {
     const QString from_path = QStandardPaths::findExecutable("ollama");
     if (!from_path.isEmpty()) {
@@ -357,21 +406,13 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
         return QString();
     }
 
-    const QString curl = QStandardPaths::findExecutable("curl");
-    if (curl.isEmpty()) {
-        return "runtime_exec_failed: curl not found";
-    }
-
     QString health_url = base_url;
     if (health_url.endsWith('/')) {
         health_url.chop(1);
     }
     health_url = health_url + "/neurx/health";
 
-    const QString health_probe = run_process(
-        curl,
-        {"-sS", "--connect-timeout", "1", "--max-time", "2", health_url},
-        5000);
+    const QString health_probe = run_http_request("GET", health_url, QString(), 5000);
     if (!health_probe.startsWith("runtime_")) {
         return QString();
     }
@@ -395,10 +436,7 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
 
     for (int attempt = 0; attempt < 10; ++attempt) {
         QThread::msleep(300);
-        const QString probe = run_process(
-            curl,
-            {"-sS", "--connect-timeout", "1", "--max-time", "2", health_url},
-            5000);
+        const QString probe = run_http_request("GET", health_url, QString(), 5000);
         if (!probe.startsWith("runtime_")) {
             return QString();
         }
@@ -417,11 +455,6 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     const QString model_name = local_model_name_.trimmed();
     if (base_url.isEmpty() || chat_path.isEmpty() || model_name.isEmpty()) {
         return "local_model_config_missing: base_url, chat_path, or model";
-    }
-
-    const QString curl = QStandardPaths::findExecutable("curl");
-    if (curl.isEmpty()) {
-        return "runtime_exec_failed: curl not found";
     }
 
     QString url = base_url;
@@ -445,10 +478,16 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     request_json.insert("max_tokens", max_steps);
 
     const QString payload = QString::fromUtf8(QJsonDocument(request_json).toJson(QJsonDocument::Compact));
-    const QString raw = run_process(
-        curl,
-        {"-sS", "--connect-timeout", "2", "--max-time", "10", "-X", "POST", "-H", "Content-Type: application/json", "--data", payload, url},
-        120000);
+    QTemporaryFile tmp;
+    tmp.setAutoRemove(true);
+    if (!tmp.open()) {
+        return QString("runtime_exec_failed: could not create temp file");
+    }
+    tmp.write(payload.toUtf8());
+    tmp.flush();
+    tmp.close();
+
+    const QString raw = run_http_request("POST", url, tmp.fileName(), 120000);
     if (raw.startsWith("runtime_")) {
         return raw;
     }
@@ -756,7 +795,22 @@ QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& fi
     return run_code_assistant_request(prompt, filePath);
 }
 
-QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QString& filePath) const {
+QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QString& filePath) {
+    const QString root = find_repo_root();
+    if (root.isEmpty()) {
+        return "repo_not_found";
+    }
+    const QString route = agent_route_for_prompt(prompt, filePath);
+    emit log_message("info", "agent", QString("code-assistant start route=%1 prompt_len=%2 file=%3")
+        .arg(route)
+        .arg(prompt.size())
+        .arg(filePath.trimmed().isEmpty() ? QStringLiteral("-") : QFileInfo(filePath.trimmed()).fileName()));
+    const QString backend_ready = ensure_local_openai_backend(root);
+    if (!backend_ready.isEmpty()) {
+        emit log_message("warning", "agent", QString("code-assistant backend failed: %1").arg(backend_ready));
+        return backend_ready;
+    }
+
     // Post to local backend /neurx/api/agent/suggest with optional file context
     QString url = local_model_base_url_.trimmed();
     if (url.isEmpty()) {
@@ -789,37 +843,28 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     tmp.flush();
     tmp.close();
 
-    const QString curlResult = run_process("curl", QStringList()
-        << "-s" << "-X" << "POST" << "-H" << "Content-Type: application/json"
-        << "--data-binary" << ("@" + tmp.fileName()) << url, 120000);
+    const QString curlResult = run_http_request("POST", url, tmp.fileName(), 120000);
 
     if (curlResult.startsWith("runtime_")) {
+        emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(curlResult));
         return curlResult;
     }
 
     QJsonParseError parse_error;
     const QJsonDocument response_json = QJsonDocument::fromJson(curlResult.toUtf8(), &parse_error);
     if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+        emit log_message("error", "agent", QString("code-assistant parse failed: %1").arg(curlResult.left(200)));
         return QString("code_assistant_parse_failed: %1").arg(curlResult.left(200));
     }
 
     const QJsonObject response = response_json.object();
-    const QJsonObject meta = response.value("meta").toObject();
-    QString result = QString("code_ok route=%1")
-        .arg(agent_route_for_prompt(prompt, filePath));
     const QString suggestion = response.value("suggestion").toString();
-    if (!suggestion.isEmpty()) {
-        result = result + "\n" + suggestion;
-    }
-    if (meta.contains("checkpoint_file")) {
-        result = result + "\ncheckpoint_file=" + meta.value("checkpoint_file").toString();
-    }
-    if (meta.contains("checkpoint_step")) {
-        result = result + "\ncheckpoint_step=" + QString::number(meta.value("checkpoint_step").toInt(-1));
-    }
-    if (meta.contains("checkpoint_model_name")) {
-        result = result + "\ncheckpoint_model_name=" + meta.value("checkpoint_model_name").toString();
-    }
+    QString result = suggestion.isEmpty()
+        ? QString("code_ok route=%1").arg(agent_route_for_prompt(prompt, filePath))
+        : suggestion;
+    emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2")
+        .arg(route)
+        .arg(result.size()));
     return result;
 }
 

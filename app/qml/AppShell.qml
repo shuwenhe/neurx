@@ -346,12 +346,12 @@ Item {
                     property real dragStartX: 0
                     property int dragStartWidth: 0
 
-                    onPressed: {
+                    onPressed: function(mouse) {
                         dragStartX = mouse.x
                         dragStartWidth = shell.explorerPaneWidth
                     }
 
-                    onPositionChanged: {
+                    onPositionChanged: function(mouse) {
                         if (!pressed) {
                             return
                         }
@@ -494,12 +494,12 @@ Item {
                     property real dragStartX: 0
                     property int dragStartWidth: 0
 
-                    onPressed: {
+                    onPressed: function(mouse) {
                         dragStartX = mouse.x
                         dragStartWidth = shell.agentPaneWidth
                     }
 
-                    onPositionChanged: {
+                    onPositionChanged: function(mouse) {
                         if (!pressed) {
                             return
                         }

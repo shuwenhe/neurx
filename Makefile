@@ -1,4 +1,4 @@
-.PHONY: help install install-local s-compile-runtime clean verify-layout
+.PHONY: help install install-local s-compile-runtime logs clean verify-layout
 
 .DEFAULT_GOAL := s-compile-runtime
 
@@ -9,12 +9,18 @@ help:
 	@echo "  s-compile-runtime Compile all NeurX S sources to IR"
 	@echo "  install-local     Alias of s-compile-runtime"
 	@echo "  install           Alias of s-compile-runtime"
+	@echo "  logs              Start the app and stream runtime logs to build/logs/neurx.log"
 	@echo "  clean             Remove generated artifacts and caches"
 	@echo "  verify-layout     Check for forbidden IR/build artifacts in source directories"
 
 install: s-compile-runtime
 
 install-local: s-compile-runtime
+
+logs:
+	@mkdir -p build/logs
+	@echo "Streaming NeurX runtime logs to build/logs/neurx.log"
+	@bash app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log
 
 s-compile-runtime:
 	@if [ ! -x "$(S_COMPILER)" ]; then \
