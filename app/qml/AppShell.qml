@@ -26,6 +26,7 @@ Item {
     property int explorerPaneWidth: 280
     property int agentPaneWidth: 342
     property int runSteps: 4
+    property bool agentRunning: false
 
     ListModel {
         id: fileModel
@@ -100,15 +101,6 @@ Item {
         }
     }
 
-    function checkpointModelIndex() {
-        for (var i = 0; i < Runtime.checkpointModelChoices.length; ++i) {
-            if (Runtime.checkpointModelChoices[i].value === Runtime.localModelName) {
-                return i
-            }
-        }
-        return Runtime.checkpointModelChoices.length > 0 ? 0 : -1
-    }
-
     function parseResultField(text, key) {
         var lines = (text || "").split("\n")
         var prefix = key + "="
@@ -122,6 +114,9 @@ Item {
 
     Component.onCompleted: {
         selectFile(selectedFileIndex)
+        if (Runtime.checkpointModelChoices.length > 0) {
+            Runtime.localModelName = Runtime.checkpointModelChoices[0].value
+        }
         clampPaneWidths()
     }
     onWidthChanged: clampPaneWidths()
@@ -543,19 +538,17 @@ Item {
                             anchors.margins: 10
                             spacing: 8
 
-                            ComboBox {
+                            Text {
                                 id: modelPicker
                                 Layout.fillWidth: true
-                                model: Runtime.checkpointModelChoices
-                                editable: false
-                                textRole: "text"
-                                valueRole: "value"
-                                currentIndex: checkpointModelIndex()
-                                enabled: Runtime.checkpointModelChoices.length > 0
-
-                                onActivated: {
-                                    Runtime.localModelName = currentValue
-                                }
+                                text: Runtime.checkpointModelChoices.length > 0
+                                    ? Runtime.checkpointModelChoices[0].text
+                                    : qsTr("No NeurX checkpoints were found under the configured run directory.")
+                                color: shell.textPrimary
+                                font.pixelSize: 14
+                                font.bold: true
+                                elide: Text.ElideMiddle
+                                wrapMode: Text.NoWrap
                             }
 
                             Text {
@@ -569,7 +562,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
                                 text: Runtime.checkpointModelChoices.length > 0
-                                    ? qsTr("Only NeurX checkpoint snapshots are exposed here.")
+                                    ? qsTr("Latest NeurX checkpoint only. The active agent auto-switches to it.")
                                     : qsTr("No NeurX checkpoints were found under the configured run directory.")
                                 color: shell.textMuted
                                 font.pixelSize: 11
@@ -692,23 +685,39 @@ Item {
                             Layout.preferredWidth: 120
                             Layout.preferredHeight: 36
                             radius: 10
-                            color: shell.accent
+                            color: shell.agentRunning ? shell.panelHover : shell.accent
 
                             Text {
                                 anchors.centerIn: parent
-                                text: qsTr("Run Agent")
+                                text: shell.agentRunning ? qsTr("Running...") : qsTr("Run Agent")
                                 color: shell.bg
                                 font.bold: true
                             }
 
                             MouseArea {
                                 anchors.fill: parent
+                                enabled: !shell.agentRunning
                                 onClicked: {
+                                    if (shell.agentRunning) {
+                                        return
+                                    }
                                     var prompt = promptEditor.text.trim()
                                     if (!prompt) {
                                         prompt = "hello"
                                     }
-                                    resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
+                                    shell.agentRunning = true
+                                    runtimeStatus.text = qsTr("running")
+                                    Qt.callLater(function() {
+                                        try {
+                                            resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
+                                            runtimeStatus.text = qsTr("done")
+                                        } catch (e) {
+                                            resultOutput.text = qsTr("run_agent_failed: ") + e
+                                            runtimeStatus.text = qsTr("failed")
+                                        } finally {
+                                            shell.agentRunning = false
+                                        }
+                                    })
                                 }
                             }
                         }
