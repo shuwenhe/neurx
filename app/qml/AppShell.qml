@@ -20,13 +20,6 @@ Item {
     readonly property int paneMinEditorWidth: 420
     readonly property int paneMinAgentWidth: 300
     readonly property int workspaceMargin: 20
-    readonly property var modelPresets: [
-        "qwen2.5:0.5b",
-        "qwen2.5:1.5b",
-        "qwen2.5:3b",
-        "llama3.2:1b",
-        "llama3.2:3b"
-    ]
 
     property int selectedFileIndex: 1
     property string selectedFilePath: ""
@@ -107,16 +100,12 @@ Item {
     }
 
     function checkpointModelIndex() {
-        if (Runtime.checkpointModelChoices.length === 0) {
-            return shell.modelPresets.indexOf(Runtime.localModelName)
-        }
-
         for (var i = 0; i < Runtime.checkpointModelChoices.length; ++i) {
             if (Runtime.checkpointModelChoices[i].value === Runtime.localModelName) {
                 return i
             }
         }
-        return -1
+        return Runtime.checkpointModelChoices.length > 0 ? 0 : -1
     }
 
     Component.onCompleted: {
@@ -545,51 +534,31 @@ Item {
                             ComboBox {
                                 id: modelPicker
                                 Layout.fillWidth: true
-                                model: Runtime.checkpointModelChoices.length > 0 ? Runtime.checkpointModelChoices : shell.modelPresets
+                                model: Runtime.checkpointModelChoices
                                 editable: false
-                                textRole: Runtime.checkpointModelChoices.length > 0 ? "text" : undefined
-                                valueRole: Runtime.checkpointModelChoices.length > 0 ? "value" : undefined
+                                textRole: "text"
+                                valueRole: "value"
                                 currentIndex: checkpointModelIndex()
+                                enabled: Runtime.checkpointModelChoices.length > 0
 
                                 onActivated: {
-                                    Runtime.localModelName = Runtime.checkpointModelChoices.length > 0 ? currentValue : currentText
-                                }
-                            }
-
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 34
-                                radius: 10
-                                color: shell.editorBg
-                                border.color: shell.border
-
-                                TextInput {
-                                    id: modelNameInput
-                                    anchors.fill: parent
-                                    anchors.margins: 10
-                                    text: Runtime.localModelName
-                                    color: shell.textPrimary
-                                    selectByMouse: true
-                                    selectionColor: shell.accent
-                                    selectedTextColor: shell.bg
-                                    font.pixelSize: 12
-
-                                    onTextEdited: Runtime.localModelName = text
-                                }
-
-                                Text {
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 10
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: qsTr("Custom model name")
-                                    color: shell.textMuted
-                                    visible: modelNameInput.text.length === 0
+                                    Runtime.localModelName = currentValue
                                 }
                             }
 
                             Text {
                                 Layout.fillWidth: true
                                 text: Runtime.localModelSummary
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                wrapMode: Text.WordWrap
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: Runtime.checkpointModelChoices.length > 0
+                                    ? qsTr("Only NeurX checkpoint snapshots are exposed here.")
+                                    : qsTr("No NeurX checkpoints were found under the configured run directory.")
                                 color: shell.textMuted
                                 font.pixelSize: 11
                                 wrapMode: Text.WordWrap
