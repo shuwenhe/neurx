@@ -56,11 +56,12 @@ private:
     QString find_repo_root() const;
     QString run_agent_probe(const QString& repo_root) const;
     QString run_process(const QString& program, const QStringList& args, int timeout_ms, const QString& working_dir = QString()) const;
+    QString run_http_request(const QString& method, const QString& url, const QString& body_file = QString(), int timeout_ms = 120000) const;
     QString ollama_command() const;
     QString bootstrap_ollama_model();
     QString ensure_local_openai_backend(const QString& repo_root);
     QString run_local_model_agent(const QString& prompt, int max_steps) const;
-    QString run_code_assistant_request(const QString& prompt, const QString& filePath) const;
+    QString run_code_assistant_request(const QString& prompt, const QString& filePath);
     QString local_model_default_chat_path() const;
     QString normalize_local_model_backend(const QString& backend) const;
     QString checkpoint_models_root() const;
