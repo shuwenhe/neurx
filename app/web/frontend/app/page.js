@@ -18,6 +18,28 @@ function fallbackResponse(payload) {
   };
 }
 
+function groupModelOptions(modelOptions) {
+  const groups = new Map();
+
+  for (const option of modelOptions) {
+    const label = option.label || option.value || '';
+    const parts = label.split('/').filter(Boolean);
+    const groupLabel = parts.length > 0 ? parts[0] : 'checkpoints';
+    const displayLabel = parts.length > 1 ? parts.slice(1).join('/') : label;
+    const group = groups.get(groupLabel) || [];
+    group.push({
+      ...option,
+      displayLabel,
+    });
+    groups.set(groupLabel, group);
+  }
+
+  return Array.from(groups.entries()).map(([groupLabel, options]) => ({
+    groupLabel,
+    options,
+  }));
+}
+
 export default function Page() {
   const [prompt, setPrompt] = useState('Explain how NeurX exposes an S-based LLM backend.');
   const [model, setModel] = useState('gpt_large');
@@ -64,6 +86,8 @@ export default function Page() {
       cancelled = true;
     };
   }, []);
+
+  const groupedModelOptions = useMemo(() => groupModelOptions(modelOptions), [modelOptions]);
 
   const requestPreview = useMemo(
     () =>
@@ -132,13 +156,25 @@ export default function Page() {
         <div className="row">
           <label className="inline" htmlFor="model">
             <span>Model checkpoint</span>
-            <input
+            <select
               id="model"
-              type="text"
-              list="model-options"
               value={model}
               onChange={(event) => setModel(event.target.value)}
-            />
+            >
+              {groupedModelOptions.length === 0 ? (
+                <option value="gpt_large">gpt_large</option>
+              ) : (
+                groupedModelOptions.map((group) => (
+                  <optgroup key={group.groupLabel} label={group.groupLabel}>
+                    {group.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.displayLabel}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              )}
+            </select>
           </label>
           <label className="inline" htmlFor="maxTokens">
             <span>Max tokens</span>
@@ -153,14 +189,8 @@ export default function Page() {
           </label>
         </div>
 
-        <datalist id="model-options">
-          {modelOptions.map((option) => (
-            <option key={option.value} value={option.value} label={option.label} />
-          ))}
-        </datalist>
-
         <p className="hint">
-          Suggestions are loaded from <code>/neurx/api/models</code> and map to checkpoint files under <code>artifacts/checkpoints/</code>.
+          Checkpoints are loaded from <code>/neurx/api/models</code> and grouped by run name from <code>artifacts/checkpoints/</code>.
         </p>
 
         <button type="button" onClick={handleSend} disabled={loading}>
