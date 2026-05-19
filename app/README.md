@@ -61,6 +61,8 @@ Supported config fields:
 
 The same fields can also be edited from the QML app shell after launch.
 
+If `NEURX_BACKEND_CHECKPOINT_ROOT` is set, the Qt shell discovers `.neurx` snapshots under that tree and offers them in the local model picker. When `NEURX_BACKEND_CHECKPOINT_FILE` is set, the shell prefers that checkpoint path.
+
 When `run_with_llm.sh` starts the local backend, it will automatically prefer the newest `.neurx` file under `artifacts/checkpoints/` and expose it through the backend response.
 
 ## Directory Layout

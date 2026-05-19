@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QVariantList>
 #include <QString>
 #include <QStringList>
 
@@ -12,6 +13,7 @@ class NeurxBridge : public QObject {
     Q_PROPERTY(QString localModelName READ local_model_name WRITE set_local_model_name NOTIFY localModelConfigChanged)
     Q_PROPERTY(QString localModelChatPath READ local_model_chat_path WRITE set_local_model_chat_path NOTIFY localModelConfigChanged)
     Q_PROPERTY(QString localModelSummary READ local_model_summary NOTIFY localModelConfigChanged)
+    Q_PROPERTY(QVariantList checkpointModelChoices READ checkpoint_model_choices NOTIFY localModelConfigChanged)
 
 public:
     explicit NeurxBridge(QObject* parent = nullptr);
@@ -41,6 +43,8 @@ public:
     QString local_model_chat_path() const;
     void set_local_model_chat_path(const QString& chat_path);
 
+    QVariantList checkpoint_model_choices() const;
+
 private:
     QString find_repo_root() const;
     QString run_agent_probe(const QString& repo_root) const;
@@ -50,11 +54,19 @@ private:
     QString run_local_model_agent(const QString& prompt, int max_steps) const;
     QString local_model_default_chat_path() const;
     QString normalize_local_model_backend(const QString& backend) const;
+    QString checkpoint_models_root() const;
+    QString checkpoint_model_file() const;
+    QString resolve_checkpoint_file(const QString& root, const QString& explicit_file) const;
+    QStringList scan_checkpoint_files(const QString& root) const;
+    QVariantList checkpoint_choices_for_qml() const;
 
     bool local_model_enabled_ {false};
     QString local_model_backend_ {"openai"};
     QString local_model_base_url_;
     QString local_model_name_ {"local-model"};
     QString local_model_chat_path_ {"/v1/chat/completions"};
+    QString checkpoint_models_root_;
+    QString checkpoint_model_file_;
+    QVariantList checkpoint_model_choices_;
     mutable bool local_ollama_ready_ {false};
 };
