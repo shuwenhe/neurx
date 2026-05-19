@@ -27,6 +27,7 @@ Item {
     property int agentPaneWidth: 342
     property int runSteps: 4
     property bool agentRunning: false
+    property int runClickSeq: 0
 
     ListModel {
         id: fileModel
@@ -705,14 +706,15 @@ Item {
                                     if (!prompt) {
                                         prompt = "hello"
                                     }
+                                    shell.runClickSeq += 1
                                     shell.agentRunning = true
-                                    runtimeStatus.text = qsTr("running")
+                                    runtimeStatus.text = qsTr("running #") + shell.runClickSeq
                                     try {
                                         resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
-                                        runtimeStatus.text = qsTr("done")
+                                        runtimeStatus.text = qsTr("done #") + shell.runClickSeq
                                     } catch (e) {
                                         resultOutput.text = qsTr("run_agent_failed: ") + e
-                                        runtimeStatus.text = qsTr("failed")
+                                        runtimeStatus.text = qsTr("failed #") + shell.runClickSeq
                                     } finally {
                                         shell.agentRunning = false
                                     }
