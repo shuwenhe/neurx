@@ -95,6 +95,48 @@ const server = createServer((req, res) => {
     return;
   }
 
+  // Code-assistant endpoint (Copilot/Codex-like): accepts { prompt, filePath, model?, maxTokens? }
+  if (req.method === 'POST' && req.url === '/neurx/api/agent/suggest') {
+    const chunks = [];
+    req.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      try {
+        const bodyText = Buffer.concat(chunks).toString('utf8');
+        const payload = JSON.parse(bodyText || '{}');
+        const model = payload.model || (process.env.NEURX_BACKEND_CHECKPOINT_FILE || '').trim() || 'gpt_large';
+        let prompt = payload.prompt || '';
+        const filePath = payload.filePath || '';
+        if (filePath) {
+          try {
+            const fileText = fs.readFileSync(filePath, 'utf8');
+            prompt = `File: ${filePath}\n---\n${fileText}\n---\nUser prompt:\n${prompt}`;
+          } catch (e) {
+            // ignore file read errors and proceed with original prompt
+          }
+        }
+        const maxTokens = Math.min(payload.maxTokens || 64, 256);
+        const response = processLlmRequest(model, prompt, maxTokens);
+        send(res, 200, JSON.stringify({ ok: true, suggestion: response.completion, meta: response }, null, 2));
+      } catch (err) {
+        send(
+          res,
+          500,
+          JSON.stringify(
+            {
+              ok: false,
+              error: err.message || 'Internal server error',
+            },
+            null,
+            2,
+          ),
+        );
+      }
+    });
+    return;
+  }
+
   // Compatibility: also accept v1/chat/completions for OpenAI-like clients
   if (req.method === 'POST' && req.url === '/v1/chat/completions') {
     const chunks = [];
