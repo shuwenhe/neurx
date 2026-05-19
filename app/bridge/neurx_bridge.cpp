@@ -17,6 +17,11 @@ constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
+
+bool run_diag_enabled() {
+    const QString v = qEnvironmentVariable("NEURX_AGENT_DEBUG_RUN").trimmed().toLower();
+    return v == "1" || v == "true" || v == "yes" || v == "on";
+}
 }
 
 NeurxBridge::NeurxBridge(QObject* parent)
@@ -655,10 +660,12 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
         steps = 1;
     }
 
-    emit log_message("info", "bridge", QString("run_agent seq=%1 steps=%2 prompt_len=%3")
-        .arg(run_seq)
-        .arg(steps)
-        .arg(prompt.size()));
+    if (run_diag_enabled()) {
+        emit log_message("info", "bridge", QString("run_agent seq=%1 steps=%2 prompt_len=%3")
+            .arg(run_seq)
+            .arg(steps)
+            .arg(prompt.size()));
+    }
 
     refresh_checkpoint_model_state();
 
@@ -698,13 +705,17 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
                     result = result + "\ncheckpoint_step=" + QString::number(obj.value("checkpoint_step").toInt(-1));
                 }
                 result = result + "\n" + content;
-                emit log_message("info", "bridge", QString("run_agent seq=%1 completed local-json").arg(run_seq));
+                if (run_diag_enabled()) {
+                    emit log_message("info", "bridge", QString("run_agent seq=%1 completed local-json").arg(run_seq));
+                }
                 emit log_message("info", "agent", result);
                 emit runtime_status_changed("local-model", local_model_name_);
                 return result;
             }
 
-            emit log_message("info", "bridge", QString("run_agent seq=%1 completed local-text").arg(run_seq));
+            if (run_diag_enabled()) {
+                emit log_message("info", "bridge", QString("run_agent seq=%1 completed local-text").arg(run_seq));
+            }
             emit log_message("info", "agent", local_result);
             emit runtime_status_changed("local-model", local_model_name_);
             return local_result;
@@ -717,7 +728,9 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     Q_UNUSED(prompt);
     Q_UNUSED(steps);
     const QString result = run_agent_probe(root);
-    emit log_message("info", "bridge", QString("run_agent seq=%1 completed probe").arg(run_seq));
+    if (run_diag_enabled()) {
+        emit log_message("info", "bridge", QString("run_agent seq=%1 completed probe").arg(run_seq));
+    }
     emit log_message("info", "agent", result);
     emit runtime_status_changed("s-runtime", "probe");
     return result;
