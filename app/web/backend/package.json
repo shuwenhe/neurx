@@ -1,15 +1,11 @@
 {
   "name": "neurx-backend",
   "version": "1.0.0",
-  "type": "module",
-  "description": "NeurX LLM backend - Node.js HTTP wrapper for local model inference",
-  "main": "server.mjs",
+  "description": "NeurX LLM backend - S core with shell HTTP wrapper",
+  "main": "http_server.sh",
   "scripts": {
-    "start": "node server.mjs",
-    "dev": "node --watch server.mjs"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "start": "bash http_server.sh",
+    "dev": "bash http_server.sh"
   },
   "keywords": [
     "neurx",

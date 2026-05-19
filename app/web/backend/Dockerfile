@@ -1,9 +1,9 @@
-FROM node:20-alpine
+FROM alpine:3.20
 
-RUN apk add --no-cache bash coreutils
+RUN apk add --no-cache bash coreutils socat
 
 WORKDIR /app/backend
 COPY app/web/backend ./
 
 EXPOSE 18080
-CMD ["node", "server.mjs"]
+CMD ["bash", "http_server.sh"]
