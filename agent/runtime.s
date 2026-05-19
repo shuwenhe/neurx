@@ -89,8 +89,8 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         return state
     }
 
-    agent_execute_result result = agent_execute_step(state.tools, state.memory, state.plan.current_task, input, state.model_path)
-    agent_plan_state next_plan = agent_plan_next(state.plan, result.observation)
+    agent_execute_result result = agent_execute_step(state.tools, state.memory, state.plan.goal, state.plan.current_task, input, state.model_path)
+    agent_plan_state next_plan = agent_plan_next(state.plan, result.tools, result.memory, result.observation)
     agent_trace_state next_trace = agent_trace_append(
         state.trace,
         state.steps + 1,
