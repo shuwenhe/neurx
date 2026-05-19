@@ -423,13 +423,13 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
     }
 
     const QString backend_dir = QDir(repo_root).filePath("app/web/backend");
-    const QFileInfo server_file(QDir(backend_dir).filePath("server.mjs"));
+    const QFileInfo server_file(QDir(backend_dir).filePath("http_server.mjs"));
     if (!server_file.exists() || !server_file.isFile()) {
-        return "runtime_exec_failed: backend server.mjs not found";
+        return "runtime_exec_failed: backend http_server.mjs not found";
     }
 
     emit log_message("info", "bridge", "Starting local NeurX backend on 127.0.0.1:18080");
-    const bool started = QProcess::startDetached(node, {"server.mjs"}, backend_dir);
+    const bool started = QProcess::startDetached(node, {"http_server.mjs"}, backend_dir);
     if (!started) {
         return "runtime_exec_failed: failed to start local backend";
     }

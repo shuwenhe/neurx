@@ -3,8 +3,10 @@ set -euo pipefail
 
 # Start NeurX backend and Qt application with local LLM model
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${APP_DIR}/.." && pwd)"
+BUILD_DIR="${APP_DIR}/build"
+APP_BINARY="${ROOT_DIR}/bin/linux-x86_64/neurx_app"
 
 # Backend configuration
 export PORT=${PORT:-18080}
@@ -26,25 +28,43 @@ echo "Starting NeurX app with local LLM backend..."
 echo "  Root: ${ROOT_DIR}"
 echo "  Backend port: ${PORT}"
 
-# Start backend in background
-(
-  cd "${SCRIPT_DIR}/web/backend"
-  node server.mjs
-) &
-BACKEND_PID=$!
-trap "kill $BACKEND_PID 2>/dev/null || true" EXIT
+BACKEND_PID=""
+HEALTH_URL="http://127.0.0.1:${PORT}/neurx/health"
 
-# Wait for backend to start
-sleep 2
+# Reuse an already-running backend if health probe succeeds.
+HEALTH_JSON="$(curl -s "${HEALTH_URL}" 2>/dev/null || true)"
+if [ -n "${HEALTH_JSON}" ]; then
+  if printf '%s' "${HEALTH_JSON}" | grep -q '"backend":"s-gateway"'; then
+    echo "S backend already running on port ${PORT}; reusing existing process."
+  else
+    echo "Error: port ${PORT} is occupied by a non-S backend."
+    echo "Health payload: ${HEALTH_JSON}"
+    echo "Please stop the old backend or set PORT to another value."
+    exit 1
+  fi
+else
+  (
+    cd "${APP_DIR}/web/backend"
+    bash ./http_server.sh
+  ) &
+  BACKEND_PID=$!
+  trap '[ -n "${BACKEND_PID}" ] && kill "${BACKEND_PID}" 2>/dev/null || true' EXIT
 
-# Check if backend is running
-if ! curl -s http://127.0.0.1:${PORT}/neurx/health >/dev/null 2>&1; then
-  echo "Error: backend failed to start on port ${PORT}"
-  kill $BACKEND_PID 2>/dev/null || true
-  exit 1
+  sleep 2
+
+  if ! kill -0 "${BACKEND_PID}" >/dev/null 2>&1; then
+    echo "Error: backend process exited during startup (PID: ${BACKEND_PID})"
+    exit 1
+  fi
+
+  if ! curl -s "${HEALTH_URL}" >/dev/null 2>&1; then
+    echo "Error: backend failed to start on port ${PORT}"
+    kill "${BACKEND_PID}" 2>/dev/null || true
+    exit 1
+  fi
+
+  echo "Backend started (PID: ${BACKEND_PID})"
 fi
-
-echo "Backend started (PID: $BACKEND_PID)"
 
 # Configure Qt app to use local LLM backend
 export NEURX_LLM_ENABLED=1
@@ -54,10 +74,10 @@ export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
 export NEURX_LLM_CHAT_PATH=/neurx/api/chat
 
 # Build Qt app if needed
-if [ ! -f "${SCRIPT_DIR}/build/neurx_app" ] || [ ! -f "${SCRIPT_DIR}/build/CMakeCache.txt" ]; then
+if [ ! -f "${APP_BINARY}" ] || [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   echo "Building Qt application..."
-  cmake -S "${SCRIPT_DIR}" -B "${SCRIPT_DIR}/build" -DCMAKE_BUILD_TYPE=Release
-  cmake --build "${SCRIPT_DIR}/build" -j$(nproc)
+  cmake -S "${APP_DIR}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
+  cmake --build "${BUILD_DIR}" -j$(nproc)
 fi
 
 echo "Launching Qt application..."
@@ -67,4 +87,4 @@ echo "  Checkpoint root: ${NEURX_BACKEND_CHECKPOINT_ROOT}"
 echo "  Checkpoint file: ${NEURX_BACKEND_CHECKPOINT_FILE}"
 
 # Run Qt app
-"${SCRIPT_DIR}/build/neurx_app"
+"${APP_BINARY}"
