@@ -257,3 +257,13 @@ func infer_pipeline_to_vllm_runtime(infer_pipeline_state state) vllm_runtime_sta
 func infer_pipeline_vllm_schedule_next(infer_pipeline_state state) vllm_runtime_step_result {
     vllm_runtime_schedule_next(state.vllm)
 }
+
+func infer_pipeline_last_observation(infer_pipeline_state state) string {
+    if state.response.finished {
+        return "infer:done"
+    }
+    if state.response.status_code == 429 {
+        return "infer:rejected"
+    }
+    "infer:running"
+}

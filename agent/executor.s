@@ -2,6 +2,7 @@ package neurx.agent.executor
 
 use neurx.agent.tool_registry
 use neurx.agent.memory
+use neurx.infer
 
 struct agent_execute_result {
     agent_tool_registry_state tools
@@ -11,7 +12,7 @@ struct agent_execute_result {
     bool ok
 }
 
-func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memory, string task, string input) agent_execute_result {
+func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memory, string task, string input, string model_path) agent_execute_result {
     string action = "noop"
     string observation = "tool_unavailable"
     bool ok = false
@@ -26,6 +27,11 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             observation = "retrieved"
             ok = true
         }
+    } else if model_path != "" && agent_tool_registry_has_enabled(tools, "infer") {
+        infer_pipeline_state pipeline = new_infer_pipeline_state(input, model_path, 512, 256, 32, 2048)
+        action = "infer"
+        observation = infer_pipeline_last_observation(pipeline)
+        ok = true
     } else {
         if agent_tool_registry_has_enabled(tools, "search") {
             action = "search"
