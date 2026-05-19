@@ -58,8 +58,10 @@ private:
     QString checkpoint_models_root() const;
     QString checkpoint_model_file() const;
     QString resolve_checkpoint_file(const QString& root, const QString& explicit_file) const;
+    QString resolve_latest_checkpoint_file(const QString& root) const;
     QStringList scan_checkpoint_files(const QString& root) const;
     QVariantList checkpoint_choices_for_qml() const;
+    void refresh_checkpoint_model_state();
 
     bool local_model_enabled_ {false};
     QString local_model_backend_ {"openai"};
