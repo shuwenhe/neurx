@@ -69,7 +69,116 @@ function gptLargeSummary(state) {
   return `${state.name}[${state.architecture},${state.parameter_count_m}M,layers=${state.num_layers},heads=${state.num_heads},ctx=${state.context_window}]`;
 }
 
-function resolveArtifactContext() {
+function isCheckpointFile(filePath) {
+  return filePath.endsWith('.neurx');
+}
+
+function scanCheckpointFiles(root) {
+  const files = [];
+  if (!root) {
+    return files;
+  }
+
+  const walk = (dir) => {
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const candidate = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(candidate);
+        continue;
+      }
+      if (!entry.isFile() || !isCheckpointFile(candidate)) {
+        continue;
+      }
+      try {
+        const stat = fs.statSync(candidate);
+        files.push({ path: candidate, mtimeMs: stat.mtimeMs });
+      } catch {
+        // Ignore unreadable files.
+      }
+    }
+  };
+
+  walk(root);
+  files.sort((left, right) => {
+    if (right.mtimeMs !== left.mtimeMs) {
+      return right.mtimeMs - left.mtimeMs;
+    }
+    return left.path.localeCompare(right.path);
+  });
+  return files;
+}
+
+function findLatestCheckpointFile(root) {
+  const files = scanCheckpointFiles(root);
+  return files.length > 0 ? files[0].path : '';
+}
+
+function resolveCheckpointCandidatePaths(selector, root) {
+  const value = (selector || '').trim();
+  if (!value) {
+    return [];
+  }
+
+  const candidates = [];
+  if (path.isAbsolute(value)) {
+    candidates.push(value);
+  } else {
+    candidates.push(path.resolve(process.cwd(), value));
+    if (root) {
+      candidates.push(path.resolve(root, '..', value));
+      candidates.push(path.resolve(root, value));
+    }
+  }
+
+  return candidates;
+}
+
+function resolveCheckpointFile(selector, root, explicitFile) {
+  const candidates = resolveCheckpointCandidatePaths(selector, root);
+
+  for (const candidate of candidates) {
+    try {
+      const stat = fs.statSync(candidate);
+      if (stat.isFile() && isCheckpointFile(candidate)) {
+        return candidate;
+      }
+      if (stat.isDirectory()) {
+        const latest = findLatestCheckpointFile(candidate);
+        if (latest) {
+          return latest;
+        }
+      }
+    } catch {
+      // Ignore missing candidates.
+    }
+  }
+
+  if (explicitFile) {
+    return explicitFile;
+  }
+
+  return root ? findLatestCheckpointFile(root) : '';
+}
+
+function collectCheckpointModelChoices(root) {
+  const files = scanCheckpointFiles(root);
+  return files.map((entry) => ({
+    label: root ? path.relative(root, entry.path) : path.basename(entry.path),
+    value: entry.path,
+    checkpoint_file: entry.path,
+    checkpoint_root: root,
+    mtime_ms: entry.mtimeMs,
+  }));
+}
+
+function resolveArtifactContext(selector = '') {
   const root = (process.env.NEURX_BACKEND_CHECKPOINT_ROOT || '').trim();
   const explicitFile = (process.env.NEURX_BACKEND_CHECKPOINT_FILE || '').trim();
 
@@ -81,41 +190,7 @@ function resolveArtifactContext() {
     };
   }
 
-  let checkpointFile = explicitFile;
-  if (!checkpointFile && root) {
-    let latest = { path: '', mtimeMs: -1 };
-
-    const walk = (dir) => {
-      let entries = [];
-      try {
-        entries = fs.readdirSync(dir, { withFileTypes: true });
-      } catch {
-        return;
-      }
-
-      for (const entry of entries) {
-        const candidate = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          walk(candidate);
-          continue;
-        }
-        if (!entry.isFile() || !candidate.endsWith('.neurx')) {
-          continue;
-        }
-        try {
-          const stat = fs.statSync(candidate);
-          if (stat.mtimeMs >= latest.mtimeMs) {
-            latest = { path: candidate, mtimeMs: stat.mtimeMs };
-          }
-        } catch {
-          // Ignore unreadable files.
-        }
-      }
-    };
-
-    walk(root);
-    checkpointFile = latest.path;
-  }
+  const checkpointFile = resolveCheckpointFile(selector, root, explicitFile);
 
   return {
     checkpointRoot: root,
@@ -755,7 +830,7 @@ function buildCompletion(state, model, prompt, tokenTrace, artifact, runtimeLaye
 }
 
 function processLlmRequest(model = 'gpt_large', prompt = '', maxTokens = 16) {
-  const artifact = loadArtifactSnapshot(resolveArtifactContext());
+  const artifact = loadArtifactSnapshot(resolveArtifactContext(model));
   if (!prompt) {
     prompt = 'Explain NeurX LLM backend in one short paragraph.';
   }
@@ -825,4 +900,4 @@ function parseOpenAIRequest(body) {
   }
 }
 
-export { processLlmRequest, parseOpenAIRequest, gptLargeState, gptLargeSummary };
+export { processLlmRequest, parseOpenAIRequest, gptLargeState, gptLargeSummary, collectCheckpointModelChoices };

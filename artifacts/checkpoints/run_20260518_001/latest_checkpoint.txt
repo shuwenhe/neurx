@@ -1,0 +1,1 @@
+/home/shuwen/shuwen/neurx/artifacts/checkpoints/run_20260518_001/step_0003000/latest/gpt_large_pretrain.neurx

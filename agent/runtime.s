@@ -5,6 +5,7 @@ use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor
 use neurx.agent.trace
+use neurx.runtime.io.{runtime_env_get}
 
 struct agent_runtime_state {
     agent_plan_state plan
@@ -18,15 +19,55 @@ struct agent_runtime_state {
     string model_path
 }
 
+func trim_or_empty(string value) string {
+    string next = trim(value)
+    next
+}
+
+func resolve_agent_model_path(string model_path) string {
+    string direct = trim_or_empty(model_path)
+    if direct != "" {
+        return direct
+    }
+
+    string env_path = trim_or_empty(runtime_env_get("NEURX_AGENT_MODEL_PATH", ""))
+    if env_path != "" {
+        return env_path
+    }
+
+    string env_file = trim_or_empty(runtime_env_get("NEURX_AGENT_CHECKPOINT_FILE", ""))
+    if env_file != "" {
+        return env_file
+    }
+
+    string env_root = trim_or_empty(runtime_env_get("NEURX_AGENT_CHECKPOINT_ROOT", ""))
+    if env_root != "" {
+        return env_root
+    }
+
+    string backend_file = trim_or_empty(runtime_env_get("NEURX_BACKEND_CHECKPOINT_FILE", ""))
+    if backend_file != "" {
+        return backend_file
+    }
+
+    string backend_root = trim_or_empty(runtime_env_get("NEURX_BACKEND_CHECKPOINT_ROOT", ""))
+    if backend_root != "" {
+        return backend_root
+    }
+
+    ""
+}
+
 func new_agent_runtime_state(string goal, string initial_task, int step_budget) agent_runtime_state {
     new_agent_runtime_state_with_model(goal, initial_task, step_budget, "")
 }
 
 func new_agent_runtime_state_with_model(string goal, string initial_task, int step_budget, string model_path) agent_runtime_state {
+    string resolved_model_path = resolve_agent_model_path(model_path)
     agent_tool_registry_state tools = new_agent_tool_registry_state()
     tools = agent_tool_registry_add(tools, "search", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "retrieve", true, 5000, 1)
-    if model_path != "" {
+    if resolved_model_path != "" {
         tools = agent_tool_registry_add(tools, "infer", true, 32000, 1)
     }
 
@@ -39,7 +80,7 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
         finished: false,
         last_action: "",
         last_observation: "",
-        model_path: model_path,
+        model_path: resolved_model_path,
     }
 }
 

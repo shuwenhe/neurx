@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const endpoint = '/neurx/api/chat';
+const modelEndpoint = '/neurx/api/models';
 
 function fallbackResponse(payload) {
   return {
@@ -20,10 +21,49 @@ function fallbackResponse(payload) {
 export default function Page() {
   const [prompt, setPrompt] = useState('Explain how NeurX exposes an S-based LLM backend.');
   const [model, setModel] = useState('gpt_large');
+  const [modelOptions, setModelOptions] = useState([]);
   const [maxTokens, setMaxTokens] = useState(16);
   const [status, setStatus] = useState('idle');
   const [responseText, setResponseText] = useState('{}');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadModels() {
+      try {
+        const response = await fetch(modelEndpoint, { cache: 'no-store' });
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        const models = Array.isArray(data.models) ? data.models : [];
+        if (cancelled) {
+          return;
+        }
+
+        setModelOptions(models);
+        if (models.length > 0) {
+          setModel((current) => {
+            if (!current || current === 'gpt_large') {
+              return models[0].value || current;
+            }
+            return current;
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setModelOptions([]);
+        }
+      }
+    }
+
+    loadModels();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const requestPreview = useMemo(
     () =>
@@ -91,10 +131,11 @@ export default function Page() {
 
         <div className="row">
           <label className="inline" htmlFor="model">
-            <span>Model</span>
+            <span>Model checkpoint</span>
             <input
               id="model"
               type="text"
+              list="model-options"
               value={model}
               onChange={(event) => setModel(event.target.value)}
             />
@@ -111,6 +152,16 @@ export default function Page() {
             />
           </label>
         </div>
+
+        <datalist id="model-options">
+          {modelOptions.map((option) => (
+            <option key={option.value} value={option.value} label={option.label} />
+          ))}
+        </datalist>
+
+        <p className="hint">
+          Suggestions are loaded from <code>/neurx/api/models</code> and map to checkpoint files under <code>artifacts/checkpoints/</code>.
+        </p>
 
         <button type="button" onClick={handleSend} disabled={loading}>
           {loading ? 'Sending...' : 'Send'}
