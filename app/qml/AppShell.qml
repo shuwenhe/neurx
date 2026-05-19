@@ -25,6 +25,7 @@ Item {
     property string selectedFilePath: ""
     property int explorerPaneWidth: 280
     property int agentPaneWidth: 342
+    property int runSteps: 4
 
     ListModel {
         id: fileModel
@@ -106,6 +107,17 @@ Item {
             }
         }
         return Runtime.checkpointModelChoices.length > 0 ? 0 : -1
+    }
+
+    function parseResultField(text, key) {
+        var lines = (text || "").split("\n")
+        var prefix = key + "="
+        for (var i = 0; i < lines.length; ++i) {
+            if (lines[i].indexOf(prefix) === 0) {
+                return lines[i].slice(prefix.length)
+            }
+        }
+        return ""
     }
 
     Component.onCompleted: {
@@ -696,7 +708,36 @@ Item {
                                     if (!prompt) {
                                         prompt = "hello"
                                     }
-                                    resultOutput.text = Runtime.run_agent(prompt, 4)
+                                    resultOutput.text = Runtime.run_agent(prompt, shell.runSteps)
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 150
+                            Layout.preferredHeight: 36
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                spacing: 8
+
+                                Text {
+                                    text: qsTr("Steps")
+                                    color: shell.textPrimary
+                                    font.bold: true
+                                }
+
+                                SpinBox {
+                                    id: stepsPicker
+                                    from: 1
+                                    to: 64
+                                    value: shell.runSteps
+                                    editable: true
+                                    onValueModified: shell.runSteps = value
                                 }
                             }
                         }
@@ -745,6 +786,34 @@ Item {
                             color: shell.textPrimary
                             text: qsTr("Run the agent to see output here.")
                             font.pixelSize: 12
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 58
+                        radius: 12
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 2
+
+                            Text {
+                                text: qsTr("Checkpoint file: ") + (parseResultField(resultOutput.text, "checkpoint_file") || qsTr("(none)"))
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: qsTr("Checkpoint step: ") + (parseResultField(resultOutput.text, "checkpoint_step") || qsTr("(n/a)"))
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                            }
                         }
                     }
 
