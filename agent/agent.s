@@ -54,6 +54,14 @@ func agent_current_task(agent_runtime_state state) string {
     state.plan.current_task
 }
 
+func agent_route(agent_runtime_state state) string {
+    agent_memory_lookup_result route_result = agent_memory_lookup_short(state.memory, "route")
+    if route_result.found {
+        return route_result.value
+    }
+    ""
+}
+
 func agent_step_count(agent_runtime_state state) int {
     state.steps
 }
