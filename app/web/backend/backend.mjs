@@ -782,7 +782,18 @@ function simulateCheckpointGeneration(state, prompt, maxTokens) {
   const tokenBias = Number.isFinite(state.checkpoint_token_bias) ? state.checkpoint_token_bias : 0;
   const fingerprintBias = Number.isFinite(state.checkpoint_fingerprint) ? state.checkpoint_fingerprint : 0;
   const profileSeed = Number.isFinite(state.checkpoint_profile_seed) ? state.checkpoint_profile_seed : 0;
-  let seed = prompt.length + state.num_layers + state.num_heads + tokenBias + fingerprintBias + profileSeed;
+  // Use a simple hash of the full prompt (not only length) so different prompts produce different sequences.
+  function promptHash(s) {
+    if (!s) return 0;
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) {
+      h = ((h << 5) + h) + s.charCodeAt(i); /* h * 33 + c */
+      h = h & 0xffffffff;
+    }
+    return Math.abs(h);
+  }
+
+  let seed = promptHash(prompt) + state.num_layers + state.num_heads + tokenBias + fingerprintBias + profileSeed;
   let token = seed;
   const trace = [];
   for (let generated = 0; generated < maxTokens; generated++) {
