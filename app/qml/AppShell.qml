@@ -724,10 +724,10 @@ Item {
                                     }
                                     shell.runClickSeq += 1
                                     shell.agentRunning = true
-                                    runtimeStatus.text = qsTr("running #") + shell.runClickSeq
+                                    runtimeStatus.text = qsTr("routing #") + shell.runClickSeq
                                     resultOutput.text = qsTr("Running agent...")
                                     try {
-                                        Runtime.run_agent_async(prompt, shell.runSteps)
+                                        Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
                                     } catch (e) {
                                         resultOutput.text = qsTr("run_agent_failed: ") + e
                                         runtimeStatus.text = qsTr("failed #") + shell.runClickSeq

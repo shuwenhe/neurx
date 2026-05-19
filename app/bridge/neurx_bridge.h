@@ -23,6 +23,9 @@ public:
     Q_INVOKABLE QString run_agent(const QString& prompt, int max_steps);
     Q_INVOKABLE QString run_code_assistant(const QString& prompt, const QString& filePath);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
+    Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);
+    Q_INVOKABLE void run_agent_auto_async(const QString& prompt, const QString& filePath, int max_steps);
+    Q_INVOKABLE QString agent_route_for_prompt(const QString& prompt, const QString& filePath) const;
     Q_INVOKABLE QString local_model_summary() const;
 
 signals:
@@ -57,6 +60,7 @@ private:
     QString bootstrap_ollama_model();
     QString ensure_local_openai_backend(const QString& repo_root);
     QString run_local_model_agent(const QString& prompt, int max_steps) const;
+    QString run_code_assistant_request(const QString& prompt, const QString& filePath) const;
     QString local_model_default_chat_path() const;
     QString normalize_local_model_backend(const QString& backend) const;
     QString checkpoint_models_root() const;
