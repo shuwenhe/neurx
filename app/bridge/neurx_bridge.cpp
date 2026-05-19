@@ -381,7 +381,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     const QString payload = QString::fromUtf8(QJsonDocument(request_json).toJson(QJsonDocument::Compact));
     const QString raw = run_process(
         curl,
-        {"-sS", "-X", "POST", "-H", "Content-Type: application/json", "--data", payload, url},
+        {"-sS", "--connect-timeout", "2", "--max-time", "10", "-X", "POST", "-H", "Content-Type: application/json", "--data", payload, url},
         120000);
     if (raw.startsWith("runtime_")) {
         return raw;
@@ -541,7 +541,8 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     }
 
     if (local_model_enabled_ && !local_model_base_url_.trimmed().isEmpty() && !local_model_name_.trimmed().isEmpty()) {
-        if (local_model_backend_ == "ollama" && !local_ollama_ready_) {
+        const bool allow_ollama_bootstrap = qEnvironmentVariableIntValue("NEURX_AUTO_BOOTSTRAP_OLLAMA") == 1;
+        if (local_model_backend_ == "ollama" && !local_ollama_ready_ && allow_ollama_bootstrap) {
             const QString bootstrap_result = bootstrap_ollama_model();
             if (!bootstrap_result.isEmpty()) {
                 emit log_message("warning", "bridge", QString("Ollama bootstrap failed: %1").arg(bootstrap_result));
