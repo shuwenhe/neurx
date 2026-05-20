@@ -21,6 +21,7 @@ Item {
     readonly property int paneMinExplorerWidth: 220
     readonly property int paneMinEditorWidth: 420
     readonly property int paneMinAgentWidth: 300
+
     readonly property int workspaceMargin: 20
 
     property int selectedFileIndex: 1
@@ -30,14 +31,64 @@ Item {
     property int runSteps: 4
     property bool agentRunning: false
     property int runClickSeq: 0
+    property int runStartMs: 0
     property string lastPromptText: ""
-    property string lastResponseLabel: qsTr("Copilot")
+    property string lastResponseLabel: qsTr("NeurX")
+    property string lastRunDurationText: ""
     property bool agentDetailsExpanded: false
 
     function beginConversation(prompt, responseLabel, pendingText) {
         lastPromptText = prompt
         lastResponseLabel = responseLabel
         resultOutput.text = pendingText
+        lastRunDurationText = qsTr("Working...")
+        runStartMs = Date.now()
+    }
+
+    function sendAgentPrompt() {
+        if (shell.agentRunning) {
+            return
+        }
+
+        var prompt = promptEditor.text.trim()
+        if (!prompt) {
+            prompt = "hello"
+        }
+
+        shell.runClickSeq += 1
+        shell.agentRunning = true
+        runtimeStatus.text = qsTr("routing #") + shell.runClickSeq
+        shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
+        shell.agentDetailsExpanded = false
+
+        try {
+            Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
+        } catch (e) {
+            resultOutput.text = qsTr("run_agent_failed: ") + e
+            runtimeStatus.text = qsTr("failed #") + shell.runClickSeq
+            shell.agentRunning = false
+        } finally {
+            // Completion comes from Runtime.agentRunFinished.
+        }
+    }
+
+    function sendCodeSuggestion() {
+        var prompt = promptEditor.text.trim()
+        var filePath = shell.selectedFilePath || ""
+        runtimeStatus.text = qsTr("suggesting")
+        shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
+        shell.agentDetailsExpanded = false
+
+        try {
+            resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
+            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
+            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            runtimeStatus.text = qsTr("suggestion_done")
+        } catch (e) {
+            resultOutput.text = qsTr("suggest_failed: ") + e
+            runtimeStatus.text = qsTr("failed")
+            shell.lastRunDurationText = qsTr("Working...")
+        }
     }
 
     ListModel {
@@ -135,6 +186,8 @@ Item {
 
         function onAgentRunFinished(result) {
             resultOutput.text = result
+            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
+            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
             runtimeStatus.text = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
         }
@@ -333,6 +386,7 @@ Item {
                             }
                         }
                     }
+
                 }
             }
 
@@ -666,175 +720,6 @@ Item {
                     }
 
                     Text {
-                        text: qsTr("Prompt")
-                        color: shell.textPrimary
-                        font.pixelSize: 16
-                        font.bold: true
-                    }
-
-                    Rectangle {
-                        id: promptInput
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 132
-                        radius: 12
-                        color: shell.editorBg
-                        border.color: shell.border
-
-                        TextEdit {
-                            id: promptEditor
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            text: ""
-                            wrapMode: TextEdit.Wrap
-                            color: shell.textPrimary
-                            selectionColor: shell.accent
-                            selectedTextColor: shell.bg
-                            font.pixelSize: 13
-                            focus: true
-                        }
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.top: parent.top
-                            anchors.topMargin: 10
-                            text: qsTr("Ask the agent to inspect files or summarize state")
-                            color: shell.textMuted
-                            visible: promptEditor.text.length === 0 && !promptEditor.activeFocus
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-
-                        Rectangle {
-                            Layout.preferredWidth: 120
-                            Layout.preferredHeight: 36
-                            radius: 10
-                            color: shell.agentRunning ? shell.panelHover : shell.accent
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: shell.agentRunning ? qsTr("Running...") : qsTr("Run Agent")
-                                color: shell.bg
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: !shell.agentRunning
-                                onClicked: {
-                                    if (shell.agentRunning) {
-                                        return
-                                    }
-                                    var prompt = promptEditor.text.trim()
-                                    if (!prompt) {
-                                        prompt = "hello"
-                                    }
-                                    shell.runClickSeq += 1
-                                    shell.agentRunning = true
-                                    runtimeStatus.text = qsTr("routing #") + shell.runClickSeq
-                                    shell.beginConversation(prompt, qsTr("Copilot"), qsTr("Working on your request..."))
-                                    shell.agentDetailsExpanded = false
-                                    try {
-                                        Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
-                                    } catch (e) {
-                                        resultOutput.text = qsTr("run_agent_failed: ") + e
-                                        runtimeStatus.text = qsTr("failed #") + shell.runClickSeq
-                                        shell.agentRunning = false
-                                    } finally {
-                                        // Completion comes from Runtime.agentRunFinished.
-                                    }
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 140
-                            Layout.preferredHeight: 36
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Suggest Code")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    var prompt = promptEditor.text.trim()
-                                    var filePath = shell.selectedFilePath || ""
-                                    runtimeStatus.text = qsTr("suggesting")
-                                    shell.beginConversation(prompt, qsTr("Copilot Coding Agent"), qsTr("Preparing code suggestion..."))
-                                    shell.agentDetailsExpanded = false
-                                    try {
-                                        resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
-                                        runtimeStatus.text = qsTr("suggestion_done")
-                                    } catch (e) {
-                                        resultOutput.text = qsTr("suggest_failed: ") + e
-                                        runtimeStatus.text = qsTr("failed")
-                                    }
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 150
-                            Layout.preferredHeight: 36
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 8
-
-                                Text {
-                                    text: qsTr("Steps")
-                                    color: shell.textPrimary
-                                    font.bold: true
-                                }
-
-                                SpinBox {
-                                    id: stepsPicker
-                                    from: 1
-                                    to: 64
-                                    value: shell.runSteps
-                                    editable: true
-                                    onValueModified: shell.runSteps = value
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 136
-                            Layout.preferredHeight: 36
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Refresh Status")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: runtimeStatus.text = Runtime.ping()
-                            }
-                        }
-                    }
-
-                    Text {
                         text: qsTr("Conversation")
                         color: shell.textPrimary
                         font.pixelSize: 16
@@ -843,7 +728,8 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 260
+                        Layout.preferredHeight: 220
+                        Layout.maximumHeight: 220
                         radius: 12
                         color: shell.editorBg
                         border.color: shell.border
@@ -865,7 +751,7 @@ Item {
 
                                     Rectangle {
                                         id: userBubbleRect
-                                        width: Math.min(parent.width * 0.88, userBubbleColumn.implicitWidth + 28)
+                                        width: Math.min(parent.width * 0.84, userBubbleColumn.implicitWidth + 28)
                                         height: userBubbleColumn.implicitHeight + 20
                                         x: parent.width - width
                                         radius: 12
@@ -902,7 +788,7 @@ Item {
 
                                     Rectangle {
                                         id: agentBubbleRect
-                                        width: Math.min(parent.width * 0.94, agentBubbleColumn.implicitWidth + 28)
+                                        width: Math.min(parent.width * 0.90, agentBubbleColumn.implicitWidth + 28)
                                         height: agentBubbleColumn.implicitHeight + 20
                                         radius: 12
                                         color: shell.agentBubble
@@ -937,6 +823,12 @@ Item {
                                                     color: shell.textMuted
                                                     font.pixelSize: 11
                                                     font.bold: true
+                                                }
+
+                                                Text {
+                                                    text: shell.lastRunDurationText.length > 0 ? shell.lastRunDurationText : qsTr("Working...")
+                                                    color: shell.textMuted
+                                                    font.pixelSize: 11
                                                 }
                                             }
 
@@ -1009,6 +901,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: shell.agentDetailsExpanded ? 108 : 0
+                        Layout.maximumHeight: shell.agentDetailsExpanded ? 108 : 0
                         visible: shell.agentDetailsExpanded
                         radius: 12
                         color: shell.editorBg
@@ -1068,6 +961,150 @@ Item {
                     }
 
                     Text {
+                        text: qsTr("Send")
+                        color: shell.textPrimary
+                        font.pixelSize: 16
+                        font.bold: true
+                    }
+
+                    Rectangle {
+                        id: promptInput
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 104
+                        Layout.maximumHeight: 104
+                        radius: 12
+                        color: shell.editorBg
+                        border.color: shell.border
+
+                        TextEdit {
+                            id: promptEditor
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            text: ""
+                            wrapMode: TextEdit.Wrap
+                            color: shell.textPrimary
+                            selectionColor: shell.accent
+                            selectedTextColor: shell.bg
+                            font.pixelSize: 13
+                            focus: true
+                            Keys.priority: Keys.BeforeItem
+
+                            Keys.onPressed: function(event) {
+                                if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && !(event.modifiers & Qt.ShiftModifier)) {
+                                    event.accepted = true
+                                    shell.sendAgentPrompt()
+                                }
+                            }
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.top: parent.top
+                            anchors.topMargin: 10
+                            text: qsTr("Ask the agent to inspect files or summarize state")
+                            color: shell.textMuted
+                            visible: promptEditor.text.length === 0 && !promptEditor.activeFocus
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Rectangle {
+                            Layout.preferredWidth: 116
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.agentRunning ? shell.panelHover : shell.accent
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: shell.agentRunning ? qsTr("Running...") : qsTr("Run")
+                                color: shell.bg
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !shell.agentRunning
+                                onClicked: shell.sendAgentPrompt()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 132
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Suggest")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: shell.sendCodeSuggestion()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 120
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 6
+                                spacing: 6
+
+                                Text {
+                                    text: qsTr("Steps")
+                                    color: shell.textPrimary
+                                    font.bold: true
+                                    font.pixelSize: 11
+                                }
+
+                                SpinBox {
+                                    id: stepsPicker
+                                    from: 1
+                                    to: 64
+                                    value: shell.runSteps
+                                    editable: true
+                                    onValueModified: shell.runSteps = value
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 124
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Refresh")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: runtimeStatus.text = Runtime.ping()
+                            }
+                        }
+                    }
+
+                    Text {
                         text: qsTr("Runtime Log")
                         color: shell.textPrimary
                         font.pixelSize: 16
@@ -1077,6 +1114,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        Layout.minimumHeight: 120
                         radius: 14
                         color: shell.panelAlt
                         border.color: shell.border
