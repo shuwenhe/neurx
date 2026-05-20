@@ -104,6 +104,25 @@ func agent_trace_last_ok(agent_trace_state state) bool {
     state.ok_flags[size - 1]
 }
 
+func agent_trace_export(agent_trace_state state) string {
+    string out = "trace_count=" + string(state.count)
+    int i = 0
+    while i < len(state.steps) {
+        out = out + "\nstep[" + string(i) + "]=" + string(state.steps[i])
+        out = out + "\ntask[" + string(i) + "]=" + state.tasks[i]
+        out = out + "\ninput[" + string(i) + "]=" + state.inputs[i]
+        out = out + "\naction[" + string(i) + "]=" + state.actions[i]
+        out = out + "\nobservation[" + string(i) + "]=" + state.observations[i]
+        if state.ok_flags[i] {
+            out = out + "\nok[" + string(i) + "]=true"
+        } else {
+            out = out + "\nok[" + string(i) + "]=false"
+        }
+        i = i + 1
+    }
+    out + "\n"
+}
+
 func agent_trace_state_dict(agent_trace_state state) agent_trace_state {
     state
 }
