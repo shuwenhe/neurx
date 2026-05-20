@@ -76,6 +76,21 @@ When `run_with_llm.sh` starts the local backend, it will automatically prefer th
 - tests: Qt shell tests
 - scripts: cross-platform Qt6 setup helpers
 
+## Code Agent Skeleton
+
+The app now includes an incremental coding-agent scaffold under `app/service/`:
+
+- `code_agent_runner.sh`: first-stage code task runner
+- `code_templates.sh`: trivial code-template fallback
+- `tools/read.sh`, `tools/search.sh`, `tools/write.sh`, `tools/build.sh`, `tools/test.sh`: workspace tools
+- `CODE_AGENT_ARCHITECTURE.md`: migration path from prompt/response shell to coding agent
+
+Current behavior:
+
+- the Qt bridge tries `code_agent_runner.sh` first for code tasks
+- runner-completed responses return directly to the UI
+- unhandled tasks fall through to the existing model chat path
+
 ## App Web
 
 The Next.js web app under `app/web/` expects:
