@@ -31,6 +31,18 @@ echo "  Backend port: ${PORT}"
 BACKEND_PID=""
 HEALTH_URL="http://127.0.0.1:${PORT}/neurx/health"
 
+BACKEND_DIR=""
+if [ -d "${APP_DIR}/service" ]; then
+  BACKEND_DIR="${APP_DIR}/service"
+elif [ -d "${APP_DIR}/web/backend" ]; then
+  BACKEND_DIR="${APP_DIR}/web/backend"
+elif [ -d "${APP_DIR}/backend" ]; then
+  BACKEND_DIR="${APP_DIR}/backend"
+else
+  echo "Error: backend directory not found under ${APP_DIR}."
+  exit 1
+fi
+
 # Reuse an already-running backend if health probe succeeds.
 HEALTH_JSON="$(curl -s "${HEALTH_URL}" 2>/dev/null || true)"
 if [ -n "${HEALTH_JSON}" ]; then
@@ -44,7 +56,7 @@ if [ -n "${HEALTH_JSON}" ]; then
   fi
 else
   (
-    cd "${APP_DIR}/web/backend"
+    cd "${BACKEND_DIR}"
     bash ./http_server.sh
   ) &
   BACKEND_PID=$!
@@ -73,12 +85,13 @@ export NEURX_LLM_BASE_URL=http://127.0.0.1:${PORT}
 export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
 export NEURX_LLM_CHAT_PATH=/neurx/api/chat
 
-# Build Qt app if needed
-if [ ! -f "${APP_BINARY}" ] || [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
-  echo "Building Qt application..."
+# Rebuild Qt app on every launch so make logs picks up the latest local changes.
+if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
+  echo "Configuring Qt application..."
   cmake -S "${APP_DIR}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
-  cmake --build "${BUILD_DIR}" -j$(nproc)
 fi
+echo "Building Qt application..."
+cmake --build "${BUILD_DIR}" -j$(nproc)
 
 echo "Launching Qt application..."
 echo "  LLM Backend: ${NEURX_LLM_BASE_URL}${NEURX_LLM_CHAT_PATH}"
