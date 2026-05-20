@@ -1980,6 +1980,12 @@ Item {
                                                 text: qsTr("Context")
                                                 onClicked: shell.openFilteredSkillContext()
                                             }
+
+                                            ToolButton {
+                                                visible: shell.selectedSkillRecord() !== null
+                                                text: qsTr("Copy all")
+                                                onClicked: shell.copyConversationText(shell.filteredSkillContextPreview())
+                                            }
                                         }
 
                                         Text {
