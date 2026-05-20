@@ -35,6 +35,7 @@ Item {
     property string lastPromptText: ""
     property string lastResponseLabel: qsTr("NeurX")
     property string lastRunDurationText: ""
+    property string runtimeStatusText: Runtime.ping()
     property bool agentDetailsExpanded: false
 
     function beginConversation(prompt, responseLabel, pendingText) {
@@ -57,7 +58,7 @@ Item {
 
         shell.runClickSeq += 1
         shell.agentRunning = true
-        runtimeStatus.text = qsTr("routing #") + shell.runClickSeq
+        shell.runtimeStatusText = qsTr("routing #") + shell.runClickSeq
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
         shell.agentDetailsExpanded = false
 
@@ -65,7 +66,7 @@ Item {
             Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
         } catch (e) {
             resultOutput.text = qsTr("run_agent_failed: ") + e
-            runtimeStatus.text = qsTr("failed #") + shell.runClickSeq
+            shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
             shell.agentRunning = false
         } finally {
             // Completion comes from Runtime.agentRunFinished.
@@ -75,7 +76,7 @@ Item {
     function sendCodeSuggestion() {
         var prompt = promptEditor.text.trim()
         var filePath = shell.selectedFilePath || ""
-        runtimeStatus.text = qsTr("suggesting")
+        shell.runtimeStatusText = qsTr("suggesting")
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
         shell.agentDetailsExpanded = false
 
@@ -83,10 +84,10 @@ Item {
             resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
             var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
             shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
-            runtimeStatus.text = qsTr("suggestion_done")
+            shell.runtimeStatusText = qsTr("suggestion_done")
         } catch (e) {
             resultOutput.text = qsTr("suggest_failed: ") + e
-            runtimeStatus.text = qsTr("failed")
+            shell.runtimeStatusText = qsTr("failed")
             shell.lastRunDurationText = qsTr("Working...")
         }
     }
@@ -188,7 +189,7 @@ Item {
             resultOutput.text = result
             var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
             shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
-            runtimeStatus.text = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
+            shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
         }
     }
@@ -530,72 +531,6 @@ Item {
                     Text {
                         text: qsTr("Live runtime and agent control")
                         color: shell.textMuted
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 96
-                        radius: 14
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 6
-
-                            Text {
-                                text: qsTr("Active agents")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            ListView {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                model: AgentModel
-                                spacing: 8
-                                clip: true
-
-                                delegate: Rectangle {
-                                    required property string agentId
-                                    required property string name
-                                    required property string status
-
-                                    width: ListView.view.width
-                                    height: 68
-                                    radius: 12
-                                    color: shell.editorBg
-                                    border.color: shell.border
-
-                                    Column {
-                                        anchors.fill: parent
-                                        anchors.margins: 10
-                                        spacing: 4
-
-                                        Text {
-                                            text: name
-                                            color: shell.textPrimary
-                                            font.bold: true
-                                        }
-
-                                        Text {
-                                            text: agentId
-                                            color: shell.textMuted
-                                            font.pixelSize: 12
-                                        }
-
-                                        Text {
-                                            text: status
-                                            color: shell.accent
-                                            elide: Text.ElideRight
-                                            width: parent.width
-                                            font.pixelSize: 12
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
 
                     Text {
@@ -978,7 +913,7 @@ Item {
 
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: runtimeStatus.text = Runtime.ping()
+                                onClicked: shell.runtimeStatusText = Runtime.ping()
                             }
                         }
                     }
