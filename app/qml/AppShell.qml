@@ -38,7 +38,7 @@ Item {
     property int runSteps: 4
     property bool agentRunning: false
     property int runClickSeq: 0
-    property int runStartMs: 0
+    property real runStartMs: 0
     property string lastPromptText: ""
     property string lastResponseLabel: qsTr("NeurX")
     property string lastRunDurationText: ""
@@ -55,6 +55,13 @@ Item {
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
+    property bool windowHovered: false
+
+    HoverHandler {
+        target: shell
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onHoveredChanged: shell.windowHovered = hovered
+    }
 
     function escapeHtml(text) {
         return (text || "")
@@ -171,6 +178,16 @@ Item {
         activeAssistantMessageIndex = -1
     }
 
+    function elapsedDurationText() {
+        var startMs = Number(shell.runStartMs)
+        var nowMs = Date.now()
+        if (!isFinite(startMs) || startMs <= 0 || startMs > nowMs) {
+            return qsTr("Worked just now")
+        }
+        var elapsedSeconds = Math.max(1, Math.round((nowMs - startMs) / 1000))
+        return qsTr("Worked for %1s").arg(elapsedSeconds)
+    }
+
     function sendAgentPrompt() {
         if (shell.agentRunning) {
             return
@@ -229,8 +246,7 @@ Item {
 
         try {
             resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
-            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
-            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.lastRunDurationText = shell.elapsedDurationText()
             shell.runtimeStatusText = qsTr("suggestion_done")
             if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
                 conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
@@ -277,8 +293,7 @@ Item {
 
         try {
             resultOutput.text = Runtime.export_agent_skill_snapshot(prompt, shell.runSteps)
-            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
-            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.lastRunDurationText = shell.elapsedDurationText()
             shell.runtimeStatusText = qsTr("snapshot_done")
             shell.finishConversation(resultOutput.text, shell.lastRunDurationText)
         } catch (e) {
@@ -303,8 +318,7 @@ Item {
 
         try {
             resultOutput.text = Runtime.export_agent_trajectory(prompt, shell.runSteps)
-            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
-            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.lastRunDurationText = shell.elapsedDurationText()
             shell.runtimeStatusText = qsTr("trajectory_done")
             shell.finishConversation(resultOutput.text, shell.lastRunDurationText)
         } catch (e) {
@@ -866,8 +880,7 @@ Item {
         target: Runtime
 
         function onAgentRunFinished(result) {
-            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
-            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.lastRunDurationText = shell.elapsedDurationText()
             shell.finishConversation(result, shell.lastRunDurationText)
             shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
@@ -1342,7 +1355,7 @@ Item {
 
                                     ToolButton {
                                         enabled: !model.pending && model.text.length > 0
-                                        visible: true
+                                        visible: shell.windowHovered
                                         opacity: enabled ? 1.0 : 0.45
                                         anchors.top: parent.top
                                         anchors.right: parent.right
@@ -1353,7 +1366,7 @@ Item {
                                         padding: 0
                                         text: ""
                                         z: 2
-                                        ToolTip.visible: hovered
+                                        ToolTip.visible: shell.windowHovered
                                         ToolTip.text: qsTr("Copy")
                                         background: Rectangle {
                                             radius: 6
