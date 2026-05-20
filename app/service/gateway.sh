@@ -73,6 +73,87 @@ sed_escape_replacement() {
   printf '%s' "${1:-}" | sed -e 's/[\\&|]/\\&/g'
 }
 
+lower_prompt="$(printf '%s' "${prompt:-}" | tr '[:upper:]' '[:lower:]')"
+if [ -n "${prompt:-}" ]; then
+  if template_completion="$(infer_template_completion "$lower_prompt")"; then
+    model_escaped="$(json_escape "${NEURX_BACKEND_MODEL:-gpt_large}")"
+    prompt_escaped="$(json_escape "${NEURX_BACKEND_PROMPT:-}")"
+    completion_escaped="$(json_escape "$template_completion")"
+    printf '{"ok":true,"backend_name":"neurx.app.backend.llm.s","model_name":"%s","summary":"template-direct-response","prompt":"%s","completion":"%s","generated_tokens":16,"last_token":0,"train_loss":0,"validation_loss":0,"ready":true}' \
+      "$model_escaped" \
+      "$prompt_escaped" \
+      "$completion_escaped"
+    exit 0
+  fi
+fi
+
+# ── Ollama / OpenAI-compatible LLM inference ─────────────────────────────────
+# When no template matches, try a locally-running LLM (Ollama or compatible).
+# Set NEURX_OLLAMA_URL to override; default: http://localhost:11434
+# Set NEURX_OLLAMA_MODEL to choose model; default: qwen2.5-coder:latest
+ollama_url="${NEURX_OLLAMA_URL:-http://localhost:11434}"
+ollama_model="${NEURX_OLLAMA_MODEL:-${NEURX_LLM_MODEL:-qwen2.5-coder:latest}}"
+
+if tags_json="$(curl -sf --connect-timeout 1 "${ollama_url}/api/tags" 2>/dev/null)"; then
+  # Auto-select best available code model if the configured one is not present.
+  # Use env var to pass ollama_model into python3 to avoid heredoc-vs-pipe conflict.
+  if command -v python3 >/dev/null 2>&1; then
+    auto_model="$(printf '%s' "$tags_json" | \
+      NEURX_CFG_MODEL="$ollama_model" python3 -c '
+import sys, json, os
+data = json.load(sys.stdin)
+configured = os.environ.get("NEURX_CFG_MODEL", "")
+names = [m["name"] for m in data.get("models", [])]
+if configured in names:
+    print(configured); exit()
+preferred = ["qwen2.5-coder", "codellama", "deepseek-coder",
+             "qwen2.5", "qwen3", "phi4", "phi3", "llama3", "mistral"]
+for p in preferred:
+    for n in names:
+        if p in n.lower():
+            print(n); exit()
+if names:
+    print(names[0])
+' 2>/dev/null)" || auto_model=""
+    [ -n "$auto_model" ] && ollama_model="$auto_model"
+  fi
+
+  user_msg="$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")"
+  system_msg="You are NeurX, an expert coding assistant. Write complete, working programs. Return only the code without markdown fences or extra explanation unless the user asks for it."
+  system_escaped="$(json_escape "$system_msg")"
+  chat_body="{\"model\":\"$(json_escape "$ollama_model")\",\"messages\":[{\"role\":\"system\",\"content\":\"${system_escaped}\"},{\"role\":\"user\",\"content\":\"${user_msg}\"}],\"stream\":false}"
+
+  llm_resp=""
+  llm_out_file="$(mktemp /tmp/neurx_llm_out.XXXXXX)"
+  if printf '%s' "$chat_body" | curl -sf -X POST "${ollama_url}/api/chat" \
+      -H 'Content-Type: application/json' \
+      --connect-timeout 5 --max-time 120 \
+      -d @- > "$llm_out_file" 2>/dev/null; then
+    if command -v python3 >/dev/null 2>&1; then
+      llm_resp="$(python3 -c '
+import sys, json
+try:
+    with open(sys.argv[1]) as f:
+        d = json.load(f)
+    print(d.get("message", {}).get("content", ""), end="")
+except Exception:
+    pass
+' "$llm_out_file" 2>/dev/null)" || llm_resp=""
+    fi
+  fi
+  rm -f "$llm_out_file"
+
+  if [ -n "${llm_resp:-}" ]; then
+    model_e="$(json_escape "$ollama_model")"
+    prompt_e="$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")"
+    code_e="$(json_escape "$llm_resp")"
+    printf '{"ok":true,"backend_name":"neurx.ollama","model_name":"%s","summary":"ollama-inference","prompt":"%s","completion":"%s","generated_tokens":0,"ready":true}\n' \
+      "$model_e" "$prompt_e" "$code_e"
+    exit 0
+  fi
+fi
+# ─────────────────────────────────────────────────────────────────────────────
+
 serve_out_file="$(mktemp /tmp/neurx_serve_out.XXXXXX)"
 serve_err_file="$(mktemp /tmp/neurx_serve_err.XXXXXX)"
 trap 'rm -f "$body_file" "$serve_out_file" "$serve_err_file"' EXIT
@@ -86,14 +167,9 @@ serve_out="$(cat "$serve_out_file")"
 serve_err="$(cat "$serve_err_file")"
 
 completion="S backend is alive and responding."
-lower_prompt="$(printf '%s' "${prompt:-}" | tr '[:upper:]' '[:lower:]')"
 if [ -n "${prompt:-}" ]; then
-  if template_completion="$(infer_template_completion "$lower_prompt")"; then
-    completion="$template_completion"
-  else
-    prompt_line="$(printf '%s' "$prompt" | head -n 1)"
-    completion="已收到你的请求：${prompt_line}。当前由本地 S 后端链路处理。"
-  fi
+  prompt_line="$(printf '%s' "$prompt" | head -n 1)"
+  completion="已收到你的请求：${prompt_line}。当前由本地 S 后端链路处理。"
 fi
 
 if [ "$serve_status" -ne 0 ]; then
