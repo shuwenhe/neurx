@@ -7,6 +7,9 @@ struct agent_trace_state {
     []string actions
     []string observations
     []string active_skills
+    []string tool_names
+    []int tool_timeout_ms
+    []int tool_retries
     []bool ok_flags
     int count
 }
@@ -19,12 +22,15 @@ func new_agent_trace_state() agent_trace_state {
         actions: [],
         observations: [],
         active_skills: [],
+        tool_names: [],
+        tool_timeout_ms: [],
+        tool_retries: [],
         ok_flags: [],
         count: 0,
     }
 }
 
-func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, bool ok) agent_trace_state {
+func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, string tool_name, int timeout_ms, int retries, bool ok) agent_trace_state {
     int size = len(state.steps)
     []int steps = []int{cap: size + 1}
     []string tasks = []string{cap: size + 1}
@@ -32,6 +38,9 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
     []string actions = []string{cap: size + 1}
     []string observations = []string{cap: size + 1}
     []string active_skills = []string{cap: size + 1}
+    []string tool_names = []string{cap: size + 1}
+    []int tool_timeout_ms = []int{cap: size + 1}
+    []int tool_retries = []int{cap: size + 1}
     []bool ok_flags = []bool{cap: size + 1}
 
     int i = 0
@@ -42,6 +51,9 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
         actions[i] = state.actions[i]
         observations[i] = state.observations[i]
         active_skills[i] = state.active_skills[i]
+        tool_names[i] = state.tool_names[i]
+        tool_timeout_ms[i] = state.tool_timeout_ms[i]
+        tool_retries[i] = state.tool_retries[i]
         ok_flags[i] = state.ok_flags[i]
         i = i + 1
     }
@@ -52,6 +64,9 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
     actions[size] = action
     observations[size] = observation
     active_skills[size] = active_skill
+    tool_names[size] = tool_name
+    tool_timeout_ms[size] = timeout_ms
+    tool_retries[size] = retries
     ok_flags[size] = ok
 
     agent_trace_state {
@@ -61,6 +76,9 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
         actions: actions,
         observations: observations,
         active_skills: active_skills,
+        tool_names: tool_names,
+        tool_timeout_ms: tool_timeout_ms,
+        tool_retries: tool_retries,
         ok_flags: ok_flags,
         count: state.count + 1,
     }
@@ -120,6 +138,9 @@ func agent_trace_export(agent_trace_state state) string {
         out = out + "\naction[" + string(i) + "]=" + state.actions[i]
         out = out + "\nobservation[" + string(i) + "]=" + state.observations[i]
         out = out + "\nactive_skill[" + string(i) + "]=" + state.active_skills[i]
+        out = out + "\ntool[" + string(i) + "]=" + state.tool_names[i]
+        out = out + "\ntool_timeout_ms[" + string(i) + "]=" + string(state.tool_timeout_ms[i])
+        out = out + "\ntool_retries[" + string(i) + "]=" + string(state.tool_retries[i])
         if state.ok_flags[i] {
             out = out + "\nok[" + string(i) + "]=true"
         } else {

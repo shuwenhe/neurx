@@ -498,7 +498,7 @@ Item {
         var headers = []
         var stepMap = {}
         var activePrefix = /^active_skill\[(\d+)\]=(.*)$/
-        var fieldPrefix = /^(step|task|input|action|observation|ok|active_skill)\[(\d+)\]=(.*)$/
+        var fieldPrefix = /^(step|task|input|action|observation|ok|active_skill|tool|tool_timeout_ms|tool_retries)\[(\d+)\]=(.*)$/
 
         for (var i = 0; i < lines.length; ++i) {
             var headerMatch = /^([^\[]+)=/.exec(lines[i])
