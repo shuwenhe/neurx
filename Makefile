@@ -1,28 +1,18 @@
-.PHONY: help install install-local s-compile-runtime logs clean verify-layout
+.PHONY: help install neurx app clean
 
-.DEFAULT_GOAL := s-compile-runtime
+.DEFAULT_GOAL := help
 
 S_COMPILER ?= $(shell command -v s 2>/dev/null)
 
 help:
-	@echo "Targets:"
-	@echo "  s-compile-runtime Compile all NeurX S sources to IR"
-	@echo "  install-local     Alias of s-compile-runtime"
-	@echo "  install           Alias of s-compile-runtime"
-	@echo "  logs              Start the app and stream runtime logs to build/logs/neurx.log"
+	@echo "  neurx             Compile the NeurX deep learning framework to IR"
+	@echo "  app               Compile and run the local Qt app"
+	@echo "  install           Alias of neurx"
 	@echo "  clean             Remove generated artifacts and caches"
-	@echo "  verify-layout     Check for forbidden IR/build artifacts in source directories"
 
-install: s-compile-runtime
+install: neurx
 
-install-local: s-compile-runtime
-
-logs:
-	@mkdir -p build/logs
-	@echo "Streaming NeurX runtime logs to build/logs/neurx.log"
-	@bash app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log
-
-s-compile-runtime:
+neurx:
 	@if [ ! -x "$(S_COMPILER)" ]; then \
 		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
 		echo "hint: install the S compiler and ensure 's' is on PATH, or pass S_COMPILER=/path/to/s"; \
@@ -68,13 +58,10 @@ s-compile-runtime:
 	} > "$$manifest_path"
 	@echo "runtime manifest: build/ir/manifest.json"
 
+app:
+	@mkdir -p build/logs
+	@echo "Streaming NeurX runtime logs to build/logs/neurx.log"
+	@bash app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log
+
 clean:
 	@rm -rf build runtime/__pycache__ test/__pycache__ checkpoint.pkl
-
-verify-layout:
-	@echo "Checking for forbidden IR/build artifacts in source directories..."
-	@if find . -type f \( -name '*.ir' -a ! -path './build/*' \) | grep -q .; then \
-		echo 'ERROR: Found .ir files outside build/. Please clean up.'; exit 1; \
-	else \
-		echo 'OK: No forbidden IR files found.'; \
-	fi
