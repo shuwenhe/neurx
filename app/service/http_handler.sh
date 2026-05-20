@@ -94,6 +94,7 @@ handle_models() {
 
 handle_chat() {
   local model prompt max_tokens req_json response err_text
+  local gateway_path serve_path
   model="$(extract_json_string model "$REQUEST_BODY")"
   prompt="$(extract_json_string prompt "$REQUEST_BODY")"
   if [[ -z "$prompt" ]]; then
@@ -109,8 +110,11 @@ handle_chat() {
   [[ -z "$max_tokens" ]] && max_tokens="16"
 
   req_json="{\"model\":\"$(json_escape "$model")\",\"prompt\":\"$(json_escape "$prompt")\",\"max_tokens\":${max_tokens}}"
+  gateway_path="${ROOT_DIR}/gateway.sh"
+  serve_path="${ROOT_DIR}/serve.s"
 
   log_inference "chat.start model=${model} prompt_len=${#prompt} max_tokens=${max_tokens}"
+  log_inference "chat.code_path handler=${ROOT_DIR}/http_handler.sh gateway=${gateway_path} serve=${serve_path}"
 
   local err_file
   err_file="$(mktemp /tmp/neurx_gateway_err.XXXXXX)"
