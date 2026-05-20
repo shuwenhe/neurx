@@ -6,6 +6,7 @@ use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor
 use neurx.agent.trace
+use neurx.agent.skill_registry
 
 func new_default_agent(string goal) agent_runtime_state {
     new_agent_runtime_state(goal, "analyze", 8)
@@ -92,6 +93,22 @@ func agent_trace_entry_last_action(agent_runtime_state state) string {
 
 func agent_trace_entry_last_observation(agent_runtime_state state) string {
     agent_trace_last_observation(state.trace)
+}
+
+func agent_skill_count(agent_runtime_state state) int {
+    agent_skill_registry_count(state.skills)
+}
+
+func agent_has_skill(agent_runtime_state state, string name) bool {
+    agent_skill_registry_has(state.skills, name)
+}
+
+func agent_active_skill_name(agent_runtime_state state) string {
+    agent_skill_registry_active(state.skills).spec.name
+}
+
+func agent_active_skill_status(agent_runtime_state state) string {
+    agent_skill_registry_active(state.skills).spec.status
 }
 
 func agent_state_dict(agent_runtime_state state) agent_runtime_state {

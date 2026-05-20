@@ -96,6 +96,14 @@ func agent_trace_last_observation(agent_trace_state state) string {
     state.observations[size - 1]
 }
 
+func agent_trace_last_ok(agent_trace_state state) bool {
+    int size = len(state.ok_flags)
+    if size <= 0 {
+        return false
+    }
+    state.ok_flags[size - 1]
+}
+
 func agent_trace_state_dict(agent_trace_state state) agent_trace_state {
     state
 }
