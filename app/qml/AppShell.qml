@@ -25,16 +25,16 @@ Item {
     readonly property color highlightDirective: "#d2a8ff"
     readonly property int paneHandleWidth: 10
     readonly property int paneMinExplorerWidth: 220
-    readonly property int paneMinEditorWidth: 420
-    readonly property int paneMinAgentWidth: 300
-    readonly property int conversationBubbleMaxWidth: 560
+    readonly property int paneMinEditorWidth: 340
+    readonly property int paneMinAgentWidth: 380
+    readonly property int conversationBubbleMaxWidth: 520
 
     readonly property int workspaceMargin: 20
 
     property int selectedFileIndex: 1
     property string selectedFilePath: ""
     property int explorerPaneWidth: 280
-    property int agentPaneWidth: 342
+    property int agentPaneWidth: 540
     property int runSteps: 4
     property bool agentRunning: false
     property int runClickSeq: 0
@@ -52,6 +52,7 @@ Item {
     property bool skillHighFailOnly: false
     property bool selectedSkillFailedOnly: false
     property string selectedSkillToolFilter: ""
+    property string selectedSkillSearchText: ""
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
@@ -169,6 +170,7 @@ Item {
         skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
@@ -210,6 +212,7 @@ Item {
         skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -242,6 +245,7 @@ Item {
         skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -289,6 +293,7 @@ Item {
         skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -314,6 +319,7 @@ Item {
         skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -714,6 +720,7 @@ Item {
     function filteredSelectedSkillTraceSteps() {
         var steps = selectedSkillTraceSteps()
         var filtered = []
+        var searchText = (selectedSkillSearchText || "").trim().toLowerCase()
         for (var i = 0; i < steps.length; ++i) {
             var item = steps[i]
             if (selectedSkillFailedOnly && (item.ok || "false") === "true") {
@@ -721,6 +728,13 @@ Item {
             }
             if (selectedSkillToolFilter.length > 0 && (item.tool || "") !== selectedSkillToolFilter) {
                 continue
+            }
+            if (searchText.length > 0) {
+                var actionText = (item.action || "").toLowerCase()
+                var observationText = (item.observation || "").toLowerCase()
+                if (actionText.indexOf(searchText) < 0 && observationText.indexOf(searchText) < 0) {
+                    continue
+                }
             }
             filtered.push(item)
         }
@@ -757,6 +771,7 @@ Item {
         preview.push("selected_skill=" + (skillRecord.name || ""))
         preview.push("failed_only=" + (selectedSkillFailedOnly ? "true" : "false"))
         preview.push("tool_filter=" + (selectedSkillToolFilter || ""))
+        preview.push("search_text=" + (selectedSkillSearchText || ""))
         preview.push("filtered_trace_steps=" + steps.length)
         preview.push(skillRecordPreview(resultOutput.text, skillRecord))
         if (steps.length > 0) {
@@ -822,6 +837,7 @@ Item {
         selectedSkillName = skillRecord.name || ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
         var skillName = (skillRecord.name || "").trim()
         if (skillName.length > 0) {
             promptEditor.text = qsTr("Inspect skill %1").arg(skillName)
@@ -1288,7 +1304,7 @@ Item {
 
                                 Rectangle {
                                     id: bubbleRect
-                                    width: Math.min(parent.width * 0.90, shell.conversationBubbleMaxWidth)
+                                    width: Math.min(Math.max(220, parent.width - 28), shell.conversationBubbleMaxWidth)
                                     height: bubbleColumn.implicitHeight + 20
                                     x: model.kind === "user" ? parent.width - width : 0
                                     radius: 12
@@ -1342,14 +1358,21 @@ Item {
                                             }
                                         }
 
-                                        Text {
+                                        TextArea {
                                             width: Math.max(120, bubbleRect.width - 48)
                                             text: model.text
-                                            textFormat: Text.PlainText
-                                            wrapMode: Text.WrapAnywhere
+                                            readOnly: true
+                                            textFormat: TextEdit.PlainText
+                                            wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
+                                            selectByMouse: true
                                             color: shell.textPrimary
                                             font.pixelSize: 13
-                                            clip: true
+                                            padding: 0
+                                            leftPadding: 0
+                                            rightPadding: 0
+                                            topPadding: 0
+                                            bottomPadding: 0
+                                            background: null
                                         }
                                     }
 
@@ -1357,10 +1380,10 @@ Item {
                                         enabled: !model.pending && model.text.length > 0
                                         visible: shell.windowHovered
                                         opacity: enabled ? 1.0 : 0.45
-                                        anchors.top: parent.top
-                                        anchors.right: parent.right
-                                        anchors.topMargin: 6
-                                        anchors.rightMargin: 6
+                                        anchors.left: parent.left
+                                        anchors.bottom: parent.bottom
+                                        anchors.leftMargin: 6
+                                        anchors.bottomMargin: 6
                                         width: 24
                                         height: 24
                                         padding: 0
@@ -2104,6 +2127,37 @@ Item {
 
                                                     displayText: currentText && currentText.length > 0 ? currentText : qsTr("All tools")
                                                     onActivated: shell.selectedSkillToolFilter = currentValue || currentText || ""
+                                                }
+
+                                                Rectangle {
+                                                    Layout.preferredWidth: 180
+                                                    Layout.preferredHeight: 30
+                                                    radius: 8
+                                                    color: shell.editorBg
+                                                    border.color: shell.border
+
+                                                    TextInput {
+                                                        anchors.fill: parent
+                                                        anchors.margins: 8
+                                                        text: shell.selectedSkillSearchText
+                                                        color: shell.textPrimary
+                                                        font.pixelSize: 12
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        clip: true
+                                                        selectByMouse: true
+                                                        onTextChanged: shell.selectedSkillSearchText = text
+                                                    }
+
+                                                    Text {
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 8
+                                                        anchors.rightMargin: 8
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        text: qsTr("Search action/observation")
+                                                        color: shell.textMuted
+                                                        font.pixelSize: 12
+                                                        visible: shell.selectedSkillSearchText.length === 0
+                                                    }
                                                 }
 
                                                 Text {
