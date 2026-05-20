@@ -29,6 +29,49 @@ bool run_diag_enabled() {
     return v == "1" || v == "true" || v == "yes" || v == "on";
 }
 
+QString sanitize_chat_path(QString value) {
+    value = value.trimmed();
+    if (value.isEmpty()) {
+        return value;
+    }
+
+    static const QStringList known_suffixes = {
+        "/neurx/api/chat",
+        "/neurx/api/agent/suggest",
+        "/v1/chat/completions",
+        "/api/chat",
+        "/api/generate"
+    };
+
+    for (const QString& suffix : known_suffixes) {
+        if (value == suffix) {
+            return value;
+        }
+
+        const int idx = value.indexOf(suffix, 0, Qt::CaseInsensitive);
+        if (idx > 0) {
+            return suffix;
+        }
+    }
+
+    if (!value.startsWith('/')) {
+        value.prepend('/');
+    }
+    return value;
+}
+
+QString join_url_and_path(QString base_url, QString path) {
+    base_url = base_url.trimmed();
+    path = sanitize_chat_path(path);
+    if (base_url.endsWith('/')) {
+        base_url.chop(1);
+    }
+    if (!path.startsWith('/')) {
+        path.prepend('/');
+    }
+    return base_url + path;
+}
+
 QString escape_s_string(const QString& value) {
     QString out = value;
     out.replace("\\", "\\\\");
@@ -111,7 +154,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_name_ = kDefaultOllamaModel;
     }
     if (!env_chat_path.trimmed().isEmpty()) {
-        local_model_chat_path_ = env_chat_path.trimmed();
+        local_model_chat_path_ = sanitize_chat_path(env_chat_path);
     } else if (!checkpoint_model_file_.isEmpty()) {
         local_model_chat_path_ = "/neurx/api/chat";
     } else {
@@ -218,7 +261,7 @@ QString NeurxBridge::local_model_chat_path() const {
 }
 
 void NeurxBridge::set_local_model_chat_path(const QString& chat_path) {
-    const QString next = chat_path.trimmed();
+    const QString next = sanitize_chat_path(chat_path);
     if (local_model_chat_path_ == next) {
         return;
     }
@@ -1038,11 +1081,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     if (url.isEmpty()) {
         url = "http://127.0.0.1:18080";
     }
-    if (!url.endsWith('/')) {
-        url += '/';
-    }
-    const QString chat_url = url + "neurx/api/chat";
-    const QString suggest_url = url + "neurx/api/agent/suggest";
+    const QString effective_chat_path = local_model_chat_path_.trimmed().isEmpty()
+        ? QStringLiteral("/neurx/api/chat")
+        : local_model_chat_path_;
+    const QString chat_url = join_url_and_path(url, effective_chat_path);
+    const QString suggest_url = join_url_and_path(url, QStringLiteral("/neurx/api/agent/suggest"));
+    const bool suggest_supported = chat_url.contains("/neurx/api/chat");
 
     QJsonObject payload;
     QString effective_prompt;
@@ -1063,14 +1107,27 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             .arg(prompt.trimmed());
     }
 
-    payload.insert("prompt", effective_prompt);
-    if (!filePath.trimmed().isEmpty()) {
-        payload.insert("filePath", filePath.trimmed());
+    if (chat_url.contains("/v1/chat/completions") || chat_url.contains("/api/chat")) {
+        if (!local_model_name_.trimmed().isEmpty()) {
+            payload.insert("model", local_model_name_.trimmed());
+        }
+        payload.insert("max_tokens", 256);
+        QJsonObject user_message;
+        user_message.insert("role", "user");
+        user_message.insert("content", effective_prompt);
+        QJsonArray messages;
+        messages.append(user_message);
+        payload.insert("messages", messages);
+    } else {
+        payload.insert("prompt", effective_prompt);
+        if (!filePath.trimmed().isEmpty()) {
+            payload.insert("filePath", filePath.trimmed());
+        }
+        if (!local_model_name_.trimmed().isEmpty()) {
+            payload.insert("model", local_model_name_.trimmed());
+        }
+        payload.insert("max_tokens", 256);
     }
-    if (!local_model_name_.trimmed().isEmpty()) {
-        payload.insert("model", local_model_name_.trimmed());
-    }
-    payload.insert("max_tokens", 256);
 
     QJsonDocument doc(payload);
     QByteArray body = doc.toJson(QJsonDocument::Compact);
@@ -1119,6 +1176,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     if (!fallback.isEmpty()) {
         emit log_message("info", "agent", QString("code-assistant done route=%1 fallback=hello-template-nochat").arg(route));
         return fallback;
+    }
+
+    // Fall back to the lightweight suggest endpoint only for the local NeurX backend.
+    if (!suggest_supported) {
+        emit log_message("warning", "agent", QString("code-assistant empty chat response from %1").arg(chat_url));
+        return QString("code_assistant_empty_response: %1").arg(chat_url);
     }
 
     // Fall back to the lightweight suggest endpoint so the UI still completes if chat output is empty.
