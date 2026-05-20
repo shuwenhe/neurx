@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ../..
-      dockerfile: app/web/backend/Dockerfile
+      dockerfile: app/service/Dockerfile
     environment:
       PORT: 18080
       NEURX_S_BINARY: /usr/local/bin/s
@@ -11,10 +11,10 @@ services:
     ports:
       - "18080:18080"
 
-  frontend:
+  web:
     build:
       context: ../..
-      dockerfile: app/web/frontend/Dockerfile
+      dockerfile: app/web/Dockerfile
     environment:
       NEURX_BACKEND_URL: http://backend:18080/neurx/api/chat
     depends_on:
@@ -25,7 +25,7 @@ services:
   nginx:
     image: nginx:1.27-alpine
     depends_on:
-      - frontend
+      - web
     ports:
       - "8080:8080"
     volumes:

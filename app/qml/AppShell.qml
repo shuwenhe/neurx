@@ -212,75 +212,6 @@ Item {
         anchors.margins: 20
         spacing: 16
 
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 94
-            radius: 16
-            color: shell.surface
-            border.color: shell.border
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 6
-
-                Text {
-                    text: qsTr("Explorer / Editor / Agent")
-                    color: shell.textPrimary
-                    font.pixelSize: 28
-                    font.bold: true
-                }
-
-                Text {
-                    text: qsTr("Left: project explorer. Middle: code editor. Right: live agent workspace.")
-                    color: shell.textMuted
-                    wrapMode: Text.WordWrap
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 54
-            radius: 14
-            color: shell.surface
-            border.color: shell.border
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 14
-
-                Text {
-                    text: qsTr("Runtime")
-                    color: shell.textPrimary
-                    font.bold: true
-                }
-
-                Text {
-                    id: runtimeStatus
-                    Layout.fillWidth: true
-                    text: Runtime.ping()
-                    color: shell.textMuted
-                    wrapMode: Text.WordWrap
-                }
-
-                Rectangle {
-                    Layout.preferredWidth: 168
-                    Layout.preferredHeight: 28
-                    radius: 10
-                    color: shell.panelAlt
-                    border.color: shell.border
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: Runtime.localModelEnabled ? qsTr("Local model on") : qsTr("Local model off")
-                        color: shell.textPrimary
-                    }
-                }
-            }
-        }
-
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -599,58 +530,6 @@ Item {
                     Text {
                         text: qsTr("Live runtime and agent control")
                         color: shell.textMuted
-                    }
-
-                    Text {
-                        text: qsTr("Model")
-                        color: shell.textPrimary
-                        font.pixelSize: 16
-                        font.bold: true
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 120
-                        radius: 14
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 8
-
-                            Text {
-                                id: modelPicker
-                                Layout.fillWidth: true
-                                text: Runtime.checkpointModelChoices.length > 0
-                                    ? Runtime.checkpointModelChoices[0].text
-                                    : qsTr("No NeurX checkpoints were found under the configured run directory.")
-                                color: shell.textPrimary
-                                font.pixelSize: 14
-                                font.bold: true
-                                elide: Text.ElideMiddle
-                                wrapMode: Text.NoWrap
-                            }
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: Runtime.localModelSummary
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                wrapMode: Text.WordWrap
-                            }
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: Runtime.checkpointModelChoices.length > 0
-                                    ? qsTr("Latest NeurX checkpoint only. The active agent auto-switches to it.")
-                                    : qsTr("No NeurX checkpoints were found under the configured run directory.")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                wrapMode: Text.WordWrap
-                            }
-                        }
                     }
 
                     Rectangle {

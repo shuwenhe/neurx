@@ -2,7 +2,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'NeurX LLM',
-  description: 'NeurX Next.js frontend for the S-based LLM backend',
+  description: 'NeurX Next.js web UI for the S-based LLM backend',
 };
 
 export default function RootLayout({ children }) {

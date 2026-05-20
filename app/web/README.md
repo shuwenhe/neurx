@@ -1,6 +1,6 @@
-# app/web/frontend
+# app/web
 
-Next.js frontend for the NeurX LLM entry.
+Next.js web entry for the NeurX LLM.
 
 ## Contract
 
@@ -23,7 +23,7 @@ When deployed behind Nginx on port `8080`, the public entry page is `http://111.
 ## Run
 
 ```bash
-cd app/web/frontend
+cd app/web
 npm install
 npm run dev
 ```
@@ -34,7 +34,7 @@ If the API route should target a different backend URL, set:
 export NEURX_BACKEND_URL=http://127.0.0.1:18080/neurx/api/chat
 ```
 
-To run the frontend in development with the local gateway wrapper:
+To run the web app in development with the local gateway wrapper:
 
 ```bash
 ./run.sh
@@ -49,4 +49,4 @@ npm run start
 
 ## Notes
 
-The frontend does not implement inference itself. The `/neurx/api/chat` route forwards to the backend HTTP endpoint, which can be backed by the S gateway in `app/backend/gateway.sh` or any equivalent wrapper around `app/backend/serve.s`.
+The web app does not implement inference itself. The `/neurx/api/chat` route forwards to the backend HTTP endpoint, which can be backed by the S gateway in `app/service/gateway.sh` or any equivalent wrapper around `app/service/serve.s`.

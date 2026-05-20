@@ -7,14 +7,14 @@ const modelEndpoint = '/neurx/api/models';
 
 function fallbackResponse(payload) {
   return {
-    backend_name: 'neurx.frontend.fallback',
+    backend_name: 'neurx.web.fallback',
     model_name: payload.model,
     prompt: payload.prompt,
-    completion: 'Frontend fallback: the S backend gateway is not reachable yet.',
+    completion: 'Web fallback: the S backend gateway is not reachable yet.',
     token_trace: [],
     generated_tokens: 0,
     ready: false,
-    note: 'Point /neurx/api/chat to app/backend/gateway.sh or an equivalent HTTP wrapper.',
+    note: 'Point /neurx/api/chat to app/service/gateway.sh or an equivalent HTTP wrapper.',
   };
 }
 
