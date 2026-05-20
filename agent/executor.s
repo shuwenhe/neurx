@@ -9,6 +9,9 @@ struct agent_execute_result {
     agent_memory_state memory
     string action
     string observation
+    string tool_name
+    int tool_timeout_ms
+    int tool_retries
     bool ok
 }
 
@@ -60,6 +63,9 @@ func agent_route_for_goal(string goal, string input) string {
 func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memory, string goal, string task, string input, string model_path) agent_execute_result {
     string action = "noop"
     string observation = "tool_unavailable"
+    string tool_name = ""
+    int tool_timeout_ms = 0
+    int tool_retries = 0
     bool ok = false
     string route = agent_route_for_goal(goal, input)
     agent_memory_state next_memory = agent_memory_write_short(memory, "last_input", input)
@@ -80,6 +86,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         if agent_tool_registry_has_enabled(tools, "retrieve") {
             action = "retrieve"
             observation = "retrieved:" + route
+            tool_name = "retrieve"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
             ok = true
             next_memory = agent_memory_write_long(next_memory, "retrieved", route)
         }
@@ -88,6 +97,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             infer_pipeline_state pipeline = new_infer_pipeline_from_checkpoint(input, model_path, 512, 256, 32, 2048)
             action = "infer"
             observation = infer_pipeline_last_observation(pipeline)
+            tool_name = "infer"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
             ok = true
             next_memory = agent_memory_write_long(next_memory, "inferred_model", model_path)
         }
@@ -104,6 +116,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         if agent_tool_registry_has_enabled(tools, "search") {
             action = "search"
             observation = "searched:" + route
+            tool_name = "search"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
             ok = true
             next_memory = agent_memory_write_long(next_memory, "searched", route)
         }
@@ -117,6 +132,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         memory: next_memory,
         action: action,
         observation: observation,
+        tool_name: tool_name,
+        tool_timeout_ms: tool_timeout_ms,
+        tool_retries: tool_retries,
         ok: ok,
     }
 }
