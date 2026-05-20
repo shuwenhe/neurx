@@ -778,7 +778,8 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
 }
 
 QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString& filePath) const {
-    const QString text = (prompt + " " + filePath).trimmed().toLower();
+    Q_UNUSED(filePath);
+    const QString text = prompt.trimmed().toLower();
     if (text.contains("fix") || text.contains("bug") || text.contains("error") || text.contains("implement") || text.contains("patch") || text.contains("refactor") || text.contains("code") || text.contains("qml")) {
         return "code";
     }
