@@ -1,4 +1,5 @@
 #include <QGuiApplication>
+#include <QQuickStyle>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
@@ -8,6 +9,7 @@
 #include "bridge/neurx_bridge.h"
 
 int main(int argc, char* argv[]) {
+    QQuickStyle::setStyle("Fusion");
     QGuiApplication app(argc, argv);
     app.setApplicationName("Neurx App Shell");
 

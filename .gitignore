@@ -53,6 +53,7 @@ logs/
 # Trained model artifacts
 artifacts/checkpoints/*.neurx
 artifacts/checkpoints/**/*.neurx
+artifacts/checkpoints/Qwen2.5-VL-7B/
 
 # Auto push
 .auto_push_state/
@@ -92,3 +93,12 @@ runtime/*.ir
 # Prebuilt neurx binaries (kept out of git; use CI releases)
 # top-level bin/ directory for prebuilt artifacts
 /bin/
+
+# Qt app build output
+app/build/
+
+# Ollama temp installer files
+/tmp/neurx-ollama/
+
+# make app log output
+build/logs/
