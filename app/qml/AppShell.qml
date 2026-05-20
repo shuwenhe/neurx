@@ -57,6 +57,7 @@ Item {
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
+    property int agentRunTimeoutMs: 20000
 
     function escapeHtml(text) {
         return (text || "")
@@ -125,10 +126,14 @@ Item {
     }
 
     function appendConversationMessage(kind, label, text, pending) {
+        var parsed = shell.parseConversationPayload(text || "")
         conversationModel.append({
             kind: kind,
             label: label,
             text: text,
+            bodyText: parsed.bodyText,
+            modeText: parsed.modeText,
+            planText: parsed.planText,
             pending: pending,
             durationText: pending ? qsTr("Working...") : "",
             copied: false
@@ -158,6 +163,7 @@ Item {
 
     function finishConversation(result, durationText) {
         resultOutput.text = result
+        var parsed = shell.parseConversationPayload(result)
         diagnosticsSkillRecords = parseSkillRecords(result)
         selectedSkillName = ""
         skillStatusFilter = ""
@@ -168,11 +174,46 @@ Item {
         selectedSkillSearchText = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
+            conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", parsed.bodyText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "modeText", parsed.modeText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "planText", parsed.planText)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
             conversationModel.setProperty(activeAssistantMessageIndex, "durationText", durationText || "")
         }
         conversationList.positionViewAtEnd()
         activeAssistantMessageIndex = -1
+    }
+
+    function parseConversationPayload(text) {
+        var source = text || ""
+        var lines = source.split("\n")
+        var modeText = ""
+        var planText = ""
+        var bodyLines = []
+        var inHeader = true
+
+        for (var i = 0; i < lines.length; ++i) {
+            var line = lines[i]
+            if (inHeader && line.indexOf("[mode] ") === 0) {
+                modeText = line.substring(7).trim()
+                continue
+            }
+            if (inHeader && line.indexOf("[plan] ") === 0) {
+                planText = line.substring(7).trim()
+                continue
+            }
+            if (inHeader && line.trim().length === 0 && (modeText.length > 0 || planText.length > 0)) {
+                continue
+            }
+            inHeader = false
+            bodyLines.push(line)
+        }
+
+        return {
+            modeText: modeText,
+            planText: planText,
+            bodyText: bodyLines.join("\n").trim()
+        }
     }
 
     function elapsedDurationText() {
@@ -200,6 +241,7 @@ Item {
         shell.agentRunning = true
         shell.runtimeStatusText = qsTr("routing #") + shell.runClickSeq
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
+        agentRunTimeoutTimer.restart()
         diagnosticsSkillRecords = []
         selectedSkillName = ""
         skillStatusFilter = ""
@@ -216,12 +258,16 @@ Item {
             resultOutput.text = qsTr("run_agent_failed: ") + e
             if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
                 conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "modeText", "")
+                conversationModel.setProperty(activeAssistantMessageIndex, "planText", "")
                 conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
                 conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
                 activeAssistantMessageIndex = -1
             }
             shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
             shell.agentRunning = false
+            agentRunTimeoutTimer.stop()
         } finally {
             // Completion comes from Runtime.agentRunFinished.
         }
@@ -891,9 +937,34 @@ Item {
         target: Runtime
 
         function onAgentRunFinished(result) {
+            agentRunTimeoutTimer.stop()
             shell.lastRunDurationText = shell.elapsedDurationText()
             shell.finishConversation(result, shell.lastRunDurationText)
             shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
+            shell.agentRunning = false
+        }
+    }
+
+    Timer {
+        id: agentRunTimeoutTimer
+        interval: shell.agentRunTimeoutMs
+        repeat: false
+        onTriggered: {
+            if (!shell.agentRunning) {
+                return
+            }
+            var timeoutText = qsTr("runtime_timeout: agent request exceeded %1s").arg(Math.round(shell.agentRunTimeoutMs / 1000))
+            resultOutput.text = timeoutText
+            if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+                conversationModel.setProperty(activeAssistantMessageIndex, "text", timeoutText)
+                conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", timeoutText)
+                conversationModel.setProperty(activeAssistantMessageIndex, "modeText", "")
+                conversationModel.setProperty(activeAssistantMessageIndex, "planText", "")
+                conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+                conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
+                activeAssistantMessageIndex = -1
+            }
+            shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
             shell.agentRunning = false
         }
     }
@@ -1393,16 +1464,43 @@ Item {
                                                     mipmap: true
                                                 }
                                                 onClicked: {
-                                                    shell.copyConversationText(model.text)
+                                                    shell.copyConversationText(model.bodyText && model.bodyText.length > 0 ? model.bodyText : model.text)
                                                     conversationModel.setProperty(index, "copied", true)
                                                     copyResetTimer.restart()
                                                 }
                                             }
                                         }
 
+                                        Rectangle {
+                                            visible: model.modeText && model.modeText.length > 0
+                                            radius: 999
+                                            color: Qt.rgba(0.10, 0.66, 0.45, 0.14)
+                                            border.color: Qt.rgba(0.10, 0.66, 0.45, 0.42)
+                                            height: 22
+                                            width: modeLabel.implicitWidth + 14
+
+                                            Text {
+                                                id: modeLabel
+                                                anchors.centerIn: parent
+                                                text: model.modeText
+                                                color: shell.accent
+                                                font.pixelSize: 11
+                                                font.bold: true
+                                            }
+                                        }
+
+                                        Text {
+                                            visible: model.planText && model.planText.length > 0
+                                            width: Math.max(120, bubbleRect.width - 26)
+                                            text: model.planText
+                                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                            color: shell.textMuted
+                                            font.pixelSize: 11
+                                        }
+
                                         TextEdit {
                                             width: Math.max(120, bubbleRect.width - 26)
-                                            text: model.text
+                                            text: model.bodyText && model.bodyText.length > 0 ? model.bodyText : model.text
                                             readOnly: true
                                             selectByMouse: true
                                             selectByKeyboard: true
@@ -1741,6 +1839,7 @@ Item {
                                     spacing: 8
 
                                     ComboBox {
+                                        id: skillStatusCombo
                                         Layout.preferredWidth: 170
                                         model: shell.skillStatusOptions()
                                         currentIndex: Math.max(0, model.indexOf(shell.skillStatusFilter))
@@ -1756,7 +1855,7 @@ Item {
                                             leftPadding: 10
                                             rightPadding: 10
                                             verticalAlignment: Text.AlignVCenter
-                                            text: control.displayText
+                                            text: skillStatusCombo.displayText
                                             color: shell.textPrimary
                                             font.pixelSize: 12
                                             elide: Text.ElideRight
@@ -2001,6 +2100,7 @@ Item {
                                                 }
 
                                                 ComboBox {
+                                                    id: selectedSkillToolCombo
                                                     Layout.preferredWidth: 160
                                                     model: shell.selectedSkillTraceToolOptions()
                                                     currentIndex: Math.max(0, model.indexOf(shell.selectedSkillToolFilter))
@@ -2016,7 +2116,7 @@ Item {
                                                         leftPadding: 10
                                                         rightPadding: 10
                                                         verticalAlignment: Text.AlignVCenter
-                                                        text: control.displayText
+                                                        text: selectedSkillToolCombo.displayText
                                                         color: shell.textPrimary
                                                         font.pixelSize: 12
                                                         elide: Text.ElideRight

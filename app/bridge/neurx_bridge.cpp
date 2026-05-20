@@ -994,14 +994,28 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 const QString runner_status = runner_obj.value("status").toString();
                 const QString runner_mode = runner_obj.value("mode").toString();
                 const QString runner_response = runner_obj.value("response").toString();
+                const QString runner_plan = runner_obj.value("plan").toString();
+                const QString runner_file_context = runner_obj.value("file_context").toString();
                 if (runner_status == "completed" && !runner_response.trimmed().isEmpty()) {
                     emit log_message("info", "agent", QString("code-assistant done route=%1 source=runner mode=%2")
                         .arg(route, runner_mode));
-                    return runner_response.trimmed();
+                    QString decorated = runner_response.trimmed();
+                    if (!runner_mode.trimmed().isEmpty()) {
+                        decorated = QString("[mode] %1\n\n%2").arg(runner_mode.trimmed(), decorated);
+                    }
+                    return decorated;
                 }
                 if (runner_status == "unhandled") {
                     emit log_message("info", "agent", QString("code-assistant runner delegated route=%1 mode=%2")
                         .arg(route, runner_mode));
+                    QString delegated = QString("[mode] %1").arg(runner_mode.trimmed().isEmpty() ? QStringLiteral("planner") : runner_mode.trimmed());
+                    if (!runner_plan.trimmed().isEmpty()) {
+                        delegated = delegated + "\n[plan] " + runner_plan.trimmed();
+                    }
+                    if (!runner_file_context.trimmed().isEmpty()) {
+                        delegated = delegated + "\n[file_context]\n" + runner_file_context.trimmed();
+                    }
+                    emit log_message("info", "agent", delegated);
                 }
             }
         }

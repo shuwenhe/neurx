@@ -1,0 +1,14 @@
+import QtQuick
+import QtQuick.Controls
+
+ApplicationWindow {
+    visible: true
+    width: 480
+    height: 320
+    title: "Hello"
+
+    Label {
+        anchors.centerIn: parent
+        text: "Hello, world!"
+    }
+}
