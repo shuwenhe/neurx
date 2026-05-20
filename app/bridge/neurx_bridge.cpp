@@ -12,6 +12,7 @@
 #include <QStandardPaths>
 #include <QThread>
 #include <QVariantMap>
+#include <QDebug>
 #include <QtConcurrent/QtConcurrentRun>
 
 namespace {
@@ -253,7 +254,11 @@ QString NeurxBridge::run_http_request(const QString& method, const QString& url,
         return "runtime_exec_failed: node not found";
     }
 
-const QString script = R"JS(
+    const int request_timeout_ms = qMax(1000, timeout_ms - 2000);
+    qInfo().noquote() << QString("bridge http_request start method=%1 url=%2 timeout_ms=%3")
+        .arg(method, url)
+        .arg(timeout_ms);
+    const QString script = QString(R"JS(
 const fs = await import('node:fs');
 const [requestUrl, requestMethod, requestBodyFile] = process.argv.slice(1);
 const target = new URL(requestUrl);
@@ -261,7 +266,10 @@ if (target.hostname === 'localhost') {
   target.hostname = '127.0.0.1';
 }
 
-const options = { method: requestMethod, headers: {} };
+const requestTimeoutMs = %1;
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(new Error(`request timeout after ${requestTimeoutMs}ms`)), requestTimeoutMs);
+const options = { method: requestMethod, headers: {}, signal: controller.signal };
 
 if (requestBodyFile) {
   options.body = fs.readFileSync(requestBodyFile, 'utf8');
@@ -270,6 +278,7 @@ if (requestBodyFile) {
 
 try {
   const response = await fetch(target, options);
+  clearTimeout(timeout);
   const text = await response.text();
   if (!response.ok) {
     console.error(text || `HTTP ${response.status}`);
@@ -277,6 +286,7 @@ try {
   }
   process.stdout.write(text);
 } catch (err) {
+  clearTimeout(timeout);
   const cause = err && err.cause ? err.cause : null;
   const detail = cause && (cause.code || cause.message)
     ? `${err.message || String(err)}: ${cause.code || cause.message}`
@@ -284,7 +294,7 @@ try {
   console.error(detail);
   process.exit(1);
 }
-)JS";
+)JS").arg(request_timeout_ms);
 
     QStringList args;
     args << "--input-type=module"
@@ -293,7 +303,16 @@ try {
          << url
          << method
          << body_file;
-    return run_process(node, args, timeout_ms);
+    const QString result = run_process(node, args, timeout_ms);
+    if (result.startsWith("runtime_")) {
+        qWarning().noquote() << QString("bridge http_request failed method=%1 url=%2 result=%3")
+            .arg(method, url, result.left(200));
+    } else {
+        qInfo().noquote() << QString("bridge http_request done method=%1 url=%2 bytes=%3")
+            .arg(method, url)
+            .arg(result.size());
+    }
+    return result;
 }
 
 QString NeurxBridge::ollama_command() const {
@@ -412,32 +431,36 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
     }
     health_url = health_url + "/neurx/health";
 
+    qInfo().noquote() << QString("bridge local backend health probe url=%1").arg(health_url);
     const QString health_probe = run_http_request("GET", health_url, QString(), 5000);
     if (!health_probe.startsWith("runtime_")) {
+        qInfo().noquote() << QString("bridge local backend already healthy url=%1").arg(health_url);
         return QString();
     }
 
-    const QString node = QStandardPaths::findExecutable("node");
-    if (node.isEmpty()) {
-        return "runtime_exec_failed: node not found";
-    }
-
-    const QString backend_dir = QDir(repo_root).filePath("app/web/backend");
-    const QFileInfo server_file(QDir(backend_dir).filePath("http_server.mjs"));
+    const QString backend_dir = QDir(repo_root).filePath("app/service");
+    const QFileInfo server_file(QDir(backend_dir).filePath("http_server.sh"));
     if (!server_file.exists() || !server_file.isFile()) {
-        return "runtime_exec_failed: backend http_server.mjs not found";
+        return "runtime_exec_failed: backend http_server.sh not found";
     }
 
-    emit log_message("info", "bridge", "Starting local NeurX backend on 127.0.0.1:18080");
-    const bool started = QProcess::startDetached(node, {"http_server.mjs"}, backend_dir);
+    qInfo().noquote() << QString("bridge starting local backend dir=%1 script=%2")
+        .arg(backend_dir, server_file.fileName());
+    const bool started = QProcess::startDetached("bash", {"http_server.sh"}, backend_dir);
     if (!started) {
         return "runtime_exec_failed: failed to start local backend";
     }
 
     for (int attempt = 0; attempt < 10; ++attempt) {
         QThread::msleep(300);
+        qInfo().noquote() << QString("bridge local backend probe attempt=%1 url=%2")
+            .arg(attempt + 1)
+            .arg(health_url);
         const QString probe = run_http_request("GET", health_url, QString(), 5000);
         if (!probe.startsWith("runtime_")) {
+            qInfo().noquote() << QString("bridge local backend ready url=%1 attempt=%2")
+                .arg(health_url)
+                .arg(attempt + 1);
             return QString();
         }
     }
@@ -486,6 +509,14 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     tmp.write(payload.toUtf8());
     tmp.flush();
     tmp.close();
+
+    const QString repo_root = find_repo_root();
+    if (!repo_root.isEmpty()) {
+        qInfo().noquote() << QString("bridge local backend code_path handler=%1 gateway=%2 serve=%3")
+            .arg(QDir(repo_root).filePath("app/service/http_handler.sh"))
+            .arg(QDir(repo_root).filePath("app/service/gateway.sh"))
+            .arg(QDir(repo_root).filePath("app/service/serve.s"));
+    }
 
     const QString raw = run_http_request("POST", url, tmp.fileName(), 120000);
     if (raw.startsWith("runtime_")) {
@@ -669,7 +700,10 @@ void NeurxBridge::refresh_checkpoint_model_state() {
     checkpoint_model_choices_ = checkpoint_choices_for_qml();
 
     if (local_model_enabled_ && local_model_backend_ == "openai") {
-        local_model_name_ = latest;
+        local_model_name_ = QFileInfo(latest).baseName();
+        if (local_model_name_.isEmpty()) {
+            local_model_name_ = QFileInfo(latest).fileName();
+        }
         if (local_model_base_url_.trimmed().isEmpty()) {
             local_model_base_url_ = "http://127.0.0.1:18080";
         }
@@ -738,6 +772,10 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
                     .arg(obj.value("backend").toString())
                     .arg(obj.value("model").toString())
                     .arg(obj.value("steps").toInt(steps));
+                result = result + "\ncode_path=app/bridge/neurx_bridge.cpp";
+                result = result + "\nbackend_path=app/service/http_handler.sh";
+                result = result + "\ngateway_path=app/service/gateway.sh";
+                result = result + "\nentry_path=app/service/serve.s";
                 const QString checkpoint_file = obj.value("checkpoint_file").toString();
                 if (!checkpoint_file.isEmpty()) {
                     result = result + "\ncheckpoint_file=" + checkpoint_file;

@@ -1,4 +1,4 @@
-# app/web/backend
+# app/service
 
 S-based backend core for the NeurX app, with a shell HTTP wrapper for local execution.
 

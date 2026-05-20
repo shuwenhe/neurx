@@ -77,7 +77,7 @@ serve_err_file="$(mktemp /tmp/neurx_serve_err.XXXXXX)"
 trap 'rm -f "$body_file" "$serve_out_file" "$serve_err_file"' EXIT
 
 set +e
-"${S_BINARY}" run "${ROOT_DIR}/backend/serve.s" >"$serve_out_file" 2>"$serve_err_file"
+"${S_BINARY}" run "${ROOT_DIR}/service/serve.s" >"$serve_out_file" 2>"$serve_err_file"
 serve_status=$?
 set -e
 
