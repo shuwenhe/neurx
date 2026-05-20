@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 S_BINARY="${NEURX_S_BINARY:-${S_BINARY:-s}}"
+source "${ROOT_DIR}/service/code_templates.sh"
 
 pick_s_binary() {
   local candidate="$1"
@@ -85,9 +86,14 @@ serve_out="$(cat "$serve_out_file")"
 serve_err="$(cat "$serve_err_file")"
 
 completion="S backend is alive and responding."
+lower_prompt="$(printf '%s' "${prompt:-}" | tr '[:upper:]' '[:lower:]')"
 if [ -n "${prompt:-}" ]; then
-  prompt_line="$(printf '%s' "$prompt" | head -n 1)"
-  completion="已收到你的请求：${prompt_line}。当前由本地 S 后端链路处理。"
+  if template_completion="$(infer_template_completion "$lower_prompt")"; then
+    completion="$template_completion"
+  else
+    prompt_line="$(printf '%s' "$prompt" | head -n 1)"
+    completion="已收到你的请求：${prompt_line}。当前由本地 S 后端链路处理。"
+  fi
 fi
 
 if [ "$serve_status" -ne 0 ]; then

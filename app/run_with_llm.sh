@@ -91,7 +91,7 @@ if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   cmake -S "${APP_DIR}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
 fi
 echo "Building Qt application..."
-cmake --build "${BUILD_DIR}" -j$(nproc)
+cmake --build "${BUILD_DIR}" --clean-first -j$(nproc)
 
 echo "Launching Qt application..."
 echo "  LLM Backend: ${NEURX_LLM_BASE_URL}${NEURX_LLM_CHAT_PATH}"
