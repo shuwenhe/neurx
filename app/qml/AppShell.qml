@@ -661,6 +661,44 @@ Item {
         return lines.join("\n")
     }
 
+    function filteredSkillContextPreview() {
+        var skillRecord = selectedSkillRecord()
+        if (!skillRecord) {
+            return ""
+        }
+
+        var preview = []
+        var steps = filteredSelectedSkillTraceSteps()
+        preview.push("selected_skill=" + (skillRecord.name || ""))
+        preview.push("failed_only=" + (selectedSkillFailedOnly ? "true" : "false"))
+        preview.push("tool_filter=" + (selectedSkillToolFilter || ""))
+        preview.push("filtered_trace_steps=" + steps.length)
+        preview.push(skillRecordPreview(resultOutput.text, skillRecord))
+        if (steps.length > 0) {
+            var blocks = []
+            for (var i = 0; i < steps.length; ++i) {
+                blocks.push(traceStepPreview(steps[i]))
+            }
+            preview.push(blocks.join("\n\n"))
+        } else {
+            preview.push("no_trace_steps_for_current_filters=true")
+        }
+        return preview.join("\n")
+    }
+
+    function openFilteredSkillContext() {
+        var text = filteredSkillContextPreview()
+        if (!text.length) {
+            return
+        }
+        selectedFileIndex = -1
+        selectedFilePath = exportSavedPath(resultOutput.text)
+        editorKind = "Text"
+        editorPlainText = text
+        shell.copyNoticeText = qsTr("Opened context")
+        copyNoticeTimer.restart()
+    }
+
     function openTraceStep(stepRecord) {
         if (!stepRecord) {
             return
@@ -1839,6 +1877,12 @@ Item {
                                                 visible: shell.selectedSkillRecord() !== null
                                                 text: qsTr("Open")
                                                 onClicked: shell.openSelectedSkillExport()
+                                            }
+
+                                            ToolButton {
+                                                visible: shell.selectedSkillRecord() !== null
+                                                text: qsTr("Context")
+                                                onClicked: shell.openFilteredSkillContext()
                                             }
                                         }
 
