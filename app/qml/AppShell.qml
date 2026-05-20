@@ -44,6 +44,7 @@ Item {
     property string runtimeStatusText: Runtime.ping()
     property string editorPlainText: ""
     property string editorKind: "Text"
+    property var diagnosticsSkillRecords: []
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
@@ -147,6 +148,7 @@ Item {
 
     function finishConversation(result, durationText) {
         resultOutput.text = result
+        diagnosticsSkillRecords = parseSkillRecords(result)
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
@@ -171,6 +173,7 @@ Item {
         shell.agentRunning = true
         shell.runtimeStatusText = qsTr("routing #") + shell.runClickSeq
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
+        diagnosticsSkillRecords = []
         shell.agentDetailsExpanded = false
 
         try {
@@ -196,6 +199,7 @@ Item {
         promptEditor.text = ""
         shell.runtimeStatusText = qsTr("suggesting")
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
+        diagnosticsSkillRecords = []
         shell.agentDetailsExpanded = false
 
         try {
@@ -237,6 +241,7 @@ Item {
         var prompt = resolvedAgentPrompt()
         shell.runtimeStatusText = qsTr("snapshot")
         shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
+        diagnosticsSkillRecords = []
         shell.agentDetailsExpanded = false
 
         try {
@@ -256,6 +261,7 @@ Item {
         var prompt = resolvedAgentPrompt()
         shell.runtimeStatusText = qsTr("trajectory")
         shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
+        diagnosticsSkillRecords = []
         shell.agentDetailsExpanded = false
 
         try {
@@ -394,6 +400,64 @@ Item {
 
     function exportLastObservation(text) {
         return parseResultField(text, "last_observation")
+    }
+
+    function parseSkillRecords(text) {
+        var lines = (text || "").split("\n")
+        var records = []
+        for (var i = 0; i < lines.length; ++i) {
+            var match = /^skill\[(\d+)\]\.([a-z_]+)=(.*)$/.exec(lines[i])
+            if (!match) {
+                continue
+            }
+            var index = parseInt(match[1], 10)
+            var field = match[2]
+            var value = match[3]
+            if (!records[index]) {
+                records[index] = {
+                    name: "",
+                    version: "",
+                    intent: "",
+                    status: "",
+                    created_step: "",
+                    updated_step: "",
+                    promote_count: "",
+                    fail_count: "",
+                    success_rate: "",
+                    avg_steps: "",
+                    tool_cost: "",
+                    stability: ""
+                }
+            }
+            records[index][field] = value
+        }
+
+        var compact = []
+        for (var j = 0; j < records.length; ++j) {
+            if (records[j]) {
+                compact.push(records[j])
+            }
+        }
+        return compact
+    }
+
+    function openSavedExport(path) {
+        var next = (path || "").trim()
+        if (!next.length) {
+            return
+        }
+        var text = Runtime.read_text_file(next)
+        if (text.indexOf("read_text_file_failed:") === 0) {
+            shell.copyNoticeText = qsTr("Open failed")
+            copyNoticeTimer.restart()
+            return
+        }
+        selectedFileIndex = -1
+        selectedFilePath = next
+        editorKind = "Text"
+        editorPlainText = text
+        shell.copyNoticeText = qsTr("Opened export")
+        copyNoticeTimer.restart()
     }
 
     function hasStructuredExport(text) {
@@ -885,10 +949,10 @@ Item {
                                         }
                                     }
 
-                                    ToolButton {
-                                        enabled: !model.pending && model.text.length > 0
-                                        visible: true
-                                        opacity: enabled ? 1.0 : 0.45
+                                        ToolButton {
+                                            enabled: !model.pending && model.text.length > 0
+                                            visible: true
+                                            opacity: enabled ? 1.0 : 0.45
                                         anchors.top: parent.top
                                         anchors.right: parent.right
                                         anchors.topMargin: 6
@@ -897,24 +961,29 @@ Item {
                                         height: 24
                                         padding: 0
                                         text: ""
-                                        z: 2
-                                        ToolTip.visible: hovered
-                                        ToolTip.text: qsTr("Copy")
-                                        background: Rectangle {
-                                            radius: 6
-                                            color: Qt.rgba(1, 1, 1, 0.04)
-                                            border.color: Qt.rgba(255, 255, 255, 0.06)
+                                            z: 2
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: qsTr("Copy")
+                                            background: Rectangle {
+                                                radius: 6
+                                                color: Qt.rgba(1, 1, 1, 0.04)
+                                                border.color: Qt.rgba(255, 255, 255, 0.06)
+                                            }
+                                            contentItem: Image {
+                                                anchors.centerIn: parent
+                                                width: 14
+                                                height: 14
+                                                source: "qrc:/neurx/app/icons/copy.svg"
+                                                fillMode: Image.PreserveAspectFit
+                                                sourceSize.width: 14
+                                                sourceSize.height: 14
+                                                opacity: enabled ? 1.0 : 0.45
+                                                smooth: true
+                                                mipmap: true
+                                            }
+                                            onClicked: shell.copyConversationText(model.text)
                                         }
-                                        contentItem: Text {
-                                            text: "⧉"
-                                            color: enabled ? shell.textPrimary : shell.textMuted
-                                            horizontalAlignment: Text.AlignHCenter
-                                            verticalAlignment: Text.AlignVCenter
-                                            font.pixelSize: 14
-                                        }
-                                        onClicked: shell.copyConversationText(model.text)
                                     }
-                                }
 
                                 MouseArea {
                                     anchors.fill: bubbleRect
@@ -1195,6 +1264,25 @@ Item {
                                     }
                                     onClicked: shell.copyConversationText(exportSavedPath(resultOutput.text))
                                 }
+
+                                ToolButton {
+                                    visible: exportSavedPath(resultOutput.text).length > 0
+                                    enabled: visible
+                                    padding: 0
+                                    width: 24
+                                    height: 24
+                                    text: ""
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Open export")
+                                    contentItem: Text {
+                                        text: "↗"
+                                        color: shell.textPrimary
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        font.pixelSize: 14
+                                    }
+                                    onClicked: shell.openSavedExport(exportSavedPath(resultOutput.text))
+                                }
                             }
 
                             GridLayout {
@@ -1320,6 +1408,78 @@ Item {
                                     color: shell.textPrimary
                                     wrapMode: Text.WrapAnywhere
                                     visible: exportLastObservation(resultOutput.text).length > 0
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                visible: diagnosticsSkillRecords.length > 0
+                                spacing: 6
+
+                                Text {
+                                    text: qsTr("Skills")
+                                    color: shell.textPrimary
+                                    font.pixelSize: 13
+                                    font.bold: true
+                                }
+
+                                Repeater {
+                                    model: diagnosticsSkillRecords
+
+                                    delegate: Rectangle {
+                                        required property var modelData
+
+                                        Layout.fillWidth: true
+                                        implicitHeight: skillColumn.implicitHeight + 14
+                                        radius: 10
+                                        color: shell.editorBg
+                                        border.color: shell.border
+
+                                        ColumnLayout {
+                                            id: skillColumn
+                                            anchors.fill: parent
+                                            anchors.margins: 8
+                                            spacing: 4
+
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 8
+
+                                                Text {
+                                                    text: modelData.name || qsTr("(unnamed)")
+                                                    color: shell.textPrimary
+                                                    font.bold: true
+                                                }
+
+                                                Text {
+                                                    text: modelData.status || qsTr("unknown")
+                                                    color: shell.textMuted
+                                                }
+
+                                                Item {
+                                                    Layout.fillWidth: true
+                                                }
+
+                                                Text {
+                                                    text: modelData.version || ""
+                                                    color: shell.textMuted
+                                                }
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: qsTr("success=%1 stability=%2 avg_steps=%3 fail=%4 promote=%5")
+                                                    .arg(modelData.success_rate || "0")
+                                                    .arg(modelData.stability || "0")
+                                                    .arg(modelData.avg_steps || "0")
+                                                    .arg(modelData.fail_count || "0")
+                                                    .arg(modelData.promote_count || "0")
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
+                                                wrapMode: Text.WrapAnywhere
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
