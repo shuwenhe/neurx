@@ -111,6 +111,30 @@ func agent_active_skill_status(agent_runtime_state state) string {
     agent_skill_registry_active(state.skills).spec.status
 }
 
+func agent_skill_status(agent_runtime_state state, string name) string {
+    agent_skill_registry_get(state.skills, name).spec.status
+}
+
+func agent_skill_fail_count(agent_runtime_state state, string name) int {
+    agent_skill_registry_get(state.skills, name).fail_count
+}
+
+func agent_skill_snapshot(agent_runtime_state state) string {
+    agent_runtime_skill_snapshot(state)
+}
+
+func agent_trajectory_export(agent_runtime_state state) string {
+    agent_runtime_trajectory_export(state)
+}
+
+func agent_persist_skill_snapshot(agent_runtime_state state, string path) string {
+    agent_runtime_persist_skill_snapshot(state, path)
+}
+
+func agent_export_trajectory(agent_runtime_state state, string path) string {
+    agent_runtime_export_trajectory(state, path)
+}
+
 func agent_state_dict(agent_runtime_state state) agent_runtime_state {
     state
 }

@@ -101,6 +101,82 @@ func agent_skill_registry_upsert(agent_skill_registry_state state, agent_skill_r
     }
 }
 
+func agent_skill_registry_record_success(agent_skill_registry_state state, string name, int step) agent_skill_registry_state {
+    int index = agent_skill_registry_find_index(state, name)
+    if index < 0 {
+        return state
+    }
+
+    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record record = records[index]
+    record.last_updated_step = step
+    if record.metrics.success_rate < 1.0 {
+        record.metrics.success_rate = 1.0
+    }
+    if record.metrics.stability < 1.0 {
+        record.metrics.stability = 1.0
+    }
+    if record.metrics.avg_steps <= 0.0 {
+        record.metrics.avg_steps = 1.0
+    }
+    if record.spec.status == "candidate" {
+        record.spec.status = "validated"
+    }
+    records[index] = record
+
+    agent_skill_registry_state {
+        records: records,
+        active_index: state.active_index,
+        version: state.version + 1,
+        promote_count: state.promote_count,
+        retire_count: state.retire_count,
+    }
+}
+
+func agent_skill_registry_record_failure(agent_skill_registry_state state, string name, int step, int retire_after_failures) agent_skill_registry_state {
+    int index = agent_skill_registry_find_index(state, name)
+    if index < 0 {
+        return state
+    }
+
+    int threshold = retire_after_failures
+    if threshold <= 0 {
+        threshold = 1
+    }
+
+    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    agent_skill_record record = records[index]
+    record.last_updated_step = step
+    record.fail_count = record.fail_count + 1
+    if record.metrics.stability > 0.0 {
+        record.metrics.stability = record.metrics.stability - 0.5
+        if record.metrics.stability < 0.0 {
+            record.metrics.stability = 0.0
+        }
+    }
+    if record.fail_count >= threshold {
+        record.spec.status = "retired"
+    }
+    records[index] = record
+
+    int next_active_index = state.active_index
+    int next_retire_count = state.retire_count
+    if record.spec.status == "retired" {
+        next_retire_count = state.retire_count + 1
+        if next_active_index == index {
+            next_active_index = -1
+        }
+    }
+
+    agent_skill_registry_state {
+        records: records,
+        active_index: next_active_index,
+        version: state.version + 1,
+        promote_count: state.promote_count,
+        retire_count: next_retire_count,
+    }
+}
+
 func agent_skill_registry_promote(agent_skill_registry_state state, string name) agent_skill_registry_state {
     int index = agent_skill_registry_find_index(state, name)
     if index < 0 {
@@ -162,6 +238,33 @@ func agent_skill_registry_active(agent_skill_registry_state state) agent_skill_r
         new_agent_skill_metrics(),
         0
     )
+}
+
+func agent_skill_registry_snapshot(agent_skill_registry_state state) string {
+    string out = "registry_version=" + string(state.version)
+    out = out + "\nactive_index=" + string(state.active_index)
+    out = out + "\npromote_count=" + string(state.promote_count)
+    out = out + "\nretire_count=" + string(state.retire_count)
+
+    int i = 0
+    while i < len(state.records) {
+        agent_skill_record record = state.records[i]
+        out = out + "\nskill[" + string(i) + "].name=" + record.spec.name
+        out = out + "\nskill[" + string(i) + "].version=" + record.spec.version
+        out = out + "\nskill[" + string(i) + "].intent=" + record.spec.intent
+        out = out + "\nskill[" + string(i) + "].status=" + record.spec.status
+        out = out + "\nskill[" + string(i) + "].created_step=" + string(record.created_step)
+        out = out + "\nskill[" + string(i) + "].updated_step=" + string(record.last_updated_step)
+        out = out + "\nskill[" + string(i) + "].promote_count=" + string(record.promote_count)
+        out = out + "\nskill[" + string(i) + "].fail_count=" + string(record.fail_count)
+        out = out + "\nskill[" + string(i) + "].success_rate=" + string(record.metrics.success_rate)
+        out = out + "\nskill[" + string(i) + "].avg_steps=" + string(record.metrics.avg_steps)
+        out = out + "\nskill[" + string(i) + "].tool_cost=" + string(record.metrics.tool_cost)
+        out = out + "\nskill[" + string(i) + "].stability=" + string(record.metrics.stability)
+        i = i + 1
+    }
+
+    out + "\n"
 }
 
 func agent_skill_registry_state_dict(agent_skill_registry_state state) agent_skill_registry_state {
