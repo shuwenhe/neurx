@@ -27,6 +27,7 @@ Item {
     readonly property int paneMinExplorerWidth: 220
     readonly property int paneMinEditorWidth: 420
     readonly property int paneMinAgentWidth: 300
+    readonly property int conversationBubbleMaxWidth: 560
 
     readonly property int workspaceMargin: 20
 
@@ -460,6 +461,22 @@ Item {
         copyNoticeTimer.restart()
     }
 
+    function activateSkillRecord(skillRecord) {
+        if (!skillRecord) {
+            return
+        }
+        var skillName = (skillRecord.name || "").trim()
+        if (skillName.length > 0) {
+            promptEditor.text = qsTr("Inspect skill %1").arg(skillName)
+            promptEditor.forceActiveFocus()
+            promptEditor.cursorPosition = promptEditor.text.length
+        }
+        var savedPath = exportSavedPath(resultOutput.text)
+        if (savedPath.length > 0) {
+            openSavedExport(savedPath)
+        }
+    }
+
     function hasStructuredExport(text) {
         return exportSavedPath(text).length > 0
             || exportActiveSkill(text).length > 0
@@ -886,7 +903,7 @@ Item {
 
                                 Rectangle {
                                     id: bubbleRect
-                                    width: Math.min(parent.width * 0.90, bubbleColumn.implicitWidth + 28)
+                                    width: Math.min(parent.width * 0.90, shell.conversationBubbleMaxWidth)
                                     height: bubbleColumn.implicitHeight + 20
                                     x: model.kind === "user" ? parent.width - width : 0
                                     radius: 12
@@ -943,7 +960,8 @@ Item {
                                         Text {
                                             width: Math.max(120, bubbleRect.width - 20)
                                             text: model.text
-                                            wrapMode: Text.Wrap
+                                            textFormat: Text.PlainText
+                                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                                             color: shell.textPrimary
                                             font.pixelSize: 13
                                         }
@@ -1433,7 +1451,7 @@ Item {
                                         implicitHeight: skillColumn.implicitHeight + 14
                                         radius: 10
                                         color: shell.editorBg
-                                        border.color: shell.border
+                                        border.color: skillMouse.containsMouse ? shell.accent : shell.border
 
                                         ColumnLayout {
                                             id: skillColumn
@@ -1478,6 +1496,23 @@ Item {
                                                 font.pixelSize: 11
                                                 wrapMode: Text.WrapAnywhere
                                             }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.intent || ""
+                                                color: shell.textPrimary
+                                                font.pixelSize: 11
+                                                wrapMode: Text.WrapAnywhere
+                                                visible: text.length > 0
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            id: skillMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: shell.activateSkillRecord(modelData)
                                         }
                                     }
                                 }

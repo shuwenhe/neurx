@@ -865,6 +865,7 @@ QString NeurxBridge::read_text_file(const QString& path) const {
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return QString("read_text_file_failed: %1").arg(next);
     }
+
     return QString::fromUtf8(file.readAll());
 }
 
