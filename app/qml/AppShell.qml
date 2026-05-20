@@ -48,6 +48,8 @@ Item {
     property var diagnosticsSkillRecords: []
     property string selectedSkillName: ""
     property string skillStatusFilter: ""
+    property bool skillActiveOnly: false
+    property bool skillHighFailOnly: false
     property bool selectedSkillFailedOnly: false
     property string selectedSkillToolFilter: ""
     property bool agentDetailsExpanded: false
@@ -156,6 +158,8 @@ Item {
         diagnosticsSkillRecords = parseSkillRecords(result)
         selectedSkillName = ""
         skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
@@ -185,6 +189,8 @@ Item {
         diagnosticsSkillRecords = []
         selectedSkillName = ""
         skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -215,6 +221,8 @@ Item {
         diagnosticsSkillRecords = []
         selectedSkillName = ""
         skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -261,6 +269,8 @@ Item {
         diagnosticsSkillRecords = []
         selectedSkillName = ""
         skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -285,6 +295,8 @@ Item {
         diagnosticsSkillRecords = []
         selectedSkillName = ""
         skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -501,6 +513,12 @@ Item {
         for (var i = 0; i < diagnosticsSkillRecords.length; ++i) {
             var item = diagnosticsSkillRecords[i]
             if (skillStatusFilter.length > 0 && (item.status || "") !== skillStatusFilter) {
+                continue
+            }
+            if (skillActiveOnly && (item.name || "") !== exportActiveSkill(resultOutput.text)) {
+                continue
+            }
+            if (skillHighFailOnly && parseInt(item.fail_count || "0", 10) < 2) {
                 continue
             }
             filtered.push(item)
@@ -1311,18 +1329,14 @@ Item {
                                             }
                                         }
 
-                                        TextEdit {
+                                        Text {
                                             width: Math.max(120, bubbleRect.width - 48)
                                             text: model.text
-                                            readOnly: true
-                                            textFormat: TextEdit.PlainText
-                                            wrapMode: TextEdit.WrapAnywhere
+                                            textFormat: Text.PlainText
+                                            wrapMode: Text.WrapAnywhere
                                             color: shell.textPrimary
-                                            selectionColor: shell.selectionBg
-                                            selectedTextColor: shell.textPrimary
                                             font.pixelSize: 13
-                                            selectByMouse: true
-                                            activeFocusOnTab: false
+                                            clip: true
                                         }
                                     }
 
@@ -1837,6 +1851,24 @@ Item {
                                         text: qsTr("%1 skills").arg(shell.filteredDiagnosticsSkillRecords().length)
                                         color: shell.textMuted
                                         font.pixelSize: 11
+                                    }
+
+                                    CheckBox {
+                                        text: qsTr("Active only")
+                                        checked: shell.skillActiveOnly
+                                        onToggled: {
+                                            shell.skillActiveOnly = checked
+                                            shell.clearSelectedSkillIfFilteredOut()
+                                        }
+                                    }
+
+                                    CheckBox {
+                                        text: qsTr("High fail")
+                                        checked: shell.skillHighFailOnly
+                                        onToggled: {
+                                            shell.skillHighFailOnly = checked
+                                            shell.clearSelectedSkillIfFilteredOut()
+                                        }
                                     }
 
                                     Item {
