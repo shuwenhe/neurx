@@ -46,6 +46,7 @@ Item {
     property string editorPlainText: ""
     property string editorKind: "Text"
     property var diagnosticsSkillRecords: []
+    property string selectedSkillName: ""
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
@@ -150,6 +151,7 @@ Item {
     function finishConversation(result, durationText) {
         resultOutput.text = result
         diagnosticsSkillRecords = parseSkillRecords(result)
+        selectedSkillName = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
@@ -175,6 +177,7 @@ Item {
         shell.runtimeStatusText = qsTr("routing #") + shell.runClickSeq
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
         diagnosticsSkillRecords = []
+        selectedSkillName = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -201,6 +204,7 @@ Item {
         shell.runtimeStatusText = qsTr("suggesting")
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
         diagnosticsSkillRecords = []
+        selectedSkillName = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -243,6 +247,7 @@ Item {
         shell.runtimeStatusText = qsTr("snapshot")
         shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
         diagnosticsSkillRecords = []
+        selectedSkillName = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -263,6 +268,7 @@ Item {
         shell.runtimeStatusText = qsTr("trajectory")
         shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
         diagnosticsSkillRecords = []
+        selectedSkillName = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -416,6 +422,7 @@ Item {
             var value = match[3]
             if (!records[index]) {
                 records[index] = {
+                    skill_index: index,
                     name: "",
                     version: "",
                     intent: "",
@@ -442,6 +449,45 @@ Item {
         return compact
     }
 
+    function selectedSkillRecord() {
+        for (var i = 0; i < diagnosticsSkillRecords.length; ++i) {
+            if ((diagnosticsSkillRecords[i].name || "") === selectedSkillName) {
+                return diagnosticsSkillRecords[i]
+            }
+        }
+        return null
+    }
+
+    function skillRecordPreview(text, skillRecord) {
+        if (!skillRecord) {
+            return ""
+        }
+        var lines = (text || "").split("\n")
+        var prefix = "skill[" + skillRecord.skill_index + "]."
+        var preview = []
+        var active = exportActiveSkill(text)
+        var execution = exportSkillExecutionStatus(text)
+        var savedPath = exportSavedPath(text)
+        if (skillRecord.name) {
+            preview.push("selected_skill=" + skillRecord.name)
+        }
+        if (active.length > 0) {
+            preview.push("active_skill=" + active)
+        }
+        if (execution.length > 0) {
+            preview.push("skill_execution_status=" + execution)
+        }
+        if (savedPath.length > 0) {
+            preview.push("saved_path=" + savedPath)
+        }
+        for (var i = 0; i < lines.length; ++i) {
+            if (lines[i].indexOf(prefix) === 0) {
+                preview.push(lines[i])
+            }
+        }
+        return preview.join("\n")
+    }
+
     function openSavedExport(path) {
         var next = (path || "").trim()
         if (!next.length) {
@@ -465,16 +511,46 @@ Item {
         if (!skillRecord) {
             return
         }
+        selectedSkillName = skillRecord.name || ""
         var skillName = (skillRecord.name || "").trim()
         if (skillName.length > 0) {
             promptEditor.text = qsTr("Inspect skill %1").arg(skillName)
             promptEditor.forceActiveFocus()
             promptEditor.cursorPosition = promptEditor.text.length
         }
+        selectedFileIndex = -1
+        selectedFilePath = exportSavedPath(resultOutput.text)
+        editorKind = "Text"
+        editorPlainText = skillRecordPreview(resultOutput.text, skillRecord)
+    }
+
+    function openSelectedSkillExport() {
         var savedPath = exportSavedPath(resultOutput.text)
         if (savedPath.length > 0) {
             openSavedExport(savedPath)
+            return
         }
+        var skillRecord = selectedSkillRecord()
+        if (skillRecord) {
+            selectedFileIndex = -1
+            selectedFilePath = ""
+            editorKind = "Text"
+            editorPlainText = skillRecordPreview(resultOutput.text, skillRecord)
+        }
+    }
+
+    function inspectSelectedSkill() {
+        var skillRecord = selectedSkillRecord()
+        if (!skillRecord) {
+            return
+        }
+        var skillName = (skillRecord.name || "").trim()
+        if (!skillName.length) {
+            return
+        }
+        promptEditor.text = qsTr("Inspect skill %1").arg(skillName)
+        promptEditor.forceActiveFocus()
+        promptEditor.cursorPosition = promptEditor.text.length
     }
 
     function hasStructuredExport(text) {
@@ -957,20 +1033,26 @@ Item {
                                             }
                                         }
 
-                                        Text {
-                                            width: Math.max(120, bubbleRect.width - 20)
+                                        TextEdit {
+                                            width: Math.max(120, bubbleRect.width - 48)
                                             text: model.text
-                                            textFormat: Text.PlainText
-                                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                            readOnly: true
+                                            textFormat: TextEdit.PlainText
+                                            wrapMode: TextEdit.WrapAnywhere
                                             color: shell.textPrimary
+                                            selectionColor: shell.selectionBg
+                                            selectedTextColor: shell.textPrimary
                                             font.pixelSize: 13
+                                            selectByMouse: true
+                                            activeFocusOnTab: false
+                                            background: null
                                         }
                                     }
 
-                                        ToolButton {
-                                            enabled: !model.pending && model.text.length > 0
-                                            visible: true
-                                            opacity: enabled ? 1.0 : 0.45
+                                    ToolButton {
+                                        enabled: !model.pending && model.text.length > 0
+                                        visible: true
+                                        opacity: enabled ? 1.0 : 0.45
                                         anchors.top: parent.top
                                         anchors.right: parent.right
                                         anchors.topMargin: 6
@@ -979,29 +1061,29 @@ Item {
                                         height: 24
                                         padding: 0
                                         text: ""
-                                            z: 2
-                                            ToolTip.visible: hovered
-                                            ToolTip.text: qsTr("Copy")
-                                            background: Rectangle {
-                                                radius: 6
-                                                color: Qt.rgba(1, 1, 1, 0.04)
-                                                border.color: Qt.rgba(255, 255, 255, 0.06)
-                                            }
-                                            contentItem: Image {
-                                                anchors.centerIn: parent
-                                                width: 14
-                                                height: 14
-                                                source: "qrc:/neurx/app/icons/copy.svg"
-                                                fillMode: Image.PreserveAspectFit
-                                                sourceSize.width: 14
-                                                sourceSize.height: 14
-                                                opacity: enabled ? 1.0 : 0.45
-                                                smooth: true
-                                                mipmap: true
-                                            }
-                                            onClicked: shell.copyConversationText(model.text)
+                                        z: 2
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Copy")
+                                        background: Rectangle {
+                                            radius: 6
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.color: Qt.rgba(255, 255, 255, 0.06)
                                         }
+                                        contentItem: Image {
+                                            anchors.centerIn: parent
+                                            width: 14
+                                            height: 14
+                                            source: "qrc:/neurx/app/icons/copy.svg"
+                                            fillMode: Image.PreserveAspectFit
+                                            sourceSize.width: 14
+                                            sourceSize.height: 14
+                                            opacity: enabled ? 1.0 : 0.45
+                                            smooth: true
+                                            mipmap: true
+                                        }
+                                        onClicked: shell.copyConversationText(model.text)
                                     }
+                                }
 
                                 MouseArea {
                                     anchors.fill: bubbleRect
@@ -1451,7 +1533,9 @@ Item {
                                         implicitHeight: skillColumn.implicitHeight + 14
                                         radius: 10
                                         color: shell.editorBg
-                                        border.color: skillMouse.containsMouse ? shell.accent : shell.border
+                                        border.color: shell.selectedSkillName === (modelData.name || "")
+                                            ? shell.accent
+                                            : skillMouse.containsMouse ? shell.accent : shell.border
 
                                         ColumnLayout {
                                             id: skillColumn
@@ -1513,6 +1597,87 @@ Item {
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: shell.activateSkillRecord(modelData)
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    visible: shell.selectedSkillName.length > 0 && shell.selectedSkillRecord() !== null
+                                    implicitHeight: selectedSkillColumn.implicitHeight + 16
+                                    radius: 10
+                                    color: Qt.rgba(0.10, 0.15, 0.13, 0.95)
+                                    border.color: shell.accent
+
+                                    ColumnLayout {
+                                        id: selectedSkillColumn
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        spacing: 6
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+
+                                            Text {
+                                                text: qsTr("Selected Skill")
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
+                                                font.bold: true
+                                            }
+
+                                            Text {
+                                                text: shell.selectedSkillRecord() ? shell.selectedSkillRecord().name || "" : ""
+                                                color: shell.textPrimary
+                                                font.bold: true
+                                            }
+
+                                            Item {
+                                                Layout.fillWidth: true
+                                            }
+
+                                            ToolButton {
+                                                visible: shell.selectedSkillRecord() !== null
+                                                text: qsTr("Inspect")
+                                                onClicked: shell.inspectSelectedSkill()
+                                            }
+
+                                            ToolButton {
+                                                visible: shell.selectedSkillRecord() !== null
+                                                text: qsTr("Copy")
+                                                onClicked: shell.copyConversationText(shell.selectedSkillRecord().name || "")
+                                            }
+
+                                            ToolButton {
+                                                visible: shell.selectedSkillRecord() !== null
+                                                text: qsTr("Open")
+                                                onClicked: shell.openSelectedSkillExport()
+                                            }
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: shell.selectedSkillRecord() ? shell.selectedSkillRecord().intent || "" : ""
+                                            color: shell.textPrimary
+                                            wrapMode: Text.WrapAnywhere
+                                            visible: text.length > 0
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: shell.selectedSkillRecord()
+                                                ? qsTr("status=%1 version=%2 success=%3 stability=%4 avg_steps=%5 fail=%6 promote=%7")
+                                                    .arg(shell.selectedSkillRecord().status || "unknown")
+                                                    .arg(shell.selectedSkillRecord().version || "")
+                                                    .arg(shell.selectedSkillRecord().success_rate || "0")
+                                                    .arg(shell.selectedSkillRecord().stability || "0")
+                                                    .arg(shell.selectedSkillRecord().avg_steps || "0")
+                                                    .arg(shell.selectedSkillRecord().fail_count || "0")
+                                                    .arg(shell.selectedSkillRecord().promote_count || "0")
+                                                : ""
+                                            color: shell.textMuted
+                                            font.pixelSize: 11
+                                            wrapMode: Text.WrapAnywhere
                                         }
                                     }
                                 }
