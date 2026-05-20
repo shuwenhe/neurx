@@ -505,6 +505,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
 
     QJsonObject request_json;
     request_json.insert("model", model_name);
+    request_json.insert("prompt", prompt);
     QJsonObject user_message;
     user_message.insert("role", "user");
     user_message.insert("content", prompt);
@@ -830,9 +831,26 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
     return result;
 }
 
+static bool is_code_language_token(const QString& text) {
+    static const QStringList langs = {
+        "c", "c++", "cpp", "java", "python", "rust", "go", "swift",
+        "kotlin", "typescript", "javascript", "js", "ts", "qml",
+        "html", "css", "sql", "bash", "sh", "s"
+    };
+    for (const QString& lang : langs) {
+        if (text == lang) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString& filePath) const {
     Q_UNUSED(filePath);
     const QString text = prompt.trimmed().toLower();
+    if (is_code_language_token(text)) {
+        return "code";
+    }
     if (text.contains("fix") || text.contains("bug") || text.contains("error") || text.contains("implement") || text.contains("patch") || text.contains("refactor") || text.contains("code") || text.contains("qml")) {
         return "code";
     }
