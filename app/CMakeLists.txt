@@ -28,6 +28,9 @@ qt_add_executable(neurx_app
 qt_add_qml_module(neurx_app
     URI neurx.app
     VERSION 1.0
+    RESOURCES
+        icons/copy.svg
+        icons/check.svg
     QML_FILES
         qml/Main.qml
         qml/AppShell.qml

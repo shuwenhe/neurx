@@ -27,7 +27,8 @@ Item {
     readonly property int paneMinExplorerWidth: 220
     readonly property int paneMinEditorWidth: 340
     readonly property int paneMinAgentWidth: 380
-    readonly property int conversationBubbleMaxWidth: 520
+    readonly property real userBubbleWidthRatio: 0.58
+    readonly property real assistantBubbleWidthRatio: 0.86
 
     readonly property int workspaceMargin: 20
 
@@ -1312,7 +1313,9 @@ Item {
 
                                 Rectangle {
                                     id: bubbleRect
-                                    width: Math.min(Math.max(220, parent.width - 28), shell.conversationBubbleMaxWidth)
+                                    width: model.kind === "user"
+                                        ? Math.max(180, parent.width * shell.userBubbleWidthRatio)
+                                        : Math.max(260, parent.width * shell.assistantBubbleWidthRatio)
                                     height: bubbleColumn.implicitHeight + 20
                                     x: model.kind === "user" ? parent.width - width : 0
                                     radius: 12
@@ -1366,21 +1369,20 @@ Item {
                                             }
                                         }
 
-                                        TextArea {
-                                            width: Math.max(120, bubbleRect.width - 48)
+                                        TextEdit {
+                                            width: Math.max(120, bubbleRect.width - 26)
                                             text: model.text
                                             readOnly: true
+                                            selectByMouse: true
+                                            activeFocusOnPress: false
+                                            persistentSelection: true
                                             textFormat: TextEdit.PlainText
                                             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
-                                            selectByMouse: true
                                             color: shell.textPrimary
+                                            selectionColor: shell.selectionBg
+                                            selectedTextColor: shell.textPrimary
                                             font.pixelSize: 13
-                                            padding: 0
-                                            leftPadding: 0
-                                            rightPadding: 0
-                                            topPadding: 0
-                                            bottomPadding: 0
-                                            background: null
+                                            lineHeight: 1.2
                                         }
                                     }
 
