@@ -46,6 +46,7 @@ Item {
     property string editorKind: "Text"
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
+    property string copyNoticeText: ""
 
     function escapeHtml(text) {
         return (text || "")
@@ -122,6 +123,15 @@ Item {
             durationText: pending ? qsTr("Working...") : ""
         })
         conversationList.positionViewAtEnd()
+    }
+
+    function copyConversationText(text) {
+        if (!text || !text.length) {
+            return
+        }
+        Runtime.copy_to_clipboard(text)
+        shell.copyNoticeText = qsTr("Copied")
+        copyNoticeTimer.restart()
     }
 
     function beginConversation(prompt, responseLabel, pendingText) {
@@ -209,6 +219,55 @@ Item {
                 conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
             }
             activeAssistantMessageIndex = -1
+        }
+    }
+
+    function resolvedAgentPrompt() {
+        var prompt = promptEditor.text.trim()
+        if (!prompt && shell.lastPromptText.length > 0) {
+            prompt = shell.lastPromptText
+        }
+        if (!prompt) {
+            prompt = "hello"
+        }
+        return prompt
+    }
+
+    function sendSkillSnapshot() {
+        var prompt = resolvedAgentPrompt()
+        shell.runtimeStatusText = qsTr("snapshot")
+        shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
+        shell.agentDetailsExpanded = false
+
+        try {
+            resultOutput.text = Runtime.export_agent_skill_snapshot(prompt, shell.runSteps)
+            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
+            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.runtimeStatusText = qsTr("snapshot_done")
+            shell.finishConversation(resultOutput.text, shell.lastRunDurationText)
+        } catch (e) {
+            resultOutput.text = qsTr("snapshot_failed: ") + e
+            shell.runtimeStatusText = qsTr("failed")
+            shell.finishConversation(resultOutput.text, qsTr("failed"))
+        }
+    }
+
+    function sendTrajectoryExport() {
+        var prompt = resolvedAgentPrompt()
+        shell.runtimeStatusText = qsTr("trajectory")
+        shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
+        shell.agentDetailsExpanded = false
+
+        try {
+            resultOutput.text = Runtime.export_agent_trajectory(prompt, shell.runSteps)
+            var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
+            shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.runtimeStatusText = qsTr("trajectory_done")
+            shell.finishConversation(resultOutput.text, shell.lastRunDurationText)
+        } catch (e) {
+            resultOutput.text = qsTr("trajectory_failed: ") + e
+            shell.runtimeStatusText = qsTr("failed")
+            shell.finishConversation(resultOutput.text, qsTr("failed"))
         }
     }
 
@@ -671,11 +730,20 @@ Item {
                     anchors.bottomMargin: 16
                     spacing: 10
 
-                    Text {
-                        text: qsTr("Conversation")
-                        color: shell.textPrimary
-                        font.pixelSize: 16
-                        font.bold: true
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: qsTr("Conversation")
+                            color: shell.textPrimary
+                            font.pixelSize: 16
+                            font.bold: true
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
                     }
 
                     Rectangle {
@@ -686,6 +754,13 @@ Item {
                         radius: 12
                         color: shell.editorBg
                         border.color: shell.border
+
+                        Timer {
+                            id: copyNoticeTimer
+                            interval: 1200
+                            repeat: false
+                            onTriggered: shell.copyNoticeText = ""
+                        }
 
                         ListView {
                             id: conversationList
@@ -700,6 +775,7 @@ Item {
                             delegate: Item {
                                 width: conversationList.width
                                 height: bubbleRect.height
+                                property bool hovered: false
 
                                 Rectangle {
                                     id: bubbleRect
@@ -716,8 +792,9 @@ Item {
                                         anchors.margins: 10
                                         spacing: 6
 
-                                        Row {
+                                        RowLayout {
                                             spacing: 8
+                                            Layout.fillWidth: true
 
                                             Rectangle {
                                                 visible: model.kind !== "user"
@@ -740,6 +817,7 @@ Item {
                                                 color: shell.textMuted
                                                 font.pixelSize: 11
                                                 font.bold: true
+                                                Layout.alignment: Qt.AlignVCenter
                                             }
 
                                             Text {
@@ -747,6 +825,11 @@ Item {
                                                 text: model.durationText
                                                 color: shell.textMuted
                                                 font.pixelSize: 11
+                                                Layout.alignment: Qt.AlignVCenter
+                                            }
+
+                                            Item {
+                                                Layout.fillWidth: true
                                             }
                                         }
 
@@ -758,7 +841,60 @@ Item {
                                             font.pixelSize: 13
                                         }
                                     }
+
+                                    ToolButton {
+                                        enabled: !model.pending && model.text.length > 0
+                                        visible: hovered
+                                        opacity: hovered ? 1.0 : 0.0
+                                        anchors.top: parent.top
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 6
+                                        anchors.rightMargin: 6
+                                        width: 24
+                                        height: 24
+                                        padding: 0
+                                        text: ""
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Copy")
+                                        contentItem: Text {
+                                            text: "⧉"
+                                            color: enabled ? shell.textPrimary : shell.textMuted
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                            font.pixelSize: 14
+                                        }
+                                        onClicked: shell.copyConversationText(model.text)
+                                    }
                                 }
+
+                                MouseArea {
+                                    anchors.fill: bubbleRect
+                                    hoverEnabled: true
+                                    acceptedButtons: Qt.NoButton
+                                    onEntered: hovered = true
+                                    onExited: hovered = false
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            visible: shell.copyNoticeText.length > 0
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: 10
+                            radius: 999
+                            color: Qt.rgba(0.09, 0.12, 0.11, 0.92)
+                            border.color: Qt.rgba(0.39, 0.67, 0.54, 0.55)
+                            z: 10
+
+                            Text {
+                                anchors.margins: 6
+                                anchors.fill: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                color: shell.textPrimary
+                                font.pixelSize: 10
+                                text: shell.copyNoticeText
                             }
                         }
 
@@ -869,6 +1005,46 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: shell.sendCodeSuggestion()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 138
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Snapshot")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: shell.sendSkillSnapshot()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 142
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Trajectory")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: shell.sendTrajectoryExport()
                             }
                         }
 
