@@ -10,7 +10,7 @@ use neurx.agent.skill_feedback
 use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
 use neurx.agent.skill_executor
-use neurx.runtime.io.{runtime_env_get}
+use neurx.runtime.io.{runtime_env_get, runtime_write_text_file}
 
 struct agent_runtime_state {
     agent_plan_state plan
@@ -100,18 +100,31 @@ func agent_runtime_should_synthesize_skill(agent_skill_feedback_state feedback) 
     feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize"
 }
 
-func agent_runtime_update_skills(agent_skill_registry_state registry, agent_trace_state trace_state, agent_memory_state memory_state) agent_skill_registry_state {
+func agent_runtime_retire_failure_threshold() int {
+    2
+}
+
+func agent_runtime_failed_skill_name(agent_runtime_state state, agent_skill_feedback_state feedback) string {
+    string active = trim_or_empty(state.skill_execution.active_skill)
+    if active != "" && active != "none" {
+        return active
+    }
+    agent_skill_name_from_feedback(feedback)
+}
+
+func agent_runtime_update_skills(agent_runtime_state state, agent_trace_state trace_state, agent_memory_state memory_state) agent_skill_registry_state {
     agent_skill_feedback_state feedback = agent_skill_feedback_from_trace(trace_state, memory_state)
     if feedback.task == "" {
-        return registry
+        return state.skills
     }
 
     string skill_name = agent_skill_name_from_feedback(feedback)
-    agent_skill_registry_state next = registry
+    agent_skill_registry_state next = state.skills
 
     if agent_runtime_should_synthesize_skill(feedback) {
         agent_skill_record record = agent_skill_synthesize(feedback)
         next = agent_skill_registry_upsert(next, record)
+        next = agent_skill_registry_record_success(next, skill_name, feedback.step)
         agent_skill_eval_result eval = agent_skill_evaluate(agent_skill_registry_get(next, skill_name), 60.0, -20.0)
         if eval.should_promote {
             next = agent_skill_registry_promote(next, skill_name)
@@ -120,11 +133,46 @@ func agent_runtime_update_skills(agent_skill_registry_state registry, agent_trac
         return next
     }
 
-    if !feedback.success && agent_skill_registry_has(next, skill_name) {
-        return agent_skill_registry_retire(next, skill_name)
+    if !feedback.success {
+        string failed_skill = agent_runtime_failed_skill_name(state, feedback)
+        if agent_skill_registry_has(next, failed_skill) {
+            return agent_skill_registry_record_failure(next, failed_skill, feedback.step, agent_runtime_retire_failure_threshold())
+        }
     }
 
     next
+}
+
+func agent_runtime_skill_snapshot(agent_runtime_state state) string {
+    string out = "steps=" + string(state.steps)
+    out = out + "\nfinished=" + state.plan.status
+    out = out + "\nlast_action=" + state.last_action
+    out = out + "\nlast_observation=" + state.last_observation
+    out = out + "\nactive_skill=" + state.skill_execution.active_skill
+    out = out + "\nskill_execution_status=" + state.skill_execution.status
+    out = out + "\n" + agent_skill_registry_snapshot(state.skills)
+    out
+}
+
+func agent_runtime_trajectory_export(agent_runtime_state state) string {
+    string out = "goal=" + state.plan.goal
+    out = out + "\ncurrent_task=" + state.plan.current_task
+    out = out + "\nstatus=" + state.plan.status
+    out = out + "\nsteps=" + string(state.steps)
+    out = out + "\nmodel_path=" + state.model_path
+    out = out + "\n" + agent_trace_export(state.trace)
+    out = out + "\n" + agent_runtime_skill_snapshot(state)
+    out
+}
+
+func agent_runtime_persist_skill_snapshot(agent_runtime_state state, string path) string {
+    runtime_write_text_file(path, agent_runtime_skill_snapshot(state))
+    path
+}
+
+func agent_runtime_export_trajectory(agent_runtime_state state, string path) string {
+    runtime_write_text_file(path, agent_runtime_trajectory_export(state))
+    path
 }
 
 func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_state {
@@ -143,7 +191,20 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         result.observation,
         result.ok,
     )
-    agent_skill_registry_state next_skills = agent_runtime_update_skills(state.skills, next_trace, result.memory)
+    agent_runtime_state current = agent_runtime_state {
+        plan: state.plan,
+        memory: state.memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        steps: state.steps,
+        finished: state.finished,
+        last_action: state.last_action,
+        last_observation: state.last_observation,
+        model_path: state.model_path,
+    }
+    agent_skill_registry_state next_skills = agent_runtime_update_skills(current, next_trace, result.memory)
     agent_skill_execution_state next_skill_execution = agent_skill_execute(next_skills, next_plan.current_task)
 
     agent_runtime_state {
