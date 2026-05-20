@@ -47,6 +47,7 @@ Item {
     property string editorKind: "Text"
     property var diagnosticsSkillRecords: []
     property string selectedSkillName: ""
+    property string skillStatusFilter: ""
     property bool selectedSkillFailedOnly: false
     property string selectedSkillToolFilter: ""
     property bool agentDetailsExpanded: false
@@ -154,6 +155,7 @@ Item {
         resultOutput.text = result
         diagnosticsSkillRecords = parseSkillRecords(result)
         selectedSkillName = ""
+        skillStatusFilter = ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
@@ -182,6 +184,7 @@ Item {
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        skillStatusFilter = ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -211,6 +214,7 @@ Item {
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        skillStatusFilter = ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -256,6 +260,7 @@ Item {
         shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        skillStatusFilter = ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -279,6 +284,7 @@ Item {
         shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        skillStatusFilter = ""
         selectedSkillFailedOnly = false
         selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
@@ -462,12 +468,59 @@ Item {
     }
 
     function selectedSkillRecord() {
-        for (var i = 0; i < diagnosticsSkillRecords.length; ++i) {
-            if ((diagnosticsSkillRecords[i].name || "") === selectedSkillName) {
-                return diagnosticsSkillRecords[i]
+        var records = filteredDiagnosticsSkillRecords()
+        for (var i = 0; i < records.length; ++i) {
+            if ((records[i].name || "") === selectedSkillName) {
+                return records[i]
+            }
+        }
+        for (var j = 0; j < diagnosticsSkillRecords.length; ++j) {
+            if ((diagnosticsSkillRecords[j].name || "") === selectedSkillName) {
+                return diagnosticsSkillRecords[j]
             }
         }
         return null
+    }
+
+    function skillStatusOptions() {
+        var seen = { "": true }
+        var options = [""]
+        for (var i = 0; i < diagnosticsSkillRecords.length; ++i) {
+            var status = (diagnosticsSkillRecords[i].status || "").trim()
+            if (!status.length || seen[status]) {
+                continue
+            }
+            seen[status] = true
+            options.push(status)
+        }
+        return options
+    }
+
+    function filteredDiagnosticsSkillRecords() {
+        var filtered = []
+        for (var i = 0; i < diagnosticsSkillRecords.length; ++i) {
+            var item = diagnosticsSkillRecords[i]
+            if (skillStatusFilter.length > 0 && (item.status || "") !== skillStatusFilter) {
+                continue
+            }
+            filtered.push(item)
+        }
+        return filtered
+    }
+
+    function clearSelectedSkillIfFilteredOut() {
+        if (!selectedSkillName.length) {
+            return
+        }
+        var records = filteredDiagnosticsSkillRecords()
+        for (var i = 0; i < records.length; ++i) {
+            if ((records[i].name || "") === selectedSkillName) {
+                return diagnosticsSkillRecords[i]
+            }
+        }
+        selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
     }
 
     function skillRecordPreview(text, skillRecord) {
@@ -1270,7 +1323,6 @@ Item {
                                             font.pixelSize: 13
                                             selectByMouse: true
                                             activeFocusOnTab: false
-                                            background: null
                                         }
                                     }
 
@@ -1748,8 +1800,52 @@ Item {
                                     font.bold: true
                                 }
 
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+
+                                    ComboBox {
+                                        Layout.preferredWidth: 170
+                                        model: shell.skillStatusOptions()
+                                        currentIndex: Math.max(0, model.indexOf(shell.skillStatusFilter))
+
+                                        delegate: ItemDelegate {
+                                            required property var modelData
+                                            required property int index
+                                            width: parent ? parent.width : 170
+                                            text: modelData && modelData.length > 0 ? modelData : qsTr("All statuses")
+                                        }
+
+                                        contentItem: Text {
+                                            leftPadding: 10
+                                            rightPadding: 10
+                                            verticalAlignment: Text.AlignVCenter
+                                            text: control.displayText
+                                            color: shell.textPrimary
+                                            font.pixelSize: 12
+                                            elide: Text.ElideRight
+                                        }
+
+                                        displayText: currentText && currentText.length > 0 ? currentText : qsTr("All statuses")
+                                        onActivated: {
+                                            shell.skillStatusFilter = currentValue || currentText || ""
+                                            shell.clearSelectedSkillIfFilteredOut()
+                                        }
+                                    }
+
+                                    Text {
+                                        text: qsTr("%1 skills").arg(shell.filteredDiagnosticsSkillRecords().length)
+                                        color: shell.textMuted
+                                        font.pixelSize: 11
+                                    }
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                    }
+                                }
+
                                 Repeater {
-                                    model: diagnosticsSkillRecords
+                                    model: filteredDiagnosticsSkillRecords()
 
                                     delegate: Rectangle {
                                         required property var modelData
