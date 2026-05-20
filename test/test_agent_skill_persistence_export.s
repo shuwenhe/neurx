@@ -51,7 +51,7 @@ func main() int {
     }
 
     string trajectory = agent_trajectory_export(state)
-    if !contains(trajectory, "trace_count=4") || !contains(trajectory, "task[3]=verify") {
+    if !contains(trajectory, "trace_count=4") || !contains(trajectory, "task[3]=verify") || !contains(trajectory, "active_skill[") {
         println("agent trajectory export missing expected trace lines")
         return 1
     }
@@ -63,7 +63,7 @@ func main() int {
         println("persisted skill snapshot missing expected skill")
         return 1
     }
-    if !contains(runtime_read_text_file(trajectory_path), "trace_count=4") {
+    if !contains(runtime_read_text_file(trajectory_path), "trace_count=4") || !contains(runtime_read_text_file(trajectory_path), "active_skill[") {
         println("persisted trajectory export missing expected trace count")
         return 1
     }
