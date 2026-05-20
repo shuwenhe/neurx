@@ -360,6 +360,49 @@ Item {
         return ""
     }
 
+    function exportSavedPath(text) {
+        return parseResultField(text, "saved_path")
+    }
+
+    function exportActiveSkill(text) {
+        return parseResultField(text, "active_skill")
+    }
+
+    function exportSkillExecutionStatus(text) {
+        return parseResultField(text, "skill_execution_status")
+    }
+
+    function exportTraceCount(text) {
+        return parseResultField(text, "trace_count")
+    }
+
+    function exportRegistryVersion(text) {
+        return parseResultField(text, "registry_version")
+    }
+
+    function exportPromoteCount(text) {
+        return parseResultField(text, "promote_count")
+    }
+
+    function exportRetireCount(text) {
+        return parseResultField(text, "retire_count")
+    }
+
+    function exportLastAction(text) {
+        return parseResultField(text, "last_action")
+    }
+
+    function exportLastObservation(text) {
+        return parseResultField(text, "last_observation")
+    }
+
+    function hasStructuredExport(text) {
+        return exportSavedPath(text).length > 0
+            || exportActiveSkill(text).length > 0
+            || exportTraceCount(text).length > 0
+            || exportRegistryVersion(text).length > 0
+    }
+
     function isFailureResult(text) {
         return text.indexOf("runtime_") === 0
             || text.indexOf("local_model_") === 0
@@ -844,8 +887,8 @@ Item {
 
                                     ToolButton {
                                         enabled: !model.pending && model.text.length > 0
-                                        visible: hovered
-                                        opacity: hovered ? 1.0 : 0.0
+                                        visible: true
+                                        opacity: enabled ? 1.0 : 0.45
                                         anchors.top: parent.top
                                         anchors.right: parent.right
                                         anchors.topMargin: 6
@@ -854,8 +897,14 @@ Item {
                                         height: 24
                                         padding: 0
                                         text: ""
+                                        z: 2
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Copy")
+                                        background: Rectangle {
+                                            radius: 6
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.color: Qt.rgba(255, 255, 255, 0.06)
+                                        }
                                         contentItem: Text {
                                             text: "⧉"
                                             color: enabled ? shell.textPrimary : shell.textMuted
@@ -1095,6 +1144,183 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: shell.runtimeStatusText = Runtime.ping()
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        visible: hasStructuredExport(resultOutput.text)
+                        implicitHeight: exportDetailsColumn.implicitHeight + 20
+                        radius: 12
+                        color: shell.panelAlt
+                        border.color: shell.border
+
+                        ColumnLayout {
+                            id: exportDetailsColumn
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 8
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: qsTr("Diagnostics")
+                                    color: shell.textPrimary
+                                    font.pixelSize: 14
+                                    font.bold: true
+                                }
+
+                                Item {
+                                    Layout.fillWidth: true
+                                }
+
+                                ToolButton {
+                                    visible: exportSavedPath(resultOutput.text).length > 0
+                                    enabled: visible
+                                    padding: 0
+                                    width: 24
+                                    height: 24
+                                    text: ""
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Copy saved path")
+                                    contentItem: Text {
+                                        text: "⧉"
+                                        color: shell.textPrimary
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        font.pixelSize: 14
+                                    }
+                                    onClicked: shell.copyConversationText(exportSavedPath(resultOutput.text))
+                                }
+                            }
+
+                            GridLayout {
+                                Layout.fillWidth: true
+                                columns: 2
+                                columnSpacing: 12
+                                rowSpacing: 6
+
+                                Text {
+                                    text: qsTr("Saved Path")
+                                    color: shell.textMuted
+                                    visible: exportSavedPath(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportSavedPath(resultOutput.text)
+                                    color: shell.textPrimary
+                                    elide: Text.ElideMiddle
+                                    visible: exportSavedPath(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Active Skill")
+                                    color: shell.textMuted
+                                    visible: exportActiveSkill(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportActiveSkill(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportActiveSkill(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Execution")
+                                    color: shell.textMuted
+                                    visible: exportSkillExecutionStatus(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportSkillExecutionStatus(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportSkillExecutionStatus(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Trace Count")
+                                    color: shell.textMuted
+                                    visible: exportTraceCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportTraceCount(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportTraceCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Registry Version")
+                                    color: shell.textMuted
+                                    visible: exportRegistryVersion(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportRegistryVersion(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportRegistryVersion(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Promotions")
+                                    color: shell.textMuted
+                                    visible: exportPromoteCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportPromoteCount(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportPromoteCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Retirements")
+                                    color: shell.textMuted
+                                    visible: exportRetireCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportRetireCount(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportRetireCount(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Last Action")
+                                    color: shell.textMuted
+                                    visible: exportLastAction(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportLastAction(resultOutput.text)
+                                    color: shell.textPrimary
+                                    visible: exportLastAction(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    text: qsTr("Last Observation")
+                                    color: shell.textMuted
+                                    visible: exportLastObservation(resultOutput.text).length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportLastObservation(resultOutput.text)
+                                    color: shell.textPrimary
+                                    wrapMode: Text.WrapAnywhere
+                                    visible: exportLastObservation(resultOutput.text).length > 0
+                                }
                             }
                         }
                     }
