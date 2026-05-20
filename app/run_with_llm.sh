@@ -85,6 +85,11 @@ export NEURX_LLM_BASE_URL=http://127.0.0.1:${PORT}
 export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
 export NEURX_LLM_CHAT_PATH=/neurx/api/chat
 
+# Ollama inference endpoint for arbitrary code generation (gateway.sh fallback)
+# Override with: NEURX_OLLAMA_URL=http://host:11434 NEURX_OLLAMA_MODEL=codellama ./run_with_llm.sh
+export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://localhost:11434}"
+export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-qwen2.5-coder:latest}"
+
 # Rebuild Qt app on every launch so make app picks up the latest local changes.
 if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   echo "Configuring Qt application..."
