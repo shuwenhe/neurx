@@ -45,6 +45,7 @@ Item {
     property string editorPlainText: ""
     property string editorKind: "Text"
     property bool agentDetailsExpanded: false
+    property int activeAssistantMessageIndex: -1
 
     function escapeHtml(text) {
         return (text || "")
@@ -112,12 +113,37 @@ Item {
             + "</pre>"
     }
 
+    function appendConversationMessage(kind, label, text, pending) {
+        conversationModel.append({
+            kind: kind,
+            label: label,
+            text: text,
+            pending: pending,
+            durationText: pending ? qsTr("Working...") : ""
+        })
+        conversationList.positionViewAtEnd()
+    }
+
     function beginConversation(prompt, responseLabel, pendingText) {
         lastPromptText = prompt
         lastResponseLabel = responseLabel
         resultOutput.text = pendingText
         lastRunDurationText = qsTr("Working...")
         runStartMs = Date.now()
+        appendConversationMessage("user", qsTr("You"), prompt, false)
+        activeAssistantMessageIndex = conversationModel.count
+        appendConversationMessage("assistant", responseLabel, pendingText, true)
+    }
+
+    function finishConversation(result, durationText) {
+        resultOutput.text = result
+        if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+            conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
+            conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+            conversationModel.setProperty(activeAssistantMessageIndex, "durationText", durationText || "")
+        }
+        conversationList.positionViewAtEnd()
+        activeAssistantMessageIndex = -1
     }
 
     function sendAgentPrompt() {
@@ -141,6 +167,12 @@ Item {
             Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
         } catch (e) {
             resultOutput.text = qsTr("run_agent_failed: ") + e
+            if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+                conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+                conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
+                activeAssistantMessageIndex = -1
+            }
             shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
             shell.agentRunning = false
         } finally {
@@ -161,11 +193,27 @@ Item {
             var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
             shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
             shell.runtimeStatusText = qsTr("suggestion_done")
+            if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+                conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+                conversationModel.setProperty(activeAssistantMessageIndex, "durationText", shell.lastRunDurationText)
+            }
+            activeAssistantMessageIndex = -1
         } catch (e) {
             resultOutput.text = qsTr("suggest_failed: ") + e
             shell.runtimeStatusText = qsTr("failed")
             shell.lastRunDurationText = qsTr("Working...")
+            if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+                conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+                conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
+            }
+            activeAssistantMessageIndex = -1
         }
+    }
+
+    ListModel {
+        id: conversationModel
     }
 
     ListModel {
@@ -263,9 +311,9 @@ Item {
         target: Runtime
 
         function onAgentRunFinished(result) {
-            resultOutput.text = result
             var elapsedSeconds = Math.max(1, Math.round((Date.now() - shell.runStartMs) / 1000))
             shell.lastRunDurationText = qsTr("Worked for %1s").arg(elapsedSeconds)
+            shell.finishConversation(result, shell.lastRunDurationText)
             shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
         }
@@ -617,8 +665,11 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 12
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    anchors.topMargin: 8
+                    anchors.bottomMargin: 16
+                    spacing: 10
 
                     Text {
                         text: qsTr("Conversation")
@@ -629,117 +680,82 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 220
-                        Layout.maximumHeight: 220
+                        Layout.fillHeight: true
+                        Layout.preferredHeight: 440
+                        Layout.minimumHeight: 320
                         radius: 12
                         color: shell.editorBg
                         border.color: shell.border
 
-                        ScrollView {
-                            id: conversationScroll
+                        ListView {
+                            id: conversationList
                             anchors.fill: parent
                             anchors.margins: 10
                             clip: true
+                            spacing: 12
+                            model: conversationModel
+                            boundsBehavior: Flickable.StopAtBounds
+                            onContentHeightChanged: positionViewAtEnd()
 
-                            Column {
-                                width: conversationScroll.availableWidth
-                                spacing: 12
+                            delegate: Item {
+                                width: conversationList.width
+                                height: bubbleRect.height
 
-                                Item {
-                                    visible: shell.lastPromptText.length > 0
-                                    width: parent.width
-                                    height: visible ? userBubbleRect.height : 0
+                                Rectangle {
+                                    id: bubbleRect
+                                    width: Math.min(parent.width * 0.90, bubbleColumn.implicitWidth + 28)
+                                    height: bubbleColumn.implicitHeight + 20
+                                    x: model.kind === "user" ? parent.width - width : 0
+                                    radius: 12
+                                    color: model.kind === "user" ? shell.userBubble : shell.agentBubble
+                                    border.color: model.kind === "user" ? Qt.rgba(1, 1, 1, 0.06) : shell.border
 
-                                    Rectangle {
-                                        id: userBubbleRect
-                                        width: Math.min(parent.width * 0.84, userBubbleColumn.implicitWidth + 28)
-                                        height: userBubbleColumn.implicitHeight + 20
-                                        x: parent.width - width
-                                        radius: 12
-                                        color: shell.userBubble
-                                        border.color: Qt.rgba(1, 1, 1, 0.06)
+                                    Column {
+                                        id: bubbleColumn
+                                        anchors.fill: parent
+                                        anchors.margins: 10
+                                        spacing: 6
 
-                                        Column {
-                                            id: userBubbleColumn
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            spacing: 6
+                                        Row {
+                                            spacing: 8
+
+                                            Rectangle {
+                                                visible: model.kind !== "user"
+                                                width: 18
+                                                height: 18
+                                                radius: 9
+                                                color: shell.accent
+
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: qsTr("C")
+                                                    color: shell.bg
+                                                    font.pixelSize: 10
+                                                    font.bold: true
+                                                }
+                                            }
 
                                             Text {
-                                                text: qsTr("You")
+                                                text: model.label
                                                 color: shell.textMuted
                                                 font.pixelSize: 11
                                                 font.bold: true
                                             }
 
                                             Text {
-                                                width: Math.max(80, userBubbleRect.width - 20)
-                                                text: shell.lastPromptText
-                                                wrapMode: Text.Wrap
-                                                color: shell.textPrimary
-                                                font.pixelSize: 13
+                                                visible: model.kind !== "user"
+                                                text: model.durationText
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
                                             }
                                         }
-                                    }
-                                }
 
-                                Item {
-                                    width: parent.width
-                                    height: agentBubbleRect.height
-
-                                    Rectangle {
-                                        id: agentBubbleRect
-                                        width: Math.min(parent.width * 0.90, agentBubbleColumn.implicitWidth + 28)
-                                        height: agentBubbleColumn.implicitHeight + 20
-                                        radius: 12
-                                        color: shell.agentBubble
-                                        border.color: shell.border
-
-                                        Column {
-                                            id: agentBubbleColumn
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            spacing: 6
-
-                                            Row {
-                                                spacing: 8
-
-                                                Rectangle {
-                                                    width: 18
-                                                    height: 18
-                                                    radius: 9
-                                                    color: shell.accent
-
-                                                    Text {
-                                                        anchors.centerIn: parent
-                                                        text: qsTr("C")
-                                                        color: shell.bg
-                                                        font.pixelSize: 10
-                                                        font.bold: true
-                                                    }
-                                                }
-
-                                                Text {
-                                                    text: shell.lastResponseLabel
-                                                    color: shell.textMuted
-                                                    font.pixelSize: 11
-                                                    font.bold: true
-                                                }
-
-                                                Text {
-                                                    text: shell.lastRunDurationText.length > 0 ? shell.lastRunDurationText : qsTr("Working...")
-                                                    color: shell.textMuted
-                                                    font.pixelSize: 11
-                                                }
-                                            }
-
-                                            Text {
-                                                width: Math.max(120, agentBubbleRect.width - 20)
-                                                text: resultOutput.text
-                                                wrapMode: Text.Wrap
-                                                color: shell.textPrimary
-                                                font.pixelSize: 13
-                                            }
+                                        Text {
+                                            width: Math.max(120, bubbleRect.width - 20)
+                                            text: model.text
+                                            wrapMode: Text.Wrap
+                                            color: shell.textPrimary
+                                            font.pixelSize: 13
                                         }
                                     }
                                 }
@@ -757,108 +773,10 @@ Item {
                         }
                     }
 
-                    Rectangle {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 40
-                        radius: 12
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: shell.agentDetailsExpanded = !shell.agentDetailsExpanded
-                        }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 8
-
-                            Text {
-                                text: qsTr("Details")
-                                color: shell.textPrimary
-                                font.pixelSize: 13
-                                font.bold: true
-                            }
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: shell.agentDetailsExpanded
-                                    ? qsTr("Hide code paths and checkpoint info")
-                                    : qsTr("Show code paths and checkpoint info")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                text: shell.agentDetailsExpanded ? "▾" : "▸"
-                                color: shell.textMuted
-                                font.pixelSize: 18
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: shell.agentDetailsExpanded ? 108 : 0
-                        Layout.maximumHeight: shell.agentDetailsExpanded ? 108 : 0
-                        visible: shell.agentDetailsExpanded
-                        radius: 12
-                        color: shell.editorBg
-                        border.color: shell.border
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 2
-
-                            Text {
-                                text: qsTr("code_path=app/bridge/neurx_bridge.cpp")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                text: qsTr("backend_path=app/service/http_handler.sh")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                text: qsTr("gateway_path=app/service/gateway.sh")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                text: qsTr("entry_path=app/service/serve.s")
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                text: qsTr("Checkpoint file: ") + (parseResultField(resultOutput.text, "checkpoint_file") || qsTr("(none)"))
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                text: qsTr("Checkpoint step: ") + (parseResultField(resultOutput.text, "checkpoint_step") || qsTr("(n/a)"))
-                                color: shell.textMuted
-                                font.pixelSize: 11
-                            }
-                        }
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: 12
                     }
 
                     Text {
@@ -871,8 +789,8 @@ Item {
                     Rectangle {
                         id: promptInput
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 104
-                        Layout.maximumHeight: 104
+                        Layout.preferredHeight: 88
+                        Layout.maximumHeight: 88
                         radius: 12
                         color: shell.editorBg
                         border.color: shell.border
