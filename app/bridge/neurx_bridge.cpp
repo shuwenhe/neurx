@@ -871,8 +871,12 @@ static bool looks_like_stub_chat_response(const QString& text) {
 
 static QString hello_program_fallback(const QString& prompt) {
     const QString text = prompt.trimmed().toLower();
+    const bool wants_hello = text.contains("hello")
+        || text.contains("hello world")
+        || text.contains("hello, world")
+        || text.contains("helloworld");
     if ((text.contains("c++") || text.contains("cpp"))
-        && (text.contains("hello") || text.contains("程序") || text.contains("code") || text.contains("example") || text.contains("示例"))) {
+        && wants_hello) {
         return QString(
             "#include <iostream>\n\n"
             "int main() {\n"
@@ -880,10 +884,10 @@ static QString hello_program_fallback(const QString& prompt) {
             "    return 0;\n"
             "}\n");
     }
-    if (text.contains("python") && text.contains("hello")) {
+    if (text.contains("python") && wants_hello) {
         return QString("print(\"Hello, world!\")\n");
     }
-    if ((text.contains("java")) && text.contains("hello")) {
+    if ((text.contains("java")) && wants_hello) {
         return QString(
             "public class Main {\n"
             "    public static void main(String[] args) {\n"
@@ -892,6 +896,10 @@ static QString hello_program_fallback(const QString& prompt) {
             "}\n");
     }
     return QString();
+}
+
+static QString direct_code_template_for_prompt(const QString& prompt) {
+    return hello_program_fallback(prompt);
 }
 
 QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString& filePath) const {
@@ -967,6 +975,44 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         .arg(route)
         .arg(prompt.size())
         .arg(filePath.trimmed().isEmpty() ? QStringLiteral("-") : QFileInfo(filePath.trimmed()).fileName()));
+
+    const QString runner_path = QDir(root).filePath("app/service/code_agent_runner.sh");
+    if (QFileInfo::exists(runner_path) && QFileInfo(runner_path).isFile()) {
+        const QString runner_result = run_process(
+            "bash",
+            QStringList() << runner_path
+                          << "--prompt" << prompt
+                          << "--file" << filePath.trimmed()
+                          << "--repo" << root,
+            5000,
+            root);
+        if (!runner_result.startsWith("runtime_")) {
+            QJsonParseError runner_parse_error;
+            const QJsonDocument runner_json = QJsonDocument::fromJson(runner_result.toUtf8(), &runner_parse_error);
+            if (runner_parse_error.error == QJsonParseError::NoError && runner_json.isObject()) {
+                const QJsonObject runner_obj = runner_json.object();
+                const QString runner_status = runner_obj.value("status").toString();
+                const QString runner_mode = runner_obj.value("mode").toString();
+                const QString runner_response = runner_obj.value("response").toString();
+                if (runner_status == "completed" && !runner_response.trimmed().isEmpty()) {
+                    emit log_message("info", "agent", QString("code-assistant done route=%1 source=runner mode=%2")
+                        .arg(route, runner_mode));
+                    return runner_response.trimmed();
+                }
+                if (runner_status == "unhandled") {
+                    emit log_message("info", "agent", QString("code-assistant runner delegated route=%1 mode=%2")
+                        .arg(route, runner_mode));
+                }
+            }
+        }
+    }
+
+    const QString direct_template = direct_code_template_for_prompt(prompt);
+    if (!direct_template.isEmpty()) {
+        emit log_message("info", "agent", QString("code-assistant done route=%1 source=bridge-direct-template").arg(route));
+        return direct_template;
+    }
+
     const QString backend_ready = ensure_local_openai_backend(root);
     if (!backend_ready.isEmpty()) {
         emit log_message("warning", "agent", QString("code-assistant backend failed: %1").arg(backend_ready));
