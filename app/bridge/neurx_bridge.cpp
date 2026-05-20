@@ -785,10 +785,12 @@ QString NeurxBridge::run_agent(const QString& prompt, int max_steps) {
                     .arg(obj.value("backend").toString())
                     .arg(obj.value("model").toString())
                     .arg(obj.value("steps").toInt(steps));
-                result = result + "\ncode_path=app/bridge/neurx_bridge.cpp";
-                result = result + "\nbackend_path=app/service/http_handler.sh";
-                result = result + "\ngateway_path=app/service/gateway.sh";
-                result = result + "\nentry_path=app/service/serve.s";
+                if (run_diag_enabled()) {
+                    result = result + "\ncode_path=app/bridge/neurx_bridge.cpp";
+                    result = result + "\nbackend_path=app/service/http_handler.sh";
+                    result = result + "\ngateway_path=app/service/gateway.sh";
+                    result = result + "\nentry_path=app/service/serve.s";
+                }
                 const QString checkpoint_file = obj.value("checkpoint_file").toString();
                 if (!checkpoint_file.isEmpty()) {
                     result = result + "\ncheckpoint_file=" + checkpoint_file;
