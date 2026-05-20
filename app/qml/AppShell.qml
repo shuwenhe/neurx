@@ -47,6 +47,8 @@ Item {
     property string editorKind: "Text"
     property var diagnosticsSkillRecords: []
     property string selectedSkillName: ""
+    property bool selectedSkillFailedOnly: false
+    property string selectedSkillToolFilter: ""
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
@@ -152,6 +154,8 @@ Item {
         resultOutput.text = result
         diagnosticsSkillRecords = parseSkillRecords(result)
         selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
@@ -178,6 +182,8 @@ Item {
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Working on your request..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -205,6 +211,8 @@ Item {
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -248,6 +256,8 @@ Item {
         shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -269,6 +279,8 @@ Item {
         shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
         diagnosticsSkillRecords = []
         selectedSkillName = ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         shell.agentDetailsExpanded = false
 
         try {
@@ -599,6 +611,37 @@ Item {
         return traceStepsForSkill(resultOutput.text, selectedSkillRecord())
     }
 
+    function selectedSkillTraceToolOptions() {
+        var steps = selectedSkillTraceSteps()
+        var seen = { "": true }
+        var options = [""]
+        for (var i = 0; i < steps.length; ++i) {
+            var toolName = (steps[i].tool || "").trim()
+            if (!toolName.length || seen[toolName]) {
+                continue
+            }
+            seen[toolName] = true
+            options.push(toolName)
+        }
+        return options
+    }
+
+    function filteredSelectedSkillTraceSteps() {
+        var steps = selectedSkillTraceSteps()
+        var filtered = []
+        for (var i = 0; i < steps.length; ++i) {
+            var item = steps[i]
+            if (selectedSkillFailedOnly && (item.ok || "false") === "true") {
+                continue
+            }
+            if (selectedSkillToolFilter.length > 0 && (item.tool || "") !== selectedSkillToolFilter) {
+                continue
+            }
+            filtered.push(item)
+        }
+        return filtered
+    }
+
     function traceStepPreview(stepRecord) {
         if (!stepRecord) {
             return ""
@@ -654,6 +697,8 @@ Item {
             return
         }
         selectedSkillName = skillRecord.name || ""
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
         var skillName = (skillRecord.name || "").trim()
         if (skillName.length > 0) {
             promptEditor.text = qsTr("Inspect skill %1").arg(skillName)
@@ -1834,8 +1879,62 @@ Item {
                                                 font.bold: true
                                             }
 
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 8
+
+                                                CheckBox {
+                                                    text: qsTr("Failed only")
+                                                    checked: shell.selectedSkillFailedOnly
+                                                    onToggled: shell.selectedSkillFailedOnly = checked
+                                                }
+
+                                                ComboBox {
+                                                    Layout.preferredWidth: 160
+                                                    model: shell.selectedSkillTraceToolOptions()
+                                                    currentIndex: Math.max(0, model.indexOf(shell.selectedSkillToolFilter))
+
+                                                    delegate: ItemDelegate {
+                                                        required property var modelData
+                                                        required property int index
+                                                        width: parent ? parent.width : 160
+                                                        text: modelData && modelData.length > 0 ? modelData : qsTr("All tools")
+                                                    }
+
+                                                    contentItem: Text {
+                                                        leftPadding: 10
+                                                        rightPadding: 10
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        text: control.displayText
+                                                        color: shell.textPrimary
+                                                        font.pixelSize: 12
+                                                        elide: Text.ElideRight
+                                                    }
+
+                                                    displayText: currentText && currentText.length > 0 ? currentText : qsTr("All tools")
+                                                    onActivated: shell.selectedSkillToolFilter = currentValue || currentText || ""
+                                                }
+
+                                                Text {
+                                                    text: qsTr("%1 steps").arg(shell.filteredSelectedSkillTraceSteps().length)
+                                                    color: shell.textMuted
+                                                    font.pixelSize: 11
+                                                }
+
+                                                Item {
+                                                    Layout.fillWidth: true
+                                                }
+                                            }
+
+                                            Text {
+                                                visible: shell.filteredSelectedSkillTraceSteps().length === 0
+                                                text: qsTr("No steps match the current filters")
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
+                                            }
+
                                             Repeater {
-                                                model: shell.selectedSkillTraceSteps()
+                                                model: shell.filteredSelectedSkillTraceSteps()
 
                                                 delegate: Rectangle {
                                                     required property var modelData
