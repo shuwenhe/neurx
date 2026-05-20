@@ -547,6 +547,58 @@ Item {
         return preview.join("\n")
     }
 
+    function traceStepsForSkill(text, skillRecord) {
+        if (!skillRecord) {
+            return []
+        }
+
+        var lines = (text || "").split("\n")
+        var skillName = skillRecord.name || ""
+        var stepMap = {}
+        var orderedIndexes = []
+        var activePrefix = /^active_skill\[(\d+)\]=(.*)$/
+        var fieldPrefix = /^(step|task|input|action|observation|ok|active_skill|tool|tool_timeout_ms|tool_retries)\[(\d+)\]=(.*)$/
+
+        for (var i = 0; i < lines.length; ++i) {
+            var stepMatch = fieldPrefix.exec(lines[i])
+            if (!stepMatch) {
+                continue
+            }
+            var field = stepMatch[1]
+            var index = stepMatch[2]
+            var value = stepMatch[3]
+            if (!stepMap[index]) {
+                stepMap[index] = {
+                    step: "",
+                    task: "",
+                    input: "",
+                    action: "",
+                    observation: "",
+                    ok: "false",
+                    active_skill: "",
+                    tool: "",
+                    tool_timeout_ms: "0",
+                    tool_retries: "0"
+                }
+                orderedIndexes.push(index)
+            }
+            stepMap[index][field] = value
+        }
+
+        var filtered = []
+        for (var j = 0; j < orderedIndexes.length; ++j) {
+            var item = stepMap[orderedIndexes[j]]
+            if ((item.active_skill || "") === skillName) {
+                filtered.push(item)
+            }
+        }
+        return filtered
+    }
+
+    function selectedSkillTraceSteps() {
+        return traceStepsForSkill(resultOutput.text, selectedSkillRecord())
+    }
+
     function openSavedExport(path) {
         var next = (path || "").trim()
         if (!next.length) {
@@ -1737,6 +1789,104 @@ Item {
                                             color: shell.textMuted
                                             font.pixelSize: 11
                                             wrapMode: Text.WrapAnywhere
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            visible: shell.selectedSkillTraceSteps().length > 0
+                                            spacing: 6
+
+                                            Text {
+                                                text: qsTr("Trace Steps")
+                                                color: shell.textPrimary
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                            }
+
+                                            Repeater {
+                                                model: shell.selectedSkillTraceSteps()
+
+                                                delegate: Rectangle {
+                                                    required property var modelData
+
+                                                    Layout.fillWidth: true
+                                                    implicitHeight: stepColumn.implicitHeight + 14
+                                                    radius: 8
+                                                    color: shell.editorBg
+                                                    border.color: shell.border
+
+                                                    ColumnLayout {
+                                                        id: stepColumn
+                                                        anchors.fill: parent
+                                                        anchors.margins: 8
+                                                        spacing: 4
+
+                                                        RowLayout {
+                                                            Layout.fillWidth: true
+                                                            spacing: 8
+
+                                                            Text {
+                                                                text: qsTr("Step %1").arg(modelData.step || "?")
+                                                                color: shell.textPrimary
+                                                                font.bold: true
+                                                            }
+
+                                                            Text {
+                                                                text: modelData.task || qsTr("unknown")
+                                                                color: shell.textMuted
+                                                            }
+
+                                                            Item {
+                                                                Layout.fillWidth: true
+                                                            }
+
+                                                            Text {
+                                                                text: (modelData.ok || "false") === "true" ? qsTr("ok") : qsTr("failed")
+                                                                color: (modelData.ok || "false") === "true" ? shell.accent : "#e57373"
+                                                                font.bold: true
+                                                            }
+                                                        }
+
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: qsTr("tool=%1 timeout=%2 retries=%3")
+                                                                .arg(modelData.tool || "-")
+                                                                .arg(modelData.tool_timeout_ms || "0")
+                                                                .arg(modelData.tool_retries || "0")
+                                                            color: shell.textMuted
+                                                            font.pixelSize: 11
+                                                            wrapMode: Text.WrapAnywhere
+                                                        }
+
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: qsTr("action: %1").arg(modelData.action || "")
+                                                            color: shell.textPrimary
+                                                            font.pixelSize: 11
+                                                            wrapMode: Text.WrapAnywhere
+                                                            visible: text.length > 8
+                                                        }
+
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: qsTr("input: %1").arg(modelData.input || "")
+                                                            color: shell.textMuted
+                                                            font.pixelSize: 11
+                                                            wrapMode: Text.WrapAnywhere
+                                                            visible: text.length > 7
+                                                        }
+
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: qsTr("observation: %1").arg(modelData.observation || "")
+                                                            color: shell.textPrimary
+                                                            font.pixelSize: 11
+                                                            wrapMode: Text.WrapAnywhere
+                                                            visible: text.length > 13
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
