@@ -136,7 +136,8 @@ Item {
             label: label,
             text: text,
             pending: pending,
-            durationText: pending ? qsTr("Working...") : ""
+            durationText: pending ? qsTr("Working...") : "",
+            copied: false
         })
         conversationList.positionViewAtEnd()
     }
@@ -1299,8 +1300,15 @@ Item {
 
                             delegate: Item {
                                 width: conversationList.width
-                                height: bubbleRect.height
+                                height: bubbleRect.height + (shell.windowHovered ? 30 : 0)
                                 property bool hovered: false
+
+                                Timer {
+                                    id: copyResetTimer
+                                    interval: 3000
+                                    repeat: false
+                                    onTriggered: conversationModel.setProperty(index, "copied", false)
+                                }
 
                                 Rectangle {
                                     id: bubbleRect
@@ -1381,26 +1389,24 @@ Item {
                                         visible: shell.windowHovered
                                         opacity: enabled ? 1.0 : 0.45
                                         anchors.left: parent.left
-                                        anchors.bottom: parent.bottom
+                                        anchors.top: parent.bottom
                                         anchors.leftMargin: 6
-                                        anchors.bottomMargin: 6
+                                        anchors.topMargin: 6
                                         width: 24
                                         height: 24
                                         padding: 0
                                         text: ""
                                         z: 2
-                                        ToolTip.visible: shell.windowHovered
-                                        ToolTip.text: qsTr("Copy")
                                         background: Rectangle {
                                             radius: 6
-                                            color: Qt.rgba(1, 1, 1, 0.04)
-                                            border.color: Qt.rgba(255, 255, 255, 0.06)
+                                            color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.16) : Qt.rgba(1, 1, 1, 0.04)
+                                            border.color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.48) : Qt.rgba(255, 255, 255, 0.06)
                                         }
                                         contentItem: Image {
                                             anchors.centerIn: parent
                                             width: 14
                                             height: 14
-                                            source: "qrc:/neurx/app/icons/copy.svg"
+                                            source: model.copied ? "qrc:/neurx/app/icons/check.svg" : "qrc:/neurx/app/icons/copy.svg"
                                             fillMode: Image.PreserveAspectFit
                                             sourceSize.width: 14
                                             sourceSize.height: 14
@@ -1408,7 +1414,11 @@ Item {
                                             smooth: true
                                             mipmap: true
                                         }
-                                        onClicked: shell.copyConversationText(model.text)
+                                        onClicked: {
+                                            shell.copyConversationText(model.text)
+                                            conversationModel.setProperty(index, "copied", true)
+                                            copyResetTimer.restart()
+                                        }
                                     }
                                 }
 
@@ -1955,6 +1965,16 @@ Item {
                                                     text: modelData.version || ""
                                                     color: shell.textMuted
                                                 }
+
+                                                ToolButton {
+                                                    padding: 0
+                                                    width: 22
+                                                    height: 22
+                                                    text: "⧉"
+                                                    ToolTip.visible: hovered
+                                                    ToolTip.text: qsTr("Copy skill context")
+                                                    onClicked: shell.copyConversationText(shell.skillRecordPreview(resultOutput.text, modelData))
+                                                }
                                             }
 
                                             Text {
@@ -1985,6 +2005,7 @@ Item {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
+                                            z: -1
                                             onClicked: shell.activateSkillRecord(modelData)
                                         }
                                     }
