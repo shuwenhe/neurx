@@ -84,6 +84,10 @@ export NEURX_LLM_BACKEND=openai
 export NEURX_LLM_BASE_URL=http://127.0.0.1:${PORT}
 export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
 export NEURX_LLM_CHAT_PATH=/neurx/api/chat
+export NEURX_CODE_AGENT_ENABLE_MODEL_LOOP="${NEURX_CODE_AGENT_ENABLE_MODEL_LOOP:-0}"
+export NEURX_CODE_AGENT_BASE_URL="${NEURX_CODE_AGENT_BASE_URL:-${NEURX_LLM_BASE_URL}}"
+export NEURX_CODE_AGENT_CHAT_PATH="${NEURX_CODE_AGENT_CHAT_PATH:-${NEURX_LLM_CHAT_PATH}}"
+export NEURX_CODE_AGENT_MODEL="${NEURX_CODE_AGENT_MODEL:-${NEURX_LLM_MODEL}}"
 
 # Ollama inference endpoint for arbitrary code generation (gateway.sh fallback)
 # Override with: NEURX_OLLAMA_URL=http://host:11434 NEURX_OLLAMA_MODEL=codellama ./run_with_llm.sh
@@ -101,6 +105,9 @@ cmake --build "${BUILD_DIR}" --clean-first -j$(nproc)
 echo "Launching Qt application..."
 echo "  LLM Backend: ${NEURX_LLM_BASE_URL}${NEURX_LLM_CHAT_PATH}"
 echo "  Model: ${NEURX_LLM_MODEL}"
+echo "  Code agent model loop: ${NEURX_CODE_AGENT_ENABLE_MODEL_LOOP}"
+echo "  Code agent backend: ${NEURX_CODE_AGENT_BASE_URL}${NEURX_CODE_AGENT_CHAT_PATH}"
+echo "  Code agent model: ${NEURX_CODE_AGENT_MODEL}"
 echo "  Checkpoint root: ${NEURX_BACKEND_CHECKPOINT_ROOT}"
 echo "  Checkpoint file: ${NEURX_BACKEND_CHECKPOINT_FILE}"
 

@@ -93,7 +93,7 @@ handle_models() {
 }
 
 handle_chat() {
-  local model prompt max_tokens req_json response err_text
+  local model prompt max_tokens req_json response err_text summary
   local gateway_path serve_path
   model="$(extract_json_string model "$REQUEST_BODY")"
   prompt="$(extract_json_string prompt "$REQUEST_BODY")"
@@ -119,7 +119,9 @@ handle_chat() {
   local err_file
   err_file="$(mktemp /tmp/neurx_gateway_err.XXXXXX)"
   if response="$(printf '%s' "$req_json" | "${ROOT_DIR}/gateway.sh" 2>"$err_file")"; then
-    log_inference "chat.done model=${model} bytes=${#response}"
+    summary="$(extract_json_string summary "$response")"
+    [[ -z "$summary" ]] && summary="unknown"
+    log_inference "chat.done model=${model} summary=${summary} bytes=${#response}"
     send_response "200 OK" "$response"
   else
     err_text="$(cat "$err_file")"
