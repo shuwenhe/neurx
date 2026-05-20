@@ -6,6 +6,7 @@ struct agent_trace_state {
     []string inputs
     []string actions
     []string observations
+    []string active_skills
     []bool ok_flags
     int count
 }
@@ -17,18 +18,20 @@ func new_agent_trace_state() agent_trace_state {
         inputs: [],
         actions: [],
         observations: [],
+        active_skills: [],
         ok_flags: [],
         count: 0,
     }
 }
 
-func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, bool ok) agent_trace_state {
+func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, bool ok) agent_trace_state {
     int size = len(state.steps)
     []int steps = []int{cap: size + 1}
     []string tasks = []string{cap: size + 1}
     []string inputs = []string{cap: size + 1}
     []string actions = []string{cap: size + 1}
     []string observations = []string{cap: size + 1}
+    []string active_skills = []string{cap: size + 1}
     []bool ok_flags = []bool{cap: size + 1}
 
     int i = 0
@@ -38,6 +41,7 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
         inputs[i] = state.inputs[i]
         actions[i] = state.actions[i]
         observations[i] = state.observations[i]
+        active_skills[i] = state.active_skills[i]
         ok_flags[i] = state.ok_flags[i]
         i = i + 1
     }
@@ -47,6 +51,7 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
     inputs[size] = input
     actions[size] = action
     observations[size] = observation
+    active_skills[size] = active_skill
     ok_flags[size] = ok
 
     agent_trace_state {
@@ -55,6 +60,7 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
         inputs: inputs,
         actions: actions,
         observations: observations,
+        active_skills: active_skills,
         ok_flags: ok_flags,
         count: state.count + 1,
     }
@@ -113,6 +119,7 @@ func agent_trace_export(agent_trace_state state) string {
         out = out + "\ninput[" + string(i) + "]=" + state.inputs[i]
         out = out + "\naction[" + string(i) + "]=" + state.actions[i]
         out = out + "\nobservation[" + string(i) + "]=" + state.observations[i]
+        out = out + "\nactive_skill[" + string(i) + "]=" + state.active_skills[i]
         if state.ok_flags[i] {
             out = out + "\nok[" + string(i) + "]=true"
         } else {
