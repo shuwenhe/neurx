@@ -190,6 +190,9 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         result.action,
         result.observation,
         state.skill_execution.active_skill,
+        result.tool_name,
+        result.tool_timeout_ms,
+        result.tool_retries,
         result.ok,
     )
     agent_runtime_state current = agent_runtime_state {

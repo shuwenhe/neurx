@@ -69,6 +69,28 @@ func agent_tool_registry_has_enabled(agent_tool_registry_state state, string too
     false
 }
 
+func agent_tool_registry_timeout_ms(agent_tool_registry_state state, string tool_name) int {
+    int i = 0
+    while i < len(state.tool_names) {
+        if state.tool_names[i] == tool_name {
+            return state.timeout_ms[i]
+        }
+        i = i + 1
+    }
+    0
+}
+
+func agent_tool_registry_retries(agent_tool_registry_state state, string tool_name) int {
+    int i = 0
+    while i < len(state.tool_names) {
+        if state.tool_names[i] == tool_name {
+            return state.retries[i]
+        }
+        i = i + 1
+    }
+    0
+}
+
 func agent_tool_registry_state_dict(agent_tool_registry_state state) agent_tool_registry_state {
     state
 }
