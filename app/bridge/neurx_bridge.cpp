@@ -10,6 +10,8 @@
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QStandardPaths>
+#include <QClipboard>
+#include <QGuiApplication>
 #include <QThread>
 #include <QVariantMap>
 #include <QDebug>
@@ -24,6 +26,16 @@ constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
 bool run_diag_enabled() {
     const QString v = qEnvironmentVariable("NEURX_AGENT_DEBUG_RUN").trimmed().toLower();
     return v == "1" || v == "true" || v == "yes" || v == "on";
+}
+
+QString escape_s_string(const QString& value) {
+    QString out = value;
+    out.replace("\\", "\\\\");
+    out.replace("\"", "\\\"");
+    out.replace("\n", "\\n");
+    out.replace("\r", "\\r");
+    out.replace("\t", "\\t");
+    return out;
 }
 }
 
@@ -834,6 +846,20 @@ QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& fi
     return run_code_assistant_request(prompt, filePath);
 }
 
+QString NeurxBridge::export_agent_skill_snapshot(const QString& prompt, int max_steps) {
+    return run_agent_state_export(prompt, max_steps, "skill_snapshot");
+}
+
+QString NeurxBridge::export_agent_trajectory(const QString& prompt, int max_steps) {
+    return run_agent_state_export(prompt, max_steps, "trajectory");
+}
+
+void NeurxBridge::copy_to_clipboard(const QString& text) {
+    if (QClipboard* clipboard = QGuiApplication::clipboard()) {
+        clipboard->setText(text);
+    }
+}
+
 QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QString& filePath) {
     const QString root = find_repo_root();
     if (root.isEmpty()) {
@@ -904,6 +930,76 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2")
         .arg(route)
         .arg(result.size()));
+    return result;
+}
+
+QString NeurxBridge::run_agent_state_export(const QString& prompt, int max_steps, const QString& export_kind) {
+    const QString root = find_repo_root();
+    if (root.isEmpty()) {
+        return "repo_not_found";
+    }
+
+    int steps = max_steps;
+    if (steps <= 0) {
+        steps = 1;
+    }
+
+    const QString safe_prompt = prompt.trimmed().isEmpty() ? QStringLiteral("hello") : prompt;
+    const QString export_dir = QDir(root).filePath("artifacts/checkpoints/agent/skills");
+    QDir().mkpath(export_dir);
+
+    const QString file_name = export_kind == "trajectory"
+        ? QStringLiteral("latest_trajectory.txt")
+        : QStringLiteral("latest_skill_snapshot.txt");
+    const QString target_path = QDir(export_dir).filePath(file_name);
+
+    QTemporaryFile runner(QDir(root).filePath("build/tmp/neurx_agent_export_XXXXXX.s"));
+    QDir().mkpath(QDir(root).filePath("build/tmp"));
+    runner.setAutoRemove(true);
+    if (!runner.open()) {
+        return QString("runtime_exec_failed: could not create S export runner");
+    }
+
+    const QString prompt_literal = escape_s_string(safe_prompt);
+    const QString target_literal = escape_s_string(target_path);
+    const QString export_expr = export_kind == "trajectory"
+        ? QStringLiteral("agent_trajectory_export(state)")
+        : QStringLiteral("agent_skill_snapshot(state)");
+    const QString persist_stmt = export_kind == "trajectory"
+        ? QStringLiteral("    agent_export_trajectory(state, \"") + target_literal + QStringLiteral("\")\n")
+        : QStringLiteral("    agent_persist_skill_snapshot(state, \"") + target_literal + QStringLiteral("\")\n");
+
+    const QString source = QString(
+        "package neurx.app.agent_export_runner\n\n"
+        "use neurx.agent.{new_default_agent, run_agent_once, agent_skill_snapshot, agent_trajectory_export, agent_persist_skill_snapshot, agent_export_trajectory}\n\n"
+        "func main() int {\n"
+        "    string prompt = \"%1\"\n"
+        "    agent_runtime_state state = new_default_agent(prompt)\n"
+        "    int total = %2\n"
+        "    int i = 0\n"
+        "    while i < total {\n"
+        "        state = run_agent_once(state, prompt)\n"
+        "        i = i + 1\n"
+        "    }\n"
+        "%3"
+        "    println(\"saved_path=%4\")\n"
+        "    println(%5)\n"
+        "    0\n"
+        "}\n")
+        .arg(prompt_literal)
+        .arg(steps)
+        .arg(persist_stmt)
+        .arg(target_literal)
+        .arg(export_expr);
+
+    runner.write(source.toUtf8());
+    runner.flush();
+    runner.close();
+
+    const QString result = run_process("s", QStringList() << "run" << runner.fileName(), 120000, root);
+    if (!result.startsWith("runtime_")) {
+        emit log_message("info", "agent", QString("agent export done kind=%1 len=%2").arg(export_kind).arg(result.size()));
+    }
     return result;
 }
 
