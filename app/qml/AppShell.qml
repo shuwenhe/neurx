@@ -129,6 +129,7 @@ Item {
         if (!prompt) {
             prompt = "hello"
         }
+        promptEditor.text = ""
 
         shell.runClickSeq += 1
         shell.agentRunning = true
@@ -150,6 +151,7 @@ Item {
     function sendCodeSuggestion() {
         var prompt = promptEditor.text.trim()
         var filePath = shell.selectedFilePath || ""
+        promptEditor.text = ""
         shell.runtimeStatusText = qsTr("suggesting")
         shell.beginConversation(prompt, qsTr("NeurX"), qsTr("Preparing code suggestion..."))
         shell.agentDetailsExpanded = false
