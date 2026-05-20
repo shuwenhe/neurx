@@ -599,6 +599,37 @@ Item {
         return traceStepsForSkill(resultOutput.text, selectedSkillRecord())
     }
 
+    function traceStepPreview(stepRecord) {
+        if (!stepRecord) {
+            return ""
+        }
+
+        var lines = []
+        lines.push("step=" + (stepRecord.step || ""))
+        lines.push("task=" + (stepRecord.task || ""))
+        lines.push("input=" + (stepRecord.input || ""))
+        lines.push("action=" + (stepRecord.action || ""))
+        lines.push("observation=" + (stepRecord.observation || ""))
+        lines.push("active_skill=" + (stepRecord.active_skill || ""))
+        lines.push("tool=" + (stepRecord.tool || ""))
+        lines.push("tool_timeout_ms=" + (stepRecord.tool_timeout_ms || "0"))
+        lines.push("tool_retries=" + (stepRecord.tool_retries || "0"))
+        lines.push("ok=" + (stepRecord.ok || "false"))
+        return lines.join("\n")
+    }
+
+    function openTraceStep(stepRecord) {
+        if (!stepRecord) {
+            return
+        }
+        selectedFileIndex = -1
+        selectedFilePath = exportSavedPath(resultOutput.text)
+        editorKind = "Text"
+        editorPlainText = traceStepPreview(stepRecord)
+        shell.copyNoticeText = qsTr("Opened step")
+        copyNoticeTimer.restart()
+    }
+
     function openSavedExport(path) {
         var next = (path || "").trim()
         if (!next.length) {
@@ -1838,6 +1869,16 @@ Item {
 
                                                             Item {
                                                                 Layout.fillWidth: true
+                                                            }
+
+                                                            ToolButton {
+                                                                text: qsTr("Copy")
+                                                                onClicked: shell.copyConversationText(shell.traceStepPreview(modelData))
+                                                            }
+
+                                                            ToolButton {
+                                                                text: qsTr("Open")
+                                                                onClicked: shell.openTraceStep(modelData)
                                                             }
 
                                                             Text {
