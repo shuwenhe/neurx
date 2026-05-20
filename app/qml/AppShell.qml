@@ -57,13 +57,6 @@ Item {
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
-    property bool windowHovered: false
-
-    HoverHandler {
-        target: shell
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        onHoveredChanged: shell.windowHovered = hovered
-    }
 
     function escapeHtml(text) {
         return (text || "")
@@ -1301,8 +1294,7 @@ Item {
 
                             delegate: Item {
                                 width: conversationList.width
-                                height: bubbleRect.height + (shell.windowHovered ? 30 : 0)
-                                property bool hovered: false
+                                height: bubbleRect.height
 
                                 Timer {
                                     id: copyResetTimer
@@ -1321,6 +1313,12 @@ Item {
                                     radius: 12
                                     color: model.kind === "user" ? shell.userBubble : shell.agentBubble
                                     border.color: model.kind === "user" ? Qt.rgba(1, 1, 1, 0.06) : shell.border
+
+                                    HoverHandler {
+                                        id: bubbleHover
+                                        target: bubbleRect
+                                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                                    }
 
                                     Column {
                                         id: bubbleColumn
@@ -1367,6 +1365,39 @@ Item {
                                             Item {
                                                 Layout.fillWidth: true
                                             }
+
+                                            ToolButton {
+                                                enabled: !model.pending && model.text.length > 0
+                                                visible: bubbleHover.hovered || model.copied
+                                                opacity: enabled ? 1.0 : 0.45
+                                                Layout.alignment: Qt.AlignTop
+                                                width: 24
+                                                height: 24
+                                                padding: 0
+                                                text: ""
+                                                background: Rectangle {
+                                                    radius: 6
+                                                    color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.16) : Qt.rgba(1, 1, 1, 0.04)
+                                                    border.color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.48) : Qt.rgba(255, 255, 255, 0.06)
+                                                }
+                                                contentItem: Image {
+                                                    anchors.centerIn: parent
+                                                    width: 14
+                                                    height: 14
+                                                    source: model.copied ? "qrc:/neurx/app/icons/check.svg" : "qrc:/neurx/app/icons/copy.svg"
+                                                    fillMode: Image.PreserveAspectFit
+                                                    sourceSize.width: 14
+                                                    sourceSize.height: 14
+                                                    opacity: enabled ? 1.0 : 0.45
+                                                    smooth: true
+                                                    mipmap: true
+                                                }
+                                                onClicked: {
+                                                    shell.copyConversationText(model.text)
+                                                    conversationModel.setProperty(index, "copied", true)
+                                                    copyResetTimer.restart()
+                                                }
+                                            }
                                         }
 
                                         TextEdit {
@@ -1374,62 +1405,20 @@ Item {
                                             text: model.text
                                             readOnly: true
                                             selectByMouse: true
-                                            activeFocusOnPress: false
+                                            selectByKeyboard: true
+                                            activeFocusOnPress: true
                                             persistentSelection: true
+                                            cursorVisible: false
+                                            mouseSelectionMode: TextEdit.SelectCharacters
                                             textFormat: TextEdit.PlainText
                                             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
                                             color: shell.textPrimary
                                             selectionColor: shell.selectionBg
                                             selectedTextColor: shell.textPrimary
                                             font.pixelSize: 13
-                                            lineHeight: 1.2
                                         }
                                     }
 
-                                    ToolButton {
-                                        enabled: !model.pending && model.text.length > 0
-                                        visible: shell.windowHovered
-                                        opacity: enabled ? 1.0 : 0.45
-                                        anchors.left: parent.left
-                                        anchors.top: parent.bottom
-                                        anchors.leftMargin: 6
-                                        anchors.topMargin: 6
-                                        width: 24
-                                        height: 24
-                                        padding: 0
-                                        text: ""
-                                        z: 2
-                                        background: Rectangle {
-                                            radius: 6
-                                            color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.16) : Qt.rgba(1, 1, 1, 0.04)
-                                            border.color: model.copied ? Qt.rgba(0.10, 0.66, 0.45, 0.48) : Qt.rgba(255, 255, 255, 0.06)
-                                        }
-                                        contentItem: Image {
-                                            anchors.centerIn: parent
-                                            width: 14
-                                            height: 14
-                                            source: model.copied ? "qrc:/neurx/app/icons/check.svg" : "qrc:/neurx/app/icons/copy.svg"
-                                            fillMode: Image.PreserveAspectFit
-                                            sourceSize.width: 14
-                                            sourceSize.height: 14
-                                            opacity: enabled ? 1.0 : 0.45
-                                            smooth: true
-                                            mipmap: true
-                                        }
-                                        onClicked: {
-                                            shell.copyConversationText(model.text)
-                                            conversationModel.setProperty(index, "copied", true)
-                                            copyResetTimer.restart()
-                                        }
-                                    }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: bubbleRect
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                    onEntered: hovered = true
-                                    onExited: hovered = false
                                 }
                             }
                         }
@@ -1464,12 +1453,6 @@ Item {
                             text: qsTr("Run the agent to see output here.")
                             font.pixelSize: 12
                         }
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumHeight: 12
                     }
 
                     Text {
@@ -1545,115 +1528,6 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            Layout.preferredWidth: 132
-                            Layout.preferredHeight: 34
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Suggest")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: shell.sendCodeSuggestion()
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 138
-                            Layout.preferredHeight: 34
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Snapshot")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: shell.sendSkillSnapshot()
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 142
-                            Layout.preferredHeight: 34
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Trajectory")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: shell.sendTrajectoryExport()
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 120
-                            Layout.preferredHeight: 34
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 6
-                                spacing: 6
-
-                                Text {
-                                    text: qsTr("Steps")
-                                    color: shell.textPrimary
-                                    font.bold: true
-                                    font.pixelSize: 11
-                                }
-
-                                SpinBox {
-                                    id: stepsPicker
-                                    from: 1
-                                    to: 64
-                                    value: shell.runSteps
-                                    editable: true
-                                    onValueModified: shell.runSteps = value
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.preferredWidth: 124
-                            Layout.preferredHeight: 34
-                            radius: 10
-                            color: shell.panelAlt
-                            border.color: shell.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: qsTr("Refresh")
-                                color: shell.textPrimary
-                                font.bold: true
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: shell.runtimeStatusText = Runtime.ping()
-                            }
-                        }
                     }
 
                     Rectangle {
