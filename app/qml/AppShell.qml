@@ -17,6 +17,12 @@ Item {
     readonly property color selectionBg: "#173f31"
     readonly property color userBubble: "#123d2f"
     readonly property color agentBubble: "#171b22"
+    readonly property color lineNumberBg: "#14181d"
+    readonly property color lineNumberBorder: "#20262d"
+    readonly property color highlightKeyword: "#6cb6ff"
+    readonly property color highlightString: "#f69d50"
+    readonly property color highlightComment: "#7f8c98"
+    readonly property color highlightDirective: "#d2a8ff"
     readonly property int paneHandleWidth: 10
     readonly property int paneMinExplorerWidth: 220
     readonly property int paneMinEditorWidth: 420
@@ -36,7 +42,75 @@ Item {
     property string lastResponseLabel: qsTr("NeurX")
     property string lastRunDurationText: ""
     property string runtimeStatusText: Runtime.ping()
+    property string editorPlainText: ""
+    property string editorKind: "Text"
     property bool agentDetailsExpanded: false
+
+    function escapeHtml(text) {
+        return (text || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+    }
+
+    function syntaxKeywords(kind) {
+        if (kind === "QML") {
+            return ["import", "property", "readonly", "required", "signal", "function", "if", "else", "return", "true", "false", "var", "let", "const", "id", "onClicked", "anchors", "parent"]
+        }
+        if (kind === "C++") {
+            return ["class", "const", "constexpr", "enum", "explicit", "false", "for", "if", "include", "int", "namespace", "nullptr", "override", "private", "protected", "public", "return", "signals", "slots", "static", "struct", "switch", "template", "true", "void", "while"]
+        }
+        return ["if", "else", "for", "while", "return", "function", "const", "let", "var", "true", "false"]
+    }
+
+    function lineNumberHtml(text) {
+        var lineCount = Math.max(1, (text || "").split("\n").length)
+        var numbers = []
+        for (var index = 1; index <= lineCount; ++index) {
+            numbers.push(index)
+        }
+
+        return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textMuted + ";text-align:right;\">"
+            + numbers.join("\n")
+            + "</pre>"
+    }
+
+    function highlightCode(text, kind) {
+        var source = text || ""
+        if (!source.length) {
+            return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\"></pre>"
+        }
+
+        var keywords = syntaxKeywords(kind)
+        var keywordPattern = keywords.length > 0 ? "\\b(?:" + keywords.join("|") + ")\\b" : "$^"
+        var tokenPattern = new RegExp("(//[^\\n]*|/\\*[\\s\\S]*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|#[A-Za-z_][A-Za-z0-9_]*|" + keywordPattern + ")", "g")
+        var highlighted = ""
+        var lastIndex = 0
+        var match
+
+        while ((match = tokenPattern.exec(source)) !== null) {
+            highlighted += escapeHtml(source.slice(lastIndex, match.index))
+            var token = match[0]
+            var color = shell.highlightKeyword
+
+            if (token.indexOf("//") === 0 || token.indexOf("/*") === 0) {
+                color = shell.highlightComment
+            } else if (token.indexOf("#") === 0) {
+                color = shell.highlightDirective
+            } else if (token.indexOf("\"") === 0 || token.indexOf("'") === 0) {
+                color = shell.highlightString
+            }
+
+            highlighted += "<span style=\"color:" + color + ";\">" + escapeHtml(token) + "</span>"
+            lastIndex = match.index + token.length
+        }
+
+        highlighted += escapeHtml(source.slice(lastIndex))
+        return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\">"
+            + highlighted.replace(/\t/g, "    ")
+            + "</pre>"
+    }
 
     function beginConversation(prompt, responseLabel, pendingText) {
         lastPromptText = prompt
@@ -132,7 +206,8 @@ Item {
         selectedFileIndex = index
         var entry = fileModel.get(index)
         selectedFilePath = entry.path
-        editorText.text = entry.content
+        editorKind = entry.kind
+        editorPlainText = entry.content
     }
 
     function clamp(value, minValue, maxValue) {
@@ -415,24 +490,46 @@ Item {
                         border.color: shell.border
                         clip: true
 
+                        Rectangle {
+                            id: editorGutter
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: 60
+                            color: shell.lineNumberBg
+                            border.color: shell.lineNumberBorder
+
+                            Text {
+                                id: editorLineNumbers
+                                anchors.right: parent.right
+                                anchors.rightMargin: 10
+                                y: 12 - editorFlick.contentY
+                                textFormat: Text.RichText
+                                text: shell.lineNumberHtml(shell.editorPlainText)
+                            }
+                        }
+
                         Flickable {
                             id: editorFlick
-                            anchors.fill: parent
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.left: editorGutter.right
                             anchors.margins: 1
-                            contentWidth: width
+                            contentWidth: Math.max(width, editorText.paintedWidth + 32)
                             contentHeight: editorText.paintedHeight + 24
                             clip: true
                             boundsBehavior: Flickable.StopAtBounds
 
                             TextEdit {
                                 id: editorText
-                                width: editorFlick.width - 32
+                                width: Math.max(editorFlick.width - 32, paintedWidth + 4)
                                 height: paintedHeight + 2
-                                anchors.left: parent.left
-                                anchors.leftMargin: 16
-                                anchors.top: parent.top
-                                anchors.topMargin: 12
-                                text: ""
+                                x: 16
+                                y: 12
+                                text: shell.highlightCode(shell.editorPlainText, shell.editorKind)
+                                textFormat: TextEdit.RichText
+                                readOnly: true
                                 wrapMode: TextEdit.NoWrap
                                 selectByMouse: true
                                 color: shell.textPrimary
@@ -446,7 +543,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: qsTr("Select a file from Explorer to load it into the editor.")
                                 color: shell.textMuted
-                                visible: editorText.text.length === 0
+                                visible: shell.editorPlainText.length === 0
                             }
                         }
                     }
@@ -520,18 +617,6 @@ Item {
                     anchors.fill: parent
                     anchors.margins: 16
                     spacing: 12
-
-                    Text {
-                        text: qsTr("Agent")
-                        color: shell.textPrimary
-                        font.pixelSize: 18
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: qsTr("Live runtime and agent control")
-                        color: shell.textMuted
-                    }
 
                     Text {
                         text: qsTr("Conversation")
@@ -918,68 +1003,6 @@ Item {
                         }
                     }
 
-                    Text {
-                        text: qsTr("Runtime Log")
-                        color: shell.textPrimary
-                        font.pixelSize: 16
-                        font.bold: true
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumHeight: 120
-                        radius: 14
-                        color: shell.panelAlt
-                        border.color: shell.border
-
-                        ListView {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            model: LogModel
-                            spacing: 8
-                            clip: true
-
-                            delegate: Row {
-                                required property string time
-                                required property string level
-                                required property string tag
-                                required property string message
-
-                                width: ListView.view.width
-                                spacing: 8
-
-                                Text {
-                                    text: time
-                                    color: shell.textMuted
-                                    width: 64
-                                    font.pixelSize: 12
-                                }
-
-                                Text {
-                                    text: level
-                                    color: level === "error" ? "#ff6b6b" : (level === "warning" ? "#ffb347" : shell.accent)
-                                    width: 56
-                                    font.pixelSize: 12
-                                }
-
-                                Text {
-                                    text: tag
-                                    color: shell.textPrimary
-                                    width: 64
-                                    font.pixelSize: 12
-                                }
-
-                                Text {
-                                    text: message
-                                    color: shell.textMuted
-                                    width: Math.max(0, parent.width - 220)
-                                    wrapMode: Text.Wrap
-                                    font.pixelSize: 12
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
