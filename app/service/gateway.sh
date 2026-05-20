@@ -87,6 +87,101 @@ if [ -n "${prompt:-}" ]; then
   fi
 fi
 
+# ── NeurX checkpoint inference (first-stage classifier + metadata) ────────────
+# Find the most recent .neurx checkpoint if NEURX_BACKEND_CHECKPOINT_FILE is set
+# or if artifacts/checkpoints/ directory exists.
+neurx_ckpt_file="${NEURX_BACKEND_CHECKPOINT_FILE:-}"
+if [ -z "$neurx_ckpt_file" ] && [ -d "${ROOT_DIR}/artifacts/checkpoints" ]; then
+  neurx_ckpt_file="$(find "${ROOT_DIR}/artifacts/checkpoints" -type f -name '*.neurx' \
+    2>/dev/null | sort | tail -n 1 || true)"
+fi
+
+neurx_step=""
+neurx_loss=""
+neurx_n_params=""
+neurx_cls=""
+if [ -n "$neurx_ckpt_file" ] && [ -f "$neurx_ckpt_file" ] && command -v python3 >/dev/null 2>&1; then
+  neurx_meta="$(NEURX_CKPT="$neurx_ckpt_file" NEURX_PROMPT="${prompt:-}" python3 -c '
+import os, math
+
+ckpt_path = os.environ.get("NEURX_CKPT", "")
+prompt_text = os.environ.get("NEURX_PROMPT", "")
+
+params = {}
+meta = {}
+with open(ckpt_path) as f:
+    for line in f:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, val = line.split("=", 1)
+        if key.startswith("param") and "." in key:
+            parts = key.split(".", 1)
+            try:
+                idx = int(parts[0].replace("param", ""))
+            except ValueError:
+                continue
+            attr = parts[1]
+            if idx not in params:
+                params[idx] = {}
+            if attr == "data":
+                params[idx]["data"] = [float(x) for x in val.split(",") if x.strip()]
+            elif attr == "shape":
+                params[idx]["shape"] = [int(x) for x in val.split(",") if x.strip()]
+        else:
+            meta[key] = val
+
+step = meta.get("step", "0")
+loss = meta.get("loss", "0.0")
+n = len(params)
+
+# Simple 4-class forward pass: prompt chars -> features -> MLP output -> class
+def tok4(text):
+    return [(ord(c) % 256) / 256.0 for c in list(text[:4].ljust(4))]
+
+def mm(vec, data, rows, cols):
+    r = [0.0] * cols
+    for j in range(cols):
+        for i in range(rows):
+            r[j] += vec[i] * (data[i * cols + j] if i * cols + j < len(data) else 0.0)
+    return r
+
+x = tok4(prompt_text)
+cls = 0
+if n >= 2:
+    p0, p1 = params.get(0, {}), params.get(1, {})
+    s0 = p0.get("shape", [4, 8])
+    s1 = p1.get("shape", [8, 4])
+    h = mm(x, p0.get("data", []), s0[0], s0[1])
+    h = [max(0.0, v) for v in h]
+    o = mm(h, p1.get("data", []), s1[0], s1[1])
+    if n >= 3:
+        b = params.get(2, {}).get("data", [])
+        o = [o[i] + (b[i] if i < len(b) else 0.0) for i in range(len(o))]
+    cls = o.index(max(o)) if o else 0
+
+print(f"{step},{loss},{n},{cls}")
+' 2>/dev/null)" || neurx_meta=""
+
+  if [ -n "${neurx_meta:-}" ]; then
+    neurx_step="$(printf '%s' "$neurx_meta" | cut -d',' -f1)"
+    neurx_loss="$(printf '%s' "$neurx_meta" | cut -d',' -f2)"
+    neurx_n_params="$(printf '%s' "$neurx_meta" | cut -d',' -f3)"
+    neurx_cls="$(printf '%s' "$neurx_meta" | cut -d',' -f4)"
+  fi
+fi
+# Routing hint based on NeurX classifier output (0=math,1=string,2=system,3=other)
+neurx_hint=""
+case "${neurx_cls:-}" in
+  0) neurx_hint="The request appears to involve numeric computation or algorithms." ;;
+  1) neurx_hint="The request appears to involve string or text processing." ;;
+  2) neurx_hint="The request appears to involve system or I/O operations." ;;
+  3) neurx_hint="The request is a general programming task." ;;
+esac
+# ─────────────────────────────────────────────────────────────────────────────
+
 # ── Ollama / OpenAI-compatible LLM inference ─────────────────────────────────
 # When no template matches, try a locally-running LLM (Ollama or compatible).
 # Set NEURX_OLLAMA_URL to override; default: http://localhost:11434
@@ -119,7 +214,15 @@ if names:
   fi
 
   user_msg="$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")"
-  system_msg="You are NeurX, an expert coding assistant. Write complete, working programs. Return only the code without markdown fences or extra explanation unless the user asks for it."
+
+  # Build system message; inject NeurX checkpoint metadata when available
+  neurx_ctx=""
+  if [ -n "${neurx_step:-}" ]; then
+    ckpt_name="$(basename "${neurx_ckpt_file:-unknown.neurx}" .neurx)"
+    neurx_ctx=" NeurX model context: checkpoint=${ckpt_name}, step=${neurx_step}, loss=${neurx_loss}, params=${neurx_n_params}."
+    [ -n "${neurx_hint:-}" ] && neurx_ctx="${neurx_ctx} ${neurx_hint}"
+  fi
+  system_msg="You are NeurX, an expert coding assistant.${neurx_ctx} Write complete, working programs. Return only the code without markdown fences or extra explanation unless the user asks for it."
   system_escaped="$(json_escape "$system_msg")"
   chat_body="{\"model\":\"$(json_escape "$ollama_model")\",\"messages\":[{\"role\":\"system\",\"content\":\"${system_escaped}\"},{\"role\":\"user\",\"content\":\"${user_msg}\"}],\"stream\":false}"
 
@@ -144,11 +247,21 @@ except Exception:
   rm -f "$llm_out_file"
 
   if [ -n "${llm_resp:-}" ]; then
+    # Determine backend_name and summary based on whether NeurX checkpoint was used
+    if [ -n "${neurx_step:-}" ]; then
+      backend_name="neurx.checkpoint+ollama"
+      summary_val="neurx-checkpoint-routed"
+    else
+      backend_name="neurx.ollama"
+      summary_val="ollama-inference"
+    fi
     model_e="$(json_escape "$ollama_model")"
     prompt_e="$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")"
     code_e="$(json_escape "$llm_resp")"
-    printf '{"ok":true,"backend_name":"neurx.ollama","model_name":"%s","summary":"ollama-inference","prompt":"%s","completion":"%s","generated_tokens":0,"ready":true}\n' \
-      "$model_e" "$prompt_e" "$code_e"
+    ckpt_e="$(json_escape "${neurx_ckpt_file:-}")"
+    printf '{"ok":true,"backend_name":"%s","model_name":"%s","summary":"%s","prompt":"%s","completion":"%s","neurx_step":%s,"neurx_loss":%s,"neurx_params":%s,"checkpoint":"%s","generated_tokens":0,"ready":true}\n' \
+      "$backend_name" "$model_e" "$summary_val" "$prompt_e" "$code_e" \
+      "${neurx_step:-0}" "${neurx_loss:-0}" "${neurx_n_params:-0}" "$ckpt_e"
     exit 0
   fi
 fi
@@ -156,7 +269,12 @@ fi
 
 serve_out_file="$(mktemp /tmp/neurx_serve_out.XXXXXX)"
 serve_err_file="$(mktemp /tmp/neurx_serve_err.XXXXXX)"
-trap 'rm -f "$body_file" "$serve_out_file" "$serve_err_file"' EXIT
+trap 'rm -f "$body_file" "$serve_out_file" "$serve_err_file" /tmp/neurx_ckpt_path.txt' EXIT
+
+# Write checkpoint path so serve.s can load it at runtime
+if [ -n "${neurx_ckpt_file:-}" ] && [ -f "${neurx_ckpt_file:-}" ]; then
+  printf '%s' "$neurx_ckpt_file" > /tmp/neurx_ckpt_path.txt
+fi
 
 set +e
 "${S_BINARY}" run "${ROOT_DIR}/service/serve.s" >"$serve_out_file" 2>"$serve_err_file"
