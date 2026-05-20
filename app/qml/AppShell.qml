@@ -488,6 +488,65 @@ Item {
         return preview.join("\n")
     }
 
+    function trajectoryPreviewForSkill(text, skillRecord) {
+        if (!skillRecord) {
+            return ""
+        }
+
+        var lines = (text || "").split("\n")
+        var skillName = skillRecord.name || ""
+        var headers = []
+        var stepMap = {}
+        var activePrefix = /^active_skill\[(\d+)\]=(.*)$/
+        var fieldPrefix = /^(step|task|input|action|observation|ok|active_skill)\[(\d+)\]=(.*)$/
+
+        for (var i = 0; i < lines.length; ++i) {
+            var headerMatch = /^([^\[]+)=/.exec(lines[i])
+            var stepMatch = fieldPrefix.exec(lines[i])
+            if (stepMatch) {
+                var index = stepMatch[2]
+                if (!stepMap[index]) {
+                    stepMap[index] = []
+                }
+                stepMap[index].push(lines[i])
+                continue
+            }
+            if (headerMatch && headerMatch[1].indexOf("skill") !== 0) {
+                headers.push(lines[i])
+            }
+        }
+
+        var filtered = []
+        for (var j = 0; j < lines.length; ++j) {
+            var activeMatch = activePrefix.exec(lines[j])
+            if (!activeMatch) {
+                continue
+            }
+            if ((activeMatch[2] || "") !== skillName) {
+                continue
+            }
+            var stepLines = stepMap[activeMatch[1]]
+            if (!stepLines) {
+                continue
+            }
+            filtered.push(stepLines.join("\n"))
+        }
+
+        var preview = []
+        preview.push("selected_skill=" + skillName)
+        preview.push("filtered_trace_steps=" + filtered.length)
+        if (headers.length > 0) {
+            preview.push(headers.join("\n"))
+        }
+        if (filtered.length > 0) {
+            preview.push(filtered.join("\n\n"))
+        } else {
+            preview.push("no_trace_steps_for_skill=true")
+            preview.push(skillRecordPreview(text, skillRecord))
+        }
+        return preview.join("\n")
+    }
+
     function openSavedExport(path) {
         var next = (path || "").trim()
         if (!next.length) {
@@ -521,7 +580,7 @@ Item {
         selectedFileIndex = -1
         selectedFilePath = exportSavedPath(resultOutput.text)
         editorKind = "Text"
-        editorPlainText = skillRecordPreview(resultOutput.text, skillRecord)
+        editorPlainText = trajectoryPreviewForSkill(resultOutput.text, skillRecord)
     }
 
     function openSelectedSkillExport() {
@@ -535,7 +594,7 @@ Item {
             selectedFileIndex = -1
             selectedFilePath = ""
             editorKind = "Text"
-            editorPlainText = skillRecordPreview(resultOutput.text, skillRecord)
+            editorPlainText = trajectoryPreviewForSkill(resultOutput.text, skillRecord)
         }
     }
 
