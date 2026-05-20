@@ -15,6 +15,8 @@ Item {
     readonly property color panelHover: "#202020"
     readonly property color editorBg: "#0f1115"
     readonly property color selectionBg: "#173f31"
+    readonly property color userBubble: "#123d2f"
+    readonly property color agentBubble: "#171b22"
     readonly property int paneHandleWidth: 10
     readonly property int paneMinExplorerWidth: 220
     readonly property int paneMinEditorWidth: 420
@@ -28,6 +30,15 @@ Item {
     property int runSteps: 4
     property bool agentRunning: false
     property int runClickSeq: 0
+    property string lastPromptText: ""
+    property string lastResponseLabel: qsTr("Copilot")
+    property bool agentDetailsExpanded: false
+
+    function beginConversation(prompt, responseLabel, pendingText) {
+        lastPromptText = prompt
+        lastResponseLabel = responseLabel
+        resultOutput.text = pendingText
+    }
 
     ListModel {
         id: fileModel
@@ -43,7 +54,7 @@ Item {
             label: "Main.qml"
             path: "app/qml/Main.qml"
             kind: "QML"
-            content: "import QtQuick\nimport QtQuick.Window\n\nWindow {\n    id: root\n    visible: true\n    visibility: Window.FullScreen\n    width: 960\n    height: 640\n    minimumWidth: 760\n    minimumHeight: 520\n    title: qsTr(\"Neurx Explorer / Editor / Agent\")\n    color: \"#111111\"\n\n    AppShell {\n        anchors.fill: parent\n    }\n}"
+            content: "import QtQuick\nimport QtQuick.Window\n\nWindow {\n    id: root\n    visible: true\n    visibility: Window.FullScreen\n    width: 1440\n    height: 900\n    minimumWidth: 1200\n    minimumHeight: 760\n    title: qsTr(\"Neurx Explorer / Editor / Agent\")\n    color: \"#111111\"\n\n    AppShell {\n        anchors.fill: parent\n    }\n}"
         }
 
         ListElement {
@@ -725,7 +736,8 @@ Item {
                                     shell.runClickSeq += 1
                                     shell.agentRunning = true
                                     runtimeStatus.text = qsTr("routing #") + shell.runClickSeq
-                                    resultOutput.text = qsTr("Running agent...")
+                                    shell.beginConversation(prompt, qsTr("Copilot"), qsTr("Working on your request..."))
+                                    shell.agentDetailsExpanded = false
                                     try {
                                         Runtime.run_agent_auto_async(prompt, shell.selectedFilePath || "", shell.runSteps)
                                     } catch (e) {
@@ -759,6 +771,8 @@ Item {
                                     var prompt = promptEditor.text.trim()
                                     var filePath = shell.selectedFilePath || ""
                                     runtimeStatus.text = qsTr("suggesting")
+                                    shell.beginConversation(prompt, qsTr("Copilot Coding Agent"), qsTr("Preparing code suggestion..."))
+                                    shell.agentDetailsExpanded = false
                                     try {
                                         resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
                                         runtimeStatus.text = qsTr("suggestion_done")
@@ -821,7 +835,7 @@ Item {
                     }
 
                     Text {
-                        text: qsTr("Result")
+                        text: qsTr("Conversation")
                         color: shell.textPrimary
                         font.pixelSize: 16
                         font.bold: true
@@ -829,15 +843,119 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 110
+                        Layout.preferredHeight: 260
                         radius: 12
                         color: shell.editorBg
                         border.color: shell.border
 
-                        TextEdit {
-                            id: resultOutput
+                        ScrollView {
+                            id: conversationScroll
                             anchors.fill: parent
                             anchors.margins: 10
+                            clip: true
+
+                            Column {
+                                width: conversationScroll.availableWidth
+                                spacing: 12
+
+                                Item {
+                                    visible: shell.lastPromptText.length > 0
+                                    width: parent.width
+                                    height: visible ? userBubbleRect.height : 0
+
+                                    Rectangle {
+                                        id: userBubbleRect
+                                        width: Math.min(parent.width * 0.88, userBubbleColumn.implicitWidth + 28)
+                                        height: userBubbleColumn.implicitHeight + 20
+                                        x: parent.width - width
+                                        radius: 12
+                                        color: shell.userBubble
+                                        border.color: Qt.rgba(1, 1, 1, 0.06)
+
+                                        Column {
+                                            id: userBubbleColumn
+                                            anchors.fill: parent
+                                            anchors.margins: 10
+                                            spacing: 6
+
+                                            Text {
+                                                text: qsTr("You")
+                                                color: shell.textMuted
+                                                font.pixelSize: 11
+                                                font.bold: true
+                                            }
+
+                                            Text {
+                                                width: Math.max(80, userBubbleRect.width - 20)
+                                                text: shell.lastPromptText
+                                                wrapMode: Text.Wrap
+                                                color: shell.textPrimary
+                                                font.pixelSize: 13
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Item {
+                                    width: parent.width
+                                    height: agentBubbleRect.height
+
+                                    Rectangle {
+                                        id: agentBubbleRect
+                                        width: Math.min(parent.width * 0.94, agentBubbleColumn.implicitWidth + 28)
+                                        height: agentBubbleColumn.implicitHeight + 20
+                                        radius: 12
+                                        color: shell.agentBubble
+                                        border.color: shell.border
+
+                                        Column {
+                                            id: agentBubbleColumn
+                                            anchors.fill: parent
+                                            anchors.margins: 10
+                                            spacing: 6
+
+                                            Row {
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    width: 18
+                                                    height: 18
+                                                    radius: 9
+                                                    color: shell.accent
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: qsTr("C")
+                                                        color: shell.bg
+                                                        font.pixelSize: 10
+                                                        font.bold: true
+                                                    }
+                                                }
+
+                                                Text {
+                                                    text: shell.lastResponseLabel
+                                                    color: shell.textMuted
+                                                    font.pixelSize: 11
+                                                    font.bold: true
+                                                }
+                                            }
+
+                                            Text {
+                                                width: Math.max(120, agentBubbleRect.width - 20)
+                                                text: resultOutput.text
+                                                wrapMode: Text.Wrap
+                                                color: shell.textPrimary
+                                                font.pixelSize: 13
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        TextEdit {
+                            id: resultOutput
+                            visible: false
                             readOnly: true
                             wrapMode: TextEdit.Wrap
                             color: shell.textPrimary
@@ -848,15 +966,90 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 58
+                        Layout.preferredHeight: 40
                         radius: 12
                         color: shell.panelAlt
+                        border.color: shell.border
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: shell.agentDetailsExpanded = !shell.agentDetailsExpanded
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 8
+
+                            Text {
+                                text: qsTr("Details")
+                                color: shell.textPrimary
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: shell.agentDetailsExpanded
+                                    ? qsTr("Hide code paths and checkpoint info")
+                                    : qsTr("Show code paths and checkpoint info")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                            }
+
+                            Text {
+                                text: shell.agentDetailsExpanded ? "▾" : "▸"
+                                color: shell.textMuted
+                                font.pixelSize: 18
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: shell.agentDetailsExpanded ? 108 : 0
+                        visible: shell.agentDetailsExpanded
+                        radius: 12
+                        color: shell.editorBg
                         border.color: shell.border
 
                         ColumnLayout {
                             anchors.fill: parent
                             anchors.margins: 10
                             spacing: 2
+
+                            Text {
+                                text: qsTr("code_path=app/bridge/neurx_bridge.cpp")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: qsTr("backend_path=app/service/http_handler.sh")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: qsTr("gateway_path=app/service/gateway.sh")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: qsTr("entry_path=app/service/serve.s")
+                                color: shell.textMuted
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
 
                             Text {
                                 text: qsTr("Checkpoint file: ") + (parseResultField(resultOutput.text, "checkpoint_file") || qsTr("(none)"))
