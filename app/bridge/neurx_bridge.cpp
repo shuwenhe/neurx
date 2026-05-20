@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
+#include <QFile>
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -852,6 +853,19 @@ QString NeurxBridge::export_agent_skill_snapshot(const QString& prompt, int max_
 
 QString NeurxBridge::export_agent_trajectory(const QString& prompt, int max_steps) {
     return run_agent_state_export(prompt, max_steps, "trajectory");
+}
+
+QString NeurxBridge::read_text_file(const QString& path) const {
+    const QString next = path.trimmed();
+    if (next.isEmpty()) {
+        return QString();
+    }
+
+    QFile file(next);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString("read_text_file_failed: %1").arg(next);
+    }
+    return QString::fromUtf8(file.readAll());
 }
 
 void NeurxBridge::copy_to_clipboard(const QString& text) {
