@@ -8,7 +8,7 @@
 - `vision/`: classification and detection workflows
 - `diffusion/`: text-to-image, image-to-image, and video workflows
 - `multimodal/`: visual-language model workflows
-- `agent/`: tool use and memory workflows
+- `agent/`: tool use, memory, and skill evolution workflows
 - `benchmark/`: benchmark and evaluation workflows
 - `dataset/`: shared dataset manifests and preprocessing workflows
 

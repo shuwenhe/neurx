@@ -1,0 +1,11 @@
+# Sample config for agent/skills
+max_generations: 20
+promotion_threshold: 85.0
+retire_threshold: 20.0
+min_success_rate: 0.80
+max_avg_steps: 12
+allowed_tools:
+  - search
+  - retrieve
+  - infer
+output_dir: "artifacts/checkpoints/agent/skills"

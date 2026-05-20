@@ -85,7 +85,7 @@ export NEURX_LLM_BASE_URL=http://127.0.0.1:${PORT}
 export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
 export NEURX_LLM_CHAT_PATH=/neurx/api/chat
 
-# Rebuild Qt app on every launch so make logs picks up the latest local changes.
+# Rebuild Qt app on every launch so make app picks up the latest local changes.
 if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   echo "Configuring Qt application..."
   cmake -S "${APP_DIR}" -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release

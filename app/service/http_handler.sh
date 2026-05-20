@@ -134,7 +134,7 @@ handle_agent_suggest() {
   prompt="$(extract_json_string prompt "$REQUEST_BODY")"
   file_name="$(extract_json_string filePath "$REQUEST_BODY")"
   if [[ "$prompt" == *"serving a local checkpoint snapshot"* ]] || [[ "$prompt" == *"token_trace="* ]]; then
-    suggestion="这是 checkpoint 调试快照，不应直接作为回答正文。请保持回答简洁，把 checkpoint、token_trace、stage_signature 等内容写入 make logs 的 inference 日志。"
+    suggestion="这是 checkpoint 调试快照，不应直接作为回答正文。请保持回答简洁，把 checkpoint、token_trace、stage_signature 等内容写入 make app 的 inference 日志。"
   elif [[ -n "$file_name" ]]; then
     suggestion="已收到问题。建议先在 ${file_name} 中定位报错上下文并最小改动修复，再复测。"
   elif [[ -n "$prompt" ]]; then

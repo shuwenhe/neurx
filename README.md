@@ -52,6 +52,7 @@ The current top-level folders are kept for compatibility. The target layout is:
 
 - `workflows/` is the orchestration layer for active multi-stage pipelines.
 - LLM, vision, diffusion, multimodal, agent, benchmark, and dataset workflows live here.
+- Agent skills evolution belongs under `workflows/agent/skills/`.
 - Model definitions still belong in `model/`.
 - Shared reusable training helpers still belong in `train/`, `pretrain/`, and `posttrain/`.
 - Keep workflow code focused on config, pipeline, launch, and dataset wiring.
