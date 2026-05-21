@@ -25,6 +25,8 @@ public:
     Q_INVOKABLE QString export_agent_skill_snapshot(const QString& prompt, int max_steps);
     Q_INVOKABLE QString export_agent_trajectory(const QString& prompt, int max_steps);
     Q_INVOKABLE QString read_text_file(const QString& path) const;
+    Q_INVOKABLE QVariantList explorer_entries(const QString& path = QString()) const;
+    Q_INVOKABLE QString explorer_default_path() const;
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);

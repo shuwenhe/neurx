@@ -32,8 +32,12 @@ Item {
 
     readonly property int workspaceMargin: 20
 
-    property int selectedFileIndex: 1
+    property int selectedFileIndex: -1
     property string selectedFilePath: ""
+    property string explorerCurrentPath: ""
+    property string explorerRootLabel: ""
+    property bool explorerRootExpanded: true
+    property var explorerExpandedPaths: ({})
     property int explorerPaneWidth: 280
     property int agentPaneWidth: 540
     property int runSteps: 4
@@ -57,7 +61,26 @@ Item {
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
     property string copyNoticeText: ""
-    property int agentRunTimeoutMs: 20000
+    property int agentRunTimeoutMs: 120000
+
+    function explorerLeafName(path) {
+        var value = (path || "").trim()
+        if (!value.length) {
+            return qsTr("COMPUTER")
+        }
+        while (value.length > 1 && value.charAt(value.length - 1) === "/") {
+            value = value.slice(0, value.length - 1)
+        }
+        var slash = value.lastIndexOf("/")
+        if (slash < 0) {
+            return value.toUpperCase()
+        }
+        var leaf = value.slice(slash + 1)
+        if (!leaf.length) {
+            leaf = value
+        }
+        return leaf.toUpperCase()
+    }
 
     function escapeHtml(text) {
         return (text || "")
@@ -381,33 +404,138 @@ Item {
 
     ListModel {
         id: fileModel
+    }
 
-        ListElement {
-            label: "main.cpp"
-            path: "app/app/main.cpp"
-            kind: "C++"
-            content: "#include <QGuiApplication>\n#include <QQmlApplicationEngine>\n#include <QQmlContext>\n#include <QUrl>\n\n#include \"bridge/AgentListModel.h\"\n#include \"bridge/LogModel.h\"\n#include \"bridge/neurx_bridge.h\"\n\nint main(int argc, char* argv[]) {\n    QGuiApplication app(argc, argv);\n    app.setApplicationName(\"Neurx App Shell\");\n\n    NeurxBridge bridge;\n    AgentListModel agent_model;\n    LogModel log_model;\n\n    QObject::connect(&bridge, &NeurxBridge::runtime_status_changed,\n        &agent_model, &AgentListModel::set_primary_agent_status);\n    QObject::connect(&bridge, &NeurxBridge::log_message,\n        &log_model, &LogModel::append);\n\n    QQmlApplicationEngine engine;\n    engine.rootContext()->setContextProperty(\"Runtime\", &bridge);\n    engine.rootContext()->setContextProperty(\"AgentModel\", &agent_model);\n    engine.rootContext()->setContextProperty(\"LogModel\", &log_model);\n\n    engine.load(QUrl(QStringLiteral(\"qrc:/neurx/app/qml/Main.qml\")));\n\n    if (engine.rootObjects().isEmpty()) {\n        return -1;\n    }\n\n    return app.exec();\n}"
+    function explorerChildEntries(path, depth) {
+        var entries = Runtime.explorer_entries(path || "")
+        var dirs = []
+        var files = []
+        for (var i = 0; i < entries.length; ++i) {
+            var entry = entries[i]
+            var isExpanded = !!explorerExpandedPaths[entry.path]
+            var item = {
+                label: entry.label,
+                path: entry.path,
+                kind: entry.kind,
+                isDir: entry.isDir,
+                depth: depth,
+                expanded: entry.isDir ? isExpanded : false,
+                isRoot: false
+            }
+            if (entry.isDir) {
+                dirs.push(item)
+            } else {
+                files.push(item)
+            }
+        }
+        // Always render directories before files at every tree level.
+        return dirs.concat(files)
+    }
+
+    function insertExpandedChildren(index) {
+        if (index < 0 || index >= fileModel.count) {
+            return 0
+        }
+        var entry = fileModel.get(index)
+        if (!entry.isDir || !entry.expanded) {
+            return 0
+        }
+        var children = explorerChildEntries(entry.path, entry.depth + 1)
+        for (var i = 0; i < children.length; ++i) {
+            fileModel.insert(index + 1 + i, children[i])
+        }
+        var inserted = children.length
+        var cursor = index + 1
+        for (var j = 0; j < children.length; ++j) {
+            if (children[j].isDir && children[j].expanded) {
+                var nested = insertExpandedChildren(cursor)
+                inserted += nested
+                cursor += nested
+            }
+            cursor += 1
+        }
+        return inserted
+    }
+
+    function populateExplorerRoot() {
+        fileModel.clear()
+        if (!explorerRootExpanded) {
+            selectedFileIndex = -1
+            return
         }
 
-        ListElement {
-            label: "Main.qml"
-            path: "app/qml/Main.qml"
-            kind: "QML"
-            content: "import QtQuick\nimport QtQuick.Window\n\nWindow {\n    id: root\n    visible: true\n    visibility: Window.FullScreen\n    width: 1440\n    height: 900\n    minimumWidth: 1200\n    minimumHeight: 760\n    title: qsTr(\"Neurx Explorer / Editor / Agent\")\n    color: \"#111111\"\n\n    AppShell {\n        anchors.fill: parent\n    }\n}"
+        var children = explorerChildEntries(explorerCurrentPath, 0)
+        if (!explorerCurrentPath.length && children.length === 1
+                && children[0].isDir && children[0].path === "/") {
+            children[0].expanded = true
+            explorerExpandedPaths["/"] = true
         }
 
-        ListElement {
-            label: "neurx_bridge.cpp"
-            path: "app/bridge/neurx_bridge.cpp"
-            kind: "C++"
-            content: "#include \"neurx_bridge.h\"\n\n// Bridge runtime helpers live here."
+        for (var i = 0; i < children.length; ++i) {
+            fileModel.append(children[i])
         }
+        for (var j = 0; j < fileModel.count; ++j) {
+            if (fileModel.get(j).isDir && fileModel.get(j).expanded) {
+                insertExpandedChildren(j)
+            }
+        }
+        selectedFileIndex = fileModel.count > 0 ? 0 : -1
+        fileView.positionViewAtBeginning()
+    }
 
-        ListElement {
-            label: "AgentListModel.h"
-            path: "app/bridge/AgentListModel.h"
-            kind: "C++"
-            content: "#pragma once\n\n#include <QAbstractListModel>\n#include <QString>\n#include <QVector>\n\nclass AgentListModel : public QAbstractListModel {\n    Q_OBJECT\n\npublic:\n    enum Roles {\n        IdRole = Qt::UserRole + 1,\n        NameRole,\n        StatusRole,\n    };\n\n    explicit AgentListModel(QObject* parent = nullptr);\n\n    int rowCount(const QModelIndex& parent = QModelIndex()) const override;\n    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;\n    QHash<int, QByteArray> roleNames() const override;\n\npublic slots:\n    void set_primary_agent_status(const QString& status, const QString& task);\n\nprivate:\n    struct AgentEntry {\n        QString id;\n        QString name;\n        QString status;\n    };\n\n    QVector<AgentEntry> entries_;\n};"
+    function refreshExplorer(path) {
+        fileModel.clear()
+        explorerCurrentPath = path || ""
+        explorerRootLabel = shell.explorerLeafName(explorerCurrentPath)
+        explorerRootExpanded = true
+        populateExplorerRoot()
+    }
+
+    function collapseDirectory(index) {
+        if (index < 0 || index >= fileModel.count) {
+            return
+        }
+        var entry = fileModel.get(index)
+        var depth = entry.depth
+        var removeCount = 0
+        for (var i = index + 1; i < fileModel.count; ++i) {
+            if (fileModel.get(i).depth <= depth) {
+                break
+            }
+            removeCount += 1
+        }
+        if (removeCount > 0) {
+            fileModel.remove(index + 1, removeCount)
+        }
+        fileModel.setProperty(index, "expanded", false)
+        explorerExpandedPaths[entry.path] = false
+    }
+
+    function expandDirectory(index) {
+        if (index < 0 || index >= fileModel.count) {
+            return
+        }
+        var entry = fileModel.get(index)
+        var children = explorerChildEntries(entry.path, entry.depth + 1)
+        for (var i = 0; i < children.length; ++i) {
+            fileModel.insert(index + 1 + i, children[i])
+        }
+        fileModel.setProperty(index, "expanded", true)
+        explorerExpandedPaths[entry.path] = true
+    }
+
+    function toggleDirectory(index) {
+        if (index < 0 || index >= fileModel.count) {
+            return
+        }
+        var entry = fileModel.get(index)
+        if (!entry.isDir) {
+            return
+        }
+        if (entry.expanded) {
+            collapseDirectory(index)
+        } else {
+            expandDirectory(index)
         }
     }
 
@@ -416,11 +544,32 @@ Item {
             return
         }
 
-        selectedFileIndex = index
         var entry = fileModel.get(index)
+        selectedFileIndex = index
+        if (entry.isDir) {
+            toggleDirectory(index)
+            return
+        }
         selectedFilePath = entry.path
         editorKind = entry.kind
-        editorPlainText = entry.content
+        editorPlainText = Runtime.read_text_file(entry.path)
+    }
+
+    function goExplorerUp() {
+        if (!explorerCurrentPath || explorerCurrentPath === "/") {
+            refreshExplorer("")
+            return
+        }
+        var normalized = explorerCurrentPath
+        while (normalized.length > 1 && normalized.charAt(normalized.length - 1) === "/") {
+            normalized = normalized.slice(0, normalized.length - 1)
+        }
+        var slash = normalized.lastIndexOf("/")
+        if (slash <= 0) {
+            refreshExplorer("")
+            return
+        }
+        refreshExplorer(normalized.slice(0, slash))
     }
 
     function clamp(value, minValue, maxValue) {
@@ -970,8 +1119,14 @@ Item {
     }
 
     Component.onCompleted: {
-        selectFile(selectedFileIndex)
-        if (Runtime.checkpointModelChoices.length > 0) {
+        refreshExplorer(Runtime.explorer_default_path())
+        // Only apply the checkpoint model selection when using the s-backend.
+        // When the URL points to Ollama (port 11434), the model is already set
+        // from the environment (e.g. "neurx-qwen2.5vl-local:latest") and must
+        // not be overridden with a checkpoint file path.
+        var baseUrl = Runtime.localModelBaseUrl
+        var isOllama = baseUrl.indexOf(":11434") !== -1 || baseUrl.toLowerCase().indexOf("ollama") !== -1
+        if (Runtime.checkpointModelChoices.length > 0 && !isOllama) {
             Runtime.localModelName = Runtime.checkpointModelChoices[0].value
         }
         clampPaneWidths()
@@ -996,104 +1151,249 @@ Item {
             Rectangle {
                 Layout.preferredWidth: shell.explorerPaneWidth
                 Layout.fillHeight: true
-                radius: 18
-                color: shell.surface
-                border.color: shell.border
+                radius: 10
+                color: "#181818"
+                border.color: "#252526"
 
-                ColumnLayout {
+                Item {
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 12
 
-                    Text {
-                        text: qsTr("Explorer")
-                        color: shell.textPrimary
-                        font.pixelSize: 18
-                        font.bold: true
-                    }
+                    RowLayout {
+                        id: explorerHeader
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 38
+                        spacing: 10
 
-                    Text {
-                        text: qsTr("Project files")
-                        color: shell.textMuted
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: "transparent"
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 14
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: qsTr("EXPLORER")
+                                color: "#cccccc"
+                                font.pixelSize: 12
+                                font.letterSpacing: 1.2
+                                font.bold: true
+                            }
+                        }
+
+                        ToolButton {
+                            icon.source: "qrc:/neurx/app/icons/refresh.svg"
+                            display: AbstractButton.IconOnly
+                            icon.width: 14
+                            icon.height: 14
+                            width: 28
+                            height: 28
+                            onClicked: shell.refreshExplorer(shell.explorerCurrentPath)
+                        }
+
+                        ToolButton {
+                            icon.source: "qrc:/neurx/app/icons/disks.svg"
+                            display: AbstractButton.IconOnly
+                            icon.width: 14
+                            icon.height: 14
+                            width: 28
+                            height: 28
+                            onClicked: shell.refreshExplorer("")
+                        }
+
+                        ToolButton {
+                            icon.source: "qrc:/neurx/app/icons/up.svg"
+                            display: AbstractButton.IconOnly
+                            icon.width: 14
+                            icon.height: 14
+                            width: 28
+                            height: 28
+                            enabled: shell.explorerCurrentPath.length > 0
+                            onClicked: shell.goExplorerUp()
+                        }
+
+                        Item { Layout.preferredWidth: 8 }
                     }
 
                     Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 14
-                        color: shell.panelAlt
-                        border.color: shell.border
+                        id: explorerDivider
+                        anchors.top: explorerHeader.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 1
+                        color: "#252526"
+                    }
+
+                    Rectangle {
+                        id: explorerRootRow
+                        anchors.top: explorerDivider.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 32
+                        color: "transparent"
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                shell.explorerRootExpanded = !shell.explorerRootExpanded
+                                shell.populateExplorerRoot()
+                            }
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 6
+
+                            Text {
+                                visible: false
+                            }
+
+                            Image {
+                                source: shell.explorerRootExpanded
+                                    ? "qrc:/neurx/app/icons/chevron-down.svg"
+                                    : "qrc:/neurx/app/icons/chevron-right.svg"
+                                sourceSize.width: 12
+                                sourceSize.height: 12
+                                Layout.preferredWidth: 12
+                                Layout.preferredHeight: 12
+                            }
+
+                            Image {
+                                source: "qrc:/neurx/app/icons/folder.svg"
+                                sourceSize.width: 14
+                                sourceSize.height: 14
+                                Layout.preferredWidth: 14
+                                Layout.preferredHeight: 14
+                            }
+
+                            Text {
+                                text: shell.explorerRootLabel.length > 0 ? shell.explorerRootLabel : qsTr("FOLDERS")
+                                color: "#c5c5c5"
+                                font.pixelSize: 11
+                                font.bold: true
+                                font.letterSpacing: 0.8
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        id: explorerTreePanel
+                        anchors.top: explorerRootRow.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        color: "#181818"
 
                         ListView {
                             id: fileView
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 12
+                            anchors.bottomMargin: 6
                             model: fileModel
-                            spacing: 8
+                            spacing: 0
                             clip: true
                             currentIndex: shell.selectedFileIndex
+                            ScrollBar.vertical: ScrollBar {
+                                policy: ScrollBar.AlwaysOn
+                                width: 10
+                                contentItem: Rectangle {
+                                    implicitWidth: 10
+                                    radius: 5
+                                    color: "#4b4b4b"
+                                }
+                                background: Rectangle {
+                                    radius: 5
+                                    color: "#232323"
+                                }
+                            }
 
                             delegate: Rectangle {
                                 required property int index
                                 required property string label
                                 required property string path
                                 required property string kind
+                                required property bool isDir
+                                required property int depth
+                                required property bool expanded
 
                                 width: ListView.view.width
-                                height: 72
-                                radius: 12
-                                color: ListView.isCurrentItem ? shell.selectionBg : shell.editorBg
-                                border.color: ListView.isCurrentItem ? shell.accent : shell.border
+                                height: 24
+                                radius: 4
+                                color: mouseArea.containsMouse
+                                    ? "#2a2d2e"
+                                    : ListView.isCurrentItem
+                                        ? "#37373d"
+                                        : "transparent"
+                                border.width: 0
 
                                 MouseArea {
+                                    id: mouseArea
                                     anchors.fill: parent
+                                    hoverEnabled: true
                                     onClicked: shell.selectFile(index)
                                 }
 
-                                ColumnLayout {
+                                RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
-                                    spacing: 4
+                                    anchors.leftMargin: 8 + (depth * 14)
+                                    anchors.rightMargin: 8
+                                    spacing: 6
 
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 8
+                                    Text {
+                                        Layout.preferredWidth: 10
+                                        visible: false
+                                    }
 
-                                        Text {
-                                            text: label
-                                            color: shell.textPrimary
-                                            font.bold: true
-                                            Layout.fillWidth: true
-                                        }
+                                    Image {
+                                        source: isDir
+                                            ? (expanded
+                                                ? "qrc:/neurx/app/icons/chevron-down.svg"
+                                                : "qrc:/neurx/app/icons/chevron-right.svg")
+                                            : ""
+                                        visible: isDir
+                                        sourceSize.width: 12
+                                        sourceSize.height: 12
+                                        Layout.preferredWidth: 12
+                                        Layout.preferredHeight: 12
+                                    }
 
-                                        Rectangle {
-                                            Layout.preferredWidth: 44
-                                            Layout.preferredHeight: 20
-                                            radius: 8
-                                            color: shell.panelAlt
-                                            border.color: shell.border
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: kind
-                                                color: shell.textMuted
-                                                font.pixelSize: 11
-                                            }
-                                        }
+                                    Image {
+                                        source: isDir
+                                            ? "qrc:/neurx/app/icons/folder.svg"
+                                            : "qrc:/neurx/app/icons/file.svg"
+                                        sourceSize.width: 14
+                                        sourceSize.height: 14
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        antialiasing: true
+                                        Layout.preferredWidth: 14
+                                        Layout.preferredHeight: 14
                                     }
 
                                     Text {
-                                        text: path
-                                        color: shell.textMuted
-                                        font.pixelSize: 12
-                                        elide: Text.ElideRight
+                                        text: label
+                                        color: ListView.isCurrentItem ? "#ffffff" : "#cccccc"
+                                        font.pixelSize: 13
+                                        font.bold: false
                                         Layout.fillWidth: true
+                                        elide: Text.ElideMiddle
+                                    }
+
+                                    Text {
+                                        text: kind
+                                        color: "#8c8c8c"
+                                        font.pixelSize: 10
+                                        visible: !isDir
                                     }
                                 }
                             }
                         }
                     }
-
                 }
             }
 
@@ -1220,6 +1520,12 @@ Item {
                             contentHeight: editorText.paintedHeight + 24
                             clip: true
                             boundsBehavior: Flickable.StopAtBounds
+                            ScrollBar.vertical: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
+                            ScrollBar.horizontal: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
 
                             TextEdit {
                                 id: editorText

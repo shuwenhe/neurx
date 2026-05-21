@@ -1,4 +1,6 @@
-.PHONY: help install neurx app clean check-bash
+.PHONY: help install neurx app linux windows macos ios android harmony clean check-bash \
+	app-linux app-windows app-macos app-ios app-android app-harmony \
+	linux windows macos ios android harmony
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -14,7 +16,12 @@ else
 BASH ?= $(WINDOWS_GIT_BASH)
 endif
 else
+UNAME_S := $(shell uname -s 2>/dev/null)
+ifeq ($(UNAME_S),Darwin)
+PLATFORM := macos
+else
 PLATFORM := linux
+endif
 BASH ?= bash
 endif
 
@@ -25,7 +32,13 @@ CURDIR_UNIX := $(subst \,/,$(CURDIR))
 
 help:
 	@echo "  neurx             Compile the NeurX deep learning framework to IR"
-	@echo "  app               Compile and run the local Qt app"
+	@echo "  app               Compile and run the local Qt app for the current host ($(PLATFORM))"
+	@echo "  linux             Compile and run the Linux app"
+	@echo "  windows           Compile and run the Windows app"
+	@echo "  macos             Compile and run the macOS app"
+	@echo "  ios               Compile the iOS app (placeholder target)"
+	@echo "  android           Compile the Android app (placeholder target)"
+	@echo "  harmony           Compile the Harmony app (placeholder target)"
 	@echo "  install           Alias of neurx"
 	@echo "  clean             Remove generated artifacts and caches"
 	@echo "  platform          $(PLATFORM)"
@@ -46,6 +59,15 @@ else
 endif
 
 install: neurx
+
+app: app-$(PLATFORM)
+
+linux: app-linux
+windows: app-windows
+macos: app-macos
+ios: app-ios
+android: app-android
+harmony: app-harmony
 
 ifeq ($(PLATFORM),windows)
 
@@ -97,10 +119,10 @@ neurx: check-bash
 	} > \"$$manifest_path\" && \
 	echo 'runtime manifest: build/ir/manifest.json'"
 
-app: check-bash
+app-linux app-windows app-macos app-ios app-android app-harmony: check-bash
 	@if not exist build\logs mkdir build\logs
 	@echo Streaming NeurX runtime logs to build/logs/neurx.log
-	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && bash app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log"
+	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && NEURX_APP_TARGET_PLATFORM='$(@:app-%=%)' bash app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log"
 
 clean:
 	@if exist build rmdir /s /q build
@@ -157,10 +179,10 @@ neurx: check-bash
 	} > "$$manifest_path"
 	@echo "runtime manifest: build/ir/manifest.json"
 
-app: check-bash
+app-linux app-windows app-macos app-ios app-android app-harmony: check-bash
 	@mkdir -p build/logs
 	@echo "Streaming NeurX runtime logs to build/logs/neurx.log"
-	@$(BASH) app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log
+	@NEURX_APP_TARGET_PLATFORM="$(@:app-%=%)" $(BASH) app/run_with_llm.sh 2>&1 | tee build/logs/neurx.log
 
 clean:
 	@rm -rf build runtime/__pycache__ test/__pycache__ checkpoint.pkl
