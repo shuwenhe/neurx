@@ -367,6 +367,48 @@ EOF
   rm -rf "${tmp_dir}"
 }
 
+ensure_optional_local_ollama_model() {
+  local ollama_bin="$1"
+  local model_name="$2"
+  local model_dir="$3"
+
+  if [ -z "${model_name}" ] || [ -z "${model_dir}" ] || [ ! -d "${model_dir}" ]; then
+    return 0
+  fi
+
+  ensure_local_ollama_model "${ollama_bin}" "${model_name}" "${model_dir}"
+}
+
+ensure_repo_ollama_server() {
+  local ollama_bin="$1"
+  local ollama_url="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
+  local ollama_host="${ollama_url#http://}"
+  ollama_host="${ollama_host#https://}"
+
+  if curl -sf --connect-timeout 1 "${ollama_url}/api/tags" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  mkdir -p "${ROOT_DIR}/build/logs"
+  local log_file="${ROOT_DIR}/build/logs/ollama.log"
+  echo "Starting dedicated Ollama server..."
+  echo "  URL: ${ollama_url}"
+  echo "  Store: ${OLLAMA_MODELS}"
+  OLLAMA_HOST="${ollama_host}" OLLAMA_MODELS="${OLLAMA_MODELS}" "${ollama_bin}" serve >"${log_file}" 2>&1 &
+
+  local attempt
+  for attempt in $(seq 1 30); do
+    if curl -sf --connect-timeout 1 "${ollama_url}/api/tags" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "Error: dedicated Ollama server did not become ready at ${ollama_url}"
+  echo "Hint: inspect ${log_file}"
+  exit 1
+}
+
 ensure_ollama_and_model() {
   local model="$1"
   local ollama_bin=""
@@ -384,10 +426,15 @@ ensure_ollama_and_model() {
     fi
   fi
 
+  ensure_repo_ollama_server "${ollama_bin}"
+
   if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; then
-    local local_model_name="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5vl-local:latest}"
+    local local_model_name="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
     ensure_local_ollama_model "${ollama_bin}" "${local_model_name}" "${NEURX_OLLAMA_MODEL_DIR}"
-    export NEURX_OLLAMA_MODEL="${local_model_name}"
+    ensure_optional_local_ollama_model \
+      "${ollama_bin}" \
+      "${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-${NEURX_OLLAMA_FALLBACK_MODEL:-}}" \
+      "${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR:-${NEURX_OLLAMA_FALLBACK_MODEL_DIR:-}}"
   elif ! ollama_model_exists "${ollama_bin}" "${model}"; then
     echo "Pulling Ollama model ${model}..."
     "${ollama_bin}" pull "${model}"
@@ -542,26 +589,41 @@ export NEURX_CODE_AGENT_MODEL="${NEURX_CODE_AGENT_MODEL:-${NEURX_LLM_MODEL}}"
 
 # Ollama inference endpoint for arbitrary code generation (gateway.sh fallback)
 # Override with:
-#   NEURX_OLLAMA_URL=http://host:11434
+#   NEURX_OLLAMA_URL=http://host:11435
 #   NEURX_OLLAMA_MODEL=qwen2.5:0.5b
 #   NEURX_OLLAMA_MODEL_DIR=/path/to/local/safetensors/model
-export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://localhost:11434}"
-export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-qwen2.5:0.5b}"
-DEFAULT_OLLAMA_MODEL_DIR="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-VL-7B"
-if [ -z "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${DEFAULT_OLLAMA_MODEL_DIR}" ]; then
-  export NEURX_OLLAMA_MODEL_DIR="${DEFAULT_OLLAMA_MODEL_DIR}"
+export NEURX_OLLAMA_MODELS="${NEURX_OLLAMA_MODELS:-${ROOT_DIR}/artifacts/checkpoints}"
+mkdir -p "${NEURX_OLLAMA_MODELS}"
+export OLLAMA_MODELS="${NEURX_OLLAMA_MODELS}"
+export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
+export NEURX_OLLAMA_LOCAL_MODEL_NAME="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
+export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL="${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-neurx-qwen2.5-vl-7b-local:latest}"
+# Prefer the Instruct model by default; keep VL-7B as a fallback if present.
+DEFAULT_OLLAMA_MODEL_DIR_PRIMARY="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-0.5B-Instruct"
+DEFAULT_OLLAMA_MODEL_DIR_FALLBACK="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-VL-7B"
+if [ -z "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${DEFAULT_OLLAMA_MODEL_DIR_PRIMARY}" ]; then
+  export NEURX_OLLAMA_MODEL_DIR="${DEFAULT_OLLAMA_MODEL_DIR_PRIMARY}"
+fi
+if [ -z "${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR:-}" ] && [ -d "${DEFAULT_OLLAMA_MODEL_DIR_FALLBACK}" ]; then
+  export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR="${DEFAULT_OLLAMA_MODEL_DIR_FALLBACK}"
+fi
+if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; then
+  export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-${NEURX_OLLAMA_LOCAL_MODEL_NAME}}"
+else
+  export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-qwen2.5:0.5b}"
 fi
 ensure_ollama_and_model "${NEURX_OLLAMA_MODEL}"
 
 # If a local Ollama model directory is configured, route the main LLM chat
-# directly to Ollama's OpenAI-compatible API using the imported local model.
+# directly to Ollama. Keep the smaller configured Ollama model as the default;
+# the imported local directory model remains available for explicit selection.
 # The code agent and NeurX-specific API paths (/neurx/api/*) still go through
 # the s-backend at port ${PORT} — those endpoints don't exist on Ollama.
 if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; then
   export NEURX_BACKEND_MODEL="${NEURX_OLLAMA_MODEL}"
   export NEURX_LLM_MODEL="${NEURX_OLLAMA_MODEL}"
   export NEURX_LLM_BASE_URL="${NEURX_OLLAMA_URL}"
-  export NEURX_LLM_CHAT_PATH="/v1/chat/completions"
+  export NEURX_LLM_CHAT_PATH="/api/chat"
   # Code agent stays on s-backend so /neurx/api/chat and /neurx/api/agent/* resolve
   export NEURX_CODE_AGENT_BASE_URL="http://127.0.0.1:${PORT}"
   export NEURX_CODE_AGENT_CHAT_PATH="/neurx/api/chat"
@@ -680,6 +742,9 @@ fi
 echo "Launching Qt application..."
 echo "  LLM Backend: ${NEURX_LLM_BASE_URL}${NEURX_LLM_CHAT_PATH}"
 echo "  Model: ${NEURX_LLM_MODEL}"
+if [ -n "${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR:-}" ]; then
+  echo "  Customer-service fallback model: ${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL}"
+fi
 echo "  Code agent model loop: ${NEURX_CODE_AGENT_ENABLE_MODEL_LOOP}"
 echo "  Code agent backend: ${NEURX_CODE_AGENT_BASE_URL}${NEURX_CODE_AGENT_CHAT_PATH}"
 echo "  Code agent model: ${NEURX_CODE_AGENT_MODEL}"
@@ -688,6 +753,8 @@ echo "  Checkpoint file: ${NEURX_BACKEND_CHECKPOINT_FILE}"
 if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ]; then
   echo "  Ollama model dir: ${NEURX_OLLAMA_MODEL_DIR}"
 fi
+echo "  Ollama store: ${NEURX_OLLAMA_MODELS}"
+echo "  Ollama URL: ${NEURX_OLLAMA_URL}"
 echo "  Ollama model: ${NEURX_OLLAMA_MODEL}"
 echo "  Build dir: ${BUILD_DIR}"
 echo "  CMake: ${CMAKE_BIN}"
