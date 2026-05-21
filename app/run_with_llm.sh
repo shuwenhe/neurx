@@ -5,18 +5,81 @@ set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${APP_DIR}/.." && pwd)"
-PLATFORM_TAG="$(uname -s | tr '[:upper:]' '[:lower:]')"
-BUILD_DIR="${NEURX_APP_BUILD_DIR:-${APP_DIR}/build/make-${PLATFORM_TAG}}"
+HOST_UNAME="$(uname -s)"
+PLATFORM_TAG="$(printf '%s' "${HOST_UNAME}" | tr '[:upper:]' '[:lower:]')"
 
 # Detect WSL (Linux kernel running inside Windows)
 IS_WSL=0
 if [[ "${PLATFORM_TAG}" == linux ]] && grep -qi microsoft /proc/version 2>/dev/null; then
   IS_WSL=1
 fi
-APP_OUTPUT_SUBDIR="linux-x86_64"
-if [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* || "${IS_WSL}" == "1" ]]; then
-  APP_OUTPUT_SUBDIR="windows-x86_64"
+
+normalize_target_platform() {
+  local raw="${1:-}"
+  case "${raw}" in
+    linux|windows|macos|ios|android|harmony)
+      printf '%s' "${raw}"
+      ;;
+    win|mingw|msys|cygwin)
+      printf '%s' "windows"
+      ;;
+    mac|darwin|osx)
+      printf '%s' "macos"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+detect_host_platform() {
+  if [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* ]]; then
+    printf '%s' "windows"
+  elif [[ "${HOST_UNAME}" == "Darwin" ]]; then
+    printf '%s' "macos"
+  else
+    printf '%s' "linux"
+  fi
+}
+
+HOST_PLATFORM="$(detect_host_platform)"
+TARGET_PLATFORM="$(normalize_target_platform "${NEURX_APP_TARGET_PLATFORM:-${HOST_PLATFORM}}" || true)"
+if [ -z "${TARGET_PLATFORM}" ]; then
+  echo "Error: unsupported NEURX_APP_TARGET_PLATFORM=${NEURX_APP_TARGET_PLATFORM:-}"
+  echo "Hint: use one of linux/windows/macos/ios/android/harmony."
+  exit 1
 fi
+
+case "${TARGET_PLATFORM}" in
+  linux)
+    if [[ "$(uname -m)" == aarch64 || "$(uname -m)" == arm64 ]]; then
+      APP_OUTPUT_SUBDIR="linux-arm64"
+    else
+      APP_OUTPUT_SUBDIR="linux-x86_64"
+    fi
+    ;;
+  windows)
+    APP_OUTPUT_SUBDIR="windows-x86_64"
+    ;;
+  macos)
+    if [[ "$(uname -m)" == arm64 ]]; then
+      APP_OUTPUT_SUBDIR="macos-arm64"
+    else
+      APP_OUTPUT_SUBDIR="macos-x86_64"
+    fi
+    ;;
+  ios)
+    exec "${APP_DIR}/scripts/run_ios.sh" "$@"
+    ;;
+  android)
+    exec "${APP_DIR}/scripts/run_android.sh" "$@"
+    ;;
+  harmony)
+    exec "${APP_DIR}/scripts/run_harmony.sh" "$@"
+    ;;
+esac
+
+BUILD_DIR="${NEURX_APP_BUILD_DIR:-${APP_DIR}/build/make-${TARGET_PLATFORM}}"
 APP_BINARY_BASE="${ROOT_DIR}/bin/${APP_OUTPUT_SUBDIR}/neurx_app"
 
 to_native_path() {
@@ -63,9 +126,53 @@ resolve_qt6_dir() {
     return 0
   fi
 
-  local candidates=(
-    "/c/Users/Public/qt/6.11.0/mingw_64/lib/cmake/Qt6"
-  )
+  local candidates=()
+  case "${TARGET_PLATFORM}" in
+    linux)
+      candidates=(
+        "/usr/lib/x86_64-linux-gnu/cmake/Qt6"
+        "/usr/lib/aarch64-linux-gnu/cmake/Qt6"
+        "/usr/lib64/cmake/Qt6"
+        "/usr/lib/cmake/Qt6"
+        "/usr/local/lib/cmake/Qt6"
+        # Qt official installer (x86_64)
+        "${HOME}/Qt/6.11.0/gcc_64/lib/cmake/Qt6"
+        "${HOME}/Qt/6.10.0/gcc_64/lib/cmake/Qt6"
+        "${HOME}/Qt/6.9.0/gcc_64/lib/cmake/Qt6"
+        "${HOME}/Qt/6.8.0/gcc_64/lib/cmake/Qt6"
+      )
+      if command -v qtpaths6 >/dev/null 2>&1; then
+        local prefix=""
+        prefix="$(qtpaths6 --install-prefix 2>/dev/null || true)"
+        if [ -n "${prefix}" ]; then
+          candidates+=("${prefix}/lib/cmake/Qt6")
+        fi
+      fi
+      ;;
+    macos)
+      candidates=(
+        "/opt/homebrew/opt/qt/lib/cmake/Qt6"
+        "/usr/local/opt/qt/lib/cmake/Qt6"
+        # Qt official installer (Apple Silicon)
+        "${HOME}/Qt/6.11.0/macos/lib/cmake/Qt6"
+        "${HOME}/Qt/6.10.0/macos/lib/cmake/Qt6"
+        "${HOME}/Qt/6.9.0/macos/lib/cmake/Qt6"
+        "${HOME}/Qt/6.8.0/macos/lib/cmake/Qt6"
+      )
+      if command -v brew >/dev/null 2>&1; then
+        local brew_prefix=""
+        brew_prefix="$(brew --prefix qt 2>/dev/null || true)"
+        if [ -n "${brew_prefix}" ]; then
+          candidates=("${brew_prefix}/lib/cmake/Qt6" "${candidates[@]}")
+        fi
+      fi
+      ;;
+    windows)
+      candidates=(
+        "/c/Users/Public/qt/6.11.0/mingw_64/lib/cmake/Qt6"
+      )
+      ;;
+  esac
 
   local candidate
   for candidate in "${candidates[@]}"; do
@@ -266,7 +373,7 @@ ensure_ollama_and_model() {
 
   ollama_bin="$(resolve_ollama || true)"
   if [ -z "${ollama_bin}" ] || ! "${ollama_bin}" list >/dev/null 2>&1; then
-    if [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* || "${IS_WSL}" == "1" ]]; then
+    if [[ "${TARGET_PLATFORM}" == "windows" ]] && [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* || "${IS_WSL}" == "1" ]]; then
       echo "Ollama not found or not ready; installing and preparing ${model}..."
       powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(to_native_path "${APP_DIR}/scripts/setup_ollama.ps1")" -Model "${model}"
       ollama_bin="$(resolve_ollama || true)"
@@ -302,7 +409,7 @@ stop_running_app_before_build() {
     taskkill_bin="/c/Windows/System32/taskkill.exe"
   fi
 
-  if [ -n "${taskkill_bin}" ]; then
+  if [ "${TARGET_PLATFORM}" = "windows" ] && [ -n "${taskkill_bin}" ]; then
     "${taskkill_bin}" /F /IM "${app_name}" /T >/dev/null 2>&1 || true
 
     local tasklist_bin=""
@@ -368,6 +475,8 @@ fi
 
 echo "Starting NeurX app with local LLM backend..."
 echo "  Root: ${ROOT_DIR}"
+echo "  Host platform: ${HOST_PLATFORM}"
+echo "  Target platform: ${TARGET_PLATFORM}"
 echo "  Backend port: ${PORT}"
 
 BACKEND_PID=""
@@ -477,7 +586,17 @@ QT_BIN_DIR="$(resolve_qt_bin_dir || true)"
 
 CMAKE_CONFIGURE_ARGS=()
 EXPECTED_GENERATOR=""
-if [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* ]]; then
+CMAKE_CONFIGURE_ARGS+=(
+  -DNEURX_APP_TARGET_PLATFORM="${TARGET_PLATFORM}"
+  -DQt6_DIR="$(to_native_path "${QT6_DIR_RESOLVED}")"
+  -DCMAKE_PREFIX_PATH="$(to_native_path "$(cd "${QT6_DIR_RESOLVED}/../../.." && pwd)")"
+)
+
+if [[ "${TARGET_PLATFORM}" == "windows" ]]; then
+  if [[ ! "${PLATFORM_TAG}" == mingw* && ! "${PLATFORM_TAG}" == msys* && ! "${PLATFORM_TAG}" == cygwin* && ! "${IS_WSL}" == "1" ]]; then
+    echo "Error: windows app target requires Windows, MSYS2, Git Bash, or WSL."
+    exit 1
+  fi
   MINGW_GPP="$(resolve_mingw_gpp || true)"
   MINGW_MAKE="$(resolve_mingw_make || true)"
   if [ -z "${MINGW_GPP}" ] || [ -z "${MINGW_MAKE}" ]; then
@@ -489,8 +608,6 @@ if [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_T
   EXPECTED_GENERATOR="MinGW Makefiles"
   CMAKE_CONFIGURE_ARGS+=(
     -G "${EXPECTED_GENERATOR}"
-    -DQt6_DIR="$(to_native_path "${QT6_DIR_RESOLVED}")"
-    -DCMAKE_PREFIX_PATH="$(to_native_path "$(cd "${QT6_DIR_RESOLVED}/../../.." && pwd)")"
     -DCMAKE_CXX_COMPILER="$(to_native_path "${MINGW_GPP}")"
     -DCMAKE_MAKE_PROGRAM="$(to_native_path "${MINGW_MAKE}")"
   )
@@ -533,19 +650,23 @@ if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   "${CMAKE_BIN}" -S "$(to_native_path "${APP_DIR}")" -B "$(to_native_path "${BUILD_DIR}")" -DCMAKE_BUILD_TYPE=Release "${CMAKE_CONFIGURE_ARGS[@]}"
 fi
 echo "Building Qt application..."
-"${CMAKE_BIN}" --build "$(to_native_path "${BUILD_DIR}")" --clean-first -j$(nproc)
+BUILD_JOBS="$(command -v nproc >/dev/null 2>&1 && nproc || getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || printf '4')"
+"${CMAKE_BIN}" --build "$(to_native_path "${BUILD_DIR}")" --clean-first -j"${BUILD_JOBS}"
 
 APP_BINARY="${APP_BINARY_BASE}"
 if [ ! -x "${APP_BINARY}" ] && [ -x "${APP_BINARY_BASE}.exe" ]; then
   APP_BINARY="${APP_BINARY_BASE}.exe"
 fi
+if [ ! -x "${APP_BINARY}" ] && [ -x "${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app" ]; then
+  APP_BINARY="${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app"
+fi
 
 if [ ! -x "${APP_BINARY}" ]; then
-  echo "Error: Qt application binary not found: ${APP_BINARY_BASE}(.exe)"
+  echo "Error: Qt application binary not found: ${APP_BINARY_BASE}"
   exit 1
 fi
 
-if [[ "${APP_BINARY}" == *.exe ]] && [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* ]]; then
+if [[ "${APP_BINARY}" == *.exe ]] && [[ "${TARGET_PLATFORM}" == "windows" ]] && [[ "${PLATFORM_TAG}" == mingw* || "${PLATFORM_TAG}" == msys* || "${PLATFORM_TAG}" == cygwin* ]]; then
   WINDEPLOYQT_BIN="$(resolve_windeployqt || true)"
   if [ -n "${WINDEPLOYQT_BIN}" ]; then
     echo "Deploying Qt runtime beside the app..."
