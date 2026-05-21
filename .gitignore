@@ -53,6 +53,7 @@ logs/
 # Trained model artifacts
 artifacts/checkpoints/*.neurx
 artifacts/checkpoints/**/*.neurx
+artifacts/checkpoints/Qwen2.5-0.5B-Instruct/
 artifacts/checkpoints/Qwen2.5-VL-7B/
 
 # Auto push
