@@ -87,7 +87,6 @@ if [ -n "${prompt:-}" ]; then
   fi
 fi
 
-# ── NeurX checkpoint inference (first-stage classifier + metadata) ────────────
 # Find the most recent .neurx checkpoint if NEURX_BACKEND_CHECKPOINT_FILE is set
 # or if artifacts/checkpoints/ directory exists.
 neurx_ckpt_file="${NEURX_BACKEND_CHECKPOINT_FILE:-}"
