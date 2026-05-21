@@ -7,10 +7,41 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-if(WIN32)
+set(NEURX_APP_TARGET_PLATFORM "${NEURX_APP_TARGET_PLATFORM}" CACHE STRING "NeurX app target platform")
+if(NOT NEURX_APP_TARGET_PLATFORM)
+    if(WIN32)
+        set(NEURX_APP_TARGET_PLATFORM "windows")
+    elseif(APPLE)
+        set(NEURX_APP_TARGET_PLATFORM "macos")
+    else()
+        set(NEURX_APP_TARGET_PLATFORM "linux")
+    endif()
+endif()
+
+string(TOLOWER "${NEURX_APP_TARGET_PLATFORM}" NEURX_APP_TARGET_PLATFORM)
+
+if(NEURX_APP_TARGET_PLATFORM STREQUAL "windows")
     set(NEURX_APP_OUTPUT_SUBDIR "windows-x86_64")
+elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "linux")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+        set(NEURX_APP_OUTPUT_SUBDIR "linux-arm64")
+    else()
+        set(NEURX_APP_OUTPUT_SUBDIR "linux-x86_64")
+    endif()
+elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "macos")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+        set(NEURX_APP_OUTPUT_SUBDIR "macos-arm64")
+    else()
+        set(NEURX_APP_OUTPUT_SUBDIR "macos-x86_64")
+    endif()
+elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "ios")
+    message(FATAL_ERROR "NeurX app iOS target is not implemented yet.")
+elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "android")
+    message(FATAL_ERROR "NeurX app Android target is not implemented yet.")
+elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "harmony")
+    message(FATAL_ERROR "NeurX app Harmony target is not implemented yet.")
 else()
-    set(NEURX_APP_OUTPUT_SUBDIR "linux-x86_64")
+    message(FATAL_ERROR "Unsupported NEURX_APP_TARGET_PLATFORM=${NEURX_APP_TARGET_PLATFORM}")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../bin/${NEURX_APP_OUTPUT_SUBDIR}")
@@ -37,6 +68,13 @@ qt_add_qml_module(neurx_app
     RESOURCES
         icons/copy.svg
         icons/check.svg
+        icons/folder.svg
+        icons/file.svg
+        icons/chevron-right.svg
+        icons/chevron-down.svg
+        icons/refresh.svg
+        icons/disks.svg
+        icons/up.svg
     QML_FILES
         qml/Main.qml
         qml/AppShell.qml
