@@ -1811,10 +1811,31 @@ Item {
                                     id: mouseArea
                                     anchors.fill: parent
                                     hoverEnabled: true
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                                     onClicked: shell.selectFile(index, true)
+                                    onPressed: function(mouse) {
+                                        if (mouse.button === Qt.RightButton) {
+                                            shell.selectFile(index, true)
+                                            fileContextMenu.popup()
+                                        }
+                                    }
                                     onDoubleClicked: {
                                         if (!isDir) {
                                             shell.selectFile(index, false)
+                                        }
+                                    }
+                                }
+
+                                Menu {
+                                    id: fileContextMenu
+
+                                    MenuItem {
+                                        text: qsTr("Copy Path")
+                                        enabled: path.length > 0
+                                        onTriggered: {
+                                            Runtime.copy_to_clipboard(path)
+                                            shell.copyNoticeText = qsTr("Path copied")
+                                            copyNoticeTimer.restart()
                                         }
                                     }
                                 }
