@@ -42,6 +42,9 @@ constexpr const char kDefaultRemoteAppModel[] = "Qwen/Qwen2.5-7B-Instruct";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
+constexpr int kCodeAgentHistoryLimit = 8;
+constexpr int kCodeAgentFileCacheLimit = 6;
+constexpr int kCodeAgentLoopLimit = 6;
 
 QString docx_plain_text_from_xml(const QByteArray& xml_bytes) {
     QXmlStreamReader xml(xml_bytes);
@@ -92,6 +95,154 @@ QString docx_plain_text_from_xml(const QByteArray& xml_bytes) {
         normalized.replace(QStringLiteral("\n\n\n"), QStringLiteral("\n\n"));
     }
     return normalized.trimmed();
+}
+
+QString clip_text(QString text, int max_chars) {
+    if (text.size() <= max_chars) {
+        return text;
+    }
+    text.truncate(max_chars);
+    return text + QStringLiteral("\n...[truncated]");
+}
+
+QString normalize_newlines(QString text) {
+    text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    text.replace(QChar('\r'), QChar('\n'));
+    return text;
+}
+
+QString repo_relative_path(const QString& repo_root, const QString& absolute_path) {
+    const QDir root_dir(repo_root);
+    return QDir::cleanPath(root_dir.relativeFilePath(absolute_path));
+}
+
+QString resolve_workspace_path(const QString& repo_root, const QString& raw_path, bool* ok = nullptr) {
+    if (ok) {
+        *ok = false;
+    }
+    const QString trimmed_root = QDir::cleanPath(repo_root.trimmed());
+    const QString trimmed_path = raw_path.trimmed();
+    if (trimmed_root.isEmpty() || trimmed_path.isEmpty()) {
+        return QString();
+    }
+
+    QString absolute_path;
+    const QFileInfo input_info(trimmed_path);
+    if (input_info.isAbsolute()) {
+        absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
+    } else {
+        absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
+        absolute_path = QDir::cleanPath(absolute_path);
+    }
+
+    const QString root_prefix = trimmed_root.endsWith('/')
+        ? trimmed_root
+        : trimmed_root + QLatin1Char('/');
+    const bool in_root = absolute_path == trimmed_root
+        || absolute_path.startsWith(root_prefix, Qt::CaseInsensitive);
+    if (!in_root) {
+        return QString();
+    }
+
+    if (ok) {
+        *ok = true;
+    }
+    return absolute_path;
+}
+
+QString resolve_path_with_allowed_roots(const QString& repo_root,
+                                        const QString& raw_path,
+                                        const QStringList& allowed_external_roots,
+                                        bool* ok = nullptr) {
+    if (ok) {
+        *ok = false;
+    }
+    const QString trimmed_root = QDir::cleanPath(repo_root.trimmed());
+    const QString trimmed_path = raw_path.trimmed();
+    if (trimmed_root.isEmpty() || trimmed_path.isEmpty()) {
+        return QString();
+    }
+
+    QString absolute_path;
+    const QFileInfo input_info(trimmed_path);
+    if (input_info.isAbsolute()) {
+        absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
+    } else {
+        absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
+        absolute_path = QDir::cleanPath(absolute_path);
+    }
+
+    const auto path_is_within_root = [](const QString& path, const QString& root) {
+        const QString clean_root = QDir::cleanPath(root.trimmed());
+        if (clean_root.isEmpty()) {
+            return false;
+        }
+        const QString root_prefix = clean_root.endsWith('/')
+            ? clean_root
+            : clean_root + QLatin1Char('/');
+        return path == clean_root || path.startsWith(root_prefix, Qt::CaseInsensitive);
+    };
+
+    if (path_is_within_root(absolute_path, trimmed_root)) {
+        if (ok) {
+            *ok = true;
+        }
+        return absolute_path;
+    }
+
+    for (const QString& allowed_root : allowed_external_roots) {
+        if (path_is_within_root(absolute_path, allowed_root)) {
+            if (ok) {
+                *ok = true;
+            }
+            return absolute_path;
+        }
+    }
+
+    return QString();
+}
+
+QString extract_json_object_text(const QString& text) {
+    const QString trimmed = text.trimmed();
+    if (trimmed.isEmpty()) {
+        return QString();
+    }
+
+    QJsonParseError direct_error;
+    const QJsonDocument direct_doc = QJsonDocument::fromJson(trimmed.toUtf8(), &direct_error);
+    if (direct_error.error == QJsonParseError::NoError && direct_doc.isObject()) {
+        return trimmed;
+    }
+
+    const int first_brace = trimmed.indexOf('{');
+    const int last_brace = trimmed.lastIndexOf('}');
+    if (first_brace >= 0 && last_brace > first_brace) {
+        const QString candidate = trimmed.mid(first_brace, last_brace - first_brace + 1);
+        QJsonParseError candidate_error;
+        const QJsonDocument candidate_doc = QJsonDocument::fromJson(candidate.toUtf8(), &candidate_error);
+        if (candidate_error.error == QJsonParseError::NoError && candidate_doc.isObject()) {
+            return candidate;
+        }
+    }
+    return QString();
+}
+
+QString read_file_window_text(const QString& path, int start_line, int line_count) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QStringLiteral("read_file_failed");
+    }
+
+    const QString content = QString::fromUtf8(file.readAll());
+    const QStringList lines = normalize_newlines(content).split(QChar('\n'));
+    const int first = qMax(1, start_line);
+    const int count = qMax(1, line_count);
+    const int last = qMin(lines.size(), first + count - 1);
+    QStringList window;
+    for (int i = first; i <= last; ++i) {
+        window.append(QString::number(i) + QStringLiteral(":") + lines.at(i - 1));
+    }
+    return window.join(QChar('\n'));
 }
 
 bool run_diag_enabled() {
@@ -1538,6 +1689,160 @@ QString NeurxBridge::local_model_summary() const {
         .arg(checkpoint_model_choices_.size());
 }
 
+bool NeurxBridge::has_pending_code_agent_changes() const {
+    return !code_agent_pending_changes_.isEmpty();
+}
+
+QVariantList NeurxBridge::pending_code_agent_changes() const {
+    return code_agent_pending_changes_;
+}
+
+QString NeurxBridge::pending_code_agent_changes_summary() const {
+    if (code_agent_pending_changes_.isEmpty()) {
+        return QStringLiteral("no_pending_code_agent_changes");
+    }
+
+    QStringList lines;
+    lines << QStringLiteral("pending_change_count=") + QString::number(code_agent_pending_changes_.size());
+    for (int i = 0; i < code_agent_pending_changes_.size(); ++i) {
+        const QVariantMap change = code_agent_pending_changes_.at(i).toMap();
+        QString line = QStringLiteral("pending_change[%1].action=").arg(i) + change.value(QStringLiteral("action")).toString();
+        const QString path = change.value(QStringLiteral("path")).toString().trimmed();
+        if (!path.isEmpty()) {
+            line += QStringLiteral(" path=") + path;
+        }
+        const QString summary = change.value(QStringLiteral("summary")).toString().trimmed();
+        if (!summary.isEmpty()) {
+            line += QStringLiteral(" summary=") + summary;
+        }
+        const QString preview = change.value(QStringLiteral("preview")).toString().trimmed();
+        if (!preview.isEmpty()) {
+            line += QStringLiteral(" preview=") + clip_text(preview, 180).replace(QChar('\n'), QChar(' '));
+        }
+        lines << line;
+    }
+    return lines.join(QChar('\n'));
+}
+
+QString NeurxBridge::apply_pending_code_agent_changes() {
+    if (code_agent_pending_changes_.isEmpty()) {
+        return QStringLiteral("no_pending_code_agent_changes");
+    }
+
+    QStringList edited_paths;
+    QStringList applied_summaries;
+
+    for (const QVariant& item : std::as_const(code_agent_pending_changes_)) {
+        const QVariantMap change = item.toMap();
+        const QString action = change.value(QStringLiteral("action")).toString();
+        const QString raw_path = change.value(QStringLiteral("path")).toString();
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(find_repo_root(), raw_path, &ok);
+        if (!ok) {
+            applied_summaries << QStringLiteral("tool_error: apply pending change outside workspace");
+            continue;
+        }
+
+        if (action == QStringLiteral("write_file")) {
+            QDir().mkpath(QFileInfo(absolute_path).absolutePath());
+            QFile file(absolute_path);
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+                applied_summaries << QStringLiteral("tool_error: pending write_file failed");
+                continue;
+            }
+            const QString content = normalize_newlines(change.value(QStringLiteral("content")).toString());
+            const QByteArray bytes = content.toUtf8();
+            file.write(bytes);
+            file.close();
+            edited_paths.append(repo_relative_path(find_repo_root(), absolute_path));
+            applied_summaries << QStringLiteral("applied write_file ") + repo_relative_path(find_repo_root(), absolute_path);
+            continue;
+        }
+
+        QFile file(absolute_path);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            applied_summaries << QStringLiteral("tool_error: pending change failed to read file");
+            continue;
+        }
+        QString content = normalize_newlines(QString::fromUtf8(file.readAll()));
+        file.close();
+
+        if (action == QStringLiteral("apply_patch")) {
+            const QString old_text = normalize_newlines(change.value(QStringLiteral("old_text")).toString());
+            const QString new_text = normalize_newlines(change.value(QStringLiteral("new_text")).toString());
+            const bool replace_all = change.value(QStringLiteral("replace_all")).toBool();
+            if (old_text.isEmpty()) {
+                applied_summaries << QStringLiteral("tool_error: pending apply_patch old_text empty");
+                continue;
+            }
+            if (content.indexOf(old_text) < 0) {
+                applied_summaries << QStringLiteral("tool_error: pending apply_patch old_text not found");
+                continue;
+            }
+            if (replace_all) {
+                content.replace(old_text, new_text, Qt::CaseSensitive);
+            } else {
+                const int first_match = content.indexOf(old_text);
+                const int end = first_match + old_text.size();
+                content = content.left(first_match) + new_text + content.mid(end);
+            }
+        } else if (action == QStringLiteral("replace_range")) {
+            const int start_line = change.value(QStringLiteral("start_line")).toInt();
+            const int end_line = change.value(QStringLiteral("end_line")).toInt();
+            if (start_line < 1 || end_line < start_line - 1) {
+                applied_summaries << QStringLiteral("tool_error: pending replace_range invalid span");
+                continue;
+            }
+            QStringList lines = content.split(QChar('\n'));
+            const int line_count = lines.size();
+            const int start_index = qBound(0, start_line - 1, line_count);
+            const int end_index = qBound(0, end_line, line_count);
+            QStringList replacement_lines = normalize_newlines(change.value(QStringLiteral("new_text")).toString()).split(QChar('\n'));
+            QStringList merged;
+            for (int i = 0; i < start_index; ++i) {
+                merged.append(lines.at(i));
+            }
+            for (const QString& line : replacement_lines) {
+                merged.append(line);
+            }
+            for (int i = end_index; i < line_count; ++i) {
+                merged.append(lines.at(i));
+            }
+            content = merged.join(QChar('\n'));
+        } else {
+            applied_summaries << QStringLiteral("tool_error: unsupported pending action ") + action;
+            continue;
+        }
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+            applied_summaries << QStringLiteral("tool_error: pending write failed");
+            continue;
+        }
+        const QByteArray bytes = content.toUtf8();
+        file.write(bytes);
+        file.close();
+
+        const QString repo_path = repo_relative_path(find_repo_root(), absolute_path);
+        edited_paths.append(repo_path);
+        applied_summaries << QStringLiteral("applied ") + action + QStringLiteral(" ") + repo_path;
+    }
+
+    code_agent_pending_changes_.clear();
+
+    QString result = QStringLiteral("applied_pending_change_count=") + QString::number(edited_paths.size());
+    for (const QString& path : std::as_const(edited_paths)) {
+        result += QStringLiteral("\nedited_path=") + path;
+    }
+    if (!applied_summaries.isEmpty()) {
+        result += QStringLiteral("\nlast_observation=") + clip_text(applied_summaries.join(QStringLiteral("; ")), 300);
+    }
+    return result;
+}
+
+void NeurxBridge::clear_pending_code_agent_changes() {
+    code_agent_pending_changes_.clear();
+}
+
 QString NeurxBridge::checkpoint_models_root() const {
     return checkpoint_models_root_;
 }
@@ -1857,8 +2162,8 @@ QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString
     }
     if (contains_any_keyword(text, {
         "fix", "bug", "error", "implement", "patch", "refactor", "code", "qml",
-        "write", "create", "build", "generate", "example", "hello world",
-        "写", "实现", "修复", "代码", "程序", "示例", "例子"
+        "write", "create", "mkdir", "directory", "folder", "build", "generate", "example", "hello world",
+        "写", "创建", "目录", "文件夹", "实现", "修复", "代码", "程序", "示例", "例子"
     })) {
         return "code";
     }
@@ -2087,6 +2392,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     if (root.isEmpty()) {
         return "repo_not_found";
     }
+    QString runner_plan;
+    QString runner_file_context;
     const QString route = agent_route_for_prompt(prompt, filePath);
     emit log_message("info", "agent", QString("code-assistant start route=%1 prompt_len=%2 file=%3")
         .arg(route)
@@ -2111,8 +2418,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 const QString runner_status = runner_obj.value("status").toString();
                 const QString runner_mode = runner_obj.value("mode").toString();
                 const QString runner_response = runner_obj.value("response").toString();
-                const QString runner_plan = runner_obj.value("plan").toString();
-                const QString runner_file_context = runner_obj.value("file_context").toString();
+                runner_plan = runner_obj.value("plan").toString();
+                runner_file_context = runner_obj.value("file_context").toString();
                 if (runner_status == "completed" && !runner_response.trimmed().isEmpty()) {
                     emit log_message("info", "agent", QString("code-assistant done route=%1 source=runner mode=%2")
                         .arg(route, runner_mode));
@@ -2350,6 +2657,453 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             allow_suggest_fallback,
             source_label + QStringLiteral("-retry"));
     };
+
+    const QString normalized_file_path = filePath.trimmed();
+    code_agent_pending_changes_.clear();
+    auto remember_recent_action = [&](const QString& summary) {
+        const QString trimmed = summary.trimmed();
+        if (trimmed.isEmpty()) {
+            return;
+        }
+        code_agent_recent_actions_.append(trimmed);
+        while (code_agent_recent_actions_.size() > kCodeAgentHistoryLimit) {
+            code_agent_recent_actions_.removeFirst();
+        }
+    };
+    auto remember_recent_file = [&](const QString& absolute_path, const QString& content_preview) {
+        const QString cleaned = QDir::cleanPath(absolute_path.trimmed());
+        if (cleaned.isEmpty()) {
+            return;
+        }
+        code_agent_recent_files_.removeAll(cleaned);
+        code_agent_recent_files_.append(cleaned);
+        while (code_agent_recent_files_.size() > kCodeAgentFileCacheLimit) {
+            const QString removed = code_agent_recent_files_.takeFirst();
+            code_agent_file_cache_.remove(removed);
+        }
+        code_agent_file_cache_.insert(cleaned, clip_text(content_preview, 4000));
+    };
+    auto format_tool_response = [&](const QString& action,
+                                    const QString& body,
+                                    const QString& relative_path = QString()) -> QString {
+        QString result = QStringLiteral("tool=") + action;
+        if (!relative_path.trimmed().isEmpty()) {
+            result += QStringLiteral("\npath=") + relative_path.trimmed();
+        }
+        result += QStringLiteral("\n") + clip_text(body.trimmed(), 12000);
+        return result.trimmed();
+    };
+    auto read_workspace_file = [&](const QString& raw_path, int start_line, int line_count) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok || !QFileInfo::exists(absolute_path) || !QFileInfo(absolute_path).isFile()) {
+            return QStringLiteral("tool_error: read_file path not found");
+        }
+        const QString text = read_file_window_text(absolute_path, start_line, line_count);
+        if (text == QStringLiteral("read_file_failed")) {
+            return QStringLiteral("tool_error: read_file failed");
+        }
+        remember_recent_file(absolute_path, text);
+        return format_tool_response(
+            QStringLiteral("read_file"),
+            text,
+            repo_relative_path(root, absolute_path));
+    };
+    auto list_workspace_files = [&](const QString& raw_dir, int limit) -> QString {
+        bool ok = false;
+        const QString absolute_dir = resolve_workspace_path(root, raw_dir.trimmed().isEmpty() ? QStringLiteral(".") : raw_dir, &ok);
+        if (!ok || !QFileInfo::exists(absolute_dir) || !QFileInfo(absolute_dir).isDir()) {
+            return QStringLiteral("tool_error: list_files directory not found");
+        }
+        QStringList entries;
+        QDirIterator it(absolute_dir, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        const int capped_limit = qBound(1, limit, 200);
+        while (it.hasNext() && entries.size() < capped_limit) {
+            const QString next = QDir::cleanPath(it.next());
+            if (next.contains(QStringLiteral("/.git/"), Qt::CaseInsensitive)
+                || next.contains(QStringLiteral("/app/build/"), Qt::CaseInsensitive)
+                || next.contains(QStringLiteral("/build/"), Qt::CaseInsensitive)) {
+                continue;
+            }
+            entries.append(repo_relative_path(root, next));
+        }
+        return format_tool_response(QStringLiteral("list_files"), entries.join(QChar('\n')));
+    };
+    auto search_workspace_files = [&](const QString& query) -> QString {
+        const QString script_path = QDir(root).filePath(QStringLiteral("app/service/tools/search.sh"));
+        if (!QFileInfo::exists(script_path)) {
+            return QStringLiteral("tool_error: search tool unavailable");
+        }
+        const QString output = run_process(
+            QStringLiteral("bash"),
+            QStringList() << script_path << query << root,
+            10000,
+            root);
+        if (output.startsWith(QStringLiteral("runtime_"))) {
+            return output;
+        }
+        return format_tool_response(QStringLiteral("search_files"), output);
+    };
+    auto create_workspace_directory = [&](const QString& raw_path) -> QString {
+        static const QStringList kAllowedExternalRoots = {
+            QStringLiteral("C:/Users"),
+            QStringLiteral("C:/Users/")
+        };
+        bool ok = false;
+        const QString absolute_path = resolve_path_with_allowed_roots(root, raw_path, kAllowedExternalRoots, &ok);
+        if (!ok || absolute_path.isEmpty()) {
+            return QStringLiteral("tool_error: mkdir path not allowed");
+        }
+        const QFileInfo info(absolute_path);
+        if (info.exists() && info.isFile()) {
+            return QStringLiteral("tool_error: mkdir path already exists as file");
+        }
+        if (info.exists() && info.isDir()) {
+            return format_tool_response(QStringLiteral("mkdir"), QStringLiteral("directory already exists"), absolute_path);
+        }
+        if (!QDir().mkpath(absolute_path)) {
+            return QStringLiteral("tool_error: mkdir failed");
+        }
+        return format_tool_response(QStringLiteral("mkdir"), QStringLiteral("created directory"), absolute_path);
+    };
+    QStringList staged_paths;
+    auto stage_pending_change = [&](const QVariantMap& change) {
+        QVariantMap next = change;
+        const QString raw_path = next.value(QStringLiteral("path")).toString();
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (ok) {
+            next.insert(QStringLiteral("repo_path"), repo_relative_path(root, absolute_path));
+            const QString preview = next.value(QStringLiteral("preview")).toString().trimmed();
+            if (!preview.isEmpty()) {
+                next.insert(QStringLiteral("preview"), clip_text(preview, 600));
+            }
+            code_agent_pending_changes_.append(next);
+            const QString repo_path = next.value(QStringLiteral("repo_path")).toString();
+            if (!repo_path.isEmpty() && !staged_paths.contains(repo_path)) {
+                staged_paths.append(repo_path);
+            }
+        }
+    };
+    auto apply_workspace_patch = [&](const QString& raw_path,
+                                     const QString& old_text,
+                                     const QString& new_text,
+                                     bool replace_all) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok || !QFileInfo::exists(absolute_path) || !QFileInfo(absolute_path).isFile()) {
+            return QStringLiteral("tool_error: apply_patch path not found");
+        }
+
+        if (old_text.isEmpty()) {
+            return QStringLiteral("tool_error: apply_patch old_text is empty");
+        }
+
+        QFile file(absolute_path);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return QStringLiteral("tool_error: apply_patch failed to read file");
+        }
+        const QString content = normalize_newlines(QString::fromUtf8(file.readAll()));
+        file.close();
+
+        const QString normalized_old_text = normalize_newlines(old_text);
+        const QString normalized_new_text = normalize_newlines(new_text);
+        if (content.indexOf(normalized_old_text) < 0) {
+            return QStringLiteral("tool_error: apply_patch old_text not found");
+        }
+        if (!replace_all && content.count(normalized_old_text) > 1) {
+            return QStringLiteral("tool_error: apply_patch old_text matched multiple locations");
+        }
+
+        QVariantMap change;
+        change.insert(QStringLiteral("action"), QStringLiteral("apply_patch"));
+        change.insert(QStringLiteral("path"), raw_path.trimmed());
+        change.insert(QStringLiteral("old_text"), normalized_old_text);
+        change.insert(QStringLiteral("new_text"), normalized_new_text);
+        change.insert(QStringLiteral("replace_all"), replace_all);
+        change.insert(QStringLiteral("summary"), replace_all
+            ? QStringLiteral("replace all matches")
+            : QStringLiteral("replace focused match"));
+        change.insert(QStringLiteral("preview"), QStringLiteral("apply_patch\n--- old ---\n%1\n--- new ---\n%2")
+            .arg(clip_text(normalized_old_text, 500), clip_text(normalized_new_text, 500)));
+        stage_pending_change(change);
+        return format_tool_response(
+            QStringLiteral("apply_patch"),
+            QStringLiteral("staged patch preview"),
+            repo_relative_path(root, absolute_path));
+    };
+    auto replace_workspace_range = [&](const QString& raw_path,
+                                       int start_line,
+                                       int end_line,
+                                       const QString& new_text) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok || !QFileInfo::exists(absolute_path) || !QFileInfo(absolute_path).isFile()) {
+            return QStringLiteral("tool_error: replace_range path not found");
+        }
+        if (start_line < 1) {
+            return QStringLiteral("tool_error: replace_range invalid start_line");
+        }
+        if (end_line < 0) {
+            return QStringLiteral("tool_error: replace_range invalid end_line");
+        }
+
+        QFile file(absolute_path);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return QStringLiteral("tool_error: replace_range failed to read file");
+        }
+        const QString content = normalize_newlines(QString::fromUtf8(file.readAll()));
+        file.close();
+
+        QStringList lines = content.split(QChar('\n'));
+        const int line_count = lines.size();
+        if (start_line > line_count + 1) {
+            return QStringLiteral("tool_error: replace_range start_line beyond end of file");
+        }
+        if (end_line < start_line - 1) {
+            return QStringLiteral("tool_error: replace_range invalid line span");
+        }
+
+        const int start_index = qBound(0, start_line - 1, line_count);
+        const int end_index = qBound(0, end_line, line_count);
+        QStringList replacement_lines = normalize_newlines(new_text).split(QChar('\n'));
+
+        QVariantMap change;
+        change.insert(QStringLiteral("action"), QStringLiteral("replace_range"));
+        change.insert(QStringLiteral("path"), raw_path.trimmed());
+        change.insert(QStringLiteral("start_line"), start_line);
+        change.insert(QStringLiteral("end_line"), end_line);
+        change.insert(QStringLiteral("new_text"), normalize_newlines(new_text));
+        change.insert(QStringLiteral("summary"), QStringLiteral("replace lines %1-%2")
+            .arg(start_line)
+            .arg(qMax(start_line - 1, end_line)));
+        change.insert(QStringLiteral("preview"), QStringLiteral("replace_range lines %1-%2\n--- new ---\n%3")
+            .arg(start_line)
+            .arg(qMax(start_line - 1, end_line))
+            .arg(clip_text(normalize_newlines(new_text), 500)));
+        stage_pending_change(change);
+        const int reported_end_line = end_line >= start_line ? qMin(end_line, line_count) : start_line - 1;
+        const QString action_label = end_line >= start_line
+            ? QStringLiteral("replaced")
+            : QStringLiteral("inserted");
+        return format_tool_response(
+            QStringLiteral("replace_range"),
+            QStringLiteral("staged %1 lines %2-%3").arg(action_label).arg(start_line).arg(reported_end_line),
+            repo_relative_path(root, absolute_path));
+    };
+    auto write_workspace_file = [&](const QString& raw_path, const QString& content) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok) {
+            return QStringLiteral("tool_error: write_file path outside workspace");
+        }
+        QVariantMap change;
+        change.insert(QStringLiteral("action"), QStringLiteral("write_file"));
+        change.insert(QStringLiteral("path"), raw_path.trimmed());
+        change.insert(QStringLiteral("content"), normalize_newlines(content));
+        change.insert(QStringLiteral("summary"), QStringLiteral("replace file content"));
+        change.insert(QStringLiteral("preview"), clip_text(normalize_newlines(content), 1000));
+        stage_pending_change(change);
+        return format_tool_response(
+            QStringLiteral("write_file"),
+            QStringLiteral("staged full file replacement"),
+            repo_relative_path(root, absolute_path));
+    };
+    auto build_agent_context = [&]() -> QString {
+        QStringList sections;
+        sections << QStringLiteral("repo_root=") + root;
+        sections << QStringLiteral("target_file=") + (normalized_file_path.isEmpty() ? QStringLiteral("-") : normalized_file_path);
+        if (!runner_plan.trimmed().isEmpty()) {
+            sections << QStringLiteral("runner_plan=\n") + runner_plan.trimmed();
+        }
+        if (!runner_file_context.trimmed().isEmpty()) {
+            sections << QStringLiteral("initial_file_context=\n") + clip_text(runner_file_context.trimmed(), 4000);
+        }
+        if (!code_agent_recent_actions_.isEmpty()) {
+            sections << QStringLiteral("recent_actions=\n") + code_agent_recent_actions_.join(QStringLiteral("\n---\n"));
+        }
+        QStringList cached_files;
+        for (const QString& cached_path : code_agent_recent_files_) {
+            if (!code_agent_file_cache_.contains(cached_path)) {
+                continue;
+            }
+            cached_files << QStringLiteral("[file] ") + repo_relative_path(root, cached_path)
+                + QStringLiteral("\n") + code_agent_file_cache_.value(cached_path);
+        }
+        if (!cached_files.isEmpty()) {
+            sections << QStringLiteral("cached_files=\n") + cached_files.join(QStringLiteral("\n\n"));
+        }
+        return sections.join(QStringLiteral("\n\n"));
+    };
+    auto try_run_tool_loop = [&](const QString& base_url,
+                                 const QString& chat_path,
+                                 const QString& model_name,
+                                 bool allow_suggest_fallback,
+                                 const QString& source_label) -> QString {
+        QStringList tool_observations;
+        if (!runner_file_context.trimmed().isEmpty()) {
+            tool_observations << QStringLiteral("initial_context=\n") + runner_file_context.trimmed();
+        }
+
+        for (int step = 0; step < kCodeAgentLoopLimit; ++step) {
+            QStringList prompt_sections;
+            prompt_sections << QStringLiteral(
+                "You are a coding agent working inside the NeurX repository.\n"
+                "Return exactly one JSON object and nothing else.\n"
+                "Available actions:\n"
+                "{\"action\":\"read_file\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"line_count\":120,\"reason\":\"...\"}\n"
+                "{\"action\":\"search_files\",\"query\":\"text to search\",\"reason\":\"...\"}\n"
+                "{\"action\":\"list_files\",\"dir\":\"relative/or/absolute\",\"limit\":80,\"reason\":\"...\"}\n"
+                "{\"action\":\"mkdir\",\"path\":\"C:/Users/hello\",\"reason\":\"create a directory\"}\n"
+                "{\"action\":\"replace_range\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"end_line\":20,\"new_text\":\"replacement text\",\"summary\":\"what changed\"}\n"
+                "{\"action\":\"apply_patch\",\"path\":\"relative/or/absolute\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false,\"summary\":\"what changed\"}\n"
+                "{\"action\":\"write_file\",\"path\":\"relative/or/absolute\",\"content\":\"full file content\",\"summary\":\"what changed\"}\n"
+                "{\"action\":\"final\",\"response\":\"user-facing summary\"}\n"
+                "Rules:\n"
+                "- for file edits stay within the repository\n"
+                "- mkdir may create directories under C:/Users and inside the repository\n"
+                "- read before editing unless the request is trivial\n"
+                "- prefer mkdir for directory creation requests\n"
+                "- prefer replace_range for localized line edits\n"
+                "- prefer apply_patch for focused edits\n"
+                "- write_file must contain the full replacement file content\n"
+                "- prefer minimal edits\n"
+                "- if enough work is done, respond with final");
+            prompt_sections << QStringLiteral("User request:\n") + sanitize_code_assistant_prompt(prompt);
+            prompt_sections << QStringLiteral("Context:\n") + build_agent_context();
+            if (!tool_observations.isEmpty()) {
+                prompt_sections << QStringLiteral("Tool observations so far:\n") + tool_observations.join(QStringLiteral("\n\n"));
+            }
+            prompt_sections << QStringLiteral("Current step: %1 of %2").arg(step + 1).arg(kCodeAgentLoopLimit);
+
+            const QString action_text = run_code_chat_with_noise_retry(
+                prompt_sections.join(QStringLiteral("\n\n")),
+                base_url,
+                chat_path,
+                model_name,
+                allow_suggest_fallback,
+                source_label + QStringLiteral("-tool-loop"));
+            const QString json_text = extract_json_object_text(action_text);
+            if (json_text.isEmpty()) {
+                return QString();
+            }
+
+            QJsonParseError action_parse_error;
+            const QJsonDocument action_doc = QJsonDocument::fromJson(json_text.toUtf8(), &action_parse_error);
+            if (action_parse_error.error != QJsonParseError::NoError || !action_doc.isObject()) {
+                return QString();
+            }
+            const QJsonObject action_obj = action_doc.object();
+            const QString action = action_obj.value(QStringLiteral("action")).toString().trimmed();
+            if (action.isEmpty()) {
+                return QString();
+            }
+
+            if (action == QStringLiteral("final")) {
+                QString response = action_obj.value(QStringLiteral("response")).toString().trimmed();
+                if (response.isEmpty()) {
+                    response = QStringLiteral("Agent completed the requested coding task.");
+                }
+                if (!staged_paths.isEmpty()) {
+                    for (const QString& path : std::as_const(staged_paths)) {
+                        response += QStringLiteral("\npending_path=") + path;
+                    }
+                }
+                response += QStringLiteral("\npending_change_count=") + QString::number(code_agent_pending_changes_.size());
+                if (!code_agent_recent_actions_.isEmpty()) {
+                    response += QStringLiteral("\nlast_action=") + code_agent_recent_actions_.constLast();
+                }
+                if (!tool_observations.isEmpty()) {
+                    response += QStringLiteral("\nlast_observation=") + clip_text(tool_observations.constLast(), 200);
+                }
+                return response.trimmed();
+            }
+
+            QString observation;
+            if (action == QStringLiteral("read_file")) {
+                observation = read_workspace_file(
+                    action_obj.value(QStringLiteral("path")).toString(),
+                    action_obj.value(QStringLiteral("start_line")).toInt(1),
+                    action_obj.value(QStringLiteral("line_count")).toInt(120));
+            } else if (action == QStringLiteral("search_files")) {
+                observation = search_workspace_files(action_obj.value(QStringLiteral("query")).toString().trimmed());
+            } else if (action == QStringLiteral("list_files")) {
+                observation = list_workspace_files(
+                    action_obj.value(QStringLiteral("dir")).toString(),
+                    action_obj.value(QStringLiteral("limit")).toInt(80));
+            } else if (action == QStringLiteral("mkdir")) {
+                observation = create_workspace_directory(action_obj.value(QStringLiteral("path")).toString());
+            } else if (action == QStringLiteral("apply_patch")) {
+                observation = apply_workspace_patch(
+                    action_obj.value(QStringLiteral("path")).toString(),
+                    action_obj.value(QStringLiteral("old_text")).toString(),
+                    action_obj.value(QStringLiteral("new_text")).toString(),
+                    action_obj.value(QStringLiteral("replace_all")).toBool(false));
+            } else if (action == QStringLiteral("replace_range")) {
+                observation = replace_workspace_range(
+                    action_obj.value(QStringLiteral("path")).toString(),
+                    action_obj.value(QStringLiteral("start_line")).toInt(-1),
+                    action_obj.value(QStringLiteral("end_line")).toInt(-1),
+                    action_obj.value(QStringLiteral("new_text")).toString());
+            } else if (action == QStringLiteral("write_file")) {
+                observation = write_workspace_file(
+                    action_obj.value(QStringLiteral("path")).toString(),
+                    action_obj.value(QStringLiteral("content")).toString());
+            } else {
+                return QString();
+            }
+
+            const QString summary = action_obj.value(QStringLiteral("summary")).toString().trimmed().isEmpty()
+                ? action
+                : action + QStringLiteral(": ") + action_obj.value(QStringLiteral("summary")).toString().trimmed();
+            remember_recent_action(summary);
+            tool_observations << observation;
+        }
+
+        return QStringLiteral("runtime_timeout: code agent loop exceeded step limit");
+    };
+
+    const bool should_try_tool_loop = !normalized_file_path.isEmpty()
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("edit"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("modify"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("update"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("create"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("mkdir"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("directory"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("folder"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("创建"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("目录"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("文件夹"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("write to file"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("patch"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("fix"), Qt::CaseInsensitive);
+
+    if (should_try_tool_loop) {
+        const QString local_tool_result = try_run_tool_loop(
+            local_code_base_url,
+            local_code_chat_path,
+            local_code_model,
+            true,
+            QStringLiteral("local"));
+        if (!local_tool_result.trimmed().isEmpty()
+            && !local_tool_result.startsWith(QStringLiteral("runtime_timeout: code agent loop exceeded step limit"))) {
+            emit log_message("info", "agent", QString("code-assistant done route=%1 source=local-tool-loop").arg(route));
+            return local_tool_result;
+        }
+        if (!same_code_chat_target) {
+            const QString remote_tool_result = try_run_tool_loop(
+                remote_code_base_url,
+                remote_code_chat_path,
+                remote_code_model,
+                false,
+                QStringLiteral("remote"));
+            if (!remote_tool_result.trimmed().isEmpty()
+                && !remote_tool_result.startsWith(QStringLiteral("runtime_timeout: code agent loop exceeded step limit"))) {
+                emit log_message("info", "agent", QString("code-assistant done route=%1 source=remote-tool-loop").arg(route));
+                return remote_tool_result;
+            }
+        }
+    }
 
     const QString local_result = run_code_chat_with_noise_retry(
         effective_prompt,

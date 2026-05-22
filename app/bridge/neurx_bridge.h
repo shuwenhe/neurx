@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QHash>
 #include <QVariantList>
 #include <QString>
 #include <QStringList>
@@ -44,6 +45,11 @@ public:
     Q_INVOKABLE void run_agent_auto_async(const QString& prompt, const QString& filePath, int max_steps);
     Q_INVOKABLE QString agent_route_for_prompt(const QString& prompt, const QString& filePath) const;
     Q_INVOKABLE QString local_model_summary() const;
+    Q_INVOKABLE bool has_pending_code_agent_changes() const;
+    Q_INVOKABLE QVariantList pending_code_agent_changes() const;
+    Q_INVOKABLE QString pending_code_agent_changes_summary() const;
+    Q_INVOKABLE QString apply_pending_code_agent_changes();
+    Q_INVOKABLE void clear_pending_code_agent_changes();
 
 signals:
     void runtime_status_changed(const QString& status, const QString& task);
@@ -99,6 +105,10 @@ private:
     QString checkpoint_models_root_;
     QString checkpoint_model_file_;
     QVariantList checkpoint_model_choices_;
+    QStringList code_agent_recent_actions_;
+    QStringList code_agent_recent_files_;
+    QHash<QString, QString> code_agent_file_cache_;
+    QVariantList code_agent_pending_changes_;
     bool agent_run_active_ {false};
     mutable bool local_ollama_ready_ {false};
 };
