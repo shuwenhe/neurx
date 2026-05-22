@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Qt.labs.settings 1.1
 
 Item {
     id: shell
@@ -67,8 +68,17 @@ Item {
     property string loginPhoneText: ""
     property string loginCodeText: ""
     property string loginStatusText: ""
+    property string generatedLoginCode: ""
+    property bool loginLoggedIn: false
     property int agentRunTimeoutMs: 120000
     property bool restoringSession: false
+
+    Settings {
+        id: loginSettings
+        category: "app_shell_login"
+        property bool loggedIn: false
+        property string phone: ""
+    }
 
     function explorerLeafName(path) {
         var value = (path || "").trim()
@@ -667,7 +677,28 @@ Item {
         return qsTr("Worked for %1s").arg(elapsedSeconds)
     }
 
+    function refreshLoginButtonText() {
+        shell.loginButtonText = shell.loginLoggedIn ? qsTr("已登录") : qsTr("登录")
+    }
+
+    function generateFourDigitCode() {
+        return String(1000 + Math.floor(Math.random() * 9000))
+    }
+
+    function requireLoginForAgentAction(actionLabel) {
+        if (shell.loginLoggedIn) {
+            return false
+        }
+        shell.runtimeStatusText = qsTr("login_required")
+        shell.loginStatusText = qsTr("请先登录后再进行%1").arg(actionLabel)
+        loginPopup.open()
+        return true
+    }
+
     function sendAgentPrompt() {
+        if (requireLoginForAgentAction(qsTr("Agent 请求"))) {
+            return
+        }
         if (shell.agentRunning) {
             return
         }
@@ -715,6 +746,9 @@ Item {
     }
 
     function sendCodeSuggestion() {
+        if (requireLoginForAgentAction(qsTr("代码请求"))) {
+            return
+        }
         var prompt = promptEditor.text.trim()
         var filePath = shell.selectedFilePath || ""
         promptEditor.text = ""
@@ -765,6 +799,9 @@ Item {
     }
 
     function sendSkillSnapshot() {
+        if (requireLoginForAgentAction(qsTr("技能导出"))) {
+            return
+        }
         var prompt = resolvedAgentPrompt()
         shell.runtimeStatusText = qsTr("snapshot")
         shell.beginConversation(prompt, qsTr("Snapshot"), qsTr("Exporting skill snapshot..."))
@@ -791,6 +828,9 @@ Item {
     }
 
     function sendTrajectoryExport() {
+        if (requireLoginForAgentAction(qsTr("轨迹导出"))) {
+            return
+        }
         var prompt = resolvedAgentPrompt()
         shell.runtimeStatusText = qsTr("trajectory")
         shell.beginConversation(prompt, qsTr("Trajectory"), qsTr("Exporting agent trajectory..."))
@@ -1541,6 +1581,9 @@ Item {
     }
 
     Component.onCompleted: {
+        shell.loginLoggedIn = loginSettings.loggedIn
+        shell.loginPhoneText = loginSettings.phone
+        refreshLoginButtonText()
         restoreEditorSession()
         // Only apply the checkpoint model selection when using the s-backend.
         // When the backend points to Ollama, the model is already set
@@ -2220,6 +2263,9 @@ Item {
                                 onClicked: {
                                     shell.runtimeStatusText = qsTr("login_clicked")
                                     shell.loginStatusText = ""
+                                    if (shell.loginLoggedIn) {
+                                        shell.loginStatusText = qsTr("当前已登录手机号：") + shell.loginPhoneText
+                                    }
                                     loginPopup.open()
                                 }
                             }
@@ -3209,9 +3255,9 @@ Item {
                 }
             }
 
-            Text {
-                text: qsTr("输入手机号和验证码")
-                color: shell.textMuted
+                Text {
+                    text: qsTr("输入手机号和验证码")
+                    color: shell.textMuted
                 font.pixelSize: 12
             }
 
@@ -3263,7 +3309,8 @@ Item {
                                 shell.loginStatusText = qsTr("请先输入手机号")
                                 return
                             }
-                            shell.loginStatusText = qsTr("验证码已发送到 ") + shell.loginPhoneText
+                            shell.generatedLoginCode = shell.generateFourDigitCode()
+                            shell.loginStatusText = qsTr("验证码已发送到手机，模拟验证码：") + shell.generatedLoginCode
                         }
                     }
                 }
@@ -3333,7 +3380,21 @@ Item {
                                 shell.loginStatusText = qsTr("请输入验证码")
                                 return
                             }
+                            if (shell.generatedLoginCode.length !== 4) {
+                                shell.loginStatusText = qsTr("请先获取验证码")
+                                return
+                            }
+                            if (shell.loginCodeText.trim() !== shell.generatedLoginCode) {
+                                shell.loginStatusText = qsTr("验证码错误，请输入 4 位正确验证码")
+                                return
+                            }
+                            shell.loginLoggedIn = true
+                            loginSettings.loggedIn = true
+                            loginSettings.phone = shell.loginPhoneText
+                            shell.generatedLoginCode = ""
+                            shell.loginCodeText = ""
                             shell.loginStatusText = qsTr("登录成功：") + shell.loginPhoneText
+                            shell.refreshLoginButtonText()
                             shell.copyNoticeText = qsTr("已提交登录信息")
                             copyNoticeTimer.restart()
                             loginPopup.close()
