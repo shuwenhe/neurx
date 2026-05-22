@@ -32,8 +32,11 @@ constexpr const char kDefaultCustomerServiceFallbackModelDir[] = "artifacts/chec
 constexpr const char kDefaultCodeAgentLocalBaseUrl[] = "http://127.0.0.1:18080";
 constexpr const char kDefaultCodeAgentLocalChatPath[] = "/neurx/api/chat";
 constexpr const char kDefaultCodeAgentRemoteBaseUrl[] = "http://111.202.231.146:8080";
-constexpr const char kDefaultCodeAgentRemoteChatPath[] = "/neurx/api/chat";
+constexpr const char kDefaultCodeAgentRemoteChatPath[] = "/v1/chat/completions";
 constexpr const char kDefaultCodeAgentRemoteModel[] = "Qwen2.5-VL-7B";
+constexpr const char kDefaultRemoteAppBaseUrl[] = "http://111.202.231.146:8080";
+constexpr const char kDefaultRemoteAppChatPath[] = "/v1/chat/completions";
+constexpr const char kDefaultRemoteAppModel[] = "Qwen2.5-VL-7B";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
@@ -90,10 +93,6 @@ bool url_looks_like_s_backend(const QString& base_url) {
     const QUrl url(base_url.trimmed());
     const QString host = url.host().trimmed().toLower();
     const int port = url.port();
-    // Check for remote backend
-    if (base_url.contains("111.202.231.146") && port == 8080) {
-        return true;
-    }
     return (host == "127.0.0.1" || host == "localhost") && port == 18080;
 }
 
