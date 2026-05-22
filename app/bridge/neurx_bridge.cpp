@@ -31,12 +31,12 @@ constexpr const char kDefaultCustomerServiceFallbackModel[] = "neurx-qwen2.5-vl-
 constexpr const char kDefaultCustomerServiceFallbackModelDir[] = "artifacts/checkpoints/Qwen2.5-VL-7B";
 constexpr const char kDefaultCodeAgentLocalBaseUrl[] = "http://127.0.0.1:18080";
 constexpr const char kDefaultCodeAgentLocalChatPath[] = "/neurx/api/chat";
-constexpr const char kDefaultCodeAgentRemoteBaseUrl[] = "http://111.202.231.146:8080";
+constexpr const char kDefaultCodeAgentRemoteBaseUrl[] = "https://api.deepseek.com";
 constexpr const char kDefaultCodeAgentRemoteChatPath[] = "/v1/chat/completions";
-constexpr const char kDefaultCodeAgentRemoteModel[] = "Qwen2.5-VL-7B";
-constexpr const char kDefaultRemoteAppBaseUrl[] = "http://111.202.231.146:8080";
+constexpr const char kDefaultCodeAgentRemoteModel[] = "deepseek-chat";
+constexpr const char kDefaultRemoteAppBaseUrl[] = "https://api.deepseek.com";
 constexpr const char kDefaultRemoteAppChatPath[] = "/v1/chat/completions";
-constexpr const char kDefaultRemoteAppModel[] = "Qwen2.5-VL-7B";
+constexpr const char kDefaultRemoteAppModel[] = "deepseek-chat";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
@@ -994,12 +994,14 @@ QString NeurxBridge::run_http_request(const QString& method, const QString& url,
     }
 
     const int request_timeout_ms = qMax(1000, timeout_ms - 2000);
-    qInfo().noquote() << QString("bridge http_request start method=%1 url=%2 timeout_ms=%3")
+    const QString api_key = qEnvironmentVariable("NEURX_API_KEY").trimmed();
+    qInfo().noquote() << QString("bridge http_request start method=%1 url=%2 timeout_ms=%3 has_api_key=%4")
         .arg(method, url)
-        .arg(timeout_ms);
+        .arg(timeout_ms)
+        .arg(api_key.isEmpty() ? "no" : "yes");
     const QString script = QString(R"JS(
 const fs = await import('node:fs');
-const [requestUrl, requestMethod, requestBodyFile] = process.argv.slice(1);
+const [requestUrl, requestMethod, requestBodyFile, apiKey] = process.argv.slice(1);
 const target = new URL(requestUrl);
 if (target.hostname === 'localhost') {
   target.hostname = '127.0.0.1';
@@ -1009,6 +1011,10 @@ const requestTimeoutMs = %1;
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(new Error(`request timeout after ${requestTimeoutMs}ms`)), requestTimeoutMs);
 const options = { method: requestMethod, headers: {}, signal: controller.signal };
+
+if (apiKey) {
+  options.headers['Authorization'] = `Bearer ${apiKey}`;
+}
 
 if (requestBodyFile) {
   options.body = fs.readFileSync(requestBodyFile, 'utf8');
@@ -1041,7 +1047,8 @@ try {
          << script
          << url
          << method
-         << body_file;
+         << body_file
+         << api_key;
     const QString result = run_process(node, args, timeout_ms);
     if (result.startsWith("runtime_")) {
         qWarning().noquote() << QString("bridge http_request failed method=%1 url=%2 result=%3")
