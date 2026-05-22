@@ -506,7 +506,7 @@ stop_running_app_before_build() {
 
 # Backend configuration
 export PORT=${PORT:-18080}
-export NEURX_REMOTE_ONLY="${NEURX_REMOTE_ONLY:-1}"
+export NEURX_REMOTE_ONLY="${NEURX_REMOTE_ONLY:-0}"
 export NEURX_REMOTE_BASE_URL="${NEURX_REMOTE_BASE_URL:-https://api.siliconflow.cn}"
 export NEURX_REMOTE_CHAT_PATH="${NEURX_REMOTE_CHAT_PATH:-/v1/chat/completions}"
 export NEURX_REMOTE_MODEL="${NEURX_REMOTE_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
