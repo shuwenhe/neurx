@@ -63,6 +63,10 @@ Item {
     property int activeAssistantMessageIndex: -1
     property string activeAssistantStreamText: ""
     property string copyNoticeText: ""
+    property string loginButtonText: qsTr("登录")
+    property string loginPhoneText: ""
+    property string loginCodeText: ""
+    property string loginStatusText: ""
     property int agentRunTimeoutMs: 120000
     property bool restoringSession: false
 
@@ -2191,6 +2195,35 @@ Item {
                         Item {
                             Layout.fillWidth: true
                         }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignTop | Qt.AlignRight
+                            Layout.preferredWidth: 92
+                            Layout.preferredHeight: 36
+                            radius: 18
+                            color: agentLoginMouseArea.pressed ? "#157f58" : shell.accent
+                            border.color: Qt.lighter(shell.accent, 1.15)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: shell.loginButtonText
+                                color: shell.bg
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                id: agentLoginMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    shell.runtimeStatusText = qsTr("login_clicked")
+                                    shell.loginStatusText = ""
+                                    loginPopup.open()
+                                }
+                            }
+                        }
                     }
 
                     Rectangle {
@@ -3132,6 +3165,180 @@ Item {
                         }
                     }
 
+                }
+            }
+        }
+    }
+
+    Popup {
+        id: loginPopup
+        anchors.centerIn: Overlay.overlay
+        width: 360
+        height: 300
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        padding: 0
+
+        background: Rectangle {
+            radius: 16
+            color: shell.surface
+            border.color: shell.border
+        }
+
+        contentItem: ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 18
+            spacing: 14
+
+            RowLayout {
+                Layout.fillWidth: true
+
+                Text {
+                    text: qsTr("登录")
+                    color: shell.textPrimary
+                    font.pixelSize: 18
+                    font.bold: true
+                }
+
+                Item { Layout.fillWidth: true }
+
+                ToolButton {
+                    text: "✕"
+                    onClicked: loginPopup.close()
+                }
+            }
+
+            Text {
+                text: qsTr("输入手机号和验证码")
+                color: shell.textMuted
+                font.pixelSize: 12
+            }
+
+            TextField {
+                id: phoneField
+                Layout.fillWidth: true
+                placeholderText: qsTr("请输入手机号")
+                text: shell.loginPhoneText
+                color: shell.textPrimary
+                selectByMouse: true
+                onTextChanged: shell.loginPhoneText = text
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                TextField {
+                    id: codeField
+                    Layout.fillWidth: true
+                    placeholderText: qsTr("请输入验证码")
+                    text: shell.loginCodeText
+                    color: shell.textPrimary
+                    selectByMouse: true
+                    onTextChanged: shell.loginCodeText = text
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 102
+                    Layout.preferredHeight: 38
+                    radius: 10
+                    color: verifyMouseArea.pressed ? shell.panelHover : shell.panelAlt
+                    border.color: shell.border
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("获取验证码")
+                        color: shell.textPrimary
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: verifyMouseArea
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (shell.loginPhoneText.trim().length === 0) {
+                                shell.loginStatusText = qsTr("请先输入手机号")
+                                return
+                            }
+                            shell.loginStatusText = qsTr("验证码已发送到 ") + shell.loginPhoneText
+                        }
+                    }
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: shell.loginStatusText
+                color: shell.textMuted
+                visible: text.length > 0
+                wrapMode: Text.Wrap
+                font.pixelSize: 12
+            }
+
+            Item { Layout.fillHeight: true }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    radius: 12
+                    color: cancelLoginMouseArea.pressed ? shell.panelHover : shell.panelAlt
+                    border.color: shell.border
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("取消")
+                        color: shell.textPrimary
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: cancelLoginMouseArea
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: loginPopup.close()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    radius: 12
+                    color: submitLoginMouseArea.pressed ? "#157f58" : shell.accent
+                    border.color: Qt.lighter(shell.accent, 1.15)
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("登录")
+                        color: shell.bg
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: submitLoginMouseArea
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (shell.loginPhoneText.trim().length === 0) {
+                                shell.loginStatusText = qsTr("请输入手机号")
+                                return
+                            }
+                            if (shell.loginCodeText.trim().length === 0) {
+                                shell.loginStatusText = qsTr("请输入验证码")
+                                return
+                            }
+                            shell.loginStatusText = qsTr("登录成功：") + shell.loginPhoneText
+                            shell.copyNoticeText = qsTr("已提交登录信息")
+                            copyNoticeTimer.restart()
+                            loginPopup.close()
+                        }
+                    }
                 }
             }
         }

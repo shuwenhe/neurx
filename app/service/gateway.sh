@@ -76,7 +76,7 @@ sed_escape_replacement() {
 lower_prompt="$(printf '%s' "${prompt:-}" | tr '[:upper:]' '[:lower:]')"
 if [ -n "${prompt:-}" ]; then
   if template_completion="$(infer_template_completion "$lower_prompt")"; then
-    model_escaped="$(json_escape "${NEURX_BACKEND_MODEL:-gpt_large}")"
+    model_escaped="$(json_escape "${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}")"
     prompt_escaped="$(json_escape "${NEURX_BACKEND_PROMPT:-}")"
     completion_escaped="$(json_escape "$template_completion")"
     printf '{"ok":true,"backend_name":"neurx.app.backend.llm.s","model_name":"%s","summary":"template-direct-response","prompt":"%s","completion":"%s","generated_tokens":16,"last_token":0,"train_loss":0,"validation_loss":0,"ready":true}' \
@@ -181,17 +181,97 @@ case "${neurx_cls:-}" in
 esac
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ── Qwen2.5-VL OpenAI-compatible inference ───────────────────────────────────
+# Use an external/self-hosted VL endpoint when the requested/default model
+# resolves to the configured VL model name.
+vl_base_url="${NEURX_VL_BASE_URL:-}"
+vl_model="${NEURX_VL_MODEL:-Qwen2.5-VL-7B}"
+vl_completion_path="${NEURX_VL_COMPLETION_PATH:-/v1/completions}"
+vl_timeout="${NEURX_VL_TIMEOUT_SEC:-120}"
+effective_model="${NEURX_BACKEND_MODEL:-}"
+
+if [ -n "$vl_base_url" ] && [ -n "$vl_model" ] && [ "${effective_model:-$vl_model}" = "$vl_model" ]; then
+  vl_url="${vl_base_url%/}${vl_completion_path}"
+  vl_body="{\"model\":\"$(json_escape "$vl_model")\",\"prompt\":\"$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")\",\"max_tokens\":${NEURX_BACKEND_MAX_TOKENS:-${max_tokens:-128}},\"temperature\":0.0,\"top_p\":1.0}"
+  vl_out_file="$(mktemp /tmp/neurx_vl_out.XXXXXX)"
+  vl_err_file="$(mktemp /tmp/neurx_vl_err.XXXXXX)"
+
+  if printf '%s' "$vl_body" | curl -sf -X POST "$vl_url" \
+      -H 'Content-Type: application/json' \
+      --connect-timeout 5 --max-time "${vl_timeout}" \
+      -d @- > "$vl_out_file" 2>"$vl_err_file"; then
+    vl_text=""
+    vl_completion_tokens="0"
+    if command -v python3 >/dev/null 2>&1; then
+      vl_text="$(python3 -c '
+import json, sys
+with open(sys.argv[1]) as f:
+    payload = json.load(f)
+text = ""
+choices = payload.get("choices") or []
+if choices:
+    first = choices[0] or {}
+    text = first.get("text") or first.get("message", {}).get("content", "") or ""
+print(text)
+' "$vl_out_file" 2>/dev/null)" || vl_text=""
+      vl_completion_tokens="$(python3 -c '
+import json, sys
+with open(sys.argv[1]) as f:
+    payload = json.load(f)
+usage = payload.get("usage") or {}
+print(usage.get("completion_tokens") or 0, end="")
+' "$vl_out_file" 2>/dev/null)" || vl_completion_tokens="0"
+    fi
+
+    rm -f "$vl_out_file" "$vl_err_file"
+
+    if [ -n "${vl_text:-}" ]; then
+      printf '{"ok":true,"backend_name":"neurx.qwen2_5_vl","model_name":"%s","summary":"qwen2.5-vl-direct","prompt":"%s","completion":"%s","generated_tokens":%s,"last_token":0,"train_loss":0,"validation_loss":0,"ready":true}\n' \
+        "$(json_escape "$vl_model")" \
+        "$(json_escape "${NEURX_BACKEND_PROMPT:-${prompt:-}}")" \
+        "$(json_escape "$vl_text")" \
+        "${vl_completion_tokens:-0}"
+      exit 0
+    fi
+
+    printf 'runtime_error: qwen2.5-vl returned empty content model=%s url=%s\n' \
+      "$vl_model" "$vl_url" >&2
+    exit 1
+  fi
+
+  vl_err="$(tr '\n' ' ' < "$vl_err_file" | head -c 240)"
+  rm -f "$vl_out_file" "$vl_err_file"
+  printf 'runtime_error: qwen2.5-vl request failed model=%s url=%s timeout=%ss error=%s\n' \
+    "$vl_model" "$vl_url" "$vl_timeout" "${vl_err:-unknown}" >&2
+  exit 1
+fi
+
 # ── Ollama / OpenAI-compatible LLM inference ─────────────────────────────────
 # When no template matches, try a locally-running LLM (Ollama or compatible).
 # Set NEURX_OLLAMA_URL to override; default: http://localhost:11434
 # Set NEURX_OLLAMA_MODEL to choose model; default: qwen2.5-coder:latest
 ollama_url="${NEURX_OLLAMA_URL:-http://localhost:11434}"
-ollama_model="${NEURX_OLLAMA_MODEL:-${NEURX_LLM_MODEL:-qwen2.5-coder:latest}}"
+requested_model="${NEURX_BACKEND_MODEL:-}"
+ollama_model="${requested_model:-${NEURX_OLLAMA_MODEL:-${NEURX_LLM_MODEL:-qwen2.5-coder:latest}}}"
+ollama_timeout="${NEURX_OLLAMA_TIMEOUT_SEC:-30}"
 
 if tags_json="$(curl -sf --connect-timeout 1 "${ollama_url}/api/tags" 2>/dev/null)"; then
   # Auto-select best available code model if the configured one is not present.
-  # Use env var to pass ollama_model into python3 to avoid heredoc-vs-pipe conflict.
-  if command -v python3 >/dev/null 2>&1; then
+  # Use env var to pass model config into python3 to avoid heredoc-vs-pipe conflict.
+  if [ -n "$requested_model" ] && command -v python3 >/dev/null 2>&1; then
+    requested_present="$(printf '%s' "$tags_json" | \
+      NEURX_CFG_MODEL="$requested_model" python3 -c '
+import sys, json, os
+data = json.load(sys.stdin)
+configured = os.environ.get("NEURX_CFG_MODEL", "")
+names = [m["name"] for m in data.get("models", [])]
+print("1" if configured in names else "0", end="")
+' 2>/dev/null)" || requested_present="0"
+    if [ "$requested_present" != "1" ]; then
+      printf 'runtime_error: requested model not available in ollama: %s\n' "$requested_model" >&2
+      exit 1
+    fi
+  elif command -v python3 >/dev/null 2>&1; then
     auto_model="$(printf '%s' "$tags_json" | \
       NEURX_CFG_MODEL="$ollama_model" python3 -c '
 import sys, json, os
@@ -227,10 +307,11 @@ if names:
 
   llm_resp=""
   llm_out_file="$(mktemp /tmp/neurx_llm_out.XXXXXX)"
+  llm_err_file="$(mktemp /tmp/neurx_llm_err.XXXXXX)"
   if printf '%s' "$chat_body" | curl -sf -X POST "${ollama_url}/api/chat" \
       -H 'Content-Type: application/json' \
-      --connect-timeout 5 --max-time 120 \
-      -d @- > "$llm_out_file" 2>/dev/null; then
+      --connect-timeout 5 --max-time "${ollama_timeout}" \
+      -d @- > "$llm_out_file" 2>"$llm_err_file"; then
     if command -v python3 >/dev/null 2>&1; then
       llm_resp="$(python3 -c '
 import sys, json
@@ -242,8 +323,14 @@ except Exception:
     pass
 ' "$llm_out_file" 2>/dev/null)" || llm_resp=""
     fi
+  else
+    llm_err="$(tr '\n' ' ' < "$llm_err_file" | head -c 240)"
+    rm -f "$llm_out_file" "$llm_err_file"
+    printf 'runtime_error: ollama request failed model=%s url=%s timeout=%ss error=%s\n' \
+      "$ollama_model" "$ollama_url" "$ollama_timeout" "${llm_err:-unknown}" >&2
+    exit 1
   fi
-  rm -f "$llm_out_file"
+  rm -f "$llm_out_file" "$llm_err_file"
 
   if [ -n "${llm_resp:-}" ]; then
     # Determine backend_name and summary based on whether NeurX checkpoint was used
@@ -263,6 +350,10 @@ except Exception:
       "${neurx_step:-0}" "${neurx_loss:-0}" "${neurx_n_params:-0}" "$ckpt_e"
     exit 0
   fi
+
+  printf 'runtime_error: ollama returned empty content model=%s url=%s\n' \
+    "$ollama_model" "$ollama_url" >&2
+  exit 1
 fi
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -297,7 +388,7 @@ if [ "$serve_status" -eq 0 ] && [ -z "$serve_out" ]; then
   completion="${completion}（serve.s 执行成功但无输出）"
 fi
 
-model_escaped="$(json_escape "${NEURX_BACKEND_MODEL:-gpt_large}")"
+model_escaped="$(json_escape "${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}")"
 prompt_escaped="$(json_escape "${NEURX_BACKEND_PROMPT:-}")"
 completion_escaped="$(json_escape "$completion")"
 
