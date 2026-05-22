@@ -641,6 +641,17 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_chat_path_ = local_model_default_chat_path();
     }
 
+    const bool has_checkpoint_model = !checkpoint_model_file_.isEmpty();
+    const bool env_name_is_checkpoint = looks_like_checkpoint_model_name(env_name.trimmed());
+    const bool base_url_is_not_local_s_backend = !url_looks_like_s_backend(local_model_base_url_);
+    if (has_checkpoint_model && base_url_is_not_local_s_backend
+        && (env_name.trimmed().isEmpty() || env_name_is_checkpoint)) {
+        local_model_backend_ = "openai";
+        local_model_base_url_ = "http://127.0.0.1:18080";
+        local_model_chat_path_ = "/neurx/api/chat";
+        local_model_name_ = checkpoint_model_file_;
+    }
+
     const bool default_local_setup = env_enabled.trimmed().isEmpty()
         && env_backend.trimmed().isEmpty()
         && env_base_url.trimmed().isEmpty()

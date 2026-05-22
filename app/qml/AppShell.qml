@@ -1991,7 +1991,8 @@ Item {
                                 required property int index
                                 required property string label
                                 required property string path
-                                property bool isPreview: model.preview !== undefined ? model.preview : false
+                                required property bool preview
+                                property bool isPreview: preview
 
                                 width: Math.min(220, Math.max(120, tabLabel.implicitWidth + 42))
                                 height: 28
