@@ -161,6 +161,17 @@ Item {
 
         var entryIndex = indexOfEntryPath(tab.path)
         selectedFileIndex = entryIndex
+
+        // Auto-reveal: expand explorer to the file and scroll to it
+        if (tab.path.length > 0) {
+            expandToFilePath(tab.path)
+            var revealedIndex = indexOfEntryPath(tab.path)
+            if (revealedIndex >= 0) {
+                selectedFileIndex = revealedIndex
+                fileView.positionViewAtIndex(revealedIndex, ListView.Contain)
+            }
+        }
+
         persistSessionState()
     }
 
