@@ -2291,6 +2291,9 @@ Item {
                             model: conversationModel
                             boundsBehavior: Flickable.StopAtBounds
                             onContentHeightChanged: positionViewAtEnd()
+                            ScrollBar.vertical: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
 
                             delegate: Item {
                                 width: conversationList.width
