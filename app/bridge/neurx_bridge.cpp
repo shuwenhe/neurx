@@ -687,7 +687,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
     const QString env_chat_path = qEnvironmentVariable("NEURX_LLM_CHAT_PATH");
     const QString env_remote_only = qEnvironmentVariable("NEURX_REMOTE_ONLY").trimmed().toLower();
     const bool remote_only = env_remote_only.isEmpty()
-        ? true
+        ? false
         : !(env_remote_only == "0" || env_remote_only == "false" || env_remote_only == "no" || env_remote_only == "off");
     const QString remote_base_url = qEnvironmentVariable(
         "NEURX_REMOTE_BASE_URL", kDefaultCodeAgentRemoteBaseUrl).trimmed();
