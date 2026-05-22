@@ -9,11 +9,14 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QProcess>
+#include <QSettings>
 #include <QTemporaryFile>
 #include <QStandardPaths>
 #include <QStorageInfo>
 #include <QClipboard>
+#include <QElapsedTimer>
 #include <QGuiApplication>
+#include <QMetaObject>
 #include <QThread>
 #include <QUrl>
 #include <QVariantMap>
@@ -22,8 +25,10 @@
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
-constexpr const char kDefaultLocalOllamaModel[] = "neurx-qwen2.5vl-local:latest";
-constexpr const char kDefaultLocalOllamaModelDir[] = "artifacts/checkpoints/Qwen2.5-VL-7B";
+constexpr const char kDefaultLocalOllamaModel[] = "neurx-qwen2.5-0.5b-instruct-local:latest";
+constexpr const char kDefaultLocalOllamaModelDir[] = "artifacts/checkpoints/Qwen2.5-0.5B-Instruct";
+constexpr const char kDefaultCustomerServiceFallbackModel[] = "neurx-qwen2.5-vl-7b-local:latest";
+constexpr const char kDefaultCustomerServiceFallbackModelDir[] = "artifacts/checkpoints/Qwen2.5-VL-7B";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
@@ -90,6 +95,14 @@ bool url_looks_like_ollama(const QString& base_url) {
     if ((host == "127.0.0.1" || host == "localhost") && port == 11434) {
         return true;
     }
+    const QUrl env_url(qEnvironmentVariable("NEURX_OLLAMA_URL").trimmed());
+    if (env_url.isValid() && !env_url.host().trimmed().isEmpty()) {
+        const QString env_host = env_url.host().trimmed().toLower();
+        const int env_port = env_url.port();
+        if (host == env_host && port == env_port) {
+            return true;
+        }
+    }
     return host.contains("ollama");
 }
 
@@ -141,9 +154,6 @@ QString preferred_model_name_for(QString base_url,
         configured_name.contains("gpt_large_pretrain", Qt::CaseInsensitive);
 
     if (wants_ollama) {
-        if (!local_ollama_model_dir.isEmpty()) {
-            return QString::fromLatin1(kDefaultLocalOllamaModel);
-        }
         if (!configured_name.isEmpty() && configured_name != "local-model" && !looks_like_checkpoint_name) {
             return configured_name;
         }
@@ -159,10 +169,6 @@ QString preferred_model_name_for(QString base_url,
 
     if (has_checkpoint_model && !checkpoint_model_file.trimmed().isEmpty()) {
         return checkpoint_model_file.trimmed();
-    }
-
-    if (!local_ollama_model_dir.isEmpty()) {
-        return QString::fromLatin1(kDefaultLocalOllamaModel);
     }
 
     return configured_name;
@@ -183,6 +189,35 @@ QString resolve_local_ollama_model_dir(const QString& repo_root, const QString& 
 
     if (!checkpoint_root.trimmed().isEmpty()) {
         const QDir checkpoints_dir(checkpoint_root);
+        const QString inferred = checkpoints_dir.filePath("Qwen2.5-0.5B-Instruct");
+        if (QFileInfo(inferred).exists() && QFileInfo(inferred).isDir()) {
+            return QDir(inferred).absolutePath();
+        }
+    }
+
+    return QString();
+}
+
+QString resolve_customer_service_fallback_model_dir(const QString& repo_root, const QString& checkpoint_root = QString()) {
+    const QString env_dir = qEnvironmentVariable("NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR").trimmed();
+    if (!env_dir.isEmpty() && QFileInfo(env_dir).exists() && QFileInfo(env_dir).isDir()) {
+        return QDir(env_dir).absolutePath();
+    }
+
+    const QString compat_env_dir = qEnvironmentVariable("NEURX_OLLAMA_FALLBACK_MODEL_DIR").trimmed();
+    if (!compat_env_dir.isEmpty() && QFileInfo(compat_env_dir).exists() && QFileInfo(compat_env_dir).isDir()) {
+        return QDir(compat_env_dir).absolutePath();
+    }
+
+    if (!repo_root.trimmed().isEmpty()) {
+        const QString inferred = QDir(repo_root).filePath(QString::fromLatin1(kDefaultCustomerServiceFallbackModelDir));
+        if (QFileInfo(inferred).exists() && QFileInfo(inferred).isDir()) {
+            return QDir(inferred).absolutePath();
+        }
+    }
+
+    if (!checkpoint_root.trimmed().isEmpty()) {
+        const QDir checkpoints_dir(checkpoint_root);
         const QString inferred = checkpoints_dir.filePath("Qwen2.5-VL-7B");
         if (QFileInfo(inferred).exists() && QFileInfo(inferred).isDir()) {
             return QDir(inferred).absolutePath();
@@ -190,6 +225,66 @@ QString resolve_local_ollama_model_dir(const QString& repo_root, const QString& 
     }
 
     return QString();
+}
+
+QString customer_service_fallback_model_name(const QString& repo_root, const QString& checkpoint_root) {
+    const QString env_model = qEnvironmentVariable("NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL").trimmed();
+    if (!env_model.isEmpty()) {
+        return env_model;
+    }
+
+    const QString compat_env_model = qEnvironmentVariable("NEURX_OLLAMA_FALLBACK_MODEL").trimmed();
+    if (!compat_env_model.isEmpty()) {
+        return compat_env_model;
+    }
+
+    const QString fallback_dir = resolve_customer_service_fallback_model_dir(repo_root, checkpoint_root);
+    if (!fallback_dir.isEmpty()) {
+        return QString::fromLatin1(kDefaultCustomerServiceFallbackModel);
+    }
+
+    return QString();
+}
+
+bool prompt_targets_customer_service(const QString& prompt) {
+    const QString text = prompt.trimmed().toLower();
+    static const QStringList keywords = {
+        "customer service", "customer support", "support ticket", "ticket", "after-sales",
+        "after sales", "refund", "complaint", "order issue", "help desk",
+        "客服", "客户服务", "售后", "工单", "退款", "投诉", "订单问题", "支持工单"
+    };
+    for (const QString& keyword : keywords) {
+        if (text.contains(keyword)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool response_needs_customer_service_fallback(const QString& response_text) {
+    const QString trimmed = response_text.trimmed();
+    if (trimmed.isEmpty()) {
+        return true;
+    }
+
+    const QString lowered = trimmed.toLower();
+    if (lowered.startsWith("runtime_")
+        || lowered.startsWith("local_model_")
+        || lowered.startsWith("code_assistant_")) {
+        return true;
+    }
+
+    static const QStringList weak_markers = {
+        "i'm sorry", "i am sorry", "can't help", "cannot help", "unable to help",
+        "please provide your request", "抱歉", "无法处理", "不能处理", "无法帮助", "请提供您的请求"
+    };
+    for (const QString& marker : weak_markers) {
+        if (lowered.contains(marker)) {
+            return true;
+        }
+    }
+
+    return trimmed.size() < 24;
 }
 
 QString escape_s_string(const QString& value) {
@@ -200,6 +295,239 @@ QString escape_s_string(const QString& value) {
     out.replace("\r", "\\r");
     out.replace("\t", "\\t");
     return out;
+}
+
+QString stream_content_from_object(const QJsonObject& obj) {
+    if (obj.value("message").isObject()) {
+        const QString content = obj.value("message").toObject().value("content").toString();
+        if (!content.isEmpty()) {
+            return content;
+        }
+    }
+
+    if (obj.value("response").isString()) {
+        const QString content = obj.value("response").toString();
+        if (!content.isEmpty()) {
+            return content;
+        }
+    }
+
+    if (obj.value("choices").isArray()) {
+        const QJsonArray choices = obj.value("choices").toArray();
+        if (!choices.isEmpty() && choices.first().isObject()) {
+            const QJsonObject first = choices.first().toObject();
+            if (first.value("delta").isObject()) {
+                const QString content = first.value("delta").toObject().value("content").toString();
+                if (!content.isEmpty()) {
+                    return content;
+                }
+            }
+            if (first.value("message").isObject()) {
+                const QString content = first.value("message").toObject().value("content").toString();
+                if (!content.isEmpty()) {
+                    return content;
+                }
+            }
+            if (first.value("text").isString()) {
+                const QString content = first.value("text").toString();
+                if (!content.isEmpty()) {
+                    return content;
+                }
+            }
+        }
+    }
+
+    return QString();
+}
+
+bool stream_done_from_object(const QJsonObject& obj) {
+    if (obj.value("done").toBool(false)) {
+        return true;
+    }
+
+    if (obj.value("choices").isArray()) {
+        const QJsonArray choices = obj.value("choices").toArray();
+        if (!choices.isEmpty() && choices.first().isObject()) {
+            const QString finish_reason = choices.first().toObject().value("finish_reason").toString();
+            if (!finish_reason.isEmpty()) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool parse_stream_line(const QByteArray& raw_line, QString* chunk, QJsonObject* obj, bool* done) {
+    QByteArray line = raw_line.trimmed();
+    if (line.isEmpty()) {
+        return false;
+    }
+
+    if (line.startsWith("data:")) {
+        line = line.mid(5).trimmed();
+    }
+
+    if (line == "[DONE]") {
+        if (done) {
+            *done = true;
+        }
+        if (chunk) {
+            chunk->clear();
+        }
+        if (obj) {
+            *obj = QJsonObject();
+        }
+        return true;
+    }
+
+    QJsonParseError parse_error;
+    const QJsonDocument doc = QJsonDocument::fromJson(line, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError || !doc.isObject()) {
+        return false;
+    }
+
+    const QJsonObject parsed = doc.object();
+    if (obj) {
+        *obj = parsed;
+    }
+    if (chunk) {
+        *chunk = stream_content_from_object(parsed);
+    }
+    if (done) {
+        *done = stream_done_from_object(parsed);
+    }
+    return true;
+}
+
+QString run_streaming_chat_request(NeurxBridge* bridge,
+                                   const QString& url,
+                                   const QString& body_file,
+                                   int timeout_ms,
+                                   QString* accumulated_content,
+                                   QJsonObject* last_object) {
+    const QString curl = QStandardPaths::findExecutable("curl");
+    if (curl.isEmpty()) {
+        return QStringLiteral("runtime_exec_failed: curl not found");
+    }
+
+    QProcess proc;
+    QStringList args;
+    args << "-N" << "-sS"
+         << "-X" << "POST"
+         << url
+         << "-H" << "Content-Type: application/json"
+         << "--connect-timeout" << "5"
+         << "--max-time" << QString::number(qMax(1, timeout_ms / 1000))
+         << "--data-binary" << QString("@%1").arg(body_file);
+    proc.setProgram(curl);
+    proc.setArguments(args);
+    proc.start();
+
+    if (!proc.waitForStarted(10000)) {
+        return QStringLiteral("runtime_exec_failed: failed to start curl");
+    }
+
+    QByteArray stdout_buffer;
+    QByteArray stderr_buffer;
+    QString content;
+    QJsonObject final_object;
+    QElapsedTimer timer;
+    timer.start();
+
+    auto flush_stdout = [&]() {
+        stdout_buffer.append(proc.readAllStandardOutput());
+        stderr_buffer.append(proc.readAllStandardError());
+
+        while (true) {
+            const int newline = stdout_buffer.indexOf('\n');
+            if (newline < 0) {
+                break;
+            }
+
+            const QByteArray line = stdout_buffer.left(newline);
+            stdout_buffer.remove(0, newline + 1);
+
+            QString chunk;
+            QJsonObject parsed;
+            bool done = false;
+            if (!parse_stream_line(line, &chunk, &parsed, &done)) {
+                continue;
+            }
+            if (!parsed.isEmpty()) {
+                final_object = parsed;
+            }
+            if (!chunk.isEmpty()) {
+                content += chunk;
+                if (bridge) {
+                    QMetaObject::invokeMethod(
+                        bridge,
+                        [bridge, chunk]() {
+                            emit bridge->agentRunChunk(chunk);
+                        },
+                        Qt::QueuedConnection);
+                }
+            }
+            if (done) {
+                continue;
+            }
+        }
+    };
+
+    while (proc.state() != QProcess::NotRunning) {
+        const int remaining = timeout_ms - static_cast<int>(timer.elapsed());
+        if (remaining <= 0) {
+            proc.kill();
+            proc.waitForFinished(5000);
+            return QStringLiteral("runtime_timeout: curl");
+        }
+        proc.waitForReadyRead(qMin(200, remaining));
+        proc.waitForFinished(0);
+        flush_stdout();
+    }
+
+    flush_stdout();
+    if (!stdout_buffer.trimmed().isEmpty()) {
+        QString chunk;
+        QJsonObject parsed;
+        bool done = false;
+        if (parse_stream_line(stdout_buffer, &chunk, &parsed, &done)) {
+            if (!parsed.isEmpty()) {
+                final_object = parsed;
+            }
+            if (!chunk.isEmpty()) {
+                content += chunk;
+                if (bridge) {
+                    QMetaObject::invokeMethod(
+                        bridge,
+                        [bridge, chunk]() {
+                            emit bridge->agentRunChunk(chunk);
+                        },
+                        Qt::QueuedConnection);
+                }
+            }
+        }
+    }
+
+    if (accumulated_content) {
+        *accumulated_content = content;
+    }
+    if (last_object) {
+        *last_object = final_object;
+    }
+
+    const QString stderr_text = QString::fromUtf8(stderr_buffer).trimmed();
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        if (!stderr_text.isEmpty()) {
+            return QString("runtime_exec_failed: %1").arg(stderr_text.left(200));
+        }
+        if (!content.isEmpty()) {
+            return QString("runtime_exec_failed: %1").arg(content.left(200));
+        }
+        return QStringLiteral("runtime_exec_failed: curl");
+    }
+
+    return QString();
 }
 }
 
@@ -264,7 +592,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_base_url_ = !checkpoint_model_file_.isEmpty()
             ? "http://127.0.0.1:18080"
             : (!local_ollama_model_dir.isEmpty() || local_model_backend_ == "ollama")
-            ? "http://127.0.0.1:11434"
+            ? qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435")
             : "http://127.0.0.1:8000";
     }
     if (!env_name.trimmed().isEmpty()) {
@@ -272,7 +600,9 @@ NeurxBridge::NeurxBridge(QObject* parent)
     } else if (!checkpoint_model_file_.isEmpty()) {
         local_model_name_ = checkpoint_model_file_;
     } else if (local_model_backend_ == "ollama") {
-        local_model_name_ = kDefaultOllamaModel;
+        local_model_name_ = local_ollama_model_dir.isEmpty()
+            ? QString::fromLatin1(kDefaultOllamaModel)
+            : QString::fromLatin1(kDefaultLocalOllamaModel);
     }
     if (!env_chat_path.trimmed().isEmpty()) {
         local_model_chat_path_ = sanitize_chat_path(env_chat_path);
@@ -291,7 +621,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_enabled_ = true;
         if (!local_ollama_model_dir.isEmpty()) {
             local_model_backend_ = "ollama";
-            local_model_base_url_ = "http://127.0.0.1:11434";
+            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435");
             local_model_name_ = QString::fromLatin1(kDefaultLocalOllamaModel);
             local_model_chat_path_ = local_model_default_chat_path();
         } else if (!checkpoint_model_file_.isEmpty()) {
@@ -301,8 +631,8 @@ NeurxBridge::NeurxBridge(QObject* parent)
             local_model_chat_path_ = "/neurx/api/chat";
         } else {
             local_model_backend_ = "ollama";
-            local_model_base_url_ = "http://127.0.0.1:11434";
-            local_model_name_ = kDefaultOllamaModel;
+            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435");
+            local_model_name_ = QString::fromLatin1(kDefaultOllamaModel);
             local_model_chat_path_ = local_model_default_chat_path();
         }
     }
@@ -361,7 +691,9 @@ void NeurxBridge::set_local_model_backend(const QString& backend) {
     local_model_backend_ = normalized;
     local_ollama_ready_ = false;
     if (local_model_backend_ == "ollama" && (local_model_name_.isEmpty() || local_model_name_ == "local-model")) {
-        local_model_name_ = kDefaultOllamaModel;
+        local_model_name_ = resolve_local_ollama_model_dir(find_repo_root(), checkpoint_models_root_).isEmpty()
+            ? QString::fromLatin1(kDefaultOllamaModel)
+            : QString::fromLatin1(kDefaultLocalOllamaModel);
     }
     local_model_chat_path_ = preferred_chat_path_for(
         local_model_base_url_,
@@ -600,7 +932,9 @@ QString NeurxBridge::bootstrap_ollama_model() {
     }
 
     if (local_model_name_.trimmed().isEmpty() || local_model_name_ == "local-model") {
-        local_model_name_ = kDefaultOllamaModel;
+        local_model_name_ = resolve_local_ollama_model_dir(find_repo_root(), checkpoint_models_root_).isEmpty()
+            ? QString::fromLatin1(kDefaultOllamaModel)
+            : QString::fromLatin1(kDefaultLocalOllamaModel);
         emit localModelConfigChanged();
     }
 
@@ -696,25 +1030,26 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
     return "runtime_timeout: local backend did not become ready";
 }
 
-QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps) const {
+QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps) {
     if (!local_model_enabled_) {
         return "local_model_config_missing: disabled";
     }
 
+    const QString repo_root = find_repo_root();
     const QString base_url = local_model_base_url_.trimmed();
     const QString chat_path = preferred_chat_path_for(
         base_url,
         local_model_chat_path_,
         local_model_backend_,
         !checkpoint_model_file_.isEmpty());
-    const QString model_name = preferred_model_name_for(
+    const QString primary_model_name = preferred_model_name_for(
         base_url,
         local_model_name_,
         local_model_backend_,
         !checkpoint_model_file_.isEmpty(),
         checkpoint_model_file_,
-        resolve_local_ollama_model_dir(find_repo_root(), checkpoint_models_root_));
-    if (base_url.isEmpty() || chat_path.isEmpty() || model_name.isEmpty()) {
+        resolve_local_ollama_model_dir(repo_root, checkpoint_models_root_));
+    if (base_url.isEmpty() || chat_path.isEmpty() || primary_model_name.isEmpty()) {
         return "local_model_config_missing: base_url, chat_path, or model";
     }
 
@@ -728,30 +1063,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     }
     url = url + path;
 
-    QJsonObject request_json;
-    request_json.insert("model", model_name);
-    qInfo().noquote() << QString("bridge local model request url=%1 model=%2 path=%3 backend=%4")
-        .arg(url, model_name, chat_path, local_model_backend_);
-    request_json.insert("prompt", prompt);
-    QJsonObject user_message;
-    user_message.insert("role", "user");
-    user_message.insert("content", prompt);
-    QJsonArray messages;
-    messages.append(user_message);
-    request_json.insert("messages", messages);
-    request_json.insert("max_tokens", max_steps);
-
-    const QString payload = QString::fromUtf8(QJsonDocument(request_json).toJson(QJsonDocument::Compact));
-    QTemporaryFile tmp;
-    tmp.setAutoRemove(true);
-    if (!tmp.open()) {
-        return QString("runtime_exec_failed: could not create temp file");
-    }
-    tmp.write(payload.toUtf8());
-    tmp.flush();
-    tmp.close();
-
-    const QString repo_root = find_repo_root();
+    const bool wants_streaming = url_looks_like_ollama(base_url) && chat_path == "/api/chat";
     if (!repo_root.isEmpty()) {
         qInfo().noquote() << QString("bridge local backend code_path handler=%1 gateway=%2 serve=%3")
             .arg(QDir(repo_root).filePath("app/service/http_handler.sh"))
@@ -759,69 +1071,173 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
             .arg(QDir(repo_root).filePath("app/service/serve.s"));
     }
 
-    const QString raw = run_http_request("POST", url, tmp.fileName(), 120000);
-    if (raw.startsWith("runtime_")) {
-        return raw;
-    }
+    auto run_request_for_model = [&](const QString& requested_model_name) -> QString {
+        QJsonObject request_json;
+        request_json.insert("model", requested_model_name);
+        qInfo().noquote() << QString("bridge local model request url=%1 model=%2 path=%3 backend=%4")
+            .arg(url, requested_model_name, chat_path, local_model_backend_);
+        request_json.insert("prompt", prompt);
+        QJsonObject user_message;
+        user_message.insert("role", "user");
+        user_message.insert("content", prompt);
+        QJsonArray messages;
+        messages.append(user_message);
+        request_json.insert("messages", messages);
+        request_json.insert("max_tokens", max_steps);
 
-    QJsonParseError parse_error;
-    const QJsonDocument response_json = QJsonDocument::fromJson(raw.toUtf8(), &parse_error);
-    if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
-        return QString("local_model_parse_failed: %1").arg(raw.left(200));
-    }
-
-    const QJsonObject response = response_json.object();
-    QString content = response.value("content").toString();
-    if (content.isEmpty()) {
-        content = response.value("completion").toString();
-    }
-    if (content.isEmpty() && response.value("choices").isArray()) {
-        const QJsonArray choices = response.value("choices").toArray();
-        if (!choices.isEmpty() && choices.first().isObject()) {
-            const QJsonObject message = choices.first().toObject().value("message").toObject();
-            content = message.value("content").toString();
+        if (wants_streaming) {
+            request_json.insert("stream", true);
         }
+
+        const QString payload = QString::fromUtf8(QJsonDocument(request_json).toJson(QJsonDocument::Compact));
+        QTemporaryFile tmp;
+        tmp.setAutoRemove(true);
+        if (!tmp.open()) {
+            return QStringLiteral("runtime_exec_failed: could not create temp file");
+        }
+        tmp.write(payload.toUtf8());
+        tmp.flush();
+        tmp.close();
+
+        QString raw;
+        QString streamed_content;
+        QJsonObject streamed_object;
+        if (wants_streaming) {
+            qInfo().noquote() << QString("bridge http_request stream method=POST url=%1 timeout_ms=%2")
+                .arg(url)
+                .arg(120000);
+            const QString stream_error = run_streaming_chat_request(
+                this, url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
+            if (!stream_error.isEmpty()) {
+                qWarning().noquote() << QString("bridge http_request failed method=POST url=%1 result=%2")
+                    .arg(url, stream_error.left(200));
+                return stream_error;
+            }
+
+            QJsonObject normalized_stream = streamed_object;
+            if (!streamed_content.isEmpty()) {
+                QJsonObject message = normalized_stream.value("message").toObject();
+                message.insert("content", streamed_content);
+                normalized_stream.insert("message", message);
+                normalized_stream.insert("content", streamed_content);
+            }
+            if (!normalized_stream.contains("backend")) {
+                normalized_stream.insert("backend", local_model_backend_);
+            }
+            if (!normalized_stream.contains("model")) {
+                normalized_stream.insert("model", requested_model_name);
+            }
+            if (!normalized_stream.contains("steps")) {
+                normalized_stream.insert("steps", max_steps);
+            }
+            raw = QString::fromUtf8(QJsonDocument(normalized_stream).toJson(QJsonDocument::Compact));
+            qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1 content_len=%3 content_preview=%4")
+                .arg(url)
+                .arg(raw.size())
+                .arg(streamed_content.size())
+                .arg(streamed_content.left(120));
+        } else {
+            raw = run_http_request("POST", url, tmp.fileName(), 120000);
+        }
+        if (raw.startsWith("runtime_")) {
+            return raw;
+        }
+
+        QJsonParseError parse_error;
+        const QJsonDocument response_json = QJsonDocument::fromJson(raw.toUtf8(), &parse_error);
+        if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+            return QString("local_model_parse_failed: %1").arg(raw.left(200));
+        }
+
+        const QJsonObject response = response_json.object();
+        QString content = response.value("content").toString();
+        if (content.isEmpty()) {
+            content = response.value("completion").toString();
+        }
+        if (content.isEmpty() && response.value("choices").isArray()) {
+            const QJsonArray choices = response.value("choices").toArray();
+            if (!choices.isEmpty() && choices.first().isObject()) {
+                const QJsonObject message = choices.first().toObject().value("message").toObject();
+                content = message.value("content").toString();
+            }
+        }
+
+        QString backend = response.value("backend").toString();
+        if (backend.isEmpty()) {
+            backend = response.value("backend_name").toString();
+        }
+        if (backend.isEmpty()) {
+            backend = local_model_backend_;
+        }
+
+        QString model = response.value("model").toString();
+        if (model.isEmpty()) {
+            model = response.value("model_name").toString();
+        }
+        if (model.isEmpty()) {
+            model = requested_model_name;
+        }
+
+        int steps = response.value("steps").toInt(max_steps);
+        if (steps <= 0) {
+            steps = max_steps;
+        }
+
+        QJsonObject normalized;
+        normalized.insert("backend", backend);
+        normalized.insert("model", model);
+        normalized.insert("steps", steps);
+        normalized.insert("content", content);
+        if (response.contains("checkpoint_step")) {
+            normalized.insert("checkpoint_step", response.value("checkpoint_step"));
+        }
+        if (response.contains("artifact_root")) {
+            normalized.insert("artifact_root", response.value("artifact_root"));
+        }
+        if (response.contains("checkpoint_file")) {
+            normalized.insert("checkpoint_file", response.value("checkpoint_file"));
+        }
+        if (response.contains("checkpoint_runtime_layer_states")) {
+            normalized.insert("checkpoint_runtime_layer_states", response.value("checkpoint_runtime_layer_states"));
+        }
+        return QString::fromUtf8(QJsonDocument(normalized).toJson(QJsonDocument::Compact));
+    };
+
+    auto extract_content = [](const QString& result) -> QString {
+        QJsonParseError parse_error;
+        const QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8(), &parse_error);
+        if (parse_error.error != QJsonParseError::NoError || !doc.isObject()) {
+            return result.trimmed();
+        }
+        return doc.object().value("content").toString().trimmed();
+    };
+
+    const bool customer_service_prompt = prompt_targets_customer_service(prompt);
+    const QString fallback_model_name = customer_service_fallback_model_name(repo_root, checkpoint_models_root_);
+
+    QString primary_result = run_request_for_model(primary_model_name);
+    if (!customer_service_prompt
+        || fallback_model_name.isEmpty()
+        || fallback_model_name == primary_model_name) {
+        return primary_result;
     }
 
-    QString backend = response.value("backend").toString();
-    if (backend.isEmpty()) {
-        backend = response.value("backend_name").toString();
-    }
-    if (backend.isEmpty()) {
-        backend = local_model_backend_;
-    }
-
-    QString model = response.value("model").toString();
-    if (model.isEmpty()) {
-        model = response.value("model_name").toString();
-    }
-    if (model.isEmpty()) {
-        model = model_name;
+    const bool primary_failed = primary_result.startsWith("runtime_")
+        || primary_result.startsWith("local_model_");
+    const QString primary_content = extract_content(primary_result);
+    if (!primary_failed && !response_needs_customer_service_fallback(primary_content)) {
+        return primary_result;
     }
 
-    int steps = response.value("steps").toInt(max_steps);
-    if (steps <= 0) {
-        steps = max_steps;
+    emit log_message("info", "bridge",
+        QString("customer-service fallback primary=%1 fallback=%2")
+            .arg(primary_model_name, fallback_model_name));
+    const QString fallback_result = run_request_for_model(fallback_model_name);
+    if (!fallback_result.startsWith("runtime_") && !fallback_result.startsWith("local_model_")) {
+        return fallback_result;
     }
 
-    QJsonObject normalized;
-    normalized.insert("backend", backend);
-    normalized.insert("model", model);
-    normalized.insert("steps", steps);
-    normalized.insert("content", content);
-    if (response.contains("checkpoint_step")) {
-        normalized.insert("checkpoint_step", response.value("checkpoint_step"));
-    }
-    if (response.contains("artifact_root")) {
-        normalized.insert("artifact_root", response.value("artifact_root"));
-    }
-    if (response.contains("checkpoint_file")) {
-        normalized.insert("checkpoint_file", response.value("checkpoint_file"));
-    }
-    if (response.contains("checkpoint_runtime_layer_states")) {
-        normalized.insert("checkpoint_runtime_layer_states", response.value("checkpoint_runtime_layer_states"));
-    }
-    return QString::fromUtf8(QJsonDocument(normalized).toJson(QJsonDocument::Compact));
+    return primary_failed ? fallback_result : primary_result;
 }
 
 QString NeurxBridge::local_model_summary() const {
@@ -1299,20 +1715,37 @@ QVariantList NeurxBridge::explorer_entries(const QString& path) const {
 }
 
 QString NeurxBridge::explorer_default_path() const {
-    // Prefer the repository root so the explorer opens directly inside the project
-    // rather than at the top-level disk root, which requires an extra click to expand.
-    const QString repo_root = find_repo_root();
-    if (!repo_root.trimmed().isEmpty()) {
-        return QDir(repo_root).absolutePath();
-    }
+    // Keep the explorer at the virtual "computer" root so mounted disks are
+    // visible by default. The QML layer expands "/" automatically when it is
+    // the only available volume.
+    return QString();
+}
 
-    // Fall back to the current working directory.
-    const QString cwd = QDir::currentPath();
-    if (!cwd.isEmpty()) {
-        return cwd;
-    }
+QVariantMap NeurxBridge::load_ui_session() const {
+    QSettings settings;
+    QVariantMap session;
+    session.insert("explorerCurrentPath", settings.value("app_shell/explorerCurrentPath", QString()).toString());
+    session.insert("selectedFilePath", settings.value("app_shell/selectedFilePath", QString()).toString());
+    session.insert("explorerPaneWidth", settings.value("app_shell/explorerPaneWidth", 280).toInt());
+    session.insert("agentPaneWidth", settings.value("app_shell/agentPaneWidth", 540).toInt());
+    session.insert("editorTabs", settings.value("app_shell/editorTabs", QVariantList()).toList());
+    session.insert("activeEditorTabIndex", settings.value("app_shell/activeEditorTabIndex", -1).toInt());
+    return session;
+}
 
-    return QStringLiteral("/");
+void NeurxBridge::save_ui_session(const QString& explorerPath,
+                                  const QString& selectedFilePath,
+                                  int explorerPaneWidth,
+                                  int agentPaneWidth,
+                                  const QVariantList& editorTabs,
+                                  int activeEditorTabIndex) {
+    QSettings settings;
+    settings.setValue("app_shell/explorerCurrentPath", explorerPath.trimmed());
+    settings.setValue("app_shell/selectedFilePath", selectedFilePath.trimmed());
+    settings.setValue("app_shell/explorerPaneWidth", explorerPaneWidth);
+    settings.setValue("app_shell/agentPaneWidth", agentPaneWidth);
+    settings.setValue("app_shell/editorTabs", editorTabs);
+    settings.setValue("app_shell/activeEditorTabIndex", activeEditorTabIndex);
 }
 
 void NeurxBridge::copy_to_clipboard(const QString& text) {
@@ -1431,6 +1864,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             .arg(prompt.trimmed());
     }
 
+    const bool wants_streaming = url_looks_like_ollama(url) && effective_chat_path == "/api/chat";
     if (chat_url.contains("/v1/chat/completions") || chat_url.contains("/api/chat")) {
         if (effective_model_name.isEmpty()) {
             emit log_message("warning", "agent",
@@ -1439,6 +1873,9 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         }
         payload.insert("model", effective_model_name);
         payload.insert("max_tokens", 256);
+        if (wants_streaming) {
+            payload.insert("stream", true);
+        }
         QJsonObject user_message;
         user_message.insert("role", "user");
         user_message.insert("content", effective_prompt);
@@ -1468,7 +1905,32 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     tmp.flush();
     tmp.close();
 
-    const QString chatResult = run_http_request("POST", chat_url, tmp.fileName(), 120000);
+    QString chatResult;
+    if (wants_streaming) {
+        qInfo().noquote() << QString("bridge http_request stream method=POST url=%1 timeout_ms=%2")
+            .arg(chat_url)
+            .arg(120000);
+        QString streamed_content;
+        QJsonObject streamed_object;
+        const QString stream_error = run_streaming_chat_request(
+            this, chat_url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
+        if (!stream_error.isEmpty()) {
+            emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(stream_error));
+            return stream_error;
+        }
+        if (!streamed_content.trimmed().isEmpty()) {
+            emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2 stream=1")
+                .arg(route)
+                .arg(streamed_content.size()));
+            return streamed_content.trimmed();
+        }
+        chatResult = QString::fromUtf8(QJsonDocument(streamed_object).toJson(QJsonDocument::Compact));
+        qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1")
+            .arg(chat_url)
+            .arg(chatResult.size());
+    } else {
+        chatResult = run_http_request("POST", chat_url, tmp.fileName(), 120000);
+    }
     if (!chatResult.startsWith("runtime_")) {
         QJsonParseError parse_error;
         const QJsonDocument response_json = QJsonDocument::fromJson(chatResult.toUtf8(), &parse_error);
