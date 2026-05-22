@@ -592,7 +592,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_base_url_ = !checkpoint_model_file_.isEmpty()
             ? "http://127.0.0.1:18080"
             : (!local_ollama_model_dir.isEmpty() || local_model_backend_ == "ollama")
-            ? qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435")
+            ? qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11434")
             : "http://127.0.0.1:8000";
     }
     if (!env_name.trimmed().isEmpty()) {
@@ -621,7 +621,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
         local_model_enabled_ = true;
         if (!local_ollama_model_dir.isEmpty()) {
             local_model_backend_ = "ollama";
-            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435");
+            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11434");
             local_model_name_ = QString::fromLatin1(kDefaultLocalOllamaModel);
             local_model_chat_path_ = local_model_default_chat_path();
         } else if (!checkpoint_model_file_.isEmpty()) {
@@ -631,7 +631,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
             local_model_chat_path_ = "/neurx/api/chat";
         } else {
             local_model_backend_ = "ollama";
-            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11435");
+            local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11434");
             local_model_name_ = QString::fromLatin1(kDefaultOllamaModel);
             local_model_chat_path_ = local_model_default_chat_path();
         }
