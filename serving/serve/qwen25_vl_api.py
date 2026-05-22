@@ -1,5 +1,7 @@
 import base64
 import io
+import inspect
+import logging
 import os
 import time
 import urllib.request
@@ -8,7 +10,7 @@ from threading import Lock
 from typing import Any
 
 import torch
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from PIL import Image
 from pydantic import BaseModel
 from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
@@ -21,14 +23,79 @@ PORT = int(os.getenv("PORT", "8004"))
 DEFAULT_MAX_TOKENS = int(os.getenv("DEFAULT_MAX_TOKENS", "128"))
 DEVICE = os.getenv("DEVICE", "cpu").lower()
 ATTN_IMPLEMENTATION = os.getenv("ATTN_IMPLEMENTATION", "eager")
+VISIBLE_DEVICES = os.getenv("ASCEND_RT_VISIBLE_DEVICES", "")
 
 MODEL_DTYPE = torch.float16 if DEVICE != "cpu" else "auto"
+
+LOG_LEVEL = os.getenv("LLM_LOG_LEVEL", "INFO").upper()
+if not logging.getLogger().handlers:
+    logging.basicConfig(level=LOG_LEVEL, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 app = FastAPI(title="Qwen2.5-VL API", version="1.0.0")
 
 processor = None
 model = None
 generation_lock = Lock()
+logger = logging.getLogger(__name__)
+logger.setLevel(LOG_LEVEL)
+
+
+def _caller_code_ref(depth: int = 1) -> str:
+    frame = inspect.currentframe()
+    try:
+        for _ in range(depth):
+            if frame is None:
+                break
+            frame = frame.f_back
+        if frame is None:
+            return "unknown"
+        return f"{os.path.basename(frame.f_code.co_filename)}:{frame.f_lineno}"
+    finally:
+        del frame
+
+
+def _format_log_value(value: Any, limit: int = 180) -> str:
+    if isinstance(value, str):
+        text = value.replace("\n", "\\n")
+    elif isinstance(value, (int, float, bool)) or value is None:
+        text = str(value)
+    else:
+        text = str(value)
+    if len(text) > limit:
+        return f"{text[:limit]}..."
+    return text
+
+
+def _trace_log(event: str, **fields: Any) -> None:
+    parts = [f"{key}={_format_log_value(value)}" for key, value in fields.items() if value is not None]
+    message = f"trace event={event} code={_caller_code_ref(depth=2)}"
+    if parts:
+        message = f"{message} {' '.join(parts)}"
+    logger.info(message)
+
+
+def _visible_device_ids() -> list[int]:
+    if DEVICE == "cpu":
+        return []
+
+    raw = VISIBLE_DEVICES.strip()
+    if not raw:
+        return [0]
+
+    device_ids: list[int] = []
+    for item in raw.split(","):
+        value = item.strip()
+        if not value:
+            continue
+        try:
+            device_ids.append(int(value))
+        except ValueError:
+            continue
+    return device_ids or [0]
+
+
+def _use_multi_npu() -> bool:
+    return DEVICE == "npu" and len(_visible_device_ids()) > 1
 
 
 class ChatMessage(BaseModel):
@@ -56,17 +123,39 @@ def _device_name() -> str:
     return "cpu" if DEVICE == "cpu" else f"{DEVICE}:0"
 
 
+def _input_device_name() -> str:
+    if DEVICE == "cpu" or model is None:
+        return "cpu"
+
+    hf_device_map = getattr(model, "hf_device_map", None)
+    if isinstance(hf_device_map, dict):
+        for mapped_device in hf_device_map.values():
+            if isinstance(mapped_device, int):
+                return f"{DEVICE}:{mapped_device}"
+            if isinstance(mapped_device, str) and mapped_device not in {"cpu", "disk"}:
+                return mapped_device
+
+    return _device_name()
+
+
 def _load_model() -> None:
     global processor, model
 
     processor = AutoProcessor.from_pretrained(MODEL_PATH, trust_remote_code=True, use_fast=False)
+    model_kwargs = {
+        "trust_remote_code": True,
+        "dtype": MODEL_DTYPE,
+        "attn_implementation": ATTN_IMPLEMENTATION,
+    }
+    if _use_multi_npu():
+        model_kwargs["device_map"] = "auto"
+        model_kwargs["low_cpu_mem_usage"] = True
+
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         MODEL_PATH,
-        trust_remote_code=True,
-        dtype=MODEL_DTYPE,
-        attn_implementation=ATTN_IMPLEMENTATION,
+        **model_kwargs,
     )
-    if DEVICE != "cpu":
+    if DEVICE != "cpu" and not _use_multi_npu():
         model = model.to(_device_name())
     model.eval()
 
@@ -81,6 +170,8 @@ def _build_generate_kwargs(max_tokens: int | None, temperature: float | None, to
     effective_temperature = 0.0 if temperature is None else temperature
     effective_top_p = 1.0 if top_p is None else top_p
     do_sample = effective_temperature > 0
+    if _use_multi_npu() and do_sample:
+        do_sample = False
 
     kwargs: dict[str, Any] = {
         "max_new_tokens": effective_max_tokens,
@@ -159,6 +250,7 @@ def _generate_from_messages(
     max_tokens: int | None,
     temperature: float | None,
     top_p: float | None,
+    trace_id: str | None = None,
 ) -> tuple[str, dict[str, int]]:
     normalized_messages, images = _normalize_messages(messages)
     prompt = processor.apply_chat_template(normalized_messages, tokenize=False, add_generation_prompt=True)
@@ -169,10 +261,22 @@ def _generate_from_messages(
         return_tensors="pt",
     )
     prompt_tokens = int(model_inputs["input_ids"].shape[-1])
-    if DEVICE != "cpu":
-        model_inputs = model_inputs.to(_device_name())
+    if DEVICE != "cpu" and not _use_multi_npu():
+        model_inputs = model_inputs.to(_input_device_name())
 
     generate_kwargs = _build_generate_kwargs(max_tokens, temperature, top_p)
+    _trace_log(
+        "model_generate_start",
+        trace_id=trace_id,
+        model=MODEL_ID,
+        device=DEVICE,
+        deployment="multi_npu" if _use_multi_npu() else "single_device",
+        message_count=len(messages),
+        image_count=len(images),
+        prompt_tokens=prompt_tokens,
+        do_sample=generate_kwargs.get("do_sample"),
+        max_new_tokens=generate_kwargs.get("max_new_tokens"),
+    )
     with generation_lock:
         with torch.no_grad():
             generated = model.generate(**model_inputs, **generate_kwargs)
@@ -185,12 +289,26 @@ def _generate_from_messages(
         "completion_tokens": completion_tokens,
         "total_tokens": prompt_tokens + completion_tokens,
     }
+    _trace_log(
+        "model_generate_done",
+        trace_id=trace_id,
+        model=MODEL_ID,
+        prompt_tokens=usage["prompt_tokens"],
+        completion_tokens=usage["completion_tokens"],
+        total_tokens=usage["total_tokens"],
+    )
     return text, usage
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "model": MODEL_ID, "device": DEVICE}
+    return {
+        "status": "ok",
+        "model": MODEL_ID,
+        "device": DEVICE,
+        "visible_devices": VISIBLE_DEVICES or "0",
+        "deployment": "multi_npu" if _use_multi_npu() else "single_device",
+    }
 
 
 @app.get("/v1/models")
@@ -209,11 +327,22 @@ def list_models() -> dict[str, Any]:
 
 
 @app.post("/v1/chat/completions")
-def chat_completions(request: ChatCompletionRequest) -> dict[str, Any]:
+def chat_completions(request: ChatCompletionRequest, http_request: Request) -> dict[str, Any]:
+    trace_id = http_request.headers.get("X-Neurx-Trace-Id", "") or uuid.uuid4().hex[:12]
+    _trace_log(
+        "model_request",
+        trace_id=trace_id,
+        endpoint="/v1/chat/completions",
+        remote=(http_request.client.host if http_request.client else None),
+        model=request.model,
+        message_count=len(request.messages),
+        temperature=request.temperature,
+        top_p=request.top_p,
+    )
     if request.model != MODEL_ID:
         raise HTTPException(status_code=404, detail=f"unknown model: {request.model}")
 
-    answer, usage = _generate_from_messages(request.messages, request.max_tokens, request.temperature, request.top_p)
+    answer, usage = _generate_from_messages(request.messages, request.max_tokens, request.temperature, request.top_p, trace_id=trace_id)
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
         "object": "chat.completion",
@@ -231,7 +360,18 @@ def chat_completions(request: ChatCompletionRequest) -> dict[str, Any]:
 
 
 @app.post("/v1/completions")
-def completions(request: CompletionRequest) -> dict[str, Any]:
+def completions(request: CompletionRequest, http_request: Request) -> dict[str, Any]:
+    trace_id = http_request.headers.get("X-Neurx-Trace-Id", "") or uuid.uuid4().hex[:12]
+    _trace_log(
+        "model_request",
+        trace_id=trace_id,
+        endpoint="/v1/completions",
+        remote=(http_request.client.host if http_request.client else None),
+        model=request.model,
+        prompt_len=len(request.prompt),
+        temperature=request.temperature,
+        top_p=request.top_p,
+    )
     if request.model != MODEL_ID:
         raise HTTPException(status_code=404, detail=f"unknown model: {request.model}")
 
@@ -240,6 +380,7 @@ def completions(request: CompletionRequest) -> dict[str, Any]:
         request.max_tokens,
         request.temperature,
         request.top_p,
+        trace_id=trace_id,
     )
     return {
         "id": f"cmpl-{uuid.uuid4().hex[:24]}",
