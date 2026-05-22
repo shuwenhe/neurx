@@ -1,0 +1,19 @@
+# Keep docs and ignore heavy/generated checkpoint artifacts by default.
+*
+!.gitignore
+!README.md
+!index.md
+
+# Keep tracked docs within selected subtrees if needed later.
+!agent/
+agent/*
+!agent/**/README.md
+
+# Ignore training/runtime outputs and imported model payloads.
+run_*/
+*.neurx
+Qwen2.5-0.5B-Instruct/
+Qwen2.5-VL-7B/
+blobs/
+manifests/
+models/

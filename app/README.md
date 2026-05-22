@@ -16,17 +16,23 @@ This directory hosts the Qt-based cross-platform app shell for Neurx.
 
 ### Quick Start with Local LLM
 
-To run the Qt app with local NeurX LLM backend (gpt_large):
+To run the Qt app with the local NeurX LLM backend on Linux:
 
 ```bash
-cd app
-bash run_with_llm.sh
+make linux
 ```
 
 This will:
 1. Start the Node.js backend on `http://127.0.0.1:18080`
 2. Build the Qt app (if needed)
 3. Launch the app with LLM enabled
+
+For other hosts, use the explicit platform target:
+
+```bash
+make windows
+make macos
+```
 
 ### Manual Build
 
