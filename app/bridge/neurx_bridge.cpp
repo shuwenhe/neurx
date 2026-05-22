@@ -319,6 +319,23 @@ bool response_needs_customer_service_fallback(const QString& response_text) {
     return trimmed.size() < 24;
 }
 
+QString clean_utf8_response(const QString& text) {
+    QString cleaned = text;
+    // Remove replacement characters and invalid Unicode
+    cleaned.remove(QChar(0xFFFD)); // Unicode replacement character
+    cleaned.remove(QChar(0xFEFF)); // BOM
+    // Remove control characters except newlines and tabs
+    QString result;
+    result.reserve(cleaned.size());
+    for (const QChar& ch : cleaned) {
+        const ushort code = ch.unicode();
+        if (code >= 32 || code == '\n' || code == '\r' || code == '\t') {
+            result.append(ch);
+        }
+    }
+    return result.trimmed();
+}
+
 bool response_requests_cleaner_prompt(const QString& response_text) {
     const QString lowered = response_text.trimmed().toLower();
     if (lowered.isEmpty()) {
@@ -1024,7 +1041,9 @@ if (requestBodyFile) {
 try {
   const response = await fetch(target, options);
   clearTimeout(timeout);
-  const text = await response.text();
+  const buffer = await response.arrayBuffer();
+  const decoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: true });
+  const text = decoder.decode(buffer).replace(/\uFFFD/g, '?');
   if (!response.ok) {
     console.error(text || `HTTP ${response.status}`);
     process.exit(1);
@@ -1342,6 +1361,9 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
                 content = message.value("content").toString();
             }
         }
+        
+        // Clean invalid UTF-8 characters from response
+        content = clean_utf8_response(content);
 
         QString backend = response.value("backend").toString();
         if (backend.isEmpty()) {
