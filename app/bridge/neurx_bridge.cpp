@@ -90,6 +90,10 @@ bool url_looks_like_s_backend(const QString& base_url) {
     const QUrl url(base_url.trimmed());
     const QString host = url.host().trimmed().toLower();
     const int port = url.port();
+    // Check for remote backend
+    if (base_url.contains("111.202.231.146") && port == 8080) {
+        return true;
+    }
     return (host == "127.0.0.1" || host == "localhost") && port == 18080;
 }
 
@@ -1076,19 +1080,12 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     }
 
     const QString repo_root = find_repo_root();
-    const QString base_url = local_model_base_url_.trimmed();
-    const QString chat_path = preferred_chat_path_for(
-        base_url,
-        local_model_chat_path_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty());
-    const QString primary_model_name = preferred_model_name_for(
-        base_url,
-        local_model_name_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty(),
-        checkpoint_model_file_,
-        resolve_local_ollama_model_dir(repo_root, checkpoint_models_root_));
+    const QString base_url = qEnvironmentVariable(
+        "NEURX_REMOTE_BASE_URL", kDefaultCodeAgentRemoteBaseUrl).trimmed();
+    const QString chat_path = sanitize_chat_path(qEnvironmentVariable(
+        "NEURX_REMOTE_CHAT_PATH", kDefaultCodeAgentRemoteChatPath));
+    const QString primary_model_name = remote_code_agent_model_name(
+        qEnvironmentVariable("NEURX_REMOTE_MODEL").trimmed());
     if (base_url.isEmpty() || chat_path.isEmpty() || primary_model_name.isEmpty()) {
         return "local_model_config_missing: base_url, chat_path, or model";
     }
@@ -1115,7 +1112,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
         QJsonObject request_json;
         request_json.insert("model", requested_model_name);
         qInfo().noquote() << QString("bridge local model request url=%1 model=%2 path=%3 backend=%4")
-            .arg(url, requested_model_name, chat_path, local_model_backend_);
+            .arg(url, requested_model_name, chat_path, QStringLiteral("openai"));
         request_json.insert("prompt", prompt);
         QJsonObject user_message;
         user_message.insert("role", "user");
@@ -1161,7 +1158,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
                     normalized_stream.insert("content", streamed_content);
                 }
                 if (!normalized_stream.contains("backend")) {
-                    normalized_stream.insert("backend", local_model_backend_);
+                    normalized_stream.insert("backend", QStringLiteral("openai"));
                 }
                 if (!normalized_stream.contains("model")) {
                     normalized_stream.insert("model", requested_model_name);
@@ -1209,7 +1206,7 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
             backend = response.value("backend_name").toString();
         }
         if (backend.isEmpty()) {
-            backend = local_model_backend_;
+            backend = QStringLiteral("openai");
         }
 
         QString model = response.value("model").toString();
@@ -1245,41 +1242,8 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
         return QString::fromUtf8(QJsonDocument(normalized).toJson(QJsonDocument::Compact));
     };
 
-    auto extract_content = [](const QString& result) -> QString {
-        QJsonParseError parse_error;
-        const QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8(), &parse_error);
-        if (parse_error.error != QJsonParseError::NoError || !doc.isObject()) {
-            return result.trimmed();
-        }
-        return doc.object().value("content").toString().trimmed();
-    };
-
-    const bool customer_service_prompt = prompt_targets_customer_service(prompt);
-    const QString fallback_model_name = customer_service_fallback_model_name(repo_root, checkpoint_models_root_);
-
-    QString primary_result = run_request_for_model(primary_model_name);
-    if (!customer_service_prompt
-        || fallback_model_name.isEmpty()
-        || fallback_model_name == primary_model_name) {
-        return primary_result;
-    }
-
-    const bool primary_failed = primary_result.startsWith("runtime_")
-        || primary_result.startsWith("local_model_");
-    const QString primary_content = extract_content(primary_result);
-    if (!primary_failed && !response_needs_customer_service_fallback(primary_content)) {
-        return primary_result;
-    }
-
-    emit log_message("info", "bridge",
-        QString("customer-service fallback primary=%1 fallback=%2")
-            .arg(primary_model_name, fallback_model_name));
-    const QString fallback_result = run_request_for_model(fallback_model_name);
-    if (!fallback_result.startsWith("runtime_") && !fallback_result.startsWith("local_model_")) {
-        return fallback_result;
-    }
-
-    return primary_failed ? fallback_result : primary_result;
+    Q_UNUSED(repo_root);
+    return run_request_for_model(primary_model_name);
 }
 
 QString NeurxBridge::local_model_summary() const {
