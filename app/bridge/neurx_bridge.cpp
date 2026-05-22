@@ -572,6 +572,16 @@ NeurxBridge::NeurxBridge(QObject* parent)
     const QString env_base_url = qEnvironmentVariable("NEURX_LLM_BASE_URL");
     const QString env_name = qEnvironmentVariable("NEURX_LLM_MODEL");
     const QString env_chat_path = qEnvironmentVariable("NEURX_LLM_CHAT_PATH");
+    const QString env_remote_only = qEnvironmentVariable("NEURX_REMOTE_ONLY").trimmed().toLower();
+    const bool remote_only = env_remote_only.isEmpty()
+        ? true
+        : !(env_remote_only == "0" || env_remote_only == "false" || env_remote_only == "no" || env_remote_only == "off");
+    const QString remote_base_url = qEnvironmentVariable(
+        "NEURX_REMOTE_BASE_URL", kDefaultCodeAgentRemoteBaseUrl).trimmed();
+    const QString remote_chat_path = sanitize_chat_path(qEnvironmentVariable(
+        "NEURX_REMOTE_CHAT_PATH", kDefaultCodeAgentRemoteChatPath));
+    const QString remote_model_name = remote_code_agent_model_name(
+        qEnvironmentVariable("NEURX_REMOTE_MODEL").trimmed());
     const QString env_checkpoint_root = qEnvironmentVariable("NEURX_BACKEND_CHECKPOINT_ROOT");
     const QString env_checkpoint_file = qEnvironmentVariable("NEURX_BACKEND_CHECKPOINT_FILE");
     const QString local_ollama_model_dir = resolve_local_ollama_model_dir(repo_root, checkpoint_models_root_);
@@ -613,13 +623,16 @@ NeurxBridge::NeurxBridge(QObject* parent)
         const QString lowered = env_enabled.trimmed().toLower();
         local_model_enabled_ = lowered == "1" || lowered == "true" || lowered == "yes" || lowered == "on";
     } else {
-        local_model_enabled_ = !env_base_url.trimmed().isEmpty();
+        local_model_enabled_ = remote_only || !env_base_url.trimmed().isEmpty();
     }
 
     if (!env_backend.trimmed().isEmpty()) {
         local_model_backend_ = normalize_local_model_backend(env_backend);
     }
-    if (!env_base_url.trimmed().isEmpty()) {
+    if (remote_only) {
+        local_model_backend_ = "openai";
+        local_model_base_url_ = remote_base_url;
+    } else if (!env_base_url.trimmed().isEmpty()) {
         local_model_base_url_ = env_base_url.trimmed();
     } else {
         local_model_base_url_ = !checkpoint_model_file_.isEmpty()
@@ -628,7 +641,9 @@ NeurxBridge::NeurxBridge(QObject* parent)
             ? qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11434")
             : "http://127.0.0.1:8000";
     }
-    if (!env_name.trimmed().isEmpty()) {
+    if (remote_only) {
+        local_model_name_ = remote_model_name;
+    } else if (!env_name.trimmed().isEmpty()) {
         local_model_name_ = env_name.trimmed();
     } else if (!checkpoint_model_file_.isEmpty()) {
         local_model_name_ = checkpoint_model_file_;
@@ -637,7 +652,9 @@ NeurxBridge::NeurxBridge(QObject* parent)
             ? QString::fromLatin1(kDefaultOllamaModel)
             : QString::fromLatin1(kDefaultLocalOllamaModel);
     }
-    if (!env_chat_path.trimmed().isEmpty()) {
+    if (remote_only) {
+        local_model_chat_path_ = remote_chat_path;
+    } else if (!env_chat_path.trimmed().isEmpty()) {
         local_model_chat_path_ = sanitize_chat_path(env_chat_path);
     } else if (!checkpoint_model_file_.isEmpty()) {
         local_model_chat_path_ = "/neurx/api/chat";
@@ -648,7 +665,7 @@ NeurxBridge::NeurxBridge(QObject* parent)
     const bool has_checkpoint_model = !checkpoint_model_file_.isEmpty();
     const bool env_name_is_checkpoint = looks_like_checkpoint_model_name(env_name.trimmed());
     const bool base_url_is_not_local_s_backend = !url_looks_like_s_backend(local_model_base_url_);
-    if (has_checkpoint_model && base_url_is_not_local_s_backend
+    if (!remote_only && has_checkpoint_model && base_url_is_not_local_s_backend
         && (env_name.trimmed().isEmpty() || env_name_is_checkpoint)) {
         local_model_backend_ = "openai";
         local_model_base_url_ = "http://127.0.0.1:18080";
@@ -663,7 +680,12 @@ NeurxBridge::NeurxBridge(QObject* parent)
         && env_chat_path.trimmed().isEmpty();
     if (default_local_setup) {
         local_model_enabled_ = true;
-        if (!local_ollama_model_dir.isEmpty()) {
+        if (remote_only) {
+            local_model_backend_ = "openai";
+            local_model_base_url_ = remote_base_url;
+            local_model_name_ = remote_model_name;
+            local_model_chat_path_ = remote_chat_path;
+        } else if (!local_ollama_model_dir.isEmpty()) {
             local_model_backend_ = "ollama";
             local_model_base_url_ = qEnvironmentVariable("NEURX_OLLAMA_URL", "http://127.0.0.1:11434");
             local_model_name_ = QString::fromLatin1(kDefaultLocalOllamaModel);
