@@ -29,6 +29,11 @@ constexpr const char kDefaultLocalOllamaModel[] = "neurx-qwen2.5-0.5b-instruct-l
 constexpr const char kDefaultLocalOllamaModelDir[] = "artifacts/checkpoints/Qwen2.5-0.5B-Instruct";
 constexpr const char kDefaultCustomerServiceFallbackModel[] = "neurx-qwen2.5-vl-7b-local:latest";
 constexpr const char kDefaultCustomerServiceFallbackModelDir[] = "artifacts/checkpoints/Qwen2.5-VL-7B";
+constexpr const char kDefaultCodeAgentLocalBaseUrl[] = "http://127.0.0.1:18080";
+constexpr const char kDefaultCodeAgentLocalChatPath[] = "/neurx/api/chat";
+constexpr const char kDefaultCodeAgentRemoteBaseUrl[] = "http://111.202.231.146:8080";
+constexpr const char kDefaultCodeAgentRemoteChatPath[] = "/neurx/api/chat";
+constexpr const char kDefaultCodeAgentRemoteModel[] = "Qwen2.5-VL-7B";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
@@ -85,6 +90,9 @@ bool url_looks_like_s_backend(const QString& base_url) {
     const QUrl url(base_url.trimmed());
     const QString host = url.host().trimmed().toLower();
     const int port = url.port();
+    if (base_url.contains("111.202.231.146") && port == 8080) {
+        return true;
+    }
     return (host == "127.0.0.1" || host == "localhost") && port == 18080;
 }
 
@@ -104,6 +112,14 @@ bool url_looks_like_ollama(const QString& base_url) {
         }
     }
     return host.contains("ollama");
+}
+
+bool looks_like_checkpoint_model_name(const QString& value) {
+    const QString configured_name = value.trimmed();
+    return configured_name.endsWith(".neurx", Qt::CaseInsensitive)
+        || configured_name.contains('/')
+        || configured_name.contains('\\')
+        || configured_name.contains("gpt_large_pretrain", Qt::CaseInsensitive);
 }
 
 QString preferred_chat_path_for(QString base_url,
@@ -147,11 +163,7 @@ QString preferred_model_name_for(QString base_url,
     backend = backend.trimmed().toLower();
     local_ollama_model_dir = local_ollama_model_dir.trimmed();
     const bool wants_ollama = backend == "ollama" || url_looks_like_ollama(base_url);
-    const bool looks_like_checkpoint_name =
-        configured_name.endsWith(".neurx", Qt::CaseInsensitive) ||
-        configured_name.contains('/') ||
-        configured_name.contains('\\') ||
-        configured_name.contains("gpt_large_pretrain", Qt::CaseInsensitive);
+    const bool looks_like_checkpoint_name = looks_like_checkpoint_model_name(configured_name);
 
     if (wants_ollama) {
         if (!configured_name.isEmpty() && configured_name != "local-model" && !looks_like_checkpoint_name) {
@@ -172,6 +184,26 @@ QString preferred_model_name_for(QString base_url,
     }
 
     return configured_name;
+}
+
+QString remote_code_agent_model_name(QString configured_name) {
+    configured_name = configured_name.trimmed();
+    if (configured_name.isEmpty() || configured_name == "local-model" || looks_like_checkpoint_model_name(configured_name)) {
+        const QString env_vl_model = qEnvironmentVariable("NEURX_VL_MODEL").trimmed();
+        if (!env_vl_model.isEmpty()) {
+            return env_vl_model;
+        }
+        return QString::fromLatin1(kDefaultCodeAgentRemoteModel);
+    }
+    return configured_name;
+}
+
+QString remote_code_agent_chat_url() {
+    const QString base_url = qEnvironmentVariable(
+        "NEURX_CODE_AGENT_REMOTE_BASE_URL", kDefaultCodeAgentRemoteBaseUrl).trimmed();
+    const QString chat_path = qEnvironmentVariable(
+        "NEURX_CODE_AGENT_REMOTE_CHAT_PATH", kDefaultCodeAgentRemoteChatPath).trimmed();
+    return join_url_and_path(base_url, chat_path);
 }
 
 QString resolve_local_ollama_model_dir(const QString& repo_root, const QString& checkpoint_root = QString()) {
@@ -1036,19 +1068,10 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     }
 
     const QString repo_root = find_repo_root();
-    const QString base_url = local_model_base_url_.trimmed();
-    const QString chat_path = preferred_chat_path_for(
-        base_url,
-        local_model_chat_path_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty());
-    const QString primary_model_name = preferred_model_name_for(
-        base_url,
-        local_model_name_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty(),
-        checkpoint_model_file_,
-        resolve_local_ollama_model_dir(repo_root, checkpoint_models_root_));
+    // Directly use remote backend
+    const QString base_url = QString(kDefaultCodeAgentRemoteBaseUrl);
+    const QString chat_path = QString(kDefaultCodeAgentRemoteChatPath);
+    const QString primary_model_name = QString(kDefaultCodeAgentRemoteModel);
     if (base_url.isEmpty() || chat_path.isEmpty() || primary_model_name.isEmpty()) {
         return "local_model_config_missing: base_url, chat_path, or model";
     }
@@ -1109,37 +1132,37 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
             const QString stream_error = run_streaming_chat_request(
                 this, url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
             if (!stream_error.isEmpty()) {
-                qWarning().noquote() << QString("bridge http_request failed method=POST url=%1 result=%2")
-                    .arg(url, stream_error.left(200));
-                return stream_error;
+                qWarning().noquote() << QString("bridge remote model stream failed: %1").arg(stream_error.left(200));
+                return QString("runtime_stream_failed: %1").arg(stream_error.left(200));
+            } else {
+                QJsonObject normalized_stream = streamed_object;
+                if (!streamed_content.isEmpty()) {
+                    QJsonObject message = normalized_stream.value("message").toObject();
+                    message.insert("content", streamed_content);
+                    normalized_stream.insert("message", message);
+                    normalized_stream.insert("content", streamed_content);
+                }
+                if (!normalized_stream.contains("backend")) {
+                    normalized_stream.insert("backend", local_model_backend_);
+                }
+                if (!normalized_stream.contains("model")) {
+                    normalized_stream.insert("model", requested_model_name);
+                }
+                if (!normalized_stream.contains("steps")) {
+                    normalized_stream.insert("steps", max_steps);
+                }
+                raw = QString::fromUtf8(QJsonDocument(normalized_stream).toJson(QJsonDocument::Compact));
+                qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1 content_len=%3 content_preview=%4")
+                    .arg(url)
+                    .arg(raw.size())
+                    .arg(streamed_content.size())
+                    .arg(streamed_content.left(120));
             }
-
-            QJsonObject normalized_stream = streamed_object;
-            if (!streamed_content.isEmpty()) {
-                QJsonObject message = normalized_stream.value("message").toObject();
-                message.insert("content", streamed_content);
-                normalized_stream.insert("message", message);
-                normalized_stream.insert("content", streamed_content);
-            }
-            if (!normalized_stream.contains("backend")) {
-                normalized_stream.insert("backend", local_model_backend_);
-            }
-            if (!normalized_stream.contains("model")) {
-                normalized_stream.insert("model", requested_model_name);
-            }
-            if (!normalized_stream.contains("steps")) {
-                normalized_stream.insert("steps", max_steps);
-            }
-            raw = QString::fromUtf8(QJsonDocument(normalized_stream).toJson(QJsonDocument::Compact));
-            qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1 content_len=%3 content_preview=%4")
-                .arg(url)
-                .arg(raw.size())
-                .arg(streamed_content.size())
-                .arg(streamed_content.left(120));
         } else {
             raw = run_http_request("POST", url, tmp.fileName(), 120000);
         }
         if (raw.startsWith("runtime_")) {
+            qWarning().noquote() << QString("bridge remote model request failed: %1").arg(raw);
             return raw;
         }
 
@@ -1822,30 +1845,6 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         return backend_ready;
     }
 
-    // Prefer the main chat backend so code requests can return actual code instead of a canned suggestion.
-    QString url = local_model_base_url_.trimmed();
-    if (url.isEmpty()) {
-        url = "http://127.0.0.1:18080";
-    }
-    const QString effective_chat_path = preferred_chat_path_for(
-        url,
-        local_model_chat_path_.trimmed().isEmpty() ? QStringLiteral("/neurx/api/chat") : local_model_chat_path_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty());
-    const QString effective_model_name = preferred_model_name_for(
-        url,
-        local_model_name_,
-        local_model_backend_,
-        !checkpoint_model_file_.isEmpty(),
-        checkpoint_model_file_,
-        resolve_local_ollama_model_dir(root, checkpoint_models_root_));
-    const QString chat_url = join_url_and_path(url, effective_chat_path);
-    const QString suggest_url = join_url_and_path(url, QStringLiteral("/neurx/api/agent/suggest"));
-    const bool suggest_supported = chat_url.contains("/neurx/api/chat");
-    qInfo().noquote() << QString("bridge code assistant request url=%1 model=%2 path=%3 backend=%4")
-        .arg(chat_url, effective_model_name, effective_chat_path, local_model_backend_);
-
-    QJsonObject payload;
     QString effective_prompt;
     if (!filePath.trimmed().isEmpty()) {
         effective_prompt = QString(
@@ -1864,101 +1863,192 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             .arg(prompt.trimmed());
     }
 
-    const bool wants_streaming = url_looks_like_ollama(url) && effective_chat_path == "/api/chat";
-    if (chat_url.contains("/v1/chat/completions") || chat_url.contains("/api/chat")) {
-        if (effective_model_name.isEmpty()) {
-            emit log_message("warning", "agent",
-                QString("code-assistant: model name is empty for url=%1 — aborting request").arg(chat_url));
-            return "local_model_config_missing: model name could not be resolved";
-        }
-        payload.insert("model", effective_model_name);
-        payload.insert("max_tokens", 256);
-        if (wants_streaming) {
-            payload.insert("stream", true);
-        }
-        QJsonObject user_message;
-        user_message.insert("role", "user");
-        user_message.insert("content", effective_prompt);
-        QJsonArray messages;
-        messages.append(user_message);
-        payload.insert("messages", messages);
-    } else {
-        payload.insert("prompt", effective_prompt);
-        if (!filePath.trimmed().isEmpty()) {
-            payload.insert("filePath", filePath.trimmed());
-        }
-        if (!effective_model_name.isEmpty()) {
-            payload.insert("model", effective_model_name);
-        }
-        payload.insert("max_tokens", 256);
-    }
+    const QString local_code_base_url = qEnvironmentVariable("NEURX_CODE_AGENT_BASE_URL").trimmed().isEmpty()
+        ? QString::fromLatin1(kDefaultCodeAgentLocalBaseUrl)
+        : qEnvironmentVariable("NEURX_CODE_AGENT_BASE_URL").trimmed();
+    const QString local_code_chat_path = preferred_chat_path_for(
+        local_code_base_url,
+        qEnvironmentVariable("NEURX_CODE_AGENT_CHAT_PATH", kDefaultCodeAgentLocalChatPath),
+        QStringLiteral("openai"),
+        !checkpoint_model_file_.isEmpty());
+    const QString local_code_model = preferred_model_name_for(
+        local_code_base_url,
+        qEnvironmentVariable("NEURX_CODE_AGENT_MODEL").trimmed().isEmpty()
+            ? checkpoint_model_file_
+            : qEnvironmentVariable("NEURX_CODE_AGENT_MODEL").trimmed(),
+        QStringLiteral("openai"),
+        !checkpoint_model_file_.isEmpty(),
+        checkpoint_model_file_,
+        resolve_local_ollama_model_dir(root, checkpoint_models_root_));
 
-    QJsonDocument doc(payload);
-    QByteArray body = doc.toJson(QJsonDocument::Compact);
+    const QString remote_code_base_url = qEnvironmentVariable(
+        "NEURX_CODE_AGENT_REMOTE_BASE_URL", kDefaultCodeAgentRemoteBaseUrl).trimmed();
+    const QString remote_code_chat_path = preferred_chat_path_for(
+        remote_code_base_url,
+        qEnvironmentVariable("NEURX_CODE_AGENT_REMOTE_CHAT_PATH", kDefaultCodeAgentRemoteChatPath),
+        QStringLiteral("openai"),
+        false);
+    const QString remote_code_model = remote_code_agent_model_name(
+        qEnvironmentVariable("NEURX_CODE_AGENT_REMOTE_MODEL").trimmed());
 
-    QTemporaryFile tmp;
-    tmp.setAutoRemove(true);
-    if (!tmp.open()) {
-        return QString("runtime_exec_failed: could not create temp file");
-    }
-    tmp.write(body);
-    tmp.flush();
-    tmp.close();
-
-    QString chatResult;
-    if (wants_streaming) {
-        qInfo().noquote() << QString("bridge http_request stream method=POST url=%1 timeout_ms=%2")
-            .arg(chat_url)
-            .arg(120000);
-        QString streamed_content;
-        QJsonObject streamed_object;
-        const QString stream_error = run_streaming_chat_request(
-            this, chat_url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
-        if (!stream_error.isEmpty()) {
-            emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(stream_error));
-            return stream_error;
-        }
-        if (!streamed_content.trimmed().isEmpty()) {
-            emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2 stream=1")
-                .arg(route)
-                .arg(streamed_content.size()));
-            return streamed_content.trimmed();
-        }
-        chatResult = QString::fromUtf8(QJsonDocument(streamed_object).toJson(QJsonDocument::Compact));
-        qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1")
-            .arg(chat_url)
-            .arg(chatResult.size());
-    } else {
-        chatResult = run_http_request("POST", chat_url, tmp.fileName(), 120000);
-    }
-    if (!chatResult.startsWith("runtime_")) {
+    auto extract_chat_content = [](const QString& response_text) -> QString {
         QJsonParseError parse_error;
-        const QJsonDocument response_json = QJsonDocument::fromJson(chatResult.toUtf8(), &parse_error);
-        if (parse_error.error == QJsonParseError::NoError && response_json.isObject()) {
-            const QJsonObject response = response_json.object();
-            QString content = response.value("content").toString();
-            if (content.isEmpty()) {
-                content = response.value("completion").toString();
-            }
-            if (content.isEmpty() && response.value("choices").isArray()) {
-                const QJsonArray choices = response.value("choices").toArray();
-                if (!choices.isEmpty() && choices.first().isObject()) {
-                    const QJsonObject message = choices.first().toObject().value("message").toObject();
-                    content = message.value("content").toString();
+        const QJsonDocument response_json = QJsonDocument::fromJson(response_text.toUtf8(), &parse_error);
+        if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+            return QString();
+        }
+
+        const QJsonObject response = response_json.object();
+        QString content = response.value("content").toString();
+        if (content.isEmpty()) {
+            content = response.value("completion").toString();
+        }
+        if (content.isEmpty() && response.value("choices").isArray()) {
+            const QJsonArray choices = response.value("choices").toArray();
+            if (!choices.isEmpty() && choices.first().isObject()) {
+                const QJsonObject first = choices.first().toObject();
+                if (first.value("message").isObject()) {
+                    content = first.value("message").toObject().value("content").toString();
                 }
-            }
-            if (!content.trimmed().isEmpty()) {
-                const QString fallback = hello_program_fallback(prompt);
-                if (!fallback.isEmpty() && looks_like_stub_chat_response(content)) {
-                    emit log_message("info", "agent", QString("code-assistant done route=%1 fallback=hello-template").arg(route));
-                    return fallback;
+                if (content.isEmpty()) {
+                    content = first.value("text").toString();
                 }
-                emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2")
-                    .arg(route)
-                    .arg(content.size()));
-                return content.trimmed();
             }
         }
+        return content.trimmed();
+    };
+
+    auto run_code_chat = [&](const QString& base_url,
+                             const QString& chat_path,
+                             const QString& model_name,
+                             bool allow_suggest_fallback,
+                             const QString& source_label) -> QString {
+        const QString chat_url = join_url_and_path(base_url, chat_path);
+        const QString suggest_url = join_url_and_path(base_url, QStringLiteral("/neurx/api/agent/suggest"));
+        const bool suggest_supported = allow_suggest_fallback && chat_url.contains("/neurx/api/chat");
+        const bool wants_streaming = url_looks_like_ollama(base_url) && chat_path == "/api/chat";
+
+        qInfo().noquote() << QString("bridge code assistant request url=%1 model=%2 path=%3 backend=openai source=%4")
+            .arg(chat_url, model_name, chat_path, source_label);
+
+        QJsonObject payload;
+        if (chat_url.contains("/v1/chat/completions") || chat_url.contains("/api/chat")) {
+            if (model_name.isEmpty()) {
+                return "local_model_config_missing: model name could not be resolved";
+            }
+            payload.insert("model", model_name);
+            payload.insert("max_tokens", 256);
+            if (wants_streaming) {
+                payload.insert("stream", true);
+            }
+            QJsonObject user_message;
+            user_message.insert("role", "user");
+            user_message.insert("content", effective_prompt);
+            QJsonArray messages;
+            messages.append(user_message);
+            payload.insert("messages", messages);
+        } else {
+            payload.insert("prompt", effective_prompt);
+            if (!filePath.trimmed().isEmpty()) {
+                payload.insert("filePath", filePath.trimmed());
+            }
+            if (!model_name.isEmpty()) {
+                payload.insert("model", model_name);
+            }
+            payload.insert("max_tokens", 256);
+        }
+
+        QTemporaryFile tmp;
+        tmp.setAutoRemove(true);
+        if (!tmp.open()) {
+            return QString("runtime_exec_failed: could not create temp file");
+        }
+        tmp.write(QJsonDocument(payload).toJson(QJsonDocument::Compact));
+        tmp.flush();
+        tmp.close();
+
+        QString chat_result;
+        if (wants_streaming) {
+            qInfo().noquote() << QString("bridge http_request stream method=POST url=%1 timeout_ms=%2")
+                .arg(chat_url)
+                .arg(120000);
+            QString streamed_content;
+            QJsonObject streamed_object;
+            const QString stream_error = run_streaming_chat_request(
+                this, chat_url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
+            if (!stream_error.isEmpty()) {
+                return stream_error;
+            }
+            if (!streamed_content.trimmed().isEmpty()) {
+                return streamed_content.trimmed();
+            }
+            chat_result = QString::fromUtf8(QJsonDocument(streamed_object).toJson(QJsonDocument::Compact));
+            qInfo().noquote() << QString("bridge http_request done method=POST url=%1 bytes=%2 stream=1")
+                .arg(chat_url)
+                .arg(chat_result.size());
+        } else {
+            chat_result = run_http_request("POST", chat_url, tmp.fileName(), 120000);
+        }
+
+        const QString content = extract_chat_content(chat_result);
+        if (!content.isEmpty()) {
+            return content;
+        }
+        if (!suggest_supported || chat_result.startsWith("runtime_")) {
+            return chat_result;
+        }
+
+        const QString suggest_result = run_http_request("POST", suggest_url, tmp.fileName(), 120000);
+        if (suggest_result.startsWith("runtime_")) {
+            return suggest_result;
+        }
+
+        QJsonParseError parse_error;
+        const QJsonDocument response_json = QJsonDocument::fromJson(suggest_result.toUtf8(), &parse_error);
+        if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
+            return QString("code_assistant_parse_failed: %1").arg(suggest_result.left(200));
+        }
+        return response_json.object().value("suggestion").toString().trimmed();
+    };
+
+    const QString local_result = run_code_chat(
+        local_code_base_url,
+        local_code_chat_path,
+        local_code_model,
+        true,
+        QStringLiteral("local"));
+    const bool local_failed = local_result.startsWith("runtime_")
+        || local_result.startsWith("local_model_")
+        || local_result.startsWith("code_assistant_");
+    const bool local_weak = !local_failed
+        && (local_result.isEmpty()
+            || looks_like_stub_chat_response(local_result)
+            || response_needs_customer_service_fallback(local_result));
+    if (!local_failed && !local_weak) {
+        emit log_message("info", "agent", QString("code-assistant done route=%1 source=local suggestion_len=%2")
+            .arg(route)
+            .arg(local_result.size()));
+        return local_result;
+    }
+
+    emit log_message("warning", "agent",
+        QString("code-assistant local fallback reason=%1")
+            .arg(local_failed ? local_result.left(200) : QStringLiteral("weak_response")));
+
+    const QString remote_result = run_code_chat(
+        remote_code_base_url,
+        remote_code_chat_path,
+        remote_code_model,
+        false,
+        QStringLiteral("remote"));
+    const bool remote_failed = remote_result.startsWith("runtime_")
+        || remote_result.startsWith("local_model_")
+        || remote_result.startsWith("code_assistant_");
+    if (!remote_failed && !remote_result.trimmed().isEmpty()) {
+        emit log_message("info", "agent", QString("code-assistant done route=%1 source=remote suggestion_len=%2")
+            .arg(route)
+            .arg(remote_result.size()));
+        return remote_result.trimmed();
     }
 
     const QString fallback = hello_program_fallback(prompt);
@@ -1966,36 +2056,9 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         emit log_message("info", "agent", QString("code-assistant done route=%1 fallback=hello-template-nochat").arg(route));
         return fallback;
     }
-
-    // Fall back to the lightweight suggest endpoint only for the local NeurX backend.
-    if (!suggest_supported) {
-        emit log_message("warning", "agent", QString("code-assistant empty chat response from %1").arg(chat_url));
-        return QString("code_assistant_empty_response: %1").arg(chat_url);
-    }
-
-    // Fall back to the lightweight suggest endpoint so the UI still completes if chat output is empty.
-    const QString curlResult = run_http_request("POST", suggest_url, tmp.fileName(), 120000);
-    if (curlResult.startsWith("runtime_")) {
-        emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(curlResult));
-        return curlResult;
-    }
-
-    QJsonParseError parse_error;
-    const QJsonDocument response_json = QJsonDocument::fromJson(curlResult.toUtf8(), &parse_error);
-    if (parse_error.error != QJsonParseError::NoError || !response_json.isObject()) {
-        emit log_message("error", "agent", QString("code-assistant parse failed: %1").arg(curlResult.left(200)));
-        return QString("code_assistant_parse_failed: %1").arg(curlResult.left(200));
-    }
-
-    const QJsonObject response = response_json.object();
-    const QString suggestion = response.value("suggestion").toString();
-    QString result = suggestion.isEmpty()
-        ? QString("code_ok route=%1").arg(agent_route_for_prompt(prompt, filePath))
-        : suggestion;
-    emit log_message("info", "agent", QString("code-assistant done route=%1 suggestion_len=%2")
-        .arg(route)
-        .arg(result.size()));
-    return result;
+    const QString final_error = local_failed ? local_result : remote_result;
+    emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(final_error.left(200)));
+    return final_error;
 }
 
 QString NeurxBridge::run_agent_state_export(const QString& prompt, int max_steps, const QString& export_kind) {
