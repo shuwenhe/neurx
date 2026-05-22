@@ -1771,6 +1771,20 @@ void NeurxBridge::save_ui_session(const QString& explorerPath,
     settings.setValue("app_shell/activeEditorTabIndex", activeEditorTabIndex);
 }
 
+QVariantMap NeurxBridge::load_login_session() const {
+    QSettings settings;
+    QVariantMap session;
+    session.insert("loggedIn", settings.value("app_shell_login/loggedIn", false).toBool());
+    session.insert("phone", settings.value("app_shell_login/phone", QString()).toString());
+    return session;
+}
+
+void NeurxBridge::save_login_session(bool loggedIn, const QString& phone) {
+    QSettings settings;
+    settings.setValue("app_shell_login/loggedIn", loggedIn);
+    settings.setValue("app_shell_login/phone", phone.trimmed());
+}
+
 void NeurxBridge::copy_to_clipboard(const QString& text) {
     if (QClipboard* clipboard = QGuiApplication::clipboard()) {
         clipboard->setText(text);

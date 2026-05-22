@@ -34,6 +34,8 @@ public:
                                      int agentPaneWidth,
                                      const QVariantList& editorTabs,
                                      int activeEditorTabIndex);
+    Q_INVOKABLE QVariantMap load_login_session() const;
+    Q_INVOKABLE void save_login_session(bool loggedIn, const QString& phone);
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);
