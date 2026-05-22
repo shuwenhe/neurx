@@ -1,4 +1,4 @@
-.PHONY: help install neurx app linux windows macos ios android harmony clean check-bash \
+.PHONY: help install neurx linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony
 
@@ -32,7 +32,6 @@ CURDIR_UNIX := $(subst \,/,$(CURDIR))
 
 help:
 	@echo "  neurx             Compile the NeurX deep learning framework to IR"
-	@echo "  app               Compile and run the local Qt app for the current host ($(PLATFORM))"
 	@echo "  linux             Compile and run the Linux app"
 	@echo "  windows           Compile and run the Windows app"
 	@echo "  macos             Compile and run the macOS app"
@@ -59,8 +58,6 @@ else
 endif
 
 install: neurx
-
-app: app-$(PLATFORM)
 
 linux: app-linux
 windows: app-windows

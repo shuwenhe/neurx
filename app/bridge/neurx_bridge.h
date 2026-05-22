@@ -27,6 +27,13 @@ public:
     Q_INVOKABLE QString read_text_file(const QString& path) const;
     Q_INVOKABLE QVariantList explorer_entries(const QString& path = QString()) const;
     Q_INVOKABLE QString explorer_default_path() const;
+    Q_INVOKABLE QVariantMap load_ui_session() const;
+    Q_INVOKABLE void save_ui_session(const QString& explorerPath,
+                                     const QString& selectedFilePath,
+                                     int explorerPaneWidth,
+                                     int agentPaneWidth,
+                                     const QVariantList& editorTabs,
+                                     int activeEditorTabIndex);
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);
@@ -37,6 +44,7 @@ public:
 signals:
     void runtime_status_changed(const QString& status, const QString& task);
     void log_message(const QString& level, const QString& tag, const QString& message);
+    void agentRunChunk(const QString& chunk);
     void agentRunFinished(const QString& result);
     void localModelConfigChanged();
 
@@ -66,7 +74,7 @@ private:
     QString ollama_command() const;
     QString bootstrap_ollama_model();
     QString ensure_local_openai_backend(const QString& repo_root);
-    QString run_local_model_agent(const QString& prompt, int max_steps) const;
+    QString run_local_model_agent(const QString& prompt, int max_steps);
     QString run_code_assistant_request(const QString& prompt, const QString& filePath);
     QString run_agent_state_export(const QString& prompt, int max_steps, const QString& export_kind);
     QString local_model_default_chat_path() const;
