@@ -507,10 +507,10 @@ stop_running_app_before_build() {
 # Backend configuration
 export PORT=${PORT:-18080}
 export NEURX_REMOTE_ONLY="${NEURX_REMOTE_ONLY:-1}"
-export NEURX_REMOTE_BASE_URL="${NEURX_REMOTE_BASE_URL:-https://api.deepseek.com}"
+export NEURX_REMOTE_BASE_URL="${NEURX_REMOTE_BASE_URL:-https://api.siliconflow.cn}"
 export NEURX_REMOTE_CHAT_PATH="${NEURX_REMOTE_CHAT_PATH:-/v1/chat/completions}"
-export NEURX_REMOTE_MODEL="${NEURX_REMOTE_MODEL:-deepseek-chat}"
-export NEURX_API_KEY="${NEURX_API_KEY:-}"
+export NEURX_REMOTE_MODEL="${NEURX_REMOTE_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
+export NEURX_API_KEY="${NEURX_API_KEY:-sk-lfxyesaczabjadtgfoxbyqqpygsymgfxjcosjpfazsoqriwy}"
 export NEURX_BACKEND_MODEL=${NEURX_BACKEND_MODEL:-${NEURX_REMOTE_MODEL}}
 export NEURX_BACKEND_CHECKPOINT_ROOT=${NEURX_BACKEND_CHECKPOINT_ROOT:-"${ROOT_DIR}/artifacts/checkpoints"}
 
