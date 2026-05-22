@@ -90,9 +90,6 @@ bool url_looks_like_s_backend(const QString& base_url) {
     const QUrl url(base_url.trimmed());
     const QString host = url.host().trimmed().toLower();
     const int port = url.port();
-    if (base_url.contains("111.202.231.146") && port == 8080) {
-        return true;
-    }
     return (host == "127.0.0.1" || host == "localhost") && port == 18080;
 }
 
@@ -1068,10 +1065,19 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
     }
 
     const QString repo_root = find_repo_root();
-    // Directly use remote backend
-    const QString base_url = QString(kDefaultCodeAgentRemoteBaseUrl);
-    const QString chat_path = QString(kDefaultCodeAgentRemoteChatPath);
-    const QString primary_model_name = QString(kDefaultCodeAgentRemoteModel);
+    const QString base_url = local_model_base_url_.trimmed();
+    const QString chat_path = preferred_chat_path_for(
+        base_url,
+        local_model_chat_path_,
+        local_model_backend_,
+        !checkpoint_model_file_.isEmpty());
+    const QString primary_model_name = preferred_model_name_for(
+        base_url,
+        local_model_name_,
+        local_model_backend_,
+        !checkpoint_model_file_.isEmpty(),
+        checkpoint_model_file_,
+        resolve_local_ollama_model_dir(repo_root, checkpoint_models_root_));
     if (base_url.isEmpty() || chat_path.isEmpty() || primary_model_name.isEmpty()) {
         return "local_model_config_missing: base_url, chat_path, or model";
     }
@@ -1132,8 +1138,9 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
             const QString stream_error = run_streaming_chat_request(
                 this, url, tmp.fileName(), 120000, &streamed_content, &streamed_object);
             if (!stream_error.isEmpty()) {
-                qWarning().noquote() << QString("bridge remote model stream failed: %1").arg(stream_error.left(200));
-                return QString("runtime_stream_failed: %1").arg(stream_error.left(200));
+                qWarning().noquote() << QString("bridge http_request failed method=POST url=%1 result=%2")
+                    .arg(url, stream_error.left(200));
+                return stream_error;
             } else {
                 QJsonObject normalized_stream = streamed_object;
                 if (!streamed_content.isEmpty()) {
@@ -1162,7 +1169,8 @@ QString NeurxBridge::run_local_model_agent(const QString& prompt, int max_steps)
             raw = run_http_request("POST", url, tmp.fileName(), 120000);
         }
         if (raw.startsWith("runtime_")) {
-            qWarning().noquote() << QString("bridge remote model request failed: %1").arg(raw);
+            qWarning().noquote() << QString("bridge http_request failed method=POST url=%1 result=%2")
+                .arg(url, raw.left(200));
             return raw;
         }
 
