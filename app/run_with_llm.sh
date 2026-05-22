@@ -299,7 +299,7 @@ resolve_ollama() {
   fi
 
   local candidates=(
-    "/c/Users/${USERNAME}/AppData/Local/Programs/Ollama/ollama.exe"
+    "/c/Users/${USERNAME:-${USER:-}}/AppData/Local/Programs/Ollama/ollama.exe"
     "/c/Program Files/Ollama/ollama.exe"
   )
 
@@ -598,6 +598,9 @@ export OLLAMA_MODELS="${NEURX_OLLAMA_MODELS}"
 export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
 export NEURX_OLLAMA_LOCAL_MODEL_NAME="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
 export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL="${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-neurx-qwen2.5-vl-7b-local:latest}"
+NEURX_VL_BASE_URL="${NEURX_VL_BASE_URL:-http://127.0.0.1:8004}"
+NEURX_VL_MODEL="${NEURX_VL_MODEL:-Qwen2.5-VL-7B}"
+NEURX_VL_CHAT_PATH="${NEURX_VL_CHAT_PATH:-/v1/chat/completions}"
 # Prefer the Instruct model by default; keep VL-7B as a fallback if present.
 DEFAULT_OLLAMA_MODEL_DIR_PRIMARY="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-0.5B-Instruct"
 DEFAULT_OLLAMA_MODEL_DIR_FALLBACK="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-VL-7B"
@@ -612,7 +615,9 @@ if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; t
 else
   export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-qwen2.5:0.5b}"
 fi
-ensure_ollama_and_model "${NEURX_OLLAMA_MODEL}"
+if ! curl -sf --connect-timeout 1 "${NEURX_VL_BASE_URL}/health" >/dev/null 2>&1; then
+  ensure_ollama_and_model "${NEURX_OLLAMA_MODEL}"
+fi
 
 # If a local Ollama model directory is configured, route the main LLM chat
 # directly to Ollama. Keep the smaller configured Ollama model as the default;
@@ -628,6 +633,16 @@ if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; t
   export NEURX_CODE_AGENT_BASE_URL="http://127.0.0.1:${PORT}"
   export NEURX_CODE_AGENT_CHAT_PATH="/neurx/api/chat"
   export NEURX_CODE_AGENT_MODEL="${NEURX_OLLAMA_MODEL}"
+fi
+
+if curl -sf --connect-timeout 1 "${NEURX_VL_BASE_URL}/health" >/dev/null 2>&1; then
+  export NEURX_BACKEND_MODEL="${NEURX_VL_MODEL}"
+  export NEURX_LLM_MODEL="${NEURX_VL_MODEL}"
+  export NEURX_LLM_BASE_URL="${NEURX_VL_BASE_URL}"
+  export NEURX_LLM_CHAT_PATH="${NEURX_VL_CHAT_PATH}"
+  export NEURX_CODE_AGENT_BASE_URL="http://127.0.0.1:${PORT}"
+  export NEURX_CODE_AGENT_CHAT_PATH="/neurx/api/chat"
+  export NEURX_CODE_AGENT_MODEL="${NEURX_CODE_AGENT_MODEL:-${NEURX_LLM_MODEL}}"
 fi
 
 CMAKE_BIN="$(resolve_cmake || true)"
