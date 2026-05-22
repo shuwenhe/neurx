@@ -1908,6 +1908,10 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         false);
     const QString remote_code_model = remote_code_agent_model_name(
         qEnvironmentVariable("NEURX_CODE_AGENT_REMOTE_MODEL").trimmed());
+    const bool same_code_chat_target =
+        join_url_and_path(local_code_base_url, local_code_chat_path)
+            == join_url_and_path(remote_code_base_url, remote_code_chat_path)
+        && local_code_model.trimmed() == remote_code_model.trimmed();
 
     auto extract_chat_content = [](const QString& response_text) -> QString {
         QJsonParseError parse_error;
@@ -2052,6 +2056,14 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     emit log_message("warning", "agent",
         QString("code-assistant local fallback reason=%1")
             .arg(local_failed ? local_result.left(200) : QStringLiteral("weak_response")));
+
+    if (same_code_chat_target) {
+        const QString final_error = local_result.startsWith("runtime_")
+            ? local_result
+            : QStringLiteral("runtime_exec_failed: remote backend returned no usable response");
+        emit log_message("error", "agent", QString("code-assistant request failed: %1").arg(final_error.left(200)));
+        return final_error;
+    }
 
     const QString remote_result = run_code_chat(
         remote_code_base_url,
