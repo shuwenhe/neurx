@@ -506,7 +506,11 @@ stop_running_app_before_build() {
 
 # Backend configuration
 export PORT=${PORT:-18080}
-export NEURX_BACKEND_MODEL=${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}
+export NEURX_REMOTE_ONLY="${NEURX_REMOTE_ONLY:-1}"
+export NEURX_REMOTE_BASE_URL="${NEURX_REMOTE_BASE_URL:-http://111.202.231.146:8080}"
+export NEURX_REMOTE_CHAT_PATH="${NEURX_REMOTE_CHAT_PATH:-/neurx/api/chat}"
+export NEURX_REMOTE_MODEL="${NEURX_REMOTE_MODEL:-Qwen2.5-VL-7B}"
+export NEURX_BACKEND_MODEL=${NEURX_BACKEND_MODEL:-${NEURX_REMOTE_MODEL}}
 export NEURX_BACKEND_CHECKPOINT_ROOT=${NEURX_BACKEND_CHECKPOINT_ROOT:-"${ROOT_DIR}/artifacts/checkpoints"}
 
 LATEST_CHECKPOINT_FILE="${NEURX_BACKEND_CHECKPOINT_FILE:-}"
@@ -515,16 +519,22 @@ if [ -z "${LATEST_CHECKPOINT_FILE}" ] && [ -d "${NEURX_BACKEND_CHECKPOINT_ROOT}"
 fi
 export NEURX_BACKEND_CHECKPOINT_FILE="${LATEST_CHECKPOINT_FILE}"
 
-if [ -n "${NEURX_BACKEND_CHECKPOINT_FILE}" ] && [ -z "${NEURX_BACKEND_MODEL_OVERRIDE:-}" ]; then
+if [ "${NEURX_REMOTE_ONLY}" != "1" ] && [ -n "${NEURX_BACKEND_CHECKPOINT_FILE}" ] && [ -z "${NEURX_BACKEND_MODEL_OVERRIDE:-}" ]; then
   NEURX_BACKEND_MODEL="$(basename "${NEURX_BACKEND_CHECKPOINT_FILE}" .neurx)"
   export NEURX_BACKEND_MODEL
 fi
 
-echo "Starting NeurX app with local LLM backend..."
+echo "Starting NeurX app..."
 echo "  Root: ${ROOT_DIR}"
 echo "  Host platform: ${HOST_PLATFORM}"
 echo "  Target platform: ${TARGET_PLATFORM}"
-echo "  Backend port: ${PORT}"
+if [ "${NEURX_REMOTE_ONLY}" = "1" ]; then
+  echo "  Backend mode: remote-only"
+  echo "  Remote backend: ${NEURX_REMOTE_BASE_URL}${NEURX_REMOTE_CHAT_PATH}"
+  echo "  Remote model: ${NEURX_REMOTE_MODEL}"
+else
+  echo "  Backend port: ${PORT}"
+fi
 
 BACKEND_PID=""
 HEALTH_URL="http://127.0.0.1:${PORT}/neurx/health"
@@ -541,111 +551,69 @@ else
   exit 1
 fi
 
-# Reuse an already-running backend if health probe succeeds.
-HEALTH_JSON="$(curl -s "${HEALTH_URL}" 2>/dev/null || true)"
-if [ -n "${HEALTH_JSON}" ]; then
-  if printf '%s' "${HEALTH_JSON}" | grep -q '"backend":"s-gateway"'; then
-    echo "S backend already running on port ${PORT}; reusing existing process."
+if [ "${NEURX_REMOTE_ONLY}" != "1" ]; then
+  # Reuse an already-running backend if health probe succeeds.
+  HEALTH_JSON="$(curl -s "${HEALTH_URL}" 2>/dev/null || true)"
+  if [ -n "${HEALTH_JSON}" ]; then
+    if printf '%s' "${HEALTH_JSON}" | grep -q '"backend":"s-gateway"'; then
+      echo "S backend already running on port ${PORT}; reusing existing process."
+    else
+      echo "Error: port ${PORT} is occupied by a non-S backend."
+      echo "Health payload: ${HEALTH_JSON}"
+      echo "Please stop the old backend or set PORT to another value."
+      exit 1
+    fi
   else
-    echo "Error: port ${PORT} is occupied by a non-S backend."
-    echo "Health payload: ${HEALTH_JSON}"
-    echo "Please stop the old backend or set PORT to another value."
-    exit 1
+    (
+      cd "${BACKEND_DIR}"
+      bash ./http_server.sh
+    ) &
+    BACKEND_PID=$!
+    trap '[ -n "${BACKEND_PID}" ] && kill "${BACKEND_PID}" 2>/dev/null || true' EXIT
+
+    sleep 2
+
+    if ! kill -0 "${BACKEND_PID}" >/dev/null 2>&1; then
+      echo "Error: backend process exited during startup (PID: ${BACKEND_PID})"
+      exit 1
+    fi
+
+    if ! curl -s "${HEALTH_URL}" >/dev/null 2>&1; then
+      echo "Error: backend failed to start on port ${PORT}"
+      kill "${BACKEND_PID}" 2>/dev/null || true
+      exit 1
+    fi
+
+    echo "Backend started (PID: ${BACKEND_PID})"
   fi
-else
-  (
-    cd "${BACKEND_DIR}"
-    bash ./http_server.sh
-  ) &
-  BACKEND_PID=$!
-  trap '[ -n "${BACKEND_PID}" ] && kill "${BACKEND_PID}" 2>/dev/null || true' EXIT
-
-  sleep 2
-
-  if ! kill -0 "${BACKEND_PID}" >/dev/null 2>&1; then
-    echo "Error: backend process exited during startup (PID: ${BACKEND_PID})"
-    exit 1
-  fi
-
-  if ! curl -s "${HEALTH_URL}" >/dev/null 2>&1; then
-    echo "Error: backend failed to start on port ${PORT}"
-    kill "${BACKEND_PID}" 2>/dev/null || true
-    exit 1
-  fi
-
-  echo "Backend started (PID: ${BACKEND_PID})"
 fi
 
-# Configure Qt app to use local LLM backend
+# Configure Qt app
 export NEURX_LLM_ENABLED=1
 export NEURX_LLM_BACKEND=openai
-export NEURX_LLM_BASE_URL=http://127.0.0.1:${PORT}
-export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_BACKEND_MODEL}}"
-export NEURX_LLM_CHAT_PATH=/neurx/api/chat
+export NEURX_LLM_BASE_URL="${NEURX_LLM_BASE_URL:-${NEURX_REMOTE_BASE_URL}}"
+export NEURX_LLM_MODEL="${NEURX_LLM_MODEL:-${NEURX_REMOTE_MODEL}}"
+export NEURX_LLM_CHAT_PATH="${NEURX_LLM_CHAT_PATH:-${NEURX_REMOTE_CHAT_PATH}}"
 export NEURX_CODE_AGENT_ENABLE_MODEL_LOOP="${NEURX_CODE_AGENT_ENABLE_MODEL_LOOP:-0}"
 export NEURX_CODE_AGENT_BASE_URL="${NEURX_CODE_AGENT_BASE_URL:-${NEURX_LLM_BASE_URL}}"
 export NEURX_CODE_AGENT_CHAT_PATH="${NEURX_CODE_AGENT_CHAT_PATH:-${NEURX_LLM_CHAT_PATH}}"
 export NEURX_CODE_AGENT_MODEL="${NEURX_CODE_AGENT_MODEL:-${NEURX_LLM_MODEL}}"
-export NEURX_CODE_AGENT_REMOTE_BASE_URL="${NEURX_CODE_AGENT_REMOTE_BASE_URL:-http://111.202.231.146:8080}"
-export NEURX_CODE_AGENT_REMOTE_CHAT_PATH="${NEURX_CODE_AGENT_REMOTE_CHAT_PATH:-/neurx/api/chat}"
-export NEURX_CODE_AGENT_REMOTE_MODEL="${NEURX_CODE_AGENT_REMOTE_MODEL:-Qwen2.5-VL-7B}"
+export NEURX_CODE_AGENT_REMOTE_BASE_URL="${NEURX_CODE_AGENT_REMOTE_BASE_URL:-${NEURX_REMOTE_BASE_URL}}"
+export NEURX_CODE_AGENT_REMOTE_CHAT_PATH="${NEURX_CODE_AGENT_REMOTE_CHAT_PATH:-${NEURX_REMOTE_CHAT_PATH}}"
+export NEURX_CODE_AGENT_REMOTE_MODEL="${NEURX_CODE_AGENT_REMOTE_MODEL:-${NEURX_REMOTE_MODEL}}"
 
 # Ollama inference endpoint for arbitrary code generation (gateway.sh fallback)
 # Override with:
 #   NEURX_OLLAMA_URL=http://host:11435
 #   NEURX_OLLAMA_MODEL=qwen2.5:0.5b
 #   NEURX_OLLAMA_MODEL_DIR=/path/to/local/safetensors/model
-export NEURX_OLLAMA_MODELS="${NEURX_OLLAMA_MODELS:-${ROOT_DIR}/artifacts/checkpoints}"
-mkdir -p "${NEURX_OLLAMA_MODELS}"
-export OLLAMA_MODELS="${NEURX_OLLAMA_MODELS}"
-export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
-export NEURX_OLLAMA_LOCAL_MODEL_NAME="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
-export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL="${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-neurx-qwen2.5-vl-7b-local:latest}"
-NEURX_VL_BASE_URL="${NEURX_VL_BASE_URL:-http://127.0.0.1:8004}"
-NEURX_VL_MODEL="${NEURX_VL_MODEL:-Qwen2.5-VL-7B}"
-NEURX_VL_CHAT_PATH="${NEURX_VL_CHAT_PATH:-/v1/chat/completions}"
-# Prefer the Instruct model by default; keep VL-7B as a fallback if present.
-DEFAULT_OLLAMA_MODEL_DIR_PRIMARY="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-0.5B-Instruct"
-DEFAULT_OLLAMA_MODEL_DIR_FALLBACK="${ROOT_DIR}/artifacts/checkpoints/Qwen2.5-VL-7B"
-if [ -z "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${DEFAULT_OLLAMA_MODEL_DIR_PRIMARY}" ]; then
-  export NEURX_OLLAMA_MODEL_DIR="${DEFAULT_OLLAMA_MODEL_DIR_PRIMARY}"
-fi
-if [ -z "${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR:-}" ] && [ -d "${DEFAULT_OLLAMA_MODEL_DIR_FALLBACK}" ]; then
-  export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL_DIR="${DEFAULT_OLLAMA_MODEL_DIR_FALLBACK}"
-fi
-if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; then
-  export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-${NEURX_OLLAMA_LOCAL_MODEL_NAME}}"
-else
-  export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-qwen2.5:0.5b}"
-fi
-if ! curl -sf --connect-timeout 1 "${NEURX_VL_BASE_URL}/health" >/dev/null 2>&1; then
-  ensure_ollama_and_model "${NEURX_OLLAMA_MODEL}"
-fi
-
-# If a local Ollama model directory is configured, route the main LLM chat
-# directly to Ollama. Keep the smaller configured Ollama model as the default;
-# the imported local directory model remains available for explicit selection.
-# The code agent and NeurX-specific API paths (/neurx/api/*) still go through
-# the s-backend at port ${PORT} — those endpoints don't exist on Ollama.
-if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ] && [ -d "${NEURX_OLLAMA_MODEL_DIR}" ]; then
-  export NEURX_BACKEND_MODEL="${NEURX_OLLAMA_MODEL}"
-  export NEURX_LLM_MODEL="${NEURX_OLLAMA_MODEL}"
-  export NEURX_LLM_BASE_URL="${NEURX_OLLAMA_URL}"
-  export NEURX_LLM_CHAT_PATH="/api/chat"
-  # Code agent stays on s-backend so /neurx/api/chat and /neurx/api/agent/* resolve
-  export NEURX_CODE_AGENT_BASE_URL="http://127.0.0.1:${PORT}"
-  export NEURX_CODE_AGENT_CHAT_PATH="/neurx/api/chat"
-  export NEURX_CODE_AGENT_MODEL="${NEURX_OLLAMA_MODEL}"
-fi
-
-if curl -sf --connect-timeout 1 "${NEURX_VL_BASE_URL}/health" >/dev/null 2>&1; then
-  export NEURX_BACKEND_MODEL="${NEURX_VL_MODEL}"
-  export NEURX_LLM_MODEL="${NEURX_VL_MODEL}"
-  export NEURX_LLM_BASE_URL="${NEURX_VL_BASE_URL}"
-  export NEURX_LLM_CHAT_PATH="${NEURX_VL_CHAT_PATH}"
-  export NEURX_CODE_AGENT_BASE_URL="http://127.0.0.1:${PORT}"
-  export NEURX_CODE_AGENT_CHAT_PATH="/neurx/api/chat"
-  export NEURX_CODE_AGENT_MODEL="${NEURX_CODE_AGENT_MODEL:-${NEURX_LLM_MODEL}}"
+if [ "${NEURX_REMOTE_ONLY}" != "1" ]; then
+  export NEURX_OLLAMA_MODELS="${NEURX_OLLAMA_MODELS:-${ROOT_DIR}/artifacts/checkpoints}"
+  mkdir -p "${NEURX_OLLAMA_MODELS}"
+  export OLLAMA_MODELS="${NEURX_OLLAMA_MODELS}"
+  export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
+  export NEURX_OLLAMA_LOCAL_MODEL_NAME="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
+  export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL="${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-neurx-qwen2.5-vl-7b-local:latest}"
 fi
 
 CMAKE_BIN="$(resolve_cmake || true)"
