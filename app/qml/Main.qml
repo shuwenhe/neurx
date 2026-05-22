@@ -13,6 +13,25 @@ Window {
     color: "#111111"
 
     AppShell {
-        anchors.fill: parent
+        id: appShell
+        width: root.width / appShell.uiZoom
+        height: root.height / appShell.uiZoom
+        scale: appShell.uiZoom
+        transformOrigin: Item.TopLeft
+    }
+
+    Shortcut {
+        sequences: ["Ctrl++", "Ctrl+=", "Ctrl+Shift+="]
+        onActivated: appShell.zoomIn()
+    }
+
+    Shortcut {
+        sequences: ["Ctrl+-", "Ctrl+_"]
+        onActivated: appShell.zoomOut()
+    }
+
+    Shortcut {
+        sequences: ["Ctrl+0"]
+        onActivated: appShell.resetZoom()
     }
 }

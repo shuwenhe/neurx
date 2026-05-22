@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtMultimedia
+import QtQuick.Pdf
 
 Item {
     id: shell
@@ -71,6 +73,124 @@ Item {
     property bool loginLoggedIn: false
     property int agentRunTimeoutMs: 120000
     property bool restoringSession: false
+    property real uiZoom: 1.0
+    readonly property real minUiZoom: 0.5
+    readonly property real maxUiZoom: 2.0
+    readonly property real uiZoomStep: 0.1
+
+    function roundedUiZoom(value) {
+        return Math.round(value * 10) / 10
+    }
+
+    function setUiZoom(value) {
+        var next = Math.max(minUiZoom, Math.min(maxUiZoom, roundedUiZoom(value)))
+        if (Math.abs(next - uiZoom) < 0.001) {
+            return
+        }
+        uiZoom = next
+    }
+
+    function zoomIn() {
+        setUiZoom(uiZoom + uiZoomStep)
+    }
+
+    function zoomOut() {
+        setUiZoom(uiZoom - uiZoomStep)
+    }
+
+    function resetZoom() {
+        setUiZoom(1.0)
+    }
+
+    function imageKinds() {
+        return ["PNG", "JPG", "JPEG", "GIF", "BMP", "WEBP", "SVG"]
+    }
+
+    function videoKinds() {
+        return ["MP4", "MOV", "M4V", "WEBM", "MKV", "AVI"]
+    }
+
+    function officeDocumentKinds() {
+        return ["DOC", "DOCX", "XLS", "XLSX", "PPT", "PPTX", "ODT", "ODS", "ODP", "RTF"]
+    }
+
+    function inlineDocumentKinds() {
+        return ["DOCX"]
+    }
+
+    function imageKindForPath(path) {
+        var value = normalizedPath(path)
+        if (!value.length) {
+            return ""
+        }
+        var slash = value.lastIndexOf("/")
+        var dot = value.lastIndexOf(".")
+        if (dot <= slash) {
+            return ""
+        }
+        return value.slice(dot + 1).toUpperCase()
+    }
+
+    function effectiveEditorKind(path, fallbackKind) {
+        var imageKind = imageKindForPath(path)
+        if (imageKinds().indexOf(imageKind) >= 0) {
+            return imageKind
+        }
+        if (videoKinds().indexOf(imageKind) >= 0) {
+            return imageKind
+        }
+        if (officeDocumentKinds().indexOf(imageKind) >= 0) {
+            return imageKind
+        }
+        if (imageKind === "PDF") {
+            return imageKind
+        }
+        return fallbackKind || "Text"
+    }
+
+    function isImageKind(kind, path) {
+        var nextKind = effectiveEditorKind(path, kind)
+        return imageKinds().indexOf((nextKind || "").toUpperCase()) >= 0
+    }
+
+    function isPdfKind(kind) {
+        return (kind || "").toUpperCase() === "PDF"
+    }
+
+    function isVideoKind(kind, path) {
+        var nextKind = effectiveEditorKind(path, kind)
+        return videoKinds().indexOf((nextKind || "").toUpperCase()) >= 0
+    }
+
+    function isOfficeDocumentKind(kind, path) {
+        var nextKind = effectiveEditorKind(path, kind)
+        return officeDocumentKinds().indexOf((nextKind || "").toUpperCase()) >= 0
+    }
+
+    function isInlineDocumentKind(kind, path) {
+        var nextKind = effectiveEditorKind(path, kind)
+        return inlineDocumentKinds().indexOf((nextKind || "").toUpperCase()) >= 0
+    }
+
+    function readEditorPreviewText(path, kind) {
+        if (isInlineDocumentKind(kind, path)) {
+            return Runtime.read_docx_text_file(path)
+        }
+        return Runtime.read_text_file(path)
+    }
+
+    function editorImageSource(path) {
+        var value = normalizedPath(path)
+        if (!value.length) {
+            return ""
+        }
+        value = value.replace(/\\/g, "/")
+        if (value.charAt(0) !== "/") {
+            value = "/" + value
+        }
+        // encodeURI preserves /:@!$&'()*+,;=# but encodes spaces and Unicode
+        return encodeURI("file://" + value)
+    }
 
     function explorerLeafName(path) {
         var value = (path || "").trim()
@@ -196,12 +316,13 @@ Item {
             isPreview = true
         }
         var normalizedFilePath = normalizedPath(path)
+        var resolvedKind = effectiveEditorKind(normalizedFilePath, kind)
         var shouldReuse = preferExisting !== false && normalizedFilePath.length > 0
         var existingIndex = shouldReuse ? indexOfEditorTab(normalizedFilePath) : -1
 
         if (existingIndex >= 0) {
-            editorTabsModel.setProperty(existingIndex, "kind", kind || "Text")
-            editorTabsModel.setProperty(existingIndex, "text", text || "")
+            editorTabsModel.setProperty(existingIndex, "kind", resolvedKind)
+            editorTabsModel.setProperty(existingIndex, "text", (isImageKind(resolvedKind, normalizedFilePath) || isVideoKind(resolvedKind, normalizedFilePath) || isPdfKind(resolvedKind) || (isOfficeDocumentKind(resolvedKind, normalizedFilePath) && !isInlineDocumentKind(resolvedKind, normalizedFilePath))) ? "" : (text || ""))
             editorTabsModel.setProperty(existingIndex, "label", editorTabLabel(normalizedFilePath, fallbackLabel))
             if (!isPreview) {
                 editorTabsModel.setProperty(existingIndex, "preview", false)
@@ -221,8 +342,8 @@ Item {
 
         if (previewIndex >= 0) {
             editorTabsModel.setProperty(previewIndex, "path", normalizedFilePath)
-            editorTabsModel.setProperty(previewIndex, "kind", kind || "Text")
-            editorTabsModel.setProperty(previewIndex, "text", text || "")
+            editorTabsModel.setProperty(previewIndex, "kind", resolvedKind)
+            editorTabsModel.setProperty(previewIndex, "text", (isImageKind(resolvedKind, normalizedFilePath) || isVideoKind(resolvedKind, normalizedFilePath) || isPdfKind(resolvedKind) || (isOfficeDocumentKind(resolvedKind, normalizedFilePath) && !isInlineDocumentKind(resolvedKind, normalizedFilePath))) ? "" : (text || ""))
             editorTabsModel.setProperty(previewIndex, "label", editorTabLabel(normalizedFilePath, fallbackLabel))
             editorTabsModel.setProperty(previewIndex, "preview", isPreview)
             activateEditorTab(previewIndex)
@@ -231,8 +352,8 @@ Item {
 
         editorTabsModel.append({
             path: normalizedFilePath,
-            kind: kind || "Text",
-            text: text || "",
+            kind: resolvedKind,
+            text: (isImageKind(resolvedKind, normalizedFilePath) || isVideoKind(resolvedKind, normalizedFilePath) || isPdfKind(resolvedKind) || (isOfficeDocumentKind(resolvedKind, normalizedFilePath) && !isInlineDocumentKind(resolvedKind, normalizedFilePath))) ? "" : (text || ""),
             label: editorTabLabel(normalizedFilePath, fallbackLabel),
             preview: isPreview
         })
@@ -305,11 +426,14 @@ Item {
             var entry = tabEntries[i]
             var path = normalizedPath(entry.path || "")
             var text = ""
+            var kind = effectiveEditorKind(path, entry.kind || "Text")
 
             if (path.length > 0) {
-                text = Runtime.read_text_file(path)
-                if (text.indexOf("read_text_file_failed:") === 0) {
-                    continue
+                if (!isImageKind(kind, path) && !isVideoKind(kind, path) && !isPdfKind(kind) && !(isOfficeDocumentKind(kind, path) && !isInlineDocumentKind(kind, path))) {
+                    text = readEditorPreviewText(path, kind)
+                    if (text.indexOf("read_text_file_failed:") === 0 || text.indexOf("read_docx_text_file_failed:") === 0) {
+                        continue
+                    }
                 }
             } else {
                 text = entry.text || ""
@@ -317,7 +441,7 @@ Item {
 
             editorTabsModel.append({
                 path: path,
-                kind: entry.kind || "Text",
+                kind: kind,
                 text: text,
                 label: editorTabLabel(path, entry.label || ""),
                 preview: !!entry.preview
@@ -420,6 +544,7 @@ Item {
             selectedFilePath || "",
             explorerPaneWidth,
             agentPaneWidth,
+            uiZoom,
             editorTabsSnapshot(),
             activeEditorTabIndex)
     }
@@ -434,6 +559,9 @@ Item {
         }
         if ((session.agentPaneWidth || 0) > 0) {
             agentPaneWidth = session.agentPaneWidth
+        }
+        if ((session.uiZoom || 0) > 0) {
+            uiZoom = session.uiZoom
         }
 
         var savedFilePath = (session.selectedFilePath || "").trim()
@@ -491,6 +619,9 @@ Item {
     }
 
     function syntaxKeywords(kind) {
+        if (kind === "DOCX") {
+            return []
+        }
         if (kind === "QML") {
             return ["import", "property", "readonly", "required", "signal", "function", "if", "else", "return", "true", "false", "var", "let", "const", "id", "onClicked", "anchors", "parent"]
         }
@@ -500,6 +631,12 @@ Item {
         return ["if", "else", "for", "while", "return", "function", "const", "let", "var", "true", "false"]
     }
 
+    function codeFontCss() {
+        // Avoid generic CSS font families here because Qt on Windows may
+        // resolve them through legacy GDI aliases like "Modern" and log warnings.
+        return "'Consolas','Cascadia Mono','Courier New'"
+    }
+
     function lineNumberHtml(text) {
         var lineCount = Math.max(1, (text || "").split("\n").length)
         var numbers = []
@@ -507,7 +644,7 @@ Item {
             numbers.push(index)
         }
 
-        return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textMuted + ";text-align:right;\">"
+        return "<pre style=\"margin:0;font-family:" + codeFontCss() + ";font-size:14px;line-height:1.35;color:" + shell.textMuted + ";text-align:right;\">"
             + numbers.join("\n")
             + "</pre>"
     }
@@ -515,7 +652,12 @@ Item {
     function highlightCode(text, kind) {
         var source = text || ""
         if (!source.length) {
-            return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\"></pre>"
+            return "<pre style=\"margin:0;font-family:" + codeFontCss() + ";font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\"></pre>"
+        }
+        if (kind === "DOCX") {
+            return "<pre style=\"margin:0;font-family:" + codeFontCss() + ";font-size:14px;line-height:1.45;color:" + shell.textPrimary + ";white-space:pre-wrap;\">"
+                + escapeHtml(source)
+                + "</pre>"
         }
 
         var keywords = syntaxKeywords(kind)
@@ -543,7 +685,7 @@ Item {
         }
 
         highlighted += escapeHtml(source.slice(lastIndex))
-        return "<pre style=\"margin:0;font-family:'Consolas','Courier New',monospace;font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\">"
+        return "<pre style=\"margin:0;font-family:" + codeFontCss() + ";font-size:14px;line-height:1.35;color:" + shell.textPrimary + ";\">"
             + highlighted.replace(/\t/g, "    ")
             + "</pre>"
     }
@@ -1011,6 +1153,32 @@ Item {
             toggleDirectory(index)
             return
         }
+        if (isImageKind(entry.kind, entry.path)) {
+            openEditorTab(entry.path, entry.kind, "", entry.label, true, isPreview)
+            return
+        }
+        if (isVideoKind(entry.kind, entry.path)) {
+            openEditorTab(entry.path, entry.kind, "", entry.label, true, isPreview)
+            return
+        }
+        if (isPdfKind(entry.kind)) {
+            openEditorTab(entry.path, entry.kind, "", entry.label, true, isPreview)
+            return
+        }
+        if (isInlineDocumentKind(entry.kind, entry.path)) {
+            var docxText = Runtime.read_docx_text_file(entry.path)
+            if (docxText.indexOf("read_docx_text_file_failed:") === 0) {
+                shell.copyNoticeText = qsTr("Open failed")
+                copyNoticeTimer.restart()
+                return
+            }
+            openEditorTab(entry.path, entry.kind, docxText, entry.label, true, isPreview)
+            return
+        }
+        if (isOfficeDocumentKind(entry.kind, entry.path)) {
+            openEditorTab(entry.path, entry.kind, "", entry.label, true, isPreview)
+            return
+        }
         openEditorTab(entry.path, entry.kind, Runtime.read_text_file(entry.path), entry.label, true, isPreview)
     }
 
@@ -1461,6 +1629,40 @@ Item {
         if (!next.length) {
             return
         }
+        if (isImageKind("", next)) {
+            selectedFileIndex = -1
+            openEditorTab(next, imageKindForPath(next), "", "", true)
+            shell.copyNoticeText = qsTr("Opened export")
+            copyNoticeTimer.restart()
+            return
+        }
+        if (isVideoKind("", next)) {
+            selectedFileIndex = -1
+            openEditorTab(next, imageKindForPath(next), "", "", true)
+            shell.copyNoticeText = qsTr("Opened export")
+            copyNoticeTimer.restart()
+            return
+        }
+        if (isInlineDocumentKind("", next)) {
+            var docxText = Runtime.read_docx_text_file(next)
+            if (docxText.indexOf("read_docx_text_file_failed:") === 0) {
+                shell.copyNoticeText = qsTr("Open failed")
+                copyNoticeTimer.restart()
+                return
+            }
+            selectedFileIndex = -1
+            openEditorTab(next, imageKindForPath(next), docxText, "", true)
+            shell.copyNoticeText = qsTr("Opened export")
+            copyNoticeTimer.restart()
+            return
+        }
+        if (isOfficeDocumentKind("", next)) {
+            selectedFileIndex = -1
+            openEditorTab(next, imageKindForPath(next), "", "", true)
+            shell.copyNoticeText = qsTr("Opened export")
+            copyNoticeTimer.restart()
+            return
+        }
         var text = Runtime.read_text_file(next)
         if (text.indexOf("read_text_file_failed:") === 0) {
             shell.copyNoticeText = qsTr("Open failed")
@@ -1593,6 +1795,7 @@ Item {
     onWidthChanged: clampPaneWidths()
     onExplorerPaneWidthChanged: persistSessionState()
     onAgentPaneWidthChanged: persistSessionState()
+    onUiZoomChanged: persistSessionState()
 
     Shortcut {
         sequences: ["Ctrl+W", "Ctrl+F4"]
@@ -2106,6 +2309,11 @@ Item {
                             width: 60
                             color: shell.lineNumberBg
                             border.color: shell.lineNumberBorder
+                            visible: !shell.isImageKind(shell.editorKind, shell.selectedFilePath)
+                                && !shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
+                                && !shell.isPdfKind(shell.editorKind)
+                                && !(shell.isOfficeDocumentKind(shell.editorKind, shell.selectedFilePath)
+                                    && !shell.isInlineDocumentKind(shell.editorKind, shell.selectedFilePath))
 
                             Text {
                                 id: editorLineNumbers
@@ -2128,6 +2336,11 @@ Item {
                             contentHeight: editorText.paintedHeight + 24
                             clip: true
                             boundsBehavior: Flickable.StopAtBounds
+                            visible: !shell.isImageKind(shell.editorKind, shell.selectedFilePath)
+                                && !shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
+                                && !shell.isPdfKind(shell.editorKind)
+                                && !(shell.isOfficeDocumentKind(shell.editorKind, shell.selectedFilePath)
+                                    && !shell.isInlineDocumentKind(shell.editorKind, shell.selectedFilePath))
                             ScrollBar.vertical: ScrollBar {
                                 policy: ScrollBar.AsNeeded
                             }
@@ -2157,7 +2370,443 @@ Item {
                                 anchors.centerIn: parent
                                 text: qsTr("Select a file from Explorer to open it in the editor.")
                                 color: shell.textMuted
-                                visible: shell.editorPlainText.length === 0
+                                visible: shell.editorPlainText.length === 0 && shell.selectedFilePath.length === 0
+                            }
+                        }
+
+                        Flickable {
+                            id: imagePreviewFlick
+                            anchors.fill: parent
+                            anchors.margins: 1
+                            contentWidth: Math.max(width, previewImage.paintedWidth + 32)
+                            contentHeight: Math.max(height, previewImage.paintedHeight + 32)
+                            clip: true
+                            boundsBehavior: Flickable.StopAtBounds
+                            visible: shell.isImageKind(shell.editorKind, shell.selectedFilePath)
+                            ScrollBar.vertical: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
+                            ScrollBar.horizontal: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
+
+                            Image {
+                                id: previewImage
+                                x: 16
+                                y: 16
+                                source: shell.isImageKind(shell.editorKind, shell.selectedFilePath)
+                                    ? shell.editorImageSource(shell.selectedFilePath)
+                                    : ""
+                                fillMode: Image.PreserveAspectFit
+                                asynchronous: true
+                                cache: false
+                                sourceSize.width: Math.max(1, imagePreviewFlick.width)
+                                sourceSize.height: Math.max(1, imagePreviewFlick.height)
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: qsTr("Image preview unavailable")
+                            color: shell.textMuted
+                            visible: shell.isImageKind(shell.editorKind, shell.selectedFilePath)
+                                && previewImage.status === Image.Error
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#090b0f"
+                            visible: shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
+
+                            MediaPlayer {
+                                id: previewPlayer
+                                source: shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
+                                    ? shell.editorImageSource(shell.selectedFilePath)
+                                    : ""
+                                audioOutput: AudioOutput {
+                                    volume: 1.0
+                                }
+                                videoOutput: previewVideoOutput
+                                onSourceChanged: {
+                                    if (source.toString().length > 0) {
+                                        play()
+                                    } else {
+                                        stop()
+                                    }
+                                }
+                            }
+
+                            VideoOutput {
+                                id: previewVideoOutput
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.bottom: videoControls.top
+                                anchors.margins: 16
+                                fillMode: VideoOutput.PreserveAspectFit
+                            }
+
+                            Rectangle {
+                                id: videoControls
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                anchors.margins: 16
+                                height: 56
+                                radius: 12
+                                color: "#161b22"
+                                border.color: shell.border
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 14
+                                    anchors.rightMargin: 14
+                                    spacing: 12
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 96
+                                        Layout.preferredHeight: 32
+                                        radius: 8
+                                        color: playPauseMouseArea.pressed ? "#157f58" : shell.accent
+                                        border.color: Qt.lighter(shell.accent, 1.15)
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: previewPlayer.playbackState === MediaPlayer.PlayingState
+                                                ? qsTr("Pause")
+                                                : qsTr("Play")
+                                            color: shell.bg
+                                            font.pixelSize: 13
+                                            font.bold: true
+                                        }
+
+                                        MouseArea {
+                                            id: playPauseMouseArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                if (previewPlayer.playbackState === MediaPlayer.PlayingState) {
+                                                    previewPlayer.pause()
+                                                } else {
+                                                    previewPlayer.play()
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: shell.selectedFilePath.length
+                                            ? qsTr("Playing %1").arg(shell.editorTabLabel(shell.selectedFilePath, ""))
+                                            : qsTr("No video selected.")
+                                        color: shell.textMuted
+                                        elide: Text.ElideMiddle
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 124
+                                        Layout.preferredHeight: 32
+                                        radius: 8
+                                        color: openVideoMouseArea.pressed ? "#222a34" : "#1b222c"
+                                        border.color: shell.border
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: qsTr("Open Externally")
+                                            color: shell.textPrimary
+                                            font.pixelSize: 12
+                                            font.bold: true
+                                        }
+
+                                        MouseArea {
+                                            id: openVideoMouseArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#0d1015"
+                            visible: shell.isPdfKind(shell.editorKind)
+
+                            PdfDocument {
+                                id: previewPdfDocument
+                                source: shell.isPdfKind(shell.editorKind) && shell.selectedFilePath.length > 0
+                                    ? shell.editorImageSource(shell.selectedFilePath)
+                                    : ""
+                            }
+
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 56
+                                    radius: 12
+                                    color: "#161b22"
+                                    border.color: shell.border
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 14
+                                        anchors.rightMargin: 14
+                                        spacing: 12
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 96
+                                            Layout.preferredHeight: 32
+                                            radius: 8
+                                            color: pdfFitWidthMouseArea.pressed ? "#157f58" : shell.accent
+                                            border.color: Qt.lighter(shell.accent, 1.15)
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: qsTr("Fit Width")
+                                                color: shell.bg
+                                                font.pixelSize: 13
+                                                font.bold: true
+                                            }
+
+                                            MouseArea {
+                                                id: pdfFitWidthMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: pdfPreview.scaleToWidth(pdfPreview.width, pdfPreview.height)
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 92
+                                            Layout.preferredHeight: 32
+                                            radius: 8
+                                            color: pdfFitPageMouseArea.pressed ? "#222a34" : "#1b222c"
+                                            border.color: shell.border
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: qsTr("Fit Page")
+                                                color: shell.textPrimary
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                            }
+
+                                            MouseArea {
+                                                id: pdfFitPageMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: pdfPreview.scaleToPage(pdfPreview.width, pdfPreview.height)
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 84
+                                            Layout.preferredHeight: 32
+                                            radius: 8
+                                            color: pdfZoomOutMouseArea.pressed ? "#222a34" : "#1b222c"
+                                            border.color: shell.border
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: qsTr("Zoom -")
+                                                color: shell.textPrimary
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                            }
+
+                                            MouseArea {
+                                                id: pdfZoomOutMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: pdfPreview.renderScale = Math.max(0.25, pdfPreview.renderScale / 1.2)
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 84
+                                            Layout.preferredHeight: 32
+                                            radius: 8
+                                            color: pdfZoomInMouseArea.pressed ? "#222a34" : "#1b222c"
+                                            border.color: shell.border
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: qsTr("Zoom +")
+                                                color: shell.textPrimary
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                            }
+
+                                            MouseArea {
+                                                id: pdfZoomInMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: pdfPreview.renderScale = Math.min(5.0, pdfPreview.renderScale * 1.2)
+                                            }
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: previewPdfDocument.status === PdfDocument.Ready
+                                                ? qsTr("Page %1 / %2  |  %3%")
+                                                    .arg(pdfPreview.currentPage + 1)
+                                                    .arg(Math.max(1, previewPdfDocument.pageCount))
+                                                    .arg(Math.round(pdfPreview.renderScale * 100))
+                                                : (previewPdfDocument.status === PdfDocument.Loading
+                                                    ? qsTr("Loading PDF...")
+                                                    : shell.editorTabLabel(shell.selectedFilePath, qsTr("PDF")))
+                                            color: shell.textMuted
+                                            elide: Text.ElideMiddle
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 124
+                                            Layout.preferredHeight: 32
+                                            radius: 8
+                                            color: openPdfMouseArea.pressed ? "#222a34" : "#1b222c"
+                                            border.color: shell.border
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: qsTr("Open Externally")
+                                                color: shell.textPrimary
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                            }
+
+                                            MouseArea {
+                                                id: openPdfMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    radius: 12
+                                    color: "#0f1115"
+                                    border.color: shell.border
+                                    clip: true
+
+                                    PdfMultiPageView {
+                                        id: pdfPreview
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        visible: previewPdfDocument.status === PdfDocument.Ready
+                                        document: previewPdfDocument
+                                    }
+
+                                    Column {
+                                        anchors.centerIn: parent
+                                        spacing: 12
+                                        visible: previewPdfDocument.status !== PdfDocument.Ready
+
+                                        Text {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            text: previewPdfDocument.status === PdfDocument.Loading
+                                                ? qsTr("Loading PDF...")
+                                                : (previewPdfDocument.error.length > 0
+                                                    ? qsTr("PDF preview unavailable")
+                                                    : qsTr("No PDF file selected."))
+                                            color: shell.textPrimary
+                                            font.pixelSize: 16
+                                            font.bold: true
+                                        }
+
+                                        Text {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            text: previewPdfDocument.error.length > 0
+                                                ? previewPdfDocument.error
+                                                : qsTr("Please wait while the document is prepared.")
+                                            color: shell.textMuted
+                                            font.pixelSize: 12
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                    }
+                                }
+                            }
+                            onWidthChanged: {
+                                if (previewPdfDocument.status === PdfDocument.Ready) {
+                                    pdfPreview.scaleToWidth(width - 32, height - 32)
+                                }
+                            }
+                        }
+
+                        Connections {
+                            target: previewPdfDocument
+                            function onStatusChanged(status) {
+                                if (status === PdfDocument.Ready) {
+                                    pdfPreview.scaleToWidth(pdfPreview.width, pdfPreview.height)
+                                }
+                            }
+                        }
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 14
+                            visible: shell.isOfficeDocumentKind(shell.editorKind, shell.selectedFilePath)
+                                && !shell.isInlineDocumentKind(shell.editorKind, shell.selectedFilePath)
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: qsTr("Document preview is not available in this build")
+                                color: shell.textPrimary
+                                font.pixelSize: 16
+                                font.bold: true
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: shell.selectedFilePath.length
+                                    ? qsTr("Open this document in your system office app.")
+                                    : qsTr("No document selected.")
+                                color: shell.textMuted
+                                font.pixelSize: 12
+                            }
+
+                            Rectangle {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: 184
+                                height: 38
+                                radius: 10
+                                color: openDocumentMouseArea.pressed ? "#157f58" : shell.accent
+                                border.color: Qt.lighter(shell.accent, 1.15)
+                                visible: shell.selectedFilePath.length > 0
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Open Document")
+                                    color: shell.bg
+                                    font.pixelSize: 13
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    id: openDocumentMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
+                                }
                             }
                         }
                     }
