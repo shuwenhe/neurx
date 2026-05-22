@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Qt.labs.settings 1.1
 
 Item {
     id: shell
@@ -72,13 +71,6 @@ Item {
     property bool loginLoggedIn: false
     property int agentRunTimeoutMs: 120000
     property bool restoringSession: false
-
-    Settings {
-        id: loginSettings
-        category: "app_shell_login"
-        property bool loggedIn: false
-        property string phone: ""
-    }
 
     function explorerLeafName(path) {
         var value = (path || "").trim()
@@ -1581,8 +1573,9 @@ Item {
     }
 
     Component.onCompleted: {
-        shell.loginLoggedIn = loginSettings.loggedIn
-        shell.loginPhoneText = loginSettings.phone
+        var loginSession = Runtime.load_login_session()
+        shell.loginLoggedIn = !!loginSession.loggedIn
+        shell.loginPhoneText = loginSession.phone || ""
         refreshLoginButtonText()
         restoreEditorSession()
         // Only apply the checkpoint model selection when using the s-backend.
@@ -3389,8 +3382,7 @@ Item {
                                 return
                             }
                             shell.loginLoggedIn = true
-                            loginSettings.loggedIn = true
-                            loginSettings.phone = shell.loginPhoneText
+                            Runtime.save_login_session(true, shell.loginPhoneText)
                             shell.generatedLoginCode = ""
                             shell.loginCodeText = ""
                             shell.loginStatusText = qsTr("登录成功：") + shell.loginPhoneText
