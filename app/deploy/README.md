@@ -37,6 +37,25 @@ That makes the public page available at:
 
 The backend core itself stays in `app/service/serve.s`.
 
+## Bind Qwen2.5-VL-7B
+
+If you want the public entry `http://111.202.231.146:8080/neurx` to use `Qwen2.5-VL-7B` as the backend model service, run the VL API first and point the NeurX backend gateway at it:
+
+```bash
+cd serving/serve
+bash qwen25_vl_cpu_api_container.sh
+```
+
+Then export the gateway variables before starting the app stack:
+
+```bash
+export NEURX_BACKEND_MODEL=Qwen2.5-VL-7B
+export NEURX_VL_BASE_URL=http://127.0.0.1:8004
+export NEURX_VL_MODEL=Qwen2.5-VL-7B
+```
+
+After that, `POST /neurx/api/chat` will route `Qwen2.5-VL-7B` requests to the VL service instead of the default Ollama fallback.
+
 ## Docker Compose
 
 You can also bring up the full stack locally:

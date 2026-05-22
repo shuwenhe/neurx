@@ -105,7 +105,7 @@ handle_chat() {
     fi
   fi
   max_tokens="$(extract_json_int max_tokens "$REQUEST_BODY")"
-  [[ -z "$model" ]] && model="${NEURX_BACKEND_MODEL:-gpt_large}"
+  [[ -z "$model" ]] && model="${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}"
   [[ -z "$prompt" ]] && prompt="Please provide your request."
   [[ -z "$max_tokens" ]] && max_tokens="16"
 

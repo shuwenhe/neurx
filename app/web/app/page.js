@@ -42,7 +42,7 @@ function groupModelOptions(modelOptions) {
 
 export default function Page() {
   const [prompt, setPrompt] = useState('Explain how NeurX exposes an S-based LLM backend.');
-  const [model, setModel] = useState('gpt_large');
+  const [model, setModel] = useState('Qwen2.5-VL-7B');
   const [modelOptions, setModelOptions] = useState([]);
   const [maxTokens, setMaxTokens] = useState(16);
   const [status, setStatus] = useState('idle');
@@ -68,7 +68,7 @@ export default function Page() {
         setModelOptions(models);
         if (models.length > 0) {
           setModel((current) => {
-            if (!current || current === 'gpt_large') {
+            if (!current || current === 'Qwen2.5-VL-7B') {
               return models[0].value || current;
             }
             return current;
@@ -105,7 +105,7 @@ export default function Page() {
 
   async function handleSend() {
     const payload = {
-      model: model.trim() || 'gpt_large',
+      model: model.trim() || 'Qwen2.5-VL-7B',
       prompt,
       max_tokens: Number(maxTokens || 16),
     };
@@ -162,7 +162,7 @@ export default function Page() {
               onChange={(event) => setModel(event.target.value)}
             >
               {groupedModelOptions.length === 0 ? (
-                <option value="gpt_large">gpt_large</option>
+                <option value="Qwen2.5-VL-7B">Qwen2.5-VL-7B</option>
               ) : (
                 groupedModelOptions.map((group) => (
                   <optgroup key={group.groupLabel} label={group.groupLabel}>

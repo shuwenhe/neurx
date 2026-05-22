@@ -6,6 +6,9 @@ services:
     environment:
       PORT: 18080
       NEURX_S_BINARY: /usr/local/bin/s
+      NEURX_BACKEND_MODEL: ${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}
+      NEURX_VL_BASE_URL: ${NEURX_VL_BASE_URL:-}
+      NEURX_VL_MODEL: ${NEURX_VL_MODEL:-Qwen2.5-VL-7B}
     volumes:
       - /home/shuwen/.local/bin/s:/usr/local/bin/s:ro
     ports:
