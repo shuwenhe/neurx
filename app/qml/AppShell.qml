@@ -50,6 +50,7 @@ Item {
     property string runtimeStatusText: Runtime.ping()
     property string editorPlainText: ""
     property string editorKind: "Text"
+    property int activeEditorTabIndex: -1
     property var diagnosticsSkillRecords: []
     property string selectedSkillName: ""
     property string skillStatusFilter: ""
@@ -60,8 +61,10 @@ Item {
     property string selectedSkillSearchText: ""
     property bool agentDetailsExpanded: false
     property int activeAssistantMessageIndex: -1
+    property string activeAssistantStreamText: ""
     property string copyNoticeText: ""
     property int agentRunTimeoutMs: 120000
+    property bool restoringSession: false
 
     function explorerLeafName(path) {
         var value = (path || "").trim()
@@ -80,6 +83,386 @@ Item {
             leaf = value
         }
         return leaf.toUpperCase()
+    }
+
+    function editorTabLabel(path, fallbackLabel) {
+        var fallback = (fallbackLabel || "").trim()
+        if (fallback.length) {
+            return fallback
+        }
+        var value = normalizedPath(path)
+        if (!value.length) {
+            return qsTr("Preview")
+        }
+        var slash = value.lastIndexOf("/")
+        return slash >= 0 ? value.slice(slash + 1) : value
+    }
+
+    function directoryForFilePath(path) {
+        var value = (path || "").trim()
+        if (!value.length) {
+            return ""
+        }
+        while (value.length > 1 && value.charAt(value.length - 1) === "/") {
+            value = value.slice(0, value.length - 1)
+        }
+        var slash = value.lastIndexOf("/")
+        if (slash <= 0) {
+            return ""
+        }
+        return value.slice(0, slash)
+    }
+
+    function normalizedPath(path) {
+        var value = (path || "").trim()
+        while (value.length > 1 && value.charAt(value.length - 1) === "/") {
+            value = value.slice(0, value.length - 1)
+        }
+        return value
+    }
+
+    function indexOfEntryPath(path) {
+        var target = normalizedPath(path)
+        for (var i = 0; i < fileModel.count; ++i) {
+            if (normalizedPath(fileModel.get(i).path) === target) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    function indexOfEditorTab(path) {
+        var target = normalizedPath(path)
+        if (!target.length) {
+            return -1
+        }
+        for (var i = 0; i < editorTabsModel.count; ++i) {
+            if (normalizedPath(editorTabsModel.get(i).path) === target) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    function syncEditorStateFromActiveTab() {
+        if (activeEditorTabIndex < 0 || activeEditorTabIndex >= editorTabsModel.count) {
+            selectedFilePath = ""
+            editorKind = "Text"
+            editorPlainText = ""
+            selectedFileIndex = -1
+            persistSessionState()
+            return
+        }
+
+        var tab = editorTabsModel.get(activeEditorTabIndex)
+        selectedFilePath = tab.path
+        editorKind = tab.kind
+        editorPlainText = tab.text
+
+        var entryIndex = indexOfEntryPath(tab.path)
+        selectedFileIndex = entryIndex
+        persistSessionState()
+    }
+
+    function activateEditorTab(index) {
+        if (index < 0 || index >= editorTabsModel.count) {
+            activeEditorTabIndex = -1
+            syncEditorStateFromActiveTab()
+            return
+        }
+        activeEditorTabIndex = index
+        syncEditorStateFromActiveTab()
+    }
+
+    function openEditorTab(path, kind, text, fallbackLabel, preferExisting, isPreview) {
+        if (isPreview === undefined) {
+            isPreview = true
+        }
+        var normalizedFilePath = normalizedPath(path)
+        var shouldReuse = preferExisting !== false && normalizedFilePath.length > 0
+        var existingIndex = shouldReuse ? indexOfEditorTab(normalizedFilePath) : -1
+
+        if (existingIndex >= 0) {
+            editorTabsModel.setProperty(existingIndex, "kind", kind || "Text")
+            editorTabsModel.setProperty(existingIndex, "text", text || "")
+            editorTabsModel.setProperty(existingIndex, "label", editorTabLabel(normalizedFilePath, fallbackLabel))
+            if (!isPreview) {
+                editorTabsModel.setProperty(existingIndex, "preview", false)
+            }
+            activateEditorTab(existingIndex)
+            return
+        }
+
+        // If there's an existing preview tab, replace it instead of appending
+        var previewIndex = -1
+        for (var i = 0; i < editorTabsModel.count; ++i) {
+            if (editorTabsModel.get(i).preview) {
+                previewIndex = i
+                break
+            }
+        }
+
+        if (previewIndex >= 0) {
+            editorTabsModel.setProperty(previewIndex, "path", normalizedFilePath)
+            editorTabsModel.setProperty(previewIndex, "kind", kind || "Text")
+            editorTabsModel.setProperty(previewIndex, "text", text || "")
+            editorTabsModel.setProperty(previewIndex, "label", editorTabLabel(normalizedFilePath, fallbackLabel))
+            editorTabsModel.setProperty(previewIndex, "preview", isPreview)
+            activateEditorTab(previewIndex)
+            return
+        }
+
+        editorTabsModel.append({
+            path: normalizedFilePath,
+            kind: kind || "Text",
+            text: text || "",
+            label: editorTabLabel(normalizedFilePath, fallbackLabel),
+            preview: isPreview
+        })
+        activateEditorTab(editorTabsModel.count - 1)
+    }
+
+    function closeEditorTab(index) {
+        if (index < 0 || index >= editorTabsModel.count) {
+            return
+        }
+
+        var wasActive = index === activeEditorTabIndex
+        editorTabsModel.remove(index, 1)
+
+        if (editorTabsModel.count === 0) {
+            activeEditorTabIndex = -1
+            syncEditorStateFromActiveTab()
+            return
+        }
+
+        if (wasActive) {
+            activateEditorTab(Math.min(index, editorTabsModel.count - 1))
+            return
+        }
+
+        if (index < activeEditorTabIndex) {
+            activeEditorTabIndex -= 1
+        }
+        syncEditorStateFromActiveTab()
+    }
+
+    function closeActiveEditorTab() {
+        if (activeEditorTabIndex >= 0) {
+            closeEditorTab(activeEditorTabIndex)
+        }
+    }
+
+    function activateAdjacentEditorTab(step) {
+        if (editorTabsModel.count <= 1) {
+            return
+        }
+        if (activeEditorTabIndex < 0) {
+            activateEditorTab(0)
+            return
+        }
+        var offset = step < 0 ? -1 : 1
+        var nextIndex = (activeEditorTabIndex + offset + editorTabsModel.count) % editorTabsModel.count
+        activateEditorTab(nextIndex)
+    }
+
+    function editorTabsSnapshot() {
+        var tabs = []
+        for (var i = 0; i < editorTabsModel.count; ++i) {
+            var tab = editorTabsModel.get(i)
+            tabs.push({
+                path: tab.path || "",
+                kind: tab.kind || "Text",
+                label: tab.label || "",
+                preview: !!tab.preview,
+                text: (tab.path || "").length > 0 ? "" : (tab.text || "")
+            })
+        }
+        return tabs
+    }
+
+    function restoreEditorTabs(tabEntries, activeIndex) {
+        editorTabsModel.clear()
+
+        for (var i = 0; i < tabEntries.length; ++i) {
+            var entry = tabEntries[i]
+            var path = normalizedPath(entry.path || "")
+            var text = ""
+
+            if (path.length > 0) {
+                text = Runtime.read_text_file(path)
+                if (text.indexOf("read_text_file_failed:") === 0) {
+                    continue
+                }
+            } else {
+                text = entry.text || ""
+            }
+
+            editorTabsModel.append({
+                path: path,
+                kind: entry.kind || "Text",
+                text: text,
+                label: editorTabLabel(path, entry.label || ""),
+                preview: !!entry.preview
+            })
+        }
+
+        if (editorTabsModel.count === 0) {
+            activeEditorTabIndex = -1
+            syncEditorStateFromActiveTab()
+            return
+        }
+
+        var targetIndex = activeIndex
+        if (targetIndex < 0 || targetIndex >= editorTabsModel.count) {
+            targetIndex = 0
+        }
+        activateEditorTab(targetIndex)
+    }
+
+    function expandToFilePath(filePath) {
+        var targetFilePath = normalizedPath(filePath)
+        var targetDirPath = normalizedPath(directoryForFilePath(targetFilePath))
+        var rootPath = normalizedPath(explorerCurrentPath)
+        if (!targetFilePath.length || !targetDirPath.length) {
+            return
+        }
+
+        if (!rootPath.length) {
+            if (targetDirPath === "/") {
+                var rootIndex = indexOfEntryPath("/")
+                if (rootIndex >= 0) {
+                    var rootEntry = fileModel.get(rootIndex)
+                    if (rootEntry.isDir && !rootEntry.expanded) {
+                        expandDirectory(rootIndex)
+                    }
+                }
+                return
+            }
+
+            var topRootIndex = indexOfEntryPath("/")
+            if (topRootIndex < 0) {
+                return
+            }
+            var topRootEntry = fileModel.get(topRootIndex)
+            if (topRootEntry.isDir && !topRootEntry.expanded) {
+                expandDirectory(topRootIndex)
+            }
+
+            var topParts = targetDirPath.slice(1).split("/")
+            var topCurrentPath = "/"
+            for (var topPartIndex = 0; topPartIndex < topParts.length; ++topPartIndex) {
+                if (!topParts[topPartIndex].length) {
+                    continue
+                }
+                topCurrentPath = topCurrentPath === "/"
+                    ? "/" + topParts[topPartIndex]
+                    : topCurrentPath + "/" + topParts[topPartIndex]
+                var topIndex = indexOfEntryPath(topCurrentPath)
+                if (topIndex >= 0) {
+                    var topEntry = fileModel.get(topIndex)
+                    if (topEntry.isDir && !topEntry.expanded) {
+                        expandDirectory(topIndex)
+                    }
+                }
+            }
+            return
+        }
+
+        if (targetDirPath === rootPath) {
+            return
+        }
+        if (targetDirPath.indexOf(rootPath + "/") !== 0) {
+            return
+        }
+
+        var relativeDir = targetDirPath.slice(rootPath.length + 1)
+        var parts = relativeDir.split("/")
+        var currentPath = rootPath
+        for (var i = 0; i < parts.length; ++i) {
+            if (!parts[i].length) {
+                continue
+            }
+            currentPath += "/" + parts[i]
+            var index = indexOfEntryPath(currentPath)
+            if (index >= 0) {
+                var entry = fileModel.get(index)
+                if (entry.isDir && !entry.expanded) {
+                    expandDirectory(index)
+                }
+            }
+        }
+    }
+
+    function persistSessionState() {
+        if (restoringSession) {
+            return
+        }
+        Runtime.save_ui_session(
+            explorerCurrentPath || "",
+            selectedFilePath || "",
+            explorerPaneWidth,
+            agentPaneWidth,
+            editorTabsSnapshot(),
+            activeEditorTabIndex)
+    }
+
+    function restoreEditorSession() {
+        restoringSession = true
+
+        var session = Runtime.load_ui_session()
+
+        if ((session.explorerPaneWidth || 0) > 0) {
+            explorerPaneWidth = session.explorerPaneWidth
+        }
+        if ((session.agentPaneWidth || 0) > 0) {
+            agentPaneWidth = session.agentPaneWidth
+        }
+
+        var savedFilePath = (session.selectedFilePath || "").trim()
+        var savedExplorerPath = (session.explorerCurrentPath || "").trim()
+        var savedEditorTabs = session.editorTabs || []
+        var savedActiveEditorTabIndex = session.activeEditorTabIndex
+        if (savedActiveEditorTabIndex === undefined || savedActiveEditorTabIndex === null) {
+            savedActiveEditorTabIndex = -1
+        }
+        var targetExplorerPath = savedExplorerPath.length ? savedExplorerPath : Runtime.explorer_default_path()
+        var normalizedTargetExplorerPath = normalizedPath(targetExplorerPath)
+
+        if (savedFilePath.length && savedExplorerPath.length) {
+            var inferredDir = normalizedPath(directoryForFilePath(savedFilePath))
+            var fileUnderExplorerRoot = inferredDir === normalizedTargetExplorerPath
+                || inferredDir.indexOf(normalizedTargetExplorerPath + "/") === 0
+            if (inferredDir.length && (!normalizedTargetExplorerPath.length || !fileUnderExplorerRoot)) {
+                targetExplorerPath = inferredDir
+            }
+        }
+
+        refreshExplorer(targetExplorerPath)
+
+        if (savedEditorTabs.length > 0) {
+            restoreEditorTabs(savedEditorTabs, savedActiveEditorTabIndex)
+        } else if (savedFilePath.length) {
+            expandToFilePath(savedFilePath)
+            for (var i = 0; i < fileModel.count; ++i) {
+                var entry = fileModel.get(i)
+                if (!entry.isDir && normalizedPath(entry.path) === normalizedPath(savedFilePath)) {
+                    selectFile(i, false)
+                    break
+                }
+            }
+        }
+
+        if (selectedFilePath.length) {
+            expandToFilePath(selectedFilePath)
+            selectedFileIndex = indexOfEntryPath(selectedFilePath)
+            if (selectedFileIndex >= 0) {
+                fileView.positionViewAtIndex(selectedFileIndex, ListView.Contain)
+            }
+        }
+
+        restoringSession = false
+        persistSessionState()
     }
 
     function escapeHtml(text) {
@@ -176,6 +559,7 @@ Item {
     function beginConversation(prompt, responseLabel, pendingText) {
         lastPromptText = prompt
         lastResponseLabel = responseLabel
+        activeAssistantStreamText = ""
         resultOutput.text = pendingText
         lastRunDurationText = qsTr("Working...")
         runStartMs = Date.now()
@@ -184,7 +568,26 @@ Item {
         appendConversationMessage("assistant", responseLabel, pendingText, true)
     }
 
+    function updateStreamingConversation(chunk) {
+        if (!chunk || !chunk.length) {
+            return
+        }
+        activeAssistantStreamText += chunk
+        resultOutput.text = activeAssistantStreamText
+        var parsed = shell.parseConversationPayload(activeAssistantStreamText)
+        if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+            conversationModel.setProperty(activeAssistantMessageIndex, "text", activeAssistantStreamText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", parsed.bodyText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "modeText", parsed.modeText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "planText", parsed.planText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "pending", true)
+            conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("Streaming..."))
+        }
+        conversationList.positionViewAtEnd()
+    }
+
     function finishConversation(result, durationText) {
+        activeAssistantStreamText = ""
         resultOutput.text = result
         var parsed = shell.parseConversationPayload(result)
         diagnosticsSkillRecords = parseSkillRecords(result)
@@ -406,6 +809,10 @@ Item {
         id: fileModel
     }
 
+    ListModel {
+        id: editorTabsModel
+    }
+
     function explorerChildEntries(path, depth) {
         var entries = Runtime.explorer_entries(path || "")
         var dirs = []
@@ -479,8 +886,13 @@ Item {
                 insertExpandedChildren(j)
             }
         }
-        selectedFileIndex = fileModel.count > 0 ? 0 : -1
-        fileView.positionViewAtBeginning()
+        var activeEntryIndex = indexOfEntryPath(selectedFilePath)
+        selectedFileIndex = activeEntryIndex >= 0 ? activeEntryIndex : (fileModel.count > 0 ? 0 : -1)
+        if (selectedFileIndex >= 0) {
+            fileView.positionViewAtIndex(selectedFileIndex, ListView.Contain)
+        } else {
+            fileView.positionViewAtBeginning()
+        }
     }
 
     function refreshExplorer(path) {
@@ -489,6 +901,7 @@ Item {
         explorerRootLabel = shell.explorerLeafName(explorerCurrentPath)
         explorerRootExpanded = true
         populateExplorerRoot()
+        persistSessionState()
     }
 
     function collapseDirectory(index) {
@@ -539,7 +952,7 @@ Item {
         }
     }
 
-    function selectFile(index) {
+    function selectFile(index, isPreview) {
         if (index < 0 || index >= fileModel.count) {
             return
         }
@@ -547,12 +960,11 @@ Item {
         var entry = fileModel.get(index)
         selectedFileIndex = index
         if (entry.isDir) {
+            // directories are handled in toggleDirectory
             toggleDirectory(index)
             return
         }
-        selectedFilePath = entry.path
-        editorKind = entry.kind
-        editorPlainText = Runtime.read_text_file(entry.path)
+        openEditorTab(entry.path, entry.kind, Runtime.read_text_file(entry.path), entry.label, true, isPreview)
     }
 
     function goExplorerUp() {
@@ -982,9 +1394,7 @@ Item {
             return
         }
         selectedFileIndex = -1
-        selectedFilePath = exportSavedPath(resultOutput.text)
-        editorKind = "Text"
-        editorPlainText = text
+        openEditorTab("", "Text", text, qsTr("Skill Context"), false)
         shell.copyNoticeText = qsTr("Opened context")
         copyNoticeTimer.restart()
     }
@@ -994,9 +1404,7 @@ Item {
             return
         }
         selectedFileIndex = -1
-        selectedFilePath = exportSavedPath(resultOutput.text)
-        editorKind = "Text"
-        editorPlainText = traceStepPreview(stepRecord)
+        openEditorTab("", "Text", traceStepPreview(stepRecord), qsTr("Trace Step"), false)
         shell.copyNoticeText = qsTr("Opened step")
         copyNoticeTimer.restart()
     }
@@ -1013,9 +1421,7 @@ Item {
             return
         }
         selectedFileIndex = -1
-        selectedFilePath = next
-        editorKind = "Text"
-        editorPlainText = text
+        openEditorTab(next, "Text", text, "", true)
         shell.copyNoticeText = qsTr("Opened export")
         copyNoticeTimer.restart()
     }
@@ -1035,9 +1441,7 @@ Item {
             promptEditor.cursorPosition = promptEditor.text.length
         }
         selectedFileIndex = -1
-        selectedFilePath = exportSavedPath(resultOutput.text)
-        editorKind = "Text"
-        editorPlainText = trajectoryPreviewForSkill(resultOutput.text, skillRecord)
+        openEditorTab("", "Text", trajectoryPreviewForSkill(resultOutput.text, skillRecord), skillName.length ? skillName : qsTr("Skill"), false)
     }
 
     function openSelectedSkillExport() {
@@ -1049,9 +1453,7 @@ Item {
         var skillRecord = selectedSkillRecord()
         if (skillRecord) {
             selectedFileIndex = -1
-            selectedFilePath = ""
-            editorKind = "Text"
-            editorPlainText = trajectoryPreviewForSkill(resultOutput.text, skillRecord)
+            openEditorTab("", "Text", trajectoryPreviewForSkill(resultOutput.text, skillRecord), qsTr("Skill Preview"), false)
         }
     }
 
@@ -1092,6 +1494,10 @@ Item {
             shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
         }
+
+        function onAgentRunChunk(chunk) {
+            shell.updateStreamingConversation(chunk)
+        }
     }
 
     Timer {
@@ -1113,25 +1519,44 @@ Item {
                 conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
                 activeAssistantMessageIndex = -1
             }
+            shell.activeAssistantStreamText = ""
             shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
             shell.agentRunning = false
         }
     }
 
     Component.onCompleted: {
-        refreshExplorer(Runtime.explorer_default_path())
+        restoreEditorSession()
         // Only apply the checkpoint model selection when using the s-backend.
-        // When the URL points to Ollama (port 11434), the model is already set
+        // When the backend points to Ollama, the model is already set
         // from the environment (e.g. "neurx-qwen2.5vl-local:latest") and must
         // not be overridden with a checkpoint file path.
         var baseUrl = Runtime.localModelBaseUrl
-        var isOllama = baseUrl.indexOf(":11434") !== -1 || baseUrl.toLowerCase().indexOf("ollama") !== -1
+        var backend = Runtime.localModelBackend || ""
+        var isOllama = backend === "ollama" || baseUrl.toLowerCase().indexOf("ollama") !== -1
         if (Runtime.checkpointModelChoices.length > 0 && !isOllama) {
             Runtime.localModelName = Runtime.checkpointModelChoices[0].value
         }
         clampPaneWidths()
     }
     onWidthChanged: clampPaneWidths()
+    onExplorerPaneWidthChanged: persistSessionState()
+    onAgentPaneWidthChanged: persistSessionState()
+
+    Shortcut {
+        sequences: ["Ctrl+W", "Ctrl+F4"]
+        onActivated: shell.closeActiveEditorTab()
+    }
+
+    Shortcut {
+        sequences: ["Ctrl+Tab"]
+        onActivated: shell.activateAdjacentEditorTab(1)
+    }
+
+    Shortcut {
+        sequences: ["Ctrl+Shift+Tab"]
+        onActivated: shell.activateAdjacentEditorTab(-1)
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -1335,7 +1760,12 @@ Item {
                                     id: mouseArea
                                     anchors.fill: parent
                                     hoverEnabled: true
-                                    onClicked: shell.selectFile(index)
+                                    onClicked: shell.selectFile(index, true)
+                                    onDoubleClicked: {
+                                        if (!isDir) {
+                                            shell.selectFile(index, false)
+                                        }
+                                    }
                                 }
 
                                 RowLayout {
@@ -1461,7 +1891,11 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: selectedFilePath
+                            text: selectedFilePath.length
+                                ? selectedFilePath
+                                : (activeEditorTabIndex >= 0 && activeEditorTabIndex < editorTabsModel.count
+                                    ? editorTabsModel.get(activeEditorTabIndex).label
+                                    : "")
                             color: shell.textMuted
                             elide: Text.ElideRight
                         }
@@ -1478,6 +1912,107 @@ Item {
                                 text: qsTr("Read only")
                                 color: shell.textMuted
                                 font.pixelSize: 11
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 42
+                        radius: 12
+                        color: shell.panelAlt
+                        border.color: shell.border
+                        clip: true
+
+                        ListView {
+                            id: editorTabsView
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            anchors.topMargin: 5
+                            anchors.bottomMargin: 5
+                            model: editorTabsModel
+                            orientation: ListView.Horizontal
+                            spacing: 6
+                            clip: true
+
+                            delegate: Rectangle {
+                                required property int index
+                                required property string label
+                                required property string path
+                                property bool isPreview: model.preview !== undefined ? model.preview : false
+
+                                width: Math.min(220, Math.max(120, tabLabel.implicitWidth + 42))
+                                height: 28
+                                radius: 8
+                                color: index === shell.activeEditorTabIndex ? "#2c313a" : "#1a1d22"
+                                border.color: index === shell.activeEditorTabIndex ? "#4b5563" : "#2a2f36"
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                                    onClicked: shell.activateEditorTab(index)
+                                    onPressed: function(mouse) {
+                                        if (mouse.button === Qt.MiddleButton) {
+                                            mouse.accepted = true
+                                            shell.closeEditorTab(index)
+                                        }
+                                    }
+                                    onDoubleClicked: {
+                                        if (isPreview) {
+                                            editorTabsModel.setProperty(index, "preview", false)
+                                        }
+                                    }
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 8
+                                    spacing: 8
+
+                                    Text {
+                                        id: tabLabel
+                                        Layout.fillWidth: true
+                                        text: label
+                                        font.italic: isPreview
+                                        color: index === shell.activeEditorTabIndex ? shell.textPrimary : "#c3c8cf"
+                                        font.pixelSize: 12
+                                        elide: Text.ElideMiddle
+                                    }
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 16
+                                        Layout.preferredHeight: 16
+                                        radius: 8
+                                        color: closeTabMouse.containsMouse ? "#3b414a" : "transparent"
+                                        visible: editorTabsModel.count > 0
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "x"
+                                            color: "#9da3ae"
+                                            font.pixelSize: 11
+                                        }
+
+                                        MouseArea {
+                                            id: closeTabMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: function(mouse) {
+                                                mouse.accepted = true
+                                                shell.closeEditorTab(index)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Open files from Explorer to create editor tabs.")
+                                color: shell.textMuted
+                                visible: editorTabsModel.count === 0
                             }
                         }
                     }
@@ -1547,7 +2082,7 @@ Item {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: qsTr("Select a file from Explorer to load it into the editor.")
+                                text: qsTr("Select a file from Explorer to open it in the editor.")
                                 color: shell.textMuted
                                 visible: shell.editorPlainText.length === 0
                             }
@@ -1565,7 +2100,11 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: qsTr("Editing %1").arg(selectedFilePath)
+                            text: selectedFilePath.length
+                                ? qsTr("Editing %1").arg(selectedFilePath)
+                                : (activeEditorTabIndex >= 0 && activeEditorTabIndex < editorTabsModel.count
+                                    ? qsTr("Previewing %1").arg(editorTabsModel.get(activeEditorTabIndex).label)
+                                    : qsTr("No file open"))
                             color: shell.textPrimary
                             elide: Text.ElideRight
                         }
