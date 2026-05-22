@@ -72,6 +72,7 @@ Item {
     property string generatedLoginCode: ""
     property bool loginLoggedIn: false
     property int agentRunTimeoutMs: 120000
+    property var pendingCodeAgentChanges: []
     property bool restoringSession: false
     property real uiZoom: 1.0
     readonly property real minUiZoom: 0.5
@@ -900,6 +901,7 @@ Item {
 
         try {
             resultOutput.text = Runtime.run_code_assistant(prompt, filePath)
+            refreshPendingCodeAgentChanges()
             shell.lastRunDurationText = shell.elapsedDurationText()
             shell.runtimeStatusText = qsTr("suggestion_done")
             if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
@@ -1240,6 +1242,18 @@ Item {
         return ""
     }
 
+    function parseResultFields(text, key) {
+        var lines = (text || "").split("\n")
+        var prefix = key + "="
+        var values = []
+        for (var i = 0; i < lines.length; ++i) {
+            if (lines[i].indexOf(prefix) === 0) {
+                values.push(lines[i].slice(prefix.length))
+            }
+        }
+        return values
+    }
+
     function exportSavedPath(text) {
         return parseResultField(text, "saved_path")
     }
@@ -1274,6 +1288,59 @@ Item {
 
     function exportLastObservation(text) {
         return parseResultField(text, "last_observation")
+    }
+
+    function exportPendingChangeCount(text) {
+        return parseResultField(text, "pending_change_count")
+    }
+
+    function exportEditedPaths(text) {
+        return parseResultFields(text, "edited_path")
+    }
+
+    function refreshEditedFile(path) {
+        var next = normalizedPath(path)
+        if (!next.length) {
+            return
+        }
+        var kind = effectiveEditorKind(next, imageKindForPath(next))
+        if (isImageKind(kind, next) || isVideoKind(kind, next) || isPdfKind(kind) || (isOfficeDocumentKind(kind, next) && !isInlineDocumentKind(kind, next))) {
+            openEditorTab(next, kind, "", "", true, false)
+            return
+        }
+        var text = readEditorPreviewText(next, kind)
+        openEditorTab(next, kind, text, "", true, false)
+    }
+
+    function applyEditedPaths(text) {
+        var editedPaths = exportEditedPaths(text)
+        for (var i = 0; i < editedPaths.length; ++i) {
+            refreshEditedFile(editedPaths[i])
+        }
+    }
+
+    function refreshPendingCodeAgentChanges() {
+        pendingCodeAgentChanges = Runtime.pending_code_agent_changes()
+    }
+
+    function applyPendingCodeAgentChanges() {
+        if (!Runtime.has_pending_code_agent_changes()) {
+            return
+        }
+        var result = Runtime.apply_pending_code_agent_changes()
+        resultOutput.text = result
+        applyEditedPaths(result)
+        refreshPendingCodeAgentChanges()
+        shell.runtimeStatusText = qsTr("changes_applied")
+    }
+
+    function discardPendingCodeAgentChanges() {
+        if (!Runtime.has_pending_code_agent_changes()) {
+            return
+        }
+        Runtime.clear_pending_code_agent_changes()
+        refreshPendingCodeAgentChanges()
+        shell.runtimeStatusText = qsTr("changes_discarded")
     }
 
     function parseSkillRecords(text) {
@@ -1725,6 +1792,7 @@ Item {
             || exportActiveSkill(text).length > 0
             || exportTraceCount(text).length > 0
             || exportRegistryVersion(text).length > 0
+            || pendingCodeAgentChanges.length > 0
     }
 
     function isFailureResult(text) {
@@ -1739,6 +1807,7 @@ Item {
         function onAgentRunFinished(result) {
             agentRunTimeoutTimer.stop()
             shell.lastRunDurationText = shell.elapsedDurationText()
+            refreshPendingCodeAgentChanges()
             shell.finishConversation(result, shell.lastRunDurationText)
             shell.runtimeStatusText = isFailureResult(result) ? qsTr("failed #") + shell.runClickSeq : qsTr("done #") + shell.runClickSeq
             shell.agentRunning = false
@@ -3421,6 +3490,119 @@ Item {
                                     color: shell.textPrimary
                                     wrapMode: Text.WrapAnywhere
                                     visible: exportLastObservation(resultOutput.text).length > 0
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                visible: pendingCodeAgentChanges.length > 0
+                                spacing: 8
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+
+                                    Text {
+                                        text: qsTr("Pending Changes")
+                                        color: shell.textPrimary
+                                        font.pixelSize: 13
+                                        font.bold: true
+                                    }
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Rectangle {
+                                        radius: 8
+                                        color: shell.accent
+                                        implicitWidth: 104
+                                        implicitHeight: 30
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: qsTr("Apply")
+                                            color: shell.bg
+                                            font.bold: true
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: shell.applyPendingCodeAgentChanges()
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        radius: 8
+                                        color: shell.panelHover
+                                        border.color: shell.border
+                                        implicitWidth: 104
+                                        implicitHeight: 30
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: qsTr("Discard")
+                                            color: shell.textPrimary
+                                            font.bold: true
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: shell.discardPendingCodeAgentChanges()
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: exportPendingChangeCount(resultOutput.text).length > 0
+                                        ? qsTr("Pending change count: %1").arg(exportPendingChangeCount(resultOutput.text))
+                                        : qsTr("Pending changes are staged in memory until you apply them.")
+                                    color: shell.textMuted
+                                    wrapMode: Text.WrapAnywhere
+                                }
+
+                                Repeater {
+                                    model: pendingCodeAgentChanges
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        radius: 10
+                                        color: shell.panelAlt
+                                        border.color: shell.border
+                                        implicitHeight: pendingChangeColumn.implicitHeight + 16
+
+                                        ColumnLayout {
+                                            id: pendingChangeColumn
+                                            anchors.fill: parent
+                                            anchors.margins: 8
+                                            spacing: 4
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: (modelData.action || "") + (modelData.repo_path ? "  " + modelData.repo_path : "")
+                                                color: shell.textPrimary
+                                                font.bold: true
+                                                wrapMode: Text.WrapAnywhere
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.summary || ""
+                                                color: shell.textMuted
+                                                wrapMode: Text.WrapAnywhere
+                                                visible: (modelData.summary || "").length > 0
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.preview || ""
+                                                color: shell.textPrimary
+                                                wrapMode: Text.WrapAnywhere
+                                                font.family: "Consolas"
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
