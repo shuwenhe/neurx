@@ -20,8 +20,10 @@
 #include <QThread>
 #include <QUrl>
 #include <QVariantMap>
+#include <QXmlStreamReader>
 #include <QDebug>
 #include <QtConcurrent/QtConcurrentRun>
+#include <QtCore/6.11.0/QtCore/private/qzipreader_p.h>
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
@@ -40,6 +42,57 @@ constexpr const char kDefaultRemoteAppModel[] = "Qwen/Qwen2.5-7B-Instruct";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
+
+QString docx_plain_text_from_xml(const QByteArray& xml_bytes) {
+    QXmlStreamReader xml(xml_bytes);
+    QString text;
+    bool pending_paragraph_break = false;
+
+    const auto append_text = [&](const QString& value) {
+        if (value.isEmpty()) {
+            return;
+        }
+        if (pending_paragraph_break && !text.isEmpty() && !text.endsWith('\n')) {
+            text.append('\n');
+        }
+        pending_paragraph_break = false;
+        text.append(value);
+    };
+
+    while (!xml.atEnd()) {
+        xml.readNext();
+
+        if (xml.isStartElement()) {
+            const QStringView name = xml.name();
+            if (name == u"tab") {
+                append_text(QStringLiteral("\t"));
+            } else if (name == u"br" || name == u"cr") {
+                append_text(QStringLiteral("\n"));
+            }
+            continue;
+        }
+
+        if (xml.isCharacters() && !xml.isWhitespace()) {
+            append_text(xml.text().toString());
+            continue;
+        }
+
+        if (xml.isEndElement() && xml.name() == u"p") {
+            pending_paragraph_break = true;
+        }
+    }
+
+    if (xml.hasError()) {
+        return QString();
+    }
+
+    QString normalized = text;
+    normalized.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    while (normalized.contains(QStringLiteral("\n\n\n"))) {
+        normalized.replace(QStringLiteral("\n\n\n"), QStringLiteral("\n\n"));
+    }
+    return normalized.trimmed();
+}
 
 bool run_diag_enabled() {
     const QString v = qEnvironmentVariable("NEURX_AGENT_DEBUG_RUN").trimmed().toLower();
@@ -1853,6 +1906,32 @@ QString NeurxBridge::read_text_file(const QString& path) const {
     return QString::fromUtf8(file.readAll());
 }
 
+QString NeurxBridge::read_docx_text_file(const QString& path) const {
+    const QString next = path.trimmed();
+    if (next.isEmpty()) {
+        return QString();
+    }
+
+    QZipReader archive(next);
+    if (!archive.exists()) {
+        return QString("read_docx_text_file_failed: %1").arg(next);
+    }
+
+    const QByteArray document_xml = archive.fileData(QStringLiteral("word/document.xml"));
+    archive.close();
+
+    if (document_xml.isEmpty()) {
+        return QString("read_docx_text_file_failed: %1").arg(next);
+    }
+
+    const QString extracted = docx_plain_text_from_xml(document_xml);
+    if (extracted.isEmpty()) {
+        return QString("read_docx_text_file_failed: %1").arg(next);
+    }
+
+    return extracted;
+}
+
 QVariantList NeurxBridge::explorer_entries(const QString& path) const {
     QVariantList entries;
 
@@ -1951,7 +2030,14 @@ QVariantMap NeurxBridge::load_ui_session() const {
     session.insert("selectedFilePath", settings.value("app_shell/selectedFilePath", QString()).toString());
     session.insert("explorerPaneWidth", settings.value("app_shell/explorerPaneWidth", 280).toInt());
     session.insert("agentPaneWidth", settings.value("app_shell/agentPaneWidth", 540).toInt());
-    session.insert("editorTabs", settings.value("app_shell/editorTabs", QVariantList()).toList());
+    session.insert("uiZoom", settings.value("app_shell/uiZoom", 1.0).toDouble());
+    {
+        const QByteArray tabsJson = settings.value("app_shell/editorTabs", QByteArray()).toByteArray();
+        QJsonParseError err;
+        const QJsonDocument doc = QJsonDocument::fromJson(tabsJson, &err);
+        session.insert("editorTabs", (err.error == QJsonParseError::NoError && doc.isArray())
+            ? doc.array().toVariantList() : QVariantList());
+    }
     session.insert("activeEditorTabIndex", settings.value("app_shell/activeEditorTabIndex", -1).toInt());
     return session;
 }
@@ -1960,6 +2046,7 @@ void NeurxBridge::save_ui_session(const QString& explorerPath,
                                   const QString& selectedFilePath,
                                   int explorerPaneWidth,
                                   int agentPaneWidth,
+                                  double uiZoom,
                                   const QVariantList& editorTabs,
                                   int activeEditorTabIndex) {
     QSettings settings;
@@ -1967,7 +2054,11 @@ void NeurxBridge::save_ui_session(const QString& explorerPath,
     settings.setValue("app_shell/selectedFilePath", selectedFilePath.trimmed());
     settings.setValue("app_shell/explorerPaneWidth", explorerPaneWidth);
     settings.setValue("app_shell/agentPaneWidth", agentPaneWidth);
-    settings.setValue("app_shell/editorTabs", editorTabs);
+    settings.setValue("app_shell/uiZoom", uiZoom);
+    {
+        const QJsonArray arr = QJsonArray::fromVariantList(editorTabs);
+        settings.setValue("app_shell/editorTabs", QJsonDocument(arr).toJson(QJsonDocument::Compact));
+    }
     settings.setValue("app_shell/activeEditorTabIndex", activeEditorTabIndex);
 }
 

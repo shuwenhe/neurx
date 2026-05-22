@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#include <QFont>
 
 #include "bridge/AgentListModel.h"
 #include "bridge/LogModel.h"
@@ -12,6 +13,10 @@ int main(int argc, char* argv[]) {
     QQuickStyle::setStyle("Fusion");
     QGuiApplication app(argc, argv);
     app.setApplicationName("Neurx App Shell");
+    QFont ui_font(QStringLiteral("Segoe UI"), 10);
+    ui_font.setStyleHint(QFont::SansSerif);
+    ui_font.setStyleStrategy(QFont::PreferOutline);
+    app.setFont(ui_font);
 
     NeurxBridge bridge;
     AgentListModel agent_model;
