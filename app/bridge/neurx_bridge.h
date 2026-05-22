@@ -25,6 +25,7 @@ public:
     Q_INVOKABLE QString export_agent_skill_snapshot(const QString& prompt, int max_steps);
     Q_INVOKABLE QString export_agent_trajectory(const QString& prompt, int max_steps);
     Q_INVOKABLE QString read_text_file(const QString& path) const;
+    Q_INVOKABLE QString read_docx_text_file(const QString& path) const;
     Q_INVOKABLE QVariantList explorer_entries(const QString& path = QString()) const;
     Q_INVOKABLE QString explorer_default_path() const;
     Q_INVOKABLE QVariantMap load_ui_session() const;
@@ -32,6 +33,7 @@ public:
                                      const QString& selectedFilePath,
                                      int explorerPaneWidth,
                                      int agentPaneWidth,
+                                     double uiZoom,
                                      const QVariantList& editorTabs,
                                      int activeEditorTabIndex);
     Q_INVOKABLE QVariantMap load_login_session() const;
