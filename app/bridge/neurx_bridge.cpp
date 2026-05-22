@@ -319,6 +319,120 @@ bool response_needs_customer_service_fallback(const QString& response_text) {
     return trimmed.size() < 24;
 }
 
+bool response_requests_cleaner_prompt(const QString& response_text) {
+    const QString lowered = response_text.trimmed().toLower();
+    if (lowered.isEmpty()) {
+        return false;
+    }
+
+    static const QStringList markers = {
+        "包含较多重复或噪声字符",
+        "噪声字符",
+        "请按“背景、问题、期望结果”三行重写",
+        "请按\"背景、问题、期望结果\"三行重写",
+        "please rewrite in three lines",
+        "background, problem, expected result",
+        "too much repeated or noisy text",
+        "noisy characters"
+    };
+    for (const QString& marker : markers) {
+        if (lowered.contains(marker.toLower())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+QString sanitize_code_assistant_prompt(const QString& prompt) {
+    const QStringList raw_lines = prompt.split('\n');
+    QStringList kept_lines;
+    QString previous_normalized;
+    int dropped_runtime_lines = 0;
+    int dropped_html_lines = 0;
+
+    for (QString line : raw_lines) {
+        line = line.trimmed();
+        if (line.isEmpty()) {
+            continue;
+        }
+
+        const QString lowered = line.toLower();
+        if (lowered.startsWith("bridge ")
+            || lowered.startsWith("runtime_")
+            || lowered.startsWith("qrc:/")
+            || lowered.startsWith("gmake[")
+            || lowered.startsWith("cmake:")
+            || lowered.startsWith("launching qt application")
+            || lowered.startsWith("ollama ")
+            || lowered.startsWith("build dir:")
+            || lowered.startsWith("checkpoint ")
+            || lowered.startsWith("llm backend:")
+            || lowered.startsWith("code agent ")
+            || lowered.contains("504 gateway time-out")
+            || lowered.contains("nginx/1.18.0")
+            || lowered.contains("unknown model:")
+            || lowered.contains("http_request start")
+            || lowered.contains("http_request failed")
+            || lowered.contains("http_request done")) {
+            ++dropped_runtime_lines;
+            continue;
+        }
+
+        if (lowered.startsWith("<html")
+            || lowered.startsWith("<head>")
+            || lowered.startsWith("<body>")
+            || lowered.startsWith("<center>")
+            || lowered.startsWith("<hr")
+            || lowered.startsWith("</")) {
+            ++dropped_html_lines;
+            continue;
+        }
+
+        QString normalized = lowered;
+        normalized.replace('\t', ' ');
+        while (normalized.contains("  ")) {
+            normalized.replace("  ", " ");
+        }
+        if (normalized == previous_normalized) {
+            continue;
+        }
+        previous_normalized = normalized;
+        kept_lines.append(line);
+        if (kept_lines.size() >= 12) {
+            break;
+        }
+    }
+
+    QString cleaned = kept_lines.join('\n').trimmed();
+    if (cleaned.isEmpty()) {
+        cleaned = prompt.trimmed();
+    }
+
+    if (cleaned.size() > 1200) {
+        cleaned = cleaned.left(1200).trimmed();
+    }
+
+    if (dropped_runtime_lines > 0 || dropped_html_lines > 0) {
+        cleaned = QString(
+            "Background: I am using the NeurX code assistant in the repository.\n"
+            "Problem: %1\n"
+            "Expected result: Provide a direct technical answer or code change without commenting on input noise.")
+            .arg(cleaned);
+    }
+
+    return cleaned;
+}
+
+QString rewrite_code_assistant_prompt_for_noise_retry(const QString& prompt) {
+    const QString cleaned = sanitize_code_assistant_prompt(prompt);
+    return QString(
+        "Answer the user request directly. Do not comment on formatting, noise, or repetition.\n"
+        "Background: Working in the NeurX repository.\n"
+        "Problem: %1\n"
+        "Expected result: Give a concise technical answer first, and include code if the user is asking for code.")
+        .arg(cleaned);
+}
+
 QString escape_s_string(const QString& value) {
     QString out = value;
     out.replace("\\", "\\\\");
@@ -1863,6 +1977,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         return backend_ready;
     }
 
+    const QString cleaned_user_prompt = sanitize_code_assistant_prompt(prompt);
     QString effective_prompt;
     if (!filePath.trimmed().isEmpty()) {
         effective_prompt = QString(
@@ -1871,14 +1986,14 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             "User request: %2\n"
             "Provide a concrete code answer. If the user asks to write code, return the code first. "
             "Keep the reply concise and executable.")
-            .arg(filePath.trimmed(), prompt.trimmed());
+            .arg(filePath.trimmed(), cleaned_user_prompt);
     } else {
         effective_prompt = QString(
             "You are a code assistant working in the NeurX repository.\n"
             "User request: %1\n"
             "If the user asks to write code, return a complete minimal program. "
             "Prefer directly answering with code when appropriate.")
-            .arg(prompt.trimmed());
+            .arg(cleaned_user_prompt);
     }
 
     const QString local_code_base_url = qEnvironmentVariable("NEURX_CODE_AGENT_BASE_URL").trimmed().isEmpty()
@@ -1940,7 +2055,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         return content.trimmed();
     };
 
-    auto run_code_chat = [&](const QString& base_url,
+    auto run_code_chat = [&](const QString& request_prompt,
+                             const QString& base_url,
                              const QString& chat_path,
                              const QString& model_name,
                              bool allow_suggest_fallback,
@@ -1965,12 +2081,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             }
             QJsonObject user_message;
             user_message.insert("role", "user");
-            user_message.insert("content", effective_prompt);
+            user_message.insert("content", request_prompt);
             QJsonArray messages;
             messages.append(user_message);
             payload.insert("messages", messages);
         } else {
-            payload.insert("prompt", effective_prompt);
+            payload.insert("prompt", request_prompt);
             if (!filePath.trimmed().isEmpty()) {
                 payload.insert("filePath", filePath.trimmed());
             }
@@ -2033,7 +2149,37 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         return response_json.object().value("suggestion").toString().trimmed();
     };
 
-    const QString local_result = run_code_chat(
+    auto run_code_chat_with_noise_retry = [&](const QString& request_prompt,
+                                              const QString& base_url,
+                                              const QString& chat_path,
+                                              const QString& model_name,
+                                              bool allow_suggest_fallback,
+                                              const QString& source_label) -> QString {
+        const QString first_result = run_code_chat(
+            request_prompt,
+            base_url,
+            chat_path,
+            model_name,
+            allow_suggest_fallback,
+            source_label);
+        if (!response_requests_cleaner_prompt(first_result)) {
+            return first_result;
+        }
+
+        const QString retry_prompt = rewrite_code_assistant_prompt_for_noise_retry(prompt);
+        emit log_message("warning", "agent",
+            QString("code-assistant retry cleaned_prompt source=%1").arg(source_label));
+        return run_code_chat(
+            retry_prompt,
+            base_url,
+            chat_path,
+            model_name,
+            allow_suggest_fallback,
+            source_label + QStringLiteral("-retry"));
+    };
+
+    const QString local_result = run_code_chat_with_noise_retry(
+        effective_prompt,
         local_code_base_url,
         local_code_chat_path,
         local_code_model,
@@ -2065,7 +2211,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         return final_error;
     }
 
-    const QString remote_result = run_code_chat(
+    const QString remote_result = run_code_chat_with_noise_retry(
+        effective_prompt,
         remote_code_base_url,
         remote_code_chat_path,
         remote_code_model,
