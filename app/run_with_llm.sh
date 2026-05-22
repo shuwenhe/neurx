@@ -614,6 +614,12 @@ if [ "${NEURX_REMOTE_ONLY}" != "1" ]; then
   export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-http://127.0.0.1:11435}"
   export NEURX_OLLAMA_LOCAL_MODEL_NAME="${NEURX_OLLAMA_LOCAL_MODEL_NAME:-neurx-qwen2.5-0.5b-instruct-local:latest}"
   export NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL="${NEURX_CUSTOMER_SERVICE_FALLBACK_MODEL:-neurx-qwen2.5-vl-7b-local:latest}"
+else
+  export NEURX_OLLAMA_MODELS="${NEURX_OLLAMA_MODELS:-}"
+  export OLLAMA_MODELS="${OLLAMA_MODELS:-}"
+  export NEURX_OLLAMA_URL="${NEURX_OLLAMA_URL:-}"
+  export NEURX_OLLAMA_MODEL="${NEURX_OLLAMA_MODEL:-}"
+  export NEURX_OLLAMA_MODEL_DIR="${NEURX_OLLAMA_MODEL_DIR:-}"
 fi
 
 CMAKE_BIN="$(resolve_cmake || true)"
@@ -739,9 +745,9 @@ echo "  Checkpoint file: ${NEURX_BACKEND_CHECKPOINT_FILE}"
 if [ -n "${NEURX_OLLAMA_MODEL_DIR:-}" ]; then
   echo "  Ollama model dir: ${NEURX_OLLAMA_MODEL_DIR}"
 fi
-echo "  Ollama store: ${NEURX_OLLAMA_MODELS}"
-echo "  Ollama URL: ${NEURX_OLLAMA_URL}"
-echo "  Ollama model: ${NEURX_OLLAMA_MODEL}"
+echo "  Ollama store: ${NEURX_OLLAMA_MODELS:-}"
+echo "  Ollama URL: ${NEURX_OLLAMA_URL:-}"
+echo "  Ollama model: ${NEURX_OLLAMA_MODEL:-}"
 echo "  Build dir: ${BUILD_DIR}"
 echo "  CMake: ${CMAKE_BIN}"
 if [ -n "${EXPECTED_GENERATOR}" ]; then
