@@ -360,6 +360,57 @@ bool response_requests_cleaner_prompt(const QString& response_text) {
     return false;
 }
 
+bool response_looks_garbled(const QString& response_text) {
+    const QString text = response_text.trimmed();
+    if (text.isEmpty()) {
+        return false;
+    }
+
+    const QString lowered = text.toLower();
+    int signal_count = 0;
+
+    if (lowered.contains("classclass")
+        || lowered.contains("```python\nclass\n")
+        || lowered.contains("```cpp\nclass\n")
+        || lowered.contains("habiabit")
+        || lowered.contains("arious")
+        || lowered.contains("定义\n")
+        || lowered.contains("由于\n\n代码片段的补全版示例")) {
+        signal_count += 2;
+    }
+
+    static const QStringList noise_markers = {
+        "[attr]",
+        "用户",
+        "пользователь",
+        "séjourne",
+        "équipé",
+        "כלפי",
+        "verbatim",
+        "wię",
+        "class由于",
+        "class定义"
+    };
+    for (const QString& marker : noise_markers) {
+        if (lowered.contains(marker.toLower())) {
+            signal_count += 1;
+        }
+    }
+
+    const int code_fence_count = text.count("```");
+    if (code_fence_count >= 3) {
+        signal_count += 1;
+    }
+
+    const int colon_count = text.count(':');
+    const int newline_count = text.count('\n');
+    if (colon_count >= 4 && newline_count <= 8 && code_fence_count >= 2) {
+        signal_count += 1;
+    }
+
+    return signal_count >= 2;
+}
+
 QString sanitize_code_assistant_prompt(const QString& prompt) {
     const QStringList raw_lines = prompt.split('\n');
     QStringList kept_lines;
@@ -443,10 +494,12 @@ QString sanitize_code_assistant_prompt(const QString& prompt) {
 QString rewrite_code_assistant_prompt_for_noise_retry(const QString& prompt) {
     const QString cleaned = sanitize_code_assistant_prompt(prompt);
     return QString(
-        "Answer the user request directly. Do not comment on formatting, noise, or repetition.\n"
+        "Answer the user request directly. Do not comment on formatting, noise, repetition, or language choice.\n"
+        "Use only Simplified Chinese unless the user explicitly requests another language.\n"
+        "Do not invent example code in another language when the request is about an existing file.\n"
         "Background: Working in the NeurX repository.\n"
         "Problem: %1\n"
-        "Expected result: Give a concise technical answer first, and include code if the user is asking for code.")
+        "Expected result: If a file path is mentioned, analyze that file only. Give a concise technical answer first, and include code only when the user explicitly asks for code changes.")
         .arg(cleaned);
 }
 
@@ -2191,7 +2244,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             model_name,
             allow_suggest_fallback,
             source_label);
-        if (!response_requests_cleaner_prompt(first_result)) {
+        if (!response_requests_cleaner_prompt(first_result) && !response_looks_garbled(first_result)) {
             return first_result;
         }
 
@@ -2220,6 +2273,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     const bool local_weak = !local_failed
         && (local_result.isEmpty()
             || looks_like_stub_chat_response(local_result)
+            || response_looks_garbled(local_result)
             || response_needs_customer_service_fallback(local_result));
     if (!local_failed && !local_weak) {
         emit log_message("info", "agent", QString("code-assistant done route=%1 source=local suggestion_len=%2")
@@ -2250,7 +2304,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     const bool remote_failed = remote_result.startsWith("runtime_")
         || remote_result.startsWith("local_model_")
         || remote_result.startsWith("code_assistant_");
-    if (!remote_failed && !remote_result.trimmed().isEmpty()) {
+    if (!remote_failed && !remote_result.trimmed().isEmpty() && !response_looks_garbled(remote_result)) {
         emit log_message("info", "agent", QString("code-assistant done route=%1 source=remote suggestion_len=%2")
             .arg(route)
             .arg(remote_result.size()));
