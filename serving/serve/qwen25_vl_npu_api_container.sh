@@ -2,7 +2,7 @@
 set -euo pipefail
 
 container_name="qwen25-vl-7b-npu-api"
-visible_devices="${ASCEND_RT_VISIBLE_DEVICES:-2}"
+visible_devices="${ASCEND_RT_VISIBLE_DEVICES:-0,1,2,3,4,5,6,7}"
 
 docker rm -f "$container_name" >/dev/null 2>&1 || true
 
@@ -35,4 +35,4 @@ exec docker run --rm \
   --volume /app/neurx/serving/serve/qwen25_vl_api.py:/srv/qwen25_vl_api.py:ro \
   --volume /app/neurx/artifacts/checkpoints:/model:ro \
   quay.io/ascend/vllm-ascend:nightly-main-310p \
-  python /srv/qwen25_vl_api.py
+  bash -lc 'python -m pip install -q accelerate && python /srv/qwen25_vl_api.py'
