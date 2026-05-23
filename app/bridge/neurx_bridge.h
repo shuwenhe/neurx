@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QDateTime>
 #include <QVariantList>
 #include <QString>
 #include <QStringList>
@@ -96,6 +97,17 @@ private:
     QStringList scan_checkpoint_files(const QString& root) const;
     QVariantList checkpoint_choices_for_qml() const;
     void refresh_checkpoint_model_state();
+    QString login_database_connection_name() const;
+    QString login_database_host() const;
+    int login_database_port() const;
+    QString login_database_name() const;
+    QString login_database_user() const;
+    QString login_database_password() const;
+    bool persist_login_session_to_database(const QString& phone,
+                                           const QString& rememberToken,
+                                           const QDateTime& rememberExpires) const;
+    QVariantMap load_login_session_from_database(const QString& phone,
+                                                 const QString& rememberToken) const;
 
     bool local_model_enabled_ {false};
     QString local_model_backend_ {"openai"};
