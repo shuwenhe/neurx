@@ -9,4 +9,8 @@ if [[ $# -eq 0 ]]; then
 fi
 
 cd "$WORKDIR"
+if [[ $# -eq 1 ]]; then
+  bash -lc "$1"
+  exit $?
+fi
 "$@"

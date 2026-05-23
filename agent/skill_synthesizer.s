@@ -34,15 +34,44 @@ func agent_skill_synthesize(agent_skill_feedback_state feedback) agent_skill_rec
     preconditions[0] = "trace_available"
 
     []string steps = []string{cap: 3}
-    steps[0] = "observe"
-    steps[1] = "plan"
-    steps[2] = "execute"
+    if feedback.task == "infer" {
+        steps = []string{cap: 4}
+        steps[0] = "load_model"
+        steps[1] = "tokenize"
+        steps[2] = "generate"
+        steps[3] = "decode"
+    } else if feedback.task == "retrieve" {
+        steps[0] = "formulate_query"
+        steps[1] = "fetch_documents"
+        steps[2] = "rank_results"
+    } else if feedback.task == "verify" {
+        steps[0] = "load_artifacts"
+        steps[1] = "run_checks"
+        steps[2] = "report_results"
+    } else if feedback.task == "analyze" {
+        steps[0] = "extract_signals"
+        steps[1] = "classify_intent"
+        steps[2] = "summarize"
+    } else if feedback.task == "plan" {
+        steps[0] = "decompose_goal"
+        steps[1] = "order_steps"
+        steps[2] = "assign_tools"
+    } else if feedback.task == "finalize" {
+        steps[0] = "collect_results"
+        steps[1] = "format_output"
+        steps[2] = "emit_done"
+    } else {
+        steps[0] = "observe"
+        steps[1] = "plan"
+        steps[2] = "execute"
+    }
 
     []string success_signals = []string{cap: 1}
     success_signals[0] = "done"
 
-    []string failure_signals = []string{cap: 1}
+    []string failure_signals = []string{cap: 2}
     failure_signals[0] = "tool_unavailable"
+    failure_signals[1] = feedback.task + ":failed"
 
     agent_skill_spec spec = agent_skill_spec {
         name: name,

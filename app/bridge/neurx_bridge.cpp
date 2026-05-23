@@ -311,6 +311,60 @@ QString join_url_and_path(QString base_url, QString path) {
     return base_url + path;
 }
 
+QString preferred_bash_program() {
+    static QString cached;
+    if (!cached.isEmpty()) {
+        return cached;
+    }
+
+    const QStringList candidates = {
+        QStringLiteral("C:/Program Files/Git/bin/bash.exe"),
+        QStringLiteral("C:/Program Files/Git/usr/bin/bash.exe")
+    };
+    for (const QString& candidate : candidates) {
+        if (QFileInfo::exists(candidate) && QFileInfo(candidate).isFile()) {
+            cached = candidate;
+            return cached;
+        }
+    }
+
+    cached = QStringLiteral("bash");
+    return cached;
+}
+
+bool is_windows_script_program(const QString& path) {
+    const QString lowered = path.trimmed().toLower();
+    return lowered.endsWith(QStringLiteral(".cmd"))
+        || lowered.endsWith(QStringLiteral(".bat"));
+}
+
+bool is_runnable_s_candidate(const QString& candidate) {
+    const QString trimmed = candidate.trimmed();
+    if (trimmed.isEmpty()) {
+        return false;
+    }
+
+    if (trimmed.contains('/') || trimmed.contains('\\') || QFileInfo(trimmed).isAbsolute()) {
+        return QFileInfo::exists(trimmed) && QFileInfo(trimmed).isFile();
+    }
+
+    return !QStandardPaths::findExecutable(trimmed).isEmpty();
+}
+
+QString resolved_s_candidate_path(const QString& candidate) {
+    const QString trimmed = candidate.trimmed();
+    if (trimmed.isEmpty()) {
+        return QString();
+    }
+
+    if (trimmed.contains('/') || trimmed.contains('\\') || QFileInfo(trimmed).isAbsolute()) {
+        return QDir::cleanPath(QFileInfo(trimmed).absoluteFilePath());
+    }
+
+    const QString resolved = QStandardPaths::findExecutable(trimmed);
+    return resolved.isEmpty() ? trimmed : resolved;
+}
+
 bool url_looks_like_s_backend(const QString& base_url) {
     const QUrl url(base_url.trimmed());
     const QString host = url.host().trimmed().toLower();
@@ -1279,6 +1333,76 @@ QString NeurxBridge::run_process(const QString& program, const QStringList& args
     return stdout_text;
 }
 
+QString NeurxBridge::resolve_s_binary(const QString& repo_root) const {
+    const QStringList env_candidates = {
+        qEnvironmentVariable("NEURX_S_BINARY").trimmed(),
+        qEnvironmentVariable("S_BINARY").trimmed()
+    };
+    for (const QString& candidate : env_candidates) {
+        if (is_runnable_s_candidate(candidate)) {
+            return resolved_s_candidate_path(candidate);
+        }
+    }
+
+    const QStringList path_candidates = {
+        QStringLiteral("s.cmd"),
+        QStringLiteral("s.exe"),
+        QStringLiteral("s")
+    };
+    for (const QString& candidate : path_candidates) {
+        if (is_runnable_s_candidate(candidate)) {
+            return resolved_s_candidate_path(candidate);
+        }
+    }
+
+    const QString home_dir = QDir::homePath();
+    const QStringList file_candidates = {
+        qEnvironmentVariable("S_ROOT").trimmed().isEmpty()
+            ? QString()
+            : QDir(qEnvironmentVariable("S_ROOT").trimmed()).filePath("bin/s.cmd"),
+        qEnvironmentVariable("S_ROOT").trimmed().isEmpty()
+            ? QString()
+            : QDir(qEnvironmentVariable("S_ROOT").trimmed()).filePath("bin/s.exe"),
+        qEnvironmentVariable("S_ROOT").trimmed().isEmpty()
+            ? QString()
+            : QDir(qEnvironmentVariable("S_ROOT").trimmed()).filePath("bin/s"),
+        QDir(home_dir).filePath("s/bin/s.cmd"),
+        QDir(home_dir).filePath("s/bin/s.exe"),
+        QDir(home_dir).filePath("s/bin/s"),
+        QDir(repo_root).filePath("../s/bin/s.cmd"),
+        QDir(repo_root).filePath("../s/bin/s.exe"),
+        QDir(repo_root).filePath("../s/bin/s")
+    };
+    for (const QString& candidate : file_candidates) {
+        if (is_runnable_s_candidate(candidate)) {
+            return resolved_s_candidate_path(candidate);
+        }
+    }
+
+    return QString();
+}
+
+QString NeurxBridge::run_s_cli(const QString& s_binary,
+                               const QStringList& args,
+                               int timeout_ms,
+                               const QString& working_dir) const {
+    const QString trimmed = s_binary.trimmed();
+    if (trimmed.isEmpty()) {
+        return QStringLiteral("runtime_exec_failed: no S binary configured");
+    }
+
+#ifdef Q_OS_WIN
+    if (is_windows_script_program(trimmed)) {
+        QStringList cmd_args;
+        cmd_args << QStringLiteral("/c") << QDir::toNativeSeparators(trimmed);
+        cmd_args.append(args);
+        return run_process(QStringLiteral("cmd.exe"), cmd_args, timeout_ms, working_dir);
+    }
+#endif
+
+    return run_process(trimmed, args, timeout_ms, working_dir);
+}
+
 QString NeurxBridge::run_http_request(const QString& method, const QString& url, const QString& body_file, int timeout_ms) const {
     const QString node = QStandardPaths::findExecutable("node");
     if (node.isEmpty()) {
@@ -1488,7 +1612,7 @@ QString NeurxBridge::ensure_local_openai_backend(const QString& repo_root) {
 
     qInfo().noquote() << QString("bridge starting local backend dir=%1 script=%2")
         .arg(backend_dir, server_file.fileName());
-    const bool started = QProcess::startDetached("bash", {"http_server.sh"}, backend_dir);
+    const bool started = QProcess::startDetached(preferred_bash_program(), {"http_server.sh"}, backend_dir);
     if (!started) {
         return "runtime_exec_failed: failed to start local backend";
     }
@@ -2207,12 +2331,52 @@ QString NeurxBridge::run_code_assistant(const QString& prompt, const QString& fi
     return run_code_assistant_request(prompt, filePath);
 }
 
+QString NeurxBridge::run_native_s_agent(const QString& prompt, int max_steps) {
+    return run_native_s_agent_request(prompt, max_steps);
+}
+
 QString NeurxBridge::export_agent_skill_snapshot(const QString& prompt, int max_steps) {
     return run_agent_state_export(prompt, max_steps, "skill_snapshot");
 }
 
 QString NeurxBridge::export_agent_trajectory(const QString& prompt, int max_steps) {
     return run_agent_state_export(prompt, max_steps, "trajectory");
+}
+
+QString NeurxBridge::ensure_native_s_runtime_compiled(const QString& repo_root, const QString& s_binary) {
+    const QString normalized_root = QDir::cleanPath(repo_root.trimmed());
+    const QString normalized_binary = QDir::cleanPath(s_binary.trimmed());
+    const bool force_recompile = qEnvironmentVariableIntValue("NEURX_S_ALWAYS_COMPILE") == 1;
+    if (normalized_root.isEmpty() || normalized_binary.isEmpty()) {
+        return QStringLiteral("runtime_exec_failed: missing S runtime compile inputs");
+    }
+
+    if (!force_recompile
+        && native_s_runtime_ready_repo_root_ == normalized_root
+        && native_s_runtime_ready_binary_ == normalized_binary) {
+        return QString();
+    }
+
+    const QString compile_script = QDir(normalized_root).filePath("workflows/agent/common/compile_runtime.sh");
+    if (!QFileInfo::exists(compile_script) || !QFileInfo(compile_script).isFile()) {
+        return QStringLiteral("runtime_exec_failed: compile_runtime.sh not found");
+    }
+
+    emit log_message("info", "agent",
+        QString("native S compile start binary=%1").arg(QFileInfo(normalized_binary).fileName()));
+    const QString compile_result = run_process(
+        preferred_bash_program(),
+        QStringList() << compile_script << QStringLiteral("--s-bin") << normalized_binary,
+        10 * 60 * 1000,
+        normalized_root);
+    if (compile_result.startsWith(QStringLiteral("runtime_"))) {
+        return compile_result;
+    }
+
+    native_s_runtime_ready_repo_root_ = normalized_root;
+    native_s_runtime_ready_binary_ = normalized_binary;
+    emit log_message("info", "agent", QString("native S compile done len=%1").arg(compile_result.size()));
+    return QString();
 }
 
 QString NeurxBridge::read_text_file(const QString& path) const {
@@ -2407,7 +2571,8 @@ QVariantMap NeurxBridge::load_login_session() const {
     return session;
 }
 
-void NeurxBridge::save_login_session(bool loggedIn, const QString& phone) {
+void NeurxBridge::save_login_session(bool loggedIn,
+                                     const QString& phone) {
     QSettings settings;
     const QString normalized_phone = phone.trimmed();
     settings.setValue("app_shell_login/loggedIn", loggedIn);
@@ -2424,7 +2589,9 @@ void NeurxBridge::save_login_session(bool loggedIn, const QString& phone) {
     settings.setValue("app_shell_login/rememberToken", remember_token);
     settings.setValue("app_shell_login/rememberExpires", remember_expires);
 
-    const bool persisted = persist_login_session_to_database(normalized_phone, remember_token, remember_expires);
+    const bool persisted = persist_login_session_to_database(normalized_phone,
+                                                             remember_token,
+                                                             remember_expires);
     if (!persisted) {
         qWarning() << "Failed to persist login session to MySQL for phone" << normalized_phone;
     }
@@ -2490,15 +2657,13 @@ bool NeurxBridge::persist_login_session_to_database(const QString& phone,
             QSqlQuery query(db);
             query.prepare(R"SQL(
                 INSERT INTO `user`
-                    (`phone`, `password`, `email`)
+                    (`phone`)
                 VALUES
-                    (?, ?, ?)
+                    (?)
                 ON DUPLICATE KEY UPDATE
                     `phone` = VALUES(`phone`)
             )SQL");
             query.addBindValue(normalized_phone);
-            query.addBindValue(QString());
-            query.addBindValue(QString());
             ok = query.exec();
             if (!ok) {
                 error_text = query.lastError().text();
@@ -2599,7 +2764,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     const QString runner_path = QDir(root).filePath("app/service/code_agent_runner.sh");
     if (QFileInfo::exists(runner_path) && QFileInfo(runner_path).isFile()) {
         const QString runner_result = run_process(
-            "bash",
+            preferred_bash_program(),
             QStringList() << runner_path
                           << "--prompt" << prompt
                           << "--file" << filePath.trimmed()
@@ -2931,7 +3096,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             return QStringLiteral("tool_error: search tool unavailable");
         }
         const QString output = run_process(
-            QStringLiteral("bash"),
+            preferred_bash_program(),
             QStringList() << script_path << query << root,
             10000,
             root);
@@ -3105,6 +3270,51 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             QStringLiteral("staged full file replacement"),
             repo_relative_path(root, absolute_path));
     };
+    auto summarize_pending_changes = [&]() -> QString {
+        if (code_agent_pending_changes_.isEmpty()) {
+            return format_tool_response(
+                QStringLiteral("show_pending_changes"),
+                QStringLiteral("no_pending_code_agent_changes"));
+        }
+        return format_tool_response(
+            QStringLiteral("show_pending_changes"),
+            pending_code_agent_changes_summary());
+    };
+    auto run_workspace_command_tool = [&](const QString& tool_name,
+                                          const QString& script_name,
+                                          const QString& command_text) -> QString {
+        const QString script_path = QDir(root).filePath(QStringLiteral("app/service/tools/") + script_name);
+        if (!QFileInfo::exists(script_path) || !QFileInfo(script_path).isFile()) {
+            return QStringLiteral("tool_error: %1 tool unavailable").arg(tool_name);
+        }
+
+        QStringList args;
+        args << script_path << root;
+        const QString trimmed_command = command_text.trimmed();
+        if (!trimmed_command.isEmpty()) {
+            args << trimmed_command;
+        }
+
+        const QString output = run_process(
+            preferred_bash_program(),
+            args,
+            120000,
+            root);
+        if (output.startsWith(QStringLiteral("runtime_"))) {
+            return output;
+        }
+
+        QString body = trimmed_command.isEmpty()
+            ? QStringLiteral("command=default")
+            : QStringLiteral("command=%1").arg(trimmed_command);
+        if (!code_agent_pending_changes_.isEmpty()) {
+            body += QStringLiteral("\npending_changes_note=staged changes were not applied before execution");
+        }
+        if (!output.trimmed().isEmpty()) {
+            body += QStringLiteral("\n") + output.trimmed();
+        }
+        return format_tool_response(tool_name, body);
+    };
     auto build_agent_context = [&]() -> QString {
         QStringList sections;
         sections << QStringLiteral("repo_root=") + root;
@@ -3150,10 +3360,13 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 "{\"action\":\"read_file\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"line_count\":120,\"reason\":\"...\"}\n"
                 "{\"action\":\"search_files\",\"query\":\"text to search\",\"reason\":\"...\"}\n"
                 "{\"action\":\"list_files\",\"dir\":\"relative/or/absolute\",\"limit\":80,\"reason\":\"...\"}\n"
+                "{\"action\":\"show_pending_changes\",\"reason\":\"inspect staged edits\"}\n"
                 "{\"action\":\"mkdir\",\"path\":\"C:/Users/hello\",\"reason\":\"create a directory\"}\n"
                 "{\"action\":\"replace_range\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"end_line\":20,\"new_text\":\"replacement text\",\"summary\":\"what changed\"}\n"
                 "{\"action\":\"apply_patch\",\"path\":\"relative/or/absolute\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false,\"summary\":\"what changed\"}\n"
                 "{\"action\":\"write_file\",\"path\":\"relative/or/absolute\",\"content\":\"full file content\",\"summary\":\"what changed\"}\n"
+                "{\"action\":\"run_build\",\"command\":\"cmake --build build\",\"reason\":\"validate current workspace\"}\n"
+                "{\"action\":\"run_test\",\"command\":\"ctest --output-on-failure\",\"reason\":\"validate current workspace\"}\n"
                 "{\"action\":\"final\",\"response\":\"user-facing summary\"}\n"
                 "Rules:\n"
                 "- for file edits stay within the repository\n"
@@ -3163,6 +3376,9 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 "- prefer replace_range for localized line edits\n"
                 "- prefer apply_patch for focused edits\n"
                 "- write_file must contain the full replacement file content\n"
+                "- run_build and run_test execute against the current workspace state only\n"
+                "- staged changes are not auto-applied before run_build or run_test\n"
+                "- use show_pending_changes before final when edits were staged\n"
                 "- prefer minimal edits\n"
                 "- if enough work is done, respond with final");
             prompt_sections << QStringLiteral("User request:\n") + sanitize_code_assistant_prompt(prompt);
@@ -3227,6 +3443,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 observation = list_workspace_files(
                     action_obj.value(QStringLiteral("dir")).toString(),
                     action_obj.value(QStringLiteral("limit")).toInt(80));
+            } else if (action == QStringLiteral("show_pending_changes")) {
+                observation = summarize_pending_changes();
             } else if (action == QStringLiteral("mkdir")) {
                 observation = create_workspace_directory(action_obj.value(QStringLiteral("path")).toString());
             } else if (action == QStringLiteral("apply_patch")) {
@@ -3245,6 +3463,16 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 observation = write_workspace_file(
                     action_obj.value(QStringLiteral("path")).toString(),
                     action_obj.value(QStringLiteral("content")).toString());
+            } else if (action == QStringLiteral("run_build")) {
+                observation = run_workspace_command_tool(
+                    QStringLiteral("run_build"),
+                    QStringLiteral("build.sh"),
+                    action_obj.value(QStringLiteral("command")).toString());
+            } else if (action == QStringLiteral("run_test")) {
+                observation = run_workspace_command_tool(
+                    QStringLiteral("run_test"),
+                    QStringLiteral("test.sh"),
+                    action_obj.value(QStringLiteral("command")).toString());
             } else {
                 return QString();
             }
@@ -3272,7 +3500,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("文件夹"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("write to file"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("patch"), Qt::CaseInsensitive)
-        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("fix"), Qt::CaseInsensitive);
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("fix"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("bug"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("error"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("failing"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("test"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("build"), Qt::CaseInsensitive);
 
     if (should_try_tool_loop) {
         const QString local_tool_result = try_run_tool_loop(
@@ -3367,6 +3600,14 @@ QString NeurxBridge::run_agent_state_export(const QString& prompt, int max_steps
     if (root.isEmpty()) {
         return "repo_not_found";
     }
+    const QString s_binary = resolve_s_binary(root);
+    if (s_binary.isEmpty()) {
+        return QStringLiteral("runtime_exec_failed: S compiler not found. Set NEURX_S_BINARY or put s/s.cmd on PATH.");
+    }
+    const QString compile_result = ensure_native_s_runtime_compiled(root, s_binary);
+    if (!compile_result.isEmpty()) {
+        return compile_result;
+    }
 
     int steps = max_steps;
     if (steps <= 0) {
@@ -3425,9 +3666,73 @@ QString NeurxBridge::run_agent_state_export(const QString& prompt, int max_steps
     runner.flush();
     runner.close();
 
-    const QString result = run_process("s", QStringList() << "run" << runner.fileName(), 120000, root);
+    const QString result = run_s_cli(s_binary, QStringList() << "run" << runner.fileName(), 120000, root);
     if (!result.startsWith("runtime_")) {
         emit log_message("info", "agent", QString("agent export done kind=%1 len=%2").arg(export_kind).arg(result.size()));
+    }
+    return result;
+}
+
+QString NeurxBridge::run_native_s_agent_request(const QString& prompt, int max_steps) {
+    const QString root = find_repo_root();
+    if (root.isEmpty()) {
+        return QStringLiteral("repo_not_found");
+    }
+    const QString s_binary = resolve_s_binary(root);
+    if (s_binary.isEmpty()) {
+        return QStringLiteral("runtime_exec_failed: S compiler not found. Set NEURX_S_BINARY or put s/s.cmd on PATH.");
+    }
+    const QString compile_result = ensure_native_s_runtime_compiled(root, s_binary);
+    if (!compile_result.isEmpty()) {
+        return compile_result;
+    }
+
+    int steps = max_steps;
+    if (steps <= 0) {
+        steps = 1;
+    }
+
+    const QString safe_prompt = prompt.trimmed().isEmpty() ? QStringLiteral("hello") : prompt;
+    QTemporaryFile runner(QDir(root).filePath("build/tmp/neurx_native_agent_XXXXXX.s"));
+    QDir().mkpath(QDir(root).filePath("build/tmp"));
+    runner.setAutoRemove(true);
+    if (!runner.open()) {
+        return QStringLiteral("runtime_exec_failed: could not create native S agent runner");
+    }
+
+    const QString prompt_literal = escape_s_string(safe_prompt);
+    const QString source = QString(
+        "package neurx.app.native_agent_runner\n\n"
+        "use neurx.agent.{new_default_agent, run_agent_once, agent_route, agent_status, agent_current_task, agent_last_observation, agent_step_count, agent_skill_snapshot}\n\n"
+        "func main() int {\n"
+        "    string prompt = \"%1\"\n"
+        "    agent_runtime_state state = new_default_agent(prompt)\n"
+        "    int total = %2\n"
+        "    int i = 0\n"
+        "    while i < total {\n"
+        "        state = run_agent_once(state, prompt)\n"
+        "        i = i + 1\n"
+        "    }\n"
+        "    println(\"native_s_agent=true\")\n"
+        "    println(\"prompt=\" + prompt)\n"
+        "    println(\"route=\" + agent_route(state))\n"
+        "    println(\"status=\" + agent_status(state))\n"
+        "    println(\"current_task=\" + agent_current_task(state))\n"
+        "    println(\"steps=\" + string(agent_step_count(state)))\n"
+        "    println(\"last_observation=\" + agent_last_observation(state))\n"
+        "    println(agent_skill_snapshot(state))\n"
+        "    0\n"
+        "}\n")
+        .arg(prompt_literal)
+        .arg(steps);
+
+    runner.write(source.toUtf8());
+    runner.flush();
+    runner.close();
+
+    const QString result = run_s_cli(s_binary, QStringList() << "run" << runner.fileName(), 120000, root);
+    if (!result.startsWith("runtime_")) {
+        emit log_message("info", "agent", QString("native S agent run completed steps=%1 len=%2").arg(steps).arg(result.size()));
     }
     return result;
 }
@@ -3475,6 +3780,29 @@ void NeurxBridge::run_agent_async(const QString& prompt, int max_steps) {
 
     watcher->setFuture(QtConcurrent::run([this, prompt, max_steps]() {
         return run_agent(prompt, max_steps);
+    }));
+}
+
+void NeurxBridge::run_native_s_agent_async(const QString& prompt, int max_steps) {
+    if (agent_run_active_) {
+        emit log_message("warning", "agent", "agent run already in progress");
+        emit runtime_status_changed("busy", "native-s-agent");
+        return;
+    }
+
+    agent_run_active_ = true;
+    emit runtime_status_changed("running", "native-s-agent");
+
+    auto* watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        const QString result = watcher->result();
+        watcher->deleteLater();
+        agent_run_active_ = false;
+        emit agentRunFinished(result);
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, prompt, max_steps]() {
+        return run_native_s_agent(prompt, max_steps);
     }));
 }
 

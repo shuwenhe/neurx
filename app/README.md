@@ -71,6 +71,24 @@ If `NEURX_BACKEND_CHECKPOINT_ROOT` is set, the Qt shell discovers `.neurx` snaps
 
 When `run_with_llm.sh` starts the local backend, it will automatically prefer the newest `.neurx` file under `artifacts/checkpoints/` and expose it through the backend response.
 
+## Native S Agent
+
+The app shell also includes a `Native S` entry that runs `neurx/agent/*.s` directly through the S toolchain.
+
+Recommended setup:
+
+- `NEURX_S_BINARY=C:\Users\shuwen\s\bin\s.cmd` on Windows
+- `NEURX_S_BINARY=/path/to/s` on Linux/macOS
+
+When `Runtime.run_native_s_agent_async(...)`, `export_agent_skill_snapshot(...)`, or `export_agent_trajectory(...)` is triggered, the bridge will:
+
+1. resolve `NEURX_S_BINARY`
+2. compile the NeurX S runtime through `workflows/agent/common/compile_runtime.sh`
+3. execute the generated temporary S runner with the same S binary
+
+If the S binary is missing, the app returns a `runtime_exec_failed` error with the setup hint.
+Set `NEURX_S_ALWAYS_COMPILE=1` if you want the bridge to re-run the S runtime compilation on every native-agent request instead of reusing the per-session cache.
+
 ## Directory Layout
 
 - app: Qt app entry and top-level UI bootstrap

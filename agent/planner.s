@@ -11,6 +11,13 @@ struct agent_plan_state {
     bool needs_replan
     bool finished
     string status
+    string replan_reason
+    []string task_queue
+    int replan_count
+}
+
+func agent_plan_max_replan_count() int {
+    3
 }
 
 func new_agent_plan_state(string goal, string current_task, int step_budget) agent_plan_state {
@@ -26,6 +33,9 @@ func new_agent_plan_state(string goal, string current_task, int step_budget) age
         needs_replan: false,
         finished: false,
         status: "idle",
+        replan_reason: "",
+        task_queue: [],
+        replan_count: 0,
     }
 }
 
@@ -38,6 +48,59 @@ func agent_plan_set_task(agent_plan_state state, string current_task) agent_plan
         needs_replan: false,
         finished: state.finished,
         status: "running",
+        replan_reason: "",
+        task_queue: state.task_queue,
+        replan_count: state.replan_count,
+    }
+}
+
+func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_state {
+    int size = len(state.task_queue)
+    []string queue = []string{cap: size + 1}
+    int i = 0
+    while i < size {
+        queue[i] = state.task_queue[i]
+        i = i + 1
+    }
+    queue[size] = task
+    agent_plan_state {
+        goal: state.goal,
+        current_task: state.current_task,
+        step_budget: state.step_budget,
+        step_count: state.step_count,
+        needs_replan: state.needs_replan,
+        finished: state.finished,
+        status: state.status,
+        replan_reason: state.replan_reason,
+        task_queue: queue,
+        replan_count: state.replan_count,
+    }
+}
+
+func agent_plan_enqueue_tasks(agent_plan_state state, []string tasks) agent_plan_state {
+    int old_size = len(state.task_queue)
+    int add_size = len(tasks)
+    []string queue = []string{cap: old_size + add_size}
+    int i = 0
+    while i < old_size {
+        queue[i] = state.task_queue[i]
+        i = i + 1
+    }
+    while i < old_size + add_size {
+        queue[i] = tasks[i - old_size]
+        i = i + 1
+    }
+    agent_plan_state {
+        goal: state.goal,
+        current_task: state.current_task,
+        step_budget: state.step_budget,
+        step_count: state.step_count,
+        needs_replan: state.needs_replan,
+        finished: state.finished,
+        status: state.status,
+        replan_reason: state.replan_reason,
+        task_queue: queue,
+        replan_count: state.replan_count,
     }
 }
 
@@ -59,6 +122,8 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
     bool needs_replan = false
     string status = "running"
     string next_task = state.current_task
+    string replan_reason = ""
+    []string next_queue = state.task_queue
     string route = agent_plan_route(memory)
     bool has_retrieve = agent_tool_registry_has_enabled(tools, "retrieve")
     bool has_infer = agent_tool_registry_has_enabled(tools, "infer")
@@ -68,11 +133,31 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
         status = "done"
         next_task = "complete"
     } else if observation == "tool_unavailable" || observation == "infer:rejected" || observation == "local_model_config_missing: disabled" {
-        needs_replan = true
-        status = "replan"
-        next_task = "analyze"
+        int next_replan_count_check = state.replan_count + 1
+        if next_replan_count_check >= agent_plan_max_replan_count() {
+            finished = true
+            status = "replan_limit_reached"
+            next_task = "complete"
+        } else {
+            needs_replan = true
+            status = "replan"
+            next_task = "analyze"
+            replan_reason = observation
+            next_queue = []
+        }
     } else if !finished && !needs_replan {
-        if state.current_task == "analyze" {
+        if len(next_queue) > 0 {
+            next_task = next_queue[0]
+            int q_size = len(next_queue) - 1
+            []string trimmed = []string{cap: q_size}
+            int qi = 0
+            while qi < q_size {
+                trimmed[qi] = next_queue[qi + 1]
+                qi = qi + 1
+            }
+            next_queue = trimmed
+            status = "queued:" + next_task
+        } else if state.current_task == "analyze" {
             next_task = "plan"
             status = "planning:" + route
         } else if state.current_task == "plan" {
@@ -130,6 +215,11 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
         status = "budget_exhausted"
     }
 
+    int next_replan_count = state.replan_count
+    if needs_replan {
+        next_replan_count = state.replan_count + 1
+    }
+
     agent_plan_state {
         goal: state.goal,
         current_task: next_task,
@@ -138,6 +228,9 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
         needs_replan: needs_replan,
         finished: finished,
         status: status,
+        replan_reason: replan_reason,
+        task_queue: next_queue,
+        replan_count: next_replan_count,
     }
 }
 
@@ -145,6 +238,40 @@ func agent_plan_state_dict(agent_plan_state state) agent_plan_state {
     state
 }
 
+func agent_plan_update_goal(agent_plan_state state, string new_goal) agent_plan_state {
+    agent_plan_state {
+        goal: new_goal,
+        current_task: "analyze",
+        step_budget: state.step_budget,
+        step_count: state.step_count,
+        needs_replan: false,
+        finished: false,
+        status: "goal_updated",
+        replan_reason: "",
+        task_queue: [],
+        replan_count: state.replan_count,
+    }
+}
+
 func agent_plan_load_state_dict(agent_plan_state state, agent_plan_state other) agent_plan_state {
     other
+}
+
+func agent_plan_set_budget(agent_plan_state state, int budget) agent_plan_state {
+    int b = budget
+    if b <= 0 {
+        b = 1
+    }
+    agent_plan_state {
+        goal: state.goal,
+        current_task: state.current_task,
+        step_budget: b,
+        step_count: state.step_count,
+        needs_replan: state.needs_replan,
+        finished: state.finished && state.status == "budget_exhausted" && state.step_count < b ? false : state.finished,
+        status: state.finished && state.status == "budget_exhausted" && state.step_count < b ? "running" : state.status,
+        replan_reason: state.replan_reason,
+        task_queue: state.task_queue,
+        replan_count: state.replan_count,
+    }
 }
