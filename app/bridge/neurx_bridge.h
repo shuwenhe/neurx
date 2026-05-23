@@ -23,6 +23,7 @@ public:
 
     Q_INVOKABLE QString ping();
     Q_INVOKABLE QString run_agent(const QString& prompt, int max_steps);
+    Q_INVOKABLE QString run_native_s_agent(const QString& prompt, int max_steps);
     Q_INVOKABLE QString run_code_assistant(const QString& prompt, const QString& filePath);
     Q_INVOKABLE QString export_agent_skill_snapshot(const QString& prompt, int max_steps);
     Q_INVOKABLE QString export_agent_trajectory(const QString& prompt, int max_steps);
@@ -39,9 +40,11 @@ public:
                                      const QVariantList& editorTabs,
                                      int activeEditorTabIndex);
     Q_INVOKABLE QVariantMap load_login_session() const;
-    Q_INVOKABLE void save_login_session(bool loggedIn, const QString& phone);
+    Q_INVOKABLE void save_login_session(bool loggedIn,
+                                        const QString& phone);
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
+    Q_INVOKABLE void run_native_s_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);
     Q_INVOKABLE void run_agent_auto_async(const QString& prompt, const QString& filePath, int max_steps);
     Q_INVOKABLE QString agent_route_for_prompt(const QString& prompt, const QString& filePath) const;
@@ -81,11 +84,15 @@ private:
     QString find_repo_root() const;
     QString run_agent_probe(const QString& repo_root) const;
     QString run_process(const QString& program, const QStringList& args, int timeout_ms, const QString& working_dir = QString()) const;
+    QString resolve_s_binary(const QString& repo_root) const;
+    QString run_s_cli(const QString& s_binary, const QStringList& args, int timeout_ms, const QString& working_dir = QString()) const;
     QString run_http_request(const QString& method, const QString& url, const QString& body_file = QString(), int timeout_ms = 120000) const;
     QString ollama_command() const;
     QString bootstrap_ollama_model();
     QString ensure_local_openai_backend(const QString& repo_root);
+    QString ensure_native_s_runtime_compiled(const QString& repo_root, const QString& s_binary);
     QString run_local_model_agent(const QString& prompt, int max_steps);
+    QString run_native_s_agent_request(const QString& prompt, int max_steps);
     QString run_code_assistant_request(const QString& prompt, const QString& filePath);
     QString run_agent_state_export(const QString& prompt, int max_steps, const QString& export_kind);
     QString local_model_default_chat_path() const;
@@ -123,4 +130,6 @@ private:
     QVariantList code_agent_pending_changes_;
     bool agent_run_active_ {false};
     mutable bool local_ollama_ready_ {false};
+    QString native_s_runtime_ready_repo_root_;
+    QString native_s_runtime_ready_binary_;
 };

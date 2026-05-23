@@ -698,6 +698,7 @@ Item {
             label: label,
             text: text,
             bodyText: parsed.bodyText,
+            sourceText: parsed.sourceText,
             modeText: parsed.modeText,
             planText: parsed.planText,
             pending: pending,
@@ -738,6 +739,7 @@ Item {
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", activeAssistantStreamText)
             conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", parsed.bodyText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "sourceText", parsed.sourceText)
             conversationModel.setProperty(activeAssistantMessageIndex, "modeText", parsed.modeText)
             conversationModel.setProperty(activeAssistantMessageIndex, "planText", parsed.planText)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", true)
@@ -761,6 +763,7 @@ Item {
         if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
             conversationModel.setProperty(activeAssistantMessageIndex, "text", result)
             conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", parsed.bodyText)
+            conversationModel.setProperty(activeAssistantMessageIndex, "sourceText", parsed.sourceText)
             conversationModel.setProperty(activeAssistantMessageIndex, "modeText", parsed.modeText)
             conversationModel.setProperty(activeAssistantMessageIndex, "planText", parsed.planText)
             conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
@@ -773,13 +776,39 @@ Item {
     function parseConversationPayload(text) {
         var source = text || ""
         var lines = source.split("\n")
+        var sourceText = ""
         var modeText = ""
         var planText = ""
         var bodyLines = []
         var inHeader = true
+        var nativePrefixes = [
+            "native_s_agent=",
+            "prompt=",
+            "route=",
+            "status=",
+            "current_task=",
+            "steps=",
+            "last_observation="
+        ]
 
         for (var i = 0; i < lines.length; ++i) {
             var line = lines[i]
+            if (inHeader && line.indexOf("native_s_agent=true") === 0) {
+                sourceText = qsTr("Native S")
+                continue
+            }
+            if (inHeader && sourceText.length > 0) {
+                var isNativeMeta = false
+                for (var prefixIndex = 0; prefixIndex < nativePrefixes.length; ++prefixIndex) {
+                    if (line.indexOf(nativePrefixes[prefixIndex]) === 0) {
+                        isNativeMeta = true
+                        break
+                    }
+                }
+                if (isNativeMeta) {
+                    continue
+                }
+            }
             if (inHeader && line.indexOf("[mode] ") === 0) {
                 modeText = line.substring(7).trim()
                 continue
@@ -796,6 +825,7 @@ Item {
         }
 
         return {
+            sourceText: sourceText,
             modeText: modeText,
             planText: planText,
             bodyText: bodyLines.join("\n").trim()
@@ -877,6 +907,63 @@ Item {
             agentRunTimeoutTimer.stop()
         } finally {
             // Completion comes from Runtime.agentRunFinished.
+        }
+    }
+
+    function runAgentDemo() {
+        if (shell.agentRunning) {
+            return
+        }
+        promptEditor.text = "Explain repository architecture and module layout"
+        promptEditor.forceActiveFocus()
+        promptEditor.cursorPosition = promptEditor.text.length
+        shell.sendAgentPrompt()
+    }
+
+    function runNativeSAgentDemo() {
+        if (requireLoginForAgentAction(qsTr("Native S Agent"))) {
+            return
+        }
+        if (shell.agentRunning) {
+            return
+        }
+
+        var prompt = promptEditor.text.trim()
+        if (!prompt) {
+            prompt = "Explain repository architecture and module layout"
+        }
+        promptEditor.text = prompt
+        shell.runClickSeq += 1
+        shell.agentRunning = true
+        shell.runtimeStatusText = qsTr("native-s #") + shell.runClickSeq
+        shell.beginConversation(prompt, qsTr("Native S"), qsTr("Running native S agent..."))
+        agentRunTimeoutTimer.restart()
+        diagnosticsSkillRecords = []
+        selectedSkillName = ""
+        skillStatusFilter = ""
+        skillActiveOnly = false
+        skillHighFailOnly = false
+        selectedSkillFailedOnly = false
+        selectedSkillToolFilter = ""
+        selectedSkillSearchText = ""
+        shell.agentDetailsExpanded = false
+
+        try {
+            Runtime.run_native_s_agent_async(prompt, shell.runSteps)
+        } catch (e) {
+            resultOutput.text = qsTr("run_native_s_agent_failed: ") + e
+            if (activeAssistantMessageIndex >= 0 && activeAssistantMessageIndex < conversationModel.count) {
+                conversationModel.setProperty(activeAssistantMessageIndex, "text", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "bodyText", resultOutput.text)
+                conversationModel.setProperty(activeAssistantMessageIndex, "modeText", "")
+                conversationModel.setProperty(activeAssistantMessageIndex, "planText", "")
+                conversationModel.setProperty(activeAssistantMessageIndex, "pending", false)
+                conversationModel.setProperty(activeAssistantMessageIndex, "durationText", qsTr("failed"))
+                activeAssistantMessageIndex = -1
+            }
+            shell.runtimeStatusText = qsTr("failed #") + shell.runClickSeq
+            shell.agentRunning = false
+            agentRunTimeoutTimer.stop()
         }
     }
 
@@ -3143,6 +3230,24 @@ Item {
                                         }
 
                                         Rectangle {
+                                            visible: model.sourceText && model.sourceText.length > 0
+                                            radius: 999
+                                            color: Qt.rgba(0.10, 0.66, 0.45, 0.14)
+                                            border.color: Qt.rgba(0.10, 0.66, 0.45, 0.42)
+                                            height: 22
+                                            width: sourceLabel.implicitWidth + 14
+
+                                            Text {
+                                                id: sourceLabel
+                                                anchors.centerIn: parent
+                                                text: model.sourceText
+                                                color: shell.accent
+                                                font.pixelSize: 11
+                                                font.bold: true
+                                            }
+                                        }
+
+                                        Rectangle {
                                             visible: model.modeText && model.modeText.length > 0
                                             radius: 999
                                             color: Qt.rgba(0.10, 0.66, 0.45, 0.14)
@@ -3294,6 +3399,48 @@ Item {
                                 anchors.fill: parent
                                 enabled: !shell.agentRunning
                                 onClicked: shell.sendAgentPrompt()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 116
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.agentRunning ? shell.panelHover : shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Agent Demo")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !shell.agentRunning
+                                onClicked: shell.runAgentDemo()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 128
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.agentRunning ? shell.panelHover : shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Native S")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !shell.agentRunning
+                                onClicked: shell.runNativeSAgentDemo()
                             }
                         }
 
@@ -4165,6 +4312,21 @@ Item {
                 }
             }
 
+            // Password field below verification code
+            TextField {
+                id: passwordField
+                Layout.fillWidth: true
+                placeholderText: qsTr("请输入密码")
+                visible: false
+                enabled: false
+                Layout.preferredHeight: 0
+                Layout.maximumHeight: 0
+                text: ""
+                echoMode: TextInput.Password
+                color: shell.textPrimary
+                selectByMouse: true
+            }
+
             Text {
                 Layout.fillWidth: true
                 text: shell.loginStatusText
@@ -4229,6 +4391,10 @@ Item {
                                 shell.loginStatusText = qsTr("请输入验证码")
                                 return
                             }
+                            if (false) {
+                                shell.loginStatusText = qsTr("请输入密码")
+                                return
+                            }
                             if (shell.generatedLoginCode.length !== 4) {
                                 shell.loginStatusText = qsTr("请先获取验证码")
                                 return
@@ -4238,7 +4404,8 @@ Item {
                                 return
                             }
                             shell.loginLoggedIn = true
-                            Runtime.save_login_session(true, shell.loginPhoneText)
+                            Runtime.save_login_session(true,
+                                                       shell.loginPhoneText)
                             shell.generatedLoginCode = ""
                             shell.loginCodeText = ""
                             shell.loginStatusText = qsTr("登录成功：") + shell.loginPhoneText

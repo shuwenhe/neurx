@@ -158,3 +158,106 @@ func agent_trace_state_dict(agent_trace_state state) agent_trace_state {
 func agent_trace_load_state_dict(agent_trace_state state, agent_trace_state other) agent_trace_state {
     other
 }
+
+func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_state {
+    int size = len(state.steps)
+    int keep = max_entries
+    if keep <= 0 {
+        keep = 1
+    }
+    if size <= keep {
+        return state
+    }
+    int start = size - keep
+    []int steps = []int{cap: keep}
+    []string tasks = []string{cap: keep}
+    []string inputs = []string{cap: keep}
+    []string actions = []string{cap: keep}
+    []string observations = []string{cap: keep}
+    []string active_skills = []string{cap: keep}
+    []string tool_names = []string{cap: keep}
+    []int tool_timeout_ms = []int{cap: keep}
+    []int tool_retries = []int{cap: keep}
+    []bool ok_flags = []bool{cap: keep}
+    int i = 0
+    while i < keep {
+        steps[i] = state.steps[start + i]
+        tasks[i] = state.tasks[start + i]
+        inputs[i] = state.inputs[start + i]
+        actions[i] = state.actions[start + i]
+        observations[i] = state.observations[start + i]
+        active_skills[i] = state.active_skills[start + i]
+        tool_names[i] = state.tool_names[start + i]
+        tool_timeout_ms[i] = state.tool_timeout_ms[start + i]
+        tool_retries[i] = state.tool_retries[start + i]
+        ok_flags[i] = state.ok_flags[start + i]
+        i = i + 1
+    }
+    agent_trace_state {
+        steps: steps,
+        tasks: tasks,
+        inputs: inputs,
+        actions: actions,
+        observations: observations,
+        active_skills: active_skills,
+        tool_names: tool_names,
+        tool_timeout_ms: tool_timeout_ms,
+        tool_retries: tool_retries,
+        ok_flags: ok_flags,
+        count: state.count,
+    }
+}
+
+func agent_trace_clear(agent_trace_state state) agent_trace_state {
+    agent_trace_state {
+        steps: [],
+        tasks: [],
+        inputs: [],
+        actions: [],
+        observations: [],
+        active_skills: [],
+        tool_names: [],
+        tool_timeout_ms: [],
+        tool_retries: [],
+        ok_flags: [],
+        count: 0,
+    }
+}
+
+func agent_trace_ok_rate(agent_trace_state state) float {
+    int size = len(state.ok_flags)
+    if size <= 0 {
+        return 0.0
+    }
+    int ok_count = 0
+    int i = 0
+    while i < size {
+        if state.ok_flags[i] {
+            ok_count = ok_count + 1
+        }
+        i = i + 1
+    }
+    float(ok_count) / float(size)
+}
+
+func agent_trace_filter_task_obs(agent_trace_state state, string task) []string {
+    int count = 0
+    int i = 0
+    while i < len(state.tasks) {
+        if state.tasks[i] == task {
+            count = count + 1
+        }
+        i = i + 1
+    }
+    []string out = []string{cap: count}
+    int wi = 0
+    i = 0
+    while i < len(state.tasks) {
+        if state.tasks[i] == task {
+            out[wi] = state.observations[i]
+            wi = wi + 1
+        }
+        i = i + 1
+    }
+    out
+}

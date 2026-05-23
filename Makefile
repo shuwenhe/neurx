@@ -1,4 +1,4 @@
-.PHONY: help install neurx linux windows macos ios android harmony clean check-bash \
+.PHONY: help install neurx s-compile-runtime linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony
 
@@ -44,11 +44,12 @@ help:
 
 check-bash:
 ifeq ($(PLATFORM),windows)
-	@"$(BASH)" -lc "exit 0" || ( \
-		echo error: Git Bash not found: $(BASH) && \
-		echo hint: install Git for Windows, or run make BASH=C:/path/to/bash.exe ^<target^> && \
-		exit 1 \
-	)
+	@if [ ! -x "$(BASH)" ]; then \
+		echo "error: Git Bash not found: $(BASH)"; \
+		echo "hint: install Git for Windows, or run make BASH=C:/path/to/bash.exe <target>"; \
+		exit 1; \
+	fi
+	@"$(BASH)" -lc "exit 0"
 else
 	@command -v bash >/dev/null 2>&1 || { \
 		echo "error: bash not found on PATH"; \
@@ -58,6 +59,8 @@ else
 endif
 
 install: neurx
+
+s-compile-runtime: neurx
 
 linux: app-linux
 windows: app-windows
