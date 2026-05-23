@@ -126,8 +126,10 @@ resolve_qt6_dir() {
     return 0
   fi
 
+  # Qt is always installed on the host — use HOST_PLATFORM for discovery,
+  # regardless of TARGET_PLATFORM (which may differ for cross-compilation).
   local candidates=()
-  case "${TARGET_PLATFORM}" in
+  case "${HOST_PLATFORM}" in
     linux)
       candidates=(
         "/usr/lib/x86_64-linux-gnu/cmake/Qt6"
@@ -168,9 +170,24 @@ resolve_qt6_dir() {
       fi
       ;;
     windows)
-      candidates=(
-        "/c/Users/Public/qt/6.11.0/mingw_64/lib/cmake/Qt6"
-      )
+      # Cover all Qt 6 kit types installed under common Windows roots.
+      # Order: prefer mingw_64 (default CI kit), then llvm-mingw_64, msvc variants.
+      local qt_roots=("/c/Users/Public/qt" "/c/Qt" "/c/qt")
+      local qt_versions=("6.11.0" "6.10.0" "6.9.0" "6.8.0")
+      local qt_kits=("mingw_64" "llvm-mingw_64" "msvc2022_64" "msvc2022_arm64" "msvc2019_64")
+      for _root in "${qt_roots[@]}"; do
+        for _ver in "${qt_versions[@]}"; do
+          for _kit in "${qt_kits[@]}"; do
+            candidates+=("${_root}/${_ver}/${_kit}/lib/cmake/Qt6")
+          done
+        done
+      done
+      # Also respect user's HOME-based Qt installer
+      for _ver in "${qt_versions[@]}"; do
+        for _kit in "${qt_kits[@]}"; do
+          candidates+=("${HOME}/Qt/${_ver}/${_kit}/lib/cmake/Qt6")
+        done
+      done
       ;;
   esac
 
@@ -709,15 +726,18 @@ BUILD_JOBS="$(command -v nproc >/dev/null 2>&1 && nproc || getconf _NPROCESSORS_
 "${CMAKE_BIN}" --build "$(to_native_path "${BUILD_DIR}")" --clean-first -j"${BUILD_JOBS}"
 
 APP_BINARY="${APP_BINARY_BASE}"
-if [ ! -x "${APP_BINARY}" ] && [ -x "${APP_BINARY_BASE}.exe" ]; then
+# On Windows/Git Bash .exe files may lack the Unix executable bit; use -f as fallback and chmod.
+if [ ! -x "${APP_BINARY}" ] && [ -f "${APP_BINARY_BASE}.exe" ]; then
+  chmod +x "${APP_BINARY_BASE}.exe" 2>/dev/null || true
   APP_BINARY="${APP_BINARY_BASE}.exe"
 fi
-if [ ! -x "${APP_BINARY}" ] && [ -x "${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app" ]; then
+if [ ! -x "${APP_BINARY}" ] && [ -f "${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app" ]; then
+  chmod +x "${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app" 2>/dev/null || true
   APP_BINARY="${APP_BINARY_BASE}.app/Contents/MacOS/neurx_app"
 fi
 
 if [ ! -x "${APP_BINARY}" ]; then
-  echo "Error: Qt application binary not found: ${APP_BINARY_BASE}"
+  echo "Error: Qt application binary not found or not executable: ${APP_BINARY_BASE}"
   exit 1
 fi
 
