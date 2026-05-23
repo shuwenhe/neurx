@@ -42,7 +42,6 @@ out/
 
 # Logs
 *.log
-logs/
 
 # Misc
 .DS_Store
@@ -95,11 +94,26 @@ runtime/*.ir
 # top-level bin/ directory for prebuilt artifacts
 /bin/
 
-# Qt app build output
-app/build/
-
 # Ollama temp installer files
 /tmp/neurx-ollama/
 
-# make app log output
-build/logs/
+# Common CMake / build files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Executables and linker outputs
+*.exe
+*.out
+
+# Archives and packages
+*.zip
+*.tar.gz
+*.tar
+*.gz
+
+# Top-level checkpoints and binaries
+/checkpoints/
