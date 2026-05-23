@@ -22,6 +22,10 @@
 #include <QVariantMap>
 #include <QXmlStreamReader>
 #include <QDebug>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QUuid>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QtCore/6.11.0/QtCore/private/qzipreader_p.h>
 
@@ -40,11 +44,25 @@ constexpr const char kDefaultRemoteAppBaseUrl[] = "https://api.siliconflow.cn";
 constexpr const char kDefaultRemoteAppChatPath[] = "/v1/chat/completions";
 constexpr const char kDefaultRemoteAppModel[] = "Qwen/Qwen2.5-7B-Instruct";
 constexpr const char kCheckpointRunName[] = "run_20260518_001";
+constexpr const char kDefaultMysqlHost[] = "127.0.0.1";
+constexpr int kDefaultMysqlPort = 33061;
+constexpr const char kDefaultMysqlDatabase[] = "neurx";
+constexpr const char kDefaultMysqlUser[] = "neurx";
+constexpr const char kDefaultMysqlPassword[] = "Neurx@_20260523..";
+constexpr const char kLoginRememberDays = 30;
 constexpr int kOllamaInstallTimeoutMs = 30 * 60 * 1000;
 constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
 constexpr int kCodeAgentHistoryLimit = 8;
 constexpr int kCodeAgentFileCacheLimit = 6;
 constexpr int kCodeAgentLoopLimit = 6;
+
+QString env_or_default(const char* name, const char* fallback) {
+    const QByteArray value = qgetenv(name);
+    if (!value.isEmpty()) {
+        return QString::fromUtf8(value);
+    }
+    return QString::fromUtf8(fallback);
+}
 
 QString docx_plain_text_from_xml(const QByteArray& xml_bytes) {
     QXmlStreamReader xml(xml_bytes);
@@ -2369,6 +2387,20 @@ void NeurxBridge::save_ui_session(const QString& explorerPath,
 
 QVariantMap NeurxBridge::load_login_session() const {
     QSettings settings;
+    const QString savedPhone = settings.value("app_shell_login/phone", QString()).toString().trimmed();
+    const QString savedToken = settings.value("app_shell_login/rememberToken", QString()).toString().trimmed();
+    if (!savedPhone.isEmpty()) {
+        const QVariantMap database_session = load_login_session_from_database(savedPhone, savedToken);
+        if (!database_session.isEmpty()) {
+            settings.setValue("app_shell_login/loggedIn", true);
+            settings.setValue("app_shell_login/phone", database_session.value("phone").toString());
+            if (database_session.contains("rememberToken")) {
+                settings.setValue("app_shell_login/rememberToken", database_session.value("rememberToken").toString());
+            }
+            return database_session;
+        }
+    }
+
     QVariantMap session;
     session.insert("loggedIn", settings.value("app_shell_login/loggedIn", false).toBool());
     session.insert("phone", settings.value("app_shell_login/phone", QString()).toString());
@@ -2377,8 +2409,172 @@ QVariantMap NeurxBridge::load_login_session() const {
 
 void NeurxBridge::save_login_session(bool loggedIn, const QString& phone) {
     QSettings settings;
+    const QString normalized_phone = phone.trimmed();
     settings.setValue("app_shell_login/loggedIn", loggedIn);
-    settings.setValue("app_shell_login/phone", phone.trimmed());
+    settings.setValue("app_shell_login/phone", normalized_phone);
+
+    if (!loggedIn || normalized_phone.isEmpty()) {
+        settings.remove("app_shell_login/rememberToken");
+        settings.remove("app_shell_login/rememberExpires");
+        return;
+    }
+
+    const QString remember_token = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const QDateTime remember_expires = QDateTime::currentDateTime().addDays(kLoginRememberDays);
+    settings.setValue("app_shell_login/rememberToken", remember_token);
+    settings.setValue("app_shell_login/rememberExpires", remember_expires);
+
+    const bool persisted = persist_login_session_to_database(normalized_phone, remember_token, remember_expires);
+    if (!persisted) {
+        qWarning() << "Failed to persist login session to MySQL for phone" << normalized_phone;
+    }
+}
+
+QString NeurxBridge::login_database_connection_name() const {
+    return QStringLiteral("neurx_login_mysql");
+}
+
+QString NeurxBridge::login_database_host() const {
+    return env_or_default("NEURX_MYSQL_HOST", kDefaultMysqlHost);
+}
+
+int NeurxBridge::login_database_port() const {
+    const int port = qEnvironmentVariableIntValue("NEURX_MYSQL_PORT");
+    return port > 0 ? port : kDefaultMysqlPort;
+}
+
+QString NeurxBridge::login_database_name() const {
+    return env_or_default("NEURX_MYSQL_DATABASE", kDefaultMysqlDatabase);
+}
+
+QString NeurxBridge::login_database_user() const {
+    return env_or_default("NEURX_MYSQL_USER", kDefaultMysqlUser);
+}
+
+QString NeurxBridge::login_database_password() const {
+    return env_or_default("NEURX_MYSQL_PASSWORD", kDefaultMysqlPassword);
+}
+
+bool NeurxBridge::persist_login_session_to_database(const QString& phone,
+                                                    const QString& rememberToken,
+                                                    const QDateTime& rememberExpires) const {
+    const QString normalized_phone = phone.trimmed();
+    Q_UNUSED(rememberToken);
+    Q_UNUSED(rememberExpires);
+    if (normalized_phone.isEmpty()) {
+        return false;
+    }
+
+    const QString connection_name = login_database_connection_name();
+    if (QSqlDatabase::contains(connection_name)) {
+        {
+            QSqlDatabase existing = QSqlDatabase::database(connection_name);
+            if (existing.isOpen()) {
+                existing.close();
+            }
+        }
+        QSqlDatabase::removeDatabase(connection_name);
+    }
+
+    bool ok = false;
+    QString error_text;
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QMYSQL"), connection_name);
+        db.setHostName(login_database_host());
+        db.setPort(login_database_port());
+        db.setDatabaseName(login_database_name());
+        db.setUserName(login_database_user());
+        db.setPassword(login_database_password());
+
+        if (db.open()) {
+            QSqlQuery query(db);
+            query.prepare(R"SQL(
+                INSERT INTO `user`
+                    (`phone`, `password`, `email`)
+                VALUES
+                    (?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    `phone` = VALUES(`phone`)
+            )SQL");
+            query.addBindValue(normalized_phone);
+            query.addBindValue(QString());
+            query.addBindValue(QString());
+            ok = query.exec();
+            if (!ok) {
+                error_text = query.lastError().text();
+            }
+        } else {
+            error_text = db.lastError().text();
+        }
+
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(connection_name);
+
+    if (!ok && !error_text.isEmpty()) {
+        qWarning() << "MySQL login session persist failed:" << error_text;
+    }
+    return ok;
+}
+
+QVariantMap NeurxBridge::load_login_session_from_database(const QString& phone,
+                                                          const QString& rememberToken) const {
+    const QString normalized_phone = phone.trimmed();
+    Q_UNUSED(rememberToken);
+    if (normalized_phone.isEmpty()) {
+        return {};
+    }
+
+    const QString connection_name = login_database_connection_name();
+    if (QSqlDatabase::contains(connection_name)) {
+        {
+            QSqlDatabase existing = QSqlDatabase::database(connection_name);
+            if (existing.isOpen()) {
+                existing.close();
+            }
+        }
+        QSqlDatabase::removeDatabase(connection_name);
+    }
+
+    QVariantMap session;
+    QString error_text;
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QMYSQL"), connection_name);
+        db.setHostName(login_database_host());
+        db.setPort(login_database_port());
+        db.setDatabaseName(login_database_name());
+        db.setUserName(login_database_user());
+        db.setPassword(login_database_password());
+
+        if (db.open()) {
+            QSqlQuery query(db);
+            query.prepare(R"SQL(
+                SELECT `phone`
+                FROM `user`
+                WHERE `phone` = ?
+                LIMIT 1
+            )SQL");
+            query.addBindValue(normalized_phone);
+
+            if (query.exec() && query.next()) {
+                session.insert("loggedIn", true);
+                session.insert("phone", query.value(0).toString());
+                return session;
+            }
+
+            error_text = query.lastError().text();
+        } else {
+            error_text = db.lastError().text();
+        }
+
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(connection_name);
+
+    if (!error_text.isEmpty()) {
+        qWarning() << "MySQL login session load failed:" << error_text;
+    }
+    return {};
 }
 
 void NeurxBridge::copy_to_clipboard(const QString& text) {
