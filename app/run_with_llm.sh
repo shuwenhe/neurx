@@ -722,6 +722,10 @@ if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
   "${CMAKE_BIN}" -S "$(to_native_path "${APP_DIR}")" -B "$(to_native_path "${BUILD_DIR}")" -DCMAKE_BUILD_TYPE=Release "${CMAKE_CONFIGURE_ARGS[@]}"
 fi
 echo "Building Qt application..."
+# On Windows, kill any running instance first so the linker can overwrite the exe.
+if [[ "${HOST_PLATFORM}" == "windows" ]] && command -v taskkill >/dev/null 2>&1; then
+  taskkill //F //IM neurx_app.exe >/dev/null 2>&1 || true
+fi
 BUILD_JOBS="$(command -v nproc >/dev/null 2>&1 && nproc || getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || printf '4')"
 "${CMAKE_BIN}" --build "$(to_native_path "${BUILD_DIR}")" --clean-first -j"${BUILD_JOBS}"
 

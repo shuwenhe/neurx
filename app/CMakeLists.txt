@@ -20,6 +20,14 @@ endif()
 
 string(TOLOWER "${NEURX_APP_TARGET_PLATFORM}" NEURX_APP_TARGET_PLATFORM)
 
+if(NEURX_APP_TARGET_PLATFORM STREQUAL "ios" OR NEURX_APP_TARGET_PLATFORM STREQUAL "android")
+    find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui Network Qml Quick QuickControls2 Concurrent Sql)
+    add_subdirectory(mobile)
+    return()
+endif()
+
+find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui Qml Quick QuickControls2 Concurrent Pdf Sql)
+
 if(NEURX_APP_TARGET_PLATFORM STREQUAL "windows")
     set(NEURX_APP_OUTPUT_SUBDIR "windows-x86_64")
 elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "linux")
@@ -34,10 +42,6 @@ elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "macos")
     else()
         set(NEURX_APP_OUTPUT_SUBDIR "macos-x86_64")
     endif()
-elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "ios")
-    message(FATAL_ERROR "NeurX app iOS target is not implemented yet.")
-elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "android")
-    message(FATAL_ERROR "NeurX app Android target is not implemented yet.")
 elseif(NEURX_APP_TARGET_PLATFORM STREQUAL "harmony")
     message(FATAL_ERROR "NeurX app Harmony target is not implemented yet.")
 else()
@@ -49,8 +53,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui Qml Quick QuickControls2 Concurrent Pdf Sql)
 
 qt_add_executable(neurx_app
     app/main.cpp

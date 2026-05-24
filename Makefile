@@ -44,11 +44,11 @@ help:
 
 check-bash:
 ifeq ($(PLATFORM),windows)
-	@if [ ! -x "$(BASH)" ]; then \
-		echo "error: Git Bash not found: $(BASH)"; \
-		echo "hint: install Git for Windows, or run make BASH=C:/path/to/bash.exe <target>"; \
-		exit 1; \
-	fi
+	@where "$(BASH)" >NUL 2>&1 || if not exist "$(BASH)" ( \
+		echo error: Git Bash not found: $(BASH) & \
+		echo hint: install Git for Windows, or run make BASH=C:/path/to/bash.exe ^<target^> & \
+		exit /b 1 \
+	)
 	@"$(BASH)" -lc "exit 0"
 else
 	@command -v bash >/dev/null 2>&1 || { \
