@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MOBILE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 ANDROID_ABI="${NEURX_ANDROID_ABI:-arm64-v8a}"
-ANDROID_API="${NEURX_ANDROID_API:-26}"
+ANDROID_API="${NEURX_ANDROID_API:-28}"
 BUILD_DIR="${NEURX_MOBILE_BUILD_DIR:-${MOBILE_DIR}/build/android-${ANDROID_ABI}}"
 
 resolve_android_ndk() {
