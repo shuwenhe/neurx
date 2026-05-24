@@ -29,11 +29,12 @@ resolve_adb() {
 find_apk() {
   local candidate
   for candidate in \
+    "$(find "${BUILD_DIR}" -type f -name '*release-signed*.apk' | sort | tail -n 1)" \
     "$(find "${BUILD_DIR}" -type f -name '*release*.apk' | sort | tail -n 1)" \
     "$(find "${BUILD_DIR}" -type f -name '*debug*.apk' | sort | tail -n 1)" \
     "$(find "${BUILD_DIR}" -type f -name '*.apk' | sort | tail -n 1)"
   do
-    if [ -n "${candidate}" ] && [ -f "${candidate}" ]; then
+    if [ -n "${candidate}" ] && [ -f "${candidate}" ] && [[ "${candidate}" != *"unsigned.apk" ]]; then
       printf '%s' "${candidate}"
       return 0
     fi

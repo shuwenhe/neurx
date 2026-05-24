@@ -117,3 +117,14 @@ Testing/
 
 # Top-level checkpoints and binaries
 /checkpoints/
+
+# Android / Qt mobile build artifacts
+app/mobile/build/
+app/mobile/.gradle/
+app/mobile/build/android-arm64-v8a/
+*.apk
+*.aab
+*.keystore
+# Gradle wrapper dists are machine-local
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
