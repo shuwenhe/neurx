@@ -9,7 +9,6 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
-    CorePrivate
     Gui
     Network
     Qml
@@ -43,7 +42,6 @@ target_include_directories(neurx_mobile PRIVATE
 
 target_link_libraries(neurx_mobile PRIVATE
     Qt6::Core
-    Qt6::CorePrivate
     Qt6::Gui
     Qt6::Network
     Qt6::Qml
@@ -84,4 +82,3 @@ install(TARGETS neurx_mobile
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )
-
