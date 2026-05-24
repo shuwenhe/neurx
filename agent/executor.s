@@ -49,6 +49,12 @@ func agent_text_contains(string text, string pattern) bool {
 
 func agent_route_for_goal(string goal, string input) string {
     string text = lower(trim(goal + " " + input))
+    if agent_text_contains(text, "delete") || agent_text_contains(text, "remove") || agent_text_contains(text, "rm ") || agent_text_contains(text, "trash") {
+        return "delete"
+    }
+    if agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") || agent_text_contains(text, "mkdir") || agent_text_contains(text, "create folder") || agent_text_contains(text, "make dir") {
+        return "write"
+    }
     if agent_text_contains(text, "fix") || agent_text_contains(text, "bug") || agent_text_contains(text, "error") || agent_text_contains(text, "implement") || agent_text_contains(text, "patch") || agent_text_contains(text, "refactor") {
         return "code"
     }
@@ -230,6 +236,38 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             if !ok {
                 observation = "tool_unavailable"
             }
+        }
+    } else if task == "delete" {
+        if agent_tool_registry_has_enabled(tools, "delete") {
+            tool_name = "delete"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            action = "delete"
+            string target_path = ""
+            agent_memory_lookup_result path_result = agent_memory_lookup_short(next_memory, "last_input")
+            if path_result.found {
+                target_path = path_result.value
+                next_memory = path_result.state
+            }
+            observation = "delete:requested;path=" + target_path
+            ok = true
+            next_memory = agent_memory_write_long(next_memory, "delete_target", target_path)
+        }
+    } else if task == "write" {
+        if agent_tool_registry_has_enabled(tools, "write") {
+            tool_name = "write"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            action = "write"
+            agent_memory_lookup_result input_result = agent_memory_lookup_short(next_memory, "last_input")
+            string write_target = ""
+            if input_result.found {
+                write_target = input_result.value
+                next_memory = input_result.state
+            }
+            observation = "write:requested;target=" + write_target
+            ok = true
+            next_memory = agent_memory_write_long(next_memory, "write_target", write_target)
         }
     } else if task == "verify" {
         action = "verify"

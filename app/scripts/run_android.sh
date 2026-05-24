@@ -22,6 +22,16 @@ OUTPUT_DIR="${ROOT_DIR}/bin/android-${ANDROID_ABI}"
 
 Qt6_ANDROID_DIR="${Qt6_ANDROID_DIR:-${Qt6_DIR:-}}"
 
+if [ -d "${APP_DIR}/mobile" ]; then
+  export NEURX_ANDROID_ABI="${NEURX_ANDROID_ABI:-arm64-v8a}"
+  export NEURX_ANDROID_API="${NEURX_ANDROID_API:-26}"
+  export NEURX_MOBILE_BUILD_DIR="${NEURX_MOBILE_BUILD_DIR:-${APP_DIR}/mobile/build/android-${NEURX_ANDROID_ABI}}"
+  export Qt6_ANDROID_DIR="${Qt6_ANDROID_DIR:-${Qt6_DIR:-}}"
+  "${APP_DIR}/mobile/scripts/build_android.sh"
+  "${APP_DIR}/mobile/scripts/deploy_android.sh"
+  exit 0
+fi
+
 # ---------------------------------------------------------------------------
 # Dependency checks
 # ---------------------------------------------------------------------------
@@ -140,7 +150,7 @@ fi
 echo "Installing ${APK} via adb..."
 adb install -r "${APK}"
 
-PACKAGE="${NEURX_ANDROID_PACKAGE:-com.neurx.app}"
-ACTIVITY="${NEURX_ANDROID_ACTIVITY:-${PACKAGE}/.MainActivity}"
+PACKAGE="${NEURX_ANDROID_PACKAGE:-com.neurx.mobile}"
+ACTIVITY="${NEURX_ANDROID_ACTIVITY:-${PACKAGE}/org.qtproject.qt.android.bindings.QtActivity}"
 echo "Launching ${ACTIVITY}..."
 adb shell am start -n "${ACTIVITY}"

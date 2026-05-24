@@ -74,6 +74,8 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
     agent_tool_registry_state tools = new_agent_tool_registry_state()
     tools = agent_tool_registry_add(tools, "search", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "retrieve", true, 5000, 1)
+    tools = agent_tool_registry_add(tools, "write", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "delete", true, 10000, 1)
     if resolved_model_path != "" {
         tools = agent_tool_registry_add(tools, "infer", true, 32000, 1)
     }

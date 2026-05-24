@@ -71,7 +71,7 @@ Item {
     property string loginStatusText: ""
     property string generatedLoginCode: ""
     property bool loginLoggedIn: false
-    property string loginMode: "phone"
+    property string loginMode: "qr"
     property string loginQrToken: ""
     property string loginQrStatus: "pending"
     property int agentRunTimeoutMs: 120000
@@ -4276,9 +4276,16 @@ Item {
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         padding: 0
+        onOpened: {
+            if (shell.loginMode === "qr") {
+                shell.loginQrToken = shell.generateQrToken()
+                shell.loginQrStatus = "pending"
+                qrPollTimer.restart()
+            }
+        }
         onClosed: {
             qrPollTimer.stop()
-            shell.loginMode = "phone"
+            shell.loginMode = "qr"
             shell.loginQrToken = ""
             shell.loginQrStatus = "pending"
         }
