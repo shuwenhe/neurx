@@ -71,6 +71,9 @@ Item {
     property string loginStatusText: ""
     property string generatedLoginCode: ""
     property bool loginLoggedIn: false
+    property string loginMode: "phone"
+    property string loginQrToken: ""
+    property string loginQrStatus: "pending"
     property int agentRunTimeoutMs: 120000
     property var pendingCodeAgentChanges: []
     property bool restoringSession: false
@@ -843,11 +846,18 @@ Item {
     }
 
     function refreshLoginButtonText() {
-        shell.loginButtonText = shell.loginLoggedIn ? qsTr("已登录") : qsTr("登录")
+        shell.loginButtonText = shell.loginLoggedIn ? qsTr("Logged In") : qsTr("Login")
     }
 
     function generateFourDigitCode() {
         return String(1000 + Math.floor(Math.random() * 9000))
+    }
+
+    function generateQrToken() {
+        var h = "0123456789abcdef"
+        var t = ""
+        for (var i = 0; i < 32; i++) t += h[Math.floor(Math.random() * 16)]
+        return t
     }
 
     function requireLoginForAgentAction(actionLabel) {
@@ -1022,7 +1032,7 @@ Item {
     }
 
     function sendSkillSnapshot() {
-        if (requireLoginForAgentAction(qsTr("技能导出"))) {
+        if (requireLoginForAgentAction(qsTr("Export Skills"))) {
             return
         }
         var prompt = resolvedAgentPrompt()
@@ -1906,6 +1916,43 @@ Item {
     }
 
     Timer {
+        id: qrPollTimer
+        interval: 2000
+        repeat: true
+        running: false
+        onTriggered: {
+            if (!loginPopup.visible || shell.loginMode !== "qr" || shell.loginQrToken.length === 0) {
+                qrPollTimer.stop()
+                return
+            }
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET", "http://127.0.0.1:18080/neurx/api/auth/qr-status?token=" + shell.loginQrToken)
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState !== XMLHttpRequest.DONE) return
+                if (xhr.status === 200) {
+                    try {
+                        var resp = JSON.parse(xhr.responseText)
+                        shell.loginQrStatus = resp.status || "pending"
+                        if (resp.status === "confirmed") {
+                            qrPollTimer.stop()
+                            var phone = resp.phone || "qr_user"
+                            shell.loginLoggedIn = true
+                            Runtime.save_login_session(true, phone)
+                            shell.loginPhoneText = phone
+                            shell.loginStatusText = qsTr("扫码登录成功")
+                            shell.refreshLoginButtonText()
+                            shell.copyNoticeText = qsTr("Login saved")
+                            copyNoticeTimer.restart()
+                            loginPopup.close()
+                        }
+                    } catch(e) {}
+                }
+            }
+            xhr.send()
+        }
+    }
+
+    Timer {
         id: agentRunTimeoutTimer
         interval: shell.agentRunTimeoutMs
         repeat: false
@@ -2195,6 +2242,16 @@ Item {
                                             Runtime.copy_to_clipboard(path)
                                             shell.copyNoticeText = qsTr("Path copied")
                                             copyNoticeTimer.restart()
+                                        }
+                                    }
+                                    MenuItem {
+                                        text: qsTr("删除")
+                                        enabled: path.length > 0
+                                        onTriggered: {
+                                            deleteConfirmDialog.targetPath = path
+                                            deleteConfirmDialog.targetLabel = label
+                                            deleteConfirmDialog.targetIsDir = isDir
+                                            deleteConfirmDialog.open()
                                         }
                                     }
                                 }
@@ -3084,7 +3141,7 @@ Item {
                                     shell.runtimeStatusText = qsTr("login_clicked")
                                     shell.loginStatusText = ""
                                     if (shell.loginLoggedIn) {
-                                        shell.loginStatusText = qsTr("当前已登录手机号：") + shell.loginPhoneText
+                                        shell.loginStatusText = qsTr("Current logged-in phone: ") + shell.loginPhoneText
                                     }
                                     loginPopup.open()
                                 }
@@ -3485,7 +3542,7 @@ Item {
                                     ToolTip.visible: hovered
                                     ToolTip.text: qsTr("Copy saved path")
                                     contentItem: Text {
-                                        text: "⧉"
+                                        text: "Copy"
                                         color: shell.textPrimary
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -3504,7 +3561,7 @@ Item {
                                     ToolTip.visible: hovered
                                     ToolTip.text: qsTr("Open export")
                                     contentItem: Text {
-                                        text: "↗"
+                                        text: "Open"
                                         color: shell.textPrimary
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -3876,9 +3933,7 @@ Item {
                                                     padding: 0
                                                     width: 22
                                                     height: 22
-                                                    text: "⧉"
-                                                    ToolTip.visible: hovered
-                                                    ToolTip.text: qsTr("Copy skill context")
+                                                    text: qsTr("Copy")
                                                     onClicked: shell.copyConversationText(shell.skillRecordPreview(resultOutput.text, modelData))
                                                 }
                                             }
@@ -4216,11 +4271,17 @@ Item {
         id: loginPopup
         anchors.centerIn: Overlay.overlay
         width: 360
-        height: 300
+        height: shell.loginMode === "qr" ? 440 : 320
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         padding: 0
+        onClosed: {
+            qrPollTimer.stop()
+            shell.loginMode = "phone"
+            shell.loginQrToken = ""
+            shell.loginQrStatus = "pending"
+        }
 
         background: Rectangle {
             radius: 16
@@ -4246,19 +4307,72 @@ Item {
                 Item { Layout.fillWidth: true }
 
                 ToolButton {
-                    text: "✕"
+                    text: "X"
                     onClicked: loginPopup.close()
                 }
             }
 
-                Text {
-                    text: qsTr("输入手机号和验证码")
-                    color: shell.textMuted
-                font.pixelSize: 12
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 30
+                    radius: 6
+                    color: shell.loginMode === "phone" ? shell.accent : shell.panelAlt
+                    border.color: shell.border
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("手机登录")
+                        color: shell.loginMode === "phone" ? shell.bg : shell.textMuted
+                        font.pixelSize: 12
+                        font.bold: shell.loginMode === "phone"
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            shell.loginMode = "phone"
+                            shell.loginStatusText = ""
+                            qrPollTimer.stop()
+                        }
+                    }
+                }
+
+                Item { width: 8 }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 30
+                    radius: 6
+                    color: shell.loginMode === "qr" ? shell.accent : shell.panelAlt
+                    border.color: shell.border
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("扫码登录")
+                        color: shell.loginMode === "qr" ? shell.bg : shell.textMuted
+                        font.pixelSize: 12
+                        font.bold: shell.loginMode === "qr"
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (shell.loginMode === "qr") return
+                            shell.loginMode = "qr"
+                            shell.loginStatusText = ""
+                            shell.loginQrToken = shell.generateQrToken()
+                            shell.loginQrStatus = "pending"
+                            qrPollTimer.restart()
+                        }
+                    }
+                }
             }
 
             TextField {
                 id: phoneField
+                visible: shell.loginMode === "phone"
                 Layout.fillWidth: true
                 placeholderText: qsTr("请输入手机号")
                 text: shell.loginPhoneText
@@ -4268,6 +4382,7 @@ Item {
             }
 
             RowLayout {
+                visible: shell.loginMode === "phone"
                 Layout.fillWidth: true
                 spacing: 10
 
@@ -4290,7 +4405,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: qsTr("获取验证码")
+                        text: qsTr("Get Code")
                         color: shell.textPrimary
                         font.pixelSize: 12
                         font.bold: true
@@ -4302,11 +4417,11 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (shell.loginPhoneText.trim().length === 0) {
-                                shell.loginStatusText = qsTr("请先输入手机号")
+                                shell.loginStatusText = qsTr("Enter phone number first")
                                 return
                             }
                             shell.generatedLoginCode = shell.generateFourDigitCode()
-                            shell.loginStatusText = qsTr("验证码已发送到手机，模拟验证码：") + shell.generatedLoginCode
+                            shell.loginStatusText = qsTr("Verification code sent. Demo code: ") + shell.generatedLoginCode
                         }
                     }
                 }
@@ -4315,16 +4430,77 @@ Item {
             // Password field below verification code
             TextField {
                 id: passwordField
-                Layout.fillWidth: true
-                placeholderText: qsTr("请输入密码")
                 visible: false
                 enabled: false
+                Layout.fillWidth: true
+                placeholderText: qsTr("Enter password")
                 Layout.preferredHeight: 0
                 Layout.maximumHeight: 0
                 text: ""
                 echoMode: TextInput.Password
                 color: shell.textPrimary
                 selectByMouse: true
+            }
+
+            // QR code login content
+            ColumnLayout {
+                visible: shell.loginMode === "qr"
+                Layout.fillWidth: true
+                spacing: 10
+
+                Image {
+                    Layout.alignment: Qt.AlignHCenter
+                    width: 200
+                    height: 200
+                    source: shell.loginQrToken.length > 0
+                        ? "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=neurx://login?token=" + shell.loginQrToken
+                        : ""
+                    cache: false
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: shell.loginQrStatus === "confirmed"
+                        ? qsTr("登录成功，正在进入…")
+                        : shell.loginQrStatus === "scanned"
+                            ? qsTr("已扫码，请在手机端确认")
+                            : qsTr("请使用 Neurx App 扫码登录")
+                    color: shell.textMuted
+                    font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                }
+
+                Rectangle {
+                    visible: shell.loginQrStatus === "pending" && shell.loginQrToken.length > 0
+                    Layout.alignment: Qt.AlignHCenter
+                    implicitWidth: 160
+                    implicitHeight: 28
+                    radius: 6
+                    color: simScanMouseArea.pressed ? shell.panelHover : shell.panelAlt
+                    border.color: shell.border
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("模拟扫码（演示）")
+                        color: shell.textMuted
+                        font.pixelSize: 11
+                    }
+
+                    MouseArea {
+                        id: simScanMouseArea
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (shell.loginQrToken.length === 0) return
+                            var xhr = new XMLHttpRequest()
+                            xhr.open("POST", "http://127.0.0.1:18080/neurx/api/auth/qr-scan")
+                            xhr.setRequestHeader("Content-Type", "application/json")
+                            xhr.send(JSON.stringify({token: shell.loginQrToken, phone: "demo@neurx.ai"}))
+                        }
+                    }
+                }
             }
 
             Text {
@@ -4365,6 +4541,7 @@ Item {
                 }
 
                 Rectangle {
+                    visible: shell.loginMode === "phone"
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
                     radius: 12
@@ -4392,15 +4569,15 @@ Item {
                                 return
                             }
                             if (false) {
-                                shell.loginStatusText = qsTr("请输入密码")
+                                shell.loginStatusText = qsTr("Enter password")
                                 return
                             }
                             if (shell.generatedLoginCode.length !== 4) {
-                                shell.loginStatusText = qsTr("请先获取验证码")
+                                shell.loginStatusText = qsTr("Get the verification code first")
                                 return
                             }
                             if (shell.loginCodeText.trim() !== shell.generatedLoginCode) {
-                                shell.loginStatusText = qsTr("验证码错误，请输入 4 位正确验证码")
+                                shell.loginStatusText = qsTr("验证码错误，请输�?4 位正确验证码")
                                 return
                             }
                             shell.loginLoggedIn = true
@@ -4408,15 +4585,77 @@ Item {
                                                        shell.loginPhoneText)
                             shell.generatedLoginCode = ""
                             shell.loginCodeText = ""
-                            shell.loginStatusText = qsTr("登录成功：") + shell.loginPhoneText
+                            shell.loginStatusText = qsTr("Login successful: ") + shell.loginPhoneText
                             shell.refreshLoginButtonText()
-                            shell.copyNoticeText = qsTr("已提交登录信息")
+                            shell.copyNoticeText = qsTr("Login saved")
                             copyNoticeTimer.restart()
                             loginPopup.close()
                         }
                     }
                 }
             }
+        }
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        property string targetPath: ""
+        property string targetLabel: ""
+        property bool targetIsDir: false
+
+        title: qsTr("Confirm Delete")
+        modal: true
+        anchors.centerIn: parent
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        background: Rectangle {
+            color: "#1e1e2e"
+            border.color: "#3a3a4a"
+            border.width: 1
+            radius: 8
+        }
+
+        header: Item {
+            height: 44
+            Text {
+                anchors.centerIn: parent
+                text: deleteConfirmDialog.title
+                color: "#f3f3f3"
+                font.pixelSize: 14
+                font.bold: true
+            }
+        }
+
+        contentItem: Text {
+            text: deleteConfirmDialog.targetIsDir
+                ? qsTr("Delete folder \"%1\" and all of its contents? This action cannot be undone.").arg(deleteConfirmDialog.targetLabel)
+                : qsTr("Delete file \"%1\"? This action cannot be undone.").arg(deleteConfirmDialog.targetLabel)
+            color: "#cccccc"
+            font.pixelSize: 13
+            wrapMode: Text.WordWrap
+            width: 340
+            topPadding: 8
+            bottomPadding: 8
+        }
+
+        onAccepted: {
+            if (deleteConfirmDialog.targetPath.length === 0) return
+            var result = Runtime.delete_path(deleteConfirmDialog.targetPath, true)
+            if (result === "deleted" || result === "already_absent") {
+                if (shell.selectedFilePath === deleteConfirmDialog.targetPath) {
+                    shell.selectedFilePath = ""
+                    shell.selectedFileIndex = -1
+                }
+                shell.refreshExplorer(shell.explorerCurrentPath)
+            } else {
+                shell.copyNoticeText = result
+                copyNoticeTimer.restart()
+            }
+            deleteConfirmDialog.targetPath = ""
+        }
+
+        onRejected: {
+            deleteConfirmDialog.targetPath = ""
         }
     }
 }

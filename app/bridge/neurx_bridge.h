@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtCore/qtmetamacros.h>
 #include <QObject>
 #include <QHash>
 #include <QDateTime>
@@ -43,6 +44,7 @@ public:
     Q_INVOKABLE void save_login_session(bool loggedIn,
                                         const QString& phone);
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
+    Q_INVOKABLE QString delete_path(const QString& path, bool recursive = true);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_native_s_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);

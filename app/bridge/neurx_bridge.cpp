@@ -448,7 +448,7 @@ QString preferred_model_name_for(QString base_url,
         return QString::fromLatin1(kDefaultOllamaModel);
     }
 
-    // Explicit user-configured name always wins — never replace a valid model name
+    // Explicit user-configured name always wins; never replace a valid model name.
     // (e.g. "qwen2.5:0.5b" from NEURX_LLM_MODEL) with an auto-detected placeholder.
     // But never forward a checkpoint file path/basename as an Ollama or OpenAI model name.
     if (!configured_name.isEmpty() && configured_name != "local-model" && !looks_like_checkpoint_name) {
@@ -559,7 +559,7 @@ bool prompt_targets_customer_service(const QString& prompt) {
     static const QStringList keywords = {
         "customer service", "customer support", "support ticket", "ticket", "after-sales",
         "after sales", "refund", "complaint", "order issue", "help desk",
-        "客服", "客户服务", "售后", "工单", "退款", "投诉", "订单问题", "支持工单"
+        "customer support cn", "after sales cn", "ticket cn", "refund cn", "complaint cn", "order help cn", "support help cn", "service help cn"
     };
     for (const QString& keyword : keywords) {
         if (text.contains(keyword)) {
@@ -584,7 +584,7 @@ bool response_needs_customer_service_fallback(const QString& response_text) {
 
     static const QStringList weak_markers = {
         "i'm sorry", "i am sorry", "can't help", "cannot help", "unable to help",
-        "please provide your request", "抱歉", "无法处理", "不能处理", "无法帮助", "请提供您的请求"
+        "please provide your request", "generic apology", "unable to process", "cannot process", "unable to help", "request more details"
     };
     for (const QString& marker : weak_markers) {
         if (lowered.contains(marker)) {
@@ -619,10 +619,10 @@ bool response_requests_cleaner_prompt(const QString& response_text) {
     }
 
     static const QStringList markers = {
-        "包含较多重复或噪声字符",
-        "噪声字符",
-        "请按“背景、问题、期望结果”三行重写",
-        "请按\"背景、问题、期望结果\"三行重写",
+        "too much repeated or noisy text",
+        "noisy characters",
+        "please rewrite in three lines",
+        "background, problem, expected result",
         "please rewrite in three lines",
         "background, problem, expected result",
         "too much repeated or noisy text",
@@ -650,22 +650,22 @@ bool response_looks_garbled(const QString& response_text) {
         || lowered.contains("```cpp\nclass\n")
         || lowered.contains("habiabit")
         || lowered.contains("arious")
-        || lowered.contains("定义\n")
-        || lowered.contains("由于\n\n代码片段的补全版示例")) {
+        || lowered.contains("definition")
+        || lowered.contains("garbled example output")) {
         signal_count += 2;
     }
 
     static const QStringList noise_markers = {
         "[attr]",
-        "用户",
-        "пользователь",
-        "séjourne",
-        "équipé",
-        "כלפי",
+        "user",
+        "user-facing garble",
+        "s????????rne",
+        "equip",
+        "garbled unicode",
         "verbatim",
-        "wię",
-        "class由于",
-        "class定义"
+        "wide",
+        "class due to",
+        "class define"
     };
     for (const QString& marker : noise_markers) {
         if (lowered.contains(marker.toLower())) {
@@ -765,6 +765,53 @@ QString sanitize_code_assistant_prompt(const QString& prompt) {
     }
 
     return cleaned;
+}
+
+bool prompt_requests_delete_operation(const QString& prompt) {
+    const QString text = prompt.trimmed();
+    if (text.isEmpty()) {
+        return false;
+    }
+    const QString chineseDelete = QString(QChar(0x5220)) + QString(QChar(0x9664));
+    return text.contains(QStringLiteral("delete"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("remove"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("cleanup"), Qt::CaseInsensitive)
+        || text.contains(chineseDelete, Qt::CaseInsensitive);
+}
+
+QString extract_delete_target_path(const QString& prompt, const QString& file_path) {
+    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
+    if (!explicit_file.isEmpty()) {
+        return explicit_file;
+    }
+
+    QString normalized = prompt;
+    normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\t'), QLatin1Char(' '));
+    while (normalized.contains(QStringLiteral("  "))) {
+        normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
+    }
+    const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    for (QString token : tokens) {
+        token = token.trimmed();
+        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}").contains(token.front())) {
+            token.remove(0, 1);
+        }
+        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}").contains(token.back())) {
+            token.chop(1);
+        }
+        if (token.size() >= 3
+            && token.at(1) == QLatin1Char(':')
+            && (token.at(2) == QLatin1Char('/') || token.at(2) == QLatin1Char('\\'))) {
+            return QDir::cleanPath(token);
+        }
+        if (token.startsWith(QLatin1Char('/'))) {
+            return QDir::cleanPath(token);
+        }
+    }
+
+    return QString();
 }
 
 QString rewrite_code_assistant_prompt_for_noise_retry(const QString& prompt) {
@@ -1901,6 +1948,37 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
             continue;
         }
 
+        if (action == QStringLiteral("delete_path")) {
+            const QVariant recursive_value = change.value(QStringLiteral("recursive"));
+            const bool recursive = recursive_value.isValid() ? recursive_value.toBool() : true;
+            const QFileInfo info(absolute_path);
+            if (!info.exists()) {
+                applied_summaries << QStringLiteral("delete_path already absent ") + repo_relative_path(find_repo_root(), absolute_path);
+                continue;
+            }
+            bool removed = false;
+            if (info.isDir()) {
+                if (recursive) {
+                    QDir dir(absolute_path);
+                    removed = dir.removeRecursively();
+                } else {
+                    const QFileInfo dir_info(absolute_path);
+                    QDir parent_dir = dir_info.dir();
+                    removed = parent_dir.rmdir(dir_info.fileName());
+                }
+            } else {
+                QFile file_to_remove(absolute_path);
+                removed = file_to_remove.remove();
+            }
+            if (!removed) {
+                applied_summaries << QStringLiteral("tool_error: pending delete_path failed");
+                continue;
+            }
+            edited_paths.append(repo_relative_path(find_repo_root(), absolute_path));
+            applied_summaries << QStringLiteral("applied delete_path ") + repo_relative_path(find_repo_root(), absolute_path);
+            continue;
+        }
+
         QFile file(absolute_path);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             applied_summaries << QStringLiteral("tool_error: pending change failed to read file");
@@ -2258,9 +2336,9 @@ static bool prompt_mentions_code_language(const QString& text) {
 }
 
 static bool looks_like_stub_chat_response(const QString& text) {
-    return text.contains("当前由本地 S 后端链路处理")
+    return text.contains("S backend placeholder response")
         || text.contains("S backend is alive and responding")
-        || text.contains("serve.s 执行成功但无输出");
+        || text.contains("serve.s fallback placeholder");
 }
 
 static QString hello_program_fallback(const QString& prompt) {
@@ -2305,7 +2383,7 @@ QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString
     if (contains_any_keyword(text, {
         "fix", "bug", "error", "implement", "patch", "refactor", "code", "qml",
         "write", "create", "mkdir", "directory", "folder", "build", "generate", "example", "hello world",
-        "写", "创建", "目录", "文件夹", "实现", "修复", "代码", "程序", "示例", "例子"
+        "write cn", "create cn", "directory cn", "folder cn", "implement cn", "fix cn", "code cn", "example cn", "build cn", "program cn"
     })) {
         return "code";
     }
@@ -2314,13 +2392,13 @@ QString NeurxBridge::agent_route_for_prompt(const QString& prompt, const QString
     }
     if (contains_any_keyword(text, {
         "review", "audit", "check", "test",
-        "审查", "审计", "检查", "测试"
+        "review cn", "audit cn", "check cn", "test cn"
     })) {
         return "review";
     }
     if (contains_any_keyword(text, {
         "search", "lookup", "find",
-        "搜索", "查找", "查询"
+        "search cn", "lookup cn", "find cn"
     })) {
         return "search";
     }
@@ -2748,6 +2826,37 @@ void NeurxBridge::copy_to_clipboard(const QString& text) {
     }
 }
 
+QString NeurxBridge::delete_path(const QString& path, bool recursive) {
+    const QString trimmed = QDir::cleanPath(path.trimmed());
+    if (trimmed.isEmpty()) {
+        return QStringLiteral("delete_path_error: empty path");
+    }
+    const QFileInfo info(trimmed);
+    if (!info.exists()) {
+        return QStringLiteral("already_absent");
+    }
+    bool removed = false;
+    if (info.isDir()) {
+        if (recursive) {
+            QDir dir(trimmed);
+            removed = dir.removeRecursively();
+        } else {
+            QDir parent = info.dir();
+            removed = parent.rmdir(info.fileName());
+        }
+    } else {
+        QFile file(trimmed);
+        removed = file.remove();
+    }
+    if (!removed) {
+        return QStringLiteral("delete_path_error: failed to remove ") + trimmed;
+    }
+    qInfo().noquote() << QString("bridge delete_path path=%1 recursive=%2")
+        .arg(trimmed)
+        .arg(recursive ? "true" : "false");
+    return QStringLiteral("deleted");
+}
+
 QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QString& filePath) {
     const QString root = find_repo_root();
     if (root.isEmpty()) {
@@ -2810,6 +2919,23 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     if (!direct_template.isEmpty()) {
         emit log_message("info", "agent", QString("code-assistant done route=%1 source=bridge-direct-template").arg(route));
         return direct_template;
+    }
+
+    if (prompt_requests_delete_operation(prompt)) {
+        const QString delete_target = extract_delete_target_path(prompt, filePath);
+        if (!delete_target.isEmpty()) {
+            const QString delete_result = delete_path(delete_target, true);
+            emit log_message("info", "agent",
+                QString("code-assistant direct-delete path=%1 result=%2")
+                    .arg(delete_target, delete_result));
+            if (delete_result == QStringLiteral("deleted")) {
+                return QStringLiteral("Deleted path: %1").arg(delete_target);
+            }
+            if (delete_result == QStringLiteral("already_absent")) {
+                return QStringLiteral("Path already absent: %1").arg(delete_target);
+            }
+            return delete_result;
+        }
     }
 
     const QString backend_ready = ensure_local_openai_backend(root);
@@ -3270,6 +3396,41 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             QStringLiteral("staged full file replacement"),
             repo_relative_path(root, absolute_path));
     };
+    auto delete_workspace_path = [&](const QString& raw_path, bool recursive) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok) {
+            return QStringLiteral("tool_error: delete_path path outside workspace");
+        }
+        const QFileInfo info(absolute_path);
+        if (!info.exists()) {
+            return format_tool_response(
+                QStringLiteral("delete_path"),
+                QStringLiteral("path already absent"),
+                repo_relative_path(root, absolute_path));
+        }
+        if (info.isDir() && !recursive) {
+            QDir dir(absolute_path);
+            if (!dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries).isEmpty()) {
+                return QStringLiteral("tool_error: delete_path directory is not empty; set recursive=true");
+            }
+        }
+        QVariantMap change;
+        change.insert(QStringLiteral("action"), QStringLiteral("delete_path"));
+        change.insert(QStringLiteral("path"), raw_path.trimmed());
+        change.insert(QStringLiteral("recursive"), recursive);
+        change.insert(QStringLiteral("summary"), info.isDir()
+            ? QStringLiteral("delete directory")
+            : QStringLiteral("delete file"));
+        change.insert(QStringLiteral("preview"), QStringLiteral("delete_path recursive=%1 target=%2")
+            .arg(recursive ? QStringLiteral("true") : QStringLiteral("false"),
+                 repo_relative_path(root, absolute_path)));
+        stage_pending_change(change);
+        return format_tool_response(
+            QStringLiteral("delete_path"),
+            info.isDir() ? QStringLiteral("staged directory deletion") : QStringLiteral("staged file deletion"),
+            repo_relative_path(root, absolute_path));
+    };
     auto summarize_pending_changes = [&]() -> QString {
         if (code_agent_pending_changes_.isEmpty()) {
             return format_tool_response(
@@ -3365,12 +3526,16 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 "{\"action\":\"replace_range\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"end_line\":20,\"new_text\":\"replacement text\",\"summary\":\"what changed\"}\n"
                 "{\"action\":\"apply_patch\",\"path\":\"relative/or/absolute\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false,\"summary\":\"what changed\"}\n"
                 "{\"action\":\"write_file\",\"path\":\"relative/or/absolute\",\"content\":\"full file content\",\"summary\":\"what changed\"}\n"
+                "{\"action\":\"delete_path\",\"path\":\"relative/or/absolute\",\"recursive\":true,\"summary\":\"what was removed\"}\n"
                 "{\"action\":\"run_build\",\"command\":\"cmake --build build\",\"reason\":\"validate current workspace\"}\n"
                 "{\"action\":\"run_test\",\"command\":\"ctest --output-on-failure\",\"reason\":\"validate current workspace\"}\n"
                 "{\"action\":\"final\",\"response\":\"user-facing summary\"}\n"
                 "Rules:\n"
                 "- for file edits stay within the repository\n"
                 "- mkdir may create directories under C:/Users and inside the repository\n"
+                "- delete_path may delete files or directories inside the repository only\n"
+                "- set recursive=true when deleting a non-empty directory\n"
+                "- only delete paths when the user explicitly asked for removal or cleanup\n"
                 "- read before editing unless the request is trivial\n"
                 "- prefer mkdir for directory creation requests\n"
                 "- prefer replace_range for localized line edits\n"
@@ -3463,6 +3628,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 observation = write_workspace_file(
                     action_obj.value(QStringLiteral("path")).toString(),
                     action_obj.value(QStringLiteral("content")).toString());
+            } else if (action == QStringLiteral("delete_path")) {
+                observation = delete_workspace_path(
+                    action_obj.value(QStringLiteral("path")).toString(),
+                    action_obj.contains(QStringLiteral("recursive"))
+                        ? action_obj.value(QStringLiteral("recursive")).toBool()
+                        : true);
             } else if (action == QStringLiteral("run_build")) {
                 observation = run_workspace_command_tool(
                     QStringLiteral("run_build"),
@@ -3495,10 +3666,14 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("mkdir"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("directory"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("folder"), Qt::CaseInsensitive)
-        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("创建"), Qt::CaseInsensitive)
-        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("目录"), Qt::CaseInsensitive)
-        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("文件夹"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("create cn"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("directory cn"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("folder cn"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("write to file"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("delete"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("remove"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("cleanup"), Qt::CaseInsensitive)
+        || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("delete cn"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("patch"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("fix"), Qt::CaseInsensitive)
         || sanitize_code_assistant_prompt(prompt).contains(QStringLiteral("bug"), Qt::CaseInsensitive)

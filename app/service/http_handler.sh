@@ -150,6 +150,71 @@ handle_agent_suggest() {
   send_response "200 OK" "{\"ok\":true,\"suggestion\":\"$(json_escape "$suggestion")\"}"
 }
 
+handle_auth_qr_status() {
+  local token
+  token="${PATH_ONLY#*token=}"
+  token="${token%%&*}"
+  if [[ -z "$token" ]]; then
+    send_response "400 Bad Request" '{"ok":false,"error":"missing token"}'
+    return
+  fi
+  local status_file="/tmp/neurx_qr_${token}.json"
+  if [[ -f "$status_file" ]]; then
+    send_response "200 OK" "$(cat "$status_file")"
+  else
+    send_response "200 OK" '{"ok":true,"status":"pending"}'
+  fi
+}
+
+handle_auth_qr_scan() {
+  local token phone status_file
+  token="$(extract_json_string token "$REQUEST_BODY")"
+  phone="$(extract_json_string phone "$REQUEST_BODY")"
+  [[ -z "$phone" ]] && phone="demo@neurx.ai"
+  if [[ -z "$token" ]]; then
+    send_response "400 Bad Request" '{"ok":false,"error":"missing token"}'
+    return
+  fi
+  status_file="/tmp/neurx_qr_${token}.json"
+  printf '{"ok":true,"status":"confirmed","phone":"%s"}' "$(json_escape "$phone")" > "$status_file"
+  log_inference "auth.qr_scan token=${token} phone=${phone}"
+  send_response "200 OK" '{"ok":true}'
+}
+
+handle_agent_delete() {
+  local target_path recursive result
+  target_path="$(extract_json_string path "$REQUEST_BODY")"
+  recursive="$(extract_json_string recursive "$REQUEST_BODY")"
+  [[ -z "$recursive" ]] && recursive="1"
+
+  if [[ -z "$target_path" ]]; then
+    send_response "400 Bad Request" "{\"ok\":false,\"error\":\"missing path\"}"
+    return
+  fi
+
+  # Reject paths outside the workspace root (repo root must be set)
+  local repo_root
+  repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"
+  if [[ -n "$repo_root" && "$target_path" != "$repo_root"* ]]; then
+    send_response "403 Forbidden" "{\"ok\":false,\"error\":\"path outside workspace\"}"
+    return
+  fi
+
+  if [[ ! -e "$target_path" ]]; then
+    send_response "200 OK" "{\"ok\":true,\"result\":\"already_absent\",\"path\":\"$(json_escape "$target_path")\"}"
+    return
+  fi
+
+  result="$("${ROOT_DIR}/tools/delete.sh" "$target_path" "$recursive" 2>&1)"
+  local exit_code=$?
+  log_inference "agent.delete path=${target_path} recursive=${recursive} exit=${exit_code}"
+  if [[ $exit_code -eq 0 ]]; then
+    send_response "200 OK" "{\"ok\":true,\"result\":\"deleted\",\"path\":\"$(json_escape "$target_path")\"}"
+  else
+    send_response "500 Internal Server Error" "{\"ok\":false,\"error\":\"$(json_escape "$result")\",\"path\":\"$(json_escape "$target_path")\"}"
+  fi
+}
+
 METHOD=""
 PATH_ONLY=""
 CONTENT_LENGTH=0
@@ -174,6 +239,15 @@ case "$METHOD $PATH_ONLY" in
     ;;
   "POST /neurx/api/agent/suggest")
     handle_agent_suggest
+    ;;
+  "POST /neurx/api/agent/delete")
+    handle_agent_delete
+    ;;
+  "GET /neurx/api/auth/qr-status"*)
+    handle_auth_qr_status
+    ;;
+  "POST /neurx/api/auth/qr-scan")
+    handle_auth_qr_scan
     ;;
   *)
     send_response "404 Not Found" "{\"ok\":false,\"error\":\"not found\",\"path\":\"$(json_escape "$PATH_ONLY")\"}"
