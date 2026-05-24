@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="neurx_green">#21C27A</color>
+    <color name="neurx_green_dark">#154734</color>
+    <color name="neurx_navy">#09111B</color>
+    <color name="neurx_panel">#101826</color>
+    <color name="neurx_white">#F4F7FB</color>
+</resources>

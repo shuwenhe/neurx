@@ -9,14 +9,14 @@
 #include "../bridge/neurx_bridge.h"
 
 int main(int argc, char* argv[]) {
-    QQuickStyle::setStyle("Fusion");
+    QQuickStyle::setStyle("Material");
     QGuiApplication app(argc, argv);
     app.setApplicationName("NeurX Mobile");
     app.setOrganizationName("NeurX");
 
-    QFont ui_font(QStringLiteral("Segoe UI"), 10);
+    QFont ui_font = app.font();
+    ui_font.setPointSize(10);
     ui_font.setStyleHint(QFont::SansSerif);
-    ui_font.setStyleStrategy(QFont::PreferOutline);
     app.setFont(ui_font);
 
     NeurxBridge bridge;
