@@ -9,12 +9,16 @@ ANDROID_API="${NEURX_ANDROID_API:-26}"
 BUILD_DIR="${NEURX_MOBILE_BUILD_DIR:-${MOBILE_DIR}/build/android-${ANDROID_ABI}}"
 
 resolve_android_ndk() {
+  local sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
   for dir in \
     "${ANDROID_NDK_ROOT:-}" \
     "${NDK_ROOT:-}" \
+    "${sdk_root}/ndk/27.2.12479018" \
+    "${sdk_root}/ndk-bundle" \
     "${ANDROID_HOME:-}/ndk-bundle" \
     "${HOME}/Android/Sdk/ndk-bundle" \
-    "/opt/android-ndk"
+    "/opt/android-ndk" \
+    "C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/27.2.12479018"
   do
     [ -n "${dir}" ] && [ -f "${dir}/build/cmake/android.toolchain.cmake" ] && printf '%s' "${dir}" && return 0
   done
@@ -29,6 +33,7 @@ resolve_qt6_android_dir() {
   for dir in \
     "${Qt6_ANDROID_DIR:-}" \
     "${Qt6_DIR:-}" \
+    "C:/Users/Public/qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
     "${HOME}/Qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
     "${HOME}/Qt/6.10.0/${abi_tag}/lib/cmake/Qt6"
   do
@@ -47,6 +52,7 @@ cmake -S "${MOBILE_DIR}" -B "${BUILD_DIR}" \
   -DANDROID_ABI="${ANDROID_ABI}" \
   -DANDROID_PLATFORM="android-${ANDROID_API}" \
   -DCMAKE_BUILD_TYPE=Release \
+  -DANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-C:/Users/Administrator/AppData/Local/Android/Sdk}" \
   -DQt6_DIR="${QT6_ANDROID_DIR_RESOLVED}"
 
-cmake --build "${BUILD_DIR}" --config Release
+cmake --build "${BUILD_DIR}" --config Release --target neurx_mobile_apk

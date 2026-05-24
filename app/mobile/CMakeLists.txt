@@ -82,6 +82,6 @@ endif()
 install(TARGETS neurx_mobile
     BUNDLE DESTINATION .
     RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
 )
 
-qt_finalize_executable(neurx_mobile)
