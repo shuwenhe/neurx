@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QtCore/qtmetamacros.h>
+#include <QObject>
 #include <QAbstractListModel>
 #include <QString>
 #include <QVector>

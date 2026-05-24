@@ -92,6 +92,7 @@ Set `NEURX_S_ALWAYS_COMPILE=1` if you want the bridge to re-run the S runtime co
 ## Directory Layout
 
 - app: Qt app entry and top-level UI bootstrap
+- mobile: standalone Android/iOS Qt Quick client
 - bridge: ABI/FFI bridge between Qt app shell and Neurx core
 - qml: Qt Quick shell views migrated into Neurx
 - platform: platform-specific helpers and lifecycle wrappers
@@ -106,7 +107,7 @@ The app now includes an incremental coding-agent scaffold under `app/service/`:
 
 - `code_agent_runner.sh`: first-stage code task runner
 - `code_templates.sh`: trivial code-template fallback
-- `tools/read.sh`, `tools/search.sh`, `tools/write.sh`, `tools/build.sh`, `tools/test.sh`: workspace tools
+- `tools/read.sh`, `tools/search.sh`, `tools/write.sh`, `tools/delete.sh`, `tools/build.sh`, `tools/test.sh`: workspace tools
 - `CODE_AGENT_ARCHITECTURE.md`: migration path from prompt/response shell to coding agent
 
 Current behavior:

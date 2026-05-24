@@ -50,6 +50,10 @@ Expected evolution:
 
 - write file content from stdin
 
+### `app/service/tools/delete.sh`
+
+- delete a file or directory from the workspace
+
 ### `app/service/tools/build.sh`
 
 - run project build commands in a controlled workdir
@@ -72,6 +76,7 @@ Expected evolution:
   - `read_file`
   - `search_files`
   - `write_file`
+  - `delete_path`
   - `run_build`
   - `run_test`
 
