@@ -27,7 +27,9 @@
 #include <QSqlQuery>
 #include <QUuid>
 #include <QtConcurrent/QtConcurrentRun>
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 #include <QtCore/6.11.0/QtCore/private/qzipreader_p.h>
+#endif
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
@@ -2477,6 +2479,10 @@ QString NeurxBridge::read_docx_text_file(const QString& path) const {
         return QString();
     }
 
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    Q_UNUSED(next);
+    return QStringLiteral("read_docx_text_file_unavailable_on_mobile");
+#else
     QZipReader archive(next);
     if (!archive.exists()) {
         return QString("read_docx_text_file_failed: %1").arg(next);
@@ -2495,6 +2501,7 @@ QString NeurxBridge::read_docx_text_file(const QString& path) const {
     }
 
     return extracted;
+#endif
 }
 
 QVariantList NeurxBridge::explorer_entries(const QString& path) const {
