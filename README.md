@@ -101,6 +101,8 @@ The current top-level folders are kept for compatibility. The target layout is:
 
 The S modules are compiled into runtime IR during the `s-compile-runtime` step and written under `build/ir/`.
 
+For the current NeurX agent capability boundary and the roadmap toward a GPT/Codex-style coding agent, see [doc/AGENT_CAPABILITY_GAP.md](doc/AGENT_CAPABILITY_GAP.md).
+
 ## Hardware Backends
 
 - `arch/cuda/`: CUDA/NVIDIA GPU support

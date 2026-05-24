@@ -127,6 +127,8 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
     string route = agent_plan_route(memory)
     bool has_retrieve = agent_tool_registry_has_enabled(tools, "retrieve")
     bool has_infer = agent_tool_registry_has_enabled(tools, "infer")
+    bool has_delete = agent_tool_registry_has_enabled(tools, "delete")
+    bool has_write = agent_tool_registry_has_enabled(tools, "write")
 
     if observation == "done" {
         finished = true
@@ -161,7 +163,13 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
             next_task = "plan"
             status = "planning:" + route
         } else if state.current_task == "plan" {
-            if route == "review" {
+            if route == "delete" && has_delete {
+                next_task = "delete"
+                status = "deleting:" + route
+            } else if route == "write" && has_write {
+                next_task = "write"
+                status = "writing:" + route
+            } else if route == "review" {
                 next_task = "verify"
                 status = "verifying:" + route
             } else if route == "search" {
@@ -184,6 +192,12 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
                     status = "verifying:" + route
                 }
             }
+        } else if state.current_task == "delete" {
+            next_task = "verify"
+            status = "verifying:" + route
+        } else if state.current_task == "write" {
+            next_task = "verify"
+            status = "verifying:" + route
         } else if state.current_task == "retrieve" {
             if has_infer {
                 next_task = "infer"
