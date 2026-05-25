@@ -24,10 +24,6 @@ public:
 
     Q_INVOKABLE QString ping();
     Q_INVOKABLE QString run_agent(const QString& prompt, int max_steps);
-    Q_INVOKABLE QString run_native_s_agent(const QString& prompt, int max_steps);
-    Q_INVOKABLE QString run_hello_s();
-    Q_INVOKABLE QString run_sum123(int a, int b, int c);
-    Q_INVOKABLE QString sum123_source() const;
     Q_INVOKABLE QString run_code_assistant(const QString& prompt, const QString& filePath);
     Q_INVOKABLE QString export_agent_skill_snapshot(const QString& prompt, int max_steps);
     Q_INVOKABLE QString export_agent_trajectory(const QString& prompt, int max_steps);
@@ -49,7 +45,6 @@ public:
     Q_INVOKABLE void copy_to_clipboard(const QString& text);
     Q_INVOKABLE QString delete_path(const QString& path, bool recursive = true);
     Q_INVOKABLE void run_agent_async(const QString& prompt, int max_steps);
-    Q_INVOKABLE void run_native_s_agent_async(const QString& prompt, int max_steps);
     Q_INVOKABLE void run_code_assistant_async(const QString& prompt, const QString& filePath);
     Q_INVOKABLE void run_agent_auto_async(const QString& prompt, const QString& filePath, int max_steps);
     Q_INVOKABLE QString agent_route_for_prompt(const QString& prompt, const QString& filePath) const;
@@ -97,9 +92,7 @@ private:
     QString ensure_local_openai_backend(const QString& repo_root);
     QString ensure_native_s_runtime_compiled(const QString& repo_root, const QString& s_binary);
     QString run_local_model_agent(const QString& prompt, int max_steps);
-    QString run_native_s_agent_request(const QString& prompt, int max_steps);
     QString run_code_assistant_request(const QString& prompt, const QString& filePath);
-    QString run_sum123_request(int a, int b, int c);
     QString run_agent_state_export(const QString& prompt, int max_steps, const QString& export_kind);
     QString local_model_default_chat_path() const;
     QString normalize_local_model_backend(const QString& backend) const;
