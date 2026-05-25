@@ -7,7 +7,7 @@ This note describes what `neurx/agent/*.s` currently implements, what is still m
 The current NeurX agent is a lightweight local runtime with these pieces:
 
 - runtime state, step loop, and budget tracking in [runtime.s](/c:/Users/shuwen/neurx/agent/runtime.s:1)
-- deterministic task progression in [planner.s](/c:/Users/shuwen/neurx/agent/planner.s:1)
+- deterministic task progression in [planner.s](/c:/Users/shuwen/neurx/planner/planner.s:1)
 - short and long memory in [memory.s](/c:/Users/shuwen/neurx/agent/memory.s:1)
 - tool registration and per-tool timeout/retry metadata in [tool_registry.s](/c:/Users/shuwen/neurx/agent/tool_registry.s:1)
 - action execution and route selection in [executor.s](/c:/Users/shuwen/neurx/agent/executor.s:1)
@@ -87,7 +87,7 @@ NeurX today has only a small subset of that environment reach.
 
 ### 4. Planning depth
 
-NeurX planning is explicit but narrow: `analyze -> plan -> retrieve/infer -> verify -> finalize` with route-specific branches in [planner.s](/c:/Users/shuwen/neurx/agent/planner.s:115).
+NeurX planning is explicit but narrow: `analyze -> plan -> retrieve/infer -> verify -> finalize` with route-specific branches in [planner.s](/c:/Users/shuwen/neurx/planner/planner.s:115).
 
 GPT/Codex-style agents typically support:
 
