@@ -20,6 +20,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 qt_add_executable(neurx_mobile
     main.cpp
+    qr/QrScanner.h
+    qr/QrScanner.cpp
     ../bridge/AgentListModel.h
     ../bridge/AgentListModel.cpp
     ../bridge/LogModel.h
