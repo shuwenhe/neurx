@@ -129,6 +129,9 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
     bool has_infer = agent_tool_registry_has_enabled(tools, "infer")
     bool has_delete = agent_tool_registry_has_enabled(tools, "delete")
     bool has_write = agent_tool_registry_has_enabled(tools, "write")
+    bool has_apply_patch = agent_tool_registry_has_enabled(tools, "apply_patch")
+    bool has_build = agent_tool_registry_has_enabled(tools, "build")
+    bool has_test = agent_tool_registry_has_enabled(tools, "test")
 
     if observation == "done" {
         finished = true
@@ -169,6 +172,12 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
             } else if route == "write" && has_write {
                 next_task = "write"
                 status = "writing:" + route
+            } else if route == "apply_patch" && has_apply_patch {
+                next_task = "apply_patch"
+                status = "patching:" + route
+            } else if route == "build" && has_build {
+                next_task = "build"
+                status = "building:" + route
             } else if route == "review" {
                 next_task = "verify"
                 status = "verifying:" + route
@@ -196,6 +205,30 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
             next_task = "verify"
             status = "verifying:" + route
         } else if state.current_task == "write" {
+            if has_build {
+                next_task = "build"
+                status = "building:" + route
+            } else {
+                next_task = "verify"
+                status = "verifying:" + route
+            }
+        } else if state.current_task == "apply_patch" || state.current_task == "patch" {
+            if has_build {
+                next_task = "build"
+                status = "building:" + route
+            } else {
+                next_task = "verify"
+                status = "verifying:" + route
+            }
+        } else if state.current_task == "build" {
+            if has_test {
+                next_task = "test"
+                status = "testing:" + route
+            } else {
+                next_task = "verify"
+                status = "verifying:" + route
+            }
+        } else if state.current_task == "test" {
             next_task = "verify"
             status = "verifying:" + route
         } else if state.current_task == "retrieve" {
@@ -276,14 +309,21 @@ func agent_plan_set_budget(agent_plan_state state, int budget) agent_plan_state 
     if b <= 0 {
         b = 1
     }
+    bool budget_restore = state.finished && state.status == "budget_exhausted" && state.step_count < b
+    bool new_finished = state.finished
+    string new_status = state.status
+    if budget_restore {
+        new_finished = false
+        new_status = "running"
+    }
     agent_plan_state {
         goal: state.goal,
         current_task: state.current_task,
         step_budget: b,
         step_count: state.step_count,
         needs_replan: state.needs_replan,
-        finished: state.finished && state.status == "budget_exhausted" && state.step_count < b ? false : state.finished,
-        status: state.finished && state.status == "budget_exhausted" && state.step_count < b ? "running" : state.status,
+        finished: new_finished,
+        status: new_status,
         replan_reason: state.replan_reason,
         task_queue: state.task_queue,
         replan_count: state.replan_count,

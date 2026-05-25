@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtMultimedia
-import QtQuick.Pdf
 
 Item {
     id: shell
@@ -975,6 +973,28 @@ Item {
             shell.agentRunning = false
             agentRunTimeoutTimer.stop()
         }
+    }
+
+    function showHelloSDialog() {
+        try {
+            helloSDialog.messageText = Runtime.run_hello_s()
+        } catch (e) {
+            helloSDialog.messageText = qsTr("run_hello_s_failed: ") + e
+        }
+        helloSDialog.open()
+    }
+
+    function showSum123Dialog() {
+        try {
+            sum123Dialog.sourceText = Runtime.sum123_source()
+        } catch (e) {
+            sum123Dialog.sourceText = "// error: " + e
+        }
+        sum123Dialog.inputA = ""
+        sum123Dialog.inputB = ""
+        sum123Dialog.inputC = ""
+        sum123Dialog.resultText = ""
+        sum123Dialog.open()
     }
 
     function sendCodeSuggestion() {
@@ -2626,349 +2646,98 @@ Item {
                                 && previewImage.status === Image.Error
                         }
 
-                        Rectangle {
-                            anchors.fill: parent
-                            color: "#090b0f"
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 14
                             visible: shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
 
-                            MediaPlayer {
-                                id: previewPlayer
-                                source: shell.isVideoKind(shell.editorKind, shell.selectedFilePath)
-                                    ? shell.editorImageSource(shell.selectedFilePath)
-                                    : ""
-                                audioOutput: AudioOutput {
-                                    volume: 1.0
-                                }
-                                videoOutput: previewVideoOutput
-                                onSourceChanged: {
-                                    if (source.toString().length > 0) {
-                                        play()
-                                    } else {
-                                        stop()
-                                    }
-                                }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: qsTr("Video preview is not available in this build")
+                                color: shell.textPrimary
+                                font.pixelSize: 16
+                                font.bold: true
                             }
 
-                            VideoOutput {
-                                id: previewVideoOutput
-                                anchors.left: parent.left
-                                anchors.top: parent.top
-                                anchors.right: parent.right
-                                anchors.bottom: videoControls.top
-                                anchors.margins: 16
-                                fillMode: VideoOutput.PreserveAspectFit
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: shell.selectedFilePath.length
+                                    ? qsTr("Open this video in your system player.")
+                                    : qsTr("No video selected.")
+                                color: shell.textMuted
+                                font.pixelSize: 12
                             }
 
                             Rectangle {
-                                id: videoControls
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
-                                anchors.margins: 16
-                                height: 56
-                                radius: 12
-                                color: "#161b22"
+                                width: 148
+                                height: 36
+                                radius: 8
+                                color: openVideoFallbackMouseArea.pressed ? "#222a34" : "#1b222c"
                                 border.color: shell.border
+                                visible: shell.selectedFilePath.length > 0
 
-                                RowLayout {
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Open Externally")
+                                    color: shell.textPrimary
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    id: openVideoFallbackMouseArea
                                     anchors.fill: parent
-                                    anchors.leftMargin: 14
-                                    anchors.rightMargin: 14
-                                    spacing: 12
-
-                                    Rectangle {
-                                        Layout.preferredWidth: 96
-                                        Layout.preferredHeight: 32
-                                        radius: 8
-                                        color: playPauseMouseArea.pressed ? "#157f58" : shell.accent
-                                        border.color: Qt.lighter(shell.accent, 1.15)
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: previewPlayer.playbackState === MediaPlayer.PlayingState
-                                                ? qsTr("Pause")
-                                                : qsTr("Play")
-                                            color: shell.bg
-                                            font.pixelSize: 13
-                                            font.bold: true
-                                        }
-
-                                        MouseArea {
-                                            id: playPauseMouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (previewPlayer.playbackState === MediaPlayer.PlayingState) {
-                                                    previewPlayer.pause()
-                                                } else {
-                                                    previewPlayer.play()
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: shell.selectedFilePath.length
-                                            ? qsTr("Playing %1").arg(shell.editorTabLabel(shell.selectedFilePath, ""))
-                                            : qsTr("No video selected.")
-                                        color: shell.textMuted
-                                        elide: Text.ElideMiddle
-                                        verticalAlignment: Text.AlignVCenter
-                                    }
-
-                                    Rectangle {
-                                        Layout.preferredWidth: 124
-                                        Layout.preferredHeight: 32
-                                        radius: 8
-                                        color: openVideoMouseArea.pressed ? "#222a34" : "#1b222c"
-                                        border.color: shell.border
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: qsTr("Open Externally")
-                                            color: shell.textPrimary
-                                            font.pixelSize: 12
-                                            font.bold: true
-                                        }
-
-                                        MouseArea {
-                                            id: openVideoMouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
-                                        }
-                                    }
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
                                 }
                             }
                         }
 
-                        Rectangle {
-                            anchors.fill: parent
-                            color: "#0d1015"
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 14
                             visible: shell.isPdfKind(shell.editorKind)
 
-                            PdfDocument {
-                                id: previewPdfDocument
-                                source: shell.isPdfKind(shell.editorKind) && shell.selectedFilePath.length > 0
-                                    ? shell.editorImageSource(shell.selectedFilePath)
-                                    : ""
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: qsTr("PDF preview is not available in this build")
+                                color: shell.textPrimary
+                                font.pixelSize: 16
+                                font.bold: true
                             }
 
-                            ColumnLayout {
-                                anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 56
-                                    radius: 12
-                                    color: "#161b22"
-                                    border.color: shell.border
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 14
-                                        anchors.rightMargin: 14
-                                        spacing: 12
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 96
-                                            Layout.preferredHeight: 32
-                                            radius: 8
-                                            color: pdfFitWidthMouseArea.pressed ? "#157f58" : shell.accent
-                                            border.color: Qt.lighter(shell.accent, 1.15)
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: qsTr("Fit Width")
-                                                color: shell.bg
-                                                font.pixelSize: 13
-                                                font.bold: true
-                                            }
-
-                                            MouseArea {
-                                                id: pdfFitWidthMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: pdfPreview.scaleToWidth(pdfPreview.width, pdfPreview.height)
-                                            }
-                                        }
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 92
-                                            Layout.preferredHeight: 32
-                                            radius: 8
-                                            color: pdfFitPageMouseArea.pressed ? "#222a34" : "#1b222c"
-                                            border.color: shell.border
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: qsTr("Fit Page")
-                                                color: shell.textPrimary
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                            }
-
-                                            MouseArea {
-                                                id: pdfFitPageMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: pdfPreview.scaleToPage(pdfPreview.width, pdfPreview.height)
-                                            }
-                                        }
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 84
-                                            Layout.preferredHeight: 32
-                                            radius: 8
-                                            color: pdfZoomOutMouseArea.pressed ? "#222a34" : "#1b222c"
-                                            border.color: shell.border
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: qsTr("Zoom -")
-                                                color: shell.textPrimary
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                            }
-
-                                            MouseArea {
-                                                id: pdfZoomOutMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: pdfPreview.renderScale = Math.max(0.25, pdfPreview.renderScale / 1.2)
-                                            }
-                                        }
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 84
-                                            Layout.preferredHeight: 32
-                                            radius: 8
-                                            color: pdfZoomInMouseArea.pressed ? "#222a34" : "#1b222c"
-                                            border.color: shell.border
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: qsTr("Zoom +")
-                                                color: shell.textPrimary
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                            }
-
-                                            MouseArea {
-                                                id: pdfZoomInMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: pdfPreview.renderScale = Math.min(5.0, pdfPreview.renderScale * 1.2)
-                                            }
-                                        }
-
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: previewPdfDocument.status === PdfDocument.Ready
-                                                ? qsTr("Page %1 / %2  |  %3%")
-                                                    .arg(pdfPreview.currentPage + 1)
-                                                    .arg(Math.max(1, previewPdfDocument.pageCount))
-                                                    .arg(Math.round(pdfPreview.renderScale * 100))
-                                                : (previewPdfDocument.status === PdfDocument.Loading
-                                                    ? qsTr("Loading PDF...")
-                                                    : shell.editorTabLabel(shell.selectedFilePath, qsTr("PDF")))
-                                            color: shell.textMuted
-                                            elide: Text.ElideMiddle
-                                            verticalAlignment: Text.AlignVCenter
-                                        }
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 124
-                                            Layout.preferredHeight: 32
-                                            radius: 8
-                                            color: openPdfMouseArea.pressed ? "#222a34" : "#1b222c"
-                                            border.color: shell.border
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: qsTr("Open Externally")
-                                                color: shell.textPrimary
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                            }
-
-                                            MouseArea {
-                                                id: openPdfMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    radius: 12
-                                    color: "#0f1115"
-                                    border.color: shell.border
-                                    clip: true
-
-                                    PdfMultiPageView {
-                                        id: pdfPreview
-                                        anchors.fill: parent
-                                        anchors.margins: 8
-                                        visible: previewPdfDocument.status === PdfDocument.Ready
-                                        document: previewPdfDocument
-                                    }
-
-                                    Column {
-                                        anchors.centerIn: parent
-                                        spacing: 12
-                                        visible: previewPdfDocument.status !== PdfDocument.Ready
-
-                                        Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            text: previewPdfDocument.status === PdfDocument.Loading
-                                                ? qsTr("Loading PDF...")
-                                                : (previewPdfDocument.error.length > 0
-                                                    ? qsTr("PDF preview unavailable")
-                                                    : qsTr("No PDF file selected."))
-                                            color: shell.textPrimary
-                                            font.pixelSize: 16
-                                            font.bold: true
-                                        }
-
-                                        Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            text: previewPdfDocument.error.length > 0
-                                                ? previewPdfDocument.error
-                                                : qsTr("Please wait while the document is prepared.")
-                                            color: shell.textMuted
-                                            font.pixelSize: 12
-                                            horizontalAlignment: Text.AlignHCenter
-                                        }
-                                    }
-                                }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: shell.selectedFilePath.length
+                                    ? qsTr("Open this PDF in your system viewer.")
+                                    : qsTr("No PDF file selected.")
+                                color: shell.textMuted
+                                font.pixelSize: 12
                             }
-                            onWidthChanged: {
-                                if (previewPdfDocument.status === PdfDocument.Ready) {
-                                    pdfPreview.scaleToWidth(width - 32, height - 32)
-                                }
-                            }
-                        }
 
-                        Connections {
-                            target: previewPdfDocument
-                            function onStatusChanged(status) {
-                                if (status === PdfDocument.Ready) {
-                                    pdfPreview.scaleToWidth(pdfPreview.width, pdfPreview.height)
+                            Rectangle {
+                                width: 148
+                                height: 36
+                                radius: 8
+                                color: openPdfFallbackMouseArea.pressed ? "#222a34" : "#1b222c"
+                                border.color: shell.border
+                                visible: shell.selectedFilePath.length > 0
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Open Externally")
+                                    color: shell.textPrimary
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    id: openPdfFallbackMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Qt.openUrlExternally(shell.editorImageSource(shell.selectedFilePath))
                                 }
                             }
                         }
@@ -3498,6 +3267,46 @@ Item {
                                 anchors.fill: parent
                                 enabled: !shell.agentRunning
                                 onClicked: shell.runNativeSAgentDemo()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 116
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Hello S")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: shell.showHelloSDialog()
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 116
+                            Layout.preferredHeight: 34
+                            radius: 10
+                            color: shell.panelAlt
+                            border.color: shell.border
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Sum123")
+                                color: shell.textPrimary
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: shell.showSum123Dialog()
                             }
                         }
 
@@ -4663,6 +4472,271 @@ Item {
 
         onRejected: {
             deleteConfirmDialog.targetPath = ""
+        }
+    }
+
+    Dialog {
+        id: helloSDialog
+        property string messageText: ""
+        modal: true
+        title: qsTr("hello.s")
+        standardButtons: Dialog.Ok
+
+        Text {
+            text: helloSDialog.messageText
+            color: shell.textPrimary
+            font.pixelSize: 16
+            wrapMode: Text.WordWrap
+            width: Math.min(420, shell.width - 80)
+        }
+    }
+
+    Dialog {
+        id: sum123Dialog
+        property string sourceText: ""
+        property string inputA: ""
+        property string inputB: ""
+        property string inputC: ""
+        property string resultText: ""
+
+        modal: true
+        title: qsTr("sum123.s — 三数求和")
+        standardButtons: Dialog.Close
+        anchors.centerIn: parent
+        width: Math.min(520, shell.width - 60)
+
+        background: Rectangle {
+            color: shell.surface
+            border.color: shell.border
+            border.width: 1
+            radius: 8
+        }
+
+        header: Item {
+            height: 44
+            Text {
+                anchors.centerIn: parent
+                text: sum123Dialog.title
+                color: shell.textPrimary
+                font.pixelSize: 14
+                font.bold: true
+            }
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 12
+            width: sum123Dialog.width - 48
+
+            Text {
+                text: qsTr("S 源码 (agent/sum123.s)")
+                color: shell.textMuted
+                font.pixelSize: 12
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 80
+                color: shell.editorBg
+                border.color: shell.border
+                radius: 4
+
+                ScrollView {
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    clip: true
+
+                    Text {
+                        text: sum123Dialog.sourceText
+                        color: shell.highlightKeyword
+                        font.family: "monospace"
+                        font.pixelSize: 12
+                        wrapMode: Text.WrapAnywhere
+                    }
+                }
+            }
+
+            Text {
+                text: qsTr("输入三个整数")
+                color: shell.textMuted
+                font.pixelSize: 12
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 36
+                    color: shell.editorBg
+                    border.color: sum123AInput.activeFocus ? shell.accent : shell.border
+                    radius: 4
+
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        text: qsTr("A")
+                        color: shell.textMuted
+                        font.pixelSize: 14
+                        verticalAlignment: Text.AlignVCenter
+                        visible: sum123Dialog.inputA.length === 0
+                        enabled: false
+                    }
+                    TextInput {
+                        id: sum123AInput
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        color: shell.textPrimary
+                        font.pixelSize: 14
+                        verticalAlignment: TextInput.AlignVCenter
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        text: sum123Dialog.inputA
+                        onTextChanged: sum123Dialog.inputA = text
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: sum123AInput.forceActiveFocus()
+                    }
+                }
+
+                Text {
+                    text: "+"
+                    color: shell.textMuted
+                    font.pixelSize: 18
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 36
+                    color: shell.editorBg
+                    border.color: sum123BInput.activeFocus ? shell.accent : shell.border
+                    radius: 4
+
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        text: qsTr("B")
+                        color: shell.textMuted
+                        font.pixelSize: 14
+                        verticalAlignment: Text.AlignVCenter
+                        visible: sum123Dialog.inputB.length === 0
+                        enabled: false
+                    }
+                    TextInput {
+                        id: sum123BInput
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        color: shell.textPrimary
+                        font.pixelSize: 14
+                        verticalAlignment: TextInput.AlignVCenter
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        text: sum123Dialog.inputB
+                        onTextChanged: sum123Dialog.inputB = text
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: sum123BInput.forceActiveFocus()
+                    }
+                }
+
+                Text {
+                    text: "+"
+                    color: shell.textMuted
+                    font.pixelSize: 18
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 36
+                    color: shell.editorBg
+                    border.color: sum123CInput.activeFocus ? shell.accent : shell.border
+                    radius: 4
+
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        text: qsTr("C")
+                        color: shell.textMuted
+                        font.pixelSize: 14
+                        verticalAlignment: Text.AlignVCenter
+                        visible: sum123Dialog.inputC.length === 0
+                        enabled: false
+                    }
+                    TextInput {
+                        id: sum123CInput
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        color: shell.textPrimary
+                        font.pixelSize: 14
+                        verticalAlignment: TextInput.AlignVCenter
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        text: sum123Dialog.inputC
+                        onTextChanged: sum123Dialog.inputC = text
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: sum123CInput.forceActiveFocus()
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 36
+                radius: 8
+                color: shell.accent
+
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("计算 A + B + C")
+                    color: shell.bg
+                    font.bold: true
+                    font.pixelSize: 13
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        var a = parseInt(sum123Dialog.inputA) || 0
+                        var b = parseInt(sum123Dialog.inputB) || 0
+                        var c = parseInt(sum123Dialog.inputC) || 0
+                        try {
+                            sum123Dialog.resultText = Runtime.run_sum123(a, b, c)
+                        } catch (e) {
+                            sum123Dialog.resultText = qsTr("error: ") + e
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 44
+                visible: sum123Dialog.resultText.length > 0
+                color: shell.panelAlt
+                border.color: shell.border
+                radius: 4
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 8
+
+                    Text {
+                        text: qsTr("结果：")
+                        color: shell.textMuted
+                        font.pixelSize: 13
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: sum123Dialog.resultText
+                        color: shell.accent
+                        font.pixelSize: 20
+                        font.bold: true
+                    }
+                }
+            }
         }
     }
 }

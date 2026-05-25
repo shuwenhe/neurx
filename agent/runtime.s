@@ -10,6 +10,16 @@ use neurx.agent.skill_feedback
 use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
 use neurx.agent.skill_executor
+use neurx.agent.reflection
+use neurx.agent.context_manager
+use neurx.agent.context_builder
+use neurx.agent.reasoning
+use neurx.agent.subagent
+use neurx.agent.perception
+use neurx.agent.answer_synthesizer
+use neurx.agent.interrupt
+use neurx.agent.safety
+use neurx.agent.session
 use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
 
 struct agent_runtime_state {
@@ -19,6 +29,13 @@ struct agent_runtime_state {
     agent_trace_state trace
     agent_skill_registry_state skills
     agent_skill_execution_state skill_execution
+    agent_reflection_state reflection
+    agent_context_state context
+    agent_reasoning_state reasoning
+    agent_subagent_registry_state subagents
+    agent_answer_state answer
+    agent_interrupt_state interrupt
+    agent_session_state session
     int steps
     bool finished
     string last_action
@@ -29,6 +46,25 @@ struct agent_runtime_state {
 func trim_or_empty(string value) string {
     string next = trim(value)
     next
+}
+
+func s_char_is_digit(string s, int i) bool {
+    string ch = string(s[i])
+    ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9"
+}
+
+func s_char_digit_val(string s, int i) int {
+    string ch = string(s[i])
+    if ch == "1" { return 1 }
+    if ch == "2" { return 2 }
+    if ch == "3" { return 3 }
+    if ch == "4" { return 4 }
+    if ch == "5" { return 5 }
+    if ch == "6" { return 6 }
+    if ch == "7" { return 7 }
+    if ch == "8" { return 8 }
+    if ch == "9" { return 9 }
+    0
 }
 
 func resolve_agent_model_path(string model_path) string {
@@ -76,10 +112,14 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
     tools = agent_tool_registry_add(tools, "retrieve", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "write", true, 10000, 1)
     tools = agent_tool_registry_add(tools, "delete", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "apply_patch", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "build", true, 20000, 0)
+    tools = agent_tool_registry_add(tools, "test", true, 20000, 0)
     if resolved_model_path != "" {
         tools = agent_tool_registry_add(tools, "infer", true, 32000, 1)
     }
 
+    string session_id = "session_" + string(0)
     agent_runtime_state {
         plan: new_agent_plan_state(goal, initial_task, step_budget),
         memory: new_agent_memory_state(),
@@ -87,6 +127,13 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
         trace: new_agent_trace_state(),
         skills: new_agent_skill_registry_state(),
         skill_execution: new_agent_skill_execution_state(),
+        reflection: new_agent_reflection_state(),
+        context: new_agent_context_state(agent_context_default_max_tokens()),
+        reasoning: new_agent_reasoning_state(),
+        subagents: new_agent_subagent_registry_state(),
+        answer: new_agent_answer_state(goal),
+        interrupt: new_agent_interrupt_state(),
+        session: new_agent_session_state(session_id, goal),
         steps: 0,
         finished: false,
         last_action: "",
@@ -157,6 +204,12 @@ func agent_runtime_skill_snapshot(agent_runtime_state state) string {
     out = out + "\nlast_observation=" + state.last_observation
     out = out + "\nactive_skill=" + state.skill_execution.active_skill
     out = out + "\nskill_execution_status=" + state.skill_execution.status
+    out = out + "\n" + agent_reflection_summary(state.reflection)
+    out = out + "\n" + agent_context_summary(state.context)
+    out = out + "\n" + agent_answer_summary(state.answer)
+    out = out + "\n" + agent_interrupt_summary(state.interrupt)
+    out = out + "\n" + agent_subagent_summary(state.subagents)
+    out = out + "\n" + agent_session_summary(state.session)
     out = out + "\n" + agent_skill_registry_snapshot(state.skills)
     out
 }
@@ -182,13 +235,62 @@ func agent_runtime_export_trajectory(agent_runtime_state state, string path) str
     path
 }
 
+func agent_runtime_make_blocked(agent_runtime_state state, string reason) agent_runtime_state {
+    agent_runtime_state {
+        plan: state.plan,
+        memory: state.memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
+        steps: state.steps + 1,
+        finished: true,
+        last_action: "blocked",
+        last_observation: "safety:" + reason,
+        model_path: state.model_path,
+    }
+}
+
 func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_state {
     if state.finished {
         return state
     }
 
+    agent_safety_result safety = agent_safety_check(state.plan.current_task, input, state.plan.goal)
+    if !safety.allowed {
+        return agent_runtime_make_blocked(state, safety.reason)
+    }
+
+    agent_session_state next_session = agent_session_user(state.session, input)
+
+    agent_context_state next_context = agent_context_maybe_compress(
+        agent_context_append(state.context, input)
+    )
+
+    agent_reasoning_state next_reasoning = agent_reasoning_for_goal(
+        state.reasoning, state.plan.goal, state.last_observation
+    )
+
     agent_execute_result result = agent_execute_step(state.tools, state.memory, state.plan.goal, state.plan.current_task, input, state.model_path)
+
+    agent_reflection_state next_reflection = agent_reflect(
+        state.reflection, state.plan.goal, result.action, result.observation, state.steps + 1
+    )
+
+    agent_perception_result perception = agent_perceive(result.observation, "tool")
+
     agent_plan_state next_plan = agent_plan_next(state.plan, result.tools, result.memory, result.observation)
+    if next_reflection.needs_correction && !next_plan.needs_replan {
+        next_plan = agent_plan_set_task(next_plan, "analyze")
+    }
+
     agent_memory_state final_memory = result.memory
     if next_plan.needs_replan && next_plan.replan_reason != "" {
         final_memory = agent_memory_write_short(final_memory, "replan_reason", next_plan.replan_reason)
@@ -204,7 +306,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             int pq_start = 0
             int pi = 0
             while pi < len(pq) {
-                if pq[pi] == '[' {
+                if string(pq[pi]) == "[" {
                     pq_start = pi + 1
                     break
                 }
@@ -213,7 +315,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             int pq_end = len(pq)
             pi = pq_end - 1
             while pi >= 0 {
-                if pq[pi] == ']' {
+                if string(pq[pi]) == "]" {
                     pq_end = pi
                     break
                 }
@@ -222,7 +324,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             string token = ""
             pi = pq_start
             while pi <= pq_end {
-                bool at_sep = pi == pq_end || pq[pi] == ','
+                bool at_sep = pi == pq_end || string(pq[pi]) == ","
                 if at_sep {
                     string t = trim(token)
                     if len(t) > 0 {
@@ -247,27 +349,23 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         result.tool_name,
         result.tool_timeout_ms,
         result.tool_retries,
-        result.ok,
+        result.ok
     )
     agent_tool_registry_state final_tools = result.tools
     if next_plan.needs_replan && next_plan.replan_reason == "tool_unavailable" && result.tool_name != "" {
         final_tools = agent_tool_registry_disable(final_tools, result.tool_name)
     }
-    agent_runtime_state current = agent_runtime_state {
-        plan: state.plan,
-        memory: state.memory,
-        tools: state.tools,
-        trace: state.trace,
-        skills: state.skills,
-        skill_execution: state.skill_execution,
-        steps: state.steps,
-        finished: state.finished,
-        last_action: state.last_action,
-        last_observation: state.last_observation,
-        model_path: state.model_path,
-    }
-    agent_skill_registry_state next_skills = agent_runtime_update_skills(current, next_trace, result.memory)
+    agent_skill_registry_state next_skills = agent_runtime_update_skills(state, next_trace, result.memory)
     agent_skill_execution_state next_skill_execution = agent_skill_execute(next_skills, next_plan.current_task)
+
+    agent_answer_state next_answer = state.answer
+    if next_plan.finished {
+        next_answer = agent_answer_synthesize(state.answer, next_trace, final_memory, state.steps + 1)
+    }
+
+    next_session = agent_session_assistant(next_session, result.observation)
+    next_context = agent_context_append(next_context, result.observation)
+    next_context = agent_context_build_from_memory(next_context, final_memory)
 
     agent_runtime_state {
         plan: next_plan,
@@ -276,6 +374,13 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         trace: next_trace,
         skills: next_skills,
         skill_execution: next_skill_execution,
+        reflection: next_reflection,
+        context: next_context,
+        reasoning: next_reasoning,
+        subagents: state.subagents,
+        answer: next_answer,
+        interrupt: state.interrupt,
+        session: next_session,
         steps: state.steps + 1,
         finished: next_plan.finished,
         last_action: result.action,
@@ -320,7 +425,7 @@ func agent_runtime_replay_line_value(string line) string {
     int eq = 0
     int li = 0
     while li < len(line) {
-        if line[li] == '=' {
+        if string(line[li]) == "=" {
             eq = li + 1
             break
         }
@@ -358,7 +463,7 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
     int ci = 0
     while ci <= content_len {
         bool at_end = ci == content_len
-        bool at_newline = !at_end && content[ci] == '\n'
+        bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
             string ln = cur_line
             cur_line = ""
@@ -376,8 +481,8 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
                     int step_val = 0
                     int si = 0
                     while si < len(val) {
-                        if val[si] >= '0' && val[si] <= '9' {
-                            step_val = step_val * 10 + int(val[si]) - int('0')
+                        if s_char_is_digit(val, si) {
+                            step_val = step_val * 10 + s_char_digit_val(val, si)
                         }
                         si = si + 1
                     }
@@ -442,7 +547,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
     int ci = 0
     while ci <= content_len {
         bool at_end = ci == content_len
-        bool at_newline = !at_end && content[ci] == '\n'
+        bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
             string ln = cur_line
             cur_line = ""
@@ -460,8 +565,8 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     int sv = 0
                     int si = 0
                     while si < len(val) {
-                        if val[si] >= '0' && val[si] <= '9' {
-                            sv = sv * 10 + int(val[si]) - int('0')
+                        if s_char_is_digit(val, si) {
+                            sv = sv * 10 + s_char_digit_val(val, si)
                         }
                         si = si + 1
                     }
@@ -473,14 +578,14 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     bool past_dot = false
                     float frac = 0.1
                     while si < len(val) {
-                        if val[si] >= '0' && val[si] <= '9' {
+                        if s_char_is_digit(val, si) {
                             if past_dot {
-                                fv = fv + float(int(val[si]) - int('0')) * frac
+                                fv = fv + float(s_char_digit_val(val, si)) * frac
                                 frac = frac * 0.1
                             } else {
-                                int_part = int_part * 10 + int(val[si]) - int('0')
+                                int_part = int_part * 10 + s_char_digit_val(val, si)
                             }
-                        } else if val[si] == '.' {
+                        } else if string(val[si]) == "." {
                             past_dot = true
                             fv = float(int_part)
                         }
@@ -497,14 +602,14 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     bool past_dot = false
                     float frac = 0.1
                     while si < len(val) {
-                        if val[si] >= '0' && val[si] <= '9' {
+                        if s_char_is_digit(val, si) {
                             if past_dot {
-                                fv = fv + float(int(val[si]) - int('0')) * frac
+                                fv = fv + float(s_char_digit_val(val, si)) * frac
                                 frac = frac * 0.1
                             } else {
-                                int_part = int_part * 10 + int(val[si]) - int('0')
+                                int_part = int_part * 10 + s_char_digit_val(val, si)
                             }
-                        } else if val[si] == '.' {
+                        } else if string(val[si]) == "." {
                             past_dot = true
                             fv = float(int_part)
                         }
@@ -521,14 +626,14 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     bool past_dot = false
                     float frac = 0.1
                     while si < len(val) {
-                        if val[si] >= '0' && val[si] <= '9' {
+                        if s_char_is_digit(val, si) {
                             if past_dot {
-                                fv = fv + float(int(val[si]) - int('0')) * frac
+                                fv = fv + float(s_char_digit_val(val, si)) * frac
                                 frac = frac * 0.1
                             } else {
-                                int_part = int_part * 10 + int(val[si]) - int('0')
+                                int_part = int_part * 10 + s_char_digit_val(val, si)
                             }
-                        } else if val[si] == '.' {
+                        } else if string(val[si]) == "." {
                             past_dot = true
                             fv = float(int_part)
                         }
@@ -607,10 +712,24 @@ func agent_runtime_extend_budget(agent_runtime_state state, int extra) agent_run
         step_count: state.plan.step_count,
         needs_replan: state.plan.needs_replan,
         finished: false,
-        status: state.plan.status == "budget_exhausted" ? "running" : state.plan.status,
+        status: "running",
         replan_reason: state.plan.replan_reason,
         task_queue: state.plan.task_queue,
         replan_count: state.plan.replan_count,
+    }
+    if state.plan.status != "budget_exhausted" {
+        next_plan = agent_plan_state {
+            goal: state.plan.goal,
+            current_task: state.plan.current_task,
+            step_budget: state.plan.step_budget + add,
+            step_count: state.plan.step_count,
+            needs_replan: state.plan.needs_replan,
+            finished: false,
+            status: state.plan.status,
+            replan_reason: state.plan.replan_reason,
+            task_queue: state.plan.task_queue,
+            replan_count: state.plan.replan_count,
+        }
     }
     agent_runtime_state {
         plan: next_plan,
@@ -619,6 +738,13 @@ func agent_runtime_extend_budget(agent_runtime_state state, int extra) agent_run
         trace: state.trace,
         skills: state.skills,
         skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
         steps: state.steps,
         finished: false,
         last_action: state.last_action,
@@ -627,22 +753,78 @@ func agent_runtime_extend_budget(agent_runtime_state state, int extra) agent_run
     }
 }
 
-func agent_runtime_step_with_task(agent_runtime_state state, string task, string input) agent_runtime_state {
-    agent_plan_state forced_plan = agent_plan_set_task(state.plan, task)
-    agent_runtime_state forced = agent_runtime_state {
-        plan: forced_plan,
+func agent_runtime_with_plan(agent_runtime_state state, agent_plan_state plan) agent_runtime_state {
+    agent_runtime_state {
+        plan: plan,
         memory: state.memory,
         tools: state.tools,
         trace: state.trace,
         skills: state.skills,
         skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
         steps: state.steps,
         finished: state.finished,
         last_action: state.last_action,
         last_observation: state.last_observation,
         model_path: state.model_path,
     }
-    agent_runtime_step(forced, input)
+}
+
+func agent_runtime_with_memory(agent_runtime_state state, agent_memory_state memory) agent_runtime_state {
+    agent_runtime_state {
+        plan: state.plan,
+        memory: memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
+        steps: state.steps,
+        finished: state.finished,
+        last_action: state.last_action,
+        last_observation: state.last_observation,
+        model_path: state.model_path,
+    }
+}
+
+func agent_runtime_with_skills(agent_runtime_state state, agent_skill_registry_state skills) agent_runtime_state {
+    agent_runtime_state {
+        plan: state.plan,
+        memory: state.memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
+        steps: state.steps,
+        finished: state.finished,
+        last_action: state.last_action,
+        last_observation: state.last_observation,
+        model_path: state.model_path,
+    }
+}
+
+func agent_runtime_step_with_task(agent_runtime_state state, string task, string input) agent_runtime_state {
+    agent_plan_state forced_plan = agent_plan_set_task(state.plan, task)
+    agent_runtime_step(agent_runtime_with_plan(state, forced_plan), input)
 }
 
 func agent_runtime_warm_start(string goal, string memory_path, string skill_path, string model_path) agent_runtime_state {
@@ -653,38 +835,14 @@ func agent_runtime_warm_start(string goal, string memory_path, string skill_path
             loaded_memory = agent_memory_restore(memory_path)
         }
     }
-    agent_runtime_state mid = agent_runtime_state {
-        plan: base.plan,
-        memory: loaded_memory,
-        tools: base.tools,
-        trace: base.trace,
-        skills: base.skills,
-        skill_execution: base.skill_execution,
-        steps: base.steps,
-        finished: base.finished,
-        last_action: base.last_action,
-        last_observation: base.last_observation,
-        model_path: base.model_path,
-    }
+    agent_runtime_state mid = agent_runtime_with_memory(base, loaded_memory)
     agent_skill_registry_state loaded_skills = mid.skills
     if skill_path != "" {
         if runtime_file_exists(skill_path) {
             loaded_skills = agent_runtime_import_skill_snapshot(mid, skill_path)
         }
     }
-    agent_runtime_state {
-        plan: mid.plan,
-        memory: mid.memory,
-        tools: mid.tools,
-        trace: mid.trace,
-        skills: loaded_skills,
-        skill_execution: mid.skill_execution,
-        steps: mid.steps,
-        finished: mid.finished,
-        last_action: mid.last_action,
-        last_observation: mid.last_observation,
-        model_path: mid.model_path,
-    }
+    agent_runtime_with_skills(mid, loaded_skills)
 }
 
 func agent_runtime_summary(agent_runtime_state state) string {
