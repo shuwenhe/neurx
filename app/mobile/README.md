@@ -34,6 +34,23 @@ Deploy to a connected Android phone:
 bash scripts/deploy_android.sh
 ```
 
+Linux host to Xiaomi phone:
+
+```bash
+export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+export ANDROID_NDK_ROOT="$ANDROID_SDK_ROOT/ndk/27.2.12479018"
+export Qt6_ANDROID_DIR="$HOME/Qt/6.11.0/android_arm64_v8a/lib/cmake/Qt6"
+bash scripts/build_android.sh
+bash scripts/deploy_android.sh
+```
+
+Before deploying, enable on the Xiaomi phone:
+
+- Developer options
+- USB debugging
+- USB installation
+- If MIUI/HyperOS blocks adb installs, also allow debugging security settings for this session
+
 On Windows PowerShell, you can check whether the Android SDK/NDK are wired up with:
 
 ```powershell
