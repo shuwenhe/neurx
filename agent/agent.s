@@ -1,7 +1,7 @@
 package neurx.agent
 
 use neurx.agent.runtime
-use neurx.agent.planner
+use neurx.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor

@@ -1,4 +1,4 @@
-package neurx.agent.planner
+package neurx.planner
 
 use neurx.agent.memory
 use neurx.agent.tool_registry

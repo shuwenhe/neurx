@@ -1,7 +1,7 @@
 package neurx.test_agent_skill_failure_retire
 
 use neurx.agent.runtime
-use neurx.agent.planner
+use neurx.planner
 use neurx.agent.{new_default_agent, run_agent_once, agent_skill_status, agent_skill_fail_count}
 
 func force_task(agent_runtime_state state, string task, string model_path) agent_runtime_state {
