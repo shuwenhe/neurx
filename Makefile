@@ -1,6 +1,7 @@
 .PHONY: help install neurx s-compile-runtime linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
-	linux windows macos ios android harmony
+	linux windows macos ios android harmony \
+	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -41,6 +42,14 @@ help:
 	@echo "  install           Alias of neurx"
 	@echo "  clean             Remove generated artifacts and caches"
 	@echo "  platform          $(PLATFORM)"
+	@echo ""
+	@echo "Platform install targets:"
+	@echo "  install-robot     Install NeurX on Jetson Orin / RK3588 robot"
+	@echo "  install-auto      Install NeurX on automotive SoC (DRIVE Orin / QNX)"
+	@echo "  install-desktop   Install NeurX on Linux / macOS desktop"
+	@echo "  install-tablet    Install NeurX on Android tablet via ADB"
+	@echo "  install-mobile-android  Install NeurX on Android phone via ADB"
+	@echo "  install-mobile-ios      Install NeurX on iPhone via Xcode"
 
 check-bash:
 ifeq ($(PLATFORM),windows)
@@ -186,5 +195,24 @@ app-linux app-windows app-macos app-ios app-android app-harmony: check-bash
 
 clean:
 	@rm -rf build runtime/__pycache__ test/__pycache__ checkpoint.pkl
+
+# ── Platform install targets ─────────────────────────────────────────────────
+install-robot:
+	@bash install/robot/install.sh
+
+install-auto:
+	@bash install/auto/install.sh
+
+install-desktop:
+	@bash install/desktop/install.sh
+
+install-tablet:
+	@bash install/tablet/install.sh
+
+install-mobile-android:
+	@bash install/mobile/install-android.sh
+
+install-mobile-ios:
+	@bash install/mobile/install-ios.sh
 
 endif

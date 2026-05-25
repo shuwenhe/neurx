@@ -106,6 +106,10 @@ The current top-level folders are kept for compatibility. The target layout is:
 - Shared reusable training helpers still belong in `train/`, `pretrain/`, and `posttrain/`.
 - Keep workflow code focused on config, pipeline, launch, and dataset wiring.
 
+## Installation Targets
+
+For platform-specific NeurX installation guidance across desktop, mobile, tablet, robot, automotive, and embedded targets, see [doc/INSTALL_TARGETS.md](doc/INSTALL_TARGETS.md).
+
 ## S Modules
 
 - `ad/ad.s`: automatic differentiation state, grad mode, record tracking, and backward skeleton
