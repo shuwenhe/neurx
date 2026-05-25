@@ -1,4 +1,4 @@
-package neurx.agent.perception
+package neurx.perception.perception
 
 struct agent_perception_result {
     string kind
@@ -39,10 +39,9 @@ func agent_perception_starts_with(string text, string prefix) bool {
 }
 
 func agent_perception_contains_kv(string text) bool {
-    int n = len(text)
     int i = 0
-    while i < n {
-        if string(text[i]) == "=" {
+    while i < len(text) {
+        if text[i] == '=' {
             return true
         }
         i = i + 1
@@ -52,7 +51,7 @@ func agent_perception_contains_kv(string text) bool {
 
 func agent_perception_detect_kind(string raw) string {
     string text = lower(trim(raw))
-    if len(text) == 0 {
+    if text == "" {
         return "empty"
     }
     if agent_perception_starts_with(text, "{") {
@@ -74,55 +73,48 @@ func agent_perception_detect_kind(string raw) string {
 }
 
 func agent_perception_parse_kv(string raw) agent_perception_result {
-    []string keys = []string{cap: 16}
-    []string values = []string{cap: 16}
-    int field_count = 0
-    int n = len(raw)
-    string cur_key = ""
-    string cur_val = ""
-    bool in_val = false
+    string text = trim(raw)
+    []string keys = []
+    []string values = []
     int i = 0
-    while i <= n {
-        bool at_end = i == n
-        string ch = ""
-        if !at_end {
-            ch = string(raw[i])
+    string item = ""
+    while i <= len(text) {
+        bool split = i == len(text)
+        if !split {
+            string ch = string(text[i])
+            split = ch == ";" || ch == "\n"
         }
-        if !in_val {
-            if ch == "=" {
-                in_val = true
-            } else if ch == " " || ch == "\n" || at_end || ch == ";" {
-                if cur_key != "" && !in_val {
-                    cur_key = ""
+        if split {
+            string pair = trim(item)
+            if pair != "" {
+                int eq = -1
+                int j = 0
+                while j < len(pair) {
+                    if pair[j] == '=' {
+                        eq = j
+                        break
+                    }
+                    j = j + 1
                 }
-                cur_key = ""
-            } else {
-                cur_key = cur_key + ch
+                if eq >= 0 {
+                    keys.push(trim(string(pair[0:eq])))
+                    values.push(trim(string(pair[eq + 1:len(pair)])))
+                }
             }
+            item = ""
         } else {
-            if ch == " " || ch == "\n" || ch == ";" || at_end {
-                if cur_key != "" {
-                    keys[field_count] = cur_key
-                    values[field_count] = cur_val
-                    field_count = field_count + 1
-                }
-                cur_key = ""
-                cur_val = ""
-                in_val = false
-            } else {
-                cur_val = cur_val + ch
-            }
+            item = item + string(text[i])
         }
         i = i + 1
     }
     agent_perception_result {
         kind: "kv",
         content: raw,
-        source: "observation",
+        source: "tool",
         structured: true,
         keys: keys,
         values: values,
-        field_count: field_count,
+        field_count: len(keys),
     }
 }
 
@@ -146,5 +138,5 @@ func agent_perception_get_field(agent_perception_result result, string key) stri
 }
 
 func agent_perception_summary(agent_perception_result result) string {
-    "kind=" + result.kind + " structured=" + string(result.structured) + " fields=" + string(result.field_count) + " source=" + result.source
+    "kind=" + result.kind + " source=" + result.source + " structured=" + string(result.structured) + " fields=" + string(result.field_count)
 }

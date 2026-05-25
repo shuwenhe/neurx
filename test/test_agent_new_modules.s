@@ -4,11 +4,11 @@ use neurx.reflection
 use neurx.agent.context_manager
 use neurx.agent.reasoning
 use neurx.agent.subagent
-use neurx.agent.perception
+use neurx.perception.perception
 use neurx.agent.answer_synthesizer
 use neurx.agent.interrupt
-use neurx.agent.safety
-use neurx.agent.session
+use neurx.safety.safety
+use neurx.session.session
 use neurx.agent.action_schema
 use neurx.agent.workspace_tools
 use neurx.agent.workspace_search

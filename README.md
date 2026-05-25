@@ -25,6 +25,32 @@ NeurX is AI operating system written in S.
 - `build/ir/`: generated S IR artifacts
 - `build/logs/`: generated compiler and runtime logs
 
+## AI OS Skeleton
+
+To evolve NeurX into an AI operating system, the repository should keep a system-oriented top layer:
+
+- `kernel/`: task loop, lifecycle, quotas, and module orchestration
+- `memory/`: short-term memory, long-term memory, retrieval state, and checkpoints
+- `planner/`: goal decomposition, task queues, budgeting, and replanning
+- `reflection/`: self-critique, correction suggestions, and post-step review
+- `reasoning/`: route selection, verification, and decision policies
+- `perception/`: repository, file, UI, and multimodal input understanding
+- `executor/`: action execution, tool dispatch, and observation capture
+- `scheduler/`: multi-task, multi-agent, and background job scheduling
+- `tool/`: tool interfaces, adapters, and execution contracts
+- `skills/`: skill packaging, evaluation, and composition
+- `registry/`: shared registries for tools, skills, agents, and workflows
+- `session/`: user sessions, resumability, and conversation/task state
+- `safety/`: risk checks, approval gates, and policy enforcement
+- `security/`: sandboxing, auth, secrets, and capability control
+- `storage/`: artifacts, state stores, indexes, and durable persistence
+- `observability/`: traces, metrics, logs, and replay/debug snapshots
+- `services/`: background model, indexing, and orchestration services
+- `api/`: HTTP, RPC, CLI, and external integration surfaces
+- `shell/`: interactive system shell and command entrypoints
+- `ui/`: desktop, mobile, and web system interfaces
+- `sdk/`: developer-facing integration and extension APIs
+
 ## Canonical Layering
 
 The current top-level folders are kept for compatibility. The target layout is:

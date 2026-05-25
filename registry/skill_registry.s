@@ -1,4 +1,4 @@
-package neurx.agent.skill_registry
+package neurx.registry.skill_registry
 
 use neurx.agent.skill_schema
 use neurx.runtime.io.{runtime_write_text_file}
@@ -43,10 +43,14 @@ func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_reco
         records[i] = state.records[i]
         i = i + 1
     }
-    records[size] = record
+    records[size] = agent_skill_record_state_dict(record)
+    int active_index = state.active_index
+    if active_index < 0 {
+        active_index = size
+    }
     agent_skill_registry_state {
         records: records,
-        active_index: state.active_index,
+        active_index: active_index,
         version: state.version + 1,
         promote_count: state.promote_count,
         retire_count: state.retire_count,
@@ -54,12 +58,12 @@ func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_reco
 }
 
 func agent_skill_registry_find_index(agent_skill_registry_state state, string name) int {
-    int i = len(state.records) - 1
-    while i >= 0 {
+    int i = 0
+    while i < len(state.records) {
         if state.records[i].spec.name == name {
             return i
         }
-        i = i - 1
+        i = i + 1
     }
     -1
 }
@@ -69,11 +73,23 @@ func agent_skill_registry_get(agent_skill_registry_state state, string name) age
     if index >= 0 {
         return state.records[index]
     }
-    new_agent_skill_record(
-        new_agent_skill_spec(name, "v0", "", "missing"),
-        new_agent_skill_metrics(),
-        0
-    )
+    agent_skill_record {
+        spec: agent_skill_spec {
+            name: "",
+            description: "",
+            prompt: "",
+            version: "0",
+            status: "missing",
+        },
+        success_count: 0,
+        fail_count: 0,
+        last_step: 0,
+        avg_steps: 0.0,
+        total_steps: 0,
+        promoted: false,
+        retired: false,
+        score: 0.0,
+    }
 }
 
 func agent_skill_registry_has(agent_skill_registry_state state, string name) bool {
@@ -85,27 +101,8 @@ func agent_skill_registry_upsert(agent_skill_registry_state state, agent_skill_r
     if index < 0 {
         return agent_skill_registry_add(state, record)
     }
-
-    agent_skill_record existing = state.records[index]
-    float existing_score = existing.metrics.success_rate * 100.0
-    existing_score = existing_score + (existing.metrics.stability * 25.0)
-    existing_score = existing_score - (existing.metrics.avg_steps * 2.0)
-    existing_score = existing_score - existing.metrics.tool_cost
-    float new_score = record.metrics.success_rate * 100.0
-    new_score = new_score + (record.metrics.stability * 25.0)
-    new_score = new_score - (record.metrics.avg_steps * 2.0)
-    new_score = new_score - record.metrics.tool_cost
-    if existing_score > new_score && existing.spec.status != "retired" {
-        return state
-    }
-
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    agent_skill_record next = agent_skill_record_state_dict(record)
-    next.created_step = records[index].created_step
-    next.promote_count = records[index].promote_count
-    next.fail_count = records[index].fail_count
-    records[index] = next
-
+    records[index] = agent_skill_record_state_dict(record)
     agent_skill_registry_state {
         records: records,
         active_index: state.active_index,
@@ -120,31 +117,17 @@ func agent_skill_registry_record_success(agent_skill_registry_state state, strin
     if index < 0 {
         return state
     }
-
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    agent_skill_record record = records[index]
-    record.last_updated_step = step
-    if record.metrics.success_rate < 1.0 {
-        record.metrics.success_rate = 1.0
+    agent_skill_record rec = records[index]
+    rec.success_count = rec.success_count + 1
+    rec.last_step = step
+    rec.total_steps = rec.total_steps + steps_taken
+    int total_runs = rec.success_count + rec.fail_count
+    if total_runs > 0 {
+        rec.avg_steps = float(rec.total_steps) / float(total_runs)
     }
-    if record.metrics.stability < 1.0 {
-        record.metrics.stability = 1.0
-    }
-    float actual_steps = 1.0
-    if steps_taken > 0 {
-        actual_steps = float(steps_taken)
-    }
-    if record.metrics.avg_steps <= 0.0 {
-        record.metrics.avg_steps = actual_steps
-    } else {
-        record.metrics.avg_steps = (record.metrics.avg_steps + actual_steps) * 0.5
-    }
-    record.metrics.avg_latency = record.metrics.avg_steps
-    if record.spec.status == "candidate" {
-        record.spec.status = "validated"
-    }
-    records[index] = record
-
+    rec.spec.status = "active"
+    records[index] = rec
     agent_skill_registry_state {
         records: records,
         active_index: state.active_index,
@@ -155,15 +138,15 @@ func agent_skill_registry_record_success(agent_skill_registry_state state, strin
 }
 
 func agent_skill_registry_observation_matches_failure(agent_skill_record record, string observation) bool {
-    if observation == "" {
+    string obs = lower(trim(observation))
+    if obs == "" {
         return false
     }
-    int i = 0
-    while i < len(record.spec.failure_signals) {
-        if record.spec.failure_signals[i] == observation {
-            return true
-        }
-        i = i + 1
+    if obs == "tool_unavailable" || obs == "no_result" {
+        return true
+    }
+    if len(obs) >= 6 && string(obs[0:6]) == "error:" {
+        return true
     }
     false
 }
@@ -173,42 +156,31 @@ func agent_skill_registry_record_failure(agent_skill_registry_state state, strin
     if index < 0 {
         return state
     }
-
-    int threshold = retire_after_failures
-    if threshold <= 0 {
-        threshold = 1
+    int retire_threshold = retire_after_failures
+    if retire_threshold <= 0 {
+        retire_threshold = 3
     }
-
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    agent_skill_record record = records[index]
-    record.last_updated_step = step
-    record.fail_count = record.fail_count + 1
-    if record.metrics.stability > 0.0 {
-        record.metrics.stability = record.metrics.stability - 0.5
-        if record.metrics.stability < 0.0 {
-            record.metrics.stability = 0.0
-        }
+    agent_skill_record rec = records[index]
+    rec.fail_count = rec.fail_count + 1
+    rec.last_step = step
+    if rec.fail_count >= retire_threshold {
+        rec.retired = true
+        rec.spec.status = "retired"
+    } else {
+        rec.spec.status = "degraded"
     }
-    if record.fail_count >= threshold {
-        record.spec.status = "retired"
+    records[index] = rec
+    int retire_count = state.retire_count
+    if rec.retired {
+        retire_count = retire_count + 1
     }
-    records[index] = record
-
-    int next_active_index = state.active_index
-    int next_retire_count = state.retire_count
-    if record.spec.status == "retired" {
-        next_retire_count = state.retire_count + 1
-        if next_active_index == index {
-            next_active_index = -1
-        }
-    }
-
     agent_skill_registry_state {
         records: records,
-        active_index: next_active_index,
+        active_index: state.active_index,
         version: state.version + 1,
         promote_count: state.promote_count,
-        retire_count: next_retire_count,
+        retire_count: retire_count,
     }
 }
 
@@ -218,13 +190,11 @@ func agent_skill_registry_promote(agent_skill_registry_state state, string name)
         return state
     }
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    agent_skill_record record = records[index]
-    record.spec.status = "promoted"
-    record.promote_count = record.promote_count + 1
-    records[index] = record
+    records[index].promoted = true
+    records[index].spec.status = "promoted"
     agent_skill_registry_state {
         records: records,
-        active_index: index,
+        active_index: state.active_index,
         version: state.version + 1,
         promote_count: state.promote_count + 1,
         retire_count: state.retire_count,
@@ -237,10 +207,8 @@ func agent_skill_registry_retire(agent_skill_registry_state state, string name) 
         return state
     }
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    agent_skill_record record = records[index]
-    record.spec.status = "retired"
-    record.fail_count = record.fail_count + 1
-    records[index] = record
+    records[index].retired = true
+    records[index].spec.status = "retired"
     agent_skill_registry_state {
         records: records,
         active_index: state.active_index,
@@ -256,7 +224,7 @@ func agent_skill_registry_set_active(agent_skill_registry_state state, string na
         return state
     }
     agent_skill_registry_state {
-        records: state.records,
+        records: agent_skill_registry_copy_records(state.records),
         active_index: index,
         version: state.version + 1,
         promote_count: state.promote_count,
@@ -268,59 +236,36 @@ func agent_skill_registry_active(agent_skill_registry_state state) agent_skill_r
     if state.active_index >= 0 && state.active_index < len(state.records) {
         return state.records[state.active_index]
     }
-    new_agent_skill_record(
-        new_agent_skill_spec("none", "v0", "inactive", "idle"),
-        new_agent_skill_metrics(),
-        0
-    )
+    if len(state.records) > 0 {
+        return state.records[0]
+    }
+    agent_skill_registry_get(state, "")
 }
 
 func agent_skill_registry_snapshot(agent_skill_registry_state state) string {
-    string out = "registry_version=" + string(state.version)
-    out = out + "\nactive_index=" + string(state.active_index)
-    out = out + "\npromote_count=" + string(state.promote_count)
-    out = out + "\nretire_count=" + string(state.retire_count)
-
+    string out = "skills=" + string(len(state.records)) + " version=" + string(state.version)
     int i = 0
     while i < len(state.records) {
-        agent_skill_record record = state.records[i]
-        out = out + "\nskill[" + string(i) + "].name=" + record.spec.name
-        out = out + "\nskill[" + string(i) + "].version=" + record.spec.version
-        out = out + "\nskill[" + string(i) + "].intent=" + record.spec.intent
-        out = out + "\nskill[" + string(i) + "].status=" + record.spec.status
-        out = out + "\nskill[" + string(i) + "].created_step=" + string(record.created_step)
-        out = out + "\nskill[" + string(i) + "].updated_step=" + string(record.last_updated_step)
-        out = out + "\nskill[" + string(i) + "].promote_count=" + string(record.promote_count)
-        out = out + "\nskill[" + string(i) + "].fail_count=" + string(record.fail_count)
-        out = out + "\nskill[" + string(i) + "].success_rate=" + string(record.metrics.success_rate)
-        out = out + "\nskill[" + string(i) + "].avg_steps=" + string(record.metrics.avg_steps)
-        out = out + "\nskill[" + string(i) + "].tool_cost=" + string(record.metrics.tool_cost)
-        out = out + "\nskill[" + string(i) + "].stability=" + string(record.metrics.stability)
+        agent_skill_record rec = state.records[i]
+        out = out + "\nskill[" + string(i) + "]=" + rec.spec.name + " status=" + rec.spec.status + " success=" + string(rec.success_count) + " fail=" + string(rec.fail_count)
         i = i + 1
     }
-
-    out + "\n"
+    out
 }
 
 func agent_skill_registry_best_promoted_index(agent_skill_registry_state state) int {
-    int best_index = -1
-    float best_score = -999.0
+    int best = -1
+    float best_score = -1000000.0
     int i = 0
     while i < len(state.records) {
-        agent_skill_record record = state.records[i]
-        if record.spec.status == "promoted" || record.spec.status == "validated" {
-            float score = record.metrics.success_rate * 100.0
-            score = score + (record.metrics.stability * 25.0)
-            score = score - (record.metrics.avg_steps * 2.0)
-            score = score - record.metrics.tool_cost
-            if best_index < 0 || score > best_score {
-                best_score = score
-                best_index = i
-            }
+        agent_skill_record rec = state.records[i]
+        if rec.promoted && !rec.retired && rec.score >= best_score {
+            best = i
+            best_score = rec.score
         }
         i = i + 1
     }
-    best_index
+    best
 }
 
 func agent_skill_registry_activate_best(agent_skill_registry_state state) agent_skill_registry_state {
@@ -329,7 +274,7 @@ func agent_skill_registry_activate_best(agent_skill_registry_state state) agent_
         return state
     }
     agent_skill_registry_state {
-        records: state.records,
+        records: agent_skill_registry_copy_records(state.records),
         active_index: best,
         version: state.version + 1,
         promote_count: state.promote_count,
@@ -358,14 +303,13 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
 }
 
 func agent_skill_registry_names(agent_skill_registry_state state) []string {
-    int size = len(state.records)
-    []string out = []string{cap: size}
+    []string names = []string{cap: len(state.records)}
     int i = 0
-    while i < size {
-        out[i] = state.records[i].spec.name
+    while i < len(state.records) {
+        names[i] = state.records[i].spec.name
         i = i + 1
     }
-    out
+    names
 }
 
 func agent_skill_registry_success_rate(agent_skill_registry_state state, string name) float {
@@ -373,72 +317,62 @@ func agent_skill_registry_success_rate(agent_skill_registry_state state, string 
     if index < 0 {
         return 0.0
     }
-    state.records[index].metrics.success_rate
+    agent_skill_record rec = state.records[index]
+    int total = rec.success_count + rec.fail_count
+    if total <= 0 {
+        return 0.0
+    }
+    float(rec.success_count) / float(total)
 }
 
 func agent_skill_registry_promoted_names(agent_skill_registry_state state) []string {
     int count = 0
     int i = 0
     while i < len(state.records) {
-        if state.records[i].spec.status == "promoted" || state.records[i].spec.status == "validated" {
+        if state.records[i].promoted && !state.records[i].retired {
             count = count + 1
         }
         i = i + 1
     }
-    []string out = []string{cap: count}
-    int wi = 0
+    []string names = []string{cap: count}
     i = 0
+    int out_i = 0
     while i < len(state.records) {
-        if state.records[i].spec.status == "promoted" || state.records[i].spec.status == "validated" {
-            out[wi] = state.records[i].spec.name
-            wi = wi + 1
+        if state.records[i].promoted && !state.records[i].retired {
+            names[out_i] = state.records[i].spec.name
+            out_i = out_i + 1
         }
         i = i + 1
     }
-    out
+    names
 }
 
 func agent_skill_registry_prune(agent_skill_registry_state state) agent_skill_registry_state {
-    int old_size = len(state.records)
-    int keep_count = 0
+    int keep = 0
     int i = 0
-    while i < old_size {
-        if state.records[i].spec.status != "retired" {
-            keep_count = keep_count + 1
+    while i < len(state.records) {
+        if !state.records[i].retired {
+            keep = keep + 1
         }
         i = i + 1
     }
-    if keep_count == old_size {
-        return state
-    }
-    []agent_skill_record records = []agent_skill_record{cap: keep_count}
-    string active_name = ""
-    if state.active_index >= 0 && state.active_index < old_size {
-        active_name = state.records[state.active_index].spec.name
-    }
-    int wi = 0
+    []agent_skill_record records = []agent_skill_record{cap: keep}
     i = 0
-    while i < old_size {
-        if state.records[i].spec.status != "retired" {
-            records[wi] = agent_skill_record_state_dict(state.records[i])
-            wi = wi + 1
+    int out_i = 0
+    int active_index = -1
+    while i < len(state.records) {
+        if !state.records[i].retired {
+            records[out_i] = agent_skill_record_state_dict(state.records[i])
+            if i == state.active_index {
+                active_index = out_i
+            }
+            out_i = out_i + 1
         }
         i = i + 1
-    }
-    int new_active = -1
-    if active_name != "" {
-        int ai = 0
-        while ai < keep_count {
-            if records[ai].spec.name == active_name {
-                new_active = ai
-                break
-            }
-            ai = ai + 1
-        }
     }
     agent_skill_registry_state {
         records: records,
-        active_index: new_active,
+        active_index: active_index,
         version: state.version + 1,
         promote_count: state.promote_count,
         retire_count: state.retire_count,
@@ -450,36 +384,16 @@ func agent_skill_registry_force_retire(agent_skill_registry_state state, string 
     if index < 0 {
         return state
     }
-    agent_skill_record old = state.records[index]
-    agent_skill_spec new_spec = agent_skill_spec {
-        name: old.spec.name,
-        version: old.spec.version,
-        intent: old.spec.intent,
-        status: "retired",
-        triggers: copy_strings(old.spec.triggers),
-        required_tools: copy_strings(old.spec.required_tools),
-        preconditions: copy_strings(old.spec.preconditions),
-        steps: copy_strings(old.spec.steps),
-        success_signals: copy_strings(old.spec.success_signals),
-        failure_signals: copy_strings(old.spec.failure_signals),
-    }
-    agent_skill_record new_record = agent_skill_record {
-        spec: new_spec,
-        metrics: old.metrics,
-        created_step: old.created_step,
-        last_updated_step: old.last_updated_step,
-        promote_count: old.promote_count,
-        fail_count: old.fail_count,
-    }
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
-    records[index] = new_record
-    int new_active = state.active_index
-    if state.active_index == index {
-        new_active = -1
+    records[index].retired = true
+    records[index].spec.status = "retired"
+    int active_index = state.active_index
+    if active_index == index {
+        active_index = -1
     }
     agent_skill_registry_state {
         records: records,
-        active_index: new_active,
+        active_index: active_index,
         version: state.version + 1,
         promote_count: state.promote_count,
         retire_count: state.retire_count + 1,
@@ -496,7 +410,7 @@ func agent_skill_registry_avg_steps(agent_skill_registry_state state, string nam
     if index < 0 {
         return 0.0
     }
-    state.records[index].metrics.avg_steps
+    state.records[index].avg_steps
 }
 
 func agent_skill_registry_stability(agent_skill_registry_state state, string name) float {
@@ -504,7 +418,12 @@ func agent_skill_registry_stability(agent_skill_registry_state state, string nam
     if index < 0 {
         return 0.0
     }
-    state.records[index].metrics.stability
+    agent_skill_record rec = state.records[index]
+    int total = rec.success_count + rec.fail_count
+    if total <= 0 {
+        return 0.0
+    }
+    float(rec.success_count - rec.fail_count) / float(total)
 }
 
 func agent_skill_registry_version(agent_skill_registry_state state, string name) string {
