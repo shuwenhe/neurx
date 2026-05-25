@@ -87,6 +87,12 @@ patch_gradle_android_build() {
       -e "s/^qtTargetSdkVersion=.*/qtTargetSdkVersion=${ANDROID_COMPILE_SDK}/" \
       -e 's/^org\.gradle\.offline=.*/org.gradle.offline=false/' \
       "${gradle_props}"
+    # AndroidX is required for CameraX and ML Kit
+    if ! grep -q "android.useAndroidX" "${gradle_props}"; then
+      echo "android.useAndroidX=true" >> "${gradle_props}"
+    else
+      sed -i -e 's/^android\.useAndroidX=.*/android.useAndroidX=true/' "${gradle_props}"
+    fi
   fi
 
   if [ -f "${build_gradle}" ]; then
@@ -103,6 +109,21 @@ patch_gradle_android_build() {
     if ! grep -q "versionCode ${ANDROID_VERSION_CODE}" "${build_gradle}"; then
       sed -i \
         -e "/defaultConfig {/a\\        versionCode ${ANDROID_VERSION_CODE}\\n        versionName '${ANDROID_VERSION_NAME}'" \
+        "${build_gradle}"
+    fi
+
+    # --- QR scanner dependencies (CameraX + ML Kit) ---
+    if ! grep -q "mlkit:barcode-scanning" "${build_gradle}"; then
+      sed -i \
+        -e "s|implementation fileTree(dir: 'libs', include: \['\*.jar', '\*.aar'\])|implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])\n    implementation 'com.google.mlkit:barcode-scanning:17.1.0'\n    implementation 'androidx.camera:camera-camera2:1.1.0'\n    implementation 'androidx.camera:camera-lifecycle:1.1.0'\n    implementation 'androidx.camera:camera-view:1.1.0'|" \
+        "${build_gradle}"
+    fi
+
+    # --- Java 8 compile options required by CameraX lambdas ---
+    if ! grep -q "JavaVersion.VERSION_1_8" "${build_gradle}"; then
+      # Insert compileOptions block after the compileSdkVersion line inside android {}
+      sed -i \
+        -e "/compileSdkVersion/a\\    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_1_8\n        targetCompatibility JavaVersion.VERSION_1_8\n    }" \
         "${build_gradle}"
     fi
   fi
@@ -143,6 +164,27 @@ if app is None:
 def a(name: str) -> str:
     return f"{{{android_ns}}}{name}"
 
+permission_names = {
+    child.get(a("name"))
+    for child in root.findall("uses-permission")
+    if child.get(a("name"))
+}
+if "android.permission.CAMERA" not in permission_names:
+    permission = ET.Element("uses-permission")
+    permission.set(a("name"), "android.permission.CAMERA")
+    root.insert(1, permission)
+
+feature_names = {
+    child.get(a("name"))
+    for child in root.findall("uses-feature")
+    if child.get(a("name"))
+}
+if "android.hardware.camera" not in feature_names:
+    feature = ET.Element("uses-feature")
+    feature.set(a("name"), "android.hardware.camera")
+    feature.set(a("required"), "true")
+    root.insert(2, feature)
+
 app.set(a("name"), "org.qtproject.qt.android.bindings.QtApplication")
 app.set(a("allowBackup"), "true")
 app.set(a("allowNativeHeapPointerTagging"), "false")
@@ -180,6 +222,20 @@ for key, value in metadata_values.items():
         node = ET.SubElement(activity, "meta-data")
         node.set(a("name"), key)
     node.set(a("value"), value)
+
+qr_activity = None
+for candidate in app.findall("activity"):
+    if candidate.get(a("name")) == "com.neurx.mobile.QrScanActivity":
+        qr_activity = candidate
+        break
+
+if qr_activity is None:
+    qr_activity = ET.SubElement(app, "activity")
+    qr_activity.set(a("name"), "com.neurx.mobile.QrScanActivity")
+
+qr_activity.set(a("exported"), "false")
+qr_activity.set(a("screenOrientation"), "portrait")
+qr_activity.set(a("theme"), "@android:style/Theme.Black.NoTitleBar.Fullscreen")
 
 tree.write(manifest_path, encoding="utf-8", xml_declaration=True)
 PY

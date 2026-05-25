@@ -9,6 +9,7 @@
 #include "../bridge/AgentListModel.h"
 #include "../bridge/LogModel.h"
 #include "../bridge/neurx_bridge.h"
+#include "qr/QrScanner.h"
 
 #if defined(Q_OS_ANDROID)
 #include <android/log.h>
@@ -48,6 +49,7 @@ int main(int argc, char* argv[]) {
     NeurxBridge bridge;
     AgentListModel agent_model;
     LogModel log_model;
+    QrScanner qr_scanner;
 
     QObject::connect(&bridge, &NeurxBridge::runtime_status_changed,
         &agent_model, &AgentListModel::set_primary_agent_status);
@@ -74,6 +76,7 @@ int main(int argc, char* argv[]) {
     root_ctx->setContextProperty("Runtime", &bridge);
     root_ctx->setContextProperty("AgentModel", &agent_model);
     root_ctx->setContextProperty("LogModel", &log_model);
+    root_ctx->setContextProperty("QrScanner", &qr_scanner);
     mobile_log_info(QStringLiteral("Loading mobile QML entrypoint"));
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/neurx/mobile/qml/MobileMain.qml")));
     mobile_log_info(QStringLiteral("Mobile root object count %1").arg(engine.rootObjects().size()));

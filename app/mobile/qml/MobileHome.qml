@@ -49,6 +49,86 @@ Item {
         id: messageModel
     }
 
+    // ── QR scanner result popup ──────────────────────────────────────────────
+    Connections {
+        target: QrScanner
+
+        function onQrCodeFound(code) {
+            qrResultPopup.resultText = code
+            qrResultPopup.open()
+        }
+
+        function onScanCancelled() {
+            // No-op: user cancelled, nothing to show.
+        }
+    }
+
+    Popup {
+        id: qrResultPopup
+        property string resultText: ""
+        anchors.centerIn: parent
+        width: Math.min(parent.width - 48, 400)
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        padding: 20
+
+        background: Rectangle {
+            radius: 16
+            color: shell.panel
+            border.color: shell.border
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 14
+
+            Text {
+                text: qsTr("扫码结果")
+                color: shell.accent
+                font.pixelSize: 16
+                font.bold: true
+            }
+
+            TextEdit {
+                Layout.fillWidth: true
+                text: qrResultPopup.resultText
+                color: shell.textPrimary
+                font.pixelSize: 13
+                wrapMode: Text.WrapAnywhere
+                readOnly: true
+                selectByMouse: true
+                background: Rectangle {
+                    radius: 8
+                    color: "#0d1520"
+                    border.color: shell.border
+                }
+                leftPadding: 8; rightPadding: 8
+                topPadding: 8; bottomPadding: 8
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Button {
+                    text: qsTr("发送到对话")
+                    Layout.fillWidth: true
+                    onClicked: {
+                        if (qrResultPopup.resultText.length > 0) {
+                            promptField.text = qrResultPopup.resultText
+                        }
+                        qrResultPopup.close()
+                    }
+                }
+
+                Button {
+                    text: qsTr("关闭")
+                    onClicked: qrResultPopup.close()
+                }
+            }
+        }
+    }
+
     Connections {
         target: Runtime
 
@@ -270,6 +350,12 @@ Item {
 
                                 Item {
                                     Layout.fillWidth: true
+                                }
+
+                                Button {
+                                    text: qsTr("扫码")
+                                    enabled: !shell.running
+                                    onClicked: QrScanner.startScan()
                                 }
 
                                 Button {

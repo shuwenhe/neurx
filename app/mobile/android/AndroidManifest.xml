@@ -10,6 +10,8 @@
         android:smallScreens="true" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <application
         android:name="org.qtproject.qt.android.bindings.QtApplication"
@@ -53,5 +55,11 @@
                 android:name="android.app.extract_android_style"
                 android:value="minimal" />
         </activity>
+
+        <activity
+            android:name="com.neurx.mobile.QrScanActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
     </application>
 </manifest>
