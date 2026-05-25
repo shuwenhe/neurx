@@ -29,6 +29,7 @@ NeurX is AI operating system written in S.
 
 To evolve NeurX into an AI operating system, the repository should keep a system-oriented top layer:
 
+- `init/`: boot sequence, default service startup, and base policy loading
 - `kernel/`: task loop, lifecycle, quotas, and module orchestration
 - `memory/`: short-term memory, long-term memory, retrieval state, and checkpoints
 - `planner/`: goal decomposition, task queues, budgeting, and replanning
@@ -51,6 +52,28 @@ To evolve NeurX into an AI operating system, the repository should keep a system
 - `shell/`: interactive system shell and command entrypoints
 - `ui/`: desktop, mobile, and web system interfaces
 - `sdk/`: developer-facing integration and extension APIs
+
+## Linux-Style AI OS Mapping
+
+NeurX can borrow Linux subsystem boundaries while adapting them to AI-native runtime objects.
+
+- Linux `init/` -> NeurX `init/`: bootstrapping, service bring-up, and initial policy load
+- Linux `kernel/` -> NeurX `kernel/`: task control, scheduling, interrupts/signals, and orchestration
+- Linux `mm/` -> NeurX `kernel/mm/` + `memory/`: memory regions, KV cache, checkpoints, and reclaim
+- Linux `fs/` -> NeurX `kernel/fs/` + `fs/` + `storage/`: workspace VFS, artifacts, and durable state
+- Linux `ipc/` -> NeurX `ipc/`: agent-to-agent messaging, shared buffers, and synchronization
+- Linux `security/` -> NeurX `security/` + `safety/`: sandboxing, approvals, and AI risk policy
+- Linux `drivers/` -> NeurX `drivers/` + `tool/`: filesystem, model, UI, and tool adapters
+- Linux `tools/` / `usr/` -> NeurX `shell/`, `sdk/`, `api/`, and `ui/`: user and developer interfaces
+
+Current kernel-style subtrees already started in this repository:
+
+- `kernel/mm/`: AI memory manager
+- `kernel/fs/`: VFS and workspace abstraction
+- `kernel/irq/`: interrupt/signal-like event handling
+- `kernel/proc/`: process/task abstractions
+- `kernel/sched/`: task scheduling
+- `ipc/`: inter-agent communication
 
 ## Canonical Layering
 
