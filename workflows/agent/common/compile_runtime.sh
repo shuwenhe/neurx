@@ -61,7 +61,7 @@ compile_one() {
   fi
 }
 
-for root in s ops data tensor ad engine nn opt lf train pretrain runtime distributed serving infer infer/vllm model platform compile reasoning workflows app/web; do
+for root in agent s ops data tensor ad engine nn opt lf train pretrain runtime distributed serving infer infer/vllm model platform compile reasoning workflows app/web; do
   [[ -d "$root" ]] || continue
   while IFS= read -r src; do
     [[ -n "$src" ]] || continue

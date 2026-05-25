@@ -19,6 +19,22 @@ struct agent_memory_lookup_result {
     bool found
 }
 
+func agent_memory_lookup_found(agent_memory_state s, string v) agent_memory_lookup_result {
+    agent_memory_lookup_result {
+        state: s,
+        value: v,
+        found: true,
+    }
+}
+
+func agent_memory_lookup_miss(agent_memory_state s) agent_memory_lookup_result {
+    agent_memory_lookup_result {
+        state: s,
+        value: "",
+        found: false,
+    }
+}
+
 func new_agent_memory_state() agent_memory_state {
     agent_memory_state {
         short_keys: [],
@@ -107,79 +123,59 @@ func agent_memory_write_long(agent_memory_state state, string key, string value)
     }
 }
 
-func agent_memory_lookup_short(agent_memory_state state, string key) agent_memory_lookup_result {
-    int i = len(state.short_keys) - 1
+func agent_memory_lookup_short(agent_memory_state src, string key) agent_memory_lookup_result {
+    int i = len(src.short_keys) - 1
+    bool found = false
+    string found_val = ""
     while i >= 0 {
-        if state.short_keys[i] == key {
-            return agent_memory_lookup_result {
-                state: agent_memory_state {
-                    short_keys: state.short_keys,
-                    short_values: state.short_values,
-                    long_keys: state.long_keys,
-                    long_values: state.long_values,
-                    writes: state.writes,
-                    reads: state.reads + 1,
-                    max_short_size: state.max_short_size,
-                    max_long_size: state.max_long_size,
-                },
-                value: state.short_values[i],
-                found: true,
-            }
+        if src.short_keys[i] == key {
+            found = true
+            found_val = src.short_values[i]
+            i = -999
         }
         i = i - 1
     }
-
     agent_memory_lookup_result {
         state: agent_memory_state {
-            short_keys: state.short_keys,
-            short_values: state.short_values,
-            long_keys: state.long_keys,
-            long_values: state.long_values,
-            writes: state.writes,
-            reads: state.reads + 1,
-            max_short_size: state.max_short_size,
-            max_long_size: state.max_long_size,
+            short_keys: src.short_keys,
+            short_values: src.short_values,
+            long_keys: src.long_keys,
+            long_values: src.long_values,
+            writes: src.writes,
+            reads: src.reads + 1,
+            max_short_size: src.max_short_size,
+            max_long_size: src.max_long_size,
         },
-        value: "",
-        found: false,
+        value: found_val,
+        found: found,
     }
 }
 
-func agent_memory_lookup_long(agent_memory_state state, string key) agent_memory_lookup_result {
-    int i = len(state.long_keys) - 1
+func agent_memory_lookup_long(agent_memory_state src, string key) agent_memory_lookup_result {
+    int i = len(src.long_keys) - 1
+    bool found = false
+    string found_val = ""
     while i >= 0 {
-        if state.long_keys[i] == key {
-            return agent_memory_lookup_result {
-                state: agent_memory_state {
-                    short_keys: state.short_keys,
-                    short_values: state.short_values,
-                    long_keys: state.long_keys,
-                    long_values: state.long_values,
-                    writes: state.writes,
-                    reads: state.reads + 1,
-                    max_short_size: state.max_short_size,
-                    max_long_size: state.max_long_size,
-                },
-                value: state.long_values[i],
-                found: true,
-            }
+        if src.long_keys[i] == key {
+            found = true
+            found_val = src.long_values[i]
+            i = -999
         }
         i = i - 1
     }
-
     agent_memory_lookup_result {
         state: agent_memory_state {
-            short_keys: state.short_keys,
-            short_values: state.short_values,
-            long_keys: state.long_keys,
-            long_values: state.long_values,
-            writes: state.writes,
-            reads: state.reads + 1,
-            max_short_size: state.max_short_size,
-            max_long_size: state.max_long_size,
+            short_keys: src.short_keys,
+            short_values: src.short_values,
+            long_keys: src.long_keys,
+            long_values: src.long_values,
+            writes: src.writes,
+            reads: src.reads + 1,
+            max_short_size: src.max_short_size,
+            max_long_size: src.max_long_size,
         },
-        value: "",
-        found: false,
+        value: found_val,
+        found: found,
     }
 }
 
@@ -338,13 +334,13 @@ func agent_memory_restore(string path) agent_memory_state {
     int ci = 0
     while ci <= content_len {
         bool at_end = ci == content_len
-        bool at_newline = !at_end && content[ci] == '\n'
+        bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
             string ln = cur_line
             cur_line = ""
             if len(ln) > 5 {
-                bool is_short = len(ln) > 6 && ln[0] == 's' && ln[1] == 'h' && ln[2] == 'o' && ln[3] == 'r' && ln[4] == 't' && ln[5] == ':'
-                bool is_long = len(ln) > 5 && ln[0] == 'l' && ln[1] == 'o' && ln[2] == 'n' && ln[3] == 'g' && ln[4] == ':'
+                bool is_short = len(ln) > 6 && string(ln[0]) == "s" && string(ln[1]) == "h" && string(ln[2]) == "o" && string(ln[3]) == "r" && string(ln[4]) == "t" && string(ln[5]) == ":"
+                bool is_long = len(ln) > 5 && string(ln[0]) == "l" && string(ln[1]) == "o" && string(ln[2]) == "n" && string(ln[3]) == "g" && string(ln[4]) == ":"
                 int prefix_len = 0
                 if is_short {
                     prefix_len = 6
@@ -363,7 +359,7 @@ func agent_memory_restore(string path) agent_memory_state {
                     bool past_eq = false
                     int ki = 0
                     while ki < len(rest) {
-                        if !past_eq && rest[ki] == '=' {
+                        if !past_eq && string(rest[ki]) == "=" {
                             past_eq = true
                         } else if past_eq {
                             kv_val = kv_val + string(rest[ki])

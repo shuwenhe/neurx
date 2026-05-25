@@ -2,6 +2,9 @@ package neurx.agent.executor
 
 use neurx.agent.tool_registry
 use neurx.agent.memory
+use neurx.agent.action_schema
+use neurx.agent.workspace_tools
+use neurx.agent.workspace_search
 use neurx.infer
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
 
@@ -55,6 +58,9 @@ func agent_route_for_goal(string goal, string input) string {
     if agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") || agent_text_contains(text, "mkdir") || agent_text_contains(text, "create folder") || agent_text_contains(text, "make dir") {
         return "write"
     }
+    if agent_text_contains(text, "apply_patch") {
+        return "apply_patch"
+    }
     if agent_text_contains(text, "fix") || agent_text_contains(text, "bug") || agent_text_contains(text, "error") || agent_text_contains(text, "implement") || agent_text_contains(text, "patch") || agent_text_contains(text, "refactor") {
         return "code"
     }
@@ -70,6 +76,9 @@ func agent_route_for_goal(string goal, string input) string {
     if agent_text_contains(text, "search") || agent_text_contains(text, "lookup") || agent_text_contains(text, "find") {
         return "search"
     }
+    if agent_text_contains(text, "build") || agent_text_contains(text, "compile") {
+        return "build"
+    }
     "general"
 }
 
@@ -81,9 +90,11 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
     int tool_retries = 0
     bool ok = false
     string route = agent_route_for_goal(goal, input)
+    agent_action_state parsed_action = agent_action_parse(input, task)
     agent_memory_state next_memory = agent_memory_write_short(memory, "last_input", input)
     next_memory = agent_memory_write_short(next_memory, "goal", goal)
     next_memory = agent_memory_write_short(next_memory, "route", route)
+    next_memory = agent_memory_write_long(next_memory, "last_action_schema", agent_action_summary(parsed_action))
 
     if task == "analyze" {
         action = "analyze"
@@ -142,73 +153,100 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 max_tries = 1
             }
 
-            string index_path = runtime_env_get("NEURX_RETRIEVE_INDEX_PATH", "")
-            string doc_path = runtime_env_get("NEURX_RETRIEVE_DOC_PATH", "")
-            if doc_path == "" {
-                if route == "sql" {
-                    if runtime_file_exists("sql/neurx_init.sql") {
-                        doc_path = "sql/neurx_init.sql"
-                    } else if runtime_file_exists("neurx/sql/neurx_init.sql") {
-                        doc_path = "neurx/sql/neurx_init.sql"
-                    }
-                } else if route == "repo" {
-                    if runtime_file_exists("README.md") {
-                        doc_path = "README.md"
-                    } else if runtime_file_exists("neurx/README.md") {
-                        doc_path = "neurx/README.md"
-                    } else if runtime_file_exists("doc/README.md") {
-                        doc_path = "doc/README.md"
-                    } else if runtime_file_exists("neurx/doc/README.md") {
-                        doc_path = "neurx/doc/README.md"
-                    } else if runtime_file_exists("app/README.md") {
-                        doc_path = "app/README.md"
-                    } else if runtime_file_exists("neurx/app/README.md") {
-                        doc_path = "neurx/app/README.md"
+            agent_workspace_result ws_result = agent_workspace_result {
+                ok: false,
+                observation: "",
+                resolved_path: "",
+            }
+            string search_query = parsed_action.query
+            if search_query == "" && route == "search" {
+                search_query = input
+            }
+            if search_query != "" {
+                agent_search_result search_result = agent_search_workspace(search_query, route, 3, 512)
+                observation = search_result.observation
+                ok = search_result.ok
+                next_memory = agent_memory_write_long(next_memory, "search_query", search_result.query)
+                next_memory = agent_memory_write_long(next_memory, "search_result", observation)
+            } else if parsed_action.path != "" {
+                ws_result = agent_workspace_read(parsed_action.path, 1024)
+            } else {
+                string index_path = runtime_env_get("NEURX_RETRIEVE_INDEX_PATH", "")
+                string doc_path = runtime_env_get("NEURX_RETRIEVE_DOC_PATH", "")
+                if doc_path == "" {
+                    if route == "sql" {
+                        if runtime_file_exists("sql/neurx_init.sql") {
+                            doc_path = "sql/neurx_init.sql"
+                        } else if runtime_file_exists("neurx/sql/neurx_init.sql") {
+                            doc_path = "neurx/sql/neurx_init.sql"
+                        }
+                    } else if route == "repo" {
+                        if runtime_file_exists("README.md") {
+                            doc_path = "README.md"
+                        } else if runtime_file_exists("neurx/README.md") {
+                            doc_path = "neurx/README.md"
+                        } else if runtime_file_exists("doc/README.md") {
+                            doc_path = "doc/README.md"
+                        } else if runtime_file_exists("neurx/doc/README.md") {
+                            doc_path = "neurx/doc/README.md"
+                        } else if runtime_file_exists("app/README.md") {
+                            doc_path = "app/README.md"
+                        } else if runtime_file_exists("neurx/app/README.md") {
+                            doc_path = "neurx/app/README.md"
+                        }
                     }
                 }
-            }
-            string retrieved_content = ""
-            int try_i = 0
-            while try_i < max_tries {
-                if doc_path != "" && runtime_file_exists(doc_path) {
-                    string raw = runtime_read_text_file(doc_path)
-                    int max_chars = 1024
-                    if len(raw) <= max_chars {
-                        retrieved_content = raw
-                    } else {
-                        int ci = 0
-                        while ci < max_chars {
-                            retrieved_content = retrieved_content + string(raw[ci])
-                            ci = ci + 1
+                string retrieved_content = ""
+                int try_i = 0
+                while try_i < max_tries {
+                    if doc_path != "" && runtime_file_exists(doc_path) {
+                        string raw = runtime_read_text_file(doc_path)
+                        int max_chars = 1024
+                        if len(raw) <= max_chars {
+                            retrieved_content = raw
+                        } else {
+                            int ci = 0
+                            while ci < max_chars {
+                                retrieved_content = retrieved_content + string(raw[ci])
+                                ci = ci + 1
+                            }
+                            retrieved_content = retrieved_content + "...[truncated]"
                         }
-                        retrieved_content = retrieved_content + "...[truncated]"
-                    }
-                } else if index_path != "" && runtime_file_exists(index_path) {
-                    string idx = runtime_read_text_file(index_path)
-                    int max_chars = 512
-                    if len(idx) <= max_chars {
-                        retrieved_content = idx
-                    } else {
-                        int ci = 0
-                        while ci < max_chars {
-                            retrieved_content = retrieved_content + string(idx[ci])
-                            ci = ci + 1
+                    } else if index_path != "" && runtime_file_exists(index_path) {
+                        string idx = runtime_read_text_file(index_path)
+                        int max_chars = 512
+                        if len(idx) <= max_chars {
+                            retrieved_content = idx
+                        } else {
+                            int ci = 0
+                            while ci < max_chars {
+                                retrieved_content = retrieved_content + string(idx[ci])
+                                ci = ci + 1
+                            }
+                            retrieved_content = retrieved_content + "...[truncated]"
                         }
-                        retrieved_content = retrieved_content + "...[truncated]"
                     }
+                    if retrieved_content != "" {
+                        break
+                    }
+                    try_i = try_i + 1
                 }
                 if retrieved_content != "" {
-                    break
+                    observation = "retrieved:route=" + route + ";content=" + retrieved_content
+                } else {
+                    observation = "retrieved:route=" + route + ";source=none"
                 }
-                try_i = try_i + 1
             }
 
-            if retrieved_content != "" {
-                observation = "retrieved:route=" + route + ";content=" + retrieved_content
+            if search_query != "" {
+                next_memory = agent_memory_write_long(next_memory, "retrieved", observation)
+            } else if parsed_action.path != "" {
+                observation = ws_result.observation
+                ok = ws_result.ok
+                next_memory = agent_memory_write_long(next_memory, "retrieved_path", ws_result.resolved_path)
             } else {
-                observation = "retrieved:route=" + route + ";source=none"
+                ok = true
             }
-            ok = true
             next_memory = agent_memory_write_long(next_memory, "retrieved", observation)
         }
     } else if task == "infer" {
@@ -249,9 +287,13 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 target_path = path_result.value
                 next_memory = path_result.state
             }
-            observation = "delete:requested;path=" + target_path
-            ok = true
-            next_memory = agent_memory_write_long(next_memory, "delete_target", target_path)
+            if parsed_action.path != "" {
+                target_path = parsed_action.path
+            }
+            agent_workspace_result delete_result = agent_workspace_delete(target_path)
+            observation = delete_result.observation
+            ok = delete_result.ok
+            next_memory = agent_memory_write_long(next_memory, "delete_target", delete_result.resolved_path)
         }
     } else if task == "write" {
         if agent_tool_registry_has_enabled(tools, "write") {
@@ -265,9 +307,38 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 write_target = input_result.value
                 next_memory = input_result.state
             }
-            observation = "write:requested;target=" + write_target
-            ok = true
-            next_memory = agent_memory_write_long(next_memory, "write_target", write_target)
+            if parsed_action.path != "" {
+                write_target = parsed_action.path
+            }
+            if parsed_action.old_text != "" {
+                agent_workspace_patch_result patch_result = agent_workspace_apply_patch(write_target, parsed_action.old_text, parsed_action.new_text, parsed_action.replace_all)
+                observation = patch_result.observation
+                ok = patch_result.ok
+                next_memory = agent_memory_write_long(next_memory, "patch_target", patch_result.resolved_path)
+                next_memory = agent_memory_write_long(next_memory, "patch_replacements", string(patch_result.replacements))
+            } else {
+                string write_content = parsed_action.content
+                if write_content == "" {
+                    write_content = input
+                }
+                agent_workspace_result write_result = agent_workspace_write(write_target, write_content)
+                observation = write_result.observation
+                ok = write_result.ok
+                next_memory = agent_memory_write_long(next_memory, "write_target", write_result.resolved_path)
+                next_memory = agent_memory_write_long(next_memory, "write_content_len", string(len(write_content)))
+            }
+        }
+    } else if task == "apply_patch" || task == "patch" {
+        if agent_tool_registry_has_enabled(tools, "apply_patch") {
+            tool_name = "apply_patch"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            action = "apply_patch"
+            agent_workspace_patch_result patch_result = agent_workspace_apply_patch(parsed_action.path, parsed_action.old_text, parsed_action.new_text, parsed_action.replace_all)
+            observation = patch_result.observation
+            ok = patch_result.ok
+            next_memory = agent_memory_write_long(next_memory, "patch_target", patch_result.resolved_path)
+            next_memory = agent_memory_write_long(next_memory, "patch_replacements", string(patch_result.replacements))
         }
     } else if task == "verify" {
         action = "verify"
@@ -298,6 +369,30 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         observation = "verified:route=" + route + plan_tag + infer_tag + retrieved_tag
         ok = true
         next_memory = agent_memory_write_long(next_memory, "verified", observation)
+    } else if task == "build" {
+        if agent_tool_registry_has_enabled(tools, "build") {
+            tool_name = "build"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            action = "build"
+            agent_workspace_command_result build_result = agent_workspace_run_command("build", parsed_action.command)
+            observation = build_result.observation
+            ok = build_result.ok
+            next_memory = agent_memory_write_long(next_memory, "build_command", build_result.command)
+            next_memory = agent_memory_write_long(next_memory, "build_result", observation)
+        }
+    } else if task == "test" {
+        if agent_tool_registry_has_enabled(tools, "test") {
+            tool_name = "test"
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            action = "test"
+            agent_workspace_command_result test_result = agent_workspace_run_command("test", parsed_action.command)
+            observation = test_result.observation
+            ok = test_result.ok
+            next_memory = agent_memory_write_long(next_memory, "test_command", test_result.command)
+            next_memory = agent_memory_write_long(next_memory, "test_result", observation)
+        }
     } else if task == "finalize" {
         action = "finalize"
         agent_memory_lookup_result verified_result = agent_memory_lookup_long(next_memory, "verified")
@@ -312,12 +407,19 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
     } else {
         if agent_tool_registry_has_enabled(tools, "search") {
             action = "search"
-            observation = "searched:" + route
             tool_name = "search"
             tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
             tool_retries = agent_tool_registry_retries(tools, tool_name)
-            ok = true
+            string q = parsed_action.query
+            if q == "" {
+                q = input
+            }
+            agent_search_result search_result = agent_search_workspace(q, route, 3, 512)
+            observation = search_result.observation
+            ok = search_result.ok
             next_memory = agent_memory_write_long(next_memory, "searched", route)
+            next_memory = agent_memory_write_long(next_memory, "search_query", search_result.query)
+            next_memory = agent_memory_write_long(next_memory, "search_result", observation)
         }
     }
 
