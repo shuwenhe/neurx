@@ -1,6 +1,5 @@
 # neurx
-
-neurx is a deep learning framework written in S.
+NeurX is AI operating system written in S.
 
 ## Layout
 
