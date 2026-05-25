@@ -3,7 +3,7 @@ package neurx.agent.runtime
 use neurx.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
-use neurx.agent.executor.{agent_execute_step, agent_text_contains}
+use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.trace
 use neurx.registry.skill_registry
 use neurx.agent.skill_feedback
@@ -11,9 +11,9 @@ use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
 use neurx.agent.skill_executor
 use neurx.reflection
-use neurx.agent.context_manager
-use neurx.agent.context_builder
-use neurx.agent.reasoning
+use neurx.context.context_manager
+use neurx.context.context_builder
+use neurx.reasoning.reasoning
 use neurx.agent.subagent
 use neurx.perception.perception
 use neurx.agent.answer_synthesizer

@@ -33,6 +33,7 @@ To evolve NeurX into an AI operating system, the repository should keep a system
 - `memory/`: short-term memory, long-term memory, retrieval state, and checkpoints
 - `planner/`: goal decomposition, task queues, budgeting, and replanning
 - `reflection/`: self-critique, correction suggestions, and post-step review
+- `context/`: context assembly, token budgeting, and compression
 - `reasoning/`: route selection, verification, and decision policies
 - `perception/`: repository, file, UI, and multimodal input understanding
 - `executor/`: action execution, tool dispatch, and observation capture
