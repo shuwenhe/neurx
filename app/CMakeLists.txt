@@ -21,12 +21,12 @@ endif()
 string(TOLOWER "${NEURX_APP_TARGET_PLATFORM}" NEURX_APP_TARGET_PLATFORM)
 
 if(NEURX_APP_TARGET_PLATFORM STREQUAL "ios" OR NEURX_APP_TARGET_PLATFORM STREQUAL "android")
-    find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui Network Qml Quick QuickControls2 Concurrent Sql)
+    find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2 Concurrent Sql)
     add_subdirectory(mobile)
     return()
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core CorePrivate Gui Qml Quick QuickControls2 Concurrent Pdf Sql)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Concurrent Sql)
 
 if(NEURX_APP_TARGET_PLATFORM STREQUAL "windows")
     set(NEURX_APP_OUTPUT_SUBDIR "windows-x86_64")
@@ -86,7 +86,7 @@ set_target_properties(neurx_app PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
 )
 
-target_link_libraries(neurx_app PRIVATE Qt6::Core Qt6::CorePrivate Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent Qt6::Pdf Qt6::Sql)
+target_link_libraries(neurx_app PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent Qt6::Sql)
 
 target_include_directories(neurx_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

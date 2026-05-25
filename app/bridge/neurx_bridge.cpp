@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QTemporaryFile>
+#include <QTemporaryDir>
 #include <QStandardPaths>
 #include <QStorageInfo>
 #include <QClipboard>
@@ -27,9 +28,6 @@
 #include <QSqlQuery>
 #include <QUuid>
 #include <QtConcurrent/QtConcurrentRun>
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-#include <QtCore/6.11.0/QtCore/private/qzipreader_p.h>
-#endif
 
 namespace {
 constexpr const char kDefaultOllamaModel[] = "qwen2.5:0.5b";
@@ -115,6 +113,83 @@ QString docx_plain_text_from_xml(const QByteArray& xml_bytes) {
         normalized.replace(QStringLiteral("\n\n\n"), QStringLiteral("\n\n"));
     }
     return normalized.trimmed();
+}
+
+QString quote_powershell_literal(QString value) {
+    value.replace(QLatin1Char('\''), QStringLiteral("''"));
+    return QStringLiteral("'%1'").arg(value);
+}
+
+QByteArray read_docx_document_xml(const QString& path) {
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    Q_UNUSED(path);
+    return {};
+#elif defined(Q_OS_WIN)
+    const QString powershell = QStandardPaths::findExecutable(QStringLiteral("powershell.exe"));
+    if (powershell.isEmpty()) {
+        return {};
+    }
+
+    QTemporaryDir temp_dir;
+    if (!temp_dir.isValid()) {
+        return {};
+    }
+
+    const QString script = QStringLiteral(
+        "$ErrorActionPreference='Stop'; "
+        "Expand-Archive -LiteralPath %1 -DestinationPath %2 -Force; "
+        "Get-Content -LiteralPath %3 -Raw -Encoding UTF8")
+        .arg(quote_powershell_literal(path))
+        .arg(quote_powershell_literal(temp_dir.path()))
+        .arg(quote_powershell_literal(QDir(temp_dir.path()).filePath(QStringLiteral("word/document.xml"))));
+
+    QProcess proc;
+    proc.setProgram(powershell);
+    proc.setArguments({
+        QStringLiteral("-NoProfile"),
+        QStringLiteral("-NonInteractive"),
+        QStringLiteral("-Command"),
+        script
+    });
+    proc.start();
+    if (!proc.waitForStarted(10000) || !proc.waitForFinished(15000)) {
+        proc.kill();
+        proc.waitForFinished(2000);
+        return {};
+    }
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        return {};
+    }
+    return proc.readAllStandardOutput();
+#else
+    QString extractor = QStandardPaths::findExecutable(QStringLiteral("unzip"));
+    QStringList args;
+    if (!extractor.isEmpty()) {
+        args << QStringLiteral("-p") << path << QStringLiteral("word/document.xml");
+    } else {
+        extractor = QStandardPaths::findExecutable(QStringLiteral("bsdtar"));
+        if (!extractor.isEmpty()) {
+            args << QStringLiteral("-xOf") << path << QStringLiteral("word/document.xml");
+        }
+    }
+    if (extractor.isEmpty()) {
+        return {};
+    }
+
+    QProcess proc;
+    proc.setProgram(extractor);
+    proc.setArguments(args);
+    proc.start();
+    if (!proc.waitForStarted(10000) || !proc.waitForFinished(15000)) {
+        proc.kill();
+        proc.waitForFinished(2000);
+        return {};
+    }
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        return {};
+    }
+    return proc.readAllStandardOutput();
+#endif
 }
 
 QString clip_text(QString text, int max_chars) {
@@ -2415,6 +2490,140 @@ QString NeurxBridge::run_native_s_agent(const QString& prompt, int max_steps) {
     return run_native_s_agent_request(prompt, max_steps);
 }
 
+QString NeurxBridge::run_hello_s() {
+    const QString root = find_repo_root();
+    if (root.isEmpty()) {
+        return QStringLiteral("repo_not_found");
+    }
+
+    const QString hello_path = QDir(root).filePath("agent/hello.s");
+    qInfo().noquote() << QString("bridge hello_s source_path=%1").arg(hello_path);
+    emit log_message("info", "agent", QString("hello.s source_path=%1").arg(hello_path));
+    if (!QFileInfo::exists(hello_path) || !QFileInfo(hello_path).isFile()) {
+        return QStringLiteral("runtime_exec_failed: agent/hello.s not found");
+    }
+
+    QStringList candidates;
+    const QString env_s = qEnvironmentVariable("NEURX_S_BINARY").trimmed();
+    const QString env_legacy_s = qEnvironmentVariable("S_BINARY").trimmed();
+    const QString repo_s = QDir(root).filePath("../s/bin/s");
+    const QString path_s = resolved_s_candidate_path(QStringLiteral("s"));
+    if (!env_s.isEmpty()) {
+        candidates << env_s;
+    }
+    if (!env_legacy_s.isEmpty() && !candidates.contains(env_legacy_s)) {
+        candidates << env_legacy_s;
+    }
+    if (is_runnable_s_candidate(repo_s) && !candidates.contains(repo_s)) {
+        candidates << repo_s;
+    }
+    if (is_runnable_s_candidate(path_s) && !candidates.contains(path_s)) {
+        candidates << path_s;
+    }
+
+    for (const QString& candidate : candidates) {
+        const QString s_binary = resolved_s_candidate_path(candidate);
+        qInfo().noquote() << QString("bridge hello_s run source_path=%1 s_binary=%2")
+            .arg(hello_path, s_binary);
+        const QString result = run_s_cli(s_binary, QStringList() << "run" << hello_path, 30000, root).trimmed();
+        if (!result.isEmpty()
+            && !result.startsWith(QStringLiteral("runtime_"))
+            && !result.startsWith(QStringLiteral("error"))) {
+            emit log_message("info", "agent", QString("hello.s stdout=%1").arg(result));
+            return result;
+        }
+        qInfo().noquote() << QString("bridge hello_s empty_or_failed s_binary=%1 result=%2")
+            .arg(s_binary, result.left(200));
+    }
+
+    return QStringLiteral("runtime_exec_failed: hello.s produced no stdout through s run");
+}
+
+QString NeurxBridge::sum123_source() const {
+    const QString root = find_repo_root();
+    if (root.isEmpty()) {
+        return QStringLiteral("// repo_not_found");
+    }
+    const QString path = QDir(root).filePath("agent/sum123.s");
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QStringLiteral("// agent/sum123.s not found");
+    }
+    return QString::fromUtf8(f.readAll());
+}
+
+QString NeurxBridge::run_sum123(int a, int b, int c) {
+    return run_sum123_request(a, b, c);
+}
+
+QString NeurxBridge::run_sum123_request(int a, int b, int c) {
+    qDebug() << "[sum123] >> run_sum123_request(" << a << "," << b << "," << c << ")";
+
+    const QString root = find_repo_root();
+    qDebug() << "[sum123]    find_repo_root() ->" << root;
+    if (root.isEmpty()) {
+        qDebug() << "[sum123]    ERROR: repo root not found";
+        return QStringLiteral("repo_not_found");
+    }
+
+    const QString s_binary = resolve_s_binary(root);
+    qDebug() << "[sum123]    resolve_s_binary() ->" << s_binary;
+    if (s_binary.isEmpty()) {
+        qDebug() << "[sum123]    ERROR: S compiler not found";
+        return QStringLiteral("runtime_exec_failed: S compiler not found. Set NEURX_S_BINARY or put s/s.cmd on PATH.");
+    }
+
+    qDebug() << "[sum123]    ensure_native_s_runtime_compiled() ...";
+    const QString compile_result = ensure_native_s_runtime_compiled(root, s_binary);
+    if (!compile_result.isEmpty()) {
+        qDebug() << "[sum123]    compile ERROR:" << compile_result;
+        return compile_result;
+    }
+    qDebug() << "[sum123]    compile OK";
+
+    const QString tmpDir = QDir(root).filePath("build/tmp");
+    QDir().mkpath(tmpDir);
+    QTemporaryFile runner(QDir(root).filePath("build/tmp/neurx_sum123_XXXXXX.s"));
+    runner.setAutoRemove(true);
+    if (!runner.open()) {
+        qDebug() << "[sum123]    ERROR: could not create runner temp file in" << tmpDir;
+        return QStringLiteral("runtime_exec_failed: could not create sum123 runner");
+    }
+    qDebug() << "[sum123]    runner temp file ->" << runner.fileName();
+
+    // s run does not support cross-package linking yet, so we inline sum_three
+    // directly from neurx.agent.sum123 instead of using `use neurx.agent.sum123`.
+    // println / string() are not builtins; only print() is.
+    const QString source = QString(
+        "package neurx.app.sum123_runner\n\n"
+        "func sum_three(int a, int b, int c) int {\n"
+        "    a + b + c\n"
+        "}\n\n"
+        "func main() int {\n"
+        "    int result = sum_three(%1, %2, %3)\n"
+        "    print(result)\n"
+        "    0\n"
+        "}\n")
+        .arg(a)
+        .arg(b)
+        .arg(c);
+
+    qDebug() << "[sum123]    runner source:\n" << source;
+    runner.write(source.toUtf8());
+    runner.flush();
+    runner.close();
+
+    qDebug() << "[sum123]    exec:" << s_binary << "run" << runner.fileName();
+    const QString result = run_s_cli(s_binary, QStringList() << "run" << runner.fileName(), 30000, root);
+    qDebug() << "[sum123]    raw result:" << result;
+
+    if (!result.startsWith("runtime_")) {
+        emit log_message("info", "agent", QString("sum123 a=%1 b=%2 c=%3 result=%4").arg(a).arg(b).arg(c).arg(result.trimmed()));
+    }
+    qDebug() << "[sum123] << return" << result.trimmed();
+    return result.trimmed();
+}
+
 QString NeurxBridge::export_agent_skill_snapshot(const QString& prompt, int max_steps) {
     return run_agent_state_export(prompt, max_steps, "skill_snapshot");
 }
@@ -2483,14 +2692,7 @@ QString NeurxBridge::read_docx_text_file(const QString& path) const {
     Q_UNUSED(next);
     return QStringLiteral("read_docx_text_file_unavailable_on_mobile");
 #else
-    QZipReader archive(next);
-    if (!archive.exists()) {
-        return QString("read_docx_text_file_failed: %1").arg(next);
-    }
-
-    const QByteArray document_xml = archive.fileData(QStringLiteral("word/document.xml"));
-    archive.close();
-
+    const QByteArray document_xml = read_docx_document_xml(next);
     if (document_xml.isEmpty()) {
         return QString("read_docx_text_file_failed: %1").arg(next);
     }
