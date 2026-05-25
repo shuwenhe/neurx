@@ -6,6 +6,7 @@ MOBILE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BUILD_DIR="${NEURX_MOBILE_BUILD_DIR:-${MOBILE_DIR}/build/android-arm64-v8a}"
 PACKAGE_NAME="${NEURX_ANDROID_PACKAGE_NAME:-com.neurx.mobile}"
 ACTIVITY_NAME="${NEURX_ANDROID_ACTIVITY_NAME:-org.qtproject.qt.android.bindings.QtActivity}"
+SKIP_LAUNCH="${NEURX_ANDROID_SKIP_LAUNCH:-0}"
 
 resolve_adb() {
   if command -v adb >/dev/null 2>&1; then
@@ -70,4 +71,7 @@ if [ -z "${DEVICE_SERIAL}" ]; then
 fi
 
 "${ADB}" -s "${DEVICE_SERIAL}" install -r -d "${APK_PATH}"
-"${ADB}" -s "${DEVICE_SERIAL}" shell am start -n "${PACKAGE_NAME}/${ACTIVITY_NAME}" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+
+if [[ "${SKIP_LAUNCH}" != "1" ]]; then
+  "${ADB}" -s "${DEVICE_SERIAL}" shell am start -n "${PACKAGE_NAME}/${ACTIVITY_NAME}" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+fi

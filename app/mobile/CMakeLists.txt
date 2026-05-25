@@ -31,6 +31,7 @@ qt_add_executable(neurx_mobile
 qt_add_qml_module(neurx_mobile
     URI neurx.mobile
     VERSION 1.0
+    RESOURCE_PREFIX "/qt/qml/"
     QML_FILES
         qml/MobileMain.qml
         qml/MobileHome.qml
@@ -54,7 +55,6 @@ target_link_libraries(neurx_mobile PRIVATE
 set_target_properties(neurx_mobile PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
-    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
 )
 
 if(ANDROID)

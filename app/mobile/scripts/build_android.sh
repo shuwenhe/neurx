@@ -7,13 +7,31 @@ MOBILE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ANDROID_ABI="${NEURX_ANDROID_ABI:-arm64-v8a}"
 ANDROID_API="${NEURX_ANDROID_API:-28}"
 BUILD_DIR="${NEURX_MOBILE_BUILD_DIR:-${MOBILE_DIR}/build/android-${ANDROID_ABI}}"
-ANDROID_SDK_ROOT_RESOLVED="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-C:/Users/Administrator/AppData/Local/Android/Sdk}}"
-ANDROID_JAVA_HOME="${JAVA_HOME:-C:/Program Files/Android/Android Studio/jbr}"
-ANDROID_COMPILE_SDK="${NEURX_ANDROID_COMPILE_SDK:-36}"
+DEFAULT_ANDROID_SDK_ROOT="${HOME}/Android/Sdk"
+if [[ "${OS:-}" == "Windows_NT" ]]; then
+  DEFAULT_ANDROID_SDK_ROOT="C:/Users/Administrator/AppData/Local/Android/Sdk"
+fi
+ANDROID_SDK_ROOT_RESOLVED="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-${DEFAULT_ANDROID_SDK_ROOT}}}"
+DEFAULT_ANDROID_JAVA_HOME="${JAVA_HOME:-}"
+if [[ -z "${DEFAULT_ANDROID_JAVA_HOME}" ]]; then
+  if [[ "${OS:-}" == "Windows_NT" ]]; then
+    DEFAULT_ANDROID_JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
+  elif [[ -d "/usr/lib/jvm/default-java" ]]; then
+    DEFAULT_ANDROID_JAVA_HOME="/usr/lib/jvm/default-java"
+  elif [[ -d "/usr/lib/jvm/java-17-openjdk-amd64" ]]; then
+    DEFAULT_ANDROID_JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+  fi
+fi
+ANDROID_JAVA_HOME="${DEFAULT_ANDROID_JAVA_HOME}"
+# Qt 6.4.x still generates an Android Gradle Plugin 7.2.1 project.
+# compileSdk 36 is too new for that toolchain on this host, while 34 is installed and stable.
+ANDROID_COMPILE_SDK="${NEURX_ANDROID_COMPILE_SDK:-34}"
 ANDROID_NDK_VERSION="${NEURX_ANDROID_NDK_VERSION:-27.2.12479018}"
 ANDROID_PACKAGE_NAME="${NEURX_ANDROID_PACKAGE_NAME:-com.neurx.mobile}"
 ANDROID_VERSION_CODE="${NEURX_ANDROID_VERSION_CODE:-1}"
 ANDROID_VERSION_NAME="${NEURX_ANDROID_VERSION_NAME:-1.0.0}"
+DEFAULT_GRADLE_USER_HOME="${TMPDIR:-/tmp}/neurx-gradle"
+GRADLE_USER_HOME="${GRADLE_USER_HOME:-${NEURX_GRADLE_USER_HOME:-${DEFAULT_GRADLE_USER_HOME}}}"
 
 resolve_android_ndk() {
   local sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
@@ -40,9 +58,13 @@ resolve_qt6_android_dir() {
   for dir in \
     "${Qt6_ANDROID_DIR:-}" \
     "${Qt6_DIR:-}" \
-    "C:/Users/Public/qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
     "${HOME}/Qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
-    "${HOME}/Qt/6.10.0/${abi_tag}/lib/cmake/Qt6"
+    "C:/Users/Public/qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
+    "${HOME}/Qt/6.10.0/${abi_tag}/lib/cmake/Qt6" \
+    "/opt/Qt/6.11.0/${abi_tag}/lib/cmake/Qt6" \
+    "/opt/Qt/6.10.0/${abi_tag}/lib/cmake/Qt6" \
+    "${HOME}/Qt/6.4.2/${abi_tag}/lib/cmake/Qt6" \
+    "/opt/Qt/6.4.2/${abi_tag}/lib/cmake/Qt6"
   do
     [ -n "${dir}" ] && [ -f "${dir}/Qt6Config.cmake" ] && printf '%s' "${dir}" && return 0
   done
@@ -59,7 +81,7 @@ patch_gradle_android_build() {
   if [ -f "${gradle_props}" ]; then
     sed -i \
       -e '/^androidBuildToolsVersion=/d' \
-      -e "s/^androidCompileSdkVersion=.*/androidCompileSdkVersion=android-${ANDROID_COMPILE_SDK}/" \
+      -e "s/^androidCompileSdkVersion=.*/androidCompileSdkVersion=${ANDROID_COMPILE_SDK}/" \
       -e "s/^androidNdkVersion=.*/androidNdkVersion=${ANDROID_NDK_VERSION}/" \
       -e "s/^androidPackageName=.*/androidPackageName=${ANDROID_PACKAGE_NAME}/" \
       -e "s/^qtTargetSdkVersion=.*/qtTargetSdkVersion=${ANDROID_COMPILE_SDK}/" \
@@ -96,6 +118,73 @@ patch_gradle_android_build() {
   fi
 }
 
+patch_android_manifest() {
+  local android_build_dir="${BUILD_DIR}/android-build"
+  local manifest="${android_build_dir}/AndroidManifest.xml"
+
+  if [ ! -f "${manifest}" ]; then
+    return 0
+  fi
+
+  python3 - "${manifest}" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+manifest_path = sys.argv[1]
+android_ns = "http://schemas.android.com/apk/res/android"
+ET.register_namespace("android", android_ns)
+
+tree = ET.parse(manifest_path)
+root = tree.getroot()
+app = root.find("application")
+if app is None:
+    raise SystemExit(0)
+
+def a(name: str) -> str:
+    return f"{{{android_ns}}}{name}"
+
+app.set(a("name"), "org.qtproject.qt.android.bindings.QtApplication")
+app.set(a("allowBackup"), "true")
+app.set(a("allowNativeHeapPointerTagging"), "false")
+app.set(a("fullBackupOnly"), "false")
+
+activity = None
+for candidate in app.findall("activity"):
+    if candidate.get(a("name")) == "org.qtproject.qt.android.bindings.QtActivity":
+        activity = candidate
+        break
+
+if activity is None:
+    raise SystemExit(0)
+
+activity.set(a("label"), "@string/app_name")
+activity.set(a("configChanges"), "orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density")
+activity.set(a("launchMode"), "singleTop")
+
+metadata_values = {
+    "android.app.lib_name": "neurx_mobile",
+    "android.app.arguments": "",
+    "android.app.background_running": "true",
+    "android.app.extract_android_style": "minimal",
+}
+
+existing = {
+    child.get(a("name")): child
+    for child in activity.findall("meta-data")
+    if child.get(a("name"))
+}
+
+for key, value in metadata_values.items():
+    node = existing.get(key)
+    if node is None:
+        node = ET.SubElement(activity, "meta-data")
+        node.set(a("name"), key)
+    node.set(a("value"), value)
+
+tree.write(manifest_path, encoding="utf-8", xml_declaration=True)
+PY
+}
+
 NDK_ROOT="$(resolve_android_ndk)"
 QT6_ANDROID_DIR_RESOLVED="$(resolve_qt6_android_dir)"
 
@@ -116,9 +205,20 @@ if [ -d "${ANDROID_JAVA_HOME}/bin" ]; then
   export PATH="${ANDROID_JAVA_HOME}/bin:${PATH}"
 fi
 
-cmake --build "${BUILD_DIR}" --config Release
+mkdir -p "${GRADLE_USER_HOME}"
+export GRADLE_USER_HOME
+
+# Build only through the APK staging target first so Qt's generated Gradle
+# files can be patched before Gradle packaging starts.
+cmake --build "${BUILD_DIR}" --config Release --target neurx_mobile_prepare_apk_dir
 patch_gradle_android_build
+patch_android_manifest
 (
   cd "${BUILD_DIR}/android-build"
-  cmd.exe //c gradlew.bat assembleDebug
+  if [[ "${OS:-}" == "Windows_NT" ]]; then
+    cmd.exe //c gradlew.bat assembleDebug
+  else
+    chmod +x gradlew 2>/dev/null || true
+    ./gradlew assembleDebug
+  fi
 )
