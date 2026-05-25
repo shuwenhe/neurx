@@ -5,7 +5,7 @@ use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.trace
-use neurx.agent.skill_registry
+use neurx.registry.skill_registry
 use neurx.agent.skill_feedback
 use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
@@ -15,11 +15,11 @@ use neurx.agent.context_manager
 use neurx.agent.context_builder
 use neurx.agent.reasoning
 use neurx.agent.subagent
-use neurx.agent.perception
+use neurx.perception.perception
 use neurx.agent.answer_synthesizer
 use neurx.agent.interrupt
-use neurx.agent.safety
-use neurx.agent.session
+use neurx.safety.safety
+use neurx.session.session
 use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
 
 struct agent_runtime_state {

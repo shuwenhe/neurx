@@ -1,4 +1,4 @@
-package neurx.agent.session
+package neurx.session.session
 
 struct agent_session_turn {
     int index
@@ -63,8 +63,7 @@ func agent_session_system(agent_session_state state, string content) agent_sessi
 }
 
 func agent_session_last_user_input(agent_session_state state) string {
-    int n = state.count
-    int i = n - 1
+    int i = state.count - 1
     while i >= 0 {
         if state.turns[i].role == "user" {
             return state.turns[i].content
@@ -85,14 +84,11 @@ func agent_session_close(agent_session_state state) agent_session_state {
 }
 
 func agent_session_to_prompt(agent_session_state state) string {
-    string out = ""
-    if state.system_prompt != "" {
-        out = "system: " + state.system_prompt + "\n"
-    }
+    string out = "system: " + state.system_prompt
     int i = 0
     while i < state.count {
         agent_session_turn t = state.turns[i]
-        out = out + t.role + ": " + t.content + "\n"
+        out = out + "\n" + t.role + ": " + t.content
         i = i + 1
     }
     out

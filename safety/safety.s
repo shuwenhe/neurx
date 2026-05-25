@@ -1,4 +1,4 @@
-package neurx.agent.safety
+package neurx.safety.safety
 
 struct agent_safety_result {
     bool allowed
@@ -39,15 +39,15 @@ func agent_safety_text_contains(string text, string pattern) bool {
     int i = 0
     while i <= hl - nl {
         int j = 0
-        bool match = true
+        bool ok = true
         while j < nl {
             if h[i + j] != n[j] {
-                match = false
+                ok = false
                 break
             }
             j = j + 1
         }
-        if match {
+        if ok {
             return true
         }
         i = i + 1
@@ -91,5 +91,5 @@ func agent_safety_check(string action, string input, string goal) agent_safety_r
 }
 
 func agent_safety_summary(agent_safety_result result) string {
-    "allowed=" + string(result.allowed) + " category=" + result.category + " severity=" + string(result.severity) + " reason=" + result.reason
+    "allowed=" + string(result.allowed) + " reason=" + result.reason + " category=" + result.category + " severity=" + string(result.severity)
 }
