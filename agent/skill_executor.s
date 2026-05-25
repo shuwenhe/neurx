@@ -1,6 +1,6 @@
 package neurx.agent.skill_executor
 
-use neurx.agent.skill_registry
+use neurx.registry.skill_registry
 use neurx.agent.skill_schema
 
 struct agent_skill_execution_state {

@@ -1,7 +1,7 @@
 package neurx.train.skill_evolution
 
 use neurx.agent.skill_feedback
-use neurx.agent.skill_registry
+use neurx.registry.skill_registry
 use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
 use neurx.agent.skill_schema
