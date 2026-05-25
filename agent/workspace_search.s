@@ -19,7 +19,7 @@ func agent_search_candidate_paths(string route) []string {
     []string paths = []string{cap: 12}
     paths.push("agent/runtime.s")
     paths.push("agent/executor.s")
-    paths.push("agent/planner.s")
+    paths.push("planner/planner.s")
     paths.push("agent/memory.s")
     paths.push("agent/workspace_tools.s")
     paths.push("agent/action_schema.s")
