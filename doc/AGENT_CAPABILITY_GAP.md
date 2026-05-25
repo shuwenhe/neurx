@@ -10,7 +10,7 @@ The current NeurX agent is a lightweight local runtime with these pieces:
 - deterministic task progression in [planner.s](/c:/Users/shuwen/neurx/planner/planner.s:1)
 - short and long memory in [memory.s](/c:/Users/shuwen/neurx/agent/memory.s:1)
 - tool registration and per-tool timeout/retry metadata in [tool_registry.s](/c:/Users/shuwen/neurx/agent/tool_registry.s:1)
-- action execution and route selection in [executor.s](/c:/Users/shuwen/neurx/agent/executor.s:1)
+- action execution and route selection in [executor.s](/c:/Users/shuwen/neurx/executor/executor.s:1)
 - trace export, replay, skill synthesis, promotion, and retirement in [trace.s](/c:/Users/shuwen/neurx/agent/trace.s:1), [skill_registry.s](/c:/Users/shuwen/neurx/registry/skill_registry.s:1), and [skill_executor.s](/c:/Users/shuwen/neurx/agent/skill_executor.s:1)
 
 It is already a real agent runtime, but it is not yet a full GPT/Codex-class general-purpose agent platform.
@@ -46,7 +46,7 @@ It is already a real agent runtime, but it is not yet a full GPT/Codex-class gen
 
 ### 1. Decision policy
 
-NeurX currently routes tasks with keyword heuristics in [executor.s](/c:/Users/shuwen/neurx/agent/executor.s:50).
+NeurX currently routes tasks with keyword heuristics in [executor.s](/c:/Users/shuwen/neurx/executor/executor.s:50).
 
 GPT/Codex-style agents usually:
 

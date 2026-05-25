@@ -1,8 +1,8 @@
 package neurx.test_agent_new_modules
 
 use neurx.reflection
-use neurx.agent.context_manager
-use neurx.agent.reasoning
+use neurx.context.context_manager
+use neurx.reasoning.reasoning
 use neurx.agent.subagent
 use neurx.perception.perception
 use neurx.agent.answer_synthesizer
@@ -12,7 +12,7 @@ use neurx.session.session
 use neurx.agent.action_schema
 use neurx.agent.workspace_tools
 use neurx.agent.workspace_search
-use neurx.agent.context_builder
+use neurx.context.context_builder
 use neurx.agent.trace
 use neurx.agent.memory
 use neurx.runtime.io.{runtime_read_text_file}

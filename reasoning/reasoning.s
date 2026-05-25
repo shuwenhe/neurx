@@ -1,4 +1,4 @@
-package neurx.agent.reasoning
+package neurx.reasoning.reasoning
 
 struct agent_reasoning_step {
     int index
@@ -79,12 +79,12 @@ func agent_reasoning_for_goal(agent_reasoning_state state, string goal, string o
 }
 
 func agent_reasoning_last_conclusion(agent_reasoning_state state) string {
-    if state.count == 0 {
+    if state.count <= 0 {
         return ""
     }
     state.steps[state.count - 1].conclusion
 }
 
 func agent_reasoning_export(agent_reasoning_state state) string {
-    "reasoning_steps=" + string(state.count) + " complete=" + string(state.chain_complete) + "\n" + state.scratchpad
+    state.scratchpad
 }
