@@ -1,6 +1,6 @@
 package neurx.test_agent_new_modules
 
-use neurx.agent.reflection
+use neurx.reflection
 use neurx.agent.context_manager
 use neurx.agent.reasoning
 use neurx.agent.subagent

@@ -10,7 +10,7 @@ use neurx.agent.skill_feedback
 use neurx.agent.skill_synthesizer
 use neurx.agent.skill_evaluator
 use neurx.agent.skill_executor
-use neurx.agent.reflection
+use neurx.reflection
 use neurx.agent.context_manager
 use neurx.agent.context_builder
 use neurx.agent.reasoning

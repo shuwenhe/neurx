@@ -1,4 +1,4 @@
-package neurx.agent.reflection
+package neurx.reflection
 
 use neurx.agent.trace
 use neurx.agent.memory
