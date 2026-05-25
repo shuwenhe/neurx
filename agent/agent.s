@@ -4,7 +4,7 @@ use neurx.agent.runtime
 use neurx.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
-use neurx.agent.executor
+use neurx.executor.executor
 use neurx.agent.trace
 use neurx.registry.skill_registry
 

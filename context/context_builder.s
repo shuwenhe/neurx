@@ -1,6 +1,6 @@
-package neurx.agent.context_builder
+package neurx.context.context_builder
 
-use neurx.agent.context_manager
+use neurx.context.context_manager
 use neurx.agent.memory
 
 func agent_context_build_from_memory(agent_context_state context, agent_memory_state memory) agent_context_state {

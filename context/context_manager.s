@@ -1,4 +1,4 @@
-package neurx.agent.context_manager
+package neurx.context.context_manager
 
 struct agent_context_state {
     int token_count
@@ -125,5 +125,5 @@ func agent_context_to_string(agent_context_state state) string {
 }
 
 func agent_context_summary(agent_context_state state) string {
-    "tokens=" + string(state.token_count) + "/" + string(state.max_tokens) + " segments=" + string(len(state.segments)) + " compressions=" + string(state.compressions)
+    "tokens=" + string(state.token_count) + " max=" + string(state.max_tokens) + " compressed=" + string(state.compressed) + " compressions=" + string(state.compressions)
 }
