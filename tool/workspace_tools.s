@@ -554,6 +554,40 @@ func agent_workspace_shell(string command) agent_workspace_command_result {
     agent_workspace_command_result_fail(command, failure)
 }
 
+func agent_workspace_sql_run(string query) agent_workspace_command_result {
+    if trim(query) == "" {
+        return agent_workspace_command_result_fail("", agent_workspace_observation("sql", "blocked", "reason=empty_query"))
+    }
+    string host = trim(runtime_env_get("NEURX_DB_HOST", "127.0.0.1"))
+    string port = trim(runtime_env_get("NEURX_DB_PORT", "3306"))
+    string user = trim(runtime_env_get("NEURX_DB_USER", "neurx"))
+    string pass = trim(runtime_env_get("NEURX_DB_PASS", ""))
+    string db   = trim(runtime_env_get("NEURX_DB_NAME", "neurx"))
+    if host == "" { host = "127.0.0.1" }
+    if port == "" { port = "3306" }
+    if user == "" { user = "neurx" }
+    if db   == "" { db = "neurx" }
+    string cmd = "mysql -h " + runtime_shell_escape(host) + " -P " + port + " -u " + runtime_shell_escape(user)
+    if pass != "" {
+        cmd = cmd + " -p" + runtime_shell_escape(pass)
+    }
+    cmd = cmd + " " + runtime_shell_escape(db) + " -e " + runtime_shell_escape(query) + " 2>&1"
+    string output = trim(runtime_run_command_output(cmd))
+    runtime_command_result run = runtime_run_command(cmd)
+    if run.ok {
+        string obs = agent_workspace_observation("sql", "ok", "db=" + db)
+        if output != "" {
+            obs = obs + ";output=" + agent_workspace_clip(output, 1200)
+        }
+        return agent_workspace_command_result_ok(cmd, obs)
+    }
+    string failure = agent_workspace_observation("sql", "failed", "db=" + db + ";exit_code=" + string(run.exit_code))
+    if output != "" {
+        failure = failure + ";output=" + agent_workspace_clip(output, 1200)
+    }
+    agent_workspace_command_result_fail(cmd, failure)
+}
+
 func agent_workspace_apply_unified_diff(string diff_text) agent_workspace_result {
     if trim(diff_text) == "" {
         return agent_workspace_result_fail(agent_workspace_observation("patch", "blocked", "reason=empty_diff"), "")
