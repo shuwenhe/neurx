@@ -1,5 +1,7 @@
 package neurx.reasoning.reasoning
 
+use neurx.agent.observation
+
 struct agent_reasoning_step {
     int index
     string thought
@@ -67,12 +69,11 @@ func agent_reasoning_for_goal(agent_reasoning_state state, string goal, string o
     string concl1 = "observation=" + observation
     agent_reasoning_state s1 = agent_reasoning_append(state, thought1, concl1)
 
-    string o = lower(trim(observation))
     string thought2 = "assess_progress"
     string concl2 = "ok"
-    if o == "tool_unavailable" || o == "" {
+    if agent_observation_requires_replan(observation) {
         concl2 = "blocked"
-    } else if o == "noop" {
+    } else if agent_observation_is_no_progress(observation) {
         concl2 = "no_progress"
     }
     agent_reasoning_append(s1, thought2, concl2)

@@ -28,6 +28,11 @@ struct agent_skill_record {
     int last_updated_step
     int promote_count
     int fail_count
+    int success_count
+    int total_steps
+    bool promoted
+    bool retired
+    float score
 }
 
 func copy_strings([]string values) []string {
@@ -73,6 +78,11 @@ func new_agent_skill_record(agent_skill_spec spec, agent_skill_metrics metrics, 
         last_updated_step: created_step,
         promote_count: 0,
         fail_count: 0,
+        success_count: 0,
+        total_steps: 0,
+        promoted: false,
+        retired: false,
+        score: 0.0,
     }
 }
 
@@ -111,6 +121,11 @@ func agent_skill_record_state_dict(agent_skill_record record) agent_skill_record
         last_updated_step: record.last_updated_step,
         promote_count: record.promote_count,
         fail_count: record.fail_count,
+        success_count: record.success_count,
+        total_steps: record.total_steps,
+        promoted: record.promoted,
+        retired: record.retired,
+        score: record.score,
     }
 }
 
@@ -122,5 +137,10 @@ func agent_skill_record_load_state_dict(agent_skill_record record, agent_skill_r
         last_updated_step: other.last_updated_step,
         promote_count: other.promote_count,
         fail_count: other.fail_count,
+        success_count: other.success_count,
+        total_steps: other.total_steps,
+        promoted: other.promoted,
+        retired: other.retired,
+        score: other.score,
     }
 }

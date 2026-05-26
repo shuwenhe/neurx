@@ -1,6 +1,7 @@
 package neurx.agent
 
 use neurx.agent.runtime
+use neurx.agent.observation
 use neurx.planner
 use neurx.agent.memory
 use neurx.agent.tool_registry
@@ -448,8 +449,17 @@ func agent_trace_last_n_summary(agent_runtime_state state, int n) string {
             out = out + "\n"
         }
         string ok_tag = "fail"
-        if state.trace.ok_flags[i] {
+        agent_observation_state parsed = agent_observation_parse(state.trace.observations[i])
+        if parsed.terminal {
+            ok_tag = "done"
+        } else if parsed.ok {
             ok_tag = "ok"
+        } else if parsed.blocked {
+            ok_tag = "blocked"
+        } else if parsed.failed {
+            ok_tag = "failed"
+        } else if parsed.no_progress {
+            ok_tag = "no_progress"
         }
         out = out + "[" + string(i) + "] task=" + state.trace.tasks[i] + " action=" + state.trace.actions[i] + " " + ok_tag + " obs=" + state.trace.observations[i]
         i = i + 1

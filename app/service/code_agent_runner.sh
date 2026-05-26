@@ -63,6 +63,67 @@ emit_json() {
     "$(json_escape "$REPO_ROOT")"
 }
 
+emit_envelope() {
+  local status="$1"
+  local mode="$2"
+  local response="$3"
+  local plan="$4"
+  local file_context="${5:-}"
+  local summary="${6:-}"
+  local actions_json="${7:-[]}"
+  local action_results_json="${8:-[]}"
+  printf '{"protocol_version":"neurx.code_agent.v1","status":"%s","mode":"%s","summary":"%s","response":"%s","plan":"%s","file_context":"%s","actions":%s,"action_results":%s,"prompt":"%s","file_path":"%s","repo_root":"%s"}' \
+    "$(json_escape "$status")" \
+    "$(json_escape "$mode")" \
+    "$(json_escape "$summary")" \
+    "$(json_escape "$response")" \
+    "$(json_escape "$plan")" \
+    "$(json_escape "$file_context")" \
+    "$actions_json" \
+    "$action_results_json" \
+    "$(json_escape "$PROMPT")" \
+    "$(json_escape "$FILE_PATH")" \
+    "$(json_escape "$REPO_ROOT")"
+}
+
+build_action_json() {
+  local tool="$1"
+  local args_json="${2:-{}}"
+  local summary="${3:-}"
+  local requires_approval="${4:-false}"
+  printf '%s' '{"tool":"'
+  printf '%s' "$(json_escape "$tool")"
+  printf '%s' '","args":'
+  printf '%s' "$args_json"
+  printf '%s' ',"summary":"'
+  printf '%s' "$(json_escape "$summary")"
+  printf '%s' '","requires_approval":'
+  printf '%s' "$requires_approval"
+  printf '%s' '}'
+}
+
+build_action_result_json() {
+  local ok="$1"
+  local tool="$2"
+  local summary="${3:-}"
+  local output="${4:-}"
+  local changed_paths_json="${5:-[]}"
+  local requires_approval="${6:-false}"
+  printf '%s' '{"ok":'
+  printf '%s' "$ok"
+  printf '%s' ',"tool":"'
+  printf '%s' "$(json_escape "$tool")"
+  printf '%s' '","summary":"'
+  printf '%s' "$(json_escape "$summary")"
+  printf '%s' '","output":"'
+  printf '%s' "$(json_escape "$output")"
+  printf '%s' '","changed_paths":'
+  printf '%s' "$changed_paths_json"
+  printf '%s' ',"requires_approval":'
+  printf '%s' "$requires_approval"
+  printf '%s' '}'
+}
+
 model_loop_enabled() {
   [[ "$MODEL_LOOP_ENABLED" == "1" || "$MODEL_LOOP_ENABLED" == "true" || "$MODEL_LOOP_ENABLED" == "yes" ]]
 }
@@ -835,7 +896,9 @@ EOF
 
 lower_prompt="$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')"
 if template_completion="$(infer_template_completion "$lower_prompt")"; then
-  emit_json "completed" "template" "$template_completion" "Matched a local code template and returned it directly." ""
+  completed_summary="Matched a local code template and returned it directly."
+  action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$template_completion" "[]" "false")"
+  emit_envelope "completed" "template" "$template_completion" "Matched a local code template and returned it directly." "" "$completed_summary" "[]" "[$action_result_json]"
   exit 0
 fi
 
@@ -849,27 +912,37 @@ if language="$(detect_language "$lower_prompt")"; then
         validated_code="$(repair_cpp_program "$validated_code")"
       fi
       if validate_cpp_program "$validated_code"; then
-        emit_json "completed" "synthesized-cpp" "$validated_code" "Synthesized a C++ standalone program and validated it with g++." ""
+        completed_summary="Synthesized a C++ standalone program and validated it with g++."
+        action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$validated_code" "[]" "false")"
+        emit_envelope "completed" "synthesized-cpp" "$validated_code" "Synthesized a C++ standalone program and validated it with g++." "" "$completed_summary" "[]" "[$action_result_json]"
         exit 0
       fi
     fi
     if [[ "$language" == "python" ]] && validate_python_program "$synthesized_code"; then
-      emit_json "completed" "synthesized-python" "$synthesized_code" "Synthesized a Python standalone program and validated it with python3 -m py_compile." ""
+      completed_summary="Synthesized a Python standalone program and validated it with python3 -m py_compile."
+      action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$synthesized_code" "[]" "false")"
+      emit_envelope "completed" "synthesized-python" "$synthesized_code" "Synthesized a Python standalone program and validated it with python3 -m py_compile." "" "$completed_summary" "[]" "[$action_result_json]"
       exit 0
     fi
     if [[ "$language" == "javascript" ]] && validate_javascript_program "$synthesized_code"; then
-      emit_json "completed" "synthesized-javascript" "$synthesized_code" "Synthesized a JavaScript standalone program and validated it with node --check." ""
+      completed_summary="Synthesized a JavaScript standalone program and validated it with node --check."
+      action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$synthesized_code" "[]" "false")"
+      emit_envelope "completed" "synthesized-javascript" "$synthesized_code" "Synthesized a JavaScript standalone program and validated it with node --check." "" "$completed_summary" "[]" "[$action_result_json]"
       exit 0
     fi
     if [[ "$language" == "go" ]] && validate_go_program "$synthesized_code"; then
-      emit_json "completed" "synthesized-go" "$synthesized_code" "Synthesized a Go standalone program and validated it with go build." ""
+      completed_summary="Synthesized a Go standalone program and validated it with go build."
+      action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$synthesized_code" "[]" "false")"
+      emit_envelope "completed" "synthesized-go" "$synthesized_code" "Synthesized a Go standalone program and validated it with go build." "" "$completed_summary" "[]" "[$action_result_json]"
       exit 0
     fi
   fi
 
   model_code=""
   if model_code="$(generate_with_model_loop "$language" "$PROMPT")"; then
-    emit_json "completed" "model-loop-${language}" "$model_code" "Generated code with the model loop and validated it locally." ""
+    completed_summary="Generated code with the model loop and validated it locally."
+    action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$model_code" "[]" "false")"
+    emit_envelope "completed" "model-loop-${language}" "$model_code" "Generated code with the model loop and validated it locally." "" "$completed_summary" "[]" "[$action_result_json]"
     exit 0
   fi
 fi
@@ -880,4 +953,10 @@ if [[ -n "$FILE_PATH" && -f "$FILE_PATH" ]]; then
 fi
 
 plan="1. Inspect workspace context. 2. Read target files. 3. Ask model for code or patch. 4. Apply changes. 5. Build and test. 6. Repair failures."
-emit_json "unhandled" "planner" "" "$plan" "$file_context"
+actions_json="[]"
+if [[ -n "$FILE_PATH" ]]; then
+  actions_json="$(printf '[{"tool":"read_file","args":{"path":"%s","start_line":1,"line_count":120},"summary":"Read the target file before proposing edits.","requires_approval":false}]' \
+    "$(json_escape "$FILE_PATH")")"
+fi
+summary="Runner delegated the request to the bridge planner and attached the first suggested actions."
+emit_envelope "unhandled" "planner" "" "$plan" "$file_context" "$summary" "$actions_json" "[]"

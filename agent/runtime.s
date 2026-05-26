@@ -2,6 +2,7 @@ package neurx.agent.runtime
 
 use neurx.planner
 use neurx.agent.memory
+use neurx.agent.action_schema
 use neurx.agent.tool_registry
 use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.trace
@@ -17,9 +18,11 @@ use neurx.reasoning.reasoning
 use neurx.agent.subagent
 use neurx.perception.perception
 use neurx.agent.answer_synthesizer
+use neurx.agent.observation
 use neurx.agent.interrupt
 use neurx.safety.safety
 use neurx.session.session
+use neurx.agent.workspace_tools
 use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
 
 struct agent_runtime_state {
@@ -46,6 +49,521 @@ struct agent_runtime_state {
 func trim_or_empty(string value) string {
     string next = trim(value)
     next
+}
+
+func agent_runtime_observation(string kind, string status, string details) string {
+    string obs = kind + ":status=" + status
+    if trim(details) != "" {
+        obs = obs + ";" + details
+    }
+    obs
+}
+
+func agent_runtime_finalize_memory(agent_memory_state memory_state, agent_trace_state trace_state) agent_memory_state {
+    agent_memory_lookup_result final_result = agent_memory_lookup_long(memory_state, "final_answer")
+    if final_result.found && trim(final_result.value) != "" {
+        return memory_state
+    }
+    string fallback = agent_trace_last_progress_observation(trace_state)
+    if trim(fallback) == "" {
+        return memory_state
+    }
+    agent_memory_write_long(memory_state, "final_answer", fallback)
+}
+
+func agent_runtime_max_repair_attempts() int {
+    2
+}
+
+func agent_runtime_repair_attempt_count(agent_memory_state memory_state) int {
+    agent_memory_lookup_result count_result = agent_memory_lookup_short(memory_state, "repair_attempt_count")
+    if !count_result.found || trim(count_result.value) == "" {
+        return 0
+    }
+    string raw = count_result.value
+    int value = 0
+    int i = 0
+    while i < len(raw) {
+        if s_char_is_digit(raw, i) {
+            value = value * 10 + s_char_digit_val(raw, i)
+        }
+        i = i + 1
+    }
+    value
+}
+
+func agent_runtime_clear_repair_state(agent_memory_state memory_state) agent_memory_state {
+    agent_memory_state next = memory_state
+    next = agent_memory_delete(next, "repair_attempt_count")
+    next = agent_memory_delete(next, "repair_last_failure")
+    next = agent_memory_delete(next, "repair_last_failure_kind")
+    next = agent_memory_delete(next, "repair_failure_summary")
+    next
+}
+
+func agent_runtime_record_repair_failure(agent_memory_state memory_state, string task, string observation) agent_memory_state {
+    int attempts = agent_runtime_repair_attempt_count(memory_state) + 1
+    agent_memory_state next = agent_memory_write_short(memory_state, "repair_attempt_count", string(attempts))
+    next = agent_memory_write_long(next, "repair_last_failure", observation)
+    next = agent_memory_write_short(next, "repair_last_failure_kind", lower(trim(task)))
+    next
+}
+
+func agent_runtime_preferred_failure_summary(agent_memory_state memory_state, string task, string observation) string {
+    string kind = lower(trim(task))
+    agent_memory_lookup_result summary_result = agent_memory_lookup_long(memory_state, "last_" + kind + "_failure_summary")
+    if summary_result.found && trim(summary_result.value) != "" {
+        return summary_result.value
+    }
+    agent_memory_lookup_result repair_result = agent_memory_lookup_long(summary_result.state, "repair_last_failure")
+    if repair_result.found && trim(repair_result.value) != "" {
+        return repair_result.value
+    }
+    observation
+}
+
+func agent_runtime_repair_failure_summary(string task, string failure_summary_source, int attempts, int limit, string reason) string {
+    string details = "kind=" + lower(trim(task))
+    details = details + ";attempts=" + string(attempts)
+    details = details + ";limit=" + string(limit)
+    details = details + ";reason=" + reason
+    if trim(failure_summary_source) != "" {
+        details = details + ";last_failure=" + agent_workspace_clip(failure_summary_source, 200)
+    }
+    agent_runtime_observation("repair", "failed", details)
+}
+
+func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_plan_state next_plan, agent_memory_state memory_state, agent_execute_result result, string input, string failure_summary) agent_runtime_state {
+    agent_memory_state final_memory = agent_memory_write_long(memory_state, "repair_failure_summary", failure_summary)
+    final_memory = agent_memory_write_long(final_memory, "final_answer", failure_summary)
+    agent_reflection_state next_reflection = agent_reflect(
+        state.reflection, state.plan.goal, result.action, failure_summary, state.steps + 1
+    )
+    agent_trace_state next_trace = agent_trace_append(
+        state.trace,
+        state.steps + 1,
+        state.plan.current_task,
+        "",
+        result.action,
+        failure_summary,
+        state.skill_execution.active_skill,
+        result.tool_name,
+        result.tool_timeout_ms,
+        result.tool_retries,
+        false
+    )
+    agent_reasoning_state next_reasoning = agent_reasoning_for_goal(
+        state.reasoning, state.plan.goal, state.last_observation
+    )
+    agent_context_state next_context = agent_context_maybe_compress(
+        agent_context_append(state.context, input)
+    )
+    next_context = agent_context_append(next_context, failure_summary)
+    next_context = agent_context_build_from_memory(next_context, final_memory)
+    agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), failure_summary)
+    agent_skill_registry_state next_skills = agent_runtime_update_skills(state, next_trace, final_memory)
+    agent_skill_execution_state next_skill_execution = agent_skill_execute(next_skills, "complete")
+    agent_answer_state next_answer = agent_answer_synthesize(state.answer, next_trace, final_memory, state.steps + 1)
+    agent_runtime_state finished_state = agent_runtime_state {
+        plan: next_plan,
+        memory: final_memory,
+        tools: result.tools,
+        trace: next_trace,
+        skills: next_skills,
+        skill_execution: next_skill_execution,
+        reflection: next_reflection,
+        context: next_context,
+        reasoning: next_reasoning,
+        subagents: state.subagents,
+        answer: next_answer,
+        interrupt: state.interrupt,
+        session: next_session,
+        steps: state.steps + 1,
+        finished: true,
+        last_action: result.action,
+        last_observation: failure_summary,
+        model_path: state.model_path,
+    }
+    agent_runtime_persist_skill_snapshot(finished_state, ".neurx_skills.snapshot")
+    finished_state
+}
+
+func agent_runtime_requires_approval(string task) bool {
+    string t = lower(trim(task))
+    t == "write" || t == "write_file" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
+}
+
+func agent_runtime_approval_matches(string granted, string task) bool {
+    string g = lower(trim(granted))
+    string t = lower(trim(task))
+    if g == "" || t == "" {
+        return false
+    }
+    if g == t {
+        return true
+    }
+    if g == "write" && t == "write_file" {
+        return true
+    }
+    if g == "delete" && t == "delete_path" {
+        return true
+    }
+    if g == "apply_patch" && t == "patch" {
+        return true
+    }
+    false
+}
+
+func agent_runtime_interrupt_observation(string reason, string action) string {
+    string details = "reason=" + reason
+    if trim(action) != "" {
+        details = details + ";action=" + action
+    }
+    agent_runtime_observation("interrupt", "blocked", details)
+}
+
+func agent_runtime_pending_count(agent_memory_state memory_state) int {
+    agent_memory_lookup_result count_result = agent_memory_lookup_short(memory_state, "pending_change_count")
+    if !count_result.found || trim(count_result.value) == "" {
+        return 0
+    }
+    string raw = count_result.value
+    int value = 0
+    int i = 0
+    while i < len(raw) {
+        if s_char_is_digit(raw, i) {
+            value = value * 10 + s_char_digit_val(raw, i)
+        }
+        i = i + 1
+    }
+    value
+}
+
+func agent_runtime_pending_change_path(string action, string raw_input) string {
+    agent_action_state parsed = agent_action_parse(raw_input, action)
+    string path = trim(parsed.path)
+    if path != "" {
+        return path
+    }
+    if action == "delete" || action == "delete_path" {
+        return trim(raw_input)
+    }
+    ""
+}
+
+func agent_runtime_pending_change_preview(string action, string raw_input) string {
+    agent_action_state parsed = agent_action_parse(raw_input, action)
+    if action == "write" || action == "write_file" || action == "code" {
+        return agent_workspace_clip(parsed.content, 180)
+    }
+    if action == "apply_patch" || action == "patch" {
+        return "old=" + agent_workspace_clip(parsed.old_text, 80) + " new=" + agent_workspace_clip(parsed.new_text, 80)
+    }
+    if action == "delete" || action == "delete_path" {
+        return "delete " + agent_runtime_pending_change_path(action, raw_input)
+    }
+    agent_workspace_clip(raw_input, 180)
+}
+
+func agent_runtime_stage_pending_change(agent_memory_state memory_state, string action, string raw_input) agent_memory_state {
+    int count = agent_runtime_pending_count(memory_state)
+    string idx = string(count)
+    agent_memory_state next = agent_memory_write_long(memory_state, "pending_change_action_" + idx, action)
+    next = agent_memory_write_long(next, "pending_change_input_" + idx, raw_input)
+    string path = agent_runtime_pending_change_path(action, raw_input)
+    if path != "" {
+        next = agent_memory_write_long(next, "pending_change_path_" + idx, path)
+    }
+    string preview = agent_runtime_pending_change_preview(action, raw_input)
+    if preview != "" {
+        next = agent_memory_write_long(next, "pending_change_preview_" + idx, preview)
+    }
+    next = agent_memory_write_short(next, "pending_change_count", string(count + 1))
+    next
+}
+
+func agent_runtime_pending_summary(agent_memory_state memory_state) string {
+    int count = agent_runtime_pending_count(memory_state)
+    if count <= 0 {
+        return agent_runtime_observation("show_pending_changes", "no_progress", "pending_change_count=0")
+    }
+    string out = agent_runtime_observation("show_pending_changes", "ok", "pending_change_count=" + string(count))
+    int i = 0
+    while i < count {
+        string idx = string(i)
+        agent_memory_lookup_result action_result = agent_memory_lookup_long(memory_state, "pending_change_action_" + idx)
+        agent_memory_lookup_result input_result = agent_memory_lookup_long(action_result.state, "pending_change_input_" + idx)
+        agent_memory_lookup_result path_result = agent_memory_lookup_long(input_result.state, "pending_change_path_" + idx)
+        agent_memory_lookup_result preview_result = agent_memory_lookup_long(path_result.state, "pending_change_preview_" + idx)
+        out = out + "\npending_change[" + idx + "].action=" + action_result.value
+        if trim(path_result.value) != "" {
+            out = out + "\npending_change[" + idx + "].path=" + path_result.value
+        }
+        if trim(preview_result.value) != "" {
+            out = out + "\npending_change[" + idx + "].preview=" + preview_result.value
+        }
+        i = i + 1
+    }
+    out
+}
+
+func agent_runtime_apply_staged_change(string action, string raw_input) string {
+    agent_action_state parsed = agent_action_parse(raw_input, action)
+    if action == "write" || action == "write_file" {
+        string write_path = parsed.path
+        string write_content = parsed.content
+        if write_path == "" || write_content == "" {
+            return agent_runtime_observation("apply_pending_changes", "failed", "action=write;reason=args_missing")
+        }
+        return agent_workspace_write(write_path, write_content).observation
+    }
+    if action == "delete" || action == "delete_path" {
+        string del_path = parsed.path
+        if del_path == "" {
+            del_path = raw_input
+        }
+        return agent_workspace_delete(del_path).observation
+    }
+    if action == "apply_patch" || action == "patch" {
+        if parsed.path == "" || parsed.old_text == "" || parsed.new_text == "" {
+            return agent_runtime_observation("apply_pending_changes", "failed", "action=apply_patch;reason=args_missing")
+        }
+        return agent_workspace_apply_patch(parsed.path, parsed.old_text, parsed.new_text, parsed.replace_all).observation
+    }
+    if action == "code" {
+        string code_path = parsed.path
+        string code_content = parsed.content
+        if code_path == "" || code_content == "" {
+            return agent_runtime_observation("apply_pending_changes", "failed", "action=code;reason=args_missing")
+        }
+        return agent_workspace_write(code_path, code_content).observation
+    }
+    agent_runtime_observation("apply_pending_changes", "failed", "action=" + action + ";reason=unsupported")
+}
+
+func agent_runtime_clear_pending_changes(agent_memory_state memory_state) agent_memory_state {
+    int count = agent_runtime_pending_count(memory_state)
+    agent_memory_state next = memory_state
+    int i = 0
+    while i < count {
+        string idx = string(i)
+        next = agent_memory_delete(next, "pending_change_action_" + idx)
+        next = agent_memory_delete(next, "pending_change_input_" + idx)
+        next = agent_memory_delete(next, "pending_change_path_" + idx)
+        next = agent_memory_delete(next, "pending_change_preview_" + idx)
+        i = i + 1
+    }
+    agent_memory_write_short(next, "pending_change_count", "0")
+}
+
+func agent_runtime_apply_pending_changes(agent_memory_state memory_state) agent_workspace_result {
+    int count = agent_runtime_pending_count(memory_state)
+    if count <= 0 {
+        return agent_workspace_result {
+            ok: false,
+            observation: agent_runtime_observation("apply_pending_changes", "no_progress", "pending_change_count=0"),
+            resolved_path: "",
+        }
+    }
+    string out = agent_runtime_observation("apply_pending_changes", "ok", "pending_change_count=" + string(count))
+    bool all_ok = true
+    int changed_count = 0
+    int i = 0
+    while i < count {
+        string idx = string(i)
+        agent_memory_lookup_result action_result = agent_memory_lookup_long(memory_state, "pending_change_action_" + idx)
+        agent_memory_lookup_result input_result = agent_memory_lookup_long(action_result.state, "pending_change_input_" + idx)
+        agent_memory_lookup_result path_result = agent_memory_lookup_long(input_result.state, "pending_change_path_" + idx)
+        string applied = agent_runtime_apply_staged_change(action_result.value, input_result.value)
+        agent_observation_state parsed = agent_observation_parse(applied)
+        if !parsed.ok && !parsed.terminal {
+            all_ok = false
+        } else {
+            if trim(path_result.value) != "" {
+                out = out + "\nchanged_path=" + path_result.value
+            }
+            changed_count = changed_count + 1
+        }
+        out = out + "\napplied[" + idx + "]=" + applied
+        i = i + 1
+    }
+    out = out + "\nchanged_path_count=" + string(changed_count)
+    agent_workspace_result {
+        ok: all_ok,
+        observation: out,
+        resolved_path: "",
+    }
+}
+
+func agent_runtime_with_interrupt(agent_runtime_state state, agent_interrupt_state interrupt_state) agent_runtime_state {
+    agent_runtime_state {
+        plan: state.plan,
+        memory: state.memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: interrupt_state,
+        session: state.session,
+        steps: state.steps,
+        finished: state.finished,
+        last_action: state.last_action,
+        last_observation: state.last_observation,
+        model_path: state.model_path,
+    }
+}
+
+func agent_runtime_make_interrupt_pending(agent_runtime_state state, string input) agent_runtime_state {
+    string action = state.plan.current_task
+    string observation = agent_runtime_interrupt_observation("approval_required", action)
+    agent_interrupt_state next_interrupt = agent_interrupt_request(state.interrupt, action, observation)
+    agent_memory_state next_memory = agent_memory_write_short(state.memory, "interrupt_resume_input", input)
+    next_memory = agent_memory_write_short(next_memory, "interrupt_resume_task", state.plan.current_task)
+    agent_trace_state next_trace = agent_trace_append(
+        state.trace,
+        state.steps + 1,
+        state.plan.current_task,
+        input,
+        "interrupt_request",
+        observation,
+        state.skill_execution.active_skill,
+        "",
+        0,
+        0,
+        false
+    )
+    agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
+    agent_context_state next_context = agent_context_append(
+        agent_context_maybe_compress(agent_context_append(state.context, input)),
+        observation
+    )
+    agent_runtime_state {
+        plan: state.plan,
+        memory: next_memory,
+        tools: state.tools,
+        trace: next_trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: next_context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: state.answer,
+        interrupt: next_interrupt,
+        session: next_session,
+        steps: state.steps + 1,
+        finished: false,
+        last_action: "interrupt_request",
+        last_observation: observation,
+        model_path: state.model_path,
+    }
+}
+
+func agent_runtime_handle_interrupt_response(agent_runtime_state state, string input) agent_runtime_state {
+    agent_interrupt_state resolved = agent_interrupt_resolve(state.interrupt, input)
+    if agent_interrupt_approved(resolved) {
+        agent_memory_lookup_result resume_input_result = agent_memory_lookup_short(state.memory, "interrupt_resume_input")
+        string resume_input = input
+        agent_memory_state next_memory = state.memory
+        if resume_input_result.found && trim(resume_input_result.value) != "" {
+            resume_input = resume_input_result.value
+            next_memory = resume_input_result.state
+        }
+        next_memory = agent_runtime_stage_pending_change(next_memory, resolved.kind, resume_input)
+        string observation = agent_runtime_observation("pending_change", "ok", "action=" + resolved.kind + ";pending_change_count=" + string(agent_runtime_pending_count(next_memory)))
+        agent_trace_state next_trace = agent_trace_append(
+            state.trace,
+            state.steps + 1,
+            state.plan.current_task,
+            input,
+            "interrupt_approved",
+            observation,
+            state.skill_execution.active_skill,
+            "",
+            0,
+            0,
+            true
+        )
+        agent_plan_state next_plan = agent_plan_set_task(state.plan, "analyze")
+        agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
+        agent_context_state next_context = agent_context_append(
+            agent_context_maybe_compress(agent_context_append(state.context, input)),
+            observation
+        )
+        return agent_runtime_state {
+            plan: next_plan,
+            memory: next_memory,
+            tools: state.tools,
+            trace: next_trace,
+            skills: state.skills,
+            skill_execution: state.skill_execution,
+            reflection: state.reflection,
+            context: next_context,
+            reasoning: state.reasoning,
+            subagents: state.subagents,
+            answer: state.answer,
+            interrupt: resolved,
+            session: next_session,
+            steps: state.steps + 1,
+            finished: false,
+            last_action: "interrupt_approved",
+            last_observation: observation,
+            model_path: state.model_path,
+        }
+    }
+
+    string action = state.interrupt.kind
+    string observation = agent_runtime_interrupt_observation("approval_denied", action)
+    agent_trace_state next_trace = agent_trace_append(
+        state.trace,
+        state.steps + 1,
+        state.plan.current_task,
+        input,
+        "interrupt_denied",
+        observation,
+        state.skill_execution.active_skill,
+        "",
+        0,
+        0,
+        false
+    )
+    agent_memory_state next_memory = agent_memory_write_short(state.memory, "replan_reason", observation)
+    agent_plan_state next_plan = agent_plan_set_task(state.plan, "analyze")
+    agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
+    agent_context_state next_context = agent_context_append(
+        agent_context_maybe_compress(agent_context_append(state.context, input)),
+        observation
+    )
+    agent_answer_state next_answer = state.answer
+    if next_plan.finished {
+        next_memory = agent_runtime_finalize_memory(next_memory, next_trace)
+        next_answer = agent_answer_synthesize(state.answer, next_trace, next_memory, state.steps + 1)
+    }
+    agent_runtime_state {
+        plan: next_plan,
+        memory: next_memory,
+        tools: state.tools,
+        trace: next_trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: next_context,
+        reasoning: state.reasoning,
+        subagents: state.subagents,
+        answer: next_answer,
+        interrupt: resolved,
+        session: next_session,
+        steps: state.steps + 1,
+        finished: next_plan.finished,
+        last_action: "interrupt_denied",
+        last_observation: observation,
+        model_path: state.model_path,
+    }
 }
 
 func s_char_is_digit(string s, int i) bool {
@@ -117,7 +635,17 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
     tools = agent_tool_registry_add(tools, "test", true, 20000, 0)
     if resolved_model_path != "" {
         tools = agent_tool_registry_add(tools, "infer", true, 32000, 1)
+        tools = agent_tool_registry_add(tools, "code", true, 60000, 1)
+        tools = agent_tool_registry_add(tools, "review", true, 32000, 1)
     }
+    tools = agent_tool_registry_add(tools, "repo", true, 5000, 1)
+    tools = agent_tool_registry_add(tools, "shell", true, 30000, 0)
+    tools = agent_tool_registry_add(tools, "git_status", true, 5000, 1)
+    tools = agent_tool_registry_add(tools, "git_diff", true, 5000, 1)
+    tools = agent_tool_registry_add(tools, "git_log", true, 5000, 1)
+    tools = agent_tool_registry_add(tools, "git_commit", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "grep", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "find_symbol", true, 10000, 1)
 
     string session_id = "session_" + string(0)
     agent_runtime_state {
@@ -146,7 +674,7 @@ func agent_runtime_should_synthesize_skill(agent_skill_feedback_state feedback) 
     if !feedback.success {
         return false
     }
-    feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize"
+    feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize" || feedback.task == "shell"
 }
 
 func agent_runtime_retire_failure_threshold() int {
@@ -175,9 +703,12 @@ func agent_runtime_update_skills(agent_runtime_state state, agent_trace_state tr
         next = agent_skill_registry_upsert(next, record)
         next = agent_skill_registry_record_success(next, skill_name, feedback.step, state.skill_execution.step_count)
         agent_skill_eval_result eval = agent_skill_evaluate(agent_skill_registry_get(next, skill_name), 60.0, -20.0)
+        next = agent_skill_registry_set_score(next, skill_name, eval.score)
         if eval.should_promote {
             next = agent_skill_registry_promote(next, skill_name)
             next = agent_skill_registry_activate_best(next)
+        } else if eval.should_retire {
+            next = agent_skill_registry_retire(next, skill_name)
         }
         return next
     }
@@ -187,7 +718,7 @@ func agent_runtime_update_skills(agent_runtime_state state, agent_trace_state tr
         if agent_skill_registry_has(next, failed_skill) {
             agent_skill_record failed_record = agent_skill_registry_get(next, failed_skill)
             bool signal_matched = agent_skill_registry_observation_matches_failure(failed_record, feedback.signal)
-            if signal_matched || feedback.signal == "tool_unavailable" {
+            if signal_matched {
                 agent_skill_registry_state after_failure = agent_skill_registry_record_failure(next, failed_skill, feedback.step, agent_runtime_retire_failure_threshold())
                 return agent_skill_registry_activate_best(after_failure)
             }
@@ -236,24 +767,41 @@ func agent_runtime_export_trajectory(agent_runtime_state state, string path) str
 }
 
 func agent_runtime_make_blocked(agent_runtime_state state, string reason) agent_runtime_state {
+    string blocked_observation = agent_runtime_observation("safety", "blocked", "reason=" + reason)
+    agent_trace_state next_trace = agent_trace_append(
+        state.trace,
+        state.steps + 1,
+        state.plan.current_task,
+        "",
+        "blocked",
+        blocked_observation,
+        state.skill_execution.active_skill,
+        "",
+        0,
+        0,
+        false
+    )
+    agent_memory_state next_memory = state.memory
+    agent_answer_state next_answer = state.answer
+    next_answer = agent_answer_synthesize(next_answer, next_trace, next_memory, state.steps + 1)
     agent_runtime_state {
         plan: state.plan,
-        memory: state.memory,
+        memory: next_memory,
         tools: state.tools,
-        trace: state.trace,
+        trace: next_trace,
         skills: state.skills,
         skill_execution: state.skill_execution,
         reflection: state.reflection,
         context: state.context,
         reasoning: state.reasoning,
         subagents: state.subagents,
-        answer: state.answer,
+        answer: next_answer,
         interrupt: state.interrupt,
         session: state.session,
         steps: state.steps + 1,
         finished: true,
         last_action: "blocked",
-        last_observation: "safety:" + reason,
+        last_observation: blocked_observation,
         model_path: state.model_path,
     }
 }
@@ -263,9 +811,79 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         return state
     }
 
+    if state.interrupt.pending {
+        return agent_runtime_handle_interrupt_response(state, input)
+    }
+
     agent_safety_result safety = agent_safety_check(state.plan.current_task, input, state.plan.goal)
     if !safety.allowed {
         return agent_runtime_make_blocked(state, safety.reason)
+    }
+
+    if state.plan.current_task == "show_pending_changes" {
+        string observation = agent_runtime_pending_summary(state.memory)
+        agent_trace_state next_trace = agent_trace_append(state.trace, state.steps + 1, state.plan.current_task, input, "show_pending_changes", observation, state.skill_execution.active_skill, "", 0, 0, agent_observation_is_progress(observation))
+        return agent_runtime_state {
+            plan: agent_plan_set_task(state.plan, "analyze"),
+            memory: state.memory,
+            tools: state.tools,
+            trace: next_trace,
+            skills: state.skills,
+            skill_execution: state.skill_execution,
+            reflection: state.reflection,
+            context: agent_context_append(agent_context_maybe_compress(agent_context_append(state.context, input)), observation),
+            reasoning: state.reasoning,
+            subagents: state.subagents,
+            answer: state.answer,
+            interrupt: state.interrupt,
+            session: agent_session_assistant(agent_session_user(state.session, input), observation),
+            steps: state.steps + 1,
+            finished: false,
+            last_action: "show_pending_changes",
+            last_observation: observation,
+            model_path: state.model_path,
+        }
+    }
+
+    if state.plan.current_task == "apply_pending_changes" {
+        agent_workspace_result apply_result = agent_runtime_apply_pending_changes(state.memory)
+        agent_memory_state next_memory = state.memory
+        if apply_result.ok {
+            next_memory = agent_runtime_clear_pending_changes(next_memory)
+        }
+        agent_trace_state next_trace = agent_trace_append(state.trace, state.steps + 1, state.plan.current_task, input, "apply_pending_changes", apply_result.observation, state.skill_execution.active_skill, "", 0, 0, apply_result.ok)
+        return agent_runtime_state {
+            plan: agent_plan_set_task(state.plan, "analyze"),
+            memory: next_memory,
+            tools: state.tools,
+            trace: next_trace,
+            skills: state.skills,
+            skill_execution: state.skill_execution,
+            reflection: state.reflection,
+            context: agent_context_append(agent_context_maybe_compress(agent_context_append(state.context, input)), apply_result.observation),
+            reasoning: state.reasoning,
+            subagents: state.subagents,
+            answer: state.answer,
+            interrupt: state.interrupt,
+            session: agent_session_assistant(agent_session_user(state.session, input), apply_result.observation),
+            steps: state.steps + 1,
+            finished: false,
+            last_action: "apply_pending_changes",
+            last_observation: apply_result.observation,
+            model_path: state.model_path,
+        }
+    }
+
+    agent_memory_state approval_memory = state.memory
+    bool approval_granted = false
+    agent_memory_lookup_result approval_result = agent_memory_lookup_short(approval_memory, "interrupt_approval_granted_for")
+    if approval_result.found && agent_runtime_approval_matches(approval_result.value, state.plan.current_task) {
+        approval_granted = true
+        approval_memory = approval_result.state
+    }
+
+    if agent_runtime_requires_approval(state.plan.current_task) && !approval_granted {
+        return agent_runtime_make_interrupt_pending(state, input)
     }
 
     agent_session_state next_session = agent_session_user(state.session, input)
@@ -278,7 +896,78 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         state.reasoning, state.plan.goal, state.last_observation
     )
 
-    agent_execute_result result = agent_execute_step(state.tools, state.memory, state.plan.goal, state.plan.current_task, input, state.model_path)
+    agent_execute_result result = agent_execute_step(state.tools, approval_memory, state.plan.goal, state.plan.current_task, input, state.model_path)
+    agent_memory_state execution_memory = result.memory
+    agent_subagent_registry_state current_subagents = state.subagents
+    agent_memory_lookup_result spawn_goal = agent_memory_lookup_long(execution_memory, "subagent_goal")
+    if spawn_goal.found && spawn_goal.value != "" {
+        agent_memory_lookup_result spawn_input = agent_memory_lookup_long(execution_memory, "subagent_input")
+        agent_memory_lookup_result spawn_steps_raw = agent_memory_lookup_short(execution_memory, "subagent_max_steps")
+        int spawn_max_steps = 16
+        if spawn_steps_raw.found && spawn_steps_raw.value != "" {
+            string smsr = spawn_steps_raw.value
+            int smsv = 0
+            int si = 0
+            while si < len(smsr) {
+                if s_char_is_digit(smsr, si) {
+                    smsv = smsv * 10 + s_char_digit_val(smsr, si)
+                }
+                si = si + 1
+            }
+            if smsv > 0 {
+                spawn_max_steps = smsv
+            }
+        }
+        string spawn_inp = ""
+        if spawn_input.found {
+            spawn_inp = spawn_input.value
+            execution_memory = spawn_input.state
+        }
+        current_subagents = agent_subagent_spawn(current_subagents, spawn_goal.value, spawn_inp, spawn_max_steps)
+        execution_memory = spawn_goal.state
+    }
+    agent_observation_state execution_observation = agent_observation_parse(result.observation)
+    bool repair_task = state.plan.current_task == "build" || state.plan.current_task == "test"
+    if repair_task {
+        if execution_observation.failed {
+            execution_memory = agent_runtime_record_repair_failure(execution_memory, state.plan.current_task, result.observation)
+        } else if execution_observation.ok || execution_observation.terminal {
+            execution_memory = agent_runtime_clear_repair_state(execution_memory)
+        }
+    }
+    result.memory = execution_memory
+
+    if repair_task && execution_observation.failed {
+        int repair_attempts = agent_runtime_repair_attempt_count(execution_memory)
+        int repair_limit = agent_runtime_max_repair_attempts()
+        bool has_code = agent_tool_registry_has_enabled(state.tools, "code")
+        string stop_reason = ""
+        if !has_code {
+            stop_reason = "repair_tool_unavailable"
+        } else if repair_attempts >= repair_limit {
+            stop_reason = "repair_limit_reached"
+        }
+        if stop_reason != "" {
+            string preferred_failure = agent_runtime_preferred_failure_summary(execution_memory, state.plan.current_task, result.observation)
+            string failure_summary = agent_runtime_repair_failure_summary(
+                state.plan.current_task, preferred_failure, repair_attempts, repair_limit, stop_reason
+            )
+            agent_plan_state stop_plan = agent_plan_state {
+                goal: state.plan.goal,
+                current_task: "complete",
+                step_budget: state.plan.step_budget,
+                step_count: state.plan.step_count + 1,
+                needs_replan: false,
+                finished: true,
+                status: "repair_failed",
+                replan_reason: failure_summary,
+                task_queue: [],
+                replan_count: state.plan.replan_count,
+                code_attempts: state.plan.code_attempts,
+            }
+            return agent_runtime_finish_after_repair_failure(state, stop_plan, execution_memory, result, input, failure_summary)
+        }
+    }
 
     agent_reflection_state next_reflection = agent_reflect(
         state.reflection, state.plan.goal, result.action, result.observation, state.steps + 1
@@ -336,6 +1025,9 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
                 }
                 pi = pi + 1
             }
+            if len(next_plan.task_queue) > 0 {
+                next_plan = agent_plan_dequeue_to_current(next_plan)
+            }
         }
     }
     agent_trace_state next_trace = agent_trace_append(
@@ -352,7 +1044,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         result.ok
     )
     agent_tool_registry_state final_tools = result.tools
-    if next_plan.needs_replan && next_plan.replan_reason == "tool_unavailable" && result.tool_name != "" {
+    if next_plan.needs_replan && agent_observation_requires_replan(next_plan.replan_reason) && result.tool_name != "" {
         final_tools = agent_tool_registry_disable(final_tools, result.tool_name)
     }
     agent_skill_registry_state next_skills = agent_runtime_update_skills(state, next_trace, result.memory)
@@ -360,7 +1052,31 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
 
     agent_answer_state next_answer = state.answer
     if next_plan.finished {
+        final_memory = agent_runtime_finalize_memory(final_memory, next_trace)
         next_answer = agent_answer_synthesize(state.answer, next_trace, final_memory, state.steps + 1)
+        agent_runtime_persist_skill_snapshot(
+            agent_runtime_state {
+                plan: next_plan,
+                memory: final_memory,
+                tools: final_tools,
+                trace: next_trace,
+                skills: next_skills,
+                skill_execution: next_skill_execution,
+                reflection: next_reflection,
+                context: next_context,
+                reasoning: next_reasoning,
+                subagents: current_subagents,
+                answer: next_answer,
+                interrupt: state.interrupt,
+                session: next_session,
+                steps: state.steps + 1,
+                finished: true,
+                last_action: result.action,
+                last_observation: result.observation,
+                model_path: state.model_path,
+            },
+            ".neurx_skills.snapshot"
+        )
     }
 
     next_session = agent_session_assistant(next_session, result.observation)
@@ -377,7 +1093,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         reflection: next_reflection,
         context: next_context,
         reasoning: next_reasoning,
-        subagents: state.subagents,
+        subagents: current_subagents,
         answer: next_answer,
         interrupt: state.interrupt,
         session: next_session,
@@ -385,6 +1101,56 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         finished: next_plan.finished,
         last_action: result.action,
         last_observation: result.observation,
+        model_path: state.model_path,
+    }
+}
+
+func agent_runtime_run_pending_subagents(agent_runtime_state state) agent_runtime_state {
+    agent_subagent_registry_state registry = state.subagents
+    int n = registry.count
+    if n == 0 {
+        return state
+    }
+    agent_memory_state merged_memory = state.memory
+    int i = 0
+    while i < n {
+        agent_subagent_task t = registry.tasks[i]
+        if t.status == "pending" {
+            agent_runtime_state sub_state = new_agent_runtime_state_with_model(t.goal, "analyze", t.max_steps, state.model_path)
+            agent_runtime_state sub_done = run_agent_steps(sub_state, t.input, t.max_steps)
+            agent_memory_lookup_result ans = agent_memory_lookup_long(sub_done.memory, "final_answer")
+            string sub_result = ""
+            bool sub_ok = sub_done.finished
+            if ans.found && ans.value != "" {
+                sub_result = ans.value
+            } else {
+                sub_result = sub_done.last_observation
+            }
+            registry = agent_subagent_complete(registry, t.id, sub_result, sub_ok)
+            if sub_result != "" {
+                merged_memory = agent_memory_write_long(merged_memory, "subagent_result_" + t.id, sub_result)
+            }
+        }
+        i = i + 1
+    }
+    agent_runtime_state {
+        plan: state.plan,
+        memory: merged_memory,
+        tools: state.tools,
+        trace: state.trace,
+        skills: state.skills,
+        skill_execution: state.skill_execution,
+        reflection: state.reflection,
+        context: state.context,
+        reasoning: state.reasoning,
+        subagents: registry,
+        answer: state.answer,
+        interrupt: state.interrupt,
+        session: state.session,
+        steps: state.steps,
+        finished: state.finished,
+        last_action: state.last_action,
+        last_observation: state.last_observation,
         model_path: state.model_path,
     }
 }
@@ -399,7 +1165,13 @@ func run_agent_steps(agent_runtime_state state, string input, int max_steps) age
     int i = 0
     while i < total {
         current = agent_runtime_step(current, input)
+        if !agent_subagent_all_done(current.subagents) {
+            current = agent_runtime_run_pending_subagents(current)
+        }
         if current.finished {
+            return current
+        }
+        if agent_runtime_is_stalled(current) {
             return current
         }
         i = i + 1
@@ -475,6 +1247,8 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
                     cur_action = val
                 } else if agent_text_contains(ln, "observation[") {
                     cur_obs = val
+                    agent_observation_state parsed_obs = agent_observation_parse(cur_obs)
+                    cur_ok = parsed_obs.ok || parsed_obs.terminal
                 } else if agent_text_contains(ln, "active_skill[") {
                     cur_skill = val
                 } else if agent_text_contains(ln, "step[") {
@@ -488,7 +1262,9 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
                     }
                     cur_step = step_val
                 } else if agent_text_contains(ln, "ok[") {
-                    cur_ok = val == "true"
+                    if cur_obs == "" {
+                        cur_ok = val == "true"
+                    }
                     if cur_task != "" && cur_obs != "" {
                         agent_skill_feedback_state fb = agent_skill_feedback_state {
                             skill_name: cur_skill,
