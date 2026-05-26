@@ -128,6 +128,41 @@ model_loop_enabled() {
   [[ "$MODEL_LOOP_ENABLED" == "1" || "$MODEL_LOOP_ENABLED" == "true" || "$MODEL_LOOP_ENABLED" == "yes" ]]
 }
 
+runtime_loop_enabled() {
+  [[ "${NEURX_CODE_AGENT_USE_RUNTIME:-0}" == "1" || "${NEURX_CODE_AGENT_USE_RUNTIME:-}" == "true" || "${NEURX_CODE_AGENT_USE_RUNTIME:-}" == "yes" ]]
+}
+
+prompt_wants_repo_agent() {
+  local text
+  text="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$text" == *"sum"* || "$text" == *"fibonacci"* || "$text" == *"factorial"* || "$text" == *"prime"* ]]; then
+    return 1
+  fi
+  [[ "$text" == *"fix "* || "$text" == *"fix the"* || "$text" == *"bug"* \
+    || "$text" == *"build fail"* || "$text" == *"compile error"* || "$text" == *"test fail"* \
+    || "$text" == *"refactor"* || "$text" == *"implement"* || "$text" == *"patch"* \
+    || "$text" == *"create "* || "$text" == *"write to"* || "$text" == *"save to"* \
+    || "$text" == *"创建"* || "$text" == *"写入"* || "$text" == *"文件"* \
+    || "$text" == *"in this repo"* || "$text" == *"in the repo"* || "$text" == *"workspace"* \
+    || "$text" == *"codebase"* || "$text" == *"neurx"* ]]
+}
+
+run_neurx_runtime_agent() {
+  local runner="${SCRIPT_DIR}/run_neurx_code_agent.sh"
+  if [[ ! -f "$runner" ]]; then
+    return 1
+  fi
+  chmod +x "$runner" 2>/dev/null || true
+  local repo="${REPO_ROOT:-$ROOT_DIR}"
+  bash "$runner" \
+    --json \
+    --prompt "$PROMPT" \
+    --repo "$repo" \
+    ${FILE_PATH:+--file "$FILE_PATH"} \
+    ${NEURX_CODE_AGENT_BUILD_COMMAND:+--build-command "$NEURX_CODE_AGENT_BUILD_COMMAND"} \
+    ${NEURX_CODE_AGENT_TEST_COMMAND:+--test-command "$NEURX_CODE_AGENT_TEST_COMMAND"}
+}
+
 task_supports_language() {
   local languages_csv="$1"
   local language="$2"
@@ -895,6 +930,24 @@ EOF
 }
 
 lower_prompt="$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')"
+
+should_run_runtime=0
+if runtime_loop_enabled; then
+  should_run_runtime=1
+elif [[ "${NEURX_CODE_AGENT_AUTO_RUNTIME:-1}" == "1" ]] && prompt_wants_repo_agent "$lower_prompt"; then
+  should_run_runtime=1
+fi
+
+if [[ "$should_run_runtime" -eq 1 ]]; then
+  # 不再静默调用，允许 stderr 透传到终端显示日志
+  if runtime_json="$(run_neurx_runtime_agent || true)"; then
+    if [[ -n "$runtime_json" && "$runtime_json" == \{* ]]; then
+      printf '%s\n' "$runtime_json"
+      exit 0
+    fi
+  fi
+fi
+
 if template_completion="$(infer_template_completion "$lower_prompt")"; then
   completed_summary="Matched a local code template and returned it directly."
   action_result_json="$(build_action_result_json "true" "generate_completion" "$completed_summary" "$template_completion" "[]" "false")"
