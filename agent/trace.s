@@ -1,5 +1,7 @@
 package neurx.agent.trace
 
+use neurx.agent.observation
+
 struct agent_trace_state {
     []int steps
     []string tasks
@@ -128,20 +130,35 @@ func agent_trace_last_ok(agent_trace_state state) bool {
     state.ok_flags[size - 1]
 }
 
+func agent_trace_last_progress_observation(agent_trace_state state) string {
+    int i = len(state.observations) - 1
+    while i >= 0 {
+        agent_observation_state parsed = agent_observation_parse(state.observations[i])
+        if parsed.ok || parsed.terminal {
+            return state.observations[i]
+        }
+        i = i - 1
+    }
+    ""
+}
+
 func agent_trace_export(agent_trace_state state) string {
     string out = "trace_count=" + string(state.count)
     int i = 0
     while i < len(state.steps) {
+        agent_observation_state parsed = agent_observation_parse(state.observations[i])
         out = out + "\nstep[" + string(i) + "]=" + string(state.steps[i])
         out = out + "\ntask[" + string(i) + "]=" + state.tasks[i]
         out = out + "\ninput[" + string(i) + "]=" + state.inputs[i]
         out = out + "\naction[" + string(i) + "]=" + state.actions[i]
         out = out + "\nobservation[" + string(i) + "]=" + state.observations[i]
+        out = out + "\nobservation_status[" + string(i) + "]=" + parsed.status
+        out = out + "\nobservation_kind[" + string(i) + "]=" + parsed.kind
         out = out + "\nactive_skill[" + string(i) + "]=" + state.active_skills[i]
         out = out + "\ntool[" + string(i) + "]=" + state.tool_names[i]
         out = out + "\ntool_timeout_ms[" + string(i) + "]=" + string(state.tool_timeout_ms[i])
         out = out + "\ntool_retries[" + string(i) + "]=" + string(state.tool_retries[i])
-        if state.ok_flags[i] {
+        if parsed.ok || parsed.terminal {
             out = out + "\nok[" + string(i) + "]=true"
         } else {
             out = out + "\nok[" + string(i) + "]=false"
@@ -225,14 +242,15 @@ func agent_trace_clear(agent_trace_state state) agent_trace_state {
 }
 
 func agent_trace_ok_rate(agent_trace_state state) float {
-    int size = len(state.ok_flags)
+    int size = len(state.observations)
     if size <= 0 {
         return 0.0
     }
     int ok_count = 0
     int i = 0
     while i < size {
-        if state.ok_flags[i] {
+        agent_observation_state parsed = agent_observation_parse(state.observations[i])
+        if parsed.ok || parsed.terminal {
             ok_count = ok_count + 1
         }
         i = i + 1

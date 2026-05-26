@@ -2,6 +2,7 @@ package neurx.agent.answer_synthesizer
 
 use neurx.agent.trace
 use neurx.agent.memory
+use neurx.agent.observation
 
 struct agent_answer_state {
     string goal
@@ -28,15 +29,7 @@ func agent_answer_confidence_from_trace(agent_trace_state trace_state) string {
     if n == 0 {
         return "none"
     }
-    int ok_count = 0
-    int i = 0
-    while i < n {
-        if trace_state.ok_flags[i] {
-            ok_count = ok_count + 1
-        }
-        i = i + 1
-    }
-    int ratio = ok_count * 100 / n
+    int ratio = int(agent_trace_ok_rate(trace_state) * 100.0)
     if ratio >= 80 {
         return "high"
     } else if ratio >= 50 {
@@ -61,12 +54,26 @@ func agent_answer_extract_from_memory(agent_memory_state memory_state) string {
     ""
 }
 
+func agent_answer_extract_from_trace(agent_trace_state trace_state) string {
+    string obs = agent_trace_last_progress_observation(trace_state)
+    if obs == "" {
+        return ""
+    }
+    agent_observation_state parsed = agent_observation_parse(obs)
+    if !parsed.ok && !parsed.terminal {
+        return ""
+    }
+    obs
+}
+
 func agent_answer_synthesize(agent_answer_state state, agent_trace_state trace_state, agent_memory_state memory_state, int step) agent_answer_state {
     string answer = agent_answer_extract_from_memory(memory_state)
     string source = "memory"
     if answer == "" && trace_state.count > 0 {
-        answer = agent_trace_last_observation(trace_state)
-        source = "trace"
+        answer = agent_answer_extract_from_trace(trace_state)
+        if answer != "" {
+            source = "trace"
+        }
     }
     string confidence = agent_answer_confidence_from_trace(trace_state)
     agent_answer_state {
