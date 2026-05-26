@@ -7,3 +7,4 @@ Current subtrees:
 - `memory/`: retrieval and memory workflows
 - `tool_use/`: tool-use and trajectory workflows
 - `skills/`: skill evolution and promotion workflows
+- `code_agent/`: coding-oriented agent profile and workflow entrypoints

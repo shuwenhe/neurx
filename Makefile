@@ -1,4 +1,4 @@
-.PHONY: help install neurx s-compile-runtime linux windows macos ios android harmony clean check-bash \
+.PHONY: help install neurx s-package-index s-compile-runtime code-agent-build code-agent linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony \
 	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
@@ -40,6 +40,8 @@ help:
 	@echo "  android           Compile the Android app (placeholder target)"
 	@echo "  harmony           Compile the Harmony app (placeholder target)"
 	@echo "  install           Alias of neurx"
+	@echo "  code-agent-build  Build build/bin/neurx_code_agent from agent/code_agent.s"
+	@echo "  code-agent        Run code agent (TASK=... optional)"
 	@echo "  clean             Remove generated artifacts and caches"
 	@echo "  platform          $(PLATFORM)"
 	@echo ""
@@ -69,6 +71,28 @@ endif
 
 install: neurx
 
+s-package-index: check-bash
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1 && [ ! -x "$(S_COMPILER)" ]; then \
+		echo "error: S compiler wrapper not found: $(S_COMPILER)"; \
+		echo "hint: point S_COMPILER at s/bin/s or ensure s is on PATH"; \
+		exit 1; \
+	fi
+	@"$(S_COMPILER)" mod index "$(CURDIR_UNIX)"
+
+code-agent-build: check-bash s-package-index
+	@mkdir -p build/bin
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1 && [ ! -x "$(S_COMPILER)" ]; then \
+		echo "error: S compiler not found: $(S_COMPILER)"; exit 1; \
+	fi
+	@"$(S_COMPILER)" build agent/code_agent.s -o build/bin/neurx_code_agent
+	@echo "built build/bin/neurx_code_agent"
+
+code-agent:
+	@TASK_TEXT="$${TASK:-$${NEURX_CODE_AGENT_TASK:-inspect agent/ and summarize the code agent architecture}}"; \
+	chmod +x app/service/run_neurx_code_agent.sh 2>/dev/null || true; \
+	NEURX_CODE_AGENT_FULL_AUTO="$${NEURX_CODE_AGENT_FULL_AUTO:-1}" \
+	bash app/service/run_neurx_code_agent.sh --prompt "$$TASK_TEXT" --repo "$$(pwd)"
+
 s-compile-runtime: neurx
 
 linux: app-linux
@@ -80,7 +104,14 @@ harmony: app-harmony
 
 ifeq ($(PLATFORM),windows)
 
-neurx: check-bash
+s-package-index: check-bash
+	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && \
+	if ! command -v '$(S_COMPILER)' >/dev/null 2>&1 && [ ! -x '$(S_COMPILER)' ]; then \
+		echo 'error: S compiler wrapper not found: $(S_COMPILER)'; exit 1; \
+	fi && \
+	'$(S_COMPILER)' mod index \"$$PWD\""
+
+neurx: check-bash s-package-index
 	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && \
 	if ! command -v '$(S_COMPILER)' >/dev/null 2>&1 && [ ! -x '$(S_COMPILER)' ]; then \
 		echo 'error: S compiler not found or not executable: $(S_COMPILER)'; \
@@ -141,7 +172,7 @@ clean:
 
 else
 
-neurx: check-bash
+neurx: check-bash s-package-index
 	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1 && [ ! -x "$(S_COMPILER)" ]; then \
 		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
 		echo "hint: install the S compiler and ensure 's' is on PATH, or pass S_COMPILER=/path/to/s"; \

@@ -156,6 +156,8 @@ The S modules are compiled into runtime IR during the `s-compile-runtime` step a
 
 For the current NeurX agent capability boundary and the roadmap toward a GPT/Codex-style coding agent, see [doc/AGENT_CAPABILITY_GAP.md](doc/AGENT_CAPABILITY_GAP.md).
 
+For the coding-oriented agent workflow entrypoint, see [workflows/agent/code_agent/README.md](workflows/agent/code_agent/README.md).
+
 ## Hardware Backends
 
 - `arch/cuda/`: CUDA/NVIDIA GPU support

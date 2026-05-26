@@ -596,6 +596,14 @@ func resolve_agent_model_path(string model_path) string {
         return env_path
     }
 
+    string endpoint_url = trim_or_empty(runtime_env_get("NEURX_CODE_AGENT_BASE_URL", runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", ""))))
+    string endpoint_model = trim_or_empty(runtime_env_get("NEURX_CODE_AGENT_MODEL", runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", ""))))
+    string endpoint_path = trim_or_empty(runtime_env_get("NEURX_CODE_AGENT_CHAT_PATH", runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions"))))
+    string endpoint_backend = trim_or_empty(runtime_env_get("NEURX_CODE_AGENT_BACKEND", runtime_env_get("NEURX_LLM_BACKEND", "openai")))
+    if endpoint_url != "" && endpoint_model != "" && lower(endpoint_backend) == "openai" {
+        return "backend=openai url=" + endpoint_url + " model=" + endpoint_model + " path=" + endpoint_path
+    }
+
     string env_file = trim_or_empty(runtime_env_get("NEURX_AGENT_CHECKPOINT_FILE", ""))
     if env_file != "" {
         return env_file
@@ -623,6 +631,55 @@ func new_agent_runtime_state(string goal, string initial_task, int step_budget) 
     new_agent_runtime_state_with_model(goal, initial_task, step_budget, "")
 }
 
+func agent_runtime_append_task([]string queue, string task) []string {
+    if trim(task) == "" {
+        return queue
+    }
+    queue.push(task)
+    queue
+}
+
+func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []string {
+    []string queue = []string{cap: 12}
+    if agent_tool_registry_has_enabled(tools, "git_status") {
+        queue = agent_runtime_append_task(queue, "git_status")
+    }
+    if agent_tool_registry_has_enabled(tools, "repo") {
+        queue = agent_runtime_append_task(queue, "repo")
+    }
+    if agent_tool_registry_has_enabled(tools, "retrieve") {
+        queue = agent_runtime_append_task(queue, "retrieve")
+    }
+    if agent_tool_registry_has_enabled(tools, "code") {
+        queue = agent_runtime_append_task(queue, "code")
+        if agent_tool_registry_has_enabled(tools, "build") {
+            queue = agent_runtime_append_task(queue, "build")
+        }
+        if agent_tool_registry_has_enabled(tools, "test") {
+            queue = agent_runtime_append_task(queue, "test")
+        }
+        if agent_tool_registry_has_enabled(tools, "git_diff") {
+            queue = agent_runtime_append_task(queue, "git_diff")
+        }
+        if agent_tool_registry_has_enabled(tools, "review") {
+            queue = agent_runtime_append_task(queue, "review")
+        }
+    }
+    queue = agent_runtime_append_task(queue, "verify")
+    queue = agent_runtime_append_task(queue, "finalize")
+    queue
+}
+
+func agent_runtime_plan_with_task_queue(agent_plan_state plan, []string tasks) agent_plan_state {
+    agent_plan_state next = plan
+    int i = 0
+    while i < len(tasks) {
+        next = agent_plan_enqueue_task(next, tasks[i])
+        i = i + 1
+    }
+    next
+}
+
 func new_agent_runtime_state_with_model(string goal, string initial_task, int step_budget, string model_path) agent_runtime_state {
     string resolved_model_path = resolve_agent_model_path(model_path)
     agent_tool_registry_state tools = new_agent_tool_registry_state()
@@ -646,6 +703,7 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
     tools = agent_tool_registry_add(tools, "git_commit", true, 10000, 1)
     tools = agent_tool_registry_add(tools, "grep", true, 10000, 1)
     tools = agent_tool_registry_add(tools, "find_symbol", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "list_dir", true, 5000, 1)
 
     string session_id = "session_" + string(0)
     agent_runtime_state {
@@ -668,6 +726,25 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
         last_observation: "",
         model_path: resolved_model_path,
     }
+}
+
+func new_code_agent_runtime_state(string goal, int step_budget) agent_runtime_state {
+    new_code_agent_runtime_state_with_model(goal, step_budget, "", "", "")
+}
+
+func new_code_agent_runtime_state_with_model(string goal, int step_budget, string model_path, string build_command, string test_command) agent_runtime_state {
+    agent_runtime_state base = new_agent_runtime_state_with_model(goal, "analyze", step_budget, model_path)
+    agent_memory_state memory_state = agent_memory_write_short(base.memory, "route", "code")
+    memory_state = agent_memory_write_short(memory_state, "code_agent_profile", "codex_claude_style")
+    memory_state = agent_memory_write_long(memory_state, "code_agent_goal", goal)
+    if trim(build_command) != "" {
+        memory_state = agent_memory_write_long(memory_state, "preferred_build_command", trim(build_command))
+    }
+    if trim(test_command) != "" {
+        memory_state = agent_memory_write_long(memory_state, "preferred_test_command", trim(test_command))
+    }
+    agent_plan_state plan_state = agent_runtime_plan_with_task_queue(base.plan, agent_runtime_code_agent_task_queue(base.tools))
+    agent_runtime_with_memory(agent_runtime_with_plan(base, plan_state), memory_state)
 }
 
 func agent_runtime_should_synthesize_skill(agent_skill_feedback_state feedback) bool {

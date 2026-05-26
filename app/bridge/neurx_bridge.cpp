@@ -305,6 +305,19 @@ QString resolve_workspace_path(const QString& repo_root, const QString& raw_path
     const QFileInfo input_info(trimmed_path);
     if (input_info.isAbsolute()) {
         absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
+        // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
+        if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
+            QString filename = input_info.fileName();
+            // 尝试剥离模型可能臆造的错误根目录前缀
+            QString raw = trimmed_path;
+            if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
+            } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+            }
+            absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
+            absolute_path = QDir::cleanPath(absolute_path);
+        }
     } else {
         absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
         absolute_path = QDir::cleanPath(absolute_path);
@@ -342,6 +355,19 @@ QString resolve_path_with_allowed_roots(const QString& repo_root,
     const QFileInfo input_info(trimmed_path);
     if (input_info.isAbsolute()) {
         absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
+        // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
+        if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
+            QString filename = input_info.fileName();
+            // 尝试剥离模型可能臆造的错误根目录前缀
+            QString raw = trimmed_path;
+            if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
+            } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+            }
+            absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
+            absolute_path = QDir::cleanPath(absolute_path);
+        }
     } else {
         absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
         absolute_path = QDir::cleanPath(absolute_path);
@@ -1523,6 +1549,10 @@ QString NeurxBridge::run_process(const QString& program, const QStringList& args
 
     const QString stdout_text = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
     const QString stderr_text = QString::fromUtf8(proc.readAllStandardError()).trimmed();
+
+    if (run_diag_enabled() && !stderr_text.isEmpty()) {
+        qInfo().noquote() << QString("process %1 stderr:\n%2").arg(program, stderr_text);
+    }
 
     if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
         if (!stderr_text.isEmpty()) {

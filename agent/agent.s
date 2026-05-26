@@ -17,6 +17,14 @@ func new_default_agent_with_model(string goal, string model_path) agent_runtime_
     new_agent_runtime_state_with_model(goal, "analyze", 8, model_path)
 }
 
+func new_code_agent(string goal, int step_budget) agent_runtime_state {
+    new_code_agent_runtime_state(goal, step_budget)
+}
+
+func new_code_agent_with_model(string goal, int step_budget, string model_path, string build_command, string test_command) agent_runtime_state {
+    new_code_agent_runtime_state_with_model(goal, step_budget, model_path, build_command, test_command)
+}
+
 func run_agent(agent_runtime_state state, string input, int max_steps) agent_runtime_state {
     run_agent_steps(state, input, max_steps)
 }
