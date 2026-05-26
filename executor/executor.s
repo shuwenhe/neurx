@@ -364,12 +364,17 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string del_path = parsed_action.path
-            if del_path == "" {
-                del_path = input
+            if del_path == "" && !parsed_action.structured && !agent_text_contains(lower(trim(input)), " ") {
+                del_path = trim(input)
             }
-            agent_workspace_result del_result = agent_workspace_delete(del_path)
-            observation = del_result.observation
-            ok = del_result.ok
+            if trim(del_path) == "" {
+                observation = "delete:status=failed;reason=path_missing"
+                ok = false
+            } else {
+                agent_workspace_result del_result = agent_workspace_delete(del_path)
+                observation = del_result.observation
+                ok = del_result.ok
+            }
         }
     } else if dispatch == "write" || dispatch == "write_file" {
         action = "write"
@@ -379,15 +384,17 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string write_path = parsed_action.path
             string write_content = parsed_action.content
-            if write_path == "" {
-                write_path = input
+            if trim(write_path) == "" {
+                observation = "write:status=failed;reason=path_missing"
+                ok = false
+            } else if trim(write_content) == "" {
+                observation = "write:status=failed;reason=content_missing;path=" + write_path
+                ok = false
+            } else {
+                agent_workspace_result write_result = agent_workspace_write(write_path, write_content)
+                observation = write_result.observation
+                ok = write_result.ok
             }
-            if write_content == "" {
-                write_content = input
-            }
-            agent_workspace_result write_result = agent_workspace_write(write_path, write_content)
-            observation = write_result.observation
-            ok = write_result.ok
         }
     } else if dispatch == "apply_patch" || dispatch == "patch" {
         action = "apply_patch"
@@ -399,10 +406,10 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             string patch_old = parsed_action.old_text
             string patch_new = parsed_action.new_text
             bool patch_replace_all = parsed_action.replace_all
-            if patch_path == "" {
-                patch_path = input
-            }
-            if patch_old == "" || patch_new == "" {
+            if trim(patch_path) == "" {
+                observation = "apply_patch:status=failed;reason=path_missing"
+                ok = false
+            } else if patch_old == "" || patch_new == "" {
                 observation = "apply_patch:status=failed;reason=args_missing;path=" + patch_path
                 ok = false
             } else {
@@ -447,8 +454,8 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         }
     } else if dispatch == "code" {
         action = "code"
-        if model_path != "" {
-            tool_name = agent_tool_registry_find_by_capability(tools, "write")
+        if model_path != "" && agent_tool_registry_has_enabled(tools, "code") {
+            tool_name = agent_tool_registry_find_by_capability(tools, "code")
             tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string code_path = parsed_action.path
@@ -540,21 +547,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                     observation = "code:status=failed;reason=write_failed"
                     ok = false
                 }
-            } else if code_path == "" {
-                code_path = input
-                if code_content != "" {
-                    agent_workspace_result code_write_result = agent_workspace_write(code_path, code_content)
-                    ok = code_write_result.ok
-                    if ok {
-                        observation = agent_execute_observation("code", "ok", "path=" + code_path + ";bytes=" + string(len(code_content)))
-                        next_memory = agent_memory_write_long(next_memory, "generated_code", "path=" + code_path + ";bytes=" + string(len(code_content)))
-                    } else {
-                        observation = code_write_result.observation
-                    }
-                } else {
-                    observation = "code:status=failed;reason=content_missing;path=" + code_path
-                    ok = false
-                }
+            } else if trim(code_path) == "" {
+                observation = "code:status=failed;reason=path_missing"
+                ok = false
             } else if code_content != "" {
                 agent_workspace_result code_write_result = agent_workspace_write(code_path, code_content)
                 ok = code_write_result.ok
@@ -568,6 +563,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 observation = "code:status=failed;reason=content_missing;path=" + code_path
                 ok = false
             }
+        } else if model_path != "" {
+            observation = "code:status=blocked;reason=tool_disabled"
+            ok = false
         } else {
             observation = "code:status=blocked;reason=model_disabled"
         }
@@ -729,6 +727,31 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         } else {
             observation = "find_symbol:status=blocked;reason=tool_disabled"
         }
+    } else if dispatch == "sql" {
+        action = "sql"
+        if agent_tool_registry_has_enabled(tools, "sql") {
+            tool_name = agent_tool_registry_find_by_capability(tools, "sql")
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            tool_retries = agent_tool_registry_retries(tools, tool_name)
+            string sql_query = parsed_action.query
+            if sql_query == "" {
+                sql_query = parsed_action.content
+            }
+            if sql_query == "" {
+                sql_query = input
+            }
+            agent_workspace_command_result sql_result = agent_workspace_sql_run(sql_query)
+            observation = sql_result.observation
+            ok = sql_result.ok
+            next_memory = agent_memory_write_long(next_memory, "last_sql", observation)
+            if !ok {
+                next_memory = agent_memory_write_long(next_memory, "last_sql_failure_summary", agent_execute_failure_summary("sql", observation))
+            } else {
+                next_memory = agent_memory_delete(next_memory, "last_sql_failure_summary")
+            }
+        } else {
+            observation = "sql:status=blocked;reason=tool_disabled"
+        }
     } else if dispatch == "subagent" || dispatch == "spawn_subagent" {
         action = "subagent"
         string sub_goal = parsed_action.query
@@ -857,6 +880,11 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         if fa_shell.found && fa_shell.value != "" {
             final_answer = final_answer + "\nshell=" + agent_execute_clip(fa_shell.value, 240)
             next_memory = fa_shell.state
+        }
+        agent_memory_lookup_result fa_sql = agent_memory_lookup_long(next_memory, "last_sql")
+        if fa_sql.found && fa_sql.value != "" {
+            final_answer = final_answer + "\nsql=" + agent_execute_clip(fa_sql.value, 400)
+            next_memory = fa_sql.state
         }
         agent_memory_lookup_result fa_git_commit = agent_memory_lookup_long(next_memory, "last_git_commit")
         if fa_git_commit.found && fa_git_commit.value != "" {
