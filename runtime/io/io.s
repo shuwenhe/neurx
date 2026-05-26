@@ -4,6 +4,7 @@ use std.env.get as env_get
 use std.fs.read_to_string as fs_read_to_string
 use std.fs.write_text_file as fs_write_text_file
 use std.process.run_process
+use std.process.run_process_output
 use std.vec.vec
 
 struct json_value {
@@ -13,6 +14,21 @@ struct runtime_command_result {
     bool ok
     int exit_code
     string error
+}
+
+func runtime_shell_escape(string value) string {
+    string out = "'"
+    int i = 0
+    while i < len(value) {
+        string ch = string(value[i])
+        if ch == "'" {
+            out = out + "'\"'\"'"
+        } else {
+            out = out + ch
+        }
+        i = i + 1
+    }
+    out + "'"
 }
 
 func runtime_read_text_file(string path) string {
@@ -33,7 +49,52 @@ func runtime_append_text_file(string path, string content) () {
 }
 
 func runtime_file_exists(string path) bool {
-    fs_read_to_string(path).is_ok()
+    string trimmed = trim(path)
+    if trimmed == "" {
+        return false
+    }
+    if fs_read_to_string(trimmed).is_ok() {
+        return true
+    }
+    runtime_run_command("test -e " + runtime_shell_escape(trimmed)).ok
+}
+
+func runtime_dir_exists(string path) bool {
+    string trimmed = trim(path)
+    if trimmed == "" {
+        return false
+    }
+    runtime_run_command("test -d " + runtime_shell_escape(trimmed)).ok
+}
+
+func runtime_make_dirs(string path) runtime_command_result {
+    string trimmed = trim(path)
+    if trimmed == "" {
+        return runtime_command_result {
+            ok: false,
+            exit_code: 1,
+            error: "empty_path",
+        }
+    }
+    runtime_run_command("mkdir -p " + runtime_shell_escape(trimmed))
+}
+
+func runtime_delete_path(string path, bool recursive) runtime_command_result {
+    string trimmed = trim(path)
+    if trimmed == "" {
+        return runtime_command_result {
+            ok: false,
+            exit_code: 1,
+            error: "empty_path",
+        }
+    }
+    string command = ""
+    if recursive {
+        command = "rm -rf -- " + runtime_shell_escape(trimmed)
+    } else {
+        command = "rm -f -- " + runtime_shell_escape(trimmed)
+    }
+    runtime_run_command(command)
 }
 
 func runtime_env_get(string name, string default_value) string {
@@ -71,6 +132,22 @@ func runtime_run_command(string command) runtime_command_result {
         exit_code: 1,
         error: out.unwrap_err().message,
     }
+}
+
+func runtime_run_command_output(string command) string {
+    string cmd = trim(command)
+    if cmd == "" {
+        return ""
+    }
+    vec[string] argv = vec[string]()
+    argv.push("sh")
+    argv.push("-c")
+    argv.push(cmd)
+    result[string, std.process.process_error] out = run_process_output(argv)
+    if out.is_ok() {
+        return out.unwrap()
+    }
+    ""
 }
 
 func runtime_json_parse(string text) json_value {

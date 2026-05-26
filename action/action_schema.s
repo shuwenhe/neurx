@@ -116,6 +116,30 @@ func agent_action_extract_field(string raw, string key) string {
 
 func agent_action_detect_tool(string raw, string fallback) string {
     string text = lower(trim(raw))
+    if agent_action_text_contains(text, "tool=show_pending_changes") || agent_action_text_contains(text, "\"tool\":\"show_pending_changes\"") {
+        return "show_pending_changes"
+    }
+    if agent_action_text_contains(text, "tool=apply_pending_changes") || agent_action_text_contains(text, "\"tool\":\"apply_pending_changes\"") {
+        return "apply_pending_changes"
+    }
+    if agent_action_text_contains(text, "tool=write_file") || agent_action_text_contains(text, "\"tool\":\"write_file\"") {
+        return "write"
+    }
+    if agent_action_text_contains(text, "tool=delete_path") || agent_action_text_contains(text, "\"tool\":\"delete_path\"") {
+        return "delete"
+    }
+    if agent_action_text_contains(text, "tool=read_file") || agent_action_text_contains(text, "\"tool\":\"read_file\"") {
+        return "retrieve"
+    }
+    if agent_action_text_contains(text, "tool=search_files") || agent_action_text_contains(text, "\"tool\":\"search_files\"") {
+        return "search"
+    }
+    if agent_action_text_contains(text, "tool=run_build") || agent_action_text_contains(text, "\"tool\":\"run_build\"") {
+        return "build"
+    }
+    if agent_action_text_contains(text, "tool=run_test") || agent_action_text_contains(text, "\"tool\":\"run_test\"") {
+        return "test"
+    }
     if agent_action_text_contains(text, "path=") || agent_action_text_contains(text, "content=") {
         if agent_action_text_contains(text, "delete") {
             return "delete"
@@ -126,6 +150,9 @@ func agent_action_detect_tool(string raw, string fallback) string {
         if agent_action_text_contains(text, "read") || agent_action_text_contains(text, "retrieve") {
             return "retrieve"
         }
+        if agent_action_text_contains(text, "search") || agent_action_text_contains(text, "find") {
+            return "search"
+        }
         if agent_action_text_contains(text, "build") {
             return "build"
         }
@@ -135,6 +162,12 @@ func agent_action_detect_tool(string raw, string fallback) string {
         if agent_action_text_contains(text, "write") || agent_action_text_contains(text, "create") || agent_action_text_contains(text, "patch") {
             return "write"
         }
+    }
+    if agent_action_text_contains(text, "show pending") || agent_action_text_contains(text, "show_pending_changes") {
+        return "show_pending_changes"
+    }
+    if agent_action_text_contains(text, "apply pending") || agent_action_text_contains(text, "apply_pending_changes") {
+        return "apply_pending_changes"
     }
     fallback
 }

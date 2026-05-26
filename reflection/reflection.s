@@ -2,6 +2,7 @@ package neurx.reflection
 
 use neurx.agent.trace
 use neurx.agent.memory
+use neurx.agent.observation
 
 struct agent_reflection_state {
     string critique
@@ -27,8 +28,7 @@ func new_agent_reflection_state() agent_reflection_state {
 
 func agent_reflection_is_aligned(string goal, string action, string observation) bool {
     string a = lower(trim(action))
-    string o = lower(trim(observation))
-    if o == "tool_unavailable" || o == "no_result" || o == "" {
+    if agent_observation_requires_replan(observation) || agent_observation_is_no_progress(observation) || trim(observation) == "" {
         return false
     }
     if a == "noop" {
@@ -49,7 +49,7 @@ func agent_reflect(agent_reflection_state state, string goal, string action, str
     bool needs_correction = critique != "ok"
     string suggestion = ""
     if needs_correction {
-        if observation == "tool_unavailable" {
+        if agent_observation_requires_replan(observation) {
             suggestion = "switch_tool"
         } else if action == "noop" {
             suggestion = "replan"

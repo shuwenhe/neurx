@@ -1,5 +1,6 @@
 package neurx.agent.skill_feedback
 
+use neurx.agent.observation
 use neurx.agent.trace
 use neurx.agent.memory
 
@@ -27,7 +28,8 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
     string task = agent_trace_last_task(trace_state)
     string action = agent_trace_last_action(trace_state)
     string observation = agent_trace_last_observation(trace_state)
-    bool success = agent_trace_last_ok(trace_state)
+    agent_observation_state parsed = agent_observation_parse(observation)
+    bool success = parsed.ok || parsed.terminal
     string route = ""
     agent_memory_lookup_result route_result = agent_memory_lookup_short(memory_state, "route")
     if route_result.found {
@@ -35,8 +37,13 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
     }
 
     string signal = action
-    if !success && observation != "" {
-        signal = action + ":" + observation
+    if observation != "" {
+        if parsed.status != "" {
+            signal = action + ":status=" + parsed.status
+        }
+        if parsed.kind != "" && parsed.kind != action {
+            signal = signal + ";kind=" + parsed.kind
+        }
     }
 
     agent_skill_feedback_state {

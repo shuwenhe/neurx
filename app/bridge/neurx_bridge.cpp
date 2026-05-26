@@ -56,6 +56,20 @@ constexpr int kCodeAgentHistoryLimit = 8;
 constexpr int kCodeAgentFileCacheLimit = 6;
 constexpr int kCodeAgentLoopLimit = 6;
 
+struct CodeAgentRunnerEnvelope {
+    bool valid {false};
+    QString protocol_version;
+    QString status;
+    QString mode;
+    QString summary;
+    QString response;
+    QString plan;
+    QString file_context;
+    QJsonArray action_objects;
+    QStringList action_summaries;
+    QStringList action_result_summaries;
+};
+
 QString env_or_default(const char* name, const char* fallback) {
     const QByteArray value = qgetenv(name);
     if (!value.isEmpty()) {
@@ -198,6 +212,72 @@ QString clip_text(QString text, int max_chars) {
     }
     text.truncate(max_chars);
     return text + QStringLiteral("\n...[truncated]");
+}
+
+CodeAgentRunnerEnvelope parse_code_agent_runner_envelope(const QString& runner_result) {
+    CodeAgentRunnerEnvelope envelope;
+    if (runner_result.startsWith(QStringLiteral("runtime_"))) {
+        return envelope;
+    }
+
+    QJsonParseError runner_parse_error;
+    const QJsonDocument runner_json = QJsonDocument::fromJson(runner_result.toUtf8(), &runner_parse_error);
+    if (runner_parse_error.error != QJsonParseError::NoError || !runner_json.isObject()) {
+        return envelope;
+    }
+
+    const QJsonObject runner_obj = runner_json.object();
+    envelope.valid = true;
+    envelope.protocol_version = runner_obj.value(QStringLiteral("protocol_version")).toString();
+    envelope.status = runner_obj.value(QStringLiteral("status")).toString();
+    envelope.mode = runner_obj.value(QStringLiteral("mode")).toString();
+    envelope.summary = runner_obj.value(QStringLiteral("summary")).toString();
+    envelope.response = runner_obj.value(QStringLiteral("response")).toString();
+    envelope.plan = runner_obj.value(QStringLiteral("plan")).toString();
+    envelope.file_context = runner_obj.value(QStringLiteral("file_context")).toString();
+
+    if (runner_obj.value(QStringLiteral("actions")).isArray()) {
+        const QJsonArray actions = runner_obj.value(QStringLiteral("actions")).toArray();
+        envelope.action_objects = actions;
+        for (const QJsonValue& value : actions) {
+            if (!value.isObject()) {
+                continue;
+            }
+            const QJsonObject action = value.toObject();
+            const QString tool = action.value(QStringLiteral("tool")).toString().trimmed();
+            const QString summary = action.value(QStringLiteral("summary")).toString().trimmed();
+            QString line = tool.isEmpty() ? QStringLiteral("action") : tool;
+            if (!summary.isEmpty()) {
+                line += QStringLiteral(": ") + summary;
+            }
+            if (action.value(QStringLiteral("requires_approval")).toBool()) {
+                line += QStringLiteral(" [approval]");
+            }
+            envelope.action_summaries << line;
+        }
+    }
+
+    if (runner_obj.value(QStringLiteral("action_results")).isArray()) {
+        const QJsonArray action_results = runner_obj.value(QStringLiteral("action_results")).toArray();
+        for (const QJsonValue& value : action_results) {
+            if (!value.isObject()) {
+                continue;
+            }
+            const QJsonObject result = value.toObject();
+            const QString tool = result.value(QStringLiteral("tool")).toString().trimmed();
+            const QString summary = result.value(QStringLiteral("summary")).toString().trimmed();
+            QString line = tool.isEmpty() ? QStringLiteral("result") : tool;
+            line += result.value(QStringLiteral("ok")).toBool(true)
+                ? QStringLiteral(": ok")
+                : QStringLiteral(": failed");
+            if (!summary.isEmpty()) {
+                line += QStringLiteral(" - ") + summary;
+            }
+            envelope.action_result_summaries << line;
+        }
+    }
+
+    return envelope;
 }
 
 QString normalize_newlines(QString text) {
@@ -2935,6 +3015,10 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     }
     QString runner_plan;
     QString runner_file_context;
+    QString runner_summary;
+    QStringList runner_action_summaries;
+    QStringList runner_action_result_summaries;
+    QJsonArray runner_action_objects;
     const QString route = agent_route_for_prompt(prompt, filePath);
     emit log_message("info", "agent", QString("code-assistant start route=%1 prompt_len=%2 file=%3")
         .arg(route)
@@ -2951,16 +3035,17 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                           << "--repo" << root,
             5000,
             root);
-        if (!runner_result.startsWith("runtime_")) {
-            QJsonParseError runner_parse_error;
-            const QJsonDocument runner_json = QJsonDocument::fromJson(runner_result.toUtf8(), &runner_parse_error);
-            if (runner_parse_error.error == QJsonParseError::NoError && runner_json.isObject()) {
-                const QJsonObject runner_obj = runner_json.object();
-                const QString runner_status = runner_obj.value("status").toString();
-                const QString runner_mode = runner_obj.value("mode").toString();
-                const QString runner_response = runner_obj.value("response").toString();
-                runner_plan = runner_obj.value("plan").toString();
-                runner_file_context = runner_obj.value("file_context").toString();
+        const CodeAgentRunnerEnvelope runner_envelope = parse_code_agent_runner_envelope(runner_result);
+        if (runner_envelope.valid) {
+                const QString runner_status = runner_envelope.status;
+                const QString runner_mode = runner_envelope.mode;
+                runner_summary = runner_envelope.summary;
+                const QString runner_response = runner_envelope.response;
+                runner_plan = runner_envelope.plan;
+                runner_file_context = runner_envelope.file_context;
+                runner_action_objects = runner_envelope.action_objects;
+                runner_action_summaries = runner_envelope.action_summaries;
+                runner_action_result_summaries = runner_envelope.action_result_summaries;
                 if (runner_status == "completed" && !runner_response.trimmed().isEmpty()) {
                     emit log_message("info", "agent", QString("code-assistant done route=%1 source=runner mode=%2")
                         .arg(route, runner_mode));
@@ -2968,21 +3053,29 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                     if (!runner_mode.trimmed().isEmpty()) {
                         decorated = QString("[mode] %1\n\n%2").arg(runner_mode.trimmed(), decorated);
                     }
+                    if (!runner_summary.trimmed().isEmpty()) {
+                        decorated = QString("[summary] %1\n\n%2").arg(runner_summary.trimmed(), decorated);
+                    }
                     return decorated;
                 }
                 if (runner_status == "unhandled") {
                     emit log_message("info", "agent", QString("code-assistant runner delegated route=%1 mode=%2")
                         .arg(route, runner_mode));
                     QString delegated = QString("[mode] %1").arg(runner_mode.trimmed().isEmpty() ? QStringLiteral("planner") : runner_mode.trimmed());
+                    if (!runner_summary.trimmed().isEmpty()) {
+                        delegated += QStringLiteral("\n[summary] ") + runner_summary.trimmed();
+                    }
                     if (!runner_plan.trimmed().isEmpty()) {
                         delegated = delegated + "\n[plan] " + runner_plan.trimmed();
+                    }
+                    if (!runner_action_summaries.isEmpty()) {
+                        delegated += QStringLiteral("\n[actions]\n") + runner_action_summaries.join(QChar('\n'));
                     }
                     if (!runner_file_context.trimmed().isEmpty()) {
                         delegated = delegated + "\n[file_context]\n" + runner_file_context.trimmed();
                     }
                     emit log_message("info", "agent", delegated);
                 }
-            }
         }
     }
 
@@ -3547,12 +3640,133 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         }
         return format_tool_response(tool_name, body);
     };
+    auto summarize_action_result = [&](const QString& action_name, const QString& observation) -> QString {
+        QString line = action_name.trimmed().isEmpty() ? QStringLiteral("action") : action_name.trimmed();
+        if (observation.startsWith(QStringLiteral("tool_error:")) || observation.startsWith(QStringLiteral("runtime_"))) {
+            line += QStringLiteral(": failed - ") + clip_text(observation.trimmed(), 240).replace(QChar('\n'), QChar(' '));
+        } else {
+            line += QStringLiteral(": ok - ") + clip_text(observation.trimmed(), 240).replace(QChar('\n'), QChar(' '));
+        }
+        return line;
+    };
+    auto execute_action_object = [&](const QJsonObject& action_obj, bool allow_mutating_actions) -> QString {
+        QString action = action_obj.value(QStringLiteral("action")).toString().trimmed();
+        if (action.isEmpty()) {
+            action = action_obj.value(QStringLiteral("tool")).toString().trimmed();
+        }
+        if (action.isEmpty()) {
+            return QString();
+        }
+        const bool is_safe_readonly_action =
+            action == QStringLiteral("read_file")
+            || action == QStringLiteral("search_files")
+            || action == QStringLiteral("list_files")
+            || action == QStringLiteral("show_pending_changes");
+        if (!allow_mutating_actions && !is_safe_readonly_action) {
+            return QStringLiteral("tool_error: deferred runner action requires tool loop");
+        }
+
+        if (action == QStringLiteral("read_file")) {
+            return read_workspace_file(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("start_line")).toInt(1),
+                action_obj.value(QStringLiteral("line_count")).toInt(120));
+        }
+        if (action == QStringLiteral("search_files")) {
+            return search_workspace_files(action_obj.value(QStringLiteral("query")).toString().trimmed());
+        }
+        if (action == QStringLiteral("list_files")) {
+            return list_workspace_files(
+                action_obj.value(QStringLiteral("dir")).toString(),
+                action_obj.value(QStringLiteral("limit")).toInt(80));
+        }
+        if (action == QStringLiteral("show_pending_changes")) {
+            return summarize_pending_changes();
+        }
+        if (action == QStringLiteral("mkdir")) {
+            return create_workspace_directory(action_obj.value(QStringLiteral("path")).toString());
+        }
+        if (action == QStringLiteral("apply_patch")) {
+            return apply_workspace_patch(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("old_text")).toString(),
+                action_obj.value(QStringLiteral("new_text")).toString(),
+                action_obj.value(QStringLiteral("replace_all")).toBool(false));
+        }
+        if (action == QStringLiteral("replace_range")) {
+            return replace_workspace_range(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("start_line")).toInt(-1),
+                action_obj.value(QStringLiteral("end_line")).toInt(-1),
+                action_obj.value(QStringLiteral("new_text")).toString());
+        }
+        if (action == QStringLiteral("write_file")) {
+            return write_workspace_file(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("content")).toString());
+        }
+        if (action == QStringLiteral("delete_path")) {
+            return delete_workspace_path(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.contains(QStringLiteral("recursive"))
+                    ? action_obj.value(QStringLiteral("recursive")).toBool()
+                    : true);
+        }
+        if (action == QStringLiteral("run_build")) {
+            return run_workspace_command_tool(
+                QStringLiteral("run_build"),
+                QStringLiteral("build.sh"),
+                action_obj.value(QStringLiteral("command")).toString());
+        }
+        if (action == QStringLiteral("run_test")) {
+            return run_workspace_command_tool(
+                QStringLiteral("run_test"),
+                QStringLiteral("test.sh"),
+                action_obj.value(QStringLiteral("command")).toString());
+        }
+        return QString();
+    };
+    QStringList initial_tool_observations;
+    auto execute_safe_runner_actions = [&]() {
+        if (runner_action_objects.isEmpty()) {
+            return;
+        }
+        for (const QJsonValue& value : std::as_const(runner_action_objects)) {
+            if (!value.isObject()) {
+                continue;
+            }
+            const QJsonObject action_obj = value.toObject();
+            const QString action_name = action_obj.value(QStringLiteral("action")).toString().trimmed().isEmpty()
+                ? action_obj.value(QStringLiteral("tool")).toString().trimmed()
+                : action_obj.value(QStringLiteral("action")).toString().trimmed();
+            const QString observation = execute_action_object(action_obj, false);
+            if (observation.isEmpty()) {
+                continue;
+            }
+            if (observation == QStringLiteral("tool_error: deferred runner action requires tool loop")) {
+                continue;
+            }
+            initial_tool_observations << observation;
+            runner_action_result_summaries << summarize_action_result(action_name, observation);
+            remember_recent_action(action_name);
+        }
+    };
+    execute_safe_runner_actions();
     auto build_agent_context = [&]() -> QString {
         QStringList sections;
         sections << QStringLiteral("repo_root=") + root;
         sections << QStringLiteral("target_file=") + (normalized_file_path.isEmpty() ? QStringLiteral("-") : normalized_file_path);
         if (!runner_plan.trimmed().isEmpty()) {
             sections << QStringLiteral("runner_plan=\n") + runner_plan.trimmed();
+        }
+        if (!runner_summary.trimmed().isEmpty()) {
+            sections << QStringLiteral("runner_summary=") + runner_summary.trimmed();
+        }
+        if (!runner_action_summaries.isEmpty()) {
+            sections << QStringLiteral("runner_actions=\n") + runner_action_summaries.join(QStringLiteral("\n"));
+        }
+        if (!runner_action_result_summaries.isEmpty()) {
+            sections << QStringLiteral("runner_action_results=\n") + runner_action_result_summaries.join(QStringLiteral("\n"));
         }
         if (!runner_file_context.trimmed().isEmpty()) {
             sections << QStringLiteral("initial_file_context=\n") + clip_text(runner_file_context.trimmed(), 4000);
@@ -3582,6 +3796,13 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         if (!runner_file_context.trimmed().isEmpty()) {
             tool_observations << QStringLiteral("initial_context=\n") + runner_file_context.trimmed();
         }
+        if (!runner_action_summaries.isEmpty()) {
+            tool_observations << QStringLiteral("runner_actions=\n") + runner_action_summaries.join(QStringLiteral("\n"));
+        }
+        if (!runner_action_result_summaries.isEmpty()) {
+            tool_observations << QStringLiteral("runner_action_results=\n") + runner_action_result_summaries.join(QStringLiteral("\n"));
+        }
+        tool_observations.append(initial_tool_observations);
 
         for (int step = 0; step < kCodeAgentLoopLimit; ++step) {
             QStringList prompt_sections;
@@ -3667,55 +3888,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 return response.trimmed();
             }
 
-            QString observation;
-            if (action == QStringLiteral("read_file")) {
-                observation = read_workspace_file(
-                    action_obj.value(QStringLiteral("path")).toString(),
-                    action_obj.value(QStringLiteral("start_line")).toInt(1),
-                    action_obj.value(QStringLiteral("line_count")).toInt(120));
-            } else if (action == QStringLiteral("search_files")) {
-                observation = search_workspace_files(action_obj.value(QStringLiteral("query")).toString().trimmed());
-            } else if (action == QStringLiteral("list_files")) {
-                observation = list_workspace_files(
-                    action_obj.value(QStringLiteral("dir")).toString(),
-                    action_obj.value(QStringLiteral("limit")).toInt(80));
-            } else if (action == QStringLiteral("show_pending_changes")) {
-                observation = summarize_pending_changes();
-            } else if (action == QStringLiteral("mkdir")) {
-                observation = create_workspace_directory(action_obj.value(QStringLiteral("path")).toString());
-            } else if (action == QStringLiteral("apply_patch")) {
-                observation = apply_workspace_patch(
-                    action_obj.value(QStringLiteral("path")).toString(),
-                    action_obj.value(QStringLiteral("old_text")).toString(),
-                    action_obj.value(QStringLiteral("new_text")).toString(),
-                    action_obj.value(QStringLiteral("replace_all")).toBool(false));
-            } else if (action == QStringLiteral("replace_range")) {
-                observation = replace_workspace_range(
-                    action_obj.value(QStringLiteral("path")).toString(),
-                    action_obj.value(QStringLiteral("start_line")).toInt(-1),
-                    action_obj.value(QStringLiteral("end_line")).toInt(-1),
-                    action_obj.value(QStringLiteral("new_text")).toString());
-            } else if (action == QStringLiteral("write_file")) {
-                observation = write_workspace_file(
-                    action_obj.value(QStringLiteral("path")).toString(),
-                    action_obj.value(QStringLiteral("content")).toString());
-            } else if (action == QStringLiteral("delete_path")) {
-                observation = delete_workspace_path(
-                    action_obj.value(QStringLiteral("path")).toString(),
-                    action_obj.contains(QStringLiteral("recursive"))
-                        ? action_obj.value(QStringLiteral("recursive")).toBool()
-                        : true);
-            } else if (action == QStringLiteral("run_build")) {
-                observation = run_workspace_command_tool(
-                    QStringLiteral("run_build"),
-                    QStringLiteral("build.sh"),
-                    action_obj.value(QStringLiteral("command")).toString());
-            } else if (action == QStringLiteral("run_test")) {
-                observation = run_workspace_command_tool(
-                    QStringLiteral("run_test"),
-                    QStringLiteral("test.sh"),
-                    action_obj.value(QStringLiteral("command")).toString());
-            } else {
+            const QString observation = execute_action_object(action_obj, true);
+            if (observation.isEmpty()) {
                 return QString();
             }
 

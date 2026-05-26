@@ -1,5 +1,6 @@
 package neurx.registry.skill_registry
 
+use neurx.agent.observation
 use neurx.agent.skill_schema
 use neurx.runtime.io.{runtime_write_text_file}
 
@@ -74,17 +75,13 @@ func agent_skill_registry_get(agent_skill_registry_state state, string name) age
         return state.records[index]
     }
     agent_skill_record {
-        spec: agent_skill_spec {
-            name: "",
-            description: "",
-            prompt: "",
-            version: "0",
-            status: "missing",
-        },
-        success_count: 0,
+        spec: new_agent_skill_spec("", "0", "", "missing"),
+        metrics: new_agent_skill_metrics(),
+        created_step: 0,
+        last_updated_step: 0,
+        promote_count: 0,
         fail_count: 0,
-        last_step: 0,
-        avg_steps: 0.0,
+        success_count: 0,
         total_steps: 0,
         promoted: false,
         retired: false,
@@ -120,11 +117,12 @@ func agent_skill_registry_record_success(agent_skill_registry_state state, strin
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
     agent_skill_record rec = records[index]
     rec.success_count = rec.success_count + 1
-    rec.last_step = step
+    rec.last_updated_step = step
     rec.total_steps = rec.total_steps + steps_taken
     int total_runs = rec.success_count + rec.fail_count
     if total_runs > 0 {
-        rec.avg_steps = float(rec.total_steps) / float(total_runs)
+        rec.metrics.avg_steps = float(rec.total_steps) / float(total_runs)
+        rec.metrics.success_rate = float(rec.success_count) / float(total_runs)
     }
     rec.spec.status = "active"
     records[index] = rec
@@ -138,17 +136,12 @@ func agent_skill_registry_record_success(agent_skill_registry_state state, strin
 }
 
 func agent_skill_registry_observation_matches_failure(agent_skill_record record, string observation) bool {
-    string obs = lower(trim(observation))
+    string obs = trim(observation)
     if obs == "" {
         return false
     }
-    if obs == "tool_unavailable" || obs == "no_result" {
-        return true
-    }
-    if len(obs) >= 6 && string(obs[0:6]) == "error:" {
-        return true
-    }
-    false
+    agent_observation_state parsed = agent_observation_parse(obs)
+    parsed.blocked || parsed.failed || parsed.no_progress
 }
 
 func agent_skill_registry_record_failure(agent_skill_registry_state state, string name, int step, int retire_after_failures) agent_skill_registry_state {
@@ -163,7 +156,11 @@ func agent_skill_registry_record_failure(agent_skill_registry_state state, strin
     []agent_skill_record records = agent_skill_registry_copy_records(state.records)
     agent_skill_record rec = records[index]
     rec.fail_count = rec.fail_count + 1
-    rec.last_step = step
+    rec.last_updated_step = step
+    int total_runs = rec.success_count + rec.fail_count
+    if total_runs > 0 {
+        rec.metrics.success_rate = float(rec.success_count) / float(total_runs)
+    }
     if rec.fail_count >= retire_threshold {
         rec.retired = true
         rec.spec.status = "retired"
@@ -247,7 +244,7 @@ func agent_skill_registry_snapshot(agent_skill_registry_state state) string {
     int i = 0
     while i < len(state.records) {
         agent_skill_record rec = state.records[i]
-        out = out + "\nskill[" + string(i) + "]=" + rec.spec.name + " status=" + rec.spec.status + " success=" + string(rec.success_count) + " fail=" + string(rec.fail_count)
+    out = out + "\nskill[" + string(i) + "]=" + rec.spec.name + " status=" + rec.spec.status + " success=" + string(rec.success_count) + " fail=" + string(rec.fail_count)
         i = i + 1
     }
     out
@@ -266,6 +263,22 @@ func agent_skill_registry_best_promoted_index(agent_skill_registry_state state) 
         i = i + 1
     }
     best
+}
+
+func agent_skill_registry_set_score(agent_skill_registry_state state, string name, float score) agent_skill_registry_state {
+    int index = agent_skill_registry_find_index(state, name)
+    if index < 0 {
+        return state
+    }
+    []agent_skill_record records = agent_skill_registry_copy_records(state.records)
+    records[index].score = score
+    agent_skill_registry_state {
+        records: records,
+        active_index: state.active_index,
+        version: state.version + 1,
+        promote_count: state.promote_count,
+        retire_count: state.retire_count,
+    }
 }
 
 func agent_skill_registry_activate_best(agent_skill_registry_state state) agent_skill_registry_state {

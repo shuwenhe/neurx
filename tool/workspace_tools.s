@@ -1,6 +1,6 @@
 package neurx.agent.workspace_tools
 
-use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file, runtime_file_exists, runtime_run_command}
+use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file, runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_delete_path, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 
 struct agent_workspace_result {
     bool ok
@@ -127,6 +127,30 @@ func agent_workspace_clip(string text, int max_chars) string {
     out + "...[truncated]"
 }
 
+func agent_workspace_observation(string kind, string status, string details) string {
+    string obs = kind + ":status=" + status
+    if trim(details) != "" {
+        obs = obs + ";" + details
+    }
+    obs
+}
+
+func agent_workspace_count_lines(string text) int {
+    string trimmed = trim(text)
+    if trimmed == "" {
+        return 0
+    }
+    int count = 1
+    int i = 0
+    while i < len(trimmed) {
+        if string(trimmed[i]) == "\n" {
+            count = count + 1
+        }
+        i = i + 1
+    }
+    count
+}
+
 func agent_workspace_result_ok(string obs, string path) agent_workspace_result {
     agent_workspace_result {
         ok: true,
@@ -159,6 +183,14 @@ func agent_workspace_command_result_fail(string cmd, string obs) agent_workspace
     }
 }
 
+func agent_workspace_command_output_detail(string output, int max_chars) string {
+    string trimmed = trim(output)
+    if trimmed == "" {
+        return ""
+    }
+    ";output_summary=" + agent_workspace_clip(trimmed, max_chars)
+}
+
 func agent_workspace_patch_result_ok(string obs, string path, int replacements) agent_workspace_patch_result {
     agent_workspace_patch_result {
         ok: true,
@@ -180,34 +212,58 @@ func agent_workspace_patch_result_fail(string obs, string path) agent_workspace_
 func agent_workspace_read(string path, int max_chars) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
-        return agent_workspace_result_fail("retrieve:blocked;path=" + path, "")
+        return agent_workspace_result_fail(agent_workspace_observation("retrieve", "blocked", "reason=path_not_allowed;path=" + path), "")
     }
     if !runtime_file_exists(resolved) {
-        return agent_workspace_result_fail("retrieve:missing;path=" + resolved, resolved)
+        return agent_workspace_result_fail(agent_workspace_observation("retrieve", "failed", "reason=missing;path=" + resolved), resolved)
     }
     string content = runtime_read_text_file(resolved)
-    agent_workspace_result_ok("retrieve:ok;path=" + resolved + ";content=" + agent_workspace_clip(content, max_chars), resolved)
+    agent_workspace_result_ok(agent_workspace_observation("retrieve", "ok", "path=" + resolved + ";content=" + agent_workspace_clip(content, max_chars)), resolved)
 }
 
 func agent_workspace_write(string path, string content) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
-        return agent_workspace_result_fail("write:blocked;path=" + path, "")
+        return agent_workspace_result_fail(agent_workspace_observation("write", "blocked", "reason=path_not_allowed;path=" + path), "")
+    }
+    int last_slash = -1
+    int i = 0
+    while i < len(resolved) {
+        if string(resolved[i]) == "/" {
+            last_slash = i
+        }
+        i = i + 1
+    }
+    if last_slash > 0 {
+        string parent = ""
+        i = 0
+        while i < last_slash {
+            parent = parent + string(resolved[i])
+            i = i + 1
+        }
+        runtime_command_result mkdir_result = runtime_make_dirs(parent)
+        if !mkdir_result.ok {
+            return agent_workspace_result_fail(agent_workspace_observation("write", "failed", "reason=mkdir_failed;path=" + parent + ";error=" + mkdir_result.error), resolved)
+        }
     }
     runtime_write_text_file(resolved, content)
-    agent_workspace_result_ok("write:ok;path=" + resolved + ";bytes=" + string(len(content)), resolved)
+    agent_workspace_result_ok(agent_workspace_observation("write", "ok", "path=" + resolved + ";bytes=" + string(len(content))), resolved)
 }
 
 func agent_workspace_delete(string path) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
-        return agent_workspace_result_fail("delete:blocked;path=" + path, "")
+        return agent_workspace_result_fail(agent_workspace_observation("delete", "blocked", "reason=path_not_allowed;path=" + path), "")
     }
     if !runtime_file_exists(resolved) {
-        return agent_workspace_result_fail("delete:missing;path=" + resolved, resolved)
+        return agent_workspace_result_fail(agent_workspace_observation("delete", "failed", "reason=missing;path=" + resolved), resolved)
     }
-    runtime_write_text_file(resolved, "")
-    agent_workspace_result_ok("delete:cleared;path=" + resolved, resolved)
+    bool recursive = runtime_dir_exists(resolved)
+    runtime_command_result delete_result = runtime_delete_path(resolved, recursive)
+    if !delete_result.ok {
+        return agent_workspace_result_fail(agent_workspace_observation("delete", "failed", "path=" + resolved + ";error=" + delete_result.error), resolved)
+    }
+    agent_workspace_result_ok(agent_workspace_observation("delete", "ok", "path=" + resolved), resolved)
 }
 
 func agent_workspace_default_build_command() string {
@@ -240,9 +296,9 @@ func agent_workspace_plan_command(string tool_name, string requested) agent_work
         }
     }
     if command == "" || command == "build_unconfigured" || command == "test_unconfigured" {
-        return agent_workspace_command_result_fail(command, tool_name + ":unconfigured")
+        return agent_workspace_command_result_fail(command, agent_workspace_observation(tool_name, "blocked", "reason=unconfigured"))
     }
-    agent_workspace_command_result_ok(command, tool_name + ":planned;command=" + command)
+    agent_workspace_command_result_ok(command, agent_workspace_observation(tool_name, "ok", "phase=planned;command=" + command))
 }
 
 func agent_workspace_run_command(string tool_name, string requested) agent_workspace_command_result {
@@ -250,11 +306,16 @@ func agent_workspace_run_command(string tool_name, string requested) agent_works
     if !planned.ok {
         return planned
     }
+    string output = trim(runtime_run_command_output(planned.command))
     runtime_command_result run = runtime_run_command(planned.command)
     if run.ok {
-        return agent_workspace_command_result_ok(planned.command, tool_name + ":ok;command=" + planned.command + ";exit_code=0")
+        string observation = agent_workspace_observation(tool_name, "ok", "command=" + planned.command + ";exit_code=0")
+        observation = observation + agent_workspace_command_output_detail(output, 800)
+        return agent_workspace_command_result_ok(planned.command, observation)
     }
-    agent_workspace_command_result_fail(planned.command, tool_name + ":failed;command=" + planned.command + ";exit_code=" + string(run.exit_code) + ";error=" + run.error)
+    string failure = agent_workspace_observation(tool_name, "failed", "command=" + planned.command + ";exit_code=" + string(run.exit_code) + ";reason=command_failed;error=" + run.error)
+    failure = failure + agent_workspace_command_output_detail(output, 800)
+    agent_workspace_command_result_fail(planned.command, failure)
 }
 
 func agent_workspace_find(string text, string pattern, int start) int {
@@ -287,7 +348,7 @@ func agent_workspace_find(string text, string pattern, int start) int {
 
 func agent_workspace_replace_exact(string text, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     if old_text == "" {
-        return agent_workspace_patch_result_fail("patch:empty_old_text", "")
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "failed", "reason=empty_old_text"), "")
     }
     string out = ""
     int cursor = 0
@@ -308,7 +369,7 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
         idx = agent_workspace_find(text, old_text, cursor)
     }
     if replacements <= 0 {
-        return agent_workspace_patch_result_fail("patch:no_match", "")
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=no_match"), "")
     }
     int tail = cursor
     while tail < len(text) {
@@ -323,19 +384,296 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     }
 }
 
+// Split text into an array of lines (strips \r, no newline terminators)
+func agent_workspace_split_lines(string text) []string {
+    int count = agent_workspace_count_lines(text)
+    if count < 1 {
+        count = 1
+    }
+    []string result = []string{cap: count + 1}
+    string line = ""
+    int i = 0
+    while i < len(text) {
+        string ch = string(text[i])
+        if ch == "\n" {
+            result.push(line)
+            line = ""
+        } else if ch != "\r" {
+            line = line + ch
+        }
+        i = i + 1
+    }
+    result.push(line)
+    result
+}
+
+// Normalize a line for fuzzy comparison: expand tabs, trim leading/trailing whitespace
+func agent_workspace_normalize_line(string line) string {
+    string expanded = ""
+    int i = 0
+    while i < len(line) {
+        string ch = string(line[i])
+        if ch == "\t" {
+            expanded = expanded + "    "
+        } else {
+            expanded = expanded + ch
+        }
+        i = i + 1
+    }
+    trim(expanded)
+}
+
+// Fuzzy line-based replace: falls back to whitespace-normalized line matching
+func agent_workspace_replace_fuzzy(string content, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
+    []string cl = agent_workspace_split_lines(content)
+    []string ol = agent_workspace_split_lines(old_text)
+    int nc = len(cl)
+    int no = len(ol)
+    if no == 0 {
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=empty_old_text"), "")
+    }
+    // Pre-compute normalized old lines
+    []string norm_ol = []string{cap: no + 1}
+    int oi = 0
+    while oi < no {
+        norm_ol.push(agent_workspace_normalize_line(ol[oi]))
+        oi = oi + 1
+    }
+    bool content_ends_newline = nc > 0 && len(content) > 0 && string(content[len(content) - 1]) == "\n"
+    string out = ""
+    int replacements = 0
+    int ci = 0
+    while ci < nc {
+        // Try to match old_lines starting at ci
+        bool match = no > 0 && ci + no <= nc
+        if match {
+            int mi = 0
+            while mi < no {
+                if agent_workspace_normalize_line(cl[ci + mi]) != norm_ol[mi] {
+                    match = false
+                    break
+                }
+                mi = mi + 1
+            }
+        }
+        if match {
+            out = out + new_text
+            bool new_ends_nl = len(new_text) > 0 && string(new_text[len(new_text) - 1]) == "\n"
+            if !new_ends_nl && ci + no < nc {
+                out = out + "\n"
+            }
+            ci = ci + no
+            replacements = replacements + 1
+            if !replace_all {
+                // Append remaining lines as-is
+                while ci < nc {
+                    if ci < nc - 1 {
+                        out = out + cl[ci] + "\n"
+                    } else {
+                        out = out + cl[ci]
+                        if content_ends_newline {
+                            out = out + "\n"
+                        }
+                    }
+                    ci = ci + 1
+                }
+                break
+            }
+        } else {
+            if ci < nc - 1 {
+                out = out + cl[ci] + "\n"
+            } else {
+                out = out + cl[ci]
+                if content_ends_newline {
+                    out = out + "\n"
+                }
+            }
+            ci = ci + 1
+        }
+    }
+    if replacements <= 0 {
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=no_match"), "")
+    }
+    agent_workspace_patch_result {
+        ok: true,
+        observation: out,
+        resolved_path: "",
+        replacements: replacements,
+    }
+}
+
 func agent_workspace_apply_patch(string path, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
-        return agent_workspace_patch_result_fail("patch:blocked;path=" + path, "")
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "blocked", "reason=path_not_allowed;path=" + path), "")
     }
     if !runtime_file_exists(resolved) {
-        return agent_workspace_patch_result_fail("patch:missing;path=" + resolved, resolved)
+        return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "failed", "reason=missing;path=" + resolved), resolved)
     }
     string content = runtime_read_text_file(resolved)
     agent_workspace_patch_result replaced = agent_workspace_replace_exact(content, old_text, new_text, replace_all)
     if !replaced.ok {
-        return agent_workspace_patch_result_fail(replaced.observation + ";path=" + resolved, resolved)
+        // Exact match failed — try fuzzy whitespace-normalized line matching
+        replaced = agent_workspace_replace_fuzzy(content, old_text, new_text, replace_all)
+        if !replaced.ok {
+            return agent_workspace_patch_result_fail(replaced.observation + ";path=" + resolved, resolved)
+        }
     }
     runtime_write_text_file(resolved, replaced.observation)
-    agent_workspace_patch_result_ok("patch:ok;path=" + resolved + ";replacements=" + string(replaced.replacements), resolved, replaced.replacements)
+    agent_workspace_patch_result_ok(agent_workspace_observation("patch", "ok", "path=" + resolved + ";replacements=" + string(replaced.replacements)), resolved, replaced.replacements)
+}
+
+func agent_workspace_repo_map(int max_files) string {
+    string root = agent_workspace_root()
+    string cap_str = string(max_files)
+    string cmd = "find " + runtime_shell_escape(root) + " -type f \\( -name '*.s' -o -name '*.md' -o -name 'CMakeLists.txt' -o -name 'Makefile' \\) -not -path '*/.git/*' -not -path '*/build/*' -not -path '*/node_modules/*' | sort | head -" + cap_str
+    string output = runtime_run_command_output(cmd)
+    if trim(output) == "" {
+        return agent_workspace_observation("repo_map", "no_progress", "reason=empty")
+    }
+    agent_workspace_observation("repo_map", "ok", "file_count=" + string(agent_workspace_count_lines(output))) + "\n" + output
+}
+
+func agent_workspace_shell(string command) agent_workspace_command_result {
+    if trim(command) == "" {
+        return agent_workspace_command_result_fail("", agent_workspace_observation("shell", "blocked", "reason=empty_command"))
+    }
+    string output = trim(runtime_run_command_output(command))
+    runtime_command_result run = runtime_run_command(command)
+    if run.ok {
+        string obs = agent_workspace_observation("shell", "ok", "command=" + agent_workspace_clip(command, 160))
+        if output != "" {
+            obs = obs + ";output=" + agent_workspace_clip(output, 1200)
+        }
+        return agent_workspace_command_result_ok(command, obs)
+    }
+    string failure = agent_workspace_observation("shell", "failed", "command=" + agent_workspace_clip(command, 160) + ";exit_code=" + string(run.exit_code))
+    if output != "" {
+        failure = failure + ";output=" + agent_workspace_clip(output, 1200)
+    }
+    agent_workspace_command_result_fail(command, failure)
+}
+
+func agent_workspace_apply_unified_diff(string diff_text) agent_workspace_result {
+    if trim(diff_text) == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("patch", "blocked", "reason=empty_diff"), "")
+    }
+    string root = agent_workspace_root()
+    string tmp = agent_workspace_join_path(root, ".neurx_agent_patch.diff")
+    runtime_write_text_file(tmp, diff_text)
+    string cmd = "cd " + runtime_shell_escape(root) + " && patch -p1 --batch < " + runtime_shell_escape(tmp) + " 2>&1"
+    string output = trim(runtime_run_command_output(cmd))
+    runtime_command_result run = runtime_run_command(cmd)
+    runtime_run_command("rm -f " + runtime_shell_escape(tmp))
+    if run.ok {
+        return agent_workspace_result_ok(agent_workspace_observation("patch", "ok", "type=unified;output=" + agent_workspace_clip(output, 400)), "")
+    }
+    agent_workspace_result_fail(agent_workspace_observation("patch", "failed", "type=unified;output=" + agent_workspace_clip(output, 400)), "")
+}
+
+func agent_workspace_git_root() string {
+    string output = trim(runtime_run_command_output("git rev-parse --show-toplevel 2>/dev/null"))
+    if output == "" {
+        return agent_workspace_root()
+    }
+    output
+}
+
+func agent_workspace_git_cmd(string subcmd) agent_workspace_command_result {
+    string root = agent_workspace_git_root()
+    string cmd = "cd " + runtime_shell_escape(root) + " && git " + subcmd + " 2>&1"
+    string output = trim(runtime_run_command_output(cmd))
+    runtime_command_result run = runtime_run_command(cmd)
+    string kind = "git_" + subcmd
+    if run.ok {
+        string obs = agent_workspace_observation(kind, "ok", "")
+        if output != "" {
+            obs = agent_workspace_observation(kind, "ok", "output=" + agent_workspace_clip(output, 1600))
+        }
+        return agent_workspace_command_result_ok(cmd, obs)
+    }
+    agent_workspace_command_result_fail(cmd, agent_workspace_observation(kind, "failed", "output=" + agent_workspace_clip(output, 800)))
+}
+
+func agent_workspace_git_status() agent_workspace_command_result {
+    agent_workspace_git_cmd("status --short")
+}
+
+func agent_workspace_git_diff(string args) agent_workspace_command_result {
+    string a = trim(args)
+    if a == "" {
+        return agent_workspace_git_cmd("diff HEAD")
+    }
+    agent_workspace_git_cmd("diff " + a)
+}
+
+func agent_workspace_git_log(int n) agent_workspace_command_result {
+    string count = string(n)
+    if n <= 0 {
+        count = "10"
+    }
+    agent_workspace_git_cmd("log --oneline -" + count)
+}
+
+func agent_workspace_git_commit(string message) agent_workspace_command_result {
+    if trim(message) == "" {
+        return agent_workspace_command_result_fail("", agent_workspace_observation("git_commit", "blocked", "reason=empty_message"))
+    }
+    string root = agent_workspace_git_root()
+    string add_cmd = "cd " + runtime_shell_escape(root) + " && git add -A 2>&1"
+    runtime_run_command(add_cmd)
+    string commit_cmd = "cd " + runtime_shell_escape(root) + " && git commit -m " + runtime_shell_escape(message) + " 2>&1"
+    string output = trim(runtime_run_command_output(commit_cmd))
+    runtime_command_result run = runtime_run_command(commit_cmd)
+    if run.ok {
+        return agent_workspace_command_result_ok(commit_cmd, agent_workspace_observation("git_commit", "ok", "output=" + agent_workspace_clip(output, 400)))
+    }
+    agent_workspace_command_result_fail(commit_cmd, agent_workspace_observation("git_commit", "failed", "output=" + agent_workspace_clip(output, 400)))
+}
+
+func agent_workspace_grep(string pattern, string path_glob, int max_results) agent_workspace_result {
+    if trim(pattern) == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("grep", "blocked", "reason=empty_pattern"), "")
+    }
+    string root = agent_workspace_git_root()
+    string glob_arg = "."
+    if trim(path_glob) != "" {
+        glob_arg = path_glob
+    }
+    int limit = max_results
+    if limit <= 0 {
+        limit = 40
+    }
+    string cmd = "cd " + runtime_shell_escape(root) + " && grep -rn --include=" + runtime_shell_escape(glob_arg) + " -m " + string(limit) + " " + runtime_shell_escape(pattern) + " 2>&1 | head -" + string(limit)
+    string output = trim(runtime_run_command_output(cmd))
+    runtime_command_result run = runtime_run_command(cmd)
+    if output == "" {
+        return agent_workspace_result_ok(agent_workspace_observation("grep", "ok", "pattern=" + agent_workspace_clip(pattern, 80) + ";matches=0"), "")
+    }
+    string details = "pattern=" + agent_workspace_clip(pattern, 80) + ";output=" + agent_workspace_clip(output, 2000)
+    if run.ok {
+        return agent_workspace_result_ok(agent_workspace_observation("grep", "ok", details), "")
+    }
+    agent_workspace_result_fail(agent_workspace_observation("grep", "failed", details), "")
+}
+
+func agent_workspace_find_symbol(string symbol, string ext) agent_workspace_result {
+    if trim(symbol) == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("find_symbol", "blocked", "reason=empty_symbol"), "")
+    }
+    string root = agent_workspace_git_root()
+    string include_arg = "*"
+    if trim(ext) != "" {
+        include_arg = "*." + ext
+    }
+    string cmd = "cd " + runtime_shell_escape(root) + " && grep -rn --include=" + runtime_shell_escape(include_arg) + " -m 20 " + runtime_shell_escape("func " + symbol) + " 2>&1 | head -20"
+    string output = trim(runtime_run_command_output(cmd))
+    if output == "" {
+        string cmd2 = "cd " + runtime_shell_escape(root) + " && grep -rn --include=" + runtime_shell_escape(include_arg) + " -m 20 " + runtime_shell_escape(symbol) + " 2>&1 | head -20"
+        output = trim(runtime_run_command_output(cmd2))
+    }
+    if output == "" {
+        return agent_workspace_result_ok(agent_workspace_observation("find_symbol", "ok", "symbol=" + symbol + ";matches=0"), "")
+    }
+    agent_workspace_result_ok(agent_workspace_observation("find_symbol", "ok", "symbol=" + symbol + ";output=" + agent_workspace_clip(output, 1600)), "")
 }
