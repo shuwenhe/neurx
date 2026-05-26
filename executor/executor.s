@@ -132,6 +132,14 @@ func agent_execute_failure_summary(string kind, string observation) string {
     summary
 }
 
+func agent_execute_memory_preferred_command(agent_memory_state memory, string key) string {
+    agent_memory_lookup_result preferred = agent_memory_lookup_long(memory, key)
+    if preferred.found && trim(preferred.value) != "" {
+        return trim(preferred.value)
+    }
+    ""
+}
+
 func agent_route_for_goal(string goal, string input) string {
     string text = lower(trim(goal + " " + input))
     if agent_text_contains(text, "delete_path") || agent_text_contains(text, "delete") || agent_text_contains(text, "remove") || agent_text_contains(text, "rm ") || agent_text_contains(text, "trash") {
@@ -175,6 +183,9 @@ func agent_route_for_goal(string goal, string input) string {
     }
     if agent_text_contains(text, "find symbol") || agent_text_contains(text, "find_symbol") || agent_text_contains(text, "go to definition") || agent_text_contains(text, "find definition") {
         return "find_symbol"
+    }
+    if agent_text_contains(text, "list_dir") || agent_text_contains(text, "list dir") || agent_text_contains(text, "list directory") || agent_text_contains(text, "list files") || agent_text_contains(text, "show files") || agent_text_contains(text, "ls ") {
+        return "list_dir"
     }
     if agent_text_contains(text, "search_files") || agent_text_contains(text, "search") || agent_text_contains(text, "lookup") || agent_text_contains(text, "find") {
         return "search"
@@ -425,6 +436,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string build_command = parsed_action.command
+            if trim(build_command) == "" {
+                build_command = agent_execute_memory_preferred_command(next_memory, "preferred_build_command")
+            }
             agent_workspace_command_result build_result = agent_workspace_run_command("build", build_command)
             observation = build_result.observation
             ok = build_result.ok
@@ -442,6 +456,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string test_command = parsed_action.command
+            if trim(test_command) == "" {
+                test_command = agent_execute_memory_preferred_command(next_memory, "preferred_test_command")
+            }
             agent_workspace_command_result test_result = agent_workspace_run_command("test", test_command)
             observation = test_result.observation
             ok = test_result.ok
@@ -726,6 +743,20 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             next_memory = agent_memory_write_long(next_memory, "searched", observation)
         } else {
             observation = "find_symbol:status=blocked;reason=tool_disabled"
+        }
+    } else if dispatch == "list_dir" {
+        action = "list_dir"
+        if agent_tool_registry_has_enabled(tools, "list_dir") {
+            string ld_path = parsed_action.path
+            if ld_path == "" {
+                ld_path = "."
+            }
+            agent_workspace_result ld_result = agent_workspace_list_dir(ld_path, 200)
+            observation = ld_result.observation
+            ok = ld_result.ok
+            next_memory = agent_memory_write_long(next_memory, "last_list_dir", observation)
+        } else {
+            observation = "list_dir:status=blocked;reason=tool_disabled"
         }
     } else if dispatch == "sql" {
         action = "sql"

@@ -306,7 +306,8 @@ func agent_workspace_run_command(string tool_name, string requested) agent_works
     if !planned.ok {
         return planned
     }
-    string output = trim(runtime_run_command_output(planned.command))
+    // Capture stderr too because build/test tools often emit logs there.
+    string output = trim(runtime_run_command_output(planned.command + " 2>&1"))
     runtime_command_result run = runtime_run_command(planned.command)
     if run.ok {
         string observation = agent_workspace_observation(tool_name, "ok", "command=" + planned.command + ";exit_code=0")
@@ -710,4 +711,27 @@ func agent_workspace_find_symbol(string symbol, string ext) agent_workspace_resu
         return agent_workspace_result_ok(agent_workspace_observation("find_symbol", "ok", "symbol=" + symbol + ";matches=0"), "")
     }
     agent_workspace_result_ok(agent_workspace_observation("find_symbol", "ok", "symbol=" + symbol + ";output=" + agent_workspace_clip(output, 1600)), "")
+}
+
+func agent_workspace_list_dir(string path, int max_entries) agent_workspace_result {
+    string resolved = agent_workspace_resolve_path(path)
+    if resolved == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("list_dir", "blocked", "reason=path_not_allowed;path=" + path), "")
+    }
+    if !runtime_dir_exists(resolved) {
+        if !runtime_file_exists(resolved) {
+            return agent_workspace_result_fail(agent_workspace_observation("list_dir", "failed", "reason=missing;path=" + resolved), resolved)
+        }
+        return agent_workspace_result_fail(agent_workspace_observation("list_dir", "failed", "reason=not_a_directory;path=" + resolved), resolved)
+    }
+    int limit = max_entries
+    if limit <= 0 {
+        limit = 200
+    }
+    string cmd = "ls -la " + runtime_shell_escape(resolved) + " 2>&1 | head -" + string(limit + 1)
+    string output = trim(runtime_run_command_output(cmd))
+    if output == "" {
+        return agent_workspace_result_ok(agent_workspace_observation("list_dir", "ok", "path=" + resolved + ";entries=0"), resolved)
+    }
+    agent_workspace_result_ok(agent_workspace_observation("list_dir", "ok", "path=" + resolved + ";output=" + agent_workspace_clip(output, 2000)), resolved)
 }

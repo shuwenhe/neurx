@@ -10,6 +10,7 @@ use neurx.infer.serve.continuous_batch
 use neurx.infer.serve.admission_control
 use neurx.infer.vllm.vllm
 use neurx.infer.eval
+use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_run_command_output, runtime_run_command, runtime_shell_escape}
 use neurx.ops
 use neurx.tensor.tensor
 use neurx.checkpoint
@@ -129,7 +130,9 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         eval: state.eval,
         model_weights: state.model_weights,
     }
-}(infer_pipeline_state state, string request_id, int input_tokens, int remaining_tokens) infer_pipeline_state {
+}
+
+func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_id, int input_tokens, int remaining_tokens) infer_pipeline_state {
     int prefill_tokens = input_tokens
     if prefill_tokens < 0 {
         prefill_tokens = 0
@@ -258,6 +261,244 @@ func infer_pipeline_prefix_cache_hits(infer_pipeline_state state) int {
 
 func infer_pipeline_admission_rejected(infer_pipeline_state state) int {
     state.admission.rejected
+}
+
+func infer_text_contains(string text, string pattern) bool {
+    string haystack = lower(trim(text))
+    string needle = lower(trim(pattern))
+    int hay_len = len(haystack)
+    int nee_len = len(needle)
+    if nee_len <= 0 {
+        return true
+    }
+    if hay_len < nee_len {
+        return false
+    }
+    int i = 0
+    while i <= hay_len - nee_len {
+        int j = 0
+        bool match = true
+        while j < nee_len {
+            if haystack[i + j] != needle[j] {
+                match = false
+                break
+            }
+            j = j + 1
+        }
+        if match {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+func infer_starts_with(string text, string prefix) bool {
+    int tl = len(text)
+    int pl = len(prefix)
+    if pl > tl {
+        return false
+    }
+    int i = 0
+    while i < pl {
+        if text[i] != prefix[i] {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
+func infer_find_field(string raw, string key) string {
+    string marker = key + "="
+    int raw_len = len(raw)
+    int marker_len = len(marker)
+    if marker_len <= 1 || raw_len < marker_len {
+        return ""
+    }
+    int i = 0
+    while i <= raw_len - marker_len {
+        int j = 0
+        bool match = true
+        while j < marker_len {
+            if raw[i + j] != marker[j] {
+                match = false
+                break
+            }
+            j = j + 1
+        }
+        if match {
+            int start = i + marker_len
+            string value = ""
+            int k = start
+            while k < raw_len {
+                string ch = string(raw[k])
+                if ch == "\n" {
+                    break
+                }
+                if ch == " " {
+                    bool next_is_field = false
+                    int look = k + 1
+                    while look < raw_len && string(raw[look]) != " " && string(raw[look]) != "\n" {
+                        if string(raw[look]) == "=" {
+                            next_is_field = true
+                            break
+                        }
+                        look = look + 1
+                    }
+                    if next_is_field {
+                        break
+                    }
+                }
+                value = value + ch
+                k = k + 1
+            }
+            return trim(value)
+        }
+        i = i + 1
+    }
+    ""
+}
+
+func infer_json_escape(string value) string {
+    string out = ""
+    int i = 0
+    while i < len(value) {
+        string ch = string(value[i])
+        if ch == "\\" {
+            out = out + "\\\\"
+        } else if ch == "\"" {
+            out = out + "\\\""
+        } else if ch == "\n" {
+            out = out + "\\n"
+        } else if ch == "\r" {
+            out = out + "\\r"
+        } else if ch == "\t" {
+            out = out + "\\t"
+        } else {
+            out = out + ch
+        }
+        i = i + 1
+    }
+    out
+}
+
+func infer_http_join_url(string base_url, string chat_path) string {
+    string base = trim(base_url)
+    string path = trim(chat_path)
+    if base == "" {
+        return ""
+    }
+    if path == "" {
+        return base
+    }
+    if infer_text_contains(base, path) {
+        return base
+    }
+    if string(base[len(base) - 1]) == "/" && infer_starts_with(path, "/") {
+        string suffix = ""
+        int i = 1
+        while i < len(path) {
+            suffix = suffix + string(path[i])
+            i = i + 1
+        }
+        return base + suffix
+    }
+    if string(base[len(base) - 1]) != "/" && !infer_starts_with(path, "/") {
+        return base + "/" + path
+    }
+    base + path
+}
+
+func infer_openai_descriptor_backend(string model_path) string {
+    string backend = infer_find_field(model_path, "backend")
+    if backend != "" {
+        return lower(trim(backend))
+    }
+    if infer_text_contains(model_path, "url=http://") || infer_text_contains(model_path, "url=https://") {
+        return "openai"
+    }
+    ""
+}
+
+func infer_openai_response_text(string response_path) string {
+    string parser = "python3 -c " + runtime_shell_escape(
+        "import json,sys\n" +
+        "payload=json.load(open(sys.argv[1]))\n" +
+        "choices=payload.get('choices') or []\n" +
+        "first=choices[0] if choices else {}\n" +
+        "text=(first.get('message',{}) or {}).get('content','') or first.get('text','') or ''\n" +
+        "if isinstance(text,list):\n" +
+        "    parts=[]\n" +
+        "    for item in text:\n" +
+        "        if isinstance(item,dict):\n" +
+        "            parts.append(str(item.get('text','')))\n" +
+        "        else:\n" +
+        "            parts.append(str(item))\n" +
+        "    text=''.join(parts)\n" +
+        "print(str(text), end='')"
+    ) + " " + runtime_shell_escape(response_path) + " 2>/dev/null"
+    trim(runtime_run_command_output(parser))
+}
+
+func infer_run_openai(string model_path, string prompt) string {
+    string url = infer_find_field(model_path, "url")
+    if url == "" {
+        url = trim(runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", "")))
+    }
+    string path = infer_find_field(model_path, "path")
+    if path == "" {
+        path = trim(runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions")))
+    }
+    string model_name = infer_find_field(model_path, "model")
+    if model_name == "" {
+        model_name = trim(runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", "")))
+    }
+    string api_key = trim(runtime_env_get("NEURX_LLM_API_KEY", runtime_env_get("NEURX_API_KEY", "")))
+    string final_url = infer_http_join_url(url, path)
+    if final_url == "" || model_name == "" {
+        return ""
+    }
+
+    string payload_path = "/tmp/neurx_agent_openai_request.json"
+    string response_path = "/tmp/neurx_agent_openai_response.json"
+    string error_path = "/tmp/neurx_agent_openai_error.log"
+    string payload = "{\"model\":\"" + infer_json_escape(model_name) + "\",\"messages\":[{\"role\":\"user\",\"content\":\"" + infer_json_escape(prompt) + "\"}],\"temperature\":0.0,\"top_p\":1.0,\"stream\":false}"
+    runtime_write_text_file(payload_path, payload)
+
+    string cmd = "curl -sS -X POST " + runtime_shell_escape(final_url) +
+        " -H 'Content-Type: application/json'"
+    if api_key != "" {
+        cmd = cmd + " -H " + runtime_shell_escape("Authorization: Bearer " + api_key)
+    }
+    cmd = cmd + " --connect-timeout 10 --max-time 180 -d @" + runtime_shell_escape(payload_path) +
+        " > " + runtime_shell_escape(response_path) + " 2> " + runtime_shell_escape(error_path)
+
+    runtime_command_result run = runtime_run_command(cmd)
+    if !run.ok {
+        return ""
+    }
+    string text = infer_openai_response_text(response_path)
+    runtime_run_command("rm -f " + runtime_shell_escape(payload_path) + " " + runtime_shell_escape(response_path) + " " + runtime_shell_escape(error_path))
+    text
+}
+
+func infer_run(string model_path, string prompt) string {
+    string resolved = trim(model_path)
+    if resolved == "" {
+        return ""
+    }
+    if infer_openai_descriptor_backend(resolved) == "openai" {
+        return infer_run_openai(resolved, prompt)
+    }
+    string llm_backend = lower(trim(runtime_env_get("NEURX_LLM_BACKEND", "")))
+    if llm_backend == "openai" {
+        string implicit = "backend=openai model=" + trim(runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", resolved))) +
+            " url=" + trim(runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", ""))) +
+            " path=" + trim(runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions")))
+        return infer_run_openai(implicit, prompt)
+    }
+    ""
 }
 
 func infer_pipeline_queue_depth(infer_pipeline_state state) int {
