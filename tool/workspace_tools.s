@@ -221,6 +221,54 @@ func agent_workspace_read(string path, int max_chars) agent_workspace_result {
     agent_workspace_result_ok(agent_workspace_observation("retrieve", "ok", "path=" + resolved + ";content=" + agent_workspace_clip(content, max_chars)), resolved)
 }
 
+func agent_workspace_read_file(string path, int start_line, int line_count, int max_chars) agent_workspace_result {
+    string resolved = agent_workspace_resolve_path(path)
+    if resolved == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("read_file", "blocked", "reason=path_not_allowed;path=" + path), "")
+    }
+    if !runtime_file_exists(resolved) {
+        return agent_workspace_result_fail(agent_workspace_observation("read_file", "failed", "reason=missing;path=" + resolved), resolved)
+    }
+    string content = runtime_read_text_file(resolved)
+    []string lines = agent_workspace_split_lines(content)
+    int start = start_line
+    if start <= 0 {
+        start = 1
+    }
+    int count = line_count
+    if count <= 0 {
+        count = 120
+    }
+    int begin = start - 1
+    if begin < 0 {
+        begin = 0
+    }
+    if begin >= len(lines) {
+        begin = len(lines)
+    }
+    int end = begin + count
+    if end > len(lines) {
+        end = len(lines)
+    }
+    string slice = ""
+    int i = begin
+    while i < end {
+        slice = slice + lines[i]
+        if i + 1 < end {
+            slice = slice + "\n"
+        }
+        i = i + 1
+    }
+    agent_workspace_result_ok(
+        agent_workspace_observation(
+            "read_file",
+            "ok",
+            "path=" + resolved + ";start_line=" + string(start) + ";line_count=" + string(end - begin) + ";content=" + agent_workspace_clip(slice, max_chars)
+        ),
+        resolved
+    )
+}
+
 func agent_workspace_write(string path, string content) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
@@ -248,6 +296,20 @@ func agent_workspace_write(string path, string content) agent_workspace_result {
     }
     runtime_write_text_file(resolved, content)
     agent_workspace_result_ok(agent_workspace_observation("write", "ok", "path=" + resolved + ";bytes=" + string(len(content))), resolved)
+}
+
+func agent_workspace_write_file(string path, string content) agent_workspace_result {
+    agent_workspace_result base = agent_workspace_write(path, content)
+    if !base.ok {
+        return agent_workspace_result_fail(
+            agent_workspace_observation("write_file", "failed", "path=" + path + ";reason=write_failed"),
+            base.resolved_path
+        )
+    }
+    agent_workspace_result_ok(
+        agent_workspace_observation("write_file", "ok", "path=" + base.resolved_path + ";bytes=" + string(len(content))),
+        base.resolved_path
+    )
 }
 
 func agent_workspace_mkdir(string path) agent_workspace_result {
@@ -539,6 +601,10 @@ func agent_workspace_apply_patch(string path, string old_text, string new_text, 
     agent_workspace_patch_result_ok(agent_workspace_observation("patch", "ok", "path=" + resolved + ";replacements=" + string(replaced.replacements)), resolved, replaced.replacements)
 }
 
+func agent_workspace_patch_file(string path, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
+    agent_workspace_apply_patch(path, old_text, new_text, replace_all)
+}
+
 func agent_workspace_repo_map(int max_files) string {
     string root = agent_workspace_root()
     string cap_str = string(max_files)
@@ -556,16 +622,24 @@ func agent_workspace_shell(string command) agent_workspace_command_result {
     }
     string output = trim(runtime_run_command_output(command))
     runtime_command_result run = runtime_run_command(command)
+    // Cap shell output to prevent context overflow. Large outputs (logs, find /,
+    // compilation noise) must be read with retrieve/grep instead.
+    int max_out = 2000
+    bool truncated = len(output) > max_out
+    string capped = output
+    if truncated {
+        capped = agent_workspace_clip(output, max_out) + ";note=output_truncated_use_retrieve_or_grep_for_full_output"
+    }
     if run.ok {
         string obs = agent_workspace_observation("shell", "ok", "command=" + agent_workspace_clip(command, 160))
-        if output != "" {
-            obs = obs + ";output=" + agent_workspace_clip(output, 1200)
+        if capped != "" {
+            obs = obs + ";output=" + capped
         }
         return agent_workspace_command_result_ok(command, obs)
     }
     string failure = agent_workspace_observation("shell", "failed", "command=" + agent_workspace_clip(command, 160) + ";exit_code=" + string(run.exit_code))
-    if output != "" {
-        failure = failure + ";output=" + agent_workspace_clip(output, 1200)
+    if capped != "" {
+        failure = failure + ";output=" + capped
     }
     agent_workspace_command_result_fail(command, failure)
 }
@@ -705,6 +779,38 @@ func agent_workspace_grep(string pattern, string path_glob, int max_results) age
         return agent_workspace_result_ok(agent_workspace_observation("grep", "ok", details), "")
     }
     agent_workspace_result_fail(agent_workspace_observation("grep", "failed", details), "")
+}
+
+func agent_workspace_search_files(string query, int max_results) agent_workspace_result {
+    string trimmed = trim(query)
+    if trimmed == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("search_files", "blocked", "reason=empty_query"), "")
+    }
+    string root = agent_workspace_git_root()
+    int limit = max_results
+    if limit <= 0 {
+        limit = 40
+    }
+    string grep_cmd = "cd " + runtime_shell_escape(root) + " && grep -rn -m " + string(limit) + " " + runtime_shell_escape(trimmed) + " . 2>/dev/null | head -" + string(limit)
+    string grep_out = trim(runtime_run_command_output(grep_cmd))
+    if grep_out != "" {
+        return agent_workspace_result_ok(
+            agent_workspace_observation("search_files", "ok", "query=" + agent_workspace_clip(trimmed, 120) + ";output=" + agent_workspace_clip(grep_out, 2000)),
+            root
+        )
+    }
+    string find_cmd = "cd " + runtime_shell_escape(root) + " && find . -type f | grep -i " + runtime_shell_escape(trimmed) + " | head -" + string(limit)
+    string find_out = trim(runtime_run_command_output(find_cmd))
+    if find_out == "" {
+        return agent_workspace_result_ok(
+            agent_workspace_observation("search_files", "ok", "query=" + agent_workspace_clip(trimmed, 120) + ";matches=0"),
+            root
+        )
+    }
+    agent_workspace_result_ok(
+        agent_workspace_observation("search_files", "ok", "query=" + agent_workspace_clip(trimmed, 120) + ";output=" + agent_workspace_clip(find_out, 2000)),
+        root
+    )
 }
 
 func agent_workspace_find_symbol(string symbol, string ext) agent_workspace_result {

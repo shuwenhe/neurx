@@ -293,136 +293,109 @@ QString repo_relative_path(const QString& repo_root, const QString& absolute_pat
 }
 
 QString resolve_workspace_path(const QString& repo_root, const QString& raw_path, bool* ok = nullptr) {
-    if (ok) {
-        *ok = false;
-    }
+    if (ok) *ok = false;
     const QString trimmed_root = QDir::cleanPath(repo_root.trimmed());
-    const QString trimmed_path = raw_path.trimmed();
-    if (trimmed_root.isEmpty() || trimmed_path.isEmpty()) {
-        return QString();
-    }
+    QString rel = raw_path.trimmed();
+    if (trimmed_root.isEmpty() || rel.isEmpty()) return QString();
 
-    QString absolute_path;
-    const QFileInfo input_info(trimmed_path);
-    if (input_info.isAbsolute()) {
-        absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
-        // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
-        if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
-            // 尝试剥离模型可能臆造的错误根目录前缀
-            QString raw = trimmed_path;
-            if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
-            } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
-            } else if (raw.contains("/code/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/code/", Qt::CaseInsensitive) + 6);
-            }
+    const auto path_is_within_root = [](const QString& path, const QString& root) {
+        const QString clean_root = QDir::cleanPath(root.trimmed());
+        if (clean_root.isEmpty()) return false;
+        const QString root_prefix = clean_root.endsWith('/') ? clean_root : clean_root + '/';
+        return path == clean_root || path.startsWith(root_prefix, Qt::CaseInsensitive);
+    };
 
-            QString repo_stripped = trimmed_root;
-            if (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
-            QString raw_stripped = raw;
-            if (raw_stripped.startsWith('/')) raw_stripped.remove(0, 1);
-            if (!repo_stripped.isEmpty() && raw_stripped.startsWith(repo_stripped, Qt::CaseInsensitive)) {
-                raw = raw_stripped.mid(repo_stripped.length());
-            }
-            if (raw.startsWith('/')) raw.remove(0, 1);
-
-            absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
-            absolute_path = QDir::cleanPath(absolute_path);
+    if (QFileInfo(rel).isAbsolute()) {
+        QString abs = QDir::cleanPath(rel);
+        if (path_is_within_root(abs, trimmed_root)) {
+            if (ok) *ok = true;
+            return abs;
         }
-    } else {
-        absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
-        absolute_path = QDir::cleanPath(absolute_path);
     }
 
-    const QString root_prefix = trimmed_root.endsWith('/')
-        ? trimmed_root
-        : trimmed_root + QLatin1Char('/');
-    const bool in_root = absolute_path == trimmed_root
-        || absolute_path.startsWith(root_prefix, Qt::CaseInsensitive);
-    if (!in_root) {
-        return QString();
+    if (rel.contains("/neurx/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
+    } else if (rel.contains("/ne_readx/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+    } else if (rel.contains("/code/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/code/", Qt::CaseInsensitive) + 6);
     }
 
-    if (ok) {
-        *ok = true;
+    while (rel.startsWith('/')) rel.remove(0, 1);
+
+    QString repo_stripped = trimmed_root;
+    while (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
+    if (!repo_stripped.isEmpty() && rel.startsWith(repo_stripped, Qt::CaseInsensitive)) {
+        rel = rel.mid(repo_stripped.length());
+        while (rel.startsWith('/')) rel.remove(0, 1);
     }
-    return absolute_path;
+
+    QString absolute_path = QDir::cleanPath(QDir(trimmed_root).absoluteFilePath(rel));
+    if (path_is_within_root(absolute_path, trimmed_root)) {
+        if (ok) *ok = true;
+        return absolute_path;
+    }
+    return QString();
 }
 
 QString resolve_path_with_allowed_roots(const QString& repo_root,
                                         const QString& raw_path,
                                         const QStringList& allowed_external_roots,
                                         bool* ok = nullptr) {
-    if (ok) {
-        *ok = false;
-    }
+    if (ok) *ok = false;
     const QString trimmed_root = QDir::cleanPath(repo_root.trimmed());
-    const QString trimmed_path = raw_path.trimmed();
-    if (trimmed_root.isEmpty() || trimmed_path.isEmpty()) {
-        return QString();
-    }
-
-    QString absolute_path;
-    const QFileInfo input_info(trimmed_path);
-    if (input_info.isAbsolute()) {
-        absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
-        // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
-        if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
-            // 尝试剥离模型可能臆造的错误根目录前缀
-            QString raw = trimmed_path;
-            if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
-            } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
-            } else if (raw.contains("/code/", Qt::CaseInsensitive)) {
-                raw = raw.mid(raw.indexOf("/code/", Qt::CaseInsensitive) + 6);
-            }
-
-            QString repo_stripped = trimmed_root;
-            if (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
-            QString raw_stripped = raw;
-            if (raw_stripped.startsWith('/')) raw_stripped.remove(0, 1);
-            if (!repo_stripped.isEmpty() && raw_stripped.startsWith(repo_stripped, Qt::CaseInsensitive)) {
-                raw = raw_stripped.mid(repo_stripped.length());
-            }
-            if (raw.startsWith('/')) raw.remove(0, 1);
-
-            absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
-            absolute_path = QDir::cleanPath(absolute_path);
-        }
-    } else {
-        absolute_path = QDir(trimmed_root).absoluteFilePath(trimmed_path);
-        absolute_path = QDir::cleanPath(absolute_path);
-    }
+    QString rel = raw_path.trimmed();
+    if (trimmed_root.isEmpty() || rel.isEmpty()) return QString();
 
     const auto path_is_within_root = [](const QString& path, const QString& root) {
         const QString clean_root = QDir::cleanPath(root.trimmed());
-        if (clean_root.isEmpty()) {
-            return false;
-        }
-        const QString root_prefix = clean_root.endsWith('/')
-            ? clean_root
-            : clean_root + QLatin1Char('/');
+        if (clean_root.isEmpty()) return false;
+        const QString root_prefix = clean_root.endsWith('/') ? clean_root : clean_root + '/';
         return path == clean_root || path.startsWith(root_prefix, Qt::CaseInsensitive);
     };
 
-    if (path_is_within_root(absolute_path, trimmed_root)) {
-        if (ok) {
-            *ok = true;
+    if (QFileInfo(rel).isAbsolute()) {
+        QString abs = QDir::cleanPath(rel);
+        if (path_is_within_root(abs, trimmed_root)) {
+            if (ok) *ok = true;
+            return abs;
         }
-        return absolute_path;
+        for (const QString& allowed : allowed_external_roots) {
+            if (path_is_within_root(abs, allowed)) {
+                if (ok) *ok = true;
+                return abs;
+            }
+        }
     }
 
-    for (const QString& allowed_root : allowed_external_roots) {
-        if (path_is_within_root(absolute_path, allowed_root)) {
-            if (ok) {
-                *ok = true;
-            }
+    if (rel.contains("/neurx/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
+    } else if (rel.contains("/ne_readx/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+    } else if (rel.contains("/code/", Qt::CaseInsensitive)) {
+        rel = rel.mid(rel.indexOf("/code/", Qt::CaseInsensitive) + 6);
+    }
+
+    while (rel.startsWith('/')) rel.remove(0, 1);
+
+    QString repo_stripped = trimmed_root;
+    while (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
+    if (!repo_stripped.isEmpty() && rel.startsWith(repo_stripped, Qt::CaseInsensitive)) {
+        rel = rel.mid(repo_stripped.length());
+        while (rel.startsWith('/')) rel.remove(0, 1);
+    }
+
+    QString absolute_path = QDir::cleanPath(QDir(trimmed_root).absoluteFilePath(rel));
+    if (path_is_within_root(absolute_path, trimmed_root)) {
+        if (ok) *ok = true;
+        return absolute_path;
+    }
+    for (const QString& allowed : allowed_external_roots) {
+        if (path_is_within_root(absolute_path, allowed)) {
+            if (ok) *ok = true;
             return absolute_path;
         }
     }
-
     return QString();
 }
 
@@ -641,10 +614,12 @@ QString preferred_model_name_for(QString base_url,
                                  bool has_checkpoint_model,
                                  QString checkpoint_model_file,
                                  QString local_ollama_model_dir) {
+    base_url = base_url.trimmed();
     configured_name = configured_name.trimmed();
     backend = backend.trimmed().toLower();
     local_ollama_model_dir = local_ollama_model_dir.trimmed();
     const bool wants_ollama = backend == "ollama" || url_looks_like_ollama(base_url);
+    const bool wants_local_s_backend = url_looks_like_s_backend(base_url);
     const bool looks_like_checkpoint_name = looks_like_checkpoint_model_name(configured_name);
 
     if (wants_ollama) {
@@ -661,7 +636,7 @@ QString preferred_model_name_for(QString base_url,
         return configured_name;
     }
 
-    if (has_checkpoint_model && !checkpoint_model_file.trimmed().isEmpty()) {
+    if (wants_local_s_backend && has_checkpoint_model && !checkpoint_model_file.trimmed().isEmpty()) {
         return checkpoint_model_file.trimmed();
     }
 
@@ -3224,7 +3199,7 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         qEnvironmentVariable("NEURX_CODE_AGENT_CHAT_PATH", kDefaultCodeAgentLocalChatPath),
         QStringLiteral("openai"),
         !checkpoint_model_file_.isEmpty());
-    const QString local_code_model = preferred_model_name_for(
+    QString local_code_model = preferred_model_name_for(
         local_code_base_url,
         qEnvironmentVariable("NEURX_CODE_AGENT_MODEL").trimmed().isEmpty()
             ? checkpoint_model_file_
@@ -3243,6 +3218,11 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         false);
     const QString remote_code_model = remote_code_agent_model_name(
         qEnvironmentVariable("NEURX_CODE_AGENT_REMOTE_MODEL").trimmed());
+    if (local_code_model.trimmed().isEmpty()
+        && !url_looks_like_s_backend(local_code_base_url)
+        && !url_looks_like_ollama(local_code_base_url)) {
+        local_code_model = remote_code_model;
+    }
     const bool same_code_chat_target =
         join_url_and_path(local_code_base_url, local_code_chat_path)
             == join_url_and_path(remote_code_base_url, remote_code_chat_path)

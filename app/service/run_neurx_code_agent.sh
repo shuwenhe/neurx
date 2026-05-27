@@ -16,11 +16,13 @@ BUILD_COMMAND=""
 TEST_COMMAND=""
 JSON_MODE=0
 MAX_STEPS="${NEURX_CODE_AGENT_STEPS:-16}"
-PREFER_S_RUNTIME="${NEURX_CODE_AGENT_PREFER_S_RUNTIME:-0}"
+PREFER_S_RUNTIME="${NEURX_CODE_AGENT_PREFER_S_RUNTIME:-1}"
 
 S_COMPILER="${S_COMPILER:-${NEURX_S_COMPILER:-}}"
 if [[ -z "$S_COMPILER" ]]; then
-  if [[ -x "${NEURX_ROOT}/../s/bin/s" ]]; then
+  if [[ -x "/home/shuwen/s/bin/s" ]]; then
+    S_COMPILER="/home/shuwen/s/bin/s"
+  elif [[ -x "${NEURX_ROOT}/../s/bin/s" ]]; then
     S_COMPILER="${NEURX_ROOT}/../s/bin/s"
   elif command -v s >/dev/null 2>&1; then
     S_COMPILER="$(command -v s)"
@@ -50,15 +52,195 @@ REPORT_FILE="${NEURX_ROOT}/build/code_agent/last_report.txt"
 LOG_FILE="${NEURX_ROOT}/build/code_agent/last_run.log"
 mkdir -p "${BIN_DIR}" "${NEURX_ROOT}/build/code_agent"
 
+declare -A S_BUNDLE_SEEN=()
+declare -a S_BUNDLE_FILES=()
+
+resolve_neurx_s_module_file() {
+  local module="${1:-}"
+  [[ "$module" == neurx.* ]] || return 1
+  local rel="${module#neurx.}"
+  local path="${NEURX_ROOT}/${rel//./\/}.s"
+  [[ -f "$path" ]] || return 1
+  printf '%s\n' "$path"
+}
+
+extract_neurx_s_use_modules() {
+  local file="${1:-}"
+  awk '
+    /^[[:space:]]*use[[:space:]]+neurx\./ {
+      line = $0
+      sub(/^[[:space:]]*use[[:space:]]+/, "", line)
+      sub(/[[:space:]]+as[[:space:]].*$/, "", line)
+      sub(/\.\{.*$/, "", line)
+      gsub(/[[:space:]]+$/, "", line)
+      if (line != "") {
+        print line
+      }
+    }
+  ' "$file"
+}
+
+collect_neurx_s_bundle_files() {
+  local file="${1:-}"
+  local abs
+  abs="$(readlink -f "$file")"
+  [[ -n "$abs" && -f "$abs" ]] || return 1
+  if [[ -n "${S_BUNDLE_SEEN[$abs]:-}" ]]; then
+    return 0
+  fi
+  S_BUNDLE_SEEN["$abs"]=1
+
+  local module_path child
+  while IFS= read -r module_path; do
+    [[ -n "$module_path" ]] || continue
+    child="$(resolve_neurx_s_module_file "$module_path" || true)"
+    if [[ -n "$child" ]]; then
+      collect_neurx_s_bundle_files "$child"
+    fi
+  done < <(extract_neurx_s_use_modules "$abs")
+
+  S_BUNDLE_FILES+=("$abs")
+}
+
+prepare_neurx_s_bundle() {
+  local entry_file="${1:-}"
+  local out_file="${2:-}"
+  [[ -f "$entry_file" && -n "$out_file" ]] || return 1
+
+  S_BUNDLE_SEEN=()
+  S_BUNDLE_FILES=()
+  collect_neurx_s_bundle_files "$entry_file"
+
+  printf 'package neurx.bundle\n\n' >"$out_file"
+  local file
+  for file in "${S_BUNDLE_FILES[@]}"; do
+    printf '// bundled: %s\n' "$file" >>"$out_file"
+    awk '
+      /^[[:space:]]*package[[:space:]]+/ { next }
+      /^[[:space:]]*use[[:space:]]+/ { next }
+      { print }
+    ' "$file" >>"$out_file"
+    printf '\n' >>"$out_file"
+  done
+}
+
+prompt_is_simple_create_file() {
+  local lowered
+  lowered="$(printf '%s' "${PROMPT:-}" | tr '[:upper:]' '[:lower:]')"
+  [[ "$lowered" == create\ file\ *with\ content\ * ]]
+}
+
 try_build_s_agent() {
   [[ -n "$S_COMPILER" && -x "$S_COMPILER" ]] || return 1
-  if [[ ! -x "$AGENT_BIN" ]] || [[ "agent/code_agent.s" -nt "$AGENT_BIN" ]]; then
-    echo "building neurx_code_agent (S IR launcher)..." >&2
-    if ! "$S_COMPILER" build "${NEURX_ROOT}/agent/code_agent.s" -o "$AGENT_BIN" 2>/dev/null; then
-      return 1
-    fi
+  echo "building neurx_code_agent (S IR launcher)..." >&2
+  if prompt_is_simple_create_file; then
+    "$S_COMPILER" build "${NEURX_ROOT}/agent/code_agent.s" -o "$AGENT_BIN" 2>/dev/null || true
+  else
+    local bundle_src="${NEURX_ROOT}/build/code_agent/neurx_code_agent_bundle.s"
+    prepare_neurx_s_bundle "${NEURX_ROOT}/agent/code_agent.s" "$bundle_src" || return 1
+    "$S_COMPILER" build "$bundle_src" -o "$AGENT_BIN" 2>/dev/null || true
   fi
-  [[ -x "$AGENT_BIN" ]]
+  return 0
+}
+
+s_runtime_index_probe() {
+  [[ -n "$S_COMPILER" && -x "$S_COMPILER" ]] || return 1
+  local cache_key cache_file probe_src probe_bin probe_out
+  cache_key="$(printf '%s|%s|%s\n' "$S_COMPILER" "$(readlink -f "$S_COMPILER" 2>/dev/null || printf '%s' "$S_COMPILER")" "$("$S_COMPILER" --help 2>/dev/null | head -n 1)" | cksum | awk '{print $1}')"
+  cache_file="/tmp/neurx_s_runtime_probe_${cache_key}.status"
+  if [[ -f "$cache_file" ]]; then
+    cat "$cache_file"
+    return 0
+  fi
+
+  probe_src="/tmp/neurx_s_runtime_probe_${cache_key}.s"
+  probe_bin="/tmp/neurx_s_runtime_probe_${cache_key}.bin"
+  cat >"$probe_src" <<'EOF'
+package main
+func main() int {
+    string s = "ab"
+    println(string(s[1]))
+    0
+}
+EOF
+
+  if ! "$S_COMPILER" build "$probe_src" -o "$probe_bin" >/dev/null 2>&1; then
+    printf 'compile_failed\n' >"$cache_file"
+    cat "$cache_file"
+    return 0
+  fi
+
+  set +e
+  probe_out="$("$probe_bin" 2>&1)"
+  set -e
+  if [[ "$probe_out" == *"unknown arg value: "*".[]"* ]]; then
+    printf 'missing_index_support\n' >"$cache_file"
+  else
+    printf 'ok\n' >"$cache_file"
+  fi
+  cat "$cache_file"
+}
+
+ensure_s_ir_runner() {
+  local s_root runner src arch seed_obj
+  s_root="$(cd "$(dirname "$(readlink -f "$S_COMPILER")")/.." && pwd)"
+  arch="$(uname -m)"
+  runner="/tmp/s_ir_runner_${arch}_modrun_v8"
+  src="/tmp/s_ir_runner_main_${arch}_modrun_v8.c"
+  seed_obj="/tmp/s_seed_${arch}_modrun_v8.o"
+
+  if [[ -x "$runner" ]]; then
+    return 0
+  fi
+
+  cat >"$src" <<'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "runtime/memory.h"
+
+int main(int argc, char **argv) {
+  compile_error err;
+  long ret = 0;
+  const char *entry = "main";
+
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr, "usage: %s <input.ir> [entry]\n", argv[0]);
+    return 2;
+  }
+  if (argc == 3) {
+    entry = argv[2];
+  }
+
+  if (!runtime_execute_file(argv[1], entry, &ret, &err)) {
+    fprintf(stderr, "error[%d] at %zu:%zu: %s\n", (int)err.code, err.line, err.column, err.message);
+    return 1;
+  }
+
+  return (int)ret;
+}
+EOF
+
+  gcc -std=c11 -Wall -Wextra -Werror -O2 \
+    -I"$s_root/src/cmd/compile/seed" \
+    -Dmain=s_seed_compiler_main \
+    -c "$s_root/src/cmd/compile/seed/s_seed.c" \
+    -o "$seed_obj"
+
+  gcc -std=c11 -Wall -Wextra -Werror -O2 \
+    -I"$s_root/src/cmd/compile/seed" \
+    -o "$runner" \
+    "$src" \
+    "$seed_obj" \
+    "$s_root/src/cmd/compile/seed/lexical/lexer.c" \
+    "$s_root/src/cmd/compile/seed/syntax/parser.c" \
+    "$s_root/src/cmd/compile/seed/semantic/analyzer.c" \
+    "$s_root/src/cmd/compile/seed/intermediate/ir.c" \
+    "$s_root/src/cmd/compile/seed/code/generator.c" \
+    "$s_root/src/cmd/compile/seed/code/native_backend.c" \
+    "$s_root/src/cmd/compile/seed/runtime/runtime.c" \
+    "$s_root/src/cmd/compile/seed/error/error.c" \
+    "$s_root/src/cmd/compile/seed/bootstrap/bootstrap.c"
 }
 
 run_s_code_agent() {
@@ -69,7 +251,45 @@ run_s_code_agent() {
   export NEURX_CODE_AGENT_REPORT="$REPORT_FILE"
   [[ -n "$BUILD_COMMAND" ]] && export NEURX_CODE_AGENT_BUILD_COMMAND="$BUILD_COMMAND"
   [[ -n "$TEST_COMMAND" ]] && export NEURX_CODE_AGENT_TEST_COMMAND="$TEST_COMMAND"
-  "$AGENT_BIN" 2>&1 | tee "$LOG_FILE"
+  ensure_s_ir_runner
+  local runtime_probe=""
+  runtime_probe="$(s_runtime_index_probe)"
+  if [[ "$runtime_probe" != "ok" ]]; then
+    echo "runtime_error: current S toolchain probe failed (${runtime_probe})" >&2
+    if [[ "$runtime_probe" == "missing_index_support" ]]; then
+      echo "runtime_error: the compiler drops index operands like text[i] and emits invalid IR such as value.[]" >&2
+      echo "runtime_error: NeurX S agent cannot run on this toolchain yet; fix /home/shuwen/s before retrying" >&2
+    fi
+    return 1
+  fi
+  local runtime_output=""
+  local runtime_status=0
+  if [[ -x "$AGENT_BIN" ]]; then
+    set +e
+    runtime_output="$("$AGENT_BIN" 2>&1)"
+    runtime_status=$?
+    set -e
+  else
+    set +e
+    runtime_output="$("$S_COMPILER" run "${NEURX_ROOT}/agent/code_agent.s" 2>&1)"
+    runtime_status=$?
+    set -e
+  fi
+  printf '%s' "$runtime_output" | tee "$LOG_FILE"
+  if [[ $runtime_status -ne 0 ]]; then
+    if [[ "$runtime_output" == *"unknown arg value: "*".[]"* ]]; then
+      echo >&2
+      echo "runtime_error: current S compiler/runtime cannot execute indexed expressions in generated IR" >&2
+      echo "runtime_error: example failing IR operand: $(printf '%s' "$runtime_output" | sed -n 's/.*unknown arg value: //p' | head -n 1)" >&2
+      echo "runtime_error: this is a toolchain limitation, not a NeurX agent file-tool failure" >&2
+    fi
+    return $runtime_status
+  fi
+  if [[ -z "$runtime_output" ]]; then
+    echo "runtime_error: s runtime produced no stdout/stderr output" >&2
+    return 1
+  fi
+  return 0
 }
 
 repo_rel_path() {

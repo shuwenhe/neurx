@@ -165,6 +165,20 @@ func code_agent_find(string text, string pattern, int start) int {
     -1
 }
 
+func code_agent_starts_with(string text, string prefix) bool {
+    if len(prefix) > len(text) {
+        return false
+    }
+    int i = 0
+    while i < len(prefix) {
+        if text[i] != prefix[i] {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
 func code_agent_extract_trailing_field(string observation, string marker) string {
     int pos = code_agent_find(observation, marker, 0)
     if pos < 0 {
@@ -178,6 +192,120 @@ func code_agent_extract_trailing_field(string observation, string marker) string
         i = i + 1
     }
     trim(out)
+}
+
+func code_agent_slice(string text, int start, int end) string {
+    int lo = start
+    int hi = end
+    if lo < 0 {
+        lo = 0
+    }
+    if hi < lo {
+        hi = lo
+    }
+    if hi > len(text) {
+        hi = len(text)
+    }
+    string out = ""
+    int i = lo
+    while i < hi {
+        out = out + string(text[i])
+        i = i + 1
+    }
+    out
+}
+
+func code_agent_shell_escape(string text) string {
+    string out = "'"
+    int i = 0
+    while i < len(text) {
+        string ch = string(text[i])
+        if ch == "'" {
+            out = out + "'\"'\"'"
+        } else {
+            out = out + ch
+        }
+        i = i + 1
+    }
+    out + "'"
+}
+
+func code_agent_normalize_command_text(string task) string {
+    string trimmed = trim(task)
+    if code_agent_starts_with(trimmed, "```") {
+        int first_nl = code_agent_find(trimmed, "\n", 0)
+        int last_ticks = code_agent_find(trimmed, "```", 3)
+        if first_nl >= 0 && last_ticks > first_nl {
+            return trim(code_agent_slice(trimmed, first_nl + 1, last_ticks))
+        }
+    }
+    trimmed
+}
+
+func code_agent_resolve_task_path(string rel_path) string {
+    string root = trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", "."))
+    string abs_path = rel_path
+    if !code_agent_starts_with(rel_path, "/") {
+        if root == "" || root == "." {
+            abs_path = rel_path
+        } else if code_agent_starts_with(root, "/") {
+            if code_agent_starts_with(rel_path, "./") {
+                abs_path = root + "/" + code_agent_slice(rel_path, 2, len(rel_path))
+            } else {
+                abs_path = root + "/" + rel_path
+            }
+        }
+    }
+    abs_path
+}
+
+func code_agent_fast_path_touch_file(string task) string {
+    string command = code_agent_normalize_command_text(task)
+    string lowered = lower(command)
+    string prefix = "touch "
+    if !code_agent_starts_with(lowered, prefix) {
+        return ""
+    }
+    string raw_path = trim(code_agent_slice(command, len(prefix), len(command)))
+    if raw_path == "" {
+        return ""
+    }
+    string abs_path = code_agent_resolve_task_path(raw_path)
+    string touch_py = "import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); p.touch()"
+    runtime_run_command_output("python3 -c " + code_agent_shell_escape(touch_py) + " " + code_agent_shell_escape(abs_path))
+    string verify = trim(runtime_run_command_output("test -f " + code_agent_shell_escape(abs_path) + " && printf ok"))
+    if verify == "ok" {
+        return "created_file path=" + abs_path
+    }
+    "create_file_failed path=" + abs_path
+}
+
+func code_agent_fast_path_create_file(string task) string {
+    string trimmed = code_agent_normalize_command_text(task)
+    string lowered = lower(trimmed)
+    string prefix = "create file "
+    string mid = " with content "
+    if !code_agent_starts_with(lowered, prefix) {
+        return ""
+    }
+    int mid_pos = code_agent_find(lowered, mid, len(prefix))
+    if mid_pos < 0 {
+        return ""
+    }
+    string rel_path = trim(code_agent_slice(trimmed, len(prefix), mid_pos))
+    string content = code_agent_slice(trimmed, mid_pos + len(mid), len(trimmed))
+    if rel_path == "" {
+        return ""
+    }
+
+    string abs_path = code_agent_resolve_task_path(rel_path)
+    string write_py = "import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(sys.argv[2])"
+    runtime_run_command_output("python3 -c " + code_agent_shell_escape(write_py) + " " + code_agent_shell_escape(abs_path) + " " + code_agent_shell_escape(content))
+    string verify = trim(runtime_run_command_output("test -f " + code_agent_shell_escape(abs_path) + " && printf ok"))
+    if verify == "ok" {
+        return "created_file path=" + abs_path
+    }
+    "create_file_failed path=" + abs_path
 }
 
 func code_agent_print_terminal_log(string action, string observation) () {
@@ -346,7 +474,7 @@ func code_agent_print_answer(agent_runtime_state state) {
     println("[code_agent] last_observation: ", state.last_observation)
 }
 
-func main() {
+func main() int {
     // resolve task: env var → stdin pipe
     string task = trim(runtime_env_get("NEURX_CODE_AGENT_TASK", ""))
     if task == "" {
@@ -356,7 +484,7 @@ func main() {
         println("[code_agent] error: no task provided.")
         println("[code_agent]   Set NEURX_CODE_AGENT_TASK=\"...\" or pipe via stdin:")
         println("[code_agent]   echo \"fix the build error\" | neurx_code_agent")
-        return
+        return 1
     }
 
     string model_path  = code_agent_resolve_model_path()
@@ -376,6 +504,18 @@ func main() {
     println("[code_agent] workspace : ", trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", ".")))
     println("[code_agent] ─────────────────────────────────────────────────")
 
+    string touch_path_result = code_agent_fast_path_touch_file(task)
+    if touch_path_result != "" {
+        println("[code_agent] fast_path : ", touch_path_result)
+        return 0
+    }
+
+    string fast_path_result = code_agent_fast_path_create_file(task)
+    if fast_path_result != "" {
+        println("[code_agent] fast_path : ", fast_path_result)
+        return 0
+    }
+
     string build_command = code_agent_resolve_build_command()
     string test_command = code_agent_resolve_test_command()
     string report_path = trim(runtime_env_get("NEURX_CODE_AGENT_REPORT", ""))
@@ -387,4 +527,5 @@ func main() {
     }
     code_agent_print_git_diff()
     code_agent_print_answer(result)
+    0
 }
