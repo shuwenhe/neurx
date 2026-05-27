@@ -41,6 +41,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -z "$REPO_ROOT" ]] && REPO_ROOT="$NEURX_ROOT"
+REPO_ROOT="${REPO_ROOT%/}"
 [[ -n "$PROMPT" ]] || { echo "error: --prompt is required" >&2; exit 2; }
 
 BIN_DIR="${NEURX_ROOT}/build/bin"
@@ -83,21 +84,34 @@ repo_rel_path() {
 safe_repo_path() {
   local path="${1:-}"
   [[ -z "$path" ]] && return 1
+  # Clean markdown backticks and trim whitespace
+  path="$(printf '%s' "$path" | sed -e 's/[`]//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  [[ -z "$path" ]] && return 1
   [[ "$path" == *".."* ]] && return 1
 
-  # 深度纠正：模型经常会输出包含完整物理路径的伪绝对路径
   local rel="$path"
+  # 1. If already absolute and within REPO_ROOT
+  if [[ "$rel" == "$REPO_ROOT"* ]]; then
+    printf '%s' "$rel"
+    return 0
+  fi
 
-  # 1. 剥离已知的绝对路径根部前缀
+  # 2. Deep correction for common LLM path hallucinations
+  # Strip leading / if any
   rel="${rel#/}"
+
+  # Dynamically strip REPO_ROOT components if they appear at the start
+  local repo_stripped="${REPO_ROOT#/}"
+  if [[ -n "$repo_stripped" ]] && [[ "$rel" == "$repo_stripped"* ]]; then
+    rel="${rel#"$repo_stripped"}"
+    rel="${rel#/}"
+  fi
+
+  # Fallback for known hardcoded variations
   rel="${rel#home/shuwen/shuwen/neurx/}"
   rel="${rel#home/shuwen/shuwen/ne_readx/}"
-
-  # 2. 剥离可能重复的项目名
   rel="${rel#neurx/}"
   rel="${rel#ne_readx/}"
-
-  # 3. 处理可能存在的冗余前导斜杠
   rel="${rel#/}"
 
   # 构造最终绝对路径
@@ -183,10 +197,33 @@ EOF
     local model_raw model_text target_rel target_abs
     if model_raw="$(code_agent_call_model "$model_prompt")"; then
       if model_text="$(code_agent_extract_model_text "$model_raw")"; then
-        target_rel="$(printf '%s' "$model_text" | sed -n 's/^[[:space:]]*FILE:[[:space:]]*//ip' | head -n 1 | tr -d '\r')"
+        # Robustly extract FILE: path, handle case insensitivity and possible markdown backticks
+        target_rel="$(printf '%s' "$model_text" | grep -i "FILE:" | head -n 1 | sed -e 's/.*FILE:[[:space:]]*//i' -e 's/[`]//g' | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
         if [[ -n "$target_rel" ]] && target_abs="$(safe_repo_path "$target_rel")"; then
           local new_content
-          new_content="$(printf '%s' "$model_text" | sed -e '1,/^[[:space:]]*CONTENT:/d')"
+          # Extract everything after CONTENT: (case-insensitive)
+          new_content="$(printf '%s' "$model_text" | sed -e '1,/^[[:space:]]*CONTENT:/Id')"
+
+          # If content starts with a code block fence, try to strip it for a cleaner write
+          if [[ "$new_content" =~ ^[[:space:]]*\`{3,} ]]; then
+             if command -v python3 >/dev/null 2>&1; then
+                new_content="$(printf '%s' "$new_content" | python3 -c "
+import sys, re
+c = sys.stdin.read()
+# Try to match a fenced block
+m = re.search(r'^\s*\`{3,}(?:\w+)?\n(.*?)\n\`{3,}', c, re.DOTALL | re.MULTILINE)
+if m:
+    print(m.group(1), end='')
+else:
+    # Otherwise just strip the starting fence and any trailing ones
+    c = re.sub(r'^\s*\`{3,}(?:\w+)?\n', '', c)
+    c = re.sub(r'\n\`{3,}\s*$', '', c)
+    print(c, end='')
+" 2>/dev/null || printf '%s' "$new_content")"
+             fi
+          fi
+
           if [[ -n "$new_content" ]]; then
             # 自动创建父目录 (这是创建新文件的关键)
             mkdir -p "$(dirname "$target_abs")"
