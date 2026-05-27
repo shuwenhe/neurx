@@ -8,6 +8,7 @@ use neurx.agent.workspace_tools
 use neurx.agent.workspace_search
 use neurx.infer
 use neurx.executor.model_tool_select
+use neurx.safety.safety
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
 
 struct agent_execute_result {
@@ -145,7 +146,7 @@ func agent_route_for_goal(string goal, string input) string {
     if agent_text_contains(text, "delete_path") || agent_text_contains(text, "delete") || agent_text_contains(text, "remove") || agent_text_contains(text, "rm ") || agent_text_contains(text, "trash") {
         return "delete"
     }
-    if agent_text_contains(text, "write_file") || agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") {
+    if agent_text_contains(text, "write_file") || agent_text_contains(text, "create_file") || agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") || agent_text_contains(text, "make file") || agent_text_contains(text, "touch ") {
         return "write"
     }
     if agent_text_contains(text, "mkdir") || agent_text_contains(text, "create folder") || agent_text_contains(text, "make dir") || agent_text_contains(text, "create directory") || agent_text_contains(text, "new folder") {
@@ -291,17 +292,23 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string retrieve_path = parsed_action.path
             if task == "read_file" && retrieve_path != "" {
-                agent_workspace_result read_result = agent_workspace_read(retrieve_path, 2048)
+                agent_workspace_result read_result = agent_workspace_read_file(retrieve_path, 1, 160, 4096)
                 observation = read_result.observation
                 ok = read_result.ok
             } else {
                 string retrieve_query = parsed_action.query
-                if retrieve_query == "" {
-                    retrieve_query = input
+                if retrieve_path != "" {
+                    agent_workspace_result read_result = agent_workspace_read_file(retrieve_path, 1, 160, 4096)
+                    observation = read_result.observation
+                    ok = read_result.ok
+                } else {
+                    if retrieve_query == "" {
+                        retrieve_query = input
+                    }
+                    agent_search_result search_result = agent_search_workspace(retrieve_query, route, 3, 512)
+                    observation = search_result.observation
+                    ok = search_result.ok
                 }
-                agent_search_result search_result = agent_search_workspace(retrieve_query, route, 3, 512)
-                observation = search_result.observation
-                ok = search_result.ok
             }
             if ok {
                 next_memory = agent_memory_write_long(next_memory, "retrieved", observation)
@@ -315,11 +322,19 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             tool_retries = agent_tool_registry_retries(tools, tool_name)
             string search_query = parsed_action.query
             if search_query == "" {
+                search_query = parsed_action.path
+            }
+            if search_query == "" {
                 search_query = input
             }
-            agent_search_result search_result = agent_search_workspace(search_query, route, 3, 512)
-            observation = search_result.observation
-            ok = search_result.ok
+            agent_workspace_result search_files_result = agent_workspace_search_files(search_query, 40)
+            observation = search_files_result.observation
+            ok = search_files_result.ok
+            if !ok {
+                agent_search_result fallback_result = agent_search_workspace(search_query, route, 3, 512)
+                observation = fallback_result.observation
+                ok = fallback_result.ok
+            }
             if ok {
                 next_memory = agent_memory_write_long(next_memory, "searched", observation)
             }
@@ -408,7 +423,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 ok = mkdir_result.ok
             }
         }
-    } else if dispatch == "write" || dispatch == "write_file" {
+    } else if dispatch == "write" || dispatch == "write_file" || dispatch == "create_file" {
         action = "write"
         if agent_tool_registry_has_enabled(tools, "write") {
             tool_name = agent_tool_registry_find_by_capability(tools, "write")
@@ -419,11 +434,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             if trim(write_path) == "" {
                 observation = "write:status=failed;reason=path_missing"
                 ok = false
-            } else if trim(write_content) == "" {
-                observation = "write:status=failed;reason=content_missing;path=" + write_path
-                ok = false
             } else {
-                agent_workspace_result write_result = agent_workspace_write(write_path, write_content)
+                // Allow empty content: creates an empty file (touch semantics).
+                agent_workspace_result write_result = agent_workspace_write_file(write_path, write_content)
                 observation = write_result.observation
                 ok = write_result.ok
             }
@@ -445,7 +458,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 observation = "apply_patch:status=failed;reason=args_missing;path=" + patch_path
                 ok = false
             } else {
-                agent_workspace_patch_result patch_result = agent_workspace_apply_patch(patch_path, patch_old, patch_new, patch_replace_all)
+                agent_workspace_patch_result patch_result = agent_workspace_patch_file(patch_path, patch_old, patch_new, patch_replace_all)
                 observation = patch_result.observation
                 ok = patch_result.ok
             }
@@ -662,10 +675,16 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             if shell_cmd == "" {
                 shell_cmd = input
             }
-            agent_workspace_command_result shell_result = agent_workspace_shell(shell_cmd)
-            observation = shell_result.observation
-            ok = shell_result.ok
-            next_memory = agent_memory_write_long(next_memory, "last_shell", observation)
+            agent_safety_result shell_safety = agent_safety_check("shell", shell_cmd, goal)
+            if !shell_safety.allowed {
+                observation = agent_execute_observation("shell", "blocked", "reason=" + shell_safety.reason + ";category=" + shell_safety.category + ";severity=" + string(shell_safety.severity))
+                ok = false
+            } else {
+                agent_workspace_command_result shell_result = agent_workspace_shell(shell_cmd)
+                observation = shell_result.observation
+                ok = shell_result.ok
+                next_memory = agent_memory_write_long(next_memory, "last_shell", observation)
+            }
         } else {
             observation = "shell:status=blocked;reason=tool_disabled"
         }

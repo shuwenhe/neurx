@@ -88,8 +88,11 @@ func agent_model_route_scan_response(string response) string {
 }
 
 func agent_model_route_normalize(string raw) string {
-    if raw == "write" || raw == "write_file" || raw == "create" || raw == "create_file" || raw == "new_file" || raw == "mkdir" {
+    if raw == "write" || raw == "write_file" || raw == "create" || raw == "create_file" || raw == "new_file" {
         return "write"
+    }
+    if raw == "mkdir" || raw == "create_directory" || raw == "new_folder" || raw == "create_folder" {
+        return "mkdir"
     }
     if raw == "delete" || raw == "remove" || raw == "delete_file" || raw == "rm" || raw == "trash" {
         return "delete"
@@ -314,15 +317,18 @@ func agent_model_tool_call_build_prompt(agent_tool_registry_state tools, agent_m
         prompt = prompt + "PRIOR REASONING:\n" + agent_model_clip(inferred_result.value, 1000) + "\n"
     }
     prompt = prompt + "\nAVAILABLE TOOLS:\n" + tools_list + "\n"
-    prompt = prompt + "\nRespond in this EXACT format (omit inapplicable fields):\n"
-    prompt = prompt + "tool: <write|delete|apply_patch|apply_unified_diff|retrieve|search|grep|find_symbol|build|test|shell|infer|code|review|repo|sql|git_status|git_diff|git_log|git_commit|subagent|general>\n"
-    prompt = prompt + "path: <file_path_or_glob>\n"
-    prompt = prompt + "query: <search_query_or_goal_for_subtask>\n"
-    prompt = prompt + "command: <shell_command>\n"
-    prompt = prompt + "old_text: <exact_text_to_replace>\n"
-    prompt = prompt + "replace_all: <true_or_false>\n"
-    prompt = prompt + "new_text: <replacement_text>\n"
-    prompt = prompt + "For multi-line file content:\n"
+    prompt = prompt + "\nRespond with EXACTLY ONE tool call object and nothing else.\n"
+    prompt = prompt + "Use this JSON-like shape:\n"
+    prompt = prompt + "{\"action\":\"read_file|write_file|patch|search_files|mkdir|delete_path|run_build|run_test|shell|infer|code|review|repo|sql|git_status|git_diff|git_log|git_commit|subagent|general\",\"path\":\"relative/path\",\"query\":\"text\",\"command\":\"bash command\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false}\n"
+    prompt = prompt + "Rules:\n"
+    prompt = prompt + "- Use action=read_file to inspect a specific file\n"
+    prompt = prompt + "- Use action=search_files to search by text or filename\n"
+    prompt = prompt + "- Use action=write_file to create or fully replace a file\n"
+    prompt = prompt + "- Use action=patch for targeted edits to an existing file\n"
+    prompt = prompt + "- Use action=mkdir to create a directory\n"
+    prompt = prompt + "- Use action=delete_path only when deletion is required\n"
+    prompt = prompt + "- Prefer read_file before patching unless the request is trivial\n"
+    prompt = prompt + "- For multi-line file content, keep the JSON object first and then include a content block\n"
     prompt = prompt + "---BEGIN CONTENT---\n"
     prompt = prompt + "<content>\n"
     prompt = prompt + "---END CONTENT---\n"
@@ -330,35 +336,7 @@ func agent_model_tool_call_build_prompt(agent_tool_registry_state tools, agent_m
 }
 
 func agent_model_tool_call_parse(string response) agent_action_state {
-    string tool = agent_model_parse_field(response, "tool")
-    string path = agent_model_parse_field(response, "path")
-    string query = agent_model_parse_field(response, "query")
-    string command = agent_model_parse_field(response, "command")
-    string old_text = agent_model_parse_field(response, "old_text")
-    string new_text = agent_model_parse_field(response, "new_text")
-    string replace_all_raw = lower(trim(agent_model_parse_field(response, "replace_all")))
-    bool replace_all = replace_all_raw == "true" || replace_all_raw == "1" || replace_all_raw == "yes"
-    string content = agent_model_parse_block(response, "---BEGIN CONTENT---", "---END CONTENT---")
-    if content == "" {
-        content = agent_model_parse_field(response, "content")
-    }
-    string normalized_tool = agent_model_route_normalize(tool)
-    if normalized_tool == "" {
-        normalized_tool = trim(tool)
-    }
-    bool structured = normalized_tool != "" && normalized_tool != "general"
-    agent_action_state {
-        tool: normalized_tool,
-        path: path,
-        content: content,
-        query: query,
-        command: command,
-        old_text: old_text,
-        new_text: new_text,
-        raw: response,
-        replace_all: replace_all,
-        structured: structured,
-    }
+    agent_action_parse(response, "general")
 }
 
 func agent_model_tool_call(agent_tool_registry_state tools, agent_memory_state memory, string goal, string task, string input, string model_path) agent_action_state {

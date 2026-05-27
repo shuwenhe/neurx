@@ -155,8 +155,9 @@ func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_
     agent_reasoning_state next_reasoning = agent_reasoning_for_goal(
         state.reasoning, state.plan.goal, state.last_observation
     )
-    agent_context_state next_context = agent_context_maybe_compress(
-        agent_context_append(state.context, input)
+    agent_context_state next_context = agent_context_smart_compress(
+        agent_context_append(state.context, input),
+        state.model_path
     )
     next_context = agent_context_append(next_context, failure_summary)
     next_context = agent_context_build_from_memory(next_context, final_memory)
@@ -190,7 +191,7 @@ func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_
 
 func agent_runtime_requires_approval(string task) bool {
     string t = lower(trim(task))
-    t == "write" || t == "write_file" || t == "mkdir" || t == "create_directory" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
+    t == "write" || t == "write_file" || t == "create_file" || t == "mkdir" || t == "create_directory" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
 }
 
 func agent_runtime_approval_matches(string granted, string task) bool {
@@ -203,6 +204,9 @@ func agent_runtime_approval_matches(string granted, string task) bool {
         return true
     }
     if g == "write" && t == "write_file" {
+        return true
+    }
+    if g == "write" && t == "create_file" {
         return true
     }
     if g == "delete" && t == "delete_path" {
@@ -256,7 +260,7 @@ func agent_runtime_pending_change_path(string action, string raw_input) string {
 
 func agent_runtime_pending_change_preview(string action, string raw_input) string {
     agent_action_state parsed = agent_action_parse(raw_input, action)
-    if action == "write" || action == "write_file" || action == "code" {
+    if action == "write" || action == "write_file" || action == "create_file" || action == "code" {
         return agent_workspace_clip(parsed.content, 180)
     }
     if action == "mkdir" || action == "create_directory" {
@@ -315,11 +319,11 @@ func agent_runtime_pending_summary(agent_memory_state memory_state) string {
 
 func agent_runtime_apply_staged_change(string action, string raw_input) string {
     agent_action_state parsed = agent_action_parse(raw_input, action)
-    if action == "write" || action == "write_file" {
+    if action == "write" || action == "write_file" || action == "create_file" {
         string write_path = parsed.path
         string write_content = parsed.content
-        if write_path == "" || write_content == "" {
-            return agent_runtime_observation("apply_pending_changes", "failed", "action=write;reason=args_missing")
+        if write_path == "" {
+            return agent_runtime_observation("apply_pending_changes", "failed", "action=write;reason=path_missing")
         }
         return agent_workspace_write(write_path, write_content).observation
     }
@@ -455,7 +459,7 @@ func agent_runtime_make_interrupt_pending(agent_runtime_state state, string inpu
     )
     agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
     agent_context_state next_context = agent_context_append(
-        agent_context_maybe_compress(agent_context_append(state.context, input)),
+        agent_context_smart_compress(agent_context_append(state.context, input), state.model_path),
         observation
     )
     agent_runtime_state {
@@ -508,7 +512,7 @@ func agent_runtime_handle_interrupt_response(agent_runtime_state state, string i
         agent_plan_state next_plan = agent_plan_set_task(state.plan, "analyze")
         agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
         agent_context_state next_context = agent_context_append(
-            agent_context_maybe_compress(agent_context_append(state.context, input)),
+            agent_context_smart_compress(agent_context_append(state.context, input), state.model_path),
             observation
         )
         return agent_runtime_state {
@@ -552,7 +556,7 @@ func agent_runtime_handle_interrupt_response(agent_runtime_state state, string i
     agent_plan_state next_plan = agent_plan_set_task(state.plan, "analyze")
     agent_session_state next_session = agent_session_assistant(agent_session_user(state.session, input), observation)
     agent_context_state next_context = agent_context_append(
-        agent_context_maybe_compress(agent_context_append(state.context, input)),
+        agent_context_smart_compress(agent_context_append(state.context, input), state.model_path),
         observation
     )
     agent_answer_state next_answer = state.answer
@@ -925,7 +929,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             skills: state.skills,
             skill_execution: state.skill_execution,
             reflection: state.reflection,
-            context: agent_context_append(agent_context_maybe_compress(agent_context_append(state.context, input)), observation),
+            context: agent_context_append(agent_context_smart_compress(agent_context_append(state.context, input), state.model_path), observation),
             reasoning: state.reasoning,
             subagents: state.subagents,
             answer: state.answer,
@@ -954,7 +958,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             skills: state.skills,
             skill_execution: state.skill_execution,
             reflection: state.reflection,
-            context: agent_context_append(agent_context_maybe_compress(agent_context_append(state.context, input)), apply_result.observation),
+            context: agent_context_append(agent_context_smart_compress(agent_context_append(state.context, input), state.model_path), apply_result.observation),
             reasoning: state.reasoning,
             subagents: state.subagents,
             answer: state.answer,
@@ -982,8 +986,9 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
 
     agent_session_state next_session = agent_session_user(state.session, input)
 
-    agent_context_state next_context = agent_context_maybe_compress(
-        agent_context_append(state.context, input)
+    agent_context_state next_context = agent_context_smart_compress(
+        agent_context_append(state.context, input),
+        state.model_path
     )
 
     agent_reasoning_state next_reasoning = agent_reasoning_for_goal(
