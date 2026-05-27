@@ -60,6 +60,7 @@ signals:
     void log_message(const QString& level, const QString& tag, const QString& message);
     void agentRunChunk(const QString& chunk);
     void agentRunFinished(const QString& result);
+    void explorerChanged(const QString& changedPath, const QString& changeKind);
     void localModelConfigChanged();
 
 public:
