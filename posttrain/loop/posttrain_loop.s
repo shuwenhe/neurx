@@ -70,8 +70,8 @@ func new_posttrain_pipeline_state(posttrain_config cfg, posttrain_data_state dat
         loop: new_posttrain_loop_state(cfg, data, reward),
         checkpoint: new_posttrain_checkpoint_state(run_name, root),
         eval: new_posttrain_eval_state(),
-        opt: new_optimizer(),
-        sched: new_lr_scheduler(cfg.lr),
+        opt:        new_optimizer(),
+        sched:      new_named_lr_scheduler(cfg.lr, cfg.lr * 0.1, 0, cfg.max_steps, cfg.scheduler),
         metrics: new_posttrain_metrics_state(),
     }
 }

@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QProcess>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTemporaryFile>
 #include <QTemporaryDir>
@@ -56,6 +57,10 @@ constexpr int kOllamaPullTimeoutMs = 30 * 60 * 1000;
 constexpr int kCodeAgentHistoryLimit = 8;
 constexpr int kCodeAgentFileCacheLimit = 6;
 constexpr int kCodeAgentLoopLimit = 6;
+
+QString bridge_source_file_path() {
+    return QDir::cleanPath(QString::fromUtf8(__FILE__));
+}
 
 struct CodeAgentRunnerEnvelope {
     bool valid {false};
@@ -281,7 +286,7 @@ CodeAgentRunnerEnvelope parse_code_agent_runner_envelope(const QString& runner_r
     return envelope;
 }
 
-QString normalize_newlines(QString text) {
+    QString normalize_newlines(QString text) {
     text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
     text.replace(QChar('\r'), QChar('\n'));
     return text;
@@ -960,12 +965,23 @@ bool prompt_requests_delete_operation(const QString& prompt) {
         || text.contains(chineseDelete, Qt::CaseInsensitive);
 }
 
-QString extract_delete_target_path(const QString& prompt, const QString& file_path) {
-    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
-    if (!explicit_file.isEmpty()) {
-        return explicit_file;
-    }
+QString strip_path_like_tokens_from_prompt(const QString& prompt);
 
+bool prompt_requests_rename_operation(const QString& prompt) {
+    const QString text = strip_path_like_tokens_from_prompt(prompt);
+    if (text.isEmpty()) {
+        return false;
+    }
+    return text.contains(QStringLiteral("rename"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("move"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("rename to"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("改名"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("重命名"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("改成"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("改为"), Qt::CaseInsensitive);
+}
+
+QString strip_path_like_tokens_from_prompt(const QString& prompt) {
     QString normalized = prompt;
     normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
     normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
@@ -973,14 +989,129 @@ QString extract_delete_target_path(const QString& prompt, const QString& file_pa
     while (normalized.contains(QStringLiteral("  "))) {
         normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
     }
+
+    QStringList kept;
     const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
     for (QString token : tokens) {
         token = token.trimmed();
-        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}").contains(token.front())) {
+        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(token.front())) {
             token.remove(0, 1);
         }
-        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}").contains(token.back())) {
+        while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(token.back())) {
             token.chop(1);
+        }
+        token = QDir::fromNativeSeparators(token);
+        if (token.startsWith(QStringLiteral("./"))) {
+            token.remove(0, 2);
+        }
+        if (token.startsWith(QStringLiteral("neurx/"), Qt::CaseInsensitive)) {
+            token.remove(0, 6);
+        } else if (token.startsWith(QStringLiteral("ne_readx/"), Qt::CaseInsensitive)) {
+            token.remove(0, 9);
+        } else if (token.startsWith(QStringLiteral("code/"), Qt::CaseInsensitive)) {
+            token.remove(0, 5);
+        }
+        if (token.isEmpty()) {
+            continue;
+        }
+        const bool is_absolute = token.startsWith(QLatin1Char('/'))
+            || (token.size() >= 3
+                && token.at(1) == QLatin1Char(':')
+                && (token.at(2) == QLatin1Char('/') || token.at(2) == QLatin1Char('\\')));
+        const bool is_relative_path = token.contains(QLatin1Char('/')) || token.contains(QLatin1Char('\\'));
+        if (is_absolute || is_relative_path) {
+            continue;
+        }
+        kept.append(token);
+    }
+    return kept.join(QChar(' ')).trimmed();
+}
+
+bool prompt_requests_create_file_operation(const QString& prompt) {
+    const QString text = strip_path_like_tokens_from_prompt(prompt);
+    if (text.isEmpty()) {
+        return false;
+    }
+    const QString chineseCreate = QString(QChar(0x521b)) + QString(QChar(0x5efa));
+    const QString chineseNew = QString(QChar(0x65b0)) + QString(QChar(0x5efa));
+    const QString chineseFile = QString(QChar(0x6587)) + QString(QChar(0x4ef6));
+    const bool mentions_create =
+        text.contains(QStringLiteral("create file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("new file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("add file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("touch "), Qt::CaseInsensitive)
+        || text.contains(chineseCreate + chineseFile, Qt::CaseInsensitive)
+        || text.contains(chineseNew + chineseFile, Qt::CaseInsensitive)
+        || (text.contains(chineseCreate, Qt::CaseInsensitive)
+            && text.contains(chineseFile, Qt::CaseInsensitive));
+    if (mentions_create) {
+        return true;
+    }
+
+    const bool mentions_create_verb =
+        text.contains(QStringLiteral("create"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("new"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("add"), Qt::CaseInsensitive)
+        || text.contains(chineseCreate, Qt::CaseInsensitive)
+        || text.contains(chineseNew, Qt::CaseInsensitive);
+    if (!mentions_create_verb) {
+        return false;
+    }
+
+    static const QRegularExpression kFileLikeNamePattern(
+        QStringLiteral("[^\\s/\\\\]+\\.[A-Za-z0-9]{1,16}"));
+    return kFileLikeNamePattern.match(text).hasMatch();
+}
+
+bool prompt_targets_current_file(const QString& prompt) {
+    const QString text = prompt.trimmed();
+    if (text.isEmpty()) {
+        return false;
+    }
+    return text.contains(QStringLiteral("this file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("current file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("selected file"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("该文件"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("当前文件"), Qt::CaseInsensitive)
+        || text.contains(QStringLiteral("这个文件"), Qt::CaseInsensitive);
+}
+
+QString normalize_prompt_path_token(QString token) {
+    token = token.trimmed();
+    while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(token.front())) {
+        token.remove(0, 1);
+    }
+    while (!token.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(token.back())) {
+        token.chop(1);
+    }
+    token = QDir::fromNativeSeparators(token);
+    if (token.startsWith(QStringLiteral("./"))) {
+        token.remove(0, 2);
+    }
+    if (token.startsWith(QStringLiteral("neurx/"), Qt::CaseInsensitive)) {
+        token.remove(0, 6);
+    } else if (token.startsWith(QStringLiteral("ne_readx/"), Qt::CaseInsensitive)) {
+        token.remove(0, 9);
+    } else if (token.startsWith(QStringLiteral("code/"), Qt::CaseInsensitive)) {
+        token.remove(0, 5);
+    }
+    return token;
+}
+
+QString extract_path_candidate_from_prompt(const QString& prompt) {
+    QString normalized = prompt;
+    normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\t'), QLatin1Char(' '));
+    while (normalized.contains(QStringLiteral("  "))) {
+        normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
+    }
+
+    const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    for (QString token : tokens) {
+        token = normalize_prompt_path_token(token);
+        if (token.isEmpty()) {
+            continue;
         }
         if (token.size() >= 3
             && token.at(1) == QLatin1Char(':')
@@ -990,6 +1121,333 @@ QString extract_delete_target_path(const QString& prompt, const QString& file_pa
         if (token.startsWith(QLatin1Char('/'))) {
             return QDir::cleanPath(token);
         }
+        if (token.contains(QLatin1Char('/')) || token.contains(QLatin1Char('\\'))) {
+            return QDir::cleanPath(token);
+        }
+        const int dot_index = token.lastIndexOf(QLatin1Char('.'));
+        if (dot_index > 0 && dot_index < token.size() - 1) {
+            return token;
+        }
+    }
+
+    return QString();
+}
+
+QString extract_file_name_candidate_from_prompt(const QString& prompt) {
+    QString normalized = prompt;
+    normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\t'), QLatin1Char(' '));
+    while (normalized.contains(QStringLiteral("  "))) {
+        normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
+    }
+
+    const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    static const QRegularExpression kFileLikeNamePattern(
+        QStringLiteral("([^\\s/\\\\]+\\.[A-Za-z0-9]{1,16})"));
+    const auto cleanup_file_name = [](QString name) {
+        static const QStringList prefixes = {
+            QStringLiteral("创建"),
+            QStringLiteral("新建"),
+            QStringLiteral("create"),
+            QStringLiteral("new"),
+            QStringLiteral("add")
+        };
+        QString next = name.trimmed();
+        for (const QString& prefix : prefixes) {
+            if (next.startsWith(prefix, Qt::CaseInsensitive) && next.size() > prefix.size()) {
+                next = next.mid(prefix.size()).trimmed();
+                break;
+            }
+        }
+        while (!next.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(next.front())) {
+            next.remove(0, 1);
+        }
+        while (!next.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(next.back())) {
+            next.chop(1);
+        }
+        return next;
+    };
+    for (QString token : tokens) {
+        token = normalize_prompt_path_token(token);
+        if (token.isEmpty()) {
+            continue;
+        }
+        if (token.contains(QLatin1Char('/')) || token.contains(QLatin1Char('\\'))) {
+            const QFileInfo info(token);
+            const QString name = cleanup_file_name(info.fileName().trimmed());
+            if (kFileLikeNamePattern.match(name).hasMatch()) {
+                return name;
+            }
+            continue;
+        }
+        const QRegularExpressionMatch match = kFileLikeNamePattern.match(cleanup_file_name(token));
+        if (match.hasMatch()) {
+            return match.captured(1);
+        }
+    }
+    return QString();
+}
+
+QStringList extract_file_name_candidates_from_prompt(const QString& prompt) {
+    QString normalized = prompt;
+    normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\t'), QLatin1Char(' '));
+    while (normalized.contains(QStringLiteral("  "))) {
+        normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
+    }
+
+    const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    static const QRegularExpression kFileLikeNamePattern(
+        QStringLiteral("([^\\s/\\\\]+\\.[A-Za-z0-9]{1,16})"));
+    QStringList results;
+    const auto cleanup_file_name = [](QString name) {
+        static const QStringList prefixes = {
+            QStringLiteral("创建"),
+            QStringLiteral("新建"),
+            QStringLiteral("create"),
+            QStringLiteral("new"),
+            QStringLiteral("add"),
+            QStringLiteral("rename"),
+            QStringLiteral("改名为"),
+            QStringLiteral("重命名为"),
+            QStringLiteral("改成"),
+            QStringLiteral("改为")
+        };
+        QString next = name.trimmed();
+        for (const QString& prefix : prefixes) {
+            if (next.startsWith(prefix, Qt::CaseInsensitive) && next.size() > prefix.size()) {
+                next = next.mid(prefix.size()).trimmed();
+                break;
+            }
+        }
+        while (!next.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(next.front())) {
+            next.remove(0, 1);
+        }
+        while (!next.isEmpty() && QStringLiteral("\"'`,;:()[]{}<>").contains(next.back())) {
+            next.chop(1);
+        }
+        return next;
+    };
+    for (QString token : tokens) {
+        token = normalize_prompt_path_token(token);
+        if (token.isEmpty()) {
+            continue;
+        }
+        QString candidate;
+        if (token.contains(QLatin1Char('/')) || token.contains(QLatin1Char('\\'))) {
+            candidate = cleanup_file_name(QFileInfo(token).fileName().trimmed());
+        } else {
+            const QRegularExpressionMatch match = kFileLikeNamePattern.match(cleanup_file_name(token));
+            if (match.hasMatch()) {
+                candidate = match.captured(1);
+            }
+        }
+        if (!candidate.isEmpty() && !results.contains(candidate)) {
+            results.append(candidate);
+        }
+    }
+    return results;
+}
+
+QStringList extract_path_candidates_from_prompt(const QString& prompt) {
+    QString normalized = prompt;
+    normalized.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\r'), QLatin1Char(' '));
+    normalized.replace(QLatin1Char('\t'), QLatin1Char(' '));
+    while (normalized.contains(QStringLiteral("  "))) {
+        normalized.replace(QStringLiteral("  "), QStringLiteral(" "));
+    }
+
+    QStringList results;
+    const QStringList tokens = normalized.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    for (QString token : tokens) {
+        token = normalize_prompt_path_token(token);
+        if (token.isEmpty()) {
+            continue;
+        }
+        if (token.size() >= 3
+            && token.at(1) == QLatin1Char(':')
+            && (token.at(2) == QLatin1Char('/') || token.at(2) == QLatin1Char('\\'))) {
+            results.append(QDir::cleanPath(token));
+            continue;
+        }
+        if (token.startsWith(QLatin1Char('/'))) {
+            results.append(QDir::cleanPath(token));
+            continue;
+        }
+        if (token.contains(QLatin1Char('/')) || token.contains(QLatin1Char('\\'))) {
+            results.append(QDir::cleanPath(token));
+        }
+    }
+    results.removeDuplicates();
+    return results;
+}
+
+QString extract_delete_target_path(const QString& prompt, const QString& file_path) {
+    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
+    if (!explicit_file.isEmpty() && prompt_targets_current_file(prompt)) {
+        return explicit_file;
+    }
+    return extract_path_candidate_from_prompt(prompt);
+}
+
+QString extract_create_target_path(const QString& prompt, const QString& file_path) {
+    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
+    if (!explicit_file.isEmpty() && prompt_targets_current_file(prompt)) {
+        return explicit_file;
+    }
+    const QString path_candidate = extract_path_candidate_from_prompt(prompt);
+    const QString file_name_candidate = extract_file_name_candidate_from_prompt(prompt);
+    if (!path_candidate.isEmpty()) {
+        const QFileInfo info(path_candidate);
+        if (!file_name_candidate.isEmpty() && (info.isDir() || (!info.exists() && !path_candidate.contains(QLatin1Char('.'))))) {
+            return QDir(path_candidate).filePath(file_name_candidate);
+        }
+        return path_candidate;
+    }
+    return file_name_candidate;
+}
+
+QString extract_rename_source_path(const QString& prompt, const QString& file_path) {
+    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
+    if (!explicit_file.isEmpty() && prompt_targets_current_file(prompt)) {
+        return explicit_file;
+    }
+    const QStringList path_candidates = extract_path_candidates_from_prompt(prompt);
+    if (!path_candidates.isEmpty()) {
+        return path_candidates.first();
+    }
+    return QString();
+}
+
+QString extract_rename_target_path(const QString& prompt,
+                                   const QString& file_path,
+                                   const QString& source_path) {
+    const QStringList path_candidates = extract_path_candidates_from_prompt(prompt);
+    if (path_candidates.size() >= 2) {
+        return path_candidates.at(1);
+    }
+    const QStringList file_name_candidates = extract_file_name_candidates_from_prompt(prompt);
+    QString target_name;
+    if (!file_name_candidates.isEmpty()) {
+        const QString source_name = QFileInfo(source_path).fileName().trimmed();
+        for (const QString& candidate : file_name_candidates) {
+            if (!source_name.isEmpty() && candidate == source_name) {
+                continue;
+            }
+            target_name = candidate;
+        }
+        if (target_name.isEmpty()) {
+            target_name = file_name_candidates.last();
+        }
+    }
+    if (target_name.isEmpty()) {
+        return QString();
+    }
+
+    const QString explicit_file = QDir::cleanPath(file_path.trimmed());
+    if (!explicit_file.isEmpty() && prompt_targets_current_file(prompt)) {
+        return QDir(QFileInfo(explicit_file).absolutePath()).filePath(target_name);
+    }
+    if (!source_path.trimmed().isEmpty()) {
+        return QDir(QFileInfo(source_path).absolutePath()).filePath(target_name);
+    }
+    return target_name;
+}
+
+QString extract_create_file_content(const QString& prompt, const QString& target_path = QString()) {
+    const int fence_start = prompt.indexOf(QStringLiteral("```"));
+    if (fence_start >= 0) {
+        const int first_line_end = prompt.indexOf(QChar('\n'), fence_start + 3);
+        const int content_start = first_line_end >= 0 ? first_line_end + 1 : fence_start + 3;
+        const int fence_end = prompt.indexOf(QStringLiteral("```"), content_start);
+        if (fence_end > content_start) {
+            return normalize_newlines(prompt.mid(content_start, fence_end - content_start).trimmed());
+        }
+    }
+
+    const QStringList markers = {
+        QStringLiteral("content:"),
+        QStringLiteral("contents:"),
+        QStringLiteral("with content:"),
+        QStringLiteral("内容："),
+        QStringLiteral("内容:"),
+        QStringLiteral("写入："),
+        QStringLiteral("写入:")
+    };
+    const QString lowered = prompt.toLower();
+    for (const QString& marker : markers) {
+        const int idx = lowered.indexOf(marker.toLower());
+        if (idx >= 0) {
+            const QString suffix = prompt.mid(idx + marker.size()).trimmed();
+            if (!suffix.isEmpty()) {
+                return normalize_newlines(suffix);
+            }
+        }
+    }
+
+    const bool wants_implementation =
+        lowered.contains(QStringLiteral("implement"))
+        || lowered.contains(QStringLiteral("实现"))
+        || lowered.contains(QStringLiteral("编写"))
+        || lowered.contains(QStringLiteral("写一个"))
+        || lowered.contains(QStringLiteral("用c++实现"))
+        || lowered.contains(QStringLiteral("用 c++ 实现"))
+        || lowered.contains(QStringLiteral("with c++"));
+    const bool wants_cpp =
+        lowered.contains(QStringLiteral("c++"))
+        || lowered.contains(QStringLiteral("cpp"));
+    if (wants_implementation && wants_cpp) {
+        const QFileInfo info(target_path.trimmed());
+        const QString file_name = info.fileName().trimmed().isEmpty()
+            ? target_path.trimmed()
+            : info.fileName().trimmed();
+        const QString base_name = info.completeBaseName().trimmed().isEmpty()
+            ? file_name
+            : info.completeBaseName().trimmed();
+        const QString suffix = info.suffix().trimmed().toLower();
+
+        if (base_name.compare(QStringLiteral("main"), Qt::CaseInsensitive) == 0
+            || base_name.compare(QStringLiteral("hello"), Qt::CaseInsensitive) == 0) {
+            return QString(
+                "#include <iostream>\n\n"
+                "int main() {\n"
+                "    std::cout << \"Hello, world!\" << std::endl;\n"
+                "    return 0;\n"
+                "}\n");
+        }
+
+        if (suffix == QStringLiteral("h") || suffix == QStringLiteral("hh")
+            || suffix == QStringLiteral("hpp") || suffix == QStringLiteral("hxx")) {
+            QString guard = base_name.toUpper();
+            guard.replace(QRegularExpression(QStringLiteral("[^A-Z0-9]+")), QStringLiteral("_"));
+            if (guard.isEmpty()) {
+                guard = QStringLiteral("GENERATED_HEADER");
+            }
+            guard += QStringLiteral("_H");
+            return QString(
+                "#ifndef %1\n"
+                "#define %1\n\n"
+                "class %2 {\n"
+                "public:\n"
+                "    %2();\n"
+                "};\n\n"
+                "#endif\n")
+                .arg(guard, base_name.left(1).toUpper() + base_name.mid(1));
+        }
+
+        const QString class_name = base_name.left(1).toUpper() + base_name.mid(1);
+        return QString(
+            "#include <iostream>\n\n"
+            "void %1() {\n"
+            "    std::cout << \"%2\" << std::endl;\n"
+            "}\n")
+            .arg(base_name.compare(class_name, Qt::CaseSensitive) == 0
+                    ? QStringLiteral("run")
+                    : base_name,
+                 class_name);
     }
 
     return QString();
@@ -2137,6 +2595,9 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
 
     QStringList edited_paths;
     QStringList applied_summaries;
+    const auto emit_explorer_change = [this](const QString& absolute_path, const QString& action) {
+        emit explorerChanged(QDir::cleanPath(absolute_path), action);
+    };
 
     for (const QVariant& item : std::as_const(code_agent_pending_changes_)) {
         const QVariantMap change = item.toMap();
@@ -2149,11 +2610,14 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
             continue;
         }
 
-        if (action == QStringLiteral("write_file")) {
+        if (action == QStringLiteral("write_file") || action == QStringLiteral("create_file")) {
             QDir().mkpath(QFileInfo(absolute_path).absolutePath());
             QFile file(absolute_path);
             if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
-                applied_summaries << QStringLiteral("tool_error: pending write_file failed");
+                applied_summaries << QStringLiteral("tool_error: pending %1 failed").arg(action);
+                emit log_message("error", "fs",
+                    QString("file_op action=%1 mode=pending-apply result=failed target=%2 handler=%3")
+                        .arg(action, absolute_path, bridge_source_file_path()));
                 continue;
             }
             const QString content = normalize_newlines(change.value(QStringLiteral("content")).toString());
@@ -2161,7 +2625,14 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
             file.write(bytes);
             file.close();
             edited_paths.append(repo_relative_path(find_repo_root(), absolute_path));
-            applied_summaries << QStringLiteral("applied write_file ") + repo_relative_path(find_repo_root(), absolute_path);
+            applied_summaries << QStringLiteral("applied %1 ").arg(action)
+                + repo_relative_path(find_repo_root(), absolute_path);
+            emit_explorer_change(absolute_path, action == QStringLiteral("create_file")
+                ? QStringLiteral("create")
+                : QStringLiteral("update"));
+            emit log_message("info", "fs",
+                QString("file_op action=%1 mode=pending-apply result=ok target=%2 handler=%3")
+                    .arg(action, absolute_path, bridge_source_file_path()));
             continue;
         }
 
@@ -2189,10 +2660,17 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
             }
             if (!removed) {
                 applied_summaries << QStringLiteral("tool_error: pending delete_path failed");
+                emit log_message("error", "fs",
+                    QString("file_op action=delete_path mode=pending-apply result=failed target=%1 handler=%2")
+                        .arg(absolute_path, bridge_source_file_path()));
                 continue;
             }
             edited_paths.append(repo_relative_path(find_repo_root(), absolute_path));
             applied_summaries << QStringLiteral("applied delete_path ") + repo_relative_path(find_repo_root(), absolute_path);
+            emit_explorer_change(absolute_path, QStringLiteral("delete"));
+            emit log_message("info", "fs",
+                QString("file_op action=delete_path mode=pending-apply result=ok target=%1 handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
             continue;
         }
 
@@ -2253,6 +2731,9 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
 
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
             applied_summaries << QStringLiteral("tool_error: pending write failed");
+            emit log_message("error", "fs",
+                QString("file_op action=%1 mode=pending-apply result=failed target=%2 handler=%3")
+                    .arg(action, absolute_path, bridge_source_file_path()));
             continue;
         }
         const QByteArray bytes = content.toUtf8();
@@ -2262,6 +2743,10 @@ QString NeurxBridge::apply_pending_code_agent_changes() {
         const QString repo_path = repo_relative_path(find_repo_root(), absolute_path);
         edited_paths.append(repo_path);
         applied_summaries << QStringLiteral("applied ") + action + QStringLiteral(" ") + repo_path;
+        emit_explorer_change(absolute_path, QStringLiteral("update"));
+        emit log_message("info", "fs",
+            QString("file_op action=%1 mode=pending-apply result=ok target=%2 handler=%3")
+                .arg(action, absolute_path, bridge_source_file_path()));
     }
 
     code_agent_pending_changes_.clear();
@@ -2921,6 +3406,15 @@ bool NeurxBridge::persist_login_session_to_database(const QString& phone,
         return false;
     }
 
+    if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QMYSQL"))) {
+        emit const_cast<NeurxBridge*>(this)->log_message(
+            "warning",
+            "db",
+            QString("MySQL driver unavailable; skipping login session persist handler=%1")
+                .arg(bridge_source_file_path()));
+        return false;
+    }
+
     const QString connection_name = login_database_connection_name();
     if (QSqlDatabase::contains(connection_name)) {
         {
@@ -2976,6 +3470,15 @@ QVariantMap NeurxBridge::load_login_session_from_database(const QString& phone,
     const QString normalized_phone = phone.trimmed();
     Q_UNUSED(rememberToken);
     if (normalized_phone.isEmpty()) {
+        return {};
+    }
+
+    if (!QSqlDatabase::isDriverAvailable(QStringLiteral("QMYSQL"))) {
+        emit const_cast<NeurxBridge*>(this)->log_message(
+            "warning",
+            "db",
+            QString("MySQL driver unavailable; skipping login session load handler=%1")
+                .arg(bridge_source_file_path()));
         return {};
     }
 
@@ -3044,6 +3547,10 @@ QString NeurxBridge::delete_path(const QString& path, bool recursive) {
     }
     const QFileInfo info(trimmed);
     if (!info.exists()) {
+        emit explorerChanged(trimmed, QStringLiteral("delete"));
+        emit log_message("info", "fs",
+            QString("file_op action=delete_path mode=api result=already_absent target=%1 handler=%2")
+                .arg(trimmed, bridge_source_file_path()));
         return QStringLiteral("already_absent");
     }
     bool removed = false;
@@ -3065,6 +3572,12 @@ QString NeurxBridge::delete_path(const QString& path, bool recursive) {
     qInfo().noquote() << QString("bridge delete_path path=%1 recursive=%2")
         .arg(trimmed)
         .arg(recursive ? "true" : "false");
+    emit explorerChanged(trimmed, QStringLiteral("delete"));
+    emit log_message(removed ? "info" : "error", "fs",
+        QString("file_op action=delete_path mode=api result=%1 target=%2 handler=%3")
+            .arg(removed ? QStringLiteral("ok") : QStringLiteral("failed"),
+                 trimmed,
+                 bridge_source_file_path()));
     return QStringLiteral("deleted");
 }
 
@@ -3088,6 +3601,192 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         .arg(route)
         .arg(prompt.size())
         .arg(filePath.trimmed().isEmpty() ? QStringLiteral("-") : QFileInfo(filePath.trimmed()).fileName()));
+
+    const auto create_workspace_file_direct = [&](const QString& raw_path, const QString& content) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok || absolute_path.isEmpty()) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 handler=%2")
+                    .arg(raw_path.trimmed(), bridge_source_file_path()));
+            return QStringLiteral("create_file_error: path outside workspace");
+        }
+        const QFileInfo info(absolute_path);
+        if (info.exists() && info.isDir()) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 reason=path_is_directory handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("create_file_error: path already exists as directory");
+        }
+        if (info.exists() && info.isFile()) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 reason=file_exists handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("create_file_error: file already exists");
+        }
+        if (!QDir().mkpath(QFileInfo(absolute_path).absolutePath())) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 reason=mkpath_failed handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("create_file_error: failed to create parent directory");
+        }
+        QFile file(absolute_path);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 reason=open_failed handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("create_file_error: failed to open file for writing");
+        }
+        const QByteArray bytes = normalize_newlines(content).toUtf8();
+        if (file.write(bytes) < 0) {
+            emit log_message("error", "fs",
+                QString("file_op action=create_file mode=agent-direct result=failed target=%1 reason=write_failed handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("create_file_error: failed to write file");
+        }
+        file.close();
+        emit explorerChanged(absolute_path, QStringLiteral("create"));
+        emit log_message("info", "fs",
+            QString("file_op action=create_file mode=agent-direct result=ok target=%1 handler=%2")
+                .arg(absolute_path, bridge_source_file_path()));
+        return QStringLiteral("Created file: %1").arg(repo_relative_path(root, absolute_path));
+    };
+
+    const auto delete_workspace_path_direct = [&](const QString& raw_path) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok || absolute_path.isEmpty()) {
+            emit log_message("error", "fs",
+                QString("file_op action=delete_path mode=agent-direct result=failed target=%1 handler=%2")
+                    .arg(raw_path.trimmed(), bridge_source_file_path()));
+            return QStringLiteral("delete_path_error: path outside workspace");
+        }
+        const QFileInfo info(absolute_path);
+        if (!info.exists()) {
+            emit log_message("info", "fs",
+                QString("file_op action=delete_path mode=agent-direct result=already_absent target=%1 handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("Path already absent: %1").arg(repo_relative_path(root, absolute_path));
+        }
+        bool removed = false;
+        if (info.isDir()) {
+            QDir dir(absolute_path);
+            removed = dir.removeRecursively();
+        } else {
+            QFile file(absolute_path);
+            removed = file.remove();
+        }
+        if (!removed) {
+            emit log_message("error", "fs",
+                QString("file_op action=delete_path mode=agent-direct result=failed target=%1 handler=%2")
+                    .arg(absolute_path, bridge_source_file_path()));
+            return QStringLiteral("delete_path_error: failed to remove %1")
+                .arg(repo_relative_path(root, absolute_path));
+        }
+        emit explorerChanged(absolute_path, QStringLiteral("delete"));
+        emit log_message("info", "fs",
+            QString("file_op action=delete_path mode=agent-direct result=ok target=%1 handler=%2")
+                .arg(absolute_path, bridge_source_file_path()));
+        return QStringLiteral("Deleted path: %1").arg(repo_relative_path(root, absolute_path));
+    };
+
+    const auto rename_workspace_path_direct = [&](const QString& raw_source_path,
+                                                  const QString& raw_target_path,
+                                                  const QString& mode) -> QString {
+        bool source_ok = false;
+        const QString absolute_source_path = resolve_workspace_path(root, raw_source_path, &source_ok);
+        bool target_ok = false;
+        const QString absolute_target_path = resolve_workspace_path(root, raw_target_path, &target_ok);
+        if (!source_ok || absolute_source_path.isEmpty() || !target_ok || absolute_target_path.isEmpty()) {
+            emit log_message("error", "fs",
+                QString("file_op action=rename_path mode=%1 result=failed source=%2 target=%3 reason=path_outside_workspace handler=%4")
+                    .arg(mode, raw_source_path.trimmed(), raw_target_path.trimmed(), bridge_source_file_path()));
+            return QStringLiteral("rename_path_error: path outside workspace");
+        }
+        const QFileInfo source_info(absolute_source_path);
+        if (!source_info.exists()) {
+            emit log_message("error", "fs",
+                QString("file_op action=rename_path mode=%1 result=failed source=%2 target=%3 reason=source_missing handler=%4")
+                    .arg(mode, absolute_source_path, absolute_target_path, bridge_source_file_path()));
+            return QStringLiteral("rename_path_error: source path not found");
+        }
+        const QFileInfo target_info(absolute_target_path);
+        if (target_info.exists()) {
+            emit log_message("error", "fs",
+                QString("file_op action=rename_path mode=%1 result=failed source=%2 target=%3 reason=target_exists handler=%4")
+                    .arg(mode, absolute_source_path, absolute_target_path, bridge_source_file_path()));
+            return QStringLiteral("rename_path_error: target path already exists");
+        }
+        if (!QDir().mkpath(QFileInfo(absolute_target_path).absolutePath())) {
+            emit log_message("error", "fs",
+                QString("file_op action=rename_path mode=%1 result=failed source=%2 target=%3 reason=mkpath_failed handler=%4")
+                    .arg(mode, absolute_source_path, absolute_target_path, bridge_source_file_path()));
+            return QStringLiteral("rename_path_error: failed to create target parent directory");
+        }
+        bool renamed = false;
+        if (source_info.isDir()) {
+            QDir parent_dir = source_info.dir();
+            renamed = parent_dir.rename(source_info.fileName(), QFileInfo(absolute_target_path).fileName());
+            if (renamed && source_info.dir().absolutePath() != QFileInfo(absolute_target_path).dir().absolutePath()) {
+                // Fallback for cross-directory directory moves.
+                QDir target_parent(QFileInfo(absolute_target_path).dir().absolutePath());
+                renamed = target_parent.rename(absolute_source_path, absolute_target_path);
+            }
+        } else {
+            QFile source_file(absolute_source_path);
+            renamed = source_file.rename(absolute_target_path);
+        }
+        if (!renamed) {
+            emit log_message("error", "fs",
+                QString("file_op action=rename_path mode=%1 result=failed source=%2 target=%3 reason=rename_failed handler=%4")
+                    .arg(mode, absolute_source_path, absolute_target_path, bridge_source_file_path()));
+            return QStringLiteral("rename_path_error: failed to rename path");
+        }
+        emit explorerChanged(absolute_source_path, QStringLiteral("delete"));
+        emit explorerChanged(absolute_target_path, QStringLiteral("create"));
+        emit log_message("info", "fs",
+            QString("file_op action=rename_path mode=%1 result=ok source=%2 target=%3 handler=%4")
+                .arg(mode, absolute_source_path, absolute_target_path, bridge_source_file_path()));
+        return QStringLiteral("Renamed path: %1 -> %2")
+            .arg(repo_relative_path(root, absolute_source_path),
+                 repo_relative_path(root, absolute_target_path));
+    };
+
+    if (prompt_requests_rename_operation(prompt)) {
+        const QString rename_source = extract_rename_source_path(prompt, filePath);
+        const QString rename_target = extract_rename_target_path(prompt, filePath, rename_source);
+        if (!rename_source.isEmpty() && !rename_target.isEmpty()) {
+            const QString rename_result = rename_workspace_path_direct(
+                rename_source, rename_target, QStringLiteral("agent-direct"));
+            emit log_message("info", "agent",
+                QString("code-assistant direct-rename source=%1 target=%2 result=%3")
+                    .arg(rename_source, rename_target, rename_result));
+            return rename_result;
+        }
+    }
+
+    if (prompt_requests_create_file_operation(prompt)) {
+        const QString create_target = extract_create_target_path(prompt, filePath);
+        if (!create_target.isEmpty()) {
+            const QString create_content = extract_create_file_content(prompt, create_target);
+            const QString create_result = create_workspace_file_direct(create_target, create_content);
+            emit log_message("info", "agent",
+                QString("code-assistant direct-create path=%1 result=%2")
+                    .arg(create_target, create_result));
+            return create_result;
+        }
+    }
+
+    if (prompt_requests_delete_operation(prompt)) {
+        const QString delete_target = extract_delete_target_path(prompt, filePath);
+        if (!delete_target.isEmpty()) {
+            const QString delete_result = delete_workspace_path_direct(delete_target);
+            emit log_message("info", "agent",
+                QString("code-assistant direct-delete path=%1 result=%2")
+                    .arg(delete_target, delete_result));
+            return delete_result;
+        }
+    }
 
     const QString runner_path = QDir(root).filePath("app/service/code_agent_runner.sh");
     if (QFileInfo::exists(runner_path) && QFileInfo(runner_path).isFile()) {
@@ -3147,23 +3846,6 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     if (!direct_template.isEmpty()) {
         emit log_message("info", "agent", QString("code-assistant done route=%1 source=bridge-direct-template").arg(route));
         return direct_template;
-    }
-
-    if (prompt_requests_delete_operation(prompt)) {
-        const QString delete_target = extract_delete_target_path(prompt, filePath);
-        if (!delete_target.isEmpty()) {
-            const QString delete_result = delete_path(delete_target, true);
-            emit log_message("info", "agent",
-                QString("code-assistant direct-delete path=%1 result=%2")
-                    .arg(delete_target, delete_result));
-            if (delete_result == QStringLiteral("deleted")) {
-                return QStringLiteral("Deleted path: %1").arg(delete_target);
-            }
-            if (delete_result == QStringLiteral("already_absent")) {
-                return QStringLiteral("Path already absent: %1").arg(delete_target);
-            }
-            return delete_result;
-        }
     }
 
     const QString backend_ready = ensure_local_openai_backend(root);
@@ -3646,6 +4328,32 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             repo_relative_path(root, absolute_path));
         return maybe_apply_pending_changes(staged_result);
     };
+    auto create_workspace_file = [&](const QString& raw_path, const QString& content) -> QString {
+        bool ok = false;
+        const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
+        if (!ok) {
+            return QStringLiteral("tool_error: create_file path outside workspace");
+        }
+        const QFileInfo info(absolute_path);
+        if (info.exists() && info.isDir()) {
+            return QStringLiteral("tool_error: create_file path already exists as directory");
+        }
+        if (info.exists() && info.isFile()) {
+            return QStringLiteral("tool_error: create_file path already exists as file");
+        }
+        QVariantMap change;
+        change.insert(QStringLiteral("action"), QStringLiteral("create_file"));
+        change.insert(QStringLiteral("path"), raw_path.trimmed());
+        change.insert(QStringLiteral("content"), normalize_newlines(content));
+        change.insert(QStringLiteral("summary"), QStringLiteral("create new file"));
+        change.insert(QStringLiteral("preview"), clip_text(normalize_newlines(content), 1000));
+        stage_pending_change(change);
+        const QString staged_result = format_tool_response(
+            QStringLiteral("create_file"),
+            QStringLiteral("staged new file creation"),
+            repo_relative_path(root, absolute_path));
+        return maybe_apply_pending_changes(staged_result);
+    };
     auto delete_workspace_path = [&](const QString& raw_path, bool recursive) -> QString {
         bool ok = false;
         const QString absolute_path = resolve_workspace_path(root, raw_path, &ok);
@@ -3681,6 +4389,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             info.isDir() ? QStringLiteral("staged directory deletion") : QStringLiteral("staged file deletion"),
             repo_relative_path(root, absolute_path));
         return maybe_apply_pending_changes(staged_result);
+    };
+    auto rename_workspace_path = [&](const QString& raw_source_path, const QString& raw_target_path) -> QString {
+        return rename_workspace_path_direct(
+            raw_source_path,
+            raw_target_path,
+            auto_apply_pending_changes ? QStringLiteral("tool-loop-auto") : QStringLiteral("tool-loop"));
     };
     auto summarize_pending_changes = [&]() -> QString {
         if (code_agent_pending_changes_.isEmpty()) {
@@ -3792,12 +4506,22 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 action_obj.value(QStringLiteral("path")).toString(),
                 action_obj.value(QStringLiteral("content")).toString());
         }
+        if (action == QStringLiteral("create_file")) {
+            return create_workspace_file(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("content")).toString());
+        }
         if (action == QStringLiteral("delete_path")) {
             return delete_workspace_path(
                 action_obj.value(QStringLiteral("path")).toString(),
                 action_obj.contains(QStringLiteral("recursive"))
                     ? action_obj.value(QStringLiteral("recursive")).toBool()
                     : true);
+        }
+        if (action == QStringLiteral("rename_path")) {
+            return rename_workspace_path(
+                action_obj.value(QStringLiteral("path")).toString(),
+                action_obj.value(QStringLiteral("target_path")).toString());
         }
         if (action == QStringLiteral("run_build")) {
             return run_workspace_command_tool(
@@ -3902,6 +4626,8 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 "{\"action\":\"list_files\",\"dir\":\"relative/or/absolute\",\"limit\":80,\"reason\":\"...\"}\n"
                 "{\"action\":\"show_pending_changes\",\"reason\":\"inspect staged edits\"}\n"
                 "{\"action\":\"mkdir\",\"path\":\"C:/Users/hello\",\"reason\":\"create a directory\"}\n"
+                "{\"action\":\"create_file\",\"path\":\"relative/or/absolute\",\"content\":\"optional initial file content\",\"summary\":\"what changed\"}\n"
+                "{\"action\":\"rename_path\",\"path\":\"relative/or/absolute\",\"target_path\":\"relative/or/absolute\",\"summary\":\"what changed\"}\n"
                 "{\"action\":\"replace_range\",\"path\":\"relative/or/absolute\",\"start_line\":1,\"end_line\":20,\"new_text\":\"replacement text\",\"summary\":\"what changed\"}\n"
                 "{\"action\":\"apply_patch\",\"path\":\"relative/or/absolute\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false,\"summary\":\"what changed\"}\n"
                 "{\"action\":\"write_file\",\"path\":\"relative/or/absolute\",\"content\":\"full file content\",\"summary\":\"what changed\"}\n"
@@ -3917,9 +4643,12 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 "- only delete paths when the user explicitly asked for removal or cleanup\n"
                 "- read before editing unless the request is trivial\n"
                 "- prefer mkdir for directory creation requests\n"
+                "- prefer create_file for new file creation requests, including empty files\n"
+                "- use rename_path for rename or move requests inside the repository\n"
                 "- prefer replace_range for localized line edits\n"
                 "- prefer apply_patch for focused edits\n"
-                "- write_file must contain the full replacement file content\n"
+                "- write_file must contain the full replacement file content for an existing file\n"
+                "- create_file may use empty content when the user asked for an empty file\n"
                 "- run_build and run_test execute against the current workspace state only\n"
                 "- staged changes are not auto-applied before run_build or run_test\n"
                 "- use show_pending_changes before final when edits were staged\n"
