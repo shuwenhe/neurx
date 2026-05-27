@@ -125,6 +125,9 @@ func agent_action_detect_tool(string raw, string fallback) string {
     if agent_action_text_contains(text, "tool=write_file") || agent_action_text_contains(text, "\"tool\":\"write_file\"") {
         return "write"
     }
+    if agent_action_text_contains(text, "tool=mkdir") || agent_action_text_contains(text, "\"tool\":\"mkdir\"") || agent_action_text_contains(text, "tool=create_directory") || agent_action_text_contains(text, "\"tool\":\"create_directory\"") {
+        return "mkdir"
+    }
     if agent_action_text_contains(text, "tool=delete_path") || agent_action_text_contains(text, "\"tool\":\"delete_path\"") {
         return "delete"
     }

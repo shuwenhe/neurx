@@ -250,6 +250,21 @@ func agent_workspace_write(string path, string content) agent_workspace_result {
     agent_workspace_result_ok(agent_workspace_observation("write", "ok", "path=" + resolved + ";bytes=" + string(len(content))), resolved)
 }
 
+func agent_workspace_mkdir(string path) agent_workspace_result {
+    string resolved = agent_workspace_resolve_path(path)
+    if resolved == "" {
+        return agent_workspace_result_fail(agent_workspace_observation("mkdir", "blocked", "reason=path_not_allowed;path=" + path), "")
+    }
+    if runtime_dir_exists(resolved) {
+        return agent_workspace_result_ok(agent_workspace_observation("mkdir", "ok", "path=" + resolved + ";already_exists=true"), resolved)
+    }
+    runtime_command_result mkdir_result = runtime_make_dirs(resolved)
+    if !mkdir_result.ok {
+        return agent_workspace_result_fail(agent_workspace_observation("mkdir", "failed", "path=" + resolved + ";error=" + mkdir_result.error), resolved)
+    }
+    agent_workspace_result_ok(agent_workspace_observation("mkdir", "ok", "path=" + resolved), resolved)
+}
+
 func agent_workspace_delete(string path) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {

@@ -190,7 +190,7 @@ func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_
 
 func agent_runtime_requires_approval(string task) bool {
     string t = lower(trim(task))
-    t == "write" || t == "write_file" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
+    t == "write" || t == "write_file" || t == "mkdir" || t == "create_directory" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
 }
 
 func agent_runtime_approval_matches(string granted, string task) bool {
@@ -209,6 +209,9 @@ func agent_runtime_approval_matches(string granted, string task) bool {
         return true
     }
     if g == "apply_patch" && t == "patch" {
+        return true
+    }
+    if g == "mkdir" && t == "create_directory" {
         return true
     }
     false
@@ -255,6 +258,9 @@ func agent_runtime_pending_change_preview(string action, string raw_input) strin
     agent_action_state parsed = agent_action_parse(raw_input, action)
     if action == "write" || action == "write_file" || action == "code" {
         return agent_workspace_clip(parsed.content, 180)
+    }
+    if action == "mkdir" || action == "create_directory" {
+        return "mkdir " + agent_runtime_pending_change_path(action, raw_input)
     }
     if action == "apply_patch" || action == "patch" {
         return "old=" + agent_workspace_clip(parsed.old_text, 80) + " new=" + agent_workspace_clip(parsed.new_text, 80)
@@ -329,6 +335,16 @@ func agent_runtime_apply_staged_change(string action, string raw_input) string {
             return agent_runtime_observation("apply_pending_changes", "failed", "action=apply_patch;reason=args_missing")
         }
         return agent_workspace_apply_patch(parsed.path, parsed.old_text, parsed.new_text, parsed.replace_all).observation
+    }
+    if action == "mkdir" || action == "create_directory" {
+        string mkdir_path = parsed.path
+        if mkdir_path == "" {
+            mkdir_path = raw_input
+        }
+        if mkdir_path == "" {
+            return agent_runtime_observation("apply_pending_changes", "failed", "action=mkdir;reason=path_missing")
+        }
+        return agent_workspace_mkdir(mkdir_path).observation
     }
     if action == "code" {
         string code_path = parsed.path
@@ -686,6 +702,7 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
     tools = agent_tool_registry_add(tools, "search", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "retrieve", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "write", true, 10000, 1)
+    tools = agent_tool_registry_add(tools, "mkdir", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "delete", true, 10000, 1)
     tools = agent_tool_registry_add(tools, "apply_patch", true, 10000, 1)
     tools = agent_tool_registry_add(tools, "build", true, 20000, 0)
