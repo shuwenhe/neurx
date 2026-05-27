@@ -932,19 +932,30 @@ EOF
 lower_prompt="$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')"
 
 should_run_runtime=0
+runtime_required=0
 if runtime_loop_enabled; then
   should_run_runtime=1
+  runtime_required=1
 elif [[ "${NEURX_CODE_AGENT_AUTO_RUNTIME:-1}" == "1" ]] && prompt_wants_repo_agent "$lower_prompt"; then
   should_run_runtime=1
+  runtime_required=1
 fi
 
 if [[ "$should_run_runtime" -eq 1 ]]; then
-  # 不再静默调用，允许 stderr 透传到终端显示日志
-  if runtime_json="$(run_neurx_runtime_agent || true)"; then
-    if [[ -n "$runtime_json" && "$runtime_json" == \{* ]]; then
-      printf '%s\n' "$runtime_json"
-      exit 0
+  runtime_json="$(run_neurx_runtime_agent 2>&1 || true)"
+  if [[ -n "$runtime_json" && "$runtime_json" == \{* ]]; then
+    printf '%s\n' "$runtime_json"
+    exit 0
+  fi
+  if [[ "$runtime_required" -eq 1 ]]; then
+    runtime_summary="S runtime agent failed before producing a JSON envelope."
+    runtime_response="$runtime_json"
+    if [[ -z "$runtime_response" ]]; then
+      runtime_response="runtime agent returned no output"
     fi
+    action_result_json="$(build_action_result_json "false" "run_neurx_runtime_agent" "$runtime_summary" "$runtime_response" "[]" "false")"
+    emit_envelope "failed" "runtime" "$runtime_response" "git_status -> repo -> retrieve -> code -> build -> test" "" "$runtime_summary" "[]" "[$action_result_json]"
+    exit 0
   fi
 fi
 
