@@ -145,8 +145,11 @@ func agent_route_for_goal(string goal, string input) string {
     if agent_text_contains(text, "delete_path") || agent_text_contains(text, "delete") || agent_text_contains(text, "remove") || agent_text_contains(text, "rm ") || agent_text_contains(text, "trash") {
         return "delete"
     }
-    if agent_text_contains(text, "write_file") || agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") || agent_text_contains(text, "mkdir") || agent_text_contains(text, "create folder") || agent_text_contains(text, "make dir") {
+    if agent_text_contains(text, "write_file") || agent_text_contains(text, "create file") || agent_text_contains(text, "write file") || agent_text_contains(text, "new file") {
         return "write"
+    }
+    if agent_text_contains(text, "mkdir") || agent_text_contains(text, "create folder") || agent_text_contains(text, "make dir") || agent_text_contains(text, "create directory") || agent_text_contains(text, "new folder") {
+        return "mkdir"
     }
     if agent_text_contains(text, "apply_patch") {
         return "apply_patch"
@@ -385,6 +388,24 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 agent_workspace_result del_result = agent_workspace_delete(del_path)
                 observation = del_result.observation
                 ok = del_result.ok
+            }
+        }
+    } else if dispatch == "mkdir" || dispatch == "create_directory" {
+        action = "mkdir"
+        if agent_tool_registry_has_enabled(tools, "mkdir") {
+            tool_name = agent_tool_registry_find_by_capability(tools, "mkdir")
+            tool_timeout_ms = agent_tool_registry_timeout_ms(tools, tool_name)
+            string mkdir_path = parsed_action.path
+            if trim(mkdir_path) == "" && !parsed_action.structured {
+                mkdir_path = trim(input)
+            }
+            if trim(mkdir_path) == "" {
+                observation = "mkdir:status=failed;reason=path_missing"
+                ok = false
+            } else {
+                agent_workspace_result mkdir_result = agent_workspace_mkdir(mkdir_path)
+                observation = mkdir_result.observation
+                ok = mkdir_result.ok
             }
         }
     } else if dispatch == "write" || dispatch == "write_file" {

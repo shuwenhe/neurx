@@ -1,5 +1,6 @@
 #include "bridge/neurx_bridge.h"
 
+#include <stdio.h>
 #include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
@@ -307,14 +308,25 @@ QString resolve_workspace_path(const QString& repo_root, const QString& raw_path
         absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
         // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
         if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
-            QString filename = input_info.fileName();
             // 尝试剥离模型可能臆造的错误根目录前缀
             QString raw = trimmed_path;
             if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
                 raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
             } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
                 raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+            } else if (raw.contains("/code/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/code/", Qt::CaseInsensitive) + 6);
             }
+
+            QString repo_stripped = trimmed_root;
+            if (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
+            QString raw_stripped = raw;
+            if (raw_stripped.startsWith('/')) raw_stripped.remove(0, 1);
+            if (!repo_stripped.isEmpty() && raw_stripped.startsWith(repo_stripped, Qt::CaseInsensitive)) {
+                raw = raw_stripped.mid(repo_stripped.length());
+            }
+            if (raw.startsWith('/')) raw.remove(0, 1);
+
             absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
             absolute_path = QDir::cleanPath(absolute_path);
         }
@@ -357,14 +369,25 @@ QString resolve_path_with_allowed_roots(const QString& repo_root,
         absolute_path = QDir::cleanPath(input_info.absoluteFilePath());
         // 容错处理：如果绝对路径不匹配当前 root，尝试将其作为相对路径处理或寻找子路径
         if (!absolute_path.startsWith(trimmed_root, Qt::CaseInsensitive)) {
-            QString filename = input_info.fileName();
             // 尝试剥离模型可能臆造的错误根目录前缀
             QString raw = trimmed_path;
             if (raw.contains("/neurx/", Qt::CaseInsensitive)) {
                 raw = raw.mid(raw.indexOf("/neurx/", Qt::CaseInsensitive) + 7);
             } else if (raw.contains("/ne_readx/", Qt::CaseInsensitive)) {
                 raw = raw.mid(raw.indexOf("/ne_readx/", Qt::CaseInsensitive) + 10);
+            } else if (raw.contains("/code/", Qt::CaseInsensitive)) {
+                raw = raw.mid(raw.indexOf("/code/", Qt::CaseInsensitive) + 6);
             }
+
+            QString repo_stripped = trimmed_root;
+            if (repo_stripped.startsWith('/')) repo_stripped.remove(0, 1);
+            QString raw_stripped = raw;
+            if (raw_stripped.startsWith('/')) raw_stripped.remove(0, 1);
+            if (!repo_stripped.isEmpty() && raw_stripped.startsWith(repo_stripped, Qt::CaseInsensitive)) {
+                raw = raw_stripped.mid(repo_stripped.length());
+            }
+            if (raw.startsWith('/')) raw.remove(0, 1);
+
             absolute_path = QDir(trimmed_root).absoluteFilePath(raw);
             absolute_path = QDir::cleanPath(absolute_path);
         }
@@ -1541,25 +1564,49 @@ QString NeurxBridge::run_process(const QString& program, const QStringList& args
         return QString("runtime_exec_failed: failed to start %1").arg(program);
     }
 
-    if (!proc.waitForFinished(timeout_ms)) {
-        proc.kill();
-        proc.waitForFinished(5000);
-        return QString("runtime_timeout: %1").arg(program);
+    QByteArray stdout_data;
+    QByteArray stderr_data;
+    QElapsedTimer timer;
+    timer.start();
+    const bool diag = run_diag_enabled();
+
+    while (true) {
+        const bool finished = proc.waitForFinished(100);
+
+        const QByteArray out = proc.readAllStandardOutput();
+        if (!out.isEmpty()) {
+            stdout_data.append(out);
+        }
+
+        const QByteArray err = proc.readAllStandardError();
+        if (!err.isEmpty()) {
+            stderr_data.append(err);
+            if (diag) {
+                fwrite(err.constData(), 1, err.size(), stderr);
+                fflush(stderr);
+            }
+        }
+
+        if (finished) {
+            break;
+        }
+
+        if (timer.elapsed() > timeout_ms) {
+            proc.kill();
+            proc.waitForFinished(5000);
+            return QString("runtime_timeout: %1").arg(program);
+        }
     }
 
-    const QString stdout_text = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
-    const QString stderr_text = QString::fromUtf8(proc.readAllStandardError()).trimmed();
-
-    if (run_diag_enabled() && !stderr_text.isEmpty()) {
-        qInfo().noquote() << QString("process %1 stderr:\n%2").arg(program, stderr_text);
-    }
+    const QString stdout_text = QString::fromUtf8(stdout_data).trimmed();
+    const QString stderr_text = QString::fromUtf8(stderr_data).trimmed();
 
     if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
         if (!stderr_text.isEmpty()) {
-            return QString("runtime_exec_failed: %1").arg(stderr_text.left(200));
+            return QString("runtime_exec_failed: %1").arg(stderr_text.left(500));
         }
         if (!stdout_text.isEmpty()) {
-            return QString("runtime_exec_failed: %1").arg(stdout_text.left(200));
+            return QString("runtime_exec_failed: %1").arg(stdout_text.left(500));
         }
         return QString("runtime_exec_failed: %1").arg(program);
     }
@@ -1776,10 +1823,18 @@ QString NeurxBridge::bootstrap_ollama_model() {
         emit localModelConfigChanged();
     }
 
-    emit log_message("info", "bridge", QString("Pulling Ollama model %1").arg(local_model_name_));
-    const QString pull_result = run_process(command, {"pull", local_model_name_}, kOllamaPullTimeoutMs);
-    if (pull_result.startsWith("runtime_")) {
-        return pull_result;
+    // Implement logic to check if the target Ollama model exists
+    emit log_message("info", "bridge", QString("Checking for Ollama model %1").arg(local_model_name_));
+    const QString show_result = run_process(command, {"show", local_model_name_}, 10000);
+
+    if (show_result.startsWith("runtime_exec_failed")) {
+        emit log_message("info", "bridge", QString("Pulling Ollama model %1").arg(local_model_name_));
+        const QString pull_result = run_process(command, {"pull", local_model_name_}, kOllamaPullTimeoutMs);
+        if (pull_result.startsWith("runtime_")) {
+            return pull_result;
+        }
+    } else {
+        emit log_message("info", "bridge", QString("Ollama model %1 is already available").arg(local_model_name_));
     }
 
     local_ollama_ready_ = true;
@@ -3050,6 +3105,10 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     QStringList runner_action_result_summaries;
     QJsonArray runner_action_objects;
     const QString route = agent_route_for_prompt(prompt, filePath);
+    const QString full_auto_env = qEnvironmentVariable("NEURX_CODE_AGENT_FULL_AUTO", QStringLiteral("1")).trimmed().toLower();
+    const bool auto_apply_pending_changes = full_auto_env == QStringLiteral("1")
+        || full_auto_env == QStringLiteral("true")
+        || full_auto_env == QStringLiteral("yes");
     emit log_message("info", "agent", QString("code-assistant start route=%1 prompt_len=%2 file=%3")
         .arg(route)
         .arg(prompt.size())
@@ -3428,7 +3487,9 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
     auto create_workspace_directory = [&](const QString& raw_path) -> QString {
         static const QStringList kAllowedExternalRoots = {
             QStringLiteral("C:/Users"),
-            QStringLiteral("C:/Users/")
+            QStringLiteral("C:/Users/"),
+            QStringLiteral("/home"),
+            QStringLiteral("/home/")
         };
         bool ok = false;
         const QString absolute_path = resolve_path_with_allowed_roots(root, raw_path, kAllowedExternalRoots, &ok);
@@ -3465,6 +3526,18 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
                 staged_paths.append(repo_path);
             }
         }
+    };
+    auto maybe_apply_pending_changes = [&](const QString& staged_result) -> QString {
+        if (!auto_apply_pending_changes) {
+            return staged_result;
+        }
+        const QString apply_result = apply_pending_code_agent_changes();
+        if (apply_result.startsWith(QStringLiteral("tool_error:"))
+            || apply_result.startsWith(QStringLiteral("runtime_"))) {
+            return apply_result;
+        }
+        return QStringLiteral("%1\nauto_apply=%2")
+            .arg(staged_result.trimmed(), clip_text(apply_result.trimmed(), 240));
     };
     auto apply_workspace_patch = [&](const QString& raw_path,
                                      const QString& old_text,
@@ -3508,10 +3581,11 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         change.insert(QStringLiteral("preview"), QStringLiteral("apply_patch\n--- old ---\n%1\n--- new ---\n%2")
             .arg(clip_text(normalized_old_text, 500), clip_text(normalized_new_text, 500)));
         stage_pending_change(change);
-        return format_tool_response(
+        const QString staged_result = format_tool_response(
             QStringLiteral("apply_patch"),
             QStringLiteral("staged patch preview"),
             repo_relative_path(root, absolute_path));
+        return maybe_apply_pending_changes(staged_result);
     };
     auto replace_workspace_range = [&](const QString& raw_path,
                                        int start_line,
@@ -3567,10 +3641,11 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         const QString action_label = end_line >= start_line
             ? QStringLiteral("replaced")
             : QStringLiteral("inserted");
-        return format_tool_response(
+        const QString staged_result = format_tool_response(
             QStringLiteral("replace_range"),
             QStringLiteral("staged %1 lines %2-%3").arg(action_label).arg(start_line).arg(reported_end_line),
             repo_relative_path(root, absolute_path));
+        return maybe_apply_pending_changes(staged_result);
     };
     auto write_workspace_file = [&](const QString& raw_path, const QString& content) -> QString {
         bool ok = false;
@@ -3585,10 +3660,11 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
         change.insert(QStringLiteral("summary"), QStringLiteral("replace file content"));
         change.insert(QStringLiteral("preview"), clip_text(normalize_newlines(content), 1000));
         stage_pending_change(change);
-        return format_tool_response(
+        const QString staged_result = format_tool_response(
             QStringLiteral("write_file"),
             QStringLiteral("staged full file replacement"),
             repo_relative_path(root, absolute_path));
+        return maybe_apply_pending_changes(staged_result);
     };
     auto delete_workspace_path = [&](const QString& raw_path, bool recursive) -> QString {
         bool ok = false;
@@ -3620,10 +3696,11 @@ QString NeurxBridge::run_code_assistant_request(const QString& prompt, const QSt
             .arg(recursive ? QStringLiteral("true") : QStringLiteral("false"),
                  repo_relative_path(root, absolute_path)));
         stage_pending_change(change);
-        return format_tool_response(
+        const QString staged_result = format_tool_response(
             QStringLiteral("delete_path"),
             info.isDir() ? QStringLiteral("staged directory deletion") : QStringLiteral("staged file deletion"),
             repo_relative_path(root, absolute_path));
+        return maybe_apply_pending_changes(staged_result);
     };
     auto summarize_pending_changes = [&]() -> QString {
         if (code_agent_pending_changes_.isEmpty()) {

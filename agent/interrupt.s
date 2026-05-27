@@ -53,7 +53,7 @@ func agent_interrupt_approved(agent_interrupt_state state) bool {
 func agent_interrupt_should_request(string action, string observation) bool {
     string a = lower(trim(action))
     string o = lower(trim(observation))
-    if a == "delete" || a == "delete_path" || a == "write" || a == "write_file" || a == "apply_patch" || a == "patch" || a == "code" {
+    if a == "delete" || a == "delete_path" || a == "write" || a == "write_file" || a == "mkdir" || a == "create_directory" || a == "apply_patch" || a == "patch" || a == "code" {
         return true
     }
     if o == "confirm_required" || o == "needs_approval" {
