@@ -249,6 +249,63 @@ Item {
         return value
     }
 
+    function pathIsSameOrChildPath(path, parentPath) {
+        var current = normalizedPath(path)
+        var parent = normalizedPath(parentPath)
+        if (!current.length || !parent.length) {
+            return false
+        }
+        if (current === parent) {
+            return true
+        }
+        return current.indexOf(parent + "/") === 0
+    }
+
+    function shouldRefreshExplorerForPath(changedPath) {
+        var currentRoot = normalizedPath(explorerCurrentPath)
+        var nextPath = normalizedPath(changedPath)
+        if (!nextPath.length) {
+            return false
+        }
+        if (!currentRoot.length) {
+            return true
+        }
+        return pathIsSameOrChildPath(nextPath, currentRoot) || pathIsSameOrChildPath(currentRoot, nextPath)
+    }
+
+    function revealAndOpenFile(path) {
+        var targetPath = normalizedPath(path)
+        if (!targetPath.length) {
+            return
+        }
+        var targetDir = normalizedPath(directoryForFilePath(targetPath))
+        if (shouldRefreshExplorerForPath(targetPath)) {
+            refreshExplorer(explorerCurrentPath)
+        } else if (targetDir.length) {
+            refreshExplorer(targetDir)
+        }
+        expandToFilePath(targetPath)
+        var entryIndex = indexOfEntryPath(targetPath)
+        if (entryIndex >= 0) {
+            selectFile(entryIndex, false)
+            return
+        }
+        refreshEditedFile(targetPath)
+    }
+
+    function closeEditorTabsForPath(targetPath) {
+        var normalizedTarget = normalizedPath(targetPath)
+        if (!normalizedTarget.length) {
+            return
+        }
+        for (var i = editorTabsModel.count - 1; i >= 0; --i) {
+            var tabPath = normalizedPath(editorTabsModel.get(i).path)
+            if (pathIsSameOrChildPath(tabPath, normalizedTarget)) {
+                closeEditorTab(i)
+            }
+        }
+    }
+
     function indexOfEntryPath(path) {
         var target = normalizedPath(path)
         for (var i = 0; i < fileModel.count; ++i) {
@@ -1112,7 +1169,8 @@ Item {
         }
         for (var j = 0; j < fileModel.count; ++j) {
             if (fileModel.get(j).isDir && fileModel.get(j).expanded) {
-                insertExpandedChildren(j)
+                var insertedCount = insertExpandedChildren(j)
+                j += insertedCount
             }
         }
         var activeEntryIndex = indexOfEntryPath(selectedFilePath)
@@ -1853,6 +1911,43 @@ Item {
 
         function onAgentRunChunk(chunk) {
             shell.updateStreamingConversation(chunk)
+        }
+
+        function onExplorerChanged(changedPath, changeKind) {
+            var nextPath = shell.normalizedPath(changedPath)
+            if (!nextPath.length) {
+                return
+            }
+            if (changeKind === "create") {
+                shell.revealAndOpenFile(nextPath)
+                return
+            }
+            if (changeKind === "delete") {
+                if (shell.pathIsSameOrChildPath(shell.selectedFilePath, nextPath)) {
+                    shell.selectedFilePath = ""
+                    shell.selectedFileIndex = -1
+                }
+                shell.closeEditorTabsForPath(nextPath)
+            }
+            if (shell.shouldRefreshExplorerForPath(nextPath)) {
+                shell.refreshExplorer(shell.explorerCurrentPath)
+            }
+        }
+    }
+
+    Connections {
+        target: LogModel
+
+        function onRowsInserted(parent, first, last) {
+            if (logListView.count > 0) {
+                logListView.positionViewAtEnd()
+            }
+        }
+
+        function onModelReset() {
+            if (logListView.count > 0) {
+                logListView.positionViewAtEnd()
+            }
         }
     }
 
@@ -3904,6 +3999,108 @@ Item {
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+
+                                    Text {
+                                        text: qsTr("Backend Logs")
+                                        color: shell.textPrimary
+                                        font.pixelSize: 13
+                                        font.bold: true
+                                    }
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                    }
+
+                                    ToolButton {
+                                        text: qsTr("Clear")
+                                        onClicked: LogModel.clear()
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 220
+                                    radius: 10
+                                    color: shell.editorBg
+                                    border.color: shell.border
+
+                                    ListView {
+                                        id: logListView
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        clip: true
+                                        spacing: 6
+                                        model: LogModel
+
+                                        delegate: Rectangle {
+                                            required property string time
+                                            required property string level
+                                            required property string tag
+                                            required property string message
+
+                                            width: logListView.width
+                                            implicitHeight: logColumn.implicitHeight + 12
+                                            radius: 8
+                                            color: tag === "fs"
+                                                ? Qt.rgba(0.14, 0.20, 0.16, 0.96)
+                                                : shell.panelAlt
+                                            border.color: tag === "fs"
+                                                ? shell.accent
+                                                : (level === "error" ? "#e57373" : shell.border)
+
+                                            ColumnLayout {
+                                                id: logColumn
+                                                anchors.fill: parent
+                                                anchors.margins: 8
+                                                spacing: 4
+
+                                                RowLayout {
+                                                    Layout.fillWidth: true
+                                                    spacing: 8
+
+                                                    Text {
+                                                        text: time
+                                                        color: shell.textMuted
+                                                        font.pixelSize: 11
+                                                    }
+
+                                                    Text {
+                                                        text: level + " / " + tag
+                                                        color: tag === "fs"
+                                                            ? shell.accent
+                                                            : (level === "error" ? "#e57373" : shell.textMuted)
+                                                        font.pixelSize: 11
+                                                        font.bold: tag === "fs"
+                                                    }
+
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                    }
+                                                }
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: message || ""
+                                                    color: shell.textPrimary
+                                                    wrapMode: Text.WrapAnywhere
+                                                    font.pixelSize: 12
+                                                    font.family: (tag || "") === "fs" ? "Consolas" : "Segoe UI"
+                                                }
+                                            }
+                                        }
+
+                                        ScrollBar.vertical: ScrollBar { }
                                     }
                                 }
                             }
