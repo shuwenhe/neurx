@@ -43,7 +43,7 @@ void OpenAIProvider::sendRequest(const LLMRequest &request)
     if (m_reply) cancel();
     if (m_apiKey.trimmed().isEmpty()) {
         emit requestError(
-            "OpenAI-compatible API key is empty. Set it in Settings, or via env (SILICONFLOW_API_KEY / OPENAI_API_KEY)."
+            "OpenAI-compatible API key is empty. Set it in Settings, via env (SILICONFLOW_API_KEY / OPENAI_API_KEY), or in ~/.config/neurx-code/secrets.env."
         );
         return;
     }
