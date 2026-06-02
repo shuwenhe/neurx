@@ -19,3 +19,8 @@ build*/
 
 # NeurX local state and secrets
 .neurx/
+
+# User secrets configuration files (API keys, etc.)
+secrets.env
+.env
+*.env.local
