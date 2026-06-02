@@ -17,6 +17,13 @@ struct LLMRequest {
     bool               stream{true};
 };
 
+struct MessageImageAttachment {
+    QString path;
+    QString mimeType;
+    QString dataUrl;
+    QString altText;
+};
+
 struct LLMResponse {
     AgentMessage  message;
     int           inputTokens{0};
