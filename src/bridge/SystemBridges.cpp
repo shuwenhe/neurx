@@ -1,6 +1,7 @@
 #include "SystemBridges.h"
 #include <QDebug>
 #include <QDateTime>
+#include <QEventLoop>
 
 // ════════════════════════════════════════════════════════
 // MemoryToolBridge 实现
@@ -88,11 +89,26 @@ bool ApprovalToolBridge::checkToolPermission(
 
     if (!m_toolSystem) return false;
 
-    auto schema = m_toolSystem->getSchemaRegistry()->getToolSchema(toolId);
     auto permMgr = m_toolSystem->getPermissionManager();
 
-    AccessCheckResult result = permMgr->checkToolAccess(toolId, userId);
-    return result.allowed;
+    if (!permMgr) return false;
+
+    bool allowed = false;
+    bool completed = false;
+    QEventLoop loop;
+    permMgr->checkToolAccess(toolId, userId, [&](bool granted, const QString &) {
+        allowed = granted;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
+
+    return allowed;
 }
 
 void ApprovalToolBridge::recordAuditLog(const ToolExecutionResult &result) {
@@ -104,6 +120,13 @@ void ApprovalToolBridge::recordAuditLog(const ToolExecutionResult &result) {
     log["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     m_approvalsRequested++;
+    if (result.status == ExecutionStatus::Completed) {
+        m_approvalsApproved++;
+    } else if (result.status == ExecutionStatus::Failed ||
+               result.status == ExecutionStatus::Rejected ||
+               result.status == ExecutionStatus::Cancelled) {
+        m_approvalsDenied++;
+    }
 }
 
 QVariantMap ApprovalToolBridge::getStatistics() const {
@@ -206,7 +229,22 @@ QVector<ToolSchema> LLMToolBridge::recommendToolsWithLLM(const QString &descript
 
     // 使用工具系统推荐工具
     auto discovery = m_toolSystem->getToolDiscovery();
-    auto tools = discovery->recommendTools(description, 5);
+    if (!discovery) return QVector<ToolSchema>();
+
+    QVector<ToolSchema> tools;
+    bool completed = false;
+    QEventLoop loop;
+    discovery->recommendTools(description, [&](const QVector<ToolSchema> &result) {
+        tools = result;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
 
     m_recommendations++;
     return tools;
