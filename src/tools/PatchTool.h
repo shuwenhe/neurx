@@ -1,5 +1,6 @@
 #pragma once
 #include "agent/ToolRegistry.h"
+#include "sandbox/SandboxManager.h"
 #include "tools/CheckpointManager.h"
 #include <QDir>
 #include <memory>
@@ -20,6 +21,8 @@ public:
     QJsonObject parametersSchema() const override;
     ToolResult  execute(const QString &callId, const QJsonObject &args) override;
     QString     summary(const QJsonObject &args) const override;
+
+    void setSandboxManager(SandboxManager *manager) { m_sandboxManager = manager; }
 
 private:
     struct BackupEntry {
@@ -44,8 +47,10 @@ private:
     bool restoreBackup(const QString &manifestPath, QString &error);
     bool runGitApply(const QStringList &args, const QString &patchPath, QString &output) const;
     QString createCheckpoint(const QStringList &touchedPaths) const;
+    bool canAccessTouchedPaths(const QStringList &paths, FileSystemAccessMode mode) const;
 
     QString m_workspaceRoot;
     QString m_lastBackupId;
     std::unique_ptr<CheckpointManager> m_checkpointManager;
+    SandboxManager *m_sandboxManager{nullptr};
 };

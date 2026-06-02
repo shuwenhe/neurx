@@ -8,6 +8,14 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+static bool isWriteOperationName(const QString &operation)
+{
+    return operation == QStringLiteral("write_file")
+        || operation == QStringLiteral("create_file")
+        || operation == QStringLiteral("delete_file")
+        || operation == QStringLiteral("move_file");
+}
+
 FileSystemTool::FileSystemTool(const QString &workspaceRoot, QObject *parent)
     : BaseTool(parent)
     , m_root(workspaceRoot)
@@ -37,6 +45,21 @@ QJsonObject FileSystemTool::parametersSchema() const
 ToolResult FileSystemTool::execute(const QString &callId, const QJsonObject &args)
 {
     const QString op = args["operation"].toString();
+    if (m_sandboxManager) {
+        const QString path = args["path"].toString();
+        const QString absPath = safePath(path);
+        if (absPath.isEmpty())
+            return {callId, name(), true, "Path traversal denied."};
+        if (m_sandboxManager->isProtectedMetadata(absPath))
+            return {callId, name(), true, "Protected metadata access denied: " + path};
+        const FileSystemAccessMode mode = isWriteOperationName(op)
+            ? FileSystemAccessMode::Write
+            : FileSystemAccessMode::Read;
+        if (!m_sandboxManager->canAccess(absPath, mode))
+            return {callId, name(), true, "Sandbox policy denied access: " + path};
+        if (m_sandboxManager->isReadOnlyMode() && isWriteOperationName(op))
+            return {callId, name(), true, "Read-only sandbox mode blocks file writes."};
+    }
     if (op == "read_file")       return opReadFile(callId, args);
     if (op == "write_file")      return opWriteFile(callId, args);
     if (op == "list_directory")  return opListDir(callId, args);
@@ -50,6 +73,11 @@ ToolResult FileSystemTool::execute(const QString &callId, const QJsonObject &arg
 QString FileSystemTool::summary(const QJsonObject &args) const
 {
     return args["operation"].toString() + " " + args["path"].toString();
+}
+
+bool FileSystemTool::isWriteOperation(const QString &operation) const
+{
+    return isWriteOperationName(operation);
 }
 
 QString FileSystemTool::safePath(const QString &rel) const
@@ -91,6 +119,8 @@ ToolResult FileSystemTool::opReadFile(const QString &callId, const QJsonObject &
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
+    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Read))
+        return {callId, name(), true, "Sandbox policy denied read access."};
 
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -116,6 +146,8 @@ ToolResult FileSystemTool::opWriteFile(const QString &callId, const QJsonObject 
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
+    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Write))
+        return {callId, name(), true, "Sandbox policy denied write access."};
     const QString checkpointId = checkpointPaths({args["path"].toString()},
                                                  QStringLiteral("file_system write %1").arg(args["path"].toString()));
 
@@ -138,6 +170,8 @@ ToolResult FileSystemTool::opListDir(const QString &callId, const QJsonObject &a
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
+    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Read))
+        return {callId, name(), true, "Sandbox policy denied read access."};
 
     QDir dir(path);
     if (!dir.exists()) return {callId, name(), true, "Directory not found."};
@@ -163,6 +197,8 @@ ToolResult FileSystemTool::opDeleteFile(const QString &callId, const QJsonObject
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
+    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Write))
+        return {callId, name(), true, "Sandbox policy denied delete access."};
     const QString checkpointId = checkpointPaths({args["path"].toString()},
                                                  QStringLiteral("file_system delete %1").arg(args["path"].toString()));
 
@@ -180,6 +216,11 @@ ToolResult FileSystemTool::opMoveFile(const QString &callId, const QJsonObject &
     const QString dest = safePath(args["destination"].toString());
     if (src.isEmpty() || dest.isEmpty())
         return {callId, name(), true, "Path traversal denied."};
+    if (m_sandboxManager) {
+        if (!m_sandboxManager->canAccess(src, FileSystemAccessMode::Write)
+            || !m_sandboxManager->canAccess(dest, FileSystemAccessMode::Write))
+            return {callId, name(), true, "Sandbox policy denied move access."};
+    }
     const QString checkpointId = checkpointPaths(
         {args["path"].toString(), args["destination"].toString()},
         QStringLiteral("file_system move %1 -> %2")
