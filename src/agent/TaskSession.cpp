@@ -46,8 +46,11 @@ QVariantList jsonArrayToVariantList(const QJsonArray &items)
 
 QJsonObject snapshotToJson(const TaskSessionSnapshot &snapshot)
 {
+    const QString threadId = snapshot.effectiveThreadId();
     QJsonObject obj;
+    obj["threadId"] = threadId;
     obj["sessionId"] = snapshot.sessionId;
+    obj["parentThreadId"] = snapshot.parentThreadId;
     obj["workspacePath"] = snapshot.workspacePath;
     obj["currentProvider"] = snapshot.currentProvider;
     obj["currentModel"] = snapshot.currentModel;
@@ -56,6 +59,7 @@ QJsonObject snapshotToJson(const TaskSessionSnapshot &snapshot)
         ? snapshot.updatedAt.toUTC().toString(Qt::ISODateWithMs)
         : QString{};
     obj["todoItems"] = variantListToJsonArray(snapshot.todoItems);
+    obj["executionTimeline"] = variantListToJsonArray(snapshot.executionTimeline);
 
     QJsonArray messagesJson;
     for (const auto &message : snapshot.messages)
@@ -67,13 +71,20 @@ QJsonObject snapshotToJson(const TaskSessionSnapshot &snapshot)
 TaskSessionSnapshot snapshotFromJson(const QJsonObject &obj)
 {
     TaskSessionSnapshot snapshot;
+    snapshot.threadId = obj.value("threadId").toString();
     snapshot.sessionId = obj.value("sessionId").toString();
+    if (snapshot.threadId.trimmed().isEmpty())
+        snapshot.threadId = snapshot.sessionId;
+    if (snapshot.sessionId.trimmed().isEmpty())
+        snapshot.sessionId = snapshot.threadId;
+    snapshot.parentThreadId = obj.value("parentThreadId").toString();
     snapshot.workspacePath = obj.value("workspacePath").toString();
     snapshot.currentProvider = obj.value("currentProvider").toString();
     snapshot.currentModel = obj.value("currentModel").toString();
     snapshot.currentFilePath = obj.value("currentFilePath").toString();
     snapshot.updatedAt = QDateTime::fromString(obj.value("updatedAt").toString(), Qt::ISODateWithMs);
     snapshot.todoItems = jsonArrayToVariantList(obj.value("todoItems").toArray());
+    snapshot.executionTimeline = jsonArrayToVariantList(obj.value("executionTimeline").toArray());
 
     for (const auto &value : obj.value("messages").toArray()) {
         if (value.isObject())
@@ -131,12 +142,15 @@ QList<QVariantMap> TaskSessionStore::listSessions()
             continue;
 
         QVariantMap item;
-        item["sessionId"] = snapshot.sessionId;
+        item["threadId"] = snapshot.effectiveThreadId();
+        item["sessionId"] = snapshot.effectiveThreadId();
+        item["parentThreadId"] = snapshot.parentThreadId;
         item["workspacePath"] = snapshot.workspacePath;
         item["currentProvider"] = snapshot.currentProvider;
         item["currentModel"] = snapshot.currentModel;
         item["currentFilePath"] = snapshot.currentFilePath;
         item["messageCount"] = snapshot.messages.size();
+        item["eventCount"] = snapshot.executionTimeline.size();
         item["updatedAt"] = snapshot.updatedAt.isValid()
             ? snapshot.updatedAt.toLocalTime().toString(Qt::ISODate)
             : info.lastModified().toLocalTime().toString(Qt::ISODate);
@@ -150,6 +164,12 @@ bool TaskSessionStore::saveLatest(const TaskSessionSnapshot &snapshot)
     if (!snapshot.isValid())
         return false;
 
+    TaskSessionSnapshot normalized = snapshot;
+    if (normalized.threadId.trimmed().isEmpty())
+        normalized.threadId = normalized.sessionId.trimmed();
+    if (normalized.sessionId.trimmed().isEmpty())
+        normalized.sessionId = normalized.threadId.trimmed();
+
     QDir root(sessionRootPath());
     if (!root.exists() && !QDir().mkpath(root.path()))
         return false;
@@ -158,12 +178,12 @@ bool TaskSessionStore::saveLatest(const TaskSessionSnapshot &snapshot)
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;
 
-    const QJsonDocument doc(snapshotToJson(snapshot));
+    const QJsonDocument doc(snapshotToJson(normalized));
     file.write(doc.toJson(QJsonDocument::Indented));
     if (!file.commit())
         return false;
 
-    QSaveFile sessionFile(sessionPathForId(snapshot.sessionId));
+    QSaveFile sessionFile(sessionPathForId(normalized.effectiveThreadId()));
     if (!sessionFile.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;
     sessionFile.write(doc.toJson(QJsonDocument::Indented));

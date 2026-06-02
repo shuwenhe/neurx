@@ -3,6 +3,7 @@
 #include <QString>
 #include <QVector>
 #include <QVariantMap>
+#include <QSet>
 #include <memory>
 
 #include "tools/ClaudeToolSystem.h"

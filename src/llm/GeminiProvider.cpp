@@ -101,7 +101,7 @@ QJsonObject GeminiProvider::buildRequestBody(const LLMRequest &request) const
     }
 
     if (!request.tools.isEmpty()) {
-        body["tools"] = buildTools(request.tools);
+        body["tools"] = request.tools;
     }
 
     return body;

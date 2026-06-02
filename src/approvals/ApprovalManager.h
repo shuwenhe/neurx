@@ -2,7 +2,9 @@
 
 #include "ApprovalTypes.h"
 #include <QObject>
+#include <QVector>
 #include <memory>
+#include <functional>
 
 /**
  * @class ApprovalManager

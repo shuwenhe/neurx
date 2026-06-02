@@ -2,12 +2,14 @@
 #include <QObject>
 #include <QList>
 #include <QString>
+#include <QVariantList>
 #include "agent/AgentMessage.h"
 #include "agent/Planner.h"
 #include "agent/Executor.h"
 #include "agent/Verifier.h"
 #include "agent/ToolRegistry.h"
 #include "llm/LLMProvider.h"
+#include "approvals/ApprovalManager.h"
 
 // ── AgentConfig ───────────────────────────────────────────────────────────────
 
@@ -15,7 +17,7 @@ struct AgentConfig {
     QString systemPrompt;
     int     maxIterations{20};      // hard cap on plan→act cycles per turn
     int     contextWindowTokens{200000};
-    bool    autoApproveTools{false};// if false, emit toolApprovalRequired
+    bool    autoApproveTools{false}; // if true, safe tools may auto-run; high-risk tools still prompt
 };
 
 // ── AgentEngine ───────────────────────────────────────────────────────────────
@@ -36,6 +38,7 @@ public:
 
     void setProvider(LLMProvider *provider);
     void setToolRegistry(ToolRegistry *registry);
+    void setApprovalManager(ApprovalManager *manager);
     void setConfig(const AgentConfig &config);
     void setSystemPrompt(const QString &prompt);
     void setAutoApproveTools(bool enabled);
@@ -52,11 +55,11 @@ public:
 
 public slots:
     // Submit a new user message and kick off the agent loop.
-    void submitUserMessage(const QString &text);
+    void submitUserMessage(const QString &text, const QVariantList &attachments = {});
     // Inject a file/code snippet into context (from editor or file tree).
     void injectContext(const QString &filePath, const QString &content,
                        int startLine = -1, int endLine = -1);
-    // Approve or reject a pending tool call (when autoApproveTools==false).
+    // Approve or reject a pending tool call.
     void approveTool(const QString &callId, bool approved);
     // Interrupt the current loop mid-run.
     void interrupt();
@@ -78,8 +81,8 @@ signals:
     // Emitted by streaming tools (e.g. ShellTool) as incremental output arrives.
     void toolOutputChunk(const QString &callId, const QString &chunk);
 
-    // When autoApproveTools==false, the UI must call approveTool() to proceed.
-    void toolApprovalRequired(const ToolCall &call);
+    // Emitted when a tool needs user approval. The risk label describes why.
+    void toolApprovalRequired(const ToolCall &call, const QString &riskLevel);
 
     // The full agent turn is complete (no more tool calls).
     void turnComplete();
@@ -89,9 +92,15 @@ private:
     void runLoop();
     void setStatus(AgentStatus s);
     void appendMessage(const AgentMessage &msg);
+    bool shouldRequireApproval(const ToolCall &call) const;
+    QString approvalRiskLevel(const ToolCall &call) const;
+    QString approvalResourceForCall(const ToolCall &call) const;
+    bool isDestructiveShellCommand(const QString &command) const;
+    QString shellCommandFromCall(const ToolCall &call) const;
 
     LLMProvider      *m_provider{nullptr};
     ToolRegistry     *m_registry{nullptr};
+    ApprovalManager  *m_approvalManager{nullptr};
     Planner           m_planner;
     Executor          m_executor;
     Verifier          m_verifier;

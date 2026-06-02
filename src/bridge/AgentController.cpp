@@ -1,14 +1,21 @@
 #include "bridge/AgentController.h"
 #include "llm/AnthropicProvider.h"
+#include "llm/GeminiProvider.h"
 #include "llm/OpenAIProvider.h"
 #include "llm/OllamaProvider.h"
 #include "tools/FileSystemTool.h"
 #include "tools/PatchTool.h"
 #include "tools/ShellTool.h"
+#include "tools/DockerShellTool.h"
+#include "tools/GitHubTool.h"
+#include "tools/GitLabTool.h"
+#include "tools/JiraTool.h"
 #include "tools/SearchTool.h"
 #include "tools/WebFetchTool.h"
 #include "tools/WebSearchTool.h"
+#include "tools/GeminiGroundingTool.h"
 #include "tools/CodexTool.h"
+#include "tools/DelegationTool.h"
 #include "tools/CheckpointTool.h"
 #include "tools/KnowledgeTool.h"
 #include "tools/McpProxyTool.h"
@@ -17,19 +24,29 @@
 #include "tools/MemoryTool.h"
 #include "tools/SessionStore.h"
 #include "tools/TodoTool.h"
+#include "tools/CustomScriptTool.h"
 #include <QFile>
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QBuffer>
+#include <QImage>
+#include <QImageReader>
+#include <QMimeDatabase>
 #include <QTextStream>
 #include <QFileInfo>
 #include <QDateTime>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QDir>
+#include <QDirIterator>
 #include <QList>
 #include <QProcessEnvironment>
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QRegularExpression>
+#include <QSet>
+#include <QUuid>
 #include <QDebug>
 #include <algorithm>
 #include <limits>
@@ -38,16 +55,30 @@ static const QString kControllerSystemPrompt = R"(
 You are NeurX Code, an expert software engineering AI assistant.
 You are operating as a code agent, not a chat assistant.
 You have access to tools that let you read and write files, apply patches,
-run shell commands, and search the codebase. Use them to complete coding tasks accurately.
+run shell commands (both local and sandboxed Docker), and search the codebase.
+
+Agentic Lifecycle:
+1. PERCEIVE: Use 'search' (grep/find) or 'knowledge' to index and read relevant code files. If using Gemini, you can read large sets of files to build a massive context.
+2. REASON & GROUND: Understand the logic. Use 'google_search' (native grounding) to verify API usage or documentation facts.
+3. PLAN: Use the 'todo' tool to maintain an active step-by-step plan for the task.
+4. ACTION: Apply changes using 'patch'. Use 'run_docker_command' to run builds, tests, or scripts in a safe, persistent sandbox.
+5. OBSERVE: Read the output from the sandbox. If available, use multimodal input (attached images) to verify UI changes. Iterate until the goal is achieved.
 
 Guidelines:
 - For every coding task, form a concise plan before editing.
 - For non-trivial tasks, use the todo tool to maintain a current step list.
 - Always read relevant files before making changes.
 - Prefer targeted patch edits over rewriting entire files.
-- Use web_search to discover current external information, then web_fetch to read the exact page.
+- Use run_docker_command for builds, tests, or running any untrusted code to ensure isolation and state persistence.
+- Use the github, gitlab, or jira tools to read issues, list tasks, or post updates to remote repositories and project management systems.
+- For high-precision web queries, use google_search to leverage native grounding.
+- Use web_search for general search or web_fetch to read the exact page.
+- Use delegate_task for complex sub-patterns:
+    - ARCHITECTURE-FIRST: Design headers, then delegate implementation details.
+    - PARALLEL-TESTING: Delegate test suite creation while you develop logic.
+    - POST-DEV CLEANUP: Delegate workspace-wide linting and doc improvements.
+- Leverage the long-context capabilities of Gemini models by reading all relevant files and documentation for complex architectural tasks.
 - Use knowledge to index and search local workspace documents or notes before reaching for external search.
-- Inspect <workspace>/.neurx/mcp.json for additional MCP tools and use them when they fit the task.
 - After any edit, verify the result with tests, build commands, or a focused check.
 - If verification fails, inspect the failure and iterate until fixed.
 - Explain your reasoning briefly before each significant action.
@@ -62,6 +93,7 @@ static const char kSettingsAnthropicEndpoint[] = "anthropic_endpoint";
 static const char kSettingsOpenAIEndpoint[] = "openai_endpoint";
 static const char kSettingsAnthropicApiKey[] = "anthropic_api_key";
 static const char kSettingsOpenAIApiKey[]    = "openai_api_key";
+static const char kSettingsGeminiApiKey[]    = "gemini_api_key";
 static const char kSettingsBraveApiKey[]     = "brave_api_key";
 static const char kSettingsAutoApproveTools[] = "auto_approve_tools";
 static const char kSettingsWorkspacePath[] = "workspace_path";
@@ -90,6 +122,14 @@ static bool hasAnyEnvValue(std::initializer_list<const char *> names)
             return true;
     }
     return false;
+}
+
+static QVariantList messagesToVariantList(const QList<AgentMessage> &messages)
+{
+    QVariantList list;
+    for (const auto &message : messages)
+        list.append(message.toJson().toVariantMap());
+    return list;
 }
 
 static QString defaultSecretsEnvPath()
@@ -206,6 +246,151 @@ static QString logPreview(const QString &text, int maxLen = 120)
     return compact.left(maxLen) + QStringLiteral("...");
 }
 
+static QString toolEventPreview(const QString &toolName, const QJsonObject &args, int maxLen = 140)
+{
+    QString preview = toolName;
+    if (!args.isEmpty()) {
+        preview += QStringLiteral(" ");
+        preview += QString::fromUtf8(QJsonDocument(args).toJson(QJsonDocument::Compact));
+    }
+    return logPreview(preview, maxLen);
+}
+
+static ProgrammingLanguage detectLanguageFromPath(const QString &path)
+{
+    const QString ext = QFileInfo(path).suffix().toLower();
+    if (ext == QLatin1String("py")) return ProgrammingLanguage::Python;
+    if (ext == QLatin1String("js")) return ProgrammingLanguage::JavaScript;
+    if (ext == QLatin1String("ts")) return ProgrammingLanguage::TypeScript;
+    if (ext == QLatin1String("java")) return ProgrammingLanguage::Java;
+    if (ext == QLatin1String("cs")) return ProgrammingLanguage::CSharp;
+    if (ext == QLatin1String("cpp") || ext == QLatin1String("cc") || ext == QLatin1String("cxx") || ext == QLatin1String("hpp") || ext == QLatin1String("hh"))
+        return ProgrammingLanguage::Cpp;
+    if (ext == QLatin1String("c")) return ProgrammingLanguage::C;
+    if (ext == QLatin1String("go")) return ProgrammingLanguage::Go;
+    if (ext == QLatin1String("rs")) return ProgrammingLanguage::Rust;
+    if (ext == QLatin1String("rb")) return ProgrammingLanguage::Ruby;
+    if (ext == QLatin1String("php")) return ProgrammingLanguage::PHP;
+    if (ext == QLatin1String("swift")) return ProgrammingLanguage::Swift;
+    if (ext == QLatin1String("kt") || ext == QLatin1String("kts")) return ProgrammingLanguage::Kotlin;
+    if (ext == QLatin1String("sql")) return ProgrammingLanguage::SQL;
+    if (ext == QLatin1String("html") || ext == QLatin1String("htm")) return ProgrammingLanguage::HTML;
+    if (ext == QLatin1String("css")) return ProgrammingLanguage::CSS;
+    return ProgrammingLanguage::Unknown;
+}
+
+static QVariantList vectorStringToVariantList(const QVector<QString> &items);
+
+static QVariantMap issueToVariantMap(const CodeIssue &issue)
+{
+    return QVariantMap{
+        {QStringLiteral("id"), issue.id},
+        {QStringLiteral("severity"), int(issue.severity)},
+        {QStringLiteral("type"), issue.type},
+        {QStringLiteral("message"), issue.message},
+        {QStringLiteral("lineNumber"), issue.lineNumber},
+        {QStringLiteral("columnNumber"), issue.columnNumber},
+        {QStringLiteral("suggestedFix"), issue.suggestedFix},
+        {QStringLiteral("alternatives"), vectorStringToVariantList(issue.alternatives)},
+        {QStringLiteral("rule"), issue.rule},
+        {QStringLiteral("documentation"), issue.documentation},
+    };
+}
+
+static QVariantList stringListToVariantList(const QStringList &items)
+{
+    QVariantList list;
+    for (const auto &item : items)
+        list.append(item);
+    return list;
+}
+
+static QVariantList vectorStringToVariantList(const QVector<QString> &items)
+{
+    QVariantList list;
+    for (const auto &item : items)
+        list.append(item);
+    return list;
+}
+
+static QJsonObject variantMapToJsonObject(const QVariantMap &map)
+{
+    QJsonObject obj;
+    for (auto it = map.begin(); it != map.end(); ++it)
+        obj.insert(it.key(), QJsonValue::fromVariant(it.value()));
+    return obj;
+}
+
+static QVariantMap analysisToVariantMap(const CodeAnalysisResult &result)
+{
+    QVariantList issues;
+    for (const auto &issue : result.issues)
+        issues.append(issueToVariantMap(issue));
+
+    return QVariantMap{
+        {QStringLiteral("analysisId"), result.analysisId},
+        {QStringLiteral("filename"), result.filename},
+        {QStringLiteral("language"), int(result.language)},
+        {QStringLiteral("lineCount"), result.lineCount},
+        {QStringLiteral("characterCount"), result.characterCount},
+        {QStringLiteral("complexity"), result.complexity},
+        {QStringLiteral("criticalCount"), result.criticalCount},
+        {QStringLiteral("errorCount"), result.errorCount},
+        {QStringLiteral("warningCount"), result.warningCount},
+        {QStringLiteral("infoCount"), result.infoCount},
+        {QStringLiteral("quality"), result.quality},
+        {QStringLiteral("maintainability"), result.maintainability},
+        {QStringLiteral("security"), result.security},
+        {QStringLiteral("performance"), result.performance},
+        {QStringLiteral("analyzedAt"), result.analyzedAt.toString(Qt::ISODateWithMs)},
+        {QStringLiteral("issues"), issues},
+    };
+}
+
+static QVariantMap reviewToVariantMap(const CodeReview &review)
+{
+    QVariantList issues;
+    for (const auto &issue : review.issues)
+        issues.append(issueToVariantMap(issue));
+
+    return QVariantMap{
+        {QStringLiteral("reviewId"), review.reviewId},
+        {QStringLiteral("author"), review.author},
+        {QStringLiteral("reviewer"), review.reviewer},
+        {QStringLiteral("overallScore"), review.overallScore},
+        {QStringLiteral("reviewedAt"), review.reviewedAt.toString(Qt::ISODateWithMs)},
+        {QStringLiteral("code"), review.code},
+        {QStringLiteral("issues"), issues},
+        {QStringLiteral("suggestions"), stringListToVariantList(review.suggestions)},
+        {QStringLiteral("praise"), stringListToVariantList(review.praise)},
+    };
+}
+
+static QVariantMap explanationToVariantMap(const CodeExplanation &explanation)
+{
+    return QVariantMap{
+        {QStringLiteral("explanationId"), explanation.explanationId},
+        {QStringLiteral("summary"), explanation.summary},
+        {QStringLiteral("detailedExplanation"), explanation.detailedExplanation},
+        {QStringLiteral("createdAt"), explanation.createdAt.toString(Qt::ISODateWithMs)},
+        {QStringLiteral("keyComponents"), stringListToVariantList(explanation.keyComponents)},
+        {QStringLiteral("suggestedImprovements"), stringListToVariantList(explanation.suggestedImprovements)},
+    };
+}
+
+static QString selectionTargetLabel(const QString &path, int startLine, int endLine)
+{
+    if (path.isEmpty())
+        return QStringLiteral("selected text");
+    if (startLine > 0 && endLine >= startLine) {
+        return QStringLiteral("%1:%2-%3")
+            .arg(fileDisplayName(path))
+            .arg(startLine)
+            .arg(endLine);
+    }
+    return fileDisplayName(path);
+}
+
 static QString summarizeCheckpointFiles(const QVariantList &files)
 {
     if (files.isEmpty())
@@ -254,6 +439,222 @@ static QString summarizeKnowledgeHits(const QVariantList &hits, const QString &q
     return lines.join(QStringLiteral("\n\n"));
 }
 
+static QString readTextPreview(const QString &path, int maxChars = 700)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return {};
+
+    const QString text = QString::fromUtf8(f.readAll()).trimmed();
+    if (text.size() <= maxChars)
+        return text;
+    return text.left(maxChars) + QStringLiteral("...");
+}
+
+static QString previewFirstMeaningfulLines(const QString &text, int maxLines = 4)
+{
+    const QStringList lines = text.split('\n', Qt::SkipEmptyParts);
+    QStringList chosen;
+    for (const QString &line : lines) {
+        const QString trimmed = line.trimmed();
+        if (trimmed.isEmpty())
+            continue;
+        chosen.append(trimmed);
+        if (chosen.size() >= maxLines)
+            break;
+    }
+    return chosen.join(QStringLiteral(" "));
+}
+
+static bool isImageMimeType(const QString &mimeType)
+{
+    return mimeType.startsWith(QStringLiteral("image/"));
+}
+
+static QString dataUrlFromBytes(const QByteArray &bytes, const QString &mimeType)
+{
+    const QString normalizedMime = mimeType.isEmpty()
+        ? QStringLiteral("image/png")
+        : mimeType;
+    return QStringLiteral("data:%1;base64,%2")
+        .arg(normalizedMime, QString::fromLatin1(bytes.toBase64()));
+}
+
+static QVariantList attachmentListFromImage(const QString &filePath, const QByteArray &bytes, const QString &mimeType, const QString &altText)
+{
+    QVariantMap attachment;
+    attachment["type"] = QStringLiteral("image");
+    attachment["path"] = QFileInfo(filePath).absoluteFilePath();
+    attachment["fileName"] = QFileInfo(filePath).fileName();
+    attachment["mimeType"] = mimeType.isEmpty() ? QStringLiteral("image/png") : mimeType;
+    attachment["base64"] = QString::fromLatin1(bytes.toBase64());
+    attachment["dataUrl"] = dataUrlFromBytes(bytes, mimeType);
+    attachment["altText"] = altText;
+    return {attachment};
+}
+
+static QVariantMap attachmentMapFromBytes(const QString &filePath,
+                                          const QByteArray &bytes,
+                                          const QString &mimeType,
+                                          const QString &altText)
+{
+    QVariantMap attachment;
+    attachment["type"] = QStringLiteral("image");
+    attachment["path"] = QFileInfo(filePath).absoluteFilePath();
+    attachment["fileName"] = QFileInfo(filePath).fileName();
+    attachment["mimeType"] = mimeType.isEmpty() ? QStringLiteral("image/png") : mimeType;
+    attachment["base64"] = QString::fromLatin1(bytes.toBase64());
+    attachment["dataUrl"] = dataUrlFromBytes(bytes, mimeType);
+    attachment["altText"] = altText;
+    return attachment;
+}
+
+static QVariantMap attachmentMapFromImage(const QImage &image,
+                                          const QString &filePath,
+                                          const QString &mimeType,
+                                          const QString &altText)
+{
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    return attachmentMapFromBytes(filePath, bytes, mimeType.isEmpty() ? QStringLiteral("image/png") : mimeType, altText);
+}
+
+static QString attachmentSummary(const QVariantMap &attachment)
+{
+    const QString fileName = attachment.value("fileName").toString();
+    const QString altText = attachment.value("altText").toString();
+    if (!fileName.isEmpty() && !altText.isEmpty())
+        return QStringLiteral("%1 - %2").arg(fileName, altText);
+    if (!fileName.isEmpty())
+        return fileName;
+    return altText;
+}
+
+static QString attachmentSummaryText(const QVariantList &attachments)
+{
+    if (attachments.isEmpty())
+        return QString{};
+
+    QStringList parts;
+    for (const QVariant &value : attachments) {
+        const QVariantMap map = value.toMap();
+        const QString summary = attachmentSummary(map);
+        if (!summary.isEmpty())
+            parts << summary;
+    }
+    if (parts.isEmpty())
+        return QStringLiteral("[attachments]");
+    return QStringLiteral("[attachments] %1").arg(parts.join(QStringLiteral(", ")));
+}
+
+static QVariantList attachmentListFromVariantMaps(const QList<QVariantMap> &maps)
+{
+    QVariantList list;
+    for (const auto &map : maps)
+        list.append(map);
+    return list;
+}
+
+static QString skillTitleFromPath(const QString &path)
+{
+    QFileInfo info(path);
+    const QString base = info.dir().dirName();
+    if (!base.isEmpty() && base != QStringLiteral("."))
+        return base;
+    return info.completeBaseName();
+}
+
+static QString skillPreview(const QString &content)
+{
+    return previewFirstMeaningfulLines(content, 3);
+}
+
+static QString markdownTitleFromContent(const QString &content)
+{
+    const QStringList lines = content.split('\n');
+    for (const QString &line : lines) {
+        const QString trimmed = line.trimmed();
+        if (!trimmed.startsWith(QStringLiteral("#")))
+            continue;
+        QString title = trimmed;
+        while (title.startsWith('#'))
+            title.remove(0, 1);
+        return title.trimmed();
+    }
+    return {};
+}
+
+static QVariantMap skillEntryForFile(const QString &path, const QString &kind)
+{
+    QVariantMap entry;
+    entry["kind"] = kind;
+    entry["path"] = QFileInfo(path).absoluteFilePath();
+    entry["title"] = kind == QStringLiteral("instruction")
+        ? QStringLiteral("AGENTS.md")
+        : skillTitleFromPath(path);
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return entry;
+
+    const QString content = QString::fromUtf8(f.readAll()).trimmed();
+    const QString title = markdownTitleFromContent(content);
+    if (!title.isEmpty())
+        entry["title"] = title;
+    entry["description"] = skillPreview(content);
+    entry["content"] = content.left(4000);
+    return entry;
+}
+
+static QVariantList discoverWorkspaceSkillEntries(const QString &workspacePath)
+{
+    QVariantList entries;
+    if (workspacePath.trimmed().isEmpty())
+        return entries;
+
+    QSet<QString> seen;
+    auto addEntry = [&](const QString &path, const QString &kind) {
+        const QString absolute = QFileInfo(path).absoluteFilePath();
+        if (absolute.isEmpty() || seen.contains(absolute))
+            return;
+        seen.insert(absolute);
+        entries.append(skillEntryForFile(absolute, kind));
+    };
+
+    const QString root = QFileInfo(workspacePath).absoluteFilePath();
+    const QString rootAgents = QDir(root).filePath(QStringLiteral("AGENTS.md"));
+    if (QFileInfo::exists(rootAgents))
+        addEntry(rootAgents, QStringLiteral("instruction"));
+
+    QDirIterator agentsIter(root, QStringList{QStringLiteral("AGENTS.md")}, QDir::Files, QDirIterator::Subdirectories);
+    while (agentsIter.hasNext()) {
+        const QString path = agentsIter.next();
+        if (path.contains(QStringLiteral("/.git/")))
+            continue;
+        addEntry(path, QStringLiteral("instruction"));
+    }
+
+    const QStringList skillRoots = {
+        QDir(root).filePath(QStringLiteral(".neurx/skills")),
+        QDir(root).filePath(QStringLiteral(".agents/skills")),
+        QDir(root).filePath(QStringLiteral("skills")),
+    };
+
+    for (const QString &skillRoot : skillRoots) {
+        if (!QFileInfo::exists(skillRoot))
+            continue;
+        QDirIterator skillIter(skillRoot, QStringList{QStringLiteral("SKILL.md")}, QDir::Files, QDirIterator::Subdirectories);
+        while (skillIter.hasNext()) {
+            const QString path = skillIter.next();
+            addEntry(path, QStringLiteral("skill"));
+        }
+    }
+
+    return entries;
+}
+
 static void unregisterToolAndDelete(ToolRegistry *registry, const QString &name)
 {
     if (!registry)
@@ -288,6 +689,7 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         {ContentRole,   "content"},
         {ThinkingRole,  "thinking"},
         {ToolCallsRole, "toolCalls"},
+        {AttachmentsRole, "attachments"},
     };
 }
 
@@ -300,6 +702,7 @@ QVariant ChatModel::data(const QModelIndex &idx, int role) const
     case ContentRole:   return m.content;
     case ThinkingRole:  return m.thinking;
     case ToolCallsRole: return m.toolCalls;
+    case AttachmentsRole:return m.attachments;
     default:            return {};
     }
 }
@@ -328,7 +731,7 @@ void ChatModel::replaceLast(const ChatMessage &msg)
 
     m_msgs.last() = msg;
     const auto idx = index(m_msgs.size() - 1);
-    emit dataChanged(idx, idx, {RoleRole, ContentRole, ThinkingRole, ToolCallsRole});
+    emit dataChanged(idx, idx, {RoleRole, ContentRole, ThinkingRole, ToolCallsRole, AttachmentsRole});
 }
 
 void ChatModel::appendToolCallToLastAssistant(const QVariantMap &card)
@@ -377,29 +780,546 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     m_engine    = new AgentEngine(this);
     m_workspaceContext = new WorkspaceContext(this);
     m_workspaceIndex   = new WorkspaceIndex(this);
+    m_codeMagic        = new DefaultCodeMagic(this);
+    m_sandboxManager   = new DefaultSandboxManager(this);
+    m_approvalManager  = new DefaultApprovalManager(this);
+
+    connect(m_sandboxManager, &DefaultSandboxManager::sandboxExecutionEvent,
+            this, &AgentController::onSandboxExecutionEvent);
+    connect(m_codeMagic, &CodeMagic::analysisCompleted,
+            this, &AgentController::onCodeMagicAnalysisCompleted);
+    connect(m_codeMagic, &CodeMagic::generationCompleted,
+            this, &AgentController::onCodeMagicGenerationCompleted);
+    connect(m_codeMagic, &CodeMagic::refactoringCompleted,
+            this, &AgentController::onCodeMagicRefactoringCompleted);
+    connect(m_codeMagic, &CodeMagic::testsGenerated,
+            this, &AgentController::onCodeMagicTestsGenerated);
+    connect(m_codeMagic, &CodeMagic::errorOccurred,
+            this, &AgentController::onCodeMagicErrorOccurred);
+
+    const QString threadStoreBase = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+        .filePath(QStringLiteral("threads"));
+    m_threadStore = new FileBasedThreadStore(threadStoreBase, this);
+    if (!m_threadStore->initialize())
+        qWarning().noquote() << "[thread-store] failed to initialize at" << threadStoreBase;
 
     // Register providers
     auto *anthropic = new AnthropicProvider(this);
     auto *openai    = new OpenAIProvider(this);
     auto *ollama    = new OllamaProvider(this);
+    auto *gemini    = new GeminiProvider(this);
     m_providers["anthropic"] = anthropic;
     m_providers["openai"]    = openai;
     m_providers["ollama"]    = ollama;
+    m_providers["gemini"]    = gemini;
 
     m_currentProvider = "openai";
     m_currentModel    = openai->availableModels().first();
     m_anthropicEndpoint = QStringLiteral("https://api.anthropic.com/v1/messages");
     m_openaiEndpoint  = QString::fromUtf8(kSiliconFlowOpenAIEndpoint);
     m_sessionId = TaskSessionStore::defaultSessionId();
+    m_threadCreatedAt = QDateTime::currentDateTimeUtc();
 
     loadSettings();
+    configurePolicyManagers();
     setupEngine();
+    if (!m_workspacePath.isEmpty())
+        refreshWorkspaceSkills();
     restoreTaskSession();
     startLocalGateway();
 
     if (!m_currentFilePath.isEmpty() && QFileInfo::exists(m_currentFilePath)) {
         openEditorFile(m_currentFilePath);
     }
+}
+
+AgentController::CodeMagicInput AgentController::resolveCodeMagicInput() const
+{
+    CodeMagicInput input;
+    if (!m_selectedText.trimmed().isEmpty()) {
+        input.path = m_selectedFilePath.isEmpty() ? m_currentFilePath : m_selectedFilePath;
+        input.code = m_selectedText;
+        input.language = detectLanguageFromPath(input.path);
+        input.targetLabel = selectionTargetLabel(input.path, m_selectedStartLine, m_selectedEndLine);
+        input.hasSelection = true;
+        return input;
+    }
+
+    input.path = m_currentFilePath;
+    input.code = m_currentFileContent;
+    input.language = detectLanguageFromPath(m_currentFilePath);
+    input.targetLabel = fileDisplayName(m_currentFilePath);
+    return input;
+}
+
+void AgentController::updateCodeMagicResult(const QVariantMap &result, const QString &targetLabel)
+{
+    m_codeMagicResult = result;
+    m_codeMagicTargetLabel = targetLabel;
+    emit codeMagicResultChanged();
+}
+
+static QStringList inferredToolTags(const QString &toolName)
+{
+    if (toolName == QStringLiteral("file_system"))
+        return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("io")};
+    if (toolName == QStringLiteral("patch"))
+        return {QStringLiteral("diff"), QStringLiteral("files"), QStringLiteral("edit")};
+    if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
+        return {QStringLiteral("shell"), QStringLiteral("command"), QStringLiteral("execution")};
+    if (toolName == QStringLiteral("search"))
+        return {QStringLiteral("search"), QStringLiteral("workspace")};
+    if (toolName == QStringLiteral("web_search") || toolName == QStringLiteral("web_fetch"))
+        return {QStringLiteral("web"), QStringLiteral("network")};
+    if (toolName == QStringLiteral("knowledge"))
+        return {QStringLiteral("knowledge"), QStringLiteral("indexing")};
+    if (toolName == QStringLiteral("checkpoint"))
+        return {QStringLiteral("checkpoint"), QStringLiteral("rollback")};
+    if (toolName == QStringLiteral("todo"))
+        return {QStringLiteral("planning"), QStringLiteral("tasks")};
+    if (toolName == QStringLiteral("codex_agent"))
+        return {QStringLiteral("agent"), QStringLiteral("delegation")};
+    return {QStringLiteral("tool")};
+}
+
+QString AgentController::approvalRiskLevelForTool(const QString &toolName, const QVariantMap &arguments) const
+{
+    const QString name = toolName.trimmed();
+    if (name == QStringLiteral("run_command") || name == QStringLiteral("run_docker_command")) {
+        const QString command = arguments.value(QStringLiteral("command")).toString().trimmed().toLower();
+        const QStringList destructivePatterns = {
+            QStringLiteral(R"(\brm\b.*\s-rf\b)"),
+            QStringLiteral(R"(\bgit\b.*\breset\b.*\b--hard\b)"),
+            QStringLiteral(R"(\bgit\b.*\bclean\b.*\b-f\b)"),
+            QStringLiteral(R"(\bchmod\b.*\b-R\b.*\b777\b)"),
+            QStringLiteral(R"(\bchown\b.*\b-R\b)"),
+            QStringLiteral(R"(\bdd\b.*\bof=/dev/\w+\b)"),
+            QStringLiteral(R"(\bmkfs\w*\b)"),
+            QStringLiteral(R"(\bshutdown\b|\breboot\b|\bhalt\b)"),
+        };
+        for (const auto &pattern : destructivePatterns) {
+            if (QRegularExpression(pattern, QRegularExpression::CaseInsensitiveOption).match(command).hasMatch())
+                return QStringLiteral("critical");
+        }
+        return name == QStringLiteral("run_docker_command") ? QStringLiteral("low") : QStringLiteral("high");
+    }
+
+    if (name == QStringLiteral("file_system")
+        || name == QStringLiteral("patch")
+        || name == QStringLiteral("github")
+        || name == QStringLiteral("gitlab")
+        || name == QStringLiteral("jira"))
+        return QStringLiteral("high");
+
+    if (name == QStringLiteral("web_search")
+        || name == QStringLiteral("web_fetch")
+        || name == QStringLiteral("codex_agent"))
+        return QStringLiteral("medium");
+
+    return QStringLiteral("low");
+}
+
+bool AgentController::toolNeedsApproval(const QString &toolName, const QVariantMap &arguments,
+                                        QString *riskLevel, QString *reason) const
+{
+    const QString risk = approvalRiskLevelForTool(toolName, arguments);
+    if (riskLevel)
+        *riskLevel = risk;
+
+    QString resource;
+    if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
+        resource = arguments.value(QStringLiteral("command")).toString();
+    else if (toolName == QStringLiteral("patch"))
+        resource = arguments.value(QStringLiteral("patch")).toString();
+    else if (toolName == QStringLiteral("file_system")) {
+        const QString op = arguments.value(QStringLiteral("operation")).toString();
+        const QString path = arguments.value(QStringLiteral("path")).toString();
+        const QString destination = arguments.value(QStringLiteral("destination")).toString();
+        resource = destination.isEmpty()
+            ? QStringLiteral("%1 %2").arg(op, path)
+            : QStringLiteral("%1 %2 -> %3").arg(op, path, destination);
+    }
+
+    if (!m_approvalManager) {
+        if (reason)
+            *reason = QStringLiteral("No approval manager configured.");
+        return !m_autoApproveTools || risk == QStringLiteral("high") || risk == QStringLiteral("critical");
+    }
+
+    const AskForApproval policy = m_approvalManager->getPolicyFor(toolName, resource);
+    if (reason) {
+        *reason = QStringLiteral("policy=%1, risk=%2")
+                      .arg(int(policy))
+                      .arg(risk);
+    }
+
+    if (policy == AskForApproval::Never)
+        return false;
+    if (!m_autoApproveTools)
+        return true;
+    if (policy == AskForApproval::OnRequest
+        || policy == AskForApproval::Granular
+        || policy == AskForApproval::UnlessTrusted)
+        return true;
+    if (policy == AskForApproval::OnFailure)
+        return false;
+    return risk == QStringLiteral("high") || risk == QStringLiteral("critical");
+}
+
+QVariantMap AgentController::buildToolPermissionState(const QString &toolName, const QVariantMap &context) const
+{
+    QVariantMap out;
+    QString risk;
+    QString reason;
+    const bool needsApproval = toolNeedsApproval(toolName, context, &risk, &reason);
+    out.insert(QStringLiteral("toolName"), toolName);
+    out.insert(QStringLiteral("riskLevel"), risk);
+    out.insert(QStringLiteral("requiresApproval"), needsApproval);
+    out.insert(QStringLiteral("reason"), reason);
+    if (m_approvalManager) {
+        const QString resource = context.value(QStringLiteral("command")).toString().trimmed().isEmpty()
+            ? context.value(QStringLiteral("path")).toString()
+            : context.value(QStringLiteral("command")).toString();
+        const AskForApproval policy = m_approvalManager->getPolicyFor(toolName, resource);
+        out.insert(QStringLiteral("policy"), int(policy));
+        out.insert(QStringLiteral("readOnlyMode"), m_approvalManager->isReadOnlyMode());
+    }
+    return out;
+}
+
+QVariantMap AgentController::buildToolCatalogEntry(BaseTool *tool) const
+{
+    QVariantMap entry;
+    if (!tool)
+        return entry;
+
+    const QString name = tool->name();
+    const QJsonObject schema = tool->parametersSchema();
+    const QString schemaText = QString::fromUtf8(QJsonDocument(schema).toJson(QJsonDocument::Compact));
+    const QStringList tags = inferredToolTags(name);
+    const QVariantMap permission = buildToolPermissionState(name, QVariantMap{});
+
+    int executionCount = 0;
+    QString lastUsedAt;
+    for (const auto &event : m_executionTimeline) {
+        const QVariantMap ev = event.toMap();
+        if (ev.value(QStringLiteral("toolName")).toString() == name) {
+            ++executionCount;
+            lastUsedAt = ev.value(QStringLiteral("timestamp")).toString();
+        }
+    }
+
+    entry.insert(QStringLiteral("toolId"), name);
+    entry.insert(QStringLiteral("name"), name);
+    entry.insert(QStringLiteral("description"), tool->description());
+    entry.insert(QStringLiteral("summary"), tool->summary(QJsonObject{}));
+    entry.insert(QStringLiteral("schema"), schema.toVariantMap());
+    entry.insert(QStringLiteral("schemaText"), schemaText);
+    entry.insert(QStringLiteral("tags"), tags);
+    entry.insert(QStringLiteral("category"), tags.contains(QStringLiteral("shell"))
+                                                    ? QStringLiteral("Execution")
+                                                    : tags.contains(QStringLiteral("files"))
+                                                        ? QStringLiteral("Workspace")
+                                                        : tags.contains(QStringLiteral("web"))
+                                                            ? QStringLiteral("Network")
+                                                            : QStringLiteral("General"));
+    entry.insert(QStringLiteral("available"), true);
+    entry.insert(QStringLiteral("executionCount"), executionCount);
+    entry.insert(QStringLiteral("lastUsedAt"), lastUsedAt);
+    entry.insert(QStringLiteral("permission"), permission);
+    entry.insert(QStringLiteral("requiresApproval"), permission.value(QStringLiteral("requiresApproval")).toBool());
+    entry.insert(QStringLiteral("riskLevel"), permission.value(QStringLiteral("riskLevel")).toString());
+    return entry;
+}
+
+QVariantList AgentController::toolCatalog() const
+{
+    QVariantList list;
+    if (!m_registry)
+        return list;
+
+    for (BaseTool *tool : m_registry->allTools()) {
+        if (!tool)
+            continue;
+        list.append(buildToolCatalogEntry(tool));
+    }
+    return list;
+}
+
+QVariantList AgentController::discoverTools(const QString &query) const
+{
+    const QString needle = query.trimmed().toLower();
+    const QVariantList catalog = toolCatalog();
+    if (needle.isEmpty())
+        return catalog;
+
+    QVariantList results;
+    for (const auto &item : catalog) {
+        const QVariantMap entry = item.toMap();
+        const QString haystack = QStringList{
+            entry.value(QStringLiteral("name")).toString(),
+            entry.value(QStringLiteral("description")).toString(),
+            entry.value(QStringLiteral("schemaText")).toString(),
+            entry.value(QStringLiteral("tags")).toStringList().join(QStringLiteral(" "))
+        }.join(QStringLiteral(" ")).toLower();
+        if (haystack.contains(needle))
+            results.append(entry);
+    }
+    return results;
+}
+
+QVariantMap AgentController::toolSchema(const QString &toolName) const
+{
+    QVariantMap out;
+    if (!m_registry)
+        return out;
+
+    BaseTool *tool = m_registry->tool(toolName);
+    if (!tool) {
+        out.insert(QStringLiteral("error"), QStringLiteral("Tool not found."));
+        return out;
+    }
+
+    out.insert(QStringLiteral("toolId"), tool->name());
+    out.insert(QStringLiteral("name"), tool->name());
+    out.insert(QStringLiteral("description"), tool->description());
+    out.insert(QStringLiteral("schema"), tool->parametersSchema().toVariantMap());
+    out.insert(QStringLiteral("schemaText"), QString::fromUtf8(QJsonDocument(tool->parametersSchema()).toJson(QJsonDocument::Indented)));
+    out.insert(QStringLiteral("permission"), buildToolPermissionState(tool->name(), QVariantMap{}));
+    return out;
+}
+
+QVariantMap AgentController::executePendingTool(const QString &approvalId)
+{
+    const auto pending = m_pendingToolExecutions.value(approvalId);
+    if (pending.toolName.isEmpty())
+        return {{QStringLiteral("error"), QStringLiteral("Pending tool execution not found.")}};
+
+    m_pendingToolExecutions.remove(approvalId);
+    if (!m_registry)
+        return {{QStringLiteral("error"), QStringLiteral("Tool registry is not available.")}};
+
+    BaseTool *tool = m_registry->tool(pending.toolName);
+    if (!tool)
+        return {{QStringLiteral("error"), QStringLiteral("Unknown tool: %1").arg(pending.toolName)}};
+
+    appendExecutionEvent(QStringLiteral("tool_execution"),
+                         QStringLiteral("Tool execution started"),
+                         QStringLiteral("running"),
+                         pending.summary,
+                         pending.toolName,
+                         approvalId);
+
+    QString accumulatedOutput;
+    const QMetaObject::Connection outputConn = connect(tool, &BaseTool::outputChunk, this,
+        [&](const QString &chunkCallId, const QString &chunk) {
+            if (chunkCallId != approvalId)
+                return;
+            if (accumulatedOutput.isEmpty()) {
+                appendExecutionEvent(QStringLiteral("tool_output"),
+                                     QStringLiteral("Tool output"),
+                                     QStringLiteral("running"),
+                                     logPreview(chunk),
+                                     pending.toolName,
+                                     approvalId);
+            }
+            accumulatedOutput += chunk;
+        });
+
+    const ToolResult toolResult = tool->execute(approvalId, variantMapToJsonObject(pending.arguments));
+    disconnect(outputConn);
+
+    QVariantMap response;
+    response.insert(QStringLiteral("toolName"), pending.toolName);
+    response.insert(QStringLiteral("callId"), approvalId);
+    response.insert(QStringLiteral("approved"), true);
+    response.insert(QStringLiteral("isError"), toolResult.isError);
+    response.insert(QStringLiteral("content"), toolResult.content);
+    response.insert(QStringLiteral("summary"), pending.summary);
+    if (!accumulatedOutput.isEmpty())
+        response.insert(QStringLiteral("streamOutput"), accumulatedOutput);
+
+    appendExecutionEvent(QStringLiteral("tool_execution"),
+                         toolResult.isError ? QStringLiteral("Tool failed") : QStringLiteral("Tool completed"),
+                         toolResult.isError ? QStringLiteral("error") : QStringLiteral("done"),
+                         logPreview(toolResult.content),
+                         pending.toolName,
+                         approvalId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+
+    if (toolResult.isError)
+        response.insert(QStringLiteral("error"), toolResult.content);
+    else
+        emit successOccurred(QStringLiteral("%1 completed.").arg(pending.toolName));
+    return response;
+}
+
+QVariantMap AgentController::toolPermissionState(const QString &toolName, const QVariantMap &context) const
+{
+    return buildToolPermissionState(toolName, context);
+}
+
+QVariantMap AgentController::toolExecutionStats(const QString &toolName) const
+{
+    QVariantMap stats;
+    if (toolName.trimmed().isEmpty())
+        return stats;
+
+    int total = 0;
+    int success = 0;
+    int failed = 0;
+    QString lastUsedAt;
+    for (const auto &event : m_executionTimeline) {
+        const QVariantMap ev = event.toMap();
+        if (ev.value(QStringLiteral("toolName")).toString() != toolName)
+            continue;
+        const QString kind = ev.value(QStringLiteral("kind")).toString();
+        if (kind != QStringLiteral("tool_execution"))
+            continue;
+        ++total;
+        const QString status = ev.value(QStringLiteral("status")).toString();
+        if (status == QStringLiteral("done"))
+            ++success;
+        else if (status == QStringLiteral("error"))
+            ++failed;
+        lastUsedAt = ev.value(QStringLiteral("timestamp")).toString();
+    }
+
+    stats.insert(QStringLiteral("toolName"), toolName);
+    stats.insert(QStringLiteral("totalExecutions"), total);
+    stats.insert(QStringLiteral("successfulExecutions"), success);
+    stats.insert(QStringLiteral("failedExecutions"), failed);
+    stats.insert(QStringLiteral("successRate"), total > 0 ? (100.0 * success) / total : 0.0);
+    stats.insert(QStringLiteral("lastUsedAt"), lastUsedAt);
+    return stats;
+}
+
+QVariantList AgentController::toolExecutionHistory(const QString &toolName, int limit) const
+{
+    QVariantList history;
+    if (toolName.trimmed().isEmpty() || limit <= 0)
+        return history;
+
+    for (int i = m_executionTimeline.size() - 1; i >= 0; --i) {
+        const QVariantMap ev = m_executionTimeline.at(i).toMap();
+        if (ev.value(QStringLiteral("toolName")).toString() != toolName)
+            continue;
+        history.append(ev);
+        if (history.size() >= limit)
+            break;
+    }
+    return history;
+}
+
+QVariantMap AgentController::executeToolByName(const QString &toolName, const QVariantMap &arguments)
+{
+    QVariantMap response;
+    if (!m_registry) {
+        response.insert(QStringLiteral("error"), QStringLiteral("Tool registry is not available."));
+        return response;
+    }
+
+    BaseTool *tool = m_registry->tool(toolName);
+    if (!tool) {
+        response.insert(QStringLiteral("error"), QStringLiteral("Unknown tool: %1").arg(toolName));
+        return response;
+    }
+
+    QString riskLevel;
+    QString reason;
+    const bool needsApproval = toolNeedsApproval(toolName, arguments, &riskLevel, &reason);
+    const QString callId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    if (needsApproval && !m_autoApproveTools) {
+        const QJsonObject jsonArgs = variantMapToJsonObject(arguments);
+        m_pendingToolExecutions.insert(callId, PendingToolExecution{toolName, arguments, tool->summary(jsonArgs), riskLevel});
+        emit toolApprovalRequired(callId, toolName, tool->summary(jsonArgs), riskLevel);
+        response.insert(QStringLiteral("pending"), true);
+        response.insert(QStringLiteral("approvalId"), callId);
+        response.insert(QStringLiteral("toolName"), toolName);
+        response.insert(QStringLiteral("riskLevel"), riskLevel);
+        response.insert(QStringLiteral("reason"), reason);
+        appendExecutionEvent(QStringLiteral("approval"),
+                             QStringLiteral("Tool approval requested"),
+                             QStringLiteral("running"),
+                             QStringLiteral("%1 · %2").arg(toolName, riskLevel),
+                             toolName,
+                             callId);
+        if (!m_restoringSessionHistory)
+            saveTaskSession();
+        return response;
+    }
+
+    appendExecutionEvent(QStringLiteral("tool_execution"),
+                         QStringLiteral("Tool execution started"),
+                         QStringLiteral("running"),
+                         tool->summary(variantMapToJsonObject(arguments)),
+                         toolName,
+                         callId);
+
+    QString accumulatedOutput;
+    const QMetaObject::Connection outputConn = connect(tool, &BaseTool::outputChunk, this,
+        [&](const QString &chunkCallId, const QString &chunk) {
+            if (chunkCallId != callId)
+                return;
+            if (accumulatedOutput.isEmpty()) {
+                appendExecutionEvent(QStringLiteral("tool_output"),
+                                     QStringLiteral("Tool output"),
+                                     QStringLiteral("running"),
+                                     logPreview(chunk),
+                                     toolName,
+                                     callId);
+            }
+            accumulatedOutput += chunk;
+        });
+
+    const ToolResult toolResult = tool->execute(callId, variantMapToJsonObject(arguments));
+    disconnect(outputConn);
+
+    response.insert(QStringLiteral("toolName"), toolName);
+    response.insert(QStringLiteral("callId"), callId);
+    response.insert(QStringLiteral("isError"), toolResult.isError);
+    response.insert(QStringLiteral("content"), toolResult.content);
+    response.insert(QStringLiteral("summary"), tool->summary(variantMapToJsonObject(arguments)));
+    response.insert(QStringLiteral("riskLevel"), riskLevel);
+    if (!accumulatedOutput.isEmpty())
+        response.insert(QStringLiteral("streamOutput"), accumulatedOutput);
+
+    appendExecutionEvent(QStringLiteral("tool_execution"),
+                         toolResult.isError ? QStringLiteral("Tool failed") : QStringLiteral("Tool completed"),
+                         toolResult.isError ? QStringLiteral("error") : QStringLiteral("done"),
+                         logPreview(toolResult.content),
+                         toolName,
+                         callId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+
+    if (toolResult.isError) {
+        response.insert(QStringLiteral("error"), toolResult.content);
+        emit errorOccurred(toolResult.content);
+    } else {
+        emit successOccurred(QStringLiteral("%1 completed.").arg(toolName));
+    }
+    return response;
+}
+
+void AgentController::setCurrentSelection(const QString &filePath, const QString &code,
+                                          int startLine, int endLine)
+{
+    const QString normalizedPath = normalizeLocalFilePath(filePath);
+    const QString trimmedCode = code;
+
+    if (normalizedPath.isEmpty() || trimmedCode.trimmed().isEmpty()) {
+        clearCurrentSelection();
+        return;
+    }
+
+    m_selectedFilePath = normalizedPath;
+    m_selectedText = trimmedCode;
+    m_selectedStartLine = startLine;
+    m_selectedEndLine = endLine;
+    emit currentSelectionChanged();
 }
 
 void AgentController::loadSettings()
@@ -413,6 +1333,7 @@ void AgentController::loadSettings()
     const QString endpoint = s.value(kSettingsOpenAIEndpoint, m_openaiEndpoint).toString();
     const QString anthropicApiKey = s.value(kSettingsAnthropicApiKey, m_anthropicApiKey).toString();
     const QString openaiApiKey = s.value(kSettingsOpenAIApiKey, m_openaiApiKey).toString();
+    const QString geminiApiKey = s.value(kSettingsGeminiApiKey, m_geminiApiKey).toString();
     const bool autoApprove = s.value(kSettingsAutoApproveTools, m_autoApproveTools).toBool();
     const QString workspace = s.value(kSettingsWorkspacePath, QString{}).toString();
     const QString currentFile = s.value(kSettingsCurrentFilePath, QString{}).toString();
@@ -466,6 +1387,7 @@ void AgentController::loadSettings()
     m_openaiEndpoint = normalizeOpenAICompatEndpoint(chosenEndpoint);
 
     m_anthropicApiKey = anthropicApiKey.trimmed();
+    m_geminiApiKey = geminiApiKey.trimmed();
 
     const QString envOpenaiKey = firstNonEmptyEnvValue({
         "SILICONFLOW_API_KEY",
@@ -542,6 +1464,7 @@ void AgentController::saveSettings() const
     }
 
     s.setValue(kSettingsAnthropicApiKey, m_anthropicApiKey);
+    s.setValue(kSettingsGeminiApiKey, m_geminiApiKey);
     if (!m_openaiApiKeyFromRuntime) {
         s.setValue(kSettingsOpenAIApiKey, m_openaiApiKey);
     }
@@ -613,6 +1536,7 @@ QJsonObject AgentController::localGatewayState() const
     state.insert(QStringLiteral("currentModel"), m_currentModel);
     state.insert(QStringLiteral("currentFilePath"), m_currentFilePath);
     state.insert(QStringLiteral("sessionId"), m_sessionId);
+    state.insert(QStringLiteral("threadId"), m_sessionId);
     state.insert(QStringLiteral("todoCount"), int(todoItems().size()));
     state.insert(QStringLiteral("scheduledTaskCount"), int(scheduledTasks().size()));
     state.insert(QStringLiteral("knowledgeSourceCount"), int(knowledgeSources().size()));
@@ -656,6 +1580,7 @@ void AgentController::setupEngine()
 {
     m_engine->setProvider(m_providers.value(m_currentProvider));
     m_engine->setToolRegistry(m_registry);
+    m_engine->setApprovalManager(m_approvalManager);
     m_engine->setActiveModel(m_currentModel);
     m_engine->setAutoApproveTools(m_autoApproveTools);
     if (auto *anthropic = qobject_cast<AnthropicProvider *>(m_providers.value("anthropic"))) {
@@ -665,6 +1590,9 @@ void AgentController::setupEngine()
     if (auto *openai = qobject_cast<OpenAIProvider *>(m_providers.value("openai"))) {
         openai->setEndpointOverride(m_openaiEndpoint);
         openai->setApiKey(m_openaiApiKey);
+    }
+    if (auto *gemini = qobject_cast<GeminiProvider *>(m_providers.value("gemini"))) {
+        gemini->setApiKey(m_geminiApiKey);
     }
     refreshSystemPrompt();
 
@@ -679,13 +1607,25 @@ void AgentController::setupEngine()
     connect(m_engine, &AgentEngine::toolOutputChunk,
             this, &AgentController::onToolOutputChunk);
     connect(m_engine, &AgentEngine::toolApprovalRequired,
-            this, [this](const ToolCall &call) {
+            this, [this](const ToolCall &call, const QString &riskLevel) {
                 qInfo().noquote() << "[agent] tool approval required:" << call.name
-                                  << "callId=" << call.id;
+                                  << "callId=" << call.id
+                                  << "risk=" << riskLevel;
+                appendExecutionEvent(
+                    QStringLiteral("approval"),
+                    riskLevel == QStringLiteral("high")
+                        ? QStringLiteral("Approval required")
+                        : QStringLiteral("Approval requested"),
+                    QStringLiteral("waiting"),
+                    riskLevel + QStringLiteral(" risk · ") + toolEventPreview(call.name, call.arguments),
+                    call.name,
+                    call.id);
+                saveTaskSession();
                 emit toolApprovalRequired(call.id, call.name,
                     m_registry->tool(call.name)
                         ? m_registry->tool(call.name)->summary(call.arguments)
-                        : call.name);
+                        : call.name,
+                    riskLevel);
             });
     connect(m_engine, &AgentEngine::turnComplete,
             this, [this]() {
@@ -728,7 +1668,16 @@ void AgentController::restoreTaskSession()
 
 void AgentController::applyTaskSession(const TaskSessionSnapshot &snapshot)
 {
-    m_sessionId = snapshot.sessionId;
+    const QString oldThreadId = m_sessionId;
+    m_sessionId = snapshot.effectiveThreadId();
+    m_parentThreadId = snapshot.parentThreadId;
+    m_threadCreatedAt = snapshot.updatedAt.isValid()
+        ? snapshot.updatedAt.toUTC()
+        : QDateTime::currentDateTimeUtc();
+    m_executionTimeline = snapshot.executionTimeline;
+    emit executionTimelineChanged();
+    if (oldThreadId != m_sessionId)
+        emit currentThreadIdChanged();
     m_documents.clear();
     m_currentEditorIndex = -1;
     m_currentFilePath.clear();
@@ -759,6 +1708,8 @@ void AgentController::applyTaskSession(const TaskSessionSnapshot &snapshot)
 
     if (!snapshot.currentFilePath.isEmpty() && QFileInfo::exists(snapshot.currentFilePath))
         openEditorFile(snapshot.currentFilePath);
+
+    clearPendingAttachments();
 }
 
 void AgentController::rebuildChatModelFromHistory()
@@ -783,18 +1734,137 @@ void AgentController::rebuildChatModelFromHistory()
 void AgentController::saveTaskSession()
 {
     TaskSessionSnapshot snapshot;
-    snapshot.sessionId = m_sessionId.trimmed().isEmpty()
+    const QString threadId = m_sessionId.trimmed().isEmpty()
         ? TaskSessionStore::defaultSessionId()
         : m_sessionId;
+    snapshot.threadId = threadId;
+    snapshot.sessionId = threadId;
+    snapshot.parentThreadId = m_parentThreadId;
     snapshot.workspacePath = m_workspacePath;
     snapshot.currentProvider = m_currentProvider;
     snapshot.currentModel = m_currentModel;
     snapshot.currentFilePath = m_currentFilePath;
     snapshot.todoItems = todoItems();
+    snapshot.executionTimeline = m_executionTimeline;
     snapshot.messages = m_engine->history();
     snapshot.updatedAt = QDateTime::currentDateTimeUtc();
     TaskSessionStore::saveLatest(snapshot);
+    syncThreadStore();
     emit recentSessionsChanged();
+}
+
+StoredThread AgentController::buildStoredThreadSnapshot() const
+{
+    StoredThread thread;
+    const QString threadId = m_sessionId.trimmed().isEmpty()
+        ? TaskSessionStore::defaultSessionId()
+        : m_sessionId.trimmed();
+    const ThreadId id = ThreadId::fromString(threadId);
+    thread.id = id;
+    thread.metadata.threadId = id;
+    thread.metadata.parentThreadId = ThreadId::fromString(m_parentThreadId);
+    thread.metadata.mode = m_parentThreadId.trimmed().isEmpty()
+        ? ThreadInitializationMode::Fresh
+        : ThreadInitializationMode::Forked;
+    thread.metadata.createdAt = m_threadCreatedAt.isValid()
+        ? m_threadCreatedAt
+        : QDateTime::currentDateTimeUtc();
+    thread.metadata.lastModified = QDateTime::currentDateTimeUtc();
+    thread.metadata.customMetadata = QVariantMap{
+        {QStringLiteral("workspacePath"), m_workspacePath},
+        {QStringLiteral("currentProvider"), m_currentProvider},
+        {QStringLiteral("currentModel"), m_currentModel},
+        {QStringLiteral("currentFilePath"), m_currentFilePath},
+        {QStringLiteral("todoCount"), int(todoItems().size())},
+        {QStringLiteral("messageCount"), int(m_engine ? m_engine->history().size() : 0)},
+        {QStringLiteral("eventCount"), int(m_executionTimeline.size())},
+    };
+    thread.lastState = QVariantMap{
+        {QStringLiteral("workspacePath"), m_workspacePath},
+        {QStringLiteral("currentProvider"), m_currentProvider},
+        {QStringLiteral("currentModel"), m_currentModel},
+        {QStringLiteral("currentFilePath"), m_currentFilePath},
+        {QStringLiteral("parentThreadId"), m_parentThreadId},
+        {QStringLiteral("todoItems"), todoItems()},
+        {QStringLiteral("executionTimeline"), m_executionTimeline},
+        {QStringLiteral("messages"), messagesToVariantList(m_engine ? m_engine->history() : QList<AgentMessage>{})},
+        {QStringLiteral("pendingAttachments"), m_pendingAttachments},
+        {QStringLiteral("localSkills"), m_localSkills},
+        {QStringLiteral("knowledgeSearchQuery"), m_knowledgeSearchQuery},
+        {QStringLiteral("knowledgeSearchResults"), m_knowledgeSearchResults},
+        {QStringLiteral("scheduledTasks"), scheduledTasks()},
+    };
+    thread.isActive = true;
+    thread.lastExecuted = QDateTime::currentDateTimeUtc();
+    return thread;
+}
+
+void AgentController::syncThreadStore()
+{
+    if (!m_threadStore)
+        return;
+
+    const StoredThread thread = buildStoredThreadSnapshot();
+    if (thread.id.isNull())
+        return;
+
+    m_threadStore->upsertThread(thread, [](ThreadStoreError result) {
+        if (result != ThreadStoreError::Success)
+            qWarning().noquote() << "[thread-store] upsert failed:" << int(result);
+    });
+}
+
+QString AgentController::inferExecutionKind(const QString &toolName) const
+{
+    if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
+        return QStringLiteral("command_execution");
+    if (toolName == QStringLiteral("patch"))
+        return QStringLiteral("file_change");
+    if (toolName == QStringLiteral("search"))
+        return QStringLiteral("search");
+    if (toolName == QStringLiteral("web_search") || toolName == QStringLiteral("web_fetch"))
+        return QStringLiteral("web");
+    if (toolName == QStringLiteral("todo"))
+        return QStringLiteral("todo");
+    if (toolName == QStringLiteral("github") || toolName == QStringLiteral("gitlab") || toolName == QStringLiteral("jira"))
+        return QStringLiteral("web");
+    if (toolName == QStringLiteral("knowledge"))
+        return QStringLiteral("knowledge");
+    if (toolName == QStringLiteral("session_search"))
+        return QStringLiteral("memory");
+    if (toolName == QStringLiteral("schedule"))
+        return QStringLiteral("reminder");
+    if (toolName == QStringLiteral("codex_agent"))
+        return QStringLiteral("subagent");
+    return QStringLiteral("tool");
+}
+
+void AgentController::appendExecutionEvent(const QString &kind,
+                                          const QString &title,
+                                          const QString &status,
+                                          const QString &details,
+                                          const QString &toolName,
+                                          const QString &callId)
+{
+    if (m_restoringSessionHistory)
+        return;
+
+    QVariantMap event;
+    event["id"] = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    event["kind"] = kind;
+    event["title"] = title;
+    event["status"] = status;
+    event["details"] = details;
+    event["toolName"] = toolName;
+    event["callId"] = callId;
+    event["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+    m_executionTimeline.append(event);
+    const int kMaxEvents = 120;
+    while (m_executionTimeline.size() > kMaxEvents)
+        m_executionTimeline.removeFirst();
+    emit executionTimelineChanged();
+    if (!toolName.isEmpty())
+        emit toolCatalogChanged();
 }
 
 void AgentController::unloadMcpTools()
@@ -844,6 +1914,55 @@ bool AgentController::resumeTaskSession(const QString &sessionId)
     return true;
 }
 
+bool AgentController::forkCurrentThread()
+{
+    if (!m_engine) {
+        emit errorOccurred(QStringLiteral("Agent engine is not available."));
+        return false;
+    }
+
+    const QString previousThreadId = m_sessionId.trimmed().isEmpty()
+        ? TaskSessionStore::defaultSessionId()
+        : m_sessionId.trimmed();
+    const QString forkedThreadId = TaskSessionStore::defaultSessionId();
+    const QDateTime forkedAt = QDateTime::currentDateTimeUtc();
+
+    TaskSessionSnapshot snapshot;
+    snapshot.threadId = forkedThreadId;
+    snapshot.sessionId = forkedThreadId;
+    snapshot.parentThreadId = previousThreadId;
+    snapshot.workspacePath = m_workspacePath;
+    snapshot.currentProvider = m_currentProvider;
+    snapshot.currentModel = m_currentModel;
+    snapshot.currentFilePath = m_currentFilePath;
+    snapshot.todoItems = todoItems();
+    snapshot.executionTimeline = m_executionTimeline;
+    snapshot.messages = m_engine->history();
+    snapshot.updatedAt = forkedAt;
+
+    if (!TaskSessionStore::saveLatest(snapshot)) {
+        emit errorOccurred(QStringLiteral("Failed to fork current thread."));
+        return false;
+    }
+
+    const QString oldThreadId = m_sessionId;
+    m_sessionId = forkedThreadId;
+    m_parentThreadId = previousThreadId;
+    m_threadCreatedAt = forkedAt;
+    if (oldThreadId != m_sessionId)
+        emit currentThreadIdChanged();
+    clearPendingAttachments();
+
+    if (auto *store = qobject_cast<SessionStore *>(m_registry ? m_registry->tool("session_search") : nullptr))
+        store->beginSession(m_workspacePath);
+
+    saveSettings();
+    saveTaskSession();
+    emit recentSessionsChanged();
+    emit successOccurred(QStringLiteral("Forked thread %1 from %2.").arg(forkedThreadId, previousThreadId));
+    return true;
+}
+
 void AgentController::appendSessionStoreMessage(const QString &role, const QString &content)
 {
     if (m_restoringSessionHistory)
@@ -884,8 +2003,102 @@ void AgentController::refreshSystemPrompt()
         prompt += "\n\nCurrent task plan:\n" + todoLines.join('\n');
     }
 
+    if (!m_localSkills.isEmpty()) {
+        QStringList skillLines;
+        skillLines << QStringLiteral("Workspace-local instructions and skills:");
+        for (const QVariant &item : m_localSkills) {
+            const QVariantMap map = item.toMap();
+            QString line = QStringLiteral("- [%1] %2").arg(map.value("kind").toString(), map.value("title").toString());
+            const QString description = map.value("description").toString().trimmed();
+            const QString path = map.value("path").toString().trimmed();
+            if (!description.isEmpty())
+                line += QStringLiteral(": %1").arg(description);
+            if (!path.isEmpty())
+                line += QStringLiteral(" (%1)").arg(path);
+            skillLines << line;
+        }
+        prompt += "\n\n" + skillLines.join('\n');
+    }
+
     m_engine->setSystemPrompt(prompt);
     emit workspaceSummaryChanged();
+}
+
+void AgentController::refreshWorkspaceSkills()
+{
+    const QVariantList skills = discoverWorkspaceSkillEntries(m_workspacePath);
+    if (skills == m_localSkills)
+        return;
+    m_localSkills = skills;
+    emit localSkillsChanged();
+    refreshSystemPrompt();
+}
+
+void AgentController::discoverCustomTools(const QString &workspacePath)
+{
+    if (workspacePath.isEmpty()) return;
+
+    const QString toolsDir = QDir(workspacePath).filePath(".neurx/tools");
+    if (!QFileInfo::exists(toolsDir)) return;
+
+    QDirIterator it(toolsDir, QStringList{"*.json"}, QDir::Files);
+    while (it.hasNext()) {
+        const QString path = it.next();
+        QFile f(path);
+        if (f.open(QIODevice::ReadOnly)) {
+            const QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
+            const QString name = obj["name"].toString();
+            const QString desc = obj["description"].toString();
+            const QString script = QFileInfo(path).dir().filePath(obj["script"].toString());
+            const QJsonObject schema = obj["parameters"].toObject();
+
+            if (!name.isEmpty() && !script.isEmpty()) {
+                m_registry->registerTool(new CustomScriptTool(name, desc, script, schema, this));
+                qInfo().noquote() << "[discovery] discovered custom tool:" << name;
+            }
+        }
+    }
+}
+
+void AgentController::configurePolicyManagers()
+{
+    if (m_approvalManager) {
+        ApprovalPolicy policy;
+        policy.defaultPolicy = AskForApproval::OnRequest;
+        policy.defaultReviewer = ApprovalsReviewer::User;
+        policy.readOnlyMode = false;
+        policy.doubleConfirmPatterns = {
+            QStringLiteral(R"(\brm\b.*\s-rf\b)"),
+            QStringLiteral(R"(\bgit\b.*\breset\b.*\b--hard\b)"),
+            QStringLiteral(R"(\bgit\b.*\bclean\b.*\b-f\b)"),
+            QStringLiteral(R"(\bchmod\b.*\b-R\b.*\b777\b)"),
+            QStringLiteral(R"(\bchown\b.*\b-R\b)"),
+            QStringLiteral(R"(\bdd\b.*\bof=/dev/\w+\b)"),
+            QStringLiteral(R"(\bmkfs\w*\b)"),
+        };
+        m_approvalManager->setDefaultPolicy(policy);
+
+        const QStringList protectedPatterns = {
+            QStringLiteral(".git"),
+            QStringLiteral(".agents"),
+            QStringLiteral(".codex"),
+            QStringLiteral(".env"),
+        };
+        for (const QString &pattern : protectedPatterns) {
+            GranularApprovalConfig fileRule;
+            fileRule.resourcePattern = pattern;
+            fileRule.approval = AskForApproval::OnRequest;
+            fileRule.action = QStringLiteral("prompt");
+            fileRule.toolNames = {QStringLiteral("file_system"), QStringLiteral("patch"), QStringLiteral("run_command")};
+            fileRule.permanent = true;
+            m_approvalManager->addGranularRule(fileRule);
+        }
+
+        connect(m_approvalManager, &ApprovalManager::policyChanged,
+                this, [this]() {
+                    emit toolCatalogChanged();
+                });
+    }
 }
 
 QStringList AgentController::providers() const { return m_providers.keys(); }
@@ -1007,6 +2220,18 @@ void AgentController::setOpenaiApiKey(const QString &key)
     emit openaiApiKeyChanged();
 }
 
+void AgentController::setGeminiApiKey(const QString &key)
+{
+    const QString normalized = key.trimmed();
+    if (m_geminiApiKey == normalized) return;
+    m_geminiApiKey = normalized;
+    if (auto *gemini = qobject_cast<GeminiProvider *>(m_providers.value("gemini"))) {
+        gemini->setApiKey(m_geminiApiKey);
+    }
+    saveSettings();
+    emit geminiApiKeyChanged();
+}
+
 void AgentController::setBraveApiKey(const QString &key)
 {
     const QString normalized = key.trimmed();
@@ -1102,15 +2327,24 @@ void AgentController::setCurrentModel(const QString &model)
 void AgentController::setWorkspacePath(const QString &path)
 {
     if (m_workspacePath == path) return;
+    m_pendingToolExecutions.clear();
     unloadMcpTools();
     m_workspacePath = path;
     if (m_workspaceContext) m_workspaceContext->setRootPath(path);
     if (m_workspaceIndex)   m_workspaceIndex->setRootPath(path);
+    if (m_sandboxManager) {
+        m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
+        m_sandboxManager->setReadOnlyMode(false);
+        m_sandboxManager->clearPaths();
+        m_sandboxManager->addAllowedReadPath(path);
+        m_sandboxManager->addAllowedWritePath(path);
+    }
 
     // Re-instantiate file-system tools with the new root.
     unregisterToolAndDelete(m_registry, "file_system");
     unregisterToolAndDelete(m_registry, "patch");
     unregisterToolAndDelete(m_registry, "run_command");
+    unregisterToolAndDelete(m_registry, "run_docker_command");
     unregisterToolAndDelete(m_registry, "search");
     unregisterToolAndDelete(m_registry, "web_search");
     unregisterToolAndDelete(m_registry, "web_fetch");
@@ -1120,15 +2354,21 @@ void AgentController::setWorkspacePath(const QString &path)
     unregisterToolAndDelete(m_registry, "session_search");
     unregisterToolAndDelete(m_registry, "todo");
     unregisterToolAndDelete(m_registry, "knowledge");
+    unregisterToolAndDelete(m_registry, "github");
+    unregisterToolAndDelete(m_registry, "gitlab");
+    unregisterToolAndDelete(m_registry, "jira");
     unloadReminderTool();
 
     m_registry->registerTool(new FileSystemTool(path, m_registry));
     m_registry->registerTool(new PatchTool(path, m_registry));
     m_registry->registerTool(new ShellTool(path, m_registry));
+    m_registry->registerTool(new DockerShellTool(path, m_registry));
     m_registry->registerTool(new SearchTool(path, m_registry));
     m_registry->registerTool(new WebSearchTool(m_registry));
+    m_registry->registerTool(new GeminiGroundingTool(m_registry));
     m_registry->registerTool(new WebFetchTool(m_registry));
     m_registry->registerTool(new CodexTool(path, m_registry));
+    m_registry->registerTool(new DelegationTool(m_registry, m_providers.value(m_currentProvider), m_currentModel, m_registry));
     auto *checkpointTool = new CheckpointTool(path, m_registry);
     connect(checkpointTool, &CheckpointTool::checkpointRolledBack,
             this, [this]() {
@@ -1141,6 +2381,9 @@ void AgentController::setWorkspacePath(const QString &path)
     });
     m_registry->registerTool(checkpointTool);
     m_registry->registerTool(new MemoryTool(path, m_registry));
+    m_registry->registerTool(new GitHubTool(m_registry));
+    m_registry->registerTool(new GitLabTool(m_registry));
+    m_registry->registerTool(new JiraTool(m_registry));
     auto *knowledgeTool = new KnowledgeTool(m_registry);
     knowledgeTool->setDbPath(QDir(path).filePath(QStringLiteral(".neurx/knowledge.db")));
     m_registry->registerTool(knowledgeTool);
@@ -1182,6 +2425,13 @@ void AgentController::setWorkspacePath(const QString &path)
     });
     m_registry->registerTool(todoTool);
 
+    if (auto *fileTool = qobject_cast<FileSystemTool *>(m_registry->tool("file_system")))
+        fileTool->setSandboxManager(m_sandboxManager);
+    if (auto *patchTool = qobject_cast<PatchTool *>(m_registry->tool("patch")))
+        patchTool->setSandboxManager(m_sandboxManager);
+    if (auto *shellTool = qobject_cast<ShellTool *>(m_registry->tool("run_command")))
+        shellTool->setSandboxManager(m_sandboxManager);
+
     const QList<BaseTool *> mcpTools = McpServerLoader::loadFromConfig(path, m_registry);
     for (BaseTool *tool : mcpTools) {
         if (!tool)
@@ -1195,11 +2445,14 @@ void AgentController::setWorkspacePath(const QString &path)
         m_mcpToolNames.append(tool->name());
     }
     emit mcpToolsChanged();
+    emit toolCatalogChanged();
 
     if (!m_currentFilePath.isEmpty() && QFileInfo::exists(m_currentFilePath)) {
         openEditorFile(m_currentFilePath);
     }
 
+    refreshWorkspaceSkills();
+    discoverCustomTools(path);
     refreshSystemPrompt();
     saveSettings();
     saveTaskSession();
@@ -1490,6 +2743,322 @@ bool AgentController::cancelReminder(const QString &id)
     return true;
 }
 
+QStringList AgentController::parseSlashListItems(const QString &text) const
+{
+    QStringList items;
+    QString normalized = text;
+    normalized.replace("\r\n", "\n");
+    normalized = normalized.trimmed();
+    if (normalized.isEmpty())
+        return items;
+
+    const QStringList chunks = normalized.split('\n', Qt::SkipEmptyParts);
+    for (QString chunk : chunks) {
+        const QStringList fragments = chunk.split(';', Qt::SkipEmptyParts);
+        for (QString fragment : fragments) {
+            QString item = fragment.trimmed();
+            if (item.isEmpty())
+                continue;
+
+            while (!item.isEmpty() && (item.startsWith('-') || item.startsWith('*') || item.startsWith('•')))
+                item = item.mid(1).trimmed();
+
+            int i = 0;
+            while (i < item.size() && item.at(i).isDigit())
+                ++i;
+            if (i > 0 && i < item.size() && (item.at(i) == '.' || item.at(i) == ')' || item.at(i) == ':'))
+                item = item.mid(i + 1).trimmed();
+
+            if (!item.isEmpty())
+                items.append(item);
+        }
+    }
+    return items;
+}
+
+QVariantList AgentController::buildPlanItems(const QStringList &items) const
+{
+    QVariantList todos;
+    for (int i = 0; i < items.size(); ++i) {
+        QVariantMap todo;
+        todo["id"] = QStringLiteral("plan-%1").arg(i + 1);
+        todo["content"] = items.at(i);
+        todo["status"] = i == 0 ? QStringLiteral("in_progress") : QStringLiteral("pending");
+        todos.append(todo);
+    }
+    return todos;
+}
+
+QString AgentController::buildSlashHelp() const
+{
+    return QStringLiteral(
+        "Available commands:\n"
+        "/help - show this command list\n"
+        "/plan <items> - replace the current task plan with a list of items\n"
+        "/review [topic] - ask for a code review focused on the current workspace\n"
+        "/analyze - analyze the current file with CodeMagic\n"
+        "/explain - explain the current file with CodeMagic\n"
+        "/search <query> - search local workspace knowledge and paths\n"
+        "/checkpoint [id] - open the checkpoint restore dialog or rollback by id\n"
+        "/delegate <task> - ask the agent to delegate a subtask with codex_agent");
+}
+
+QVariantMap AgentController::analyzeCurrentFileWithCodeMagic()
+{
+    QVariantMap result;
+    if (!m_codeMagic) {
+        result.insert(QStringLiteral("error"), QStringLiteral("CodeMagic is not available."));
+        return result;
+    }
+    const CodeMagicInput input = resolveCodeMagicInput();
+    if (input.path.isEmpty() || input.code.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Open a file first."));
+        return result;
+    }
+
+    CodeAnalysisResult analysis = m_codeMagic->analyzeCode(input.code, input.language);
+    if (analysis.filename.isEmpty())
+        analysis.filename = input.path;
+
+    result = analysisToVariantMap(analysis);
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("kind"), QStringLiteral("analysis"));
+    result.insert(QStringLiteral("targetLabel"), input.targetLabel);
+    updateCodeMagicResult(result, input.targetLabel);
+    appendExecutionEvent(
+        QStringLiteral("code_magic_analysis"),
+        QStringLiteral("Code analysis completed"),
+        QStringLiteral("done"),
+        QStringLiteral("%1 issue(s), quality %2")
+            .arg(analysis.issues.size())
+            .arg(QString::number(analysis.quality, 'f', 1)),
+        QStringLiteral("code_magic"),
+        analysis.analysisId);
+    saveTaskSession();
+    emit successOccurred(QStringLiteral("Code analysis completed for %1.").arg(input.targetLabel));
+    return result;
+}
+
+QVariantMap AgentController::reviewCurrentFileWithCodeMagic()
+{
+    QVariantMap result;
+    if (!m_codeMagic) {
+        result.insert(QStringLiteral("error"), QStringLiteral("CodeMagic is not available."));
+        return result;
+    }
+    const CodeMagicInput input = resolveCodeMagicInput();
+    if (input.path.isEmpty() || input.code.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Open a file first."));
+        return result;
+    }
+
+    const CodeReview review = m_codeMagic->reviewCode(input.code,
+                                                      input.targetLabel,
+                                                      QStringLiteral("NeurX"));
+    result = reviewToVariantMap(review);
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("kind"), QStringLiteral("review"));
+    result.insert(QStringLiteral("targetLabel"), input.targetLabel);
+    updateCodeMagicResult(result, input.targetLabel);
+    appendExecutionEvent(
+        QStringLiteral("code_magic_review"),
+        QStringLiteral("Code review completed"),
+        QStringLiteral("done"),
+        QStringLiteral("score %1, %2 issue(s)")
+            .arg(QString::number(review.overallScore, 'f', 1))
+            .arg(review.issues.size()),
+        QStringLiteral("code_magic"),
+        review.reviewId);
+    saveTaskSession();
+    emit successOccurred(QStringLiteral("Code review completed for %1.").arg(input.targetLabel));
+    return result;
+}
+
+QVariantMap AgentController::explainCurrentFileWithCodeMagic()
+{
+    QVariantMap result;
+    if (!m_codeMagic) {
+        result.insert(QStringLiteral("error"), QStringLiteral("CodeMagic is not available."));
+        return result;
+    }
+    const CodeMagicInput input = resolveCodeMagicInput();
+    if (input.path.isEmpty() || input.code.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Open a file first."));
+        return result;
+    }
+
+    const CodeExplanation explanation = m_codeMagic->explainCode(
+        input.code,
+        input.language);
+    result = explanationToVariantMap(explanation);
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("kind"), QStringLiteral("explanation"));
+    result.insert(QStringLiteral("targetLabel"), input.targetLabel);
+    updateCodeMagicResult(result, input.targetLabel);
+    appendExecutionEvent(
+        QStringLiteral("code_magic_explain"),
+        QStringLiteral("Code explanation completed"),
+        QStringLiteral("done"),
+        logPreview(explanation.summary.isEmpty() ? explanation.detailedExplanation : explanation.summary),
+        QStringLiteral("code_magic"),
+        explanation.explanationId);
+    saveTaskSession();
+    emit successOccurred(QStringLiteral("Code explanation completed for %1.").arg(input.targetLabel));
+    return result;
+}
+
+QString AgentController::buildReviewPrompt(const QString &topic) const
+{
+    const QString focus = topic.trimmed();
+    QString prompt = QStringLiteral(
+        "Perform a focused code review of the current workspace.\n"
+        "Find bugs, regressions, missing tests, and risky assumptions.\n"
+        "Return findings first, ordered by severity, with file and line references when possible.\n"
+        "If no issues are found, say so and mention any residual risk or testing gaps.");
+    if (!focus.isEmpty())
+        prompt += QStringLiteral("\nFocus on: %1").arg(focus);
+    return prompt;
+}
+
+bool AgentController::handleSlashCommand(const QString &text)
+{
+    const QString trimmed = text.trimmed();
+    if (!trimmed.startsWith('/'))
+        return false;
+
+    const QString body = trimmed.mid(1).trimmed();
+    if (body.isEmpty()) {
+        emit successOccurred(buildSlashHelp());
+        return true;
+    }
+
+    const int splitAt = body.indexOf(' ');
+    const QString command = (splitAt < 0 ? body : body.left(splitAt)).toLower();
+    const QString args = splitAt < 0 ? QString{} : body.mid(splitAt + 1).trimmed();
+
+    if (command == QStringLiteral("help") || command == QStringLiteral("commands") || command == QStringLiteral("?")) {
+        emit successOccurred(buildSlashHelp());
+        return true;
+    }
+
+    if (command == QStringLiteral("plan")) {
+        if (args.isEmpty()) {
+            submitToAgent(QStringLiteral(
+                "Create a concise implementation plan for the current task. "
+                "Use the todo tool to keep the plan current, and keep the plan short and actionable."));
+            return true;
+        }
+
+        const QStringList items = parseSlashListItems(args);
+        if (items.isEmpty()) {
+            emit errorOccurred(QStringLiteral("Could not parse any plan items. Use new lines or semicolons between steps."));
+            return true;
+        }
+
+        auto *todoTool = qobject_cast<TodoTool *>(m_registry ? m_registry->tool("todo") : nullptr);
+        if (!todoTool) {
+            emit errorOccurred(QStringLiteral("Todo tool is not available."));
+            return true;
+        }
+
+        const QVariantList todos = buildPlanItems(items);
+        todoTool->setTodoItems(todos);
+        saveTaskSession();
+        emit successOccurred(QStringLiteral("Plan updated with %1 item%2.").arg(todos.size()).arg(todos.size() == 1 ? "" : "s"));
+        return true;
+    }
+
+    if (command == QStringLiteral("review")) {
+        if (args.isEmpty() && !m_currentFilePath.isEmpty() && !m_currentFileContent.trimmed().isEmpty()) {
+            const QVariantMap review = reviewCurrentFileWithCodeMagic();
+            if (review.contains(QStringLiteral("error"))) {
+                emit errorOccurred(review.value(QStringLiteral("error")).toString());
+            } else {
+                emit successOccurred(QStringLiteral("Code review score %1 with %2 issue(s).")
+                                         .arg(review.value(QStringLiteral("overallScore")).toFloat(), 0, 'f', 1)
+                                         .arg(review.value(QStringLiteral("issues")).toList().size()));
+            }
+            return true;
+        }
+        submitToAgent(buildReviewPrompt(args));
+        return true;
+    }
+
+    if (command == QStringLiteral("analyze")) {
+        const QVariantMap analysis = analyzeCurrentFileWithCodeMagic();
+        if (analysis.contains(QStringLiteral("error"))) {
+            emit errorOccurred(analysis.value(QStringLiteral("error")).toString());
+        } else {
+            emit successOccurred(QStringLiteral("Code analysis completed with %1 issue(s).")
+                                     .arg(analysis.value(QStringLiteral("issues")).toList().size()));
+        }
+        return true;
+    }
+
+    if (command == QStringLiteral("explain")) {
+        const QVariantMap explanation = explainCurrentFileWithCodeMagic();
+        if (explanation.contains(QStringLiteral("error"))) {
+            emit errorOccurred(explanation.value(QStringLiteral("error")).toString());
+        } else {
+            emit successOccurred(QStringLiteral("Code explanation ready for %1.")
+                                     .arg(fileDisplayName(m_currentFilePath)));
+        }
+        return true;
+    }
+
+    if (command == QStringLiteral("search")) {
+        if (args.isEmpty()) {
+            emit errorOccurred(QStringLiteral("Usage: /search <query>"));
+            return true;
+        }
+
+        const QString knowledgeResult = searchWorkspaceKnowledge(args);
+        const QStringList pathMatches = searchWorkspacePaths(args);
+        if (!pathMatches.isEmpty()) {
+            emit successOccurred(QStringLiteral("Path matches: %1")
+                                     .arg(pathMatches.mid(0, 5).join(QStringLiteral(", "))));
+        } else if (!knowledgeResult.isEmpty()) {
+            emit successOccurred(QStringLiteral("Local search completed."));
+        }
+        return true;
+    }
+
+    if (command == QStringLiteral("checkpoint")) {
+        if (!args.isEmpty()) {
+            rollbackCheckpoint(args);
+            return true;
+        }
+
+        const QVariantList checkpoints = recentCheckpoints();
+        if (checkpoints.isEmpty()) {
+            emit successOccurred(QStringLiteral("No checkpoints available."));
+            return true;
+        }
+
+        const QVariantMap checkpoint = checkpoints.first().toMap();
+        const QString checkpointId = checkpoint.value(QStringLiteral("id")).toString();
+        const QString description = checkpoint.value(QStringLiteral("description")).toString();
+        const QVariantList files = checkpointPreview(checkpointId);
+        emit checkpointRestoreRequested(checkpointId, description, files);
+        return true;
+    }
+
+    if (command == QStringLiteral("delegate")) {
+        if (args.isEmpty()) {
+            emit errorOccurred(QStringLiteral("Usage: /delegate <task>"));
+            return true;
+        }
+
+        submitToAgent(QStringLiteral(
+            "Use the codex_agent tool to delegate the following subtask, then summarize the outcome and any follow-up work:\n%1")
+                          .arg(args));
+        return true;
+    }
+
+    emit errorOccurred(QStringLiteral("Unknown command: /%1. Type /help for available commands.").arg(command));
+    return true;
+}
+
 void AgentController::syncKnowledgeForPathChange(const QString &oldPath, const QString &newPath, bool wasDirectory)
 {
     auto *knowledgeTool = qobject_cast<KnowledgeTool *>(m_registry ? m_registry->tool("knowledge") : nullptr);
@@ -1573,6 +3142,7 @@ void AgentController::openEditorFile(const QString &filePath)
     }
 
     qInfo().noquote() << QStringLiteral("[AgentController] openEditorFile -> path=%1 index=%2 contentLen=%3").arg(normalizedPath).arg(index).arg(content.size());
+    clearCurrentSelection();
     setCurrentEditorIndex(index);
     if (m_workspaceContext) m_workspaceContext->recordFileAccess(normalizedPath);
     if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(normalizedPath);
@@ -2043,6 +3613,7 @@ void AgentController::setAutoApproveTools(bool v)
     saveSettings();
     saveTaskSession();
     emit autoApproveToolsChanged();
+    emit toolCatalogChanged();
 }
 
 void AgentController::setBusy(bool b)
@@ -2054,13 +3625,113 @@ void AgentController::setBusy(bool b)
 
 void AgentController::sendMessage(const QString &text)
 {
-    if (text.trimmed().isEmpty()) return;
+    const QString trimmed = text.trimmed();
+    const bool hasAttachments = !m_pendingAttachments.isEmpty();
+    if (trimmed.isEmpty() && !hasAttachments)
+        return;
+    if (trimmed.startsWith('/')) {
+        if (handleSlashCommand(trimmed))
+            return;
+    }
+    submitToAgent(text);
+}
+
+void AgentController::submitToAgent(const QString &text, const QVariantList &attachments)
+{
+    if (!m_engine || m_busy) {
+        emit errorOccurred(QStringLiteral("Agent is busy."));
+        return;
+    }
+
+    const QVariantList effectiveAttachments = attachments.isEmpty()
+        ? m_pendingAttachments
+        : attachments;
+    const QString sessionText = text.trimmed().isEmpty()
+        ? attachmentSummaryText(effectiveAttachments)
+        : text;
     qInfo().noquote() << "[agent] user message:" << logPreview(text);
     m_streamingText.clear();
     m_streamingAssistantActive = false;
-    appendSessionStoreMessage(QStringLiteral("user"), text);
-    m_engine->submitUserMessage(text);
+    appendSessionStoreMessage(QStringLiteral("user"), sessionText);
+    m_engine->submitUserMessage(text, effectiveAttachments);
+    if (attachments.isEmpty() && !m_pendingAttachments.isEmpty()) {
+        m_pendingAttachments.clear();
+        emit pendingAttachmentsChanged();
+    }
     saveTaskSession();
+}
+
+bool AgentController::attachImageFromPath(const QString &filePath)
+{
+    const QString normalized = normalizeLocalFilePath(filePath);
+    if (normalized.isEmpty()) {
+        emit errorOccurred(QStringLiteral("Invalid image path."));
+        return false;
+    }
+
+    QFile file(normalized);
+    if (!file.open(QIODevice::ReadOnly)) {
+        emit errorOccurred(QStringLiteral("Failed to open image file: %1").arg(normalized));
+        return false;
+    }
+
+    const QByteArray bytes = file.readAll();
+    if (bytes.isEmpty()) {
+        emit errorOccurred(QStringLiteral("Image file is empty: %1").arg(normalized));
+        return false;
+    }
+
+    QMimeDatabase mimeDb;
+    const QString mimeType = mimeDb.mimeTypeForFile(normalized, QMimeDatabase::MatchContent).name();
+    if (!isImageMimeType(mimeType) && !QImageReader(normalized).canRead()) {
+        emit errorOccurred(QStringLiteral("Selected file is not a supported image: %1").arg(normalized));
+        return false;
+    }
+
+    const QVariantMap attachment = attachmentMapFromBytes(
+        normalized,
+        bytes,
+        mimeType.isEmpty() ? QStringLiteral("image/png") : mimeType,
+        QFileInfo(normalized).fileName());
+
+    m_pendingAttachments.append(attachment);
+    emit pendingAttachmentsChanged();
+    emit successOccurred(QStringLiteral("Attached image: %1").arg(QFileInfo(normalized).fileName()));
+    return true;
+}
+
+bool AgentController::attachImageFromClipboard()
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    if (!clipboard) {
+        emit errorOccurred(QStringLiteral("Clipboard is not available."));
+        return false;
+    }
+
+    const QImage image = clipboard->image();
+    if (image.isNull()) {
+        emit errorOccurred(QStringLiteral("Clipboard does not contain an image."));
+        return false;
+    }
+
+    const QVariantMap attachment = attachmentMapFromImage(
+        image,
+        QStringLiteral("clipboard.png"),
+        QStringLiteral("image/png"),
+        QStringLiteral("Clipboard image"));
+
+    m_pendingAttachments.append(attachment);
+    emit pendingAttachmentsChanged();
+    emit successOccurred(QStringLiteral("Attached image from clipboard."));
+    return true;
+}
+
+void AgentController::clearPendingAttachments()
+{
+    if (m_pendingAttachments.isEmpty())
+        return;
+    m_pendingAttachments.clear();
+    emit pendingAttachmentsChanged();
 }
 
 void AgentController::injectFile(const QString &filePath)
@@ -2078,10 +3749,23 @@ void AgentController::injectFile(const QString &filePath)
 void AgentController::injectSelection(const QString &filePath, const QString &code,
                                       int startLine, int endLine)
 {
-    if (m_workspaceContext) m_workspaceContext->recordFileAccess(filePath);
-    if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(filePath);
+    const QString normalizedPath = normalizeLocalFilePath(filePath);
+    setCurrentSelection(normalizedPath.isEmpty() ? filePath : normalizedPath, code, startLine, endLine);
+    if (m_workspaceContext) m_workspaceContext->recordFileAccess(normalizedPath.isEmpty() ? filePath : normalizedPath);
+    if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(normalizedPath.isEmpty() ? filePath : normalizedPath);
     refreshSystemPrompt();
-    m_engine->injectContext(filePath, code, startLine, endLine);
+    m_engine->injectContext(normalizedPath.isEmpty() ? filePath : normalizedPath, code, startLine, endLine);
+}
+
+void AgentController::clearCurrentSelection()
+{
+    if (m_selectedFilePath.isEmpty() && m_selectedText.isEmpty() && m_selectedStartLine < 0 && m_selectedEndLine < 0)
+        return;
+    m_selectedFilePath.clear();
+    m_selectedText.clear();
+    m_selectedStartLine = -1;
+    m_selectedEndLine = -1;
+    emit currentSelectionChanged();
 }
 
 void AgentController::interrupt()     { m_engine->interrupt(); }
@@ -2089,16 +3773,52 @@ void AgentController::clearHistory()
 {
     m_engine->clearHistory();
     m_chatModel->clear();
+    m_executionTimeline.clear();
+    m_pendingToolExecutions.clear();
+    emit executionTimelineChanged();
+    emit toolCatalogChanged();
+    clearPendingAttachments();
+    clearCurrentSelection();
+    updateCodeMagicResult(QVariantMap{}, QString{});
     m_streamingAssistantActive = false;
     m_streamingText.clear();
     m_sessionId = TaskSessionStore::defaultSessionId();
+    m_parentThreadId.clear();
+    m_threadCreatedAt = QDateTime::currentDateTimeUtc();
+    emit currentThreadIdChanged();
     if (auto *store = qobject_cast<SessionStore *>(m_registry ? m_registry->tool("session_search") : nullptr))
         store->beginSession(m_workspacePath);
     saveTaskSession();
     emit recentSessionsChanged();
 }
-void AgentController::approveTool(const QString &callId) { m_engine->approveTool(callId, true); }
-void AgentController::rejectTool(const QString &callId)  { m_engine->approveTool(callId, false); }
+void AgentController::approveTool(const QString &callId)
+{
+    if (m_pendingToolExecutions.contains(callId)) {
+        const QVariantMap result = executePendingTool(callId);
+        if (result.contains(QStringLiteral("error")))
+            emit errorOccurred(result.value(QStringLiteral("error")).toString());
+        return;
+    }
+    m_engine->approveTool(callId, true);
+}
+
+void AgentController::rejectTool(const QString &callId)
+{
+    if (m_pendingToolExecutions.contains(callId)) {
+        const PendingToolExecution pending = m_pendingToolExecutions.take(callId);
+        appendExecutionEvent(QStringLiteral("approval"),
+                             QStringLiteral("Tool execution rejected"),
+                             QStringLiteral("error"),
+                             pending.summary,
+                             pending.toolName,
+                             callId);
+        if (!m_restoringSessionHistory)
+            saveTaskSession();
+        emit errorOccurred(QStringLiteral("Tool execution denied by user."));
+        return;
+    }
+    m_engine->approveTool(callId, false);
+}
 
 void AgentController::onTokenReceived(const TokenEvent &ev)
 {
@@ -2117,7 +3837,6 @@ void AgentController::onTokenReceived(const TokenEvent &ev)
 
 void AgentController::onMessageAdded(const AgentMessage &msg)
 {
-    saveTaskSession();
     switch (msg.role) {
     case MessageRole::System:
         appendSessionStoreMessage(QStringLiteral("system"), msg.content);
@@ -2133,6 +3852,23 @@ void AgentController::onMessageAdded(const AgentMessage &msg)
     }
     if (msg.role == MessageRole::Tool) return; // tool results shown as cards
 
+    const QString roleKind = (msg.role == MessageRole::Assistant)
+        ? QStringLiteral("assistant_message")
+        : (msg.role == MessageRole::User)
+            ? QStringLiteral("user_message")
+            : QStringLiteral("system_message");
+    appendExecutionEvent(
+        roleKind,
+        roleKind == QStringLiteral("assistant_message")
+            ? QStringLiteral("Assistant response")
+            : roleKind == QStringLiteral("user_message")
+                ? QStringLiteral("User input")
+                : QStringLiteral("System note"),
+        QStringLiteral("done"),
+        logPreview(msg.content));
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+
     ChatMessage cm;
     switch (msg.role) {
     case MessageRole::User:      cm.role = "user";      break;
@@ -2140,6 +3876,7 @@ void AgentController::onMessageAdded(const AgentMessage &msg)
     default:                     cm.role = "system";    break;
     }
     cm.content = msg.content;
+    cm.attachments = msg.attachments;
 
     for (const auto &tc : msg.toolCalls) {
         QVariantMap card;
@@ -2162,6 +3899,15 @@ void AgentController::onToolExecuting(const ToolCall &call)
 {
     qInfo().noquote() << "[agent] tool executing:" << call.name
                       << "callId=" << call.id;
+    appendExecutionEvent(
+        inferExecutionKind(call.name),
+        QStringLiteral("Tool running"),
+        QStringLiteral("running"),
+        toolEventPreview(call.name, call.arguments),
+        call.name,
+        call.id);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
     QVariantMap card;
     card["id"]     = call.id;
     card["name"]   = call.name;
@@ -2178,6 +3924,15 @@ void AgentController::onToolFinished(const ToolResult &result)
                       << "callId=" << result.callId
                       << "status=" << (result.isError ? "error" : "done")
                       << "preview=" << logPreview(result.content);
+    appendExecutionEvent(
+        inferExecutionKind(result.name),
+        result.isError ? QStringLiteral("Tool failed") : QStringLiteral("Tool completed"),
+        result.isError ? QStringLiteral("error") : QStringLiteral("done"),
+        logPreview(result.content),
+        result.name,
+        result.callId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
     QVariantMap card;
     card["id"]     = result.callId;
     card["name"]   = result.name;
@@ -2196,10 +3951,110 @@ void AgentController::onToolFinished(const ToolResult &result)
 
 void AgentController::onToolOutputChunk(const QString &callId, const QString &chunk)
 {
+    const bool firstChunk = !m_runningToolOutput.contains(callId) || m_runningToolOutput.value(callId).isEmpty();
     m_runningToolOutput[callId] += chunk;
+    if (firstChunk) {
+        appendExecutionEvent(
+            QStringLiteral("tool_output"),
+            QStringLiteral("Tool output"),
+            QStringLiteral("running"),
+            logPreview(chunk),
+            QString{},
+            callId);
+        if (!m_restoringSessionHistory)
+            saveTaskSession();
+    }
     QVariantMap card;
     card["id"]     = callId;
     card["status"] = "running";
     card["result"] = m_runningToolOutput.value(callId);
     m_chatModel->updateToolCall(callId, card);
+}
+
+void AgentController::onSandboxExecutionEvent(const QVariantMap &event)
+{
+    const QString kind = event.value(QStringLiteral("kind")).toString();
+    const QString title = event.value(QStringLiteral("title")).toString();
+    const QString status = event.value(QStringLiteral("status")).toString();
+    const QString details = event.value(QStringLiteral("details")).toString();
+    const QString toolName = event.value(QStringLiteral("toolName")).toString();
+    const QString callId = event.value(QStringLiteral("callId")).toString();
+
+    appendExecutionEvent(kind.isEmpty() ? QStringLiteral("sandbox") : kind,
+                         title.isEmpty() ? QStringLiteral("Sandbox event") : title,
+                         status.isEmpty() ? QStringLiteral("running") : status,
+                         details,
+                         toolName,
+                         callId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+}
+
+void AgentController::onCodeMagicAnalysisCompleted(const CodeAnalysisResult &result)
+{
+    appendExecutionEvent(
+        QStringLiteral("code_magic_analysis"),
+        QStringLiteral("Code analysis completed"),
+        QStringLiteral("done"),
+        QStringLiteral("%1 issue(s), quality %2")
+            .arg(result.issues.size())
+            .arg(QString::number(result.quality, 'f', 1)),
+        QStringLiteral("code_magic"),
+        result.analysisId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+}
+
+void AgentController::onCodeMagicGenerationCompleted(const GeneratedCode &code)
+{
+    appendExecutionEvent(
+        QStringLiteral("code_magic_generation"),
+        QStringLiteral("Code generation completed"),
+        QStringLiteral("done"),
+        logPreview(code.explanation.isEmpty() ? code.code : code.explanation),
+        QStringLiteral("code_magic"),
+        code.generationId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+}
+
+void AgentController::onCodeMagicRefactoringCompleted(const RefactoringResult &result)
+{
+    appendExecutionEvent(
+        QStringLiteral("code_magic_refactor"),
+        QStringLiteral("Code refactoring completed"),
+        result.successful ? QStringLiteral("done") : QStringLiteral("error"),
+        result.successful ? logPreview(result.explanation) : result.error,
+        QStringLiteral("code_magic"),
+        result.refactoringId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+}
+
+void AgentController::onCodeMagicTestsGenerated(const GeneratedTests &tests)
+{
+    appendExecutionEvent(
+        QStringLiteral("code_magic_tests"),
+        QStringLiteral("Tests generated"),
+        QStringLiteral("done"),
+        QStringLiteral("%1 test case(s), coverage %2%")
+            .arg(tests.numberOfTests)
+            .arg(tests.estimatedCoverage),
+        QStringLiteral("code_magic"),
+        tests.testId);
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+}
+
+void AgentController::onCodeMagicErrorOccurred(const QString &error)
+{
+    appendExecutionEvent(
+        QStringLiteral("code_magic_error"),
+        QStringLiteral("CodeMagic error"),
+        QStringLiteral("error"),
+        error,
+        QStringLiteral("code_magic"));
+    if (!m_restoringSessionHistory)
+        saveTaskSession();
+    emit errorOccurred(error);
 }

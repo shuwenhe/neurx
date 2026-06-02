@@ -21,6 +21,8 @@ QJsonArray Planner::buildTools(const QString &providerId, const ToolRegistry *re
     if (!registry) return {};
     if (providerId == "openai")
         return registry->toOpenAISchema();
+    if (providerId == "gemini")
+        return registry->toGeminiSchema();
     if (providerId == "anthropic")
         return registry->toAnthropicSchema();
     return {};

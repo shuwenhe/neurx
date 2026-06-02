@@ -21,11 +21,13 @@ Popup {
     property string pendingCallId
     property string toolName
     property string toolSummary
+    property string approvalRisk: "medium"
 
-    function show(callId, name, summary) {
+    function show(callId, name, summary, riskLevel) {
         pendingCallId = callId
         toolName      = name
         toolSummary   = summary
+        approvalRisk  = riskLevel || "medium"
         open()
     }
 
@@ -51,6 +53,27 @@ Popup {
             text: "The agent wants to run:"
             color: Theme.textMuted
             font.pixelSize: Theme.fontSm
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 24
+            radius: Theme.radius
+            color: root.approvalRisk === "critical" ? "#6b1f1f"
+                : root.approvalRisk === "high" ? Theme.error
+                : root.approvalRisk === "medium" ? Theme.warning
+                : Theme.success
+
+            Label {
+                anchors.centerIn: parent
+                text: root.approvalRisk === "critical" ? "Critical risk"
+                    : root.approvalRisk === "high" ? "High risk"
+                    : root.approvalRisk === "medium" ? "Medium risk"
+                    : "Low risk"
+                color: "white"
+                font.pixelSize: Theme.fontXs
+                font.bold: true
+            }
         }
 
         Rectangle {

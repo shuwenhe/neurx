@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 #include <QDateTime>
 #include <QUuid>
+#include <QVector>
 
 /**
  * @enum AskForApproval

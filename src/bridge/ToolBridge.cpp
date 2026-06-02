@@ -2,6 +2,7 @@
 #include "AgentController.h"
 #include <QDebug>
 #include <QDateTime>
+#include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -264,7 +265,28 @@ QVector<ToolSchema> ToolBridge::searchTools(
     auto discovery = m_toolSystem->getToolDiscovery();
     locker.unlock();
 
-    return discovery->searchTools(keywords, category, 10);
+    QVector<ToolSchema> results;
+    bool completed = false;
+    QEventLoop loop;
+
+    ToolDiscoveryQuery query;
+    query.keyword = keywords;
+    query.category = category;
+    query.limit = 10;
+
+    discovery->searchTools(query, [&](const QVector<ToolSchema> &tools) {
+        results = tools;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
+
+    return results;
 }
 
 QVector<ToolSchema> ToolBridge::recommendTools(const QString &description) {
@@ -277,7 +299,23 @@ QVector<ToolSchema> ToolBridge::recommendTools(const QString &description) {
     auto discovery = m_toolSystem->getToolDiscovery();
     locker.unlock();
 
-    return discovery->recommendTools(description, 10);
+    QVector<ToolSchema> results;
+    bool completed = false;
+    QEventLoop loop;
+
+    discovery->recommendTools(description, [&](const QVector<ToolSchema> &tools) {
+        results = tools;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
+
+    return results;
 }
 
 void ToolBridge::recommendToolsAsync(
@@ -294,7 +332,7 @@ void ToolBridge::recommendToolsAsync(
     auto discovery = m_toolSystem->getToolDiscovery();
     locker.unlock();
 
-    discovery->recommendTools(description, 10, [this, callback](const QVector<ToolSchema> &tools) {
+    discovery->recommendTools(description, [this, callback](const QVector<ToolSchema> &tools) {
         emit toolsRecommended(tools);
         if (callback) callback(tools);
     });
@@ -310,7 +348,7 @@ ToolSchema ToolBridge::getToolDetails(const QString &toolId) const {
     auto registry = m_toolSystem->getSchemaRegistry();
     locker.unlock();
 
-    return registry->getToolSchema(toolId);
+    return registry->getSchema(toolId);
 }
 
 QVector<QVector<ToolSchema>> ToolBridge::getCompatibleChains(const QString &toolId) const {
@@ -323,7 +361,7 @@ QVector<QVector<ToolSchema>> ToolBridge::getCompatibleChains(const QString &tool
     auto discovery = m_toolSystem->getToolDiscovery();
     locker.unlock();
 
-    return discovery->searchToolChains("", 5);  // 简化实现
+    return discovery->searchToolChains(toolId, 5);
 }
 
 // ── 统计和监控 ────────────────────────────────────────
@@ -418,7 +456,22 @@ bool ToolBridge::checkToolAccess(
     auto permMgr = m_toolSystem->getPermissionManager();
     locker.unlock();
 
-    return permMgr->checkToolAccess(toolId, userId).allowed;
+    bool allowed = false;
+    bool completed = false;
+    QEventLoop loop;
+    permMgr->checkToolAccess(toolId, userId, [&](bool granted, const QString &) {
+        allowed = granted;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
+
+    return allowed;
 }
 
 bool ToolBridge::checkExecutionPermission(
@@ -434,7 +487,22 @@ bool ToolBridge::checkExecutionPermission(
     auto permMgr = m_toolSystem->getPermissionManager();
     locker.unlock();
 
-    return permMgr->checkExecutionPermission(request, userId).allowed;
+    bool allowed = false;
+    bool completed = false;
+    QEventLoop loop;
+    permMgr->checkExecutionPermission(request.toolId, userId, [&](bool granted, const QString &) {
+        allowed = granted;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
+
+    return allowed;
 }
 
 void ToolBridge::requestExecutionApproval(
@@ -448,14 +516,30 @@ void ToolBridge::requestExecutionApproval(
         return;
     }
 
-    auto permMgr = m_toolSystem->getPermissionManager();
+    auto approvalMgr = m_approval;
     locker.unlock();
 
-    permMgr->requestExecutionApproval(request, [this, callback](bool approved) {
+    if (!approvalMgr) {
+        if (callback) callback(false);
+        return;
+    }
+
+    ExecApprovalRequestEvent approvalRequest;
+    approvalRequest.approvalId = request.executionId.isEmpty()
+        ? QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch())
+        : request.executionId;
+    approvalRequest.commandLine = request.parameters.value("commandLine").toString();
+    approvalRequest.toolName = request.toolId;
+    approvalRequest.reason = QString("ToolBridge approval request for %1").arg(request.toolId);
+    approvalRequest.policy = approvalMgr->getPolicyFor(request.toolId, request.capabilityName);
+    approvalRequest.requestedAt = QDateTime::currentDateTime();
+    approvalRequest.context = request.context;
+
+    approvalMgr->requestExecApproval(approvalRequest, [this, approvalId = approvalRequest.approvalId, callback](bool approved, ApprovalDecision) {
         if (approved) {
-            emit approvalApproved(request.executionId);
+            emit approvalApproved(approvalId);
         } else {
-            emit approvalRejected(request.executionId);
+            emit approvalRejected(approvalId);
         }
         if (callback) callback(approved);
     });
@@ -636,9 +720,10 @@ void ToolBridge::processQueue() {
     locker.unlock();
 
     m_toolSystem->getToolExecutor()->executeTool(request, [this, callback](const ToolExecutionResult &result) {
-        locker.relock();
-        m_activeExecutions.removeAll(result.executionId);
-        locker.unlock();
+        {
+            QMutexLocker resultLocker(&m_mutex);
+            m_activeExecutions.removeAll(result.executionId);
+        }
 
         if (callback) callback(result);
 
@@ -684,20 +769,28 @@ void ToolBridge::logAuditEntry(
     }
 }
 
-ExecutionApprovalRequest ToolBridge::createApprovalRequest(
+ExecApprovalRequestEvent ToolBridge::createApprovalRequest(
     const ToolExecutionRequest &toolRequest) {
 
-    ExecutionApprovalRequest request;
-    request.toolId = toolRequest.toolId;
-    request.requestedBy = toolRequest.requestedBy;
+    ExecApprovalRequestEvent request;
+    request.toolName = toolRequest.toolId;
+    request.commandLine = toolRequest.parameters.value("commandLine").toString();
+    request.reason = toolRequest.context.value("reason").toString();
+    request.requestedAt = QDateTime::currentDateTime();
+    request.context = toolRequest.context;
 
     return request;
 }
 
 bool ToolBridge::toolRequiresApproval(const ToolSchema &schema) const {
-    // 检查工具权限等级
-    return schema.version.toLower().contains("restricted") ||
-           schema.version.toLower().contains("private");
+    QMutexLocker locker(&m_mutex);
+
+    if (!m_approval) {
+        return false;
+    }
+
+    const auto policy = m_approval->getPolicyFor(schema.toolId, schema.category);
+    return policy != AskForApproval::Never;
 }
 
 // ── 槽 ────────────────────────────────────────

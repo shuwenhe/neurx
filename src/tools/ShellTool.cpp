@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QRegularExpression>
+#include <QVariantMap>
 
 static bool matchesAny(const QString &text, const QStringList &patterns)
 {
@@ -17,6 +18,28 @@ static bool matchesAny(const QString &text, const QStringList &patterns)
             return true;
     }
     return false;
+}
+
+static void recordSandboxEvent(SandboxManager *manager,
+                               const QString &kind,
+                               const QString &title,
+                               const QString &status,
+                               const QString &details,
+                               const QString &toolName,
+                               const QString &callId)
+{
+    if (!manager)
+        return;
+
+    QVariantMap event;
+    event["kind"] = kind;
+    event["title"] = title;
+    event["status"] = status;
+    event["details"] = details;
+    event["toolName"] = toolName;
+    event["callId"] = callId;
+    event["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+    manager->recordExecutionEvent(event);
 }
 
 ShellTool::ShellTool(const QString &workingDir, QObject *parent)
@@ -110,6 +133,14 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
         env.insert(it.key(), it.value().toString());
 
     if (m_sandboxManager && extraEnv.isEmpty()) {
+        recordSandboxEvent(m_sandboxManager,
+                           QStringLiteral("command_execution"),
+                           QStringLiteral("Shell command started"),
+                           QStringLiteral("running"),
+                           summary(args),
+                           name(),
+                           callId);
+
         SandboxExecRequest request;
         request.commandLine = command;
         request.workingDirectory = cwd;
@@ -129,6 +160,17 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
 
         if (!output.isEmpty())
             emit outputChunk(callId, output);
+
+        recordSandboxEvent(m_sandboxManager,
+                           QStringLiteral("command_execution"),
+                           QStringLiteral("Shell command finished"),
+                           exitCode == 0 ? QStringLiteral("done") : QStringLiteral("error"),
+                           QStringLiteral("exitCode=%1\n%2%3")
+                               .arg(exitCode)
+                               .arg(output)
+                               .arg(error.isEmpty() ? QString() : QString("\n") + error),
+                           name(),
+                           callId);
 
         const bool failed = exitCode != 0;
         const QString result = QString("Exit code: %1\n%2%3")
@@ -152,6 +194,14 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
     if (!proc.waitForStarted(5000))
         return {callId, name(), true, "Process failed to start."};
 
+    recordSandboxEvent(m_sandboxManager,
+                       QStringLiteral("command_execution"),
+                       QStringLiteral("Shell command started"),
+                       QStringLiteral("running"),
+                       summary(args),
+                       name(),
+                       callId);
+
     // Stream stdout/stderr incrementally while the process runs.
     QString accumulated;
     const qint64 deadline = QDateTime::currentMSecsSinceEpoch() + timeout;
@@ -160,6 +210,13 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
         if (QDateTime::currentMSecsSinceEpoch() > deadline) {
             proc.kill();
             proc.waitForFinished(1000);
+            recordSandboxEvent(m_sandboxManager,
+                               QStringLiteral("command_execution"),
+                               QStringLiteral("Shell command finished"),
+                               QStringLiteral("error"),
+                               QStringLiteral("timeout after %1ms\n%2").arg(timeout).arg(accumulated),
+                               name(),
+                               callId);
             return {callId, name(), true,
                     QString("Timeout after %1ms.\nPartial output:\n%2")
                         .arg(timeout).arg(accumulated)};
@@ -181,6 +238,13 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
 
     proc.waitForFinished(500);
     const int exitCode = proc.exitCode();
+    recordSandboxEvent(m_sandboxManager,
+                       QStringLiteral("command_execution"),
+                       QStringLiteral("Shell command finished"),
+                       exitCode == 0 ? QStringLiteral("done") : QStringLiteral("error"),
+                       QStringLiteral("exitCode=%1\n%2").arg(exitCode).arg(accumulated),
+                       name(),
+                       callId);
     return {callId, name(), exitCode != 0,
             QString("Exit code: %1\n%2").arg(exitCode).arg(accumulated)};
 }

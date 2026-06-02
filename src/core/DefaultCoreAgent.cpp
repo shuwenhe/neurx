@@ -1,5 +1,6 @@
 #include "DefaultCoreAgent.h"
 #include <QUuid>
+#include <QMutexLocker>
 #include <QDebug>
 #include <QDateTime>
 #include <algorithm>

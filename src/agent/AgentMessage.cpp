@@ -62,6 +62,22 @@ ToolResult toolResultFromJson(const QJsonObject &obj)
     return result;
 }
 
+QJsonArray attachmentsToJson(const QVariantList &attachments)
+{
+    QJsonArray arr;
+    for (const auto &value : attachments)
+        arr.append(QJsonValue::fromVariant(value));
+    return arr;
+}
+
+QVariantList attachmentsFromJson(const QJsonArray &attachments)
+{
+    QVariantList list;
+    for (const auto &value : attachments)
+        list.append(value.toVariant());
+    return list;
+}
+
 } // namespace
 
 QJsonObject AgentMessage::toJson() const
@@ -70,6 +86,7 @@ QJsonObject AgentMessage::toJson() const
     obj["role"] = roleToString(role);
     obj["content"] = content;
     obj["timestamp"] = timestamp.toUTC().toString(Qt::ISODateWithMs);
+    obj["attachments"] = attachmentsToJson(attachments);
 
     QJsonArray toolCallsJson;
     for (const auto &call : toolCalls)
@@ -89,6 +106,7 @@ AgentMessage AgentMessage::fromJson(const QJsonObject &obj)
     AgentMessage message;
     message.role = stringToRole(obj.value("role").toString());
     message.content = obj.value("content").toString();
+    message.attachments = attachmentsFromJson(obj.value("attachments").toArray());
     message.timestamp = QDateTime::fromString(
         obj.value("timestamp").toString(), Qt::ISODateWithMs);
     if (!message.timestamp.isValid())
