@@ -1,0 +1,133 @@
+# neurx Configuration File (TOML)
+# This is a sample configuration showing all available settings
+
+[agent]
+name = "neurx-agent"
+model = "claude-3.5-sonnet"
+reasoning = "disabled"
+max_retries = 3
+execution_timeout_ms = 300000  # 5 minutes
+max_output_size = 1000000      # 1 MB
+verbose_logging = false
+strict_mode = false
+auto_approve = false
+
+enable_shell_execution = true
+enable_file_operations = true
+enable_network_access = false
+
+[llm]
+provider = "anthropic"
+api_key = "${NEURX_API_KEY}"  # Environment variable
+model = "claude-3.5-sonnet"
+
+max_tokens = 8000
+temperature = 0.7
+top_p = 1.0
+
+max_retries = 3
+retry_delay_ms = 1000
+timeout_ms = 60000
+
+# Optional custom endpoint
+# endpoint = "https://api.anthropic.com"
+
+[storage]
+backend = "file-based"  # or "sqlite", "postgres"
+data_dir = "~/.neurx/data"
+
+[storage.file_paths]
+threads_dir = "threads"
+checkpoints_dir = "checkpoints"
+logs_dir = "logs"
+
+# Uncomment for database backend
+# [storage.database]
+# host = "localhost"
+# port = 5432
+# database = "neurx"
+# username = "neurx_user"
+# password = "${DB_PASSWORD}"
+
+[approval]
+mode = "on-request"     # "never", "on-request", "granular", "always"
+reviewer = "user"       # "user", "auto-review", "guardian"
+auto_approve_on_retry = false
+auto_approve_read_only = true
+
+[[approval.trusted_paths]]
+path = "/tmp"
+
+[[approval.trusted_paths]]
+path = "~/.config"
+
+[[approval.blocked_paths]]
+path = "/etc/passwd"
+
+[[approval.blocked_paths]]
+path = "/root/.ssh"
+
+[approval.tool_policies]
+git = "on-request"
+shell = "on-request"
+file-system = "granular"
+network = "never"
+
+[logging]
+level = "info"          # "debug", "info", "warn", "error"
+format = "text"         # "text", "json"
+output = "console"      # "console", "file", "both"
+log_file = "neurx.log"
+max_file_size_mb = 100
+max_backups = 10
+color_output = true
+
+enable_telemetry = false
+# telemetry_endpoint = "https://telemetry.example.com"
+
+# Tool-specific configurations
+
+[tools.shell]
+enabled = true
+timeout_ms = 30000
+
+[tools.shell.settings]
+working_directory = "~"
+env_inherit = true
+
+[tools.shell.sandbox]
+mode = "read-only"
+allowed_paths = ["/tmp", "${HOME}"]
+blocked_paths = ["/etc", "/root"]
+
+[tools.file-system]
+enabled = true
+timeout_ms = 10000
+
+[tools.file-system.sandbox]
+mode = "workspace-write"
+allowed_paths = ["${HOME}/workspace"]
+blocked_paths = ["/root", "/sys"]
+
+[tools.git]
+enabled = true
+timeout_ms = 30000
+
+[tools.git.permissions]
+permissions = ["clone", "pull", "push", "commit"]
+
+[tools.network]
+enabled = false
+timeout_ms = 60000
+
+# Custom extension settings
+
+[custom]
+# Add custom key-value pairs here for extensions
+enable_custom_plugins = true
+plugin_directory = "~/.neurx/plugins"
+
+# Profile-specific overrides can be specified as:
+# [profile.development]
+# [profile.production]
+# [profile.testing]
