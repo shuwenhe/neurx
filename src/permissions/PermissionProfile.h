@@ -57,6 +57,9 @@ public:
     // 配置管理
     static PermissionProfile loadFromFile(const QString &filePath);
     bool saveToFile(const QString &filePath) const;
+    static QString defaultFilePath();
+    static PermissionProfile loadDefault();
+    bool saveDefault() const;
 
     // 规则管理
     void setRule(OperationType type, const OperationApprovalRule &rule);

@@ -32,6 +32,9 @@ signals:
     // Emitted during execute() for tools that stream partial output (e.g. ShellTool).
     // Each chunk is an incremental stdout/stderr fragment.
     void outputChunk(const QString &callId, const QString &chunk);
+
+    // Emitted when the tool generates an activity event (e.g. sub-agent progress).
+    void eventOccurred(const QString &callId, const QVariantMap &event);
 };
 
 // ── ToolRegistry ─────────────────────────────────────────────────────────────

@@ -40,6 +40,8 @@ Item {
             return "search";
         case "web":
             return "web";
+        case "subagent_tool":
+            return "subagent";
         default:
             return "tools";
         }
@@ -69,6 +71,8 @@ Item {
             return "⌕";
         case "web":
             return "🌐";
+        case "subagent_tool":
+            return "🤖";
         case "tool":
             return "⋯";
         default:
@@ -108,6 +112,8 @@ Item {
             return "Knowledge";
         case "web":
             return "Web";
+        case "subagent_tool":
+            return "Sub-Agent";
         default:
             return kind || "Event";
         }
@@ -187,6 +193,7 @@ Item {
                         { key: "files", label: "Files" },
                         { key: "search", label: "Search" },
                         { key: "web", label: "Web" },
+                        { key: "subagent", label: "Sub-Agents" },
                         { key: "tools", label: "Tools" }
                     ]
 

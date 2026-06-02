@@ -1,10 +1,14 @@
 #pragma once
 
 #include <QString>
+#include <QSet>
 #include <QVariantMap>
 #include <memory>
 #include "tools/ClaudeToolSystem.h"
 #include "memory/DefaultMemoryManager.h"
+#include "approvals/DefaultApprovalManager.h"
+#include "plugins/DefaultPluginManager.h"
+#include "code/LLMCodeAnalyzer.h"
 
 /**
  * @brief MemoryToolBridge - 将Memory系统集成到工具系统
