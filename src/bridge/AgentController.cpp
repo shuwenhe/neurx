@@ -132,6 +132,108 @@ static QVariantList messagesToVariantList(const QList<AgentMessage> &messages)
     return list;
 }
 
+static QString askForApprovalToString(AskForApproval value)
+{
+    switch (value) {
+    case AskForApproval::Never: return QStringLiteral("never");
+    case AskForApproval::OnFailure: return QStringLiteral("on-failure");
+    case AskForApproval::OnRequest: return QStringLiteral("on-request");
+    case AskForApproval::Granular: return QStringLiteral("granular");
+    case AskForApproval::UnlessTrusted: return QStringLiteral("unless-trusted");
+    }
+    return QStringLiteral("on-request");
+}
+
+static AskForApproval askForApprovalFromString(const QString &value)
+{
+    const QString normalized = value.trimmed().toLower();
+    if (normalized == QStringLiteral("never")) return AskForApproval::Never;
+    if (normalized == QStringLiteral("on-failure")) return AskForApproval::OnFailure;
+    if (normalized == QStringLiteral("granular")) return AskForApproval::Granular;
+    if (normalized == QStringLiteral("unless-trusted")) return AskForApproval::UnlessTrusted;
+    return AskForApproval::OnRequest;
+}
+
+static QString reviewerToString(ApprovalsReviewer value)
+{
+    switch (value) {
+    case ApprovalsReviewer::User: return QStringLiteral("user");
+    case ApprovalsReviewer::AutoReview: return QStringLiteral("auto-review");
+    case ApprovalsReviewer::Guardian: return QStringLiteral("guardian");
+    }
+    return QStringLiteral("user");
+}
+
+static ApprovalsReviewer reviewerFromString(const QString &value)
+{
+    const QString normalized = value.trimmed().toLower();
+    if (normalized == QStringLiteral("auto-review")) return ApprovalsReviewer::AutoReview;
+    if (normalized == QStringLiteral("guardian")) return ApprovalsReviewer::Guardian;
+    return ApprovalsReviewer::User;
+}
+
+static QVariantMap approvalPolicyToVariantMap(const ApprovalPolicy &policy)
+{
+    QVariantMap map;
+    map[QStringLiteral("defaultPolicy")] = askForApprovalToString(policy.defaultPolicy);
+    map[QStringLiteral("defaultReviewer")] = reviewerToString(policy.defaultReviewer);
+    map[QStringLiteral("requireNetworkApproval")] = policy.requireNetworkApproval;
+    map[QStringLiteral("restrictedProtocols")] = QVariantList();
+    {
+        QVariantList protocols;
+        for (const auto &protocol : policy.restrictedProtocols)
+            protocols.append(static_cast<int>(protocol));
+        map[QStringLiteral("restrictedProtocols")] = protocols;
+    }
+    map[QStringLiteral("doubleConfirmPatterns")] = policy.doubleConfirmPatterns;
+    map[QStringLiteral("readOnlyMode")] = policy.readOnlyMode;
+    map[QStringLiteral("autoApproveOnRetry")] = policy.autoApproveOnRetry;
+
+    QVariantList rules;
+    for (const auto &rule : policy.granularRules) {
+        QVariantMap ruleMap;
+        ruleMap[QStringLiteral("resourcePattern")] = rule.resourcePattern;
+        ruleMap[QStringLiteral("approval")] = askForApprovalToString(rule.approval);
+        ruleMap[QStringLiteral("action")] = rule.action;
+        ruleMap[QStringLiteral("toolNames")] = rule.toolNames;
+        ruleMap[QStringLiteral("permanent")] = rule.permanent;
+        rules.append(ruleMap);
+    }
+    map[QStringLiteral("granularRules")] = rules;
+    return map;
+}
+
+static ApprovalPolicy approvalPolicyFromVariantMap(const QVariantMap &map)
+{
+    ApprovalPolicy policy;
+    policy.defaultPolicy = askForApprovalFromString(map.value(QStringLiteral("defaultPolicy")).toString());
+    policy.defaultReviewer = reviewerFromString(map.value(QStringLiteral("defaultReviewer")).toString());
+    policy.requireNetworkApproval = map.value(QStringLiteral("requireNetworkApproval"), true).toBool();
+    policy.readOnlyMode = map.value(QStringLiteral("readOnlyMode"), false).toBool();
+    policy.autoApproveOnRetry = map.value(QStringLiteral("autoApproveOnRetry"), false).toBool();
+
+    const QVariantList protocols = map.value(QStringLiteral("restrictedProtocols")).toList();
+    for (const auto &protocol : protocols)
+        policy.restrictedProtocols.append(static_cast<NetworkApprovalProtocol>(protocol.toInt()));
+
+    policy.doubleConfirmPatterns = map.value(QStringLiteral("doubleConfirmPatterns")).toStringList();
+
+    const QVariantList rules = map.value(QStringLiteral("granularRules")).toList();
+    for (const auto &item : rules) {
+        const QVariantMap ruleMap = item.toMap();
+        GranularApprovalConfig rule;
+        rule.resourcePattern = ruleMap.value(QStringLiteral("resourcePattern")).toString();
+        rule.approval = askForApprovalFromString(ruleMap.value(QStringLiteral("approval")).toString());
+        rule.action = ruleMap.value(QStringLiteral("action")).toString();
+        rule.toolNames = ruleMap.value(QStringLiteral("toolNames")).toStringList();
+        rule.permanent = ruleMap.value(QStringLiteral("permanent"), false).toBool();
+        if (!rule.resourcePattern.trimmed().isEmpty())
+            policy.granularRules.append(rule);
+    }
+
+    return policy;
+}
+
 static QString defaultSecretsEnvPath()
 {
     return QDir::homePath() + QStringLiteral("/.config/neurx-code/secrets.env");
@@ -1729,6 +1831,9 @@ void AgentController::applyTaskSession(const TaskSessionSnapshot &snapshot)
     if (auto *todoTool = qobject_cast<TodoTool *>(m_registry ? m_registry->tool("todo") : nullptr))
         todoTool->setTodoItems(snapshot.todoItems);
 
+    if (m_approvalManager && !snapshot.approvalProfile.isEmpty())
+        m_approvalManager->setDefaultPolicy(approvalPolicyFromVariantMap(snapshot.approvalProfile));
+
     m_engine->setHistory(snapshot.messages);
     rebuildChatModelFromHistory();
 
@@ -1772,6 +1877,8 @@ void AgentController::saveTaskSession()
     snapshot.currentFilePath = m_currentFilePath;
     snapshot.todoItems = todoItems();
     snapshot.executionTimeline = m_executionTimeline;
+    if (m_approvalManager)
+        snapshot.approvalProfile = approvalPolicyToVariantMap(m_approvalManager->getDefaultPolicy());
     snapshot.messages = m_engine->history();
     snapshot.updatedAt = QDateTime::currentDateTimeUtc();
     TaskSessionStore::saveLatest(snapshot);
@@ -1804,6 +1911,9 @@ StoredThread AgentController::buildStoredThreadSnapshot() const
         {QStringLiteral("todoCount"), int(todoItems().size())},
         {QStringLiteral("messageCount"), int(m_engine ? m_engine->history().size() : 0)},
         {QStringLiteral("eventCount"), int(m_executionTimeline.size())},
+        {QStringLiteral("approvalProfile"), m_approvalManager
+            ? approvalPolicyToVariantMap(m_approvalManager->getDefaultPolicy())
+            : QVariantMap{}},
     };
     thread.lastState = QVariantMap{
         {QStringLiteral("workspacePath"), m_workspacePath},
@@ -1819,6 +1929,9 @@ StoredThread AgentController::buildStoredThreadSnapshot() const
         {QStringLiteral("knowledgeSearchQuery"), m_knowledgeSearchQuery},
         {QStringLiteral("knowledgeSearchResults"), m_knowledgeSearchResults},
         {QStringLiteral("scheduledTasks"), scheduledTasks()},
+        {QStringLiteral("approvalProfile"), m_approvalManager
+            ? approvalPolicyToVariantMap(m_approvalManager->getDefaultPolicy())
+            : QVariantMap{}},
     };
     thread.isActive = true;
     thread.lastExecuted = QDateTime::currentDateTimeUtc();
@@ -1963,6 +2076,8 @@ bool AgentController::forkCurrentThread()
     snapshot.currentFilePath = m_currentFilePath;
     snapshot.todoItems = todoItems();
     snapshot.executionTimeline = m_executionTimeline;
+    if (m_approvalManager)
+        snapshot.approvalProfile = approvalPolicyToVariantMap(m_approvalManager->getDefaultPolicy());
     snapshot.messages = m_engine->history();
     snapshot.updatedAt = forkedAt;
 
