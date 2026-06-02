@@ -2,6 +2,9 @@
 
 #include "SandboxTypes.h"
 #include <QObject>
+#include <QVector>
+#include <QVariantMap>
+#include <functional>
 #include <memory>
 
 /**
@@ -74,6 +77,9 @@ public:
     /// Execute command/tool in sandbox
     virtual void executeInSandbox(const SandboxExecRequest &request,
                                  std::function<void(int exitCode, const QString &output, const QString &error)> callback) = 0;
+
+    /// Record a sandbox execution event for unified timeline/logging.
+    virtual void recordExecutionEvent(const QVariantMap &event) = 0;
     
     /// Transform permissions for tool execution (apply approval/granular policies)
     virtual void transformPermissions(const SandboxTransformRequest &request,
@@ -115,6 +121,9 @@ signals:
     
     /// Emitted on sandbox error
     void sandboxError(const QString &error);
+
+    /// Emitted when sandbox execution activity is recorded
+    void sandboxExecutionEvent(const QVariantMap &event);
 };
 
 using SandboxManagerPtr = std::shared_ptr<SandboxManager>;

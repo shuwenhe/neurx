@@ -2,6 +2,7 @@
 
 #include "SandboxManager.h"
 #include <QObject>
+#include <QMutex>
 #include <QProcess>
 #include <memory>
 
@@ -43,6 +44,7 @@ public:
     // Execution
     void executeInSandbox(const SandboxExecRequest &request,
                          std::function<void(int exitCode, const QString &output, const QString &error)> callback) override;
+    void recordExecutionEvent(const QVariantMap &event) override;
     void transformPermissions(const SandboxTransformRequest &request,
                              std::function<void(const FileSystemSandboxPolicy &transformed)> callback) override;
     
@@ -69,7 +71,7 @@ private:
     
     SandboxMode m_defaultMode{SandboxMode::ReadOnly};
     FileSystemSandboxPolicy m_fsPolicy;
-    NetworkSandboxPolicy m_networkPolicy{NetworkSandboxPolicy::DenyAll};
+    NetworkSandboxPolicy m_networkPolicy{NetworkSandboxPolicy::Restricted};
     QStringList m_protectedMetadataPaths{".git", ".agents", ".codex", ".env"};
     ExecutionStats m_stats;
     bool m_readOnlyMode{false};

@@ -37,6 +37,8 @@ public:
     // ThreadStore interface
     void createThread(const CreateThreadParams &params,
                      std::function<void(ThreadStoreError, ThreadId)> callback) override;
+    void upsertThread(const StoredThread &thread,
+                     std::function<void(ThreadStoreError)> callback) override;
     void forkThread(const ThreadId &parentId,
                    const QVariantMap &forkContext,
                    std::function<void(ThreadStoreError, ThreadId)> callback) override;

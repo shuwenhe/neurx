@@ -1,7 +1,9 @@
 #include "DefaultApprovalManager.h"
+#include <QMutexLocker>
 #include <QDebug>
 #include <QDateTime>
 #include <QUuid>
+#include <algorithm>
 
 DefaultApprovalManager::DefaultApprovalManager(QObject *parent)
     : ApprovalManager(parent)
@@ -66,13 +68,14 @@ void DefaultApprovalManager::requestExecApproval(const ExecApprovalRequestEvent 
     pending.requestedAt = QDateTime::currentDateTime();
     m_pendingApprovals[approvalId] = pending;
     
-    AskForApproval policy = getPolicyFor_impl(request.toolName, request.command);
+    AskForApproval policy = getPolicyFor_impl(request.toolName, request.commandLine);
     
     locker.unlock();
     
     emit approvalRequested(approvalId, QVariantMap{
         {"toolName", request.toolName},
-        {"command", request.command},
+        {"commandLine", request.commandLine},
+        {"reason", request.reason},
         {"context", request.context}
     });
     
@@ -99,14 +102,12 @@ void DefaultApprovalManager::requestNetworkApproval(const NetworkApprovalContext
     
     QMutexLocker locker(&m_mutex);
     
-    QString approvalId = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    
     AskForApproval policy = m_defaultPolicy.defaultPolicy;
     
     // Check granular rules for network patterns
     for (const auto &rule : m_granularRules) {
-        if (context.targetHost.contains(rule.resourcePattern)) {
-            policy = rule.policy;
+        if (context.hostname.contains(rule.resourcePattern) || context.destination.contains(rule.resourcePattern)) {
+            policy = rule.approval;
             break;
         }
     }
@@ -129,8 +130,10 @@ void DefaultApprovalManager::requestGuardianAssessment(const ExecApprovalRequest
     GuardianAssessmentEvent assessment;
     assessment.eventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     assessment.assessedAt = QDateTime::currentDateTime();
-    assessment.command = request.command;
-    assessment.riskLevel = RiskLevel::Medium; // Default assessment
+    assessment.targetAction = request.commandLine;
+    assessment.riskLevel = "medium";
+    assessment.recommended = true;
+    assessment.reasoning = request.reason;
     
     m_assessmentHistory.append(assessment);
     
@@ -157,8 +160,28 @@ AskForApproval DefaultApprovalManager::getPolicyFor_impl(const QString &toolName
 {
     // Check granular rules first
     for (const auto &rule : m_granularRules) {
-        if (rule.toolName == toolName && resource.contains(rule.resourcePattern)) {
-            return rule.policy;
+        if ((rule.toolNames.isEmpty() || rule.toolNames.contains("*") || rule.toolNames.contains(toolName))
+            && resource.contains(rule.resourcePattern)) {
+            return rule.approval;
+        }
+    }
+
+    if (m_defaultPolicy.readOnlyMode) {
+        const bool writeLike = toolName.contains("patch", Qt::CaseInsensitive)
+            || toolName.contains("file", Qt::CaseInsensitive)
+            || toolName.contains("shell", Qt::CaseInsensitive)
+            || resource.contains("rm ", Qt::CaseInsensitive)
+            || resource.contains("git reset", Qt::CaseInsensitive)
+            || resource.contains("chmod", Qt::CaseInsensitive)
+            || resource.contains("chown", Qt::CaseInsensitive);
+        if (writeLike) {
+            return AskForApproval::OnRequest;
+        }
+    }
+
+    for (const auto &pattern : m_defaultPolicy.doubleConfirmPatterns) {
+        if (!pattern.isEmpty() && resource.contains(pattern)) {
+            return AskForApproval::OnRequest;
         }
     }
     
@@ -169,7 +192,8 @@ AskForApproval DefaultApprovalManager::getPolicyFor_impl(const QString &toolName
 bool DefaultApprovalManager::checkGranularRules(const QString &toolName, const QString &resource) const
 {
     for (const auto &rule : m_granularRules) {
-        if (rule.toolName == toolName && resource.contains(rule.resourcePattern)) {
+        if ((rule.toolNames.isEmpty() || rule.toolNames.contains("*") || rule.toolNames.contains(toolName))
+            && resource.contains(rule.resourcePattern)) {
             return true;
         }
     }
@@ -180,11 +204,13 @@ void DefaultApprovalManager::recordDecision(const QString &approvalId,
                                            ApprovalDecision decision,
                                            const QString &reason)
 {
+    Q_UNUSED(reason);
     QMutexLocker locker(&m_mutex);
     
     auto it = m_pendingApprovals.find(approvalId);
     if (it != m_pendingApprovals.end()) {
         it->processed = true;
+        const qint64 elapsedMs = it->requestedAt.msecsTo(QDateTime::currentDateTime());
         
         if (decision == ApprovalDecision::Accept) {
             m_stats.approvedCount++;
@@ -192,6 +218,13 @@ void DefaultApprovalManager::recordDecision(const QString &approvalId,
             m_stats.rejectedCount++;
         }
         m_stats.totalRequests++;
+        if (elapsedMs >= 0) {
+            if (m_stats.averageDecisionTime <= 0) {
+                m_stats.averageDecisionTime = static_cast<int>(elapsedMs);
+            } else {
+                m_stats.averageDecisionTime = static_cast<int>((m_stats.averageDecisionTime + elapsedMs) / 2);
+            }
+        }
     }
     
     locker.unlock();
@@ -213,6 +246,7 @@ QVariantMap DefaultApprovalManager::getApprovalStats() const
     stats["totalRequests"] = m_stats.totalRequests;
     stats["approvedCount"] = m_stats.approvedCount;
     stats["rejectedCount"] = m_stats.rejectedCount;
+    stats["averageDecisionTimeMs"] = m_stats.averageDecisionTime;
     stats["pendingCount"] = m_pendingApprovals.size();
     stats["assessmentCount"] = m_assessmentHistory.size();
     
@@ -249,5 +283,3 @@ QVector<ExecApprovalRequestEvent> DefaultApprovalManager::getPendingApprovals() 
     
     return pending;
 }
-
-#include "moc_DefaultApprovalManager.cpp"

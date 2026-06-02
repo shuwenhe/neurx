@@ -2,6 +2,75 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QCryptographicHash>
+#include <QRegularExpression>
+
+namespace {
+
+ProgrammingLanguage parseProgrammingLanguage(const QString &language)
+{
+    const QString value = language.trimmed().toLower();
+    if (value == "python" || value == "py") return ProgrammingLanguage::Python;
+    if (value == "javascript" || value == "js") return ProgrammingLanguage::JavaScript;
+    if (value == "typescript" || value == "ts") return ProgrammingLanguage::TypeScript;
+    if (value == "java") return ProgrammingLanguage::Java;
+    if (value == "csharp" || value == "c#") return ProgrammingLanguage::CSharp;
+    if (value == "cpp" || value == "c++" || value == "cc") return ProgrammingLanguage::Cpp;
+    if (value == "c") return ProgrammingLanguage::C;
+    if (value == "go" || value == "golang") return ProgrammingLanguage::Go;
+    if (value == "rust" || value == "rs") return ProgrammingLanguage::Rust;
+    if (value == "ruby" || value == "rb") return ProgrammingLanguage::Ruby;
+    if (value == "php") return ProgrammingLanguage::PHP;
+    if (value == "swift") return ProgrammingLanguage::Swift;
+    if (value == "kotlin" || value == "kt") return ProgrammingLanguage::Kotlin;
+    if (value == "sql") return ProgrammingLanguage::SQL;
+    if (value == "html") return ProgrammingLanguage::HTML;
+    if (value == "css") return ProgrammingLanguage::CSS;
+    if (value == "scala") return ProgrammingLanguage::Scala;
+    if (value == "haskell" || value == "hs") return ProgrammingLanguage::Haskell;
+    return ProgrammingLanguage::Unknown;
+}
+
+RefactoringType parseRefactoringType(const QString &type)
+{
+    const QString value = type.trimmed().toLower();
+    if (value == "extractmethod" || value == "extract_method") return RefactoringType::ExtractMethod;
+    if (value == "inlinevariable" || value == "inline_variable") return RefactoringType::InlineVariable;
+    if (value == "renamevariable" || value == "rename_variable") return RefactoringType::RenameVariable;
+    if (value == "movefunction" || value == "move_function") return RefactoringType::MoveFunction;
+    if (value == "extractclass" || value == "extract_class") return RefactoringType::ExtractClass;
+    if (value == "simplifycondition" || value == "simplify_condition") return RefactoringType::SimplifyCondition;
+    if (value == "optimizeloop" || value == "optimize_loop") return RefactoringType::OptimizeLoop;
+    if (value == "reducecomplexity" || value == "reduce_complexity") return RefactoringType::ReduceComplexity;
+    if (value == "improvereadability" || value == "improve_readability") return RefactoringType::ImproveReadability;
+    return RefactoringType::Custom;
+}
+
+QString languageName(ProgrammingLanguage language)
+{
+    switch (language) {
+    case ProgrammingLanguage::Python: return "python";
+    case ProgrammingLanguage::JavaScript: return "javascript";
+    case ProgrammingLanguage::TypeScript: return "typescript";
+    case ProgrammingLanguage::Java: return "java";
+    case ProgrammingLanguage::CSharp: return "csharp";
+    case ProgrammingLanguage::Cpp: return "cpp";
+    case ProgrammingLanguage::C: return "c";
+    case ProgrammingLanguage::Go: return "go";
+    case ProgrammingLanguage::Rust: return "rust";
+    case ProgrammingLanguage::Ruby: return "ruby";
+    case ProgrammingLanguage::PHP: return "php";
+    case ProgrammingLanguage::Swift: return "swift";
+    case ProgrammingLanguage::Kotlin: return "kotlin";
+    case ProgrammingLanguage::SQL: return "sql";
+    case ProgrammingLanguage::HTML: return "html";
+    case ProgrammingLanguage::CSS: return "css";
+    case ProgrammingLanguage::Scala: return "scala";
+    case ProgrammingLanguage::Haskell: return "haskell";
+    default: return "unknown";
+    }
+}
+
+} // namespace
 
 CodeMagicToolBridge::CodeMagicToolBridge(
     std::shared_ptr<ClaudeToolSystem> toolSystem,
@@ -55,8 +124,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "analyze";
         cap.description = "Analyze code for issues";
-        cap.inputParameters = {{"code", "Code content"}, {"language", "Programming language"}};
-        cap.outputParameters = {{"issues", "List of issues found"}, {"metrics", "Code metrics"}};
+        cap.inputParams = {"code", "language"};
+        cap.outputParams = {"issues", "metrics"};
         capabilities.append(cap);
 
     } else if (toolId == "code-refactor") {
@@ -70,8 +139,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "refactor";
         cap.description = "Generate refactoring suggestions";
-        cap.inputParameters = {{"code", "Code to refactor"}, {"language", "Programming language"}};
-        cap.outputParameters = {{"suggestions", "Refactoring suggestions"}, {"refactoredCode", "Refactored code"}};
+        cap.inputParams = {"code", "language", "refactorType"};
+        cap.outputParams = {"success", "refactoredCode", "explanation"};
         capabilities.append(cap);
 
     } else if (toolId == "code-generator") {
@@ -85,8 +154,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "generate";
         cap.description = "Generate code from description";
-        cap.inputParameters = {{"description", "Code description"}, {"language", "Target language"}};
-        cap.outputParameters = {{"code", "Generated code"}, {"explanation", "Code explanation"}};
+        cap.inputParams = {"description", "language"};
+        cap.outputParams = {"code", "explanation"};
         capabilities.append(cap);
 
     } else if (toolId == "complexity-checker") {
@@ -100,8 +169,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "check";
         cap.description = "Calculate code complexity metrics";
-        cap.inputParameters = {{"code", "Code to analyze"}, {"language", "Programming language"}};
-        cap.outputParameters = {{"cyclomaticComplexity", "Cyclomatic complexity"}, {"cognitiveComplexity", "Cognitive complexity"}};
+        cap.inputParams = {"code", "language"};
+        cap.outputParams = {"cyclomaticComplexity", "level"};
         capabilities.append(cap);
 
     } else if (toolId == "security-analyzer") {
@@ -115,8 +184,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "analyze";
         cap.description = "Detect security issues";
-        cap.inputParameters = {{"code", "Code to analyze"}, {"language", "Programming language"}};
-        cap.outputParameters = {{"vulnerabilities", "Security vulnerabilities found"}, {"severity", "Issue severity levels"}};
+        cap.inputParams = {"code", "language"};
+        cap.outputParams = {"vulnerabilitiesFound", "severity"};
         capabilities.append(cap);
 
     } else if (toolId == "performance-analyzer") {
@@ -130,8 +199,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
         ToolCapabilityDefinition cap;
         cap.name = "analyze";
         cap.description = "Find performance issues";
-        cap.inputParameters = {{"code", "Code to analyze"}, {"language", "Programming language"}};
-        cap.outputParameters = {{"issues", "Performance issues found"}, {"suggestions", "Optimization suggestions"}};
+        cap.inputParams = {"code", "language"};
+        cap.outputParams = {"performanceIssues", "hasBottlenecks"};
         capabilities.append(cap);
 
     } else {
@@ -142,7 +211,8 @@ bool CodeMagicToolBridge::registerTool(const QString &toolId) {
     // 设置基本属性
     schema.capabilities = capabilities;
     schema.category = "Code";
-    schema.tags = QVector<QString>{"code", "analysis", "refactor"};
+    schema.tags = QStringList{"code", "analysis", "refactor"};
+    schema.minPermissionLevel = PermissionLevel::Internal;
 
     // 注册工具
     ToolPermission permission;
@@ -176,14 +246,21 @@ ToolExecutionResult CodeMagicToolBridge::executeCodeAnalyzer(const QVariantMap &
     }
 
     // 调用CodeMagic API
-    auto analysisResult = m_codeMagic->analyzeCode(code, language);
+    const auto analysisResult = m_codeMagic->analyzeCode(code, parseProgrammingLanguage(language));
+    const auto metrics = m_codeMagic->getCodeMetrics(code);
 
     QVariantMap resultMap;
     resultMap["issues"] = analysisResult.issues.size();
     resultMap["metrics"] = QVariantMap{
         {"lines", analysisResult.lineCount},
-        {"functions", analysisResult.functionCount}
+        {"characters", analysisResult.characterCount},
+        {"complexity", analysisResult.complexity},
+        {"functions", metrics.value("functions")}
     };
+    resultMap["quality"] = analysisResult.quality;
+    resultMap["maintainability"] = analysisResult.maintainability;
+    resultMap["security"] = analysisResult.security;
+    resultMap["performance"] = analysisResult.performance;
 
     QString executionId = QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch());
     return convertResult(executionId, "code-analyzer", resultMap);
@@ -202,17 +279,19 @@ ToolExecutionResult CodeMagicToolBridge::executeCodeRefactor(const QVariantMap &
     }
 
     // 构造重构请求
-    CodeRefactoringRequest request;
+    RefactoringRequest request;
     request.code = code;
-    request.language = language;
-    request.refactoringType = refactorType;
+    request.type = parseRefactoringType(refactorType);
+    request.description = refactorType;
+    request.options["language"] = language;
 
     auto refactoringResult = m_codeMagic->refactorCode(request);
 
     QVariantMap resultMap;
-    resultMap["success"] = refactoringResult.success;
+    resultMap["success"] = refactoringResult.successful;
     resultMap["originalCode"] = code;
     resultMap["refactoredCode"] = refactoringResult.refactoredCode;
+    resultMap["explanation"] = refactoringResult.explanation;
     resultMap["suggestions"] = QVariantList();
 
     QString executionId = QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch());
@@ -231,9 +310,9 @@ ToolExecutionResult CodeMagicToolBridge::executeCodeGenerator(const QVariantMap 
     }
 
     // 构造生成请求
-    GeneratedCodeRequest request;
+    CodeGenerationRequest request;
     request.description = description;
-    request.targetLanguage = language;
+    request.language = parseProgrammingLanguage(language);
 
     auto generatedCode = m_codeMagic->generateCode(request);
 
@@ -280,7 +359,7 @@ ToolExecutionResult CodeMagicToolBridge::executeSecurityAnalyzer(const QVariantM
     }
 
     // 查找安全问题
-    auto issues = m_codeMagic->findSecurityIssues(code, language);
+    auto issues = m_codeMagic->findSecurityIssues(code, parseProgrammingLanguage(language));
 
     QVariantMap resultMap;
     resultMap["vulnerabilitiesFound"] = issues.size();
@@ -302,7 +381,7 @@ ToolExecutionResult CodeMagicToolBridge::executePerformanceAnalyzer(const QVaria
     }
 
     // 查找性能问题
-    auto issues = m_codeMagic->findPerformanceIssues(code, language);
+    auto issues = m_codeMagic->findPerformanceIssues(code, parseProgrammingLanguage(language));
 
     QVariantMap resultMap;
     resultMap["performanceIssues"] = issues.size();
@@ -323,8 +402,10 @@ QVariantMap CodeMagicToolBridge::getStatistics() const {
     stats["registeredTools"] = static_cast<int>(m_registeredTools.size());
 
     if (m_totalExecutions > 0) {
-        float hitRate = (float)m_cacheHits / (m_cacheHits + m_cacheMisses);
-        stats["cacheHitRate"] = hitRate;
+        const int cacheSamples = m_cacheHits + m_cacheMisses;
+        stats["cacheHitRate"] = cacheSamples > 0
+            ? static_cast<float>(m_cacheHits) / cacheSamples
+            : 0.0f;
     }
 
     return stats;

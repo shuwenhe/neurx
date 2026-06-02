@@ -2,7 +2,7 @@
 
 #include "CoreAgent.h"
 #include <QMap>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <memory>
 
 /**
@@ -119,7 +119,7 @@ private:
     // Conversation history
     QVector<QVariantMap> m_conversationHistory;
     
-    mutable QMutex m_mutex;
+    mutable QRecursiveMutex m_mutex;
     
     QDateTime m_startedAt;
     

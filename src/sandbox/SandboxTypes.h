@@ -56,7 +56,8 @@ enum class SandboxType {
     MacosSeatbelt,      ///< macOS Seatbelt sandbox
     LinuxSeccomp,       ///< Linux seccomp-bpf or Landlock
     LinuxBubbleWrap,    ///< Linux bubblewrap (bwrap)
-    WindowsRestrictedToken ///< Windows Restricted Token
+    WindowsRestrictedToken, ///< Windows Restricted Token
+    Docker              ///< Docker-based containerization
 };
 
 /**

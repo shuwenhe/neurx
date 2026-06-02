@@ -1,6 +1,7 @@
 #include "ApprovalManager.h"
-#include <QDebug>
-#include <QDateTime>
+#include <QMap>
+#include <QMutex>
+#include <memory>
 
 /**
  * @class DefaultApprovalManager
@@ -15,13 +16,13 @@ class DefaultApprovalManager : public ApprovalManager {
     Q_OBJECT
 public:
     explicit DefaultApprovalManager(QObject *parent = nullptr);
-    
+
     // Policy configuration
     void setDefaultPolicy(const ApprovalPolicy &policy) override;
     ApprovalPolicy getDefaultPolicy() const override;
     void addGranularRule(const GranularApprovalConfig &rule) override;
     void removeGranularRule(const QString &resourcePattern) override;
-    
+
     // Approval requests
     void requestExecApproval(const ExecApprovalRequestEvent &request,
                             std::function<void(bool approved, ApprovalDecision decision)> callback) override;
@@ -29,17 +30,17 @@ public:
                                std::function<void(bool approved, ApprovalDecision decision)> callback) override;
     void requestGuardianAssessment(const ExecApprovalRequestEvent &request,
                                   std::function<void(GuardianAssessmentEvent)> callback) override;
-    
+
     bool requiresApproval(const QString &action, const QString &toolName) const override;
     AskForApproval getPolicyFor(const QString &toolName, const QString &resource) const override;
-    
+
     // Decision recording
     void recordDecision(const QString &approvalId,
                        ApprovalDecision decision,
                        const QString &reason) override;
     void recordAssessment(const GuardianAssessmentEvent &assessment) override;
     QVariantMap getApprovalStats() const override;
-    
+
     // Mode control
     void setReadOnlyMode(bool enabled) override;
     bool isReadOnlyMode() const override;
@@ -52,14 +53,14 @@ private:
         QDateTime requestedAt;
         bool processed{false};
     };
-    
+
     struct ApprovalStatistics {
         int totalRequests{0};
         int approvedCount{0};
         int rejectedCount{0};
         int averageDecisionTime{0}; // milliseconds
     };
-    
+
     ApprovalPolicy m_defaultPolicy;
     QVector<GranularApprovalConfig> m_granularRules;
     QMap<QString, PendingApproval> m_pendingApprovals;
@@ -67,11 +68,9 @@ private:
     ApprovalStatistics m_stats;
     bool m_readOnlyMode{false};
     mutable QMutex m_mutex;
-    
+
     AskForApproval getPolicyFor_impl(const QString &toolName, const QString &resource) const;
     bool checkGranularRules(const QString &toolName, const QString &resource) const;
 };
 
 using DefaultApprovalManagerPtr = std::shared_ptr<DefaultApprovalManager>;
-
-#endif // DEFAULTAPPROVALMANAGER_H

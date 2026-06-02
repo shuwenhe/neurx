@@ -369,7 +369,7 @@ private:
     /**
      * @brief 转换为权限请求
      */
-    ExecutionApprovalRequest createApprovalRequest(
+    ExecApprovalRequestEvent createApprovalRequest(
         const ToolExecutionRequest &toolRequest);
 
     /**

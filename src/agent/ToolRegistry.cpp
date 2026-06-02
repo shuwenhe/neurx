@@ -54,3 +54,34 @@ QJsonArray ToolRegistry::toOpenAISchema() const
     }
     return arr;
 }
+
+QJsonArray ToolRegistry::toGeminiSchema() const
+{
+    QJsonArray declarations;
+    for (const auto *t : m_tools) {
+        // Special case for Gemini's built-in grounding
+        if (t->name() == "google_search") continue;
+
+        QJsonObject dec;
+        dec["name"]        = t->name();
+        dec["description"] = t->description();
+        dec["parameters"]  = t->parametersSchema();
+        declarations.append(dec);
+    }
+
+    QJsonArray toolsArr;
+    if (!declarations.isEmpty()) {
+        QJsonObject fnDeclarations;
+        fnDeclarations["function_declarations"] = declarations;
+        toolsArr.append(fnDeclarations);
+    }
+
+    // Add native grounding if tool exists
+    if (m_tools.contains("google_search")) {
+        QJsonObject searchTool;
+        searchTool["google_search_retrieval"] = QJsonObject();
+        toolsArr.append(searchTool);
+    }
+
+    return toolsArr;
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QVector>
 #include <QMap>
 #include <QVariantMap>
@@ -138,5 +139,3 @@ using AgentStateChangeCallback = std::function<void(AgentState oldState, AgentSt
 using AgentRequestCallback = std::function<void(const AgentRequest &request)>;
 using AgentResponseCallback = std::function<void(const AgentResponse &response)>;
 using AgentErrorCallback = std::function<void(int errorCode, const QString &message)>;
-
-#endif // COREAGENTTYPE_H

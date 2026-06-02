@@ -13,6 +13,7 @@ Item {
     required property string     messageRole
     required property string     messageContent
     required property var        messageToolCalls   // list of {id, name, status, args, result}
+    required property var        messageAttachments // list of QVariantMap image attachments
 
     implicitHeight: bodyColumn.implicitHeight + 16
 
@@ -29,6 +30,7 @@ Item {
             || messageContent.indexOf("Rolled back workspace files") === 0)
     property bool toolsExpanded: false
     readonly property var contentBlocks: root.isAssistant ? parseBlocks(root.messageContent) : []
+    readonly property var attachments: root.messageAttachments || []
     readonly property color badgeColor: {
         if (isUser)
             return Theme.accent
@@ -135,7 +137,7 @@ Item {
                     : roleLabel.x + roleLabel.width + root.rowGap
                 y: 0
                 width: root.contentWidth
-                visible: root.messageContent.length > 0
+                visible: root.messageContent.length > 0 || root.attachments.length > 0
                 color: root.bubbleColor
                 radius: Theme.radius + 2
                 border.color: root.isUser ? Theme.accent : root.isCheckpointNotice ? Theme.success : Theme.border
@@ -159,6 +161,56 @@ Item {
                         font: Theme.uiFont
                         readOnly: true
                         selectByMouse: true
+                    }
+
+                    Flow {
+                        width: parent.width
+                        visible: root.attachments.length > 0
+                        spacing: 8
+
+                        Repeater {
+                            model: root.attachments
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                width: 110
+                                height: 118
+                                radius: Theme.radius
+                                color: Theme.bg
+                                border.color: Theme.border
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 6
+                                    spacing: 5
+
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 78
+                                        radius: 6
+                                        color: Theme.surface
+                                        border.color: Theme.border
+                                        clip: true
+
+                                        Image {
+                                            anchors.fill: parent
+                                            anchors.margins: 1
+                                            source: modelData.dataUrl || ""
+                                            fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                        }
+                                    }
+
+                                    Label {
+                                        width: parent.width
+                                        text: modelData.fileName || modelData.path || "image"
+                                        color: root.isUser ? "white" : Theme.textPrimary
+                                        font.pixelSize: Theme.fontXs
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     Repeater {
