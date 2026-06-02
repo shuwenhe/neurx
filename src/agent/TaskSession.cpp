@@ -60,6 +60,7 @@ QJsonObject snapshotToJson(const TaskSessionSnapshot &snapshot)
         : QString{};
     obj["todoItems"] = variantListToJsonArray(snapshot.todoItems);
     obj["executionTimeline"] = variantListToJsonArray(snapshot.executionTimeline);
+    obj["approvalProfile"] = QJsonValue::fromVariant(snapshot.approvalProfile);
 
     QJsonArray messagesJson;
     for (const auto &message : snapshot.messages)
@@ -85,6 +86,7 @@ TaskSessionSnapshot snapshotFromJson(const QJsonObject &obj)
     snapshot.updatedAt = QDateTime::fromString(obj.value("updatedAt").toString(), Qt::ISODateWithMs);
     snapshot.todoItems = jsonArrayToVariantList(obj.value("todoItems").toArray());
     snapshot.executionTimeline = jsonArrayToVariantList(obj.value("executionTimeline").toArray());
+    snapshot.approvalProfile = obj.value("approvalProfile").toObject().toVariantMap();
 
     for (const auto &value : obj.value("messages").toArray()) {
         if (value.isObject())
