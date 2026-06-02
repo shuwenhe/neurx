@@ -24,10 +24,15 @@ Item {
     property int gutterDigits: Math.max(2, String(root.lineCount).length)
     property int gutterWidth: Math.max(48, Math.ceil(editorFontMetrics.averageCharacterWidth * gutterDigits) + 18)
 
-    function syncFromAgent() {
-        if (editorArea && editorArea.text !== agent.currentFileContent) {
+    function syncFromAgent(resetView) {
+        if (editorArea && (editorArea.text !== agent.currentFileContent || resetView)) {
             syncingEditorFromAgent = true
             editorArea.text = agent.currentFileContent
+            if (resetView) {
+                editorArea.cursorPosition = 0
+                editorArea.contentX = 0
+                editorArea.contentY = 0
+            }
             syncingEditorFromAgent = false
         }
         updateCursorMetrics()
@@ -53,7 +58,7 @@ Item {
 
     Connections {
         target: agent
-        function onCurrentFilePathChanged() { root.syncFromAgent() }
+        function onCurrentFilePathChanged() { root.syncFromAgent(true) }
         function onCurrentFileContentChanged() { root.syncFromAgent() }
         function onOpenFilesChanged() {
             if (agent.currentFilePath)
@@ -635,7 +640,7 @@ Item {
 
                             onCursorPositionChanged: root.updateCursorMetrics()
                             Component.onCompleted: {
-                                root.syncFromAgent()
+                                root.syncFromAgent(true)
                                 if (agent.currentFilePath)
                                     forceActiveFocus()
                             }

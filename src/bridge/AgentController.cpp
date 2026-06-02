@@ -29,6 +29,7 @@
 #include <QProcessEnvironment>
 #include <QSaveFile>
 #include <QStandardPaths>
+#include <QUrl>
 #include <QDebug>
 #include <algorithm>
 #include <limits>
@@ -175,6 +176,19 @@ static QString normalizeOpenAICompatEndpoint(QString endpoint)
         return endpoint + QStringLiteral("/chat/completions");
 
     return endpoint + QStringLiteral("/v1/chat/completions");
+}
+
+static QString normalizeLocalFilePath(const QString &path)
+{
+    const QString trimmed = path.trimmed();
+    if (trimmed.isEmpty())
+        return {};
+
+    const QUrl url(trimmed);
+    if (url.isLocalFile())
+        return QFileInfo(url.toLocalFile()).absoluteFilePath();
+
+    return QFileInfo(trimmed).absoluteFilePath();
 }
 
 static QString fileDisplayName(const QString &path)
@@ -1520,10 +1534,16 @@ void AgentController::syncKnowledgeForPathChange(const QString &oldPath, const Q
 
 void AgentController::openEditorFile(const QString &filePath)
 {
-    QFile f(filePath);
+    const QString normalizedPath = normalizeLocalFilePath(filePath);
+    if (normalizedPath.isEmpty()) {
+        emit errorOccurred(QStringLiteral("Invalid file path."));
+        return;
+    }
+
+    QFile f(normalizedPath);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning().noquote() << "[AgentController] openEditorFile failed to open:" << filePath;
-        emit errorOccurred(QStringLiteral("Failed to open file: %1").arg(filePath));
+        qWarning().noquote() << "[AgentController] openEditorFile failed to open:" << normalizedPath;
+        emit errorOccurred(QStringLiteral("Failed to open file: %1").arg(normalizedPath));
         return;
     }
 
@@ -1532,7 +1552,7 @@ void AgentController::openEditorFile(const QString &filePath)
 
     int index = -1;
     for (int i = 0; i < m_documents.size(); ++i) {
-        if (m_documents[i].path == filePath) {
+        if (m_documents[i].path == normalizedPath) {
             index = i;
             break;
         }
@@ -1540,7 +1560,7 @@ void AgentController::openEditorFile(const QString &filePath)
 
     if (index < 0) {
         EditorDocument doc;
-        doc.path = filePath;
+        doc.path = normalizedPath;
         doc.content = content;
         doc.savedContent = content;
         doc.dirty = false;
@@ -1552,10 +1572,10 @@ void AgentController::openEditorFile(const QString &filePath)
         m_documents[index].savedContent = content;
     }
 
-    qInfo().noquote() << QStringLiteral("[AgentController] openEditorFile -> path=%1 index=%2 contentLen=%3").arg(filePath).arg(index).arg(content.size());
+    qInfo().noquote() << QStringLiteral("[AgentController] openEditorFile -> path=%1 index=%2 contentLen=%3").arg(normalizedPath).arg(index).arg(content.size());
     setCurrentEditorIndex(index);
-    if (m_workspaceContext) m_workspaceContext->recordFileAccess(filePath);
-    if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(filePath);
+    if (m_workspaceContext) m_workspaceContext->recordFileAccess(normalizedPath);
+    if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(normalizedPath);
 }
 
 bool AgentController::createWorkspaceEntry(const QString &parentPath, const QString &name, bool directory)
