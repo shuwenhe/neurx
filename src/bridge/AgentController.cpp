@@ -28,6 +28,7 @@
 #include <QList>
 #include <QProcessEnvironment>
 #include <QSaveFile>
+#include <QStandardPaths>
 #include <QDebug>
 #include <algorithm>
 #include <limits>
@@ -88,6 +89,72 @@ static bool hasAnyEnvValue(std::initializer_list<const char *> names)
             return true;
     }
     return false;
+}
+
+static QString defaultSecretsEnvPath()
+{
+    return QDir::homePath() + QStringLiteral("/.config/neurx-code/secrets.env");
+}
+
+static QString secretsEnvPathIfExists()
+{
+    const QString p1 = defaultSecretsEnvPath();
+    if (QFileInfo::exists(p1))
+        return p1;
+
+    const QString appCfg = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (!appCfg.isEmpty()) {
+        const QString p2 = QDir(appCfg).filePath(QStringLiteral("secrets.env"));
+        if (QFileInfo::exists(p2))
+            return p2;
+    }
+    return {};
+}
+
+static QHash<QString, QString> loadDotenvFile(const QString &path)
+{
+    QHash<QString, QString> out;
+    if (path.trimmed().isEmpty())
+        return out;
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return out;
+
+    QTextStream ts(&f);
+    while (!ts.atEnd()) {
+        QString line = ts.readLine().trimmed();
+        if (line.isEmpty() || line.startsWith('#'))
+            continue;
+        if (line.startsWith(QStringLiteral("export ")))
+            line = line.mid(7).trimmed();
+
+        const int eq = line.indexOf('=');
+        if (eq <= 0)
+            continue;
+
+        const QString key = line.left(eq).trimmed();
+        QString value = line.mid(eq + 1).trimmed();
+        if (value.size() >= 2) {
+            const QChar q = value.front();
+            if ((q == QLatin1Char('\"') || q == QLatin1Char('\'')) && value.back() == q)
+                value = value.mid(1, value.size() - 2);
+        }
+        if (!key.isEmpty() && !value.isEmpty())
+            out.insert(key, value);
+    }
+    return out;
+}
+
+static QString firstNonEmptySecretsValue(const QHash<QString, QString> &kv,
+                                        std::initializer_list<const char *> names)
+{
+    for (const char *name : names) {
+        const QString v = kv.value(QString::fromUtf8(name)).trimmed();
+        if (!v.isEmpty())
+            return v;
+    }
+    return {};
 }
 
 static QString normalizeOpenAICompatEndpoint(QString endpoint)
@@ -353,12 +420,36 @@ void AgentController::loadSettings()
         "OPENAI_BASE_URL",
     });
 
-    // Prefer environment variables over local settings so secrets/config can be injected
-    // at runtime without touching persisted QSettings.
-    m_openaiEndpoint = !envEndpoint.isEmpty() ? envEndpoint : endpoint.trimmed();
-    m_openaiEndpoint = normalizeOpenAICompatEndpoint(m_openaiEndpoint);
-    if (m_openaiEndpoint.isEmpty())
-        m_openaiEndpoint = QString::fromUtf8(kSiliconFlowOpenAIEndpoint);
+    const QString secretsPath = secretsEnvPathIfExists();
+    const auto secrets = loadDotenvFile(secretsPath);
+    const QString secretsEndpoint = firstNonEmptySecretsValue(secrets, {
+        "SILICONFLOW_API_URL",
+        "SILICONFLOW_API_ENDPOINT",
+        "SILICONFLOW_API_BASE_URL",
+        "OPENAI_API_URL",
+        "OPENAI_API_ENDPOINT",
+        "OPENAI_API_BASE_URL",
+        "OPENAI_BASE_URL",
+    });
+
+    const QString settingsEndpoint = endpoint.trimmed();
+
+    // Precedence: env > Settings(UI) > secrets.env > default.
+    QString chosenEndpoint;
+    if (!envEndpoint.isEmpty()) {
+        chosenEndpoint = envEndpoint;
+        m_openaiEndpointFromRuntime = true;
+    } else if (!settingsEndpoint.isEmpty()) {
+        chosenEndpoint = settingsEndpoint;
+        m_openaiEndpointFromRuntime = false;
+    } else if (!secretsEndpoint.isEmpty()) {
+        chosenEndpoint = secretsEndpoint;
+        m_openaiEndpointFromRuntime = true;
+    } else {
+        chosenEndpoint = QString::fromUtf8(kSiliconFlowOpenAIEndpoint);
+        m_openaiEndpointFromRuntime = false;
+    }
+    m_openaiEndpoint = normalizeOpenAICompatEndpoint(chosenEndpoint);
 
     m_anthropicApiKey = anthropicApiKey.trimmed();
 
@@ -367,7 +458,43 @@ void AgentController::loadSettings()
         "OPENAI_API_KEY",
         "OPENAI_COMPATIBLE_API_KEY",
     });
-    m_openaiApiKey = !envOpenaiKey.isEmpty() ? envOpenaiKey : openaiApiKey.trimmed();
+    const QString secretsOpenaiKey = firstNonEmptySecretsValue(secrets, {
+        "SILICONFLOW_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENAI_COMPATIBLE_API_KEY",
+    });
+    const QString settingsOpenaiKey = openaiApiKey.trimmed();
+
+    // Precedence: env > Settings(UI) > secrets.env.
+    if (!envOpenaiKey.isEmpty()) {
+        m_openaiApiKey = envOpenaiKey;
+        m_openaiApiKeyFromRuntime = true;
+    } else if (!settingsOpenaiKey.isEmpty()) {
+        m_openaiApiKey = settingsOpenaiKey;
+        m_openaiApiKeyFromRuntime = false;
+    } else {
+        m_openaiApiKey = secretsOpenaiKey;
+        m_openaiApiKeyFromRuntime = !secretsOpenaiKey.isEmpty();
+    }
+
+    // Try to load from local secrets.json if still empty or as an override fallback
+    if (m_openaiApiKey.isEmpty() || m_anthropicApiKey.isEmpty()) {
+        QString secretsPath = QDir::current().filePath(".neurx/secrets.json");
+        if (!workspace.isEmpty() && !QFileInfo::exists(secretsPath)) {
+            secretsPath = QDir(workspace).filePath(".neurx/secrets.json");
+        }
+        if (QFileInfo::exists(secretsPath)) {
+            QFile f(secretsPath);
+            if (f.open(QIODevice::ReadOnly)) {
+                const QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
+                if (m_openaiApiKey.isEmpty() && obj.contains("openai_api_key"))
+                    m_openaiApiKey = obj["openai_api_key"].toString().trimmed();
+                if (m_anthropicApiKey.isEmpty() && obj.contains("anthropic_api_key"))
+                    m_anthropicApiKey = obj["anthropic_api_key"].toString().trimmed();
+            }
+        }
+    }
+
     m_autoApproveTools = autoApprove;
 
     if (m_providers.contains(provider)) {
@@ -394,26 +521,14 @@ void AgentController::saveSettings() const
     s.setValue(kSettingsCurrentModel, m_currentModel);
     s.setValue(kSettingsAnthropicEndpoint, m_anthropicEndpoint);
 
-    // If endpoint/key are supplied via environment variables, treat them as runtime-only
+    // If endpoint/key are supplied via environment/secrets.env, treat them as runtime-only
     // and avoid persisting them into local QSettings.
-    if (!hasAnyEnvValue({
-            "SILICONFLOW_API_URL",
-            "SILICONFLOW_API_ENDPOINT",
-            "SILICONFLOW_API_BASE_URL",
-            "OPENAI_API_URL",
-            "OPENAI_API_ENDPOINT",
-            "OPENAI_API_BASE_URL",
-            "OPENAI_BASE_URL",
-        })) {
+    if (!m_openaiEndpointFromRuntime) {
         s.setValue(kSettingsOpenAIEndpoint, m_openaiEndpoint);
     }
 
     s.setValue(kSettingsAnthropicApiKey, m_anthropicApiKey);
-    if (!hasAnyEnvValue({
-            "SILICONFLOW_API_KEY",
-            "OPENAI_API_KEY",
-            "OPENAI_COMPATIBLE_API_KEY",
-        })) {
+    if (!m_openaiApiKeyFromRuntime) {
         s.setValue(kSettingsOpenAIApiKey, m_openaiApiKey);
     }
     s.setValue(kSettingsAutoApproveTools, m_autoApproveTools);
@@ -841,11 +956,11 @@ void AgentController::setAnthropicEndpoint(const QString &url)
 
 void AgentController::setOpenaiEndpoint(const QString &url)
 {
-    const QString normalized = url.trimmed().isEmpty()
-        ? QString::fromUtf8(kSiliconFlowOpenAIEndpoint)
-        : url.trimmed();
+    const QString fallback = QString::fromUtf8(kSiliconFlowOpenAIEndpoint);
+    const QString normalized = normalizeOpenAICompatEndpoint(url.trimmed().isEmpty() ? fallback : url);
     if (m_openaiEndpoint == normalized) return;
     m_openaiEndpoint = normalized;
+    m_openaiEndpointFromRuntime = false;
     saveSettings();
     if (auto *openai = qobject_cast<OpenAIProvider *>(m_providers.value("openai"))) {
         openai->setEndpointOverride(m_openaiEndpoint);
@@ -870,6 +985,7 @@ void AgentController::setOpenaiApiKey(const QString &key)
     const QString normalized = key.trimmed();
     if (m_openaiApiKey == normalized) return;
     m_openaiApiKey = normalized;
+    m_openaiApiKeyFromRuntime = false;
     if (auto *openai = qobject_cast<OpenAIProvider *>(m_providers.value("openai"))) {
         openai->setApiKey(m_openaiApiKey);
     }

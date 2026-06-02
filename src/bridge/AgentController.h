@@ -241,6 +241,8 @@ private:
     QString  m_anthropicApiKey;
     QString  m_openaiApiKey;
     QString  m_braveApiKey;
+    bool     m_openaiEndpointFromRuntime{false};
+    bool     m_openaiApiKeyFromRuntime{false};
     QString  m_currentFilePath;
     QString  m_currentFileContent;
     QHash<QString, QString> m_runningToolOutput;  // callId -> accumulated streaming output
