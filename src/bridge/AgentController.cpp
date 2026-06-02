@@ -25,6 +25,8 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QDir>
+#include <QList>
+#include <QProcessEnvironment>
 #include <QSaveFile>
 #include <QDebug>
 #include <algorithm>
@@ -62,6 +64,51 @@ static const char kSettingsBraveApiKey[]     = "brave_api_key";
 static const char kSettingsAutoApproveTools[] = "auto_approve_tools";
 static const char kSettingsWorkspacePath[] = "workspace_path";
 static const char kSettingsCurrentFilePath[] = "current_file_path";
+
+static QString envValue(const char *name)
+{
+    return QProcessEnvironment::systemEnvironment().value(name).trimmed();
+}
+
+static QString firstNonEmptyEnvValue(std::initializer_list<const char *> names)
+{
+    for (const char *name : names) {
+        const QString value = envValue(name);
+        if (!value.isEmpty())
+            return value;
+    }
+    return {};
+}
+
+static bool hasAnyEnvValue(std::initializer_list<const char *> names)
+{
+    const auto env = QProcessEnvironment::systemEnvironment();
+    for (const char *name : names) {
+        if (!env.value(name).trimmed().isEmpty())
+            return true;
+    }
+    return false;
+}
+
+static QString normalizeOpenAICompatEndpoint(QString endpoint)
+{
+    endpoint = endpoint.trimmed();
+    if (endpoint.isEmpty())
+        return {};
+    while (endpoint.endsWith('/'))
+        endpoint.chop(1);
+
+    if (endpoint.contains(QStringLiteral("/chat/completions")))
+        return endpoint;
+
+    if (endpoint.endsWith(QStringLiteral("/v1")))
+        return endpoint + QStringLiteral("/chat/completions");
+
+    if (endpoint.contains(QStringLiteral("/v1")))
+        return endpoint + QStringLiteral("/chat/completions");
+
+    return endpoint + QStringLiteral("/v1/chat/completions");
+}
 
 static QString fileDisplayName(const QString &path)
 {
@@ -294,11 +341,33 @@ void AgentController::loadSettings()
     m_anthropicEndpoint = anthropicEndpoint.trimmed().isEmpty()
         ? QStringLiteral("https://api.anthropic.com/v1/messages")
         : anthropicEndpoint.trimmed();
-    m_openaiEndpoint = endpoint.trimmed().isEmpty()
-        ? QString::fromUtf8(kSiliconFlowOpenAIEndpoint)
-        : endpoint.trimmed();
+    const QString envEndpoint = firstNonEmptyEnvValue({
+        // SiliconFlow / OpenAI-compatible
+        "SILICONFLOW_API_URL",
+        "SILICONFLOW_API_ENDPOINT",
+        "SILICONFLOW_API_BASE_URL",
+        // Generic OpenAI-compatible
+        "OPENAI_API_URL",
+        "OPENAI_API_ENDPOINT",
+        "OPENAI_API_BASE_URL",
+        "OPENAI_BASE_URL",
+    });
+
+    // Prefer environment variables over local settings so secrets/config can be injected
+    // at runtime without touching persisted QSettings.
+    m_openaiEndpoint = !envEndpoint.isEmpty() ? envEndpoint : endpoint.trimmed();
+    m_openaiEndpoint = normalizeOpenAICompatEndpoint(m_openaiEndpoint);
+    if (m_openaiEndpoint.isEmpty())
+        m_openaiEndpoint = QString::fromUtf8(kSiliconFlowOpenAIEndpoint);
+
     m_anthropicApiKey = anthropicApiKey.trimmed();
-    m_openaiApiKey = openaiApiKey.trimmed();
+
+    const QString envOpenaiKey = firstNonEmptyEnvValue({
+        "SILICONFLOW_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENAI_COMPATIBLE_API_KEY",
+    });
+    m_openaiApiKey = !envOpenaiKey.isEmpty() ? envOpenaiKey : openaiApiKey.trimmed();
     m_autoApproveTools = autoApprove;
 
     if (m_providers.contains(provider)) {
@@ -324,9 +393,29 @@ void AgentController::saveSettings() const
     s.setValue(kSettingsCurrentProvider, m_currentProvider);
     s.setValue(kSettingsCurrentModel, m_currentModel);
     s.setValue(kSettingsAnthropicEndpoint, m_anthropicEndpoint);
-    s.setValue(kSettingsOpenAIEndpoint, m_openaiEndpoint);
+
+    // If endpoint/key are supplied via environment variables, treat them as runtime-only
+    // and avoid persisting them into local QSettings.
+    if (!hasAnyEnvValue({
+            "SILICONFLOW_API_URL",
+            "SILICONFLOW_API_ENDPOINT",
+            "SILICONFLOW_API_BASE_URL",
+            "OPENAI_API_URL",
+            "OPENAI_API_ENDPOINT",
+            "OPENAI_API_BASE_URL",
+            "OPENAI_BASE_URL",
+        })) {
+        s.setValue(kSettingsOpenAIEndpoint, m_openaiEndpoint);
+    }
+
     s.setValue(kSettingsAnthropicApiKey, m_anthropicApiKey);
-    s.setValue(kSettingsOpenAIApiKey, m_openaiApiKey);
+    if (!hasAnyEnvValue({
+            "SILICONFLOW_API_KEY",
+            "OPENAI_API_KEY",
+            "OPENAI_COMPATIBLE_API_KEY",
+        })) {
+        s.setValue(kSettingsOpenAIApiKey, m_openaiApiKey);
+    }
     s.setValue(kSettingsAutoApproveTools, m_autoApproveTools);
     s.setValue(kSettingsWorkspacePath, m_workspacePath);
     s.setValue(kSettingsCurrentFilePath, m_currentFilePath);

@@ -65,18 +65,28 @@ else
     echo "[macos] WARNING: Qt6 not found. Set CMAKE_PREFIX_PATH or install via Homebrew."
 fi
 
-# ── Rust / Cargo check ───────────────────────────────────────────────────────
-if ! command -v cargo &>/dev/null && [ -x "$HOME/.cargo/bin/cargo" ]; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
+# ── Codex CLI (Rust) toggle ──────────────────────────────────────────────────
+# By default we skip building the bundled Codex CLI to avoid requiring Rust/cargo.
+# Enable explicitly with:
+#   NEURX_BUILD_CODEX_CLI=1 make mac
+NEURX_BUILD_CODEX_CLI="${NEURX_BUILD_CODEX_CLI:-0}"
 
-if command -v cargo &>/dev/null; then
-    echo "[macos] cargo found: $(cargo --version)"
-else
-    echo "[macos] WARNING: 'cargo' not found — Codex CLI will not be built."
-    echo "        Install Rust: curl https://sh.rustup.rs -sSf | sh"
-    echo "        Or pass -DBUILD_CODEX_CLI=OFF to skip."
+if [ "$NEURX_BUILD_CODEX_CLI" != "1" ]; then
+    echo "[macos] Codex CLI build disabled (set NEURX_BUILD_CODEX_CLI=1 to enable)"
     CMAKE_EXTRA_ARGS+=("-DBUILD_CODEX_CLI=OFF")
+else
+    # ── Rust / Cargo check ────────────────────────────────────────────────────
+    if ! command -v cargo &>/dev/null && [ -x "$HOME/.cargo/bin/cargo" ]; then
+        export PATH="$HOME/.cargo/bin:$PATH"
+    fi
+
+    if command -v cargo &>/dev/null; then
+        echo "[macos] cargo found: $(cargo --version)"
+    else
+        echo "[macos] ERROR: 'cargo' not found but NEURX_BUILD_CODEX_CLI=1."
+        echo "        Install Rust: curl https://sh.rustup.rs -sSf | sh"
+        exit 1
+    fi
 fi
 
 # ── Select generator ─────────────────────────────────────────────────────────
