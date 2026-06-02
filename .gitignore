@@ -1,0 +1,12 @@
+build/
+build-check/
+build-check-ai/
+*.user
+*.autosave
+.qmake.stash
+build-check-libs/
+
+# Build directories
+build-check/
+build/
+build*/
