@@ -10,3 +10,12 @@ build-check-libs/
 build-check/
 build/
 build*/
+
+# Local NeurX runtime state (may contain secrets)
+.neurx/
+
+# Local NeurX secrets/config
+.neurx/secrets.json
+
+# NeurX local state and secrets
+.neurx/
