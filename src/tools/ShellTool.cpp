@@ -6,6 +6,18 @@
 #include <QJsonDocument>
 #include <QProcess>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
+
+static bool matchesAny(const QString &text, const QStringList &patterns)
+{
+    const QString normalized = text.trimmed().toLower();
+    for (const auto &pattern : patterns) {
+        const QRegularExpression re(pattern, QRegularExpression::CaseInsensitiveOption);
+        if (re.match(normalized).hasMatch())
+            return true;
+    }
+    return false;
+}
 
 ShellTool::ShellTool(const QString &workingDir, QObject *parent)
     : BaseTool(parent), m_workingDir(workingDir)
@@ -46,6 +58,22 @@ bool ShellTool::isAllowed(const QString &command) const
     return false;
 }
 
+bool ShellTool::isDestructiveCommand(const QString &command) const
+{
+    return matchesAny(command, {
+        QStringLiteral(R"(\brm\b.*\s-rf\b)"),
+        QStringLiteral(R"(\bgit\b.*\breset\b.*\b--hard\b)"),
+        QStringLiteral(R"(\bgit\b.*\bclean\b.*\b-f\b)"),
+        QStringLiteral(R"(\bchmod\b.*\b-R\b.*\b777\b)"),
+        QStringLiteral(R"(\bchown\b.*\b-R\b)"),
+        QStringLiteral(R"(\bdd\b.*\bof=/dev/\w+\b)"),
+        QStringLiteral(R"(\bmkfs\w*\b)"),
+        QStringLiteral(R"(\bshutdown\b|\breboot\b|\bhalt\b)"),
+        QStringLiteral(R"(\bpowershell\b.*\bremove-item\b.*\b-recurse\b)"),
+        QStringLiteral(R"(\bdel\b.*\s\/s\b.*\s\/q\b)")
+    });
+}
+
 ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
 {
     const QString command = args["command"].toString().trimmed();
@@ -54,6 +82,16 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
 
     if (!isAllowed(command))
         return {callId, name(), true, "Command not in allowlist: " + command};
+
+    if (m_sandboxManager && m_sandboxManager->isReadOnlyMode() && isDestructiveCommand(command))
+        return {callId, name(), true, "Read-only sandbox mode blocks destructive shell commands."};
+
+    if (m_sandboxManager) {
+        for (const auto &meta : m_sandboxManager->protectedMetadataPaths()) {
+            if (!meta.isEmpty() && command.contains(meta))
+                return {callId, name(), true, "Command touches protected metadata: " + meta};
+        }
+    }
 
     const int timeout = args.value("timeout_ms").toInt(m_defaultTimeoutMs);
     const QString subDir = args.value("working_dir").toString();
@@ -66,13 +104,42 @@ ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
             cwd = abs;
     }
 
-    QProcess proc;
-    proc.setWorkingDirectory(cwd);
-
     auto env = QProcessEnvironment::systemEnvironment();
     const auto extraEnv = args.value("env").toObject();
     for (auto it = extraEnv.begin(); it != extraEnv.end(); ++it)
         env.insert(it.key(), it.value().toString());
+
+    if (m_sandboxManager && extraEnv.isEmpty()) {
+        SandboxExecRequest request;
+        request.commandLine = command;
+        request.workingDirectory = cwd;
+        request.sandboxMode = m_sandboxManager->isReadOnlyMode() ? SandboxMode::ReadOnly : SandboxMode::WorkspaceWrite;
+        request.fsPolicy = m_sandboxManager->getFileSystemPolicy();
+        request.netPolicy = m_sandboxManager->getNetworkPolicy();
+        request.timeoutMs = timeout;
+
+        QString output;
+        QString error;
+        int exitCode = -1;
+        m_sandboxManager->executeInSandbox(request, [&](int code, const QString &out, const QString &err) {
+            exitCode = code;
+            output = out;
+            error = err;
+        });
+
+        if (!output.isEmpty())
+            emit outputChunk(callId, output);
+
+        const bool failed = exitCode != 0;
+        const QString result = QString("Exit code: %1\n%2%3")
+                                   .arg(exitCode)
+                                   .arg(output)
+                                   .arg(error.isEmpty() ? QString() : QString("\n") + error);
+        return {callId, name(), failed, result};
+    }
+
+    QProcess proc;
+    proc.setWorkingDirectory(cwd);
     proc.setProcessEnvironment(env);
     proc.setProcessChannelMode(QProcess::MergedChannels);
 

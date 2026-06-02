@@ -1,5 +1,6 @@
 #pragma once
 #include "agent/ToolRegistry.h"
+#include "sandbox/SandboxManager.h"
 #include "tools/CheckpointManager.h"
 #include <QDir>
 #include <memory>
@@ -23,7 +24,10 @@ public:
     ToolResult  execute(const QString &callId, const QJsonObject &args) override;
     QString     summary(const QJsonObject &args) const override;
 
+    void setSandboxManager(SandboxManager *manager) { m_sandboxManager = manager; }
+
 private:
+    bool isWriteOperation(const QString &operation) const;
     ToolResult opReadFile(const QString &callId, const QJsonObject &args);
     ToolResult opWriteFile(const QString &callId, const QJsonObject &args);
     ToolResult opListDir(const QString &callId, const QJsonObject &args);
@@ -38,4 +42,5 @@ private:
 
     QDir m_root;
     std::unique_ptr<CheckpointManager> m_checkpointManager;
+    SandboxManager *m_sandboxManager{nullptr};
 };

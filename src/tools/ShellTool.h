@@ -1,5 +1,7 @@
 #pragma once
 #include "agent/ToolRegistry.h"
+#include "approvals/ApprovalManager.h"
+#include "sandbox/SandboxManager.h"
 #include <QProcess>
 
 // ── ShellTool ─────────────────────────────────────────────────────────────────
@@ -24,11 +26,16 @@ public:
 
     void setDefaultTimeoutMs(int ms) { m_defaultTimeoutMs = ms; }
     void setAllowedCommands(const QStringList &cmds) { m_allowlist = cmds; }
+    void setSandboxManager(SandboxManager *manager) { m_sandboxManager = manager; }
+    void setApprovalManager(ApprovalManager *manager) { m_approvalManager = manager; }
 
 private:
     bool isAllowed(const QString &command) const;
+    bool isDestructiveCommand(const QString &command) const;
 
     QString     m_workingDir;
     int         m_defaultTimeoutMs{30000};
     QStringList m_allowlist; // empty = all allowed
+    SandboxManager *m_sandboxManager{nullptr};
+    ApprovalManager *m_approvalManager{nullptr};
 };
