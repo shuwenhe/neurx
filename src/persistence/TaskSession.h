@@ -24,6 +24,7 @@ struct TaskSession {
     int currentStepIndex = 0;
     QVector<QVariantMap> checkpoints;    // 检查点历史
     QVariantMap metadata;                // 元数据
+    QVariantMap approvalProfile;         // 审批配置快照
 
     // 转换为JSON
     QJsonObject toJson() const;
