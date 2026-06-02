@@ -30,6 +30,7 @@ QJsonObject TaskSession::toJson() const {
         checkpointsArray.append(QJsonValue::fromVariant(cp));
     }
     json["checkpoints"] = checkpointsArray;
+    json["approvalProfile"] = QJsonValue::fromVariant(approvalProfile);
 
     return json;
 }
@@ -52,6 +53,8 @@ TaskSession TaskSession::fromJson(const QJsonObject &json) {
     for (const auto &cp : json["checkpoints"].toArray()) {
         session.checkpoints.append(cp.toVariant().toMap());
     }
+
+    session.approvalProfile = json["approvalProfile"].toObject().toVariantMap();
 
     return session;
 }
