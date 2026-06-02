@@ -1521,8 +1521,11 @@ void AgentController::syncKnowledgeForPathChange(const QString &oldPath, const Q
 void AgentController::openEditorFile(const QString &filePath)
 {
     QFile f(filePath);
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning().noquote() << "[AgentController] openEditorFile failed to open:" << filePath;
+        emit errorOccurred(QStringLiteral("Failed to open file: %1").arg(filePath));
         return;
+    }
 
     QTextStream in(&f);
     const QString content = in.readAll();

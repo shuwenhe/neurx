@@ -53,9 +53,9 @@ Item {
             text = decodeURIComponent(text)
         } catch (e) {
         }
-        if (text.startsWith("file:///"))
-            text = text.slice(8)
-        else if (text.startsWith("file://"))
+        // FolderListModel.filePath is typically a file:// URL.
+        // Strip the URL scheme while preserving the leading '/' in absolute paths.
+        if (text.startsWith("file://"))
             text = text.slice(7)
         return text.replace(/\\/g, "/")
     }
