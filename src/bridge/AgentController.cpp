@@ -1126,8 +1126,21 @@ QVariantMap AgentController::executePendingTool(const QString &approvalId)
             accumulatedOutput += chunk;
         });
 
+    const QMetaObject::Connection eventConn = connect(tool, &BaseTool::eventOccurred, this,
+        [&](const QString &chunkCallId, const QVariantMap &event) {
+            if (chunkCallId != approvalId)
+                return;
+            appendExecutionEvent(event.value("kind").toString(),
+                                 event.value("title").toString(),
+                                 event.value("status").toString(),
+                                 event.value("details").toString(),
+                                 event.value("toolName").toString(),
+                                 approvalId);
+        });
+
     const ToolResult toolResult = tool->execute(approvalId, variantMapToJsonObject(pending.arguments));
     disconnect(outputConn);
+    disconnect(eventConn);
 
     QVariantMap response;
     response.insert(QStringLiteral("toolName"), pending.toolName);
@@ -1274,8 +1287,21 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
             accumulatedOutput += chunk;
         });
 
+    const QMetaObject::Connection eventConn = connect(tool, &BaseTool::eventOccurred, this,
+        [&](const QString &chunkCallId, const QVariantMap &event) {
+            if (chunkCallId != callId)
+                return;
+            appendExecutionEvent(event.value("kind").toString(),
+                                 event.value("title").toString(),
+                                 event.value("status").toString(),
+                                 event.value("details").toString(),
+                                 event.value("toolName").toString(),
+                                 callId);
+        });
+
     const ToolResult toolResult = tool->execute(callId, variantMapToJsonObject(arguments));
     disconnect(outputConn);
+    disconnect(eventConn);
 
     response.insert(QStringLiteral("toolName"), toolName);
     response.insert(QStringLiteral("callId"), callId);

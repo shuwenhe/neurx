@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QDir>
 #include <QDebug>
 #include <QDateTime>
 
@@ -88,6 +89,21 @@ bool PermissionProfile::saveToFile(const QString &filePath) const {
 
     qDebug() << "Permission profile saved:" << filePath;
     return true;
+}
+
+QString PermissionProfile::defaultFilePath()
+{
+    return QDir::current().filePath(QStringLiteral(".claude-approval.json"));
+}
+
+PermissionProfile PermissionProfile::loadDefault()
+{
+    return loadFromFile(defaultFilePath());
+}
+
+bool PermissionProfile::saveDefault() const
+{
+    return saveToFile(defaultFilePath());
 }
 
 void PermissionProfile::setRule(OperationType type, const OperationApprovalRule &rule) {

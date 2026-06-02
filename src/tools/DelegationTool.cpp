@@ -89,6 +89,34 @@ ToolResult DelegationTool::execute(const QString &callId, const QJsonObject &arg
     });
 
     // Start the sub-agent
+    connect(&subEngine, &AgentEngine::tokenReceived, [&](const TokenEvent &ev) {
+        if (ev.type == TokenEvent::Type::TextDelta) {
+            emit outputChunk(callId, ev.delta);
+        }
+    });
+
+    connect(&subEngine, &AgentEngine::toolExecuting, [&](const ToolCall &subCall) {
+        emit outputChunk(callId, QString("\n> Sub-Agent Action: %1\n").arg(subCall.name));
+        QVariantMap event;
+        event["kind"] = "subagent_tool";
+        event["title"] = "Sub-Agent: " + subCall.name;
+        event["status"] = "running";
+        event["toolName"] = subCall.name;
+        emit eventOccurred(callId, event);
+    });
+
+    connect(&subEngine, &AgentEngine::toolFinished, [&](const ToolResult &res) {
+        if (res.isError) {
+            emit outputChunk(callId, QString("\n! Sub-Agent Tool Failed: %1\n").arg(res.content));
+        }
+        QVariantMap event;
+        event["kind"] = "subagent_tool";
+        event["title"] = "Sub-Agent: " + res.name;
+        event["status"] = res.isError ? "error" : "done";
+        event["details"] = res.content.left(100);
+        emit eventOccurred(callId, event);
+    });
+
     subEngine.submitUserMessage("Please complete the following task: " + task);
 
     loop.exec();

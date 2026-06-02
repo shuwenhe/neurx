@@ -654,7 +654,20 @@ QString ToolBridge::smartExecute(
 
     // 推荐工具
     auto discovery = m_toolSystem->getToolDiscovery();
-    auto tools = discovery->recommendTools(description, 5);
+    QVector<ToolSchema> tools;
+    bool completed = false;
+    QEventLoop loop;
+    discovery->recommendTools(description, [&](const QVector<ToolSchema> &result) {
+        tools = result;
+        completed = true;
+        if (loop.isRunning()) {
+            loop.quit();
+        }
+    });
+
+    if (!completed) {
+        loop.exec();
+    }
 
     locker.unlock();
 
