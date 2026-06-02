@@ -5,6 +5,26 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QVariant>
+#include <QVariantMap>
+
+static QList<MessageImageAttachment> extractImageAttachments(const AgentMessage &msg)
+{
+    QList<MessageImageAttachment> images;
+    for (const QVariant &value : msg.attachments) {
+        const QVariantMap map = value.toMap();
+        if (map.value("type").toString() != QStringLiteral("image"))
+            continue;
+        MessageImageAttachment image;
+        image.path = map.value("path").toString();
+        image.mimeType = map.value("mimeType").toString();
+        image.dataUrl = map.value("dataUrl").toString();
+        image.altText = map.value("altText").toString();
+        if (!image.dataUrl.isEmpty())
+            images.append(image);
+    }
+    return images;
+}
 
 static constexpr char kBaseUrl[] = "https://api.siliconflow.cn/v1/chat/completions";
 
@@ -163,7 +183,28 @@ QJsonArray OpenAIProvider::buildMessages(const QList<AgentMessage> &history) con
             m["tool_calls"] = calls;
         }
 
-        m["content"] = msg.content;
+        const auto images = extractImageAttachments(msg);
+        if (images.isEmpty()) {
+            m["content"] = msg.content;
+        } else {
+            QJsonArray content;
+            if (!msg.content.isEmpty()) {
+                QJsonObject textBlock;
+                textBlock["type"] = "text";
+                textBlock["text"] = msg.content;
+                content.append(textBlock);
+            }
+            for (const auto &image : images) {
+                QJsonObject imageUrl;
+                imageUrl["url"] = image.dataUrl;
+
+                QJsonObject block;
+                block["type"] = "image_url";
+                block["image_url"] = imageUrl;
+                content.append(block);
+            }
+            m["content"] = content;
+        }
         arr.append(m);
     }
     return arr;
