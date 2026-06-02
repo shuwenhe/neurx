@@ -10,12 +10,15 @@ Item {
     id: root
 
     required property var    model         // ChatModel*
+    required property var    agent
     required property bool   busy
     required property string streamingText
 
     signal sendMessage(string text)
     signal interrupt()
     signal clearHistory()
+    signal attachImageRequested()
+    signal pasteImageRequested()
 
     Rectangle {
         anchors.fill: parent
@@ -111,6 +114,7 @@ Item {
                     required property string role
                     required property string content
                     required property var toolCalls
+                    required property var attachments
 
                     width: listView.width
                     implicitHeight: bubble.implicitHeight
@@ -121,6 +125,7 @@ Item {
                         messageRole: parent.role
                         messageContent: parent.content
                         messageToolCalls: parent.toolCalls
+                        messageAttachments: parent.attachments
                     }
                 }
 
@@ -215,11 +220,90 @@ Item {
                     }
                 }
 
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Button {
+                        text: "Attach image"
+                        enabled: !root.busy
+                        onClicked: root.attachImageRequested()
+                    }
+
+                    Button {
+                        text: "Paste image"
+                        enabled: !root.busy
+                        onClicked: root.pasteImageRequested()
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    Button {
+                        text: "Clear attachments"
+                        enabled: !root.busy && root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
+                        onClicked: root.agent.clearPendingAttachments()
+                    }
+                }
+
+                Repeater {
+                    model: root.agent && root.agent.pendingAttachments ? root.agent.pendingAttachments : []
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        implicitHeight: 44
+                        radius: Theme.radius
+                        color: Theme.surfaceAlt
+                        border.color: Theme.border
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            spacing: 8
+
+                            Rectangle {
+                                width: 28
+                                height: 28
+                                radius: 6
+                                color: Theme.surface
+                                border.color: Theme.border
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "🖼"
+                                    font.pixelSize: Theme.fontSm
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+
+                                Label {
+                                    text: modelData.fileName || modelData.path || "Image attachment"
+                                    color: Theme.textPrimary
+                                    font.pixelSize: Theme.fontSm
+                                    elide: Text.ElideRight
+                                }
+
+                                Label {
+                                    text: modelData.altText || modelData.mimeType || ""
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.fontXs
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Button {
                     Layout.fillWidth: true
                     implicitHeight: 40
                     text: root.busy ? "Stop response" : "NeurX"
-                    enabled: root.busy || inputArea.text.trim().length > 0
+                    enabled: root.busy
+                             || inputArea.text.trim().length > 0
+                             || (root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0)
                     highlighted: !root.busy
 
                     background: Rectangle {
@@ -267,13 +351,23 @@ Item {
                         }
                     }
                 }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: "Commands: /help /plan /review /search /checkpoint /delegate"
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.fontXs
+                    elide: Text.ElideRight
+                }
             }
         }
     }
 
     function submitInput() {
         const txt = inputArea.text.trim()
-        if (txt.length === 0) return
+        const hasAttachments = root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
+        if (txt.length === 0 && !hasAttachments)
+            return
         inputArea.text = ""
         root.sendMessage(txt)
     }

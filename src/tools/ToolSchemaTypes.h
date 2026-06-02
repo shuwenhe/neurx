@@ -226,5 +226,3 @@ using ToolExecutionCallback = std::function<void(const ToolExecutionResult&)>;
 using ToolDiscoveryCallback = std::function<void(const QVector<ToolSchema>&)>;
 using ToolPermissionCallback = std::function<void(bool granted, const QString& reason)>;
 using ToolChainCallback = std::function<void(const QVector<ToolExecutionResult>&)>;
-
-#endif // TOOLSCHEMATYPES_H

@@ -138,17 +138,88 @@ Item {
                     title: "Safety"
                     background: Rectangle { color: Theme.surfaceAlt; radius: Theme.radius }
 
-                    RowLayout {
+                    ColumnLayout {
                         width: parent.width
-                        Label {
-                            text: "Auto-approve tool calls"
-                            color: Theme.textPrimary
-                            font.pixelSize: Theme.fontMd
-                            Layout.fillWidth: true
+                        spacing: 6
+
+                        RowLayout {
+                            width: parent.width
+                            Label {
+                                text: "Auto-approve safe tools"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: root.agent.autoApproveTools
+                                onToggled: root.agent.autoApproveTools = checked
+                            }
                         }
-                        Switch {
-                            checked: root.agent.autoApproveTools
-                            onToggled: root.agent.autoApproveTools = checked
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: "When enabled, read-only tools can run automatically. Commands, patches, and file writes still ask first."
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontXs
+                            wrapMode: Text.Wrap
+                        }
+                    }
+                }
+
+                GroupBox {
+                    Layout.fillWidth: true
+                    title: "Workspace Skills"
+                    background: Rectangle { color: Theme.surfaceAlt; radius: Theme.radius }
+
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 6
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: root.agent.localSkills.length > 0
+                                ? "Discovered local instructions and skills"
+                                : "No workspace-local skills found yet."
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontSm
+                            wrapMode: Text.Wrap
+                        }
+
+                        Repeater {
+                            model: root.agent.localSkills
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                radius: Theme.radius
+                                color: Theme.surface
+                                border.color: Theme.border
+                                implicitHeight: skillColumn.implicitHeight + 12
+
+                                ColumnLayout {
+                                    id: skillColumn
+                                    anchors.fill: parent
+                                    anchors.margins: 6
+                                    spacing: 2
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: "[" + (modelData.kind || "skill") + "] " + (modelData.title || "")
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.fontSm
+                                        font.bold: true
+                                    }
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: modelData.description || modelData.path || ""
+                                        color: Theme.textMuted
+                                        font.pixelSize: Theme.fontXs
+                                        wrapMode: Text.Wrap
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -175,6 +246,27 @@ Item {
                                 radius: Theme.radius
                             }
                             placeholderText: "Custom system prompt…"
+                        }
+                    }
+                }
+
+                GroupBox {
+                    Layout.fillWidth: true
+                    title: "Sessions"
+                    background: Rectangle { color: Theme.surfaceAlt; radius: Theme.radius }
+
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 8
+
+                        SessionPanel {
+                            Layout.fillWidth: true
+                            recentSessions: root.agent.recentSessions
+                            executionTimeline: root.agent.executionTimeline
+                            currentThreadId: root.agent.currentThreadId
+                            onResumeRequested: sessionId => root.agent.resumeTaskSession(sessionId)
+                            onNewSessionRequested: root.agent.clearHistory()
+                            onForkRequested: root.agent.forkCurrentThread()
                         }
                     }
                 }

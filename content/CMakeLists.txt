@@ -9,7 +9,10 @@ qt6_add_qml_module(content
     QML_FILES
         App.qml
         ChatPanel.qml
+        ActivityPanel.qml
         SessionPanel.qml
+        CodeMagicPanel.qml
+        ToolRegistryPanel.qml
         LocalToolsPanel.qml
         CheckpointRestoreDialog.qml
         EditorPanel.qml

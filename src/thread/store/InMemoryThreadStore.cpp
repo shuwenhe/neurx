@@ -39,6 +39,30 @@ void InMemoryThreadStore::createThread(const CreateThreadParams &params,
     emit threadModified(newId);
 }
 
+void InMemoryThreadStore::upsertThread(const StoredThread &thread,
+                                       std::function<void(ThreadStoreError)> callback)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (thread.id.isNull()) {
+        locker.unlock();
+        if (callback)
+            callback(ThreadStoreError::InvalidOperation);
+        return;
+    }
+
+    ThreadData &data = m_threads[thread.id];
+    data.thread = thread;
+    if (data.thread.metadata.threadId.isNull())
+        data.thread.metadata.threadId = thread.id;
+    data.thread.metadata.lastModified = QDateTime::currentDateTime();
+    locker.unlock();
+
+    if (callback)
+        callback(ThreadStoreError::Success);
+    emit threadModified(thread.id);
+}
+
 void InMemoryThreadStore::forkThread(const ThreadId &parentId,
                                      const QVariantMap &forkContext,
                                      std::function<void(ThreadStoreError, ThreadId)> callback)

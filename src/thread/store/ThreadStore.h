@@ -28,6 +28,10 @@ public:
     /// Create a new thread with initial parameters
     virtual void createThread(const CreateThreadParams &params,
                              std::function<void(ThreadStoreError, ThreadId)> callback) = 0;
+
+    /// Upsert a thread record using an explicit thread id.
+    virtual void upsertThread(const StoredThread &thread,
+                             std::function<void(ThreadStoreError)> callback) = 0;
     
     /// Fork an existing thread (branch into parallel execution)
     virtual void forkThread(const ThreadId &parentId,

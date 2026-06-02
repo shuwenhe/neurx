@@ -48,12 +48,39 @@ Item {
         root.cursorColumn = Math.max(1, parts[parts.length - 1].length + 1)
     }
 
+    function lineFromIndex(text, position) {
+        const prefix = text.slice(0, Math.max(0, position))
+        return Math.max(1, prefix.split("\n").length)
+    }
+
     function editorCursorY() {
         if (!agent.currentFilePath || !editorArea)
             return 0
 
         const rect = editorArea.positionToRectangle(editorArea.cursorPosition)
         return rect.y
+    }
+
+    function syncSelectionToAgent() {
+        if (!agent.currentFilePath || !editorArea) {
+            agent.clearCurrentSelection()
+            return
+        }
+
+        const hasSelection = editorArea.selectedText && editorArea.selectedText.length > 0
+        if (!hasSelection) {
+            agent.clearCurrentSelection()
+            return
+        }
+
+        const startLine = root.lineFromIndex(editorArea.text, editorArea.selectionStart)
+        const endLine = root.lineFromIndex(editorArea.text, editorArea.selectionEnd)
+        agent.setCurrentSelection(
+            agent.currentFilePath,
+            editorArea.selectedText,
+            startLine,
+            Math.max(startLine, endLine)
+        )
     }
 
     Connections {
@@ -510,8 +537,11 @@ Item {
                             border.width: 1
                         }
                         onClicked: {
-                            const lines = editorArea.text.length > 0 ? editorArea.text.split("\n").length : 0
-                            agent.injectSelection(agent.currentFilePath, editorArea.text, 1, lines)
+                            const hasSelection = editorArea.selectedText && editorArea.selectedText.length > 0
+                            const payload = hasSelection ? editorArea.selectedText : editorArea.text
+                            const startLine = hasSelection ? root.lineFromIndex(editorArea.text, editorArea.selectionStart) : 1
+                            const endLine = hasSelection ? root.lineFromIndex(editorArea.text, editorArea.selectionEnd) : root.lineFromIndex(editorArea.text, editorArea.text.length)
+                            agent.injectSelection(agent.currentFilePath, payload, startLine, Math.max(startLine, endLine))
                         }
                     }
                 }
@@ -636,8 +666,12 @@ Item {
                                     return
                                 if (agent.currentFileContent !== text)
                                     agent.currentFileContent = text
+                                Qt.callLater(() => root.syncSelectionToAgent())
                             }
 
+                            onSelectionStartChanged: root.syncSelectionToAgent()
+                            onSelectionEndChanged: root.syncSelectionToAgent()
+                            onSelectedTextChanged: root.syncSelectionToAgent()
                             onCursorPositionChanged: root.updateCursorMetrics()
                             Component.onCompleted: {
                                 root.syncFromAgent(true)

@@ -47,9 +47,10 @@ public:
     BaseTool *tool(const QString &name) const;
     QList<BaseTool *> allTools() const;
 
-    // Produce the tools array for an LLM request (OpenAI / Anthropic schema).
+    // Produce the tools array for an LLM request (OpenAI / Anthropic / Gemini schema).
     QJsonArray toOpenAISchema()    const;
     QJsonArray toAnthropicSchema() const;
+    QJsonArray toGeminiSchema()    const;
 
 private:
     QHash<QString, BaseTool *> m_tools;

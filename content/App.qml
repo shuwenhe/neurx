@@ -181,20 +181,66 @@ ApplicationWindow {
                     }
                 }
 
-                // Right: agent
-                ChatPanel {
-                    id: agentPanel
+                // Right: agent workspace
+                ColumnLayout {
+                    id: agentWorkspace
                     Layout.preferredWidth: root.agentWidth
                     Layout.minimumWidth: root.minAgentWidth
                     Layout.maximumWidth: root.agentWidth
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    model: agentCtx.chatModel
-                    busy: agentCtx.busy
-                    streamingText: agentCtx.streamingText
-                    onSendMessage: text => agentCtx.sendMessage(text)
-                    onInterrupt: agentCtx.interrupt()
-                    onClearHistory: agentCtx.clearHistory()
+                    spacing: 8
+
+                    TabBar {
+                        id: agentTabs
+                        Layout.fillWidth: true
+                        currentIndex: 0
+
+                        TabButton { text: "Chat" }
+                        TabButton { text: "Activity" }
+                        TabButton { text: "CodeMagic" }
+                        TabButton { text: "Tools" }
+                    }
+
+                    StackLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        currentIndex: agentTabs.currentIndex
+
+                        ChatPanel {
+                            id: agentPanel
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            agent: agentCtx
+                            model: agentCtx.chatModel
+                            busy: agentCtx.busy
+                            streamingText: agentCtx.streamingText
+                            onSendMessage: text => agentCtx.sendMessage(text)
+                            onInterrupt: agentCtx.interrupt()
+                            onClearHistory: agentCtx.clearHistory()
+                            onAttachImageRequested: imagePicker.open()
+                            onPasteImageRequested: agentCtx.attachImageFromClipboard()
+                        }
+
+                        ActivityPanel {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            executionTimeline: agentCtx.executionTimeline
+                            currentThreadId: agentCtx.currentThreadId
+                        }
+
+                        CodeMagicPanel {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            agent: agentCtx
+                        }
+
+                        ToolRegistryPanel {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            agent: agentCtx
+                        }
+                    }
                 }
             }
         }
@@ -360,6 +406,14 @@ ApplicationWindow {
         onConfirmed: checkpointId => agentCtx.rollbackCheckpoint(checkpointId)
     }
 
+    FileDialog {
+        id: imagePicker
+        title: "Attach image"
+        nameFilters: [ "Images (*.png *.jpg *.jpeg *.gif *.bmp *.webp)" ]
+        fileMode: FileDialog.OpenFile
+        onAccepted: agentCtx.attachImageFromPath(selectedFile.toString())
+    }
+
     // ── File picker (uses native dialog via QML FileDialog) ───────────────
     FolderDialog {
         id: workspacePicker
@@ -399,8 +453,11 @@ ApplicationWindow {
 
     Connections {
         target: agentCtx
-        function onToolApprovalRequired(callId, toolName, summary) {
-            approvalDialog.show(callId, toolName, summary)
+        function onToolApprovalRequired(callId, toolName, summary, riskLevel) {
+            approvalDialog.show(callId, toolName, summary, riskLevel)
+        }
+        function onCheckpointRestoreRequested(checkpointId, description, files) {
+            checkpointRestoreDialog.show(checkpointId, description, files)
         }
         function onErrorOccurred(message) {
             errorBanner.showError(message)

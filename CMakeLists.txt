@@ -54,13 +54,21 @@ add_library(neurx_core STATIC
     # LLM providers
     src/llm/LLMProvider.cpp
     src/llm/AnthropicProvider.cpp
+    src/llm/GeminiProvider.cpp
     src/llm/OpenAIProvider.cpp
     src/llm/OllamaProvider.cpp
     src/llm/ToolCallRepair.cpp
+    # Core / Code magic
+    src/core/DefaultCoreAgent.cpp
+    src/code/DefaultCodeMagic.cpp
     # Tools
     src/tools/CheckpointManager.cpp
     src/tools/CheckpointTool.cpp
+    src/tools/DockerShellTool.cpp
     src/tools/FileSystemTool.cpp
+    src/tools/GitHubTool.cpp
+    src/tools/GitLabTool.cpp
+    src/tools/JiraTool.cpp
     src/tools/MemoryTool.cpp
     src/tools/PatchTool.cpp
     src/tools/SessionStore.cpp
@@ -70,6 +78,7 @@ add_library(neurx_core STATIC
     src/tools/WebSearchTool.cpp
     src/tools/TodoTool.cpp
     src/tools/CodexTool.cpp
+    src/tools/DelegationTool.cpp
     src/tools/McpClient.cpp
     src/tools/McpProxyTool.cpp
     src/tools/KnowledgeTool.cpp

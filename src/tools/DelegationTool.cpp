@@ -48,9 +48,19 @@ ToolResult DelegationTool::execute(const QString &callId, const QJsonObject &arg
     subEngine.setActiveModel(m_model);
     subEngine.setAutoApproveTools(true); // Sub-agents usually run in full-auto
 
-    // Inject system prompt extension for sub-agent
-    QString subSystemPrompt = "You are a specialized sub-agent delegated to handle this specific task: " + task +
-                             "\nFocus strictly on this task and return a clear summary when done.";
+    // Inject specialized system prompt based on role
+    const QString role = args["role"].toString("Generalist");
+    QString subSystemPrompt = QString("You are a %1 sub-agent. Task: %2\n").arg(role, task);
+
+    if (role == "Tester") {
+        subSystemPrompt += "Focus: Write comprehensive tests (unit, integration). Follow existing project test patterns.";
+    } else if (role == "Cleaner") {
+        subSystemPrompt += "Focus: Fix style violations, lint errors, and improve documentation. Do not change logic.";
+    } else if (role == "Coder") {
+        subSystemPrompt += "Focus: Implement details based on the provided architecture. Adhere strictly to interfaces.";
+    }
+
+    subSystemPrompt += "\nReturn a concise summary of changes and any remaining issues.";
     subEngine.setSystemPrompt(subSystemPrompt);
 
     // If context files are provided, inject them

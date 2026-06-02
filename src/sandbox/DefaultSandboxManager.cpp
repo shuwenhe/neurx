@@ -1,9 +1,11 @@
 #include "DefaultSandboxManager.h"
+#include <QMutexLocker>
 #include <QDebug>
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QProcess>
 #include <QCoreApplication>
+#include <algorithm>
 
 DefaultSandboxManager::DefaultSandboxManager(QObject *parent)
     : SandboxManager(parent)
@@ -176,10 +178,12 @@ bool DefaultSandboxManager::canAccess(const QString &path, FileSystemAccessMode 
 void DefaultSandboxManager::executeInSandbox(const SandboxExecRequest &request,
                                             std::function<void(int, const QString &, const QString &)> callback)
 {
-    if (m_readOnlyMode && request.writePermission != FileSystemAccessMode::Read) {
+    if (m_readOnlyMode && request.sandboxMode != SandboxMode::ReadOnly) {
         if (callback) {
             callback(-1, "", "Read-only mode enabled");
         }
+        QMutexLocker locker(&m_mutex);
+        m_stats.accessDeniedCount++;
         return;
     }
     
@@ -194,16 +198,36 @@ void DefaultSandboxManager::executeInSandbox(const SandboxExecRequest &request,
     }
 }
 
+void DefaultSandboxManager::recordExecutionEvent(const QVariantMap &event)
+{
+    emit sandboxExecutionEvent(event);
+}
+
 void DefaultSandboxManager::transformPermissions(const SandboxTransformRequest &request,
                                                  std::function<void(const FileSystemSandboxPolicy &)> callback)
 {
     QMutexLocker locker(&m_mutex);
     
     FileSystemSandboxPolicy transformed = m_fsPolicy;
-    
-    // Apply granular rules based on tool context
-    if (!request.toolContext.isEmpty()) {
-        // Could apply tool-specific policies here
+
+    // Apply a lightweight transformation based on the requested tool and paths.
+    for (const auto &path : request.requestedPaths) {
+        if (!transformed.allowedReadPaths.contains(path)) {
+            transformed.allowedReadPaths.append(path);
+        }
+
+        const bool looksWritable = request.toolName.contains("patch", Qt::CaseInsensitive)
+            || request.toolName.contains("file", Qt::CaseInsensitive)
+            || request.toolName.contains("write", Qt::CaseInsensitive)
+            || request.toolName.contains("edit", Qt::CaseInsensitive);
+
+        if (looksWritable && !m_readOnlyMode && !transformed.allowedWritePaths.contains(path)) {
+            transformed.allowedWritePaths.append(path);
+        }
+
+        if (isProtectedMetadata(path) && !transformed.deniedPaths.contains(path)) {
+            transformed.deniedPaths.append(path);
+        }
     }
     
     locker.unlock();
@@ -275,18 +299,35 @@ void DefaultSandboxManager::executeWithBwrap(const SandboxExecRequest &request,
                                             std::function<void(int, const QString &, const QString &)> callback)
 {
     QStringList args = buildBwrapCommand(request);
-    args << request.command;
+    args << "--" << "/bin/bash" << "-lc" << request.commandLine;
     
     QProcess process;
     process.start("bwrap", args);
+
+    if (!process.waitForStarted(5000)) {
+        QMutexLocker locker(&m_mutex);
+        m_stats.failedExecutions++;
+        locker.unlock();
+
+        if (callback) {
+            callback(-1, "", "Failed to start sandboxed process");
+        }
+        return;
+    }
     
-    if (!process.waitForFinished()) {
+    const int timeoutMs = request.timeoutMs > 0 ? request.timeoutMs : -1;
+    if (!process.waitForFinished(timeoutMs)) {
+        process.kill();
+        process.waitForFinished(1000);
+        const QString partialOutput = process.readAllStandardOutput();
+        const QString partialError = process.readAllStandardError();
+
         QMutexLocker locker(&m_mutex);
         m_stats.failedExecutions++;
         locker.unlock();
         
         if (callback) {
-            callback(-1, "", "Process failed to complete");
+            callback(-1, partialOutput, partialError.isEmpty() ? "Process timed out" : partialError);
         }
         return;
     }
@@ -321,15 +362,32 @@ void DefaultSandboxManager::executeWithoutSandbox(const SandboxExecRequest &requ
                                                  std::function<void(int, const QString &, const QString &)> callback)
 {
     QProcess process;
-    process.start("/bin/bash", QStringList() << "-c" << request.command);
+    process.start("/bin/bash", QStringList() << "-lc" << request.commandLine);
+
+    if (!process.waitForStarted(5000)) {
+        QMutexLocker locker(&m_mutex);
+        m_stats.failedExecutions++;
+        locker.unlock();
+
+        if (callback) {
+            callback(-1, "", "Failed to start process");
+        }
+        return;
+    }
     
-    if (!process.waitForFinished()) {
+    const int timeoutMs = request.timeoutMs > 0 ? request.timeoutMs : -1;
+    if (!process.waitForFinished(timeoutMs)) {
+        process.kill();
+        process.waitForFinished(1000);
+        const QString partialOutput = process.readAllStandardOutput();
+        const QString partialError = process.readAllStandardError();
+
         QMutexLocker locker(&m_mutex);
         m_stats.failedExecutions++;
         locker.unlock();
         
         if (callback) {
-            callback(-1, "", "Process failed");
+            callback(-1, partialOutput, partialError.isEmpty() ? "Process timed out" : partialError);
         }
         return;
     }
@@ -362,19 +420,33 @@ QStringList DefaultSandboxManager::buildBwrapCommand(const SandboxExecRequest &r
     QStringList args;
     
     args << "--tmpfs" << "/tmp";
+
+    if (!request.workingDirectory.isEmpty()) {
+        args << "--chdir" << request.workingDirectory;
+    }
+
+    const FileSystemSandboxPolicy effectivePolicy = request.fsPolicy.allowedReadPaths.isEmpty()
+        && request.fsPolicy.allowedWritePaths.isEmpty()
+        && request.fsPolicy.deniedPaths.isEmpty()
+        ? m_fsPolicy
+        : request.fsPolicy;
     
     // Add allowed read paths
-    for (const auto &path : m_fsPolicy.allowedReadPaths) {
-        args << "--bind" << path << path;
+    for (const auto &path : effectivePolicy.allowedReadPaths) {
+        args << "--ro-bind" << path << path;
     }
     
     // Add allowed write paths
-    for (const auto &path : m_fsPolicy.allowedWritePaths) {
-        args << "--bind" << path << path;
+    for (const auto &path : effectivePolicy.allowedWritePaths) {
+        if (m_readOnlyMode || request.sandboxMode == SandboxMode::ReadOnly) {
+            args << "--ro-bind" << path << path;
+        } else {
+            args << "--bind" << path << path;
+        }
     }
     
     // Network policy
-    if (m_networkPolicy == NetworkSandboxPolicy::DenyAll) {
+    if (m_networkPolicy == NetworkSandboxPolicy::Restricted || request.netPolicy == NetworkSandboxPolicy::Restricted) {
         args << "--unshare-net";
     }
     

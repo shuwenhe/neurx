@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QDir>
+#include <QMutexLocker>
 #include <QDebug>
 
 FileBasedThreadStore::FileBasedThreadStore(const QString &baseDir, QObject *parent)
@@ -85,6 +86,43 @@ void FileBasedThreadStore::createThread(const CreateThreadParams &params,
     }
     
     emit threadModified(newId);
+}
+
+void FileBasedThreadStore::upsertThread(const StoredThread &thread,
+                                        std::function<void(ThreadStoreError)> callback)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (!m_initialized) {
+        locker.unlock();
+        if (callback)
+            callback(ThreadStoreError::StorageError);
+        return;
+    }
+
+    if (thread.id.isNull()) {
+        locker.unlock();
+        if (callback)
+            callback(ThreadStoreError::InvalidOperation);
+        return;
+    }
+
+    StoredThread normalized = thread;
+    if (normalized.metadata.threadId.isNull())
+        normalized.metadata.threadId = normalized.id;
+    normalized.metadata.lastModified = QDateTime::currentDateTime();
+
+    if (!saveThreadToFile(normalized)) {
+        locker.unlock();
+        if (callback)
+            callback(ThreadStoreError::StorageError);
+        return;
+    }
+
+    locker.unlock();
+    if (callback)
+        callback(ThreadStoreError::Success);
+    emit threadModified(normalized.id);
 }
 
 void FileBasedThreadStore::forkThread(const ThreadId &parentId,
@@ -583,10 +621,27 @@ bool FileBasedThreadStore::saveThreadToFile(const StoredThread &thread)
         return false;
     }
     
-    // Serialize thread data to JSON
+    // Serialize the full thread snapshot so the store can act as a state layer,
+    // not just a metadata index.
     QJsonObject threadObj;
     threadObj["id"] = thread.id.toString();
     threadObj["isActive"] = thread.isActive;
+    threadObj["metadata"] = QJsonObject::fromVariantMap(QVariantMap{
+        {QStringLiteral("threadId"), thread.metadata.threadId.toString()},
+        {QStringLiteral("parentThreadId"), thread.metadata.parentThreadId.toString()},
+        {QStringLiteral("mode"), int(thread.metadata.mode)},
+        {QStringLiteral("createdAt"), thread.metadata.createdAt.toUTC().toString(Qt::ISODateWithMs)},
+        {QStringLiteral("lastModified"), thread.metadata.lastModified.toUTC().toString(Qt::ISODateWithMs)},
+        {QStringLiteral("lastCheckpointAt"), thread.metadata.lastCheckpointAt.toUTC().toString(Qt::ISODateWithMs)},
+        {QStringLiteral("checkpointCount"), thread.metadata.checkpointCount},
+        {QStringLiteral("forkCount"), thread.metadata.forkCount},
+        {QStringLiteral("customMetadata"), thread.metadata.customMetadata},
+    });
+    threadObj["lastState"] = QJsonObject::fromVariantMap(thread.lastState);
+    threadObj["availableCheckpoints"] = QJsonArray::fromStringList(thread.availableCheckpoints);
+    threadObj["lastExecuted"] = thread.lastExecuted.isValid()
+        ? thread.lastExecuted.toUTC().toString(Qt::ISODateWithMs)
+        : QString{};
     
     // Save to file
     QString filePath = path + "/thread.json";
@@ -621,7 +676,22 @@ bool FileBasedThreadStore::loadThreadFromFile(const ThreadId &threadId, StoredTh
     // Deserialize from JSON
     thread.id = threadId;
     thread.isActive = doc.object()["isActive"].toBool(false);
-    
+    const QJsonObject metaObj = doc.object().value("metadata").toObject();
+    thread.metadata.threadId = ThreadId::fromString(metaObj.value("threadId").toString(threadId.toString()));
+    thread.metadata.parentThreadId = ThreadId::fromString(metaObj.value("parentThreadId").toString());
+    thread.metadata.mode = static_cast<ThreadInitializationMode>(metaObj.value("mode").toInt(int(ThreadInitializationMode::Fresh)));
+    thread.metadata.createdAt = QDateTime::fromString(metaObj.value("createdAt").toString(), Qt::ISODateWithMs);
+    thread.metadata.lastModified = QDateTime::fromString(metaObj.value("lastModified").toString(), Qt::ISODateWithMs);
+    thread.metadata.lastCheckpointAt = QDateTime::fromString(metaObj.value("lastCheckpointAt").toString(), Qt::ISODateWithMs);
+    thread.metadata.checkpointCount = metaObj.value("checkpointCount").toInt(0);
+    thread.metadata.forkCount = metaObj.value("forkCount").toInt(0);
+    thread.metadata.customMetadata = metaObj.value("customMetadata").toObject().toVariantMap();
+    thread.lastState = doc.object().value("lastState").toObject().toVariantMap();
+    for (const auto &value : doc.object().value("availableCheckpoints").toArray()) {
+        thread.availableCheckpoints.append(value.toString());
+    }
+    thread.lastExecuted = QDateTime::fromString(doc.object().value("lastExecuted").toString(), Qt::ISODateWithMs);
+
     return true;
 }
 

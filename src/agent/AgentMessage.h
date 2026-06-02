@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDateTime>
+#include <QVariantList>
 
 // ── Roles ────────────────────────────────────────────────────────────────────
 
@@ -33,12 +34,14 @@ struct ToolResult {
 struct AgentMessage {
     MessageRole     role{MessageRole::User};
     QString         content;                // text part
+    QVariantList    attachments;            // list of QVariantMap attachments (e.g. images)
     QList<ToolCall> toolCalls;             // non-empty when role==Assistant invoking tools
     QList<ToolResult> toolResults;         // non-empty when role==Tool
     QDateTime       timestamp{QDateTime::currentDateTimeUtc()};
 
     bool hasToolCalls()   const { return !toolCalls.isEmpty(); }
     bool hasToolResults() const { return !toolResults.isEmpty(); }
+    bool hasAttachments() const { return !attachments.isEmpty(); }
 
     QJsonObject toJson() const;
     static AgentMessage fromJson(const QJsonObject &obj);
