@@ -1,7 +1,7 @@
 import QtQuick 6.2
 import QtQuick.Controls 6.2
 import QtQuick.Layouts 6.2
-import Qt.labs.settings
+import QtCore
 import NeurXCode
 
 // ── FileTreePanel ─────────────────────────────────────────────────────────────
@@ -307,6 +307,7 @@ Item {
     Dialog {
         id: entryDialog
         modal: true
+        implicitWidth: 360
         title: pendingActionMode === "rename"
             ? "Rename"
             : (pendingActionMode === "new-folder" ? "New Folder" : "New File")
@@ -367,6 +368,7 @@ Item {
     Dialog {
         id: deleteDialog
         modal: true
+        implicitWidth: 380
         title: "Delete"
         closePolicy: Popup.CloseOnEscape
         onOpened: {
