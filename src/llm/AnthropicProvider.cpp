@@ -5,6 +5,26 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QVariant>
+#include <QVariantMap>
+
+static QList<MessageImageAttachment> extractImageAttachments(const AgentMessage &msg)
+{
+    QList<MessageImageAttachment> images;
+    for (const QVariant &value : msg.attachments) {
+        const QVariantMap map = value.toMap();
+        if (map.value("type").toString() != QStringLiteral("image"))
+            continue;
+        MessageImageAttachment image;
+        image.path = map.value("path").toString();
+        image.mimeType = map.value("mimeType").toString();
+        image.dataUrl = map.value("dataUrl").toString();
+        image.altText = map.value("altText").toString();
+        if (!image.dataUrl.isEmpty())
+            images.append(image);
+    }
+    return images;
+}
 
 static constexpr char kBaseUrl[] = "https://api.anthropic.com/v1/messages";
 static constexpr char kApiVersion[] = "2023-06-01";
@@ -151,6 +171,22 @@ QJsonArray AnthropicProvider::buildMessages(const QList<AgentMessage> &history) 
                 textBlock["text"] = msg.content;
                 content.append(textBlock);
             }
+            const auto images = extractImageAttachments(msg);
+            for (const auto &image : images) {
+                QJsonObject source;
+                source["type"] = "base64";
+                source["media_type"] = image.mimeType.isEmpty() ? QStringLiteral("image/png") : image.mimeType;
+                const QString dataUrl = image.dataUrl;
+                const int comma = dataUrl.indexOf(',');
+                source["data"] = comma >= 0 ? dataUrl.mid(comma + 1) : dataUrl;
+
+                QJsonObject block;
+                block["type"] = "image";
+                block["source"] = source;
+                if (!image.altText.isEmpty())
+                    block["alt_text"] = image.altText;
+                content.append(block);
+            }
             for (const auto &tc : msg.toolCalls) {
                 QJsonObject block;
                 block["type"]  = "tool_use";
@@ -161,7 +197,34 @@ QJsonArray AnthropicProvider::buildMessages(const QList<AgentMessage> &history) 
             }
             m["content"] = content;
         } else {
-            m["content"] = msg.content;
+            const auto images = extractImageAttachments(msg);
+            if (images.isEmpty()) {
+                m["content"] = msg.content;
+            } else {
+                QJsonArray content;
+                if (!msg.content.isEmpty()) {
+                    QJsonObject textBlock;
+                    textBlock["type"] = "text";
+                    textBlock["text"] = msg.content;
+                    content.append(textBlock);
+                }
+                for (const auto &image : images) {
+                    QJsonObject source;
+                    source["type"] = "base64";
+                    source["media_type"] = image.mimeType.isEmpty() ? QStringLiteral("image/png") : image.mimeType;
+                    const QString dataUrl = image.dataUrl;
+                    const int comma = dataUrl.indexOf(',');
+                    source["data"] = comma >= 0 ? dataUrl.mid(comma + 1) : dataUrl;
+
+                    QJsonObject block;
+                    block["type"] = "image";
+                    block["source"] = source;
+                    if (!image.altText.isEmpty())
+                        block["alt_text"] = image.altText;
+                    content.append(block);
+                }
+                m["content"] = content;
+            }
         }
         arr.append(m);
     }
