@@ -21,6 +21,7 @@ Item {
     readonly property int labelWidth: 56
     readonly property int rowGap: 10
     readonly property real contentWidth: Math.max(220, width - 32 - avatarSize - labelWidth - (rowGap * 2))
+    readonly property real wideContentWidth: Math.max(220, width - 32)
 
     readonly property bool isUser:   messageRole === "user"
     readonly property bool isTool:   messageRole === "tool" || messageRole === "tool_result"
@@ -95,7 +96,9 @@ Item {
         Item {
             id: messageRow
             width: parent.width
-            height: Math.max(avatar.height, Math.max(roleLabel.implicitHeight, bubble.visible ? bubble.implicitHeight : 0))
+            height: root.isAssistant
+                ? avatar.height + roleLabel.implicitHeight + 8 + (bubble.visible ? bubble.implicitHeight : 0)
+                : Math.max(avatar.height, Math.max(roleLabel.implicitHeight, bubble.visible ? bubble.implicitHeight : 0))
 
             Rectangle {
                 id: avatar
@@ -118,11 +121,9 @@ Item {
 
             Label {
                 id: roleLabel
-                x: root.isUser
-                    ? avatar.x - root.rowGap - width
-                    : avatar.width + root.rowGap
+                x: root.isAssistant ? 0 : (root.isUser ? avatar.x - root.rowGap - width : avatar.width + root.rowGap)
                 y: 2
-                width: root.labelWidth
+                width: root.isAssistant ? parent.width : root.labelWidth
                 horizontalAlignment: root.isUser ? Text.AlignRight : Text.AlignLeft
                 text: root.isUser ? "You" : root.isCheckpointNotice ? "Checkpoint" : root.isTool ? "Tool" : "NeurX"
                 color: root.isUser ? Theme.accent : root.isCheckpointNotice ? Theme.success : Theme.textMuted
@@ -132,11 +133,11 @@ Item {
 
             Rectangle {
                 id: bubble
-                x: root.isUser
+                x: root.isAssistant ? 0 : (root.isUser
                     ? roleLabel.x - root.rowGap - width
-                    : roleLabel.x + roleLabel.width + root.rowGap
-                y: 0
-                width: root.contentWidth
+                    : roleLabel.x + roleLabel.width + root.rowGap)
+                y: root.isAssistant ? (avatar.height + 8) : 0
+                width: root.isAssistant ? root.wideContentWidth : root.contentWidth
                 visible: root.messageContent.length > 0 || root.attachments.length > 0
                 color: root.bubbleColor
                 radius: Theme.radius + 2
@@ -218,7 +219,7 @@ Item {
 
                         delegate: Loader {
                             required property var modelData
-                            width: parent ? parent.width : root.contentWidth - 24
+                            width: parent ? parent.width : root.wideContentWidth - 24
                             sourceComponent: modelData.type === "code" ? codeBlock : markdownBlock
 
                             property string blockText: modelData.text || ""
@@ -304,7 +305,7 @@ Item {
             wrapMode: Text.Wrap
             color: Theme.textPrimary
             font: Theme.uiFont
-            width: root.contentWidth - 24
+            width: root.isAssistant ? root.wideContentWidth - 24 : root.contentWidth - 24
             visible: text.trim().length > 0
         }
     }
@@ -313,7 +314,7 @@ Item {
         id: codeBlock
 
         Rectangle {
-            width: root.contentWidth - 24
+            width: root.isAssistant ? root.wideContentWidth - 24 : root.contentWidth - 24
             color: Theme.bg
             radius: Theme.radius
             border.color: Theme.border
