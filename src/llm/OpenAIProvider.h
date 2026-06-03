@@ -28,7 +28,7 @@ private:
     };
 
     QJsonObject buildRequestBody(const LLMRequest &request) const;
-    QJsonArray  buildMessages(const QList<AgentMessage> &history) const;
+    QJsonArray  buildMessages(const QList<AgentMessage> &history, const QString &model) const;
 
     void handleStreamChunk(const QByteArray &chunk);
     void parseDelta(const QJsonObject &delta);
