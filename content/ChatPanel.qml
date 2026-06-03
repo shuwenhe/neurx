@@ -23,6 +23,13 @@ Item {
     ]
     property string slashQuery: ""
     property bool slashMenuOpen: false
+    property int slashSelectedIndex: 0
+    readonly property var filteredSlashCommands: root.slashCommands.filter(cmd => {
+        const q = root.slashQuery.trim().toLowerCase()
+        if (q.length === 0)
+            return true
+        return cmd.label.slice(1).toLowerCase().startsWith(q)
+    })
 
     signal sendMessage(string text)
     signal interrupt()
@@ -177,6 +184,7 @@ Item {
 
         // ── Codex-style composer ─────────────────────────────────────────
         Rectangle {
+            id: composerBox
             Layout.fillWidth: true
             Layout.minimumHeight: 72 + attachmentsArea.implicitHeight
             color: Theme.surface
@@ -514,14 +522,129 @@ Item {
                                     event.accepted = false
                                 } else if (inputArea.preeditText.length > 0) {
                                     event.accepted = false
+                                } else if (root.slashMenuOpen && root.filteredSlashCommands.length > 0 && inputArea.text.trim().startsWith("/")) {
+                                    event.accepted = true
+                                    root.acceptSlashSelection(root.slashSelectedIndex)
                                 } else {
                                     event.accepted = true
                                     submitInput()
                                 }
                             }
 
+                            Keys.onTabPressed: event => {
+                                if (root.slashMenuOpen && root.filteredSlashCommands.length > 0 && inputArea.text.trim().startsWith("/")) {
+                                    event.accepted = true
+                                    root.acceptSlashSelection(root.slashSelectedIndex)
+                                } else {
+                                    event.accepted = false
+                                }
+                            }
+
+                            Keys.onDownPressed: event => {
+                                if (root.slashMenuOpen && root.filteredSlashCommands.length > 0 && inputArea.text.trim().startsWith("/")) {
+                                    event.accepted = true
+                                    root.moveSlashSelection(1)
+                                } else {
+                                    event.accepted = false
+                                }
+                            }
+
+                            Keys.onUpPressed: event => {
+                                if (root.slashMenuOpen && root.filteredSlashCommands.length > 0 && inputArea.text.trim().startsWith("/")) {
+                                    event.accepted = true
+                                    root.moveSlashSelection(-1)
+                                } else {
+                                    event.accepted = false
+                                }
+                            }
+
                             Component.onCompleted: forceActiveFocus()
+                            onTextChanged: root.updateSlashState()
+                            onActiveFocusChanged: {
+                                if (!activeFocus)
+                                    root.closeSlashMenu()
+                            }
                         }
+                    }
+                }
+            }
+        }
+
+    }
+
+    Popup {
+        id: slashPopup
+        parent: root
+        x: composerBox.x + 16
+        y: Math.max(8, composerBox.y - implicitHeight - 8)
+        width: Math.max(260, composerBox.width - 32)
+        implicitHeight: Math.min(240, contentItem.implicitHeight + 16)
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        modal: false
+
+        background: Rectangle {
+            radius: Theme.radius + 2
+            color: Theme.surface
+            border.color: Theme.border
+            border.width: 1
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 6
+            anchors.margins: 8
+
+            Label {
+                Layout.fillWidth: true
+                text: root.slashQuery.trim().length > 0 ? "Commands matching /" + root.slashQuery.trim() : "Quick commands"
+                color: Theme.textMuted
+                font.pixelSize: Theme.fontXs
+                elide: Text.ElideRight
+            }
+
+            ListView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.min(180, contentHeight)
+                model: root.filteredSlashCommands
+                clip: true
+                spacing: 4
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        implicitWidth: ListView.view.width
+                        implicitHeight: 34
+                        radius: Theme.radius
+                        color: (ListView.isCurrentItem || itemHover.containsMouse) ? Theme.surfaceAlt : "transparent"
+                        border.color: Theme.border
+                        border.width: 1
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        spacing: 10
+
+                        Label {
+                            text: modelData.label
+                            color: Theme.textPrimary
+                            font.pixelSize: Theme.fontSm
+                            font.bold: true
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: modelData.hint
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontXs
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    MouseArea {
+                        id: itemHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: root.setSlashSelection(index)
+                        onClicked: root.acceptSlashSelection(index)
                     }
                 }
             }
@@ -543,5 +666,67 @@ Item {
         inputArea.forceActiveFocus()
         inputArea.text = command
         inputArea.cursorPosition = inputArea.text.length
+        root.updateSlashState()
+    }
+
+    function updateSlashState() {
+        const txt = inputArea.text
+        const trimmed = txt.trim()
+        const first = trimmed.split(/\s+/)[0]
+        if (!first || !first.startsWith("/")) {
+            root.closeSlashMenu()
+            return
+        }
+
+        if (trimmed !== txt || trimmed !== first) {
+            root.closeSlashMenu()
+            return
+        }
+
+        const query = first.slice(1).trim().toLowerCase()
+        root.slashQuery = query
+
+        const matches = root.filteredSlashCommands
+        root.slashMenuOpen = !root.busy && matches.length > 0
+        if (root.slashMenuOpen)
+            root.slashSelectedIndex = Math.max(0, Math.min(root.slashSelectedIndex, matches.length - 1))
+    }
+
+    function closeSlashMenu() {
+        root.slashQuery = ""
+        root.slashMenuOpen = false
+        root.slashSelectedIndex = 0
+    }
+
+    function setSlashSelection(index) {
+        const count = root.filteredSlashCommands.length
+        if (count === 0)
+            return
+        root.slashSelectedIndex = Math.max(0, Math.min(index, count - 1))
+    }
+
+    function moveSlashSelection(delta) {
+        const count = root.filteredSlashCommands.length
+        if (count === 0)
+            return
+        root.slashSelectedIndex = (root.slashSelectedIndex + delta + count) % count
+    }
+
+    function acceptSlashSelection(index) {
+        const count = root.filteredSlashCommands.length
+        if (count === 0)
+            return
+        const item = root.filteredSlashCommands[Math.max(0, Math.min(index, count - 1))]
+        if (!item)
+            return
+        root.insertSlashCommand(item.label + " ")
+    }
+
+    onSlashMenuOpenChanged: {
+        if (root.slashMenuOpen && root.filteredSlashCommands.length > 0) {
+            slashPopup.open()
+        } else {
+            slashPopup.close()
+        }
     }
 }

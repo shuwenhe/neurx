@@ -30,8 +30,11 @@ Item {
             editorArea.text = agent.currentFileContent
             if (resetView) {
                 editorArea.cursorPosition = 0
-                editorArea.contentX = 0
-                editorArea.contentY = 0
+                // editorArea is hosted inside a ScrollView; reset the ScrollView's content offsets
+                if (editorScrollView) {
+                    editorScrollView.contentX = 0
+                    editorScrollView.contentY = 0
+                }
             }
             syncingEditorFromAgent = false
         }
@@ -577,7 +580,8 @@ Item {
                         Item {
                             width: parent.width
                             height: root.lineCount * editorFontMetrics.lineSpacing
-                            y: -editorArea.contentY
+                            // editorArea is placed inside a ScrollView (editorScroll); use its contentY
+                            y: editorScroll ? -editorScroll.contentY : 0
 
                             Repeater {
                                 model: root.lineCount
@@ -611,7 +615,7 @@ Item {
 
                     Rectangle {
                         x: 0
-                        y: Math.max(0, root.editorCursorY() - editorArea.contentY)
+                        y: Math.max(0, root.editorCursorY() - (editorScrollView ? editorScrollView.contentY : 0))
                         width: parent.width
                         height: editorFontMetrics.lineSpacing
                         color: Theme.accent
@@ -620,6 +624,7 @@ Item {
                     }
 
                     ScrollView {
+                        id: editorScrollView
                         anchors {
                             fill: parent
                             leftMargin: 12
