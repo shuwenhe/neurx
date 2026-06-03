@@ -26,6 +26,16 @@ static QList<MessageImageAttachment> extractImageAttachments(const AgentMessage 
     return images;
 }
 
+static bool isVisionModel(const QString &model)
+{
+    const QString m = model.toLower();
+    return m.contains(QStringLiteral("-vl")) ||
+           m.contains(QStringLiteral("-v-")) ||
+           m.contains(QStringLiteral("vision")) ||
+           m.contains(QStringLiteral("-v1")) || // Some older models like CogVLM
+           m.contains(QStringLiteral("multimodal"));
+}
+
 static constexpr char kBaseUrl[] = "https://api.siliconflow.cn/v1/chat/completions";
 
 static QJsonObject parseToolArguments(const QString &rawArgs, const QString &callId)
@@ -131,12 +141,13 @@ void OpenAIProvider::cancel()
 
 QJsonObject OpenAIProvider::buildRequestBody(const LLMRequest &request) const
 {
+    const QString model = request.model.isEmpty() ? availableModels().first() : request.model;
     QJsonObject body;
-    body["model"]       = request.model.isEmpty() ? availableModels().first() : request.model;
+    body["model"]       = model;
     body["stream"]      = request.stream;
     body["temperature"] = static_cast<double>(request.temperature);
     body["max_tokens"]  = request.maxTokens;
-    body["messages"]    = buildMessages(request.messages);
+    body["messages"]    = buildMessages(request.messages, model);
 
     if (!request.tools.isEmpty()) {
         body["tools"]       = request.tools;
@@ -145,8 +156,12 @@ QJsonObject OpenAIProvider::buildRequestBody(const LLMRequest &request) const
     return body;
 }
 
-QJsonArray OpenAIProvider::buildMessages(const QList<AgentMessage> &history) const
+QJsonArray OpenAIProvider::buildMessages(const QList<AgentMessage> &history, const QString &model) const
 {
+    // Check if the current model supports vision.
+    // If not, we must avoid the multi-modal 'content' array format.
+    const bool supportsVision = isVisionModel(model);
+
     QJsonArray arr;
     for (const auto &msg : history) {
         QJsonObject m;
@@ -184,7 +199,7 @@ QJsonArray OpenAIProvider::buildMessages(const QList<AgentMessage> &history) con
         }
 
         const auto images = extractImageAttachments(msg);
-        if (images.isEmpty()) {
+        if (images.isEmpty() || !supportsVision) {
             m["content"] = msg.content;
         } else {
             QJsonArray content;

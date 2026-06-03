@@ -21,15 +21,21 @@ Item {
         { "label": "/checkpoint", "hint": "open rollback" },
         { "label": "/delegate", "hint": "delegate a subtask" }
     ]
+    property var recentSlashCommands: []
     property string slashQuery: ""
     property bool slashMenuOpen: false
     property int slashSelectedIndex: 0
-    readonly property var filteredSlashCommands: root.slashCommands.filter(cmd => {
+    readonly property var filteredSlashCommands: (function() {
         const q = root.slashQuery.trim().toLowerCase()
-        if (q.length === 0)
-            return true
-        return cmd.label.slice(1).toLowerCase().startsWith(q)
-    })
+        const recent = root.recentSlashCommands.filter(cmd => root.matchesSlashQuery(cmd.label, q))
+        const recentLabels = recent.map(cmd => cmd.label)
+        const base = root.slashCommands.filter(cmd => {
+            if (!root.matchesSlashQuery(cmd.label, q))
+                return false
+            return recentLabels.indexOf(cmd.label) === -1
+        })
+        return recent.concat(base)
+    })()
 
     signal sendMessage(string text)
     signal interrupt()
@@ -558,6 +564,15 @@ Item {
                                 }
                             }
 
+                            Keys.onEscapePressed: event => {
+                                if (root.slashMenuOpen) {
+                                    event.accepted = true
+                                    root.closeSlashMenu()
+                                } else {
+                                    event.accepted = false
+                                }
+                            }
+
                             Component.onCompleted: forceActiveFocus()
                             onTextChanged: root.updateSlashState()
                             onActiveFocusChanged: {
@@ -595,16 +610,20 @@ Item {
 
             Label {
                 Layout.fillWidth: true
-                text: root.slashQuery.trim().length > 0 ? "Commands matching /" + root.slashQuery.trim() : "Quick commands"
+                text: root.slashQuery.trim().length > 0
+                      ? "Commands matching /" + root.slashQuery.trim()
+                      : (root.recentSlashCommands.length > 0 ? "Recent commands" : "Quick commands")
                 color: Theme.textMuted
                 font.pixelSize: Theme.fontXs
                 elide: Text.ElideRight
             }
 
             ListView {
+                id: slashList
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.min(180, contentHeight)
                 model: root.filteredSlashCommands
+                currentIndex: root.slashSelectedIndex
                 clip: true
                 spacing: 4
 
@@ -621,6 +640,21 @@ Item {
                         anchors.fill: parent
                         anchors.margins: 8
                         spacing: 10
+
+                        Rectangle {
+                            width: 18
+                            height: 18
+                            radius: 9
+                            color: modelData.hint === "recent" ? Theme.accent : Theme.surfaceAlt
+
+                            Label {
+                                anchors.centerIn: parent
+                                text: modelData.hint === "recent" ? "↺" : "/"
+                                color: modelData.hint === "recent" ? "white" : Theme.textMuted
+                                font.pixelSize: 11
+                                font.bold: true
+                            }
+                        }
 
                         Label {
                             text: modelData.label
@@ -654,8 +688,16 @@ Item {
     function submitInput() {
         const txt = inputArea.text.trim()
         const hasAttachments = root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
+        
         if (txt.length === 0 && !hasAttachments)
             return
+        
+        // For text-only messages, clear pending attachments to prevent sending to non-VLM models
+        if (txt.length > 0 && hasAttachments) {
+            root.agent.clearPendingAttachments()
+        }
+        
+        root.recordSlashUsage(txt)
         inputArea.text = ""
         root.sendMessage(txt)
     }
@@ -689,13 +731,38 @@ Item {
         const matches = root.filteredSlashCommands
         root.slashMenuOpen = !root.busy && matches.length > 0
         if (root.slashMenuOpen)
-            root.slashSelectedIndex = Math.max(0, Math.min(root.slashSelectedIndex, matches.length - 1))
+            root.slashSelectedIndex = 0
     }
 
     function closeSlashMenu() {
         root.slashQuery = ""
         root.slashMenuOpen = false
         root.slashSelectedIndex = 0
+    }
+
+    function matchesSlashQuery(label, query) {
+        if (query.length === 0)
+            return true
+        return label.slice(1).toLowerCase().startsWith(query)
+    }
+
+    function recordSlashUsage(text) {
+        const trimmed = text.trim()
+        if (!trimmed.startsWith("/"))
+            return
+
+        const command = trimmed.split(/\s+/)[0]
+        if (!command || command.length < 2)
+            return
+
+        const next = [{ "label": command, "hint": "recent" }]
+        for (const item of root.recentSlashCommands) {
+            if (item.label !== command)
+                next.push(item)
+            if (next.length >= 5)
+                break
+        }
+        root.recentSlashCommands = next
     }
 
     function setSlashSelection(index) {
