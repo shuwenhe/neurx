@@ -128,6 +128,13 @@ Item {
                 acceptedButtons: Qt.NoButton
                 onEntered: root.messageListHovered = true
                 onExited: root.messageListHovered = false
+                onWheel: function(wheel) {
+                    if (wheel.angleDelta.y !== 0 || wheel.pixelDelta.y !== 0) {
+                        if (!root.isListViewAtBottom())
+                            root.autoFollowLatest = false
+                    }
+                    wheel.accepted = false
+                }
             }
 
             ListView {
@@ -154,8 +161,6 @@ Item {
                 onContentYChanged: {
                     if (root.isListViewAtBottom()) {
                         root.autoFollowLatest = true
-                    } else if (listView.moving || listView.dragging || listView.flicking) {
-                        root.autoFollowLatest = false
                     }
                     if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
                         root.scrollToBottom()
@@ -182,8 +187,8 @@ Item {
 
                 footer: Item {
                     width: listView.width
-                    height: (busy || !root.autoFollowLatest || root.messageListHovered) ? 48 : 0
-                    visible: busy || !root.autoFollowLatest || root.messageListHovered
+                    height: busy ? 48 : (!root.autoFollowLatest ? 26 : 0)
+                    visible: busy || !root.autoFollowLatest
 
                     RowLayout {
                         anchors.left: parent.left
@@ -219,35 +224,73 @@ Item {
                             }
                         }
 
+                        Label {
+                            visible: !busy && !root.autoFollowLatest
+                            text: "Paused"
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontXs
+                        }
+
                         Item { Layout.fillWidth: true }
 
-                        Rectangle {
-                            radius: 999
-                            color: jumpLatestHover.containsMouse ? Theme.accent : Theme.surfaceAlt
-                            border.color: Theme.border
-                            border.width: 1
-                            opacity: root.autoFollowLatest ? 0.0 : 1.0
-                            Behavior on opacity { NumberAnimation { duration: 160 } }
-                            implicitHeight: 28
-                            implicitWidth: jumpLabel.implicitWidth + 24
+                        Item {
+                            id: jumpLatestArea
+                            visible: !busy && !root.autoFollowLatest
+                            Layout.preferredWidth: jumpLatestHotspot.visible ? 92 : 18
+                            Layout.preferredHeight: 18
 
-                            Label {
-                                id: jumpLabel
-                                anchors.centerIn: parent
-                                text: "Jump to latest"
-                                color: root.autoFollowLatest ? Theme.textMuted : Theme.textPrimary
-                                font.pixelSize: Theme.fontXs
+                            Rectangle {
+                                id: jumpLatestHotspot
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 18
+                                height: 18
+                                radius: 9
+                                color: jumpLatestHotspotMouse.containsMouse ? Theme.accent : Theme.surfaceAlt
+                                border.color: Theme.border
+                                border.width: 1
+                                opacity: jumpLatestHotspotMouse.containsMouse ? 1.0 : 0.9
+                                Behavior on opacity { NumberAnimation { duration: 140 } }
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "↓"
+                                    color: Theme.textPrimary
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    id: jumpLatestHotspotMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    enabled: listView.contentHeight > listView.height
+                                    onClicked: {
+                                        root.autoFollowLatest = true
+                                        root.scrollToBottom()
+                                    }
+                                }
                             }
 
-                            MouseArea {
-                                id: jumpLatestHover
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-                                enabled: listView.contentHeight > listView.height
-                                onClicked: {
-                                    root.autoFollowLatest = true
-                                    root.scrollToBottom()
+                            Rectangle {
+                                anchors.right: jumpLatestHotspot.left
+                                anchors.rightMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: jumpLatestHint.implicitWidth + 16
+                                height: 22
+                                radius: 11
+                                color: Theme.surfaceAlt
+                                border.color: Theme.border
+                                opacity: jumpLatestHotspotMouse.containsMouse ? 1.0 : 0.0
+                                Behavior on opacity { NumberAnimation { duration: 140 } }
+
+                                Label {
+                                    id: jumpLatestHint
+                                    anchors.centerIn: parent
+                                    text: "Jump to latest"
+                                    color: Theme.textPrimary
+                                    font.pixelSize: Theme.fontXs
                                 }
                             }
                         }
@@ -367,7 +410,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.minimumHeight: 40
+                    Layout.minimumHeight: 88
                     Layout.margins: 8
                     color: Theme.bg
                     radius: Theme.radius
@@ -383,7 +426,7 @@ Item {
                         radius: 6
                         anchors.left: parent.left
                         anchors.bottom: parent.bottom
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 8
                         anchors.bottomMargin: 6
                         color: addHovered ? Theme.surfaceAlt : "transparent"
                         border.color: addHovered ? Theme.border : "transparent"
@@ -419,8 +462,8 @@ Item {
                         radius: 6
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        anchors.rightMargin: 4
-                        anchors.bottomMargin: 4
+                        anchors.rightMargin: 8
+                        anchors.bottomMargin: 6
                         color: sendBtnReady ? (sendBtnHovered ? Theme.accent : Theme.accent) : Theme.surfaceAlt
                         opacity: sendBtnReady ? 1.0 : 0.5
 
@@ -457,10 +500,10 @@ Item {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        anchors.leftMargin: 34
-                        anchors.rightMargin: 44
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
                         anchors.topMargin: 10
-                        anchors.bottomMargin: 10
+                        anchors.bottomMargin: 44
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         clip: true
 
@@ -730,15 +773,10 @@ Item {
     function submitInput() {
         const txt = inputArea.text.trim()
         const hasAttachments = root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
-        
+
         if (txt.length === 0 && !hasAttachments)
             return
-        
-        // For text-only messages, clear pending attachments to prevent sending to non-VLM models
-        if (txt.length > 0 && hasAttachments) {
-            root.agent.clearPendingAttachments()
-        }
-        
+
         inputArea.text = ""
         root.sendMessage(txt)
     }
