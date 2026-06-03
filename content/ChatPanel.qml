@@ -132,7 +132,15 @@ Item {
 
                 ScrollBar.vertical: ScrollBar {}
 
-                onCountChanged: Qt.callLater(() => positionViewAtEnd())
+                onCountChanged: root.scrollToBottom()
+                onContentHeightChanged: {
+                    if (root.busy || root.streamingText.length > 0)
+                        root.scrollToBottom()
+                }
+                onCurrentIndexChanged: {
+                    if (root.busy || root.streamingText.length > 0)
+                        root.scrollToBottom()
+                }
 
                 delegate: Item {
                     required property string role
@@ -308,108 +316,79 @@ Item {
                     border.width: inputArea.activeFocus ? 2 : 1
                     clip: true
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 5
-                        anchors.rightMargin: 4
-                        spacing: 4
+                    // ── Add attachment menu ───────────────────────
+                    Rectangle {
+                        id: addButton
+                        width: 28
+                        height: 28
+                        radius: 6
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 6
+                        anchors.bottomMargin: 6
+                        color: addHovered ? Theme.surfaceAlt : "transparent"
+                        border.color: addHovered ? Theme.border : "transparent"
+                        border.width: 1
 
-                        // ── Left toolbar (attach/paste buttons) ────────
-                        RowLayout {
-                            spacing: 2
-
-                            // Attach image button
-                            Rectangle {
-                                width: 28
-                                height: 28
-                                radius: 6
-                                color: attachHovered ? Theme.surfaceAlt : "transparent"
-                                border.color: attachHovered ? Theme.border : "transparent"
-                                border.width: 1
-
-                                Label {
-                                    anchors.centerIn: parent
-                                    text: "📎"
-                                    font.pixelSize: 14
-                                }
-
-                                property bool attachHovered: false
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: !root.busy
-                                    enabled: !root.busy
-                                    opacity: enabled ? 1.0 : 0.4
-
-                                    onHoveredChanged: parent.attachHovered = containsMouse
-                                    onClicked: root.attachImageRequested()
-                                }
-                            }
-
-                            // Paste image button
-                            Rectangle {
-                                width: 28
-                                height: 28
-                                radius: 6
-                                color: pasteHovered ? Theme.surfaceAlt : "transparent"
-                                border.color: pasteHovered ? Theme.border : "transparent"
-                                border.width: 1
-
-                                Label {
-                                    anchors.centerIn: parent
-                                    text: "🖼"
-                                    font.pixelSize: 14
-                                }
-
-                                property bool pasteHovered: false
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: !root.busy
-                                    enabled: !root.busy
-                                    opacity: enabled ? 1.0 : 0.4
-
-                                    onHoveredChanged: parent.pasteHovered = containsMouse
-                                    onClicked: root.pasteImageRequested()
-                                }
-                            }
+                        Label {
+                            anchors.centerIn: parent
+                            text: "+"
+                            color: Theme.textPrimary
+                            font.pixelSize: 16
+                            font.bold: true
                         }
 
-                        // ── Send button (right side) ───────────────────
-                        Rectangle {
-                            width: 32
-                            height: 32
-                            radius: 6
-                            color: sendBtnReady ? (sendBtnHovered ? Theme.accent : Theme.accent) : Theme.surfaceAlt
-                            opacity: sendBtnReady ? 1.0 : 0.5
+                        property bool addHovered: false
 
-                            property bool sendBtnReady: root.busy
-                                                       || inputArea.text.trim().length > 0
-                                                       || (root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0)
-                            property bool sendBtnHovered: false
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: !root.busy
+                            enabled: !root.busy
+                            opacity: enabled ? 1.0 : 0.4
 
-                            Label {
-                                anchors.centerIn: parent
-                                text: root.busy ? "⏹" : "↑"
-                                color: parent.sendBtnReady ? "white" : Theme.textMuted
-                                font.pixelSize: 18
-                                font.bold: true
-                            }
+                            onHoveredChanged: parent.addHovered = containsMouse
+                            onClicked: attachmentMenu.open()
+                        }
+                    }
 
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: parent.sendBtnReady ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                hoverEnabled: true
-                                enabled: parent.sendBtnReady
-                                opacity: enabled ? 1.0 : 0.5
+                    // ── Send button (bottom right) ───────────────────
+                    Rectangle {
+                        id: sendButton
+                        width: 32
+                        height: 32
+                        radius: 6
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: 4
+                        anchors.bottomMargin: 4
+                        color: sendBtnReady ? (sendBtnHovered ? Theme.accent : Theme.accent) : Theme.surfaceAlt
+                        opacity: sendBtnReady ? 1.0 : 0.5
 
-                                onHoveredChanged: parent.sendBtnHovered = containsMouse
-                                onClicked: {
-                                    if (root.busy) root.interrupt()
-                                    else           submitInput()
-                                }
+                        property bool sendBtnReady: root.busy
+                                                   || inputArea.text.trim().length > 0
+                                                   || (root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0)
+                        property bool sendBtnHovered: false
+
+                        Label {
+                            anchors.centerIn: parent
+                            text: root.busy ? "⏹" : "↑"
+                            color: parent.sendBtnReady ? "white" : Theme.textMuted
+                            font.pixelSize: 18
+                            font.bold: true
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: parent.sendBtnReady ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            hoverEnabled: true
+                            enabled: parent.sendBtnReady
+                            opacity: enabled ? 1.0 : 0.5
+
+                            onHoveredChanged: parent.sendBtnHovered = containsMouse
+                            onClicked: {
+                                if (root.busy) root.interrupt()
+                                else           submitInput()
                             }
                         }
                     }
@@ -419,7 +398,7 @@ Item {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        anchors.leftMargin: 40
+                        anchors.leftMargin: 34
                         anchors.rightMargin: 44
                         anchors.topMargin: 10
                         anchors.bottomMargin: 10
@@ -500,6 +479,90 @@ Item {
                                     root.closeSlashMenu()
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        Popup {
+            id: attachmentMenu
+            parent: root
+            x: composerBox.x + 10
+            y: composerBox.y - implicitHeight - 8
+            width: 220
+            implicitHeight: contentItem.implicitHeight + 16
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+            modal: false
+
+            // Auto-close timer when mouse leaves menu
+            Timer {
+                id: closeTimer
+                interval: 200
+                onTriggered: attachmentMenu.close()
+            }
+
+            background: Rectangle {
+                radius: Theme.radius + 2
+                color: Theme.surface
+                border.color: Theme.border
+                border.width: 1
+
+                // MouseArea to track mouse enter/leave
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    propagateComposedEvents: true
+
+                    onEntered: closeTimer.stop()
+                    onExited: closeTimer.start()
+
+                    // Pass through clicks to children
+                    onPressed: mouse.accepted = false
+                }
+            }
+
+            contentItem: ColumnLayout {
+                spacing: 6
+                anchors.margins: 8
+
+                Label {
+                    Layout.fillWidth: true
+                    text: "Add attachment"
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.fontXs
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "Attach image"
+                    enabled: !root.busy
+                    onClicked: {
+                        closeTimer.stop()
+                        attachmentMenu.close()
+                        root.attachImageRequested()
+                    }
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "Paste image"
+                    enabled: !root.busy
+                    onClicked: {
+                        closeTimer.stop()
+                        attachmentMenu.close()
+                        root.pasteImageRequested()
+                    }
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "Attach current file"
+                    enabled: !root.busy && root.agent && root.agent.currentFilePath && root.agent.currentFilePath.length > 0
+                    onClicked: {
+                        closeTimer.stop()
+                        attachmentMenu.close()
+                        if (root.agent && root.agent.currentFilePath)
+                            root.agent.injectFile(root.agent.currentFilePath)
                     }
                 }
             }
@@ -659,6 +722,13 @@ Item {
         root.slashSelectedIndex = 0
     }
 
+    function scrollToBottom() {
+        Qt.callLater(() => {
+            if (listView)
+                listView.positionViewAtEnd()
+        })
+    }
+
     function matchesSlashQuery(label, query) {
         if (query.length === 0)
             return true
@@ -695,5 +765,15 @@ Item {
         } else {
             slashPopup.close()
         }
+    }
+
+    onBusyChanged: {
+        if (root.busy)
+            root.scrollToBottom()
+    }
+
+    onStreamingTextChanged: {
+        if (root.busy || root.streamingText.length > 0)
+            root.scrollToBottom()
     }
 }
