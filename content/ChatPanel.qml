@@ -208,7 +208,10 @@ Item {
                         Item { Layout.fillWidth: true }
 
                         Button {
-                            visible: !root.autoFollowLatest
+                            opacity: root.autoFollowLatest ? 0.0 : 1.0
+                            Behavior on opacity {
+                                NumberAnimation { duration: 160 }
+                            }
                             text: "Jump to latest"
                             enabled: listView.contentHeight > listView.height
                             onClicked: {

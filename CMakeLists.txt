@@ -128,6 +128,7 @@ endif()
 
 # ── Platform-specific packaging ───────────────────────────────────────────────
 if(APPLE)
+    # Set macOS bundle properties
     set_target_properties(neurx-codeApp PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_BUNDLE_NAME "NeurX Code"
@@ -136,6 +137,17 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "ai.neurx.code"
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
     )
+    
+    # Copy app icon into the bundle if it exists
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns")
+        set_source_files_properties(
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns"
+            PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources
+        )
+        target_sources(neurx-codeApp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns")
+    endif()
+    
     # Embed Qt plugins into the .app bundle
     qt_generate_deploy_app_script(
         TARGET neurx-codeApp
