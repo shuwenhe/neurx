@@ -19,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_TYPE="${1:-Release}"
 BUILD_DIR="$PROJECT_DIR/build/macos-$BUILD_TYPE"
+DERIVED_DATA_DIR="$BUILD_DIR/DerivedData"
 
 # ── Qt discovery ─────────────────────────────────────────────────────────────
 QT_CMAKE_PREFIX=""
@@ -101,7 +102,7 @@ cmake_args=(
     -B "$BUILD_DIR"
     -G "$GENERATOR"
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
-    -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+    -DCMAKE_OSX_ARCHITECTURES="arm64"
     -DLINK_INSIGHT=OFF
     -DBUILD_QDS_COMPONENTS=OFF
 )
@@ -112,7 +113,14 @@ cmake "${cmake_args[@]}"
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 if [ "$GENERATOR" = "Xcode" ]; then
-    cmake --build "$BUILD_DIR" --config "$BUILD_TYPE" --parallel "$(sysctl -n hw.logicalcpu)"
+    xcodebuild \
+        -project "$BUILD_DIR/neurx-codeApp.xcodeproj" \
+        -scheme "neurx-codeApp" \
+        -configuration "$BUILD_TYPE" \
+        -parallelizeTargets \
+        -jobs "$(sysctl -n hw.logicalcpu)" \
+        -derivedDataPath "$DERIVED_DATA_DIR" \
+        build
 else
     cmake --build "$BUILD_DIR" --parallel "$(sysctl -n hw.logicalcpu)"
 fi
@@ -124,11 +132,22 @@ if [ -n "$APP_BUNDLE" ] && [ -n "$QT_CMAKE_PREFIX" ]; then
     MACDEPLOYQT="$QT_CMAKE_PREFIX/bin/macdeployqt"
     if [ -f "$MACDEPLOYQT" ]; then
         echo "[macos] Running macdeployqt on $APP_BUNDLE …"
-        "$MACDEPLOYQT" "$APP_BUNDLE" \
+        DEPLOY_STAGE="$(mktemp -d "${TMPDIR:-/private/tmp}/neurx-macdeployqt.XXXXXX")"
+        STAGED_APP="$DEPLOY_STAGE/$(basename "$APP_BUNDLE")"
+        ditto "$APP_BUNDLE" "$STAGED_APP"
+
+        "$MACDEPLOYQT" "$STAGED_APP" \
             -qmldir="$PROJECT_DIR" \
             -dmg \
             -always-overwrite
-        DMG=$(find "$BUILD_DIR" -name "*.dmg" | head -1)
+
+        rm -rf "$APP_BUNDLE"
+        ditto "$STAGED_APP" "$APP_BUNDLE"
+
+        DMG=$(find "$DEPLOY_STAGE" -name "*.dmg" | head -1)
+        if [ -n "$DMG" ]; then
+            mv "$DMG" "$BUILD_DIR/"
+        fi
         echo ""
         echo "✓ DMG created: ${DMG:-$BUILD_DIR/}"
     fi

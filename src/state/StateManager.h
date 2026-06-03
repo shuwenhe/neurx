@@ -18,6 +18,7 @@
 class StateManager : public QObject {
     Q_OBJECT
 public:
+    explicit StateManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~StateManager() = default;
     
     // ── State Access ───────────────────────────────────────────

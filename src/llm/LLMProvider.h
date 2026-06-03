@@ -8,7 +8,7 @@
 //  Abstract base for all LLM backends.
 //  Providers are responsible for HTTP, auth, retry and rate-limit logic.
 
-struct LLMRequest {
+struct ProviderLLMRequest {
     QString            model;
     QList<AgentMessage> messages;
     QJsonArray         tools;       // provider-specific schema
@@ -24,12 +24,15 @@ struct MessageImageAttachment {
     QString altText;
 };
 
-struct LLMResponse {
+struct ProviderLLMResponse {
     AgentMessage  message;
     int           inputTokens{0};
     int           outputTokens{0};
     QString       stopReason;      // "end_turn" | "tool_use" | "max_tokens"
 };
+
+using LLMRequest = ProviderLLMRequest;
+using LLMResponse = ProviderLLMResponse;
 
 class LLMProvider : public QObject {
     Q_OBJECT

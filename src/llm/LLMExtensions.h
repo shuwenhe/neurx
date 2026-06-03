@@ -19,8 +19,9 @@
 class LLMExtensions : public QObject {
     Q_OBJECT
 public:
+    explicit LLMExtensions(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~LLMExtensions() = default;
-    
+
     // ── Provider Management ─────────────────────────────
     
     /// Register provider

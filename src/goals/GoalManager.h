@@ -21,6 +21,7 @@ class ThreadStore;
 class GoalManager : public QObject {
     Q_OBJECT
 public:
+    explicit GoalManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~GoalManager() = default;
     
     // ── Creation & Management ──────────────────────────────────

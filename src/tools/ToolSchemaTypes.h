@@ -7,6 +7,7 @@
 #include <QVariantMap>
 #include <QDateTime>
 #include <functional>
+#include "execution/ExecutionTypes.h"
 
 /**
  * @file ToolSchemaTypes.h
@@ -48,7 +49,8 @@ struct ToolPermission {
     QStringList allowedRoles;     // 允许的角色列表
     QStringList deniedUsers;      // 拒绝的用户列表
     QStringList deniedRoles;      // 拒绝的角色列表
-    
+    QStringList allowedCapabilities; // 允许的能力列表
+
     bool requiresApproval = false;    // 是否需要审批
     bool requiresAuthentication = false;  // 是否需要认证
     bool auditExecutions = false;     // 是否审计执行
@@ -146,16 +148,7 @@ struct ToolExecutionRequest {
 
 // ── 工具执行结果 ────────────────────────────────
 
-enum class ExecutionStatus {
-    Pending,           // 等待中
-    Running,           // 执行中
-    Completed,         // 已完成
-    Failed,            // 失败
-    Cancelled,         // 已取消
-    Timeout,           // 超时
-    Approved,          // 已批准
-    Rejected           // 已拒绝
-};
+using ToolExecutionStatus = ExecutionStatus;
 
 struct ToolExecutionResult {
     QString executionId;

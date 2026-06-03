@@ -23,6 +23,9 @@ public:
 protected:
     explicit LoggingManager(QObject *parent = nullptr) : QObject(parent) {}
     
+protected:
+    explicit LoggingManager(QObject *parent = nullptr) : QObject(parent) {}
+    
     // ── Logging ─────────────────────────────────────────
     
     /// Log message

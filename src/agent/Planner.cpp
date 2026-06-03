@@ -93,9 +93,9 @@ QList<AgentMessage> Planner::trimToContextBudget(
 }
 
 LLMRequest Planner::buildRequest(const QList<AgentMessage> &history,
-                                 const QString &model,
-                                 const QString &providerId,
-                                 const AgentToolRegistry *registry) const
+                                   const QString &model,
+                                   const QString &providerId,
+                                   const AgentToolRegistry *registry) const
 {
     LLMRequest req;
     req.model        = model;

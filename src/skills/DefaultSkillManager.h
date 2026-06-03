@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef NEURX_DEFAULT_SKILL_MANAGER_H
+#define NEURX_DEFAULT_SKILL_MANAGER_H
+
 #include "SkillManager.h"
 #include <QMap>
 #include <QVector>
@@ -106,3 +109,5 @@ private:
 };
 
 using DefaultSkillManagerPtr = std::shared_ptr<DefaultSkillManager>;
+
+#endif // NEURX_DEFAULT_SKILL_MANAGER_H

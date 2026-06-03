@@ -74,7 +74,7 @@ void DefaultToolDiscovery::searchTools(
     if (query.sortByPopularity) {
         std::sort(results.begin(), results.end(),
             [this](const ToolSchema &a, const ToolSchema &b) {
-                return m_tools[a.toolId].usageCount > m_tools[b.toolId].usageCount;
+                return m_tools.value(a.toolId).usageCount > m_tools.value(b.toolId).usageCount;
             });
     }
     
@@ -246,7 +246,7 @@ QVector<ToolSchema> DefaultToolDiscovery::getPopularTools(int limit) const {
     
     std::sort(tools.begin(), tools.end(),
         [this](const ToolSchema &a, const ToolSchema &b) {
-            return m_tools[a.toolId].usageCount > m_tools[b.toolId].usageCount;
+            return m_tools.value(a.toolId).usageCount > m_tools.value(b.toolId).usageCount;
         });
     
     if (tools.size() > limit) {
@@ -268,7 +268,7 @@ QVector<ToolSchema> DefaultToolDiscovery::getNewTools(int limit) const {
     
     std::sort(tools.begin(), tools.end(),
         [this](const ToolSchema &a, const ToolSchema &b) {
-            return m_tools[a.toolId].createdAt > m_tools[b.toolId].createdAt;
+            return m_tools.value(a.toolId).createdAt > m_tools.value(b.toolId).createdAt;
         });
     
     if (tools.size() > limit) {
@@ -290,7 +290,7 @@ QVector<ToolSchema> DefaultToolDiscovery::getTopRatedTools(int limit) const {
     
     std::sort(tools.begin(), tools.end(),
         [this](const ToolSchema &a, const ToolSchema &b) {
-            return m_tools[a.toolId].overallRating > m_tools[b.toolId].overallRating;
+            return m_tools.value(a.toolId).overallRating > m_tools.value(b.toolId).overallRating;
         });
     
     if (tools.size() > limit) {

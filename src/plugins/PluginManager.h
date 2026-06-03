@@ -18,6 +18,7 @@
 class PluginManager : public QObject {
     Q_OBJECT
 public:
+    explicit PluginManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~PluginManager() = default;
 
 protected:

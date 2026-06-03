@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef NEURX_SKILL_TYPES_H
+#define NEURX_SKILL_TYPES_H
+
 #include <QString>
 #include <QVariantMap>
 #include <QStringList>
@@ -167,3 +170,5 @@ struct SkillNotification {
 using SkillCallback = std::function<void(const SkillResult &result)>;
 using SkillsListCallback = std::function<void(const QVector<SkillCapability> &skills)>;
 using SkillAvailabilityCallback = std::function<void(const QVector<SkillAvailability> &available)>;
+
+#endif // NEURX_SKILL_TYPES_H

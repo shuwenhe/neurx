@@ -20,12 +20,12 @@ BaseTool *AgentToolRegistry::tool(const QString &name) const
     return m_tools.value(name, nullptr);
 }
 
-QList<BaseTool *> ToolRegistry::allTools() const
+QList<BaseTool *> AgentToolRegistry::allTools() const
 {
     return m_tools.values();
 }
 
-QJsonArray ToolRegistry::toAnthropicSchema() const
+QJsonArray AgentToolRegistry::toAnthropicSchema() const
 {
     QJsonArray arr;
     for (const auto *t : m_tools) {
@@ -38,7 +38,7 @@ QJsonArray ToolRegistry::toAnthropicSchema() const
     return arr;
 }
 
-QJsonArray ToolRegistry::toOpenAISchema() const
+QJsonArray AgentToolRegistry::toOpenAISchema() const
 {
     QJsonArray arr;
     for (const auto *t : m_tools) {
@@ -55,7 +55,7 @@ QJsonArray ToolRegistry::toOpenAISchema() const
     return arr;
 }
 
-QJsonArray ToolRegistry::toGeminiSchema() const
+QJsonArray AgentToolRegistry::toGeminiSchema() const
 {
     QJsonArray declarations;
     for (const auto *t : m_tools) {

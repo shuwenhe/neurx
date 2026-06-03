@@ -293,7 +293,7 @@ struct ShutdownSequence {
 
 // ── Callbacks ───────────────────────────────────────
 
-using StateChangeCallback = std::function<void(SystemState oldState, SystemState newState)>;
+using SystemStateChangeCallback = std::function<void(SystemState oldState, SystemState newState)>;
 using HealthChangeCallback = std::function<void(const SubsystemHealth &)>;
 using WorkflowCallback = std::function<void(const WorkflowExecution &)>;
 using MessageCallback = std::function<void(const SystemMessage &)>;

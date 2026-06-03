@@ -265,7 +265,7 @@ void DefaultMemoryManager::searchByDomain(const QString &domain,
     
     for (auto it = m_memories.begin(); it != m_memories.end(); ++it) {
         if (it->memory.type == MemoryType::Semantic) {
-            SemanticMemory semMem = static_cast<SemanticMemory>(it->memory);
+            SemanticMemory semMem = reinterpret_cast<SemanticMemory&>(it->memory);
             if (semMem.domain == domain) {
                 MemorySearchResult result;
                 result.memory = it->memory;
@@ -351,7 +351,7 @@ QVector<EpisodicMemory> DefaultMemoryManager::getRecentEpisodes(int limit) const
     
     for (auto it = m_memories.begin(); it != m_memories.end(); ++it) {
         if (it->memory.type == MemoryType::Episodic) {
-            episodes.append(static_cast<EpisodicMemory>(it->memory));
+            episodes.append(reinterpret_cast<const EpisodicMemory&>(it->memory));
         }
     }
     
@@ -445,7 +445,7 @@ QVector<MemoryEntry> DefaultMemoryManager::traverseMemoryGraph(const QString &st
 void DefaultMemoryManager::addToWorkingMemory(const MemoryEntry &memory,
                                              std::function<void(bool success)> callback)
 {
-    QString id = storeWorkingMemory(static_cast<WorkingMemory>(memory));
+    QString id = storeWorkingMemory(reinterpret_cast<const WorkingMemory&>(memory));
     if (!id.isEmpty()) {
         if (callback) callback(true);
     } else {

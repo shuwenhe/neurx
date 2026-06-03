@@ -175,9 +175,9 @@ struct ToolExecutionResult {
     QString stderr;                // Standard error
 };
 
-// ── Tool Registry ──────────────────────────────────────
+// ── Tool Registry Metadata ──────────────────────────────
 
-struct ToolRegistry {
+struct ToolRegistryMetadata {
     QString registryId;
     QString name;
     
