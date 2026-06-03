@@ -19,6 +19,7 @@ struct TaskSessionSnapshot {
     QDateTime updatedAt;
     QVariantList todoItems;
     QVariantList executionTimeline;
+    QVariantMap approvalProfile;
     QList<AgentMessage> messages;
 
     bool isValid() const { return !threadId.trimmed().isEmpty() || !sessionId.trimmed().isEmpty(); }

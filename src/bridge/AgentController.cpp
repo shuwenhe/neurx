@@ -25,6 +25,7 @@
 #include "tools/SessionStore.h"
 #include "tools/TodoTool.h"
 #include "tools/CustomScriptTool.h"
+#include "tools/SkillTool.h"
 #include <QFile>
 #include <QGuiApplication>
 #include <QClipboard>
@@ -882,6 +883,7 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     m_engine    = new AgentEngine(this);
     m_workspaceContext = new WorkspaceContext(this);
     m_workspaceIndex   = new WorkspaceIndex(this);
+    m_skillManager     = new ClaudeSkillManager(this);
     m_codeMagic        = new DefaultCodeMagic(this);
     m_sandboxManager   = new DefaultSandboxManager(this);
     m_approvalManager  = new DefaultApprovalManager(this);
@@ -2131,6 +2133,12 @@ void AgentController::refreshSystemPrompt()
         if (!memorySnapshot.isEmpty())
             prompt += "\n\nPersistent memory:\n" + memorySnapshot;
     }
+
+    if (m_skillManager) {
+        const QString skillsContext = m_skillManager->getSkillsContextMarkdown(1, 20);
+        if (!skillsContext.trimmed().isEmpty())
+            prompt += "\n\n" + skillsContext;
+    }
     const QVariantList currentTodos = todoItems();
     if (!currentTodos.isEmpty()) {
         QStringList todoLines;
@@ -2167,6 +2175,11 @@ void AgentController::refreshSystemPrompt()
 
 void AgentController::refreshWorkspaceSkills()
 {
+    if (m_skillManager) {
+        const QString error = m_skillManager->initialize(m_workspacePath);
+        if (!error.isEmpty())
+            qWarning().noquote() << "[skills] discovery error:" << error;
+    }
     const QVariantList skills = discoverWorkspaceSkillEntries(m_workspacePath);
     if (skills == m_localSkills)
         return;
@@ -2525,6 +2538,7 @@ void AgentController::setWorkspacePath(const QString &path)
     m_registry->registerTool(new GitHubTool(m_registry));
     m_registry->registerTool(new GitLabTool(m_registry));
     m_registry->registerTool(new JiraTool(m_registry));
+    m_registry->registerTool(new SkillTool(m_skillManager, m_registry));
     auto *knowledgeTool = new KnowledgeTool(m_registry);
     knowledgeTool->setDbPath(QDir(path).filePath(QStringLiteral(".neurx/knowledge.db")));
     m_registry->registerTool(knowledgeTool);
@@ -2901,7 +2915,7 @@ QStringList AgentController::parseSlashListItems(const QString &text) const
             if (item.isEmpty())
                 continue;
 
-            while (!item.isEmpty() && (item.startsWith('-') || item.startsWith('*') || item.startsWith('•')))
+            while (!item.isEmpty() && (item.startsWith('-') || item.startsWith('*') || item.startsWith(QStringLiteral("•"))))
                 item = item.mid(1).trimmed();
 
             int i = 0;
@@ -2936,6 +2950,7 @@ QString AgentController::buildSlashHelp() const
         "Available commands:\n"
         "/help - show this command list\n"
         "/plan <items> - replace the current task plan with a list of items\n"
+        "/skills [query] - list Claude-style skills or inspect one\n"
         "/review [topic] - ask for a code review focused on the current workspace\n"
         "/analyze - analyze the current file with CodeMagic\n"
         "/explain - explain the current file with CodeMagic\n"
@@ -3106,6 +3121,67 @@ bool AgentController::handleSlashCommand(const QString &text)
         todoTool->setTodoItems(todos);
         saveTaskSession();
         emit successOccurred(QStringLiteral("Plan updated with %1 item%2.").arg(todos.size()).arg(todos.size() == 1 ? "" : "s"));
+        return true;
+    }
+
+    if (command == QStringLiteral("skills")) {
+        if (!m_skillManager) {
+            emit errorOccurred(QStringLiteral("Skills manager is not available."));
+            return true;
+        }
+
+        const QString needle = args.trimmed();
+        if (needle.isEmpty()) {
+            QStringList lines;
+            const QString skillsContext = m_skillManager->getSkillsContextMarkdown(1, 50);
+            const QStringList contextLines = skillsContext.split('\n');
+            for (const QString &line : contextLines) {
+                const QString trimmedLine = line.trimmed();
+                if (trimmedLine.startsWith(QStringLiteral("- **")) || trimmedLine.startsWith(QStringLiteral("- ")))
+                    lines.append(trimmedLine);
+            }
+            if (lines.isEmpty()) {
+                emit successOccurred(QStringLiteral("No Claude-style skills were discovered."));
+            } else {
+                emit successOccurred(QStringLiteral("Discovered skills:\n%1").arg(lines.join(QStringLiteral("\n"))));
+            }
+            return true;
+        }
+
+        const QVector<ClaudeSkill> allSkills = m_skillManager->getAllSkills();
+        for (const auto &skill : allSkills) {
+            const QString haystack = skill.metadata.skillId + QStringLiteral(" ")
+                + skill.metadata.name + QStringLiteral(" ")
+                + skill.metadata.description;
+            if (!haystack.contains(needle, Qt::CaseInsensitive))
+                continue;
+
+            QString details = QStringLiteral("Skill: %1\nDescription: %2\nSource: %3\n")
+                .arg(skill.metadata.name,
+                     skill.metadata.description,
+                     skill.filePath);
+
+            if (!skill.metadata.tags.isEmpty())
+                details += QStringLiteral("Tags: %1\n").arg(skill.metadata.tags.join(QStringLiteral(", ")));
+            if (!skill.requiredEnvironmentVariables.isEmpty()) {
+                QStringList envLines;
+                for (const auto &env : skill.requiredEnvironmentVariables) {
+                    envLines << QStringLiteral("- %1%2")
+                                    .arg(env.name,
+                                         env.required ? QStringLiteral(" (required)") : QString());
+                }
+                details += QStringLiteral("Environment:\n%1\n").arg(envLines.join(QStringLiteral("\n")));
+            }
+            if (!skill.markdownContent.trimmed().isEmpty()) {
+                details += QStringLiteral("\nInstructions:\n%1")
+                    .arg(skill.markdownContent.left(2400));
+            }
+
+            emit successOccurred(details);
+            return true;
+        }
+
+        emit errorOccurred(QStringLiteral("No skill matched '%1'.").arg(needle));
         return true;
     }
 
