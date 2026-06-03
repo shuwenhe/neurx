@@ -165,10 +165,10 @@ Item {
             }
         }
 
-        // ── Copilot-style Input ──────────────────────────────────────────
+        // ── Codex-style composer ─────────────────────────────────────────
         Rectangle {
             Layout.fillWidth: true
-            Layout.minimumHeight: 56 + attachmentsArea.implicitHeight
+            Layout.minimumHeight: 72 + attachmentsArea.implicitHeight
             color: Theme.surface
             border.color: Theme.border
             radius: Theme.radius + 2
@@ -178,7 +178,7 @@ Item {
                 anchors.fill: parent
                 spacing: 0
 
-                // ── Attachments section ────────────────────────────────
+                // ── Attachment chips ───────────────────────────────────
                 ColumnLayout {
                     id: attachmentsArea
                     Layout.fillWidth: true
@@ -196,19 +196,19 @@ Item {
                         delegate: Rectangle {
                             required property var modelData
                             Layout.fillWidth: true
-                            implicitHeight: 40
+                            implicitHeight: 34
                             radius: Theme.radius
                             color: Theme.surfaceAlt
                             border.color: Theme.border
 
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.margins: 6
-                                spacing: 8
+                                anchors.margins: 5
+                                spacing: 6
 
                                 Rectangle {
-                                    width: 28
-                                    height: 28
+                                    width: 22
+                                    height: 22
                                     radius: 6
                                     color: Theme.bg
                                     border.color: Theme.border
@@ -216,13 +216,13 @@ Item {
                                     Label {
                                         anchors.centerIn: parent
                                         text: "🖼"
-                                        font.pixelSize: 14
+                                        font.pixelSize: 12
                                     }
                                 }
 
                                 Column {
                                     Layout.fillWidth: true
-                                    spacing: 2
+                                    spacing: 0
 
                                     Label {
                                         text: modelData.fileName || modelData.path || "Image"
@@ -242,8 +242,8 @@ Item {
                                 }
 
                                 Rectangle {
-                                    width: 24
-                                    height: 24
+                                    width: 20
+                                    height: 20
                                     radius: 4
                                     color: closeBtn.hovered ? Theme.error : "transparent"
                                     opacity: closeBtn.hovered ? 0.8 : 0.5
@@ -252,7 +252,7 @@ Item {
                                         anchors.centerIn: parent
                                         text: "×"
                                         color: "white"
-                                        font.pixelSize: 16
+                                        font.pixelSize: 14
                                         font.bold: true
                                     }
 
@@ -275,7 +275,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.minimumHeight: 48
+                    Layout.minimumHeight: 40
                     Layout.margins: 8
                     color: Theme.bg
                     radius: Theme.radius
@@ -285,7 +285,7 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 6
+                        anchors.margins: 5
                         anchors.rightMargin: 4
                         spacing: 4
 
@@ -295,8 +295,8 @@ Item {
 
                             // Attach image button
                             Rectangle {
-                                width: 32
-                                height: 32
+                                width: 28
+                                height: 28
                                 radius: 6
                                 color: attachHovered ? Theme.surfaceAlt : "transparent"
                                 border.color: attachHovered ? Theme.border : "transparent"
@@ -305,7 +305,7 @@ Item {
                                 Label {
                                     anchors.centerIn: parent
                                     text: "📎"
-                                    font.pixelSize: 16
+                                    font.pixelSize: 14
                                 }
 
                                 property bool attachHovered: false
@@ -324,8 +324,8 @@ Item {
 
                             // Paste image button
                             Rectangle {
-                                width: 32
-                                height: 32
+                                width: 28
+                                height: 28
                                 radius: 6
                                 color: pasteHovered ? Theme.surfaceAlt : "transparent"
                                 border.color: pasteHovered ? Theme.border : "transparent"
@@ -334,7 +334,7 @@ Item {
                                 Label {
                                     anchors.centerIn: parent
                                     text: "🖼"
-                                    font.pixelSize: 16
+                                    font.pixelSize: 14
                                 }
 
                                 property bool pasteHovered: false
@@ -373,8 +373,8 @@ Item {
                                 focus: true
                                 leftPadding: 0
                                 rightPadding: 0
-                                topPadding: 2
-                                bottomPadding: 2
+                                topPadding: 0
+                                bottomPadding: 0
 
                                 Keys.onReturnPressed: event => {
                                     if (event.modifiers & Qt.ShiftModifier) {
@@ -393,8 +393,8 @@ Item {
 
                         // ── Send button (right side) ───────────────────
                         Rectangle {
-                            width: 36
-                            height: 36
+                            width: 32
+                            height: 32
                             radius: 6
                             color: sendBtnReady ? (sendBtnHovered ? Theme.accent : Theme.accent) : Theme.surfaceAlt
                             opacity: sendBtnReady ? 1.0 : 0.5
@@ -408,7 +408,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: root.busy ? "⏹" : "↑"
                                 color: parent.sendBtnReady ? "white" : Theme.textMuted
-                                font.pixelSize: 20
+                                font.pixelSize: 18
                                 font.bold: true
                             }
 
@@ -424,44 +424,6 @@ Item {
                                     if (root.busy) root.interrupt()
                                     else           submitInput()
                                 }
-                            }
-                        }
-                    }
-                }
-
-                // ── Footer hint ────────────────────────────────────────
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 24
-                    color: "transparent"
-
-                    RowLayout {
-                        anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
-                        spacing: 8
-
-                        Label {
-                            text: "Enter to send  •  Shift+Enter for newline"
-                            color: Theme.textMuted
-                            font.pixelSize: Theme.fontXs
-                        }
-
-                        Item { Layout.fillWidth: true }
-
-                        Label {
-                            text: root.busy ? "Working..." : "Ready"
-                            color: root.busy ? Theme.warning : Theme.textMuted
-                            font.pixelSize: Theme.fontXs
-                        }
-
-                        Label {
-                            text: "Clear"
-                            color: Theme.textMuted
-                            font.pixelSize: Theme.fontXs
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.clearHistory()
                             }
                         }
                     }
