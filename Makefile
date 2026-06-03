@@ -5,7 +5,7 @@
 #  Usage:
 #    make linux          # build for Linux (current machine)
 #    make mac            # build on macOS
-#    make windows        # print Windows build instructions
+#    make windows        # build on Windows
 # ─────────────────────────────────────────────────────────────────────────────
 
 .PHONY: linux mac windows help
@@ -27,7 +27,8 @@ help:
 	@echo ""
 	@echo "    make linux            Build Release for Linux (current machine)"
 	@echo "    make mac              Build Release for macOS"
-	@echo "    make windows          Print Windows build instructions"
+	@echo "    make windows          Build Release for Windows (on Windows)"
+	@echo "    make setup            Setup LLM API keys (recommended first step)"
 	@echo ""
 
 # ── Linux ────────────────────────────────────────────────────────────────────
@@ -43,10 +44,16 @@ mac:
 ifeq ($(OS),Windows_NT)
 windows:
 	@call scripts\\build-windows.bat $(BUILD_TYPE)
+
+setup:
+	@call scripts\\setup-windows.bat
 else
 windows:
 	@printf '\n  Windows build must be run on a Windows machine:\n'
 	@printf '    scripts\\\\build-windows.bat Release\n\n'
 	@printf '  Or use the GitHub Actions CI workflow:\n'
 	@printf "    .github/workflows/build.yml  (see 'windows' job)\n\n"
+
+setup:
+	@bash $(PROJECT_ROOT)scripts/setup-llm.sh
 endif
