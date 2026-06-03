@@ -26,6 +26,7 @@ Item {
     property bool slashMenuOpen: false
     property int slashSelectedIndex: 0
     property bool autoFollowLatest: true
+    property bool messageListHovered: false
     readonly property var filteredSlashCommands: (function() {
         const q = root.slashQuery.trim().toLowerCase()
         const recent = Array.from(root.recentSlashCommands).map(cmd => ({ "label": cmd, "hint": "recent" }))
@@ -112,6 +113,7 @@ Item {
 
         // ── Message list ──────────────────────────────────────────────────
         Rectangle {
+            id: messagesPanel
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumWidth: 180
@@ -119,6 +121,14 @@ Item {
             border.color: Theme.border
             radius: Theme.radius + 2
             clip: true
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.NoButton
+                onEntered: root.messageListHovered = true
+                onExited: root.messageListHovered = false
+            }
 
             ListView {
                 id: listView
@@ -142,7 +152,11 @@ Item {
                         root.scrollToBottom()
                 }
                 onContentYChanged: {
-                    root.autoFollowLatest = root.isListViewAtBottom()
+                    if (root.isListViewAtBottom()) {
+                        root.autoFollowLatest = true
+                    } else if (listView.moving || listView.dragging || listView.flicking) {
+                        root.autoFollowLatest = false
+                    }
                     if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
                         root.scrollToBottom()
                 }
@@ -168,8 +182,8 @@ Item {
 
                 footer: Item {
                     width: listView.width
-                    height: (busy || !root.autoFollowLatest) ? 48 : 0
-                    visible: busy || !root.autoFollowLatest
+                    height: (busy || !root.autoFollowLatest || root.messageListHovered) ? 48 : 0
+                    visible: busy || !root.autoFollowLatest || root.messageListHovered
 
                     RowLayout {
                         anchors.left: parent.left
@@ -207,16 +221,34 @@ Item {
 
                         Item { Layout.fillWidth: true }
 
-                        Button {
+                        Rectangle {
+                            radius: 999
+                            color: jumpLatestHover.containsMouse ? Theme.accent : Theme.surfaceAlt
+                            border.color: Theme.border
+                            border.width: 1
                             opacity: root.autoFollowLatest ? 0.0 : 1.0
-                            Behavior on opacity {
-                                NumberAnimation { duration: 160 }
+                            Behavior on opacity { NumberAnimation { duration: 160 } }
+                            implicitHeight: 28
+                            implicitWidth: jumpLabel.implicitWidth + 24
+
+                            Label {
+                                id: jumpLabel
+                                anchors.centerIn: parent
+                                text: "Jump to latest"
+                                color: root.autoFollowLatest ? Theme.textMuted : Theme.textPrimary
+                                font.pixelSize: Theme.fontXs
                             }
-                            text: "Jump to latest"
-                            enabled: listView.contentHeight > listView.height
-                            onClicked: {
-                                root.autoFollowLatest = true
-                                root.scrollToBottom()
+
+                            MouseArea {
+                                id: jumpLatestHover
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                enabled: listView.contentHeight > listView.height
+                                onClicked: {
+                                    root.autoFollowLatest = true
+                                    root.scrollToBottom()
+                                }
                             }
                         }
                     }
