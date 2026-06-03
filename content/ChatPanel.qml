@@ -13,6 +13,16 @@ Item {
     required property var    agent
     required property bool   busy
     required property string streamingText
+    readonly property var slashCommands: [
+        { "label": "/help", "hint": "show command list" },
+        { "label": "/plan", "hint": "replace task plan" },
+        { "label": "/review", "hint": "request code review" },
+        { "label": "/search", "hint": "search workspace" },
+        { "label": "/checkpoint", "hint": "open rollback" },
+        { "label": "/delegate", "hint": "delegate a subtask" }
+    ]
+    property string slashQuery: ""
+    property bool slashMenuOpen: false
 
     signal sendMessage(string text)
     signal interrupt()
@@ -245,8 +255,8 @@ Item {
                                     width: 20
                                     height: 20
                                     radius: 4
-                                    color: closeBtn.hovered ? Theme.error : "transparent"
-                                    opacity: closeBtn.hovered ? 0.8 : 0.5
+                                    color: closeBtn.containsMouse ? Theme.error : "transparent"
+                                    opacity: closeBtn.containsMouse ? 0.8 : 0.5
 
                                     Label {
                                         anchors.centerIn: parent
@@ -292,6 +302,37 @@ Item {
                         // ── Left toolbar (attach/paste buttons) ────────
                         RowLayout {
                             spacing: 2
+
+                            // Slash command trigger
+                            Rectangle {
+                                width: 28
+                                height: 28
+                                radius: 6
+                                color: slashHovered ? Theme.surfaceAlt : "transparent"
+                                border.color: slashHovered ? Theme.border : "transparent"
+                                border.width: 1
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "/"
+                                    color: Theme.textPrimary
+                                    font.pixelSize: 16
+                                    font.bold: true
+                                }
+
+                                property bool slashHovered: false
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: !root.busy
+                                    enabled: !root.busy
+                                    opacity: enabled ? 1.0 : 0.4
+
+                                    onHoveredChanged: parent.slashHovered = containsMouse
+                                    onClicked: root.insertSlashCommand("/")
+                                }
+                            }
 
                             // Attach image button
                             Rectangle {
@@ -352,45 +393,6 @@ Item {
                             }
                         }
 
-                        // ── Text input area ────────────────────────────
-                        ScrollView {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                            clip: true
-
-                            TextArea {
-                                id: inputArea
-                                objectName: "chatInput"
-                                width: parent.width
-                                placeholderText: "Ask NeurX Code. Shift+Enter for newline"
-                                placeholderTextColor: Theme.textMuted
-                                wrapMode: TextArea.Wrap
-                                color: Theme.textPrimary
-                                font: Theme.uiFont
-                                background: null
-                                enabled: !root.busy
-                                focus: true
-                                leftPadding: 0
-                                rightPadding: 0
-                                topPadding: 0
-                                bottomPadding: 0
-
-                                Keys.onReturnPressed: event => {
-                                    if (event.modifiers & Qt.ShiftModifier) {
-                                        event.accepted = false
-                                    } else if (inputArea.preeditText.length > 0) {
-                                        event.accepted = false
-                                    } else {
-                                        event.accepted = true
-                                        submitInput()
-                                    }
-                                }
-
-                                Component.onCompleted: forceActiveFocus()
-                            }
-                        }
-
                         // ── Send button (right side) ───────────────────
                         Rectangle {
                             width: 32
@@ -427,6 +429,100 @@ Item {
                             }
                         }
                     }
+
+                    RowLayout {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 8
+                        spacing: 6
+
+                        Label {
+                            text: "Commands"
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontXs
+                        }
+
+                        Repeater {
+                            model: root.slashCommands
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                property bool hovered: false
+
+                                radius: 10
+                                color: hovered ? Theme.surfaceAlt : "transparent"
+                                border.color: Theme.border
+                                border.width: 1
+                                implicitHeight: 22
+                                implicitWidth: chipLabel.implicitWidth + 18
+
+                                Label {
+                                    id: chipLabel
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    color: Theme.textPrimary
+                                    font.pixelSize: Theme.fontXs
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    enabled: !root.busy
+
+                                    onHoveredChanged: parent.hovered = containsMouse
+                                    onClicked: root.insertSlashCommand(modelData.label + " ")
+                                }
+                            }
+                        }
+                    }
+
+                    ScrollView {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 40
+                        anchors.rightMargin: 44
+                        anchors.topMargin: 10
+                        anchors.bottomMargin: 34
+                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                        clip: true
+
+                        TextArea {
+                            id: inputArea
+                            objectName: "chatInput"
+                            width: parent.width
+                            placeholderText: "Ask NeurX Code. Shift+Enter for newline"
+                            placeholderTextColor: Theme.textMuted
+                            wrapMode: TextArea.Wrap
+                            color: Theme.textPrimary
+                            font: Theme.uiFont
+                            background: null
+                            enabled: !root.busy
+                            focus: true
+                            leftPadding: 0
+                            rightPadding: 0
+                            topPadding: 0
+                            bottomPadding: 0
+
+                            Keys.onReturnPressed: event => {
+                                if (event.modifiers & Qt.ShiftModifier) {
+                                    event.accepted = false
+                                } else if (inputArea.preeditText.length > 0) {
+                                    event.accepted = false
+                                } else {
+                                    event.accepted = true
+                                    submitInput()
+                                }
+                            }
+
+                            Component.onCompleted: forceActiveFocus()
+                        }
+                    }
                 }
             }
         }
@@ -439,5 +535,13 @@ Item {
             return
         inputArea.text = ""
         root.sendMessage(txt)
+    }
+
+    function insertSlashCommand(command) {
+        if (root.busy)
+            return
+        inputArea.forceActiveFocus()
+        inputArea.text = command
+        inputArea.cursorPosition = inputArea.text.length
     }
 }
