@@ -47,10 +47,15 @@ add_library(neurx_core STATIC
     src/agent/AgentEngine.cpp
     src/agent/AgentMessage.cpp
     src/agent/Planner.cpp
+    src/agent/SkillManager.cpp
     src/agent/TaskSession.cpp
     src/agent/Executor.cpp
     src/agent/Verifier.cpp
     src/agent/ToolRegistry.cpp
+    # Claude-style skills
+    src/skills/SkillDiscoveryEngine.cpp
+    src/skills/SkillEnvironmentManager.cpp
+    src/skills/ClaudeSkillManager.cpp
     # LLM providers
     src/llm/LLMProvider.cpp
     src/llm/AnthropicProvider.cpp
@@ -73,6 +78,7 @@ add_library(neurx_core STATIC
     src/tools/PatchTool.cpp
     src/tools/SessionStore.cpp
     src/tools/ShellTool.cpp
+    src/tools/SkillTool.cpp
     src/tools/SearchTool.cpp
     src/tools/WebFetchTool.cpp
     src/tools/WebSearchTool.cpp

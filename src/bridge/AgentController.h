@@ -14,6 +14,7 @@
 #include "code/DefaultCodeMagic.h"
 #include "context/WorkspaceContext.h"
 #include "context/WorkspaceIndex.h"
+#include "skills/ClaudeSkillManager.h"
 #include "sandbox/DefaultSandboxManager.h"
 #include "approvals/DefaultApprovalManager.h"
 #include "thread/store/FileBasedThreadStore.h"
@@ -130,6 +131,7 @@ public:
     QString      openaiEndpoint()    const { return m_openaiEndpoint; }
     QString      anthropicApiKey()    const { return m_anthropicApiKey; }
     QString      openaiApiKey()    const { return m_openaiApiKey; }
+    QString      geminiApiKey()    const { return m_geminiApiKey; }
     QString      braveApiKey()     const { return m_braveApiKey; }
     QString      currentFilePath()    const { return m_currentFilePath; }
     QString      currentFileContent() const { return m_currentFileContent; }
@@ -337,6 +339,7 @@ private:
     ChatModel      *m_chatModel{nullptr};
     WorkspaceContext *m_workspaceContext{nullptr};
     WorkspaceIndex   *m_workspaceIndex{nullptr};
+    ClaudeSkillManager *m_skillManager{nullptr};
     DefaultSandboxManager *m_sandboxManager{nullptr};
     DefaultApprovalManager *m_approvalManager{nullptr};
     DefaultCodeMagic *m_codeMagic{nullptr};

@@ -70,13 +70,6 @@ public:
     void maintenance(std::function<void(ThreadStoreError)> callback) override;
 
 private:
-    struct CheckpointData {
-        QString id;
-        QString label;
-        QVariantMap state;
-        QDateTime createdAt;
-    };
-    
     struct ThreadData {
         StoredThread thread;
         QVector<CheckpointData> checkpoints;

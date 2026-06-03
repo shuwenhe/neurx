@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ThreadTypes.h"
+#include "thread/ThreadTypes.h"
 #include <QObject>
 #include <QVector>
 #include <memory>
