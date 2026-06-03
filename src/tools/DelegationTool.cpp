@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QDebug>
 
-DelegationTool::DelegationTool(ToolRegistry *registry, LLMProvider *provider,
+DelegationTool::DelegationTool(AgentToolRegistry *registry, LLMProvider *provider,
                              const QString &model, QObject *parent)
     : BaseTool(parent), m_registry(registry), m_provider(provider), m_model(model)
 {}
