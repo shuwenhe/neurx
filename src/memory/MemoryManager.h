@@ -19,6 +19,9 @@ class MemoryManager : public QObject {
     Q_OBJECT
 public:
     virtual ~MemoryManager() = default;
+
+protected:
+    explicit MemoryManager(QObject *parent = nullptr) : QObject(parent) {}
     
     // ── Memory Storage ────────────────────────────────────
     

@@ -16,6 +16,9 @@ class ConfigManager : public QObject {
 public:
     virtual ~ConfigManager() = default;
     
+protected:
+    explicit ConfigManager(QObject *parent = nullptr) : QObject(parent) {}
+    
     // ── Loading ────────────────────────────────────────────────
     
     /// Load configuration from file (TOML format)

@@ -2,6 +2,7 @@
 
 #include "ThreadStore.h"
 #include <QString>
+#include <QMutex>
 #include <memory>
 
 /**

@@ -3,6 +3,7 @@
 #include "ToolSchemaTypes.h"
 #include <QObject>
 #include <memory>
+#include <functional>
 
 /**
  * @class ToolPermissionManager
@@ -17,6 +18,7 @@
 class ToolPermissionManager : public QObject {
     Q_OBJECT
 public:
+    explicit ToolPermissionManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ToolPermissionManager() = default;
     
     // ── 权限管理 ───────────────────────────────────────
@@ -170,5 +172,3 @@ signals:
     /// 权限过期
     void permissionExpired(const QString &toolId);
 };
-
-#endif // TOOLPERMISSIONMANAGER_H

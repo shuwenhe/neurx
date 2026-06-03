@@ -198,5 +198,3 @@ private:
     CompactionStrategy m_currentCompactionStrategy{CompactionStrategy::Automatic};
     TaskBudget m_currentBudget;
 };
-
-#endif // ANTHROPICSKILLSEXTENSION_H

@@ -224,5 +224,3 @@ private:
     QMap<QString, QVariantMap> m_agentStates;
     int m_agentCounter{0};
 };
-
-#endif // DEFAULTANTHROPICMANAGERS_H

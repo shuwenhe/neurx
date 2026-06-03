@@ -64,9 +64,9 @@ EditOperation CollaborativeEditor::transformOperation(const EditOperation &op1, 
     
     if (op1.type == EditOperation::Type::Insert &&
         op2.type == EditOperation::Type::Insert) {
-        // 两个插入操作：需要检查位置冲突
-        if (op1.position < op2.position) {
-            op2.position += op1.content.length();
+        // 两个插入操作：如果另一个插入发生在前面，当前操作需要右移。
+        if (op1.position > op2.position) {
+            transformed.position += op2.content.length();
         }
     }
     

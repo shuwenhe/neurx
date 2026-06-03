@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QObject>
 #include <QJsonDocument>
+
+SkillDiscoveryEngine::SkillDiscoveryEngine() = default;
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QCryptographicHash>

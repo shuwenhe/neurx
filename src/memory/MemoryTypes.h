@@ -218,5 +218,3 @@ using MemoryListCallback = std::function<void(const QVector<MemoryEntry> &)>;
 using MemorySearchCallback = std::function<void(const QVector<MemorySearchResult> &)>;
 using MemoryStatCallback = std::function<void(const MemoryStats &)>;
 using MemoryErrorCallback = std::function<void(const QString &error)>;
-
-#endif // MEMORYTYPES_H

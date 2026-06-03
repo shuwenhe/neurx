@@ -1,26 +1,40 @@
+# CMake / Qt build outputs
 build/
+build-*/
 build-check/
-build-check-ai/
+build-check-*/
+build-check-libs/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.dir/
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+*.app
+*.qmlc
+*.jsc
+*.moc
+*.qrc
+*.rcc
+
+# Qt / IDE temporary files
 *.user
 *.autosave
 .qmake.stash
-build-check-libs/
-
-# Build directories
-build-check/
-build/
-build*/
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
 
 # Local NeurX runtime state (may contain secrets)
 .neurx/
 
 # Local NeurX secrets/config
 .neurx/secrets.json
-
-# NeurX local state and secrets
-.neurx/
-
-# User secrets configuration files (API keys, etc.)
 secrets.env
 .env
 *.env.local

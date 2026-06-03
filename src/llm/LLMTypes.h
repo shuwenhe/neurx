@@ -296,5 +296,3 @@ using LLMCallback = std::function<void(const LLMResponse &)>;
 using TokenCallback = std::function<void(const TokenUsage &)>;
 using StreamCallback = std::function<void(const StreamChunk &)>;
 using ModelListCallback = std::function<void(const QVector<ModelInfo> &)>;
-
-#endif // LLMTYPES_H
