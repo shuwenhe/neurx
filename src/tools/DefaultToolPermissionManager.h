@@ -53,8 +53,9 @@ public:
                                   const QString &userId,
                                  ToolPermissionCallback callback) override;
     
-    bool validateExecutionRequest(const ToolExecutionRequest &request,
-                                 const QString &userId) override;
+    void validateExecutionRequest(const ToolExecutionRequest &request,
+                                 const QString &userId,
+                                 std::function<void(bool, QString)> callback = nullptr) override;
     
     // ── 用户/角色管理 ───────────────────────────────────
     void addAllowedUser(const QString &toolId,
@@ -80,7 +81,6 @@ public:
     void setUserRole(const QString &userId,
                     const QString &role,
                     std::function<void(bool)> callback = nullptr);
-
     QString getUserRole(const QString &userId) const;
     
     // ── 审批工作流 ───────────────────────────────────────

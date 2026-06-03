@@ -23,9 +23,6 @@ public:
 protected:
     explicit MemoryManager(QObject *parent = nullptr) : QObject(parent) {}
     
-protected:
-    explicit MemoryManager(QObject *parent = nullptr) : QObject(parent) {}
-    
     // ── Memory Storage ────────────────────────────────────
     
     /// Store a new memory
