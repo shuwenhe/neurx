@@ -21,13 +21,14 @@ Item {
         { "label": "/checkpoint", "hint": "open rollback" },
         { "label": "/delegate", "hint": "delegate a subtask" }
     ]
-    property var recentSlashCommands: []
+    readonly property var recentSlashCommands: root.agent && root.agent.recentSlashCommands ? root.agent.recentSlashCommands : []
     property string slashQuery: ""
     property bool slashMenuOpen: false
     property int slashSelectedIndex: 0
     readonly property var filteredSlashCommands: (function() {
         const q = root.slashQuery.trim().toLowerCase()
-        const recent = root.recentSlashCommands.filter(cmd => root.matchesSlashQuery(cmd.label, q))
+        const recent = Array.from(root.recentSlashCommands).map(cmd => ({ "label": cmd, "hint": "recent" }))
+            .filter(cmd => root.matchesSlashQuery(cmd.label, q))
         const recentLabels = recent.map(cmd => cmd.label)
         const base = root.slashCommands.filter(cmd => {
             if (!root.matchesSlashQuery(cmd.label, q))
@@ -317,37 +318,6 @@ Item {
                         RowLayout {
                             spacing: 2
 
-                            // Slash command trigger
-                            Rectangle {
-                                width: 28
-                                height: 28
-                                radius: 6
-                                color: slashHovered ? Theme.surfaceAlt : "transparent"
-                                border.color: slashHovered ? Theme.border : "transparent"
-                                border.width: 1
-
-                                Label {
-                                    anchors.centerIn: parent
-                                    text: "/"
-                                    color: Theme.textPrimary
-                                    font.pixelSize: 16
-                                    font.bold: true
-                                }
-
-                                property bool slashHovered: false
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: !root.busy
-                                    enabled: !root.busy
-                                    opacity: enabled ? 1.0 : 0.4
-
-                                    onHoveredChanged: parent.slashHovered = containsMouse
-                                    onClicked: root.insertSlashCommand("/")
-                                }
-                            }
-
                             // Attach image button
                             Rectangle {
                                 width: 28
@@ -444,56 +414,6 @@ Item {
                         }
                     }
 
-                    RowLayout {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 8
-                        spacing: 6
-
-                        Label {
-                            text: "Commands"
-                            color: Theme.textMuted
-                            font.pixelSize: Theme.fontXs
-                        }
-
-                        Repeater {
-                            model: root.slashCommands
-
-                            delegate: Rectangle {
-                                required property var modelData
-                                property bool hovered: false
-
-                                radius: 10
-                                color: hovered ? Theme.surfaceAlt : "transparent"
-                                border.color: Theme.border
-                                border.width: 1
-                                implicitHeight: 22
-                                implicitWidth: chipLabel.implicitWidth + 18
-
-                                Label {
-                                    id: chipLabel
-                                    anchors.centerIn: parent
-                                    text: modelData.label
-                                    color: Theme.textPrimary
-                                    font.pixelSize: Theme.fontXs
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-                                    enabled: !root.busy
-
-                                    onHoveredChanged: parent.hovered = containsMouse
-                                    onClicked: root.insertSlashCommand(modelData.label + " ")
-                                }
-                            }
-                        }
-                    }
-
                     ScrollView {
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -502,7 +422,7 @@ Item {
                         anchors.leftMargin: 40
                         anchors.rightMargin: 44
                         anchors.topMargin: 10
-                        anchors.bottomMargin: 34
+                        anchors.bottomMargin: 10
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         clip: true
 
@@ -697,7 +617,6 @@ Item {
             root.agent.clearPendingAttachments()
         }
         
-        root.recordSlashUsage(txt)
         inputArea.text = ""
         root.sendMessage(txt)
     }
@@ -744,25 +663,6 @@ Item {
         if (query.length === 0)
             return true
         return label.slice(1).toLowerCase().startsWith(query)
-    }
-
-    function recordSlashUsage(text) {
-        const trimmed = text.trim()
-        if (!trimmed.startsWith("/"))
-            return
-
-        const command = trimmed.split(/\s+/)[0]
-        if (!command || command.length < 2)
-            return
-
-        const next = [{ "label": command, "hint": "recent" }]
-        for (const item of root.recentSlashCommands) {
-            if (item.label !== command)
-                next.push(item)
-            if (next.length >= 5)
-                break
-        }
-        root.recentSlashCommands = next
     }
 
     function setSlashSelection(index) {
