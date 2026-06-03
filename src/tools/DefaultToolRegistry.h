@@ -15,7 +15,7 @@
  * - Permission management
  * - Execution monitoring
  */
-class DefaultToolRegistry : public ToolRegistry {
+class DefaultToolRegistry : public CoreToolRegistry {
 public:
     explicit DefaultToolRegistry(QObject *parent = nullptr);
     ~DefaultToolRegistry() = default;

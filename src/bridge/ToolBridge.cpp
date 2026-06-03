@@ -55,8 +55,11 @@ bool ToolBridge::initialize(AgentController *controller) {
         }
 
         // 连接信号-槽
-        connect(m_toolSystem.get(), &ClaudeToolSystem::toolExecutionCompleted,
-                this, &ToolBridge::onToolExecutionCompleted);
+        auto executor = m_toolSystem->getToolExecutor();
+        if (executor) {
+            connect(executor.get(), &ToolExecutor::executionCompleted,
+                    this, &ToolBridge::onToolExecutionCompleted);
+        }
 
         m_initialized = true;
         qDebug() << "ToolBridge initialized successfully";

@@ -2,10 +2,11 @@
 #include <QDebug>
 #include <QUuid>
 #include <QDateTime>
+#include <QMutexLocker>
 #include <algorithm>
 
 DefaultToolRegistry::DefaultToolRegistry(QObject *parent)
-    : ToolRegistry(parent)
+    : CoreToolRegistry(parent)
 {
 }
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ApprovalManager.h"
 #include <QMap>
 #include <QMutex>

@@ -19,6 +19,7 @@
 class IntegrationOrchestrator : public QObject {
     Q_OBJECT
 public:
+    explicit IntegrationOrchestrator(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~IntegrationOrchestrator() = default;
     
     // ── System Lifecycle ────────────────────────────────
@@ -59,7 +60,7 @@ public:
     
     /// Set state (internal)
     virtual void setState(SystemState state,
-                         StateChangeCallback callback = nullptr) = 0;
+                         SystemStateChangeCallback callback = nullptr) = 0;
     
     // ── Subsystem Management ────────────────────────────
     

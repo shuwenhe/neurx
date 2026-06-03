@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef NEURX_SKILL_MANAGER_H
+#define NEURX_SKILL_MANAGER_H
+
 #include "SkillTypes.h"
 #include <QObject>
 #include <memory>
@@ -18,6 +21,7 @@
 class SkillManager : public QObject {
     Q_OBJECT
 public:
+    explicit SkillManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~SkillManager() = default;
     
     // ── Discovery ──────────────────────────────────────────────
@@ -156,3 +160,5 @@ signals:
 };
 
 using SkillManagerPtr = std::shared_ptr<SkillManager>;
+
+#endif // NEURX_SKILL_MANAGER_H

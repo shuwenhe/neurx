@@ -14,6 +14,7 @@
 class ConfigManager : public QObject {
     Q_OBJECT
 public:
+    explicit ConfigManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ConfigManager() = default;
     
 protected:

@@ -4,7 +4,7 @@
 #include "agent/AgentToolRegistry.h"
 #include "llm/LLMProvider.h"
 
-struct AgentConfig;
+struct AgentEngineConfig;
 
 // ── Planner ──────────────────────────────────────────────────────────────────
 //  Builds provider-specific LLM requests for one agent turn.
@@ -39,4 +39,3 @@ private:
     int     m_contextBudget{100000};
     float   m_temperature{0.0f};
 };
-

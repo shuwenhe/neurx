@@ -26,6 +26,7 @@ class SandboxManager;
 class ExecutionEngine : public QObject {
     Q_OBJECT
 public:
+    explicit ExecutionEngine(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ExecutionEngine() = default;
     
     // ── Initialization ─────────────────────────────────────────

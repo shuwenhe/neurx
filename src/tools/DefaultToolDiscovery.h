@@ -147,7 +147,7 @@ private:
     };
     
     // 存储
-    QMap<QString, ToolMetadata> m_tools;
+    mutable QMap<QString, ToolMetadata> m_tools;
     QMap<QString, Collection> m_collections;
     QMap<QString, int> m_searchTrends;  // keyword -> count
     

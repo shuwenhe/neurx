@@ -3,6 +3,7 @@
 #include <QUuid>
 #include <QDateTime>
 #include <QElapsedTimer>
+#include <algorithm>
 
 DefaultExecutionEngine::DefaultExecutionEngine(QObject *parent)
     : ExecutionEngine(parent)
@@ -490,7 +491,9 @@ QVector<ExecutionHistoryEntry> DefaultExecutionEngine::getExecutionHistory(
     auto it = m_tasks.find(taskId);
     if (it != m_tasks.end()) {
         QVector<ExecutionHistoryEntry> result;
-        for (int i = std::max(0, it->history.size() - limit); i < it->history.size(); ++i) {
+        qsizetype totalSize = it->history.size();
+        qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+        for (qsizetype i = start; i < totalSize; ++i) {
             result.append(it->history[i]);
         }
         return result;
@@ -504,7 +507,9 @@ QVector<ExecutionHistoryEntry> DefaultExecutionEngine::getAllExecutionHistory(in
     QMutexLocker locker(&m_mutex);
     
     QVector<ExecutionHistoryEntry> result;
-    for (int i = std::max(0, m_globalHistory.size() - limit); i < m_globalHistory.size(); ++i) {
+    qsizetype totalSize = m_globalHistory.size();
+    qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+    for (qsizetype i = start; i < totalSize; ++i) {
         result.append(m_globalHistory[i]);
     }
     
@@ -544,9 +549,13 @@ QVector<ExecutionTask> DefaultExecutionEngine::getCompletedTasks(int limit) cons
     QVector<ExecutionTask> completed;
     int count = 0;
     
-    for (auto it = m_tasks.rbegin(); it != m_tasks.rend() && count < limit; ++it) {
-        if (it->task.status_str == "completed") {
-            completed.append(it->task);
+    QVector<TaskEntry> allTasks = m_tasks.values().toVector();
+    std::reverse(allTasks.begin(), allTasks.end());
+    
+    for (const auto &entry : allTasks) {
+        if (count >= limit) break;
+        if (entry.task.status_str == "completed") {
+            completed.append(entry.task);
             count++;
         }
     }
@@ -561,9 +570,13 @@ QVector<ExecutionTask> DefaultExecutionEngine::getFailedTasks(int limit) const
     QVector<ExecutionTask> failed;
     int count = 0;
     
-    for (auto it = m_tasks.rbegin(); it != m_tasks.rend() && count < limit; ++it) {
-        if (it->task.status_str == "failed") {
-            failed.append(it->task);
+    QVector<TaskEntry> allTasks = m_tasks.values().toVector();
+    std::reverse(allTasks.begin(), allTasks.end());
+    
+    for (const auto &entry : allTasks) {
+        if (count >= limit) break;
+        if (entry.task.status_str == "failed") {
+            failed.append(entry.task);
             count++;
         }
     }

@@ -310,8 +310,9 @@ QVector<SkillMention> DefaultSkillManager::getSkillsForLLMContext(const QVariant
     QVector<SkillMention> mentions;
     
     auto available = getAvailableSkills(context);
-    
-    for (int i = 0; i < std::min(available.size(), maxSkills); ++i) {
+    qsizetype limit = static_cast<qsizetype>(maxSkills);
+
+    for (qsizetype i = 0; i < std::min(available.size(), limit); ++i) {
         const auto &skill = available[i];
         
         SkillMention mention;
@@ -435,7 +436,10 @@ QVector<SkillResult> DefaultSkillManager::getInvocationHistory(int limit) const
     QMutexLocker locker(&m_mutex);
     
     QVector<SkillResult> history;
-    for (int i = std::max(0, m_invocationHistory.size() - limit); i < m_invocationHistory.size(); ++i) {
+    qsizetype totalSize = m_invocationHistory.size();
+    qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+
+    for (qsizetype i = start; i < totalSize; ++i) {
         history.append(m_invocationHistory[i]);
     }
     

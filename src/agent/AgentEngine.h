@@ -11,9 +11,9 @@
 #include "llm/LLMProvider.h"
 #include "approvals/ApprovalManager.h"
 
-// ── AgentConfig ───────────────────────────────────────────────────────────────
+// ── AgentEngineConfig ────────────────────────────────────────
 
-struct AgentConfig {
+struct AgentEngineConfig {
     QString systemPrompt;
     int     maxIterations{20};      // hard cap on plan→act cycles per turn
     int     contextWindowTokens{200000};
@@ -39,7 +39,7 @@ public:
     void setProvider(LLMProvider *provider);
     void setToolRegistry(AgentToolRegistry *registry);
     void setApprovalManager(ApprovalManager *manager);
-    void setConfig(const AgentConfig &config);
+    void setConfig(const AgentEngineConfig &config);
     void setSystemPrompt(const QString &prompt);
     void setAutoApproveTools(bool enabled);
     QString systemPrompt() const { return m_config.systemPrompt; }
@@ -104,7 +104,7 @@ private:
     Planner           m_planner;
     Executor          m_executor;
     Verifier          m_verifier;
-    AgentConfig       m_config;
+    AgentEngineConfig       m_config;
     AgentStatus       m_status{AgentStatus::Idle};
     QString           m_activeModel;
     QList<AgentMessage> m_history;

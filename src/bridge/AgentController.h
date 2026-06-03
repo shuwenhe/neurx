@@ -335,7 +335,7 @@ private:
     QString inferExecutionKind(const QString &toolName) const;
 
     AgentEngine    *m_engine{nullptr};
-    ToolRegistry *m_registry{nullptr};
+    AgentToolRegistry *m_registry{nullptr};
     ChatModel      *m_chatModel{nullptr};
     WorkspaceContext *m_workspaceContext{nullptr};
     WorkspaceIndex   *m_workspaceIndex{nullptr};

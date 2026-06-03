@@ -100,7 +100,7 @@ void DefaultToolExecutor::executeToolChain(
         recordExecution(result);
         updatePerformanceData(request.toolId, result);
         
-        if (result.status == ExecutionStatus::Failed) {
+        if (result.status == ToolExecutionStatus::Failed) {
             emit chainExecutionCompleted(chain.chainId);
             if (callback) {
                 callback(results);
@@ -146,7 +146,7 @@ QString DefaultToolExecutor::executeChainStep(
 
 // ── 执行管理 ────────────────────────────────────────
 
-ExecutionStatus DefaultToolExecutor::getExecutionStatus(
+ToolExecutionStatus DefaultToolExecutor::getExecutionStatus(
     const QString &executionId) const {
     
     QMutexLocker locker(&m_mutex);
@@ -155,7 +155,7 @@ ExecutionStatus DefaultToolExecutor::getExecutionStatus(
         return m_executions[executionId].status;
     }
     
-    return ExecutionStatus::Pending;
+    return ToolExecutionStatus::Pending;
 }
 
 ToolExecutionResult DefaultToolExecutor::getExecutionResult(
@@ -176,9 +176,9 @@ int DefaultToolExecutor::getExecutionProgress(const QString &executionId) const 
     
     if (m_executions.contains(executionId)) {
         const auto &result = m_executions[executionId];
-        if (result.status == ExecutionStatus::Running) {
+        if (result.status == ToolExecutionStatus::Running) {
             return 50;  // 简化：运行中50%
-        } else if (result.status == ExecutionStatus::Completed) {
+        } else if (result.status == ToolExecutionStatus::Completed) {
             return 100;
         }
     }
@@ -204,7 +204,7 @@ void DefaultToolExecutor::cancelExecution(
     QMutexLocker locker(&m_mutex);
     
     if (m_executions.contains(executionId)) {
-        m_executions[executionId].status = ExecutionStatus::Cancelled;
+        m_executions[executionId].status = ToolExecutionStatus::Cancelled;
         emit executionCancelled(executionId);
         if (callback) callback(true);
     } else {
@@ -219,7 +219,7 @@ void DefaultToolExecutor::pauseExecution(
     QMutexLocker locker(&m_mutex);
     
     if (m_executions.contains(executionId)) {
-        if (m_executions[executionId].status == ExecutionStatus::Running) {
+        if (m_executions[executionId].status == ToolExecutionStatus::Running) {
             if (callback) callback(true);
             return;
         }
@@ -252,7 +252,7 @@ void DefaultToolExecutor::retryExecution(
     }
     
     auto result = m_executions[executionId];
-    result.status = ExecutionStatus::Pending;
+    result.status = ToolExecutionStatus::Pending;
     result.retryCount++;
     
     m_executions[executionId] = result;
@@ -597,7 +597,7 @@ QVector<ToolExecutionResult> DefaultToolExecutor::getFailedExecutions(int limit)
     int count = 0;
     
     for (const auto &result : m_executions) {
-        if (result.status == ExecutionStatus::Failed && count < limit) {
+        if (result.status == ToolExecutionStatus::Failed && count < limit) {
             failed.append(result);
             count++;
         }
@@ -732,7 +732,7 @@ ToolExecutionResult DefaultToolExecutor::executeInternal(
     ToolExecutionResult result;
     result.executionId = request.executionId;
     result.toolId = request.toolId;
-    result.status = ExecutionStatus::Completed;
+    result.status = ToolExecutionStatus::Completed;
     result.startedAt = QDateTime::currentDateTime();
     result.completedAt = QDateTime::currentDateTime();
     result.durationMs = 100;  // 模拟100ms执行时间
@@ -756,7 +756,7 @@ void DefaultToolExecutor::updatePerformanceData(
     auto &perf = m_performanceData[toolId];
     perf.totalExecutions++;
     
-    if (result.status == ExecutionStatus::Completed) {
+    if (result.status == ToolExecutionStatus::Completed) {
         perf.successCount++;
     } else {
         perf.failureCount++;

@@ -63,7 +63,7 @@ void AgentEngine::setApprovalManager(ApprovalManager *manager)
     m_approvalManager = manager;
 }
 
-void AgentEngine::setConfig(const AgentConfig &config)
+void AgentEngine::setConfig(const AgentEngineConfig &config)
 {
     m_config = config;
     m_planner.setMaxTokens(m_config.contextWindowTokens);

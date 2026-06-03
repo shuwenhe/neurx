@@ -39,7 +39,7 @@ public:
     HealthStatus getHealthStatus() const override;
     SystemMetrics getSystemMetrics() const override;
     void setState(SystemState state,
-                 StateChangeCallback callback = nullptr) override;
+                 SystemStateChangeCallback callback = nullptr) override;
     
     // Subsystem Management
     void registerSubsystem(SubsystemType type, const QString &name,
