@@ -19,6 +19,21 @@ set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "PROJECT_DIR=%%~fI"
 set "BUILD_DIR=%PROJECT_DIR%\build\windows-%BUILD_TYPE%"
 
+REM Load secrets.env if it exists (for API keys, etc.)
+if exist "%USERPROFILE%\.config\neurx-code\secrets.env" (
+    echo [windows] Loading secrets from: %USERPROFILE%\.config\neurx-code\secrets.env
+    for /f "eol=# delims=" %%L in (%USERPROFILE%\.config\neurx-code\secrets.env) do (
+        if not "%%L"=="" (
+            setlocal enabledelayedexpansion
+            set "line=%%L"
+            if "!line:~0,1!" neq "#" (
+                set "!line!"
+            )
+            endlocal & set "%%L"
+        )
+    )
+)
+
 REM Discover common Qt tool locations and add them to PATH when present.
 if exist "C:\Users\Public\qt\Tools\CMake_64\bin\cmake.exe" set "PATH=C:\Users\Public\qt\Tools\CMake_64\bin;%PATH%"
 if exist "C:\Users\Public\qt\Tools\Ninja\ninja.exe" set "PATH=C:\Users\Public\qt\Tools\Ninja;%PATH%"

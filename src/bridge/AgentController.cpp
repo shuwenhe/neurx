@@ -1486,6 +1486,10 @@ void AgentController::loadSettings()
         "OPENAI_API_ENDPOINT",
         "OPENAI_API_BASE_URL",
         "OPENAI_BASE_URL",
+        // NeurX legacy alias
+        "NEURX_API_URL",
+        "NEURX_API_ENDPOINT",
+        "NEURX_API_BASE_URL",
     });
 
     const QString secretsPath = secretsEnvPathIfExists();
@@ -1498,6 +1502,9 @@ void AgentController::loadSettings()
         "OPENAI_API_ENDPOINT",
         "OPENAI_API_BASE_URL",
         "OPENAI_BASE_URL",
+        "NEURX_API_URL",
+        "NEURX_API_ENDPOINT",
+        "NEURX_API_BASE_URL",
     });
 
     const QString settingsEndpoint = endpoint.trimmed();
@@ -1526,11 +1533,13 @@ void AgentController::loadSettings()
         "SILICONFLOW_API_KEY",
         "OPENAI_API_KEY",
         "OPENAI_COMPATIBLE_API_KEY",
+        "NEURX_API_KEY",
     });
     const QString secretsOpenaiKey = firstNonEmptySecretsValue(secrets, {
         "SILICONFLOW_API_KEY",
         "OPENAI_API_KEY",
         "OPENAI_COMPATIBLE_API_KEY",
+        "NEURX_API_KEY",
     });
     const QString settingsOpenaiKey = openaiApiKey.trimmed();
 
