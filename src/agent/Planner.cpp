@@ -16,7 +16,7 @@ void Planner::setTemperature(float temperature)
     m_temperature = temperature;
 }
 
-QJsonArray Planner::buildTools(const QString &providerId, const ToolRegistry *registry) const
+QJsonArray Planner::buildTools(const QString &providerId, const AgentToolRegistry *registry) const
 {
     if (!registry) return {};
     if (providerId == "openai")
@@ -95,7 +95,7 @@ QList<AgentMessage> Planner::trimToContextBudget(
 LLMRequest Planner::buildRequest(const QList<AgentMessage> &history,
                                  const QString &model,
                                  const QString &providerId,
-                                 const ToolRegistry *registry) const
+                                 const AgentToolRegistry *registry) const
 {
     LLMRequest req;
     req.model        = model;
