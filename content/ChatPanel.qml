@@ -165,177 +165,298 @@ Item {
             }
         }
 
-        // ── Send window ───────────────────────────────────────────────────
+        // ── Copilot-style Input ──────────────────────────────────────────
         Rectangle {
             Layout.fillWidth: true
-            Layout.minimumHeight: 156
-            Layout.preferredHeight: 184
+            Layout.minimumHeight: 56 + attachmentsArea.implicitHeight
             color: Theme.surface
             border.color: Theme.border
             radius: Theme.radius + 2
+            clip: true
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 12
-                spacing: 10
+                spacing: 0
 
-                Rectangle {
+                // ── Attachments section ────────────────────────────────
+                ColumnLayout {
+                    id: attachmentsArea
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    color: Theme.bg
-                    radius: Theme.radius + 2
-                    border.color: inputArea.activeFocus ? Theme.accent : Theme.border
-                    border.width: 1
+                    Layout.leftMargin: 12
+                    Layout.rightMargin: 12
+                    Layout.topMargin: attachmentsList.count > 0 ? 8 : 0
+                    Layout.bottomMargin: attachmentsList.count > 0 ? 8 : 0
+                    spacing: 6
+                    visible: attachmentsList.count > 0
 
-                    ScrollView {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        clip: true
+                    Repeater {
+                        id: attachmentsList
+                        model: root.agent && root.agent.pendingAttachments ? root.agent.pendingAttachments : []
 
-                        TextArea {
-                            id: inputArea
-                            objectName: "chatInput"
-                            width: parent.width
-                            placeholderText: "Ask NeurX Code. Shift+Enter for newline"
-                            wrapMode: TextArea.Wrap
-                            color: Theme.textPrimary
-                            font: Theme.uiFont
-                            background: null
-                            enabled: !root.busy
-                            focus: true
+                        delegate: Rectangle {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            implicitHeight: 40
+                            radius: Theme.radius
+                            color: Theme.surfaceAlt
+                            border.color: Theme.border
 
-                            Keys.onReturnPressed: event => {
-                                if (event.modifiers & Qt.ShiftModifier) {
-                                    event.accepted = false   // insert newline
-                                } else if (inputArea.preeditText.length > 0) {
-                                    event.accepted = false   // let IME confirm the composition
-                                } else {
-                                    event.accepted = true
-                                    submitInput()
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 6
+                                spacing: 8
+
+                                Rectangle {
+                                    width: 28
+                                    height: 28
+                                    radius: 6
+                                    color: Theme.bg
+                                    border.color: Theme.border
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "🖼"
+                                        font.pixelSize: 14
+                                    }
+                                }
+
+                                Column {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    Label {
+                                        text: modelData.fileName || modelData.path || "Image"
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.fontSm
+                                        elide: Text.ElideRight
+                                        width: parent.width
+                                    }
+
+                                    Label {
+                                        text: modelData.mimeType || ""
+                                        color: Theme.textMuted
+                                        font.pixelSize: Theme.fontXs
+                                        elide: Text.ElideRight
+                                        width: parent.width
+                                    }
+                                }
+
+                                Rectangle {
+                                    width: 24
+                                    height: 24
+                                    radius: 4
+                                    color: closeBtn.hovered ? Theme.error : "transparent"
+                                    opacity: closeBtn.hovered ? 0.8 : 0.5
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "×"
+                                        color: "white"
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                    }
+
+                                    MouseArea {
+                                        id: closeBtn
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
+                                        enabled: !root.busy
+
+                                        onClicked: root.agent.clearPendingAttachments()
+                                    }
                                 }
                             }
-
-                            Component.onCompleted: forceActiveFocus()
                         }
                     }
                 }
 
-                RowLayout {
+                // ── Main input row (Copilot style) ─────────────────────
+                Rectangle {
                     Layout.fillWidth: true
-                    spacing: 8
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 48
+                    Layout.margins: 8
+                    color: Theme.bg
+                    radius: Theme.radius
+                    border.color: inputArea.activeFocus ? Theme.accent : Theme.border
+                    border.width: inputArea.activeFocus ? 2 : 1
+                    clip: true
 
-                    Button {
-                        text: "Attach image"
-                        enabled: !root.busy
-                        onClicked: root.attachImageRequested()
-                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 6
+                        anchors.rightMargin: 4
+                        spacing: 4
 
-                    Button {
-                        text: "Paste image"
-                        enabled: !root.busy
-                        onClicked: root.pasteImageRequested()
-                    }
-
-                    Item { Layout.fillWidth: true }
-
-                    Button {
-                        text: "Clear attachments"
-                        enabled: !root.busy && root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
-                        onClicked: root.agent.clearPendingAttachments()
-                    }
-                }
-
-                Repeater {
-                    model: root.agent && root.agent.pendingAttachments ? root.agent.pendingAttachments : []
-
-                    delegate: Rectangle {
-                        required property var modelData
-                        Layout.fillWidth: true
-                        implicitHeight: 44
-                        radius: Theme.radius
-                        color: Theme.surfaceAlt
-                        border.color: Theme.border
-
+                        // ── Left toolbar (attach/paste buttons) ────────
                         RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 8
+                            spacing: 2
 
+                            // Attach image button
                             Rectangle {
-                                width: 28
-                                height: 28
+                                width: 32
+                                height: 32
                                 radius: 6
-                                color: Theme.surface
-                                border.color: Theme.border
+                                color: attachHovered ? Theme.surfaceAlt : "transparent"
+                                border.color: attachHovered ? Theme.border : "transparent"
+                                border.width: 1
+
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "📎"
+                                    font.pixelSize: 16
+                                }
+
+                                property bool attachHovered: false
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: !root.busy
+                                    enabled: !root.busy
+                                    opacity: enabled ? 1.0 : 0.4
+
+                                    onHoveredChanged: parent.attachHovered = containsMouse
+                                    onClicked: root.attachImageRequested()
+                                }
+                            }
+
+                            // Paste image button
+                            Rectangle {
+                                width: 32
+                                height: 32
+                                radius: 6
+                                color: pasteHovered ? Theme.surfaceAlt : "transparent"
+                                border.color: pasteHovered ? Theme.border : "transparent"
+                                border.width: 1
 
                                 Label {
                                     anchors.centerIn: parent
                                     text: "🖼"
-                                    font.pixelSize: Theme.fontSm
+                                    font.pixelSize: 16
+                                }
+
+                                property bool pasteHovered: false
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: !root.busy
+                                    enabled: !root.busy
+                                    opacity: enabled ? 1.0 : 0.4
+
+                                    onHoveredChanged: parent.pasteHovered = containsMouse
+                                    onClicked: root.pasteImageRequested()
                                 }
                             }
+                        }
 
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 1
+                        // ── Text input area ────────────────────────────
+                        ScrollView {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            clip: true
 
-                                Label {
-                                    text: modelData.fileName || modelData.path || "Image attachment"
-                                    color: Theme.textPrimary
-                                    font.pixelSize: Theme.fontSm
-                                    elide: Text.ElideRight
+                            TextArea {
+                                id: inputArea
+                                objectName: "chatInput"
+                                width: parent.width
+                                placeholderText: "Ask NeurX Code. Shift+Enter for newline"
+                                placeholderTextColor: Theme.textMuted
+                                wrapMode: TextArea.Wrap
+                                color: Theme.textPrimary
+                                font: Theme.uiFont
+                                background: null
+                                enabled: !root.busy
+                                focus: true
+                                leftPadding: 0
+                                rightPadding: 0
+                                topPadding: 2
+                                bottomPadding: 2
+
+                                Keys.onReturnPressed: event => {
+                                    if (event.modifiers & Qt.ShiftModifier) {
+                                        event.accepted = false
+                                    } else if (inputArea.preeditText.length > 0) {
+                                        event.accepted = false
+                                    } else {
+                                        event.accepted = true
+                                        submitInput()
+                                    }
                                 }
 
-                                Label {
-                                    text: modelData.altText || modelData.mimeType || ""
-                                    color: Theme.textMuted
-                                    font.pixelSize: Theme.fontXs
-                                    elide: Text.ElideRight
+                                Component.onCompleted: forceActiveFocus()
+                            }
+                        }
+
+                        // ── Send button (right side) ───────────────────
+                        Rectangle {
+                            width: 36
+                            height: 36
+                            radius: 6
+                            color: sendBtnReady ? (sendBtnHovered ? Theme.accent : Theme.accent) : Theme.surfaceAlt
+                            opacity: sendBtnReady ? 1.0 : 0.5
+
+                            property bool sendBtnReady: root.busy
+                                                       || inputArea.text.trim().length > 0
+                                                       || (root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0)
+                            property bool sendBtnHovered: false
+
+                            Label {
+                                anchors.centerIn: parent
+                                text: root.busy ? "⏹" : "↑"
+                                color: parent.sendBtnReady ? "white" : Theme.textMuted
+                                font.pixelSize: 20
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: parent.sendBtnReady ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                hoverEnabled: true
+                                enabled: parent.sendBtnReady
+                                opacity: enabled ? 1.0 : 0.5
+
+                                onHoveredChanged: parent.sendBtnHovered = containsMouse
+                                onClicked: {
+                                    if (root.busy) root.interrupt()
+                                    else           submitInput()
                                 }
                             }
                         }
                     }
                 }
 
-                Button {
-                    Layout.fillWidth: true
-                    implicitHeight: 40
-                    text: root.busy ? "Stop response" : "NeurX"
-                    enabled: root.busy
-                             || inputArea.text.trim().length > 0
-                             || (root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0)
-                    highlighted: !root.busy
-
-                    background: Rectangle {
-                        radius: Theme.radius
-                        color: root.busy ? Theme.error : Theme.accent
-                    }
-
-                    contentItem: Label {
-                        text: parent.text
-                        color: "white"
-                        font.pixelSize: Theme.fontMd
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    onClicked: {
-                        if (root.busy) root.interrupt()
-                        else           submitInput()
-                    }
-                }
-
+                // ── Footer hint ────────────────────────────────────────
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 26
+                    Layout.preferredHeight: 24
                     color: "transparent"
 
                     RowLayout {
                         anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                        spacing: 8
+
                         Label {
-                            text: "Clear conversation"
+                            text: "Enter to send  •  Shift+Enter for newline"
                             color: Theme.textMuted
-                            font.pixelSize: Theme.fontSm
+                            font.pixelSize: Theme.fontXs
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Label {
+                            text: root.busy ? "Working..." : "Ready"
+                            color: root.busy ? Theme.warning : Theme.textMuted
+                            font.pixelSize: Theme.fontXs
+                        }
+
+                        Label {
+                            text: "Clear"
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.fontXs
 
                             MouseArea {
                                 anchors.fill: parent
@@ -343,21 +464,7 @@ Item {
                                 onClicked: root.clearHistory()
                             }
                         }
-                        Item { Layout.fillWidth: true }
-                        Label {
-                            text: root.busy ? "Working" : "Ready"
-                            color: root.busy ? Theme.warning : Theme.textMuted
-                            font.pixelSize: Theme.fontSm
-                        }
                     }
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    text: "Commands: /help /plan /review /search /checkpoint /delegate"
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.fontXs
-                    elide: Text.ElideRight
                 }
             }
         }

@@ -239,27 +239,30 @@ void DefaultToolPermissionManager::checkCapabilityPermission(
     checkToolAccess(toolId, userId, callback);
 }
 
-bool DefaultToolPermissionManager::validateExecutionRequest(
+void DefaultToolPermissionManager::validateExecutionRequest(
     const ToolExecutionRequest &request,
-    const QString &userId) {
+    const QString &userId,
+    std::function<void(bool, QString)> callback) {
     
     QMutexLocker locker(&m_mutex);
     
-    // 检查用户
+    bool success = true;
+    QString error;
+
     if (userId.isEmpty()) {
-        return false;
-    }
-    
-    // 检查工具权限
-    if (m_permissions.contains(request.toolId)) {
+        success = false;
+        error = "User ID is empty";
+    } else if (m_permissions.contains(request.toolId)) {
         const auto &perm = m_permissions[request.toolId];
-        
         if (perm.permission.requiresApproval && request.requiresApproval) {
-            return false;
+            success = false;
+            error = "Execution requires approval";
         }
     }
-    
-    return true;
+
+    if (callback) {
+        callback(success, error);
+    }
 }
 
 // ── 用户/角色管理 ───────────────────────────────────
