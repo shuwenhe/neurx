@@ -25,6 +25,7 @@ Item {
     property string slashQuery: ""
     property bool slashMenuOpen: false
     property int slashSelectedIndex: 0
+    property bool autoFollowLatest: true
     readonly property var filteredSlashCommands: (function() {
         const q = root.slashQuery.trim().toLowerCase()
         const recent = Array.from(root.recentSlashCommands).map(cmd => ({ "label": cmd, "hint": "recent" }))
@@ -132,13 +133,17 @@ Item {
 
                 ScrollBar.vertical: ScrollBar {}
 
-                onCountChanged: root.scrollToBottom()
-                onContentHeightChanged: {
-                    if (root.busy || root.streamingText.length > 0)
+                onCountChanged: {
+                    if (root.autoFollowLatest)
                         root.scrollToBottom()
                 }
-                onCurrentIndexChanged: {
-                    if (root.busy || root.streamingText.length > 0)
+                onContentHeightChanged: {
+                    if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
+                        root.scrollToBottom()
+                }
+                onContentYChanged: {
+                    root.autoFollowLatest = root.isListViewAtBottom()
+                    if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
                         root.scrollToBottom()
                 }
 
@@ -163,34 +168,53 @@ Item {
 
                 footer: Item {
                     width: listView.width
-                    height: busy ? 48 : 0
-                    visible: busy
+                    height: (busy || !root.autoFollowLatest) ? 48 : 0
+                    visible: busy || !root.autoFollowLatest
 
-                    Row {
+                    RowLayout {
                         anchors.left: parent.left
+                        anchors.right: parent.right
                         anchors.leftMargin: 18
+                        anchors.rightMargin: 18
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 6
 
-                        Repeater {
-                            model: 3
-                            Rectangle {
-                                width: 7
-                                height: 7
-                                radius: 4
-                                color: Theme.accent
-                                SequentialAnimation on opacity {
-                                    loops: Animation.Infinite
-                                    NumberAnimation { to: 0.2; duration: 400 + index * 150 }
-                                    NumberAnimation { to: 1.0; duration: 400 + index * 150 }
+                        Row {
+                            visible: busy
+                            spacing: 6
+
+                            Repeater {
+                                model: 3
+                                Rectangle {
+                                    width: 7
+                                    height: 7
+                                    radius: 4
+                                    color: Theme.accent
+                                    SequentialAnimation on opacity {
+                                        loops: Animation.Infinite
+                                        NumberAnimation { to: 0.2; duration: 400 + index * 150 }
+                                        NumberAnimation { to: 1.0; duration: 400 + index * 150 }
+                                    }
                                 }
+                            }
+
+                            Label {
+                                text: "NeurX is thinking..."
+                                color: Theme.textMuted
+                                font.pixelSize: Theme.fontSm
                             }
                         }
 
-                        Label {
-                            text: "NeurX is thinking..."
-                            color: Theme.textMuted
-                            font.pixelSize: Theme.fontSm
+                        Item { Layout.fillWidth: true }
+
+                        Button {
+                            visible: !root.autoFollowLatest
+                            text: "Jump to latest"
+                            enabled: listView.contentHeight > listView.height
+                            onClicked: {
+                                root.autoFollowLatest = true
+                                root.scrollToBottom()
+                            }
                         }
                     }
                 }
@@ -729,6 +753,15 @@ Item {
         })
     }
 
+    function isListViewAtBottom() {
+        if (!listView)
+            return true
+
+        const threshold = 24
+        return listView.contentHeight <= listView.height
+            || (listView.contentY + listView.height + threshold) >= listView.contentHeight
+    }
+
     function matchesSlashQuery(label, query) {
         if (query.length === 0)
             return true
@@ -768,12 +801,12 @@ Item {
     }
 
     onBusyChanged: {
-        if (root.busy)
+        if (root.busy && root.autoFollowLatest)
             root.scrollToBottom()
     }
 
     onStreamingTextChanged: {
-        if (root.busy || root.streamingText.length > 0)
+        if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
             root.scrollToBottom()
     }
 }
