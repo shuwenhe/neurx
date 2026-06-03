@@ -79,7 +79,9 @@ void DefaultToolExecutor::executeToolChain(
         
         // 合并参数
         auto params = step.parameters;
-        params.unite(globalParams);
+        for (auto it = globalParams.begin(); it != globalParams.end(); ++it) {
+            params[it.key()] = it.value();
+        }
         
         // 如果需要从前一个步骤获取输入
         if (!step.inputFromPrevious.isEmpty() && !results.isEmpty()) {

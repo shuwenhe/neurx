@@ -17,6 +17,7 @@
 class ToolDiscovery : public QObject {
     Q_OBJECT
 public:
+    explicit ToolDiscovery(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ToolDiscovery() = default;
     
     // ── 基础搜索 ───────────────────────────────────────
@@ -179,5 +180,3 @@ signals:
     /// 搜索完成
     void searchCompleted(int resultCount);
 };
-
-#endif // TOOLDISCOVERY_H

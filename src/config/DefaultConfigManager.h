@@ -3,6 +3,7 @@
 #include "ConfigManager.h"
 #include <QSettings>
 #include <QMap>
+#include <QMutex>
 #include <memory>
 
 /**

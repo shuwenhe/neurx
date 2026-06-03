@@ -291,5 +291,3 @@ public:
     /// List active agents
     virtual QVector<QString> listAgents() = 0;
 };
-
-#endif // ANTHROPICMANAGERS_H

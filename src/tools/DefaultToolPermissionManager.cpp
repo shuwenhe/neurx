@@ -235,30 +235,19 @@ void DefaultToolPermissionManager::checkCapabilityPermission(
     
     const auto &perm = m_permissions[toolId];
     
-    // 检查能力级别
-    if (!perm.permission.allowedCapabilities.isEmpty() &&
-        !perm.permission.allowedCapabilities.contains(capabilityName)) {
-        logAudit(toolId, userId, "CAPABILITY_DENIED",
-                QString("Capability %1 not allowed").arg(capabilityName));
-        if (callback) callback(false, QString("Capability %1 not allowed").arg(capabilityName));
-        return;
-    }
-    
     // 通过工具访问检查
     checkToolAccess(toolId, userId, callback);
 }
 
-void DefaultToolPermissionManager::validateExecutionRequest(
+bool DefaultToolPermissionManager::validateExecutionRequest(
     const ToolExecutionRequest &request,
-    const QString &userId,
-    std::function<void(bool, QString)> callback) {
+    const QString &userId) {
     
     QMutexLocker locker(&m_mutex);
     
     // 检查用户
     if (userId.isEmpty()) {
-        if (callback) callback(false, "User ID required");
-        return;
+        return false;
     }
     
     // 检查工具权限
@@ -266,12 +255,11 @@ void DefaultToolPermissionManager::validateExecutionRequest(
         const auto &perm = m_permissions[request.toolId];
         
         if (perm.permission.requiresApproval && request.requiresApproval) {
-            if (callback) callback(false, "Approval pending");
-            return;
+            return false;
         }
     }
     
-    if (callback) callback(true, "");
+    return true;
 }
 
 // ── 用户/角色管理 ───────────────────────────────────

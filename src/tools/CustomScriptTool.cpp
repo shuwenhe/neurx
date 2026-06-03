@@ -1,29 +1,38 @@
-#include "tools/CustomScriptTool.h"
+#include "CustomScriptTool.h"
 #include <QJsonDocument>
-#include <QProcess>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QDebug>
 
 CustomScriptTool::CustomScriptTool(const QString &name, const QString &description,
                                  const QString &scriptPath, const QJsonObject &schema,
                                  QObject *parent)
-    : BaseTool(parent), m_name(name), m_description(description),
-      m_scriptPath(scriptPath), m_schema(schema)
-{}
+    : BaseTool(parent)
+    , m_name(name)
+    , m_description(description)
+    , m_scriptPath(scriptPath)
+    , m_schema(schema)
+{
+}
 
 ToolResult CustomScriptTool::execute(const QString &callId, const QJsonObject &args)
 {
-    QProcess proc;
-    QStringList procArgs;
-    procArgs << m_scriptPath << QString::fromUtf8(QJsonDocument(args).toJson(QJsonDocument::Compact));
+    // Implementation for executing local scripts
+    QProcess process;
+    process.setProgram(m_scriptPath);
 
-    proc.setProcessChannelMode(QProcess::MergedChannels);
-    proc.start("sh", {"-c", QString("%1 '%2'").arg(m_scriptPath, QString::fromUtf8(QJsonDocument(args).toJson(QJsonDocument::Compact)))});
+    // Convert args to JSON string
+    QString argsJson = QJsonDocument(args).toJson(QJsonDocument::Compact);
+    process.setArguments({argsJson});
 
-    if (!proc.waitForFinished(30000)) {
-        proc.kill();
-        return {callId, name(), true, "Script execution timed out."};
+    process.start();
+    if (!process.waitForFinished(30000)) { // 30s timeout
+        return {callId, m_name, true, "Script execution timed out"};
     }
 
-    const QByteArray output = proc.readAll();
-    return {callId, name(), proc.exitCode() != 0, QString::fromUtf8(output)};
+    if (process.exitCode() != 0) {
+        return {callId, m_name, true, "Script failed with exit code " + QString::number(process.exitCode()) + ": " + process.readAllStandardError()};
+    }
+
+    return {callId, m_name, false, QString::fromUtf8(process.readAllStandardOutput())};
 }

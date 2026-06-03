@@ -1,6 +1,7 @@
 #include "DefaultToolDiscovery.h"
 #include <QUuid>
 #include <QDebug>
+#include <QRegularExpression>
 #include <algorithm>
 
 DefaultToolDiscovery::DefaultToolDiscovery(QObject *parent)
@@ -96,8 +97,9 @@ ToolSchema DefaultToolDiscovery::getTool(const QString &toolId) const {
     QMutexLocker locker(&m_mutex);
     
     if (m_tools.contains(toolId)) {
-        m_tools[toolId].usageCount++;
-        return m_tools[toolId].schema;
+        auto tool = m_tools.value(toolId);
+        tool.usageCount++;
+        return tool.schema;
     }
     
     return ToolSchema();
@@ -937,7 +939,7 @@ QVector<QString> DefaultToolDiscovery::extractKeywords(const QString &text) cons
     for (const auto &word : words) {
         QString cleaned = word.toLower();
         // 移除标点符号
-        cleaned.replace(QRegExp("[^a-z0-9_]"), "");
+        cleaned.replace(QRegularExpression("[^a-z0-9_]"), "");
         
         if (cleaned.length() > 2) {  // 忽略太短的词
             keywords.append(cleaned);

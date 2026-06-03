@@ -191,5 +191,3 @@ using LLMResponseCallback = std::function<void(const LLMResponse&)>;
 using LLMAnalysisCallback = std::function<void(const LLMAnalysisResult&)>;
 using LLMGenerationCallback = std::function<void(const LLMGeneratedCode&)>;
 using LLMProgressCallback = std::function<void(const QString& message, int progress)>;
-
-#endif // LLMPROVIDERTYPES_H

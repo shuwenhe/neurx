@@ -18,6 +18,7 @@
 class ToolExecutor : public QObject {
     Q_OBJECT
 public:
+    explicit ToolExecutor(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ToolExecutor() = default;
     
     // ── 工具执行 ───────────────────────────────────────
@@ -228,5 +229,3 @@ signals:
     /// 队列有变化
     void queueChanged();
 };
-
-#endif // TOOLEXECUTOR_H

@@ -3,6 +3,7 @@
 #include "thread/ThreadTypes.h"
 #include <QObject>
 #include <QVector>
+#include <QMutex>
 #include <memory>
 
 /**
@@ -21,6 +22,7 @@
 class ThreadStore : public QObject {
     Q_OBJECT
 public:
+    explicit ThreadStore(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ThreadStore() = default;
     
     // ── Creation and Initialization ────────────────────────────────────

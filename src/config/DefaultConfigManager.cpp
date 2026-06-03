@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QMutex>
 
 DefaultConfigManager::DefaultConfigManager(QObject *parent)
     : ConfigManager(parent)

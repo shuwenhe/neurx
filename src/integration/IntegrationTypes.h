@@ -298,5 +298,3 @@ using HealthChangeCallback = std::function<void(const SubsystemHealth &)>;
 using WorkflowCallback = std::function<void(const WorkflowExecution &)>;
 using MessageCallback = std::function<void(const SystemMessage &)>;
 using ErrorCallback = std::function<void(int errorCode, const QString &message)>;
-
-#endif // INTEGRATIONTYPES_H

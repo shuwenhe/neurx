@@ -321,7 +321,7 @@ void FileBasedThreadStore::listCheckpoints(const ThreadId &threadId,
     
     QVector<QString> ids;
     for (const auto &file : files) {
-        ids.append(file.remove(".json"));
+        ids.append(file.left(file.size() - 5));
     }
     
     locker.unlock();

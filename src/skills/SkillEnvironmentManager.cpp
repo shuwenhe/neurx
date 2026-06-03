@@ -7,6 +7,8 @@
 #include <QDebug>
 #include <QProcessEnvironment>
 
+SkillEnvironmentManager::SkillEnvironmentManager() = default;
+
 DefaultSkillEnvironmentManager::DefaultSkillEnvironmentManager()
 {
     // Load from system environment

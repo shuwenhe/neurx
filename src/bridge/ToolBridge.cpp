@@ -5,6 +5,7 @@
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMutex>
 
 ToolBridge::ToolBridge(QObject *parent)
     : QObject(parent) {

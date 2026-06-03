@@ -179,5 +179,3 @@ signals:
     /// 能力已移除
     void capabilityRemoved(const QString &toolId, const QString &capabilityName);
 };
-
-#endif // TOOLSCHEMAREGISTRY_H

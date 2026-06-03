@@ -21,6 +21,7 @@
 class ApprovalManager : public QObject {
     Q_OBJECT
 public:
+    explicit ApprovalManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ApprovalManager() = default;
     
     // ── Policy Configuration ───────────────────────────────────────────

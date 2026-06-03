@@ -22,6 +22,7 @@
 class SandboxManager : public QObject {
     Q_OBJECT
 public:
+    explicit SandboxManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~SandboxManager() = default;
     
     // ── Detection and Platform Info ────────────────────────────────────

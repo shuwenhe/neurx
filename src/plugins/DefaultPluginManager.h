@@ -4,6 +4,7 @@
 #include <QPluginLoader>
 #include <QLibraryInfo>
 #include <QMap>
+#include <QMutex>
 
 /**
  * @class DefaultPluginManager

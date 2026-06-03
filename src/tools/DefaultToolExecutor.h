@@ -210,5 +210,3 @@ private:
     void updatePerformanceData(const QString &toolId,
                               const ToolExecutionResult &result);
 };
-
-#endif // DEFAULTTOOLEXECUTOR_H
