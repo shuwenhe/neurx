@@ -127,7 +127,7 @@ QVector<QString> TaskPersistence::listSessions() const {
     QDir dir(m_persistencePath);
 
     for (const auto &file : dir.entryList(QStringList() << "*.json")) {
-        sessions.append(file.replace(".json", ""));
+        sessions.append(file.left(file.length() - 5)); // Remove ".json"
     }
 
     return sessions;

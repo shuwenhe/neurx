@@ -37,12 +37,12 @@ signals:
     void eventOccurred(const QString &callId, const QVariantMap &event);
 };
 
-// ── ToolRegistry ─────────────────────────────────────────────────────────────
+// ── AgentToolRegistry ─────────────────────────────────────────────────────────────
 
-class ToolRegistry : public QObject {
+class AgentToolRegistry : public QObject {
     Q_OBJECT
 public:
-    explicit ToolRegistry(QObject *parent = nullptr);
+    explicit AgentToolRegistry(QObject *parent = nullptr);
 
     void registerTool(BaseTool *tool);
     void unregisterTool(const QString &name);

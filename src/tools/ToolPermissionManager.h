@@ -21,6 +21,10 @@ public:
     explicit ToolPermissionManager(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ToolPermissionManager() = default;
     
+protected:
+    explicit ToolPermissionManager(QObject *parent = nullptr) : QObject(parent) {}
+    
+public:
     // ── 权限管理 ───────────────────────────────────────
     
     /// 设置工具权限
@@ -63,8 +67,9 @@ public:
                                           ToolPermissionCallback callback = nullptr) = 0;
     
     /// 验证执行请求
-    virtual bool validateExecutionRequest(const ToolExecutionRequest &request,
-                                         const QString &userId) = 0;
+    virtual void validateExecutionRequest(const ToolExecutionRequest &request,
+                                         const QString &userId,
+                                         std::function<void(bool success, QString error)> callback = nullptr) = 0;
     
     // ── 角色和用户管理 ──────────────────────────────────
     
@@ -124,7 +129,7 @@ public:
                                 std::function<void(bool)> callback = nullptr) = 0;
     
     /// 获取待审批列表
-    virtual QVector<ToolExecutionRequest> getPendingApprovals() const = 0;
+    virtual QVector<QVariantMap> getPendingApprovals(int limit = 100) const = 0;
     
     // ── 审计日志 ────────────────────────────────────────
     

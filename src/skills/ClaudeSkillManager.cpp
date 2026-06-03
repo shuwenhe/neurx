@@ -25,6 +25,7 @@ static QStringList skillDiscoveryRoots(const QString &baseDirectory)
     addRoot(QDir(home).filePath(QStringLiteral(".claude/skills")));
     addRoot(QDir(home).filePath(QStringLiteral(".neurx/skills")));
     addRoot(QDir(home).filePath(QStringLiteral(".agents/skills")));
+    addRoot(QStringLiteral("/Users/feifei/agent/skills/skills"));
 
     return roots;
 }

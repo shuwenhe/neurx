@@ -1,6 +1,7 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "agent/AgentEngine.h"
+#include "tools/ToolRegistry.h"
 
 // ── DelegationTool ───────────────────────────────────────────────────────────
 //  Allows the parent agent to spawn a recursive sub-agent for a specific task.

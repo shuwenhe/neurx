@@ -19,6 +19,10 @@ class ToolSchemaRegistry : public QObject {
 public:
     virtual ~ToolSchemaRegistry() = default;
     
+protected:
+    explicit ToolSchemaRegistry(QObject *parent = nullptr) : QObject(parent) {}
+    
+public:
     // ── 模式管理 ───────────────────────────────────────
     
     /// 注册工具模式

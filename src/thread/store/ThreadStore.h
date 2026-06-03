@@ -25,6 +25,10 @@ public:
     explicit ThreadStore(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ThreadStore() = default;
     
+protected:
+    explicit ThreadStore(QObject *parent = nullptr) : QObject(parent) {}
+    
+public:
     // ── Creation and Initialization ────────────────────────────────────
     
     /// Create a new thread with initial parameters

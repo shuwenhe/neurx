@@ -1,21 +1,21 @@
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include <QJsonObject>
 #include <QJsonArray>
 
-ToolRegistry::ToolRegistry(QObject *parent) : QObject(parent) {}
+AgentToolRegistry::AgentToolRegistry(QObject *parent) : QObject(parent) {}
 
-void ToolRegistry::registerTool(BaseTool *tool)
+void AgentToolRegistry::registerTool(BaseTool *tool)
 {
     m_tools.insert(tool->name(), tool);
     if (tool->parent() == nullptr) tool->setParent(this);
 }
 
-void ToolRegistry::unregisterTool(const QString &name)
+void AgentToolRegistry::unregisterTool(const QString &name)
 {
     m_tools.remove(name);
 }
 
-BaseTool *ToolRegistry::tool(const QString &name) const
+BaseTool *AgentToolRegistry::tool(const QString &name) const
 {
     return m_tools.value(name, nullptr);
 }

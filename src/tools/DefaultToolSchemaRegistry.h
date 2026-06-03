@@ -16,7 +16,6 @@
  * - 依赖分析
  */
 class DefaultToolSchemaRegistry : public ToolSchemaRegistry {
-    Q_OBJECT
 public:
     explicit DefaultToolSchemaRegistry(QObject *parent = nullptr);
     ~DefaultToolSchemaRegistry() = default;
@@ -135,7 +134,7 @@ private:
     QMap<QString, ToolSchema> m_schemas;
     QMap<QString, QVector<SchemaVersion>> m_versions;
     QMap<QString, QVector<ToolCapabilityDefinition>> m_capabilities;
-    QMap<QString, int> m_usageCount;
+    mutable QMap<QString, int> m_usageCount;
     
     // 依赖追踪
     QMap<QString, QStringList> m_dependencies;  // toolId -> dependencies

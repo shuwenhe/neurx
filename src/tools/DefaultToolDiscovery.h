@@ -16,7 +16,6 @@
  * - 评价系统
  */
 class DefaultToolDiscovery : public ToolDiscovery {
-    Q_OBJECT
 public:
     explicit DefaultToolDiscovery(QObject *parent = nullptr);
     ~DefaultToolDiscovery() = default;

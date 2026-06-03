@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include "agent/AgentEngine.h"
 #include "agent/TaskSession.h"
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "llm/LLMProvider.h"
 #include "code/DefaultCodeMagic.h"
 #include "context/WorkspaceContext.h"
@@ -335,7 +335,7 @@ private:
     QString inferExecutionKind(const QString &toolName) const;
 
     AgentEngine    *m_engine{nullptr};
-    ToolRegistry   *m_registry{nullptr};
+    ToolRegistry *m_registry{nullptr};
     ChatModel      *m_chatModel{nullptr};
     WorkspaceContext *m_workspaceContext{nullptr};
     WorkspaceIndex   *m_workspaceIndex{nullptr};
