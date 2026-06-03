@@ -391,7 +391,7 @@ NeurxConfig DefaultConfigManager::parseEnvironment()
     if (env.contains("NEURX_API_KEY")) {
         config.llm.apiKey = env.value("NEURX_API_KEY");
     }
-    
+
     if (env.contains("NEURX_DATA_DIR")) {
         config.storage.dataDir = env.value("NEURX_DATA_DIR");
     }
