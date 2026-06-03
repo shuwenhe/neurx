@@ -1,5 +1,5 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 
 // ── WebSearchTool ─────────────────────────────────────────────────────────────
 //  Web search using Brave Search API (primary) or DuckDuckGo instant answers

@@ -1,5 +1,5 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "sandbox/SandboxManager.h"
 #include "tools/CheckpointManager.h"
 #include <QDir>

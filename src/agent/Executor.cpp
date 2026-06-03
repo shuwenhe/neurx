@@ -1,6 +1,6 @@
 #include "agent/Executor.h"
 
-void Executor::setToolRegistry(ToolRegistry *registry)
+void Executor::setToolRegistry(AgentToolRegistry *registry)
 {
     m_registry = registry;
 }

@@ -354,19 +354,19 @@ void DefaultToolPermissionManager::removeAllowedRole(
     }
 }
 
-QVector<QString> DefaultToolPermissionManager::getAllowedUsers(
+QStringList DefaultToolPermissionManager::getAllowedUsers(
     const QString &toolId) const {
     
     QMutexLocker locker(&m_mutex);
     
     if (m_permissions.contains(toolId)) {
-        return QVector<QString>(m_permissions[toolId].allowedUsers.begin(),
-                               m_permissions[toolId].allowedUsers.end());
+        return QStringList(m_permissions[toolId].allowedUsers.begin(),
+                           m_permissions[toolId].allowedUsers.end());
     }
-    return QVector<QString>();
+    return QStringList();
 }
 
-QVector<QString> DefaultToolPermissionManager::getAllowedRoles(
+QStringList DefaultToolPermissionManager::getAllowedRoles(
     const QString &toolId) const {
     
     QMutexLocker locker(&m_mutex);
@@ -374,7 +374,7 @@ QVector<QString> DefaultToolPermissionManager::getAllowedRoles(
     if (m_permissions.contains(toolId)) {
         return m_permissions[toolId].permission.allowedRoles;
     }
-    return QVector<QString>();
+    return QStringList();
 }
 
 void DefaultToolPermissionManager::setUserRole(

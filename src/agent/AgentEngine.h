@@ -7,7 +7,7 @@
 #include "agent/Planner.h"
 #include "agent/Executor.h"
 #include "agent/Verifier.h"
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "llm/LLMProvider.h"
 #include "approvals/ApprovalManager.h"
 
@@ -37,7 +37,7 @@ public:
     ~AgentEngine() override;
 
     void setProvider(LLMProvider *provider);
-    void setToolRegistry(ToolRegistry *registry);
+    void setToolRegistry(AgentToolRegistry *registry);
     void setApprovalManager(ApprovalManager *manager);
     void setConfig(const AgentConfig &config);
     void setSystemPrompt(const QString &prompt);
@@ -99,7 +99,7 @@ private:
     QString shellCommandFromCall(const ToolCall &call) const;
 
     LLMProvider      *m_provider{nullptr};
-    ToolRegistry     *m_registry{nullptr};
+    AgentToolRegistry *m_registry{nullptr};
     ApprovalManager  *m_approvalManager{nullptr};
     Planner           m_planner;
     Executor          m_executor;

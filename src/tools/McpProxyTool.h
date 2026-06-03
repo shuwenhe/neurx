@@ -1,5 +1,5 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "tools/McpClient.h"
 #include <QSharedPointer>
 
