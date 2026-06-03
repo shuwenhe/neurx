@@ -201,7 +201,7 @@ void ClaudeToolSystem::smartExecute(
     
     // 推荐工具
     m_toolDiscovery->recommendTools(description,
-        [this, parameters, userId, callback](const QVector<ToolSchema> &tools) {
+        [this, parameters, userId, description, callback](const QVector<ToolSchema> &tools) {
             if (tools.isEmpty()) {
                 qWarning() << "No tools found for:" << description;
                 return;
@@ -340,10 +340,10 @@ QString ClaudeToolSystem::generateSystemReport() const {
     report += "\n\n";
     
     report += "Subsystems:\n";
-    report += "- Permission Manager: " + (m_permissionManager ? "Active" : "Inactive") + "\n";
-    report += "- Schema Registry: " + (m_schemaRegistry ? "Active" : "Inactive") + "\n";
-    report += "- Tool Discovery: " + (m_toolDiscovery ? "Active" : "Inactive") + "\n";
-    report += "- Tool Executor: " + (m_toolExecutor ? "Active" : "Inactive") + "\n";
+    report += QString("- Permission Manager: %1\n").arg(m_permissionManager ? "Active" : "Inactive");
+    report += QString("- Schema Registry: %1\n").arg(m_schemaRegistry ? "Active" : "Inactive");
+    report += QString("- Tool Discovery: %1\n").arg(m_toolDiscovery ? "Active" : "Inactive");
+    report += QString("- Tool Executor: %1\n").arg(m_toolExecutor ? "Active" : "Inactive");
     
     auto sysStats = getSystemStatistics();
     

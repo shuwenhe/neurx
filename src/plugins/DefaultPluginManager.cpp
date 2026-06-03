@@ -792,7 +792,7 @@ PluginManifest DefaultPluginManager::parseManifest(const QString &manifestPath, 
 {
     QFile file(manifestPath);
     if (!file.open(QIODevice::ReadOnly)) {
-        error = PluginError::FileNotFound;
+        error = PluginError::NotFound;
         return PluginManifest();
     }
     

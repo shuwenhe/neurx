@@ -15,13 +15,13 @@
  * - Permission management
  * - Tool lifecycle
  */
-class ToolRegistry : public QObject {
+class CoreToolRegistry : public QObject {
     Q_OBJECT
 public:
-    virtual ~ToolRegistry() = default;
+    virtual ~CoreToolRegistry() = default;
     
 protected:
-    explicit ToolRegistry(QObject *parent = nullptr) : QObject(parent) {}
+    explicit CoreToolRegistry(QObject *parent = nullptr) : QObject(parent) {}
     
 public:
     // ── Tool Registration ───────────────────────────────
@@ -266,4 +266,4 @@ signals:
     void permissionChanged(const QString &toolId, const QString &principalId);
 };
 
-using ToolRegistryPtr = std::shared_ptr<ToolRegistry>;
+using CoreToolRegistryPtr = std::shared_ptr<CoreToolRegistry>;

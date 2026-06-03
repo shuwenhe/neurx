@@ -123,8 +123,9 @@ void ApprovalToolBridge::recordAuditLog(const ToolExecutionResult &result) {
     if (result.status == ExecutionStatus::Completed) {
         m_approvalsApproved++;
     } else if (result.status == ExecutionStatus::Failed ||
-               result.status == ExecutionStatus::Rejected ||
-               result.status == ExecutionStatus::Cancelled) {
+               result.status == ExecutionStatus::Cancelled ||
+               result.status == ExecutionStatus::Timeout ||
+               result.status == ExecutionStatus::Skipped) {
         m_approvalsDenied++;
     }
 }
@@ -162,11 +163,11 @@ bool PluginToolBridge::discoverAndRegisterPluginTools() {
     for (const auto &plugin : plugins) {
         ToolSchema schema;
         schema.toolId = "plugin-" + plugin.id;
-        schema.name = "Plugin: " + plugin.name;
+        schema.name = "Plugin: " + plugin.metadata.name;
         schema.description = "Integrated plugin tool";
         schema.category = "Plugin";
-        schema.author = plugin.author;
-        schema.version = plugin.version;
+        schema.author = plugin.metadata.author;
+        schema.version = plugin.metadata.version;
 
         ToolPermission permission;
         permission.toolId = schema.toolId;

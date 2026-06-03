@@ -149,7 +149,7 @@ SystemMetrics DefaultIntegrationOrchestrator::getSystemMetrics() const {
 }
 
 void DefaultIntegrationOrchestrator::setState(SystemState state,
-                                             StateChangeCallback callback) {
+                                             SystemStateChangeCallback callback) {
     QMutexLocker locker(&m_mutex);
     
     SystemState oldState = m_state;

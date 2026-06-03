@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QCryptographicHash>
+#include <algorithm>
 #include <QDebug>
 #include <QUuid>
 #include <algorithm>
@@ -299,8 +300,10 @@ CompactedContext DefaultContextCompactionManager::compactContext(
     CompactedContext result;
     
     // Keep recent messages uncompressed (based on messageWindow)
-    int uncompressedCount = std::min(config.messageWindow, messages.count());
-    int compactableCount = std::max(0, messages.count() - uncompressedCount);
+    const qsizetype messageCount = messages.size();
+    const qsizetype requestedWindow = qMax<qsizetype>(0, static_cast<qsizetype>(config.messageWindow));
+    const qsizetype uncompressedCount = requestedWindow < messageCount ? requestedWindow : messageCount;
+    const qsizetype compactableCount = messageCount > uncompressedCount ? messageCount - uncompressedCount : 0;
     
     // Calculate original tokens (rough estimate: 4 chars per token)
     for (const auto &msg : messages) {

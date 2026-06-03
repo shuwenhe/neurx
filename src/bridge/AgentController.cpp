@@ -758,7 +758,7 @@ static QVariantList discoverWorkspaceSkillEntries(const QString &workspacePath)
     return entries;
 }
 
-static void unregisterToolAndDelete(ToolRegistry *registry, const QString &name)
+static void unregisterToolAndDelete(AgentToolRegistry *registry, const QString &name)
 {
     if (!registry)
         return;
@@ -879,7 +879,7 @@ void ChatModel::clear()
 AgentController::AgentController(QObject *parent) : QObject(parent)
 {
     m_chatModel = new ChatModel(this);
-    m_registry  = new ToolRegistry(this);
+    m_registry  = new AgentToolRegistry(this);
     m_engine    = new AgentEngine(this);
     m_workspaceContext = new WorkspaceContext(this);
     m_workspaceIndex   = new WorkspaceIndex(this);

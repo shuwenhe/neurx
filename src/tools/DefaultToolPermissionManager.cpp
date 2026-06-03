@@ -47,7 +47,7 @@ ToolPermission DefaultToolPermissionManager::getToolPermission(
     QMutexLocker locker(&m_mutex);
     
     if (m_permissions.contains(toolId)) {
-        return m_permissions[toolId].permission;
+        return m_permissions.value(toolId).permission;
     }
     
     // 返回默认权限
@@ -138,7 +138,7 @@ void DefaultToolPermissionManager::checkToolAccess(
         return;
     }
     
-    const auto &perm = m_permissions[toolId];
+    const auto &perm = m_permissions.value(toolId);
     
     // 检查权限级别
     if (perm.permission.level == PermissionLevel::Public) {
@@ -187,7 +187,7 @@ void DefaultToolPermissionManager::checkExecutionPermission(
         return;
     }
     
-    const auto &perm = m_permissions[toolId];
+    const auto &perm = m_permissions.value(toolId);
     
     // 检查是否需要审批
     if (perm.permission.requiresApproval) {
@@ -233,7 +233,7 @@ void DefaultToolPermissionManager::checkCapabilityPermission(
         return;
     }
     
-    const auto &perm = m_permissions[toolId];
+    const auto &perm = m_permissions.value(toolId);
     
     // 通过工具访问检查
     checkToolAccess(toolId, userId, callback);
@@ -704,7 +704,7 @@ QVariantMap DefaultToolPermissionManager::getToolAccessStats(
     stats["deniedCount"] = 0;  // 可以额外跟踪
     
     if (m_permissions.contains(toolId)) {
-        const auto &perm = m_permissions[toolId];
+        const auto &perm = m_permissions.value(toolId);
         stats["allowedUsers"] = perm.allowedUsers.size();
         stats["allowedRoles"] = perm.permission.allowedRoles.size();
     }
@@ -739,7 +739,7 @@ bool DefaultToolPermissionManager::checkUserPermission(
     const QString &userId) const {
     
     if (m_permissions.contains(toolId)) {
-        return m_permissions[toolId].allowedUsers.contains(userId);
+        return m_permissions.value(toolId).allowedUsers.contains(userId);
     }
     return false;
 }
@@ -755,7 +755,7 @@ bool DefaultToolPermissionManager::checkRolePermission(
     QString userRole = m_users[userId].role;
     
     if (m_permissions.contains(toolId)) {
-        return m_permissions[toolId].permission.allowedRoles.contains(userRole);
+        return m_permissions.value(toolId).permission.allowedRoles.contains(userRole);
     }
     
     return false;
@@ -764,7 +764,7 @@ bool DefaultToolPermissionManager::checkRolePermission(
 bool DefaultToolPermissionManager::isPermissionExpired(const QString &toolId) const {
     
     if (m_permissions.contains(toolId)) {
-        const auto &entry = m_permissions[toolId];
+        const auto &entry = m_permissions.value(toolId);
         if (!entry.expiresAt.isNull()) {
             return QDateTime::currentDateTime() > entry.expiresAt;
         }

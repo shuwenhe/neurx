@@ -83,7 +83,7 @@ struct PromptTemplate {
     QString name;
     QString description;
     
-    QString template;              // Template with {{variables}}
+    QString templateContent;              // Template with {{variables}}
     QStringList variables;         // Variable names
     QStringList requiredVariables;
     

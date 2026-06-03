@@ -314,7 +314,10 @@ QVector<StateChange> DefaultStateManager::getChangeHistory(int limit) const
     QMutexLocker locker(&m_mutex);
     
     QVector<StateChange> result;
-    for (int i = std::max(0, m_changeHistory.size() - limit); i < m_changeHistory.size(); ++i) {
+    qsizetype totalSize = m_changeHistory.size();
+    qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+
+    for (qsizetype i = start; i < totalSize; ++i) {
         result.append(m_changeHistory[i]);
     }
     
@@ -329,7 +332,10 @@ QVector<StateChange> DefaultStateManager::getVariableHistory(const QString &key,
     auto it = m_variableHistory.find(key);
     if (it != m_variableHistory.end()) {
         QVector<StateChange> result;
-        for (int i = std::max(0, it->size() - limit); i < it->size(); ++i) {
+        qsizetype totalSize = it->size();
+        qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+
+        for (qsizetype i = start; i < totalSize; ++i) {
             result.append((*it)[i]);
         }
         return result;
@@ -504,7 +510,10 @@ QVector<TurnState> DefaultStateManager::getTurnHistory(int limit) const
     QMutexLocker locker(&m_mutex);
     
     QVector<TurnState> result;
-    for (int i = std::max(0, m_turnHistory.size() - limit); i < m_turnHistory.size(); ++i) {
+    qsizetype totalSize = m_turnHistory.size();
+    qsizetype start = std::max(static_cast<qsizetype>(0), totalSize - static_cast<qsizetype>(limit));
+
+    for (qsizetype i = start; i < totalSize; ++i) {
         result.append(m_turnHistory[i]);
     }
     
@@ -724,10 +733,13 @@ void DefaultStateManager::recordChange(const StateChange &change)
 bool DefaultStateManager::matchesPattern(const QString &key, const QString &pattern) const
 {
     if (pattern.isEmpty()) return true;
-    
+
+    QString p = pattern;
+    p.replace("*", ".*").replace("?", ".");
+
     // Simple wildcard matching
     QRegularExpression regex(
-        "^" + pattern.replace("*", ".*").replace("?", ".") + "$",
+        "^" + p + "$",
         QRegularExpression::CaseInsensitiveOption
     );
     

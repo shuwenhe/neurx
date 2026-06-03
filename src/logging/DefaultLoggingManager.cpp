@@ -869,18 +869,14 @@ QByteArray DefaultLoggingManager::exportMetrics(const QString &format) const {
     QMutexLocker locker(&m_mutex);
     
     if (format == "csv") {
-        QByteArray csv;
-        csv.append("metricId,name,value,unit,timestamp\n");
+        QString csv;
+        csv += "metricId,name,value,unit,timestamp\n";
         
         for (const auto &metric : m_metrics) {
-            csv.append(metric.metricId).append(",");
-            csv.append(metric.name).append(",");
-            csv.append(QString::number(metric.value)).append(",");
-            csv.append(metric.unit).append(",");
-            csv.append(metric.timestamp.toString()).append("\n");
+            csv += metric.metricId + "," + metric.name + "," + QString::number(metric.value) + "," + metric.unit + "," + metric.timestamp.toString() + "\n";
         }
         
-        return csv;
+        return csv.toUtf8();
     }
     
     return QByteArray();
@@ -945,14 +941,12 @@ Report DefaultLoggingManager::generateReportInternal(const QDateTime &from,
     for (const auto &event : m_events) {
         if (event.timestamp >= from && event.timestamp <= to) {
             report.events.append(event);
-            report.totalEvents++;
         }
     }
     
     for (const auto &alert : m_alerts) {
         if (alert.createdAt >= from && alert.createdAt <= to) {
             report.alerts.append(alert);
-            report.totalAlerts++;
         }
     }
     

@@ -358,7 +358,7 @@ QVector<PromptTemplate> DefaultLLMExtensions::listTemplates() const
 QString DefaultLLMExtensions::renderTemplate(const PromptTemplate &template_,
                                             const PromptVariables &variables) const
 {
-    QString result = template_.template;
+    QString result = template_.templateContent;
     
     for (const auto &var : template_.variables) {
         QString placeholder = "{{" + var + "}}";
