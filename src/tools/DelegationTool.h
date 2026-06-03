@@ -1,7 +1,6 @@
 #pragma once
 #include "agent/AgentToolRegistry.h"
 #include "agent/AgentEngine.h"
-#include "tools/ToolRegistry.h"
 
 // ── DelegationTool ───────────────────────────────────────────────────────────
 //  Allows the parent agent to spawn a recursive sub-agent for a specific task.
@@ -10,7 +9,7 @@
 class DelegationTool : public BaseTool {
     Q_OBJECT
 public:
-    explicit DelegationTool(ToolRegistry *registry, LLMProvider *provider,
+    explicit DelegationTool(AgentToolRegistry *registry, LLMProvider *provider,
                            const QString &model, QObject *parent = nullptr);
 
     QString name()        const override { return "delegate_task"; }
@@ -24,7 +23,7 @@ public:
     QString     summary(const QJsonObject &args) const override;
 
 private:
-    ToolRegistry *m_registry;
+    AgentToolRegistry *m_registry;
     LLMProvider  *m_provider;
     QString       m_model;
 };
