@@ -19,6 +19,7 @@
 class CodeMagic : public QObject {
     Q_OBJECT
 public:
+    explicit CodeMagic(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~CodeMagic() = default;
     
     // ── Code Analysis ───────────────────────────────

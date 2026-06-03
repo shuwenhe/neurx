@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ThreadId.h"
+#include "thread/ThreadId.h"
 #include <QVariantMap>
 #include <QDateTime>
 #include <QVector>
@@ -82,6 +82,17 @@ struct StoredThread {
     
     /// Last execution timestamp
     QDateTime lastExecuted;
+};
+
+/**
+ * @struct CheckpointData
+ * @brief Serialized checkpoint payload shared by thread stores
+ */
+struct CheckpointData {
+    QString id;
+    QString label;
+    QVariantMap state;
+    QDateTime createdAt;
 };
 
 /**

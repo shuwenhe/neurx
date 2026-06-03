@@ -20,6 +20,7 @@
 class CoreAgent : public QObject {
     Q_OBJECT
 public:
+    explicit CoreAgent(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~CoreAgent() = default;
     
     // ── Lifecycle Management ────────────────────────────
