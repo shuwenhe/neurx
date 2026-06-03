@@ -53,9 +53,8 @@ public:
                                   const QString &userId,
                                  ToolPermissionCallback callback) override;
     
-    void validateExecutionRequest(const ToolExecutionRequest &request,
-                                 const QString &userId,
-                                 std::function<void(bool, QString)> callback) override;
+    bool validateExecutionRequest(const ToolExecutionRequest &request,
+                                 const QString &userId) override;
     
     // ── 用户/角色管理 ───────────────────────────────────
     void addAllowedUser(const QString &toolId,
@@ -80,9 +79,9 @@ public:
     
     void setUserRole(const QString &userId,
                     const QString &role,
-                    std::function<void(bool)> callback = nullptr) override;
-    
-    QString getUserRole(const QString &userId) const override;
+                    std::function<void(bool)> callback = nullptr);
+
+    QString getUserRole(const QString &userId) const;
     
     // ── 审批工作流 ───────────────────────────────────────
     void setRequiresApproval(const QString &toolId,
@@ -107,10 +106,10 @@ public:
                         const QString &reason = "",
                         std::function<void(bool)> callback = nullptr) override;
     
-    QVector<QVariantMap> getPendingApprovals(int limit = 100) const override;
-    
+    QVector<QVariantMap> getPendingApprovals(int limit = 100) const;
+
     QVector<QVariantMap> getApprovalHistory(const QString &toolId,
-                                           int limit = 100) const override;
+                                           int limit = 100) const;
     
     // ── 审计日志 ───────────────────────────────────────
     QVector<QVariantMap> getToolAuditLog(const QString &toolId,
@@ -200,5 +199,3 @@ private:
     
     QString generateAuditId();
 };
-
-#endif // DEFAULTTOOLPERMISSIONMANAGER_H

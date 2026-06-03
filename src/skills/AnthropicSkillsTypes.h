@@ -265,5 +265,3 @@ using CompactionCallback = std::function<void(const CompactedContext &)>;
 using BudgetAlertCallback = std::function<void(const BudgetStatus &)>;
 using ManagedAgentCallback = std::function<void(bool success, const QString &response)>;
 using BatchJobCallback = std::function<void(const BatchJob &job)>;
-
-#endif // ANTHROPICSKILLTYPES_H

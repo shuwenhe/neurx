@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../code/CodeMagic.h"
-#include "LLMProvider.h"
+#include "llm/LLMProvider.h"
 #include <QMap>
 #include <QMutex>
 
@@ -240,5 +240,3 @@ private:
                                       ProgrammingLanguage language);
     GeneratedCode llmGenerateCode(const CodeGenerationRequest &request);
 };
-
-#endif // LLMCODEANALYZER_H

@@ -327,5 +327,3 @@ using ToolCallback = std::function<void(const ToolExecutionResult &)>;
 using ToolListCallback = std::function<void(const QVector<ToolInstance> &)>;
 using ToolSearchCallback = std::function<void(const QVector<ToolSearchResult> &)>;
 using ToolErrorCallback = std::function<void(const QString &error)>;
-
-#endif // TOOLTYPES_H

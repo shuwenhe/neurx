@@ -153,5 +153,3 @@ private:
     bool hasCircularDependency(const QString &toolId,
                                QSet<QString> &visited);
 };
-
-#endif // DEFAULTTOOLSCHEMAREGISTRY_H

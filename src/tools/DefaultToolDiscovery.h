@@ -162,5 +162,3 @@ private:
     
     QVector<QString> extractKeywords(const QString &text) const;
 };
-
-#endif // DEFAULTTOOLDISCOVERY_H

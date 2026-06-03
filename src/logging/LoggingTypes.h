@@ -311,5 +311,3 @@ using EventCallback = std::function<void(const Event &)>;
 using AlertCallback = std::function<void(const Alert &)>;
 using MetricsCallback = std::function<void(const QVector<Metric> &)>;
 using ReportCallback = std::function<void(const Report &)>;
-
-#endif // LOGGINGTYPES_H

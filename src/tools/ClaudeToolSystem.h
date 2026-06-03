@@ -100,5 +100,3 @@ private:
     bool m_initialized;
     mutable QMutex m_mutex;
 };
-
-#endif // CLAUDETOOLSYSTEM_H

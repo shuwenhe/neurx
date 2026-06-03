@@ -128,7 +128,7 @@ void DefaultApprovalManager::requestGuardianAssessment(const ExecApprovalRequest
     QMutexLocker locker(&m_mutex);
     
     GuardianAssessmentEvent assessment;
-    assessment.eventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    assessment.assessmentId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     assessment.assessedAt = QDateTime::currentDateTime();
     assessment.targetAction = request.commandLine;
     assessment.riskLevel = "medium";
