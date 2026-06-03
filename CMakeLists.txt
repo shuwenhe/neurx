@@ -139,13 +139,13 @@ if(APPLE)
     )
     
     # Copy app icon into the bundle if it exists
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.icns")
         set_source_files_properties(
-            "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns"
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.icns"
             PROPERTIES
             MACOSX_PACKAGE_LOCATION Resources
         )
-        target_sources(neurx-codeApp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.icns")
+        target_sources(neurx-codeApp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.icns")
     endif()
     
     # Embed Qt plugins into the .app bundle
