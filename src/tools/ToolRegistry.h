@@ -20,6 +20,10 @@ class ToolRegistry : public QObject {
 public:
     virtual ~ToolRegistry() = default;
     
+protected:
+    explicit ToolRegistry(QObject *parent = nullptr) : QObject(parent) {}
+    
+public:
     // ── Tool Registration ───────────────────────────────
     
     /// Register a new tool

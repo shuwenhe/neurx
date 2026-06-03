@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 #include "agent/AgentMessage.h"
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 #include "llm/LLMProvider.h"
 
 struct AgentConfig;
@@ -23,10 +23,10 @@ public:
     LLMRequest buildRequest(const QList<AgentMessage> &history,
                             const QString &model,
                             const QString &providerId,
-                            const ToolRegistry *registry) const;
+                            const AgentToolRegistry *registry) const;
 
 private:
-    QJsonArray buildTools(const QString &providerId, const ToolRegistry *registry) const;
+    QJsonArray buildTools(const QString &providerId, const AgentToolRegistry *registry) const;
 
     // Returns a trimmed copy of history that fits within budgetTokens.
     // Always keeps the first user message and trims from the middle.

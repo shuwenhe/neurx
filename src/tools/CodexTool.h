@@ -1,5 +1,5 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 
 // ── CodexTool ─────────────────────────────────────────────────────────────────
 //  Delegates a complex coding sub-task to the Codex CLI agent.

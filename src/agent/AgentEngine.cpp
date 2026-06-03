@@ -52,7 +52,7 @@ void AgentEngine::setProvider(LLMProvider *provider)
     }
 }
 
-void AgentEngine::setToolRegistry(ToolRegistry *registry)
+void AgentEngine::setToolRegistry(AgentToolRegistry *registry)
 {
     m_registry = registry;
     m_executor.setToolRegistry(registry);

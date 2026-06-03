@@ -18,7 +18,6 @@
  * - 性能监控
  */
 class DefaultToolExecutor : public ToolExecutor {
-    Q_OBJECT
 public:
     explicit DefaultToolExecutor(QObject *parent = nullptr);
     ~DefaultToolExecutor() = default;

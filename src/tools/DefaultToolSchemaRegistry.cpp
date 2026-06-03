@@ -5,6 +5,8 @@
 #include <QJsonArray>
 #include <QDebug>
 #include <QDate>
+#include <QQueue>
+#include <algorithm>
 
 DefaultToolSchemaRegistry::DefaultToolSchemaRegistry(QObject *parent)
     : ToolSchemaRegistry(parent) {
@@ -197,11 +199,12 @@ void DefaultToolSchemaRegistry::removeCapability(
     
     if (removed > 0) {
         // 同时更新schema
-        m_schemas[toolId].capabilities.removeAll(
+        auto &caps = m_schemas[toolId].capabilities;
+        auto it = std::remove_if(caps.begin(), caps.end(),
             [capabilityName](const ToolCapabilityDefinition &c) {
                 return c.name == capabilityName;
-            }
-        );
+            });
+        caps.erase(it, caps.end());
         m_schemas[toolId].updatedAt = QDateTime::currentDateTime();
         
         emit capabilityRemoved(toolId, capabilityName);

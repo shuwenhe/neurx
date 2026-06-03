@@ -1,5 +1,5 @@
 #pragma once
-#include "agent/ToolRegistry.h"
+#include "agent/AgentToolRegistry.h"
 
 // ── GeminiGroundingTool ──────────────────────────────────────────────────────
 //  A specialized tool that leverages Google's native grounding features.
