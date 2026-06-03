@@ -99,6 +99,8 @@ static const char kSettingsBraveApiKey[]     = "brave_api_key";
 static const char kSettingsAutoApproveTools[] = "auto_approve_tools";
 static const char kSettingsWorkspacePath[] = "workspace_path";
 static const char kSettingsCurrentFilePath[] = "current_file_path";
+static const char kSettingsRecentSlashCommands[] = "recent_slash_commands";
+static constexpr int kMaxRecentSlashCommands = 8;
 
 static QString envValue(const char *name)
 {
@@ -1467,6 +1469,7 @@ void AgentController::loadSettings()
     const bool autoApprove = s.value(kSettingsAutoApproveTools, m_autoApproveTools).toBool();
     const QString workspace = s.value(kSettingsWorkspacePath, QString{}).toString();
     const QString currentFile = s.value(kSettingsCurrentFilePath, QString{}).toString();
+    const QStringList recentSlashCommands = s.value(kSettingsRecentSlashCommands).toStringList();
 
     s.endGroup();
 
@@ -1577,6 +1580,15 @@ void AgentController::loadSettings()
 
     if (!currentFile.isEmpty())
         m_currentFilePath = currentFile;
+
+    m_recentSlashCommands.clear();
+    for (const QString &command : recentSlashCommands) {
+        const QString trimmedCommand = command.trimmed();
+        if (trimmedCommand.startsWith('/'))
+            m_recentSlashCommands.append(trimmedCommand);
+        if (m_recentSlashCommands.size() >= kMaxRecentSlashCommands)
+            break;
+    }
 }
 
 void AgentController::saveSettings() const
@@ -1601,6 +1613,7 @@ void AgentController::saveSettings() const
     s.setValue(kSettingsAutoApproveTools, m_autoApproveTools);
     s.setValue(kSettingsWorkspacePath, m_workspacePath);
     s.setValue(kSettingsCurrentFilePath, m_currentFilePath);
+    s.setValue(kSettingsRecentSlashCommands, m_recentSlashCommands);
     s.endGroup();
     s.sync();
 }
@@ -3092,6 +3105,12 @@ bool AgentController::handleSlashCommand(const QString &text)
     const QString command = (splitAt < 0 ? body : body.left(splitAt)).toLower();
     const QString args = splitAt < 0 ? QString{} : body.mid(splitAt + 1).trimmed();
 
+    // Allow paths to be sent as regular messages (don't treat them as slash commands)
+    // If the command part contains path separators or looks like a path, treat as regular text
+    if (command.contains('/') || command.contains('.') || command.contains('~')) {
+        return false;
+    }
+
     if (command == QStringLiteral("help") || command == QStringLiteral("commands") || command == QStringLiteral("?")) {
         emit successOccurred(buildSlashHelp());
         return true;
@@ -3847,10 +3866,66 @@ void AgentController::sendMessage(const QString &text)
     if (trimmed.isEmpty() && !hasAttachments)
         return;
     if (trimmed.startsWith('/')) {
-        if (handleSlashCommand(trimmed))
+        if (handleSlashCommand(trimmed)) {
+            if (shouldTrackSlashCommand(trimmed))
+                recordSlashCommand(trimmed);
             return;
+        }
     }
     submitToAgent(text);
+}
+
+void AgentController::recordSlashCommand(const QString &text)
+{
+    const QString trimmed = text.trimmed();
+    if (!trimmed.startsWith('/'))
+        return;
+
+    const QString command = trimmed.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts).value(0).trimmed();
+    if (command.size() < 2)
+        return;
+
+    QStringList updated;
+    updated.reserve(qMin(m_recentSlashCommands.size() + 1, kMaxRecentSlashCommands));
+    updated.append(command);
+    for (const QString &existing : m_recentSlashCommands) {
+        if (existing == command)
+            continue;
+        updated.append(existing);
+        if (updated.size() >= kMaxRecentSlashCommands)
+            break;
+    }
+
+    if (updated == m_recentSlashCommands)
+        return;
+
+    m_recentSlashCommands = updated;
+    saveSettings();
+    emit recentSlashCommandsChanged();
+}
+
+bool AgentController::shouldTrackSlashCommand(const QString &text) const
+{
+    const QString trimmed = text.trimmed();
+    if (!trimmed.startsWith('/'))
+        return false;
+
+    const QString body = trimmed.mid(1).trimmed();
+    if (body.isEmpty())
+        return true;
+
+    const QString command = body.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts).value(0).toLower();
+    return command == QStringLiteral("help")
+        || command == QStringLiteral("commands")
+        || command == QStringLiteral("?")
+        || command == QStringLiteral("plan")
+        || command == QStringLiteral("skills")
+        || command == QStringLiteral("review")
+        || command == QStringLiteral("analyze")
+        || command == QStringLiteral("explain")
+        || command == QStringLiteral("search")
+        || command == QStringLiteral("checkpoint")
+        || command == QStringLiteral("delegate");
 }
 
 void AgentController::submitToAgent(const QString &text, const QVariantList &attachments)

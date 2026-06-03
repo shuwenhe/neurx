@@ -95,6 +95,7 @@ class AgentController : public QObject {
     Q_PROPERTY(QVariantList todoItems READ todoItems NOTIFY todoItemsChanged)
     Q_PROPERTY(QVariantList recentCheckpoints READ recentCheckpoints NOTIFY recentCheckpointsChanged)
     Q_PROPERTY(QVariantList recentSessions READ recentSessions NOTIFY recentSessionsChanged)
+    Q_PROPERTY(QStringList recentSlashCommands READ recentSlashCommands NOTIFY recentSlashCommandsChanged)
     Q_PROPERTY(QString currentThreadId READ currentThreadId NOTIFY currentThreadIdChanged)
     Q_PROPERTY(QVariantList executionTimeline READ executionTimeline NOTIFY executionTimelineChanged)
     Q_PROPERTY(QVariantList pendingAttachments READ pendingAttachments NOTIFY pendingAttachmentsChanged)
@@ -143,6 +144,7 @@ public:
     QVariantList todoItems() const;
     QVariantList recentCheckpoints() const;
     QVariantList recentSessions() const;
+    QStringList recentSlashCommands() const { return m_recentSlashCommands; }
     QString currentThreadId() const { return m_sessionId; }
     QVariantList executionTimeline() const { return m_executionTimeline; }
     QVariantList pendingAttachments() const { return m_pendingAttachments; }
@@ -245,6 +247,7 @@ signals:
     void todoItemsChanged();
     void recentCheckpointsChanged();
     void recentSessionsChanged();
+    void recentSlashCommandsChanged();
     void currentThreadIdChanged();
     void executionTimelineChanged();
     void pendingAttachmentsChanged();
@@ -275,6 +278,8 @@ private:
     void syncKnowledgeForPathChange(const QString &oldPath, const QString &newPath, bool wasDirectory);
     void unloadReminderTool();
     void processScheduledReminderQueue();
+    bool shouldTrackSlashCommand(const QString &text) const;
+    void recordSlashCommand(const QString &text);
     void startLocalGateway();
     QJsonObject localGatewayState() const;
     void closeEditorTabInternal(int index, bool allowDirtyClose);
@@ -383,6 +388,7 @@ private:
     QString  m_lastWorkspaceActionSource;
     QString  m_lastWorkspaceActionDestination;
     QStringList m_mcpToolNames;
+    QStringList m_recentSlashCommands;
     QString  m_reminderSummary;
     QStringList m_pendingReminderPrompts;
     QString m_knowledgeSearchQuery;
