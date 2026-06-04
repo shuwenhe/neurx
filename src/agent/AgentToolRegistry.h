@@ -1,9 +1,11 @@
 #pragma once
 #include <QObject>
 #include <QHash>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <functional>
 #include "agent/AgentMessage.h"
+#include "tools/ToolSchemaTypes.h"
 
 // ── BaseTool ──────────────────────────────────────────────────────────────────
 //  All tools must derive from BaseTool and be registered in ToolRegistry.
@@ -49,6 +51,10 @@ public:
 
     BaseTool *tool(const QString &name) const;
     QList<BaseTool *> allTools() const;
+    ToolSchema toolSchema(const QString &name) const;
+    QVector<ToolSchema> allToolSchemas() const;
+    QJsonObject toolSchemaJson(const QString &name) const;
+    QJsonArray allToolSchemasJson() const;
 
     // Produce the tools array for an LLM request (OpenAI / Anthropic / Gemini schema).
     QJsonArray toOpenAISchema()    const;
@@ -57,4 +63,10 @@ public:
 
 private:
     QHash<QString, BaseTool *> m_tools;
+    QHash<QString, ToolSchema> m_toolSchemas;
+
+    ToolSchema buildSchemaForTool(const BaseTool *tool) const;
+    static QStringList inferredToolTags(const QString &toolName);
+    static QString inferredCategory(const QStringList &tags);
+    static QStringList parameterNamesFromSchema(const QJsonObject &schema);
 };

@@ -59,6 +59,10 @@ add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
 )
 
+target_sources(neurx_core PRIVATE
+    src/filesystem/ExecutorFileSystem.h
+)
+
 target_include_directories(neurx_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -78,6 +82,7 @@ set_target_properties(neurx_core PROPERTIES
 add_library(neurx_ui STATIC
     src/bridge/AgentController.cpp
     src/bridge/SyntaxHighlighter.cpp
+    src/bridge/EditorCommandBridge.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
@@ -103,6 +108,8 @@ qt_add_executable(neurx-codeApp
 target_link_libraries(neurx-codeApp PRIVATE
     neurx_ui
     neurx_core
+    content
+    NeurXCode
 )
 
 qt_add_resources(neurx-codeApp "configuration"
@@ -283,6 +290,10 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
 if (LINK_INSIGHT)
     include(${CMAKE_CURRENT_SOURCE_DIR}/insight)
 endif ()
+
+# Enable testing
+enable_testing()
+add_subdirectory(tests)
 
 include(GNUInstallDirs)
 install(TARGETS neurx-codeApp

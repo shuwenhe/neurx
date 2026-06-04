@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include "agent/AgentToolRegistry.h"
+#include "sandbox/DefaultSandboxManager.h"
 #include "tools/ClaudeStandardTools.h"
 
 int main(int argc, char *argv[])

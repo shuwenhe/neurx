@@ -2,6 +2,7 @@
 #include "sandbox/SandboxManager.h"
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QTextStream>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -246,12 +247,12 @@ ToolResult SmartFileCreator::createSimpleFile(const QString& callId, const FileC
         }
     }
     
-    // Write file
-    QFile file(absPath);
+    // Write file atomically
+    QSaveFile file(absPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return {callId, name(), true, "Cannot open file for writing: " + file.errorString()};
     }
-    
+
     QTextStream out(&file);
     
     // Add header if appropriate
@@ -271,8 +272,10 @@ ToolResult SmartFileCreator::createSimpleFile(const QString& callId, const FileC
         QString boilerplate = generateBoilerplate(req.path, detectFileType(req.path));
         out << boilerplate;
     }
-    
-    file.close();
+    out.flush();
+    if (!file.commit()) {
+        return {callId, name(), true, "Failed to commit file write."};
+    }
     
     return {callId, name(), false, QString("Created: %1").arg(req.path)};
 }
@@ -964,6 +967,8 @@ bool SmartFileCreator::canOverwrite(const QString& path) const
 
 QString SmartFileCreator::safePath(const QString& relOrAbsPath) const
 {
+    if (relOrAbsPath.trimmed().isEmpty())
+        return QString();
     const QString abs = QFileInfo(m_root.absoluteFilePath(relOrAbsPath)).absoluteFilePath();
     // Prevent path traversal
     const QString workspaceRoot = QFileInfo(m_root.absolutePath()).absoluteFilePath();

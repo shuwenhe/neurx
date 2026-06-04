@@ -1,5 +1,6 @@
 #include "tools/ClaudeStandardTools.h"
 #include <QFile>
+#include <QSaveFile>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QProcess>
@@ -8,6 +9,47 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QDateTime>
+#include <QSaveFile>
+
+namespace {
+
+bool isPathInsideWorkspace(const QString &path, const QString &workspaceRoot)
+{
+    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
+    const QString cleanPath = QDir::cleanPath(path);
+    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
+        return false;
+
+    if (cleanPath == cleanRoot)
+        return true;
+
+    const QString relative = QDir(cleanRoot).relativeFilePath(cleanPath);
+    return !relative.isEmpty()
+        && !relative.startsWith(QStringLiteral(".."))
+        && !QDir::isAbsolutePath(relative);
+}
+
+bool writeFileAtomically(const QString &path, const QString &content, QString *error)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        if (error)
+            *error = file.errorString();
+        return false;
+    }
+
+    QTextStream out(&file);
+    out << content;
+    out.flush();
+    if (!file.commit()) {
+        if (error)
+            *error = file.errorString();
+        return false;
+    }
+    return true;
+}
+
+} // namespace
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // WriteTool Implementation
@@ -79,18 +121,28 @@ ToolResult WriteTool::execute(const QString& callId, const QJsonObject& args)
     
     qDebug() << "[WriteTool] Parent directory ensured:" << parentDir;
     
-    // Write file
-    QFile file(absPath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QString error = file.errorString();
-        qWarning() << "[WriteTool] Error: Cannot open file for writing:" << absPath << "error:" << error;
+    // Atomic write: use QSaveFile to avoid leaving partially-written files
+    QSaveFile save(absPath);
+    if (!save.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QString error = save.errorString();
+        qWarning() << "[WriteTool] Error: Cannot open QSaveFile for writing:" << absPath << "error:" << error;
         return {callId, name(), true, "Error: Cannot open file for writing: " + error};
     }
-    
-    QTextStream out(&file);
+
+    QTextStream out(&save);
+    out.setEncoding(QStringConverter::Utf8);
     out << newText;
-    file.close();
-    
+
+    // Ensure data is flushed and commit atomically
+    out.flush();
+    if (!save.commit()) {
+        QString error = save.errorString();
+        qWarning() << "[WriteTool] Error: QSaveFile commit failed for:" << absPath << "error:" << error;
+        // Attempt to cancel to clean up temp file
+        save.cancelWriting();
+        return {callId, name(), true, "Error: Failed to write file: " + error};
+    }
+
     qInfo() << "[WriteTool] Successfully wrote" << newText.size() << "bytes to:" << absPath;
     
     // Get relative path for display
@@ -111,19 +163,19 @@ QString WriteTool::summary(const QJsonObject& args) const
 QString WriteTool::safePath(const QString& relOrAbsPath) const
 {
     QString workspaceRoot = m_root.absolutePath();
+    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
     
     // 如果是绝对路径，直接检查是否在工作空间内
     QFileInfo fileInfo(relOrAbsPath);
     if (fileInfo.isAbsolute()) {
         QString absPath = QDir::cleanPath(fileInfo.absoluteFilePath());
-        QString cleanRoot = QDir::cleanPath(workspaceRoot);
         
         qDebug() << "[WriteTool::safePath] Absolute path check:";
         qDebug() << "  Input:" << relOrAbsPath;
         qDebug() << "  Cleaned:" << absPath;
         qDebug() << "  Workspace:" << cleanRoot;
         
-        if (absPath.startsWith(cleanRoot)) {
+        if (isPathInsideWorkspace(absPath, workspaceRoot)) {
             qDebug() << "  ✅ Path is within workspace";
             return absPath;
         } else {
@@ -135,7 +187,6 @@ QString WriteTool::safePath(const QString& relOrAbsPath) const
     // 相对路径：转换为绝对路径
     QString abs = m_root.absoluteFilePath(relOrAbsPath);
     QString cleanAbs = QDir::cleanPath(abs);
-    QString cleanRoot = QDir::cleanPath(workspaceRoot);
     
     qDebug() << "[WriteTool::safePath] Relative path check:";
     qDebug() << "  Input:" << relOrAbsPath;
@@ -143,7 +194,7 @@ QString WriteTool::safePath(const QString& relOrAbsPath) const
     qDebug() << "  Workspace:" << cleanRoot;
     
     // Prevent path traversal
-    if (!cleanAbs.startsWith(cleanRoot)) {
+    if (!isPathInsideWorkspace(cleanAbs, workspaceRoot)) {
         qWarning() << "  ❌ Path traversal detected";
         return QString();
     }
@@ -440,7 +491,7 @@ QString MultiEditTool::safePath(const QString& relOrAbsPath) const
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ReadTool Implementation
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═���═════════════════════════════════════════════════════════════════════════════
 
 ReadTool::ReadTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)
@@ -590,7 +641,7 @@ bool ReadTool::isBinaryFile(const QString& filePath) const
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // BashTool Implementation
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════��═════
 
 BashTool::BashTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)

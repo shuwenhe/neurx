@@ -142,7 +142,10 @@ Item {
                         clip: true
                         spacing: 6
 
-                        ScrollBar.vertical: ScrollBar {}
+                        ScrollBar.vertical: CustomScrollBar {
+                            anchors.right: toolsList.right
+                            anchors.rightMargin: 2
+                        }
 
                         delegate: Rectangle {
                             required property var modelData
@@ -230,11 +233,17 @@ Item {
                     border.color: Theme.border
 
                     Flickable {
+                        id: detailFlickable
                         anchors.fill: parent
                         anchors.margins: 8
                         contentWidth: width
                         contentHeight: detailColumn.implicitHeight
                         clip: true
+
+                        ScrollBar.vertical: CustomScrollBar {
+                            anchors.right: detailFlickable.right
+                            anchors.rightMargin: -2
+                        }
 
                         ColumnLayout {
                             id: detailColumn

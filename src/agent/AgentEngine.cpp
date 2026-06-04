@@ -161,6 +161,7 @@ QString AgentEngine::approvalRiskLevel(const ToolCall &call) const
     if (toolName == QStringLiteral("patch")
         || toolName == QStringLiteral("apply_patch")
         || toolName == QStringLiteral("file_system")
+        || toolName == QStringLiteral("codex_file_system")
         || toolName == QStringLiteral("github")
         || toolName == QStringLiteral("gitlab")
         || toolName == QStringLiteral("jira"))
@@ -186,7 +187,8 @@ QString AgentEngine::approvalResourceForCall(const ToolCall &call) const
     }
     if (toolName == QStringLiteral("github") || toolName == QStringLiteral("gitlab") || toolName == QStringLiteral("jira"))
         return QStringLiteral("%1 %2").arg(call.arguments.value("action").toString(), call.arguments.value("repo").toString() + call.arguments.value("project").toString() + call.arguments.value("issue_key").toString());
-    if (toolName == QStringLiteral("file_system")) {
+    if (toolName == QStringLiteral("file_system")
+        || toolName == QStringLiteral("codex_file_system")) {
         const QString op = call.arguments.value(QStringLiteral("operation")).toString();
         const QString path = call.arguments.value(QStringLiteral("path")).toString();
         const QString destination = call.arguments.value(QStringLiteral("destination")).toString();

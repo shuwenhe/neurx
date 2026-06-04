@@ -66,8 +66,8 @@ struct ToolCapabilityDefinition {
     QString name;                 // 能力名称
     QString description;          // 描述
     
-    QVector<QString> inputParams; // 输入参数名称
-    QVector<QString> outputParams;// 输出参数名称
+    QStringList inputParams;      // 输入参数名称
+    QStringList outputParams;     // 输出参数名称
     
     QString category;             // 能力分类
     QStringList tags;             // 标签
@@ -97,7 +97,7 @@ struct ToolSchema {
     QString category;
     
     // 能力列表
-    QVector<ToolCapabilityDefinition> capabilities;
+    QList<ToolCapabilityDefinition> capabilities;
     
     // 权限
     PermissionLevel minPermissionLevel;
@@ -219,3 +219,165 @@ using ToolExecutionCallback = std::function<void(const ToolExecutionResult&)>;
 using ToolDiscoveryCallback = std::function<void(const QVector<ToolSchema>&)>;
 using ToolPermissionCallback = std::function<void(bool granted, const QString& reason)>;
 using ToolChainCallback = std::function<void(const QVector<ToolExecutionResult>&)>;
+
+// ── 工具版本管理 ──────────────────────────────────
+
+struct ToolVersionInfo {
+    QString toolId;
+    QString version;
+    QString previousVersion;      // 前一个版本
+    QString name;                 // 版本名称
+    
+    QDateTime releasedAt;
+    QDateTime expiresAt;          // 版本过期日期
+    QString releaseNotes;         // 发布说明
+    
+    QStringList breakingChanges;  // 重大更改
+    QStringList deprecations;     // 弃用列表
+    QStringList newFeatures;      // 新功能
+    QStringList bugFixes;         // 错误修复
+    QStringList dependencies;     // 依赖列表
+    
+    QString changeLog;            // 更改日志链接
+    
+    // 兼容性
+    QStringList compatibleVersions;  // 兼容的版本
+    QStringList minDependencyVersions; // 最小依赖版本
+    
+    bool isPrerelease = false;
+    bool isDeprecated = false;
+    
+    QString author;
+    QString checksum;             // 版本完整性校验
+};
+
+struct ToolVersionConstraint {
+    QString toolId;
+    QString minVersion;           // 最小版本
+    QString maxVersion;           // 最大版本
+    QStringList excludedVersions; // 排除版本列表
+    
+    bool allowPrereleases = false;
+    bool autoUpgrade = true;      // 自动升级
+};
+
+// ── 缓存管理 ───────────────────────────────────────
+
+enum class CacheInvalidationStrategy {
+    TTL,                          // 按时间失效
+    LRU,                          // 最少使用优先
+    LFU,                          // 最少频繁使用优先
+    Manual                        // 手动失效
+};
+
+struct CacheEntry {
+    QString entryId;
+    QString toolId;
+    QString capabilityName;
+    
+    QVariantMap parameters;
+    QVariantMap result;
+    
+    QDateTime createdAt;
+    QDateTime expiresAt;
+    int accessCount = 0;          // 访问次数
+    int hitCount = 0;             // 缓存命中次数
+    QDateTime lastAccessedAt;
+    
+    int sizeBytes = 0;            // 缓存大小
+    float confidence = 1.0f;      // 缓存置信度(用于确定性操作)
+};
+
+struct CacheStatistics {
+    int totalEntries = 0;
+    int hitCount = 0;
+    int missCount = 0;
+    float hitRatio = 0.0f;        // 命中率
+    
+    int totalSizeBytes = 0;
+    int maxSizeBytes = 0;         // 最大缓存大小
+    
+    float avgAccessTime = 0.0f;   // 平均访问时间
+    
+    QDateTime lastClearedAt;
+    int itemsEvicted = 0;         // 驱逐项数
+};
+
+// ── 性能指标 ───────────────────────────────────────
+
+struct ExecutionMetrics {
+    QString executionId;
+    QString toolId;
+    
+    qint64 startTimeMs = 0;
+    qint64 endTimeMs = 0;
+    qint64 durationMs = 0;
+    
+    // CPU 指标
+    float cpuPercent = 0.0f;
+    qint64 peakMemoryMB = 0;
+    qint64 avgMemoryMB = 0;
+    
+    // 网络指标
+    qint64 bytesIn = 0;
+    qint64 bytesOut = 0;
+    
+    // 磁盘 I/O
+    qint64 diskReadsMB = 0;
+    qint64 diskWritesMB = 0;
+    
+    // 成本
+    float estimatedCost = 0.0f;
+    QString costBreakdown;        // 成本明细
+};
+
+struct ToolMetricsSummary {
+    QString toolId;
+    
+    int totalExecutions = 0;
+    int successCount = 0;
+    int failureCount = 0;
+    float successRate = 0.0f;
+    
+    float avgDurationMs = 0.0f;
+    float minDurationMs = 0.0f;
+    float maxDurationMs = 0.0f;
+    float p95DurationMs = 0.0f;   // 95百分位
+    float p99DurationMs = 0.0f;   // 99百分位
+    
+    float avgCost = 0.0f;
+    float totalCost = 0.0f;
+    
+    // 可靠性
+    float reliability = 0.0f;     // 可靠性评分
+    int consecutiveFailures = 0;
+    
+    QDateTime lastExecutedAt;
+    QDateTime statsCollectedAt;
+};
+
+// ── 工具链验证 ─────────────────────────────────────
+
+struct ChainValidationResult {
+    bool isValid = true;
+    QStringList errors;           // 验证错误
+    QStringList warnings;         // 验证警告
+    
+    // 依赖检查
+    QStringList missingDependencies;
+    QStringList versionConflicts;
+    
+    // 性能估计
+    qint64 estimatedDurationMs = 0;
+    float estimatedCost = 0.0f;
+    
+    // 兼容性
+    QStringList incompatibleVersions;
+    bool canExecute = true;
+};
+
+// ── 性能指标回调 ───────────────────────────────────
+
+using ExecutionMetricsCallback = std::function<void(const ExecutionMetrics&)>;
+using VersionCallback = std::function<void(bool success, const QString& message)>;
+using CacheCallback = std::function<void(const QVariantMap& entry)>;
