@@ -20,6 +20,7 @@ FileSystemTool::FileSystemTool(const QString &workspaceRoot, QObject *parent)
     : BaseTool(parent)
     , m_root(workspaceRoot)
     , m_checkpointManager(std::make_unique<CheckpointManager>(workspaceRoot))
+    , m_smartFileCreator(std::make_unique<SmartFileCreator>(workspaceRoot))
 {}
 
 QJsonObject FileSystemTool::parametersSchema() const
@@ -34,18 +35,28 @@ QJsonObject FileSystemTool::parametersSchema() const
             },
             "path":    { "type": "string", "description": "Relative path from workspace root." },
             "content": { "type": "string", "description": "File content (for write/create)." },
+            "mode": { "type": "string", "enum": ["simple","smart","template","batch","structure"], "description": "Enhanced create_file mode." },
+            "intent": { "type": "string", "description": "What the new file should contain (smart mode)." },
+            "template": { "type": "string", "description": "Template name for create_file." },
+            "template_vars": { "type": "object", "description": "Variables for the selected template." },
+            "related_files": { "type": "array", "items": { "type": "string" }, "description": "Related workspace files to guide smart creation." },
+            "overwrite": { "type": "boolean", "description": "Allow replacing an existing file during create_file." },
+            "create_dirs": { "type": "boolean", "description": "Create missing parent directories during create_file." },
+            "files": { "type": "array", "description": "Batch or structure file specs for create_file.", "items": { "type": "object" } },
+            "structure_intent": { "type": "string", "description": "High-level intent for a created file structure." },
+            "generate_missing": { "type": "boolean", "description": "Whether create_file structure mode may add inferred files." },
             "destination": { "type": "string", "description": "Destination path (for move)." },
             "start_line": { "type": "integer", "description": "First line to read (1-based, inclusive)." },
             "end_line":   { "type": "integer", "description": "Last line to read (1-based, inclusive)." }
         },
-        "required": ["operation", "path"]
+        "required": ["operation"]
     })").object();
 }
 
 ToolResult FileSystemTool::execute(const QString &callId, const QJsonObject &args)
 {
     const QString op = args["operation"].toString();
-    if (m_sandboxManager) {
+    if (m_sandboxManager && op != "create_file") {
         const QString path = args["path"].toString();
         const QString absPath = safePath(path);
         if (absPath.isEmpty())
@@ -78,6 +89,13 @@ QString FileSystemTool::summary(const QJsonObject &args) const
 bool FileSystemTool::isWriteOperation(const QString &operation) const
 {
     return isWriteOperationName(operation);
+}
+
+void FileSystemTool::setSandboxManager(SandboxManager *manager)
+{
+    m_sandboxManager = manager;
+    if (m_smartFileCreator)
+        m_smartFileCreator->setSandboxManager(manager);
 }
 
 QString FileSystemTool::safePath(const QString &rel) const
@@ -187,10 +205,41 @@ ToolResult FileSystemTool::opListDir(const QString &callId, const QJsonObject &a
 
 ToolResult FileSystemTool::opCreateFile(const QString &callId, const QJsonObject &args)
 {
-    const QString path = safePath(args["path"].toString());
-    if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
-    if (QFile::exists(path)) return {callId, name(), true, "File already exists."};
-    return opWriteFile(callId, args);
+    const bool hasEnhancedArgs = args.contains("mode")
+        || args.contains("intent")
+        || args.contains("template")
+        || args.contains("template_vars")
+        || args.contains("related_files")
+        || args.contains("files")
+        || args.contains("structure_intent")
+        || args.contains("overwrite")
+        || args.contains("create_dirs")
+        || args.contains("generate_missing");
+
+    if (!hasEnhancedArgs && !args.contains("content")) {
+        const QString path = safePath(args["path"].toString());
+        if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
+        if (QFile::exists(path)) return {callId, name(), true, "File already exists."};
+        return opWriteFile(callId, args);
+    }
+
+    QJsonObject smartArgs;
+    if (args.contains("mode")) smartArgs["mode"] = args.value("mode");
+    if (args.contains("path")) smartArgs["path"] = args.value("path");
+    if (args.contains("content")) smartArgs["content"] = args.value("content");
+    if (args.contains("intent")) smartArgs["intent"] = args.value("intent");
+    if (args.contains("template")) smartArgs["template"] = args.value("template");
+    if (args.contains("template_vars")) smartArgs["template_vars"] = args.value("template_vars");
+    if (args.contains("related_files")) smartArgs["related_files"] = args.value("related_files");
+    if (args.contains("overwrite")) smartArgs["overwrite"] = args.value("overwrite");
+    if (args.contains("create_dirs")) smartArgs["create_dirs"] = args.value("create_dirs");
+    if (args.contains("files")) smartArgs["files"] = args.value("files");
+    if (args.contains("structure_intent")) smartArgs["structure_intent"] = args.value("structure_intent");
+    if (args.contains("generate_missing")) smartArgs["generate_missing"] = args.value("generate_missing");
+
+    ToolResult result = m_smartFileCreator->execute(callId, smartArgs);
+    result.name = name();
+    return result;
 }
 
 ToolResult FileSystemTool::opDeleteFile(const QString &callId, const QJsonObject &args)

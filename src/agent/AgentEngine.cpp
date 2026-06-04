@@ -159,6 +159,7 @@ QString AgentEngine::approvalRiskLevel(const ToolCall &call) const
     }
 
     if (toolName == QStringLiteral("patch")
+        || toolName == QStringLiteral("apply_patch")
         || toolName == QStringLiteral("file_system")
         || toolName == QStringLiteral("github")
         || toolName == QStringLiteral("gitlab")
@@ -179,8 +180,10 @@ QString AgentEngine::approvalResourceForCall(const ToolCall &call) const
     const QString toolName = call.name.trimmed();
     if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
         return shellCommandFromCall(call);
-    if (toolName == QStringLiteral("patch"))
-        return call.arguments.value(QStringLiteral("patch")).toString();
+    if (toolName == QStringLiteral("patch") || toolName == QStringLiteral("apply_patch")) {
+        const QString patch = call.arguments.value(QStringLiteral("patch")).toString();
+        return patch.isEmpty() ? call.arguments.value(QStringLiteral("input")).toString() : patch;
+    }
     if (toolName == QStringLiteral("github") || toolName == QStringLiteral("gitlab") || toolName == QStringLiteral("jira"))
         return QStringLiteral("%1 %2").arg(call.arguments.value("action").toString(), call.arguments.value("repo").toString() + call.arguments.value("project").toString() + call.arguments.value("issue_key").toString());
     if (toolName == QStringLiteral("file_system")) {

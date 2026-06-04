@@ -135,8 +135,16 @@ QJsonObject AnthropicProvider::buildRequestBody(const LLMRequest &request) const
 
     body["messages"] = buildMessages(request.messages);
 
-    if (!request.tools.isEmpty())
+    if (!request.tools.isEmpty()) {
+        qDebug() << "[AnthropicProvider] Adding" << request.tools.size() << "tools to request";
+        for (int i = 0; i < request.tools.size(); ++i) {
+            QJsonObject tool = request.tools[i].toObject();
+            qDebug() << "  - Tool" << i << ":" << tool["name"].toString();
+        }
         body["tools"] = convertTools(request.tools);
+    } else {
+        qWarning() << "[AnthropicProvider] No tools in request!";
+    }
 
     return body;
 }
