@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QElapsedTimer>
 #include <memory>
+#include <functional>
 
 /**
  * @class PerformanceOptimizer
