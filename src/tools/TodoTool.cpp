@@ -3,7 +3,7 @@
 #include <QJsonObject>
 
 const QStringList TodoTool::kValidStatuses = {
-    "pending", "in_progress", "completed", "cancelled"
+    "pending", "in_progress", "completed", "cancelled", "blocked"
 };
 
 // ── ctor ─────────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ QString TodoTool::description() const
         "Use it to decompose complex requests, track progress, and stay focused.\n"
         "Actions:\n"
         "  write — replace the full todo list. Provide a `todos` array where each item has:\n"
-        "          id (string), content (string), status (pending|in_progress|completed|cancelled).\n"
+        "          id (string), content (string), status (pending|in_progress|completed|cancelled|blocked).\n"
         "          Mark a task in_progress before starting it; mark it completed immediately after.\n"
         "          Only one task may be in_progress at a time.\n"
         "  read  — return the current list without modification.\n"
@@ -51,7 +51,7 @@ QJsonObject TodoTool::parametersSchema() const
                         {"content", QJsonObject{{"type","string"}}},
                         {"status",  QJsonObject{{"type","string"},
                             {"enum", QJsonArray{"pending","in_progress",
-                                                "completed","cancelled"}}}},
+                                                "completed","cancelled","blocked"}}}},
                     }},
                     {"required", QJsonArray{"id","content","status"}},
                 }},
@@ -123,6 +123,7 @@ ToolResult TodoTool::opWrite(const QString &callId, const QJsonObject &args)
         const QString statusIcon =
             m["status"] == "completed"  ? "✓" :
             m["status"] == "in_progress"? "▶" :
+            m["status"] == "blocked"    ? "!" :
             m["status"] == "cancelled"  ? "✗" : "○";
         lines << QStringLiteral("  %1 [%2] %3")
                      .arg(statusIcon, m["id"].toString(), m["content"].toString());
@@ -143,6 +144,7 @@ ToolResult TodoTool::opRead(const QString &callId)
         const QString statusIcon =
             m["status"] == "completed"  ? "✓" :
             m["status"] == "in_progress"? "▶" :
+            m["status"] == "blocked"    ? "!" :
             m["status"] == "cancelled"  ? "✗" : "○";
         lines << QStringLiteral("  %1 [%2] %3")
                      .arg(statusIcon, m["id"].toString(), m["content"].toString());

@@ -106,7 +106,7 @@ public:
                         const QString &reason = "",
                         std::function<void(bool)> callback = nullptr) override;
     
-    QVector<QVariantMap> getPendingApprovals(int limit = 100) const;
+    QVector<QVariantMap> getPendingApprovals(int limit = 100) const override;
 
     QVector<QVariantMap> getApprovalHistory(const QString &toolId,
                                            int limit = 100) const;

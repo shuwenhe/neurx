@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "*.qml": "qml",
+        "*.h": "cpp",
+        "*.cpp": "cpp"
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.codeAnalysis.clangTidy.enabled": false,
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "search.exclude": {
+        "**/build": true,
+        "**/build/**": true,
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/.DS_Store": true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/build/CMakeFiles": true,
+        "**/build/_deps": true
+    },
+    "editor.formatOnSave": false,
+    "C_Cpp.formatting": "disabled"
+}

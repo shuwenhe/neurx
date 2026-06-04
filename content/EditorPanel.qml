@@ -31,9 +31,11 @@ Item {
             if (resetView) {
                 editorArea.cursorPosition = 0
                 // editorArea is hosted inside a ScrollView; reset the ScrollView's content offsets
-                if (editorScrollView) {
-                    editorScrollView.contentX = 0
-                    editorScrollView.contentY = 0
+                // ScrollView exposes its internal flickable as `contentItem`.
+                // Use contentItem.contentX/contentY to manipulate scroll offsets.
+                if (editorScrollView && editorScrollView.contentItem) {
+                    editorScrollView.contentItem.contentX = 0
+                    editorScrollView.contentItem.contentY = 0
                 }
             }
             syncingEditorFromAgent = false
@@ -580,8 +582,8 @@ Item {
                         Item {
                             width: parent.width
                             height: root.lineCount * editorFontMetrics.lineSpacing
-                            // editorArea is placed inside a ScrollView (editorScroll); use its contentY
-                            y: editorScroll ? -editorScroll.contentY : 0
+                            // editorArea is placed inside a ScrollView (editorScrollView); use its contentItem.contentY
+                            y: (editorScrollView && editorScrollView.contentItem) ? -editorScrollView.contentItem.contentY : 0
 
                             Repeater {
                                 model: root.lineCount
@@ -615,7 +617,8 @@ Item {
 
                     Rectangle {
                         x: 0
-                        y: Math.max(0, root.editorCursorY() - (editorScrollView ? editorScrollView.contentY : 0))
+                        // Use the ScrollView's contentItem for its contentY
+                        y: Math.max(0, root.editorCursorY() - ((editorScrollView && editorScrollView.contentItem) ? editorScrollView.contentItem.contentY : 0))
                         width: parent.width
                         height: editorFontMetrics.lineSpacing
                         color: Theme.accent

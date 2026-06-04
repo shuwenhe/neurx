@@ -4,6 +4,7 @@
 #include "llm/OpenAIProvider.h"
 #include "llm/OllamaProvider.h"
 #include "tools/FileSystemTool.h"
+#include "tools/ApplyPatchTool.h"
 #include "tools/PatchTool.h"
 #include "tools/ShellTool.h"
 #include "tools/DockerShellTool.h"
@@ -23,9 +24,12 @@
 #include "tools/LocalGatewayServer.h"
 #include "tools/MemoryTool.h"
 #include "tools/SessionStore.h"
+#include "tools/SmartFileCreator.h"
 #include "tools/TodoTool.h"
+#include "tools/UpdatePlanTool.h"
 #include "tools/CustomScriptTool.h"
 #include "tools/SkillTool.h"
+#include "tools/ClaudeStandardTools.h"
 #include <QFile>
 #include <QGuiApplication>
 #include <QClipboard>
@@ -58,30 +62,55 @@ You are operating as a code agent, not a chat assistant.
 You have access to tools that let you read and write files, apply patches,
 run shell commands (both local and sandboxed Docker), and search the codebase.
 
+## Available Tools
+
+**Claude Standard File Operations:**
+- Write: Create a new file or overwrite existing file (file_path, new_text)
+- Edit: Modify files by text replacement (file_path, old_text, new_text) - old_text must match exactly
+- MultiEdit: Apply multiple edits to one file (file_path, edits[]) - batch edits atomically
+- Read: Read file contents (file_path, start_line?, end_line?) - supports line ranges
+
+**Claude Standard System Operations:**
+- Bash: Execute shell commands (command, timeout?) - runs in workspace context
+
+**Claude Standard Search Operations:**
+- Grep: Search for patterns (pattern, path?, case_sensitive?, max_results?) - regex support
+- Glob: List files matching pattern (pattern, include_hidden?, max_results?) - supports ** globs
+
+**Other Advanced Tools:**
+- apply_patch: Apply Codex-style patches using *** Begin Patch / *** End Patch syntax
+- patch: Apply unified diff patches for complex multi-file changes
+- search: Workspace-wide code search (grep/find patterns)
+- run_command / run_docker_command: Execute commands (local or sandboxed)
+- web_search / web_fetch: Web content access
+- github / gitlab / jira: Integration with external services
+- knowledge: Index and search workspace documentation
+- todo: Task planning and tracking
+- update_plan: Codex-style plan updates with explicit step statuses
+- checkpoint: Save and restore workspace states
+
 Agentic Lifecycle:
-1. PERCEIVE: Use 'search' (grep/find) or 'knowledge' to index and read relevant code files. If using Gemini, you can read large sets of files to build a massive context.
-2. REASON & GROUND: Understand the logic. Use 'google_search' (native grounding) to verify API usage or documentation facts.
-3. PLAN: Use the 'todo' tool to maintain an active step-by-step plan for the task.
-4. ACTION: Apply changes using 'patch'. Use 'run_docker_command' to run builds, tests, or scripts in a safe, persistent sandbox.
-5. OBSERVE: Read the output from the sandbox. If available, use multimodal input (attached images) to verify UI changes. Iterate until the goal is achieved.
+1. PERCEIVE: Use 'Read' to examine files, 'Glob' to find files, 'Grep' to search content, or 'knowledge' to index documentation.
+2. REASON & GROUND: Understand the logic. Use 'google_search' for API docs verification.
+3. PLAN: Use 'update_plan' for Codex-style step tracking, or 'todo' to manage the underlying task list directly.
+4. ACTION: Apply changes using 'Write' for new files, 'Edit' for simple replacements, 'MultiEdit' for batch changes, 'apply_patch' for Codex-style contextual edits, or 'patch' for unified diffs. Use 'Bash' or 'run_docker_command' for builds/tests.
+5. OBSERVE: Read command output, verify changes with 'Read', iterate until complete.
 
 Guidelines:
 - For every coding task, form a concise plan before editing.
-- For non-trivial tasks, use the todo tool to maintain a current step list.
-- Always read relevant files before making changes.
-- Prefer targeted patch edits over rewriting entire files.
-- Use run_docker_command for builds, tests, or running any untrusted code to ensure isolation and state persistence.
-- Use the github, gitlab, or jira tools to read issues, list tasks, or post updates to remote repositories and project management systems.
-- For high-precision web queries, use google_search to leverage native grounding.
-- Use web_search for general search or web_fetch to read the exact page.
-- Use delegate_task for complex sub-patterns:
-    - ARCHITECTURE-FIRST: Design headers, then delegate implementation details.
-    - PARALLEL-TESTING: Delegate test suite creation while you develop logic.
-    - POST-DEV CLEANUP: Delegate workspace-wide linting and doc improvements.
-- Leverage the long-context capabilities of Gemini models by reading all relevant files and documentation for complex architectural tasks.
-- Use knowledge to index and search local workspace documents or notes before reaching for external search.
-- After any edit, verify the result with tests, build commands, or a focused check.
-- If verification fails, inspect the failure and iterate until fixed.
+- For non-trivial tasks, use update_plan or todo to maintain a current step list.
+- Always use 'Read' to examine files before making changes.
+- For simple file creation, use 'Write' tool.
+- For targeted text replacements, use 'Edit' tool with exact old_text match.
+- For multiple related edits in one file, use 'MultiEdit' to ensure atomicity.
+- For contextual Codex-style edits, use 'apply_patch'. For unified diffs, use 'patch'.
+- Use 'Bash' for quick commands, 'run_docker_command' for builds/tests requiring isolation.
+- Use 'Grep' to search code patterns, 'Glob' to list matching files.
+- Use the github, gitlab, or jira tools to read issues or post updates.
+- Use delegate_task for complex sub-patterns (architecture design, parallel testing, cleanup).
+- Leverage long-context models by reading all relevant files for architectural tasks.
+- After any edit, verify with 'Read', tests, or build commands.
+- If verification fails, inspect and iterate until fixed.
 - Explain your reasoning briefly before each significant action.
 - Ask for clarification if the task is ambiguous.
 )";
@@ -334,6 +363,42 @@ static QString normalizeLocalFilePath(const QString &path)
         return QFileInfo(url.toLocalFile()).absoluteFilePath();
 
     return QFileInfo(trimmed).absoluteFilePath();
+}
+
+static QString normalizeWorkspaceComparablePath(const QString &path)
+{
+    const QString normalized = normalizeLocalFilePath(path);
+    if (normalized.isEmpty())
+        return {};
+
+    QFileInfo info(normalized);
+    const QString resolved = info.exists() ? info.canonicalFilePath() : normalized;
+    return QDir::cleanPath(resolved);
+}
+
+static bool isPathInsideWorkspace(const QString &candidatePath, const QString &workspacePath)
+{
+    const QString normalizedWorkspace = normalizeWorkspaceComparablePath(workspacePath);
+    const QString normalizedCandidate = normalizeWorkspaceComparablePath(candidatePath);
+    
+    qDebug() << "[isPathInsideWorkspace]";
+    qDebug() << "  workspace:" << normalizedWorkspace;
+    qDebug() << "  candidate:" << normalizedCandidate;
+    
+    if (normalizedWorkspace.isEmpty() || normalizedCandidate.isEmpty()) {
+        qWarning() << "  -> EMPTY PATH (workspace empty:" << normalizedWorkspace.isEmpty() 
+                   << "candidate empty:" << normalizedCandidate.isEmpty() << ")";
+        return false;
+    }
+    if (normalizedWorkspace == QStringLiteral("/")) {
+        bool result = normalizedCandidate.startsWith(QStringLiteral("/"));
+        qDebug() << "  -> ROOT WORKSPACE, result:" << result;
+        return result;
+    }
+    bool result = (normalizedCandidate == normalizedWorkspace
+        || normalizedCandidate.startsWith(normalizedWorkspace + QStringLiteral("/")));
+    qDebug() << "  -> result:" << result;
+    return result;
 }
 
 static QString fileDisplayName(const QString &path)
@@ -969,7 +1034,9 @@ static QStringList inferredToolTags(const QString &toolName)
 {
     if (toolName == QStringLiteral("file_system"))
         return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("io")};
-    if (toolName == QStringLiteral("patch"))
+    if (toolName == QStringLiteral("smart_file_creator"))
+        return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("scaffold")};
+    if (toolName == QStringLiteral("patch") || toolName == QStringLiteral("apply_patch"))
         return {QStringLiteral("diff"), QStringLiteral("files"), QStringLiteral("edit")};
     if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
         return {QStringLiteral("shell"), QStringLiteral("command"), QStringLiteral("execution")};
@@ -981,7 +1048,7 @@ static QStringList inferredToolTags(const QString &toolName)
         return {QStringLiteral("knowledge"), QStringLiteral("indexing")};
     if (toolName == QStringLiteral("checkpoint"))
         return {QStringLiteral("checkpoint"), QStringLiteral("rollback")};
-    if (toolName == QStringLiteral("todo"))
+    if (toolName == QStringLiteral("todo") || toolName == QStringLiteral("update_plan"))
         return {QStringLiteral("planning"), QStringLiteral("tasks")};
     if (toolName == QStringLiteral("codex_agent"))
         return {QStringLiteral("agent"), QStringLiteral("delegation")};
@@ -1011,7 +1078,9 @@ QString AgentController::approvalRiskLevelForTool(const QString &toolName, const
     }
 
     if (name == QStringLiteral("file_system")
+        || name == QStringLiteral("smart_file_creator")
         || name == QStringLiteral("patch")
+        || name == QStringLiteral("apply_patch")
         || name == QStringLiteral("github")
         || name == QStringLiteral("gitlab")
         || name == QStringLiteral("jira"))
@@ -1035,15 +1104,21 @@ bool AgentController::toolNeedsApproval(const QString &toolName, const QVariantM
     QString resource;
     if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
         resource = arguments.value(QStringLiteral("command")).toString();
-    else if (toolName == QStringLiteral("patch"))
+    else if (toolName == QStringLiteral("patch") || toolName == QStringLiteral("apply_patch")) {
         resource = arguments.value(QStringLiteral("patch")).toString();
-    else if (toolName == QStringLiteral("file_system")) {
+        if (resource.isEmpty())
+            resource = arguments.value(QStringLiteral("input")).toString();
+    } else if (toolName == QStringLiteral("file_system")) {
         const QString op = arguments.value(QStringLiteral("operation")).toString();
         const QString path = arguments.value(QStringLiteral("path")).toString();
         const QString destination = arguments.value(QStringLiteral("destination")).toString();
         resource = destination.isEmpty()
             ? QStringLiteral("%1 %2").arg(op, path)
             : QStringLiteral("%1 %2 -> %3").arg(op, path, destination);
+    } else if (toolName == QStringLiteral("smart_file_creator")) {
+        resource = QStringLiteral("create %1").arg(arguments.value(QStringLiteral("path")).toString());
+    } else if (toolName == QStringLiteral("update_plan")) {
+        resource = QStringLiteral("plan update");
     }
 
     if (!m_approvalManager) {
@@ -1981,13 +2056,13 @@ QString AgentController::inferExecutionKind(const QString &toolName) const
 {
     if (toolName == QStringLiteral("run_command") || toolName == QStringLiteral("run_docker_command"))
         return QStringLiteral("command_execution");
-    if (toolName == QStringLiteral("patch"))
+    if (toolName == QStringLiteral("patch") || toolName == QStringLiteral("apply_patch"))
         return QStringLiteral("file_change");
     if (toolName == QStringLiteral("search"))
         return QStringLiteral("search");
     if (toolName == QStringLiteral("web_search") || toolName == QStringLiteral("web_fetch"))
         return QStringLiteral("web");
-    if (toolName == QStringLiteral("todo"))
+    if (toolName == QStringLiteral("todo") || toolName == QStringLiteral("update_plan"))
         return QStringLiteral("todo");
     if (toolName == QStringLiteral("github") || toolName == QStringLiteral("gitlab") || toolName == QStringLiteral("jira"))
         return QStringLiteral("web");
@@ -2265,7 +2340,7 @@ void AgentController::configurePolicyManagers()
             fileRule.resourcePattern = pattern;
             fileRule.approval = AskForApproval::OnRequest;
             fileRule.action = QStringLiteral("prompt");
-            fileRule.toolNames = {QStringLiteral("file_system"), QStringLiteral("patch"), QStringLiteral("run_command")};
+            fileRule.toolNames = {QStringLiteral("file_system"), QStringLiteral("patch"), QStringLiteral("apply_patch"), QStringLiteral("run_command")};
             fileRule.permanent = true;
             m_approvalManager->addGranularRule(fileRule);
         }
@@ -2472,6 +2547,8 @@ void AgentController::setCurrentProvider(const QString &id)
     if (!m_providers.contains(id) || m_currentProvider == id) return;
     m_currentProvider = id;
     m_engine->setProvider(m_providers.value(id));
+    if (auto *smartTool = qobject_cast<SmartFileCreator *>(m_registry ? m_registry->tool("smart_file_creator") : nullptr))
+        smartTool->setLLMProvider(m_providers.value(id));
     if (id == "anthropic") {
         if (auto *anthropic = qobject_cast<AnthropicProvider *>(m_providers.value(id))) {
             anthropic->setEndpointOverride(m_anthropicEndpoint);
@@ -2502,22 +2579,35 @@ void AgentController::setCurrentModel(const QString &model)
 
 void AgentController::setWorkspacePath(const QString &path)
 {
-    if (m_workspacePath == path) return;
+    qDebug() << "[AgentController::setWorkspacePath] Called with path:" << path;
+    const QString normalizedPath = normalizeWorkspaceComparablePath(path);
+    qDebug() << "[AgentController::setWorkspacePath] Normalized path:" << normalizedPath;
+    if (m_workspacePath == normalizedPath) {
+        qDebug() << "[AgentController::setWorkspacePath] Path unchanged, returning";
+        return;
+    }
+    qDebug() << "[AgentController::setWorkspacePath] Setting new workspace";
     m_pendingToolExecutions.clear();
     unloadMcpTools();
-    m_workspacePath = path;
-    if (m_workspaceContext) m_workspaceContext->setRootPath(path);
-    if (m_workspaceIndex)   m_workspaceIndex->setRootPath(path);
+    m_workspacePath = normalizedPath;
+    if (m_workspaceContext) m_workspaceContext->setRootPath(normalizedPath);
+    if (m_workspaceIndex)   m_workspaceIndex->setRootPath(normalizedPath);
     if (m_sandboxManager) {
+        qDebug() << "[AgentController] Configuring Sandbox";
         m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
         m_sandboxManager->setReadOnlyMode(false);
         m_sandboxManager->clearPaths();
-        m_sandboxManager->addAllowedReadPath(path);
-        m_sandboxManager->addAllowedWritePath(path);
+        m_sandboxManager->addAllowedReadPath(normalizedPath);
+        m_sandboxManager->addAllowedWritePath(normalizedPath);
+        qDebug() << "[AgentController] Sandbox configured with path:" << normalizedPath;
+    } else {
+        qWarning() << "[AgentController] SandboxManager is NULL!";
     }
 
     // Re-instantiate file-system tools with the new root.
     unregisterToolAndDelete(m_registry, "file_system");
+    unregisterToolAndDelete(m_registry, "smart_file_creator");
+    unregisterToolAndDelete(m_registry, "apply_patch");
     unregisterToolAndDelete(m_registry, "patch");
     unregisterToolAndDelete(m_registry, "run_command");
     unregisterToolAndDelete(m_registry, "run_docker_command");
@@ -2529,13 +2619,26 @@ void AgentController::setWorkspacePath(const QString &path)
     unregisterToolAndDelete(m_registry, "memory");
     unregisterToolAndDelete(m_registry, "session_search");
     unregisterToolAndDelete(m_registry, "todo");
+    unregisterToolAndDelete(m_registry, "update_plan");
     unregisterToolAndDelete(m_registry, "knowledge");
     unregisterToolAndDelete(m_registry, "github");
     unregisterToolAndDelete(m_registry, "gitlab");
     unregisterToolAndDelete(m_registry, "jira");
     unloadReminderTool();
 
+    // Register Claude Standard Tools (Write, Edit, MultiEdit, Read, Bash, Grep, Glob)
+    qDebug() << "[AgentController] About to register Claude Standard Tools";
+    qDebug() << "[AgentController] Workspace path:" << path;
+    qDebug() << "[AgentController] Registry:" << m_registry;
+    qDebug() << "[AgentController] SandboxManager:" << m_sandboxManager;
+    ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
+    qDebug() << "[AgentController] Claude Standard Tools registered";
+    
     m_registry->registerTool(new FileSystemTool(path, m_registry));
+    auto *smartFileCreator = new SmartFileCreator(path, m_registry);
+    smartFileCreator->setLLMProvider(m_providers.value(m_currentProvider));
+    m_registry->registerTool(smartFileCreator);
+    m_registry->registerTool(new ApplyPatchTool(path, m_registry));
     m_registry->registerTool(new PatchTool(path, m_registry));
     m_registry->registerTool(new ShellTool(path, m_registry));
     m_registry->registerTool(new DockerShellTool(path, m_registry));
@@ -2601,9 +2704,16 @@ void AgentController::setWorkspacePath(const QString &path)
                 refreshSystemPrompt();
     });
     m_registry->registerTool(todoTool);
+    m_registry->registerTool(new UpdatePlanTool(todoTool, m_registry));
 
     if (auto *fileTool = qobject_cast<FileSystemTool *>(m_registry->tool("file_system")))
         fileTool->setSandboxManager(m_sandboxManager);
+    if (auto *smartTool = qobject_cast<SmartFileCreator *>(m_registry->tool("smart_file_creator"))) {
+        smartTool->setSandboxManager(m_sandboxManager);
+        smartTool->setLLMProvider(m_providers.value(m_currentProvider));
+    }
+    if (auto *applyPatchTool = qobject_cast<ApplyPatchTool *>(m_registry->tool("apply_patch")))
+        applyPatchTool->setSandboxManager(m_sandboxManager);
     if (auto *patchTool = qobject_cast<PatchTool *>(m_registry->tool("patch")))
         patchTool->setSandboxManager(m_sandboxManager);
     if (auto *shellTool = qobject_cast<ShellTool *>(m_registry->tool("run_command")))
@@ -3395,8 +3505,14 @@ void AgentController::openEditorFile(const QString &filePath)
 
 bool AgentController::createWorkspaceEntry(const QString &parentPath, const QString &name, bool directory)
 {
-    if (m_workspacePath.isEmpty())
+    qDebug() << "[createWorkspaceEntry] Called with parentPath:" << parentPath << "name:" << name << "directory:" << directory;
+    qDebug() << "[createWorkspaceEntry] Current m_workspacePath:" << m_workspacePath;
+    
+    if (m_workspacePath.isEmpty()) {
+        qWarning() << "[createWorkspaceEntry] ERROR: m_workspacePath is empty!";
+        emit errorOccurred(QStringLiteral("No workspace is open."));
         return false;
+    }
 
     const QString cleanName = QFileInfo(name.trimmed()).fileName();
     if (cleanName.isEmpty()) {
@@ -3404,13 +3520,22 @@ bool AgentController::createWorkspaceEntry(const QString &parentPath, const QStr
         return false;
     }
 
-    const QString absParent = QFileInfo(parentPath).isDir()
-        ? QFileInfo(parentPath).absoluteFilePath()
-        : QFileInfo(parentPath).absolutePath();
-    if (!absParent.startsWith(m_workspacePath)) {
+    const QFileInfo parentInfo(parentPath);
+    const QString absParent = parentInfo.isDir()
+        ? normalizeWorkspaceComparablePath(parentPath)
+        : normalizeWorkspaceComparablePath(parentInfo.absolutePath());
+    
+    qDebug() << "[createWorkspaceEntry] Normalized absParent:" << absParent;
+    qDebug() << "[createWorkspaceEntry] Workspace root:" << m_workspacePath;
+    
+    if (!isPathInsideWorkspace(absParent, m_workspacePath)) {
+        qWarning() << "[createWorkspaceEntry] Path validation failed!";
+        qWarning() << "  - absParent:" << absParent;
+        qWarning() << "  - workspace:" << m_workspacePath;
         emit errorOccurred(QStringLiteral("Path is outside the workspace."));
         return false;
     }
+    qDebug() << "[createWorkspaceEntry] Path validation passed";
 
     const QString absPath = QDir(absParent).filePath(cleanName);
     if (QFileInfo::exists(absPath)) {
@@ -3509,8 +3634,8 @@ bool AgentController::renameWorkspacePath(const QString &path, const QString &ne
     if (m_workspacePath.isEmpty())
         return false;
 
-    const QString absPath = QFileInfo(path).absoluteFilePath();
-    if (!absPath.startsWith(m_workspacePath) || !QFileInfo::exists(absPath)) {
+    const QString absPath = normalizeWorkspaceComparablePath(path);
+    if (!isPathInsideWorkspace(absPath, m_workspacePath) || !QFileInfo::exists(absPath)) {
         emit errorOccurred(QStringLiteral("Path is outside the workspace."));
         return false;
     }
@@ -3574,8 +3699,8 @@ bool AgentController::deleteWorkspacePath(const QString &path)
     if (m_workspacePath.isEmpty())
         return false;
 
-    const QString absPath = QFileInfo(path).absoluteFilePath();
-    if (!absPath.startsWith(m_workspacePath) || !QFileInfo::exists(absPath)) {
+    const QString absPath = normalizeWorkspaceComparablePath(path);
+    if (!isPathInsideWorkspace(absPath, m_workspacePath) || !QFileInfo::exists(absPath)) {
         emit errorOccurred(QStringLiteral("Path is outside the workspace."));
         return false;
     }
@@ -3630,9 +3755,10 @@ bool AgentController::moveWorkspacePath(const QString &path, const QString &dest
     if (m_workspacePath.isEmpty())
         return false;
 
-    const QString absPath = QFileInfo(path).absoluteFilePath();
-    const QString absDestinationDir = QFileInfo(destinationDir).absoluteFilePath();
-    if (!absPath.startsWith(m_workspacePath) || !absDestinationDir.startsWith(m_workspacePath)) {
+    const QString absPath = normalizeWorkspaceComparablePath(path);
+    const QString absDestinationDir = normalizeWorkspaceComparablePath(destinationDir);
+    if (!isPathInsideWorkspace(absPath, m_workspacePath)
+        || !isPathInsideWorkspace(absDestinationDir, m_workspacePath)) {
         emit errorOccurred(QStringLiteral("Path is outside the workspace."));
         return false;
     }
@@ -4243,6 +4369,7 @@ void AgentController::onToolFinished(const ToolResult &result)
 
     if (!result.isError
         && (result.name == QStringLiteral("file_system")
+            || result.name == QStringLiteral("apply_patch")
             || result.name == QStringLiteral("patch")
             || result.name == QStringLiteral("checkpoint"))) {
         emit recentCheckpointsChanged();
