@@ -7,6 +7,47 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QSaveFile>
+
+namespace {
+
+bool isPathInsideWorkspace(const QString &path, const QString &workspaceRoot)
+{
+    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
+    const QString cleanPath = QDir::cleanPath(path);
+    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
+        return false;
+
+    if (cleanPath == cleanRoot)
+        return true;
+
+    const QString relative = QDir(cleanRoot).relativeFilePath(cleanPath);
+    return !relative.isEmpty()
+        && !relative.startsWith(QStringLiteral(".."))
+        && !QDir::isAbsolutePath(relative);
+}
+
+bool writeFileAtomically(const QString &path, const QString &content, QString *error)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        if (error)
+            *error = file.errorString();
+        return false;
+    }
+
+    QTextStream out(&file);
+    out << content;
+    out.flush();
+    if (!file.commit()) {
+        if (error)
+            *error = file.errorString();
+        return false;
+    }
+    return true;
+}
+
+} // namespace
 
 static bool isWriteOperationName(const QString &operation)
 {
@@ -100,9 +141,10 @@ void FileSystemTool::setSandboxManager(SandboxManager *manager)
 
 QString FileSystemTool::safePath(const QString &rel) const
 {
-    const QString abs = m_root.absoluteFilePath(rel);
-    // Prevent path traversal
-    if (!QFileInfo(abs).absoluteFilePath().startsWith(m_root.absolutePath()))
+    if (rel.trimmed().isEmpty())
+        return {};
+    const QString abs = QDir::cleanPath(m_root.absoluteFilePath(rel));
+    if (!isPathInsideWorkspace(abs, m_root.absolutePath()))
         return {};
     return abs;
 }
@@ -172,12 +214,10 @@ ToolResult FileSystemTool::opWriteFile(const QString &callId, const QJsonObject 
     QFileInfo fi(path);
     m_root.mkpath(fi.dir().absolutePath());
 
-    QFile f(path);
-    if (!f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        return {callId, name(), true, "Cannot write: " + f.errorString()};
+    QString error;
+    if (!writeFileAtomically(path, args["content"].toString(), &error))
+        return {callId, name(), true, "Cannot write: " + error};
 
-    QTextStream out(&f);
-    out << args["content"].toString();
     QString result = "Written: " + args["path"].toString();
     if (!checkpointId.isEmpty())
         result += "\nCheckpoint: " + checkpointId;

@@ -27,6 +27,7 @@ Item {
     property int slashSelectedIndex: 0
     property bool autoFollowLatest: true
     property bool messageListHovered: false
+    property bool autoScrollingList: false
     readonly property var filteredSlashCommands: (function() {
         const q = root.slashQuery.trim().toLowerCase()
         const recent = Array.from(root.recentSlashCommands).map(cmd => ({ "label": cmd, "hint": "recent" }))
@@ -134,30 +135,11 @@ Item {
                 verticalLayoutDirection: ListView.TopToBottom
                 interactive: true
                 
-                ScrollBar.vertical: ScrollBar {
+                ScrollBar.vertical: CustomScrollBar {
                     id: scrollBar
-                    policy: ScrollBar.AsNeeded
                     visible: listView.contentHeight > listView.height
-                }
-                
-                // 使用 MouseArea 作为子项而不是覆盖层，这样不会阻止滚动
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    acceptedButtons: Qt.NoButton
-                    propagateComposedEvents: true
-                    preventStealing: false
-                    onEntered: root.messageListHovered = true
-                    onExited: root.messageListHovered = false
-                    onWheel: function(wheel) {
-                        // 检测用户手动滚动，停止自动跟随
-                        if (wheel.angleDelta.y !== 0 || wheel.pixelDelta.y !== 0) {
-                            if (!root.isListViewAtBottom())
-                                root.autoFollowLatest = false
-                        }
-                        // 不接受事件，让 ListView 处理滚动
-                        wheel.accepted = false
-                    }
+                    anchors.right: listView.right
+                    anchors.rightMargin: 2
                 }
 
                 onCountChanged: {
@@ -169,6 +151,8 @@ Item {
                         root.scrollToBottom()
                 }
                 onContentYChanged: {
+                    if (!root.autoScrollingList && !root.isListViewAtBottom())
+                        root.autoFollowLatest = false
                     if (root.isListViewAtBottom()) {
                         root.autoFollowLatest = true
                     }
@@ -305,6 +289,16 @@ Item {
                             }
                         }
                     }
+                }
+            }
+
+            // ── Mouse hover detection for message list (use HoverHandler so wheel events reach the ListView)
+            Item {
+                anchors.fill: parent
+                anchors.margins: 8
+
+                HoverHandler {
+                    onHoveredChanged: root.messageListHovered = hovered
                 }
             }
         }
@@ -830,9 +824,13 @@ Item {
     }
 
     function scrollToBottom() {
+        root.autoScrollingList = true
         Qt.callLater(() => {
             if (listView)
                 listView.positionViewAtEnd()
+            Qt.callLater(() => {
+                root.autoScrollingList = false
+            })
         })
     }
 

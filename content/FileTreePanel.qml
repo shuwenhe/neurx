@@ -13,6 +13,7 @@ Item {
     required property var agent
 
     signal fileClicked(string path)
+    signal findInFolderRequested(string path)
 
     property var expandedPaths: ({})
     property var searchExpandedPaths: ({})

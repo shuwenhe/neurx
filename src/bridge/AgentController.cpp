@@ -1,9 +1,11 @@
 #include "bridge/AgentController.h"
+#include "commands/CommandManager.h"
 #include "llm/AnthropicProvider.h"
 #include "llm/GeminiProvider.h"
 #include "llm/OpenAIProvider.h"
 #include "llm/OllamaProvider.h"
 #include "tools/FileSystemTool.h"
+#include "tools/CodexFileSystemTool.h"
 #include "tools/ApplyPatchTool.h"
 #include "tools/PatchTool.h"
 #include "tools/ShellTool.h"
@@ -42,6 +44,7 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QDir>
 #include <QDirIterator>
 #include <QList>
@@ -69,6 +72,7 @@ run shell commands (both local and sandboxed Docker), and search the codebase.
 - Edit: Modify files by text replacement (file_path, old_text, new_text) - old_text must match exactly
 - MultiEdit: Apply multiple edits to one file (file_path, edits[]) - batch edits atomically
 - Read: Read file contents (file_path, start_line?, end_line?) - supports line ranges
+- codex_file_system: Codex-style file operations (write_file, read_file, create_directory, delete_file, get_metadata, write_batch)
 
 **Claude Standard System Operations:**
 - Bash: Execute shell commands (command, timeout?) - runs in workspace context
@@ -174,6 +178,158 @@ static QString askForApprovalToString(AskForApproval value)
     case AskForApproval::UnlessTrusted: return QStringLiteral("unless-trusted");
     }
     return QStringLiteral("on-request");
+}
+
+static void registerCoreCommands(AgentController *controller)
+{
+    if (!controller)
+        return;
+
+    auto *manager = CommandManager::instance();
+    const auto add = [manager](const Command &command) {
+        manager->registerCommand(command);
+    };
+
+    add(Command{
+        QStringLiteral("neurx.command_palette"),
+        QStringLiteral("Show Command Palette"),
+        QStringLiteral("Workbench"),
+        QStringLiteral("Ctrl+Shift+P"),
+        QStringLiteral("Open the command palette"),
+        [controller]() {
+            Q_UNUSED(controller);
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.chat.clear_history"),
+        QStringLiteral("Clear Chat History"),
+        QStringLiteral("Chat"),
+        QStringLiteral("Ctrl+L"),
+        QStringLiteral("Clear the current chat thread"),
+        [controller]() {
+            controller->clearHistory();
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.tools.toggle_auto_approve"),
+        QStringLiteral("Toggle Tool Auto-Approve"),
+        QStringLiteral("Tools"),
+        QString(),
+        QStringLiteral("Enable or disable automatic tool approval"),
+        [controller]() {
+            controller->setAutoApproveTools(!controller->autoApproveTools());
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.knowledge.index_workspace"),
+        QStringLiteral("Index Workspace Knowledge"),
+        QStringLiteral("Knowledge"),
+        QString(),
+        QStringLiteral("Scan the workspace into the knowledge index"),
+        [controller]() {
+            return controller->indexWorkspaceKnowledge();
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.knowledge.index_current_file"),
+        QStringLiteral("Index Current File"),
+        QStringLiteral("Knowledge"),
+        QString(),
+        QStringLiteral("Index the currently open file"),
+        [controller]() {
+            return controller->indexCurrentFileKnowledge();
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.knowledge.index_recent_files"),
+        QStringLiteral("Index Recent Files"),
+        QStringLiteral("Knowledge"),
+        QString(),
+        QStringLiteral("Index recently opened files"),
+        [controller]() {
+            return controller->indexRecentFilesKnowledge();
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.selection.clear"),
+        QStringLiteral("Clear Selection"),
+        QStringLiteral("Editor"),
+        QStringLiteral("Esc"),
+        QStringLiteral("Clear the current code selection"),
+        [controller]() {
+            controller->clearCurrentSelection();
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.file.copy_current_path"),
+        QStringLiteral("Copy Current File Path"),
+        QStringLiteral("File"),
+        QStringLiteral("Ctrl+Alt+C"),
+        QStringLiteral("Copy the active file path to the clipboard"),
+        [controller]() {
+            if (controller->currentFilePath().isEmpty())
+                return false;
+            controller->copyPathToClipboard(controller->currentFilePath());
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.file.open_folder"),
+        QStringLiteral("Open Folder..."),
+        QStringLiteral("File"),
+        QStringLiteral("Ctrl+K,Ctrl+O"),
+        QStringLiteral("Pick a folder to use as the workspace root"),
+        [controller]() {
+            return controller->openWorkspaceFolder();
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.file.open_workspace_file"),
+        QStringLiteral("Open Workspace File..."),
+        QStringLiteral("File"),
+        QString(),
+        QStringLiteral("Pick a .code-workspace file and open its primary folder"),
+        [controller]() {
+            return controller->openWorkspaceFile();
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.codemagic.review_current_file"),
+        QStringLiteral("Review Current File"),
+        QStringLiteral("CodeMagic"),
+        QString(),
+        QStringLiteral("Run a review pass on the current file"),
+        [controller]() {
+            controller->reviewCurrentFileWithCodeMagic();
+            return true;
+        }
+    });
+
+    add(Command{
+        QStringLiteral("neurx.codemagic.explain_current_file"),
+        QStringLiteral("Explain Current File"),
+        QStringLiteral("CodeMagic"),
+        QString(),
+        QStringLiteral("Ask CodeMagic to explain the current file"),
+        [controller]() {
+            controller->explainCurrentFileWithCodeMagic();
+            return true;
+        }
+    });
 }
 
 static AskForApproval askForApprovalFromString(const QString &value)
@@ -374,6 +530,52 @@ static QString normalizeWorkspaceComparablePath(const QString &path)
     QFileInfo info(normalized);
     const QString resolved = info.exists() ? info.canonicalFilePath() : normalized;
     return QDir::cleanPath(resolved);
+}
+
+static QString resolveWorkspaceSelectionPath(const QString &path)
+{
+    QString normalized = normalizeLocalFilePath(path);
+    if (normalized.isEmpty())
+        return {};
+
+    QFileInfo info(normalized);
+    if (!info.exists())
+        return {};
+
+    const QString suffix = info.suffix().toLower();
+    if (suffix != QStringLiteral("code-workspace"))
+        return info.isDir() ? info.absoluteFilePath() : info.absolutePath();
+
+    QFile file(info.absoluteFilePath());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return info.absolutePath();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    if (!doc.isObject())
+        return info.absolutePath();
+
+    const QJsonArray folders = doc.object().value(QStringLiteral("folders")).toArray();
+    for (const auto &entry : folders) {
+        const QJsonObject folder = entry.toObject();
+        QString folderPath = folder.value(QStringLiteral("path")).toString();
+        if (folderPath.trimmed().isEmpty()) {
+            const QString uri = folder.value(QStringLiteral("uri")).toString();
+            if (!uri.isEmpty()) {
+                const QUrl folderUrl(uri);
+                if (folderUrl.isLocalFile())
+                    folderPath = folderUrl.toLocalFile();
+            }
+        }
+
+        if (folderPath.trimmed().isEmpty())
+            continue;
+
+        const QFileInfo folderInfo(QDir(info.absolutePath()).filePath(folderPath));
+        if (folderInfo.exists())
+            return folderInfo.absoluteFilePath();
+    }
+
+    return info.absolutePath();
 }
 
 static bool isPathInsideWorkspace(const QString &candidatePath, const QString &workspacePath)
@@ -996,15 +1198,14 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     setupEngine();
     
     // Register Claude Standard Tools early - even if no workspace is open yet
-    // This ensures Agent has access to basic tools immediately
+    // Do this before setupEngine so the planner/engine sees the tools from the
+    // first request. Use home dir as fallback when no workspace is configured.
     QString toolRegistrationPath = m_workspacePath;
     if (toolRegistrationPath.isEmpty()) {
-        // Use home directory as default workspace for tool registration
         toolRegistrationPath = QDir::homePath();
         qDebug() << "[AgentController::init] No workspace set, using home dir for tool registration:" << toolRegistrationPath;
     }
     
-    // Configure sandbox with the registration path
     if (m_sandboxManager) {
         m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
         m_sandboxManager->setReadOnlyMode(false);
@@ -1014,11 +1215,13 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
         qDebug() << "[AgentController::init] Sandbox initialized with path:" << toolRegistrationPath;
     }
     
-    // Register Claude Standard Tools
     qDebug() << "[AgentController::init] Registering Claude Standard Tools";
     ClaudeStandardToolFactory::registerAllTools(toolRegistrationPath, m_registry, m_sandboxManager);
     qDebug() << "[AgentController::init] Claude Standard Tools registered successfully";
     
+    setupEngine();
+    registerCoreCommands(this);
+
     if (!m_workspacePath.isEmpty())
         refreshWorkspaceSkills();
     restoreTaskSession();
@@ -1059,6 +1262,8 @@ static QStringList inferredToolTags(const QString &toolName)
 {
     if (toolName == QStringLiteral("file_system"))
         return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("io")};
+    if (toolName == QStringLiteral("codex_file_system"))
+        return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("codex")};
     if (toolName == QStringLiteral("smart_file_creator"))
         return {QStringLiteral("files"), QStringLiteral("workspace"), QStringLiteral("scaffold")};
     if (toolName == QStringLiteral("patch") || toolName == QStringLiteral("apply_patch"))
@@ -1103,6 +1308,7 @@ QString AgentController::approvalRiskLevelForTool(const QString &toolName, const
     }
 
     if (name == QStringLiteral("file_system")
+        || name == QStringLiteral("codex_file_system")
         || name == QStringLiteral("smart_file_creator")
         || name == QStringLiteral("patch")
         || name == QStringLiteral("apply_patch")
@@ -1133,7 +1339,8 @@ bool AgentController::toolNeedsApproval(const QString &toolName, const QVariantM
         resource = arguments.value(QStringLiteral("patch")).toString();
         if (resource.isEmpty())
             resource = arguments.value(QStringLiteral("input")).toString();
-    } else if (toolName == QStringLiteral("file_system")) {
+    } else if (toolName == QStringLiteral("file_system")
+               || toolName == QStringLiteral("codex_file_system")) {
         const QString op = arguments.value(QStringLiteral("operation")).toString();
         const QString path = arguments.value(QStringLiteral("path")).toString();
         const QString destination = arguments.value(QStringLiteral("destination")).toString();
@@ -1221,6 +1428,8 @@ QVariantMap AgentController::buildToolCatalogEntry(BaseTool *tool) const
     entry.insert(QStringLiteral("summary"), tool->summary(QJsonObject{}));
     entry.insert(QStringLiteral("schema"), schema.toVariantMap());
     entry.insert(QStringLiteral("schemaText"), schemaText);
+    if (m_registry)
+        entry.insert(QStringLiteral("schemaModel"), m_registry->toolSchemaJson(name).toVariantMap());
     entry.insert(QStringLiteral("tags"), tags);
     entry.insert(QStringLiteral("category"), tags.contains(QStringLiteral("shell"))
                                                     ? QStringLiteral("Execution")
@@ -1429,6 +1638,72 @@ QVariantList AgentController::toolExecutionHistory(const QString &toolName, int 
             break;
     }
     return history;
+}
+
+QVariantList AgentController::commandPaletteCommands(const QString &query) const
+{
+    QVariantList result;
+    const auto *manager = CommandManager::instance();
+    if (!manager)
+        return result;
+
+    const QList<QVariantMap> commands = query.trimmed().isEmpty()
+        ? manager->getAllCommands()
+        : manager->searchCommands(query);
+
+    for (const auto &command : commands)
+        result.append(command);
+    return result;
+}
+
+bool AgentController::executeCommand(const QString &commandId)
+{
+    auto *manager = CommandManager::instance();
+    if (!manager) {
+        emit errorOccurred(QStringLiteral("Command manager is not available."));
+        return false;
+    }
+
+    if (!manager->executeCommand(commandId)) {
+        emit errorOccurred(QStringLiteral("Command not found or failed: %1").arg(commandId));
+        return false;
+    }
+
+    return true;
+}
+
+bool AgentController::openWorkspaceFolder(const QString &path)
+{
+    if (path.trimmed().isEmpty()) {
+        emit openWorkspaceFolderRequested();
+        return true;
+    }
+
+    const QString normalizedPath = normalizeWorkspaceComparablePath(resolveWorkspaceSelectionPath(path));
+    if (normalizedPath.isEmpty()) {
+        emit errorOccurred(QStringLiteral("Invalid workspace folder path."));
+        return false;
+    }
+
+    setWorkspacePath(normalizedPath);
+    return true;
+}
+
+bool AgentController::openWorkspaceFile(const QString &path)
+{
+    if (path.trimmed().isEmpty()) {
+        emit openWorkspaceFileRequested();
+        return true;
+    }
+
+    const QString selectedPath = resolveWorkspaceSelectionPath(path);
+    if (selectedPath.isEmpty()) {
+        emit errorOccurred(QStringLiteral("Invalid workspace file."));
+        return false;
+    }
+
+    setWorkspacePath(selectedPath);
+    return true;
 }
 
 QVariantMap AgentController::executeToolByName(const QString &toolName, const QVariantMap &arguments)
@@ -2365,7 +2640,11 @@ void AgentController::configurePolicyManagers()
             fileRule.resourcePattern = pattern;
             fileRule.approval = AskForApproval::OnRequest;
             fileRule.action = QStringLiteral("prompt");
-            fileRule.toolNames = {QStringLiteral("file_system"), QStringLiteral("patch"), QStringLiteral("apply_patch"), QStringLiteral("run_command")};
+            fileRule.toolNames = {QStringLiteral("file_system"),
+                                  QStringLiteral("codex_file_system"),
+                                  QStringLiteral("patch"),
+                                  QStringLiteral("apply_patch"),
+                                  QStringLiteral("run_command")};
             fileRule.permanent = true;
             m_approvalManager->addGranularRule(fileRule);
         }
@@ -2640,6 +2919,7 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] Claude Standard Tools registered";
     
     m_registry->registerTool(new FileSystemTool(path, m_registry));
+    m_registry->registerTool(new CodexFileSystemTool(path, m_registry));
     auto *smartFileCreator = new SmartFileCreator(path, m_registry);
     smartFileCreator->setLLMProvider(m_providers.value(m_currentProvider));
     m_registry->registerTool(smartFileCreator);
@@ -2713,6 +2993,8 @@ void AgentController::setWorkspacePath(const QString &path)
 
     if (auto *fileTool = qobject_cast<FileSystemTool *>(m_registry->tool("file_system")))
         fileTool->setSandboxManager(m_sandboxManager);
+    if (auto *codexFileTool = qobject_cast<CodexFileSystemTool *>(m_registry->tool("codex_file_system")))
+        codexFileTool->setSandboxManager(m_sandboxManager);
     if (auto *smartTool = qobject_cast<SmartFileCreator *>(m_registry->tool("smart_file_creator"))) {
         smartTool->setSandboxManager(m_sandboxManager);
         smartTool->setLLMProvider(m_providers.value(m_currentProvider));
@@ -3689,12 +3971,12 @@ bool AgentController::renameWorkspacePath(const QString &path, const QString &ne
 
     emit openFilesChanged();
     syncKnowledgeForPathChange(absPath, newAbsPath, info.isDir());
-    m_lastWorkspaceActionType.clear();
-    m_lastWorkspaceActionSource.clear();
-    m_lastWorkspaceActionDestination.clear();
+    m_lastWorkspaceActionType = "rename";
+    m_lastWorkspaceActionSource = absPath;
+    m_lastWorkspaceActionDestination = newAbsPath;
     emit undoWorkspaceActionChanged();
-    refreshSystemPrompt();
     saveSettings();
+    refreshSystemPrompt();
     saveTaskSession();
     return true;
 }

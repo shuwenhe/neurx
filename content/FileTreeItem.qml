@@ -207,6 +207,16 @@ Item {
                                 }
 
                                 MenuItem {
+                                    visible: model.fileIsDir
+                                    text: "Find in Folder..."
+                                    onTriggered: {
+                                        // Set agent switch to Search tab and initialize search with the path
+                                        // This requires a signal or a property in root.panel
+                                        node.panel.findInFolderRequested(itemRoot.normalizedFilePath)
+                                    }
+                                }
+
+                                MenuItem {
                                     text: "重命名"
                                     onTriggered: root.panel.openRenameDialog(itemRoot.normalizedFilePath)
                                 }

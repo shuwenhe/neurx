@@ -15,8 +15,14 @@ Item {
         color: Theme.surface
 
         ScrollView {
+            id: settingsScroll
             anchors.fill: parent
             clip: true
+
+            ScrollBar.vertical: CustomScrollBar {
+                anchors.right: settingsScroll.right
+                anchors.rightMargin: 2
+            }
 
             ColumnLayout {
                 width: root.width - 32
@@ -28,6 +34,72 @@ Item {
                     text: "Settings"
                     font.pixelSize: Theme.fontLg; font.bold: true
                     color: Theme.textPrimary
+                }
+
+                GroupBox {
+                    Layout.fillWidth: true
+                    title: "Appearance"
+                    background: Rectangle { color: Theme.surfaceAlt; radius: Theme.radius }
+
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 8
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Theme"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            ComboBox {
+                                model: ["Dark", "Light"]
+                                currentIndex: Theme.currentTheme === "dark" ? 0 : 1
+                                onActivated: index => {
+                                    Theme.currentTheme = (index === 0 ? "dark" : "light")
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Zoom Factor"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            SpinBox {
+                                from: 40; to: 300; value: Math.round(root.agent.parent.zoomFactor * 100)
+                                stepSize: 10
+                                editable: true
+                                onValueModified: root.agent.parent.zoomFactor = value / 100.0
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Auto-save"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: false // placeholder
+                                onToggled: {
+                                    // We need to reach editorPanel.autoSave.
+                                    // In App.qml, editorPanel is a top-level child.
+                                    // SettingsPanel is inside a drawer in App.qml.
+                                    // root.agent.parent is essentially the App root if context is right.
+                                    if (typeof editorPanel !== "undefined") {
+                                        editorPanel.autoSave = checked
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // ── API Keys ──────────────────────────────────────────────
@@ -224,7 +296,7 @@ Item {
                     }
                 }
 
-                // ── System Prompt ─────────────────────────────────────────
+                // ── System Prompt ────────────────────��────────────────────
                 GroupBox {
                     Layout.fillWidth: true
                     title: "System Prompt"

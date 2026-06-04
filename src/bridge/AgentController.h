@@ -193,6 +193,10 @@ public:
                                               const QVariantMap &arguments = {});
     Q_INVOKABLE QVariantMap toolExecutionStats(const QString &toolName) const;
     Q_INVOKABLE QVariantList toolExecutionHistory(const QString &toolName, int limit = 20) const;
+    Q_INVOKABLE QVariantList commandPaletteCommands(const QString &query = QString()) const;
+    Q_INVOKABLE bool executeCommand(const QString &commandId);
+    Q_INVOKABLE bool openWorkspaceFolder(const QString &path = QString());
+    Q_INVOKABLE bool openWorkspaceFile(const QString &path = QString());
     Q_INVOKABLE bool resumeTaskSession(const QString &sessionId);
     Q_INVOKABLE bool forkCurrentThread();
     Q_INVOKABLE bool indexWorkspaceKnowledge();
@@ -249,6 +253,8 @@ signals:
     void recentSessionsChanged();
     void recentSlashCommandsChanged();
     void currentThreadIdChanged();
+    void openWorkspaceFolderRequested();
+    void openWorkspaceFileRequested();
     void executionTimelineChanged();
     void pendingAttachmentsChanged();
     void localSkillsChanged();

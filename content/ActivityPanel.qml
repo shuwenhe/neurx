@@ -219,11 +219,17 @@ Item {
                 border.color: Theme.border
 
                 Flickable {
+                    id: flickable
                     anchors.fill: parent
                     anchors.margins: 6
                     clip: true
                     contentWidth: width
                     contentHeight: timelineColumn.implicitHeight
+
+                    ScrollBar.vertical: CustomScrollBar {
+                        anchors.right: flickable.right
+                        anchors.rightMargin: -2
+                    }
 
                     ColumnLayout {
                         id: timelineColumn

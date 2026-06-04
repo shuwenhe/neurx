@@ -161,11 +161,15 @@ Item {
             }
 
             ScrollView {
+                id: scrollView
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                ScrollBar.vertical.policy: ScrollBar.AsNeeded
-                ScrollBar.horizontal.policy: ScrollBar.AsNeeded
+
+                ScrollBar.vertical: CustomScrollBar {
+                    anchors.right: scrollView.right
+                    anchors.rightMargin: 2
+                }
 
                 ColumnLayout {
                     width: root.width - 24
