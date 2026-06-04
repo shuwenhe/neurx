@@ -18,14 +18,32 @@ void Planner::setTemperature(float temperature)
 
 QJsonArray Planner::buildTools(const QString &providerId, const AgentToolRegistry *registry) const
 {
-    if (!registry) return {};
-    if (providerId == "openai")
-        return registry->toOpenAISchema();
-    if (providerId == "gemini")
-        return registry->toGeminiSchema();
-    if (providerId == "anthropic")
-        return registry->toAnthropicSchema();
-    return {};
+    if (!registry) {
+        qWarning() << "[Planner] No registry provided, cannot build tools";
+        return {};
+    }
+    
+    // List all available tools
+    auto tools_list = registry->allTools();
+    qDebug() << "[Planner] Registry has" << tools_list.size() << "tools:";
+    for (const auto *tool : tools_list) {
+        qDebug() << "  -" << tool->name();
+    }
+    
+    QJsonArray tools;
+    if (providerId == "openai") {
+        tools = registry->toOpenAISchema();
+        qDebug() << "[Planner] Built OpenAI schema with" << tools.size() << "tools";
+    } else if (providerId == "gemini") {
+        tools = registry->toGeminiSchema();
+        qDebug() << "[Planner] Built Gemini schema with" << tools.size() << "tools";
+    } else if (providerId == "anthropic") {
+        tools = registry->toAnthropicSchema();
+        qDebug() << "[Planner] Built Anthropic schema with" << tools.size() << "tools";
+    }
+    
+    qDebug() << "[Planner] Built" << tools.size() << "tools for provider:" << providerId;
+    return tools;
 }
 
 // ── context budget helpers ────────────────────────────────────────────────────

@@ -122,21 +122,6 @@ Item {
             radius: Theme.radius + 2
             clip: true
 
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.NoButton
-                onEntered: root.messageListHovered = true
-                onExited: root.messageListHovered = false
-                onWheel: function(wheel) {
-                    if (wheel.angleDelta.y !== 0 || wheel.pixelDelta.y !== 0) {
-                        if (!root.isListViewAtBottom())
-                            root.autoFollowLatest = false
-                    }
-                    wheel.accepted = false
-                }
-            }
-
             ListView {
                 id: listView
                 anchors.fill: parent
@@ -147,8 +132,33 @@ Item {
                 topMargin: 8
                 bottomMargin: 8
                 verticalLayoutDirection: ListView.TopToBottom
-
-                ScrollBar.vertical: ScrollBar {}
+                interactive: true
+                
+                ScrollBar.vertical: ScrollBar {
+                    id: scrollBar
+                    policy: ScrollBar.AsNeeded
+                    visible: listView.contentHeight > listView.height
+                }
+                
+                // 使用 MouseArea 作为子项而不是覆盖层，这样不会阻止滚动
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    propagateComposedEvents: true
+                    preventStealing: false
+                    onEntered: root.messageListHovered = true
+                    onExited: root.messageListHovered = false
+                    onWheel: function(wheel) {
+                        // 检测用户手动滚动，停止自动跟随
+                        if (wheel.angleDelta.y !== 0 || wheel.pixelDelta.y !== 0) {
+                            if (!root.isListViewAtBottom())
+                                root.autoFollowLatest = false
+                        }
+                        // 不接受事件，让 ListView 处理滚动
+                        wheel.accepted = false
+                    }
+                }
 
                 onCountChanged: {
                     if (root.autoFollowLatest)

@@ -417,7 +417,7 @@ ApplicationWindow {
     // ── File picker (uses native dialog via QML FileDialog) ───────────────
     FolderDialog {
         id: workspacePicker
-        onAccepted: agentCtx.workspacePath = selectedFolder.toString().replace("file://", "")
+        onAccepted: agentCtx.workspacePath = decodeURIComponent(selectedFolder.toString().replace("file://", ""))
     }
 
     // ── State ─────────────────────────────────────────────────────────────

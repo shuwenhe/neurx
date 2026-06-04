@@ -6,6 +6,7 @@ AgentToolRegistry::AgentToolRegistry(QObject *parent) : QObject(parent) {}
 
 void AgentToolRegistry::registerTool(BaseTool *tool)
 {
+    qDebug() << "[AgentToolRegistry] Registering tool:" << tool->name();
     m_tools.insert(tool->name(), tool);
     if (tool->parent() == nullptr) tool->setParent(this);
 }
@@ -28,7 +29,9 @@ QList<BaseTool *> AgentToolRegistry::allTools() const
 QJsonArray AgentToolRegistry::toAnthropicSchema() const
 {
     QJsonArray arr;
+    qDebug() << "[AgentToolRegistry] Building Anthropic schema for" << m_tools.size() << "tools";
     for (const auto *t : m_tools) {
+        qDebug() << "  - Tool:" << t->name();
         QJsonObject tool;
         tool["name"]         = t->name();
         tool["description"]  = t->description();

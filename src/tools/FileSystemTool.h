@@ -2,6 +2,7 @@
 #include "agent/AgentToolRegistry.h"
 #include "sandbox/SandboxManager.h"
 #include "tools/CheckpointManager.h"
+#include "tools/SmartFileCreator.h"
 #include <QDir>
 #include <memory>
 
@@ -24,7 +25,7 @@ public:
     ToolResult  execute(const QString &callId, const QJsonObject &args) override;
     QString     summary(const QJsonObject &args) const override;
 
-    void setSandboxManager(SandboxManager *manager) { m_sandboxManager = manager; }
+    void setSandboxManager(SandboxManager *manager);
 
 private:
     bool isWriteOperation(const QString &operation) const;
@@ -42,5 +43,6 @@ private:
 
     QDir m_root;
     std::unique_ptr<CheckpointManager> m_checkpointManager;
+    std::unique_ptr<SmartFileCreator> m_smartFileCreator;
     SandboxManager *m_sandboxManager{nullptr};
 };

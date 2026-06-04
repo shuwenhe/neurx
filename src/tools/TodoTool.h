@@ -13,7 +13,7 @@
 //    read   — return the current list.
 //
 //  Each item: { "id": string, "content": string, "status": "pending" |
-//               "in_progress" | "completed" | "cancelled" }
+//               "in_progress" | "completed" | "cancelled" | "blocked" }
 //
 //  Only one item may have status "in_progress" at a time (enforced on write).
 
