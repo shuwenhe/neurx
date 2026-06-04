@@ -6,9 +6,21 @@ AgentToolRegistry::AgentToolRegistry(QObject *parent) : QObject(parent) {}
 
 void AgentToolRegistry::registerTool(BaseTool *tool)
 {
-    qDebug() << "[AgentToolRegistry] Registering tool:" << tool->name();
-    m_tools.insert(tool->name(), tool);
+    if (!tool)
+        return;
+
+    const QString name = tool->name();
+    BaseTool *previous = m_tools.value(name, nullptr);
+    qDebug() << "[AgentToolRegistry] Registering tool:" << name;
+
+    // Allow re-registration during workspace rebuilds without leaving the
+    // registry temporarily empty. If a tool with the same name already exists,
+    // replace it in-place and retire the old instance afterwards.
+    m_tools.insert(name, tool);
     if (tool->parent() == nullptr) tool->setParent(this);
+
+    if (previous && previous != tool)
+        previous->deleteLater();
 }
 
 void AgentToolRegistry::unregisterTool(const QString &name)

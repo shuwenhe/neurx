@@ -994,6 +994,31 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     loadSettings();
     configurePolicyManagers();
     setupEngine();
+    
+    // Register Claude Standard Tools early - even if no workspace is open yet
+    // This ensures Agent has access to basic tools immediately
+    QString toolRegistrationPath = m_workspacePath;
+    if (toolRegistrationPath.isEmpty()) {
+        // Use home directory as default workspace for tool registration
+        toolRegistrationPath = QDir::homePath();
+        qDebug() << "[AgentController::init] No workspace set, using home dir for tool registration:" << toolRegistrationPath;
+    }
+    
+    // Configure sandbox with the registration path
+    if (m_sandboxManager) {
+        m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
+        m_sandboxManager->setReadOnlyMode(false);
+        m_sandboxManager->clearPaths();
+        m_sandboxManager->addAllowedReadPath(toolRegistrationPath);
+        m_sandboxManager->addAllowedWritePath(toolRegistrationPath);
+        qDebug() << "[AgentController::init] Sandbox initialized with path:" << toolRegistrationPath;
+    }
+    
+    // Register Claude Standard Tools
+    qDebug() << "[AgentController::init] Registering Claude Standard Tools";
+    ClaudeStandardToolFactory::registerAllTools(toolRegistrationPath, m_registry, m_sandboxManager);
+    qDebug() << "[AgentController::init] Claude Standard Tools registered successfully";
+    
     if (!m_workspacePath.isEmpty())
         refreshWorkspaceSkills();
     restoreTaskSession();
@@ -2604,29 +2629,9 @@ void AgentController::setWorkspacePath(const QString &path)
         qWarning() << "[AgentController] SandboxManager is NULL!";
     }
 
-    // Re-instantiate file-system tools with the new root.
-    unregisterToolAndDelete(m_registry, "file_system");
-    unregisterToolAndDelete(m_registry, "smart_file_creator");
-    unregisterToolAndDelete(m_registry, "apply_patch");
-    unregisterToolAndDelete(m_registry, "patch");
-    unregisterToolAndDelete(m_registry, "run_command");
-    unregisterToolAndDelete(m_registry, "run_docker_command");
-    unregisterToolAndDelete(m_registry, "search");
-    unregisterToolAndDelete(m_registry, "web_search");
-    unregisterToolAndDelete(m_registry, "web_fetch");
-    unregisterToolAndDelete(m_registry, "codex_agent");
-    unregisterToolAndDelete(m_registry, "checkpoint");
-    unregisterToolAndDelete(m_registry, "memory");
-    unregisterToolAndDelete(m_registry, "session_search");
-    unregisterToolAndDelete(m_registry, "todo");
-    unregisterToolAndDelete(m_registry, "update_plan");
-    unregisterToolAndDelete(m_registry, "knowledge");
-    unregisterToolAndDelete(m_registry, "github");
-    unregisterToolAndDelete(m_registry, "gitlab");
-    unregisterToolAndDelete(m_registry, "jira");
-    unloadReminderTool();
-
-    // Register Claude Standard Tools (Write, Edit, MultiEdit, Read, Bash, Grep, Glob)
+    // Re-register workspace-dependent tools directly. The registry now
+    // replaces same-named tools in place, which avoids a temporary empty
+    // registry during workspace rebuilds.
     qDebug() << "[AgentController] About to register Claude Standard Tools";
     qDebug() << "[AgentController] Workspace path:" << path;
     qDebug() << "[AgentController] Registry:" << m_registry;
