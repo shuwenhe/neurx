@@ -21,6 +21,44 @@
 #include "thread/ThreadId.h"
 #include "tools/ReminderTool.h"
 
+// VS Code Integration Services
+#include "services/NotificationService.h"
+#include "services/ProgressService.h"
+#include "services/StorageService.h"
+#include "services/FileService.h"
+#include "services/WorkspaceService.h"
+#include "services/SearchService.h"
+#include "services/TasksManager.h"
+#include "services/TerminalService.h"
+#include "services/DebugSession.h"
+#include "services/KeyBindingManager.h"
+#include "workbench/QuickAccessManager.h"
+#include "languages/LanguageClient.h"
+#include "languages/GitService.h"
+
+// Phase 2: Advanced Features
+#include "features/FeatureProviders.h"
+#include "features/NavigationProviders.h"
+#include "features/EditingProviders.h"
+
+// Phase 3 & Beyond: Extended Editor Features
+#include "editor/FindAndReplace.h"
+#include "editor/FoldingManager.h"
+#include "editor/SnippetManager.h"
+#include "editor/CommentManager.h"
+#include "editor/BracketMatcher.h"
+#include "editor/CaseConverter.h"
+#include "editor/EditorHistory.h"
+#include "editor/GoToDefinition.h"
+#include "editor/InlineRename.h"
+#include "editor/LineOperations.h"
+#include "editor/MultiCursor.h"
+#include "editor/OutlineProvider.h"
+#include "editor/SelectToBracket.h"
+#include "editor/SmartSelection.h"
+#include "editor/WordHighlight.h"
+#include "editor/WordOperations.h"
+
 class LocalGatewayServer;
 
 // ── ChatMessage (QML-visible model item) ─────────────────────────────────────
@@ -206,6 +244,171 @@ public:
     Q_INVOKABLE bool removeKnowledgeSource(const QString &path);
     Q_INVOKABLE bool createReminder(const QString &title, int dueInMinutes, int repeatMinutes = 0);
     Q_INVOKABLE bool cancelReminder(const QString &id);
+
+    // VS Code Integration Service Access
+    Q_INVOKABLE QString notifyInfo(const QString& message);
+    Q_INVOKABLE QString notifyWarning(const QString& message);
+    Q_INVOKABLE QString notifyError(const QString& message);
+    Q_INVOKABLE QString notifySuccess(const QString& message);
+    Q_INVOKABLE bool dismissNotification(const QString& notificationId);
+
+    Q_INVOKABLE QString startProgress(const QString& title);
+    Q_INVOKABLE void updateProgress(const QString& progressId, int current);
+    Q_INVOKABLE void finishProgress(const QString& progressId);
+
+    Q_INVOKABLE QVariantList searchQuickAccess(const QString& query);
+    Q_INVOKABLE bool executeQuickAccessItem(const QString& itemId);
+
+    Q_INVOKABLE QVariantList performSearch(const QString& text, bool useRegex = false);
+    Q_INVOKABLE int replaceAllMatches(const QString& searchText, const QString& replacement);
+
+    Q_INVOKABLE QStringList findFilesInWorkspace(const QString& pattern);
+    Q_INVOKABLE QStringList getRecentFiles(int maxCount = 20);
+
+    Q_INVOKABLE QStringList getGitStatus();
+    Q_INVOKABLE QString getCurrentGitBranch();
+    Q_INVOKABLE bool commitGitChanges(const QString& message);
+    Q_INVOKABLE bool pushToGit(const QString& remote = "origin");
+    Q_INVOKABLE bool pullFromGit(const QString& remote = "origin");
+
+    Q_INVOKABLE QString executeTask(const QString& taskId);
+    Q_INVOKABLE bool terminateTask(const QString& executionId);
+    Q_INVOKABLE QString getTaskOutput(const QString& executionId);
+
+    Q_INVOKABLE QString createTerminal(const QString& name = QString());
+    Q_INVOKABLE QString createTerminalWithPath(const QString& name, const QString& path);
+    Q_INVOKABLE void revealInExplorer(const QString& path);
+    Q_INVOKABLE void sendTerminalCommand(const QString& terminalId, const QString& command);
+    Q_INVOKABLE void closeTerminal(const QString& terminalId);
+
+    Q_INVOKABLE QString startDebugSession(const QString& configuration);
+    Q_INVOKABLE void stopDebugSession(const QString& sessionId);
+    Q_INVOKABLE bool debugPause(const QString& sessionId);
+    Q_INVOKABLE bool debugContinue(const QString& sessionId);
+    Q_INVOKABLE bool debugStepOver(const QString& sessionId);
+    Q_INVOKABLE bool debugStepInto(const QString& sessionId);
+    Q_INVOKABLE bool debugStepOut(const QString& sessionId);
+    Q_INVOKABLE QVariantList getDebugStackTrace(const QString& sessionId) const;
+    Q_INVOKABLE QVariantList getDebugVariables(const QString& sessionId, int frameId) const;
+    Q_INVOKABLE QString evaluateDebugExpression(const QString& sessionId, const QString& expression);
+    Q_INVOKABLE bool setDebugBreakpoint(const QString& sessionId, const QString& filePath, int line,
+                                        int column = 0, const QString& condition = QString(),
+                                        const QString& hitCondition = QString());
+    Q_INVOKABLE bool removeDebugBreakpoint(const QString& sessionId, const QString& breakpointId);
+    Q_INVOKABLE QVariantList getDebugBreakpoints(const QString& sessionId) const;
+
+    Q_INVOKABLE void registerLanguageServer(const QString& name, const QString& command);
+    Q_INVOKABLE QVariantMap requestHover(const QString& filePath, int line, int column);
+
+    Q_INVOKABLE QVariantList getAllKeyBindings() const;
+    Q_INVOKABLE QVariantMap getKeyBinding(const QString& commandId) const;
+    Q_INVOKABLE bool registerKeyBinding(const QString& commandId, const QString& keys,
+                                        const QString& when = QString(),
+                                        const QString& description = QString());
+    Q_INVOKABLE bool unregisterKeyBinding(const QString& commandId);
+    Q_INVOKABLE QVariantList findKeyBindingConflicts(const QString& keys) const;
+    Q_INVOKABLE bool resetKeyBindings();
+    Q_INVOKABLE bool saveKeyBindings(const QString& filePath) const;
+    Q_INVOKABLE bool loadKeyBindings(const QString& filePath);
+
+    // Phase 2: Advanced Features API
+    // Basic Editing (Week 1)
+    Q_INVOKABLE QString trimTrailingWhitespace(const QString& text);
+    Q_INVOKABLE QVariantList formatDocument(const QString& filePath, const QVariantMap& options = {});
+    Q_INVOKABLE QVariantMap getTypeDefinition(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantMap goToDeclaration(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantList getPathCompletions(const QString& text, int cursorPosition);
+
+    // Navigation Features (Week 2)
+    Q_INVOKABLE QVariantList getBreadcrumbs(const QString& filePath, int line);
+    Q_INVOKABLE QVariantList findAllReferences(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantMap getCurrentSymbol(const QString& filePath, int line);
+    Q_INVOKABLE QVariantList searchWorkspaceSymbols(const QString& query);
+    Q_INVOKABLE bool startFileWatching(const QString& path);
+    Q_INVOKABLE bool stopFileWatching(const QString& path);
+    Q_INVOKABLE QVariantList getFileChanges();
+
+    // Editing Enhancement Features
+    Q_INVOKABLE QVariantList getInlineCompletions(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantMap getParameterHints(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantList getCodeActions(const QString& filePath, int line, int column);
+    Q_INVOKABLE bool applyCodeAction(const QString& filePath, const QVariantMap& action);
+    Q_INVOKABLE QVariantList getSemanticTokens(const QString& filePath);
+    Q_INVOKABLE QVariantList getSemanticTokensRange(const QString& filePath, int startLine, int endLine);
+    Q_INVOKABLE QVariantList getLinkedEditingRanges(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantList searchWorkspace(const QString& pattern, const QVariantMap& options = {});
+    Q_INVOKABLE int replaceInWorkspace(const QString& pattern, const QString& replacement, const QVariantMap& options = {});
+
+    // Phase 3 & Beyond: Extended Editor Features API
+    // Find & Replace
+    Q_INVOKABLE QVariantList findMatches(const QString& query, const QJsonObject& options);
+    Q_INVOKABLE QVariantMap findNext(const QString& query, int currentLine, int currentColumn);
+    Q_INVOKABLE QVariantMap findPrevious(const QString& query, int currentLine, int currentColumn);
+    Q_INVOKABLE int replaceAll(const QString& pattern, const QString& replacement);
+    Q_INVOKABLE bool replaceSingle(const QString& pattern, const QString& replacement, int line, int column);
+
+    // Code Folding
+    Q_INVOKABLE QVariantList computeFoldRanges(const QString& code, const QString& language);
+    Q_INVOKABLE void toggleFold(int line);
+    Q_INVOKABLE void foldAll();
+    Q_INVOKABLE void unfoldAll();
+    Q_INVOKABLE void foldLevel(int level);
+
+    // Snippets
+    Q_INVOKABLE QVariantList getSnippets(const QString& language);
+    Q_INVOKABLE QVariantList searchSnippets(const QString& query);
+    Q_INVOKABLE bool insertSnippet(const QJsonObject& snippet);
+    Q_INVOKABLE QString resolveSnippetVariables(const QString& snippet);
+
+    // Comments
+    Q_INVOKABLE void toggleLineComment(int line);
+    Q_INVOKABLE void toggleBlockComment(int startLine, int endLine);
+    Q_INVOKABLE void addLineComment(const QVariantList& lines);
+    Q_INVOKABLE void removeLineComment(const QVariantList& lines);
+
+    // Bracket Matching & Selection
+    Q_INVOKABLE QVariantMap getBracketPair(const QString& filePath, int line, int column);
+    Q_INVOKABLE void highlightBrackets(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantMap selectToBracket(const QString& filePath, int line, int column);
+
+    // Case & Text Operations
+    Q_INVOKABLE QString convertToUpperCase(const QString& text);
+    Q_INVOKABLE QString convertToLowerCase(const QString& text);
+    Q_INVOKABLE QString convertToCamelCase(const QString& text);
+    Q_INVOKABLE QString convertToSnakeCase(const QString& text);
+
+    // Editor History & Navigation
+    Q_INVOKABLE QVariantList getEditHistory();
+    Q_INVOKABLE bool canUndo();
+    Q_INVOKABLE bool canRedo();
+    Q_INVOKABLE QVariantMap goToDefinitionEx(const QString& filePath, int line, int column);
+    Q_INVOKABLE bool performInlineRename(const QString& filePath, int line, int column, const QString& newName);
+
+    // Line & Cursor Operations
+    Q_INVOKABLE void copyLine(int line);
+    Q_INVOKABLE void deleteLine(int line);
+    Q_INVOKABLE void moveLinesUp(int startLine, int endLine);
+    Q_INVOKABLE void moveLinesDown(int startLine, int endLine);
+    Q_INVOKABLE void duplicateLine(int line);
+    Q_INVOKABLE QVariantList getCursorPositions();
+    Q_INVOKABLE void addCursorAtLine(int line, int column);
+    Q_INVOKABLE void removeCursor(int index);
+    Q_INVOKABLE void clearCursors();
+
+    // Outline & Navigation
+    Q_INVOKABLE QVariantList getOutlineSymbols(const QString& filePath);
+    Q_INVOKABLE bool navigateToSymbol(const QString& symbolName);
+
+    // Smart Selection & Highlighting
+    Q_INVOKABLE QVariantMap selectWord(const QString& filePath, int line, int column);
+    Q_INVOKABLE QVariantList selectScope(const QString& filePath, int line, int column);
+    Q_INVOKABLE void highlightAllOccurrences(const QString& word);
+    Q_INVOKABLE void clearHighlights();
+    Q_INVOKABLE QVariantList getWordOccurrences(const QString& word, const QString& filePath);
+
+    // Word Operations
+    Q_INVOKABLE void deleteWord(int line, int column);
+    Q_INVOKABLE void deleteWordBackward(int line, int column);
 
 public slots:
     void sendMessage(const QString &text);
@@ -402,6 +605,62 @@ private:
     QString m_localGatewayUrl;
     quint16 m_localGatewayPort{0};
     LocalGatewayServer *m_gatewayServer{nullptr};
+
+    // VS Code Integration Services
+    NotificationService* m_notificationService{nullptr};
+    ProgressService* m_progressService{nullptr};
+    StorageService* m_storageService{nullptr};
+    FileService* m_fileService{nullptr};
+    WorkspaceService* m_workspaceService{nullptr};
+    SearchService* m_searchService{nullptr};
+    TasksManager* m_tasksManager{nullptr};
+    TerminalService* m_terminalService{nullptr};
+    DebugSession* m_debugSession{nullptr};
+    KeyBindingManager* m_keyBindingManager{nullptr};
+    QuickAccessManager* m_quickAccessManager{nullptr};
+    LanguageClient* m_languageClient{nullptr};
+    GitService* m_gitService{nullptr};
+
+    // Phase 2: Advanced Features Providers
+    // Basic Features (Week 1)
+    TrimTrailingWhitespaceProvider* m_trimWhitespaceProvider{nullptr};
+    FormatDocumentProvider* m_formatDocumentProvider{nullptr};
+    TypeDefinitionProvider* m_typeDefinitionProvider{nullptr};
+    GoToDeclarationProvider* m_goToDeclarationProvider{nullptr};
+    PathCompletionProvider* m_pathCompletionProvider{nullptr};
+
+    // Navigation Features (Week 2)
+    BreadcrumbProvider* m_breadcrumbProvider{nullptr};
+    FindReferencesProvider* m_findReferencesProvider{nullptr};
+    SymbolNavigationProvider* m_symbolNavigationProvider{nullptr};
+    WorkspaceSymbolProvider* m_workspaceSymbolProvider{nullptr};
+    FileWatcherProvider* m_fileWatcherProvider{nullptr};
+
+    // Editing Enhancement Features
+    InlineCompletionProvider* m_inlineCompletionProvider{nullptr};
+    ParameterHintProvider* m_parameterHintProvider{nullptr};
+    CodeActionProvider* m_codeActionProvider{nullptr};
+    SemanticHighlightProvider* m_semanticHighlightProvider{nullptr};
+    LinkedEditingProvider* m_linkedEditingProvider{nullptr};
+    SearchOptimizerProvider* m_searchOptimizerProvider{nullptr};
+
+    // Phase 3 & Beyond: Extended Editor Features
+    FindAndReplace* m_findAndReplace{nullptr};
+    FoldingManager* m_foldingManager{nullptr};
+    SnippetManager* m_snippetManager{nullptr};
+    CommentManager* m_commentManager{nullptr};
+    BracketMatcher* m_bracketMatcher{nullptr};
+    CaseConverter* m_caseConverter{nullptr};
+    EditorHistory* m_editorHistory{nullptr};
+    GoToDefinition* m_goToDefinition{nullptr};
+    InlineRename* m_inlineRename{nullptr};
+    LineOperations* m_lineOperations{nullptr};
+    MultiCursor* m_multiCursor{nullptr};
+    OutlineProvider* m_outlineProvider{nullptr};
+    SelectToBracket* m_selectToBracket{nullptr};
+    SmartSelection* m_smartSelection{nullptr};
+    WordHighlight* m_wordHighlight{nullptr};
+    WordOperations* m_wordOperations{nullptr};
 
     struct EditorDocument {
         QString path;

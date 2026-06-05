@@ -16,7 +16,7 @@
  * - Filter by severity
  */
 
-struct Diagnostic {
+struct DiagnosticItem {
     enum Severity { Error, Warning, Information, Hint };
     
     QString filePath;
@@ -39,23 +39,23 @@ public:
     static DiagnosticsService* instance();
     
     // Diagnostic management
-    void addDiagnostic(const Diagnostic& diagnostic);
-    void addDiagnostics(const QList<Diagnostic>& diagnostics);
+    void addDiagnostic(const DiagnosticItem& diagnostic);
+    void addDiagnostics(const QList<DiagnosticItem>& diagnostics);
     void clearDiagnostics();
     void clearDiagnostics(const QString& filePath);
-    void removeDiagnostic(const Diagnostic& diagnostic);
+    void removeDiagnostic(const DiagnosticItem& diagnostic);
     
     // Query
-    QList<Diagnostic> getDiagnostics() const;
-    QList<Diagnostic> getDiagnostics(const QString& filePath) const;
-    QList<Diagnostic> getDiagnostics(Diagnostic::Severity severity) const;
+    QList<DiagnosticItem> getDiagnostics() const;
+    QList<DiagnosticItem> getDiagnostics(const QString& filePath) const;
+    QList<DiagnosticItem> getDiagnostics(DiagnosticItem::Severity severity) const;
     int errorCount() const;
     int warningCount() const;
     
     // Navigation
-    Diagnostic getDiagnosticAtLine(int line) const;
-    Diagnostic getNextDiagnostic() const;
-    Diagnostic getPreviousDiagnostic() const;
+    DiagnosticItem getDiagnosticAtLine(int line) const;
+    DiagnosticItem getNextDiagnostic() const;
+    DiagnosticItem getPreviousDiagnostic() const;
 
 signals:
     void diagnosticsChanged();
@@ -69,5 +69,5 @@ private:
     
     Q_DISABLE_COPY_MOVE(DiagnosticsService)
     
-    QList<Diagnostic> m_diagnostics;
+    QList<DiagnosticItem> m_diagnostics;
 };

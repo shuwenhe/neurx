@@ -61,8 +61,14 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 40
             color: "#252526"
-            border.bottom.color: "#3e3e42"
-            border.bottom.width: 1
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 1
+                color: "#3e3e42"
+            }
 
             RowLayout {
                 anchors.fill: parent
@@ -77,8 +83,8 @@ Item {
                 }
 
                 Rectangle {
-                    width: 50
-                    height: 20
+                    implicitWidth: 50
+                    implicitHeight: 20
                     color: "#3c3c3c"
                     border.color: "#555555"
                     border.width: 1
@@ -141,8 +147,14 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 35
             color: "#1e1e1e"
-            border.bottom.color: "#3e3e42"
-            border.bottom.width: 1
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 1
+                color: "#3e3e42"
+            }
 
             RowLayout {
                 anchors.fill: parent
@@ -180,7 +192,7 @@ Item {
 
                 TextField {
                     placeholderText: "Search..."
-                    width: 150
+                    Layout.preferredWidth: 150
                     onTextChanged: {
                         root.searchText = text
                         updateFilteredProblems()
@@ -207,8 +219,14 @@ Item {
                 width: problemsList.width
                 height: 56
                 color: index % 2 === 0 ? "#1e1e1e" : "#252526"
-                border.bottom.color: "#3e3e42"
-                border.bottom.width: 1
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: "#3e3e42"
+                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -246,8 +264,7 @@ Item {
                     }
 
                     RowLayout {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 20
+                        Layout.fillWidth: true
                         spacing: 12
 
                         Text {
@@ -284,8 +301,14 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 25
             color: "#252526"
-            border.top.color: "#3e3e42"
-            border.top.width: 1
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 1
+                color: "#3e3e42"
+            }
 
             Text {
                 anchors.left: parent.left
@@ -296,5 +319,5 @@ Item {
                 font.pixelSize: 10
             }
         }
-    }}
-
+    }
+}

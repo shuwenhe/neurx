@@ -54,6 +54,52 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultExecutionEngine\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultIntegrationOrchestrator\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultGoalManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultLLMExtensions\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LanguageClient\\.cpp$")
+# Services excluded from neurx_core - will be compiled in neurx_ui
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "NotificationService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ProgressService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SearchService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TasksManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TerminalService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StorageService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConfigService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DiagnosticsService\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DebugSession\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "KeyBindingManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "OperationCache\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PerformanceOptimizer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ThemeManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitService\\.cpp$")
+# Feature providers excluded from neurx_core - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FeatureProviders\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "NavigationProviders\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditingProviders\\.cpp$")
+# Phase 3 & 4 editor features - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "QuickAccessManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FindAndReplace\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FoldingManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SnippetManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "BracketMatcher\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CaseConverter\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditorHistory\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToDefinition\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "InlineRename\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LineOperations\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "MultiCursor\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "OutlineProvider\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SelectToBracket\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SmartSelection\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WordHighlight\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WordOperations\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToError\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PeekView\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StickyScroll\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToError\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PeekView\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StickyScroll\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -80,9 +126,60 @@ set_target_properties(neurx_core PROPERTIES
 )
 
 add_library(neurx_ui STATIC
+    # Phase 2: Core Features
     src/bridge/AgentController.cpp
     src/bridge/SyntaxHighlighter.cpp
     src/bridge/EditorCommandBridge.cpp
+    src/features/FeatureProviders.cpp
+    src/features/NavigationProviders.cpp
+    src/features/EditingProviders.cpp
+
+    # Phase 3: Quick Access & Edit Features
+    src/workbench/QuickAccessManager.cpp
+    src/editor/FindAndReplace.cpp
+    src/editor/FoldingManager.cpp
+    src/editor/SnippetManager.cpp
+    src/editor/CommentManager.cpp
+
+    # Phase 3+: Advanced Editor Features
+    src/editor/BracketMatcher.cpp
+    src/editor/CaseConverter.cpp
+    src/editor/EditorHistory.cpp
+    src/editor/GoToDefinition.cpp
+    src/editor/InlineRename.cpp
+    src/editor/LineOperations.cpp
+    src/editor/MultiCursor.cpp
+    src/editor/OutlineProvider.cpp
+    src/editor/SelectToBracket.cpp
+    src/editor/SmartSelection.cpp
+    src/editor/WordHighlight.cpp
+    src/editor/WordOperations.cpp
+
+    # Phase 4: Advanced Navigation & UI
+    src/editor/GoToError.cpp
+    src/editor/PeekView.cpp
+    src/editor/StickyScroll.cpp
+
+    # Services: Required for AgentController integration
+    src/services/NotificationService.cpp
+    src/services/ProgressService.cpp
+    src/services/FileService.cpp
+    src/services/SearchService.cpp
+    src/services/WorkspaceService.cpp
+    src/services/TasksManager.cpp
+    src/services/TerminalService.cpp
+    src/services/StorageService.cpp
+    src/services/ConfigService.cpp
+    src/services/DiagnosticsService.cpp
+    src/services/DebugSession.cpp
+    src/services/KeyBindingManager.cpp
+    src/services/OperationCache.cpp
+    src/services/PerformanceOptimizer.cpp
+    src/services/ThemeManager.cpp
+    src/languages/GitService.cpp
+
+    # Language Server & Other Infrastructure
+    src/languages/LanguageClient.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
@@ -144,7 +241,7 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "ai.neurx.code"
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
     )
-    
+
     # Copy app icon into the bundle if it exists
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.icns")
         set_source_files_properties(
@@ -154,7 +251,7 @@ if(APPLE)
         )
         target_sources(neurx-codeApp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.icns")
     endif()
-    
+
     # Embed Qt plugins into the .app bundle
     qt_generate_deploy_app_script(
         TARGET neurx-codeApp

@@ -16,6 +16,7 @@ qt6_add_qml_module(NeurXCode
     URI "NeurXCode"
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
+    NO_PLUGIN
         QML_FILES
         Constants.qml
         Theme.qml

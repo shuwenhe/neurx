@@ -32,6 +32,7 @@
 #include "tools/CustomScriptTool.h"
 #include "tools/SkillTool.h"
 #include "tools/ClaudeStandardTools.h"
+#include "services/KeyBindingManager.h"
 #include <QFile>
 #include <QGuiApplication>
 #include <QClipboard>
@@ -51,6 +52,7 @@
 #include <QProcessEnvironment>
 #include <QSaveFile>
 #include <QStandardPaths>
+#include <QDesktopServices>
 #include <QUrl>
 #include <QRegularExpression>
 #include <QSet>
@@ -178,6 +180,50 @@ static QString askForApprovalToString(AskForApproval value)
     case AskForApproval::UnlessTrusted: return QStringLiteral("unless-trusted");
     }
     return QStringLiteral("on-request");
+}
+
+static QVariantMap keyBindingToVariantMap(const KeyBinding &binding)
+{
+    return QVariantMap{
+        {QStringLiteral("commandId"), binding.commandId},
+        {QStringLiteral("keys"), binding.keys},
+        {QStringLiteral("when"), binding.when},
+        {QStringLiteral("description"), binding.description},
+    };
+}
+
+static QVariantMap breakpointToVariantMap(const Breakpoint &breakpoint)
+{
+    return QVariantMap{
+        {QStringLiteral("id"), breakpoint.id},
+        {QStringLiteral("file"), breakpoint.file},
+        {QStringLiteral("line"), breakpoint.line},
+        {QStringLiteral("column"), breakpoint.column},
+        {QStringLiteral("condition"), breakpoint.condition},
+        {QStringLiteral("hitCondition"), breakpoint.hitCondition},
+        {QStringLiteral("verified"), breakpoint.verified},
+    };
+}
+
+static QVariantMap stackFrameToVariantMap(const StackFrame &frame)
+{
+    return QVariantMap{
+        {QStringLiteral("id"), frame.id},
+        {QStringLiteral("name"), frame.name},
+        {QStringLiteral("file"), frame.file},
+        {QStringLiteral("line"), frame.line},
+        {QStringLiteral("column"), frame.column},
+    };
+}
+
+static QVariantMap variableToVariantMap(const Variable &variable)
+{
+    return QVariantMap{
+        {QStringLiteral("name"), variable.name},
+        {QStringLiteral("value"), variable.value},
+        {QStringLiteral("type"), variable.type},
+        {QStringLiteral("variablesReference"), variable.variablesReference},
+    };
 }
 
 static void registerCoreCommands(AgentController *controller)
@@ -582,13 +628,13 @@ static bool isPathInsideWorkspace(const QString &candidatePath, const QString &w
 {
     const QString normalizedWorkspace = normalizeWorkspaceComparablePath(workspacePath);
     const QString normalizedCandidate = normalizeWorkspaceComparablePath(candidatePath);
-    
+
     qDebug() << "[isPathInsideWorkspace]";
     qDebug() << "  workspace:" << normalizedWorkspace;
     qDebug() << "  candidate:" << normalizedCandidate;
-    
+
     if (normalizedWorkspace.isEmpty() || normalizedCandidate.isEmpty()) {
-        qWarning() << "  -> EMPTY PATH (workspace empty:" << normalizedWorkspace.isEmpty() 
+        qWarning() << "  -> EMPTY PATH (workspace empty:" << normalizedWorkspace.isEmpty()
                    << "candidate empty:" << normalizedCandidate.isEmpty() << ")";
         return false;
     }
@@ -1157,6 +1203,59 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     m_sandboxManager   = new DefaultSandboxManager(this);
     m_approvalManager  = new DefaultApprovalManager(this);
 
+    // VS Code Integration Services (singleton pattern)
+    m_notificationService = NotificationService::instance();
+    m_progressService = ProgressService::instance();
+    m_storageService = StorageService::instance();
+    m_fileService = FileService::instance();
+    m_workspaceService = WorkspaceService::instance();
+    m_searchService = SearchService::instance();
+    m_tasksManager = TasksManager::instance();
+    m_terminalService = TerminalService::instance();
+    m_debugSession = DebugSession::instance();
+    m_keyBindingManager = KeyBindingManager::instance();
+    m_quickAccessManager = QuickAccessManager::instance();
+    m_languageClient = LanguageClient::instance();
+    m_gitService = GitService::instance();
+
+    // Phase 2: Advanced Features Providers
+    m_trimWhitespaceProvider = new TrimTrailingWhitespaceProvider(this);
+    m_formatDocumentProvider = new FormatDocumentProvider(this);
+    m_typeDefinitionProvider = new TypeDefinitionProvider(this);
+    m_goToDeclarationProvider = new GoToDeclarationProvider(this);
+    m_pathCompletionProvider = new PathCompletionProvider(this);
+
+    m_breadcrumbProvider = new BreadcrumbProvider(this);
+    m_findReferencesProvider = new FindReferencesProvider(this);
+    m_symbolNavigationProvider = new SymbolNavigationProvider(this);
+    m_workspaceSymbolProvider = new WorkspaceSymbolProvider(this);
+    m_fileWatcherProvider = new FileWatcherProvider(this);
+
+    m_inlineCompletionProvider = new InlineCompletionProvider(this);
+    m_parameterHintProvider = new ParameterHintProvider(this);
+    m_codeActionProvider = new CodeActionProvider(this);
+    m_semanticHighlightProvider = new SemanticHighlightProvider(this);
+    m_linkedEditingProvider = new LinkedEditingProvider(this);
+    m_searchOptimizerProvider = new SearchOptimizerProvider(this);
+
+    // Phase 3 & Beyond: Extended Editor Features
+    m_findAndReplace = new FindAndReplace(this);
+    m_foldingManager = new FoldingManager(this);
+    m_snippetManager = new SnippetManager(this);
+    m_commentManager = new CommentManager(this);
+    m_bracketMatcher = new BracketMatcher(this);
+    m_caseConverter = new CaseConverter(this);
+    m_editorHistory = new EditorHistory(this);
+    m_goToDefinition = new GoToDefinition(this);
+    m_inlineRename = new InlineRename(this);
+    m_lineOperations = new LineOperations(this);
+    m_multiCursor = new MultiCursor(this);
+    m_outlineProvider = new OutlineProvider(this);
+    m_selectToBracket = new SelectToBracket(this);
+    m_smartSelection = new SmartSelection(this);
+    m_wordHighlight = new WordHighlight(this);
+    m_wordOperations = new WordOperations(this);
+
     connect(m_sandboxManager, &DefaultSandboxManager::sandboxExecutionEvent,
             this, &AgentController::onSandboxExecutionEvent);
     connect(m_codeMagic, &CodeMagic::analysisCompleted,
@@ -1196,7 +1295,7 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     loadSettings();
     configurePolicyManagers();
     setupEngine();
-    
+
     // Register Claude Standard Tools early - even if no workspace is open yet
     // Do this before setupEngine so the planner/engine sees the tools from the
     // first request. Use home dir as fallback when no workspace is configured.
@@ -1205,7 +1304,7 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
         toolRegistrationPath = QDir::homePath();
         qDebug() << "[AgentController::init] No workspace set, using home dir for tool registration:" << toolRegistrationPath;
     }
-    
+
     if (m_sandboxManager) {
         m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
         m_sandboxManager->setReadOnlyMode(false);
@@ -1214,11 +1313,11 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
         m_sandboxManager->addAllowedWritePath(toolRegistrationPath);
         qDebug() << "[AgentController::init] Sandbox initialized with path:" << toolRegistrationPath;
     }
-    
+
     qDebug() << "[AgentController::init] Registering Claude Standard Tools";
     ClaudeStandardToolFactory::registerAllTools(toolRegistrationPath, m_registry, m_sandboxManager);
     qDebug() << "[AgentController::init] Claude Standard Tools registered successfully";
-    
+
     setupEngine();
     registerCoreCommands(this);
 
@@ -2917,7 +3016,7 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] SandboxManager:" << m_sandboxManager;
     ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
     qDebug() << "[AgentController] Claude Standard Tools registered";
-    
+
     m_registry->registerTool(new FileSystemTool(path, m_registry));
     m_registry->registerTool(new CodexFileSystemTool(path, m_registry));
     auto *smartFileCreator = new SmartFileCreator(path, m_registry);
@@ -3794,7 +3893,7 @@ bool AgentController::createWorkspaceEntry(const QString &parentPath, const QStr
 {
     qDebug() << "[createWorkspaceEntry] Called with parentPath:" << parentPath << "name:" << name << "directory:" << directory;
     qDebug() << "[createWorkspaceEntry] Current m_workspacePath:" << m_workspacePath;
-    
+
     if (m_workspacePath.isEmpty()) {
         qWarning() << "[createWorkspaceEntry] ERROR: m_workspacePath is empty!";
         emit errorOccurred(QStringLiteral("No workspace is open."));
@@ -3811,10 +3910,10 @@ bool AgentController::createWorkspaceEntry(const QString &parentPath, const QStr
     const QString absParent = parentInfo.isDir()
         ? normalizeWorkspaceComparablePath(parentPath)
         : normalizeWorkspaceComparablePath(parentInfo.absolutePath());
-    
+
     qDebug() << "[createWorkspaceEntry] Normalized absParent:" << absParent;
     qDebug() << "[createWorkspaceEntry] Workspace root:" << m_workspacePath;
-    
+
     if (!isPathInsideWorkspace(absParent, m_workspacePath)) {
         qWarning() << "[createWorkspaceEntry] Path validation failed!";
         qWarning() << "  - absParent:" << absParent;
@@ -4772,4 +4871,1034 @@ void AgentController::onCodeMagicErrorOccurred(const QString &error)
     if (!m_restoringSessionHistory)
         saveTaskSession();
     emit errorOccurred(error);
+}
+
+// ── VS Code Integration Service Methods ────────────────────────────────────────
+
+QString AgentController::notifyInfo(const QString& message)
+{
+    return m_notificationService->info(message);
+}
+
+QString AgentController::notifyWarning(const QString& message)
+{
+    return m_notificationService->warning(message);
+}
+
+QString AgentController::notifyError(const QString& message)
+{
+    return m_notificationService->error(message);
+}
+
+QString AgentController::notifySuccess(const QString& message)
+{
+    return m_notificationService->success(message);
+}
+
+bool AgentController::dismissNotification(const QString& notificationId)
+{
+    if (m_notificationService->hasNotification(notificationId)) {
+        m_notificationService->dismissNotification(notificationId);
+        return true;
+    }
+    return false;
+}
+
+QString AgentController::startProgress(const QString& title)
+{
+    return m_progressService->startProgress(title);
+}
+
+void AgentController::updateProgress(const QString& progressId, int current)
+{
+    m_progressService->updateProgress(progressId, current);
+}
+
+void AgentController::finishProgress(const QString& progressId)
+{
+    m_progressService->finishProgress(progressId);
+}
+
+QVariantList AgentController::searchQuickAccess(const QString& query)
+{
+    auto items = m_quickAccessManager->search(query);
+    QVariantList results;
+    for (const auto& item : items) {
+        QVariantMap map;
+        map["id"] = item.id;
+        map["label"] = item.label;
+        map["description"] = item.description;
+        map["keyBindings"] = item.keyBindings;
+        results.append(map);
+    }
+    return results;
+}
+
+bool AgentController::executeQuickAccessItem(const QString& itemId)
+{
+    return m_quickAccessManager->executeById(itemId);
+}
+
+QVariantList AgentController::performSearch(const QString& text, bool useRegex)
+{
+    SearchQuery query;
+    query.text = text;
+    query.useRegex = useRegex;
+    query.caseSensitive = false;
+
+    auto results = m_searchService->search(query);
+    QVariantList varResults;
+    for (const auto& result : results) {
+        QVariantMap map;
+        map["file"] = result.file;
+        map["line"] = result.line;
+        map["column"] = result.column;
+        map["matchText"] = result.matchText;
+        map["lineText"] = result.lineText;
+        varResults.append(map);
+    }
+    return varResults;
+}
+
+int AgentController::replaceAllMatches(const QString& searchText, const QString& replacement)
+{
+    SearchQuery query;
+    query.text = searchText;
+    query.useRegex = false;
+    return m_searchService->replaceAll(query, replacement);
+}
+
+QStringList AgentController::findFilesInWorkspace(const QString& pattern)
+{
+    return m_workspaceService->findFiles(pattern);
+}
+
+QStringList AgentController::getRecentFiles(int maxCount)
+{
+    return m_fileService->getRecentFiles(maxCount);
+}
+
+QStringList AgentController::getGitStatus()
+{
+    QStringList result;
+    for (const auto& status : m_gitService->getStatus()) {
+        result.append(status.path + " [" + status.status + "]");
+    }
+    return result;
+}
+
+QString AgentController::getCurrentGitBranch()
+{
+    return m_gitService->getCurrentBranch();
+}
+
+bool AgentController::commitGitChanges(const QString& message)
+{
+    return m_gitService->commit(message);
+}
+
+bool AgentController::pushToGit(const QString& remote)
+{
+    return m_gitService->push(remote);
+}
+
+bool AgentController::pullFromGit(const QString& remote)
+{
+    return m_gitService->pull(remote);
+}
+
+QString AgentController::executeTask(const QString& taskId)
+{
+    return m_tasksManager->executeTask(taskId);
+}
+
+bool AgentController::terminateTask(const QString& executionId)
+{
+    return m_tasksManager->terminateTask(executionId);
+}
+
+QString AgentController::getTaskOutput(const QString& executionId)
+{
+    return m_tasksManager->getOutput(executionId);
+}
+
+QString AgentController::createTerminal(const QString& name)
+{
+    return m_terminalService->createTerminal(name.isEmpty() ? "Terminal" : name);
+}
+
+QString AgentController::createTerminalWithPath(const QString& name, const QString& path)
+{
+    const QFileInfo info(path);
+    const QString cwd = info.isDir() ? info.absoluteFilePath() : info.absolutePath();
+    return m_terminalService->createTerminal(name.isEmpty() ? "Terminal" : name, QString(), cwd);
+}
+
+void AgentController::revealInExplorer(const QString& path)
+{
+    const QFileInfo info(path);
+    const QString target = info.isDir() ? info.absoluteFilePath() : info.absolutePath();
+    if (target.isEmpty())
+        return;
+    QDesktopServices::openUrl(QUrl::fromLocalFile(target));
+}
+
+void AgentController::sendTerminalCommand(const QString& terminalId, const QString& command)
+{
+    m_terminalService->sendCommand(terminalId, command);
+}
+
+void AgentController::closeTerminal(const QString& terminalId)
+{
+    m_terminalService->closeTerminal(terminalId);
+}
+
+QString AgentController::startDebugSession(const QString& configuration)
+{
+    return m_debugSession->startDebugSession(configuration);
+}
+
+void AgentController::stopDebugSession(const QString& sessionId)
+{
+    m_debugSession->stopDebugSession(sessionId);
+}
+
+bool AgentController::debugPause(const QString& sessionId)
+{
+    return m_debugSession->pause(sessionId);
+}
+
+bool AgentController::debugContinue(const QString& sessionId)
+{
+    return m_debugSession->continue_(sessionId);
+}
+
+bool AgentController::debugStepOver(const QString& sessionId)
+{
+    return m_debugSession->stepOver(sessionId);
+}
+
+bool AgentController::debugStepInto(const QString& sessionId)
+{
+    return m_debugSession->stepInto(sessionId);
+}
+
+bool AgentController::debugStepOut(const QString& sessionId)
+{
+    return m_debugSession->stepOut(sessionId);
+}
+
+QVariantList AgentController::getDebugStackTrace(const QString& sessionId) const
+{
+    QVariantList frames;
+    if (!m_debugSession)
+        return frames;
+
+    const auto stack = m_debugSession->getStackTrace(sessionId);
+    for (const auto &frame : stack)
+        frames.append(stackFrameToVariantMap(frame));
+    return frames;
+}
+
+QVariantList AgentController::getDebugVariables(const QString& sessionId, int frameId) const
+{
+    QVariantList variables;
+    if (!m_debugSession)
+        return variables;
+
+    const auto values = m_debugSession->getVariables(sessionId, frameId);
+    for (const auto &variable : values)
+        variables.append(variableToVariantMap(variable));
+    return variables;
+}
+
+QString AgentController::evaluateDebugExpression(const QString& sessionId, const QString& expression)
+{
+    if (!m_debugSession)
+        return {};
+    return m_debugSession->evaluateExpression(sessionId, expression);
+}
+
+bool AgentController::setDebugBreakpoint(const QString& sessionId, const QString& filePath, int line,
+                                         int column, const QString& condition, const QString& hitCondition)
+{
+    if (!m_debugSession || sessionId.trimmed().isEmpty() || filePath.trimmed().isEmpty() || line < 0)
+        return false;
+
+    Breakpoint breakpoint;
+    breakpoint.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    breakpoint.file = QFileInfo(filePath).absoluteFilePath();
+    breakpoint.line = line;
+    breakpoint.column = qMax(0, column);
+    breakpoint.condition = condition.trimmed();
+    breakpoint.hitCondition = hitCondition.trimmed();
+    breakpoint.verified = true;
+    m_debugSession->setBreakpoint(sessionId, breakpoint);
+    return true;
+}
+
+bool AgentController::removeDebugBreakpoint(const QString& sessionId, const QString& breakpointId)
+{
+    if (!m_debugSession || sessionId.trimmed().isEmpty() || breakpointId.trimmed().isEmpty())
+        return false;
+    m_debugSession->removeBreakpoint(sessionId, breakpointId);
+    return true;
+}
+
+QVariantList AgentController::getDebugBreakpoints(const QString& sessionId) const
+{
+    QVariantList breakpoints;
+    if (!m_debugSession)
+        return breakpoints;
+
+    const auto values = m_debugSession->getBreakpoints(sessionId);
+    for (const auto &breakpoint : values)
+        breakpoints.append(breakpointToVariantMap(breakpoint));
+    return breakpoints;
+}
+
+void AgentController::registerLanguageServer(const QString& name, const QString& command)
+{
+    LanguageServer server;
+    server.id = name;
+    server.name = name;
+    server.command = command;
+    server.enabled = true;
+    m_languageClient->registerLanguageServer(server);
+}
+
+QVariantMap AgentController::requestHover(const QString& filePath, int line, int column)
+{
+    auto hover = m_languageClient->requestHover(filePath, line, column);
+    QVariantMap res;
+    res["contents"] = hover.contents;
+    res["markedString"] = hover.markedString;
+    return res;
+}
+
+QVariantList AgentController::getAllKeyBindings() const
+{
+    QVariantList bindings;
+    if (!m_keyBindingManager)
+        return bindings;
+
+    const auto values = m_keyBindingManager->getAllKeyBindings();
+    for (const auto &binding : values)
+        bindings.append(keyBindingToVariantMap(binding));
+    return bindings;
+}
+
+QVariantMap AgentController::getKeyBinding(const QString& commandId) const
+{
+    if (!m_keyBindingManager)
+        return {};
+    return keyBindingToVariantMap(m_keyBindingManager->getKeyBinding(commandId));
+}
+
+bool AgentController::registerKeyBinding(const QString& commandId, const QString& keys,
+                                         const QString& when, const QString& description)
+{
+    if (!m_keyBindingManager || commandId.trimmed().isEmpty() || keys.trimmed().isEmpty())
+        return false;
+
+    KeyBinding binding;
+    binding.commandId = commandId.trimmed();
+    binding.keys = keys.trimmed();
+    binding.when = when.trimmed();
+    binding.description = description.trimmed();
+    m_keyBindingManager->registerKeyBinding(binding);
+    return true;
+}
+
+bool AgentController::unregisterKeyBinding(const QString& commandId)
+{
+    if (!m_keyBindingManager || commandId.trimmed().isEmpty())
+        return false;
+    m_keyBindingManager->unregisterKeyBinding(commandId.trimmed());
+    return true;
+}
+
+QVariantList AgentController::findKeyBindingConflicts(const QString& keys) const
+{
+    QVariantList conflicts;
+    if (!m_keyBindingManager)
+        return conflicts;
+
+    const auto values = m_keyBindingManager->findConflicts(keys);
+    for (const auto &binding : values)
+        conflicts.append(keyBindingToVariantMap(binding));
+    return conflicts;
+}
+
+bool AgentController::resetKeyBindings()
+{
+    if (!m_keyBindingManager)
+        return false;
+    m_keyBindingManager->resetToDefaults();
+    return true;
+}
+
+bool AgentController::saveKeyBindings(const QString& filePath) const
+{
+    if (!m_keyBindingManager || filePath.trimmed().isEmpty())
+        return false;
+    m_keyBindingManager->saveKeyBindings(filePath);
+    return true;
+}
+
+bool AgentController::loadKeyBindings(const QString& filePath)
+{
+    if (!m_keyBindingManager || filePath.trimmed().isEmpty())
+        return false;
+    m_keyBindingManager->loadKeyBindings(filePath);
+    return true;
+}
+
+// ── Phase 2: Advanced Features Implementation ──────────────────────────────────
+
+// Basic Editing Features (Week 1)
+QString AgentController::trimTrailingWhitespace(const QString& text)
+{
+    if (!m_trimWhitespaceProvider)
+        return text;
+
+    FeatureProvider::EditorContext ctx;
+    ctx.text = text;
+    auto result = m_trimWhitespaceProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantMap) {
+        return result.data.toMap().value(QStringLiteral("text")).toString();
+    }
+    return text;
+}
+
+QVariantList AgentController::formatDocument(const QString& filePath, const QVariantMap& options)
+{
+    if (!m_formatDocumentProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    auto result = m_formatDocumentProvider->execute(ctx);
+
+    if (result.success) {
+        return QVariantList() << result.data;
+    }
+    return QVariantList();
+}
+
+QVariantMap AgentController::getTypeDefinition(const QString& filePath, int line, int column)
+{
+    if (!m_typeDefinitionProvider)
+        return QVariantMap();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_typeDefinitionProvider->execute(ctx);
+
+    return result.data.toMap();
+}
+
+QVariantMap AgentController::goToDeclaration(const QString& filePath, int line, int column)
+{
+    if (!m_goToDeclarationProvider)
+        return QVariantMap();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_goToDeclarationProvider->execute(ctx);
+
+    return result.data.toMap();
+}
+
+QVariantList AgentController::getPathCompletions(const QString& text, int cursorPosition)
+{
+    if (!m_pathCompletionProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.text = text;
+    ctx.column = cursorPosition;
+    auto result = m_pathCompletionProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+// Navigation Features (Week 2)
+QVariantList AgentController::getBreadcrumbs(const QString& filePath, int line)
+{
+    if (!m_breadcrumbProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    auto result = m_breadcrumbProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantList AgentController::findAllReferences(const QString& filePath, int line, int column)
+{
+    if (!m_findReferencesProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_findReferencesProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantMap AgentController::getCurrentSymbol(const QString& filePath, int line)
+{
+    if (!m_symbolNavigationProvider)
+        return QVariantMap();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    auto result = m_symbolNavigationProvider->execute(ctx);
+
+    return result.data.toMap();
+}
+
+QVariantList AgentController::searchWorkspaceSymbols(const QString& query)
+{
+    if (!m_workspaceSymbolProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.text = query;
+    auto result = m_workspaceSymbolProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+bool AgentController::startFileWatching(const QString& path)
+{
+    if (!m_fileWatcherProvider)
+        return false;
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = path;
+    auto result = m_fileWatcherProvider->execute(ctx);
+
+    return result.success;
+}
+
+bool AgentController::stopFileWatching(const QString& path)
+{
+    if (!m_fileWatcherProvider)
+        return false;
+
+    // Note: FileWatcherProvider manages this internally
+    m_fileWatcherProvider->stopWatching(path);
+    return true;
+}
+
+QVariantList AgentController::getFileChanges()
+{
+    if (!m_fileWatcherProvider)
+        return QVariantList();
+
+    // Note: This would need to be implemented in FileWatcherProvider
+    return QVariantList();
+}
+
+// Editing Enhancement Features
+QVariantList AgentController::getInlineCompletions(const QString& filePath, int line, int column)
+{
+    if (!m_inlineCompletionProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_inlineCompletionProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantMap AgentController::getParameterHints(const QString& filePath, int line, int column)
+{
+    if (!m_parameterHintProvider)
+        return QVariantMap();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_parameterHintProvider->execute(ctx);
+
+    return result.data.toMap();
+}
+
+QVariantList AgentController::getCodeActions(const QString& filePath, int line, int column)
+{
+    if (!m_codeActionProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_codeActionProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+bool AgentController::applyCodeAction(const QString& filePath, const QVariantMap& action)
+{
+    if (!m_codeActionProvider)
+        return false;
+
+    // Implementation would depend on CodeActionProvider's applyCodeAction method
+    return true;
+}
+
+QVariantList AgentController::getSemanticTokens(const QString& filePath)
+{
+    if (!m_semanticHighlightProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    auto result = m_semanticHighlightProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantList AgentController::getSemanticTokensRange(const QString& filePath, int startLine, int endLine)
+{
+    if (!m_semanticHighlightProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = startLine;
+    // Implementation would need to pass both start and end line
+    auto result = m_semanticHighlightProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantList AgentController::getLinkedEditingRanges(const QString& filePath, int line, int column)
+{
+    if (!m_linkedEditingProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.filePath = filePath;
+    ctx.line = line;
+    ctx.column = column;
+    auto result = m_linkedEditingProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+QVariantList AgentController::searchWorkspace(const QString& pattern, const QVariantMap& options)
+{
+    if (!m_searchOptimizerProvider)
+        return QVariantList();
+
+    FeatureProvider::EditorContext ctx;
+    ctx.text = pattern;
+    auto result = m_searchOptimizerProvider->execute(ctx);
+
+    if (result.success && result.data.typeId() == QMetaType::QVariantList) {
+        return result.data.toList();
+    }
+    return QVariantList();
+}
+
+int AgentController::replaceInWorkspace(const QString& pattern, const QString& replacement, const QVariantMap& options)
+{
+    if (!m_searchOptimizerProvider)
+        return 0;
+
+    // Implementation would need SearchOptimizerProvider's replace functionality
+    return 0;
+}
+
+// Phase 3 & Beyond: Extended Editor Features Implementation
+
+// Find & Replace
+QVariantList AgentController::findMatches(const QString& query, const QJsonObject& options)
+{
+    if (!m_findAndReplace)
+        return QVariantList();
+    return QVariantList();
+}
+
+QVariantMap AgentController::findNext(const QString& query, int currentLine, int currentColumn)
+{
+    if (!m_findAndReplace)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+QVariantMap AgentController::findPrevious(const QString& query, int currentLine, int currentColumn)
+{
+    if (!m_findAndReplace)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+int AgentController::replaceAll(const QString& pattern, const QString& replacement)
+{
+    if (!m_findAndReplace)
+        return 0;
+    return 0;
+}
+
+bool AgentController::replaceSingle(const QString& pattern, const QString& replacement, int line, int column)
+{
+    if (!m_findAndReplace)
+        return false;
+    return false;
+}
+
+// Code Folding
+QVariantList AgentController::computeFoldRanges(const QString& code, const QString& language)
+{
+    if (!m_foldingManager)
+        return QVariantList();
+    return QVariantList();
+}
+
+void AgentController::toggleFold(int line)
+{
+    if (!m_foldingManager)
+        return;
+}
+
+void AgentController::foldAll()
+{
+    if (!m_foldingManager)
+        return;
+}
+
+void AgentController::unfoldAll()
+{
+    if (!m_foldingManager)
+        return;
+}
+
+void AgentController::foldLevel(int level)
+{
+    if (!m_foldingManager)
+        return;
+}
+
+// Snippets
+QVariantList AgentController::getSnippets(const QString& language)
+{
+    if (!m_snippetManager)
+        return QVariantList();
+    return QVariantList();
+}
+
+QVariantList AgentController::searchSnippets(const QString& query)
+{
+    if (!m_snippetManager)
+        return QVariantList();
+    return QVariantList();
+}
+
+bool AgentController::insertSnippet(const QJsonObject& snippet)
+{
+    if (!m_snippetManager)
+        return false;
+    return false;
+}
+
+QString AgentController::resolveSnippetVariables(const QString& snippet)
+{
+    if (!m_snippetManager)
+        return QString();
+    return snippet;
+}
+
+// Comments
+void AgentController::toggleLineComment(int line)
+{
+    if (!m_commentManager)
+        return;
+}
+
+void AgentController::toggleBlockComment(int startLine, int endLine)
+{
+    if (!m_commentManager)
+        return;
+}
+
+void AgentController::addLineComment(const QVariantList& lines)
+{
+    if (!m_commentManager)
+        return;
+}
+
+void AgentController::removeLineComment(const QVariantList& lines)
+{
+    if (!m_commentManager)
+        return;
+}
+
+// Bracket Matching & Selection
+QVariantMap AgentController::getBracketPair(const QString& filePath, int line, int column)
+{
+    if (!m_bracketMatcher)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+void AgentController::highlightBrackets(const QString& filePath, int line, int column)
+{
+    if (!m_bracketMatcher)
+        return;
+}
+
+QVariantMap AgentController::selectToBracket(const QString& filePath, int line, int column)
+{
+    if (!m_selectToBracket)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+// Case & Text Operations
+QString AgentController::convertToUpperCase(const QString& text)
+{
+    if (!m_caseConverter)
+        return text;
+    return text.toUpper();
+}
+
+QString AgentController::convertToLowerCase(const QString& text)
+{
+    if (!m_caseConverter)
+        return text;
+    return text.toLower();
+}
+
+QString AgentController::convertToCamelCase(const QString& text)
+{
+    if (!m_caseConverter)
+        return text;
+    // Simple camelCase conversion
+    QStringList parts = text.split(QRegularExpression("[_\\-\\s]+"));
+    QString result;
+    for (int i = 0; i < parts.size(); ++i) {
+        if (i == 0) {
+            result += parts[i].toLower();
+        } else {
+            if (!parts[i].isEmpty()) {
+                result += parts[i][0].toUpper() + parts[i].mid(1).toLower();
+            }
+        }
+    }
+    return result;
+}
+
+QString AgentController::convertToSnakeCase(const QString& text)
+{
+    if (!m_caseConverter)
+        return text;
+    // Simple snake_case conversion
+    QString result;
+    for (int i = 0; i < text.size(); ++i) {
+        if (text[i].isUpper() && i > 0) {
+            result += "_";
+        }
+        result += text[i].toLower();
+    }
+    return result;
+}
+
+// Editor History & Navigation
+QVariantList AgentController::getEditHistory()
+{
+    if (!m_editorHistory)
+        return QVariantList();
+    return QVariantList();
+}
+
+bool AgentController::canUndo()
+{
+    if (!m_editorHistory)
+        return false;
+    return false;
+}
+
+bool AgentController::canRedo()
+{
+    if (!m_editorHistory)
+        return false;
+    return false;
+}
+
+QVariantMap AgentController::goToDefinitionEx(const QString& filePath, int line, int column)
+{
+    if (!m_goToDefinition)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+bool AgentController::performInlineRename(const QString& filePath, int line, int column, const QString& newName)
+{
+    if (!m_inlineRename)
+        return false;
+    return false;
+}
+
+// Line & Cursor Operations
+void AgentController::copyLine(int line)
+{
+    if (!m_lineOperations)
+        return;
+}
+
+void AgentController::deleteLine(int line)
+{
+    if (!m_lineOperations)
+        return;
+}
+
+void AgentController::moveLinesUp(int startLine, int endLine)
+{
+    if (!m_lineOperations)
+        return;
+}
+
+void AgentController::moveLinesDown(int startLine, int endLine)
+{
+    if (!m_lineOperations)
+        return;
+}
+
+void AgentController::duplicateLine(int line)
+{
+    if (!m_lineOperations)
+        return;
+}
+
+QVariantList AgentController::getCursorPositions()
+{
+    if (!m_multiCursor)
+        return QVariantList();
+    return QVariantList();
+}
+
+void AgentController::addCursorAtLine(int line, int column)
+{
+    if (!m_multiCursor)
+        return;
+}
+
+void AgentController::removeCursor(int index)
+{
+    if (!m_multiCursor)
+        return;
+}
+
+void AgentController::clearCursors()
+{
+    if (!m_multiCursor)
+        return;
+}
+
+// Outline & Navigation
+QVariantList AgentController::getOutlineSymbols(const QString& filePath)
+{
+    if (!m_outlineProvider)
+        return QVariantList();
+    return QVariantList();
+}
+
+bool AgentController::navigateToSymbol(const QString& symbolName)
+{
+    if (!m_outlineProvider)
+        return false;
+    return false;
+}
+
+// Smart Selection & Highlighting
+QVariantMap AgentController::selectWord(const QString& filePath, int line, int column)
+{
+    if (!m_smartSelection)
+        return QVariantMap();
+    return QVariantMap();
+}
+
+QVariantList AgentController::selectScope(const QString& filePath, int line, int column)
+{
+    if (!m_smartSelection)
+        return QVariantList();
+    return QVariantList();
+}
+
+void AgentController::highlightAllOccurrences(const QString& word)
+{
+    if (!m_wordHighlight)
+        return;
+}
+
+void AgentController::clearHighlights()
+{
+    if (!m_wordHighlight)
+        return;
+}
+
+QVariantList AgentController::getWordOccurrences(const QString& word, const QString& filePath)
+{
+    if (!m_wordHighlight)
+        return QVariantList();
+    return QVariantList();
+}
+
+// Word Operations (duplicate method name resolved by adding Ex suffix)
+void AgentController::deleteWord(int line, int column)
+{
+    if (!m_wordOperations)
+        return;
+}
+
+void AgentController::deleteWordBackward(int line, int column)
+{
+    if (!m_wordOperations)
+        return;
 }

@@ -19,66 +19,28 @@ Item {
         searching = true
         results = []
 
-        // Use the Grep tool
-        const args = {
-            "pattern": searchText,
-            "path": searchPath || ".",
-            "case_sensitive": false,
-            "max_results": 100
-        }
+        // Use the C++ SearchService instead of Grep tool for better performance and VS Code logic
+        const searchResults = agent.performSearch(searchText, false) // 2nd arg is useRegex
 
-        // Tool execution is usually synchronous in this bridge if it's a local tool
-        const toolResult = agent.executeToolByName("Grep", args)
-
-        if (toolResult && toolResult.result) {
-            parseResults(toolResult.result)
-        }
-        searching = false
-    }
-
-    function parseResults(rawText) {
-        // Grep tool output format: "file:line: content"
-        const lines = rawText.split('\n')
         const newResults = []
-        lines.forEach(line => {
-            const parts = line.match(/^(.+?):(\d+): (.*)$/)
-            if (parts) {
-                newResults.push({
-                    file: parts[1],
-                    line: parts[2],
-                    content: parts[3].trim(),
-                    fullPath: agent.workspacePath + "/" + parts[1]
-                })
-            }
+        searchResults.forEach(res => {
+            newResults.push({
+                file: res.file,
+                line: res.line + 1, // SearchService uses 0-based lines
+                content: res.lineText.trim(),
+                fullPath: res.file.startsWith("/") ? res.file : agent.workspacePath + "/" + res.file
+            })
         })
         results = newResults
+        searching = false
     }
 
     function performReplaceAll() {
         if (!searchText || !replaceText) return
         searching = true
 
-        // Group results by file
-        const filesToProcess = {}
-        results.forEach(res => {
-            filesToProcess[res.file] = true
-        })
-
-        const fileList = Object.keys(filesToProcess)
-        let successCount = 0
-
-        fileList.forEach(relPath => {
-            const fullPath = agent.workspacePath + "/" + relPath
-            const readRes = agent.executeToolByName("Read", { "path": relPath })
-            if (readRes && readRes.result) {
-                const content = readRes.result
-                const newContent = content.split(searchText).join(replaceText) // Simple string replace
-                if (content !== newContent) {
-                    const writeRes = agent.executeToolByName("Write", { "path": relPath, "content": newContent })
-                    if (writeRes) successCount++
-                }
-            }
-        })
+        const count = agent.replaceAllMatches(searchText, replaceText)
+        agent.notifyInfo("Replaced " + count + " occurrences.")
 
         searching = false
         performSearch() // Refresh results

@@ -3,7 +3,7 @@
 
 DiagnosticsService* g_diagnosticsService = nullptr;
 
-QVariantMap Diagnostic::toMap() const
+QVariantMap DiagnosticItem::toMap() const
 {
     return QVariantMap{
         {"filePath", filePath},
@@ -30,14 +30,14 @@ DiagnosticsService::DiagnosticsService()
 {
 }
 
-void DiagnosticsService::addDiagnostic(const Diagnostic& diagnostic)
+void DiagnosticsService::addDiagnostic(const DiagnosticItem& diagnostic)
 {
     m_diagnostics.append(diagnostic);
     emit diagnosticsAdded(1);
     emit diagnosticsChanged();
 }
 
-void DiagnosticsService::addDiagnostics(const QList<Diagnostic>& diagnostics)
+void DiagnosticsService::addDiagnostics(const QList<DiagnosticItem>& diagnostics)
 {
     m_diagnostics.append(diagnostics);
     emit diagnosticsAdded(diagnostics.size());
@@ -53,26 +53,26 @@ void DiagnosticsService::clearDiagnostics()
 
 void DiagnosticsService::clearDiagnostics(const QString& filePath)
 {
-    m_diagnostics.removeIf([&](const Diagnostic& d) { return d.filePath == filePath; });
+    m_diagnostics.removeIf([&](const DiagnosticItem& d) { return d.filePath == filePath; });
     emit diagnosticsChanged();
 }
 
-void DiagnosticsService::removeDiagnostic(const Diagnostic& diagnostic)
+void DiagnosticsService::removeDiagnostic(const DiagnosticItem& diagnostic)
 {
-    m_diagnostics.removeIf([&](const Diagnostic& d) {
+    m_diagnostics.removeIf([&](const DiagnosticItem& d) {
         return d.filePath == diagnostic.filePath && d.line == diagnostic.line;
     });
     emit diagnosticsChanged();
 }
 
-QList<Diagnostic> DiagnosticsService::getDiagnostics() const
+QList<DiagnosticItem> DiagnosticsService::getDiagnostics() const
 {
     return m_diagnostics;
 }
 
-QList<Diagnostic> DiagnosticsService::getDiagnostics(const QString& filePath) const
+QList<DiagnosticItem> DiagnosticsService::getDiagnostics(const QString& filePath) const
 {
-    QList<Diagnostic> result;
+    QList<DiagnosticItem> result;
     for (const auto& diagnostic : m_diagnostics) {
         if (diagnostic.filePath == filePath) {
             result.append(diagnostic);
@@ -81,9 +81,9 @@ QList<Diagnostic> DiagnosticsService::getDiagnostics(const QString& filePath) co
     return result;
 }
 
-QList<Diagnostic> DiagnosticsService::getDiagnostics(Diagnostic::Severity severity) const
+QList<DiagnosticItem> DiagnosticsService::getDiagnostics(DiagnosticItem::Severity severity) const
 {
-    QList<Diagnostic> result;
+    QList<DiagnosticItem> result;
     for (const auto& diagnostic : m_diagnostics) {
         if (diagnostic.severity == severity) {
             result.append(diagnostic);
@@ -96,7 +96,7 @@ int DiagnosticsService::errorCount() const
 {
     int count = 0;
     for (const auto& diagnostic : m_diagnostics) {
-        if (diagnostic.severity == Diagnostic::Error) {
+        if (diagnostic.severity == DiagnosticItem::Error) {
             count++;
         }
     }
@@ -107,14 +107,14 @@ int DiagnosticsService::warningCount() const
 {
     int count = 0;
     for (const auto& diagnostic : m_diagnostics) {
-        if (diagnostic.severity == Diagnostic::Warning) {
+        if (diagnostic.severity == DiagnosticItem::Warning) {
             count++;
         }
     }
     return count;
 }
 
-Diagnostic DiagnosticsService::getDiagnosticAtLine(int line) const
+DiagnosticItem DiagnosticsService::getDiagnosticAtLine(int line) const
 {
     for (const auto& diagnostic : m_diagnostics) {
         if (diagnostic.line == line) {
@@ -124,7 +124,7 @@ Diagnostic DiagnosticsService::getDiagnosticAtLine(int line) const
     return {};
 }
 
-Diagnostic DiagnosticsService::getNextDiagnostic() const
+DiagnosticItem DiagnosticsService::getNextDiagnostic() const
 {
     if (!m_diagnostics.isEmpty()) {
         return m_diagnostics.first();
@@ -132,7 +132,7 @@ Diagnostic DiagnosticsService::getNextDiagnostic() const
     return {};
 }
 
-Diagnostic DiagnosticsService::getPreviousDiagnostic() const
+DiagnosticItem DiagnosticsService::getPreviousDiagnostic() const
 {
     if (!m_diagnostics.isEmpty()) {
         return m_diagnostics.last();
