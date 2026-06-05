@@ -1210,8 +1210,8 @@ Item {
                                         thumbColor: "#3a3a3a"
                                         hoverThumbColor: "#5f5f5f"
                                         pressedThumbColor: "#8f8f8f"
+                                        policy: ScrollBar.AsNeeded
                                     }
-                                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                                     TextArea {
                                         id: editorArea

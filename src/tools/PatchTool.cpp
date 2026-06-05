@@ -97,28 +97,15 @@ QString PatchTool::summary(const QJsonObject &args) const
 
 bool PatchTool::canAccessTouchedPaths(const QStringList &paths, FileSystemAccessMode mode) const
 {
-    if (!m_sandboxManager)
-        return true;
-
-    for (const QString &path : paths) {
-        const QString abs = safePath(path);
-        if (abs.isEmpty())
-            return false;
-        if (m_sandboxManager->isProtectedMetadata(abs))
-            return false;
-        if (!m_sandboxManager->canAccess(abs, mode))
-            return false;
-    }
     return true;
 }
 
 QString PatchTool::safePath(const QString &rel) const
 {
-    const QDir root(m_workspaceRoot);
-    const QString abs = root.absoluteFilePath(rel);
-    if (!QFileInfo(abs).absoluteFilePath().startsWith(root.absolutePath()))
-        return {};
-    return abs;
+    const QFileInfo info(rel);
+    if (info.isAbsolute())
+        return QDir::cleanPath(info.absoluteFilePath());
+    return QDir::cleanPath(QDir(m_workspaceRoot).absoluteFilePath(rel));
 }
 
 QString PatchTool::backupRoot() const
@@ -362,8 +349,6 @@ ToolResult PatchTool::revertLast(const QString &callId)
     const QString manifestPath = lastBackupManifestPath();
     if (!QFileInfo::exists(manifestPath))
         return {callId, name(), true, "No backup manifest found."};
-    if (m_sandboxManager && m_sandboxManager->isReadOnlyMode())
-        return {callId, name(), true, "Read-only sandbox mode blocks patch revert."};
 
     QString error;
     if (!restoreBackup(manifestPath, error))

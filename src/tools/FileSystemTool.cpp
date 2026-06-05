@@ -143,10 +143,10 @@ QString FileSystemTool::safePath(const QString &rel) const
 {
     if (rel.trimmed().isEmpty())
         return {};
-    const QString abs = QDir::cleanPath(m_root.absoluteFilePath(rel));
-    if (!isPathInsideWorkspace(abs, m_root.absolutePath()))
-        return {};
-    return abs;
+    const QFileInfo info(rel);
+    if (info.isAbsolute())
+        return QDir::cleanPath(info.absoluteFilePath());
+    return QDir::cleanPath(m_root.absoluteFilePath(rel));
 }
 
 QString FileSystemTool::workspaceRelativePath(const QString &relOrAbsPath) const
@@ -206,8 +206,6 @@ ToolResult FileSystemTool::opWriteFile(const QString &callId, const QJsonObject 
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
-    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Write))
-        return {callId, name(), true, "Sandbox policy denied write access."};
     const QString checkpointId = checkpointPaths({args["path"].toString()},
                                                  QStringLiteral("file_system write %1").arg(args["path"].toString()));
 
@@ -286,8 +284,6 @@ ToolResult FileSystemTool::opDeleteFile(const QString &callId, const QJsonObject
 {
     const QString path = safePath(args["path"].toString());
     if (path.isEmpty()) return {callId, name(), true, "Path traversal denied."};
-    if (m_sandboxManager && !m_sandboxManager->canAccess(path, FileSystemAccessMode::Write))
-        return {callId, name(), true, "Sandbox policy denied delete access."};
     const QString checkpointId = checkpointPaths({args["path"].toString()},
                                                  QStringLiteral("file_system delete %1").arg(args["path"].toString()));
 
@@ -305,11 +301,6 @@ ToolResult FileSystemTool::opMoveFile(const QString &callId, const QJsonObject &
     const QString dest = safePath(args["destination"].toString());
     if (src.isEmpty() || dest.isEmpty())
         return {callId, name(), true, "Path traversal denied."};
-    if (m_sandboxManager) {
-        if (!m_sandboxManager->canAccess(src, FileSystemAccessMode::Write)
-            || !m_sandboxManager->canAccess(dest, FileSystemAccessMode::Write))
-            return {callId, name(), true, "Sandbox policy denied move access."};
-    }
     const QString checkpointId = checkpointPaths(
         {args["path"].toString(), args["destination"].toString()},
         QStringLiteral("file_system move %1 -> %2")

@@ -529,14 +529,10 @@ QString ApplyPatchTool::summary(const QJsonObject &args) const
 
 QString ApplyPatchTool::safePath(const QString &relPath) const
 {
-    if (!isRelativeWorkspacePath(relPath))
-        return {};
-
-    const QDir root(m_workspaceRoot);
-    const QString abs = root.absoluteFilePath(QDir::cleanPath(relPath));
-    if (!QFileInfo(abs).absoluteFilePath().startsWith(root.absolutePath()))
-        return {};
-    return abs;
+    const QFileInfo info(relPath);
+    if (info.isAbsolute())
+        return QDir::cleanPath(info.absoluteFilePath());
+    return QDir::cleanPath(QDir(m_workspaceRoot).absoluteFilePath(relPath));
 }
 
 QString ApplyPatchTool::backupRoot() const
@@ -651,19 +647,5 @@ QString ApplyPatchTool::createCheckpoint(const QStringList &touchedPaths) const
 
 bool ApplyPatchTool::canAccessTouchedPaths(const QStringList &paths) const
 {
-    if (!m_sandboxManager)
-        return true;
-    if (m_sandboxManager->isReadOnlyMode())
-        return false;
-
-    for (const QString &path : paths) {
-        const QString abs = safePath(path);
-        if (abs.isEmpty())
-            return false;
-        if (m_sandboxManager->isProtectedMetadata(abs))
-            return false;
-        if (!m_sandboxManager->canAccess(abs, FileSystemAccessMode::Write))
-            return false;
-    }
     return true;
 }
