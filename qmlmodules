@@ -19,6 +19,6 @@ if(NOT TARGET NeurXCode)
 endif()
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
-    contentplugin
-    NeurXCodeplugin
+    content
+    NeurXCode
 )

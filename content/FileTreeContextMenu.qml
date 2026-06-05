@@ -17,7 +17,7 @@ Menu {
     signal newFile()
     signal newFolder()
     signal rename()
-    signal delete()
+    signal deleteItem()
     signal copyPath()
     signal copyRelativePath()
     signal cut()
@@ -73,7 +73,7 @@ Menu {
 
     MenuItem {
         text: "Delete"
-        onTriggered: contextMenu.delete()
+        onTriggered: contextMenu.deleteItem()
     }
 
     MenuSeparator { }

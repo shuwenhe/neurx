@@ -6,24 +6,43 @@ qt6_add_qml_module(content
     URI "content"
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
+    NO_PLUGIN
     QML_FILES
         App.qml
-        ChatPanel.qml
+        ActivityBarButton.qml
         ActivityPanel.qml
-        SessionPanel.qml
-        CodeMagicPanel.qml
-        ToolRegistryPanel.qml
-        LocalToolsPanel.qml
+        BreadcrumbPopup.qml
+        ChatPanel.qml
         CheckpointRestoreDialog.qml
+        CodeMagicPanel.qml
+        CommandPalette.qml
+        CustomScrollBar.qml
+        DiffView.qml
         EditorPanel.qml
-        MessageBubble.qml
-        TaskPlanPanel.qml
-        ToolCallCard.qml
-        FileTreePanel.qml
-        FileTreeItem.qml
-        ToolApprovalDialog.qml
-        SettingsPanel.qml
         ErrorBanner.qml
+        FileTreeContextMenu.qml
+        FileTreeItem.qml
+        FileTreePanel.qml
+        GitHistoryPanel.qml
+        GoToLinePopup.qml
+        GoToSymbolPopup.qml
+        GoToWorkspaceSymbolPopup.qml
+        LocalToolsPanel.qml
+        MarkdownPreview.qml
+        MessageBubble.qml
+        OutlinePanel.qml
+        ProblemsPanel.qml
+        SearchPanel.qml
+        SessionPanel.qml
+        SettingsPanel.qml
+        SourceControlPanel.qml
+        StatusBar.qml
+        TaskPlanPanel.qml
+        TerminalPanel.qml
+        ToolApprovalDialog.qml
+        ToolCallCard.qml
+        ToolRegistryPanel.qml
+        Screen01.ui.qml
     RESOURCES
         fonts/fonts.txt
 )

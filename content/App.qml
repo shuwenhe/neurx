@@ -53,17 +53,17 @@ ApplicationWindow {
     // ── Zoom ──────────────────────────────────────────────────────────────
     property real zoomFactor: 1.0
 
-    Shortcut { sequence: "Ctrl+=";        onActivated: zoomFactor = Math.min(zoomFactor + 0.1, 3.0) }
-    Shortcut { sequence: "Ctrl++";        onActivated: zoomFactor = Math.min(zoomFactor + 0.1, 3.0) }
-    Shortcut { sequence: "Ctrl+-";        onActivated: zoomFactor = Math.max(zoomFactor - 0.1, 0.4) }
-    Shortcut { sequence: "Ctrl+0";        onActivated: zoomFactor = 1.0 }
+    Shortcut { sequence: "Ctrl+=";        onActivated: root.zoomFactor = Math.min(root.zoomFactor + 0.1, 3.0) }
+    Shortcut { sequence: "Ctrl++";        onActivated: root.zoomFactor = Math.min(root.zoomFactor + 0.1, 3.0) }
+    Shortcut { sequence: "Ctrl+-";        onActivated: root.zoomFactor = Math.max(root.zoomFactor - 0.1, 0.4) }
+    Shortcut { sequence: "Ctrl+0";        onActivated: root.zoomFactor = 1.0 }
 
     Shortcut {
         sequence: "F2"
         enabled: root.shortcutsEnabled
         onActivated: {
-            if (agentCtx.currentFilePath)
-                fileTree.openRenameDialog(agentCtx.currentFilePath)
+            if (root.agentCtx.currentFilePath)
+                fileTree.openRenameDialog(root.agentCtx.currentFilePath)
         }
     }
 
@@ -71,8 +71,8 @@ ApplicationWindow {
         sequence: "Del"
         enabled: root.shortcutsEnabled
         onActivated: {
-            if (agentCtx.currentFilePath)
-                fileTree.openDeleteDialog(agentCtx.currentFilePath)
+            if (root.agentCtx.currentFilePath)
+                fileTree.openDeleteDialog(root.agentCtx.currentFilePath)
         }
     }
 
@@ -80,9 +80,9 @@ ApplicationWindow {
         sequence: "Ctrl+N"
         enabled: root.shortcutsEnabled
         onActivated: {
-            const dirPath = agentCtx.currentFilePath
-                          ? fileTree.currentDirForPath(agentCtx.currentFilePath)
-                          : (agentCtx.workspacePath || "")
+            const dirPath = root.agentCtx.currentFilePath
+                          ? fileTree.currentDirForPath(root.agentCtx.currentFilePath)
+                          : (root.agentCtx.workspacePath || "")
             fileTree.openCreateDialog(dirPath, false)
         }
     }
@@ -91,9 +91,9 @@ ApplicationWindow {
         sequence: "Ctrl+Shift+N"
         enabled: root.shortcutsEnabled
         onActivated: {
-            const dirPath = agentCtx.currentFilePath
-                          ? fileTree.currentDirForPath(agentCtx.currentFilePath)
-                          : (agentCtx.workspacePath || "")
+            const dirPath = root.agentCtx.currentFilePath
+                          ? fileTree.currentDirForPath(root.agentCtx.currentFilePath)
+                          : (root.agentCtx.workspacePath || "")
             fileTree.openCreateDialog(dirPath, true)
         }
     }
@@ -149,10 +149,10 @@ ApplicationWindow {
                             }
                             ActivityBarButton {
                                 icon: "📂"
-                                active: sidebarVisible
+                                active: root.sidebarVisible
                                 onClicked: {
-                                    sidebarVisible = !sidebarVisible
-                                    appSettings.sidebarVisible = sidebarVisible
+                                    root.sidebarVisible = !root.sidebarVisible
+                                    appSettings.sidebarVisible = root.sidebarVisible
                                 }
                                 toolTip: "Explorer"
                             }
@@ -162,8 +162,8 @@ ApplicationWindow {
                                 onClicked: {
                                     agentTabs.currentIndex = 1
                                     appSettings.lastAgentTabIndex = 1
-                                    if (!sidebarVisible) {
-                                        sidebarVisible = true
+                                    if (!root.sidebarVisible) {
+                                        root.sidebarVisible = true
                                         appSettings.sidebarVisible = true
                                     }
                                 }
@@ -175,8 +175,8 @@ ApplicationWindow {
                                 onClicked: {
                                     agentTabs.currentIndex = 2
                                     appSettings.lastAgentTabIndex = 2
-                                    if (!sidebarVisible) {
-                                        sidebarVisible = true
+                                    if (!root.sidebarVisible) {
+                                        root.sidebarVisible = true
                                         appSettings.sidebarVisible = true
                                     }
                                 }
@@ -188,8 +188,8 @@ ApplicationWindow {
                                 onClicked: {
                                     agentTabs.currentIndex = 3
                                     appSettings.lastAgentTabIndex = 3
-                                    if (!sidebarVisible) {
-                                        sidebarVisible = true
+                                    if (!root.sidebarVisible) {
+                                        root.sidebarVisible = true
                                         appSettings.sidebarVisible = true
                                     }
                                 }
@@ -201,8 +201,8 @@ ApplicationWindow {
                                 onClicked: {
                                     agentTabs.currentIndex = 8
                                     appSettings.lastAgentTabIndex = 8
-                                    if (!sidebarVisible) {
-                                        sidebarVisible = true
+                                    if (!root.sidebarVisible) {
+                                        root.sidebarVisible = true
                                         appSettings.sidebarVisible = true
                                     }
                                 }
@@ -211,7 +211,7 @@ ApplicationWindow {
                             ActivityBarButton {
                                 icon: "⚠"
                                 active: agentTabs.currentIndex === 7
-                                onClicked: { agentTabs.currentIndex = 7; if (!sidebarVisible) sidebarVisible = true; }
+                                onClicked: { agentTabs.currentIndex = 7; if (!root.sidebarVisible) root.sidebarVisible = true; }
                                 toolTip: "Problems"
                             }
 
@@ -228,13 +228,13 @@ ApplicationWindow {
                     // Left: file tree + workspace controls
                     FileTreePanel {
                         id: fileTree
-                        Layout.preferredWidth: sidebarVisible ? root.explorerWidth : 0
-                        Layout.minimumWidth: sidebarVisible ? root.minExplorerWidth : 0
-                        Layout.maximumWidth: sidebarVisible ? root.explorerWidth : 0
+                        Layout.preferredWidth: root.sidebarVisible ? root.explorerWidth : 0
+                        Layout.minimumWidth: root.sidebarVisible ? root.minExplorerWidth : 0
+                        Layout.maximumWidth: root.sidebarVisible ? root.explorerWidth : 0
                         Layout.fillHeight: true
-                        agent: agentCtx
-                        visible: sidebarVisible
-                        onFileClicked: path => agentCtx.openEditorFile(path)
+                        agent: root.agentCtx
+                        visible: root.sidebarVisible
+                        onFileClicked: path => root.agentCtx.openEditorFile(path)
                         onFindInFolderRequested: path => {
                             agentTabs.currentIndex = 1
                             searchPanel.searchPath = path
@@ -244,10 +244,10 @@ ApplicationWindow {
 
                     // Divider
                     Rectangle {
-                        width: sidebarVisible ? root.splitterWidth : 0
+                        width: root.sidebarVisible ? root.splitterWidth : 0
                         Layout.fillHeight: true
                         color: hovered ? Theme.accentHover : Theme.border
-                        visible: sidebarVisible
+                        visible: root.sidebarVisible
 
                         property bool hovered: false
 
@@ -539,7 +539,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    model: quickOpenResultsModel
+                    model: quickOpen.quickOpenResultsModel
                     highlight: Rectangle { color: Theme.accent; opacity: 0.1 }
                     highlightFollowsCurrentItem: true
 
@@ -929,8 +929,11 @@ ApplicationWindow {
         edge: Qt.RightEdge
 
         SettingsPanel {
+            id: settingsPanel
             anchors.fill: parent
             agent: agentCtx
+            appZoomFactor: root.zoomFactor
+            onAppZoomFactorChanged: root.zoomFactor = settingsPanel.appZoomFactor
         }
     }
 
@@ -1018,7 +1021,14 @@ ApplicationWindow {
             // Close diff mode when switching files normally
             editorPanel.closeDiff()
         }
-        function onToolApprovalRequired(callId, toolName, summary, riskLevel) {
+        function onToolApprovalRequired(a, b, c, d, e, f, g) {
+            // Accept multiple parameters to handle signal argument variations
+            const callId = a, toolName = b, summary = c, riskLevel = d
+            const risk = (riskLevel || "").toLowerCase()
+            if (risk === "low") {
+                agentCtx.approveTool(callId, true)
+                return
+            }
             approvalDialog.show(callId, toolName, summary, riskLevel)
         }
         function onCheckpointRestoreRequested(checkpointId, description, files) {

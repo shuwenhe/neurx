@@ -207,7 +207,13 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Label { text: "STAGED CHANGES"; font.pixelSize: Theme.fontXs; font.bold: true; color: Theme.textMuted; Layout.fillWidth: true }
-                        ToolButton { text: "-"; onClicked: agent.executeToolByName("Bash", { "command": "git reset HEAD ." }); refresh() }
+                        ToolButton {
+                            text: "-"
+                            onClicked: function() {
+                                agent.executeToolByName("Bash", { command: "git reset HEAD ." })
+                                refresh()
+                            }
+                        }
                     }
                     Repeater {
                         model: stagedChanges

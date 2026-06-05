@@ -9,6 +9,7 @@ import NeurXCode
 Item {
     id: root
     required property var agent
+    property real appZoomFactor: 1.0
 
     Rectangle {
         anchors.fill: parent
@@ -71,10 +72,10 @@ Item {
                                 Layout.fillWidth: true
                             }
                             SpinBox {
-                                from: 40; to: 300; value: Math.round(root.agent.parent.zoomFactor * 100)
+                                from: 40; to: 300; value: Math.round(root.appZoomFactor * 100)
                                 stepSize: 10
                                 editable: true
-                                onValueModified: root.agent.parent.zoomFactor = value / 100.0
+                                onValueModified: root.appZoomFactor = value / 100.0
                             }
                         }
 
@@ -87,14 +88,93 @@ Item {
                                 Layout.fillWidth: true
                             }
                             Switch {
-                                checked: false // placeholder
+                                checked: (typeof editorPanel !== "undefined") ? editorPanel.autoSave : false
                                 onToggled: {
-                                    // We need to reach editorPanel.autoSave.
-                                    // In App.qml, editorPanel is a top-level child.
-                                    // SettingsPanel is inside a drawer in App.qml.
-                                    // root.agent.parent is essentially the App root if context is right.
                                     if (typeof editorPanel !== "undefined") {
                                         editorPanel.autoSave = checked
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Word Wrap"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: (typeof editorPanel !== "undefined") ? editorPanel.wordWrap : false
+                                onToggled: {
+                                    if (typeof editorPanel !== "undefined") {
+                                        editorPanel.wordWrap = checked
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    Layout.fillWidth: true
+                    title: "Editor Features"
+                    background: Rectangle { color: Theme.surfaceAlt; radius: Theme.radius }
+
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 8
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Auto-closing Pairs"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: (typeof editorPanel !== "undefined") ? editorPanel.autoClosingPairs : true
+                                onToggled: {
+                                    if (typeof editorPanel !== "undefined") {
+                                        editorPanel.autoClosingPairs = checked
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Auto Indentation"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: (typeof editorPanel !== "undefined") ? editorPanel.autoIndent : true
+                                onToggled: {
+                                    if (typeof editorPanel !== "undefined") {
+                                        editorPanel.autoIndent = checked
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: "Bracket Highlighting"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.fontMd
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                checked: (typeof editorPanel !== "undefined") ? editorPanel.autoHighlightBrackets : true
+                                onToggled: {
+                                    if (typeof editorPanel !== "undefined") {
+                                        editorPanel.autoHighlightBrackets = checked
                                     }
                                 }
                             }
