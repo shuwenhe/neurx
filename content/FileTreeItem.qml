@@ -217,6 +217,20 @@ Item {
                                 }
 
                                 MenuItem {
+                                    text: "Open in Integrated Terminal"
+                                    onTriggered: {
+                                        node.panel.agent.createTerminalWithPath("Terminal", itemRoot.normalizedFilePath)
+                                    }
+                                }
+
+                                MenuItem {
+                                    text: "Reveal in Finder"
+                                    onTriggered: {
+                                        node.panel.agent.revealInExplorer(itemRoot.normalizedFilePath)
+                                    }
+                                }
+
+                                MenuItem {
                                     text: "重命名"
                                     onTriggered: root.panel.openRenameDialog(itemRoot.normalizedFilePath)
                                 }

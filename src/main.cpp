@@ -30,10 +30,14 @@
 #include "editor/InlineRename.h"
 #include "editor/GoToDefinition.h"
 #include "editor/SelectToBracket.h"
+#include "editor/PeekView.h"
+#include "editor/StickyScroll.h"
 
 // New editor features (Phase 4 - Workbench)
 #include "editor/FindAndReplace.h"
 #include "editor/MultiCursor.h"
+
+using namespace Qt::StringLiterals;
 
 int main(int argc, char *argv[])
 {
@@ -73,6 +77,8 @@ int main(int argc, char *argv[])
     auto* inlineRename = new InlineRename();
     auto* goToDefinition = new GoToDefinition();
     auto* selectToBracket = new SelectToBracket();
+    auto* peekView = new PeekView();
+    auto* stickyScroll = new StickyScroll();
 
     // Initialize Phase 4 workbench features
     auto* findAndReplace = new FindAndReplace();
@@ -116,6 +122,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("inlineRename", inlineRename);
     engine.rootContext()->setContextProperty("goToDefinition", goToDefinition);
     engine.rootContext()->setContextProperty("selectToBracket", selectToBracket);
+    engine.rootContext()->setContextProperty("peekView", peekView);
+    engine.rootContext()->setContextProperty("stickyScroll", stickyScroll);
     
     // Expose Phase 4 features to QML
     engine.rootContext()->setContextProperty("findAndReplace", findAndReplace);
@@ -124,7 +132,7 @@ int main(int argc, char *argv[])
     // Expose command bridge to QML
     engine.rootContext()->setContextProperty("editorCommandBridge", commandBridge);
 
-    const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
+    const QUrl url(u"qrc:/qt/qml/Main/main.qml"_s);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,

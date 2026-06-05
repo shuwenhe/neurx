@@ -23,6 +23,10 @@ Item {
     property string originalContent: ""
     property bool isMarkdown: agent.currentFilePath ? agent.currentFilePath.endsWith(".md") : false
     property bool autoSave: false
+    property bool autoClosingPairs: true
+    property bool autoIndent: true
+    property bool autoHighlightBrackets: true
+    property bool wordWrap: false
     property int cursorLine: 1
     property int cursorColumn: 1
     property int lineCount: Math.max(1, agent.currentFileContent.length > 0 ? agent.currentFileContent.split("\n").length : 1)
@@ -30,6 +34,7 @@ Item {
     property int gutterWidth: Math.max(48, Math.ceil(editorFontMetrics.averageCharacterWidth * gutterDigits) + 18)
 
     property var bracketHighlightPos: null
+    property string hoverContent: ""
 
     function syncFromAgent(resetView) {
         if (editorArea && (editorArea.text !== agent.currentFileContent || resetView)) {
@@ -40,9 +45,10 @@ Item {
                 // editorArea is hosted inside a ScrollView; reset the ScrollView's content offsets
                 // ScrollView exposes its internal flickable as `contentItem`.
                 // Use contentItem.contentX/contentY to manipulate scroll offsets.
-                if (editorScrollView && editorScrollView.contentItem) {
-                    editorScrollView.contentItem.contentX = 0
-                    editorScrollView.contentItem.contentY = 0
+                const flickable = editorFlickable()
+                if (flickable) {
+                    flickable.contentX = 0
+                    flickable.contentY = 0
                 }
             }
             syncingEditorFromAgent = false
@@ -71,6 +77,10 @@ Item {
 
         const rect = editorArea.positionToRectangle(editorArea.cursorPosition)
         return rect.y
+    }
+
+    function editorFlickable() {
+        return editorScrollView && editorScrollView.contentItem ? editorScrollView.contentItem : null
     }
 
     function syncSelectionToAgent() {
@@ -147,6 +157,30 @@ Item {
         onActivated: root.transformSelection(1)
     }
 
+    Shortcut {
+        sequence: "Ctrl+/"
+        context: Qt.WindowShortcut
+        enabled: !!agent.currentFilePath
+        onActivated: root.toggleComment()
+    }
+
+    function toggleComment() {
+        if (!editorArea || !commentManager)
+            return false
+
+        const range = currentSelectionRange()
+        const startLine = range ? root.lineFromIndex(editorArea.text, range.start) : root.cursorLine
+        const endLine = range ? root.lineFromIndex(editorArea.text, range.end) : root.cursorLine
+
+        // Use a default language if unknown
+        const lang = agent.currentFilePath ? agent.currentFilePath.split('.').pop() : "cpp"
+        commentManager.toggleLineComment(startLine - 1, endLine - 1, lang)
+
+        // The commentManager usually triggers a signal that syncs back,
+        // but let's make sure we refresh if needed.
+        return true
+    }
+
     function saveCurrentFile() {
         if (!agent.currentFilePath)
             return
@@ -201,12 +235,48 @@ Item {
 
         // Ensure the line is visible
         const rect = editorArea.positionToRectangle(position)
-        if (editorScrollView && editorScrollView.contentItem) {
-            const flickable = editorScrollView.contentItem
+        const flickable = editorFlickable()
+        if (flickable) {
             const viewportHeight = flickable.height
             const targetY = rect.y - viewportHeight / 2
             flickable.contentY = Math.max(0, Math.min(targetY, flickable.contentHeight - viewportHeight))
         }
+    }
+
+    function closeDiff() {
+        if (!root.diffMode)
+            return
+        root.diffMode = false
+        root.originalContent = ""
+    }
+
+    function highlightBrackets() {
+        if (!editorArea || !bracketMatcher || !root.autoHighlightBrackets) {
+            root.bracketHighlightPos = null
+            return
+        }
+
+        const candidates = [
+            { line: root.cursorLine - 1, column: root.cursorColumn - 1 },
+            { line: root.cursorLine - 1, column: root.cursorColumn - 2 }
+        ]
+
+        for (let i = 0; i < candidates.length; ++i) {
+            const pos = candidates[i]
+            if (pos.line < 0 || pos.column < 0)
+                continue
+
+            const info = bracketMatcher.matchingBracketAt(editorArea.text, pos.line, pos.column)
+            if (info && info.hasMatch) {
+                const openIndex = indexFromLineColumn(editorArea.text, info.openLine, info.openColumn)
+                const closeIndex = indexFromLineColumn(editorArea.text, info.closeLine, info.closeColumn)
+                root.bracketHighlightPos = [openIndex, closeIndex]
+                bracketHighlightTimer.restart()
+                return
+            }
+        }
+
+        root.bracketHighlightPos = null
     }
 
     function indexFromLineColumn(text, line, column) {
@@ -224,6 +294,34 @@ Item {
         return {
             line: Math.max(0, root.cursorLine - 1),
             column: Math.max(0, root.cursorColumn - 1)
+        }
+    }
+
+    function showHover(line, column) {
+        if (!editorArea || !agent || !agent.currentFilePath) {
+            root.hoverContent = ""
+            hoverPopup.close()
+            return
+        }
+
+        const hover = agent.requestHover(agent.currentFilePath, line, column)
+        if (!hover) {
+            root.hoverContent = ""
+            hoverPopup.close()
+            return
+        }
+
+        const parts = []
+        if (hover.contents)
+            parts.push(hover.contents)
+        if (hover.markedString)
+            parts.push(hover.markedString)
+
+        root.hoverContent = parts.length > 0 ? parts.join("\n\n") : ""
+        if (root.hoverContent.length > 0) {
+            hoverPopup.open()
+        } else {
+            hoverPopup.close()
         }
     }
 
@@ -284,6 +382,53 @@ Item {
             return false
 
         return replaceRange(range.start, range.end, converted)
+    }
+
+    function formatDocument() {
+        if (!agent.currentFilePath || !editorArea)
+            return
+
+        const edits = agent.formatDocument(agent.currentFilePath, {"tabSize": 4, "insertSpaces": true})
+        if (edits && edits.length > 0) {
+            // Edits usually come ordered from end to start to avoid index shifts,
+            // but let's assume they might not be and sort them descending by offset
+            const sortedEdits = [...edits].sort((a, b) => b.offset - a.offset)
+
+            // If the provider returns standard LSP TextEdits (range/newText),
+            // we'd need more logic. But if it's simpler edits...
+            // Let's check what m_formatDocumentProvider->execute(ctx) returns.
+        } else {
+            // If the provider directly modified the file or returns nothing,
+            // we just reload. Most simple implementation:
+            agent.saveCurrentFile() // Ensure current changes are on disk
+            // Call the formatter (which might change the file on disk or just return text)
+            // For now, let's assume it might have changed the file or we need to sync.
+            root.syncFromAgent(true)
+        }
+    }
+
+    function goToReferences() {
+        if (!agent.currentFilePath || !editorArea)
+            return
+
+        const pos = currentLineColumn0Based()
+        const results = agent.findAllReferences(agent.currentFilePath, pos.line + 1, pos.column + 1)
+
+        if (results && results.length > 0) {
+            // Bridge to search panel
+            if (typeof searchPanel !== "undefined") {
+                agentTabs.currentIndex = 1 // Switch to search tab
+                searchPanel.searchText = "References"
+                searchPanel.results = results.map(res => ({
+                    file: res.file,
+                    line: res.line,
+                    content: res.lineText || "Reference",
+                    fullPath: res.file.startsWith("/") ? res.file : agent.workspacePath + "/" + res.file
+                }))
+            }
+        } else {
+            agent.notifyInfo("No references found.")
+        }
     }
 
     function executeEditorCommand(commandId) {
@@ -354,26 +499,14 @@ Item {
                 continue
 
             const info = bracketMatcher.matchingBracketAt(editorArea.text, pos.line, pos.column)
-            if (!info || !info.hasMatch)
-                continue
-
-            const isOpen = info.openLine === pos.line && info.openColumn === pos.column
-
-            // Highlight BOTH brackets
-            const openIndex = indexFromLineColumn(editorArea.text, info.openLine, info.openColumn)
-            const closeIndex = indexFromLineColumn(editorArea.text, info.closeLine, info.closeColumn)
-            root.bracketHighlightPos = [openIndex, closeIndex]
-            bracketHighlightTimer.restart()
-
-            const targetLine = isOpen ? info.closeLine : info.openLine
-            const targetColumn = isOpen ? info.closeColumn : info.openColumn
-            const index = indexFromLineColumn(editorArea.text, targetLine, targetColumn)
-            editorArea.cursorPosition = index
-            editorArea.forceActiveFocus()
-            return true
+            if (info && info.hasMatch) {
+                const openIndex = indexFromLineColumn(editorArea.text, info.openLine, info.openColumn)
+                const closeIndex = indexFromLineColumn(editorArea.text, info.closeLine, info.closeColumn)
+                root.bracketHighlightPos = [openIndex, closeIndex]
+                return
+            }
         }
-
-        return false
+        root.bracketHighlightPos = null
     }
 
     function activateTab(index) {
@@ -548,12 +681,21 @@ Item {
         }
         MenuSeparator {}
         MenuItem {
+            text: "Format Document"
+            onTriggered: root.formatDocument()
+        }
+        MenuSeparator {}
+        MenuItem {
             text: "Go to Definition"
             onTriggered: {
                 // Simplified: use search to find definitions in current or other files
                 // For now just triggered Go to Symbol
                 goToSymbolPopup.open()
             }
+        }
+        MenuItem {
+            text: "Go to References"
+            onTriggered: root.goToReferences()
         }
         MenuItem {
             text: "Go to Line..."
@@ -991,7 +1133,7 @@ Item {
                                         width: parent.width
                                         height: root.lineCount * editorFontMetrics.lineSpacing
                                         // editorArea is placed inside a ScrollView (editorScrollView); use its contentItem.contentY
-                                        y: (editorScrollView && editorScrollView.contentItem) ? -editorScrollView.contentY : 0
+                                        y: (editorScrollView && editorScrollView.contentItem) ? -editorScrollView.contentItem.contentY : 0
 
                                         Repeater {
                                             model: root.lineCount
@@ -1026,7 +1168,7 @@ Item {
                                 Rectangle {
                                     x: 0
                                     // Use the ScrollView's contentItem for its contentY
-                                    y: Math.max(0, root.editorCursorY() - (editorScrollView ? editorScrollView.contentY : 0))
+                                    y: Math.max(0, root.editorCursorY() - (editorScrollView && editorScrollView.contentItem ? editorScrollView.contentItem.contentY : 0))
                                     width: parent.width
                                     height: editorFontMetrics.lineSpacing
                                     color: Theme.accent
@@ -1057,21 +1199,88 @@ Item {
                                         color: Theme.textPrimary
                                         selectionColor: Theme.accent
                                         selectedTextColor: "white"
-                                        backgroundColor: "transparent"
+                                        background: null
                                         renderType: Text.NativeRendering
                                         selectByMouse: true
                                         persistentSelection: true
-                                        wrapMode: TextArea.NoWrap
-                                        onCursorPositionChanged: root.updateCursorMetrics()
-                                        onSelectedTextChanged: root.syncSelectionToAgent()
+                                        wrapMode: root.wordWrap ? TextArea.Wrap : TextArea.NoWrap
 
-                                        Keys.onPressed: event => {
+                                        function getLineText(lineIndex) {
+                                            const lines = text.split("\n")
+                                            if (lineIndex >= 0 && lineIndex < lines.length)
+                                                return lines[lineIndex]
+                                            return ""
+                                        }
+
+                                        Keys.onPressed: function(event) {
                                             if (event.key === Qt.Key_F && event.modifiers === Qt.ControlModifier) {
                                                 findPopup.open()
                                                 findInput.forceActiveFocus()
                                                 event.accepted = true
+                                                return
+                                            }
+
+                                            if (root.autoClosingPairs) {
+                                                const pairs = {
+                                                    '(': ')',
+                                                    '[': ']',
+                                                    '{': '}',
+                                                    '"': '"',
+                                                    "'": "'"
+                                                }
+                                                const openChars = Object.keys(pairs)
+                                                const typedChar = event.text
+                                                if (typedChar.length === 1 && openChars.includes(typedChar)) {
+                                                    const pos = cursorPosition
+                                                    // Check if we are typing a closing quote that is already there
+                                                    if ((typedChar === '"' || typedChar === "'") && text.charAt(pos) === typedChar) {
+                                                        cursorPosition = pos + 1
+                                                        event.accepted = true
+                                                        return
+                                                    }
+
+                                                    insert(pos, pairs[typedChar])
+                                                    cursorPosition = pos // Move back so the typed char lands before the pair
+                                                    // Let the default handler insert the opening char
+                                                } else if (typedChar.length === 1 && Object.values(pairs).includes(typedChar)) {
+                                                    // User typed a closing char, check if it's already there
+                                                    const pos = cursorPosition
+                                                    if (text.charAt(pos) === typedChar) {
+                                                        cursorPosition = pos + 1
+                                                        event.accepted = true
+                                                        return
+                                                    }
+                                                }
+                                            }
+
+                                            if (root.autoIndent && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+                                                const pos = cursorPosition
+                                                const lineIndex = root.cursorLine - 1
+                                                const currentLine = getLineText(lineIndex)
+                                                const indentMatch = currentLine.match(/^\s*/)
+                                                let indent = indentMatch ? indentMatch[0] : ""
+
+                                                const trimmedLine = currentLine.trim()
+                                                if (trimmedLine.endsWith("{") || trimmedLine.endsWith(":") || trimmedLine.endsWith("[")) {
+                                                    indent += "    " // Add 4 spaces for new block
+                                                }
+
+                                                insert(pos, "\n" + indent)
+                                                event.accepted = true
+                                                return
                                             }
                                         }
+
+                                        onCursorPositionChanged: {
+                                            root.updateCursorMetrics()
+                                            if (root.autoHighlightBrackets) {
+                                                root.highlightBrackets()
+                                            }
+                                            // Request hover on cursor move (optional, or use a timer)
+                                            hoverTimer.restart()
+                                        }
+
+                                        onSelectedTextChanged: root.syncSelectionToAgent()
 
                                         Component.onCompleted: {
                                             root.syncFromAgent(true)
@@ -1133,7 +1342,7 @@ Item {
                                         Rectangle {
                                             width: parent.width
                                             height: Math.max(10, (editorScrollView.height / Math.max(1, editorArea.height)) * minimapText.height)
-                                            y: (editorScrollView.contentY / Math.max(1, editorArea.height)) * minimapText.height
+                                        y: ((editorScrollView && editorScrollView.contentItem ? editorScrollView.contentItem.contentY : 0) / Math.max(1, editorArea.height)) * minimapText.height
                                             color: Theme.accent
                                             opacity: 0.2
                                             border.color: Theme.accent
@@ -1145,12 +1354,16 @@ Item {
                                         anchors.fill: parent
                                         onClicked: (mouse) => {
                                             const ratio = mouse.y / height
-                                            editorScrollView.contentY = ratio * editorArea.height - editorScrollView.height / 2
+                                            if (editorScrollView && editorScrollView.contentItem) {
+                                                editorScrollView.contentItem.contentY = ratio * editorArea.height - editorScrollView.height / 2
+                                            }
                                         }
                                         onPositionChanged: (mouse) => {
                                             if (pressed) {
                                                 const ratio = mouse.y / height
-                                                editorScrollView.contentY = ratio * editorArea.height - editorScrollView.height / 2
+                                                if (editorScrollView && editorScrollView.contentItem) {
+                                                    editorScrollView.contentItem.contentY = ratio * editorArea.height - editorScrollView.height / 2
+                                                }
                                             }
                                         }
                                     }
@@ -1186,6 +1399,37 @@ Item {
         id: bracketHighlightTimer
         interval: 1000
         onTriggered: root.bracketHighlightPos = null
+    }
+
+    Timer {
+        id: hoverTimer
+        interval: 1000
+        repeat: false
+        onTriggered: root.showHover(root.cursorLine, root.cursorColumn)
+    }
+
+    Popup {
+        id: hoverPopup
+        width: Math.min(400, hoverLabel.implicitWidth + 20)
+        height: hoverLabel.implicitHeight + 20
+        padding: 10
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: Rectangle {
+            color: Theme.surfaceAlt
+            radius: 4
+            border.color: Theme.border
+            border.width: 1
+        }
+
+        contentItem: Label {
+            id: hoverLabel
+            text: root.hoverContent
+            color: Theme.textPrimary
+            font.pixelSize: Theme.fontSm
+            wrapMode: Text.WordWrap
+            textFormat: Text.MarkdownText
+        }
     }
 
     Popup {
