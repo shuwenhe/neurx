@@ -17,7 +17,7 @@ Item {
 
     implicitHeight: bodyColumn.implicitHeight + 16
 
-    readonly property int avatarSize: 28
+    readonly property int avatarSize: root.isAssistant ? 22 : 28
     readonly property int labelWidth: 56
     readonly property int rowGap: 10
     readonly property real contentWidth: Math.max(220, width - 32 - avatarSize - labelWidth - (rowGap * 2))
@@ -30,6 +30,7 @@ Item {
         && (messageContent.indexOf("Restored checkpoint ") === 0
             || messageContent.indexOf("Rolled back workspace files") === 0)
     property bool toolsExpanded: false
+    readonly property real roleLabelHeight: root.isAssistant ? 0 : roleLabel.implicitHeight
     readonly property var contentBlocks: root.isAssistant ? parseBlocks(root.messageContent) : []
     readonly property var attachments: root.messageAttachments || []
     readonly property color badgeColor: {
@@ -97,8 +98,8 @@ Item {
             id: messageRow
             width: parent.width
             height: root.isAssistant
-                ? avatar.height + roleLabel.implicitHeight + 8 + (bubble.visible ? bubble.implicitHeight : 0)
-                : Math.max(avatar.height, Math.max(roleLabel.implicitHeight, bubble.visible ? bubble.implicitHeight : 0))
+                ? avatar.height + 6 + (bubble.visible ? bubble.implicitHeight : 0)
+                : Math.max(avatar.height, Math.max(roleLabelHeight, bubble.visible ? bubble.implicitHeight : 0))
 
             Rectangle {
                 id: avatar
@@ -114,7 +115,7 @@ Item {
                 // Show logo for assistant messages, letter for others
                 Image {
                     anchors.fill: parent
-                    anchors.margins: 2
+                    anchors.margins: 1
                     source: root.isAssistant ? "file:///Users/feifei/agent/neurx-code/assets/icons/logo.png" : ""
                     fillMode: Image.PreserveAspectFit
                     visible: root.isAssistant
@@ -140,6 +141,7 @@ Item {
                 color: root.isUser ? Theme.accent : root.isCheckpointNotice ? Theme.success : Theme.textMuted
                 font.pixelSize: Theme.fontSm
                 font.bold: true
+                visible: !root.isAssistant
             }
 
             Rectangle {
@@ -147,7 +149,7 @@ Item {
                 x: root.isAssistant ? 0 : (root.isUser
                     ? roleLabel.x - root.rowGap - width
                     : roleLabel.x + roleLabel.width + root.rowGap)
-                y: root.isAssistant ? (avatar.height + 8) : 0
+                y: root.isAssistant ? (avatar.height + 6) : 0
                 width: root.isAssistant ? root.wideContentWidth : root.contentWidth
                 visible: root.messageContent.length > 0 || root.attachments.length > 0
                 color: root.bubbleColor

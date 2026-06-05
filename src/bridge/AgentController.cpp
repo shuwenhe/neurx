@@ -1127,6 +1127,7 @@ QVariant ChatModel::data(const QModelIndex &idx, int role) const
 
 void ChatModel::append(const ChatMessage &msg)
 {
+    qDebug() << "[ChatModel::append]" << "role=" << msg.role << "content=" << msg.content.left(50);
     beginInsertRows({}, m_msgs.size(), m_msgs.size());
     m_msgs.append(msg);
     endInsertRows();
@@ -4403,10 +4404,16 @@ void AgentController::setBusy(bool b)
 
 void AgentController::sendMessage(const QString &text)
 {
+    qDebug() << "[AgentController::sendMessage]" << "text=" << text.left(50) << "busy=" << m_busy;
     const QString trimmed = text.trimmed();
     const bool hasAttachments = !m_pendingAttachments.isEmpty();
     if (trimmed.isEmpty() && !hasAttachments)
         return;
+    if (m_busy) {
+        qWarning() << "[AgentController::sendMessage] Agent is busy, ignoring message submission";
+        emit errorOccurred(QStringLiteral("Agent is busy. Please wait for the current operation to complete."));
+        return;
+    }
     if (trimmed.startsWith('/')) {
         if (handleSlashCommand(trimmed)) {
             if (shouldTrackSlashCommand(trimmed))
@@ -4472,6 +4479,7 @@ bool AgentController::shouldTrackSlashCommand(const QString &text) const
 
 void AgentController::submitToAgent(const QString &text, const QVariantList &attachments)
 {
+    qDebug() << "[AgentController::submitToAgent] Submitting:" << text.left(50);
     if (!m_engine || m_busy) {
         emit errorOccurred(QStringLiteral("Agent is busy."));
         return;
@@ -4671,6 +4679,7 @@ void AgentController::onTokenReceived(const TokenEvent &ev)
 
 void AgentController::onMessageAdded(const AgentMessage &msg)
 {
+    qDebug() << "[AgentController::onMessageAdded]" << "role=" << (int)msg.role << "content=" << msg.content.left(50);
     switch (msg.role) {
     case MessageRole::System:
         appendSessionStoreMessage(QStringLiteral("system"), msg.content);
@@ -4725,6 +4734,7 @@ void AgentController::onMessageAdded(const AgentMessage &msg)
         m_chatModel->replaceLast(cm);
         m_streamingAssistantActive = false;
     } else {
+        qDebug() << "[AgentController::onMessageAdded] Appending to ChatModel";
         m_chatModel->append(cm);
     }
 }

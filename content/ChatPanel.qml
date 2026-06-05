@@ -485,16 +485,20 @@ Item {
                         }
 
                         MouseArea {
+                            id: sendButtonArea
                             anchors.fill: parent
                             cursorShape: parent.sendBtnReady ? Qt.PointingHandCursor : Qt.ArrowCursor
                             hoverEnabled: true
-                            enabled: parent.sendBtnReady
+                            enabled: parent.sendBtnReady && !root.isSubmitting
                             opacity: enabled ? 1.0 : 0.5
 
                             onHoveredChanged: parent.sendBtnHovered = containsMouse
                             onClicked: {
-                                if (root.busy) root.interrupt()
-                                else           submitInput()
+                                if (root.busy) {
+                                    root.interrupt()
+                                } else if (!root.isSubmitting) {
+                                    submitInput()
+                                }
                             }
                         }
                     }
@@ -774,15 +778,35 @@ Item {
         }
     }
 
+    property bool isSubmitting: false
+    
+    Timer {
+        id: submissionCooldown
+        interval: 100  // 100ms cooldown to prevent duplicate submissions
+        running: false
+        repeat: false
+        onTriggered: {
+            root.isSubmitting = false
+        }
+    }
+
     function submitInput() {
+        if (root.isSubmitting) {
+            console.warn("[ChatPanel] submitInput called while already submitting - ignoring")
+            return
+        }
+        
         const txt = inputArea.text.trim()
         const hasAttachments = root.agent && root.agent.pendingAttachments && root.agent.pendingAttachments.length > 0
 
         if (txt.length === 0 && !hasAttachments)
             return
 
+        root.isSubmitting = true
+        console.debug("[ChatPanel] Submitting message:", txt.substring(0, 50))
         inputArea.text = ""
         root.sendMessage(txt)
+        submissionCooldown.start()
     }
 
     function insertSlashCommand(command) {

@@ -1187,7 +1187,30 @@ Item {
                                     }
                                     clip: true
                                     contentWidth: -1
-                                    ScrollBar.vertical: CustomScrollBar {}
+                                    ScrollBar.vertical: CustomScrollBar {
+                                        collapsedWidth: 6
+                                        hoveredWidth: 7
+                                        thumbWidth: 4
+                                        thumbHeight: 24
+                                        inactiveOpacity: 0.18
+                                        activeOpacity: 0.78
+                                        backgroundOpacity: 0.05
+                                        thumbColor: "#3a3a3a"
+                                        hoverThumbColor: "#5f5f5f"
+                                        pressedThumbColor: "#8f8f8f"
+                                    }
+                                    ScrollBar.horizontal: CustomScrollBar {
+                                        collapsedWidth: 6
+                                        hoveredWidth: 7
+                                        thumbWidth: 4
+                                        thumbHeight: 24
+                                        inactiveOpacity: 0.18
+                                        activeOpacity: 0.78
+                                        backgroundOpacity: 0.05
+                                        thumbColor: "#3a3a3a"
+                                        hoverThumbColor: "#5f5f5f"
+                                        pressedThumbColor: "#8f8f8f"
+                                    }
                                     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                                     TextArea {
@@ -1291,7 +1314,11 @@ Item {
 
                                     SyntaxHighlighter {
                                         textDocument: editorArea.textDocument
-                                        language: agent.currentFilePath ? agent.currentFilePath.split('.').pop() : ""
+                                        language: {
+                                            if (!agent.currentFilePath) return ""
+                                            var parts = agent.currentFilePath.split('.')
+                                            return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : ""
+                                        }
                                     }
 
                                     Repeater {

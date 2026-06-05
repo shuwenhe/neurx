@@ -291,7 +291,18 @@ Item {
                 font.pixelSize: 12
             }
 
-            ScrollBar.vertical: CustomScrollBar {}
+            ScrollBar.vertical: CustomScrollBar {
+                collapsedWidth: 8
+                hoveredWidth: 10
+                thumbWidth: 6
+                thumbHeight: 26
+                inactiveOpacity: 0.35
+                activeOpacity: 0.9
+                backgroundOpacity: 0.07
+                thumbColor: "#3d3d3d"
+                hoverThumbColor: "#646464"
+                pressedThumbColor: "#909090"
+            }
         }
 
         // Status bar
