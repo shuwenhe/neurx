@@ -139,7 +139,7 @@ Item {
                     id: scrollBar
                     visible: listView.contentHeight > listView.height
                     anchors.right: listView.right
-                    anchors.rightMargin: 2
+                    anchors.rightMargin: 0
                 }
 
                 onCountChanged: {

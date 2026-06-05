@@ -5,21 +5,27 @@ import NeurXCode
 ScrollBar {
     id: control
     policy: ScrollBar.AsNeeded
-    width: control.hovered || control.pressed || control.active ? 8 : 6
+    width: control.hovered || control.pressed || control.active ? 12 : 9
+    minimumSize: 0.12
 
     contentItem: Rectangle {
-        implicitWidth: 6
-        implicitHeight: 30
-        radius: 3
-        color: control.pressed ? Theme.accent : (control.hovered || control.active ? Theme.textMuted : "#444")
-        opacity: control.active || control.hovered || control.pressed ? 0.95 : 0.28
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-        Behavior on color { ColorAnimation { duration: 150 } }
+        implicitWidth: 8
+        implicitHeight: 28
+        radius: 4
+        color: control.pressed
+                ? "#969696"
+                : (control.hovered || control.active ? "#797979" : "#424242")
+        opacity: control.pressed
+                ? 1.0
+                : (control.hovered || control.active ? 1.0 : 0.5)
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on color { ColorAnimation { duration: 120 } }
         Behavior on implicitWidth { NumberAnimation { duration: 120 } }
     }
 
     background: Item {
-        implicitWidth: 6
-        opacity: control.hovered || control.active ? 1.0 : 0.0
+        implicitWidth: 12
+        opacity: control.hovered || control.active ? 0.1 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 }

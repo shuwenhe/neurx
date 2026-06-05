@@ -109,6 +109,16 @@ Item {
                 radius: root.avatarSize / 2
                 color: root.badgeColor
                 border.color: root.isUser ? Theme.accent : Theme.border
+                clip: true
+
+                // Show logo for assistant messages, letter for others
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 2
+                    source: root.isAssistant ? "file:///Users/feifei/agent/neurx-code/assets/icons/logo.png" : ""
+                    fillMode: Image.PreserveAspectFit
+                    visible: root.isAssistant
+                }
 
                 Label {
                     anchors.centerIn: parent
@@ -116,6 +126,7 @@ Item {
                     color: root.isUser ? "white" : Theme.textPrimary
                     font.pixelSize: Theme.fontSm
                     font.bold: true
+                    visible: !root.isAssistant
                 }
             }
 
