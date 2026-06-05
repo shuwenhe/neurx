@@ -69,7 +69,7 @@ Item {
                     wrapMode: Text.WrapAnywhere
                 }
 
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: CustomScrollBar {}
             }
         }
 
@@ -114,4 +114,3 @@ Item {
         }
     }
 }
-

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import NeurXCode
 
 /**
  * ProblemsPanel.qml
@@ -290,10 +291,7 @@ Item {
                 font.pixelSize: 12
             }
 
-            ScrollBar.vertical: ScrollBar {
-                active: true
-                policy: ScrollBar.AsNeeded
-            }
+            ScrollBar.vertical: CustomScrollBar {}
         }
 
         // Status bar

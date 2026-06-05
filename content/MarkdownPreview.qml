@@ -39,6 +39,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
+            ScrollBar.vertical: CustomScrollBar {}
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
             Rectangle {
@@ -63,4 +64,3 @@ Item {
         }
     }
 }
-

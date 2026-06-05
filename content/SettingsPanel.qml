@@ -22,7 +22,7 @@ Item {
 
             ScrollBar.vertical: CustomScrollBar {
                 anchors.right: settingsScroll.right
-                anchors.rightMargin: 2
+                anchors.rightMargin: 0
             }
 
             ColumnLayout {
