@@ -40,7 +40,9 @@ Item {
             Layout.fillHeight: true
             clip: true
             ScrollBar.vertical: CustomScrollBar {}
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            ScrollBar.horizontal {
+                policy: ScrollBar.AlwaysOff
+            }
 
             Rectangle {
                 width: parent.width

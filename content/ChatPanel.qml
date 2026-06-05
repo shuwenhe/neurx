@@ -4,7 +4,7 @@ import QtQuick.Layouts 6.2
 import NeurXCode
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
-//  Right-side agent panel: message list on top, send controls at bottom.
+//  Right-side agent panel: message list fills the available area, composer at bottom.
 
 Item {
     id: root
@@ -57,69 +57,16 @@ Item {
         anchors.margins: 10
         spacing: 10
 
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 54
-            color: Theme.surface
-            border.color: Theme.border
-            radius: Theme.radius + 2
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 12
-                spacing: 10
-
-                Rectangle {
-                    width: 28
-                    height: 28
-                    radius: 14
-                    color: Theme.accent
-
-                    Label {
-                        anchors.centerIn: parent
-                        text: "N"
-                        color: "white"
-                        font.pixelSize: Theme.fontSm
-                        font.bold: true
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-
-                    Label {
-                        text: "NeurX Chat"
-                        color: Theme.textPrimary
-                        font.pixelSize: Theme.fontMd
-                        font.bold: true
-                    }
-
-                    Label {
-                        text: root.busy ? "Thinking and using tools" : "Ready for code questions"
-                        color: Theme.textMuted
-                        font.pixelSize: Theme.fontSm
-                    }
-                }
-
-                Rectangle {
-                    width: 10
-                    height: 10
-                    radius: 5
-                    color: root.busy ? Theme.warning : Theme.success
-                }
-            }
-        }
-
         // ── Message list ──────────────────────────────────────────────────
         Rectangle {
             id: messagesPanel
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredHeight: 0
+            Layout.minimumHeight: 0
             Layout.minimumWidth: 180
             color: Theme.surface
-            border.color: Theme.border
+            border.color: "transparent"
             radius: Theme.radius + 2
             clip: true
 
@@ -150,14 +97,10 @@ Item {
                     if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
                         root.scrollToBottom()
                 }
-                onContentYChanged: {
-                    if (!root.autoScrollingList && !root.isListViewAtBottom())
-                        root.autoFollowLatest = false
-                    if (root.isListViewAtBottom()) {
-                        root.autoFollowLatest = true
-                    }
-                    if (root.autoFollowLatest && (root.busy || root.streamingText.length > 0))
-                        root.scrollToBottom()
+                onMovementEnded: {
+                    if (root.autoScrollingList)
+                        return
+                    root.autoFollowLatest = root.isListViewAtBottom()
                 }
 
                 delegate: Item {
@@ -307,9 +250,10 @@ Item {
         Rectangle {
             id: composerBox
             Layout.fillWidth: true
+            Layout.preferredHeight: 72 + attachmentsArea.implicitHeight
             Layout.minimumHeight: 72 + attachmentsArea.implicitHeight
             color: Theme.surface
-            border.color: Theme.border
+            border.color: "transparent"
             radius: Theme.radius + 2
             clip: true
 

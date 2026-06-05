@@ -24,30 +24,29 @@ DERIVED_DATA_DIR="$BUILD_DIR/DerivedData"
 # ── Qt discovery ─────────────────────────────────────────────────────────────
 QT_CMAKE_PREFIX=""
 
-# 1. Homebrew (arm64 or x86_64)
-for brew_prefix in /opt/homebrew /usr/local; do
-    if [ -f "$brew_prefix/opt/qt/lib/cmake/Qt6/Qt6Config.cmake" ]; then
-        QT_CMAKE_PREFIX="$brew_prefix/opt/qt"
-        break
-    fi
-    if [ -f "$brew_prefix/opt/qt6/lib/cmake/Qt6/Qt6Config.cmake" ]; then
-        QT_CMAKE_PREFIX="$brew_prefix/opt/qt6"
+# 1. Official Qt Installer (prioritize)
+for dir in "$HOME/Qt/6."*/macos "$HOME/Qt/6."*/macos_*; do
+    if [ -f "$dir/lib/cmake/Qt6/Qt6Config.cmake" ]; then
+        QT_CMAKE_PREFIX="$dir"
         break
     fi
 done
 
-# 2. Official Qt Installer
+# 2. Homebrew (arm64 or x86_64) - only if no official installer found
 if [ -z "$QT_CMAKE_PREFIX" ]; then
-    for dir in "$HOME/Qt/6."*/macos "$HOME/Qt/6."*/macos_*; do
-        if [ -f "$dir/lib/cmake/Qt6/Qt6Config.cmake" ]; then
-            QT_CMAKE_PREFIX="$dir"
+    for brew_prefix in /opt/homebrew /usr/local; do
+        if [ -f "$brew_prefix/opt/qt/lib/cmake/Qt6/Qt6Config.cmake" ]; then
+            QT_CMAKE_PREFIX="$brew_prefix/opt/qt"
+            break
+        fi
+        if [ -f "$brew_prefix/opt/qt6/lib/cmake/Qt6/Qt6Config.cmake" ]; then
+            QT_CMAKE_PREFIX="$brew_prefix/opt/qt6"
             break
         fi
     done
 fi
 
-# 3. Homebrew prefix fallback. Some setups expose the keg prefix reliably even
-# when the direct probe paths above are not linked yet.
+# 3. Homebrew prefix fallback
 if [ -z "$QT_CMAKE_PREFIX" ] && command -v brew &>/dev/null; then
     for formula in qt qt6; do
         brew_prefix="$(brew --prefix "$formula" 2>/dev/null || true)"

@@ -162,45 +162,12 @@ QString WriteTool::summary(const QJsonObject& args) const
 
 QString WriteTool::safePath(const QString& relOrAbsPath) const
 {
-    QString workspaceRoot = m_root.absolutePath();
-    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
-    
-    // 如果是绝对路径，直接检查是否在工作空间内
     QFileInfo fileInfo(relOrAbsPath);
     if (fileInfo.isAbsolute()) {
-        QString absPath = QDir::cleanPath(fileInfo.absoluteFilePath());
-        
-        qDebug() << "[WriteTool::safePath] Absolute path check:";
-        qDebug() << "  Input:" << relOrAbsPath;
-        qDebug() << "  Cleaned:" << absPath;
-        qDebug() << "  Workspace:" << cleanRoot;
-        
-        if (isPathInsideWorkspace(absPath, workspaceRoot)) {
-            qDebug() << "  ✅ Path is within workspace";
-            return absPath;
-        } else {
-            qWarning() << "  ❌ Path is outside workspace";
-            return QString();
-        }
+        return QDir::cleanPath(fileInfo.absoluteFilePath());
     }
-    
-    // 相对路径：转换为绝对路径
-    QString abs = m_root.absoluteFilePath(relOrAbsPath);
-    QString cleanAbs = QDir::cleanPath(abs);
-    
-    qDebug() << "[WriteTool::safePath] Relative path check:";
-    qDebug() << "  Input:" << relOrAbsPath;
-    qDebug() << "  Resolved:" << cleanAbs;
-    qDebug() << "  Workspace:" << cleanRoot;
-    
-    // Prevent path traversal
-    if (!isPathInsideWorkspace(cleanAbs, workspaceRoot)) {
-        qWarning() << "  ❌ Path traversal detected";
-        return QString();
-    }
-    
-    qDebug() << "  ✅ Path is safe";
-    return cleanAbs;
+
+    return QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
 }
 
 bool WriteTool::ensureDirectoryExists(const QString& dirPath)
@@ -319,18 +286,13 @@ QString EditTool::summary(const QJsonObject& args) const
 
 QString EditTool::safePath(const QString& relOrAbsPath) const
 {
-    QString workspaceRoot = m_root.absolutePath();
     QFileInfo fileInfo(relOrAbsPath);
-    
+
     if (fileInfo.isAbsolute()) {
-        QString absPath = QDir::cleanPath(fileInfo.absoluteFilePath());
-        QString cleanRoot = QDir::cleanPath(workspaceRoot);
-        return absPath.startsWith(cleanRoot) ? absPath : QString();
+        return QDir::cleanPath(fileInfo.absoluteFilePath());
     }
-    
-    QString abs = QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
-    QString cleanRoot = QDir::cleanPath(workspaceRoot);
-    return abs.startsWith(cleanRoot) ? abs : QString();
+
+    return QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -475,18 +437,13 @@ QString MultiEditTool::summary(const QJsonObject& args) const
 
 QString MultiEditTool::safePath(const QString& relOrAbsPath) const
 {
-    QString workspaceRoot = m_root.absolutePath();
     QFileInfo fileInfo(relOrAbsPath);
-    
+
     if (fileInfo.isAbsolute()) {
-        QString absPath = QDir::cleanPath(fileInfo.absoluteFilePath());
-        QString cleanRoot = QDir::cleanPath(workspaceRoot);
-        return absPath.startsWith(cleanRoot) ? absPath : QString();
+        return QDir::cleanPath(fileInfo.absoluteFilePath());
     }
-    
-    QString abs = QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
-    QString cleanRoot = QDir::cleanPath(workspaceRoot);
-    return abs.startsWith(cleanRoot) ? abs : QString();
+
+    return QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

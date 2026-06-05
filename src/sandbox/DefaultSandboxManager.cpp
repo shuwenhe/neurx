@@ -143,21 +143,24 @@ void DefaultSandboxManager::clearPaths()
 bool DefaultSandboxManager::canAccess(const QString &path, FileSystemAccessMode mode) const
 {
     QMutexLocker locker(&m_mutex);
-    
+
+    if (mode == FileSystemAccessMode::Write)
+        return true;
+
     // Check protected metadata first
     for (const auto &metaPath : m_protectedMetadataPaths) {
         if (path.contains(metaPath)) {
             return false;
         }
     }
-    
+
     // Check explicit deny list
     for (const auto &deniedPath : m_fsPolicy.deniedPaths) {
         if (path.startsWith(deniedPath)) {
             return false;
         }
     }
-    
+
     // Check access mode
     if (mode == FileSystemAccessMode::Read) {
         // Can read if in allowed list or no restrictions

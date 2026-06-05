@@ -7,10 +7,17 @@
 
 void set_qt_environment()
 {
-    // Let the system IME (fcitx/ibus) take effect; only fall back to
-    // qtvirtualkeyboard when nothing else is configured.
+    // Keep macOS on its native input/pasteboard stack. Only force fcitx on
+    // Linux-like desktops where that is the expected IME.
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD)
     if (qEnvironmentVariable("QT_IM_MODULE").isEmpty())
         qputenv("QT_IM_MODULE", "fcitx");
+#endif
+
+#if defined(Q_OS_MACOS)
+    qputenv("QT_MAC_WANTS_LAYER", "1");
+#endif
+
     qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
     qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
     qputenv("QT_LOGGING_RULES", "qt.qml.connections=false");

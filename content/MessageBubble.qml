@@ -175,6 +175,12 @@ Item {
                         font: Theme.uiFont
                         readOnly: true
                         selectByMouse: true
+                        // Prevent TextEdit from stealing wheel events from the parent ListView
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton
+                            onWheel: (wheel) => { wheel.accepted = false }
+                        }
                     }
 
                     Flow {
@@ -355,6 +361,12 @@ Item {
                     font: Theme.monoFont
                     readOnly: true
                     selectByMouse: true
+                    // Prevent TextEdit from stealing wheel events from the parent ListView
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        onWheel: (wheel) => { wheel.accepted = false }
+                    }
                 }
             }
         }
