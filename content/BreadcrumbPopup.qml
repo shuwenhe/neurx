@@ -34,7 +34,7 @@ Popup {
             Layout.fillHeight: true
             clip: true
             model: folderModel
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: CustomScrollBar {}
 
             FolderListModel {
                 id: folderModel
@@ -73,4 +73,3 @@ Popup {
         }
     }
 }
-

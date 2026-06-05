@@ -209,9 +209,7 @@ Rectangle {
                     }
                 }
 
-                ScrollBar.vertical: ScrollBar {
-                    policy: ScrollBar.AsNeeded
-                }
+                ScrollBar.vertical: CustomScrollBar {}
             }
         }
 

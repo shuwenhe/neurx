@@ -165,7 +165,7 @@ Item {
 
                         ScrollBar.vertical: CustomScrollBar {
                             anchors.right: toolsList.right
-                            anchors.rightMargin: 2
+                            anchors.rightMargin: 0
                         }
 
                         delegate: Rectangle {
@@ -263,7 +263,7 @@ Item {
 
                         ScrollBar.vertical: CustomScrollBar {
                             anchors.right: detailFlickable.right
-                            anchors.rightMargin: -2
+                            anchors.rightMargin: 0
                         }
 
                         ColumnLayout {

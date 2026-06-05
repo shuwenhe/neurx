@@ -228,7 +228,7 @@ Item {
 
                     ScrollBar.vertical: CustomScrollBar {
                         anchors.right: flickable.right
-                        anchors.rightMargin: -2
+                        anchors.rightMargin: 0
                     }
 
                     ColumnLayout {
