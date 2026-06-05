@@ -491,7 +491,7 @@ QString MultiEditTool::safePath(const QString& relOrAbsPath) const
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ReadTool Implementation
-// ═���═════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
 ReadTool::ReadTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)
@@ -641,7 +641,7 @@ bool ReadTool::isBinaryFile(const QString& filePath) const
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // BashTool Implementation
-// ═════════════════════════════════════════════════════════════════════════��═════
+// ═══════════════════════════════════════════════════════════════════════════════
 
 BashTool::BashTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)
@@ -715,8 +715,10 @@ ToolResult BashTool::execute(const QString& callId, const QJsonObject& args)
     }
     
     int exitCode = process.exitCode();
-    QString output = QString::fromUtf8(process.readAll());
-    
+    QByteArray stdOut = process.readAllStandardOutput();
+    QByteArray stdErr = process.readAllStandardError();
+    QString output = QString::fromUtf8(stdOut + stdErr);
+
     QString result = QString("=== Command: %1 ===\n"
                            "Exit code: %2\n"
                            "Output:\n%3")

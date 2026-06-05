@@ -1035,10 +1035,12 @@ ApplicationWindow {
             checkpointRestoreDialog.show(checkpointId, description, files)
         }
         function onErrorOccurred(message) {
-            errorBanner.showError(message)
+            if ((message || "").includes("Failed to start process"))
+                return
+            console.warn(message)
         }
         function onSuccessOccurred(message) {
-            errorBanner.showSuccess(message)
+            console.info(message)
         }
     }
 
@@ -1054,9 +1056,4 @@ ApplicationWindow {
         return Math.max(root.minAgentWidth, available - reserved)
     }
 
-    // ── Error banner ──────────────────────────────────────────────────────
-    ErrorBanner {
-        id: errorBanner
-        anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-    }
 }

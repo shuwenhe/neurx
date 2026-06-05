@@ -10,6 +10,8 @@ Item {
 
     property string searchQuery: ""
     property var selectedTool: ({})
+    property var selectedToolPermission: ({})
+    property var selectedToolStats: ({})
     property string argumentText: "{}"
     property var lastResult: ({})
 
@@ -36,6 +38,12 @@ Item {
         function onToolCatalogChanged() {
             if (!root.selectedTool.name && root.filteredTools.length > 0)
                 root.selectTool(root.filteredTools[0])
+            else
+                root.refreshSelectedToolState()
+        }
+
+        function onExecutionTimelineChanged() {
+            root.refreshSelectedToolState()
         }
     }
 
@@ -43,6 +51,17 @@ Item {
         root.selectedTool = tool || {}
         root.argumentText = "{}"
         root.lastResult = {}
+        root.refreshSelectedToolState()
+    }
+
+    function refreshSelectedToolState() {
+        if (!root.selectedTool.name) {
+            root.selectedToolPermission = ({})
+            root.selectedToolStats = ({})
+            return
+        }
+        root.selectedToolPermission = agent.toolPermissionState(root.selectedTool.name || "", {})
+        root.selectedToolStats = agent.toolExecutionStats(root.selectedTool.name || "")
     }
 
     function permissionBadge(text) {
@@ -52,6 +71,8 @@ Item {
     Component.onCompleted: {
         if (!root.selectedTool.name && root.filteredTools.length > 0)
             root.selectTool(root.filteredTools[0])
+        else
+            root.refreshSelectedToolState()
     }
 
     Rectangle {
@@ -298,7 +319,7 @@ Item {
                                     id: permissionColumn
                                     anchors.fill: parent
                                     anchors.margins: 8
-                                    spacing: 4
+                                    spacing: 6
 
                                     Label {
                                         text: "Permission"
@@ -307,13 +328,35 @@ Item {
                                         font.bold: true
                                     }
 
-                                    Label {
+                                    GridLayout {
                                         Layout.fillWidth: true
-                                        text: JSON.stringify(agent.toolPermissionState(root.selectedTool.name || "", {}), null, 2)
-                                        color: Theme.textMuted
-                                        font.family: Theme.monoFont.family
-                                        font.pixelSize: Theme.fontXs
-                                        wrapMode: Text.WordWrap
+                                        columns: 2
+                                        columnSpacing: 12
+                                        rowSpacing: 4
+
+                                        Label { text: "Risk"; color: Theme.textMuted }
+                                        Label {
+                                            text: root.selectedToolPermission.riskLevel || root.selectedTool.riskLevel || "unknown"
+                                            color: Theme.textPrimary
+                                        }
+
+                                        Label { text: "Approval"; color: Theme.textMuted }
+                                        Label {
+                                            text: root.selectedToolPermission.requiresApproval ? "required" : "not required"
+                                            color: Theme.textPrimary
+                                        }
+
+                                        Label { text: "Policy"; color: Theme.textMuted }
+                                        Label {
+                                            text: root.selectedToolPermission.policyName || String(root.selectedToolPermission.policy || "unknown")
+                                            color: Theme.textPrimary
+                                        }
+
+                                        Label { text: "Read-only"; color: Theme.textMuted }
+                                        Label {
+                                            text: root.selectedToolPermission.readOnlyMode ? "enabled" : "disabled"
+                                            color: Theme.textPrimary
+                                        }
                                     }
                                 }
                             }
@@ -345,16 +388,19 @@ Item {
                                         rowSpacing: 4
 
                                         Label { text: "Runs"; color: Theme.textMuted }
-                                        Label { text: String(agent.toolExecutionStats(root.selectedTool.name || "").totalExecutions || 0); color: Theme.textPrimary }
+                                        Label { text: String(root.selectedToolStats.totalExecutions || 0); color: Theme.textPrimary }
+
+                                        Label { text: "Running"; color: Theme.textMuted }
+                                        Label { text: String(root.selectedToolStats.runningExecutions || 0); color: Theme.textPrimary }
 
                                         Label { text: "Success"; color: Theme.textMuted }
-                                        Label { text: String(agent.toolExecutionStats(root.selectedTool.name || "").successfulExecutions || 0); color: Theme.textPrimary }
+                                        Label { text: String(root.selectedToolStats.successfulExecutions || 0); color: Theme.textPrimary }
 
                                         Label { text: "Failed"; color: Theme.textMuted }
-                                        Label { text: String(agent.toolExecutionStats(root.selectedTool.name || "").failedExecutions || 0); color: Theme.textPrimary }
+                                        Label { text: String(root.selectedToolStats.failedExecutions || 0); color: Theme.textPrimary }
 
                                         Label { text: "Success %"; color: Theme.textMuted }
-                                        Label { text: Number(agent.toolExecutionStats(root.selectedTool.name || "").successRate || 0).toFixed(1) + "%"; color: Theme.textPrimary }
+                                        Label { text: Number(root.selectedToolStats.successRate || 0).toFixed(1) + "%"; color: Theme.textPrimary }
                                     }
                                 }
                             }
