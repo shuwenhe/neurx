@@ -1187,8 +1187,8 @@ Item {
                                     }
                                     clip: true
                                     contentWidth: -1
+                                    ScrollBar.vertical: CustomScrollBar {}
                                     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
-                                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
                                     TextArea {
                                         id: editorArea
@@ -1287,6 +1287,11 @@ Item {
                                             if (agent.currentFilePath)
                                                 forceActiveFocus()
                                         }
+                                    }
+
+                                    SyntaxHighlighter {
+                                        textDocument: editorArea.textDocument
+                                        language: agent.currentFilePath ? agent.currentFilePath.split('.').pop() : ""
                                     }
 
                                     Repeater {
