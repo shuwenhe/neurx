@@ -552,7 +552,7 @@ Item {
                 contentHeight: treeColumn.implicitHeight
                 boundsBehavior: Flickable.StopAtBounds
 
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: CustomScrollBar {}
                 ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
 
                 property Item currentFileMarker: null
