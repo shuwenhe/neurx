@@ -1303,6 +1303,9 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     if (toolRegistrationPath.isEmpty()) {
         toolRegistrationPath = QDir::homePath();
         qDebug() << "[AgentController::init] No workspace set, using home dir for tool registration:" << toolRegistrationPath;
+    } else {
+        // Ensure the path is absolute and clean
+        toolRegistrationPath = QDir(toolRegistrationPath).absolutePath();
     }
 
     if (m_sandboxManager) {
@@ -1494,6 +1497,7 @@ QVariantMap AgentController::buildToolPermissionState(const QString &toolName, c
             : context.value(QStringLiteral("command")).toString();
         const AskForApproval policy = m_approvalManager->getPolicyFor(toolName, resource);
         out.insert(QStringLiteral("policy"), int(policy));
+        out.insert(QStringLiteral("policyName"), askForApprovalToString(policy));
         out.insert(QStringLiteral("readOnlyMode"), m_approvalManager->isReadOnlyMode());
     }
     return out;
@@ -1693,7 +1697,8 @@ QVariantMap AgentController::toolExecutionStats(const QString &toolName) const
     if (toolName.trimmed().isEmpty())
         return stats;
 
-    int total = 0;
+    int started = 0;
+    int running = 0;
     int success = 0;
     int failed = 0;
     QString lastUsedAt;
@@ -1704,20 +1709,32 @@ QVariantMap AgentController::toolExecutionStats(const QString &toolName) const
         const QString kind = ev.value(QStringLiteral("kind")).toString();
         if (kind != QStringLiteral("tool_execution"))
             continue;
-        ++total;
         const QString status = ev.value(QStringLiteral("status")).toString();
-        if (status == QStringLiteral("done"))
+        if (status == QStringLiteral("running")) {
+            ++started;
+            ++running;
+        } else if (status == QStringLiteral("done")) {
+            ++started;
             ++success;
-        else if (status == QStringLiteral("error"))
+        } else if (status == QStringLiteral("error")) {
+            ++started;
             ++failed;
+        }
         lastUsedAt = ev.value(QStringLiteral("timestamp")).toString();
     }
 
+    const int finished = success + failed;
+    qDebug() << "[toolExecutionStats]" << toolName 
+             << "started=" << started << "running=" << running 
+             << "success=" << success << "failed=" << failed 
+             << "finished=" << finished;
     stats.insert(QStringLiteral("toolName"), toolName);
-    stats.insert(QStringLiteral("totalExecutions"), total);
+    stats.insert(QStringLiteral("totalExecutions"), finished);
+    stats.insert(QStringLiteral("startedExecutions"), started);
+    stats.insert(QStringLiteral("runningExecutions"), running);
     stats.insert(QStringLiteral("successfulExecutions"), success);
     stats.insert(QStringLiteral("failedExecutions"), failed);
-    stats.insert(QStringLiteral("successRate"), total > 0 ? (100.0 * success) / total : 0.0);
+    stats.insert(QStringLiteral("successRate"), finished > 0 ? (100.0 * success) / finished : 0.0);
     stats.insert(QStringLiteral("lastUsedAt"), lastUsedAt);
     return stats;
 }
@@ -1880,6 +1897,10 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
         });
 
     const ToolResult toolResult = tool->execute(callId, variantMapToJsonObject(arguments));
+    qDebug() << "[AgentController] Tool execution result:" 
+             << "tool=" << toolName 
+             << "isError=" << toolResult.isError 
+             << "content=" << toolResult.content.left(100);
     disconnect(outputConn);
     disconnect(eventConn);
 
