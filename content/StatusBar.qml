@@ -6,7 +6,7 @@ import NeurXCode
 Rectangle {
     id: statusRoot
     height: 22
-    color: Theme.accent
+    color: "#2d2d30"
 
     required property var agent
     property int cursorLine: 1

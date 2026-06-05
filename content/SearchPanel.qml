@@ -220,7 +220,7 @@ Item {
                     running: searching
                 }
 
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: CustomScrollBar {}
             }
         }
     }

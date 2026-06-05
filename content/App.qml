@@ -347,6 +347,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             currentIndex: appSettings.lastAgentTabIndex
                             onCurrentIndexChanged: appSettings.lastAgentTabIndex = currentIndex
+                            background: Rectangle { color: "#1e1e1e"; border.color: "#3e3e42"; border.width: 1 }
 
                             TabButton { text: "Chat" }
                             TabButton { text: "Search" }
@@ -791,7 +792,7 @@ ApplicationWindow {
     // ── Top toolbar ──────────────────────────────────────────────────────────────
     header: ToolBar {
         height: 44
-        background: Rectangle { color: Theme.surface; border.color: Theme.border; border.width: 1 }
+        background: Rectangle { color: "#1e1e1e"; border.color: "#3e3e42"; border.width: 1 }
 
         RowLayout {
             anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
