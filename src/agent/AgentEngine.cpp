@@ -107,6 +107,7 @@ void AgentEngine::setStatus(AgentStatus s)
 
 void AgentEngine::appendMessage(const AgentMessage &msg)
 {
+    qDebug() << "[AgentEngine::appendMessage]" << "role=" << (int)msg.role << "content=" << msg.content.left(50);
     m_history.append(msg);
     emit messageAdded(msg);
 }
