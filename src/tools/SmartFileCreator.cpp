@@ -188,18 +188,11 @@ ToolResult SmartFileCreator::execute(const QString& callId, const QJsonObject& a
         return {callId, name(), true, error};
     }
     
-    // Check sandbox
     QString absPath = safePath(req.path);
     if (absPath.isEmpty()) {
         return {callId, name(), true, "Path traversal denied."};
     }
-    
-    if (m_sandboxManager) {
-        if (!m_sandboxManager->canAccess(absPath, FileSystemAccessMode::Write)) {
-            return {callId, name(), true, "Sandbox policy denied write access."};
-        }
-    }
-    
+
     // Check overwrite
     if (QFile::exists(absPath) && !req.overwrite) {
         return {callId, name(), true, "File already exists. Use overwrite=true to replace."};
@@ -234,8 +227,6 @@ ToolResult SmartFileCreator::createSimpleFile(const QString& callId, const FileC
     const QString absPath = safePath(req.path);
     if (absPath.isEmpty())
         return {callId, name(), true, "Path traversal denied."};
-    if (m_sandboxManager && !m_sandboxManager->canAccess(absPath, FileSystemAccessMode::Write))
-        return {callId, name(), true, "Sandbox policy denied write access."};
     if (QFile::exists(absPath) && !req.overwrite)
         return {callId, name(), true, "File already exists. Use overwrite=true to replace."};
     
@@ -969,13 +960,10 @@ QString SmartFileCreator::safePath(const QString& relOrAbsPath) const
 {
     if (relOrAbsPath.trimmed().isEmpty())
         return QString();
-    const QString abs = QFileInfo(m_root.absoluteFilePath(relOrAbsPath)).absoluteFilePath();
-    // Prevent path traversal
-    const QString workspaceRoot = QFileInfo(m_root.absolutePath()).absoluteFilePath();
-    if (abs != workspaceRoot && !abs.startsWith(workspaceRoot + QStringLiteral("/"))) {
-        return QString();
-    }
-    return abs;
+    const QFileInfo info(relOrAbsPath);
+    if (info.isAbsolute())
+        return QDir::cleanPath(info.absoluteFilePath());
+    return QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
 }
 
 bool SmartFileCreator::ensureDirectoryExists(const QString& dirPath)

@@ -584,6 +584,7 @@ private:
     int      m_currentEditorIndex{-1};
     bool     m_autoApproveTools{false};
     bool     m_busy{false};
+    bool     m_engineSignalsConnected{false};
     QString  m_streamingText;
     bool     m_streamingAssistantActive{false};
     bool     m_restoringSessionHistory{false};

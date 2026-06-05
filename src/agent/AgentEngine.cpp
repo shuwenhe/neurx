@@ -267,8 +267,11 @@ void AgentEngine::approveTool(const QString &callId, bool approved)
         resultMsg.role = MessageRole::Tool;
         resultMsg.toolResults.append(denied);
         appendMessage(resultMsg);
+        return;
     }
-    // If approved, the runLoop re-checks and proceeds.
+
+    // Approval must remove the pending entry so the waiting runLoop can continue.
+    m_pendingApprovals.remove(callId);
 }
 
 void AgentEngine::runLoop()

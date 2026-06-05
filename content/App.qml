@@ -340,25 +340,15 @@ ApplicationWindow {
                         Layout.maximumWidth: root.agentWidth
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        spacing: 8
+                        spacing: 0
 
-                        TabBar {
+                        Item {
                             id: agentTabs
                             Layout.fillWidth: true
-                            currentIndex: appSettings.lastAgentTabIndex
+                            Layout.preferredHeight: 0
+                            property int currentIndex: appSettings.lastAgentTabIndex
                             onCurrentIndexChanged: appSettings.lastAgentTabIndex = currentIndex
-                            background: Rectangle { color: "#1e1e1e"; border.color: "#3e3e42"; border.width: 1 }
-
-                            TabButton { text: "Chat" }
-                            TabButton { text: "Search" }
-                            TabButton { text: "Outline" }
-                            TabButton { text: "Terminal" }
-                            TabButton { text: "Activity" }
-                            TabButton { text: "CodeMagic" }
-                            TabButton { text: "Tools" }
-                            TabButton { text: "Problems" }
-                            TabButton { text: "Git" }
-                            TabButton { text: "History" }
+                            visible: false
                         }
 
                         StackLayout {
@@ -1022,9 +1012,7 @@ ApplicationWindow {
             // Close diff mode when switching files normally
             editorPanel.closeDiff()
         }
-        function onToolApprovalRequired(a, b, c, d, e, f, g) {
-            // Accept multiple parameters to handle signal argument variations
-            const callId = a, toolName = b, summary = c, riskLevel = d
+        function onToolApprovalRequired(callId, toolName, summary, riskLevel) {
             const risk = (riskLevel || "").toLowerCase()
             if (risk === "low") {
                 agentCtx.approveTool(callId, true)

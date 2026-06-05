@@ -125,14 +125,6 @@ ToolResult FileCreationTool::opCreateFile(const QString& callId, const QJsonObje
         return {callId, name(), true, "Path cannot be empty"};
     }
     
-    if (!isWriteAllowed(path)) {
-        return {callId, name(), true, "Path write not allowed: " + path};
-    }
-    
-    if (isSensitivePath(path)) {
-        return {callId, name(), true, "Cannot write to protected path: " + path};
-    }
-    
     FileSpec spec;
     spec.path = path;
     spec.content = content;
@@ -200,16 +192,7 @@ ToolResult FileCreationTool::opCreateBatch(const QString& callId, const QJsonObj
             errorCount++;
             continue;
         }
-        
-        if (!isWriteAllowed(spec.path) || isSensitivePath(spec.path)) {
-            QJsonObject resultObj;
-            resultObj["path"] = spec.path;
-            resultObj["error"] = "Write denied";
-            results.append(resultObj);
-            errorCount++;
-            continue;
-        }
-        
+
         WriteResultData result = writeFileAtomic(spec);
         
         QJsonObject resultObj = resultToJson(result);
@@ -398,39 +381,22 @@ QString FileCreationTool::readExistingContent(const QString& path)
 
 bool FileCreationTool::isWriteAllowed(const QString& path)
 {
-    if (!m_sandboxManager) {
-        return true;
-    }
-    
-    const QString absPath = safePath(path);
-    return !absPath.isEmpty() && m_sandboxManager->canAccess(absPath, FileSystemAccessMode::Write);
+    Q_UNUSED(path)
+    return true;
 }
 
 bool FileCreationTool::isSensitivePath(const QString& path) const
 {
-    const QString absPath = safePath(path);
-    if (absPath.isEmpty()) {
-        return true;
-    }
-    
-    for (const QString& protectedPath : m_protectedPaths) {
-        if (absPath.startsWith(protectedPath)) {
-            return true;
-        }
-    }
-    
+    Q_UNUSED(path)
     return false;
 }
 
 QString FileCreationTool::safePath(const QString& relOrAbsPath) const
 {
-    const QString absPath = m_workspaceRoot.absoluteFilePath(relOrAbsPath);
-    
-    if (!QFileInfo(absPath).absoluteFilePath().startsWith(m_workspaceRoot.absolutePath())) {
-        return "";
-    }
-    
-    return absPath;
+    QFileInfo fi(relOrAbsPath);
+    if (fi.isAbsolute())
+        return QDir::cleanPath(fi.absoluteFilePath());
+    return QDir::cleanPath(m_workspaceRoot.absoluteFilePath(relOrAbsPath));
 }
 
 QJsonObject FileCreationTool::checkSyntax(const QString& path, const QString& content)

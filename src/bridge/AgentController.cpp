@@ -2244,53 +2244,56 @@ void AgentController::setupEngine()
     }
     refreshSystemPrompt();
 
-    connect(m_engine, &AgentEngine::tokenReceived,
-            this, &AgentController::onTokenReceived);
-    connect(m_engine, &AgentEngine::messageAdded,
-            this, &AgentController::onMessageAdded);
-    connect(m_engine, &AgentEngine::toolExecuting,
-            this, &AgentController::onToolExecuting);
-    connect(m_engine, &AgentEngine::toolFinished,
-            this, &AgentController::onToolFinished);
-    connect(m_engine, &AgentEngine::toolOutputChunk,
-            this, &AgentController::onToolOutputChunk);
-    connect(m_engine, &AgentEngine::toolApprovalRequired,
-            this, [this](const ToolCall &call, const QString &riskLevel) {
-                qInfo().noquote() << "[agent] tool approval required:" << call.name
-                                  << "callId=" << call.id
-                                  << "risk=" << riskLevel;
-                appendExecutionEvent(
-                    QStringLiteral("approval"),
-                    riskLevel == QStringLiteral("high")
-                        ? QStringLiteral("Approval required")
-                        : QStringLiteral("Approval requested"),
-                    QStringLiteral("waiting"),
-                    riskLevel + QStringLiteral(" risk · ") + toolEventPreview(call.name, call.arguments),
-                    call.name,
-                    call.id);
-                saveTaskSession();
-                emit toolApprovalRequired(call.id, call.name,
-                    m_registry->tool(call.name)
-                        ? m_registry->tool(call.name)->summary(call.arguments)
-                        : call.name,
-                    riskLevel);
-            });
-    connect(m_engine, &AgentEngine::turnComplete,
-            this, [this]() {
-                qInfo().noquote() << "[agent] turn complete";
-                setBusy(false);
-                processScheduledReminderQueue();
-            });
-    connect(m_engine, &AgentEngine::errorOccurred,
-            this, [this](const QString &e) {
-                qWarning().noquote() << "[agent] error:" << e;
-                setBusy(false);
-                emit errorOccurred(e);
-            });
-    connect(m_engine, &AgentEngine::statusChanged,
-            this, [this](AgentEngine::AgentStatus s) {
-                setBusy(s != AgentEngine::AgentStatus::Idle);
-            });
+    if (!m_engineSignalsConnected) {
+        connect(m_engine, &AgentEngine::tokenReceived,
+                this, &AgentController::onTokenReceived);
+        connect(m_engine, &AgentEngine::messageAdded,
+                this, &AgentController::onMessageAdded);
+        connect(m_engine, &AgentEngine::toolExecuting,
+                this, &AgentController::onToolExecuting);
+        connect(m_engine, &AgentEngine::toolFinished,
+                this, &AgentController::onToolFinished);
+        connect(m_engine, &AgentEngine::toolOutputChunk,
+                this, &AgentController::onToolOutputChunk);
+        connect(m_engine, &AgentEngine::toolApprovalRequired,
+                this, [this](const ToolCall &call, const QString &riskLevel) {
+                    qInfo().noquote() << "[agent] tool approval required:" << call.name
+                                      << "callId=" << call.id
+                                      << "risk=" << riskLevel;
+                    appendExecutionEvent(
+                        QStringLiteral("approval"),
+                        riskLevel == QStringLiteral("high")
+                            ? QStringLiteral("Approval required")
+                            : QStringLiteral("Approval requested"),
+                        QStringLiteral("waiting"),
+                        riskLevel + QStringLiteral(" risk · ") + toolEventPreview(call.name, call.arguments),
+                        call.name,
+                        call.id);
+                    saveTaskSession();
+                    emit toolApprovalRequired(call.id, call.name,
+                        m_registry->tool(call.name)
+                            ? m_registry->tool(call.name)->summary(call.arguments)
+                            : call.name,
+                        riskLevel);
+                });
+        connect(m_engine, &AgentEngine::turnComplete,
+                this, [this]() {
+                    qInfo().noquote() << "[agent] turn complete";
+                    setBusy(false);
+                    processScheduledReminderQueue();
+                });
+        connect(m_engine, &AgentEngine::errorOccurred,
+                this, [this](const QString &e) {
+                    qWarning().noquote() << "[agent] error:" << e;
+                    setBusy(false);
+                    emit errorOccurred(e);
+                });
+        connect(m_engine, &AgentEngine::statusChanged,
+                this, [this](AgentEngine::AgentStatus s) {
+                    setBusy(s != AgentEngine::AgentStatus::Idle);
+                });
+        m_engineSignalsConnected = true;
+    }
 
     if (m_workspaceContext) {
         connect(m_workspaceContext, &WorkspaceContext::recentFilesChanged,
