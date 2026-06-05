@@ -5,27 +5,38 @@ import NeurXCode
 ScrollBar {
     id: control
     policy: ScrollBar.AsNeeded
-    width: control.hovered || control.pressed || control.active ? 12 : 9
+    property real collapsedWidth: 9
+    property real hoveredWidth: 12
+    property real thumbWidth: 8
+    property real thumbHeight: 28
+    property real inactiveOpacity: 0.5
+    property real activeOpacity: 1.0
+    property real backgroundOpacity: 0.1
+    property color thumbColor: "#424242"
+    property color hoverThumbColor: "#797979"
+    property color pressedThumbColor: "#969696"
+
+    width: control.hovered || control.pressed || control.active ? control.hoveredWidth : control.collapsedWidth
     minimumSize: 0.12
 
     contentItem: Rectangle {
-        implicitWidth: 8
-        implicitHeight: 28
-        radius: 4
+        implicitWidth: control.thumbWidth
+        implicitHeight: control.thumbHeight
+        radius: Math.max(2, control.thumbWidth / 2)
         color: control.pressed
-                ? "#969696"
-                : (control.hovered || control.active ? "#797979" : "#424242")
+                ? control.pressedThumbColor
+                : (control.hovered || control.active ? control.hoverThumbColor : control.thumbColor)
         opacity: control.pressed
-                ? 1.0
-                : (control.hovered || control.active ? 1.0 : 0.5)
+                ? control.activeOpacity
+                : (control.hovered || control.active ? control.activeOpacity : control.inactiveOpacity)
         Behavior on opacity { NumberAnimation { duration: 120 } }
         Behavior on color { ColorAnimation { duration: 120 } }
         Behavior on implicitWidth { NumberAnimation { duration: 120 } }
     }
 
     background: Item {
-        implicitWidth: 12
-        opacity: control.hovered || control.active ? 0.1 : 0.0
+        implicitWidth: control.hoveredWidth
+        opacity: control.hovered || control.active ? control.backgroundOpacity : 0.0
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 }
