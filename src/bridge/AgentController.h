@@ -495,6 +495,9 @@ private:
     void syncKnowledgeForPathChange(const QString &oldPath, const QString &newPath, bool wasDirectory);
     void unloadReminderTool();
     void processScheduledReminderQueue();
+    void refreshEditorFileWatchers();
+    void onWatchedFileChanged(const QString &path);
+    void reloadOpenDocumentFromDisk(const QString &path);
     bool shouldTrackSlashCommand(const QString &text) const;
     void recordSlashCommand(const QString &text);
     void startLocalGateway();
@@ -607,6 +610,7 @@ private:
     QString  m_lastWorkspaceActionDestination;
     QStringList m_mcpToolNames;
     QStringList m_recentSlashCommands;
+    QStringList m_watchedEditorPaths;
     QString  m_reminderSummary;
     QStringList m_pendingReminderPrompts;
     QString m_knowledgeSearchQuery;
