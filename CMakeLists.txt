@@ -89,6 +89,7 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "BracketMatcher\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CaseConverter\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditorHistory\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileWatcher\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToDefinition\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "InlineRename\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LineOperations\\.cpp$")
@@ -375,6 +376,68 @@ if(BUILD_CODEX_CLI)
 
     message(STATUS "[neurx] Codex CLI: cargo=${CARGO_EXECUTABLE}, profile=${CODEX_CARGO_PROFILE}")
     message(STATUS "[neurx] Codex CLI binary: ${CODEX_CLI_BINARY}")
+endif()
+
+# ── Gemini CLI (C++) ──────────────────────────────────────────────────────────
+# Builds the bundled Gemini CLI C++ workspace and copies the resulting binary
+# into the app output directory so GeminiTool can invoke it at runtime.
+#
+# Disable with:  cmake ... -DBUILD_GEMINI_CLI=OFF
+# ─────────────────────────────────────────────────────────────────────────────
+# Note: gemini-cli directory does not exist in this workspace, so disable by default
+option(BUILD_GEMINI_CLI "Build the Gemini CLI from the bundled C++ workspace" OFF)
+set(GEMINI_CLI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gemini-cli")
+if(BUILD_GEMINI_CLI)
+    # Map CMake build type → Gemini profile.
+    set(_gemini_cli_args "build" "-p" "gemini-cli")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(GEMINI_CLI_PROFILE "debug")
+    else()
+        set(GEMINI_CLI_PROFILE "release")
+        list(APPEND _gemini_cli_args "--release")
+    endif()
+
+    set(GEMINI_CLI_BINARY
+        "${GEMINI_CLI_DIR}/target/${GEMINI_CLI_PROFILE}/gemini${CMAKE_EXECUTABLE_SUFFIX}")
+
+    # ── Copy the binary into the runtime output tree ──────────────────────────
+    if(APPLE)
+        # macOS: place inside the .app bundle's Contents/MacOS/
+        add_custom_command(TARGET neurx-codeApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${GEMINI_CLI_BINARY}"
+                "$<TARGET_BUNDLE_DIR:neurx-codeApp>/Contents/MacOS/gemini"
+            COMMENT "[neurx] Copying Gemini CLI into .app bundle…"
+            VERBATIM
+        )
+        install(PROGRAMS "${GEMINI_CLI_BINARY}"
+                DESTINATION "neurx-codeApp.app/Contents/MacOS"
+                COMPONENT Runtime)
+    elseif(WIN32)
+        add_custom_command(TARGET neurx-codeApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${GEMINI_CLI_BINARY}"
+                "$<TARGET_FILE_DIR:neurx-codeApp>/gemini.exe"
+            COMMENT "[neurx] Copying Gemini CLI next to executable…"
+            VERBATIM
+        )
+        install(PROGRAMS "${GEMINI_CLI_BINARY}"
+                DESTINATION "."
+                COMPONENT Runtime)
+    else()
+        # Linux: place in the same directory as the app binary.
+        add_custom_command(TARGET neurx-codeApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${GEMINI_CLI_BINARY}"
+                "$<TARGET_FILE_DIR:neurx-codeApp>/gemini"
+            COMMENT "[neurx] Copying Gemini CLI next to executable…"
+            VERBATIM
+        )
+        install(PROGRAMS "${GEMINI_CLI_BINARY}"
+                DESTINATION "bin"
+                COMPONENT Runtime)
+    endif()
+    message(STATUS "[neurx] Gemini CLI binary: ${GEMINI_CLI_BINARY}")
 endif()
 
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
