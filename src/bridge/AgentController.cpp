@@ -1221,6 +1221,11 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     m_languageClient = LanguageClient::instance();
     m_gitService = GitService::instance();
 
+    if (m_fileService) {
+        connect(m_fileService, &FileService::fileChanged,
+                this, &AgentController::onWatchedFileChanged);
+    }
+
     // Phase 2: Advanced Features Providers
     m_trimWhitespaceProvider = new TrimTrailingWhitespaceProvider(this);
     m_formatDocumentProvider = new FormatDocumentProvider(this);
@@ -1335,6 +1340,10 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     if (!m_currentFilePath.isEmpty() && QFileInfo::exists(m_currentFilePath)) {
         openEditorFile(m_currentFilePath);
     }
+
+    connect(this, &AgentController::openFilesChanged,
+            this, &AgentController::refreshEditorFileWatchers);
+    refreshEditorFileWatchers();
 }
 
 AgentController::CodeMagicInput AgentController::resolveCodeMagicInput() const
@@ -2004,7 +2013,35 @@ QVariantMap AgentController::writeFileWithCodex(const QString &filePath,
     if (!workingDir.trimmed().isEmpty())
         arguments.insert(QStringLiteral("working_dir"), workingDir.trimmed());
 
-    return executeToolByName(QStringLiteral("codex_agent"), arguments);
+    QVariantMap result = executeToolByName(QStringLiteral("codex_agent"), arguments);
+    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+        return result;
+
+    if (!result.contains(QStringLiteral("error"))) {
+        for (auto &doc : m_documents) {
+            if (normalizeLocalFilePath(doc.path) == absolutePath) {
+                doc.content = content;
+                doc.savedContent = content;
+                doc.dirty = false;
+                break;
+            }
+        }
+
+        if (m_currentFilePath == absolutePath) {
+            m_currentFileContent = content;
+            emit currentFileContentChanged();
+        }
+
+        emit openFilesChanged();
+        if (m_workspaceIndex)
+            m_workspaceIndex->recordFileAccess(absolutePath);
+        if (m_workspaceContext)
+            m_workspaceContext->recordFileAccess(absolutePath);
+        saveSettings();
+        saveTaskSession();
+    }
+
+    return result;
 }
 
 void AgentController::setCurrentSelection(const QString &filePath, const QString &code,
@@ -4004,6 +4041,96 @@ void AgentController::openEditorFile(const QString &filePath)
     setCurrentEditorIndex(index);
     if (m_workspaceContext) m_workspaceContext->recordFileAccess(normalizedPath);
     if (m_workspaceIndex)   m_workspaceIndex->recordFileAccess(normalizedPath);
+}
+
+void AgentController::refreshEditorFileWatchers()
+{
+    if (!m_fileService)
+        return;
+
+    QStringList desiredPaths;
+    desiredPaths.reserve(m_documents.size());
+    for (const auto &doc : m_documents) {
+        const QString normalized = normalizeLocalFilePath(doc.path);
+        if (normalized.isEmpty() || desiredPaths.contains(normalized))
+            continue;
+        desiredPaths.append(normalized);
+    }
+
+    for (const QString &path : m_watchedEditorPaths) {
+        if (!desiredPaths.contains(path))
+            m_fileService->unwatchFile(path);
+    }
+
+    for (const QString &path : desiredPaths) {
+        if (!m_watchedEditorPaths.contains(path))
+            m_fileService->watchFile(path);
+    }
+
+    m_watchedEditorPaths = desiredPaths;
+}
+
+void AgentController::reloadOpenDocumentFromDisk(const QString &path)
+{
+    const QString normalizedPath = normalizeLocalFilePath(path);
+    if (normalizedPath.isEmpty())
+        return;
+
+    QFileInfo info(normalizedPath);
+    if (!info.exists() || !info.isFile())
+        return;
+
+    QFile file(normalizedPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    const QString diskContent = in.readAll();
+
+    for (int i = 0; i < m_documents.size(); ++i) {
+        auto &doc = m_documents[i];
+        if (normalizeLocalFilePath(doc.path) != normalizedPath)
+            continue;
+
+        if (doc.dirty && doc.content != diskContent) {
+            qWarning().noquote() << "[AgentController] Skipping auto-reload for dirty file:" << normalizedPath;
+            if (m_fileService)
+                m_fileService->watchFile(normalizedPath);
+            return;
+        }
+
+        if (doc.content == diskContent && doc.savedContent == diskContent) {
+            if (m_fileService)
+                m_fileService->watchFile(normalizedPath);
+            return;
+        }
+
+        doc.content = diskContent;
+        doc.savedContent = diskContent;
+        doc.dirty = false;
+
+        if (i == m_currentEditorIndex) {
+            m_currentFileContent = diskContent;
+            emit currentFileContentChanged();
+        }
+
+        emit openFilesChanged();
+        saveSettings();
+        saveTaskSession();
+        emit successOccurred(QStringLiteral("Auto-refreshed %1").arg(QFileInfo(normalizedPath).fileName()));
+
+        if (m_fileService)
+            m_fileService->watchFile(normalizedPath);
+        return;
+    }
+
+    if (m_fileService)
+        m_fileService->watchFile(normalizedPath);
+}
+
+void AgentController::onWatchedFileChanged(const QString &path)
+{
+    reloadOpenDocumentFromDisk(path);
 }
 
 bool AgentController::createWorkspaceEntry(const QString &parentPath, const QString &name, bool directory)

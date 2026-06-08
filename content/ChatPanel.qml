@@ -19,6 +19,7 @@ Item {
         { "label": "/review", "hint": "request code review" },
         { "label": "/search", "hint": "search workspace" },
         { "label": "/checkpoint", "hint": "open rollback" },
+        { "label": "/write", "hint": "write current file via Codex" },
         { "label": "/delegate", "hint": "delegate a subtask" }
     ]
     readonly property var recentSlashCommands: root.agent && root.agent.recentSlashCommands ? root.agent.recentSlashCommands : []
@@ -746,6 +747,13 @@ Item {
         if (txt.length === 0 && !hasAttachments)
             return
 
+        if (root.handleLocalSlashCommand(txt)) {
+            inputArea.text = ""
+            root.closeSlashMenu()
+            submissionCooldown.start()
+            return
+        }
+
         root.isSubmitting = true
         console.debug("[ChatPanel] Submitting message:", txt.substring(0, 50))
         inputArea.text = ""
@@ -760,6 +768,27 @@ Item {
         inputArea.text = command
         inputArea.cursorPosition = inputArea.text.length
         root.updateSlashState()
+    }
+
+    function handleLocalSlashCommand(text) {
+        const trimmed = text.trim()
+        if (trimmed.length === 0)
+            return false
+
+        const command = trimmed.split(/\s+/)[0].toLowerCase()
+        if (command !== "/write")
+            return false
+
+        if (!root.agent || !root.agent.currentFilePath || root.agent.currentFilePath.length === 0) {
+            console.warn("[ChatPanel] /write requires an open file")
+            return true
+        }
+
+        const filePath = root.agent.currentFilePath
+        const content = root.agent.currentFileContent || ""
+        console.debug("[ChatPanel] Writing current file via Codex:", filePath)
+        root.agent.writeFileWithCodex(filePath, content)
+        return true
     }
 
     function updateSlashState() {

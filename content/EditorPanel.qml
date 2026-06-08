@@ -189,6 +189,12 @@ Item {
         root.syncFromAgent()
     }
 
+    function writeCurrentFileWithCodex() {
+        if (!agent.currentFilePath)
+            return
+        agent.writeFileWithCodex(agent.currentFilePath, editorArea.text)
+    }
+
     Timer {
         id: autoSaveTimer
         interval: 2000
@@ -962,6 +968,24 @@ Item {
                             border.width: 1
                         }
                         onClicked: root.saveCurrentFile()
+                    }
+
+                    Button {
+                        text: "Codex Write"
+                        enabled: !!agent.currentFilePath && !agent.busy
+                        topPadding: 3
+                        bottomPadding: 3
+                        leftPadding: 8
+                        rightPadding: 8
+                        font.pixelSize: Theme.fontXs
+                        flat: true
+                        background: Rectangle {
+                            radius: 4
+                            color: parent.down ? Theme.border : (parent.hovered ? Theme.surface : "transparent")
+                            border.color: parent.hovered ? Theme.border : "transparent"
+                            border.width: 1
+                        }
+                        onClicked: root.writeCurrentFileWithCodex()
                     }
 
                     Button {
