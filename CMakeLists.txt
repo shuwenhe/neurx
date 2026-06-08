@@ -126,6 +126,14 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConfigGeneratorTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeMigrationTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityAnalysisTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubAutomationTool\\.cpp$")
+# Guardian Agent System - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RiskAssessor\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ApprovalStrategyManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GuardianAgentTool\\.cpp$")
+# Guardian Agent System - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RiskAssessor\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ApprovalStrategyManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GuardianAgentTool\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -192,6 +200,49 @@ add_library(neurx_ui STATIC
     src/editor/PeekView.cpp
     src/editor/StickyScroll.cpp
 
+    # Framework & Tool System
+    src/tools/ClaudeToolSystem.cpp
+    src/tools/ClaudeStandardTools.cpp
+    src/tools/FileSystemTool.cpp
+    src/tools/SearchTool.cpp
+    src/tools/ShellTool.cpp
+    src/tools/DockerShellTool.cpp
+    src/tools/PatchTool.cpp
+    src/tools/ApplyPatchTool.cpp
+    src/tools/CodexApplyPatchTool.cpp
+    src/tools/CodexTool.cpp
+    src/tools/CodexFileSystemTool.cpp
+    src/tools/DelegationTool.cpp
+    src/tools/KnowledgeTool.cpp
+    src/tools/WebSearchTool.cpp
+    src/tools/WebFetchTool.cpp
+    src/tools/GitHubTool.cpp
+    src/tools/GitLabTool.cpp
+    src/tools/JiraTool.cpp
+    src/tools/TodoTool.cpp
+    src/tools/ReminderTool.cpp
+    src/tools/MemoryTool.cpp
+    src/tools/CheckpointTool.cpp
+    src/tools/CheckpointManager.cpp
+    src/tools/UpdatePlanTool.cpp
+    src/tools/SkillTool.cpp
+    src/tools/CustomScriptTool.cpp
+    src/tools/SmartFileCreator.cpp
+    src/tools/McpClient.cpp
+    src/tools/DefaultToolDiscovery.cpp
+    src/tools/DefaultToolExecutor.cpp
+    src/tools/DefaultToolPermissionManager.cpp
+    src/tools/DefaultToolRegistry.cpp
+    src/tools/DefaultToolSchemaRegistry.cpp
+    src/tools/ToolCacheManager.cpp
+    src/tools/ToolChainManager.cpp
+    src/tools/ToolMetricsCollector.cpp
+    src/tools/ToolVersionManager.cpp
+    src/tools/LocalGatewayServer.cpp
+    src/tools/SessionStore.cpp
+    src/tools/McpProxyTool.cpp
+    src/tools/GeminiGroundingTool.cpp
+
     # Services: Required for AgentController integration
     src/services/NotificationService.cpp
     src/services/ProgressService.cpp
@@ -244,10 +295,20 @@ add_library(neurx_ui STATIC
     src/tools/CompilerIntegrationTool.cpp
     src/tools/ConfigGeneratorTool.cpp
 
+
+    # Guardian Agent System (Automated Approval & Risk Assessment)
+    src/agent/runtime/RiskAssessor.cpp
+    src/agent/runtime/ApprovalStrategyManager.cpp
+    src/agent/tools/GuardianAgentTool.cpp
     # File Operation Tools (Phase 4: Migration & Security)
     src/tools/CodeMigrationTool.cpp
     src/tools/SecurityAnalysisTool.cpp
     src/tools/GitHubAutomationTool.cpp
+
+    # Guardian Agent System (Automated Approval & Risk Assessment)
+    src/agent/runtime/RiskAssessor.cpp
+    src/agent/runtime/ApprovalStrategyManager.cpp
+    src/agent/tools/GuardianAgentTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
