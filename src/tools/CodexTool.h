@@ -22,6 +22,8 @@ public:
             "Codex will autonomously plan and execute multi-step operations "
             "(read/write files, run tests, apply patches, etc.) and return "
             "a summary of what it did. "
+            "It can also be used for exact file writes when file_path and "
+            "new_text are provided. "
             "Use for large, well-scoped tasks such as: refactoring a module, "
             "implementing a feature with tests, or fixing all lint errors. "
             "The 'task' parameter must be a detailed, self-contained description "
@@ -40,6 +42,8 @@ public:
     void setDefaultTimeoutMs(int ms) { m_timeoutMs = ms; }
 
 private:
+    QString buildWriteTask(const QString &filePath, const QString &newText, const QString &cwd) const;
+
     QString m_workingDir;
     QString m_codexBin{QStringLiteral("codex")};
     int     m_timeoutMs{300'000};   // 5 min – Codex may run multi-step loops
