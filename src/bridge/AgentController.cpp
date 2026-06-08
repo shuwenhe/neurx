@@ -54,6 +54,11 @@
 #include "tools/SecurityAnalysisTool.h"
 #include "tools/GitHubAutomationTool.h"
 
+// Guardian Agent System (Automated Approval & Risk Assessment)
+#include "agent/runtime/RiskAssessor.h"
+#include "agent/runtime/ApprovalStrategyManager.h"
+#include "agent/tools/GuardianAgentTool.h"
+
 // Phase 1 Framework Tools (Tool Registry Integrated)
 #include "tools/GitWorkflowTool.h"
 
@@ -3924,6 +3929,10 @@ void AgentController::setWorkspacePath(const QString &path)
     m_registry->registerTool(new CodeMigrationTool(path, m_registry));
     m_registry->registerTool(new SecurityAnalysisTool(path, m_registry));
     m_registry->registerTool(new GitHubAutomationTool(m_registry));
+
+    // 🛡️  Guardian Agent System - Automated Approval & Risk Assessment
+    qDebug() << "[AgentController] Registering Guardian Agent System...";
+    m_registry->registerTool(new GuardianAgentTool(m_registry));
 
     // 🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
     qDebug() << "[AgentController] Registering Phase 1 framework tools...";
