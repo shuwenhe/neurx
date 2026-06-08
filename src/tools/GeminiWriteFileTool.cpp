@@ -5,6 +5,9 @@
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QDebug>
+#include <QSaveFile>
+#include <QByteArray>
+#include <QJsonObject>
 
 GeminiWriteFileTool::GeminiWriteFileTool(QObject *parent) : BaseTool(parent)
 {
@@ -22,59 +25,86 @@ QString GeminiWriteFileTool::description() const
 
 QJsonObject GeminiWriteFileTool::parametersSchema() const
 {
-    return QJsonObject{
-        {"type", "object"},
-        {"properties", QJsonObject{
-            {"file_path", QJsonObject{
-                {"type", "string"},
-                {"description", "The absolute path to the file to write to."}
-            }},
-            {"content", QJsonObject{
-                {"type", "string"},
-                {"description", "The content to write to the file."}
-            }}
-        }},
-        {"required", QJsonArray{"file_path", "content"}}
-    };
+    // support either content (string) or contentsBase64 (base64-encoded binary)
+    QJsonObject props;
+    props["file_path"] = QJsonObject{{"type", "string"}, {"description", "Absolute path to write."}};
+    props["content"] = QJsonObject{{"type", "string"}, {"description", "UTF-8 text content."}};
+    props["contentsBase64"] = QJsonObject{{"type", "string"}, {"description", "Base64 encoded binary content."}};
+    props["options"] = QJsonObject{{"type", "object"}, {"description", "Write options"}};
+
+    return QJsonObject{{"type", "object"}, {"properties", props}, {"required", QJsonArray{"file_path"}}};
 }
 
 ToolResult GeminiWriteFileTool::execute(const QString &callId, const QJsonObject &args)
 {
     QString filePath = args["file_path"].toString();
-    QString content = args["content"].toString();
-
-    qInfo() << "[GeminiWriteFileTool]" << callId << "START: file_path=" << filePath << "content_size=" << content.size();
-
     if (filePath.isEmpty()) {
         qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: file_path is empty";
         return {callId, name(), true, "Error: file_path parameter is required"};
     }
 
-    if (content.isEmpty()) {
-        qWarning() << "[GeminiWriteFileTool]" << callId << "WARNING: content is empty, creating empty file";
+    // Determine content bytes: either contentsBase64 or content
+    QByteArray bytes;
+    if (args.contains("contentsBase64")) {
+        bytes = QByteArray::fromBase64(args.value("contentsBase64").toString().toLatin1());
+    } else if (args.contains("content")) {
+        bytes = args.value("content").toString().toUtf8();
+    } else {
+        // create empty file if nothing provided
+        bytes.clear();
     }
 
-    QFile file(filePath);
-    QDir dir = QFileInfo(file).dir();
+    // Options
+    bool atomic = false;
+    bool createDirs = true;
+    if (args.contains("options") && args.value("options").isObject()) {
+        QJsonObject opts = args.value("options").toObject();
+        if (opts.contains("atomic")) atomic = opts.value("atomic").toBool(false);
+        if (opts.contains("createDirs")) createDirs = opts.value("createDirs").toBool(true);
+    }
 
+    qInfo() << "[GeminiWriteFileTool]" << callId << "START: file_path=" << filePath << "bytes=" << bytes.size() << "atomic=" << atomic;
+
+    QFileInfo finfo(filePath);
+    QDir dir = finfo.dir();
     if (!dir.exists()) {
-        if (!dir.mkpath(".")) {
-            qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: Failed to create directory:" << dir.path();
-            return {callId, name(), true, "Error: Failed to create directory: " + dir.path()};
+        if (createDirs) {
+            if (!dir.mkpath(".")) {
+                qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: Failed to create directory:" << dir.path();
+                return {callId, name(), true, "Error: Failed to create directory: " + dir.path()};
+            }
+        } else {
+            return {callId, name(), true, "Parent directory does not exist: " + dir.path()};
         }
-        qInfo() << "[GeminiWriteFileTool]" << callId << "Created directory:" << dir.path();
     }
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QString error = file.errorString();
-        qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: Failed to open file:" << error;
-        return {callId, name(), true, "Error: Failed to open file for writing: " + error};
+    if (atomic) {
+        QSaveFile out(filePath);
+        if (!out.open(QIODevice::WriteOnly)) {
+            QString err = out.errorString();
+            qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: open QSaveFile:" << err;
+            return {callId, name(), true, "Error: Failed to open file for atomic write: " + err};
+        }
+        if (bytes.size()) {
+            qint64 written = out.write(bytes);
+            Q_UNUSED(written);
+        }
+        if (!out.commit()) {
+            QString err = out.errorString();
+            qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: commit QSaveFile:" << err;
+            return {callId, name(), true, "Error: Failed to commit atomic write: " + err};
+        }
+    } else {
+        QFile file(filePath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            QString err = file.errorString();
+            qWarning() << "[GeminiWriteFileTool]" << callId << "ERROR: open file:" << err;
+            return {callId, name(), true, "Error: Failed to open file for writing: " + err};
+        }
+        if (bytes.size()) file.write(bytes);
+        file.close();
     }
 
-    QTextStream out(&file);
-    out << content;
-    file.close();
-
-    qInfo() << "[GeminiWriteFileTool]" << callId << "SUCCESS: Wrote" << content.size() << "bytes to" << filePath;
+    qInfo() << "[GeminiWriteFileTool]" << callId << "SUCCESS: Wrote" << bytes.size() << "bytes to" << filePath;
     return {callId, name(), false, "Successfully wrote to file: " + filePath};
 }

@@ -22,6 +22,7 @@ class Tool : public QObject
     Q_OBJECT
 public:
     explicit Tool(QObject *parent = nullptr) : QObject(parent) {}
+    virtual ~Tool();
     virtual QString name() const = 0;
     virtual QString description() const { return {}; }
     virtual QJsonObject schema() const { return QJsonObject(); }

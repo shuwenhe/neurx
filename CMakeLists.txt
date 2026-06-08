@@ -107,11 +107,15 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "HookManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityScanner\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitWorkflowTool\\.cpp$")
 # File operation tools - compiled in neurx_ui library instead  
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "Tool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileMetadataTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "BatchFileOperationsTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AdvancedSearchTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSyncTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PermissionsManagerTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DirectoryTreeTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TextProcessingTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiReadFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiWriteFileTool\\.cpp$")
 
@@ -200,15 +204,27 @@ add_library(neurx_ui STATIC
 
     # Language Server & Other Infrastructure
     src/languages/LanguageClient.cpp
+    src/tools/Tool.cpp
     src/tools/GeminiReadFileTool.cpp
     src/tools/GeminiWriteFileTool.cpp
-    
+    src/tools/GeminiListFilesTool.cpp
+    src/tools/GeminiStatFileTool.cpp
+    src/tools/GeminiRemoveFileTool.cpp
+    src/tools/GeminiMkdirTool.cpp
+    src/tools/GeminiAppendFileTool.cpp
+    src/tools/GeminiExistsFileTool.cpp
+    src/tools/GeminiGrepTool.cpp
+    src/tools/GeminiRgTool.cpp
+
     # File Operation Tools (Phase 2)
     src/tools/EditFileTool.cpp
     src/tools/FileMetadataTool.cpp
     src/tools/BatchFileOperationsTool.cpp
     src/tools/AdvancedSearchTool.cpp
     src/tools/FileSyncTool.cpp
+    src/tools/PermissionsManagerTool.cpp
+    src/tools/DirectoryTreeTool.cpp
+    src/tools/TextProcessingTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
