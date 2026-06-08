@@ -46,7 +46,7 @@ void AgentEngine::setProvider(LLMProvider *provider)
         if (m_provider->providerId() == "gemini") {
             budget = 1000000; // 1M tokens for Gemini
         }
-        m_planner.setMaxTokens(budget);
+        m_planner.setMaxTokens(m_config.maxCompletionTokens);
         m_planner.setContextBudget(qMax(0, budget - 8192));
         m_planner.setTemperature(0.0f);
     }
@@ -66,7 +66,7 @@ void AgentEngine::setApprovalManager(ApprovalManager *manager)
 void AgentEngine::setConfig(const AgentEngineConfig &config)
 {
     m_config = config;
-    m_planner.setMaxTokens(m_config.contextWindowTokens);
+    m_planner.setMaxTokens(m_config.maxCompletionTokens);
     m_planner.setContextBudget(
         qMax(0, m_config.contextWindowTokens - 8192));
     m_planner.setTemperature(0.0f);
@@ -91,12 +91,23 @@ void AgentEngine::setActiveModel(const QString &model)
     emit activeModelChanged(model);
 }
 
+QList<AgentMessage> AgentEngine::history() const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_history;
+}
+
 void AgentEngine::setHistory(const QList<AgentMessage> &history)
 {
+    QMutexLocker locker(&m_mutex);
     m_history = history;
 }
 
-void AgentEngine::clearHistory() { m_history.clear(); }
+void AgentEngine::clearHistory()
+{
+    QMutexLocker locker(&m_mutex);
+    m_history.clear();
+}
 
 void AgentEngine::setStatus(AgentStatus s)
 {
@@ -108,7 +119,10 @@ void AgentEngine::setStatus(AgentStatus s)
 void AgentEngine::appendMessage(const AgentMessage &msg)
 {
     qDebug() << "[AgentEngine::appendMessage]" << "role=" << (int)msg.role << "content=" << msg.content.left(50);
-    m_history.append(msg);
+    {
+        QMutexLocker locker(&m_mutex);
+        m_history.append(msg);
+    }
     emit messageAdded(msg);
 }
 
@@ -259,6 +273,7 @@ void AgentEngine::interrupt() { m_interrupted = true; }
 
 void AgentEngine::approveTool(const QString &callId, bool approved)
 {
+    QMutexLocker locker(&m_mutex);
     if (!m_pendingApprovals.contains(callId)) return;
     if (!approved) {
         m_pendingApprovals.remove(callId);
@@ -266,6 +281,7 @@ void AgentEngine::approveTool(const QString &callId, bool approved)
         AgentMessage resultMsg;
         resultMsg.role = MessageRole::Tool;
         resultMsg.toolResults.append(denied);
+        locker.unlock();
         appendMessage(resultMsg);
         return;
     }
@@ -287,7 +303,7 @@ void AgentEngine::runLoop()
         // ── Plan request ─────────────────────────────────────────────────────
         const QString providerId = m_provider ? m_provider->providerId() : QString{};
         const LLMRequest req = m_planner.buildRequest(
-            m_history,
+            history(),
             m_activeModel,
             providerId,
             m_registry);
@@ -364,12 +380,19 @@ void AgentEngine::runLoop()
             if (m_interrupted) break;
 
             if (shouldRequireApproval(call)) {
-                m_pendingApprovals[call.id] = call;
+                {
+                    QMutexLocker locker(&m_mutex);
+                    m_pendingApprovals[call.id] = call;
+                }
                 emit toolApprovalRequired(call, approvalRiskLevel(call));
                 setStatus(AgentStatus::Waiting);
-                // Wait for approval (poll with small sleep — production would use semaphore)
-                while (m_pendingApprovals.contains(call.id) && !m_interrupted)
+                // Wait for approval
+                bool pending = true;
+                while (pending && !m_interrupted) {
                     QThread::msleep(100);
+                    QMutexLocker locker(&m_mutex);
+                    pending = m_pendingApprovals.contains(call.id);
+                }
                 setStatus(AgentStatus::Executing);
                 if (m_interrupted) break;
             }
