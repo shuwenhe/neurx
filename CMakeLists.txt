@@ -158,6 +158,11 @@ add_library(neurx_ui STATIC
     src/editor/OutlineProvider.cpp
     src/editor/SelectToBracket.cpp
     src/editor/SmartSelection.cpp
+
+    # Phase 4: Extensibility & Advanced Features
+    src/agent/HookManager.cpp
+    src/security/SecurityScanner.cpp
+    src/tools/GitWorkflowTool.cpp
     src/editor/WordHighlight.cpp
     src/editor/WordOperations.cpp
 
@@ -186,6 +191,8 @@ add_library(neurx_ui STATIC
 
     # Language Server & Other Infrastructure
     src/languages/LanguageClient.cpp
+    src/tools/GeminiReadFileTool.cpp
+    src/tools/GeminiWriteFileTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
@@ -400,13 +407,29 @@ if(BUILD_GEMINI_CLI)
     set(GEMINI_CLI_BINARY
         "${GEMINI_CLI_DIR}/target/${GEMINI_CLI_PROFILE}/gemini${CMAKE_EXECUTABLE_SUFFIX}")
 
+    set(GEMINI_COPY_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CopyGeminiCliIfExists.cmake")
+    file(WRITE "${GEMINI_COPY_SCRIPT}" [=[
+if(EXISTS "${src}")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${src}" "${dst}"
+        RESULT_VARIABLE copy_result
+    )
+    if(NOT copy_result EQUAL 0)
+        message(FATAL_ERROR "[neurx] Failed to copy Gemini CLI from ${src} to ${dst}")
+    endif()
+else()
+    message(STATUS "[neurx] Gemini CLI binary not found at ${src}; skipping bundle copy.")
+endif()
+]=])
+
     # ── Copy the binary into the runtime output tree ──────────────────────────
     if(APPLE)
         # macOS: place inside the .app bundle's Contents/MacOS/
         add_custom_command(TARGET neurx-codeApp POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${GEMINI_CLI_BINARY}"
-                "$<TARGET_BUNDLE_DIR:neurx-codeApp>/Contents/MacOS/gemini"
+            COMMAND ${CMAKE_COMMAND}
+                -Dsrc="${GEMINI_CLI_BINARY}"
+                -Ddst="$<TARGET_BUNDLE_DIR:neurx-codeApp>/Contents/MacOS/gemini"
+                -P "${GEMINI_COPY_SCRIPT}"
             COMMENT "[neurx] Copying Gemini CLI into .app bundle…"
             VERBATIM
         )
@@ -415,9 +438,10 @@ if(BUILD_GEMINI_CLI)
                 COMPONENT Runtime)
     elseif(WIN32)
         add_custom_command(TARGET neurx-codeApp POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${GEMINI_CLI_BINARY}"
-                "$<TARGET_FILE_DIR:neurx-codeApp>/gemini.exe"
+            COMMAND ${CMAKE_COMMAND}
+                -Dsrc="${GEMINI_CLI_BINARY}"
+                -Ddst="$<TARGET_FILE_DIR:neurx-codeApp>/gemini.exe"
+                -P "${GEMINI_COPY_SCRIPT}"
             COMMENT "[neurx] Copying Gemini CLI next to executable…"
             VERBATIM
         )
@@ -427,9 +451,10 @@ if(BUILD_GEMINI_CLI)
     else()
         # Linux: place in the same directory as the app binary.
         add_custom_command(TARGET neurx-codeApp POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${GEMINI_CLI_BINARY}"
-                "$<TARGET_FILE_DIR:neurx-codeApp>/gemini"
+            COMMAND ${CMAKE_COMMAND}
+                -Dsrc="${GEMINI_CLI_BINARY}"
+                -Ddst="$<TARGET_FILE_DIR:neurx-codeApp>/gemini"
+                -P "${GEMINI_COPY_SCRIPT}"
             COMMENT "[neurx] Copying Gemini CLI next to executable…"
             VERBATIM
         )
