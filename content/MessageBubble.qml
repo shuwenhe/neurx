@@ -333,6 +333,7 @@ Item {
         id: codeBlock
 
         Rectangle {
+            id: codeBlockRect
             width: root.isAssistant ? root.wideContentWidth - 24 : root.contentWidth - 24
             color: Theme.bg
             radius: Theme.radius
@@ -340,21 +341,88 @@ Item {
             visible: blockText.trim().length > 0
             implicitHeight: codeColumn.implicitHeight + 16
 
+            property bool hovered: false
+            property bool copied: false
+
             ColumnLayout {
                 id: codeColumn
                 anchors.fill: parent
                 anchors.margins: 8
                 spacing: 6
 
-                Label {
-                    text: blockLanguage.length > 0 ? blockLanguage : "code"
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.fontXs
-                    font.bold: true
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Label {
+                        text: blockLanguage.length > 0 ? blockLanguage : "code"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.fontXs
+                        font.bold: true
+                        Layout.fillWidth: true
+                    }
+
+                    // Copy button (Copilot style)
+                    Rectangle {
+                        Layout.preferredWidth: 70
+                        Layout.preferredHeight: 24
+                        radius: 4
+                        color: copyButtonMouseArea.containsMouse ? Theme.surfaceAlt : Theme.surface
+                        border.color: Theme.border
+                        border.width: 1
+                        opacity: codeBlockRect.hovered || codeBlockRect.copied ? 1.0 : 0.0
+                        visible: opacity > 0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 4
+
+                            // Icon (copy or checkmark)
+                            Label {
+                                text: codeBlockRect.copied ? "✓" : "⎘"
+                                color: codeBlockRect.copied ? Theme.success : Theme.textMuted
+                                font.pixelSize: Theme.fontSm
+                            }
+
+                            Label {
+                                text: codeBlockRect.copied ? "Copied" : "Copy"
+                                color: codeBlockRect.copied ? Theme.success : Theme.textMuted
+                                font.pixelSize: Theme.fontXs
+                            }
+                        }
+
+                        MouseArea {
+                            id: copyButtonMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                // Copy the code text to clipboard
+                                codeTextEdit.selectAll()
+                                codeTextEdit.copy()
+                                codeTextEdit.deselect()
+                                
+                                // Show "Copied" feedback
+                                codeBlockRect.copied = true
+                                copiedTimer.restart()
+                            }
+                        }
+
+                        Timer {
+                            id: copiedTimer
+                            interval: 2000
+                            onTriggered: codeBlockRect.copied = false
+                        }
+                    }
                 }
 
                 TextEdit {
-                    width: parent.width
+                    id: codeTextEdit
+                    Layout.fillWidth: true
                     text: blockText
                     wrapMode: TextEdit.WrapAnywhere
                     color: Theme.textPrimary
@@ -368,6 +436,16 @@ Item {
                         onWheel: (wheel) => { wheel.accepted = false }
                     }
                 }
+            }
+
+            // Hover detection
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.NoButton
+                onEntered: codeBlockRect.hovered = true
+                onExited: codeBlockRect.hovered = false
+                propagateComposedEvents: true
             }
         }
     }
