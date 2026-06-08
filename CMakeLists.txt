@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.21.1)
 
 option(LINK_INSIGHT "Link Qt Insight Tracker library" ON)
-option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
+# Qt Design Studio components pull a remote repository during configure.
+# Keep them opt-in so ordinary local builds do not fail when offline or
+# behind a restricted network.
+option(BUILD_QDS_COMPONENTS "Build design studio components" OFF)
+option(NEURX_ALLOW_QDS_FETCH "Allow fetching Qt Design Studio components from the network" OFF)
 
 project(neurx-codeApp LANGUAGES CXX)
 
@@ -140,6 +144,7 @@ add_library(neurx_ui STATIC
     src/editor/FoldingManager.cpp
     src/editor/SnippetManager.cpp
     src/editor/CommentManager.cpp
+    src/editor/FileWatcher.cpp
 
     # Phase 3+: Advanced Editor Features
     src/editor/BracketMatcher.cpp
@@ -377,6 +382,14 @@ set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
     CACHE STRING "Import paths for Qt Creator's code model"
     FORCE
 )
+
+if (BUILD_QDS_COMPONENTS AND NOT NEURX_ALLOW_QDS_FETCH)
+    message(WARNING
+        "[neurx] BUILD_QDS_COMPONENTS is ON but NEURX_ALLOW_QDS_FETCH is OFF. "
+        "Skipping Qt Design Studio components to avoid configure failures when network access is unavailable. "
+        "Enable both options explicitly if you want CMake to fetch them.")
+    set(BUILD_QDS_COMPONENTS OFF CACHE BOOL "" FORCE)
+endif()
 
 if (BUILD_QDS_COMPONENTS)
     include(${CMAKE_CURRENT_SOURCE_DIR}/qmlcomponents)
