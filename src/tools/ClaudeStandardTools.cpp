@@ -11,6 +11,22 @@
 #include <QDateTime>
 #include <QSaveFile>
 
+#include "tools/GeminiListFilesTool.h"
+#include "tools/GeminiStatFileTool.h"
+#include "tools/GeminiRemoveFileTool.h"
+#include "tools/GeminiMkdirTool.h"
+#include "tools/GeminiAppendFileTool.h"
+#include "tools/GeminiExistsFileTool.h"
+#include "tools/GeminiRgTool.h"
+#include "tools/GeminiReadFileTool.h"
+#include "tools/GeminiWriteFileTool.h"
+#include "tools/GeminiChmodTool.h"
+#include "tools/GeminiHashTool.h"
+#include "tools/GeminiSymlinkTool.h"
+#include "tools/GeminiMoveFileTool.h"
+#include "tools/GeminiCopyFileTool.h"
+#include "tools/GeminiWriteBatchTool.h"
+
 namespace {
 
 bool isPathInsideWorkspace(const QString &path, const QString &workspaceRoot)
@@ -510,7 +526,7 @@ QString MultiEditTool::safePath(const QString& relOrAbsPath) const
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ReadTool Implementation
-// ══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 
 ReadTool::ReadTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)
@@ -1132,6 +1148,23 @@ void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
     registry->registerTool(createBashTool(workspaceRoot, sandboxManager));
     registry->registerTool(createGrepTool(workspaceRoot, sandboxManager));
     registry->registerTool(createGlobTool(workspaceRoot, sandboxManager));
+
+    // Register additional Gemini tools
+    registry->registerTool(createGeminiListFilesAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiStatFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiRemoveFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiMkdirAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiAppendFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiExistsFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiRgAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiReadFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiWriteFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiChmodAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiHashAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiSymlinkAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiMoveFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiCopyFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiWriteBatchAdapter(workspaceRoot, sandboxManager));
 }
 
 WriteTool* ClaudeStandardToolFactory::createWriteTool(const QString& workspaceRoot,
@@ -1188,4 +1221,111 @@ GlobTool* ClaudeStandardToolFactory::createGlobTool(const QString& workspaceRoot
     auto tool = new GlobTool(workspaceRoot);
     tool->setSandboxManager(sandboxManager);
     return tool;
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiListFilesAdapter(const QString& workspaceRoot,
+                                                               SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    auto tool = new GeminiListFilesTool();
+    // Gemini tools currently don't use sandboxManager directly but could be extended
+    return tool;
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiStatFileAdapter(const QString& workspaceRoot,
+                                                             SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiStatFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiRemoveFileAdapter(const QString& workspaceRoot,
+                                                               SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiRemoveFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiMkdirAdapter(const QString& workspaceRoot,
+                                                         SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiMkdirTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiAppendFileAdapter(const QString& workspaceRoot,
+                                                              SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiAppendFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiExistsFileAdapter(const QString& workspaceRoot,
+                                                              SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiExistsFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiRgAdapter(const QString& workspaceRoot,
+                                                       SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiRgTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiReadFileAdapter(const QString& workspaceRoot,
+                                                              SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiReadFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiWriteFileAdapter(const QString& workspaceRoot,
+                                                               SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiWriteFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiChmodAdapter(const QString& workspaceRoot,
+                                                           SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiChmodTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiHashAdapter(const QString& workspaceRoot,
+                                                          SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiHashTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiSymlinkAdapter(const QString& workspaceRoot,
+                                                             SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiSymlinkTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiMoveFileAdapter(const QString& workspaceRoot,
+                                                              SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiMoveFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiCopyFileAdapter(const QString& workspaceRoot,
+                                                              SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiCopyFileTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createGeminiWriteBatchAdapter(const QString& workspaceRoot,
+                                                                SandboxManager* sandboxManager)
+{
+    Q_UNUSED(workspaceRoot);
+    return new GeminiWriteBatchTool();
 }

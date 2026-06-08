@@ -1,18 +1,18 @@
 #ifndef GEMINIMKDIRTOOL_H
 #define GEMINIMKDIRTOOL_H
 
-#include "tools/Tool.h"
+#include "agent/AgentToolRegistry.h"
 #include <QJsonObject>
 
-class GeminiMkdirTool : public Tool
+class GeminiMkdirTool : public BaseTool
 {
     Q_OBJECT
 public:
     explicit GeminiMkdirTool(QObject *parent = nullptr);
     QString name() const override;
     QString description() const override;
-    QJsonObject schema() const override;
-    QJsonObject run(const QJsonObject &args) override;
+    QJsonObject parametersSchema() const override;
+    ToolResult execute(const QString &callId, const QJsonObject &args) override;
 };
 
 #endif // GEMINIMKDIRTOOL_H

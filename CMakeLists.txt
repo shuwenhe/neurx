@@ -118,6 +118,10 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DirectoryTreeTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TextProcessingTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiReadFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiWriteFileTool\\.cpp$")
+# Phase 3 file operation tools - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PatchGeneratorTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CompilerIntegrationTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConfigGeneratorTool\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -204,7 +208,6 @@ add_library(neurx_ui STATIC
 
     # Language Server & Other Infrastructure
     src/languages/LanguageClient.cpp
-    src/tools/Tool.cpp
     src/tools/GeminiReadFileTool.cpp
     src/tools/GeminiWriteFileTool.cpp
     src/tools/GeminiListFilesTool.cpp
@@ -218,6 +221,9 @@ add_library(neurx_ui STATIC
     src/tools/GeminiHashTool.cpp
     src/tools/GeminiSymlinkTool.cpp
     src/tools/GeminiChmodTool.cpp
+    src/tools/GeminiMoveFileTool.cpp
+    src/tools/GeminiCopyFileTool.cpp
+    src/tools/GeminiWriteBatchTool.cpp
 
     # File Operation Tools (Phase 2)
     src/tools/EditFileTool.cpp
@@ -228,6 +234,11 @@ add_library(neurx_ui STATIC
     src/tools/PermissionsManagerTool.cpp
     src/tools/DirectoryTreeTool.cpp
     src/tools/TextProcessingTool.cpp
+
+    # File Operation Tools (Phase 3: Compiler & Config)
+    src/tools/PatchGeneratorTool.cpp
+    src/tools/CompilerIntegrationTool.cpp
+    src/tools/ConfigGeneratorTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC

@@ -1,18 +1,18 @@
 #ifndef GEMINIAPPENDFILETOOL_H
 #define GEMINIAPPENDFILETOOL_H
 
-#include "tools/Tool.h"
+#include "agent/AgentToolRegistry.h"
 #include <QJsonObject>
 
-class GeminiAppendFileTool : public Tool
+class GeminiAppendFileTool : public BaseTool
 {
     Q_OBJECT
 public:
     explicit GeminiAppendFileTool(QObject *parent = nullptr);
     QString name() const override;
     QString description() const override;
-    QJsonObject schema() const override;
-    QJsonObject run(const QJsonObject &args) override;
+    QJsonObject parametersSchema() const override;
+    ToolResult execute(const QString &callId, const QJsonObject &args) override;
 };
 
 #endif // GEMINIAPPENDFILETOOL_H
