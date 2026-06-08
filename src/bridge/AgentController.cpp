@@ -33,6 +33,24 @@
 #include "tools/SkillTool.h"
 #include "tools/ClaudeStandardTools.h"
 #include "tools/CodexApplyPatchTool.h"
+
+// Phase 2 File Operation Tools
+#include "tools/EditFileTool.h"
+#include "tools/FileMetadataTool.h"
+#include "tools/BatchFileOperationsTool.h"
+#include "tools/AdvancedSearchTool.h"
+#include "tools/FileSyncTool.h"
+#include "tools/PermissionsManagerTool.h"
+#include "tools/DirectoryTreeTool.h"
+#include "tools/TextProcessingTool.h"
+
+// Phase 1 Framework Tools (Tool Registry Integrated)
+#include "tools/GitWorkflowTool.h"
+
+// Phase 1 Framework Components (Non-tool Infrastructure)
+// TODO: HookManager - For lifecycle hook management and interception
+// TODO: SecurityScanner - For code pattern scanning and security validation
+
 #include "services/KeyBindingManager.h"
 #include <QFile>
 #include <QGuiApplication>
@@ -3870,6 +3888,28 @@ void AgentController::setWorkspacePath(const QString &path)
     });
     m_registry->registerTool(todoTool);
     m_registry->registerTool(new UpdatePlanTool(todoTool, m_registry));
+
+    // 🔧 Phase 2: File Operation Tools - Batch 1
+    qDebug() << "[AgentController] Registering Phase 2 file operation tools (Batch 1)...";
+    m_registry->registerTool(new EditFileTool(path, m_registry));
+    m_registry->registerTool(new FileMetadataTool(path, m_registry));
+    m_registry->registerTool(new BatchFileOperationsTool(path, m_registry));
+    m_registry->registerTool(new AdvancedSearchTool(path, m_registry));
+    m_registry->registerTool(new FileSyncTool(path, m_registry));
+
+    // 🔧 Phase 2: File Operation Tools - Batch 2
+    qDebug() << "[AgentController] Registering Phase 2 file operation tools (Batch 2)...";
+    m_registry->registerTool(new PermissionsManagerTool(path, m_registry));
+    m_registry->registerTool(new DirectoryTreeTool(path, m_registry));
+    m_registry->registerTool(new TextProcessingTool(path, m_registry));
+
+    // 🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
+    qDebug() << "[AgentController] Registering Phase 1 framework tools...";
+    m_registry->registerTool(new GitWorkflowTool(m_registry));
+    
+    // TODO: Integrate HookManager and SecurityScanner as non-tool components
+    // HookManager: For lifecycle hook management
+    // SecurityScanner: For code pattern scanning and security validation
 
     if (auto *fileTool = qobject_cast<FileSystemTool *>(m_registry->tool("file_system")))
         fileTool->setSandboxManager(m_sandboxManager);

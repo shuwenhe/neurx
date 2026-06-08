@@ -215,6 +215,9 @@ add_library(neurx_ui STATIC
     src/tools/GeminiExistsFileTool.cpp
     src/tools/GeminiGrepTool.cpp
     src/tools/GeminiRgTool.cpp
+    src/tools/GeminiHashTool.cpp
+    src/tools/GeminiSymlinkTool.cpp
+    src/tools/GeminiChmodTool.cpp
 
     # File Operation Tools (Phase 2)
     src/tools/EditFileTool.cpp
