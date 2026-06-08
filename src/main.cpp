@@ -16,6 +16,7 @@
 #include "bridge/AgentController.h"
 #include "bridge/SyntaxHighlighter.h"
 #include "bridge/EditorCommandBridge.h"
+#include "agent/AgentMessage.h"
 
 // New editor features (Phase 2)
 #include "editor/BracketMatcher.h"
@@ -48,6 +49,14 @@ int main(int argc, char *argv[])
     app.setOrganizationName("NeurX");
     app.setOrganizationDomain("neurx.ai");
     app.setWindowIcon(QIcon(":/assets/icon.png"));
+
+    // Register custom meta types for signal/slot communication
+    qRegisterMetaType<ToolCall>("ToolCall");
+    qRegisterMetaType<ToolResult>("ToolResult");
+    qRegisterMetaType<TokenEvent>("TokenEvent");
+    qRegisterMetaType<AgentMessage>("AgentMessage");
+    qRegisterMetaType<QList<ToolCall>>("QList<ToolCall>");
+    qRegisterMetaType<QList<ToolResult>>("QList<ToolResult>");
 
     // Scale default font proportionally to screen DPI (base: 13px @ 96 DPI).
     if (QScreen *screen = app.primaryScreen()) {

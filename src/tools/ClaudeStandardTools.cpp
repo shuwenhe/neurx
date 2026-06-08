@@ -84,72 +84,108 @@ ToolResult WriteTool::execute(const QString& callId, const QJsonObject& args)
     QString filePath = args.value("file_path").toString();
     QString newText = args.value("new_text").toString();
     
-    qDebug() << "[WriteTool] Executing with file_path:" << filePath << "size:" << newText.size();
+    qInfo() << "[WriteTool]" << callId << "START: file_path=" << filePath << "content_size=" << newText.size() << "bytes";
     
     if (filePath.isEmpty()) {
-        qWarning() << "[WriteTool] Error: file_path is empty";
-        return {callId, name(), true, "Error: file_path is required"};
+        qWarning() << "[WriteTool]" << callId << "ERROR: file_path is empty";
+        return {callId, name(), true, "Error: file_path parameter is required and cannot be empty"};
     }
     
-    // Validate path
+    if (newText.isEmpty()) {
+        qWarning() << "[WriteTool]" << callId << "WARNING: new_text is empty, will create empty file";
+    }
+    
+    // ── Step 1: Validate and resolve path ──
     QString absPath = safePath(filePath);
     if (absPath.isEmpty()) {
-        qWarning() << "[WriteTool] Error: Path traversal detected for:" << filePath;
-        return {callId, name(), true, "Error: Path traversal attack detected"};
+        qWarning() << "[WriteTool]" << callId << "ERROR: Path traversal attack detected for:" << filePath;
+        return {callId, name(), true, "Error: Path traversal attack detected in file_path"};
     }
     
-    qDebug() << "[WriteTool] Resolved absolute path:" << absPath;
+    qInfo() << "[WriteTool]" << callId << "Step 1: Resolved absolute path:" << absPath;
+    qInfo() << "[WriteTool]" << callId << "Workspace root:" << m_root.absolutePath();
     
-    // Check sandbox
+    // ── Step 2: Check sandbox permissions ──
     if (m_sandboxManager) {
         if (!m_sandboxManager->canAccess(absPath, FileSystemAccessMode::Write)) {
-            qWarning() << "[WriteTool] Error: Sandbox denied write access to:" << absPath;
+            qWarning() << "[WriteTool]" << callId << "ERROR: Sandbox denied write access to:" << absPath;
             return {callId, name(), true, "Error: Sandbox policy denied write access to " + filePath};
         }
-        qDebug() << "[WriteTool] Sandbox check passed";
+        qInfo() << "[WriteTool]" << callId << "Step 2: Sandbox permission check PASSED";
     } else {
-        qDebug() << "[WriteTool] No sandbox manager, skipping permission check";
+        qInfo() << "[WriteTool]" << callId << "Step 2: No sandbox manager, skipping permission check";
     }
     
-    // Create parent directories
+    // ── Step 3: Ensure parent directories exist ──
     QFileInfo fileInfo(absPath);
     QString parentDir = fileInfo.dir().absolutePath();
+    qInfo() << "[WriteTool]" << callId << "Parent directory:" << parentDir;
+    
     if (!ensureDirectoryExists(parentDir)) {
-        qWarning() << "[WriteTool] Error: Failed to create parent directory:" << parentDir;
-        return {callId, name(), true, "Error: Failed to create parent directories"};
+        qWarning() << "[WriteTool]" << callId << "ERROR: Failed to create parent directory:" << parentDir;
+        return {callId, name(), true, "Error: Failed to create parent directories for " + filePath};
     }
     
-    qDebug() << "[WriteTool] Parent directory ensured:" << parentDir;
+    qInfo() << "[WriteTool]" << callId << "Step 3: Parent directory ensured";
     
-    // Atomic write: use QSaveFile to avoid leaving partially-written files
+    // ── Step 4: Preserve file attributes (if file exists) ──
+    QFile existingFile(absPath);
+    bool fileExists = existingFile.exists();
+    QFile::Permissions originalPermissions = QFile::Permissions();
+    if (fileExists) {
+        originalPermissions = existingFile.permissions();
+        qInfo() << "[WriteTool]" << callId << "File exists, preserving permissions";
+    } else {
+        qInfo() << "[WriteTool]" << callId << "Creating new file";
+    }
+    
+    // ── Step 5: Atomic write ──
     QSaveFile save(absPath);
     if (!save.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QString error = save.errorString();
-        qWarning() << "[WriteTool] Error: Cannot open QSaveFile for writing:" << absPath << "error:" << error;
+        qWarning() << "[WriteTool]" << callId << "ERROR: Cannot open file for writing. Path:" << absPath 
+                   << "Error:" << error;
         return {callId, name(), true, "Error: Cannot open file for writing: " + error};
     }
+
+    qInfo() << "[WriteTool]" << callId << "Step 4: File opened for writing";
 
     QTextStream out(&save);
     out.setEncoding(QStringConverter::Utf8);
     out << newText;
 
-    // Ensure data is flushed and commit atomically
+    // Ensure data is flushed
     out.flush();
+    qInfo() << "[WriteTool]" << callId << "Step 5: Content flushed to stream";
+
+    // Commit atomically
     if (!save.commit()) {
         QString error = save.errorString();
-        qWarning() << "[WriteTool] Error: QSaveFile commit failed for:" << absPath << "error:" << error;
-        // Attempt to cancel to clean up temp file
+        qWarning() << "[WriteTool]" << callId << "ERROR: QSaveFile commit failed. Path:" << absPath 
+                   << "Error:" << error;
         save.cancelWriting();
-        return {callId, name(), true, "Error: Failed to write file: " + error};
+        return {callId, name(), true, "Error: Failed to write file atomically: " + error};
     }
 
-    qInfo() << "[WriteTool] Successfully wrote" << newText.size() << "bytes to:" << absPath;
+    qInfo() << "[WriteTool]" << callId << "Step 6: File committed atomically";
+    
+    // Verify file was actually written
+    if (!QFile::exists(absPath)) {
+        qWarning() << "[WriteTool]" << callId << "ERROR: File does not exist after commit:" << absPath;
+        return {callId, name(), true, "Error: File was not created despite successful commit"};
+    }
+    
+    // Get file size for verification
+    QFileInfo verifyInfo(absPath);
+    qint64 writtenSize = verifyInfo.size();
+    
+    qInfo() << "[WriteTool]" << callId << "SUCCESS: Wrote" << writtenSize << "bytes to:" << absPath;
     
     // Get relative path for display
     QString relativePath = m_root.relativeFilePath(absPath);
-    QString message = QString("Created/Updated file: %1 (%2 bytes)")
+    QString message = QString("✓ Created/Updated %1 (%2 bytes)")
                         .arg(relativePath)
-                        .arg(newText.size());
+                        .arg(writtenSize);
     
     return {callId, name(), false, message};
 }
@@ -172,8 +208,34 @@ QString WriteTool::safePath(const QString& relOrAbsPath) const
 
 bool WriteTool::ensureDirectoryExists(const QString& dirPath)
 {
-    QDir dir;
-    return dir.mkpath(dirPath);
+    if (dirPath.isEmpty()) {
+        qWarning() << "[WriteTool::ensureDirectoryExists] ERROR: dirPath is empty";
+        return false;
+    }
+    
+    QDir dir(dirPath);
+    
+    // Check if directory already exists
+    if (dir.exists()) {
+        qInfo() << "[WriteTool::ensureDirectoryExists] Directory already exists:" << dirPath;
+        return true;
+    }
+    
+    // Attempt to create directory recursively
+    if (!dir.mkpath(dirPath)) {
+        qWarning() << "[WriteTool::ensureDirectoryExists] ERROR: Failed to create directory:" << dirPath;
+        qWarning() << "[WriteTool::ensureDirectoryExists] Parent path:" << dir.path();
+        return false;
+    }
+    
+    // Verify directory was created
+    if (!dir.exists()) {
+        qWarning() << "[WriteTool::ensureDirectoryExists] ERROR: Directory was not created despite mkpath success:" << dirPath;
+        return false;
+    }
+    
+    qInfo() << "[WriteTool::ensureDirectoryExists] Successfully created directory:" << dirPath;
+    return true;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -672,9 +734,8 @@ ToolResult BashTool::execute(const QString& callId, const QJsonObject& args)
     }
     
     int exitCode = process.exitCode();
-    QByteArray stdOut = process.readAllStandardOutput();
-    QByteArray stdErr = process.readAllStandardError();
-    QString output = QString::fromUtf8(stdOut + stdErr);
+    const QByteArray outputBytes = process.readAll();
+    const QString output = QString::fromUtf8(outputBytes);
 
     QString result = QString("=== Command: %1 ===\n"
                            "Exit code: %2\n"

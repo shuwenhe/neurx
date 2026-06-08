@@ -3,6 +3,7 @@
 #include <QList>
 #include <QString>
 #include <QVariantList>
+#include <QMutex>
 #include "agent/AgentMessage.h"
 #include "agent/Planner.h"
 #include "agent/Executor.h"
@@ -15,9 +16,10 @@
 
 struct AgentEngineConfig {
     QString systemPrompt;
-    int     maxIterations{20};      // hard cap on plan→act cycles per turn
-    int     contextWindowTokens{200000};
-    bool    autoApproveTools{false}; // if true, safe tools may auto-run; high-risk tools still prompt
+    int     maxIterations{15};      // slightly reduced
+    int     contextWindowTokens{65536}; // more conservative default
+    int     maxCompletionTokens{4096};  // more common limit
+    bool    autoApproveTools{false};
 };
 
 // ── AgentEngine ───────────────────────────────────────────────────────────────
@@ -49,7 +51,7 @@ public:
     void        setActiveModel(const QString &model);
 
     // Conversation history access (read-only from QML side).
-    const QList<AgentMessage> &history() const { return m_history; }
+    QList<AgentMessage> history() const;
     void setHistory(const QList<AgentMessage> &history);
     void clearHistory();
 
@@ -111,5 +113,6 @@ private:
 
     // Pending approval: callId → ToolCall
     QHash<QString, ToolCall> m_pendingApprovals;
+    mutable QMutex m_mutex;
     bool m_interrupted{false};
 };
