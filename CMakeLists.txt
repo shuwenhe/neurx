@@ -102,9 +102,18 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WordOperations\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToError\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PeekView\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StickyScroll\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToError\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PeekView\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StickyScroll\\.cpp$")
+# Phase 4: Extensibility features - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "HookManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityScanner\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitWorkflowTool\\.cpp$")
+# File operation tools - compiled in neurx_ui library instead  
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditFileTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileMetadataTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "BatchFileOperationsTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AdvancedSearchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSyncTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiReadFileTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiWriteFileTool\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -193,6 +202,13 @@ add_library(neurx_ui STATIC
     src/languages/LanguageClient.cpp
     src/tools/GeminiReadFileTool.cpp
     src/tools/GeminiWriteFileTool.cpp
+    
+    # File Operation Tools (Phase 2)
+    src/tools/EditFileTool.cpp
+    src/tools/FileMetadataTool.cpp
+    src/tools/BatchFileOperationsTool.cpp
+    src/tools/AdvancedSearchTool.cpp
+    src/tools/FileSyncTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC

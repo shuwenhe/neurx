@@ -20,6 +20,8 @@ Item {
         { "label": "/search", "hint": "search workspace" },
         { "label": "/checkpoint", "hint": "open rollback" },
         { "label": "/write", "hint": "write current file via Codex" },
+        { "label": "/mkdir", "hint": "create a directory via Codex" },
+        { "label": "/rm", "hint": "delete a path via Codex" },
         { "label": "/delegate", "hint": "delegate a subtask" }
     ]
     readonly property var recentSlashCommands: root.agent && root.agent.recentSlashCommands ? root.agent.recentSlashCommands : []
@@ -775,20 +777,50 @@ Item {
         if (trimmed.length === 0)
             return false
 
-        const command = trimmed.split(/\s+/)[0].toLowerCase()
-        if (command !== "/write")
-            return false
+        const parts = trimmed.split(/\s+/)
+        const command = parts[0].toLowerCase()
+        const args = trimmed.slice(command.length).trim()
 
-        if (!root.agent || !root.agent.currentFilePath || root.agent.currentFilePath.length === 0) {
-            console.warn("[ChatPanel] /write requires an open file")
+        if (!root.agent)
+            return true
+
+        if (command === "/write") {
+            if (!root.agent.currentFilePath || root.agent.currentFilePath.length === 0) {
+                console.warn("[ChatPanel] /write requires an open file")
+                return true
+            }
+
+            const filePath = root.agent.currentFilePath
+            const content = root.agent.currentFileContent || ""
+            console.debug("[ChatPanel] Writing current file via Codex:", filePath)
+            root.agent.writeFileWithCodex(filePath, content)
             return true
         }
 
-        const filePath = root.agent.currentFilePath
-        const content = root.agent.currentFileContent || ""
-        console.debug("[ChatPanel] Writing current file via Codex:", filePath)
-        root.agent.writeFileWithCodex(filePath, content)
-        return true
+        if (command === "/mkdir") {
+            if (args.length === 0) {
+                console.warn("[ChatPanel] /mkdir requires a target path")
+                return true
+            }
+
+            console.debug("[ChatPanel] Creating directory via Codex:", args)
+            root.agent.createDirectoryWithCodex(args)
+            return true
+        }
+
+        if (command === "/rm") {
+            const targetPath = args.length > 0 ? args : (root.agent.currentFilePath || "")
+            if (targetPath.length === 0) {
+                console.warn("[ChatPanel] /rm requires a target path or open file")
+                return true
+            }
+
+            console.debug("[ChatPanel] Deleting path via Codex:", targetPath)
+            root.agent.deletePathWithCodex(targetPath, true)
+            return true
+        }
+
+        return false
     }
 
     function updateSlashState() {
