@@ -49,6 +49,11 @@
 #include "tools/CompilerIntegrationTool.h"
 #include "tools/ConfigGeneratorTool.h"
 
+// Phase 4 File Operation Tools
+#include "tools/CodeMigrationTool.h"
+#include "tools/SecurityAnalysisTool.h"
+#include "tools/GitHubAutomationTool.h"
+
 // Phase 1 Framework Tools (Tool Registry Integrated)
 #include "tools/GitWorkflowTool.h"
 
@@ -3913,6 +3918,12 @@ void AgentController::setWorkspacePath(const QString &path)
     m_registry->registerTool(new PatchGeneratorTool(m_registry));
     m_registry->registerTool(new CompilerIntegrationTool(path, m_registry));
     m_registry->registerTool(new ConfigGeneratorTool(path, m_registry));
+
+    // 🔧 Phase 4: File Operation Tools - Migration & Security
+    qDebug() << "[AgentController] Registering Phase 4 file operation tools...";
+    m_registry->registerTool(new CodeMigrationTool(path, m_registry));
+    m_registry->registerTool(new SecurityAnalysisTool(path, m_registry));
+    m_registry->registerTool(new GitHubAutomationTool(m_registry));
 
     // 🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
     qDebug() << "[AgentController] Registering Phase 1 framework tools...";

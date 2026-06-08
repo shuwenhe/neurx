@@ -122,6 +122,10 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiWriteFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PatchGeneratorTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CompilerIntegrationTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConfigGeneratorTool\\.cpp$")
+# Phase 4 file operation tools - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeMigrationTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityAnalysisTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubAutomationTool\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -239,6 +243,11 @@ add_library(neurx_ui STATIC
     src/tools/PatchGeneratorTool.cpp
     src/tools/CompilerIntegrationTool.cpp
     src/tools/ConfigGeneratorTool.cpp
+
+    # File Operation Tools (Phase 4: Migration & Security)
+    src/tools/CodeMigrationTool.cpp
+    src/tools/SecurityAnalysisTool.cpp
+    src/tools/GitHubAutomationTool.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
