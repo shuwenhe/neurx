@@ -676,6 +676,413 @@ static QString toolEventPreview(const QString &toolName, const QJsonObject &args
     return logPreview(preview, maxLen);
 }
 
+static bool isPatchLikeTool(const QString &toolName)
+{
+    return toolName == QStringLiteral("patch")
+        || toolName == QStringLiteral("apply_patch")
+        || toolName == QStringLiteral("codex_apply_patch");
+}
+
+static QString extractPatchTextFromArguments(const QString &toolName, const QVariantMap &arguments)
+{
+    if (!isPatchLikeTool(toolName))
+        return {};
+
+    QString patchText = arguments.value(QStringLiteral("patch")).toString();
+    if (patchText.isEmpty())
+        patchText = arguments.value(QStringLiteral("input")).toString();
+    return patchText;
+}
+
+static QString normalizePreviewPatchPath(QString rawPath)
+{
+    rawPath = rawPath.trimmed();
+    const int tabIndex = rawPath.indexOf('\t');
+    if (tabIndex >= 0)
+        rawPath = rawPath.left(tabIndex);
+    const int spaceIndex = rawPath.indexOf(' ');
+    if (spaceIndex >= 0)
+        rawPath = rawPath.left(spaceIndex);
+    if (rawPath.startsWith(QStringLiteral("a/")) || rawPath.startsWith(QStringLiteral("b/")))
+        rawPath = rawPath.mid(2);
+    return rawPath.trimmed();
+}
+
+static QStringList extractTouchedPathsFromPatchText(const QString &patchText)
+{
+    QStringList touchedPaths;
+    const QStringList lines = patchText.split('\n');
+    for (const QString &line : lines) {
+        if (!line.startsWith(QStringLiteral("--- ")) && !line.startsWith(QStringLiteral("+++ ")))
+            continue;
+        const QString rawPath = normalizePreviewPatchPath(line.mid(4));
+        if (rawPath.isEmpty() || rawPath == QStringLiteral("/dev/null"))
+            continue;
+        if (!touchedPaths.contains(rawPath))
+            touchedPaths.append(rawPath);
+    }
+    return touchedPaths;
+}
+
+namespace ApprovalPreview {
+
+struct PatchLine {
+    QChar kind;
+    QString text;
+};
+
+struct UpdateHunk {
+    QString header;
+    QList<PatchLine> lines;
+    bool explicitEndOfFile{false};
+};
+
+struct PatchOperation {
+    enum class Kind {
+        Add,
+        Delete,
+        Update,
+    };
+
+    Kind kind{Kind::Add};
+    QString path;
+    QString moveTo;
+    QStringList addedLines;
+    QList<UpdateHunk> hunks;
+};
+
+struct VirtualFileState {
+    bool loaded{false};
+    bool exists{false};
+    bool isDir{false};
+    bool trailingNewline{false};
+    QString content;
+};
+
+static QString normalizeLineEndings(QString text)
+{
+    text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    text.replace(QChar('\r'), QChar('\n'));
+    return text;
+}
+
+static QStringList splitLines(const QString &text, bool *trailingNewline)
+{
+    if (trailingNewline)
+        *trailingNewline = text.endsWith(QLatin1Char('\n'));
+
+    if (text.isEmpty())
+        return {};
+
+    QString body = text;
+    if (body.endsWith(QLatin1Char('\n')))
+        body.chop(1);
+
+    if (body.isEmpty())
+        return {};
+
+    return body.split(QLatin1Char('\n'), Qt::KeepEmptyParts);
+}
+
+static QString joinLines(const QStringList &lines, bool trailingNewline)
+{
+    QString text = lines.join(QLatin1Char('\n'));
+    if (trailingNewline && !lines.isEmpty())
+        text += QLatin1Char('\n');
+    return text;
+}
+
+static bool isPatchBoundary(const QString &line)
+{
+    return line.startsWith(QStringLiteral("*** "));
+}
+
+static bool isRelativeWorkspacePath(const QString &path)
+{
+    if (path.trimmed().isEmpty())
+        return false;
+    if (QDir::isAbsolutePath(path))
+        return false;
+
+    const QString cleaned = QDir::cleanPath(path);
+    return cleaned != QStringLiteral("..")
+        && !cleaned.startsWith(QStringLiteral("../"))
+        && !cleaned.startsWith(QStringLiteral("..\\"));
+}
+
+static int findSequence(const QStringList &haystack, const QStringList &needle, int startIndex)
+{
+    if (needle.isEmpty())
+        return qBound(0, startIndex, int(haystack.size()));
+    if (needle.size() > haystack.size())
+        return -1;
+
+    for (int i = qMax(0, startIndex); i <= haystack.size() - needle.size(); ++i) {
+        bool matches = true;
+        for (int j = 0; j < needle.size(); ++j) {
+            if (haystack.at(i + j) != needle.at(j)) {
+                matches = false;
+                break;
+            }
+        }
+        if (matches)
+            return i;
+    }
+    return -1;
+}
+
+static bool applyUpdateHunks(const QString &path,
+                             const QList<UpdateHunk> &hunks,
+                             const QString &originalText,
+                             bool originalTrailingNewline,
+                             QString &updatedText,
+                             bool &updatedTrailingNewline,
+                             QString &error)
+{
+    QStringList lines = splitLines(originalText, nullptr);
+    updatedTrailingNewline = originalTrailingNewline;
+    int cursor = 0;
+
+    for (const UpdateHunk &hunk : hunks) {
+        QStringList oldLines;
+        QStringList newLines;
+        for (const PatchLine &line : hunk.lines) {
+            if (line.kind != QLatin1Char('+'))
+                oldLines.append(line.text);
+            if (line.kind != QLatin1Char('-'))
+                newLines.append(line.text);
+        }
+
+        if (oldLines.isEmpty() && newLines.isEmpty()) {
+            error = QStringLiteral("Empty update hunk for %1.").arg(path);
+            return false;
+        }
+
+        int matchIndex = findSequence(lines, oldLines, cursor);
+        if (matchIndex < 0 && cursor > 0)
+            matchIndex = findSequence(lines, oldLines, 0);
+        if (matchIndex < 0) {
+            error = QStringLiteral("Failed to match patch context while updating %1.").arg(path);
+            return false;
+        }
+
+        lines.erase(lines.begin() + matchIndex, lines.begin() + matchIndex + oldLines.size());
+        for (int i = int(newLines.size()) - 1; i >= 0; --i)
+            lines.insert(matchIndex, newLines.at(i));
+        cursor = matchIndex + int(newLines.size());
+    }
+
+    updatedText = joinLines(lines, updatedTrailingNewline);
+    return true;
+}
+
+static bool parseApplyPatch(const QString &rawPatch, QList<PatchOperation> &operations, QString &error)
+{
+    const QString patch = normalizeLineEndings(rawPatch);
+    const QStringList lines = patch.split(QLatin1Char('\n'), Qt::KeepEmptyParts);
+    if (lines.isEmpty() || lines.first() != QStringLiteral("*** Begin Patch")) {
+        error = QStringLiteral("The first line of the patch must be '*** Begin Patch'.");
+        return false;
+    }
+
+    int index = 1;
+    bool sawEnd = false;
+    while (index < lines.size()) {
+        const QString line = lines.at(index);
+        if (line == QStringLiteral("*** End Patch")) {
+            sawEnd = true;
+            ++index;
+            break;
+        }
+        if (line.isEmpty()) {
+            ++index;
+            continue;
+        }
+
+        PatchOperation operation;
+        if (line.startsWith(QStringLiteral("*** Add File: "))) {
+            operation.kind = PatchOperation::Kind::Add;
+            operation.path = line.mid(QStringLiteral("*** Add File: ").size()).trimmed();
+            ++index;
+            while (index < lines.size() && !isPatchBoundary(lines.at(index))) {
+                const QString contentLine = lines.at(index);
+                if (!contentLine.startsWith(QLatin1Char('+'))) {
+                    error = QStringLiteral("Unexpected line in add file hunk: '%1'.").arg(contentLine);
+                    return false;
+                }
+                operation.addedLines.append(contentLine.mid(1));
+                ++index;
+            }
+        } else if (line.startsWith(QStringLiteral("*** Delete File: "))) {
+            operation.kind = PatchOperation::Kind::Delete;
+            operation.path = line.mid(QStringLiteral("*** Delete File: ").size()).trimmed();
+            ++index;
+        } else if (line.startsWith(QStringLiteral("*** Update File: "))) {
+            operation.kind = PatchOperation::Kind::Update;
+            operation.path = line.mid(QStringLiteral("*** Update File: ").size()).trimmed();
+            ++index;
+
+            if (index < lines.size() && lines.at(index).startsWith(QStringLiteral("*** Move to: "))) {
+                operation.moveTo = lines.at(index).mid(QStringLiteral("*** Move to: ").size()).trimmed();
+                ++index;
+            }
+
+            while (index < lines.size()) {
+                const QString hunkHeader = lines.at(index);
+                if (hunkHeader == QStringLiteral("*** End Patch")
+                    || hunkHeader.startsWith(QStringLiteral("*** Add File: "))
+                    || hunkHeader.startsWith(QStringLiteral("*** Delete File: "))
+                    || hunkHeader.startsWith(QStringLiteral("*** Update File: "))) {
+                    break;
+                }
+
+                if (!hunkHeader.startsWith(QStringLiteral("@@"))) {
+                    error = QStringLiteral("Invalid update hunk header: '%1'.").arg(hunkHeader);
+                    return false;
+                }
+
+                UpdateHunk hunk;
+                hunk.header = hunkHeader.mid(2).trimmed();
+                ++index;
+                while (index < lines.size()) {
+                    const QString hunkLine = lines.at(index);
+                    if (hunkLine.startsWith(QStringLiteral("@@"))
+                        || hunkLine == QStringLiteral("*** End Patch")
+                        || hunkLine.startsWith(QStringLiteral("*** Add File: "))
+                        || hunkLine.startsWith(QStringLiteral("*** Delete File: "))
+                        || hunkLine.startsWith(QStringLiteral("*** Update File: "))) {
+                        break;
+                    }
+                    if (hunkLine == QStringLiteral("*** End of File")) {
+                        hunk.explicitEndOfFile = true;
+                        ++index;
+                        break;
+                    }
+                    if (hunkLine.isEmpty()
+                        || (hunkLine.at(0) != QLatin1Char(' ')
+                            && hunkLine.at(0) != QLatin1Char('+')
+                            && hunkLine.at(0) != QLatin1Char('-'))) {
+                        error = QStringLiteral("Unexpected line found in update hunk: '%1'.").arg(hunkLine);
+                        return false;
+                    }
+                    hunk.lines.append({hunkLine.at(0), hunkLine.mid(1)});
+                    ++index;
+                }
+
+                if (hunk.lines.isEmpty()) {
+                    error = QStringLiteral("Update hunk for %1 cannot be empty.").arg(operation.path);
+                    return false;
+                }
+                operation.hunks.append(hunk);
+            }
+
+            if (operation.hunks.isEmpty()) {
+                error = QStringLiteral("Update file operation for %1 requires at least one hunk.").arg(operation.path);
+                return false;
+            }
+        } else {
+            error = QStringLiteral("Invalid patch hunk header: '%1'.").arg(line);
+            return false;
+        }
+
+        if (!isRelativeWorkspacePath(operation.path)) {
+            error = QStringLiteral("Patch paths must be relative and stay inside the workspace: %1").arg(operation.path);
+            return false;
+        }
+        if (!operation.moveTo.isEmpty() && !isRelativeWorkspacePath(operation.moveTo)) {
+            error = QStringLiteral("Patch move targets must be relative and stay inside the workspace: %1").arg(operation.moveTo);
+            return false;
+        }
+
+        operations.append(operation);
+    }
+
+    if (!sawEnd) {
+        error = QStringLiteral("Missing '*** End Patch' terminator.");
+        return false;
+    }
+
+    if (operations.isEmpty()) {
+        error = QStringLiteral("Patch did not contain any file operations.");
+        return false;
+    }
+
+    return true;
+}
+
+static QVariantMap buildApplyPatchDiffPreview(const QString &patchText, const QString &workspaceRoot)
+{
+    QList<PatchOperation> operations;
+    QString error;
+    if (!parseApplyPatch(patchText, operations, error))
+        return {};
+
+    QHash<QString, VirtualFileState> fileStates;
+    auto loadState = [&](const QString &relPath) -> VirtualFileState {
+        if (fileStates.contains(relPath))
+            return fileStates.value(relPath);
+
+        VirtualFileState state;
+        state.loaded = true;
+        const QString absPath = QDir(workspaceRoot).absoluteFilePath(relPath);
+        const QFileInfo info(absPath);
+        state.exists = info.exists();
+        state.isDir = info.isDir();
+        if (state.exists && info.isFile()) {
+            QFile file(absPath);
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                state.loaded = false;
+                fileStates.insert(relPath, state);
+                return state;
+            }
+            state.content = normalizeLineEndings(QString::fromUtf8(file.readAll()));
+            state.trailingNewline = state.content.endsWith(QLatin1Char('\n'));
+        }
+        fileStates.insert(relPath, state);
+        return state;
+    };
+
+    for (const PatchOperation &operation : operations) {
+        const QString previewPath = operation.kind == PatchOperation::Kind::Delete
+            ? operation.path
+            : (!operation.moveTo.isEmpty() ? operation.moveTo : operation.path);
+        const VirtualFileState baseState = loadState(operation.path);
+
+        QString originalText = baseState.exists ? baseState.content : QString();
+        QString modifiedText = originalText;
+
+        if (operation.kind == PatchOperation::Kind::Add) {
+            modifiedText = operation.addedLines.join(QLatin1Char('\n'));
+        } else if (operation.kind == PatchOperation::Kind::Delete) {
+            modifiedText.clear();
+        } else {
+            QString updatedText;
+            bool updatedTrailingNewline = baseState.trailingNewline;
+            if (!applyUpdateHunks(operation.path,
+                                  operation.hunks,
+                                  baseState.content,
+                                  baseState.trailingNewline,
+                                  updatedText,
+                                  updatedTrailingNewline,
+                                  error)) {
+                continue;
+            }
+            modifiedText = updatedText;
+        }
+
+        return QVariantMap{
+            {QStringLiteral("hasVisualDiff"), true},
+            {QStringLiteral("previewFile"), previewPath},
+            {QStringLiteral("originalText"), originalText},
+            {QStringLiteral("modifiedText"), modifiedText}
+        };
+    }
+
+    return {};
+}
+
+} // namespace ApprovalPreview
+
 static ProgrammingLanguage detectLanguageFromPath(const QString &path)
 {
     const QString ext = QFileInfo(path).suffix().toLower();
@@ -1868,6 +2275,10 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
     if (needsApproval && !m_autoApproveTools) {
         const QJsonObject jsonArgs = variantMapToJsonObject(arguments);
         m_pendingToolExecutions.insert(callId, PendingToolExecution{toolName, arguments, tool->summary(jsonArgs), riskLevel});
+        m_pendingApprovalPreviews.insert(callId, QVariantMap{
+            {QStringLiteral("toolName"), toolName},
+            {QStringLiteral("arguments"), arguments}
+        });
         emit toolApprovalRequired(callId, toolName, tool->summary(jsonArgs), riskLevel, reason);
         response.insert(QStringLiteral("pending"), true);
         response.insert(QStringLiteral("approvalId"), callId);
@@ -1955,6 +2366,32 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
     return response;
 }
 
+QVariantMap AgentController::toolApprovalPreview(const QString &callId) const
+{
+    const QVariantMap preview = m_pendingApprovalPreviews.value(callId);
+    if (preview.isEmpty())
+        return {};
+
+    const QString toolName = preview.value(QStringLiteral("toolName")).toString();
+    const QVariantMap arguments = preview.value(QStringLiteral("arguments")).toMap();
+    const QString patchText = extractPatchTextFromArguments(toolName, arguments);
+    const QStringList touchedPaths = extractTouchedPathsFromPatchText(patchText);
+
+    QVariantMap result;
+    result.insert(QStringLiteral("toolName"), toolName);
+    result.insert(QStringLiteral("isPatch"), isPatchLikeTool(toolName));
+    result.insert(QStringLiteral("patchText"), patchText);
+    result.insert(QStringLiteral("touchedFiles"), touchedPaths);
+    result.insert(QStringLiteral("operation"), arguments.value(QStringLiteral("operation")).toString());
+    if (toolName == QStringLiteral("apply_patch")) {
+        const QVariantMap visualPreview = ApprovalPreview::buildApplyPatchDiffPreview(
+            patchText, m_workspacePath.trimmed().isEmpty() ? QDir::currentPath() : m_workspacePath);
+        for (auto it = visualPreview.begin(); it != visualPreview.end(); ++it)
+            result.insert(it.key(), it.value());
+    }
+    return result;
+}
+
 QVariantMap AgentController::delegateToCodex(const QString &task, const QString &model, const QString &workingDir)
 {
     const QString trimmedTask = task.trimmed();
@@ -1972,36 +2409,178 @@ QVariantMap AgentController::delegateToCodex(const QString &task, const QString 
     return executeToolByName(QStringLiteral("codex_agent"), arguments);
 }
 
+QVariantMap AgentController::createFileWithCodex(const QString &filePath,
+                                                 const QString &content,
+                                                 const QString &model,
+                                                 const QString &workingDir)
+{
+    return writeFileWithCodex(filePath, content, model, workingDir);
+}
+
+QVariantMap AgentController::createDirectoryWithCodex(const QString &dirPath)
+{
+    const QString absolutePath = resolveCodexWorkspacePath(dirPath);
+    if (absolutePath.isEmpty())
+        return {{QStringLiteral("error"), QStringLiteral("Target directory must be inside the current workspace.")}};
+
+    QVariantMap result = executeCodexCreateDirectory(absolutePath);
+    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+        return result;
+
+    if (!result.contains(QStringLiteral("error"))) {
+        if (m_workspaceIndex)
+            m_workspaceIndex->refresh();
+        refreshSystemPrompt();
+        saveSettings();
+        saveTaskSession();
+    }
+
+    return result;
+}
+
 QVariantMap AgentController::writeFileWithCodex(const QString &filePath,
                                                 const QString &content,
                                                 const QString &model,
                                                 const QString &workingDir)
 {
-    const QString trimmedPath = filePath.trimmed();
-    if (trimmedPath.isEmpty()) {
-        return {{QStringLiteral("error"), QStringLiteral("File path is required.")}};
-    }
-
-    if (m_workspacePath.trimmed().isEmpty()) {
-        return {{QStringLiteral("error"), QStringLiteral("Workspace path is not set.")}};
-    }
-
-    const QString workspaceRoot = normalizeWorkspaceComparablePath(m_workspacePath);
-    if (workspaceRoot.isEmpty()) {
-        return {{QStringLiteral("error"), QStringLiteral("Unable to resolve workspace root.")}};
-    }
-
-    QString absolutePath = normalizeLocalFilePath(trimmedPath);
-    if (QFileInfo(trimmedPath).isRelative()) {
-        absolutePath = QDir(workspaceRoot).absoluteFilePath(trimmedPath);
-    }
-    absolutePath = QDir::cleanPath(absolutePath);
-
-    if (!isPathInsideWorkspace(absolutePath, workspaceRoot)) {
+    const QString absolutePath = resolveCodexWorkspacePath(filePath);
+    if (absolutePath.isEmpty()) {
         return {{QStringLiteral("error"), QStringLiteral("Target file must be inside the current workspace.")}};
     }
 
-    const QString task = QStringLiteral("Write the exact requested contents to %1 using the available file-editing tools.")
+    QVariantMap result = executeCodexFileWrite(absolutePath, content);
+    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+        return result;
+
+    if (result.contains(QStringLiteral("error"))) {
+        const QString errorText = result.value(QStringLiteral("error")).toString();
+        qWarning().noquote() << "[AgentController] codex_file_system write failed, falling back to codex_agent:"
+                             << errorText;
+        result = executeCodexCliWrite(absolutePath, content, model, workingDir);
+        if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+            return result;
+    }
+
+    if (!result.contains(QStringLiteral("error")))
+        syncOpenDocumentAfterWrite(absolutePath, content);
+
+    return result;
+}
+
+QVariantMap AgentController::writeFilesWithCodex(const QVariantList &files)
+{
+    if (files.isEmpty())
+        return {{QStringLiteral("error"), QStringLiteral("At least one file is required.")}};
+
+    QVariantList normalizedFiles;
+    for (const QVariant &entryVariant : files) {
+        const QVariantMap entry = entryVariant.toMap();
+        const QString originalPath = entry.value(QStringLiteral("path")).toString();
+        const QString absolutePath = resolveCodexWorkspacePath(originalPath);
+        if (absolutePath.isEmpty()) {
+            return {{QStringLiteral("error"),
+                     QStringLiteral("Target file must be inside the current workspace: %1").arg(originalPath)}};
+        }
+
+        QVariantMap normalizedEntry;
+        normalizedEntry.insert(QStringLiteral("path"), absolutePath);
+        normalizedEntry.insert(QStringLiteral("contents"), entry.value(QStringLiteral("contents")).toString());
+        normalizedFiles.append(normalizedEntry);
+    }
+
+    QVariantMap result = executeCodexBatchWrite(normalizedFiles);
+    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+        return result;
+    if (result.contains(QStringLiteral("error")))
+        return result;
+
+    for (const QVariant &entryVariant : normalizedFiles) {
+        const QVariantMap entry = entryVariant.toMap();
+        syncOpenDocumentAfterWrite(entry.value(QStringLiteral("path")).toString(),
+                                   entry.value(QStringLiteral("contents")).toString());
+    }
+
+    return result;
+}
+
+QVariantMap AgentController::deletePathWithCodex(const QString &path, bool recursive)
+{
+    const QString absolutePath = resolveCodexWorkspacePath(path);
+    if (absolutePath.isEmpty())
+        return {{QStringLiteral("error"), QStringLiteral("Target path must be inside the current workspace.")}};
+
+    const QFileInfo info(absolutePath);
+    if (!info.exists())
+        return {{QStringLiteral("error"), QStringLiteral("Target path does not exist.")}};
+
+    QVariantMap result = executeCodexDeletePath(absolutePath, recursive);
+    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
+        return result;
+
+    if (!result.contains(QStringLiteral("error")))
+        syncOpenDocumentsAfterDelete(absolutePath, info.isDir());
+
+    return result;
+}
+
+QVariantMap AgentController::executeCodexFileWrite(const QString &absolutePath, const QString &content)
+{
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("operation"), QStringLiteral("write_file"));
+    arguments.insert(QStringLiteral("path"), absolutePath);
+    arguments.insert(QStringLiteral("contents"), content);
+
+    QVariantMap options;
+    options.insert(QStringLiteral("atomic"), true);
+    options.insert(QStringLiteral("createDirs"), true);
+    arguments.insert(QStringLiteral("options"), options);
+
+    return executeToolByName(QStringLiteral("codex_file_system"), arguments);
+}
+
+QVariantMap AgentController::executeCodexBatchWrite(const QVariantList &files)
+{
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("operation"), QStringLiteral("write_batch"));
+    arguments.insert(QStringLiteral("files"), files);
+
+    QVariantMap options;
+    options.insert(QStringLiteral("atomic"), true);
+    options.insert(QStringLiteral("createDirs"), true);
+    arguments.insert(QStringLiteral("options"), options);
+
+    return executeToolByName(QStringLiteral("codex_file_system"), arguments);
+}
+
+QVariantMap AgentController::executeCodexCreateDirectory(const QString &absolutePath)
+{
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("operation"), QStringLiteral("create_directory"));
+    arguments.insert(QStringLiteral("path"), absolutePath);
+
+    QVariantMap directoryOptions;
+    directoryOptions.insert(QStringLiteral("recursive"), true);
+    directoryOptions.insert(QStringLiteral("failIfExists"), false);
+    arguments.insert(QStringLiteral("directoryOptions"), directoryOptions);
+
+    return executeToolByName(QStringLiteral("codex_file_system"), arguments);
+}
+
+QVariantMap AgentController::executeCodexDeletePath(const QString &absolutePath, bool recursive)
+{
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("operation"), QStringLiteral("delete_file"));
+    arguments.insert(QStringLiteral("path"), absolutePath);
+    arguments.insert(QStringLiteral("deleteRecursive"), recursive);
+
+    return executeToolByName(QStringLiteral("codex_file_system"), arguments);
+}
+
+QVariantMap AgentController::executeCodexCliWrite(const QString &absolutePath, const QString &content,
+                                                  const QString &model, const QString &workingDir)
+{
+    const QString task = QStringLiteral(
+        "Write the exact requested contents to %1 using the available file-editing tools.")
                              .arg(absolutePath);
 
     QVariantMap arguments;
@@ -2013,35 +2592,89 @@ QVariantMap AgentController::writeFileWithCodex(const QString &filePath,
     if (!workingDir.trimmed().isEmpty())
         arguments.insert(QStringLiteral("working_dir"), workingDir.trimmed());
 
-    QVariantMap result = executeToolByName(QStringLiteral("codex_agent"), arguments);
-    if (result.contains(QStringLiteral("pending")) && result.value(QStringLiteral("pending")).toBool())
-        return result;
+    return executeToolByName(QStringLiteral("codex_agent"), arguments);
+}
 
-    if (!result.contains(QStringLiteral("error"))) {
-        for (auto &doc : m_documents) {
-            if (normalizeLocalFilePath(doc.path) == absolutePath) {
-                doc.content = content;
-                doc.savedContent = content;
-                doc.dirty = false;
-                break;
-            }
+QString AgentController::resolveCodexWorkspacePath(const QString &path) const
+{
+    const QString trimmedPath = path.trimmed();
+    if (trimmedPath.isEmpty() || m_workspacePath.trimmed().isEmpty())
+        return QString();
+
+    const QString workspaceRoot = normalizeWorkspaceComparablePath(m_workspacePath);
+    if (workspaceRoot.isEmpty())
+        return QString();
+
+    QString absolutePath = normalizeLocalFilePath(trimmedPath);
+    if (QFileInfo(trimmedPath).isRelative())
+        absolutePath = QDir(workspaceRoot).absoluteFilePath(trimmedPath);
+
+    absolutePath = QDir::cleanPath(absolutePath);
+    if (!isPathInsideWorkspace(absolutePath, workspaceRoot))
+        return QString();
+
+    return absolutePath;
+}
+
+void AgentController::syncOpenDocumentAfterWrite(const QString &absolutePath, const QString &content)
+{
+    for (auto &doc : m_documents) {
+        if (normalizeLocalFilePath(doc.path) == absolutePath) {
+            doc.content = content;
+            doc.savedContent = content;
+            doc.dirty = false;
+            break;
         }
-
-        if (m_currentFilePath == absolutePath) {
-            m_currentFileContent = content;
-            emit currentFileContentChanged();
-        }
-
-        emit openFilesChanged();
-        if (m_workspaceIndex)
-            m_workspaceIndex->recordFileAccess(absolutePath);
-        if (m_workspaceContext)
-            m_workspaceContext->recordFileAccess(absolutePath);
-        saveSettings();
-        saveTaskSession();
     }
 
-    return result;
+    if (normalizeLocalFilePath(m_currentFilePath) == absolutePath) {
+        m_currentFileContent = content;
+        emit currentFileContentChanged();
+    }
+
+    emit openFilesChanged();
+    if (m_workspaceIndex)
+        m_workspaceIndex->recordFileAccess(absolutePath);
+    if (m_workspaceContext)
+        m_workspaceContext->recordFileAccess(absolutePath);
+    saveSettings();
+    saveTaskSession();
+}
+
+void AgentController::syncOpenDocumentsAfterDelete(const QString &absolutePath, bool wasDirectory)
+{
+    const QString pathPrefix = absolutePath + QStringLiteral("/");
+
+    for (int i = m_documents.size() - 1; i >= 0; --i) {
+        const QString documentPath = normalizeLocalFilePath(m_documents[i].path);
+        if (documentPath == absolutePath || (wasDirectory && documentPath.startsWith(pathPrefix))) {
+            m_documents.removeAt(i);
+            if (i == m_currentEditorIndex)
+                m_currentEditorIndex = -1;
+            else if (i < m_currentEditorIndex)
+                --m_currentEditorIndex;
+        }
+    }
+
+    const QString currentPath = normalizeLocalFilePath(m_currentFilePath);
+    if (currentPath == absolutePath || (wasDirectory && currentPath.startsWith(pathPrefix))) {
+        m_currentFilePath.clear();
+        m_currentFileContent.clear();
+        emit currentFilePathChanged();
+        emit currentFileContentChanged();
+    }
+
+    if (m_workspaceIndex)
+        m_workspaceIndex->refresh();
+    emit openFilesChanged();
+    syncKnowledgeForPathChange(absolutePath, QString{}, wasDirectory);
+    m_lastWorkspaceActionType = "delete";
+    m_lastWorkspaceActionSource = absolutePath;
+    m_lastWorkspaceActionDestination.clear();
+    emit undoWorkspaceActionChanged();
+    refreshSystemPrompt();
+    saveSettings();
+    saveTaskSession();
 }
 
 void AgentController::setCurrentSelection(const QString &filePath, const QString &code,
@@ -2381,6 +3014,10 @@ void AgentController::setupEngine()
                         riskLevel + QStringLiteral(" risk · ") + toolEventPreview(call.name, call.arguments),
                         call.name,
                         call.id);
+                    m_pendingApprovalPreviews.insert(call.id, QVariantMap{
+                        {QStringLiteral("toolName"), call.name},
+                        {QStringLiteral("arguments"), call.arguments.toVariantMap()}
+                    });
                     saveTaskSession();
                     emit toolApprovalRequired(call.id,
                                               call.name,
@@ -3618,6 +4255,8 @@ QString AgentController::buildSlashHelp() const
         "/explain - explain the current file with CodeMagic\n"
         "/search <query> - search local workspace knowledge and paths\n"
         "/checkpoint [id] - open the checkpoint restore dialog or rollback by id\n"
+        "/mkdir <path> - create a directory inside the current workspace via codex_file_system\n"
+        "/rm <path> - delete a file or directory inside the current workspace via codex_file_system\n"
         "/delegate <task> - ask the agent to delegate a subtask with codex_agent");
 }
 
@@ -3925,6 +4564,37 @@ bool AgentController::handleSlashCommand(const QString &text)
         const QString description = checkpoint.value(QStringLiteral("description")).toString();
         const QVariantList files = checkpointPreview(checkpointId);
         emit checkpointRestoreRequested(checkpointId, description, files);
+        return true;
+    }
+
+    if (command == QStringLiteral("mkdir")) {
+        if (args.isEmpty()) {
+            emit errorOccurred(QStringLiteral("Usage: /mkdir <path>"));
+            return true;
+        }
+
+        const QVariantMap result = createDirectoryWithCodex(args);
+        if (result.contains(QStringLiteral("error"))) {
+            emit errorOccurred(result.value(QStringLiteral("error")).toString());
+        } else if (!result.value(QStringLiteral("pending")).toBool()) {
+            emit successOccurred(QStringLiteral("Created directory: %1").arg(args));
+        }
+        return true;
+    }
+
+    if (command == QStringLiteral("rm")) {
+        const QString targetPath = args.isEmpty() ? m_currentFilePath : args;
+        if (targetPath.trimmed().isEmpty()) {
+            emit errorOccurred(QStringLiteral("Usage: /rm <path>"));
+            return true;
+        }
+
+        const QVariantMap result = deletePathWithCodex(targetPath, true);
+        if (result.contains(QStringLiteral("error"))) {
+            emit errorOccurred(result.value(QStringLiteral("error")).toString());
+        } else if (!result.value(QStringLiteral("pending")).toBool()) {
+            emit successOccurred(QStringLiteral("Deleted path: %1").arg(targetPath));
+        }
         return true;
     }
 
@@ -4858,17 +5528,20 @@ void AgentController::clearHistory()
 void AgentController::approveTool(const QString &callId)
 {
     if (m_pendingToolExecutions.contains(callId)) {
+        m_pendingApprovalPreviews.remove(callId);
         const QVariantMap result = executePendingTool(callId);
         if (result.contains(QStringLiteral("error")))
             emit errorOccurred(result.value(QStringLiteral("error")).toString());
         return;
     }
+    m_pendingApprovalPreviews.remove(callId);
     m_engine->approveTool(callId, true);
 }
 
 void AgentController::rejectTool(const QString &callId)
 {
     if (m_pendingToolExecutions.contains(callId)) {
+        m_pendingApprovalPreviews.remove(callId);
         const PendingToolExecution pending = m_pendingToolExecutions.take(callId);
         appendExecutionEvent(QStringLiteral("approval"),
                              QStringLiteral("Tool execution rejected"),
@@ -4881,6 +5554,7 @@ void AgentController::rejectTool(const QString &callId)
         emit errorOccurred(QStringLiteral("Tool execution denied by user."));
         return;
     }
+    m_pendingApprovalPreviews.remove(callId);
     m_engine->approveTool(callId, false);
 }
 

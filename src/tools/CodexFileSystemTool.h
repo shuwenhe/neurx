@@ -45,6 +45,11 @@ private:
     ToolResult opDeleteFile(const QString& callId, const QJsonObject& args);
     ToolResult opGetMetadata(const QString& callId, const QJsonObject& args);
     ToolResult opWriteBatch(const QString& callId, const QJsonObject& args);
+    ToolResult opExists(const QString& callId, const QJsonObject& args);
+    ToolResult opListDirectory(const QString& callId, const QJsonObject& args);
+    ToolResult opMoveFile(const QString& callId, const QJsonObject& args);
+    ToolResult opCopyFile(const QString& callId, const QJsonObject& args);
+    ToolResult opAppendFile(const QString& callId, const QJsonObject& args);
 
     // Sandbox context creation
     FileSystemSandboxContext* createSandboxContext(const QJsonObject& sandboxSpec) const;

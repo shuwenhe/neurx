@@ -227,15 +227,23 @@ public:
     Q_INVOKABLE QVariantMap toolSchema(const QString &toolName) const;
     Q_INVOKABLE QVariantMap toolPermissionState(const QString &toolName,
                                                const QVariantMap &context = {}) const;
+    Q_INVOKABLE QVariantMap toolApprovalPreview(const QString &callId) const;
     Q_INVOKABLE QVariantMap executeToolByName(const QString &toolName,
                                               const QVariantMap &arguments = {});
     Q_INVOKABLE QVariantMap delegateToCodex(const QString &task,
                                             const QString &model = QString(),
                                             const QString &workingDir = QString());
+    Q_INVOKABLE QVariantMap createFileWithCodex(const QString &filePath,
+                                                const QString &content = QString(),
+                                                const QString &model = QString(),
+                                                const QString &workingDir = QString());
+    Q_INVOKABLE QVariantMap createDirectoryWithCodex(const QString &dirPath);
     Q_INVOKABLE QVariantMap writeFileWithCodex(const QString &filePath,
                                                const QString &content,
                                                const QString &model = QString(),
                                                const QString &workingDir = QString());
+    Q_INVOKABLE QVariantMap writeFilesWithCodex(const QVariantList &files);
+    Q_INVOKABLE QVariantMap deletePathWithCodex(const QString &path, bool recursive = true);
     Q_INVOKABLE QVariantMap toolExecutionStats(const QString &toolName) const;
     Q_INVOKABLE QVariantList toolExecutionHistory(const QString &toolName, int limit = 20) const;
     Q_INVOKABLE QVariantList commandPaletteCommands(const QString &query = QString()) const;
@@ -533,6 +541,15 @@ private:
     QVariantMap buildToolCatalogEntry(BaseTool *tool) const;
     QVariantMap buildToolPermissionState(const QString &toolName, const QVariantMap &context) const;
     QVariantMap executePendingTool(const QString &approvalId);
+    QVariantMap executeCodexFileWrite(const QString &absolutePath, const QString &content);
+    QVariantMap executeCodexBatchWrite(const QVariantList &files);
+    QVariantMap executeCodexCreateDirectory(const QString &absolutePath);
+    QVariantMap executeCodexDeletePath(const QString &absolutePath, bool recursive);
+    QVariantMap executeCodexCliWrite(const QString &absolutePath, const QString &content,
+                                     const QString &model, const QString &workingDir);
+    QString resolveCodexWorkspacePath(const QString &path) const;
+    void syncOpenDocumentAfterWrite(const QString &absolutePath, const QString &content);
+    void syncOpenDocumentsAfterDelete(const QString &absolutePath, bool wasDirectory);
     void configurePolicyManagers();
     void syncThreadStore();
     StoredThread buildStoredThreadSnapshot() const;
@@ -682,4 +699,5 @@ private:
         bool dirty{false};
     };
     QVector<EditorDocument> m_documents;
+    QHash<QString, QVariantMap> m_pendingApprovalPreviews;
 };

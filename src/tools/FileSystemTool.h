@@ -7,8 +7,8 @@
 #include <memory>
 
 // ── FileSystemTool ────────────────────────────────────────────────────────────
-//  Provides read_file, write_file, list_directory, create_file, delete_file.
-//  Operations are sandboxed to the configured workspace root.
+//  Provides read_file, write_file, list_directory, create_file, delete_file, move_file,
+//  and copy_file. Operations are sandboxed to the configured workspace root.
 
 class FileSystemTool : public BaseTool {
     Q_OBJECT
@@ -35,6 +35,7 @@ private:
     ToolResult opCreateFile(const QString &callId, const QJsonObject &args);
     ToolResult opDeleteFile(const QString &callId, const QJsonObject &args);
     ToolResult opMoveFile(const QString &callId, const QJsonObject &args);
+    ToolResult opCopyFile(const QString &callId, const QJsonObject &args);
 
     // Resolve a user-supplied path against workspaceRoot; returns empty on traversal attack.
     QString safePath(const QString &relOrAbsPath) const;
