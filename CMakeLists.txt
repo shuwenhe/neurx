@@ -141,6 +141,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandRegistry\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditorCommandManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandPalette\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ContextMenuIntegration\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginLoader\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginSandbox\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginValidator\\.cpp$")
 
 # Temporarily exclude files with known compilation issues in core
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LanguageClient\\.cpp$")
@@ -325,6 +328,11 @@ add_library(neurx_ui STATIC
     src/editor/EditorCommandManager.cpp
     src/editor/CommandPalette.cpp
     src/editor/ContextMenuIntegration.cpp
+
+    # Plugin System Upgrade (Tier 2: Dynamic Loading & Hot Reload)
+    src/plugins/PluginLoader.cpp
+    src/plugins/PluginSandbox.cpp
+    src/plugins/PluginValidator.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
