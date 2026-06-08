@@ -44,6 +44,11 @@
 #include "tools/DirectoryTreeTool.h"
 #include "tools/TextProcessingTool.h"
 
+// Phase 3 File Operation Tools
+#include "tools/PatchGeneratorTool.h"
+#include "tools/CompilerIntegrationTool.h"
+#include "tools/ConfigGeneratorTool.h"
+
 // Phase 1 Framework Tools (Tool Registry Integrated)
 #include "tools/GitWorkflowTool.h"
 
@@ -3902,6 +3907,12 @@ void AgentController::setWorkspacePath(const QString &path)
     m_registry->registerTool(new PermissionsManagerTool(path, m_registry));
     m_registry->registerTool(new DirectoryTreeTool(path, m_registry));
     m_registry->registerTool(new TextProcessingTool(path, m_registry));
+
+    // 🔧 Phase 3: File Operation Tools - Compiler & Config
+    qDebug() << "[AgentController] Registering Phase 3 file operation tools...";
+    m_registry->registerTool(new PatchGeneratorTool(m_registry));
+    m_registry->registerTool(new CompilerIntegrationTool(path, m_registry));
+    m_registry->registerTool(new ConfigGeneratorTool(path, m_registry));
 
     // 🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
     qDebug() << "[AgentController] Registering Phase 1 framework tools...";

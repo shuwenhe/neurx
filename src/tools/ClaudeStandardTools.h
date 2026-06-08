@@ -146,7 +146,7 @@ private:
     SandboxManager* m_sandboxManager{nullptr};
 };
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ════════════════════════��═════════════════════════════════════════════════════
 // Read Tool - 读取文件内容
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -338,7 +338,7 @@ private:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Tool Factory - 工具工厂
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════��═════════════════════════════
 
 /**
  * @class ClaudeStandardToolFactory
@@ -373,4 +373,36 @@ public:
                                    SandboxManager* sandboxManager = nullptr);
     static GlobTool* createGlobTool(const QString& workspaceRoot,
                                    SandboxManager* sandboxManager = nullptr);
+    // Adapters for additional Gemini-style file operation tools implemented
+    // under src/tools (GeminiListFilesTool, GeminiStatFileTool, etc.).
+    static BaseTool* createGeminiListFilesAdapter(const QString& workspaceRoot,
+                                                 SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiStatFileAdapter(const QString& workspaceRoot,
+                                               SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiRemoveFileAdapter(const QString& workspaceRoot,
+                                                 SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiMkdirAdapter(const QString& workspaceRoot,
+                                           SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiAppendFileAdapter(const QString& workspaceRoot,
+                                                SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiExistsFileAdapter(const QString& workspaceRoot,
+                                                SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiRgAdapter(const QString& workspaceRoot,
+                                        SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiReadFileAdapter(const QString& workspaceRoot,
+                                               SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiWriteFileAdapter(const QString& workspaceRoot,
+                                                SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiChmodAdapter(const QString& workspaceRoot,
+                                           SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiHashAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiSymlinkAdapter(const QString& workspaceRoot,
+                                             SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiMoveFileAdapter(const QString& workspaceRoot,
+                                              SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiCopyFileAdapter(const QString& workspaceRoot,
+                                              SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiWriteBatchAdapter(const QString& workspaceRoot,
+                                                SandboxManager* sandboxManager = nullptr);
 };
