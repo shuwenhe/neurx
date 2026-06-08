@@ -1,24 +1,32 @@
 #include "GeminiStatFileTool.h"
 #include <QFileInfo>
 #include <QJsonObject>
+#include <QJsonDocument>
 
-GeminiStatFileTool::GeminiStatFileTool(QObject *parent) : Tool(parent) {}
+GeminiStatFileTool::GeminiStatFileTool(QObject *parent) : BaseTool(parent) {}
 
 QString GeminiStatFileTool::name() const { return QStringLiteral("stat_file"); }
 QString GeminiStatFileTool::description() const { return QStringLiteral("Get file/directory metadata"); }
 
-QJsonObject GeminiStatFileTool::schema() const {
+QJsonObject GeminiStatFileTool::parametersSchema() const {
     QJsonObject s;
     s["path"] = QStringLiteral("string");
     return s;
 }
 
-QJsonObject GeminiStatFileTool::run(const QJsonObject &args) {
+ToolResult GeminiStatFileTool::execute(const QString &callId, const QJsonObject &args)
+{
     QString path = args.value("path").toString();
-    if (path.isEmpty()) return QJsonObject{{"success", false}, {"error", "Missing 'path'"}};
+    if (path.isEmpty()) {
+        QJsonObject res{{"success", false}, {"error", "Missing 'path'"}};
+        return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
+    }
 
     QFileInfo fi(path);
-    if (!fi.exists()) return QJsonObject{{"success", false}, {"error", "Path does not exist"}};
+    if (!fi.exists()) {
+        QJsonObject res{{"success", false}, {"error", "Path does not exist"}};
+        return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
+    }
 
     QJsonObject result;
     result["success"] = true;
@@ -30,6 +38,7 @@ QJsonObject GeminiStatFileTool::run(const QJsonObject &args) {
     result["lastRead"] = fi.lastRead().toString(Qt::ISODate);
     result["owner"] = fi.owner();
     result["group"] = fi.group();
-    return result;
+
+    return {callId, name(), false, QString::fromUtf8(QJsonDocument(result).toJson(QJsonDocument::Compact))};
 }
 

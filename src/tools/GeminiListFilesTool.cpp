@@ -2,14 +2,14 @@
 #include <QFileInfoList>
 #include <QJsonArray>
 #include <QDirIterator>
+#include <QJsonDocument>
 
-GeminiListFilesTool::GeminiListFilesTool(QObject *parent) : Tool(parent) {}
+GeminiListFilesTool::GeminiListFilesTool(QObject *parent) : BaseTool(parent) {}
 
 QString GeminiListFilesTool::name() const { return QStringLiteral("list_files"); }
 QString GeminiListFilesTool::description() const { return QStringLiteral("List files in a directory"); }
 
-QJsonObject GeminiListFilesTool::schema() const {
-    // 简单 schema，前端可据此生成 UI
+QJsonObject GeminiListFilesTool::parametersSchema() const {
     QJsonObject s;
     s["path"] = QStringLiteral("string");
     s["recursive"] = QStringLiteral("boolean (optional)");
@@ -17,18 +17,21 @@ QJsonObject GeminiListFilesTool::schema() const {
     return s;
 }
 
-QJsonObject GeminiListFilesTool::run(const QJsonObject &args) {
+ToolResult GeminiListFilesTool::execute(const QString &callId, const QJsonObject &args)
+{
     QString path = args.value("path").toString();
     bool recursive = args.value("recursive").toBool(false);
     QString pattern = args.value("pattern").toString("*");
 
     if (path.isEmpty()) {
-        return QJsonObject{{"success", false}, {"error", "Missing 'path' argument"}};
+        QJsonObject res{{"success", false}, {"error", "Missing 'path' argument"}};
+        return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
     }
 
     QDir dir(path);
     if (!dir.exists()) {
-        return QJsonObject{{"success", false}, {"error", QString("Directory does not exist: %1").arg(path)}};
+        QJsonObject res{{"success", false}, {"error", QString("Directory does not exist: %1").arg(path)}};
+        return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
     }
 
     QJsonArray items;
@@ -43,6 +46,7 @@ QJsonObject GeminiListFilesTool::run(const QJsonObject &args) {
         for (const QFileInfo &fi : list) items.append(fi.filePath());
     }
 
-    return QJsonObject{{"success", true}, {"items", items}};
+    QJsonObject res{{"success", true}, {"items", items}};
+    return {callId, name(), false, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
 }
 

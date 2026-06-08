@@ -4,13 +4,14 @@
 #include <QFileInfo>
 #include <QDirIterator>
 #include <QTextStream>
+#include <QJsonDocument>
 
-GeminiRgTool::GeminiRgTool(QObject *parent) : Tool(parent) {}
+GeminiRgTool::GeminiRgTool(QObject *parent) : BaseTool(parent) {}
 
 QString GeminiRgTool::name() const { return QStringLiteral("rg_search"); }
 QString GeminiRgTool::description() const { return QStringLiteral("Search using ripgrep if available, fallback to simple grep"); }
 
-QJsonObject GeminiRgTool::schema() const {
+QJsonObject GeminiRgTool::parametersSchema() const {
     QJsonObject s;
     s["path"] = QStringLiteral("string (file or directory)");
     s["pattern"] = QStringLiteral("string (regular expression)");
@@ -18,12 +19,15 @@ QJsonObject GeminiRgTool::schema() const {
     return s;
 }
 
-QJsonObject GeminiRgTool::run(const QJsonObject &args) {
+ToolResult GeminiRgTool::execute(const QString &callId, const QJsonObject &args) {
     QString path = args.value("path").toString();
     QString pattern = args.value("pattern").toString();
     bool recursive = args.value("recursive").toBool(true);
 
-    if (path.isEmpty() || pattern.isEmpty()) return QJsonObject{{"success", false}, {"error", "Missing 'path' or 'pattern'"}};
+    if (path.isEmpty() || pattern.isEmpty()) {
+        QJsonObject res{{"success", false}, {"error", "Missing 'path' or 'pattern'"}};
+        return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
+    }
 
     // Try to run rg
     QProcess check;
@@ -44,7 +48,8 @@ QJsonObject GeminiRgTool::run(const QJsonObject &args) {
         if (!proc.waitForFinished(10000)) {
             // timeout
             proc.kill();
-            return QJsonObject{{"success", false}, {"error", "rg timeout or failed"}};
+            QJsonObject res{{"success", false}, {"error", "rg timeout or failed"}};
+            return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
         }
         const QByteArray out = proc.readAllStandardOutput();
         QTextStream ts(out);
@@ -66,7 +71,10 @@ QJsonObject GeminiRgTool::run(const QJsonObject &args) {
         // fallback to simple grep implemented inline (non-optimized)
         QFileInfo fi(path);
         QRegularExpression rx(pattern);
-        if (!rx.isValid()) return QJsonObject{{"success", false}, {"error", "Invalid regular expression"}};
+        if (!rx.isValid()) {
+            QJsonObject res{{"success", false}, {"error", "Invalid regular expression"}};
+            return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
+        }
 
         if (fi.isFile()) {
             QFile file(path);
@@ -109,10 +117,11 @@ QJsonObject GeminiRgTool::run(const QJsonObject &args) {
                 file.close();
             }
         } else {
-            return QJsonObject{{"success", false}, {"error", "Path is neither file nor directory"}};
+            QJsonObject res{{"success", false}, {"error", "Path is neither file nor directory"}};
+            return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
         }
     }
 
-    return QJsonObject{{"success", true}, {"matches", matches}};
+    QJsonObject res{{"success", true}, {"matches", matches}};
+    return {callId, name(), false, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
 }
-
