@@ -45,10 +45,10 @@ public:
     void clear();
 
     // Get list of currently watched files
-    QStringList watchedFiles() const { return m_watchedFiles.toList(); }
+    QStringList watchedFiles() const { return QStringList(m_watchedFiles.begin(), m_watchedFiles.end()); }
 
     // Get list of currently watched directories
-    QStringList watchedDirectories() const { return m_watchedDirs.toList(); }
+    QStringList watchedDirectories() const { return QStringList(m_watchedDirs.begin(), m_watchedDirs.end()); }
 
     // Check if a file is being watched
     bool isWatching(const QString &filePath) const { return m_watchedFiles.contains(filePath); }

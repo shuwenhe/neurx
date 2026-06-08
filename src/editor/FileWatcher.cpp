@@ -13,10 +13,11 @@ FileWatcher::FileWatcher(QObject *parent)
     connect(&m_debounceTimer, &QTimer::timeout, this, &FileWatcher::onDebounceTimeout);
 
     // Connect filesystem watcher signals
-    connect(m_watcher, QOverload<const QString &>::of(&QFileSystemWatcher::fileChanged),
-            this, &FileWatcher::onFileChanged);
-    connect(m_watcher, QOverload<const QString &>::of(&QFileSystemWatcher::directoryChanged),
-            this, &FileWatcher::onDirectoryChanged);
+    // Use lambdas to avoid signal overload resolution issues
+    connect(m_watcher, &QFileSystemWatcher::fileChanged,
+            this, [this](const QString &path) { this->onFileChanged(path); });
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged,
+            this, [this](const QString &path) { this->onDirectoryChanged(path); });
 }
 
 FileWatcher::~FileWatcher()
