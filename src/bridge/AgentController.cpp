@@ -87,6 +87,7 @@ run shell commands (both local and sandboxed Docker), and search the codebase.
 **Other Advanced Tools:**
 - apply_patch: Apply Codex-style patches using *** Begin Patch / *** End Patch syntax
 - patch: Apply unified diff patches for complex multi-file changes
+- codex_agent: Delegate a subtask or exact file write to the external Codex CLI
 - search: Workspace-wide code search (grep/find patterns)
 - run_command / run_docker_command: Execute commands (local or sandboxed)
 - web_search / web_fetch: Web content access
@@ -577,34 +578,6 @@ static QString normalizeWorkspaceComparablePath(const QString &path)
     QFileInfo info(normalized);
     const QString resolved = info.exists() ? info.canonicalFilePath() : normalized;
     return QDir::cleanPath(resolved);
-}
-
-static bool isPathInsideWorkspace(const QString &path, const QString &workspaceRoot)
-{
-    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
-    const QString cleanPath = QDir::cleanPath(path);
-    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
-        return false;
-
-    if (cleanPath == cleanRoot)
-        return true;
-
-    const QString relative = QDir(cleanRoot).relativeFilePath(cleanPath);
-    return !relative.isEmpty()
-        && !relative.startsWith(QStringLiteral(".."))
-        && !QDir::isAbsolutePath(relative);
-}
-
-static QString workspaceRelativeOrAbsolutePath(const QString &path, const QString &workspaceRoot)
-{
-    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
-    const QString cleanPath = QDir::cleanPath(path);
-    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
-        return {};
-
-    if (isPathInsideWorkspace(cleanPath, cleanRoot))
-        return QDir(cleanRoot).relativeFilePath(cleanPath);
-    return cleanPath;
 }
 
 static QString resolveWorkspaceSelectionPath(const QString &path)
@@ -1450,9 +1423,16 @@ QString AgentController::approvalRiskLevelForTool(const QString &toolName, const
         return QStringLiteral("high");
 
     if (name == QStringLiteral("web_search")
-        || name == QStringLiteral("web_fetch")
-        || name == QStringLiteral("codex_agent"))
+        || name == QStringLiteral("web_fetch"))
         return QStringLiteral("medium");
+
+    if (name == QStringLiteral("codex_agent")) {
+        if (!arguments.value(QStringLiteral("file_path")).toString().trimmed().isEmpty()
+            || !arguments.value(QStringLiteral("new_text")).toString().isEmpty()) {
+            return QStringLiteral("high");
+        }
+        return QStringLiteral("medium");
+    }
 
     return QStringLiteral("low");
 }
@@ -1484,7 +1464,10 @@ bool AgentController::toolNeedsApproval(const QString &toolName, const QVariantM
     } else if (toolName == QStringLiteral("update_plan")) {
         resource = QStringLiteral("plan update");
     } else if (toolName == QStringLiteral("codex_agent")) {
-        resource = arguments.value(QStringLiteral("task")).toString();
+        const QString filePath = arguments.value(QStringLiteral("file_path")).toString();
+        resource = !filePath.trimmed().isEmpty()
+            ? QStringLiteral("write %1").arg(filePath)
+            : arguments.value(QStringLiteral("task")).toString();
     }
 
     if (!m_approvalManager) {
@@ -2009,12 +1992,12 @@ QVariantMap AgentController::writeFileWithCodex(const QString &filePath,
         return {{QStringLiteral("error"), QStringLiteral("Target file must be inside the current workspace.")}};
     }
 
-    const QString promptPath = workspaceRelativeOrAbsolutePath(absolutePath, workspaceRoot);
-    const QString task = QStringLiteral("Write the exact requested contents to this file using the available file-editing tools.");
+    const QString task = QStringLiteral("Write the exact requested contents to %1 using the available file-editing tools.")
+                             .arg(absolutePath);
 
     QVariantMap arguments;
     arguments.insert(QStringLiteral("task"), task);
-    arguments.insert(QStringLiteral("file_path"), promptPath);
+    arguments.insert(QStringLiteral("file_path"), absolutePath);
     arguments.insert(QStringLiteral("new_text"), content);
     if (!model.trimmed().isEmpty())
         arguments.insert(QStringLiteral("model"), model.trimmed());

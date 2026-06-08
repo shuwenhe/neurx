@@ -180,6 +180,7 @@ QString CodexTool::buildWriteTask(const QString &filePath, const QString &newTex
     task += QStringLiteral("Workspace root: %1\n").arg(cwdPath);
     task += QStringLiteral("Target file: %1\n").arg(normalizedPath);
     task += QStringLiteral("Rules:\n");
+    task += QStringLiteral("- Create the file if it does not exist; overwrite it if it does.\n");
     task += QStringLiteral("- Write the file contents exactly as provided.\n");
     task += QStringLiteral("- Do not change any other files unless absolutely necessary for the write.\n");
     task += QStringLiteral("- Prefer apply_patch or the filesystem tool for the actual write.\n");
