@@ -7,6 +7,23 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 
+namespace {
+
+static QString previewText(const QString &text, int maxLen = 120)
+{
+    const QString compact = text.simplified();
+    if (compact.size() <= maxLen)
+        return compact;
+    return compact.left(maxLen) + QChar(u'\u2026');
+}
+
+static QString normalizeForPromptPath(const QString &path)
+{
+    return QDir::cleanPath(path);
+}
+
+} // namespace
+
 CodexTool::CodexTool(const QString &workingDir, QObject *parent)
     : BaseTool(parent), m_workingDir(workingDir)
 {
@@ -53,6 +70,14 @@ QJsonObject CodexTool::parametersSchema() const
                 "type": "string",
                 "description": "Codex model to use, e.g. 'codex-mini-latest' or 'o4-mini'. Omit to use the Codex CLI default."
             },
+            "file_path": {
+                "type": "string",
+                "description": "Optional target file path to overwrite. When set together with new_text, Codex will write the exact content to this file."
+            },
+            "new_text": {
+                "type": "string",
+                "description": "Optional exact file contents to write when file_path is provided."
+            },
             "working_dir": {
                 "type": "string",
                 "description": "Optional sub-directory relative to the workspace root in which to run Codex."
@@ -68,8 +93,11 @@ QJsonObject CodexTool::parametersSchema() const
 
 ToolResult CodexTool::execute(const QString &callId, const QJsonObject &args)
 {
-    const QString task = args[QStringLiteral("task")].toString().trimmed();
-    if (task.isEmpty())
+    QString task = args[QStringLiteral("task")].toString().trimmed();
+    const QString filePath = args.value(QStringLiteral("file_path")).toString().trimmed();
+    const QString newText = args.value(QStringLiteral("new_text")).toString();
+
+    if (task.isEmpty() && filePath.isEmpty())
         return {callId, name(), /*isError=*/true,
                 QStringLiteral("Parameter 'task' must not be empty.")};
 
@@ -84,6 +112,14 @@ ToolResult CodexTool::execute(const QString &callId, const QJsonObject &args)
         if (QFileInfo(candidate).isDir())
             cwd = candidate;
     }
+
+    if (!filePath.isEmpty()) {
+        task = buildWriteTask(filePath, newText, cwd);
+    }
+
+    if (task.isEmpty())
+        return {callId, name(), /*isError=*/true,
+                QStringLiteral("Unable to build a Codex task.")};
 
     // Build argv: codex --full-auto [--model <m>] "<task>"
     QStringList argv;
@@ -126,7 +162,33 @@ ToolResult CodexTool::execute(const QString &callId, const QJsonObject &args)
 
 QString CodexTool::summary(const QJsonObject &args) const
 {
+    const QString filePath = args.value(QStringLiteral("file_path")).toString().trimmed();
+    if (!filePath.isEmpty())
+        return QStringLiteral("codex write: ") + filePath;
+
     const QString task = args.value(QStringLiteral("task")).toString();
-    const QString preview = (task.size() <= 80) ? task : task.left(80) + QChar(u'\u2026');
-    return QStringLiteral("codex: ") + preview;
+    return QStringLiteral("codex: ") + previewText(task, 80);
+}
+
+QString CodexTool::buildWriteTask(const QString &filePath, const QString &newText, const QString &cwd) const
+{
+    const QString normalizedPath = normalizeForPromptPath(filePath);
+    const QString cwdPath = normalizeForPromptPath(cwd);
+
+    QString task;
+    task += QStringLiteral("Overwrite the target file exactly as requested.\n");
+    task += QStringLiteral("Workspace root: %1\n").arg(cwdPath);
+    task += QStringLiteral("Target file: %1\n").arg(normalizedPath);
+    task += QStringLiteral("Rules:\n");
+    task += QStringLiteral("- Write the file contents exactly as provided.\n");
+    task += QStringLiteral("- Do not change any other files unless absolutely necessary for the write.\n");
+    task += QStringLiteral("- Prefer apply_patch or the filesystem tool for the actual write.\n");
+    task += QStringLiteral("- Verify the final file contents match exactly.\n");
+    task += QStringLiteral("Exact file contents:\n");
+    task += QStringLiteral("<<<NEURX_FILE_CONTENT_START>>>\n");
+    task += newText;
+    if (!newText.endsWith('\n'))
+        task += QChar('\n');
+    task += QStringLiteral("<<<NEURX_FILE_CONTENT_END>>>\n");
+    return task;
 }

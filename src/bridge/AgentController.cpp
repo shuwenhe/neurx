@@ -32,6 +32,7 @@
 #include "tools/CustomScriptTool.h"
 #include "tools/SkillTool.h"
 #include "tools/ClaudeStandardTools.h"
+#include "tools/CodexApplyPatchTool.h"
 #include "services/KeyBindingManager.h"
 #include <QFile>
 #include <QGuiApplication>
@@ -576,6 +577,34 @@ static QString normalizeWorkspaceComparablePath(const QString &path)
     QFileInfo info(normalized);
     const QString resolved = info.exists() ? info.canonicalFilePath() : normalized;
     return QDir::cleanPath(resolved);
+}
+
+static bool isPathInsideWorkspace(const QString &path, const QString &workspaceRoot)
+{
+    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
+    const QString cleanPath = QDir::cleanPath(path);
+    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
+        return false;
+
+    if (cleanPath == cleanRoot)
+        return true;
+
+    const QString relative = QDir(cleanRoot).relativeFilePath(cleanPath);
+    return !relative.isEmpty()
+        && !relative.startsWith(QStringLiteral(".."))
+        && !QDir::isAbsolutePath(relative);
+}
+
+static QString workspaceRelativeOrAbsolutePath(const QString &path, const QString &workspaceRoot)
+{
+    const QString cleanRoot = QDir::cleanPath(workspaceRoot);
+    const QString cleanPath = QDir::cleanPath(path);
+    if (cleanRoot.isEmpty() || cleanPath.isEmpty())
+        return {};
+
+    if (isPathInsideWorkspace(cleanPath, cleanRoot))
+        return QDir(cleanRoot).relativeFilePath(cleanPath);
+    return cleanPath;
 }
 
 static QString resolveWorkspaceSelectionPath(const QString &path)
@@ -1951,6 +1980,50 @@ QVariantMap AgentController::delegateToCodex(const QString &task, const QString 
     return executeToolByName(QStringLiteral("codex_agent"), arguments);
 }
 
+QVariantMap AgentController::writeFileWithCodex(const QString &filePath,
+                                                const QString &content,
+                                                const QString &model,
+                                                const QString &workingDir)
+{
+    const QString trimmedPath = filePath.trimmed();
+    if (trimmedPath.isEmpty()) {
+        return {{QStringLiteral("error"), QStringLiteral("File path is required.")}};
+    }
+
+    if (m_workspacePath.trimmed().isEmpty()) {
+        return {{QStringLiteral("error"), QStringLiteral("Workspace path is not set.")}};
+    }
+
+    const QString workspaceRoot = normalizeWorkspaceComparablePath(m_workspacePath);
+    if (workspaceRoot.isEmpty()) {
+        return {{QStringLiteral("error"), QStringLiteral("Unable to resolve workspace root.")}};
+    }
+
+    QString absolutePath = normalizeLocalFilePath(trimmedPath);
+    if (QFileInfo(trimmedPath).isRelative()) {
+        absolutePath = QDir(workspaceRoot).absoluteFilePath(trimmedPath);
+    }
+    absolutePath = QDir::cleanPath(absolutePath);
+
+    if (!isPathInsideWorkspace(absolutePath, workspaceRoot)) {
+        return {{QStringLiteral("error"), QStringLiteral("Target file must be inside the current workspace.")}};
+    }
+
+    const QString promptPath = workspaceRelativeOrAbsolutePath(absolutePath, workspaceRoot);
+    const QString task = QStringLiteral("Write the exact requested contents to this file using the available file-editing tools.");
+
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("task"), task);
+    arguments.insert(QStringLiteral("file_path"), promptPath);
+    arguments.insert(QStringLiteral("new_text"), content);
+    if (!model.trimmed().isEmpty())
+        arguments.insert(QStringLiteral("model"), model.trimmed());
+    if (!workingDir.trimmed().isEmpty())
+        arguments.insert(QStringLiteral("working_dir"), workingDir.trimmed());
+
+    return executeToolByName(QStringLiteral("codex_agent"), arguments);
+}
+
 void AgentController::setCurrentSelection(const QString &filePath, const QString &code,
                                           int startLine, int endLine)
 {
@@ -3062,6 +3135,11 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] SandboxManager:" << m_sandboxManager;
     ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
     qDebug() << "[AgentController] Claude Standard Tools registered";
+
+    // Register Codex filesystem integration tools (apply_patch and write_file via CLI)
+    qDebug() << "[AgentController] Registering Codex filesystem tools...";
+    CodexFilesystemToolFactory::registerFilesystemTools(path, m_registry, m_sandboxManager);
+    qDebug() << "[AgentController] Codex filesystem tools registered";
 
     m_registry->registerTool(new FileSystemTool(path, m_registry));
     m_registry->registerTool(new CodexFileSystemTool(path, m_registry));

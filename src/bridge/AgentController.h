@@ -232,6 +232,10 @@ public:
     Q_INVOKABLE QVariantMap delegateToCodex(const QString &task,
                                             const QString &model = QString(),
                                             const QString &workingDir = QString());
+    Q_INVOKABLE QVariantMap writeFileWithCodex(const QString &filePath,
+                                               const QString &content,
+                                               const QString &model = QString(),
+                                               const QString &workingDir = QString());
     Q_INVOKABLE QVariantMap toolExecutionStats(const QString &toolName) const;
     Q_INVOKABLE QVariantList toolExecutionHistory(const QString &toolName, int limit = 20) const;
     Q_INVOKABLE QVariantList commandPaletteCommands(const QString &query = QString()) const;
