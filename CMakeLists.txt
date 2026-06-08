@@ -46,20 +46,14 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
     qt_standard_project_setup()
 endif()
 
+# ── Phase 1: Framework Sources (neurx_core) ───────────────────────────────────
 # Use GLOB_RECURSE to find all sources, then filter out problematic files
 file(GLOB_RECURSE NEURX_CORE_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/bridge/")
-# Temporarily exclude files with known compilation issues
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultToolRegistry\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultExecutionEngine\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultIntegrationOrchestrator\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultGoalManager\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultLLMExtensions\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LanguageClient\\.cpp$")
-# Services excluded from neurx_core - will be compiled in neurx_ui
+# Exclude files that will be compiled in neurx_ui
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "NotificationService\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ProgressService\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileService\\.cpp$")
@@ -76,11 +70,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "OperationCache\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PerformanceOptimizer\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ThemeManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitService\\.cpp$")
-# Feature providers excluded from neurx_core - compiled in neurx_ui library instead
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FeatureProviders\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "NavigationProviders\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditingProviders\\.cpp$")
-# Phase 3 & 4 editor features - compiled in neurx_ui library instead
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "QuickAccessManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FindAndReplace\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FoldingManager\\.cpp$")
@@ -102,11 +94,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WordOperations\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GoToError\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PeekView\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "StickyScroll\\.cpp$")
-# Phase 4: Extensibility features - compiled in neurx_ui library instead
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "HookManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityScanner\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitWorkflowTool\\.cpp$")
-# File operation tools - compiled in neurx_ui library instead  
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "Tool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileMetadataTool\\.cpp$")
@@ -118,22 +108,46 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DirectoryTreeTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TextProcessingTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiReadFileTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiWriteFileTool\\.cpp$")
-# Phase 3 file operation tools - compiled in neurx_ui library instead
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PatchGeneratorTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CompilerIntegrationTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConfigGeneratorTool\\.cpp$")
-# Phase 4 file operation tools - compiled in neurx_ui library instead
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeMigrationTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityAnalysisTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubAutomationTool\\.cpp$")
-# Guardian Agent System - compiled in neurx_ui library instead
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ClaudeToolSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ClaudeStandardTools\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultTool.*\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "Tool.*Manager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ToolMetricsCollector\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ToolCacheManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "McpClient\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CheckpointManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LocalGatewayServer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SessionStore\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SmartFileCreator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WebFetchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WebSearchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitLabTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DockerShellTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ApplyPatchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodexApplyPatchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodexFileSystemTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiGroundingTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RiskAssessor\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ApprovalStrategyManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GuardianAgentTool\\.cpp$")
-# Guardian Agent System - compiled in neurx_ui library instead
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RiskAssessor\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ApprovalStrategyManager\\.cpp$")
-list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GuardianAgentTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandRegistry\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditorCommandManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandPalette\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ContextMenuIntegration\\.cpp$")
+
+# Temporarily exclude files with known compilation issues in core
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LanguageClient\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultExecutionEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultIntegrationOrchestrator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultGoalManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultLLMExtensions\\.cpp$")
 
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
@@ -300,15 +314,17 @@ add_library(neurx_ui STATIC
     src/agent/runtime/RiskAssessor.cpp
     src/agent/runtime/ApprovalStrategyManager.cpp
     src/agent/tools/GuardianAgentTool.cpp
+
     # File Operation Tools (Phase 4: Migration & Security)
     src/tools/CodeMigrationTool.cpp
     src/tools/SecurityAnalysisTool.cpp
     src/tools/GitHubAutomationTool.cpp
 
-    # Guardian Agent System (Automated Approval & Risk Assessment)
-    src/agent/runtime/RiskAssessor.cpp
-    src/agent/runtime/ApprovalStrategyManager.cpp
-    src/agent/tools/GuardianAgentTool.cpp
+    # Editor Command Integration (Tier 2: Editor Commands)
+    src/editor/CommandRegistry.cpp
+    src/editor/EditorCommandManager.cpp
+    src/editor/CommandPalette.cpp
+    src/editor/ContextMenuIntegration.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC

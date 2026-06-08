@@ -59,6 +59,11 @@
 #include "agent/runtime/ApprovalStrategyManager.h"
 #include "agent/tools/GuardianAgentTool.h"
 
+// Editor Command Integration
+#include "editor/EditorCommandManager.h"
+#include "editor/CommandPalette.h"
+#include "editor/ContextMenuIntegration.h"
+
 // Phase 1 Framework Tools (Tool Registry Integrated)
 #include "tools/GitWorkflowTool.h"
 
@@ -3934,7 +3939,11 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] Registering Guardian Agent System...";
     m_registry->registerTool(new GuardianAgentTool(m_registry));
 
-    // 🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
+    // � Editor Command Integration (Tier 2)
+    qDebug() << "[AgentController] Registering Editor Command Manager...";
+    m_registry->registerTool(new EditorCommandManager(this));
+
+    // �🎯 Phase 1: Core Framework Tools (GitWorkflowTool is a BaseTool)
     qDebug() << "[AgentController] Registering Phase 1 framework tools...";
     m_registry->registerTool(new GitWorkflowTool(m_registry));
     
