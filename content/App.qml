@@ -50,6 +50,14 @@ ApplicationWindow {
     // Capture C++ context property so child bindings don't create a loop
     readonly property var agentCtx: agent
 
+    ErrorBanner {
+        id: globalBanner
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        z: 200
+    }
+
     // ── Zoom ──────────────────────────────────────────────────────────────
     property real zoomFactor: 1.0
 
@@ -605,6 +613,7 @@ ApplicationWindow {
                 { id: "ws.recent",  title: "File: Open Recent...", category: "File", action: () => openRecentPopup.open() },
                 { id: "ws.close",   title: "File: Close Folder", category: "File", action: () => agentCtx.workspacePath = "" },
                 { id: "editor.save", title: "File: Save", shortcut: "Ctrl+S", action: () => editorPanel.saveCurrentFile() },
+                { id: "editor.codexWrite", title: "File: Codex Write Current File", action: () => editorPanel.writeCurrentFileWithCodex() },
                 { id: "editor.reload", title: "File: Reload from disk", action: () => editorPanel.syncFromAgent(true) },
                 { id: "editor.goto", title: "Go to Line", shortcut: "Ctrl+G", action: () => goToLinePopup.open() },
                 { id: "editor.gotoSymbol", title: "Go to Symbol in Editor...", shortcut: "Ctrl+Shift+O", action: () => goToSymbolPopup.open() },
@@ -804,6 +813,17 @@ ApplicationWindow {
                 font.pixelSize: Theme.fontMd
                 onClicked: agentCtx.openWorkspaceFolder()
                 ToolTip.text: agentCtx.workspacePath || "No workspace selected"
+                ToolTip.visible: hovered
+            }
+
+            ToolButton {
+                text: "Codex Write"
+                enabled: !!agentCtx.currentFilePath
+                font.pixelSize: Theme.fontMd
+                onClicked: editorPanel.writeCurrentFileWithCodex()
+                ToolTip.text: agentCtx.currentFilePath
+                                ? "Write the current file via Codex CLI"
+                                : "Open a file first"
                 ToolTip.visible: hovered
             }
 
@@ -1030,6 +1050,9 @@ ApplicationWindow {
         }
         function onSuccessOccurred(message) {
             console.info(message)
+            if ((message || "").startsWith("Auto-refreshed ")) {
+                globalBanner.showSuccess(message)
+            }
         }
     }
 

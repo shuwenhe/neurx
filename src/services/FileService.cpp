@@ -88,6 +88,10 @@ FileService* FileService::instance() {
 
 FileService::FileService()
     : m_impl(std::make_unique<Impl>()) {
+    connect(&m_impl->watcher, &QFileSystemWatcher::fileChanged,
+            this, [this](const QString& path) {
+                emit fileChanged(path);
+            });
 }
 
 FileService::~FileService() = default;
@@ -233,10 +237,6 @@ bool FileService::writeFileAsText(const QString& path, const QString& content,
 void FileService::watchFile(const QString& path) {
     if (!m_impl->watcher.files().contains(path)) {
         m_impl->watcher.addPath(path);
-        connect(&m_impl->watcher, &QFileSystemWatcher::fileChanged,
-                this, [this](const QString& path) {
-                    emit fileChanged(path);
-                });
         emit fileWatched(path);
     }
 }
