@@ -22,7 +22,7 @@ QJsonObject CodexFileSystemTool::parametersSchema() const
         "properties": {
             "operation": {
                 "type": "string",
-                "enum": ["write_file", "read_file", "create_directory", "delete_file", "get_metadata", "write_batch"],
+                "enum": ["write_file", "read_file", "create_directory", "delete_file", "get_metadata", "write_batch", "exists", "list_directory", "move", "copy", "append"],
                 "description": "File system operation to perform"
             },
             "path": {
@@ -107,6 +107,16 @@ ToolResult CodexFileSystemTool::execute(const QString& callId, const QJsonObject
         return opGetMetadata(callId, args);
     } else if (operation == "write_batch") {
         return opWriteBatch(callId, args);
+    } else if (operation == "exists") {
+        return opExists(callId, args);
+    } else if (operation == "list_directory") {
+        return opListDirectory(callId, args);
+    } else if (operation == "move") {
+        return opMoveFile(callId, args);
+    } else if (operation == "copy") {
+        return opCopyFile(callId, args);
+    } else if (operation == "append") {
+        return opAppendFile(callId, args);
     }
 
     return ToolResult{
@@ -199,6 +209,252 @@ ToolResult CodexFileSystemTool::opWriteFile(const QString& callId, const QJsonOb
         output["error"] = fsResult.message();
         output["code"] = static_cast<int>(fsResult.code());
         result.content = QJsonDocument(output).toJson(QJsonDocument::Compact);
+    }
+
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opExists(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString path = args.value("path").toString();
+
+    if (path.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path is required"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+
+    bool exists = m_fileSystem->exists(path, sandbox.get());
+
+    QJsonObject output;
+    output["path"] = path;
+    output["exists"] = exists;
+    result.isError = false;
+    result.content = QJsonDocument(output).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opListDirectory(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString path = args.value("path").toString();
+
+    if (path.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path is required"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+
+    QJsonObject meta = m_fileSystem->getMetadata(path, sandbox.get());
+    if (meta.contains("error")) {
+        result.isError = true;
+        result.content = QJsonDocument(meta).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    if (!meta.value("isDir").toBool()) {
+        result.isError = true;
+        QJsonObject out;
+        out["error"] = QString("Path is not a directory: %1").arg(path);
+        result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    QDir dir(path);
+    QFileInfoList list = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries, QDir::DirsFirst | QDir::Name);
+
+    QJsonArray entries;
+    for (const QFileInfo& info : list) {
+        QJsonObject item;
+        item["name"] = info.fileName();
+        item["path"] = info.absoluteFilePath();
+        item["isFile"] = info.isFile();
+        item["isDir"] = info.isDir();
+        item["size"] = static_cast<qint64>(info.size());
+        item["modified"] = info.lastModified().toString(Qt::ISODate);
+        entries.append(item);
+    }
+
+    QJsonObject out;
+    out["path"] = path;
+    out["entries"] = entries;
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opMoveFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString src = args.value("path").toString();
+    QString dst = args.value("destination").toString();
+    if (dst.isEmpty()) dst = args.value("dest").toString();
+
+    if (src.isEmpty() || dst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path and destination are required"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+
+    // Check source metadata
+    QJsonObject srcMeta = m_fileSystem->getMetadata(src, sandbox.get());
+    if (srcMeta.contains("error")) {
+        result.isError = true;
+        result.content = QJsonDocument(srcMeta).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    // Try atomic rename
+    QFile srcFile(src);
+    bool ok = srcFile.rename(dst);
+    if (!ok) {
+        // Fallback to copy + delete
+        if (!QFile::copy(src, dst)) {
+            result.isError = true;
+            QJsonObject out;
+            out["error"] = QString("Failed to move %1 -> %2").arg(src, dst);
+            result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+            return result;
+        }
+        if (!QFile::remove(src)) {
+            // Best-effort: report copy success but delete failed
+            result.isError = true;
+            QJsonObject out;
+            out["error"] = QString("Copied to %1 but failed to remove source %2").arg(dst, src);
+            result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+            return result;
+        }
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["from"] = src;
+    out["to"] = dst;
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opCopyFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString src = args.value("path").toString();
+    QString dst = args.value("destination").toString();
+    if (dst.isEmpty()) dst = args.value("dest").toString();
+
+    if (src.isEmpty() || dst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path and destination are required"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+
+    QJsonObject srcMeta = m_fileSystem->getMetadata(src, sandbox.get());
+    if (srcMeta.contains("error")) {
+        result.isError = true;
+        result.content = QJsonDocument(srcMeta).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    if (!QFile::copy(src, dst)) {
+        result.isError = true;
+        QJsonObject out;
+        out["error"] = QString("Failed to copy %1 -> %2").arg(src, dst);
+        result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["from"] = src;
+    out["to"] = dst;
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opAppendFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString path = args.value("path").toString();
+
+    if (path.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path is required"})";
+        return result;
+    }
+
+    // Get contents to append
+    QByteArray toAppend;
+    if (args.contains("contentsBase64")) {
+        toAppend = QByteArray::fromBase64(args.value("contentsBase64").toString().toLatin1());
+    } else if (args.contains("contents")) {
+        toAppend = args.value("contents").toString().toUtf8();
+    } else {
+        result.isError = true;
+        result.content = R"({"error": "contents or contentsBase64 is required"})";
+        return result;
+    }
+
+    WriteFileOptions options;
+    if (args.contains("options")) {
+        QJsonObject opts = args.value("options").toObject();
+        if (opts.contains("atomic")) options.atomic = opts.value("atomic").toBool();
+        if (opts.contains("createDirs")) options.createDirs = opts.value("createDirs").toBool();
+        if (opts.contains("lineEnding")) options.lineEnding = opts.value("lineEnding").toString();
+        if (opts.contains("preserveMetadata")) options.preserveMetadata = opts.value("preserveMetadata").toBool();
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+
+    // Read existing content if present
+    QByteArray existing;
+    auto readRes = m_fileSystem->readFile(path, existing, sandbox.get());
+    if (readRes.isErr()) {
+        if (readRes.code() == FileSystemResult::ErrorCode::NotFound) {
+            existing.clear();
+        } else {
+            result.isError = true;
+            result.content = QJsonDocument(resultToJson(readRes)).toJson(QJsonDocument::Compact);
+            return result;
+        }
+    }
+
+    QByteArray finalContents = existing + toAppend;
+    auto writeRes = m_fileSystem->writeFile(path, finalContents, options, sandbox.get());
+    if (writeRes.isOk()) {
+        QJsonObject out;
+        out["success"] = true;
+        out["path"] = path;
+        out["bytesWritten"] = static_cast<int>(toAppend.size());
+        result.isError = false;
+        result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    } else {
+        result.isError = true;
+        result.content = QJsonDocument(resultToJson(writeRes)).toJson(QJsonDocument::Compact);
     }
 
     return result;

@@ -118,6 +118,7 @@ ToolResult FileSystemTool::execute(const QString &callId, const QJsonObject &arg
     if (op == "create_file")     return opCreateFile(callId, args);
     if (op == "delete_file")     return opDeleteFile(callId, args);
     if (op == "move_file")       return opMoveFile(callId, args);
+    if (op == "copy_file")       return opCopyFile(callId, args);
 
     return {callId, name(), true, "Unknown operation: " + op};
 }
@@ -313,3 +314,52 @@ ToolResult FileSystemTool::opMoveFile(const QString &callId, const QJsonObject &
         result += "\nCheckpoint: " + checkpointId;
     return {callId, name(), false, result};
 }
+
+ToolResult FileSystemTool::opCopyFile(const QString &callId, const QJsonObject &args)
+{
+    const QString src  = safePath(args["path"].toString());
+    const QString dest = safePath(args["destination"].toString());
+    if (src.isEmpty() || dest.isEmpty())
+        return {callId, name(), true, "Path traversal denied."};
+    const QString checkpointId = checkpointPaths(
+        {args["path"].toString(), args["destination"].toString()},
+        QStringLiteral("file_system copy %1 -> %2").arg(args["path"].toString(), args["destination"].toString()));
+
+    // Ensure destination directory exists
+    QFileInfo destInfo(dest);
+    m_root.mkpath(destInfo.dir().absolutePath());
+
+    // For files use QFile::copy; for directories perform recursive copy
+    QFileInfo srcInfo(src);
+    bool ok = false;
+    if (srcInfo.isDir()) {
+        // Recursive directory copy
+        QDir sourceDir(src);
+        QDir destDir(dest);
+        if (!destDir.exists()) destDir.mkpath(dest);
+
+        QFileInfoList entries = sourceDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+        ok = true;
+        for (const QFileInfo &entry : entries) {
+            const QString relPath = QDir(src).relativeFilePath(entry.absoluteFilePath());
+            const QString targetPath = destDir.absoluteFilePath(relPath);
+            if (entry.isDir()) {
+                if (!QDir().mkpath(targetPath)) { ok = false; break; }
+            } else {
+                QDir().mkpath(QFileInfo(targetPath).dir().absolutePath());
+                if (!QFile::copy(entry.absoluteFilePath(), targetPath)) { ok = false; break; }
+            }
+        }
+    } else {
+        ok = QFile::copy(src, dest);
+    }
+
+    if (!ok)
+        return {callId, name(), true, "Failed to copy file/directory."};
+
+    QString result = "Copied to: " + args["destination"].toString();
+    if (!checkpointId.isEmpty())
+        result += "\nCheckpoint: " + checkpointId;
+    return {callId, name(), false, result};
+}
+

@@ -335,11 +335,12 @@ Item {
         Rectangle {
             id: codeBlockRect
             width: root.isAssistant ? root.wideContentWidth - 24 : root.contentWidth - 24
-            color: Theme.bg
-            radius: Theme.radius
-            border.color: Theme.border
+            color: "#111318"
+            radius: Theme.radius + 2
+            border.color: codeBlockRect.hovered ? "#3c4658" : "#2b313d"
+            border.width: 1
             visible: blockText.trim().length > 0
-            implicitHeight: codeColumn.implicitHeight + 16
+            implicitHeight: codeColumn.implicitHeight + 18
 
             property bool hovered: false
             property bool copied: false
@@ -347,75 +348,120 @@ Item {
             ColumnLayout {
                 id: codeColumn
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
+                anchors.margins: 0
+                spacing: 0
 
-                RowLayout {
+                Rectangle {
                     Layout.fillWidth: true
-                    spacing: 8
+                    Layout.preferredHeight: 38
+                    color: "#171b22"
+                    radius: codeBlockRect.radius
 
-                    Label {
-                        text: blockLanguage.length > 0 ? blockLanguage : "code"
-                        color: Theme.textMuted
-                        font.pixelSize: Theme.fontXs
-                        font.bold: true
-                        Layout.fillWidth: true
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: codeHeaderDivider.height
+                        color: codeHeaderDivider.color
+                        visible: false
                     }
 
-                    // Copy button (Copilot style)
                     Rectangle {
-                        Layout.preferredWidth: 70
-                        Layout.preferredHeight: 24
-                        radius: 4
-                        color: copyButtonMouseArea.containsMouse ? Theme.surfaceAlt : Theme.surface
-                        border.color: Theme.border
-                        border.width: 1
-                        opacity: codeBlockRect.hovered || codeBlockRect.copied ? 1.0 : 0.0
-                        visible: opacity > 0
+                        id: codeHeaderDivider
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 1
+                        color: "#262d38"
+                    }
 
-                        Behavior on opacity {
-                            NumberAnimation { duration: 150 }
-                        }
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 10
+                        spacing: 8
 
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 4
-
-                            // Icon (copy or checkmark)
-                            Label {
-                                text: codeBlockRect.copied ? "✓" : "⎘"
-                                color: codeBlockRect.copied ? Theme.success : Theme.textMuted
-                                font.pixelSize: Theme.fontSm
-                            }
+                        Rectangle {
+                            Layout.preferredHeight: 22
+                            Layout.preferredWidth: languageLabel.implicitWidth + 14
+                            radius: 11
+                            color: "#202734"
+                            border.color: "#30394a"
+                            border.width: 1
 
                             Label {
-                                text: codeBlockRect.copied ? "Copied" : "Copy"
-                                color: codeBlockRect.copied ? Theme.success : Theme.textMuted
+                                id: languageLabel
+                                anchors.centerIn: parent
+                                text: blockLanguage.length > 0 ? blockLanguage : "code"
+                                color: "#c3cedd"
                                 font.pixelSize: Theme.fontXs
+                                font.bold: true
                             }
                         }
 
-                        MouseArea {
-                            id: copyButtonMouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                // Copy the code text to clipboard
-                                codeTextEdit.selectAll()
-                                codeTextEdit.copy()
-                                codeTextEdit.deselect()
-                                
-                                // Show "Copied" feedback
-                                codeBlockRect.copied = true
-                                copiedTimer.restart()
-                            }
+                        Item {
+                            Layout.fillWidth: true
                         }
 
-                        Timer {
-                            id: copiedTimer
-                            interval: 2000
-                            onTriggered: codeBlockRect.copied = false
+                        Rectangle {
+                            id: copyButton
+                            Layout.preferredWidth: copyButtonLabel.implicitWidth + 28
+                            Layout.preferredHeight: 24
+                            radius: 12
+                            color: codeBlockRect.copied
+                                   ? "#193524"
+                                   : (copyButtonMouseArea.containsMouse ? "#263142" : "#1c2330")
+                            border.color: codeBlockRect.copied ? "#2d8a57" : "#344154"
+                            border.width: 1
+                            opacity: codeBlockRect.hovered || codeBlockRect.copied ? 1.0 : 0.82
+
+                            Behavior on opacity {
+                                NumberAnimation { duration: 120 }
+                            }
+
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
+                            }
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 5
+
+                                Label {
+                                    text: codeBlockRect.copied ? "✓" : "⎘"
+                                    color: codeBlockRect.copied ? "#7ee2a8" : "#b7c2d3"
+                                    font.pixelSize: Theme.fontSm
+                                    font.bold: true
+                                }
+
+                                Label {
+                                    id: copyButtonLabel
+                                    text: codeBlockRect.copied ? "Copied" : "Copy"
+                                    color: codeBlockRect.copied ? "#7ee2a8" : "#d6deea"
+                                    font.pixelSize: Theme.fontXs
+                                    font.bold: true
+                                }
+                            }
+
+                            MouseArea {
+                                id: copyButtonMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    codeTextEdit.selectAll()
+                                    codeTextEdit.copy()
+                                    codeTextEdit.deselect()
+                                    codeBlockRect.copied = true
+                                    copiedTimer.restart()
+                                }
+                            }
+
+                            Timer {
+                                id: copiedTimer
+                                interval: 1800
+                                onTriggered: codeBlockRect.copied = false
+                            }
                         }
                     }
                 }
@@ -423,9 +469,13 @@ Item {
                 TextEdit {
                     id: codeTextEdit
                     Layout.fillWidth: true
+                    Layout.leftMargin: 12
+                    Layout.rightMargin: 12
+                    Layout.topMargin: 10
+                    Layout.bottomMargin: 12
                     text: blockText
                     wrapMode: TextEdit.WrapAnywhere
-                    color: Theme.textPrimary
+                    color: "#e6edf3"
                     font: Theme.monoFont
                     readOnly: true
                     selectByMouse: true

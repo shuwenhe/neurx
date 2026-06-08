@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QDir>
 #include <QFileInfo>
+#include <QJsonArray>
 #include <QDebug>
 
 GeminiWriteFileTool::GeminiWriteFileTool(QObject *parent) : BaseTool(parent)
@@ -77,4 +78,3 @@ ToolResult GeminiWriteFileTool::execute(const QString &callId, const QJsonObject
     qInfo() << "[GeminiWriteFileTool]" << callId << "SUCCESS: Wrote" << content.size() << "bytes to" << filePath;
     return {callId, name(), false, "Successfully wrote to file: " + filePath};
 }
-
