@@ -184,9 +184,16 @@ QString AgentEngine::approvalRiskLevel(const ToolCall &call) const
 
     if (toolName == QStringLiteral("web_search")
         || toolName == QStringLiteral("google_search")
-        || toolName == QStringLiteral("web_fetch")
-        || toolName == QStringLiteral("codex_agent"))
+        || toolName == QStringLiteral("web_fetch"))
         return QStringLiteral("medium");
+
+    if (toolName == QStringLiteral("codex_agent")) {
+        if (!call.arguments.value(QStringLiteral("file_path")).toString().trimmed().isEmpty()
+            || !call.arguments.value(QStringLiteral("new_text")).toString().isEmpty()) {
+            return QStringLiteral("high");
+        }
+        return QStringLiteral("medium");
+    }
 
     return QStringLiteral("low");
 }
@@ -210,6 +217,12 @@ QString AgentEngine::approvalResourceForCall(const ToolCall &call) const
         return destination.isEmpty()
             ? QStringLiteral("%1 %2").arg(op, path)
             : QStringLiteral("%1 %2 -> %3").arg(op, path, destination);
+    }
+    if (toolName == QStringLiteral("codex_agent")) {
+        const QString filePath = call.arguments.value(QStringLiteral("file_path")).toString();
+        return !filePath.trimmed().isEmpty()
+            ? QStringLiteral("write %1").arg(filePath)
+            : call.arguments.value(QStringLiteral("task")).toString();
     }
     return QString();
 }
