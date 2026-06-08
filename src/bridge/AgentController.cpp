@@ -1454,6 +1454,8 @@ bool AgentController::toolNeedsApproval(const QString &toolName, const QVariantM
         resource = QStringLiteral("create %1").arg(arguments.value(QStringLiteral("path")).toString());
     } else if (toolName == QStringLiteral("update_plan")) {
         resource = QStringLiteral("plan update");
+    } else if (toolName == QStringLiteral("codex_agent")) {
+        resource = arguments.value(QStringLiteral("task")).toString();
     }
 
     if (!m_approvalManager) {
@@ -1845,7 +1847,7 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
     if (needsApproval && !m_autoApproveTools) {
         const QJsonObject jsonArgs = variantMapToJsonObject(arguments);
         m_pendingToolExecutions.insert(callId, PendingToolExecution{toolName, arguments, tool->summary(jsonArgs), riskLevel});
-        emit toolApprovalRequired(callId, toolName, tool->summary(jsonArgs), riskLevel);
+        emit toolApprovalRequired(callId, toolName, tool->summary(jsonArgs), riskLevel, reason);
         response.insert(QStringLiteral("pending"), true);
         response.insert(QStringLiteral("approvalId"), callId);
         response.insert(QStringLiteral("toolName"), toolName);
@@ -1930,6 +1932,23 @@ QVariantMap AgentController::executeToolByName(const QString &toolName, const QV
         emit successOccurred(QStringLiteral("%1 completed.").arg(toolName));
     }
     return response;
+}
+
+QVariantMap AgentController::delegateToCodex(const QString &task, const QString &model, const QString &workingDir)
+{
+    const QString trimmedTask = task.trimmed();
+    if (trimmedTask.isEmpty()) {
+        return {{QStringLiteral("error"), QStringLiteral("Codex task is required.")}};
+    }
+
+    QVariantMap arguments;
+    arguments.insert(QStringLiteral("task"), trimmedTask);
+    if (!model.trimmed().isEmpty())
+        arguments.insert(QStringLiteral("model"), model.trimmed());
+    if (!workingDir.trimmed().isEmpty())
+        arguments.insert(QStringLiteral("working_dir"), workingDir.trimmed());
+
+    return executeToolByName(QStringLiteral("codex_agent"), arguments);
 }
 
 void AgentController::setCurrentSelection(const QString &filePath, const QString &code,
@@ -2270,11 +2289,13 @@ void AgentController::setupEngine()
                         call.name,
                         call.id);
                     saveTaskSession();
-                    emit toolApprovalRequired(call.id, call.name,
-                        m_registry->tool(call.name)
-                            ? m_registry->tool(call.name)->summary(call.arguments)
-                            : call.name,
-                        riskLevel);
+                    emit toolApprovalRequired(call.id,
+                                              call.name,
+                                              m_registry->tool(call.name)
+                                                  ? m_registry->tool(call.name)->summary(call.arguments)
+                                                  : call.name,
+                                              riskLevel,
+                                              QString());
                 });
         connect(m_engine, &AgentEngine::turnComplete,
                 this, [this]() {
@@ -3815,9 +3836,19 @@ bool AgentController::handleSlashCommand(const QString &text)
             return true;
         }
 
-        submitToAgent(QStringLiteral(
-            "Use the codex_agent tool to delegate the following subtask, then summarize the outcome and any follow-up work:\n%1")
-                          .arg(args));
+        const QVariantMap result = delegateToCodex(args);
+        if (result.contains(QStringLiteral("error"))) {
+            emit errorOccurred(result.value(QStringLiteral("error")).toString());
+            return true;
+        }
+
+        if (result.value(QStringLiteral("pending")).toBool()) {
+            emit successOccurred(QStringLiteral("Codex task queued for approval."));
+        } else if (result.value(QStringLiteral("isError")).toBool()) {
+            emit errorOccurred(result.value(QStringLiteral("content")).toString());
+        } else {
+            emit successOccurred(QStringLiteral("Codex task completed."));
+        }
         return true;
     }
 

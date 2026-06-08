@@ -229,6 +229,9 @@ public:
                                                const QVariantMap &context = {}) const;
     Q_INVOKABLE QVariantMap executeToolByName(const QString &toolName,
                                               const QVariantMap &arguments = {});
+    Q_INVOKABLE QVariantMap delegateToCodex(const QString &task,
+                                            const QString &model = QString(),
+                                            const QString &workingDir = QString());
     Q_INVOKABLE QVariantMap toolExecutionStats(const QString &toolName) const;
     Q_INVOKABLE QVariantList toolExecutionHistory(const QString &toolName, int limit = 20) const;
     Q_INVOKABLE QVariantList commandPaletteCommands(const QString &query = QString()) const;
@@ -470,7 +473,8 @@ signals:
     void scheduledTasksChanged();
     void localGatewayUrlChanged();
     void toolApprovalRequired(const QString &callId, const QString &toolName,
-                              const QString &summary, const QString &riskLevel);
+                              const QString &summary, const QString &riskLevel,
+                              const QString &reason);
     void checkpointRestoreRequested(const QString &checkpointId,
                                     const QString &description,
                                     const QVariantList &files);

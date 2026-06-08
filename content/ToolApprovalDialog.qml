@@ -22,12 +22,14 @@ Popup {
     property string toolName
     property string toolSummary
     property string approvalRisk: "medium"
+    property string approvalReason: ""
 
-    function show(callId, name, summary, riskLevel) {
+    function show(callId, name, summary, riskLevel, reason) {
         pendingCallId = callId
         toolName      = name
         toolSummary   = summary
         approvalRisk  = riskLevel || "medium"
+        approvalReason = reason || ""
         open()
     }
 
@@ -78,18 +80,34 @@ Popup {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 36
+            implicitHeight: contentColumn.implicitHeight + 24
             color: Theme.surface
             radius: Theme.radius
             border.color: Theme.border
 
-            Label {
-                anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
-                text: root.toolName + "  —  " + root.toolSummary
-                color: Theme.textPrimary
-                font: Theme.monoFont
-                elide: Text.ElideRight
-                width: parent.width - 24
+            Column {
+                id: contentColumn
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 4
+
+                Label {
+                    width: parent.width
+                    text: root.toolName + "  —  " + root.toolSummary
+                    color: Theme.textPrimary
+                    font: Theme.monoFont
+                    elide: Text.ElideRight
+                }
+
+                Label {
+                    id: reasonLabel
+                    width: parent.width
+                    visible: root.approvalReason.length > 0
+                    text: root.approvalReason
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.fontXs
+                    wrapMode: Text.Wrap
+                }
             }
         }
 

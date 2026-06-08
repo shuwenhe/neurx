@@ -20,6 +20,10 @@ struct ToolCall {
     QString id;           // unique per call, e.g. "toolu_01..."
     QString name;
     QJsonObject arguments;
+    
+    bool operator==(const ToolCall &other) const {
+        return id == other.id && name == other.name && arguments == other.arguments;
+    }
 };
 
 struct ToolResult {
@@ -27,6 +31,11 @@ struct ToolResult {
     QString name;
     bool    isError{false};
     QString content;      // serialized output or error message
+    
+    bool operator==(const ToolResult &other) const {
+        return callId == other.callId && name == other.name && 
+               isError == other.isError && content == other.content;
+    }
 };
 
 // ── A single message in the conversation history ─────────────────────────────
@@ -42,6 +51,11 @@ struct AgentMessage {
     bool hasToolCalls()   const { return !toolCalls.isEmpty(); }
     bool hasToolResults() const { return !toolResults.isEmpty(); }
     bool hasAttachments() const { return !attachments.isEmpty(); }
+    
+    bool operator==(const AgentMessage &other) const {
+        return role == other.role && content == other.content && 
+               toolCalls == other.toolCalls && toolResults == other.toolResults;
+    }
 
     QJsonObject toJson() const;
     static AgentMessage fromJson(const QJsonObject &obj);
@@ -57,4 +71,18 @@ struct TokenEvent {
     QString toolName;
     QJsonObject toolArgsDelta;
     QString errorMessage;
+    
+    bool operator==(const TokenEvent &other) const {
+        return type == other.type && delta == other.delta && 
+               toolCallId == other.toolCallId && toolName == other.toolName;
+    }
 };
+
+// ── Qt Meta-Type Registration ────────────────────────────────────────────────
+
+Q_DECLARE_METATYPE(ToolCall)
+Q_DECLARE_METATYPE(ToolResult)
+Q_DECLARE_METATYPE(TokenEvent)
+Q_DECLARE_METATYPE(AgentMessage)
+Q_DECLARE_METATYPE(QList<ToolCall>)
+Q_DECLARE_METATYPE(QList<ToolResult>)

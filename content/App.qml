@@ -1012,13 +1012,13 @@ ApplicationWindow {
             // Close diff mode when switching files normally
             editorPanel.closeDiff()
         }
-        function onToolApprovalRequired(callId, toolName, summary, riskLevel) {
+        function onToolApprovalRequired(callId, toolName, summary, riskLevel, reason) {
             const risk = (riskLevel || "").toLowerCase()
             if (risk === "low") {
-                agentCtx.approveTool(callId, true)
+                agentCtx.approveTool(callId)
                 return
             }
-            approvalDialog.show(callId, toolName, summary, riskLevel)
+            approvalDialog.show(callId, toolName, summary, riskLevel, reason || "")
         }
         function onCheckpointRestoreRequested(checkpointId, description, files) {
             checkpointRestoreDialog.show(checkpointId, description, files)
