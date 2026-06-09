@@ -37,6 +37,7 @@
 #include "tools/GeminiGrepTool.h"
 #include "tools/GeminiGetInternalDocsTool.h"
 #include "tools/GeminiCompleteTaskTool.h"
+#include "tools/NeurxSkillCreatorTool.h"
 #include "tools/SkillTool.h"
 #include "tools/PlanModeTools.h"
 
@@ -1332,6 +1333,7 @@ void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
     registry->registerTool(createGeminiGrepAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiGetInternalDocsAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(ClaudeStandardToolFactory::createGeminiCompleteTaskAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createSkillCreatorAdapter(workspaceRoot, sandboxManager, skillManager));
 
     // Plan Mode Tools
     registry->registerTool(new EnterPlanModeTool(registry));
@@ -1588,6 +1590,14 @@ BaseTool* ClaudeStandardToolFactory::createGeminiCompleteTaskAdapter(const QStri
     Q_UNUSED(workspaceRoot);
     Q_UNUSED(sandboxManager);
     return new GeminiCompleteTaskTool();
+}
+
+BaseTool* ClaudeStandardToolFactory::createSkillCreatorAdapter(const QString& workspaceRoot,
+                                                          SandboxManager* sandboxManager,
+                                                          ClaudeSkillManager* skillManager)
+{
+    Q_UNUSED(sandboxManager);
+    return new NeurxSkillCreatorTool(skillManager, workspaceRoot);
 }
 
 BaseTool* ClaudeStandardToolFactory::createSkillAdapter(const QString& workspaceRoot, SandboxManager* sandboxManager, ClaudeSkillManager* skillManager)
