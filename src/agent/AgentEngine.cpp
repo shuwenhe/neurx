@@ -359,6 +359,8 @@ void AgentEngine::submitUserMessage(const QString &text, const QVariantList &att
         slashContext["activeModel"] = m_activeModel;
         slashContext["historySize"] = static_cast<int>(m_history.size());
         if (m_contextManager) {
+            slashContext["contextItems"] = m_contextManager->getContextAsJSON();
+            slashContext["contextText"] = m_contextManager->getContextAsText();
             slashContext["contextSize"] = m_contextManager->getContextSize();
             slashContext["contextCount"] = static_cast<int>(m_contextManager->allContextItems().size());
         }
