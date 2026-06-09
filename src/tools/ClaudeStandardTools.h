@@ -460,4 +460,7 @@ public:
     static BaseTool* createSkillAdapter(const QString& workspaceRoot, 
                                        SandboxManager* sandboxManager = nullptr,
                                        ClaudeSkillManager* skillManager = nullptr);
+    static BaseTool* createSkillCreatorAdapter(const QString& workspaceRoot,
+                                              SandboxManager* sandboxManager = nullptr,
+                                              ClaudeSkillManager* skillManager = nullptr);
 };
