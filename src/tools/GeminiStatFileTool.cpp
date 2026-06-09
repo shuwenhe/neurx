@@ -9,9 +9,13 @@ QString GeminiStatFileTool::name() const { return QStringLiteral("stat_file"); }
 QString GeminiStatFileTool::description() const { return QStringLiteral("Get file/directory metadata"); }
 
 QJsonObject GeminiStatFileTool::parametersSchema() const {
-    QJsonObject s;
-    s["path"] = QStringLiteral("string");
-    return s;
+    return QJsonDocument::fromJson(R"JSON({
+        "type": "object",
+        "properties": {
+            "path": { "type": "string", "description": "The path to the file or directory" }
+        },
+        "required": ["path"]
+    })JSON").object();
 }
 
 ToolResult GeminiStatFileTool::execute(const QString &callId, const QJsonObject &args)
@@ -41,4 +45,3 @@ ToolResult GeminiStatFileTool::execute(const QString &callId, const QJsonObject 
 
     return {callId, name(), false, QString::fromUtf8(QJsonDocument(result).toJson(QJsonDocument::Compact))};
 }
-

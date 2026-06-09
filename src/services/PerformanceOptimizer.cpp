@@ -5,17 +5,17 @@
 #include <QThreadPool>
 #include <QRunnable>
 
-PerformanceOptimizer::PerformanceOptimizer(QObject* parent)
+TextPerformanceOptimizer::TextPerformanceOptimizer(QObject* parent)
     : QObject(parent), m_indexValid(false) {
 }
 
-PerformanceOptimizer::~PerformanceOptimizer() {
+TextPerformanceOptimizer::~TextPerformanceOptimizer() {
     clearSearchCache();
 }
 
 // Process large text in chunks to avoid memory spike
-void PerformanceOptimizer::processInChunks(const QString& text, int chunkSize,
-                                          std::function<void(const FileChunk&)> processor) {
+void TextPerformanceOptimizer::processInChunks(const QString& text, int chunkSize,
+                                              std::function<void(const FileChunk&)> processor) {
     if (text.isEmpty() || chunkSize <= 0) return;
 
     QElapsedTimer timer;
@@ -55,7 +55,7 @@ void PerformanceOptimizer::processInChunks(const QString& text, int chunkSize,
 }
 
 // Incremental search for large texts
-PerformanceOptimizer::SearchProgress PerformanceOptimizer::incrementalSearch(
+TextPerformanceOptimizer::SearchProgress TextPerformanceOptimizer::incrementalSearch(
     const QString& text, const QString& pattern,
     int& resumeFromLine, int maxMatchesPerBatch) {
 
@@ -106,11 +106,11 @@ PerformanceOptimizer::SearchProgress PerformanceOptimizer::incrementalSearch(
 }
 
 // Cache search results
-void PerformanceOptimizer::cacheSearchResult(const QString& pattern, const QList<int>& positions) {
+void TextPerformanceOptimizer::cacheSearchResult(const QString& pattern, const QList<int>& positions) {
     m_searchCache[pattern] = positions;
 }
 
-QList<int> PerformanceOptimizer::getCachedResult(const QString& pattern) const {
+QList<int> TextPerformanceOptimizer::getCachedResult(const QString& pattern) const {
     auto it = m_searchCache.find(pattern);
     if (it != m_searchCache.end()) {
         return it.value();
@@ -118,12 +118,12 @@ QList<int> PerformanceOptimizer::getCachedResult(const QString& pattern) const {
     return QList<int>();
 }
 
-void PerformanceOptimizer::clearSearchCache() {
+void TextPerformanceOptimizer::clearSearchCache() {
     m_searchCache.clear();
 }
 
 // Estimate processing time based on text size and operation type
-int PerformanceOptimizer::estimateProcessingTime(const QString& text, const QString& operation) const {
+int TextPerformanceOptimizer::estimateProcessingTime(const QString& text, const QString& operation) const {
     // Rough estimates in milliseconds
     double sizeInMB = text.size() / (1024.0 * 1024.0);
 
@@ -139,8 +139,8 @@ int PerformanceOptimizer::estimateProcessingTime(const QString& text, const QStr
 }
 
 // Execute batch operations optimally
-QString PerformanceOptimizer::executeBatchOptimized(const QString& text,
-                                                     const QList<BatchOperation>& operations) {
+QString TextPerformanceOptimizer::executeBatchOptimized(const QString& text,
+                                                       const QList<BatchOperation>& operations) {
     if (operations.isEmpty()) return text;
 
     // Sort operations by position (reverse order to preserve indices)
@@ -178,7 +178,7 @@ QString PerformanceOptimizer::executeBatchOptimized(const QString& text,
 }
 
 // Analyze memory usage
-PerformanceOptimizer::MemoryStats PerformanceOptimizer::analyzeMemoryUsage(const QString& text) const {
+TextPerformanceOptimizer::MemoryStats TextPerformanceOptimizer::analyzeMemoryUsage(const QString& text) const {
     MemoryStats stats;
     stats.textSize = text.size();
     stats.lineCount = countLines(text);
@@ -196,7 +196,7 @@ PerformanceOptimizer::MemoryStats PerformanceOptimizer::analyzeMemoryUsage(const
 }
 
 // Build line index for fast line access
-void PerformanceOptimizer::buildLineIndex(const QString& text) {
+void TextPerformanceOptimizer::buildLineIndex(const QString& text) {
     if (m_indexedText == text && m_indexValid) return;
 
     m_lineOffsets.clear();
@@ -213,7 +213,7 @@ void PerformanceOptimizer::buildLineIndex(const QString& text) {
 }
 
 // Get line by number
-QString PerformanceOptimizer::getLine(int lineNumber) const {
+QString TextPerformanceOptimizer::getLine(int lineNumber) const {
     if (!m_indexValid || lineNumber < 0 || lineNumber >= m_lineOffsets.size()) {
         return QString();
     }
@@ -227,7 +227,7 @@ QString PerformanceOptimizer::getLine(int lineNumber) const {
 }
 
 // Find line number for a position
-int PerformanceOptimizer::findLineNumber(int position) const {
+int TextPerformanceOptimizer::findLineNumber(int position) const {
     if (!m_indexValid) return -1;
 
     auto it = std::upper_bound(m_lineOffsets.begin(), m_lineOffsets.end(), position);
@@ -240,13 +240,13 @@ int PerformanceOptimizer::findLineNumber(int position) const {
 }
 
 // Count lines in text
-int PerformanceOptimizer::countLines(const QString& text) const {
+int TextPerformanceOptimizer::countLines(const QString& text) const {
     if (text.isEmpty()) return 0;
     return text.count('\n') + 1;
 }
 
 // Split text into lines
-QList<int> PerformanceOptimizer::splitIntoLines(const QString& text) const {
+QList<int> TextPerformanceOptimizer::splitIntoLines(const QString& text) const {
     QList<int> lineStarts;
     lineStarts.append(0);
 

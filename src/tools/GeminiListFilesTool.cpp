@@ -1,7 +1,7 @@
 #include "GeminiListFilesTool.h"
+#include <QDirIterator>
 #include <QFileInfoList>
 #include <QJsonArray>
-#include <QDirIterator>
 #include <QJsonDocument>
 
 GeminiListFilesTool::GeminiListFilesTool(QObject *parent) : BaseTool(parent) {}
@@ -10,11 +10,15 @@ QString GeminiListFilesTool::name() const { return QStringLiteral("list_files");
 QString GeminiListFilesTool::description() const { return QStringLiteral("List files in a directory"); }
 
 QJsonObject GeminiListFilesTool::parametersSchema() const {
-    QJsonObject s;
-    s["path"] = QStringLiteral("string");
-    s["recursive"] = QStringLiteral("boolean (optional)");
-    s["pattern"] = QStringLiteral("string (optional, glob)");
-    return s;
+    return QJsonDocument::fromJson(R"JSON({
+        "type": "object",
+        "properties": {
+            "path": { "type": "string", "description": "The directory path to list" },
+            "recursive": { "type": "boolean", "description": "Whether to list files recursively", "default": false },
+            "pattern": { "type": "string", "description": "Glob pattern for matching files", "default": "*" }
+        },
+        "required": ["path"]
+    })JSON").object();
 }
 
 ToolResult GeminiListFilesTool::execute(const QString &callId, const QJsonObject &args)
@@ -34,19 +38,35 @@ ToolResult GeminiListFilesTool::execute(const QString &callId, const QJsonObject
         return {callId, name(), true, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
     }
 
-    QJsonArray items;
+    QFileInfoList entries;
     if (recursive) {
         QDirIterator it(path, QStringList() << pattern, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             it.next();
-            items.append(it.filePath());
+            entries.append(it.fileInfo());
         }
     } else {
-        QFileInfoList list = dir.entryInfoList(QStringList() << pattern, QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name);
-        for (const QFileInfo &fi : list) items.append(fi.filePath());
+        entries = dir.entryInfoList(QStringList() << pattern, QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name);
+    }
+
+    // Sort: Directories first, then alphabetically
+    std::sort(entries.begin(), entries.end(), [](const QFileInfo &a, const QFileInfo &b) {
+        if (a.isDir() && !b.isDir()) return true;
+        if (!a.isDir() && b.isDir()) return false;
+        return QString::compare(a.fileName(), b.fileName(), Qt::CaseInsensitive) < 0;
+    });
+
+    QJsonArray items;
+    for (const QFileInfo &fi : entries) {
+        QJsonObject item;
+        item["name"] = fi.fileName();
+        item["path"] = fi.absoluteFilePath();
+        item["is_dir"] = fi.isDir();
+        item["size"] = fi.size();
+        item["modified"] = fi.lastModified().toString(Qt::ISODate);
+        items.append(item);
     }
 
     QJsonObject res{{"success", true}, {"items", items}};
     return {callId, name(), false, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
 }
-
