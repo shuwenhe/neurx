@@ -42,6 +42,7 @@ private:
     ToolResult opWriteFile(const QString& callId, const QJsonObject& args);
     ToolResult opCreateFile(const QString& callId, const QJsonObject& args);
     ToolResult opReadFile(const QString& callId, const QJsonObject& args);
+    ToolResult opReadToEndFile(const QString& callId, const QJsonObject& args);
     ToolResult opCreateDirectory(const QString& callId, const QJsonObject& args);
     ToolResult opDeleteFile(const QString& callId, const QJsonObject& args);
     ToolResult opGetMetadata(const QString& callId, const QJsonObject& args);
@@ -58,9 +59,17 @@ private:
     ToolResult opListDirectory(const QString& callId, const QJsonObject& args);
     ToolResult opFindFiles(const QString& callId, const QJsonObject& args);
     ToolResult opReadManyFiles(const QString& callId, const QJsonObject& args);
+    ToolResult opReadTree(const QString& callId, const QJsonObject& args);
     ToolResult opSearchInFiles(const QString& callId, const QJsonObject& args);
+    ToolResult opDiffFile(const QString& callId, const QJsonObject& args);
+    ToolResult opReplaceInFile(const QString& callId, const QJsonObject& args);
+    ToolResult opPreviewPatch(const QString& callId, const QJsonObject& args);
+    ToolResult opApplyPatch(const QString& callId, const QJsonObject& args);
+    ToolResult opRevertLastPatch(const QString& callId, const QJsonObject& args);
     ToolResult opMoveFile(const QString& callId, const QJsonObject& args);
+    ToolResult opMoveTree(const QString& callId, const QJsonObject& args);
     ToolResult opCopyFile(const QString& callId, const QJsonObject& args);
+    ToolResult opCopyTree(const QString& callId, const QJsonObject& args);
     ToolResult opAppendFile(const QString& callId, const QJsonObject& args);
     ToolResult opRenameFile(const QString& callId, const QJsonObject& args);
 

@@ -1,10 +1,12 @@
 #include "GeminiReadFileTool.h"
+#include "agent/JitContext.h"
 #include <QFile>
 #include <QTextStream>
 #include <QJsonObject>
 #include <QJsonArray>
 
-GeminiReadFileTool::GeminiReadFileTool(QObject *parent) : BaseTool(parent)
+GeminiReadFileTool::GeminiReadFileTool(const QString &workspaceRoot, QObject *parent)
+    : BaseTool(parent), m_workspaceRoot(workspaceRoot)
 {
 }
 
@@ -52,8 +54,12 @@ ToolResult GeminiReadFileTool::execute(const QString &callId, const QJsonObject 
     }
 
     QTextStream in(&file);
-    const QString content = in.readAll();
+    QString content = in.readAll();
     file.close();
+
+    // Discover JIT context
+    QString jitContext = JitContext::discoverContext(filePath, m_workspaceRoot);
+    content = JitContext::appendJitContext(content, jitContext);
 
     return {callId, name(), false, content};
 }

@@ -1,18 +1,19 @@
 #include "agent/ToolSummarizer.h"
 #include <QDebug>
+#include <QEventLoop>
+#include <QMetaObject>
+#include <QThread>
+#include <QTimer>
 
 const QString ToolSummarizer::kSummarizePrompt = QStringLiteral(
-    "Summarize the following tool output to be a maximum of %1 tokens. "
-    "The summary should be concise and capture the main points of the tool output.\n\n"
-    "The summarization should be done based on the content that is provided. Here are the basic rules to follow:\n"
-    "1. If the text is a directory listing or any output that is structural, use the history of the conversation to understand the context. "
-    "Try to understand what information we need from the tool output and return that as a response.\n"
-    "2. If the text is text content and there is nothing structural that we need, summarize the text.\n"
-    "3. If the text is the output of a shell command, try to understand what information we need from the tool output and return a summarization "
-    "along with the stack trace of any error within the <error></error> tags. If there are warnings, include them in the summary within <warning></warning> tags.\n\n"
-    "Text to summarize:\n"
-    "\"%2\"\n\n"
-    "Return the summary string which should first contain an overall summarization of text followed by the full stack trace of errors and warnings."
+    "You are a precise tool-output summarizer.\n"
+    "Summarize the provided tool output concisely, preserving important errors, warnings, "
+    "paths, counts, and actionable details.\n"
+    "Return plain text only.\n\n"
+    "Tool: %3\n"
+    "Budget: %1 tokens\n\n"
+    "Tool output:\n"
+    "%2"
 );
 
 ToolSummarizer::ToolSummarizer(LLMProvider *provider)
@@ -31,8 +32,85 @@ QString ToolSummarizer::summarize(const QString &toolName, const QString &output
     qDebug() << "[ToolSummarizer] Tool output exceeds token limit for tool:" << toolName;
     qDebug() << "[ToolSummarizer] Output length:" << output.length() << "bytes";
 
-    // For now, just return the original output if it's too long
-    // In a full implementation, this would call the LLM provider to summarize
-    QString preview = output.left(maxTokens * 4);
-    return preview + "\n\n[...output truncated by ToolSummarizer...]";
+    LLMRequest request;
+    request.model.clear();
+    request.temperature = 0.0f;
+    request.maxTokens = qMax(256, qMin(maxTokens, 1024));
+    request.stream = false;
+
+    AgentMessage systemMsg;
+    systemMsg.role = MessageRole::System;
+    systemMsg.content = QStringLiteral(
+        "Summarize tool output for an agent. Preserve essential facts, file paths, counts, "
+        "errors, warnings, and any actionable next steps. Return plain text only."
+    );
+
+    AgentMessage userMsg;
+    userMsg.role = MessageRole::User;
+    userMsg.content = kSummarizePrompt.arg(maxTokens)
+                                      .arg(output)
+                                      .arg(toolName);
+
+    request.messages = {systemMsg, userMsg};
+
+    LLMResponse response;
+    QString requestError;
+    bool finished = false;
+
+    QEventLoop loop;
+    QMetaObject::Connection responseConn = QObject::connect(
+        m_provider, &LLMProvider::responseComplete,
+        &loop, [&](const LLMResponse &res) {
+            response = res;
+            finished = true;
+            loop.quit();
+        });
+
+    QMetaObject::Connection errorConn = QObject::connect(
+        m_provider, &LLMProvider::requestError,
+        &loop, [&](const QString &err) {
+            requestError = err;
+            finished = true;
+            loop.quit();
+        });
+
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, [&]() {
+        requestError = QStringLiteral("Tool summary request timed out.");
+        finished = true;
+        loop.quit();
+    });
+
+    timeoutTimer.start(15000);
+
+    if (m_provider->thread() == QThread::currentThread()) {
+        m_provider->sendRequest(request);
+    } else {
+        QMetaObject::invokeMethod(
+            m_provider,
+            [provider = m_provider, request]() { provider->sendRequest(request); },
+            Qt::QueuedConnection);
+    }
+
+    if (!finished) {
+        loop.exec();
+    }
+    QObject::disconnect(responseConn);
+    QObject::disconnect(errorConn);
+
+    if (!finished || !requestError.isEmpty() || response.message.content.trimmed().isEmpty()) {
+        if (!requestError.isEmpty()) {
+            qWarning() << "[ToolSummarizer] Summary request failed:" << requestError;
+        }
+        const QString preview = output.left(maxTokens * 4);
+        return preview + QStringLiteral("\n\n[...output truncated by ToolSummarizer...]");
+    }
+
+    const QString summarized = response.message.content.trimmed();
+    if (summarized.length() > maxTokens * 4) {
+        return summarized.left(maxTokens * 4) + QStringLiteral("\n\n[...summary truncated by ToolSummarizer...]");
+    }
+
+    return summarized;
 }

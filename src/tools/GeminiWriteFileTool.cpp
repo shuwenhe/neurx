@@ -1,4 +1,5 @@
 #include "GeminiWriteFileTool.h"
+#include "agent/JitContext.h"
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
@@ -9,7 +10,8 @@
 #include <QByteArray>
 #include <QJsonObject>
 
-GeminiWriteFileTool::GeminiWriteFileTool(QObject *parent) : BaseTool(parent)
+GeminiWriteFileTool::GeminiWriteFileTool(const QString &workspaceRoot, QObject *parent)
+    : BaseTool(parent), m_workspaceRoot(workspaceRoot)
 {
 }
 
@@ -106,5 +108,12 @@ ToolResult GeminiWriteFileTool::execute(const QString &callId, const QJsonObject
     }
 
     qInfo() << "[GeminiWriteFileTool]" << callId << "SUCCESS: Wrote" << bytes.size() << "bytes to" << filePath;
-    return {callId, name(), false, "Successfully wrote to file: " + filePath};
+
+    QString result = "Successfully wrote to file: " + filePath;
+
+    // Discover JIT context
+    QString jitContext = JitContext::discoverContext(filePath, m_workspaceRoot);
+    result = JitContext::appendJitContext(result, jitContext);
+
+    return {callId, name(), false, result};
 }
