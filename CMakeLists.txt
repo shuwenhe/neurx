@@ -207,6 +207,11 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityPatternDetector\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TestCoverageAnalyzer\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorHandlingAnalyzer\\.cpp$")
 
+# Wave 5: Code Quality and Design Systems
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeSimplificationSuggester\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentQualityAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TypeDesignValidator\\.cpp$")
+
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSearchTool\\.cpp$")
@@ -495,9 +500,9 @@ add_library(neurx_ui STATIC
     # File Operation Tools (Phase 5: Advanced File Operations from claude-code)
     # src/tools/FileSearchTool.cpp
     # src/tools/FileSafetyValidator.cpp
-    # src/tools/IncrementalEditTool.cpp
-    # src/tools/FileStateManager.cpp
-    # src/tools/FileCreationTool.cpp
+    src/tools/IncrementalEditTool.cpp
+    src/tools/FileStateManager.cpp
+    src/tools/FileCreationTool.cpp
 
     # Editor Command Integration (Tier 2: Editor Commands)
     src/editor/CommandRegistry.cpp
@@ -521,6 +526,11 @@ add_library(neurx_ui STATIC
     src/agent/SecurityPatternDetector.cpp
     src/agent/TestCoverageAnalyzer.cpp
     src/agent/ErrorHandlingAnalyzer.cpp
+
+    # Wave 5: Code Quality and Design Systems
+    src/agent/CodeSimplificationSuggester.cpp
+    src/agent/CommentQualityAnalyzer.cpp
+    src/agent/TypeDesignValidator.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC

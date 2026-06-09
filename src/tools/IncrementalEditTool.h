@@ -4,6 +4,8 @@
 #include <QDir>
 #include <memory>
 
+class FileStateManager;
+
 /**
  * @class IncrementalEditTool
  * @brief Edit files by line ranges without full file replacement
@@ -79,8 +81,11 @@ private:
     ) const;
 
     QString formatEditResult(const EditResult &result) const;
+    qint64 fileMtime(const QString &filepath) const;
+    bool ensureFileUnchanged(const QString &filepath, qint64 expectedMtime, QString &error) const;
 
     QDir m_root;
+    QString m_taskId{"incremental_edit"};
     static constexpr int MAX_BATCH_EDITS = 100;
     static constexpr int DEFAULT_PREVIEW_CONTEXT = 3;
 };
