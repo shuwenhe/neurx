@@ -298,7 +298,8 @@ QString CodeSimplificationSuggester::generatePriorityList(const QVector<Simplifi
     QString list;
     list += "## Top Simplification Priorities\n\n";
     
-    for (int i = 0; i < std::min(count, suggestions.size()); ++i) {
+    int maxItems = std::min(count, static_cast<int>(suggestions.size()));
+    for (int i = 0; i < maxItems; ++i) {
         list += QString("%1. %2 (Impact: %.1f%%)\n").arg(i+1).arg(suggestions[i].explanation).arg(suggestions[i].impact * 100);
     }
 
