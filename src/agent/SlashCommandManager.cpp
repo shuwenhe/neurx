@@ -390,6 +390,20 @@ void SlashCommandManager::registerBuiltInCommands()
             return cmdWorkspaceStatus(args, ctx);
         });
     }
+
+    // /context command
+    {
+        SlashCommand cmd;
+        cmd.id = "context";
+        cmd.name = "context";
+        cmd.description = "Show the currently injected context items";
+        cmd.category = "utilities";
+        cmd.aliases = {"context-status"};
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdContext(args, ctx);
+        });
+    }
 }
 
 // ── Command History ─────────────────────────────────────────────────────────
@@ -545,6 +559,71 @@ SlashCommandResult SlashCommandManager::cmdWorkspaceStatus(const QStringList &ar
         QString::number(result.metadata["contextCount"].toInt()),
         QString::number(result.metadata["contextSize"].toInt())
     );
+    return result;
+}
+
+SlashCommandResult SlashCommandManager::cmdContext(const QStringList &args,
+                                                  const QJsonObject &context)
+{
+    SlashCommandResult result;
+    result.success = true;
+    result.metadata["command"] = "context";
+    result.metadata["contextCount"] = context.value("contextCount").toInt();
+    result.metadata["contextSize"] = context.value("contextSize").toInt();
+
+    const bool showJson = args.contains(QStringLiteral("--json"))
+        || args.contains(QStringLiteral("json"))
+        || args.contains(QStringLiteral("raw"));
+
+    const QJsonArray items = context.value("contextItems").toArray();
+    if (items.isEmpty()) {
+        result.output = QStringLiteral("No injected context items are currently available.");
+        return result;
+    }
+
+    if (showJson) {
+        result.output = QString::fromUtf8(
+            QJsonDocument(items).toJson(QJsonDocument::Indented)
+        );
+        return result;
+    }
+
+    QString output;
+    output += QStringLiteral("Context items: %1\n").arg(items.size());
+    output += QStringLiteral("Context size: %1 tokens (estimated)\n\n")
+                  .arg(result.metadata["contextSize"].toInt());
+
+    for (int i = 0; i < items.size(); ++i) {
+        const QJsonObject item = items.at(i).toObject();
+        const QString id = item.value("id").toString();
+        const QString type = item.value("type").toString();
+        const QString source = item.value("source").toString();
+        const int priority = item.value("priority").toInt();
+        const QString timestamp = item.value("timestamp").toString();
+        const QString content = item.value("content").toString().simplified();
+        const QString preview = content.size() > 160 ? content.left(160) + QStringLiteral("...") : content;
+
+        output += QStringLiteral("%1. [%2] %3\n").arg(i + 1).arg(type, source);
+        output += QStringLiteral("   id: %1 | priority: %2 | timestamp: %3\n")
+                      .arg(id, QString::number(priority), timestamp);
+        if (!preview.isEmpty()) {
+            output += QStringLiteral("   content: %1\n").arg(preview);
+        }
+
+        const QJsonObject metadata = item.value("metadata").toObject();
+        if (!metadata.isEmpty()) {
+            output += QStringLiteral("   metadata: ");
+            QStringList metaPairs;
+            for (auto it = metadata.begin(); it != metadata.end(); ++it) {
+                metaPairs.append(QStringLiteral("%1=%2").arg(it.key(), it.value().toVariant().toString()));
+            }
+            output += metaPairs.join(QStringLiteral(", ")) + QStringLiteral("\n");
+        }
+
+        output += QStringLiteral("\n");
+    }
+
+    result.output = output.trimmed();
     return result;
 }
 
