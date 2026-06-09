@@ -8,6 +8,14 @@
 #include <QMutexLocker>
 #include <QMutex>
 
+// Agent Runtime Enhancement components (Tier 3)
+#include "agent/SlashCommandManager.h"
+#include "agent/EventBus.h"
+#include "agent/RuleEngine.h"
+#include "agent/MCPManager.h"
+#include "agent/ContextManager.h"
+#include "agent/ExecutionStrategyManager.h"
+
 static const QString kDefaultSystem = R"(
 You are NeurX Code, an expert software engineering AI assistant.
 You have access to tools that let you read and write files, run shell commands,
@@ -32,6 +40,57 @@ static QString logMessagePreview(const QString &text, int maxLen = 120)
 AgentEngine::AgentEngine(QObject *parent) : QObject(parent)
 {
     m_config.systemPrompt = kDefaultSystem.trimmed();
+
+    // Initialize Agent Runtime Enhancement managers (Tier 3)
+    m_eventBus = std::make_unique<EventBus>(this);
+    m_slashCommandManager = std::make_unique<SlashCommandManager>(this);
+    m_ruleEngine = std::make_unique<RuleEngine>(this);
+    m_mcpManager = std::make_unique<MCPManager>(this);
+    m_contextManager = std::make_unique<ContextManager>(this);
+    m_strategyManager = std::make_unique<ExecutionStrategyManager>(this);
+
+    // Connect EventBus to important signals
+    connect(this, &AgentEngine::toolExecuting, m_eventBus.get(), [this](const ToolCall &call) {
+        m_eventBus->publishEvent(
+            AgentEvent::Type::ToolCalled,
+            call.name,
+            call.arguments
+        );
+    });
+
+    connect(this, &AgentEngine::toolFinished, m_eventBus.get(), [this](const ToolResult &result) {
+        QJsonObject data;
+        data["content"] = result.content;
+        data["isError"] = result.isError;
+        m_eventBus->publishEvent(
+            result.isError ? AgentEvent::Type::ToolFailed : AgentEvent::Type::ToolCompleted,
+            result.name,
+            data
+        );
+    });
+
+    connect(this, &AgentEngine::statusChanged, m_eventBus.get(), [this](AgentStatus status) {
+        QString statusStr;
+        switch (status) {
+            case AgentStatus::Thinking:
+                statusStr = "Thinking";
+                break;
+            case AgentStatus::Executing:
+                statusStr = "Executing";
+                break;
+            case AgentStatus::Waiting:
+                statusStr = "Waiting";
+                break;
+            case AgentStatus::Idle:
+                statusStr = "Idle";
+                break;
+        }
+        m_eventBus->publishCustomEvent(
+            QStringLiteral("ExecutionStatusChanged"),
+            QStringLiteral("AgentEngine"),
+            QJsonObject{{"status", statusStr}}
+        );
+    });
 }
 
 AgentEngine::~AgentEngine() = default;

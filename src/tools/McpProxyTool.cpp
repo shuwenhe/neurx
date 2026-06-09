@@ -13,6 +13,22 @@ McpProxyTool::McpProxyTool(const McpToolDef &def,
                            QObject *parent)
     : BaseTool(parent), m_def(def), m_client(client)
 {
+    m_qualifiedName = sanitizeName(QStringLiteral("mcp_%1_%2")
+                                   .arg(m_client->serverName(), m_def.name));
+}
+
+QString McpProxyTool::sanitizeName(const QString &name)
+{
+    // ^[a-zA-Z_][a-zA-Z0-9_\-.:]{0,63}$
+    QString s = name;
+    s.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9_\\-\\.:]")), QStringLiteral("_"));
+    if (!s.isEmpty() && !s[0].isLetter() && s[0] != '_') {
+        s.prepend('_');
+    }
+    if (s.length() > 64) {
+        s = s.left(30) + QStringLiteral("___") + s.right(31);
+    }
+    return s;
 }
 
 QString McpProxyTool::summary(const QJsonObject &args) const

@@ -60,6 +60,10 @@ ToolResult WebSearchTool::execute(const QString &callId, const QJsonObject &args
     if (query.isEmpty())
         return {callId, name(), true, "query is required."};
 
+    // Note: We don't filter the query itself, but in searchBrave/searchDuckDuckGo
+    // we could filter results if we wanted to be extremely safe.
+    // For now, let's just ensure num_results is reasonable.
+
     const int n = qBound(1, args.value("num_results").toInt(5), 10);
 
     if (!m_braveApiKey.isEmpty())

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVariantList>
 #include <QMutex>
+#include <memory>
 #include "agent/AgentMessage.h"
 #include "agent/Planner.h"
 #include "agent/Executor.h"
@@ -11,6 +12,14 @@
 #include "agent/AgentToolRegistry.h"
 #include "llm/LLMProvider.h"
 #include "approvals/ApprovalManager.h"
+
+// Agent Runtime Enhancement components (Tier 3)
+class SlashCommandManager;
+class EventBus;
+class RuleEngine;
+class MCPManager;
+class ContextManager;
+class ExecutionStrategyManager;
 
 // ── AgentEngineConfig ────────────────────────────────────────
 
@@ -45,6 +54,14 @@ public:
     void setSystemPrompt(const QString &prompt);
     void setAutoApproveTools(bool enabled);
     QString systemPrompt() const { return m_config.systemPrompt; }
+
+    // Agent Runtime Enhancement accessors (Tier 3)
+    SlashCommandManager *slashCommandManager() const { return m_slashCommandManager.get(); }
+    EventBus *eventBus() const { return m_eventBus.get(); }
+    RuleEngine *ruleEngine() const { return m_ruleEngine.get(); }
+    MCPManager *mcpManager() const { return m_mcpManager.get(); }
+    ContextManager *contextManager() const { return m_contextManager.get(); }
+    ExecutionStrategyManager *strategyManager() const { return m_strategyManager.get(); }
 
     AgentStatus status()      const { return m_status; }
     QString     activeModel() const { return m_activeModel; }
@@ -110,6 +127,14 @@ private:
     AgentStatus       m_status{AgentStatus::Idle};
     QString           m_activeModel;
     QList<AgentMessage> m_history;
+
+    // Agent Runtime Enhancement managers (Tier 3)
+    std::unique_ptr<SlashCommandManager> m_slashCommandManager;
+    std::unique_ptr<EventBus> m_eventBus;
+    std::unique_ptr<RuleEngine> m_ruleEngine;
+    std::unique_ptr<MCPManager> m_mcpManager;
+    std::unique_ptr<ContextManager> m_contextManager;
+    std::unique_ptr<ExecutionStrategyManager> m_strategyManager;
 
     // Pending approval: callId → ToolCall
     QHash<QString, ToolCall> m_pendingApprovals;

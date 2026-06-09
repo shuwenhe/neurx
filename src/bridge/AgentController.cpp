@@ -113,7 +113,7 @@ run shell commands (both local and sandboxed Docker), and search the codebase.
 - Edit: Modify files by text replacement (file_path, old_text, new_text) - old_text must match exactly
 - MultiEdit: Apply multiple edits to one file (file_path, edits[]) - batch edits atomically
 - Read: Read file contents (file_path, start_line?, end_line?) - supports line ranges
-- codex_file_system: Codex-style file operations (write_file, read_file, create_directory, delete_file, get_metadata, write_batch)
+- codex_file_system: Codex-style file operations (write_file, create_file, read_file, create_directory, delete_file, get_metadata, write_batch, exists, list_directory, move, rename, copy, append)
 
 **Claude Standard System Operations:**
 - Bash: Execute shell commands (command, timeout?) - runs in workspace context
@@ -4337,6 +4337,9 @@ QString AgentController::buildSlashHelp() const
         "/checkpoint [id] - open the checkpoint restore dialog or rollback by id\n"
         "/mkdir <path> - create a directory inside the current workspace via codex_file_system\n"
         "/rm <path> - delete a file or directory inside the current workspace via codex_file_system\n"
+        "/ls <path> - list a directory inside the current workspace via codex_file_system\n"
+        "/mv <src> <dst> - move or rename a file or directory inside the current workspace via codex_file_system\n"
+        "/cp <src> <dst> - copy a file or directory inside the current workspace via codex_file_system\n"
         "/delegate <task> - ask the agent to delegate a subtask with codex_agent");
 }
 

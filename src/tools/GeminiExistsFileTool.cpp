@@ -8,9 +8,13 @@ QString GeminiExistsFileTool::name() const { return QStringLiteral("exists"); }
 QString GeminiExistsFileTool::description() const { return QStringLiteral("Check file or directory existence"); }
 
 QJsonObject GeminiExistsFileTool::parametersSchema() const {
-    QJsonObject s;
-    s["path"] = QStringLiteral("string");
-    return s;
+    return QJsonDocument::fromJson(R"JSON({
+        "type": "object",
+        "properties": {
+            "path": { "type": "string", "description": "The path to check" }
+        },
+        "required": ["path"]
+    })JSON").object();
 }
 
 ToolResult GeminiExistsFileTool::execute(const QString &callId, const QJsonObject &args)
@@ -25,4 +29,3 @@ ToolResult GeminiExistsFileTool::execute(const QString &callId, const QJsonObjec
     QJsonObject res{{"success", true}, {"exists", fi.exists()}, {"isFile", fi.isFile()}, {"isDir", fi.isDir()}};
     return {callId, name(), false, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
 }
-

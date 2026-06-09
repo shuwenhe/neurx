@@ -14,15 +14,18 @@ public:
                  QSharedPointer<McpClient> client,
                  QObject *parent = nullptr);
 
-    QString     name()        const override { return m_def.name; }
+    QString     name()        const override { return m_qualifiedName; }
     QString     description() const override { return m_def.description; }
     QJsonObject parametersSchema() const override { return m_def.inputSchema; }
     ToolResult  execute(const QString &callId, const QJsonObject &args) override;
     QString     summary(const QJsonObject &args) const override;
 
 private:
+    static QString sanitizeName(const QString &name);
+
     McpToolDef               m_def;
     QSharedPointer<McpClient> m_client;
+    QString                  m_qualifiedName;
 };
 
 // ── McpServerLoader ───────────────────────────────────────────────────────────

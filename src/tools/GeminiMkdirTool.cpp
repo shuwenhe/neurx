@@ -8,10 +8,14 @@ QString GeminiMkdirTool::name() const { return QStringLiteral("make_dir"); }
 QString GeminiMkdirTool::description() const { return QStringLiteral("Create directory (optionally recursive)"); }
 
 QJsonObject GeminiMkdirTool::parametersSchema() const {
-    QJsonObject s;
-    s["path"] = QStringLiteral("string");
-    s["recursive"] = QStringLiteral("boolean (optional, default true)");
-    return s;
+    return QJsonDocument::fromJson(R"JSON({
+        "type": "object",
+        "properties": {
+            "path": { "type": "string", "description": "The directory path to create" },
+            "recursive": { "type": "boolean", "description": "Whether to create parent directories", "default": true }
+        },
+        "required": ["path"]
+    })JSON").object();
 }
 
 ToolResult GeminiMkdirTool::execute(const QString &callId, const QJsonObject &args)
@@ -33,4 +37,3 @@ ToolResult GeminiMkdirTool::execute(const QString &callId, const QJsonObject &ar
     QJsonObject res{{"success", true}};
     return {callId, name(), false, QString::fromUtf8(QJsonDocument(res).toJson(QJsonDocument::Compact))};
 }
-

@@ -11,7 +11,7 @@
 #include <functional>
 
 /**
- * @class PerformanceOptimizer
+ * @class TextPerformanceOptimizer
  * @brief Performance optimization for large file operations
  * 
  * Features:
@@ -22,12 +22,12 @@
  * - Parallel processing hints
  */
 
-class PerformanceOptimizer : public QObject {
+class TextPerformanceOptimizer : public QObject {
     Q_OBJECT
 
 public:
-    explicit PerformanceOptimizer(QObject* parent = nullptr);
-    ~PerformanceOptimizer();
+    explicit TextPerformanceOptimizer(QObject* parent = nullptr);
+    ~TextPerformanceOptimizer();
 
     // Large file optimization
     struct FileChunk {
@@ -102,8 +102,8 @@ private:
     int countLines(const QString& text) const;
 };
 
-Q_DECLARE_METATYPE(PerformanceOptimizer::FileChunk)
-Q_DECLARE_METATYPE(PerformanceOptimizer::SearchProgress)
-Q_DECLARE_METATYPE(PerformanceOptimizer::MemoryStats)
+Q_DECLARE_METATYPE(TextPerformanceOptimizer::FileChunk)
+Q_DECLARE_METATYPE(TextPerformanceOptimizer::SearchProgress)
+Q_DECLARE_METATYPE(TextPerformanceOptimizer::MemoryStats)
 
 #endif // PERFORMANCEOPTIMIZER_H

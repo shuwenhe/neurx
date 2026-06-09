@@ -6,6 +6,9 @@
 #include <QDir>
 #include <QProcess>
 
+// Forward declarations
+class ClaudeSkillManager;
+
 /**
  * @file ClaudeStandardTools.h
  * @brief Claude Code 标准工具集
@@ -146,7 +149,7 @@ private:
     SandboxManager* m_sandboxManager{nullptr};
 };
 
-// ════════════════════════��═════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // Read Tool - 读取文件内容
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -338,7 +341,7 @@ private:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Tool Factory - 工具工厂
-// ═════════════════════════════════════════════════��═════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * @class ClaudeStandardToolFactory
@@ -405,4 +408,25 @@ public:
                                               SandboxManager* sandboxManager = nullptr);
     static BaseTool* createGeminiWriteBatchAdapter(const QString& workspaceRoot,
                                                 SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiReadManyFilesAdapter(const QString& workspaceRoot,
+                                                   SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiGlobAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiEditAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiWriteTodosAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiUpdateTopicAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiAskUserAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiGrepAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiGetInternalDocsAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createGeminiCompleteTaskAdapter(const QString& workspaceRoot,
+                                          SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createSkillAdapter(const QString& workspaceRoot, 
+                                       SandboxManager* sandboxManager = nullptr,
+                                       ClaudeSkillManager* skillManager = nullptr);
 };

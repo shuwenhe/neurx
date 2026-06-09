@@ -97,11 +97,131 @@ bool ShellTool::isDestructiveCommand(const QString &command) const
     });
 }
 
+bool ShellTool::detectCommandSubstitution(const QString &command)
+{
+#ifdef Q_OS_WIN
+    return detectPowerShellSubstitution(command);
+#else
+    return detectBashSubstitution(command);
+#endif
+}
+
+bool ShellTool::detectBashSubstitution(const QString &command)
+{
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
+    int i = 0;
+    while (i < command.length()) {
+        const QChar &ch = command[i];
+        if (ch == '\'' && !inDoubleQuote) {
+            inSingleQuote = !inSingleQuote;
+            i++;
+            continue;
+        }
+        if (ch == '"' && !inSingleQuote) {
+            inDoubleQuote = !inDoubleQuote;
+            i++;
+            continue;
+        }
+        if (inSingleQuote) {
+            i++;
+            continue;
+        }
+        if (ch == '\\' && i + 1 < command.length()) {
+            if (inDoubleQuote) {
+                const QChar next = command[i + 1];
+                static const QString escapedChars = QStringLiteral("$`\"\\\n");
+                if (escapedChars.contains(next)) {
+                    i += 2;
+                    continue;
+                }
+            } else {
+                i += 2;
+                continue;
+            }
+        }
+        if (ch == '$' && i + 1 < command.length() && command[i + 1] == '(') {
+            return true;
+        }
+        if (!inDoubleQuote && (ch == '<' || ch == '>') && i + 1 < command.length() && command[i + 1] == '(') {
+            return true;
+        }
+        if (ch == '`') {
+            return true;
+        }
+        i++;
+    }
+    return false;
+}
+
+bool ShellTool::detectPowerShellSubstitution(const QString &command)
+{
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
+    int i = 0;
+    while (i < command.length()) {
+        const QChar &ch = command[i];
+
+        if (ch == '\'' && !inDoubleQuote) {
+            inSingleQuote = !inSingleQuote;
+            i++;
+            continue;
+        }
+        if (ch == '"' && !inSingleQuote) {
+            inDoubleQuote = !inDoubleQuote;
+            i++;
+            continue;
+        }
+
+        if (inSingleQuote) {
+            i++;
+            continue;
+        }
+        if (ch == '`' && i + 1 < command.length()) {
+            i += 2;
+            continue;
+        }
+        if (ch == '$' && i + 1 < command.length() && command[i + 1] == '(') {
+            return true;
+        }
+        if (!inDoubleQuote && ch == '@' && i + 1 < command.length() && command[i + 1] == '(') {
+            return true;
+        }
+        if (!inDoubleQuote && ch == '(') {
+            const QString before = command.left(i).trimmed();
+            if (!before.isEmpty()) {
+                const QChar prevChar = before[before.length() - 1];
+                if (prevChar == '(') {
+                    i++;
+                    continue;
+                }
+                static const QRegularExpression reKeyword(
+                    QStringLiteral(R"(\b(if|elseif|else|foreach|for|while|do|switch|try|catch|finally|until|trap|function|filter)(\s+[-\w]+)*\s*$)"),
+                    QRegularExpression::CaseInsensitiveOption);
+                if (reKeyword.match(before).hasMatch()) {
+                    i++;
+                    continue;
+                }
+            }
+            return true;
+        }
+
+        i++;
+    }
+    return false;
+}
+
 ToolResult ShellTool::execute(const QString &callId, const QJsonObject &args)
 {
     const QString command = args["command"].toString().trimmed();
     if (command.isEmpty())
         return {callId, name(), true, "Empty command."};
+
+    if (detectCommandSubstitution(command)) {
+        return {callId, name(), true,
+                "Command injection detected: command substitution syntax ($(), backticks, <(), or >()) found in command arguments. "
+                "This is a security risk and the command was blocked."};
+    }
 
     if (!isAllowed(command))
         return {callId, name(), true, "Command not in allowlist: " + command};
