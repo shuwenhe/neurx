@@ -53,7 +53,9 @@ public:
     void setConfig(const AgentEngineConfig &config);
     void setSystemPrompt(const QString &prompt);
     void setAutoApproveTools(bool enabled);
+    void setWorkspaceRoot(const QString &root);
     QString systemPrompt() const { return m_config.systemPrompt; }
+    QString workspaceRoot() const { return m_workspaceRoot; }
 
     // Agent Runtime Enhancement accessors (Tier 3)
     SlashCommandManager *slashCommandManager() const { return m_slashCommandManager.get(); }
@@ -126,6 +128,7 @@ private:
     AgentEngineConfig       m_config;
     AgentStatus       m_status{AgentStatus::Idle};
     QString           m_activeModel;
+    QString           m_workspaceRoot;
     QList<AgentMessage> m_history;
 
     // Agent Runtime Enhancement managers (Tier 3)

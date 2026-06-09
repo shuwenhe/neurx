@@ -53,8 +53,10 @@ bool GitAutomationManager::smartCommit(const QString& message, CommitType type)
         executeGitCommandBool("add -A");
     }
 
-    QString cmd = QString("commit -m \"%1\"").arg(message);
-    bool success = executeGitCommandBool(cmd);
+    QProcess process;
+    process.start(m_gitPath, {"commit", "-m", message});
+    process.waitForFinished();
+    bool success = (process.exitCode() == 0);
 
     if (success) {
         m_statistics.totalCommits++;
@@ -564,7 +566,7 @@ GitAutomationManager::GitStats GitAutomationManager::getStatistics() const
 QString GitAutomationManager::executeGitCommand(const QString& command)
 {
     QProcess process;
-    process.start(m_gitPath, QStringList(command));
+    process.start(m_gitPath, command.split(' ', Qt::SkipEmptyParts));
     process.waitForFinished();
 
     return QString::fromUtf8(process.readAllStandardOutput());
@@ -573,7 +575,7 @@ QString GitAutomationManager::executeGitCommand(const QString& command)
 bool GitAutomationManager::executeGitCommandBool(const QString& command)
 {
     QProcess process;
-    process.start(m_gitPath, QStringList(command));
+    process.start(m_gitPath, command.split(' ', Qt::SkipEmptyParts));
     process.waitForFinished();
 
     return process.exitCode() == 0;
