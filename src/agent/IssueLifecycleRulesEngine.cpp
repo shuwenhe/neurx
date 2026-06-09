@@ -1,6 +1,7 @@
 #include "IssueLifecycleRulesEngine.h"
 #include <QDebug>
 #include <QDateTime>
+#include <QJsonArray>
 
 IssueLifecycleRulesEngine::IssueLifecycleRulesEngine(QObject* parent)
     : QObject(parent), m_autoTransitionEnabled(true), m_maxInactivityDays(30), m_staleUpvoteThreshold(10)
@@ -83,7 +84,52 @@ void IssueLifecycleRulesEngine::trackIssue(int issueNumber, LifecycleLabel initi
 {
     m_issueStates[issueNumber] = initialLabel;
     m_lastActivity[issueNumber] = QDateTime::currentDateTimeUtc();
+    if (!m_issueUpvotes.contains(issueNumber)) {
+        m_issueUpvotes[issueNumber] = 0;
+    }
     emit issueTracked(issueNumber);
+}
+
+void IssueLifecycleRulesEngine::ingestIssueSnapshot(int issueNumber, const QJsonObject& issue)
+{
+    const QJsonArray labels = issue.value("labels").toArray();
+    LifecycleLabel initialLabel = Invalid;
+    for (const QJsonValue& labelValue : labels) {
+        const QString label = labelValue.toObject().value("name").toString().toLower();
+        if (label == "needs-repro" || label == "needs-reproduction") {
+            initialLabel = NeedsRepro;
+            break;
+        }
+        if (label == "needs-info" || label == "needs-information") {
+            initialLabel = NeedsInfo;
+            break;
+        }
+        if (label == "stale") {
+            initialLabel = Stale;
+            break;
+        }
+        if (label == "autoclose" || label == "auto-close") {
+            initialLabel = Autoclose;
+            break;
+        }
+    }
+
+    trackIssue(issueNumber, initialLabel);
+
+    const QDateTime updatedAt = QDateTime::fromString(issue.value("updated_at").toString(), Qt::ISODate);
+    const QDateTime createdAt = QDateTime::fromString(issue.value("created_at").toString(), Qt::ISODate);
+    if (updatedAt.isValid()) {
+        m_lastActivity[issueNumber] = updatedAt.toUTC();
+    } else if (createdAt.isValid()) {
+        m_lastActivity[issueNumber] = createdAt.toUTC();
+    }
+
+    int upvotes = issue.value("upvotes").toInt(-1);
+    if (upvotes < 0) {
+        upvotes = issue.value("reactions").toObject().value("+1").toInt(0);
+    }
+    m_issueUpvotes[issueNumber] = qMax(0, upvotes);
+    m_issueMetadata[issueNumber] = issue;
 }
 
 void IssueLifecycleRulesEngine::updateIssueState(int issueNumber, LifecycleLabel newLabel)
@@ -124,6 +170,25 @@ void IssueLifecycleRulesEngine::recordActivity(int issueNumber)
     emit activityRecorded(issueNumber);
 }
 
+void IssueLifecycleRulesEngine::setIssueUpvotes(int issueNumber, int upvotes)
+{
+    m_issueUpvotes[issueNumber] = qMax(0, upvotes);
+}
+
+QJsonObject IssueLifecycleRulesEngine::exportIssueSnapshot(int issueNumber) const
+{
+    QJsonObject out;
+    out["issueNumber"] = issueNumber;
+    out["state"] = labelToString(getCurrentState(issueNumber));
+    out["daysInactive"] = daysSinceLastActivity(issueNumber);
+    out["upvotes"] = m_issueUpvotes.value(issueNumber, 0);
+    out["lastActivity"] = getLastActivity(issueNumber).toString(Qt::ISODate);
+    if (m_issueMetadata.contains(issueNumber)) {
+        out["metadata"] = m_issueMetadata.value(issueNumber);
+    }
+    return out;
+}
+
 IssueLifecycleRulesEngine::LifecycleLabel IssueLifecycleRulesEngine::evaluatePolicy(int issueNumber) const
 {
     if (!m_issueStates.contains(issueNumber)) {
@@ -132,13 +197,15 @@ IssueLifecycleRulesEngine::LifecycleLabel IssueLifecycleRulesEngine::evaluatePol
     
     int daysSince = daysSinceLastActivity(issueNumber);
     LifecycleLabel currentState = m_issueStates.value(issueNumber);
+    const int upvotes = m_issueUpvotes.value(issueNumber, 0);
+    const int adjustedMaxDays = upvotes >= m_staleUpvoteThreshold ? m_maxInactivityDays + 7 : m_maxInactivityDays;
     
     // Evaluate policies in priority order
-    if (daysSince >= 30) {
+    if (daysSince >= adjustedMaxDays) {
         return Autoclose;
     }
     
-    if (daysSince >= 14 && currentState != Autoclose) {
+    if (daysSince >= qMax(14, adjustedMaxDays / 2) && currentState != Autoclose) {
         return Stale;
     }
     
@@ -208,10 +275,11 @@ QString IssueLifecycleRulesEngine::generateCloseReason(LifecycleLabel label) con
 QString IssueLifecycleRulesEngine::generateStatusUpdate(int issueNumber, LifecycleLabel label) const
 {
     QString status = labelToString(label);
-    return QString("Issue #%1 status updated to: %2\n%3")
+    return QString("Issue #%1 status updated to: %2\n%3\nInactive for %4 days")
         .arg(issueNumber)
         .arg(status)
-        .arg(generateNudgeMessage(label));
+        .arg(generateNudgeMessage(label))
+        .arg(daysSinceLastActivity(issueNumber));
 }
 
 void IssueLifecycleRulesEngine::setStaleUpvoteThreshold(int threshold)

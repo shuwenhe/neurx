@@ -58,10 +58,13 @@ public:
     
     // Issue state management
     void trackIssue(int issueNumber, LifecycleLabel initialLabel = Invalid);
+    void ingestIssueSnapshot(int issueNumber, const QJsonObject& issue);
     void updateIssueState(int issueNumber, LifecycleLabel newLabel);
     LifecycleLabel getCurrentState(int issueNumber) const;
     QDateTime getLastActivity(int issueNumber) const;
     void recordActivity(int issueNumber);
+    void setIssueUpvotes(int issueNumber, int upvotes);
+    QJsonObject exportIssueSnapshot(int issueNumber) const;
     
     // Policy evaluation
     LifecycleLabel evaluatePolicy(int issueNumber) const;
@@ -100,6 +103,8 @@ private:
     QVector<LifecyclePolicy> m_policies;
     QMap<int, LifecycleLabel> m_issueStates;
     QMap<int, QDateTime> m_lastActivity;
+    QMap<int, int> m_issueUpvotes;
+    QMap<int, QJsonObject> m_issueMetadata;
     QVector<IssueTransition> m_transitionHistory;
     
     bool m_autoTransitionEnabled;
