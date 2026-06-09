@@ -187,6 +187,8 @@ private:
     SlashCommandResult cmdPluginCreate(const QStringList &args, const QJsonObject &context);
     SlashCommandResult cmdHelp(const QStringList &args, const QJsonObject &context);
     SlashCommandResult cmdCommit(const QStringList &args, const QJsonObject &context);
+    SlashCommandResult cmdCommitPushPR(const QStringList &args, const QJsonObject &context);
+    SlashCommandResult cmdCleanGone(const QStringList &args, const QJsonObject &context);
     
     // ── Helper methods ───────────────────────────────────────────────────────
     QStringList parseCommandLine(const QString &line) const;

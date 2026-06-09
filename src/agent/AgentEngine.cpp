@@ -15,6 +15,7 @@
 #include "agent/MCPManager.h"
 #include "agent/ContextManager.h"
 #include "agent/ExecutionStrategyManager.h"
+#include "security/FolderTrustDiscoveryService.h"
 
 static const QString kDefaultSystem = R"(
 You are NeurX Code, an expert software engineering AI assistant.
@@ -108,6 +109,7 @@ void AgentEngine::setProvider(LLMProvider *provider)
         m_planner.setMaxTokens(m_config.maxCompletionTokens);
         m_planner.setContextBudget(qMax(0, budget - 8192));
         m_planner.setTemperature(0.0f);
+        m_executor.setLLMProvider(m_provider);
     }
 }
 
@@ -141,6 +143,15 @@ void AgentEngine::setSystemPrompt(const QString &prompt)
 void AgentEngine::setAutoApproveTools(bool enabled)
 {
     m_config.autoApproveTools = enabled;
+}
+
+void AgentEngine::setWorkspaceRoot(const QString &root)
+{
+    m_workspaceRoot = root;
+
+    // TODO: Perform Folder Trust Discovery when properly integrated
+    // Temporarily disabled to avoid duplicate symbol issues
+    // FolderDiscoveryResults discovery = FolderTrustDiscoveryService::discover(root);
 }
 
 void AgentEngine::setActiveModel(const QString &model)
@@ -327,6 +338,26 @@ void AgentEngine::injectContext(const QString &filePath, const QString &content,
 void AgentEngine::submitUserMessage(const QString &text, const QVariantList &attachments)
 {
     if (m_status != AgentStatus::Idle) return;
+
+    // Check for slash commands (Tier 3 enhancement)
+    if (text.startsWith('/') && m_slashCommandManager) {
+        SlashCommandResult result = m_slashCommandManager->executeCommand(text);
+        if (result.success) {
+            AgentMessage cmdResponse;
+            cmdResponse.role = MessageRole::Assistant;
+            cmdResponse.content = result.output;
+            appendMessage(cmdResponse);
+
+            // If the command specified an agent, we might want to switch or delegate
+            if (result.metadata.contains("agent")) {
+                // Future: implementation for agent delegation
+                qDebug() << "[AgentEngine] Command requested specialized agent:" << result.metadata["agent"].toString();
+            }
+
+            emit turnComplete();
+            return;
+        }
+    }
 
     AgentMessage userMsg;
     userMsg.role    = MessageRole::User;

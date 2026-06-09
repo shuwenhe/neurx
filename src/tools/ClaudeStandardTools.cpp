@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QDateTime>
 #include <QSaveFile>
+#include <functional>
 
 #include "tools/GeminiListFilesTool.h"
 #include "tools/GeminiStatFileTool.h"
@@ -29,6 +30,7 @@
 #include "tools/GeminiReadManyFilesTool.h"
 #include "tools/GeminiGlobTool.h"
 #include "tools/GeminiEditTool.h"
+#include "tools/ApplyPatchTool.h"
 #include "tools/GeminiWriteTodosTool.h"
 #include "tools/GeminiUpdateTopicTool.h"
 #include "tools/GeminiAskUserTool.h"
@@ -36,6 +38,7 @@
 #include "tools/GeminiGetInternalDocsTool.h"
 #include "tools/GeminiCompleteTaskTool.h"
 #include "tools/SkillTool.h"
+#include "tools/PlanModeTools.h"
 
 namespace {
 
@@ -688,6 +691,151 @@ bool ReadTool::isBinaryFile(const QString& filePath) const
 // BashTool Implementation
 // ═══════════════════════════════════════════════════════════════════════════════
 
+ReadTreeTool::ReadTreeTool(const QString& workspaceRoot, QObject* parent)
+    : BaseTool(parent)
+    , m_root(workspaceRoot)
+{
+}
+
+QJsonObject ReadTreeTool::parametersSchema() const
+{
+    return QJsonDocument::fromJson(R"JSON({
+        "type": "object",
+        "properties": {
+            "path": {
+                "type": "string",
+                "description": "Directory or file path to read as a tree (default: workspace root)"
+            },
+            "include_contents": {
+                "type": "boolean",
+                "description": "Include file contents for leaf files",
+                "default": false
+            },
+            "include_hidden": {
+                "type": "boolean",
+                "description": "Include hidden files and directories",
+                "default": false
+            },
+            "max_depth": {
+                "type": "integer",
+                "description": "Maximum recursion depth (-1 for unlimited)",
+                "default": -1
+            },
+            "max_results": {
+                "type": "integer",
+                "description": "Maximum number of files to inspect",
+                "default": 1000
+            }
+        }
+    })JSON").object();
+}
+
+ToolResult ReadTreeTool::execute(const QString& callId, const QJsonObject& args)
+{
+    QString path = args.value("path").toString(".");
+    const bool includeContents = args.value("include_contents").toBool(false);
+    const bool includeHidden = args.value("include_hidden").toBool(false);
+    const int maxDepth = args.value("max_depth").toInt(-1);
+    const int maxResults = qMax(1, args.value("max_results").toInt(1000));
+
+    const QString absPath = safePath(path);
+    if (absPath.isEmpty()) {
+        return {callId, name(), true, "Error: Path traversal attack detected"};
+    }
+
+    if (!QFileInfo::exists(absPath)) {
+        return {callId, name(), true, "Error: Path does not exist: " + path};
+    }
+
+    if (m_sandboxManager && !m_sandboxManager->canAccess(absPath, FileSystemAccessMode::Read)) {
+        return {callId, name(), true, "Error: Sandbox policy denied read access"};
+    }
+
+    int filesSeen = 0;
+    bool truncated = false;
+
+    std::function<QJsonObject(const QString&, int)> buildNode;
+    buildNode = [&](const QString& currentPath, int depth) -> QJsonObject {
+        QFileInfo info(currentPath);
+        QJsonObject node;
+        node["name"] = info.fileName().isEmpty() ? info.absoluteFilePath() : info.fileName();
+        node["path"] = currentPath;
+        node["relativePath"] = m_root.relativeFilePath(currentPath);
+        node["isDir"] = info.isDir();
+        node["isFile"] = info.isFile();
+        node["size"] = static_cast<qint64>(info.size());
+        node["modified"] = info.lastModified().toString(Qt::ISODate);
+
+        if (info.isDir()) {
+            if (maxDepth >= 0 && depth >= maxDepth) {
+                node["truncated"] = true;
+                return node;
+            }
+
+            QDir dir(currentPath);
+            QDir::Filters filters = QDir::NoDotAndDotDot | QDir::AllEntries;
+            if (includeHidden) {
+                filters |= QDir::Hidden;
+            }
+
+            QJsonArray children;
+            const QFileInfoList entries = dir.entryInfoList(filters, QDir::DirsFirst | QDir::Name);
+            for (const QFileInfo& entry : entries) {
+                if (filesSeen >= maxResults) {
+                    truncated = true;
+                    node["truncated"] = true;
+                    break;
+                }
+                children.append(buildNode(entry.absoluteFilePath(), depth + 1));
+            }
+            node["children"] = children;
+            return node;
+        }
+
+        ++filesSeen;
+        if (includeContents) {
+            QFile file(currentPath);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                const QByteArray bytes = file.readAll();
+                node["contents"] = QString::fromUtf8(bytes);
+                node["contentsBase64"] = QString::fromLatin1(bytes.toBase64());
+            }
+        }
+
+        return node;
+    };
+
+    QJsonObject out;
+    out["path"] = path;
+    out["root"] = buildNode(absPath, 0);
+    out["filesSeen"] = filesSeen;
+    out["truncated"] = truncated;
+    out["includeContents"] = includeContents;
+    out["maxDepth"] = maxDepth;
+
+    return {callId, name(), false, QJsonDocument(out).toJson(QJsonDocument::Compact)};
+}
+
+QString ReadTreeTool::summary(const QJsonObject& args) const
+{
+    return QString("Read tree: %1").arg(args.value("path").toString("."));
+}
+
+QString ReadTreeTool::safePath(const QString& relOrAbsPath) const
+{
+    QFileInfo fileInfo(relOrAbsPath);
+
+    if (fileInfo.isAbsolute()) {
+        const QString absPath = QDir::cleanPath(fileInfo.absoluteFilePath());
+        const QString cleanRoot = QDir::cleanPath(m_root.absolutePath());
+        return absPath.startsWith(cleanRoot) ? absPath : QString();
+    }
+
+    const QString absPath = QDir::cleanPath(m_root.absoluteFilePath(relOrAbsPath));
+    const QString cleanRoot = QDir::cleanPath(m_root.absolutePath());
+    return absPath.startsWith(cleanRoot) ? absPath : QString();
+}
+
 BashTool::BashTool(const QString& workspaceRoot, QObject* parent)
     : BaseTool(parent)
     , m_root(workspaceRoot)
@@ -1155,9 +1303,26 @@ void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
     registry->registerTool(createEditTool(workspaceRoot, sandboxManager));
     registry->registerTool(createMultiEditTool(workspaceRoot, sandboxManager));
     registry->registerTool(createReadTool(workspaceRoot, sandboxManager));
+    registry->registerTool(createReadTreeTool(workspaceRoot, sandboxManager));
+    registry->registerTool(createApplyPatchTool(workspaceRoot, sandboxManager));
     registry->registerTool(createBashTool(workspaceRoot, sandboxManager));
     registry->registerTool(createGrepTool(workspaceRoot, sandboxManager));
     registry->registerTool(createGlobTool(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiListFilesAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiStatFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiRemoveFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiMkdirAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiAppendFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiExistsFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiRgAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiReadFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiWriteFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiChmodAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiHashAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiSymlinkAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiMoveFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiCopyFileAdapter(workspaceRoot, sandboxManager));
+    registry->registerTool(createGeminiWriteBatchAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiReadManyFilesAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiGlobAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiEditAdapter(workspaceRoot, sandboxManager));
@@ -1167,6 +1332,10 @@ void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
     registry->registerTool(createGeminiGrepAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiGetInternalDocsAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(ClaudeStandardToolFactory::createGeminiCompleteTaskAdapter(workspaceRoot, sandboxManager));
+
+    // Plan Mode Tools
+    registry->registerTool(new EnterPlanModeTool(registry));
+    registry->registerTool(new ExitPlanModeTool(registry));
 
     // Common standard tools
 }
@@ -1199,6 +1368,22 @@ ReadTool* ClaudeStandardToolFactory::createReadTool(const QString& workspaceRoot
                                                    SandboxManager* sandboxManager)
 {
     auto tool = new ReadTool(workspaceRoot);
+    tool->setSandboxManager(sandboxManager);
+    return tool;
+}
+
+ReadTreeTool* ClaudeStandardToolFactory::createReadTreeTool(const QString& workspaceRoot,
+                                                           SandboxManager* sandboxManager)
+{
+    auto tool = new ReadTreeTool(workspaceRoot);
+    tool->setSandboxManager(sandboxManager);
+    return tool;
+}
+
+BaseTool* ClaudeStandardToolFactory::createApplyPatchTool(const QString& workspaceRoot,
+                                                         SandboxManager* sandboxManager)
+{
+    auto tool = new ApplyPatchTool(workspaceRoot);
     tool->setSandboxManager(sandboxManager);
     return tool;
 }
@@ -1281,15 +1466,13 @@ BaseTool* ClaudeStandardToolFactory::createGeminiRgAdapter(const QString& worksp
 BaseTool* ClaudeStandardToolFactory::createGeminiReadFileAdapter(const QString& workspaceRoot,
                                                               SandboxManager* sandboxManager)
 {
-    Q_UNUSED(workspaceRoot);
-    return new GeminiReadFileTool();
+    return new GeminiReadFileTool(workspaceRoot);
 }
 
 BaseTool* ClaudeStandardToolFactory::createGeminiWriteFileAdapter(const QString& workspaceRoot,
-                                                               SandboxManager* sandboxManager)
+                                                                SandboxManager* sandboxManager)
 {
-    Q_UNUSED(workspaceRoot);
-    return new GeminiWriteFileTool();
+    return new GeminiWriteFileTool(workspaceRoot);
 }
 
 BaseTool* ClaudeStandardToolFactory::createGeminiChmodAdapter(const QString& workspaceRoot,
@@ -1317,6 +1500,7 @@ BaseTool* ClaudeStandardToolFactory::createGeminiMoveFileAdapter(const QString& 
                                                               SandboxManager* sandboxManager)
 {
     Q_UNUSED(workspaceRoot);
+    Q_UNUSED(sandboxManager);
     return new GeminiMoveFileTool();
 }
 
@@ -1324,6 +1508,7 @@ BaseTool* ClaudeStandardToolFactory::createGeminiCopyFileAdapter(const QString& 
                                                               SandboxManager* sandboxManager)
 {
     Q_UNUSED(workspaceRoot);
+    Q_UNUSED(sandboxManager);
     return new GeminiCopyFileTool();
 }
 
@@ -1338,15 +1523,13 @@ BaseTool* ClaudeStandardToolFactory::createGeminiWriteBatchAdapter(const QString
 BaseTool* ClaudeStandardToolFactory::createGeminiReadManyFilesAdapter(const QString& workspaceRoot,
                                                                   SandboxManager* sandboxManager)
 {
-    Q_UNUSED(workspaceRoot);
     Q_UNUSED(sandboxManager);
-    return new GeminiReadManyFilesTool();
+    return new GeminiReadManyFilesTool(workspaceRoot);
 }
 
 BaseTool* ClaudeStandardToolFactory::createGeminiGlobAdapter(const QString& workspaceRoot,
                                                           SandboxManager* sandboxManager)
 {
-    Q_UNUSED(workspaceRoot);
     Q_UNUSED(sandboxManager);
     return new GeminiGlobTool();
 }
