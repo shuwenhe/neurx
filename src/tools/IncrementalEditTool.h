@@ -41,6 +41,7 @@ private:
         int endLine{1};    // 1-based, inclusive
         QString content;
         bool createIfMissing{false};
+        bool previewOnly{false};
     };
 
     struct EditResult {
@@ -76,6 +77,8 @@ private:
         const QStringList &newLines,
         int contextLines = 3
     ) const;
+
+    QString formatEditResult(const EditResult &result) const;
 
     QDir m_root;
     static constexpr int MAX_BATCH_EDITS = 100;

@@ -195,6 +195,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ExplanatoryOutputStyleManager\\.cp
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueDuplicateAutoCloser\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubSweepAutomation\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceHealthAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubIssueLabelManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueLifecycleRulesEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AutoCommentGenerator\\.cpp$")
 
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
