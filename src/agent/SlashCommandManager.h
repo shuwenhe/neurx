@@ -191,11 +191,14 @@ private:
     SlashCommandResult cmdCleanGone(const QStringList &args, const QJsonObject &context);
     SlashCommandResult cmdWorkspaceStatus(const QStringList &args, const QJsonObject &context);
     SlashCommandResult cmdContext(const QStringList &args, const QJsonObject &context);
+    SlashCommandResult cmdIssueLifecycle(const QStringList &args, const QJsonObject &context);
+    SlashCommandResult cmdIssueActivity(const QStringList &args, const QJsonObject &context);
     
     // ── Helper methods ───────────────────────────────────────────────────────
     QStringList parseCommandLine(const QString &line) const;
     bool validateCommand(const SlashCommand &cmd) const;
     QString expandContext(const QString &text, const QJsonObject &context) const;
+    QMap<QString, QString> parseKeyValueArgs(const QStringList &args) const;
 
     // ── Data members ─────────────────────────────────────────────────────────
     QMap<QString, SlashCommand> m_commands;

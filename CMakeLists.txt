@@ -202,6 +202,11 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DuplicateDetectionBackfill\\.cpp$"
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueActivityMonitor\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PullRequestAutoReviewer\\.cpp$")
 
+# Wave 4: Security and Testing Systems
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityPatternDetector\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TestCoverageAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorHandlingAnalyzer\\.cpp$")
+
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSearchTool\\.cpp$")
@@ -464,6 +469,7 @@ add_library(neurx_ui STATIC
     src/agent/IssueLifecycleManager.cpp
     src/agent/IssueLifecycleRulesEngine.cpp
     src/agent/AutoCommentGenerator.cpp
+    src/agent/IssueActivityMonitor.cpp
     # DISABLED: src/agent/AutonomousIterationEngine.cpp
     # DISABLED: src/agent/SecurityGuidelineEnforcer.cpp
     # DISABLED: src/agent/InteractiveOutputStyler.cpp
@@ -510,6 +516,11 @@ add_library(neurx_ui STATIC
     src/agent/RalphIterationEngine.cpp
     src/agent/InteractivePromptSystem.cpp
     src/agent/GitCommandIntegration.cpp
+
+    # Wave 4: Security and Testing Systems
+    src/agent/SecurityPatternDetector.cpp
+    src/agent/TestCoverageAnalyzer.cpp
+    src/agent/ErrorHandlingAnalyzer.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
