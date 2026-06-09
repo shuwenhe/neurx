@@ -376,6 +376,20 @@ void SlashCommandManager::registerBuiltInCommands()
             return cmdCleanGone(args, ctx);
         });
     }
+
+    // /workspace command
+    {
+        SlashCommand cmd;
+        cmd.id = "workspace";
+        cmd.name = "workspace";
+        cmd.description = "Show current workspace and conversation context status";
+        cmd.category = "utilities";
+        cmd.aliases = {"workspace-status"};
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdWorkspaceStatus(args, ctx);
+        });
+    }
 }
 
 // ── Command History ─────────────────────────────────────────────────────────
@@ -506,6 +520,31 @@ SlashCommandResult SlashCommandManager::cmdCleanGone(const QStringList &args,
     result.metadata["agent"] = "git-workflow-agent";
 
     emit commandStatusUpdated("clean_gone", "Identifying merged branches...");
+    return result;
+}
+
+SlashCommandResult SlashCommandManager::cmdWorkspaceStatus(const QStringList &args,
+                                                          const QJsonObject &context)
+{
+    Q_UNUSED(args);
+    SlashCommandResult result;
+    result.success = true;
+    result.metadata["command"] = "workspace";
+    result.metadata["workspaceRoot"] = context.value("workspaceRoot").toString();
+    result.metadata["activeModel"] = context.value("activeModel").toString();
+    result.metadata["historySize"] = context.value("historySize").toInt();
+    result.metadata["contextSize"] = context.value("contextSize").toInt();
+    result.metadata["contextCount"] = context.value("contextCount").toInt();
+
+    result.output = QStringLiteral(
+        "Workspace: %1\nModel: %2\nHistory messages: %3\nContext items: %4\nContext size: %5"
+    ).arg(
+        result.metadata["workspaceRoot"].toString(),
+        result.metadata["activeModel"].toString(),
+        QString::number(result.metadata["historySize"].toInt()),
+        QString::number(result.metadata["contextCount"].toInt()),
+        QString::number(result.metadata["contextSize"].toInt())
+    );
     return result;
 }
 
