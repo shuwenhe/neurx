@@ -198,6 +198,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceHealthAnalyzer\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubIssueLabelManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueLifecycleRulesEngine\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AutoCommentGenerator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DuplicateDetectionBackfill\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueActivityMonitor\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PullRequestAutoReviewer\\.cpp$")
 
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
@@ -459,6 +462,8 @@ add_library(neurx_ui STATIC
 
     # Claude Code Migration (Tier 12: Issue Management, Iteration, Security, Output Styling)
     src/agent/IssueLifecycleManager.cpp
+    src/agent/IssueLifecycleRulesEngine.cpp
+    src/agent/AutoCommentGenerator.cpp
     # DISABLED: src/agent/AutonomousIterationEngine.cpp
     # DISABLED: src/agent/SecurityGuidelineEnforcer.cpp
     # DISABLED: src/agent/InteractiveOutputStyler.cpp
