@@ -158,6 +158,37 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LearningModeSystem\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RalphIterationEngine\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "InteractivePromptSystem\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitCommandIntegration\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitWorkflowAgent\\.cpp$")
+
+# Exclude Tier 5-6 systems that are in neurx_ui only
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeReviewEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitAutomationManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FeatureDevelopmentWorkflow\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginSystemRegistry\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "OutputStyleManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "HookifyManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SkillSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TypeDesignValidator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IterativeExecutor\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueLifecycleManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AdvancedHookManager\\.cpp$")
+
+# Exclude Tier 3 systems that are in neurx_ui only  
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SlashCommandManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EventBus\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RuleEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "MCPManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ContextManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ExecutionStrategyManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "JitContext\\.cpp$")
+
+# Exclude Tier 4 systems that are in neurx_ui only
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ToolDiscoveryManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConversationManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ProgressTracker\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorRecoveryManager\\.cpp$")
 
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
@@ -358,6 +389,7 @@ add_library(neurx_ui STATIC
     src/agent/MCPManager.cpp
     src/agent/ContextManager.cpp
     src/agent/ExecutionStrategyManager.cpp
+    src/agent/JitContext.cpp
 
     # Agent System Enhancement (Tier 4: Tool Discovery, Conversations, Progress Tracking, Error Recovery)
     src/agent/ToolDiscoveryManager.cpp
