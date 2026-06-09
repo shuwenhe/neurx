@@ -1,9 +1,73 @@
 #include "agent/SlashCommandManager.h"
+#include "agent/AutoCommentGenerator.h"
+#include "agent/IssueActivityMonitor.h"
+#include "agent/IssueLifecycleRulesEngine.h"
 #include <QDebug>
 #include <QDateTime>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QJsonDocument>
+
+namespace {
+
+IssueLifecycleRulesEngine::LifecycleLabel labelFromText(const QString &text)
+{
+    const QString normalized = text.trimmed().toLower();
+    if (normalized == QStringLiteral("needs-repro") || normalized == QStringLiteral("needs_repro")) {
+        return IssueLifecycleRulesEngine::NeedsRepro;
+    }
+    if (normalized == QStringLiteral("needs-info") || normalized == QStringLiteral("needs_info")) {
+        return IssueLifecycleRulesEngine::NeedsInfo;
+    }
+    if (normalized == QStringLiteral("stale")) {
+        return IssueLifecycleRulesEngine::Stale;
+    }
+    if (normalized == QStringLiteral("autoclose") || normalized == QStringLiteral("auto-close")) {
+        return IssueLifecycleRulesEngine::Autoclose;
+    }
+    if (normalized == QStringLiteral("invalid")) {
+        return IssueLifecycleRulesEngine::Invalid;
+    }
+    return IssueLifecycleRulesEngine::Invalid;
+}
+
+QString lifecycleLabelToText(IssueLifecycleRulesEngine::LifecycleLabel label)
+{
+    switch (label) {
+        case IssueLifecycleRulesEngine::Invalid: return QStringLiteral("invalid");
+        case IssueLifecycleRulesEngine::NeedsRepro: return QStringLiteral("needs-repro");
+        case IssueLifecycleRulesEngine::NeedsInfo: return QStringLiteral("needs-info");
+        case IssueLifecycleRulesEngine::Stale: return QStringLiteral("stale");
+        case IssueLifecycleRulesEngine::Autoclose: return QStringLiteral("autoclose");
+    }
+    return QStringLiteral("invalid");
+}
+
+AutoCommentGenerator::CommentType commentTypeForLifecycle(IssueLifecycleRulesEngine::LifecycleLabel label)
+{
+    switch (label) {
+        case IssueLifecycleRulesEngine::NeedsInfo: return AutoCommentGenerator::NeedsInfoRequest;
+        case IssueLifecycleRulesEngine::NeedsRepro: return AutoCommentGenerator::NeedsReproRequest;
+        case IssueLifecycleRulesEngine::Stale: return AutoCommentGenerator::StaleWarning;
+        case IssueLifecycleRulesEngine::Autoclose: return AutoCommentGenerator::AutoCloseWarning;
+        case IssueLifecycleRulesEngine::Invalid: return AutoCommentGenerator::Custom;
+    }
+    return AutoCommentGenerator::Custom;
+}
+
+QStringList splitCsv(const QString &value)
+{
+    QStringList out;
+    for (const QString &part : value.split(',', Qt::SkipEmptyParts)) {
+        const QString trimmed = part.trimmed();
+        if (!trimmed.isEmpty()) {
+            out.append(trimmed);
+        }
+    }
+    return out;
+}
+
+}
 
 SlashCommandManager::SlashCommandManager(QObject *parent)
     : QObject(parent)
@@ -404,6 +468,54 @@ void SlashCommandManager::registerBuiltInCommands()
             return cmdContext(args, ctx);
         });
     }
+
+    // /issue-lifecycle command
+    {
+        SlashCommand cmd;
+        cmd.id = "issue-lifecycle";
+        cmd.name = "issue-lifecycle";
+        cmd.description = "Analyze a GitHub issue and generate a lifecycle comment draft";
+        cmd.category = "issues";
+        cmd.aliases = {"issue-comment", "issue-auto"};
+        cmd.args = {
+            {"issue_number", "Issue number"},
+            {"labels", "Comma-separated labels"},
+            {"days", "Days inactive"},
+            {"upvotes", "Upvote count"},
+            {"state", "Issue state"},
+            {"reason", "State reason or closure reason"},
+            {"missing_info", "Comma-separated missing info hints"},
+            {"duplicate_of", "Duplicate issue number"}
+        };
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdIssueLifecycle(args, ctx);
+        });
+    }
+
+    // /issue-activity command
+    {
+        SlashCommand cmd;
+        cmd.id = "issue-activity";
+        cmd.name = "issue-activity";
+        cmd.description = "Evaluate issue activity and generate stale/close recommendations";
+        cmd.category = "issues";
+        cmd.aliases = {"issue-monitor", "stale-check"};
+        cmd.args = {
+            {"issue_number", "Issue number"},
+            {"title", "Issue title"},
+            {"state", "Issue state"},
+            {"days", "Days inactive"},
+            {"upvotes", "Upvote count"},
+            {"assignees", "Assignee count"},
+            {"labels", "Comma-separated labels"},
+            {"process_assigned", "Process assigned issues (true/false)"}
+        };
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdIssueActivity(args, ctx);
+        });
+    }
 }
 
 // ── Command History ─────────────────────────────────────────────────────────
@@ -627,11 +739,361 @@ SlashCommandResult SlashCommandManager::cmdContext(const QStringList &args,
     return result;
 }
 
+SlashCommandResult SlashCommandManager::cmdIssueLifecycle(const QStringList &args,
+                                                         const QJsonObject &context)
+{
+    const QMap<QString, QString> kv = parseKeyValueArgs(args);
+
+    auto readString = [&](const QString &key, const QString &fallback = QString()) -> QString {
+        if (kv.contains(key)) {
+            return kv.value(key);
+        }
+
+        QString ctxKey = key;
+        if (!ctxKey.contains('_')) {
+            ctxKey.replace('-', '_');
+        }
+
+        const QJsonValue value = context.value(ctxKey);
+        if (value.isString()) {
+            return value.toString();
+        }
+        if (value.isDouble()) {
+            return QString::number(value.toDouble());
+        }
+        if (value.isBool()) {
+            return value.toBool() ? QStringLiteral("true") : QStringLiteral("false");
+        }
+        return fallback;
+    };
+
+    auto readLabels = [&]() -> QStringList {
+        if (kv.contains(QStringLiteral("labels"))) {
+            return splitCsv(kv.value(QStringLiteral("labels")));
+        }
+
+        const QJsonValue value = context.value(QStringLiteral("labels"));
+        if (value.isArray()) {
+            QStringList labels;
+            for (const auto &item : value.toArray()) {
+                const QString label = item.isObject()
+                    ? item.toObject().value(QStringLiteral("name")).toString()
+                    : item.toString();
+                if (!label.trimmed().isEmpty()) {
+                    labels.append(label.trimmed());
+                }
+            }
+            return labels;
+        }
+
+        return splitCsv(value.toString());
+    };
+
+    const bool showJson = args.contains(QStringLiteral("--json"))
+        || args.contains(QStringLiteral("json"))
+        || args.contains(QStringLiteral("raw"));
+
+    const int issueNumber = readString(QStringLiteral("issue_number"),
+                                       readString(QStringLiteral("issue"),
+                                                  readString(QStringLiteral("number"), QStringLiteral("0")))).toInt();
+    const int effectiveIssueNumber = issueNumber > 0 ? issueNumber : 1;
+    const QString title = readString(QStringLiteral("title"), context.value(QStringLiteral("title")).toString());
+    const QString body = readString(QStringLiteral("body"), context.value(QStringLiteral("body")).toString());
+    const QString state = readString(QStringLiteral("state"), QStringLiteral("open")).toLower();
+    const QString stateReason = readString(QStringLiteral("reason"),
+                                          readString(QStringLiteral("state_reason"))).toLower();
+    const QString style = readString(QStringLiteral("style"), QStringLiteral("friendly"));
+    const int daysInactive = readString(QStringLiteral("days"), QStringLiteral("0")).toInt();
+    const int upvotes = readString(QStringLiteral("upvotes"), QStringLiteral("0")).toInt();
+    const int duplicateOf = readString(QStringLiteral("duplicate_of"), QStringLiteral("0")).toInt();
+    const QString reason = readString(QStringLiteral("reason_text"), readString(QStringLiteral("reason")));
+    const QStringList labels = readLabels();
+    const QStringList missingInfo = splitCsv(readString(QStringLiteral("missing_info")));
+
+    QJsonObject issueSnapshot;
+    issueSnapshot["number"] = effectiveIssueNumber;
+    issueSnapshot["title"] = title;
+    issueSnapshot["body"] = body;
+    issueSnapshot["state"] = state;
+    issueSnapshot["state_reason"] = stateReason;
+    issueSnapshot["upvotes"] = upvotes;
+    issueSnapshot["updated_at"] = QDateTime::currentDateTimeUtc().addDays(-qMax(0, daysInactive)).toString(Qt::ISODate);
+    issueSnapshot["created_at"] = QDateTime::currentDateTimeUtc().addDays(-qMax(0, daysInactive + 3)).toString(Qt::ISODate);
+
+    QJsonArray labelsArray;
+    for (const QString &label : labels) {
+        labelsArray.append(QJsonObject{{QStringLiteral("name"), label}});
+    }
+    issueSnapshot["labels"] = labelsArray;
+
+    IssueLifecycleRulesEngine engine;
+    engine.ingestIssueSnapshot(effectiveIssueNumber, issueSnapshot);
+    engine.setIssueUpvotes(effectiveIssueNumber, upvotes);
+    engine.setMaxInactivityDays(qMax(1, daysInactive > 0 ? daysInactive : 30));
+    engine.setAutoTransitionEnabled(false);
+
+    const auto currentLabel = labelFromText(stateReason.isEmpty() && !labels.isEmpty()
+        ? labels.first()
+        : stateReason);
+    const auto recommendedLabel = engine.evaluatePolicy(effectiveIssueNumber);
+
+    AutoCommentGenerator generator;
+    generator.setCommentStyle(style);
+
+    QString comment;
+    if (duplicateOf > 0) {
+        comment = generator.generateDuplicateComment(duplicateOf);
+    } else {
+        switch (commentTypeForLifecycle(recommendedLabel)) {
+            case AutoCommentGenerator::NeedsInfoRequest:
+                comment = generator.generateNeedsInfoComment(missingInfo.isEmpty()
+                    ? QStringList{QStringLiteral("environment"), QStringLiteral("steps to reproduce")}
+                    : missingInfo);
+                break;
+            case AutoCommentGenerator::NeedsReproRequest:
+                comment = generator.generateNeedsReproComment();
+                break;
+            case AutoCommentGenerator::StaleWarning:
+                comment = generator.generateStaleWarningComment(qMax(1, daysInactive));
+                break;
+            case AutoCommentGenerator::AutoCloseWarning:
+                comment = generator.generateAutoCloseComment(reason.isEmpty()
+                    ? QStringLiteral("inactive for too long")
+                    : reason);
+                break;
+            case AutoCommentGenerator::Custom:
+            default:
+                comment = generator.generateLifecycleComment(effectiveIssueNumber,
+                    lifecycleLabelToText(recommendedLabel), qMax(0, daysInactive));
+                break;
+        }
+    }
+
+    QJsonObject payload;
+    payload["command"] = "issue-lifecycle";
+    payload["issueNumber"] = issueNumber;
+    payload["title"] = title;
+    payload["currentLabel"] = lifecycleLabelToText(currentLabel);
+    payload["recommendedLabel"] = lifecycleLabelToText(recommendedLabel);
+    payload["daysInactive"] = daysInactive;
+    payload["upvotes"] = upvotes;
+    payload["duplicateOf"] = duplicateOf;
+    payload["state"] = state;
+    payload["stateReason"] = stateReason;
+    payload["comment"] = comment;
+    payload["issueSnapshot"] = issueSnapshot;
+
+    SlashCommandResult result;
+    result.success = true;
+    result.metadata = payload;
+
+    if (showJson) {
+        result.output = QString::fromUtf8(QJsonDocument(payload).toJson(QJsonDocument::Indented));
+    } else {
+        result.output = QStringLiteral(
+            "Issue #%1 lifecycle\n"
+            "Title: %2\n"
+            "Current: %3\n"
+            "Recommended: %4\n"
+            "Days inactive: %5\n"
+            "Upvotes: %6\n\n"
+            "Comment draft:\n%7"
+        ).arg(
+            QString::number(issueNumber),
+            title.isEmpty() ? QStringLiteral("(untitled)") : title,
+            payload["currentLabel"].toString(),
+            payload["recommendedLabel"].toString(),
+            QString::number(daysInactive),
+            QString::number(upvotes),
+            comment
+        );
+    }
+
+    return result;
+}
+
+SlashCommandResult SlashCommandManager::cmdIssueActivity(const QStringList &args,
+                                                        const QJsonObject &context)
+{
+    const QMap<QString, QString> kv = parseKeyValueArgs(args);
+
+    auto readString = [&](const QString &key, const QString &fallback = QString()) -> QString {
+        if (kv.contains(key)) {
+            return kv.value(key);
+        }
+
+        QString ctxKey = key;
+        if (!ctxKey.contains('_')) {
+            ctxKey.replace('-', '_');
+        }
+
+        const QJsonValue value = context.value(ctxKey);
+        if (value.isString()) return value.toString();
+        if (value.isDouble()) return QString::number(value.toDouble());
+        if (value.isBool()) return value.toBool() ? QStringLiteral("true") : QStringLiteral("false");
+        return fallback;
+    };
+
+    auto readBool = [&](const QString &key, bool fallback = false) -> bool {
+        if (kv.contains(key)) {
+            const QString value = kv.value(key).toLower();
+            return value == QStringLiteral("1")
+                || value == QStringLiteral("true")
+                || value == QStringLiteral("yes")
+                || value == QStringLiteral("on");
+        }
+        QString ctxKey = key;
+        if (!ctxKey.contains('_')) {
+            ctxKey.replace('-', '_');
+        }
+        return context.value(ctxKey).toBool(fallback);
+    };
+
+    const bool showJson = args.contains(QStringLiteral("--json"))
+        || args.contains(QStringLiteral("json"))
+        || args.contains(QStringLiteral("raw"));
+
+    const int issueNumber = readString(QStringLiteral("issue_number"),
+                                       readString(QStringLiteral("issue"),
+                                                  readString(QStringLiteral("number"), QStringLiteral("0")))).toInt();
+    const int effectiveIssueNumber = issueNumber > 0 ? issueNumber : 1;
+    const QString title = readString(QStringLiteral("title"));
+    const QString state = readString(QStringLiteral("state"), QStringLiteral("open")).toLower();
+    const QString stateReason = readString(QStringLiteral("reason"),
+                                          readString(QStringLiteral("state_reason"))).toLower();
+    const int daysInactive = readString(QStringLiteral("days"), QStringLiteral("0")).toInt();
+    const int upvotes = readString(QStringLiteral("upvotes"), QStringLiteral("0")).toInt();
+    const int assignees = readString(QStringLiteral("assignees"), QStringLiteral("0")).toInt();
+    const int staleDays = readString(QStringLiteral("stale_days"), QStringLiteral("14")).toInt();
+    const int closeDays = readString(QStringLiteral("close_days"), QStringLiteral("7")).toInt();
+    const int preserveThreshold = readString(QStringLiteral("upvote_threshold"), QStringLiteral("10")).toInt();
+    const bool processAssigned = readBool(QStringLiteral("process_assigned"), false);
+    const QStringList labels = splitCsv(readString(QStringLiteral("labels")));
+
+    IssueActivityMonitor::IssueState issueState;
+    issueState.number = effectiveIssueNumber;
+    issueState.title = title;
+    issueState.state = state;
+    issueState.stateReason = stateReason;
+    issueState.createdAt = QDateTime::currentDateTime().addDays(-qMax(0, daysInactive + 3));
+    issueState.updatedAt = QDateTime::currentDateTime().addDays(-qMax(0, daysInactive));
+    issueState.lastActivityAt = issueState.updatedAt;
+    issueState.assigneeCount = assignees;
+    issueState.reactionCount = upvotes;
+    issueState.upvoteCount = upvotes;
+    for (const QString &label : labels) {
+        issueState.labels.insert(label.trimmed());
+    }
+
+    IssueActivityMonitor::MonitorConfig config;
+    config.staleDays = qMax(1, staleDays);
+    config.closeExpirationDays = qMax(1, closeDays);
+    config.upvoteThresholdForPreservation = qMax(0, preserveThreshold);
+    config.processAssignedIssues = processAssigned;
+
+    IssueActivityMonitor monitor;
+    monitor.updateIssueState(issueState);
+
+    const bool stale = monitor.isStaleIssue(issueState, config);
+    const bool preserve = monitor.shouldPreserveIssue(issueState, config);
+    const bool expired = (issueState.labels.contains(QStringLiteral("stale"))
+        || issueState.labels.contains(QStringLiteral("autoclose")))
+        && daysInactive >= (config.staleDays + config.closeExpirationDays);
+
+    QString recommendation;
+    QString action;
+    QString comment;
+
+    AutoCommentGenerator generator;
+    if (stale && !preserve) {
+        action = QStringLiteral("mark-stale");
+        recommendation = QStringLiteral("Issue should be marked stale.");
+        comment = generator.generateStaleWarningComment(daysInactive);
+    } else if (expired && !preserve) {
+        action = QStringLiteral("close");
+        recommendation = QStringLiteral("Issue can be closed due to inactivity.");
+        comment = generator.generateAutoCloseComment(QStringLiteral("inactive for %1 days").arg(daysInactive));
+    } else if (preserve) {
+        action = QStringLiteral("preserve");
+        recommendation = QStringLiteral("Issue should be preserved.");
+        comment = QStringLiteral("Preserve due to high engagement or assignment.");
+    } else {
+        action = QStringLiteral("no-action");
+        recommendation = QStringLiteral("No lifecycle action needed.");
+        comment = generator.generateLifecycleComment(effectiveIssueNumber, QStringLiteral("stale"), daysInactive);
+    }
+
+    QJsonObject payload;
+    payload["command"] = "issue-activity";
+    payload["issueNumber"] = issueNumber;
+    payload["title"] = title;
+    payload["state"] = state;
+    payload["daysInactive"] = daysInactive;
+    payload["upvotes"] = upvotes;
+    payload["assignees"] = assignees;
+    payload["stale"] = stale;
+    payload["preserve"] = preserve;
+    payload["expired"] = expired;
+    payload["action"] = action;
+    payload["recommendation"] = recommendation;
+    payload["comment"] = comment;
+    payload["monitorStats"] = monitor.getMonitoringStatistics();
+
+    SlashCommandResult result;
+    result.success = true;
+    result.metadata = payload;
+
+    if (showJson) {
+        result.output = QString::fromUtf8(QJsonDocument(payload).toJson(QJsonDocument::Indented));
+    } else {
+        result.output = QStringLiteral(
+            "Issue #%1 activity\n"
+            "Title: %2\n"
+            "State: %3\n"
+            "Inactive days: %4\n"
+            "Upvotes: %5\n"
+            "Assignees: %6\n"
+            "Action: %7\n\n"
+            "%8\n\n"
+            "Comment draft:\n%9"
+        ).arg(
+            QString::number(issueNumber),
+            title.isEmpty() ? QStringLiteral("(untitled)") : title,
+            state,
+            QString::number(daysInactive),
+            QString::number(upvotes),
+            QString::number(assignees),
+            action,
+            recommendation,
+            comment
+        );
+    }
+
+    return result;
+}
+
 // ── Helper methods ───────────────────────────────────────────────────────────
 
 QStringList SlashCommandManager::parseCommandLine(const QString &line) const
 {
     return line.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+}
+
+QMap<QString, QString> SlashCommandManager::parseKeyValueArgs(const QStringList &args) const
+{
+    QMap<QString, QString> map;
+    for (const QString &arg : args) {
+        const int eq = arg.indexOf('=');
+        if (eq <= 0) {
+            continue;
+        }
+        const QString key = arg.left(eq).trimmed();
+        const QString value = arg.mid(eq + 1).trimmed();
+        if (!key.isEmpty()) {
+            map[key] = value;
+        }
+    }
+    return map;
 }
 
 bool SlashCommandManager::validateCommand(const SlashCommand &cmd) const
