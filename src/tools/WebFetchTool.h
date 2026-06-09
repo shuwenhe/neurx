@@ -18,6 +18,9 @@ public:
     QString     summary(const QJsonObject &args) const override;
 
 private:
+    static QString normalizeUrl(const QString &urlStr);
+    static bool isBlockedHost(const QString &urlStr);
+    static QString convertGithubUrlToRaw(const QString &urlStr);
     static QString extractText(const QString &html);
     static QString truncate(const QString &text, int maxChars);
 };

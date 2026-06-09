@@ -53,6 +53,13 @@ file(GLOB_RECURSE NEURX_CORE_SOURCES CONFIGURE_DEPENDS
 )
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/bridge/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/editor/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/features/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/services/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/languages/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/workbench/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/security/")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/plugins/")
 # Exclude files that will be compiled in neurx_ui
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "NotificationService\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ProgressService\\.cpp$")
@@ -144,6 +151,21 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ContextMenuIntegration\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginLoader\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginSandbox\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginValidator\\.cpp$")
+
+# Exclude new Tier 15 systems (Interactive Workflows)
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommitCommandManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LearningModeSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RalphIterationEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "InteractivePromptSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitCommandIntegration\\.cpp$")
+
+# Exclude tools and services that are in neurx_ui only
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSearchTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IncrementalEditTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSafetyValidator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "AgentController\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SyntaxHighlighter\\.cpp$")
 
 # Temporarily exclude files with known compilation issues in core
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LanguageClient\\.cpp$")
@@ -284,6 +306,8 @@ add_library(neurx_ui STATIC
     src/tools/GeminiWriteFileTool.cpp
     src/tools/GeminiListFilesTool.cpp
     src/tools/GeminiStatFileTool.cpp
+    src/tools/GeminiReadManyFilesTool.cpp
+    src/tools/GeminiGlobTool.cpp
     src/tools/GeminiRemoveFileTool.cpp
     src/tools/GeminiMkdirTool.cpp
     src/tools/GeminiAppendFileTool.cpp
@@ -296,6 +320,15 @@ add_library(neurx_ui STATIC
     src/tools/GeminiMoveFileTool.cpp
     src/tools/GeminiCopyFileTool.cpp
     src/tools/GeminiWriteBatchTool.cpp
+    src/tools/GeminiEditTool.cpp
+    src/tools/GeminiWriteTodosTool.cpp
+    src/tools/GeminiUpdateTopicTool.cpp
+    src/tools/GeminiAskUserTool.cpp
+    src/tools/GeminiGetInternalDocsTool.cpp
+    src/tools/GeminiCompleteTaskTool.cpp
+    src/tools/CodeMigrationTool.cpp
+    src/tools/SecurityAnalysisTool.cpp
+    src/tools/GitHubAutomationTool.cpp
 
     # File Operation Tools (Phase 2)
     src/tools/EditFileTool.cpp
@@ -318,10 +351,101 @@ add_library(neurx_ui STATIC
     src/agent/runtime/ApprovalStrategyManager.cpp
     src/agent/tools/GuardianAgentTool.cpp
 
+    # Agent Runtime Enhancement (Tier 3: Slash Commands, Events, Rules, MCP, Context, Strategy)
+    src/agent/SlashCommandManager.cpp
+    src/agent/EventBus.cpp
+    src/agent/RuleEngine.cpp
+    src/agent/MCPManager.cpp
+    src/agent/ContextManager.cpp
+    src/agent/ExecutionStrategyManager.cpp
+
+    # Agent System Enhancement (Tier 4: Tool Discovery, Conversations, Progress Tracking, Error Recovery)
+    src/agent/ToolDiscoveryManager.cpp
+    src/agent/ConversationManager.cpp
+    src/agent/ProgressTracker.cpp
+    src/agent/ErrorRecoveryManager.cpp
+
+    # Claude Code Migration (Tier 5: Code Review, Git Automation, Security Analysis, Feature Development, Plugin System)
+    src/agent/CodeReviewEngine.cpp
+    src/agent/GitAutomationManager.cpp
+    src/agent/SecurityAnalyzer.cpp
+    src/agent/FeatureDevelopmentWorkflow.cpp
+    src/agent/PluginSystemRegistry.cpp
+
+    # Claude Code Migration (Tier 6: Output Styles, Hooks, Skills, Workspace Analysis, Type Validation, Iteration)
+    src/agent/OutputStyleManager.cpp
+    src/agent/HookifyManager.cpp
+    src/agent/SkillSystem.cpp
+    src/agent/WorkspaceAnalyzer.cpp
+    src/agent/TypeDesignValidator.cpp
+    src/agent/IterativeExecutor.cpp
+
+    # Claude Code Migration (Tier 7: Frontend Design, Model Migration, PR Review, SDK Dev, Knowledge Base)
+    # TEMPORARILY DISABLED FOR FAST BUILD - ENABLE AFTER CORE COMPILES
+    # src/agent/FrontendDesignSystem.cpp
+    # src/agent/ModelMigrationManager.cpp
+    # src/agent/PRReviewAgents.cpp
+    # src/agent/AgentSDKDeveloper.cpp
+    # src/agent/KnowledgebaseManager.cpp
+
+    # Claude Code Migration (Tier 8: Automation, Analytics, Localization, Optimization, Webhooks)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/AutomationOrchestrator.cpp
+    # src/agent/AnalyticsEngine.cpp
+    # src/agent/LocalizationManager.cpp
+    # src/agent/PerformanceOptimizer.cpp
+    # src/agent/CustomWebhookManager.cpp
+
+    # Claude Code Migration (Tier 9: Extensions, Marketplace, Collaboration, Cost Optimization)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/CustomExtensionManager.cpp
+    # src/agent/AppMarketplaceManager.cpp
+    # src/agent/RealtimeCollaborationEngine.cpp
+    # src/agent/CostOptimizationEngine.cpp
+
+    # Claude Code Migration (Tier 10: Compliance, Disaster Recovery, Metrics, Documentation)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/ComplianceFramework.cpp
+    # src/agent/DisasterRecoveryManager.cpp
+    # src/agent/MetricsTrackingEngine.cpp
+    # src/agent/DocumentationGenerator.cpp
+
+    # Claude Code Migration (Tier 11: Data Pipelines, Recommendations, Enterprise Integration)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/DataPipelineOrchestrator.cpp
+    # src/agent/IntelligentRecommendationEngine.cpp
+    # src/agent/EnterpriseIntegrationPlatform.cpp
+
+    # Claude Code Migration (Tier 12: Issue Management, Iteration, Security, Output Styling)
+    src/agent/IssueLifecycleManager.cpp
+    # DISABLED: src/agent/AutonomousIterationEngine.cpp
+    # DISABLED: src/agent/SecurityGuidelineEnforcer.cpp
+    # DISABLED: src/agent/InteractiveOutputStyler.cpp
+
+    # Claude Code Migration (Tier 13: Code Analysis, Code Exploration, Conversation Analysis, Advanced Hooks)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/CodeArchitectureAnalyzer.cpp
+    # src/agent/InteractiveCodeExplorer.cpp
+    # src/agent/ConversationAnalyzer.cpp
+    src/agent/AdvancedHookManager.cpp
+
+    # Claude Code Migration (Tier 14: Thematic Content, Code Snippets, Prompt Optimization)
+    # TEMPORARILY DISABLED FOR FAST BUILD
+    # src/agent/ThematicContentGenerator.cpp
+    # src/agent/CodeSnippetLibraryManager.cpp
+    # src/agent/DynamicPromptOptimizer.cpp
+
     # File Operation Tools (Phase 4: Migration & Security)
-    src/tools/CodeMigrationTool.cpp
-    src/tools/SecurityAnalysisTool.cpp
-    src/tools/GitHubAutomationTool.cpp
+    # src/tools/CodeMigrationTool.cpp
+    # src/tools/SecurityAnalysisTool.cpp
+    # src/tools/GitHubAutomationTool.cpp
+
+    # File Operation Tools (Phase 5: Advanced File Operations from claude-code)
+    # src/tools/FileSearchTool.cpp
+    # src/tools/FileSafetyValidator.cpp
+    # src/tools/IncrementalEditTool.cpp
+    # src/tools/FileStateManager.cpp
+    # src/tools/FileCreationTool.cpp
 
     # Editor Command Integration (Tier 2: Editor Commands)
     src/editor/CommandRegistry.cpp
@@ -333,6 +457,13 @@ add_library(neurx_ui STATIC
     src/plugins/PluginLoader.cpp
     src/plugins/PluginSandbox.cpp
     src/plugins/PluginValidator.cpp
+
+    # Claude Code Advanced Features (Tier 15: Interactive Workflows)
+    src/agent/CommitCommandManager.cpp
+    src/agent/LearningModeSystem.cpp
+    src/agent/RalphIterationEngine.cpp
+    src/agent/InteractivePromptSystem.cpp
+    src/agent/GitCommandIntegration.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
@@ -357,7 +488,6 @@ qt_add_executable(neurx-codeApp
 
 target_link_libraries(neurx-codeApp PRIVATE
     neurx_ui
-    neurx_core
     content
     NeurXCode
 )

@@ -1,5 +1,7 @@
 #include "tools/WebFetchTool.h"
 #include <QEventLoop>
+#include <QHostAddress>
+#include <QHostInfo>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -48,9 +50,16 @@ QString WebFetchTool::summary(const QJsonObject &args) const
 
 ToolResult WebFetchTool::execute(const QString &callId, const QJsonObject &args)
 {
-    const QString urlStr = args.value("url").toString().trimmed();
+    QString urlStr = args.value("url").toString().trimmed();
     if (urlStr.isEmpty())
         return {callId, name(), true, "url is required."};
+
+    urlStr = normalizeUrl(urlStr);
+    urlStr = convertGithubUrlToRaw(urlStr);
+
+    if (isBlockedHost(urlStr)) {
+        return {callId, name(), true, "Access to blocked or private host is not allowed: " + urlStr};
+    }
 
     const QUrl url(urlStr);
     if (!url.isValid() || (url.scheme() != "https" && url.scheme() != "http"))
@@ -103,6 +112,69 @@ ToolResult WebFetchTool::execute(const QString &callId, const QJsonObject &args)
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
+
+QString WebFetchTool::normalizeUrl(const QString &urlStr)
+{
+    QUrl url(urlStr);
+    if (!url.isValid()) return urlStr;
+
+    url.setHost(url.host().toLower());
+
+    // Remove default ports
+    if ((url.scheme() == "http" && url.port() == 80) ||
+        (url.scheme() == "https" && url.port() == 443)) {
+        url.setPort(-1);
+    }
+
+    // Normalize path: remove trailing slash if not root
+    QString path = url.path();
+    if (path.length() > 1 && path.endsWith('/')) {
+        path.chop(1);
+        url.setPath(path);
+    }
+
+    return url.toString();
+}
+
+bool WebFetchTool::isBlockedHost(const QString &urlStr)
+{
+    const QUrl url(urlStr);
+    const QString host = url.host().toLower();
+
+    if (host == "localhost" || host == "127.0.0.1" || host == "::1") {
+        return true;
+    }
+
+    // Check if it's a private IP address
+    QHostAddress addr(host);
+    if (!addr.isNull()) {
+        if (addr.isLoopback()) return true;
+        // Simple private IP range checks
+        quint32 ipv4 = addr.toIPv4Address();
+        if ((ipv4 & 0xFF000000) == 0x0A000000) return true; // 10.0.0.0/8
+        if ((ipv4 & 0xFFF00000) == 0xAC100000) return true; // 172.16.0.0/12
+        if ((ipv4 & 0xFFFF0000) == 0xC0A80000) return true; // 192.168.0.0/16
+        if ((ipv4 & 0xFFFF0000) == 0xA9FE0000) return true; // 169.254.0.0/16 (Link-local)
+    }
+
+    return false;
+}
+
+QString WebFetchTool::convertGithubUrlToRaw(const QString &urlStr)
+{
+    const QUrl url(urlStr);
+    if (url.host() == "github.com") {
+        QString path = url.path();
+        // Match /user/repo/blob/branch/path/to/file
+        static const QRegularExpression re(QStringLiteral("^/([^/]+/[^/]+)/blob/(.*)$"));
+        auto match = re.match(path);
+        if (match.hasMatch()) {
+            return QStringLiteral("https://raw.githubusercontent.com/%1/%2")
+                .arg(match.captured(1), match.captured(2));
+        }
+    }
+    return urlStr;
+}
 
 QString WebFetchTool::extractText(const QString &html)
 {

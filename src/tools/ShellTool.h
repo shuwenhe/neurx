@@ -32,6 +32,9 @@ public:
 private:
     bool isAllowed(const QString &command) const;
     bool isDestructiveCommand(const QString &command) const;
+    static bool detectCommandSubstitution(const QString &command);
+    static bool detectBashSubstitution(const QString &command);
+    static bool detectPowerShellSubstitution(const QString &command);
 
     QString     m_workingDir;
     int         m_defaultTimeoutMs{30000};
