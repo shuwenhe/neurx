@@ -329,6 +329,19 @@ void AgentEngine::injectContext(const QString &filePath, const QString &content,
     if (startLine > 0) ctx += QString(" (lines %1-%2)").arg(startLine).arg(endLine);
     ctx += "\n" + content + "\n```";
 
+    if (m_contextManager) {
+        ContextItem item;
+        item.type = QStringLiteral("file");
+        item.source = filePath;
+        item.content = content;
+        item.transient = true;
+        item.priority = 55;
+        item.metadata["display"] = ctx;
+        if (startLine > 0) item.metadata["startLine"] = startLine;
+        if (endLine > 0) item.metadata["endLine"] = endLine;
+        m_contextManager->addContextItem(item);
+    }
+
     AgentMessage msg;
     msg.role    = MessageRole::User;
     msg.content = ctx;
@@ -341,7 +354,16 @@ void AgentEngine::submitUserMessage(const QString &text, const QVariantList &att
 
     // Check for slash commands (Tier 3 enhancement)
     if (text.startsWith('/') && m_slashCommandManager) {
-        SlashCommandResult result = m_slashCommandManager->executeCommand(text);
+        QJsonObject slashContext;
+        slashContext["workspaceRoot"] = m_workspaceRoot;
+        slashContext["activeModel"] = m_activeModel;
+        slashContext["historySize"] = static_cast<int>(m_history.size());
+        if (m_contextManager) {
+            slashContext["contextSize"] = m_contextManager->getContextSize();
+            slashContext["contextCount"] = static_cast<int>(m_contextManager->allContextItems().size());
+        }
+
+        SlashCommandResult result = m_slashCommandManager->executeCommand(text, slashContext);
         if (result.success) {
             AgentMessage cmdResponse;
             cmdResponse.role = MessageRole::Assistant;
@@ -405,8 +427,20 @@ void AgentEngine::runLoop()
 
         // ── Plan request ─────────────────────────────────────────────────────
         const QString providerId = m_provider ? m_provider->providerId() : QString{};
+        QList<AgentMessage> requestHistory = history();
+        if (m_contextManager) {
+            const QString contextText = m_contextManager->getContextAsText().trimmed();
+            if (!contextText.isEmpty()) {
+                AgentMessage contextMsg;
+                contextMsg.role = MessageRole::System;
+                contextMsg.content = QStringLiteral(
+                    "Workspace context snapshot:\n"
+                ) + contextText;
+                requestHistory.prepend(contextMsg);
+            }
+        }
         const LLMRequest req = m_planner.buildRequest(
-            history(),
+            requestHistory,
             m_activeModel,
             providerId,
             m_registry);

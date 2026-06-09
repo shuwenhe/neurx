@@ -8,7 +8,7 @@ class GeminiEditTool : public BaseTool
 {
     Q_OBJECT
 public:
-    explicit GeminiEditTool(QObject *parent = nullptr);
+    explicit GeminiEditTool(const QString &workspaceRoot = QString(), QObject *parent = nullptr);
 
     QString name() const override;
     QString description() const override;
@@ -16,6 +16,7 @@ public:
     ToolResult execute(const QString &callId, const QJsonObject &args) override;
 
 private:
+    QString m_workspaceRoot;
     QString applyFlexibleReplacement(const QString &content, const QString &oldString, const QString &newString, int *occurrences);
     QString applyRegexReplacement(const QString &content, const QString &oldString, const QString &newString, int *occurrences, bool allowMultiple);
     QString stripLine(const QString &line);

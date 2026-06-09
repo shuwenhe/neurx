@@ -1,4 +1,5 @@
 #include "GeminiReadManyFilesTool.h"
+#include "agent/JitContext.h"
 #include <QFile>
 #include <QTextStream>
 #include <QJsonObject>
@@ -8,7 +9,8 @@
 #include <QJsonDocument>
 #include <QRegularExpression>
 
-GeminiReadManyFilesTool::GeminiReadManyFilesTool(QObject *parent) : BaseTool(parent)
+GeminiReadManyFilesTool::GeminiReadManyFilesTool(const QString &workspaceRoot, QObject *parent)
+    : BaseTool(parent), m_workspaceRoot(workspaceRoot)
 {
 }
 
@@ -122,5 +124,12 @@ ToolResult GeminiReadManyFilesTool::execute(const QString &callId, const QJsonOb
         response["skipped"] = QJsonArray::fromStringList(skipped);
     }
 
-    return {callId, name(), false, QJsonDocument(response).toJson(QJsonDocument::Compact)};
+    // Discover JIT context for the first file's directory (approximating gemini-cli behavior)
+    if (!processedFiles.isEmpty()) {
+        QString firstPath = processedFiles.first();
+        QString jitContext = JitContext::discoverContext(firstPath, m_workspaceRoot);
+        result = JitContext::appendJitContext(result, jitContext);
+    }
+
+    return {callId, name(), false, result};
 }

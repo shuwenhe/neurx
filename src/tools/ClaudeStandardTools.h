@@ -193,6 +193,33 @@ private:
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// ReadTree Tool - 递归读取目录树
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class ReadTreeTool : public BaseTool {
+    Q_OBJECT
+public:
+    explicit ReadTreeTool(const QString& workspaceRoot, QObject* parent = nullptr);
+
+    QString name() const override { return "ReadTree"; }
+    QString description() const override {
+        return "Read a directory tree recursively. "
+               "Can optionally include file contents and limit recursion depth.";
+    }
+    QJsonObject parametersSchema() const override;
+    ToolResult execute(const QString& callId, const QJsonObject& args) override;
+    QString summary(const QJsonObject& args) const override;
+
+    void setSandboxManager(SandboxManager* manager) { m_sandboxManager = manager; }
+
+private:
+    QString safePath(const QString& relOrAbsPath) const;
+
+    QDir m_root;
+    SandboxManager* m_sandboxManager{nullptr};
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Bash Tool - 执行 Shell 命令
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -370,6 +397,10 @@ public:
                                              SandboxManager* sandboxManager = nullptr);
     static ReadTool* createReadTool(const QString& workspaceRoot,
                                    SandboxManager* sandboxManager = nullptr);
+    static ReadTreeTool* createReadTreeTool(const QString& workspaceRoot,
+                                           SandboxManager* sandboxManager = nullptr);
+    static BaseTool* createApplyPatchTool(const QString& workspaceRoot,
+                                       SandboxManager* sandboxManager = nullptr);
     static BashTool* createBashTool(const QString& workspaceRoot,
                                    SandboxManager* sandboxManager = nullptr);
     static GrepTool* createGrepTool(const QString& workspaceRoot,

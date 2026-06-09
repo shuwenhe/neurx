@@ -1,4 +1,5 @@
 #include "GeminiEditTool.h"
+#include "agent/JitContext.h"
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
@@ -8,7 +9,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-GeminiEditTool::GeminiEditTool(QObject *parent) : BaseTool(parent)
+GeminiEditTool::GeminiEditTool(const QString &workspaceRoot, QObject *parent)
+    : BaseTool(parent), m_workspaceRoot(workspaceRoot)
 {
 }
 
@@ -81,58 +83,71 @@ ToolResult GeminiEditTool::execute(const QString &callId, const QJsonObject &arg
     const QString content = in.readAll();
     file.close();
 
+    ToolResult res;
+    res.callId = callId;
+    res.name = name();
+    res.isError = false;
+
+    QString finalNewContent;
+    int totalOccurrences = 0;
+    QString strategy;
+
     // 1. Try Exact match first
     int count = content.count(oldString);
     if (count > 0) {
         if (!allowMultiple && count > 1) {
             return {callId, name(), true, QString("Found %1 exact matches, but allow_multiple is false.").arg(count)};
         }
-        QString newContent = content;
-        newContent.replace(oldString, newString);
+        finalNewContent = content;
+        finalNewContent.replace(oldString, newString);
+        totalOccurrences = count;
+        strategy = "exact";
+    } else {
+        // 2. Try Flexible match (whitespace-insensitive)
+        int flexCount = 0;
+        QString flexContent = applyFlexibleReplacement(content, oldString, newString, &flexCount);
 
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            return {callId, name(), true, "Failed to write file: " + file.errorString()};
+        if (flexCount > 0) {
+            if (!allowMultiple && flexCount > 1) {
+                return {callId, name(), true, QString("Found %1 flexible matches, but allow_multiple is false.").arg(flexCount)};
+            }
+            finalNewContent = flexContent;
+            totalOccurrences = flexCount;
+            strategy = "flexible";
+        } else {
+            // 3. Try Regex match
+            int regCount = 0;
+            QString regContent = applyRegexReplacement(content, oldString, newString, &regCount, allowMultiple);
+
+            if (regCount > 0) {
+                if (!allowMultiple && regCount > 1) {
+                    return {callId, name(), true, QString("Found %1 regex matches, but allow_multiple is false.").arg(regCount)};
+                }
+                finalNewContent = regContent;
+                totalOccurrences = regCount;
+                strategy = "regex";
+            }
         }
-        QTextStream out(&file);
-        out << newContent;
-        file.close();
-        return {callId, name(), false, QString("Successfully applied %1 exact replacement(s).").arg(count)};
     }
 
-    // 2. Try Flexible match (whitespace-insensitive)
-    int occurrences = 0;
-    QString flexibleNewContent = applyFlexibleReplacement(content, oldString, newString, &occurrences);
-
-    if (occurrences > 0) {
-        if (!allowMultiple && occurrences > 1) {
-            return {callId, name(), true, QString("Found %1 flexible matches, but allow_multiple is false.").arg(occurrences)};
-        }
-
+    if (totalOccurrences > 0) {
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             return {callId, name(), true, "Failed to write file: " + file.errorString()};
         }
         QTextStream out(&file);
-        out << flexibleNewContent;
+        out << finalNewContent;
         file.close();
-        return {callId, name(), false, QString("Successfully applied %1 flexible replacement(s).").arg(occurrences)};
-    }
 
-    // 3. Try Regex match
-    int regexOccurrences = 0;
-    QString regexNewContent = applyRegexReplacement(content, oldString, newString, &regexOccurrences, allowMultiple);
+        QString message = QString("Successfully applied %1 %2 replacement(s) to %3.")
+                .arg(totalOccurrences).arg(strategy).arg(filePath);
 
-    if (regexOccurrences > 0) {
-        if (!allowMultiple && regexOccurrences > 1) {
-            return {callId, name(), true, QString("Found %1 regex matches, but allow_multiple is false.").arg(regexOccurrences)};
+        // Append JIT context if available
+        QString jit = JitContext::discoverContext(filePath, m_workspaceRoot);
+        if (!jit.isEmpty()) {
+            message = JitContext::appendJitContext(message, jit);
         }
 
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            return {callId, name(), true, "Failed to write file: " + file.errorString()};
-        }
-        QTextStream out(&file);
-        out << regexNewContent;
-        file.close();
-        return {callId, name(), false, QString("Successfully applied %1 regex-based replacement(s).").arg(regexOccurrences)};
+        return {callId, name(), false, message};
     }
 
     return {callId, name(), true, "Could not find old_string in file (no exact, flexible, or regex matches)."};

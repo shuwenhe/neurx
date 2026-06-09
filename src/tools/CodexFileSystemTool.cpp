@@ -5,11 +5,195 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QSet>
 #include <QRegularExpression>
+#include <QProcess>
+#include <QTemporaryFile>
+#include <QTextStream>
 #include <QDebug>
+#include <functional>
+
+namespace {
+
+QString trimPatchHeaderPath(QString rawPath)
+{
+    rawPath = rawPath.trimmed();
+    const int tab = rawPath.indexOf('\t');
+    if (tab >= 0) rawPath = rawPath.left(tab);
+    const int sp = rawPath.indexOf(' ');
+    if (sp >= 0) rawPath = rawPath.left(sp);
+    return rawPath.trimmed();
+}
+
+QString normalizePatchPath(QString rawPath)
+{
+    rawPath = trimPatchHeaderPath(rawPath);
+    if (rawPath == "/dev/null") return rawPath;
+    if (rawPath.startsWith("a/") || rawPath.startsWith("b/")) {
+        rawPath = rawPath.mid(2);
+    }
+    return rawPath;
+}
+
+QStringList parseTouchedPaths(const QString& patchText)
+{
+    QStringList touched;
+    const QStringList lines = patchText.split('\n');
+    for (const QString& line : lines) {
+        if (line.startsWith("--- ") || line.startsWith("+++ ")) {
+            const QString path = normalizePatchPath(line.mid(4));
+            if (path.isEmpty() || path == "/dev/null") {
+                continue;
+            }
+            if (!touched.contains(path)) {
+                touched << path;
+            }
+        }
+    }
+    return touched;
+}
+
+bool writeTextFile(const QString& path, const QString& text)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+    QTextStream out(&file);
+    out << text;
+    return file.commit();
+}
+
+QString readTextFile(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+    return QString::fromUtf8(file.readAll());
+}
+
+QString patchBackupRoot(const QString& workspaceRoot)
+{
+    return QDir(workspaceRoot).absoluteFilePath(".neurx/codex-patch-backups");
+}
+
+QString patchLastManifestPath(const QString& workspaceRoot)
+{
+    return QDir(patchBackupRoot(workspaceRoot)).absoluteFilePath("last/manifest.json");
+}
+
+bool ensurePatchBackup(const QString& workspaceRoot, const QStringList& touchedPaths, QString& backupId, QString& error)
+{
+    backupId = QDateTime::currentDateTimeUtc().toString("yyyyMMddhhmmsszzz");
+    const QString root = QDir(patchBackupRoot(workspaceRoot)).absoluteFilePath("last");
+    if (!QDir().mkpath(root)) {
+        error = QStringLiteral("Failed to create patch backup directory.");
+        return false;
+    }
+
+    QJsonArray entries;
+    for (const QString& relPath : touchedPaths) {
+        const QFileInfo info(QDir(workspaceRoot).absoluteFilePath(relPath));
+        const QString absPath = info.absoluteFilePath();
+        const bool existed = info.exists();
+        const QString backupPath = QDir(root).absoluteFilePath(relPath);
+
+        if (existed) {
+            QDir().mkpath(QFileInfo(backupPath).absolutePath());
+            QFile::remove(backupPath);
+            if (!QFile::copy(absPath, backupPath)) {
+                error = QStringLiteral("Failed to backup: %1").arg(relPath);
+                return false;
+            }
+        }
+
+        QJsonObject entry;
+        entry["path"] = relPath;
+        entry["backup_path"] = backupPath;
+        entry["existed"] = existed;
+        entries.append(entry);
+    }
+
+    QJsonObject manifest;
+    manifest["backup_id"] = backupId;
+    manifest["entries"] = entries;
+    manifest["patch_time_utc"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+
+    const QString manifestText = QString::fromUtf8(QJsonDocument(manifest).toJson(QJsonDocument::Indented));
+    if (!writeTextFile(QDir(root).absoluteFilePath("manifest.json"), manifestText)) {
+        error = QStringLiteral("Failed to write patch backup manifest.");
+        return false;
+    }
+    if (!writeTextFile(patchLastManifestPath(workspaceRoot), manifestText)) {
+        error = QStringLiteral("Failed to write last patch backup manifest.");
+        return false;
+    }
+
+    return true;
+}
+
+bool restorePatchBackup(const QString& workspaceRoot, const QString& manifestPath, QString& error)
+{
+    const QString manifestText = readTextFile(manifestPath);
+    if (manifestText.isEmpty()) {
+        error = QStringLiteral("No backup manifest found.");
+        return false;
+    }
+
+    const QJsonDocument doc = QJsonDocument::fromJson(manifestText.toUtf8());
+    if (!doc.isObject()) {
+        error = QStringLiteral("Invalid patch backup manifest.");
+        return false;
+    }
+
+    const QJsonArray entries = doc.object().value("entries").toArray();
+    for (const auto& entryVal : entries) {
+        const QJsonObject entry = entryVal.toObject();
+        const QString relPath = entry.value("path").toString();
+        const QString backupPath = entry.value("backup_path").toString();
+        const bool existed = entry.value("existed").toBool();
+        const QString absPath = QDir(workspaceRoot).absoluteFilePath(relPath);
+
+        if (!existed) {
+            QFile::remove(absPath);
+            continue;
+        }
+
+        const QString backupText = readTextFile(backupPath);
+        if (backupText.isEmpty() && !QFileInfo::exists(backupPath)) {
+            error = QStringLiteral("Missing backup file: %1").arg(relPath);
+            return false;
+        }
+
+        if (!writeTextFile(absPath, backupText)) {
+            error = QStringLiteral("Failed to restore: %1").arg(relPath);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool isGitRepo(const QString& root)
+{
+    QProcess proc;
+    proc.setWorkingDirectory(root);
+    proc.start("git", {"rev-parse", "--is-inside-work-tree"});
+    if (!proc.waitForFinished(3000)) {
+        proc.kill();
+        return false;
+    }
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        return false;
+    }
+    return QString::fromUtf8(proc.readAllStandardOutput()).trimmed() == "true";
+}
+
+} // namespace
 
 CodexFileSystemTool::CodexFileSystemTool(
     const QString& workspaceRoot,
@@ -30,7 +214,7 @@ QJsonObject CodexFileSystemTool::parametersSchema() const
         "properties": {
             "operation": {
                 "type": "string",
-                "enum": ["write_file", "create_file", "read_file", "create_directory", "delete_file", "get_metadata", "stat_file", "hash_file", "chmod", "symlink", "touch", "truncate", "read_range", "tail", "write_batch", "exists", "list_directory", "find_files", "read_many_files", "move", "rename", "copy", "append"],
+                "enum": ["write_file", "create_file", "read_file", "read_to_end", "create_directory", "delete_file", "get_metadata", "stat_file", "hash_file", "chmod", "symlink", "touch", "truncate", "read_range", "tail", "write_batch", "exists", "list_directory", "find_files", "read_many_files", "read_tree", "search_in_files", "diff_file", "replace_in_file", "preview_patch", "apply_patch", "revert_last_patch", "move", "move_tree", "rename", "copy", "copy_tree", "append"],
                 "description": "File system operation to perform"
             },
             "path": {
@@ -99,9 +283,69 @@ QJsonObject CodexFileSystemTool::parametersSchema() const
                 "type": "boolean",
                 "description": "Include hidden files in multi-file operations"
             },
+            "maxDepth": {
+                "type": "integer",
+                "description": "Maximum recursion depth for read_tree"
+            },
+            "includeContents": {
+                "type": "boolean",
+                "description": "Include file contents for read_tree"
+            },
+            "pattern": {
+                "type": "string",
+                "description": "Text or regular expression pattern for search_in_files"
+            },
+            "regex": {
+                "type": "boolean",
+                "description": "Treat pattern as regular expression"
+            },
+            "caseSensitive": {
+                "type": "boolean",
+                "description": "Case-sensitive search"
+            },
+            "contextLines": {
+                "type": "integer",
+                "description": "Number of context lines to include around each match"
+            },
+            "wholeWord": {
+                "type": "boolean",
+                "description": "Match whole words only"
+            },
+            "maxMatches": {
+                "type": "integer",
+                "description": "Maximum number of matches to return"
+            },
             "destination": {
                 "type": "string",
                 "description": "Destination path for move/copy/rename"
+            },
+            "otherPath": {
+                "type": "string",
+                "description": "Second path for diff operations"
+            },
+            "old_string": {
+                "type": "string",
+                "description": "Text to replace in replace_in_file"
+            },
+            "new_string": {
+                "type": "string",
+                "description": "Replacement text for replace_in_file"
+            },
+            "allowMultiple": {
+                "type": "boolean",
+                "description": "Replace all occurrences instead of exactly one"
+            },
+            "replaceRegex": {
+                "type": "boolean",
+                "description": "Treat old_string as a regular expression for replace_in_file"
+            },
+            "replaceCaseSensitive": {
+                "type": "boolean",
+                "description": "Use case-sensitive matching for replace_in_file"
+            },
+            "patch": {
+                "type": "string",
+                "description": "Unified diff patch for preview_patch/apply_patch"
             },
             "target": {
                 "type": "string",
@@ -169,6 +413,8 @@ ToolResult CodexFileSystemTool::execute(const QString& callId, const QJsonObject
         return opCreateFile(callId, args);
     } else if (operation == "read_file") {
         return opReadFile(callId, args);
+    } else if (operation == "read_to_end") {
+        return opReadToEndFile(callId, args);
     } else if (operation == "create_directory") {
         return opCreateDirectory(callId, args);
     } else if (operation == "delete_file") {
@@ -201,12 +447,30 @@ ToolResult CodexFileSystemTool::execute(const QString& callId, const QJsonObject
         return opFindFiles(callId, args);
     } else if (operation == "read_many_files") {
         return opReadManyFiles(callId, args);
+    } else if (operation == "read_tree") {
+        return opReadTree(callId, args);
+    } else if (operation == "search_in_files") {
+        return opSearchInFiles(callId, args);
+    } else if (operation == "diff_file") {
+        return opDiffFile(callId, args);
+    } else if (operation == "replace_in_file") {
+        return opReplaceInFile(callId, args);
+    } else if (operation == "preview_patch") {
+        return opPreviewPatch(callId, args);
+    } else if (operation == "apply_patch") {
+        return opApplyPatch(callId, args);
+    } else if (operation == "revert_last_patch") {
+        return opRevertLastPatch(callId, args);
     } else if (operation == "move") {
         return opMoveFile(callId, args);
+    } else if (operation == "move_tree") {
+        return opMoveTree(callId, args);
     } else if (operation == "rename") {
         return opRenameFile(callId, args);
     } else if (operation == "copy") {
         return opCopyFile(callId, args);
+    } else if (operation == "copy_tree") {
+        return opCopyTree(callId, args);
     } else if (operation == "append") {
         return opAppendFile(callId, args);
     }
@@ -735,6 +999,687 @@ ToolResult CodexFileSystemTool::opReadManyFiles(const QString& callId, const QJs
     return result;
 }
 
+ToolResult CodexFileSystemTool::opReadTree(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    QString path = args.value("path").toString();
+    if (path.isEmpty()) {
+        path = QStringLiteral(".");
+    }
+
+    const QString safe = safePath(path);
+    if (safe.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"path traversal attack detected"})";
+        return result;
+    }
+
+    const bool includeHidden = args.value("includeHiddenFiles").toBool(false);
+    const bool includeContents = args.value("includeContents").toBool(false);
+    const int maxDepth = qMax(-1, args.value("maxDepth").toInt(-1));
+    const int maxFiles = qMax(1, args.value("maxFiles").toInt(1000));
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
+
+    int filesSeen = 0;
+    bool truncated = false;
+
+    std::function<QJsonObject(const QString&, int)> buildNode;
+    buildNode = [&](const QString& absPath, int depth) -> QJsonObject {
+        QFileInfo info(absPath);
+        QJsonObject node;
+        node["name"] = info.fileName().isEmpty() ? info.absoluteFilePath() : info.fileName();
+        node["path"] = absPath;
+        node["relativePath"] = workspaceRelativePath(absPath);
+        node["exists"] = info.exists();
+        node["isDir"] = info.isDir();
+        node["isFile"] = info.isFile();
+        node["size"] = static_cast<qint64>(info.size());
+        node["modified"] = info.lastModified().toString(Qt::ISODate);
+
+        if (!info.exists()) {
+            node["error"] = "Path does not exist";
+            return node;
+        }
+
+        if (info.isDir()) {
+            if (maxDepth >= 0 && depth >= maxDepth) {
+                node["truncated"] = true;
+                return node;
+            }
+
+            QDir dir(absPath);
+            QDir::Filters filters = QDir::NoDotAndDotDot | QDir::AllEntries;
+            if (includeHidden) {
+                filters |= QDir::Hidden;
+            }
+
+            QJsonArray children;
+            const QFileInfoList entries = dir.entryInfoList(filters, QDir::DirsFirst | QDir::Name);
+            for (const QFileInfo& entry : entries) {
+                if (filesSeen >= maxFiles) {
+                    truncated = true;
+                    node["truncated"] = true;
+                    break;
+                }
+                children.append(buildNode(entry.absoluteFilePath(), depth + 1));
+            }
+            node["children"] = children;
+            return node;
+        }
+
+        ++filesSeen;
+        if (includeContents) {
+            QByteArray contents;
+            const auto readResult = m_fileSystem->readFile(absPath, contents, sandbox.get());
+            if (readResult.isOk()) {
+                node["contents"] = QString::fromUtf8(contents);
+                node["contentsBase64"] = QString::fromLatin1(contents.toBase64());
+            } else {
+                node["readError"] = readResult.message();
+                node["readCode"] = static_cast<int>(readResult.code());
+            }
+        }
+
+        return node;
+    };
+
+    QJsonObject out;
+    out["path"] = path;
+    out["root"] = buildNode(safe, 0);
+    out["filesSeen"] = filesSeen;
+    out["truncated"] = truncated;
+    out["includeContents"] = includeContents;
+    out["maxDepth"] = maxDepth;
+
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opSearchInFiles(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+
+    const QString pattern = args.value("pattern").toString();
+    if (pattern.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"pattern is required"})";
+        return result;
+    }
+
+    const QJsonArray include = args.value("include").toArray();
+    QStringList patterns;
+    patterns.reserve(include.size());
+    for (const auto& value : include) {
+        const QString p = value.toString();
+        if (!p.isEmpty()) {
+            patterns.append(p);
+        }
+    }
+    if (patterns.isEmpty()) {
+        patterns << "**/*";
+    }
+
+    QString baseDir = args.value("base_dir").toString();
+    if (baseDir.isEmpty()) {
+        baseDir = m_root.absolutePath();
+    } else {
+        const QString safeBase = safePath(baseDir);
+        if (safeBase.isEmpty()) {
+            result.isError = true;
+            result.content = R"({"error":"path traversal attack detected"})";
+            return result;
+        }
+        baseDir = safeBase;
+    }
+
+    const bool includeHidden = args.value("includeHiddenFiles").toBool(false);
+    bool useRegex = args.value("regex").toBool(false);
+    const bool caseSensitive = args.value("caseSensitive").toBool(false);
+    const bool wholeWord = args.value("wholeWord").toBool(false);
+    const int contextLines = qMax(0, args.value("contextLines").toInt(0));
+    const int maxMatches = qMax(1, args.value("maxMatches").toInt(200));
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
+
+    const QStringList files = collectFilesByPatterns(baseDir, patterns, includeHidden, maxMatches);
+    QRegularExpression regex;
+    if (useRegex) {
+        QRegularExpression::PatternOptions options = QRegularExpression::NoPatternOption;
+        if (!caseSensitive) {
+            options |= QRegularExpression::CaseInsensitiveOption;
+        }
+        regex = QRegularExpression(pattern, options);
+        if (!regex.isValid()) {
+            result.isError = true;
+            result.content = QString(R"({"error":"Invalid regular expression: %1"})").arg(regex.errorString());
+            return result;
+        }
+    } else {
+        if (wholeWord) {
+            const QString wholeWordPattern = QStringLiteral(R"(\b%1\b)").arg(QRegularExpression::escape(pattern));
+            regex = QRegularExpression(wholeWordPattern,
+                                       caseSensitive ? QRegularExpression::NoPatternOption
+                                                     : QRegularExpression::CaseInsensitiveOption);
+            useRegex = true;
+        }
+    }
+
+    QJsonArray matches;
+    int filesSearched = 0;
+
+    for (const QString& filePath : files) {
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            continue;
+        }
+
+        const QString text = QString::fromUtf8(file.readAll());
+        file.close();
+        ++filesSearched;
+
+        const QStringList lines = text.split('\n');
+        for (int i = 0; i < lines.size() && matches.size() < maxMatches; ++i) {
+            const QString& line = lines.at(i);
+            bool matched = false;
+            int column = -1;
+
+            if (useRegex) {
+                const auto match = regex.match(line);
+                matched = match.hasMatch();
+                if (matched) {
+                    column = match.capturedStart() + 1;
+                }
+            } else {
+                QString haystack = line;
+                QString needle = pattern;
+                if (!caseSensitive) {
+                    haystack = haystack.toLower();
+                    needle = needle.toLower();
+                }
+                column = haystack.indexOf(needle) + 1;
+                matched = column > 0;
+            }
+
+            if (!matched) {
+                continue;
+            }
+
+            QJsonObject matchObj;
+            matchObj["path"] = filePath;
+            matchObj["relativePath"] = workspaceRelativePath(filePath);
+            matchObj["lineNumber"] = i + 1;
+            matchObj["columnNumber"] = column;
+            matchObj["line"] = line;
+
+            if (contextLines > 0) {
+                const int beforeStart = qMax(0, i - contextLines);
+                const int afterEnd = qMin(lines.size(), i + contextLines + 1);
+                matchObj["beforeContext"] = lines.mid(beforeStart, i - beforeStart).join("\n");
+                matchObj["afterContext"] = lines.mid(i + 1, afterEnd - (i + 1)).join("\n");
+            }
+
+            matches.append(matchObj);
+        }
+
+        if (matches.size() >= maxMatches) {
+            break;
+        }
+    }
+
+    QJsonObject out;
+    out["base_dir"] = baseDir;
+    out["pattern"] = pattern;
+    out["regex"] = useRegex;
+    out["caseSensitive"] = caseSensitive;
+    out["wholeWord"] = wholeWord;
+    out["filesSearched"] = filesSearched;
+    out["matches"] = matches;
+    out["matchCount"] = matches.size();
+
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opDiffFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString leftPath = args.value("path").toString();
+    QString rightPath = args.value("destination").toString();
+    if (rightPath.isEmpty()) {
+        rightPath = args.value("otherPath").toString();
+    }
+
+    if (leftPath.isEmpty() || rightPath.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path and destination/otherPath are required"})";
+        return result;
+    }
+
+    const QString safeLeft = safePath(leftPath);
+    const QString safeRight = safePath(rightPath);
+    if (safeLeft.isEmpty() || safeRight.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
+
+    QByteArray leftBytes;
+    QByteArray rightBytes;
+    auto leftRes = m_fileSystem->readFile(safeLeft, leftBytes, sandbox.get());
+    if (leftRes.isErr()) {
+        result.isError = true;
+        result.content = QJsonDocument(resultToJson(leftRes)).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    auto rightRes = m_fileSystem->readFile(safeRight, rightBytes, sandbox.get());
+    if (rightRes.isErr()) {
+        result.isError = true;
+        result.content = QJsonDocument(resultToJson(rightRes)).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    const QStringList leftLines = QString::fromUtf8(leftBytes).split('\n', Qt::KeepEmptyParts);
+    const QStringList rightLines = QString::fromUtf8(rightBytes).split('\n', Qt::KeepEmptyParts);
+    const int maxLines = qMax(leftLines.size(), rightLines.size());
+
+    QJsonArray changes;
+    int added = 0;
+    int removed = 0;
+    int changed = 0;
+
+    for (int i = 0; i < maxLines; ++i) {
+        const bool hasLeft = i < leftLines.size();
+        const bool hasRight = i < rightLines.size();
+        const QString leftLine = hasLeft ? leftLines.at(i) : QString();
+        const QString rightLine = hasRight ? rightLines.at(i) : QString();
+
+        if (hasLeft && hasRight && leftLine == rightLine) {
+            continue;
+        }
+
+        QJsonObject change;
+        change["lineNumber"] = i + 1;
+        if (!hasLeft) {
+            change["type"] = "added";
+            change["right"] = rightLine;
+            ++added;
+        } else if (!hasRight) {
+            change["type"] = "removed";
+            change["left"] = leftLine;
+            ++removed;
+        } else {
+            change["type"] = "changed";
+            change["left"] = leftLine;
+            change["right"] = rightLine;
+            ++changed;
+        }
+        changes.append(change);
+    }
+
+    QJsonObject out;
+    out["leftPath"] = leftPath;
+    out["rightPath"] = rightPath;
+    out["leftSize"] = static_cast<int>(leftBytes.size());
+    out["rightSize"] = static_cast<int>(rightBytes.size());
+    out["added"] = added;
+    out["removed"] = removed;
+    out["changed"] = changed;
+    out["different"] = !changes.isEmpty();
+    out["changes"] = changes;
+
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opReplaceInFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString path = args.value("path").toString();
+    const QString oldString = args.value("old_string").toString();
+    const QString newString = args.value("new_string").toString();
+    const bool allowMultiple = args.value("allowMultiple").toBool(false);
+    const bool useRegex = args.value("replaceRegex").toBool(false);
+    const bool caseSensitive = args.value("replaceCaseSensitive").toBool(false);
+
+    if (path.isEmpty() || oldString.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"path and old_string are required"})";
+        return result;
+    }
+
+    const QString safe = safePath(path);
+    if (safe.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && (!sandbox->canRead() || !sandbox->canWrite())) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies replace access"})";
+        return result;
+    }
+
+    QByteArray bytes;
+    const auto readResult = m_fileSystem->readFile(safe, bytes, sandbox.get());
+    if (readResult.isErr()) {
+        result.isError = true;
+        result.content = QJsonDocument(resultToJson(readResult)).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    const QString original = QString::fromUtf8(bytes);
+    QString updated = original;
+    int replacements = 0;
+
+    if (useRegex) {
+        QRegularExpression::PatternOptions options = QRegularExpression::NoPatternOption;
+        if (!caseSensitive) {
+            options |= QRegularExpression::CaseInsensitiveOption;
+        }
+
+        const QRegularExpression rx(oldString, options);
+        if (!rx.isValid()) {
+            result.isError = true;
+            result.content = QString(R"({"error":"Invalid regular expression: %1"})").arg(rx.errorString());
+            return result;
+        }
+
+        auto it = rx.globalMatch(original);
+        while (it.hasNext()) {
+            it.next();
+            ++replacements;
+        }
+
+        if (replacements == 0) {
+            result.isError = true;
+            result.content = R"({"error":"No matches found"})";
+            return result;
+        }
+        if (!allowMultiple && replacements > 1) {
+            result.isError = true;
+            result.content = QString(R"({"error":"Found %1 matches, but allowMultiple is false"})").arg(replacements);
+            return result;
+        }
+
+        updated.replace(rx, newString);
+    } else {
+        Qt::CaseSensitivity cs = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+        if (caseSensitive) {
+            replacements = original.count(oldString, Qt::CaseSensitive);
+        } else {
+            replacements = original.count(oldString, Qt::CaseInsensitive);
+        }
+
+        if (replacements == 0) {
+            result.isError = true;
+            result.content = R"({"error":"No matches found"})";
+            return result;
+        }
+        if (!allowMultiple && replacements > 1) {
+            result.isError = true;
+            result.content = QString(R"({"error":"Found %1 matches, but allowMultiple is false"})").arg(replacements);
+            return result;
+        }
+
+        Q_UNUSED(cs);
+        updated.replace(oldString, newString, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    }
+
+    QFile file(safe);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        result.isError = true;
+        result.content = QString(R"({"error":"Failed to open file for write: %1"})").arg(file.errorString());
+        return result;
+    }
+    if (file.write(updated.toUtf8()) < 0) {
+        result.isError = true;
+        result.content = QString(R"({"error":"Failed to write updated file: %1"})").arg(file.errorString());
+        return result;
+    }
+    file.close();
+
+    QJsonObject out;
+    out["success"] = true;
+    out["path"] = path;
+    out["replacements"] = replacements;
+    out["regex"] = useRegex;
+    out["caseSensitive"] = caseSensitive;
+    out["allowMultiple"] = allowMultiple;
+
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opPreviewPatch(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString patchText = args.value("patch").toString();
+    if (patchText.trimmed().isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"patch is required"})";
+        return result;
+    }
+
+    if (!isGitRepo(m_root.absolutePath())) {
+        result.isError = true;
+        result.content = R"({"error":"workspace is not a git repository"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies write access"})";
+        return result;
+    }
+
+    const QStringList touchedPaths = parseTouchedPaths(patchText);
+    QJsonObject out;
+    out["patchLines"] = patchText.split('\n').size();
+    out["touchedPaths"] = QJsonArray::fromStringList(touchedPaths);
+    out["isGitRepo"] = true;
+
+    QTemporaryFile tmp(QDir(m_root.absolutePath()).absoluteFilePath(".neurx-patch-XXXXXX.diff"));
+    if (!tmp.open()) {
+        result.isError = true;
+        result.content = R"({"error":"failed to create temporary patch file"})";
+        return result;
+    }
+    tmp.write(patchText.toUtf8());
+    tmp.flush();
+
+    QProcess proc;
+    proc.setWorkingDirectory(m_root.absolutePath());
+    proc.start("git", {"apply", "--check", "--verbose", tmp.fileName()});
+    if (!proc.waitForFinished(30000)) {
+        proc.kill();
+        result.isError = true;
+        result.content = R"({"error":"git apply preview timed out"})";
+        return result;
+    }
+
+    const QString output = QString::fromUtf8(proc.readAllStandardOutput()) + QString::fromUtf8(proc.readAllStandardError());
+    if (proc.exitCode() != 0 || proc.exitStatus() != QProcess::NormalExit) {
+        result.isError = true;
+        out["error"] = output.trimmed().isEmpty() ? QStringLiteral("Patch preview failed") : output.trimmed();
+        result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    out["preview"] = true;
+    out["message"] = "Patch is applicable.";
+    if (!output.trimmed().isEmpty()) {
+        out["output"] = output.trimmed();
+    }
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opApplyPatch(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString patchText = args.value("patch").toString();
+    if (patchText.trimmed().isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error":"patch is required"})";
+        return result;
+    }
+
+    if (!isGitRepo(m_root.absolutePath())) {
+        result.isError = true;
+        result.content = R"({"error":"workspace is not a git repository"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies write access"})";
+        return result;
+    }
+
+    const QStringList touchedPaths = parseTouchedPaths(patchText);
+    if (sandbox && sandbox->shouldRunInSandbox()) {
+        for (const QString& relPath : touchedPaths) {
+            const QString safe = safePath(relPath);
+            if (safe.isEmpty()) {
+                result.isError = true;
+                result.content = QString(R"({"error":"path traversal attack detected: %1"})").arg(relPath);
+                return result;
+            }
+        }
+    }
+
+    QString backupId;
+    QString backupError;
+    if (!ensurePatchBackup(m_root.absolutePath(), touchedPaths, backupId, backupError)) {
+        result.isError = true;
+        result.content = QString(R"({"error":"%1"})").arg(backupError);
+        return result;
+    }
+
+    QTemporaryFile tmp(QDir(m_root.absolutePath()).absoluteFilePath(".neurx-patch-XXXXXX.diff"));
+    if (!tmp.open()) {
+        result.isError = true;
+        result.content = R"({"error":"failed to create temporary patch file"})";
+        return result;
+    }
+    tmp.write(patchText.toUtf8());
+    tmp.flush();
+
+    QProcess proc;
+    proc.setWorkingDirectory(m_root.absolutePath());
+    proc.start("git", {"apply", "--whitespace=nowarn", tmp.fileName()});
+    if (!proc.waitForFinished(30000)) {
+        proc.kill();
+        result.isError = true;
+        result.content = R"({"error":"git apply timed out"})";
+        return result;
+    }
+
+    const QString output = QString::fromUtf8(proc.readAllStandardOutput()) + QString::fromUtf8(proc.readAllStandardError());
+    if (proc.exitCode() != 0 || proc.exitStatus() != QProcess::NormalExit) {
+        QString restoreError;
+        if (!restorePatchBackup(m_root.absolutePath(), patchLastManifestPath(m_root.absolutePath()), restoreError)) {
+            result.isError = true;
+            QJsonObject out;
+            out["error"] = output.trimmed().isEmpty() ? QStringLiteral("Patch application failed") : output.trimmed();
+            out["rollbackError"] = restoreError;
+            result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+            return result;
+        }
+        result.isError = true;
+        QJsonObject out;
+        out["error"] = output.trimmed().isEmpty() ? QStringLiteral("Patch application failed") : output.trimmed();
+        result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["patchApplied"] = true;
+    out["backupId"] = backupId;
+    out["touchedPaths"] = QJsonArray::fromStringList(touchedPaths);
+    if (!output.trimmed().isEmpty()) {
+        out["output"] = output.trimmed();
+    }
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opRevertLastPatch(const QString& callId, const QJsonObject& args)
+{
+    Q_UNUSED(args);
+    ToolResult result;
+    const QString manifestPath = patchLastManifestPath(m_root.absolutePath());
+    if (!QFileInfo::exists(manifestPath)) {
+        result.isError = true;
+        result.content = R"({"error":"No patch backup manifest found"})";
+        return result;
+    }
+
+    QString error;
+    if (!restorePatchBackup(m_root.absolutePath(), manifestPath, error)) {
+        result.isError = true;
+        result.content = QString(R"({"error":"%1"})").arg(error);
+        return result;
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["restored"] = true;
+    out["manifestPath"] = manifestPath;
+
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
 ToolResult CodexFileSystemTool::opMoveFile(const QString& callId, const QJsonObject& args)
 {
     ToolResult result;
@@ -759,6 +1704,11 @@ ToolResult CodexFileSystemTool::opMoveFile(const QString& callId, const QJsonObj
     std::unique_ptr<FileSystemSandboxContext> sandbox;
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && (!sandbox->canRead() || !sandbox->canWrite() || !sandbox->canDelete())) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies move access"})";
+        return result;
     }
 
     // Check source metadata
@@ -787,6 +1737,69 @@ ToolResult CodexFileSystemTool::opMoveFile(const QString& callId, const QJsonObj
     out["success"] = true;
     out["from"] = src;
     out["to"] = dst;
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opMoveTree(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString src = args.value("path").toString();
+    QString dst = args.value("destination").toString();
+    if (dst.isEmpty()) {
+        dst = args.value("otherPath").toString();
+    }
+
+    if (src.isEmpty() || dst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path and destination are required"})";
+        return result;
+    }
+
+    const QString safeSrc = safePath(src);
+    const QString safeDst = safePath(dst);
+    if (safeSrc.isEmpty() || safeDst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && (!sandbox->canRead() || !sandbox->canWrite() || !sandbox->canDelete())) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies move access"})";
+        return result;
+    }
+
+    QJsonObject srcMeta = m_fileSystem->getMetadata(safeSrc, sandbox.get());
+    if (srcMeta.contains("error")) {
+        result.isError = true;
+        result.content = QJsonDocument(srcMeta).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    if (!ensureParentDirectory(safeDst)) {
+        result.isError = true;
+        result.content = R"({"error": "failed to create destination directory"})";
+        return result;
+    }
+
+    if (!moveRecursive(safeSrc, safeDst)) {
+        result.isError = true;
+        result.content = QString(R"({"error":"Failed to move tree %1 -> %2"})").arg(src, dst);
+        return result;
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["from"] = src;
+    out["to"] = dst;
+    out["recursive"] = true;
+
     result.isError = false;
     result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
     return result;
@@ -826,6 +1839,11 @@ ToolResult CodexFileSystemTool::opCopyFile(const QString& callId, const QJsonObj
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
+    if (sandbox && sandbox->shouldRunInSandbox() && (!sandbox->canRead() || !sandbox->canWrite())) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies copy access"})";
+        return result;
+    }
 
     QJsonObject srcMeta = m_fileSystem->getMetadata(safeSrc, sandbox.get());
     if (srcMeta.contains("error")) {
@@ -852,6 +1870,69 @@ ToolResult CodexFileSystemTool::opCopyFile(const QString& callId, const QJsonObj
     out["success"] = true;
     out["from"] = src;
     out["to"] = dst;
+    result.isError = false;
+    result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opCopyTree(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString src = args.value("path").toString();
+    QString dst = args.value("destination").toString();
+    if (dst.isEmpty()) {
+        dst = args.value("otherPath").toString();
+    }
+
+    if (src.isEmpty() || dst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path and destination are required"})";
+        return result;
+    }
+
+    const QString safeSrc = safePath(src);
+    const QString safeDst = safePath(dst);
+    if (safeSrc.isEmpty() || safeDst.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && (!sandbox->canRead() || !sandbox->canWrite())) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies copy access"})";
+        return result;
+    }
+
+    QJsonObject srcMeta = m_fileSystem->getMetadata(safeSrc, sandbox.get());
+    if (srcMeta.contains("error")) {
+        result.isError = true;
+        result.content = QJsonDocument(srcMeta).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    if (!ensureParentDirectory(safeDst)) {
+        result.isError = true;
+        result.content = R"({"error": "failed to create destination directory"})";
+        return result;
+    }
+
+    if (!copyRecursive(safeSrc, safeDst)) {
+        result.isError = true;
+        result.content = QString(R"({"error":"Failed to copy tree %1 -> %2"})").arg(src, dst);
+        return result;
+    }
+
+    QJsonObject out;
+    out["success"] = true;
+    out["from"] = src;
+    out["to"] = dst;
+    out["recursive"] = true;
+
     result.isError = false;
     result.content = QJsonDocument(out).toJson(QJsonDocument::Compact);
     return result;
@@ -899,6 +1980,11 @@ ToolResult CodexFileSystemTool::opAppendFile(const QString& callId, const QJsonO
     std::unique_ptr<FileSystemSandboxContext> sandbox;
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies write access"})";
+        return result;
     }
 
     if (!ensureParentDirectory(safe)) {
@@ -959,6 +2045,11 @@ ToolResult CodexFileSystemTool::opReadFile(const QString& callId, const QJsonObj
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
 
     QByteArray contents;
     auto fsResult = m_fileSystem->readFile(safe, contents, sandbox.get());
@@ -980,6 +2071,54 @@ ToolResult CodexFileSystemTool::opReadFile(const QString& callId, const QJsonObj
         result.content = QJsonDocument(output).toJson(QJsonDocument::Compact);
     }
 
+    return result;
+}
+
+ToolResult CodexFileSystemTool::opReadToEndFile(const QString& callId, const QJsonObject& args)
+{
+    ToolResult result;
+    const QString path = args.value("path").toString();
+
+    if (path.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path is required"})";
+        return result;
+    }
+
+    const QString safe = safePath(path);
+    if (safe.isEmpty()) {
+        result.isError = true;
+        result.content = R"({"error": "path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
+
+    QByteArray contents;
+    const auto fsResult = m_fileSystem->readFile(safe, contents, sandbox.get());
+    if (fsResult.isErr()) {
+        result.isError = true;
+        result.content = QJsonDocument(resultToJson(fsResult)).toJson(QJsonDocument::Compact);
+        return result;
+    }
+
+    QJsonObject output;
+    output["success"] = true;
+    output["path"] = path;
+    output["size"] = static_cast<int>(contents.size());
+    output["contents"] = QString::fromUtf8(contents);
+    output["contentsBase64"] = QString::fromLatin1(contents.toBase64());
+
+    result.isError = false;
+    result.content = QJsonDocument(output).toJson(QJsonDocument::Compact);
     return result;
 }
 
@@ -1015,6 +2154,11 @@ ToolResult CodexFileSystemTool::opCreateDirectory(const QString& callId, const Q
     std::unique_ptr<FileSystemSandboxContext> sandbox;
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canCreateDirs()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies directory creation"})";
+        return result;
     }
 
     auto fsResult = m_fileSystem->createDirectory(safe, options, sandbox.get());
@@ -1057,6 +2201,11 @@ ToolResult CodexFileSystemTool::opDeleteFile(const QString& callId, const QJsonO
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canDelete()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies delete access"})";
+        return result;
+    }
 
     auto fsResult = m_fileSystem->deleteFile(safe, deleteRecursive, sandbox.get());
 
@@ -1096,6 +2245,11 @@ ToolResult CodexFileSystemTool::opGetMetadata(const QString& callId, const QJson
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
+    }
 
     auto metadata = m_fileSystem->getMetadata(safe, sandbox.get());
 
@@ -1126,6 +2280,11 @@ ToolResult CodexFileSystemTool::opStatFile(const QString& callId, const QJsonObj
     std::unique_ptr<FileSystemSandboxContext> sandbox;
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
     }
 
     QJsonObject metadata = m_fileSystem->getMetadata(safe, sandbox.get());
@@ -1181,6 +2340,11 @@ ToolResult CodexFileSystemTool::opHashFile(const QString& callId, const QJsonObj
     std::unique_ptr<FileSystemSandboxContext> sandbox;
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies read access"})";
+        return result;
     }
 
     QByteArray contents;
@@ -1374,6 +2538,11 @@ ToolResult CodexFileSystemTool::opTouchFile(const QString& callId, const QJsonOb
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies write access"})";
+        return result;
+    }
 
     if (!ensureParentDirectory(safe)) {
         result.isError = true;
@@ -1429,6 +2598,16 @@ ToolResult CodexFileSystemTool::opTruncateFile(const QString& callId, const QJso
     if (safe.isEmpty()) {
         result.isError = true;
         result.content = R"({"error": "path traversal attack detected"})";
+        return result;
+    }
+
+    std::unique_ptr<FileSystemSandboxContext> sandbox;
+    if (args.contains("sandbox")) {
+        sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
+    }
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
+        result.isError = true;
+        result.content = R"({"error":"Sandbox policy denies write access"})";
         return result;
     }
 
@@ -1552,9 +2731,9 @@ ToolResult CodexFileSystemTool::opTailFile(const QString& callId, const QJsonObj
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
-    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
         result.isError = true;
-        result.content = R"({"error":"Sandbox policy denies read access"})";
+        result.content = R"({"error":"Sandbox policy denies write access"})";
         return result;
     }
 
@@ -1641,9 +2820,9 @@ ToolResult CodexFileSystemTool::opWriteBatch(const QString& callId, const QJsonO
     if (args.contains("sandbox")) {
         sandbox.reset(createSandboxContext(args.value("sandbox").toObject()));
     }
-    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canRead()) {
+    if (sandbox && sandbox->shouldRunInSandbox() && !sandbox->canWrite()) {
         result.isError = true;
-        result.content = R"({"error":"Sandbox policy denies read access"})";
+        result.content = R"({"error":"Sandbox policy denies write access"})";
         return result;
     }
 

@@ -341,10 +341,39 @@ void SlashCommandManager::registerBuiltInCommands()
         cmd.description = "Create a git commit with AI-generated message";
         cmd.category = "git";
         cmd.aliases = {"git-commit"};
-        cmd.allowedTools = {"shell_tool"};
-        
+        cmd.allowedTools = {"shell_tool", "git_workflow_agent"};
+
         registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
             return cmdCommit(args, ctx);
+        });
+    }
+
+    // /commit-push-pr command
+    {
+        SlashCommand cmd;
+        cmd.id = "commit-push-pr";
+        cmd.name = "commit-push-pr";
+        cmd.description = "Commit, push, and create a pull request";
+        cmd.category = "git";
+        cmd.aliases = {"pr"};
+        cmd.allowedTools = {"shell_tool", "git_workflow_agent"};
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdCommitPushPR(args, ctx);
+        });
+    }
+
+    // /clean_gone command
+    {
+        SlashCommand cmd;
+        cmd.id = "clean_gone";
+        cmd.name = "clean_gone";
+        cmd.description = "Clean up local branches that have been deleted on the remote";
+        cmd.category = "git";
+        cmd.allowedTools = {"shell_tool", "git_workflow_agent"};
+
+        registerCommand(cmd, [this](const QStringList &args, const QJsonObject &ctx) {
+            return cmdCleanGone(args, ctx);
         });
     }
 }
@@ -446,10 +475,37 @@ SlashCommandResult SlashCommandManager::cmdCommit(const QStringList &args,
 {
     SlashCommandResult result;
     result.success = true;
-    result.output = "Generating commit message...";
+    result.output = "Generating commit message and creating commit...";
     result.metadata["command"] = "commit";
-    
-    emit commandStatusUpdated("commit", "Analyzing changes...");
+    result.metadata["agent"] = "git-workflow-agent";
+
+    emit commandStatusUpdated("commit", "Analyzing changes and generating message...");
+    return result;
+}
+
+SlashCommandResult SlashCommandManager::cmdCommitPushPR(const QStringList &args,
+                                                       const QJsonObject &context)
+{
+    SlashCommandResult result;
+    result.success = true;
+    result.output = "Starting commit-push-PR workflow...";
+    result.metadata["command"] = "commit-push-pr";
+    result.metadata["agent"] = "git-workflow-agent";
+
+    emit commandStatusUpdated("commit-push-pr", "Initializing git workflow...");
+    return result;
+}
+
+SlashCommandResult SlashCommandManager::cmdCleanGone(const QStringList &args,
+                                                  const QJsonObject &context)
+{
+    SlashCommandResult result;
+    result.success = true;
+    result.output = "Cleaning up gone branches...";
+    result.metadata["command"] = "clean_gone";
+    result.metadata["agent"] = "git-workflow-agent";
+
+    emit commandStatusUpdated("clean_gone", "Identifying merged branches...");
     return result;
 }
 

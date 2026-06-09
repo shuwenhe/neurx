@@ -135,6 +135,10 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("stickyScroll", stickyScroll);
     
     // Expose Phase 4 features to QML
+
+
+
+
     engine.rootContext()->setContextProperty("findAndReplace", findAndReplace);
     engine.rootContext()->setContextProperty("multiCursor", multiCursor);
     
@@ -162,3 +166,7 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
+
+
+
