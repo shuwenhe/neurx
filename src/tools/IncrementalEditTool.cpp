@@ -169,6 +169,7 @@ IncrementalEditTool::EditResult IncrementalEditTool::opInsertLines(const EditOpe
     }
 
     QStringList lines = readFileLines(absPath);
+    const qint64 snapshotMtime = fileMtime(absPath);
     if (lines.isEmpty() && op.createIfMissing) {
         lines.clear();  // Start with empty file
     } else if (lines.isEmpty()) {
@@ -211,6 +212,12 @@ IncrementalEditTool::EditResult IncrementalEditTool::opInsertLines(const EditOpe
         return result;
     }
 
+    QString conflictError;
+    if (!ensureFileUnchanged(absPath, snapshotMtime, conflictError)) {
+        result.error = conflictError;
+        return result;
+    }
+
     if (writeFileLines(absPath, lines)) {
         result.success = true;
         result.preview = QString("Inserted %1 lines at line %2")
@@ -235,6 +242,7 @@ IncrementalEditTool::EditResult IncrementalEditTool::opReplaceLines(const EditOp
     }
 
     QStringList lines = readFileLines(absPath);
+    const qint64 snapshotMtime = fileMtime(absPath);
     if (lines.isEmpty()) {
         result.error = "File does not exist or is empty";
         return result;
@@ -290,6 +298,12 @@ IncrementalEditTool::EditResult IncrementalEditTool::opReplaceLines(const EditOp
         return result;
     }
 
+    QString conflictError;
+    if (!ensureFileUnchanged(absPath, snapshotMtime, conflictError)) {
+        result.error = conflictError;
+        return result;
+    }
+
     if (writeFileLines(absPath, lines)) {
         result.success = true;
         result.preview = QString("Replaced %1 lines at line %2 with %3 lines")
@@ -315,6 +329,7 @@ IncrementalEditTool::EditResult IncrementalEditTool::opDeleteLines(const EditOpe
     }
 
     QStringList lines = readFileLines(absPath);
+    const qint64 snapshotMtime = fileMtime(absPath);
     if (lines.isEmpty()) {
         result.error = "File is empty";
         return result;
@@ -353,6 +368,12 @@ IncrementalEditTool::EditResult IncrementalEditTool::opDeleteLines(const EditOpe
         return result;
     }
 
+    QString conflictError;
+    if (!ensureFileUnchanged(absPath, snapshotMtime, conflictError)) {
+        result.error = conflictError;
+        return result;
+    }
+
     if (writeFileLines(absPath, lines)) {
         result.success = true;
         result.preview = QString("Deleted %1 lines at line %2")
@@ -377,6 +398,7 @@ IncrementalEditTool::EditResult IncrementalEditTool::opAppendLines(const EditOpe
     }
 
     QStringList lines = readFileLines(absPath);
+    const qint64 snapshotMtime = fileMtime(absPath);
     if (lines.isEmpty() && !op.createIfMissing) {
         result.error = "File does not exist";
         return result;
@@ -404,6 +426,12 @@ IncrementalEditTool::EditResult IncrementalEditTool::opAppendLines(const EditOpe
         result.preview = QString("Preview append to %1\n%2")
                              .arg(op.filepath)
                              .arg(result.preview);
+        return result;
+    }
+
+    QString conflictError;
+    if (!ensureFileUnchanged(absPath, snapshotMtime, conflictError)) {
+        result.error = conflictError;
         return result;
     }
 
@@ -617,6 +645,37 @@ bool IncrementalEditTool::writeFileLines(const QString &filepath, const QStringL
         }
     }
     file.close();
+
+    return true;
+}
+
+qint64 IncrementalEditTool::fileMtime(const QString &filepath) const
+{
+    QFileInfo info(filepath);
+    if (!info.exists()) {
+        return -1;
+    }
+    return info.lastModified().toMSecsSinceEpoch();
+}
+
+bool IncrementalEditTool::ensureFileUnchanged(const QString &filepath, qint64 expectedMtime, QString &error) const
+{
+    if (expectedMtime < 0) {
+        return true;
+    }
+
+    QFileInfo info(filepath);
+    if (!info.exists()) {
+        error = QStringLiteral("File %1 no longer exists. Re-read before writing.").arg(m_root.relativeFilePath(filepath));
+        return false;
+    }
+
+    const qint64 currentMtime = info.lastModified().toMSecsSinceEpoch();
+    if (currentMtime != expectedMtime) {
+        error = QStringLiteral("File %1 changed while editing. Re-read before writing.")
+                    .arg(m_root.relativeFilePath(filepath));
+        return false;
+    }
 
     return true;
 }

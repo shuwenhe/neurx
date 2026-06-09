@@ -5,6 +5,8 @@
 #include "llm/OpenAIProvider.h"
 #include "llm/OllamaProvider.h"
 #include "tools/FileSystemTool.h"
+#include "tools/FileCreationTool.h"
+#include "tools/IncrementalEditTool.h"
 #include "tools/CodexFileSystemTool.h"
 #include "tools/ApplyPatchTool.h"
 #include "tools/PatchTool.h"
@@ -114,6 +116,8 @@ run shell commands (both local and sandboxed Docker), and search the codebase.
 - MultiEdit: Apply multiple edits to one file (file_path, edits[]) - batch edits atomically
 - Read: Read file contents (file_path, start_line?, end_line?) - supports line ranges
 - codex_file_system: Codex-style file operations (write_file, create_file, read_file, create_directory, delete_file, get_metadata, write_batch, exists, list_directory, move, rename, copy, append)
+- file_creation: Atomic file creation and overwrite with validation and checkpoint support
+- incremental_edit: Line-range edits with insert, replace, delete, append, and batch preview
 
 **Claude Standard System Operations:**
 - Bash: Execute shell commands (command, timeout?) - runs in workspace context
@@ -3837,7 +3841,11 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] Codex filesystem tools registered";
 
     m_registry->registerTool(new FileSystemTool(path, m_registry));
+    auto *fileCreationTool = new FileCreationTool(path, m_registry);
+    fileCreationTool->setSandboxManager(m_sandboxManager);
+    m_registry->registerTool(fileCreationTool);
     m_registry->registerTool(new CodexFileSystemTool(path, m_registry));
+    m_registry->registerTool(new IncrementalEditTool(path, m_registry));
     auto *smartFileCreator = new SmartFileCreator(path, m_registry);
     smartFileCreator->setLLMProvider(m_providers.value(m_currentProvider));
     m_registry->registerTool(smartFileCreator);

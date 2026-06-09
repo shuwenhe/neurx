@@ -141,7 +141,11 @@ ToolResult FileCreationTool::opCreateFile(const QString& callId, const QJsonObje
     if (QFileInfo::exists(absPath) && !spec.overwrite) {
         return {callId, name(), true, "File already exists. Use overwrite=true to replace."};
     }
-    
+
+    if (!isWriteAllowed(absPath)) {
+        return {callId, name(), true, "Write access denied for protected or outside-workspace path"};
+    }
+
     if (QFileInfo::exists(absPath)) {
         createCheckpoint(spec.path, "Before file modification");
     }
@@ -188,6 +192,25 @@ ToolResult FileCreationTool::opCreateBatch(const QString& callId, const QJsonObj
         if (spec.path.isEmpty()) {
             QJsonObject resultObj;
             resultObj["error"] = "Path cannot be empty";
+            results.append(resultObj);
+            errorCount++;
+            continue;
+        }
+
+        const QString absPath = safePath(spec.path);
+        if (absPath.isEmpty() || !isWriteAllowed(absPath)) {
+            QJsonObject resultObj;
+            resultObj["error"] = "Write access denied for protected or outside-workspace path";
+            resultObj["path"] = spec.path;
+            results.append(resultObj);
+            errorCount++;
+            continue;
+        }
+
+        if (QFileInfo::exists(absPath) && !spec.overwrite) {
+            QJsonObject resultObj;
+            resultObj["error"] = "File already exists. Use overwrite=true to replace.";
+            resultObj["path"] = spec.path;
             results.append(resultObj);
             errorCount++;
             continue;
@@ -257,6 +280,10 @@ FileCreationTool::WriteResultData FileCreationTool::writeFileAtomic(const FileSp
     
     // Atomic write using QSaveFile (creates a safe temp file and commits atomically)
     bool existed = QFileInfo::exists(absPath);
+    if (existed && !spec.overwrite) {
+        result.error = "File already exists. Use overwrite=true to replace.";
+        return result;
+    }
     QFile::Permissions originalPerms;
     if (existed) {
         originalPerms = QFileInfo(absPath).permissions();
@@ -381,13 +408,36 @@ QString FileCreationTool::readExistingContent(const QString& path)
 
 bool FileCreationTool::isWriteAllowed(const QString& path)
 {
-    Q_UNUSED(path)
-    return true;
+    const QString absPath = safePath(path);
+    if (absPath.isEmpty()) {
+        return false;
+    }
+
+    if (isSensitivePath(absPath)) {
+        return false;
+    }
+
+    const QString cleanRoot = QDir::cleanPath(m_workspaceRoot.absolutePath());
+    const QString cleanPath = QDir::cleanPath(absPath);
+    if (cleanPath == cleanRoot) {
+        return true;
+    }
+
+    const QString relative = m_workspaceRoot.relativeFilePath(cleanPath);
+    return !relative.startsWith(QStringLiteral("..")) && !QDir::isAbsolutePath(relative);
 }
 
 bool FileCreationTool::isSensitivePath(const QString& path) const
 {
-    Q_UNUSED(path)
+    const QString cleanPath = QDir::cleanPath(path);
+    for (const QString& protectedPath : m_protectedPaths) {
+        if (cleanPath == QDir::cleanPath(protectedPath)) {
+            return true;
+        }
+        if (cleanPath.startsWith(QDir::cleanPath(protectedPath) + QLatin1Char('/'))) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -395,7 +445,15 @@ QString FileCreationTool::safePath(const QString& relOrAbsPath) const
 {
     QFileInfo fi(relOrAbsPath);
     if (fi.isAbsolute())
-        return QDir::cleanPath(fi.absoluteFilePath());
+    {
+        const QString absPath = QDir::cleanPath(fi.absoluteFilePath());
+        const QString cleanRoot = QDir::cleanPath(m_workspaceRoot.absolutePath());
+        const QString relative = m_workspaceRoot.relativeFilePath(absPath);
+        if (absPath == cleanRoot || (!relative.startsWith(QStringLiteral("..")) && !QDir::isAbsolutePath(relative))) {
+            return absPath;
+        }
+        return {};
+    }
     return QDir::cleanPath(m_workspaceRoot.absoluteFilePath(relOrAbsPath));
 }
 
@@ -441,14 +499,29 @@ bool FileCreationTool::checkJSONSyntax(const QString& content, QString& error)
 
 bool FileCreationTool::checkPythonSyntax(const QString& content, QString& error)
 {
+    QTemporaryFile tempFile(QDir::tempPath() + QStringLiteral("/neurx_py_check_XXXXXX.py"));
+    tempFile.setAutoRemove(true);
+    if (!tempFile.open()) {
+        error = QStringLiteral("Failed to create temporary file for Python syntax check");
+        return false;
+    }
+    tempFile.write(content.toUtf8());
+    tempFile.flush();
+    const QString tempPath = tempFile.fileName();
+    tempFile.close();
+
     QProcess process;
-    process.start("python3", QStringList() << "-m" << "py_compile" << "-");
-    process.write(content.toUtf8());
-    process.closeWriteChannel();
-    process.waitForFinished(5000);
-    
-    if (process.exitCode() != 0) {
-        error = process.readAllStandardError();
+    process.start(QStringLiteral("python3"), QStringList() << QStringLiteral("-m") << QStringLiteral("py_compile") << tempPath);
+    if (!process.waitForFinished(5000)) {
+        error = QStringLiteral("Python syntax check timed out");
+        return false;
+    }
+
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+        error = QString::fromUtf8(process.readAllStandardError()).trimmed();
+        if (error.isEmpty()) {
+            error = QStringLiteral("Python syntax check failed");
+        }
         return false;
     }
     
