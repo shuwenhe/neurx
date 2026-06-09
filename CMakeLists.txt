@@ -190,6 +190,12 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ConversationManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ProgressTracker\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorRecoveryManager\\.cpp$")
 
+# Exclude new utility systems for automation and analysis
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ExplanatoryOutputStyleManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueDuplicateAutoCloser\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubSweepAutomation\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceHealthAnalyzer\\.cpp$")
+
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSearchTool\\.cpp$")
