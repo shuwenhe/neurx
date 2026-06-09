@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QDebug>
+#include <QMap>
 #include <algorithm>
 
 IncrementalEditTool::IncrementalEditTool(const QString &workspaceRoot, QObject *parent)
@@ -59,6 +60,12 @@ QJsonObject IncrementalEditTool::parametersSchema() const
     createIfMissing["description"] = "Create file if it doesn't exist";
     createIfMissing["default"] = false;
     properties["create_if_missing"] = createIfMissing;
+
+    QJsonObject previewObj;
+    previewObj["type"] = "boolean";
+    previewObj["description"] = "Preview changes without writing to disk";
+    previewObj["default"] = false;
+    properties["preview"] = previewObj;
     
     QJsonObject edits;
     edits["type"] = "array";
@@ -92,6 +99,7 @@ ToolResult IncrementalEditTool::execute(const QString &callId, const QJsonObject
     op.endLine = args.value("end_line").toInt(op.startLine);
     op.content = args["content"].toString("");
     op.createIfMissing = args.value("create_if_missing").toBool(false);
+    op.previewOnly = args.value("preview").toBool(false);
 
     if (op.filepath.isEmpty()) {
         return {callId, name(), true, "File path cannot be empty"};
@@ -131,6 +139,7 @@ ToolResult IncrementalEditTool::execute(const QString &callId, const QJsonObject
     response["lines_modified"] = result.linesModified;
     response["lines_added"] = result.linesAdded;
     response["lines_removed"] = result.linesRemoved;
+    response["preview_only"] = op.previewOnly;
 
     if (!result.preview.isEmpty()) {
         response["preview"] = result.preview;
@@ -175,6 +184,11 @@ IncrementalEditTool::EditResult IncrementalEditTool::opInsertLines(const EditOpe
         return result;
     }
 
+    if (!validateContent(op.content)) {
+        result.error = "Content exceeds safe size limit";
+        return result;
+    }
+
     // Insert content
     QStringList contentLines = op.content.split('\n', Qt::KeepEmptyParts);
     if (!contentLines.isEmpty() && contentLines.back().isEmpty()) {
@@ -187,6 +201,15 @@ IncrementalEditTool::EditResult IncrementalEditTool::opInsertLines(const EditOpe
     }
     result.linesAdded = contentLines.count();
     result.linesModified = contentLines.count();
+    result.preview = generatePreview(QStringList{}, contentLines, DEFAULT_PREVIEW_CONTEXT);
+
+    if (op.previewOnly) {
+        result.success = true;
+        result.preview = QString("Preview insert at line %1\n%2")
+                             .arg(op.startLine)
+                             .arg(result.preview);
+        return result;
+    }
 
     if (writeFileLines(absPath, lines)) {
         result.success = true;
@@ -232,6 +255,11 @@ IncrementalEditTool::EditResult IncrementalEditTool::opReplaceLines(const EditOp
         oldLines.append(lines[i]);
     }
 
+    if (!validateContent(op.content)) {
+        result.error = "Content exceeds safe size limit";
+        return result;
+    }
+
     // Replace content
     QStringList newLines = op.content.split('\n', Qt::KeepEmptyParts);
     if (!newLines.isEmpty() && newLines.back().isEmpty()) {
@@ -251,6 +279,16 @@ IncrementalEditTool::EditResult IncrementalEditTool::opReplaceLines(const EditOp
     result.linesRemoved = oldLines.count();
     result.linesAdded = newLines.count();
     result.linesModified = qMax(result.linesAdded, result.linesRemoved);
+    result.preview = generatePreview(oldLines, newLines, DEFAULT_PREVIEW_CONTEXT);
+
+    if (op.previewOnly) {
+        result.success = true;
+        result.preview = QString("Preview replace %1-%2\n%3")
+                             .arg(op.startLine)
+                             .arg(op.endLine)
+                             .arg(result.preview);
+        return result;
+    }
 
     if (writeFileLines(absPath, lines)) {
         result.success = true;
@@ -291,6 +329,11 @@ IncrementalEditTool::EditResult IncrementalEditTool::opDeleteLines(const EditOpe
         return result;
     }
 
+    QStringList oldLines;
+    for (int i = op.startLine - 1; i < op.endLine && i < lines.count(); ++i) {
+        oldLines.append(lines[i]);
+    }
+
     // Delete lines
     int linesToDelete = op.endLine - op.startLine + 1;
     for (int i = 0; i < linesToDelete && !lines.isEmpty(); ++i) {
@@ -299,6 +342,16 @@ IncrementalEditTool::EditResult IncrementalEditTool::opDeleteLines(const EditOpe
 
     result.linesRemoved = linesToDelete;
     result.linesModified = linesToDelete;
+    result.preview = generatePreview(oldLines, QStringList{}, DEFAULT_PREVIEW_CONTEXT);
+
+    if (op.previewOnly) {
+        result.success = true;
+        result.preview = QString("Preview delete %1-%2\n%3")
+                             .arg(op.startLine)
+                             .arg(op.endLine)
+                             .arg(result.preview);
+        return result;
+    }
 
     if (writeFileLines(absPath, lines)) {
         result.success = true;
@@ -329,15 +382,30 @@ IncrementalEditTool::EditResult IncrementalEditTool::opAppendLines(const EditOpe
         return result;
     }
 
+    if (!validateContent(op.content)) {
+        result.error = "Content exceeds safe size limit";
+        return result;
+    }
+
     // Append content
     QStringList contentLines = op.content.split('\n', Qt::KeepEmptyParts);
     if (!contentLines.isEmpty() && contentLines.back().isEmpty()) {
         contentLines.pop_back();
     }
 
+    const QStringList oldLines = lines;
     lines.append(contentLines);
     result.linesAdded = contentLines.count();
     result.linesModified = contentLines.count();
+    result.preview = generatePreview(oldLines, lines, DEFAULT_PREVIEW_CONTEXT);
+
+    if (op.previewOnly) {
+        result.success = true;
+        result.preview = QString("Preview append to %1\n%2")
+                             .arg(op.filepath)
+                             .arg(result.preview);
+        return result;
+    }
 
     if (writeFileLines(absPath, lines)) {
         result.success = true;
@@ -353,6 +421,7 @@ IncrementalEditTool::EditResult IncrementalEditTool::opAppendLines(const EditOpe
 ToolResult IncrementalEditTool::opBatchEdit(const QString &callId, const QJsonObject &args)
 {
     const auto editsArray = args["edits"].toArray();
+    const bool previewOnly = args.value("preview").toBool(false);
 
     if (editsArray.isEmpty()) {
         return {callId, name(), true, "No edits specified"};
@@ -365,6 +434,7 @@ ToolResult IncrementalEditTool::opBatchEdit(const QString &callId, const QJsonOb
     QJsonArray results;
     int successCount = 0;
     int errorCount = 0;
+    QMap<QString, QList<QPair<int, int>>> usedRanges;
 
     for (const QJsonValue &editVal : editsArray) {
         const QJsonObject editObj = editVal.toObject();
@@ -375,13 +445,67 @@ ToolResult IncrementalEditTool::opBatchEdit(const QString &callId, const QJsonOb
         op.endLine = editObj.value("end_line").toInt(op.startLine);
         op.content = editObj["content"].toString("");
         op.createIfMissing = editObj.value("create_if_missing").toBool(false);
+        op.previewOnly = editObj.value("preview").toBool(previewOnly);
 
         const QString opType = editObj["operation"].toString();
         if (opType == "insert") op.type = EditOperation::Insert;
         else if (opType == "replace") op.type = EditOperation::Replace;
         else if (opType == "delete") op.type = EditOperation::Delete;
         else if (opType == "append") op.type = EditOperation::Append;
-        else continue;
+        else {
+            ++errorCount;
+            QJsonObject resultObj;
+            resultObj["file"] = op.filepath;
+            resultObj["success"] = false;
+            resultObj["error"] = QStringLiteral("Unknown operation: %1").arg(opType);
+            results.append(resultObj);
+            continue;
+        }
+
+        if (!validateContent(op.content)) {
+            ++errorCount;
+            QJsonObject resultObj;
+            resultObj["file"] = op.filepath;
+            resultObj["success"] = false;
+            resultObj["error"] = QStringLiteral("Content exceeds safe size limit");
+            results.append(resultObj);
+            continue;
+        }
+
+        if (op.type != EditOperation::Append) {
+            const QString absPath = safePath(op.filepath);
+            const QString conflict = detectConflicts(op.filepath, op.startLine, op.endLine);
+            if (!conflict.isEmpty()) {
+                ++errorCount;
+                QJsonObject resultObj;
+                resultObj["file"] = op.filepath;
+                resultObj["success"] = false;
+                resultObj["error"] = conflict;
+                results.append(resultObj);
+                continue;
+            }
+
+            auto &ranges = usedRanges[absPath];
+            bool overlaps = false;
+            for (const auto &range : ranges) {
+                if (!(op.endLine < range.first || op.startLine > range.second)) {
+                    overlaps = true;
+                    break;
+                }
+            }
+            if (overlaps) {
+                ++errorCount;
+                QJsonObject resultObj;
+                resultObj["file"] = op.filepath;
+                resultObj["success"] = false;
+                resultObj["error"] = QStringLiteral("Conflicting edit range in batch: %1-%2")
+                                         .arg(op.startLine)
+                                         .arg(op.endLine);
+                results.append(resultObj);
+                continue;
+            }
+            ranges.append(qMakePair(op.startLine, op.endLine));
+        }
 
         EditResult result;
         switch (op.type) {
@@ -403,6 +527,9 @@ ToolResult IncrementalEditTool::opBatchEdit(const QString &callId, const QJsonOb
         resultObj["file"] = result.filepath;
         resultObj["success"] = result.success;
         resultObj["lines_modified"] = result.linesModified;
+        resultObj["lines_added"] = result.linesAdded;
+        resultObj["lines_removed"] = result.linesRemoved;
+        resultObj["preview"] = result.preview;
 
         if (result.success) {
             successCount++;
@@ -417,6 +544,7 @@ ToolResult IncrementalEditTool::opBatchEdit(const QString &callId, const QJsonOb
     summary["total"] = editsArray.size();
     summary["succeeded"] = successCount;
     summary["failed"] = errorCount;
+    summary["preview_only"] = previewOnly;
     summary["edits"] = results;
 
     return {callId, name(), errorCount > 0, QJsonDocument(summary).toJson(QJsonDocument::Compact)};
@@ -436,10 +564,25 @@ bool IncrementalEditTool::validateContent(const QString &content) const
 
 QString IncrementalEditTool::detectConflicts(const QString &filepath, int startLine, int endLine) const
 {
-    Q_UNUSED(filepath);
-    Q_UNUSED(startLine);
-    Q_UNUSED(endLine);
-    return "";  // No conflict detection for now
+    const QString absPath = safePath(filepath);
+    if (absPath.isEmpty()) {
+        return "Invalid file path";
+    }
+
+    if (startLine < 1 || endLine < startLine) {
+        return "Invalid line range";
+    }
+
+    const QStringList lines = readFileLines(absPath);
+    if (lines.isEmpty()) {
+        return QString();
+    }
+
+    if (startLine > lines.count() || endLine > lines.count()) {
+        return QString("Line range exceeds file length (%1)").arg(lines.count());
+    }
+
+    return QString();
 }
 
 QStringList IncrementalEditTool::readFileLines(const QString &filepath) const
@@ -492,8 +635,49 @@ QString IncrementalEditTool::generatePreview(
     const QStringList &newLines,
     int contextLines) const
 {
-    Q_UNUSED(oldLines);
-    Q_UNUSED(newLines);
-    Q_UNUSED(contextLines);
-    return "";  // Preview generation can be expanded later
+    QString preview;
+    const int limit = qMax(oldLines.count(), newLines.count());
+    const int shown = qMin(limit, qMax(1, contextLines));
+
+    for (int i = 0; i < shown; ++i) {
+        const QString oldLine = i < oldLines.count() ? oldLines[i] : QString();
+        const QString newLine = i < newLines.count() ? newLines[i] : QString();
+
+        if (oldLine == newLine) {
+            if (!oldLine.isEmpty()) {
+                preview += QStringLiteral("  %1\n").arg(oldLine);
+            }
+            continue;
+        }
+
+        if (!oldLine.isEmpty()) {
+            preview += QStringLiteral("- %1\n").arg(oldLine);
+        }
+        if (!newLine.isEmpty()) {
+            preview += QStringLiteral("+ %1\n").arg(newLine);
+        }
+    }
+
+    if (limit > shown) {
+        preview += QStringLiteral("  ...");
+    }
+
+    return preview.trimmed();
+}
+
+QString IncrementalEditTool::formatEditResult(const EditResult &result) const
+{
+    QString text = QStringLiteral("%1: %2")
+                       .arg(result.filepath,
+                            result.success ? QStringLiteral("success") : QStringLiteral("failed"));
+
+    if (!result.preview.isEmpty()) {
+        text += QStringLiteral("\n") + result.preview;
+    }
+
+    if (!result.error.isEmpty()) {
+        text += QStringLiteral("\nerror: ") + result.error;
+    }
+
+    return text;
 }
