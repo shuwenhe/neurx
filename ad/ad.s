@@ -707,6 +707,50 @@ func tensor_transform_chain_mean_dim() transform_chain {
     neurx.tensor.autograd.tensor_transform_chain_mean_dim()
 }
 
+func build_causal_mask(tensor scores) tensor {
+    int rows = scores.shape[0]
+    int cols = scores.shape[1]
+    tensor mask = neurx.tensor.tensor.zeros_like(scores)
+    int r = 0
+    while r < rows {
+        int c = r + 1
+        while c < cols {
+            mask.data[r * cols + c] = 1.0
+            c = c + 1
+        }
+        r = r + 1
+    }
+    mask
+}
+
+func scaled_dot_product_attention(tensor query, tensor key, tensor value, tensor mask, bool has_mask) tensor {
+    int ndim_q = len(query.shape)
+    int ndim_k = len(key.shape)
+    int ndim_v = len(value.shape)
+    if ndim_q < 2 || ndim_k < 2 || ndim_v < 2 {
+        return neurx.tensor.tensor.clone(query)
+    }
+
+    tensor key_t = neurx.tensor.tensor.transpose(key, 0, 1)
+    tensor scores = neurx.tensor.tensor.matmul(query, key_t)
+    tensor head_dim_tensor = neurx.tensor.tensor.sqrt(
+        neurx.tensor.tensor.new([float(query.shape[1])], [1], false)
+    )
+    tensor scaled_scores = neurx.tensor.tensor.div(scores, head_dim_tensor)
+    if has_mask {
+        scaled_scores = neurx.indexing.masked_fill(scaled_scores, mask, -1000000000.0)
+    }
+    tensor weights = neurx.tensor.tensor.softmax(scaled_scores, -1)
+    neurx.tensor.tensor.matmul(weights, value)
+}
+
+func causal_attention(tensor query, tensor key, tensor value) tensor {
+    tensor key_t = neurx.tensor.tensor.transpose(key, 0, 1)
+    tensor scores = neurx.tensor.tensor.matmul(query, key_t)
+    tensor mask = build_causal_mask(scores)
+    scaled_dot_product_attention(query, key, value, mask, true)
+}
+
 func function_ready_for_linearize(function_record f, linearize_state state) bool {
     neurx.ad.function.function_ready(f) && linearize_ready(state)
 }
