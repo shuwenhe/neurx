@@ -1296,7 +1296,8 @@ bool GlobTool::shouldExclude(const QString& path) const
 
 void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
                                                  AgentToolRegistry* registry,
-                                                 SandboxManager* sandboxManager)
+                                                 SandboxManager* sandboxManager,
+                                                 ClaudeSkillManager* skillManager)
 {
     if (!registry) return;
 
@@ -1333,7 +1334,9 @@ void ClaudeStandardToolFactory::registerAllTools(const QString& workspaceRoot,
     registry->registerTool(createGeminiGrepAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(createGeminiGetInternalDocsAdapter(workspaceRoot, sandboxManager));
     registry->registerTool(ClaudeStandardToolFactory::createGeminiCompleteTaskAdapter(workspaceRoot, sandboxManager));
-    registry->registerTool(createSkillCreatorAdapter(workspaceRoot, sandboxManager, skillManager));
+    if (auto skillCreatorTool = createSkillCreatorAdapter(workspaceRoot, sandboxManager, skillManager)) {
+        registry->registerTool(skillCreatorTool);
+    }
 
     // Plan Mode Tools
     registry->registerTool(new EnterPlanModeTool(registry));
@@ -1597,6 +1600,9 @@ BaseTool* ClaudeStandardToolFactory::createSkillCreatorAdapter(const QString& wo
                                                           ClaudeSkillManager* skillManager)
 {
     Q_UNUSED(sandboxManager);
+    if (!skillManager) {
+        return nullptr;
+    }
     return new NeurxSkillCreatorTool(skillManager, workspaceRoot);
 }
 

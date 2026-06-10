@@ -49,7 +49,8 @@ endif()
 # ── Phase 1: Framework Sources (neurx_core) ───────────────────────────────────
 # Use GLOB_RECURSE to find all sources, then filter out problematic files
 file(GLOB_RECURSE NEURX_CORE_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.h"
 )
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/bridge/")
@@ -212,6 +213,14 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeSimplificationSuggester\\.cpp$
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentQualityAnalyzer\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TypeDesignValidator\\.cpp$")
 
+# Ensure ThreadId and LoggingManager are included even if they match filters
+file(GLOB THREAD_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/thread/*.cpp")
+file(GLOB LOGGING_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/logging/*.cpp")
+# Include base class implementations in core as well
+file(GLOB TOOL_BASE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/tools/Tool*.cpp")
+list(APPEND NEURX_CORE_SOURCES ${THREAD_SOURCES} ${LOGGING_SOURCES} ${TOOL_BASE_SOURCES})
+list(REMOVE_DUPLICATES NEURX_CORE_SOURCES)
+
 # Exclude tools and services that are in neurx_ui only
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GeminiEditTool\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileSearchTool\\.cpp$")
@@ -318,7 +327,9 @@ add_library(neurx_ui STATIC
     src/tools/CheckpointManager.cpp
     src/tools/UpdatePlanTool.cpp
     src/tools/SkillTool.cpp
+    src/tools/NeurxSkillCreatorTool.cpp
     src/tools/CustomScriptTool.cpp
+    src/tools/PlanModeTools.cpp
     src/tools/SmartFileCreator.cpp
     src/tools/McpClient.cpp
     src/tools/DefaultToolDiscovery.cpp
@@ -334,6 +345,12 @@ add_library(neurx_ui STATIC
     src/tools/SessionStore.cpp
     src/tools/McpProxyTool.cpp
     src/tools/GeminiGroundingTool.cpp
+    
+    # Abstract base class implementations for vtable emission
+    src/tools/ToolExecutor.cpp
+    src/tools/ToolDiscovery.cpp
+    src/tools/ToolSchemaRegistry.cpp
+    src/tools/ToolPermissionManager.cpp
 
     # Services: Required for AgentController integration
     src/services/NotificationService.cpp

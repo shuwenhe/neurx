@@ -23,8 +23,8 @@ class ThreadStore : public QObject {
     Q_OBJECT
 public:
     explicit ThreadStore(QObject *parent = nullptr) : QObject(parent) {}
-    virtual ~ThreadStore() = default;
-    
+    virtual ~ThreadStore();
+
 public:
     // ── Creation and Initialization ────────────────────────────────────
     

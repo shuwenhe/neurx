@@ -1775,7 +1775,7 @@ AgentController::AgentController(QObject *parent) : QObject(parent)
     }
 
     qDebug() << "[AgentController::init] Registering Claude Standard Tools";
-    ClaudeStandardToolFactory::registerAllTools(toolRegistrationPath, m_registry, m_sandboxManager);
+    ClaudeStandardToolFactory::registerAllTools(toolRegistrationPath, m_registry, m_sandboxManager, m_skillManager);
     qDebug() << "[AgentController::init] Claude Standard Tools registered successfully";
 
     setupEngine();
@@ -3832,7 +3832,7 @@ void AgentController::setWorkspacePath(const QString &path)
     qDebug() << "[AgentController] Workspace path:" << path;
     qDebug() << "[AgentController] Registry:" << m_registry;
     qDebug() << "[AgentController] SandboxManager:" << m_sandboxManager;
-    ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
+    ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager, m_skillManager);
     qDebug() << "[AgentController] Claude Standard Tools registered";
 
     // Register Codex filesystem integration tools (apply_patch and write_file via CLI)

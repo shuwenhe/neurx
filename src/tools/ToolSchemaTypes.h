@@ -48,7 +48,7 @@ struct ToolPermission {
     QStringList allowedUsers;     // 允许的用户列表
     QStringList allowedRoles;     // 允许的角色列表
     QStringList deniedUsers;      // 拒绝的用户列表
-    QStringList deniedRoles;      // 拒绝的角色列表
+    QStringList deniedRoles;     // 拒绝的角色列表
     QStringList allowedCapabilities; // 允许的能力列表
 
     bool requiresApproval = false;    // 是否需要审批
@@ -59,6 +59,7 @@ struct ToolPermission {
     QDateTime expiresAt;           // 权限过期时间
     QString createdBy;
 };
+#define NEURX_TOOL_SCHEMA_OVERLAP_TYPES_DEFINED 1
 
 // ── 工具能力定义 ─────────────────────────────────
 
@@ -171,6 +172,20 @@ struct ToolExecutionResult {
     QVariantMap metadata;         // 额外元数据
 };
 
+// ── 工具链步骤 ───────────────────────────────────
+
+struct ToolChainStep {
+    int stepId;
+    QString toolId;
+    QString capabilityName;
+    
+    QVariantMap parameters;
+    QStringList inputFromPrevious;// 从前一步的输出获取
+    
+    bool stopOnError = false;     // 错误时停止
+    int maxRetries = 1;           // 最大重试
+};
+
 // ── 工具发现查询 ─────────────────────────────────
 
 struct ToolDiscoveryQuery {
@@ -187,18 +202,6 @@ struct ToolDiscoveryQuery {
 };
 
 // ── 工具链定义 ───────────────────────────────────
-
-struct ToolChainStep {
-    int stepId;
-    QString toolId;
-    QString capabilityName;
-    
-    QVariantMap parameters;
-    QStringList inputFromPrevious;// 从前一步的输出获取
-    
-    bool stopOnError = false;     // 错误时停止
-    int maxRetries = 1;           // 最大重试
-};
 
 struct ToolChainDefinition {
     QString chainId;

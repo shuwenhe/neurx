@@ -381,10 +381,12 @@ public:
      * @param workspaceRoot 工作空间根目录
      * @param registry 工具注册表
      * @param sandboxManager Sandbox 管理器（可选）
+     * @param skillManager Skill 管理器（可选）
      */
     static void registerAllTools(const QString& workspaceRoot,
                                  AgentToolRegistry* registry,
-                                 SandboxManager* sandboxManager = nullptr);
+                                 SandboxManager* sandboxManager = nullptr,
+                                 ClaudeSkillManager* skillManager = nullptr);
     
     /**
      * @brief 创建单个工具

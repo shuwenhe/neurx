@@ -19,8 +19,8 @@ class ToolPermissionManager : public QObject {
     Q_OBJECT
 public:
     explicit ToolPermissionManager(QObject *parent = nullptr) : QObject(parent) {}
-    virtual ~ToolPermissionManager() = default;
-    
+    virtual ~ToolPermissionManager();
+
 public:
     // ── 权限管理 ───────────────────────────────────────
     
