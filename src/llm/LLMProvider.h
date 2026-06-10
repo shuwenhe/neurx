@@ -3,15 +3,17 @@
 #include <QJsonArray>
 #include <functional>
 #include "agent/AgentMessage.h"
+#include "llm/LLMTypes.h"
 
 // ── LLMProvider ──────────────────────────────────────────────────────────────
 //  Abstract base for all LLM backends.
 //  Providers are responsible for HTTP, auth, retry and rate-limit logic.
 
+// Provider-specific request/response types with expected field names for agent communication
 struct ProviderLLMRequest {
-    QString            model;
-    QList<AgentMessage> messages;
-    QJsonArray         tools;       // provider-specific schema
+    QString            model;                    // Model name/ID
+    QList<AgentMessage> messages;                // Conversation history
+    QJsonArray         tools;                    // Provider-specific tool schema
     float              temperature{0.0f};
     int                maxTokens{8192};
     bool               stream{true};
@@ -25,12 +27,13 @@ struct MessageImageAttachment {
 };
 
 struct ProviderLLMResponse {
-    AgentMessage  message;
+    AgentMessage  message;                       // Structured response with content & toolCalls
     int           inputTokens{0};
     int           outputTokens{0};
-    QString       stopReason;      // "end_turn" | "tool_use" | "max_tokens"
+    QString       stopReason;                   // "end_turn" | "tool_use" | "max_tokens"
 };
 
+// Type aliases for agent code
 using LLMRequest = ProviderLLMRequest;
 using LLMResponse = ProviderLLMResponse;
 

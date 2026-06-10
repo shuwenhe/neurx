@@ -154,6 +154,7 @@ struct ToolInstance {
 };
 
 /// Tool execution result
+#ifndef NEURX_TOOL_SCHEMA_OVERLAP_TYPES_DEFINED
 struct ToolExecutionResult {
     QString toolId;
     QString executionId;
@@ -174,6 +175,8 @@ struct ToolExecutionResult {
     QString stdout;                // Standard output
     QString stderr;                // Standard error
 };
+#define NEURX_TOOL_TYPES_OVERLAP_TYPES_DEFINED 1
+#endif
 
 // ── Tool Registry Metadata ──────────────────────────────
 
@@ -215,6 +218,7 @@ enum class ChainStrategy {
     Looped       // Run in a loop
 };
 
+ #ifndef NEURX_TOOL_SCHEMA_OVERLAP_TYPES_DEFINED
 struct ToolChainStep {
     QString stepId;
     QString toolId;
@@ -227,6 +231,8 @@ struct ToolChainStep {
     int timeout = 30000;           // Timeout (ms)
     int maxRetries = 0;            // Retry count
 };
+#define NEURX_TOOL_TYPES_OVERLAP_TYPES_DEFINED 1
+#endif
 
 struct ToolChain {
     QString chainId;
@@ -253,6 +259,7 @@ enum class Permission {
     Admin          // Administrative access
 };
 
+ #ifndef NEURX_TOOL_SCHEMA_OVERLAP_TYPES_DEFINED
 struct ToolPermission {
     QString toolId;
     QString principalId;           // User/role ID
@@ -261,6 +268,8 @@ struct ToolPermission {
     QDateTime grantedAt;
     QDateTime expiresAt;           // Optional expiration
 };
+#define NEURX_TOOL_TYPES_OVERLAP_TYPES_DEFINED 1
+#endif
 
 // ── Tool Marketplace ───────────────────────────────────
 

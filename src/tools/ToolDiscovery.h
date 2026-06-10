@@ -18,8 +18,8 @@ class ToolDiscovery : public QObject {
     Q_OBJECT
 public:
     explicit ToolDiscovery(QObject *parent = nullptr) : QObject(parent) {}
-    virtual ~ToolDiscovery() = default;
-    
+    virtual ~ToolDiscovery();
+
     // ── 基础搜索 ───────────────────────────────────────
     
     /// 搜索工具

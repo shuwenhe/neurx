@@ -19,8 +19,8 @@ class ToolExecutor : public QObject {
     Q_OBJECT
 public:
     explicit ToolExecutor(QObject *parent = nullptr) : QObject(parent) {}
-    virtual ~ToolExecutor() = default;
-    
+    virtual ~ToolExecutor();
+
     // ── 工具执行 ───────────────────────────────────────
     
     /// 执行工具

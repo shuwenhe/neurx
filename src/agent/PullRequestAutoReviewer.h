@@ -175,5 +175,3 @@ private:
     QString formatFindingMessage(const ReviewFinding& finding);
     QString generateDetailedSuggestion(const CodePattern& pattern);
 };
-
-#endif // PULL_REQUEST_AUTO_REVIEWER_H
