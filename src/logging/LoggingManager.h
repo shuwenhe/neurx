@@ -18,7 +18,7 @@
 class LoggingManager : public QObject {
     Q_OBJECT
 public:
-    virtual ~LoggingManager() = default;
+    virtual ~LoggingManager();
 
 protected:
     explicit LoggingManager(QObject *parent = nullptr) : QObject(parent) {}
