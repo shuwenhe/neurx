@@ -1,0 +1,5 @@
+# Sample config for agent/tool_use
+max_steps: 200
+model_name: "agent-tool-use-mini"
+tool_manifest: "data/agent/tool_use/tools.json"
+output_dir: "artifacts/checkpoints/agent/tool_use"

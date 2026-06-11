@@ -1,0 +1,13 @@
+{
+  "backend_name": "neurx.app.backend.llm",
+  "model_name": "gpt_large",
+  "summary": "gpt_large[decoder-only-transformer,3400M,layers=32,heads=32,ctx=2048]",
+  "prompt": "Explain how NeurX exposes an S-based LLM backend.",
+  "completion": "NeurX S backend is serving the local GPT-large scaffold. model=gpt_large summary=gpt_large[decoder-only-transformer,3400M,layers=32,heads=32,ctx=2048] prompt_len=49 source=env token_trace=177,242,308,375",
+  "token_trace": "177,242,308,375",
+  "generated_tokens": 4,
+  "last_token": 375,
+  "train_loss": 3.8,
+  "validation_loss": 3.9,
+  "ready": true
+}

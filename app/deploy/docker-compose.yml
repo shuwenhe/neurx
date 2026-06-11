@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: app/service/Dockerfile
+    environment:
+      PORT: 18080
+      NEURX_S_BINARY: /usr/local/bin/s
+      NEURX_BACKEND_MODEL: ${NEURX_BACKEND_MODEL:-Qwen2.5-VL-7B}
+      NEURX_VL_BASE_URL: ${NEURX_VL_BASE_URL:-}
+      NEURX_VL_MODEL: ${NEURX_VL_MODEL:-Qwen2.5-VL-7B}
+    volumes:
+      - /home/shuwen/.local/bin/s:/usr/local/bin/s:ro
+    ports:
+      - "18080:18080"
+
+  web:
+    build:
+      context: ../..
+      dockerfile: app/web/Dockerfile
+    environment:
+      NEURX_BACKEND_URL: http://backend:18080/neurx/api/chat
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.neurx.compose.conf:/etc/nginx/conf.d/default.conf:ro
