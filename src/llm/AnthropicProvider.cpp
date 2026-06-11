@@ -57,7 +57,7 @@ QStringList AnthropicProvider::availableModels() const
     };
 }
 
-void AnthropicProvider::sendRequest(const LLMRequest &request)
+void AnthropicProvider::sendRequest(const ProviderLLMRequest &request)
 {
     if (m_reply) cancel();
     if (m_apiKey.trimmed().isEmpty()) {
@@ -116,7 +116,7 @@ void AnthropicProvider::cancel()
     }
 }
 
-QJsonObject AnthropicProvider::buildRequestBody(const LLMRequest &request) const
+QJsonObject AnthropicProvider::buildRequestBody(const ProviderLLMRequest &request) const
 {
     QJsonObject body;
     body["model"]      = request.model.isEmpty() ? availableModels().first() : request.model;

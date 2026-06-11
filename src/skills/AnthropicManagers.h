@@ -18,7 +18,7 @@
  */
 class PromptCachingManager {
 public:
-    PromptCachingManager();
+    PromptCachingManager() = default;
     virtual ~PromptCachingManager() = default;
     
     /// Analyze content for caching suitability
@@ -54,7 +54,7 @@ public:
  */
 class AdaptiveThinkingManager {
 public:
-    AdaptiveThinkingManager();
+    AdaptiveThinkingManager() = default;
     virtual ~AdaptiveThinkingManager() = default;
     
     /// Auto-determine optimal thinking depth for task
@@ -86,7 +86,7 @@ public:
  */
 class EffortControlManager {
 public:
-    EffortControlManager();
+    EffortControlManager() = default;
     virtual ~EffortControlManager() = default;
     
     /// Recommend effort level for task
@@ -121,7 +121,7 @@ public:
  */
 class ContextCompactionManager {
 public:
-    ContextCompactionManager();
+    ContextCompactionManager() = default;
     virtual ~ContextCompactionManager() = default;
     
     /// Compact conversation history
@@ -157,7 +157,7 @@ class ToolRunnerFramework {
 public:
     using ToolExecutor = std::function<ToolResult(const QString &toolName, const QVariantMap &params)>;
     
-    ToolRunnerFramework();
+    ToolRunnerFramework() = default;
     virtual ~ToolRunnerFramework() = default;
     
     /// Register available tools
@@ -195,7 +195,7 @@ public:
  */
 class FileAPIManager {
 public:
-    FileAPIManager();
+    FileAPIManager() = default;
     virtual ~FileAPIManager() = default;
     
     /// Upload file to API
@@ -232,7 +232,7 @@ public:
  */
 class BatchProcessingManager {
 public:
-    BatchProcessingManager();
+    BatchProcessingManager() = default;
     virtual ~BatchProcessingManager() = default;
     
     /// Create a batch job
@@ -267,7 +267,7 @@ public:
  */
 class ManagedAgentOrchestrator {
 public:
-    ManagedAgentOrchestrator();
+    ManagedAgentOrchestrator() = default;
     virtual ~ManagedAgentOrchestrator() = default;
     
     /// Create a managed agent

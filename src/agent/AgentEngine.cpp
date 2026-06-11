@@ -441,7 +441,7 @@ void AgentEngine::runLoop()
                 requestHistory.prepend(contextMsg);
             }
         }
-        const LLMRequest req = m_planner.buildRequest(
+        const ProviderLLMRequest req = m_planner.buildRequest(
             requestHistory,
             m_activeModel,
             providerId,
@@ -456,7 +456,7 @@ void AgentEngine::runLoop()
 
         setStatus(AgentStatus::Thinking);
 
-        LLMResponse response;
+        ProviderLLMResponse response;
         bool        done = false;
         QString     providerError;
 
@@ -467,7 +467,7 @@ void AgentEngine::runLoop()
 
         QMetaObject::Connection connComplete = connect(
             m_provider, &LLMProvider::responseComplete,
-            this, [&](const LLMResponse &r) { response = r; done = true; });
+            this, [&](const ProviderLLMResponse &r) { response = r; done = true; });
 
         QMetaObject::Connection connError = connect(
             m_provider, &LLMProvider::requestError,

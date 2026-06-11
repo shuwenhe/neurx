@@ -110,12 +110,12 @@ QList<AgentMessage> Planner::trimToContextBudget(
     return trimmed;
 }
 
-LLMRequest Planner::buildRequest(const QList<AgentMessage> &history,
-                                   const QString &model,
-                                   const QString &providerId,
-                                   const AgentToolRegistry *registry) const
+ProviderLLMRequest Planner::buildRequest(const QList<AgentMessage> &history,
+                                         const QString &model,
+                                         const QString &providerId,
+                                         const AgentToolRegistry *registry) const
 {
-    LLMRequest req;
+    ProviderLLMRequest req;
     req.model        = model;
     req.messages     = (m_contextBudget > 0)
                        ? trimToContextBudget(history, m_contextBudget)

@@ -110,7 +110,7 @@ struct PromptVariables {
 
 // ── LLM Request/Response ───────────────────────────────
 
-struct LLMRequest {
+struct CodexLLMRequest {
     QString requestId;
     ModelConfig model;
     
@@ -131,7 +131,7 @@ struct LLMRequest {
     int timeoutMs = 30000;         // Request timeout
 };
 
-struct LLMResponse {
+struct CodexLLMResponse {
     QString responseId;
     QString requestId;
     
@@ -153,6 +153,10 @@ struct LLMResponse {
     float confidence = 0.0f;       // Confidence score (0-1)
     QStringList warnings;          // Warnings
 };
+
+// Backward-compatible aliases used throughout the existing codebase.
+using LLMRequest = CodexLLMRequest;
+using LLMResponse = CodexLLMResponse;
 
 // ── Streaming ──────────────────────────────────────────
 

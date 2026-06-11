@@ -16,7 +16,7 @@ public:
     QString     displayName()     const override { return "Ollama (Local)"; }
     QStringList availableModels() const override { return m_cachedModels; }
 
-    void sendRequest(const LLMRequest &request) override;
+    void sendRequest(const ProviderLLMRequest &request) override;
     void cancel() override;
 
     // Refresh model list from the Ollama daemon.
