@@ -1,0 +1,15 @@
+tests/test_creation.py
+tests/test_phase1_math.py
+tests/test_phase2_new_features.py
+tests/test_phase3_operations.py
+tests/test_tensor_enhancements.py
+tests/test_tensor_new_features.py
+tests/test_tensor_ops_extended.py
+tests/test_tensor_phase2_enhancements.py
+tests/test_scatter_gather.py
+tests/test_sgd.py
+tests/test_adam_rmsprop.py
+tests/test_schedulers.py
+tests/test_focal_loss.py
+tests/test_new_features.py
+tests/test_new_modules.py

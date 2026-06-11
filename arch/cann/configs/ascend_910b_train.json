@@ -1,0 +1,18 @@
+{
+  "name": "neurx-ascend-910b-training",
+  "mode": "train",
+  "target": {
+    "soc": "Ascend910B1"
+  },
+  "env": {
+    "ASCEND_RT_VISIBLE_DEVICES": "0",
+    "HCCL_CONNECT_TIMEOUT": "7200"
+  },
+  "train": {
+    "workdir": "/app/neurx",
+    "command": [
+      "s",
+      "train/loop.s"
+    ]
+  }
+}
