@@ -20,11 +20,11 @@ public:
     QString     displayName()    const override { return "Anthropic Claude"; }
     QStringList availableModels() const override;
 
-    void sendRequest(const LLMRequest &request) override;
+    void sendRequest(const ProviderLLMRequest &request) override;
     void cancel() override;
 
 private:
-    QJsonObject  buildRequestBody(const LLMRequest &request) const;
+    QJsonObject  buildRequestBody(const ProviderLLMRequest &request) const;
     QJsonArray   convertTools(const QJsonArray &tools) const;
     QJsonArray   buildMessages(const QList<AgentMessage> &history) const;
 
@@ -40,5 +40,5 @@ private:
     QString       m_currentToolId;
     QString       m_currentToolName;
     QString       m_currentToolArgs;
-    LLMResponse   m_partialResponse;
+    ProviderLLMResponse   m_partialResponse;
 };

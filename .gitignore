@@ -38,3 +38,51 @@ ui_*.h
 secrets.env
 .env
 *.env.local
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+.Spotlight-V100
+.Trashes
+
+# IDE and editor specific
+.vscode/
+.idea/
+.qtcreator/
+.qtc_clangd/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+
+# OS specific
+Thumbs.db
+.directory
+
+# Compilation database
+compile_commands.json
+
+# Test outputs
+test_results.xml
+coverage/
+*.gcda
+*.gcno
+
+# Dependencies
+node_modules/
+.npm
+.pnp
+.yarn/cache
+.yarn/install-state.gz

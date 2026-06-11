@@ -17,7 +17,7 @@ public:
     QString     displayName()     const override { return "OpenAI"; }
     QStringList availableModels() const override;
 
-    void sendRequest(const LLMRequest &request) override;
+    void sendRequest(const ProviderLLMRequest &request) override;
     void cancel() override;
 
 private:
@@ -27,7 +27,7 @@ private:
         QString args;
     };
 
-    QJsonObject buildRequestBody(const LLMRequest &request) const;
+    QJsonObject buildRequestBody(const ProviderLLMRequest &request) const;
     QJsonArray  buildMessages(const QList<AgentMessage> &history, const QString &model) const;
 
     void handleStreamChunk(const QByteArray &chunk);
@@ -41,5 +41,5 @@ private:
     QByteArray  m_errorBuffer;
     QString     m_streamText;
     QHash<int, PendingToolCall> m_pendingToolCalls;
-    LLMResponse m_partialResponse;
+    ProviderLLMResponse m_partialResponse;
 };

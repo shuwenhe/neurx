@@ -32,7 +32,7 @@ QString ToolSummarizer::summarize(const QString &toolName, const QString &output
     qDebug() << "[ToolSummarizer] Tool output exceeds token limit for tool:" << toolName;
     qDebug() << "[ToolSummarizer] Output length:" << output.length() << "bytes";
 
-    LLMRequest request;
+    ProviderLLMRequest request;
     request.model.clear();
     request.temperature = 0.0f;
     request.maxTokens = qMax(256, qMin(maxTokens, 1024));
@@ -53,14 +53,14 @@ QString ToolSummarizer::summarize(const QString &toolName, const QString &output
 
     request.messages = {systemMsg, userMsg};
 
-    LLMResponse response;
+    ProviderLLMResponse response;
     QString requestError;
     bool finished = false;
 
     QEventLoop loop;
     QMetaObject::Connection responseConn = QObject::connect(
         m_provider, &LLMProvider::responseComplete,
-        &loop, [&](const LLMResponse &res) {
+        &loop, [&](const ProviderLLMResponse &res) {
             response = res;
             finished = true;
             loop.quit();

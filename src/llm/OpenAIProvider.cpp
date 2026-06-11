@@ -68,7 +68,7 @@ QStringList OpenAIProvider::availableModels() const
     };
 }
 
-void OpenAIProvider::sendRequest(const LLMRequest &request)
+void OpenAIProvider::sendRequest(const ProviderLLMRequest &request)
 {
     if (m_reply) cancel();
     if (m_apiKey.trimmed().isEmpty()) {
@@ -139,7 +139,7 @@ void OpenAIProvider::cancel()
     m_pendingToolCalls.clear();
 }
 
-QJsonObject OpenAIProvider::buildRequestBody(const LLMRequest &request) const
+QJsonObject OpenAIProvider::buildRequestBody(const ProviderLLMRequest &request) const
 {
     const QString model = request.model.isEmpty() ? availableModels().first() : request.model;
     QJsonObject body;

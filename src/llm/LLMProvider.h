@@ -33,10 +33,6 @@ struct ProviderLLMResponse {
     QString       stopReason;                   // "end_turn" | "tool_use" | "max_tokens"
 };
 
-// Type aliases for agent code
-using LLMRequest = ProviderLLMRequest;
-using LLMResponse = ProviderLLMResponse;
-
 class LLMProvider : public QObject {
     Q_OBJECT
 public:
@@ -51,7 +47,7 @@ public:
 
     // Send a request and stream responses back via signals.
     // Returns immediately; results arrive via tokenReceived / responseComplete.
-    virtual void sendRequest(const LLMRequest &request) = 0;
+    virtual void sendRequest(const ProviderLLMRequest &request) = 0;
 
     // Cancel the in-flight request, if any.
     virtual void cancel() = 0;
@@ -62,7 +58,7 @@ public:
 
 signals:
     void tokenReceived(const TokenEvent &event);
-    void responseComplete(const LLMResponse &response);
+    void responseComplete(const ProviderLLMResponse &response);
     void requestError(const QString &error);
 
 protected:

@@ -20,10 +20,10 @@ public:
     // A value ≤ 0 disables trimming. Default: 100000 tokens.
     void setContextBudget(int tokens) { m_contextBudget = tokens; }
 
-    LLMRequest buildRequest(const QList<AgentMessage> &history,
-                            const QString &model,
-                            const QString &providerId,
-                            const AgentToolRegistry *registry) const;
+    ProviderLLMRequest buildRequest(const QList<AgentMessage> &history,
+                                    const QString &model,
+                                    const QString &providerId,
+                                    const AgentToolRegistry *registry) const;
 
 private:
     QJsonArray buildTools(const QString &providerId, const AgentToolRegistry *registry) const;

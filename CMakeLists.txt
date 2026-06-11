@@ -47,10 +47,9 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
 endif()
 
 # ── Phase 1: Framework Sources (neurx_core) ───────────────────────────────────
-# Use GLOB_RECURSE to find all sources, then filter out problematic files
+# Use GLOB_RECURSE to find source files, then filter out problematic files.
 file(GLOB_RECURSE NEURX_CORE_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.h"
 )
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "/src/bridge/")
@@ -208,6 +207,9 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityPatternDetector\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TestCoverageAnalyzer\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorHandlingAnalyzer\\.cpp$")
 
+# Exclude all test files from production libraries
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "src/test/.*\\.cpp$")
+
 # Wave 5: Code Quality and Design Systems
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeSimplificationSuggester\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentQualityAnalyzer\\.cpp$")
@@ -236,12 +238,57 @@ list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultIntegrationOrchestrator\\.c
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultGoalManager\\.cpp$")
 list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DefaultLLMExtensions\\.cpp$")
 
+# These implementations should only be in neurx_ui to avoid duplicate symbols
+
+# Exclude all files that belong to neurx_ui only
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandRegistry\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "EditorCommandManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommandPalette\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ContextMenuIntegration\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginLoader\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginSandbox\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PluginValidator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommitCommandManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "LearningModeSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "RalphIterationEngine\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "InteractivePromptSystem\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitCommandIntegration\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "SecurityPatternDetector\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TestCoverageAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ErrorHandlingAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CodeSimplificationSuggester\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "CommentQualityAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "TypeDesignValidator\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitWorkflowAgent\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubIssueLabelManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PullRequestAutoReviewer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "DuplicateDetectionBackfill\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "ExplanatoryOutputStyleManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "GitHubSweepAutomation\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "WorkspaceHealthAnalyzer\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IssueDuplicateAutoCloser\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "PerformanceOptimizer\\.cpp$")
+
+# Exclude ALL tool and tool manager implementations from neurx_core
+# These are now built into neurx_ui only
+file(GLOB ALL_TOOL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/tools/*.cpp")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "src/tools/.*\\.cpp$")
+
+# Also exclude FileStateManager from neurx_core as it's in neurx_ui too
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileStateManager\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "FileCreationTool\\.cpp$")
+list(FILTER NEURX_CORE_SOURCES EXCLUDE REGEX "IncrementalEditTool\\.cpp$")
+
 add_library(neurx_core STATIC
     ${NEURX_CORE_SOURCES}
 )
 
 target_sources(neurx_core PRIVATE
     src/filesystem/ExecutorFileSystem.h
+    src/config/ConfigManager.h
+    src/skills/SkillManager.h
+    src/state/StateManager.h
+    src/tools/ToolRegistry.h
 )
 
 target_include_directories(neurx_core PUBLIC
@@ -464,7 +511,6 @@ add_library(neurx_ui STATIC
     # src/agent/AutomationOrchestrator.cpp
     # src/agent/AnalyticsEngine.cpp
     # src/agent/LocalizationManager.cpp
-    # src/agent/PerformanceOptimizer.cpp
     # src/agent/CustomWebhookManager.cpp
 
     # Claude Code Migration (Tier 9: Extensions, Marketplace, Collaboration, Cost Optimization)
@@ -515,7 +561,6 @@ add_library(neurx_ui STATIC
     # src/tools/GitHubAutomationTool.cpp
 
     # File Operation Tools (Phase 5: Advanced File Operations from claude-code)
-    # src/tools/FileSearchTool.cpp
     # src/tools/FileSafetyValidator.cpp
     src/tools/IncrementalEditTool.cpp
     src/tools/FileStateManager.cpp
@@ -531,6 +576,7 @@ add_library(neurx_ui STATIC
     src/plugins/PluginLoader.cpp
     src/plugins/PluginSandbox.cpp
     src/plugins/PluginValidator.cpp
+    src/plugins/PluginMetadata.cpp
 
     # Claude Code Advanced Features (Tier 15: Interactive Workflows)
     src/agent/CommitCommandManager.cpp
@@ -547,7 +593,9 @@ add_library(neurx_ui STATIC
     # Wave 5: Code Quality and Design Systems
     src/agent/CodeSimplificationSuggester.cpp
     src/agent/CommentQualityAnalyzer.cpp
-    src/agent/TypeDesignValidator.cpp
+
+    # GitHub Automation & Analysis Systems
+    src/agent/GitWorkflowAgent.cpp
 )
 
 target_include_directories(neurx_ui PUBLIC
@@ -590,6 +638,15 @@ target_link_libraries(neurx-codeApp PRIVATE
     Qt6::Network
     Qt6::Concurrent
 )
+
+if(APPLE)
+    # The app pulls in two large static libraries with circular references.
+    # Force-load them so the linker can resolve symbols regardless of archive order.
+    target_link_options(neurx-codeApp PRIVATE
+        "SHELL:-Wl,-force_load,$<TARGET_FILE:neurx_ui>"
+        "SHELL:-Wl,-force_load,$<TARGET_FILE:neurx_core>"
+    )
+endif()
 
 # Optional WebSockets support
 if(Qt6WebSockets_FOUND)

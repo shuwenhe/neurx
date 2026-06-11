@@ -1,4 +1,5 @@
 #include "tools/ClaudeStandardTools.h"
+#include "skills/ClaudeSkillManager.h"
 #include <QFile>
 #include <QSaveFile>
 #include <QFileInfo>

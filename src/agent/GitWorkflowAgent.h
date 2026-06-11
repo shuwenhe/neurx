@@ -4,10 +4,10 @@
 #include <QStringList>
 #include <QVariantMap>
 
-namespace neurx {
-
 class GitAutomationManager;
 class CommitCommandManager;
+
+namespace neurx {
 
 /**
  * @class GitWorkflowAgent
@@ -40,8 +40,8 @@ public:
                               std::function<void(const AgentResult&)> callback);
 
 private:
-    GitAutomationManager* m_gitManager;
-    CommitCommandManager* m_commitCommandManager;
+    ::GitAutomationManager* m_gitManager;
+    ::CommitCommandManager* m_commitCommandManager;
 
     // Helper to generate commit message using LLM
     void generateCommitMessageWithLLM(const QString& diff,
@@ -51,4 +51,3 @@ private:
 };
 
 } // namespace neurx
-
