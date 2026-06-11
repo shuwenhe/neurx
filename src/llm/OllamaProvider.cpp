@@ -30,7 +30,7 @@ void OllamaProvider::refreshModels()
     });
 }
 
-void OllamaProvider::sendRequest(const LLMRequest &request)
+void OllamaProvider::sendRequest(const ProviderLLMRequest &request)
 {
     if (m_reply) cancel();
 
@@ -93,7 +93,7 @@ void OllamaProvider::handleStreamChunk(const QByteArray &chunk)
             emit tokenReceived(te);
         }
         if (obj["done"].toBool()) {
-            LLMResponse resp;
+            ProviderLLMResponse resp;
             resp.message.role = MessageRole::Assistant;
             emit responseComplete(resp);
         }

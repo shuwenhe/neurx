@@ -32,8 +32,8 @@ GitWorkflowAgent::GitWorkflowAgent(QObject* parent)
         {}
     }, parent)
 {
-    m_gitManager = new GitAutomationManager(this);
-    m_commitCommandManager = new CommitCommandManager(this);
+    m_gitManager = new ::GitAutomationManager(this);
+    m_commitCommandManager = new ::CommitCommandManager(this);
 }
 
 GitWorkflowAgent::~GitWorkflowAgent() = default;
@@ -78,14 +78,19 @@ void GitWorkflowAgent::createSmartCommit(const QString& context,
                                         const QString& workspacePath,
                                         std::function<void(const AgentResult&)> callback)
 {
-    // 1. Get Gil Context
-    QString status = m_gitManager->getRepositoryStatus();
-    QString diff = m_gitManager->executeGitCommand("diff --cached");
-    if (diff.isEmpty()) {
-        diff = m_gitManager->executeGitCommand("diff");
+    // 1. Get Git context via the public API.
+    const QString status = m_gitManager->getRepositoryStatus();
+    const QStringList stagedFiles = m_gitManager->getStagedFiles();
+    const QStringList unstagedFiles = m_gitManager->getUnstagedFiles();
+    const auto recentCommits = m_gitManager->getCommitHistory(5);
+    QStringList recentMessages;
+    for (const auto &commit : recentCommits) {
+        recentMessages.append(commit.message);
     }
-
-    QString recentLog = m_gitManager->executeGitCommand("log -n 5 --oneline");
+    const QString diff = QStringLiteral("Staged files: %1\nUnstaged files: %2")
+                             .arg(stagedFiles.join(", "))
+                             .arg(unstagedFiles.join(", "));
+    const QString recentLog = recentMessages.join("\n");
 
     // 2. Generate Commit Message with LLM
     generateCommitMessageWithLLM(diff, status, recentLog, [this, workspacePath, callback](const QString& message) {
@@ -171,11 +176,10 @@ void GitWorkflowAgent::generateCommitMessageWithLLM(const QString& diff,
         "Return ONLY the commit message."
     ).arg(status).arg(diff).arg(recentLog);
 
-    // TODO: Connect to actual LLM provider
-    // For now, use the manager's basic generator as fallback
+    // TODO: Connect to actual LLM provider.
+    // For now, use the manager's basic generator as fallback.
     QStringList changedFiles = m_gitManager->getStagedFiles();
-    callback(m_gitManager->generateCommitMessage(changedFiles, GitAutomationManager::Feature));
+    callback(m_gitManager->generateCommitMessage(changedFiles, ::GitAutomationManager::Feature));
 }
 
 } // namespace neurx
-

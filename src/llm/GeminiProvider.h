@@ -16,11 +16,11 @@ public:
     QString     displayName()     const override { return "Google Gemini"; }
     QStringList availableModels() const override;
 
-    void sendRequest(const LLMRequest &request) override;
+    void sendRequest(const ProviderLLMRequest &request) override;
     void cancel() override;
 
 private:
-    QJsonObject buildRequestBody(const LLMRequest &request) const;
+    QJsonObject buildRequestBody(const ProviderLLMRequest &request) const;
     QJsonArray  buildContents(const QList<AgentMessage> &history) const;
     QJsonObject buildTools(const QJsonArray &tools) const;
 
@@ -31,5 +31,5 @@ private:
     QNetworkReply         *m_reply{nullptr};
 
     QByteArray  m_buffer;
-    LLMResponse m_partialResponse;
+    ProviderLLMResponse m_partialResponse;
 };

@@ -24,7 +24,7 @@ QStringList GeminiProvider::availableModels() const
     };
 }
 
-void GeminiProvider::sendRequest(const LLMRequest &request)
+void GeminiProvider::sendRequest(const ProviderLLMRequest &request)
 {
     if (m_reply) cancel();
     if (m_apiKey.trimmed().isEmpty()) {
@@ -76,7 +76,7 @@ void GeminiProvider::cancel()
     m_buffer.clear();
 }
 
-QJsonObject GeminiProvider::buildRequestBody(const LLMRequest &request) const
+QJsonObject GeminiProvider::buildRequestBody(const ProviderLLMRequest &request) const
 {
     QJsonObject body;
     body["contents"] = buildContents(request.messages);

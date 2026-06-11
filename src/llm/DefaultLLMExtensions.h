@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LLMExtensions.h"
+#include "llm/LLMExtensions.h"
 #include <QMap>
 #include <QMutex>
 
