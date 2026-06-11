@@ -1,0 +1,19 @@
+{
+  "name": "neurx-backend",
+  "version": "1.0.0",
+  "description": "NeurX LLM backend - S core with shell HTTP wrapper",
+  "main": "http_server.sh",
+  "scripts": {
+    "start": "bash http_server.sh",
+    "dev": "bash http_server.sh"
+  },
+  "keywords": [
+    "neurx",
+    "llm",
+    "backend",
+    "gpt",
+    "local"
+  ],
+  "author": "NeurX",
+  "license": "MIT"
+}
