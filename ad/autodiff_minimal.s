@@ -319,11 +319,12 @@ func mean_node(grad_graph graph, int input_id) grad_graph {
         total = total + input.data[i]
         i = i + 1
     }
+    float mean_value = total / len(input.data)
     []grad_node nodes = copy_nodes(graph.nodes)
     nodes.push(
         grad_node {
             id: len(nodes),
-            data: [total / len(input.data)],
+            data: [mean_value],
             shape: [1],
             requires_grad: input.requires_grad,
             op: "mean",
@@ -431,11 +432,13 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
     []grad_node nodes = copy_nodes(graph.nodes)
 
     []float result = []float{cap: len(lhs.data)}
+    int shape_0 = lhs.shape[0]
+    int shape_1 = rhs.shape[1]
     nodes.push(
         grad_node {
             id: len(nodes),
             data: result,
-            shape: [lhs.shape[0], rhs.shape[1]],
+            shape: [shape_0, shape_1],
             requires_grad: lhs.requires_grad || rhs.requires_grad,
             op: "matmul",
             left: left,
@@ -452,7 +455,7 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
 
 func create_dynamic_graph() grad_graph {
     grad_graph {
-        nodes: []grad_node{},
+        nodes: []grad_node{cap: 0},
     }
 }
 
