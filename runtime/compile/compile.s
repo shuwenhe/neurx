@@ -50,6 +50,42 @@ func join_strings([]string values) string {
     out
 }
 
+func get_compile_state_node(compile_state state, int index) string {
+    state.nodes[index]
+}
+
+func get_compile_state_edge(compile_state state, int index) string {
+    state.edges[index]
+}
+
+func get_compile_state_pass(compile_state state, int index) string {
+    state.passes[index]
+}
+
+func get_compile_state_cache_key(compile_state state, int index) string {
+    state.cache_keys[index]
+}
+
+func get_compile_state_tag(compile_state state, int index) string {
+    state.tags[index]
+}
+
+func get_compile_state_op(compile_state state, int index) string {
+    state.ops[index]
+}
+
+func get_compile_state_param(compile_state state, int index) string {
+    state.params[index]
+}
+
+func get_compile_state_input(compile_state state, int index) string {
+    state.inputs[index]
+}
+
+func get_compile_state_output(compile_state state, int index) string {
+    state.outputs[index]
+}
+
 func new_compile_state(string name, string backend, string mode) compile_state {
     compile_state {
         name: name,
@@ -140,7 +176,7 @@ func compile_edge_count(compile_state state) int {
 func compile_has_node(compile_state state, string node) bool {
     int i = 0
     while i < len(state.nodes) {
-        if state.nodes[i] == node {
+        if get_compile_state_node(state, i) == node {
             return true
         }
         i = i + 1
@@ -151,7 +187,7 @@ func compile_has_node(compile_state state, string node) bool {
 func compile_has_edge(compile_state state, string edge) bool {
     int i = 0
     while i < len(state.edges) {
-        if state.edges[i] == edge {
+        if get_compile_state_edge(state, i) == edge {
             return true
         }
         i = i + 1
@@ -162,7 +198,7 @@ func compile_has_edge(compile_state state, string edge) bool {
 func compile_has_pass(compile_state state, string pass) bool {
     int i = 0
     while i < len(state.passes) {
-        if state.passes[i] == pass {
+        if get_compile_state_pass(state, i) == pass {
             return true
         }
         i = i + 1
@@ -173,7 +209,7 @@ func compile_has_pass(compile_state state, string pass) bool {
 func compile_has_cache_key(compile_state state, string key) bool {
     int i = 0
     while i < len(state.cache_keys) {
-        if state.cache_keys[i] == key {
+        if get_compile_state_cache_key(state, i) == key {
             return true
         }
         i = i + 1
