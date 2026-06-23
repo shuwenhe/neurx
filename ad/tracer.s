@@ -26,6 +26,39 @@ func copy_strings([]string values) []string {
     out
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_op(tracer_state state, int index) string {
+    state.ops[index]
+}
+
+func get_param_string(tracer_state state, int index) string {
+    state.params[index]
+}
+
+func get_input(tracer_state state, int index) string {
+    state.inputs[index]
+}
+
+func get_output(tracer_state state, int index) string {
+    state.outputs[index]
+}
+
+func get_eqn(tracer_state state, int index) ir_eqn {
+    state.eqns[index]
+}
+
+func get_tag(tracer_state state, int index) string {
+    state.tags[index]
+}
+
+func get_chain_step(transform_chain chain, int index) string {
+    chain.steps[index]
+}
+
+func get_chain_param(transform_chain chain, int index) string {
+    chain.params[index]
+}
+
 func copy_eqn(ir_eqn eqn) ir_eqn {
     ir_eqn {
         primitive: eqn.primitive,
@@ -99,7 +132,7 @@ func tracer_eqn_count(tracer_state state) int {
 func tracer_has_op(tracer_state state, string op) bool {
     int i = 0
     while i < len(state.ops) {
-        if state.ops[i] == op {
+        if get_op(state, i) == op {
             return true
         }
         i = i + 1
@@ -110,7 +143,7 @@ func tracer_has_op(tracer_state state, string op) bool {
 func tracer_has_param(tracer_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
-        if state.params[i] == param {
+        if get_param_string(state, i) == param {
             return true
         }
         i = i + 1
@@ -121,7 +154,7 @@ func tracer_has_param(tracer_state state, string param) bool {
 func tracer_has_input(tracer_state state, string input) bool {
     int i = 0
     while i < len(state.inputs) {
-        if state.inputs[i] == input {
+        if get_input(state, i) == input {
             return true
         }
         i = i + 1
@@ -132,7 +165,7 @@ func tracer_has_input(tracer_state state, string input) bool {
 func tracer_has_output(tracer_state state, string output) bool {
     int i = 0
     while i < len(state.outputs) {
-        if state.outputs[i] == output {
+        if get_output(state, i) == output {
             return true
         }
         i = i + 1
@@ -143,7 +176,8 @@ func tracer_has_output(tracer_state state, string output) bool {
 func tracer_has_eqn(tracer_state state, string primitive) bool {
     int i = 0
     while i < len(state.eqns) {
-        if state.eqns[i].primitive == primitive {
+        ir_eqn eqn = get_eqn(state, i)
+        if eqn.primitive == primitive {
             return true
         }
         i = i + 1
@@ -154,7 +188,7 @@ func tracer_has_eqn(tracer_state state, string primitive) bool {
 func tracer_has_tag(tracer_state state, string tag) bool {
     int i = 0
     while i < len(state.tags) {
-        if state.tags[i] == tag {
+        if get_tag(state, i) == tag {
             return true
         }
         i = i + 1
@@ -429,15 +463,16 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
         eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
         while i < len(chain.steps) {
+            string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
-                primitive: chain.steps[i],
+                primitive: step,
                 params: copy_strings([]string{cap: 0}),
                 inputs: [],
                 outputs: [],
             }
-            if i < len(chain.params) && chain.params[i] != "" {
+            if i < len(chain.params) && get_chain_param(chain, i) != "" {
                 []string params = []string{cap: 1}
-                params[0] = chain.params[i]
+                params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }
             i = i + 1
