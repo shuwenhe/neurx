@@ -164,7 +164,7 @@ static PyObject* tensor_cuda_layernorm_device(PyObject* /*self*/, PyObject* args
     PyObject* g_capsule = nullptr;
     PyObject* b_capsule = nullptr;
     int m = 0, n = 0;
-    float eps = 1e-5f;
+    float eps = 0.00001f;
     const char* dtype_str = nullptr;
     if (!PyArg_ParseTuple(args, "OOOiifs", &a_capsule, &g_capsule, &b_capsule, &m, &n, &eps, &dtype_str)) {
         return _raise(PyExc_TypeError, "expected (capsule, gamma, beta, m, n, eps, dtype)");

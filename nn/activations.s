@@ -249,8 +249,8 @@ func log_softmax(tensor input) tensor {
     int i = 0
     while i < n {
         float v = sm.data[i]
-        if v < 1e-12 {
-            v = 1e-12
+        if v < 0.000000000001 {
+            v = 0.000000000001
         }
         out[i] = log_approx(v)
         i = i + 1
