@@ -184,8 +184,8 @@ func reasoning_trace_from_agent(agent_runtime_state state, string source) reason
                 input: state.trace.inputs[i],
                 action: state.trace.actions[i],
                 observation: state.trace.observations[i],
-                ok: state.trace.ok_flags[i],
-            },
+                ok: state.trace.ok_flags[i]
+            }
         )
         i = i + 1
     }
