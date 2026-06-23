@@ -57,7 +57,8 @@ func positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
     }
-    int result = value % modulus
+    int div_result = value / modulus
+    int result = value - div_result * modulus
     if result < 0 {
         result = result + modulus
     }
@@ -270,7 +271,8 @@ func next_batch(dataloader_state state) dataloader_step_output {
         if total <= 0 {
             next_cursor = 0
         } else if next_cursor >= total {
-            next_cursor = next_cursor % total
+            int div_result = next_cursor / total
+            next_cursor = next_cursor - div_result * total
         }
         cursor = next_cursor
         batch_index = batch_index + 1
