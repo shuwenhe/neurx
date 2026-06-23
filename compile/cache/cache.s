@@ -42,10 +42,19 @@ func make_cache_key(string module_name, string backend, string mode, bool dynami
     module_name + "|" + backend + "|" + mode + "|" + dyn + "|" + full + "|" + dbg
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_key(compile_cache_state cache, int index) string {
+    cache.keys[index]
+}
+
+func get_entry(compile_cache_state cache, int index) string {
+    cache.entries[index]
+}
+
 func cache_find_index(compile_cache_state cache, string key) int {
     int i = 0
     while i < len(cache.keys) {
-        if cache.keys[i] == key {
+        if get_key(cache, i) == key {
             return i
         }
         i = i + 1
@@ -94,7 +103,7 @@ func cache_entry(compile_cache_state cache, string key) string {
     if idx < 0 {
         return ""
     }
-    cache.entries[idx]
+    get_entry(cache, idx)
 }
 
 func compile_cache_state_dict(compile_cache_state cache) compile_cache_state {

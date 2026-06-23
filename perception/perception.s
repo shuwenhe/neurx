@@ -22,6 +22,15 @@ func new_agent_perception_result(string kind, string content, string source) age
     }
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_key(agent_perception_result result, int index) string {
+    result.keys[index]
+}
+
+func get_value(agent_perception_result result, int index) string {
+    result.values[index]
+}
+
 func agent_perception_starts_with(string text, string prefix) bool {
     int tl = len(text)
     int pl = len(prefix)
@@ -129,8 +138,8 @@ func agent_perceive(string raw, string source) agent_perception_result {
 func agent_perception_get_field(agent_perception_result result, string key) string {
     int i = 0
     while i < result.field_count {
-        if result.keys[i] == key {
-            return result.values[i]
+        if get_key(result, i) == key {
+            return get_value(result, i)
         }
         i = i + 1
     }
