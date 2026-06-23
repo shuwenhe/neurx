@@ -50,7 +50,7 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
         max_blocks,
         prefix_cache.max_entries,
         prefix_cache.max_tokens,
-        admission.policy,
+        admission.policy
     )
     vllm = vllm_runtime_enqueue_request(vllm, request_id, input_tokens, max_new_tokens, accepted)
 
@@ -116,7 +116,7 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         state.response,
         next_decode.step,
         next_decode.finished,
-        200,
+        200
     )
     infer_pipeline_state {
         request: state.request,
@@ -128,7 +128,7 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         admission: next_admission,
         vllm: next_vllm,
         eval: state.eval,
-        model_weights: state.model_weights,
+        model_weights: state.model_weights
     }
 }
 
@@ -175,7 +175,7 @@ func infer_pipeline_sample_logits(infer_pipeline_state state, tensor logits, ten
         sample.temperature,
         sample.top_k,
         sample.top_p,
-        sample.repetition_penalty,
+        sample.repetition_penalty
     )
 }
 
@@ -207,7 +207,7 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
                 scheduled_sample.temperature,
                 scheduled_sample.top_k,
                 scheduled_sample.top_p,
-                scheduled_sample.repetition_penalty,
+                scheduled_sample.repetition_penalty
             )
             return infer_pipeline_step(scheduled_state, next_token_id)
         }
@@ -220,7 +220,7 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
         sample.temperature,
         sample.top_k,
         sample.top_p,
-        sample.repetition_penalty,
+        sample.repetition_penalty
     )
     infer_pipeline_step(state, next_token_id)
 }

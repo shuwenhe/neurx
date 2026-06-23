@@ -69,11 +69,21 @@ func copy_subset(subset_state state) subset_state {
     }
 }
 
+func get_dataset(concat_dataset_state state, int index) dataset_state {
+    state.datasets[index]
+}
+
+func get_cumulative_size(concat_dataset_state state, int index) int {
+    state.cumulative_sizes[index]
+}
+
 func copy_concat(concat_dataset_state state) concat_dataset_state {
     []dataset_state datasets = []dataset_state{cap: len(state.datasets)}
     int i = 0
-    while i < len(state.datasets) {
-        datasets[i] = copy_dataset(state.datasets[i])
+    int datasets_len = len(state.datasets)
+    while i < datasets_len {
+        dataset_state ds = get_dataset(state, i)
+        datasets[i] = copy_dataset(ds)
         i = i + 1
     }
     concat_dataset_state {
