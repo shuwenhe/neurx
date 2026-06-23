@@ -65,6 +65,35 @@ func copy_strings([]string values) []string {
     out
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_primitive(ir_graph graph, int index) string {
+    graph.primitives[index]
+}
+
+func get_param(ir_graph graph, int index) string {
+    graph.params[index]
+}
+
+func get_eqn(ir_graph graph, int index) ir_eqn {
+    graph.eqns[index]
+}
+
+func get_eqn_input(ir_eqn eqn, int index) string {
+    eqn.inputs[index]
+}
+
+func get_eqn_param(ir_eqn eqn, int index) string {
+    eqn.params[index]
+}
+
+func get_chain_step(transform_chain chain, int index) string {
+    chain.steps[index]
+}
+
+func get_chain_param(transform_chain chain, int index) string {
+    chain.params[index]
+}
+
 func copy_eqn(ir_eqn eqn) ir_eqn {
     ir_eqn {
         primitive: eqn.primitive,
@@ -138,7 +167,7 @@ func ir_output_count(ir_graph graph) int {
 func ir_has_primitive(ir_graph graph, string primitive) bool {
     int i = 0
     while i < len(graph.primitives) {
-        if graph.primitives[i] == primitive {
+        if get_primitive(graph, i) == primitive {
             return true
         }
         i = i + 1
@@ -298,15 +327,16 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
         eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
         while i < len(chain.steps) {
+            string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
-                primitive: chain.steps[i],
+                primitive: step,
                 params: []string{cap: 0},
                 inputs: [],
                 outputs: [],
             }
-            if i < len(chain.params) && chain.params[i] != "" {
+            if i < len(chain.params) && get_chain_param(chain, i) != "" {
                 []string params = []string{cap: 1}
-                params[0] = chain.params[i]
+                params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }
             i = i + 1
@@ -355,12 +385,12 @@ func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
     while i < len(graph.eqns) {
-        ir_eqn eqn = graph.eqns[i]
-        if eqn.primitive == "add" && len(eqn.inputs) > 1 && eqn.inputs[0] == eqn.inputs[1] {
+        ir_eqn eqn = get_eqn(graph, i)
+        if eqn.primitive == "add" && len(eqn.inputs) > 1 && get_eqn_input(eqn, 0) == get_eqn_input(eqn, 1) {
             []string params = []string{cap: 1}
             params[0] = "2.0"
             []string inputs = []string{cap: 1}
-            inputs[0] = eqn.inputs[0]
+            inputs[0] = get_eqn_input(eqn, 0)
             optimized_eqns.push(ir_eqn {
                 primitive: "mul",
                 params: params,
@@ -394,7 +424,8 @@ func compile_jaxpr(ir_graph graph) string {
     string compiled_code = ""
     int i = 0
     while i < len(graph.eqns) {
-        compiled_code = compiled_code + graph.eqns[i].primitive + "\n"
+        ir_eqn eqn = get_eqn(graph, i)
+        compiled_code = compiled_code + eqn.primitive + "\n"
         i = i + 1
     }
     compiled_code
@@ -403,12 +434,15 @@ func compile_jaxpr(ir_graph graph) string {
 func synchronize_gradients([]ir_eqn eqns, int num_workers) []ir_eqn {
     int i = 0
     while i < len(eqns) {
-        if eqns[i].primitive == "grad" {
+        ir_eqn eqn = eqns[i]
+        if eqn.primitive == "grad" {
             int j = 0
-            while j < len(eqns[i].params) {
-                eqns[i].params[j] = eqns[i].params[j] + "|sync"
+            while j < len(eqn.params) {
+                string param_val = get_eqn_param(eqn, j)
+                eqn.params[j] = param_val + "|sync"
                 j = j + 1
             }
+            eqns[i] = eqn
         }
         i = i + 1
     }
