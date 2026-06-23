@@ -96,17 +96,7 @@ func serving_runtime_effective_capacity(int max_active_requests, int batch_capac
     effective_capacity
 }
 
-func new_serving_runtime_config(
-    int max_active_requests,
-    int max_prefill_tokens,
-    int batch_capacity,
-    int layer_count,
-    int page_size,
-    int max_pages,
-    int max_prefix_entries,
-    int max_prefix_tokens,
-    string policy
-) serving_runtime_config {
+func new_serving_runtime_config(int max_active_requests, int max_prefill_tokens, int batch_capacity, int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string policy) serving_runtime_config {
     int normalized_active_requests = max_active_requests
     if normalized_active_requests <= 0 {
         normalized_active_requests = 1
@@ -148,42 +138,11 @@ func new_serving_runtime_config(
     }
 }
 
-func new_serving_runtime_state(
-    int max_active_requests,
-    int max_prefill_tokens,
-    int batch_capacity,
-    int layer_count,
-    int page_size,
-    int max_pages,
-    int max_prefix_entries,
-    int max_prefix_tokens,
-    string policy
-) serving_runtime_state {
-    serving_runtime_config config = new_serving_runtime_config(
-        max_active_requests,
-        max_prefill_tokens,
-        batch_capacity,
-        layer_count,
-        page_size,
-        max_pages,
-        max_prefix_entries,
-        max_prefix_tokens,
-        policy,
-    )
-    admission_control_state admission = new_admission_control_state_with_policy(
-        config.max_active_requests,
-        config.max_prefill_tokens,
-        config.policy,
-    )
+func new_serving_runtime_state(int max_active_requests, int max_prefill_tokens, int batch_capacity, int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string policy) serving_runtime_state {
+    serving_runtime_config config = new_serving_runtime_config(max_active_requests, max_prefill_tokens, batch_capacity, layer_count, page_size, max_pages, max_prefix_entries, max_prefix_tokens, policy)
+    admission_control_state admission = new_admission_control_state_with_policy(config.max_active_requests, config.max_prefill_tokens, config.policy)
     continuous_batch_state batch = new_continuous_batch_state(config.batch_capacity)
-    vllm_runtime_state vllm = new_vllm_runtime_state(
-        config.layer_count,
-        config.page_size,
-        config.max_pages,
-        config.max_prefix_entries,
-        config.max_prefix_tokens,
-        admission.policy,
-    )
+    vllm_runtime_state vllm = new_vllm_runtime_state(config.layer_count, config.page_size, config.max_pages, config.max_prefix_entries, config.max_prefix_tokens, admission.policy)
 
     serving_runtime_state {
         config: config,
@@ -197,12 +156,7 @@ func new_serving_runtime_state(
     }
 }
 
-func serving_runtime_submit_request(
-    serving_runtime_state state,
-    string request_id,
-    int prefill_tokens,
-    int remaining_tokens
-) serving_runtime_state {
+func serving_runtime_submit_request(serving_runtime_state state, string request_id, int prefill_tokens, int remaining_tokens) serving_runtime_state {
     int normalized_prefill = prefill_tokens
     if normalized_prefill < 0 {
         normalized_prefill = 0
@@ -212,30 +166,14 @@ func serving_runtime_submit_request(
         normalized_remaining = 0
     }
 
-    bool accepted = admission_can_enqueue_with_remaining(
-        state.admission,
-        state.batch.active_requests,
-        normalized_prefill,
-        normalized_remaining,
-    )
+    bool accepted = admission_can_enqueue_with_remaining(state.admission, state.batch.active_requests, normalized_prefill, normalized_remaining)
 
-    admission_control_state next_admission = admission_on_enqueue_with_remaining(
-        state.admission,
-        normalized_prefill,
-        normalized_remaining,
-        accepted,
-    )
+    admission_control_state next_admission = admission_on_enqueue_with_remaining(state.admission, normalized_prefill, normalized_remaining, accepted)
     continuous_batch_state next_batch = state.batch
     if accepted {
         next_batch = continuous_batch_enqueue_request(next_batch, normalized_prefill)
     }
-    vllm_runtime_state next_vllm = vllm_runtime_enqueue_request(
-        state.vllm,
-        request_id,
-        normalized_prefill,
-        normalized_remaining,
-        accepted,
-    )
+    vllm_runtime_state next_vllm = vllm_runtime_enqueue_request(state.vllm, request_id, normalized_prefill, normalized_remaining, accepted)
 
     int next_accepted = state.accepted_requests
     int next_rejected = state.rejected_requests

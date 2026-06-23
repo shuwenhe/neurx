@@ -66,7 +66,9 @@ func has_suffix(string value, string suffix) bool {
 func last_path_separator_index(string path) int {
     int i = len(path) - 1
     while i >= 0 {
-        if path[i] == "/" {
+        // '/' ASCII code is 47
+        int ch = int(string(path[i]))
+        if ch == 47 {
             return i
         }
         i = i - 1
@@ -79,7 +81,7 @@ func path_dirname(string path) string {
     if idx < 0 {
         return ""
     }
-    path[0:idx]
+    neurx.strings.substring(path, 0, idx)
 }
 
 func path_basename(string path) string {
@@ -87,22 +89,23 @@ func path_basename(string path) string {
     if idx < 0 {
         return path
     }
-    path[idx + 1:len(path)]
+    neurx.strings.substring(path, idx + 1, len(path))
 }
 
 func path_join(string left, string right) string {
     string base = trim(left)
     string tail = trim(right)
-    if base == "" {
+    if neurx.strings.strings_eq(base, "") {
         return tail
     }
-    if tail == "" {
+    if neurx.strings.strings_eq(tail, "") {
         return base
     }
-    if has_suffix(base, "/") {
-        return base + tail
+    bool suffix_check = has_suffix(base, "/")
+    if suffix_check {
+        return neurx.strings.concat2(base, tail)
     }
-    base + "/" + tail
+    neurx.strings.concat3(base, "/", tail)
 }
 
 func strip_checkpoint_file_tail(string path) string {
@@ -140,7 +143,7 @@ func resolve_checkpoint_path(string path) string {
     }
 
     while has_suffix(target, "/") {
-        target = target[0:len(target) - 1]
+        target = neurx.strings.substring(target, 0, len(target) - 1)
     }
 
     if runtime_file_exists(target) {
@@ -191,14 +194,16 @@ func split_lines(string text) []string {
     int i = 0
     while i < n {
         string ch = text[i]
-        if ch == "\n" {
+        int chi = int(string(ch))
+        // '\n' ASCII is 10, '\r' ASCII is 13
+        if chi == 10 {
             string cleaned = trim(current)
             if cleaned != "" {
                 lines.push(cleaned)
             }
             current = ""
-        } else if ch != "\r" {
-            current = current + ch
+        } else if chi != 13 {
+            current = neurx.strings.concat2(current, ch)
         }
         i = i + 1
     }
@@ -216,11 +221,13 @@ func csv_tokens(string text) []string {
     int i = 0
     while i < n {
         string ch = text[i]
-        if ch == "," {
+        int chi = int(string(ch))
+        // ',' ASCII is 44
+        if chi == 44 {
             tokens.push(trim(current))
             current = ""
         } else {
-            current = current + ch
+            current = neurx.strings.concat2(current, ch)
         }
         i = i + 1
     }
@@ -286,28 +293,59 @@ func parse_float_list(string value) []float {
 
 func parse_bool_flag(string value) bool {
     string v = lower(trim(value))
-    v == "1" || v == "true" || v == "yes" || v == "on"
+    bool r1 = neurx.strings.strings_eq(v, "1")
+    bool r2 = neurx.strings.strings_eq(v, "true")
+    bool r3 = neurx.strings.strings_eq(v, "yes")
+    bool r4 = neurx.strings.strings_eq(v, "on")
+    r1 || r2 || r3 || r4
 }
 
 func tensor_to_checkpoint_lines(int index, tensor value) []string {
     []string lines = []string{cap: 0}
-    lines.push("param" + string(index) + ".requires_grad=" + string(value.requires_grad))
-    lines.push("param" + string(index) + ".shape=" + join_ints(value.shape))
-    lines.push("param" + string(index) + ".data=" + join_floats(value.data))
+    string idx_str = string(index)
+    string line1 = neurx.strings.concat5("param", idx_str, ".requires_grad=", string(value.requires_grad), "")
+    string line2 = neurx.strings.concat5("param", idx_str, ".shape=", join_ints(value.shape), "")
+    string line3 = neurx.strings.concat5("param", idx_str, ".data=", join_floats(value.data), "")
+    lines.push(line1)
+    lines.push(line2)
+    lines.push(line3)
     lines
+}
+
+func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string {
+    // Workaround for S compiler array indexing limitation
+    []float empty_data = []float{cap: 0}
+    []int empty_shape = []int{cap: 0}
+    tensor t = new(empty_data, empty_shape, false)
+    if index < len(params) {
+        // Use a helper approach - iterate to find the element
+        int k = 0
+        while k < len(params) {
+            if k == index {
+                t = params[k]
+                k = len(params)  // break
+            }
+            k = k + 1
+        }
+    }
+    tensor_to_checkpoint_lines(index, t)
 }
 
 func checkpoint_to_text(checkpoint state) string {
     string out = "checkpoint_v1\n"
-    out = out + "step=" + string(state.step) + "\n"
-    out = out + "loss=" + string(state.loss) + "\n"
-    out = out + "param_count=" + string(len(state.params)) + "\n"
+    string step_line = neurx.strings.concat4("step=", string(state.step), "\n", "")
+    string loss_line = neurx.strings.concat4("loss=", string(state.loss), "\n", "")
+    string count_line = neurx.strings.concat4("param_count=", string(len(state.params)), "\n", "")
+    out = neurx.strings.concat2(out, step_line)
+    out = neurx.strings.concat2(out, loss_line)
+    out = neurx.strings.concat2(out, count_line)
     int i = 0
     while i < len(state.params) {
-        []string lines = tensor_to_checkpoint_lines(i, state.params[i])
+        []string lines = tensor_to_checkpoint_lines_from_params(state.params, i)
         int j = 0
         while j < len(lines) {
-            out = out + lines[j] + "\n"
+            string line_j = neurx.string_at(lines, j)
+            out = neurx.strings.concat3(out, line_j, "\n")
             j = j + 1
         }
         i = i + 1
@@ -330,11 +368,11 @@ func parse_checkpoint_lines([]string lines) checkpoint {
     while i < len(lines) {
         string line = lines[i]
         if has_prefix(line, "step=") {
-            step = int(line[len("step="):])
+            step = int(neurx.strings.substring(line, len("step="), len(line)))
         } else if has_prefix(line, "loss=") {
-            loss = float(line[len("loss="):])
+            loss = float(neurx.strings.substring(line, len("loss="), len(line)))
         } else if has_prefix(line, "param_count=") {
-            param_count = int(line[len("param_count="):])
+            param_count = int(neurx.strings.substring(line, len("param_count="), len(line)))
         }
         i = i + 1
     }
@@ -347,29 +385,31 @@ func parse_checkpoint_lines([]string lines) checkpoint {
             int eq_pos = -1
             int j = 0
             while j < len(line) {
-                if line[j] == "=" {
+                // '=' ASCII is 61
+                if int(string(line[j])) == 61 {
                     eq_pos = j
                     j = len(line)
                 }
                 j = j + 1
             }
             if eq_pos >= 0 {
-                string head = line[0:eq_pos]
-                string flag = line[eq_pos + 1:len(line)]
+                string head = neurx.strings.substring(line, 0, eq_pos)
+                string flag = neurx.strings.substring(line, eq_pos + 1, len(line))
                 int dot_pos = -1
                 j = 0
                 while j < len(head) {
-                    if head[j] == "." {
+                    // '.' ASCII is 46
+                    if int(string(head[j])) == 46 {
                         dot_pos = j
                         j = len(head)
                     }
                     j = j + 1
                 }
                 if dot_pos > len("param") {
-                    string idx_text = head[len("param"):dot_pos]
+                    string idx_text = neurx.strings.substring(head, len("param"), dot_pos)
                     int idx = int(idx_text)
-                    string shape_key = "param" + string(idx) + ".shape="
-                    string data_key = "param" + string(idx) + ".data="
+                    string shape_key = neurx.strings.concat4("param", string(idx), ".shape=", "")
+                    string data_key = neurx.strings.concat4("param", string(idx), ".data=", "")
                     bool requires_grad = parse_bool_flag(flag)
                     []int shape = []int{cap: 0}
                     []float data = []float{cap: 0}
@@ -378,10 +418,10 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                     while k < len(lines) {
                         string candidate = lines[k]
                         if has_prefix(candidate, shape_key) {
-                            shape = parse_int_list(candidate[len(shape_key):len(candidate)])
+                            shape = parse_int_list(neurx.strings.substring(candidate, len(shape_key), len(candidate)))
                         }
                         if has_prefix(candidate, data_key) {
-                            data = parse_float_list(candidate[len(data_key):len(candidate)])
+                            data = parse_float_list(neurx.strings.substring(candidate, len(data_key), len(candidate)))
                         }
                         k = k + 1
                     }
@@ -462,16 +502,16 @@ func normalize_checkpoint_path(string path) string {
         target = "latest"
     }
     while has_suffix(target, "/") {
-        target = target[0:len(target) - 1]
+        target = neurx.strings.substring(target, 0, len(target) - 1)
     }
     if has_prefix(target, "/") {
         return target
     }
     if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
-        target = "artifacts/checkpoints/" + target
+        target = neurx.strings.concat2("artifacts/checkpoints/", target)
     }
     if !has_suffix(target, ".neurx") && !has_suffix(target, ".txt") && !has_suffix(path_basename(target), "latest") {
-        target = target + ".neurx"
+        target = neurx.strings.concat2(target, ".neurx")
     }
     target
 }

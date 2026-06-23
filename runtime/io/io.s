@@ -21,18 +21,19 @@ func runtime_shell_escape(string value) string {
     int i = 0
     while i < len(value) {
         string ch = string(value[i])
-        if ch == "'" {
-            out = out + "'\"'\"'"
+        // '\'' ASCII is 39
+        if int(ch) == 39 {
+            out = neurx.strings.concat2(out, "'\"'\"'")
         } else {
-            out = out + ch
+            out = neurx.strings.concat2(out, ch)
         }
         i = i + 1
     }
-    out + "'"
+    neurx.strings.concat2(out, "'")
 }
 
 func runtime_read_text_file(string path) string {
-    result[string, std.fs.fs_error] out = fs_read_to_string(path)
+    var out = fs_read_to_string(path)
     if out.is_ok() {
         return out.unwrap()
     }
@@ -115,11 +116,11 @@ func runtime_run_command(string command) runtime_command_result {
         }
     }
 
-    vec[string] argv = vec[string]()
-    argv.push("sh")
-    argv.push("-c")
-    argv.push(cmd)
-    result[(), std.process.process_error] out = run_process(argv)
+    []string argv = []string{cap: 3}
+    argv[0] = "sh"
+    argv[1] = "-c"
+    argv[2] = cmd
+    var out = run_process(argv)
     if out.is_ok() {
         return runtime_command_result {
             ok: true,
@@ -139,11 +140,11 @@ func runtime_run_command_output(string command) string {
     if cmd == "" {
         return ""
     }
-    vec[string] argv = vec[string]()
-    argv.push("sh")
-    argv.push("-c")
-    argv.push(cmd)
-    result[string, std.process.process_error] out = run_process_output(argv)
+    []string argv = []string{cap: 3}
+    argv[0] = "sh"
+    argv[1] = "-c"
+    argv[2] = cmd
+    var out = run_process_output(argv)
     if out.is_ok() {
         return out.unwrap()
     }

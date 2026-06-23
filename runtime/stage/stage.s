@@ -98,7 +98,7 @@ func stage_param_count(stage_state state) int {
 func stage_has_stage(stage_state state, string value) bool {
     int i = 0
     while i < len(state.stages) {
-        if state.stages[i] == value {
+        if neurx.strings.strings_eq(state.stages[i], value) {
             return true
         }
         i = i + 1
@@ -109,7 +109,7 @@ func stage_has_stage(stage_state state, string value) bool {
 func stage_has_param(stage_state state, string value) bool {
     int i = 0
     while i < len(state.params) {
-        if state.params[i] == value {
+        if neurx.strings.strings_eq(state.params[i], value) {
             return true
         }
         i = i + 1
@@ -320,7 +320,7 @@ func stage_control_param_count(stage_state state) int {
 func stage_has_control_branch(stage_state state, string branch) bool {
     int i = 0
     while i < len(state.control_branches) {
-        if state.control_branches[i] == branch {
+        if neurx.strings.strings_eq(state.control_branches[i], branch) {
             return true
         }
         i = i + 1
@@ -331,7 +331,7 @@ func stage_has_control_branch(stage_state state, string branch) bool {
 func stage_has_control_param(stage_state state, string param) bool {
     int i = 0
     while i < len(state.control_params) {
-        if state.control_params[i] == param {
+        if neurx.strings.strings_eq(state.control_params[i], param) {
             return true
         }
         i = i + 1
@@ -650,10 +650,7 @@ func stage_to_transform_chain(stage_state state) transform_chain {
     transform_chain chain = neurx.ad.function.new_transform_chain()
     int i = 0
     while i < len(state.stages) {
-        string param = ""
-        if i < len(state.params) {
-            param = state.params[i]
-        }
+        string param = neurx.strings.string_at(state.params, i)
         if param != "" {
             chain = neurx.ad.function.transform_chain_add_step_with_param(chain, state.stages[i], param)
         } else {
@@ -664,11 +661,8 @@ func stage_to_transform_chain(stage_state state) transform_chain {
     if state.control_enabled || state.control_cond_enabled || state.control_loop_enabled || state.control_scan_enabled || len(state.control_branches) > 0 || len(state.control_params) > 0 {
         int j = 0
         while j < len(state.control_branches) {
-            string branch = state.control_branches[j]
-            string param = ""
-            if j < len(state.control_params) {
-                param = state.control_params[j]
-            }
+            string branch = neurx.strings.string_at(state.control_branches, j)
+            string param = neurx.strings.string_at(state.control_params, j)
             if param != "" {
                 chain = neurx.ad.function.transform_chain_add_step_with_param(chain, branch, param)
             } else {
@@ -678,7 +672,7 @@ func stage_to_transform_chain(stage_state state) transform_chain {
         }
         int k = len(state.control_branches)
         while k < len(state.control_params) {
-            chain = neurx.ad.function.transform_chain_add_step_with_param(chain, "control_param", state.control_params[k])
+            chain = neurx.ad.function.transform_chain_add_step_with_param(chain, "control_param", neurx.strings.string_at(state.control_params, k))
             k = k + 1
         }
     }
