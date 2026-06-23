@@ -10,7 +10,7 @@ struct robotics_perception_state {
     bool trained
 }
 
-func copy_float([]float values) []float {
+func robotics_perception_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
@@ -21,7 +21,7 @@ func copy_float([]float values) []float {
     out
 }
 
-func copy_int([]int values) []int {
+func robotics_perception_copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
@@ -32,7 +32,7 @@ func copy_int([]int values) []int {
     out
 }
 
-func ramp_values(int n, float scale) []float {
+func robotics_perception_ramp_values(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
     while i < n {
@@ -48,7 +48,7 @@ func new_robotics_perception_state(string perception_name, int obs_dim, int late
         perception_name: perception_name,
         obs_dim: obs_dim,
         latent_dim: latent_dim,
-        weight: ramp_values(weight_count, 0.01),
+        weight: robotics_perception_ramp_values(weight_count, 0.01),
         bias: []float{cap: latent_dim},
         normalized: false,
         trained: false,
@@ -60,8 +60,8 @@ func robotics_perception_state_dict(robotics_perception_state state) robotics_pe
         perception_name: state.perception_name,
         obs_dim: state.obs_dim,
         latent_dim: state.latent_dim,
-        weight: copy_float(state.weight),
-        bias: copy_float(state.bias),
+        weight: robotics_perception_copy_float(state.weight),
+        bias: robotics_perception_copy_float(state.bias),
         normalized: state.normalized,
         trained: state.trained,
     }
@@ -72,8 +72,8 @@ func robotics_perception_load_state_dict(robotics_perception_state state, roboti
         perception_name: other.perception_name,
         obs_dim: other.obs_dim,
         latent_dim: other.latent_dim,
-        weight: copy_float(other.weight),
-        bias: copy_float(other.bias),
+        weight: robotics_perception_copy_float(other.weight),
+        bias: robotics_perception_copy_float(other.bias),
         normalized: other.normalized,
         trained: other.trained,
     }
@@ -105,10 +105,9 @@ func robotics_perception_mark_normalized(robotics_perception_state state) roboti
         perception_name: state.perception_name,
         obs_dim: state.obs_dim,
         latent_dim: state.latent_dim,
-        weight: copy_float(state.weight),
-        bias: copy_float(state.bias),
+        weight: robotics_perception_copy_float(state.weight),
+        bias: robotics_perception_copy_float(state.bias),
         normalized: true,
         trained: state.trained,
     }
 }
-

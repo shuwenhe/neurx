@@ -60,7 +60,7 @@ func robotics_training_corpus() []int {
     []int token_ids = []int{cap: 16}
     int i = 0
     while i < 16 {
-        token_ids[i] = i % 8
+        token_ids[i] = i - (i / 8) * 8
         i = i + 1
     }
     token_ids

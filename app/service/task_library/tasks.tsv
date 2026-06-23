@@ -1,8 +1,0 @@
-sum_series|cpp,python,javascript,go|extract_sum_upper_bound|by_language|90|local-synth
-even_odd|cpp,python,javascript,go|偶数,even,奇数,odd,奇偶|by_language|80|local-synth
-array_sum|cpp,python|数组求和,sum array,array sum,列表求和|by_language|70|local-synth
-reverse_string|cpp,python,javascript,go|字符串反转,reverse string|by_language|70|local-synth
-fibonacci|cpp,python|斐波那契,fibonacci|by_language|70|local-synth
-prime_check|cpp,python|质数,prime|by_language|70|local-synth
-max_value|cpp,python|最大值,max value,maximum|by_language|60|local-synth
-factorial_function|cpp,python|函数,阶乘|by_language|60|local-synth
