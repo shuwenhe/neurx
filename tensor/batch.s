@@ -1,7 +1,10 @@
 package neurx.tensor.batch
+use neurx.strings
 
 use neurx.ad.function
+use neurx.strings
 use neurx.tensor.tensor
+use neurx.strings
 
 struct batch_state {
     string name
@@ -10,16 +13,6 @@ struct batch_state {
     int batch_dim
     []string primitives
     []string params
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func join_strings([]string values) string {

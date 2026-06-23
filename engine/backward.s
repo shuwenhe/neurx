@@ -1,9 +1,14 @@
 package neurx.engine
+use neurx.strings
 
 use neurx.ad.ir
+use neurx.strings
 use neurx.ad.tracer
+use neurx.strings
 use neurx.tensor.autograd
+use neurx.strings
 use neurx.tensor.tensor
+use neurx.strings
 
 struct backward_state {
     string name
@@ -16,16 +21,6 @@ struct backward_state {
     []string outputs
     []string tags
     []float upstream
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_float([]float values) []float {
