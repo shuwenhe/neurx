@@ -32,6 +32,12 @@ struct adamw_optimizer {
     []float v
 }
 
+struct adamw_step_output {
+    adamw_optimizer optimizer
+    tensor params
+    float grad_norm
+}
+
 struct rmsprop_optimizer {
     float lr
     float alpha
@@ -194,6 +200,90 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tens
         i = i + 1
     }
     new(out, params.shape, params.requires_grad)
+}
+
+func tensor_l2_norm(tensor value) float {
+    float total_sq = 0.0
+    int i = 0
+    while i < len(value.data) {
+        float v = value.data[i]
+        total_sq = total_sq + v * v
+        i = i + 1
+    }
+    if total_sq <= 0.0 {
+        return 0.0
+    }
+    1.0 / inv_sqrt(total_sq + 1e-12)
+}
+
+func scale_tensor(tensor value, float scale) tensor {
+    int n = len(value.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = value.data[i] * scale
+        i = i + 1
+    }
+    new(out, value.shape, value.requires_grad)
+}
+
+func clip_grad_tensor(tensor grads, float max_norm, float eps) tensor {
+    if max_norm <= 0.0 {
+        return grads
+    }
+    float norm = tensor_l2_norm(grads)
+    if norm <= max_norm || norm <= 0.0 {
+        return grads
+    }
+    float scale = max_norm / (norm + eps)
+    scale_tensor(grads, scale)
+}
+
+func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) adamw_step_output {
+    int n = len(params.data)
+    []float m = ensure_size(optimizer.m, n)
+    []float v = ensure_size(optimizer.v, n)
+    []float out = []float{cap: n}
+
+    int step = optimizer.step + 1
+    float beta1_pow = optimizer.beta1_pow * optimizer.beta1
+    float beta2_pow = optimizer.beta2_pow * optimizer.beta2
+    float bias_c1 = 1.0 - beta1_pow
+    float bias_c2 = 1.0 - beta2_pow
+    if bias_c1 <= 0.0 {
+        bias_c1 = 1.0
+    }
+    if bias_c2 <= 0.0 {
+        bias_c2 = 1.0
+    }
+
+    int i = 0
+    while i < n {
+        float g = grads.data[i] + optimizer.weight_decay * params.data[i]
+        m[i] = optimizer.beta1 * m[i] + (1.0 - optimizer.beta1) * g
+        v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
+        float m_hat = m[i] / bias_c1
+        float v_hat = v[i] / bias_c2
+        out[i] = params.data[i] - optimizer.lr * m_hat * inv_sqrt(v_hat + optimizer.eps)
+        i = i + 1
+    }
+
+    adamw_step_output {
+        optimizer: adamw_optimizer {
+            lr: optimizer.lr,
+            beta1: optimizer.beta1,
+            beta2: optimizer.beta2,
+            eps: optimizer.eps,
+            weight_decay: optimizer.weight_decay,
+            step: step,
+            beta1_pow: beta1_pow,
+            beta2_pow: beta2_pow,
+            m: m,
+            v: v,
+        },
+        params: new(out, params.shape, params.requires_grad),
+        grad_norm: tensor_l2_norm(grads),
+    }
 }
 
 func clip_grad_norm([]tensor params, float max_norm, float eps) float {
