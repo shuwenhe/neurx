@@ -1,6 +1,8 @@
 package neurx.runtime.compile
+use neurx.strings
 
 use neurx.runtime.stage
+use neurx.strings
 
 struct compile_state {
     string name
@@ -25,16 +27,6 @@ struct compile_state {
     []string passes
     []string cache_keys
     []string tags
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func join_strings([]string values) string {

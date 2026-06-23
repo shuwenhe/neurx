@@ -1,20 +1,11 @@
 package neurx.compile.cache
+use neurx.strings
 
 struct compile_cache_state {
     []string keys
     []string entries
     int hit_count
     int miss_count
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func new_compile_cache_state() compile_cache_state {

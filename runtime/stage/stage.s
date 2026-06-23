@@ -1,7 +1,10 @@
 package neurx.runtime.stage
+use neurx.strings
 
 use neurx.runtime.control
+use neurx.strings
 use neurx.ad.function
+use neurx.strings
 
 struct stage_state {
     string name
@@ -20,16 +23,6 @@ struct stage_state {
     int control_iterations
     []string control_branches
     []string control_params
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func join_strings([]string values) string {
