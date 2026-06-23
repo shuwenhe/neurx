@@ -1,10 +1,14 @@
 # Sample pretrain config for workflows/llm/pretrain
+dataset_manifest: "data/pretrain/mini_manifest.json"
+output_dir: "artifacts/checkpoints/run_20260518_001"
 micro_batch_size: 8
 seq_len: 16
 max_steps: 64
 lr: 0.00015
+min_lr: 0.00003
 warmup_steps: 128
+weight_decay: 0.1
+log_interval: 8
+backend: "cuda"
 save_interval: 32
 eval_interval: 16
-dataset_manifest: "data/pretrain/mini_manifest.json"
-output_dir: "artifacts/checkpoints/run_20260518_001"

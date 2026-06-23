@@ -186,6 +186,17 @@ func bpe_merge_token(bpe_tokenizer_state tokenizer, int index) string {
     tokenizer.merge_tokens[index]
 }
 
+func bpe_has_merge_token(bpe_tokenizer_state tokenizer, string token) bool {
+    int i = 0
+    while i < len(tokenizer.merge_tokens) {
+        if neurx.strings.strings_eq(bpe_merge_token(tokenizer, i), token) {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
 func bpe_tokenize_text(string text, bpe_tokenizer_state tokenizer) []string {
     []string tokens = tokenize_chars(text)
     int i = 0
@@ -288,10 +299,7 @@ func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequ
         if best_count < min_pair_frequency || best_left == "" {
             break
         }
-        string merged = best_left + best_right
-        if has_string(tokenizer.merge_tokens, merged) {
-            break
-        }
+        string merged = token_pair_key(best_left, best_right)
         tokenizer.merge_lefts.push(best_left)
         tokenizer.merge_rights.push(best_right)
         tokenizer.merge_tokens.push(merged)
