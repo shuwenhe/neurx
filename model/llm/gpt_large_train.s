@@ -326,9 +326,11 @@ func new_gpt_large_training_state([]string documents, gpt_large_training_config 
         dropout: model.dropout,
     }
     transformer backbone = transformer_init(backbone_config)
-    tensor token_embedding = ramp_tensor([model.vocab_size, model.hidden_size], 0.01)
-    tensor lm_head_weight = ramp_tensor([model.hidden_size, model.vocab_size], 0.005)
-    tensor lm_head_bias = zero_tensor([model.vocab_size])
+    int vocab_size = model.vocab_size
+    int hidden_size = model.hidden_size
+    tensor token_embedding = ramp_tensor([vocab_size, hidden_size], 0.01)
+    tensor lm_head_weight = ramp_tensor([hidden_size, vocab_size], 0.005)
+    tensor lm_head_bias = zero_tensor([vocab_size])
     dataloader_state loader = new_state(token_ids, config.batch_size, config.seq_len)
     gpt_large_training_state {
         model: model,
@@ -465,8 +467,10 @@ func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_
     }
 
     dataloader_step_output batch_output = next_batch(loader)
-    tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, [len(batch_output.batch.input_ids)])
-    tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, [len(batch_output.batch.target_ids)])
+    int shape_input = len(batch_output.batch.input_ids)
+    tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, [shape_input])
+    int shape_target = len(batch_output.batch.target_ids)
+    tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, [shape_target])
     tensor hidden = embedding_lookup(state.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.backbone, hidden)
     tensor logits = ops.lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
@@ -475,7 +479,7 @@ func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_
     if len(loss_tensor.data) > 0 {
         loss_value = loss_tensor.data[0]
     }
-    gpt_large_training_update(
+    return gpt_large_training_update(
         gpt_large_training_state {
             model: state.model,
             backbone: state.backbone,
@@ -497,7 +501,7 @@ func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_
         logits,
         target_ids,
         loss_value,
-        batch_output.batch.valid_tokens,
+        batch_output.batch.valid_tokens
     )
 }
 
