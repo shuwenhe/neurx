@@ -110,13 +110,24 @@ func is_digit_char(string ch) bool {
     ch >= "0" && ch <= "9"
 }
 
+func config_substring(string s, int from, int to) string {
+    string result = ""
+    int i = from
+    while i < to && i < len(s) {
+        result = result + string(s[i])
+        i = i + 1
+    }
+    result
+}
+
 func is_valid_int_literal(string value) bool {
     string v = trim(value)
     if len(v) == 0 {
         return false
     }
     int start = 0
-    if v[0] == "+" || v[0] == "-" {
+    string first_char = config_substring(v, 0, 1)
+    if first_char == "+" || first_char == "-" {
         if len(v) == 1 {
             return false
         }
@@ -124,7 +135,8 @@ func is_valid_int_literal(string value) bool {
     }
     int i = start
     while i < len(v) {
-        if !is_digit_char(v[i]) {
+        string digit_char = config_substring(v, i, i + 1)
+        if !is_digit_char(digit_char) {
             return false
         }
         i = i + 1

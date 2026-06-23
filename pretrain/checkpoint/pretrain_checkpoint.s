@@ -25,11 +25,11 @@ func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkp
         save_best_only: false,
         last_saved_step: -1,
         best_step: -1,
-        best_metric: 1e30,
+        best_metric: 999999999999999999999999999999.0,
         save_count: 0,
         prune_count: 0,
         next_save_step: next_save_step,
-        has_best: false,
+        has_best: false
     }
 }
 

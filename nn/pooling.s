@@ -64,7 +64,7 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
             int ol = 0
             while ol < out_len {
                 int start = ol * stride - padding
-                float max_v = -1e30
+                float max_v = -999999999999999999999999999999.0
                 int k = 0
                 while k < kernel_size {
                     int pos = start + k
@@ -150,7 +150,7 @@ func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
                 while ow < out_w {
                     int h_start = oh * stride_h - pad_h
                     int w_start = ow * stride_w - pad_w
-                    float max_v = -1e30
+                    float max_v = -999999999999999999999999999999.0
                     int khi = 0
                     while khi < kernel_h {
                         int kwi = 0
