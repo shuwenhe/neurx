@@ -9,30 +9,30 @@ package neurx.distributed.training_orchestrator
 //
 // Architecture: 3D Parallelism + FSDP + Mixed Precision
 //
-// ┌─────────────────────────────────────────────────────────────┐
-// │                    Training Cluster                         │
-│                                                             │
-│  DP Replica 0 ─┐                                            │
-│  ├─ TP Group 0 ─┤                                           │
-│  │  ├─ PP Stage 0 (GPU 0): Embedding + Layers 0-9         │
-│  │  ├─ PP Stage 1 (GPU 1): Layers 10-19                   │
-│  │  ├─ ...                                                   │
-│  │  └─ PP Stage P-1 (GPU P-1): Output Head                 │
-│  │                                                           │
-│  ├─ TP Group 1 ─┤  (DP Replica 1)                           │
-│  │  └─ Same structure, different data                       │
-│  │                                                           │
-│  ...                                                         │
-│  └─ TP Group D-1 (DP Replica D-1)                            │
-│                                                             │
-│  Each DP replica uses FSDP to shard parameters internally   │
-│  Mixed precision: BF16 storage, FP32 master weights         │
-│  Loss scaling: Dynamic (if FP16)                             │
-│  Optimizer: AdamW (decoupled weight decay)                   │
-│                                                             │
-│  Total GPUs = TP × PP × DP                                   │
-│  Example: 16 × 16 × 2 = 512 GPUs for 2T model              │
-└─────────────────────────────────────────────────────────────┘
+// +-------------------------------------------------------------+
+// |                    Training Cluster                         |
+|                                                             |
+|  DP Replica 0 -+                                            |
+|  |- TP Group 0 -|                                           |
+|  |  |- PP Stage 0 (GPU 0): Embedding + Layers 0-9         |
+|  |  |- PP Stage 1 (GPU 1): Layers 10-19                   |
+|  |  |- ...                                                   |
+|  |  +- PP Stage P-1 (GPU P-1): Output Head                 |
+|  |                                                           |
+|  |- TP Group 1 -|  (DP Replica 1)                           |
+|  |  +- Same structure, different data                       |
+|  |                                                           |
+|  ...                                                         |
+|  +- TP Group D-1 (DP Replica D-1)                            |
+|                                                             |
+|  Each DP replica uses FSDP to shard parameters internally   |
+|  Mixed precision: BF16 storage, FP32 master weights         |
+|  Loss scaling: Dynamic (if FP16)                             |
+|  Optimizer: AdamW (decoupled weight decay)                   |
+|                                                             |
+|  Total GPUs = TP × PP × DP                                   |
+|  Example: 16 × 16 × 2 = 512 GPUs for 2T model              |
++-------------------------------------------------------------+
 
 // ===================== Unified Configuration =====================
 

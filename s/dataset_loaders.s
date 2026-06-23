@@ -112,7 +112,7 @@ func trim_whitespace(string s) string {
 }
 
 func is_space(byte c) bool {
-    c == ' ' || c == '\t' || c == '\n' || c == '\r'
+    c == 32 || c == 9 || c == 10 || c == 13
 }
 
 // Simulated file reading

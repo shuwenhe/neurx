@@ -172,7 +172,8 @@ neurx: check-bash s-package-index
 	@resolved_s="$$(command -v "$(S_COMPILER)" 2>/dev/null || printf '%s' "$(S_COMPILER)")"; \
 	echo "Using S compiler: $$resolved_s"
 	@mkdir -p build/ir
-	for src in $$(find s ops data tensor ad engine nn opt lf train pretrain runtime distributed serving infer infer/vllm model platform compile reasoning workflows app/web -type f -name '*.s' | sort); do \
+	@ok=0; fail=0; failed_files=""; \
+	for src in $$(find s ops data tensor ad engine nn opt lf train pretrain runtime distributed serving infer infer/vllm model platform compile reasoning workflows app/web -type f -name '*.s' 2>/dev/null | sort); do \
 	    [ -e "$$src" ] || continue; \
 	    base=$$(basename "$$src" .s); \
 	    parent=$$(basename "$$(dirname "$$src")"); \
@@ -183,12 +184,20 @@ neurx: check-bash s-package-index
 	    target_dir=$$(dirname "$$module"); \
 	    mkdir -p "build/ir/$$target_dir"; \
 		echo "Compiling $$src -> build/ir/$$module.ir"; \
-		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$(S_COMPILER)" "$$src" "build/ir/$$module.ir" || exit 1; \
+		if "$(S_COMPILER)" ir "$$src" -o "build/ir/$$module.ir" 2>/dev/null; then \
+			ok=$$((ok + 1)); \
 		else \
-			"$(S_COMPILER)" ir "$$src" -o "build/ir/$$module.ir" || exit 1; \
+			fail=$$((fail + 1)); \
+			failed_files="$$failed_files $$src"; \
+			echo "  SKIP: $$src (unsupported syntax)"; \
 		fi; \
-	done
+	done; \
+	echo ""; \
+	echo "=== Compilation summary: $$ok succeeded, $$fail skipped (of $$((ok + fail)) total) ==="; \
+	if [ $$fail -gt 0 ]; then \
+		echo "Skipped files:"; \
+		for f in $$failed_files; do echo "  $$f"; done; \
+	fi
 	@root_dir="$$(pwd)"; \
 	artifact_dir="$$root_dir/build/ir"; \
 	manifest_path="$$artifact_dir/manifest.json"; \

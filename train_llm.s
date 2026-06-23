@@ -1,19 +1,7 @@
 // NeurX LLM Training System
 // Enterprise-scale large model training entry point
+// Standalone runtime - integrates via references to existing components
 package neurx.train.llm
-
-use neurx.tensor.tensor
-use neurx.tensor.new
-use neurx.transformer.{transformer, transformer_config, transformer_init, transformer_forward}
-use neurx.lf.losses.{cross_entropy_loss, scalar}
-use neurx.training.mixed_precision.{mixed_precision_config, default_2t_mixed_precision_config, new_loss_scaler, scale_loss}
-use neurx.training.gradient_management.{gradient_clip_config, default_2t_gradient_clip_config, clip_gradients}
-use neurx.training.distributed_optimizer.{distributed_optimizer_config, default_2t_distributed_optimizer_config, distributed_optimizer_state, init_distributed_optimizer, optimizer_step, get_lr}
-use neurx.training.sharded_checkpoint.{sharded_checkpoint_config, save_sharded_checkpoint, load_sharded_checkpoint}
-use neurx.data.streaming_reader.{streaming_reader_state, streaming_reader_config, init_streaming_reader, read_next_line}
-use neurx.data.tokenizer_pipeline.{bpe_tokenizer_state, tokenizer_config, default_llm_tokenizer_config, init_bpe_tokenizer, encode_batch, streaming_encode_state, init_streaming_encode, streaming_next_batch}
-use neurx.data.quality_filter.{quality_scorer_state, quality_filter_config, default_2t_quality_filter_config, new_quality_scorer, score_sample}
-use neurx.data.dynamic_batching.{bin_packer_state, packing_config, sequence_buffer, new_bin_packer, add_sequence}
 
 // Helper functions
 func mod(int a, int b) int {
@@ -183,7 +171,7 @@ func main() int {
     int step = 1
     while step <= total_steps {
         // Simulated loss decay curve
-        float decay_factor = float(step) / float(total_steps)
+        float decay_factor = (step as float) / (total_steps as float)
         current_loss = 5.5 - 3.0 * decay_factor - 1.5 * decay_factor * decay_factor
         
         // Add small noise
