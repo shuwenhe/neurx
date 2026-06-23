@@ -12,7 +12,7 @@ struct diffusion_config {
 func new_diffusion_config() diffusion_config {
     diffusion_config {
         timesteps: 1000,
-        beta_start: 1e-4,
+        beta_start: 0.0001,
         beta_end: 0.02,
         schedule: "linear",
         prediction_type: "epsilon",

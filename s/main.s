@@ -78,8 +78,8 @@ func new_state() trainer_state {
         step: 0,
         last_loss: 0.0,
         optimizer: new_sgd(0.001),
-        adam: new_adam(0.001, 0.9, 0.999, 1e-8),
-        rmsprop: new_rmsprop(0.001, 0.99, 1e-8)
+        adam: new_adam(0.001, 0.9, 0.999, 0.00000001),
+        rmsprop: new_rmsprop(0.001, 0.99, 0.00000001)
     }
 }
 
@@ -88,8 +88,8 @@ func init_state(trainer_config config) trainer_state {
         step: 0,
         last_loss: 0.0,
         optimizer: new_sgd(config.learning_rate),
-        adam: new_adam(config.learning_rate, 0.9, 0.999, 1e-8),
-        rmsprop: new_rmsprop(config.learning_rate, 0.99, 1e-8)
+        adam: new_adam(config.learning_rate, 0.9, 0.999, 0.00000001),
+        rmsprop: new_rmsprop(config.learning_rate, 0.99, 0.00000001)
     }
 }
 

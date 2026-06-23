@@ -23,7 +23,7 @@ func new_posttrain_config() posttrain_config {
         global_batch_size: 128,
         micro_batch_size: 8,
         max_steps: 20000,
-        lr: 1e-5,
+        lr: 0.00001,
         kl_coef: 0.02,
         clip_range: 0.2,
         log_interval: 10,
