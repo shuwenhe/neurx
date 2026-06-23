@@ -109,7 +109,7 @@ func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     while i < len(token_ids) {
         int token_id = token_ids[i]
         
-        if token_id >= 0 && token_id < tokenizer.vocab.vocab_size {
+        if token_id >= 0  token_id < tokenizer.vocab.vocab_size {
             // result = result + tokenizer.vocab.token_to_id[token_id]
         }
         

@@ -67,14 +67,22 @@ func compute_graph_signature(ir_graph graph) string {
 }
 
 // Lookup compiled graph in cache
-func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry? {
+func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry {
     string key = generate_cache_key(graph)
     
     // Search for matching entry
     // Update access stats
     // Return entry or nil
     
-    cache_entry? {nil}
+    cache_entry {
+        cache_key: key,
+        optimized_graph: graph,
+        backend_kernels: [],
+        entry_size_bytes: 0,
+        created_at_timestamp: 0,
+        last_accessed_at_timestamp: 0,
+        access_count: 0,
+    }
 }
 
 // Store compiled graph in cache

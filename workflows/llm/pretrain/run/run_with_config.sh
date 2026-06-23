@@ -9,7 +9,7 @@ Usage: $0 [--config path] [--steps N]
 --steps:  override steps in config (optional)
 
 This launcher extracts workflow fields from YAML, generates a small S runner
-that calls the persistent pipeline runner, and compiles the runner IR.
+that calls the 2T runtime-backed pipeline runner, and compiles the runner IR.
 EOF
 }
 
@@ -53,9 +53,15 @@ MIN_LR="$(awk -F":" '/^min_lr[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}'
 WEIGHT_DECAY="$(awk -F":" '/^weight_decay[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 DATASET_MANIFEST="$(awk -F":" '/^dataset_manifest[[:space:]]*:/ {sub(/^[[:space:]]*/, "", $2); gsub(/^"|"$/, "", $2); print $2; exit}' "$CONFIG" || true)"
 OUTPUT_DIR="$(awk -F":" '/^output_dir[[:space:]]*:/ {sub(/^[[:space:]]*/, "", $2); gsub(/^"|"$/, "", $2); print $2; exit}' "$CONFIG" || true)"
+CHECKPOINT_ROOT="$(awk -F":" '/^checkpoint_root[[:space:]]*:/ {sub(/^[[:space:]]*/, "", $2); gsub(/^"|"$/, "", $2); print $2; exit}' "$CONFIG" || true)"
 LOG_INTERVAL="$(awk -F":" '/^log_interval[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 EVAL_INTERVAL="$(awk -F":" '/^eval_interval[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 SAVE_INTERVAL="$(awk -F":" '/^save_interval[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+TP_DEGREE="$(awk -F":" '/^tensor_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+PP_DEGREE="$(awk -F":" '/^pipeline_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+DP_DEGREE="$(awk -F":" '/^data_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+SP_DEGREE="$(awk -F":" '/^sequence_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+ZERO_STAGE="$(awk -F":" '/^zero_stage[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 
 if [[ -z "$MICRO_BATCH" ]]; then MICRO_BATCH=8; fi
 if [[ -z "$SEQ_LEN" ]]; then SEQ_LEN=16; fi
@@ -65,9 +71,15 @@ if [[ -z "$MIN_LR" ]]; then MIN_LR=0.00003; fi
 if [[ -z "$WEIGHT_DECAY" ]]; then WEIGHT_DECAY=0.1; fi
 if [[ -z "$DATASET_MANIFEST" ]]; then DATASET_MANIFEST="data/pretrain/mini_manifest.json"; fi
 if [[ -z "$OUTPUT_DIR" ]]; then OUTPUT_DIR="artifacts/checkpoints/run_20260518_001"; fi
+if [[ -z "$CHECKPOINT_ROOT" ]]; then CHECKPOINT_ROOT="$OUTPUT_DIR"; fi
 if [[ -z "$LOG_INTERVAL" ]]; then LOG_INTERVAL=8; fi
 if [[ -z "$EVAL_INTERVAL" ]]; then EVAL_INTERVAL=16; fi
 if [[ -z "$SAVE_INTERVAL" ]]; then SAVE_INTERVAL=32; fi
+if [[ -z "$TP_DEGREE" ]]; then TP_DEGREE=4; fi
+if [[ -z "$PP_DEGREE" ]]; then PP_DEGREE=2; fi
+if [[ -z "$DP_DEGREE" ]]; then DP_DEGREE=1; fi
+if [[ -z "$SP_DEGREE" ]]; then SP_DEGREE=1; fi
+if [[ -z "$ZERO_STAGE" ]]; then ZERO_STAGE=2; fi
 
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [[ -z "$ROOT_DIR" ]]; then
@@ -87,17 +99,17 @@ trap cleanup EXIT
 cat > "$TMP_S" <<SFILE
 package neurx.workflows.llm.pretrain.run_tmp
 
-use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_params}
 use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_config}
+use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_distributed_config}
 
 func main() int {
-  run_pretrain_with_config(${MICRO_BATCH}, ${SEQ_LEN}, ${LR}, ${MAX_STEPS}, ${WARMUP_STEPS}, ${MIN_LR}, ${WEIGHT_DECAY}, ${LOG_INTERVAL}, ${EVAL_INTERVAL}, ${SAVE_INTERVAL}, "${DATASET_MANIFEST}", "${OUTPUT_DIR}")
+  run_pretrain_with_distributed_config(${MICRO_BATCH}, ${SEQ_LEN}, ${LR}, ${MAX_STEPS}, ${WARMUP_STEPS}, ${MIN_LR}, ${WEIGHT_DECAY}, ${LOG_INTERVAL}, ${EVAL_INTERVAL}, ${SAVE_INTERVAL}, "${DATASET_MANIFEST}", "${CHECKPOINT_ROOT}", ${TP_DEGREE}, ${PP_DEGREE}, ${DP_DEGREE}, ${SP_DEGREE}, ${ZERO_STAGE})
   0
 }
 SFILE
 
-# compile and run the tmp S file
-make s-compile-runtime
+# Compile the tmp S file only; the workflow runner now drives the 2T runtime and
+# rank-sharded checkpoint path directly.
 s "$TMP_S" "$TMP_IR"
 
-echo "Compiled pretrain workflow entrypoint with steps=${MAX_STEPS}, micro_batch=${MICRO_BATCH}, seq_len=${SEQ_LEN}, lr=${LR}, log/eval/save=${LOG_INTERVAL}/${EVAL_INTERVAL}/${SAVE_INTERVAL}, manifest=${DATASET_MANIFEST}, output_dir=${OUTPUT_DIR}"
+echo "Compiled pretrain workflow entrypoint with steps=${MAX_STEPS}, micro_batch=${MICRO_BATCH}, seq_len=${SEQ_LEN}, lr=${LR}, log/eval/save=${LOG_INTERVAL}/${EVAL_INTERVAL}/${SAVE_INTERVAL}, manifest=${DATASET_MANIFEST}, checkpoint_root=${CHECKPOINT_ROOT}, tp/pp/dp/sp/zero=${TP_DEGREE}/${PP_DEGREE}/${DP_DEGREE}/${SP_DEGREE}/${ZERO_STAGE}"

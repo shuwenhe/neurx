@@ -73,7 +73,7 @@ func execute_distributed_step(distributed_training_state state,
     state.current_step = state.current_step + 1
     
     // Every N steps, check health and save checkpoint
-    if state.current_step % 100 == 0 {
+    if s(state.current_step - (state.current_step / 100) * 100) == 0 {
         // state = handle_checkpoint_step(state)
     }
     

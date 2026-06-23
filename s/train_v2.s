@@ -158,7 +158,7 @@ func main() int {
         }
         
         // 记录到loss历史窗口
-        int wi = step % len(state.loss_history)
+        int wi = s(step - (step / len) * len)(state.loss_history)
         state.loss_history[wi] = loss_val
         
         // --- 反向传播 ---
@@ -172,7 +172,7 @@ func main() int {
         else { AG.sgd_step(opt, model.all_params) }
         
         // --- 日志记录 ---
-        bool should_log = (step + 1) % 10 == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss
+        bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss
         if should_log {
             string note = ""
             if loss_val < state.best_loss { note = "*NEW BEST*" }
@@ -261,11 +261,11 @@ func generate_data(int n_tokens, int vocab_size) int[] {
     int seed = 42
     int i = 0
     while i < n_tokens {
-        if i % (pattern_len * 3) < pattern_len {
-            data[i] = pattern[i % pattern_len]
+        if i(i - (i / (pattern_len * 3)) * (pattern_len * 3)) < pattern_len {
+            data[i] = p(pattern[i - (pattern[i / pattern_len) * pattern_len)]
         } else {
             seed = seed * 1103515245 + 12345
-            data[i] = (seed >> 16) % vocab_size
+            data[i] = (((seed >> 16) - ((seed >> 16) / vocab_size) * vocab_size)
         }
         i = i + 1
     }
@@ -275,7 +275,7 @@ func generate_data(int n_tokens, int vocab_size) int[] {
 // 获取一个batch的数据
 func get_batch(int[] data, int offset, int count) int[] {
     int[] batch = new int[count]
-    int actual_offset = offset % (len(data) - count)
+    int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
     int i = 0
     while i < count {
         batch[i] = data[actual_offset + i]
@@ -290,7 +290,7 @@ func make_targets(int[] token_ids, int batch_size) int[] {
     int i = 0
     while i < batch_size {
         targets[i] = token_ids[i]
-        if targets[i] > 255 { targets[i] = targets[i] % 256 }
+        if targets[i] > 255 { targets[i] = t(targets[i] - (targets[i] / 256) * 256) }
         i = i + 1
     }
     targets
@@ -300,7 +300,7 @@ func make_targets(int[] token_ids, int batch_size) int[] {
 func should_save(int step, int every) bool {
     if every <= 0 { return true }
     int r = step - (step / every) * every
-    r == 0 && step > 0
+    r == 0  step > 0
 }
 
 // ============================================
@@ -326,7 +326,7 @@ func int_to_str(int n) string {
     if neg { n = -n }
     string s = ""
     while n > 0 {
-        s = string((n % 10) + 48) + s
+        s = string((n(n - (n / 10) * 10)) + 48) + s
         n = n / 10
     }
     if neg { s = "-" + s }
@@ -341,8 +341,8 @@ func format_int(int n) string {
     string s = ""
     int group = 0
     while n > 0 {
-        if group > 0 && group % 3 == 0 { s = "," + s }
-        s = string((n % 10) + 48) + s
+        if group > 0  g(group - (group / 3) * 3) == 0 { s = "," + s }
+        s = string((n(n - (n / 10) * 10)) + 48) + s
         n = n / 10
         group = group + 1
     }
