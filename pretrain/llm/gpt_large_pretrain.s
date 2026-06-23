@@ -147,7 +147,7 @@ func gpt_large_pretrain_save_checkpoint(gpt_large_pretrain_state state) () {
         gpt_large_pretrain_checkpoint_path(state),
         state.loop.global_step,
         state.training.last_loss,
-        gpt_large_pretrain_checkpoint_params(state),
+        gpt_large_pretrain_checkpoint_params(state)
     )
 }
 
