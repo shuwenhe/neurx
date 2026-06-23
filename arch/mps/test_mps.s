@@ -73,7 +73,7 @@ func amp_smoke() int {
     status = status + assert_eq_bool(is_autocast_enabled(autocast), false, "autocast should be disabled after exit")
 
     grad_scaler_state scaler = new_grad_scaler(1024.0, 2.0, 0.5, 2000, true)
-    scaler = grad_scaler_step(scaler, 1.0e40)
+    scaler = grad_scaler_step(scaler, 10000000000000000000000000000000000000000.0)
     status = status + assert_eq_float(grad_scaler_get_scale(scaler), 512.0, "grad scaler should back off to 512.0")
     status = status + assert_eq_bool(grad_scaler_found_inf(scaler), true, "grad scaler should mark found_inf")
     status

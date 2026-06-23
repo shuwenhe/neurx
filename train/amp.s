@@ -139,7 +139,7 @@ func grad_scaler_step(grad_scaler_state scaler, float loss) grad_scaler_state {
     if loss != loss {
         found_inf = true
     }
-    if loss > 1.0e30 {
+    if loss > 999999999999999999999999999999.0 {
         found_inf = true
     }
     return update_scale(scaler, found_inf)
