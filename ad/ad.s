@@ -733,8 +733,9 @@ func scaled_dot_product_attention(tensor query, tensor key, tensor value, tensor
 
     tensor key_t = neurx.tensor.tensor.transpose(key, 0, 1)
     tensor scores = neurx.tensor.tensor.matmul(query, key_t)
+    float dim_value = float(query.shape[1])
     tensor head_dim_tensor = neurx.tensor.tensor.sqrt(
-        neurx.tensor.tensor.new([float(query.shape[1])], [1], false)
+        neurx.tensor.tensor.new([dim_value], [1], false)
     )
     tensor scaled_scores = neurx.tensor.tensor.div(scores, head_dim_tensor)
     if has_mask {
