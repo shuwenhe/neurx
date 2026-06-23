@@ -1,20 +1,12 @@
 package neurx.ad.eqn
 
+use neurx.strings
+
 struct ir_eqn {
     string primitive
     []string params
     []string inputs
     []string outputs
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_eqn(ir_eqn eqn) ir_eqn {
