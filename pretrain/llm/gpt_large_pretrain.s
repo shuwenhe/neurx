@@ -95,6 +95,12 @@ func tensor_from_ints([]int values, []int shape) tensor {
     new(data, copy_int(shape), false)
 }
 
+func shape1(int size) []int {
+    []int out = []int{cap: 1}
+    out[0] = size
+    out
+}
+
 func one_hot_tensor(tensor ids, int vocab_size) tensor {
     int n = len(ids.data)
     []float data = []float{cap: n * vocab_size}
@@ -378,8 +384,8 @@ func gpt_large_pretrain_validation_metrics(gpt_large_pretrain_state state) gpt_l
     dataloader_step_output batch_output = gpt_large_pretrain_valid_batch(state)
     int input_len = len(batch_output.batch.input_ids)
     int target_len = len(batch_output.batch.target_ids)
-    tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, [input_len])
-    tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, [target_len])
+    tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, shape1(input_len))
+    tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, shape1(target_len))
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
     tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
@@ -425,8 +431,10 @@ func gpt_large_pretrain_forward_logits(gpt_large_pretrain_state state, tensor in
 }
 
 func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloader_step_output train_output, dataloader_step_output valid_output) gpt_large_pretrain_state {
-    tensor input_ids = tensor_from_ints(train_output.batch.input_ids, [len(train_output.batch.input_ids)])
-    tensor target_ids = tensor_from_ints(train_output.batch.target_ids, [len(train_output.batch.target_ids)])
+    int train_input_len = len(train_output.batch.input_ids)
+    int train_target_len = len(train_output.batch.target_ids)
+    tensor input_ids = tensor_from_ints(train_output.batch.input_ids, shape1(train_input_len))
+    tensor target_ids = tensor_from_ints(train_output.batch.target_ids, shape1(train_target_len))
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
     tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
@@ -471,8 +479,10 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     int next_step = state.training.step + 1
     int next_seen_tokens = state.training.model.seen_tokens + train_output.batch.valid_tokens
     float train_ppl = 1.0 + loss_value * loss_value * 3.0
-    tensor valid_input_ids = tensor_from_ints(valid_output.batch.input_ids, [len(valid_output.batch.input_ids)])
-    tensor valid_target_ids = tensor_from_ints(valid_output.batch.target_ids, [len(valid_output.batch.target_ids)])
+    int valid_input_len = len(valid_output.batch.input_ids)
+    int valid_target_len = len(valid_output.batch.target_ids)
+    tensor valid_input_ids = tensor_from_ints(valid_output.batch.input_ids, shape1(valid_input_len))
+    tensor valid_target_ids = tensor_from_ints(valid_output.batch.target_ids, shape1(valid_target_len))
     tensor valid_hidden = embedding_lookup(state.training.token_embedding, valid_input_ids, 0)
     tensor valid_backbone_out = transformer_forward(state.training.backbone, valid_hidden)
     tensor valid_logits = ops.lm_head_logits(valid_backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
