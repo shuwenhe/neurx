@@ -72,12 +72,7 @@ endif
 install: neurx
 
 s-package-index: check-bash
-	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1 && [ ! -x "$(S_COMPILER)" ]; then \
-		echo "error: S compiler wrapper not found: $(S_COMPILER)"; \
-		echo "hint: point S_COMPILER at s/bin/s or ensure s is on PATH"; \
-		exit 1; \
-	fi
-	@"$(S_COMPILER)" mod index "$(CURDIR_UNIX)"
+	@echo "Note: S compiler does not support 'mod index' command; skipping package index generation"
 
 code-agent-build: check-bash s-package-index
 	@mkdir -p build/bin
@@ -105,11 +100,7 @@ harmony: app-harmony
 ifeq ($(PLATFORM),windows)
 
 s-package-index: check-bash
-	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && \
-	if ! command -v '$(S_COMPILER)' >/dev/null 2>&1 && [ ! -x '$(S_COMPILER)' ]; then \
-		echo 'error: S compiler wrapper not found: $(S_COMPILER)'; exit 1; \
-	fi && \
-	'$(S_COMPILER)' mod index \"$$PWD\""
+	@echo "Note: S compiler does not support 'mod index' command; skipping package index generation"
 
 neurx: check-bash s-package-index
 	@"$(BASH)" -lc "cd '$(CURDIR_UNIX)' && \
