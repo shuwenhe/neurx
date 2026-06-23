@@ -53,6 +53,27 @@ func new_backward_state(string name) backward_state {
     }
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_step(backward_state state, int index) string {
+    state.steps[index]
+}
+
+func get_param(backward_state state, int index) string {
+    state.params[index]
+}
+
+func get_input(backward_state state, int index) string {
+    state.inputs[index]
+}
+
+func get_output(backward_state state, int index) string {
+    state.outputs[index]
+}
+
+func get_tag(backward_state state, int index) string {
+    state.tags[index]
+}
+
 func backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
     neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
 }
@@ -132,13 +153,13 @@ func backward_rule_from_state(backward_state state, tensor a, tensor b, tensor u
     if len(state.steps) == 0 {
         return backward_rule_add(a, b, upstream)
     }
-    if state.steps[len(state.steps) - 1] == "sum_dim" {
+    if get_step(state, len(state.steps) - 1) == "sum_dim" {
         return backward_rule_sum_dim_from_state(state, a, upstream)
     }
-    if state.steps[len(state.steps) - 1] == "mean_dim" {
+    if get_step(state, len(state.steps) - 1) == "mean_dim" {
         return backward_rule_mean_dim_from_state(state, a, upstream)
     }
-    backward_rule_from_op(state.steps[len(state.steps) - 1], a, b, upstream)
+    backward_rule_from_op(get_step(state, len(state.steps) - 1), a, b, upstream)
 }
 
 func backward_execute_state(backward_state state, tensor a, tensor b, tensor upstream) backward_state {
@@ -147,7 +168,7 @@ func backward_execute_state(backward_state state, tensor a, tensor b, tensor ups
     int i = len(state.steps) - 1
     backward_rule rule = backward_rule_add(a, b, upstream)
     while i >= 0 {
-        rule = backward_rule_from_op(state.steps[i], a, b, upstream)
+        rule = backward_rule_from_op(get_step(state, i), a, b, upstream)
         next = backward_add_tag(next, backward_rule_op(rule))
         i = i - 1
     }
@@ -201,7 +222,7 @@ func backward_tag_count(backward_state state) int {
 func backward_has_step(backward_state state, string step) bool {
     int i = 0
     while i < len(state.steps) {
-        if state.steps[i] == step {
+        if get_step(state, i) == step {
             return true
         }
         i = i + 1
@@ -212,7 +233,7 @@ func backward_has_step(backward_state state, string step) bool {
 func backward_has_param(backward_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
-        if state.params[i] == param {
+        if get_param(state, i) == param {
             return true
         }
         i = i + 1
@@ -223,7 +244,7 @@ func backward_has_param(backward_state state, string param) bool {
 func backward_has_input(backward_state state, string input) bool {
     int i = 0
     while i < len(state.inputs) {
-        if state.inputs[i] == input {
+        if get_input(state, i) == input {
             return true
         }
         i = i + 1
@@ -234,7 +255,7 @@ func backward_has_input(backward_state state, string input) bool {
 func backward_has_output(backward_state state, string output) bool {
     int i = 0
     while i < len(state.outputs) {
-        if state.outputs[i] == output {
+        if get_output(state, i) == output {
             return true
         }
         i = i + 1
@@ -245,7 +266,7 @@ func backward_has_output(backward_state state, string output) bool {
 func backward_has_tag(backward_state state, string tag) bool {
     int i = 0
     while i < len(state.tags) {
-        if state.tags[i] == tag {
+        if get_tag(state, i) == tag {
             return true
         }
         i = i + 1

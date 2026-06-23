@@ -108,7 +108,7 @@ func compile_module(string module_name, compile_options options) compile_result 
             options.mode,
             options.dynamic,
             options.fullgraph,
-            options.debug,
+            options.debug
         )
         make_compile_result(pipeline_to_compiled_state(pipeline, module_name, options), true, clear_error())
     }
@@ -121,7 +121,7 @@ func compiled_module_execute(compiled_module_state state) compiled_module_state 
         state.options.mode,
         state.options.dynamic,
         state.options.fullgraph,
-        state.options.debug,
+        state.options.debug
     )
     compiled_module_state {
         module_name: state.module_name,

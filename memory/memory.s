@@ -48,6 +48,23 @@ func new_agent_memory_state() agent_memory_state {
     }
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_short_key(agent_memory_state state, int index) string {
+    state.short_keys[index]
+}
+
+func get_short_value(agent_memory_state state, int index) string {
+    state.short_values[index]
+}
+
+func get_long_key(agent_memory_state state, int index) string {
+    state.long_keys[index]
+}
+
+func get_long_value(agent_memory_state state, int index) string {
+    state.long_values[index]
+}
+
 func agent_memory_write_short(agent_memory_state state, string key, string value) agent_memory_state {
     int old_size = len(state.short_keys)
     int new_size = old_size + 1
@@ -66,8 +83,8 @@ func agent_memory_write_short(agent_memory_state state, string key, string value
 
     int i = 0
     while i < old_size - start {
-        keys[i] = state.short_keys[i + start]
-        values[i] = state.short_values[i + start]
+        keys[i] = get_short_key(state, i + start)
+        values[i] = get_short_value(state, i + start)
         i = i + 1
     }
 
@@ -103,8 +120,8 @@ func agent_memory_write_long(agent_memory_state state, string key, string value)
 
     int i = 0
     while i < old_size - start {
-        keys[i] = state.long_keys[i + start]
-        values[i] = state.long_values[i + start]
+        keys[i] = get_long_key(state, i + start)
+        values[i] = get_long_value(state, i + start)
         i = i + 1
     }
 
@@ -128,9 +145,9 @@ func agent_memory_lookup_short(agent_memory_state src, string key) agent_memory_
     bool found = false
     string found_val = ""
     while i >= 0 {
-        if src.short_keys[i] == key {
+        if get_short_key(src, i) == key {
             found = true
-            found_val = src.short_values[i]
+            found_val = get_short_value(src, i)
             i = -999
         }
         i = i - 1
@@ -156,9 +173,9 @@ func agent_memory_lookup_long(agent_memory_state src, string key) agent_memory_l
     bool found = false
     string found_val = ""
     while i >= 0 {
-        if src.long_keys[i] == key {
+        if get_long_key(src, i) == key {
             found = true
-            found_val = src.long_values[i]
+            found_val = get_long_value(src, i)
             i = -999
         }
         i = i - 1
@@ -254,7 +271,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     int s_keep = 0
     int i = 0
     while i < s_size {
-        if state.short_keys[i] != key {
+        if get_short_key(state, i) != key {
             s_keep = s_keep + 1
         }
         i = i + 1
@@ -264,9 +281,9 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     int wi = 0
     i = 0
     while i < s_size {
-        if state.short_keys[i] != key {
-            short_k[wi] = state.short_keys[i]
-            short_v[wi] = state.short_values[i]
+        if get_short_key(state, i) != key {
+            short_k[wi] = get_short_key(state, i)
+            short_v[wi] = get_short_value(state, i)
             wi = wi + 1
         }
         i = i + 1
@@ -274,7 +291,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     int l_keep = 0
     i = 0
     while i < l_size {
-        if state.long_keys[i] != key {
+        if get_long_key(state, i) != key {
             l_keep = l_keep + 1
         }
         i = i + 1
@@ -284,9 +301,9 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     wi = 0
     i = 0
     while i < l_size {
-        if state.long_keys[i] != key {
-            long_k[wi] = state.long_keys[i]
-            long_v[wi] = state.long_values[i]
+        if get_long_key(state, i) != key {
+            long_k[wi] = get_long_key(state, i)
+            long_v[wi] = get_long_value(state, i)
             wi = wi + 1
         }
         i = i + 1
@@ -307,12 +324,12 @@ func agent_memory_export(agent_memory_state state) string {
     string out = ""
     int i = 0
     while i < len(state.short_keys) {
-        out = out + "short:" + state.short_keys[i] + "=" + state.short_values[i] + "\n"
+        out = out + "short:" + get_short_key(state, i) + "=" + get_short_value(state, i) + "\n"
         i = i + 1
     }
     i = 0
     while i < len(state.long_keys) {
-        out = out + "long:" + state.long_keys[i] + "=" + state.long_values[i] + "\n"
+        out = out + "long:" + get_long_key(state, i) + "=" + get_long_value(state, i) + "\n"
         i = i + 1
     }
     out
