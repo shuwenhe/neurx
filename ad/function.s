@@ -221,10 +221,15 @@ func transform_chain_param_count(transform_chain chain) int {
     len(chain.params)
 }
 
+func get_transform_step(transform_chain chain, int index) string {
+    chain.steps[index]
+}
+
 func transform_chain_has_step(transform_chain chain, string step) bool {
     int i = 0
     while i < len(chain.steps) {
-        if chain.steps[i] == step {
+        string s = get_transform_step(chain, i)
+        if s == step {
             return true
         }
         i = i + 1
@@ -350,10 +355,19 @@ func function_param_count(function_record f) int {
     len(f.params)
 }
 
+func get_function_tag(function_record f, int index) string {
+    f.tags[index]
+}
+
+func get_function_param(function_record f, int index) string {
+    f.params[index]
+}
+
 func function_has_tag(function_record f, string tag) bool {
     int i = 0
     while i < len(f.tags) {
-        if f.tags[i] == tag {
+        string t = get_function_tag(f, i)
+        if t == tag {
             return true
         }
         i = i + 1
@@ -364,7 +378,8 @@ func function_has_tag(function_record f, string tag) bool {
 func function_has_param(function_record f, string param) bool {
     int i = 0
     while i < len(f.params) {
-        if f.params[i] == param {
+        string p = get_function_param(f, i)
+        if p == param {
             return true
         }
         i = i + 1
@@ -510,12 +525,14 @@ func function_transform_chain(function_record f) transform_chain {
     int i = 0
     while i < len(f.tags) {
         []string params = []string{cap: 0}
-        if i < len(f.params) && f.params[i] != "" {
+        string param_val = get_function_param(f, i)
+        if i < len(f.params) && param_val != "" {
             params = []string{cap: 1}
-            params[0] = f.params[i]
+            params[0] = param_val
         }
+        string tag_val = get_function_tag(f, i)
         eqns[i] = jaxpr_eqn {
-            primitive: f.tags[i],
+            primitive: tag_val,
             params: params,
             inputs: [],
             outputs: [],
