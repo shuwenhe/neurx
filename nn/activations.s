@@ -67,8 +67,10 @@ func copy_int([]int data) []int {
     out
 }
 
-
-
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_tensor_data(tensor t, int index) float {
+    t.data[index]
+}
 
 func relu(tensor input) tensor {
     int n = len(input.data)
@@ -212,18 +214,18 @@ func softmax(tensor input) tensor {
     int r = 0
     while r < rows {
         int base = r * cols
-        float max_v = input.data[base]
+        float max_v = get_tensor_data(input, base)
         int c = 1
         while c < cols {
-            if input.data[base + c] > max_v {
-                max_v = input.data[base + c]
+            if get_tensor_data(input, base + c) > max_v {
+                max_v = get_tensor_data(input, base + c)
             }
             c = c + 1
         }
         float denom = 0.0
         c = 0
         while c < cols {
-            float v = exp_approx(input.data[base + c] - max_v)
+            float v = exp_approx(get_tensor_data(input, base + c) - max_v)
             out[base + c] = v
             denom = denom + v
             c = c + 1

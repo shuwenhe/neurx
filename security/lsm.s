@@ -55,6 +55,11 @@ func new_lsm_state(enforcing bool) -> lsm_state {
     }
 }
 
+// Getter functions to work around compiler type inference bug with struct field indexing
+func get_allowed_tool(security_context ctx, int index) string {
+    ctx.allowed_tools[index]
+}
+
 // register_context: assign a security context to an agent (like setcon / task_setcon)
 func lsm_register(ls lsm_state, ctx security_context) -> lsm_state {
     ls.contexts = append(ls.contexts, ctx)
@@ -92,7 +97,7 @@ func lsm_check_tool_call(ls lsm_state, agent_pid int, tool_name string) -> (lsm_
         bool ok = false
         int j = 0
         while j < len(ctx.allowed_tools) {
-            if ctx.allowed_tools[j] == tool_name {
+            if get_allowed_tool(ctx, j) == tool_name {
                 ok = true
             }
             j = j + 1
