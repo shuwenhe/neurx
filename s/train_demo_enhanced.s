@@ -252,7 +252,7 @@ def print_model_summary(GPTModel self):
     print(gpt_config_string(self.config))
     println("-" * 60)
     
-    # Count by component
+    // Count by component
     token_params = count_parameters(self.token_embed)
     pos_params = count_parameters(self.pos_embed)
     block_params = sum(count_parameters(b) for b in self.blocks) if hasattr(self.blocks, '__len__') else 0
@@ -346,7 +346,7 @@ func generate_synthetic_data(int n_tokens, int vocab_size) int[] {
         } else {
             // Pseudo-random based on seed
             seed = seed * 1103515245 + 12345
-            data[i] = (seed >> 16) % vocab_size
+            data[i] = (((seed >> 16) - ((seed >> 16) / vocab_size) * vocab_size)
         }
         i = i + 1
     }
@@ -361,7 +361,7 @@ func next_batch(DataLoader mut loader) Tuple<int[], int[]> {
     
     // Check if we need to wrap around
     if loader.current_position + tokens_per_batch > loader.total_tokens {
-        loader.current_position = 0  # Reset to beginning of dataset
+        loader.current_position = 0  // Reset to beginning of dataset
     }
     
     int[] input_ids = new int[tokens_per_batch]
@@ -370,11 +370,11 @@ func next_batch(DataLoader mut loader) Tuple<int[], int[]> {
     int i = 0
     while i < tokens_per_batch {
         input_ids[i] = loader.tokens[loader.current_position + i]
-        target_ids[i] = loader.tokens[loader.current_position + i + 1]  # Shifted by 1
+        target_ids[i] = loader.tokens[loader.current_position + i + 1]  // Shifted by 1
         i = i + 1
     }
     
-    loader.current_position = loader.current_position + loader.seq_len  # Move by seq_len (not full batch) for overlap
+    loader.current_position = loader.current_position + loader.seq_len  // Move by seq_len (not full batch) for overlap
     
     (input_ids, target_ids)
 
@@ -397,7 +397,7 @@ struct CheckpointInfo {
     float loss
     int timestamp
     int param_count
-    float[] model_weights_hash  # For integrity verification
+    float[] model_weights_hash  // For integrity verification
 }
 
 func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
@@ -502,15 +502,15 @@ func run_training(GPTConfig config) TrainingResult {
     if config.optimizer == "adam" || config.optimizer == "adamw":
         opt = new_adam_optimizer(
             config.learning_rate,
-            0.9,    # beta1
-            0.999,  # beta2
+            0.9,    // beta1
+            0.999,  // beta2
             config.weight_decay,
-            1e-8    # eps
+            1e-8    // eps
         )
     else:
         opt = new_sgd_optimizer(
             config.learning_rate,
-            0.9,    # momentum
+            0.9,    // momentum
             config.weight_decay
         )
     println("  Optimizer: ", config.optimizer, " (lr=", config.learning_rate, ")")
@@ -542,7 +542,7 @@ func run_training(GPTConfig config) TrainingResult {
     while step < config.max_steps {
         int step_start = get_time_ms()
 
-        # === Forward pass ===
+        // === Forward pass ===
         Tuple<int[], int[]> batch = next_batch(dataloader)
         int[] input_ids = batch[0]
         int[] target_ids = batch[1]
@@ -551,42 +551,42 @@ func run_training(GPTConfig config) TrainingResult {
         AutoGradTensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)
 
-        # === Backward pass ===
+        // === Backward pass ===
         zero_grad(model.all_parameters)
         Map<string, Tensor> grads = backward(loss_tensor)
         float grad_norm = clip_grad_norm_(model.all_parameters, 1.0)
 
-        # === Optimizer step ===
+        // === Optimizer step ===
         if config.optimizer == "adam" || config.optimizer == "adamw":
             adam_step(opt, model.all_parameters)
         else:
             sgd_step(opt, model.all_parameters)
 
-        # === Update state ===
+        // === Update state ===
         state.global_step = state.global_step + 1
         
-        # Track best loss
+        // Track best loss
         if loss_val < state.best_loss:
             state.best_loss = loss_val
             state.best_step = step + 1
         
-        # Record loss history
+        // Record loss history
         if step < len(state.loss_history) {
             state.loss_history[step] = loss_val
         }
 
-        # Update sliding window of recent losses
+        // Update sliding window of recent losses
         int wi = math_mod(step, len(recent_losses))
         recent_losses[wi] = loss_val
 
         int step_time = get_time_ms() - step_start
 
-        # === Logging ===
+        // === Logging ===
         if math_mod(step + 1, 10) == 0 or step == config.max_steps - 1 or loss_val < state.best_loss:
             println(format_step_line(step + 1, loss_val, state.best_loss, 
                                      grad_norm, opt.learning_rate, step_time))
 
-        # === Checkpoint saving ===
+        // === Checkpoint saving ===
         if check_should_save(step + 1, config.save_every_n):
             string ckpt_path = save_checkpoint_v2(
                 "artifacts/checkpoints",
@@ -601,11 +601,11 @@ func run_training(GPTConfig config) TrainingResult {
 
     int total_time = get_time_ms() - start_time
 
-    # === Final checkpoints ===
+    // === Final checkpoints ===
     println("")
     println("[5/5] Saving final checkpoints...")
     
-    # Save final model
+    // Save final model
     string final_ckpt = save_checkpoint_v2(
         "artifacts/checkpoints",
         config.max_steps, state.loss_history[config.max_steps - 1],
@@ -615,7 +615,7 @@ func run_training(GPTConfig config) TrainingResult {
     if not final_ckpt.startswith("[ERROR]"):
         append(checkpoints_saved, final_ckpt)
     
-    # Save best model
+    // Save best model
     string best_ckpt = save_checkpoint_v2(
         "artifacts/checkpoints",
         state.best_step, state.best_loss,
@@ -625,7 +625,7 @@ func run_training(GPTConfig config) TrainingResult {
     rename_file(best_ckpt, "artifacts/checkpoints/best_model.neurx")
     append(checkpoints_saved, "artifacts/checkpoints/best_model.neurx")
 
-    # Update manifest
+    // Update manifest
     save_manifest("artifacts/checkpoints/latest_checkpoint.txt", checkpoints_saved)
 
     println("")
@@ -651,47 +651,47 @@ func run_training(GPTConfig config) TrainingResult {
         saved_checkpoints: checkpoints_saved,
     }
 
-# Format a single line of training progress
+// Format a single line of training progress
 func format_step_line(int step, float loss, float best_loss, 
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
     
-    # Pad step number
+    // Pad step number
     string step_str = string(step)
     while len(step_str) < 4: step_str = " " + step_str
     line = line + step_str + " | "
     
-    # Pad loss
+    // Pad loss
     string loss_str = format_float(loss, 6)
     while len(loss_str) < 8: loss_str = " " + loss_str
     line = line + loss_str + " | "
     
-    # Pad best loss
+    // Pad best loss
     string best_str = format_float(best_loss, 6)
     while len(best_str) < 7: best_str = " " + best_str
     line = line + best_str + " | "
     
-    # Pad grad norm
+    // Pad grad norm
     string grad_str = format_float(grad_norm, 4)
     while len(grad_str) < 8: grad_str = " " + grad_str
     line = line + grad_str + " | "
     
-    # Pad learning rate
+    // Pad learning rate
     string lr_str = format_float(lr, 6)
     while len(lr_str) < 8: lr_str = " " + lr_str
     line = line + lr_str + " | "
     
-    # Time
+    // Time
     line = line + string(time_ms) + " ms"
     
     line
 
-# Helper: check if should save at this step
+// Helper: check if should save at this step
 func check_should_save(int step, int every_n) bool:
     if every_n <= 0: return True
     return math_mod(step, every_n) == 0 and step > 0
 
-# Save manifest file listing all checkpoints
+// Save manifest file listing all checkpoints
 func save_manifest(string manifest_path, string[] checkpoints) void:
     content = "# NeurX Checkpoint Manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"
@@ -702,38 +702,38 @@ func save_manifest(string manifest_path, string[] checkpoints) void:
     
     write_text_file(manifest_path, content)
 
-# Get current time in milliseconds (platform-specific stub)
+// Get current time in milliseconds (platform-specific stub)
 func get_time_ms() int:
-    # In actual implementation, this would call system time
-    return 0  # Placeholder
+    // In actual implementation, this would call system time
+    return 0  // Placeholder
 
-# File operations (using enhanced std.fs)
+// File operations (using enhanced std.fs)
 func write_text_file(string path, string content) Result[void, Error]:
-    # Implementation depends on runtime IO capabilities
+    // Implementation depends on runtime IO capabilities
     pass
 
 def rename_file(string old_path, string new_path) void:
     pass
 
-# ============================================
+// ============================================
 // Entry Point (程序入口)
 // ============================================
 
 func main() int:
-    # Parse command-line arguments (simplified)
+    // Parse command-line arguments (simplified)
     GPTConfig config = default_gpt_config()
     
-    # Allow overrides via environment or args
-    # In real implementation, use proper CLI parsing
+    // Allow overrides via environment or args
+    // In real implementation, use proper CLI parsing
     
     println("NeurX GPT Training - AI Native Edition")
     println("======================================")
     println("")
     
-    # Run training
+    // Run training
     TrainingResult result = run_training(config)
     
-    # Return success if training completed normally
+    // Return success if training completed normally
     if result.state.trained and result.best_loss < 3.0:
         println("\n✓ Training completed successfully!")
         return 0

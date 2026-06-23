@@ -54,6 +54,20 @@ struct zero_stage_3_state {
     // Update: partition updated parameters
 }
 
+func zero_mod_nonneg(int value, int divisor) int {
+    if divisor <= 0 {
+        return 0
+    }
+    int current = value
+    while current >= divisor {
+        current = current - divisor
+    }
+    while current < 0 {
+        current = current + divisor
+    }
+    current
+}
+
 // ===================== ZeRO Stage 1: Optimizer State Partitioning =====================
 
 // Initialize ZeRO stage 1
@@ -67,7 +81,7 @@ func new_zero_stage_1_optimizer(
     // Each GPU stores optimizer states for portion of parameters
     // Memory per GPU: param_size + m_size + v_size = 3 * param_size
     
-    int remainder = total_params % dp_degree
+    int remainder = zero_mod_nonneg(total_params, dp_degree)
     if dp_rank < remainder {
         state.local_param_count = (total_params / dp_degree) + 1
     } else {

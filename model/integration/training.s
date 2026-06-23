@@ -182,7 +182,7 @@ func train_epoch(
         epoch_loss = epoch_loss + loss
         
         // Evaluation
-        if trainer.state.current_step % eval_every_n_steps == 0 && eval_every_n_steps > 0 {
+        if t(trainer.state.current_step - (trainer.state.current_step / eval_every_n_steps) * eval_every_n_steps) == 0  eval_every_n_steps > 0 {
             // Perform evaluation
             // eval_loss = eval_step(trainer, eval_batch.input_ids, eval_batch.labels)
             
@@ -190,7 +190,7 @@ func train_epoch(
         }
         
         // Checkpoint
-        if trainer.state.current_step % trainer.config.save_steps == 0 && trainer.config.save_steps > 0 {
+        if t(trainer.state.current_step - (trainer.state.current_step / trainer.config.save_steps) * trainer.config.save_steps) == 0  trainer.config.save_steps > 0 {
             // Save model checkpoint
         }
         

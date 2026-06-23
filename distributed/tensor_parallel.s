@@ -20,6 +20,20 @@ struct tensor_parallel_state {
     [][]double local_grads     // Local gradients
 }
 
+func tp_mod_nonneg(int value, int divisor) int {
+    if divisor <= 0 {
+        return 0
+    }
+    int current = value
+    while current >= divisor {
+        current = current - divisor
+    }
+    while current < 0 {
+        current = current + divisor
+    }
+    current
+}
+
 // Initialize tensor parallelism
 func new_tensor_parallel_config(int tp_degree, int tp_rank, []int tp_group) tensor_parallel_config {
     tensor_parallel_config cfg
@@ -37,7 +51,7 @@ func new_tensor_parallel_state(tensor_parallel_config cfg, int global_hidden_dim
     state.config = cfg
     
     // Validate divisibility
-    int remainder = global_hidden_dim % cfg.tp_degree
+    int remainder = tp_mod_nonneg(global_hidden_dim, cfg.tp_degree)
     if remainder != 0 {
         // log_error: "Hidden dimension not divisible by TP degree"
         return state
@@ -45,7 +59,7 @@ func new_tensor_parallel_state(tensor_parallel_config cfg, int global_hidden_dim
     
     state.local_hidden_dim = global_hidden_dim / cfg.tp_degree
     
-    remainder = global_num_heads % cfg.tp_degree
+    remainder = tp_mod_nonneg(global_num_heads, cfg.tp_degree)
     if remainder != 0 {
         // log_error: "Attention heads not divisible by TP degree"
         return state

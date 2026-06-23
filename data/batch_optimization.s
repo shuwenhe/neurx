@@ -48,7 +48,7 @@ func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimize
     }
     
     int i = 0
-    while i < len(sequences) && batch.total_tokens < target_tokens {
+    while i < len(sequences)  batch.total_tokens < target_tokens {
         batch.sequences[batch.sequences_in_batch] = sequences[i]
         batch.total_tokens = batch.total_tokens + sequences[i].num_tokens
         batch.sequences_in_batch = batch.sequences_in_batch + 1

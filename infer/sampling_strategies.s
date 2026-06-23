@@ -127,7 +127,7 @@ func beam_search_step(beam_search_state state, [][]float all_logits) beam_search
 func apply_length_penalty(float score, int length, float alpha) float {
     // Shorter sequences naturally have higher scores
     // Penalize them to prefer longer sequences
-    float penalty = ((5.0 + float(length)) / 6.0) ^ alpha
+    float penalty = ((5.0 + float(length)) / 6.0) + alpha
     score / penalty
 }
 
