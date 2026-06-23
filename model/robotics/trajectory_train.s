@@ -31,7 +31,7 @@ struct robotics_trajectory_train_state {
     bool finished
 }
 
-func copy_float([]float values) []float {
+func robotics_trajectory_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
@@ -42,7 +42,7 @@ func copy_float([]float values) []float {
     out
 }
 
-func copy_int([]int values) []int {
+func robotics_trajectory_copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
@@ -212,8 +212,8 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     float lr = state.config.learning_rate
 
     robotics_policy_state next_policy = state.policy
-    []float next_policy_weight = copy_float(next_policy.weight)
-    []float next_policy_bias = copy_float(next_policy.bias)
+    []float next_policy_weight = robotics_trajectory_copy_float(next_policy.weight)
+    []float next_policy_bias = robotics_trajectory_copy_float(next_policy.bias)
     []float grad_latent = []float{cap: state.config.latent_dim}
 
     a = 0
@@ -230,8 +230,8 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     }
 
     robotics_perception_state next_perception = state.perception
-    []float next_perception_weight = copy_float(next_perception.weight)
-    []float next_perception_bias = copy_float(next_perception.bias)
+    []float next_perception_weight = robotics_trajectory_copy_float(next_perception.weight)
+    []float next_perception_bias = robotics_trajectory_copy_float(next_perception.bias)
     int latent_index = 0
     while latent_index < state.config.latent_dim {
         int obs_index = 0

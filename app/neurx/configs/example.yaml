@@ -1,6 +1,0 @@
-app:
-  name: neurx-demo
-  bind: 0.0.0.0:8080
-runtime:
-  backend: s
-  model: demo/bert
