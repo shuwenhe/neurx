@@ -192,7 +192,7 @@ func batch_param_count(batch_state state) int {
 func batch_has_primitive(batch_state state, string primitive) bool {
     int i = 0
     while i < len(state.primitives) {
-        if state.primitives[i] == primitive {
+        if neurx.strings.strings_eq(neurx.strings.string_at(state.primitives, i), primitive) {
             return true
         }
         i = i + 1
@@ -203,7 +203,7 @@ func batch_has_primitive(batch_state state, string primitive) bool {
 func batch_has_param(batch_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
-        if state.params[i] == param {
+        if neurx.strings.strings_eq(neurx.strings.string_at(state.params, i), param) {
             return true
         }
         i = i + 1

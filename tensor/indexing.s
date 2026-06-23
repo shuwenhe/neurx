@@ -154,13 +154,12 @@ func masked_select(tensor a, tensor mask) tensor {
         }
         i = i + 1
     }
+    // Create shape array before tensor literal (S compiler limitation)
+    []int result_shape = []int{cap: 1}
+    result_shape[0] = count
     tensor {
         data: out,
-        shape: {
-            []int shape = []int{cap: 1}
-            shape[0] = count
-            shape
-        },
+        shape: result_shape,
         requires_grad: a.requires_grad || mask.requires_grad,
         grad: none,
     }
@@ -216,13 +215,12 @@ func nonzero(tensor a) tensor {
         }
         i = i + 1
     }
+    // Create shape array before tensor literal (S compiler limitation)
+    []int result_shape2 = []int{cap: 1}
+    result_shape2[0] = count
     tensor {
         data: out,
-        shape: {
-            []int shape = []int{cap: 1}
-            shape[0] = count
-            shape
-        },
+        shape: result_shape2,
         requires_grad: false,
         grad: none,
     }
@@ -415,13 +413,12 @@ func pad(tensor a, int before, int after, float value) tensor {
         out[i] = value
         i = i + 1
     }
+    // Create shape array before tensor literal (S compiler limitation)
+    []int result_shape3 = []int{cap: 1}
+    result_shape3[0] = total
     tensor {
         data: out,
-        shape: {
-            []int shape = []int{cap: 1}
-            shape[0] = total
-            shape
-        },
+        shape: result_shape3,
         requires_grad: a.requires_grad,
         grad: none,
     }
@@ -447,13 +444,12 @@ func slice(tensor a, int start, int end) tensor {
         out[i] = a.data[s + i]
         i = i + 1
     }
+    // Create shape array before tensor literal (S compiler limitation)
+    []int slice_shape = []int{cap: 1}
+    slice_shape[0] = total
     tensor {
         data: out,
-        shape: {
-            []int shape = []int{cap: 1}
-            shape[0] = total
-            shape
-        },
+        shape: slice_shape,
         requires_grad: a.requires_grad,
         grad: none,
     }
@@ -467,13 +463,12 @@ func gather(tensor a, []int indices) tensor {
         out[i] = a.data[indices[i]]
         i = i + 1
     }
+    // Create shape array before tensor literal (S compiler limitation)
+    []int gather_shape = []int{cap: 1}
+    gather_shape[0] = n
     tensor {
         data: out,
-        shape: {
-            []int shape = []int{cap: 1}
-            shape[0] = n
-            shape
-        },
+        shape: gather_shape,
         requires_grad: a.requires_grad,
         grad: none,
     }

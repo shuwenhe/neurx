@@ -297,7 +297,11 @@ func train_step_with_parallel(training_pipeline_state state, train_parallel_stat
         return next
     }
 
-    []float reduced = train_parallel_all_reduce_grad(parallel, [next.last_loss, next.metrics.score])
+    // Create array for gradient reduction (S compiler limitation)
+    []float grad_arr = []float{cap: 2}
+    grad_arr[0] = next.last_loss
+    grad_arr[1] = next.metrics.score
+    []float reduced = train_parallel_all_reduce_grad(parallel, grad_arr)
     int world_size = train_parallel_world_size(parallel)
     if world_size <= 0 {
         world_size = 1
@@ -312,14 +316,7 @@ func train_step_with_parallel(training_pipeline_state state, train_parallel_stat
         synced_score = reduced[1] / world_size
     }
 
-    training_metrics_state synced_metrics = build_metrics(
-        next.metrics.step,
-        next.metrics.epoch,
-        next.metrics.batch_index,
-        next.metrics.valid_tokens,
-        synced_loss,
-        synced_score,
-    )
+    training_metrics_state synced_metrics = build_metrics(next.metrics.step, next.metrics.epoch, next.metrics.batch_index, next.metrics.valid_tokens, synced_loss, synced_score)
 
     training_pipeline_state {
         loop: next.loop,

@@ -43,24 +43,24 @@ while gen < max_gen {
 // ─── Stage 2: Evaluate ───────────────────────────────────────────────────────
 
 []string promoted = agent_promoted_skill_names(evolved)
-string eval_report = "promoted_count=" + string(len(promoted))
+string eval_report = neurx.strings.concat2("promoted_count=", string(len(promoted)))
 int ei = 0
 while ei < len(promoted) {
     float sr = agent_skill_success_rate(evolved, promoted[ei])
     int sr_pct = int(sr * 100.0)
-    eval_report = eval_report + "\n  skill=" + promoted[ei] + " success_rate=" + string(sr_pct) + "%"
+    eval_report = neurx.strings.concat6(eval_report, "\n  skill=", neurx.strings.string_at(promoted, ei), " success_rate=", string(sr_pct), "%")
     ei = ei + 1
 }
 
 // ─── Stage 3: Candidate report ───────────────────────────────────────────────
 
 []string all_names = agent_skill_names(evolved)
-string candidate_report = "total_skills=" + string(len(all_names))
+string candidate_report = neurx.strings.concat2("total_skills=", string(len(all_names)))
 int ci = 0
 while ci < len(all_names) {
     float sr2 = agent_skill_success_rate(evolved, all_names[ci])
     int sr2_pct = int(sr2 * 100.0)
-    candidate_report = candidate_report + "\n  " + all_names[ci] + "=" + string(sr2_pct) + "%"
+    candidate_report = neurx.strings.concat6(candidate_report, "\n  ", neurx.strings.string_at(all_names, ci), "=", string(sr2_pct), "%")
     ci = ci + 1
 }
 

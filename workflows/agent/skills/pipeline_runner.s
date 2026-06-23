@@ -18,56 +18,14 @@ func run_agent_skills_workflow_state(int max_generations, float promotion_thresh
     skill_evolution_config config = new_skill_evolution_config(max_generations, promotion_threshold, retire_threshold, min_success_rate, max_avg_steps)
     skill_evolution_state state = new_skill_evolution_state(config)
 
-    state = skill_evolution_collect(state, workflow_skill_feedback(
-        "repo",
-        "verify",
-        "verify",
-        "task=verify action=verify observation=verified:route=repo;plan_ok=true;retrieved_ok=true",
-        1,
-        true,
-    ))
-    state = skill_evolution_step(state, workflow_skill_feedback(
-        "repo",
-        "verify",
-        "verify",
-        "task=verify action=verify observation=verified:route=repo;plan_ok=true;retrieved_ok=true",
-        1,
-        true,
-    ))
+    state = skill_evolution_collect(state, workflow_skill_feedback("repo", "verify", "verify", "task=verify action=verify observation=verified:route=repo;plan_ok=true;retrieved_ok=true", 1, true))
+    state = skill_evolution_step(state, workflow_skill_feedback("repo", "verify", "verify", "task=verify action=verify observation=verified:route=repo;plan_ok=true;retrieved_ok=true", 1, true))
 
-    state = skill_evolution_collect(state, workflow_skill_feedback(
-        "sql",
-        "verify",
-        "verify",
-        "task=verify action=verify observation=verified:route=sql;plan_ok=true;retrieved_ok=true;schema_context=true",
-        2,
-        true,
-    ))
-    state = skill_evolution_step(state, workflow_skill_feedback(
-        "sql",
-        "verify",
-        "verify",
-        "task=verify action=verify observation=verified:route=sql;plan_ok=true;retrieved_ok=true;schema_context=true",
-        2,
-        true,
-    ))
+    state = skill_evolution_collect(state, workflow_skill_feedback("sql", "verify", "verify", "task=verify action=verify observation=verified:route=sql;plan_ok=true;retrieved_ok=true;schema_context=true", 2, true))
+    state = skill_evolution_step(state, workflow_skill_feedback("sql", "verify", "verify", "task=verify action=verify observation=verified:route=sql;plan_ok=true;retrieved_ok=true;schema_context=true", 2, true))
 
-    state = skill_evolution_collect(state, workflow_skill_feedback(
-        "code",
-        "infer",
-        "infer:tool_unavailable",
-        "task=infer action=infer observation=tool_unavailable",
-        3,
-        false,
-    ))
-    state = skill_evolution_step(state, workflow_skill_feedback(
-        "code",
-        "infer",
-        "infer:tool_unavailable",
-        "task=infer action=infer observation=tool_unavailable",
-        3,
-        false,
-    ))
+    state = skill_evolution_collect(state, workflow_skill_feedback("code", "infer", "infer:tool_unavailable", "task=infer action=infer observation=tool_unavailable", 3, false))
+    state = skill_evolution_step(state, workflow_skill_feedback("code", "infer", "infer:tool_unavailable", "task=infer action=infer observation=tool_unavailable", 3, false))
 
     state
 }

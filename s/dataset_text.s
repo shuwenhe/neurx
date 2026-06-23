@@ -25,7 +25,7 @@ func copy_ints([]int values) []int {
 func has_string([]string values, string target) bool {
     int i = 0
     while i < len(values) {
-        if values[i] == target {
+        if neurx.strings.strings_eq(neurx.strings.string_at(values, i), target) {
             return true
         }
         i = i + 1
@@ -39,11 +39,13 @@ func count_lines(string text) int {
     int i = 0
     bool has_content = false
     while i < n {
-        string ch = text[i]
-        if ch == "\n" {
+        string ch = neurx.strings.substring(text, i, i + 1)
+        int chi = int(string(ch))
+        // '\n' ASCII is 10, '\r' ASCII is 13
+        if chi == 10 {
             lines = lines + 1
             has_content = false
-        } else if ch != "\r" {
+        } else if chi != 13 {
             has_content = true
         }
         i = i + 1
@@ -65,22 +67,24 @@ func split_lines(string text) []string {
     int i = 0
     int line_idx = 0
     while i < n {
-        string ch = text[i]
-        if ch == "\n" {
+        string ch = neurx.strings.substring(text, i, i + 1)
+        int chi = int(string(ch))
+        // '\n' ASCII is 10, '\r' ASCII is 13
+        if chi == 10 {
             string cleaned = trim(current)
-            if cleaned != "" {
-                lines[line_idx] = cleaned
+            if !neurx.strings.strings_eq(cleaned, "") {
+                neurx.strings.string_set(lines, line_idx, cleaned)
                 line_idx = line_idx + 1
             }
             current = ""
-        } else if ch != "\r" {
-            current = current + ch
+        } else if chi != 13 {
+            current = neurx.strings.concat2(current, ch)
         }
         i = i + 1
     }
     string cleaned_tail = trim(current)
-    if cleaned_tail != "" {
-        lines[line_idx] = cleaned_tail
+    if !neurx.strings.strings_eq(cleaned_tail, "") {
+        neurx.strings.string_set(lines, line_idx, cleaned_tail)
         line_idx = line_idx + 1
     }
     if line_idx == 0 {
@@ -93,7 +97,7 @@ func split_lines(string text) []string {
     []string out = []string{cap: line_idx}
     int j = 0
     while j < line_idx {
-        out[j] = lines[j]
+        neurx.strings.string_set(out, j, neurx.strings.string_at(lines, j))
         j = j + 1
     }
     out
@@ -104,8 +108,10 @@ func build_vocab(string text) []string {
     []string vocab = []string{cap: n}
     int i = 0
     while i < n {
-        string ch = text[i]
-        if ch != "\r" && !has_string(vocab, ch) {
+        string ch = neurx.strings.substring(text, i, i + 1)
+        int chi = int(string(ch))
+        // '\r' ASCII is 13
+        if chi != 13 && !has_string(vocab, ch) {
             vocab.push(ch)
         }
         i = i + 1
@@ -116,7 +122,7 @@ func build_vocab(string text) []string {
 func vocab_index([]string vocab, string ch) int {
     int i = 0
     while i < len(vocab) {
-        if vocab[i] == ch {
+        if neurx.strings.strings_eq(neurx.strings.string_at(vocab, i), ch) {
             return i
         }
         i = i + 1
@@ -129,8 +135,10 @@ func encode_text(string text, []string vocab) []int {
     []int token_ids = []int{cap: n}
     int i = 0
     while i < n {
-        string ch = text[i]
-        if ch != "\r" {
+        string ch = neurx.strings.substring(text, i, i + 1)
+        int chi = int(string(ch))
+        // '\r' ASCII is 13
+        if chi != 13 {
             int idx = vocab_index(vocab, ch)
             if idx < 0 {
                 idx = 0
