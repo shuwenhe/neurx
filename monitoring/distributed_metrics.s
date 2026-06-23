@@ -1,0 +1,491 @@
+// Distributed Monitoring and Observability System
+// Real-time performance monitoring for 256+ GPU training
+// Includes metrics collection, anomaly detection, and dashboarding
+
+module distributed_monitoring
+
+// Metric types
+enum metric_type {
+    COUNTER,        // Monotonically increasing (steps, tokens)
+    GAUGE,          // Point-in-time value (throughput, memory)
+    HISTOGRAM,      // Distribution (latencies)
+    TIMER,          // Time measurement
+}
+
+// Metric definition
+structure metric_definition {
+    name: string
+    description: string
+    mtype: metric_type
+    unit: string
+    tags: vector  // Key-value pairs for filtering
+}
+
+// Single metric data point
+structure metric_value {
+    timestamp: float
+    value: float
+    rank: int
+    tags: vector
+}
+
+// Training metrics snapshot
+structure training_metrics {
+    global_step: int
+    epoch: int
+    timestamp: float
+    
+    // Loss metrics
+    loss: float
+    loss_ema: float        // Exponential moving average
+    loss_std: float        // Standard deviation
+    
+    // Throughput
+    tokens_per_second: float
+    samples_per_second: float
+    tflops_per_gpu: float
+    
+    // Timing breakdown
+    forward_time: float
+    backward_time: float
+    optimizer_time: float
+    communication_time: float
+    data_loading_time: float
+    
+    // Memory usage
+    reserved_memory_gb: float
+    allocated_memory_gb: float
+    peak_memory_gb: float
+    
+    // Communication
+    all_reduce_time: float
+    all_to_all_time: float
+    all_gather_time: float
+    reduce_scatter_time: float
+    communication_volume_gb: float
+    
+    // Gradient statistics
+    gradient_norm: float
+    gradient_max: float
+    gradient_min: float
+    num_nan_gradients: int
+}
+
+// Per-rank metrics
+structure rank_metrics {
+    rank: int
+    metrics: training_metrics
+    
+    // Rank-specific info
+    gpu_utilization: float
+    gpu_memory_used_gb: float
+    network_sent_gb: float
+    network_recv_gb: float
+}
+
+// Metrics aggregator
+structure metrics_aggregator {
+    window_size: int                    // Number of steps to aggregate
+    history: vector                     // Historical metrics
+    current_metrics: training_metrics
+    
+    // Distributed
+    all_rank_metrics: vector            // Metrics from all ranks
+    
+    // Statistics
+    loss_history: vector
+    throughput_history: vector
+    
+    // Thresholds for anomalies
+    loss_spike_threshold: float
+    throughput_drop_threshold: float
+    memory_threshold_gb: float
+}
+
+// Anomaly detection
+structure anomaly_detector {
+    // Thresholds
+    loss_divergence_threshold: float     // 5x growth = anomaly
+    gradient_explosion_threshold: float  // 1e8
+    throughput_drop_threshold: float     // 20% drop
+    
+    // State
+    prev_loss: float
+    prev_throughput: float
+    anomaly_count: int
+}
+
+// Initialize metrics aggregator
+fn new_metrics_aggregator(window_size: int): metrics_aggregator {
+    var agg: metrics_aggregator
+    agg.window_size = window_size
+    agg.history = allocate_vector(window_size, 0.0)
+    
+    agg.loss_history = allocate_vector(window_size, 0.0)
+    agg.throughput_history = allocate_vector(window_size, 0.0)
+    
+    agg.loss_spike_threshold = 2.0      // 2x increase = spike
+    agg.throughput_drop_threshold = 0.8 // 20% drop
+    agg.memory_threshold_gb = 78.0      // 80GB threshold for H100
+    
+    return agg
+}
+
+// Collect metrics for current training step
+fn collect_training_metrics(
+    global_step: int,
+    epoch: int,
+    loss: float,
+    predictions: vector,
+    targets: vector,
+    model_params: vector,
+    gradients: vector,
+    forward_time_ms: float,
+    backward_time_ms: float,
+    optimizer_time_ms: float,
+    communication_time_ms: float,
+    data_load_time_ms: float,
+    batch_size: int,
+    sequence_length: int,
+    reserved_memory_gb: float,
+    allocated_memory_gb: float,
+    peak_memory_gb: float,
+    comm_volume_gb: float
+): training_metrics {
+    
+    var metrics: training_metrics
+    metrics.global_step = global_step
+    metrics.epoch = epoch
+    metrics.timestamp = get_time()
+    
+    // Loss metrics
+    metrics.loss = loss
+    metrics.loss_ema = 0.9 * metrics.loss_ema + 0.1 * loss  // Exponential moving average
+    
+    // Compute throughput
+    var total_time_ms: float = forward_time_ms + backward_time_ms + optimizer_time_ms + communication_time_ms
+    var tokens_processed: int = batch_size * sequence_length
+    metrics.tokens_per_second = float(tokens_processed) / (total_time_ms / 1000.0)
+    metrics.samples_per_second = float(batch_size) / (total_time_ms / 1000.0)
+    
+    // Estimate theoretical TFLOPS
+    // For 2T model: ~2 * 2T * 8K = 32e15 FLOPs per forward pass
+    var estimated_flops: float = 32.0e15  // 32 PetaFLOPs per forward
+    metrics.tflops_per_gpu = (estimated_flops * 2.0) / (total_time_ms / 1000.0) / 1e12  // Include backward
+    
+    // Timing breakdown
+    metrics.forward_time = forward_time_ms
+    metrics.backward_time = backward_time_ms
+    metrics.optimizer_time = optimizer_time_ms
+    metrics.communication_time = communication_time_ms
+    metrics.data_loading_time = data_load_time_ms
+    
+    // Memory usage
+    metrics.reserved_memory_gb = reserved_memory_gb
+    metrics.allocated_memory_gb = allocated_memory_gb
+    metrics.peak_memory_gb = peak_memory_gb
+    
+    // Communication volume
+    metrics.communication_volume_gb = comm_volume_gb
+    
+    // Gradient statistics
+    metrics.gradient_norm = compute_vector_norm(gradients)
+    metrics.gradient_max = compute_vector_max(gradients)
+    metrics.gradient_min = compute_vector_min(gradients)
+    
+    var num_nan: int = 0
+    for i in range(0, length(gradients)) {
+        if is_nan(gradients[i]) {
+            num_nan = num_nan + 1
+        }
+    }
+    metrics.num_nan_gradients = num_nan
+    
+    return metrics
+}
+
+// Collect per-rank metrics
+fn collect_rank_metrics(
+    rank: int,
+    metrics: training_metrics,
+    gpu_utilization_percent: float,
+    gpu_memory_used_gb: float,
+    network_sent_gb: float,
+    network_recv_gb: float
+): rank_metrics {
+    
+    var rank_m: rank_metrics
+    rank_m.rank = rank
+    rank_m.metrics = metrics
+    rank_m.gpu_utilization = gpu_utilization_percent
+    rank_m.gpu_memory_used_gb = gpu_memory_used_gb
+    rank_m.network_sent_gb = network_sent_gb
+    rank_m.network_recv_gb = network_recv_gb
+    
+    return rank_m
+}
+
+// Aggregate metrics across all ranks
+fn aggregate_metrics_across_ranks(
+    all_rank_metrics: vector,
+    num_ranks: int,
+    aggregator: metrics_aggregator
+): training_metrics {
+    
+    var agg_metrics: training_metrics
+    
+    if num_ranks <= 0 {
+        return agg_metrics
+    }
+    
+    // Initialize aggregated metrics
+    agg_metrics.global_step = all_rank_metrics[0].metrics.global_step
+    agg_metrics.epoch = all_rank_metrics[0].metrics.epoch
+    agg_metrics.timestamp = get_time()
+    
+    // Aggregate over all ranks
+    var sum_loss: float = 0.0
+    var sum_tokens_per_sec: float = 0.0
+    var sum_tflops: float = 0.0
+    var max_memory: float = 0.0
+    var sum_comm_time: float = 0.0
+    var sum_comm_volume: float = 0.0
+    
+    for i in range(0, num_ranks) {
+        var rank_m: rank_metrics = all_rank_metrics[i].metrics
+        sum_loss = sum_loss + rank_m.loss
+        sum_tokens_per_sec = sum_tokens_per_sec + rank_m.tokens_per_second
+        sum_tflops = sum_tflops + rank_m.tflops_per_gpu
+        max_memory = max(max_memory, rank_m.peak_memory_gb)
+        sum_comm_time = sum_comm_time + rank_m.communication_time
+        sum_comm_volume = sum_comm_volume + rank_m.communication_volume_gb
+    }
+    
+    // Average and aggregate
+    agg_metrics.loss = sum_loss / float(num_ranks)
+    agg_metrics.tokens_per_second = sum_tokens_per_sec / float(num_ranks)
+    agg_metrics.tflops_per_gpu = sum_tflops / float(num_ranks)
+    agg_metrics.peak_memory_gb = max_memory
+    agg_metrics.communication_time = sum_comm_time / float(num_ranks)
+    agg_metrics.communication_volume_gb = sum_comm_volume
+    
+    return agg_metrics
+}
+
+// Detect anomalies in metrics
+fn detect_anomalies(
+    current_metrics: training_metrics,
+    detector: anomaly_detector
+): (bool, string) {  // Returns (is_anomaly, description)
+    
+    var is_anomaly: bool = false
+    var description: string = ""
+    
+    // Check 1: Loss divergence
+    if detector.prev_loss > 0.0 {
+        var loss_ratio: float = current_metrics.loss / detector.prev_loss
+        
+        if loss_ratio > detector.loss_divergence_threshold {
+            is_anomaly = true
+            description = "Loss divergence: " + str(loss_ratio) + "x increase"
+        }
+    }
+    detector.prev_loss = current_metrics.loss
+    
+    // Check 2: Gradient explosion
+    if current_metrics.gradient_max > detector.gradient_explosion_threshold {
+        is_anomaly = true
+        description = "Gradient explosion: max_grad = " + str(current_metrics.gradient_max)
+    }
+    
+    // Check 3: Throughput drop
+    if detector.prev_throughput > 0.0 {
+        var throughput_ratio: float = current_metrics.tokens_per_second / detector.prev_throughput
+        
+        if throughput_ratio < detector.throughput_drop_threshold {
+            is_anomaly = true
+            description = "Throughput drop: " + str(throughput_ratio) + "x decrease"
+        }
+    }
+    detector.prev_throughput = current_metrics.tokens_per_second
+    
+    // Check 4: NaN in loss or gradients
+    if is_nan(current_metrics.loss) || current_metrics.num_nan_gradients > 0 {
+        is_anomaly = true
+        description = "NaN detected in loss or gradients"
+    }
+    
+    // Check 5: Memory threshold exceeded
+    if current_metrics.peak_memory_gb > detector.throughput_drop_threshold {
+        is_anomaly = true
+        description = "Memory usage exceeded threshold"
+    }
+    
+    if is_anomaly {
+        detector.anomaly_count = detector.anomaly_count + 1
+    }
+    
+    return (is_anomaly, description)
+}
+
+// Compute timing breakdown percentages
+fn compute_timing_breakdown(
+    metrics: training_metrics
+): (float, float, float, float, float) {  // Returns %forward, %backward, %optimizer, %communication, %data_load
+    
+    var total_time: float = metrics.forward_time + metrics.backward_time + metrics.optimizer_time +
+                            metrics.communication_time + metrics.data_loading_time
+    
+    if total_time <= 0.0 {
+        return (0.0, 0.0, 0.0, 0.0, 0.0)
+    }
+    
+    var pct_forward: float = (metrics.forward_time / total_time) * 100.0
+    var pct_backward: float = (metrics.backward_time / total_time) * 100.0
+    var pct_optimizer: float = (metrics.optimizer_time / total_time) * 100.0
+    var pct_communication: float = (metrics.communication_time / total_time) * 100.0
+    var pct_data_load: float = (metrics.data_loading_time / total_time) * 100.0
+    
+    return (pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load)
+}
+
+// Identify communication bottlenecks
+fn identify_communication_bottlenecks(
+    metrics: training_metrics,
+    num_ranks: int,
+    num_layers: int
+): string {
+    
+    var bottleneck_info: string = ""
+    
+    // Communication overhead ratio
+    var total_compute_time: float = metrics.forward_time + metrics.backward_time + metrics.optimizer_time
+    var comm_ratio: float = metrics.communication_time / total_compute_time
+    
+    if comm_ratio > 0.2 {
+        bottleneck_info = "High communication overhead: " + str(comm_ratio * 100.0) + "%"
+    }
+    
+    // Per-layer communication
+    var avg_comm_per_layer: float = metrics.communication_time / float(num_layers)
+    
+    if avg_comm_per_layer > 100.0 {
+        bottleneck_info = bottleneck_info + "\nLarge all-reduce latency: " + str(avg_comm_per_layer) + "ms per layer"
+    }
+    
+    // Collective operation analysis
+    var all_reduce_ratio: float = metrics.all_reduce_time / metrics.communication_time
+    if all_reduce_ratio > 0.5 {
+        bottleneck_info = bottleneck_info + "\nAll-reduce dominates: " + str(all_reduce_ratio * 100.0) + "%"
+    }
+    
+    return bottleneck_info
+}
+
+// Print metrics summary
+fn print_metrics_summary(
+    metrics: training_metrics,
+    aggregator: metrics_aggregator
+): void {
+    
+    var (pct_fwd, pct_bwd, pct_opt, pct_comm, pct_data) = compute_timing_breakdown(metrics)
+    
+    // Print header
+    println("===== Training Metrics (Step " + str(metrics.global_step) + ") =====")
+    
+    // Loss metrics
+    println("Loss: " + str(metrics.loss) + " (EMA: " + str(metrics.loss_ema) + ")")
+    
+    // Throughput
+    println("Throughput: " + str(metrics.tokens_per_second) + " tokens/sec")
+    println("TFLOPS/GPU: " + str(metrics.tflops_per_gpu) + " TFLOPS")
+    
+    // Timing breakdown
+    println("Timing: " + str(pct_fwd) + "% fwd, " + str(pct_bwd) + "% bwd, " + str(pct_opt) + "% opt, " +
+            str(pct_comm) + "% comm, " + str(pct_data) + "% data")
+    
+    // Memory
+    println("Memory: " + str(metrics.allocated_memory_gb) + "GB / " + str(metrics.reserved_memory_gb) + "GB reserved")
+    
+    // Gradients
+    println("Grad norm: " + str(metrics.gradient_norm) + " (max: " + str(metrics.gradient_max) + ")")
+}
+
+// Export metrics to file for dashboarding
+fn export_metrics_to_file(
+    metrics: training_metrics,
+    output_file: string
+): void {
+    
+    // Write metrics as JSON or CSV
+    // Can be read by Tensorboard, Weights&Biases, etc.
+}
+
+// Initialize anomaly detector
+fn new_anomaly_detector(): anomaly_detector {
+    var detector: anomaly_detector
+    detector.loss_divergence_threshold = 5.0
+    detector.gradient_explosion_threshold = 1e8
+    detector.throughput_drop_threshold = 0.8
+    detector.prev_loss = 0.0
+    detector.prev_throughput = 0.0
+    detector.anomaly_count = 0
+    
+    return detector
+}
+
+// Helper: Compute vector norm
+fn compute_vector_norm(v: vector): float {
+    var norm_sq: float = 0.0
+    
+    for i in range(0, length(v)) {
+        norm_sq = norm_sq + v[i] * v[i]
+    }
+    
+    return sqrt(norm_sq)
+}
+
+// Helper: Compute vector max
+fn compute_vector_max(v: vector): float {
+    var max_val: float = -inf
+    
+    for i in range(0, length(v)) {
+        if abs(v[i]) > max_val {
+            max_val = abs(v[i])
+        }
+    }
+    
+    return max_val
+}
+
+// Helper: Compute vector min
+fn compute_vector_min(v: vector): float {
+    var min_val: float = inf
+    
+    for i in range(0, length(v)) {
+        if abs(v[i]) < min_val {
+            min_val = abs(v[i])
+        }
+    }
+    
+    return min_val
+}
+
+// Helper: Get time
+fn get_time(): float {
+    return 0.0
+}
+
+// Helper: Is NaN
+fn is_nan(val: float): bool {
+    return val != val
+}
+
+// Helper: Print
+fn println(msg: string): void {
+}
+
+// Recommended monitoring config for 2T model
+fn recommended_monitoring_config_2t(): metrics_aggregator {
+    return new_metrics_aggregator(1000)
+}

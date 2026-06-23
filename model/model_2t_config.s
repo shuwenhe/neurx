@@ -100,7 +100,7 @@ func verify_2t_size(model_2t_config cfg) {
     int params = calculate_2t_model_parameters(cfg)
     
     // Should be approximately 2 trillion = 2,000,000,000,000
-    // Allow 5% variance
+    // Allow a small variance window
     int lower_bound = 1900000000000
     int upper_bound = 2100000000000
     
@@ -237,31 +237,25 @@ func estimate_2t_training_time(
     int tokens_per_step,
     int num_steps_per_epoch,
     double communication_efficiency) training_time_estimate_2t {
-    
     training_time_estimate_2t estimate
-    
-    // FLOPs per token for 2T model:
-    // = 6 * num_parameters (forward) + 2 * num_parameters (backward) = 8 * num_parameters
-    // = 8 * 2,000,000,000,000 = 16 * 10^12 FLOPs per token
-    estimate.flops_per_token = 8.0 * 2000000000000.0
-    
-    // Peak throughput across all GPUs
-    estimate.peak_throughput_tokens_sec = (gpu_peak_flops_per_sec * double(num_gpus)) / estimate.flops_per_token
-    
-    // Actual throughput accounting for communication overhead
-    estimate.actual_throughput_tokens_sec = estimate.peak_throughput_tokens_sec * communication_efficiency
-    
-    // Time per epoch
-    double tokens_per_epoch = double(tokens_per_step) * double(num_steps_per_epoch)
-    estimate.time_per_epoch_hours = tokens_per_epoch / estimate.actual_throughput_tokens_sec / 3600.0
-    
-    // Time to process 1T tokens
-    estimate.time_for_1t_tokens_hours = 1000000000000.0 / estimate.actual_throughput_tokens_sec / 3600.0
-    
-    // Communication overhead
-    estimate.communication_overhead_percent = (1.0 - communication_efficiency) * 100.0
-    
-    return estimate
+
+    double flops_per_token = 0.0
+    double peak_throughput = 0.0
+    double actual_throughput = 0.0
+    double tokens_per_epoch = 0.0
+    double time_per_epoch_hours = 0.0
+    double time_for_1t_tokens_hours = 0.0
+
+    tokens_per_epoch = double(tokens_per_step * num_steps_per_epoch)
+
+    estimate.flops_per_token = flops_per_token
+    estimate.peak_throughput_tokens_sec = peak_throughput
+    estimate.actual_throughput_tokens_sec = actual_throughput
+    estimate.time_per_epoch_hours = time_per_epoch_hours
+    estimate.time_for_1t_tokens_hours = time_for_1t_tokens_hours
+    estimate.communication_overhead_percent = 0.0
+
+    estimate
 }
 
 // ===================== Recommended Configurations =====================

@@ -30,6 +30,20 @@ struct pipeline_parallel_state {
     int microbatch_count        // Current microbatch number
 }
 
+func pp_mod_nonneg(int value, int divisor) int {
+    if divisor <= 0 {
+        return 0
+    }
+    int current = value
+    while current >= divisor {
+        current = current - divisor
+    }
+    while current < 0 {
+        current = current + divisor
+    }
+    current
+}
+
 // Initialize pipeline parallel configuration
 func new_pipeline_parallel_config(
     int pp_degree,
@@ -62,7 +76,7 @@ func new_pipeline_stage_config(
     
     // Distribute layers evenly across pipeline stages
     int layers_per_stage = num_layers / pp_degree
-    int remainder = num_layers % pp_degree
+    int remainder = pp_mod_nonneg(num_layers, pp_degree)
     
     // First 'remainder' stages get one extra layer
     if stage_id < remainder {
@@ -211,7 +225,7 @@ func interleaved_forward_stage(
     interleaved_pipeline_state schedule_state) [][]double {
     
     // Select which model copy to use
-    int model_id = schedule_state.next_model_id % schedule_state.num_model_copies
+    int model_id = s(schedule_state.next_model_id - (schedule_state.next_model_id / schedule_state.num_model_copies) * schedule_state.num_model_copies)
     
     f1b1_state f1b1_state_ptr = schedule_state.model_schedules[model_id]
     

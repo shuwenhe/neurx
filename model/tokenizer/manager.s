@@ -101,7 +101,7 @@ func encode_sequence(tokenizer_manager mgr, string text) []int {
     }
     
     // Truncate if needed
-    if mgr.truncate_to_max_length && len(token_ids) > mgr.max_sequence_length {
+    if mgr.truncate_to_max_length  len(token_ids) > mgr.max_sequence_length {
         // Truncate to max_sequence_length
     }
     
@@ -141,7 +141,7 @@ func decode_sequence(tokenizer_manager mgr, []int token_ids) string {
         int token_id = token_ids[i]
         
         // Convert token ID back to character
-        if token_id >= 0 && token_id < mgr.vocab_size {
+        if token_id >= 0  token_id < mgr.vocab_size {
             // char c = chr(token_id)
             // text = text + c
         }
@@ -176,7 +176,7 @@ func pad_sequences(tokenizer_manager mgr, [][]int sequences, int target_length) 
         
         // Copy original tokens
         int j = 0
-        while j < len(seq) && j < target_length {
+        while j < len(seq)  j < target_length {
             padded_seq[j] = seq[j]
             j = j + 1
         }

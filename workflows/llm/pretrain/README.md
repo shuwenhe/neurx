@@ -28,4 +28,10 @@ Supported config keys:
 - `save_interval`
 
 The runner compiles a temporary S entrypoint and passes those config values into the pretrain workflow state.
-The canonical model implementation should be called from `model/llm/`.
+The current workflow entrypoint now drives `neurx.distributed.two_t_runtime`, which:
+
+- loads real text data through the shared dataloader path
+- writes rank-specific TP checkpoint shards
+- restores optimizer, loader, and RNG metadata from the workflow checkpoint sidecar
+
+The canonical model implementation is still shared from `model/llm/`, but the workflow launcher now targets the 2T runtime / checkpoint stack.

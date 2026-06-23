@@ -193,7 +193,7 @@ func new_absolute_position_embedding(position_embedding_config cfg) absolute_pos
             double div_term = exp((double(d) / double(hidden_dim)) * -log(10000.0))
             double angle = double(pos) * div_term
             
-            if d % 2 == 0 {
+            if d(d - (d / 2) * 2) == 0 {
                 embedding[pos][d] = float(sin(angle))
             } else {
                 embedding[pos][d] = float(cos(angle))

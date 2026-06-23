@@ -20,6 +20,20 @@ struct sequence_parallel_state {
     int hidden_dim
 }
 
+func sp_mod_nonneg(int value, int divisor) int {
+    if divisor <= 0 {
+        return 0
+    }
+    int current = value
+    while current >= divisor {
+        current = current - divisor
+    }
+    while current < 0 {
+        current = current + divisor
+    }
+    current
+}
+
 // Initialize sequence parallelism config
 func new_sequence_parallel_config(
     int sp_degree,
@@ -51,7 +65,7 @@ func new_sequence_parallel_state(
     state.hidden_dim = hidden_dim
     
     // Check divisibility
-    int remainder = global_seq_len % cfg.sp_degree
+    int remainder = sp_mod_nonneg(global_seq_len, cfg.sp_degree)
     if remainder != 0 {
         // log_warning: "Sequence length not divisible by SP degree, using ceiling division"
     }

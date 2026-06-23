@@ -45,6 +45,20 @@ struct distributed_training_state {
     int samples_since_sync
 }
 
+func dtc_mod_nonneg(int value, int divisor) int {
+    if divisor <= 0 {
+        return 0
+    }
+    int current = value
+    while current >= divisor {
+        current = current - divisor
+    }
+    while current < 0 {
+        current = current + divisor
+    }
+    current
+}
+
 // Calculate parallel decomposition
 func calculate_parallel_decomposition(
     int world_size,
@@ -61,7 +75,7 @@ func calculate_parallel_decomposition(
     // Data parallel is remaining: dp_degree = world_size / (tp_degree * pp_degree)
     int product = config.tp_degree * config.pp_degree
     
-    if world_size % product == 0 {
+    if dtc_mod_nonneg(world_size, product) == 0 {
         config.dp_degree = world_size / product
     } else {
         // log_error: "Parallel degrees don't divide world size evenly"
@@ -90,10 +104,10 @@ func new_distributed_training_state(
     state.epoch_count = 0
     
     // Calculate local ranks within each parallel group
-    state.tp_rank = global_rank % config.tp_degree
-    state.pp_rank = (global_rank / config.tp_degree) % config.pp_degree
+    state.tp_rank = dtc_mod_nonneg(global_rank, config.tp_degree)
+    state.pp_rank = dtc_mod_nonneg(global_rank / config.tp_degree, config.pp_degree)
     state.dp_rank = global_rank / (config.tp_degree * config.pp_degree)
-    state.sp_rank = state.tp_rank % config.sp_degree  // Reuse TP groups for SP
+    state.sp_rank = dtc_mod_nonneg(state.tp_rank, config.sp_degree)  // Reuse TP groups for SP
     
     // Build processor groups
     // TP group: GPUs with same pp_rank and dp_rank
@@ -151,7 +165,7 @@ func distributed_forward_pass(
     
     while layer_idx < total_layers {
         // Check if this layer is on current GPU
-        if (layer_idx % config.pp_degree) == dist_state.pp_rank {
+        if (l(layer_idx - (layer_idx / config.pp_degree) * config.pp_degree)) == dist_state.pp_rank {
             
             // Step 2a: Apply TP + SP within layer
             // TP: column-parallel for Q, K, V
@@ -163,14 +177,14 @@ func distributed_forward_pass(
             
             // Send output to next PP stage
             if dist_state.pp_rank < (config.pp_degree - 1) {
-                int next_stage = (dist_state.pp_rank + 1) % config.pp_degree
+                int next_stage = (((dist_state.pp_rank + 1) - ((dist_state.pp_rank + 1) / config.pp_degree) * config.pp_degree)
                 // send_to_stage(layer_output, dest=next_stage, layer=layer_idx)
             }
             
         } else {
             // Receive from previous PP stage
             if dist_state.pp_rank > 0 || layer_idx > 0 {
-                int prev_stage = (dist_state.pp_rank - 1 + config.pp_degree) % config.pp_degree
+                int prev_stage = (((dist_state.pp_rank - 1 + config.pp_degree) - ((dist_state.pp_rank - 1 + config.pp_degree) / config.pp_degree) * config.pp_degree)
                 // layer_output = receive_from_stage(src=prev_stage, layer=layer_idx)
             }
         }
@@ -200,20 +214,20 @@ func distributed_backward_pass(
     while layer_idx >= 0 {
         
         // Backward through this layer (if it's on this GPU)
-        if (layer_idx % config.pp_degree) == dist_state.pp_rank {
+        if (l(layer_idx - (layer_idx / config.pp_degree) * config.pp_degree)) == dist_state.pp_rank {
             
             // Backward: compute gradients w.r.t. weights and activations
             // current_grad = backward_transformer_layer(current_grad, ...)
             
             // Send gradient to previous stage
-            if layer_idx > 0 && (layer_idx - 1) % config.pp_degree != dist_state.pp_rank {
-                int prev_stage = ((layer_idx - 1) / config.pp_degree) % config.pp_degree
+            if layer_idx > 0  dtc_mod_nonneg(layer_idx - 1, config.pp_degree) != dist_state.pp_rank {
+                int prev_stage = dtc_mod_nonneg((layer_idx - 1) / config.pp_degree, config.pp_degree)
                 // send_gradient(current_grad, dest=prev_stage)
             }
             
         } else {
             // Receive gradient from next stage
-            int next_stage = ((layer_idx + 1) / config.pp_degree) % config.pp_degree
+            int next_stage = dtc_mod_nonneg((layer_idx + 1) / config.pp_degree, config.pp_degree)
             // current_grad = receive_gradient(src=next_stage)
         }
         
@@ -345,7 +359,7 @@ func calculate_distributed_metrics(
     // For TP: small (local to TP group)
     // For PP: moderate (GPU-to-GPU)
     // For DP+ZeRO: significant
-    metrics.communication_time_percent = 15.0  // Typical: 10-20% for large models
+    metrics.communication_time_percent = 15.0  // Typical: 10-(20 - (20 / for) * for) large models
     
     metrics.computation_time_percent = 100.0 - metrics.communication_time_percent
     
@@ -383,7 +397,7 @@ func distributed_training_loop_2t(
         distributed_optimizer_step(model_params, grads, learning_rate, dist_state)
         
         // Logging
-        if step % log_interval == 0 && dist_state.global_rank == 0 {
+        if s(step - (step / log_interval) * log_interval) == 0  dist_state.global_rank == 0 {
             // log_info("Step " + str(step) + " Loss: " + str(loss))
         }
         
