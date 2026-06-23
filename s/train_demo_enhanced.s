@@ -255,7 +255,7 @@ def print_model_summary(GPTModel self):
     // Count by component
     token_params = count_parameters(self.token_embed)
     pos_params = count_parameters(self.pos_embed)
-    block_params = sum(count_parameters(b) for b in self.blocks) if hasattr(self.blocks, '__len__') else 0
+    block_params = count_parameters(self.blocks)
     norm_params = count_parameters(self.final_norm)
     head_params = count_parameters(self.output_head)
     
