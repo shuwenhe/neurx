@@ -1,4 +1,4 @@
-package neurx.pretrain.optimizer
+package neurx.pretrain.optimizer.pretrain_adamw
 
 use neurx.opt.optim.{adamw_optimizer, adamw_step_output, adamw_step_state, new_adamw, scale_tensor}
 use neurx.opt.scheduler.{lr_scheduler, new_named_lr_scheduler, scheduler_current_lr, scheduler_load_state_dict, scheduler_state_dict, scheduler_step}
@@ -64,10 +64,10 @@ func pretrain_optimizer_global_norm3(tensor a, tensor b, tensor c) float {
     if guess < 1.0 {
         guess = 1.0
     }
-    int i = 0
-    while i < 6 {
+    int j = 0
+    while j < 6 {
         guess = 0.5 * (guess + total_sq / guess)
-        i = i + 1
+        j = j + 1
     }
     guess
 }
