@@ -359,7 +359,7 @@ func length([]float v) int {
     return len(v)
 }
 
-func length([]int v) int {
+func length_int([]int v) int {
     return len(v)
 }
 

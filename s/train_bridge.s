@@ -5,7 +5,6 @@ package neurx.train.bridge
 
 use std.fs.write_text_file as write_file
 use std.fs.read_to_string as read_file
-use std.io.println as println
 
 // ============================================
 // Checkpoint I/O (对应 s/checkpoint.s)

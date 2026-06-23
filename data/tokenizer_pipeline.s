@@ -173,7 +173,7 @@ func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_st
         string line = lines[rank]
         
         // Skip empty lines and comments
-        if len(line) == 0 or line[0] == '#':
+        if len(line) == 0 or line[0] == 35 {
             rank = rank + 1
             continue
         

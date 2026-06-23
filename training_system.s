@@ -39,13 +39,7 @@ type TrainingMetrics struct {
 // 2. 数学工具函数
 // =====================================================================
 
-func modulo(a int, b int) int {
-    result := a
-    for result >= b {
-        result = result - b
-    }
-    return result
-}
+// % 操作符已在 S 编译器中原生支持
 
 func exp_s(x float) float {
     if x > 20.0 {
@@ -278,7 +272,7 @@ func create_batch_targets(batch_size int, vocab_size int, step int) []int {
     
     b := 0
     for b < batch_size {
-        targets[b] = modulo(b + step, vocab_size)
+        targets[b] = (b + step) % vocab_size
         b = b + 1
     }
     
@@ -300,7 +294,7 @@ func float_to_string(f float) string {
     } else {
         temp := int_part
         for temp > 0 {
-            digit := modulo(temp, 10)
+            digit := temp % 10
             int_str = string_char(digit + 48) + int_str
             temp = temp / 10
         }
@@ -310,7 +304,7 @@ func float_to_string(f float) string {
     if frac_part > 0 {
         temp := frac_part
         for len(frac_str) < 4 {
-            digit := modulo(temp, 10)
+            digit := temp % 10
             frac_str = string_char(digit + 48) + frac_str
             temp = temp / 10
         }
@@ -342,7 +336,7 @@ func int_to_string(x int) string {
     result := ""
     temp := x
     for temp > 0 {
-        digit := modulo(temp, 10)
+        digit := temp % 10
         result = string_char(digit + 48) + result
         temp = temp / 10
     }
@@ -451,7 +445,7 @@ func main() {
         _ = attention_forward(hidden_states, model_cfg.SeqLen, model_cfg.HiddenDim)
         
         // Print progress
-        if modulo(step+1, 50) == 0 || step == 0 {
+        if (step+1) % 50 == 0 || step == 0 {
             avg_loss := total_loss / float(step+1)
             avg_ppl := perplexity(avg_loss)
             
