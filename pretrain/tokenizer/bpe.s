@@ -173,11 +173,27 @@ func apply_merge_pass([]string tokens, string left, string right, string merged)
     out
 }
 
+// Getter helpers avoid field-index inference issues in the S compiler.
+func bpe_merge_left(bpe_tokenizer_state tokenizer, int index) string {
+    tokenizer.merge_lefts[index]
+}
+
+func bpe_merge_right(bpe_tokenizer_state tokenizer, int index) string {
+    tokenizer.merge_rights[index]
+}
+
+func bpe_merge_token(bpe_tokenizer_state tokenizer, int index) string {
+    tokenizer.merge_tokens[index]
+}
+
 func bpe_tokenize_text(string text, bpe_tokenizer_state tokenizer) []string {
     []string tokens = tokenize_chars(text)
     int i = 0
     while i < len(tokenizer.merge_tokens) {
-        tokens = apply_merge_pass(tokens, tokenizer.merge_lefts[i], tokenizer.merge_rights[i], tokenizer.merge_tokens[i])
+        string left = bpe_merge_left(tokenizer, i)
+        string right = bpe_merge_right(tokenizer, i)
+        string merged = bpe_merge_token(tokenizer, i)
+        tokens = apply_merge_pass(tokens, left, right, merged)
         i = i + 1
     }
     tokens

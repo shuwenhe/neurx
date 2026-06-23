@@ -26,9 +26,9 @@ struct pretrain_optimizer_step_state {
 
 func new_pretrain_optimizer_state(float lr, float min_lr, int warmup_steps, int max_steps, float weight_decay, float max_grad_norm) pretrain_optimizer_state {
     pretrain_optimizer_state {
-        token_embedding_opt: new_adamw(lr, 0.9, 0.95, 1e-8, weight_decay),
-        lm_head_weight_opt: new_adamw(lr, 0.9, 0.95, 1e-8, weight_decay),
-        lm_head_bias_opt: new_adamw(lr, 0.9, 0.95, 1e-8, weight_decay),
+        token_embedding_opt: new_adamw(lr, 0.9, 0.95, 0.00000001, weight_decay),
+        lm_head_weight_opt: new_adamw(lr, 0.9, 0.95, 0.00000001, weight_decay),
+        lm_head_bias_opt: new_adamw(lr, 0.9, 0.95, 0.00000001, weight_decay),
         scheduler: new_named_lr_scheduler(lr, min_lr, warmup_steps, max_steps, "cosine"),
         max_grad_norm: max_grad_norm,
         step: 0,
