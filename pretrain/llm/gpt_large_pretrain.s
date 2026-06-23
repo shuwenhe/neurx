@@ -1,13 +1,22 @@
 package neurx.pretrain.llm.gpt_large_pretrain
+use neurx.strings
 
 use neurx.model.llm.gpt_large_train.{gpt_large_training_config, gpt_large_training_state, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_step}
+use neurx.strings
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, new_pretrain_checkpoint_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
+use neurx.strings
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr, pretrain_config_state_dict, pretrain_config_load_state_dict}
+use neurx.strings
 use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_tokens, next_epoch, pretrain_data_state_dict, pretrain_data_load_state_dict}
+use neurx.strings
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
+use neurx.strings
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
+use neurx.strings
 use neurx.checkpoint.{save_checkpoint}
+use neurx.strings
 use neurx.tensor.tensor
+use neurx.strings
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
@@ -16,16 +25,6 @@ struct gpt_large_pretrain_state {
     pretrain_checkpoint_state checkpoint
     pretrain_eval_state eval
     gpt_large_training_state training
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func zero_pad_int(int value, int width) string {

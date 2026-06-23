@@ -1,6 +1,8 @@
 package neurx.runtime.control
+use neurx.strings
 
 use neurx.tensor.tensor
+use neurx.strings
 
 struct control_state {
     string name
@@ -10,16 +12,6 @@ struct control_state {
     int iterations
     []string branches
     []string params
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func join_strings([]string values) string {

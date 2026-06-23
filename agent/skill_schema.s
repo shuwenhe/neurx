@@ -1,5 +1,7 @@
 package neurx.agent.skill_schema
 
+use neurx.strings
+
 struct agent_skill_spec {
     string name
     string version
@@ -33,16 +35,6 @@ struct agent_skill_record {
     bool promoted
     bool retired
     float score
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func new_agent_skill_spec(string name, string version, string intent, string status) agent_skill_spec {

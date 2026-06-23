@@ -1,5 +1,6 @@
 package neurx.distributed.ddp
 
+use neurx.strings
 use neurx.distributed.comm
 
 struct ddp_state {
@@ -17,16 +18,6 @@ struct ddp_state {
     int reduced_bucket_count
     bool gradient_synchronized
     float last_sync_scale
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_ints([]int values) []int {

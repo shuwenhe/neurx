@@ -1,8 +1,12 @@
 package neurx.train.language_chain
+use neurx.strings
 
 use neurx.dataset_text.{build_vocab, encode_text}
+use neurx.strings
 use neurx.dl.dataloader.{batch_count, dataloader_state, new_state, reset_state, has_next, next_batch}
+use neurx.strings
 use neurx.train.loop.{training_pipeline_state, new_training_pipeline_state, train_steps, training_pipeline_state_dict, training_pipeline_load_state_dict, training_pipeline_metrics, training_pipeline_metrics_state}
+use neurx.strings
 
 struct language_stage_config {
     string name
@@ -37,16 +41,6 @@ struct language_training_chain_state {
     language_stage_state finetune
     int active_stage
     bool finished
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_ints([]int values) []int {

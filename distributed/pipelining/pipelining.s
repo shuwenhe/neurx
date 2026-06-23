@@ -1,4 +1,5 @@
 package neurx.distributed.pipelining
+use neurx.strings
 
 struct pipeline_stage {
     string name
@@ -31,16 +32,6 @@ struct pipeline_schedule_state {
     bool warmup_done
     bool flush_done
     bool active
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_stage(pipeline_stage stage) pipeline_stage {

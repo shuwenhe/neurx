@@ -1,5 +1,6 @@
 package neurx.compile.pass_manager
 
+use neurx.strings
 use neurx.runtime.compile
 
 struct pass_plan_state {
@@ -7,16 +8,6 @@ struct pass_plan_state {
     bool has_shape_infer
     bool has_fusion
     bool has_lowering
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 func default_passes(string mode, bool dynamic, bool fullgraph) []string {
