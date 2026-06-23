@@ -1,6 +1,7 @@
 package neurx.ad.function
 
 use neurx.ad.eqn
+use neurx.strings
 
 struct function_record {
     string name
@@ -31,16 +32,6 @@ struct backward_rule {
     tensor grad_a
     tensor grad_b
     bool ready
-}
-
-func copy_strings([]string tags) []string {
-    []string out = []string{cap: len(tags)}
-    int i = 0
-    while i < len(tags) {
-        out[i] = tags[i]
-        i = i + 1
-    }
-    out
 }
 
 func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {

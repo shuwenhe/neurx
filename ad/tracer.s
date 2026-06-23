@@ -2,6 +2,7 @@ package neurx.ad.tracer
 
 use neurx.ad.function
 use neurx.ad.eqn
+use neurx.strings
 
 struct tracer_state {
     string name
@@ -14,16 +15,6 @@ struct tracer_state {
     []string outputs
     []ir_eqn eqns
     []string tags
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 // Getter functions to work around compiler type inference bug with struct field indexing
