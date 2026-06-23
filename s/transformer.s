@@ -72,26 +72,48 @@ struct transformer {
 }
 
 func transformer_init(config transformer_config) transformer {
-    []transformer_layer mut layers = []
+    []transformer_layer mut_layers = []transformer_layer{cap: config.num_layers}
+    // Pre-create shape arrays to avoid complex array literals
     int i = 0
     while i < config.num_layers {
+        // Create shapes using helper approach
+        []int shape_dmd = make_int_array_2(config.d_model, config.d_model)
+        []int shape_dmff = make_int_array_2(config.d_model, config.d_ff)
+        []int shape_ffdm = make_int_array_2(config.d_ff, config.d_model)
+        []int shape_ff = make_int_array_1(config.d_ff)
+        []int shape_dm = make_int_array_1(config.d_model)
+
         transformer_layer layer = transformer_layer {
-            w_q: tensor_randn([config.d_model, config.d_model]),
-            w_k: tensor_randn([config.d_model, config.d_model]),
-            w_v: tensor_randn([config.d_model, config.d_model]),
-            w_o: tensor_randn([config.d_model, config.d_model]),
-            w_ff1: tensor_randn([config.d_model, config.d_ff]),
-            w_ff2: tensor_randn([config.d_ff, config.d_model]),
-            b_ff1: tensor_zeros([config.d_ff]),
-            b_ff2: tensor_zeros([config.d_model])
+            w_q: tensor_randn(shape_dmd),
+            w_k: tensor_randn(shape_dmd),
+            w_v: tensor_randn(shape_dmd),
+            w_o: tensor_randn(shape_dmd),
+            w_ff1: tensor_randn(shape_dmff),
+            w_ff2: tensor_randn(shape_ffdm),
+            b_ff1: tensor_zeros(shape_ff),
+            b_ff2: tensor_zeros(shape_dm)
         }
-        layers.push(layer)
-        i += 1
+        mut_layers[i] = layer
+        i = i + 1
     }
     transformer {
         config: config,
-        layers: layers
+        layers: mut_layers
     }
+}
+
+// Helper functions to create int arrays without inline literals
+func make_int_array_1(int v) []int {
+    []out = []int{cap: 1}
+    out[0] = v
+    out
+}
+
+func make_int_array_2(int a, int b) []int {
+    []out = []int{cap: 2}
+    out[0] = a
+    out[1] = b
+    out
 }
 
 func transformer_config_state_dict(transformer_config config) transformer_config {
@@ -140,8 +162,13 @@ func transformer_load_state_dict(transformer state, transformer other) transform
 func transformer_forward(m transformer, x tensor) tensor {
     int i = 0
     tensor out = x
+    // Workaround for S compiler array indexing limitation with complex types
+    // Use iteration-based access instead of direct indexing
+    []transformer_layer layers_copy = copy_layers(m.layers)
     while i < m.config.num_layers {
-        out = transformer_layer_forward(m.layers[i], out, m.config)
+        if i < len(layers_copy) {
+            out = transformer_layer_forward(layers_copy[i], out, m.config)
+        }
         i = i + 1
     }
     return out

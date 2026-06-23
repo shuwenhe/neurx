@@ -70,7 +70,7 @@ func control_param_count(control_state state) int {
 func control_has_branch(control_state state, string branch) bool {
     int i = 0
     while i < len(state.branches) {
-        if state.branches[i] == branch {
+        if neurx.strings.strings_eq(state.branches[i], branch) {
             return true
         }
         i = i + 1
@@ -81,7 +81,7 @@ func control_has_branch(control_state state, string branch) bool {
 func control_has_param(control_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
-        if state.params[i] == param {
+        if neurx.strings.strings_eq(state.params[i], param) {
             return true
         }
         i = i + 1
@@ -275,10 +275,7 @@ func control_to_transform_chain(control_state state) transform_chain {
     transform_chain chain = neurx.ad.function.new_transform_chain()
     int i = 0
     while i < len(state.branches) {
-        string param = ""
-        if i < len(state.params) {
-            param = state.params[i]
-        }
+        string param = neurx.strings.string_at(state.params, i)
         if param != "" {
             chain = neurx.ad.function.transform_chain_add_step_with_param(chain, state.branches[i], param)
         } else {
@@ -309,13 +306,13 @@ func transform_chain_to_control(transform_chain chain, string name, int iteratio
     bool scan_enabled = false
     int i = 0
     while i < len(branches) {
-        if branches[i] == "cond" {
+        if neurx.strings.strings_eq(branches[i], "cond") {
             cond_enabled = true
         }
-        if branches[i] == "while_loop" {
+        if neurx.strings.strings_eq(branches[i], "while_loop") {
             loop_enabled = true
         }
-        if branches[i] == "scan" {
+        if neurx.strings.strings_eq(branches[i], "scan") {
             scan_enabled = true
         }
         i = i + 1

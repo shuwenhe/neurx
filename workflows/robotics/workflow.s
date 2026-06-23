@@ -103,13 +103,7 @@ func new_robotics_workflow_example_state(
     string target_name
 ) robotics_workflow_example_state {
     robotics_workflow_example_state {
-        pipeline: new_robotics_workflow_pipeline_state(
-            name,
-            mode,
-            env_name,
-            robot_name,
-            target_name,
-        ),
+        pipeline: new_robotics_workflow_pipeline_state(name, mode, env_name, robot_name, target_name),
         stage: 0,
         finished: false,
     }
