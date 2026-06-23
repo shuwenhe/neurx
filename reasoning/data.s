@@ -26,6 +26,10 @@ struct reasoning_trace_step_output {
     bool ok
 }
 
+func get_reasoning_trace_sample(reasoning_trace_dataset_state state, int index) reasoning_trace_sample_state {
+    state.samples[index]
+}
+
 func copy_reasoning_trace_samples([]reasoning_trace_sample_state samples) []reasoning_trace_sample_state {
     []reasoning_trace_sample_state out = []reasoning_trace_sample_state{cap: len(samples)}
     int i = 0
@@ -158,7 +162,7 @@ func reasoning_trace_dataset_render(reasoning_trace_dataset_state state) string 
     string out = ""
     int i = 0
     while i < len(state.samples) {
-        string rendered = reasoning_trace_sample_render(state.samples[i])
+        string rendered = reasoning_trace_sample_render(get_reasoning_trace_sample(state, i))
         if rendered != "" {
             if out != "" {
                 out = out + "\n\n---\n\n"
