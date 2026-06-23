@@ -35,6 +35,7 @@ package neurx.ad.ir
 use neurx.ad.function
 use neurx.ad.eqn
 use neurx.ad.tracer
+use neurx.strings
 
 struct ir_eqn {
     string primitive
@@ -53,16 +54,6 @@ struct ir_graph {
     []ir_eqn eqns
     bool ready
     bool linearized
-}
-
-func copy_strings([]string values) []string {
-    []string out = []string{cap: len(values)}
-    int i = 0
-    while i < len(values) {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
 }
 
 // Getter functions to work around compiler type inference bug with struct field indexing
