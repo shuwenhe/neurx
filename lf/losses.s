@@ -107,19 +107,114 @@ func new_loss() loss {
 }
 
 func cross_entropy_loss(tensor input, tensor target) tensor {
+    // Correct cross-entropy: -mean(sum(target * log_softmax(input)))
+    // input: [N, C] raw logits, target: [N] class indices or [N, C] probabilities
     int n = len(input.data)
-    float total = 0.0
-    int i = 0
-    while i < n {
-        float x = input.data[i]
-        float t = 0.0
-        if i < len(target.data) {
-            t = target.data[i]
+    int ndim = len(input.shape)
+
+    if ndim >= 2 && input.shape[1] > 1 {
+        // Multi-class: apply log_softmax along last dim, then NLL
+        int batch_size = input.shape[0]
+        int num_classes = input.shape[1]
+        float total_loss = 0.0
+        int valid_count = 0
+
+        int b = 0
+        while b < batch_size {
+            int base = b * num_classes
+
+            // Find max for numerical stability (per sample)
+            float max_v = input.data[base]
+            int c = 1
+            while c < num_classes {
+                if input.data[base + c] > max_v {
+                    max_v = input.data[base + c]
+                }
+                c = c + 1
+            }
+
+            // Compute log_sum_exp
+            float log_sum_exp = 0.0
+            float sum_exp = 0.0
+            c = 0
+            while c < num_classes {
+                float e = exp_approx(input.data[base + c] - max_v)
+                sum_exp = sum_exp + e
+                c = c + 1
+            }
+            if sum_exp > 0.0 {
+                log_sum_exp = log_approx(sum_exp) + max_v
+            }
+
+            // Get target class index
+            int target_class = 0
+            if b < len(target.data) {
+                int tc = target.data[b] as int
+                if tc >= 0 && tc < num_classes {
+                    target_class = tc
+                }
+            }
+
+            // CE loss for this sample: -logits[target] + log_sum_exp
+            float sample_loss = log_sum_exp - input.data[base + target_class]
+            total_loss = total_loss + sample_loss
+            valid_count = valid_count + 1
+            b = b + 1
         }
-        total = total - t * x
-        i = i + 1
+
+        float mean_loss = 0.0
+        if valid_count > 0 {
+            mean_loss = total_loss / float(valid_count)
+        }
+        scalar(mean_loss, input.requires_grad || target.requires_grad)
+    } else {
+        // Fallback: element-wise binary cross-entropy on flat tensors
+        float total = 0.0
+        int i = 0
+        while i < n {
+            float x = input.data[i]
+            float t = 0.0
+            if i < len(target.data) {
+                t = target.data[i]
+            }
+            // Clamp logit for numerical stability
+            if x > 20.0 {
+                x = 20.0
+            }
+            if x < -20.0 {
+                x = -20.0
+            }
+            // log_softmax approx: -log(1+exp(-x)) for t=1, -log(1+exp(x)) for t=0
+            float loss_val = 0.0
+            if t > 0.5 {
+                // -log(sigmoid(x)) = log(1+exp(-x)) = softplus(-x)
+                float neg_x = 0.0 - x
+                if neg_x > 20.0 {
+                    loss_val = neg_x
+                } else {
+                    if neg_x < -20.0 {
+                        loss_val = 0.0
+                    } else {
+                        loss_val = log_approx(1.0 + exp_approx(neg_x))
+                    }
+                }
+            } else {
+                // -log(1-sigmoid(x)) = log(1+exp(x)) = softplus(x)
+                if x > 20.0 {
+                    loss_val = x
+                } else {
+                    if x < -20.0 {
+                        loss_val = 0.0
+                    } else {
+                        loss_val = log_approx(1.0 + exp_approx(x))
+                    }
+                }
+            }
+            total = total + loss_val
+            i = i + 1
+        }
+        scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
     }
-    scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
 
 func bce_loss(tensor input, tensor target) tensor {

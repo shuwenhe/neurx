@@ -30,6 +30,8 @@ use neurx.strings
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
+    string dataset_manifest
+    string output_dir
     pretrain_data_state data
     pretrain_loop_state loop
     pretrain_checkpoint_state checkpoint
@@ -185,7 +187,29 @@ func new_gpt_large_pretrain_config() pretrain_config {
 }
 
 func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
+    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/run_20260518_001")
+}
+
+func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, int seq_len, int max_steps, float lr, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) gpt_large_pretrain_state {
     pretrain_config cfg = new_gpt_large_pretrain_config()
+    cfg = pretrain_config {
+        global_batch_size: cfg.global_batch_size,
+        micro_batch_size: micro_batch_size,
+        seq_len: seq_len,
+        max_steps: max_steps,
+        warmup_steps: warmup_steps,
+        lr: lr,
+        min_lr: min_lr,
+        weight_decay: weight_decay,
+        log_interval: log_interval,
+        eval_interval: eval_interval,
+        save_interval: save_interval,
+        bf16: cfg.bf16,
+        grad_checkpoint: cfg.grad_checkpoint,
+        optimizer: cfg.optimizer,
+        scheduler: cfg.scheduler,
+        backend: cfg.backend,
+    }
     gpt_large_training_config training_cfg = new_gpt_large_training_config(cfg.micro_batch_size, cfg.seq_len, cfg.max_steps, cfg.lr)
     []string documents = gpt_large_pretrain_documents()
     bpe_tokenized_corpus_state corpus = bpe_tokenized_corpus_from_documents(documents, 4096, 2, 0.1, 1337)
@@ -214,9 +238,11 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
     pretrain_ddp_state ddp = new_pretrain_ddp_state_from_env("gpt_large_pretrain", 256, false)
     gpt_large_pretrain_state {
         cfg: cfg,
+        dataset_manifest: dataset_manifest,
+        output_dir: output_dir,
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/run_20260518_001"),
+        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", output_dir),
         eval: new_pretrain_eval_state(),
         corpus: corpus,
         optimizer: optimizer,
@@ -229,66 +255,7 @@ func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
 }
 
 func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len, int max_steps, float lr, int log_interval, int eval_interval, int save_interval) gpt_large_pretrain_state {
-    pretrain_config base_cfg = new_gpt_large_pretrain_config()
-    pretrain_config cfg = pretrain_config {
-        global_batch_size: base_cfg.global_batch_size,
-        micro_batch_size: micro_batch_size,
-        seq_len: seq_len,
-        max_steps: max_steps,
-        warmup_steps: base_cfg.warmup_steps,
-        lr: lr,
-        min_lr: base_cfg.min_lr,
-        weight_decay: base_cfg.weight_decay,
-        log_interval: log_interval,
-        eval_interval: eval_interval,
-        save_interval: save_interval,
-        bf16: base_cfg.bf16,
-        grad_checkpoint: base_cfg.grad_checkpoint,
-        optimizer: base_cfg.optimizer,
-        scheduler: base_cfg.scheduler,
-        backend: base_cfg.backend,
-    }
-
-    gpt_large_training_config training_cfg = new_gpt_large_training_config(cfg.micro_batch_size, cfg.seq_len, cfg.max_steps, cfg.lr)
-    []string documents = gpt_large_pretrain_documents()
-    bpe_tokenized_corpus_state corpus = bpe_tokenized_corpus_from_documents(documents, 4096, 2, 0.1, 1337)
-    gpt_large_training_state training = new_gpt_large_training_state(documents, training_cfg)
-    dataloader_state train_loader = new_state(corpus.train_token_ids, training_cfg.batch_size, training_cfg.seq_len)
-    dataloader_state valid_loader = new_state(corpus.valid_token_ids, training_cfg.batch_size, training_cfg.seq_len)
-    training = gpt_large_training_state {
-        model: training.model,
-        backbone: training.backbone,
-        token_embedding: training.token_embedding,
-        lm_head_weight: training.lm_head_weight,
-        lm_head_bias: training.lm_head_bias,
-        optimizer: training.optimizer,
-        loader: train_loader,
-        config: training.config,
-        metrics: training.metrics,
-        step: training.step,
-        epoch: training.epoch,
-        last_loss: training.last_loss,
-        last_perplexity: training.last_perplexity,
-        finished: training.finished,
-    }
-    pretrain_data_state data = new_pretrain_data_state(training.model.dataset, 0, 1)
-    pretrain_loop_state loop = new_pretrain_loop_state(cfg, data)
-    pretrain_optimizer_state optimizer = new_pretrain_optimizer_state(cfg.lr, cfg.min_lr, cfg.warmup_steps, cfg.max_steps, cfg.weight_decay, 1.0)
-    pretrain_ddp_state ddp = new_pretrain_ddp_state_from_env("gpt_large_pretrain", 256, false)
-    gpt_large_pretrain_state {
-        cfg: cfg,
-        data: data,
-        loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", "artifacts/checkpoints/run_20260518_001"),
-        eval: new_pretrain_eval_state(),
-        corpus: corpus,
-        optimizer: optimizer,
-        ddp: ddp,
-        training: training,
-        valid_loader: valid_loader,
-        rng_seed: 1337,
-        rng_state: 1337,
-    }
+    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/run_20260518_001")
 }
 
 func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
@@ -337,6 +304,8 @@ func gpt_large_pretrain_metadata_text(gpt_large_pretrain_state state) string {
     out = out + "epoch=" + string(state.loop.data.epoch) + "\n"
     out = out + "loss=" + string(state.training.last_loss) + "\n"
     out = out + "best_metric=" + string(state.checkpoint.best_metric) + "\n"
+    out = out + "dataset_manifest=" + state.dataset_manifest + "\n"
+    out = out + "output_dir=" + state.output_dir + "\n"
     out = out + "optimizer.step=" + string(state.optimizer.step) + "\n"
     out = out + "optimizer.lr=" + string(state.optimizer.last_lr) + "\n"
     out = out + "optimizer.grad_norm=" + string(state.optimizer.last_grad_norm) + "\n"
@@ -587,6 +556,8 @@ func gpt_large_pretrain_save_checkpoint(gpt_large_pretrain_state state) () {
 func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pretrain_state {
     gpt_large_pretrain_state {
         cfg: pretrain_config_state_dict(state.cfg),
+        dataset_manifest: state.dataset_manifest,
+        output_dir: state.output_dir,
         data: pretrain_data_state_dict(state.data),
         loop: pretrain_loop_state_dict(state.loop),
         checkpoint: pretrain_checkpoint_state_dict(state.checkpoint),
@@ -604,6 +575,8 @@ func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pre
 func gpt_large_pretrain_load_state_dict(gpt_large_pretrain_state state, gpt_large_pretrain_state other) gpt_large_pretrain_state {
     gpt_large_pretrain_state {
         cfg: pretrain_config_load_state_dict(state.cfg, other.cfg),
+        dataset_manifest: other.dataset_manifest,
+        output_dir: other.output_dir,
         data: pretrain_data_load_state_dict(state.data, other.data),
         loop: pretrain_loop_load_state_dict(state.loop, other.loop),
         checkpoint: pretrain_checkpoint_load_state_dict(state.checkpoint, other.checkpoint),

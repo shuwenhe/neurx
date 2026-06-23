@@ -367,8 +367,11 @@ func gpt_large_training_loss(gpt_large_training_state state, tensor logits, tens
 }
 
 func gpt_large_training_update(gpt_large_training_state state, tensor input_ids, tensor hidden, tensor logits, tensor target_ids, float loss_value, int valid_tokens) gpt_large_training_state {
+    // ── Forward pass outputs ──
     tensor probabilities = ops.softmax_last_dim(logits)
     tensor targets = one_hot_tensor(target_ids, state.model.vocab_size)
+
+    // ── Output layer gradient: dL/dlogits = softmax(logits) - one_hot(target) ──
     tensor grad_logits = ops.sub(probabilities, targets)
     float scale = 1.0
     if valid_tokens > 0 {
@@ -376,14 +379,24 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
     }
     grad_logits = scale_tensor(grad_logits, scale)
 
+    // ── LM Head backward: dL/dW_head = hidden^T @ grad_logits, dL/db = sum(grad_logits) ──
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_head_weight = ops.matmul(hidden_t, grad_logits)
     tensor grad_head_bias = ops.sum_first_dim(grad_logits, false)
     tensor grad_hidden = ops.matmul(grad_logits, transpose(state.lm_head_weight, 0, 1))
 
+    // Update LM Head weights
     tensor next_head_weight = step_tensor(state.optimizer, state.lm_head_weight, grad_head_weight)
     tensor next_head_bias = step_tensor(state.optimizer, state.lm_head_bias, grad_head_bias)
-    tensor next_embedding = embedding_apply_grad(state.token_embedding, input_ids, grad_hidden, state.optimizer.lr)
+
+    // ── TRANSFORMER BACKBONE BACKWARD (the critical missing piece!) ──
+    // Backpropagate grad_hidden through all transformer layers
+    gpt_large_backward_result bw = transformer_backward(
+        state.backbone, hidden, grad_hidden, state.optimizer
+    )
+
+    // ── Embedding backward: accumulate gradient into embedding table ──
+    tensor next_embedding = embedding_apply_grad(state.token_embedding, input_ids, bw.grad_input, state.optimizer.lr)
 
     float perplexity = exp_approx(loss_value)
     float validation_loss = loss_value + 0.08
@@ -432,7 +445,7 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
             best_validation_loss: best_validation_loss,
             trained: next_step >= state.config.max_steps,
         },
-        backbone: state.backbone,
+        backbone: bw.updated_backbone,
         token_embedding: next_embedding,
         lm_head_weight: next_head_weight,
         lm_head_bias: next_head_bias,
