@@ -1,5 +1,5 @@
 // kernel/gpu/gpu.s
-// GPU device and stream management — analogue of Linux drivers/gpu/drm/ +
+// GPU device and stream management — analogue of Linux drivers/gpu/drm/
 // CUDA Driver API / Metal Command Queue
 //
 // Linux maps:
