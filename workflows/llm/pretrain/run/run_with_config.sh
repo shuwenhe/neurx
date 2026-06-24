@@ -62,6 +62,12 @@ PP_DEGREE="$(awk -F":" '/^pipeline_parallel_degree[[:space:]]*:/ {gsub(/ /, "", 
 DP_DEGREE="$(awk -F":" '/^data_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 SP_DEGREE="$(awk -F":" '/^sequence_parallel_degree[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 ZERO_STAGE="$(awk -F":" '/^zero_stage[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+HIDDEN_DIM="$(awk -F":" '/^hidden_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+NUM_LAYERS="$(awk -F":" '/^num_layers[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+NUM_ATTN_HEADS="$(awk -F":" '/^num_attention_heads[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+NUM_KV_HEADS="$(awk -F":" '/^num_kv_heads[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+INTERMEDIATE_DIM="$(awk -F":" '/^intermediate_dim[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
+VOCAB_SIZE="$(awk -F":" '/^vocab_size[[:space:]]*:/ {gsub(/ /, "", $2); print $2; exit}' "$CONFIG" || true)"
 
 if [[ -z "$MICRO_BATCH" ]]; then MICRO_BATCH=8; fi
 if [[ -z "$SEQ_LEN" ]]; then SEQ_LEN=16; fi
@@ -80,6 +86,12 @@ if [[ -z "$PP_DEGREE" ]]; then PP_DEGREE=2; fi
 if [[ -z "$DP_DEGREE" ]]; then DP_DEGREE=1; fi
 if [[ -z "$SP_DEGREE" ]]; then SP_DEGREE=1; fi
 if [[ -z "$ZERO_STAGE" ]]; then ZERO_STAGE=2; fi
+if [[ -z "$HIDDEN_DIM" ]]; then HIDDEN_DIM=128; fi
+if [[ -z "$NUM_LAYERS" ]]; then NUM_LAYERS=4; fi
+if [[ -z "$NUM_ATTN_HEADS" ]]; then NUM_ATTN_HEADS=8; fi
+if [[ -z "$NUM_KV_HEADS" ]]; then NUM_KV_HEADS=2; fi
+if [[ -z "$INTERMEDIATE_DIM" ]]; then INTERMEDIATE_DIM=512; fi
+if [[ -z "$VOCAB_SIZE" ]]; then VOCAB_SIZE=4096; fi
 
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [[ -z "$ROOT_DIR" ]]; then
@@ -103,7 +115,7 @@ use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_config}
 use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_distributed_config}
 
 func main() int {
-  run_pretrain_with_distributed_config(${MICRO_BATCH}, ${SEQ_LEN}, ${LR}, ${MAX_STEPS}, ${WARMUP_STEPS}, ${MIN_LR}, ${WEIGHT_DECAY}, ${LOG_INTERVAL}, ${EVAL_INTERVAL}, ${SAVE_INTERVAL}, "${DATASET_MANIFEST}", "${CHECKPOINT_ROOT}", ${TP_DEGREE}, ${PP_DEGREE}, ${DP_DEGREE}, ${SP_DEGREE}, ${ZERO_STAGE})
+  run_pretrain_with_distributed_config(${MICRO_BATCH}, ${SEQ_LEN}, ${LR}, ${MAX_STEPS}, ${WARMUP_STEPS}, ${MIN_LR}, ${WEIGHT_DECAY}, ${LOG_INTERVAL}, ${EVAL_INTERVAL}, ${SAVE_INTERVAL}, "${DATASET_MANIFEST}", "${CHECKPOINT_ROOT}", ${TP_DEGREE}, ${PP_DEGREE}, ${DP_DEGREE}, ${SP_DEGREE}, ${ZERO_STAGE}, ${HIDDEN_DIM}, ${NUM_LAYERS}, ${NUM_ATTN_HEADS}, ${NUM_KV_HEADS}, ${INTERMEDIATE_DIM}, ${VOCAB_SIZE})
   0
 }
 SFILE
@@ -112,4 +124,4 @@ SFILE
 # rank-sharded checkpoint path directly.
 s "$TMP_S" "$TMP_IR"
 
-echo "Compiled pretrain workflow entrypoint with steps=${MAX_STEPS}, micro_batch=${MICRO_BATCH}, seq_len=${SEQ_LEN}, lr=${LR}, log/eval/save=${LOG_INTERVAL}/${EVAL_INTERVAL}/${SAVE_INTERVAL}, manifest=${DATASET_MANIFEST}, checkpoint_root=${CHECKPOINT_ROOT}, tp/pp/dp/sp/zero=${TP_DEGREE}/${PP_DEGREE}/${DP_DEGREE}/${SP_DEGREE}/${ZERO_STAGE}"
+echo "Compiled pretrain workflow entrypoint with steps=${MAX_STEPS}, micro_batch=${MICRO_BATCH}, seq_len=${SEQ_LEN}, lr=${LR}, model=${HIDDEN_DIM}h/${NUM_LAYERS}l/${NUM_ATTN_HEADS}q/${NUM_KV_HEADS}kv/${INTERMEDIATE_DIM}ff/${VOCAB_SIZE}v, log/eval/save=${LOG_INTERVAL}/${EVAL_INTERVAL}/${SAVE_INTERVAL}, manifest=${DATASET_MANIFEST}, checkpoint_root=${CHECKPOINT_ROOT}, tp/pp/dp/sp/zero=${TP_DEGREE}/${PP_DEGREE}/${DP_DEGREE}/${SP_DEGREE}/${ZERO_STAGE}"

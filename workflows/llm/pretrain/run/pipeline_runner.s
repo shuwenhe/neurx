@@ -5,14 +5,14 @@ use neurx.distributed.two_t_training.{two_t_training_plan, new_two_t_training_pl
 use neurx.model.model_2t_config.{model_2t_config, new_2t_model_config}
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 
-func workflow_two_t_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay) model_2t_config {
+func workflow_two_t_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int hidden_dim, int num_layers, int num_attention_heads, int num_kv_heads, int intermediate_dim, int vocab_size) model_2t_config {
     model_2t_config cfg = new_2t_model_config()
-    cfg.hidden_dim = 128
-    cfg.num_layers = 4
-    cfg.num_attention_heads = 8
-    cfg.num_kv_heads = 2
-    cfg.intermediate_dim = 512
-    cfg.vocab_size = 4096
+    cfg.hidden_dim = hidden_dim
+    cfg.num_layers = num_layers
+    cfg.num_attention_heads = num_attention_heads
+    cfg.num_kv_heads = num_kv_heads
+    cfg.intermediate_dim = intermediate_dim
+    cfg.vocab_size = vocab_size
     cfg.max_seq_len = seq_len
     cfg
 }
@@ -48,19 +48,19 @@ func workflow_two_t_train_dir(string output_dir) string {
 }
 
 func run_pretrain_steps(int steps) int {
-    run_pretrain_with_distributed_config(8, 16, 0.00015, steps, 128, 0.00003, 0.1, 8, 16, 32, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2)
+    run_pretrain_with_distributed_config(8, 16, 0.00015, steps, 128, 0.00003, 0.1, 8, 16, 32, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
 }
 
 func run_pretrain_with_params(int micro_batch, int seq_len, float lr, int steps, int log_interval, int eval_interval, int save_interval) int {
-    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2)
+    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
 }
 
 func run_pretrain_with_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) int {
-    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, warmup_steps, min_lr, weight_decay, log_interval, eval_interval, save_interval, dataset_manifest, output_dir, 4, 2, 1, 1, 2)
+    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, warmup_steps, min_lr, weight_decay, log_interval, eval_interval, save_interval, dataset_manifest, output_dir, 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
 }
 
-func run_pretrain_with_distributed_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir, int tp_degree, int pp_degree, int dp_degree, int sp_degree, int zero_stage) int {
-    model_2t_config cfg = workflow_two_t_config(micro_batch, seq_len, lr, steps, warmup_steps, min_lr, weight_decay)
+func run_pretrain_with_distributed_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir, int tp_degree, int pp_degree, int dp_degree, int sp_degree, int zero_stage, int hidden_dim, int num_layers, int num_attention_heads, int num_kv_heads, int intermediate_dim, int vocab_size) int {
+    model_2t_config cfg = workflow_two_t_config(micro_batch, seq_len, lr, steps, warmup_steps, min_lr, weight_decay, hidden_dim, num_layers, num_attention_heads, num_kv_heads, intermediate_dim, vocab_size)
     two_t_training_plan plan = workflow_two_t_plan(micro_batch, seq_len, steps, tp_degree, pp_degree, dp_degree, sp_degree, zero_stage)
     string checkpoint_dir = workflow_two_t_train_dir(output_dir)
     runtime_make_dirs(checkpoint_dir)

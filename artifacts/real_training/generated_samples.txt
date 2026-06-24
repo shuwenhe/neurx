@@ -1,0 +1,4 @@
+[The] The learning rate warmup strategy helps stabilize early training by capping norm magnitude
+[model] model size consistently improves performance across tasks . The learning rate warmup strategy
+[attention] attention reduces computational complexity is often more important than quantity for building robust
+[Gradient] Gradient clipping prevents exploding gradients to linear ( x ) : super (

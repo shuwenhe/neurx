@@ -1,0 +1,180 @@
+{
+  "corpus_path": "/Users/feifei/train/neurx/data/corpus/train_corpus.txt",
+  "save_dir": "/Users/feifei/train/neurx/artifacts/real_training",
+  "tokens": 75288,
+  "train_tokens": 67759,
+  "val_tokens": 7529,
+  "vocab_size": 512,
+  "steps": 300,
+  "batch_size": 64,
+  "best_val_loss": 1.492806468420458,
+  "elapsed_time_sec": 8.434403896331787,
+  "history": [
+    {
+      "step": 1,
+      "learning_rate": 0.011666666666666665,
+      "train_loss": 6.238535054911617,
+      "train_accuracy": 0.0,
+      "val_loss": 6.228407208115846,
+      "val_accuracy": 0.04296875,
+      "val_perplexity": 506.94737842499205,
+      "steps_per_sec": 12.548629145175381
+    },
+    {
+      "step": 50,
+      "learning_rate": 0.3463493420276321,
+      "train_loss": 2.9915243925182393,
+      "train_accuracy": 0.3125,
+      "val_loss": 3.274436994128197,
+      "val_accuracy": 0.384765625,
+      "val_perplexity": 26.42834197949022,
+      "steps_per_sec": 45.56714049871218
+    },
+    {
+      "step": 100,
+      "learning_rate": 0.30419875556884957,
+      "train_loss": 1.4020236194822353,
+      "train_accuracy": 0.578125,
+      "val_loss": 1.961310643749041,
+      "val_accuracy": 0.5234375,
+      "val_perplexity": 7.108637854027766,
+      "steps_per_sec": 40.75718920158528
+    },
+    {
+      "step": 150,
+      "learning_rate": 0.22776423845670718,
+      "train_loss": 1.476338400547773,
+      "train_accuracy": 0.5625,
+      "val_loss": 1.6809152165366414,
+      "val_accuracy": 0.52734375,
+      "val_perplexity": 5.370468864512729,
+      "steps_per_sec": 39.3917591850936
+    },
+    {
+      "step": 200,
+      "learning_rate": 0.14219461007863277,
+      "train_loss": 1.370107562596026,
+      "train_accuracy": 0.578125,
+      "val_loss": 1.5902230823250225,
+      "val_accuracy": 0.5234375,
+      "val_perplexity": 4.904842990067261,
+      "steps_per_sec": 37.95072951686812
+    },
+    {
+      "step": 250,
+      "learning_rate": 0.07564436411674376,
+      "train_loss": 1.5561051611144245,
+      "train_accuracy": 0.546875,
+      "val_loss": 1.523513333778995,
+      "val_accuracy": 0.564453125,
+      "val_perplexity": 4.588317200105074,
+      "steps_per_sec": 37.46782859851963
+    },
+    {
+      "step": 300,
+      "learning_rate": 0.05001015379943567,
+      "train_loss": 1.8743922645205346,
+      "train_accuracy": 0.46875,
+      "val_loss": 1.492806468420458,
+      "val_accuracy": 0.5625,
+      "val_perplexity": 4.449565577684459,
+      "steps_per_sec": 37.115355408044195
+    }
+  ],
+  "generated_samples": {
+    "The": "The learning rate warmup strategy helps stabilize early training by capping norm magnitude",
+    "model": "model size consistently improves performance across tasks . The learning rate warmup strategy",
+    "attention": "attention reduces computational complexity is often more important than quantity for building robust",
+    "Gradient": "Gradient clipping prevents exploding gradients to linear ( x ) : super ("
+  },
+  "top_transitions": {
+    "The": [
+      {
+        "token": "learning",
+        "prob": 0.18648038884076468
+      },
+      {
+        "token": "attention",
+        "prob": 0.16618792015738104
+      },
+      {
+        "token": "key",
+        "prob": 0.15634039179261194
+      },
+      {
+        "token": "derivative",
+        "prob": 0.12261385588722623
+      },
+      {
+        "token": "neural",
+        "prob": 0.10446829140259413
+      }
+    ],
+    "model": [
+      {
+        "token": "size",
+        "prob": 0.285965344801952
+      },
+      {
+        "token": "=",
+        "prob": 0.19207460828330827
+      },
+      {
+        "token": ",",
+        "prob": 0.17150311702808355
+      },
+      {
+        "token": "to",
+        "prob": 0.13512920410397092
+      },
+      {
+        "token": "achieved",
+        "prob": 0.1263871495144078
+      }
+    ],
+    "attention": [
+      {
+        "token": "reduces",
+        "prob": 0.3561006162853119
+      },
+      {
+        "token": "mechanisms",
+        "prob": 0.14520532889469745
+      },
+      {
+        "token": "mechanism",
+        "prob": 0.14272679124955948
+      },
+      {
+        "token": "heads",
+        "prob": 0.13933901541977886
+      },
+      {
+        "token": "(",
+        "prob": 0.12105902427538018
+      }
+    ],
+    "Gradient": [
+      {
+        "token": "clipping",
+        "prob": 0.999113186382384
+      },
+      {
+        "token": "ACROSS",
+        "prob": 5.275456860724967e-05
+      },
+      {
+        "token": ".",
+        "prob": 4.463181563955872e-05
+      },
+      {
+        "token": "BATCH",
+        "prob": 2.9519554664672848e-05
+      },
+      {
+        "token": "(",
+        "prob": 2.507362111464062e-05
+      }
+    ]
+  }
+}
