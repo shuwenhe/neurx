@@ -25,7 +25,7 @@ struct prefetch_config {
     bool enable_backpressure       // Throttle if consumer is slow
 }
 
-func default_prefetch_config() prefetch_config:
+func default_prefetch_config() prefetch_config {
     prefetch_config cfg
     cfg.prefetch_queue_size = 3
     cfg.num_io_threads = 4
@@ -82,7 +82,7 @@ struct prefetch_queue {
     int max_queue_depth_observed
 }
 
-func new_prefetch_queue(int capacity) prefetch_queue:
+func new_prefetch_queue(int capacity) prefetch_queue {
     prefetch_queue q
     q.buffer = prefetched_batch[]{cap: capacity}
     q.capacity = capacity
@@ -97,7 +97,7 @@ func new_prefetch_queue(int capacity) prefetch_queue:
     return q
 
 // Producer: add a batch to the queue (blocks if full)
-func enqueue(prefetch_queue q, prefetched_batch batch) bool:
+func enqueue(prefetch_queue q, prefetched_batch batch) bool {
     if q.enable_backpressure and q.count >= q.capacity * 0.9:
         // Apply backpressure: wait for space
         wait(q.not_full, q.lock)
@@ -106,7 +106,7 @@ func enqueue(prefetch_queue q, prefetched_batch batch) bool:
         return false  // Queue full
     
     q.buffer[q.tail] = batch
-    q.tail = (((q.tail + 1) - ((q.tail + 1) / q.capacity) * q.capacity)
+    q.tail = ((q.tail + 1) - ((q.tail + 1) / q.capacity) * q.capacity)
     q.count = q.count + 1
     q.total_enqueued = q.total_enqueued + 1
     
@@ -117,7 +117,7 @@ func enqueue(prefetch_queue q, prefetched_batch batch) bool:
     return true
 
 // Consumer: get next batch from the queue (blocks if empty)
-prefetched_batch dequeue(prefetch_queue q):
+func dequeue(prefetch_queue q) prefetched_batch {
     if q.count == 0:
         // Wait for data
         wait(q.not_empty, q.lock)
