@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-NEURX_DIR="/Users/feifei/train/neurx"
+NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
 S_PRETRAIN_RUNNER="$NEURX_DIR/run_s_pretrain.sh"
 
 echo "======================================================================="

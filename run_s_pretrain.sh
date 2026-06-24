@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-NEURX_DIR="/Users/feifei/train/neurx"
-S_ROOT="/Users/feifei/train/s"
+NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
+S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 OUTPUT_DIR="${NEURX_S_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
 SOURCE_FILE="$NEURX_DIR/train_llm.s"
