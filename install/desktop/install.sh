@@ -47,7 +47,6 @@ if [ "$OS_NAME" = "Linux" ]; then
     sudo apt-get update -qq
     sudo apt-get install -y --no-install-recommends \
         build-essential cmake ninja-build \
-        python3 python3-pip \
         libopenblas-dev liblapack-dev
 
     if [ "$GPU" = "nvidia" ]; then

@@ -271,8 +271,7 @@ func code_agent_fast_path_touch_file(string task) string {
         return ""
     }
     string abs_path = code_agent_resolve_task_path(raw_path)
-    string touch_py = "import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); p.touch()"
-    runtime_run_command_output("python3 -c " + code_agent_shell_escape(touch_py) + " " + code_agent_shell_escape(abs_path))
+    runtime_run_command_output("mkdir -p $(dirname " + code_agent_shell_escape(abs_path) + ") && : > " + code_agent_shell_escape(abs_path))
     string verify = trim(runtime_run_command_output("test -f " + code_agent_shell_escape(abs_path) + " && printf ok"))
     if verify == "ok" {
         return "created_file path=" + abs_path
@@ -299,8 +298,7 @@ func code_agent_fast_path_create_file(string task) string {
     }
 
     string abs_path = code_agent_resolve_task_path(rel_path)
-    string write_py = "import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(sys.argv[2])"
-    runtime_run_command_output("python3 -c " + code_agent_shell_escape(write_py) + " " + code_agent_shell_escape(abs_path) + " " + code_agent_shell_escape(content))
+    runtime_run_command_output("mkdir -p $(dirname " + code_agent_shell_escape(abs_path) + ") && printf %s " + code_agent_shell_escape(content) + " > " + code_agent_shell_escape(abs_path))
     string verify = trim(runtime_run_command_output("test -f " + code_agent_shell_escape(abs_path) + " && printf ok"))
     if verify == "ok" {
         return "created_file path=" + abs_path

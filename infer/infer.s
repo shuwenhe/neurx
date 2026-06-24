@@ -422,22 +422,7 @@ func infer_openai_descriptor_backend(string model_path) string {
 }
 
 func infer_openai_response_text(string response_path) string {
-    string parser = "python3 -c " + runtime_shell_escape(
-        "import json,sys\n" +
-        "payload=json.load(open(sys.argv[1]))\n" +
-        "choices=payload.get('choices') or []\n" +
-        "first=choices[0] if choices else {}\n" +
-        "text=(first.get('message',{}) or {}).get('content','') or first.get('text','') or ''\n" +
-        "if isinstance(text,list):\n" +
-        "    parts=[]\n" +
-        "    for item in text:\n" +
-        "        if isinstance(item,dict):\n" +
-        "            parts.append(str(item.get('text','')))\n" +
-        "        else:\n" +
-        "            parts.append(str(item))\n" +
-        "    text=''.join(parts)\n" +
-        "print(str(text), end='')"
-    ) + " " + runtime_shell_escape(response_path) + " 2>/dev/null"
+    string parser = "jq -r '.choices[0].message.content // .choices[0].text // \"\"' " + runtime_shell_escape(response_path) + " 2>/dev/null"
     trim(runtime_run_command_output(parser))
 }
 
