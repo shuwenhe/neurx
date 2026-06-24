@@ -6,7 +6,7 @@ NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
 S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 OUTPUT_DIR="${NEURX_S_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
-SOURCE_FILE="$NEURX_DIR/train_llm.s"
+SOURCE_FILE="$NEURX_DIR/src/train_llm.s"
 IR_FILE="$BUILD_DIR/train_llm.ir"
 RUNNER_BIN="$BUILD_DIR/s_ir_runner_pretrain"
 
