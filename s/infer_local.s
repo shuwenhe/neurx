@@ -1,67 +1,151 @@
-package neurx.infer_local
+package main
 
-use neurx.checkpoint.{load_checkpoint, checkpoint_params, checkpoint_param_count}
-use neurx.creation.{randn}
-use neurx.nn.{matmul2d}
-use neurx.tensor.{unsqueeze, add}
+use neurx.checkpoint.{load_checkpoint, checkpoint_params, checkpoint_param_count, checkpoint_step, checkpoint_loss}
+use neurx.tensor.tensor
 
-/*
-示例 S 脚本：加载本地 checkpoint 并用最简单的线性层参数执行一次前向推理。
+func int_to_str(int n) string {
+    if n == 0 {
+        return "0"
+    }
+    bool neg = n < 0
+    if neg {
+        n = -n
+    }
+    string s = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        s = string(digit + 48) + s
+        n = n / 10
+    }
+    if neg {
+        s = "-" + s
+    }
+    s
+}
 
-使用说明：
-  1) 编辑下面的 `ckpt_path` 字符串为你的本地检查点路径（例如 /Volumes/YourDisk/models/model.pt）
-  2) 编译运行前先编译 S 运行时：`make s-compile-runtime`
-  3) 在可执行的 S 环境中运行（取决于你的 S 编译器/运行时），或将其整合到 neurx 的运行流程中。
+func fmt_float(float val, int decimals) string {
+    bool neg = val < 0.0
+    if neg {
+        val = -val
+    }
+    int whole = 0
+    while val >= 1.0 {
+        val = val - 1.0
+        whole = whole + 1
+    }
+    string s = ""
+    if neg {
+        s = "-"
+    }
+    s = s + int_to_str(whole) + "."
+    int i = 0
+    while i < decimals {
+        val = val * 10.0
+        int digit = 0
+        while val >= 1.0 {
+            val = val - 1.0
+            digit = digit + 1
+        }
+        s = s + string(digit + 48)
+        i = i + 1
+    }
+    s
+}
 
-注意：此示例假设 checkpoint 包含至少两个参数：权重 `W`（形状 [in,out]）和偏置 `b`（形状 [out]）。
-如果你的模型参数组织不同，请相应调整索引与形状处理逻辑。
-*/
+func ascii_code(string text, int idx) int {
+    int(string(text[idx]))
+}
 
-func main() int {
-    // TODO: 将此路径替换为你的本地 checkpoint 路径
-    string ckpt_path = "/tmp/test_ckpt.pt"
+func argmax_next_token(tensor weights, tensor bias, int prev_id, int vocab_size) int {
+    int base = 0
+    if len(weights.data) >= vocab_size * vocab_size {
+        base = prev_id * vocab_size
+        if base + vocab_size > len(weights.data) {
+            base = 0
+        }
+    }
 
-    // 加载 checkpoint（S 层接口）
-    checkpoint ck = load_checkpoint(ckpt_path)
+    float best_logit = weights.data[base] + bias.data[0]
+    int best_id = 0
+    int c = 1
+    while c < vocab_size {
+        float logit = weights.data[base + c] + bias.data[c]
+        if logit > best_logit {
+            best_logit = logit
+            best_id = c
+        }
+        c = c + 1
+    }
+    best_id
+}
 
-    // 获取参数列表
+func generate_text(tensor weights, tensor bias, string seed, int max_new_chars) string {
+    int vocab_size = 256
+    if len(weights.shape) >= 2 {
+        vocab_size = weights.shape[1]
+    }
+    if len(weights.data) > 0 && len(weights.data) < vocab_size {
+        vocab_size = len(weights.data)
+    }
+    if len(bias.data) > 0 && len(bias.data) < vocab_size {
+        vocab_size = len(bias.data)
+    }
+    if vocab_size < 2 {
+        vocab_size = 2
+    }
+
+    string output = seed
+    int current_id = 32
+    if len(seed) > 0 {
+        current_id = ascii_code(seed, len(seed) - 1) - (ascii_code(seed, len(seed) - 1) / vocab_size) * vocab_size
+    }
+
+    int n = 0
+    while n < max_new_chars {
+        int next_id = argmax_next_token(weights, bias, current_id, vocab_size)
+        output = output + string(next_id)
+        current_id = next_id
+        n = n + 1
+    }
+    output
+}
+
+func first_tensor([]tensor params) tensor {
+    params[0]
+}
+
+func second_tensor([]tensor params) tensor {
+    params[1]
+}
+
+func main() {
+    string checkpoint_path = "artifacts/checkpoints/llm_s_pretrain"
+    checkpoint ck = load_checkpoint(checkpoint_path)
     []tensor params = checkpoint_params(ck)
     int pcount = checkpoint_param_count(ck)
 
-    // 简单日志
-    open_file_append("/tmp/infer_local.log").write("[infer_local] loaded checkpoint with param count\n")
+    println("================================================")
+    println("NeurX checkpoint inference")
+    println("================================================")
+    println("Checkpoint path: " + checkpoint_path)
+    println("Step: " + int_to_str(checkpoint_step(ck)))
+    println("Loss: " + fmt_float(checkpoint_loss(ck), 4))
+    println("Param count: " + int_to_str(pcount))
+    println("Serialized weight items: " + int_to_str(len(params[0].data)))
+    println("Serialized bias items: " + int_to_str(len(params[1].data)))
+    println("")
 
-    if pcount < 1 {
-        open_file_append("/tmp/infer_local.log").write("[infer_local] no params found in checkpoint\n")
-        return 1
+    if pcount < 2 {
+        println("Checkpoint does not contain model weights yet.")
+        println("Expected at least 2 tensors: weights and bias.")
+        return
     }
 
-    // 我们假设 params[0] 是 weight 矩阵，形状为 [in_features, out_features]
-    tensor W = params[0]
-    []int wshape = W.shape
-    int in_features = 1
-    int out_features = 1
-    if len(wshape) >= 2 {
-        in_features = wshape[0]
-        out_features = wshape[1]
-    }
+    string seed = "neurx "
+    string generated = generate_text(first_tensor(params), second_tensor(params), seed, 120)
 
-    // 构建一个随机输入: batch x in_features
-    []int input_shape = []int{cap: 2}
-    input_shape[0] = 1
-    input_shape[1] = in_features
-    tensor x = randn(input_shape)
-
-    // 前向：out = x @ W  （使用 neurx.nn.matmul2d）
-    tensor out = matmul2d(x, W)
-
-    // 如果存在 bias（params[1]），做广播相加
-    if pcount >= 2 {
-        tensor b = params[1]
-        tensor b2 = unsqueeze(b, 0) // shape -> [1, out_features]
-        out = add(out, b2)
-    }
-
-    open_file_append("/tmp/infer_local.log").write("[infer_local] inference completed\n")
-    return 0
+    println("Seed: " + seed)
+    println("Generated:")
+    println(generated)
+    println("================================================")
 }

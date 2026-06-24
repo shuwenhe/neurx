@@ -28,15 +28,8 @@ fi
 
 # 检查是否有 jq (用于 JSON 编码)
 if ! command -v jq &> /dev/null; then
-    echo "⚠️  jq 未找到，尝试使用 python 进行 JSON 编码..."
-    
-    # 使用 Python 进行 JSON 编码
-    if command -v python3 &> /dev/null; then
-        DIAGRAM_CONTENT=$(python3 -c "import json; print(json.dumps(open('$MMD_FILE').read()))" 2>/dev/null)
-    else
-        echo "❌ 既没有 jq 也没有 python3"
-        exit 1
-    fi
+    echo "❌ jq 未找到，请安装 jq 后重试"
+    exit 1
 else
     # 使用 jq 进行 JSON 编码
     DIAGRAM_CONTENT=$(jq -Rs . < "$MMD_FILE")

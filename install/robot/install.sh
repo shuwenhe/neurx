@@ -39,7 +39,6 @@ echo "[1/6] Installing system packages..."
 sudo apt-get update -qq
 sudo apt-get install -y --no-install-recommends \
     build-essential cmake ninja-build \
-    python3 python3-pip \
     libopenblas-dev \
     can-utils iproute2        # CAN bus tools
 
