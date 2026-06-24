@@ -26,6 +26,12 @@ Supported config keys:
 - `log_interval`
 - `eval_interval`
 - `save_interval`
+- `hidden_dim`
+- `num_layers`
+- `num_attention_heads`
+- `num_kv_heads`
+- `intermediate_dim`
+- `vocab_size`
 
 The runner compiles a temporary S entrypoint and passes those config values into the pretrain workflow state.
 The current workflow entrypoint now drives `neurx.distributed.two_t_runtime`, which:
@@ -35,3 +41,8 @@ The current workflow entrypoint now drives `neurx.distributed.two_t_runtime`, wh
 - restores optimizer, loader, and RNG metadata from the workflow checkpoint sidecar
 
 The canonical model implementation is still shared from `model/llm/`, but the workflow launcher now targets the 2T runtime / checkpoint stack.
+
+Presets:
+
+- `config/sample.yaml`: small debug run
+- `config/gpt55_reference.yaml`: reference-only modern GPT-style dense LLM preset, not an official GPT-5.5 spec
