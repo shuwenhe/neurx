@@ -1,108 +1,165 @@
-# neurx-code
+# neurx
+NeurX is AI operating system written in S.
 
-## LLM configuration (SiliconFlow / OpenAI-compatible)
+## Layout
 
-NeurX Code supports OpenAI-compatible chat-completions endpoints (including SiliconFlow).
-You can configure endpoint + API key via environment variables (recommended) so secrets are not stored in local settings.
+- `app/neurx/`: app shell, bridge code, and UI entry points
+- `tensor/`: tensor primitives and helpers
+- `ad/`: automatic differentiation
+- `engine/`: backward execution and autograd state
+- `data/`: datasets and dataloading
+- `lf/`: loss functions
+- `train/`: training utilities
+- `runtime/`: runtime state, I/O adapters, stage state, and control-flow helpers
+- `nn/`: neural network building blocks
+- `opt/`: optimizers
+- `compile/`: graph capture, IR, passes, lowering, executor, and cache
+- `distributed/`: communication, DDP, TP, ZeRO, pipeline parallel, and launcher
+- `infer/`: inference serving, decode, cache, and sampling
+- `model/`: family-level model definitions and composition helpers
+- `workflows/`: task orchestration trees for `llm/`, `vision/`, `diffusion/`, `multimodal/`, `agent/`, `benchmark/`, and `dataset/`
+- `arch/`: backend-specific support for CUDA, CANN, and MPS
+- `examples/`: runnable examples and templates
+- `doc/`: design notes, implementation reports, and gap analysis
+- `s/`: legacy S entry scripts and prototypes
+- `build/ir/`: generated S IR artifacts
+- `build/logs/`: generated compiler and runtime logs
 
-### Quick Setup
+## AI OS Skeleton
 
-#### macOS / Linux
-```bash
-# Run the interactive setup script
-./scripts/setup-llm.sh
-# Or:
-make setup
-```
+To evolve NeurX into an AI operating system, the repository should keep a system-oriented top layer:
 
-#### Windows
-```batch
-REM Run the interactive setup script
-scripts\setup-windows.bat
-REM Or:
-make setup
-```
+- `init/`: boot sequence, default service startup, and base policy loading
+- `kernel/`: task loop, lifecycle, quotas, and module orchestration
+- `memory/`: short-term memory, long-term memory, retrieval state, and checkpoints
+- `planner/`: goal decomposition, task queues, budgeting, and replanning
+- `reflection/`: self-critique, correction suggestions, and post-step review
+- `context/`: context assembly, token budgeting, and compression
+- `reasoning/`: route selection, verification, and decision policies
+- `perception/`: repository, file, UI, and multimodal input understanding
+- `executor/`: action execution, tool dispatch, and observation capture
+- `scheduler/`: multi-task, multi-agent, and background job scheduling
+- `tool/`: tool interfaces, adapters, and execution contracts
+- `skills/`: skill packaging, evaluation, and composition
+- `registry/`: shared registries for tools, skills, agents, and workflows
+- `session/`: user sessions, resumability, and conversation/task state
+- `safety/`: risk checks, approval gates, and policy enforcement
+- `security/`: sandboxing, auth, secrets, and capability control
+- `storage/`: artifacts, state stores, indexes, and durable persistence
+- `observability/`: traces, metrics, logs, and replay/debug snapshots
+- `services/`: background model, indexing, and orchestration services
+- `api/`: HTTP, RPC, CLI, and external integration surfaces
+- `shell/`: interactive system shell and command entrypoints
+- `ui/`: desktop, mobile, and web system interfaces
+- `sdk/`: developer-facing integration and extension APIs
 
-### Configuration Methods (Priority Order)
+## Linux-Style AI OS Mapping
 
-Configuration is checked in this order:
-1. **Environment variables** (highest priority)
-2. **UI Settings panel** (within the app)
-3. **secrets.env file** (lowest priority)
+NeurX can borrow Linux subsystem boundaries while adapting them to AI-native runtime objects.
 
-### Environment Variables
+- Linux `init/` -> NeurX `init/`: bootstrapping, service bring-up, and initial policy load
+- Linux `kernel/` -> NeurX `kernel/`: task control, scheduling, interrupts/signals, and orchestration
+- Linux `mm/` -> NeurX `kernel/mm/` + `memory/`: memory regions, KV cache, checkpoints, and reclaim
+- Linux `fs/` -> NeurX `kernel/fs/` + `fs/` + `storage/`: workspace VFS, artifacts, and durable state
+- Linux `ipc/` -> NeurX `ipc/`: agent-to-agent messaging, shared buffers, and synchronization
+- Linux `security/` -> NeurX `security/` + `safety/`: sandboxing, approvals, and AI risk policy
+- Linux `drivers/` -> NeurX `drivers/` + `tool/`: filesystem, model, UI, and tool adapters
+- Linux `tools/` / `usr/` -> NeurX `shell/`, `sdk/`, `api/`, and `ui/`: user and developer interfaces
 
-Supported environment variables for API endpoint:
+Current kernel-style subtrees already started in this repository:
 
-- `SILICONFLOW_API_URL` (e.g. `https://api.siliconflow.cn/v1/chat/completions`)
-- `SILICONFLOW_API_BASE_URL` (e.g. `https://api.siliconflow.cn` or `https://api.siliconflow.cn/v1`)
-- `OPENAI_API_URL`, `OPENAI_BASE_URL`
+- `kernel/mm/`: AI memory manager
+- `kernel/fs/`: VFS and workspace abstraction
+- `kernel/irq/`: interrupt/signal-like event handling
+- `kernel/proc/`: process/task abstractions
+- `kernel/sched/`: task scheduling
+- `ipc/`: inter-agent communication
 
-Supported environment variables for API key (first non-empty wins):
+## Canonical Layering
 
-- `SILICONFLOW_API_KEY`
-- `OPENAI_API_KEY`
-- `OPENAI_COMPATIBLE_API_KEY`
-- `NEURX_API_KEY`
+The current top-level folders are kept for compatibility. The target layout is:
 
-#### Setting Environment Variables on Windows
+- `core/`: tensor, autograd, engine, nn, ops, losses, optim, data, train, runtime
+- `compile/`: graph, IR, passes, lowering, executor, cache
+- `runtime/`: device/runtime dispatch, I/O, logging, errors, and stage control
+- `distributed/`: communication, DDP, TP, ZeRO, PP, and launcher
+- `serving/`: inference serving, decode, cache, and sampling
+- `workflows/`: orchestration layer for active multi-stage pipelines
+- `backends/`: CUDA, CANN, and MPS backend implementations
+- `examples/`: runnable end-to-end examples
+- `tests/`: regression and integration tests
+- `legacy/`: historical S prototypes and compatibility shims
 
-**Option A: Command Prompt (persistent)**
-```batch
-setx SILICONFLOW_API_KEY "your-api-key-here"
-setx SILICONFLOW_API_URL "https://api.siliconflow.cn/v1"
-```
+## Recommended Priority
 
-**Option B: PowerShell (persistent)**
-```powershell
-[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY", "your-api-key-here", "User")
-[Environment]::SetEnvironmentVariable("SILICONFLOW_API_URL", "https://api.siliconflow.cn/v1", "User")
-```
+1. Strengthen `compile/` so graph capture, lowering, caching, and execution are a real framework spine.
+2. Expand `distributed/` so DDP, TP, ZeRO, and pipeline parallel share one consistent control plane.
+3. Consolidate `serving/` so decode, sampling, and KV cache are first-class inference primitives.
+4. Rehome compatibility shims into `legacy/` after the new layout stabilizes.
 
-After setting environment variables, **restart your terminal or IDE** for changes to take effect.
+## Workflows Boundary
 
-### secrets.env Configuration File
+- `workflows/` is the orchestration layer for active multi-stage pipelines.
+- LLM, vision, diffusion, multimodal, agent, benchmark, and dataset workflows live here.
+- Agent skills evolution belongs under `workflows/agent/skills/`.
+- Model definitions still belong in `model/`.
+- Shared reusable training helpers still belong in `train/`, `pretrain/`, and `posttrain/`.
+- Keep workflow code focused on config, pipeline, launch, and dataset wiring.
 
-If you start the app from a GUI launcher, environment variables may not propagate. You can store secrets in:
+## Installation Targets
 
-**Location:**
-- Unix/Linux/macOS: `~/.config/neurx-code/secrets.env`
-- Windows: `%USERPROFILE%\.config\neurx-code\secrets.env` (typically `C:\Users\<YourUsername>\.config\neurx-code\secrets.env`)
+For platform-specific NeurX installation guidance across desktop, mobile, tablet, robot, automotive, and embedded targets, see [doc/INSTALL_TARGETS.md](doc/INSTALL_TARGETS.md).
 
-**Format (simple dotenv):**
-```env
-# SiliconFlow configuration
-SILICONFLOW_API_URL=https://api.siliconflow.cn/v1
-SILICONFLOW_API_KEY=sk-...your-key...
+## S Modules
 
-# OpenAI configuration (alternative)
-OPENAI_API_KEY=sk-...your-key...
-OPENAI_BASE_URL=https://api.openai.com/v1
-```
+- `ad/ad.s`: automatic differentiation state, grad mode, record tracking, and backward skeleton
+- `engine/backward.s`: backward engine entrypoint
+- `engine/state.s`: autograd state helpers
+- `tensor/tensor.s`: tensor structure, construction, views, elementwise ops, matmul
+- `tensor/creation.s`: tensor creation and fill helpers
+- `tensor/indexing.s`: indexing, concatenation, and splitting helpers
+- `tensor/stats.s`: sorting and statistical helpers
+- `tensor/linalg.s`: linear algebra helpers
+- `tensor/einsum.s`: einsum entry point
+- `ops.s`: operator entry points
+- `autograd.s`: automatic differentiation prototype
+- `schedule.s`: scheduling prototype
+- `nn/nn.s`: linear layer and basic nn entry points
+- `multimodal.s`: multimodal batch abstraction
+- `trainer.s`: training config and step state
+- `opt/optim_mvp.s`: minimal SGD and learning rate implementation
+- `dataloader_mvp.s`: minimal dataloader for batch/sequence slicing
+- `data/dataset.s`: dataset abstraction, slicing, splitting, and concatenation
+- `data/dataloader.s`: data loading, batching, and dataloader state
+- `lf/losses.s`: loss function entry point and core loss implementations
+- `train/amp.s`: autocast and GradScaler state utilities
+- `train/checkpoint_manager.s`: checkpoint retention and best-score tracking
+- `train/logging.s`: training logging state and flush tracking
+- `train/loop.s`: training loop and single-step training pipeline state machine
+- `runtime/runtime/runtime.s`: runtime state and discovery helpers
+- `runtime/io/io.s`: file, JSON, and environment adapters for the runtime layer
+- `runtime/stage/stage.s`: staged compile state helpers for jit/lower/compile/execute
+- `compile/runtime/runtime.s`: compile-state bookkeeping used by the runtime pipeline
+- `runtime/control/control.s`: control-flow state helpers and simple cond/loop/scan primitives
+- `distributed/comm/comm.s`: process-group and collective primitives
+- `distributed/ddp/ddp.s`: DDP gradient bucket and synchronization state
+- `distributed/tp/tp.s`: tensor-parallel shard mapping
+- `distributed/tp_collective/tp_collective.s`: TP collective wrappers
+- `distributed/pp/pp.s`: pipeline-parallel execution state
+- `distributed/zero/zero.s`: ZeRO-style shard bookkeeping
+- `distributed/pipelining/pipelining.s`: pipeline stage and schedule state
+- `distributed/launcher/launcher.s`: distributed config detection and launcher helpers
 
-**Notes:**
-- This file is gitignored and will not be committed
-- If you provide a base URL, NeurX will normalize it to a chat-completions URL
-- When environment variables are set, they are treated as runtime-only and will not persist into QSettings
+## Notes
 
-### Building on Windows
+The S modules are compiled into runtime IR during the `s-compile-runtime` step and written under `build/ir/`.
 
-```batch
-REM 1. First-time setup (configure API keys)
-scripts\setup-windows.bat
+For the current NeurX agent capability boundary and the roadmap toward a GPT/Codex-style coding agent, see [doc/AGENT_CAPABILITY_GAP.md](doc/AGENT_CAPABILITY_GAP.md).
 
-REM 2. Build the project
-scripts\build-windows.bat Release
+For the coding-oriented agent workflow entrypoint, see [workflows/agent/code_agent/README.md](workflows/agent/code_agent/README.md).
 
-REM Or use make:
-make setup
-make windows
-```
+## Hardware Backends
 
-### Architecture References
-
-See documentation files for implementation details:
-
-- [docs/NEURX_CODE_CODEx_ARCHITECTURE.md](/home/shuwen/shuwen/ai/neurx/docs/NEURX_CODE_CODEx_ARCHITECTURE.md)
-- [docs/AI_PROJECT_FEATURE_ROADMAP.md](/home/shuwen/shuwen/ai/neurx/docs/AI_PROJECT_FEATURE_ROADMAP.md)
-- [docs/AI_PROJECT_IMPLEMENTATION_PLAN.md](/home/shuwen/shuwen/ai/neurx/docs/AI_PROJECT_IMPLEMENTATION_PLAN.md)
+- `arch/cuda/`: CUDA/NVIDIA GPU support
+- `arch/cann/`: Ascend NPU support
+- `arch/mps/`: Apple M1/M2 GPU support
