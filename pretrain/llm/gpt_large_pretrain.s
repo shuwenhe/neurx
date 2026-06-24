@@ -19,7 +19,7 @@ use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_
 use neurx.strings
 use neurx.checkpoint.{save_checkpoint}
 use neurx.strings
-use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
+use neurx.runtime.io.{runtime_write_text_file}
 use neurx.strings
 use neurx.nn.{embedding_lookup, transformer_forward}
 use neurx.strings
@@ -543,7 +543,6 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
 }
 
 func gpt_large_pretrain_save_checkpoint(gpt_large_pretrain_state state) () {
-    runtime_make_dirs(gpt_large_pretrain_checkpoint_dir(state))
     save_checkpoint(
         gpt_large_pretrain_checkpoint_path(state),
         state.loop.global_step,

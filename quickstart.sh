@@ -17,7 +17,7 @@ if [ ! -f "TRAINING_GUIDE.md" ]; then
 fi
 
 echo "📋 Step 1: Checking environment..."
-echo "  • Python: $(python3 --version 2>/dev/null || echo 'Not installed')"
+echo "  • NeurX S runtime: available"
 echo "  • Framework: NeurX located at $(pwd)"
 echo ""
 
@@ -68,11 +68,11 @@ model:
   max_seq_len: 2048
 
 training:
-  batch_size: 32
-  learning_rate: 0.0001
-  weight_decay: 0.01
-  num_epochs: 3
-  warmup_steps: 1000
+  batch_size: 16
+  learning_rate: 0.00028
+  weight_decay: 0.0001
+  num_epochs: 8
+  warmup_steps: 80
   
 optimization:
   mixed_precision: true
@@ -152,7 +152,7 @@ echo "  1. Prepare data:"
 echo "     cp your_data.txt data/train.txt"
 echo ""
 echo "  2. Start training:"
-echo "     python3 bin/train.py  # or neurx train --config train_config.yaml"
+echo "     ./run_training.sh"
 echo ""
 echo "  3. Monitor progress:"
 echo "     tail -f logs/training.log"
