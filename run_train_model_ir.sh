@@ -2,9 +2,10 @@
 
 set -euo pipefail
 
-NEURX_DIR="/Users/feifei/train/neurx"
-S_ROOT="/Users/feifei/train/s"
-SOURCE_FILE="${SOURCE_FILE:-$NEURX_DIR/src/train_model.s}"
+NEURX_DIR="${NEURX_DIR:-/app/train/neurx}"
+S_ROOT="${S_ROOT:-/app/train/s}"
+# default SOURCE_FILE moved to repo root (was $NEURX_DIR/src/train_model.s before restructuring)
+SOURCE_FILE="${SOURCE_FILE:-$NEURX_DIR/train_model.s}"
 IR_FILE="${IR_FILE:-$NEURX_DIR/build/train_model.ir}"
 RUNNER_BIN="${RUNNER_BIN:-$NEURX_DIR/build/s_ir_runner}"
 
