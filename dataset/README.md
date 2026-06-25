@@ -86,6 +86,41 @@ C. 华为云（ECS + OBS）
 - 严格核验 `license` 字段并记录来源，训练/发布模型时注意合规。 
 - 如果无法直接访问 Hugging Face（国内网络问题），建议在云主机使用代理或在云控制台配置出网权限。
 
+安装对象存储工具（快速参考）
+
+阿里 OSS (`ossutil`)：
+```bash
+# 下载（示例）
+curl -O https://gosspublic.alicdn.com/ossutil/1.7.7/ossutil64
+chmod +x ossutil64
+sudo mv ossutil64 /usr/local/bin/ossutil
+# 配置（会提示 AccessKeyId/AccessKeySecret/Region）
+ossutil config
+```
+
+腾讯 COS (`coscmd`)：
+```bash
+pip3 install --user coscmd
+# 配置：coscmd config（填写 SecretId/SecretKey/Region）
+```
+
+华为 OBS (`obsutil`)：
+```bash
+# 下载并配置 obsutil，请参考华为云官方文档：
+# https://support.huaweicloud.com/obs/obs_03_0001.html
+# 一般流程：下载 obsutil 可执行文件，并运行 obsutil config
+```
+
+数据验证脚本
+----------------
+仓库包含一个简单的验证脚本 `dataset/verify_dataset.sh`，用于检查 shards 是否存在、统计记录数，并验证前若干条 JSON 记录包含必要字段：
+
+```bash
+bash dataset/verify_dataset.sh /app/train/neurx/dataset/the-stack
+```
+
+如果你希望我把更多校验（如 license 统计、样本去重率估算）加入该脚本，我可以继续扩展。
+
 示例一键脚本（阿里云；保存为 `run_fetch_and_upload_aliyun.sh` 在云端运行）
 
 ```bash
