@@ -13,8 +13,18 @@ mkdir -p "$NEURX_DIR/build"
 
 if [ ! -f "$IR_FILE" ]; then
     echo "IR not found, compiling source first..."
-    cd "$S_ROOT"
-    ./bin/s "$SOURCE_FILE" "$IR_FILE"
+    # choose an s compiler binary that matches host arch if available
+    if [ "$(uname -m)" = "aarch64" ]; then
+        S_COMPILER=$(ls "$S_ROOT/bin"/s_arm64* 2>/dev/null | head -n1 || true)
+    else
+        S_COMPILER=$(ls "$S_ROOT/bin"/s_x86_64* 2>/dev/null | head -n1 || true)
+    fi
+    # fallback to generic ./bin/s if no specific binary found
+    if [ -z "$S_COMPILER" ]; then
+        S_COMPILER="$S_ROOT/bin/s"
+    fi
+    echo "Using s compiler: $S_COMPILER"
+    "$S_COMPILER" "$SOURCE_FILE" "$IR_FILE"
 fi
 
 echo "Building standalone IR runner..."
