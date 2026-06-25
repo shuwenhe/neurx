@@ -6,7 +6,12 @@ NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
 S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 OUTPUT_DIR="${NEURX_S_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
-SOURCE_FILE="$NEURX_DIR/src/train_llm.s"
+# prefer train_llm.s at repo root (repo was reorganized); fall back to src/
+if [ -f "$NEURX_DIR/train_llm.s" ]; then
+  SOURCE_FILE="$NEURX_DIR/train_llm.s"
+else
+  SOURCE_FILE="$NEURX_DIR/src/train_llm.s"
+fi
 IR_FILE="$BUILD_DIR/train_llm.ir"
 RUNNER_BIN="$BUILD_DIR/s_ir_runner_pretrain"
 
