@@ -44,6 +44,8 @@ help:
 	@echo "  code-agent        Run code agent (TASK=... optional)"
 	@echo "  clean             Remove generated artifacts and caches"
 	@echo "  platform          $(PLATFORM)"
+	@echo "  train             Run NeurX training (run_training.sh)"
+	@echo "  train-watch       Run training and tail live logs (/tmp/neurx_real_train.log)"
 	@echo ""
 	@echo "Platform install targets:"
 	@echo "  install-robot     Install NeurX on Jetson Orin / RK3588 robot"
@@ -52,6 +54,40 @@ help:
 	@echo "  install-tablet    Install NeurX on Android tablet via ADB"
 	@echo "  install-mobile-android  Install NeurX on Android phone via ADB"
 	@echo "  install-mobile-ios      Install NeurX on iPhone via Xcode"
+
+train: check-bash
+	@echo "Running NeurX training (run_training.sh)"
+	@cd '$(CURDIR_UNIX)' && \
+	OUT_DIR="$${NEURX_S_PRETRAIN_OUTPUT_DIR:-artifacts/checkpoints/llm_s_pretrain}"; \
+	NEURX_S_PRETRAIN_OUTPUT_DIR="$$OUT_DIR" bash run_training.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "Training completed successfully. Checkpoints: $$OUT_DIR"; \
+	else \
+		echo "Training failed with exit code $$STATUS"; \
+	fi; \
+	exit $$STATUS
+
+train-watch: check-bash
+	@echo "Running NeurX training (run_training.sh) and tailing live logs"
+	@cd '$(CURDIR_UNIX)' && \
+	mkdir -p .run && \
+	OUT_DIR="$${NEURX_S_PRETRAIN_OUTPUT_DIR:-artifacts/checkpoints/llm_s_pretrain}" && \
+	LOG_FILE="/tmp/neurx_real_train.log" && \
+	rm -f "$$LOG_FILE" && \
+	NEURX_S_PRETRAIN_OUTPUT_DIR="$$OUT_DIR" bash run_training.sh 2>&1 | tee "$$LOG_FILE" & \
+	TRAIN_PID=$$!; echo "$$TRAIN_PID" > .run/train_watch_pid.txt; \
+	sleep 0.5; \
+	echo "Tailing $$LOG_FILE (train pid: $$TRAIN_PID)"; \
+	# tail until the training PID exits (GNU tail supports --pid)
+	tail --pid=$$TRAIN_PID -F "$$LOG_FILE"; \
+	wait $$TRAIN_PID; STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "Training completed successfully. Checkpoints: $$OUT_DIR"; \
+	else \
+		echo "Training failed with exit code $$STATUS"; \
+	fi; \
+	rm -f .run/train_watch_pid.txt
 
 check-bash:
 ifeq ($(PLATFORM),windows)
