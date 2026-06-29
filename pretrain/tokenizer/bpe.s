@@ -107,7 +107,7 @@ func split_documents([]string documents, float valid_ratio, int seed) bpe_split_
         string doc = trim(documents[i])
         if doc != "" {
             int bucket = positive_mod(seed + i * 1103515245, 1000)
-            float bucket_value = float(bucket)
+            float bucket_value = bucket * 1.0
             float threshold = valid_ratio * 1000.0
             if bucket_value < threshold {
                 valid_documents.push(doc)
@@ -149,8 +149,7 @@ func tokenize_chars(string text) []string {
     int i = 0
     while i < n {
         string ch = neurx.strings.substring(text, i, i + 1)
-        int chi = int(string(ch))
-        if chi != 13 {
+        if ch != "\r" {
             tokens.push(ch)
         }
         i = i + 1

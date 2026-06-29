@@ -140,7 +140,7 @@ func scale_tensor(tensor value, float scale) tensor {
 }
 
 func zero_pad_int(int value, int width) string {
-    string digits = string(value)
+    string digits = int_to_str(value, 0)
     string prefix = ""
     int missing = width - len(digits)
     if missing < 0 {
@@ -300,28 +300,28 @@ func gpt_large_pretrain_metadata_path(gpt_large_pretrain_state state) string {
 
 func gpt_large_pretrain_metadata_text(gpt_large_pretrain_state state) string {
     string out = "pretrain_meta_v1\n"
-    out = out + "step=" + string(state.loop.global_step) + "\n"
-    out = out + "epoch=" + string(state.loop.data.epoch) + "\n"
-    out = out + "loss=" + string(state.training.last_loss) + "\n"
-    out = out + "best_metric=" + string(state.checkpoint.best_metric) + "\n"
+    out = out + "step=" + int_to_str(state.loop.global_step, 0) + "\n"
+    out = out + "epoch=" + int_to_str(state.loop.data.epoch, 0) + "\n"
+    out = out + "loss=" + fmt_float(state.training.last_loss, 6) + "\n"
+    out = out + "best_metric=" + fmt_float(state.checkpoint.best_metric, 6) + "\n"
     out = out + "dataset_manifest=" + state.dataset_manifest + "\n"
     out = out + "output_dir=" + state.output_dir + "\n"
-    out = out + "optimizer.step=" + string(state.optimizer.step) + "\n"
-    out = out + "optimizer.lr=" + string(state.optimizer.last_lr) + "\n"
-    out = out + "optimizer.grad_norm=" + string(state.optimizer.last_grad_norm) + "\n"
-    out = out + "loader.cursor=" + string(state.training.loader.cursor) + "\n"
-    out = out + "loader.epoch=" + string(state.training.loader.epoch) + "\n"
-    out = out + "valid_loader.cursor=" + string(state.valid_loader.cursor) + "\n"
-    out = out + "valid_loader.epoch=" + string(state.valid_loader.epoch) + "\n"
-    out = out + "rng.seed=" + string(state.rng_seed) + "\n"
-    out = out + "rng.state=" + string(state.rng_state) + "\n"
-    out = out + "ddp.enabled=" + string(pretrain_ddp_enabled(state.ddp)) + "\n"
-    out = out + "ddp.rank=" + string(pretrain_ddp_rank(state.ddp)) + "\n"
-    out = out + "ddp.world_size=" + string(pretrain_ddp_world_size(state.ddp)) + "\n"
-    out = out + "corpus.train_docs=" + string(len(state.corpus.split.train_documents)) + "\n"
-    out = out + "corpus.valid_docs=" + string(len(state.corpus.split.valid_documents)) + "\n"
-    out = out + "corpus.train_tokens=" + string(len(state.corpus.train_token_ids)) + "\n"
-    out = out + "corpus.valid_tokens=" + string(len(state.corpus.valid_token_ids)) + "\n"
+    out = out + "optimizer.step=" + int_to_str(state.optimizer.step, 0) + "\n"
+    out = out + "optimizer.lr=" + fmt_float(state.optimizer.last_lr, 6) + "\n"
+    out = out + "optimizer.grad_norm=" + fmt_float(state.optimizer.last_grad_norm, 6) + "\n"
+    out = out + "loader.cursor=" + int_to_str(state.training.loader.cursor, 0) + "\n"
+    out = out + "loader.epoch=" + int_to_str(state.training.loader.epoch, 0) + "\n"
+    out = out + "valid_loader.cursor=" + int_to_str(state.valid_loader.cursor, 0) + "\n"
+    out = out + "valid_loader.epoch=" + int_to_str(state.valid_loader.epoch, 0) + "\n"
+    out = out + "rng.seed=" + int_to_str(state.rng_seed, 0) + "\n"
+    out = out + "rng.state=" + int_to_str(state.rng_state, 0) + "\n"
+    out = out + "ddp.enabled=" + int_to_str(pretrain_ddp_enabled(state.ddp), 0) + "\n"
+    out = out + "ddp.rank=" + int_to_str(pretrain_ddp_rank(state.ddp), 0) + "\n"
+    out = out + "ddp.world_size=" + int_to_str(pretrain_ddp_world_size(state.ddp), 0) + "\n"
+    out = out + "corpus.train_docs=" + int_to_str(len(state.corpus.split.train_documents), 0) + "\n"
+    out = out + "corpus.valid_docs=" + int_to_str(len(state.corpus.split.valid_documents), 0) + "\n"
+    out = out + "corpus.train_tokens=" + int_to_str(len(state.corpus.train_token_ids), 0) + "\n"
+    out = out + "corpus.valid_tokens=" + int_to_str(len(state.corpus.valid_token_ids), 0) + "\n"
     out
 }
 
@@ -418,7 +418,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     tensor grad_logits = ops.sub(probabilities, targets)
     float scale = 1.0
     if train_output.batch.valid_tokens > 0 {
-        scale = 1.0 / float(train_output.batch.valid_tokens)
+        scale = 1.0 / (train_output.batch.valid_tokens * 1.0)
     }
     grad_logits = scale_tensor(grad_logits, scale)
 

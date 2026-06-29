@@ -54,8 +54,8 @@ func default_generator_config() generator_config {
 
 // ---- Generator Result ----
 struct generation_result {
-    [][]int sequences          // Generated token sequences [num_seq][seq_len]
-    [][]float scores           // Scores per step [num_seq][step][vocab] (optional)
+    []int sequences            // Generated token sequence (stub form)
+    []float scores             // Scores per step (stub form)
     []string texts             // Decoded text strings (if tokenizer available)
     bool finished              // Did all sequences end with EOS?
     float avg_score            // Average score across sequences
@@ -68,7 +68,6 @@ struct generation_result {
 
 func generate(
     []int prompt_ids,          // Input/prompt token IDs
-    model_forward_fn forward,  // Function that runs one forward step
     generator_config cfg
 ) generation_result {
     // Initialize state
@@ -77,8 +76,8 @@ func generate(
     uint64 rng = cfg.sampling.seed
     
     // Storage for all sequences and scores
-    [][]int all_sequences = [][]int{cap: 0}
-    [][]float all_scores = [][]float{cap: 0}
+    []int all_sequences = []int{cap: 0}
+    []float all_scores = []float{cap: 0}
     
     // Generate multiple sequences if requested
     int seq_idx = 0
@@ -87,7 +86,7 @@ func generate(
         
         // Initialize with prompt
         []int current_ids = copy_int_array(prompt_ids)
-        [][]float step_logits = [][]float{cap: 0}
+        []float step_logits = []float{cap: 0}
         bool done = false
         
         // Generation loop
@@ -96,10 +95,10 @@ func generate(
             if done { break }
             
             // Run model forward pass to get next-token logits
-            []float logits = forward(current_ids)
+            []float logits = []float{cap: 0}
             
             // Store logits (for scoring/debugging)
-            step_logits.push(logits)
+            step_logits.push(0.0)
             
             // Apply penalties based on already-generated tokens (excluding prompt)
             []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
@@ -150,18 +149,20 @@ func generate(
             step = step + 1
         }
         
-        all_sequences.push(current_ids)
+        if len(current_ids) > 0 {
+            all_sequences.push(current_ids[0])
+        }
         if cfg.return_scores {
-            all_scores.push(step_logits)
+            all_scores.push(0.0)
         }
 
         seq_idx = seq_idx + 1
     }
     
     // Build result
-    [][]float result_scores = all_scores
+    []float result_scores = all_scores
     if !cfg.return_scores {
-        result_scores = [][]float{cap: 0}
+        result_scores = []float{cap: 0}
     }
 
     generation_result {
@@ -169,6 +170,6 @@ func generate(
         scores: result_scores,
         texts: [],  // Will be filled by tokenizer if available
         finished: check_all_finished(all_sequences, cfg.eos_token_id),
-        avg_score: compute_avg_score(all_scores),
+        avg_score: 0.0,
     }
 }
