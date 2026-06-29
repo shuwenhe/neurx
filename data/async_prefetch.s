@@ -63,7 +63,7 @@ struct prefetched_batch {
 // Thread-safe ring buffer for passing data between I/O and training threads
 
 struct prefetch_queue {
-    prefetched_batch[] buffer     // Ring buffer storage
+    []prefetched_batch buffer     // Ring buffer storage
     int capacity                  // Maximum number of batches in queue
     int head                      // Next position to read (consumer side)
     int tail                      // Next position to write (producer side)
@@ -84,7 +84,7 @@ struct prefetch_queue {
 
 func new_prefetch_queue(int capacity) prefetch_queue {
     prefetch_queue q
-    q.buffer = prefetched_batch[]{cap: capacity}
+    q.buffer = []prefetched_batch{cap: capacity}
     q.capacity = capacity
     q.head = 0
     q.tail = 0

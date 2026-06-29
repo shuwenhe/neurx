@@ -16,8 +16,8 @@ struct layer_norm {
     double epsilon
     
     // Parameters
-    float gamma[4096]  // scale
-    float beta[4096]   // shift (optional)
+    [4096]float gamma  // scale
+    [4096]float beta   // shift (optional)
     
     bool use_bias
 }
@@ -25,7 +25,7 @@ struct layer_norm {
 struct rms_norm {
     int hidden_dim
     double epsilon
-    float gamma[4096]  // scale only (no bias)
+    [4096]float gamma  // scale only (no bias)
 }
 
 struct position_embedding_config {
@@ -38,7 +38,7 @@ struct position_embedding_config {
 
 struct absolute_position_embedding {
     // Pre-computed embeddings
-    float embedding[2048][4096]  // [max_seq_len, hidden_dim]
+    [2048][4096]float embedding  // [max_seq_len, hidden_dim]
     int max_seq_len
     int hidden_dim
 }
@@ -46,19 +46,19 @@ struct absolute_position_embedding {
 struct rope_embedding {
     // Rotary Position Embedding (RoPE)
     // Frequency for each dimension
-    float frequencies[4096]
+    [4096]float frequencies
     int hidden_dim
     double rope_base
     
     // Cached frequencies
-    float freq_cos[2048][4096]
-    float freq_sin[2048][4096]
+    [2048][4096]float freq_cos
+    [2048][4096]float freq_sin
 }
 
 struct alibi_embedding {
     // ALiBi (Attention with Linear Biases)
     // Per-head bias slopes
-    float head_slopes[32]  // One per attention head
+    [32]float head_slopes  // One per attention head
     int num_heads
 }
 
@@ -86,11 +86,11 @@ func new_rms_norm(layer_norm_config cfg) rms_norm {
 // out = gamma * (x - mean(x)) / sqrt(var(x) + epsilon) + beta
 func layer_normalize(
     layer_norm ln,
-    float input[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float input,  // [batch_size, seq_len, hidden_dim]
     int batch_size,
     int seq_len
-) float {
-    float output[][][] = []float[batch_size][seq_len][ln.hidden_dim]
+) [][][]float {
+    [][][]float output = []float[batch_size][seq_len][ln.hidden_dim]
     
     // For each token in each sequence
     int b = 0
@@ -141,11 +141,11 @@ func layer_normalize(
 // out = gamma * (x / RMS(x) + epsilon)
 func rms_normalize(
     rms_norm rn,
-    float input[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float input,  // [batch_size, seq_len, hidden_dim]
     int batch_size,
     int seq_len
-) float {
-    float output[][][] = []float[batch_size][seq_len][rn.hidden_dim]
+) [][][]float {
+    [][][]float output = []float[batch_size][seq_len][rn.hidden_dim]
     
     // For each token in each sequence
     int b = 0
@@ -183,7 +183,7 @@ func new_absolute_position_embedding(position_embedding_config cfg) absolute_pos
     int max_seq_len = cfg.max_seq_len
     int hidden_dim = cfg.hidden_dim
     
-    float embedding[][][] = []float[max_seq_len][hidden_dim]
+    [][][]float embedding = []float[max_seq_len][hidden_dim]
     
     // Initialize with sin/cos patterns
     int pos = 0
@@ -215,9 +215,9 @@ func new_absolute_position_embedding(position_embedding_config cfg) absolute_pos
 func get_position_embedding(
     absolute_position_embedding ape,
     int seq_len
-) float {
+) [][][]float {
     // Return embeddings for positions [0, seq_len)
-    float pos_embed[][][] = []float[1][seq_len][ape.hidden_dim]
+    [][][]float pos_embed = []float[1][seq_len][ape.hidden_dim]
     
     int pos = 0
     while pos < seq_len {
@@ -238,7 +238,7 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
     double rope_base = cfg.rope_base
     
     // Precompute frequencies
-    float frequencies[] = []float{cap: hidden_dim}
+    []float frequencies = []float{cap: hidden_dim}
     int d = 0
     while d < hidden_dim {
         double freq = 1.0 / pow(rope_base, (double(d) / double(hidden_dim)))
@@ -250,18 +250,18 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
         frequencies: frequencies,
         hidden_dim: hidden_dim,
         rope_base: rope_base,
-        freq_cos: []float[2048][hidden_dim],
-        freq_sin: []float[2048][hidden_dim],
+        freq_cos: [2048][hidden_dim]float{},
+        freq_sin: [2048][hidden_dim]float{},
     }
 }
 
 // Apply RoPE to query and key
 func apply_rope(
     rope_embedding rope,
-    float query[][][],  // [batch, num_heads, seq_len, head_dim]
-    float key[][][],    // [batch, num_heads, seq_len, head_dim]
+    [][][]float query,  // [batch, num_heads, seq_len, head_dim]
+    [][][]float key,    // [batch, num_heads, seq_len, head_dim]
     int seq_len
-) float {
+) [][][]float {
     // Rotate query and key by position-dependent angles
     // For each position, dimension pair:
     //   angle = position * frequency[d]
@@ -269,14 +269,14 @@ func apply_rope(
     
     // Where [x, y] are consecutive dimension pairs
     
-    float rotated_query[][][] = query
+    [][][]float rotated_query = query
     rotated_query
 }
 
 // ALiBi (Attention with Linear Biases)
 func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_embedding {
     // Slopes increase by power of 2 for each head
-    float slopes[] = []float{cap: num_heads}
+    []float slopes = []float{cap: num_heads}
     
     int h = 0
     while h < num_heads {
@@ -294,9 +294,9 @@ func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_emb
 // Apply ALiBi bias to attention scores
 func apply_alibi_bias(
     alibi_embedding alibi,
-    float attention_scores[][][][],  // [batch, num_heads, seq_len, seq_len]
+    [][][][]float attention_scores,  // [batch, num_heads, seq_len, seq_len]
     int seq_len
-) float {
+) [][][][]float {
     // Add position-dependent bias: bias[i, j] = -|i - j| * slope[h]
     // This encourages local attention
     

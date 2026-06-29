@@ -123,7 +123,7 @@ func main() int {
     // Step 4: 准备数据 (合成数据用于演示)
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2
-    int[] train_data = generate_data(data_len, cfg.vocab_size)
+    []int train_data = generate_data(data_len, cfg.vocab_size)
     println("[OK] Generated ", format_int(data_len), " training tokens")
     println("")
     
@@ -139,14 +139,14 @@ func main() int {
     int step = 0
     while step < cfg.max_steps {
         // --- 前向传播 ---
-        int[] input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
-        int[] target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
+        []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
+        []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
         
         // 通过GPT模型前向传播获取logits
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
         
         // 计算交叉熵损失
-        int[] targets = make_targets(target_ids, cfg.batch_size)
+        []int targets = make_targets(target_ids, cfg.batch_size)
         AG.AGTensor loss_tensor = AG.ag_cross_entropy(logits, targets)
         float loss_val = AG.item(loss_tensor)
         
@@ -158,12 +158,12 @@ func main() int {
         }
         
         // 记录到loss历史窗口
-        int wi = s(step - (step / len) * len)(state.loss_history)
+        int wi = mod(step, len(state.loss_history))
         state.loss_history[wi] = loss_val
         
         // --- 反向传播 ---
         AG.zero_grad(model.all_params)
-        Map<string, T.Tensor> grads = AG.backward(loss_tensor)
+        var grads = AG.backward(loss_tensor)
         float grad_norm = AG.clip_grad_norm_(model.all_params, 1.0)
         state.grad_norm = grad_norm
         
@@ -172,7 +172,7 @@ func main() int {
         else { AG.sgd_step(opt, model.all_params) }
         
         // --- 日志记录 ---
-        bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss
+        bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss)
         if should_log {
             string note = ""
             if loss_val < state.best_loss { note = "*NEW BEST*" }
@@ -186,7 +186,7 @@ func main() int {
         
         // --- 定期保存检查点 ---
         if should_save(step + 1, cfg.save_every) {
-            Map<string, T.Tensor> weights = AG.export_weights(model.all_params)
+            var weights = AG.export_weights(model.all_params)
             
             NN.ModelConfigSnapshot snap = NN.make_config_snapshot(
                 cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
@@ -210,7 +210,7 @@ func main() int {
     println("[5/5] Saving final checkpoints...")
     
     // Final checkpoint
-    Map<string, T.Tensor> final_weights = AG.export_weights(model.all_params)
+    var final_weights = AG.export_weights(model.all_params)
     NN.ModelConfigSnapshot final_snap = NN.make_config_snapshot(
         cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
         cfg.num_layers, cfg.max_seq_len, cfg.dropout_prob, total_params
@@ -251,21 +251,21 @@ func main() int {
 // ============================================
 
 // 生成合成训练数据 (用于demo，实际应从文件读取)
-func generate_data(int n_tokens, int vocab_size) int[] {
-    int[] data = new int[n_tokens]
+func generate_data(int n_tokens, int vocab_size) []int {
+    []int data = new int[n_tokens]
     
     // 模式 + 噪声混合
-    int[] pattern = [1, 23, 45, 67, 89, 12, 34, 56]
+    []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
     
     int seed = 42
     int i = 0
     while i < n_tokens {
-        if i(i - (i / (pattern_len * 3)) * (pattern_len * 3)) < pattern_len {
-            data[i] = p(pattern[i - (pattern[i / pattern_len) * pattern_len)]
+        if mod(i, pattern_len * 3) < pattern_len {
+            data[i] = pattern[mod(i, pattern_len)]
         } else {
             seed = seed * 1103515245 + 12345
-            data[i] = (((seed >> 16) - ((seed >> 16) / vocab_size) * vocab_size)
+            data[i] = mod(seed / 65536, vocab_size)
         }
         i = i + 1
     }
@@ -273,8 +273,8 @@ func generate_data(int n_tokens, int vocab_size) int[] {
 }
 
 // 获取一个batch的数据
-func get_batch(int[] data, int offset, int count) int[] {
-    int[] batch = new int[count]
+func get_batch([]int data, int offset, int count) []int {
+    []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
     int i = 0
     while i < count {
@@ -285,8 +285,8 @@ func get_batch(int[] data, int offset, int count) int[] {
 }
 
 // 将token IDs转为target class indices (简化版)
-func make_targets(int[] token_ids, int batch_size) int[] {
-    int[] targets = new int[batch_size]
+func make_targets([]int token_ids, int batch_size) []int {
+    []int targets = new int[batch_size]
     int i = 0
     while i < batch_size {
         targets[i] = token_ids[i]
@@ -326,7 +326,7 @@ func int_to_str(int n) string {
     if neg { n = -n }
     string s = ""
     while n > 0 {
-        s = string((n(n - (n / 10) * 10)) + 48) + s
+        s = string((n * (n - (n / 10) * 10)) + 48) + s
         n = n / 10
     }
     if neg { s = "-" + s }
@@ -339,12 +339,15 @@ func format_int(int n) string {
     bool neg = n < 0
     if neg { n = -n }
     string s = ""
-    int group = 0
+    int count = 0
     while n > 0 {
-        if group > 0  g(group - (group / 3) * 3) == 0 { s = "," + s }
-        s = string((n(n - (n / 10) * 10)) + 48) + s
+        int digit = n - (n / 10) * 10
+        s = string(digit + 48) + s
         n = n / 10
-        group = group + 1
+        count = count + 1
+        if count - (count / 3) * 3 == 0 && n > 0 {
+            s = "," + s
+        }
     }
     if neg { s = "-" + s }
     s

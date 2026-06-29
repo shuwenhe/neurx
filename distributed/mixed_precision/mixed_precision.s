@@ -347,7 +347,7 @@ struct mixed_precision_config {
 struct mixed_precision_training_state {
     mixed_precision_config config
     loss_scaler_state scaler
-    master_weight_state[] param_master_weights  // Per-parameter-group master weights
+    []master_weight_state param_master_weights  // Per-parameter-group master weights
     int num_parameter_groups
     double effective_loss_scale
     bool autocast_enabled

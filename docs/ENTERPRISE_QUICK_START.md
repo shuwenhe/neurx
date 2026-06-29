@@ -103,7 +103,7 @@ Code:     compute/flash_attention.s
 Problem:  FP32 uses too much memory and is slow
 Solution: BF16 compute, FP32 accumulate
 Result:   2x faster, 2x less memory, numerically stable
-Code:     optimization/mixed_precision.s
+Code:     train/mixed_precision.s
 ```
 
 ### Fault Recovery
@@ -403,7 +403,7 @@ Inference: 0.5TB (INT4 quantized)
 
 1. **Architecture**: `ENTERPRISE_2T_IMPLEMENTATION.md`
 2. **Flash Attention**: `compute/flash_attention.s`
-3. **Mixed Precision**: `optimization/mixed_precision.s`
+3. **Mixed Precision**: `train/mixed_precision.s`
 4. **Fault Recovery**: `distributed/fault_recovery.s`
 5. **Monitoring**: `monitoring/distributed_metrics.s`
 6. **Data Loading**: `data/distributed_dataloader.s`

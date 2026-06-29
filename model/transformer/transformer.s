@@ -56,10 +56,10 @@ struct transformer_model {
     transformer_config config
     
     // Token embedding
-    // float token_embedding[vocab_size][hidden_dim]
+    // [vocab_size][hidden_dim]float token_embedding
     
     // Position embedding (if using absolute)
-    // float position_embedding[max_seq_len][hidden_dim]
+    // [max_seq_len][hidden_dim]float position_embedding
     
     // Layers
     []transformer_layer layers
@@ -68,17 +68,17 @@ struct transformer_model {
     // layer_norm output_norm
     
     // Output projection (for language modeling head)
-    // float lm_head_weight[vocab_size][hidden_dim]
+    // [vocab_size][hidden_dim]float lm_head_weight
     
     int num_layers
     int vocab_size
 }
 
 struct transformer_output {
-    float logits[][][]  // [batch_size, seq_len, vocab_size]
-    float hidden_states[][][]  // [batch_size, seq_len, hidden_dim]
+    [][][]float logits  // [batch_size, seq_len, vocab_size]
+    [][][]float hidden_states  // [batch_size, seq_len, hidden_dim]
     // cache for future use
-    // float kv_cache[][]  
+    // [][]float kv_cache  
 }
 
 // Create transformer layer config
@@ -133,8 +133,8 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
 func new_transformer_model(transformer_config cfg) transformer_model {
     []transformer_layer layers = []transformer_layer{cap: cfg.num_layers}
     
-    int i = 0
-    while i < cfg.num_layers {
+    int layer_idx = 0
+    while layer_idx < cfg.num_layers {
         transformer_layer_config layer_cfg = transformer_layer_config {
             hidden_dim: cfg.hidden_dim,
             num_attention_heads: cfg.num_attention_heads,
@@ -148,8 +148,8 @@ func new_transformer_model(transformer_config cfg) transformer_model {
             pre_norm: cfg.pre_norm,
         }
         
-        layers[i] = new_transformer_layer(layer_cfg)
-        i = i + 1
+        layers[layer_idx] = new_transformer_layer(layer_cfg)
+        layer_idx = layer_idx + 1
     }
     
     transformer_model {
@@ -163,14 +163,14 @@ func new_transformer_model(transformer_config cfg) transformer_model {
 // Forward pass through transformer layer
 func forward_transformer_layer(
     transformer_layer layer,
-    float hidden_states[][][],  // [batch_size, seq_len, hidden_dim]
-    int attention_mask[][],     // [batch_size, seq_len]
+    [][][]float hidden_states,  // [batch_size, seq_len, hidden_dim]
+    [][]int attention_mask,     // [batch_size, seq_len]
     bool training
-) float {
+) [][][]float {
     int batch_size = 1  // TODO
     int seq_len = 1     // TODO
     
-    float residual[][][] = hidden_states
+    [][][]float residual = hidden_states
     
     // Pre-norm attention
     if layer.pre_norm {
@@ -179,7 +179,7 @@ func forward_transformer_layer(
     
     // Self-attention
     // attn_output = forward_attention(layer.attn_state, hidden_states, attention_mask)
-    float attn_output[][][] = []float[batch_size][seq_len][layer.hidden_dim]
+    [][][]float attn_output = []float[batch_size][seq_len][layer.hidden_dim]
     
     // Residual connection
     // hidden_states = residual + attn_output
@@ -199,7 +199,7 @@ func forward_transformer_layer(
     
     // Feed Forward
     // ffn_output = forward_ffn(layer.ffn, hidden_states, layer.config.dropout_rate)
-    float ffn_output[][][] = []float[batch_size][seq_len][layer.hidden_dim]
+    [][][]float ffn_output = []float[batch_size][seq_len][layer.hidden_dim]
     
     // Residual connection
     // hidden_states = residual + ffn_output
@@ -215,14 +215,14 @@ func forward_transformer_layer(
 // Forward pass through complete transformer
 func forward_transformer(
     transformer_model model,
-    int input_ids[][],  // [batch_size, seq_len]
-    int attention_mask[][]  // [batch_size, seq_len]
+    [][]int input_ids,  // [batch_size, seq_len]
+    [][]int attention_mask  // [batch_size, seq_len]
 ) transformer_output {
     int batch_size = 1  // TODO
     int seq_len = 1     // TODO
     
     // Embed input tokens
-    float hidden_states[][][] = []float[batch_size][seq_len][model.config.hidden_dim]
+    [][][]float hidden_states = []float[batch_size][seq_len][model.config.hidden_dim]
     
     // Add position embeddings
     if model.config.position_embedding_type == "absolute" {
@@ -245,7 +245,7 @@ func forward_transformer(
     // hidden_states = model.output_norm(hidden_states)
     
     // Project to vocabulary
-    float logits[][][] = []float[batch_size][seq_len][model.vocab_size]
+    [][][]float logits = []float[batch_size][seq_len][model.vocab_size]
     
     // logits = hidden_states @ model.lm_head_weight^T
     
@@ -257,8 +257,8 @@ func forward_transformer(
 
 // Compute language modeling loss
 func compute_lm_loss(
-    float logits[][][],  // [batch_size, seq_len, vocab_size]
-    int target_ids[][],  // [batch_size, seq_len]
+    [][][]float logits,  // [batch_size, seq_len, vocab_size]
+    [][]int target_ids,  // [batch_size, seq_len]
     int batch_size,
     int seq_len,
     int vocab_size
@@ -322,16 +322,16 @@ func get_model_complexity(
     transformer_model model,
     int batch_size,
     int seq_len
-) [string:long {
+) map[string]long {
     // Estimate FLOPs, memory, latency
     
-    [string:long{cap: 10}
+    map[string]long{cap: 10}
 }
 
 // Get model size
 func get_model_size(
     transformer_model model
-) [string:long {
+) map[string]long {
     // Count parameters, memory usage
     
     long total_params = 0
@@ -352,7 +352,7 @@ func get_model_size(
     // Output projection
     total_params = total_params + long(model.config.hidden_dim * model.vocab_size)
     
-    [string:long {
+    map[string]long{
         "total_parameters": total_params,
         "total_bytes": total_params * 4,  // 32-bit floats
     }

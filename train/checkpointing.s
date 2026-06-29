@@ -2,7 +2,7 @@
 // Trades compute (~30% overhead) for memory (50-70% reduction)
 // Critical for: fitting large models into GPU memory, enabling larger batch sizes
 
-package neurx.training.checkpointing
+package neurx.train.checkpointing
 
 use neurx.tensor.tensor
 use neurx.tensor.new
@@ -322,8 +322,8 @@ func standard_backward(transformer_layer layer, tensor grad_output, sgd_optimize
 checkpoint_config ckpt_cfg = default_2t_checkpoint_config()
 checkpoint_manager ckpt_mgr = new_checkpoint_manager(num_layers, ckpt_cfg)
 
-# Forward pass with checkpointing
-[]tensor layer_outputs = []tensor{cap: num_layers}
+# Forward pass []with checkpointing
+tensor layer_outputs = []tensor{cap: num_layers}
 int i = 0
 while i < num_layers:
     checkpointed_layer_forward(layers[i], current_hidden, config, ckpt_mgr)

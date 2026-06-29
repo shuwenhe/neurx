@@ -4,8 +4,8 @@ package neurx.train.autograd
 // Supports backward pass and gradient computation
 
 struct tensor {
-    float data[]  // Actual values
-    float grad[]  // Gradients
+    []float data  // Actual values
+    []float grad  // Gradients
     bool requires_grad
     string op_type  // Operation that created this tensor
 }
@@ -17,7 +17,7 @@ struct gradient_tape {
 }
 
 // Create tensor with gradient tracking
-func new_tensor(float data[], bool requires_grad) tensor {
+func new_tensor([]float data, bool requires_grad) tensor {
     tensor {
         data: data,
         grad: []float{cap: len(data)},
@@ -192,19 +192,19 @@ func print_gradient_stats(tensor t) string {
 }
 
 // Gradient clipping
-func clip_gradients(tensor t, double max_norm) tensor {
-    double total_norm = 0.0
+func clip_gradients(tensor t, float max_norm) tensor {
+    float total_norm = 0.0
     
     int i = 0
     while i < len(t.grad) {
-        total_norm = total_norm + double(t.grad[i] * t.grad[i])
+        total_norm = total_norm + float(t.grad[i] * t.grad[i])
         i = i + 1
     }
     
     total_norm = sqrt(total_norm)
     
     if total_norm > max_norm {
-        double scale = max_norm / total_norm
+        float scale = max_norm / total_norm
         i = 0
         while i < len(t.grad) {
             t.grad[i] = t.grad[i] * float(scale)
@@ -225,12 +225,12 @@ func accumulate_gradients(tensor target, tensor source) tensor {
     target
 }
 
-func sqrt(double x) double {
+func sqrt(float x) float {
     // Simple Newton-Raphson approximation
     if x <= 0.0 {
         0.0
     } else {
-        double result = x
+        float result = x
         int iter = 0
         while iter < 10 {
             result = (result + x / result) * 0.5

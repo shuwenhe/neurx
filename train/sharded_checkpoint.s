@@ -2,7 +2,7 @@
 // Splits model checkpoints across multiple files/nodes
 // Critical for: models too large to fit in single file (2T params = 8TB FP32)
 
-package neurx.training.sharded_checkpoint
+package neurx.train.sharded_checkpoint
 
 use neurx.tensor.tensor
 use neurx.tensor.new
@@ -48,7 +48,7 @@ struct shard_metadata {
     int shard_id
     string filename
     []string parameter_names  # Names of parameters in this shard
-    []int[] parameter_shapes  # Shapes of parameters
+    [][]int parameter_shapes  # Shapes of parameters
     int64 total_parameters    # Number of parameters
     int64 total_bytes         # Size in bytes (uncompressed)
     int64 compressed_bytes    # Size after compression
@@ -201,7 +201,7 @@ func split_into_shards(
         s = s + 1
     
     # Round-robin assignment to balance sizes
-    int64[] shard_sizes = []int64{cap: actual_shards}
+    []int64 shard_sizes = []int64{cap: actual_shards}
     s = 0
     while s < actual_shards:
         shard_sizes.push(0)
@@ -347,7 +347,7 @@ func save_sharded_checkpoint(
     all_param_tensors.push(lm_head_bias)
     
     # Organize into groups
-    []param_groups = organize_by_layer(all_param_names, all_param_tensors, len(backbone.layers))
+    []parameter_group param_groups = organize_by_layer(all_param_names, all_param_tensors, len(backbone.layers))
     
     # Split into shards
     [][]shard_contents = split_into_shards(param_groups, mgr.config.num_shards, 
