@@ -202,7 +202,7 @@ struct bucket_config {
 struct bucketed_dataloader {
     dataloader base_dl
     bucket_config bconfig
-    map<int>[]int length_to_samples  // Maps bucket index -> sample indices
+    map[int][]int length_to_samples  // Maps bucket index -> sample indices
     []int current_bucket_order      // Order of buckets to process
 }
 
@@ -212,7 +212,7 @@ func create_bucketed_dataloader(
     bucket_config bcfg
 ) bucketed_dataloader {
     // Analyze dataset lengths
-    map<int][]int buckets = {}
+    map[int][]int buckets = {}
     
     for i in 0..len(ds.samples) {
         int len = len(ds.samples[i].token_ids)
@@ -247,7 +247,7 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     bucket
 }
 
-func generate_bucket_order(map<int>[]int buckets) []int {
+func generate_bucket_order(map[int][]int buckets) []int {
     []int order = []
     
     for key in buckets {

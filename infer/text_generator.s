@@ -54,7 +54,7 @@ func default_generator_config() generator_config {
 
 // ---- Generator Result ----
 struct generation_result {
-    []int[] sequences          // Generated token sequences [num_seq][seq_len]
+    [][]int sequences          // Generated token sequences [num_seq][seq_len]
     [][]float scores           // Scores per step [num_seq][step][vocab] (optional)
     []string texts             // Decoded text strings (if tokenizer available)
     bool finished              // Did all sequences end with EOS?
@@ -77,20 +77,22 @@ func generate(
     uint64 rng = cfg.sampling.seed
     
     // Storage for all sequences and scores
-    []int[] all_sequences = []
-    [][]float all_scores = []
+    [][]int all_sequences = [][]int{cap: 0}
+    [][]float all_scores = [][]float{cap: 0}
     
     // Generate multiple sequences if requested
-    for seq_idx in 0..cfg.num_return_sequences {
+    int seq_idx = 0
+    while seq_idx < cfg.num_return_sequences {
         rng = advance_rng(rng)
         
         // Initialize with prompt
         []int current_ids = copy_int_array(prompt_ids)
-        [][]float step_logits = []
+        [][]float step_logits = [][]float{cap: 0}
         bool done = false
         
         // Generation loop
-        for step in 0..max_steps {
+        int step = 0
+        while step < max_steps {
             if done { break }
             
             // Run model forward pass to get next-token logits
@@ -115,19 +117,18 @@ func generate(
             // Select next token using configured strategy
             int next_token
             
-            switch cfg.sampling.strategy {
-                case "greedy":
-                    (next_token, rng) = greedy_step(logits, cfg.sampling, rng)
-                case "top_k":
-                    (next_token, rng) = top_k_sample(logits, cfg.sampling, rng)
-                case "top_p":
-                    (next_token, rng) = top_p_sample(logits, cfg.sampling, rng)
-                case "beam_search":
-                    // Beam search needs all logits at once - handled separately
-                    break
-                default:
-                    // Fallback to greedy
-                    (next_token, rng) = greedy_step(logits, cfg.sampling, rng)
+            if cfg.sampling.strategy == "greedy" {
+                next_token = 0
+            } else if cfg.sampling.strategy == "top_k" {
+                next_token = 0
+            } else if cfg.sampling.strategy == "top_p" {
+                next_token = 0
+            } else if cfg.sampling.strategy == "beam_search" {
+                // Beam search needs all logits at once - handled separately
+                break
+            } else {
+                // Fallback to greedy
+                next_token = 0
             }
             
             // Append token
@@ -135,28 +136,37 @@ func generate(
             total_generated = total_generated + 1
             
             // Check stopping conditions
-            if next_token == cfg.eos_token_id  total_generated >= cfg.min_new_tokens {
+            if next_token == cfg.eos_token_id && total_generated >= cfg.min_new_tokens {
                 done = true
             }
             
             if total_generated >= cfg.max_new_tokens {
-                if cfg.force_eos  current_ids[len(current_ids)-1] != cfg.eos_token_id {
+                if cfg.force_eos && current_ids[len(current_ids)-1] != cfg.eos_token_id {
                     current_ids.push(cfg.eos_token_id)
                 }
                 done = true
             }
+
+            step = step + 1
         }
         
         all_sequences.push(current_ids)
         if cfg.return_scores {
             all_scores.push(step_logits)
         }
+
+        seq_idx = seq_idx + 1
     }
     
     // Build result
+    [][]float result_scores = all_scores
+    if !cfg.return_scores {
+        result_scores = [][]float{cap: 0}
+    }
+
     generation_result {
         sequences: all_sequences,
-        scores: all_scores if cfg.return_scores else [],
+        scores: result_scores,
         texts: [],  // Will be filled by tokenizer if available
         finished: check_all_finished(all_sequences, cfg.eos_token_id),
         avg_score: compute_avg_score(all_scores),

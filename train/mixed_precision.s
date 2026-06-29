@@ -2,7 +2,7 @@
 // Implements BF16/FP32 Master Weights + Dynamic Loss Scaling
 // Critical for: memory reduction (50%+), training speedup (3x), gradient stability
 
-package neurx.training.mixed_precision
+package neurx.train.mixed_precision
 
 use neurx.tensor.tensor
 use neurx.tensor.new
@@ -236,7 +236,7 @@ struct gradient_accumulator {
     int total_steps               // Total accumulation steps
 }
 
-func new_gradient_accumulator(weight_shapes []int[], total_steps int) gradient_accumulator {
+func new_gradient_accumulator([][]int weight_shapes, int total_steps) gradient_accumulator {
     gradient_accumulator acc
     acc.total_steps = total_steps
     acc.current_step = 0
@@ -290,7 +290,7 @@ func is_accumulation_complete(acc gradient_accumulator) bool {
 
 // Get averaged gradients (divide by number of accumulated steps)
 func get_averaged_gradients(acc gradient_accumulator) []tensor {
-    []float avg_grads[]tensor{cap: len(acc.accumulated_gradients)}
+    []tensor avg_grads = []tensor{cap: len(acc.accumulated_gradients)}
     
     int i = 0
     while i < len(acc.accumulated_gradients) {
@@ -350,7 +350,7 @@ func init_mixed_precision_training(
     
     // Initialize gradient accumulator if enabled
     if config.enable_gradient_accumulation {
-        []int[] shapes = []int[]{cap: len(initial_weights)}
+        [][]int shapes = [][]int{cap: len(initial_weights)}
         int i = 0
         while i < len(initial_weights) {
             shapes[i] = initial_weights[i].shape

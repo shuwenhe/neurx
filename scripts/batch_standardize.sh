@@ -10,7 +10,7 @@ echo "=========================================================="
 NEURX_DIR="/Users/feifei/train/neurx"
 FILES_TO_CONVERT=(
     "compute/flash_attention.s"
-    "optimization/mixed_precision.s"  
+    "train/mixed_precision.s"  
     "distributed/fault_recovery.s"
     "monitoring/distributed_metrics.s"
     "bin/train_enterprise_2t.s"

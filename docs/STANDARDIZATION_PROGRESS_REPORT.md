@@ -56,7 +56,7 @@ Lines 1-30 verified:
 | # | File | Lines | Pattern | Status |
 |---|------|-------|---------|--------|
 | 2 | compute/flash_attention.s | 800 | structure → struct; fn → func | READY |
-| 3 | optimization/mixed_precision.s | 700 | structure → struct; fn → func | READY |
+| 3 | train/mixed_precision.s | 700 | structure → struct; fn → func | READY |
 | 4 | distributed/fault_recovery.s | 850 | structure → struct; fn → func | READY |
 | 5 | monitoring/distributed_metrics.s | 750 | structure → struct; fn → func | READY |
 | 6 | bin/train_enterprise_2t.s | 800 | structure → struct; fn → func | READY |
@@ -170,7 +170,7 @@ Primary patterns:
 - var state: flash_attention_state → flash_attention_state state
 ```
 
-### For: optimization/mixed_precision.s (700 lines)
+### For: train/mixed_precision.s (700 lines)
 ```
 Estimated replacements: ~30-35
 Structures: ~6 (mixed_precision_config, mixed_precision_state, loss_scale_config, etc.)

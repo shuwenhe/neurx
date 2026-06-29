@@ -12,7 +12,7 @@ struct checkpoint_config {
     bool enabled              // Enable gradient checkpointing
     int checkpoint_every      // Save activations every N layers (default: 1 = every layer)
     bool use_rematerialization // Use rematerialization (recompute from inputs)
-    int[] checkpoint_layers   // Specific layer indices to checkpoint (-1 = auto)
+    []int checkpoint_layers   // Specific layer indices to checkpoint (-1 = auto)
     
     // Memory optimization
     bool cpu_offload          // Offload saved checkpoints to CPU memory

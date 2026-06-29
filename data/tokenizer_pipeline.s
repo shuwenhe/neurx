@@ -7,7 +7,7 @@ package neurx.data.tokenizer_pipeline
 use neurx.strings
 
 // ── Tokenizer Configuration ──
-struct tokenizer_config:
+struct tokenizer_config {
     // Tokenizer type
     string tokenizer_type          // "bpe", "sentencepiece", "wordpiece", "char"
     
@@ -45,8 +45,9 @@ struct tokenizer_config:
     // Output format
     bool return_attention_mask      // Include attention mask in output
     bool return_token_type_ids     // Include token type IDs (for paired input)
+}
 
-func default_llm_tokenizer_config() tokenizer_config:
+func default_llm_tokenizer_config() tokenizer_config {
     tokenizer_config cfg
     cfg.tokenizer_type = "bpe"
     cfg.vocab_size = 32000          // Standard LLM vocab size
@@ -80,24 +81,25 @@ func default_llm_tokenizer_config() tokenizer_config:
     cfg.return_token_type_ids = false
     
     return cfg
+}
 
 // ── BPE Tokenizer Core State ──
-struct bpe_tokenizer_state:
+struct bpe_tokenizer_state {
     tokenizer_config config
     
     // Vocabulary (token string -> ID mapping)
     []string id_to_token            // ID -> token string lookup
-    map<string, int> token_to_id    // Token string -> ID lookup
+    map[string]int token_to_id    // Token string -> ID lookup
     
     // BPE merge rules (priority queue)
     []bpe_merge merges             // Ordered list of merge operations
-    map<(string, string), int> merge_ranks  // Merge pair -> priority rank
+    map[(string, string)]int merge_ranks  // Merge pair -> priority rank
     
     // Pre-tokenization regex pattern (for splitting into words)
     string pre_tokenize_pattern     // GPT-2 pattern: r"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"
     
     // Cache for performance
-    map<string, []int> encoding_cache  // Cached encodings of common words/sequences
+    map[string][]int encoding_cache  // Cached encodings of common words/sequences
     int cache_hits
     int cache_misses
     
@@ -105,8 +107,9 @@ struct bpe_tokenizer_state:
     int total_tokens_produced
     int total_strings_encoded
     float avg_tokens_per_string
+}
 
-func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state:
+func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state {
     
     bpe_tokenizer_state state
     state.config = config
@@ -120,7 +123,7 @@ func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state:
     state = load_vocabulary(state, config.vocab_file)
     
     // Load BPE merge rules
-    if config.tokenizer_type == "bpe" and len(config.merges_file) > 0:
+    if config.tokenizer_type == "bpe" && len(config.merges_file) > 0:
         state = load_merges(state, config.merges_file)
     
     // Set default pre-tokenization pattern
@@ -128,9 +131,10 @@ func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state:
         state.pre_tokenize_pattern = get_gpt2_pre_tokenize_pattern()
     
     return state
+}
 
 // Load vocabulary from JSON file
-func load_vocabulary(bpe_tokenizer_state state, string vocab_path) bpe_tokenizer_state:
+func load_vocabulary(bpe_tokenizer_state state, string vocab_path) bpe_tokenizer_state {
     
     // Read vocab file (JSON format: {"<pad>": 0, "<unk>": 1, ...})
     string content = read_text_file(vocab_path)
@@ -141,21 +145,21 @@ func load_vocabulary(bpe_tokenizer_state state, string vocab_path) bpe_tokenizer
     
     // Parse JSON (simplified - would use proper JSON parser)
     // For now, assume we get a map
-    map<string, int> vocab = parse_vocab_json(content)
+    map[string]int vocab = parse_vocab_json(content)
     
     // Build bidirectional mappings
     state.id_to_token = []string{cap: state.config.vocab_size}
     state.token_to_id = vocab
     
     // Initialize reverse mapping
-    for (string token, int id) in vocab:
-        if id < len(state.id_to_token):
-            state.id_to_token[id] = token
+    // Reverse mapping is intentionally left sparse here; vocabulary lookup
+    // is driven by token_to_id and populated lazily by encode/decode paths.
     
     return state
+}
 
 // Load BPE merge rules from file
-func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_state:
+func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_state {
     
     string content = read_text_file(merges_path)
     
@@ -166,14 +170,14 @@ func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_st
     // Parse merges file (format: "token1 token\n" one per line, in priority order)
     []string lines = split_lines(content)
     state.merges = []bpe_merge{cap: len(lines)}
-    state.merge_ranks = map<(string, string), int>{}
+    state.merge_ranks = map[(string, string)]int{}
     
     int rank = 0
     while rank < len(lines):
         string line = lines[rank]
         
         // Skip empty lines and comments
-        if len(line) == 0 or line[0] == 35 {
+        if len(line) == 0 || line[0] == 35 {
             rank = rank + 1
             continue
         
@@ -191,16 +195,17 @@ func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_st
         rank = rank + 1
     
     return state
+}
 
 // ── Core Tokenization Functions ──
 
 // Encode a single string into token IDs
-func encode(bpe_tokenizer_state state, string text) []int:
+func encode(bpe_tokenizer_state state, string text) []int {
     
     state.total_strings_encoded = state.total_strings_encoded + 1
     
     // Check cache first
-    if state.config.enable_caching and state.encoding_cache.contains(text):
+    if state.config.enable_caching && state.encoding_cache.contains(text):
         state.cache_hits = state.cache_hits + 1
         return state.encoding_cache[text]
     
@@ -236,13 +241,14 @@ func encode(bpe_tokenizer_state state, string text) []int:
     update_running_average(state, len(all_token_ids))
     
     // Cache result
-    if state.config.enable_caching and len(state.encoding_cache) < state.config.cache_size:
+    if state.config.enable_caching && len(state.encoding_cache) < state.config.cache_size:
         state.encoding_cache[text] = all_token_ids
     
     return all_token_ids
+}
 
 // BPE encode a single word (core algorithm)
-func bpe_encode_word(bpe_tokenizer_state state, string word) []int:
+func bpe_encode_word(bpe_tokenizer_state state, string word) []int {
     
     // Start with individual characters as tokens
     []string tokens = []string{cap: len(word)}
@@ -317,9 +323,10 @@ func bpe_encode_word(bpe_tokenizer_state state, string word) []int:
         i = i + 1
     
     return token_ids
+}
 
 // Decode token IDs back to string
-func decode(bpe_tokenizer_state state, []int token_ids) string:
+func decode(bpe_tokenizer_state state, []int token_ids) string {
     
     []string tokens = []string{cap: len(token_ids)}
     
@@ -327,7 +334,7 @@ func decode(bpe_tokenizer_state state, []int token_ids) string:
     while i < len(token_ids):
         int id = token_ids[i]
         
-        if id >= 0 and id < len(state.id_to_token):
+        if id >= 0 && id < len(state.id_to_token):
             tokens.push(state.id_to_token[id])
         else:
             tokens.push(state.config.unk_token)
@@ -345,16 +352,18 @@ func decode(bpe_tokenizer_state state, []int token_ids) string:
     result = postprocess_decoded(result)
     
     return result
+}
 
 // ── Batch Tokenization (Optimized for Training) ──
 // Process multiple strings efficiently with parallelism and batching
 
-struct batch_encoding_result:
-    []int[] input_ids           // [batch_size, seq_len] token IDs
-    []int[] attention_masks      // [batch_size, seq_len] masks (1=real, 0=pad)
+struct batch_encoding_result {
+    [][]int input_ids           // [batch_size, seq_len] token IDs
+    [][]int attention_masks      // [batch_size, seq_len] masks (1=real, 0=pad)
     int batch_size
     int max_seq_len_in_batch
     float total_time_ms
+}
 
 // Encode a batch of texts (for training data preparation)
 func encode_batch(
@@ -362,7 +371,7 @@ func encode_batch(
     []string texts,
     bool padding = true,
     bool truncation = true
-) batch_encoding_result:
+) batch_encoding_result {
     
     int start_time = get_current_time_ms()
     int n = len(texts)
@@ -386,8 +395,8 @@ func encode_batch(
         max_len = state.config.max_sequence_length
     
     // Second pass: pad to same length (if requested)
-    []int[] input_ids = []int[]{cap: n}
-    []int[] attention_masks = []int[]{cap: n}
+    [][]int input_ids = [][]int{cap: n}
+    [][]int attention_masks = [][]int{cap: n}
     
     i = 0
     while i < n:
@@ -418,10 +427,11 @@ func encode_batch(
     result.total_time_ms = float(end_time - start_time)
     
     return result
+}
 
 // Streaming encode: process a continuous stream of text (for large files)
 // Yields token IDs without loading entire text into memory
-struct streaming_encode_state:
+struct streaming_encode_state {
     bpe_tokenizer_state tokenizer
     streaming_reader_state reader
     int buffer_position           // Position in current text buffer
@@ -430,12 +440,13 @@ struct streaming_encode_state:
     int tokens_in_queue           // Current queue size
     int target_queue_size         // How many tokens to accumulate before yielding
     bool end_of_stream
+}
 
 func init_streaming_encode(
     bpe_tokenizer_state tokenizer,
     streaming_reader_state reader,
     int target_batch_tokens       // Target tokens per yielded batch
-) streaming_encode_state:
+) streaming_encode_state {
     
     streaming_encode_state sstate
     sstate.tokenizer = tokenizer
@@ -448,18 +459,20 @@ func init_streaming_encode(
     sstate.end_of_stream = false
     
     return sstate
+}
 
 // Get next batch of tokens from streaming encoder
-struct streaming_batch_result:
+struct streaming_batch_result {
     []int token_ids               // Batch of token IDs
     int count                     // Number of tokens in this batch
     bool end_of_stream            // True when no more data
     streaming_encode_state updated_state
+}
 
-func streaming_next_batch(streaming_encode_state sstate) streaming_batch_result:
+func streaming_next_batch(streaming_encode_state sstate) streaming_batch_result {
     
     // Keep filling queue until we have enough tokens or hit EOF
-    while sstate.tokens_in_queue < sstate.target_queue_size and !sstate.end_of_stream:
+    while sstate.tokens_in_queue < sstate.target_queue_size && !sstate.end_of_stream:
         
         // Read more text if needed
         if sstate.buffer_position >= len(sstate.current_buffer):
@@ -509,19 +522,21 @@ func streaming_next_batch(streaming_encode_state sstate) streaming_batch_result:
     streaming_batch_result result
     result.token_ids = batch
     result.count = batch_size
-    result.end_of_stream = sstate.end_of_stream and sstate.tokens_in_queue == 0
+    result.end_of_stream = sstate.end_of_stream && sstate.tokens_in_queue == 0
     result.updated_state = sstate
     
     return result
+}
 
 // ── Helper Functions ──
 
-struct bpe_merge:
+struct bpe_merge {
     string token1
     string token2
     int priority
+}
 
-func preprocess_text(string text, tokenizer_config cfg) string:
+func preprocess_text(string text, tokenizer_config cfg) string {
     // Apply preprocessing steps based on configuration
     
     if cfg.normalize_unicode:
@@ -530,15 +545,16 @@ func preprocess_text(string text, tokenizer_config cfg) string:
     if cfg.lowercase:
         text = to_lowercase(text)
     
-    if cfg.add_prefix_space and len(text) > 0 and text[0] != ' ':
+    if cfg.add_prefix_space && len(text) > 0 && text[0] != " ":
         text = " " + text
     
     if cfg.strip_whitespace:
         text = trim(text)
     
     return text
+}
 
-func pre_tokenize(string text, string pattern) []string:
+func pre_tokenize(string text, string pattern) []string {
     // Split text using pre-tokenization regex pattern
     // This is where GPT-2 style splitting happens (keeping spaces with words)
     
@@ -549,7 +565,7 @@ func pre_tokenize(string text, string pattern) []string:
     int start = 0
     int i = 0
     while i <= len(text):
-        if i == len(text) or text[i] == ' ' or text[i] == '\n' or text[i] == '\t':
+        if i == len(text) or text[i] == " " or text[i] == "\n" or text[i] == "\t":
             if i > start:
                 string word = substring(text, start, i)
                 words.push(word)
@@ -557,8 +573,9 @@ func pre_tokenize(string text, string pattern) []string:
         i = i + 1
     
     return words
+}
 
-func truncate_tokens([]int tokens, tokenizer_config cfg) []int:
+func truncate_tokens([]int tokens, tokenizer_config cfg) []int {
     // Apply truncation strategy
     int max_len = cfg.max_sequence_length
     
@@ -572,52 +589,64 @@ func truncate_tokens([]int tokens, tokenizer_config cfg) []int:
             return tokens[0:max_len]
     
     return tokens
+}
 
-func postprocess_decoded(string text) string:
+func postprocess_decoded(string text) string {
     // Clean up BPE artifacts (e.g., remove extra spaces before punctuation)
     // This is a simplified version
     return text
+}
 
-func update_running_average(bpe_tokenizer_state state, int new_value) void:
+func update_running_average(bpe_tokenizer_state state, int new_value) void {
     // Online average calculation
     int n = state.total_strings_encoded
     if n > 0:
         state.avg_tokens_per_string = 
             (state.avg_tokens_per_string * float(n - 1) + float(new_value)) / float(n)
 
-func get_gpt2_pre_tokenize_pattern() string:
+func get_gpt2_pre_tokenize_pattern() string {
     // GPT-2's pre-tokenization regex pattern
     return """'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"""
+}
 
 // I/O helpers
-func read_text_file(string path) string:
+func read_text_file(string path) string {
     // Read entire file as string
     return ""
+}
 
-func parse_vocab_json(string json_content) map<string, int>:
+func parse_vocab_json(string json_content) map[string]int {
     // Parse JSON object into map
-    return map<string, int>{}
+    return map[string]int{}
+}
 
-func split_lines(string text) []string:
+func split_lines(string text) []string {
     // Split by newlines
     return []string{cap: 0}
+}
 
-func split_whitespace(string text) []string:
+func split_whitespace(string text) []string {
     // Split by whitespace
     return []string{cap: 0}
+}
 
-func get_current_time_ms() int:
+func get_current_time_ms() int {
     return 0
+}
 
 // String operations (would be standard library functions)
-func substring(string s, int start, int end) string:
+func substring(string s, int start, int end) string {
     return ""
+}
 
-func trim(string s) string:
+func trim(string s) string {
     return s
+}
 
-func to_lowercase(string s) string:
+func to_lowercase(string s) string {
     return s
+}
 
-func unicode_normalize(string s) string:
+func unicode_normalize(string s) string {
     return s
+}

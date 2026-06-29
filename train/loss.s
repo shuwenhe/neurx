@@ -11,8 +11,8 @@ struct cross_entropy_loss_config {
 
 // Compute cross entropy loss
 func compute_cross_entropy_loss(
-    float logits[][],  // [batch_size, num_classes]
-    int targets[],     // [batch_size]
+    [][]float logits,  // [batch_size, num_classes]
+    []int targets,     // [batch_size]
     int batch_size,
     int num_classes,
     cross_entropy_loss_config cfg
@@ -33,7 +33,7 @@ func compute_cross_entropy_loss(
         
         // Compute softmax with numerical stability
         double sum_exp = 0.0
-        float softmax[] = []float{cap: num_classes}
+        []float softmax = []float{cap: num_classes}
         
         c = 0
         while c < num_classes {
@@ -78,7 +78,7 @@ func compute_cross_entropy_loss(
 }
 
 // Compute softmax
-func softmax(float logits[], int num_classes) float {
+func softmax([]float logits, int num_classes) float {
     // Compute softmax for numerical stability
     double max_logit = -999999.0
     int c = 0
@@ -90,7 +90,7 @@ func softmax(float logits[], int num_classes) float {
     }
     
     double sum_exp = 0.0
-    float softmax_vals[] = []float{cap: num_classes}
+    []float softmax_vals = []float{cap: num_classes}
     
     c = 0
     while c < num_classes {
@@ -142,8 +142,8 @@ func compute_l1_loss(
 
 // Mean Squared Error (MSE)
 func compute_mse_loss(
-    float predictions[],
-    float targets[],
+    []float predictions,
+    []float targets,
     int batch_size
 ) double {
     double loss = 0.0
@@ -160,8 +160,8 @@ func compute_mse_loss(
 
 // Binary Cross Entropy
 func compute_binary_cross_entropy(
-    float predictions[],
-    int targets[],
+    []float predictions,
+    []int targets,
     int batch_size
 ) double {
     double loss = 0.0
@@ -228,8 +228,8 @@ func log(double x) double {
 
 // Focal Loss (for imbalanced datasets)
 func compute_focal_loss(
-    float logits[][],
-    int targets[],
+    [][]float logits,
+    []int targets,
     int batch_size,
     int num_classes,
     double gamma,
@@ -250,7 +250,7 @@ func compute_focal_loss(
         }
         
         double sum_exp = 0.0
-        float softmax[] = []float{cap: num_classes}
+        []float softmax = []float{cap: num_classes}
         
         c = 0
         while c < num_classes {
@@ -309,12 +309,12 @@ func sqrt(double x) double {
 
 // Compute gradient of cross entropy loss
 func cross_entropy_loss_backward(
-    float logits[][],
-    int targets[],
-    float grad_output[]  // gradient from next layer
-) float {
+    [][]float logits,
+    []int targets,
+    []float grad_output  // gradient from next layer
+) [][]float {
     // grad w.r.t. logits = softmax - one_hot(targets)
     
-    float gradient[][1024]
+    [][]float gradient
     gradient
 }

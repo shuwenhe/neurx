@@ -2,7 +2,7 @@
 // Covers ALL transformer weights (attention + FFN), not just embedding/lm_head
 // Integrates with ZeRO, Tensor Parallelism, and mixed precision
 
-package neurx.training.distributed_optimizer
+package neurx.train.distributed_optimizer
 
 use neurx.tensor.tensor
 use neurx.tensor.new
@@ -291,7 +291,7 @@ func full_transformer_update(
     tensor lm_head_bias,
     # Gradients for ALL parameters
     tensor grad_embedding,
-    []tensor[] layer_gradients,  # Per-layer gradients [layer_idx][param_name -> grad]
+    [][]tensor layer_gradients,  # Per-layer gradients [layer_idx][param_name -> grad]
     tensor grad_lm_head_weight,
     tensor grad_lm_head_bias,
     transformer_optimizer_state opt_state,
@@ -456,7 +456,7 @@ func full_transformer_update(
 # After computing gradients via backward pass:
 
 # 1. Collect gradients for ALL parameters (not just embedding + lm_head!)
-[]tensor[] all_layer_gradients = collect_all_layer_gradients(backward_result)
+[][]tensor all_layer_gradients = collect_all_layer_gradients(backward_result)
 
 # 2. Clip gradients globally
 clipping_result clip_res = full_clipping_pipeline(flatten_all_gradients(all_layer_gradients), clipper, clip_config)

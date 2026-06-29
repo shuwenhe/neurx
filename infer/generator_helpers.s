@@ -47,7 +47,7 @@ func extract_generated_part([]int full_ids, int prompt_length) []int {
 // CHECK IF ALL SEQUENCES FINISHED with EOS token
 // ========================================================================
 
-func check_all_finished([]int[] sequences, int eos_id) bool {
+func check_all_finished([][]int sequences, int eos_id) bool {
     for seq in sequences {
         bool has_eos = false
         for id in seq {

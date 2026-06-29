@@ -152,7 +152,7 @@ struct partition_result:
     bool success
     string error_message
     int total_time_ms
-    []shard_info[] created_shards      // All shards that were created
+    []shard_info created_shards      // All shards that were created
 
 func partition_dataset(
     shard_manager_state mgr,
