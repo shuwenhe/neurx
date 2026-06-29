@@ -432,6 +432,8 @@ func backward_single_layer(
     // ── Residual 2 backward: grad splits to FFN path and identity ──
     // out = x2 + swiglu_out => dL/dx2 += dL/dout, dL/d(swiglu_out) = dL/dout
     tensor grad_x2_residual = grad_out  // Identity path
+    transformer_layer updated_layer = layer
+    transformer_layer_optimizer_state updated_opt = opt
 
     // ── SwiGLU FFN backward ──
     ffn_backward_result ffn_bw = backward_swiglu_ffn(
@@ -439,8 +441,8 @@ func backward_single_layer(
     )
     // Add FFN gradient to residual gradient
     grad_x2_residual = ops.add(grad_x2_residual, ffn_bw.grad_to_x2)
-    layer = ffn_bw.updated_layer
-    opt = ffn_bw.optimizer_state
+    updated_layer = ffn_bw.updated_layer
+    updated_opt = ffn_bw.optimizer_state
 
     // ── Residual 1 backward: grad splits to attention path and identity ──
     // x2 = x + attn_out => dL/dx += dL/dx2, dL/d(attn_out) = dL/dx2
@@ -448,15 +450,15 @@ func backward_single_layer(
 
     // ── Attention backward ──
     attn_backward_result attn_bw = backward_attention(
-        layer, x, grad_x2_residual, opt
+        updated_layer, x, grad_x2_residual, updated_opt
     )
-    layer = attn_bw.updated_layer
-    opt = attn_bw.optimizer_state
+    updated_layer = attn_bw.updated_layer
+    updated_opt = attn_bw.optimizer_state
 
     // Combine gradients flowing to input x
     tensor grad_x_total = ops.add(grad_x_identity, attn_bw.grad_to_x)
 
-    backward_result { grad_input: grad_x_total, updated_layer: layer, optimizer_state: opt }
+    backward_result { grad_input: grad_x_total, updated_layer: updated_layer, optimizer_state: updated_opt }
 }
 
 // ── SwiGLU FFN Backward ──────────────────────────────────────────────────────
@@ -670,7 +672,7 @@ func backward_attention(
     // ── Q/K projections backward (simplified, ignoring mask/softmax Jacobian) ──
     // Approximate: dQ ≈ d_attn @ V^T @ K / sqrt(d), dK ≈ Q^T @ d_attn @ V / sqrt(d)
     int head_dim = layer.w_q.shape[1]  // assuming square attention
-    float scale = 1.0 / sqrt_approx(float(head_dim))
+    float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     tensor d_q = ops.mul(ops.matmul(ops.matmul(d_attn, transpose(v, 0, 1)), k), scale)
     tensor d_k = ops.mul(ops.matmul(ops.matmul(transpose(q, 0, 1), d_attn), transpose(v, 0, 1)), scale)
 
