@@ -44,6 +44,12 @@ struct multi_head_attention_module {
     int num_query_groups      // num_heads / num_kv_heads
 }
 
+struct project_qkv_result {
+    []float query
+    []float key
+    []float value
+}
+
 // =====================================================================
 // Initialization
 // =====================================================================
@@ -80,7 +86,7 @@ func project_qkv(
     []float hidden_states,
     int seq_len,
     int hidden_dim
-) ([]float, []float, []float) {
+) project_qkv_result {
     // Query projection: [seq_len, hidden_dim] -> [seq_len, hidden_dim]
     []float query = matrix_multiply(hidden_states, attn.wq, seq_len, hidden_dim, hidden_dim)
     
@@ -90,7 +96,11 @@ func project_qkv(
     // Value projection: [seq_len, hidden_dim] -> [seq_len, hidden_dim]
     []float value = matrix_multiply(hidden_states, attn.wv, seq_len, hidden_dim, hidden_dim)
     
-    return (query, key, value)
+    project_qkv_result {
+        query: query,
+        key: key,
+        value: value,
+    }
 }
 
 // Reshape for multi-head attention
@@ -135,7 +145,7 @@ func scaled_dot_product_attention(
     
     []float output = allocate_vector(total_size, 0.0)
     
-    float scale = 1.0 / sqrt_float(float(head_dim))
+    float scale = 1.0 / sqrt_float(head_dim * 1.0)
     
     int h = 0
     while h < num_heads {
@@ -155,7 +165,7 @@ func scaled_dot_product_attention(
             int j = 0
             while j < seq_len {
                 // Apply causal mask if needed
-                if use_causal_mask  j > i {
+                if use_causal_mask && j > i {
                     scores[j] = -10000.0  // Large negative value
                 } else {
                     // Compute Q[i] . K[j]
@@ -216,7 +226,10 @@ func forward_attention(
     int head_dim = attn.head_dim
     
     // Project to Q, K, V
-    ([]float query, []float key, []float value) = project_qkv(attn, hidden_states, seq_len, hidden_dim)
+    project_qkv_result projected = project_qkv(attn, hidden_states, seq_len, hidden_dim)
+    []float query = projected.query
+    []float key = projected.key
+    []float value = projected.value
     
     // Reshape for multi-head attention
     []float query_reshaped = reshape_for_attention(query, seq_len, num_heads, head_dim)
@@ -329,7 +342,7 @@ func allocate_weights(int rows, int cols) []float {
     
     // Initialize with small random values (Xavier initialization)
     // For now, using simple uniform: sqrt(6 / (rows + cols))
-    float limit = sqrt_float(6.0 / float(rows + cols))
+    float limit = sqrt_float(6.0 / (rows + cols * 1.0))
     
     int i = 0
     while i < size {
@@ -365,7 +378,7 @@ func exp_float(float x) float {
     float term = 1.0
     int i = 1
     while i <= 15 {
-        term = term * x / float(i)
+        term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
     }
