@@ -82,7 +82,7 @@ struct computation_graph {
     []edge edges
     int next_node_id
     bool is_recording
-    int[] topo_order  // Topological order for backward
+    []int topo_order  // Topological order for backward
 }
 
 // Create new computation graph

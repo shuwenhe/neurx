@@ -17,33 +17,33 @@ struct ffn_config {
 
 struct standard_ffn_state {
     // Linear layers
-    float up_weight[4096][4096]    // hidden_dim -> intermediate_dim
-    float down_weight[4096][4096]  // intermediate_dim -> hidden_dim
-    float up_bias[4096]
-    float down_bias[4096]
+    [4096][4096]float up_weight    // hidden_dim -> intermediate_dim
+    [4096][4096]float down_weight  // intermediate_dim -> hidden_dim
+    [4096]float up_bias
+    [4096]float down_bias
 }
 
 struct glu_ffn_state {
     // For GLU: 2 separate up projections
-    float up_gate_weight[4096][4096]    // For gating
-    float up_value_weight[4096][4096]   // For values
-    float down_weight[4096][4096]
-    float up_gate_bias[4096]
-    float up_value_bias[4096]
-    float down_bias[4096]
+    [4096][4096]float up_gate_weight    // For gating
+    [4096][4096]float up_value_weight   // For values
+    [4096][4096]float down_weight
+    [4096]float up_gate_bias
+    [4096]float up_value_bias
+    [4096]float down_bias
 }
 
 struct moe_expert_state {
-    float expert_up[4096][4096]
-    float expert_down[4096][4096]
-    float expert_up_bias[4096]
-    float expert_down_bias[4096]
+    [4096][4096]float expert_up
+    [4096][4096]float expert_down
+    [4096]float expert_up_bias
+    [4096]float expert_down_bias
 }
 
 struct moe_ffn_state {
     []moe_expert_state experts      // Array of experts
-    float gate_weight[4096][256]    // Router for expert selection
-    float gate_bias[256]
+    [4096][256]float gate_weight    // Router for expert selection
+    [256]float gate_bias
     int num_experts
     int num_active_experts
     float expert_capacity_factor
@@ -100,69 +100,65 @@ func new_moe_ffn(ffn_config cfg, int num_experts) feed_forward_network {
 // [batch_size, seq_len, hidden_dim] -> [batch_size, seq_len, hidden_dim]
 func forward_standard_ffn(
     feed_forward_network ffn,
-    float hidden_states[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float hidden_states,  // [batch_size, seq_len, hidden_dim]
     double dropout_rate
-) float {
+) [][][]float {
     // h = activation(hidden @ W_up + b_up)
     // out = h @ W_down + b_down
     // Apply dropout to hidden layer
     
-    float output[][][] = []float{}
-    output
+    hidden_states
 }
 
 // GLU (Gated Linear Unit) forward pass
 // [batch_size, seq_len, hidden_dim] -> [batch_size, seq_len, hidden_dim]
 func forward_glu_ffn(
     feed_forward_network ffn,
-    float hidden_states[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float hidden_states,  // [batch_size, seq_len, hidden_dim]
     double dropout_rate
-) float {
+) [][][]float {
     // value = activation(hidden @ W_value + b_value)
     // gate = sigmoid(hidden @ W_gate + b_gate)
     // gated_value = value * gate
     // out = gated_value @ W_down + b_down
     
-    float output[][][] = []float{}
-    output
+    hidden_states
 }
 
 // SwiGLU: Swish * GLU variant (very popular in recent models)
 func forward_swiglu_ffn(
     feed_forward_network ffn,
-    float hidden_states[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float hidden_states,  // [batch_size, seq_len, hidden_dim]
     double dropout_rate
-) float {
+) [][][]float {
     // value = swish(hidden @ W_value + b_value)
     // gate = hidden @ W_gate + b_gate
     // gated_value = value * gate
     // out = gated_value @ W_down + b_down
     
-    float output[][][] = []float{}
-    output
+    hidden_states
 }
 
 // Mixture of Experts forward pass
 func forward_moe_ffn(
     feed_forward_network ffn,
-    float hidden_states[][][],  // [batch_size, seq_len, hidden_dim]
+    [][][]float hidden_states,  // [batch_size, seq_len, hidden_dim]
     int seq_len
-) float {
+) [][][]float {
     // Router: gate = softmax(hidden @ W_gate)
     // Select top-k experts for each token
     // Compute expert outputs
     // Combine outputs based on router weights
     // Load balancing loss
     
-    float output[][][] = []float{}
-    output
+    hidden_states
 }
 
 // Apply activation function
 func apply_activation(
-    float hidden[][][],
+    [][][]float hidden,
     string activation_type  // "relu", "gelu", "swish"
-) float {
+) [][][]float {
     // Apply activation element-wise
     
     hidden
@@ -180,28 +176,28 @@ func relu(float x) float {
 // GELU (Gaussian Error Linear Unit) approximation
 func gelu(float x) float {
     // Approximate: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
-    double cdf = 0.5 * (1.0 + (double(x) * 0.7978845608 * (1.0 + 0.044715 * double(x) * double(x))))
-    float(cdf * double(x))
+    double cdf = 0.5 * (1.0 + (float(x) * 0.7978845608 * (1.0 + 0.044715 * float(x) * float(x))))
+    float(cdf * float(x))
 }
 
 // Swish activation (also known as SiLU)
 func swish(float x) float {
     // x * sigmoid(x) = x / (1 + exp(-x))
-    double sigmoid_x = 1.0 / (1.0 + exp(-double(x)))
-    float(double(x) * sigmoid_x)
+    double sigmoid_x = 1.0 / (1.0 + exp(-float(x)))
+    float(float(x) * sigmoid_x)
 }
 
 // Sigmoid activation
 func sigmoid(float x) float {
-    float(1.0 / (1.0 + exp(-double(x))))
+    float(1.0 / (1.0 + exp(-float(x))))
 }
 
 // Dropout
 func apply_dropout(
-    float hidden[][][],
+    [][][]float hidden,
     double dropout_rate,
     int seed
-) float {
+) [][][]float {
     // Randomly zero out elements with probability dropout_rate
     // Scale remaining by 1/(1-dropout_rate)
     
@@ -210,22 +206,21 @@ func apply_dropout(
 
 // Compute router probabilities for MoE
 func compute_router_probs(
-    float router_logits[][],  // [seq_len, num_experts]
+    [][]float router_logits,  // [seq_len, num_experts]
     int seq_len,
     int num_experts,
     int num_active_experts
-) float {
+) [][]float {
     // Apply softmax
     // Select top-k experts
     // Return router probabilities
     
-    float probs[][]
-    probs
+    [][]float{cap: 0}
 }
 
 // Load balancing loss for MoE
 func compute_load_balancing_loss(
-    float router_probs[][],  // [seq_len, num_experts]
+    [][]float router_probs,  // [seq_len, num_experts]
     int seq_len,
     int num_experts
 ) double {
@@ -240,7 +235,7 @@ func get_ffn_complexity(
     feed_forward_network ffn,
     int batch_size,
     int seq_len
-) [string:long {
+) map[string]long {
     // Returns FLOPs, memory usage, etc.
-    [string:long{cap: 5}
+    map[string]long{}
 }

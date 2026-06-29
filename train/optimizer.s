@@ -14,9 +14,9 @@ struct adamw_config {
 
 struct adamw_state {
     // Per-parameter states
-    float m[]  // First moment (mean)
-    float v[]  // Second moment (variance)
-    float param[]  // Model parameters
+    []float m  // First moment (mean)
+    []float v  // Second moment (variance)
+    []float param  // Model parameters
     
     int num_params
     long long step  // Update step count
@@ -78,14 +78,14 @@ func new_adamw_custom(
 // Single AdamW update step
 func optimizer_step(
     optimizer opt,
-    float gradients[]
+    []float gradients
 ) optimizer {
     // Increment step counter
     opt.state.step = opt.state.step + 1
     
-    int i = 0
-    while i < opt.state.num_params {
-        float grad = gradients[i]
+    int idx = 0
+    while idx < opt.state.num_params {
+        float grad = gradients[idx]
         
         // Gradient clipping
         if opt.config.grad_clip_norm > 0.0 {
@@ -97,16 +97,16 @@ func optimizer_step(
         }
         
         // Update biased first moment estimate
-        opt.state.m[i] = float(opt.config.beta1) * opt.state.m[i] + 
+        opt.state.m[idx] = float(opt.config.beta1) * opt.state.m[idx] + 
                          (1.0 - opt.config.beta1) * grad
         
         // Update biased second moment estimate
-        opt.state.v[i] = float(opt.config.beta2) * opt.state.v[i] + 
+        opt.state.v[idx] = float(opt.config.beta2) * opt.state.v[idx] + 
                          (1.0 - opt.config.beta2) * grad * grad
         
         // Bias correction
-        double m_hat = double(opt.state.m[i])
-        double v_hat = double(opt.state.v[i])
+        double m_hat = double(opt.state.m[idx])
+        double v_hat = double(opt.state.v[idx])
         
         if opt.config.bias_correction {
             double bias_correction1 = 1.0 - pow(opt.config.beta1, double(opt.state.step))
@@ -116,15 +116,15 @@ func optimizer_step(
         }
         
         // Weight decay (AdamW style - decoupled)
-        opt.state.param[i] = opt.state.param[i] * 
+        opt.state.param[idx] = opt.state.param[idx] * 
                              (1.0 - opt.config.learning_rate * opt.config.weight_decay)
         
         // Update parameters
         double step_size = opt.config.learning_rate / 
                           (sqrt(v_hat) + opt.config.epsilon)
-        opt.state.param[i] = opt.state.param[i] - float(step_size * m_hat)
+        opt.state.param[idx] = opt.state.param[idx] - float(step_size * m_hat)
         
-        i = i + 1
+        idx = idx + 1
     }
     
     opt
@@ -148,8 +148,8 @@ func set_learning_rate(optimizer opt, double lr) optimizer {
 }
 
 // Get optimizer state
-func get_optimizer_state(optimizer opt) [string:int {
-    [string:int {
+func get_optimizer_state(optimizer opt) map[string]int {
+    map[string]int{
         "step": int(opt.state.step),
         "num_params": opt.state.num_params,
     }
@@ -159,10 +159,10 @@ func get_optimizer_state(optimizer opt) [string:int {
 func compute_weight_norm([]float weights) double {
     double norm_sq = 0.0
     
-    int i = 0
-    while i < len(weights) {
-        norm_sq = norm_sq + double(weights[i] * weights[i])
-        i = i + 1
+    int idx = 0
+    while idx < len(weights) {
+        norm_sq = norm_sq + double(weights[idx] * weights[idx])
+        idx = idx + 1
     }
     
     sqrt(norm_sq)
@@ -199,8 +199,8 @@ func sqrt(double x) double {
 
 // SGD with momentum (alternative)
 struct sgd_optimizer_state {
-    float param[]
-    float momentum[]
+    []float param
+    []float momentum
     int num_params
     long long step
 }
@@ -209,8 +209,8 @@ func new_sgd_optimizer(
     int num_params,
     double lr,
     double momentum
-) [string:int {
-    [string:int{cap: 5}
+) map[string]int {
+    map[string]int{cap: 5}
 }
 
 // Learning rate schedules

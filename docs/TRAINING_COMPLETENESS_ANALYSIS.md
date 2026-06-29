@@ -222,7 +222,7 @@ func training_loop() {
 5. `distributed/zero_optimizer.s` - 内存优化
 6. `data/distributed_dataloader.s` - 数据加载
 7. `compute/flash_attention.s` - 高效注意力
-8. `optimization/mixed_precision.s` - 混合精度框架
+8. `train/mixed_precision.s` - 混合精度框架
 9. `monitoring/distributed_metrics.s` - 监控系统
 10. `distributed/fault_recovery.s` - 故障恢复
 

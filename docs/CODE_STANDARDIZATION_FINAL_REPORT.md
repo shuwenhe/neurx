@@ -69,7 +69,7 @@ Lines 1-30:
 | File | Lines | Structures | Functions | Status |
 |------|-------|-----------|-----------|--------|
 | compute/flash_attention.s | 800 | 3 | 15 | 40% (partial) |
-| optimization/mixed_precision.s | 700 | 6 | 12 | 0% |
+| train/mixed_precision.s | 700 | 6 | 12 | 0% |
 | distributed/fault_recovery.s | 850 | 8 | 16 | 0% |
 | monitoring/distributed_metrics.s | 750 | 7 | 13 | 0% |
 | bin/train_enterprise_2t.s | 800 | 6 | 11 | 0% |
@@ -153,7 +153,7 @@ Lines affected: ~250 (functions + variables)
 
 **Phase 2**: Complete remaining 4 files
 ```
-- optimization/mixed_precision.s: 700 lines, ~30 replacements
+- train/mixed_precision.s: 700 lines, ~30 replacements
 - distributed/fault_recovery.s: 850 lines, ~35 replacements
 - monitoring/distributed_metrics.s: 750 lines, ~30 replacements
 - bin/train_enterprise_2t.s: 800 lines, ~35 replacements

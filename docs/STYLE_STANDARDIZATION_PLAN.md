@@ -52,7 +52,7 @@ CORRECT:
 | # | File | Lines | Status |
 |---|------|-------|--------|
 | 1 | compute/flash_attention.s | 800 | PENDING |
-| 2 | optimization/mixed_precision.s | 700 | PENDING |
+| 2 | train/mixed_precision.s | 700 | PENDING |
 | 3 | distributed/fault_recovery.s | 850 | PENDING |
 | 4 | monitoring/distributed_metrics.s | 750 | PENDING |
 | 5 | quantization/quantizer.s | 650 | PENDING |

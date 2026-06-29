@@ -2,7 +2,7 @@
 // Prevents gradient explosion, enables effective batch_size scaling
 // Critical for: training stability, large effective batch sizes (1M+ tokens)
 
-package neurx.training.gradient_management
+package neurx.train.gradient_management
 
 use neurx.tensor.tensor
 use neurx.tensor.new
@@ -45,8 +45,8 @@ func default_2t_gradient_clip_config() gradient_clip_config {
 // ── Adaptive Gradient Clipper State ──
 struct adaptive_clipper_state {
     float current_clip_norm      // Current adaptive clip threshold
-    int steps_since_adaptation   // Steps since last adaptation
-    []float recent_norms         // History of recent gradient norms
+    int steps_since_adaptation   // Steps since []last adaptation
+    float recent_norms         // History of recent gradient norms
     int max_history_size         // Maximum history to keep
 }
 
@@ -129,8 +129,8 @@ func clip_gradients_by_global_norm(
         return gradients  // No clipping needed
     }
     
-    // Apply clipping to all gradients
-    []tensor clipped_grads = []tensor{cap: len(gradients)}
+    // Apply clipping to []all gradients
+    tensor clipped_grads = []tensor{cap: len(gradients)}
     int i = 0
     while i < len(gradients) {
         []float clipped_data = []float{cap: len(gradients[i].data)}
@@ -189,8 +189,8 @@ func clip_gradients_per_layer(
     config gradient_clip_config
 ) []tensor {
     
-    // Compute per-layer norms
-    []float layer_norms = compute_per_layer_norms(gradients)
+    // Compute per-[]layer norms
+    float layer_norms = compute_per_layer_norms(gradients)
     
     []tensor clipped_grads = []tensor{cap: len(gradients)}
     int i = 0
@@ -281,8 +281,8 @@ func adaptive_gradient_clip(
         clipper.steps_since_adaptation = 0
     }
     
-    // Clip using current adaptive threshold
-    []tensor clipped_grads = clip_gradients_by_global_norm(
+    // Clip using current []adaptive threshold
+    tensor clipped_grads = clip_gradients_by_global_norm(
         gradients, 
         clipper.current_clip_norm, 
         config
@@ -323,8 +323,8 @@ func full_clipping_pipeline(
     }
     
     // Step 4: Adaptive global norm clipping
-    adaptive_clipper_state updated_clipper
-    []tensor final_grads
+    []adaptive_clipper_state updated_clipper
+    tensor final_grads
     (final_grads, updated_clipper) = adaptive_gradient_clip(current_grads, clipper, config)
     
     // Step 5: Compute final metrics

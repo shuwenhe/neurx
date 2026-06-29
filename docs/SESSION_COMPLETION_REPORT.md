@@ -199,7 +199,7 @@ float loss = cross_entropy_loss_masked(logits, targets, mask, config)
 ✓ data/ - 分布式数据加载框架
 ✓ monitoring/ - 监控和指标
 ✓ distributed/fault_recovery.s - 故障恢复
-✓ optimization/mixed_precision.s - 混合精度框架
+✓ train/mixed_precision.s - 混合精度框架
 ```
 
 ✅ **部分可用** (需要小幅补充)
