@@ -1,11 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const outputDir = process.env.NEURX_OUTPUT_DIR || '/Users/feifei/train/neurx/artifacts/checkpoints/llm_s_pretrain';
+const outputDir = process.env.NEURX_OUTPUT_DIR || path.resolve('artifacts/checkpoints/llm_s_pretrain');
 const vocabSize = 256;
 const batchSize = 16;
-const totalSteps = 800;
-const warmupSteps = 80;
+const totalSteps = Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_STEPS || '50', 10) || 50);
+const warmupSteps = Math.min(
+  totalSteps,
+  Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_WARMUP_STEPS || '10', 10) || 10),
+);
 const initialLr = 0.28;
 const minLr = 0.03;
 const weightDecay = 0.0001;

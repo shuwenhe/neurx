@@ -1,0 +1,1000 @@
+{"text": "Sample 1: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 2: A longer English sentence containing several words to increase length and diversity. 示例数据第2条，用于训练 neurx 模型。"}
+{"text": "Sample 3: 最后一条示例：谢谢！ Example: do not share secrets in training data."}
+{"text": "Sample 4: Small dataset entry for testing training pipelines. 日期示例：2026年6月28日，编号：4。"}
+{"text": "Sample 5: Hello world! This is a small training sample. 短文本示例，用于测试 UTF-8 处理。 Additional note #5."}
+{"text": "Sample 6: 这是一个中文训练样本。 NeurX training data sample for model experiments."}
+{"text": "Sample 7: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 8: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 9: 特殊字符测试：，。！？；（）【】<>“”‘’ Small dataset entry for testing training pipelines."}
+{"text": "Sample 10: Small dataset entry for testing training pipelines. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #10."}
+{"text": "Sample 11: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 12: 示例数据第12条，用于训练 neurx 模型。 This sentence is intended to provide token variety."}
+{"text": "Sample 13: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 14: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 15: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：15。 Additional note #15."}
+{"text": "Sample 16: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第16条，用于训练 neurx 模型。"}
+{"text": "Sample 17: Example: do not share secrets in training data. 最后一条示例：谢谢！"}
+{"text": "Sample 18: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 19: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 20: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。 Additional note #20."}
+{"text": "Sample 21: 最后一条示例：谢谢！ Hello world! This is a small training sample."}
+{"text": "Sample 22: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 23: Small dataset entry for testing training pipelines. 示例数据第23条，用于训练 neurx 模型。"}
+{"text": "Sample 24: 机器学习训练数据：包含中英文混合内容。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 25: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：25。 Additional note #25."}
+{"text": "Sample 26: Example: do not share secrets in training data. 示例数据第26条，用于训练 neurx 模型。"}
+{"text": "Sample 27: 这是一个中文训练样本。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 28: Hello world! This is a small training sample. 示例数据第28条，用于训练 neurx 模型。"}
+{"text": "Sample 29: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 30: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。 Additional note #30."}
+{"text": "Sample 31: The quick brown fox jumps over the lazy dog. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 32: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 33: 中文和 English 混合示例，用于增加多样性。 Short line."}
+{"text": "Sample 34: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 35: NeurX training data sample for model experiments. 示例数据第35条，用于训练 neurx 模型。 Additional note #35."}
+{"text": "Sample 36: 示例数据第36条，用于训练 neurx 模型。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 37: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 38: Short line. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 39: 最后一条示例：谢谢！ The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 40: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。 Additional note #40."}
+{"text": "Sample 41: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 42: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 43: The quick brown fox jumps over the lazy dog. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 44: Example: do not share secrets in training data. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 45: This sentence is intended to provide token variety. 示例数据第45条，用于训练 neurx 模型。 Additional note #45."}
+{"text": "Sample 46: Hello world! This is a small training sample. 示例数据第46条，用于训练 neurx 模型。"}
+{"text": "Sample 47: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 48: 包含数字：12345，浮点数：3.14。 This sentence is intended to provide token variety."}
+{"text": "Sample 49: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 50: Short line. 这是一个中文训练样本。 Additional note #50."}
+{"text": "Sample 51: 这是一个中文训练样本。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 52: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 53: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 54: 最后一条示例：谢谢！ Short line."}
+{"text": "Sample 55: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #55."}
+{"text": "Sample 56: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 57: 机器学习训练数据：包含中英文混合内容。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 58: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：58。"}
+{"text": "Sample 59: The quick brown fox jumps over the lazy dog. 示例数据第59条，用于训练 neurx 模型。"}
+{"text": "Sample 60: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #60."}
+{"text": "Sample 61: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 62: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 63: 最后一条示例：谢谢！ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 64: Short line. 最后一条示例：谢谢！"}
+{"text": "Sample 65: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第65条，用于训练 neurx 模型。 Additional note #65."}
+{"text": "Sample 66: 特殊字符测试：，。！？；（）【】<>“”‘’ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 67: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 68: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 69: 机器学习训练数据：包含中英文混合内容。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 70: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #70."}
+{"text": "Sample 71: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 72: 包含数字：12345，浮点数：3.14。 NeurX training data sample for model experiments."}
+{"text": "Sample 73: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 74: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 75: Hello world! This is a small training sample. 最后一条示例：谢谢！ Additional note #75."}
+{"text": "Sample 76: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 77: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 78: 短文本示例，用于测试 UTF-8 处理。 Short line."}
+{"text": "Sample 79: Short line. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 80: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第80条，用于训练 neurx 模型。 Additional note #80."}
+{"text": "Sample 81: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 82: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 83: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 84: 特殊字符测试：，。！？；（）【】<>“”‘’ NeurX training data sample for model experiments."}
+{"text": "Sample 85: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #85."}
+{"text": "Sample 86: Short line. 示例数据第86条，用于训练 neurx 模型。"}
+{"text": "Sample 87: 中文和 English 混合示例，用于增加多样性。 This sentence is intended to provide token variety."}
+{"text": "Sample 88: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 89: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 90: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #90."}
+{"text": "Sample 91: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 92: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 93: 示例数据第93条，用于训练 neurx 模型。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 94: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 95: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #95."}
+{"text": "Sample 96: 最后一条示例：谢谢！ Short line."}
+{"text": "Sample 97: Hello world! This is a small training sample. 日期示例：2026年6月28日，编号：97。"}
+{"text": "Sample 98: Hello world! This is a small training sample. 示例数据第98条，用于训练 neurx 模型。"}
+{"text": "Sample 99: 中文和 English 混合示例，用于增加多样性。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 100: Short line. 最后一条示例：谢谢！ Additional note #100."}
+{"text": "Sample 101: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 102: 最后一条示例：谢谢！ Short line."}
+{"text": "Sample 103: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 104: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 105: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。 Additional note #105."}
+{"text": "Sample 106: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：106。"}
+{"text": "Sample 107: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：107。"}
+{"text": "Sample 108: 日期示例：2026年6月28日，编号：108。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 109: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 110: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。 Additional note #110."}
+{"text": "Sample 111: 最后一条示例：谢谢！ The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 112: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第112条，用于训练 neurx 模型。"}
+{"text": "Sample 113: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第113条，用于训练 neurx 模型。"}
+{"text": "Sample 114: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 115: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。 Additional note #115."}
+{"text": "Sample 116: Small dataset entry for testing training pipelines. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 117: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 118: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 119: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 120: Edge-case punctuation: !?;:()[]{}<>'\"`~ 中文和 English 混合示例，用于增加多样性。 Additional note #120."}
+{"text": "Sample 121: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 122: Short line. 这是一个中文训练样本。"}
+{"text": "Sample 123: 日期示例：2026年6月28日，编号：123。 Hello world! This is a small training sample."}
+{"text": "Sample 124: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 125: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。 Additional note #125."}
+{"text": "Sample 126: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 127: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 128: The quick brown fox jumps over the lazy dog. 示例数据第128条，用于训练 neurx 模型。"}
+{"text": "Sample 129: 示例数据第129条，用于训练 neurx 模型。 Hello world! This is a small training sample."}
+{"text": "Sample 130: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #130."}
+{"text": "Sample 131: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 132: 这是一个中文训练样本。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 133: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 134: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 135: Numbers and dates: 2026-06-28, 12345, 3.14159. 短文本示例，用于测试 UTF-8 处理。 Additional note #135."}
+{"text": "Sample 136: Short line. 最后一条示例：谢谢！"}
+{"text": "Sample 137: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：137。"}
+{"text": "Sample 138: 日期示例：2026年6月28日，编号：138。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 139: The quick brown fox jumps over the lazy dog. 示例数据第139条，用于训练 neurx 模型。"}
+{"text": "Sample 140: Example: do not share secrets in training data. 这是一个中文训练样本。 Additional note #140."}
+{"text": "Sample 141: 最后一条示例：谢谢！ NeurX training data sample for model experiments."}
+{"text": "Sample 142: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：142。"}
+{"text": "Sample 143: NeurX training data sample for model experiments. 示例数据第143条，用于训练 neurx 模型。"}
+{"text": "Sample 144: 短文本示例，用于测试 UTF-8 处理。 Short line."}
+{"text": "Sample 145: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。 Additional note #145."}
+{"text": "Sample 146: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 147: 最后一条示例：谢谢！ Small dataset entry for testing training pipelines."}
+{"text": "Sample 148: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 149: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第149条，用于训练 neurx 模型。"}
+{"text": "Sample 150: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！ Additional note #150."}
+{"text": "Sample 151: The quick brown fox jumps over the lazy dog. 日期示例：2026年6月28日，编号：151。"}
+{"text": "Sample 152: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 153: 包含数字：12345，浮点数：3.14。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 154: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 155: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。 Additional note #155."}
+{"text": "Sample 156: 这是一个中文训练样本。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 157: Hello world! This is a small training sample. 这是一个中文训练样本。"}
+{"text": "Sample 158: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 159: 短文本示例，用于测试 UTF-8 处理。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 160: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。 Additional note #160."}
+{"text": "Sample 161: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 162: 中文和 English 混合示例，用于增加多样性。 NeurX training data sample for model experiments."}
+{"text": "Sample 163: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 164: NeurX training data sample for model experiments. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 165: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。 Additional note #165."}
+{"text": "Sample 166: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 167: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 168: 示例数据第168条，用于训练 neurx 模型。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 169: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：169。"}
+{"text": "Sample 170: Small dataset entry for testing training pipelines. 包含数字：12345，浮点数：3.14。 Additional note #170."}
+{"text": "Sample 171: 特殊字符测试：，。！？；（）【】<>“”‘’ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 172: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 173: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：173。"}
+{"text": "Sample 174: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 175: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #175."}
+{"text": "Sample 176: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 177: 特殊字符测试：，。！？；（）【】<>“”‘’ Hello world! This is a small training sample."}
+{"text": "Sample 178: Short line. 示例数据第178条，用于训练 neurx 模型。"}
+{"text": "Sample 179: Short line. 日期示例：2026年6月28日，编号：179。"}
+{"text": "Sample 180: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #180."}
+{"text": "Sample 181: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 182: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 183: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 184: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 185: Short line. 中文和 English 混合示例，用于增加多样性。 Additional note #185."}
+{"text": "Sample 186: 日期示例：2026年6月28日，编号：186。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 187: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 188: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 189: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 190: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。 Additional note #190."}
+{"text": "Sample 191: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 192: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 193: Edge-case punctuation: !?;:()[]{}<>'\"`~ 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 194: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 195: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #195."}
+{"text": "Sample 196: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 197: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 198: 日期示例：2026年6月28日，编号：198。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 199: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 200: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。 Additional note #200."}
+{"text": "Sample 201: 机器学习训练数据：包含中英文混合内容。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 202: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：202。"}
+{"text": "Sample 203: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 204: 机器学习训练数据：包含中英文混合内容。 This sentence is intended to provide token variety."}
+{"text": "Sample 205: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #205."}
+{"text": "Sample 206: Edge-case punctuation: !?;:()[]{}<>'\"`~ 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 207: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 208: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 209: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 210: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。 Additional note #210."}
+{"text": "Sample 211: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 212: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：212。"}
+{"text": "Sample 213: 包含数字：12345，浮点数：3.14。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 214: Short line. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 215: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。 Additional note #215."}
+{"text": "Sample 216: 特殊字符测试：，。！？；（）【】<>“”‘’ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 217: Example: do not share secrets in training data. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 218: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 219: 机器学习训练数据：包含中英文混合内容。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 220: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。 Additional note #220."}
+{"text": "Sample 221: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 222: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 NeurX training data sample for model experiments."}
+{"text": "Sample 223: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 224: A longer English sentence containing several words to increase length and diversity. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 225: The quick brown fox jumps over the lazy dog. 最后一条示例：谢谢！ Additional note #225."}
+{"text": "Sample 226: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 227: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 228: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 229: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 230: Example: do not share secrets in training data. 这是一个中文训练样本。 Additional note #230."}
+{"text": "Sample 231: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 232: This sentence is intended to provide token variety. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 233: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：233。"}
+{"text": "Sample 234: 这是一个中文训练样本。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 235: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #235."}
+{"text": "Sample 236: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 237: 最后一条示例：谢谢！ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 238: A longer English sentence containing several words to increase length and diversity. 示例数据第238条，用于训练 neurx 模型。"}
+{"text": "Sample 239: Short line. 最后一条示例：谢谢！"}
+{"text": "Sample 240: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。 Additional note #240."}
+{"text": "Sample 241: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 242: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：242。"}
+{"text": "Sample 243: 日期示例：2026年6月28日，编号：243。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 244: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 245: Short line. 短文本示例，用于测试 UTF-8 处理。 Additional note #245."}
+{"text": "Sample 246: 最后一条示例：谢谢！ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 247: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 248: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：248。"}
+{"text": "Sample 249: 中文和 English 混合示例，用于增加多样性。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 250: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。 Additional note #250."}
+{"text": "Sample 251: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 252: 短文本示例，用于测试 UTF-8 处理。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 253: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 254: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：254。"}
+{"text": "Sample 255: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。 Additional note #255."}
+{"text": "Sample 256: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 257: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 258: 中文和 English 混合示例，用于增加多样性。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 259: Hello world! This is a small training sample. 这是一个中文训练样本。"}
+{"text": "Sample 260: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：260。 Additional note #260."}
+{"text": "Sample 261: 日期示例：2026年6月28日，编号：261。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 262: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：262。"}
+{"text": "Sample 263: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 264: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 265: Short line. 短文本示例，用于测试 UTF-8 处理。 Additional note #265."}
+{"text": "Sample 266: Example: do not share secrets in training data. 最后一条示例：谢谢！"}
+{"text": "Sample 267: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 268: This sentence is intended to provide token variety. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 269: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 270: The quick brown fox jumps over the lazy dog. 最后一条示例：谢谢！ Additional note #270."}
+{"text": "Sample 271: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 272: Small dataset entry for testing training pipelines. 示例数据第272条，用于训练 neurx 模型。"}
+{"text": "Sample 273: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 274: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：274。"}
+{"text": "Sample 275: Example: do not share secrets in training data. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #275."}
+{"text": "Sample 276: 中文和 English 混合示例，用于增加多样性。 Hello world! This is a small training sample."}
+{"text": "Sample 277: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 278: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 279: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 280: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #280."}
+{"text": "Sample 281: Short line. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 282: 这是一个中文训练样本。 Example: do not share secrets in training data."}
+{"text": "Sample 283: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 284: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第284条，用于训练 neurx 模型。"}
+{"text": "Sample 285: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。 Additional note #285."}
+{"text": "Sample 286: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 287: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 288: 包含数字：12345，浮点数：3.14。 NeurX training data sample for model experiments."}
+{"text": "Sample 289: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 290: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。 Additional note #290."}
+{"text": "Sample 291: 示例数据第291条，用于训练 neurx 模型。 Short line."}
+{"text": "Sample 292: Short line. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 293: A longer English sentence containing several words to increase length and diversity. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 294: 包含数字：12345，浮点数：3.14。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 295: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。 Additional note #295."}
+{"text": "Sample 296: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 297: 最后一条示例：谢谢！ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 298: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 299: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 300: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。 Additional note #300."}
+{"text": "Sample 301: Short line. 这是一个中文训练样本。"}
+{"text": "Sample 302: NeurX training data sample for model experiments. 最后一条示例：谢谢！"}
+{"text": "Sample 303: 最后一条示例：谢谢！ Short line."}
+{"text": "Sample 304: A longer English sentence containing several words to increase length and diversity. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 305: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #305."}
+{"text": "Sample 306: 这是一个中文训练样本。 Hello world! This is a small training sample."}
+{"text": "Sample 307: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第307条，用于训练 neurx 模型。"}
+{"text": "Sample 308: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 309: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 310: Hello world! This is a small training sample. 这是一个中文训练样本。 Additional note #310."}
+{"text": "Sample 311: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 312: 中文和 English 混合示例，用于增加多样性。 Hello world! This is a small training sample."}
+{"text": "Sample 313: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 314: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：314。"}
+{"text": "Sample 315: The quick brown fox jumps over the lazy dog. 最后一条示例：谢谢！ Additional note #315."}
+{"text": "Sample 316: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：316。"}
+{"text": "Sample 317: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 318: 这是一个中文训练样本。 NeurX training data sample for model experiments."}
+{"text": "Sample 319: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 320: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #320."}
+{"text": "Sample 321: 短文本示例，用于测试 UTF-8 处理。 Short line."}
+{"text": "Sample 322: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。"}
+{"text": "Sample 323: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 324: 机器学习训练数据：包含中英文混合内容。 NeurX training data sample for model experiments."}
+{"text": "Sample 325: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。 Additional note #325."}
+{"text": "Sample 326: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。"}
+{"text": "Sample 327: 日期示例：2026年6月28日，编号：327。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 328: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 329: Hello world! This is a small training sample. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 330: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。 Additional note #330."}
+{"text": "Sample 331: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 332: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 333: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 334: Edge-case punctuation: !?;:()[]{}<>'\"`~ 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 335: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。 Additional note #335."}
+{"text": "Sample 336: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 337: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 338: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 339: 短文本示例，用于测试 UTF-8 处理。 Hello world! This is a small training sample."}
+{"text": "Sample 340: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。 Additional note #340."}
+{"text": "Sample 341: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 342: 最后一条示例：谢谢！ NeurX training data sample for model experiments."}
+{"text": "Sample 343: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 344: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 345: Hello world! This is a small training sample. 最后一条示例：谢谢！ Additional note #345."}
+{"text": "Sample 346: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：346。"}
+{"text": "Sample 347: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 348: 短文本示例，用于测试 UTF-8 处理。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 349: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 350: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。 Additional note #350."}
+{"text": "Sample 351: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 352: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：352。"}
+{"text": "Sample 353: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 354: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 355: Short line. 中文和 English 混合示例，用于增加多样性。 Additional note #355."}
+{"text": "Sample 356: NeurX training data sample for model experiments. 示例数据第356条，用于训练 neurx 模型。"}
+{"text": "Sample 357: 特殊字符测试：，。！？；（）【】<>“”‘’ This sentence is intended to provide token variety."}
+{"text": "Sample 358: Hello world! This is a small training sample. 示例数据第358条，用于训练 neurx 模型。"}
+{"text": "Sample 359: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：359。"}
+{"text": "Sample 360: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。 Additional note #360."}
+{"text": "Sample 361: Small dataset entry for testing training pipelines. 日期示例：2026年6月28日，编号：361。"}
+{"text": "Sample 362: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 363: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 364: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 365: Edge-case punctuation: !?;:()[]{}<>'\"`~ 中文和 English 混合示例，用于增加多样性。 Additional note #365."}
+{"text": "Sample 366: 这是一个中文训练样本。 Example: do not share secrets in training data."}
+{"text": "Sample 367: This sentence is intended to provide token variety. 示例数据第367条，用于训练 neurx 模型。"}
+{"text": "Sample 368: A longer English sentence containing several words to increase length and diversity. 示例数据第368条，用于训练 neurx 模型。"}
+{"text": "Sample 369: 包含数字：12345，浮点数：3.14。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 370: Short line. 这是一个中文训练样本。 Additional note #370."}
+{"text": "Sample 371: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 372: 机器学习训练数据：包含中英文混合内容。 This sentence is intended to provide token variety."}
+{"text": "Sample 373: Small dataset entry for testing training pipelines. 示例数据第373条，用于训练 neurx 模型。"}
+{"text": "Sample 374: Numbers and dates: 2026-06-28, 12345, 3.14159. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 375: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #375."}
+{"text": "Sample 376: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 377: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 378: 日期示例：2026年6月28日，编号：378。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 379: NeurX training data sample for model experiments. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 380: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。 Additional note #380."}
+{"text": "Sample 381: 日期示例：2026年6月28日，编号：381。 Short line."}
+{"text": "Sample 382: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：382。"}
+{"text": "Sample 383: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 384: 特殊字符测试：，。！？；（）【】<>“”‘’ Small dataset entry for testing training pipelines."}
+{"text": "Sample 385: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第385条，用于训练 neurx 模型。 Additional note #385."}
+{"text": "Sample 386: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 387: 示例数据第387条，用于训练 neurx 模型。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 388: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 389: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 390: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。 Additional note #390."}
+{"text": "Sample 391: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 392: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 393: 日期示例：2026年6月28日，编号：393。 Example: do not share secrets in training data."}
+{"text": "Sample 394: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 395: Example: do not share secrets in training data. 这是一个中文训练样本。 Additional note #395."}
+{"text": "Sample 396: 最后一条示例：谢谢！ Example: do not share secrets in training data."}
+{"text": "Sample 397: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 398: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：398。"}
+{"text": "Sample 399: 机器学习训练数据：包含中英文混合内容。 NeurX training data sample for model experiments."}
+{"text": "Sample 400: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：400。 Additional note #400."}
+{"text": "Sample 401: Numbers and dates: 2026-06-28, 12345, 3.14159. 最后一条示例：谢谢！"}
+{"text": "Sample 402: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 403: Numbers and dates: 2026-06-28, 12345, 3.14159. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 404: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 405: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。 Additional note #405."}
+{"text": "Sample 406: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 407: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：407。"}
+{"text": "Sample 408: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 409: This sentence is intended to provide token variety. 示例数据第409条，用于训练 neurx 模型。"}
+{"text": "Sample 410: This sentence is intended to provide token variety. 示例数据第410条，用于训练 neurx 模型。 Additional note #410."}
+{"text": "Sample 411: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 412: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 413: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 414: 短文本示例，用于测试 UTF-8 处理。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 415: Hello world! This is a small training sample. 最后一条示例：谢谢！ Additional note #415."}
+{"text": "Sample 416: Edge-case punctuation: !?;:()[]{}<>'\"`~ 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 417: 特殊字符测试：，。！？；（）【】<>“”‘’ This sentence is intended to provide token variety."}
+{"text": "Sample 418: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 419: This sentence is intended to provide token variety. 示例数据第419条，用于训练 neurx 模型。"}
+{"text": "Sample 420: NeurX training data sample for model experiments. 示例数据第420条，用于训练 neurx 模型。 Additional note #420."}
+{"text": "Sample 421: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 422: Short line. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 423: 这是一个中文训练样本。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 424: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 425: This sentence is intended to provide token variety. 最后一条示例：谢谢！ Additional note #425."}
+{"text": "Sample 426: 包含数字：12345，浮点数：3.14。 NeurX training data sample for model experiments."}
+{"text": "Sample 427: The quick brown fox jumps over the lazy dog. 示例数据第427条，用于训练 neurx 模型。"}
+{"text": "Sample 428: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 429: 包含数字：12345，浮点数：3.14。 Short line."}
+{"text": "Sample 430: Hello world! This is a small training sample. 示例数据第430条，用于训练 neurx 模型。 Additional note #430."}
+{"text": "Sample 431: Example: do not share secrets in training data. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 432: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 433: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 434: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 435: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：435。 Additional note #435."}
+{"text": "Sample 436: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 437: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 438: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Short line."}
+{"text": "Sample 439: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：439。"}
+{"text": "Sample 440: Small dataset entry for testing training pipelines. 这是一个中文训练样本。 Additional note #440."}
+{"text": "Sample 441: 示例数据第441条，用于训练 neurx 模型。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 442: Short line. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 443: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 444: 特殊字符测试：，。！？；（）【】<>“”‘’ Short line."}
+{"text": "Sample 445: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。 Additional note #445."}
+{"text": "Sample 446: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 447: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Short line."}
+{"text": "Sample 448: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：448。"}
+{"text": "Sample 449: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。"}
+{"text": "Sample 450: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。 Additional note #450."}
+{"text": "Sample 451: The quick brown fox jumps over the lazy dog. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 452: This sentence is intended to provide token variety. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 453: 中文和 English 混合示例，用于增加多样性。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 454: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 455: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。 Additional note #455."}
+{"text": "Sample 456: 示例数据第456条，用于训练 neurx 模型。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 457: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 458: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 459: 这是一个中文训练样本。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 460: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。 Additional note #460."}
+{"text": "Sample 461: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 462: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 463: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 464: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 465: Short line. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #465."}
+{"text": "Sample 466: Example: do not share secrets in training data. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 467: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 468: 示例数据第468条，用于训练 neurx 模型。 Example: do not share secrets in training data."}
+{"text": "Sample 469: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 470: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。 Additional note #470."}
+{"text": "Sample 471: 这是一个中文训练样本。 Hello world! This is a small training sample."}
+{"text": "Sample 472: NeurX training data sample for model experiments. 最后一条示例：谢谢！"}
+{"text": "Sample 473: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：473。"}
+{"text": "Sample 474: 特殊字符测试：，。！？；（）【】<>“”‘’ NeurX training data sample for model experiments."}
+{"text": "Sample 475: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：475。 Additional note #475."}
+{"text": "Sample 476: Short line. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 477: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 478: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 479: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 480: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #480."}
+{"text": "Sample 481: NeurX training data sample for model experiments. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 482: Example: do not share secrets in training data. 示例数据第482条，用于训练 neurx 模型。"}
+{"text": "Sample 483: 特殊字符测试：，。！？；（）【】<>“”‘’ Small dataset entry for testing training pipelines."}
+{"text": "Sample 484: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 485: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。 Additional note #485."}
+{"text": "Sample 486: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 487: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：487。"}
+{"text": "Sample 488: Short line. 日期示例：2026年6月28日，编号：488。"}
+{"text": "Sample 489: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 490: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：490。 Additional note #490."}
+{"text": "Sample 491: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 492: 最后一条示例：谢谢！ The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 493: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 494: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：494。"}
+{"text": "Sample 495: Short line. 最后一条示例：谢谢！ Additional note #495."}
+{"text": "Sample 496: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 497: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：497。"}
+{"text": "Sample 498: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 499: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 500: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #500."}
+{"text": "Sample 501: 示例数据第501条，用于训练 neurx 模型。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 502: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 503: Short line. 这是一个中文训练样本。"}
+{"text": "Sample 504: 中文和 English 混合示例，用于增加多样性。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 505: Example: do not share secrets in training data. 示例数据第505条，用于训练 neurx 模型。 Additional note #505."}
+{"text": "Sample 506: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 507: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Short line."}
+{"text": "Sample 508: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 509: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 510: This sentence is intended to provide token variety. 这是一个中文训练样本。 Additional note #510."}
+{"text": "Sample 511: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 512: Small dataset entry for testing training pipelines. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 513: 这是一个中文训练样本。 NeurX training data sample for model experiments."}
+{"text": "Sample 514: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：514。"}
+{"text": "Sample 515: Example: do not share secrets in training data. 示例数据第515条，用于训练 neurx 模型。 Additional note #515."}
+{"text": "Sample 516: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 517: NeurX training data sample for model experiments. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 518: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 519: 短文本示例，用于测试 UTF-8 处理。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 520: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #520."}
+{"text": "Sample 521: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 522: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Short line."}
+{"text": "Sample 523: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 524: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 525: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：525。 Additional note #525."}
+{"text": "Sample 526: A longer English sentence containing several words to increase length and diversity. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 527: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 528: 示例数据第528条，用于训练 neurx 模型。 NeurX training data sample for model experiments."}
+{"text": "Sample 529: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。"}
+{"text": "Sample 530: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。 Additional note #530."}
+{"text": "Sample 531: 最后一条示例：谢谢！ This sentence is intended to provide token variety."}
+{"text": "Sample 532: Example: do not share secrets in training data. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 533: This sentence is intended to provide token variety. 示例数据第533条，用于训练 neurx 模型。"}
+{"text": "Sample 534: 包含数字：12345，浮点数：3.14。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 535: Short line. 中文和 English 混合示例，用于增加多样性。 Additional note #535."}
+{"text": "Sample 536: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 537: 示例数据第537条，用于训练 neurx 模型。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 538: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 539: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 540: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。 Additional note #540."}
+{"text": "Sample 541: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 542: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 543: 日期示例：2026年6月28日，编号：543。 NeurX training data sample for model experiments."}
+{"text": "Sample 544: Small dataset entry for testing training pipelines. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 545: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。 Additional note #545."}
+{"text": "Sample 546: 最后一条示例：谢谢！ Small dataset entry for testing training pipelines."}
+{"text": "Sample 547: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 548: Numbers and dates: 2026-06-28, 12345, 3.14159. 最后一条示例：谢谢！"}
+{"text": "Sample 549: 这是一个中文训练样本。 Short line."}
+{"text": "Sample 550: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第550条，用于训练 neurx 模型。 Additional note #550."}
+{"text": "Sample 551: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：551。"}
+{"text": "Sample 552: 机器学习训练数据：包含中英文混合内容。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 553: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：553。"}
+{"text": "Sample 554: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 555: NeurX training data sample for model experiments. 这是一个中文训练样本。 Additional note #555."}
+{"text": "Sample 556: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 557: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 558: 短文本示例，用于测试 UTF-8 处理。 Hello world! This is a small training sample."}
+{"text": "Sample 559: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 560: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #560."}
+{"text": "Sample 561: 特殊字符测试：，。！？；（）【】<>“”‘’ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 562: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 563: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 564: 最后一条示例：谢谢！ Short line."}
+{"text": "Sample 565: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。 Additional note #565."}
+{"text": "Sample 566: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：566。"}
+{"text": "Sample 567: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 568: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 569: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 570: Small dataset entry for testing training pipelines. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #570."}
+{"text": "Sample 571: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 572: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 573: 特殊字符测试：，。！？；（）【】<>“”‘’ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 574: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 575: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：575。 Additional note #575."}
+{"text": "Sample 576: 这是一个中文训练样本。 Short line."}
+{"text": "Sample 577: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 578: Short line. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 579: 日期示例：2026年6月28日，编号：579。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 580: Example: do not share secrets in training data. 最后一条示例：谢谢！ Additional note #580."}
+{"text": "Sample 581: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 582: 示例数据第582条，用于训练 neurx 模型。 Hello world! This is a small training sample."}
+{"text": "Sample 583: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 584: Small dataset entry for testing training pipelines. 示例数据第584条，用于训练 neurx 模型。"}
+{"text": "Sample 585: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。 Additional note #585."}
+{"text": "Sample 586: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 587: Small dataset entry for testing training pipelines. 日期示例：2026年6月28日，编号：587。"}
+{"text": "Sample 588: 特殊字符测试：，。！？；（）【】<>“”‘’ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 589: Small dataset entry for testing training pipelines. 这是一个中文训练样本。"}
+{"text": "Sample 590: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。 Additional note #590."}
+{"text": "Sample 591: 日期示例：2026年6月28日，编号：591。 Hello world! This is a small training sample."}
+{"text": "Sample 592: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 593: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 594: 最后一条示例：谢谢！ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 595: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #595."}
+{"text": "Sample 596: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 597: 特殊字符测试：，。！？；（）【】<>“”‘’ Hello world! This is a small training sample."}
+{"text": "Sample 598: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 599: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 600: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。 Additional note #600."}
+{"text": "Sample 601: Numbers and dates: 2026-06-28, 12345, 3.14159. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 602: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：602。"}
+{"text": "Sample 603: 最后一条示例：谢谢！ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 604: Short line. 日期示例：2026年6月28日，编号：604。"}
+{"text": "Sample 605: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。 Additional note #605."}
+{"text": "Sample 606: 短文本示例，用于测试 UTF-8 处理。 This sentence is intended to provide token variety."}
+{"text": "Sample 607: Example: do not share secrets in training data. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 608: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 609: 包含数字：12345，浮点数：3.14。 Example: do not share secrets in training data."}
+{"text": "Sample 610: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #610."}
+{"text": "Sample 611: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 612: 中文和 English 混合示例，用于增加多样性。 Hello world! This is a small training sample."}
+{"text": "Sample 613: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 614: Short line. 示例数据第614条，用于训练 neurx 模型。"}
+{"text": "Sample 615: Short line. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #615."}
+{"text": "Sample 616: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 617: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 618: 中文和 English 混合示例，用于增加多样性。 This sentence is intended to provide token variety."}
+{"text": "Sample 619: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 620: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。 Additional note #620."}
+{"text": "Sample 621: 中文和 English 混合示例，用于增加多样性。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 622: Small dataset entry for testing training pipelines. 示例数据第622条，用于训练 neurx 模型。"}
+{"text": "Sample 623: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 624: 日期示例：2026年6月28日，编号：624。 Example: do not share secrets in training data."}
+{"text": "Sample 625: Hello world! This is a small training sample. 短文本示例，用于测试 UTF-8 处理。 Additional note #625."}
+{"text": "Sample 626: Short line. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 627: 中文和 English 混合示例，用于增加多样性。 Example: do not share secrets in training data."}
+{"text": "Sample 628: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：628。"}
+{"text": "Sample 629: Short line. 这是一个中文训练样本。"}
+{"text": "Sample 630: Numbers and dates: 2026-06-28, 12345, 3.14159. 机器学习训练数据：包含中英文混合内容。 Additional note #630."}
+{"text": "Sample 631: Short line. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 632: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 633: 包含数字：12345，浮点数：3.14。 Example: do not share secrets in training data."}
+{"text": "Sample 634: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 635: Hello world! This is a small training sample. 短文本示例，用于测试 UTF-8 处理。 Additional note #635."}
+{"text": "Sample 636: 短文本示例，用于测试 UTF-8 处理。 Short line."}
+{"text": "Sample 637: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 638: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 639: 示例数据第639条，用于训练 neurx 模型。 Hello world! This is a small training sample."}
+{"text": "Sample 640: Short line. 日期示例：2026年6月28日，编号：640。 Additional note #640."}
+{"text": "Sample 641: NeurX training data sample for model experiments. 最后一条示例：谢谢！"}
+{"text": "Sample 642: 包含数字：12345，浮点数：3.14。 Hello world! This is a small training sample."}
+{"text": "Sample 643: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第643条，用于训练 neurx 模型。"}
+{"text": "Sample 644: Example: do not share secrets in training data. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 645: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。 Additional note #645."}
+{"text": "Sample 646: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 647: A longer English sentence containing several words to increase length and diversity. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 648: 机器学习训练数据：包含中英文混合内容。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 649: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。"}
+{"text": "Sample 650: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第650条，用于训练 neurx 模型。 Additional note #650."}
+{"text": "Sample 651: 包含数字：12345，浮点数：3.14。 Example: do not share secrets in training data."}
+{"text": "Sample 652: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 653: This sentence is intended to provide token variety. 最后一条示例：谢谢！"}
+{"text": "Sample 654: 日期示例：2026年6月28日，编号：654。 Short line."}
+{"text": "Sample 655: Example: do not share secrets in training data. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #655."}
+{"text": "Sample 656: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 657: 这是一个中文训练样本。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 658: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 659: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 660: Hello world! This is a small training sample. 示例数据第660条，用于训练 neurx 模型。 Additional note #660."}
+{"text": "Sample 661: A longer English sentence containing several words to increase length and diversity. 这是一个中文训练样本。"}
+{"text": "Sample 662: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 663: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 664: NeurX training data sample for model experiments. 最后一条示例：谢谢！"}
+{"text": "Sample 665: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！ Additional note #665."}
+{"text": "Sample 666: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 667: Short line. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 668: Example: do not share secrets in training data. 最后一条示例：谢谢！"}
+{"text": "Sample 669: 特殊字符测试：，。！？；（）【】<>“”‘’ Hello world! This is a small training sample."}
+{"text": "Sample 670: Short line. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #670."}
+{"text": "Sample 671: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 672: 最后一条示例：谢谢！ NeurX training data sample for model experiments."}
+{"text": "Sample 673: The quick brown fox jumps over the lazy dog. 最后一条示例：谢谢！"}
+{"text": "Sample 674: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 675: Short line. 短文本示例，用于测试 UTF-8 处理。 Additional note #675."}
+{"text": "Sample 676: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 677: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 678: 这是一个中文训练样本。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 679: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 680: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。 Additional note #680."}
+{"text": "Sample 681: 示例数据第681条，用于训练 neurx 模型。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 682: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 683: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 684: 短文本示例，用于测试 UTF-8 处理。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 685: Small dataset entry for testing training pipelines. 这是一个中文训练样本。 Additional note #685."}
+{"text": "Sample 686: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 687: 这是一个中文训练样本。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 688: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 689: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 690: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #690."}
+{"text": "Sample 691: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 692: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 693: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 694: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 695: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。 Additional note #695."}
+{"text": "Sample 696: 特殊字符测试：，。！？；（）【】<>“”‘’ Small dataset entry for testing training pipelines."}
+{"text": "Sample 697: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 698: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 699: 中文和 English 混合示例，用于增加多样性。 Hello world! This is a small training sample."}
+{"text": "Sample 700: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。 Additional note #700."}
+{"text": "Sample 701: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 702: 中文和 English 混合示例，用于增加多样性。 NeurX training data sample for model experiments."}
+{"text": "Sample 703: A longer English sentence containing several words to increase length and diversity. 示例数据第703条，用于训练 neurx 模型。"}
+{"text": "Sample 704: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 705: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：705。 Additional note #705."}
+{"text": "Sample 706: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 707: Short line. 示例数据第707条，用于训练 neurx 模型。"}
+{"text": "Sample 708: 特殊字符测试：，。！？；（）【】<>“”‘’ NeurX training data sample for model experiments."}
+{"text": "Sample 709: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 710: The quick brown fox jumps over the lazy dog. 这是一个中文训练样本。 Additional note #710."}
+{"text": "Sample 711: 短文本示例，用于测试 UTF-8 处理。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 712: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 713: Short line. 最后一条示例：谢谢！"}
+{"text": "Sample 714: 机器学习训练数据：包含中英文混合内容。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 715: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：715。 Additional note #715."}
+{"text": "Sample 716: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 717: 包含数字：12345，浮点数：3.14。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 718: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 719: Example: do not share secrets in training data. 示例数据第719条，用于训练 neurx 模型。"}
+{"text": "Sample 720: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。 Additional note #720."}
+{"text": "Sample 721: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 722: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 723: 示例数据第723条，用于训练 neurx 模型。 Short line."}
+{"text": "Sample 724: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 725: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。 Additional note #725."}
+{"text": "Sample 726: 中文和 English 混合示例，用于增加多样性。 Hello world! This is a small training sample."}
+{"text": "Sample 727: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 728: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 729: 短文本示例，用于测试 UTF-8 处理。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 730: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。 Additional note #730."}
+{"text": "Sample 731: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 732: 中文和 English 混合示例，用于增加多样性。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 733: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 734: Edge-case punctuation: !?;:()[]{}<>'\"`~ 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 735: Numbers and dates: 2026-06-28, 12345, 3.14159. 短文本示例，用于测试 UTF-8 处理。 Additional note #735."}
+{"text": "Sample 736: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 737: A longer English sentence containing several words to increase length and diversity. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 738: 最后一条示例：谢谢！ The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 739: NeurX training data sample for model experiments. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 740: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第740条，用于训练 neurx 模型。 Additional note #740."}
+{"text": "Sample 741: 日期示例：2026年6月28日，编号：741。 Example: do not share secrets in training data."}
+{"text": "Sample 742: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 743: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 744: 机器学习训练数据：包含中英文混合内容。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 745: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。 Additional note #745."}
+{"text": "Sample 746: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：746。"}
+{"text": "Sample 747: 短文本示例，用于测试 UTF-8 处理。 This sentence is intended to provide token variety."}
+{"text": "Sample 748: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 749: Edge-case punctuation: !?;:()[]{}<>'\"`~ 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 750: Edge-case punctuation: !?;:()[]{}<>'\"`~ 日期示例：2026年6月28日，编号：750。 Additional note #750."}
+{"text": "Sample 751: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第751条，用于训练 neurx 模型。"}
+{"text": "Sample 752: A longer English sentence containing several words to increase length and diversity. 示例数据第752条，用于训练 neurx 模型。"}
+{"text": "Sample 753: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 754: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第754条，用于训练 neurx 模型。"}
+{"text": "Sample 755: Numbers and dates: 2026-06-28, 12345, 3.14159. 短文本示例，用于测试 UTF-8 处理。 Additional note #755."}
+{"text": "Sample 756: 最后一条示例：谢谢！ NeurX training data sample for model experiments."}
+{"text": "Sample 757: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 758: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 759: 机器学习训练数据：包含中英文混合内容。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 760: Example: do not share secrets in training data. 日期示例：2026年6月28日，编号：760。 Additional note #760."}
+{"text": "Sample 761: Numbers and dates: 2026-06-28, 12345, 3.14159. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 762: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Example: do not share secrets in training data."}
+{"text": "Sample 763: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 764: NeurX training data sample for model experiments. 最后一条示例：谢谢！"}
+{"text": "Sample 765: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #765."}
+{"text": "Sample 766: A longer English sentence containing several words to increase length and diversity. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 767: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 768: 短文本示例，用于测试 UTF-8 处理。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 769: Numbers and dates: 2026-06-28, 12345, 3.14159. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 770: This sentence is intended to provide token variety. 示例数据第770条，用于训练 neurx 模型。 Additional note #770."}
+{"text": "Sample 771: 示例数据第771条，用于训练 neurx 模型。 Example: do not share secrets in training data."}
+{"text": "Sample 772: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 773: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 774: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 775: Short line. 示例数据第775条，用于训练 neurx 模型。 Additional note #775."}
+{"text": "Sample 776: Example: do not share secrets in training data. 示例数据第776条，用于训练 neurx 模型。"}
+{"text": "Sample 777: 中文和 English 混合示例，用于增加多样性。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 778: Numbers and dates: 2026-06-28, 12345, 3.14159. 最后一条示例：谢谢！"}
+{"text": "Sample 779: A longer English sentence containing several words to increase length and diversity. 示例数据第779条，用于训练 neurx 模型。"}
+{"text": "Sample 780: Small dataset entry for testing training pipelines. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #780."}
+{"text": "Sample 781: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：781。"}
+{"text": "Sample 782: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 783: 示例数据第783条，用于训练 neurx 模型。 This sentence is intended to provide token variety."}
+{"text": "Sample 784: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 785: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。 Additional note #785."}
+{"text": "Sample 786: 特殊字符测试：，。！？；（）【】<>“”‘’ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 787: This sentence is intended to provide token variety. 示例数据第787条，用于训练 neurx 模型。"}
+{"text": "Sample 788: Example: do not share secrets in training data. 示例数据第788条，用于训练 neurx 模型。"}
+{"text": "Sample 789: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 790: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。 Additional note #790."}
+{"text": "Sample 791: Small dataset entry for testing training pipelines. 示例数据第791条，用于训练 neurx 模型。"}
+{"text": "Sample 792: 特殊字符测试：，。！？；（）【】<>“”‘’ NeurX training data sample for model experiments."}
+{"text": "Sample 793: Numbers and dates: 2026-06-28, 12345, 3.14159. 示例数据第793条，用于训练 neurx 模型。"}
+{"text": "Sample 794: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 795: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第795条，用于训练 neurx 模型。 Additional note #795."}
+{"text": "Sample 796: Small dataset entry for testing training pipelines. 这是一个中文训练样本。"}
+{"text": "Sample 797: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 798: 日期示例：2026年6月28日，编号：798。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 799: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 800: NeurX training data sample for model experiments. 最后一条示例：谢谢！ Additional note #800."}
+{"text": "Sample 801: 示例数据第801条，用于训练 neurx 模型。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 802: Example: do not share secrets in training data. 示例数据第802条，用于训练 neurx 模型。"}
+{"text": "Sample 803: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：803。"}
+{"text": "Sample 804: 日期示例：2026年6月28日，编号：804。 NeurX training data sample for model experiments."}
+{"text": "Sample 805: Numbers and dates: 2026-06-28, 12345, 3.14159. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #805."}
+{"text": "Sample 806: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 807: 包含数字：12345，浮点数：3.14。 Short line."}
+{"text": "Sample 808: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 809: Edge-case punctuation: !?;:()[]{}<>'\"`~ 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 810: Hello world! This is a small training sample. 这是一个中文训练样本。 Additional note #810."}
+{"text": "Sample 811: Short line. 这是一个中文训练样本。"}
+{"text": "Sample 812: The quick brown fox jumps over the lazy dog. 日期示例：2026年6月28日，编号：812。"}
+{"text": "Sample 813: 中文和 English 混合示例，用于增加多样性。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 814: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 815: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。 Additional note #815."}
+{"text": "Sample 816: 中文和 English 混合示例，用于增加多样性。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 817: Edge-case punctuation: !?;:()[]{}<>'\"`~ 最后一条示例：谢谢！"}
+{"text": "Sample 818: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 819: 包含数字：12345，浮点数：3.14。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 820: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。 Additional note #820."}
+{"text": "Sample 821: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 822: 日期示例：2026年6月28日，编号：822。 Short line."}
+{"text": "Sample 823: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 824: This sentence is intended to provide token variety. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 825: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #825."}
+{"text": "Sample 826: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：826。"}
+{"text": "Sample 827: Numbers and dates: 2026-06-28, 12345, 3.14159. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 828: 特殊字符测试：，。！？；（）【】<>“”‘’ Hello world! This is a small training sample."}
+{"text": "Sample 829: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 830: This sentence is intended to provide token variety. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #830."}
+{"text": "Sample 831: 这是一个中文训练样本。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 832: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：832。"}
+{"text": "Sample 833: Small dataset entry for testing training pipelines. 这是一个中文训练样本。"}
+{"text": "Sample 834: 短文本示例，用于测试 UTF-8 处理。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 835: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。 Additional note #835."}
+{"text": "Sample 836: A longer English sentence containing several words to increase length and diversity. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 837: 日期示例：2026年6月28日，编号：837。 Hello world! This is a small training sample."}
+{"text": "Sample 838: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 839: Short line. 最后一条示例：谢谢！"}
+{"text": "Sample 840: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #840."}
+{"text": "Sample 841: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第841条，用于训练 neurx 模型。"}
+{"text": "Sample 842: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 843: 示例数据第843条，用于训练 neurx 模型。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 844: Hello world! This is a small training sample. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 845: NeurX training data sample for model experiments. 短文本示例，用于测试 UTF-8 处理。 Additional note #845."}
+{"text": "Sample 846: 机器学习训练数据：包含中英文混合内容。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 847: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 848: The quick brown fox jumps over the lazy dog. 日期示例：2026年6月28日，编号：848。"}
+{"text": "Sample 849: 特殊字符测试：，。！？；（）【】<>“”‘’ Short line."}
+{"text": "Sample 850: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！ Additional note #850."}
+{"text": "Sample 851: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 852: 短文本示例，用于测试 UTF-8 处理。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 853: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 854: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 855: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #855."}
+{"text": "Sample 856: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：856。"}
+{"text": "Sample 857: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 858: 示例数据第858条，用于训练 neurx 模型。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 859: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 860: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。 Additional note #860."}
+{"text": "Sample 861: 示例数据第861条，用于训练 neurx 模型。 This sentence is intended to provide token variety."}
+{"text": "Sample 862: NeurX training data sample for model experiments. 示例数据第862条，用于训练 neurx 模型。"}
+{"text": "Sample 863: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 864: 短文本示例，用于测试 UTF-8 处理。 Small dataset entry for testing training pipelines."}
+{"text": "Sample 865: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #865."}
+{"text": "Sample 866: The quick brown fox jumps over the lazy dog. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 867: 日期示例：2026年6月28日，编号：867。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 868: Hello world! This is a small training sample. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 869: Edge-case punctuation: !?;:()[]{}<>'\"`~ 这是一个中文训练样本。"}
+{"text": "Sample 870: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。 Additional note #870."}
+{"text": "Sample 871: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 872: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 873: 短文本示例，用于测试 UTF-8 处理。 Short line."}
+{"text": "Sample 874: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 875: NeurX training data sample for model experiments. 最后一条示例：谢谢！ Additional note #875."}
+{"text": "Sample 876: 示例数据第876条，用于训练 neurx 模型。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 877: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 878: Short line. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 879: 示例数据第879条，用于训练 neurx 模型。 Example: do not share secrets in training data."}
+{"text": "Sample 880: Numbers and dates: 2026-06-28, 12345, 3.14159. 最后一条示例：谢谢！ Additional note #880."}
+{"text": "Sample 881: The quick brown fox jumps over the lazy dog. 最后一条示例：谢谢！"}
+{"text": "Sample 882: 日期示例：2026年6月28日，编号：882。 Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 883: Small dataset entry for testing training pipelines. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 884: Short line. 日期示例：2026年6月28日，编号：884。"}
+{"text": "Sample 885: Numbers and dates: 2026-06-28, 12345, 3.14159. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #885."}
+{"text": "Sample 886: NeurX training data sample for model experiments. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 887: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 888: 示例数据第888条，用于训练 neurx 模型。 NeurX training data sample for model experiments."}
+{"text": "Sample 889: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 890: The quick brown fox jumps over the lazy dog. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #890."}
+{"text": "Sample 891: 机器学习训练数据：包含中英文混合内容。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 892: This sentence is intended to provide token variety. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 893: A longer English sentence containing several words to increase length and diversity. 日期示例：2026年6月28日，编号：893。"}
+{"text": "Sample 894: 中文和 English 混合示例，用于增加多样性。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 895: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。 Additional note #895."}
+{"text": "Sample 896: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：896。"}
+{"text": "Sample 897: 机器学习训练数据：包含中英文混合内容。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 898: Hello world! This is a small training sample. 这是一个中文训练样本。"}
+{"text": "Sample 899: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 900: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’ Additional note #900."}
+{"text": "Sample 901: Hello world! This is a small training sample. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 902: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 903: 特殊字符测试：，。！？；（）【】<>“”‘’ This sentence is intended to provide token variety."}
+{"text": "Sample 904: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 905: This sentence is intended to provide token variety. 中文和 English 混合示例，用于增加多样性。 Additional note #905."}
+{"text": "Sample 906: 日期示例：2026年6月28日，编号：906。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 907: Numbers and dates: 2026-06-28, 12345, 3.14159. 这是一个中文训练样本。"}
+{"text": "Sample 908: Hello world! This is a small training sample. 这是一个中文训练样本。"}
+{"text": "Sample 909: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Example: do not share secrets in training data."}
+{"text": "Sample 910: Numbers and dates: 2026-06-28, 12345, 3.14159. 日期示例：2026年6月28日，编号：910。 Additional note #910."}
+{"text": "Sample 911: Edge-case punctuation: !?;:()[]{}<>'\"`~ 示例数据第911条，用于训练 neurx 模型。"}
+{"text": "Sample 912: 包含数字：12345，浮点数：3.14。 Short line."}
+{"text": "Sample 913: Small dataset entry for testing training pipelines. 日期示例：2026年6月28日，编号：913。"}
+{"text": "Sample 914: Example: do not share secrets in training data. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 915: A longer English sentence containing several words to increase length and diversity. 包含数字：12345，浮点数：3.14。 Additional note #915."}
+{"text": "Sample 916: The quick brown fox jumps over the lazy dog. 日期示例：2026年6月28日，编号：916。"}
+{"text": "Sample 917: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 918: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 919: The quick brown fox jumps over the lazy dog. 示例数据第919条，用于训练 neurx 模型。"}
+{"text": "Sample 920: A longer English sentence containing several words to increase length and diversity. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #920."}
+{"text": "Sample 921: 最后一条示例：谢谢！ A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 922: Edge-case punctuation: !?;:()[]{}<>'\"`~ 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 923: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 924: 示例数据第924条，用于训练 neurx 模型。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 925: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。 Additional note #925."}
+{"text": "Sample 926: This sentence is intended to provide token variety. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 927: 包含数字：12345，浮点数：3.14。 NeurX training data sample for model experiments."}
+{"text": "Sample 928: Example: do not share secrets in training data. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 929: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 930: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：930。 Additional note #930."}
+{"text": "Sample 931: Example: do not share secrets in training data. 这是一个中文训练样本。"}
+{"text": "Sample 932: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 933: 中文和 English 混合示例，用于增加多样性。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 934: A longer English sentence containing several words to increase length and diversity. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 935: Hello world! This is a small training sample. 这是一个中文训练样本。 Additional note #935."}
+{"text": "Sample 936: 特殊字符测试：，。！？；（）【】<>“”‘’ Example: do not share secrets in training data."}
+{"text": "Sample 937: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 938: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 939: 日期示例：2026年6月28日，编号：939。 Example: do not share secrets in training data."}
+{"text": "Sample 940: NeurX training data sample for model experiments. 日期示例：2026年6月28日，编号：940。 Additional note #940."}
+{"text": "Sample 941: Small dataset entry for testing training pipelines. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 942: 最后一条示例：谢谢！ Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 943: NeurX training data sample for model experiments. 这是一个中文训练样本。"}
+{"text": "Sample 944: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 945: Small dataset entry for testing training pipelines. 日期示例：2026年6月28日，编号：945。 Additional note #945."}
+{"text": "Sample 946: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 947: Edge-case punctuation: !?;:()[]{}<>'\"`~ 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 948: 短文本示例，用于测试 UTF-8 处理。 NeurX training data sample for model experiments."}
+{"text": "Sample 949: Small dataset entry for testing training pipelines. 最后一条示例：谢谢！"}
+{"text": "Sample 950: Example: do not share secrets in training data. 包含数字：12345，浮点数：3.14。 Additional note #950."}
+{"text": "Sample 951: 特殊字符测试：，。！？；（）【】<>“”‘’ The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 952: The quick brown fox jumps over the lazy dog. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 953: Hello world! This is a small training sample. 这是一个中文训练样本。"}
+{"text": "Sample 954: 机器学习训练数据：包含中英文混合内容。 Short line."}
+{"text": "Sample 955: Small dataset entry for testing training pipelines. 短文本示例，用于测试 UTF-8 处理。 Additional note #955."}
+{"text": "Sample 956: Short line. 机器学习训练数据：包含中英文混合内容。"}
+{"text": "Sample 957: 机器学习训练数据：包含中英文混合内容。 Hello world! This is a small training sample."}
+{"text": "Sample 958: This sentence is intended to provide token variety. 这是一个中文训练样本。"}
+{"text": "Sample 959: Short line. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 960: Hello world! This is a small training sample. 机器学习训练数据：包含中英文混合内容。 Additional note #960."}
+{"text": "Sample 961: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 962: A longer English sentence containing several words to increase length and diversity. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 963: 最后一条示例：谢谢！ Edge-case punctuation: !?;:()[]{}<>'\"`~"}
+{"text": "Sample 964: A longer English sentence containing several words to increase length and diversity. 最后一条示例：谢谢！"}
+{"text": "Sample 965: Example: do not share secrets in training data. 中文和 English 混合示例，用于增加多样性。 Additional note #965."}
+{"text": "Sample 966: 示例数据第966条，用于训练 neurx 模型。 Example: do not share secrets in training data."}
+{"text": "Sample 967: This sentence is intended to provide token variety. 日期示例：2026年6月28日，编号：967。"}
+{"text": "Sample 968: Short line. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 969: 这是一个中文训练样本。 Hello world! This is a small training sample."}
+{"text": "Sample 970: Small dataset entry for testing training pipelines. 这是一个中文训练样本。 Additional note #970."}
+{"text": "Sample 971: NeurX training data sample for model experiments. 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 972: 这是一个中文训练样本。 A longer English sentence containing several words to increase length and diversity."}
+{"text": "Sample 973: The quick brown fox jumps over the lazy dog. 日期示例：2026年6月28日，编号：973。"}
+{"text": "Sample 974: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 975: Hello world! This is a small training sample. 示例数据第975条，用于训练 neurx 模型。 Additional note #975."}
+{"text": "Sample 976: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 977: The quick brown fox jumps over the lazy dog. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 978: 这是一个中文训练样本。 Short line."}
+{"text": "Sample 979: Edge-case punctuation: !?;:()[]{}<>'\"`~ 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 980: Hello world! This is a small training sample. 包含数字：12345，浮点数：3.14。 Additional note #980."}
+{"text": "Sample 981: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 The quick brown fox jumps over the lazy dog."}
+{"text": "Sample 982: Hello world! This is a small training sample. 最后一条示例：谢谢！"}
+{"text": "Sample 983: Numbers and dates: 2026-06-28, 12345, 3.14159. 最后一条示例：谢谢！"}
+{"text": "Sample 984: 包含数字：12345，浮点数：3.14。 Short line."}
+{"text": "Sample 985: Hello world! This is a small training sample. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #985."}
+{"text": "Sample 986: This sentence is intended to provide token variety. 短文本示例，用于测试 UTF-8 处理。"}
+{"text": "Sample 987: 特殊字符测试：，。！？；（）【】<>“”‘’ Short line."}
+{"text": "Sample 988: Edge-case punctuation: !?;:()[]{}<>'\"`~ 特殊字符测试：，。！？；（）【】<>“”‘’"}
+{"text": "Sample 989: Small dataset entry for testing training pipelines. 中文和 English 混合示例，用于增加多样性。"}
+{"text": "Sample 990: Numbers and dates: 2026-06-28, 12345, 3.14159. 包含数字：12345，浮点数：3.14。 Additional note #990."}
+{"text": "Sample 991: NeurX training data sample for model experiments. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 992: The quick brown fox jumps over the lazy dog. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。"}
+{"text": "Sample 993: 中文和 English 混合示例，用于增加多样性。 Example: do not share secrets in training data."}
+{"text": "Sample 994: Example: do not share secrets in training data. 示例数据第994条，用于训练 neurx 模型。"}
+{"text": "Sample 995: Small dataset entry for testing training pipelines. 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Additional note #995."}
+{"text": "Sample 996: 日期示例：2026年6月28日，编号：996。 Short line."}
+{"text": "Sample 997: NeurX training data sample for model experiments. 示例数据第997条，用于训练 neurx 模型。"}
+{"text": "Sample 998: A longer English sentence containing several words to increase length and diversity. 包含数字：12345，浮点数：3.14。"}
+{"text": "Sample 999: 长度较长的中文句子，用来测试模型对于较长输入的处理能力。 Numbers and dates: 2026-06-28, 12345, 3.14159."}
+{"text": "Sample 1000: Example: do not share secrets in training data. 示例数据第1000条，用于训练 neurx 模型。 Additional note #1000."}

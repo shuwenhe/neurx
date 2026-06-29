@@ -6,8 +6,12 @@ NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
 S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 OUTPUT_DIR="${NEURX_S_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
+TOTAL_STEPS="${NEURX_S_PRETRAIN_STEPS:-50}"
+WARMUP_STEPS="${NEURX_S_PRETRAIN_WARMUP_STEPS:-10}"
 # prefer train_llm.s at repo root (repo was reorganized); fall back to src/
-if [ -f "$NEURX_DIR/train_llm.s" ]; then
+if [ -f "$NEURX_DIR/train_llm_jsonl.s" ]; then
+  SOURCE_FILE="$NEURX_DIR/train_llm_jsonl.s"
+elif [ -f "$NEURX_DIR/train_llm.s" ]; then
   SOURCE_FILE="$NEURX_DIR/train_llm.s"
 else
   SOURCE_FILE="$NEURX_DIR/src/train_llm.s"
@@ -44,11 +48,13 @@ echo "======================================================================="
 echo "Source: $SOURCE_FILE"
 echo "IR: $IR_FILE"
 echo "Output Dir: $OUTPUT_DIR"
+echo "Steps: $TOTAL_STEPS"
+echo "Warmup Steps: $WARMUP_STEPS"
 echo "======================================================================="
 echo ""
 
 set +e
-TRAIN_OUTPUT="$("$RUNNER_BIN" "$IR_FILE" 2>&1)"
+TRAIN_OUTPUT="$(NEURX_S_PRETRAIN_OUTPUT_DIR="$OUTPUT_DIR" NEURX_S_PRETRAIN_STEPS="$TOTAL_STEPS" NEURX_S_PRETRAIN_WARMUP_STEPS="$WARMUP_STEPS" "$RUNNER_BIN" "$IR_FILE" 2>&1)"
 STATUS=$?
 set -e
 echo "$TRAIN_OUTPUT"
@@ -56,7 +62,7 @@ if [ "$STATUS" -ne 0 ]; then
     exit "$STATUS"
 fi
 
-NEURX_OUTPUT_DIR="$OUTPUT_DIR" node "$NEURX_DIR/tools/materialize_llm_checkpoint.mjs"
+NEURX_OUTPUT_DIR="$OUTPUT_DIR" NEURX_S_PRETRAIN_STEPS="$TOTAL_STEPS" NEURX_S_PRETRAIN_WARMUP_STEPS="$WARMUP_STEPS" node "$NEURX_DIR/tools/materialize_llm_checkpoint.mjs"
 
 STEP="$(printf '%s\n' "$TRAIN_OUTPUT" | awk -F': ' '/^Total Steps:/ {print $2; exit}' | tr -d '[:space:]')"
 LOSS="$(printf '%s\n' "$TRAIN_OUTPUT" | awk -F': ' '/^Final Loss:/ {print $2; exit}' | tr -d '[:space:]')"

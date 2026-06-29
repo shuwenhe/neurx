@@ -89,6 +89,19 @@ train-watch: check-bash
 	fi; \
 	rm -f .run/train_watch_pid.txt
 
+train-jsonl: check-bash
+	@echo "Generate train_llm_jsonl.s from data/sample.jsonl and run training"
+	@cd '$(CURDIR_UNIX)' && \
+	python3 tools/generate_train_llm_from_jsonl.py data/sample.jsonl && \
+	NEURX_S_PRETRAIN_STEPS="${STEPS:-500}" NEURX_S_PRETRAIN_WARMUP_STEPS="${WARMUP:-50}" bash run_training.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "Training completed successfully. Checkpoints: $${NEURX_S_PRETRAIN_OUTPUT_DIR:-artifacts/checkpoints/llm_s_pretrain}"; \
+	else \
+		echo "Training failed with exit code $$STATUS"; \
+	fi; \
+	exit $$STATUS
+
 check-bash:
 ifeq ($(PLATFORM),windows)
 	@where "$(BASH)" >NUL 2>&1 || if not exist "$(BASH)" ( \
