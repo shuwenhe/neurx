@@ -54,6 +54,30 @@ mkdir -p build
 bash /Users/feifei/train/neurx/run_training.sh
 ```
 
+### 方式 4️⃣ : 使用环境变量控制训练时长和输出目录
+
+当前仓库里的 `run_training.sh` 会调用 `train_llm.s` 这个 S 语言训练原型。为了避免默认运行过久，可以直接用环境变量覆盖步数、预热步数和 checkpoint 输出目录：
+
+```bash
+cd /Users/shuwen/shuwen/train/neurx
+
+# 最小验证运行
+NEURX_S_PRETRAIN_STEPS=3 \
+NEURX_S_PRETRAIN_WARMUP_STEPS=2 \
+bash run_training.sh
+
+# 自定义输出目录
+NEURX_S_PRETRAIN_OUTPUT_DIR=/tmp/neurx_ckpt \
+NEURX_S_PRETRAIN_STEPS=10 \
+bash run_training.sh
+```
+
+支持的变量：
+
+- `NEURX_S_PRETRAIN_STEPS`：训练步数，默认 `50`
+- `NEURX_S_PRETRAIN_WARMUP_STEPS`：预热步数，默认 `10`
+- `NEURX_S_PRETRAIN_OUTPUT_DIR`：checkpoint 输出目录，默认 `artifacts/checkpoints/llm_s_pretrain`
+
 ---
 
 ## 📊 训练配置详情
