@@ -2,6 +2,8 @@
 // Self-contained S training program: real parameter updates, real loss, real checkpoints.
 package neurx.train.llm
 
+use neurx.runtime.io.{runtime_env_get}
+
 // Checkpoints are emitted to stdout and materialized by the wrapper script.
 
 func mod(int a, int b) int {
@@ -48,6 +50,28 @@ func int_to_str(int n) string {
         s = "-" + s
     }
     return s
+}
+
+func str_to_int(string s, int fallback) int {
+    if len(s) == 0 {
+        return fallback
+    }
+    int sign = 1
+    int i = 0
+    if s[0] == 45 {
+        sign = -1
+        i = 1
+    }
+    int value = 0
+    while i < len(s) {
+        int digit = int(s[i]) - 48
+        if digit < 0 || digit > 9 {
+            return fallback
+        }
+        value = value * 10 + digit
+        i = i + 1
+    }
+    sign * value
 }
 
 func pad_int(int n, int w) string {
@@ -386,12 +410,22 @@ func main() int {
     int corpus_len = 172 * 96
     int vocab_size = 256
     int batch_size = 16
-    int total_steps = 800
-    int warmup_steps = 80
+    int total_steps = str_to_int(runtime_env_get("NEURX_S_PRETRAIN_STEPS", "50"), 50)
+    int warmup_steps = str_to_int(runtime_env_get("NEURX_S_PRETRAIN_WARMUP_STEPS", "10"), 10)
     float initial_lr = 0.28
     float min_lr = 0.03
     float weight_decay = 0.0001
-    string checkpoint_dir = "/Users/feifei/train/neurx/artifacts/checkpoints/llm_s_pretrain"
+    string checkpoint_dir = runtime_env_get("NEURX_S_PRETRAIN_OUTPUT_DIR", "artifacts/checkpoints/llm_s_pretrain")
+
+    if total_steps < 1 {
+        total_steps = 1
+    }
+    if warmup_steps < 1 {
+        warmup_steps = 1
+    }
+    if warmup_steps > total_steps {
+        warmup_steps = total_steps
+    }
 
     int param_count = vocab_size * vocab_size
     []float weights = []float{cap: param_count}
@@ -421,7 +455,7 @@ func main() int {
     println("  - Vocab: 256")
     println("  - Parameters: ~65K")
     println("  - Batch size: 16")
-    println("  - Steps: 800")
+    println("  - Steps: " + int_to_str(total_steps))
     println("  - LR: 0.28 -> 0.03 cosine")
     println("")
     println("Data:")
