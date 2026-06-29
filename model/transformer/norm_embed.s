@@ -109,13 +109,14 @@ func exp_approx(float x) float {
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
-    while x > pi {
-        x = x - two_pi
+    float value = x
+    while value > pi {
+        value = value - two_pi
     }
-    while x < -pi {
-        x = x + two_pi
+    while value < -pi {
+        value = value + two_pi
     }
-    float x2 = x * x
+    float x2 = value * value
     float term = 1.0
     float result = 1.0
     int i = 1
@@ -130,15 +131,16 @@ func cos_approx(float x) float {
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
-    while x > pi {
-        x = x - two_pi
+    float value = x
+    while value > pi {
+        value = value - two_pi
     }
-    while x < -pi {
-        x = x + two_pi
+    while value < -pi {
+        value = value + two_pi
     }
-    float x2 = x * x
-    float term = x
-    float result = x
+    float x2 = value * value
+    float term = value
+    float result = value
     int i = 1
     while i <= 10 {
         term = -term * x2 / ((2 * i) * (2 * i + 1) * 1.0)
