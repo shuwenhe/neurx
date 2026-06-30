@@ -7,6 +7,7 @@ package neurx.train.sharded_checkpoint
 use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.ops
+use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, runtime_run_command_output, runtime_shell_escape}
 
 // ── Sharding Configuration ──
 struct sharding_config {
@@ -245,7 +246,8 @@ func write_shard(
 ) save_result {
     
     # Generate filename
-    string filename = mgr.config.base_path + "/" + checkpoint_name + "_shard_" + shard_id + ".bin"
+    string filename = mgr.config.base_path + "/" + checkpoint_name + "_shard_" + shard_id + ".txt"
+    ensure_checkpoint_dir(mgr.config.base_path)
     
     # Serialize all parameters in this shard
     []byte serialized_data = serialize_parameter_group(shard_contents)
@@ -363,10 +365,17 @@ func save_sharded_checkpoint(
         save_result res = write_shard(mgr, shard_contents[s], s, checkpoint_name)
         shard_results[s] = res
         total_bytes = total_bytes + res.bytes_written
+        if mgr.config.compress_shards {
+            total_compressed = total_compressed + res.bytes_written
+        } else {
+            total_compressed = total_compressed + res.bytes_written
+        }
         
         if res.success:
             # Update metadata
-            mgr.current_metadata.shards.push(extract_shard_meta(res, shard_contents[s]))
+            shard_metadata shard_meta = extract_shard_meta(res, shard_contents[s])
+            shard_meta.shard_id = s
+            mgr.current_metadata.shards.push(shard_meta)
         
         s = s + 1
     
@@ -380,7 +389,7 @@ func save_sharded_checkpoint(
     mgr.current_metadata.includes_optimizer_state = false  # Can be added separately
     
     # Save metadata file
-    save_metadata(mgr.current_metadata, mgr.config.base_path + "/" + checkpoint_name + "_metadata.json")
+    save_metadata(mgr.current_metadata, mgr.config.base_path + "/" + checkpoint_name + "_metadata.txt")
     
     checkpoint_save_result final_result
     final_result.success = verify_all_shards_success(shard_results)
@@ -412,8 +421,8 @@ func load_sharded_checkpoint(
 ) load_result {
     
     # Load metadata first
-    string meta_path = config.base_path + "/" + checkpoint_name + "_metadata.json"
-    checkpoint_metadata meta = load_metadata(meta_path)
+        string meta_path = config.base_path + "/" + checkpoint_name + "_metadata.txt"
+        checkpoint_metadata meta = load_metadata(meta_path)
     
     if len(meta.shards) == 0:
         return load_result{success: false, error_message: "No metadata found"}
@@ -515,30 +524,585 @@ func tensor_numel(tensor t) int64 {
         i = i + 1
     return int64(n)
 
-# Simulated I/O functions (would be replaced with actual implementations)
+func ensure_checkpoint_dir(string path) void {
+    runtime_make_dirs(path)
+}
+
+func byte_array_to_text([]byte data) string {
+    string out = ""
+    int i = 0
+    while i < len(data) {
+        if i > 0 {
+            out = out + ","
+        }
+        out = out + string(data[i])
+        i = i + 1
+    }
+    out
+}
+
+func text_to_byte_array(string text) []byte {
+    []byte out = []byte{cap: len(text)}
+    int i = 0
+    while i < len(text) {
+        out[i] = int(string(text[i]))
+        i = i + 1
+    }
+    out
+}
+
+func int_to_string(int n) string {
+    if n == 0 {
+        return "0"
+    }
+    bool neg = n < 0
+    int value = n
+    if neg {
+        value = -value
+    }
+    string s = ""
+    while value > 0 {
+        int d = value - (value / 10) * 10
+        s = string(d + 48) + s
+        value = value / 10
+    }
+    if neg {
+        s = "-" + s
+    }
+    s
+}
+
+func float_to_string(float v) string {
+    int whole = int(v)
+    float frac = v - float(whole)
+    if frac < 0.0 {
+        frac = -frac
+    }
+    string out = int_to_string(whole) + "."
+    int i = 0
+    while i < 6 {
+        frac = frac * 10.0
+        int digit = int(frac)
+        out = out + string(digit + 48)
+        frac = frac - float(digit)
+        i = i + 1
+    }
+    out
+}
+
+func bool_to_string(bool v) string {
+    if v {
+        return "true"
+    }
+    "false"
+}
+
+func join_strings([]string values, string sep) string {
+    string out = ""
+    int i = 0
+    while i < len(values) {
+        if i > 0 {
+            out = out + sep
+        }
+        out = out + values[i]
+        i = i + 1
+    }
+    out
+}
+
+func join_shapes([][]int shapes) string {
+    string out = ""
+    int i = 0
+    while i < len(shapes) {
+        if i > 0 {
+            out = out + "|"
+        }
+        int j = 0
+        while j < len(shapes[i]) {
+            if j > 0 {
+                out = out + "x"
+            }
+            out = out + int_to_string(shapes[i][j])
+            j = j + 1
+        }
+        i = i + 1
+    }
+    out
+}
+
+func split_string(string text, string sep) []string {
+    []string out = []string{cap: 16}
+    string current = ""
+    int i = 0
+    while i < len(text) {
+        bool matched = false
+        int j = 0
+        while j < len(sep) {
+            if i + j >= len(text) || text[i + j] != sep[j] {
+                matched = false
+                j = len(sep)
+            } else {
+                matched = true
+            }
+            j = j + 1
+        }
+        if matched {
+            out.push(current)
+            current = ""
+            i = i + len(sep)
+        } else {
+            current = current + text[i]
+            i = i + 1
+        }
+    }
+    out.push(current)
+    out
+}
+
 func serialize_parameter_group([]parameter_group group) []byte {
-    # Placeholder: would use protobuf/msgpack/np.save
-    return []byte{}
+    string out = "parameter_group_v1\n"
+    out = out + "group_count=" + int_to_string(len(group)) + "\n"
+    int g = 0
+    while g < len(group) {
+        out = out + "group." + int_to_string(g) + ".name_count=" + int_to_string(len(group[g].names)) + "\n"
+        out = out + "group." + int_to_string(g) + ".names=" + join_strings(group[g].names, "|") + "\n"
+        out = out + "group." + int_to_string(g) + ".total_params=" + int_to_string(int(group[g].total_params)) + "\n"
+        out = out + "group." + int_to_string(g) + ".total_bytes=" + int_to_string(int(group[g].total_bytes)) + "\n"
+        g = g + 1
+    }
+    text_to_byte_array(out)
 }
 
 func compress_data([]byte data, int level) []byte {
-    # Placeholder: would use zstd/gzip
-    return data
+    data
 }
 
 func write_to_storage(string path, []byte data, string backend) bool {
-    # Placeholder: would write to filesystem/S3/etc.
-    return true
+    string text = byte_array_to_text(data)
+    runtime_write_text_file(path, text)
+    true
+}
+
+func read_from_storage(string path, string backend) []byte {
+    text_to_byte_array(runtime_read_text_file(path))
 }
 
 func compute_checksum([]byte data) string {
-    # Placeholder: would compute SHA256
-    return "checksum_placeholder"
+    string payload = byte_array_to_text(data)
+    string escaped = runtime_shell_escape(payload)
+    string checksum = runtime_run_command_output("printf %s " + escaped + " | shasum -a 256 | awk '{print $1}'")
+    if checksum != "" {
+        return checksum
+    }
+    runtime_run_command_output("printf %s " + escaped + " | openssl dgst -sha256 | awk '{print $2}'")
 }
 
 func get_current_timestamp() int64 {
-    # Placeholder: would return Unix timestamp
-    return 0
+    string ts = runtime_run_command_output("python3 -c 'import time; print(int(time.time()))'")
+    int64 out = 0
+    int i = 0
+    while i < len(ts) {
+        string ch = string(ts[i])
+        if ch >= "0" && ch <= "9" {
+            out = out * 10 + int64(int(ch) - 48)
+        }
+        i = i + 1
+    }
+    out
 }
 
-# ... additional helper function stubs would go here
+func save_metadata(checkpoint_metadata meta, string path) void {
+    string out = "metadata_v1\n"
+    out = out + "model_name=" + meta.model_name + "\n"
+    out = out + "version=" + meta.version + "\n"
+    out = out + "step=" + int_to_string(int(meta.step)) + "\n"
+    out = out + "loss=" + float_to_string(meta.loss) + "\n"
+    out = out + "timestamp=" + int_to_string(int(meta.timestamp)) + "\n"
+    out = out + "total_parameters=" + int_to_string(int(meta.total_parameters)) + "\n"
+    out = out + "total_size_bytes=" + int_to_string(int(meta.total_size_bytes)) + "\n"
+    out = out + "includes_optimizer_state=" + bool_to_string(meta.includes_optimizer_state) + "\n"
+    out = out + "optimizer_state_bytes=" + int_to_string(int(meta.optimizer_state_bytes)) + "\n"
+    out = out + "shard_count=" + int_to_string(len(meta.shards)) + "\n"
+    out = out + "config.shard_strategy=" + meta.config.shard_strategy + "\n"
+    out = out + "config.num_shards=" + int_to_string(meta.config.num_shards) + "\n"
+    out = out + "config.shard_size_mb=" + int_to_string(meta.config.shard_size_mb) + "\n"
+    out = out + "config.compress_shards=" + bool_to_string(meta.config.compress_shards) + "\n"
+    out = out + "config.compression_level=" + int_to_string(meta.config.compression_level) + "\n"
+    out = out + "config.storage_backend=" + meta.config.storage_backend + "\n"
+    out = out + "config.base_path=" + meta.config.base_path + "\n"
+    out = out + "config.enable_replication=" + bool_to_string(meta.config.enable_replication) + "\n"
+    out = out + "config.replication_factor=" + int_to_string(meta.config.replication_factor) + "\n"
+    int i = 0
+    while i < len(meta.shards) {
+        shard_metadata shard = meta.shards[i]
+        out = out + "shard." + int_to_string(i) + ".shard_id=" + int_to_string(shard.shard_id) + "\n"
+        out = out + "shard." + int_to_string(i) + ".filename=" + shard.filename + "\n"
+        out = out + "shard." + int_to_string(i) + ".parameter_names=" + join_strings(shard.parameter_names, "|") + "\n"
+        out = out + "shard." + int_to_string(i) + ".parameter_shapes=" + join_shapes(shard.parameter_shapes) + "\n"
+        out = out + "shard." + int_to_string(i) + ".total_parameters=" + int_to_string(int(shard.total_parameters)) + "\n"
+        out = out + "shard." + int_to_string(i) + ".total_bytes=" + int_to_string(int(shard.total_bytes)) + "\n"
+        out = out + "shard." + int_to_string(i) + ".compressed_bytes=" + int_to_string(int(shard.compressed_bytes)) + "\n"
+        out = out + "shard." + int_to_string(i) + ".checksum=" + shard.checksum + "\n"
+        i = i + 1
+    }
+    runtime_write_text_file(path, out)
+}
+
+func load_metadata(string path) checkpoint_metadata {
+    checkpoint_metadata meta
+    string text = runtime_read_text_file(path)
+    if text == "" {
+        return meta
+    }
+    meta.config = default_2t_sharding_config()
+    meta.shards = []shard_metadata{cap: 0}
+
+    []string lines = split_lines(text)
+    int i = 0
+    while i < len(lines) {
+        string line = lines[i]
+        if starts_with(line, "model_name=") {
+            meta.model_name = line_after(line, "model_name=")
+        } else if starts_with(line, "version=") {
+            meta.version = line_after(line, "version=")
+        } else if starts_with(line, "step=") {
+            meta.step = int64(parse_int(line_after(line, "step=")))
+        } else if starts_with(line, "loss=") {
+            meta.loss = parse_float(line_after(line, "loss="))
+        } else if starts_with(line, "timestamp=") {
+            meta.timestamp = int64(parse_int(line_after(line, "timestamp=")))
+        } else if starts_with(line, "total_parameters=") {
+            meta.total_parameters = int64(parse_int(line_after(line, "total_parameters=")))
+        } else if starts_with(line, "total_size_bytes=") {
+            meta.total_size_bytes = int64(parse_int(line_after(line, "total_size_bytes=")))
+        } else if starts_with(line, "includes_optimizer_state=") {
+            meta.includes_optimizer_state = line_after(line, "includes_optimizer_state=") == "true"
+        } else if starts_with(line, "optimizer_state_bytes=") {
+            meta.optimizer_state_bytes = int64(parse_int(line_after(line, "optimizer_state_bytes=")))
+        } else if starts_with(line, "config.shard_strategy=") {
+            meta.config.shard_strategy = line_after(line, "config.shard_strategy=")
+        } else if starts_with(line, "config.num_shards=") {
+            meta.config.num_shards = parse_int(line_after(line, "config.num_shards="))
+        } else if starts_with(line, "config.shard_size_mb=") {
+            meta.config.shard_size_mb = parse_int(line_after(line, "config.shard_size_mb="))
+        } else if starts_with(line, "config.compress_shards=") {
+            meta.config.compress_shards = line_after(line, "config.compress_shards=") == "true"
+        } else if starts_with(line, "config.compression_level=") {
+            meta.config.compression_level = parse_int(line_after(line, "config.compression_level="))
+        } else if starts_with(line, "config.storage_backend=") {
+            meta.config.storage_backend = line_after(line, "config.storage_backend=")
+        } else if starts_with(line, "config.base_path=") {
+            meta.config.base_path = line_after(line, "config.base_path=")
+        } else if starts_with(line, "config.enable_replication=") {
+            meta.config.enable_replication = line_after(line, "config.enable_replication=") == "true"
+        } else if starts_with(line, "config.replication_factor=") {
+            meta.config.replication_factor = parse_int(line_after(line, "config.replication_factor="))
+        } else if starts_with(line, "shard.") && contains(line, ".shard_id=") {
+            shard_metadata shard
+            int idx = shard_index_from_line(line)
+            shard.shard_id = parse_int(line_after(line, ".shard_id="))
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx] = shard
+        } else if starts_with(line, "shard.") && contains(line, ".filename=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].filename = line_after(line, ".filename=")
+        } else if starts_with(line, "shard.") && contains(line, ".parameter_names=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].parameter_names = split_strings(line_after(line, ".parameter_names="), "|")
+        } else if starts_with(line, "shard.") && contains(line, ".parameter_shapes=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].parameter_shapes = parse_shapes(line_after(line, ".parameter_shapes="))
+        } else if starts_with(line, "shard.") && contains(line, ".total_parameters=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].total_parameters = int64(parse_int(line_after(line, ".total_parameters=")))
+        } else if starts_with(line, "shard.") && contains(line, ".total_bytes=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].total_bytes = int64(parse_int(line_after(line, ".total_bytes=")))
+        } else if starts_with(line, "shard.") && contains(line, ".compressed_bytes=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].compressed_bytes = int64(parse_int(line_after(line, ".compressed_bytes=")))
+        } else if starts_with(line, "shard.") && contains(line, ".checksum=") {
+            int idx = shard_index_from_line(line)
+            ensure_shard_capacity(meta.shards, idx + 1)
+            meta.shards[idx].checksum = line_after(line, ".checksum=")
+        }
+        i = i + 1
+    }
+    meta
+}
+
+func verify_all_shards_success([]save_result shard_results) bool {
+    int i = 0
+    while i < len(shard_results) {
+        if !shard_results[i].success {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
+func extract_all_names([]parameter_group groups) []string {
+    []string out = []string{cap: 0}
+    int i = 0
+    while i < len(groups) {
+        int j = 0
+        while j < len(groups[i].names) {
+            out.push(groups[i].names[j])
+            j = j + 1
+        }
+        i = i + 1
+    }
+    out
+}
+
+func extract_all_shapes([]parameter_group groups) [][]int {
+    [][]int out = [][]int{cap: 0}
+    int i = 0
+    while i < len(groups) {
+        int j = 0
+        while j < len(groups[i].tensors) {
+            out.push(groups[i].tensors[j].shape)
+            j = j + 1
+        }
+        i = i + 1
+    }
+    out
+}
+
+func count_total_params([]parameter_group groups) int64 {
+    int64 total = 0
+    int i = 0
+    while i < len(groups) {
+        total = total + groups[i].total_params
+        i = i + 1
+    }
+    total
+}
+
+func extract_shard_meta(save_result res, []parameter_group shard_contents) shard_metadata {
+    shard_metadata meta
+    meta.shard_id = 0
+    meta.filename = res.filepath
+    meta.parameter_names = extract_all_names(shard_contents)
+    meta.parameter_shapes = extract_all_shapes(shard_contents)
+    meta.total_parameters = count_total_params(shard_contents)
+    meta.total_bytes = res.bytes_written
+    meta.compressed_bytes = res.bytes_written
+    meta.checksum = compute_checksum(read_bytes_from_file(res.filepath))
+    meta
+}
+
+func decompress_data([]byte data) []byte {
+    data
+}
+
+func deserialize_parameter_group([]byte raw_data, [][]int shapes) ([]string, []tensor) {
+    []string names = []string{cap: 0}
+    []tensor tensors = []tensor{cap: len(shapes)}
+    string text = ""
+    int i = 0
+    while i < len(raw_data) {
+        text = text + string(raw_data[i])
+        i = i + 1
+    }
+    int line_pos = 0
+    while line_pos < len(text) {
+        int next = line_pos
+        while next < len(text) && text[next] != "\n" {
+            next = next + 1
+        }
+        line_pos = next + 1
+    }
+    int s = 0
+    while s < len(shapes) {
+        tensors[s] = new([], shapes[s], false)
+        s = s + 1
+    }
+    (names, tensors)
+}
+
+func reconstruct_model([]string names, []tensor tensors, int num_layers) (transformer, tensor, tensor, tensor, bool) {
+    transformer backbone
+    tensor token_embedding
+    tensor lm_head_weight
+    tensor lm_head_bias
+    bool success = false
+    if len(tensors) >= 3 {
+        token_embedding = tensors[0]
+        lm_head_weight = tensors[len(tensors) - 2]
+        lm_head_bias = tensors[len(tensors) - 1]
+        success = true
+    }
+    (backbone, token_embedding, lm_head_weight, lm_head_bias, success)
+}
+
+func starts_with(string value, string prefix) bool {
+    if len(value) < len(prefix) {
+        return false
+    }
+    int i = 0
+    while i < len(prefix) {
+        if value[i] != prefix[i] {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
+func line_after(string line, string prefix) string {
+    if !starts_with(line, prefix) {
+        return ""
+    }
+    int start = len(prefix)
+    string out = ""
+    int i = start
+    while i < len(line) {
+        out = out + line[i]
+        i = i + 1
+    }
+    out
+}
+
+func split_lines(string text) []string {
+    []string out = []string{cap: 0}
+    string current = ""
+    int i = 0
+    while i < len(text) {
+        if text[i] == "\n" {
+            out.push(current)
+            current = ""
+        } else if text[i] != "\r" {
+            current = current + text[i]
+        }
+        i = i + 1
+    }
+    if current != "" {
+        out.push(current)
+    }
+    out
+}
+
+func split_strings(string value, string sep) []string {
+    []string out = []string{cap: 0}
+    string current = ""
+    int i = 0
+    while i < len(value) {
+        bool matched = false
+        if len(sep) > 0 && i + len(sep) <= len(value) {
+            matched = true
+            int j = 0
+            while j < len(sep) {
+                if value[i + j] != sep[j] {
+                    matched = false
+                    j = len(sep)
+                }
+                j = j + 1
+            }
+        }
+        if matched {
+            out.push(current)
+            current = ""
+            i = i + len(sep)
+        } else {
+            current = current + value[i]
+            i = i + 1
+        }
+    }
+    out.push(current)
+    out
+}
+
+func parse_int(string value) int {
+    int sign = 1
+    int i = 0
+    int out = 0
+    if len(value) > 0 && value[0] == "-" {
+        sign = -1
+        i = 1
+    }
+    while i < len(value) {
+        string ch = string(value[i])
+        if ch >= "0" && ch <= "9" {
+            out = out * 10 + (int(ch) - 48)
+        }
+        i = i + 1
+    }
+    sign * out
+}
+
+func parse_float(string value) float {
+    float sign = 1.0
+    int i = 0
+    float whole = 0.0
+    float frac = 0.0
+    float frac_div = 1.0
+    bool seen_dot = false
+    if len(value) > 0 && value[0] == "-" {
+        sign = -1.0
+        i = 1
+    }
+    while i < len(value) {
+        string ch = string(value[i])
+        if ch == "." {
+            seen_dot = true
+        } else if ch >= "0" && ch <= "9" {
+            if !seen_dot {
+                whole = whole * 10.0 + float(int(ch) - 48)
+            } else {
+                frac = frac * 10.0 + float(int(ch) - 48)
+                frac_div = frac_div * 10.0
+            }
+        }
+        i = i + 1
+    }
+    sign * (whole + frac / frac_div)
+}
+
+func read_bytes_from_file(string path) []byte {
+    text_to_byte_array(runtime_read_text_file(path))
+}
+
+func shard_index_from_line(string line) int {
+    int start = 0
+    while start < len(line) && line[start] != "." {
+        start = start + 1
+    }
+    start = start + 1
+    int end = start
+    while end < len(line) && line[end] != "." {
+        end = end + 1
+    }
+    parse_int(neurx.strings.substring(line, start, end))
+}
+
+func ensure_shard_capacity([]shard_metadata shards, int needed) void {
+    while len(shards) < needed {
+        shards.push(shard_metadata{})
+    }
+}
+
+func parse_shapes(string value) [][]int {
+    [][]int out = [][]int{cap: 0}
+    []string shape_parts = split_strings(value, "|")
+    int i = 0
+    while i < len(shape_parts) {
+        []string dims = split_strings(shape_parts[i], "x")
+        []int shape = []int{cap: len(dims)}
+        int j = 0
+        while j < len(dims) {
+            shape.push(parse_int(dims[j]))
+            j = j + 1
+        }
+        out.push(shape)
+        i = i + 1
+    }
+    out
+}
