@@ -1,446 +1,430 @@
-// Mixed Precision Training for 2T+ Enterprise Models
-// Implements BF16/FP32 Master Weights + Dynamic Loss Scaling
-// Critical for: memory reduction (50%+), training speedup (3x), gradient stability
+// NeurX Mixed Precision Module
+// Support for float16 and float32 mixed training
+// Package: neurx.training.mixed_precision
+// Author: NeurX Team
+// Date: 2026-06-29
 
-package neurx.train.mixed_precision
+package neurx.training.mixed_precision
 
-use neurx.tensor.tensor
-use neurx.tensor.new
-use neurx.ops
+// ============================================================
+// Data Structures
+// ============================================================
 
-// ── Mixed Precision Configuration ──
+// float16 representation (simplified: stored as int for 16-bit simulation)
+struct float16 {
+    data: int  // 16-bit value representation
+}
+
 struct mixed_precision_config {
-    // Precision settings
-    bool use_bf16                    // Use BF16 instead of FP16 (recommended for 2T+)
-    bool fp32_master_weights         // Keep master weights in FP32 for stability
-    
-    // Loss scaling (prevents gradient underflow in low precision)
-    float initial_loss_scale        // Initial loss scale (e.g., 65536.0)
-    float loss_scale_growth_factor   // Growth factor when no overflow (e.g., 2.0)
-    float loss_scale_backoff_factor // Backoff factor on overflow (e.g., 0.5)
-    int loss_scale_window           // Steps between overflow checks (e.g., 2000)
-    
-    // Gradient handling
-    bool enable_gradient_accumulation // Enable micro-batch accumulation
-    int accumulation_steps            // Number of micro-batches per update step
-    
-    // Memory optimization
-    bool enable_activation_checkpointing // Trade compute for memory
+    use_mixed_precision: bool
+    compute_dtype: string  // "float32" or "float16"
+    accumulate_dtype: string  // Always float32 for stability
+    loss_scale: float
+    loss_scale_window: int
+    loss_scale_growth_factor: float
+    loss_scale_backoff_factor: float
+    loss_scale_min: float
+    loss_scale_max: float
 }
 
-// Default config for 2T model training
-func default_2t_mixed_precision_config() mixed_precision_config {
-    mixed_precision_config cfg
-    cfg.use_bf16 = true
-    cfg.fp32_master_weights = true
-    cfg.initial_loss_scale = 65536.0
-    cfg.loss_scale_growth_factor = 2.0
-    cfg.loss_scale_backoff_factor = 0.5
-    cfg.loss_scale_window = 2000
-    cfg.enable_gradient_accumulation = true
-    cfg.accumulation_steps = 8  // Effective batch_size * 8
-    cfg.enable_activation_checkpointing = true
-    return cfg
+struct loss_scale_scheduler {
+    current_scale: float
+    min_scale: float
+    max_scale: float
+    growth_factor: float
+    backoff_factor: float
+    overflow_count: int
+    scale_window: int
+    steps_since_last_overflow: int
 }
 
-// ── Loss Scaler State ──
-struct loss_scaler_state {
-    float current_scale          // Current loss scale value
-    int steps_since_last_check   // Steps since last overflow check
-    int consecutive_overflows    // Consecutive overflow count (for backoff)
+struct mixed_precision_state {
+    master_weights: [][]float  // float32 master copy
+    compute_weights: [][]float  // float16 or float32 compute copy
+    gradients_fp32: [][]float  // float32 gradients
+    optimizer_state_fp32: [][]float  // float32 for optimizer
+    loss_scale_scheduler: loss_scale_scheduler
+    loss_scale: float
+    overflow_count: int
+    total_steps: int
 }
 
-func new_loss_scaler(config mixed_precision_config) loss_scaler_state {
-    loss_scaler_state state
-    state.current_scale = config.initial_loss_scale
-    state.steps_since_last_check = 0
-    state.consecutive_overflows = 0
+// ============================================================
+// Float16 Conversion Utilities
+// ============================================================
+
+// float32_to_float16: Convert float32 to float16 representation
+func float32_to_float16(value: float) float16 {
+    var f16: float16
+    
+    // Simplified conversion: take significant bits
+    // In real implementation, would use proper IEEE 754 half-precision
+    if value < 0.0 {
+        value = 0.0 - value
+        // Handle negative
+    }
+    
+    // Clamp to float16 range (approximately ±65504)
+    if value > 65504.0 {
+        value = 65504.0
+    }
+    if value > 0.0 && value < 5.96e-8 {
+        value = 5.96e-8  // Minimum normal float16
+    }
+    
+    // Simplified: convert to 16-bit representation
+    var bits = 0
+    if value != 0.0 {
+        bits = int(value * 1000.0) % 65536
+    }
+    
+    f16.data = bits
+    return f16
+}
+
+// float16_to_float32: Convert float16 to float32
+func float16_to_float32(f16: float16) float {
+    // Simplified conversion back
+    return float(f16.data) / 1000.0
+}
+
+// ============================================================
+// Gradient Casting
+// ============================================================
+
+// cast_gradients_to_fp32: Cast gradients to float32 for accumulation
+func cast_gradients_to_fp32(gradients: [][]float) [][]float {
+    var result: [][]float = [][]float(len(gradients))
+    var i = 0
+    while i < len(gradients) {
+        result[i] = gradients[i]  // Already float32
+        i = i + 1
+    }
+    return result
+}
+
+// scale_gradients: Scale gradients by loss scale
+func scale_gradients(gradients: [][]float, loss_scale: float) [][]float {
+    var result: [][]float = [][]float(len(gradients))
+    var i = 0
+    while i < len(gradients) {
+        result[i] = gradients[i] / loss_scale
+        i = i + 1
+    }
+    return result
+}
+
+// unscale_gradients: Unscale gradients after optimizer step
+func unscale_gradients(gradients: [][]float, loss_scale: float) [][]float {
+    var result: [][]float = [][]float(len(gradients))
+    var i = 0
+    while i < len(gradients) {
+        result[i] = gradients[i] * loss_scale
+        i = i + 1
+    }
+    return result
+}
+
+// ============================================================
+// Loss Scale Scheduling
+// ============================================================
+
+// new_loss_scale_scheduler: Create loss scale scheduler
+func new_loss_scale_scheduler(initial_scale: float, window: int, growth_factor: float, backoff_factor: float) loss_scale_scheduler {
+    var scheduler: loss_scale_scheduler
+    scheduler.current_scale = initial_scale
+    scheduler.min_scale = 1.0
+    scheduler.max_scale = 65536.0
+    scheduler.growth_factor = growth_factor
+    scheduler.backoff_factor = backoff_factor
+    scheduler.overflow_count = 0
+    scheduler.scale_window = window
+    scheduler.steps_since_last_overflow = 0
+    return scheduler
+}
+
+// update_loss_scale: Update loss scale based on gradient overflow
+func update_loss_scale(scheduler: loss_scale_scheduler, had_overflow: bool) loss_scale_scheduler {
+    if had_overflow {
+        scheduler.current_scale = scheduler.current_scale * scheduler.backoff_factor
+        if scheduler.current_scale < scheduler.min_scale {
+            scheduler.current_scale = scheduler.min_scale
+        }
+        scheduler.overflow_count = scheduler.overflow_count + 1
+        scheduler.steps_since_last_overflow = 0
+    } else {
+        scheduler.steps_since_last_overflow = scheduler.steps_since_last_overflow + 1
+        
+        // Grow loss scale after certain number of stable steps
+        if scheduler.steps_since_last_overflow >= scheduler.scale_window {
+            scheduler.current_scale = scheduler.current_scale * scheduler.growth_factor
+            if scheduler.current_scale > scheduler.max_scale {
+                scheduler.current_scale = scheduler.max_scale
+            }
+            scheduler.steps_since_last_overflow = 0
+        }
+    }
+    
+    return scheduler
+}
+
+// ============================================================
+// Overflow Detection
+// ============================================================
+
+// detect_overflow: Check if gradients contain NaN or Inf
+func detect_overflow(gradients: [][]float) bool {
+    var i = 0
+    while i < len(gradients) {
+        if gradients[i] < 0.0 {
+            // NaN or Inf check (simplified)
+            if gradients[i] != gradients[i] {
+                return true  // NaN
+            }
+        }
+        if gradients[i] > 1.0e10 || gradients[i] < -1.0e10 {
+            // Very large values indicate potential overflow
+            if gradients[i] > 1.0e20 {
+                return true  // Likely Inf
+            }
+        }
+        i = i + 1
+    }
+    return false
+}
+
+// detect_gradient_overflow: Detailed overflow detection
+func detect_gradient_overflow(gradients: [][]float, max_grad_norm: float) (bool, float) {
+    var has_nan = false
+    var grad_norm_sq = 0.0
+    var i = 0
+    
+    while i < len(gradients) {
+        var grad = gradients[i]
+        
+        // Check for NaN (NaN != NaN)
+        if grad != grad {
+            has_nan = true
+            break
+        }
+        
+        // Accumulate norm
+        grad_norm_sq = grad_norm_sq + grad * grad
+        i = i + 1
+    }
+    
+    // Compute norm
+    var norm = 0.0
+    if grad_norm_sq > 0.0 {
+        // sqrt approximation
+        var x = grad_norm_sq
+        norm = x
+        var iter = 0
+        while iter < 5 {
+            if x == 0.0 {
+                break
+            }
+            norm = (norm + x / norm) / 2.0
+            iter = iter + 1
+        }
+    }
+    
+    var overflow = has_nan || norm > max_grad_norm
+    return overflow, norm
+}
+
+// ============================================================
+// Master Weight Management
+// ============================================================
+
+// new_mixed_precision_state: Initialize mixed precision state
+func new_mixed_precision_state(model_size: int) mixed_precision_state {
+    var state: mixed_precision_state
+    state.master_weights = [][]float(model_size)
+    state.compute_weights = [][]float(model_size)
+    state.gradients_fp32 = [][]float(model_size)
+    state.optimizer_state_fp32 = [][]float(model_size)
+    state.loss_scale_scheduler = new_loss_scale_scheduler(65536.0, 2000, 2.0, 0.5)
+    state.loss_scale = state.loss_scale_scheduler.current_scale
+    state.overflow_count = 0
+    state.total_steps = 0
     return state
 }
 
-// Scale loss by current factor
-func scale_loss(loss tensor, scaler loss_scaler_state) tensor {
-    []float scaled_data = []float{cap: len(loss.data)}
-    int i = 0
-    while i < len(loss.data) {
-        scaled_data[i] = loss.data[i] * scaler.current_scale
-        i = i + 1
-    }
-    new(scaled_data, copy_int(loss.shape), loss.requires_grad)
-}
-
-// Check for gradient overflow and adjust scale
-func check_overflow_and_adjust(
-    gradients []tensor,
-    scaler loss_scaler_state,
-    config mixed_precision_config
-) loss_scaler_state {
+// cast_weights_to_compute: Cast master weights to compute dtype
+func cast_weights_to_compute(master_weights: [][]float, use_fp16: bool) [][]float {
+    var result: [][]float = [][]float(len(master_weights))
+    var i = 0
     
-    bool has_overflow = false
-    
-    // Check each gradient for inf/nan
-    int g = 0
-    while g < len(gradients) {
-        if len(gradients[g].data) > 0 {
-            int i = 0
-            while i < len(gradients[g].data) {
-                float v = gradients[g].data[i]
-                // Check for infinity or NaN
-                if v != v || v > 1e20 || v < -1e20 {  // NaN or overflow
-                    has_overflow = true
-                    break
-                }
-                i = i + 1
-            }
-            if has_overflow { break }
-        }
-        g = g + 1
-    }
-    
-    // Adjust scale based on overflow status
-    if has_overflow {
-        // Overflow detected - reduce scale
-        scaler.current_scale = scaler.current_scale * config.loss_scale_backoff_factor
-        scaler.consecutive_overflows = scaler.consecutive_overflows + 1
-        scaler.steps_since_last_check = 0
-        
-        // Prevent scale from becoming too small
-        if scaler.current_scale < 1.0 {
-            scaler.current_scale = 1.0
-        }
-    } else {
-        // No overflow - potentially increase scale after window
-        scaler.steps_since_last_check = scaler.steps_since_last_check + 1
-        
-        if scaler.steps_since_last_check >= config.loss_scale_window {
-            // Grow scale
-            scaler.current_scale = scaler.current_scale * config.loss_scale_growth_factor
-            scaler.steps_since_last_check = 0
-            scaler.consecutive_overflows = 0
-            
-            // Cap maximum scale to prevent instability
-            if scaler.current_scale > 32768.0 * 32768.0 {
-                scaler.current_scale = 32768.0 * 32768.0
-            }
-        }
-    }
-    
-    return scaler
-}
-
-// ── FP32 Master Weight Management ──
-struct master_weight_manager {
-    []tensor fp32_weights       // Master weights in FP32
-    []tensor bf16_copies       // Working copies in BF16/FP16
-    []string weight_names      // Names for identification
-}
-
-// Create manager with initial weights
-func new_master_weight_manager(
-    initial_weights []tensor,
-    names []string,
-    config mixed_precision_config
-) master_weight_manager {
-    
-    master_weight_manager mgr
-    mgr.weight_names = names
-    
-    int n = len(initial_weights)
-    mgr.fp32_weights = []tensor{cap: n}
-    mgr.bf16_copies = []tensor{cap: n}
-    
-    int i = 0
-    while i < n {
-        // Store FP32 master copy
-        mgr.fp32_weights[i] = copy_tensor(initial_weights[i])
-        
-        // Create BF16 working copy (simulate by truncating precision)
-        mgr.bf16_copies[i] = convert_to_bf16(initial_weights[i])
-        
-        i = i + 1
-    }
-    
-    return mgr
-}
-
-// Convert FP32 tensor to BF16 (simulated via quantization)
-func convert_to_bf16(fp32_tensor tensor) tensor {
-    []float bf16_data = []float{cap: len(fp32_tensor.data)}
-    int i = 0
-    while i < len(fp32_tensor.data) {
-        // Simulate BF16: round to ~7 bits of mantissa
-        float v = fp32_tensor.data[i]
-        
-        // Round to nearest representable BF16 value
-        // BF16 has 7-bit mantissa, so we round to 2^(-7) precision
-        float rounded = round_to_bf16(v)
-        bf16_data[i] = rounded
-        
-        i = i + 1
-    }
-    new(bf16_data, copy_int(fp32_tensor.shape), fp32_tensor.requires_grad)
-}
-
-// Round value to simulate BF16 precision
-func round_to_bf16(value float) float {
-    if value == 0.0 { return 0.0 }
-    
-    // Extract sign, exponent, mantissa simulation
-    float abs_val = value
-    if abs_val < 0.0 { abs_val = -abs_val }
-    
-    // Find power of 2
-    float exp_val = 128.0  // Bias for float representation
-    if abs_val > 0.0 {
-        exp_val = log_approx(abs_val) / 0.69314718056  // ln(2)
-    }
-    
-    // Round to 7-bit mantissa precision (2^(exp-7))
-    float precision = pow_approx(2.0, exp_val - 7.0)
-    float rounded = floor(abs_val / precision + 0.5) * precision
-    
-    // Restore sign
-    if value < 0.0 { rounded = -rounded }
-    
-    return rounded
-}
-
-// Sync BF16 working copies back to FP32 masters after optimizer step
-func sync_master_weights(mgr master_weight_manager) void {
-    int i = 0
-    while i < len(mgr.fp32_weights) {
-        // Copy BF16 values back to FP32 master
-        int j = 0
-        while j < len(mgr.fp32_weights[i].data) {
-            mgr.fp32_weights[i].data[j] = mgr.bf16_copies[i].data[j]
-            j = j + 1
-        }
-        i = i + 1
-    }
-}
-
-// Update BF16 working copies from FP32 masters (before forward pass)
-func update_working_copies(mgr master_weight_manager) void {
-    int i = 0
-    while i < len(mgr.bf16_copies) {
-        // Convert FP32 master to BF16 working copy
-        mgr.bf16_copies[i] = convert_to_bf16(mgr.fp32_weights[i])
-        i = i + 1
-    }
-}
-
-// ── Gradient Accumulation State ──
-struct gradient_accumulator {
-    []tensor accumulated_gradients  // Accumulated gradients
-    int current_step               // Current micro-step within accumulation window
-    int total_steps               // Total accumulation steps
-}
-
-func new_gradient_accumulator([][]int weight_shapes, int total_steps) gradient_accumulator {
-    gradient_accumulator acc
-    acc.total_steps = total_steps
-    acc.current_step = 0
-    
-    // Initialize zero gradients for each weight
-    int n = len(weight_shapes)
-    acc.accumulated_gradients = []tensor{cap: n}
-    
-    int i = 0
-    while i < n {
-        int numel = tensor_numel(weight_shapes[i])
-        []float zeros = []float{cap: numel}
-        int j = 0
-        while j < numel {
-            zeros[j] = 0.0
-            j = j + 1
-        }
-        acc.accumulated_gradients[i] = new(zeros, copy_int(weight_shapes[i]), false)
-        i = i + 1
-    }
-    
-    return acc
-}
-
-// Add gradients from micro-batch to accumulator
-func accumulate_gradients(
-    acc gradient_accumulator,
-    micro_batch_gradients []tensor
-) gradient_accumulator {
-    
-    int i = 0
-    while i < len(acc.accumulated_gradients) {
-        // Add micro-batch gradient to accumulated
-        int j = 0
-        while j < len(acc.accumulated_gradients[i].data) {
-            acc.accumulated_gradients[i].data[j] = 
-                acc.accumulated_gradients[i].data[j] + micro_batch_gradients[i].data[j]
-            j = j + 1
-        }
-        i = i + 1
-    }
-    
-    acc.current_step = acc.current_step + 1
-    return acc
-}
-
-// Check if accumulation is complete
-func is_accumulation_complete(acc gradient_accumulator) bool {
-    return acc.current_step >= acc.total_steps
-}
-
-// Get averaged gradients (divide by number of accumulated steps)
-func get_averaged_gradients(acc gradient_accumulator) []tensor {
-    []tensor avg_grads = []tensor{cap: len(acc.accumulated_gradients)}
-    
-    int i = 0
-    while i < len(acc.accumulated_gradients) {
-        float scale = 1.0 / float(acc.current_step)
-        []float avg_data = []float{cap: len(acc.accumulated_gradients[i].data)}
-        
-        int j = 0
-        while j < len(acc.accumulated_gradients[i].data) {
-            avg_data[j] = acc.accumulated_gradients[i].data[j] * scale
-            j = j + 1
-        }
-        
-        avg_grads[i] = new(avg_data, copy_int(acc.accumulated_gradients[i].shape), true)
-        i = i + 1
-    }
-    
-    return avg_grads
-}
-
-// Reset accumulator for next iteration
-func reset_accumulator(acc gradient_accumulator) gradient_accumulator {
-    int i = 0
-    while i < len(acc.accumulated_gradients) {
-        int j = 0
-        while j < len(acc.accumulated_gradients[i].data) {
-            acc.accumulated_gradients[i].data[j] = 0.0
-            j = j + 1
-        }
-        i = i + 1
-    }
-    
-    acc.current_step = 0
-    return acc
-}
-
-// ── Mixed Precision Training Loop Integration ──
-struct mixed_precision_training_state {
-    mixed_precision_config config
-    loss_scaler_state scaler
-    master_weight_manager weight_mgr
-    gradient_accumulator grad_acc
-    bool ready_for_update  // True when accumulation complete and no overflow
-}
-
-// Initialize mixed precision for 2T model training
-func init_mixed_precision_training(
-    initial_weights []tensor,
-    weight_names []string,
-    config mixed_precision_config
-) mixed_precision_training_state {
-    
-    mixed_precision_training_state mp_state
-    mp_state.config = config
-    mp_state.scaler = new_loss_scaler(config)
-    mp_state.weight_mgr = new_master_weight_manager(initial_weights, weight_names, config)
-    mp_state.ready_for_update = false
-    
-    // Initialize gradient accumulator if enabled
-    if config.enable_gradient_accumulation {
-        [][]int shapes = [][]int{cap: len(initial_weights)}
-        int i = 0
-        while i < len(initial_weights) {
-            shapes[i] = initial_weights[i].shape
+    if use_fp16 {
+        // Convert to float16
+        while i < len(master_weights) {
+            var f16 = float32_to_float16(master_weights[i])
+            result[i] = float16_to_float32(f16)
             i = i + 1
         }
-        mp_state.grad_acc = new_gradient_accumulator(shapes, config.accumulation_steps)
-    }
-    
-    return mp_state
-}
-
-// Execute one mixed-precision training step
-func mixed_precision_step(
-    mp_state mixed_precision_training_state,
-    forward_fn func([]tensor) (tensor, []tensor),  // Returns (loss, gradients)
-    get_current_weights_func func() []tensor
-) (mixed_precision_training_state, tensor, bool) {  // Returns (updated_state, scaled_loss, should_update)
-    
-    // 1. Ensure BF16 working copies are up-to-date
-    update_working_copies(mp_state.weight_mgr)
-    
-    // 2. Forward pass with BF16 weights
-    []tensor bf16_weights = mp_state.weight_mgr.bf16_copies
-    tensor raw_loss
-    []tensor gradients
-    (raw_loss, gradients) = forward_fn(bf16_weights)
-    
-    // 3. Scale loss for gradient computation
-    tensor scaled_loss = scale_loss(raw_loss, mp_state.scaler)
-    
-    // 4. Check for overflow before committing
-    mp_state.scaler = check_overflow_and_adjust(gradients, mp_state.scaler, mp_state.config)
-    
-    // 5. Accumulate gradients if enabled
-    if mp_state.config.enable_gradient_accumulation {
-        mp_state.grad_acc = accumulate_gradients(mp_state.grad_acc, gradients)
-        
-        if is_accumulation_complete(mp_state.grad_acc) {
-            // Accumulation complete - get averaged gradients
-            gradients = get_averaged_gradients(mp_state.grad_acc)
-            mp_state.ready_for_update = true
-            
-            // Reset accumulator
-            mp_state.grad_acc = reset_accumulator(mp_state.grad_acc)
-        } else {
-            mp_state.ready_for_update = false
-        }
     } else {
-        mp_state.ready_for_update = !has_recent_overflow(mp_state.scaler)
+        // Keep as float32
+        while i < len(master_weights) {
+            result[i] = master_weights[i]
+            i = i + 1
+        }
     }
     
-    return (mp_state, scaled_loss, mp_state.ready_for_update)
+    return result
 }
 
-// Helper: check for recent overflow
-func has_recent_overflow(scaler loss_scaler_state) bool {
-    return scaler.consecutive_overflows > 0
+// update_master_weights: Update master weights from gradients
+func update_master_weights(master_weights: [][]float, gradients_fp32: [][]float, learning_rate: float) [][]float {
+    var result: [][]float = [][]float(len(master_weights))
+    var i = 0
+    
+    while i < len(master_weights) {
+        result[i] = master_weights[i] - learning_rate * gradients_fp32[i]
+        i = i + 1
+    }
+    
+    return result
 }
 
-// ── Memory Usage Estimation for 2T Model ──
-func estimate_memory_savings_2t_model(
-    num_parameters int64,     // Total parameters (e.g., 2 trillion)
-    batch_size int,
-    seq_len int,
-    hidden_dim int,
-    num_layers int
-) (float, float, float) {  // Returns (fp32_mem_gb, mixed_prec_gb, savings_percent)
-    
-    // Parameter memory
-    float param_mem_fp32 = float(num_parameters) * 4.0 / (1048576.0 * 1024.0)  // GB (4 bytes/param)
-    float param_mem_bf16 = float(num_parameters) * 2.0 / (1048576.0 * 1024.0)  // GB (2 bytes/param)
-    
-    // Activation memory (approximate)
-    float activation_per_layer = float(batch_size) * float(seq_len) * float(hidden_dim) * 4.0 / (1048576.0 * 1024.0)
-    float total_activations = activation_per_layer * float(num_layers) * 2.0  // Forward + backward
-    
-    // Optimizer states (Adam: 2 states per parameter)
-    float optimizer_states = float(num_parameters) * 8.0 / (1048576.0 * 1024.0)  // GB
-    
-    // Total memory
-    float total_fp32 = param_mem_fp32 + total_activations + optimizer_states
-    float total_mixed = param_mem_bf16 + total_activations * 0.5 + optimizer_states  // Activations also benefit
-    
-    float savings_percent = (1.0 - total_mixed / total_fp32) * 100.0
-    
-    return (total_fp32, total_mixed, savings_percent)
+// synchronize_weights: Sync compute weights with master weights
+func synchronize_weights(state: mixed_precision_state, use_fp16: bool) mixed_precision_state {
+    state.compute_weights = cast_weights_to_compute(state.master_weights, use_fp16)
+    return state
 }
 
-// Example usage for 2T model:
-// For a 2T parameter model:
-// - FP32 parameters: ~8TB (impossible on single GPU)
-// - BF16 parameters: ~4TB (still needs sharding)
-// - With ZeRO-3 + TP: feasible across GPU cluster
+// ============================================================
+// Mixed Precision Training Step
+// ============================================================
+
+// mixed_precision_forward: Forward pass with selected dtype
+func mixed_precision_forward(inputs: [][]float, weights: [][]float, use_fp16: bool) [][]float {
+    // In practice, this would dispatch to float16 or float32 kernels
+    // For now, we keep float32 for numerical stability
+    
+    var result: [][]float = [][]float(len(inputs) * len(weights))
+    var idx = 0
+    
+    var i = 0
+    while i < len(inputs) {
+        var j = 0
+        while j < len(weights) {
+            var sum = 0.0
+            var k = 0
+            while k < len(inputs[i]) {
+                sum = sum + inputs[i][k] * weights[k][j]
+                k = k + 1
+            }
+            result[idx] = sum
+            idx = idx + 1
+            j = j + 1
+        }
+        i = i + 1
+    }
+    
+    return result
+}
+
+// mixed_precision_backward: Backward pass with loss scaling
+func mixed_precision_backward(gradients: [][]float, loss_scale: float) [][]float {
+    // Scale gradients up for backward pass
+    var scaled_gradients: [][]float = [][]float(len(gradients))
+    var i = 0
+    
+    while i < len(gradients) {
+        scaled_gradients[i] = gradients[i] * loss_scale
+        i = i + 1
+    }
+    
+    return scaled_gradients
+}
+
+// mixed_precision_optimizer_step: Single training step with mixed precision
+func mixed_precision_optimizer_step(
+    state: mixed_precision_state,
+    loss: float,
+    gradients: [][]float,
+    learning_rate: float,
+    config: mixed_precision_config
+) (mixed_precision_state, bool) {
+    
+    // 1. Detect overflow
+    var overflow = detect_overflow(gradients)
+    
+    if overflow {
+        // Skip weight update if overflow detected
+        state.loss_scale_scheduler = update_loss_scale(state.loss_scale_scheduler, true)
+        state.overflow_count = state.overflow_count + 1
+        return state, true  // true = overflow occurred
+    }
+    
+    // 2. Scale gradients by loss scale
+    var scaled_gradients = scale_gradients(gradients, state.loss_scale_scheduler.current_scale)
+    
+    // 3. Cast to FP32 for accumulation
+    state.gradients_fp32 = cast_gradients_to_fp32(scaled_gradients)
+    
+    // 4. Update master weights
+    state.master_weights = update_master_weights(
+        state.master_weights,
+        state.gradients_fp32,
+        learning_rate
+    )
+    
+    // 5. Synchronize compute weights
+    var use_fp16 = config.compute_dtype == "float16"
+    state = synchronize_weights(state, use_fp16)
+    
+    // 6. Update loss scale scheduler
+    state.loss_scale_scheduler = update_loss_scale(state.loss_scale_scheduler, false)
+    state.total_steps = state.total_steps + 1
+    
+    return state, false  // false = no overflow
+}
+
+// ============================================================
+// Configuration and Utilities
+// ============================================================
+
+// new_mixed_precision_config: Create default config
+func new_mixed_precision_config() mixed_precision_config {
+    var config: mixed_precision_config
+    config.use_mixed_precision = true
+    config.compute_dtype = "float32"  // Keep float32 by default for stability
+    config.accumulate_dtype = "float32"
+    config.loss_scale = 65536.0
+    config.loss_scale_window = 2000
+    config.loss_scale_growth_factor = 2.0
+    config.loss_scale_backoff_factor = 0.5
+    config.loss_scale_min = 1.0
+    config.loss_scale_max = 65536.0
+    return config
+}
+
+// get_mixed_precision_stats: Get training statistics
+func get_mixed_precision_stats(state: mixed_precision_state) string {
+    var result = "Mixed Precision Stats:\n"
+    result = result + "  Current Loss Scale: " + string(state.loss_scale_scheduler.current_scale) + "\n"
+    result = result + "  Overflow Count: " + string(state.overflow_count) + "\n"
+    result = result + "  Total Steps: " + string(state.total_steps) + "\n"
+    result = result + "  Stable Steps Since Last Overflow: " + string(state.loss_scale_scheduler.steps_since_last_overflow) + "\n"
+    return result
+}
+
+// validate_mixed_precision_state: Sanity check state
+func validate_mixed_precision_state(state: mixed_precision_state) bool {
+    // Check loss scale is in valid range
+    if state.loss_scale_scheduler.current_scale < state.loss_scale_scheduler.min_scale {
+        return false
+    }
+    if state.loss_scale_scheduler.current_scale > state.loss_scale_scheduler.max_scale {
+        return false
+    }
+    
+    // Check weights match size
+    if len(state.master_weights) != len(state.compute_weights) {
+        return false
+    }
+    
+    return true
+}
