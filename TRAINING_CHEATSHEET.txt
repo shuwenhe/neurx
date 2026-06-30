@@ -1,0 +1,92 @@
+╔════════════════════════════════════════════════════════════════════╗
+║               NeurX LLM 训练快速参考卡                             ║
+╚════════════════════════════════════════════════════════════════════╝
+
+🚀 一行启动:
+  cd /Users/feifei/shuwen/neurx && bash run_llm_training_with_compiler.sh
+
+⚙️ 常用配置:
+  
+  基础训练 (100步):
+    bash run_llm_training_with_compiler.sh
+  
+  更长训练 (1000步):
+    export NEURX_TOTAL_STEPS=1000 && bash run_llm_training_with_compiler.sh
+  
+  大批处理 (32个样本):
+    export NEURX_BATCH_SIZE=32 && bash run_llm_training_with_compiler.sh
+  
+  长序列 (32 tokens):
+    export NEURX_SEQ_LENGTH=32 && bash run_llm_training_with_compiler.sh
+  
+  低学习率 (更稳定):
+    export NEURX_LR=0.0001 && bash run_llm_training_with_compiler.sh
+  
+  完整自定义:
+    export NEURX_TOTAL_STEPS=2000 \
+           NEURX_BATCH_SIZE=16 \
+           NEURX_LR=0.0005 \
+           NEURX_SEQ_LENGTH=16 && \
+    bash run_llm_training_with_compiler.sh
+
+📊 监控:
+  
+  查看实时日志:
+    tail -f artifacts/logs/training_*.log
+  
+  查看检查点:
+    ls -la artifacts/checkpoints/llm_training/
+  
+  查看编译输出:
+    ls -lh build/llm_training_compiler/
+
+✅ 验证:
+  
+  编译器就绪:
+    ls /Users/feifei/train/s/.local/bin/s && echo "✓"
+  
+  源代码就绪:
+    ls train/llm_training_compiler_compatible.s && echo "✓"
+  
+  输出目录:
+    ls artifacts/checkpoints/llm_training/
+
+📈 参数速查表:
+
+  参数                  | 默认 | 范围         | 说明
+  ──────────────────────|──────|──────────────|─────────────────
+  NEURX_TOTAL_STEPS     | 100  | 10-5000      | 训练步数
+  NEURX_BATCH_SIZE      | 4    | 1-64         | 批处理大小
+  NEURX_LR              | 0.001| 0.00001-0.1  | 学习率
+  NEURX_SEQ_LENGTH      | 8    | 4-128        | 序列长度
+  NEURX_WARMUP_STEPS    | 10   | 1-100        | 预热步数
+  NEURX_CHECKPOINT_INTERVAL | 10 | 1-100   | 检查点间隔
+
+💡 优化建议:
+
+  训练不稳定?
+    → 降低学习率: NEURX_LR=0.0001
+    → 增加预热: NEURX_WARMUP_STEPS=100
+  
+  训练太慢?
+    → 减少序列长度: NEURX_SEQ_LENGTH=4
+    → 增加批处理: NEURX_BATCH_SIZE=32
+  
+  想要更好的模型?
+    → 增加步数: NEURX_TOTAL_STEPS=5000
+    → 使用长序列: NEURX_SEQ_LENGTH=32
+
+🎯 完整工作流:
+
+  1. 启动基础训练:
+     bash run_llm_training_with_compiler.sh
+  
+  2. 验证检查点:
+     ls artifacts/checkpoints/llm_training/
+  
+  3. 使用推理:
+     bash run_full_inference.sh
+  
+  4. 交互演示:
+     bash demo_chat.sh
+

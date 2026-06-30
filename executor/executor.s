@@ -6,7 +6,7 @@ use neurx.agent.action_schema
 use neurx.agent.observation
 use neurx.agent.workspace_tools
 use neurx.agent.workspace_search
-use neurx.infer
+use neurx.inference
 use neurx.executor.model_tool_select
 use neurx.safety.safety
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
