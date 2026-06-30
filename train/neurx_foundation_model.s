@@ -33,6 +33,12 @@ use neurx.model.llm.gpt_backward.{
     gpt_forward_cached, gpt_backward, gpt_adamw_step
 }
 use neurx.train.gpt_training_checkpoint.{gpt_training_checkpoint, snapshot_gpt_training_state}
+use neurx.train.weight_serialization.{save_gpt_checkpoint, load_gpt_checkpoint, serialize_gpt_checkpoint}
+use neurx.posttrain.reward.reward_model.{
+    reward_model, reward_train_result, reward_batch_scores,
+    reward_model_from_backbone, reward_model_train_step,
+    reward_model_score, reward_model_eval_accuracy, rm_score_batch
+}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step}
 use neurx.alignment.supervised_finetuning.{sft_config, sft_trainer, new_sft_config, new_sft_trainer}
@@ -878,6 +884,17 @@ func run_pretrain_stage(foundation_model_state state) foundation_model_state {
         if step - (step / cfg.eval_interval) * cfg.eval_interval == 0 {
             s = log_stage_progress(s, arch)
         }
+
+        // 周期性写盘 (真实 checkpoint 持久化)
+        if cfg.save_interval > 0 && step - (step / cfg.save_interval) * cfg.save_interval == 0 {
+            gpt_training_checkpoint ckpt = snapshot_gpt_training_state(
+                model, opt, s.global_step, 0, s.lr,
+                s.current_loss, s.best_loss, "pretrain",
+                state.config.model_name, 0
+            )
+            save_gpt_checkpoint(ckpt, cfg.checkpoint_dir, "step_" + ckpt_step_str(s.global_step) + ".nckpt")
+        }
+
         if s.current_loss > 0.0 && s.current_loss < cfg.target_loss {
             break
         }
@@ -885,6 +902,14 @@ func run_pretrain_stage(foundation_model_state state) foundation_model_state {
 
     s.completed = true
     s.checkpoint_path = cfg.checkpoint_dir + "/final"
+
+    // 最终 checkpoint 落盘
+    gpt_training_checkpoint final_ckpt = snapshot_gpt_training_state(
+        model, opt, s.global_step, 0, s.lr,
+        s.best_loss, s.best_loss, "pretrain",
+        state.config.model_name, 0
+    )
+    save_gpt_checkpoint(final_ckpt, cfg.checkpoint_dir, "final.nckpt")
 
     foundation_model_state {
         config: state.config,
@@ -1007,20 +1032,45 @@ func run_rlhf_stage(foundation_model_state state) foundation_model_state {
     float beta_dpo = 0.1       // DPO KL 惩罚系数
     float ref_ratio_sum = 0.0  // 参考模型比值累积 (用于监控 KL 散度)
 
+    // ── 阶段 3a: 训练真实奖励模型 (Reward Model) ──────────────────────────
+    // 以 SFT 后的 backbone 初始化 RM，在偏好对上训练标量奖励头。
+    reward_model rm = reward_model_from_backbone(state.model, 0.00005)
+    int rm_steps = cfg.max_steps / 4      // 25% 步数用于 RM 训练
+    if rm_steps < 1 { rm_steps = 1 }
+    float rm_acc = 0.0
+    int rm_step = 0
+    while rm_step < rm_steps {
+        []int chosen  = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, true)
+        []int rejected = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, false)
+        reward_train_result rr = reward_model_train_step(rm, chosen, rejected, 2, seq_len)
+        rm = rr.model
+        rm_acc = rr.accuracy
+        rm_step = rm_step + 1
+    }
+
+    // ── 阶段 3b: 用奖励模型信号做策略优化 (DPO) ──────────────────────────
     int step = 0
     while step < cfg.max_steps {
         float lr = compute_lr_wsd(cfg.optim, step)
         s.lr = lr
 
-        // 模拟 DPO: chosen response 损失 - rejected response 损失
         []int chosen_batch = make_preference_batch(2, seq_len, arch.vocab_size, step, true)
         []int rejected_batch = make_preference_batch(2, seq_len, arch.vocab_size, step, false)
 
+        // 真实奖励模型评分 (替代之前的合成损失差)
+        reward_batch_scores sc = rm_score_batch(rm, chosen_batch,   2, seq_len)
+        reward_batch_scores sr = rm_score_batch(rm, rejected_batch, 2, seq_len)
+        float reward_chosen   = (sc.rewards[0] + sc.rewards[1]) * 0.5
+        float reward_rejected = (sr.rewards[0] + sr.rewards[1]) * 0.5
+
+        // 策略对数似然 (用于 DPO 隐式奖励)
         float loss_chosen   = compute_batch_loss(state.model, chosen_batch,   2, seq_len)
         float loss_rejected = compute_batch_loss(state.model, rejected_batch, 2, seq_len)
 
-        // DPO 损失: -log(sigmoid(β * (log_ratio_chosen - log_ratio_rejected)))
-        float log_ratio_diff = loss_rejected - loss_chosen
+        // DPO 损失结合策略似然差与奖励模型偏好信号
+        float policy_diff = loss_rejected - loss_chosen
+        float reward_diff = reward_chosen - reward_rejected
+        float log_ratio_diff = policy_diff + reward_diff
         float dpo_loss = -dpo_log_sigmoid(beta_dpo * log_ratio_diff)
 
         s.current_loss = dpo_loss
@@ -1028,13 +1078,13 @@ func run_rlhf_stage(foundation_model_state state) foundation_model_state {
         if dpo_loss < s.best_loss {
             s.best_loss = dpo_loss
         }
-        ref_ratio_sum = ref_ratio_sum + log_ratio_diff
+        ref_ratio_sum = ref_ratio_sum + reward_diff
         s.global_step = s.global_step + 1
 
         step = step + 1
 
         if step - (step / cfg.eval_interval) * cfg.eval_interval == 0 {
-            float avg_kl = ref_ratio_sum / (s.global_step * 1.0)
+            float avg_reward_margin = ref_ratio_sum / (s.global_step * 1.0)
             s = log_stage_progress(s, arch)
         }
 
@@ -1492,6 +1542,11 @@ func int_to_s(int n) string {
     }
     if neg { s = "-" + s }
     s
+}
+
+// checkpoint 文件名用步数字符串
+func ckpt_step_str(int step) string {
+    int_to_s(step)
 }
 
 func float_to_int_approx(float x) int {
