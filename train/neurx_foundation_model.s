@@ -32,6 +32,7 @@ use neurx.model.llm.gpt_backward.{
     new_gpt_adamw_state, gpt_train_step,
     gpt_forward_cached, gpt_backward, gpt_adamw_step
 }
+use neurx.train.gpt_training_checkpoint.{gpt_training_checkpoint, snapshot_gpt_training_state}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step}
 use neurx.alignment.supervised_finetuning.{sft_config, sft_trainer, new_sft_config, new_sft_trainer}
@@ -129,6 +130,7 @@ struct foundation_model_state {
     foundation_model_config config
     gpt_model model
     gpt_adamw_state optimizer        // AdamW 优化器状态 (含动量/方差)
+    gpt_training_checkpoint latest_checkpoint
     stage_state pretrain_state
     stage_state sft_state
     stage_state rlhf_state
@@ -656,10 +658,23 @@ func new_foundation_model_state(foundation_model_config cfg) foundation_model_st
     // 根据阶段 1 (预训练) 超参数初始化 AdamW 优化器
     optim_config oc = cfg.pretrain.optim
     gpt_adamw_state opt = new_gpt_adamw_state(model, oc.lr, 0.9, 0.95, 1e-8, oc.weight_decay)
+    gpt_training_checkpoint ckpt = snapshot_gpt_training_state(
+        model,
+        opt,
+        0,
+        0,
+        oc.lr,
+        9999.0,
+        9999.0,
+        "init",
+        cfg.model_name,
+        0
+    )
     foundation_model_state {
         config: cfg,
         model: model,
         optimizer: opt,
+        latest_checkpoint: ckpt,
         pretrain_state: new_stage_state("pretrain"),
         sft_state: new_stage_state("sft"),
         rlhf_state: new_stage_state("rlhf"),
@@ -875,6 +890,18 @@ func run_pretrain_stage(foundation_model_state state) foundation_model_state {
         config: state.config,
         model: model,
         optimizer: opt,
+        latest_checkpoint: snapshot_gpt_training_state(
+            model,
+            opt,
+            s.global_step,
+            0,
+            s.lr,
+            s.current_loss,
+            s.best_loss,
+            "pretrain",
+            state.config.model_name,
+            0
+        ),
         pretrain_state: s,
         sft_state: state.sft_state,
         rlhf_state: state.rlhf_state,
@@ -938,6 +965,18 @@ func run_sft_stage(foundation_model_state state) foundation_model_state {
         config: state.config,
         model: state.model,
         optimizer: state.optimizer,
+        latest_checkpoint: snapshot_gpt_training_state(
+            state.model,
+            state.optimizer,
+            s.global_step,
+            0,
+            s.lr,
+            s.current_loss,
+            s.best_loss,
+            "sft",
+            state.config.model_name,
+            0
+        ),
         pretrain_state: state.pretrain_state,
         sft_state: s,
         rlhf_state: state.rlhf_state,
@@ -1011,6 +1050,18 @@ func run_rlhf_stage(foundation_model_state state) foundation_model_state {
         config: state.config,
         model: state.model,
         optimizer: state.optimizer,
+        latest_checkpoint: snapshot_gpt_training_state(
+            state.model,
+            state.optimizer,
+            s.global_step,
+            0,
+            s.lr,
+            s.current_loss,
+            s.best_loss,
+            "rlhf",
+            state.config.model_name,
+            0
+        ),
         pretrain_state: state.pretrain_state,
         sft_state: state.sft_state,
         rlhf_state: s,
@@ -1079,6 +1130,18 @@ func run_reasoning_stage(foundation_model_state state) foundation_model_state {
         config: state.config,
         model: state.model,
         optimizer: state.optimizer,
+        latest_checkpoint: snapshot_gpt_training_state(
+            state.model,
+            state.optimizer,
+            s.global_step,
+            0,
+            s.lr,
+            s.current_loss,
+            s.best_loss,
+            "reasoning",
+            state.config.model_name,
+            0
+        ),
         pretrain_state: state.pretrain_state,
         sft_state: state.sft_state,
         rlhf_state: state.rlhf_state,
