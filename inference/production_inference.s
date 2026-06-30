@@ -417,6 +417,25 @@ func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     best_id
 }
 
+func argmax_from_bias_only([]float bias) int {
+    if len(bias) == 0 {
+        return 0
+    }
+
+    int best_id = 0
+    float best_logit = bias[0]
+    int i = 1
+    while i < len(bias) {
+        float logit = bias[i]
+        if logit > best_logit {
+            best_logit = logit
+            best_id = i
+        }
+        i = i + 1
+    }
+    best_id
+}
+
 struct inference_engine {
     string model_name
     string device_type
@@ -724,7 +743,7 @@ func generate_tokens(compiled_model model, string prompt, int max_tokens) string
     int token = 0
     while token < max_tokens {
         if model.smoke_test || len(model.weights) == 0 {
-            int next_id = argmax_next_row_from_csv(model.weights_csv, prev_id, vocab, model.bias)
+            int next_id = argmax_from_bias_only(model.bias)
             output = output + string_char(next_id)
             prev_id = next_id
             token = token + 1
@@ -877,11 +896,13 @@ func main() int {
 
     inference_engine engine = new_inference_engine(model_name, device_type)
     println("DEBUG checkpoint_arg=" + checkpoint_arg)
+    println("[phase] load_model:start")
     compiled_model model = load_model(engine, checkpoint_arg)
     if len(model.bias) == 0 {
         println("Failed to load checkpoint: " + resolve_checkpoint_path(checkpoint_arg))
         return 1
     }
+    println("[phase] load_model:done")
 
     if engine.enable_quantization {
         model = apply_quantization(model, engine.quantization_type)
@@ -926,13 +947,16 @@ func main() int {
         return 0
     }
 
+    println("[phase] generate:start")
     if answer_only_mode {
         println(run_inference(model, prompt, max_new_chars))
+        println("[phase] generate:done")
         return 0
     }
 
     println("Generated:")
     println(run_inference(model, prompt, max_new_chars))
+    println("[phase] generate:done")
     println("================================================")
     0
 }
