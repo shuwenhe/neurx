@@ -49,6 +49,10 @@ use neurx.eval.benchmark_eval.{
     run_benchmark_suite, format_benchmark_report,
     evaluate_multiple_choice, evaluate_perplexity, mc_eval_result, ppl_result
 }
+use neurx.data.corpus_loader.{
+    corpus_config, corpus_state, corpus_batch, corpus_stats,
+    default_pretraining_corpus, new_corpus_state, corpus_next_batch, corpus_get_stats
+}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step}
 use neurx.alignment.supervised_finetuning.{sft_config, sft_trainer, new_sft_config, new_sft_trainer}
@@ -866,14 +870,27 @@ func run_pretrain_stage(foundation_model_state state) foundation_model_state {
 
     gpt_model model = state.model
 
+    // 初始化真实语料加载器
+    corpus_config corpus_cfg = default_pretraining_corpus()
+    corpus_cfg.seq_len = seq_len
+    corpus_cfg.batch_size = micro_batch
+    corpus_state corpus = new_corpus_state(corpus_cfg)
+
     while step < total_steps {
         // 动态学习率
         float lr = compute_lr_wsd(oc, step)
         opt.lr = lr
         s.lr = lr
 
-        // 构造 micro-batch (生产环境替换为数据流水线)
-        []int batch = make_synthetic_batch(micro_batch, seq_len, arch.vocab_size, step)
+        // 构造训练批次 (优先使用真实语料，回落到合成数据)
+        []int batch
+        if corpus.total_docs_seen > 0 || step == 0 {
+            corpus_batch real_batch
+            (real_batch, corpus) = corpus_next_batch(corpus)
+            batch = real_batch.input_ids
+        } else {
+            batch = make_synthetic_batch(micro_batch, seq_len, arch.vocab_size, step)
+        }
 
         // 完整训练步 (前向 + 反向 + 梯度裁剪 + AdamW 更新)
         gpt_train_step_result res = gpt_train_step(
