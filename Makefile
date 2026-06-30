@@ -1,6 +1,7 @@
 .PHONY: help install neurx s-package-index s-compile-runtime code-agent-build code-agent linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony test test-transformer-e2e \
+	train train-watch train-llm train-llm-watch train-dp train-dp-watch \
 	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
 
 ifeq ($(OS),Windows_NT)
@@ -49,6 +50,10 @@ help:
 	@echo "  platform          $(PLATFORM)"
 	@echo "  train             Run NeurX training (run_training.sh)"
 	@echo "  train-watch       Run training and tail live logs (/tmp/neurx_real_train.log)"
+	@echo "  train-llm         Run LLM training with S compiler (configurable via NEURX_* env vars)"
+	@echo "  train-llm-watch   Run LLM training and tail live logs"
+	@echo "  train-dp          Run LLM training in data parallel mode"
+	@echo "  train-dp-watch    Run data parallel training and tail live logs"
 	@echo "  test-transformer-e2e  Compile and run transformer model smoke test"
 	@echo "  test              Alias of test-transformer-e2e"
 	@echo ""
@@ -93,6 +98,148 @@ train-watch: check-bash
 		echo "Training failed with exit code $$STATUS"; \
 	fi; \
 	rm -f .run/train_watch_pid.txt
+
+train-llm: check-bash
+	@echo "Running LLM training with S compiler (run_llm_training_with_compiler.sh)"
+	@cd '$(CURDIR_UNIX)' && \
+	STEPS="$${NEURX_TOTAL_STEPS:-100}"; \
+	BATCH_SIZE="$${NEURX_BATCH_SIZE:-4}"; \
+	LR="$${NEURX_LR:-0.001}"; \
+	SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-8}"; \
+	WARMUP_STEPS="$${NEURX_WARMUP_STEPS:-10}"; \
+	CHECKPOINT_INTERVAL="$${NEURX_CHECKPOINT_INTERVAL:-10}"; \
+	DP_MODE="$${NEURX_DP_MODE:-small}"; \
+	WORLD_SIZE="$${NEURX_WORLD_SIZE:-1}"; \
+	DATA_PARALLEL_SIZE="$${NEURX_DATA_PARALLEL_SIZE:-1}"; \
+	TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-1}"; \
+	PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
+	MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
+	LOSS_SCALE="$${NEURX_LOSS_SCALE:-1.0}"; \
+	export NEURX_TOTAL_STEPS="$$STEPS"; \
+	export NEURX_BATCH_SIZE="$$BATCH_SIZE"; \
+	export NEURX_LR="$$LR"; \
+	export NEURX_SEQ_LENGTH="$$SEQ_LENGTH"; \
+	export NEURX_WARMUP_STEPS="$$WARMUP_STEPS"; \
+	export NEURX_CHECKPOINT_INTERVAL="$$CHECKPOINT_INTERVAL"; \
+	export NEURX_DP_MODE="$$DP_MODE"; \
+	export NEURX_WORLD_SIZE="$$WORLD_SIZE"; \
+	export NEURX_DATA_PARALLEL_SIZE="$$DATA_PARALLEL_SIZE"; \
+	export NEURX_TENSOR_PARALLEL_SIZE="$$TENSOR_PARALLEL_SIZE"; \
+	export NEURX_PIPELINE_PARALLEL_SIZE="$$PIPELINE_PARALLEL_SIZE"; \
+	export NEURX_MIXED_PRECISION_MODE="$$MIXED_PRECISION_MODE"; \
+	export NEURX_LOSS_SCALE="$$LOSS_SCALE"; \
+	bash run_llm_training_with_compiler.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "LLM Training completed successfully. Checkpoints: artifacts/checkpoints/llm_training/"; \
+	else \
+		echo "LLM Training failed with exit code $$STATUS"; \
+	fi; \
+	exit $$STATUS
+
+train-llm-watch: check-bash
+	@echo "Running LLM training with S compiler and tailing live logs"
+	@cd '$(CURDIR_UNIX)' && \
+	mkdir -p .run && \
+	STEPS="$${NEURX_TOTAL_STEPS:-100}"; \
+	BATCH_SIZE="$${NEURX_BATCH_SIZE:-4}"; \
+	LR="$${NEURX_LR:-0.001}"; \
+	SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-8}"; \
+	WARMUP_STEPS="$${NEURX_WARMUP_STEPS:-10}"; \
+	CHECKPOINT_INTERVAL="$${NEURX_CHECKPOINT_INTERVAL:-10}"; \
+	DP_MODE="$${NEURX_DP_MODE:-small}"; \
+	WORLD_SIZE="$${NEURX_WORLD_SIZE:-1}"; \
+	DATA_PARALLEL_SIZE="$${NEURX_DATA_PARALLEL_SIZE:-1}"; \
+	TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-1}"; \
+	PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
+	MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
+	LOSS_SCALE="$${NEURX_LOSS_SCALE:-1.0}"; \
+	LOG_FILE="/tmp/neurx_llm_train.log" && \
+	rm -f "$$LOG_FILE" && \
+	export NEURX_TOTAL_STEPS="$$STEPS"; \
+	export NEURX_BATCH_SIZE="$$BATCH_SIZE"; \
+	export NEURX_LR="$$LR"; \
+	export NEURX_SEQ_LENGTH="$$SEQ_LENGTH"; \
+	export NEURX_WARMUP_STEPS="$$WARMUP_STEPS"; \
+	export NEURX_CHECKPOINT_INTERVAL="$$CHECKPOINT_INTERVAL"; \
+	export NEURX_DP_MODE="$$DP_MODE"; \
+	export NEURX_WORLD_SIZE="$$WORLD_SIZE"; \
+	export NEURX_DATA_PARALLEL_SIZE="$$DATA_PARALLEL_SIZE"; \
+	export NEURX_TENSOR_PARALLEL_SIZE="$$TENSOR_PARALLEL_SIZE"; \
+	export NEURX_PIPELINE_PARALLEL_SIZE="$$PIPELINE_PARALLEL_SIZE"; \
+	export NEURX_MIXED_PRECISION_MODE="$$MIXED_PRECISION_MODE"; \
+	export NEURX_LOSS_SCALE="$$LOSS_SCALE"; \
+	bash run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	TRAIN_PID=$$!; echo "$$TRAIN_PID" > .run/train_llm_watch_pid.txt; \
+	sleep 0.5; \
+	echo "Tailing $$LOG_FILE (train pid: $$TRAIN_PID)"; \
+	tail --pid=$$TRAIN_PID -F "$$LOG_FILE"; \
+	wait $$TRAIN_PID; STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "LLM Training completed successfully. Checkpoints: artifacts/checkpoints/llm_training/"; \
+	else \
+		echo "LLM Training failed with exit code $$STATUS"; \
+	fi; \
+	rm -f .run/train_llm_watch_pid.txt; \
+	exit $$STATUS
+
+train-dp: check-bash
+	@echo "Running LLM training in data parallel mode"
+	@cd '$(CURDIR_UNIX)' && \
+	export NEURX_TOTAL_STEPS="$${NEURX_TOTAL_STEPS:-100}"; \
+	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-4}"; \
+	export NEURX_LR="$${NEURX_LR:-0.001}"; \
+	export NEURX_SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-8}"; \
+	export NEURX_WARMUP_STEPS="$${NEURX_WARMUP_STEPS:-10}"; \
+	export NEURX_CHECKPOINT_INTERVAL="$${NEURX_CHECKPOINT_INTERVAL:-10}"; \
+	export NEURX_DP_MODE="$${NEURX_DP_MODE:-ddp}"; \
+	export NEURX_WORLD_SIZE="$${NEURX_WORLD_SIZE:-2}"; \
+	export NEURX_DATA_PARALLEL_SIZE="$${NEURX_DATA_PARALLEL_SIZE:-2}"; \
+	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-1}"; \
+	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
+	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
+	export NEURX_LOSS_SCALE="$${NEURX_LOSS_SCALE:-1.0}"; \
+	bash run_llm_training_with_compiler.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "DP training completed successfully. Checkpoints: artifacts/checkpoints/llm_training/"; \
+	else \
+		echo "DP training failed with exit code $$STATUS"; \
+	fi; \
+	exit $$STATUS
+
+train-dp-watch: check-bash
+	@echo "Running LLM training in data parallel mode and tailing live logs"
+	@cd '$(CURDIR_UNIX)' && \
+	mkdir -p .run && \
+	LOG_FILE="/tmp/neurx_llm_dp_train.log" && \
+	rm -f "$$LOG_FILE" && \
+	export NEURX_TOTAL_STEPS="$${NEURX_TOTAL_STEPS:-100}"; \
+	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-4}"; \
+	export NEURX_LR="$${NEURX_LR:-0.001}"; \
+	export NEURX_SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-8}"; \
+	export NEURX_WARMUP_STEPS="$${NEURX_WARMUP_STEPS:-10}"; \
+	export NEURX_CHECKPOINT_INTERVAL="$${NEURX_CHECKPOINT_INTERVAL:-10}"; \
+	export NEURX_DP_MODE="$${NEURX_DP_MODE:-ddp}"; \
+	export NEURX_WORLD_SIZE="$${NEURX_WORLD_SIZE:-2}"; \
+	export NEURX_DATA_PARALLEL_SIZE="$${NEURX_DATA_PARALLEL_SIZE:-2}"; \
+	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-1}"; \
+	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
+	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
+	export NEURX_LOSS_SCALE="$${NEURX_LOSS_SCALE:-1.0}"; \
+	bash run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	TRAIN_PID=$$!; echo "$$TRAIN_PID" > .run/train_dp_watch_pid.txt; \
+	sleep 0.5; \
+	echo "Tailing $$LOG_FILE (train pid: $$TRAIN_PID)"; \
+	tail --pid=$$TRAIN_PID -F "$$LOG_FILE"; \
+	wait $$TRAIN_PID; STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "DP training completed successfully. Checkpoints: artifacts/checkpoints/llm_training/"; \
+	else \
+		echo "DP training failed with exit code $$STATUS"; \
+	fi; \
+	rm -f .run/train_dp_watch_pid.txt; \
+	exit $$STATUS
 
 train-jsonl: check-bash
 	@echo "Generate train_llm_jsonl.s from data/sample.jsonl and run training"

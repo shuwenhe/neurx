@@ -1,6 +1,6 @@
 package neurx.executor.model_tool_select
 
-use neurx.infer
+use neurx.inference
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.action_schema

@@ -166,7 +166,7 @@ func example_model_evaluation() {
 // Example inference optimization
 func example_inference_optimization() {
     // For faster inference, use KV cache
-    // import neurx.infer.kv_cache_manager
+    // import neurx.inference.kv_cache_manager
     
     // Create KV cache
     // paged_kv_cache kv_cache = new_paged_kv_cache(config)
