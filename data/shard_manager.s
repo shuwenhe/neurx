@@ -5,6 +5,7 @@
 package neurx.data.shard_manager
 
 use neurx.strings
+use neurx.runtime.io.{runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_write_text_file, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
 
 // ── Configuration ──
 struct shard_manager_config {
@@ -718,21 +719,93 @@ func log_warning(shard_manager_state mgr, string msg) void:
     mgr.error_log.push("[WARN] " + msg)
 
 func save_manifest(dataset_manifest manifest, string path) void:
-    // Serialize manifest to JSON
-    return
+    string dir = trim(runtime_run_command_output("dirname " + runtime_shell_escape(path)))
+    if dir != "" {
+        runtime_make_dirs(dir)
+    }
+    runtime_write_text_file(path, manifest_to_json(manifest))
 
 func validate_all_shards(dataset_manifest manifest) void:
-    // Verify checksums for all shards
-    return
+    int i = 0
+    int validated = 0
+    while i < len(manifest.shards) {
+        shard_info shard = manifest.shards[i]
+        if !file_exists(shard.filename) {
+            print("WARNING: missing shard file: ", shard.filename)
+        } else if shard.checksum_sha256 != "" {
+            int64 size_bytes = get_file_size(shard.filename)
+            []byte shard_bytes = read_file_range(shard.filename, 0, size_bytes)
+            string actual = compute_sha256(shard_bytes)
+            if actual != shard.checksum_sha256 {
+                print("WARNING: checksum mismatch for shard ", shard.shard_id, ": ", shard.filename)
+            } else {
+                validated = validated + 1
+            }
+        } else {
+            validated = validated + 1
+        }
+        i = i + 1
+    }
+    print("Validated shards: ", validated, "/", len(manifest.shards))
 
 // OS/File system helpers (placeholders)
-func file_exists(string path) bool: return false
-func is_directory(string path) bool: return false
+func file_exists(string path) bool: return runtime_file_exists(path)
+func is_directory(string path) bool: return runtime_dir_exists(path)
 func list_files_recursive(string dir, string ext) []string: return []string{cap: 0}
-func get_file_size(string path) int64: return 0
-func create_directory(string path) bool: return true
-func read_file_range(string path, int64 offset, int64 length) []byte: return []byte{cap: 0}
-func write_all_bytes(string path, []byte data) bool: return true
+func get_file_size(string path) int64 {
+    string size_text = trim(runtime_run_command_output("wc -c < " + runtime_shell_escape(path)))
+    int64 size = 0
+    int i = 0
+    while i < len(size_text) {
+        string ch = string(size_text[i])
+        if ch >= "0" && ch <= "9" {
+            size = size * 10 + int64(int(ch) - 48)
+        }
+        i = i + 1
+    }
+    size
+}
+func create_directory(string path) bool {
+    runtime_make_dirs(path).ok
+}
+func read_file_range(string path, int64 offset, int64 length) []byte {
+    string content = runtime_read_text_file(path)
+    int start = int(offset)
+    if start < 0 {
+        start = 0
+    }
+    int available = len(content)
+    if start >= available {
+        return []byte{cap: 0}
+    }
+    int count = int(length)
+    if count < 0 {
+        count = 0
+    }
+    int end = start + count
+    if end > available {
+        end = available
+    }
+    []byte out = []byte{cap: end - start}
+    int i = 0
+    int pos = start
+    while pos < end {
+        out[i] = int(string(content[pos]))
+        i = i + 1
+        pos = pos + 1
+    }
+    out
+}
+func write_all_bytes(string path, []byte data) bool {
+    string content = ""
+    int i = 0
+    while i < len(data) {
+        content = content + string(data[i])
+        i = i + 1
+    }
+    runtime_write_text_file(path, content)
+    true
+}
 func find_next_newline_after(string path, int64 offset) int64: return offset
 func find_next_document_boundary(string path, int64 offset) int64: return offset
 func find_next_double_newline(string path, int64 offset) int64: return offset
@@ -743,6 +816,148 @@ func count_documents_in_data([]byte data) int: return 0
 func estimate_tokens_in_data([]byte data) int64: return int64(len(data)) / 3
 func assess_data_quality([]byte data) float: return 1.0
 func compress_data([]byte data, int level) []byte: return data
-func compute_sha256([]byte data) string: return ""
-func format_int_with_leading_zeros(int val, int width) string: return "" + val
-func get_current_time_ms() int: return 0
+func compute_sha256([]byte data) string {
+    string payload = ""
+    int i = 0
+    while i < len(data) {
+        payload = payload + string(data[i])
+        i = i + 1
+    }
+    string escaped = runtime_shell_escape(payload)
+    string checksum = trim(runtime_run_command_output("printf %s " + escaped + " | shasum -a 256 | awk '{print $1}'"))
+    if checksum != "" {
+        return checksum
+    }
+    trim(runtime_run_command_output("printf %s " + escaped + " | openssl dgst -sha256 | awk '{print $2}'"))
+}
+func format_int_with_leading_zeros(int val, int width) string {
+    string s = string(val)
+    while len(s) < width {
+        s = "0" + s
+    }
+    s
+}
+func get_current_time_ms() int {
+    string out = trim(runtime_run_command_output("python3 -c 'import time; print(int(time.time() * 1000))'"))
+    int current = 0
+    int i = 0
+    while i < len(out) {
+        string ch = string(out[i])
+        if ch >= "0" && ch <= "9" {
+            current = current * 10 + (int(ch) - 48)
+        }
+        i = i + 1
+    }
+    current
+}
+
+func bool_to_json(bool value) string {
+    if value {
+        return "true"
+    }
+    "false"
+}
+
+func json_escape(string value) string {
+    string out = ""
+    int i = 0
+    while i < len(value) {
+        string ch = string(value[i])
+        if ch == "\\" {
+            out = out + "\\\\"
+        } else if ch == "\"" {
+            out = out + "\\\""
+        } else if ch == "\n" {
+            out = out + "\\n"
+        } else if ch == "\r" {
+            out = out + "\\r"
+        } else if ch == "\t" {
+            out = out + "\\t"
+        } else {
+            out = out + ch
+        }
+        i = i + 1
+    }
+    out
+}
+
+func shard_info_to_json(shard_info shard) string {
+    string out = "{"
+    out = out + "\"shard_id\":" + string(shard.shard_id) + ","
+    out = out + "\"filename\":\"" + json_escape(shard.filename) + "\","
+    out = out + "\"file_size_bytes\":" + string(shard.file_size_bytes) + ","
+    out = out + "\"uncompressed_size_bytes\":" + string(shard.uncompressed_size_bytes) + ","
+    out = out + "\"document_count\":" + string(shard.document_count) + ","
+    out = out + "\"token_count\":" + string(shard.token_count) + ","
+    out = out + "\"quality_score\":" + string(shard.quality_score) + ","
+    out = out + "\"start_offset_in_dataset\":" + string(shard.start_offset_in_dataset) + ","
+    out = out + "\"end_offset_in_dataset\":" + string(shard.end_offset_in_dataset) + ","
+    out = out + "\"primary_rank\":" + string(shard.primary_rank) + ","
+    out = out + "\"is_fully_written\":" + bool_to_json(shard.is_fully_written) + ","
+    out = out + "\"is_validated\":" + bool_to_json(shard.is_validated) + ","
+    out = out + "\"checksum_sha256\":\"" + json_escape(shard.checksum_sha256) + "\","
+    out = out + "\"version\":" + string(shard.version) + ","
+    out = out + "\"access_count\":" + string(shard.access_count) + ","
+    out = out + "\"avg_read_time_ms\":" + string(shard.avg_read_time_ms) + ","
+    out = out + "\"assigned_ranks\":["
+    int i = 0
+    while i < len(shard.assigned_ranks) {
+        if i > 0 {
+            out = out + ","
+        }
+        out = out + string(shard.assigned_ranks[i])
+        i = i + 1
+    }
+    out = out + "]"
+    out = out + "}"
+    out
+}
+
+func config_to_json(shard_manager_config cfg) string {
+    string out = "{"
+    out = out + "\"target_shard_size_mb\":" + string(cfg.target_shard_size_mb) + ","
+    out = out + "\"min_shard_size_mb\":" + string(cfg.min_shard_size_mb) + ","
+    out = out + "\"max_shard_size_mb\":" + string(cfg.max_shard_size_mb) + ","
+    out = out + "\"partition_strategy\":\"" + json_escape(cfg.partition_strategy) + "\","
+    out = out + "\"boundary_alignment\":\"" + json_escape(cfg.boundary_alignment) + "\","
+    out = out + "\"num_ranks\":" + string(cfg.num_ranks) + ","
+    out = out + "\"balance_by_token_count\":" + bool_to_json(cfg.balance_by_token_count) + ","
+    out = out + "\"enable_replication\":" + bool_to_json(cfg.enable_replication) + ","
+    out = out + "\"shard_dir\":\"" + json_escape(cfg.shard_dir) + "\","
+    out = out + "\"file_extension\":\"" + json_escape(cfg.file_extension) + "\","
+    out = out + "\"compress_shards\":" + bool_to_json(cfg.compress_shards) + ","
+    out = out + "\"compression_level\":" + string(cfg.compression_level) + ","
+    out = out + "\"build_index\":" + bool_to_json(cfg.build_index) + ","
+    out = out + "\"include_checksums\":" + bool_to_json(cfg.include_checksums) + ","
+    out = out + "\"max_retries_on_failure\":" + string(cfg.max_retries_on_failure)
+    out = out + "}"
+    out
+}
+
+func manifest_to_json(dataset_manifest manifest) string {
+    string out = "{"
+    out = out + "\"dataset_name\":\"" + json_escape(manifest.dataset_name) + "\","
+    out = out + "\"dataset_version\":\"" + json_escape(manifest.dataset_version) + "\","
+    out = out + "\"source_path\":\"" + json_escape(manifest.source_path) + "\","
+    out = out + "\"total_size_bytes\":" + string(manifest.total_size_bytes) + ","
+    out = out + "\"total_compressed_bytes\":" + string(manifest.total_compressed_bytes) + ","
+    out = out + "\"total_shard_count\":" + string(manifest.total_shard_count) + ","
+    out = out + "\"total_document_count\":" + string(manifest.total_document_count) + ","
+    out = out + "\"total_token_count\":" + string(manifest.total_token_count) + ","
+    out = out + "\"config_used\":" + config_to_json(manifest.config_used) + ","
+    out = out + "\"creation_timestamp\":" + string(manifest.creation_timestamp) + ","
+    out = out + "\"created_by\":\"" + json_escape(manifest.created_by) + "\","
+    out = out + "\"parent_dataset\":\"" + json_escape(manifest.parent_dataset) + "\","
+    out = out + "\"shards\":["
+    int i = 0
+    while i < len(manifest.shards) {
+        if i > 0 {
+            out = out + ","
+        }
+        out = out + shard_info_to_json(manifest.shards[i])
+        i = i + 1
+    }
+    out = out + "]"
+    out = out + "}"
+    out
+}
