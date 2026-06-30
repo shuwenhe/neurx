@@ -20,34 +20,39 @@ func trim(string s) string {
     string out = ""
     int k = i
     while k <= j {
-        out = out + string(s[k])
+        out = out + string_char(s[k])
         k = k + 1
     }
     out
+}
+
+func string_char(int c) string {
+    ""
 }
 
 func substr(string s, int from, int to) string {
     string out = ""
     int i = from
     while i < to && i < len(s) {
-        out = out + string(s[i])
+        out = out + string_char(s[i])
         i = i + 1
     }
     out
 }
 
 func int_to_str(int n, int fallback) string {
-    if n == 0 {
+    int value = n
+    if value == 0 {
         return "0"
     }
-    bool neg = n < 0
+    bool neg = value < 0
     if neg {
-        n = -n
+        value = -value
     }
     string s = ""
-    while n > 0 {
-        s = string(n % 10 + 48) + s
-        n = n / 10
+    while value > 0 {
+        s = string_char(value % 10 + 48) + s
+        value = value / 10
     }
     if neg {
         s = "-" + s
@@ -129,15 +134,16 @@ func float_to_int(float x) int {
 }
 
 func fmt_float(float val, int decimals) string {
-    if val == 0.0 {
+    float value = val
+    if value == 0.0 {
         return "0.0"
     }
-    bool neg = val < 0.0
+    bool neg = value < 0.0
     if neg {
-        val = -val
+        value = -value
     }
-    int int_part = float_to_int(val)
-    float frac = val - int_part * 1.0
+    int int_part = float_to_int(value)
+    float frac = value - int_part * 1.0
     string s = ""
     if neg {
         s = "-"
@@ -147,7 +153,7 @@ func fmt_float(float val, int decimals) string {
     while i < decimals {
         frac = frac * 10.0
         int digit = float_to_int(frac)
-        s = s + string(digit + 48)
+        s = s + string_char(digit + 48)
         frac = frac - digit * 1.0
         i = i + 1
     }
@@ -166,7 +172,7 @@ func shell_escape(string value) string {
     string out = "'"
     int i = 0
     while i < len(value) {
-        string ch = string(value[i])
+        string ch = string_char(value[i])
         if ch == "'" {
             out = out + "'\"'\"'"
         } else {
@@ -193,6 +199,33 @@ func resolve_checkpoint_path(string input_path) string {
     checkpoint_path
 }
 
+func build_qa_prompt(string prompt) string {
+    string clean_prompt = trim(prompt)
+    if len(clean_prompt) == 0 {
+        clean_prompt = "NeurX 可以做什么？"
+    }
+    "你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：\n" +
+    clean_prompt + "\n答案："
+}
+
+func resolve_inference_prompt(string prompt_from_env, string fallback_prompt, string answer_mode) string {
+    string prompt = trim(prompt_from_env)
+    if len(prompt) == 0 {
+        prompt = trim(fallback_prompt)
+    }
+    if len(prompt) == 0 {
+        prompt = "NeurX 可以做什么？"
+    }
+
+    if answer_mode == "raw" {
+        return prompt
+    }
+    if answer_mode == "chat" {
+        return "用户: " + prompt + "\n助手: "
+    }
+    build_qa_prompt(prompt)
+}
+
 func csv_first_int(string s) int {
     string cur = ""
     int i = 0
@@ -200,7 +233,7 @@ func csv_first_int(string s) int {
         if s[i] == 44 {
             break
         }
-        cur = cur + string(s[i])
+        cur = cur + string_char(s[i])
         i = i + 1
     }
     str_to_int(trim(cur), 0)
@@ -219,7 +252,7 @@ func csv_second_int(string s) int {
         i = i + 1
     }
     while i < len(s) {
-        cur = cur + string(s[i])
+        cur = cur + string_char(s[i])
         i = i + 1
     }
     if !seen_first {
@@ -250,7 +283,7 @@ func parse_csv_floats(string s) []float {
                 cur = ""
             }
         } else {
-            cur = cur + string(s[i])
+            cur = cur + string_char(s[i])
         }
         i = i + 1
     }
@@ -527,7 +560,7 @@ func extract_weight_row_csv_from_text(string weights_csv, int row_id, int vocab_
             cur = ""
         } else {
             if field >= start_field && field <= end_field {
-                cur = cur + string(weights_csv[i])
+                cur = cur + string_char(weights_csv[i])
             }
         }
         if field > end_field {
@@ -583,7 +616,7 @@ func generate_tokens(compiled_model model, string prompt, int max_tokens) string
         }
 
         int next_id = argmax_next_row(row, model.bias, vocab)
-        output = output + string(next_id)
+        output = output + string_char(next_id)
         prev_id = next_id
         token = token + 1
     }
@@ -667,14 +700,47 @@ func benchmark_model(compiled_model model, int num_prompts, int avg_prompt_lengt
 }
 
 func main() int {
-    string model_name = runtime_env_get("NEURX_INFER_MODEL_NAME", "llm_s")
-    string device_type = runtime_env_get("NEURX_INFER_DEVICE", "cpu")
-    string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "artifacts/checkpoints/llm_s_pretrain"))
-    string seed = runtime_env_get("NEURX_INFER_SEED", "neurx ")
+    string model_name = trim(runtime_env_get("NEURX_INFER_MODEL_NAME", ""))
+    if len(model_name) == 0 {
+        model_name = "llm_s"
+    }
+
+    string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", ""))
+    if len(device_type) == 0 {
+        device_type = "cpu"
+    }
+
+    string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", ""))
+    if len(checkpoint_arg) == 0 {
+        checkpoint_arg = "/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training_validation2/final_model.neurx"
+    }
+
+    string seed = runtime_env_get("NEURX_INFER_SEED", "")
+    if len(trim(seed)) == 0 {
+        seed = "neurx "
+    }
+
+    string fallback_prompt = runtime_env_get("NEURX_INFER_FALLBACK_PROMPT", "")
+    if len(trim(fallback_prompt)) == 0 {
+        fallback_prompt = "NeurX 可以做什么？"
+    }
+
+    string prompt_from_env = runtime_env_get(
+        "NEURX_INFER_PROMPT",
+        runtime_env_get("NEURX_INFERENCE_INPUT", "")
+    )
+    if len(trim(prompt_from_env)) == 0 {
+        prompt_from_env = "NeurX 可以做什么？"
+    }
+    string answer_mode = trim(runtime_env_get("NEURX_INFER_ANSWER_MODE", ""))
+    if len(answer_mode) == 0 {
+        answer_mode = "qa"
+    }
     int max_new_chars = str_to_int(runtime_env_get("NEURX_INFER_MAX_NEW_CHARS", "120"), 120)
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
 
     inference_engine engine = new_inference_engine(model_name, device_type)
+    println("DEBUG checkpoint_arg=" + checkpoint_arg)
     compiled_model model = load_model(engine, checkpoint_arg)
     if len(model.bias) == 0 {
         println("Failed to load checkpoint: " + resolve_checkpoint_path(checkpoint_arg))
@@ -713,6 +779,10 @@ func main() int {
     println("Quantized: " + quantized_text)
     println("Graph mode: " + graph_mode_text)
     println("Seed: " + seed)
+    println("Answer mode: " + answer_mode)
+
+    string prompt = resolve_inference_prompt(prompt_from_env, fallback_prompt, answer_mode)
+    println("Prompt: " + prompt)
 
     if validate_only != "" {
         println("Validation only: checkpoint loaded.")
@@ -721,7 +791,7 @@ func main() int {
     }
 
     println("Generated:")
-    println(run_inference(model, seed, max_new_chars))
+    println(run_inference(model, prompt, max_new_chars))
     println("================================================")
     0
 }

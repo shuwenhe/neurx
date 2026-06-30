@@ -212,6 +212,12 @@ run_compiled_binary() {
     DATASET_RECORDS="0"
     if [ -f "$active_dataset" ]; then
         DATASET_RECORDS=$(wc -l < "$active_dataset" 2>/dev/null | tr -d ' ')
+    elif [ -d "$active_dataset" ]; then
+        DATASET_RECORDS=0
+        for shard in "$active_dataset"/*.jsonl.gz; do
+            [ -e "$shard" ] || continue
+            DATASET_RECORDS=$((DATASET_RECORDS + $(gzip -cd "$shard" | wc -l | tr -d ' ')))
+        done
     fi
     
     echo "训练配置:"

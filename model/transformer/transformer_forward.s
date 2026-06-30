@@ -87,7 +87,7 @@ struct transformer_forward_state {
 struct forward_pass_output {
     []float logits
     []float hidden_states
-    [][]float layer_outputs
+    []float layer_outputs
 }
 
 struct forward_pass_cache {
@@ -115,6 +115,19 @@ func copy_vector([]float src) []float {
     int i = 0
     while i < len(src) {
         out[i] = src[i]
+        i = i + 1
+    }
+    out
+}
+
+func transformer_layer_at([]transformer_layer_state layers, int index) transformer_layer_state {
+    int i = 0
+    transformer_layer_state out = layers[0]
+    while i < len(layers) {
+        if i == index {
+            out = layers[i]
+            i = len(layers)
+        }
         i = i + 1
     }
     out
@@ -190,6 +203,38 @@ func gelu(float x) float {
     x * cdf
 }
 
+func project_rows(
+    []float input,
+    []float weight,
+    []float bias,
+    int token_count,
+    int in_dim,
+    int out_dim
+) []float {
+    []float output = allocate_vector(token_count * out_dim, 0.0)
+    int token = 0
+    while token < token_count {
+        int input_base = token * in_dim
+        int output_base = token * out_dim
+        int o = 0
+        while o < out_dim {
+            float sum = 0.0
+            if len(bias) > o {
+                sum = bias[o]
+            }
+            int i = 0
+            while i < in_dim {
+                sum = sum + input[input_base + i] * weight[o * in_dim + i]
+                i = i + 1
+            }
+            output[output_base + o] = sum
+            o = o + 1
+        }
+        token = token + 1
+    }
+    output
+}
+
 // =====================================================================
 // Token Embedding
 // =====================================================================
@@ -240,33 +285,72 @@ func multi_head_attention_forward(
     bool use_causal_mask
 ) []float {
     int head_dim = hidden_dim / num_heads
-    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    int token_count = batch_size * seq_len
+    if head_dim <= 0 || token_count <= 0 {
+        return copy_vector(hidden_states)
+    }
+
+    []float q = project_rows(hidden_states, layer.wq, layer.query_bias, token_count, hidden_dim, hidden_dim)
+    []float k = project_rows(hidden_states, layer.wk, layer.key_bias, token_count, hidden_dim, hidden_dim)
+    []float v = project_rows(hidden_states, layer.wv, layer.value_bias, token_count, hidden_dim, hidden_dim)
+    []float context = allocate_vector(token_count * hidden_dim, 0.0)
+    []float output = allocate_vector(token_count * hidden_dim, 0.0)
+    float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
-            // Compute attention scores for this position
-            float attn_score = 0.0
+            int token_idx = b * seq_len + s
+            int q_base = token_idx * hidden_dim
+
             int h = 0
             while h < num_heads {
-                int head_output_idx = (b * seq_len + s) * hidden_dim + h * head_dim
-                
-                // Placeholder: simplified attention computation
-                // In full implementation, this would compute scaled dot-product attention
+                int head_offset = h * head_dim
+                []float scores = allocate_vector(seq_len, -1.0e9)
+
+                int t = 0
+                while t < seq_len {
+                    if !use_causal_mask || t <= s {
+                        int key_token_idx = b * seq_len + t
+                        int k_base = key_token_idx * hidden_dim + head_offset
+                        float score = 0.0
+                        int d = 0
+                        while d < head_dim {
+                            score = score + q[q_base + head_offset + d] * k[k_base + d]
+                            d = d + 1
+                        }
+                        scores[t] = score * scale
+                    }
+                    t = t + 1
+                }
+
+                []float probs = softmax(scores, seq_len)
+
                 int d = 0
                 while d < head_dim {
-                    int hidden_idx = (b * seq_len + s) * hidden_dim + h * head_dim + d
-                    output[head_output_idx + d] = hidden_states[hidden_idx]
+                    float acc = 0.0
+                    int t2 = 0
+                    while t2 < seq_len {
+                        if !use_causal_mask || t2 <= s {
+                            int value_token_idx = b * seq_len + t2
+                            int v_base = value_token_idx * hidden_dim + head_offset
+                            acc = acc + probs[t2] * v[v_base + d]
+                        }
+                        t2 = t2 + 1
+                    }
+                    context[q_base + head_offset + d] = acc
                     d = d + 1
                 }
-                
+
                 h = h + 1
             }
             s = s + 1
         }
         b = b + 1
     }
+
+    output = project_rows(context, layer.wo, layer.output_bias, token_count, hidden_dim, hidden_dim)
     
     output
 }
@@ -426,17 +510,17 @@ func transformer_layer_forward(
 // =====================================================================
 
 func transformer_forward_pass(
-    transformer_forward_state transformer,
+    transformer_forward_state model_state,
     []int input_ids,
     int batch_size,
     int seq_len
 ) forward_pass_output {
-    int hidden_dim = transformer.hidden_dim
-    int num_layers = transformer.num_layers
+    int hidden_dim = model_state.hidden_dim
+    int num_layers = model_state.num_layers
     
     // Embed tokens
     var hidden_states = embed_tokens(
-        transformer.token_embedding,
+        model_state.token_embedding,
         input_ids,
         batch_size,
         seq_len,
@@ -445,7 +529,7 @@ func transformer_forward_pass(
     
     // Add position encoding
     var pos_encoding = get_position_encoding(
-        transformer.pos_encoding_abs,
+        model_state.pos_encoding_abs,
         0,
         seq_len
     )
@@ -457,13 +541,10 @@ func transformer_forward_pass(
         hidden_dim
     )
     
-    // Store layer outputs for backward pass
-    [][]float layer_outputs = [][]float{cap: num_layers}
-    
     // Pass through transformer layers
     int layer_idx = 0
     while layer_idx < num_layers {
-        var layer = transformer.layers[layer_idx]
+        transformer_layer_state layer = transformer_layer_at(model_state.layers, layer_idx)
         
         hidden_states = transformer_layer_forward(
             layer,
@@ -471,19 +552,17 @@ func transformer_forward_pass(
             batch_size,
             seq_len,
             hidden_dim,
-            transformer.num_heads,
-            transformer.intermediate_dim,
-            transformer.config.use_causal_mask,
-            transformer.config.pre_norm
+            model_state.num_heads,
+            model_state.intermediate_dim,
+            model_state.config.use_causal_mask,
+            model_state.config.pre_norm
         )
-        
-        layer_outputs[layer_idx] = copy_vector(hidden_states)
         layer_idx = layer_idx + 1
     }
     
     // Final layer norm
     var final_norm_output = layer_normalize(
-        transformer.final_norm,
+        model_state.final_norm,
         hidden_states,
         batch_size,
         seq_len
@@ -491,21 +570,21 @@ func transformer_forward_pass(
     hidden_states = copy_vector(final_norm_output.normalized)
     
     // Project to vocabulary
-    []float logits = allocate_vector(batch_size * seq_len * transformer.vocab_size, 0.0)
+    []float logits = allocate_vector(batch_size * seq_len * model_state.vocab_size, 0.0)
     
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int src_idx = (b * seq_len + s) * hidden_dim
-            int dst_idx = (b * seq_len + s) * transformer.vocab_size
+            int dst_idx = (b * seq_len + s) * model_state.vocab_size
             
             int v = 0
-            while v < transformer.vocab_size {
+            while v < model_state.vocab_size {
                 float val = 0.0
                 int d = 0
                 while d < hidden_dim {
-                    val = val + hidden_states[src_idx + d] * transformer.lm_head_weight[v * hidden_dim + d]
+                    val = val + hidden_states[src_idx + d] * model_state.lm_head_weight[v * hidden_dim + d]
                     d = d + 1
                 }
                 logits[dst_idx + v] = val
@@ -520,6 +599,6 @@ func transformer_forward_pass(
     forward_pass_output {
         logits: logits,
         hidden_states: hidden_states,
-        layer_outputs: layer_outputs,
+        layer_outputs: []float{cap: 0},
     }
 }
