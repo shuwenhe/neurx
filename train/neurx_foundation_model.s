@@ -59,6 +59,14 @@ use neurx.alignment.supervised_finetuning.{sft_config, sft_trainer, new_sft_conf
 use neurx.alignment.rlhf_training.{rlhf_config, rlhf_trainer}
 use neurx.opt.adamw.{adamw_config, adamw_optimizer, new_adamw}
 use neurx.opt.lr_scheduler.{lr_scheduler, cosine_with_warmup}
+use neurx.train.industrial_gpt_stack.{
+    industrial_gpt_stack_config, build_industrial_gpt_stack,
+    industrial_stack_summary
+}
+use neurx.train.industrial_readiness.{
+    industrial_readiness_input, readiness_report,
+    evaluate_industrial_readiness, readiness_summary
+}
 
 // ============================================================================
 // 1. 配置结构体
@@ -1599,6 +1607,9 @@ func summarize_training_plan(foundation_model_config cfg) string {
     s = s + "║   总 GPU:   " + int_to_s(cfg.parallel.total_gpus) + "× H100\n"
     s = s + "║   ZeRO:     " + cfg.parallel.zero_stage + "\n"
     s = s + "╠══════════════════════════════════════════════════╣\n"
+    industrial_gpt_stack_config stack = build_industrial_gpt_stack(arch, cfg.parallel.flash_attention)
+    s = s + industrial_stack_summary(stack)
+    s = s + "╠══════════════════════════════════════════════════╣\n"
     s = s + "║ 预训练学习率:  " + cfg.pretrain.optim.lr.to_string() + "\n"
     s = s + "║ 总步数 (预训练): " + int_to_s(cfg.pretrain.max_steps) + "\n"
     s = s + "╠══════════════════════════════════════════════════╣\n"
@@ -1608,6 +1619,63 @@ func summarize_training_plan(foundation_model_config cfg) string {
     s = s + "║   估算费用:      ~$" + int_to_s(float_to_int_approx(cost)) + "\n"
     s = s + "╚══════════════════════════════════════════════════╝\n"
     s
+}
+
+// 训练前工业门禁检查：外部资源由调用方明确传入，避免把“代码存在”误判为“集群/数据已就绪”。
+func evaluate_foundation_readiness(
+    foundation_model_config cfg,
+    bool has_real_corpus,
+    bool has_tokenizer_artifact,
+    bool has_checkpoint_resume,
+    bool has_nccl_runtime,
+    bool has_benchmark_suite,
+    bool has_serving_runtime,
+    bool has_safety_eval,
+    int preference_pairs_m
+) readiness_report {
+    industrial_gpt_stack_config stack = build_industrial_gpt_stack(cfg.arch, cfg.parallel.flash_attention)
+    industrial_readiness_input input = industrial_readiness_input {
+        arch: cfg.arch,
+        stack: stack,
+        available_gpus: cfg.parallel.total_gpus,
+        pretrain_tokens_b: cfg.pretrain.data.total_tokens_b,
+        sft_tokens_b: cfg.sft.data.total_tokens_b,
+        preference_pairs_m: preference_pairs_m,
+        reasoning_tokens_b: cfg.reasoning.data.total_tokens_b,
+        has_real_corpus: has_real_corpus,
+        has_tokenizer_artifact: has_tokenizer_artifact,
+        has_checkpoint_resume: has_checkpoint_resume,
+        has_nccl_runtime: has_nccl_runtime,
+        has_benchmark_suite: has_benchmark_suite,
+        has_serving_runtime: has_serving_runtime,
+        has_safety_eval: has_safety_eval,
+    }
+    evaluate_industrial_readiness(input)
+}
+
+func summarize_foundation_readiness(
+    foundation_model_config cfg,
+    bool has_real_corpus,
+    bool has_tokenizer_artifact,
+    bool has_checkpoint_resume,
+    bool has_nccl_runtime,
+    bool has_benchmark_suite,
+    bool has_serving_runtime,
+    bool has_safety_eval,
+    int preference_pairs_m
+) string {
+    readiness_report report = evaluate_foundation_readiness(
+        cfg,
+        has_real_corpus,
+        has_tokenizer_artifact,
+        has_checkpoint_resume,
+        has_nccl_runtime,
+        has_benchmark_suite,
+        has_serving_runtime,
+        has_safety_eval,
+        preference_pairs_m
+    )
+    readiness_summary(report)
 }
 
 func int_to_s(int n) string {
