@@ -20,10 +20,14 @@ func trim(string s) string {
     string out = ""
     int k = i
     while k <= j {
-        out = out + string(s[k])
+        out = out + string_char(s[k])
         k = k + 1
     }
     out
+}
+
+func string_char(int c) string {
+    ""
 }
 
 func starts_with(string s, string prefix) bool {
@@ -44,7 +48,7 @@ func substr(string s, int from, int to) string {
     string out = ""
     int i = from
     while i < to && i < len(s) {
-        out = out + string(s[i])
+        out = out + string_char(s[i])
         i = i + 1
     }
     out
@@ -58,17 +62,18 @@ func bool_to_str(bool v) string {
 }
 
 func int_to_str(int n, int fallback) string {
-    if n == 0 {
+    int value = n
+    if value == 0 {
         return "0"
     }
-    bool neg = n < 0
+    bool neg = value < 0
     if neg {
-        n = -n
+        value = -value
     }
     string s = ""
-    while n > 0 {
-        s = string(n % 10 + 48) + s
-        n = n / 10
+    while value > 0 {
+        s = string_char(value % 10 + 48) + s
+        value = value / 10
     }
     if neg {
         s = "-" + s
@@ -151,15 +156,16 @@ func to_float(int n) float {
 }
 
 func fmt_float(float val, int decimals) string {
-    if val == 0.0 {
+    float value = val
+    if value == 0.0 {
         return "0.0"
     }
-    bool neg = val < 0.0
+    bool neg = value < 0.0
     if neg {
-        val = -val
+        value = -value
     }
-    int int_part = float_to_int(val)
-    float frac = val - int_part * 1.0
+    int int_part = float_to_int(value)
+    float frac = value - int_part * 1.0
     string s = ""
     if neg {
         s = "-"
@@ -169,7 +175,7 @@ func fmt_float(float val, int decimals) string {
     while i < decimals {
         frac = frac * 10.0
         int digit = float_to_int(frac)
-        s = s + string(digit + 48)
+        s = s + string_char(digit + 48)
         frac = frac - digit * 1.0
         i = i + 1
     }
@@ -208,7 +214,7 @@ func split_lines(string s) []string {
             i = i + 1
             continue
         }
-        line = line + string(s[i])
+        line = line + string_char(s[i])
         i = i + 1
     }
     if len(line) > 0 {

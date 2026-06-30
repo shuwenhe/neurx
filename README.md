@@ -228,9 +228,11 @@ export NEURX_LEARNING_RATE=0.001
 export NEURX_WARMUP_STEPS=100
 
 # Inference
-export NEURX_MAX_NEW_TOKENS=50
-export NEURX_TEMPERATURE=0.7
-export NEURX_BEAM_SIZE=3
+export NEURX_INFER_CHECKPOINT_PATH=artifacts/checkpoints/llm_training
+export NEURX_INFER_SEED="neurx "
+export NEURX_INFER_MAX_NEW_CHARS=120
+export NEURX_INFER_MODEL_NAME=llm_s
+export NEURX_INFER_DEVICE=cpu
 ```
 
 ### Config Files
@@ -249,9 +251,10 @@ bash run_llm_training_with_compiler.sh
 ### Example 2: Custom Inference
 
 ```bash
-export NEURX_MAX_NEW_TOKENS=100
-export NEURX_TEMPERATURE=0.8
-bash run_full_inference.sh
+export NEURX_INFER_CHECKPOINT_PATH=artifacts/checkpoints/llm_training
+export NEURX_INFER_SEED="你好"
+export NEURX_INFER_MAX_NEW_CHARS=200
+bash run_inference_llm.sh
 ```
 
 ### Example 3: Interactive Chat

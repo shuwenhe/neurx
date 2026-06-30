@@ -32,12 +32,14 @@ func copy_shape_tail(tensor a) []int {
     int ndim = len(a.shape)
     []int shape = []int{cap: ndim}
     int i = 1
+    int out_i = 1
     while i < ndim {
-        shape.push(a.shape[i])
+        shape[out_i] = a.shape[i]
+        out_i = out_i + 1
         i = i + 1
     }
     if len(shape) == 0 {
-        shape.push(1)
+        shape[0] = 1
     }
     shape
 }
@@ -116,10 +118,10 @@ func batch_matmul(tensor a, tensor b) tensor {
 
     tensor first_out = neurx.tensor.tensor.matmul(first_a, first_b)
     []int out_shape = []int{cap: len(first_out.shape) + 1}
-    out_shape.push(batch)
+    out_shape[0] = batch
     int j = 0
     while j < len(first_out.shape) {
-        out_shape.push(first_out.shape[j])
+        out_shape[j + 1] = first_out.shape[j]
         j = j + 1
     }
 
@@ -213,27 +215,41 @@ func batch_has_param(batch_state state, string param) bool {
 
 func batch_add_primitive(batch_state state, string primitive) batch_state {
     []string primitives = copy_strings(state.primitives)
-    primitives.push(primitive)
+    int n = len(primitives)
+    []string next = []string{cap: n + 1}
+    int i = 0
+    while i < n {
+        next[i] = primitives[i]
+        i = i + 1
+    }
+    next[n] = primitive
     batch_state {
         name: state.name,
         active: true,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
-        primitives: primitives,
+        primitives: next,
         params: copy_strings(state.params),
     }
 }
 
 func batch_add_param(batch_state state, string param) batch_state {
     []string params = copy_strings(state.params)
-    params.push(param)
+    int n = len(params)
+    []string next = []string{cap: n + 1}
+    int i = 0
+    while i < n {
+        next[i] = params[i]
+        i = i + 1
+    }
+    next[n] = param
     batch_state {
         name: state.name,
         active: true,
         batch_size: state.batch_size,
         batch_dim: state.batch_dim,
         primitives: copy_strings(state.primitives),
-        params: params,
+        params: next,
     }
 }
 

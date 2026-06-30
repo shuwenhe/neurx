@@ -31,7 +31,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out.push(data[i])
+        out[i] = data[i]
     }
     out
 }
@@ -40,7 +40,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     for i in 0..n {
-        out.push(data[i])
+        out[i] = data[i]
     }
     out
 }
@@ -57,7 +57,7 @@ func fill_like(tensor like, float value) tensor {
     int n = len(like.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out.push(value)
+        out[i] = value
     }
     new(out, like.shape, like.requires_grad)
 }
@@ -93,7 +93,7 @@ func flatten(tensor a, int start_dim, int end_dim) tensor {
     []int shape = []int{cap: ndim}
     int i = 0
     while i < start {
-        shape.push(a.shape[i])
+        shape[i] = a.shape[i]
         i = i + 1
     }
 
@@ -102,10 +102,10 @@ func flatten(tensor a, int start_dim, int end_dim) tensor {
         flat = flat * a.shape[i]
         i = i + 1
     }
-    shape.push(flat)
+    shape[i] = flat
 
     while i < ndim {
-        shape.push(a.shape[i])
+        shape[i] = a.shape[i]
         i = i + 1
     }
 
@@ -118,12 +118,12 @@ func squeeze(tensor a) tensor {
     int i = 0
     while i < ndim {
         if a.shape[i] != 1 {
-            shape.push(a.shape[i])
+            shape[i] = a.shape[i]
         }
         i = i + 1
     }
     if len(shape) == 0 {
-        shape.push(1)
+        shape[0] = 1
     }
     new(copy_float(a.data), shape, a.requires_grad)
 }
@@ -137,12 +137,12 @@ func unsqueeze(tensor a, int dim) tensor {
     []int shape = []int{cap: ndim + 1}
     int i = 0
     while i < d {
-        shape.push(a.shape[i])
+        shape[i] = a.shape[i]
         i = i + 1
     }
-    shape.push(1)
+    shape[i] = 1
     while i < ndim {
-        shape.push(a.shape[i])
+        shape[i + 1] = a.shape[i]
         i = i + 1
     }
     new(copy_float(a.data), shape, a.requires_grad)
@@ -157,7 +157,7 @@ func unravel_index(int flat_index, []int shape) []int {
     []int coords = []int{cap: ndim}
     int i = 0
     while i < ndim {
-        coords.push(0)
+        coords[i] = 0
         i = i + 1
     }
 
@@ -208,7 +208,7 @@ func transpose(tensor a, int dim0, int dim1) tensor {
         coords[d0] = coords[d1]
         coords[d1] = ctmp
         int src = ravel_index(coords, a.shape)
-        out.push(a.data[src])
+        out[flat] = a.data[src]
         flat = flat + 1
     }
 
@@ -220,7 +220,7 @@ func permute_inverse([]int dims) []int {
     []int inv = []int{cap: ndim}
     int i = 0
     while i < ndim {
-        inv.push(0)
+        inv[i] = 0
         i = i + 1
     }
     i = 0
@@ -236,7 +236,7 @@ func permute(tensor a, []int dims) tensor {
     []int shape = []int{cap: ndim}
     int i = 0
     while i < ndim {
-        shape.push(a.shape[dims[i]])
+        shape[i] = a.shape[dims[i]]
         i = i + 1
     }
 
@@ -245,10 +245,10 @@ func permute(tensor a, []int dims) tensor {
     int flat = 0
     while flat < total {
         []int coords = unravel_index(flat, shape)
-        []int src_coords = []int{cap: len(a.shape)}
-        int j = 0
-        while j < len(a.shape) {
-            src_coords.push(0)
+    []int src_coords = []int{cap: len(a.shape)}
+    int j = 0
+    while j < len(a.shape) {
+            src_coords[j] = 0
             j = j + 1
         }
         j = 0
@@ -257,7 +257,7 @@ func permute(tensor a, []int dims) tensor {
             j = j + 1
         }
         int src = ravel_index(src_coords, a.shape)
-        out.push(a.data[src])
+        out[flat] = a.data[src]
         flat = flat + 1
     }
 
@@ -274,7 +274,7 @@ func broadcast_shape([]int a, []int b) []int {
     []int shape = []int{cap: ndim}
     int i = 0
     while i < ndim {
-        shape.push(1)
+        shape[i] = 1
         i = i + 1
     }
     int ia = ndim_a - 1
@@ -312,7 +312,7 @@ func broadcast_index([]int coords, []int shape) int {
     []int aligned = []int{cap: ndim_shape}
     int i = 0
     while i < ndim_shape {
-        aligned.push(0)
+        aligned[i] = 0
         i = i + 1
     }
     i = 0
@@ -615,27 +615,27 @@ func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     int i = 0
     while i < ndim {
         if i != axis {
-            out_shape.push(a.shape[i])
+            out_shape[i] = a.shape[i]
         } else {
             if keepdim {
-                out_shape.push(1)
+                out_shape[i] = 1
             }
         }
         i = i + 1
     }
     if len(out_shape) == 0 {
-        out_shape.push(1)
+        out_shape[0] = 1
     }
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
     while flat < total {
         []int coords = unravel_index(flat, out_shape)
-        []int src_coords = []int{cap: ndim}
-        int j = 0
-        int k = 0
-        while j < ndim {
-            src_coords.push(0)
+    []int src_coords = []int{cap: ndim}
+    int j = 0
+    int k = 0
+    while j < ndim {
+            src_coords[j] = 0
             j = j + 1
         }
         j = 0
@@ -974,7 +974,7 @@ func softmax(tensor a, int dim) tensor {
     []int coords = []int{cap: ndim}
     int i = 0
     while i < ndim {
-        coords.push(0)
+        coords[i] = 0
         i = i + 1
     }
 
