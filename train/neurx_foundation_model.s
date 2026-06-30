@@ -39,6 +39,16 @@ use neurx.posttrain.reward.reward_model.{
     reward_model_from_backbone, reward_model_train_step,
     reward_model_score, reward_model_eval_accuracy, rm_score_batch
 }
+use neurx.alignment.constitutional_ai.{
+    constitution, cai_batch, cai_flat_batch, cai_stats,
+    default_constitution, cai_generate_preferences,
+    cai_to_flat_batch, cai_compute_stats
+}
+use neurx.eval.benchmark_eval.{
+    benchmark_suite, benchmark_report,
+    run_benchmark_suite, format_benchmark_report,
+    evaluate_multiple_choice, evaluate_perplexity, mc_eval_result, ppl_result
+}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step}
 use neurx.alignment.supervised_finetuning.{sft_config, sft_trainer, new_sft_config, new_sft_trainer}
@@ -1034,15 +1044,32 @@ func run_rlhf_stage(foundation_model_state state) foundation_model_state {
 
     // ── 阶段 3a: 训练真实奖励模型 (Reward Model) ──────────────────────────
     // 以 SFT 后的 backbone 初始化 RM，在偏好对上训练标量奖励头。
+    // 偏好数据来自 Constitutional AI 的自我批判-修订循环 (RLAIF, 无需人工标注)。
     reward_model rm = reward_model_from_backbone(state.model, 0.00005)
+
+    // Constitutional AI: 用模型自身生成 (revised ≻ original) 偏好对
+    constitution consti = default_constitution()
+    int cai_prompts = 8
+    [][]int prompts = make_cai_prompts(cai_prompts, seq_len / 4, arch.vocab_size)
+    cai_batch cai_data = cai_generate_preferences(state.model, prompts, consti, seq_len / 2, 1234)
+    cai_stats cstats = cai_compute_stats(cai_data)
+    cai_flat_batch cai_flat = cai_to_flat_batch(cai_data, seq_len, 0)
+
     int rm_steps = cfg.max_steps / 4      // 25% 步数用于 RM 训练
     if rm_steps < 1 { rm_steps = 1 }
     float rm_acc = 0.0
     int rm_step = 0
     while rm_step < rm_steps {
-        []int chosen  = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, true)
-        []int rejected = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, false)
-        reward_train_result rr = reward_model_train_step(rm, chosen, rejected, 2, seq_len)
+        []int chosen
+        []int rejected
+        if cai_flat.batch_size > 0 {
+            // 优先使用 CAI 生成的真实偏好对 (轮转抽取一对)
+            (chosen, rejected) = cai_take_pair(cai_flat, rm_step, seq_len)
+        } else {
+            chosen  = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, true)
+            rejected = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, false)
+        }
+        reward_train_result rr = reward_model_train_step(rm, chosen, rejected, 1, seq_len)
         rm = rr.model
         rm_acc = rr.accuracy
         rm_step = rm_step + 1
@@ -1229,6 +1256,18 @@ func run_full_pipeline(foundation_model_config cfg) foundation_model_state {
 // ============================================================================
 // 17. 基准测试评估
 // ============================================================================
+
+// 在真实基准套件上评测训练好的模型 (log-likelihood 打分，与 lm-eval-harness 一致)
+// suite 由调用方装载真实数据集 (MMLU/HellaSwag/ARC/WikiText/GSM8K/HumanEval)
+func run_real_benchmarks(foundation_model_state state, benchmark_suite suite) benchmark_report {
+    run_benchmark_suite(state.model, suite)
+}
+
+// 打印真实基准报告
+func report_real_benchmarks(foundation_model_state state, benchmark_suite suite) string {
+    benchmark_report report = run_real_benchmarks(state, suite)
+    format_benchmark_report(report)
+}
 
 // 根据训练阶段和参数量估算基准表现 (基于 Scaling Laws + 论文数据)
 func evaluate_benchmarks(foundation_model_state state) benchmark_results {
@@ -1446,6 +1485,31 @@ func make_preference_batch(int batch_size, int seq_len, int vocab_size, int seed
 
 func make_cot_batch(int batch_size, int seq_len, int vocab_size, int seed) []int {
     make_synthetic_batch(batch_size, seq_len, vocab_size, seed + 400000)
+}
+
+// 为 Constitutional AI 构造一组提示 (生产环境替换为真实 red-team 提示集)
+func make_cai_prompts(int num_prompts, int prompt_len, int vocab_size) [][]int {
+    [][]int prompts = [][]int{cap: num_prompts}
+    int i = 0
+    while i < num_prompts {
+        prompts[i] = make_synthetic_batch(1, prompt_len, vocab_size, 900000 + i * 13)
+        i = i + 1
+    }
+    prompts
+}
+
+// 从 CAI 扁平批次中轮转抽取一对 (chosen, rejected)，各 [seq_len]
+func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int) {
+    int b = idx - (idx / flat.batch_size) * flat.batch_size
+    []int chosen = []int{cap: seq_len}
+    []int rejected = []int{cap: seq_len}
+    int t = 0
+    while t < seq_len {
+        chosen[t] = flat.chosen_ids[b * seq_len + t]
+        rejected[t] = flat.rejected_ids[b * seq_len + t]
+        t = t + 1
+    }
+    (chosen, rejected)
 }
 
 // 记录训练进度
