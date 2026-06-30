@@ -1,5 +1,7 @@
 package neurx.model.transformer.attention
 
+use neurx.model.transformer.norm.{rope_embedding, rope_apply_result, apply_rope}
+
 // Multi-head attention for transformer blocks.
 // Supports standard attention, GQA, MQA, and a flash-attention-style entry
 // that shares the same numerically stable core.
@@ -275,11 +277,42 @@ func forward_attention(
     int seq_len
 ) []float {
     project_qkv_result projected = project_qkv(attn, hidden_states, seq_len)
-    []float attended = attention_core(attn, projected.query, projected.key, projected.value, seq_len)
+    forward_attention_projected(attn, projected.query, projected.key, projected.value, seq_len)
+}
+
+func forward_attention_projected(
+    multi_head_attention attn,
+    []float query,
+    []float key,
+    []float value,
+    int seq_len
+) []float {
+    []float attended = attention_core(attn, query, key, value, seq_len)
     int hidden_dim = attn.config.hidden_dim
     []float output = matmul_flat(attended, attn.output_weight, seq_len, hidden_dim, hidden_dim)
     output = apply_bias(output, attn.output_bias)
     output
+}
+
+func forward_attention_with_rope(
+    multi_head_attention attn,
+    []float hidden_states,
+    int batch_size,
+    int seq_len,
+    rope_embedding rope
+) []float {
+    int total_tokens = batch_size * seq_len
+    project_qkv_result projected = project_qkv(attn, hidden_states, total_tokens)
+    rope_apply_result rotated = apply_rope(
+        rope,
+        projected.query,
+        projected.key,
+        batch_size,
+        attn.config.num_heads,
+        seq_len,
+        attn.head_dim
+    )
+    forward_attention_projected(attn, rotated.query, rotated.key, projected.value, total_tokens)
 }
 
 func forward_gqa(

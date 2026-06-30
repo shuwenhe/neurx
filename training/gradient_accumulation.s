@@ -19,7 +19,9 @@ struct gradient_accumulation_config {
 
 struct accumulated_gradients {
     gradients: [][]float
+    accumulation_steps: int
     loss_sum: float
+    accumulated_loss: float
     steps_accumulated: int
     is_ready: bool  // True when ready to update
 }
@@ -40,7 +42,9 @@ struct accumulation_buffer {
 func new_accumulated_gradients(gradient_size: int) accumulated_gradients {
     var accum: accumulated_gradients
     accum.gradients = [][]float(gradient_size)
+    accum.accumulation_steps = 0
     accum.loss_sum = 0.0
+    accum.accumulated_loss = 0.0
     accum.steps_accumulated = 0
     accum.is_ready = false
     
@@ -69,6 +73,7 @@ func accumulate_gradients(
     }
     
     accum.loss_sum = accum.loss_sum + step_loss * scale
+    accum.accumulated_loss = accum.loss_sum
     accum.steps_accumulated = accum.steps_accumulated + 1
     
     return accum
@@ -98,6 +103,7 @@ func normalize_accumulated_gradients(
             i = i + 1
         }
         accum.loss_sum = accum.loss_sum * scale
+        accum.accumulated_loss = accum.loss_sum
     }
     
     return accum
@@ -112,6 +118,7 @@ func reset_accumulation(accum: accumulated_gradients) accumulated_gradients {
     }
     
     accum.loss_sum = 0.0
+    accum.accumulated_loss = 0.0
     accum.steps_accumulated = 0
     accum.is_ready = false
     
