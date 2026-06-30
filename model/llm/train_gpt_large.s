@@ -27,7 +27,7 @@ func trim(string s) string {
 }
 
 func string_char(int c) string {
-    ""
+    string(c)
 }
 
 func starts_with(string s, string prefix) bool {

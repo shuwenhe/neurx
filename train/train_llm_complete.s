@@ -127,7 +127,7 @@ func max_float(float a, float b) float {
 // =====================================================================
 
 func string_char(int c) string {
-    ""
+    string(c)
 }
 
 func int_to_str(int n) string {

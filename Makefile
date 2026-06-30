@@ -2,7 +2,7 @@
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony test test-transformer-e2e \
 	train train-watch train-llm train-llm-watch train-dp train-dp-watch \
-	infer infer-watch infer-interactive \
+	train-small infer infer-watch infer-interactive \
 	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
 
 ifeq ($(OS),Windows_NT)
@@ -53,6 +53,7 @@ help:
 	@echo "  train-watch       Run training and tail live logs (/tmp/neurx_real_train.log)"
 	@echo "  train-llm         Run LLM training with S compiler (configurable via NEURX_* env vars)"
 	@echo "  train-llm-watch   Run LLM training and tail live logs"
+	@echo "  train-small      Train the small checkpointable char-model for inference QA"
 	@echo "  train-dp          Run LLM training in data parallel mode"
 	@echo "  train-dp-watch    Run data parallel training and tail live logs"
 	@echo "  infer             Run LLM inference with S compiler (configurable via NEURX_* env vars)"
@@ -248,7 +249,7 @@ train-dp-watch: check-bash
 infer: check-bash
 	@echo "Running LLM inference with S compiler (run_inference_llm.sh)"
 	@cd '$(CURDIR_UNIX)' && \
-	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_training}}"; \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_s_pretrain}}"; \
 	SEED="$${NEURX_INFER_SEED:-neurx }"; \
 	QUESTION="$${NEURX_INFER_QUESTION:-$${NEURX_INFER_PROMPT:-$${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}}"; \
 	MAX_NEW_CHARS="$${NEURX_INFER_MAX_NEW_CHARS:-120}"; \
@@ -279,7 +280,7 @@ infer-watch: check-bash
 	@echo "Running LLM inference with S compiler and tailing live logs"
 	@cd '$(CURDIR_UNIX)' && \
 	mkdir -p .run && \
-	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_training}}"; \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_s_pretrain}}"; \
 	SEED="$${NEURX_INFER_SEED:-neurx }"; \
 	QUESTION="$${NEURX_INFER_QUESTION:-$${NEURX_INFER_PROMPT:-$${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}}"; \
 	MAX_NEW_CHARS="$${NEURX_INFER_MAX_NEW_CHARS:-120}"; \
@@ -321,7 +322,7 @@ infer-interactive: check-bash
 	TOP_K="$${NEURX_TOP_K:-40}"; \
 	TOP_P="$${NEURX_TOP_P:-0.9}"; \
 	BEAM_SIZE="$${NEURX_BEAM_SIZE:-1}"; \
-	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_CHECKPOINT_PATH:-artifacts/checkpoints/llm_training}}"; \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_CHECKPOINT_PATH:-artifacts/checkpoints/llm_s_pretrain}}"; \
 	TOKENIZER_PATH="$${NEURX_INFER_TOKENIZER_PATH:-$${NEURX_TOKENIZER_PATH:-data/corpus}}"; \
 	DEVICE="$${NEURX_INFER_DEVICE:-$${NEURX_DEVICE:-cpu}}"; \
 	export NEURX_MAX_TOKENS="$$MAX_NEW_CHARS"; \
@@ -340,6 +341,18 @@ infer-interactive: check-bash
 	export NEURX_DEVICE="$$DEVICE"; \
 	bash run_interactive_inference.sh 2>&1; \
 	STATUS=$$?; \
+	exit $$STATUS
+
+train-small: check-bash
+	@echo "Running small checkpointable model training (run_small_model_training.sh)"
+	@cd '$(CURDIR_UNIX)' && \
+	bash run_small_model_training.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "Small model training completed successfully. Checkpoints: artifacts/checkpoints/llm_s_pretrain"; \
+	else \
+		echo "Small model training failed with exit code $$STATUS"; \
+	fi; \
 	exit $$STATUS
 
 train-jsonl: check-bash

@@ -13,7 +13,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NEURX_ROOT="${SCRIPT_DIR}"
 INFERENCE_DIR="${NEURX_ROOT}/inference"
 BUILD_DIR="${NEURX_ROOT}/build/interactive_inference"
-CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_training"
+CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_s_pretrain"
+CHECKPOINT_DIR_FALLBACK="${NEURX_ROOT}/artifacts/checkpoints/llm_training"
 OUTPUT_DIR="${NEURX_ROOT}/artifacts/inference_output"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 TOKENIZER_DIR="${NEURX_ROOT}/data/corpus"
@@ -28,7 +29,8 @@ S_COMPILER_DIR="${S_COMPILER_DIR:-/Users/feifei/train/s}"
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
 IR_OUTPUT="${BUILD_DIR}/interactive_inference.ir"
-BIN_OUTPUT="${BUILD_DIR}/interactive_inference.bin"
+RUNNER_BIN="${BUILD_DIR}/interactive_inference.bin"
+RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
 LOG_FILE="${LOG_DIR}/interactive_inference_$(date +%Y%m%d_%H%M%S).log"
 
 # 会话文件
@@ -46,6 +48,12 @@ CHECKPOINT_PATH="${NEURX_INFER_CHECKPOINT_PATH:-${NEURX_CHECKPOINT_PATH:-${CHECK
 TOKENIZER_PATH="${NEURX_INFER_TOKENIZER_PATH:-${NEURX_TOKENIZER_PATH:-${TOKENIZER_DIR}}}"
 DEVICE="${NEURX_INFER_DEVICE:-${NEURX_DEVICE:-cpu}}"
 ANSWER_MODE="${NEURX_INFER_ANSWER_MODE:-chat}"
+SMOKE_TEST="${NEURX_INFER_SMOKE_TEST:-0}"
+SMOKE_PROMPT="${NEURX_INFER_PROMPT:-${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}"
+if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+    MAX_NEW_CHARS="1"
+    ANSWER_MODE="qa"
+fi
 
 # =====================================================================
 # 颜色输出和样式
@@ -139,6 +147,10 @@ load_checkpoint() {
     echo ""
     print_step "检查checkpoint..."
     
+    if [ ! -e "$CHECKPOINT_PATH" ] && [ -e "$CHECKPOINT_DIR_FALLBACK" ]; then
+        CHECKPOINT_PATH="$CHECKPOINT_DIR_FALLBACK"
+    fi
+    
     if [ -d "$CHECKPOINT_PATH" ]; then
         print_success "Checkpoint目录存在: $CHECKPOINT_PATH"
         
@@ -148,6 +160,7 @@ load_checkpoint() {
         if [ -n "$LATEST_CHECKPOINT" ]; then
             CHECKPOINT_SIZE=$(du -h "$LATEST_CHECKPOINT" | awk '{print $1}')
             print_success "最新检查点: $LATEST_CHECKPOINT ($CHECKPOINT_SIZE)"
+            CHECKPOINT_PATH="$LATEST_CHECKPOINT"
         else
             print_warning "未找到有效的checkpoint文件 (.pt/.pth/.neurx)"
         fi
@@ -155,7 +168,7 @@ load_checkpoint() {
         print_info "总checkpoint数: $CHECKPOINT_COUNT"
     else
         print_warning "Checkpoint目录不存在: $CHECKPOINT_PATH"
-        print_warning "使用命令 'make train-llm' 先生成checkpoint"
+        print_warning "使用命令 'bash run_small_model_training.sh' 先生成checkpoint"
     fi
     
     export NEURX_INFER_CHECKPOINT="$CHECKPOINT_PATH"
@@ -194,6 +207,9 @@ init_transformer() {
     echo "  Top-P:           $TOP_P (nucleus采样)"
     echo "  Beam搜索:        $BEAM_SIZE"
     echo "  计算设备:        $DEVICE"
+    if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+        echo "  Smoke test:      enabled"
+    fi
     echo ""
     
     export NEURX_MODEL_MAX_SEQ_LENGTH="8"
@@ -213,13 +229,19 @@ init_transformer() {
     export NEURX_TOKENIZER_PATH="$TOKENIZER_PATH"
     export NEURX_INFER_DEVICE="$DEVICE"
     export NEURX_DEVICE="$DEVICE"
+    if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+        export NEURX_INFER_SMOKE_TEST="1"
+        export NEURX_INFER_MAX_NEW_CHARS="1"
+        export NEURX_INFER_ANSWER_MODE="qa"
+        export NEURX_INFER_ANSWER_ONLY="1"
+    fi
     
     print_success "Transformer初始化完成"
     echo ""
 }
 
 # =====================================================================
-# 编译推理引擎
+# 编译/复用 IR 运行器
 # =====================================================================
 
 compile_inference_engine() {
@@ -242,16 +264,38 @@ compile_inference_engine() {
         return 1
     fi
     
-    print_step "编译 IR → Binary..."
-    
-    if (cd "$S_COMPILER_DIR" && "$S_COMPILER" --emit-bin "$IR_OUTPUT" "$BIN_OUTPUT" >> "$LOG_FILE" 2>&1); then
-        chmod +x "$BIN_OUTPUT"
-        BINSIZE=$(ls -lh "$BIN_OUTPUT" | awk '{print $5}')
-        print_success "二进制编译完成 ($BINSIZE)"
+    print_step "准备 IR 运行器..."
+
+    if [ -x "$RUNNER_BIN" ]; then
+        BINSIZE=$(ls -lh "$RUNNER_BIN" | awk '{print $5}')
+        print_success "复用已有运行器 ($BINSIZE)"
+    elif [ -x "$RUNNER_BIN_FALLBACK" ]; then
+        RUNNER_BIN="$RUNNER_BIN_FALLBACK"
+        BINSIZE=$(ls -lh "$RUNNER_BIN" | awk '{print $5}')
+        print_success "复用已有运行器 ($BINSIZE)"
     else
-        print_error "二进制编译失败"
-        tail -5 "$LOG_FILE"
-        return 1
+        if (cd "$NEURX_ROOT" && cc -std=c11 -O2 -Wall -Wextra -Werror -DSEED_COMPILE_ONLY \
+          -I "$S_COMPILER_DIR/src/cmd/compile/seed" \
+          -o "$RUNNER_BIN" \
+          "$NEURX_ROOT/tools/s_ir_runner.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/runtime/runtime.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/error/error.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/code/native_backend.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/lexical/lexer.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/syntax/parser.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/semantic/analyzer.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/intermediate/ir.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/code/generator.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/bootstrap/bootstrap.c" \
+          "$S_COMPILER_DIR/src/cmd/compile/seed/s_seed.c" >> "$LOG_FILE" 2>&1); then
+            chmod +x "$RUNNER_BIN"
+            BINSIZE=$(ls -lh "$RUNNER_BIN" | awk '{print $5}')
+            print_success "IR运行器编译完成 ($BINSIZE)"
+        else
+            print_error "IR运行器编译失败"
+            tail -5 "$LOG_FILE"
+            return 1
+        fi
     fi
     
     echo ""
@@ -359,53 +403,33 @@ interactive_repl() {
 generate_response() {
     local USER_INPUT="$1"
     local TURN="$2"
-    
+
     echo -e "${MAGENTA}[系统]${NC} 推理中..."
-    
-    # 基于输入内容生成更智能的响应
+
     local RESPONSE=""
-    
-    case "$USER_INPUT" in
-        *人工智能是什么*|*什么是人工智能*|*AI是什么*|*什么是AI*)
-            RESPONSE="人工智能是让机器具备感知、理解、推理和生成能力的技术集合，常见应用包括问答、翻译、推荐和图像识别。"
-            ;;
-        *什么是*)
-            RESPONSE="NeurX 是一个高性能的深度学习框架，使用 S 编程语言编写。它支持 LLM 训练、交互式推理、多轮对话和参数调整。"
-            ;;
-        *如何*|*怎么样*)
-            RESPONSE="您可以使用命令来调整推理参数，例如：temp 0.5, top-k 50, max-tokens 100。输入 'help' 或 'h' 查看所有可用命令。"
-            ;;
-        *功能*|*特性*)
-            RESPONSE="NeurX 支持：LLM 训练、交互式推理、多轮对话、参数调整、会话持久化、Tokenizer 加载、Checkpoint 管理。"
-            ;;
-        *help*|*帮助*|*命令*)
-            show_help
-            return
-            ;;
-        *)
-            # 默认响应：基本的反馈
-            RESPONSE="NeurX 推理系统已处理您的输入：\"$USER_INPUT\"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'"
-            ;;
-    esac
-    
-    # 如果二进制文件存在且看起来是真实的推理引擎（非编译器），运行实际推理
-    if [ -x "$BIN_OUTPUT" ]; then
-        BINARY_CHECK=""
-        if BINARY_CHECK=$("$BIN_OUTPUT" 2>&1 | head -3); then
-            if ! echo "$BINARY_CHECK" | grep -q "emit-bin\|--bootstrap"; then
-                # 看起来是真实的推理引擎，尝试运行它
-                export NEURX_INFERENCE_INPUT="$USER_INPUT"
-                export NEURX_INFERENCE_TURN="$TURN"
-                RESPONSE=$("$BIN_OUTPUT" 2>/dev/null || echo "$RESPONSE")
-            fi
+
+    if [ ! -x "$RUNNER_BIN" ]; then
+        RESPONSE="当前没有可执行的推理运行器。请先完成编译。"
+    else
+        export NEURX_INFERENCE_INPUT="$USER_INPUT"
+        export NEURX_INFERENCE_TURN="$TURN"
+        export NEURX_INFER_PROMPT="$USER_INPUT"
+        export NEURX_INFER_FALLBACK_PROMPT="$USER_INPUT"
+        export NEURX_INFER_ANSWER_MODE="qa"
+        export NEURX_INFER_ANSWER_ONLY="1"
+
+        local MODEL_OUTPUT=""
+        if MODEL_OUTPUT=$("$RUNNER_BIN" "$IR_OUTPUT" 2>>"$LOG_FILE"); then
+            RESPONSE="$MODEL_OUTPUT"
         else
-            # 看起来是真实的推理引擎，尝试运行它
-            export NEURX_INFERENCE_INPUT="$USER_INPUT"
-            export NEURX_INFERENCE_TURN="$TURN"
-            RESPONSE=$("$BIN_OUTPUT" 2>/dev/null || echo "$RESPONSE")
+            RESPONSE="当前没有可用 checkpoint，模型还不能直接生成答案。请先训练并保存 checkpoint。"
         fi
     fi
-    
+
+    if [ -z "$RESPONSE" ]; then
+        RESPONSE="模型没有返回内容。"
+    fi
+
     # 保存响应到历史
     echo "{\"role\": \"assistant\", \"content\": \"$RESPONSE\", \"turn\": $TURN}" >> "$CHAT_HISTORY"
     
@@ -476,7 +500,7 @@ show_config() {
 【模型配置】
   S编译器:         $S_COMPILER
   推理源文件:      $INFERENCE_SOURCE
-  二进制文件:      $BIN_OUTPUT
+  运行器文件:      $RUNNER_BIN
 
 【会话配置】
   会话ID:          $SESSION_ID
@@ -545,7 +569,7 @@ verify_inference_pipeline() {
     
     echo ""
     echo -e "${CYAN}【2】Checkpoint 检查${NC}"
-    if [ -d "$CHECKPOINT_PATH" ] && [ -n "$(ls "$CHECKPOINT_PATH"/*.pt 2>/dev/null)" ]; then
+    if [ -d "$CHECKPOINT_PATH" ] && [ -n "$(ls "$CHECKPOINT_PATH"/*.pt "$CHECKPOINT_PATH"/*.pth "$CHECKPOINT_PATH"/*.neurx 2>/dev/null)" ]; then
         echo -e "${GREEN}  ✓ Checkpoint 文件存在${NC}"
     else
         echo -e "${YELLOW}  ⚠ Checkpoint 文件不存在（可运行 'make train-llm' 生成）${NC}"
@@ -569,7 +593,7 @@ verify_inference_pipeline() {
     
     echo ""
     echo -e "${CYAN}【5】编译输出检查${NC}"
-    if [ -x "$BIN_OUTPUT" ]; then
+    if [ -x "$RUNNER_BIN" ]; then
         echo -e "${GREEN}  ✓ 推理二进制已编译${NC}"
     else
         echo -e "${YELLOW}  ⚠ 推理二进制需要编译${NC}"
@@ -577,10 +601,16 @@ verify_inference_pipeline() {
     
     echo ""
     echo -e "${CYAN}【6】推理执行检查${NC}"
-    if [ -x "$BIN_OUTPUT" ]; then
+    if [ -x "$RUNNER_BIN" ]; then
         echo -e "${YELLOW}  ⏳ 测试推理执行...${NC}"
-        
-        if "$BIN_OUTPUT" > /tmp/test_inference.txt 2>&1; then
+
+        if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+            if NEURX_INFER_SMOKE_TEST="1" NEURX_INFER_PROMPT="$SMOKE_PROMPT" NEURX_INFER_MAX_NEW_CHARS="1" NEURX_INFER_ANSWER_ONLY="1" "$RUNNER_BIN" "$IR_OUTPUT" > /tmp/test_inference.txt 2>&1; then
+                echo -e "${GREEN}  ✓ smoke 推理执行成功${NC}"
+            else
+                echo -e "${RED}  ✗ smoke 推理执行失败${NC}"
+            fi
+        elif "$RUNNER_BIN" "$IR_OUTPUT" > /tmp/test_inference.txt 2>&1; then
             echo -e "${GREEN}  ✓ 推理执行成功${NC}"
         else
             echo -e "${RED}  ✗ 推理执行失败${NC}"
@@ -606,6 +636,17 @@ main() {
     init_transformer
     compile_inference_engine
     init_session
+
+    if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+        print_header "🧪 Smoke Test"
+        generate_response "$SMOKE_PROMPT" "0"
+        echo ""
+        print_success "Smoke test 完成"
+        echo "会话日志: $SESSION_LOG"
+        echo "聊天历史: $CHAT_HISTORY"
+        echo ""
+        return 0
+    fi
     
     # 验证阶段
     verify_inference_pipeline

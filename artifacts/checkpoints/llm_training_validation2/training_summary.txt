@@ -1,0 +1,10 @@
+=======================================================================
+Model: gpt_large[decoder-only-transformer,M,layers=,heads=,ctx=]
+Steps: 
+Tokens: 
+Train Loss: .
+Val Loss: .
+Best Val Loss: .
+Learning Rate: 0.
+Checkpoint Root: 
+
