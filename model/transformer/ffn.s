@@ -46,6 +46,11 @@ struct feed_forward_network {
     string active_type
 }
 
+struct ffn_layer {
+    ffn_config config
+    feed_forward_network network
+}
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -128,6 +133,20 @@ func new_ffn_config(int hidden_dim, int intermediate_dim, string activation_type
         dropout_rate: 0.0,
         use_bias: true,
         ffn_type: ffn_type,
+    }
+}
+
+func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
+    ffn_config cfg = new_ffn_config(hidden_dim, hidden_dim * 4, activation_type, "standard")
+    if activation_type == "swiglu" {
+        return ffn_layer {
+            config: cfg,
+            network: new_glu_ffn(cfg),
+        }
+    }
+    ffn_layer {
+        config: cfg,
+        network: new_standard_ffn(cfg),
     }
 }
 
@@ -251,6 +270,17 @@ func forward_standard_ffn(
         i = i + 1
     }
     down
+}
+
+func forward_ffn_layer(
+    ffn_layer layer,
+    []float hidden_states,
+    int tokens
+) []float {
+    if layer.config.activation_type == "swiglu" || layer.config.activation_type == "geglu" {
+        return forward_swiglu_ffn(layer.network, hidden_states, tokens)
+    }
+    return forward_standard_ffn(layer.network, hidden_states, tokens)
 }
 
 func forward_glu_ffn(

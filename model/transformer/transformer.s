@@ -1,8 +1,8 @@
 package neurx.model.transformer.transformer
 
-use neurx.model.transformer.attention.{attention_config, multi_head_attention, new_attention_config, new_multi_head_attention, forward_attention, forward_gqa, forward_mqa, forward_flash_attention}
+use neurx.model.transformer.attention.{attention_config, multi_head_attention, new_attention_config, new_multi_head_attention, forward_attention, forward_attention_with_rope, forward_gqa, forward_mqa, forward_flash_attention}
 use neurx.model.transformer.ffn.{ffn_config, feed_forward_network, new_ffn_config, new_standard_ffn, new_glu_ffn, new_moe_ffn, forward_standard_ffn, forward_glu_ffn, forward_swiglu_ffn, forward_moe_ffn}
-use neurx.model.transformer.norm.{layer_norm_config, layer_norm, rms_norm, new_layer_norm, new_rms_norm, layer_normalize, rms_normalize, position_embedding_config, new_absolute_position_embedding, get_position_embedding, rope_embedding, new_rope_embedding, apply_rope, alibi_embedding, new_alibi_embedding, apply_alibi_bias}
+use neurx.model.transformer.norm.{layer_norm_config, layer_norm, rms_norm, new_layer_norm, new_rms_norm, layer_normalize, rms_normalize, position_embedding_config, new_absolute_position_embedding, learned_position_embedding, new_learned_position_embedding, get_position_embedding, get_learned_position_embedding, rope_embedding, new_rope_embedding, apply_rope, alibi_embedding, new_alibi_embedding, apply_alibi_bias}
 
 struct transformer_layer_config {
     int hidden_dim
@@ -62,6 +62,11 @@ struct transformer_model {
 struct transformer_output {
     []float logits
     []float hidden_states
+}
+
+struct transformer_block {
+    transformer_layer layer
+    string position_encoding_type
 }
 
 func allocate_vector(int size, float init_val) []float {
@@ -128,7 +133,7 @@ func new_transformer_layer_config() transformer_layer_config {
     transformer_layer_config {
         hidden_dim: 4096,
         num_attention_heads: 32,
-        intermediate_dim: 11008,
+        intermediate_dim: 16384,
         num_key_value_heads: 8,
         attention_dropout: 0.0,
         dropout_rate: 0.1,
@@ -148,7 +153,7 @@ func new_transformer_config() transformer_config {
         num_layers: 32,
         num_attention_heads: 32,
         num_key_value_heads: 8,
-        intermediate_dim: 11008,
+        intermediate_dim: 16384,
         max_seq_len: 4096,
         attention_dropout: 0.0,
         dropout_rate: 0.1,
@@ -168,6 +173,12 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
     attn_cfg.use_flash_attention = cfg.position_embedding_type == "flash"
 
     ffn_config ffn_cfg = new_ffn_config(cfg.hidden_dim, cfg.intermediate_dim, cfg.activation_type, "standard")
+    feed_forward_network ffn_module = new_standard_ffn(ffn_cfg)
+    if cfg.activation_type == "swiglu" || cfg.activation_type == "geglu" {
+        ffn_module = new_glu_ffn(ffn_cfg)
+    } else if cfg.activation_type == "moe" {
+        ffn_module = new_moe_ffn(ffn_cfg, 8)
+    }
     layer_norm_config ln_cfg = layer_norm_config {
         hidden_dim: cfg.hidden_dim,
         epsilon: 1e-5,
@@ -180,7 +191,7 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
         attn_config: attn_cfg,
         ffn_config: ffn_cfg,
         attn: new_multi_head_attention(attn_cfg),
-        ffn: new_standard_ffn(ffn_cfg),
+        ffn: ffn_module,
         ln1: new_layer_norm(ln_cfg),
         ln2: new_layer_norm(ln_cfg),
         rn1: new_rms_norm(ln_cfg),
@@ -221,6 +232,13 @@ func new_transformer_model(transformer_config cfg) transformer_model {
     }
 }
 
+func new_transformer_block(transformer_layer_config cfg) transformer_block {
+    transformer_block {
+        layer: new_transformer_layer(cfg),
+        position_encoding_type: cfg.position_embedding_type,
+    }
+}
+
 func residual_add([]float a, []float b) []float {
     return add_vectors(a, b)
 }
@@ -257,14 +275,26 @@ func forward_transformer_layer(
     int batch_size,
     int seq_len
 ) []float {
-    int hidden_dim = layer.config.hidden_dim
     []float x = copy_vector(hidden_states)
     []float attn_input = x
     if layer.config.pre_norm {
         attn_input = apply_transformer_norm(layer, x, batch_size, seq_len)
     }
 
-    []float attn_output = forward_attention(layer.attn, attn_input, seq_len * batch_size)
+    []float attn_output
+    if layer.config.position_embedding_type == "rope" {
+        position_embedding_config rope_cfg = position_embedding_config {
+            hidden_dim: layer.config.hidden_dim / layer.config.num_attention_heads,
+            max_seq_len: seq_len,
+            embed_type: "rope",
+            rope_base: 10000.0,
+            use_flash_attention: false,
+        }
+        rope_embedding rope = new_rope_embedding(rope_cfg)
+        attn_output = forward_attention_with_rope(layer.attn, attn_input, batch_size, seq_len, rope)
+    } else {
+        attn_output = forward_attention(layer.attn, attn_input, seq_len * batch_size)
+    }
     []float after_attn = residual_add(x, attn_output)
     if !layer.config.pre_norm {
         after_attn = apply_transformer_norm(layer, after_attn, batch_size, seq_len)
@@ -291,6 +321,15 @@ func forward_transformer_layer(
     out
 }
 
+func forward_transformer_block(
+    transformer_block block,
+    []float hidden_states,
+    int batch_size,
+    int seq_len
+) []float {
+    forward_transformer_layer(block.layer, hidden_states, batch_size, seq_len)
+}
+
 func forward_transformer(
     transformer_model model,
     []float hidden_states,
@@ -310,6 +349,16 @@ func forward_transformer(
         }
         []float pos_embed = get_position_embedding(new_absolute_position_embedding(pos_cfg), hidden_dim, seq_len)
         x = add_vectors(x, pos_embed)
+    } else if model.config.position_embedding_type == "learned" {
+        position_embedding_config pos_cfg = position_embedding_config {
+            hidden_dim: hidden_dim,
+            max_seq_len: model.config.max_seq_len,
+            embed_type: "learned",
+            rope_base: 10000.0,
+            use_flash_attention: false,
+        }
+        learned_position_embedding pos_embed = new_learned_position_embedding(pos_cfg)
+        x = add_vectors(x, get_learned_position_embedding(pos_embed, seq_len))
     }
 
     int layer_idx = 0

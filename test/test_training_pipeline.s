@@ -248,7 +248,7 @@ func test_loss_scale_update_on_overflow() bool {
 
 func test_loss_scale_update_growth() bool {
     // 测试稳定时的损失缩放增长
-    var current_scale: float = 65536.0
+    var current_scale: float = 1024.0
     var new_scale: float = training_pipeline.update_loss_scale(current_scale, false, 2001)
     
     // 稳定时应该增长
