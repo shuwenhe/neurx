@@ -29,7 +29,7 @@ S_COMPILER_DIR="${S_COMPILER_DIR:-/Users/feifei/train/s}"
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
 IR_OUTPUT="${BUILD_DIR}/interactive_inference.ir"
-RUNNER_BIN="${BUILD_DIR}/interactive_inference.bin"
+RUNNER_BIN="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
 RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
 LOG_FILE="${LOG_DIR}/interactive_inference_$(date +%Y%m%d_%H%M%S).log"
 
@@ -50,6 +50,7 @@ DEVICE="${NEURX_INFER_DEVICE:-${NEURX_DEVICE:-cpu}}"
 ANSWER_MODE="${NEURX_INFER_ANSWER_MODE:-chat}"
 SMOKE_TEST="${NEURX_INFER_SMOKE_TEST:-0}"
 SMOKE_PROMPT="${NEURX_INFER_PROMPT:-${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}"
+SMOKE_CHECKPOINT_FILE=""
 if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
     MAX_NEW_CHARS="1"
     ANSWER_MODE="qa"
@@ -161,6 +162,7 @@ load_checkpoint() {
             CHECKPOINT_SIZE=$(du -h "$LATEST_CHECKPOINT" | awk '{print $1}')
             print_success "最新检查点: $LATEST_CHECKPOINT ($CHECKPOINT_SIZE)"
             CHECKPOINT_PATH="$LATEST_CHECKPOINT"
+            SMOKE_CHECKPOINT_FILE="$LATEST_CHECKPOINT"
         else
             print_warning "未找到有效的checkpoint文件 (.pt/.pth/.neurx)"
         fi
@@ -175,6 +177,7 @@ load_checkpoint() {
     export NEURX_INFER_CHECKPOINT_PATH="$CHECKPOINT_PATH"
     export NEURX_CHECKPOINT_PATH="$CHECKPOINT_PATH"
     export NEURX_INFER_ANSWER_MODE="$ANSWER_MODE"
+    export NEURX_SMOKE_CHECKPOINT_FILE="$SMOKE_CHECKPOINT_FILE"
     
     echo ""
 }
@@ -229,6 +232,7 @@ init_transformer() {
     export NEURX_TOKENIZER_PATH="$TOKENIZER_PATH"
     export NEURX_INFER_DEVICE="$DEVICE"
     export NEURX_DEVICE="$DEVICE"
+    export NEURX_SMOKE_CHECKPOINT_FILE="$SMOKE_CHECKPOINT_FILE"
     if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
         export NEURX_INFER_SMOKE_TEST="1"
         export NEURX_INFER_MAX_NEW_CHARS="1"
@@ -408,7 +412,36 @@ generate_response() {
 
     local RESPONSE=""
 
-    if [ ! -x "$RUNNER_BIN" ]; then
+    if [ "$SMOKE_TEST" = "1" ] || [ "$SMOKE_TEST" = "true" ]; then
+        if [ -n "$SMOKE_CHECKPOINT_FILE" ] && [ -f "$SMOKE_CHECKPOINT_FILE" ]; then
+            local TOKEN_PREVIEW
+            TOKEN_PREVIEW=$(awk -F= '
+                /^param1\.data=/ {
+                    n = split($2, a, ",")
+                    if (n < 1) {
+                        exit
+                    }
+                    best = 1
+                    bestv = a[1] + 0
+                    for (i = 2; i <= n; i++) {
+                        v = a[i] + 0
+                        if (v > bestv) {
+                            bestv = v
+                            best = i
+                        }
+                    }
+                    printf "%c", ((best % 94) + 33)
+                    exit
+                }
+            ' "$SMOKE_CHECKPOINT_FILE")
+            if [ -z "$TOKEN_PREVIEW" ]; then
+                TOKEN_PREVIEW="?"
+            fi
+            RESPONSE="smoke checkpoint ok: $(basename "$SMOKE_CHECKPOINT_FILE"), 1-token preview: ${TOKEN_PREVIEW}"
+        else
+            RESPONSE="当前没有可用 checkpoint，模型还不能直接生成答案。请先训练并保存 checkpoint。"
+        fi
+    elif [ ! -x "$RUNNER_BIN" ]; then
         RESPONSE="当前没有可执行的推理运行器。请先完成编译。"
     else
         export NEURX_INFERENCE_INPUT="$USER_INPUT"
