@@ -67,25 +67,11 @@ struct transformer_layer_optimizer_state {
 }
 
 func copy_float([]float values) []float {
-    int n = len(values)
-    []float out = []float{cap: n}
-    int i = 0
-    while i < n {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
+    values
 }
 
 func copy_int([]int values) []int {
-    int n = len(values)
-    []int out = []int{cap: n}
-    int i = 0
-    while i < n {
-        out[i] = values[i]
-        i = i + 1
-    }
-    out
+    values
 }
 
 func copy_tensor(tensor value) tensor {
@@ -440,7 +426,7 @@ func backward_single_layer(
         layer, x, grad_out, opt
     )
     // Add FFN gradient to residual gradient
-    grad_x2_residual = ops.add(grad_x2_residual, ffn_bw.grad_to_x2)
+    grad_x2_residual = add(grad_x2_residual, ffn_bw.grad_to_x2)
     updated_layer = ffn_bw.updated_layer
     updated_opt = ffn_bw.optimizer_state
 
@@ -456,7 +442,7 @@ func backward_single_layer(
     updated_opt = attn_bw.optimizer_state
 
     // Combine gradients flowing to input x
-    tensor grad_x_total = ops.add(grad_x_identity, attn_bw.grad_to_x)
+    tensor grad_x_total = add(grad_x_identity, attn_bw.grad_to_x)
 
     backward_result { grad_input: grad_x_total, updated_layer: updated_layer, optimizer_state: updated_opt }
 }
@@ -496,45 +482,45 @@ func backward_swiglu_ffn(
     if has_swiglu {
         // ── Down projection backward ──
         // dW_ff2 = gated^T @ grad_ffn_out
-        tensor gated_t = transpose(ops.mul(ops.sigmoid(ops.matmul(x2, layer.w_ff1)), ops.matmul(x2, layer.w_up)), 0, 1)
-        tensor grad_w_ff2 = ops.matmul(gated_t, grad_ffn_out)
-        tensor grad_b_ff2 = ops.sum_first_dim(grad_ffn_out, false)
+        tensor gated_t = transpose(mul(sigmoid(matmul(x2, layer.w_ff1)), matmul(x2, layer.w_up)), 0, 1)
+        tensor grad_w_ff2 = matmul(gated_t, grad_ffn_out)
+        tensor grad_b_ff2 = sum_first_dim(grad_ffn_out, false)
         // d_gated = grad_ffn_out @ W_ff2^T
-        tensor d_gated = ops.matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
+        tensor d_gated = matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
 
         // ── Gating backward: gated = silu(gate_h) * up_h ──
         // Recompute gate hidden and up hidden
-        tensor gate_hidden = ops.add(ops.matmul(x2, layer.w_ff1), layer.b_ff1)  // x2 @ W_gate + b_gate
-        tensor up_hidden = ops.add(ops.matmul(x2, layer.w_up), layer.b_up)      // x2 @ W_up + b_up
-        tensor gate_act = ops.silu(gate_hidden)                                  // silu(gate_h)
+        tensor gate_hidden = add(matmul(x2, layer.w_ff1), layer.b_ff1)  // x2 @ W_gate + b_gate
+        tensor up_hidden = add(matmul(x2, layer.w_up), layer.b_up)      // x2 @ W_up + b_up
+        tensor gate_act = silu(gate_hidden)                                  // silu(gate_h)
 
         // d_gate_act = d_gated * up_h
-        tensor d_gate_act = ops.mul(d_gated, up_hidden)
+        tensor d_gate_act = mul(d_gated, up_hidden)
         // d_up_hidden = d_gated * gate_act
-        tensor d_up_hidden = ops.mul(d_gated, gate_act)
+        tensor d_up_hidden = mul(d_gated, gate_act)
 
         // ── Gate path backward (silu + linear) ──
         // silu'(z) = sigmoid(z) + z * sigmoid(z) * (1 - sigmoid(z))
         // Simplified: silu'(z) ≈ sigmoid(z) * (1 + z * (1 - sigmoid(z)))
-        tensor sig_gate = ops.sigmoid(gate_hidden)
-        tensor one_minus_sig = ops.sub(tensor_ones_like(sig_gate), sig_gate)
-        tensor z_times_oms = ops.mul(gate_hidden, one_minus_sig)
-        tensor one_plus_zom = ops.add(tensor_ones_like(z_times_oms), z_times_oms)
-        tensor dsilu_dz = ops.mul(sig_gate, one_plus_zom)
+        tensor sig_gate = sigmoid(gate_hidden)
+        tensor one_minus_sig = sub(tensor_ones_like(sig_gate), sig_gate)
+        tensor z_times_oms = mul(gate_hidden, one_minus_sig)
+        tensor one_plus_zom = add(tensor_ones_like(z_times_oms), z_times_oms)
+        tensor dsilu_dz = mul(sig_gate, one_plus_zom)
         // d_gate_hidden = d_gate_act * dsilu_dz
-        tensor d_gate_hidden = ops.mul(d_gate_act, dsilu_dz)
+        tensor d_gate_hidden = mul(d_gate_act, dsilu_dz)
 
         // Weight gradients
         tensor x2_t = transpose(x2, 0, 1)
-        tensor grad_w_gate = ops.matmul(x2_t, d_gate_hidden)
-        tensor grad_w_up = ops.matmul(x2_t, d_up_hidden)
-        tensor grad_b_gate = ops.sum_first_dim(d_gate_hidden, false)
-        tensor grad_b_up = ops.sum_first_dim(d_up_hidden, false)
+        tensor grad_w_gate = matmul(x2_t, d_gate_hidden)
+        tensor grad_w_up = matmul(x2_t, d_up_hidden)
+        tensor grad_b_gate = sum_first_dim(d_gate_hidden, false)
+        tensor grad_b_up = sum_first_dim(d_up_hidden, false)
 
         // Gradient to x2: dL/dx2 = d_gate_h @ W_gate^T + d_up_h @ W_up^T
-        tensor grad_from_gate = ops.matmul(d_gate_hidden, transpose(layer.w_ff1, 0, 1))
-        tensor grad_from_up = ops.matmul(d_up_hidden, transpose(layer.w_up, 0, 1))
-        tensor grad_to_x2 = ops.add(grad_from_gate, grad_from_up)
+        tensor grad_from_gate = matmul(d_gate_hidden, transpose(layer.w_ff1, 0, 1))
+        tensor grad_from_up = matmul(d_up_hidden, transpose(layer.w_up, 0, 1))
+        tensor grad_to_x2 = add(grad_from_gate, grad_from_up)
 
         adamw_step_output step_ff2 = adamw_step_state(opt.w_ff2, layer.w_ff2, grad_w_ff2)
         opt.w_ff2 = step_ff2.optimizer
@@ -561,16 +547,16 @@ func backward_swiglu_ffn(
         // ff1 = x2 @ W_ff1 + b_ff1
         // ff1_act = relu(ff1)
         // ff2 = ff1_act @ W_ff2 + b_ff2
-        tensor grad_w_ff2 = ops.matmul(transpose(x2, 0, 1), grad_ffn_out) // approximate
-        tensor grad_b_ff2 = ops.sum_first_dim(grad_ffn_out, false)
-        tensor d_ff1_act = ops.matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
+        tensor grad_w_ff2 = matmul(transpose(x2, 0, 1), grad_ffn_out) // approximate
+        tensor grad_b_ff2 = sum_first_dim(grad_ffn_out, false)
+        tensor d_ff1_act = matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
         // ReLU backward: zero where input was negative
-        tensor ff1_hidden = ops.add(ops.matmul(x2, layer.w_ff1), layer.b_ff1)
+        tensor ff1_hidden = add(matmul(x2, layer.w_ff1), layer.b_ff1)
         tensor relu_mask = relu_backward_mask(ff1_hidden)
-        tensor d_ff1 = ops.mul(d_ff1_act, relu_mask)
-        tensor grad_w_ff1 = ops.matmul(transpose(x2, 0, 1), d_ff1)
-        tensor grad_b_ff1 = ops.sum_first_dim(d_ff1, false)
-        tensor grad_to_x2 = ops.matmul(d_ff1, transpose(layer.w_ff1, 0, 1))
+        tensor d_ff1 = mul(d_ff1_act, relu_mask)
+        tensor grad_w_ff1 = matmul(transpose(x2, 0, 1), d_ff1)
+        tensor grad_b_ff1 = sum_first_dim(d_ff1, false)
+        tensor grad_to_x2 = matmul(d_ff1, transpose(layer.w_ff1, 0, 1))
 
         adamw_step_output step_ff2 = adamw_step_state(opt.w_ff2, layer.w_ff2, grad_w_ff2)
         opt.w_ff2 = step_ff2.optimizer
@@ -648,44 +634,44 @@ func backward_attention(
     //   d_to_x = dQ @ W_q^T + dK @ W_k^T + dV @ W_v^T
 
     // Recompute forward values for backward
-    tensor q = ops.matmul(x, layer.w_q)
-    tensor k = ops.matmul(x, layer.w_k)
-    tensor v = ops.matmul(x, layer.w_v)
+    tensor q = matmul(x, layer.w_q)
+    tensor k = matmul(x, layer.w_k)
+    tensor v = matmul(x, layer.w_v)
 
     // ── Output projection backward ──
     // dW_o = attn^T @ grad_attn_out (need cached attn; use approximation)
-    tensor attn_approx = ops.matmul(ops.softmax_last_dim(ops.matmul(q, transpose(k, 0, 1))), v)
+    tensor attn_approx = matmul(softmax_last_dim(matmul(q, transpose(k, 0, 1))), v)
     tensor attn_t = transpose(attn_approx, 0, 1)
-    tensor grad_w_o = ops.matmul(attn_t, grad_attn_out)
-    tensor grad_b_o = ops.sum_first_dim(grad_attn_out, false)
+    tensor grad_w_o = matmul(attn_t, grad_attn_out)
+    tensor grad_b_o = sum_first_dim(grad_attn_out, false)
     // d_attn = grad_attn_out @ W_o^T
-    tensor d_attn = ops.matmul(grad_attn_out, transpose(layer.w_o, 0, 1))
+    tensor d_attn = matmul(grad_attn_out, transpose(layer.w_o, 0, 1))
 
     // ── Value projection backward ──
     // dV = attn_weights^T @ d_attn
-    tensor attn_weights = ops.softmax_last_dim(ops.matmul(q, transpose(k, 0, 1)))
+    tensor attn_weights = softmax_last_dim(matmul(q, transpose(k, 0, 1)))
     tensor attn_weights_t = transpose(attn_weights, 0, 1)
-    tensor d_v = ops.matmul(attn_weights_t, d_attn)
-    tensor grad_w_v = ops.matmul(transpose(x, 0, 1), d_v)
-    tensor grad_b_v = ops.sum_first_dim(d_v, false)
+    tensor d_v = matmul(attn_weights_t, d_attn)
+    tensor grad_w_v = matmul(transpose(x, 0, 1), d_v)
+    tensor grad_b_v = sum_first_dim(d_v, false)
 
     // ── Q/K projections backward (simplified, ignoring mask/softmax Jacobian) ──
     // Approximate: dQ ≈ d_attn @ V^T @ K / sqrt(d), dK ≈ Q^T @ d_attn @ V / sqrt(d)
     int head_dim = layer.w_q.shape[1]  // assuming square attention
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
-    tensor d_q = ops.mul(ops.matmul(ops.matmul(d_attn, transpose(v, 0, 1)), k), scale)
-    tensor d_k = ops.mul(ops.matmul(ops.matmul(transpose(q, 0, 1), d_attn), transpose(v, 0, 1)), scale)
+    tensor d_q = mul(matmul(matmul(d_attn, transpose(v, 0, 1)), k), scale)
+    tensor d_k = mul(matmul(matmul(transpose(q, 0, 1), d_attn), transpose(v, 0, 1)), scale)
 
-    tensor grad_w_q = ops.matmul(transpose(x, 0, 1), d_q)
-    tensor grad_w_k = ops.matmul(transpose(x, 0, 1), d_k)
-    tensor grad_b_q = ops.sum_first_dim(d_q, false)
-    tensor grad_b_k = ops.sum_first_dim(d_k, false)
+    tensor grad_w_q = matmul(transpose(x, 0, 1), d_q)
+    tensor grad_w_k = matmul(transpose(x, 0, 1), d_k)
+    tensor grad_b_q = sum_first_dim(d_q, false)
+    tensor grad_b_k = sum_first_dim(d_k, false)
 
     // Gradient to input x
-    tensor grad_from_q = ops.matmul(d_q, transpose(layer.w_q, 0, 1))
-    tensor grad_from_k = ops.matmul(d_k, transpose(layer.w_k, 0, 1))
-    tensor grad_from_v = ops.matmul(d_v, transpose(layer.w_v, 0, 1))
-    tensor grad_to_x = ops.add(ops.add(grad_from_q, grad_from_k), grad_from_v)
+    tensor grad_from_q = matmul(d_q, transpose(layer.w_q, 0, 1))
+    tensor grad_from_k = matmul(d_k, transpose(layer.w_k, 0, 1))
+    tensor grad_from_v = matmul(d_v, transpose(layer.w_v, 0, 1))
+    tensor grad_to_x = add(add(grad_from_q, grad_from_k), grad_from_v)
 
     // Apply optimizer updates to all attention weights
     adamw_step_output step_w_o = adamw_step_state(opt.w_o, layer.w_o, grad_w_o)
@@ -866,20 +852,20 @@ func gpt_large_training_should_continue(gpt_large_training_state state) bool {
 func gpt_large_training_forward(gpt_large_training_state state, tensor input_ids) tensor {
     tensor hidden = embedding_lookup(state.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.backbone, hidden)
-    ops.lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
+    lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
 }
 
 func gpt_large_training_loss(gpt_large_training_state state, tensor logits, tensor target_ids) tensor {
-    ops.cross_entropy(logits, target_ids, -1, "mean", state.config.label_smoothing, -1)
+    cross_entropy(logits, target_ids, -1, "mean", state.config.label_smoothing, -1)
 }
 
 func gpt_large_training_update(gpt_large_training_state state, tensor input_ids, tensor hidden, tensor logits, tensor target_ids, float loss_value, int valid_tokens) gpt_large_training_state {
     // ── Forward pass outputs ──
-    tensor probabilities = ops.softmax_last_dim(logits)
+    tensor probabilities = softmax_last_dim(logits)
     tensor targets = one_hot_tensor(target_ids, state.model.vocab_size)
 
     // ── Output layer gradient: dL/dlogits = softmax(logits) - one_hot(target) ──
-    tensor grad_logits = ops.sub(probabilities, targets)
+    tensor grad_logits = sub(probabilities, targets)
     float scale = 1.0
     if valid_tokens > 0 {
         scale = 1.0 / (valid_tokens as float)
@@ -888,9 +874,9 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
 
     // ── LM Head backward: dL/dW_head = hidden^T @ grad_logits, dL/db = sum(grad_logits) ──
     tensor hidden_t = transpose(hidden, 0, 1)
-    tensor grad_head_weight = ops.matmul(hidden_t, grad_logits)
-    tensor grad_head_bias = ops.sum_first_dim(grad_logits, false)
-    tensor grad_hidden = ops.matmul(grad_logits, transpose(state.lm_head_weight, 0, 1))
+    tensor grad_head_weight = matmul(hidden_t, grad_logits)
+    tensor grad_head_bias = sum_first_dim(grad_logits, false)
+    tensor grad_hidden = matmul(grad_logits, transpose(state.lm_head_weight, 0, 1))
 
     // Update LM Head weights
     adamw_step_output head_weight_step = adamw_step_state(state.optimizer, state.lm_head_weight, grad_head_weight)
@@ -995,7 +981,7 @@ func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_
     tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, [shape_target])
     tensor hidden = embedding_lookup(state.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.backbone, hidden)
-    tensor logits = ops.lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
+    tensor logits = lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
     tensor loss_tensor = gpt_large_training_loss(state, logits, target_ids)
     float loss_value = 0.0
     if len(loss_tensor.data) > 0 {

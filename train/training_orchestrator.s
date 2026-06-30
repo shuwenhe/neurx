@@ -6,6 +6,7 @@
 package neurx.training.orchestrator
 
 use neurx.runtime.io.{runtime_env_get}
+use neurx.data.data_pipeline.{data_pipeline, data_pipeline_batch_result, get_next_batch_with_state, new_training_data_pipeline, reset_pipeline}
 use neurx.train.large_scale_runtime
 use neurx.train.distributed_training_adapter
 
@@ -326,6 +327,7 @@ struct TrainingController {
     LRScheduler scheduler
     MetricsTracker metrics
     CheckpointManager checkpoint_mgr
+    data_pipeline pipeline
     large_scale_training_runtime runtime
     training_bridge_state bridge_state
     distributed_training_adapter_state distributed_adapter
@@ -344,6 +346,7 @@ func create_training_controller() TrainingController {
     )
     controller.metrics = create_metrics_tracker()
     controller.checkpoint_mgr = create_checkpoint_manager()
+    controller.pipeline = new_training_data_pipeline()
     controller.distributed_adapter = new_distributed_training_adapter("small", "gloo", 1, 0, controller.model_cfg.hidden_dim)
     controller.runtime = controller.distributed_adapter.runtime
     controller.bridge_state = controller.distributed_adapter.bridge
@@ -438,6 +441,13 @@ func run_complete_training_pipeline() int {
     println("  - LM Head: 8,192 参数")
     println("")
 
+    println("✓ 数据管线:")
+    println("  - 数据集: " + controller.pipeline.manifest.source_path)
+    println("  - 文档数: " + int_to_str(controller.pipeline.manifest.total_document_count))
+    println("  - 估算tokens: " + int_to_str(controller.pipeline.manifest.total_token_count))
+    println("  - 分片数: " + int_to_str(controller.pipeline.manifest.total_shard_count))
+    println("")
+
     println("✓ 大模型运行时:")
     println("  - 就绪状态: " + controller.bridge_state.readiness_message)
     println("  - 参数规模: " + int_to_str(controller.bridge_state.estimated_param_count))
@@ -460,6 +470,12 @@ func run_complete_training_pipeline() int {
     
     int step = 0
     while step < controller.config.total_steps {
+        data_pipeline_batch_result batch_result = get_next_batch_with_state(controller.pipeline)
+        controller.pipeline = batch_result.pipeline
+        if batch_result.end_of_data {
+            controller.pipeline = reset_pipeline(controller.pipeline)
+        }
+
         float current_lr = get_learning_rate(controller.scheduler, step)
         
         // 模拟损失衰减: 5.4 → 2.1
@@ -492,6 +508,8 @@ func run_complete_training_pipeline() int {
         if step % 10 == 0 || step == controller.config.total_steps - 1 {
             println("Step " + int_to_str(step) + ": Loss = " + float_to_str(loss) + 
                    " LR = " + float_to_str(current_lr))
+            println("  batch_tokens=" + int_to_str(batch_result.batch.total_tokens) +
+                    " batch_sequences=" + int_to_str(batch_result.batch.sequences_in_batch))
             println("  sync=" + bool_to_str(step_result.sync_gradients) +
                     " allreduce=" + bool_to_str(step_result.use_allreduce) +
                     " rs=" + bool_to_str(step_result.use_reduce_scatter) +

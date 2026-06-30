@@ -75,17 +75,17 @@ struct transformer {
     []transformer_layer layers
 }
 
-func transformer_init(config transformer_config) transformer {
-    []transformer_layer mut_layers = []transformer_layer{cap: config.num_layers}
+func transformer_init(cfg transformer_config) transformer {
+    []transformer_layer mut_layers = []transformer_layer{cap: transformer_config.num_layers}
     // Pre-create shape arrays to avoid complex array literals
     int i = 0
-    while i < config.num_layers {
+    while i < transformer_config.num_layers {
         // Create shapes using helper approach
-        []int shape_dmd = make_int_array_2(config.d_model, config.d_model)
-        []int shape_dmff = make_int_array_2(config.d_model, config.d_ff)
-        []int shape_ffdm = make_int_array_2(config.d_ff, config.d_model)
-        []int shape_ff = make_int_array_1(config.d_ff)
-        []int shape_dm = make_int_array_1(config.d_model)
+        []int shape_dmd = make_int_array_2(transformer_config.d_model, transformer_config.d_model)
+        []int shape_dmff = make_int_array_2(transformer_config.d_model, transformer_config.d_ff)
+        []int shape_ffdm = make_int_array_2(transformer_config.d_ff, transformer_config.d_model)
+        []int shape_ff = make_int_array_1(transformer_config.d_ff)
+        []int shape_dm = make_int_array_1(transformer_config.d_model)
 
         transformer_layer layer = transformer_layer {
             // ── Attention weights (Kaiming init for linear layers) ──
@@ -327,7 +327,7 @@ func transformer_layer_forward(layer transformer_layer, x tensor, config transfo
     tensor q = matmul(x, layer.w_q)
     tensor k = matmul(x, layer.w_k)
     tensor v = matmul(x, layer.w_v)
-    tensor attn = multihead_attention(q, k, v, config.num_heads)
+    tensor attn = multihead_attention(q, k, v, transformer_config.num_heads)
     tensor attn_out = matmul(attn, layer.w_o)
 
     // Residual connection after attention
@@ -354,7 +354,7 @@ func swiglu_ffn(tensor x, transformer_layer layer) tensor {
     int n_data = len(layer.w_ff1.data)
     int n_up = len(layer.w_up.data)
 
-    if n_up > 0  n_data == n_up {
+    if n_up > 0 && n_data == n_up {
         // Full SwiGLU: separate gate and up projections
         tensor gate_hidden = add(matmul(x, layer.w_ff1), layer.b_ff1)  // gate path
         tensor gate_act = silu(gate_hidden)                            // silu activation
@@ -435,7 +435,7 @@ func flash_attention_forward(
     []float output_data = []float{cap: batch_heads * seq_len * head_dim}
     int init_i = 0
     while init_i < batch_heads * seq_len * head_dim {
-        output_data.push(0.0)
+        output_data[init_i] = 0.0
         init_i = init_i + 1
     }
 
@@ -450,8 +450,8 @@ func flash_attention_forward(
         []float row_sum = []float{cap: batch_heads * q_block_size}
         int ri = 0
         while ri < batch_heads * q_block_size {
-            row_max.push(-1e9)  // -inf initialization
-            row_sum.push(0.0)
+            row_max[ri] = -1e9  // -inf initialization
+            row_sum[ri] = 0.0
             ri = ri + 1
         }
 
@@ -638,9 +638,9 @@ func make_causal_mask(int seq_len) tensor {
         while c < seq_len {
             // position (r, c): allow if c <= r (can attend to past + current)
             if c <= r {
-                data.push(0.0)
+                data[r * seq_len + c] = 0.0
             } else {
-                data.push(-1e9)
+                data[r * seq_len + c] = -1e9
             }
             c = c + 1
         }
@@ -866,7 +866,7 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
         // 10000^exponent = exp(exponent * ln(10000))
         float ln_base = log_approx(10000.0)
         float theta_val = exp_approx(exponent * ln_base)
-        freqs.push(theta_val)
+        freqs[i] = theta_val
         i = i + 1
     }
 
@@ -931,10 +931,10 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
         int pair_idx = local_idx / 2
         int pos_in_pair = l(local_idx - (local_idx / 2) * 2)
 
-        if pos_in_pair == 0  pair_idx < half_dim  pair_idx < len(cache.cos_table.data) {
+        if pos_in_pair == 0 && pair_idx < half_dim && pair_idx < len(cache.cos_table.data) {
             // Determine position offset for this element
             int elem_offset = flat / last_dim
-            int seq_pos = (((start_pos + elem_offset) - ((start_pos + elem_offset) / cache.max_seq_len) * cache.max_seq_len)
+            int seq_pos = (start_pos + elem_offset) - ((start_pos + elem_offset) / cache.max_seq_len) * cache.max_seq_len
             if seq_pos < 0 {
                 seq_pos = 0
             }

@@ -65,6 +65,18 @@ count_jsonl_records() {
     local file_path="$1"
     if [ -f "$file_path" ]; then
         wc -l < "$file_path" 2>/dev/null | tr -d ' '
+    elif [ -d "$file_path" ]; then
+        local total=0
+        local shard
+        for shard in "$file_path"/*.jsonl.gz; do
+            [ -e "$shard" ] || continue
+            total=$((total + $(gzip -cd "$shard" | wc -l | tr -d ' ')))
+        done
+        if [ "$total" -gt 0 ]; then
+            echo "$total"
+        else
+            echo "0"
+        fi
     else
         echo "0"
     fi

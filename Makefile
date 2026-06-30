@@ -2,6 +2,7 @@
 	app-linux app-windows app-macos app-ios app-android app-harmony \
 	linux windows macos ios android harmony test test-transformer-e2e \
 	train train-watch train-llm train-llm-watch train-dp train-dp-watch \
+	infer infer-watch infer-interactive \
 	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
 
 ifeq ($(OS),Windows_NT)
@@ -54,6 +55,9 @@ help:
 	@echo "  train-llm-watch   Run LLM training and tail live logs"
 	@echo "  train-dp          Run LLM training in data parallel mode"
 	@echo "  train-dp-watch    Run data parallel training and tail live logs"
+	@echo "  infer             Run LLM inference with S compiler (configurable via NEURX_* env vars)"
+	@echo "  infer-watch       Run LLM inference and tail live logs"
+	@echo "  infer-interactive Run interactive LLM inference REPL (supports multi-turn, sampling params)"
 	@echo "  test-transformer-e2e  Compile and run transformer model smoke test"
 	@echo "  test              Alias of test-transformer-e2e"
 	@echo ""
@@ -239,6 +243,103 @@ train-dp-watch: check-bash
 		echo "DP training failed with exit code $$STATUS"; \
 	fi; \
 	rm -f .run/train_dp_watch_pid.txt; \
+	exit $$STATUS
+
+infer: check-bash
+	@echo "Running LLM inference with S compiler (run_inference_llm.sh)"
+	@cd '$(CURDIR_UNIX)' && \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_training}}"; \
+	SEED="$${NEURX_INFER_SEED:-neurx }"; \
+	QUESTION="$${NEURX_INFER_QUESTION:-$${NEURX_INFER_PROMPT:-$${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}}"; \
+	MAX_NEW_CHARS="$${NEURX_INFER_MAX_NEW_CHARS:-120}"; \
+	VALIDATE_ONLY="$${NEURX_INFER_VALIDATE_ONLY:-}"; \
+	MODEL_NAME="$${NEURX_INFER_MODEL_NAME:-llm_s}"; \
+	DEVICE="$${NEURX_INFER_DEVICE:-$${NEURX_DEVICE:-cpu}}"; \
+	export NEURX_INFER_CHECKPOINT="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_CHECKPOINT_PATH="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_SEED="$$SEED"; \
+	export NEURX_INFER_QUESTION="$$QUESTION"; \
+	export NEURX_INFER_PROMPT="$$QUESTION"; \
+	export NEURX_INFERENCE_INPUT="$$QUESTION"; \
+	export NEURX_INFER_MAX_NEW_CHARS="$$MAX_NEW_CHARS"; \
+	export NEURX_INFER_VALIDATE_ONLY="$$VALIDATE_ONLY"; \
+	export NEURX_INFER_MODEL_NAME="$$MODEL_NAME"; \
+	export NEURX_INFER_DEVICE="$$DEVICE"; \
+	export NEURX_DEVICE="$$DEVICE"; \
+	bash run_inference_llm.sh 2>&1; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "LLM Inference completed successfully. Output: artifacts/inference_output/"; \
+	else \
+		echo "LLM Inference failed with exit code $$STATUS"; \
+	fi; \
+	exit $$STATUS
+
+infer-watch: check-bash
+	@echo "Running LLM inference with S compiler and tailing live logs"
+	@cd '$(CURDIR_UNIX)' && \
+	mkdir -p .run && \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-artifacts/checkpoints/llm_training}}"; \
+	SEED="$${NEURX_INFER_SEED:-neurx }"; \
+	QUESTION="$${NEURX_INFER_QUESTION:-$${NEURX_INFER_PROMPT:-$${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}}"; \
+	MAX_NEW_CHARS="$${NEURX_INFER_MAX_NEW_CHARS:-120}"; \
+	VALIDATE_ONLY="$${NEURX_INFER_VALIDATE_ONLY:-}"; \
+	MODEL_NAME="$${NEURX_INFER_MODEL_NAME:-llm_s}"; \
+	DEVICE="$${NEURX_INFER_DEVICE:-$${NEURX_DEVICE:-cpu}}"; \
+	LOG_FILE="/tmp/neurx_inference.log" && \
+	rm -f "$$LOG_FILE" && \
+	export NEURX_INFER_CHECKPOINT="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_CHECKPOINT_PATH="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_SEED="$$SEED"; \
+	export NEURX_INFER_QUESTION="$$QUESTION"; \
+	export NEURX_INFER_PROMPT="$$QUESTION"; \
+	export NEURX_INFERENCE_INPUT="$$QUESTION"; \
+	export NEURX_INFER_MAX_NEW_CHARS="$$MAX_NEW_CHARS"; \
+	export NEURX_INFER_VALIDATE_ONLY="$$VALIDATE_ONLY"; \
+	export NEURX_INFER_MODEL_NAME="$$MODEL_NAME"; \
+	export NEURX_INFER_DEVICE="$$DEVICE"; \
+	export NEURX_DEVICE="$$DEVICE"; \
+	bash run_inference_llm.sh 2>&1 | tee "$$LOG_FILE" & \
+	INFER_PID=$$!; echo "$$INFER_PID" > .run/infer_watch_pid.txt; \
+	sleep 0.5; \
+	echo "Tailing $$LOG_FILE (infer pid: $$INFER_PID)"; \
+	tail --pid=$$INFER_PID -F "$$LOG_FILE"; \
+	wait $$INFER_PID; STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "LLM Inference completed successfully. Output: artifacts/inference_output/"; \
+	else \
+		echo "LLM Inference failed with exit code $$STATUS"; \
+	fi; \
+	rm -f .run/infer_watch_pid.txt; \
+	exit $$STATUS
+
+infer-interactive: check-bash
+	@echo "Running interactive LLM inference REPL (run_interactive_inference.sh)"
+	@cd '$(CURDIR_UNIX)' && \
+	MAX_NEW_CHARS="$${NEURX_INFER_MAX_NEW_CHARS:-$${NEURX_MAX_TOKENS:-50}}"; \
+	TEMPERATURE="$${NEURX_TEMPERATURE:-0.7}"; \
+	TOP_K="$${NEURX_TOP_K:-40}"; \
+	TOP_P="$${NEURX_TOP_P:-0.9}"; \
+	BEAM_SIZE="$${NEURX_BEAM_SIZE:-1}"; \
+	CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_CHECKPOINT_PATH:-artifacts/checkpoints/llm_training}}"; \
+	TOKENIZER_PATH="$${NEURX_INFER_TOKENIZER_PATH:-$${NEURX_TOKENIZER_PATH:-data/corpus}}"; \
+	DEVICE="$${NEURX_INFER_DEVICE:-$${NEURX_DEVICE:-cpu}}"; \
+	export NEURX_MAX_TOKENS="$$MAX_NEW_CHARS"; \
+	export NEURX_INFER_MAX_NEW_CHARS="$$MAX_NEW_CHARS"; \
+	export NEURX_TEMPERATURE="$$TEMPERATURE"; \
+	export NEURX_TOP_K="$$TOP_K"; \
+	export NEURX_TOP_P="$$TOP_P"; \
+	export NEURX_BEAM_SIZE="$$BEAM_SIZE"; \
+	export NEURX_INFER_CHECKPOINT="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_CHECKPOINT_PATH="$$CHECKPOINT_PATH"; \
+	export NEURX_INFER_TOKENIZER_PATH="$$TOKENIZER_PATH"; \
+	export NEURX_INFER_ANSWER_MODE="chat"; \
+	export NEURX_CHECKPOINT_PATH="$$CHECKPOINT_PATH"; \
+	export NEURX_TOKENIZER_PATH="$$TOKENIZER_PATH"; \
+	export NEURX_INFER_DEVICE="$$DEVICE"; \
+	export NEURX_DEVICE="$$DEVICE"; \
+	bash run_interactive_inference.sh 2>&1; \
+	STATUS=$$?; \
 	exit $$STATUS
 
 train-jsonl: check-bash

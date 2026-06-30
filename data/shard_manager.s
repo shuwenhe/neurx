@@ -55,6 +55,77 @@ func default_tb_shard_config() shard_manager_config:
     cfg.max_retries_on_failure = 3
     return cfg
 
+// Default training corpus path used by NeurX training entry points.
+func default_training_dataset_path() string:
+    "./data/training_data.jsonl"
+
+func default_training_shard_dir() string:
+    "./data/training_data_shards"
+
+func default_training_shard_manifest_path() string:
+    default_training_shard_dir() + "/manifest.json"
+
+func default_training_dataset_name() string:
+    "training_data"
+
+struct training_dataset_layout:
+    string dataset_path
+    string dataset_name
+    int64 total_size_bytes
+    int total_documents
+    int64 estimated_tokens
+    bool is_single_file
+
+func inspect_training_dataset(string dataset_path) training_dataset_layout:
+    training_dataset_layout layout
+    layout.dataset_path = dataset_path
+    layout.dataset_name = default_training_dataset_name()
+    layout.total_size_bytes = get_file_size(dataset_path)
+    layout.total_documents = estimate_line_count(dataset_path, layout.total_size_bytes)
+    layout.estimated_tokens = layout.total_size_bytes / 3
+    layout.is_single_file = true
+    layout
+
+func build_training_dataset_manifest(string dataset_path) dataset_manifest:
+    training_dataset_layout layout = inspect_training_dataset(dataset_path)
+    dataset_manifest manifest
+    manifest.dataset_name = layout.dataset_name
+    manifest.dataset_version = "v1"
+    manifest.source_path = layout.dataset_path
+    manifest.total_size_bytes = layout.total_size_bytes
+    manifest.total_compressed_bytes = layout.total_size_bytes
+    manifest.total_shard_count = 1
+    manifest.total_document_count = layout.total_documents
+    manifest.total_token_count = layout.estimated_tokens
+    manifest.shards = []shard_info{cap: 1}
+    manifest.config_used = default_tb_shard_config()
+    manifest.creation_timestamp = get_current_time_ms()
+    manifest.created_by = "neurx_single_file_manifest"
+    manifest.parent_dataset = ""
+
+    shard_info shard
+    shard.shard_id = 0
+    shard.filename = dataset_path
+    shard.file_size_bytes = layout.total_size_bytes
+    shard.uncompressed_size_bytes = layout.total_size_bytes
+    shard.document_count = layout.total_documents
+    shard.token_count = layout.estimated_tokens
+    shard.quality_score = 1.0
+    shard.start_offset_in_dataset = 0
+    shard.end_offset_in_dataset = layout.total_size_bytes
+    shard.assigned_ranks = []int{cap: 1}
+    shard.assigned_ranks[0] = 0
+    shard.primary_rank = 0
+    shard.is_fully_written = true
+    shard.is_validated = true
+    shard.checksum_sha256 = ""
+    shard.version = 1
+    shard.access_count = 0
+    shard.avg_read_time_ms = 0.0
+    manifest.shards.push(shard)
+
+    manifest
+
 // ── Shard Metadata ──
 struct shard_info {
     int shard_id                       // Unique identifier
