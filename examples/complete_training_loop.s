@@ -27,7 +27,7 @@ use neurx.logging.logger_api
 use neurx.logging.tensorboard_writer
 use neurx.logging.wandb_integration
 use neurx.logging.progress_display
-use neurx.infer.text_generator
+use neurx.inference.text_generator
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
 
