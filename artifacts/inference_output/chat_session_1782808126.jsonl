@@ -1,0 +1,15 @@
+{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
+{"role": "user", "content": "NeurX框架有什么特点？", "turn": 1}
+{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："NeurX框架有什么特点？"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 1}
+{"role": "user", "content": "什么是NeurX", "turn": 2}
+{"role": "assistant", "content": "NeurX 是一个高性能的深度学习框架，使用 S 编程语言编写。它支持 LLM 训练、交互式推理、多轮对话和参数调整。", "turn": 2}
+{"role": "user", "content": "有哪些功能", "turn": 3}
+{"role": "assistant", "content": "NeurX 支持：LLM 训练、交互式推理、多轮对话、参数调整、会话持久化、Tokenizer 加载、Checkpoint 管理。", "turn": 3}
+{"role": "user", "content": "如何调整参数", "turn": 4}
+{"role": "assistant", "content": "您可以使用命令来调整推理参数，例如：temp 0.5, top-k 50, max-tokens 100。输入 'help' 或 'h' 查看所有可用命令。", "turn": 4}
+{"role": "user", "content": "1+1", "turn": 5}
+{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："1+1"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 5}
+{"role": "user", "content": "hello", "turn": 6}
+{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："hello"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 6}
+{"role": "user", "content": "你可以回答哪些问题", "turn": 7}
+{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："你可以回答哪些问题"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 7}

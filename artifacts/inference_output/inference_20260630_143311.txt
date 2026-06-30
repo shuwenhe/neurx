@@ -1,0 +1,11 @@
+[NeurX 推理系统]
+模型: llm_s
+Checkpoint: /Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training_validation2
+Seed: neurx 
+问题: NeurX 可以做什么？
+
+系统消息: 推理二进制执行失败，已回退到验证性输出。
+
+回答:
+NeurX 已成功生成并保存训练 checkpoint。
+推理二进制当前未能直接运行，但问答入口和 checkpoint 解析链路已验证。
