@@ -315,7 +315,7 @@ func float_to_string(f float) string {
 }
 
 func string_char(c int) string {
-    return ""
+    return string(c)
 }
 
 func repeat_string(s string, n int) string {

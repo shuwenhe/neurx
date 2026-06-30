@@ -1,0 +1,80 @@
+{
+  "dataset_name": "training_data",
+  "source_path": "/Users/feifei/shuwen/neurx/data/training_data.jsonl",
+  "output_dir": "/Users/feifei/shuwen/neurx/data/training_data_shards",
+  "total_records": 10033,
+  "shard_count": 10,
+  "shard_size_target": 1024,
+  "shards": [
+    {
+      "file": "training_data-00000.jsonl.gz",
+      "records": 1024,
+      "start_record": 0,
+      "end_record": 1023,
+      "sha256": "36a424771c78de960e11e3af499ed274beb2751658aa47d0ceeee122c3fdd9dc"
+    },
+    {
+      "file": "training_data-00001.jsonl.gz",
+      "records": 1024,
+      "start_record": 1024,
+      "end_record": 2047,
+      "sha256": "5d84dfe5cbd1fea3c806c0ae1c4ec9ead787c910ab64e122d543bfcb357fb086"
+    },
+    {
+      "file": "training_data-00002.jsonl.gz",
+      "records": 1024,
+      "start_record": 2048,
+      "end_record": 3071,
+      "sha256": "85c2fe9b6589b66b589f091807dfcbab69b423af38bd9876011413e53388b20b"
+    },
+    {
+      "file": "training_data-00003.jsonl.gz",
+      "records": 1024,
+      "start_record": 3072,
+      "end_record": 4095,
+      "sha256": "76436e83fbf3695c33726aea87deeed09ee7362720677040d66853dae2295e8f"
+    },
+    {
+      "file": "training_data-00004.jsonl.gz",
+      "records": 1024,
+      "start_record": 4096,
+      "end_record": 5119,
+      "sha256": "50b2c3862c6e1c3ea96dfb6e1d3fd99ff7948b6aaed9ac3d3f234bb8d7a8fd0b"
+    },
+    {
+      "file": "training_data-00005.jsonl.gz",
+      "records": 1024,
+      "start_record": 5120,
+      "end_record": 6143,
+      "sha256": "7b2d0b1e9f7c49114f45d567183c327e187580c6d886c15a5ee71d664db204f2"
+    },
+    {
+      "file": "training_data-00006.jsonl.gz",
+      "records": 1024,
+      "start_record": 6144,
+      "end_record": 7167,
+      "sha256": "632d020aeede6245a5bc991368d0f19209cee06bcf5e42a7443d9afec2abed2e"
+    },
+    {
+      "file": "training_data-00007.jsonl.gz",
+      "records": 1024,
+      "start_record": 7168,
+      "end_record": 8191,
+      "sha256": "8915ed16741b08206926f3e95cc4b8a22b110f97c0223fe87e3e3c26a750b871"
+    },
+    {
+      "file": "training_data-00008.jsonl.gz",
+      "records": 1024,
+      "start_record": 8192,
+      "end_record": 9215,
+      "sha256": "27eebd110eef7f6bc27aeb95b77ce2520dfd2faebbc16fa4e427777298760c01"
+    },
+    {
+      "file": "training_data-00009.jsonl.gz",
+      "records": 817,
+      "start_record": 9216,
+      "end_record": 10032,
+      "sha256": "254ded5d65478472516aa29593e232db33a1bfd23d8f15727056c191d6445512"
+    }
+  ]
+}

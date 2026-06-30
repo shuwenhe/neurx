@@ -1,0 +1,20 @@
+{"text": "The quick brown fox jumps over the lazy dog. This is a sample training example."}
+{"text": "NeurX is a deep learning framework designed for training large language models efficiently."}
+{"text": "Transformers revolutionized the field of natural language processing with the attention mechanism."}
+{"text": "Training large models requires efficient optimization algorithms like AdamW and careful hyperparameter tuning."}
+{"text": "The multi-head attention mechanism allows models to focus on different parts of the input simultaneously."}
+{"text": "Gradient checkpointing is an important technique for training large models with limited GPU memory."}
+{"text": "Mixed precision training can significantly speed up training while maintaining model quality."}
+{"text": "Learning rate schedules like cosine annealing and linear warmup help with stable training convergence."}
+{"text": "Data parallelism and tensor parallelism are essential strategies for distributed training of large models."}
+{"text": "Batch normalization and layer normalization help stabilize neural network training."}
+{"text": "The quick brown fox jumps over the lazy dog. This is a sample training example."}
+{"text": "NeurX is a deep learning framework designed for training large language models efficiently."}
+{"text": "Transformers revolutionized the field of natural language processing with the attention mechanism."}
+{"text": "Training large models requires efficient optimization algorithms like AdamW and careful hyperparameter tuning."}
+{"text": "The multi-head attention mechanism allows models to focus on different parts of the input simultaneously."}
+{"text": "Gradient checkpointing is an important technique for training large models with limited GPU memory."}
+{"text": "Mixed precision training can significantly speed up training while maintaining model quality."}
+{"text": "Learning rate schedules like cosine annealing and linear warmup help with stable training convergence."}
+{"text": "Data parallelism and tensor parallelism are essential strategies for distributed training of large models."}
+{"text": "Batch normalization and layer normalization help stabilize neural network training."}

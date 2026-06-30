@@ -27,7 +27,7 @@ func trim(string s) string {
 }
 
 func string_char(int c) string {
-    ""
+    string(c)
 }
 
 func substr(string s, int from, int to) string {
@@ -38,6 +38,43 @@ func substr(string s, int from, int to) string {
         i = i + 1
     }
     out
+}
+
+func has_suffix(string s, string suffix) bool {
+    if len(suffix) > len(s) {
+        return false
+    }
+    substr(s, len(s) - len(suffix), len(s)) == suffix
+}
+
+func line_at(string text, int line_no) string {
+    if line_no <= 0 {
+        return ""
+    }
+
+    int current_line = 1
+    string out = ""
+    int i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if ch == 10 {
+            if current_line == line_no {
+                return out
+            }
+            current_line = current_line + 1
+            out = ""
+        } else if ch != 13 {
+            if current_line == line_no {
+                out = out + string_char(ch)
+            }
+        }
+        i = i + 1
+    }
+
+    if current_line == line_no {
+        return out
+    }
+    ""
 }
 
 func int_to_str(int n, int fallback) string {
@@ -184,14 +221,18 @@ func shell_escape(string value) string {
 }
 
 func read_line(string path, int line_no) string {
-    string cmd = "sed -n '" + int_to_str(line_no, 0) + "p' " + shell_escape(path)
-    trim(runtime_run_command_output(cmd))
+    trim(line_at(runtime_read_text_file(path), line_no))
 }
 
 func resolve_checkpoint_path(string input_path) string {
     string checkpoint_path = input_path
-    if runtime_file_exists(input_path + "/latest_checkpoint.txt") {
-        checkpoint_path = trim(runtime_read_text_file(input_path + "/latest_checkpoint.txt"))
+    if !has_suffix(input_path, ".neurx") {
+        string latest_path = trim(runtime_read_text_file(input_path + "/latest_checkpoint.txt"))
+        if len(latest_path) > 0 {
+            checkpoint_path = latest_path
+        }
+    } else if runtime_file_exists(input_path) {
+        checkpoint_path = input_path
     }
     if checkpoint_path == "" {
         checkpoint_path = input_path
@@ -300,6 +341,64 @@ func extract_weight_row_csv(string checkpoint_path, int row_id, int vocab_size) 
     trim(runtime_run_command_output(cmd))
 }
 
+func argmax_next_row_from_csv(string weights_csv, int row_id, int vocab_size, []float bias) int {
+    if vocab_size <= 0 || len(weights_csv) == 0 || len(bias) == 0 {
+        return 0
+    }
+
+    int start_field = row_id * vocab_size + 1
+    int end_field = start_field + vocab_size - 1
+    int field = 1
+    int i = 0
+    string cur = ""
+    bool have_best = false
+    int best_id = 0
+    float best_logit = 0.0
+
+    while i < len(weights_csv) {
+        int ch = weights_csv[i]
+        if ch == 44 {
+            if field >= start_field && field <= end_field && len(cur) > 0 {
+                float value = str_to_float(trim(cur))
+                int idx = field - start_field
+                if idx >= 0 && idx < len(bias) {
+                    float logit = value + bias[idx]
+                    if !have_best || logit > best_logit {
+                        best_logit = logit
+                        best_id = idx
+                        have_best = true
+                    }
+                }
+            }
+            cur = ""
+            field = field + 1
+            if field > end_field {
+                break
+            }
+        } else if field >= start_field && field <= end_field {
+            cur = cur + string_char(ch)
+        }
+        i = i + 1
+    }
+
+    if field >= start_field && field <= end_field && len(cur) > 0 {
+        float value = str_to_float(trim(cur))
+        int idx = field - start_field
+        if idx >= 0 && idx < len(bias) {
+            float logit = value + bias[idx]
+            if !have_best || logit > best_logit {
+                best_id = idx
+                have_best = true
+            }
+        }
+    }
+
+    if !have_best {
+        return 0
+    }
+    best_id
+}
+
 func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     if vocab_size <= 0 || len(weights_row) == 0 || len(bias) == 0 {
         return 0
@@ -339,11 +438,13 @@ struct compiled_model {
     int weight_cols
     int bias_size
     string weights_csv
+    []float weights
     []float bias
     []string layer_names
     bool quantized
     string quantization_type
     bool graph_mode
+    bool smoke_test
 }
 
 struct inference_config {
@@ -397,11 +498,13 @@ func empty_compiled_model() compiled_model {
         weight_cols: 0,
         bias_size: 0,
         weights_csv: "",
+        weights: []float{cap: 0},
         bias: []float{cap: 0},
         layer_names: []string{cap: 0},
         quantized: false,
         quantization_type: "none",
         graph_mode: false,
+        smoke_test: false,
     }
 }
 
@@ -430,6 +533,15 @@ func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
     int bias_size = csv_first_int(bias_shape_text)
     string weights_csv = substr(weight_data_line, 12, len(weight_data_line))
     []float bias = parse_csv_floats(substr(bias_data_line, 12, len(bias_data_line)))
+    string smoke_text = trim(runtime_env_get("NEURX_INFER_SMOKE_TEST", ""))
+    bool smoke_test = false
+    if smoke_text == "1" || smoke_text == "true" {
+        smoke_test = true
+    }
+    []float weights = []float{cap: 0}
+    if !smoke_test {
+        weights = parse_csv_floats(weights_csv)
+    }
 
     int vocab = 256
     if bias_size > 0 {
@@ -459,11 +571,13 @@ func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
         weight_cols: weight_cols,
         bias_size: bias_size,
         weights_csv: weights_csv,
+        weights: weights,
         bias: bias,
         layer_names: layers,
         quantized: false,
         quantization_type: engine.quantization_type,
         graph_mode: false,
+        smoke_test: smoke_test,
     }
 }
 
@@ -481,11 +595,13 @@ func apply_quantization(compiled_model model, string quantization_type) compiled
         weight_cols: model.weight_cols,
         bias_size: model.bias_size,
         weights_csv: model.weights_csv,
+        weights: model.weights,
         bias: model.bias,
         layer_names: model.layer_names,
         quantized: true,
         quantization_type: quantization_type,
         graph_mode: model.graph_mode,
+        smoke_test: model.smoke_test,
     }
 }
 
@@ -503,11 +619,13 @@ func compile_for_backend(compiled_model model, string backend) compiled_model {
         weight_cols: model.weight_cols,
         bias_size: model.bias_size,
         weights_csv: model.weights_csv,
+        weights: model.weights,
         bias: model.bias,
         layer_names: model.layer_names,
         quantized: model.quantized,
         quantization_type: model.quantization_type,
         graph_mode: model.graph_mode,
+        smoke_test: model.smoke_test,
     }
 }
 
@@ -525,16 +643,18 @@ func enable_graph_mode(compiled_model model) compiled_model {
         weight_cols: model.weight_cols,
         bias_size: model.bias_size,
         weights_csv: model.weights_csv,
+        weights: model.weights,
         bias: model.bias,
         layer_names: model.layer_names,
         quantized: model.quantized,
         quantization_type: model.quantization_type,
         graph_mode: true,
+        smoke_test: model.smoke_test,
     }
 }
 
 func warmup_model(compiled_model model, int num_iterations) bool {
-    if model.vocab_size <= 0 || len(model.bias) < 1 || len(model.weights_csv) == 0 {
+    if model.vocab_size <= 0 || len(model.bias) < 1 {
         return false
     }
     true
@@ -603,19 +723,30 @@ func generate_tokens(compiled_model model, string prompt, int max_tokens) string
 
     int token = 0
     while token < max_tokens {
-        int base = prev_id * vocab
-        if base < 0 {
+        if model.smoke_test || len(model.weights) == 0 {
+            int next_id = argmax_next_row_from_csv(model.weights_csv, prev_id, vocab, model.bias)
+            output = output + string_char(next_id)
+            prev_id = next_id
+            token = token + 1
+            continue
+        }
+
+        int row_start = prev_id * vocab
+        if row_start < 0 || row_start + vocab > len(model.weights) {
             return output
         }
 
-        string row_csv = extract_weight_row_csv_from_text(model.weights_csv, prev_id, vocab)
-        []float row = parse_csv_floats(row_csv)
-        if len(row) < vocab {
-            println("Could not load row " + int_to_str(prev_id, 0) + " from checkpoint: " + model.checkpoint_path)
-            return output
+        int next_id = 0
+        float best_logit = model.weights[row_start] + model.bias[0]
+        int i = 1
+        while i < vocab {
+            float logit = model.weights[row_start + i] + model.bias[i]
+            if logit > best_logit {
+                best_logit = logit
+                next_id = i
+            }
+            i = i + 1
         }
-
-        int next_id = argmax_next_row(row, model.bias, vocab)
         output = output + string_char(next_id)
         prev_id = next_id
         token = token + 1
@@ -712,7 +843,7 @@ func main() int {
 
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", ""))
     if len(checkpoint_arg) == 0 {
-        checkpoint_arg = "/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training_validation2/final_model.neurx"
+        checkpoint_arg = "/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_s_pretrain"
     }
 
     string seed = runtime_env_get("NEURX_INFER_SEED", "")
@@ -735,6 +866,11 @@ func main() int {
     string answer_mode = trim(runtime_env_get("NEURX_INFER_ANSWER_MODE", ""))
     if len(answer_mode) == 0 {
         answer_mode = "qa"
+    }
+    string answer_only = trim(runtime_env_get("NEURX_INFER_ANSWER_ONLY", ""))
+    bool answer_only_mode = false
+    if answer_only == "1" || answer_only == "true" {
+        answer_only_mode = true
     }
     int max_new_chars = str_to_int(runtime_env_get("NEURX_INFER_MAX_NEW_CHARS", "120"), 120)
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
@@ -787,6 +923,11 @@ func main() int {
     if validate_only != "" {
         println("Validation only: checkpoint loaded.")
         println("================================================")
+        return 0
+    }
+
+    if answer_only_mode {
+        println(run_inference(model, prompt, max_new_chars))
         return 0
     }
 
