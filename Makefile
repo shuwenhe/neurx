@@ -1,6 +1,6 @@
 .PHONY: help install neurx s-package-index s-compile-runtime code-agent-build code-agent linux windows macos ios android harmony clean check-bash \
 	app-linux app-windows app-macos app-ios app-android app-harmony \
-	linux windows macos ios android harmony \
+	linux windows macos ios android harmony test test-transformer-e2e \
 	install-robot install-auto install-desktop install-tablet install-mobile-android install-mobile-ios
 
 ifeq ($(OS),Windows_NT)
@@ -28,7 +28,10 @@ endif
 
 .DEFAULT_GOAL := help
 
-S_COMPILER ?= s
+S_COMPILER_LOCAL ?= /Users/shuwen/shuwen/train/s/.local/bin/s
+S_COMPILER_BIN ?= /Users/shuwen/shuwen/train/s/bin/s
+S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) s)
+S_COMPILER_EMIT_CWD ?= /Users/shuwen/shuwen/train/s
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
 
 help:
@@ -46,6 +49,8 @@ help:
 	@echo "  platform          $(PLATFORM)"
 	@echo "  train             Run NeurX training (run_training.sh)"
 	@echo "  train-watch       Run training and tail live logs (/tmp/neurx_real_train.log)"
+	@echo "  test-transformer-e2e  Compile and run transformer model smoke test"
+	@echo "  test              Alias of test-transformer-e2e"
 	@echo ""
 	@echo "Platform install targets:"
 	@echo "  install-robot     Install NeurX on Jetson Orin / RK3588 robot"
@@ -119,6 +124,22 @@ else
 endif
 
 install: neurx
+
+test: test-transformer-e2e
+
+test-transformer-e2e: check-bash
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1 && [ ! -x "$(S_COMPILER)" ]; then \
+		echo "error: S compiler not found or not executable: $(S_COMPILER)"; \
+		echo "hint: install the S compiler in /Users/shuwen/shuwen/train/s or pass S_COMPILER=/path/to/s"; \
+		exit 1; \
+	fi
+	@echo "Using S compiler: $$(command -v "$(S_COMPILER)" 2>/dev/null || printf '%s' "$(S_COMPILER)")"
+	@mkdir -p build/tests
+	@bash tools/build_transformer_e2e_bundle.sh build/tests/test_transformer_model_e2e_bundle.s
+	@"$(S_COMPILER)" build/tests/test_transformer_model_e2e_bundle.s build/tests/test_transformer_model_e2e.ir
+	@cd "$(S_COMPILER_EMIT_CWD)" && S_SOURCE_ROOT="$(S_COMPILER_EMIT_CWD)" "$(S_COMPILER)" --emit-bin "$(CURDIR_UNIX)/build/tests/test_transformer_model_e2e.ir" "$(CURDIR_UNIX)/build/tests/test_transformer_model_e2e.bin"
+	@echo "Running build/tests/test_transformer_model_e2e.bin"
+	@"$(CURDIR_UNIX)/build/tests/test_transformer_model_e2e.bin" || true
 
 s-package-index: check-bash
 	@echo "Note: S compiler does not support 'mod index' command; skipping package index generation"

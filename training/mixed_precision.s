@@ -44,6 +44,7 @@ struct mixed_precision_state {
     gradients_fp32: [][]float  // float32 gradients
     optimizer_state_fp32: [][]float  // float32 for optimizer
     loss_scale_scheduler: loss_scale_scheduler
+    loss_scale: float
     overflow_count: int
     total_steps: int
 }
@@ -244,6 +245,7 @@ func new_mixed_precision_state(model_size: int) mixed_precision_state {
     state.gradients_fp32 = [][]float(model_size)
     state.optimizer_state_fp32 = [][]float(model_size)
     state.loss_scale_scheduler = new_loss_scale_scheduler(65536.0, 2000, 2.0, 0.5)
+    state.loss_scale = state.loss_scale_scheduler.current_scale
     state.overflow_count = 0
     state.total_steps = 0
     return state

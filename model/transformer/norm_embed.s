@@ -32,6 +32,12 @@ struct position_embedding_config {
     bool use_flash_attention
 }
 
+struct learned_position_embedding {
+    int hidden_dim
+    int max_seq_len
+    []float weight
+}
+
 struct rope_embedding {
     int hidden_dim
     float rope_base
@@ -274,6 +280,26 @@ func new_absolute_position_embedding(position_embedding_config cfg) []float {
     embedding
 }
 
+func new_learned_position_embedding(position_embedding_config cfg) learned_position_embedding {
+    int total = cfg.max_seq_len * cfg.hidden_dim
+    []float weight = allocate_vector(total, 0.0)
+    int pos = 0
+    while pos < cfg.max_seq_len {
+        int d = 0
+        while d < cfg.hidden_dim {
+            int idx = pos * cfg.hidden_dim + d
+            weight[idx] = ((pos + 1) * (d + 3) * 1.0) / ((cfg.max_seq_len + cfg.hidden_dim + 1) * 1.0)
+            d = d + 1
+        }
+        pos = pos + 1
+    }
+    learned_position_embedding {
+        hidden_dim: cfg.hidden_dim,
+        max_seq_len: cfg.max_seq_len,
+        weight: weight,
+    }
+}
+
 func get_position_embedding(
     []float embedding,
     int hidden_dim,
@@ -284,6 +310,20 @@ func get_position_embedding(
     int i = 0
     while i < total {
         out[i] = embedding[i]
+        i = i + 1
+    }
+    out
+}
+
+func get_learned_position_embedding(
+    learned_position_embedding embedding,
+    int seq_len
+) []float {
+    int total = seq_len * embedding.hidden_dim
+    []float out = allocate_vector(total, 0.0)
+    int i = 0
+    while i < total && i < len(embedding.weight) {
+        out[i] = embedding.weight[i]
         i = i + 1
     }
     out
@@ -329,7 +369,8 @@ func apply_rope(
             while s < seq_len {
                 int pair = 0
                 while pair < pair_dim {
-                    int base = ((b * num_heads + h) * seq_len + s) * head_dim + pair * 2
+                    int token_base = (b * seq_len + s) * (num_heads * head_dim)
+                    int base = token_base + h * head_dim + pair * 2
                     int cache_idx = s * pair_dim + pair
                     float angle = s * 1.0 * rope.frequencies[pair]
                     float c = cos_approx(angle)
