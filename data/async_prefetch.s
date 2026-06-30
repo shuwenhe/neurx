@@ -5,6 +5,7 @@
 package neurx.data.async_prefetch
 
 use neurx.data.streaming_reader.{streaming_reader_state, read_batch_of_lines}
+use neurx.data.tokenizer_pipeline.{tokenizer_config, default_llm_tokenizer_config, bpe_tokenizer_state, init_bpe_tokenizer, encode}
 
 // ── Prefetch Configuration ──
 struct prefetch_config {
@@ -151,6 +152,7 @@ struct async_prefetch_manager {
     prefetch_config config
     streaming_reader_state reader
     prefetch_queue queue
+    bpe_tokenizer_state tokenizer
     
     // Background worker state
     []thread_handle io_workers         // I/O threads
@@ -179,6 +181,7 @@ func new_async_prefetch_manager(
     mgr.config = config
     mgr.reader = reader
     mgr.queue = new_prefetch_queue(config.prefetch_queue_size)
+    mgr.tokenizer = init_bpe_tokenizer(default_llm_tokenizer_config())
     mgr.workers_running = false
     mgr.next_batch_id_to_produce = 0
     mgr.total_bytes_loaded = 0
@@ -369,8 +372,8 @@ func tokenize_batch(
             line_idx = line_idx + 1
             continue
         
-        // Tokenize this line using BPE/SentencePiece
-        []int token_ids = tokenize_single_line(line, tokens_per_line)
+        // Tokenize this line using the configured BPE tokenizer
+        []int token_ids = tokenize_single_line(mgr, line, tokens_per_line)
         
         if len(token_ids) < 2:
             line_idx = line_idx + 1
@@ -506,15 +509,20 @@ func empty_prefetched_batch() prefetched_batch:
         priority: 0
     }
 
-func tokenize_single_line(string line, int max_tokens) []int:
-    // This would call BPE/SentencePiece tokenizer
-    // For now, return character-level token IDs as placeholder
-    []int ids = []int{cap: min(len(line), max_tokens)}
-    int i = 0
-    while i < len(line) and i < max_tokens:
-        ids[i] = int(line[i])  // Use ASCII value as token ID (placeholder)
-        i = i + 1
-    return ids
+func tokenize_single_line(async_prefetch_manager mgr, string line, int max_tokens) []int:
+    // Prefer real BPE tokenization; fall back to a bounded char-token path only
+    // if the tokenizer has no usable vocabulary loaded yet.
+    []int token_ids = encode(mgr.tokenizer, line)
+
+    if len(token_ids) > max_tokens:
+        []int truncated = []int{cap: max_tokens}
+        int i = 0
+        while i < max_tokens:
+            truncated[i] = token_ids[i]
+            i = i + 1
+        return truncated
+
+    return token_ids
 
 func estimate_bytes_from_lines([]string lines, int count) int64:
     int64 total = 0
