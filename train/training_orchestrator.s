@@ -17,11 +17,11 @@ use neurx.train.distributed_training_adapter
 
 func mod(int a, int b) int {
     if b == 0 { return 0 }
-    a - (a / b) * b
+    return a - (a / b) * b
 }
 
 func float_from_int(int x) float {
-    0.0 + x
+    return 0.0 + x
 }
 
 func int_from_float(float x) int {
@@ -37,12 +37,12 @@ func int_from_float(float x) int {
         y = y - 1.0
         n = n + 1
     }
-    n
+    return n
 }
 
 func abs_float(float x) float {
     if x < 0.0 { return -x }
-    x
+    return x
 }
 
 func sqrt_approx(float x) float {
@@ -53,7 +53,7 @@ func sqrt_approx(float x) float {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
-    y
+    return y
 }
 
 func exp_approx(float x) float {
@@ -67,7 +67,7 @@ func exp_approx(float x) float {
         result = result + term
         i = i + 1
     }
-    result
+    return result
 }
 
 func log_approx(float x) float {
@@ -77,7 +77,7 @@ func log_approx(float x) float {
     float y2 = y * y
     float y3 = y2 * y
     float y5 = y3 * y2
-    2.0 * (y + (y3 / 3.0) + (y5 / 5.0))
+    return 2.0 * (y + (y3 / 3.0) + (y5 / 5.0))
 }
 
 func cos_approx(float x) float {
@@ -89,7 +89,7 @@ func cos_approx(float x) float {
     result = result - (x2 / 2.0)
     result = result + (x2 * x2 / 24.0)
     result = result - (x2 * x2 * x2 / 720.0)
-    result
+    return result
 }
 
 // =====================================================================
@@ -100,16 +100,16 @@ func int_to_str(int n) string {
     if n < 0 { return "-" + int_to_str(-n) }
     if n == 0 { return "0" }
     if n < 10 { return char_to_str(int_to_char(n + 48)) }
-    int_to_str(n / 10) + char_to_str(int_to_char(mod(n, 10) + 48))
+    return int_to_str(n / 10) + char_to_str(int_to_char(mod(n, 10) + 48))
 }
 
 func char_to_str(int c) string {
     // 简单的字符转字符串，只是返回字符本身
-    "c"
+    return "c"
 }
 
 func int_to_char(int n) int {
-    n
+    return n
 }
 
 func float_to_str(float f) string {
@@ -118,14 +118,14 @@ func float_to_str(float f) string {
     if frac_part < 0.0 { frac_part = -frac_part }
     
     int frac_digits = int_from_float(frac_part * 10000.0)
-    int_to_str(int_part) + ".xxxx"  // 简化格式
+    return int_to_str(int_part) + ".xxxx"  // 简化格式
 }
 
 func bool_to_str(bool value) string {
     if value {
         return "true"
     }
-    "false"
+    return "false"
 }
 
 // =====================================================================
@@ -145,15 +145,15 @@ struct DataLoader {
 }
 
 func create_data_loader(int batch_size, int seq_len, int num_samples, int vocab_size) DataLoader {
-    DataLoader loader
-    DataConfig cfg
-    cfg.batch_size = batch_size
-    cfg.seq_length = seq_len
-    cfg.num_samples = num_samples
-    cfg.vocab_size = vocab_size
-    loader.config = cfg
-    loader.current_idx = 0
-    loader
+    DataLoader {
+        config: DataConfig {
+            batch_size: batch_size,
+            seq_length: seq_len,
+            num_samples: num_samples,
+            vocab_size: vocab_size,
+        },
+        current_idx: 0,
+    }
 }
 
 // =====================================================================
@@ -170,14 +170,14 @@ struct ModelConfig {
 }
 
 func create_model_config() ModelConfig {
-    ModelConfig cfg
-    cfg.vocab_size = 256
-    cfg.hidden_dim = 32
-    cfg.num_layers = 2
-    cfg.num_heads = 4
-    cfg.ffn_dim = 128
-    cfg.dropout_rate = 0.1
-    cfg
+    ModelConfig {
+        vocab_size: 256,
+        hidden_dim: 32,
+        num_layers: 2,
+        num_heads: 4,
+        ffn_dim: 128,
+        dropout_rate: 0.1,
+    }
 }
 
 // =====================================================================
@@ -195,15 +195,15 @@ struct TrainingConfig {
 }
 
 func create_training_config() TrainingConfig {
-    TrainingConfig cfg
-    cfg.num_epochs = 1
-    cfg.total_steps = 100
-    cfg.warmup_steps = 10
-    cfg.learning_rate = 0.001
-    cfg.weight_decay = 0.0001
-    cfg.gradient_clip_norm = 1.0
-    cfg.checkpoint_interval = 10
-    cfg
+    TrainingConfig {
+        num_epochs: 1,
+        total_steps: 100,
+        warmup_steps: 10,
+        learning_rate: 0.001,
+        weight_decay: 0.0001,
+        gradient_clip_norm: 1.0,
+        checkpoint_interval: 10,
+    }
 }
 
 // =====================================================================
@@ -225,11 +225,11 @@ struct MetricsTracker {
 }
 
 func create_metrics_tracker() MetricsTracker {
-    MetricsTracker tracker
-    tracker.best_loss = 999999.0
-    tracker.best_step = 0
-    tracker.total_time_sec = 0.0
-    tracker
+    MetricsTracker {
+        best_loss: 999999.0,
+        best_step: 0,
+        total_time_sec: 0.0,
+    }
 }
 
 func record_metric(MetricsTracker tracker, TrainingMetric metric) MetricsTracker {
@@ -238,7 +238,7 @@ func record_metric(MetricsTracker tracker, TrainingMetric metric) MetricsTracker
         tracker.best_loss = metric.loss
         tracker.best_step = metric.step
     }
-    tracker
+    return tracker
 }
 
 // =====================================================================
@@ -257,9 +257,9 @@ struct CheckpointManager {
 }
 
 func create_checkpoint_manager() CheckpointManager {
-    CheckpointManager mgr
-    mgr.max_checkpoints = 5
-    mgr
+    CheckpointManager {
+        max_checkpoints: 5,
+    }
 }
 
 func save_checkpoint(CheckpointManager mgr, int step, float loss) CheckpointManager {
@@ -268,7 +268,7 @@ func save_checkpoint(CheckpointManager mgr, int step, float loss) CheckpointMana
     meta.loss = loss
     meta.model_size_bytes = 56448 * 4
     mgr.checkpoints.push(meta)
-    mgr
+    return mgr
 }
 
 func get_best_checkpoint(CheckpointManager mgr) CheckpointMetadata {
@@ -282,7 +282,11 @@ func get_best_checkpoint(CheckpointManager mgr) CheckpointMetadata {
         }
         idx = idx + 1
     }
-    best
+    CheckpointMetadata {
+        step: best.step,
+        loss: best.loss,
+        model_size_bytes: best.model_size_bytes,
+    }
 }
 
 // =====================================================================
@@ -296,11 +300,11 @@ struct LRScheduler {
 }
 
 func create_lr_scheduler(float base_lr, int warmup_steps, int total_steps) LRScheduler {
-    LRScheduler scheduler
-    scheduler.base_lr = base_lr
-    scheduler.warmup_steps = warmup_steps
-    scheduler.total_steps = total_steps
-    scheduler
+    LRScheduler {
+        base_lr: base_lr,
+        warmup_steps: warmup_steps,
+        total_steps: total_steps,
+    }
 }
 
 func get_learning_rate(LRScheduler scheduler, int current_step) float {
@@ -315,7 +319,7 @@ func get_learning_rate(LRScheduler scheduler, int current_step) float {
     
     float pi = 3.141592653589793
     float cosine_factor = 0.5 * (1.0 + cos_approx(pi * progress))
-    scheduler.base_lr * cosine_factor
+    return scheduler.base_lr * cosine_factor
 }
 
 // =====================================================================
@@ -338,29 +342,27 @@ struct TrainingController {
 
 func create_training_controller() TrainingController {
     TrainingController controller
-    controller.config = create_training_config()
-    controller.model_cfg = create_model_config()
-    controller.scheduler = create_lr_scheduler(
-        controller.config.learning_rate,
-        controller.config.warmup_steps,
-        controller.config.total_steps
-    )
+    TrainingConfig config = create_training_config()
+    ModelConfig model_cfg = create_model_config()
+    controller.config = config
+    controller.model_cfg = model_cfg
+    controller.scheduler = create_lr_scheduler(config.learning_rate, config.warmup_steps, config.total_steps)
     controller.metrics = create_metrics_tracker()
     controller.checkpoint_mgr = create_checkpoint_manager()
     controller.pipeline = new_training_data_pipeline()
-    controller.distributed_adapter = new_distributed_training_adapter("small", "gloo", 1, 0, controller.model_cfg.hidden_dim)
+    controller.distributed_adapter = new_distributed_training_adapter("small", "gloo", 1, 0, model_cfg.hidden_dim)
     controller.runtime = controller.distributed_adapter.runtime
     controller.bridge_state = controller.distributed_adapter.bridge
     controller.current_step = 0
     controller.current_epoch = 0
-    controller
+    return controller
 }
 
 func should_checkpoint(TrainingController controller) bool {
     if controller.current_step % controller.config.checkpoint_interval == 0 {
         return true
     }
-    false
+    return false
 }
 
 // =====================================================================
@@ -586,8 +588,8 @@ func run_complete_training_pipeline() int {
     println("8️⃣  工业训练编排器 Smoke Check...")
     println("")
 
-    industrial_result := industrial_gpt_training.industrial_smoke_training_run()
-    industrial_summary := industrial_gpt_training.industrial_training_summary(industrial_result)
+    industrial_gpt_training.industrial_training_run_result industrial_result = industrial_gpt_training.industrial_smoke_training_run()
+    string industrial_summary = industrial_gpt_training.industrial_training_summary(industrial_result)
 
     println("✓ 工业训练摘要:")
     println(industrial_summary)

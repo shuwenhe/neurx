@@ -2,14 +2,19 @@
 
 set -euo pipefail
 
-NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 OUTPUT_DIR="${NEURX_S_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
 TOTAL_STEPS="${NEURX_S_PRETRAIN_STEPS:-50}"
 WARMUP_STEPS="${NEURX_S_PRETRAIN_WARMUP_STEPS:-10}"
-# prefer train_llm.s at repo root (repo was reorganized); fall back to src/
-if [ -f "$NEURX_DIR/train_llm_jsonl.s" ]; then
+# prefer the JSONL-capable training source; fall back to older locations.
+if [ -f "$NEURX_DIR/train/train_llm_jsonl.s" ]; then
+  SOURCE_FILE="$NEURX_DIR/train/train_llm_jsonl.s"
+elif [ -f "$NEURX_DIR/train/train_llm.s" ]; then
+  SOURCE_FILE="$NEURX_DIR/train/train_llm.s"
+elif [ -f "$NEURX_DIR/train_llm_jsonl.s" ]; then
   SOURCE_FILE="$NEURX_DIR/train_llm_jsonl.s"
 elif [ -f "$NEURX_DIR/train_llm.s" ]; then
   SOURCE_FILE="$NEURX_DIR/train_llm.s"

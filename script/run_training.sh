@@ -12,8 +12,9 @@ set -euo pipefail
 #   NEURX_S_PRETRAIN_WARMUP_STEPS  default: 10
 #   NEURX_S_PRETRAIN_OUTPUT_DIR    default: artifacts/checkpoints/llm_s_pretrain
 
-NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
-S_PRETRAIN_RUNNER="$NEURX_DIR/run_s_pretrain.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+S_PRETRAIN_RUNNER="$SCRIPT_DIR/run_s_pretrain.sh"
 
 echo "======================================================================="
 echo "NeurX 深度学习框架 - Real Training Entry"

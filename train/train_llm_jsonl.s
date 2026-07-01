@@ -33,18 +33,23 @@ func int(float x) int {
     n
 }
 
+func string_char(int c) string {
+    string(c)
+}
+
 func int_to_str(int n) string {
-    if n == 0 {
+    int value = n
+    if value == 0 {
         return "0"
     }
-    bool neg = n < 0
+    bool neg = value < 0
     if neg {
-        n = -n
+        value = -value
     }
     string s = ""
-    while n > 0 {
-        s = string(mod(n, 10) + 48) + s
-        n = n / 10
+    while value > 0 {
+        s = string_char(mod(value, 10) + 48) + s
+        value = value / 10
     }
     if neg {
         s = "-" + s
@@ -83,15 +88,16 @@ func pad_int(int n, int w) string {
 }
 
 func fmt_float(float val, int decimals) string {
-    if val == 0.0 {
+    float value = val
+    if value == 0.0 {
         return "0.0"
     }
-    bool neg = val < 0.0
+    bool neg = value < 0.0
     if neg {
-        val = -val
+        value = -value
     }
-    int int_part = int(val)
-    float frac = val - float(int_part)
+    int int_part = int(value)
+    float frac = value - float(int_part)
     string s = ""
     if neg {
         s = "-"
@@ -101,7 +107,7 @@ func fmt_float(float val, int decimals) string {
     while i < decimals {
         frac = frac * 10.0
         int digit = int(frac)
-        s = s + string(digit + 48)
+        s = s + string_char(digit + 48)
         frac = frac - float(digit)
         i = i + 1
     }
