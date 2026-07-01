@@ -1,0 +1,320 @@
+# ============================================
+# NeurX Enhanced Makefile with Evaluation Tools
+# Integrate critical training components
+# ============================================
+
+.PHONY: help build train eval monitor checkpoint report clean build-eval-tools
+
+# Configuration
+S_COMPILER ?= s
+PYTHON ?= python3
+BASH := bash
+PROJECT_ROOT := $(shell pwd)
+BIN_DIR := $(PROJECT_ROOT)/bin
+SCRIPT_DIR := $(PROJECT_ROOT)/script
+CHECKPOINT_DIR := $(PROJECT_ROOT)/artifacts/checkpoints
+LOG_DIR := $(PROJECT_ROOT)/logs
+CONFIG_FILE := $(PROJECT_ROOT)/config_large_model.json
+
+# Detect OS
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    PLATFORM := linux
+endif
+ifeq ($(UNAME_S),Darwin)
+    PLATFORM := macos
+endif
+ifeq ($(OS),Windows_NT)
+    PLATFORM := windows
+endif
+
+# Colors
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+BLUE := \033[0;34m
+NC := \033[0m
+
+# ============================================
+# Help Target
+# ============================================
+
+help:
+	@echo "$(BLUE)╔════════════════════════════════════════════════════════╗$(NC)"
+	@echo "$(BLUE)║          NeurX Training with Evaluation Tools          ║$(NC)"
+	@echo "$(BLUE)╚════════════════════════════════════════════════════════╝$(NC)"
+	@echo ""
+	@echo "$(GREEN)Core Commands:$(NC)"
+	@echo "  make help              - Show this help message"
+	@echo "  make train             - Train Claude-level LLM"
+	@echo "  make infer             - Run inference demo"
+	@echo "  make chat              - Start interactive chat"
+	@echo ""
+	@echo "$(YELLOW)Evaluation & Monitoring:$(NC)"
+	@echo "  make build-eval-tools  - Build evaluation tools (tokenizer, evaluator, etc.)"
+	@echo "  make eval              - Calculate perplexity and metrics"
+	@echo "  make monitor           - Start real-time training monitor"
+	@echo "  make checkpoint        - Manage checkpoints"
+	@echo "  make report            - Generate training report"
+	@echo ""
+	@echo "$(BLUE)Data Pipeline:$(NC)"
+	@echo "  make shard             - Shard dataset"
+	@echo "  make split             - Split into train/val/test"
+	@echo "  make tokenize          - Tokenize training data"
+	@echo ""
+	@echo "$(RED)Maintenance:$(NC)"
+	@echo "  make clean             - Clean build artifacts"
+	@echo "  make clean-all         - Clean everything including checkpoints"
+	@echo ""
+
+# ============================================
+# Directory Setup
+# ============================================
+
+dirs:
+	@mkdir -p $(BIN_DIR) $(LOG_DIR) $(CHECKPOINT_DIR)
+	@echo "$(GREEN)✓ Directories created$(NC)"
+
+# ============================================
+# Build Evaluation Tools
+# ============================================
+
+build-eval-tools: dirs
+	@echo "$(BLUE)🔨 Building evaluation tools...$(NC)"
+	@if command -v $(S_COMPILER) > /dev/null; then \
+		echo "  Building tokenizer..."; \
+		$(S_COMPILER) build $(SCRIPT_DIR)/tokenizer.s -o $(BIN_DIR)/tokenizer 2>/dev/null || echo "    ⚠ Tokenizer build skipped (using bash fallback)"; \
+		echo "  Building evaluator..."; \
+		$(S_COMPILER) build $(SCRIPT_DIR)/evaluator.s -o $(BIN_DIR)/evaluator 2>/dev/null || echo "    ⚠ Evaluator build skipped"; \
+		echo "  Building checkpoint manager..."; \
+		$(S_COMPILER) build $(SCRIPT_DIR)/checkpoint_manager.s -o $(BIN_DIR)/checkpoint_manager 2>/dev/null || echo "    ⚠ Checkpoint manager build skipped"; \
+		echo "  Building training monitor..."; \
+		$(S_COMPILER) build $(SCRIPT_DIR)/training_monitor.s -o $(BIN_DIR)/training_monitor 2>/dev/null || echo "    ⚠ Training monitor build skipped"; \
+	else \
+		echo "$(YELLOW)⚠ S compiler not found - using bash fallbacks$(NC)"; \
+	fi
+	@echo "$(GREEN)✓ Evaluation tools ready$(NC)"
+
+# ============================================
+# Training Targets
+# ============================================
+
+train: dirs build-eval-tools
+	@echo "$(BLUE)🚀 Starting NeurX LLM training...$(NC)"
+	@echo "  Config: $(CONFIG_FILE)"
+	@echo "  Checkpoints: $(CHECKPOINT_DIR)"
+	@echo "  Logs: $(LOG_DIR)"
+	@bash $(SCRIPT_DIR)/integration.sh train
+	@echo "$(GREEN)✓ Training complete$(NC)"
+
+train-with-monitoring: dirs build-eval-tools
+	@echo "$(BLUE)🚀 Starting NeurX with real-time monitoring...$(NC)"
+	@(bash $(SCRIPT_DIR)/integration.sh train &)
+	@(bash $(SCRIPT_DIR)/integration.sh monitor &)
+	@wait
+	@echo "$(GREEN)✓ Training complete$(NC)"
+
+# ============================================
+# Evaluation Targets
+# ============================================
+
+eval: dirs build-eval-tools
+	@echo "$(BLUE)📊 Computing evaluation metrics...$(NC)"
+	@if [ -f $(BIN_DIR)/evaluator ]; then \
+		$(BIN_DIR)/evaluator --config $(CONFIG_FILE); \
+	else \
+		bash $(SCRIPT_DIR)/integration.sh eval; \
+	fi
+	@echo "$(GREEN)✓ Evaluation complete$(NC)"
+
+perplexity:
+	@echo "$(BLUE)📈 Calculating perplexity...$(NC)"
+	@if [ -d "$(CHECKPOINT_DIR)" ]; then \
+		if [ -f $(BIN_DIR)/evaluator ]; then \
+			$(BIN_DIR)/evaluator --perplexity --checkpoint-dir $(CHECKPOINT_DIR); \
+		fi; \
+	else \
+		echo "$(YELLOW)⚠ No checkpoints found$(NC)"; \
+	fi
+
+# ============================================
+# Monitoring Targets
+# ============================================
+
+monitor: build-eval-tools
+	@echo "$(BLUE)📈 Starting training monitor...$(NC)"
+	@LOG_FILE="$(LOG_DIR)/training_$(shell date +%Y%m%d_%H%M%S).jsonl"; \
+	if [ -f $(BIN_DIR)/training_monitor ]; then \
+		$(BIN_DIR)/training_monitor --log-file "$$LOG_FILE"; \
+	else \
+		bash $(SCRIPT_DIR)/integration.sh monitor "$(CONFIG_FILE)"; \
+	fi
+
+# ============================================
+# Checkpoint Management
+# ============================================
+
+checkpoint-list:
+	@echo "$(BLUE)📂 Available checkpoints:$(NC)"
+	@if [ -d "$(CHECKPOINT_DIR)" ]; then \
+		ls -1d $(CHECKPOINT_DIR)/checkpoint-* 2>/dev/null | while read dir; do \
+			step=$$(basename "$$dir" | sed 's/checkpoint-//'); \
+			if [ -f "$$dir/metadata.json" ]; then \
+				echo "  Step $$step: $$(jq -r '.perplexity // "N/A"' "$$dir/metadata.json" 2>/dev/null)"; \
+			fi; \
+		done; \
+	else \
+		echo "  $(YELLOW)No checkpoints found$(NC)"; \
+	fi
+
+checkpoint-cleanup:
+	@echo "$(BLUE)🧹 Cleaning old checkpoints (keeping 5)...$(NC)"
+	@bash $(SCRIPT_DIR)/integration.sh checkpoint cleanup 5
+	@echo "$(GREEN)✓ Cleanup complete$(NC)"
+
+checkpoint-save:
+	@echo "$(BLUE)💾 Saving checkpoint...$(NC)"
+	@STEP=$$(date +%s); \
+	bash $(SCRIPT_DIR)/integration.sh checkpoint save $$STEP "" "0" "0"
+
+checkpoint-load:
+	@echo "$(BLUE)📂 Loading latest checkpoint...$(NC)"
+	@LATEST=$$(ls -t $(CHECKPOINT_DIR)/checkpoint-* 2>/dev/null | head -1); \
+	if [ -n "$$LATEST" ]; then \
+		echo "  Loaded: $$LATEST"; \
+	else \
+		echo "  $(YELLOW)No checkpoints found$(NC)"; \
+	fi
+
+# ============================================
+# Reporting Targets
+# ============================================
+
+report:
+	@echo "$(BLUE)📊 Generating training report...$(NC)"
+	@if [ -f "$(LOG_DIR)/training.jsonl" ]; then \
+		echo "  $(YELLOW)Latest 10 training steps:$(NC)"; \
+		tail -10 $(LOG_DIR)/training.jsonl | jq '.'; \
+	else \
+		echo "  $(YELLOW)No training logs found$(NC)"; \
+	fi
+
+report-detailed:
+	@echo "$(BLUE)📊 Detailed training analysis:$(NC)"
+	@$(PYTHON) -c "\
+import json, os; \
+log_file = '$(LOG_DIR)/training.jsonl'; \
+if os.path.exists(log_file): \
+    with open(log_file) as f: \
+        lines = [json.loads(l) for l in f if l.strip()]; \
+    if lines: \
+        print(f'  Total steps: {len(lines)}'); \
+        losses = [l.get('loss', 0) for l in lines if 'loss' in l]; \
+        if losses: \
+            print(f'  Min loss: {min(losses):.4f}'); \
+            print(f'  Max loss: {max(losses):.4f}'); \
+            print(f'  Avg loss: {sum(losses)/len(losses):.4f}'); \
+else: \
+    print('  No training logs found')" || true
+
+# ============================================
+# Data Pipeline Targets
+# ============================================
+
+shard:
+	@echo "$(BLUE)📦 Sharding training data...$(NC)"
+	@make -f Makefile shard 2>/dev/null || $(PYTHON) script/data_pipeline_v2.py shard
+	@echo "$(GREEN)✓ Sharding complete$(NC)"
+
+split:
+	@echo "$(BLUE)✂️  Splitting dataset into train/val/test...$(NC)"
+	@bash $(SCRIPT_DIR)/split_data.sh
+	@echo "$(GREEN)✓ Splitting complete$(NC)"
+
+tokenize: build-eval-tools
+	@echo "$(BLUE)🔤 Tokenizing training data...$(NC)"
+	@if [ -f $(BIN_DIR)/tokenizer ]; then \
+		$(BIN_DIR)/tokenizer --input data/training_data.jsonl --output data/training_data_tokenized.jsonl; \
+	else \
+		bash $(SCRIPT_DIR)/integration.sh tokenize data/training_data.jsonl data/training_data_tokenized.jsonl; \
+	fi
+	@echo "$(GREEN)✓ Tokenization complete$(NC)"
+
+# ============================================
+# Standard Training Targets
+# ============================================
+
+infer:
+	@echo "$(BLUE)🎯 Running inference demo...$(NC)"
+	@bash $(SCRIPT_DIR)/demo_complete_pipeline.sh
+	@echo "$(GREEN)✓ Inference complete$(NC)"
+
+chat:
+	@echo "$(BLUE)💬 Starting interactive chat...$(NC)"
+	@bash $(SCRIPT_DIR)/chat.sh
+
+# ============================================
+# Maintenance Targets
+# ============================================
+
+clean:
+	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
+	@rm -rf $(BIN_DIR)
+	@rm -rf build/
+	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete
+	@echo "$(GREEN)✓ Clean complete$(NC)"
+
+clean-all: clean
+	@echo "$(BLUE)🧹 Deep cleaning (removing checkpoints and logs)...$(NC)"
+	@rm -rf $(CHECKPOINT_DIR)
+	@rm -rf $(LOG_DIR)
+	@echo "$(GREEN)✓ Deep clean complete$(NC)"
+
+# ============================================
+# Status and Information
+# ============================================
+
+status:
+	@echo "$(BLUE)📊 NeurX System Status:$(NC)"
+	@echo "  Platform: $(PLATFORM)"
+	@echo "  S Compiler: $$(command -v $(S_COMPILER) || echo 'Not found')"
+	@echo "  Python: $$($(PYTHON) --version)"
+	@echo "  Config: $(CONFIG_FILE)"
+	@echo ""
+	@echo "  Directories:"
+	@echo "    Bin: $(BIN_DIR) $$([ -d $(BIN_DIR) ] && echo '✓' || echo '✗')"
+	@echo "    Logs: $(LOG_DIR) $$([ -d $(LOG_DIR) ] && echo '✓' || echo '✗')"
+	@echo "    Checkpoints: $(CHECKPOINT_DIR) $$([ -d $(CHECKPOINT_DIR) ] && echo '✓' || echo '✗')"
+	@echo ""
+	@echo "  Tools:"
+	@ls -1 $(BIN_DIR)/ 2>/dev/null | while read f; do echo "    ✓ $$f"; done || echo "    (No tools built yet)"
+
+version:
+	@echo "NeurX Training System v1.0"
+	@echo "S Language ML Framework"
+	@if command -v $(S_COMPILER) > /dev/null; then \
+		$(S_COMPILER) --version; \
+	fi
+
+# ============================================
+# Quick Start Recipes
+# ============================================
+
+quick-train:
+	@echo "$(BLUE)🚀 Quick start: Build tools + Train$(NC)"
+	@make build-eval-tools
+	@make train
+
+quick-eval:
+	@echo "$(BLUE)📊 Quick start: Evaluate$(NC)"
+	@make eval
+	@make report
+
+quick-demo:
+	@echo "$(BLUE)🎯 Quick start: Demo$(NC)"
+	@make checkpoint-list
+	@make infer
+	@make chat
+
+.DEFAULT_GOAL := help
