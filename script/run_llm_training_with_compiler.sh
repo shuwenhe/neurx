@@ -23,7 +23,7 @@ DATASET_PRIMARY_FALLBACK_PATH="${NEURX_DATASET_PRIMARY_FALLBACK_PATH:-${NEURX_RO
 DATASET_FALLBACK_PATH="${NEURX_DATASET_FALLBACK_PATH:-${NEURX_ROOT}/data/sample.jsonl}"
 
 # S编译器路径
-S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER="${S_COMPILER:-$NEURX_ROOT/../s/.local/bin/s}"
 
 resolve_s_source_root() {
     if [ -n "${S_SOURCE_ROOT:-}" ] && [ -d "$S_SOURCE_ROOT/src/cmd/compile/seed" ]; then

@@ -351,12 +351,12 @@ func default_training_config() gpt_large_training_config {
 }
 
 func default_model_state() gpt_large_state {
-    int vocab_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257")), 50257), 256, 131072)
-    int hidden_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096")), 4096), 256, 8192)
+    int vocab_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257")), 50257), 256, 262144)
+    int hidden_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096")), 4096), 256, 32768)
     int num_heads = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_NUM_HEADS", "32")), 32), 1, 128)
     int num_layers = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_NUM_LAYERS", "32")), 32), 1, 128)
-    int intermediate_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_INTERMEDIATE_SIZE", "11008")), 11008), hidden_size, 65536)
-    int max_seq_len = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_MAX_SEQ_LEN", "2048")), 2048), 16, 8192)
+    int intermediate_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_INTERMEDIATE_SIZE", "11008")), 11008), hidden_size, 131072)
+    int max_seq_len = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_MAX_SEQ_LEN", "2048")), 2048), 16, 262144)
 
     int token_embed = vocab_size * hidden_size
     int pos_embed = max_seq_len * hidden_size
@@ -364,14 +364,18 @@ func default_model_state() gpt_large_state {
     int head = hidden_size * vocab_size + vocab_size
     int total_params = token_embed + pos_embed + num_layers * per_layer + head
     int param_count_m = total_params / 1000000
+    int configured_param_count_m = str_to_int(trim(runtime_env_get("NEURX_LLM_PARAMETER_COUNT_M", "0")), 0)
+    if configured_param_count_m > 0 {
+        param_count_m = configured_param_count_m
+    }
     if param_count_m < 1 {
         param_count_m = 1
     }
 
     gpt_large_state {
-        name: "gpt_large",
-        family: "llm",
-        architecture: "decoder-only-transformer",
+        name: trim(runtime_env_get("NEURX_MODEL_NAME", "gpt_large")),
+        family: trim(runtime_env_get("NEURX_MODEL_FAMILY", "llm")),
+        architecture: trim(runtime_env_get("NEURX_MODEL_ARCHITECTURE", "decoder-only-transformer")),
         dataset: "synthetic_webtext_mix",
         vocab_size: vocab_size,
         max_seq_len: max_seq_len,

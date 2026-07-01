@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch train-7b train-70b chat check-bash shard split
+.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split test-tensor-core test-tensor-core-bin
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -33,23 +33,16 @@ CURDIR_UNIX := $(subst \,/,$(CURDIR))
 
 help:
 	@echo "  make train"
-	@echo "  make train-70b"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
+	@echo "  make test-tensor-core"
+	@echo "  make test-tensor-core-bin"
 
 train: check-bash
-	@echo "Running NeurX GPT-Large Production Pre-training"
-	@cd '$(CURDIR_UNIX)' && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 && bash production_deployment/launch_plan.sh 2>&1
-
-train-7b: check-bash
-	@echo "Running NeurX 7B training from configs/7b_training.json"
-	@cd '$(CURDIR_UNIX)' && bash LAUNCH_7B_TRAINING.sh 2>&1
-
-train-70b: check-bash
-	@echo "Running NeurX 70B training from configs/70b_training.json"
-	@cd '$(CURDIR_UNIX)' && bash LAUNCH_70B_TRAINING.sh 2>&1
+	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
+	@cd '$(CURDIR_UNIX)' && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
 
 
 
@@ -59,11 +52,11 @@ infer: check-bash
 
 pretrain: check-bash
 	@echo "Running GPT-Large production pre-training (alias for make train)"
-	@cd '$(CURDIR_UNIX)' && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 && bash production_deployment/launch_plan.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
 
 pretrain-watch: check-bash
 	@echo "Running GPT-Large pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log && bash production_deployment/launch_plan.sh 2>&1 | tee -a artifacts/logs/gpt_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log
 
 chat: check-bash
 	@cd '$(CURDIR_UNIX)' && bash script/chat.sh
@@ -77,6 +70,14 @@ shard: check-bash
 split: check-bash
 	@echo "Splitting training data into train/val/test"
 	@cd '$(CURDIR_UNIX)' && bash script/split_industrial_dataset.sh 2>&1
+
+test-tensor-core: check-bash
+	@echo "Compiling NeurX tensor core smoke tests"
+	@cd '$(CURDIR_UNIX)' && mkdir -p build/tests && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' tensor/core.s build/tests/tensor_core.ir && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' test/test_tensor_core.s build/tests/test_tensor_core.ir && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' test/test_tensor_core_runtime.s build/tests/test_tensor_core_runtime.ir
+
+test-tensor-core-bin: test-tensor-core
+	@echo "Running NeurX tensor core emitted-binary smoke tests"
+	@cd '$(CURDIR_UNIX)' && chmod +x script/link_s_ir_module.sh && script/link_s_ir_module.sh build/tests/tensor_core.ir build/tests/test_tensor_core.ir neurx.tensor.core build/tests/test_tensor_core_linked.ir && (cd '$(S_COMPILER_EMIT_CWD)' && '$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)'/build/tests/test_tensor_core_linked.ir '$(CURDIR_UNIX)'/build/tests/test_tensor_core.bin) && build/tests/test_tensor_core.bin && (cd '$(S_COMPILER_EMIT_CWD)' && '$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)'/build/tests/test_tensor_core_runtime.ir '$(CURDIR_UNIX)'/build/tests/test_tensor_core_runtime.bin) && build/tests/test_tensor_core_runtime.bin
 
 
 
