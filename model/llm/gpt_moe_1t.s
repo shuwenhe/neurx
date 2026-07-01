@@ -237,7 +237,7 @@ func int_to_string(int n) string {
     string out = ""
     while value > 0 {
         int digit = value - (value / 10) * 10
-        out = string(digit + 48) + out
+        out = chr(digit + 48) + out
         value = value / 10
     }
 
@@ -248,8 +248,9 @@ func int_to_string(int n) string {
 }
 
 func float_to_string(float x) string {
-    int whole = int(x)
-    int frac = int((x - whole * 1.0) * 100.0)
+    int whole = int_from_float(x)
+    float remainder = x - float_from_int(whole)
+    int frac = int_from_float(remainder * 100.0)
     if frac < 0 {
         frac = -frac
     }
@@ -282,6 +283,26 @@ func moe_1t_summary(moe_1t_framework fw) string {
     s = s + "checkpoint_dir=" + fw.training.checkpoint_dir + "\n"
     s = s + "output_dir=" + fw.training.output_dir + "\n"
     s
+}
+
+func float_from_int(int x) float {
+    0.0 + x
+}
+
+func int_from_float(float x) int {
+    int n = 0
+    float y = x
+    if y < 0.0 {
+        while y < 0.0 {
+            y = y + 1.0
+            n = n - 1
+        }
+    }
+    while y >= 1.0 {
+        y = y - 1.0
+        n = n + 1
+    }
+    n
 }
 
 // ============================================================================
