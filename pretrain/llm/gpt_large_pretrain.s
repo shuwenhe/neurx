@@ -6,8 +6,8 @@ use neurx.dl.dataloader.{dataloader_state, dataloader_config, dataloader_step_ou
 use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_state_dict, gpt_large_training_load_state_dict}
 use neurx.pretrain.distributed.{pretrain_ddp_state, pretrain_ddp_state_dict, pretrain_ddp_load_state_dict, new_pretrain_ddp_state_from_env, pretrain_ddp_enabled, pretrain_ddp_sync_tensor, pretrain_ddp_step, pretrain_ddp_rank, pretrain_ddp_world_size}
 use neurx.pretrain.optimizer.pretrain_adamw.{pretrain_optimizer_state, pretrain_optimizer_step_state, new_pretrain_optimizer_state, pretrain_optimizer_step, pretrain_optimizer_state_dict, pretrain_optimizer_load_state_dict}
-use neurx.pretrain.tokenizer.bpe.{bpe_split_state, bpe_tokenizer_state, bpe_tokenized_corpus_state, bpe_tokenized_corpus_from_documents, bpe_split_state_dict, bpe_split_load_state_dict, bpe_tokenizer_state_dict, bpe_tokenizer_load_state_dict, bpe_tokenized_corpus_state_dict, bpe_tokenized_corpus_load_state_dict}
-use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, new_pretrain_checkpoint_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
+use neurx.pretrain.tokenizer.bpe.{bpe_split_state, bpe_tokenizer_state, bpe_tokenized_corpus_state, bpe_tokenized_corpus_from_documents, bpe_jsonl_records_to_documents, bpe_split_state_dict, bpe_split_load_state_dict, bpe_tokenizer_state_dict, bpe_tokenizer_load_state_dict, bpe_tokenized_corpus_state_dict, bpe_tokenized_corpus_load_state_dict}
+use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr, pretrain_config_state_dict, pretrain_config_load_state_dict}
 use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_tokens, next_epoch, pretrain_data_state_dict, pretrain_data_load_state_dict}
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
@@ -470,15 +470,91 @@ func line_after(string line, string prefix) string {
     out
 }
 
+func line_before(string line, int stop_char) string {
+    string out = ""
+    int i = 0
+    while i < len(line) {
+        if line[i] == stop_char {
+            return out
+        }
+        out = out + string_char(line[i])
+        i = i + 1
+    }
+    out
+}
+
+func gpt_large_pretrain_json_string_value(string text, string key, string fallback) string {
+    []string lines = split_lines(text)
+    string needle = "\"" + key + "\""
+    int i = 0
+    while i < len(lines) {
+        string line = trim(lines[i])
+        if line != "" {
+            int key_idx = gpt_large_pretrain_find_substring(line, needle)
+            if key_idx >= 0 {
+                int colon_idx = key_idx + len(needle)
+                while colon_idx < len(line) && line[colon_idx] != 58 {
+                    colon_idx = colon_idx + 1
+                }
+                if colon_idx < len(line) {
+                    int value_start = colon_idx + 1
+                    while value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
+                        value_start = value_start + 1
+                    }
+                    if value_start < len(line) && line[value_start] == 34 {
+                        value_start = value_start + 1
+                        string value = ""
+                        while value_start < len(line) {
+                            if line[value_start] == 34 {
+                                return value
+                            }
+                            if line[value_start] == 92 && value_start + 1 < len(line) {
+                                value_start = value_start + 1
+                            }
+                            value = value + string_char(line[value_start])
+                            value_start = value_start + 1
+                        }
+                    }
+                }
+            }
+        }
+        i = i + 1
+    }
+    fallback
+}
+
+func gpt_large_pretrain_find_substring(string text, string pattern) int {
+    if len(pattern) == 0 {
+        return 0
+    }
+    int i = 0
+    while i + len(pattern) <= len(text) {
+        int j = 0
+        while j < len(pattern) && text[i + j] == pattern[j] {
+            j = j + 1
+        }
+        if j == len(pattern) {
+            return i
+        }
+        i = i + 1
+    }
+    -1
+}
+
 func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     if trim(manifest_path) == "" {
         []string refs = []string{cap: 1}
-        refs[0] = "neurx pretrain default shard"
+        refs[0] = "data/training_data_splits/train.jsonl"
         return refs
     }
     if !runtime_file_exists(manifest_path) {
         []string refs = []string{cap: 1}
-        refs[0] = "neurx pretrain default shard"
+        refs[0] = "data/training_data_splits/train.jsonl"
+        return refs
+    }
+    if gpt_large_pretrain_find_substring(manifest_path, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(manifest_path, ".gz") < 0 {
+        []string refs = []string{cap: 1}
+        refs[0] = manifest_path
         return refs
     }
 
@@ -486,17 +562,21 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     []string lines = split_lines(manifest_text)
     []string refs = []string{cap: len(lines)}
     int i = 0
+    string train_ref = gpt_large_pretrain_json_string_value(manifest_text, "train", "")
+    if trim(train_ref) != "" && trim(train_ref) != "null" {
+        refs.push(train_ref)
+    }
     while i < len(lines) {
         string ref = trim(lines[i])
         if ref != "" {
-            if ref[0] != 35 {
+            if ref[0] != 35 && gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
                 refs.push(ref)
             }
         }
         i = i + 1
     }
     if len(refs) == 0 {
-        refs.push("neurx pretrain default shard")
+        refs.push("data/training_data_splits/train.jsonl")
     }
     refs
 }
@@ -508,6 +588,9 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     if runtime_file_exists(shard_ref) {
         string text = runtime_read_text_file(shard_ref)
         []string docs = split_lines(text)
+        if gpt_large_pretrain_find_substring(shard_ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(shard_ref, ".gz") < 0 {
+            docs = bpe_jsonl_records_to_documents(docs)
+        }
         if len(docs) == 0 {
             return gpt_large_pretrain_default_documents()
         }
@@ -605,7 +688,7 @@ func new_gpt_large_pretrain_config() pretrain_config {
 }
 
 func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "data/training_data_splits/manifest.json", "artifacts/checkpoints/run_20260518_001")
 }
 
 func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, int seq_len, int max_steps, float lr, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) gpt_large_pretrain_state {
@@ -688,7 +771,7 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
 }
 
 func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len, int max_steps, float lr, int log_interval, int eval_interval, int save_interval) gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/training_data_splits/manifest.json", "artifacts/checkpoints/run_20260518_001")
 }
 
 func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
@@ -733,6 +816,24 @@ func gpt_large_pretrain_metadata_path(gpt_large_pretrain_state state) string {
     gpt_large_pretrain_checkpoint_path(state) + ".meta"
 }
 
+func gpt_large_pretrain_tokenizer_manifest_path(gpt_large_pretrain_state state) string {
+    gpt_large_pretrain_checkpoint_path(state) + ".tokenizer.manifest"
+}
+
+func gpt_large_pretrain_bundle_manifest_path(gpt_large_pretrain_state state) string {
+    gpt_large_pretrain_checkpoint_path(state) + ".bundle.txt"
+}
+
+func gpt_large_pretrain_checkpoint_bundle(gpt_large_pretrain_state state) pretrain_checkpoint_bundle_state {
+    new_pretrain_checkpoint_bundle_state(
+        state.checkpoint,
+        gpt_large_pretrain_checkpoint_path(state),
+        gpt_large_pretrain_optimizer_manifest_path(gpt_large_pretrain_checkpoint_path(state)),
+        state.dataset_manifest,
+        gpt_large_pretrain_tokenizer_manifest_path(state)
+    )
+}
+
 func gpt_large_pretrain_metadata_text(gpt_large_pretrain_state state) string {
     string out = "pretrain_meta_v1\n"
     out = out + "step=" + int_to_str(state.loop.global_step, 0) + "\n"
@@ -766,6 +867,35 @@ func gpt_large_pretrain_metadata_text(gpt_large_pretrain_state state) string {
     out = out + "corpus.valid_docs=" + int_to_str(len(state.corpus.split.valid_documents), 0) + "\n"
     out = out + "corpus.train_tokens=" + int_to_str(len(state.corpus.train_token_ids), 0) + "\n"
     out = out + "corpus.valid_tokens=" + int_to_str(len(state.corpus.valid_token_ids), 0) + "\n"
+    out
+}
+
+func gpt_large_pretrain_tokenizer_manifest_text(gpt_large_pretrain_state state) string {
+    string out = "tokenizer_manifest_v1\n"
+    out = out + "vocab_limit=" + int_to_str(state.corpus.tokenizer.vocab_limit, 0) + "\n"
+    out = out + "min_pair_frequency=" + int_to_str(state.corpus.tokenizer.min_pair_frequency, 0) + "\n"
+    out = out + "vocab_size=" + int_to_str(len(state.corpus.tokenizer.vocab), 0) + "\n"
+    out = out + "merge_count=" + int_to_str(len(state.corpus.tokenizer.merge_tokens), 0) + "\n"
+    out = out + "train_docs=" + int_to_str(len(state.corpus.split.train_documents), 0) + "\n"
+    out = out + "valid_docs=" + int_to_str(len(state.corpus.split.valid_documents), 0) + "\n"
+    out = out + "train_tokens=" + int_to_str(len(state.corpus.train_token_ids), 0) + "\n"
+    out = out + "valid_tokens=" + int_to_str(len(state.corpus.valid_token_ids), 0) + "\n"
+    out
+}
+
+func gpt_large_pretrain_bundle_text(gpt_large_pretrain_state state) string {
+    pretrain_checkpoint_bundle_state bundle = gpt_large_pretrain_checkpoint_bundle(state)
+    string out = "checkpoint_bundle_v1\n"
+    out = out + "checkpoint_path=" + bundle.checkpoint_path + "\n"
+    out = out + "checkpoint_meta_path=" + bundle.checkpoint_meta_path + "\n"
+    out = out + "optimizer_manifest_path=" + bundle.optimizer_manifest_path + "\n"
+    out = out + "tokenizer_manifest_path=" + bundle.tokenizer_manifest_path + "\n"
+    out = out + "data_manifest_path=" + bundle.data_manifest_path + "\n"
+    out = out + "bundle_manifest_path=" + gpt_large_pretrain_bundle_manifest_path(state) + "\n"
+    out = out + "resumable=" + int_to_str(bool_to_int(bundle.resumable), 0) + "\n"
+    out = out + "corpus_path=" + state.active_shard_path + "\n"
+    out = out + "active_shard_index=" + int_to_str(state.active_shard_index, 0) + "\n"
+    out = out + "active_shard_tokens=" + int_to_str(state.active_shard_tokens, 0) + "\n"
     out
 }
 
@@ -971,21 +1101,21 @@ func gpt_large_pretrain_advance_shard(gpt_large_pretrain_state state) gpt_large_
 
 func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_large_pretrain_state {
     int next_order_index = state.shard_order_index + 1
-    int next_epoch = state.shard_epoch
+    int next_shard_epoch = state.shard_epoch
     []int next_order = state.shard_order
     if len(next_order) == 0 {
         next_order = gpt_large_pretrain_build_shard_order(len(state.shard_refs), state.shard_shuffle_seed, state.shard_epoch)
     }
     if next_order_index >= len(next_order) {
-        next_epoch = state.shard_epoch + 1
-        next_order = gpt_large_pretrain_build_shard_order(len(state.shard_refs), state.shard_shuffle_seed, next_epoch)
+        next_shard_epoch = state.shard_epoch + 1
+        next_order = gpt_large_pretrain_build_shard_order(len(state.shard_refs), state.shard_shuffle_seed, next_shard_epoch)
         next_order_index = 0
     }
     int next_shard_index = gpt_large_pretrain_int_at(next_order, next_order_index)
     gpt_large_pretrain_state stepped = gpt_large_pretrain_apply_shard(state, next_shard_index)
     stepped.shard_order = next_order
     stepped.shard_order_index = next_order_index
-    stepped.shard_epoch = next_epoch
+    stepped.shard_epoch = next_shard_epoch
     stepped
 }
 
@@ -1162,6 +1292,12 @@ func gpt_large_pretrain_optimizer_files_ready(gpt_large_pretrain_state state, st
     if !runtime_file_exists(manifest_path) {
         return false
     }
+    if !runtime_file_exists(base_path + ".tokenizer.manifest") {
+        return false
+    }
+    if !runtime_file_exists(base_path + ".bundle.txt") {
+        return false
+    }
     string manifest_text = runtime_read_text_file(manifest_path)
     int manifest_layers = gpt_large_pretrain_metadata_int(manifest_text, "layer_count", -1)
     if manifest_layers != len(state.training.backbone_optimizers) {
@@ -1186,6 +1322,14 @@ func gpt_large_pretrain_restore_optimizer_state(gpt_large_pretrain_state state, 
     string manifest_path = gpt_large_pretrain_optimizer_manifest_path(base_path)
     if !runtime_file_exists(manifest_path) {
         runtime_write_text_file(state.output_dir + "/checkpoint_validation.txt", gpt_large_pretrain_optimizer_validation_text(state, checkpoint_path, "optimizer manifest missing", false))
+        return state
+    }
+    if !runtime_file_exists(base_path + ".tokenizer.manifest") {
+        runtime_write_text_file(state.output_dir + "/checkpoint_validation.txt", gpt_large_pretrain_optimizer_validation_text(state, checkpoint_path, "tokenizer manifest missing", false))
+        return state
+    }
+    if !runtime_file_exists(base_path + ".bundle.txt") {
+        runtime_write_text_file(state.output_dir + "/checkpoint_validation.txt", gpt_large_pretrain_optimizer_validation_text(state, checkpoint_path, "bundle manifest missing", false))
         return state
     }
 
@@ -1268,6 +1412,7 @@ func gpt_large_pretrain_apply_checkpoint_params(gpt_large_pretrain_state state, 
 }
 
 func gpt_large_pretrain_resume_from_checkpoint(gpt_large_pretrain_state state) gpt_large_pretrain_state {
+    gpt_large_pretrain_state restored = state
     string checkpoint_path = gpt_large_pretrain_checkpoint_path(state)
     string latest_ref_path = state.output_dir + "/latest_checkpoint_ref.txt"
     if runtime_file_exists(latest_ref_path) {
@@ -1316,11 +1461,11 @@ func gpt_large_pretrain_resume_from_checkpoint(gpt_large_pretrain_state state) g
     int meta_optimizer_step = gpt_large_pretrain_metadata_int(meta_text, "optimizer.step", state.optimizer.step)
     float meta_best_metric = gpt_large_pretrain_metadata_float(meta_text, "best_metric", state.checkpoint.best_metric)
 
-    state = gpt_large_pretrain_restore_optimizer_state(state, checkpoint_base_path, meta_text)
-    state = gpt_large_pretrain_apply_checkpoint_params(state, checkpoint_params(ckpt))
-    state.loop = pretrain_loop_state {
-        cfg: state.loop.cfg,
-        data: state.data,
+    restored = gpt_large_pretrain_restore_optimizer_state(restored, checkpoint_base_path, meta_text)
+    restored = gpt_large_pretrain_apply_checkpoint_params(restored, checkpoint_params(ckpt))
+    restored.loop = pretrain_loop_state {
+        cfg: restored.loop.cfg,
+        data: restored.data,
         global_step: meta_step,
         micro_step: 0,
         tokens_seen: meta_tokens_seen,
@@ -1331,71 +1476,71 @@ func gpt_large_pretrain_resume_from_checkpoint(gpt_large_pretrain_state state) g
         should_save: false,
         finished: false,
     }
-    state.data.token_cursor = meta_tokens_seen
-    state.data.epoch = meta_epoch
-    state.training.step = meta_step
-    state.training.last_loss = checkpoint_loss(ckpt)
-    state.training.model.current_step = meta_step
-    state.training.model.seen_tokens = meta_tokens_seen
-    state.training.model.training_steps = meta_step
-    state.training.model.best_validation_loss = meta_best_metric
+    restored.data.token_cursor = meta_tokens_seen
+    restored.data.epoch = meta_epoch
+    restored.training.step = meta_step
+    restored.training.last_loss = checkpoint_loss(ckpt)
+    restored.training.model.current_step = meta_step
+    restored.training.model.seen_tokens = meta_tokens_seen
+    restored.training.model.training_steps = meta_step
+    restored.training.model.best_validation_loss = meta_best_metric
 
-    state.loop.global_step = meta_step
-    state.loop.data = state.data
-    state.loop.tokens_seen = meta_tokens_seen
-    state.loop.loss = checkpoint_loss(ckpt)
-    state.loop.grad_norm = meta_grad_norm
-    state.data.token_cursor = meta_tokens_seen
-    state.data.epoch = meta_epoch
-    state.active_shard_index = meta_shard_index
-    state.active_shard_path = meta_shard_path
-    state.active_shard_tokens = meta_shard_tokens
-    state.shard_order = meta_shard_order
-    state.shard_order_index = meta_shard_order_index
-    state.shard_epoch = meta_shard_epoch
-    state.shard_shuffle_seed = meta_shard_seed
-    state.optimizer.step = meta_optimizer_step
-    state.optimizer.last_lr = meta_lr
-    state.optimizer.last_grad_norm = meta_grad_norm
-    state.checkpoint.best_metric = meta_best_metric
-    state.checkpoint.has_best = true
-    state.training.optimizer.lr = meta_lr
-    state.training.loader.cursor = meta_tokens_seen
-    state.training.loader.epoch = meta_epoch
-    state.valid_loader.cursor = meta_valid_cursor
-    state.valid_loader.epoch = meta_valid_epoch
+    restored.loop.global_step = meta_step
+    restored.loop.data = restored.data
+    restored.loop.tokens_seen = meta_tokens_seen
+    restored.loop.loss = checkpoint_loss(ckpt)
+    restored.loop.grad_norm = meta_grad_norm
+    restored.data.token_cursor = meta_tokens_seen
+    restored.data.epoch = meta_epoch
+    restored.active_shard_index = meta_shard_index
+    restored.active_shard_path = meta_shard_path
+    restored.active_shard_tokens = meta_shard_tokens
+    restored.shard_order = meta_shard_order
+    restored.shard_order_index = meta_shard_order_index
+    restored.shard_epoch = meta_shard_epoch
+    restored.shard_shuffle_seed = meta_shard_seed
+    restored.optimizer.step = meta_optimizer_step
+    restored.optimizer.last_lr = meta_lr
+    restored.optimizer.last_grad_norm = meta_grad_norm
+    restored.checkpoint.best_metric = meta_best_metric
+    restored.checkpoint.has_best = true
+    restored.training.optimizer.lr = meta_lr
+    restored.training.loader.cursor = meta_tokens_seen
+    restored.training.loader.epoch = meta_epoch
+    restored.valid_loader.cursor = meta_valid_cursor
+    restored.valid_loader.epoch = meta_valid_epoch
 
     if meta_shard_index >= 0 && meta_shard_index < len(state.shard_refs) {
-        state.active_shard_index = meta_shard_index
-        state.active_shard_path = meta_shard_path
-        state.active_shard_tokens = meta_shard_tokens
-        state = gpt_large_pretrain_apply_shard(state, state.active_shard_index)
-        state.loop.global_step = meta_step
-        state.loop.data = state.data
-        state.loop.tokens_seen = meta_tokens_seen
-        state.loop.loss = checkpoint_loss(ckpt)
-        state.loop.grad_norm = meta_grad_norm
-        state.data.token_cursor = meta_tokens_seen
-        state.data.epoch = meta_epoch
-        state.optimizer.step = meta_optimizer_step
-        state.optimizer.last_lr = meta_lr
-        state.optimizer.last_grad_norm = meta_grad_norm
-        state.checkpoint.best_metric = meta_best_metric
-        state.checkpoint.has_best = true
-        state.training.optimizer.lr = meta_lr
-        state.training.loader.cursor = meta_tokens_seen
-        state.training.loader.epoch = meta_epoch
-        state.valid_loader.cursor = meta_valid_cursor
-        state.valid_loader.epoch = meta_valid_epoch
-        state.training.step = checkpoint_step(ckpt)
-        state.training.last_loss = checkpoint_loss(ckpt)
-        state.training.model.current_step = meta_step
-        state.training.model.seen_tokens = meta_tokens_seen
-        state.training.model.training_steps = meta_step
-        state.training.model.best_validation_loss = meta_best_metric
+        restored.active_shard_index = meta_shard_index
+        restored.active_shard_path = meta_shard_path
+        restored.active_shard_tokens = meta_shard_tokens
+        restored = gpt_large_pretrain_apply_shard(restored, restored.active_shard_index)
+        restored.loop.global_step = meta_step
+        restored.loop.data = restored.data
+        restored.loop.tokens_seen = meta_tokens_seen
+        restored.loop.loss = checkpoint_loss(ckpt)
+        restored.loop.grad_norm = meta_grad_norm
+        restored.data.token_cursor = meta_tokens_seen
+        restored.data.epoch = meta_epoch
+        restored.optimizer.step = meta_optimizer_step
+        restored.optimizer.last_lr = meta_lr
+        restored.optimizer.last_grad_norm = meta_grad_norm
+        restored.checkpoint.best_metric = meta_best_metric
+        restored.checkpoint.has_best = true
+        restored.training.optimizer.lr = meta_lr
+        restored.training.loader.cursor = meta_tokens_seen
+        restored.training.loader.epoch = meta_epoch
+        restored.valid_loader.cursor = meta_valid_cursor
+        restored.valid_loader.epoch = meta_valid_epoch
+        restored.training.step = checkpoint_step(ckpt)
+        restored.training.last_loss = checkpoint_loss(ckpt)
+        restored.training.model.current_step = meta_step
+        restored.training.model.seen_tokens = meta_tokens_seen
+        restored.training.model.training_steps = meta_step
+        restored.training.model.best_validation_loss = meta_best_metric
     }
 
-    state
+    restored
 }
 
 func gpt_large_pretrain_env_int(string name, int fallback) int {
@@ -1431,7 +1576,7 @@ func gpt_large_pretrain_env_string(string name, string fallback) string {
 }
 
 func gpt_large_pretrain_run_from_env() gpt_large_pretrain_state {
-    string manifest = gpt_large_pretrain_env_string("NEURX_PRETRAIN_MANIFEST", "data/pretrain/mini_manifest.json")
+    string manifest = gpt_large_pretrain_env_string("NEURX_PRETRAIN_MANIFEST", "data/training_data_splits/manifest.json")
     string output_dir = gpt_large_pretrain_env_string("NEURX_PRETRAIN_OUTPUT_DIR", "artifacts/checkpoints/gpt_large_pretrain")
     int micro_batch_size = gpt_large_pretrain_env_int("NEURX_PRETRAIN_MICRO_BATCH", 8)
     int seq_len = gpt_large_pretrain_env_int("NEURX_PRETRAIN_SEQ_LEN", 16)
@@ -1735,6 +1880,8 @@ func gpt_large_pretrain_save_checkpoint(gpt_large_pretrain_state state) () {
     gpt_large_pretrain_save_optimizer_state(state)
     runtime_write_text_file(state.output_dir + "/latest_checkpoint_ref.txt", gpt_large_pretrain_checkpoint_path(state))
     runtime_write_text_file(gpt_large_pretrain_metadata_path(state), gpt_large_pretrain_metadata_text(state))
+    runtime_write_text_file(gpt_large_pretrain_tokenizer_manifest_path(state), gpt_large_pretrain_tokenizer_manifest_text(state))
+    runtime_write_text_file(gpt_large_pretrain_bundle_manifest_path(state), gpt_large_pretrain_bundle_text(state))
 }
 
 func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pretrain_state {

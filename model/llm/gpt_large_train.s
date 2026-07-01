@@ -374,7 +374,7 @@ func transformer_backward(
         tensor x_input = layer_inputs[bi + 1]  // Input to this layer
 
         // Compute gradients for this layer's weights and update them
-        backward_result bw = backward_single_layer(
+        transformer_block_backward_result bw = transformer_block_backward(
             layer, x_input, grad_current, layer_optimizer
         )
         backbone.layers = transformer_layer_set(backbone.layers, bi, bw.updated_layer)
@@ -399,6 +399,36 @@ struct backward_result {
     transformer_layer_optimizer_state optimizer_state
 }
 
+struct transformer_block_backward_result {
+    tensor grad_input
+    transformer_layer updated_layer
+    transformer_layer_optimizer_state optimizer_state
+}
+
+func approximate_attention_forward(transformer_layer layer, tensor x) tensor {
+    tensor q = matmul(x, layer.w_q)
+    tensor k = matmul(x, layer.w_k)
+    tensor v = matmul(x, layer.w_v)
+    tensor attn_scores = matmul(q, transpose(k, 0, 1))
+    tensor attn_probs = softmax_last_dim(attn_scores)
+    tensor attn_context = matmul(attn_probs, v)
+    matmul(attn_context, layer.w_o)
+}
+
+func transformer_block_backward(
+    transformer_layer layer,
+    tensor x,
+    tensor grad_out,
+    transformer_layer_optimizer_state opt
+) transformer_block_backward_result {
+    backward_result bw = backward_single_layer(layer, x, grad_out, opt)
+    transformer_block_backward_result {
+        grad_input: bw.grad_input,
+        updated_layer: bw.updated_layer,
+        optimizer_state: bw.optimizer_state,
+    }
+}
+
 func backward_single_layer(
     transformer_layer layer,
     tensor x,           // Input to this layer
@@ -420,10 +450,12 @@ func backward_single_layer(
     tensor grad_x2_residual = grad_out  // Identity path
     transformer_layer updated_layer = layer
     transformer_layer_optimizer_state updated_opt = opt
+    tensor attn_forward_approx = approximate_attention_forward(layer, x)
+    tensor ffn_input = add(x, attn_forward_approx)
 
     // ── SwiGLU FFN backward ──
     ffn_backward_result ffn_bw = backward_swiglu_ffn(
-        layer, x, grad_out, opt
+        layer, ffn_input, grad_out, opt
     )
     // Add FFN gradient to residual gradient
     grad_x2_residual = add(grad_x2_residual, ffn_bw.grad_to_x2)

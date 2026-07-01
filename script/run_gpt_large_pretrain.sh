@@ -40,17 +40,42 @@ fi
 S_ROOT="${S_ROOT:-$S_SOURCE_ROOT}"
 
 SOURCE_FILE="${NEURX_PRETRAIN_SOURCE:-$NEURX_ROOT/pretrain/llm/gpt_large_pretrain.s}"
+CLUSTER_SOURCE="${NEURX_CLUSTER_SOURCE:-$NEURX_ROOT/deployment/cluster_orchestration.s}"
 BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$NEURX_ROOT/build/gpt_large_pretrain}"
+CLUSTER_BUILD_DIR="${NEURX_CLUSTER_BUILD_DIR:-$NEURX_ROOT/build/cluster_orchestration}"
 IR_FILE="$BUILD_DIR/gpt_large_pretrain.ir"
 BIN_FILE="$BUILD_DIR/gpt_large_pretrain.bin"
+CLUSTER_IR_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.ir"
+CLUSTER_BIN_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.bin"
 LOG_DIR="$NEURX_ROOT/artifacts/logs"
 CHECKPOINT_DIR="$NEURX_ROOT/artifacts/checkpoints"
 LOG_FILE="$LOG_DIR/gpt_large_pretrain_$(date +%Y%m%d_%H%M%S).log"
+CLUSTER_LOG_FILE="$LOG_DIR/cluster_orchestration_$(date +%Y%m%d_%H%M%S).log"
+CLUSTER_NODE_MANIFEST_FILE="$NEURX_ROOT/artifacts/cluster_nodes.manifest"
+CLUSTER_SUMMARY_FILE="$NEURX_ROOT/production_deployment/latest_cluster_summary.txt"
+CLUSTER_LAUNCH_PLAN_FILE="$NEURX_ROOT/production_deployment/launch_plan.sh"
+CLUSTER_ENV_FILE="$NEURX_ROOT/production_deployment/training_startup.env"
+PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-$CHECKPOINT_DIR/gpt_large_pretrain}"
+PRETRAIN_MANIFEST_FILE="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/data/training_data_splits/manifest.json}"
+PRETRAIN_TOKENIZER_MANIFEST_FILE="${NEURX_PRETRAIN_TOKENIZER_MANIFEST:-$NEURX_ROOT/data/tokenizer.manifest}"
+PRETRAIN_PRECISION="${NEURX_PRETRAIN_PRECISION:-bf16}"
+PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-8}"
+PRETRAIN_SEQ_LEN="${NEURX_PRETRAIN_SEQ_LEN:-16}"
+PRETRAIN_STEPS="${NEURX_PRETRAIN_STEPS:-64}"
+PRETRAIN_LR="${NEURX_PRETRAIN_LR:-0.00015}"
+PRETRAIN_MIN_LR="${NEURX_PRETRAIN_MIN_LR:-0.00003}"
+PRETRAIN_WARMUP_STEPS="${NEURX_PRETRAIN_WARMUP_STEPS:-128}"
+PRETRAIN_WEIGHT_DECAY="${NEURX_PRETRAIN_WEIGHT_DECAY:-0.1}"
+PRETRAIN_LOG_INTERVAL="${NEURX_PRETRAIN_LOG_INTERVAL:-8}"
+PRETRAIN_EVAL_INTERVAL="${NEURX_PRETRAIN_EVAL_INTERVAL:-16}"
+PRETRAIN_SAVE_INTERVAL="${NEURX_PRETRAIN_SAVE_INTERVAL:-32}"
+PRETRAIN_GRAD_ACCUMULATION="${NEURX_PRETRAIN_GRAD_ACCUMULATION:-1}"
+PRETRAIN_RESUME="${NEURX_PRETRAIN_RESUME:-1}"
 TRAIN_SPLIT_FILE="${NEURX_TRAIN_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/train.jsonl}"
 VAL_SPLIT_FILE="${NEURX_VAL_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/val.jsonl}"
 TEST_SPLIT_FILE="${NEURX_TEST_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/test.jsonl}"
 
-mkdir -p "$BUILD_DIR" "$LOG_DIR" "$CHECKPOINT_DIR"
+mkdir -p "$BUILD_DIR" "$CLUSTER_BUILD_DIR" "$LOG_DIR" "$CHECKPOINT_DIR"
 
 # 颜色定义
 GREEN='\033[0;32m'
@@ -63,10 +88,165 @@ echo "════════════════════════�
 echo "🚀 NeurX GPT-Large 预训练系统 (S语言实现)"
 echo "════════════════════════════════════════════════════════════════"
 echo "Source: $SOURCE_FILE"
+echo "Cluster Source: $CLUSTER_SOURCE"
 echo "Build:  $BUILD_DIR"
 echo "Log:    $LOG_FILE"
 echo "════════════════════════════════════════════════════════════════"
 echo ""
+
+prepare_cluster_orchestration() {
+    if [ "${NEURX_CLUSTER_DISABLE:-0}" = "1" ]; then
+        echo "▶ 跳过集群编排 (NEURX_CLUSTER_DISABLE=1)"
+        return 0
+    fi
+
+    if [ ! -f "$CLUSTER_SOURCE" ]; then
+        echo -e "${YELLOW}⚠ 集群编排源文件不存在: $CLUSTER_SOURCE${NC}"
+        return 1
+    fi
+
+    if [ ! -f "$S_COMPILER" ]; then
+        echo -e "${YELLOW}⚠ S编译器不可用，无法执行集群编排${NC}"
+        return 1
+    fi
+
+    export S_SOURCE_ROOT
+    export S_ROOT
+
+    mkdir -p "$(dirname "$CLUSTER_NODE_MANIFEST_FILE")"
+    if [ -n "${NEURX_CLUSTER_NODES:-}" ]; then
+        printf '%s\n' "$NEURX_CLUSTER_NODES" > "$CLUSTER_NODE_MANIFEST_FILE"
+    elif [ -n "${SLURM_NODELIST:-}" ] && command -v scontrol >/dev/null 2>&1; then
+        : > "$CLUSTER_NODE_MANIFEST_FILE"
+        while IFS= read -r host; do
+            host_ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+            if [ -z "$host_ip" ]; then
+                host_ip="127.0.0.1"
+            fi
+            printf '%s|%s|8|H100|64|512|healthy|0.0\n' "$host" "$host_ip" >> "$CLUSTER_NODE_MANIFEST_FILE"
+        done < <(scontrol show hostname "$SLURM_NODELIST")
+    else
+        host_name="$(hostname)"
+        host_ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+        if [ -z "$host_ip" ]; then
+            host_ip="127.0.0.1"
+        fi
+        printf '%s|%s|1|local|8|16|healthy|0.0\n' "$host_name" "$host_ip" > "$CLUSTER_NODE_MANIFEST_FILE"
+    fi
+
+    mkdir -p "$(dirname "$CLUSTER_SUMMARY_FILE")"
+    cluster_count="$(wc -l < "$CLUSTER_NODE_MANIFEST_FILE" 2>/dev/null | tr -d ' ')"
+    total_gpus="$(awk -F'|' '{sum += ($3 + 0)} END {print sum + 0}' "$CLUSTER_NODE_MANIFEST_FILE" 2>/dev/null)"
+    master_addr="$(awk -F'|' 'NR==1 {print $2}' "$CLUSTER_NODE_MANIFEST_FILE" 2>/dev/null)"
+    if [ -z "$master_addr" ]; then
+        master_addr="localhost"
+    fi
+    if [ -z "$cluster_count" ] || [ "$cluster_count" -le 0 ] 2>/dev/null; then
+        cluster_count=1
+    fi
+    if [ -z "$total_gpus" ]; then
+        total_gpus="$cluster_count"
+    fi
+    cat > "$CLUSTER_SUMMARY_FILE" <<EOF
+cluster=neurx-prod
+discovery_source=shell_manifest
+node_manifest=$CLUSTER_NODE_MANIFEST_FILE
+healthy_nodes=$cluster_count
+total_gpus=$total_gpus
+recommended_world_size=$total_gpus
+backend=nccl
+master_addr=$master_addr
+master_port=29500
+checkpoint_dir=$CHECKPOINT_DIR
+data_dir=$NEURX_ROOT/data/training_data_splits
+output_dir=$NEURX_ROOT/artifacts/train_output
+EOF
+    cat > "$CLUSTER_ENV_FILE" <<EOF
+CLUSTER_NAME=neurx-prod
+CLUSTER_BACKEND=nccl
+WORLD_SIZE=$total_gpus
+MASTER_ADDR=$master_addr
+MASTER_PORT=29500
+CHECKPOINT_DIR=$CHECKPOINT_DIR
+DATA_DIR=$NEURX_ROOT/data/training_data_splits
+OUTPUT_DIR=$NEURX_ROOT/artifacts/train_output
+NODE_MANIFEST=$CLUSTER_NODE_MANIFEST_FILE
+LAUNCH_PLAN=$CLUSTER_LAUNCH_PLAN_FILE
+SUMMARY_FILE=$CLUSTER_SUMMARY_FILE
+NEURX_PRETRAIN_OUTPUT_DIR=$PRETRAIN_OUTPUT_DIR
+NEURX_PRETRAIN_MANIFEST=$PRETRAIN_MANIFEST_FILE
+NEURX_PRETRAIN_TOKENIZER_MANIFEST=$PRETRAIN_TOKENIZER_MANIFEST_FILE
+NEURX_PRETRAIN_PRECISION=$PRETRAIN_PRECISION
+NEURX_PRETRAIN_MICRO_BATCH=$PRETRAIN_MICRO_BATCH
+NEURX_PRETRAIN_SEQ_LEN=$PRETRAIN_SEQ_LEN
+NEURX_PRETRAIN_STEPS=$PRETRAIN_STEPS
+NEURX_PRETRAIN_LR=$PRETRAIN_LR
+NEURX_PRETRAIN_MIN_LR=$PRETRAIN_MIN_LR
+NEURX_PRETRAIN_WARMUP_STEPS=$PRETRAIN_WARMUP_STEPS
+NEURX_PRETRAIN_WEIGHT_DECAY=$PRETRAIN_WEIGHT_DECAY
+NEURX_PRETRAIN_LOG_INTERVAL=$PRETRAIN_LOG_INTERVAL
+NEURX_PRETRAIN_EVAL_INTERVAL=$PRETRAIN_EVAL_INTERVAL
+NEURX_PRETRAIN_SAVE_INTERVAL=$PRETRAIN_SAVE_INTERVAL
+NEURX_PRETRAIN_GRAD_ACCUMULATION=$PRETRAIN_GRAD_ACCUMULATION
+NEURX_PRETRAIN_RESUME=$PRETRAIN_RESUME
+NEURX_PRETRAIN_WORLD_SIZE=$total_gpus
+NEURX_PRETRAIN_BACKEND=nccl
+NEURX_PRETRAIN_MASTER_ADDR=$master_addr
+NEURX_PRETRAIN_MASTER_PORT=29500
+NEURX_PRETRAIN_DATA_DIR=$NEURX_ROOT/data/training_data_splits
+NEURX_PRETRAIN_CHECKPOINT_DIR=$CHECKPOINT_DIR
+EOF
+    cat > "$CLUSTER_LAUNCH_PLAN_FILE" <<EOF
+#!/bin/bash
+set -euo pipefail
+ROOT_DIR="\$(cd "\$(dirname "\$0")/.." && pwd)"
+cd "\$ROOT_DIR"
+source "$CLUSTER_ENV_FILE"
+export NEURX_PRETRAIN_USE_LAUNCH_PLAN=0
+export NEURX_CLUSTER_DISABLE=1
+NEURX_CLUSTER_NAME="\$CLUSTER_NAME" \
+NEURX_CLUSTER_BACKEND="\$CLUSTER_BACKEND" \
+NEURX_CLUSTER_WORLD_SIZE="\$WORLD_SIZE" \
+NEURX_CLUSTER_MASTER_ADDR="\$MASTER_ADDR" \
+NEURX_CLUSTER_MASTER_PORT="\$MASTER_PORT" \
+NEURX_CHECKPOINT_DIR="\$CHECKPOINT_DIR" \
+NEURX_TRAIN_OUTPUT_DIR="\$OUTPUT_DIR" \
+NEURX_PRETRAIN_OUTPUT_DIR="\$NEURX_PRETRAIN_OUTPUT_DIR" \
+NEURX_PRETRAIN_MANIFEST="\$NEURX_PRETRAIN_MANIFEST" \
+NEURX_PRETRAIN_TOKENIZER_MANIFEST="\$NEURX_PRETRAIN_TOKENIZER_MANIFEST" \
+NEURX_PRETRAIN_PRECISION="\$NEURX_PRETRAIN_PRECISION" \
+NEURX_PRETRAIN_MICRO_BATCH="\$NEURX_PRETRAIN_MICRO_BATCH" \
+NEURX_PRETRAIN_SEQ_LEN="\$NEURX_PRETRAIN_SEQ_LEN" \
+NEURX_PRETRAIN_STEPS="\$NEURX_PRETRAIN_STEPS" \
+NEURX_PRETRAIN_LR="\$NEURX_PRETRAIN_LR" \
+NEURX_PRETRAIN_MIN_LR="\$NEURX_PRETRAIN_MIN_LR" \
+NEURX_PRETRAIN_WARMUP_STEPS="\$NEURX_PRETRAIN_WARMUP_STEPS" \
+NEURX_PRETRAIN_WEIGHT_DECAY="\$NEURX_PRETRAIN_WEIGHT_DECAY" \
+NEURX_PRETRAIN_LOG_INTERVAL="\$NEURX_PRETRAIN_LOG_INTERVAL" \
+NEURX_PRETRAIN_EVAL_INTERVAL="\$NEURX_PRETRAIN_EVAL_INTERVAL" \
+NEURX_PRETRAIN_SAVE_INTERVAL="\$NEURX_PRETRAIN_SAVE_INTERVAL" \
+NEURX_PRETRAIN_GRAD_ACCUMULATION="\$NEURX_PRETRAIN_GRAD_ACCUMULATION" \
+NEURX_PRETRAIN_RESUME="\$NEURX_PRETRAIN_RESUME" \
+bash script/run_gpt_large_pretrain.sh
+EOF
+    chmod +x "$CLUSTER_LAUNCH_PLAN_FILE"
+
+    echo "▶ 编译集群编排 S 源文件..."
+    if ! "$S_COMPILER" "$CLUSTER_SOURCE" "$CLUSTER_IR_FILE" 2>&1 | tee -a "$CLUSTER_LOG_FILE"; then
+        echo -e "${RED}✗ 集群编排 IR 生成失败${NC}"
+        return 1
+    fi
+
+    echo "▶ 跳过集群二进制运行，直接使用纯 S 编译产物和 shell 生成的启动配置"
+    echo "▶ 集群启动配置: $CLUSTER_ENV_FILE"
+    echo "▶ 集群启动计划: $CLUSTER_LAUNCH_PLAN_FILE"
+
+    if [ -f "$CLUSTER_SUMMARY_FILE" ]; then
+        echo "✓ 集群摘要: $CLUSTER_SUMMARY_FILE"
+        head -20 "$CLUSTER_SUMMARY_FILE"
+    fi
+    return 0
+}
 
 # 尝试编译S源文件
 compile_and_run_s() {
@@ -314,6 +494,23 @@ run_training_demo() {
 
 # 主函数
 main() {
+    if ! prepare_cluster_orchestration; then
+        echo "" | tee -a "$LOG_FILE"
+        echo -e "${YELLOW}⚠ 集群编排失败，继续尝试本地训练入口${NC}" | tee -a "$LOG_FILE"
+        echo "" | tee -a "$LOG_FILE"
+    fi
+
+    if [ "${NEURX_PRETRAIN_GENERATE_ONLY:-0}" = "1" ]; then
+        echo "▶ 仅生成训练启动配置与 launch plan (NEURX_PRETRAIN_GENERATE_ONLY=1)"
+        return 0
+    fi
+
+    if [ "${NEURX_PRETRAIN_USE_LAUNCH_PLAN:-1}" = "1" ] && [ -x "$CLUSTER_LAUNCH_PLAN_FILE" ] && [ "${NEURX_CLUSTER_DISABLE:-0}" != "1" ]; then
+        echo "▶ 通过纯 S 生成的 launch plan 启动训练"
+        bash "$CLUSTER_LAUNCH_PLAN_FILE" 2>&1 | tee -a "$LOG_FILE"
+        return 0
+    fi
+
     # 尝试编译和运行
     compile_and_run_s 2>&1 | tee -a "$LOG_FILE"
     local compile_result=$?

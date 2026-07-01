@@ -15,6 +15,16 @@ struct pretrain_checkpoint_state {
     bool has_best
 }
 
+struct pretrain_checkpoint_bundle_state {
+    pretrain_checkpoint_state checkpoint
+    string checkpoint_path
+    string checkpoint_meta_path
+    string optimizer_manifest_path
+    string data_manifest_path
+    string tokenizer_manifest_path
+    bool resumable
+}
+
 func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkpoint_state {
     int next_save_step = 1000
     pretrain_checkpoint_state {
@@ -30,6 +40,18 @@ func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkp
         prune_count: 0,
         next_save_step: next_save_step,
         has_best: false
+    }
+}
+
+func new_pretrain_checkpoint_bundle_state(pretrain_checkpoint_state checkpoint, string checkpoint_path, string optimizer_manifest_path, string data_manifest_path, string tokenizer_manifest_path) pretrain_checkpoint_bundle_state {
+    pretrain_checkpoint_bundle_state {
+        checkpoint: checkpoint,
+        checkpoint_path: checkpoint_path,
+        checkpoint_meta_path: checkpoint_path + ".meta",
+        optimizer_manifest_path: optimizer_manifest_path,
+        data_manifest_path: data_manifest_path,
+        tokenizer_manifest_path: tokenizer_manifest_path,
+        resumable: true,
     }
 }
 
@@ -119,4 +141,28 @@ func pretrain_checkpoint_state_dict(pretrain_checkpoint_state state) pretrain_ch
 
 func pretrain_checkpoint_load_state_dict(pretrain_checkpoint_state state, pretrain_checkpoint_state other) pretrain_checkpoint_state {
     other
+}
+
+func pretrain_checkpoint_bundle_state_dict(pretrain_checkpoint_bundle_state state) pretrain_checkpoint_bundle_state {
+    pretrain_checkpoint_bundle_state {
+        checkpoint: pretrain_checkpoint_state_dict(state.checkpoint),
+        checkpoint_path: state.checkpoint_path,
+        checkpoint_meta_path: state.checkpoint_meta_path,
+        optimizer_manifest_path: state.optimizer_manifest_path,
+        data_manifest_path: state.data_manifest_path,
+        tokenizer_manifest_path: state.tokenizer_manifest_path,
+        resumable: state.resumable,
+    }
+}
+
+func pretrain_checkpoint_bundle_load_state_dict(pretrain_checkpoint_bundle_state state, pretrain_checkpoint_bundle_state other) pretrain_checkpoint_bundle_state {
+    pretrain_checkpoint_bundle_state {
+        checkpoint: pretrain_checkpoint_load_state_dict(state.checkpoint, other.checkpoint),
+        checkpoint_path: other.checkpoint_path,
+        checkpoint_meta_path: other.checkpoint_meta_path,
+        optimizer_manifest_path: other.optimizer_manifest_path,
+        data_manifest_path: other.data_manifest_path,
+        tokenizer_manifest_path: other.tokenizer_manifest_path,
+        resumable: other.resumable,
+    }
 }

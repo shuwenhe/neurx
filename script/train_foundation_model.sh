@@ -65,17 +65,20 @@ echo ""
 echo "[2/5] 编译 NeurX 框架..."
 
 NEURX_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-S_COMPILER="${NEURX_ROOT}/bin/sc"
+S_COMPILER="${S_COMPILER:-${NEURX_ROOT}/../s/.local/bin/s}"
+if [ ! -x "$S_COMPILER" ] && command -v s >/dev/null 2>&1; then
+    S_COMPILER="$(command -v s)"
+fi
 
-if [ -f "$S_COMPILER" ]; then
+SOURCE_FILE="${NEURX_ROOT}/train/neurx_foundation_model.s"
+IR_FILE="${OUTPUT_DIR}/neurx_foundation_model.ir"
+BIN_FILE="${OUTPUT_DIR}/neurx_train"
+
+if [ -x "$S_COMPILER" ]; then
     echo "  → 使用 S 语言编译器: ${S_COMPILER}"
-    "$S_COMPILER" compile \
-        "${NEURX_ROOT}/model/llm/gpt.s" \
-        "${NEURX_ROOT}/train/neurx_foundation_model.s" \
-        -o "${OUTPUT_DIR}/neurx_train" \
-        --optimize=O3 \
-        --target=native \
-        2>&1 | tee "${LOG_DIR}/compile.log"
+    "$S_COMPILER" "$SOURCE_FILE" "$IR_FILE" 2>&1 | tee "${LOG_DIR}/compile.log"
+    "$S_COMPILER" --emit-bin "$IR_FILE" "$BIN_FILE" 2>&1 | tee -a "${LOG_DIR}/compile.log"
+    chmod +x "$BIN_FILE" 2>/dev/null || true
 else
     echo "  → S 编译器未找到，将使用解释器模式"
 fi
@@ -290,22 +293,18 @@ else
 fi
 
 if [ -n "$TRAIN_CMD" ]; then
-    if [ "$NUM_GPUS" -gt 1 ]; then
-        # 多 GPU: 使用 torchrun 或 mpirun 启动
-        if command -v torchrun &>/dev/null; then
-            torchrun --nproc_per_node="${NUM_GPUS}" \
-                $TRAIN_CMD \
-                --config "${OUTPUT_DIR}/train_config.json" \
-                2>&1 | tee "${LOG_DIR}/train.log"
-        else
-            $TRAIN_CMD \
-                --config "${OUTPUT_DIR}/train_config.json" \
-                --num_gpus "${NUM_GPUS}" \
-                2>&1 | tee "${LOG_DIR}/train.log"
-        fi
+    if [ "${TRAIN_CMD##*.}" = "py" ] && [ "$NUM_GPUS" -gt 1 ] && command -v torchrun >/dev/null 2>&1; then
+        torchrun --nproc_per_node="${NUM_GPUS}" \
+            "$TRAIN_CMD" \
+            --config "${OUTPUT_DIR}/train_config.json" \
+            2>&1 | tee "${LOG_DIR}/train.log"
     else
-        # 单 GPU / CPU
-        $TRAIN_CMD \
+        export WORLD_SIZE="${NUM_GPUS}"
+        export MASTER_ADDR="${MASTER_ADDR:-localhost}"
+        export MASTER_PORT="${MASTER_PORT:-29500}"
+        export RANK="${RANK:-0}"
+        export LOCAL_RANK="${LOCAL_RANK:-0}"
+        "$TRAIN_CMD" \
             --config "${OUTPUT_DIR}/train_config.json" \
             2>&1 | tee "${LOG_DIR}/train.log"
     fi

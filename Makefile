@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split
+.PHONY: help train infer pretrain pretrain-watch train-7b train-70b chat check-bash shard split
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -33,6 +33,7 @@ CURDIR_UNIX := $(subst \,/,$(CURDIR))
 
 help:
 	@echo "  make train"
+	@echo "  make train-70b"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
@@ -40,7 +41,15 @@ help:
 
 train: check-bash
 	@echo "Running NeurX GPT-Large Production Pre-training"
-	@cd '$(CURDIR_UNIX)' && bash script/run_gpt_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 && bash production_deployment/launch_plan.sh 2>&1
+
+train-7b: check-bash
+	@echo "Running NeurX 7B training from configs/7b_training.json"
+	@cd '$(CURDIR_UNIX)' && bash LAUNCH_7B_TRAINING.sh 2>&1
+
+train-70b: check-bash
+	@echo "Running NeurX 70B training from configs/70b_training.json"
+	@cd '$(CURDIR_UNIX)' && bash LAUNCH_70B_TRAINING.sh 2>&1
 
 
 
@@ -50,11 +59,11 @@ infer: check-bash
 
 pretrain: check-bash
 	@echo "Running GPT-Large production pre-training (alias for make train)"
-	@cd '$(CURDIR_UNIX)' && bash script/run_gpt_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 && bash production_deployment/launch_plan.sh 2>&1
 
 pretrain-watch: check-bash
 	@echo "Running GPT-Large pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && NEURX_PRETRAIN_GENERATE_ONLY=1 bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log && bash production_deployment/launch_plan.sh 2>&1 | tee -a artifacts/logs/gpt_large_pretrain_watch.log
 
 chat: check-bash
 	@cd '$(CURDIR_UNIX)' && bash script/chat.sh
