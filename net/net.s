@@ -84,7 +84,7 @@ struct net_state {
     int          next_pkt_id
 }
 
-func new_net_state() -> net_state {
+func new_net_state() net_state {
     return net_state{
         sockets:       [],
         recv_queue:    [],
@@ -95,7 +95,7 @@ func new_net_state() -> net_state {
 }
 
 // socket: create a new socket (sys_socket equivalent)
-func net_socket(ns net_state, proto int, owner_pid int) -> (net_state, int) {
+func net_socket(ns net_state, proto int, owner_pid int) (net_state, int) {
     int sid = ns.next_sock_id
     net_socket s = net_socket{
         sock_id:        sid,
@@ -114,7 +114,7 @@ func net_socket(ns net_state, proto int, owner_pid int) -> (net_state, int) {
 }
 
 // connect: initiate connection (sys_connect equivalent)
-func net_connect(ns net_state, sock_id int, remote net_addr) -> net_state {
+func net_connect(ns net_state, sock_id int, remote net_addr) net_state {
     int i = 0
     while i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {
@@ -131,7 +131,7 @@ func net_connect(ns net_state, sock_id int, remote net_addr) -> net_state {
 }
 
 // send: enqueue a packet for transmission (sys_sendmsg equivalent)
-func net_send(ns net_state, sock_id int, payload string, pkt_type int) -> (net_state, int) {
+func net_send(ns net_state, sock_id int, payload string, pkt_type int) (net_state, int) {
     // find socket
     int src_port = 0
     string dst_host = ""
@@ -166,7 +166,7 @@ func net_send(ns net_state, sock_id int, payload string, pkt_type int) -> (net_s
 }
 
 // recv: dequeue a received packet for this socket (sys_recvmsg equivalent)
-func net_recv(ns net_state, sock_id int) -> (net_state, sk_buff, bool) {
+func net_recv(ns net_state, sock_id int) (net_state, sk_buff, bool) {
     int i = 0
     while i < len(ns.recv_queue) {
         if ns.recv_queue[i].sock_id == sock_id {
@@ -188,13 +188,13 @@ func net_recv(ns net_state, sock_id int) -> (net_state, sk_buff, bool) {
 }
 
 // deliver: called by the network driver to deliver an inbound packet
-func net_deliver(ns net_state, pkt sk_buff) -> net_state {
+func net_deliver(ns net_state, pkt sk_buff) net_state {
     ns.recv_queue = append(ns.recv_queue, pkt)
     return ns
 }
 
 // close: teardown socket (sys_close equivalent)
-func net_close(ns net_state, sock_id int) -> net_state {
+func net_close(ns net_state, sock_id int) net_state {
     int i = 0
     while i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {

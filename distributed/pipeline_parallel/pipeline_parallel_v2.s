@@ -192,9 +192,9 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
 func execute_1f1b_step(
     ref pipeline_state state,
     [][]double initial_input,           // [num_mb][batch, seq, hidden] or similar
-    func forward_fn,                     // Function: forward(layer_weights, input) -> (output, activations_to_save)
-    func backward_fn,                    // Function: backward(grad_output, saved_activations, layer_weights) -> grad_input
-    func loss_fn) double {               // Function: compute_loss(output, targets) -> (loss, grad_output)
+    func forward_fn,                     // Function: forward(layer_weights, input) (output, activations_to_save)
+    func backward_fn,                    // Function: backward(grad_output, saved_activations, layer_weights) grad_input
+    func loss_fn) double {               // Function: compute_loss(output, targets) (loss, grad_output)
     
     pipeline_config cfg = state.config
     int rank = cfg.pp_rank

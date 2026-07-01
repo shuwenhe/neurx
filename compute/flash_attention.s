@@ -97,7 +97,7 @@ func new_flash_attention_state(
 // Core Flash Attention forward pass with block-wise computation
 // Memory complexity: O(N) instead of O(N²)
 // Time complexity: O(N² / block_size) with better cache locality
-fn flash_attention_forward(
+func flash_attention_forward(
     q: vector,              // Query [batch, seq_len, num_heads, head_dim]
     k: vector,              // Key [batch, seq_len, num_heads, head_dim]
     v: vector,              // Value [batch, seq_len, num_heads, head_dim]
@@ -194,7 +194,7 @@ fn flash_attention_forward(
 }
 
 // Backward pass for Flash Attention (gradient computation)
-fn flash_attention_backward(
+func flash_attention_backward(
     q: vector,              // Query
     k: vector,              // Key
     v: vector,              // Value
@@ -250,7 +250,7 @@ fn flash_attention_backward(
 
 // Flash Attention with Grouped-Query Attention (GQA) for efficiency
 // Reduces KV cache to 1/num_kv_heads per group
-fn flash_attention_gqa(
+func flash_attention_gqa(
     q: vector,              // Query [batch, seq_len, num_heads, head_dim]
     k: vector,              // Key [batch, seq_len, num_kv_heads, head_dim]
     v: vector,              // Value [batch, seq_len, num_kv_heads, head_dim]
@@ -270,7 +270,7 @@ fn flash_attention_gqa(
 
 // Optimized Flash Attention for sequence parallelism
 // When using sequence parallel, different GPUs handle different seq_len chunks
-fn flash_attention_sequence_parallel(
+func flash_attention_sequence_parallel(
     q: vector,                      // Local query chunk
     k: vector,                      // Local key chunk
     v: vector,                      // Local value chunk
@@ -306,7 +306,7 @@ fn flash_attention_sequence_parallel(
 }
 
 // Compute memory savings of Flash Attention
-fn compute_flash_attention_memory_savings(
+func compute_flash_attention_memory_savings(
     batch_size: int,
     seq_len: int,
     num_heads: int,
@@ -326,19 +326,19 @@ fn compute_flash_attention_memory_savings(
 }
 
 // Helper: Load a block of data from memory-efficient layout
-fn load_block(data: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): vector {
+func load_block(data: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): vector {
     // In real implementation, this would use efficient memory access patterns
     // For now, return appropriately sized vector
     return allocate_vector(block_size * num_heads * head_dim, 0.0)
 }
 
 // Helper: Store a block of data back to output
-fn store_block(output: vector, block: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): void {
+func store_block(output: vector, block: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): void {
     // Implement efficient block storage
 }
 
 // Helper: Block matrix multiply Q @ K^T / sqrt(d_k)
-fn block_matrix_multiply(
+func block_matrix_multiply(
     q_block: vector, k_block: vector,
     q_size: int, kv_size: int, num_heads: int, head_dim: int,
     q_scale: float
@@ -367,7 +367,7 @@ fn block_matrix_multiply(
 }
 
 // Helper: Apply causal mask for autoregressive attention
-fn apply_causal_mask(
+func apply_causal_mask(
     scores: vector,
     q_start: int, kv_start: int,
     q_size: int, kv_size: int, num_heads: int
@@ -389,7 +389,7 @@ fn apply_causal_mask(
 }
 
 // Helper: Update row-wise maximum for numerical stability
-fn update_row_max(row_max: vector, scores: vector, q_size: int, kv_size: int, num_heads: int): void {
+func update_row_max(row_max: vector, scores: vector, q_size: int, kv_size: int, num_heads: int): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -408,7 +408,7 @@ fn update_row_max(row_max: vector, scores: vector, q_size: int, kv_size: int, nu
 }
 
 // Helper: Compute exp(scores - row_max) for numerical stability
-fn compute_online_exponentials(
+func compute_online_exponentials(
     scores: vector, old_max: vector, new_max: vector,
     q_size: int, kv_size: int, num_heads: int
 ): vector {
@@ -430,7 +430,7 @@ fn compute_online_exponentials(
 }
 
 // Helper: Update row-wise sum for softmax normalization
-fn add_row_sum(row_sum: vector, exp_scores: vector, q_size: int, kv_size: int, num_heads: int): void {
+func add_row_sum(row_sum: vector, exp_scores: vector, q_size: int, kv_size: int, num_heads: int): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -446,7 +446,7 @@ fn add_row_sum(row_sum: vector, exp_scores: vector, q_size: int, kv_size: int, n
 }
 
 // Helper: Update output with attention weights @ V
-fn update_output_block(
+func update_output_block(
     output: vector, exp_scores: vector, v_block: vector,
     old_max: vector, new_max: vector,
     q_size: int, kv_size: int, num_heads: int, head_dim: int
@@ -479,7 +479,7 @@ fn update_output_block(
 }
 
 // Helper: Normalize output by softmax sum
-fn normalize_output_block(output: vector, row_sum: vector, q_size: int, num_heads: int, head_dim: int): void {
+func normalize_output_block(output: vector, row_sum: vector, q_size: int, num_heads: int, head_dim: int): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -494,7 +494,7 @@ fn normalize_output_block(output: vector, row_sum: vector, q_size: int, num_head
 }
 
 // Helper: Expand KV heads for GQA
-fn expand_kv_heads(kv: vector, num_heads: int, num_kv_heads: int): vector {
+func expand_kv_heads(kv: vector, num_heads: int, num_kv_heads: int): vector {
     // Replicate KV heads to match query heads
     var expansion_factor: int = num_heads / num_kv_heads
     var expanded_size: int = length(kv) * expansion_factor
@@ -510,19 +510,19 @@ fn expand_kv_heads(kv: vector, num_heads: int, num_kv_heads: int): vector {
 }
 
 // Helper: Get chunk from all-gather result
-fn get_chunk_from_all_gather(all_gathered: vector, rank: int): vector {
+func get_chunk_from_all_gather(all_gathered: vector, rank: int): vector {
     // Extract chunk for specific rank
     return allocate_vector(length(all_gathered) / rank, 0.0)
 }
 
 // Helper: Get cross-attention mask between sequence parallel chunks
-fn get_cross_mask(from_rank: int, to_rank: int): vector {
+func get_cross_mask(from_rank: int, to_rank: int): vector {
     // Create appropriate mask for cross-chunk attention
     return allocate_vector(1, 0.0)
 }
 
 // Helper: Scale and add vectors
-fn scale_and_add(result: vector, scale_vec: vector, q_size: int, num_heads: int): void {
+func scale_and_add(result: vector, scale_vec: vector, q_size: int, num_heads: int): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             result[h * q_size + qi] = result[h * q_size + qi] * scale_vec[h * q_size + qi]
@@ -531,7 +531,7 @@ fn scale_and_add(result: vector, scale_vec: vector, q_size: int, num_heads: int)
 }
 
 // Helper: Compute attention gradients for a block
-fn compute_attention_gradients_block(
+func compute_attention_gradients_block(
     grad_q: vector, grad_k: vector, grad_v: vector,
     q: vector, k: vector, v: vector, grad_output: vector,
     q_start: int, q_end: int,
@@ -542,7 +542,7 @@ fn compute_attention_gradients_block(
 }
 
 // Benchmark Flash Attention performance
-fn benchmark_flash_attention(
+func benchmark_flash_attention(
     seq_lengths: vector,  // Different sequence lengths to test
     num_heads: int,
     head_dim: int
@@ -572,7 +572,7 @@ fn benchmark_flash_attention(
 }
 
 // Verify Flash Attention correctness against reference implementation
-fn verify_flash_attention_correctness(
+func verify_flash_attention_correctness(
     q: vector, k: vector, v: vector, mask: vector,
     seq_len: int, num_heads: int, head_dim: int
 ): bool {
@@ -601,7 +601,7 @@ fn verify_flash_attention_correctness(
 }
 
 // Reference standard attention for verification
-fn standard_attention(q: vector, k: vector, v: vector, mask: vector, 
+func standard_attention(q: vector, k: vector, v: vector, mask: vector, 
                      seq_len: int, num_heads: int, head_dim: int): vector {
     
     var q_scale: float = 1.0 / sqrt(float(head_dim))
@@ -640,7 +640,7 @@ fn standard_attention(q: vector, k: vector, v: vector, mask: vector,
 }
 
 // Export configuration for use in training
-fn recommended_flash_attention_config_2t(): flash_attention_config {
+func recommended_flash_attention_config_2t(): flash_attention_config {
     var config: flash_attention_config = new_flash_attention_config()
     config.block_size_q = 128
     config.block_size_kv = 128

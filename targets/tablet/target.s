@@ -22,7 +22,7 @@ struct tablet_target_config {
     string  precision       // "fp16" | "int8"
 }
 
-func default_tablet_target() -> tablet_target_config {
+func default_tablet_target() tablet_target_config {
     return tablet_target_config{
         os:           "ipados",
         soc_family:   "apple_m",

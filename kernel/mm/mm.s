@@ -40,7 +40,7 @@ struct mem_state {
     int          next_region_id
 }
 
-func new_mem_state() -> mem_state {
+func new_mem_state() mem_state {
     return mem_state{
         regions:       [],
         next_region_id: 0,
@@ -48,7 +48,7 @@ func new_mem_state() -> mem_state {
 }
 
 // register_region: add a memory pool (called at device init)
-func register_region(ms mem_state, domain int, device_id int, total_bytes int, page_size int) -> (mem_state, int) {
+func register_region(ms mem_state, domain int, device_id int, total_bytes int, page_size int) (mem_state, int) {
     mem_region r = mem_region{
         region_id:   ms.next_region_id,
         domain:      domain,
@@ -64,7 +64,7 @@ func register_region(ms mem_state, domain int, device_id int, total_bytes int, p
 }
 
 // mem_alloc: allocate from a region (buddy-style, simplified bump)
-func mem_alloc(ms mem_state, region_id int, size_bytes int) -> (mem_state, mem_alloc_result) {
+func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_alloc_result) {
     int align = 256  // 256-byte alignment for SIMD/DMA
     int aligned = ((size_bytes + align - 1) / align) * align
 
@@ -90,7 +90,7 @@ func mem_alloc(ms mem_state, region_id int, size_bytes int) -> (mem_state, mem_a
 }
 
 // mem_free: release bytes back to region (simplified: just decrement used)
-func mem_free(ms mem_state, region_id int, size_bytes int) -> mem_state {
+func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
     int i = 0
     while i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {
@@ -104,7 +104,7 @@ func mem_free(ms mem_state, region_id int, size_bytes int) -> mem_state {
 }
 
 // mem_pressure: compute used/total ratio across all host regions
-func mem_pressure(ms mem_state) -> float {
+func mem_pressure(ms mem_state) float {
     int total = 0
     int used  = 0
     int i = 0

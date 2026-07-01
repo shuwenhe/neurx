@@ -116,7 +116,7 @@ structure anomaly_detector {
 }
 
 // Initialize metrics aggregator
-fn new_metrics_aggregator(window_size: int): metrics_aggregator {
+func new_metrics_aggregator(window_size: int): metrics_aggregator {
     var agg: metrics_aggregator
     agg.window_size = window_size
     agg.history = allocate_vector(window_size, 0.0)
@@ -132,7 +132,7 @@ fn new_metrics_aggregator(window_size: int): metrics_aggregator {
 }
 
 // Collect metrics for current training step
-fn collect_training_metrics(
+func collect_training_metrics(
     global_step: int,
     epoch: int,
     loss: float,
@@ -205,7 +205,7 @@ fn collect_training_metrics(
 }
 
 // Collect per-rank metrics
-fn collect_rank_metrics(
+func collect_rank_metrics(
     rank: int,
     metrics: training_metrics,
     gpu_utilization_percent: float,
@@ -226,7 +226,7 @@ fn collect_rank_metrics(
 }
 
 // Aggregate metrics across all ranks
-fn aggregate_metrics_across_ranks(
+func aggregate_metrics_across_ranks(
     all_rank_metrics: vector,
     num_ranks: int,
     aggregator: metrics_aggregator
@@ -273,7 +273,7 @@ fn aggregate_metrics_across_ranks(
 }
 
 // Detect anomalies in metrics
-fn detect_anomalies(
+func detect_anomalies(
     current_metrics: training_metrics,
     detector: anomaly_detector
 ): (bool, string) {  // Returns (is_anomaly, description)
@@ -329,7 +329,7 @@ fn detect_anomalies(
 }
 
 // Compute timing breakdown percentages
-fn compute_timing_breakdown(
+func compute_timing_breakdown(
     metrics: training_metrics
 ): (float, float, float, float, float) {  // Returns %forward, %backward, %optimizer, %communication, %data_load
     
@@ -350,7 +350,7 @@ fn compute_timing_breakdown(
 }
 
 // Identify communication bottlenecks
-fn identify_communication_bottlenecks(
+func identify_communication_bottlenecks(
     metrics: training_metrics,
     num_ranks: int,
     num_layers: int
@@ -383,7 +383,7 @@ fn identify_communication_bottlenecks(
 }
 
 // Print metrics summary
-fn print_metrics_summary(
+func print_metrics_summary(
     metrics: training_metrics,
     aggregator: metrics_aggregator
 ): void {
@@ -412,7 +412,7 @@ fn print_metrics_summary(
 }
 
 // Export metrics to file for dashboarding
-fn export_metrics_to_file(
+func export_metrics_to_file(
     metrics: training_metrics,
     output_file: string
 ): void {
@@ -422,7 +422,7 @@ fn export_metrics_to_file(
 }
 
 // Initialize anomaly detector
-fn new_anomaly_detector(): anomaly_detector {
+func new_anomaly_detector(): anomaly_detector {
     var detector: anomaly_detector
     detector.loss_divergence_threshold = 5.0
     detector.gradient_explosion_threshold = 1e8
@@ -435,7 +435,7 @@ fn new_anomaly_detector(): anomaly_detector {
 }
 
 // Helper: Compute vector norm
-fn compute_vector_norm(v: vector): float {
+func compute_vector_norm(v: vector): float {
     var norm_sq: float = 0.0
     
     for i in range(0, length(v)) {
@@ -446,7 +446,7 @@ fn compute_vector_norm(v: vector): float {
 }
 
 // Helper: Compute vector max
-fn compute_vector_max(v: vector): float {
+func compute_vector_max(v: vector): float {
     var max_val: float = -inf
     
     for i in range(0, length(v)) {
@@ -459,7 +459,7 @@ fn compute_vector_max(v: vector): float {
 }
 
 // Helper: Compute vector min
-fn compute_vector_min(v: vector): float {
+func compute_vector_min(v: vector): float {
     var min_val: float = inf
     
     for i in range(0, length(v)) {
@@ -472,20 +472,20 @@ fn compute_vector_min(v: vector): float {
 }
 
 // Helper: Get time
-fn get_time(): float {
+func get_time(): float {
     return 0.0
 }
 
 // Helper: Is NaN
-fn is_nan(val: float): bool {
+func is_nan(val: float): bool {
     return val != val
 }
 
 // Helper: Print
-fn println(msg: string): void {
+func println(msg: string): void {
 }
 
 // Recommended monitoring config for 2T model
-fn recommended_monitoring_config_2t(): metrics_aggregator {
+func recommended_monitoring_config_2t(): metrics_aggregator {
     return new_metrics_aggregator(1000)
 }

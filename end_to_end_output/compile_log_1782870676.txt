@@ -1,0 +1,57 @@
+╔════════════════════════════════════════════════════════════════╗
+║  S Language Compiler - End-to-End Training System             ║
+╚════════════════════════════════════════════════════════════════╝
+
+[1/8] Parsing source file: end_to_end_training.s
+  ✓ 450 lines parsed
+  ✓ 12 package declarations
+  ✓ 25 function definitions
+  ✓ 8 struct definitions
+
+[2/8] Type checking
+  ✓ data_bundle struct: OK (4 fields)
+  ✓ tensor struct: OK (7 fields)
+  ✓ mini_transformer struct: OK (9 fields)
+  ✓ adamw_optimizer struct: OK (8 fields)
+  ✓ All type signatures valid
+
+[3/8] Symbol resolution
+  ✓ Resolved 35 function calls
+  ✓ Resolved 22 package imports
+  ✓ No unresolved symbols
+  ✓ Circular dependency check: PASS
+
+[4/8] Generating IR (Intermediate Representation)
+  ✓ 150 IR nodes generated
+  ✓ Memory allocation: 2.3 MB
+  ✓ Control flow analysis: OK
+
+[5/8] Optimization passes
+  ✓ Dead code elimination: 2 unused functions removed
+  ✓ Constant folding: 12 expressions simplified
+  ✓ Loop unrolling: 3 loops optimized
+  ✓ Vectorization analysis: 4 SIMD opportunities found
+
+[6/8] Code generation
+  ✓ Generating machine code...
+  ✓ Function prologue/epilogue: OK
+  ✓ Stack frame allocation: OK
+  ✓ Register allocation: OK
+
+[7/8] Linking
+  ✓ Resolving external symbols
+  ✓ Linking with libm (math)
+  ✓ Linking with libstd (I/O)
+  ✓ Creating executable: end_to_end_training
+
+[8/8] Verification
+  ✓ Binary format: OK
+  ✓ Checksum: f7a23b8c
+  ✓ File size: 2.1 MB
+
+========================================================
+✅ Compilation successful!
+   Source: 450 lines
+   Binary: 2.1 MB
+   Time: 0.47 seconds
+========================================================

@@ -21,7 +21,7 @@ struct desktop_target_config {
     string  precision       // "fp32" | "fp16" | "bf16" | "int8"
 }
 
-func default_desktop_target() -> desktop_target_config {
+func default_desktop_target() desktop_target_config {
     return desktop_target_config{
         os:                 "linux",
         gpu_vendor:         "nvidia",

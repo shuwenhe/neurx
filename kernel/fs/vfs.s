@@ -51,7 +51,7 @@ struct vfs_state {
     int      next_dino
 }
 
-func new_vfs() -> vfs_state {
+func new_vfs() vfs_state {
     return vfs_state{
         inodes:    [],
         dentries:  [],
@@ -61,7 +61,7 @@ func new_vfs() -> vfs_state {
 }
 
 // vfs_create: create a new VFS entry (analogous to vfs_create() in Linux)
-func vfs_create(vfs vfs_state, path string, inode_type int, size_bytes int, backend string) -> (vfs_state, int) {
+func vfs_create(vfs vfs_state, path string, inode_type int, size_bytes int, backend string) (vfs_state, int) {
     inode n = inode{
         ino:        vfs.next_ino,
         path:       path,
@@ -79,7 +79,7 @@ func vfs_create(vfs vfs_state, path string, inode_type int, size_bytes int, back
 }
 
 // vfs_lookup: find inode by path (analogous to path_lookupat() in Linux)
-func vfs_lookup(vfs vfs_state, path string) -> (inode, bool) {
+func vfs_lookup(vfs vfs_state, path string) (inode, bool) {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].path == path {
@@ -91,7 +91,7 @@ func vfs_lookup(vfs vfs_state, path string) -> (inode, bool) {
 }
 
 // vfs_open: increment ref count (analogous to dget/ihold)
-func vfs_open(vfs vfs_state, ino int) -> vfs_state {
+func vfs_open(vfs vfs_state, ino int) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino {
@@ -103,7 +103,7 @@ func vfs_open(vfs vfs_state, ino int) -> vfs_state {
 }
 
 // vfs_close: decrement ref count
-func vfs_close(vfs vfs_state, ino int) -> vfs_state {
+func vfs_close(vfs vfs_state, ino int) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino && vfs.inodes[i].ref_count > 0 {

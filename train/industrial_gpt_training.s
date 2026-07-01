@@ -75,6 +75,13 @@ struct industrial_training_run_result {
     training_pipeline.training_metrics loop_metrics
 }
 
+struct industrial_step_result {
+    training_pipeline.training_state next_state
+    training_pipeline.training_step_result step_result
+    bool checkpoint_saved
+    string checkpoint_path
+}
+
 // =====================================================================
 // Defaults
 // =====================================================================
@@ -124,6 +131,31 @@ func new_industrial_training_progress() industrial_training_progress {
         last_eval_loss: 0.0,
         last_eval_perplexity: 0.0,
     }
+}
+
+func industrial_smoke_batch() industrial_step_batch {
+    industrial_step_batch {
+        input_ids: []int{1, 2, 3, 4},
+        target_ids: []int{2, 3, 4, 5},
+        batch_size: 1,
+        sequence_length: 4,
+    }
+}
+
+func industrial_smoke_training_run() industrial_training_run_result {
+    industrial_training_config cfg = new_industrial_training_config()
+    cfg.run_name = "smoke-industrial"
+    cfg.base.total_steps = 1
+    cfg.base.checkpoint_interval = 1
+    cfg.eval_interval = 1
+    cfg.early_stopping_patience = 1
+    cfg.target_perplexity = 999999.0
+
+    []industrial_step_batch train_batches = []industrial_step_batch{industrial_smoke_batch()}
+    []industrial_step_batch validation_batches = []industrial_step_batch{industrial_smoke_batch()}
+    model.transformer_state model_state
+
+    industrial_training_run(cfg, model_state, train_batches, validation_batches)
 }
 
 // =====================================================================
@@ -204,7 +236,7 @@ func industrial_validate_batch(
     )
 
     metrics.loss = forward_result.loss_value
-    metrics.perplexity = training_pipeline.compute_perplexity(forward_result.loss_value)
+    metrics.perplexity = industrial_compute_perplexity(forward_result.loss_value)
     metrics.accuracy_proxy = 1.0 / (1.0 + metrics.loss)
     metrics.batches = 1
     metrics
@@ -248,7 +280,8 @@ func industrial_training_step(
     training_pipeline.training_state state,
     model.transformer_state model_state,
     industrial_step_batch batch
-) (training_pipeline.training_state, training_pipeline.training_step_result, bool, string) {
+) industrial_step_result {
+    industrial_step_result output
     training_pipeline.training_step_result step_result = training_pipeline.training_step(
         batch.input_ids,
         batch.target_ids,
@@ -263,8 +296,8 @@ func industrial_training_step(
     state.total_tokens = state.total_tokens + batch.batch_size * batch.sequence_length
     state.accumulated_loss = step_result.loss
     state.accumulated_steps = state.accumulated_steps + 1
-    state.learning_rate = training_pipeline.current_learning_rate(cfg.base, state.current_step)
-    state.loss_scale = training_pipeline.update_loss_scale(state.loss_scale, step_result.overflow_detected, state.current_step)
+    state.learning_rate = industrial_current_learning_rate(cfg, state.current_step)
+    state.loss_scale = industrial_update_loss_scale(state.loss_scale, step_result.overflow_detected, state.current_step)
 
     string checkpoint_path = ""
     bool checkpoint_saved = false
@@ -281,7 +314,11 @@ func industrial_training_step(
         checkpoint_saved = true
     }
 
-    (state, step_result, checkpoint_saved, checkpoint_path)
+    output.next_state = state
+    output.step_result = step_result
+    output.checkpoint_saved = checkpoint_saved
+    output.checkpoint_path = checkpoint_path
+    output
 }
 
 // =====================================================================
@@ -314,17 +351,20 @@ func industrial_training_run(
     int i = 0
     while i < total_batches {
         industrial_step_batch batch = train_batches[i]
-        (state, training_pipeline.training_step_result step_result, bool checkpoint_saved, string checkpoint_path) =
-            industrial_training_step(cfg, state, model_state, batch)
+        industrial_step_result step_output = industrial_training_step(cfg, state, model_state, batch)
+        state = step_output.next_state
 
         progress.total_steps = state.current_step
+        if total_batches > 0 {
+            state.current_epoch = state.current_step / total_batches
+        }
         progress.current_epoch = state.current_epoch
         progress.total_tokens = state.total_tokens
         progress.total_loss = state.total_loss
         progress.overflow_count = state.gradient_overflow_count
-        progress.latest_checkpoint_path = checkpoint_path
+        progress.latest_checkpoint_path = step_output.checkpoint_path
 
-        if checkpoint_saved {
+        if step_output.checkpoint_saved {
             progress.checkpoint_count = progress.checkpoint_count + 1
         }
 
@@ -363,6 +403,7 @@ func industrial_training_run(
                         state,
                         cfg.base
                     )
+                    progress.checkpoint_count = progress.checkpoint_count + 1
                 }
             } else {
                 progress.stalled_evals = progress.stalled_evals + 1
@@ -390,12 +431,12 @@ func industrial_training_run(
     result.progress = progress
     result.final_state = state
     result.loop_metrics = training_pipeline.training_metrics {
-        average_loss: training_pipeline.average_loss_from_state(state),
-        perplexity: training_pipeline.compute_perplexity(training_pipeline.average_loss_from_state(state)),
+        average_loss: average_loss_from_state(state),
+        perplexity: industrial_compute_perplexity(average_loss_from_state(state)),
         learning_rate: state.learning_rate,
         gradient_norm: 0.0,
         loss_scale: state.loss_scale,
-        throughput: training_pipeline.compute_throughput(state.total_tokens, state.current_step),
+        throughput: compute_throughput(state.total_tokens, state.current_step),
         accumulation_progress: 100,
         overflow_count: state.gradient_overflow_count,
     }
@@ -416,6 +457,9 @@ func industrial_training_summary(industrial_training_run_result result) string {
     summary = summary + "checkpoints=" + int_to_string(result.progress.checkpoint_count) + "\n"
     summary = summary + "overflow_count=" + int_to_string(result.progress.overflow_count) + "\n"
     summary = summary + "stopped_early=" + bool_to_string(result.progress.stopped_early)
+    summary = summary + "\nlast_eval_loss=" + float_to_string(result.progress.last_eval_loss)
+    summary = summary + "\nlast_eval_perplexity=" + float_to_string(result.progress.last_eval_perplexity)
+    summary = summary + "\nbest_checkpoint=" + result.progress.best_checkpoint_path
     summary
 }
 
@@ -458,13 +502,57 @@ func float_to_string(float value) string {
         remaining = remaining - 1.0
     }
 
-    int decimals = 0
-    float scaled = remaining * 1000.0
-    while scaled >= 1.0 {
-        decimals = decimals + 1
-        scaled = scaled - 1.0
-    }
-
     int_to_string(integer_part) + ".000"
 }
 
+func average_loss_from_state(training_pipeline.training_state state) float {
+    if state.current_step <= 0 {
+        return 0.0
+    }
+    state.total_loss / float(state.current_step)
+}
+
+func compute_throughput(int total_tokens, int total_steps) float {
+    if total_steps <= 0 {
+        return 0.0
+    }
+    float(total_tokens) / float(total_steps)
+}
+
+func industrial_compute_perplexity(float loss) float {
+    if loss <= 0.0 {
+        return 1.0
+    }
+    1.0 + loss + (loss * loss * 0.5)
+}
+
+func industrial_current_learning_rate(industrial_training_config cfg, int step) float {
+    if cfg.base.warmup_steps > 0 && step < cfg.base.warmup_steps {
+        return cfg.base.learning_rate * float(step) / float(cfg.base.warmup_steps)
+    }
+    cfg.base.learning_rate
+}
+
+func industrial_update_loss_scale(float current_loss_scale, bool overflow_detected, int stable_steps) float {
+    float loss_scale = current_loss_scale
+    if loss_scale < 1.0 {
+        loss_scale = 1.0
+    }
+
+    if overflow_detected {
+        loss_scale = loss_scale * 0.5
+        if loss_scale < 1.0 {
+            loss_scale = 1.0
+        }
+        return loss_scale
+    }
+
+    if stable_steps > 0 && stable_steps % 2000 == 0 {
+        loss_scale = loss_scale * 2.0
+        if loss_scale > 65536.0 {
+            loss_scale = 65536.0
+        }
+    }
+
+    loss_scale
+}

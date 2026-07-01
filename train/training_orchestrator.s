@@ -7,6 +7,7 @@ package neurx.training.orchestrator
 
 use neurx.runtime.io.{runtime_env_get}
 use neurx.data.data_pipeline.{data_pipeline, data_pipeline_batch_result, get_next_batch_with_state, new_training_data_pipeline, reset_pipeline}
+use neurx.training.industrial_gpt_training
 use neurx.train.large_scale_runtime
 use neurx.train.distributed_training_adapter
 
@@ -580,8 +581,20 @@ func run_complete_training_pipeline() int {
     println("  - Loss: " + float_to_str(best.loss))
     println("  - Model Size: " + int_to_str(best.model_size_bytes / 1024) + " KB")
     println("")
+
+    // --------- 第8步: 工业训练编排器 Smoke Check ---------
+    println("8️⃣  工业训练编排器 Smoke Check...")
+    println("")
+
+    industrial_result := industrial_gpt_training.industrial_smoke_training_run()
+    industrial_summary := industrial_gpt_training.industrial_training_summary(industrial_result)
+
+    println("✓ 工业训练摘要:")
+    println(industrial_summary)
+    println("  - Best checkpoint: " + industrial_result.progress.best_checkpoint_path)
+    println("")
     
-    // --------- 第8步: 最终总结 ---------
+    // --------- 第9步: 最终总结 ---------
     println("=========================================================================")
     println("✅ LLM完整训练流程执行完成")
     println("=========================================================================")

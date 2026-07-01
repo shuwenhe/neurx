@@ -36,12 +36,12 @@ struct proc_table {
     int               next_pid
 }
 
-func new_proc_table() -> proc_table {
+func new_proc_table() proc_table {
     return proc_table{procs: [], next_pid: 1}
 }
 
 // spawn: create a new agent process (do_fork equivalent)
-func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class int) -> (proc_table, int) {
+func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class int) (proc_table, int) {
     int pid = pt.next_pid
     proc_descriptor p = proc_descriptor{
         pid:          pid,
@@ -62,7 +62,7 @@ func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class i
 }
 
 // exit: mark agent as zombie (do_exit equivalent)
-func proc_exit(pt proc_table, pid int, exit_code int, reason string) -> proc_table {
+func proc_exit(pt proc_table, pid int, exit_code int, reason string) proc_table {
     int i = 0
     while i < len(pt.procs) {
         if pt.procs[i].pid == pid {
@@ -76,7 +76,7 @@ func proc_exit(pt proc_table, pid int, exit_code int, reason string) -> proc_tab
 }
 
 // wait: collect zombie child (waitpid equivalent)
-func proc_wait(pt proc_table, ppid int) -> (proc_table, proc_descriptor, bool) {
+func proc_wait(pt proc_table, ppid int) (proc_table, proc_descriptor, bool) {
     int i = 0
     while i < len(pt.procs) {
         if pt.procs[i].ppid == ppid && pt.procs[i].state == PROC_ZOMBIE {
