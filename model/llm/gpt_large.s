@@ -117,7 +117,7 @@ func gpt_large_head_dim(gpt_large_state state) int {
 func gpt_large_effective_lr(gpt_large_state state, gpt_large_train_config config, int step) float {
     float lr = state.learning_rate
     if config.warmup_steps > 0 && step < config.warmup_steps {
-        lr = state.learning_rate * float(step + 1) / float(config.warmup_steps)
+        lr = state.learning_rate * (step + 1) * 1.0 / (config.warmup_steps * 1.0)
     }
     if lr < config.min_lr {
         lr = config.min_lr
@@ -126,12 +126,12 @@ func gpt_large_effective_lr(gpt_large_state state, gpt_large_train_config config
 }
 
 func gpt_large_loss_after_step(gpt_large_state state, gpt_large_train_config config, int step) float {
-    float capacity = float(state.hidden_size * state.num_layers) / 131072.0
+    float capacity = (state.hidden_size * state.num_layers) * 1.0 / 131072.0
     if capacity < 1.0 {
         capacity = 1.0
     }
     float lr = gpt_large_effective_lr(state, config, step)
-    float progress = float(step + 1) * lr * capacity * 2.0
+    float progress = (step + 1) * 1.0 * lr * capacity * 2.0
     float base_loss = 3.8
     float decay = base_loss / (1.0 + progress)
     float regularizer = 0.02 + state.dropout * 0.1

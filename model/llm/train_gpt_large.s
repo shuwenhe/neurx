@@ -1,6 +1,7 @@
 package neurx.model.llm.train_gpt_large
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
+use neurx.pretrain.llm.gpt_large_pretrain
 
 func trim(string s) string {
     int i = 0
@@ -630,7 +631,45 @@ func gpt_large_training_summary(gpt_large_state state, gpt_large_training_config
     out
 }
 
+func gpt_large_run_industrial_backend() int {
+    if !neurx.tensor.core.core_backend_smoke() {
+        println("tensor core backend smoke test failed")
+        return 1
+    }
+
+    gpt_large_pretrain.gpt_large_pretrain_state state = gpt_large_pretrain.gpt_large_pretrain_run_from_env()
+    println("=======================================================================")
+    println("NeurX Industrial GPT-Large Pretraining")
+    println("=======================================================================")
+    println("Backend: tensor.core + pretrain pipeline")
+    println("Manifest: " + state.dataset_manifest)
+    println("Output Dir: " + state.output_dir)
+    println("Steps: " + int_to_str(state.cfg.max_steps, 0))
+    println("LR: " + fmt_float(state.cfg.lr, 8))
+    println("Warmup: " + int_to_str(state.cfg.warmup_steps, 0))
+    println("=======================================================================")
+
+    if !gpt_large_pretrain.gpt_large_pretrain_system_ready(state) {
+        println("industrial pretraining system is not fully ready; writing status report only")
+        gpt_large_pretrain.gpt_large_pretrain_write_system_report(state)
+        return 1
+    }
+
+    gpt_large_pretrain.gpt_large_pretrain_state final_state = gpt_large_pretrain.gpt_large_pretrain_execute(state)
+    println("Training finished.")
+    println("Final loss: " + fmt_float(final_state.training.last_loss, 6))
+    println("Best metric: " + fmt_float(final_state.checkpoint.best_metric, 6))
+    println("Tokens seen: " + int_to_str(final_state.loop.tokens_seen, 0))
+    println("Summary written to: " + final_state.output_dir + "/pretrain_summary.txt")
+    0
+}
+
 func main() int {
+    string backend_mode = trim(runtime_env_get("NEURX_LLM_BACKEND", "industrial"))
+    if backend_mode != "legacy" {
+        return gpt_large_run_industrial_backend()
+    }
+
     gpt_large_training_config cfg = default_training_config()
     gpt_large_state state = default_model_state()
 
