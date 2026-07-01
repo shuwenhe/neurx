@@ -183,6 +183,12 @@ struct benchmark_results {
     int param_count_b             // 参数量 (B)
 }
 
+// CAI 批次对 (chosen, rejected)
+struct cai_pair {
+    []int chosen
+    []int rejected
+}
+
 // ============================================================================
 // 2. 模型规模预设
 // ============================================================================
@@ -1523,7 +1529,7 @@ func make_cai_prompts(int num_prompts, int prompt_len, int vocab_size) [][]int {
 }
 
 // 从 CAI 扁平批次中轮转抽取一对 (chosen, rejected)，各 [seq_len]
-func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int):
+func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) cai_pair {
     int b = idx - (idx / flat.batch_size) * flat.batch_size
     []int chosen = []int{cap: seq_len}
     []int rejected = []int{cap: seq_len}
@@ -1533,9 +1539,11 @@ func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int):
         rejected[t] = flat.rejected_ids[b * seq_len + t]
         t = t + 1
     }
-    return (chosen, rejected)
-
-// 记录训练进度
+    cai_pair {
+        chosen: chosen,
+        rejected: rejected,
+    }
+}
 func log_stage_progress(stage_state s, gpt_config arch) stage_state {
     // 在实际训练中，这里会写入 TensorBoard / WandB / 文件日志
     // 此处为框架占位；真实日志由运行时 IO 模块处理
@@ -1674,6 +1682,33 @@ func summarize_foundation_readiness(
         preference_pairs_m
     )
     readiness_summary(report)
+}
+
+func bool_to_s(bool v) string {
+    if v {
+        return "true"
+    }
+    "false"
+}
+
+func main() int {
+    println("NeurX foundation model smoke test")
+    println("")
+
+    foundation_model_config cfg = neurx_mini_config()
+    println(summarize_training_plan(cfg))
+    println("")
+
+    foundation_model_state state = train_neurx_mini()
+    println("Final phase: " + state.current_phase)
+    println("Training complete: " + bool_to_s(state.training_complete))
+    println("Pretrain complete: " + bool_to_s(state.pretrain_state.completed))
+    println("SFT complete: " + bool_to_s(state.sft_state.completed))
+    println("RLHF complete: " + bool_to_s(state.rlhf_state.completed))
+    println("Reasoning complete: " + bool_to_s(state.reasoning_state.completed))
+    println("Total tokens seen (B): " + int_to_s(state.total_tokens_b))
+
+    return 0
 }
 
 func int_to_s(int n) string {
