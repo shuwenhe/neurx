@@ -59,10 +59,28 @@ func test_matmul_reduce() {
     assert_close(m.storage[0], 33.5, "mean all")
 }
 
+func test_broadcast_and_shape_ops() {
+    tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0], [3], "fp32", "cpu", true)
+    tensor b = neurx.tensor.core.from_data([10.0], [1], "fp32", "cpu", false)
+    tensor c = neurx.tensor.core.add(a, b)
+    tensor d = neurx.tensor.core.reshape(a, [1, 3])
+    tensor e = neurx.tensor.core.transpose2d(d)
+    tensor f = neurx.tensor.core.sum_dim(c, 0, false)
+    tensor g = neurx.tensor.core.mean_dim(c, 0, false)
+    assert_close(c.storage[0], 11.0, "broadcast add 0")
+    assert_close(c.storage[2], 13.0, "broadcast add 2")
+    assert_true(d.desc.numel == 3, "reshape numel")
+    assert_true(e.desc.shape[0] == 3, "transpose rows")
+    assert_true(e.desc.shape[1] == 1, "transpose cols")
+    assert_close(f.storage[0], 36.0, "sum dim")
+    assert_close(g.storage[0], 12.0, "mean dim")
+}
+
 func main() {
     println("NeurX tensor core tests")
     test_descriptor()
     test_view_contiguous()
     test_math()
     test_matmul_reduce()
+    test_broadcast_and_shape_ops()
 }

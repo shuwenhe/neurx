@@ -113,6 +113,14 @@ BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$NEURX_ROOT/build/gpt_large_pretrain}"
 CLUSTER_BUILD_DIR="${NEURX_CLUSTER_BUILD_DIR:-$NEURX_ROOT/build/cluster_orchestration}"
 IR_FILE="$BUILD_DIR/gpt_large_pretrain.ir"
 BIN_FILE="$BUILD_DIR/gpt_large_pretrain.bin"
+PRETRAIN_CONFIG_SRC="$NEURX_ROOT/pretrain/config/pretrain_config.s"
+PRETRAIN_CONFIG_IR="$BUILD_DIR/pretrain_config.ir"
+GPT_LARGE_MODEL_SRC="$NEURX_ROOT/model/llm/gpt_large.s"
+GPT_LARGE_MODEL_IR="$BUILD_DIR/gpt_large.ir"
+GPT_LARGE_TRAIN_SRC="$NEURX_ROOT/model/llm/gpt_large_train.s"
+GPT_LARGE_TRAIN_IR="$BUILD_DIR/gpt_large_train.ir"
+GPT_LARGE_TRAIN_LINKED_IR="$BUILD_DIR/gpt_large_train_linked.ir"
+LINKED_IR_FILE="$BUILD_DIR/gpt_large_pretrain_linked.ir"
 CLUSTER_IR_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.ir"
 CLUSTER_BIN_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.bin"
 LOG_DIR="$NEURX_ROOT/artifacts/logs"
@@ -405,7 +413,40 @@ compile_and_run_s() {
         fi
 
         echo "▶ 生成可执行二进制..."
-        if (cd "$S_SOURCE_ROOT" && "$S_COMPILER" --emit-bin "$IR_FILE" "$BIN_FILE" 2>&1); then
+        if [ -f "$PRETRAIN_CONFIG_SRC" ]; then
+            if ! "$S_COMPILER" "$PRETRAIN_CONFIG_SRC" "$PRETRAIN_CONFIG_IR" 2>&1; then
+                echo -e "${RED}✗ pretrain config 编译失败${NC}"
+                return 1
+            fi
+            if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$PRETRAIN_CONFIG_IR" "$IR_FILE" "cfg" "$LINKED_IR_FILE"; then
+                echo -e "${RED}✗ pretrain config IR 链接失败${NC}"
+                return 1
+            fi
+            if [ -f "$GPT_LARGE_MODEL_SRC" ] && [ -f "$GPT_LARGE_TRAIN_SRC" ]; then
+                if ! "$S_COMPILER" "$GPT_LARGE_MODEL_SRC" "$GPT_LARGE_MODEL_IR" 2>&1; then
+                    echo -e "${RED}✗ GPT-Large model 编译失败${NC}"
+                    return 1
+                fi
+                if ! "$S_COMPILER" "$GPT_LARGE_TRAIN_SRC" "$GPT_LARGE_TRAIN_IR" 2>&1; then
+                    echo -e "${RED}✗ GPT-Large train 编译失败${NC}"
+                    return 1
+                fi
+                if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_LARGE_MODEL_IR" "$GPT_LARGE_TRAIN_IR" "gl" "$GPT_LARGE_TRAIN_LINKED_IR"; then
+                    echo -e "${RED}✗ GPT-Large train IR 链接失败${NC}"
+                    return 1
+                fi
+                if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_LARGE_TRAIN_LINKED_IR" "$LINKED_IR_FILE" "glt" "$LINKED_IR_FILE.tmp"; then
+                    echo -e "${RED}✗ GPT-Large train 链接到主 IR 失败${NC}"
+                    return 1
+                fi
+                mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+            fi
+            IR_TO_EMIT="$LINKED_IR_FILE"
+        else
+            IR_TO_EMIT="$IR_FILE"
+        fi
+
+        if (cd "$S_SOURCE_ROOT" && "$S_COMPILER" --emit-bin "$IR_TO_EMIT" "$BIN_FILE" 2>&1); then
             if [ ! -f "$BIN_FILE" ]; then
                 echo -e "${RED}✗ 二进制文件未生成${NC}"
                 return 1
