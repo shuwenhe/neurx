@@ -1,0 +1,454 @@
+// ============================================
+// Industrial-Grade Experiment Management System
+// Track, compare, and manage training experiments
+// ============================================
+
+package main
+
+import (
+    "fmt"
+    "math"
+    "time"
+)
+
+type HyperParameter struct {
+    name            string
+    value           string
+    data_type       string
+    search_range    string
+}
+
+type ExperimentMetrics struct {
+    step            int64
+    train_loss      float64
+    val_loss        float64
+    perplexity      float64
+    learning_rate   float64
+    batch_size      int
+    throughput      float64
+    memory_usage_gb float64
+}
+
+type ExperimentConfig struct {
+    experiment_id       string
+    name                string
+    description         string
+    model_name          string
+    dataset_name        string
+    hyperparameters     []HyperParameter
+    start_time          int64
+    end_time            int64
+    status              string
+}
+
+type ExperimentResult struct {
+    config              ExperimentConfig
+    metrics_history     []ExperimentMetrics
+    best_checkpoint     string
+    best_loss           float64
+    best_perplexity     float64
+    training_duration   int64
+    converged           bool
+}
+
+type ExperimentComparison struct {
+    experiment_ids      []string
+    metric_name         string
+    results             map[string]float64
+    winner              string
+    significance        float64
+}
+
+type ExperimentManager struct {
+    experiments         map[string]ExperimentResult
+    current_experiment  string
+    comparison_history  []ExperimentComparison
+    best_experiment     string
+}
+
+// ============================================
+// Experiment Initialization
+// ============================================
+
+func (manager *ExperimentManager) initialize() {
+    fmt.Println("╔════════════════════════════════════════════════════════╗")
+    fmt.Println("║  Industrial Experiment Management System              ║")
+    fmt.Println("║  Track, compare, and optimize training experiments    ║")
+    fmt.Println("╚════════════════════════════════════════════════════════╝\n")
+    
+    fmt.Printf("Initialization:\n")
+    fmt.Printf("  Total Experiments: %d\n", len(manager.experiments))
+    fmt.Printf("  Current: %s\n\n", manager.current_experiment)
+}
+
+func (manager *ExperimentManager) create_experiment(
+    experiment_id string,
+    name string,
+    description string,
+    model_name string,
+    dataset_name string) ExperimentConfig {
+    
+    fmt.Printf("\n[Experiment] Creating experiment: %s\n", experiment_id)
+    fmt.Printf("  Name: %s\n", name)
+    fmt.Printf("  Model: %s\n", model_name)
+    fmt.Printf("  Dataset: %s\n", dataset_name)
+    
+    config := ExperimentConfig{
+        experiment_id:   experiment_id,
+        name:            name,
+        description:     description,
+        model_name:      model_name,
+        dataset_name:    dataset_name,
+        hyperparameters: make([]HyperParameter, 0),
+        start_time:      1719842400,
+        end_time:        0,
+        status:          "created",
+    }
+    
+    fmt.Printf("  ✓ Experiment created\n")
+    return config
+}
+
+// ============================================
+// Hyperparameter Management
+// ============================================
+
+func (manager *ExperimentManager) add_hyperparameter(
+    experiment_id string,
+    param_name string,
+    param_value string,
+    data_type string) {
+    
+    if result, exists := manager.experiments[experiment_id]; exists {
+        param := HyperParameter{
+            name:        param_name,
+            value:       param_value,
+            data_type:   data_type,
+            search_range: "",
+        }
+        result.config.hyperparameters = append(result.config.hyperparameters, param)
+        manager.experiments[experiment_id] = result
+    }
+}
+
+func (manager *ExperimentManager) log_hyperparameters(experiment_id string) {
+    fmt.Printf("\n[Experiment] Hyperparameters for %s:\n", experiment_id)
+    
+    if result, exists := manager.experiments[experiment_id]; exists {
+        for _, param := range result.config.hyperparameters {
+            fmt.Printf("  • %s = %s (%s)\n", param.name, param.value, param.data_type)
+        }
+    }
+}
+
+// ============================================
+// Metrics Recording
+// ============================================
+
+func (manager *ExperimentManager) record_metrics(
+    experiment_id string,
+    step int64,
+    train_loss float64,
+    val_loss float64,
+    perplexity float64,
+    learning_rate float64,
+    batch_size int,
+    throughput float64,
+    memory_gb float64) {
+    
+    if result, exists := manager.experiments[experiment_id]; exists {
+        metric := ExperimentMetrics{
+            step:           step,
+            train_loss:     train_loss,
+            val_loss:       val_loss,
+            perplexity:     perplexity,
+            learning_rate:  learning_rate,
+            batch_size:     batch_size,
+            throughput:     throughput,
+            memory_usage_gb: memory_gb,
+        }
+        
+        result.metrics_history = append(result.metrics_history, metric)
+        
+        // Update best metrics
+        if val_loss < result.best_loss {
+            result.best_loss = val_loss
+            result.best_checkpoint = fmt.Sprintf("ckpt-step-%d", step)
+        }
+        if perplexity < result.best_perplexity {
+            result.best_perplexity = perplexity
+        }
+        
+        manager.experiments[experiment_id] = result
+    }
+}
+
+func (manager *ExperimentManager) get_metrics_summary(experiment_id string) {
+    fmt.Printf("\n[Metrics] Summary for %s:\n", experiment_id)
+    
+    if result, exists := manager.experiments[experiment_id]; exists {
+        if len(result.metrics_history) > 0 {
+            first := result.metrics_history[0]
+            last := result.metrics_history[len(result.metrics_history)-1]
+            
+            fmt.Printf("  Steps: %d → %d\n", first.step, last.step)
+            fmt.Printf("  Loss: %.4f → %.4f (best: %.4f)\n", 
+                first.train_loss, last.train_loss, result.best_loss)
+            fmt.Printf("  Perplexity: %.2f → %.2f (best: %.2f)\n",
+                first.perplexity, last.perplexity, result.best_perplexity)
+            fmt.Printf("  Throughput: %.1f tok/sec\n", last.throughput)
+            fmt.Printf("  Memory: %.1f GB\n", last.memory_usage_gb)
+        }
+    }
+}
+
+// ============================================
+// Experiment Comparison
+// ============================================
+
+func (manager *ExperimentManager) compare_experiments(
+    exp_ids []string,
+    metric string) ExperimentComparison {
+    
+    fmt.Printf("\n[Comparison] Comparing %d experiments on metric: %s\n", len(exp_ids), metric)
+    
+    comparison := ExperimentComparison{
+        experiment_ids: exp_ids,
+        metric_name:    metric,
+        results:        make(map[string]float64),
+        winner:         "",
+        significance:   0.0,
+    }
+    
+    var best_value float64 = math.MaxFloat64
+    var best_exp string = ""
+    
+    for _, exp_id := range exp_ids {
+        if result, exists := manager.experiments[exp_id]; exists {
+            var value float64 = 0.0
+            
+            if metric == "loss" && len(result.metrics_history) > 0 {
+                value = result.best_loss
+            } else if metric == "perplexity" && len(result.metrics_history) > 0 {
+                value = result.best_perplexity
+            }
+            
+            comparison.results[exp_id] = value
+            fmt.Printf("  %s: %.4f\n", exp_id, value)
+            
+            if value < best_value {
+                best_value = value
+                best_exp = exp_id
+            }
+        }
+    }
+    
+    comparison.winner = best_exp
+    comparison.significance = (best_value / best_value) * 100
+    
+    fmt.Printf("  Winner: %s (%.4f)\n", best_exp, best_value)
+    
+    return comparison
+}
+
+// ============================================
+// Experiment History and Tracking
+// ============================================
+
+func (manager *ExperimentManager) mark_experiment_complete(
+    experiment_id string,
+    converged bool) {
+    
+    if result, exists := manager.experiments[experiment_id]; exists {
+        result.config.end_time = int64(time.Now().Unix())
+        result.config.status = "completed"
+        result.converged = converged
+        
+        if len(result.metrics_history) > 0 {
+            result.training_duration = result.config.end_time - result.config.start_time
+        }
+        
+        manager.experiments[experiment_id] = result
+        
+        fmt.Printf("\n[Experiment] Marked as complete: %s\n", experiment_id)
+        fmt.Printf("  Status: %s\n", result.config.status)
+        fmt.Printf("  Duration: %d seconds\n", result.training_duration)
+        fmt.Printf("  Converged: %v\n", converged)
+    }
+}
+
+func (manager *ExperimentManager) get_experiment_history() {
+    fmt.Println("\n[History] Experiment History:")
+    fmt.Println("  ID                    Status      Loss        PPL         Time")
+    fmt.Println("  ──────────────────────────────────────────────────────────────")
+    
+    for exp_id, result := range manager.experiments {
+        status := result.config.status
+        loss := fmt.Sprintf("%.4f", result.best_loss)
+        ppl := fmt.Sprintf("%.2f", result.best_perplexity)
+        duration := fmt.Sprintf("%ds", result.training_duration)
+        
+        fmt.Printf("  %-20s  %-10s  %-10s  %-10s  %s\n", 
+            exp_id, status, loss, ppl, duration)
+    }
+}
+
+// ============================================
+// Experiment Reproducibility
+// ============================================
+
+func (manager *ExperimentManager) export_experiment_config(experiment_id string) string {
+    if result, exists := manager.experiments[experiment_id]; exists {
+        config_str := fmt.Sprintf("# Experiment: %s\n", result.config.name)
+        config_str += fmt.Sprintf("ID: %s\n", experiment_id)
+        config_str += fmt.Sprintf("Model: %s\n", result.config.model_name)
+        config_str += fmt.Sprintf("Dataset: %s\n", result.config.dataset_name)
+        config_str += fmt.Sprintf("\n# Hyperparameters\n")
+        
+        for _, param := range result.config.hyperparameters {
+            config_str += fmt.Sprintf("%s=%s\n", param.name, param.value)
+        }
+        
+        config_str += fmt.Sprintf("\n# Results\n")
+        config_str += fmt.Sprintf("best_loss=%.6f\n", result.best_loss)
+        config_str += fmt.Sprintf("best_perplexity=%.4f\n", result.best_perplexity)
+        config_str += fmt.Sprintf("best_checkpoint=%s\n", result.best_checkpoint)
+        config_str += fmt.Sprintf("converged=%v\n", result.converged)
+        
+        return config_str
+    }
+    return ""
+}
+
+// ============================================
+// Automated Best Experiment Selection
+// ============================================
+
+func (manager *ExperimentManager) find_best_experiment() string {
+    var best_exp string = ""
+    var best_ppl float64 = math.MaxFloat64
+    
+    fmt.Println("\n[Analysis] Finding best experiment...")
+    
+    for exp_id, result := range manager.experiments {
+        if result.converged && result.best_perplexity < best_ppl {
+            best_ppl = result.best_perplexity
+            best_exp = exp_id
+        }
+    }
+    
+    manager.best_experiment = best_exp
+    fmt.Printf("  Best experiment: %s (PPL: %.2f)\n", best_exp, best_ppl)
+    
+    return best_exp
+}
+
+// ============================================
+// Main Interface
+// ============================================
+
+func NewExperimentManager() *ExperimentManager {
+    return &ExperimentManager{
+        experiments:        make(map[string]ExperimentResult),
+        current_experiment: "",
+        comparison_history: make([]ExperimentComparison, 0),
+        best_experiment:    "",
+    }
+}
+
+func (manager *ExperimentManager) run_complete_experiment_cycle() {
+    manager.initialize()
+    
+    // Create 3 experiments
+    fmt.Println("\n┌────────────────────────────────────────┐")
+    fmt.Println("│  Creating and Running Experiments      │")
+    fmt.Println("└────────────────────────────────────────┘")
+    
+    experiments := []struct {
+        id    string
+        name  string
+        lr    string
+        wd    string
+    }{
+        {"exp-001", "Baseline", "5e-4", "0.01"},
+        {"exp-002", "High LR", "1e-3", "0.01"},
+        {"exp-003", "High Decay", "5e-4", "0.05"},
+    }
+    
+    for _, exp := range experiments {
+        config := manager.create_experiment(
+            exp.id,
+            exp.name,
+            fmt.Sprintf("Test experiment %s", exp.name),
+            "neurx-346m",
+            "wikitext",
+        )
+        
+        result := ExperimentResult{
+            config:          config,
+            metrics_history: make([]ExperimentMetrics, 0),
+            best_loss:       math.MaxFloat64,
+            best_perplexity: math.MaxFloat64,
+        }
+        
+        manager.experiments[exp.id] = result
+        manager.current_experiment = exp.id
+        
+        // Add hyperparameters
+        manager.add_hyperparameter(exp.id, "learning_rate", exp.lr, "float")
+        manager.add_hyperparameter(exp.id, "weight_decay", exp.wd, "float")
+        manager.add_hyperparameter(exp.id, "batch_size", "32", "int")
+        manager.add_hyperparameter(exp.id, "warmup_steps", "1000", "int")
+        
+        manager.log_hyperparameters(exp.id)
+        
+        // Simulate training metrics
+        converged := false
+        for step := int64(1000); step <= 5000; step += 1000 {
+            loss := 5.0 - float64(step)/1500.0
+            ppl := loss * 1.5
+            
+            manager.record_metrics(
+                exp.id,
+                step,
+                loss,
+                loss + 0.1,
+                ppl,
+                5e-4 * float64(6000-step) / 5000,
+                32,
+                850.0,
+                24.0,
+            )
+            
+            if step == 5000 {
+                converged = true
+            }
+        }
+        
+        manager.mark_experiment_complete(exp.id, converged)
+        manager.get_metrics_summary(exp.id)
+    }
+    
+    // Compare experiments
+    fmt.Println("\n┌────────────────────────────────────────┐")
+    fmt.Println("│  Comparing Experiments                 │")
+    fmt.Println("└────────────────────────────────────────┘")
+    
+    exp_ids := []string{"exp-001", "exp-002", "exp-003"}
+    comparison := manager.compare_experiments(exp_ids, "perplexity")
+    manager.comparison_history = append(manager.comparison_history, comparison)
+    
+    // Get history and find best
+    manager.get_experiment_history()
+    manager.find_best_experiment()
+    
+    // Export config
+    fmt.Println("\n┌────────────────────────────────────────┐")
+    fmt.Println("│  Exporting Best Configuration          │")
+    fmt.Println("└────────────────────────────────────────┘")
+    
+    config_export := manager.export_experiment_config(manager.best_experiment)
+    fmt.Println("\n" + config_export)
+    
+    fmt.Println("[ExperimentManager] Complete!")
+}
