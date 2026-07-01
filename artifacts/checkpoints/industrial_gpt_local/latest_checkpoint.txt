@@ -1,0 +1,1 @@
+/Users/shuwen/shuwen/train/neurx/artifacts/checkpoints/industrial_gpt_local/final_model.neurx
