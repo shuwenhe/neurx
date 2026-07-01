@@ -893,8 +893,7 @@ func run_pretrain_stage(foundation_model_state state) foundation_model_state {
         // 构造训练批次 (优先使用真实语料，回落到合成数据)
         []int batch
         if corpus.total_docs_seen > 0 || step == 0 {
-            corpus_batch real_batch
-            (real_batch, corpus) = corpus_next_batch(corpus)
+            var (real_batch, corpus) = corpus_next_batch(corpus)
             batch = real_batch.input_ids
         } else {
             batch = make_synthetic_batch(micro_batch, seq_len, arch.vocab_size, step)
@@ -1089,7 +1088,7 @@ func run_rlhf_stage(foundation_model_state state) foundation_model_state {
         []int rejected
         if cai_flat.batch_size > 0 {
             // 优先使用 CAI 生成的真实偏好对 (轮转抽取一对)
-            (chosen, rejected) = cai_take_pair(cai_flat, rm_step, seq_len)
+            var (chosen, rejected) = cai_take_pair(cai_flat, rm_step, seq_len)
         } else {
             chosen  = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, true)
             rejected = make_preference_batch(2, seq_len, arch.vocab_size, rm_step, false)
@@ -1524,7 +1523,7 @@ func make_cai_prompts(int num_prompts, int prompt_len, int vocab_size) [][]int {
 }
 
 // 从 CAI 扁平批次中轮转抽取一对 (chosen, rejected)，各 [seq_len]
-func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int) {
+func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int):
     int b = idx - (idx / flat.batch_size) * flat.batch_size
     []int chosen = []int{cap: seq_len}
     []int rejected = []int{cap: seq_len}
@@ -1534,8 +1533,7 @@ func cai_take_pair(cai_flat_batch flat, int idx, int seq_len) ([]int, []int) {
         rejected[t] = flat.rejected_ids[b * seq_len + t]
         t = t + 1
     }
-    (chosen, rejected)
-}
+    return (chosen, rejected)
 
 // 记录训练进度
 func log_stage_progress(stage_state s, gpt_config arch) stage_state {

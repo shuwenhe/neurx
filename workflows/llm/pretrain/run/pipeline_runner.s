@@ -48,11 +48,11 @@ func workflow_two_t_train_dir(string output_dir) string {
 }
 
 func run_pretrain_steps(int steps) int {
-    run_pretrain_with_distributed_config(8, 16, 0.00015, steps, 128, 0.00003, 0.1, 8, 16, 32, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
+    run_pretrain_with_distributed_config(8, 16, 0.00015, steps, 128, 0.00003, 0.1, 8, 16, 32, "data/training_data_splits/manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
 }
 
 func run_pretrain_with_params(int micro_batch, int seq_len, float lr, int steps, int log_interval, int eval_interval, int save_interval) int {
-    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/pretrain/mini_manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
+    run_pretrain_with_distributed_config(micro_batch, seq_len, lr, steps, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/training_data_splits/manifest.json", "artifacts/checkpoints/two_t_pretrain", 4, 2, 1, 1, 2, 128, 4, 8, 2, 512, 4096)
 }
 
 func run_pretrain_with_config(int micro_batch, int seq_len, float lr, int steps, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) int {

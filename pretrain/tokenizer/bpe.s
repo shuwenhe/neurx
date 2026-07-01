@@ -350,6 +350,173 @@ func bpe_tokenized_corpus_from_documents([]string documents, int vocab_limit, in
     }
 }
 
+func bpe_find_substring(string text, string pattern) int {
+    if len(pattern) == 0 {
+        return 0
+    }
+    int i = 0
+    while i + len(pattern) <= len(text) {
+        int j = 0
+        while j < len(pattern) && text[i + j] == pattern[j] {
+            j = j + 1
+        }
+        if j == len(pattern) {
+            return i
+        }
+        i = i + 1
+    }
+    -1
+}
+
+func bpe_trim(string s) string {
+    int left = 0
+    while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
+        left = left + 1
+    }
+
+    int right = len(s) - 1
+    while right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
+        right = right - 1
+    }
+
+    if right < left {
+        return ""
+    }
+
+    string out = ""
+    int i = left
+    while i <= right {
+        out = out + string(s[i])
+        i = i + 1
+    }
+    out
+}
+
+func bpe_normalize_text(string text) string {
+    string out = ""
+    bool in_space = false
+    int i = 0
+    while i < len(text) {
+        int c = text[i]
+        if c == 9 || c == 10 || c == 13 || c == 32 {
+            if len(out) > 0 && !in_space {
+                out = out + " "
+            }
+            in_space = true
+        } else {
+            out = out + string(c)
+            in_space = false
+        }
+        i = i + 1
+    }
+    bpe_trim(out)
+}
+
+func bpe_extract_jsonl_text(string line) string {
+    string text = bpe_trim(line)
+    if text == "" {
+        return ""
+    }
+
+    int key_idx = bpe_find_substring(text, "\"text\"")
+    if key_idx < 0 {
+        return bpe_normalize_text(text)
+    }
+
+    int colon_idx = key_idx
+    while colon_idx < len(text) && text[colon_idx] != 58 {
+        colon_idx = colon_idx + 1
+    }
+    if colon_idx >= len(text) {
+        return bpe_normalize_text(text)
+    }
+
+    int i = colon_idx + 1
+    while i < len(text) && (text[i] == 32 || text[i] == 9) {
+        i = i + 1
+    }
+    if i >= len(text) {
+        return ""
+    }
+
+    string value = ""
+    if text[i] == 34 {
+        i = i + 1
+        while i < len(text) {
+            if text[i] == 92 && i + 1 < len(text) {
+                i = i + 1
+                value = value + string(text[i])
+            } else if text[i] == 34 {
+                break
+            } else {
+                value = value + string(text[i])
+            }
+            i = i + 1
+        }
+        return bpe_normalize_text(value)
+    }
+
+    while i < len(text) && text[i] != 44 && text[i] != 125 {
+        value = value + string(text[i])
+        i = i + 1
+    }
+    bpe_normalize_text(value)
+}
+
+func bpe_jsonl_records_to_documents([]string records) []string {
+    []string docs = []string{cap: len(records)}
+    int i = 0
+    while i < len(records) {
+        string doc = bpe_extract_jsonl_text(records[i])
+        doc = bpe_trim(doc)
+        if doc != "" {
+            docs.push(doc)
+        }
+        i = i + 1
+    }
+    docs
+}
+
+func bpe_pack_token_windows([]int token_ids, int seq_len, int stride) [][]int {
+    if seq_len <= 0 {
+        return [][]int{cap: 0}
+    }
+    if stride <= 0 {
+        stride = seq_len
+    }
+
+    [][]int windows = [][]int{cap: 0}
+    int start = 0
+    while start < len(token_ids) {
+        int end = start + seq_len
+        if end > len(token_ids) {
+            end = len(token_ids)
+        }
+
+        []int window = []int{cap: seq_len}
+        int i = 0
+        while i < seq_len {
+            if start + i < end {
+                window[i] = token_ids[start + i]
+            } else {
+                window[i] = 0
+            }
+            i = i + 1
+        }
+        windows.push(window)
+
+        if end >= len(token_ids) {
+            break
+        }
+        start = start + stride
+    }
+    windows
+}
+
+func bpe_tokenized_corpus_from_jsonl_records([]string records, int vocab_limit, int min_pair_frequency, float valid_ratio, int seed) bpe_tokenized_corpus_state {
+    bpe_tokenized_corpus_from_documents(bpe_jsonl_records_to_documents(records), vocab_limit, min_pair_frequency, valid_ratio, seed)
+}
+
 func bpe_split_state_dict(bpe_split_state state) bpe_split_state {
     bpe_split_state {
         train_documents: copy_strings(state.train_documents),
