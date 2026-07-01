@@ -36,12 +36,12 @@ struct ipc_state {
     int          next_msg_id
 }
 
-func new_ipc_state() -> ipc_state {
+func new_ipc_state() ipc_state {
     return ipc_state{queues: [], next_qid: 1, next_msg_id: 1}
 }
 
 // msgget: create or open a named message queue
-func msgget(is ipc_state, name string, max_depth int) -> (ipc_state, int) {
+func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
     // return existing if name matches
     int i = 0
     while i < len(is.queues) {
@@ -58,7 +58,7 @@ func msgget(is ipc_state, name string, max_depth int) -> (ipc_state, int) {
 }
 
 // msgsnd: send a message to queue
-func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, payload string) -> ipc_state {
+func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, payload string) ipc_state {
     int i = 0
     while i < len(is.queues) {
         if is.queues[i].qid == qid {
@@ -79,7 +79,7 @@ func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, pa
 }
 
 // msgrcv: receive next message for to_pid from queue
-func msgrcv(is ipc_state, qid int, to_pid int) -> (ipc_state, ipc_message, bool) {
+func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
     int qi = 0
     while qi < len(is.queues) {
         if is.queues[qi].qid == qid {
@@ -122,11 +122,11 @@ struct sem_state {
     int         next_sem_id
 }
 
-func new_sem_state() -> sem_state {
+func new_sem_state() sem_state {
     return sem_state{sems: [], next_sem_id: 1}
 }
 
-func sem_create(ss sem_state, name string, initial int, max_val int) -> (sem_state, int) {
+func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state, int) {
     semaphore s = semaphore{sem_id: ss.next_sem_id, name: name, value: initial, max_value: max_val}
     ss.sems = append(ss.sems, s)
     int id = ss.next_sem_id
@@ -135,7 +135,7 @@ func sem_create(ss sem_state, name string, initial int, max_val int) -> (sem_sta
 }
 
 // sem_down: acquire (P operation) — returns false if would block
-func sem_down(ss sem_state, sem_id int) -> (sem_state, bool) {
+func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
     int i = 0
     while i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {
@@ -151,7 +151,7 @@ func sem_down(ss sem_state, sem_id int) -> (sem_state, bool) {
 }
 
 // sem_up: release (V operation)
-func sem_up(ss sem_state, sem_id int) -> sem_state {
+func sem_up(ss sem_state, sem_id int) sem_state {
     int i = 0
     while i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {

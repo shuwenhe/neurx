@@ -21,7 +21,7 @@ struct mobile_target_config {
     string  precision      // "fp16" | "int8" | "int4"
 }
 
-func default_mobile_target() -> mobile_target_config {
+func default_mobile_target() mobile_target_config {
     return mobile_target_config{
         os:                 "android",
         soc_family:         "snapdragon",

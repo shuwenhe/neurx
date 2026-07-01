@@ -22,7 +22,7 @@ struct robot_target_config {
     []string sensors
 }
 
-func default_robot_target() -> robot_target_config {
+func default_robot_target() robot_target_config {
     return robot_target_config{
         platform:       "jetson_orin",
         control_hz:     1000,

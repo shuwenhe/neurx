@@ -44,7 +44,7 @@ struct run_queue {
     int            clock_ms
 }
 
-func new_run_queue() -> run_queue {
+func new_run_queue() run_queue {
     return run_queue{
         rt_queue:     [],
         normal_queue: [],
@@ -56,7 +56,7 @@ func new_run_queue() -> run_queue {
 }
 
 // enqueue_task: add a task to the appropriate queue (like Linux enqueue_task())
-func enqueue_task(rq run_queue, t task_struct) -> run_queue {
+func enqueue_task(rq run_queue, t task_struct) run_queue {
     if t.sched_class == SCHED_RT {
         rq.rt_queue = append(rq.rt_queue, t)
     } else if t.sched_class == SCHED_NORMAL {
@@ -71,7 +71,7 @@ func enqueue_task(rq run_queue, t task_struct) -> run_queue {
 
 // pick_next_task: select next runnable task (like Linux pick_next_task())
 // Priority: RT > NORMAL > BATCH > IDLE
-func pick_next_task(rq run_queue) -> (run_queue, task_struct, bool) {
+func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     if len(rq.rt_queue) > 0 {
         task_struct t = rq.rt_queue[0]
         rq.rt_queue = rq.rt_queue[1:]

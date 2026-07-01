@@ -37,7 +37,7 @@ struct irq_state {
     bool             irqs_disabled  // cli() equivalent
 }
 
-func new_irq_state() -> irq_state {
+func new_irq_state() irq_state {
     return irq_state{
         descriptors:     [],
         pending_hardirq: [],
@@ -48,7 +48,7 @@ func new_irq_state() -> irq_state {
 }
 
 // request_irq: register an interrupt handler
-func request_irq(is irq_state, irq_num int, name string, priority int, handler string) -> irq_state {
+func request_irq(is irq_state, irq_num int, name string, priority int, handler string) irq_state {
     irq_descriptor d = irq_descriptor{
         irq_num:         irq_num,
         name:            name,
@@ -62,7 +62,7 @@ func request_irq(is irq_state, irq_num int, name string, priority int, handler s
 }
 
 // raise_irq: signal an interrupt (hardware equivalent: write to IRQ controller)
-func raise_irq(is irq_state, irq_num int) -> irq_state {
+func raise_irq(is irq_state, irq_num int) irq_state {
     int i = 0
     while i < len(is.descriptors) {
         if is.descriptors[i].irq_num == irq_num && is.descriptors[i].enabled {
@@ -82,7 +82,7 @@ func raise_irq(is irq_state, irq_num int) -> irq_state {
 }
 
 // drain_hardirq: process all pending hard IRQs (called before each agent step)
-func drain_hardirq(is irq_state) -> (irq_state, []int) {
+func drain_hardirq(is irq_state) (irq_state, []int) {
     []int fired = is.pending_hardirq
     is.pending_hardirq = []
     return (is, fired)

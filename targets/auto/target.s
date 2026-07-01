@@ -21,7 +21,7 @@ struct auto_target_config {
     bool    v2x_enabled
 }
 
-func default_auto_target() -> auto_target_config {
+func default_auto_target() auto_target_config {
     return auto_target_config{
         soc_family:       "orin",
         functional_safety: true,

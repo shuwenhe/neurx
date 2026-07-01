@@ -42,7 +42,7 @@ struct cpu_state {
     int        next_worker_id
 }
 
-func new_cpu_state() -> cpu_state {
+func new_cpu_state() cpu_state {
     return cpu_state{
         cpus:           [],
         workers:        [],
@@ -51,7 +51,7 @@ func new_cpu_state() -> cpu_state {
 }
 
 // register_cpu: called at boot for each physical CPU core
-func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz int) -> cpu_state {
+func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz int) cpu_state {
     cpu_info c = cpu_info{
         cpu_id:       cpu_id,
         numa_node:    numa_node,
@@ -66,7 +66,7 @@ func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz
 }
 
 // spawn_worker: create a new worker thread (like alloc_workqueue / kthread_create)
-func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) -> (cpu_state, int) {
+func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) (cpu_state, int) {
     worker w = worker{
         worker_id:       cs.next_worker_id,
         cpu_affinity:    cpu_affinity,
@@ -82,7 +82,7 @@ func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) -> (cpu
 }
 
 // assign_task: mark a worker as busy with a task (like queue_work)
-func cpu_assign_task(cs cpu_state, worker_id int, task_name string) -> (cpu_state, bool) {
+func cpu_assign_task(cs cpu_state, worker_id int, task_name string) (cpu_state, bool) {
     int i = 0
     while i < len(cs.workers) {
         if cs.workers[i].worker_id == worker_id && !cs.workers[i].busy {
@@ -96,7 +96,7 @@ func cpu_assign_task(cs cpu_state, worker_id int, task_name string) -> (cpu_stat
 }
 
 // complete_task: mark worker as idle (like work_done)
-func cpu_complete_task(cs cpu_state, worker_id int) -> cpu_state {
+func cpu_complete_task(cs cpu_state, worker_id int) cpu_state {
     int i = 0
     while i < len(cs.workers) {
         if cs.workers[i].worker_id == worker_id {
@@ -110,7 +110,7 @@ func cpu_complete_task(cs cpu_state, worker_id int) -> cpu_state {
 }
 
 // pick_idle_worker: find a free worker preferring cpu/numa affinity
-func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) -> (worker, bool) {
+func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) (worker, bool) {
     // first pass: exact affinity match
     int i = 0
     while i < len(cs.workers) {
@@ -141,7 +141,7 @@ func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) -> (wor
 }
 
 // set_governor: change frequency scaling policy for a CPU
-func cpu_set_governor(cs cpu_state, cpu_id int, governor int) -> cpu_state {
+func cpu_set_governor(cs cpu_state, cpu_id int, governor int) cpu_state {
     int i = 0
     while i < len(cs.cpus) {
         if cs.cpus[i].cpu_id == cpu_id {

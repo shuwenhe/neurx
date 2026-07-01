@@ -24,7 +24,7 @@ struct world_model_state {
     bool                   initialized
 }
 
-func new_world_model() -> world_model_state {
+func new_world_model() world_model_state {
     world_state init = world_state{
         snapshot_id:      "init",
         entity_ids:       [],
@@ -47,7 +47,7 @@ func new_world_model() -> world_model_state {
 }
 
 // update: apply an observation to advance the world state
-func world_model_update(wm world_model_state, action string, observation string) -> world_model_state {
+func world_model_update(wm world_model_state, action string, observation string) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
     next.last_action      = action
@@ -69,7 +69,7 @@ func world_model_update(wm world_model_state, action string, observation string)
 }
 
 // predict: simulate the next world state given a hypothetical action
-func world_model_predict(wm world_model_state, hypothetical_action string) -> world_state {
+func world_model_predict(wm world_model_state, hypothetical_action string) world_state {
     world_state predicted = wm.current
     predicted.step             = wm.current.step + 1
     predicted.last_action      = hypothetical_action
@@ -79,7 +79,7 @@ func world_model_predict(wm world_model_state, hypothetical_action string) -> wo
 }
 
 // rollback: revert to a previous snapshot by step index
-func world_model_rollback(wm world_model_state, target_step int) -> world_model_state {
+func world_model_rollback(wm world_model_state, target_step int) world_model_state {
     for i = len(wm.history) - 1; i >= 0; i-- {
         if wm.history[i].step == target_step {
             return world_model_state{

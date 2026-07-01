@@ -53,7 +53,7 @@ structure gradient_overflow_info {
 }
 
 // Initialize mixed precision state
-fn new_mixed_precision_state(config: loss_scale_config): mixed_precision_state {
+func new_mixed_precision_state(config: loss_scale_config): mixed_precision_state {
     var state: mixed_precision_state
     
     state.compute_precision = BF16
@@ -74,10 +74,9 @@ fn new_mixed_precision_state(config: loss_scale_config): mixed_precision_state {
 }
 
 // Get default loss scaling configuration for 2T model
-fn default_loss_scale_config(): loss_scale_config {
-    return loss_scale_config {
-        initial_scale: 65536.0,    // 2^16
-        max_scale: 16777216.0,     // 2^24
+// mixed_precision_forward(...) [already processed as func]
+
+func mixed_precision_forward(
         min_scale: 1.0,            // 2^0
         scale_growth_factor: 2.0,
         scale_backoff_factor: 0.5,
@@ -87,7 +86,7 @@ fn default_loss_scale_config(): loss_scale_config {
 }
 
 // Forward pass with automatic precision conversion
-fn mixed_precision_forward(
+func mixed_precision_forward(
     layer_fn: fn(vector): vector,  // Layer computation function
     inputs: vector,                // Input tensor
     state: mixed_precision_state
@@ -107,7 +106,7 @@ fn mixed_precision_forward(
 }
 
 // Loss computation with scaling
-fn compute_scaled_loss(
+func compute_scaled_loss(
     loss: float,
     state: mixed_precision_state
 ): float {
@@ -118,7 +117,7 @@ fn compute_scaled_loss(
 }
 
 // Backward pass with unscaling
-fn backward_pass_with_unscaling(
+func backward_pass_with_unscaling(
     grad_loss: float,
     gradients: vector,
     state: mixed_precision_state
@@ -138,7 +137,7 @@ fn backward_pass_with_unscaling(
 }
 
 // Check for gradient overflow (NaN or Inf values)
-fn check_gradient_overflow(gradients: vector, num_ranks: int, rank: int): gradient_overflow_info {
+func check_gradient_overflow(gradients: vector, num_ranks: int, rank: int): gradient_overflow_info {
     
     var info: gradient_overflow_info
     info.has_overflow = false
@@ -167,7 +166,7 @@ fn check_gradient_overflow(gradients: vector, num_ranks: int, rank: int): gradie
 }
 
 // Update loss scale based on overflow status
-fn update_loss_scale(
+func update_loss_scale(
     state: mixed_precision_state,
     overflow_info: gradient_overflow_info,
     config: loss_scale_config
@@ -208,7 +207,7 @@ fn update_loss_scale(
 }
 
 // Optimizer step with gradient clipping and precision conversion
-fn mixed_precision_optimizer_step(
+func mixed_precision_optimizer_step(
     optimizer: vector,              // Optimizer state (momentum, variance)
     params: vector,                 // Model parameters
     gradients: vector,              // Unscaled gradients
@@ -235,7 +234,7 @@ fn mixed_precision_optimizer_step(
 }
 
 // Full mixed precision training step
-fn mixed_precision_training_step(
+func mixed_precision_training_step(
     model_forward: fn(vector): vector,  // Forward pass function
     compute_loss_fn: fn(vector, vector): float,  // Loss function
     targets: vector,                    // Target labels
@@ -294,7 +293,7 @@ fn mixed_precision_training_step(
 }
 
 // Distributed gradient synchronization with precision handling
-fn distributed_gradient_sync(
+func distributed_gradient_sync(
     gradients: vector,
     num_ranks: int,
     rank: int,
@@ -322,7 +321,7 @@ fn distributed_gradient_sync(
 }
 
 // Convert tensor to target precision
-fn convert_to_precision(tensor: vector, target_precision: precision_type): vector {
+func convert_to_precision(tensor: vector, target_precision: precision_type): vector {
     
     var result: vector = allocate_vector(length(tensor), 0.0)
     
@@ -345,7 +344,7 @@ fn convert_to_precision(tensor: vector, target_precision: precision_type): vecto
 }
 
 // Round value to BF16 format
-fn round_to_bf16(val: float): float {
+func round_to_bf16(val: float): float {
     // BF16: sign(1) + exponent(8) + mantissa(7)
     // Round to nearest even
     var bf16_bits: int = float_to_bits(val)
@@ -354,7 +353,7 @@ fn round_to_bf16(val: float): float {
 }
 
 // Round value to FP16 format
-fn round_to_fp16(val: float): float {
+func round_to_fp16(val: float): float {
     // FP16: sign(1) + exponent(5) + mantissa(10)
     var fp32_bits: int = float_to_bits(val)
     var rounded_bits: int = fp32_bits >> 16
@@ -362,7 +361,7 @@ fn round_to_fp16(val: float): float {
 }
 
 // Compute memory reduction from mixed precision
-fn compute_mixed_precision_memory_savings(
+func compute_mixed_precision_memory_savings(
     param_count: int,
     optimizer_state_count: int,  // m and v for Adam
     use_bf16: bool,
@@ -393,7 +392,7 @@ fn compute_mixed_precision_memory_savings(
 }
 
 // Estimate training throughput with mixed precision
-fn estimate_throughput_improvement(
+func estimate_throughput_improvement(
     fp32_throughput: float,  // Tokens per second in FP32
     use_bf16: bool,
     use_flash_attention: bool
@@ -420,7 +419,7 @@ fn estimate_throughput_improvement(
 }
 
 // Helper: Gradient clipping by global norm
-fn clip_gradients_by_norm(gradients: vector, max_norm: float): vector {
+func clip_gradients_by_norm(gradients: vector, max_norm: float): vector {
     
     // Compute global norm
     var norm_sq: float = 0.0
@@ -445,7 +444,7 @@ fn clip_gradients_by_norm(gradients: vector, max_norm: float): vector {
 }
 
 // AdamW optimizer step
-fn adamw_step(
+func adamw_step(
     params: vector, gradients: vector, optimizer_state: vector,
     learning_rate: float,
     beta1: float, beta2: float, eps: float, weight_decay: float
@@ -484,39 +483,39 @@ fn adamw_step(
 }
 
 // Helper: Check for global overflow across all ranks
-fn has_global_overflow(local_overflow: bool, num_ranks: int, rank: int): bool {
+func has_global_overflow(local_overflow: bool, num_ranks: int, rank: int): bool {
     // In actual distributed setting, use all-reduce
     return local_overflow
 }
 
 // Helper: Find which rank had overflow
-fn find_overflow_rank(rank: int): int {
+func find_overflow_rank(rank: int): int {
     return rank
 }
 
 // Helper: All-reduce average
-fn all_reduce_avg(gradients: vector, num_ranks: int, rank: int): vector {
+func all_reduce_avg(gradients: vector, num_ranks: int, rank: int): vector {
     // Distributed all-reduce average
     return gradients
 }
 
 // Helper: Get NaN check
-fn is_nan(val: float): bool {
+func is_nan(val: float): bool {
     return val != val  // NaN != NaN
 }
 
 // Helper: Get Inf check
-fn is_inf(val: float): bool {
+func is_inf(val: float): bool {
     return abs(val) > 1e10  // Very large value
 }
 
 // Helper: Backward pass (placeholder)
-fn backward_pass(loss: float): vector {
+func backward_pass(loss: float): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Helper: Get first half of vector
-fn get_first_half(v: vector): vector {
+func get_first_half(v: vector): vector {
     var mid: int = length(v) / 2
     var result: vector = allocate_vector(mid, 0.0)
     for i in range(0, mid) {
@@ -526,7 +525,7 @@ fn get_first_half(v: vector): vector {
 }
 
 // Helper: Get second half of vector
-fn get_second_half(v: vector): vector {
+func get_second_half(v: vector): vector {
     var mid: int = length(v) / 2
     var result: vector = allocate_vector(length(v) - mid, 0.0)
     for i in range(mid, length(v)) {
@@ -536,19 +535,19 @@ fn get_second_half(v: vector): vector {
 }
 
 // Helper: Convert float to bits representation
-fn float_to_bits(val: float): int {
+func float_to_bits(val: float): int {
     // Placeholder
     return 0
 }
 
 // Helper: Convert bits to float
-fn bits_to_float(bits: int): float {
+func bits_to_float(bits: int): float {
     // Placeholder
     return 0.0
 }
 
 // Recommended mixed precision configuration for 2T model
-fn recommended_mixed_precision_config_2t(): loss_scale_config {
+func recommended_mixed_precision_config_2t(): loss_scale_config {
     return loss_scale_config {
         initial_scale: 65536.0,     // 2^16
         max_scale: 16777216.0,      // 2^24
@@ -561,6 +560,6 @@ fn recommended_mixed_precision_config_2t(): loss_scale_config {
 }
 
 // Print mixed precision training status
-fn print_mixed_precision_status(state: mixed_precision_state): void {
+func print_mixed_precision_status(state: mixed_precision_state): void {
     // Print current state
 }

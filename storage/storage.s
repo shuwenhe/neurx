@@ -68,7 +68,7 @@ struct storage_state {
     int      writeback_dirty_mb      // how much dirty data is pending flush
 }
 
-func new_storage_state(depth int, total_mb int) -> storage_state {
+func new_storage_state(depth int, total_mb int) storage_state {
     io_ring r = io_ring{
         submission_queue: [],
         completion_queue: [],
@@ -89,7 +89,7 @@ func new_storage_state(depth int, total_mb int) -> storage_state {
 
 // io_submit: enqueue an I/O request (like io_uring_enter with SQE)
 func io_submit(ss storage_state, op int, path string, offset int,
-               length int, priority int, owner_pid int) -> (storage_state, int) {
+               length int, priority int, owner_pid int) (storage_state, int) {
     int rid = ss.ring.next_req_id
     io_request req = io_request{
         req_id:          rid,
@@ -110,7 +110,7 @@ func io_submit(ss storage_state, op int, path string, offset int,
 }
 
 // io_complete: driver signals completion (like io_uring CQE post)
-func io_complete(ss storage_state, req_id int, err string) -> storage_state {
+func io_complete(ss storage_state, req_id int, err string) storage_state {
     int i = 0
     while i < len(ss.ring.submission_queue) {
         if ss.ring.submission_queue[i].req_id == req_id {
@@ -141,7 +141,7 @@ func io_complete(ss storage_state, req_id int, err string) -> storage_state {
 }
 
 // io_poll: collect completed requests for an owner (like io_uring_peek_cqe)
-func io_poll(ss storage_state, owner_pid int) -> (storage_state, []io_request) {
+func io_poll(ss storage_state, owner_pid int) (storage_state, []io_request) {
     []io_request done = []
     []io_request remaining = []
     int i = 0
@@ -159,13 +159,13 @@ func io_poll(ss storage_state, owner_pid int) -> (storage_state, []io_request) {
 
 // readahead: submit a prefetch hint for a tensor shard (like madvise MADV_WILLNEED)
 func storage_readahead(ss storage_state, path string, offset int,
-                       length int, owner_pid int) -> (storage_state, int) {
+                       length int, owner_pid int) (storage_state, int) {
     return io_submit(ss, IO_READAHEAD, path, offset, length, IOPRIO_IDLE, owner_pid)
 }
 
 // checkpoint_write: submit a high-throughput sequential write
 func storage_checkpoint_write(ss storage_state, path string,
-                               data_bytes int, owner_pid int) -> (storage_state, int) {
+                               data_bytes int, owner_pid int) (storage_state, int) {
     ss.writeback_dirty_mb = ss.writeback_dirty_mb + data_bytes / (1024 * 1024)
     return io_submit(ss, IO_WRITE, path, 0, data_bytes, IOPRIO_NORMAL, owner_pid)
 }

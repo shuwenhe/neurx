@@ -22,7 +22,7 @@ struct embedded_target_config {
     string  precision       // "int8" | "int4" | "binary"
 }
 
-func default_embedded_target() -> embedded_target_config {
+func default_embedded_target() embedded_target_config {
     return embedded_target_config{
         mcu_family:         "stm32",
         ram_kb:             512,

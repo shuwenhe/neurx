@@ -86,7 +86,7 @@ structure recovery_state {
 }
 
 // Initialize checkpoint manager
-fn new_checkpoint_manager(
+func new_checkpoint_manager(
     base_path: string,
     save_interval: int,
     max_keep: int
@@ -112,7 +112,7 @@ fn new_checkpoint_manager(
 }
 
 // Save full checkpoint (called synchronously on all ranks)
-fn save_full_checkpoint(
+func save_full_checkpoint(
     global_step: int,
     epoch: int,
     loss: float,
@@ -183,7 +183,7 @@ fn save_full_checkpoint(
 }
 
 // Save incremental checkpoint (only changed parameters)
-fn save_incremental_checkpoint(
+func save_incremental_checkpoint(
     global_step: int,
     last_checkpoint_step: int,
     model_params: vector,
@@ -230,7 +230,7 @@ fn save_incremental_checkpoint(
 }
 
 // Load checkpoint for recovery
-fn load_checkpoint_for_recovery(
+func load_checkpoint_for_recovery(
     checkpoint_id: int,
     manager: checkpoint_manager,
     num_ranks: int,
@@ -276,7 +276,7 @@ fn load_checkpoint_for_recovery(
 }
 
 // Verify checkpoint integrity and consistency
-fn verify_checkpoint_integrity(
+func verify_checkpoint_integrity(
     model_params: vector,
     optimizer_state: vector,
     expected_metadata: checkpoint_metadata,
@@ -314,7 +314,7 @@ fn verify_checkpoint_integrity(
 }
 
 // Detect failures and trigger recovery
-fn detect_and_handle_failure(
+func detect_and_handle_failure(
     current_loss: float,
     prev_loss: float,
     gradients: vector,
@@ -370,7 +370,7 @@ fn detect_and_handle_failure(
 }
 
 // Execute recovery procedure
-fn execute_recovery(
+func execute_recovery(
     last_checkpoint_id: int,
     manager: checkpoint_manager,
     num_ranks: int,
@@ -418,7 +418,7 @@ fn execute_recovery(
 }
 
 // Distributed training loop with automatic failure detection and recovery
-fn distributed_training_with_recovery(
+func distributed_training_with_recovery(
     training_steps: int,
     checkpoint_interval: int,
     model_forward: fn(vector): vector,
@@ -502,7 +502,7 @@ fn distributed_training_with_recovery(
 }
 
 // Helper: Compute checkpoint checksum
-fn compute_checkpoint_checksum(model_params: vector, optimizer_state: vector): int {
+func compute_checkpoint_checksum(model_params: vector, optimizer_state: vector): int {
     var checksum: int = 0
     
     for i in range(0, length(model_params)) {
@@ -517,7 +517,7 @@ fn compute_checkpoint_checksum(model_params: vector, optimizer_state: vector): i
 }
 
 // Helper: Collect rank checkpoint data
-fn collect_rank_checkpoint_data(
+func collect_rank_checkpoint_data(
     model_params: vector, optimizer_state: vector, training_state: vector,
     rank: int, num_ranks: int
 ): vector {
@@ -536,133 +536,133 @@ fn collect_rank_checkpoint_data(
 }
 
 // Helper: Get current time
-fn get_time(): float {
+func get_time(): float {
     // Return current Unix timestamp
     return 0.0
 }
 
 // Helper: Create directory
-fn create_directory(path: string): void {
+func create_directory(path: string): void {
 }
 
 // Helper: Save metadata
-fn save_metadata(metadata: checkpoint_metadata, file: string): void {
+func save_metadata(metadata: checkpoint_metadata, file: string): void {
 }
 
 // Helper: Save binary data
-fn save_binary(data: vector, file: string): void {
+func save_binary(data: vector, file: string): void {
 }
 
 // Helper: Compress and save
-fn compress_and_save(data: vector, file: string, level: int): void {
+func compress_and_save(data: vector, file: string, level: int): void {
 }
 
 // Helper: Check if file is compressed
-fn is_compressed(file: string): bool {
+func is_compressed(file: string): bool {
     return true
 }
 
 // Helper: Decompress and load
-fn decompress_and_load(file: string): vector {
+func decompress_and_load(file: string): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Helper: Load binary
-fn load_binary(file: string): vector {
+func load_binary(file: string): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Helper: File exists
-fn file_exists(file: string): bool {
+func file_exists(file: string): bool {
     return true
 }
 
 // Helper: Load metadata
-fn load_metadata(file: string): checkpoint_metadata {
+func load_metadata(file: string): checkpoint_metadata {
     var metadata: checkpoint_metadata
     return metadata
 }
 
 // Helper: Reconstruct from incremental
-fn reconstruct_from_incremental(dir: string, rank: int): vector {
+func reconstruct_from_incremental(dir: string, rank: int): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Helper: Extract model params
-fn extract_model_params(data: vector): vector {
+func extract_model_params(data: vector): vector {
     return data
 }
 
 // Helper: Extract optimizer state
-fn extract_optimizer_state(data: vector): vector {
+func extract_optimizer_state(data: vector): vector {
     return data
 }
 
 // Helper: Extract training state
-fn extract_training_state(data: vector): vector {
+func extract_training_state(data: vector): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Helper: Barrier synchronization
-fn barrier_all_ranks(num_ranks: int, rank: int): void {
+func barrier_all_ranks(num_ranks: int, rank: int): void {
 }
 
 // Helper: Replicate checkpoint
-fn replicate_checkpoint_files(dir: string, factor: int): void {
+func replicate_checkpoint_files(dir: string, factor: int): void {
 }
 
 // Helper: Add to checkpoint DB
-fn add_to_checkpoint_db(db: vector, metadata: checkpoint_metadata, max_keep: int): void {
+func add_to_checkpoint_db(db: vector, metadata: checkpoint_metadata, max_keep: int): void {
 }
 
 // Helper: Cleanup old checkpoints
-fn cleanup_old_checkpoints(base_path: string, max_keep: int): void {
+func cleanup_old_checkpoints(base_path: string, max_keep: int): void {
 }
 
 // Helper: Broadcast metadata
-fn broadcast_metadata(metadata: checkpoint_metadata, num_ranks: int, rank: int): void {
+func broadcast_metadata(metadata: checkpoint_metadata, num_ranks: int, rank: int): void {
 }
 
 // Helper: All-reduce and
-fn all_reduce_and(value: bool, num_ranks: int, rank: int): bool {
+func all_reduce_and(value: bool, num_ranks: int, rank: int): bool {
     return value
 }
 
 // Helper: Check communication health
-fn check_communication_health(num_ranks: int, rank: int): bool {
+func check_communication_health(num_ranks: int, rank: int): bool {
     return true
 }
 
 // Helper: Find previous valid checkpoint
-fn find_previous_valid_checkpoint(ckpt_id: int, manager: checkpoint_manager, num_ranks: int, rank: int): int {
+func find_previous_valid_checkpoint(ckpt_id: int, manager: checkpoint_manager, num_ranks: int, rank: int): int {
     return ckpt_id - manager.save_interval
 }
 
 // Helper: Broadcast recovery state
-fn broadcast_recovery_state(model_params: vector, optimizer_state: vector, training_state: vector, num_ranks: int, rank: int): void {
+func broadcast_recovery_state(model_params: vector, optimizer_state: vector, training_state: vector, num_ranks: int, rank: int): void {
 }
 
 // Helper: Is NaN
-fn is_nan(val: float): bool {
+func is_nan(val: float): bool {
     return val != val
 }
 
 // Helper: Is Inf
-fn is_inf(val: float): bool {
+func is_inf(val: float): bool {
     return abs(val) > 1e10
 }
 
 // Helper: Optimizer step
-fn optimizer_step(params: vector, gradients: vector, optimizer_state: vector, lr: float): vector {
+func optimizer_step(params: vector, gradients: vector, optimizer_state: vector, lr: float): vector {
     return params
 }
 
 // Helper: Backward pass
-fn backward_pass(loss: float): vector {
+func backward_pass(loss: float): vector {
     return allocate_vector(1, 0.0)
 }
 
 // Recommended fault recovery config for 2T model
-fn recommended_fault_recovery_config_2t(): checkpoint_manager {
+func recommended_fault_recovery_config_2t(): checkpoint_manager {
     return new_checkpoint_manager("/checkpoints", 1000, 5)
 }

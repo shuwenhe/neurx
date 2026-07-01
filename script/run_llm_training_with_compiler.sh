@@ -10,7 +10,7 @@ set -euo pipefail
 # =====================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEURX_ROOT="${SCRIPT_DIR}"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 TRAIN_DIR="${NEURX_ROOT}/train"
 BUILD_DIR="${NEURX_ROOT}/build/llm_training_compiler"
 OUTPUT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_training"

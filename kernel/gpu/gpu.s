@@ -86,7 +86,7 @@ struct gpu_state {
     int           next_fence_id
 }
 
-func new_gpu_state() -> gpu_state {
+func new_gpu_state() gpu_state {
     return gpu_state{
         devices:         [],
         streams:         [],
@@ -100,7 +100,7 @@ func new_gpu_state() -> gpu_state {
 
 // gpu_register: called by arch/cuda bindings at init (like drm_dev_register)
 func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
-                  sm_count int, max_streams int, driver_version string) -> (gpu_state, int) {
+                  sm_count int, max_streams int, driver_version string) (gpu_state, int) {
     int id = len(gs.devices)
     gpu_device d = gpu_device{
         gpu_id:         id,
@@ -118,7 +118,7 @@ func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
 }
 
 // stream_create: create a command stream on a GPU (cuStreamCreate equivalent)
-func gpu_stream_create(gs gpu_state, gpu_id int, priority int) -> (gpu_state, int) {
+func gpu_stream_create(gs gpu_state, gpu_id int, priority int) (gpu_state, int) {
     int sid = gs.next_stream_id
     gpu_stream s = gpu_stream{
         stream_id:      sid,
@@ -135,7 +135,7 @@ func gpu_stream_create(gs gpu_state, gpu_id int, priority int) -> (gpu_state, in
 
 // submit_job: enqueue a kernel on a stream (cuLaunchKernel equivalent)
 func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
-                    grid_x int, grid_y int, block_size int, shared_mem_bytes int) -> (gpu_state, int) {
+                    grid_x int, grid_y int, block_size int, shared_mem_bytes int) (gpu_state, int) {
     int jid = gs.next_job_id
     gpu_job j = gpu_job{
         job_id:          jid,
@@ -165,7 +165,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
 }
 
 // record_fence: insert a sync point after current stream position (cuEventRecord)
-func gpu_record_fence(gs gpu_state, stream_id int) -> (gpu_state, int) {
+func gpu_record_fence(gs gpu_state, stream_id int) (gpu_state, int) {
     int fid = gs.next_fence_id
     gpu_fence f = gpu_fence{fence_id: fid, stream_id: stream_id, signaled: false}
     gs.fences = append(gs.fences, f)
@@ -174,7 +174,7 @@ func gpu_record_fence(gs gpu_state, stream_id int) -> (gpu_state, int) {
 }
 
 // complete_job: mark job done and signal its fence if any (called by driver ISR)
-func gpu_complete_job(gs gpu_state, job_id int) -> gpu_state {
+func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     int i = 0
     while i < len(gs.jobs) {
         if gs.jobs[i].job_id == job_id {
@@ -207,7 +207,7 @@ func gpu_complete_job(gs gpu_state, job_id int) -> gpu_state {
 }
 
 // fence_wait: check if a fence is signaled (non-blocking poll, like cuEventQuery)
-func gpu_fence_query(gs gpu_state, fence_id int) -> bool {
+func gpu_fence_query(gs gpu_state, fence_id int) bool {
     int i = 0
     while i < len(gs.fences) {
         if gs.fences[i].fence_id == fence_id {

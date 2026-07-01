@@ -9,7 +9,7 @@ set -euo pipefail
 # 配置
 # =====================================================================
 
-NEURX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${NEURX_ROOT}/build/large_model_training"
 CHECKPOINT_DIR="${NEURX_ROOT}/checkpoints/large_model"
 OUTPUT_DIR="${NEURX_ROOT}/output/large_model"
@@ -220,4 +220,3 @@ echo ""
 echo "  3️⃣  部署:"
 echo "      python3 ${NEURX_ROOT}/run_deploy.py --model ${CHECKPOINT_DIR}/model_final.ckpt --format onnx"
 echo ""
-
