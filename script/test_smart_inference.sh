@@ -73,7 +73,7 @@ test_environment() {
     
     # 检查S编译器
     print_test "S 编译器"
-    S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+    S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
     if [ -x "$S_COMPILER" ]; then
         print_pass "S 编译器就绪 ($S_COMPILER)"
     else
@@ -146,7 +146,7 @@ test_s_compilation() {
     
     SOURCE_FILE="s/smart_inference.s"
     IR_OUTPUT="build/smart_inference.ir"
-    S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+    S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
     
     # 检查编译器
     if [ ! -x "$S_COMPILER" ]; then
@@ -177,7 +177,7 @@ test_s_compilation() {
     # 编译到二进制
     print_test "编译 IR → 二进制"
     BIN_OUTPUT="build/smart_inference.bin"
-    S_COMPILER_DIR="/Users/feifei/train/s"
+    S_COMPILER_DIR="${S_COMPILER_DIR:-$SCRIPT_DIR/../../s}"
     
     if (cd "$S_COMPILER_DIR" && "$S_COMPILER" --emit-bin "$SCRIPT_DIR/$IR_OUTPUT" "$SCRIPT_DIR/$BIN_OUTPUT" 2>&1 > /tmp/compile_bin.log); then
         chmod +x "$BIN_OUTPUT"
@@ -360,7 +360,7 @@ test_performance() {
     # 编译时间测试
     print_test "S → IR 编译时间"
     start_time=$(date +%s%N)
-    /Users/feifei/train/s/.local/bin/s s/smart_inference.s build/smart_inference.ir 2>&1 > /dev/null
+    /Users/feifei/shuwen/train/s/.local/bin/s s/smart_inference.s build/smart_inference.ir 2>&1 > /dev/null
     end_time=$(date +%s%N)
     compile_time=$(( (end_time - start_time) / 1000000 ))  # 转换为毫秒
     

@@ -1,0 +1,84 @@
+# NeurX GPT-Large 大规模预训练配置
+# 这个配置文件定义了用于大规模训练的超参数
+
+[model]
+# 模型架构
+name = "gpt_large"
+vocab_size = 50257          # GPT-2 词汇表大小
+hidden_dim = 1024           # 隐藏层维度 (GPT-Medium)
+num_layers = 24             # Transformer块数量
+num_heads = 16              # 注意力头数
+ffn_dim = 4096              # FFN隐藏层维度
+max_seq_length = 2048       # 最大序列长度
+
+# 计算的参数
+# 总参数 ≈ 1.3B (13亿)
+# 内存需求 ≈ 5GB (bf16精度)
+
+[training]
+# 基础训练配置
+total_steps = 100000        # 总训练步数
+warmup_steps = 10000        # 预热步数
+learning_rate = 0.0001      # 学习率
+lr_schedule = "cosine"      # 学习率调度: linear, cosine, constant
+weight_decay = 0.01         # 权重衰减 (L2正则化)
+gradient_clip_norm = 1.0    # 梯度裁剪
+
+# 批处理配置
+batch_size = 128            # 全局批大小
+micro_batch_size = 32       # 微批大小 (梯度积累)
+num_accumulation_steps = 4  # 梯度积累步数
+
+# 数据加载
+num_workers = 8             # 数据加载工作进程
+prefetch_factor = 2         # 预加载因子
+
+[optimization]
+# 优化器配置
+optimizer = "adamw"         # adamw, adam, sgd
+betas = [0.9, 0.999]       # Adam beta参数
+eps = 1e-8                  # Adam epsilon
+
+# 混合精度训练
+mixed_precision = "bf16"    # bf16, fp16, fp32
+scale_loss = true           # 损失缩放 (for fp16)
+
+[checkpointing]
+# 检查点配置
+save_interval = 5000        # 保存检查点间隔
+keep_last_n = 3             # 保留最后N个检查点
+save_optimizer_state = true # 保存优化器状态
+save_training_state = true  # 保存训练状态
+
+[distributed]
+# 分布式训练配置
+world_size = 1              # GPU数量 (分布式时)
+backend = "nccl"            # 通信后端: nccl, gloo
+find_unused_parameters = false
+
+[logging]
+# 日志配置
+log_interval = 100          # 日志打印间隔
+log_dir = "artifacts/logs"  # 日志目录
+save_metrics = true         # 保存指标
+tensorboard = false         # TensorBoard支持
+
+[evaluation]
+# 评估配置
+eval_steps = 2500           # 评估间隔
+eval_samples = 1000         # 评估样本数
+eval_metrics = ["perplexity", "loss", "accuracy"]
+
+[data]
+# 数据集配置
+train_dataset_path = "data/pretrain_dataset.jsonl"
+val_dataset_path = "data/val_dataset.jsonl"
+cache_dir = "data/cache"
+tokenizer_name = "gpt2"     # 使用GPT-2分词器
+max_seq_length = 2048
+
+[output]
+# 输出配置
+output_dir = "artifacts/checkpoints/gpt_large_pretrain"
+resume_from_checkpoint = null  # 从检查点恢复
+seed = 42                   # 随机种子

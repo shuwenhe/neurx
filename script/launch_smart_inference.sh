@@ -111,7 +111,7 @@ compile_s_version() {
     echo ""
     
     # 检查编译器
-    S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+    S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
     if [ ! -x "$S_COMPILER" ]; then
         echo -e "${YELLOW}✗ S 编译器未找到${NC}"
         return 1
@@ -136,7 +136,7 @@ compile_s_version() {
     
     # 编译到二进制
     echo -e "${CYAN}【步骤 2】编译 IR → 二进制${NC}"
-    if (cd /Users/feifei/train/s && "$S_COMPILER" --emit-bin "$SCRIPT_DIR/build/smart_inference.ir" "$SCRIPT_DIR/build/smart_inference.bin" 2>&1); then
+    if (cd "$SCRIPT_DIR/../../s" && "$S_COMPILER" --emit-bin "$SCRIPT_DIR/build/smart_inference.ir" "$SCRIPT_DIR/build/smart_inference.bin" 2>&1); then
         chmod +x build/smart_inference.bin
         BIN_SIZE=$(ls -lh build/smart_inference.bin | awk '{print $5}')
         echo -e "${GREEN}✓ 二进制编译成功 (大小: $BIN_SIZE)${NC}"

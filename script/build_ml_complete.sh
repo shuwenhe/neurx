@@ -4,8 +4,9 @@
 
 set -euo pipefail
 
-NEURX_ROOT="/Users/feifei/shuwen/neurx"
-S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
 BUILD_DIR="$NEURX_ROOT/build/ml_complete"
 LOGS_DIR="$NEURX_ROOT/artifacts/logs"
 

@@ -1,80 +1,96 @@
 {
-  "dataset_name": "training_data",
-  "source_path": "/Users/feifei/shuwen/neurx/data/training_data.jsonl",
-  "output_dir": "/Users/feifei/shuwen/neurx/data/training_data_shards",
-  "total_records": 10033,
-  "shard_count": 10,
+  "dataset_name": "training_data_v2",
+  "source_path": "/Users/feifei/shuwen/train/neurx/data/training_data.jsonl",
+  "cleaned_path": "/Users/feifei/shuwen/train/neurx/data/training_data.cleaned.jsonl",
+  "output_dir": "/Users/feifei/shuwen/train/neurx/data/training_data_shards",
+  "generated_at": "2026-07-01T07:20:58.362221Z",
+  "seed": 42,
   "shard_size_target": 1024,
+  "total_input_records": 5500,
+  "total_clean_records": 5500,
+  "total_output_records": 5500,
+  "clean_stats": {
+    "input": 5500,
+    "kept_safety": 1300,
+    "kept_longform": 1095,
+    "kept_multilingual": 861,
+    "kept_log": 1160,
+    "kept_math": 584,
+    "kept_code": 500,
+    "kept": 5500
+  },
+  "sample_stats": {
+    "target_total": 5500,
+    "selected_total": 5500,
+    "selected_by_category": {
+      "safety": 1300,
+      "longform": 1095,
+      "multilingual": 861,
+      "log": 1160,
+      "math": 584,
+      "code": 500
+    },
+    "selected_by_length_bin": {
+      "medium": 3383,
+      "short": 519,
+      "long": 1348,
+      "xlong": 250
+    }
+  },
+  "bucket_weights": {
+    "longform": 0.22,
+    "qa": 0.16,
+    "dialog": 0.12,
+    "code": 0.15,
+    "multilingual": 0.1,
+    "math": 0.1,
+    "general": 0.07,
+    "log": 0.06,
+    "json": 0.05,
+    "safety": 0.05
+  },
   "shards": [
     {
       "file": "training_data-00000.jsonl.gz",
       "records": 1024,
       "start_record": 0,
       "end_record": 1023,
-      "sha256": "36a424771c78de960e11e3af499ed274beb2751658aa47d0ceeee122c3fdd9dc"
+      "sha256": "0a58c617fd7460559bb2135f8ab307e232669d0cbcecb13a1979fe7f043e73c7"
     },
     {
       "file": "training_data-00001.jsonl.gz",
       "records": 1024,
       "start_record": 1024,
       "end_record": 2047,
-      "sha256": "5d84dfe5cbd1fea3c806c0ae1c4ec9ead787c910ab64e122d543bfcb357fb086"
+      "sha256": "561e9c50b237f6145ec8b047bc061817cc140989bcb4dd1f939dab5125a43fda"
     },
     {
       "file": "training_data-00002.jsonl.gz",
       "records": 1024,
       "start_record": 2048,
       "end_record": 3071,
-      "sha256": "85c2fe9b6589b66b589f091807dfcbab69b423af38bd9876011413e53388b20b"
+      "sha256": "55f2f0c2c8e2b68e148866e5230dbb2df275aba128a8f1acc80791aafcc3545c"
     },
     {
       "file": "training_data-00003.jsonl.gz",
       "records": 1024,
       "start_record": 3072,
       "end_record": 4095,
-      "sha256": "76436e83fbf3695c33726aea87deeed09ee7362720677040d66853dae2295e8f"
+      "sha256": "3a1e6982731f3e6757a7fb72260b56f2fa6c3d7bd1c7edd74a237a2d962af898"
     },
     {
       "file": "training_data-00004.jsonl.gz",
       "records": 1024,
       "start_record": 4096,
       "end_record": 5119,
-      "sha256": "50b2c3862c6e1c3ea96dfb6e1d3fd99ff7948b6aaed9ac3d3f234bb8d7a8fd0b"
+      "sha256": "61c99814543d3542aaa3f10ac8f9cf5d8e172d7bd848cbf9cd3af2b148ec6d33"
     },
     {
       "file": "training_data-00005.jsonl.gz",
-      "records": 1024,
+      "records": 380,
       "start_record": 5120,
-      "end_record": 6143,
-      "sha256": "7b2d0b1e9f7c49114f45d567183c327e187580c6d886c15a5ee71d664db204f2"
-    },
-    {
-      "file": "training_data-00006.jsonl.gz",
-      "records": 1024,
-      "start_record": 6144,
-      "end_record": 7167,
-      "sha256": "632d020aeede6245a5bc991368d0f19209cee06bcf5e42a7443d9afec2abed2e"
-    },
-    {
-      "file": "training_data-00007.jsonl.gz",
-      "records": 1024,
-      "start_record": 7168,
-      "end_record": 8191,
-      "sha256": "8915ed16741b08206926f3e95cc4b8a22b110f97c0223fe87e3e3c26a750b871"
-    },
-    {
-      "file": "training_data-00008.jsonl.gz",
-      "records": 1024,
-      "start_record": 8192,
-      "end_record": 9215,
-      "sha256": "27eebd110eef7f6bc27aeb95b77ce2520dfd2faebbc16fa4e427777298760c01"
-    },
-    {
-      "file": "training_data-00009.jsonl.gz",
-      "records": 817,
-      "start_record": 9216,
-      "end_record": 10032,
-      "sha256": "254ded5d65478472516aa29593e232db33a1bfd23d8f15727056c191d6445512"
+      "end_record": 5499,
+      "sha256": "4bc63f977d911cd41859eba73df553c66ee29157d440f12f54656e7d7666ddc3"
     }
   ]
 }

@@ -10,7 +10,7 @@ set -euo pipefail
 # =====================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEURX_ROOT="${SCRIPT_DIR}"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 INFERENCE_DIR="${NEURX_ROOT}/inference"
 BUILD_DIR="${NEURX_ROOT}/build/inference"
 CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_s_pretrain"
@@ -21,8 +21,8 @@ LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$LOG_DIR"
 
 # S编译器路径
-S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
-S_COMPILER_DIR="${S_COMPILER_DIR:-/Users/feifei/train/s}"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
@@ -41,6 +41,7 @@ DEVICE="${NEURX_INFER_DEVICE:-${NEURX_DEVICE:-cpu}}"
 QUESTION="${NEURX_INFER_QUESTION:-${NEURX_INFER_PROMPT:-${NEURX_INFERENCE_INPUT:-人工智能是什么？请直接回答。}}}"
 ANSWER_MODE="${NEURX_INFER_ANSWER_MODE:-qa}"
 FALLBACK_PROMPT="${NEURX_INFER_FALLBACK_PROMPT:-$QUESTION}"
+SMOKE_TEST="${NEURX_INFER_SMOKE_TEST:-1}"
 
 # =====================================================================
 # 颜色输出
@@ -241,6 +242,7 @@ run_inference() {
         export NEURX_INFERENCE_INPUT="$QUESTION"
         export NEURX_INFER_ANSWER_MODE="$ANSWER_MODE"
         export NEURX_INFER_FALLBACK_PROMPT="$FALLBACK_PROMPT"
+        export NEURX_INFER_SMOKE_TEST="$SMOKE_TEST"
         export NEURX_DEVICE="$DEVICE"
         
         if "$RUNNER_BIN" "$IR_OUTPUT" > "$INFERENCE_OUTPUT" 2>> "$LOG_FILE"; then

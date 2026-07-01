@@ -23,8 +23,8 @@ TOKENIZER_DIR="${NEURX_ROOT}/data/corpus"
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$LOG_DIR"
 
 # S编译器路径
-S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
-S_COMPILER_DIR="${S_COMPILER_DIR:-/Users/feifei/train/s}"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"

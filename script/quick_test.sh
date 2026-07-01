@@ -85,7 +85,7 @@ echo ""
 echo "📋 测试3: S编译器检查"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+    S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
 
 test -x "$S_COMPILER"
 test_result "S编译器可执行"

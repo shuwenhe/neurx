@@ -8,10 +8,11 @@
 set -e
 
 # 配置
-NEURX_ROOT="/Users/feifei/shuwen/neurx"
-COMPILER_BIN="/Users/feifei/train/s/.local/bin/s"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+COMPILER_BIN="${COMPILER_BIN:-/Users/feifei/shuwen/train/s/.local/bin/s}"
 CHECKPOINT_DIR="$NEURX_ROOT/artifacts/checkpoints/llm_training"
-INFERENCE_SOURCE="$NEURX_ROOT/train/inference_engine.s"
+INFERENCE_SOURCE="$NEURX_ROOT/inference/inference_engine.s"
 INFERENCE_IR="$NEURX_ROOT/build/llm_inference/inference_engine.ir"
 INFERENCE_BIN="$NEURX_ROOT/build/llm_inference/inference_engine.bin"
 OUTPUT_DIR="$NEURX_ROOT/artifacts/inference_output"
@@ -71,7 +72,7 @@ echo "✅ IR文件生成成功 ($IR_SIZE)"
 echo ""
 echo "📦 生成可执行二进制..."
 
-cd /Users/feifei/train/s
+cd "$NEURX_ROOT/../s"
 $COMPILER_BIN --emit-bin "$INFERENCE_IR" "$INFERENCE_BIN" 2>&1 | tee -a "$LOG_DIR/inference_compile.log"
 
 if [ ! -f "$INFERENCE_BIN" ]; then
