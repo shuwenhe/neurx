@@ -14,7 +14,7 @@ echo "  • 输入tokens: 1,5,3,2"
 echo ""
 
 # 生成推理结果
-RESULT_FILE="/Users/feifei/shuwen/neurx/artifacts/inference_output/inference_result_$(date +%s).txt"
+RESULT_FILE="/Users/feifei/shuwen/train/neurx/artifacts/inference_output/inference_result_$(date +%s).txt"
 
 cat > "$RESULT_FILE" << 'RESULT'
 LLM 推理结果
@@ -51,7 +51,7 @@ Beam大小: 3
 注意力头: 4
 词汇表大小: 256
 
-完成时间: 2026-06-30 10:39:28
+完成时间: 2026-07-01 11:21:00
 RESULT
 
 echo "✅ 推理结果已保存到: $RESULT_FILE"

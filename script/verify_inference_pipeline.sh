@@ -190,7 +190,7 @@ test_checkpoint() {
 test_s_compiler() {
     print_header "【TEST 4】 S 编译器验证"
     
-    local S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+    local S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
     
     print_test "可执行文件" "$S_COMPILER"
     if [ -x "$S_COMPILER" ]; then
@@ -379,7 +379,7 @@ test_full_pipeline() {
     
     print_test "步骤 1/4" "验证必要组件"
     
-    local S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+    local S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
     local INFERENCE_SOURCE="$NEURX_ROOT/inference/production_inference.s"
     
     if [ ! -x "$S_COMPILER" ]; then

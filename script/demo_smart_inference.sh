@@ -116,8 +116,8 @@ echo "【5】🔨 编译信息"
 echo "════════════════════════════════════════════════════════════════"
 echo ""
 echo "S编译器:"
-if [ -x /Users/feifei/train/s/.local/bin/s ]; then
-    echo "  ✓ 已安装: /Users/feifei/train/s/.local/bin/s"
+if [ -x /Users/feifei/shuwen/train/s/.local/bin/s ]; then
+    echo "  ✓ 已安装: /Users/feifei/shuwen/train/s/.local/bin/s"
 else
     echo "  ✗ 未找到"
 fi

@@ -8,7 +8,7 @@ set -euo pipefail
 
 # 配置
 NEURX_ROOT="$(cd "$(dirname "$0")" && pwd)"
-S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
 BUILD_DIR="$NEURX_ROOT/build/large_model_training"
 TRAIN_SCRIPT="$NEURX_ROOT/train/train_large_model.s"
 OUTPUT_DIR="$NEURX_ROOT/output/large_model"

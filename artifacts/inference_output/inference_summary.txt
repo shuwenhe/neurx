@@ -3,10 +3,10 @@ LLM 推理系统摘要
 
 编译信息:
 ---------
-源文件: /Users/feifei/shuwen/neurx/inference/inference_engine.s
-IR文件: /Users/feifei/shuwen/neurx/build/inference/inference_engine.ir (大小: 1.7K)
-二进制文件: /Users/feifei/shuwen/neurx/build/inference/inference_engine.bin (大小: 103K)
-编译时间: 1782787168
+源文件: /Users/feifei/shuwen/train/neurx/inference/inference_engine.s
+IR文件: /Users/feifei/shuwen/train/neurx/build/llm_inference/inference_engine.ir (大小: 1.7K)
+二进制文件: /Users/feifei/shuwen/train/neurx/build/llm_inference/inference_engine.bin (大小: 103K)
+编译时间: 1782876060
 
 推理配置:
 ---------
@@ -17,10 +17,10 @@ Beam大小: 3
 
 系统信息:
 ---------
-NeurX根目录: /Users/feifei/shuwen/neurx
-检查点目录: /Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training
-输出目录: /Users/feifei/shuwen/neurx/artifacts/inference_output
-日志目录: /Users/feifei/shuwen/neurx/artifacts/logs
+NeurX根目录: /Users/feifei/shuwen/train/neurx
+检查点目录: /Users/feifei/shuwen/train/neurx/artifacts/checkpoints/llm_training
+输出目录: /Users/feifei/shuwen/train/neurx/artifacts/inference_output
+日志目录: /Users/feifei/shuwen/train/neurx/artifacts/logs
 
 完成状态:
 ---------
@@ -29,4 +29,4 @@ NeurX根目录: /Users/feifei/shuwen/neurx
 ✅ 推理执行成功
 ✅ 摘要生成成功
 
-推理时间戳: 2026-06-30 10:39:28
+推理时间戳: 2026-07-01 11:21:00

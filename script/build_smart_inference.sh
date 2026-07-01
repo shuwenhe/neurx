@@ -21,8 +21,8 @@ echo -e "${BLUE}${BOLD}═══════════════════
 echo ""
 
 # 设置编译器
-S_COMPILER="/Users/feifei/train/s/.local/bin/s"
-S_COMPILER_DIR="/Users/feifei/train/s"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$SCRIPT_DIR/../../s}"
 
 echo -e "${CYAN}【步骤 1】检查S编译器${NC}"
 if [ -x "$S_COMPILER" ]; then

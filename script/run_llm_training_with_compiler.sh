@@ -15,12 +15,34 @@ TRAIN_DIR="${NEURX_ROOT}/train"
 BUILD_DIR="${NEURX_ROOT}/build/llm_training_compiler"
 OUTPUT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_training"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
-DATASET_PATH="${NEURX_DATASET_PATH:-${NEURX_ROOT}/data/training_data.jsonl}"
+TRAIN_SPLIT_PATH="${NEURX_TRAIN_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/train.jsonl}"
+VAL_SPLIT_PATH="${NEURX_VAL_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/val.jsonl}"
+TEST_SPLIT_PATH="${NEURX_TEST_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/test.jsonl}"
+DATASET_PATH="${NEURX_DATASET_PATH:-$TRAIN_SPLIT_PATH}"
 DATASET_PRIMARY_FALLBACK_PATH="${NEURX_DATASET_PRIMARY_FALLBACK_PATH:-${NEURX_ROOT}/data/training_data.jsonl}"
 DATASET_FALLBACK_PATH="${NEURX_DATASET_FALLBACK_PATH:-${NEURX_ROOT}/data/sample.jsonl}"
 
 # S编译器路径
-S_COMPILER="/Users/feifei/train/s/.local/bin/s"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+
+resolve_s_source_root() {
+    if [ -n "${S_SOURCE_ROOT:-}" ] && [ -d "$S_SOURCE_ROOT/src/cmd/compile/seed" ]; then
+        printf '%s\n' "$S_SOURCE_ROOT"
+        return 0
+    fi
+
+    if [ -d "$NEURX_ROOT/../s/src/cmd/compile/seed" ]; then
+        printf '%s\n' "$NEURX_ROOT/../s"
+        return 0
+    fi
+
+    return 1
+}
+
+S_SOURCE_ROOT="${S_SOURCE_ROOT:-$(resolve_s_source_root 2>/dev/null || true)}"
+if [ -z "$S_SOURCE_ROOT" ]; then
+    S_SOURCE_ROOT="$NEURX_ROOT/../s"
+fi
 
 # 源文件和输出文件
 MAIN_SOURCE="${TRAIN_DIR}/training_orchestrator.s"
@@ -30,7 +52,7 @@ BIN_OUTPUT="${BUILD_DIR}/llm_training.bin"
 LOG_FILE="${LOG_DIR}/compiler_$(date +%Y%m%d_%H%M%S).log"
 
 # S编译器目录（用于emit-bin）
-S_COMPILER_DIR="/Users/feifei/train/s"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$S_SOURCE_ROOT}"
 
 # 训练参数 (可通过环境变量覆盖)
 TOTAL_STEPS="${NEURX_TOTAL_STEPS:-100}"
@@ -125,12 +147,16 @@ compile_s_code() {
     
     print_step "Step 1: 生成中间代码 (IR)..."
     
-    # 编译成IR
+    # 编译成IR，主源文件失败时自动切换到兼容版
     if ! "$S_COMPILER" "$MAIN_SOURCE" "$IR_OUTPUT" >> "$LOG_FILE" 2>&1; then
-        print_error "编译成IR失败"
-        print_warning "查看日志: $LOG_FILE"
-        cat "$LOG_FILE"
-        exit 1
+        print_warning "主训练源文件编译失败，切换到兼容版: $FALLBACK_SOURCE"
+        MAIN_SOURCE="$FALLBACK_SOURCE"
+        if ! "$S_COMPILER" "$MAIN_SOURCE" "$IR_OUTPUT" >> "$LOG_FILE" 2>&1; then
+            print_error "编译成IR失败"
+            print_warning "查看日志: $LOG_FILE"
+            cat "$LOG_FILE"
+            exit 1
+        fi
     fi
     
     if [ ! -f "$IR_OUTPUT" ]; then
@@ -234,6 +260,8 @@ run_compiled_binary() {
     echo "  Loss Scale: $LOSS_SCALE"
     echo "  数据集路径: $active_dataset"
     echo "  数据记录数: $DATASET_RECORDS"
+    echo "  验证集路径: $VAL_SPLIT_PATH"
+    echo "  测试集路径: $TEST_SPLIT_PATH"
     echo ""
     
     # 运行二进制
@@ -289,6 +317,8 @@ show_results() {
     echo "  ✓ 批大小:      $BATCH_SIZE"
     echo "  ✓ 序列长度:    $SEQ_LENGTH"
     echo "  ✓ 数据集:      ${DATASET_PATH}"
+    echo "  ✓ 验证集:      ${VAL_SPLIT_PATH}"
+    echo "  ✓ 测试集:      ${TEST_SPLIT_PATH}"
     echo ""
     
     echo "📝 日志文件:"

@@ -17,8 +17,8 @@ OUTPUT_DIR="${NEURX_ROOT}/artifacts/inference_output"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 
 # S编译器路径
-S_COMPILER="/Users/feifei/train/s/.local/bin/s"
-S_COMPILER_DIR="/Users/feifei/train/s"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 
 # 源文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/inference_engine.s"

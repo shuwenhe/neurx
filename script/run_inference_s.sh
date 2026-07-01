@@ -8,22 +8,26 @@ set -euo pipefail
 echo "【步骤 1】环境检查"
 echo "════════════════════════════════════════════════════════════"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+
 # 检查编译器
-if [ ! -f /Users/feifei/train/s/.local/bin/s ]; then
+if [ ! -f "$S_COMPILER" ]; then
     echo "❌ S编译器不存在"
     exit 1
 fi
-echo "✓ S编译器: /Users/feifei/train/s/.local/bin/s"
+echo "✓ S编译器: $S_COMPILER"
 
 # 检查推理脚本
-if [ ! -f /Users/feifei/shuwen/neurx/run_inference.s ]; then
+if [ ! -f "$NEURX_ROOT/run_inference.s" ]; then
     echo "❌ 推理脚本不存在"
     exit 1
 fi
-echo "✓ 推理脚本: /Users/feifei/shuwen/neurx/run_inference.s"
+echo "✓ 推理脚本: $NEURX_ROOT/run_inference.s"
 
 # 检查编译产物
-if [ ! -f /Users/feifei/shuwen/neurx/build/large_model_training/run_inference.bin ]; then
+if [ ! -f "$NEURX_ROOT/build/large_model_training/run_inference.bin" ]; then
     echo "❌ 二进制文件不存在"
     exit 1
 fi
@@ -34,7 +38,7 @@ echo "【步骤 2】加载模型"
 echo "════════════════════════════════════════════════════════════"
 
 # 检查检查点
-if [ -f /Users/feifei/shuwen/neurx/checkpoints/large_model/model_final.ckpt ]; then
+if [ -f "$NEURX_ROOT/checkpoints/large_model/model_final.ckpt" ]; then
     echo "✓ 加载检查点: model_final.ckpt"
 else
     echo "❌ 检查点文件不存在"
@@ -42,7 +46,7 @@ else
 fi
 
 # 检查配置
-if [ -f /Users/feifei/shuwen/neurx/build/large_model_training/model_config.json ]; then
+if [ -f "$NEURX_ROOT/build/large_model_training/model_config.json" ]; then
     echo "✓ 加载配置: model_config.json"
 else
     echo "❌ 配置文件不存在"

@@ -9,11 +9,14 @@ set -euo pipefail
 # =====================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEURX_ROOT="${SCRIPT_DIR}"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BUILD_DIR="${NEURX_ROOT}/build/llm_training"
 OUTPUT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_training"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
-DATASET_PATH="${NEURX_DATASET_PATH:-${NEURX_ROOT}/data/training_data.jsonl}"
+TRAIN_SPLIT_PATH="${NEURX_TRAIN_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/train.jsonl}"
+VAL_SPLIT_PATH="${NEURX_VAL_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/val.jsonl}"
+TEST_SPLIT_PATH="${NEURX_TEST_SPLIT_PATH:-${NEURX_ROOT}/data/training_data_splits/test.jsonl}"
+DATASET_PATH="${NEURX_DATASET_PATH:-$TRAIN_SPLIT_PATH}"
 DATASET_PRIMARY_FALLBACK_PATH="${NEURX_DATASET_PRIMARY_FALLBACK_PATH:-${NEURX_ROOT}/data/training_data.jsonl}"
 DATASET_FALLBACK_PATH="${NEURX_DATASET_FALLBACK_PATH:-${NEURX_ROOT}/data/sample.jsonl}"
 DATASET_SAMPLE_PATH="${NEURX_DATASET_SAMPLE_PATH:-${NEURX_ROOT}/data/sample.txt}"
@@ -32,6 +35,11 @@ TENSOR_PARALLEL_SIZE="${NEURX_TENSOR_PARALLEL_SIZE:-1}"
 PIPELINE_PARALLEL_SIZE="${NEURX_PIPELINE_PARALLEL_SIZE:-1}"
 MIXED_PRECISION_MODE="${NEURX_MIXED_PRECISION_MODE:-bf16}"
 LOSS_SCALE="${NEURX_LOSS_SCALE:-1.0}"
+TRAIN_DATASET_PATH="$DATASET_PATH"
+DATASET_RECORDS="0"
+DATASET_SIZE="unknown"
+VAL_DATASET_RECORDS="0"
+TEST_DATASET_RECORDS="0"
 
 # =====================================================================
 # 颜色输出
@@ -110,10 +118,14 @@ EOF
     TRAIN_DATASET_PATH="$active_dataset"
     DATASET_RECORDS="$(count_jsonl_records "$TRAIN_DATASET_PATH")"
     DATASET_SIZE="$(du -h "$TRAIN_DATASET_PATH" 2>/dev/null | cut -f1 || echo "unknown")"
+    VAL_DATASET_RECORDS="$(count_jsonl_records "$VAL_SPLIT_PATH")"
+    TEST_DATASET_RECORDS="$(count_jsonl_records "$TEST_SPLIT_PATH")"
 
     print_step "数据集已就绪: $TRAIN_DATASET_PATH"
     echo "  - 记录数: $DATASET_RECORDS"
     echo "  - 大小: $DATASET_SIZE"
+    echo "  - 验证集: $VAL_SPLIT_PATH ($VAL_DATASET_RECORDS)"
+    echo "  - 测试集: $TEST_SPLIT_PATH ($TEST_DATASET_RECORDS)"
     echo "  - 流式优先: true"
     echo ""
 }
@@ -160,6 +172,8 @@ run_training_demo() {
     echo "  - 样本总数: $DATASET_RECORDS"
     echo "  - 词汇大小: 256"
     echo "  - 数据集路径: $TRAIN_DATASET_PATH"
+    echo "  - 验证集路径: $VAL_SPLIT_PATH"
+    echo "  - 测试集路径: $TEST_SPLIT_PATH"
     echo ""
     
     echo "3️⃣  初始化模型..."
