@@ -149,6 +149,38 @@ func new_corpus_state(corpus_config cfg) corpus_state {
     }
 }
 
+func new_corpus_config_from_sources([]data_source sources, int batch_size, int seq_len, bool enable_dedup) corpus_config {
+    corpus_config cfg = default_pretraining_corpus()
+    cfg.sources = sources
+    cfg.num_sources = len(sources)
+    cfg.batch_size = batch_size
+    cfg.seq_len = seq_len
+    cfg.enable_dedup = enable_dedup
+    cfg
+}
+
+func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bool enable_dedup) corpus_state {
+    if len(paths) == 0 {
+        return new_corpus_state(default_pretraining_corpus())
+    }
+
+    []data_source sources = []data_source{cap: len(paths)}
+    int i = 0
+    while i < len(paths) {
+        data_source src = data_source {
+            name: "source_" + int_to_string(i),
+            path: paths[i],
+            weight: 1.0,
+            text_field: "text",
+            is_code: false,
+        }
+        sources[i] = src
+        i = i + 1
+    }
+
+    new_corpus_state(new_corpus_config_from_sources(sources, batch_size, seq_len, enable_dedup))
+}
+
 // ============================================================================
 // 3. JSONL 解析 (取出指定字段的文本)
 // ============================================================================
