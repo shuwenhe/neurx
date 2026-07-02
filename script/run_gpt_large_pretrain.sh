@@ -161,6 +161,22 @@ TRAIN_SPLIT_FILE="${NEURX_TRAIN_SPLIT_PATH:-$NEURX_ROOT/data/training_data_split
 VAL_SPLIT_FILE="${NEURX_VAL_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/val.jsonl}"
 TEST_SPLIT_FILE="${NEURX_TEST_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/test.jsonl}"
 
+allow_demo_fallback() {
+    [ "${NEURX_ALLOW_DEMO:-0}" = "1" ] || [ "${NEURX_ALLOW_FULL_1T_LOCAL:-0}" = "1" ]
+}
+
+demo_fallback_reason() {
+    if [ "${NEURX_ALLOW_DEMO:-0}" = "1" ]; then
+        printf '%s\n' "NEURX_ALLOW_DEMO=1"
+        return 0
+    fi
+    if [ "${NEURX_ALLOW_FULL_1T_LOCAL:-0}" = "1" ]; then
+        printf '%s\n' "NEURX_ALLOW_FULL_1T_LOCAL=1"
+        return 0
+    fi
+    return 1
+}
+
 mkdir -p "$BUILD_DIR" "$CLUSTER_BUILD_DIR" "$LOG_DIR" "$CHECKPOINT_DIR"
 
 # 颜色定义
@@ -815,14 +831,20 @@ main() {
         
         # 检查是否允许 1T 模式回退到演示
         # 设置 NEURX_ALLOW_DEMO=1 来启用 1T 模式的演示模式回退
-        if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_DEMO:-0}" != "1" ]; then
+        if [ "$MODEL_SIZE" = "1t" ] && ! allow_demo_fallback; then
             echo -e "${RED}✗ ${fallback_reason}（1T 模式不回退到演示）${NC}" | tee -a "$LOG_FILE"
-            echo -e "${YELLOW}💡 提示: 设置 NEURX_ALLOW_DEMO=1 来启用演示模式回退${NC}" | tee -a "$LOG_FILE"
+            echo -e "${YELLOW}💡 提示: 设置 NEURX_ALLOW_DEMO=1 或 NEURX_ALLOW_FULL_1T_LOCAL=1 来启用演示模式回退${NC}" | tee -a "$LOG_FILE"
             return 1
         fi
         
-        if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_DEMO:-0}" = "1" ]; then
-            echo -e "${YELLOW}⚠ ${fallback_reason}，1T 模式将以演示模式运行${NC}" | tee -a "$LOG_FILE"
+        if [ "$MODEL_SIZE" = "1t" ] && allow_demo_fallback; then
+            local fallback_flag
+            fallback_flag="$(demo_fallback_reason 2>/dev/null || true)"
+            if [ -n "$fallback_flag" ]; then
+                echo -e "${YELLOW}⚠ ${fallback_reason}，1T 模式将以演示模式运行（${fallback_flag}）${NC}" | tee -a "$LOG_FILE"
+            else
+                echo -e "${YELLOW}⚠ ${fallback_reason}，1T 模式将以演示模式运行${NC}" | tee -a "$LOG_FILE"
+            fi
             echo -e "${YELLOW}   (这仅用于本地开发测试，完整训练需要 S 编译器)${NC}" | tee -a "$LOG_FILE"
         else
             echo -e "${YELLOW}⚠ ${fallback_reason}，使用演示模式运行${NC}" | tee -a "$LOG_FILE"
