@@ -2,13 +2,14 @@
 set -e
 
 # Data Shard Generator Script
-# Generates distributed training shards from training_data.jsonl
+# Generates plain JSONL training shards from training_data.jsonl
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="$SCRIPT_DIR/../data"
 SOURCE_FILE="$DATA_DIR/training_data.jsonl"
 SHARD_DIR="$DATA_DIR/training_data_shards"
 MANIFEST_FILE="$SHARD_DIR/manifest.json"
+LIST_FILE="$SHARD_DIR/manifest.txt"
 
 # Configuration
 SHARD_SIZE="${SHARD_SIZE:-1024}"  # Records per shard
@@ -47,21 +48,19 @@ echo ""
 split -l $SHARD_SIZE "$SOURCE_FILE" "$SHARD_DIR/shard_tmp_"
 
 SHARD_INDEX=0
+: > "$LIST_FILE"
 for shard_file in $(ls "$SHARD_DIR"/shard_tmp_* | sort); do
     SHARD_NUM=$(printf "%05d" $SHARD_INDEX)
-    SHARD_NAME="training_data-${SHARD_NUM}.jsonl.gz"
+    SHARD_NAME="training_data-${SHARD_NUM}.jsonl"
     SHARD_PATH="$SHARD_DIR/$SHARD_NAME"
-    
-    # Compress shard
-    gzip -c "$shard_file" > "$SHARD_PATH"
+
+    mv "$shard_file" "$SHARD_PATH"
+    printf '%s\n' "$SHARD_PATH" >> "$LIST_FILE"
     
     # Count records in shard
-    SHARD_RECORDS=$(wc -l < "$shard_file")
+    SHARD_RECORDS=$(wc -l < "$SHARD_PATH")
     
     echo "  ✓ Shard $SHARD_NUM: $SHARD_NAME ($SHARD_RECORDS records)"
-    
-    # Cleanup temp file
-    rm "$shard_file"
     
     SHARD_INDEX=$((SHARD_INDEX + 1))
 done
@@ -70,7 +69,7 @@ TOTAL_SHARDS=$SHARD_INDEX
 echo "✓ Generated $TOTAL_SHARDS shards"
 echo ""
 
-# Step 4: Generate manifest.json
+# Step 4: Generate manifest.json / manifest.txt
 echo "▶ Generating manifest.json..."
 
 # Create manifest
@@ -83,21 +82,19 @@ cat > "$MANIFEST_FILE" << EOF
   "shard_count": $TOTAL_SHARDS,
   "shard_size_target": $SHARD_SIZE,
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "shard_list_path": "$LIST_FILE",
   "shards": [
 EOF
 
 # Add shard entries
 SHARD_INDEX=0
 CURRENT_RECORD=0
-for shard_file in $(ls "$SHARD_DIR"/training_data-*.jsonl.gz | sort); do
+for shard_file in $(ls "$SHARD_DIR"/training_data-*.jsonl | sort); do
     SHARD_NAME=$(basename "$shard_file")
-    SHARD_RECORDS=$(gzip -cd "$shard_file" | wc -l)
+    SHARD_RECORDS=$(wc -l < "$shard_file")
     START_RECORD=$CURRENT_RECORD
     END_RECORD=$((CURRENT_RECORD + SHARD_RECORDS - 1))
-    
-    # Calculate SHA256
-    SHA256=$(sha256sum "$shard_file" | awk '{print $1}')
-    
+
     # Add comma if not last entry
     if [ $SHARD_INDEX -lt $((TOTAL_SHARDS - 1)) ]; then
         COMMA=","
@@ -110,8 +107,7 @@ for shard_file in $(ls "$SHARD_DIR"/training_data-*.jsonl.gz | sort); do
       "file": "$SHARD_NAME",
       "records": $SHARD_RECORDS,
       "start_record": $START_RECORD,
-      "end_record": $END_RECORD,
-      "sha256": "$SHA256"
+      "end_record": $END_RECORD
     }$COMMA
 EOF
     
@@ -125,6 +121,7 @@ cat >> "$MANIFEST_FILE" << EOF
 EOF
 
 echo "✓ Manifest created: $MANIFEST_FILE"
+echo "✓ Shard list created: $LIST_FILE"
 echo ""
 
 # Step 5: Verification

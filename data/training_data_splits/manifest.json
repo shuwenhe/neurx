@@ -2,33 +2,50 @@
   "source": "/Users/feifei/shuwen/train/neurx/data/training_data.jsonl",
   "generated_at": "2026-07-01T07:21:05.985475Z",
   "seed": 42,
+  "split_method": "line_count_96_2_2",
   "ratios": {
     "train": 0.96,
     "val": 0.02,
     "test": 0.02
   },
   "counts": {
-    "train": 5500,
-    "val": 0,
-    "test": 0
+    "train": 5280,
+    "val": 110,
+    "test": 110
   },
+  "target_tokens": 1000000000000,
+  "tokenizer_manifest": "/Users/feifei/shuwen/train/neurx/data/tokenizer.manifest",
+  "shard_manifest": "/Users/feifei/shuwen/train/neurx/data/training_data_shards/manifest.txt",
   "domains": {
     "train": {
-      "unknown": 5500
+      "unknown": 5280
     },
-    "val": {},
-    "test": {}
+    "val": {
+      "unknown": 110
+    },
+    "test": {
+      "unknown": 110
+    }
   },
   "languages": {
     "train": {
-      "unknown": 5500
+      "unknown": 5280
     },
-    "val": {},
-    "test": {}
+    "val": {
+      "unknown": 110
+    },
+    "test": {
+      "unknown": 110
+    }
   },
   "files": {
     "train": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/train.jsonl",
     "val": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/val.jsonl",
     "test": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/test.jsonl"
-  }
+  },
+  "shards": [
+    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/train.jsonl",
+    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/val.jsonl",
+    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/test.jsonl"
+  ]
 }

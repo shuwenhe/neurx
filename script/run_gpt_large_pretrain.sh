@@ -93,7 +93,11 @@ configure_model_size() {
             set_default NEURX_PRETRAIN_EVAL_INTERVAL "$NEURX_LLM_EVAL_INTERVAL"
             set_default NEURX_PRETRAIN_SAVE_INTERVAL "$NEURX_LLM_SAVE_INTERVAL"
             set_default NEURX_PRETRAIN_GRAD_ACCUMULATION "8"
+            set_default NEURX_PRETRAIN_SOURCE "$NEURX_ROOT/pretrain/llm/gpt_large_pretrain.s"
+            set_default NEURX_PRETRAIN_BUILD_DIR "$NEURX_ROOT/build/neurx_1t_moe"
             set_default NEURX_PRETRAIN_OUTPUT_DIR "$NEURX_ROOT/artifacts/checkpoints/neurx_1t_moe"
+            set_default NEURX_PRETRAIN_MANIFEST "$NEURX_ROOT/data/training_data_shards/manifest.txt"
+            set_default NEURX_PRETRAIN_TOKENIZER_MANIFEST "$NEURX_ROOT/data/tokenizer.manifest"
             ;;
         *)
             MODEL_SIZE="gpt-large"
@@ -113,6 +117,10 @@ BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$NEURX_ROOT/build/gpt_large_pretrain}"
 CLUSTER_BUILD_DIR="${NEURX_CLUSTER_BUILD_DIR:-$NEURX_ROOT/build/cluster_orchestration}"
 IR_FILE="$BUILD_DIR/gpt_large_pretrain.ir"
 BIN_FILE="$BUILD_DIR/gpt_large_pretrain.bin"
+if [ "$MODEL_SIZE" = "1t" ]; then
+    IR_FILE="$BUILD_DIR/gpt_moe_1t_pretrain.ir"
+    BIN_FILE="$BUILD_DIR/gpt_moe_1t_pretrain.bin"
+fi
 PRETRAIN_CONFIG_SRC="$NEURX_ROOT/pretrain/config/pretrain_config.s"
 PRETRAIN_CONFIG_IR="$BUILD_DIR/pretrain_config.ir"
 GPT_LARGE_MODEL_SRC="$NEURX_ROOT/model/llm/gpt_large.s"
@@ -120,6 +128,8 @@ GPT_LARGE_MODEL_IR="$BUILD_DIR/gpt_large.ir"
 GPT_LARGE_TRAIN_SRC="$NEURX_ROOT/model/llm/gpt_large_train.s"
 GPT_LARGE_TRAIN_IR="$BUILD_DIR/gpt_large_train.ir"
 GPT_LARGE_TRAIN_LINKED_IR="$BUILD_DIR/gpt_large_train_linked.ir"
+GPT_MOE_1T_SRC="$NEURX_ROOT/model/llm/gpt_moe_1t.s"
+GPT_MOE_1T_IR="$BUILD_DIR/gpt_moe_1t.ir"
 LINKED_IR_FILE="$BUILD_DIR/gpt_large_pretrain_linked.ir"
 CLUSTER_IR_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.ir"
 CLUSTER_BIN_FILE="$CLUSTER_BUILD_DIR/cluster_orchestration.bin"
@@ -191,6 +201,7 @@ prepare_cluster_orchestration() {
     export S_ROOT
 
     mkdir -p "$(dirname "$CLUSTER_NODE_MANIFEST_FILE")"
+    desired_world_size="${NEURX_CLUSTER_WORLD_SIZE:-${NEURX_PRETRAIN_WORLD_SIZE:-${NEURX_REQUIRED_GPUS:-0}}}"
     if [ -n "${NEURX_CLUSTER_NODES:-}" ]; then
         printf '%s\n' "$NEURX_CLUSTER_NODES" > "$CLUSTER_NODE_MANIFEST_FILE"
     elif [ -n "${SLURM_NODELIST:-}" ] && command -v scontrol >/dev/null 2>&1; then
@@ -208,7 +219,11 @@ prepare_cluster_orchestration() {
         if [ -z "$host_ip" ]; then
             host_ip="127.0.0.1"
         fi
-        printf '%s|%s|1|local|8|16|healthy|0.0\n' "$host_name" "$host_ip" > "$CLUSTER_NODE_MANIFEST_FILE"
+        local_gpu_count=1
+        if [ -n "$desired_world_size" ] && [ "$desired_world_size" -gt 0 ] 2>/dev/null; then
+            local_gpu_count="$desired_world_size"
+        fi
+        printf '%s|%s|%s|local|8|16|healthy|0.0\n' "$host_name" "$host_ip" "$local_gpu_count" > "$CLUSTER_NODE_MANIFEST_FILE"
     fi
 
     mkdir -p "$(dirname "$CLUSTER_SUMMARY_FILE")"
@@ -223,6 +238,9 @@ prepare_cluster_orchestration() {
     fi
     if [ -z "$total_gpus" ]; then
         total_gpus="$cluster_count"
+    fi
+    if [ -n "$desired_world_size" ] && [ "$desired_world_size" -gt "$total_gpus" ] 2>/dev/null; then
+        total_gpus="$desired_world_size"
     fi
     cat > "$CLUSTER_SUMMARY_FILE" <<EOF
 cluster=neurx-prod
@@ -391,12 +409,6 @@ compile_and_run_s() {
         return 1
     fi
 
-    if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_FULL_1T_LOCAL:-0}" != "1" ]; then
-        echo -e "${YELLOW}⚠ 1T MoE 需要分布式集群，当前本地执行切换到 metadata/demo 模式${NC}"
-        NEURX_PRETRAIN_FALLBACK_REASON="1T MoE 需要分布式集群，当前本地执行 metadata/demo 模式"
-        return 1
-    fi
-    
     export S_SOURCE_ROOT
     export S_ROOT
 
@@ -437,6 +449,17 @@ compile_and_run_s() {
                 fi
                 if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_LARGE_TRAIN_LINKED_IR" "$LINKED_IR_FILE" "glt" "$LINKED_IR_FILE.tmp"; then
                     echo -e "${RED}✗ GPT-Large train 链接到主 IR 失败${NC}"
+                    return 1
+                fi
+                mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+            fi
+            if [ "$MODEL_SIZE" = "1t" ] && [ -f "$GPT_MOE_1T_SRC" ]; then
+                if ! "$S_COMPILER" "$GPT_MOE_1T_SRC" "$GPT_MOE_1T_IR" 2>&1; then
+                    echo -e "${RED}✗ GPT-MoE-1T 编译失败${NC}"
+                    return 1
+                fi
+                if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_MOE_1T_IR" "$LINKED_IR_FILE" "moe1t" "$LINKED_IR_FILE.tmp"; then
+                    echo -e "${RED}✗ GPT-MoE-1T IR 链接失败${NC}"
                     return 1
                 fi
                 mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
@@ -712,8 +735,9 @@ main() {
     if [ $compile_result -ne 0 ]; then
         echo "" | tee -a "$LOG_FILE"
         local fallback_reason="${NEURX_PRETRAIN_FALLBACK_REASON:-S编译失败}"
-        if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_FULL_1T_LOCAL:-0}" != "1" ]; then
-            fallback_reason="1T MoE 需要分布式集群，当前本地执行 metadata/demo 模式"
+        if [ "$MODEL_SIZE" = "1t" ]; then
+            echo -e "${RED}✗ ${fallback_reason}（1T 模式不回退到演示）${NC}" | tee -a "$LOG_FILE"
+            return 1
         fi
         echo -e "${YELLOW}⚠ ${fallback_reason}，使用演示模式运行${NC}" | tee -a "$LOG_FILE"
         echo "" | tee -a "$LOG_FILE"

@@ -1,6 +1,7 @@
 package neurx.pretrain.llm.gpt_large_pretrain
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, runtime_env_get}
+use neurx.model.llm.gpt_moe_1t.{moe_1t_framework_default, moe_1t_summary}
 
 use neurx.dl.dataloader.{dataloader_state, dataloader_config, dataloader_step_output, dataloader_state_dict, dataloader_load_state_dict, has_next, next_batch, new_state, reset_state, with_config, set_shuffle, set_drop_last, new_config}
 use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_state_dict, gpt_large_training_load_state_dict}
@@ -737,6 +738,10 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
     gpt_large_training_state training = new_gpt_large_training_state(active_documents, training_cfg)
     dataloader_state train_loader = gpt_large_pretrain_loader_from_corpus(corpus, training_cfg)
     dataloader_state valid_loader = gpt_large_pretrain_valid_loader_from_corpus(corpus, training_cfg)
+    string checkpoint_name = "gpt_large_pretrain"
+    if gpt_large_pretrain_is_1t_mode() {
+        checkpoint_name = "gpt_moe_1t_pretrain"
+    }
     training = gpt_large_training_state {
         model: training.model,
         backbone: training.backbone,
@@ -772,7 +777,7 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
         active_shard_tokens: len(corpus.train_token_ids),
         data: data,
         loop: loop,
-        checkpoint: new_pretrain_checkpoint_state("gpt_large_pretrain", output_dir),
+        checkpoint: new_pretrain_checkpoint_state(checkpoint_name, output_dir),
         eval: new_pretrain_eval_state(),
         corpus: corpus,
         optimizer: optimizer,
@@ -961,7 +966,7 @@ func gpt_large_pretrain_backward_ready(gpt_large_pretrain_state state) bool {
 }
 
 func gpt_large_pretrain_distributed_ready(gpt_large_pretrain_state state) bool {
-    pretrain_ddp_world_size(state.ddp) >= 1 &&
+    pretrain_ddp_world_size(state.ddp) >= gpt_large_pretrain_expected_world_size() &&
         pretrain_ddp_rank(state.ddp) >= 0
 }
 
@@ -1008,7 +1013,7 @@ func gpt_large_pretrain_system_ready(gpt_large_pretrain_state state) bool {
 
 func gpt_large_pretrain_core_summary(gpt_large_pretrain_state state) string {
     string out = ""
-    out = out + "NeurX GPT-Large Pretraining System\n"
+    out = out + gpt_large_pretrain_framework_title() + "\n"
     out = out + "----------------------------------\n"
     out = out + "Data: " + int_to_str(bool_to_int(gpt_large_pretrain_data_ready(state)), 0) + " | "
     out = out + "Model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0) + " | "
@@ -1589,19 +1594,65 @@ func gpt_large_pretrain_env_string(string name, string fallback) string {
     value
 }
 
+func gpt_large_pretrain_is_1t_mode() bool {
+    string model_size = trim(runtime_env_get("MODEL_SIZE", ""))
+    model_size == "1t" || model_size == "1t-moe" || model_size == "neurx-1t" || model_size == "neurx-1t-moe"
+}
+
+func gpt_large_pretrain_framework_title() string {
+    if gpt_large_pretrain_is_1t_mode() {
+        return "NeurX 1T MoE Pretraining System"
+    }
+    "NeurX GPT-Large Pretraining System"
+}
+
+func gpt_large_pretrain_expected_world_size() int {
+    if gpt_large_pretrain_is_1t_mode() {
+        return moe_1t_framework_default().parallel.world_size
+    }
+    1
+}
+
 func gpt_large_pretrain_run_from_env() gpt_large_pretrain_state {
-    string manifest = gpt_large_pretrain_env_string("NEURX_PRETRAIN_MANIFEST", "data/training_data_splits/manifest.json")
-    string output_dir = gpt_large_pretrain_env_string("NEURX_PRETRAIN_OUTPUT_DIR", "artifacts/checkpoints/gpt_large_pretrain")
-    int micro_batch_size = gpt_large_pretrain_env_int("NEURX_PRETRAIN_MICRO_BATCH", 8)
-    int seq_len = gpt_large_pretrain_env_int("NEURX_PRETRAIN_SEQ_LEN", 16)
-    int max_steps = gpt_large_pretrain_env_int("NEURX_PRETRAIN_STEPS", 64)
-    float lr = gpt_large_pretrain_env_float("NEURX_PRETRAIN_LR", 0.00015)
-    int warmup_steps = gpt_large_pretrain_env_int("NEURX_PRETRAIN_WARMUP_STEPS", 128)
-    float min_lr = gpt_large_pretrain_env_float("NEURX_PRETRAIN_MIN_LR", 0.00003)
-    float weight_decay = gpt_large_pretrain_env_float("NEURX_PRETRAIN_WEIGHT_DECAY", 0.1)
-    int log_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_LOG_INTERVAL", 8)
-    int eval_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_EVAL_INTERVAL", 16)
-    int save_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_SAVE_INTERVAL", 32)
+    bool is_1t = gpt_large_pretrain_is_1t_mode()
+    string manifest_default = "data/training_data_splits/manifest.json"
+    string output_default = "artifacts/checkpoints/gpt_large_pretrain"
+    int micro_batch_default = 8
+    int seq_len_default = 16
+    int max_steps_default = 64
+    float lr_default = 0.00015
+    int warmup_default = 128
+    float min_lr_default = 0.00003
+    float weight_decay_default = 0.1
+    int log_interval_default = 8
+    int eval_interval_default = 16
+    int save_interval_default = 32
+    if is_1t {
+        manifest_default = moe_1t_framework_default().training.data_manifest_path
+        output_default = moe_1t_framework_default().training.output_dir
+        micro_batch_default = 2
+        seq_len_default = 4096
+        max_steps_default = moe_1t_framework_default().training.total_steps
+        lr_default = moe_1t_framework_default().training.peak_lr
+        warmup_default = moe_1t_framework_default().training.warmup_steps
+        min_lr_default = moe_1t_framework_default().training.min_lr
+        weight_decay_default = 0.01
+        log_interval_default = moe_1t_framework_default().training.log_steps
+        eval_interval_default = moe_1t_framework_default().training.eval_steps
+        save_interval_default = moe_1t_framework_default().training.save_steps
+    }
+    string manifest = gpt_large_pretrain_env_string("NEURX_PRETRAIN_MANIFEST", manifest_default)
+    string output_dir = gpt_large_pretrain_env_string("NEURX_PRETRAIN_OUTPUT_DIR", output_default)
+    int micro_batch_size = gpt_large_pretrain_env_int("NEURX_PRETRAIN_MICRO_BATCH", micro_batch_default)
+    int seq_len = gpt_large_pretrain_env_int("NEURX_PRETRAIN_SEQ_LEN", seq_len_default)
+    int max_steps = gpt_large_pretrain_env_int("NEURX_PRETRAIN_STEPS", max_steps_default)
+    float lr = gpt_large_pretrain_env_float("NEURX_PRETRAIN_LR", lr_default)
+    int warmup_steps = gpt_large_pretrain_env_int("NEURX_PRETRAIN_WARMUP_STEPS", warmup_default)
+    float min_lr = gpt_large_pretrain_env_float("NEURX_PRETRAIN_MIN_LR", min_lr_default)
+    float weight_decay = gpt_large_pretrain_env_float("NEURX_PRETRAIN_WEIGHT_DECAY", weight_decay_default)
+    int log_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_LOG_INTERVAL", log_interval_default)
+    int eval_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_EVAL_INTERVAL", eval_interval_default)
+    int save_interval = gpt_large_pretrain_env_int("NEURX_PRETRAIN_SAVE_INTERVAL", save_interval_default)
     gpt_large_pretrain_state state = new_gpt_large_pretrain_state_with_params_and_output(
         micro_batch_size,
         seq_len,
@@ -1997,9 +2048,13 @@ func main() int {
     gpt_large_pretrain_state state = gpt_large_pretrain_run_from_env()
     println("")
     println("========================================")
-    println("  NeurX GPT-Large Pretraining System")
+    println("  " + gpt_large_pretrain_framework_title())
     println("========================================")
     println("")
+    if gpt_large_pretrain_is_1t_mode() {
+        println(moe_1t_summary(moe_1t_framework_default()))
+        println("")
+    }
     println("Core readiness:")
     println("  - Data: " + int_to_str(bool_to_int(gpt_large_pretrain_data_ready(state)), 0))
     println("  - Model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0))
