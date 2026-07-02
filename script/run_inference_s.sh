@@ -20,11 +20,11 @@ fi
 echo "✓ S编译器: $S_COMPILER"
 
 # 检查推理脚本
-if [ ! -f "$NEURX_ROOT/run_inference.s" ]; then
+if [ ! -f "$NEURX_ROOT/inference/run_inference.s" ]; then
     echo "❌ 推理脚本不存在"
     exit 1
 fi
-echo "✓ 推理脚本: $NEURX_ROOT/run_inference.s"
+echo "✓ 推理脚本: $NEURX_ROOT/inference/run_inference.s"
 
 # 检查编译产物
 if [ ! -f "$NEURX_ROOT/build/large_model_training/run_inference.bin" ]; then

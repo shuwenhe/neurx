@@ -87,17 +87,17 @@ echo "────────────────────────�
 echo ""
 
 S_FILES=(
-    "scaled_training_system.s"
-    "real_data_loader.s"
-    "cuda_accelerated_training.s"
-    "ddp_distributed_training.s"
+    "training/scaled_training_system.s"
+    "dataset/real_data_loader.s"
+    "cuda/cuda_accelerated_training.s"
+    "distributed/ddp_distributed_training.s"
 )
 
 TEST_S_FILES=(
-    "compile_and_test.s"
-    "generate_deployment_configs.s"
-    "performance_benchmark.s"
-    "system_verification.s"
+    "tests/compile_and_test.s"
+    "deploy/generate_deployment_configs.s"
+    "workflows/benchmark/performance_benchmark.s"
+    "tests/system_verification.s"
 )
 
 missing=0
@@ -269,17 +269,17 @@ echo "────────────────────────�
 echo ""
 
 echo "Step 1: Compile Production Components (Choose One)"
-echo "  neurx compile scaled_training_system.s -o bin/scaled_train"
-echo "  neurx compile real_data_loader.s -o bin/data_loader"
-echo "  neurx compile cuda_accelerated_training.s -o bin/cuda_train"
-echo "  neurx compile ddp_distributed_training.s -o bin/ddp_train"
+echo "  neurx compile training/scaled_training_system.s -o bin/scaled_train"
+echo "  neurx compile dataset/real_data_loader.s -o bin/data_loader"
+echo "  neurx compile cuda/cuda_accelerated_training.s -o bin/cuda_train"
+echo "  neurx compile distributed/ddp_distributed_training.s -o bin/ddp_train"
 echo ""
 
 echo "Step 2: Run Utility Components"
-echo "  neurx run compile_and_test.s"
-echo "  neurx run generate_deployment_configs.s"
-echo "  neurx run performance_benchmark.s"
-echo "  neurx run system_verification.s"
+echo "  neurx run tests/compile_and_test.s"
+echo "  neurx run deploy/generate_deployment_configs.s"
+echo "  neurx run workflows/benchmark/performance_benchmark.s"
+echo "  neurx run tests/system_verification.s"
 echo ""
 
 echo "Step 3: Execute Local Tests"

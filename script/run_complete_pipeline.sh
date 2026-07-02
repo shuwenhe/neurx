@@ -18,8 +18,9 @@ NC='\033[0m' # No Color
 # CONFIGURATION
 # ============================================================================
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_FILE="$PROJECT_DIR/complete_pipeline.s"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SOURCE_FILE="$PROJECT_DIR/workflows/llm/complete_pipeline.s"
 OUTPUT_DIR="$PROJECT_DIR/output"
 BIN_DIR="$PROJECT_DIR/bin"
 BINARY="$BIN_DIR/complete_pipeline"
@@ -78,7 +79,7 @@ mkdir -p "$BIN_DIR" "$OUTPUT_DIR"
 print_header "Phase 1: Compilation"
 echo ""
 
-print_info "Compiling complete_pipeline.s with optimization level 2..."
+print_info "Compiling workflows/llm/complete_pipeline.s with optimization level 2..."
 echo ""
 
 # Check if neurx compiler is available
@@ -166,7 +167,7 @@ else
     print_warning "neurx not available, cannot execute"
     print_info "To run the pipeline:"
     print_info "  1. Install neurx compiler"
-    print_info "  2. Run: neurx run complete_pipeline.s"
+    print_info "  2. Run: neurx run workflows/llm/complete_pipeline.s"
     exit 1
 fi
 

@@ -128,7 +128,7 @@ generate_compile_log() {
     cat > "$OUTPUT_DIR/compile_log.txt" << 'EOF'
 === NeurX Compilation Log ===
 Date: 2026-07-01
-Source: train_and_infer.s
+Source: workflows/llm/train_and_infer.s
 Output: bin/train_and_infer
 Optimization Level: 2
 
@@ -341,7 +341,7 @@ main() {
     echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
     echo "✅ 系统组件:"
-    echo "  • 源代码: train_and_infer.s (~400 行 S 代码)"
+    echo "  • 源代码: workflows/llm/train_and_infer.s (~400 行 S 代码)"
     echo "  • 二进制: bin/train_and_infer"
     echo "  • 配置: ModelConfig (10.03M 参数)"
     echo ""

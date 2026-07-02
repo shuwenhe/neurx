@@ -50,10 +50,10 @@ echo "────────────────────────�
 echo ""
 
 FILES=(
-    "scaled_training_system.s"
-    "real_data_loader.s"
-    "cuda_accelerated_training.s"
-    "ddp_distributed_training.s"
+    "training/scaled_training_system.s"
+    "dataset/real_data_loader.s"
+    "cuda/cuda_accelerated_training.s"
+    "distributed/ddp_distributed_training.s"
 )
 
 for file in "${FILES[@]}"; do

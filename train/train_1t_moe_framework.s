@@ -278,7 +278,7 @@ func main() {
     fmt.Println("🎯 Next Steps")
     fmt.Println("================================================================")
     fmt.Println("1. Compile this framework:")
-    fmt.Println("   /path/to/s train_1t_moe_framework.s output.ir")
+    fmt.Println("   /path/to/s train/train_1t_moe_framework.s output.ir")
     fmt.Println("")
     fmt.Println("2. Execute verification:")
     fmt.Println("   /path/to/s --emit-bin output.ir output.bin")

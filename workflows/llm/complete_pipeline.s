@@ -693,7 +693,7 @@ func main() {
     // Stage 1: Compile & IR
     // ─────────────────────────────────────────────────────────────────
     var compile_config: CompileConfig
-    compile_config.source_file = "train_and_infer.s"
+    compile_config.source_file = "workflows/llm/train_and_infer.s"
     compile_config.output_binary = "bin/train_and_infer"
     compile_config.optimization_level = 2
     compile_config.debug_mode = false
