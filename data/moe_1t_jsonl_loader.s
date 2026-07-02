@@ -22,80 +22,8 @@ package neurx.data.jsonl_loader
 // ============================================================================
 
 use neurx.strings
-use neurx.runtime.io.{io_println}
-
-// ============================================================================
-// 1. BPE Tokenizer
-// ============================================================================
-
-struct bpe_tokenizer {
-    int vocab_size              // 词汇表大小 (128K)
-    []string byte_pairs         // BPE 合并规则
-    []int token_freqs           // 每个 token 的频率
-    int special_tokens_count
-    
-    // 特殊 token IDs
-    int pad_token_id
-    int eos_token_id
-    int bos_token_id
-}
-
-// 初始化 BPE Tokenizer
-func bpe_tokenizer_new(int vocab_size) bpe_tokenizer {
-    
-    bpe_tokenizer tokenizer = bpe_tokenizer {
-        vocab_size: vocab_size,
-        byte_pairs: []string{cap: 0},
-        token_freqs: []int{cap: 0},
-        special_tokens_count: 256,
-        pad_token_id: 0,
-        eos_token_id: 2,
-        bos_token_id: 1,
-    }
-    
-    tokenizer
-}
-
-// Tokenize 文本为 token IDs
-// 简化实现：每个字符转换为字节，然后应用 BPE
-func bpe_tokenize(
-    bpe_tokenizer tokenizer,
-    string text
-) []int {
-    
-    // 步骤 1: 将文本转换为字节序列
-    []int bytes = text_to_bytes(text)
-    
-    // 步骤 2: 应用 BPE 合并
-    []int tokens = apply_bpe_merges(bytes, tokenizer)
-    
-    tokens
-}
-
-// 将文本转换为字节
-func text_to_bytes(string text) []int {
-    
-    []int bytes = []int{cap: 0}
-    
-    // 简化实现：假设每个字符都是 ASCII
-    // 实际实现需要处理 UTF-8
-    
-    bytes
-}
-
-// 应用 BPE 合并规则
-func apply_bpe_merges(
-    []int bytes,
-    bpe_tokenizer tokenizer
-) []int {
-    
-    []int tokens = bytes
-    
-    // 迭代应用 BPE 合并规则
-    // 实际实现很复杂，这里简化处理
-    
-    tokens
-}
+use neurx.runtime.io.{io_println, runtime_file_exists, runtime_read_text_file}
+use neurx.model.tokenizer.bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
 
 // ============================================================================
 // 2. JSONL 文件读取
@@ -111,18 +39,32 @@ struct jsonl_document {
 
 // 从单个 JSONL 文件读取文档
 func read_jsonl_file(string filepath) []jsonl_document {
-    
     []jsonl_document docs = []jsonl_document{cap: 0}
-    
-    // 实际实现需要文件 I/O
-    // 这里返回空列表作为占位符
-    
+    if !runtime_file_exists(filepath) {
+        return docs
+    }
+
+    string content = runtime_read_text_file(filepath)
+    []string lines = split_lines(content)
+    int i = 0
+    long doc_id = 0
+    while i < len(lines) {
+        string line = trim_string(lines[i])
+        if len(line) > 0 {
+            jsonl_document doc = parse_json_document(line)
+            doc.source = filepath
+            doc.document_id = doc_id
+            docs.push(doc)
+            doc_id = doc_id + 1
+        }
+        i = i + 1
+    }
+
     docs
 }
 
 // 解析 JSON 文本（简化）
 func parse_json_document(string json_line) jsonl_document {
-    
     jsonl_document doc = jsonl_document {
         text: "",
         source: "unknown",
@@ -130,10 +72,12 @@ func parse_json_document(string json_line) jsonl_document {
         metadata_keys: []string{cap: 0},
         metadata_values: []string{cap: 0},
     }
-    
-    // 简化实现：假设格式为 {"text": "..."}
-    // 实际需要完整 JSON 解析器
-    
+    string extracted = extract_json_string_field(json_line, "text")
+    if len(extracted) > 0 {
+        doc.text = extracted
+    } else {
+        doc.text = json_line
+    }
     doc
 }
 
@@ -201,7 +145,7 @@ func jsonl_data_loader_new(
         shuffle_buffer_size: 10000,
     }
     
-    bpe_tokenizer tok = bpe_tokenizer_new(cfg.vocab_size)
+    bpe_tokenizer tok = new_bpe_tokenizer(build_default_vocab(), new_tokenizer_config())
     
     jsonl_data_loader loader = jsonl_data_loader {
         config: cfg,
@@ -333,7 +277,7 @@ func get_next_batch(
         jsonl_document doc = loader.current_shard_docs[loader.current_doc_idx]
         
         // Tokenize
-        []int tokens = bpe_tokenize(loader.tokenizer, doc.text)
+        []int tokens = encode(loader.tokenizer, doc.text)
         
         // 添加特殊 token
         // 在开头添加 BOS，在结尾添加 EOS
@@ -422,14 +366,196 @@ func get_loader_stats(jsonl_data_loader loader) string {
 // ============================================================================
 
 func append_int([]int arr, int val) []int {
-    // 返回新数组，实际需要实现
-    arr
+    []int out = []int{cap: len(arr) + 1}
+    int i = 0
+    while i < len(arr) {
+        out.push(arr[i])
+        i = i + 1
+    }
+    out.push(val)
+    out
+}
+
+func append_string([]string arr, string val) []string {
+    []string out = []string{cap: len(arr) + 1}
+    int i = 0
+    while i < len(arr) {
+        out.push(arr[i])
+        i = i + 1
+    }
+    out.push(val)
+    out
 }
 
 func int_to_string(int x) string {
-    "shard"
+    if x == 0 {
+        return "0"
+    }
+    bool neg = false
+    int value = x
+    if value < 0 {
+        neg = true
+        value = -value
+    }
+    string out = ""
+    while value > 0 {
+        int digit = value % 10
+        out = string(digit + 48) + out
+        value = value / 10
+    }
+    if neg {
+        out = "-" + out
+    }
+    out
 }
 
 func long_to_string(long x) string {
-    "tokens"
+    int value = int(x)
+    int_to_string(value)
+}
+
+func split_lines(string text) []string {
+    []string lines = []string{cap: 0}
+    string current = ""
+    int i = 0
+    while i < len(text) {
+        string ch = neurx.strings.substring(text, i, i + 1)
+        if ch == "\n" || ch == "\r" {
+            if len(current) > 0 {
+                lines.push(current)
+                current = ""
+            }
+        } else {
+            current = neurx.strings.concat2(current, ch)
+        }
+        i = i + 1
+    }
+    if len(current) > 0 {
+        lines.push(current)
+    }
+    lines
+}
+
+func trim_string(string text) string {
+    int left = 0
+    int right = len(text) - 1
+    while left < len(text) {
+        string ch = neurx.strings.substring(text, left, left + 1)
+        if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
+            break
+        }
+        left = left + 1
+    }
+    while right >= left {
+        string ch = neurx.strings.substring(text, right, right + 1)
+        if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
+            break
+        }
+        right = right - 1
+    }
+    if right < left {
+        return ""
+    }
+    neurx.strings.substring(text, left, right + 1)
+}
+
+func extract_json_string_field(string json_line, string field_name) string {
+    string needle = "\"" + field_name + "\""
+    int pos = find_substring(json_line, needle)
+    if pos < 0 {
+        return ""
+    }
+    int i = pos + len(needle)
+    while i < len(json_line) {
+        string ch = neurx.strings.substring(json_line, i, i + 1)
+        if ch == ":" {
+            i = i + 1
+            break
+        }
+        i = i + 1
+    }
+    while i < len(json_line) {
+        string ch = neurx.strings.substring(json_line, i, i + 1)
+        if ch != " " && ch != "\t" {
+            break
+        }
+        i = i + 1
+    }
+    if i >= len(json_line) {
+        return ""
+    }
+    if neurx.strings.substring(json_line, i, i + 1) != "\"" {
+        return ""
+    }
+    i = i + 1
+    string out = ""
+    while i < len(json_line) {
+        string ch = neurx.strings.substring(json_line, i, i + 1)
+        if ch == "\"" {
+            return out
+        }
+        if ch == "\\" && i + 1 < len(json_line) {
+            string next_ch = neurx.strings.substring(json_line, i + 1, i + 2)
+            if next_ch == "\"" {
+                out = neurx.strings.concat2(out, "\"")
+                i = i + 2
+                continue
+            }
+            if next_ch == "n" {
+                out = neurx.strings.concat2(out, "\n")
+                i = i + 2
+                continue
+            }
+            if next_ch == "t" {
+                out = neurx.strings.concat2(out, "\t")
+                i = i + 2
+                continue
+            }
+            if next_ch == "\\" {
+                out = neurx.strings.concat2(out, "\\")
+                i = i + 2
+                continue
+            }
+        }
+        out = neurx.strings.concat2(out, ch)
+        i = i + 1
+    }
+    out
+}
+
+func find_substring(string text, string pattern) int {
+    if len(pattern) == 0 {
+        return 0
+    }
+    int i = 0
+    while i + len(pattern) <= len(text) {
+        int j = 0
+        while j < len(pattern) {
+            if neurx.strings.substring(text, i + j, i + j + 1) != neurx.strings.substring(pattern, j, j + 1) {
+                break
+            }
+            j = j + 1
+        }
+        if j == len(pattern) {
+            return i
+        }
+        i = i + 1
+    }
+    -1
+}
+
+func build_default_vocab() []string {
+    []string vocab = []string{cap: 0}
+    vocab.push("<pad>")
+    vocab.push("<bos>")
+    vocab.push("<eos>")
+    vocab.push("<unk>")
+    int c = 32
+    while c <= 126 {
+        vocab.push(string(c))
+        c = c + 1
+    }
+    vocab.push("\n")
+    vocab.push("\t")
+    vocab
 }
