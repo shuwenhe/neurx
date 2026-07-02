@@ -185,9 +185,9 @@ func test_cache_stats() {
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
     
-    let (hits, misses) = get_cache_stats(tokenizer)
+    let stats = get_cache_stats(tokenizer)
     
-    if hits == 0 && misses == 0 {
+    if stats.cache_hits == 0 && stats.cache_misses == 0 {
         println("  ✓ Initial cache stats zero")
     }
 }
@@ -218,7 +218,7 @@ func test_batch_operations() {
     let batch = encode_batch(tokenizer, texts, 10)
     let decoded = decode_batch(tokenizer, batch)
     
-    if len(batch) == 2 && len(decoded) == 2 {
+    if batch.batch_size == 2 && len(decoded) == 2 {
         println("  ✓ Batch operations work")
     }
 }

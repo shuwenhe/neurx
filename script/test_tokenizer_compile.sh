@@ -5,7 +5,7 @@ echo ""
 
 # Compile tokenizer test
 echo "1. Compiling tokenizer test..."
-/Users/feifei/shuwen/s/bin/s /Users/feifei/shuwen/neurx/test/test_tokenizer.s /tmp/test_tokenizer.ir 2>&1 > /tmp/tokenizer_compile.log
+/Users/feifei/train/s/.local/bin/s /Users/feifei/shuwen/train/neurx/test/test_tokenizer.s /tmp/test_tokenizer.ir > /tmp/tokenizer_compile.log 2>&1
 TOKENIZER_RESULT=$?
 
 if [ $TOKENIZER_RESULT -eq 0 ]; then
@@ -18,7 +18,7 @@ fi
 echo ""
 echo "=== Summary ==="
 echo "BPE Tokenizer files:"
-echo "  - /Users/feifei/shuwen/neurx/model/tokenizer/bpe.s"
+echo "  - /Users/feifei/shuwen/train/neurx/model/tokenizer/bpe.s"
 echo "    ✓ Character-level encoding"
 echo "    ✓ BPE merge rules"
 echo "    ✓ Vocabulary management"
@@ -27,7 +27,7 @@ echo "    ✓ Caching mechanism"
 echo "    ✓ Batch processing"
 echo "    ✓ Padding/truncation"
 echo ""
-echo "  - /Users/feifei/shuwen/neurx/test/test_tokenizer.s"
+echo "  - /Users/feifei/shuwen/train/neurx/test/test_tokenizer.s"
 echo "    ✓ 12 comprehensive tests"
 echo ""
 echo "Core Functions Implemented:"
