@@ -193,8 +193,8 @@ prepare_cluster_orchestration() {
     fi
 
     if [ ! -f "$S_COMPILER" ]; then
-        echo -e "${YELLOW}⚠ S编译器不可用，无法执行集群编排${NC}"
-        return 1
+        echo -e "${YELLOW}⚠ S编译器不可用，将生成集群配置但跳过编译${NC}"
+        # 不直接返回失败，允许生成配置文件用于后续部署
     fi
 
     export S_SOURCE_ROOT
@@ -405,6 +405,10 @@ compile_and_run_s() {
     
     if [ ! -f "$S_COMPILER" ]; then
         echo -e "${YELLOW}⚠ S编译器不可用${NC}"
+        echo -e "${YELLOW}   位置: $S_COMPILER${NC}"
+        echo -e "${YELLOW}   说明: 本地开发环境不需要 S 编译器，集群部署时会自动使用${NC}"
+        
+        # 如果允许演示模式或不是严格模式，返回错误供上层处理回退
         NEURX_PRETRAIN_FALLBACK_REASON="S编译器不可用"
         return 1
     fi
@@ -808,11 +812,21 @@ main() {
     if [ $compile_result -ne 0 ]; then
         echo "" | tee -a "$LOG_FILE"
         local fallback_reason="${NEURX_PRETRAIN_FALLBACK_REASON:-S编译失败}"
-        if [ "$MODEL_SIZE" = "1t" ]; then
+        
+        # 检查是否允许 1T 模式回退到演示
+        # 设置 NEURX_ALLOW_DEMO=1 来启用 1T 模式的演示模式回退
+        if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_DEMO:-0}" != "1" ]; then
             echo -e "${RED}✗ ${fallback_reason}（1T 模式不回退到演示）${NC}" | tee -a "$LOG_FILE"
+            echo -e "${YELLOW}💡 提示: 设置 NEURX_ALLOW_DEMO=1 来启用演示模式回退${NC}" | tee -a "$LOG_FILE"
             return 1
         fi
-        echo -e "${YELLOW}⚠ ${fallback_reason}，使用演示模式运行${NC}" | tee -a "$LOG_FILE"
+        
+        if [ "$MODEL_SIZE" = "1t" ] && [ "${NEURX_ALLOW_DEMO:-0}" = "1" ]; then
+            echo -e "${YELLOW}⚠ ${fallback_reason}，1T 模式将以演示模式运行${NC}" | tee -a "$LOG_FILE"
+            echo -e "${YELLOW}   (这仅用于本地开发测试，完整训练需要 S 编译器)${NC}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${YELLOW}⚠ ${fallback_reason}，使用演示模式运行${NC}" | tee -a "$LOG_FILE"
+        fi
         echo "" | tee -a "$LOG_FILE"
         run_training_demo | tee -a "$LOG_FILE"
     fi
