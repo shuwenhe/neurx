@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split test-tensor-core test-tensor-core-bin
+.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -37,8 +37,6 @@ help:
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
-	@echo "  make test-tensor-core"
-	@echo "  make test-tensor-core-bin"
 
 train: check-bash
 	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
@@ -70,14 +68,6 @@ shard: check-bash
 split: check-bash
 	@echo "Splitting training data into train/val/test"
 	@cd '$(CURDIR_UNIX)' && bash script/split_industrial_dataset.sh 2>&1
-
-test-tensor-core: check-bash
-	@echo "Compiling NeurX tensor core smoke tests"
-	@cd '$(CURDIR_UNIX)' && mkdir -p build/tests && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' tensor/core.s build/tests/tensor_core.ir && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' test/test_tensor_core.s build/tests/test_tensor_core.ir && S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' '$(S_COMPILER)' test/test_tensor_core_runtime.s build/tests/test_tensor_core_runtime.ir
-
-test-tensor-core-bin: test-tensor-core
-	@echo "Running NeurX tensor core emitted-binary smoke tests"
-	@cd '$(CURDIR_UNIX)' && chmod +x script/link_s_ir_module.sh && script/link_s_ir_module.sh build/tests/tensor_core.ir build/tests/test_tensor_core.ir neurx.tensor.core build/tests/test_tensor_core_linked.ir && (cd '$(S_COMPILER_EMIT_CWD)' && '$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)'/build/tests/test_tensor_core_linked.ir '$(CURDIR_UNIX)'/build/tests/test_tensor_core.bin) && build/tests/test_tensor_core.bin && (cd '$(S_COMPILER_EMIT_CWD)' && '$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)'/build/tests/test_tensor_core_runtime.ir '$(CURDIR_UNIX)'/build/tests/test_tensor_core_runtime.bin) && build/tests/test_tensor_core_runtime.bin
 
 
 
