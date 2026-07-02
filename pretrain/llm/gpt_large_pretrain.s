@@ -15,6 +15,7 @@ use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_t
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
+use neurx.data.corpus_loader.{corpus_state, corpus_token_stream_result, new_corpus_state_from_paths, corpus_collect_token_ids}
 use neurx.nn.{embedding_lookup, transformer_forward}
 use neurx.opt.optim.{adamw_optimizer}
 use neurx.ops
@@ -641,6 +642,15 @@ func gpt_large_pretrain_loader_from_corpus(bpe_tokenized_corpus_state corpus, pr
     with_config(loader, loader_cfg)
 }
 
+func gpt_large_pretrain_loader_from_paths([]string paths, pretrain_config cfg, bool shuffle) dataloader_state {
+    corpus_state corpus = new_corpus_state_from_paths(paths, cfg.micro_batch_size, cfg.seq_len, true)
+    corpus_token_stream_result stream = corpus_collect_token_ids(corpus, cfg.micro_batch_size * cfg.seq_len * 1024)
+    dataloader_state loader = new_state(stream.token_ids, cfg.micro_batch_size, cfg.seq_len)
+    dataloader_config loader_cfg = set_drop_last(new_config(cfg.micro_batch_size, cfg.seq_len), false)
+    loader_cfg = set_shuffle(loader_cfg, shuffle)
+    with_config(loader, loader_cfg)
+}
+
 func gpt_large_pretrain_valid_loader_from_corpus(bpe_tokenized_corpus_state corpus, pretrain_config cfg) dataloader_state {
     dataloader_state loader = new_state(corpus.valid_token_ids, cfg.micro_batch_size, cfg.seq_len)
     dataloader_config loader_cfg = set_drop_last(new_config(cfg.micro_batch_size, cfg.seq_len), false)
@@ -737,8 +747,16 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
     []string active_documents = gpt_large_pretrain_documents_for_ref_with_seed(active_shard_path, gpt_large_pretrain_mix_seed(shard_shuffle_seed, 0, active_shard_index + 1))
     bpe_tokenized_corpus_state corpus = gpt_large_pretrain_corpus_for_ref(active_shard_path, gpt_large_pretrain_mix_seed(shard_shuffle_seed, 0, active_shard_index + 1))
     gpt_large_training_state training = new_gpt_large_training_state(active_documents, training_cfg)
-    dataloader_state train_loader = gpt_large_pretrain_loader_from_corpus(corpus, training_cfg)
-    dataloader_state valid_loader = gpt_large_pretrain_valid_loader_from_corpus(corpus, training_cfg)
+    []string train_paths = []string{cap: 1}
+    train_paths[0] = gpt_large_pretrain_string_at(shard_refs, 0)
+    []string valid_paths = []string{cap: 1}
+    if len(shard_refs) > 1 {
+        valid_paths[0] = gpt_large_pretrain_string_at(shard_refs, 1)
+    } else {
+        valid_paths[0] = gpt_large_pretrain_string_at(shard_refs, 0)
+    }
+    dataloader_state train_loader = gpt_large_pretrain_loader_from_paths(train_paths, training_cfg, true)
+    dataloader_state valid_loader = gpt_large_pretrain_loader_from_paths(valid_paths, training_cfg, false)
     string checkpoint_name = "gpt_large_pretrain"
     if gpt_large_pretrain_is_1t_mode() {
         checkpoint_name = "gpt_moe_1t_pretrain"
@@ -1054,8 +1072,12 @@ func gpt_large_pretrain_apply_shard(gpt_large_pretrain_state state, int shard_in
     string shard_path = gpt_large_pretrain_string_at(state.shard_refs, idx)
     int shard_seed = gpt_large_pretrain_mix_seed(state.shard_shuffle_seed, state.shard_epoch, idx + 1)
     bpe_tokenized_corpus_state corpus = gpt_large_pretrain_corpus_for_ref(shard_path, shard_seed)
-    dataloader_state train_loader = gpt_large_pretrain_loader_from_corpus(corpus, state.cfg)
-    dataloader_state valid_loader = gpt_large_pretrain_valid_loader_from_corpus(corpus, state.cfg)
+    []string train_paths = []string{cap: 1}
+    train_paths[0] = shard_path
+    []string valid_paths = []string{cap: 1}
+    valid_paths[0] = shard_path
+    dataloader_state train_loader = gpt_large_pretrain_loader_from_paths(train_paths, state.cfg, true)
+    dataloader_state valid_loader = gpt_large_pretrain_loader_from_paths(valid_paths, state.cfg, false)
     pretrain_data_state data = new_pretrain_data_state(state.training.model.dataset, idx, len(state.shard_refs))
     gpt_large_pretrain_state {
         cfg: state.cfg,
