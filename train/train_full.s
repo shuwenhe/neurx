@@ -3,7 +3,7 @@ package neurx.training.train_full
 // 🚀 NeurX 工业级 GPT - S 语言训练脚本
 // 支持: 分布式训练 (DP/TP/PP) + 混合精度 + RLHF 对齐
 //
-// 编译: neurx compile train_full.s
+// 编译: neurx compile train/train_full.s
 // 运行: ./train_full --model 7b --gpus 8 --tp-size 4
 //       ./train_full --rlhf --stage sft --model 7b
 

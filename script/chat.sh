@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # NeurX Interactive Chat - ChatGPT-like循环聊天
-# 集成真实的S语言推理引擎 (chat_inference.s)
+# 集成真实的S语言推理引擎 (inference/chat_inference.s)
 
 set -euo pipefail
 
-NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="$NEURX_DIR/output"
 CHAT_DIR="$NEURX_DIR/chat_history"
 BUILD_DIR="$NEURX_DIR/build/chat_inference"
@@ -14,7 +15,7 @@ CHAT_LOG="$CHAT_DIR/chat_${SESSION_ID}.txt"
 
 # 推理引擎配置
 S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
-CHAT_SOURCE="$NEURX_DIR/chat_inference.s"
+CHAT_SOURCE="$NEURX_DIR/inference/chat_inference.s"
 
 # 创建必要的目录
 mkdir -p "$OUTPUT_DIR" "$CHAT_DIR" "$BUILD_DIR"
@@ -40,7 +41,7 @@ print_header() {
 
 ╔════════════════════════════════════════════════════════════════════╗
 ║                    NeurX Interactive Chat                         ║
-║              集成真实S语言推理引擎 (chat_inference.s)           ║
+║              集成真实S语言推理引擎 (inference/chat_inference.s)           ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 EOF
@@ -53,7 +54,7 @@ EOF
 }
 
 # 生成模型响应 - 集成真实推理引擎
-# 当前使用演示模式，可通过调用编译的chat_inference.s进行替换
+# 当前使用演示模式，可通过调用编译的inference/chat_inference.s进行替换
 generate_response() {
     local user_input="$1"
     

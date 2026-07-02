@@ -28,7 +28,7 @@ echo -e "${CYAN}╚════════════════════�
 echo ""
 
 echo -e "${BLUE}📋 Compilation Config:${NC}"
-echo "   Source: train_and_infer.s"
+echo "   Source: workflows/llm/train_and_infer.s"
 echo "   Target: bin/train_and_infer"
 echo "   Optimization: -O2"
 echo ""
@@ -438,13 +438,13 @@ echo -e "${CYAN}═════════════════════�
 echo ""
 
 echo -e "${BLUE}📚 Files Generated:${NC}"
-echo "   ✓ /Users/feifei/shuwen/train/neurx/complete_pipeline.s"
+echo "   ✓ /Users/feifei/shuwen/train/neurx/workflows/llm/complete_pipeline.s"
 echo "   ✓ /Users/feifei/shuwen/train/neurx/COMPLETE_PIPELINE_GUIDE.md"
 echo "   ✓ /Users/feifei/shuwen/train/neurx/run_complete_pipeline.sh"
 echo ""
 
 echo -e "${BLUE}🚀 Next Steps:${NC}"
-echo "   1. Compile: neurx compile complete_pipeline.s -o bin/complete_pipeline --optimize=2"
+echo "   1. Compile: neurx compile workflows/llm/complete_pipeline.s -o bin/complete_pipeline --optimize=2"
 echo "   2. Run: ./bin/complete_pipeline"
 echo "   3. Integrate into main training loop"
 echo "   4. Add optimizations (mixed precision, gradient accumulation)"

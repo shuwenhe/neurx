@@ -544,7 +544,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
     lines.push("echo 'world_size=" + cluster_int_to_string(spec.world_size) + "'")
     lines.push("echo 'backend=" + spec.backend + "'")
     lines.push("")
-    lines.push("srun neurx run train_gpt_large.s \\")
+    lines.push("srun neurx run train/train_gpt_large.s \\")
     lines.push("  --data_dir=" + spec.data_dir + " \\")
     lines.push("  --checkpoint_dir=" + spec.checkpoint_dir + " \\")
     lines.push("  --output_dir=" + spec.output_dir + " \\")

@@ -49,7 +49,7 @@ echo ""
 echo "📁 Checking Source Files:"
 echo "─────────────────────────────────────────────────────────"
 
-for file in scaled_training_system.s real_data_loader.s cuda_accelerated_training.s ddp_distributed_training.s; do
+for file in training/scaled_training_system.s dataset/real_data_loader.s cuda/cuda_accelerated_training.s distributed/ddp_distributed_training.s; do
     if [ -f "$file" ]; then
         lines=$(wc -l < "$file")
         echo "✅ $file ($lines lines)"

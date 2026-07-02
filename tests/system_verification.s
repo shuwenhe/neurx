@@ -57,7 +57,7 @@ func check_all_components() ComponentStatus[] {
     // Scaled training system
     let scaled = verify_component(
         "Scaled Training System",
-        "scaled_training_system.s",
+        "training/scaled_training_system.s",
         850
     )
     scaled.description = "6-layer Transformer, 256-dim, 100M params"
@@ -66,7 +66,7 @@ func check_all_components() ComponentStatus[] {
     // Real data loader
     let data = verify_component(
         "Real Data Loader",
-        "real_data_loader.s",
+        "dataset/real_data_loader.s",
         650
     )
     data.description = "WikiText-2, C4, 32K BPE tokenizer"
@@ -75,7 +75,7 @@ func check_all_components() ComponentStatus[] {
     // CUDA backend
     let cuda = verify_component(
         "CUDA Accelerated Training",
-        "cuda_accelerated_training.s",
+        "cuda/cuda_accelerated_training.s",
         750
     )
     cuda.description = "GPU memory, transfers, kernels"
@@ -84,7 +84,7 @@ func check_all_components() ComponentStatus[] {
     // DDP training
     let ddp = verify_component(
         "DDP Distributed Training",
-        "ddp_distributed_training.s",
+        "distributed/ddp_distributed_training.s",
         800
     )
     ddp.description = "NCCL AllReduce, process groups"
@@ -93,7 +93,7 @@ func check_all_components() ComponentStatus[] {
     // Compilation & testing
     let compile = verify_component(
         "Compilation & Testing",
-        "compile_and_test.s",
+        "tests/compile_and_test.s",
         300
     )
     compile.description = "Full test suite"
@@ -102,7 +102,7 @@ func check_all_components() ComponentStatus[] {
     // Deployment config
     let deploy = verify_component(
         "Deployment Configuration",
-        "generate_deployment_configs.s",
+        "deploy/generate_deployment_configs.s",
         400
     )
     deploy.description = "SLURM, Docker, Kubernetes"
@@ -111,7 +111,7 @@ func check_all_components() ComponentStatus[] {
     // Performance benchmark
     let perf = verify_component(
         "Performance Benchmark",
-        "performance_benchmark.s",
+        "workflows/benchmark/performance_benchmark.s",
         350
     )
     perf.description = "Scaling analysis"
@@ -210,27 +210,27 @@ func verify_integration() {
     println("")
     
     println("✅ Data flow integration:")
-    println("  scaled_training_system.s ←→ real_data_loader.s")
+    println("  training/scaled_training_system.s ←→ dataset/real_data_loader.s")
     println("  Provides batch data to model")
     println("")
     
     println("✅ Compute acceleration:")
-    println("  scaled_training_system.s ←→ cuda_accelerated_training.s")
+    println("  training/scaled_training_system.s ←→ cuda/cuda_accelerated_training.s")
     println("  Executes forward/backward on GPU")
     println("")
     
     println("✅ Distributed training:")
-    println("  scaled_training_system.s ←→ ddp_distributed_training.s")
+    println("  training/scaled_training_system.s ←→ distributed/ddp_distributed_training.s")
     println("  Synchronizes gradients across GPUs")
     println("")
     
     println("✅ Deployment:")
-    println("  All components ←→ generate_deployment_configs.s")
+    println("  All components ←→ deploy/generate_deployment_configs.s")
     println("  Packaged for SLURM/Docker/K8s")
     println("")
     
     println("✅ Performance validation:")
-    println("  All components ←→ performance_benchmark.s")
+    println("  All components ←→ workflows/benchmark/performance_benchmark.s")
     println("  Meets throughput and efficiency targets")
     println("")
 }
@@ -262,9 +262,9 @@ func check_deployment_readiness() {
     println("")
     
     println("🧪 Testing:")
-    println("  [✓] Compilation suite ready (compile_and_test.s)")
+    println("  [✓] Compilation suite ready (tests/compile_and_test.s)")
     println("  [✓] Unit tests implemented")
-    println("  [✓] Performance benchmarks (performance_benchmark.s)")
+    println("  [✓] Performance benchmarks (workflows/benchmark/performance_benchmark.s)")
     println("  [✓] Integration tests planned")
     println("")
     

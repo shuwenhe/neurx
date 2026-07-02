@@ -348,7 +348,7 @@ main() {
     ln -sf "checkpoint-$TRAINING_STEPS" "$OUTPUT_DIR/latest"
     
     echo -e "${GREEN}✓ 模型权重已成功保存到: $WEIGHTS_DIR${NC}"
-    echo -e "${BLUE}💡 提示: 使用这些权重来改进chat_inference.s的推理能力${NC}"
+    echo -e "${BLUE}💡 提示: 使用这些权重来改进inference/chat_inference.s的推理能力${NC}"
 }
 
 # =====================================================================
