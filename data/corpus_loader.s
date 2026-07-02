@@ -168,7 +168,10 @@ func jsonl_extract_text(string line, string field) string {
     while start < llen && line[start] == 32 {
         start = start + 1
     }
-    if start >= llen || line[start] != 34 {   // '"'
+    if start >= llen {
+        return ""
+    }
+    if line[start] != 34 {   // '"'
         return ""
     }
     start = start + 1   // 跳过开始引号
@@ -232,7 +235,14 @@ func compute_quality_score(string text) float {
         if c >= 32 && c < 127 {
             printable = printable + 1
         }
-        if (c >= 65 && c <= 90) || (c >= 97 && c <= 122) {
+        bool is_alpha = false
+        if c >= 65 && c <= 90 {
+            is_alpha = true
+        }
+        if c >= 97 && c <= 122 {
+            is_alpha = true
+        }
+        if is_alpha {
             alpha = alpha + 1
             if !in_word { in_word = true; word_len = 0 }
             word_len = word_len + 1
@@ -273,7 +283,7 @@ func doc_hash(string text) int {
     int i = 0
     while i < len(text) && i < 2048 {  // 只哈希前 2KB
         h = h * 16777619
-        h = h ^ text[i]
+        h = h + text[i]
         if h < 0 { h = -h }
         i = i + 1
     }
@@ -342,7 +352,7 @@ func pb_reset(packing_buffer buf) packing_buffer {
 // ============================================================================
 
 // 按权重采样下一个数据源 (逆变换采样)
-func corpus_select_source(corpus_state state) (int, corpus_state) {
+func corpus_select_source(corpus_state state) corpus_source_selection {
     state.rng = state.rng * 1664525 + 1013904223
     int rabs = state.rng
     if rabs < 0 { rabs = -rabs }
@@ -355,11 +365,17 @@ func corpus_select_source(corpus_state state) (int, corpus_state) {
     while i < state.config.num_sources {
         cumulative = cumulative + state.config.sources[i].weight
         if r < cumulative {
-            return (i, state)
+            corpus_source_selection {
+                source_index: i,
+                state: state,
+            }
         }
         i = i + 1
     }
-    (state.config.num_sources - 1, state)
+    corpus_source_selection {
+        source_index: state.config.num_sources - 1,
+        state: state,
+    }
 }
 
 // ============================================================================
@@ -375,18 +391,43 @@ struct corpus_batch {
     string[] source_names   // 每个序列的来源名称
 }
 
+struct corpus_source_selection {
+    int source_index
+    corpus_state state
+}
+
+struct corpus_document_result {
+    string text
+    corpus_state state
+    bool ok
+}
+
+struct corpus_batch_result {
+    corpus_batch batch
+    corpus_state state
+}
+
+struct corpus_token_stream_result {
+    []int token_ids
+    corpus_state state
+    int batches_read
+    int tokens_collected
+}
+
 // 读取一个文档:
 //   1. 加权选择源  →  从该源的 streaming reader 读下一行
 //   2. JSONL 解析  →  提取文本字段
 //   3. 质量过滤 / 去重
 // 返回 (doc_text, updated_state, ok)
-func corpus_read_document(corpus_state state) (string, corpus_state, bool) {
+func corpus_read_document(corpus_state state) corpus_document_result {
     int attempts = 0
     int max_attempts = 20
 
     while attempts < max_attempts {
         int src_idx
-        (src_idx, state) = corpus_select_source(state)
+        corpus_source_selection source_selection = corpus_select_source(state)
+        src_idx = source_selection.source_index
+        state = source_selection.state
         data_source src = state.config.sources[src_idx]
 
         line_read_result lr = read_next_line(state.readers[src_idx])
@@ -431,17 +472,25 @@ func corpus_read_document(corpus_state state) (string, corpus_state, bool) {
         }
 
         state.total_docs_seen = state.total_docs_seen + 1
-        return (text, state, true)
+        corpus_document_result {
+            text: text,
+            state: state,
+            ok: true,
+        }
     }
 
-    ("", state, false)
+    corpus_document_result {
+        text: "",
+        state: state,
+        ok: false,
+    }
 }
 
 // ============================================================================
 // 9. 主 API: 生成一个打包批次
 // ============================================================================
 
-func corpus_next_batch(corpus_state state) (corpus_batch, corpus_state) {
+func corpus_next_batch(corpus_state state) corpus_batch_result {
     int seq_len = state.config.seq_len
     int batch_size = state.config.batch_size
     int bos = state.config.bos_token_id
@@ -457,7 +506,10 @@ func corpus_next_batch(corpus_state state) (corpus_batch, corpus_state) {
     while seqs_ready < batch_size {
         string doc_text
         bool ok
-        (doc_text, state, ok) = corpus_read_document(state)
+        corpus_document_result doc_result = corpus_read_document(state)
+        doc_text = doc_result.text
+        state = doc_result.state
+        ok = doc_result.ok
 
         if !ok {
             // 无有效文档; 用 PAD 填满剩余
@@ -522,7 +574,49 @@ func corpus_next_batch(corpus_state state) (corpus_batch, corpus_state) {
         total_tokens: batch_size * seq_len,
         source_names: src_names,
     }
-    (batch, state)
+    corpus_batch_result {
+        batch: batch,
+        state: state,
+    }
+}
+
+func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_stream_result {
+    []int collected = []int{cap: max_tokens}
+    int batches_read = 0
+    int tokens_collected = 0
+    int target_tokens = max_tokens
+    if target_tokens < 0 {
+        target_tokens = 0
+    }
+
+    while tokens_collected < target_tokens {
+        corpus_batch_result batch_result = corpus_next_batch(state)
+        state = batch_result.state
+        []int batch_tokens = batch_result.batch.input_ids
+        int i = 0
+        while i < len(batch_tokens) && tokens_collected < target_tokens {
+            collected.push(batch_tokens[i])
+            tokens_collected = tokens_collected + 1
+            i = i + 1
+        }
+        batches_read = batches_read + 1
+        if len(batch_tokens) == 0 {
+            break
+        }
+        if tokens_collected >= target_tokens {
+            break
+        }
+        if batches_read > 1000000 {
+            break
+        }
+    }
+
+    corpus_token_stream_result {
+        token_ids: collected,
+        state: state,
+        batches_read: batches_read,
+        tokens_collected: tokens_collected,
+    }
 }
 
 // ============================================================================
