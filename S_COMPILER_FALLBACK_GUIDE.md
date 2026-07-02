@@ -24,6 +24,8 @@ NEURX_ALLOW_DEMO=1 ./script/run_gpt_large_pretrain.sh --model 1t
 #   (这仅用于本地开发测试，完整训练需要 S 编译器)
 ```
 
+`NEURX_ALLOW_FULL_1T_LOCAL=1` 也会启用同样的回退逻辑，和 `NEURX_ALLOW_DEMO=1` 等价。
+
 ### 其他模型的行为（不受影响）
 ```bash
 ./script/run_gpt_large_pretrain.sh --model gpt-large
@@ -134,6 +136,7 @@ NEURX_CLUSTER_CONFIG_ONLY=1 ./script/run_gpt_large_pretrain.sh --model 1t
 | 变量 | 值 | 说明 |
 |------|-----|------|
 | `NEURX_ALLOW_DEMO` | `1` | 允许所有模型在 S 编译器不可用时回退到演示模式 |
+| `NEURX_ALLOW_FULL_1T_LOCAL` | `1` | 允许 1T 本地运行时在 S 编译器不可用时回退到演示模式 |
 | `S_COMPILER` | 路径 | S 编译器位置（默认: `$NEURX_ROOT/../s/.local/bin/s`) |
 | `NEURX_CLUSTER_DISABLE` | `1` | 禁用集群编排功能 |
 | `MODEL_SIZE` | `1t`, `gpt-large` | 模型大小 |
@@ -187,6 +190,7 @@ A: 设置 `NEURX_ALLOW_DEMO=1` 环境变量：
 ```bash
 NEURX_ALLOW_DEMO=1 make train
 ```
+也可以使用 `NEURX_ALLOW_FULL_1T_LOCAL=1 make train`，效果相同。
 
 ### Q: 我想要 1T 模式在 S 编译器不可用时失败
 A: 不设置 `NEURX_ALLOW_DEMO` 或设置为 `0`（默认行为）：
