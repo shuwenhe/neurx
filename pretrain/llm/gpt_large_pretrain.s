@@ -562,23 +562,37 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     []string lines = split_lines(manifest_text)
     []string refs = []string{cap: len(lines)}
     int i = 0
+    int refs_len = 0
     string train_ref = gpt_large_pretrain_json_string_value(manifest_text, "train", "")
     if trim(train_ref) != "" && trim(train_ref) != "null" {
-        refs.push(train_ref)
+        refs[refs_len] = train_ref
+        refs_len = refs_len + 1
     }
     while i < len(lines) {
         string ref = trim(lines[i])
         if ref != "" {
             if ref[0] != 35 && gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
-                refs.push(ref)
+                refs[refs_len] = ref
+                refs_len = refs_len + 1
             }
         }
         i = i + 1
     }
-    if len(refs) == 0 {
-        refs.push("data/training_data_splits/train.jsonl")
+    if refs_len == 0 {
+        []string out = []string{cap: 1}
+        out[0] = "data/training_data_splits/train.jsonl"
+        return out
     }
-    refs
+    if refs_len == len(lines) {
+        return refs
+    }
+    []string out = []string{cap: refs_len}
+    int j = 0
+    while j < refs_len {
+        out[j] = refs[j]
+        j = j + 1
+    }
+    out
 }
 
 func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
