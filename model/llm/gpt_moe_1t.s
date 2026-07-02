@@ -16,7 +16,7 @@ package neurx.model.llm.gpt_moe_1t
 
 use neurx.model.llm.gpt.{gpt_config, gpt_param_count}
 use neurx.model.llm.gpt_moe.{gpt_moe_config, gpt_moe_param_count}
-use neurx.model.transformer.moe.{moe_config, moe_stats, new_moe_config, moe_compute_stats}
+use neurx.model.transformer.moe.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
 
 // ============================================================================
 // 1. 规模与训练计划

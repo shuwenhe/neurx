@@ -2,6 +2,7 @@ package neurx.pretrain.llm.gpt_large_pretrain
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, runtime_env_get}
 use neurx.model.llm.gpt_moe_1t.{moe_1t_framework_default, moe_1t_summary}
+use neurx.pretrain.llm.entry
 
 use neurx.dl.dataloader.{dataloader_state, dataloader_config, dataloader_step_output, dataloader_state_dict, dataloader_load_state_dict, has_next, next_batch, new_state, reset_state, with_config, set_shuffle, set_drop_last, new_config}
 use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_state_dict, gpt_large_training_load_state_dict}

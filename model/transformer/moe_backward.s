@@ -275,7 +275,8 @@ func moe_backward(
 
                 // d_gate_logit[eid]: ∂L/∂g_k = d_output[t] · expert_out[k]
                 // 再重计算专家输出以获得值 (或在前向缓存; 这里重计算)
-                []float eo = moe_expert_forward(layer.experts[eid], h_t, H, D)
+                moe_expert ex = layer.experts[eid]
+                []float eo = moe_expert_forward(ex, h_t, H, D)
                 float dot_eo_do = 0.0
                 d = 0
                 while d < H {
