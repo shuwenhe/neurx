@@ -452,12 +452,70 @@ compile_and_run_s() {
                     return 1
                 fi
                 mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+
+                # Compile and link BPE tokenizer for all model sizes so tokenization
+                # helpers are available at runtime (used by gpt_large_pretrain.s).
+                if [ -f "$NEURX_ROOT/pretrain/tokenizer/bpe.s" ]; then
+                    BPE_IR="$BUILD_DIR/bpe_tokenizer.ir"
+                    if ! "$S_COMPILER" "$NEURX_ROOT/pretrain/tokenizer/bpe.s" "$BPE_IR" 2>&1; then
+                        echo -e "${RED}✗ pretrain/tokenizer/bpe 编译失败${NC}"
+                        return 1
+                    fi
+                    if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$BPE_IR" "$LINKED_IR_FILE" "bpe" "$LINKED_IR_FILE.tmp"; then
+                        echo -e "${RED}✗ 将 bpe tokenizer 链接到主 IR 失败${NC}"
+                        return 1
+                    fi
+                    mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+                fi
             fi
             if [ "$MODEL_SIZE" = "1t" ] && [ -f "$GPT_MOE_1T_SRC" ]; then
                 if ! "$S_COMPILER" "$GPT_MOE_1T_SRC" "$GPT_MOE_1T_IR" 2>&1; then
                     echo -e "${RED}✗ GPT-MoE-1T 编译失败${NC}"
                     return 1
                 fi
+                # Ensure gpt_moe and transformer/moe modules are compiled and linked
+                # so symbols like `gpt_moe_param_count` and `new_moe_config` are
+                # available to the MoE 1T module.
+                if [ -f "$NEURX_ROOT/model/transformer/moe.s" ]; then
+                    MOE_IR="$BUILD_DIR/moe_transformer.ir"
+                    if ! "$S_COMPILER" "$NEURX_ROOT/model/transformer/moe.s" "$MOE_IR" 2>&1; then
+                        echo -e "${RED}✗ transformer/moe 编译失败${NC}"
+                        return 1
+                    fi
+                    if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$MOE_IR" "$LINKED_IR_FILE" "moe" "$LINKED_IR_FILE.tmp"; then
+                        echo -e "${RED}✗ 将 transformer/moe 链接到主 IR 失败${NC}"
+                        return 1
+                    fi
+                    mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+                fi
+                if [ -f "$NEURX_ROOT/model/llm/gpt_moe.s" ]; then
+                    GPT_MOE_IR="$BUILD_DIR/gpt_moe.ir"
+                    if ! "$S_COMPILER" "$NEURX_ROOT/model/llm/gpt_moe.s" "$GPT_MOE_IR" 2>&1; then
+                        echo -e "${RED}✗ gpt_moe 模块编译失败${NC}"
+                        return 1
+                    fi
+                    if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_MOE_IR" "$LINKED_IR_FILE" "gpt_moe" "$LINKED_IR_FILE.tmp"; then
+                        echo -e "${RED}✗ 将 gpt_moe 链接到主 IR 失败${NC}"
+                        return 1
+                    fi
+                    mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+                fi
+
+                    # Ensure tokenizer (BPE) module is compiled and linked so tokenization
+                    # helpers like `bpe_tokenized_corpus_from_documents` are available.
+                    if [ -f "$NEURX_ROOT/pretrain/tokenizer/bpe.s" ]; then
+                        BPE_IR="$BUILD_DIR/bpe_tokenizer.ir"
+                        if ! "$S_COMPILER" "$NEURX_ROOT/pretrain/tokenizer/bpe.s" "$BPE_IR" 2>&1; then
+                            echo -e "${RED}✗ pretrain/tokenizer/bpe 编译失败${NC}"
+                            return 1
+                        fi
+                        if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$BPE_IR" "$LINKED_IR_FILE" "bpe" "$LINKED_IR_FILE.tmp"; then
+                            echo -e "${RED}✗ 将 bpe tokenizer 链接到主 IR 失败${NC}"
+                            return 1
+                        fi
+                        mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
+                    fi
+
                 if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_MOE_1T_IR" "$LINKED_IR_FILE" "moe1t" "$LINKED_IR_FILE.tmp"; then
                     echo -e "${RED}✗ GPT-MoE-1T IR 链接失败${NC}"
                     return 1
@@ -467,6 +525,21 @@ compile_and_run_s() {
             IR_TO_EMIT="$LINKED_IR_FILE"
         else
             IR_TO_EMIT="$IR_FILE"
+        fi
+
+        # Ensure there is an unqualified `main` in the emitted IR; some link steps
+        # may rename package-local mains and leave the final IR without an entry
+        # named exactly "main". If missing, append a small IR wrapper that
+        # delegates to the framework entry (e.g. moe1t.main) so the runtime can
+        # find and execute the program.
+        if ! grep -q "^FUNC_BEGIN|main|" "$IR_TO_EMIT" 2>/dev/null; then
+            TMP_WRAPPED_IR="$IR_TO_EMIT.wrapper"
+            cat "$IR_TO_EMIT" > "$TMP_WRAPPED_IR"
+            echo "FUNC_BEGIN|main|_|_" >> "$TMP_WRAPPED_IR"
+            echo "CALL|t0|moe1t.main|0" >> "$TMP_WRAPPED_IR"
+            echo "RET|t0|_|_" >> "$TMP_WRAPPED_IR"
+            echo "FUNC_END|main|_|_" >> "$TMP_WRAPPED_IR"
+            IR_TO_EMIT="$TMP_WRAPPED_IR"
         fi
 
         if (cd "$S_SOURCE_ROOT" && "$S_COMPILER" --emit-bin "$IR_TO_EMIT" "$BIN_FILE" 2>&1); then

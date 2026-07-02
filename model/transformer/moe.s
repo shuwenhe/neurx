@@ -287,7 +287,43 @@ func moe_forward(moe_layer layer, []float hidden, int tokens) moe_output {
             // 容量检查: 超容量则丢弃 (token dropping)
             if expert_counts[eid] < capacity {
                 expert_counts[eid] = expert_counts[eid] + 1
-                []float expert_out = moe_expert_forward(layer.experts[eid], token_hidden, H, layer.expert_dim)
+                moe_expert ex = layer.experts[eid]
+                // Inline expert forward to avoid cross-module type resolution issues
+                int D = layer.expert_dim
+                []float gate = gpt_alloc(D, 0.0)
+                []float value = gpt_alloc(D, 0.0)
+                int j = 0
+                while j < D {
+                    float g = 0.0
+                    float v = 0.0
+                    int dd = 0
+                    while dd < H {
+                        g = g + token_hidden[dd] * ex.gate_weight[dd * D + j]
+                        v = v + token_hidden[dd] * ex.value_weight[dd * D + j]
+                        dd = dd + 1
+                    }
+                    gate[j] = g
+                    value[j] = v
+                    j = j + 1
+                }
+                []float gv = gpt_alloc(D, 0.0)
+                j = 0
+                while j < D {
+                    gv[j] = gpt_swish(gate[j]) * value[j]
+                    j = j + 1
+                }
+                []float expert_out = gpt_alloc(H, 0.0)
+                int dd = 0
+                while dd < H {
+                    float s = 0.0
+                    j = 0
+                    while j < D {
+                        s = s + gv[j] * ex.down_weight[j * H + dd]
+                        j = j + 1
+                    }
+                    expert_out[dd] = s
+                    dd = dd + 1
+                }
                 d = 0
                 while d < H {
                     output[t * H + d] = output[t * H + d] + gate * expert_out[d]

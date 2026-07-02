@@ -1,0 +1,10 @@
+[
+  {"rank": 0, "device": 0},
+  {"rank": 1, "device": 1},
+  {"rank": 2, "device": 2},
+  {"rank": 3, "device": 3},
+  {"rank": 4, "device": 4},
+  {"rank": 5, "device": 5},
+  {"rank": 6, "device": 6},
+  {"rank": 7, "device": 7}
+]

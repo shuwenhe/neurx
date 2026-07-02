@@ -2,6 +2,10 @@ package neurx.pretrain.tokenizer.bpe
 
 use neurx.strings
 
+func string_char(int c) string {
+    string(c)
+}
+
 struct bpe_split_state {
     []string train_documents
     []string valid_documents
@@ -384,11 +388,11 @@ func bpe_trim(string s) string {
     }
 
     string out = ""
-    int i = left
-    while i <= right {
-        out = out + string(s[i])
-        i = i + 1
-    }
+        int i = left
+        while i <= right {
+            out = out + string_char(s[i])
+            i = i + 1
+        }
     out
 }
 
@@ -404,7 +408,7 @@ func bpe_normalize_text(string text) string {
             }
             in_space = true
         } else {
-            out = out + string(c)
+                out = out + string_char(c)
             in_space = false
         }
         i = i + 1
@@ -445,11 +449,11 @@ func bpe_extract_jsonl_text(string line) string {
         while i < len(text) {
             if text[i] == 92 && i + 1 < len(text) {
                 i = i + 1
-                value = value + string(text[i])
+                value = value + string_char(text[i])
             } else if text[i] == 34 {
                 break
             } else {
-                value = value + string(text[i])
+                value = value + string_char(text[i])
             }
             i = i + 1
         }
@@ -457,7 +461,7 @@ func bpe_extract_jsonl_text(string line) string {
     }
 
     while i < len(text) && text[i] != 44 && text[i] != 125 {
-        value = value + string(text[i])
+            value = value + string_char(text[i])
         i = i + 1
     }
     bpe_normalize_text(value)

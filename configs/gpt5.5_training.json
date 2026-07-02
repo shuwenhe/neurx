@@ -1,0 +1,30 @@
+{
+  "model": {
+    "name": "gpt5.5",
+    "vocab_size": 51200,
+    "hidden_size": 12288,
+    "num_layers": 72,
+    "num_heads": 96,
+    "ffn_dim": 49152,
+    "max_seq_length": 8192
+  },
+  "training": {
+    "total_steps": 200000,
+    "warmup_steps": 2000,
+    "batch_size_per_device": 2,
+    "learning_rate": 1e-4,
+    "checkpoint_interval": 1000,
+    "mixed_precision": "bf16",
+    "loss_scale": 1.0
+  },
+  "parallelism": {
+    "world_size": 8,
+    "data_parallel": 1,
+    "tensor_parallel": 8,
+    "pipeline_parallel": 1
+  },
+  "data": {
+    "train_path": "${NEURX_DATASET_PATH:-/data/train/train.jsonl}",
+    "val_path": "${NEURX_VAL_PATH:-/data/train/val.jsonl}"
+  }
+}
