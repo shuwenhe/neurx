@@ -4,7 +4,7 @@
 
 set -e
 
-NEURX_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/neurx"
+NEURX_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "╔════════════════════════════════════════════════════════╗"
@@ -91,11 +91,14 @@ echo ""
 
 echo "🔨 Step 3: Compiling S code modules..."
 
-S_COMPILER="${S_COMPILER:-/Users/shuwen/shuwen/train/s/.local/bin/s}"
+S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+if [ ! -f "$S_COMPILER" ]; then
+    S_COMPILER="$(command -v s 2>/dev/null || true)"
+fi
 
 if [ ! -f "$S_COMPILER" ]; then
     echo "⚠️  S compiler not found at $S_COMPILER"
-    echo "   Set S_COMPILER environment variable to override"
+    echo "   Set S_COMPILER environment variable or ensure /Users/feifei/train/s/.local/bin/s exists"
     echo ""
 fi
 

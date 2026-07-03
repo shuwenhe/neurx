@@ -5,7 +5,10 @@ set -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-S_COMPILER="${S_COMPILER:-$NEURX_ROOT/../s/.local/bin/s}"
+S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+if [ ! -f "$S_COMPILER" ]; then
+    S_COMPILER="$(command -v s 2>/dev/null || true)"
+fi
 S_COMPILER_DIR="$(dirname "$S_COMPILER")"
 
 resolve_s_source_root() {
@@ -23,6 +26,7 @@ resolve_s_source_root() {
         "$S_COMPILER_DIR/../../../.." \
         "$S_COMPILER_DIR/../../.." \
         "$S_COMPILER_DIR/../.." \
+        "$NEURX_ROOT/../../../train/s" \
         "$NEURX_ROOT/../s"; do
         if [ -d "$candidate/src/cmd/compile/seed" ]; then
             (cd "$candidate" && pwd)
@@ -35,7 +39,7 @@ resolve_s_source_root() {
 
 S_SOURCE_ROOT="${S_SOURCE_ROOT:-$(resolve_s_source_root 2>/dev/null || true)}"
 if [ -z "$S_SOURCE_ROOT" ]; then
-    S_SOURCE_ROOT="$NEURX_ROOT/../s"
+    S_SOURCE_ROOT="$NEURX_ROOT/../../../train/s"
 fi
 S_ROOT="${S_ROOT:-$S_SOURCE_ROOT}"
 MODEL_SIZE="${MODEL_SIZE:-gpt-large}"
@@ -410,9 +414,9 @@ compile_and_run_s() {
     if [ ! -f "$S_COMPILER" ]; then
         echo -e "${YELLOW}⚠ S编译器不可用${NC}"
         echo -e "${YELLOW}   位置: $S_COMPILER${NC}"
-        echo -e "${YELLOW}   说明: 本地开发环境不需要 S 编译器，集群部署时会自动使用${NC}"
+        echo -e "${YELLOW}   说明: 训练入口需要可用的 S 编译器，请检查安装路径或 PATH${NC}"
+        echo -e "${YELLOW}   提示: 期望路径 /Users/feifei/train/s/.local/bin/s${NC}"
         
-        # 如果允许演示模式或不是严格模式，返回错误供上层处理回退
         NEURX_PRETRAIN_FALLBACK_REASON="S编译器不可用"
         return 1
     fi

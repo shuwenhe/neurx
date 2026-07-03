@@ -25,10 +25,10 @@ endif
 
 .DEFAULT_GOAL := help
 
-S_COMPILER_LOCAL ?= /Users/shuwen/shuwen/train/s/.local/bin/s
-S_COMPILER_BIN ?= /Users/shuwen/shuwen/train/s/bin/s
-S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) s)
-S_COMPILER_EMIT_CWD ?= /Users/shuwen/shuwen/train/s
+S_COMPILER_LOCAL ?= /Users/feifei/train/s/.local/bin/s
+S_COMPILER_BIN ?= /Users/feifei/train/s/bin/s
+S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) $(shell command -v s 2>/dev/null) s)
+S_COMPILER_EMIT_CWD ?= /Users/feifei/train/s
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
 PRETRAIN_DATA_ROOT := $(CURDIR_UNIX)/data/pretrain_dataset
 PRETRAIN_RAW_DIR := $(PRETRAIN_DATA_ROOT)/raw
