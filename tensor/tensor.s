@@ -586,14 +586,14 @@ func tensor_backward_sum_dim_grad(tensor a, tensor upstream, int dim, bool keepd
     if !keepdim {
         expanded = unsqueeze(upstream, dim)
     }
-    mul(fill_like(a, 1.0), expanded)
+    return broadcast_to(expanded, a.shape)
 }
 
 func tensor_backward_mean_dim_grad(tensor a, tensor upstream, int dim, bool keepdim) tensor {
     int axis = normalize_dim(dim, len(a.shape))
     float denom = a.shape[axis]
     tensor grad = tensor_backward_sum_dim_grad(a, upstream, dim, keepdim)
-    div(grad, scalar_tensor(denom))
+    return div(grad, scalar_tensor(denom))
 }
 
 func tensor_backward_relu_grad(tensor a, tensor upstream) tensor {
@@ -694,11 +694,11 @@ func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
 }
 
 func sum_dim(tensor a, int dim, bool keepdim) tensor {
-    reduce_over_dim(a, dim, keepdim, 0)
+    return reduce_over_dim(a, dim, keepdim, 0)
 }
 
 func mean_dim(tensor a, int dim, bool keepdim) tensor {
-    reduce_over_dim(a, dim, keepdim, 1)
+    return reduce_over_dim(a, dim, keepdim, 1)
 }
 
 func exp_approx(float x) float {
