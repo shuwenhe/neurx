@@ -88,7 +88,7 @@ cat > "$MANIFEST_FILE" << EOF
   "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "total_shards": $actual_shards,
   "total_documents": $total_shard_lines,
-  "total_size_bytes": $(du -b "$SHARD_DIR" | cut -f1),
+  "total_size_bytes": $(($(du -ks "$SHARD_DIR" | cut -f1) * 1024)),
   "average_docs_per_shard": $((total_shard_lines / actual_shards)),
   "shards": [
 EOF
@@ -97,7 +97,7 @@ EOF
 for shard in "$SHARD_DIR"/shard_*.jsonl; do
     shard_name=$(basename "$shard")
     shard_lines=$(wc -l < "$shard")
-    shard_size=$(du -b "$shard" | cut -f1)
+    shard_size=$(($(du -ks "$shard" | cut -f1) * 1024))
     
     echo "    {
       \"shard_id\": \"${shard_name%.jsonl}\",
