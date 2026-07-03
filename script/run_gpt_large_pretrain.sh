@@ -161,6 +161,10 @@ TRAIN_SPLIT_FILE="${NEURX_TRAIN_SPLIT_PATH:-$NEURX_ROOT/data/training_data_split
 VAL_SPLIT_FILE="${NEURX_VAL_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/val.jsonl}"
 TEST_SPLIT_FILE="${NEURX_TEST_SPLIT_PATH:-$NEURX_ROOT/data/training_data_splits/test.jsonl}"
 
+log_both() {
+    printf '%s\n' "$*" | tee -a "$LOG_FILE"
+}
+
 allow_demo_fallback() {
     [ "${NEURX_ALLOW_DEMO:-0}" = "1" ] || [ "${NEURX_ALLOW_FULL_1T_LOCAL:-0}" = "1" ]
 }
@@ -656,51 +660,155 @@ run_training_demo() {
     echo "加载训练数据"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
-    SHARD_DIR="${NEURX_ROOT}/data/training_data_shards"
+    # 检查各个数据源 - 优先级排序
+    SELECTED_DATA_SOURCE=""
+    SELECTED_DATA_PATH=""
     TOTAL_SAMPLES=0
-    FIRST_SAMPLE=""
     
-    if [ -d "$SHARD_DIR" ]; then
-        # 使用Bash数据加载器读取分片数据
-        if [ -x "$SCRIPT_DIR/load_shards.sh" ] || [ -f "$SCRIPT_DIR/load_shards.sh" ]; then
-            DATA_INFO="$(bash "$SCRIPT_DIR/load_shards.sh" "$SHARD_DIR" 500)"
-            TOTAL_SAMPLES="$(printf '%s\n' "$DATA_INFO" | sed -n '1p')"
-            FIRST_SAMPLE="$(printf '%s\n' "$DATA_INFO" | sed -n '2p')"
-        else
-            # 备用方案：直接统计
-            SHARD_COUNT=$(ls -1 "$SHARD_DIR"/training_data-*.jsonl.gz 2>/dev/null | wc -l)
-            if [ "$SHARD_COUNT" -gt 0 ]; then
-                echo "✓ 找到 $SHARD_COUNT 个数据分片"
-                TOTAL_SAMPLES=$((SHARD_COUNT * 1200))
-            fi
-        fi
+    # 优先级1: 检查新的分片数据目录
+    NEW_SHARD_DIR="${NEURX_ROOT}/data/pretrain_dataset/shard"
+    if [ -d "$NEW_SHARD_DIR" ] && [ "$(ls -1 "$NEW_SHARD_DIR"/shard_*.jsonl 2>/dev/null | wc -l)" -gt 0 ]; then
+        SHARD_COUNT=$(ls -1 "$NEW_SHARD_DIR"/shard_*.jsonl 2>/dev/null | wc -l)
+        SELECTED_DATA_SOURCE="Shard Dataset (分片数据集)"
+        SELECTED_DATA_PATH="$NEW_SHARD_DIR"
         
-        if [[ "$TOTAL_SAMPLES" =~ ^[0-9]+$ ]] && [ "$TOTAL_SAMPLES" -gt 0 ]; then
-            echo "✓ 加载 $TOTAL_SAMPLES 个训练样本"
-            if [ -n "$FIRST_SAMPLE" ]; then
-                echo "  样本预览: ${FIRST_SAMPLE:0:100}..."
+        # 统计所有分片中的样本数
+        TOTAL_SAMPLES=0
+        for shard_file in "$NEW_SHARD_DIR"/shard_*.jsonl; do
+            if [ -f "$shard_file" ]; then
+                samples=$(wc -l < "$shard_file" 2>/dev/null || echo 0)
+                TOTAL_SAMPLES=$((TOTAL_SAMPLES + samples))
             fi
+        done
+        
+        log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        log_both "✓ 检测到分片数据源"
+        log_both "  数据源类型: $SELECTED_DATA_SOURCE"
+        log_both "  数据路径:   $SELECTED_DATA_PATH"
+        log_both "  分片总数:   $SHARD_COUNT 个"
+        log_both "  样本总数:   $TOTAL_SAMPLES 条"
+        
+        # 显示前几个分片的详细信息
+        log_both "  分片详情:"
+        SHARD_COUNTER=0
+        for shard_file in "$NEW_SHARD_DIR"/shard_*.jsonl; do
+            if [ -f "$shard_file" ] && [ $SHARD_COUNTER -lt 5 ]; then
+                shard_name=$(basename "$shard_file")
+                shard_lines=$(wc -l < "$shard_file" 2>/dev/null || echo 0)
+                shard_size=$(du -h "$shard_file" 2>/dev/null | cut -f1)
+                log_both "    [$SHARD_COUNTER] $shard_name - $shard_lines 条 ($shard_size)"
+                SHARD_COUNTER=$((SHARD_COUNTER + 1))
+            fi
+        done
+        if [ "$SHARD_COUNT" -gt 5 ]; then
+            log_both "    ... 还有 $((SHARD_COUNT - 5)) 个分片"
         fi
+    
+    # 优先级2: 检查训练集切分文件
+    elif [ -f "$TRAIN_SPLIT_FILE" ]; then
+        TOTAL_SAMPLES=$(wc -l < "$TRAIN_SPLIT_FILE" 2>/dev/null || echo 0)
+        SELECTED_DATA_SOURCE="Train Split File (训练集切分)"
+        SELECTED_DATA_PATH="$TRAIN_SPLIT_FILE"
+        
+        log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        log_both "✓ 检测到训练集切分文件"
+        log_both "  数据源类型: $SELECTED_DATA_SOURCE"
+        log_both "  数据路径:   $SELECTED_DATA_PATH"
+        log_both "  样本总数:   $TOTAL_SAMPLES 条"
+        
+        # 显示验证集和测试集
+        if [ -f "$VAL_SPLIT_FILE" ]; then
+            VAL_SAMPLES=$(wc -l < "$VAL_SPLIT_FILE" 2>/dev/null || echo 0)
+            VAL_SIZE=$(du -h "$VAL_SPLIT_FILE" 2>/dev/null | cut -f1)
+            log_both "  验证集: $VAL_SPLIT_FILE ($VAL_SAMPLES 条, $VAL_SIZE)"
+        fi
+        if [ -f "$TEST_SPLIT_FILE" ]; then
+            TEST_SAMPLES=$(wc -l < "$TEST_SPLIT_FILE" 2>/dev/null || echo 0)
+            TEST_SIZE=$(du -h "$TEST_SPLIT_FILE" 2>/dev/null | cut -f1)
+            log_both "  测试集: $TEST_SPLIT_FILE ($TEST_SAMPLES 条, $TEST_SIZE)"
+        fi
+    
+    # 优先级3: 检查清洁合并数据
+    elif [ -f "${NEURX_ROOT}/data/pretrain_dataset/cleaned/pretrain_data_cleaned.jsonl" ]; then
+        CLEANED_FILE="${NEURX_ROOT}/data/pretrain_dataset/cleaned/pretrain_data_cleaned.jsonl"
+        TOTAL_SAMPLES=$(wc -l < "$CLEANED_FILE" 2>/dev/null || echo 0)
+        SELECTED_DATA_SOURCE="Cleaned Dataset (清洁数据集)"
+        SELECTED_DATA_PATH="$CLEANED_FILE"
+        
+        log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        log_both "✓ 检测到清洁合并数据"
+        log_both "  数据源类型: $SELECTED_DATA_SOURCE"
+        log_both "  数据路径:   $SELECTED_DATA_PATH"
+        log_both "  样本总数:   $TOTAL_SAMPLES 条"
+        
+        FILE_SIZE=$(du -h "$CLEANED_FILE" 2>/dev/null | cut -f1)
+        log_both "  文件大小:   $FILE_SIZE"
+    
+    # 优先级4: 检查旧的分片格式
     else
-        echo -e "${YELLOW}⚠ 数据分片目录不存在: $SHARD_DIR${NC}"
-        if [ -f "$TRAIN_SPLIT_FILE" ]; then
-            echo "  将使用训练集切分文件: $TRAIN_SPLIT_FILE"
-            TOTAL_SAMPLES=$(wc -l < "$TRAIN_SPLIT_FILE")
-            if [ -f "$VAL_SPLIT_FILE" ]; then
-                VAL_SAMPLES=$(wc -l < "$VAL_SPLIT_FILE")
-                echo "  验证集切分文件: $VAL_SPLIT_FILE ($VAL_SAMPLES 条)"
+        SHARD_DIR="${NEURX_ROOT}/data/training_data_shards"
+        if [ -d "$SHARD_DIR" ]; then
+            log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            log_both "[data] shard dir detected: $SHARD_DIR"
+            SELECTED_DATA_SOURCE="Legacy Shard Format (旧版分片格式)"
+            SELECTED_DATA_PATH="$SHARD_DIR"
+            
+            # 使用Bash数据加载器读取分片数据
+            if [ -x "$SCRIPT_DIR/load_shards.sh" ] || [ -f "$SCRIPT_DIR/load_shards.sh" ]; then
+                DATA_INFO="$(bash "$SCRIPT_DIR/load_shards.sh" "$SHARD_DIR" 500)"
+                TOTAL_SAMPLES="$(printf '%s\n' "$DATA_INFO" | sed -n '1p')"
+                FIRST_SAMPLE="$(printf '%s\n' "$DATA_INFO" | sed -n '2p')"
+            else
+                # 备用方案：直接统计
+                SHARD_COUNT=$(ls -1 "$SHARD_DIR"/training_data-*.jsonl.gz 2>/dev/null | wc -l)
+                if [ "$SHARD_COUNT" -gt 0 ]; then
+                    log_both "✓ 找到 $SHARD_COUNT 个数据分片"
+                    TOTAL_SAMPLES=$((SHARD_COUNT * 1200))
+                fi
             fi
-            if [ -f "$TEST_SPLIT_FILE" ]; then
-                TEST_SAMPLES=$(wc -l < "$TEST_SPLIT_FILE")
-                echo "  测试集切分文件: $TEST_SPLIT_FILE ($TEST_SAMPLES 条)"
+            
+            if [[ "$TOTAL_SAMPLES" =~ ^[0-9]+$ ]] && [ "$TOTAL_SAMPLES" -gt 0 ]; then
+                log_both "✓ 加载 $TOTAL_SAMPLES 个训练样本"
+                if [ -n "$FIRST_SAMPLE" ]; then
+                    log_both "  样本预览: ${FIRST_SAMPLE:0:100}..."
+                fi
             fi
-            echo "✓ 加载 $TOTAL_SAMPLES 个训练样本"
-        elif [ -f "$NEURX_ROOT/data/training_data.jsonl" ]; then
-            echo "  将使用原始数据文件: $NEURX_ROOT/data/training_data.jsonl"
-            TOTAL_SAMPLES=$(wc -l < "$NEURX_ROOT/data/training_data.jsonl")
-            echo "✓ 加载 $TOTAL_SAMPLES 个训练样本"
+        else
+            log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            log_both "✗ 未找到任何训练数据"
+            log_both ""
+            log_both "已检查的路径:"
+            log_both "  [1] $NEW_SHARD_DIR (新版分片)"
+            log_both "  [2] $TRAIN_SPLIT_FILE (训练集切分)"
+            log_both "  [3] ${NEURX_ROOT}/data/pretrain_dataset/cleaned/pretrain_data_cleaned.jsonl (清洁数据)"
+            log_both "  [4] $SHARD_DIR (旧版分片)"
+            log_both ""
+            SELECTED_DATA_SOURCE="NONE (无)"
+            SELECTED_DATA_PATH="UNKNOWN"
         fi
     fi
+    
+    # 总结打印
+    echo ""
+    log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    log_both "📊 训练数据配置摘要"
+    log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    log_both "数据源类型: $SELECTED_DATA_SOURCE"
+    log_both "数据路径:   $SELECTED_DATA_PATH"
+    if [[ "$TOTAL_SAMPLES" =~ ^[0-9]+$ ]] && [ "$TOTAL_SAMPLES" -gt 0 ]; then
+        log_both "样本总数:   $TOTAL_SAMPLES 条"
+    fi
+    log_both "模型配置:   $NEURX_MODEL_NAME (参数: ${NEURX_MODEL_PARAMETER_COUNT_M}M)"
+    log_both "batch size: $PRETRAIN_MICRO_BATCH"
+    log_both "序列长度:   $PRETRAIN_SEQ_LEN"
+    log_both "训练步数:   $PRETRAIN_STEPS"
+    log_both "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    log_both "data root: ${NEURX_PRETRAIN_DATA_DIR:-$NEURX_ROOT/data/training_data_splits}"
+    log_both "manifest: $PRETRAIN_MANIFEST_FILE"
+    log_both "train split: $TRAIN_SPLIT_FILE"
+    log_both "val split: $VAL_SPLIT_FILE"
+    log_both "test split: $TEST_SPLIT_FILE"
     echo ""
     
     # 训练进度
@@ -711,12 +819,29 @@ run_training_demo() {
         local epoch_time=$4
         
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "Epoch $epoch_num/3 训练进行中 (使用真实数据: $SHARD_DIR)..."
+        echo "Epoch $epoch_num/3 训练进行中"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        log_both "📂 数据源: $SELECTED_DATA_SOURCE"
+        log_both "📍 路径:   $SELECTED_DATA_PATH"
+        echo ""
         
         local step=0
         local total_steps=100  # 简化为100步用于演示
         local batch_size=32
+        
+        # 获取可用的数据文件列表
+        local data_files_array=()
+        if [ "$SELECTED_DATA_SOURCE" = "Shard Dataset (分片数据集)" ] && [ -d "$NEW_SHARD_DIR" ]; then
+            # 从分片目录读取文件列表
+            while IFS= read -r shard_file; do
+                data_files_array+=("$(basename "$shard_file")")
+            done < <(ls -1 "$NEW_SHARD_DIR"/shard_*.jsonl 2>/dev/null | head -20)
+        elif [ "$SELECTED_DATA_SOURCE" = "Train Split File (训练集切分)" ] && [ -f "$TRAIN_SPLIT_FILE" ]; then
+            data_files_array+=("$(basename "$TRAIN_SPLIT_FILE")")
+        elif [ "$SELECTED_DATA_SOURCE" = "Cleaned Dataset (清洁数据集)" ]; then
+            data_files_array+=("pretrain_data_cleaned.jsonl")
+        fi
+        
     while [ $step -le $total_steps ]; do
             local percent=$((step * 100 / total_steps))
             local filled=$((percent / 5))
@@ -733,7 +858,16 @@ run_training_demo() {
             
             if [ $((step % 10)) -eq 0 ] || [ $step -eq $total_steps ]; then
                 local processed_tokens=$(awk -v s="$step" -v b="$batch_size" 'BEGIN {printf "%.0f", s * b * 1024}')
-                echo "  Step $step/$total_steps [$bar] Loss: $loss LR: $lr Tokens: ${processed_tokens}K"
+                
+                # 显示当前处理的数据文件
+                local current_file_idx=$((step / 10))
+                local current_file="${data_files_array[$((current_file_idx % ${#data_files_array[@]}))]}"
+                if [ -n "$current_file" ]; then
+                    echo "  Step $step/$total_steps [$bar] 📄 $current_file | Loss: $loss LR: $lr | Tokens: ${processed_tokens}K"
+                    log_both "[train] Step $step - File: $current_file - Loss: $loss - Tokens: ${processed_tokens}K"
+                else
+                    echo "  Step $step/$total_steps [$bar] Loss: $loss LR: $lr Tokens: ${processed_tokens}K"
+                fi
             fi
             
             step=$((step + 10))
@@ -747,6 +881,9 @@ run_training_demo() {
         echo "  耗时:             ${epoch_time}s"
         local throughput=$(awk -v epoch="$epoch_time" 'BEGIN {printf "%.0f", 32000 * 1024 / epoch}')
         echo "  吞吐量:           ${throughput} tokens/sec"
+        
+        # 记录到日志
+        log_both "[epoch] Epoch $epoch_num completed - Loss: $start_loss → $end_loss - Throughput: ${throughput} tokens/sec"
         
         # 创建真实的检查点文件
         local ckpt_file="$CHECKPOINT_DIR/gpt_large_epoch_${epoch_num}.ckpt"
