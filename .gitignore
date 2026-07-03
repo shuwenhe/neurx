@@ -102,6 +102,7 @@ runtime/*.ir
 data/pretrain_dataset/raw/
 data/pretrain_dataset/cleaned/
 data/pretrain_dataset/shard/
+data/pretrain_dataset/manifest.json
 data/training_data_splits/
 data/*.jsonl
 data/**/*.jsonl

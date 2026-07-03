@@ -30,6 +30,14 @@ S_COMPILER_BIN ?= /Users/shuwen/shuwen/train/s/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) s)
 S_COMPILER_EMIT_CWD ?= /Users/shuwen/shuwen/train/s
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
+PRETRAIN_DATA_ROOT := $(CURDIR_UNIX)/data/pretrain_dataset
+PRETRAIN_RAW_DIR := $(PRETRAIN_DATA_ROOT)/raw
+PRETRAIN_CLEANED_FILE := $(PRETRAIN_DATA_ROOT)/cleaned/pretrain_data_cleaned.jsonl
+PRETRAIN_TRAIN_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/train.jsonl
+PRETRAIN_VAL_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/val.jsonl
+PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
+PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
+PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 help:
 	@echo "  make train"
@@ -40,7 +48,23 @@ help:
 
 train: check-bash
 	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
-	@cd '$(CURDIR_UNIX)' && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && \
+		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
+		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
+		echo "  cleaned  : $(PRETRAIN_CLEANED_FILE)" && \
+		echo "  train    : $(PRETRAIN_TRAIN_SPLIT)" && \
+		echo "  val      : $(PRETRAIN_VAL_SPLIT)" && \
+		echo "  test     : $(PRETRAIN_TEST_SPLIT)" && \
+		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
+		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
+		bash clean_data.sh && \
+		bash generate_shards.sh && \
+		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
+		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
+		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
+		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
+		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
 
 
 
@@ -50,7 +74,23 @@ infer: check-bash
 
 pretrain: check-bash
 	@echo "Running GPT-Large production pre-training (alias for make train)"
-	@cd '$(CURDIR_UNIX)' && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && \
+		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
+		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
+		echo "  cleaned  : $(PRETRAIN_CLEANED_FILE)" && \
+		echo "  train    : $(PRETRAIN_TRAIN_SPLIT)" && \
+		echo "  val      : $(PRETRAIN_VAL_SPLIT)" && \
+		echo "  test     : $(PRETRAIN_TEST_SPLIT)" && \
+		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
+		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
+		bash clean_data.sh && \
+		bash generate_shards.sh && \
+		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
+		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
+		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
+		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
+		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
 
 pretrain-watch: check-bash
 	@echo "Running GPT-Large pre-training with live log monitoring"

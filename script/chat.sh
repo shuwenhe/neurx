@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # NeurX Interactive Chat - ChatGPT-like循环聊天
-# 集成真实的S语言推理引擎 (inference/chat_inference.s)
+# 集成真实的S语言推理引擎 (inference/production_inference.s)
 
 set -euo pipefail
 
@@ -9,13 +9,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="$NEURX_DIR/output"
 CHAT_DIR="$NEURX_DIR/chat_history"
-BUILD_DIR="$NEURX_DIR/build/chat_inference"
+BUILD_DIR="$NEURX_DIR/build/interactive_inference"
 SESSION_ID="session_$(date +%s)"
 CHAT_LOG="$CHAT_DIR/chat_${SESSION_ID}.txt"
 
 # 推理引擎配置
 S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
-CHAT_SOURCE="$NEURX_DIR/inference/chat_inference.s"
+CHAT_SOURCE="$NEURX_DIR/inference/production_inference.s"
+RUNNER_IR="$BUILD_DIR/interactive_inference.ir"
+RUNNER_BIN="$NEURX_DIR/build/s_ir_runner_train_gpt_large"
+MODEL_BIN="$BUILD_DIR/interactive_inference.bin"
+CHECKPOINT_PATH="${NEURX_INFER_CHECKPOINT:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
+TOKENIZER_PATH="${NEURX_INFER_TOKENIZER_PATH:-$NEURX_DIR/data/corpus}"
+DEVICE="${NEURX_INFER_DEVICE:-cpu}"
 
 # 创建必要的目录
 mkdir -p "$OUTPUT_DIR" "$CHAT_DIR" "$BUILD_DIR"
@@ -41,7 +47,7 @@ print_header() {
 
 ╔════════════════════════════════════════════════════════════════════╗
 ║                    NeurX Interactive Chat                         ║
-║              集成真实S语言推理引擎 (inference/chat_inference.s)           ║
+║         集成真实S语言推理引擎 (inference/production_inference.s)    ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 EOF
@@ -53,48 +59,125 @@ EOF
     echo ""
 }
 
-# 生成模型响应 - 集成真实推理引擎
-# 当前使用演示模式，可通过调用编译的inference/chat_inference.s进行替换
+build_chat_prompt() {
+    local user_input="$1"
+    printf '你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：\n%s\n答案：' "$user_input"
+}
+
+extract_model_response() {
+    local raw_output="$1"
+    local extracted
+
+    extracted=$(printf '%s\n' "$raw_output" | awk '
+        /^答案：$/ {capture=1; next}
+        /^Answer:$/ {capture=1; next}
+        /^\[phase\] generate:done$/ {capture=0}
+        capture {print}
+    ')
+
+    if [ -n "$extracted" ]; then
+        printf '%s\n' "$extracted" | sed '/^[[:space:]]*$/d' | tail -n 1
+        return
+    fi
+
+    extracted=$(printf '%s\n' "$raw_output" | awk '
+        /^Generated:$/ {capture=1; next}
+        /^\[phase\] generate:done$/ {capture=0}
+        capture {print}
+    ')
+
+    if [ -n "$extracted" ]; then
+        printf '%s\n' "$extracted" | sed '/^[[:space:]]*$/d' | tail -n 1
+        return
+    fi
+
+    printf '%s\n' "$raw_output" | tail -n 1
+}
+
+clean_model_output() {
+    local user_input="$1"
+    local raw_output="$2"
+    local normalized
+
+    normalized="$(extract_model_response "$raw_output")"
+    normalized="${normalized//$'\r'/}"
+    normalized="$(printf '%s\n' "$normalized" | sed '/^[[:space:]]*$/d')"
+
+    if [ -z "$normalized" ]; then
+        printf '%s\n' ""
+        return
+    fi
+
+    normalized="$(printf '%s\n' "$normalized" | awk -v user_input="$user_input" '
+        BEGIN { saw_user=0 }
+        {
+            if ($0 == user_input) {
+                saw_user=1
+                next
+            }
+            if ($0 ~ /^你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：$/) {
+                next
+            }
+            if ($0 ~ /^答案：$/ || $0 ~ /^Answer:$/ || $0 ~ /^Generated:$/) {
+                next
+            }
+            print
+        }
+    ')"
+
+    normalized="$(printf '%s\n' "$normalized" | sed '/^[[:space:]]*$/d')"
+    if [ -n "$normalized" ]; then
+        printf '%s\n' "$normalized" | tail -n 1
+        return
+    fi
+
+    printf '%s\n' ""
+}
+
 generate_response() {
     local user_input="$1"
-    
-    # TODO: 集成真实推理引擎
-    # 预期调用: $BUILD_DIR/chat_inference.bin "$user_input"
-    # 这将使用S语言Transformer模型进行真实推理
-    
-    case "$user_input" in
-        *hello*|*Hi*|*你好*)
-            echo "👋 你好！很高兴见到你。我是 NeurX AI 助手，有什么我可以帮助你的吗？"
-            ;;
-        *"how are you"*|*你好吗*)
-            echo "✨ 我很好，谢谢你的关心！我已准备好帮助你解决任何问题。"
-            ;;
-        *"what is your name"*|*你是谁*)
-            echo "🤖 我是 NeurX，一个由深度学习框架驱动的 AI 助手。很高兴认识你！"
-            ;;
-        *help*|*帮助*)
-            printf "📚 我可以帮助你完成以下任务:\n"
-            printf "  • 回答问题\n"
-            printf "  • 进行对话\n"
-            printf "  • 提供建议\n"
-            printf "  • 解释概念\n\n"
-            printf "请提出你的问题或需求！\n"
-            ;;
-        *thank*|*谢谢*)
-            echo "😊 不客气！很高兴为你服务。还有其他我可以帮助的吗？"
-            ;;
-        *)
-            # 生成演示响应
-            printf "🧠 [推理中...] 关于'${user_input:0:20}...'的思考:\n\n"
-            printf "这是一个有趣的问题。根据我的分析:\n"
-            printf "• 核心要点已理解\n"
-            printf "• 多角度思考中...\n"
-            printf "• 综合评估后的建议:\n\n"
-            printf "✓ 我认为这是一个很好的想法。\n"
-            printf "✓ 建议进一步探索相关的方面。\n"
-            printf "✓ 这需要考虑实际的应用场景。\n"
-            ;;
-    esac
+    local prompt
+    prompt="$(build_chat_prompt "$user_input")"
+
+    if [ ! -x "$RUNNER_BIN" ]; then
+        printf "当前没有可执行的推理运行器，请先运行 \`bash script/run_interactive_inference.sh\` 完成编译。"
+        return
+    fi
+
+    if [ ! -f "$RUNNER_IR" ]; then
+        printf "当前没有找到推理 IR 文件，请先运行 \`bash script/run_interactive_inference.sh\` 生成模型运行产物。"
+        return
+    fi
+
+    local raw_output
+    raw_output=$(
+        NEURX_INFER_CHECKPOINT="$CHECKPOINT_PATH" \
+        NEURX_INFER_CHECKPOINT_PATH="$CHECKPOINT_PATH" \
+        NEURX_CHECKPOINT_PATH="$CHECKPOINT_PATH" \
+        NEURX_INFER_TOKENIZER_PATH="$TOKENIZER_PATH" \
+        NEURX_TOKENIZER_PATH="$TOKENIZER_PATH" \
+        NEURX_INFER_DEVICE="$DEVICE" \
+        NEURX_DEVICE="$DEVICE" \
+        NEURX_INFER_PROMPT="$prompt" \
+        NEURX_INFERENCE_INPUT="$prompt" \
+        NEURX_INFER_FALLBACK_PROMPT="$prompt" \
+        NEURX_INFER_ANSWER_MODE="qa" \
+        NEURX_INFER_ANSWER_ONLY="0" \
+        NEURX_INFER_MAX_NEW_CHARS="$MAX_TOKENS" \
+        NEURX_TEMPERATURE="$TEMPERATURE" \
+        NEURX_TOP_P="$TOP_P" \
+        "$RUNNER_BIN" "$RUNNER_IR" 2>&1 | tee -a "$BUILD_DIR/chat_inference.log" || true
+    )
+
+    local response
+    response="$(clean_model_output "$user_input" "$raw_output")"
+
+    if [ -z "$response" ]; then
+        printf "模型没有返回内容，请检查 checkpoint 和推理运行器。"
+        return
+    fi
+
+    printf '%s\n' "$response"
 }
 
 # 保存聊天记录
@@ -114,13 +197,14 @@ echo -e "${YELLOW}📋 推理引擎信息:${NC}"
 echo -e "   源代码: $CHAT_SOURCE"
 echo -e "   编译器: $S_COMPILER"
 echo -e "   构建目录: $BUILD_DIR"
+echo -e "   运行器: $RUNNER_BIN"
+echo -e "   模型产物: $MODEL_BIN"
+echo -e "   Checkpoint: $CHECKPOINT_PATH"
 echo ""
 echo -e "${CYAN}📌 架构:${NC}"
-echo -e "   • Transformer Encoder-Decoder 模型"
-echo -e "   • Vocabulary: 32K tokens"
-echo -e "   • Hidden dimension: 256"
-echo -e "   • 6 layer Transformer with 8 attention heads"
-echo -e "   • Temperature: 0.7, Max tokens: 150"
+echo -e "   • 生产级 S 语言推理管线"
+echo -e "   • Prompt -> IR runner -> checkpoint -> generation"
+echo -e "   • Temperature: $TEMPERATURE, Max tokens: $MAX_TOKENS"
 echo ""
 
 turn=0
