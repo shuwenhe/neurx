@@ -19,6 +19,58 @@ struct tensor {
     bool has_grad
 }
 
+func tensor_numel(tensor t) int {
+    return t.desc.numel
+}
+
+func tensor_rank(tensor t) int {
+    return len(t.desc.shape)
+}
+
+func tensor_is_view(tensor t) bool {
+    return t.desc.is_view
+}
+
+func tensor_is_contiguous(tensor t) bool {
+    return t.desc.is_contiguous
+}
+
+func tensor_clone_storage(tensor t) tensor {
+    tensor {
+        storage: copy_float(t.storage),
+        desc: tensor_desc {
+            shape: copy_int(t.desc.shape),
+            strides: copy_int(t.desc.strides),
+            storage_offset: t.desc.storage_offset,
+            numel: t.desc.numel,
+            dtype: t.desc.dtype,
+            device: t.desc.device,
+            requires_grad: t.desc.requires_grad,
+            is_view: false,
+            is_contiguous: true,
+        },
+        grad: copy_float(t.grad),
+        has_grad: t.has_grad,
+    }
+}
+
+func tensor_summary(tensor t) string {
+    string summary = "tensor(shape="
+    summary = summary + str(t.desc.shape)
+    summary = summary + ", dtype="
+    summary = summary + t.desc.dtype
+    summary = summary + ", device="
+    summary = summary + t.desc.device
+    summary = summary + ", requires_grad="
+    summary = summary + str(t.desc.requires_grad)
+    summary = summary + ", is_view="
+    summary = summary + str(t.desc.is_view)
+    summary = summary + ", contiguous="
+    summary = summary + str(t.desc.is_contiguous)
+    summary = summary + ")"
+    return summary
+}
+
 func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
@@ -93,6 +145,11 @@ func int_to_float(int n) float {
 }
 
 func broadcast_shape([]int a, []int b) []int {
+    if !broadcastable_shape(a, b) {
+        []int empty_shape = []int{cap: 1}
+        empty_shape[0] = 0
+        return empty_shape
+    }
     int ndim_a = len(a)
     int ndim_b = len(b)
     int ndim = ndim_a
@@ -129,6 +186,89 @@ func broadcast_shape([]int a, []int b) []int {
         ia = ia - 1
         ib = ib - 1
         io = io - 1
+    }
+    return out
+}
+
+func broadcastable_shape([]int a, []int b) bool {
+    int ndim_a = len(a)
+    int ndim_b = len(b)
+    int ndim = ndim_a
+    if ndim_b > ndim {
+        ndim = ndim_b
+    }
+    int ia = ndim_a - 1
+    int ib = ndim_b - 1
+    int i = ndim - 1
+    while i >= 0 {
+        int dim_a = 1
+        int dim_b = 1
+        if ia >= 0 {
+            dim_a = a[ia]
+        }
+        if ib >= 0 {
+            dim_b = b[ib]
+        }
+        if dim_a != dim_b && dim_a != 1 && dim_b != 1 {
+            return false
+        }
+        ia = ia - 1
+        ib = ib - 1
+        i = i - 1
+    }
+    return true
+}
+
+func sum_to_shape(tensor src, []int target_shape) tensor {
+    tensor input = contiguous(src)
+    if !broadcastable_shape(target_shape, input.desc.shape) {
+        []int empty_shape = []int{cap: 1}
+        empty_shape[0] = 0
+        return empty(empty_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
+    }
+
+    int target_rank = len(target_shape)
+    int input_rank = len(input.desc.shape)
+    []int out_shape = copy_int(target_shape)
+    tensor out = empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
+
+    int total = input.desc.numel
+    int flat = 0
+    while flat < total {
+        []int src_coords = unravel_index(flat, input.desc.shape)
+        []int dst_coords = []int{cap: target_rank}
+        int i = 0
+        while i < target_rank {
+            dst_coords[i] = 0
+            i = i + 1
+        }
+
+        int src_axis = input_rank - 1
+        int dst_axis = target_rank - 1
+        while dst_axis >= 0 {
+            int src_dim = 1
+            int dst_dim = target_shape[dst_axis]
+            if src_axis >= 0 {
+                src_dim = input.desc.shape[src_axis]
+                if dst_dim == 1 {
+                    dst_coords[dst_axis] = 0
+                } else if src_dim == dst_dim {
+                    dst_coords[dst_axis] = src_coords[src_axis]
+                } else if src_dim == 1 {
+                    dst_coords[dst_axis] = 0
+                } else {
+                    dst_coords[dst_axis] = src_coords[src_axis]
+                }
+            } else {
+                dst_coords[dst_axis] = 0
+            }
+            src_axis = src_axis - 1
+            dst_axis = dst_axis - 1
+        }
+
+        int dst_flat = ravel_index(dst_coords, target_shape)
+        out.storage[dst_flat] = out.storage[dst_flat] + input.storage[flat]
+        flat = flat + 1
     }
     return out
 }
@@ -294,7 +434,7 @@ func as_strided(tensor base, []int shape, []int strides, int storage_offset) ten
         is_contiguous: same_ints(strides, contiguous_strides(shape)),
     }
     return tensor {
-        storage: copy_float(base.storage),
+        storage: base.storage,
         desc: desc,
         grad: zeros_float(desc.numel),
         has_grad: false,
@@ -349,6 +489,11 @@ func broadcast_offset(tensor t, []int out_coords) int {
 func elementwise_binary(tensor a, tensor b, string op) tensor {
     tensor left = contiguous(a)
     tensor right = contiguous(b)
+    if !broadcastable_shape(left.desc.shape, right.desc.shape) {
+        []int empty_shape = []int{cap: 1}
+        empty_shape[0] = 0
+        return empty(empty_shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
+    }
     []int out_shape = broadcast_shape(left.desc.shape, right.desc.shape)
     tensor out = empty(out_shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
     int total = out.desc.numel
@@ -375,6 +520,25 @@ func elementwise_binary(tensor a, tensor b, string op) tensor {
     return out
 }
 
+func broadcast_to(tensor a, []int target_shape) tensor {
+    tensor src = contiguous(a)
+    if !broadcastable_shape(src.desc.shape, target_shape) {
+        []int empty_shape = []int{cap: 1}
+        empty_shape[0] = 0
+        return empty(empty_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
+    }
+    tensor out = empty(target_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
+    int total = out.desc.numel
+    int flat = 0
+    while flat < total {
+        []int dst_coords = unravel_index(flat, target_shape)
+        int src_off = broadcast_offset(src, dst_coords)
+        out.storage[flat] = src.storage[src_off]
+        flat = flat + 1
+    }
+    return out
+}
+
 func contiguous(tensor t) tensor {
     if t.desc.is_contiguous && t.desc.storage_offset == 0 {
         return t
@@ -386,6 +550,10 @@ func contiguous(tensor t) tensor {
         i = i + 1
     }
     return out
+}
+
+func tensor_materialize(tensor t) tensor {
+    return contiguous(t)
 }
 
 func clone(tensor t) tensor {

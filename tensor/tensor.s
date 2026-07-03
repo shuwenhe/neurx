@@ -1,5 +1,6 @@
 package neurx.tensor
 
+use neurx.backends.compute_backend
 use neurx.ad.ir
 use neurx.ad.tracer
 
@@ -458,24 +459,8 @@ func matmul(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
-    []float out = []float{cap: rows * cols}
-    int r = 0
-    while r < rows {
-        int c = 0
-        while c < cols {
-            float acc = 0.0
-            int i = 0
-            while i < inner {
-                float x = a.data[r * inner + i]
-                float y = b.data[i * cols + c]
-                acc = acc + x * y
-                i = i + 1
-            }
-            out[r * cols + c] = acc
-            c = c + 1
-        }
-        r = r + 1
-    }
+    compute_context ctx = resolve_compute_context("", "")
+    []float out = backend_matmul_dispatch(ctx, a.data, b.data, rows, inner, cols)
     new(out, [rows, cols], a.requires_grad || b.requires_grad)
 }
 
@@ -516,11 +501,13 @@ func tensor_backward_add_grad_b(tensor upstream) tensor {
 }
 
 func tensor_backward_mul_grad_a(tensor a, tensor b, tensor upstream) tensor {
-    mul(upstream, b)
+    tensor grad = mul(upstream, b)
+    sum_to_shape(grad, a.shape)
 }
 
 func tensor_backward_mul_grad_b(tensor a, tensor b, tensor upstream) tensor {
-    mul(upstream, a)
+    tensor grad = mul(upstream, a)
+    sum_to_shape(grad, b.shape)
 }
 
 func negate_tensor(tensor value) tensor {
@@ -536,13 +523,15 @@ func tensor_backward_sub_grad_b(tensor upstream) tensor {
 }
 
 func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
-    div(upstream, b)
+    tensor grad = div(upstream, b)
+    sum_to_shape(grad, a.shape)
 }
 
 func tensor_backward_div_grad_b(tensor a, tensor b, tensor upstream) tensor {
     tensor numerator = mul(upstream, a)
     tensor denominator = mul(b, b)
-    negate_tensor(div(numerator, denominator))
+    tensor grad = negate_tensor(div(numerator, denominator))
+    sum_to_shape(grad, b.shape)
 }
 
 func tensor_backward_matmul_grad_a(tensor a, tensor b, tensor upstream) tensor {
@@ -605,6 +594,33 @@ func tensor_backward_mean_dim_grad(tensor a, tensor upstream, int dim, bool keep
     float denom = a.shape[axis]
     tensor grad = tensor_backward_sum_dim_grad(a, upstream, dim, keepdim)
     div(grad, scalar_tensor(denom))
+}
+
+func tensor_backward_relu_grad(tensor a, tensor upstream) tensor {
+    tensor mask = maximum(sign(a), zeros_like(a))
+    mul(upstream, mask)
+}
+
+func tensor_backward_exp_grad(tensor a, tensor upstream) tensor {
+    mul(upstream, exp(a))
+}
+
+func tensor_backward_log_grad(tensor a, tensor upstream) tensor {
+    div(upstream, clamp(a, 0.000000000001, 1000000000.0))
+}
+
+func tensor_backward_sqrt_grad(tensor a, tensor upstream) tensor {
+    div(upstream, mul(scalar_tensor(2.0), sqrt(a)))
+}
+
+func tensor_backward_tanh_grad(tensor a, tensor upstream) tensor {
+    tensor y = tanh(a)
+    mul(upstream, sub(ones_like(a), mul(y, y)))
+}
+
+func tensor_backward_sigmoid_grad(tensor a, tensor upstream) tensor {
+    tensor y = sigmoid(a)
+    mul(upstream, mul(y, sub(ones_like(a), y)))
 }
 
 func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
@@ -1118,6 +1134,36 @@ func trace_mean_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
     neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean_dim", single_string(param), single_string("arg0"), single_string("out0"))
+}
+
+func trace_relu(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "relu", empty_strings(), single_string("arg0"), single_string("out0"))
+}
+
+func trace_exp(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "exp", empty_strings(), single_string("arg0"), single_string("out0"))
+}
+
+func trace_log(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "log", empty_strings(), single_string("arg0"), single_string("out0"))
+}
+
+func trace_sqrt(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sqrt", empty_strings(), single_string("arg0"), single_string("out0"))
+}
+
+func trace_tanh(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "tanh", empty_strings(), single_string("arg0"), single_string("out0"))
+}
+
+func trace_sigmoid(tracer_state state, tensor a) tracer_state {
+    del a
+    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sigmoid", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_broadcast_to(tracer_state state, tensor a, []int shape) tracer_state {

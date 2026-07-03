@@ -1,5 +1,6 @@
 package neurx.nn
 
+use neurx.backends.compute_backend
 use neurx.tensor.tensor
 
 struct linear {
@@ -7,6 +8,8 @@ struct linear {
     int out_features
     []float weight
     []float bias
+    bool has_bias
+    bool training
 }
 
 func copy_float([]float data) []float {
@@ -373,11 +376,79 @@ func new_linear(int in_features, int out_features) linear {
         out_features: out_features,
         weight: weight,
         bias: bias,
+        has_bias: true,
+        training: true,
     }
 }
 
+func linear_train(linear layer) linear {
+    linear {
+        in_features: layer.in_features,
+        out_features: layer.out_features,
+        weight: copy_float(layer.weight),
+        bias: copy_float(layer.bias),
+        has_bias: layer.has_bias,
+        training: true,
+    }
+}
+
+func linear_eval(linear layer) linear {
+    linear {
+        in_features: layer.in_features,
+        out_features: layer.out_features,
+        weight: copy_float(layer.weight),
+        bias: copy_float(layer.bias),
+        has_bias: layer.has_bias,
+        training: false,
+    }
+}
+
+func linear_state_dict(linear layer) linear {
+    linear {
+        in_features: layer.in_features,
+        out_features: layer.out_features,
+        weight: copy_float(layer.weight),
+        bias: copy_float(layer.bias),
+        has_bias: layer.has_bias,
+        training: layer.training,
+    }
+}
+
+func linear_load_state_dict(linear layer, linear other) linear {
+    linear {
+        in_features: other.in_features,
+        out_features: other.out_features,
+        weight: copy_float(other.weight),
+        bias: copy_float(other.bias),
+        has_bias: other.has_bias,
+        training: other.training,
+    }
+}
+
+func linear_parameters(linear layer) []tensor {
+    []tensor params = []tensor{cap: 2}
+    params[0] = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), true)
+    params[1] = neurx.tensor.new(copy_float(layer.bias), shape1(layer.out_features), true)
+    params
+}
+
 func linear_forward(linear layer, tensor input) tensor {
-    matmul2d(input, neurx.tensor.new(layer.weight, shape2(layer.in_features, layer.out_features), false))
+    compute_context ctx = resolve_compute_context("", "")
+    linear_forward_backend(layer, input, ctx)
+}
+
+func linear_forward_backend(linear layer, tensor input, compute_context ctx) tensor {
+    tensor weight = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), false)
+    int rows = input.shape[0]
+    int inner = input.shape[1]
+    []float out_data = backend_matmul_dispatch(ctx, input.data, weight.data, rows, inner, layer.out_features)
+    tensor out = neurx.tensor.new(out_data, shape2(rows, layer.out_features), input.requires_grad)
+    if layer.has_bias {
+        tensor bias = neurx.tensor.new(copy_float(layer.bias), shape1(layer.out_features), false)
+        tensor bias_view = neurx.tensor.broadcast_to(bias, out.shape)
+        out = neurx.tensor.add(out, bias_view)
+    }
+    out
 }
 
 func layer_norm(tensor input, tensor weight, tensor bias, int normalized_dims, float eps) tensor {

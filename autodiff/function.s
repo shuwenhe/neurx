@@ -290,6 +290,30 @@ func transform_chain_mean(transform_chain chain) transform_chain {
     transform_chain_with_op(chain, "mean")
 }
 
+func transform_chain_relu(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "relu")
+}
+
+func transform_chain_exp(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "exp")
+}
+
+func transform_chain_log(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "log")
+}
+
+func transform_chain_sqrt(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "sqrt")
+}
+
+func transform_chain_tanh(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "tanh")
+}
+
+func transform_chain_sigmoid(transform_chain chain) transform_chain {
+    transform_chain_with_op(chain, "sigmoid")
+}
+
 func transform_chain_set_ready(transform_chain chain, bool ready) transform_chain {
     transform_chain {
         steps: copy_transform_steps(chain.steps),
@@ -664,4 +688,28 @@ func sum(function_record f) function_record {
 
 func mean(function_record f) function_record {
     function_mean(f)
+}
+
+func function_relu(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=relu"), "relu")
+}
+
+func function_exp(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=exp"), "exp")
+}
+
+func function_log(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=log"), "log")
+}
+
+func function_sqrt(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=sqrt"), "sqrt")
+}
+
+func function_tanh(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=tanh"), "tanh")
+}
+
+func function_sigmoid(function_record f) function_record {
+    add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=sigmoid"), "sigmoid")
 }

@@ -97,6 +97,30 @@ func backward_rule_mean(tensor a, tensor upstream) backward_rule {
     neurx.tensor.autograd.tensor_backward_rule_mean(a, upstream)
 }
 
+func backward_rule_relu(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_relu(a, upstream)
+}
+
+func backward_rule_exp(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_exp(a, upstream)
+}
+
+func backward_rule_log(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_log(a, upstream)
+}
+
+func backward_rule_sqrt(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sqrt(a, upstream)
+}
+
+func backward_rule_tanh(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_tanh(a, upstream)
+}
+
+func backward_rule_sigmoid(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sigmoid(a, upstream)
+}
+
 func backward_rule_sum_dim(tensor a, tensor upstream, int dim, bool keepdim) backward_rule {
     neurx.tensor.autograd.tensor_backward_rule_sum_dim(a, upstream, dim, keepdim)
 }
@@ -126,6 +150,24 @@ func backward_rule_from_op(string op, tensor a, tensor b, tensor upstream) backw
     }
     if op == "mean" {
         return backward_rule_mean(a, upstream)
+    }
+    if op == "relu" {
+        return backward_rule_relu(a, upstream)
+    }
+    if op == "exp" {
+        return backward_rule_exp(a, upstream)
+    }
+    if op == "log" {
+        return backward_rule_log(a, upstream)
+    }
+    if op == "sqrt" {
+        return backward_rule_sqrt(a, upstream)
+    }
+    if op == "tanh" {
+        return backward_rule_tanh(a, upstream)
+    }
+    if op == "sigmoid" {
+        return backward_rule_sigmoid(a, upstream)
     }
     if op == "sum_dim" {
         return backward_rule_sum_dim(a, upstream, 0, false)

@@ -5,6 +5,7 @@
 
 package neurx.ml.math_ops
 
+use neurx.backends.compute_backend
 use neurx.tensor.{tensor, zeros}
 
 // =====================================================================
@@ -16,26 +17,14 @@ func matmul_2d(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int n = A.shape[1]
     int p = B.shape[1]
-    
-    tensor result = zeros([m, p])
-    
-    int i = 0
-    while i < m {
-        int j = 0
-        while j < p {
-            float sum = 0.0
-            int k = 0
-            while k < n {
-                sum = sum + A.data[i * n + k] * B.data[k * p + j]
-                k = k + 1
-            }
-            result.data[i * p + j] = sum
-            j = j + 1
-        }
-        i = i + 1
+    compute_context ctx = resolve_compute_context("", "")
+    []float out_data = backend_matmul_dispatch(ctx, A.data, B.data, m, n, p)
+    tensor {
+        data: out_data,
+        shape: [m, p],
+        requires_grad: A.requires_grad || B.requires_grad,
+        grad: none,
     }
-    
-    result
 }
 
 func transpose_2d(tensor A) tensor {

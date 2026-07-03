@@ -575,6 +575,30 @@ func function_mean(function_record f) function_record {
     neurx.ad.function.function_mean(f)
 }
 
+func function_relu(function_record f) function_record {
+    neurx.ad.function.function_relu(f)
+}
+
+func function_exp(function_record f) function_record {
+    neurx.ad.function.function_exp(f)
+}
+
+func function_log(function_record f) function_record {
+    neurx.ad.function.function_log(f)
+}
+
+func function_sqrt(function_record f) function_record {
+    neurx.ad.function.function_sqrt(f)
+}
+
+func function_tanh(function_record f) function_record {
+    neurx.ad.function.function_tanh(f)
+}
+
+func function_sigmoid(function_record f) function_record {
+    neurx.ad.function.function_sigmoid(f)
+}
+
 func function_add_op(function_record f) function_record {
     neurx.ad.function.add(f)
 }
@@ -615,6 +639,30 @@ func function_transform_chain_mean(function_record f) transform_chain {
     neurx.ad.function.transform_chain_mean(neurx.ad.function.function_transform_chain(f))
 }
 
+func function_transform_chain_relu(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_relu(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_exp(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_exp(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_log(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_log(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_sqrt(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_sqrt(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_tanh(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_tanh(neurx.ad.function.function_transform_chain(f))
+}
+
+func function_transform_chain_sigmoid(function_record f) transform_chain {
+    neurx.ad.function.transform_chain_sigmoid(neurx.ad.function.function_transform_chain(f))
+}
+
 func backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
     neurx.ad.function.backward_rule_add(a, b, upstream)
 }
@@ -633,6 +681,30 @@ func backward_rule_sum(tensor a, tensor upstream) backward_rule {
 
 func backward_rule_mean(tensor a, tensor upstream) backward_rule {
     neurx.ad.function.backward_rule_mean(a, upstream)
+}
+
+func backward_rule_relu(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_relu(a, upstream)
+}
+
+func backward_rule_exp(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_exp(a, upstream)
+}
+
+func backward_rule_log(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_log(a, upstream)
+}
+
+func backward_rule_sqrt(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sqrt(a, upstream)
+}
+
+func backward_rule_tanh(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_tanh(a, upstream)
+}
+
+func backward_rule_sigmoid(tensor a, tensor upstream) backward_rule {
+    neurx.tensor.autograd.tensor_backward_rule_sigmoid(a, upstream)
 }
 
 func tensor_backward_rule_sub(tensor a, tensor b, tensor upstream) backward_rule {
@@ -705,6 +777,30 @@ func tensor_transform_chain_sum_dim() transform_chain {
 
 func tensor_transform_chain_mean_dim() transform_chain {
     neurx.tensor.autograd.tensor_transform_chain_mean_dim()
+}
+
+func tensor_transform_chain_relu() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_relu()
+}
+
+func tensor_transform_chain_exp() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_exp()
+}
+
+func tensor_transform_chain_log() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_log()
+}
+
+func tensor_transform_chain_sqrt() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_sqrt()
+}
+
+func tensor_transform_chain_tanh() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_tanh()
+}
+
+func tensor_transform_chain_sigmoid() transform_chain {
+    neurx.tensor.autograd.tensor_transform_chain_sigmoid()
 }
 
 func build_causal_mask(tensor scores) tensor {
