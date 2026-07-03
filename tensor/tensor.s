@@ -492,12 +492,12 @@ func scale_tensor(tensor value, float scale) tensor {
     mul(value, scalar_tensor(scale))
 }
 
-func tensor_backward_add_grad_a(tensor upstream) tensor {
-    clone(upstream)
+func tensor_backward_add_grad_a(tensor a, tensor upstream) tensor {
+    sum_to_shape(upstream, a.shape)
 }
 
-func tensor_backward_add_grad_b(tensor upstream) tensor {
-    clone(upstream)
+func tensor_backward_add_grad_b(tensor b, tensor upstream) tensor {
+    sum_to_shape(upstream, b.shape)
 }
 
 func tensor_backward_mul_grad_a(tensor a, tensor b, tensor upstream) tensor {
@@ -514,12 +514,12 @@ func negate_tensor(tensor value) tensor {
     sub(zeros_like(value), value)
 }
 
-func tensor_backward_sub_grad_a(tensor upstream) tensor {
-    clone(upstream)
+func tensor_backward_sub_grad_a(tensor a, tensor upstream) tensor {
+    sum_to_shape(upstream, a.shape)
 }
 
-func tensor_backward_sub_grad_b(tensor upstream) tensor {
-    negate_tensor(upstream)
+func tensor_backward_sub_grad_b(tensor b, tensor upstream) tensor {
+    negate_tensor(sum_to_shape(upstream, b.shape))
 }
 
 func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
