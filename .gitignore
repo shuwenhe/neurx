@@ -98,6 +98,26 @@ runtime/*.ir
 # Ollama temp installer files
 /tmp/neurx-ollama/
 
+# Training data (large datasets)
+data/pretrain_dataset/raw/
+data/pretrain_dataset/cleaned/
+data/pretrain_dataset/shard/
+data/training_data_splits/
+data/*.jsonl
+data/**/*.jsonl
+
+# Training outputs and logs
+artifacts/checkpoints/
+artifacts/logs/
+artifacts/train_output/
+train_output.log
+*.log.gz
+
+# Model inference outputs
+outputs/
+end_to_end_output/
+output/
+
 # Common CMake / build files
 CMakeFiles/
 CMakeCache.txt
