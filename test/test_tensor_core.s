@@ -2,6 +2,7 @@ package main
 
 use neurx.tensor.core
 use neurx.tensor.autograd
+use neurx.tensor.reduce
 
 func assert_true(bool value, string name) {
     if value {
@@ -141,6 +142,20 @@ func test_broadcast_backward_rules() {
     assert_close(mean_dim_rule.grad_a.storage[5], 15.0, "mean_dim grad a 5")
 }
 
+func test_reduce_package() {
+    tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3], "fp32", "cpu", false)
+    tensor sum_rows = neurx.tensor.reduce.reduce_sum_dim(a, 1, false)
+    tensor mean_rows = neurx.tensor.reduce.reduce_mean_dim(a, 1, true)
+    tensor max_cols = neurx.tensor.reduce.reduce_max_dim(a, 0, false)
+    assert_close(sum_rows.storage[0], 6.0, "reduce sum row 0")
+    assert_close(sum_rows.storage[1], 15.0, "reduce sum row 1")
+    assert_close(mean_rows.storage[0], 2.0, "reduce mean keepdim 0")
+    assert_close(mean_rows.storage[1], 5.0, "reduce mean keepdim 1")
+    assert_close(max_cols.storage[0], 4.0, "reduce max col 0")
+    assert_close(max_cols.storage[1], 5.0, "reduce max col 1")
+    assert_close(max_cols.storage[2], 6.0, "reduce max col 2")
+}
+
 func main() {
     println("NeurX tensor core tests")
     test_descriptor()
@@ -149,4 +164,5 @@ func main() {
     test_matmul_reduce()
     test_broadcast_and_shape_ops()
     test_broadcast_backward_rules()
+    test_reduce_package()
 }
