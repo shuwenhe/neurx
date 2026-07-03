@@ -998,3 +998,27 @@
 {"text": "翻译样例 699:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
 {"text": "API 设计案例 275:高并发接口要关注幂等性、限流、超时和重试策略。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
 {"text": "问题 222:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "API 设计案例 39:高并发接口要关注幂等性、限流、超时和重试策略。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "## 训练稳定性\n背景:版本 342\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度微调需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 342)"}
+{"text": "翻译样例 463:This dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "模型能力往往不是靠某一条技巧决定,而是靠高质量数据和稳定工程共同塑造。(版本 16) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "对话 58:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "对话 67:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "安全与合规:\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n案例编号:299\n结论:安全性是默认要求,不是可选项。"}
+{"text": "翻译样例 595:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
+{"text": "数学说明 665:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "翻译样例 498:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "翻译样例 244:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "问题 95:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "翻译样例 500:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "Go 示例 100:把错误封装成结构化结果。\n```go\ntype Result struct { Ok bool; Message string }\nfunc Wrap(err error) Result {\n if err != nil { return Result{Ok:false, Message: err.Error()} }\n return Result{Ok:true, Message:\"ok\"}\n}\n```"}
+{"text": "翻译样例 273:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
+{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 318) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "对话 377:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "Go 示例 481:把错误封装成结构化结果。\n```go\ntype Result struct { Ok bool; Message string }\nfunc Wrap(err error) Result {\n if err != nil { return Result{Ok:false, Message: err.Error()} }\n return Result{Ok:true, Message:\"ok\"}\n}\n```"}
+{"text": "API 设计案例 126:OpenAPI 文档需要列出请求体、响应体、状态码、鉴权方式和示例调用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "模型能力往往不是靠某一条技巧决定,而是靠高质量数据和稳定工程共同塑造。(版本 381) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "数学说明 623:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "数学说明 634:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "[INFO] sample=274 [WARN] gradient_norm=18.4 exceeded threshold; applying clip and continuing"}
+{"text": "Bash 示例 400:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
