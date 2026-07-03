@@ -1,6 +1,6 @@
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00000.jsonl
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00001.jsonl
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00002.jsonl
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00003.jsonl
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00004.jsonl
-/Users/feifei/shuwen/train/neurx/data/training_data_shards/training_data-00005.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00000.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00001.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00002.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00003.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00004.jsonl
+/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/training_data-00005.jsonl

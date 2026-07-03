@@ -1,96 +1,48 @@
 {
-  "dataset_name": "training_data_v2",
-  "source_path": "/Users/feifei/shuwen/train/neurx/data/training_data.jsonl",
-  "cleaned_path": "/Users/feifei/shuwen/train/neurx/data/training_data.cleaned.jsonl",
-  "output_dir": "/Users/feifei/shuwen/train/neurx/data/training_data_shards",
-  "generated_at": "2026-07-01T07:20:58.362221Z",
-  "seed": 42,
+  "dataset_name": "training_data",
+  "source_path": "/Users/feifei/shuwen/train/neurx/script/../data/training_data.jsonl",
+  "output_dir": "/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards",
+  "total_records":     5500,
+  "shard_count": 6,
   "shard_size_target": 1024,
-  "total_input_records": 5500,
-  "total_clean_records": 5500,
-  "total_output_records": 5500,
-  "clean_stats": {
-    "input": 5500,
-    "kept_safety": 1300,
-    "kept_longform": 1095,
-    "kept_multilingual": 861,
-    "kept_log": 1160,
-    "kept_math": 584,
-    "kept_code": 500,
-    "kept": 5500
-  },
-  "sample_stats": {
-    "target_total": 5500,
-    "selected_total": 5500,
-    "selected_by_category": {
-      "safety": 1300,
-      "longform": 1095,
-      "multilingual": 861,
-      "log": 1160,
-      "math": 584,
-      "code": 500
-    },
-    "selected_by_length_bin": {
-      "medium": 3383,
-      "short": 519,
-      "long": 1348,
-      "xlong": 250
-    }
-  },
-  "bucket_weights": {
-    "longform": 0.22,
-    "qa": 0.16,
-    "dialog": 0.12,
-    "code": 0.15,
-    "multilingual": 0.1,
-    "math": 0.1,
-    "general": 0.07,
-    "log": 0.06,
-    "json": 0.05,
-    "safety": 0.05
-  },
+  "generated_at": "2026-07-03T06:43:24Z",
+  "shard_list_path": "/Users/feifei/shuwen/train/neurx/script/../data/training_data_shards/manifest.txt",
   "shards": [
     {
-      "file": "training_data-00000.jsonl.gz",
-      "records": 1024,
+      "file": "training_data-00000.jsonl",
+      "records":     1024,
       "start_record": 0,
-      "end_record": 1023,
-      "sha256": "0a58c617fd7460559bb2135f8ab307e232669d0cbcecb13a1979fe7f043e73c7"
+      "end_record": 1023
     },
     {
-      "file": "training_data-00001.jsonl.gz",
-      "records": 1024,
+      "file": "training_data-00001.jsonl",
+      "records":     1024,
       "start_record": 1024,
-      "end_record": 2047,
-      "sha256": "561e9c50b237f6145ec8b047bc061817cc140989bcb4dd1f939dab5125a43fda"
+      "end_record": 2047
     },
     {
-      "file": "training_data-00002.jsonl.gz",
-      "records": 1024,
+      "file": "training_data-00002.jsonl",
+      "records":     1024,
       "start_record": 2048,
-      "end_record": 3071,
-      "sha256": "55f2f0c2c8e2b68e148866e5230dbb2df275aba128a8f1acc80791aafcc3545c"
+      "end_record": 3071
     },
     {
-      "file": "training_data-00003.jsonl.gz",
-      "records": 1024,
+      "file": "training_data-00003.jsonl",
+      "records":     1024,
       "start_record": 3072,
-      "end_record": 4095,
-      "sha256": "3a1e6982731f3e6757a7fb72260b56f2fa6c3d7bd1c7edd74a237a2d962af898"
+      "end_record": 4095
     },
     {
-      "file": "training_data-00004.jsonl.gz",
-      "records": 1024,
+      "file": "training_data-00004.jsonl",
+      "records":     1024,
       "start_record": 4096,
-      "end_record": 5119,
-      "sha256": "61c99814543d3542aaa3f10ac8f9cf5d8e172d7bd848cbf9cd3af2b148ec6d33"
+      "end_record": 5119
     },
     {
-      "file": "training_data-00005.jsonl.gz",
-      "records": 380,
+      "file": "training_data-00005.jsonl",
+      "records":      380,
       "start_record": 5120,
-      "end_record": 5499,
-      "sha256": "4bc63f977d911cd41859eba73df553c66ee29157d440f12f54656e7d7666ddc3"
+      "end_record": 5499
     }
   ]
 }

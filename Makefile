@@ -45,13 +45,8 @@ help:
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
-	@echo "  make print-data-info"
 
-.PHONY: print-data-info
-print-data-info: check-bash
-	@bash script/print_training_data_info.sh
-
-train: check-bash print-data-info
+train: check-bash
 	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
 	@cd '$(CURDIR_UNIX)' && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \

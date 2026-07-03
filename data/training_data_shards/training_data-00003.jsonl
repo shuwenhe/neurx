@@ -1,75 +1,3 @@
-{"text": "模型能力往往不是靠某一条技巧决定,而是靠高质量数据和稳定工程共同塑造。(版本 379) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "翻译样例 607:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
-{"text": "[INFO] sample=131 checkpoint saved successfully at step=128000"}
-{"text": "对话 190:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "## 训练稳定性\n摘要:版本 526\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度训练需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 526)"}
-{"text": "数学说明 549:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "数学说明 561:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "API 设计案例 19:API 设计:REST 接口应该使用资源名词、稳定版本号和一致的错误返回格式。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "翻译样例 476:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
-{"text": "对话 415:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 363) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "对话 438:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "API 设计案例 489:分页接口应显式说明 cursor 或 offset 的语义,避免客户端误用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "安全与合规:\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:295\n结论:安全性是默认要求,不是可选项。"}
-{"text": "API 设计案例 54:API 设计:REST 接口应该使用资源名词、稳定版本号和一致的错误返回格式。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "翻译样例 425:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
-{"text": "安全与合规:\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:179\n结论:安全性是默认要求,不是可选项。"}
-{"text": "## 训练稳定性\n摘要:版本 94\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度微调需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 94)"}
-{"text": "问题 25:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "API 设计案例 68:分页接口应显式说明 cursor 或 offset 的语义,避免客户端误用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "翻译样例 556:This dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
-{"text": "[INFO] sample=258 checkpoint saved successfully at step=128000"}
-{"text": "问题 575:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "API 设计案例 211:高并发接口要关注幂等性、限流、超时和重试策略。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 96) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 364) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "翻译样例 300:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
-{"text": "问题 147:如何排查 OOM?\n回答:先看 batch size、序列长度、KV cache、activation checkpointing 和并行策略。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "问题 290:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "数学说明 619:统计:交叉熵损失与最大似然估计之间有直接关系。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "## Transformer 架构\n背景:版本 86\n1. 自注意力让每个 token 都能查看序列中其他位置的信息。\n2. 多头机制把不同表示子空间并行建模,提升表达力。\n3. 残差连接和层归一化共同稳定深层网络预训练。\nTransformer 之所以成为通用基础架构,核心在于可并行、可扩展、可迁移。(案例编号 86)"}
-{"text": "API 设计案例 276:API 设计:REST 接口应该使用资源名词、稳定版本号和一致的错误返回格式。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "## 工业级预训练数据治理\n背景:版本 328\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 328)"}
-{"text": "SQL 示例 497:分析最近 7 天的请求延迟。\n```sql\nSELECT service, percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_ms)\nFROM request_log\nWHERE ts >= now() - interval '7 day'\nGROUP BY service;\n```"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 174) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "翻译样例 487:This dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
-{"text": "安全与合规:\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n案例编号:372\n结论:安全性是默认要求,不是可选项。"}
-{"text": "翻译样例 366:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
-{"text": "Python 示例 155:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
-{"text": "数学说明 30:优化:当目标函数是凸函数时,局部最优解也是全局最优解。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "## 工业级预训练数据治理\n说明:版本 233\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 233)"}
-{"text": "Python 示例 401:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
-{"text": "API 设计案例 178:分页接口应显式说明 cursor 或 offset 的语义,避免客户端误用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "对话 336:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "## 训练稳定性\n背景:版本 504\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度预训练需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 504)"}
-{"text": "安全与合规:\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:340\n结论:安全性是默认要求,不是可选项。"}
-{"text": "Bash 示例 388:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
-{"text": "[INFO] sample=201 [WARN] gradient_norm=18.4 exceeded threshold; applying clip and continuing"}
-{"text": "对话 20:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "Bash 示例 339:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
-{"text": "问题 344:如何排查 OOM?\n回答:先看 batch size、序列长度、KV cache、activation checkpointing 和并行策略。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "安全与合规:\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n案例编号:398\n结论:安全性是默认要求,不是可选项。"}
-{"text": "翻译样例 128:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
-{"text": "对话 288:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "API 设计案例 280:分页接口应显式说明 cursor 或 offset 的语义,避免客户端误用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
-{"text": "Go 示例 238:把错误封装成结构化结果。\n```go\ntype Result struct { Ok bool; Message string }\nfunc Wrap(err error) Result {\n if err != nil { return Result{Ok:false, Message: err.Error()} }\n return Result{Ok:true, Message:\"ok\"}\n}\n```"}
-{"text": "安全与合规:\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n案例编号:33\n结论:安全性是默认要求,不是可选项。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 3) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 41) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "安全与合规:\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n案例编号:165\n结论:安全性是默认要求,不是可选项。"}
-{"text": "问题 498:如何排查 OOM?\n回答:先看 batch size、序列长度、KV cache、activation checkpointing 和并行策略。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 54) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 286) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "问题 384:什么时候该做量化?\n回答:当模型已经具备可接受质量,而目标是进一步降低延迟、内存和成本时。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
-{"text": "Python 示例 361:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
-{"text": "数学说明 18:统计:交叉熵损失与最大似然估计之间有直接关系。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 27) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "Python 示例 23:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
-{"text": "模型能力往往不是靠某一条技巧决定,而是靠高质量数据和稳定工程共同塑造。(版本 256) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
-{"text": "数学说明 594:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "数学说明 298:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "安全与合规:\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n案例编号:232\n结论:安全性是默认要求,不是可选项。"}
 {"text": "对话 401:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
 {"text": "Python 示例 445:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
 {"text": "数学说明 540:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
@@ -998,3 +926,99 @@
 {"text": "数学说明 538:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
 {"text": "翻译样例 322:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
 {"text": "问题 612:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "对话 144:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "[INFO] sample=95 [WARN] gradient_norm=18.4 exceeded threshold; applying clip and continuing"}
+{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 44) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "翻译样例 332:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
+{"text": "[INFO] sample=318 [WARN] gradient_norm=18.4 exceeded threshold; applying clip and continuing"}
+{"text": "## 训练稳定性\n摘要:版本 300\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度微调需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 300)"}
+{"text": "问题 361:什么时候该做量化?\n回答:当模型已经具备可接受质量,而目标是进一步降低延迟、内存和成本时。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "Python 示例 128:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
+{"text": "翻译样例 492:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "对话 329:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "API 设计案例 421:OpenAPI 文档需要列出请求体、响应体、状态码、鉴权方式和示例调用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "问题 357:如何降低训练不稳定性?\n回答:建议从学习率、warmup、梯度裁剪、数据清洗和混合精度溢出五个方向同时排查。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "数学说明 283:优化:当目标函数是凸函数时,局部最优解也是全局最优解。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "API 设计案例 325:API 设计:REST 接口应该使用资源名词、稳定版本号和一致的错误返回格式。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "## 分布式训练系统\n背景:版本 592\n1. 数据并行负责扩展吞吐,张量并行负责拆分参数,流水线并行负责拆分层级。\n2. 通信与计算的重叠决定了大多数大模型预训练的实际效率上限。\n3. 断点恢复时不仅要恢复权重,还要恢复优化器状态、数据游标和随机种子。\n一套合格的训练系统必须能在节点故障、网络抖动和 checkpoint 损坏时继续推进。(案例编号 592)"}
+{"text": "[INFO] sample=19 checkpoint saved successfully at step=128000"}
+{"text": "对话 198:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "翻译样例 133:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "## 推理服务\n说明:版本 571\n1. 高吞吐服务通常要做 KV cache、批处理聚合和并发调度。\n2. 低延迟场景更依赖编译优化、量化和内存布局。\n3. 生产推理需要监控 p50/p95 延迟、错误率和显存占用。\n一个好的推理系统不仅要回答得对,还要在峰值流量下保持稳定。(案例编号 571)"}
+{"text": "翻译样例 5:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "问题 304:如何排查 OOM?\n回答:先看 batch size、序列长度、KV cache、activation checkpointing 和并行策略。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "翻译样例 705:This dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "## 推理服务\n说明:版本 217\n1. 高吞吐服务通常要做 KV cache、批处理聚合和并发调度。\n2. 低延迟场景更依赖编译优化、量化和内存布局。\n3. 生产推理需要监控 p50/p95 延迟、错误率和显存占用。\n一个好的推理系统不仅要回答得对,还要在峰值流量下保持稳定。(案例编号 217)"}
+{"text": "问题 495:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "问题 50:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 319) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "对话 26:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "对话 17:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "问题 557:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "## 工业级预训练数据治理\n背景:版本 45\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 45)"}
+{"text": "翻译样例 507:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
+{"text": "安全与合规:\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n案例编号:216\n结论:安全性是默认要求,不是可选项。"}
+{"text": "问题 51:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "## 工业级预训练数据治理\n背景:版本 419\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 419)"}
+{"text": "问题 174:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "翻译样例 511:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
+{"text": "翻译样例 14:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "翻译样例 319:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
+{"text": "安全与合规:\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:205\n结论:安全性是默认要求,不是可选项。"}
+{"text": "翻译样例 108:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "翻译样例 96:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "## 工业级预训练数据治理\n说明:版本 145\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 145)"}
+{"text": "[INFO] sample=25 [DEBUG] loading shard 04/12 from training_data_shards/training_data-00004.jsonl.gz"}
+{"text": "## 训练稳定性\n摘要:版本 186\n1. 学习率预热可以缓解早期梯度震荡。\n2. 梯度裁剪能抑制偶发的梯度爆炸。\n3. 混合精度预训练需要动态 loss scale 来避免数值下溢。\n当损失曲线出现尖峰或长时间停滞时,优先排查数据、优化器和通信链路。(案例编号 186)"}
+{"text": "从系统角度看,工业级 LLM 的核心不是单一模型,而是数据、训练、评估、部署和治理的完整闭环。(版本 21) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "翻译样例 343:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
+{"text": "Bash 示例 353:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "翻译样例 330:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints."}
+{"text": "安全与合规:\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:190\n结论:安全性是默认要求,不是可选项。"}
+{"text": "数学说明 450:优化:当目标函数是凸函数时,局部最优解也是全局最优解。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "翻译样例 12:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
+{"text": "数学说明 590:统计:交叉熵损失与最大似然估计之间有直接关系。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "问题 91:如何降低训练不稳定性?\n回答:建议从学习率、warmup、梯度裁剪、数据清洗和混合精度溢出五个方向同时排查。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 204) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "对话 337:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "问题 193:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "一个可持续演进的训练平台需要把实验可复现性、资源调度和失败恢复都当成一等公民。(版本 253) 在实践中,还需要把监控、告警、审计和回滚纳入默认流程,这样才能在长周期训练中保持稳定推进。"}
+{"text": "Bash 示例 260:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "对话 16:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "Bash 示例 465:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "Python 示例 340:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
+{"text": "翻译样例 42:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "API 设计案例 309:API 设计:REST 接口应该使用资源名词、稳定版本号和一致的错误返回格式。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "API 设计案例 405:OpenAPI 文档需要列出请求体、响应体、状态码、鉴权方式和示例调用。\n建议:在生产里把参数校验、审计日志和监控指标都写进文档。\n示例:错误返回应包含 code、message、trace_id,方便定位问题。"}
+{"text": "Go 示例 337:把错误封装成结构化结果。\n```go\ntype Result struct { Ok bool; Message string }\nfunc Wrap(err error) Result {\n if err != nil { return Result{Ok:false, Message: err.Error()} }\n return Result{Ok:true, Message:\"ok\"}\n}\n```"}
+{"text": "问题 245:如何降低训练不稳定性?\n回答:建议从学习率、warmup、梯度裁剪、数据清洗和混合精度溢出五个方向同时排查。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "## 推理服务\n背景:版本 590\n1. 高吞吐服务通常要做 KV cache、批处理聚合和并发调度。\n2. 低延迟场景更依赖编译优化、量化和内存布局。\n3. 生产推理需要监控 p50/p95 延迟、错误率和显存占用。\n一个好的推理系统不仅要回答得对,还要在峰值流量下保持稳定。(案例编号 590)"}
+{"text": "[INFO] sample=330 step=10240 loss=2.9341 lr=0.00032 tokens_per_sec=4812 status=healthy"}
+{"text": "翻译样例 62:请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。"}
+{"text": "安全与合规:\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:116\n结论:安全性是默认要求,不是可选项。"}
+{"text": "问题 322:如何降低训练不稳定性?\n回答:建议从学习率、warmup、梯度裁剪、数据清洗和混合精度溢出五个方向同时排查。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "翻译样例 424:Translate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。\n请将以下句子改写成更正式的产品需求:the system must support resumable checkpoints.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions."}
+{"text": "Bash 示例 306:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "[INFO] sample=128 checkpoint saved successfully at step=128000"}
+{"text": "对话 394:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "数学说明 600:证明:若函数在闭区间上连续且在开区间内可导,则其在区间内存在极值点。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "## 工业级预训练数据治理\n说明:版本 88\n1. 统一采集网页、书籍、论文、代码和业务文档时,必须先定义来源、许可证和敏感字段策略。\n2. 清洗阶段要做语言识别、去重、近重复合并、乱码修复和模板噪声压制。\n3. 采样阶段要按领域和长度分桶,避免某一类内容过度主导梯度更新。\n真正稳定的训练集不是“越多越好”,而是“可追踪、可过滤、可恢复、可复现”。(案例编号 88)"}
+{"text": "Bash 示例 159:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "对话 353:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "安全与合规:\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 隐私治理必须包括脱敏、访问控制、保留期限和审计日志。\n案例编号:127\n结论:安全性是默认要求,不是可选项。"}
+{"text": "数学说明 83:线性代数:矩阵可逆的充分必要条件是行列式不为零。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "## 推理服务\n说明:版本 11\n1. 高吞吐服务通常要做 KV cache、批处理聚合和并发调度。\n2. 低延迟场景更依赖编译优化、量化和内存布局。\n3. 生产推理需要监控 p50/p95 延迟、错误率和显存占用。\n一个好的推理系统不仅要回答得对,还要在峰值流量下保持稳定。(案例编号 11)"}
+{"text": "数学说明 79:线性代数:矩阵可逆的充分必要条件是行列式不为零。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "数学说明 248:统计:交叉熵损失与最大似然估计之间有直接关系。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "数学说明 14:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "数学说明 265:概率论:当样本独立同分布时,样本均值会随样本数增大而收敛到真实均值。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "问题 318:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "问题 454:什么时候该做量化?\n回答:当模型已经具备可接受质量,而目标是进一步降低延迟、内存和成本时。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
+{"text": "数学说明 653:线性代数:矩阵可逆的充分必要条件是行列式不为零。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
+{"text": "对话 276:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "Python 示例 373:实现一个最小训练循环。\n```python\nfor step, batch in enumerate(loader):\n loss = model(batch)\n loss.backward()\n torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n optimizer.step()\n optimizer.zero_grad(set_to_none=True)\n```"}
+{"text": "对话 408:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "对话 181:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
+{"text": "SQL 示例 17:分析最近 7 天的请求延迟。\n```sql\nSELECT service, percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_ms)\nFROM request_log\nWHERE ts >= now() - interval '7 day'\nGROUP BY service;\n```"}
+{"text": "安全与合规:\n- 红队测试要覆盖越狱提示、后缀注入、提示词混淆和数据外泄路径。\n- 安全说明:训练数据中不应包含私钥、口令、身份证号或银行卡号。\n- 生产系统需要对高风险输出进行拒答、改写或人工复核。\n案例编号:32\n结论:安全性是默认要求,不是可选项。"}
+{"text": "Go 示例 16:把错误封装成结构化结果。\n```go\ntype Result struct { Ok bool; Message string }\nfunc Wrap(err error) Result {\n if err != nil { return Result{Ok:false, Message: err.Error()} }\n return Result{Ok:true, Message:\"ok\"}\n}\n```"}
