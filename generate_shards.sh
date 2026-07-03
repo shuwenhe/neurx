@@ -40,6 +40,24 @@ echo "📋 计算分片大小..."
 total_lines=$(wc -l < "$INPUT_FILE")
 echo "  总行数: $total_lines"
 echo "  输入文件: $INPUT_FILE"
+# If input file is empty, write an empty manifest and exit gracefully
+if [ "$total_lines" -eq 0 ]; then
+        echo "No documents found in $INPUT_FILE — writing empty manifest and exiting."
+        cat > "$MANIFEST_FILE" << EOF
+{
+    "dataset_name": "neurx-pretrain-dataset",
+    "version": "1.0",
+    "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "total_shards": 0,
+    "total_documents": 0,
+    "total_size_bytes": 0,
+    "average_docs_per_shard": 0,
+    "shards": []
+}
+EOF
+        echo "Empty manifest written to $MANIFEST_FILE"
+        exit 0
+fi
 
 # 计算实际可用的分片数（考虑系统限制）
 # 每个分片至少 100 行
