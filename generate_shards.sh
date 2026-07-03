@@ -12,6 +12,15 @@ INPUT_FILE="${INPUT_FILE:-$DATASET_ROOT/cleaned/train.jsonl}"
 SHARD_DIR="${SHARD_DIR:-$DATASET_ROOT/shard}"
 MANIFEST_FILE="${MANIFEST_FILE:-$DATASET_ROOT/manifest.json}"
 
+file_size_bytes() {
+    local target="$1"
+    if stat -f%z "$target" >/dev/null 2>&1; then
+        stat -f%z "$target"
+    else
+        stat -c%s "$target"
+    fi
+}
+
 echo "╔════════════════════════════════════════════╗"
 echo "║     NeurX 分片生成流程                     ║"
 echo "╚════════════════════════════════════════════╝"
@@ -88,7 +97,7 @@ cat > "$MANIFEST_FILE" << EOF
   "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "total_shards": $actual_shards,
   "total_documents": $total_shard_lines,
-  "total_size_bytes": $(($(du -ks "$SHARD_DIR" | cut -f1) * 1024)),
+  "total_size_bytes": $(file_size_bytes "$SHARD_DIR"),
   "average_docs_per_shard": $((total_shard_lines / actual_shards)),
   "shards": [
 EOF
@@ -97,7 +106,7 @@ EOF
 for shard in "$SHARD_DIR"/shard_*.jsonl; do
     shard_name=$(basename "$shard")
     shard_lines=$(wc -l < "$shard")
-    shard_size=$(($(du -ks "$shard" | cut -f1) * 1024))
+    shard_size=$(file_size_bytes "$shard")
     
     echo "    {
       \"shard_id\": \"${shard_name%.jsonl}\",
@@ -108,7 +117,7 @@ for shard in "$SHARD_DIR"/shard_*.jsonl; do
 done
 
 # 移除最后一个逗号并关闭 JSON
-sed -i '$ s/,$//' "$MANIFEST_FILE"
+sed -i '' '$ s/,$//' "$MANIFEST_FILE"
 echo "  ]
 }" >> "$MANIFEST_FILE"
 
