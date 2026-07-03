@@ -1,6 +1,7 @@
 package main
 
 use neurx.tensor.core
+use neurx.tensor.autograd
 
 func assert_true(bool value, string name) {
     if value {
@@ -82,11 +83,37 @@ func test_broadcast_and_shape_ops() {
     assert_close(g.storage[0], 12.0, "mean dim")
     assert_close(h.storage[4], 2.0, "broadcast to")
     assert_close(i.storage[0], 2.0, "sum to shape 0")
+    assert_close(i.storage[1], 4.0, "sum to shape 1")
     assert_close(i.storage[2], 6.0, "sum to shape 2")
     assert_true(j.desc.is_contiguous, "materialize contiguous")
     assert_true(k, "broadcastable true")
     assert_true(!l, "broadcastable false")
     assert_true(!m.desc.is_view, "clone storage not view")
+}
+
+func test_broadcast_backward_rules() {
+    tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0], [3], "fp32", "cpu", true)
+    tensor b = neurx.tensor.core.from_data([10.0], [1], "fp32", "cpu", true)
+    tensor upstream = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3], "fp32", "cpu", false)
+    backward_rule add_rule = neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
+    backward_rule mul_rule = neurx.tensor.autograd.tensor_backward_rule_mul(a, b, upstream)
+    backward_rule sub_rule = neurx.tensor.autograd.tensor_backward_rule_sub(a, b, upstream)
+    tensor div_b = neurx.tensor.core.from_data([2.0], [1], "fp32", "cpu", true)
+    backward_rule div_rule = neurx.tensor.autograd.tensor_backward_rule_div(a, div_b, neurx.tensor.core.from_data([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [2, 3], "fp32", "cpu", false))
+    assert_close(add_rule.grad_a.storage[0], 5.0, "add grad a 0")
+    assert_close(add_rule.grad_a.storage[1], 7.0, "add grad a 1")
+    assert_close(add_rule.grad_a.storage[2], 9.0, "add grad a 2")
+    assert_close(add_rule.grad_b.storage[0], 21.0, "add grad b 0")
+    assert_close(mul_rule.grad_a.storage[0], 50.0, "mul grad a 0")
+    assert_close(mul_rule.grad_a.storage[1], 70.0, "mul grad a 1")
+    assert_close(mul_rule.grad_a.storage[2], 90.0, "mul grad a 2")
+    assert_close(mul_rule.grad_b.storage[0], 46.0, "mul grad b 0")
+    assert_close(sub_rule.grad_a.storage[0], 5.0, "sub grad a 0")
+    assert_close(sub_rule.grad_b.storage[0], -21.0, "sub grad b 0")
+    assert_close(div_rule.grad_a.storage[0], 1.0, "div grad a 0")
+    assert_close(div_rule.grad_a.storage[1], 1.0, "div grad a 1")
+    assert_close(div_rule.grad_a.storage[2], 1.0, "div grad a 2")
+    assert_close(div_rule.grad_b.storage[0], -3.0, "div grad b 0")
 }
 
 func main() {
@@ -96,4 +123,5 @@ func main() {
     test_math()
     test_matmul_reduce()
     test_broadcast_and_shape_ops()
+    test_broadcast_backward_rules()
 }

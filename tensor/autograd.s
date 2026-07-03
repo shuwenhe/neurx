@@ -4,8 +4,8 @@ use neurx.tensor.tensor
 use neurx.ad.function
 
 func tensor_backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
-    tensor grad_a = neurx.tensor.tensor.tensor_backward_add_grad_a(upstream)
-    tensor grad_b = neurx.tensor.tensor.tensor_backward_add_grad_b(upstream)
+    tensor grad_a = neurx.tensor.tensor.tensor_backward_add_grad_a(a, upstream)
+    tensor grad_b = neurx.tensor.tensor.tensor_backward_add_grad_b(b, upstream)
     backward_rule {
         op: "add",
         primal_a: a,
@@ -32,8 +32,8 @@ func tensor_backward_rule_mul(tensor a, tensor b, tensor upstream) backward_rule
 }
 
 func tensor_backward_rule_sub(tensor a, tensor b, tensor upstream) backward_rule {
-    tensor grad_a = neurx.tensor.tensor.tensor_backward_sub_grad_a(upstream)
-    tensor grad_b = neurx.tensor.tensor.tensor_backward_sub_grad_b(upstream)
+    tensor grad_a = neurx.tensor.tensor.tensor_backward_sub_grad_a(a, upstream)
+    tensor grad_b = neurx.tensor.tensor.tensor_backward_sub_grad_b(b, upstream)
     backward_rule {
         op: "sub",
         primal_a: a,
