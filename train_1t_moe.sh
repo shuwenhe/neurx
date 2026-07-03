@@ -128,7 +128,8 @@ fi
 
 if [ ! -f "$NEURX_MANIFEST_PATH" ]; then
     echo "⚠️  Data manifest not found at $NEURX_MANIFEST_PATH"
-    echo "   Training will proceed with synthetic data"
+    echo "   真训练不允许回退到 synthetic data"
+    exit 1
 fi
 
 echo "✓ Configuration verified"

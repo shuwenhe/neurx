@@ -69,8 +69,8 @@ train: check-bash
 
 
 infer: check-bash
-	@echo "Running NeurX inference"
-	@cd '$(CURDIR_UNIX)' && bash script/demo_complete_pipeline.sh 2>&1
+	@echo "Running NeurX inference from real checkpoint"
+	@cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1
 
 pretrain: check-bash
 	@echo "Running GPT-Large production pre-training (alias for make train)"
@@ -97,6 +97,7 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log
 
 chat: check-bash
+	@echo "Running NeurX interactive chat from real checkpoint"
 	@cd '$(CURDIR_UNIX)' && bash script/chat.sh
 
 

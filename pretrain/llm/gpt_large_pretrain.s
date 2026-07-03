@@ -1019,6 +1019,10 @@ func gpt_large_pretrain_core_status_text(gpt_large_pretrain_state state) string 
     out = out + "micro_batch=" + int_to_str(state.cfg.micro_batch_size, 0) + "\n"
     out = out + "seq_len=" + int_to_str(state.cfg.seq_len, 0) + "\n"
     out = out + "lr=" + fmt_float(state.cfg.lr, 6) + "\n"
+    out = out + "quality.min_score=" + fmt_float(state.corpus.config.min_quality_score, 6) + "\n"
+    out = out + "quality.docs_seen=" + int_to_str(state.corpus.total_docs_seen, 0) + "\n"
+    out = out + "quality.docs_filtered=" + int_to_str(state.corpus.docs_filtered, 0) + "\n"
+    out = out + "quality.docs_deduped=" + int_to_str(state.corpus.docs_deduped, 0) + "\n"
     out
 }
 
@@ -1044,10 +1048,12 @@ func gpt_large_pretrain_core_summary(gpt_large_pretrain_state state) string {
     out = out + "Shard: " + int_to_str(state.active_shard_index, 0) + "/" + int_to_str(len(state.shard_refs), 0) + " @ " + state.active_shard_path + "\n"
     out = out + "Corpus docs(train/valid): " + int_to_str(len(state.corpus.split.train_documents), 0) + "/" + int_to_str(len(state.corpus.split.valid_documents), 0) + "\n"
     out = out + "Tokens(train/valid): " + int_to_str(len(state.corpus.train_token_ids), 0) + "/" + int_to_str(len(state.corpus.valid_token_ids), 0) + "\n"
+    out = out + "Quality gate: min_score=" + fmt_float(state.corpus.config.min_quality_score, 6) + ", seen=" + int_to_str(state.corpus.total_docs_seen, 0) + ", filtered=" + int_to_str(state.corpus.docs_filtered, 0) + ", deduped=" + int_to_str(state.corpus.docs_deduped, 0) + "\n"
     out = out + "Steps: " + int_to_str(state.loop.global_step, 0) + "/" + int_to_str(state.cfg.max_steps, 0) + "\n"
     out = out + "Loss: " + fmt_float(state.training.last_loss, 6) + "\n"
     out = out + "Grad norm: " + fmt_float(state.optimizer.last_grad_norm, 6) + "\n"
     out = out + "LR: " + fmt_float(state.optimizer.last_lr, 6) + "\n"
+    out = out + "Eval: " + pretrain_eval_summary(state.eval) + "\n"
     out = out + "DDP: enabled=" + int_to_str(bool_to_int(pretrain_ddp_enabled(state.ddp)), 0) + ", rank=" + int_to_str(pretrain_ddp_rank(state.ddp), 0) + ", world=" + int_to_str(pretrain_ddp_world_size(state.ddp), 0) + "\n"
     out
 }
@@ -1803,6 +1809,10 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     pretrain_eval_state next_eval = state.eval
     if state.cfg.eval_interval > 0 && (next_step / state.cfg.eval_interval) * state.cfg.eval_interval == next_step {
         next_eval = update_pretrain_eval(state.eval, next_step, validation_loss, validation_perplexity)
+        println("Eval: " + pretrain_eval_summary(next_eval))
+        if pretrain_eval_is_best(next_eval) {
+            println("Eval best updated at step " + int_to_str(next_step, 0))
+        }
     }
     dataloader_state next_valid_loader = valid_output.state
 
