@@ -6,7 +6,8 @@
 
 set -euo pipefail
 
-NEURX_HOME="${NEURX_HOME:-/Users/feifei/shuwen/train/neurx}"
+NEURX_HOME="${NEURX_HOME:-$(cd "$(dirname "$0")" && pwd)}"
+# Allow overriding individual dirs; default to paths under NEURX_HOME
 RAW_DIR="${RAW_DIR:-$NEURX_HOME/data/pretrain_dataset/raw}"
 CLEANED_DIR="${CLEANED_DIR:-$NEURX_HOME/data/pretrain_dataset/cleaned}"
 OUTPUT_FILE="${OUTPUT_FILE:-$CLEANED_DIR/pretrain_data_cleaned.jsonl}"
