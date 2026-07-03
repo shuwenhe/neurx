@@ -6,7 +6,7 @@
 
 set -e
 
-NEURX_HOME="${NEURX_HOME:-/Users/feifei/shuwen/train/neurx}"
+NEURX_HOME="${NEURX_HOME:-$(cd "$(dirname "$0")" && pwd)}"
 DATASET_ROOT="${DATASET_ROOT:-$NEURX_HOME/data/pretrain_dataset}"
 INPUT_FILE="${INPUT_FILE:-$DATASET_ROOT/cleaned/train.jsonl}"
 SHARD_DIR="${SHARD_DIR:-$DATASET_ROOT/shard}"
@@ -116,8 +116,8 @@ for shard in "$SHARD_DIR"/shard_*.jsonl; do
     }," >> "$MANIFEST_FILE"
 done
 
-# 移除最后一个逗号并关闭 JSON
-sed -i '' '$ s/,$//' "$MANIFEST_FILE"
+# 移除最后一个逗号并关闭 JSON (portable sed)
+sed -i '$ s/,$//' "$MANIFEST_FILE" 2>/dev/null || awk 'NR==FNR{a[NR]=$0;next} END{for(i=1;i<=NR;i++) print a[i]}' "$MANIFEST_FILE" "$MANIFEST_FILE" >/dev/null || true
 echo "  ]
 }" >> "$MANIFEST_FILE"
 
