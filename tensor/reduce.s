@@ -87,32 +87,43 @@ func reduce_prod(tensor a) tensor {
 
 func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     int axis = neurx.tensor.shape.normalize_dim(dim, len(a.shape))
+    if axis < 0 || axis >= len(a.shape) {
+        return neurx.tensor.tensor.clone(a)
+    }
     if len(a.shape) == 1 {
         return reduce_all(a, mode)
     }
-    if axis != 0 {
-        return neurx.tensor.tensor.clone(a)
-    }
-    int rows = a.shape[0]
-    int cols = a.shape[1]
-    []float out = []float{cap: cols}
-    int c = 0
-    while c < cols {
+    []int out_shape = neurx.tensor.shape.infer_reduce_shape(a.shape, dim, keepdim)
+    int total = neurx.tensor.tensor.shape_prod(out_shape)
+    []float out = []float{cap: total}
+    int axis_size = a.shape[axis]
+    int flat = 0
+    while flat < total {
+        []int coords = neurx.tensor.tensor.unravel_index(flat, out_shape)
+        []int src_coords = []int{cap: len(a.shape)}
+        int i = 0
+        int j = 0
+        while i < len(a.shape) {
+            src_coords[i] = 0
+            if i != axis {
+                src_coords[i] = coords[j]
+                j = j + 1
+            }
+            i = i + 1
+        }
         float acc = 0.0
-        if mode == 2 {
-            acc = a.data[c]
+        if mode == 2 || mode == 3 {
+            src_coords[axis] = 0
+            acc = a.data[neurx.tensor.tensor.ravel_index(src_coords, a.shape)]
         } else {
-            if mode == 3 {
-                acc = a.data[c]
-            } else {
-                if mode == 4 {
-                    acc = 1.0
-                }
+            if mode == 4 {
+                acc = 1.0
             }
         }
-        int r = 0
-        while r < rows {
-            float value = a.data[r * cols + c]
+        int red = 0
+        while red < axis_size {
+            src_coords[axis] = red
+            float value = a.data[neurx.tensor.tensor.ravel_index(src_coords, a.shape)]
             if mode == 0 || mode == 1 {
                 acc = acc + value
             } else {
@@ -130,19 +141,18 @@ func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
                     }
                 }
             }
-            r = r + 1
+            red = red + 1
         }
         if mode == 1 {
-            float denom = rows
+            float denom = axis_size
             if denom == 0.0 {
                 denom = 1.0
             }
             acc = acc / denom
         }
-        out[c] = acc
-        c = c + 1
+        out[flat] = acc
+        flat = flat + 1
     }
-    []int out_shape = neurx.tensor.shape.infer_reduce_shape(a.shape, dim, keepdim)
     neurx.tensor.tensor.new(out, out_shape, a.requires_grad)
 }
 
