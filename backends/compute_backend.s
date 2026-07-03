@@ -58,6 +58,61 @@ func detect_device() compute_context {
     }
 }
 
+func new_compute_context(string backend, int device_id, string dtype) compute_context {
+    bool is_gpu = backend == "cuda" || backend == "cann" || backend == "mps"
+    string active_dtype = dtype
+    if active_dtype == "" {
+        active_dtype = "fp32"
+    }
+    compute_context {
+        device: device_info {
+            backend: backend,
+            device_id: device_id,
+            has_tensor_cores: backend == "cuda",
+            supports_bf16: is_gpu,
+            supports_fp16: is_gpu,
+            supports_fp8: backend == "cuda",
+            memory_gb: 0,
+            peak_tflops: 0.0,
+        },
+        gpu_available: is_gpu,
+        active_dtype: active_dtype,
+        stream_id: 0,
+    }
+}
+
+func backend_supports_dtype(device_info device, string dtype) bool {
+    if dtype == "bf16" {
+        return device.supports_bf16
+    }
+    if dtype == "fp16" {
+        return device.supports_fp16
+    }
+    if dtype == "fp8" {
+        return device.supports_fp8
+    }
+    if dtype == "" || dtype == "fp32" {
+        return true
+    }
+    false
+}
+
+func resolve_compute_context(string preferred_backend, string preferred_dtype) compute_context {
+    compute_context ctx = detect_device()
+    if preferred_backend != "" {
+        ctx = new_compute_context(preferred_backend, 0, preferred_dtype)
+    } else {
+        ctx.active_dtype = preferred_dtype
+        if ctx.active_dtype == "" {
+            ctx.active_dtype = "fp32"
+        }
+    }
+    if !backend_supports_dtype(ctx.device, ctx.active_dtype) {
+        ctx.active_dtype = "fp32"
+    }
+    ctx
+}
+
 // ============================================================================
 // 2. 位精确低精度转换
 //
@@ -237,7 +292,24 @@ func backend_matmul_bf16(
     []float a_bf = array_to_bf16(a)
     []float b_bf = array_to_bf16(b)
     // fp32 累加 (Tensor Core 累加器是 fp32)
-    backend_matmul(ctx, a_bf, b_bf, m, k, n)
+    return backend_matmul(ctx, a_bf, b_bf, m, k, n)
+}
+
+// 根据 active_dtype 选择最合适的矩阵乘路径
+func backend_matmul_dispatch(
+    compute_context ctx,
+    []float a, []float b,
+    int m, int k, int n
+) []float {
+    if ctx.active_dtype == "bf16" {
+        return backend_matmul_bf16(ctx, a, b, m, k, n)
+    }
+    if ctx.active_dtype == "fp16" {
+        []float a_fp16 = array_to_fp16(a)
+        []float b_fp16 = array_to_fp16(b)
+        return backend_matmul(ctx, a_fp16, b_fp16, m, k, n)
+    }
+    return backend_matmul(ctx, a, b, m, k, n)
 }
 
 // ============================================================================

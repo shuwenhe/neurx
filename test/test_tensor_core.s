@@ -67,6 +67,12 @@ func test_broadcast_and_shape_ops() {
     tensor e = neurx.tensor.core.transpose2d(d)
     tensor f = neurx.tensor.core.sum_dim(c, 0, false)
     tensor g = neurx.tensor.core.mean_dim(c, 0, false)
+    tensor h = neurx.tensor.core.broadcast_to(a, [2, 3])
+    tensor i = neurx.tensor.core.sum_to_shape(h, [3])
+    tensor j = neurx.tensor.core.tensor_materialize(e)
+    bool k = neurx.tensor.core.broadcastable_shape([2, 3], [1, 3])
+    bool l = neurx.tensor.core.broadcastable_shape([2, 3], [2, 2])
+    tensor m = neurx.tensor.core.tensor_clone_storage(e)
     assert_close(c.storage[0], 11.0, "broadcast add 0")
     assert_close(c.storage[2], 13.0, "broadcast add 2")
     assert_true(d.desc.numel == 3, "reshape numel")
@@ -74,6 +80,13 @@ func test_broadcast_and_shape_ops() {
     assert_true(e.desc.shape[1] == 1, "transpose cols")
     assert_close(f.storage[0], 36.0, "sum dim")
     assert_close(g.storage[0], 12.0, "mean dim")
+    assert_close(h.storage[4], 2.0, "broadcast to")
+    assert_close(i.storage[0], 2.0, "sum to shape 0")
+    assert_close(i.storage[2], 6.0, "sum to shape 2")
+    assert_true(j.desc.is_contiguous, "materialize contiguous")
+    assert_true(k, "broadcastable true")
+    assert_true(!l, "broadcastable false")
+    assert_true(!m.desc.is_view, "clone storage not view")
 }
 
 func main() {
