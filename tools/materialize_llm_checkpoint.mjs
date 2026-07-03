@@ -2,17 +2,18 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const outputDir = process.env.NEURX_OUTPUT_DIR || path.resolve('artifacts/checkpoints/llm_s_pretrain');
-const vocabSize = 256;
-const batchSize = 16;
-const totalSteps = Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_STEPS || '50', 10) || 50);
+const defaultCorpusPath = process.env.NEURX_CORPUS_PATH || path.resolve('data/corpus/train_corpus.txt');
+const vocabSize = Math.max(64, Number.parseInt(process.env.NEURX_VOCAB_SIZE || '256', 10) || 256);
+const batchSize = Math.max(1, Number.parseInt(process.env.NEURX_BATCH_SIZE || '24', 10) || 24);
+const totalSteps = Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_STEPS || '80', 10) || 80);
 const warmupSteps = Math.min(
   totalSteps,
-  Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_WARMUP_STEPS || '10', 10) || 10),
+  Math.max(1, Number.parseInt(process.env.NEURX_S_PRETRAIN_WARMUP_STEPS || '12', 10) || 12),
 );
-const initialLr = 0.28;
-const minLr = 0.03;
-const weightDecay = 0.0001;
-const corpusRepeats = 96;
+const initialLr = Math.max(0.01, Number.parseFloat(process.env.NEURX_INITIAL_LR || '0.22') || 0.22);
+const minLr = Math.max(0.001, Number.parseFloat(process.env.NEURX_MIN_LR || '0.02') || 0.02);
+const weightDecay = Math.max(0.0, Number.parseFloat(process.env.NEURX_WEIGHT_DECAY || '0.0001') || 0.0001);
+const corpusRepeats = Math.max(1, Number.parseInt(process.env.NEURX_CORPUS_REPEATS || '128', 10) || 128);
 
 function mod(a, b) {
   return b === 0 ? 0 : a - Math.trunc(a / b) * b;
@@ -59,21 +60,66 @@ function fmtFloat(val, decimals) {
   return Number(val).toFixed(decimals);
 }
 
-function buildCorpus() {
-  const base = [
-    110, 101, 117, 114, 120, 32, 116, 114, 97, 105, 110, 115, 32, 114, 101, 97,
-    108, 32, 109, 111, 100, 101, 108, 115, 32, 119, 105, 116, 104, 32, 115, 46,
-    10, 108, 111, 115, 115, 32, 103, 111, 101, 115, 32, 100, 111, 119, 110, 32,
-    119, 104, 101, 110, 32, 103, 114, 97, 100, 105, 101, 110, 116, 115, 32, 117,
-    112, 100, 97, 116, 101, 32, 119, 101, 105, 103, 104, 116, 115, 46, 10, 99,
-    104, 101, 99, 107, 112, 111, 105, 110, 116, 115, 32, 99, 97, 112, 116, 117,
-    114, 101, 32, 112, 114, 111, 103, 114, 101, 115, 115, 32, 100, 117, 114, 105,
-    110, 103, 32, 116, 114, 97, 105, 110, 105, 110, 103, 46, 10, 97, 100, 97,
-    109, 119, 32, 107, 101, 101, 112, 115, 32, 111, 112, 116, 105, 109, 105, 122,
-    97, 116, 105, 111, 110, 32, 115, 116, 97, 98, 108, 101, 32, 97, 110, 100, 32,
-    101, 102, 102, 105, 99, 105, 101, 110, 116, 46, 10,
-  ];
+function normalizeCorpusText(text) {
+  return String(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/[^\t\n\r\x20-\x7E]/g, ' ');
+}
 
+function textToBytes(text) {
+  const bytes = [];
+  for (let i = 0; i < text.length; i += 1) {
+    const code = text.charCodeAt(i);
+    if (code === 10 || code === 13 || code === 9 || (code >= 32 && code <= 126)) {
+      bytes.push(code);
+    } else {
+      bytes.push(32);
+    }
+  }
+  return bytes;
+}
+
+function fallbackCorpusText() {
+  return [
+    'NeurX trains local models with simple checkpoint files.',
+    'The assistant should answer clearly, briefly, and directly.',
+    'If the model is unsure, it should say that it is unsure.',
+    'Question: what is NeurX?',
+    'Answer: NeurX is a local training and inference stack.',
+    'Question: how do you debug inference?',
+    'Answer: check the checkpoint path, checkpoint format, and runner output.',
+    'Question: why is the response empty?',
+    'Answer: the checkpoint may be weak, the manifest may be wrong, or the prompt may be malformed.',
+    'Question: what should a good checkpoint contain?',
+    'Answer: a compatible format, a valid latest checkpoint pointer, and useful training data.',
+    'Question: how should a chat tool respond?',
+    'Answer: it should produce a useful answer instead of echoing the prompt.',
+    'NeurX checkpoint generation should prefer the best model when it exists.',
+    'Training data quality matters more than repeated boilerplate.',
+  ].join('\n');
+}
+
+async function buildCorpus() {
+  const chunks = [];
+
+  if (defaultCorpusPath) {
+    try {
+      const corpusText = await fs.readFile(defaultCorpusPath, 'utf8');
+      const cleaned = normalizeCorpusText(corpusText).trim();
+      if (cleaned.length > 0) {
+        chunks.push(cleaned);
+      }
+    } catch (err) {
+      if (process.env.NEURX_CORPUS_PATH) {
+        throw new Error(`Failed to read corpus at ${defaultCorpusPath}: ${err.message}`);
+      }
+    }
+  }
+
+  chunks.push(fallbackCorpusText());
+
+  const baseText = normalizeCorpusText(chunks.join('\n')).trim();
+  const base = textToBytes(baseText);
   const corpus = new Array(base.length * corpusRepeats);
   for (let rep = 0; rep < corpusRepeats; rep += 1) {
     for (let i = 0; i < base.length; i += 1) {
@@ -83,8 +129,7 @@ function buildCorpus() {
   return corpus;
 }
 
-function train() {
-  const corpus = buildCorpus();
+function train(corpus) {
   const corpusLen = corpus.length;
   const paramCount = vocabSize * vocabSize;
   const weights = new Array(paramCount);
@@ -190,7 +235,8 @@ function serializeCheckpoint(step, loss, weights, bias) {
 }
 
 async function main() {
-  const result = train();
+  const corpus = await buildCorpus();
+  const result = train(corpus);
   await fs.mkdir(outputDir, { recursive: true });
   const finalPath = path.join(outputDir, 'final_model.neurx');
   const bestPath = path.join(outputDir, 'best_model.neurx');
@@ -198,7 +244,7 @@ async function main() {
 
   await fs.writeFile(finalPath, serializeCheckpoint(result.step, result.loss, result.weights, result.bias));
   await fs.writeFile(bestPath, serializeCheckpoint(result.step, result.bestLoss, result.bestWeights, result.bestBias));
-  await fs.writeFile(latestPath, `${finalPath}\n`);
+  await fs.writeFile(latestPath, `${bestPath}\n`);
 
   console.log(`Materialized full checkpoint at ${outputDir}`);
   console.log(`Step: ${result.step}`);
@@ -207,6 +253,7 @@ async function main() {
   console.log(`Tokens Processed: ${intToStr(result.tokensProcessed)}`);
   console.log(`Weights: ${result.weights.length}`);
   console.log(`Bias: ${result.bias.length}`);
+  console.log(`Corpus Path: ${defaultCorpusPath}`);
 }
 
 main().catch((err) => {

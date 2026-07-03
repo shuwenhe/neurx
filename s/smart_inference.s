@@ -1,5 +1,7 @@
 package neurx.inference.smart
 
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
+
 // NeurX 智能推理系统 - S语言实现
 // Smart Inference System in S Language
 
@@ -254,42 +256,99 @@ func generate_generic_response(string question) string {
     "🤔 您问了关于 '" + question + "' 的问题。\n\n我的知识库主要包含以下内容：\n• 深度学习基础概念\n• Transformer 架构详解\n• 优化算法 (Adam, SGD, AdamW)\n• 神经网络训练技巧\n• NeurX 框架功能\n\n💡 如果您的问题与这些领域相关，我会很乐意详细解答！"
 }
 
+func resolve_real_inference_runner() string {
+    string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_RUNNER", ""))
+    if candidate != "" && runtime_file_exists(candidate) {
+        return candidate
+    }
+
+    candidate = trim(runtime_env_get("NEURX_CHAT_INFERENCE_RUNNER", ""))
+    if candidate != "" && runtime_file_exists(candidate) {
+        return candidate
+    }
+
+    if runtime_file_exists("../build/s_ir_runner_train_gpt_large") {
+        return "../build/s_ir_runner_train_gpt_large"
+    }
+
+    if runtime_file_exists("build/s_ir_runner_train_gpt_large") {
+        return "build/s_ir_runner_train_gpt_large"
+    }
+
+    if runtime_file_exists("/Users/feifei/shuwen/train/neurx/build/s_ir_runner_train_gpt_large") {
+        return "/Users/feifei/shuwen/train/neurx/build/s_ir_runner_train_gpt_large"
+    }
+
+    ""
+}
+
+func resolve_real_inference_ir() string {
+    string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_IR", ""))
+    if candidate != "" && runtime_file_exists(candidate) {
+        return candidate
+    }
+
+    candidate = trim(runtime_env_get("NEURX_CHAT_INFERENCE_IR", ""))
+    if candidate != "" && runtime_file_exists(candidate) {
+        return candidate
+    }
+
+    if runtime_file_exists("../build/interactive_inference/interactive_inference.ir") {
+        return "../build/interactive_inference/interactive_inference.ir"
+    }
+
+    if runtime_file_exists("build/interactive_inference/interactive_inference.ir") {
+        return "build/interactive_inference/interactive_inference.ir"
+    }
+
+    if runtime_file_exists("/Users/feifei/shuwen/train/neurx/build/interactive_inference/interactive_inference.ir") {
+        return "/Users/feifei/shuwen/train/neurx/build/interactive_inference/interactive_inference.ir"
+    }
+
+    ""
+}
+
+func build_real_inference_prompt(string question) string {
+    "你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：\n" + question + "\n答案："
+}
+
+func generate_model_response(string question) string {
+    string runner_path = resolve_real_inference_runner()
+    if runner_path == "" {
+        return "模型推理运行器未找到，请先编译并生成 `build/s_ir_runner_train_gpt_large`。"
+    }
+
+    string ir_path = resolve_real_inference_ir()
+    if ir_path == "" {
+        return "模型 IR 文件未找到，请先运行 `bash script/run_interactive_inference.sh` 生成 `interactive_inference.ir`。"
+    }
+
+    string prompt = build_real_inference_prompt(question)
+    string command = "NEURX_INFER_SMOKE_TEST=1 "
+    command = command + "NEURX_INFER_PROMPT=" + runtime_shell_escape(prompt) + " "
+    command = command + "NEURX_INFER_ANSWER_ONLY=0 "
+    command = command + runtime_shell_escape(runner_path) + " " + runtime_shell_escape(ir_path) + " 2>&1 | awk '/^答案：$/ {capture=1; next} /^Answer:$/ {capture=1; next} /^Generated:$/ {capture=1; next} /^\\[phase\\] generate:done$/ {capture=0} capture && NF {line=$0} END { if (line != \"\") print line }'"
+
+    string response = trim(runtime_run_command_output(command))
+    if response != "" {
+        return response
+    }
+
+    string fallback = "NEURX_INFER_SMOKE_TEST=1 "
+    fallback = fallback + "NEURX_INFER_PROMPT=" + runtime_shell_escape(prompt) + " "
+    fallback = fallback + "NEURX_INFER_ANSWER_ONLY=0 "
+    fallback = fallback + runtime_shell_escape(runner_path) + " " + runtime_shell_escape(ir_path) + " 2>&1"
+    response = trim(runtime_run_command_output(fallback))
+    if response != "" {
+        return response
+    }
+
+    "模型推理没有返回内容，请检查 checkpoint 和运行器。"
+}
+
 func answer_question(string question) string {
-    // 生成对问题的回答
-    
-    string q_lower = str_to_lower(question)
-    
-    // 检查问题类型
-    if str_contains(q_lower, "你好") || str_contains(q_lower, "帮助") || str_contains(q_lower, "help") {
-        return generate_introduction_response()
-    }
-    
-    if str_contains(q_lower, "功能") || str_contains(q_lower, "特性") || str_contains(q_lower, "features") {
-        return generate_features_response()
-    }
-    
-    if str_contains(q_lower, "怎么") || str_contains(q_lower, "如何") || str_contains(q_lower, "使用") {
-        return generate_usage_response()
-    }
-    
-    if str_contains(q_lower, "transformer") {
-        return "Transformer 是现代 NLP 的基础架构。它使用多头注意力机制来处理序列数据。多头注意力允许模型并行处理多个表示子空间，有效捕捉不同类型的依赖关系。"
-    }
-    
-    if str_contains(q_lower, "人工智能") || str_contains(q_lower, "ai") {
-        return "人工智能是让机器具备感知、理解、推理和生成能力的技术集合。深度学习是 AI 的一个重要分支，使用神经网络学习复杂的数据表示。"
-    }
-    
-    if str_contains(q_lower, "neurx") || str_contains(q_lower, "框架") {
-        return "NeurX 是一个高性能的深度学习框架，专为大型语言模型训练和推理而设计。它提供了完整的端到端解决方案，包括模型定义、训练优化和推理部署。"
-    }
-    
-    if str_contains(q_lower, "优化") || str_contains(q_lower, "optimizer") {
-        return "常用的优化器包括 SGD、Adam 和 AdamW。Adam 使用一阶和二阶矩的自适应估计来更新参数，通常比 SGD 更快收敛。学习率调度可以进一步改进收敛性能。"
-    }
-    
-    // 默认响应
-    return generate_generic_response(question)
+    // 直接走真实推理脚本，而不是关键词模板
+    return generate_model_response(question)
 }
 
 // ============================================================================
@@ -340,7 +399,7 @@ func run_interactive_mode() {
     int turn = 1
     
     while turn <= 10 {  // S语言限制：最多10轮演示
-        print("[轮 " + int_to_string(turn) + "] 您: ")
+        print_text("[轮 " + int_to_string(turn) + "] 您: ")
         
         // 读取输入会因为S语言限制而有问题，所以这里演示自动问题
         string user_input = ""
@@ -411,7 +470,7 @@ func int_to_string(int n) string {
     while n > 0 {
         int digit = n % 10
         // 将数字转换为字符
-        result = (digit + 48) + result
+        result = string(digit + 48) + result
         n = n / 10
     }
     
@@ -432,7 +491,7 @@ func int(float f) int {
     0  // 简化版本
 }
 
-func print(string s) {
+func print_text(string s) {
     println(s)
 }
 
