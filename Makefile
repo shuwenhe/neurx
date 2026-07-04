@@ -40,16 +40,13 @@ PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
+
 help:
-	@echo "  make train            # default NeurX pretrain pipeline"
-	@echo "  make industrial-train # convenience: industrial mode alias for make train"
+	@echo "  make train            # NeurX pretrain pipeline (use MODE=industrial for industrial flow)"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
-
-industrial-train:
-	$(MAKE) train MODE=industrial
 
 train: check-bash
 	@cd '$(CURDIR_UNIX)' && \
