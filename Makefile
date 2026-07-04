@@ -25,11 +25,12 @@ endif
 
 .DEFAULT_GOAL := help
 
-S_COMPILER_LOCAL ?= /Users/feifei/train/s/.local/bin/s
-S_COMPILER_BIN ?= /Users/feifei/train/s/bin/s
-S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) $(shell command -v s 2>/dev/null) s)
-S_COMPILER_EMIT_CWD ?= /Users/feifei/train/s
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
+S_REPO_ROOT := $(CURDIR_UNIX)/../s
+S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
+S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
+S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) $(shell command -v s 2>/dev/null) s)
+S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
 PRETRAIN_DATA_ROOT := $(CURDIR_UNIX)/data/pretrain_dataset
 PRETRAIN_RAW_DIR := $(PRETRAIN_DATA_ROOT)/raw
 PRETRAIN_CLEANED_FILE := $(PRETRAIN_DATA_ROOT)/cleaned/pretrain_data_cleaned.jsonl
@@ -41,10 +42,26 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 help:
 	@echo "  make train"
+	@echo "  make industrial-train"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
+
+industrial-train: check-bash
+	@echo "Running Industrial 1T GPT training pipeline"
+	@cd '$(CURDIR_UNIX)' && \
+		mkdir -p artifacts/build/industrial_1t && \
+		NEURX_1T_MANIFEST='$(CURDIR_UNIX)/data/training_data_shards/manifest.txt' \
+		NEURX_1T_CHECKPOINT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t' \
+		NEURX_1T_BATCH_SIZE=16 \
+		NEURX_1T_SEQ_LEN=512 \
+		NEURX_1T_VOCAB_SIZE=32000 \
+		NEURX_1T_PARAM_COUNT=4096 \
+		NEURX_1T_TOTAL_STEPS=1000 \
+		$(S_COMPILER) training/industrial_1t_training.s artifacts/build/industrial_1t/industrial_1t_training.ir 2>&1 && \
+		cd '$(S_COMPILER_EMIT_CWD)' && \
+		$(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin' 2>&1
 
 train: check-bash
 	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
