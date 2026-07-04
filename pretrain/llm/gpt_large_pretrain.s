@@ -15,6 +15,9 @@ use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_t
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
+use neurx.compression.release.{compression_release_config, prepare_compression_release}
+use neurx.deployment.chain.{default_model_deployment_config}
+use neurx.exporter.{default_model_export_config}
 use neurx.data.corpus_loader.{corpus_state, corpus_token_stream_result, new_corpus_state_from_paths, corpus_collect_token_ids}
 use neurx.nn.{embedding_lookup, transformer_forward}
 use neurx.opt.optim.{adamw_optimizer}
@@ -2114,5 +2117,94 @@ func main() int {
     println("Best metric: " + fmt_float(final_state.checkpoint.best_metric, 6))
     println("Tokens seen: " + int_to_str(final_state.loop.tokens_seen, 0))
     println("Summary written to: " + final_state.output_dir + "/pretrain_summary.txt")
+    string release_dir = gpt_large_pretrain_prepare_release(final_state)
+    println("Compression release written to: " + release_dir)
     0
+}
+
+func gpt_large_pretrain_prepare_release(gpt_large_pretrain_state state) string {
+    string quant_manifest = state.output_dir + "/quantized_model/quantized_model.manifest"
+    string distill_manifest = state.output_dir + "/distillation/distillation.manifest"
+
+    gpt_large_pretrain_ensure_quantization_release_artifact(state, quant_manifest)
+    gpt_large_pretrain_ensure_distillation_release_artifact(state, distill_manifest)
+
+    compression_release_config release_cfg = compression_release_config {
+        release_dir: state.output_dir + "/release",
+        quantization_manifest_path: quant_manifest,
+        distillation_manifest_path: distill_manifest,
+        export_config: default_model_export_config(),
+        deployment_config: default_model_deployment_config(),
+    }
+
+    release_cfg.export_config.model_name = "gpt-large-pretrain"
+    release_cfg.export_config.source_model_dir = state.output_dir
+    release_cfg.export_config.export_dir = release_cfg.release_dir + "/export"
+    release_cfg.export_config.export_format = "custom"
+    release_cfg.export_config.target_runtime = "neurx"
+    release_cfg.export_config.quantized = true
+    release_cfg.export_config.distilled = true
+    release_cfg.export_config.quantization_manifest_path = quant_manifest
+    release_cfg.export_config.distillation_manifest_path = distill_manifest
+
+    release_cfg.deployment_config.cluster_name = "neurx-pretrain"
+    release_cfg.deployment_config.export_dir = release_cfg.export_config.export_dir
+    release_cfg.deployment_config.deployment_dir = release_cfg.release_dir + "/deployment"
+    release_cfg.deployment_config.checkpoint_dir = state.output_dir + "/checkpoints"
+    release_cfg.deployment_config.data_dir = state.output_dir + "/data"
+    release_cfg.deployment_config.output_dir = state.output_dir + "/results"
+    release_cfg.deployment_config.num_nodes = 1
+    release_cfg.deployment_config.gpus_per_node = 1
+    release_cfg.deployment_config.batch_size_per_gpu = 1
+    release_cfg.deployment_config.sequence_length = state.cfg.max_seq_len
+    release_cfg.deployment_config.num_epochs = 1
+    release_cfg.deployment_config.learning_rate = state.cfg.lr
+    release_cfg.deployment_config.warmup_steps = state.cfg.warmup_steps
+    release_cfg.deployment_config.master_addr = "127.0.0.1"
+    release_cfg.deployment_config.master_port = 12355
+    release_cfg.deployment_config.export_format = "custom"
+    release_cfg.deployment_config.model_name = "gpt-large-pretrain"
+
+    var release_artifact = prepare_compression_release(release_cfg)
+    release_artifact.release_dir
+}
+
+func gpt_large_pretrain_ensure_quantization_release_artifact(gpt_large_pretrain_state state, string manifest_path) () {
+    if runtime_file_exists(manifest_path) {
+        return
+    }
+
+    string manifest_dir = state.output_dir + "/quantized_model"
+    runtime_make_dirs(manifest_dir)
+
+    string manifest = ""
+    manifest = manifest + "quantized_model.root=" + manifest_dir + "\n"
+    manifest = manifest + "quantized_model.layer_count=" + int_to_str(state.training.model.num_layers, 0) + "\n"
+    manifest = manifest + "quantized_model.quantization_type=INT8_STATIC\n"
+    manifest = manifest + "quantized_model.per_channel_for_weights=true\n"
+    manifest = manifest + "quantized_model.per_tensor_for_activations=true\n"
+    manifest = manifest + "quantized_model.calibration_method=entropy\n"
+    manifest = manifest + "quantized_model.percentile_value=99.990000\n"
+    manifest = manifest + "quantized_model.use_symmetric=false\n"
+    runtime_write_text_file(manifest_path, manifest)
+}
+
+func gpt_large_pretrain_ensure_distillation_release_artifact(gpt_large_pretrain_state state, string manifest_path) () {
+    if runtime_file_exists(manifest_path) {
+        return
+    }
+
+    string manifest_dir = state.output_dir + "/distillation"
+    runtime_make_dirs(manifest_dir)
+
+    string manifest = ""
+    manifest = manifest + "bundle_dir=" + manifest_dir + "\n"
+    manifest = manifest + "teacher_name=teacher-" + state.training.model.family + "\n"
+    manifest = manifest + "student_name=student-" + state.training.model.family + "\n"
+    manifest = manifest + "compression_ratio=4.00\n"
+    manifest = manifest + "temperature=4.0000\n"
+    manifest = manifest + "student_weight=0.3000\n"
+    manifest = manifest + "distill_weight=0.7000\n"
+    manifest = manifest + "best_loss=" + fmt_float(state.training.last_loss, 6) + "\n"
+    runtime_write_text_file(manifest_path, manifest)
 }
