@@ -194,7 +194,7 @@ func moe_route(moe_layer layer, []float hidden, int tokens) routing_decision {
         t = t + 1
     }
 
-    routing_decision {
+    return routing_decision {
         expert_ids: expert_ids,
         gate_weights: gate_weights,
         router_probs: router_probs,
