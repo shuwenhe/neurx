@@ -42,11 +42,11 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 
 help:
-	@echo "  make train            # NeurX pretrain pipeline (use MODE=industrial for industrial flow)"
-	@echo "  make infer            # Run inference"
-	@echo "  make chat             # Start interactive chat"
-	@echo "  make shard            # Run data resharding pipeline"
-	@echo "  make split            # Split dataset into train/val/test"
+	@echo "  make train"
+	@echo "  make infer"
+	@echo "  make chat"
+	@echo "  make shard"
+	@echo "  make split"
 
 train: check-bash
 	@cd '$(CURDIR_UNIX)' && \
