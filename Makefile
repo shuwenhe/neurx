@@ -41,16 +41,20 @@ PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 help:
-	@echo "  make train"
-	@echo "  make industrial-train"
+	@echo "  make train            # default NeurX pretrain pipeline"
+	@echo "  make industrial-train # convenience: industrial mode alias for make train"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
 
-industrial-train: check-bash
-	@echo "Running Industrial 1T GPT training pipeline"
+industrial-train:
+	$(MAKE) train MODE=industrial
+
+train: check-bash
 	@cd '$(CURDIR_UNIX)' && \
+	if [ "$(MODE)" = "industrial" ]; then \
+		echo "Running Industrial 1T GPT training pipeline (MODE=industrial)" && \
 		mkdir -p artifacts/build/industrial_1t && \
 		NEURX_1T_MANIFEST='$(CURDIR_UNIX)/data/training_data_shards/manifest.txt' \
 		NEURX_1T_CHECKPOINT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t' \
@@ -61,11 +65,9 @@ industrial-train: check-bash
 		NEURX_1T_TOTAL_STEPS=1000 \
 		$(S_COMPILER) training/industrial_1t_training.s artifacts/build/industrial_1t/industrial_1t_training.ir 2>&1 && \
 		cd '$(S_COMPILER_EMIT_CWD)' && \
-		$(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin' 2>&1
-
-train: check-bash
-	@echo "Running NeurX 1T MoE GPT-style Production Pre-training"
-	@cd '$(CURDIR_UNIX)' && \
+		$(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin' 2>&1; \
+	else \
+		echo "Running NeurX 1T MoE GPT-style Production Pre-training" && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
 		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
 		echo "  cleaned  : $(PRETRAIN_CLEANED_FILE)" && \
@@ -81,7 +83,8 @@ train: check-bash
 		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
 		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1; \
+	fi
 
 
 
