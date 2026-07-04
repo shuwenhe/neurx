@@ -1,3 +1,56 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+env/
+venv/
+
+# Build artifacts and binaries
+/build/
+/bin/
+/out/
+/dist/
+*.o
+*.a
+*.so
+s_ir_runner
+build/s_ir_runner*
+
+# Logs and runtime files
+*.log
+/tmp/
+/var/tmp/
+core*
+
+# Secrets / env
+.env
+secrets.env
+*.pem
+*.key
+
+# Data and shards
+data/pretrain_dataset/raw/
+data/training_data_shards/
+data/training_data_splits/
+data/training_data_*.jsonl
+
+# Checkpoints and temporary training outputs
+checkpoint/
+checkpoint_*/
+tmp/
+script/.run/
+*.pid
 # Native cache
 __pycache__/
 *.so
