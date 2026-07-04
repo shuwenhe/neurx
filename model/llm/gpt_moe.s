@@ -187,7 +187,7 @@ func gpt_moe_block_forward(
     int batch_size,
     int seq_len,
     []float rope_freqs
-) ( []float, float ) {        // (output [B*S, H], aux_loss)
+) ([]float, float) {        // (output [B*S, H], aux_loss)
     int total = batch_size * seq_len
     int H = block.dense_block.hidden_dim
     int nh = block.dense_block.n_head
