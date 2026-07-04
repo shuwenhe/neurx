@@ -73,8 +73,12 @@ train: check-bash
 		echo "  test     : $(PRETRAIN_TEST_SPLIT)" && \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
-		bash clean_data.sh && \
-		bash generate_shards.sh && \
+		if [ "$(SKIP_CLEAN)" = "1" ]; then \
+			echo "SKIP_CLEAN=1, skipping data clean and shard generation"; \
+		else \
+			bash clean_data.sh && \
+			bash generate_shards.sh && \
+		fi && \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
 		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
