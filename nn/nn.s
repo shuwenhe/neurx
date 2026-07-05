@@ -5,6 +5,7 @@ use neurx.tensor.tensor
 use neurx.nn.activations
 use neurx.nn.conv
 use neurx.nn.pooling
+use neurx.nn.rnn
 
 struct linear {
     int in_features
@@ -515,6 +516,51 @@ func embedding_lookup(tensor weight, tensor input_ids, int padding_idx) tensor {
     return embedding_lookup_impl(weight, input_ids, padding_idx)
 }
 
+func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_idx, bool mean) tensor {
+    tensor embedded = embedding_lookup_impl(weight, input_ids, padding_idx)
+    int bag_count = len(offsets.data)
+    if bag_count <= 0 {
+        return neurx.tensor.new([]float{cap: 0}, shape2(0, weight.shape[1]), embedded.requires_grad)
+    }
+    int dim = weight.shape[1]
+    []float out = []float{cap: bag_count * dim}
+    int b = 0
+    while b < bag_count {
+        int start = offsets.data[b]
+        int end = len(input_ids.data)
+        if b + 1 < bag_count {
+            end = offsets.data[b + 1]
+        }
+        if start < 0 {
+            start = 0
+        }
+        if end < start {
+            end = start
+        }
+        int count = end - start
+        if count <= 0 {
+            count = 1
+        }
+        int d = 0
+        while d < dim {
+            float acc = 0.0
+            int i = start
+            while i < end {
+                acc = acc + embedded.data[i * dim + d]
+                i = i + 1
+            }
+            if mean {
+                out[b * dim + d] = acc / count
+            } else {
+                out[b * dim + d] = acc
+            }
+            d = d + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape2(bag_count, dim), embedded.requires_grad)
+}
+
 func relu(tensor input) tensor {
     return neurx.tensor.relu(input)
 }
@@ -551,6 +597,38 @@ func silu(tensor input) tensor {
     return neurx.nn.activations.silu(input)
 }
 
+func softplus(tensor input) tensor {
+    return neurx.nn.activations.softplus(input)
+}
+
+func mish(tensor input) tensor {
+    return neurx.nn.activations.mish(input)
+}
+
+func relu6(tensor input) tensor {
+    return neurx.nn.activations.relu6(input)
+}
+
+func hardtanh(tensor input, float min_value, float max_value) tensor {
+    return neurx.nn.activations.hardtanh(input, min_value, max_value)
+}
+
+func hardsigmoid(tensor input) tensor {
+    return neurx.nn.activations.hardsigmoid(input)
+}
+
+func hardswish(tensor input) tensor {
+    return neurx.nn.activations.hardswish(input)
+}
+
+func threshold(tensor input, float threshold_value, float value) tensor {
+    return neurx.nn.activations.threshold(input, threshold_value, value)
+}
+
+func softsign(tensor input) tensor {
+    return neurx.nn.activations.softsign(input)
+}
+
 func dropout(tensor input, float p, bool training) tensor {
     if !training || p <= 0.0 {
         return neurx.tensor.clone(input)
@@ -565,7 +643,7 @@ func dropout(tensor input, float p, bool training) tensor {
     while i < n {
         int bucket = i - (i / 10) * 10
         float keep = 1.0
-        if bucket < int(p * 10.0) {
+        if bucket < p * 10.0 {
             keep = 0.0
         }
         out[i] = input.data[i] * keep * keep_scale
@@ -600,7 +678,7 @@ func alpha_dropout(tensor input, float p, bool training) tensor {
     int i = 0
     while i < n {
         int bucket = i - (i / 10) * 10
-        if bucket < int(p * 10.0) {
+        if bucket < p * 10.0 {
             out[i] = alpha_prime
         } else {
             out[i] = input.data[i] * keep_scale
@@ -631,7 +709,7 @@ func cross_entropy_loss(tensor logits, tensor target) tensor {
     float loss = 0.0
     int i = 0
     while i < n {
-        int cls = int(target.data[i])
+        int cls = target.data[i]
         if cls < 0 {
             cls = 0
         }
@@ -641,7 +719,7 @@ func cross_entropy_loss(tensor logits, tensor target) tensor {
         loss = loss - log_probs.data[i * classes + cls]
         i = i + 1
     }
-    loss = loss / float(n)
+    loss = loss / n
     return neurx.tensor.scalar_tensor(loss)
 }
 
@@ -656,7 +734,25 @@ func bce_with_logits_loss(tensor logits, tensor target) tensor {
 }
 
 func nll_loss(tensor log_probs, tensor target) tensor {
-    return cross_entropy_loss(log_probs, target)
+    int n = len(target.data)
+    if n <= 0 {
+        return neurx.tensor.scalar_tensor(0.0)
+    }
+    int classes = log_probs.shape[len(log_probs.shape) - 1]
+    float loss = 0.0
+    int i = 0
+    while i < n {
+        int cls = target.data[i]
+        if cls < 0 {
+            cls = 0
+        }
+        if cls >= classes {
+            cls = classes - 1
+        }
+        loss = loss - log_probs.data[i * classes + cls]
+        i = i + 1
+    }
+    return neurx.tensor.scalar_tensor(loss / n)
 }
 
 func smooth_l1_loss(tensor input, tensor target, float beta) tensor {
@@ -690,6 +786,93 @@ func binary_cross_entropy(tensor input, tensor target) tensor {
     return neurx.tensor.mean(total)
 }
 
+func kl_div_loss(tensor input_log_probs, tensor target, bool log_target) tensor {
+    int n = len(input_log_probs.data)
+    if len(target.data) < n {
+        n = len(target.data)
+    }
+    if n <= 0 {
+        return neurx.tensor.scalar_tensor(0.0)
+    }
+    float loss = 0.0
+    int i = 0
+    while i < n {
+        float target_prob = target.data[i]
+        float target_log = 0.0
+        if log_target {
+            target_log = target.data[i]
+            target_prob = exp_approx(target.data[i])
+        } else {
+            if target_prob > 0.0 {
+                target_log = neurx.tensor.log(neurx.tensor.scalar_tensor(target_prob)).data[0]
+            }
+        }
+        if target_prob > 0.0 {
+            loss = loss + target_prob * (target_log - input_log_probs.data[i])
+        }
+        i = i + 1
+    }
+    return neurx.tensor.scalar_tensor(loss / n)
+}
+
+func margin_ranking_loss(tensor input1, tensor input2, tensor target, float margin) tensor {
+    int n = len(input1.data)
+    if len(input2.data) < n {
+        n = len(input2.data)
+    }
+    if len(target.data) < n {
+        n = len(target.data)
+    }
+    if n <= 0 {
+        return neurx.tensor.scalar_tensor(0.0)
+    }
+    float loss = 0.0
+    int i = 0
+    while i < n {
+        float v = 0.0 - target.data[i] * (input1.data[i] - input2.data[i]) + margin
+        if v > 0.0 {
+            loss = loss + v
+        }
+        i = i + 1
+    }
+    return neurx.tensor.scalar_tensor(loss / n)
+}
+
+func triplet_margin_loss(tensor anchor, tensor positive, tensor negative, float margin, int p, float eps) tensor {
+    tensor pos_dist = pairwise_distance(anchor, positive, p, eps)
+    tensor neg_dist = pairwise_distance(anchor, negative, p, eps)
+    float v = pos_dist.data[0] - neg_dist.data[0] + margin
+    if v < 0.0 {
+        v = 0.0
+    }
+    return neurx.tensor.scalar_tensor(v)
+}
+
+func cosine_embedding_loss(tensor input1, tensor input2, tensor target, float margin) tensor {
+    tensor cos = cosine_similarity(input1, input2, len(input1.shape) - 1, 1e-8)
+    int n = len(cos.data)
+    if len(target.data) < n {
+        n = len(target.data)
+    }
+    if n <= 0 {
+        return neurx.tensor.scalar_tensor(0.0)
+    }
+    float loss = 0.0
+    int i = 0
+    while i < n {
+        if target.data[i] >= 0.0 {
+            loss = loss + (1.0 - cos.data[i])
+        } else {
+            float v = cos.data[i] - margin
+            if v > 0.0 {
+                loss = loss + v
+            }
+        }
+        i = i + 1
+    }
+    return neurx.tensor.scalar_tensor(loss / n)
+}
+
 func cosine_similarity(tensor x, tensor y, int dim, float eps) tensor {
     tensor xy = neurx.tensor.mul(x, y)
     tensor x2 = neurx.tensor.mul(x, x)
@@ -716,7 +899,7 @@ func pairwise_distance(tensor x, tensor y, int p, float eps) tensor {
         i = i + 1
     }
     tensor total = neurx.tensor.add(neurx.tensor.sum(powered), neurx.tensor.scalar_tensor(eps))
-    return neurx.tensor.exp(neurx.tensor.div(neurx.tensor.log(total), neurx.tensor.scalar_tensor(float(p))))
+    return neurx.tensor.exp(neurx.tensor.div(neurx.tensor.log(total), neurx.tensor.scalar_tensor(p)))
 }
 
 func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, tensor running_var, bool training, float eps) tensor {
@@ -729,7 +912,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
     int c = 0
     while c < channels {
         float mean = 0.0
-        float var = 0.0
+        float variance = 0.0
         int per_channel = 0
         if ndim == 2 {
             int batch = input.shape[0]
@@ -740,11 +923,11 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                 mean = mean + v
                 b = b + 1
             }
-            mean = mean / float(per_channel)
+            mean = mean / per_channel
             b = 0
             while b < batch {
                 float v = input.data[b * channels + c] - mean
-                var = var + v * v
+                variance = variance + v * v
                 b = b + 1
             }
         } else {
@@ -762,13 +945,13 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                     }
                     b = b + 1
                 }
-                mean = mean / float(per_channel)
+                mean = mean / per_channel
                 b = 0
                 while b < batch {
                     int l = 0
                     while l < length {
                         float v = input.data[(b * channels + c) * length + l] - mean
-                        var = var + v * v
+                        variance = variance + v * v
                         l = l + 1
                     }
                     b = b + 1
@@ -793,7 +976,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                         }
                         b = b + 1
                     }
-                    mean = mean / float(per_channel)
+                    mean = mean / per_channel
                     b = 0
                     while b < batch {
                         int h = 0
@@ -801,7 +984,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                             int w = 0
                             while w < width {
                                 float v = input.data[((b * channels + c) * height + h) * width + w] - mean
-                                var = var + v * v
+                                variance = variance + v * v
                                 w = w + 1
                             }
                             h = h + 1
@@ -814,9 +997,9 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
         if per_channel <= 0 {
             per_channel = 1
         }
-        var = var / float(per_channel)
+        variance = variance / per_channel
         float used_mean = mean
-        float used_var = var
+        float used_var = variance
         if !training && len(running_mean.data) >= channels && len(running_var.data) >= channels {
             used_mean = running_mean.data[c]
             used_var = running_var.data[c]
@@ -912,13 +1095,14 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
     if channels <= 0 {
         return neurx.tensor.clone(input)
     }
-    if num_groups > channels {
-        num_groups = channels
+    int groups = num_groups
+    if groups > channels {
+        groups = channels
     }
-    while channels / num_groups * num_groups != channels && num_groups > 1 {
-        num_groups = num_groups - 1
+    while channels / groups * groups != channels && groups > 1 {
+        groups = groups - 1
     }
-    int group_channels = channels / num_groups
+    int group_channels = channels / groups
     int spatial = 1
     int i = 2
     while i < ndim {
@@ -929,11 +1113,11 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
     int b = 0
     while b < batch {
         int g = 0
-        while g < num_groups {
+        while g < groups {
             int c_start = g * group_channels
             int c_end = c_start + group_channels
             float mean = 0.0
-            float var = 0.0
+            float variance = 0.0
             int count = group_channels * spatial
             int c = c_start
             while c < c_end {
@@ -961,7 +1145,7 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
             if count <= 0 {
                 count = 1
             }
-            mean = mean / float(count)
+            mean = mean / count
             c = c_start
             while c < c_end {
                 int s = 0
@@ -979,13 +1163,13 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
                         }
                     }
                     float diff = input.data[idx] - mean
-                    var = var + diff * diff
+                    variance = variance + diff * diff
                     s = s + 1
                 }
                 c = c + 1
             }
-            var = var / float(count)
-            float denom = neurx.tensor.sqrt(neurx.tensor.scalar_tensor(var + eps)).data[0]
+            variance = variance / count
+            float denom = neurx.tensor.sqrt(neurx.tensor.scalar_tensor(variance + eps)).data[0]
             c = c_start
             while c < c_end {
                 float scale = 1.0
@@ -1038,35 +1222,35 @@ func flatten(tensor input, int start_dim, int end_dim) tensor {
     return neurx.tensor.flatten(input, start_dim, end_dim)
 }
 
-func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) neurx.nn.conv.conv1d_state {
+func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) conv1d_state {
     return neurx.nn.conv.new_conv1d(in_channels, out_channels, kernel_size, stride, padding, dilation, use_bias)
 }
 
-func conv1d_forward(neurx.nn.conv.conv1d_state layer, tensor input) tensor {
+func conv1d_forward(conv1d_state layer, tensor input) tensor {
     return neurx.nn.conv.conv1d_forward(layer, input)
 }
 
-func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) neurx.nn.conv.conv2d_state {
+func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) conv2d_state {
     return neurx.nn.conv.new_conv2d(in_channels, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, dil_h, dil_w, use_bias)
 }
 
-func conv2d_forward(neurx.nn.conv.conv2d_state layer, tensor input) tensor {
+func conv2d_forward(conv2d_state layer, tensor input) tensor {
     return neurx.nn.conv.conv2d_forward(layer, input)
 }
 
-func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) neurx.nn.conv.convtranspose1d_state {
+func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) convtranspose1d_state {
     return neurx.nn.conv.new_convtranspose1d(in_channels, out_channels, kernel_size, stride, padding, output_padding, dilation, use_bias)
 }
 
-func convtranspose1d_forward(neurx.nn.conv.convtranspose1d_state layer, tensor input) tensor {
+func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose1d_forward(layer, input)
 }
 
-func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) neurx.nn.conv.convtranspose2d_state {
+func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) convtranspose2d_state {
     return neurx.nn.conv.new_convtranspose2d(in_channels, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, output_pad_h, output_pad_w, dil_h, dil_w, use_bias)
 }
 
-func convtranspose2d_forward(neurx.nn.conv.convtranspose2d_state layer, tensor input) tensor {
+func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose2d_forward(layer, input)
 }
 
@@ -1076,6 +1260,14 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
 
 func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     return neurx.nn.pooling.avg_pool1d(input, kernel_size, stride, padding)
+}
+
+func adaptive_avg_pool1d(tensor input, int out_len) tensor {
+    return neurx.nn.pooling.adaptive_avg_pool1d(input, out_len)
+}
+
+func adaptive_max_pool1d(tensor input, int out_len) tensor {
+    return neurx.nn.pooling.adaptive_max_pool1d(input, out_len)
 }
 
 func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
@@ -1092,4 +1284,48 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
 
 func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     return neurx.nn.pooling.adaptive_max_pool2d(input, out_h, out_w)
+}
+
+func interpolate1d(tensor input, int out_len) tensor {
+    return neurx.nn.pooling.interpolate1d(input, out_len)
+}
+
+func interpolate2d(tensor input, int out_h, int out_w) tensor {
+    return neurx.nn.pooling.interpolate2d(input, out_h, out_w)
+}
+
+func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
+    return neurx.nn.rnn.new_rnn_cell(input_size, hidden_size)
+}
+
+func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
+    return neurx.nn.rnn.rnn_cell_forward(cell, x, h_prev)
+}
+
+func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rnn_output {
+    return neurx.nn.rnn.rnn_forward(cell, input, seq_len, h0)
+}
+
+func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
+    return neurx.nn.rnn.new_lstm_cell(input_size, hidden_size)
+}
+
+func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float c_prev) lstm_cell_output {
+    return neurx.nn.rnn.lstm_cell_forward(cell, x, h_prev, c_prev)
+}
+
+func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, []float c0) lstm_output {
+    return neurx.nn.rnn.lstm_forward(cell, input, seq_len, h0, c0)
+}
+
+func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
+    return neurx.nn.rnn.new_gru_cell(input_size, hidden_size)
+}
+
+func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
+    return neurx.nn.rnn.gru_cell_forward(cell, x, h_prev)
+}
+
+func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gru_output {
+    return neurx.nn.rnn.gru_forward(cell, input, seq_len, h0)
 }

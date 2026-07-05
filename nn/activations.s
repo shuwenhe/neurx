@@ -175,6 +175,119 @@ func silu(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
+func softplus(tensor input) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        float x = input.data[i]
+        out[i] = log_approx(1.0 + exp_approx(x))
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func mish(tensor input) tensor {
+    tensor sp = softplus(input)
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = input.data[i] * tanh_approx(sp.data[i])
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func clamp_value(float x, float min_value, float max_value) float {
+    float v = x
+    if v < min_value {
+        v = min_value
+    }
+    if v > max_value {
+        v = max_value
+    }
+    v
+}
+
+func abs_value(float x) float {
+    if x < 0.0 {
+        return 0.0 - x
+    }
+    x
+}
+
+func relu6(tensor input) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = clamp_value(input.data[i], 0.0, 6.0)
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func hardtanh(tensor input, float min_value, float max_value) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = clamp_value(input.data[i], min_value, max_value)
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func hardsigmoid(tensor input) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func hardswish(tensor input) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        float gate = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
+        out[i] = input.data[i] * gate
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func threshold(tensor input, float threshold_value, float value) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        if input.data[i] > threshold_value {
+            out[i] = input.data[i]
+        } else {
+            out[i] = value
+        }
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
+func softsign(tensor input) tensor {
+    int n = len(input.data)
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = input.data[i] / (1.0 + abs_value(input.data[i]))
+        i = i + 1
+    }
+    neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
+}
+
 
 func softmax_1d([]float values) []float {
     int n = len(values)

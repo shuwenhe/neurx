@@ -104,6 +104,7 @@ struct moe_1t_orchestrator {
     // 检查点和恢复
     string checkpoint_dir
     int last_saved_step
+    int training_step
     int resumeable
     string latest_checkpoint_path
     
@@ -357,6 +358,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         
         checkpoint_dir: checkpoint_dir,
         last_saved_step: 0,
+        training_step: 0,
         resumeable: fw.training.resumeable,
         latest_checkpoint_path: "",
         
@@ -544,13 +546,14 @@ func moe_1t_allreduce_gradients(
 func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
     float loss,
-    float loss_scale
+    float loss_scale,
+    int global_step
 ) moe_1t_orchestrator {
     // 1. 不同的 GPU 各自更新其分片的参数
     // 2. 使用动态损失缩放处理 BF16 下溢
     // 3. 梯度裁剪在分布式设置中进行
 
-    int step_index = len(orch.step_history)
+    int step_index = global_step
     int warmup_steps = orch.framework.training.warmup_steps
     int total_steps = orch.framework.training.total_steps
     float peak_lr = orch.framework.training.peak_lr
@@ -579,6 +582,7 @@ func moe_1t_optimizer_step(
     }
 
     orch.optimizer_state.learning_rate = lr
+    orch.training_step = global_step + 1
     orch
 }
 
@@ -635,6 +639,7 @@ func moe_1t_save_checkpoint(
 
     save_pretrain_checkpoint(bundle)
     orch.last_saved_step = step
+    orch.training_step = step + 1
     orch.latest_checkpoint_path = checkpoint_path
     orch
 }
@@ -678,6 +683,7 @@ func moe_1t_load_checkpoint(
     } else {
         resumed_step = resumed_step + 1
     }
+    orch.training_step = resumed_step
     (orch, resumed_step)
 }
 
@@ -690,7 +696,7 @@ func moe_1t_log_step_metrics(
     moe_1t_orchestrator orch,
     moe_1t_step_state step_state
 ) {
-    if orch.world_rank == 0 && step_state.global_step % orch.log_interval == 0 {
+    if orch.world_rank == 0 && orch.log_interval > 0 && step_state.global_step % orch.log_interval == 0 {
         string log_msg = "Step " + int_to_string(step_state.global_step) +
                         " Loss=" + float_to_string(step_state.loss) +
                         " LR=" + float_to_string(step_state.learning_rate) +
@@ -718,6 +724,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     int save_interval = state.framework.training.save_steps
     
     while global_step < total_steps && state.should_stop == 0 {
+        int current_step = state.training_step
         // 1. 加载下一批 token
         int batch_tokens_per_gpu = 512  // 可调整
         int seq_len = 4096
@@ -737,13 +744,13 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         moe_1t_allreduce_gradients(state)
         
         // 6. 优化器步骤
-        state = moe_1t_optimizer_step(state, loss, 1.0)
+        state = moe_1t_optimizer_step(state, loss, 1.0, current_step)
         float lr = state.optimizer_state.learning_rate
         
         // 7. 记录指标
         moe_1t_step_state step_state = moe_1t_step_state {
-            global_step: global_step,
-            tokens_seen: (global_step + 1) * batch_tokens_per_gpu * state.world_size,
+            global_step: current_step,
+            tokens_seen: (current_step + 1) * batch_tokens_per_gpu * state.world_size,
             epoch: 0,
             batch_tokens: batch_tokens_per_gpu,
             loss: loss,
@@ -758,11 +765,11 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         state.step_history.push(step_state)
         
         // 8. 定期保存检查点
-        if global_step > 0 && global_step % save_interval == 0 {
-            state = moe_1t_save_checkpoint(state, global_step, loss)
+        if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
+            state = moe_1t_save_checkpoint(state, current_step, loss)
         }
         
-        global_step = global_step + 1
+        global_step = state.training_step
     }
     
     if orch.world_rank == 0 {
