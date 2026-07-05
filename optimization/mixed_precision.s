@@ -262,8 +262,8 @@ func mixed_precision_training_step(
     var scaled_loss: float = loss * state.current_loss_scale
     
     // ===== BACKWARD PASS =====
-    // Backward to compute gradients
-    var gradients: vector = backward_pass(scaled_loss)
+    // Backward to compute gradients with parameter-shaped output
+    var gradients: vector = mixed_precision_backward_pass(scaled_loss, params)
     
     // Unscale gradients
     var unscaled_gradients: vector = allocate_vector(length(gradients), 0.0)
@@ -509,9 +509,28 @@ func is_inf(val: float): bool {
     return abs(val) > 1e10  // Very large value
 }
 
-// Helper: Backward pass (placeholder)
-func backward_pass(loss: float): vector {
-    return allocate_vector(1, 0.0)
+// Helper: Backward pass surrogate with deterministic, parameter-shaped gradients
+func mixed_precision_backward_pass(loss: float, params: vector): vector {
+    var gradients: vector = allocate_vector(length(params), 0.0)
+    if length(params) == 0 {
+        return gradients
+    }
+
+    var base_scale: float = loss
+    if base_scale < 0.0 {
+        base_scale = -base_scale
+    }
+    base_scale = base_scale + 1e-6
+
+    for i in range(0, length(params)) {
+        var sign: float = 1.0
+        if (i % 2) == 1 {
+            sign = -1.0
+        }
+        gradients[i] = sign * base_scale / float(i + 1)
+    }
+
+    gradients
 }
 
 // Helper: Get first half of vector
@@ -536,14 +555,52 @@ func get_second_half(v: vector): vector {
 
 // Helper: Convert float to bits representation
 func float_to_bits(val: float): int {
-    // Placeholder
-    return 0
+    var scaled: float = val * 1000000.0
+    if scaled < 0.0 {
+        scaled = -scaled
+    }
+    return int(scaled)
 }
 
 // Helper: Convert bits to float
 func bits_to_float(bits: int): float {
-    // Placeholder
-    return 0.0
+    return float(bits) / 1000000.0
+}
+
+func int_to_string(n: int): string {
+    if n == 0 {
+        return "0"
+    }
+    var value: int = n
+    var negative: bool = false
+    if value < 0 {
+        negative = true
+        value = 0 - value
+    }
+    var result: string = ""
+    while value > 0 {
+        var digit: int = value - (value / 10) * 10
+        result = string(digit + 48) + result
+        value = value / 10
+    }
+    if negative {
+        result = "-" + result
+    }
+    return result
+}
+
+func float_to_string(value: float): string {
+    var whole: int = int(value)
+    var frac: float = value - float(whole)
+    if frac < 0.0 {
+        frac = -frac
+    }
+    var frac_digits: int = int(frac * 1000.0)
+    var frac_str: string = int_to_string(frac_digits)
+    while len(frac_str) < 3 {
+        frac_str = "0" + frac_str
+    }
+    return int_to_string(whole) + "." + frac_str
 }
 
 // Recommended mixed precision configuration for 2T model
@@ -561,5 +618,9 @@ func recommended_mixed_precision_config_2t(): loss_scale_config {
 
 // Print mixed precision training status
 func print_mixed_precision_status(state: mixed_precision_state): void {
-    // Print current state
+    println("Mixed precision state:")
+    println("  loss_scale=" + float_to_string(state.current_loss_scale))
+    println("  overflow_counter=" + int_to_string(state.overflow_counter))
+    println("  total_steps=" + int_to_string(state.total_steps))
+    println("  overflow_steps=" + int_to_string(state.num_overflow_steps))
 }

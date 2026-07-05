@@ -11,6 +11,49 @@ struct tensor {
     option[tensor] grad
 }
 
+func ndim(tensor a) int {
+    return len(a.shape)
+}
+
+func numel_tensor(tensor a) int {
+    return numel(a.shape)
+}
+
+func size(tensor a, int dim) int {
+    int axis = normalize_dim(dim, len(a.shape))
+    if axis < 0 || axis >= len(a.shape) {
+        return 0
+    }
+    return a.shape[axis]
+}
+
+func item(tensor a) float {
+    if len(a.data) == 0 {
+        return 0.0
+    }
+    return a.data[0]
+}
+
+func detach(tensor a) tensor {
+    return new(copy_float(a.data), copy_int(a.shape), false)
+}
+
+func requires_grad_(tensor a, bool enabled) tensor {
+    return new(copy_float(a.data), copy_int(a.shape), enabled)
+}
+
+func to_float_list(tensor a) []float {
+    return copy_float(a.data)
+}
+
+func reshape_as(tensor a, tensor other) tensor {
+    return reshape(a, copy_int(other.shape))
+}
+
+func view_as(tensor a, tensor other) tensor {
+    return view(a, copy_int(other.shape))
+}
+
 func new([]float data, []int shape, bool requires_grad) tensor {
     tensor {
         data: data,

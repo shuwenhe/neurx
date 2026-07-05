@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split
+.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split industrial-train enterprise-pipeline
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -31,6 +31,16 @@ S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_LOCAL) $(S_COMPILER_BIN)) $(shell command -v s 2>/dev/null) s)
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
+INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
+INDUSTRIAL_CHECKPOINT_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t
+INDUSTRIAL_EXPORT_DIR ?= $(CURDIR_UNIX)/artifacts/export/industrial_1t
+INDUSTRIAL_DEPLOY_DIR ?= $(CURDIR_UNIX)/artifacts/deploy/industrial_1t
+INDUSTRIAL_BATCH_SIZE ?= 16
+INDUSTRIAL_SEQ_LEN ?= 512
+INDUSTRIAL_VOCAB_SIZE ?= 32000
+INDUSTRIAL_PARAM_COUNT ?= 4096
+INDUSTRIAL_TOTAL_STEPS ?= 1000
+INDUSTRIAL_EVAL_STEPS ?= 8
 PRETRAIN_DATA_ROOT := $(CURDIR_UNIX)/data/pretrain_dataset
 PRETRAIN_RAW_DIR := $(PRETRAIN_DATA_ROOT)/raw
 PRETRAIN_CLEANED_FILE := $(PRETRAIN_DATA_ROOT)/cleaned/pretrain_data_cleaned.jsonl
@@ -43,10 +53,42 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 help:
 	@echo "  make train"
+	@echo "  make industrial-train"
+	@echo "  make enterprise-pipeline"
 	@echo "  make infer"
 	@echo "  make chat"
 	@echo "  make shard"
 	@echo "  make split"
+
+industrial-train: check-bash
+	@echo "Running Industrial 1T GPT training pipeline"
+	@cd '$(CURDIR_UNIX)' && \
+		mkdir -p artifacts/build/industrial_1t && \
+		NEURX_1T_MANIFEST='$(INDUSTRIAL_MANIFEST)' \
+		NEURX_1T_CHECKPOINT_DIR='$(INDUSTRIAL_CHECKPOINT_DIR)' \
+		NEURX_1T_BATCH_SIZE=$(INDUSTRIAL_BATCH_SIZE) \
+		NEURX_1T_SEQ_LEN=$(INDUSTRIAL_SEQ_LEN) \
+		NEURX_1T_VOCAB_SIZE=$(INDUSTRIAL_VOCAB_SIZE) \
+		NEURX_1T_PARAM_COUNT=$(INDUSTRIAL_PARAM_COUNT) \
+		NEURX_1T_TOTAL_STEPS=$(INDUSTRIAL_TOTAL_STEPS) \
+		$(S_COMPILER) training/industrial_1t_training.s artifacts/build/industrial_1t/industrial_1t_training.ir 2>&1 && \
+		cd '$(S_COMPILER_EMIT_CWD)' && \
+		$(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin' 2>&1
+
+enterprise-pipeline: industrial-train
+	@echo "Running Enterprise NeurX pipeline (train + eval + quantize + distill + export + deploy)"
+	@NEURX_1T_ENTERPRISE_PIPELINE=1 \
+		NEURX_1T_MANIFEST='$(INDUSTRIAL_MANIFEST)' \
+		NEURX_1T_CHECKPOINT_DIR='$(INDUSTRIAL_CHECKPOINT_DIR)' \
+		NEURX_1T_EXPORT_DIR='$(INDUSTRIAL_EXPORT_DIR)' \
+		NEURX_1T_DEPLOY_DIR='$(INDUSTRIAL_DEPLOY_DIR)' \
+		NEURX_1T_BATCH_SIZE=$(INDUSTRIAL_BATCH_SIZE) \
+		NEURX_1T_SEQ_LEN=$(INDUSTRIAL_SEQ_LEN) \
+		NEURX_1T_VOCAB_SIZE=$(INDUSTRIAL_VOCAB_SIZE) \
+		NEURX_1T_PARAM_COUNT=$(INDUSTRIAL_PARAM_COUNT) \
+		NEURX_1T_TOTAL_STEPS=$(INDUSTRIAL_TOTAL_STEPS) \
+		NEURX_1T_EVAL_STEPS=$(INDUSTRIAL_EVAL_STEPS) \
+		$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin 2>&1
 
 train: check-bash
 	@cd '$(CURDIR_UNIX)' && \
