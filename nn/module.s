@@ -2,6 +2,7 @@ package neurx.nn
 
 use neurx.tensor.tensor
 use neurx.nn.conv
+use neurx.nn.rnn
 
 struct parameter {
     tensor value
@@ -36,6 +37,15 @@ struct embedding_layer {
     int vocab_size
     int embedding_dim
     int padding_idx
+    tensor weight
+    bool trainable
+}
+
+struct embedding_bag_layer {
+    int vocab_size
+    int embedding_dim
+    int padding_idx
+    bool mean
     tensor weight
     bool trainable
 }
@@ -136,6 +146,11 @@ struct lazy_linear_layer {
     linear layer
 }
 
+struct lazy_linear_forward_result {
+    lazy_linear_layer layer
+    tensor output
+}
+
 struct lazy_conv1d_layer {
     int out_channels
     int kernel_size
@@ -145,6 +160,11 @@ struct lazy_conv1d_layer {
     bool use_bias
     bool initialized
     conv1d_layer layer
+}
+
+struct lazy_conv1d_forward_result {
+    lazy_conv1d_layer layer
+    tensor output
 }
 
 struct lazy_conv2d_layer {
@@ -160,6 +180,142 @@ struct lazy_conv2d_layer {
     bool use_bias
     bool initialized
     conv2d_layer layer
+}
+
+struct lazy_conv2d_forward_result {
+    lazy_conv2d_layer layer
+    tensor output
+}
+
+struct lazy_batch_norm_layer {
+    int num_features
+    float eps
+    float momentum
+    bool track_running_stats
+    bool initialized
+    batch_norm_layer layer
+}
+
+struct lazy_batch_norm_forward_result {
+    lazy_batch_norm_layer layer
+    tensor output
+}
+
+struct lazy_sync_batch_norm_layer {
+    int num_features
+    float eps
+    float momentum
+    int world_size
+    int rank
+    bool track_running_stats
+    bool initialized
+    sync_batch_norm_layer layer
+}
+
+struct lazy_sync_batch_norm_forward_result {
+    lazy_sync_batch_norm_layer layer
+    tensor output
+}
+
+struct lazy_instance_norm_layer {
+    int num_features
+    float eps
+    float momentum
+    bool track_running_stats
+    bool initialized
+    instance_norm_layer layer
+}
+
+struct lazy_instance_norm_forward_result {
+    lazy_instance_norm_layer layer
+    tensor output
+}
+
+struct lazy_convtranspose1d_layer {
+    int out_channels
+    int kernel_size
+    int stride
+    int padding
+    int output_padding
+    int dilation
+    bool use_bias
+    bool initialized
+    convtranspose1d_layer layer
+}
+
+struct lazy_convtranspose1d_forward_result {
+    lazy_convtranspose1d_layer layer
+    tensor output
+}
+
+struct lazy_convtranspose2d_layer {
+    int out_channels
+    int kernel_h
+    int kernel_w
+    int stride_h
+    int stride_w
+    int pad_h
+    int pad_w
+    int output_pad_h
+    int output_pad_w
+    int dil_h
+    int dil_w
+    bool use_bias
+    bool initialized
+    convtranspose2d_layer layer
+}
+
+struct lazy_convtranspose2d_forward_result {
+    lazy_convtranspose2d_layer layer
+    tensor output
+}
+
+struct lazy_layer_norm_layer {
+    int normalized_dims
+    float eps
+    bool initialized
+    layer_norm_layer layer
+}
+
+struct lazy_layer_norm_forward_result {
+    lazy_layer_norm_layer layer
+    tensor output
+}
+
+struct lazy_rms_norm_layer {
+    int normalized_dims
+    float eps
+    bool initialized
+    rms_norm_layer layer
+}
+
+struct lazy_rms_norm_forward_result {
+    lazy_rms_norm_layer layer
+    tensor output
+}
+
+struct lazy_group_norm_layer {
+    int num_groups
+    float eps
+    bool initialized
+    group_norm_layer layer
+}
+
+struct lazy_group_norm_forward_result {
+    lazy_group_norm_layer layer
+    tensor output
+}
+
+struct rnn_cell_layer {
+    neurx.nn.rnn.rnn_cell_state state
+}
+
+struct lstm_cell_layer {
+    neurx.nn.rnn.lstm_cell_state state
+}
+
+struct gru_cell_layer {
+    neurx.nn.rnn.gru_cell_state state
 }
 
 struct parameter_dict {
@@ -764,6 +920,53 @@ func embedding_layer_train(embedding_layer layer) embedding_layer {
 
 func embedding_layer_eval(embedding_layer layer) embedding_layer {
     return embedding_layer_state_dict(layer)
+}
+
+func new_embedding_bag_layer(int vocab_size, int embedding_dim, int padding_idx, bool mean) embedding_bag_layer {
+    int total = vocab_size * embedding_dim
+    []float weight_data = []float{cap: total}
+    int i = 0
+    while i < total {
+        weight_data[i] = 0.0
+        i = i + 1
+    }
+    return embedding_bag_layer {
+        vocab_size: vocab_size,
+        embedding_dim: embedding_dim,
+        padding_idx: padding_idx,
+        mean: mean,
+        weight: neurx.tensor.new(weight_data, shape2(vocab_size, embedding_dim), true),
+        trainable: true,
+    }
+}
+
+func embedding_bag_layer_forward(embedding_bag_layer layer, tensor input_ids, tensor offsets) tensor {
+    return embedding_bag(layer.weight, input_ids, offsets, layer.padding_idx, layer.mean)
+}
+
+func embedding_bag_layer_state_dict(embedding_bag_layer layer) embedding_bag_layer {
+    return embedding_bag_layer {
+        vocab_size: layer.vocab_size,
+        embedding_dim: layer.embedding_dim,
+        padding_idx: layer.padding_idx,
+        mean: layer.mean,
+        weight: neurx.tensor.clone(layer.weight),
+        trainable: layer.trainable,
+    }
+}
+
+func embedding_bag_layer_module(embedding_bag_layer layer) module {
+    module m = new_module("embedding_bag")
+    m = module_add_parameter(m, "weight", layer.weight)
+    return m
+}
+
+func embedding_bag_layer_train(embedding_bag_layer layer) embedding_bag_layer {
+    return embedding_bag_layer_state_dict(layer)
+}
+
+func embedding_bag_layer_eval(embedding_bag_layer layer) embedding_bag_layer {
+    return embedding_bag_layer_state_dict(layer)
 }
 
 func new_layer_norm_layer(int normalized_dims, float eps, int hidden_size) layer_norm_layer {
@@ -1393,4 +1596,876 @@ func module_dict_load_state_dict(module_dict dict, module_dict other) module_dic
 
 func module_dict_keys(module_dict dict) []string {
     return copy_strings(dict.keys)
+}
+
+func new_lazy_linear_layer(int out_features, bool use_bias) lazy_linear_layer {
+    return lazy_linear_layer {
+        out_features: out_features,
+        use_bias: use_bias,
+        initialized: false,
+        layer: new_linear(1, out_features),
+    }
+}
+
+func lazy_linear_materialize(lazy_linear_layer layer, tensor input) lazy_linear_layer {
+    if layer.initialized {
+        return layer
+    }
+    int in_features = 1
+    if len(input.shape) > 0 {
+        in_features = input.shape[len(input.shape) - 1]
+    }
+    linear next_layer = new_linear(in_features, layer.out_features)
+    next_layer.has_bias = layer.use_bias
+    if !layer.use_bias {
+        next_layer.bias = []float{cap: 0}
+    }
+    return lazy_linear_layer {
+        out_features: layer.out_features,
+        use_bias: layer.use_bias,
+        initialized: true,
+        layer: next_layer,
+    }
+}
+
+func lazy_linear_forward(lazy_linear_layer layer, tensor input) lazy_linear_forward_result {
+    lazy_linear_layer next = lazy_linear_materialize(layer, input)
+    return lazy_linear_forward_result {
+        layer: next,
+        output: linear_forward(next.layer, input),
+    }
+}
+
+func lazy_linear_state_dict(lazy_linear_layer layer) lazy_linear_layer {
+    return lazy_linear_layer {
+        out_features: layer.out_features,
+        use_bias: layer.use_bias,
+        initialized: layer.initialized,
+        layer: linear_state_dict(layer.layer),
+    }
+}
+
+func lazy_linear_module(lazy_linear_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_linear")
+    }
+    return linear_as_module(layer.layer)
+}
+
+func lazy_linear_layer_train(lazy_linear_layer layer) lazy_linear_layer {
+    return lazy_linear_state_dict(layer)
+}
+
+func lazy_linear_layer_eval(lazy_linear_layer layer) lazy_linear_layer {
+    return lazy_linear_state_dict(layer)
+}
+
+func new_lazy_conv1d_layer(int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) lazy_conv1d_layer {
+    return lazy_conv1d_layer {
+        out_channels: out_channels,
+        kernel_size: kernel_size,
+        stride: stride,
+        padding: padding,
+        dilation: dilation,
+        use_bias: use_bias,
+        initialized: false,
+        layer: new_conv1d_layer(1, out_channels, kernel_size, stride, padding, dilation, use_bias),
+    }
+}
+
+func lazy_conv1d_materialize(lazy_conv1d_layer layer, tensor input) lazy_conv1d_layer {
+    if layer.initialized {
+        return layer
+    }
+    int in_channels = 1
+    if len(input.shape) > 1 {
+        in_channels = input.shape[1]
+    }
+    return lazy_conv1d_layer {
+        out_channels: layer.out_channels,
+        kernel_size: layer.kernel_size,
+        stride: layer.stride,
+        padding: layer.padding,
+        dilation: layer.dilation,
+        use_bias: layer.use_bias,
+        initialized: true,
+        layer: new_conv1d_layer(in_channels, layer.out_channels, layer.kernel_size, layer.stride, layer.padding, layer.dilation, layer.use_bias),
+    }
+}
+
+func lazy_conv1d_forward(lazy_conv1d_layer layer, tensor input) lazy_conv1d_forward_result {
+    lazy_conv1d_layer next = lazy_conv1d_materialize(layer, input)
+    return lazy_conv1d_forward_result {
+        layer: next,
+        output: conv1d_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_conv1d_state_dict(lazy_conv1d_layer layer) lazy_conv1d_layer {
+    return lazy_conv1d_layer {
+        out_channels: layer.out_channels,
+        kernel_size: layer.kernel_size,
+        stride: layer.stride,
+        padding: layer.padding,
+        dilation: layer.dilation,
+        use_bias: layer.use_bias,
+        initialized: layer.initialized,
+        layer: conv1d_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_conv1d_module(lazy_conv1d_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_conv1d")
+    }
+    return conv1d_layer_module(layer.layer)
+}
+
+func lazy_conv1d_layer_train(lazy_conv1d_layer layer) lazy_conv1d_layer {
+    return lazy_conv1d_state_dict(layer)
+}
+
+func lazy_conv1d_layer_eval(lazy_conv1d_layer layer) lazy_conv1d_layer {
+    return lazy_conv1d_state_dict(layer)
+}
+
+func new_lazy_conv2d_layer(int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) lazy_conv2d_layer {
+    return lazy_conv2d_layer {
+        out_channels: out_channels,
+        kernel_h: kernel_h,
+        kernel_w: kernel_w,
+        stride_h: stride_h,
+        stride_w: stride_w,
+        pad_h: pad_h,
+        pad_w: pad_w,
+        dil_h: dil_h,
+        dil_w: dil_w,
+        use_bias: use_bias,
+        initialized: false,
+        layer: new_conv2d_layer(1, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, dil_h, dil_w, use_bias),
+    }
+}
+
+func lazy_conv2d_materialize(lazy_conv2d_layer layer, tensor input) lazy_conv2d_layer {
+    if layer.initialized {
+        return layer
+    }
+    int in_channels = 1
+    if len(input.shape) > 1 {
+        in_channels = input.shape[1]
+    }
+    return lazy_conv2d_layer {
+        out_channels: layer.out_channels,
+        kernel_h: layer.kernel_h,
+        kernel_w: layer.kernel_w,
+        stride_h: layer.stride_h,
+        stride_w: layer.stride_w,
+        pad_h: layer.pad_h,
+        pad_w: layer.pad_w,
+        dil_h: layer.dil_h,
+        dil_w: layer.dil_w,
+        use_bias: layer.use_bias,
+        initialized: true,
+        layer: new_conv2d_layer(in_channels, layer.out_channels, layer.kernel_h, layer.kernel_w, layer.stride_h, layer.stride_w, layer.pad_h, layer.pad_w, layer.dil_h, layer.dil_w, layer.use_bias),
+    }
+}
+
+func lazy_conv2d_forward(lazy_conv2d_layer layer, tensor input) lazy_conv2d_forward_result {
+    lazy_conv2d_layer next = lazy_conv2d_materialize(layer, input)
+    return lazy_conv2d_forward_result {
+        layer: next,
+        output: conv2d_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_conv2d_state_dict(lazy_conv2d_layer layer) lazy_conv2d_layer {
+    return lazy_conv2d_layer {
+        out_channels: layer.out_channels,
+        kernel_h: layer.kernel_h,
+        kernel_w: layer.kernel_w,
+        stride_h: layer.stride_h,
+        stride_w: layer.stride_w,
+        pad_h: layer.pad_h,
+        pad_w: layer.pad_w,
+        dil_h: layer.dil_h,
+        dil_w: layer.dil_w,
+        use_bias: layer.use_bias,
+        initialized: layer.initialized,
+        layer: conv2d_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_conv2d_module(lazy_conv2d_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_conv2d")
+    }
+    return conv2d_layer_module(layer.layer)
+}
+
+func lazy_conv2d_layer_train(lazy_conv2d_layer layer) lazy_conv2d_layer {
+    return lazy_conv2d_state_dict(layer)
+}
+
+func lazy_conv2d_layer_eval(lazy_conv2d_layer layer) lazy_conv2d_layer {
+    return lazy_conv2d_state_dict(layer)
+}
+
+func new_lazy_batch_norm_layer(float eps, float momentum, bool track_running_stats) lazy_batch_norm_layer {
+    return lazy_batch_norm_layer {
+        num_features: 0,
+        eps: eps,
+        momentum: momentum,
+        track_running_stats: track_running_stats,
+        initialized: false,
+        layer: new_batch_norm_layer(1, eps, momentum, track_running_stats),
+    }
+}
+
+func lazy_batch_norm_materialize(lazy_batch_norm_layer layer, tensor input) lazy_batch_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int num_features = 1
+    if len(input.shape) > 1 {
+        num_features = input.shape[1]
+    }
+    return lazy_batch_norm_layer {
+        num_features: num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        track_running_stats: layer.track_running_stats,
+        initialized: true,
+        layer: new_batch_norm_layer(num_features, layer.eps, layer.momentum, layer.track_running_stats),
+    }
+}
+
+func lazy_batch_norm_forward(lazy_batch_norm_layer layer, tensor input) lazy_batch_norm_forward_result {
+    lazy_batch_norm_layer next = lazy_batch_norm_materialize(layer, input)
+    return lazy_batch_norm_forward_result {
+        layer: next,
+        output: batch_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_batch_norm_state_dict(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
+    return lazy_batch_norm_layer {
+        num_features: layer.num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        track_running_stats: layer.track_running_stats,
+        initialized: layer.initialized,
+        layer: batch_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_batch_norm_module(lazy_batch_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_batch_norm")
+    }
+    return batch_norm_layer_module(layer.layer)
+}
+
+func lazy_batch_norm_layer_train(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
+    lazy_batch_norm_layer next = lazy_batch_norm_state_dict(layer)
+    next.layer = batch_norm_layer_train(next.layer)
+    return next
+}
+
+func lazy_batch_norm_layer_eval(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
+    lazy_batch_norm_layer next = lazy_batch_norm_state_dict(layer)
+    next.layer = batch_norm_layer_eval(next.layer)
+    return next
+}
+
+func new_lazy_sync_batch_norm_layer(float eps, float momentum, int world_size, int rank, bool track_running_stats) lazy_sync_batch_norm_layer {
+    return lazy_sync_batch_norm_layer {
+        num_features: 0,
+        eps: eps,
+        momentum: momentum,
+        world_size: world_size,
+        rank: rank,
+        track_running_stats: track_running_stats,
+        initialized: false,
+        layer: new_sync_batch_norm_layer(1, eps, momentum, world_size, rank, track_running_stats),
+    }
+}
+
+func lazy_sync_batch_norm_materialize(lazy_sync_batch_norm_layer layer, tensor input) lazy_sync_batch_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int num_features = 1
+    if len(input.shape) > 1 {
+        num_features = input.shape[1]
+    }
+    return lazy_sync_batch_norm_layer {
+        num_features: num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        world_size: layer.world_size,
+        rank: layer.rank,
+        track_running_stats: layer.track_running_stats,
+        initialized: true,
+        layer: new_sync_batch_norm_layer(num_features, layer.eps, layer.momentum, layer.world_size, layer.rank, layer.track_running_stats),
+    }
+}
+
+func lazy_sync_batch_norm_forward(lazy_sync_batch_norm_layer layer, tensor input) lazy_sync_batch_norm_forward_result {
+    lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_materialize(layer, input)
+    return lazy_sync_batch_norm_forward_result {
+        layer: next,
+        output: sync_batch_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_sync_batch_norm_state_dict(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
+    return lazy_sync_batch_norm_layer {
+        num_features: layer.num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        world_size: layer.world_size,
+        rank: layer.rank,
+        track_running_stats: layer.track_running_stats,
+        initialized: layer.initialized,
+        layer: sync_batch_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_sync_batch_norm_module(lazy_sync_batch_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_sync_batch_norm")
+    }
+    return sync_batch_norm_layer_module(layer.layer)
+}
+
+func lazy_sync_batch_norm_layer_train(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
+    lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_state_dict(layer)
+    next.layer = sync_batch_norm_layer_train(next.layer)
+    return next
+}
+
+func lazy_sync_batch_norm_layer_eval(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
+    lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_state_dict(layer)
+    next.layer = sync_batch_norm_layer_eval(next.layer)
+    return next
+}
+
+func new_lazy_instance_norm_layer(float eps, float momentum, bool track_running_stats) lazy_instance_norm_layer {
+    return lazy_instance_norm_layer {
+        num_features: 0,
+        eps: eps,
+        momentum: momentum,
+        track_running_stats: track_running_stats,
+        initialized: false,
+        layer: new_instance_norm_layer(1, eps, momentum, track_running_stats),
+    }
+}
+
+func lazy_instance_norm_materialize(lazy_instance_norm_layer layer, tensor input) lazy_instance_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int num_features = 1
+    if len(input.shape) > 1 {
+        num_features = input.shape[1]
+    }
+    return lazy_instance_norm_layer {
+        num_features: num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        track_running_stats: layer.track_running_stats,
+        initialized: true,
+        layer: new_instance_norm_layer(num_features, layer.eps, layer.momentum, layer.track_running_stats),
+    }
+}
+
+func lazy_instance_norm_forward(lazy_instance_norm_layer layer, tensor input) lazy_instance_norm_forward_result {
+    lazy_instance_norm_layer next = lazy_instance_norm_materialize(layer, input)
+    return lazy_instance_norm_forward_result {
+        layer: next,
+        output: instance_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_instance_norm_state_dict(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
+    return lazy_instance_norm_layer {
+        num_features: layer.num_features,
+        eps: layer.eps,
+        momentum: layer.momentum,
+        track_running_stats: layer.track_running_stats,
+        initialized: layer.initialized,
+        layer: instance_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_instance_norm_module(lazy_instance_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_instance_norm")
+    }
+    return instance_norm_layer_module(layer.layer)
+}
+
+func lazy_instance_norm_layer_train(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
+    lazy_instance_norm_layer next = lazy_instance_norm_state_dict(layer)
+    next.layer = instance_norm_layer_train(next.layer)
+    return next
+}
+
+func lazy_instance_norm_layer_eval(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
+    lazy_instance_norm_layer next = lazy_instance_norm_state_dict(layer)
+    next.layer = instance_norm_layer_eval(next.layer)
+    return next
+}
+
+func new_lazy_convtranspose1d_layer(int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) lazy_convtranspose1d_layer {
+    return lazy_convtranspose1d_layer {
+        out_channels: out_channels,
+        kernel_size: kernel_size,
+        stride: stride,
+        padding: padding,
+        output_padding: output_padding,
+        dilation: dilation,
+        use_bias: use_bias,
+        initialized: false,
+        layer: new_convtranspose1d_layer(1, out_channels, kernel_size, stride, padding, output_padding, dilation, use_bias),
+    }
+}
+
+func lazy_convtranspose1d_materialize(lazy_convtranspose1d_layer layer, tensor input) lazy_convtranspose1d_layer {
+    if layer.initialized {
+        return layer
+    }
+    int in_channels = 1
+    if len(input.shape) > 1 {
+        in_channels = input.shape[1]
+    }
+    return lazy_convtranspose1d_layer {
+        out_channels: layer.out_channels,
+        kernel_size: layer.kernel_size,
+        stride: layer.stride,
+        padding: layer.padding,
+        output_padding: layer.output_padding,
+        dilation: layer.dilation,
+        use_bias: layer.use_bias,
+        initialized: true,
+        layer: new_convtranspose1d_layer(in_channels, layer.out_channels, layer.kernel_size, layer.stride, layer.padding, layer.output_padding, layer.dilation, layer.use_bias),
+    }
+}
+
+func lazy_convtranspose1d_forward(lazy_convtranspose1d_layer layer, tensor input) lazy_convtranspose1d_forward_result {
+    lazy_convtranspose1d_layer next = lazy_convtranspose1d_materialize(layer, input)
+    return lazy_convtranspose1d_forward_result {
+        layer: next,
+        output: convtranspose1d_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_convtranspose1d_state_dict(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
+    return lazy_convtranspose1d_layer {
+        out_channels: layer.out_channels,
+        kernel_size: layer.kernel_size,
+        stride: layer.stride,
+        padding: layer.padding,
+        output_padding: layer.output_padding,
+        dilation: layer.dilation,
+        use_bias: layer.use_bias,
+        initialized: layer.initialized,
+        layer: convtranspose1d_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_convtranspose1d_module(lazy_convtranspose1d_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_convtranspose1d")
+    }
+    return convtranspose1d_layer_module(layer.layer)
+}
+
+func lazy_convtranspose1d_layer_train(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
+    return lazy_convtranspose1d_state_dict(layer)
+}
+
+func lazy_convtranspose1d_layer_eval(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
+    return lazy_convtranspose1d_state_dict(layer)
+}
+
+func new_lazy_convtranspose2d_layer(int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) lazy_convtranspose2d_layer {
+    return lazy_convtranspose2d_layer {
+        out_channels: out_channels,
+        kernel_h: kernel_h,
+        kernel_w: kernel_w,
+        stride_h: stride_h,
+        stride_w: stride_w,
+        pad_h: pad_h,
+        pad_w: pad_w,
+        output_pad_h: output_pad_h,
+        output_pad_w: output_pad_w,
+        dil_h: dil_h,
+        dil_w: dil_w,
+        use_bias: use_bias,
+        initialized: false,
+        layer: new_convtranspose2d_layer(1, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, output_pad_h, output_pad_w, dil_h, dil_w, use_bias),
+    }
+}
+
+func lazy_convtranspose2d_materialize(lazy_convtranspose2d_layer layer, tensor input) lazy_convtranspose2d_layer {
+    if layer.initialized {
+        return layer
+    }
+    int in_channels = 1
+    if len(input.shape) > 1 {
+        in_channels = input.shape[1]
+    }
+    return lazy_convtranspose2d_layer {
+        out_channels: layer.out_channels,
+        kernel_h: layer.kernel_h,
+        kernel_w: layer.kernel_w,
+        stride_h: layer.stride_h,
+        stride_w: layer.stride_w,
+        pad_h: layer.pad_h,
+        pad_w: layer.pad_w,
+        output_pad_h: layer.output_pad_h,
+        output_pad_w: layer.output_pad_w,
+        dil_h: layer.dil_h,
+        dil_w: layer.dil_w,
+        use_bias: layer.use_bias,
+        initialized: true,
+        layer: new_convtranspose2d_layer(in_channels, layer.out_channels, layer.kernel_h, layer.kernel_w, layer.stride_h, layer.stride_w, layer.pad_h, layer.pad_w, layer.output_pad_h, layer.output_pad_w, layer.dil_h, layer.dil_w, layer.use_bias),
+    }
+}
+
+func lazy_convtranspose2d_forward(lazy_convtranspose2d_layer layer, tensor input) lazy_convtranspose2d_forward_result {
+    lazy_convtranspose2d_layer next = lazy_convtranspose2d_materialize(layer, input)
+    return lazy_convtranspose2d_forward_result {
+        layer: next,
+        output: convtranspose2d_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_convtranspose2d_state_dict(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
+    return lazy_convtranspose2d_layer {
+        out_channels: layer.out_channels,
+        kernel_h: layer.kernel_h,
+        kernel_w: layer.kernel_w,
+        stride_h: layer.stride_h,
+        stride_w: layer.stride_w,
+        pad_h: layer.pad_h,
+        pad_w: layer.pad_w,
+        output_pad_h: layer.output_pad_h,
+        output_pad_w: layer.output_pad_w,
+        dil_h: layer.dil_h,
+        dil_w: layer.dil_w,
+        use_bias: layer.use_bias,
+        initialized: layer.initialized,
+        layer: convtranspose2d_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_convtranspose2d_module(lazy_convtranspose2d_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_convtranspose2d")
+    }
+    return convtranspose2d_layer_module(layer.layer)
+}
+
+func lazy_convtranspose2d_layer_train(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
+    return lazy_convtranspose2d_state_dict(layer)
+}
+
+func lazy_convtranspose2d_layer_eval(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
+    return lazy_convtranspose2d_state_dict(layer)
+}
+
+func new_lazy_layer_norm_layer(int normalized_dims, float eps) lazy_layer_norm_layer {
+    return lazy_layer_norm_layer {
+        normalized_dims: normalized_dims,
+        eps: eps,
+        initialized: false,
+        layer: new_layer_norm_layer(normalized_dims, eps, 1),
+    }
+}
+
+func lazy_layer_norm_materialize(lazy_layer_norm_layer layer, tensor input) lazy_layer_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int ndim = len(input.shape)
+    int start = ndim - layer.normalized_dims
+    if start < 0 {
+        start = 0
+    }
+    int hidden_size = 1
+    int i = start
+    while i < ndim {
+        hidden_size = hidden_size * input.shape[i]
+        i = i + 1
+    }
+    return lazy_layer_norm_layer {
+        normalized_dims: layer.normalized_dims,
+        eps: layer.eps,
+        initialized: true,
+        layer: new_layer_norm_layer(layer.normalized_dims, layer.eps, hidden_size),
+    }
+}
+
+func lazy_layer_norm_forward(lazy_layer_norm_layer layer, tensor input) lazy_layer_norm_forward_result {
+    lazy_layer_norm_layer next = lazy_layer_norm_materialize(layer, input)
+    return lazy_layer_norm_forward_result {
+        layer: next,
+        output: layer_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_layer_norm_state_dict(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
+    return lazy_layer_norm_layer {
+        normalized_dims: layer.normalized_dims,
+        eps: layer.eps,
+        initialized: layer.initialized,
+        layer: layer_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_layer_norm_module(lazy_layer_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_layer_norm")
+    }
+    return layer_norm_layer_module(layer.layer)
+}
+
+func lazy_layer_norm_layer_train(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
+    return lazy_layer_norm_state_dict(layer)
+}
+
+func lazy_layer_norm_layer_eval(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
+    return lazy_layer_norm_state_dict(layer)
+}
+
+func new_lazy_rms_norm_layer(int normalized_dims, float eps) lazy_rms_norm_layer {
+    return lazy_rms_norm_layer {
+        normalized_dims: normalized_dims,
+        eps: eps,
+        initialized: false,
+        layer: new_rms_norm_layer(normalized_dims, eps, 1),
+    }
+}
+
+func lazy_rms_norm_materialize(lazy_rms_norm_layer layer, tensor input) lazy_rms_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int ndim = len(input.shape)
+    int start = ndim - layer.normalized_dims
+    if start < 0 {
+        start = 0
+    }
+    int hidden_size = 1
+    int i = start
+    while i < ndim {
+        hidden_size = hidden_size * input.shape[i]
+        i = i + 1
+    }
+    return lazy_rms_norm_layer {
+        normalized_dims: layer.normalized_dims,
+        eps: layer.eps,
+        initialized: true,
+        layer: new_rms_norm_layer(layer.normalized_dims, layer.eps, hidden_size),
+    }
+}
+
+func lazy_rms_norm_forward(lazy_rms_norm_layer layer, tensor input) lazy_rms_norm_forward_result {
+    lazy_rms_norm_layer next = lazy_rms_norm_materialize(layer, input)
+    return lazy_rms_norm_forward_result {
+        layer: next,
+        output: rms_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_rms_norm_state_dict(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
+    return lazy_rms_norm_layer {
+        normalized_dims: layer.normalized_dims,
+        eps: layer.eps,
+        initialized: layer.initialized,
+        layer: rms_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_rms_norm_module(lazy_rms_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_rms_norm")
+    }
+    return rms_norm_layer_module(layer.layer)
+}
+
+func lazy_rms_norm_layer_train(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
+    return lazy_rms_norm_state_dict(layer)
+}
+
+func lazy_rms_norm_layer_eval(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
+    return lazy_rms_norm_state_dict(layer)
+}
+
+func new_lazy_group_norm_layer(int num_groups, float eps) lazy_group_norm_layer {
+    return lazy_group_norm_layer {
+        num_groups: num_groups,
+        eps: eps,
+        initialized: false,
+        layer: new_group_norm_layer(num_groups, 1, eps),
+    }
+}
+
+func lazy_group_norm_materialize(lazy_group_norm_layer layer, tensor input) lazy_group_norm_layer {
+    if layer.initialized {
+        return layer
+    }
+    int num_channels = 1
+    if len(input.shape) > 1 {
+        num_channels = input.shape[1]
+    }
+    return lazy_group_norm_layer {
+        num_groups: layer.num_groups,
+        eps: layer.eps,
+        initialized: true,
+        layer: new_group_norm_layer(layer.num_groups, num_channels, layer.eps),
+    }
+}
+
+func lazy_group_norm_forward(lazy_group_norm_layer layer, tensor input) lazy_group_norm_forward_result {
+    lazy_group_norm_layer next = lazy_group_norm_materialize(layer, input)
+    return lazy_group_norm_forward_result {
+        layer: next,
+        output: group_norm_layer_forward(next.layer, input),
+    }
+}
+
+func lazy_group_norm_state_dict(lazy_group_norm_layer layer) lazy_group_norm_layer {
+    return lazy_group_norm_layer {
+        num_groups: layer.num_groups,
+        eps: layer.eps,
+        initialized: layer.initialized,
+        layer: group_norm_layer_state_dict(layer.layer),
+    }
+}
+
+func lazy_group_norm_module(lazy_group_norm_layer layer) module {
+    if !layer.initialized {
+        return new_module("lazy_group_norm")
+    }
+    return group_norm_layer_module(layer.layer)
+}
+
+func lazy_group_norm_layer_train(lazy_group_norm_layer layer) lazy_group_norm_layer {
+    return lazy_group_norm_state_dict(layer)
+}
+
+func lazy_group_norm_layer_eval(lazy_group_norm_layer layer) lazy_group_norm_layer {
+    return lazy_group_norm_state_dict(layer)
+}
+
+func new_rnn_cell_layer(int input_size, int hidden_size) rnn_cell_layer {
+    return rnn_cell_layer {
+        state: neurx.nn.rnn.new_rnn_cell(input_size, hidden_size),
+    }
+}
+
+func rnn_cell_layer_forward(rnn_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.rnn_output {
+    return neurx.nn.rnn.rnn_forward(layer.state, input, seq_len, h0)
+}
+
+func rnn_cell_layer_state_dict(rnn_cell_layer layer) rnn_cell_layer {
+    return rnn_cell_layer {
+        state: layer.state,
+    }
+}
+
+func rnn_cell_layer_module(rnn_cell_layer layer) module {
+    module m = new_module("rnn_cell")
+    m = module_add_parameter(m, "weight_ih", neurx.tensor.new(copy_float(layer.state.weight_ih), shape2(layer.state.hidden_size, layer.state.input_size), false))
+    m = module_add_parameter(m, "weight_hh", neurx.tensor.new(copy_float(layer.state.weight_hh), shape2(layer.state.hidden_size, layer.state.hidden_size), false))
+    m = module_add_parameter(m, "bias_ih", neurx.tensor.new(copy_float(layer.state.bias_ih), shape1(layer.state.hidden_size), false))
+    m = module_add_parameter(m, "bias_hh", neurx.tensor.new(copy_float(layer.state.bias_hh), shape1(layer.state.hidden_size), false))
+    return m
+}
+
+func rnn_cell_layer_train(rnn_cell_layer layer) rnn_cell_layer {
+    return rnn_cell_layer_state_dict(layer)
+}
+
+func rnn_cell_layer_eval(rnn_cell_layer layer) rnn_cell_layer {
+    return rnn_cell_layer_state_dict(layer)
+}
+
+func new_lstm_cell_layer(int input_size, int hidden_size) lstm_cell_layer {
+    return lstm_cell_layer {
+        state: neurx.nn.rnn.new_lstm_cell(input_size, hidden_size),
+    }
+}
+
+func lstm_cell_layer_forward(lstm_cell_layer layer, []float input, int seq_len, []float h0, []float c0) neurx.nn.rnn.lstm_output {
+    return neurx.nn.rnn.lstm_forward(layer.state, input, seq_len, h0, c0)
+}
+
+func lstm_cell_layer_state_dict(lstm_cell_layer layer) lstm_cell_layer {
+    return lstm_cell_layer {
+        state: layer.state,
+    }
+}
+
+func lstm_cell_layer_module(lstm_cell_layer layer) module {
+    module m = new_module("lstm_cell")
+    int hs = layer.state.hidden_size
+    int is_ = layer.state.input_size
+    int gates = 4 * hs
+    m = module_add_parameter(m, "weight_ih", neurx.tensor.new(copy_float(layer.state.weight_ih), shape2(gates, is_), false))
+    m = module_add_parameter(m, "weight_hh", neurx.tensor.new(copy_float(layer.state.weight_hh), shape2(gates, hs), false))
+    m = module_add_parameter(m, "bias_ih", neurx.tensor.new(copy_float(layer.state.bias_ih), shape1(gates), false))
+    m = module_add_parameter(m, "bias_hh", neurx.tensor.new(copy_float(layer.state.bias_hh), shape1(gates), false))
+    return m
+}
+
+func lstm_cell_layer_train(lstm_cell_layer layer) lstm_cell_layer {
+    return lstm_cell_layer_state_dict(layer)
+}
+
+func lstm_cell_layer_eval(lstm_cell_layer layer) lstm_cell_layer {
+    return lstm_cell_layer_state_dict(layer)
+}
+
+func new_gru_cell_layer(int input_size, int hidden_size) gru_cell_layer {
+    return gru_cell_layer {
+        state: neurx.nn.rnn.new_gru_cell(input_size, hidden_size),
+    }
+}
+
+func gru_cell_layer_forward(gru_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.gru_output {
+    return neurx.nn.rnn.gru_forward(layer.state, input, seq_len, h0)
+}
+
+func gru_cell_layer_state_dict(gru_cell_layer layer) gru_cell_layer {
+    return gru_cell_layer {
+        state: layer.state,
+    }
+}
+
+func gru_cell_layer_module(gru_cell_layer layer) module {
+    module m = new_module("gru_cell")
+    int hs = layer.state.hidden_size
+    int is_ = layer.state.input_size
+    int rz = 2 * hs
+    m = module_add_parameter(m, "weight_ih_rz", neurx.tensor.new(copy_float(layer.state.weight_ih_rz), shape2(rz, is_), false))
+    m = module_add_parameter(m, "weight_hh_rz", neurx.tensor.new(copy_float(layer.state.weight_hh_rz), shape2(rz, hs), false))
+    m = module_add_parameter(m, "bias_ih_rz", neurx.tensor.new(copy_float(layer.state.bias_ih_rz), shape1(rz), false))
+    m = module_add_parameter(m, "bias_hh_rz", neurx.tensor.new(copy_float(layer.state.bias_hh_rz), shape1(rz), false))
+    m = module_add_parameter(m, "weight_ih_n", neurx.tensor.new(copy_float(layer.state.weight_ih_n), shape2(hs, is_), false))
+    m = module_add_parameter(m, "weight_hh_n", neurx.tensor.new(copy_float(layer.state.weight_hh_n), shape2(hs, hs), false))
+    m = module_add_parameter(m, "bias_ih_n", neurx.tensor.new(copy_float(layer.state.bias_ih_n), shape1(hs), false))
+    m = module_add_parameter(m, "bias_hh_n", neurx.tensor.new(copy_float(layer.state.bias_hh_n), shape1(hs), false))
+    return m
+}
+
+func gru_cell_layer_train(gru_cell_layer layer) gru_cell_layer {
+    return gru_cell_layer_state_dict(layer)
+}
+
+func gru_cell_layer_eval(gru_cell_layer layer) gru_cell_layer {
+    return gru_cell_layer_state_dict(layer)
 }

@@ -128,6 +128,79 @@ func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
 
+func adaptive_avg_pool1d(tensor input, int out_len) tensor {
+    int batch = input.shape[0]
+    int channels = input.shape[1]
+    int in_len = input.shape[2]
+    []float out = []float{cap: batch * channels * out_len}
+    int b = 0
+    while b < batch {
+        int ch = 0
+        while ch < channels {
+            int ol = 0
+            while ol < out_len {
+                int start = ol * in_len / out_len
+                int end = (ol + 1) * in_len / out_len
+                if end <= start {
+                    end = start + 1
+                }
+                float sum_v = 0.0
+                int count = 0
+                int idx = start
+                while idx < end {
+                    sum_v = sum_v + input.data[(b * channels + ch) * in_len + idx]
+                    count = count + 1
+                    idx = idx + 1
+                }
+                if count == 0 {
+                    out[(b * channels + ch) * out_len + ol] = 0.0
+                } else {
+                    out[(b * channels + ch) * out_len + ol] = sum_v / count
+                }
+                ol = ol + 1
+            }
+            ch = ch + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
+}
+
+func adaptive_max_pool1d(tensor input, int out_len) tensor {
+    int batch = input.shape[0]
+    int channels = input.shape[1]
+    int in_len = input.shape[2]
+    []float out = []float{cap: batch * channels * out_len}
+    int b = 0
+    while b < batch {
+        int ch = 0
+        while ch < channels {
+            int ol = 0
+            while ol < out_len {
+                int start = ol * in_len / out_len
+                int end = (ol + 1) * in_len / out_len
+                if end <= start {
+                    end = start + 1
+                }
+                float max_v = -999999999999999999999999999999.0
+                int idx = start
+                while idx < end {
+                    float v = input.data[(b * channels + ch) * in_len + idx]
+                    if v > max_v {
+                        max_v = v
+                    }
+                    idx = idx + 1
+                }
+                out[(b * channels + ch) * out_len + ol] = max_v
+                ol = ol + 1
+            }
+            ch = ch + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
+}
+
 
 
 
@@ -328,6 +401,80 @@ func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
                         ih = ih + 1
                     }
                     out[((b * channels + ch) * out_h + oh) * out_w + ow] = max_v
+                    ow = ow + 1
+                }
+                oh = oh + 1
+            }
+            ch = ch + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
+}
+
+func interpolate1d(tensor input, int out_len) tensor {
+    int batch = input.shape[0]
+    int channels = input.shape[1]
+    int in_len = input.shape[2]
+    if out_len <= 0 {
+        return neurx.tensor.new([]float{cap: 0}, shape3(batch, channels, 0), input.requires_grad)
+    }
+    []float out = []float{cap: batch * channels * out_len}
+    int b = 0
+    while b < batch {
+        int ch = 0
+        while ch < channels {
+            int ol = 0
+            while ol < out_len {
+                int src = ol * in_len / out_len
+                if src < 0 {
+                    src = 0
+                }
+                if src >= in_len {
+                    src = in_len - 1
+                }
+                out[(b * channels + ch) * out_len + ol] = input.data[(b * channels + ch) * in_len + src]
+                ol = ol + 1
+            }
+            ch = ch + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
+}
+
+func interpolate2d(tensor input, int out_h, int out_w) tensor {
+    int batch = input.shape[0]
+    int channels = input.shape[1]
+    int in_h = input.shape[2]
+    int in_w = input.shape[3]
+    if out_h <= 0 || out_w <= 0 {
+        return neurx.tensor.new([]float{cap: 0}, shape4(batch, channels, 0, 0), input.requires_grad)
+    }
+    []float out = []float{cap: batch * channels * out_h * out_w}
+    int b = 0
+    while b < batch {
+        int ch = 0
+        while ch < channels {
+            int oh = 0
+            while oh < out_h {
+                int src_h = oh * in_h / out_h
+                if src_h < 0 {
+                    src_h = 0
+                }
+                if src_h >= in_h {
+                    src_h = in_h - 1
+                }
+                int ow = 0
+                while ow < out_w {
+                    int src_w = ow * in_w / out_w
+                    if src_w < 0 {
+                        src_w = 0
+                    }
+                    if src_w >= in_w {
+                        src_w = in_w - 1
+                    }
+                    out[((b * channels + ch) * out_h + oh) * out_w + ow] = input.data[((b * channels + ch) * in_h + src_h) * in_w + src_w]
                     ow = ow + 1
                 }
                 oh = oh + 1

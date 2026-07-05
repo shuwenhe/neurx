@@ -112,6 +112,31 @@ func optimizer_set_scheduler(optimizer opt, lr_scheduler sched) optimizer {
     return next
 }
 
+func optimizer_step_scheduler(optimizer opt, int epoch) optimizer {
+    if !opt.has_scheduler {
+        return opt
+    }
+    optimizer next = optimizer_state_dict(opt)
+    next.scheduler = scheduler_step(next.scheduler, epoch)
+    float lr = scheduler_current_lr(next.scheduler)
+    int i = 0
+    while i < len(next.param_groups) {
+        next.param_groups[i].lr = lr
+        i = i + 1
+    }
+    return next
+}
+
+func optimizer_sync_group_lrs(optimizer opt, float lr) optimizer {
+    optimizer next = optimizer_state_dict(opt)
+    int i = 0
+    while i < len(next.param_groups) {
+        next.param_groups[i].lr = lr
+        i = i + 1
+    }
+    return next
+}
+
 func optimizer_current_lr(optimizer opt) float {
     if opt.has_scheduler {
         return scheduler_current_lr(opt.scheduler)
@@ -141,16 +166,27 @@ func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_grou
     return next
 }
 
-func optimizer_zero_grad(optimizer opt) () {
-    del opt
+func optimizer_zero_grad(optimizer opt) optimizer {
+    optimizer next = optimizer_state_dict(opt)
+    int i = 0
+    while i < len(next.param_groups) {
+        next.param_groups[i] = optimizer_zero_grad_group(next.param_groups[i])
+        i = i + 1
+    }
+    return next
 }
 
 func optimizer_step_tensor_group(optimizer_param_group group, []tensor grads, float lr_override) optimizer_param_group {
+    return optimizer_step_tensor_group_from(group, grads, 0, lr_override)
+}
+
+func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grads, int start, float lr_override) optimizer_param_group {
     optimizer_param_group next = optimizer_make_group(group.params, group.lr, group.weight_decay, group.beta1, group.beta2, group.eps, group.kind)
     int i = 0
-    while i < len(next.params) && i < len(grads) {
+    int g = start
+    while i < len(next.params) && g < len(grads) {
         tensor param = next.params[i]
-        tensor grad = grads[i]
+        tensor grad = grads[g]
         float lr = group.lr
         if lr_override > 0.0 {
             lr = lr_override
@@ -164,6 +200,7 @@ func optimizer_step_tensor_group(optimizer_param_group group, []tensor grads, fl
             next.params[i] = step_tensor(sgd, param, grad)
         }
         i = i + 1
+        g = g + 1
     }
     return next
 }
@@ -179,8 +216,39 @@ func optimizer_step_group(optimizer opt, int group_index, []tensor grads) optimi
     return next
 }
 
-func optimizer_step(optimizer opt) () {
-    del opt
+func optimizer_step(optimizer opt, []tensor grads) optimizer {
+    optimizer next = optimizer_state_dict(opt)
+    float lr_override = optimizer_current_lr(next)
+    int offset = 0
+    int i = 0
+    while i < len(next.param_groups) {
+        next.param_groups[i] = optimizer_step_tensor_group_from(next.param_groups[i], grads, offset, lr_override)
+        offset = offset + len(next.param_groups[i].params)
+        i = i + 1
+    }
+    next.step = next.step + 1
+    return next
+}
+
+func optimizer_step_with_scheduler(optimizer opt, int epoch, []tensor grads) optimizer {
+    optimizer next = optimizer_step_scheduler(opt, epoch)
+    return optimizer_step(next, grads)
+}
+
+func optimizer_step_with_scheduler_and_zero_grad(optimizer opt, int epoch, []tensor grads) optimizer {
+    optimizer next = optimizer_step_with_scheduler(opt, epoch, grads)
+    return optimizer_zero_grad(next)
+}
+
+func optimizer_step_group_with_scheduler(optimizer opt, int epoch, int group_index, []tensor grads) optimizer {
+    optimizer next = optimizer_step_scheduler(opt, epoch)
+    return optimizer_step_group(next, group_index, grads)
+}
+
+func optimizer_step_all_groups_with_scheduler(optimizer opt, int epoch) optimizer {
+    optimizer next = optimizer_step_scheduler(opt, epoch)
+    next.step = next.step + 1
+    return next
 }
 
 func optimizer_state_dict(optimizer opt) optimizer {

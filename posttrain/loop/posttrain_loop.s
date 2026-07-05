@@ -137,9 +137,10 @@ func posttrain_pipeline_step(posttrain_pipeline_state state, float reward_value,
         samples,
     )
 
-    optimizer_zero_grad(state.opt)
-    optimizer_step(state.opt)
-    lr_scheduler next_sched = scheduler_step(state.sched, next_loop.global_step)
+    optimizer next_opt = optimizer_set_scheduler(state.opt, state.sched)
+    next_opt = optimizer_step_all_groups_with_scheduler(next_opt, next_loop.global_step)
+    next_opt = optimizer_zero_grad(next_opt)
+    lr_scheduler next_sched = next_opt.scheduler
 
     posttrain_checkpoint_state next_checkpoint = state.checkpoint
     if next_loop.should_save {
@@ -158,7 +159,7 @@ func posttrain_pipeline_step(posttrain_pipeline_state state, float reward_value,
         loop: next_loop,
         checkpoint: next_checkpoint,
         eval: next_eval,
-        opt: state.opt,
+        opt: next_opt,
         sched: next_sched,
         metrics: posttrain_make_metrics(next_loop.global_step, objective, reward_value, policy_loss, value_loss),
     }
