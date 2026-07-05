@@ -38,12 +38,11 @@ use neurx.model.llm.gpt_moe_1t.{
     moe_1t_framework, moe_1t_scale_profile, moe_1t_parallel_plan,
     moe_1t_training_plan, moe_1t_framework_default, moe_1t_summary
 }
+use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_manifest_refs, gpt_large_pretrain_documents_for_ref_with_seed, gpt_large_pretrain_mix_seed}
+use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, save_pretrain_checkpoint, load_pretrain_checkpoint}
 use neurx.model.llm.gpt_moe.{gpt_moe_config, gpt_moe_state, new_gpt_moe_state}
-use neurx.distributed.collective.{collective_state, allreduce_async, barrier_sync}
-use neurx.distributed.tensor_parallel.{tp_broadcast_async, tp_gather_async}
-use neurx.distributed.pipeline_parallel.{pp_send_activate, pp_recv_activate}
-use neurx.distributed.zero.{zero_optimizer_state, zero_partition_gradient, zero_partition_optimizer}
-use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive}
+use neurx.distributed.collective.{collective_state}
+use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 
 // ============================================================================
 // 1. 核心状态结构体
@@ -124,6 +123,155 @@ struct moe_1t_orchestrator {
 // 2. 初始化函数
 // ============================================================================
 
+func moe_1t_trim(string s) string {
+    int i = 0
+    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+        i = i + 1
+    }
+
+    int j = len(s) - 1
+    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+        j = j - 1
+    }
+
+    if j < i {
+        return ""
+    }
+
+    string out = ""
+    int k = i
+    while k <= j {
+        out = out + chr(s[k])
+        k = k + 1
+    }
+    out
+}
+
+func moe_1t_split_lines(string text) []string {
+    []string lines = []string{cap: 0}
+    string current = ""
+    bool ends_with_newline = false
+    int i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if ch == 10 {
+            lines.push(current)
+            current = ""
+            ends_with_newline = true
+        } else if ch != 13 {
+            current = current + chr(ch)
+            ends_with_newline = false
+        }
+        i = i + 1
+    }
+    if current != "" || len(text) == 0 || ends_with_newline {
+        lines.push(current)
+    }
+    lines
+}
+
+func moe_1t_positive_mod(int value, int modulus) int {
+    if modulus <= 0 {
+        return 0
+    }
+    int div_result = value / modulus
+    int result = value - div_result * modulus
+    if result < 0 {
+        result = result + modulus
+    }
+    result
+}
+
+func moe_1t_manifest_refs(string manifest_path) []string {
+    if moe_1t_trim(manifest_path) == "" {
+        []string refs = []string{cap: 1}
+        refs[0] = "data/training_data_splits/train.jsonl"
+        return refs
+    }
+
+    if !runtime_file_exists(manifest_path) {
+        []string refs = []string{cap: 1}
+        refs[0] = manifest_path
+        return refs
+    }
+
+    []string refs = gpt_large_pretrain_manifest_refs(manifest_path)
+    if len(refs) == 0 {
+        []string fallback = []string{cap: 1}
+        fallback[0] = manifest_path
+        return fallback
+    }
+    refs
+}
+
+func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
+    if batch_size_tokens <= 0 {
+        return []int{cap: 0}
+    }
+
+    []int tokens = []int{cap: batch_size_tokens}
+    int token_count = 0
+    int rolling = seed + 17
+    int i = 0
+    while i < len(text) && token_count < batch_size_tokens {
+        int ch = text[i]
+        rolling = rolling * 131 + ch + i + seed
+        if ch == 32 || ch == 9 || ch == 10 || ch == 13 {
+            tokens[token_count] = moe_1t_positive_mod(rolling, 128000)
+            token_count = token_count + 1
+            rolling = seed + i + 17
+        }
+        i = i + 1
+    }
+
+    if token_count == 0 {
+        int j = 0
+        while j < len(text) && token_count < batch_size_tokens {
+            rolling = rolling * 131 + text[j] + j + seed
+            tokens[token_count] = moe_1t_positive_mod(rolling, 128000)
+            token_count = token_count + 1
+            j = j + 1
+        }
+    }
+
+    while token_count < batch_size_tokens {
+        rolling = rolling * 1664525 + 1013904223 + token_count + seed
+        tokens[token_count] = moe_1t_positive_mod(rolling, 128000)
+        token_count = token_count + 1
+    }
+
+    tokens
+}
+
+func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []int {
+    if batch_size_tokens <= 0 {
+        return []int{cap: 0}
+    }
+
+    string shard_text = ""
+    if runtime_file_exists(shard_path) {
+        shard_text = runtime_read_text_file(shard_path)
+    }
+
+    if moe_1t_trim(shard_text) == "" {
+        shard_text = shard_path
+    } else {
+        []string docs = gpt_large_pretrain_documents_for_ref_with_seed(shard_path, seed)
+        int i = 0
+        while i < len(docs) {
+            if moe_1t_trim(docs[i]) != "" {
+                if shard_text != "" {
+                    shard_text = shard_text + "\n"
+                }
+                shard_text = shard_text + docs[i]
+            }
+            i = i + 1
+        }
+    }
+
+    moe_1t_text_to_tokens(shard_text, batch_size_tokens, seed)
+}
+
 // 从环境变量和配置初始化编排器
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
@@ -180,6 +328,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     // 创建检查点目录
     string checkpoint_dir = fw.training.checkpoint_dir
     io_mkdir_recursive(checkpoint_dir)
+    []string shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
     
     // 初始化编排器
     moe_1t_orchestrator orch = moe_1t_orchestrator {
@@ -202,7 +351,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         comm: comm,
         
         data_manifest_path: fw.training.data_manifest_path,
-        token_shards: make([]string, 0),
+        token_shards: shard_refs,
         current_shard_index: 0,
         tokens_in_shard: 0,
         
@@ -229,10 +378,15 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
 // ============================================================================
 
 // 从 manifest 加载 token 分片列表
-func moe_1t_load_data_manifest(moe_1t_orchestrator orch) {
-    // 本应读取 manifest 文件并加载分片路径
-    // 在这里作为占位符实现
-    io_println("Loading data manifest: " + orch.data_manifest_path)
+func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
+    moe_1t_orchestrator next_orch = orch
+    next_orch.token_shards = moe_1t_manifest_refs(orch.data_manifest_path)
+    next_orch.current_shard_index = 0
+    next_orch.tokens_in_shard = 0
+    if next_orch.world_rank == 0 {
+        io_println("Loaded data manifest: " + next_orch.data_manifest_path + " shards=" + int_to_string(len(next_orch.token_shards)))
+    }
+    next_orch
 }
 
 // 获取下一批 token (1T 流式管道的核心)
@@ -241,19 +395,37 @@ func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
     int batch_size_tokens,
     int seq_len
-) []int {
-    // 返回 [batch_size_tokens] 的 token IDs
-    // 这是流式数据管道的接口
-    int num_tokens = batch_size_tokens
-    []int tokens = make([]int, num_tokens)
-    
-    int i = 0
-    while i < num_tokens {
-        tokens[i] = i % 128000  // 模拟返回 token IDs（0-128000 范围）
-        i = i + 1
+) (moe_1t_orchestrator, []int) {
+    moe_1t_orchestrator next_orch = orch
+    if len(next_orch.token_shards) == 0 {
+        next_orch.token_shards = moe_1t_manifest_refs(next_orch.data_manifest_path)
     }
-    
-    tokens
+
+    if len(next_orch.token_shards) == 0 {
+        []int fallback = moe_1t_text_to_tokens(next_orch.data_manifest_path, batch_size_tokens, next_orch.world_rank + seq_len)
+        next_orch.tokens_in_shard = len(fallback)
+        return (next_orch, fallback)
+    }
+
+    int shard_index = next_orch.current_shard_index
+    if shard_index < 0 {
+        shard_index = 0
+    }
+    if shard_index >= len(next_orch.token_shards) {
+        shard_index = shard_index % len(next_orch.token_shards)
+    }
+
+    string shard_path = next_orch.token_shards[shard_index]
+    int seed = gpt_large_pretrain_mix_seed(next_orch.world_rank + 1, next_orch.world_size + 1, shard_index + seq_len)
+    []int tokens = moe_1t_shard_tokens(shard_path, batch_size_tokens, seed)
+
+    next_orch.current_shard_index = shard_index + 1
+    if next_orch.current_shard_index >= len(next_orch.token_shards) {
+        next_orch.current_shard_index = 0
+    }
+    next_orch.tokens_in_shard = len(tokens)
+
+    (next_orch, tokens)
 }
 
 // ============================================================================
@@ -298,15 +470,56 @@ func moe_1t_forward_pass(
     
     // 返回 logits [batch_size, vocab_size]
     []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
-    
+
+    []int expert_load = make([]int, orch.model_config.moe.num_experts)
+    int token_idx = 0
+    while token_idx < batch_size {
+        int expert_idx = moe_1t_positive_mod(batch_tokens[token_idx] + seq_len + orch.world_rank, orch.model_config.moe.num_experts)
+        expert_load[expert_idx] = expert_load[expert_idx] + 1
+        token_idx = token_idx + 1
+    }
+
+    int max_load = 0
+    int load_sum = 0
+    int load_idx = 0
+    while load_idx < len(expert_load) {
+        int load = expert_load[load_idx]
+        load_sum = load_sum + load
+        if load > max_load {
+            max_load = load
+        }
+        load_idx = load_idx + 1
+    }
+
+    float load_imbalance = 1.0
+    if len(expert_load) > 0 && load_sum > 0 {
+        float avg_load = float(load_sum) / float(len(expert_load))
+        if avg_load > 0.0 {
+            load_imbalance = float(max_load) / avg_load
+        }
+    }
+
+    []float expert_load_ratio = make([]float, orch.model_config.moe.num_experts)
+    float aux_loss = 0.0
+    int ratio_idx = 0
+    while ratio_idx < len(expert_load) {
+        float ratio = 0.0
+        if load_sum > 0 {
+            ratio = float(expert_load[ratio_idx]) / float(load_sum)
+        }
+        expert_load_ratio[ratio_idx] = ratio
+        aux_loss = aux_loss + ratio * ratio
+        ratio_idx = ratio_idx + 1
+    }
+
     moe_routing_stats stats = moe_routing_stats {
         total_tokens: batch_size,
-        expert_load: make([]int, orch.model_config.moe.num_experts),
-        expert_load_ratio: make([]float, orch.model_config.moe.num_experts),
-        load_imbalance: 1.0,
+        expert_load: expert_load,
+        expert_load_ratio: expert_load_ratio,
+        load_imbalance: load_imbalance,
         communication_cost_ms: 0.0,
         compute_cost_ms: 0.0,
-        aux_loss_value: 0.0,
+        aux_loss_value: aux_loss,
     }
     
     (logits, stats)
@@ -332,16 +545,41 @@ func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
     float loss,
     float loss_scale
-) {
+) moe_1t_orchestrator {
     // 1. 不同的 GPU 各自更新其分片的参数
     // 2. 使用动态损失缩放处理 BF16 下溢
     // 3. 梯度裁剪在分布式设置中进行
-    
-    // 更新学习率 (cosine 调度)
+
+    int step_index = len(orch.step_history)
     int warmup_steps = orch.framework.training.warmup_steps
     int total_steps = orch.framework.training.total_steps
-    
-    // 在实际实现中计算当前学习率
+    float peak_lr = orch.framework.training.peak_lr
+    float min_lr = orch.framework.training.min_lr
+    float lr = peak_lr
+
+    if warmup_steps > 0 && step_index < warmup_steps {
+        lr = peak_lr * (float(step_index + 1) / float(warmup_steps))
+    } else if total_steps > warmup_steps {
+        int decay_steps = total_steps - warmup_steps
+        int current_decay_step = step_index - warmup_steps
+        if current_decay_step < 0 {
+            current_decay_step = 0
+        }
+        if current_decay_step > decay_steps {
+            current_decay_step = decay_steps
+        }
+
+        float progress = 0.0
+        if decay_steps > 0 {
+            progress = float(current_decay_step) / float(decay_steps)
+        }
+        lr = min_lr + (peak_lr - min_lr) * 0.5 * (1.0 + moe_1t_cos(3.141592653589793 * progress))
+    } else {
+        lr = min_lr
+    }
+
+    orch.optimizer_state.learning_rate = lr
+    orch
 }
 
 // ============================================================================
@@ -349,34 +587,98 @@ func moe_1t_optimizer_step(
 // ============================================================================
 
 // 保存分布式检查点 (所有排名中止，一个 GPU 协调保存)
+func moe_1t_zero_pad_int(int value, int width) string {
+    string text = int_to_string(value)
+    if len(text) >= width {
+        return text
+    }
+
+    string out = ""
+    int pad = width - len(text)
+    while pad > 0 {
+        out = out + "0"
+        pad = pad - 1
+    }
+    return out + text
+}
+
+func moe_1t_checkpoint_path(moe_1t_orchestrator orch, int step) string {
+    string root = orch.checkpoint_dir
+    if root == "" {
+        root = orch.framework.training.checkpoint_dir
+    }
+    root + "/step_" + moe_1t_zero_pad_int(step, 7) + "/latest/" + "moe_1t_training"
+}
+
 func moe_1t_save_checkpoint(
     moe_1t_orchestrator orch,
     int step,
     float loss
-) {
+) moe_1t_orchestrator {
     if orch.world_rank == 0 {
         io_println("Saving checkpoint at step " + int_to_string(step))
         io_println("Loss: " + float_to_string(loss))
     }
-    
-    // 每个 GPU 保存其参数和梯度分片
-    // Rank 0 保存全局元数据（learning rate, step, etc.）
+
+    pretrain_checkpoint_state checkpoint_state = new_pretrain_checkpoint_state("moe_1t_training", orch.checkpoint_dir)
+    checkpoint_state = mark_saved(checkpoint_state, step)
+    checkpoint_state = mark_best(checkpoint_state, step, loss)
+
+    string checkpoint_path = moe_1t_checkpoint_path(orch, step)
+    pretrain_checkpoint_bundle_state bundle = new_pretrain_checkpoint_bundle_state(
+        checkpoint_state,
+        checkpoint_path,
+        orch.checkpoint_dir + "/optimizer.manifest",
+        orch.data_manifest_path,
+        orch.checkpoint_dir + "/tokenizer.manifest"
+    )
+
+    save_pretrain_checkpoint(bundle)
+    orch.last_saved_step = step
+    orch.latest_checkpoint_path = checkpoint_path
+    orch
 }
 
 // 加载检查点并恢复所有分布式状态
 func moe_1t_load_checkpoint(
     moe_1t_orchestrator orch,
     string checkpoint_path
-) int {
-    if orch.world_rank == 0 {
-        io_println("Loading checkpoint from: " + checkpoint_path)
+) (moe_1t_orchestrator, int) {
+    string target_path = checkpoint_path
+    if moe_1t_trim(target_path) == "" {
+        string latest_ref_path = orch.checkpoint_dir + "/latest_checkpoint.txt"
+        if runtime_file_exists(latest_ref_path) {
+            target_path = moe_1t_trim(runtime_read_text_file(latest_ref_path))
+        }
     }
-    
-    // 加载参数和梯度分片
-    // 验证检查点完整性
-    
-    // 返回恢复的全局步骤
-    0
+
+    if moe_1t_trim(target_path) == "" {
+        return (orch, 0)
+    }
+
+    if orch.world_rank == 0 {
+        io_println("Loading checkpoint from: " + target_path)
+    }
+
+    pretrain_checkpoint_state checkpoint_state = new_pretrain_checkpoint_state("moe_1t_training", orch.checkpoint_dir)
+    pretrain_checkpoint_bundle_state bundle = new_pretrain_checkpoint_bundle_state(
+        checkpoint_state,
+        target_path,
+        orch.checkpoint_dir + "/optimizer.manifest",
+        orch.data_manifest_path,
+        orch.checkpoint_dir + "/tokenizer.manifest"
+    )
+
+    pretrain_checkpoint_bundle_state restored = load_pretrain_checkpoint(bundle)
+    orch.latest_checkpoint_path = target_path
+    orch.last_saved_step = restored.checkpoint.last_saved_step
+    int resumed_step = restored.checkpoint.last_saved_step
+    if resumed_step < 0 {
+        resumed_step = 0
+    } else {
+        resumed_step = resumed_step + 1
+    }
+    (orch, resumed_step)
 }
 
 // ============================================================================
@@ -403,25 +705,27 @@ func moe_1t_log_step_metrics(
 
 // 1T 模型的完整训练循环
 func moe_1t_training_loop(moe_1t_orchestrator orch) int {
-    if orch.world_rank == 0 {
-        string summary = moe_1t_summary(orch.framework)
+    moe_1t_orchestrator state = moe_1t_load_data_manifest(orch)
+    if state.world_rank == 0 {
+        string summary = moe_1t_summary(state.framework)
         io_println("Starting 1T MoE Training")
         io_println(summary)
     }
     
     int global_step = 0
-    int total_steps = orch.framework.training.total_steps
-    int warmup_steps = orch.framework.training.warmup_steps
-    int save_interval = orch.framework.training.save_steps
+    (state, global_step) = moe_1t_load_checkpoint(state, "")
+    int total_steps = state.framework.training.total_steps
+    int save_interval = state.framework.training.save_steps
     
-    while global_step < total_steps && orch.should_stop == 0 {
+    while global_step < total_steps && state.should_stop == 0 {
         // 1. 加载下一批 token
         int batch_tokens_per_gpu = 512  // 可调整
         int seq_len = 4096
-        []int batch = moe_1t_get_next_batch(orch, batch_tokens_per_gpu, seq_len)
+        []int batch = []int{cap: 0}
+        (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
         
         // 2. 前向传播 + MoE 路由
-        ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(orch, batch, seq_len)
+        ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
         
         // 3. 计算损失 (cross-entropy + aux loss)
         float loss = 1.0  // 在实际实现中计算真实损失
@@ -430,16 +734,16 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         // gradients computed here
         
         // 5. AllReduce 梯度
-        moe_1t_allreduce_gradients(orch)
+        moe_1t_allreduce_gradients(state)
         
         // 6. 优化器步骤
-        float lr = orch.optimizer_state.learning_rate
-        moe_1t_optimizer_step(orch, loss, 1.0)
+        state = moe_1t_optimizer_step(state, loss, 1.0)
+        float lr = state.optimizer_state.learning_rate
         
         // 7. 记录指标
         moe_1t_step_state step_state = moe_1t_step_state {
             global_step: global_step,
-            tokens_seen: (global_step + 1) * batch_tokens_per_gpu * orch.world_size,
+            tokens_seen: (global_step + 1) * batch_tokens_per_gpu * state.world_size,
             epoch: 0,
             batch_tokens: batch_tokens_per_gpu,
             loss: loss,
@@ -450,11 +754,12 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             compute_time_us: 0,
         }
         
-        moe_1t_log_step_metrics(orch, step_state)
+        moe_1t_log_step_metrics(state, step_state)
+        state.step_history.push(step_state)
         
         // 8. 定期保存检查点
         if global_step > 0 && global_step % save_interval == 0 {
-            moe_1t_save_checkpoint(orch, global_step, loss)
+            state = moe_1t_save_checkpoint(state, global_step, loss)
         }
         
         global_step = global_step + 1
@@ -533,6 +838,13 @@ func float_to_string(float x) string {
     
     result = result + int_to_string(frac_int)
     result
+}
+
+func moe_1t_cos(float x) float {
+    float x2 = x * x
+    float x4 = x2 * x2
+    float x6 = x4 * x2
+    1.0 - x2 / 2.0 + x4 / 24.0 - x6 / 720.0
 }
 
 func chr(int code) string {

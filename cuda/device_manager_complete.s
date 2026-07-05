@@ -39,6 +39,7 @@ struct cuda_context {
     // Memory tracking
     int allocated_memory_bytes // Total memory currently allocated by this context
     map[string]uint64 allocations  // Map of label -> device pointer
+    map[string]int allocation_sizes // Map of label -> allocation size in bytes
 }
 
 // ========================================================================
@@ -51,7 +52,7 @@ func get_device_count() int {
     // Returns number of available GPUs on the system
     // FFI call to: cudaGetDeviceCount()
     result := cuda_runtime_call("cudaGetDeviceCount", [], 0)
-    result.int_value
+    return result.int_value
 }
 
 func get_device_properties(int device_id) (cuda_device, error) {
@@ -63,7 +64,7 @@ func get_device_properties(int device_id) (cuda_device, error) {
     // FFI call to: cudaGetDeviceProperties(&prop, device)
     props := cuda_runtime_call("cudaGetDeviceProperties", [device_id], 0)
     
-    cuda_device{
+    return cuda_device{
         id: device_id,
         name: props.string_value,
         total_memory_bytes: props.field("total_memory"),
@@ -87,7 +88,7 @@ func select_device(int device_id) error {
     if result.error_code != 0 {
         return error{message: "Failed to select device"}
     }
-    nil
+    return nil
 }
 
 // ========================================================================
@@ -119,13 +120,14 @@ func init_cuda_context(int device_id) (cuda_context, error) {
     // Associate cuBLAS with stream
     cuda_runtime_call("cublasSetStream", [cublas_h, stream], 0)
     
-    cuda_context{
+    return cuda_context{
         device: device_props,
         is_initialized: true,
         stream: stream,
         cublas_handle: cublas_h,
         allocated_memory_bytes: 0,
         allocations: make(map[string]uint64),
+        allocation_sizes: make(map[string]int),
     }
 }
 
@@ -135,17 +137,23 @@ func cleanup_cuda_context(cuda_context ctx) error {
     }
     
     // Free all allocated memory
-    for label, ptr := range ctx.allocations {
+    for _, ptr := range ctx.allocations {
         cuda_runtime_call("cudaFree", [ptr], 0)
     }
+    ctx.allocations = make(map[string]uint64)
+    ctx.allocation_sizes = make(map[string]int)
+    ctx.allocated_memory_bytes = 0
     
     // Destroy stream
     cuda_runtime_call("cudaStreamDestroy", [ctx.stream], 0)
     
     // Destroy cuBLAS handle
     cuda_runtime_call("cublasDestroy", [ctx.cublas_handle], 0)
+    ctx.stream = 0
+    ctx.cublas_handle = 0
+    ctx.is_initialized = false
     
-    nil
+    return nil
 }
 
 // ========================================================================
@@ -175,8 +183,10 @@ func cuda_malloc(cuda_context ctx, int num_bytes, string label) (uint64, error) 
     
     device_ptr := result.uint64_value
     ctx.allocations[label] = device_ptr
-    
-    device_ptr
+    ctx.allocation_sizes[label] = num_bytes
+    ctx.allocated_memory_bytes = ctx.allocated_memory_bytes + num_bytes
+
+    return device_ptr, nil
 }
 
 func cuda_malloc_pinned(int num_bytes, string label) (uint64, error) {
@@ -187,7 +197,7 @@ func cuda_malloc_pinned(int num_bytes, string label) (uint64, error) {
         return 0, error{message: "cudaMallocHost failed"}
     }
     
-    result.uint64_value
+    return result.uint64_value, nil
 }
 
 func cuda_free(cuda_context ctx, string label) error {
@@ -195,9 +205,10 @@ func cuda_free(cuda_context ctx, string label) error {
         // FFI call to: cudaFree(ptr)
         cuda_runtime_call("cudaFree", [ptr], 0)
         delete(ctx.allocations, label)
-        ctx.allocated_memory_bytes -= get_allocation_size(ptr)
+        ctx.allocated_memory_bytes -= get_allocation_size(ctx, label)
+        delete(ctx.allocation_sizes, label)
     }
-    nil
+    return nil
 }
 
 func cuda_memcpy_h2d(uint64 device_ptr, uint64 host_ptr, int num_bytes) error {
@@ -207,17 +218,17 @@ func cuda_memcpy_h2d(uint64 device_ptr, uint64 host_ptr, int num_bytes) error {
     if result.error_code != 0 {
         return error{message: "cudaMemcpyH2D failed"}
     }
-    nil
+    return nil
 }
 
 func cuda_memcpy_d2h(uint64 host_ptr, uint64 device_ptr, int num_bytes) error {
     // Copy data from GPU device memory to CPU host memory
     // FFI call to: cudaMemcpy(host_ptr, device_ptr, num_bytes, cudaMemcpyDeviceToHost)
-    result := cuda_runtime_call("cudaMemcpyD2D", [host_ptr, device_ptr, num_bytes], 0)
+    result := cuda_runtime_call("cudaMemcpyD2H", [host_ptr, device_ptr, num_bytes], 0)
     if result.error_code != 0 {
         return error{message: "cudaMemcpyD2H failed"}
     }
-    nil
+    return nil
 }
 
 func cuda_memcpy_d2d(uint64 dest_ptr, uint64 src_ptr, int num_bytes) error {
@@ -227,7 +238,7 @@ func cuda_memcpy_d2d(uint64 dest_ptr, uint64 src_ptr, int num_bytes) error {
     if result.error_code != 0 {
         return error{message: "cudaMemcpyD2D failed"}
     }
-    nil
+    return nil
 }
 
 // ========================================================================
@@ -242,7 +253,7 @@ func cuda_synchronize(cuda_context ctx) error {
     if result.error_code != 0 {
         return error{message: "cudaStreamSynchronize failed"}
     }
-    nil
+    return nil
 }
 
 func cuda_device_synchronize() error {
@@ -252,7 +263,7 @@ func cuda_device_synchronize() error {
     if result.error_code != 0 {
         return error{message: "cudaDeviceSynchronize failed"}
     }
-    nil
+    return nil
 }
 
 // ========================================================================
@@ -263,12 +274,14 @@ func cuda_runtime_call(string api_name, []int args, int flags) (any, error) {
     // Generic FFI interface for CUDA runtime API calls
     // This would be implemented as FFI binding to C CUDA runtime
     // Returns result struct with error_code, int_value, uint64_value, string_value, etc.
-    any{}
+    return any{}, nil
 }
 
-func get_allocation_size(uint64 ptr) int {
-    // Query size of an allocation (if tracking enabled)
-    0  // Would look up in allocation map
+func get_allocation_size(cuda_context ctx, string label) int {
+    if size, exists := ctx.allocation_sizes[label]; exists {
+        return size
+    }
+    return 0
 }
 
 // ========================================================================
@@ -276,7 +289,7 @@ func get_allocation_size(uint64 ptr) int {
 // ========================================================================
 
 func get_memory_stats(cuda_context ctx) map[string]int {
-    map[string]int{
+    return map[string]int{
         "total_allocated": ctx.allocated_memory_bytes,
         "num_allocations": len(ctx.allocations),
         "device_total": ctx.device.total_memory_bytes,

@@ -289,3 +289,52 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
+
+func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
+    int batch = input.shape[0]
+    int channels = input.shape[1]
+    int in_h = input.shape[2]
+    int in_w = input.shape[3]
+    []float out = []float{cap: batch * channels * out_h * out_w}
+    int b = 0
+    while b < batch {
+        int ch = 0
+        while ch < channels {
+            int oh = 0
+            while oh < out_h {
+                int ow = 0
+                while ow < out_w {
+                    int h_start = oh * in_h / out_h
+                    int h_end = (oh + 1) * in_h / out_h
+                    int w_start = ow * in_w / out_w
+                    int w_end = (ow + 1) * in_w / out_w
+                    if h_end <= h_start {
+                        h_end = h_start + 1
+                    }
+                    if w_end <= w_start {
+                        w_end = w_start + 1
+                    }
+                    float max_v = -999999999999999999999999999999.0
+                    int ih = h_start
+                    while ih < h_end {
+                        int iw = w_start
+                        while iw < w_end {
+                            float v = input.data[((b * channels + ch) * in_h + ih) * in_w + iw]
+                            if v > max_v {
+                                max_v = v
+                            }
+                            iw = iw + 1
+                        }
+                        ih = ih + 1
+                    }
+                    out[((b * channels + ch) * out_h + oh) * out_w + ow] = max_v
+                    ow = ow + 1
+                }
+                oh = oh + 1
+            }
+            ch = ch + 1
+        }
+        b = b + 1
+    }
+    neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
+}
