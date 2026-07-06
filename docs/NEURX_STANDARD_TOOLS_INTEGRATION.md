@@ -1,4 +1,4 @@
-# Claude 标准工具集成完成
+# NeurX 标准工具集成完成
 
 ## ✅ 完成的工作
 
@@ -6,11 +6,11 @@
 
 **位置**: `src/bridge/AgentController.cpp`
 
-在 `setWorkspacePath()` 函数中添加了 Claude 标准工具注册：
+在 `setWorkspacePath()` 函数中添加了 NeurX 标准工具注册：
 
 ```cpp
-// Register Claude Standard Tools (Write, Edit, MultiEdit, Read, Bash, Grep, Glob)
-ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
+// Register NeurX Standard Tools (Write, Edit, MultiEdit, Read, Bash, Grep, Glob)
+NeurXStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
 ```
 
 **注册的 7 个工具**:
@@ -27,7 +27,7 @@ ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
 **位置**: `src/bridge/AgentController.cpp` (kControllerSystemPrompt)
 
 更新了 AI 系统提示词，添加了：
-- Claude 标准工具的完整说明
+- NeurX 标准工具的完整说明
 - 每个工具的参数说明
 - 使用指南和最佳实践
 - 与其他工具的集成说明
@@ -36,13 +36,13 @@ ClaudeStandardToolFactory::registerAllTools(path, m_registry, m_sandboxManager);
 
 **位置**: `CMakeLists.txt`
 
-由于使用 `GLOB_RECURSE` 自动收集源文件，`ClaudeStandardTools.cpp` 会被自动包含到 `neurx_core` 库中，无需手动添加。
+由于使用 `GLOB_RECURSE` 自动收集源文件，`NeurXStandardTools.cpp` 会被自动包含到 `neurx_core` 库中，无需手动添加。
 
 ### 4. 测试套件 (已完成)
 
 **文件**: 
-- `tests/TestClaudeStandardTools.h`
-- `tests/TestClaudeStandardTools.cpp`
+- `tests/TestNeurXStandardTools.h`
+- `tests/TestNeurXStandardTools.cpp`
 
 创建了完整的测试套件，包含 40+ 个测试用例：
 
@@ -262,21 +262,21 @@ AI 使用 **Bash**：
 cd /Users/feifei/agent/neurx-code
 mkdir -p build && cd build
 cmake ..
-make TestClaudeStandardTools
-./tests/TestClaudeStandardTools
+make TestNeurXStandardTools
+./tests/TestNeurXStandardTools
 ```
 
 预期输出：
 ```
-********* Start testing of TestClaudeStandardTools *********
-PASS   : TestClaudeStandardTools::initTestCase()
-PASS   : TestClaudeStandardTools::testWriteToolCreateNewFile()
-PASS   : TestClaudeStandardTools::testWriteToolOverwriteExistingFile()
+********* Start testing of TestNeurXStandardTools *********
+PASS   : TestNeurXStandardTools::initTestCase()
+PASS   : TestNeurXStandardTools::testWriteToolCreateNewFile()
+PASS   : TestNeurXStandardTools::testWriteToolOverwriteExistingFile()
 ...
-PASS   : TestClaudeStandardTools::testFactoryToolSchemas()
-PASS   : TestClaudeStandardTools::cleanupTestCase()
+PASS   : TestNeurXStandardTools::testFactoryToolSchemas()
+PASS   : TestNeurXStandardTools::cleanupTestCase()
 Totals: 43 passed, 0 failed, 0 skipped
-********* Finished testing of TestClaudeStandardTools *********
+********* Finished testing of TestNeurXStandardTools *********
 ```
 
 ---
@@ -326,7 +326,7 @@ Totals: 43 passed, 0 failed, 0 skipped
 
 ## 🎉 总结
 
-NeurX Code 现在具备与 Claude Code 完全兼容的标准工具系统！
+NeurX Code 现在具备与 NeurX Code 完全兼容的标准工具系统！
 
 用户可以通过自然语言：
 - ✅ 创建和编辑文件

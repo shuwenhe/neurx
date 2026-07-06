@@ -97,7 +97,7 @@ configure_model_size() {
             set_default NEURX_PRETRAIN_EVAL_INTERVAL "$NEURX_LLM_EVAL_INTERVAL"
             set_default NEURX_PRETRAIN_SAVE_INTERVAL "$NEURX_LLM_SAVE_INTERVAL"
             set_default NEURX_PRETRAIN_GRAD_ACCUMULATION "8"
-            set_default NEURX_PRETRAIN_SOURCE "$NEURX_ROOT/pretrain/llm/model_large_pretrain.s"
+            set_default NEURX_PRETRAIN_SOURCE "$NEURX_ROOT/pretrain/llm/large_pretrain.s"
             set_default NEURX_PRETRAIN_BUILD_DIR "$NEURX_ROOT/build/neurx_1t_moe"
             set_default NEURX_PRETRAIN_OUTPUT_DIR "$NEURX_ROOT/artifacts/checkpoints/neurx_1t_moe"
             set_default NEURX_PRETRAIN_MANIFEST "$NEURX_ROOT/data/training_data_shards/manifest.txt"
@@ -115,7 +115,7 @@ configure_model_size() {
 
 configure_model_size
 
-SOURCE_FILE="${NEURX_PRETRAIN_SOURCE:-$NEURX_ROOT/pretrain/llm/model_large_pretrain.s}"
+SOURCE_FILE="${NEURX_PRETRAIN_SOURCE:-$NEURX_ROOT/pretrain/llm/large_pretrain.s}"
 CLUSTER_SOURCE="${NEURX_CLUSTER_SOURCE:-$NEURX_ROOT/deployment/cluster_orchestration.s}"
 BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$NEURX_ROOT/build/model_large_pretrain}"
 CLUSTER_BUILD_DIR="${NEURX_CLUSTER_BUILD_DIR:-$NEURX_ROOT/build/cluster_orchestration}"
@@ -383,7 +383,7 @@ NEURX_LLM_INTERMEDIATE_SIZE="\$NEURX_LLM_INTERMEDIATE_SIZE" \
 NEURX_LLM_MAX_SEQ_LEN="\$NEURX_LLM_MAX_SEQ_LEN" \
 NEURX_LLM_PARAMETER_COUNT_M="\$NEURX_LLM_PARAMETER_COUNT_M" \
 NEURX_ALLOW_FULL_1T_LOCAL="\${NEURX_ALLOW_FULL_1T_LOCAL:-0}" \
-bash script/run_model_large_pretrain.sh
+bash script/run_large_pretrain.sh
 EOF
     chmod +x "$CLUSTER_LAUNCH_PLAN_FILE"
 
@@ -466,7 +466,7 @@ compile_and_run_s() {
                 mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
 
                 # Compile and link BPE tokenizer for all model sizes so tokenization
-                # helpers are available at runtime (used by model_large_pretrain.s).
+                # helpers are available at runtime (used by large_pretrain.s).
                 if [ -f "$NEURX_ROOT/pretrain/tokenizer/bpe.s" ]; then
                     BPE_IR="$BUILD_DIR/bpe_tokenizer.ir"
                     if ! "$S_COMPILER" "$NEURX_ROOT/pretrain/tokenizer/bpe.s" "$BPE_IR" 2>&1; then

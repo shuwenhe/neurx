@@ -1,10 +1,10 @@
-# Claude Code vs NeurX Code - 文件创建对比
+# NeurX Code 文件创建对比
 
 ## 快速总结
 
-### Claude Code 的方式
+### 外部参考实现的方式
 ```
-Claude 决定 → 调用 Anthropic Tool Use API → 工具执行
+Agent 决定 → 调用 标准 Tool Use API → 工具执行
                           ↓
                     Bash (mkdir -p)
                     Write (文件内容)
@@ -30,7 +30,7 @@ Agent 决定 → 本地工具注册表 → 工具执行
 
 ## 工具对比表
 
-| 功能 | Claude Code | NeurX Code |
+| 功能 | 外部参考实现 | NeurX Code |
 |------|------------|-----------|
 | **创建文件** | Write 工具 | WriteTool::execute() |
 | **编辑文件** | Edit 工具 | EditTool::execute() |
@@ -43,9 +43,9 @@ Agent 决定 → 本地工具注册表 → 工具执行
 
 ## 代码对比
 
-### 创建文件 - Claude Code
+### 创建文件 - 外部参考实现
 
-**Anthropic API 响应**：
+**标准 API 响应**：
 ```json
 {
   "type": "tool_use",
@@ -58,7 +58,7 @@ Agent 决定 → 本地工具注册表 → 工具执行
 }
 ```
 
-**Claude Code 执行**：
+**外部参考实现执行**：
 ```bash
 # 如果父目录不存在，会失败！
 echo "print('Hello')" > /workspace/main.py
@@ -80,7 +80,7 @@ WriteTool.execute({
 })
 ```
 
-**源代码实现** (src/tools/ClaudeStandardTools.cpp)：
+**源代码实现** (src/tools/NeurXStandardTools.cpp)：
 ```cpp
 bool WriteTool::execute(const QJsonObject &parameters, QJsonObject &output) {
     QString filePath = parameters.value("file_path").toString();
@@ -110,7 +110,7 @@ bool WriteTool::execute(const QJsonObject &parameters, QJsonObject &output) {
 
 ## 安全验证对比
 
-### Claude Code - Hook 系统
+### NeurX Code - Hook 系统
 
 ```python
 # /path/to/hook.py - 在工具执行前运行
@@ -138,7 +138,7 @@ if tool_name == "Write":
 sys.exit(0)  # Allow
 ```
 
-**配置**（.claude/config.json）：
+**配置**（.neurx/config.json）：
 ```json
 {
   "hooks": {
@@ -196,13 +196,13 @@ void AgentController::setWorkspacePath(const QString &workspacePath) {
 
 ### 1. 文件夹创建
 
-**Claude Code**：
+**NeurX Code**：
 - ❌ Write 工具不创建父目录
 - ✅ 必须显式使用 `Bash` 工具和 `mkdir -p`
 - 需要两步操作
 
 ```
-Claude Code 流程：
+NeurX Code 流程：
 Bash mkdir -p → Write file
     ↓             ↓
   Step 1       Step 2
@@ -222,7 +222,7 @@ WriteTool (自动 mkdir)
 
 ### 2. 安全验证时机
 
-**Claude Code**：
+**NeurX Code**：
 ```
 工具调用
   ↓ (Hook 验证)
@@ -244,22 +244,22 @@ SandboxManager 验证
 
 ### 3. 实现方式
 
-| 方面 | Claude Code | NeurX Code |
+| 方面 | NeurX Code | NeurX Code |
 |------|------------|-----------|
 | **语言** | JavaScript/Node.js | C++/Qt |
 | **运行方式** | CLI 工具 | Qt GUI 应用 |
-| **API 依赖** | Anthropic API | 本地实现 |
+| **API 依赖** | 标准 API | 本地实现 |
 | **验证方式** | 外部 Hook 脚本 | C++ SandboxManager |
 | **集成方式** | 命令行调用 | Qt 信号/槽 |
 
 ## 工具链对比
 
-### Claude Code 工具链
+### NeurX Code 工具链
 
 ```
-Claude 输出 Write 工具调用
+NeurX 输出 Write 工具调用
           ↓
-   Claude Code 接收
+   NeurX Code 接收
           ↓
    验证 Hook (Python/Bash)
           ↓
@@ -269,7 +269,7 @@ Claude 输出 Write 工具调用
           ↓
    fs.writeFileSync()
           ↓
-   返回结果给 Claude
+   返回结果给 NeurX
 ```
 
 ### NeurX Code 工具链
@@ -279,7 +279,7 @@ Agent 决定调用 WriteTool
           ↓
 AgentToolRegistry 查找
           ↓
-ClaudeStandardToolFactory 创建工具
+NeurXStandardToolFactory 创建工具
           ↓
 WriteTool::execute() 被调用
           ↓
@@ -294,7 +294,7 @@ Agent 接收结果
 
 ## 实现建议
 
-### 从 Claude Code 学到的
+### 从 NeurX Code 学到的
 
 1. ✅ **Hook 系统** → 灵活的安全验证
    - NeurX Code 用 SandboxManager 实现
@@ -319,7 +319,7 @@ Agent 接收结果
 
 ### 场景：创建 React 项目结构
 
-**Claude Code 方式**（3 步）：
+**NeurX Code 方式**（3 步）：
 
 ```json
 Step 1: Bash 工具创建目录
@@ -366,8 +366,8 @@ write_tool.execute({
 
 ## 总结
 
-**Claude Code**：
-- 使用 Anthropic API 的 Tool Use 功能
+**NeurX Code**：
+- 使用 标准 API 的 Tool Use 功能
 - Hook 系统做安全验证
 - 需要显式 mkdir 创建目录
 - CLI 工具形式

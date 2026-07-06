@@ -194,7 +194,7 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
         order[i] = i
         i = i + 1
     }
-    gpt_large_pretrain_shuffle_ints(order, gpt_large_pretrain_mix_seed(shard_seed, shard_epoch, shard_count))
+    return gpt_large_pretrain_shuffle_ints(order, gpt_large_pretrain_mix_seed(shard_seed, shard_epoch, shard_count))
 }
 
 func gpt_large_pretrain_shuffle_strings([]string values, int seed) []string {
