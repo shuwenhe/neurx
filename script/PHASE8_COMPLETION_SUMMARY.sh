@@ -131,7 +131,7 @@ Phase 8: Production    4       3,300      ✅
    $ s run script/checkpoint_recovery.s
 
 4. 集成到完整训练:
-   $ bash script/claude_complete_pipeline.sh
+   $ bash script/neurx_complete_pipeline.sh
 
 
 💡 推荐使用流程
@@ -154,7 +154,7 @@ Phase 8: Production    4       3,300      ✅
      设置节点数和资源
 
   3. 启动完整训练
-     bash script/claude_complete_pipeline.sh
+     bash script/neurx_complete_pipeline.sh
 
   4. 监控训练进度
      查看检查点和性能指标
@@ -280,7 +280,7 @@ Phase 8: Production    4       3,300      ✅
   [ ] 部署到测试集群
 
 优先级 3 - 完整训练:
-  [ ] 运行 claude_complete_pipeline.sh
+  [ ] 运行 neurx_complete_pipeline.sh
   [ ] 监控训练进度
   [ ] 收集性能数据
   [ ] 验证最终结果

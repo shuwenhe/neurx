@@ -6,7 +6,7 @@ package neurx.model.tokenizer.chat_template
 // 工业级 LLM 微调需要统一的对话格式把 messages 转换为 token 序列。
 // 不同模型使用不同格式：
 //
-//   ChatML (GPT-4 / Qwen / Yi):
+//   ChatML (主流模型):
 //     <|im_start|>system\n{content}<|im_end|>\n
 //     <|im_start|>user\n{content}<|im_end|>\n
 //     <|im_start|>assistant\n

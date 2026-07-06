@@ -27,17 +27,17 @@ check_warn() {
 
 # 1. 检查项目结构
 echo "🔍 检查 1: 项目结构"
-if [ -f "src/tools/ClaudeStandardTools.cpp" ]; then
-    check_pass "ClaudeStandardTools.cpp 存在"
+if [ -f "src/tools/NeurXStandardTools.cpp" ]; then
+    check_pass "NeurXStandardTools.cpp 存在"
 else
-    check_fail "ClaudeStandardTools.cpp 不存在"
+    check_fail "NeurXStandardTools.cpp 不存在"
     echo "   请确保你在 neurx-code 项目根目录运行此脚本"
 fi
 
-if [ -f "src/tools/ClaudeStandardTools.h" ]; then
-    check_pass "ClaudeStandardTools.h 存在"
+if [ -f "src/tools/NeurXStandardTools.h" ]; then
+    check_pass "NeurXStandardTools.h 存在"
 else
-    check_fail "ClaudeStandardTools.h 不存在"
+    check_fail "NeurXStandardTools.h 不存在"
 fi
 echo ""
 
@@ -58,7 +58,7 @@ else
 fi
 echo ""
 
-# 3. 检查 ClaudeStandardTools 是否被编译
+# 3. 检查 NeurXStandardTools 是否被编译
 echo "🔍 检查 3: 工具代码编译"
 if [ -d "build" ]; then
     # 查找包含 WriteTool 符号的对象文件
@@ -81,8 +81,8 @@ echo ""
 
 # 5. 检查工具注册
 echo "🔍 检查 5: 工具注册代码"
-if grep -q "ClaudeStandardToolFactory::registerAllTools" src/bridge/AgentController.cpp; then
-    check_pass "找到 ClaudeStandardToolFactory::registerAllTools 调用"
+if grep -q "NeurXStandardToolFactory::registerAllTools" src/bridge/AgentController.cpp; then
+    check_pass "找到 NeurXStandardToolFactory::registerAllTools 调用"
 else
     check_fail "未找到工具注册代码"
     echo "   请检查 AgentController::setWorkspacePath 中是否调用了 registerAllTools"

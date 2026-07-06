@@ -85,9 +85,9 @@ func (server *APIServer) initialize() {
 }
 
 func (server *APIServer) register_models() {
-    server.models["neurx-346m"] = "Claude-level 346M parameter model"
-    server.models["neurx-7b"] = "Claude-level 7B parameter model"
-    server.models["neurx-70b"] = "Claude-level 70B parameter model"
+    server.models["neurx-346m"] = "NeurX-level 346M parameter model"
+    server.models["neurx-7b"] = "NeurX-level 7B parameter model"
+    server.models["neurx-70b"] = "NeurX-level 70B parameter model"
     
     fmt.Printf("Registered Models:\n")
     for name, desc := range server.models {

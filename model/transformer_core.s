@@ -15,7 +15,7 @@ struct GPTConfig {
     int num_heads                // 12/16/32
     int head_dim                 // hidden_size / num_heads
     int intermediate_size        // hidden_size * 4
-    int vocab_size               // 128000 (GPT-4 compatible)
+    int vocab_size               // 128000
     int max_position_embeddings  // 4096/8192/32768/131072
     
     // 训练配置

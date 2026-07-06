@@ -184,7 +184,7 @@ cat << 'EOF'
 
 【完整工业级训练】
 
-$ bash script/claude_complete_pipeline.sh \
+$ bash script/neurx_complete_pipeline.sh \
   --enable-experiment-tracking \
   --enable-data-governance \
   --use-dpo-alignment \
@@ -327,7 +327,7 @@ ROI: 🟢 高 (40% 成本节省)
 
 示例脚本:
   • script/phase9_industrial_systems.sh      - 概览
-  • script/claude_complete_pipeline.sh       - 完整流程
+  • script/neurx_complete_pipeline.sh        - 完整流程
 
 
 ═══════════════════════════════════════════════════════════════════

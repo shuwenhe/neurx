@@ -196,7 +196,7 @@ async function example5_CreateFromStdin() {
 async function example6_AIGeneratedFiles() {
   console.log('\n📝 示例 6: AI 生成的文件创建\n');
   
-  console.log('场景: Claude 或 GPT 生成代码后保存');
+  console.log('场景: 生成代码后保存');
   console.log('');
   console.log('流程:');
   console.log('  1. LLM 生成代码');
@@ -205,7 +205,7 @@ async function example6_AIGeneratedFiles() {
   console.log('  4. 自动语法检查 (JSON/Python)');
   console.log('  5. 创建检查点用于恢复');
   
-  console.log('\n示例请求 (Claude):');
+  console.log('\n示例请求:');
   console.log(`
 请创建一个 Python 配置文件: config.json
 内容应该包含: database, cache, logging 配置
@@ -401,7 +401,7 @@ async function main() {
   console.log('  1. 查看 FILECREATION_INTEGRATION.md 获取集成指南');
   console.log('  2. 运行 ./scripts/create-file.js --help 获取详细帮助');
   console.log('  3. 查看源代码: neurx-code/src/tools/FileCreationTool.{h,cpp}');
-  console.log('  4. 参考: claude-code/scripts/write-file.js');
+  console.log('  4. 参考: neurx-code/scripts/write-file.js');
   console.log('');
 }
 

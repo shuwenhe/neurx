@@ -1,7 +1,7 @@
 // ============================================================
 // NEURX Code Interpreter - 代码解释器系统
 // 完整实现: 沙箱执行环境 + 多语言支持 + 结果解析 + 安全隔离
-// 兼容 NEURX-4 All Tools / OpenAI Code Interpreter / Jupyter Kernel
+// 兼容 NEURX-4 All Tools / 通用代码解释器 / Jupyter Kernel
 // ============================================================
 
 module code_interpreter

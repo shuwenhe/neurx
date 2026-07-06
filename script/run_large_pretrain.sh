@@ -448,19 +448,19 @@ compile_and_run_s() {
             fi
             if [ -f "$GPT_LARGE_MODEL_SRC" ] && [ -f "$GPT_LARGE_TRAIN_SRC" ]; then
                 if ! "$S_COMPILER" "$GPT_LARGE_MODEL_SRC" "$GPT_LARGE_MODEL_IR" 2>&1; then
-                    echo -e "${RED}✗ GPT-Large model 编译失败${NC}"
+            echo -e "${RED}✗ NeurX large model 编译失败${NC}"
                     return 1
                 fi
                 if ! "$S_COMPILER" "$GPT_LARGE_TRAIN_SRC" "$GPT_LARGE_TRAIN_IR" 2>&1; then
-                    echo -e "${RED}✗ GPT-Large train 编译失败${NC}"
+                    echo -e "${RED}✗ NeurX large train 编译失败${NC}"
                     return 1
                 fi
                 if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_LARGE_MODEL_IR" "$GPT_LARGE_TRAIN_IR" "gl" "$GPT_LARGE_TRAIN_LINKED_IR"; then
-                    echo -e "${RED}✗ GPT-Large train IR 链接失败${NC}"
+                    echo -e "${RED}✗ NeurX large train IR 链接失败${NC}"
                     return 1
                 fi
                 if ! "$NEURX_ROOT/script/link_s_ir_module.sh" "$GPT_LARGE_TRAIN_LINKED_IR" "$LINKED_IR_FILE" "glt" "$LINKED_IR_FILE.tmp"; then
-                    echo -e "${RED}✗ GPT-Large train 链接到主 IR 失败${NC}"
+                    echo -e "${RED}✗ NeurX large train 链接到主 IR 失败${NC}"
                     return 1
                 fi
                 mv "$LINKED_IR_FILE.tmp" "$LINKED_IR_FILE"
