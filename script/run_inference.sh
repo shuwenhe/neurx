@@ -16,8 +16,30 @@ CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_training"
 OUTPUT_DIR="${NEURX_ROOT}/artifacts/inference_output"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 
+resolve_s_compiler() {
+    if [ -n "${S_COMPILER:-}" ] && [ -x "$S_COMPILER" ]; then
+        printf '%s\n' "$S_COMPILER"
+        return 0
+    fi
+
+    local candidate
+    for candidate in \
+        "$(command -v s 2>/dev/null || true)" \
+        "$HOME/.local/bin/s" \
+        "$NEURX_ROOT/../s/.local/bin/s" \
+        "$NEURX_ROOT/../s/bin/s" \
+        "$NEURX_ROOT/../../s/.local/bin/s"; do
+        if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 # S编译器路径
-S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER="$(resolve_s_compiler || true)"
 S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 
 # 源文件
@@ -79,7 +101,7 @@ check_environment() {
     echo ""
     
     # 检查S编译器
-    if [ ! -f "$S_COMPILER" ]; then
+    if [ -z "$S_COMPILER" ]; then
         print_error "S编译器不存在: $S_COMPILER"
         exit 1
     fi
