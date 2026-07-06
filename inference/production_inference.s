@@ -534,7 +534,7 @@ func empty_compiled_model() compiled_model {
     }
 }
 
-func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
+func load_model(string model_name, string device_type, string quantization_type, string checkpoint_arg) compiled_model {
     string checkpoint_path = resolve_checkpoint_path(checkpoint_arg)
     if !runtime_file_exists(checkpoint_path) {
         println("Checkpoint not found: " + checkpoint_path)
@@ -586,8 +586,8 @@ func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
     layers[1] = "bigram_bias"
 
     compiled_model {
-        model_name: engine.model_name,
-        backend: engine.device_type,
+        model_name: model_name,
+        backend: device_type,
         checkpoint_path: checkpoint_path,
         step: step,
         loss: loss,
@@ -602,7 +602,7 @@ func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
         bias: bias,
         layer_names: layers,
         quantized: false,
-        quantization_type: engine.quantization_type,
+        quantization_type: quantization_type,
         graph_mode: false,
         smoke_test: smoke_test,
     }
@@ -903,20 +903,21 @@ func main() int {
     int max_new_chars = str_to_int(runtime_env_get("NEURX_INFER_MAX_NEW_CHARS", "120"), 120)
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
 
-    inference_engine engine = new_inference_engine(model_name, device_type)
     println("DEBUG checkpoint_arg=" + checkpoint_arg)
     println("[phase] load_model:start")
-    compiled_model model = load_model(engine, checkpoint_arg)
+    bool enable_quantization = true
+    string quantization_type = "fp8"
+    compiled_model model = load_model(model_name, device_type, quantization_type, checkpoint_arg)
     if len(model.bias) == 0 {
         println("Failed to load checkpoint: " + resolve_checkpoint_path(checkpoint_arg))
         return 1
     }
     println("[phase] load_model:done")
 
-    if engine.enable_quantization {
-        model = apply_quantization(model, engine.quantization_type)
+    if enable_quantization {
+        model = apply_quantization(model, quantization_type)
     }
-    model = compile_for_backend(model, engine.device_type)
+    model = compile_for_backend(model, device_type)
     model = enable_graph_mode(model)
 
     println("================================================")
