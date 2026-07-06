@@ -245,7 +245,7 @@ print(f"Best PPL:         {best:>8.1f}")
 print(f"Improvement:      {improvement:>8.2f}%")
 
 if final < 50:
-    print(f"\n✅ Claude-level perplexity achieved!")
+    print(f"\n✅ NeurX-level perplexity achieved!")
 elif final < 100:
     print(f"\n🔄 Good progress, continue training")
 else:

@@ -118,7 +118,7 @@ echo ""
 
 cat > "$OUTPUT_DIR/training_log_${TIMESTAMP}.txt" << 'EOF'
 ╔════════════════════════════════════════════════════════════════════╗
-║  NeurX Industrial-Grade Claude Training - End-to-End Verification │
+║  NeurX Industrial-Grade LLM Training - End-to-End Verification    │
 ║  Language: S                                                       ║
 ║  Status: Production Ready                                          ║
 ╚════════════════════════════════════════════════════════════════════╝

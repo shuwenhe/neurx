@@ -6,7 +6,7 @@
 cat << 'EOF'
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                                                                            ║
-║       🚀 NeurX INDUSTRIAL-GRADE CLAUDE TRAINING SYSTEM 🚀                 ║
+║       🚀 NeurX INDUSTRIAL-GRADE LLM TRAINING SYSTEM 🚀                    ║
 ║                                                                            ║
 ║       End-to-End Verification Complete - Production Ready                 ║
 ║       Language: Pure S (No Go)                                            ║

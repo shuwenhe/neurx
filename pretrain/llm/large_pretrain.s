@@ -1635,7 +1635,7 @@ func gpt_large_pretrain_framework_title() string {
     if gpt_large_pretrain_is_1t_mode() {
         return "NeurX 1T MoE Pretraining System"
     }
-    "NeurX GPT-Large Pretraining System"
+    "NeurX Large Pretraining System"
 }
 
 func gpt_large_pretrain_expected_world_size() int {

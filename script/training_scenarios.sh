@@ -209,7 +209,7 @@ scenario_tensor_parallel() {
     echo ""
 }
 
-scenario_claude_scale() {
+scenario_neurx_scale() {
     print_header "场景 6: NeurX frontier 训练 (70B+) (数周)"
     echo ""
     echo "此场景用于大规模 NeurX frontier 模型训练"
@@ -303,7 +303,7 @@ main() {
             3) scenario_single_gpu ;;
             4) scenario_multi_gpu_dp ;;
             5) scenario_tensor_parallel ;;
-            6) scenario_claude_scale ;;
+            6) scenario_neurx_scale ;;
             7) scenario_inference ;;
             0) 
                 print_success "退出"

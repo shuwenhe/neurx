@@ -2,7 +2,7 @@
 
 `workflows/agent/code_agent/` packages a coding-focused agent profile on top of the base NeurX runtime.
 
-This profile is intended to behave closer to Codex/Claude-style code agents:
+This profile is intended to behave closer to Codex-style code agents:
 
 - seed the runtime with a `code` route
 - queue coding-oriented stages such as `git_status`, `repo`, `retrieve`, `code`, `build`, `test`, `git_diff`, `review`, `verify`, and `finalize`
@@ -29,7 +29,7 @@ make code-agent TASK="inspect agent/runtime.s and summarize the step loop"
 # Or directly
 bash app/service/run_neurx_code_agent.sh --json --prompt "your task" --repo .
 
-# Enable remote model (OpenAI-compatible)
+# Enable remote model (NeurX-compatible)
 export NEURX_CODE_AGENT_BASE_URL=https://api.example.com
 export NEURX_CODE_AGENT_MODEL=your-model
 export NEURX_API_KEY=sk-...
@@ -43,6 +43,6 @@ Set `NEURX_CODE_AGENT_PREFER_S_RUNTIME=1` on `run_neurx_code_agent.sh` to prefer
 
 - If `model_path` is empty, the profile still runs, but the `code` and `review` stages are skipped because those tools are model-backed.
 - `build_command` and `test_command` are stored in agent memory and used as defaults for the `build` and `test` tools.
-- For an OpenAI-compatible backend such as SiliconFlow, `model_path` can be an endpoint descriptor:
+- For a NeurX-compatible backend such as SiliconFlow, `model_path` can be an endpoint descriptor:
   `backend=openai url=https://api.siliconflow.cn model=Qwen/Qwen2.5-7B-Instruct path=/v1/chat/completions`
 - The runtime also auto-builds that descriptor from environment variables such as `NEURX_CODE_AGENT_BASE_URL`, `NEURX_CODE_AGENT_MODEL`, `NEURX_CODE_AGENT_CHAT_PATH`, `NEURX_LLM_BASE_URL`, `NEURX_LLM_MODEL`, `NEURX_LLM_CHAT_PATH`, and `NEURX_API_KEY`.

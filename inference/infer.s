@@ -410,7 +410,7 @@ func infer_http_join_url(string base_url, string chat_path) string {
     base + path
 }
 
-func infer_openai_descriptor_backend(string model_path) string {
+func infer_remote_descriptor_backend(string model_path) string {
     string backend = infer_find_field(model_path, "backend")
     if backend != "" {
         return lower(trim(backend))
@@ -421,12 +421,12 @@ func infer_openai_descriptor_backend(string model_path) string {
     ""
 }
 
-func infer_openai_response_text(string response_path) string {
+func infer_remote_response_text(string response_path) string {
     string parser = "jq -r '.choices[0].message.content // .choices[0].text // \"\"' " + runtime_shell_escape(response_path) + " 2>/dev/null"
     trim(runtime_run_command_output(parser))
 }
 
-func infer_run_openai(string model_path, string prompt) string {
+func infer_run_remote(string model_path, string prompt) string {
     string url = infer_find_field(model_path, "url")
     if url == "" {
         url = trim(runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", "")))
@@ -445,9 +445,9 @@ func infer_run_openai(string model_path, string prompt) string {
         return ""
     }
 
-    string payload_path = "/tmp/neurx_agent_openai_request.json"
-    string response_path = "/tmp/neurx_agent_openai_response.json"
-    string error_path = "/tmp/neurx_agent_openai_error.log"
+    string payload_path = "/tmp/neurx_agent_remote_request.json"
+    string response_path = "/tmp/neurx_agent_remote_response.json"
+    string error_path = "/tmp/neurx_agent_remote_error.log"
     string payload = "{\"model\":\"" + infer_json_escape(model_name) + "\",\"messages\":[{\"role\":\"user\",\"content\":\"" + infer_json_escape(prompt) + "\"}],\"temperature\":0.0,\"top_p\":1.0,\"stream\":false}"
     runtime_write_text_file(payload_path, payload)
 
@@ -463,7 +463,7 @@ func infer_run_openai(string model_path, string prompt) string {
     if !run.ok {
         return ""
     }
-    string text = infer_openai_response_text(response_path)
+    string text = infer_remote_response_text(response_path)
     runtime_run_command("rm -f " + runtime_shell_escape(payload_path) + " " + runtime_shell_escape(response_path) + " " + runtime_shell_escape(error_path))
     text
 }
@@ -473,15 +473,15 @@ func infer_run(string model_path, string prompt) string {
     if resolved == "" {
         return ""
     }
-    if infer_openai_descriptor_backend(resolved) == "openai" {
-        return infer_run_openai(resolved, prompt)
+    if infer_remote_descriptor_backend(resolved) == "openai" {
+        return infer_run_remote(resolved, prompt)
     }
     string llm_backend = lower(trim(runtime_env_get("NEURX_LLM_BACKEND", "")))
     if llm_backend == "openai" {
         string implicit = "backend=openai model=" + trim(runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", resolved))) +
             " url=" + trim(runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", ""))) +
             " path=" + trim(runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions")))
-        return infer_run_openai(implicit, prompt)
+        return infer_run_remote(implicit, prompt)
     }
     ""
 }

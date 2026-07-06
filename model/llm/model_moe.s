@@ -10,7 +10,7 @@ package neurx.model.llm.base_moe
 //
 // Examples:
 //   • Mixtral-8x7B: every block is MoE (moe_frequency=1), 8 experts, top-2
-//   • GPT-4 style:  every 2nd block is MoE (moe_frequency=2)
+//   • reference-style:  every 2nd block is MoE (moe_frequency=2)
 //   • NeurX-MoE: every block MoE, 64 fine-grained experts, top-6
 // ============================================================================
 
