@@ -41,6 +41,11 @@ struct expert_forward_result {
     []int expert_indices
 }
 
+struct moe_route_result {
+    []int expert_indices
+    []float router_probs
+}
+
 func new_moe_config(int hidden_dim, int expert_dim, int num_experts) moe_config {
     moe_config {
         num_experts: num_experts,
@@ -85,16 +90,17 @@ func new_moe_layer(moe_config cfg) moe_layer {
         config: cfg,
         gate_weight: fill_ramp(hidden_dim * num_experts, 0.01),
         gate_bias: allocate_vector(num_experts, 0.0),
-        expert_w1: [][]float{cap: num_experts},
-        expert_w2: [][]float{cap: num_experts},
-        expert_w3: [][]float{cap: num_experts},
-        expert_b1: []float{cap: num_experts},
-        expert_b2: []float{cap: num_experts},
-        expert_b3: []float{cap: num_experts},
-        router_logits: []float{},
-        expert_indices: []int{},
-        expert_counts: allocate_vector(num_experts, 0),
     }
+
+    layer.expert_w1 = [][]float{cap: num_experts}
+    layer.expert_w2 = [][]float{cap: num_experts}
+    layer.expert_w3 = [][]float{cap: num_experts}
+    layer.expert_b1 = []float{cap: num_experts}
+    layer.expert_b2 = []float{cap: num_experts}
+    layer.expert_b3 = []float{cap: num_experts}
+    layer.router_logits = []float{}
+    layer.expert_indices = []int{}
+    layer.expert_counts = allocate_vector(num_experts, 0)
     
     int e = 0
     while e < num_experts {
@@ -178,8 +184,8 @@ func softmax_row([]float row, int size) []float {
 
 func top_k_indices([]float values, int k) []int {
     int n = len(values)
-    []int indices = allocate_vector(n, 0)
-    []float vals = allocate_vector(n, 0.0)
+    []int indices = []int{cap: n}
+    []float vals = []float{cap: n}
     
     int i = 0
     while i < n {
@@ -204,15 +210,21 @@ func top_k_indices([]float values, int k) []int {
         indices[j] = indices[max_idx]
         indices[max_idx] = temp_idx
         float temp_val = vals[j]
-        vals[j] = vals[max_val]
+        vals[j] = vals[max_idx]
         vals[max_idx] = temp_val
         j = j + 1
     }
     
-    indices[0..k]
+    []int result = []int{cap: k}
+    int m = 0
+    while m < k {
+        result[m] = indices[m]
+        m = m + 1
+    }
+    result
 }
 
-func route_tokens(moe_layer layer, []float hidden_states, int seq_len) ([]int, []float) {
+func route_tokens(moe_layer layer, []float hidden_states, int seq_len) moe_route_result {
     int hidden_dim = layer.config.hidden_dim
     int num_experts = layer.config.num_experts
     int num_tokens = seq_len
@@ -254,7 +266,10 @@ func route_tokens(moe_layer layer, []float hidden_states, int seq_len) ([]int, [
         i = i + 1
     }
     
-    (expert_indices, router_probs)
+    moe_route_result {
+        expert_indices: expert_indices,
+        router_probs: router_probs,
+    }
 }
 
 func expert_forward(moe_layer layer, int expert_id, []float input, int batch_size) []float {
@@ -343,7 +358,9 @@ func moe_forward(moe_layer layer, []float hidden_states, int seq_len) moe_forwar
     int num_experts = layer.config.num_experts
     int num_experts_per_token = layer.config.num_experts_per_token
     
-    ([]int expert_indices, []float router_probs) = route_tokens(layer, hidden_states, seq_len)
+    moe_route_result routed = route_tokens(layer, hidden_states, seq_len)
+    []int expert_indices = routed.expert_indices
+    []float router_probs = routed.router_probs
     
     layer.expert_indices = expert_indices
     layer.router_logits = router_probs
