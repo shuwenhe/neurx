@@ -31,9 +31,9 @@ func code_agent_resolve_model_path() string {
     string endpoint_url = trim(runtime_env_get("NEURX_CODE_AGENT_BASE_URL", runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", ""))))
     string endpoint_model = trim(runtime_env_get("NEURX_CODE_AGENT_MODEL", runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", ""))))
     string endpoint_path = trim(runtime_env_get("NEURX_CODE_AGENT_CHAT_PATH", runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions"))))
-    string endpoint_backend = trim(runtime_env_get("NEURX_CODE_AGENT_BACKEND", runtime_env_get("NEURX_LLM_BACKEND", "openai")))
-    if endpoint_url != "" && endpoint_model != "" && lower(endpoint_backend) == "openai" {
-        return "backend=openai url=" + endpoint_url + " model=" + endpoint_model + " path=" + endpoint_path
+    string endpoint_backend = trim(runtime_env_get("NEURX_CODE_AGENT_BACKEND", runtime_env_get("NEURX_LLM_BACKEND", "remote")))
+    if endpoint_url != "" && endpoint_model != "" && endpoint_backend != "" {
+        return "backend=remote url=" + endpoint_url + " model=" + endpoint_model + " path=" + endpoint_path
     }
     mp = trim(runtime_env_get("NEURX_AGENT_CHECKPOINT_FILE", ""))
     if mp != "" {

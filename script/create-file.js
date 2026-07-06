@@ -4,7 +4,7 @@
  * @file create-file.js
  * @description CLI tool for atomic file creation via NeurX FileCreationTool
  * 
- * Mirrors functionality of claude-code/scripts/write-file.js but with enhanced features:
+ * Mirrors functionality of a reference write-file implementation but with enhanced features:
  * - Direct C++ integration via IPC
  * - Batch operations support
  * - Automatic syntax validation
@@ -155,7 +155,7 @@ async function ensureDirectoryExists(dir) {
 }
 
 /**
- * Write file atomically (matching claude-code implementation)
+ * Write file atomically (matching reference implementation)
  */
 async function writeFileAtomic(targetPath, data, mode = CONFIG.DEFAULT_MODE) {
   const dir = path.dirname(targetPath);

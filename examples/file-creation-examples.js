@@ -378,7 +378,7 @@ async function example10_RealWorldScenario() {
  */
 async function main() {
   console.log('╔════════════════════════════════════════════════════════╗');
-  console.log('║   NeurX FileCreationTool - 使用示例（参考 Claude Code）   ║');
+  console.log('║   NeurX FileCreationTool - 使用示例（参考通用代码工具）   ║');
   console.log('╚════════════════════════════════════════════════════════╝');
   
   // 运行所有示例

@@ -295,7 +295,7 @@ Run Individual Features:
   $ s run script/model_merger.s                    # Merge models
 
 Run Complete Pipeline:
-  $ bash script/claude_complete_pipeline.sh        # End-to-end training
+  $ bash script/neurx_complete_pipeline.sh          # End-to-end training
 
 Validate Implementation:
   $ bash script/validate_enterprise_features.sh    # Verify all components

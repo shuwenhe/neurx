@@ -411,12 +411,8 @@ func infer_http_join_url(string base_url, string chat_path) string {
 }
 
 func infer_remote_descriptor_backend(string model_path) string {
-    string backend = infer_find_field(model_path, "backend")
-    if backend != "" {
-        return lower(trim(backend))
-    }
     if infer_text_contains(model_path, "url=http://") || infer_text_contains(model_path, "url=https://") {
-        return "openai"
+        return "remote"
     }
     ""
 }
@@ -473,12 +469,12 @@ func infer_run(string model_path, string prompt) string {
     if resolved == "" {
         return ""
     }
-    if infer_remote_descriptor_backend(resolved) == "openai" {
+    if infer_remote_descriptor_backend(resolved) == "remote" {
         return infer_run_remote(resolved, prompt)
     }
     string llm_backend = lower(trim(runtime_env_get("NEURX_LLM_BACKEND", "")))
-    if llm_backend == "openai" {
-        string implicit = "backend=openai model=" + trim(runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", resolved))) +
+    if llm_backend == "remote" || llm_backend == "" {
+        string implicit = "backend=remote model=" + trim(runtime_env_get("NEURX_LLM_MODEL", runtime_env_get("NEURX_REMOTE_MODEL", resolved))) +
             " url=" + trim(runtime_env_get("NEURX_LLM_BASE_URL", runtime_env_get("NEURX_REMOTE_BASE_URL", ""))) +
             " path=" + trim(runtime_env_get("NEURX_LLM_CHAT_PATH", runtime_env_get("NEURX_REMOTE_CHAT_PATH", "/v1/chat/completions")))
         return infer_run_remote(implicit, prompt)

@@ -329,7 +329,7 @@ func (framework *QuantizationFramework) quantize_model(calibration_data [][]floa
     
     framework.calibrate(calibration_data)
     framework.analyze_compression()
-    framework.evaluate_quantization_impact(35.7) // Expected PPL for Claude-level
+    framework.evaluate_quantization_impact(35.7) // Expected PPL for reference-level
     framework.estimate_inference_speedup()
     
     fmt.Println("\n[Quantization] Complete")
