@@ -28,6 +28,7 @@ resolve_s_compiler() {
 
     local candidate
     for candidate in \
+        "/home/shuwen/s/bin/s" \
         "$(command -v s 2>/dev/null || true)" \
         "$HOME/.local/bin/s" \
         "$NEURX_ROOT/../s/.local/bin/s" \
@@ -51,12 +52,13 @@ resolve_s_source_root() {
     local candidate compiler_dir
     compiler_dir="$(dirname "${S_COMPILER:-}")"
     for candidate in \
+        "/home/shuwen/s" \
+        "$compiler_dir/.." \
         "$compiler_dir/../../../.." \
         "$compiler_dir/../../.." \
         "$compiler_dir/../.." \
         "$NEURX_ROOT/../s" \
-        "$NEURX_ROOT/../../s" \
-        "$HOME/mining"; do
+        "$NEURX_ROOT/../../s"; do
         if [ -d "$candidate/src/cmd/compile/seed" ]; then
             (cd "$candidate" && pwd)
             return 0
@@ -208,13 +210,25 @@ compile_to_ir() {
     echo "  编译器: $S_COMPILER"
     echo ""
     
-    if "$S_COMPILER" "$INFERENCE_SOURCE" "$IR_OUTPUT" >> "$LOG_FILE" 2>&1; then
+    if "$S_COMPILER" ir "$INFERENCE_SOURCE" -o "$IR_OUTPUT" >> "$LOG_FILE" 2>&1; then
         print_success "IR编译完成"
         echo "  生成文件: $(ls -lh "$IR_OUTPUT" | awk '{print $9, "(" $5 ")"}' )"
     else
-        print_error "IR编译失败，查看日志: $LOG_FILE"
-        tail -20 "$LOG_FILE"
-        exit 1
+        print_warning "ir 子命令失败，回退到旧参数模式"
+        if "$S_COMPILER" "$INFERENCE_SOURCE" "$IR_OUTPUT" >> "$LOG_FILE" 2>&1; then
+            if [ -s "$IR_OUTPUT" ]; then
+                print_success "IR编译完成"
+                echo "  生成文件: $(ls -lh "$IR_OUTPUT" | awk '{print $9, "(" $5 ")"}' )"
+            else
+                print_error "IR编译后未生成文件: $IR_OUTPUT"
+                tail -20 "$LOG_FILE"
+                exit 1
+            fi
+        else
+            print_error "IR编译失败，查看日志: $LOG_FILE"
+            tail -20 "$LOG_FILE"
+            exit 1
+        fi
     fi
     echo ""
 }
