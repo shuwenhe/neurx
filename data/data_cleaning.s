@@ -40,9 +40,9 @@ struct cleaning_stats {
 
 func new_cleaning_config() cleaning_config {
     cleaning_config {
-        raw_dir: "data/pretrain_dataset/raw",
-        cleaned_dir: "data/pretrain_dataset/cleaned",
-        output_file: "data/pretrain_dataset/cleaned/pretrain_data_cleaned.jsonl",
+        raw_dir: "dataset/pretrain/raw",
+        cleaned_dir: "dataset/pretrain/cleaned",
+        output_file: "dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl",
         min_text_length: 50,
         max_text_length: 100000,
         enable_dedup: true,

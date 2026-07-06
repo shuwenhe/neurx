@@ -50,12 +50,12 @@ main() {
     echo ""
     
     # 定义所有可能的数据路径
-    SHARD_DIR="${NEURX_ROOT}/data/pretrain_dataset/shard"
-    CLEANED_FILE="${NEURX_ROOT}/data/pretrain_dataset/cleaned/pretrain_data_cleaned.jsonl"
-    TRAIN_FILE="${NEURX_ROOT}/data/pretrain_dataset/cleaned/train.jsonl"
-    VAL_FILE="${NEURX_ROOT}/data/pretrain_dataset/cleaned/val.jsonl"
-    TEST_FILE="${NEURX_ROOT}/data/pretrain_dataset/cleaned/test.jsonl"
-    RAW_DIR="${NEURX_ROOT}/data/pretrain_dataset/raw"
+    SHARD_DIR="dataset/pretrain/shard"
+    CLEANED_FILE="dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl"
+    TRAIN_FILE="dataset/pretrain/cleaned/train.jsonl"
+    VAL_FILE="dataset/pretrain/cleaned/val.jsonl"
+    TEST_FILE="dataset/pretrain/cleaned/test.jsonl"
+    RAW_DIR="dataset/pretrain/raw"
     
     # 统计可用的数据源
     AVAILABLE_SOURCES=()

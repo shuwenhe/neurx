@@ -20,9 +20,56 @@ LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 # 创建必要的目录
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$LOG_DIR"
 
+resolve_s_compiler() {
+    if [ -n "${S_COMPILER:-}" ] && [ -x "$S_COMPILER" ]; then
+        printf '%s\n' "$S_COMPILER"
+        return 0
+    fi
+
+    local candidate
+    for candidate in \
+        "$(command -v s 2>/dev/null || true)" \
+        "$HOME/.local/bin/s" \
+        "$NEURX_ROOT/../s/.local/bin/s" \
+        "$NEURX_ROOT/../s/bin/s" \
+        "$NEURX_ROOT/../../s/.local/bin/s"; do
+        if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+resolve_s_source_root() {
+    if [ -n "${S_SOURCE_ROOT:-}" ] && [ -d "$S_SOURCE_ROOT/src/cmd/compile/seed" ]; then
+        printf '%s\n' "$S_SOURCE_ROOT"
+        return 0
+    fi
+
+    local candidate compiler_dir
+    compiler_dir="$(dirname "${S_COMPILER:-}")"
+    for candidate in \
+        "$compiler_dir/../../../.." \
+        "$compiler_dir/../../.." \
+        "$compiler_dir/../.." \
+        "$NEURX_ROOT/../s" \
+        "$NEURX_ROOT/../../s" \
+        "$HOME/mining"; do
+        if [ -d "$candidate/src/cmd/compile/seed" ]; then
+            (cd "$candidate" && pwd)
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 # S编译器路径
-S_COMPILER="${S_COMPILER:-$NEURX_ROOT/../s/.local/bin/s}"
-S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
+S_COMPILER="$(resolve_s_compiler || true)"
+S_SOURCE_ROOT="$(resolve_s_source_root || true)"
+S_COMPILER_DIR="${S_COMPILER_DIR:-$S_SOURCE_ROOT}"
 
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
@@ -89,7 +136,7 @@ check_environment() {
     print_step "检查推理环境..."
     
     # 检查S编译器
-    if [ ! -f "$S_COMPILER" ]; then
+    if [ -z "$S_COMPILER" ]; then
         print_error "S编译器未找到: $S_COMPILER"
         echo "请确保S编译器已安装，或设置 S_COMPILER 环境变量"
         exit 1
@@ -196,20 +243,25 @@ compile_to_binary() {
     echo "  输出: $RUNNER_BIN"
     echo ""
 
+    if [ -z "$S_SOURCE_ROOT" ]; then
+        print_error "S源码根目录未找到，无法编译IR运行器"
+        exit 1
+    fi
+
     if (cd "$NEURX_ROOT" && cc -std=c11 -O2 -Wall -Wextra -Werror -DSEED_COMPILE_ONLY \
-      -I "$S_ROOT/src/cmd/compile/seed" \
+      -I "$S_SOURCE_ROOT/src/cmd/compile/seed" \
       -o "$RUNNER_BIN" \
       "$NEURX_ROOT/tools/s_ir_runner.c" \
-      "$S_ROOT/src/cmd/compile/seed/runtime/runtime.c" \
-      "$S_ROOT/src/cmd/compile/seed/error/error.c" \
-      "$S_ROOT/src/cmd/compile/seed/code/native_backend.c" \
-      "$S_ROOT/src/cmd/compile/seed/lexical/lexer.c" \
-      "$S_ROOT/src/cmd/compile/seed/syntax/parser.c" \
-      "$S_ROOT/src/cmd/compile/seed/semantic/analyzer.c" \
-      "$S_ROOT/src/cmd/compile/seed/intermediate/ir.c" \
-      "$S_ROOT/src/cmd/compile/seed/code/generator.c" \
-      "$S_ROOT/src/cmd/compile/seed/bootstrap/bootstrap.c" \
-      "$S_ROOT/src/cmd/compile/seed/s_seed.c" >> "$LOG_FILE" 2>&1); then
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/runtime/runtime.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/error/error.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/code/native_backend.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/lexical/lexer.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/syntax/parser.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/semantic/analyzer.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/intermediate/ir.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/code/generator.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/bootstrap/bootstrap.c" \
+      "$S_SOURCE_ROOT/src/cmd/compile/seed/s_seed.c" >> "$LOG_FILE" 2>&1); then
         chmod +x "$RUNNER_BIN"
         print_success "IR运行器编译完成"
         echo "  生成文件: $(ls -lh "$RUNNER_BIN" | awk '{print $9, "(" $5 ")"}')"

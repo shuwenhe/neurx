@@ -7,7 +7,7 @@
 set -e
 
 NEURX_HOME="${NEURX_HOME:-$(cd "$(dirname "$0")/.." && pwd)}"
-DATASET_ROOT="${DATASET_ROOT:-$NEURX_HOME/data/pretrain_dataset}"
+DATASET_ROOT="${DATASET_ROOT:-$NEURX_HOME/dataset/pretrain}"
 INPUT_FILE="${INPUT_FILE:-$DATASET_ROOT/cleaned/train.jsonl}"
 SHARD_DIR="${SHARD_DIR:-$DATASET_ROOT/shard}"
 MANIFEST_FILE="${MANIFEST_FILE:-$DATASET_ROOT/manifest.json}"
