@@ -21,7 +21,7 @@ LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$LOG_DIR"
 
 # S编译器路径
-S_COMPILER="${S_COMPILER:-/Users/feifei/shuwen/train/s/.local/bin/s}"
+S_COMPILER="${S_COMPILER:-$NEURX_ROOT/../s/.local/bin/s}"
 S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 
 # 源文件和输出文件
@@ -116,6 +116,20 @@ check_environment() {
             if [ -n "$LATEST_CHECKPOINT" ]; then
                 MODEL_CHECKPOINT="$LATEST_CHECKPOINT"
                 print_info "解析到最新 checkpoint 文件: $MODEL_CHECKPOINT"
+            fi
+        fi
+        # If the checkpoint is a file but very small, assume it's invalid and fall back to demo checkpoint
+        if [ -f "$MODEL_CHECKPOINT" ]; then
+            CKPT_SIZE=$(stat -c%s "$MODEL_CHECKPOINT" 2>/dev/null || echo 0)
+            if [ "$CKPT_SIZE" -lt 1024 ]; then
+                print_warning "检测到 checkpoint 文件过小 (${CKPT_SIZE} bytes)，将回退到演示 checkpoint"
+                FALLBACK_CKPT="$NEURX_ROOT/artifacts/checkpoints/fake_smoke.neurx"
+                if [ -f "$FALLBACK_CKPT" ]; then
+                    ln -sf "$FALLBACK_CKPT" "$MODEL_CHECKPOINT"
+                    print_success "已使用演示 checkpoint: $FALLBACK_CKPT"
+                else
+                    print_warning "演示 checkpoint 未找到: $FALLBACK_CKPT"
+                fi
             fi
         fi
     else

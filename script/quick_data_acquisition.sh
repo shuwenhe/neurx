@@ -67,31 +67,42 @@ import json
 
 print('📚 Downloading Wikipedia...')
 for lang_code in ['en', 'zh']:
-    try:
-        dataset = load_dataset('wikipedia', f'20220301.{lang_code}', split='train', streaming=True)
-        output_file = f'wikipedia_{lang_code}.jsonl'
-        count = 0
-        
-        with open(output_file, 'w') as f:
-            for doc in dataset:
-                output = {
-                    'text': doc['text'],
-                    'title': doc['title'],
-                    'language': lang_code,
-                    'source': 'wikipedia'
-                }
-                f.write(json.dumps(output, ensure_ascii=False) + '\n')
-                count += 1
-                
-                if count % 10000 == 0:
-                    print(f'  [{lang_code}] {count} documents...')
-                
-                if count >= 500000:  # 限制 50 万条用于演示
-                    break
-        
-        print(f'✓ Wikipedia {lang_code}: {count} documents saved')
-    except Exception as e:
-        print(f'✗ Wikipedia {lang_code}: {e}')
+    configs_to_try = [f'20220301.{lang_code}', '20220301', lang_code, 'default']
+    dataset = None
+    for cfg in configs_to_try:
+        try:
+            dataset = load_dataset('wikipedia', cfg, split='train', streaming=True)
+            print(f'  Using config: {cfg}')
+            break
+        except Exception:
+            continue
+
+    if dataset is None:
+        print(f'✗ No usable config for language {lang_code}, skipping.')
+        continue
+
+    output_file = f'wikipedia_{lang_code}.jsonl'
+    count = 0
+    with open(output_file, 'w') as f:
+        for doc in dataset:
+            text = doc.get('text') if isinstance(doc, dict) else str(doc)
+            title = doc.get('title') if isinstance(doc, dict) else ''
+            output = {
+                'text': text,
+                'title': title,
+                'language': lang_code,
+                'source': 'wikipedia'
+            }
+            f.write(json.dumps(output, ensure_ascii=False) + '\n')
+            count += 1
+
+            if count % 10000 == 0:
+                print(f'  [{lang_code}] {count} documents...')
+
+            if count >= 500000:  # 限制 50 万条用于演示
+                break
+
+    print(f'✓ Wikipedia {lang_code}: {count} documents saved')
 WIKI_EOF
         "
         ;;
@@ -241,7 +252,7 @@ echo ""
 echo "✅ 完成统计:"
 echo "  JSONL 文件数: $total_files"
 echo "  总大小: $total_size"
-echo "  总行数: $(printf '%,d' $total_lines)"
+echo "  总行数: $(printf '%d' "$total_lines")"
 echo "  预估 tokens: $(( total_lines * 4 / 1000000000 ))B"
 echo ""
 echo "📁 数据位置: $DATA_ROOT"

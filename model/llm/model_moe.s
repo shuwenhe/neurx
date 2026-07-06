@@ -177,6 +177,12 @@ func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
     val
 }
 
+// Return type for block forward to avoid tuple return syntax issues
+struct gpt_moe_block_forward_ret {
+    []float output
+    float aux_loss
+}
+
 // ============================================================================
 // 5. 单块前向传播
 // ============================================================================
@@ -187,7 +193,7 @@ func gpt_moe_block_forward(
     int batch_size,
     int seq_len,
     []float rope_freqs
-) ([]float, float) {        // (output [B*S, H], aux_loss)
+) gpt_moe_block_forward_ret {
     int total = batch_size * seq_len
     int H = block.dense_block.hidden_dim
     int nh = block.dense_block.n_head
@@ -285,7 +291,7 @@ func gpt_moe_block_forward(
         ffn_out = gpt_dense_ffn_forward(block.dense_block, normed2, total)
     }
 
-    (gpt_add(h_attn, ffn_out), aux_loss)
+    gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
 
 // 重建稠密 SwiGLU 前向 (用于 is_moe=false 的块)
@@ -337,9 +343,9 @@ func gpt_moe_forward(
     int l = 0
     while l < model.n_layer {
         gpt_moe_block block = gpt_moe_block_at(model.blocks, l)
-        []float next_hidden
-        float aux
-        (next_hidden, aux) = gpt_moe_block_forward(block, hidden, batch_size, seq_len, model.rope_freqs)
+        gpt_moe_block_forward_ret _ret = gpt_moe_block_forward(block, hidden, batch_size, seq_len, model.rope_freqs)
+        []float next_hidden = _ret.output
+        float aux = _ret.aux_loss
         hidden = next_hidden
         total_aux = total_aux + aux
         l = l + 1
