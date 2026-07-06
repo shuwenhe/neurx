@@ -7,7 +7,7 @@ string trace_path = out_prefix + "/trace.txt"
 string traj_path = out_prefix + "/trajectory.txt"
 string mem_path = out_prefix + "/memory.txt"
 
-string goal = "implement a Codex or Claude style code agent in NeurX"
+string goal = "implement a Codex-style code agent in NeurX"
 string input = "Inspect the repository, update the agent runtime for coding tasks, and verify the result."
 string model_path = ""
 string build_command = "make s-compile-runtime"

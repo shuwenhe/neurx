@@ -63,7 +63,7 @@ echo -e "   ${GREEN}在 /Users/feifei/agent/neurx-code/src 下创建 hello.cc �
 echo ""
 echo -e "${YELLOW}步骤 4：${NC}观察终端输出，寻找关键日志："
 echo "        - [AgentToolRegistry] Registering tool: Write"
-echo "        - [AnthropicProvider] Adding X tools to request"
+echo "        - [Provider] Adding X tools to request"
 echo "        - [agent] tool executing: Write"
 echo "        - [WriteTool] Successfully wrote XXX bytes"
 echo ""
@@ -86,7 +86,7 @@ echo "================================================"
 echo ""
 
 # 启动应用并捕获日志
-"$APP_PATH" 2>&1 | tee "$TEST_OUTPUT/app.log" | grep -E --line-buffered "Tool|Write|agent|Error|Planner|Anthropic" || true
+"$APP_PATH" 2>&1 | tee "$TEST_OUTPUT/app.log" | grep -E --line-buffered "Tool|Write|agent|Error|Planner|Provider" || true
 
 echo ""
 echo "================================================"

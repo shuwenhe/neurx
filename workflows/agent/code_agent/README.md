@@ -44,5 +44,5 @@ Set `NEURX_CODE_AGENT_PREFER_S_RUNTIME=1` on `run_neurx_code_agent.sh` to prefer
 - If `model_path` is empty, the profile still runs, but the `code` and `review` stages are skipped because those tools are model-backed.
 - `build_command` and `test_command` are stored in agent memory and used as defaults for the `build` and `test` tools.
 - For a NeurX-compatible backend such as SiliconFlow, `model_path` can be an endpoint descriptor:
-  `backend=openai url=https://api.siliconflow.cn model=Qwen/Qwen2.5-7B-Instruct path=/v1/chat/completions`
+  `backend=remote url=https://api.siliconflow.cn model=your-model path=/v1/chat/completions`
 - The runtime also auto-builds that descriptor from environment variables such as `NEURX_CODE_AGENT_BASE_URL`, `NEURX_CODE_AGENT_MODEL`, `NEURX_CODE_AGENT_CHAT_PATH`, `NEURX_LLM_BASE_URL`, `NEURX_LLM_MODEL`, `NEURX_LLM_CHAT_PATH`, and `NEURX_API_KEY`.
