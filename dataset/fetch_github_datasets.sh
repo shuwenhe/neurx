@@ -29,7 +29,7 @@ clone_repo() {
 known_repo() {
   case "$1" in
     human-eval)
-      echo "https://github.com/openai/human-eval.git"
+      echo "${NEURX_HUMAN_EVAL_REPO_URL:-https://github.com/human-eval/human-eval.git}"
       ;;
     mbpp)
       echo "https://github.com/google-research/google-research.git"

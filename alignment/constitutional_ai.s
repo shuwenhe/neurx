@@ -41,7 +41,7 @@ struct constitution {
     int num_principles
 }
 
-// Anthropic 风格的核心原则集 (helpful, harmless, honest)
+// NeurX 风格的核心原则集 (helpful, harmless, honest)
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
 

@@ -66,7 +66,7 @@ struct parallel_dims {
 
 struct model_parallel_config {
     // 模型规格
-    string name                      // 模型名称 ("NEURX-5.2", "GPT-4", etc.)
+    string name                      // 模型名称 ("NEURX-5.2", "reference", etc.)
     int hidden_dim                   // 隐藏维度 (如 8192)
     int num_layers                   // Transformer 层数 (如 80)
     int num_attention_heads          // 注意力头数 (如 128)

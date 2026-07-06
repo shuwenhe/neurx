@@ -137,7 +137,7 @@ cat << 'EOF'
    → 4 GPU H100 集群就绪
 
 3. 启动训练 (24-48 小时)
-   $ bash script/claude_complete_pipeline.sh
+   $ bash script/neurx_complete_pipeline.sh
    → 核心训练系统 (Phase 1-7)
    → 自动保存检查点
    → 实时监控进度
@@ -280,7 +280,7 @@ A: 检查点系统会自动:
 
 示例脚本:
   • script/phase8_production_systems.sh
-  • script/claude_complete_pipeline.sh
+  • script/neurx_complete_pipeline.sh
 
 
 ═══════════════════════════════════════════════════════════════════

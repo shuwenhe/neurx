@@ -761,7 +761,7 @@ func new_code_agent_runtime_state(string goal, int step_budget) agent_runtime_st
 func new_code_agent_runtime_state_with_model(string goal, int step_budget, string model_path, string build_command, string test_command) agent_runtime_state {
     agent_runtime_state base = new_agent_runtime_state_with_model(goal, "analyze", step_budget, model_path)
     agent_memory_state memory_state = agent_memory_write_short(base.memory, "route", "code")
-    memory_state = agent_memory_write_short(memory_state, "code_agent_profile", "codex_claude_style")
+    memory_state = agent_memory_write_short(memory_state, "code_agent_profile", "neurx_style")
     memory_state = agent_memory_write_long(memory_state, "code_agent_goal", goal)
     if trim(build_command) != "" {
         memory_state = agent_memory_write_long(memory_state, "preferred_build_command", trim(build_command))
