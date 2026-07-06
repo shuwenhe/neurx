@@ -719,8 +719,9 @@ func extract_weight_row_csv_from_text(string weights_csv, int row_id, int vocab_
 }
 
 func generate_tokens(compiled_model model, string prompt, int max_tokens) string {
-    if max_tokens < 0 {
-        max_tokens = 0
+    int mt = max_tokens
+    if mt < 0 {
+        mt = 0
     }
     if len(model.bias) == 0 || model.vocab_size <= 0 {
         return prompt
@@ -741,7 +742,7 @@ func generate_tokens(compiled_model model, string prompt, int max_tokens) string
     }
 
     int token = 0
-    while token < max_tokens {
+    while token < mt {
         if model.smoke_test || len(model.weights) == 0 {
             int next_id = argmax_from_bias_only(model.bias)
             output = output + string_char(next_id)

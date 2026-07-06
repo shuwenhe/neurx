@@ -10,7 +10,8 @@ set -euo pipefail
 # =====================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEURX_ROOT="${SCRIPT_DIR}"
+# Use the script's parent directory as the NeurX root (repo root)
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 INFERENCE_DIR="${NEURX_ROOT}/inference"
 BUILD_DIR="${NEURX_ROOT}/build/interactive_inference"
 CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_s_pretrain"
