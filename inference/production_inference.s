@@ -88,13 +88,20 @@ func int_to_str(int n, int fallback) string {
     }
     string s = ""
     while value > 0 {
-        s = string_char(value % 10 + 48) + s
+        s = string_char(int_mod(value, 10) + 48) + s
         value = value / 10
     }
     if neg {
         s = "-" + s
     }
     s
+}
+
+func int_mod(int value, int base) int {
+    if base <= 0 {
+        return 0
+    }
+    value - (value / base) * base
 }
 
 func str_to_int(string s, int fallback) int {
@@ -551,7 +558,8 @@ func load_model(inference_engine engine, string checkpoint_arg) compiled_model {
     int weight_cols = csv_second_int(weight_shape_text)
     int bias_size = csv_first_int(bias_shape_text)
     string weights_csv = substr(weight_data_line, 12, len(weight_data_line))
-    []float bias = parse_csv_floats(substr(bias_data_line, 12, len(bias_data_line)))
+    string bias_csv = substr(bias_data_line, 12, len(bias_data_line))
+    var bias = parse_csv_floats(bias_csv)
     string smoke_text = trim(runtime_env_get("NEURX_INFER_SMOKE_TEST", ""))
     bool smoke_test = false
     if smoke_text == "1" || smoke_text == "true" {
@@ -738,7 +746,7 @@ func generate_tokens(compiled_model model, string prompt, int max_tokens) string
     string output = prompt
     int prev_id = 32
     if len(prompt) > 0 {
-        prev_id = prompt[len(prompt) - 1] % vocab
+        prev_id = int_mod(prompt[len(prompt) - 1], vocab)
     }
 
     int token = 0
