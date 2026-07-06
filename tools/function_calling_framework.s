@@ -1,7 +1,7 @@
 // ============================================================
 // NEURX FUNCTION Calling - 标准化工具调用框架
 // 完整实现: NeurX 兼容格式 + 工具定义/注册/编排 + 并行执行 + 结果解析
-// 兼容: NeurX Function Calling / Anthropic Tool Use / Gemini Function Calling
+// 兼容: NeurX Function Calling / 主流 Tool Use / 通用 Function Calling
 // 支持: 单步调用 / 多步链式调用 / 自动工具选择 / 错误恢复
 // ============================================================
 
@@ -27,7 +27,7 @@ struct FunctionCallingConfig {
     max_retries: int = 2                          # 失败重试次数
     
     // 输出格式
-    output_format: string = "neurx_compatible"  # neurx_compatible | anthropic | gemini | native
+    output_format: string = "neurx_compatible"  # neurx_compatible | compatible | native
     strict_schema_validation: bool = true         # 严格验证参数 schema
     require_permission_for: list<string> = ["write", "delete", "execute", "network"]  # 需要用户确认的操作类型
     

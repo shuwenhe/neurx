@@ -3,7 +3,7 @@
 
 [agent]
 name = "neurx-agent"
-model = "claude-3.5-sonnet"
+model = "neurx-reference-model"
 reasoning = "disabled"
 max_retries = 3
 execution_timeout_ms = 300000  # 5 minutes
@@ -17,9 +17,9 @@ enable_file_operations = true
 enable_network_access = false
 
 [llm]
-provider = "anthropic"
+provider = "remote"
 api_key = "${NEURX_API_KEY}"  # Environment variable
-model = "claude-3.5-sonnet"
+model = "neurx-reference-model"
 
 max_tokens = 8000
 temperature = 0.7
@@ -30,7 +30,7 @@ retry_delay_ms = 1000
 timeout_ms = 60000
 
 # Optional custom endpoint
-# endpoint = "https://api.anthropic.com"
+# endpoint = "https://api.example.com/v1/chat/completions"
 
 [storage]
 backend = "file-based"  # or "sqlite", "postgres"

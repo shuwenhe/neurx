@@ -193,7 +193,7 @@
   "multimodal_config": {
     "enabled_future": true,
     "target_phase": "week_3-4",
-    "vision_encoder": "openai/clip-vit-large-patch14",
+    "vision_encoder": "neurx/clip-vit-large-patch14",
     "vision_hidden_size": 1024,
     "vision_num_layers": 24,
     "projection_dim": 8192,

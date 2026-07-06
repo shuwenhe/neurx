@@ -411,6 +411,10 @@ func infer_http_join_url(string base_url, string chat_path) string {
 }
 
 func infer_remote_descriptor_backend(string model_path) string {
+    string backend = infer_find_field(model_path, "backend")
+    if backend != "" {
+        return lower(trim(backend))
+    }
     if infer_text_contains(model_path, "url=http://") || infer_text_contains(model_path, "url=https://") {
         return "remote"
     }

@@ -1,4 +1,4 @@
-Simple pretrain pipeline for GPT-Large
+Simple pretrain pipeline for a large reference model
 
 Stages:
 - dataset: manifest -> tokenizer -> shard

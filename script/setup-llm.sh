@@ -17,7 +17,7 @@ echo ""
 # 第2步：设置API密钥
 echo "✓ 第2步：设置API密钥"
 read -p "请输入 LLM API密钥: " LLM_KEY
-export ANTHROPIC_API_KEY="$LLM_KEY"
+export NEURX_API_KEY="$LLM_KEY"
 echo "✓ API密钥已设置"
 echo ""
 
@@ -40,24 +40,24 @@ echo "快速测试代码示例："
 echo ""
 cat << 'EOF'
 #include "LLMCodeAnalyzer.h"
-#include "../llm/AnthropicProvider.h"
+#include "../llm/RemoteProvider.h"
 
 int main() {
     // 创建分析器
     auto analyzer = std::make_unique<LLMCodeAnalyzer>();
-    
-    // 配置LLM
-    auto provider = new AnthropicProvider();
-    provider->setApiKey(getenv("ANTHROPIC_API_KEY"));
+
+    // 配置 LLM
+    auto provider = new RemoteProvider();
+    provider->setApiKey(getenv("NEURX_API_KEY"));
     analyzer->setLLMProvider(provider);
-    
+
     // 分析代码
-    auto result = analyzer->analyzeCode("def hello(): print('world')", 
+    auto result = analyzer->analyzeCode("def hello(): print('world')",
                                         ProgrammingLanguage::Python);
-    
+
     qDebug() << "Quality:" << result.quality;
     qDebug() << "Issues:" << result.issues.size();
-    
+
     return 0;
 }
 EOF
