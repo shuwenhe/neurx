@@ -170,7 +170,7 @@ s run script/rag_integration.s                 # RAG 集成
 s run script/cost_optimizer.s                  # 成本优化
 
 # 3. 完整训练流程
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 ```
 
 ### 生产部署

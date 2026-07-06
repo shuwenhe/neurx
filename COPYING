@@ -24,8 +24,8 @@
 | 名称 | 来源 | 许可证 | 描述 |
 |------|------|--------|------|
 | MMLU | HuggingFace (cais) | CC-BY-4.0 | 大规模多学科知识评估数据集 |
-| HumanEval | OpenAI | MIT | 代码生成评估基准 |
-| Anthropic HH-RLHF | HuggingFace | OpenRAIL | 人类反馈偏好数据集 |
+| HumanEval | 公开代码生成基准 | MIT | 代码生成评估基准 |
+| HH-RLHF 风格偏好集 | HuggingFace | OpenRAIL | 人类反馈偏好数据集 |
 | WikiPedia | Wikimedia | CC-BY-SA | 维基百科预训练数据 |
 
 所有第三方依赖均遵循各自的开源许可证。

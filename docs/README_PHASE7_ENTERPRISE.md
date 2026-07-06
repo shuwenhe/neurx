@@ -128,7 +128,7 @@ s run script/model_merger.s
 
 ```bash
 # Run entire enterprise training pipeline
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 
 # Validate all new features
 bash script/validate_enterprise_features.sh

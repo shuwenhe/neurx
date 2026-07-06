@@ -1,9 +1,9 @@
-# Claude级别工业LLM训练数据 - 完成报告
+# NeurX级别工业LLM训练数据 - 完成报告
 
 ## ✅ 完成状态
 
 **日期**: 2026-07-01  
-**目标**: 将Claude级别的训练数据写入training_data.jsonl  
+**目标**: 将NeurX级别的训练数据写入training_data.jsonl  
 **状态**: ✅ 完成
 
 ## 📊 数据统计
@@ -12,11 +12,11 @@
 |------|-----|
 | **总行数** | 5,624 |
 | **原始数据** | 5,610行 |
-| **新增Claude数据** | 14条 |
+| **新增NeurX数据** | 14条 |
 | **文件大小** | 3.0 MB |
 | **文件位置** | `/Users/feifei/shuwen/train/neurx/data/training_data.jsonl` |
 
-## 🏷️ Claude添加的14条高质量数据
+## 🏷️ NeurX添加的14条高质量数据
 
 ### 1. Python性能优化指南
 - **内容**: NumPy向量化、列表推导式、缓存装饰器等
@@ -142,7 +142,7 @@ Advanced: 6条 (架构、优化、调试)
 ### 使用的脚本
 ```bash
 # 生成Claude级别数据
-bash script/gen_claude_training_data.sh
+bash script/gen_neurx_training_data.sh
 
 # 生成结果存储在
 data/training_data_claude.jsonl
@@ -152,8 +152,8 @@ cat data/training_data_claude.jsonl >> data/training_data.jsonl
 ```
 
 ### 实现文件
-- **Bash**: `script/gen_claude_training_data.sh` - 生产实现 ✅
-- **S语言**: `script/gen_claude_data.s` - 框架定义
+- **Bash**: `script/gen_neurx_training_data.sh` - 生产实现 ✅
+- **S语言**: `script/gen_neurx_data.s` - 框架定义
 
 ## 💡 使用建议
 
@@ -173,7 +173,7 @@ jq 'select(.text | contains("Transformer") or contains("API") or contains("分�
 ### 3. 继续扩展
 ```bash
 # 可以继续添加更多Claude级别的数据
-bash script/gen_claude_training_data.sh >> data/training_data.jsonl
+bash script/gen_neurx_training_data.sh >> data/training_data.jsonl
 ```
 
 ## 📝 集成到训练流程
@@ -245,8 +245,8 @@ echo "使用数据集: $DATASET_FILE"
 |------|------|------|
 | `data/training_data.jsonl` | 主数据集（5,624行） | ✅ 已更新 |
 | `data/training_data_claude.jsonl` | Claude数据（14条） | ✅ 已生成 |
-| `script/gen_claude_training_data.sh` | 数据生成脚本 | ✅ 生产就绪 |
-| `script/gen_claude_data.s` | S语言框架 | ✅ 已创建 |
+| `script/gen_neurx_training_data.sh` | 数据生成脚本 | ✅ 生产就绪 |
+| `script/gen_neurx_data.s` | S语言框架 | ✅ 已创建 |
 | 本文档 | Claude数据说明 | ✅ 完成 |
 
 ## 🏁 总结

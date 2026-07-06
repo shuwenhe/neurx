@@ -1,14 +1,14 @@
-# Claude 标准工具系统实现
+# NeurX 标准工具系统实现
 
 **实现日期**: 2026年6月4日  
-**参照**: Claude Code 官方工具系统  
+**参照**: 外部标准工具系统  
 **状态**: ✅ 完成并可用
 
 ---
 
 ## 📋 概览
 
-本实现提供了与 Claude Code 完全兼容的 7 个标准工具，支持文件操作、命令执行和搜索功能。
+本实现提供了与外部标准工具系统兼容的 7 个标准工具，支持文件操作、命令执行和搜索功能。
 
 ### 实现的工具
 
@@ -451,7 +451,7 @@ QString resultMessage = formatToolResult(result);
 
 ```cmake
 # 在 add_library 或 add_executable 中添加
-src/tools/ClaudeStandardTools.cpp
+src/tools/NeurXStandardTools.cpp
 ```
 
 ### 2. 注册工具到 Registry
@@ -459,7 +459,7 @@ src/tools/ClaudeStandardTools.cpp
 **方法 A: 使用工厂一次性注册所有工具**
 
 ```cpp
-#include "tools/ClaudeStandardTools.h"
+#include "tools/NeurXStandardTools.h"
 #include "tools/DefaultToolRegistry.h"
 #include "sandbox/SandboxManager.h"
 
@@ -469,18 +469,18 @@ CoreToolRegistry* registry = getToolRegistry();
 SandboxManager* sandbox = getSandboxManager();
 
 // 一次性注册所有 7 个标准工具
-ClaudeStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
+NeurXStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
 ```
 
 **方法 B: 单独注册工具**
 
 ```cpp
 // 只注册需要的工具
-auto writeTool = ClaudeStandardToolFactory::createWriteTool(workspaceRoot, sandbox);
-auto readTool = ClaudeStandardToolFactory::createReadTool(workspaceRoot, sandbox);
+auto writeTool = NeurXStandardToolFactory::createWriteTool(workspaceRoot, sandbox);
+auto readTool = NeurXStandardToolFactory::createReadTool(workspaceRoot, sandbox);
 
-ToolInstance writeInst{writeTool, "Write", "claude-standard"};
-ToolInstance readInst{readTool, "Read", "claude-standard"};
+ToolInstance writeInst{writeTool, "Write", "neurx-standard"};
+ToolInstance readInst{readTool, "Read", "neurx-standard"};
 
 registry->registerTool(writeInst, "global");
 registry->registerTool(readInst, "global");
@@ -496,7 +496,7 @@ QJsonArray tools;
 QJsonObject writeTool;
 writeTool["name"] = "Write";
 writeTool["description"] = "Create or overwrite a file";
-writeTool["parameters"] = ClaudeStandardToolFactory::createWriteTool(workspace)
+writeTool["parameters"] = NeurXStandardToolFactory::createWriteTool(workspace)
                              ->parametersSchema();
 tools.append(writeTool);
 
@@ -504,7 +504,7 @@ tools.append(writeTool);
 QJsonObject readTool;
 readTool["name"] = "Read";
 readTool["description"] = "Read file contents";
-readTool["parameters"] = ClaudeStandardToolFactory::createReadTool(workspace)
+readTool["parameters"] = NeurXStandardToolFactory::createReadTool(workspace)
                             ->parametersSchema();
 tools.append(readTool);
 
@@ -681,7 +681,7 @@ void AgentController::handleToolCalls(const QJsonArray& toolCalls)
 **解决**:
 ```cpp
 // 确保工具已注册
-ClaudeStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
+NeurXStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
 
 // 检查注册表
 QStringList tools = registry->listTools();
@@ -765,16 +765,16 @@ tool->setSandboxManager(nullptr);
 
 ### 实现成果
 
-- ✅ **7 个标准工具** - 完整实现 Claude Code 兼容接口
+- ✅ **7 个标准工具** - 完整实现 NeurX 兼容接口
 - ✅ **安全可靠** - Sandbox、路径验证、危险命令检测
 - ✅ **易于集成** - 工厂模式，一键注册
 - ✅ **完整文档** - 详细的使用指南和示例
 
-### 与 Claude Code 对比
+### 与 NeurX 对比
 
-| 特性 | Claude Code | NeurX Code |
+| 特性 | 外部参考实现 | NeurX Code |
 |------|-------------|------------|
-| 工具接口 | ✅ Anthropic API | ✅ 本地实现 |
+| 工具接口 | ✅ 标准 JSON schema | ✅ 本地实现 |
 | Write 工具 | ✅ | ✅ |
 | Edit 工具 | ✅ | ✅ |
 | MultiEdit 工具 | ✅ | ✅ |
@@ -795,11 +795,11 @@ tool->setSandboxManager(nullptr);
 
 ---
 
-**NeurX Code 现在拥有与 Claude Code 相同的工具能力! 🚀**
+**NeurX Code 现在拥有完整的标准工具能力! 🚀**
 
 **实现日期**: 2026年6月4日  
 **实现者**: GitHub Copilot  
 **文件位置**:
-- 头文件: `src/tools/ClaudeStandardTools.h`
-- 实现: `src/tools/ClaudeStandardTools.cpp`
-- 文档: `docs/CLAUDE_STANDARD_TOOLS.md`
+- 头文件: `src/tools/NeurXStandardTools.h`
+- 实现: `src/tools/NeurXStandardTools.cpp`
+- 文档: `docs/NEURX_STANDARD_TOOLS.md`

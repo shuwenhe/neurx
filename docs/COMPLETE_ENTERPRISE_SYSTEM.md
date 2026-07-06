@@ -159,7 +159,7 @@
 
 ### Phase 7: 完整管道 (400+ 行)
 
-#### ✅ 端到端训练管道 (`claude_complete_pipeline.sh` - 400行)
+#### ✅ 端到端训练管道 (`neurx_complete_pipeline.sh` - 400行)
 ```
 7个训练阶段:
   1. 数据准备
@@ -235,7 +235,7 @@ cd /Users/feifei/shuwen/train/neurx
 make -f Makefile.complete demo-all
 
 # 2. 启动完整训练
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 
 # 3. 监控进度
 tail -f logs/training_*.jsonl | jq .
@@ -286,7 +286,7 @@ neurx/
 │   ├── lora_finetuning.s        (LoRA框架)
 │   ├── quantization_system.s    (量化系统)
 │   ├── inference_optimization.s (推理优化)
-│   └── claude_complete_pipeline.sh (完整管道)
+│   └── neurx_complete_pipeline.sh (完整管道)
 ├── docs/
 │   ├── COMPLETE_SYSTEM_GUIDE.md
 │   └── IMPLEMENTATION_DETAILS.md
@@ -355,7 +355,7 @@ neurx/
 
 ```bash
 # 一键启动完整系统
-bash /Users/feifei/shuwen/train/neurx/script/claude_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
 ```
 
 **系统状态**: 🟢 **完全就绪，可投入生产** 🟢

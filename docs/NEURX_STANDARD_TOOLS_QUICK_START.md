@@ -400,7 +400,7 @@ void testClaudeStandardTools()
 
 ## 📚 更多资源
 
-- **完整文档**: [CLAUDE_STANDARD_TOOLS.md](CLAUDE_STANDARD_TOOLS.md)
+- **完整文档**: [NEURX_STANDARD_TOOLS.md](NEURX_STANDARD_TOOLS.md)
 - **头文件**: [src/tools/ClaudeStandardTools.h](../src/tools/ClaudeStandardTools.h)
 - **实现**: [src/tools/ClaudeStandardTools.cpp](../src/tools/ClaudeStandardTools.cpp)
 

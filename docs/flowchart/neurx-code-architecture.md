@@ -1,8 +1,8 @@
-# claude-code Architecture Flowchart
+# NeurX Code Architecture Flowchart
 
 ```mermaid
 graph TD
-    A[Claude Code Application] --> B[Main Interface]
+    A[NeurX Code Application] --> B[Main Interface]
     B --> C[Core Editor Engine]
     
     C --> D1[Agent System]
@@ -72,7 +72,7 @@ graph TD
 ## Architecture Overview
 
 ### Core Editor Engine
-- **Agent System**: Claude AI integration with conversation context
+- **Agent System**: NeurX AI integration with conversation context
 - **Code Analysis Engine**: Syntax highlighting, parsing, error detection
 - **Command System**: Git commits, code reviews, refactoring operations
 - **Plugin Architecture**: Extensible plugin system for features

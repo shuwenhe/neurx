@@ -256,7 +256,7 @@ s run script/checkpoint_recovery.s
 
 ```bash
 # 完整训练管道
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 ```
 
 ---

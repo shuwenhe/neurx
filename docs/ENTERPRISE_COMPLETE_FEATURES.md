@@ -450,7 +450,7 @@ s run script/inference_optimization.s
 
 ```bash
 # 完整训练演示
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 
 # 单个模块演示
 s run script/data_synthesis_engine.s        # 数据

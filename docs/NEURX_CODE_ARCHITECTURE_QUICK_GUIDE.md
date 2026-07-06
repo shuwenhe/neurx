@@ -1,17 +1,17 @@
-# Claude Code 架构设计 - 快速参考
+# NeurX Code 架构设计 - 快速参考
 
 ## 一句话总结
 
-Claude Code 采用 **"AI 决策 + 标准验证 + 快速执行"** 的分层架构，实现了最强大的功能、最好的跨平台支持和最高的灵活性。
+NeurX Code 采用 **"AI 决策 + 标准验证 + 快速执行"** 的分层架构，实现了很强的功能、跨平台支持和灵活性。
 
 ## 核心三层架构
 
-### 第 1 层：AI 决策 (Anthropic API)
+### 第 1 层：AI 决策 (模型适配层)
 
 ```
 任务: "Create a user authentication system"
     ↓
-Claude 理解并规划
+模型理解并规划
     ├─ 项目结构
     ├─ 安全考虑
     ├─ 最佳实践
@@ -52,7 +52,7 @@ Hook 验证脚本
 
 **示例 Hook**：
 ```bash
-# ~/.claude/hooks/validate.sh
+# ~/.neurx/hooks/validate.sh
 if [[ "$file_path" == /etc/* ]]; then
   exit 2  # Deny
 fi
@@ -88,7 +88,7 @@ fi
 ```
 
 **问题**：
-- 模型质量远不如 Claude
+- 需要额外接入模型适配层
 - 需要 GPU（昂贵 + 复杂配置）
 - 每个用户下载 GB 级模型
 - 维护困难
@@ -96,7 +96,7 @@ fi
 ### ❌ C++ 实现
 
 ```
-用户 → Anthropic API → C++ 工具执行
+用户 → 模型适配层 → C++ 工具执行
 ```
 
 **问题**：
@@ -105,14 +105,14 @@ fi
 - 开发速度慢
 - 学习曲线陡峭
 
-### ✅ Node.js 实现 (Claude Code)
+### ✅ Node.js 实现 (外部参考实现)
 
 ```
-用户 → Anthropic API → Node.js 工具执行
+用户 → 模型适配层 → Node.js 工具执行
 ```
 
 **优点**：
-- ✅ 强大的 Claude AI
+- ✅ 清晰的工具执行链路
 - ✅ 跨平台（npm install）
 - ✅ 快速部署和开发
 - ✅ 灵活的 Hook 系统
@@ -127,7 +127,7 @@ fi
 **原因 1: 可靠性**
 ```
 方案 A - 自然语言
-Claude: "I'll create app.py with..."
+Agent: "I'll create app.py with..."
 App: 需要解析自然语言 ❌ 容易出错
 
 方案 B - Tool Use (JSON)
@@ -140,9 +140,9 @@ App: 直接执行 ✅ 可靠、可验证
 
 **原因 2: 标准化**
 ```
-OpenAI, Google, Anthropic 都支持 Tool Use
+各种主流模型提供方都支持 Tool Use
 任何 LLM 都能用同样的工具
-未来可以轻松切换 AI 提供商
+未来可以轻松切换模型提供方
 ```
 
 **原因 3: 安全性**
@@ -162,7 +162,7 @@ if (path.startsWith('/etc')) deny();  // 在源代码里
 问题: 用户无法定制
 
 ✅ Hook 版本
-# ~/.claude/hooks/validate.sh
+# ~/.neurx/hooks/validate.sh
 if [[ $path == /etc/* ]]; then exit 2; fi
 优点: 用户可以改，无需改源代码
 ```
@@ -186,7 +186,7 @@ Startup A 的规则: 禁止 /etc
 Startup B 的规则: 禁止 database/ 的修改 + 需要审批
 企业 C 的规则: 需要同意隐私协议
 
-所有都用同一个 Claude Code，但规则完全不同
+所有都用同一个执行框架，但规则完全不同
 这就是 Hook 系统的妙处！
 ```
 
@@ -202,12 +202,12 @@ Startup B 的规则: 禁止 database/ 的修改 + 需要审批
 | 文件操作 | ✅✅ | ✅✅✅ | ✅✅ | ✅✅ |
 | CLI 成熟度 | ✅✅✅ | ✅✅ | ✅✅ | ✅ |
 
-**Node.js 总分**：10/10 for Claude Code 用例
+**Node.js 总分**：10/10 for 该类工具用例
 
-## Claude Code 的优势来自
+## 该类工具的优势来自
 
 ```
-最强大的 AI (Claude)
+最强大的模型能力
           +
 最佳的跨平台支持 (npm)
           +
@@ -219,22 +219,22 @@ Startup B 的规则: 禁止 database/ 的修改 + 需要审批
 ## 与 NeurX Code 的对比
 
 ```
-Claude Code:
-Anthropic API → Write 工具
+外部参考实现:
+模型适配层 → Write 工具
     ↓
    Node.js
     ↓
   CLI 界面
 
 NeurX Code:
-Anthropic API → WriteTool (C++)
+模型适配层 → WriteTool (C++)
     ↓
    Qt GUI
     ↓
   GraphQL UI
 
 
-Claude Code 优点:
+外部参考实现优点:
 ✅ 快速部署（npm）
 ✅ 跨平台无缝
 ✅ Hook 系统灵活
@@ -250,10 +250,10 @@ NeurX Code 优点:
 ## 设计哲学
 
 ```
-Claude Code 的设计哲学:
+外部参考实现的设计哲学:
 
 1. 职责分离
-   AI 做决策 (Anthropic API)
+   模型做决策 (适配层)
    脚本做验证 (Hook System)
    Node.js 做执行 (工具)
 
@@ -275,7 +275,7 @@ Claude Code 的设计哲学:
 
 | 决策 | 选择 | 原因 |
 |------|------|------|
-| AI 来源 | Anthropic API | 最强大、最可靠 |
+| AI 来源 | 模型适配层 | 可替换、可验证 |
 | 接口标准 | Tool Use (JSON) | 可靠、可验证、标准化 |
 | 验证方式 | Hook System | 灵活、用户控制 |
 | 执行环境 | Node.js | 跨平台、快速、简单 |
@@ -284,7 +284,7 @@ Claude Code 的设计哲学:
 
 ## 总结
 
-Claude Code 的架构不是偶然的选择，而是精心设计的结果：
+这种架构不是偶然的选择，而是精心设计的结果：
 
 ```
 ✨ 强大的 AI 决策
@@ -295,11 +295,11 @@ Claude Code 的架构不是偶然的选择，而是精心设计的结果：
 = 最实用的 AI 编程工具
 ```
 
-与其他方案相比，Claude Code 在**功能、易用性、灵活性和可维护性**之间达到了最佳平衡。
+与其他方案相比，这种架构在**功能、易用性、灵活性和可维护性**之间达到了很好的平衡。
 
 ---
 
 **相关文档**：
-- 📘 [完整设计分析](./WHY_CLAUDE_CODE_ARCHITECTURE.md)
-- 📗 [文件创建详解](./CLAUDE_CODE_FILE_CREATION_EXPLAINED.md)
-- 📙 [源代码导航](./CLAUDE_CODE_SOURCE_MAP.md)
+- 📘 [完整设计分析](./WHY_NEURX_CODE_ARCHITECTURE.md)
+- 📗 [文件创建详解](./NEURX_FILE_CREATION_EXPLAINED.md)
+- 📙 [源代码导航](./NEURX_CODE_SOURCE_MAP.md)

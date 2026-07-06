@@ -1,4 +1,4 @@
-# 🎉 NeurX Complete Claude-Level LLM System - Ready for Production
+# 🎉 NeurX Complete LLM System - Ready for Production
 
 ## 项目完成总结
 
@@ -68,7 +68,7 @@
 - 延迟: 87ms (单请求)
 
 ### ✅ 7. 完整训练管道
-**文件**: `script/claude_complete_pipeline.sh` (400行)
+**文件**: `script/neurx_complete_pipeline.sh` (400行)
 
 - 7个阶段端到端演示
   1. 数据准备
@@ -116,7 +116,7 @@ neurx/script/
 ├── lora_finetuning.s            (500行)  - LoRA微调
 ├── quantization_system.s        (600行)  - 量化压缩
 ├── inference_optimization.s     (700行)  - 推理优化
-└── claude_complete_pipeline.sh  (400行)  - 完整管道
+└── neurx_complete_pipeline.sh  (400行)  - 完整管道
 
 neurx/docs/
 ├── COMPLETE_ENTERPRISE_SYSTEM.md         - 完整系统文档
@@ -142,7 +142,7 @@ neurx/script/
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 ```
 
 这会显示:
@@ -339,7 +339,7 @@ cat /Users/feifei/shuwen/train/neurx/docs/IMPLEMENTATION_REPORT.md
 
 ```bash
 # 完整演示 (10分钟)
-bash /Users/feifei/shuwen/train/neurx/script/claude_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
 ```
 
 ---
@@ -366,7 +366,7 @@ bash /Users/feifei/shuwen/train/neurx/script/claude_complete_pipeline.sh
 **准备商用部署?** 🚀
 
 ```bash
-bash /Users/feifei/shuwen/train/neurx/script/claude_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
 ```
 
 **系统状态**: 🟢 **完全就绪，可投入生产** 🟢
