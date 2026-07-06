@@ -321,13 +321,13 @@ Visit URL printed at start: `https://wandb.ai/your-entity/neurx-experiments/runs
 ```json
 // config_quicktest.json → "model"
 {
-    "vocab_size": 50257,      // GPT-2 vocab
+    "vocab_size": 50257,      // Model-v2 vocab
     "d_model": 768,           // Base model
     "n_layers": 12,           // Standard
     "n_heads": 12,            // 64 dim per head
     "d_ff": 3072              // 4x d_model
 }
-// Result: ~125M parameters (GPT-2 Small)
+// Result: ~125M parameters (Model-v2 Small)
 ```
 
 ### Enable GPU Acceleration
@@ -398,10 +398,10 @@ gen_cfg.length_penalty = 2.0
 | Model Size | Parameters | GPU Memory (FP32) | With Ckpt |
 |------------|-----------|-------------------|-----------|
 | Tiny (config) | ~10M | 2 GB | 800 MB |
-| Small (GPT-2) | 125M | 8 GB | 3 GB |
-| Medium (GPT-2M) | 355M | 14 GB | 6 GB |
-| Large (GPT-2L) | 774M | 24 GB | 10 GB |
-| XL (GPT-2XL) | 1.5B | 40 GB | 18 GB |
+| Small (Model-v2) | 125M | 8 GB | 3 GB |
+| Medium (Model-v2M) | 355M | 14 GB | 6 GB |
+| Large (Model-v2L) | 774M | 24 GB | 10 GB |
+| XL (Model-v2XL) | 1.5B | 40 GB | 18 GB |
 
 *Gradient checkpointing saves ~60-80% activation memory*
 
@@ -594,7 +594,7 @@ To understand what's happening under the hood:
 ### Practical Tips:
 - "The Batch Normalization Paper" (Ioffe & Szegedy, 2015)
 - "Fine-Tuning Transformers" (Howard & Ruder, 2018)
-- "Language Models are Few-Shot Learners" (Brown et al., 2020) - GPT-3
+- "Language Models are Few-Shot Learners" (Brown et al., 2020) - Model-v3
 
 ---
 

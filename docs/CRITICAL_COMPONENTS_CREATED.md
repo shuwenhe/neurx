@@ -206,7 +206,7 @@ Loss: 1.2345 | Speed: 1050 tok/s | Elapsed: 12h 30m | ETA: 17h 15m
 
 ### 在训练脚本中的使用方式
 
-修改 `script/run_gpt_large_pretrain.sh`:
+修改 `script/run_model_large_pretrain.sh`:
 
 ```bash
 #!/bin/bash
@@ -345,7 +345,7 @@ make build-eval-tools
 ### 第二天: 集成到训练流程
 ```bash
 # 1. 更新Makefile
-# 2. 修改run_gpt_large_pretrain.sh集成这些工具
+# 2. 修改run_model_large_pretrain.sh集成这些工具
 # 3. 验证训练流程正确使用这些组件
 ```
 

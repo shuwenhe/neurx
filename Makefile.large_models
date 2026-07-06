@@ -71,7 +71,7 @@ train-large-watch: check-bash
 
 # Extra Large Model Training (70B+ parameters)
 train-xlarge: check-bash
-	@echo "🚀 Running XLarge Model Training (70B+ parameters - Claude Scale)"
+	@echo "🚀 Running XLarge Model Training (70B+ parameters - NeurX Scale)"
 	@echo "   GPU: 32×A100-40GB | Time: 1-4 weeks | Memory: 1.2TB"
 	@cd '$(CURDIR_UNIX)' && \
 	export NEURX_TOTAL_STEPS="$${NEURX_TOTAL_STEPS:-100000}"; \

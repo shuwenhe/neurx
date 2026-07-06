@@ -3,7 +3,7 @@
 
 [model]
 # 模型架构
-name = "gpt_large"
+name = "model_large"
 vocab_size = 50257          # GPT-2 词汇表大小
 hidden_dim = 1024           # 隐藏层维度 (GPT-Medium)
 num_layers = 24             # Transformer块数量
@@ -79,6 +79,6 @@ max_seq_length = 2048
 
 [output]
 # 输出配置
-output_dir = "artifacts/checkpoints/gpt_large_pretrain"
+output_dir = "artifacts/checkpoints/model_large_pretrain"
 resume_from_checkpoint = null  # 从检查点恢复
 seed = 42                   # 随机种子

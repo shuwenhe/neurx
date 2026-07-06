@@ -1,11 +1,11 @@
 #!/bin/bash
-# Claude级别工业LLM训练数据生成脚本
+# NeurX级别工业LLM训练数据生成脚本
 # 生成高质量的多样化训练数据集
 
 NEURX_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/neurx"
-OUTPUT_FILE="$NEURX_HOME/data/training_data_claude.jsonl"
+OUTPUT_FILE="$NEURX_HOME/data/training_data_neurx.jsonl"
 
-echo "🚀 生成Claude级别的工业LLM训练数据..."
+echo "🚀 生成NeurX级别的工业LLM训练数据..."
 echo ""
 
 cat > "$OUTPUT_FILE" << 'TRAINING_DATA_EOF'
@@ -25,7 +25,7 @@ cat > "$OUTPUT_FILE" << 'TRAINING_DATA_EOF'
 {"text":"# 完整项目：从零构建文本分类系统\n\n## 问题定义\n建立一个系统，可以自动分类用户提交的技术问题为不同的类别（如Python、JavaScript、SQL等）。\n\n## 解决方案架构\n\n### 1. 数据准备\n```\n数据收集 → 数据清洗 → 数据标注 → 数据分割\n```\n\n### 2. 特征提取\n- TF-IDF：传统方法\n- Word2Vec/FastText：词向量\n- BERT嵌入：上下文感知\n\n### 3. 模型选择\n- 朴素贝叶斯：快速基线\n- SVM：非线性分类\n- 神经网络：最高准确率\n\n### 4. 评估指标\n- 准确率：(TP+TN)/(TP+TN+FP+FN)\n- 精准率：TP/(TP+FP)\n- 召回率：TP/(TP+FN)\n- F1分数：2*精准率*召回率/(精准率+召回率)\n\n### 5. 部署策略\n```\n模型训练 → A/B测试 → 灰度发布 → 完全发布 → 监控和告警\n```\n\n### 关键指标\n- 模型准确率≥95%\n- 推理延迟<100ms\n- 吞吐≥1000请求/秒\n\n## 成功因素\n1. 高质量的标注数据\n2. 合理的特征工程\n3. 持续的模型监控和改进"}
 TRAINING_DATA_EOF
 
-echo "✅ Claude级别训练数据生成完成！"
+echo "✅ NeurX级别训练数据生成完成！"
 echo ""
 echo "📊 统计信息："
 wc -l "$OUTPUT_FILE"

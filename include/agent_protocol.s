@@ -2,7 +2,7 @@ package neurx.include.agent_protocol
 
 // Full agent protocol — MCP-compatible message envelope.
 // Covers the complete request/response/tool-use/tool-result lifecycle,
-// modelled on the Claude Messages API and Model Context Protocol (MCP).
+// modelled on NeurX-compatible Messages API and Model Context Protocol (MCP).
 
 // ── message type constants ────────────────────────────────────────────────────
 

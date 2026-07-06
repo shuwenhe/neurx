@@ -44,7 +44,7 @@
 ```
 
 #### B. 完整的GPT-large实现
-**当前状态**: `model/llm/gpt_large.s` 只有config框架
+**当前状态**: `model/llm/model_large.s` 只有config框架
 **需要补充**:
 - [ ] Tokenizer集成 (BPE/Tiktoken)
 - [ ] 完整的forward pass
@@ -421,7 +421,7 @@
 对于任何组件，可以：
 1. 参考 `IMPLEMENTATION_SUMMARY.md` 了解已有内容
 2. 查看 `compile/`, `distributed/`, `data/`, `infer/`, `alignment/` 的具体实现
-3. 参考 `model/llm/gpt_large.s` 中的配置框架
+3. 参考 `model/llm/model_large.s` 中的配置框架
 4. 检查 `pretrain/` 中的训练脚本框架
 
 所有这些组件已经为集成做好了准备！

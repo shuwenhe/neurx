@@ -38,11 +38,11 @@ bash script/print_training_data_info.sh
 make train 2>&1 | tee demo_training.log
 
 # 3️⃣ 监控训练进度
-tail -f artifacts/logs/gpt_large_pretrain_*.log
+tail -f artifacts/logs/model_large_pretrain_*.log
 
 # 4️⃣ 验证输出
 ls -lh artifacts/checkpoints/
-head -100 artifacts/logs/gpt_large_pretrain_*.log
+head -100 artifacts/logs/model_large_pretrain_*.log
 ```
 
 **预期时间**: 1-2 小时
@@ -196,7 +196,7 @@ export LOCAL_RANK=${SLURM_LOCALID}
 export WORLD_SIZE=$((SLURM_NNODES * SLURM_NTASKS_PER_NODE))
 
 # 启动训练
-srun bash script/run_gpt_large_pretrain.sh
+srun bash script/run_model_large_pretrain.sh
 EOF
 
 # 3. 提交训练任务
@@ -225,7 +225,7 @@ while true; do
     
     # 2. 最新日志
     echo "📝 最新训练日志:"
-    tail -10 /opt/neurx/artifacts/logs/gpt_large_pretrain_*.log | \
+    tail -10 /opt/neurx/artifacts/logs/model_large_pretrain_*.log | \
         grep -E "Step|Loss|Tokens" | tail -5
     echo ""
     

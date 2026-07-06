@@ -73,11 +73,11 @@ else
 fi
 
 echo ""
-echo "✅ 检查项 3：Claude Standard Tools 注册完成"
-if grep -q "Claude Standard Tools registered" "$LOG_FILE"; then
-    echo "   ✅ Claude Standard Tools 已完成注册"
+echo "✅ 检查项 3：NeurX Standard Tools 注册完成"
+if grep -q "NeurX Standard Tools registered" "$LOG_FILE"; then
+    echo "   ✅ NeurX Standard Tools 已完成注册"
 else
-    echo "   ❌ Claude Standard Tools 注册未完成"
+    echo "   ❌ NeurX Standard Tools 注册未完成"
 fi
 
 echo ""

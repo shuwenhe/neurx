@@ -45,11 +45,11 @@ make chat
 ```
 artifacts/
 ├── checkpoints/
-│   ├── gpt_large_epoch_1.ckpt  (1.4 GB)
-│   ├── gpt_large_epoch_2.ckpt  (1.4 GB)
-│   └── gpt_large_epoch_3.ckpt  (1.4 GB) ⭐ 最优
+│   ├── model_large_epoch_1.ckpt  (1.4 GB)
+│   ├── model_large_epoch_2.ckpt  (1.4 GB)
+│   └── model_large_epoch_3.ckpt  (1.4 GB) ⭐ 最优
 └── logs/
-    └── gpt_large_pretrain_YYYYMMDD_HHMMSS.log
+    └── model_large_pretrain_YYYYMMDD_HHMMSS.log
 ```
 
 ## 📈 训练指标
@@ -68,7 +68,7 @@ artifacts/
 ### 推理引擎
 ```s
 // chat_inference.s
-var best_ckpt = load_checkpoint("artifacts/checkpoints/gpt_large_epoch_3.ckpt")
+var best_ckpt = load_checkpoint("artifacts/checkpoints/model_large_epoch_3.ckpt")
 var model = apply_weights(init_model(), best_ckpt)
 ```
 
@@ -80,10 +80,10 @@ make chat         # 使用训练权重进行聊天
 
 ## ⚙️ 自定义配置
 
-编辑 `pretrain/llm/gpt_large_pretrain.s`:
+编辑 `pretrain/llm/model_large_pretrain.s`:
 
 ```s
-func create_gpt_large_config() GPTLargeConfig {
+func create_model_large_config() GPTLargeConfig {
     var config: GPTLargeConfig
     config.vocab_size = 50257        // 词汇表
     config.hidden_dim = 1280         // 隐层维度
@@ -108,7 +108,7 @@ func create_gpt_large_config() GPTLargeConfig {
 
 ```bash
 # 查看最新日志
-tail -f artifacts/logs/gpt_large_pretrain_*.log
+tail -f artifacts/logs/model_large_pretrain_*.log
 
 # 或使用监视模式
 make pretrain-watch
@@ -125,8 +125,8 @@ make pretrain-watch
 ## 📚 详细文档
 
 - [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md)
-- [S语言特性](pretrain/llm/gpt_large_pretrain.s)
-- [运行脚本](script/run_gpt_large_pretrain.sh)
+- [S语言特性](pretrain/llm/model_large_pretrain.s)
+- [运行脚本](script/run_model_large_pretrain.sh)
 - [推理集成](chat_inference.s)
 
 ## 🎉 关键成果
@@ -148,7 +148,7 @@ cd neurx && make pretrain
 make pretrain-watch
 
 # 直接运行脚本
-bash script/run_gpt_large_pretrain.sh
+bash script/run_model_large_pretrain.sh
 
 # 只编译，不执行
 NEURX_PRETRAIN_COMPILE_ONLY=1 make pretrain
@@ -172,4 +172,4 @@ make chat
 
 ---
 
-**快速链接**: [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md) | [源代码](pretrain/llm/gpt_large_pretrain.s) | [运行脚本](script/run_gpt_large_pretrain.sh)
+**快速链接**: [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md) | [源代码](pretrain/llm/model_large_pretrain.s) | [运行脚本](script/run_model_large_pretrain.sh)

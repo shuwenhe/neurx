@@ -55,7 +55,7 @@ echo ""
 run_test "MoE All-to-All 模块" "[ -f \"$NEURX_ROOT/distributed/moe_all_to_all.s\" ]"
 run_test "张量并行 (TP) 模块" "[ -f \"$NEURX_ROOT/distributed/tensor_parallel.s\" ]"
 run_test "ZeRO Stage 3 模块" "[ -f \"$NEURX_ROOT/distributed/zero_gradient_reduce.s\" ]"
-run_test "损失计算模块" "[ -f \"$NEURX_ROOT/model/llm/gpt_moe_1t_loss.s\" ]"
+run_test "损失计算模块" "[ -f \"$NEURX_ROOT/model/llm/model_moe_1t_loss.s\" ]"
 run_test "学习率调度模块" "[ -f \"$NEURX_ROOT/training/lr_scheduler_moe_1t.s\" ]"
 run_test "JSONL 加载器模块" "[ -f \"$NEURX_ROOT/data/moe_1t_jsonl_loader.s\" ]"
 run_test "监控系统模块" "[ -f \"$NEURX_ROOT/monitoring/moe_1t_metrics.s\" ]"
@@ -70,7 +70,7 @@ echo ""
 
 run_test "启动脚本配置" "[ -f \"$NEURX_ROOT/production_deployment/training_startup.env\" ]"
 run_test "启动计划脚本" "[ -f \"$NEURX_ROOT/production_deployment/launch_plan.sh\" ]"
-run_test "训练入口脚本" "[ -f \"$NEURX_ROOT/script/run_gpt_large_pretrain.sh\" ]"
+run_test "训练入口脚本" "[ -f \"$NEURX_ROOT/script/run_model_large_pretrain.sh\" ]"
 
 # 3. 检查文档
 echo ""
@@ -125,7 +125,7 @@ run_test "ZeRO 模块 package 声明" "grep -q 'package neurx.distributed.zero_g
 run_test "MoE moe_alltoall_forward 函数" "grep -q 'func moe_alltoall_forward' \"$NEURX_ROOT/distributed/moe_all_to_all.s\""
 run_test "TP tp_qkv_forward 函数" "grep -q 'func tp_qkv_forward' \"$NEURX_ROOT/distributed/tensor_parallel.s\""
 run_test "ZeRO zero_stage3_new 函数" "grep -q 'func zero_stage3_new' \"$NEURX_ROOT/distributed/zero_gradient_reduce.s\""
-run_test "损失 compute_total_loss 函数" "grep -q 'func compute_total_loss' \"$NEURX_ROOT/model/llm/gpt_moe_1t_loss.s\""
+run_test "损失 compute_total_loss 函数" "grep -q 'func compute_total_loss' \"$NEURX_ROOT/model/llm/model_moe_1t_loss.s\""
 run_test "LR 调度 lr_scheduler_new 函数" "grep -q 'func lr_scheduler_new' \"$NEURX_ROOT/training/lr_scheduler_moe_1t.s\""
 
 # 7. 配置文件验证
@@ -137,7 +137,7 @@ echo ""
 
 run_test "training_startup.env 可读" "[ -r \"$NEURX_ROOT/production_deployment/training_startup.env\" ]"
 run_test "launch_plan.sh 可执行" "[ -x \"$NEURX_ROOT/production_deployment/launch_plan.sh\" ]"
-run_test "run_gpt_large_pretrain.sh 可执行" "[ -x \"$NEURX_ROOT/script/run_gpt_large_pretrain.sh\" ]"
+run_test "run_model_large_pretrain.sh 可执行" "[ -x \"$NEURX_ROOT/script/run_model_large_pretrain.sh\" ]"
 
 # 最终摘要
 echo ""

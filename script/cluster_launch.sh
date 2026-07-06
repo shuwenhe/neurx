@@ -188,7 +188,7 @@ main() {
         echo ""
         echo "将要执行的命令:"
         echo ""
-        echo "  bash $NEURX_ROOT/script/run_gpt_large_pretrain.sh"
+        echo "  bash $NEURX_ROOT/script/run_model_large_pretrain.sh"
         echo ""
         echo "环境变量:"
         echo "  RANK=$RANK"
@@ -230,7 +230,7 @@ EOF
     fi
     
     # 实际训练命令（需要 S 编译器和 GPU）
-    # bash "$NEURX_ROOT/script/run_gpt_large_pretrain.sh" 2>&1 | tee -a "$LOG_FILE"
+    # bash "$NEURX_ROOT/script/run_model_large_pretrain.sh" 2>&1 | tee -a "$LOG_FILE"
     
     # 演示模式（显示启动成功）
     echo -e "${GREEN}✅ 训练进程 $RANK 启动成功${NC}"

@@ -35,15 +35,15 @@ Warmup步数:     10,000
 ### 文件结构
 ```
 neurx/
-├── pretrain/llm/gpt_large_pretrain.s  # S语言训练实现 (完整代码)
+├── pretrain/llm/model_large_pretrain.s  # S语言训练实现 (完整代码)
 ├── script/
-│   └── run_gpt_large_pretrain.sh  # 训练运行脚本
+│   └── run_model_large_pretrain.sh  # 训练运行脚本
 ├── Makefile                        # 构建命令
 ├── artifacts/
 │   ├── checkpoints/               # 训练检查点
 │   └── logs/                       # 训练日志
 └── build/
-    └── gpt_large_pretrain/        # 编译输出
+    └── model_large_pretrain/        # 编译输出
 ```
 
 ### 运行方式
@@ -58,7 +58,7 @@ make pretrain-watch    # 监视模式（实时显示日志）
 #### 方式2: 直接运行脚本
 ```bash
 cd neurx
-bash script/run_gpt_large_pretrain.sh
+bash script/run_model_large_pretrain.sh
 ```
 
 ## 📊 S语言实现特性
@@ -152,21 +152,21 @@ Step 0/1000    [░░░░░░░░░░░░░░░░░░░░] Lo
 Step 100/1000  [██░░░░░░░░░░░░░░░░░░] Loss: 4.3821 LR: 5.94e-04
 Step 200/1000  [████░░░░░░░░░░░░░░░░] Loss: 4.2156 LR: 5.88e-04
 ...
-✓ 检查点保存: artifacts/checkpoints/gpt_large_epoch_1.ckpt
+✓ 检查点保存: artifacts/checkpoints/model_large_epoch_1.ckpt
 耗时: 154s | 吞吐量: 201K tokens/sec
 ```
 
 ### Epoch 2 (Loss: 4.1234 → 2.0456)
 ```
 Loss收敛更快，梯度更新更有效
-✓ 检查点保存: artifacts/checkpoints/gpt_large_epoch_2.ckpt
+✓ 检查点保存: artifacts/checkpoints/model_large_epoch_2.ckpt
 耗时: 158s | 吞吐量: 198K tokens/sec
 ```
 
 ### Epoch 3 (Loss: 2.0456 → 1.3789) ✓ 最优
 ```
 最大改进，模型收敛到最优点
-✓ 检查点保存: artifacts/checkpoints/gpt_large_epoch_3.ckpt
+✓ 检查点保存: artifacts/checkpoints/model_large_epoch_3.ckpt
 耗时: 155s | 吞吐量: 201K tokens/sec
 ```
 
@@ -186,11 +186,11 @@ Loss改进:        69.5% ✓
 
 ```
 artifacts/checkpoints/
-├── gpt_large_epoch_1.ckpt      (1.4 GB)
+├── model_large_epoch_1.ckpt      (1.4 GB)
 │   └── 32K词表 Embedding + 36层权重 + 输出层
-├── gpt_large_epoch_2.ckpt      (1.4 GB)
+├── model_large_epoch_2.ckpt      (1.4 GB)
 │   └── 改进的权重
-└── gpt_large_epoch_3.ckpt      (1.4 GB) ⭐ 最优
+└── model_large_epoch_3.ckpt      (1.4 GB) ⭐ 最优
     └── 最低Loss的权重集合
 ```
 
@@ -199,14 +199,14 @@ artifacts/checkpoints/
 ### 1. 加载检查点到推理引擎
 ```s
 // chat_inference.s 中
-var best_checkpoint = load_checkpoint("artifacts/checkpoints/gpt_large_epoch_3.ckpt")
+var best_checkpoint = load_checkpoint("artifacts/checkpoints/model_large_epoch_3.ckpt")
 var model = apply_weights(create_model(), best_checkpoint)
 ```
 
 ### 2. 使用训练好的权重进行聊天
 ```bash
 make chat
-# 现在使用 gpt_large_epoch_3.ckpt 中的真实权重生成回复
+# 现在使用 model_large_epoch_3.ckpt 中的真实权重生成回复
 ```
 
 ### 3. 性能指标
@@ -217,10 +217,10 @@ make chat
 ## 🛠️ 配置和自定义
 
 ### 修改训练参数
-编辑 `pretrain/llm/gpt_large_pretrain.s` 中的 `new_gpt_large_pretrain_config()`:
+编辑 `pretrain/llm/model_large_pretrain.s` 中的 `new_model_large_pretrain_config()`:
 
 ```s
-func create_gpt_large_config() GPTLargeConfig {
+func create_model_large_config() GPTLargeConfig {
     var config: GPTLargeConfig
     config.vocab_size = 50257      // 改: 词汇表大小
     config.hidden_dim = 1280       // 改: 隐层维度
@@ -267,7 +267,7 @@ NEURX_PRETRAIN_COMPILE_ONLY=1 make pretrain
 ### 日志文件位置
 ```
 artifacts/logs/
-└── gpt_large_pretrain_YYYYMMDD_HHMMSS.log
+└── model_large_pretrain_YYYYMMDD_HHMMSS.log
 ```
 
 ### 监视训练进度
@@ -276,7 +276,7 @@ artifacts/logs/
 make pretrain-watch
 
 # 或手动监视
-tail -f artifacts/logs/gpt_large_pretrain_*.log
+tail -f artifacts/logs/model_large_pretrain_*.log
 ```
 
 ### 日志内容
@@ -284,7 +284,7 @@ tail -f artifacts/logs/gpt_large_pretrain_*.log
 [Step 0] Loss: 4.5234, LR: 6.00e-04, Time: 100ms
 [Step 100] Loss: 4.3821, LR: 5.94e-04, Time: 15.2s
 [Epoch 1 Complete] Avg Loss: 4.1234, Time: 154s
-[Save Checkpoint] artifacts/checkpoints/gpt_large_epoch_1.ckpt (1.4GB)
+[Save Checkpoint] artifacts/checkpoints/model_large_epoch_1.ckpt (1.4GB)
 ```
 
 ## ✅ 验证和测试
@@ -292,7 +292,7 @@ tail -f artifacts/logs/gpt_large_pretrain_*.log
 ### 快速验证
 ```bash
 cd neurx
-bash script/run_gpt_large_pretrain.sh
+bash script/run_model_large_pretrain.sh
 # 应该看到：
 # ✓ 权重初始化
 # ✓ 3个Epoch的训练进度
@@ -340,7 +340,7 @@ var elapsed: i64 = time.now_ms() - start
 
 ### 5. 字符串处理
 ```s
-var checkpoint_name: string = "gpt_large_epoch_" + strings.itoa(epoch) + ".ckpt"
+var checkpoint_name: string = "model_large_epoch_" + strings.itoa(epoch) + ".ckpt"
 ```
 
 ## 📚 扩展方向
@@ -385,7 +385,7 @@ var checkpoint_name: string = "gpt_large_epoch_" + strings.itoa(epoch) + ".ckpt"
 
 训练完成后，最优检查点会被保存在：
 ```
-artifacts/checkpoints/gpt_large_epoch_3.ckpt
+artifacts/checkpoints/model_large_epoch_3.ckpt
 ```
 
 可以直接用于推理和聊天应用！

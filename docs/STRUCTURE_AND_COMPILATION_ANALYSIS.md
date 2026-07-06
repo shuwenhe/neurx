@@ -24,16 +24,16 @@
    - 编译: 本地无法编译（生产集群环境依赖）
    - 运行: 不参与训练（是编译工具本身）
 
-2. **主训练程序** (`pretrain/llm/gpt_large_pretrain.s`)
+2. **主训练程序** (`pretrain/llm/model_large_pretrain.s`)
    - 状态: ✅ 已实现
    - 编译: 是
    - 运行: 是 (每次都运行)
 
 3. **实际会被编译和运行的核心模块** (17 个):
    ```
-   ✅ pretrain/llm/gpt_large_pretrain.s    (主入口)
-   ✅ model/llm/gpt_large_train.s          (大规模训练)
-   ✅ model/llm/gpt_moe_1t.s               (1T MoE 模型)
+   ✅ pretrain/llm/model_large_pretrain.s    (主入口)
+   ✅ model/llm/model_large_train.s          (大规模训练)
+   ✅ model/llm/model_moe_1t.s               (1T MoE 模型)
    ✅ pretrain/distributed/               (分布式训练)
    ✅ pretrain/optimizer/                  (优化器)
    ✅ pretrain/tokenizer/bpe.s             (BPE 分词)
@@ -139,13 +139,13 @@
 ## 🏃  训练时实际加载的模块依赖图
 
 ```
-gpt_large_pretrain.s (主程序)
-├─ gpt_moe_1t.s
-│  ├─ gpt_large_train.s (Transformer 定义)
+model_large_pretrain.s (主程序)
+├─ model_moe_1t.s
+│  ├─ model_large_train.s (Transformer 定义)
 │  │  ├─ nn/attention.s
 │  │  ├─ nn/ffn.s
 │  │  └─ tensor/ops.s
-│  ├─ model/llm/gpt_moe_1t_loss.s
+│  ├─ model/llm/model_moe_1t_loss.s
 │  └─ distributed/moe_all_to_all.s
 ├─ pretrain/distributed/
 │  ├─ ddp.s
@@ -268,9 +268,9 @@ gpt_large_pretrain.s (主程序)
 ## 🔴 编译状态总结
 
 ### ✅ 必须编译 (完整功能)
-- pretrain/llm/gpt_large_pretrain.s (主程序)
-- model/llm/gpt_large_train.s (Transformer)
-- model/llm/gpt_moe_1t.s (1T MoE)
+- pretrain/llm/model_large_pretrain.s (主程序)
+- model/llm/model_large_train.s (Transformer)
+- model/llm/model_moe_1t.s (1T MoE)
 - distributed/* (DDP, TP, PP, EP)
 - pretrain/optimizer/* (AdamW)
 - pretrain/tokenizer/bpe.s (分词)
@@ -309,7 +309,7 @@ gpt_large_pretrain.s (主程序)
 ### 本地验证 (单机演示)
 ```
 make train
-  ├─ script/run_gpt_large_pretrain.sh
+  ├─ script/run_model_large_pretrain.sh
   │  ├─ 检查 S 编译器 (不可用，演示模式)
   │  └─ 运行训练演示 (输出假数据)
   └─ 生成假的检查点和日志
@@ -322,12 +322,12 @@ make train
 sbatch script/submit_training_job.sh
   ├─ 集群 SLURM 初始化
   ├─ 1024 个进程启动
-  ├─ S 编译器编译 gpt_large_pretrain.s
+  ├─ S 编译器编译 model_large_pretrain.s
   │  └─ 自动编译所有导入的依赖模块
   └─ 1024 个 GPU 上并行训练
      ├─ 数据加载 (pretrain/data)
      ├─ 前向传播 (model/llm)
-     ├─ 损失计算 (model/llm/gpt_moe_1t_loss.s)
+     ├─ 损失计算 (model/llm/model_moe_1t_loss.s)
      ├─ 后向传播 (autodiff)
      ├─ 优化器更新 (pretrain/optimizer)
      ├─ 梯度同步 (distributed)
@@ -353,7 +353,7 @@ sbatch script/submit_training_job.sh
   → 生产集群才有 /opt/s/bin/s
 
 ✓ 训练启动脚本可执行
-  → script/run_gpt_large_pretrain.sh 存在
+  → script/run_model_large_pretrain.sh 存在
   → script/submit_training_job.sh 存在
 ```
 
@@ -367,10 +367,10 @@ sbatch script/submit_training_job.sh
    sinfo -N -l
 
 ⏳ 模块编译检查
-   s compile pretrain/llm/gpt_large_pretrain.s --check
+   s compile pretrain/llm/model_large_pretrain.s --check
 
 ⏳ 单节点测试编译
-   s compile pretrain/llm/gpt_large_pretrain.s
+   s compile pretrain/llm/model_large_pretrain.s
 ```
 
 ---
@@ -410,7 +410,7 @@ sbatch script/submit_training_job.sh
 - 增量编译: 1-5 分钟 (仅修改的部分)
 
 **执行流程**:
-1. S 编译器将 gpt_large_pretrain.s 编译为二进制
+1. S 编译器将 model_large_pretrain.s 编译为二进制
 2. 自动跟踪所有 `use` 导入，编译依赖模块
 3. 生成 1024 个节点的分布式可执行文件
 4. 4-6 天训练执行
@@ -428,7 +428,7 @@ sbatch script/submit_training_job.sh
 **方法 1**: 检查导入关系
 ```bash
 # 查看主程序导入
-grep "use neurx.xxx" pretrain/llm/gpt_large_pretrain.s
+grep "use neurx.xxx" pretrain/llm/model_large_pretrain.s
 
 # 追踪依赖
 grep -r "use neurx.yyy" pretrain/distributed/
@@ -436,14 +436,14 @@ grep -r "use neurx.yyy" pretrain/distributed/
 
 **方法 2**: 检查 S 编译器日志
 ```bash
-s compile pretrain/llm/gpt_large_pretrain.s -v
+s compile pretrain/llm/model_large_pretrain.s -v
 # 会显示所有被编译的模块
 ```
 
 **方法 3**: 查看编译输出
 ```bash
 # 编译后查看符号表
-nm build/gpt_large_pretrain | grep func
+nm build/model_large_pretrain | grep func
 # 只会显示被实际使用的函数
 ```
 

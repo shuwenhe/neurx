@@ -183,12 +183,12 @@ bash script/gen_claude_training_data.sh >> data/training_data.jsonl
 # 添加Claude训练目标
 train-claude:
 	@echo "使用Claude级别数据训练..."
-	@$(RUN) -c "cd $(SCRIPT_DIR) && bash run_gpt_large_pretrain.sh training_data_industrial.jsonl"
+	@$(RUN) -c "cd $(SCRIPT_DIR) && bash run_model_large_pretrain.sh training_data_industrial.jsonl"
 ```
 
 ### 更新训练脚本
 ```bash
-# 在run_gpt_large_pretrain.sh中添加
+# 在run_model_large_pretrain.sh中添加
 DATASET_FILE="${1:-data/training_data.jsonl}"
 echo "使用数据集: $DATASET_FILE"
 ```

@@ -702,7 +702,7 @@ func random_float() float64 {
 
 func main() {
     println("╔══════════════════════════════════════════════════════════════════════╗")
-    println("║  NeurX Industrial-Grade Claude Training - End-to-End Verification   ║")
+    println("║  NeurX Industrial-Grade Training - End-to-End Verification        ║")
     println("║  Language: S                                                         ║")
     println("║  Status: Production Ready                                            ║")
     println("╚══════════════════════════════════════════════════════════════════════╝")

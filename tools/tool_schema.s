@@ -1,6 +1,6 @@
 package neurx.tool.tool_schema
 
-// Typed tool parameter schemas — analogous to Claude's JSON Schema tool definitions.
+// Typed tool parameter schemas — analogous to NeurX JSON Schema tool definitions.
 // Each tool declares its parameter names, types, descriptions, and whether required.
 // The schema registry is used to:
 //   1. Inject typed hints into prompts so the LLM knows how to call tools.

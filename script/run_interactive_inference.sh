@@ -29,8 +29,8 @@ S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 # 源文件和输出文件
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
 IR_OUTPUT="${BUILD_DIR}/interactive_inference.ir"
-RUNNER_BIN="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
-RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
+RUNNER_BIN="${NEURX_ROOT}/build/s_ir_runner_train_model_large"
+RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_model_large"
 LOG_FILE="${LOG_DIR}/interactive_inference_$(date +%Y%m%d_%H%M%S).log"
 
 # 会话文件

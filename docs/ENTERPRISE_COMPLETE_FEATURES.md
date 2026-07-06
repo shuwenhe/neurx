@@ -303,7 +303,7 @@
 │  │  Evaluation Layer (评估层)                           │  │
 │  │  • MMLU, TruthfulQA, GSM8K, HellaSwag               │  │
 │  │  • Multi-dimensional metrics                         │  │
-│  │  • Claude/GPT-4 baseline comparison                  │  │
+│  │  • Claude/Model-v4 baseline comparison                  │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                        ↓                                    │
 │  ┌──────────────────────────────────────────────────────┐  │

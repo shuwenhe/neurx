@@ -3,7 +3,7 @@ package neurx.alignment.moe_1t_dpo_grpo_alignment
 // ============================================================================
 // 1T MoE 的完整 DPO/GRPO 对齐框架
 //
-// 工业级 Claude 模型的关键：
+// 工业级 NeurX 模型的关键：
 //   1. DPO (Direct Preference Optimization) - 直接学习用户偏好
 //   2. GRPO (Generative Reward Policy Optimization) - 基于生成式奖励
 //   3. 长上下文对齐 - 支持 32K token 的偏好学习

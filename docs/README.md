@@ -222,7 +222,7 @@ Edit `config_large_model.json`:
 ```json
 {
   "model": {
-    "type": "gpt_large",
+    "type": "model_large",
     "hidden_size": 768,
     "num_layers": 12,
     "num_heads": 12,

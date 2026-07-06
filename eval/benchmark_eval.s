@@ -20,7 +20,7 @@ package neurx.eval.benchmark_eval
 // ============================================================================
 
 use neurx.model.llm.gpt.{
-    gpt_config, gpt_model, gpt_output,
+    model_config, language_model, model_output,
     gpt_forward, gpt_generate_greedy
 }
 
@@ -76,7 +76,7 @@ struct logprob_result {
 }
 
 func gpt_sequence_logprob(
-    gpt_model model,
+    language_model model,
     []int full_tokens,
     int prompt_len
 ) logprob_result {
@@ -86,7 +86,7 @@ func gpt_sequence_logprob(
     }
 
     // 单序列前向
-    gpt_output out = gpt_forward(model, full_tokens, 1, seq_len)
+    model_output out = gpt_forward(model, full_tokens, 1, seq_len)
     int vocab = model.vocab_size
 
     float total_logprob = 0.0
@@ -158,7 +158,7 @@ struct mc_eval_result {
 }
 
 // 为单题选出模型最偏好的选项 (长度归一化对数似然)
-func mc_predict(gpt_model model, mc_question q) int {
+func mc_predict(language_model model, mc_question q) int {
     int best_idx = 0
     float best_score = -1000000000.0
     int c = 0
@@ -187,7 +187,7 @@ func mc_concat([]int a, []int b) []int {
 }
 
 // 评测一组多选题，返回准确率
-func evaluate_multiple_choice(gpt_model model, []mc_question questions) mc_eval_result {
+func evaluate_multiple_choice(language_model model, []mc_question questions) mc_eval_result {
     int total = len(questions)
     int correct = 0
     float conf_sum = 0.0
@@ -246,7 +246,7 @@ struct ppl_result {
     int total_tokens
 }
 
-func evaluate_perplexity(gpt_model model, [][]int sequences) ppl_result {
+func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
     float total_loss = 0.0
     int total_tokens = 0
 
@@ -315,7 +315,7 @@ func gen_contains_answer([]int generated, []int answer) bool {
     false
 }
 
-func evaluate_generative(gpt_model model, []gen_question questions) gen_eval_result {
+func evaluate_generative(language_model model, []gen_question questions) gen_eval_result {
     int total = len(questions)
     int correct = 0
 
@@ -365,7 +365,7 @@ struct benchmark_suite {
     []gen_question humaneval
 }
 
-func run_benchmark_suite(gpt_model model, benchmark_suite suite) benchmark_report {
+func run_benchmark_suite(language_model model, benchmark_suite suite) benchmark_report {
     mc_eval_result mmlu = evaluate_multiple_choice(model, suite.mmlu)
     mc_eval_result hella = evaluate_multiple_choice(model, suite.hellaswag)
     mc_eval_result arc = evaluate_multiple_choice(model, suite.arc)

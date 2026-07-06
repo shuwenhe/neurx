@@ -219,7 +219,7 @@ func validate_config(training_orchestrator_config config, int ws) {
 func print_startup_banner(training_orchestrator_config config, int ws) {
     // log_info("")
     // log_info("╔══════════════════════════════════════════════════════════╗")
-    // log_info("║     NeurX 2 Trillion Parameter GPT — Distributed Training    ║")
+    // log_info("║     NeurX 2 Trillion Parameter Model: Distributed Training    ║")
     // log_info("╠══════════════════════════════════════════════════════════╣")
     // log_info("║                                                        ║")
     // log_info("║  Model Architecture:                                   ║")

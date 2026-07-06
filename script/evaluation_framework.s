@@ -1,6 +1,6 @@
 // ============================================
 // Comprehensive Evaluation Framework
-// Multi-dimensional assessment for Claude-level LLMs
+// Multi-dimensional assessment for NeurX-level LLMs
 // ============================================
 
 package main
@@ -45,7 +45,7 @@ type EvaluationFramework struct {
     config              EvaluationConfig
     benchmarks          map[string]BenchmarkDataset
     results             []BenchmarkResult
-    comparison_baseline map[string]float64  // Claude scores
+    comparison_baseline map[string]float64  // reference scores
 }
 
 type BenchmarkDataset struct {
@@ -420,11 +420,11 @@ func (framework *EvaluationFramework) print_report() {
 
 func (framework *EvaluationFramework) compare_with_baseline() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Model Comparison with Claude/GPT-4                   ║")
+    fmt.Println("║  Model Comparison with reference systems               ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     
     baseline := map[string]float64{
-        "MMLU": 0.867,      // Claude scores
+        "MMLU": 0.867,      // reference scores
         "TruthfulQA": 0.790,
         "GSM8K": 0.913,
         "HellaSwag": 0.962,
@@ -442,7 +442,7 @@ func (framework *EvaluationFramework) compare_with_baseline() {
             status = "🟢"
         }
         
-        fmt.Printf("%s %s: %.4f (Claude: %.4f, Gap: %+.2f%%)\n",
+        fmt.Printf("%s %s: %.4f (reference: %.4f, Gap: %+.2f%%)\n",
             status, result.benchmark_name, result.score, baseline_score, gap)
     }
 }

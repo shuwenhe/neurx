@@ -1,5 +1,5 @@
 #!/bin/bash
-# 1T MoE 工业级 Claude 模型训练 - 快速启动指南
+# 1T MoE 工业级 NeurX 模型训练 - 快速启动指南
 # Usage: bash train_1t_moe.sh
 
 set -e
@@ -8,7 +8,7 @@ NEURX_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "╔════════════════════════════════════════════════════════╗"
-echo "║  NeurX 1T MoE Industrial-Grade Claude Training Setup  ║"
+echo "║  NeurX 1T MoE Industrial-Grade Training Setup        ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -219,7 +219,7 @@ echo ""
 
 cat > "${NEURX_OUTPUT_DIR}/training_config_summary.txt" << CONFIG_EOF
 ═════════════════════════════════════════════════════════════
-  1T MoE Industrial-Grade Claude Model Training
+  1T MoE Industrial-Grade Model Training
 ═════════════════════════════════════════════════════════════
 
 MODEL CONFIGURATION

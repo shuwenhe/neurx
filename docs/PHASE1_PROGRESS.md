@@ -1,4 +1,4 @@
-# 🚀 NeurX GPT-3.5 升级 - 实现进度追踪
+# 🚀 NeurX Model-v3.5 升级 - 实现进度追踪
 
 ## 📊 总体进度: 50% 完成
 
@@ -176,7 +176,7 @@ neurx/alignment/
   - [x] 流式事件生成
   - [x] Token 流式输出
 
-- [x] **文件**: `neurx/api/openai_compat.s` (580+ 行)
+- [x] **文件**: `neurx/api/llm_compat.s` (580+ 行)
 
 ### 2.2 推理优化 (✅ 完成)
 - [x] **Flash Attention v2** (~800 行)

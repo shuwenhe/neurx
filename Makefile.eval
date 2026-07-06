@@ -46,7 +46,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)Core Commands:$(NC)"
 	@echo "  make help              - Show this help message"
-	@echo "  make train             - Train Claude-level LLM"
+	@echo "  make train             - Train NeurX-level LLM"
 	@echo "  make infer             - Run inference demo"
 	@echo "  make chat              - Start interactive chat"
 	@echo ""

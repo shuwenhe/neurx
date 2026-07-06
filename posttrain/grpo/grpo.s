@@ -3,10 +3,7 @@ package neurx.posttrain.grpo
 // ============================================================================
 // GRPO — Group Relative Policy Optimization
 //
-// 论文: "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in
-//        Open Language Models" (Shao et al., 2024)
-//        "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via
-//        Reinforcement Learning" (DeepSeek-AI, 2025)
+// 论文: GRPO / R1-style reasoning reference implementations
 //
 // 核心思想:
 //   对每个问题 q 采样 G 个输出 {o₁,...,o_G}，用组内相对奖励代替价值函数:
@@ -20,7 +17,7 @@ package neurx.posttrain.grpo
 //   • 组内相对奖励方差更小，收敛更稳
 //   • 天然适合推理/数学: 同一题多种解法评分
 //
-// 奖励设计 (DeepSeek-R1 style):
+// 奖励设计 (R1-style):
 //   r_format: <think>...</think><answer>...</answer> 格式正确 +0.1
 //   r_accuracy: 答案正确 +1.0
 //   r_length: 过长惩罚 -0.01/100token
@@ -68,7 +65,7 @@ func default_grpo_config() grpo_config {
     }
 }
 
-func deepseek_r1_grpo_config() grpo_config {
+func neurx_r1_grpo_config() grpo_config {
     grpo_config {
         group_size: 8,
         clip_eps: 0.2,

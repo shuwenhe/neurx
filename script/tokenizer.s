@@ -2,7 +2,7 @@
 
 // ============================================
 // NeurX Tokenizer Framework
-// Purpose: Tokenize training data for Claude-level LLM training
+// Purpose: Tokenize training data for NeurX-level LLM training
 // Language: S
 // ============================================
 

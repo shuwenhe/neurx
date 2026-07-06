@@ -13,10 +13,10 @@ Checkpoint scheduling state lives here; persistence and serialization should sta
 Checkpoint artifacts are written under:
 
 - `artifacts/checkpoints/`
-- example file: `artifacts/checkpoints/run_20260518_001/step_0001000/latest/gpt_large_pretrain.neurx`
+- example file: `artifacts/checkpoints/run_20260518_001/step_0001000/latest/model_large_pretrain.neurx`
 
 Core tensor, autograd, ops, and runtime logic should remain in framework core modules.
 
 ## LLM Pretraining
 
-- `llm/gpt_large_pretrain.s`: GPT-large pretraining orchestration built on the shared pretrain state machine
+- `llm/model_large_pretrain.s`: GPT-large pretraining orchestration built on the shared pretrain state machine

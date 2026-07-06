@@ -248,7 +248,7 @@ Scenario 1: Enterprise API Service
   • ROI (Year 1):             300-500%
 
 Scenario 2: Internal Production Model
-  • Cost Savings:             $5M+ vs OpenAI/Claude API
+  • Cost Savings:             $5M+ vs external API
   • Operational Efficiency:   +40% over LLaMA equivalents
   • Time-to-Market:           6 months faster than external
   • IP Value:                 $10M+ proprietary model
@@ -323,7 +323,7 @@ Training Efficiency:
   • Compute Efficiency: >90%
 
 Model Quality Metrics:
-  Current (346M):        Expected (1T):       vs Claude
+  Current (346M):        Expected (1T):       vs reference
   ────────────────────────────────────────────────────
   Perplexity: 45.2       → 12-18               12-15
   MMLU (0-shot): 25%     → 70-75%              86-92%

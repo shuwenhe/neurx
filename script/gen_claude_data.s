@@ -1,4 +1,4 @@
-// S语言实现：生成Claude级别的工业LLM训练数据
+// S语言实现：生成NeurX级别的工业LLM训练数据
 // 此脚本生成多样化、高质量的训练数据用于预训练
 
 package main
@@ -60,7 +60,7 @@ func generate_qa_data(): TrainingData {
 
 // 主函数
 func main() {
-    println("🚀 生成Claude级别的工业LLM训练数据...")
+    println("🚀 生成NeurX级别的工业LLM训练数据...")
     println("")
     println("📝 数据生成框架已建立")
     println("✅ 支持14种数据类型")

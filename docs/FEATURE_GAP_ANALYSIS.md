@@ -55,7 +55,7 @@
   - 无法从手绘草图生成原型
 - **竞品对比**：
   - Claude Code ✅ 支持 Claude Vision
-  - Codex ✅ 支持 GPT-4V
+  - Codex ✅ 支持 Model-v4V
   - Gemini CLI ✅ 支持 Gemini Pro Vision
   - Hermes Agent ✅ 支持图片
 - **用例**：
@@ -64,7 +64,7 @@
   - 手绘流程图 → 生成类图
 - **技术方案**：
   - 集成 Claude 3.5 Sonnet（最佳视觉理解）
-  - 集成 GPT-4 Turbo Vision
+  - 集成 Model-v4 Turbo Vision
   - 集成 Gemini Pro Vision
   - 文件上传组件（GUI）
   - CLI 参数：`neurx chat --image screenshot.png "解释这个错误"`

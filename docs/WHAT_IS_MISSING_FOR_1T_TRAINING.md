@@ -186,7 +186,7 @@ moe_1t_save_checkpoint_full()         // 完整保存流程
 
 #### 1. 张量并行 (Tensor Parallelism) 完整实现
 ```s
-// 需要实现: neurx/model/llm/gpt_moe_1t_tp_impl.s
+// 需要实现: neurx/model/llm/model_moe_1t_tp_impl.s
 
 func split_qkv_tp() {
   // 将 Q/K/V 投影跨 TP_SIZE=8 个 GPU 分割
@@ -231,7 +231,7 @@ func async_allreduce_partition() {
 
 #### 4. 损失计算与反向传播
 ```s
-// 需要实现: neurx/model/llm/gpt_moe_1t_backward.s
+// 需要实现: neurx/model/llm/model_moe_1t_backward.s
 
 func compute_loss(logits, labels) {
   // Cross-entropy loss

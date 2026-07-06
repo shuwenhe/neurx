@@ -47,7 +47,7 @@ struct training_config {
 // MINI GPT MODEL - Simple but complete
 // ========================================================================
 
-struct mini_gpt_model {
+struct mini_language_model {
     vocab_size: int
     embedding_dim: int
     hidden_dim: int
@@ -109,8 +109,8 @@ func generate_synthetic_data(
 // MODEL INITIALIZATION
 // ========================================================================
 
-func create_mini_gpt(config training_config) mini_gpt_model {
-    model := mini_gpt_model{
+func create_mini_gpt(config training_config) mini_language_model {
+    model := mini_language_model{
         vocab_size: config.vocab_size,
         embedding_dim: config.embedding_dim,
         hidden_dim: config.hidden_dim,
@@ -177,7 +177,7 @@ func create_mini_gpt(config training_config) mini_gpt_model {
 // ========================================================================
 
 func forward_pass(
-    model: mini_gpt_model,
+    model: mini_language_model,
     input_ids: []int,
     batch_size: int,
     seq_length: int
@@ -399,7 +399,7 @@ func run_training(config: training_config) {
 // HELPER FUNCTIONS
 // ========================================================================
 
-func count_parameters(model: mini_gpt_model) int {
+func count_parameters(model: mini_language_model) int {
     count := model.token_embedding.num_elements()
     count += model.position_embedding.num_elements()
     count += model.output_projection.num_elements()
@@ -449,7 +449,7 @@ func initialize_ones(size: int) []float {
     data
 }
 
-func verify_training(model: mini_gpt_model, losses: []float, log: logger) {
+func verify_training(model: mini_language_model, losses: []float, log: logger) {
     fmt.Printf("   Parameters: %d\n", count_parameters(model))
     fmt.Printf("   Initial loss: %.4f\n", losses[0])
     fmt.Printf("   Final loss: %.4f\n", losses[len(losses)-1])
@@ -614,7 +614,7 @@ func logger_close(log: logger) {
     // Close files
 }
 
-func save_checkpoint(path: string, model: mini_gpt_model, optimizer: any, step: int) {
+func save_checkpoint(path: string, model: mini_language_model, optimizer: any, step: int) {
     // Save checkpoint
 }
 
@@ -628,7 +628,7 @@ func write_file(path: string, content: string) {
 
 func main() {
     fmt.Printf("╔════════════════════════════════════════════════════════════════╗\n")
-    fmt.Printf("║     NeurX Industrial-Grade Claude Training System               ║\n")
+    fmt.Printf("║     NeurX Industrial-Grade Training System                     ║\n")
     fmt.Printf("║           End-to-End Verification Run                           ║\n")
     fmt.Printf("╚════════════════════════════════════════════════════════════════╝\n\n")
     

@@ -50,7 +50,7 @@ demo_perplexity_tracking() {
     done
     
     echo -e "\n✅ Perplexity progression tracked!"
-    echo "   Initial: ~1000 → Final: ~32 (Claude-level target achieved!)"
+    echo "   Initial: ~1000 → Final: ~32 (reference target achieved!)"
 }
 
 # ============================================
@@ -397,7 +397,7 @@ demo_convergence_report() {
    Best PPL:           35.7
 
 ✅ CONVERGENCE STATUS
-   Achieved: Claude-level perplexity < 50
+   Achieved: reference perplexity < 50
    Training: CONVERGED (plateau detected)
    Quality: Production Ready
 

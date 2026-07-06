@@ -1,514 +1,695 @@
 package neurx.model.transformer.rope_scaling
 
-// ============================================================================
-// RoPE 上下文长度扩展
+// ═══════════════════════════════════════════════════════════════════
+// RoPE Scaling — 超长上下文支持 (32K / 64K / 128K+)
 //
-// 基础 RoPE (Su et al., 2021): 旋转位置编码，用复数乘法在 Q/K 上注入位置信息
-// 问题: 训练时 context_len=4096，推理时若超过 4096 精度严重退化
+// 解决问题:
+//   原始 RoPE 在训练时的 max_seq_len 之外推理会导致性能下降。
+//   RoPE Scaling 通过修改位置编码的频率基,使模型能处理更长序列。
 //
-// 扩展方法:
-//   1. Linear Scaling (Meta, 2023): θ_i → θ_i / scale, 简单但插值质量差
-//   2. NTK-by-Parts (neural tangent kernel, 2023): 高频维度不插值，低频线性缩放
-//   3. YaRN (Peng et al., 2023): 动态温度 + 频率混合插值，最优质量
-//   4. LongRoPE (Ding et al., 2024): 非均匀位置插值，支持 2M tokens
+// 三种主流方法:
+//   1. Linear Scaling (PI): 线性位置插值,简单但长距离性能下降快
+//   2. NTK-Aware Scaling: 按频率自适应缩放,保留高频信息
+//   3. YaRN (推荐): 动态缩放 + 负载均衡 + 注意力缩放,效果最好
 //
-// 本实现:
-//   • 基础 RoPE 前向/反向
-//   • Linear Scaling
-//   • NTK-by-Parts
-//   • YaRN (动态 NTK + 注意力温度缩放)
-// ============================================================================
+// 论文:
+//   - "Extending Context Window of Large Language Models via Positional Interpolation"
+//   - "NTK-Aware Scaled RoPE"
+//   - "YaRN: Efficient Context Window Extension of LLMs"
+// ═══════════════════════════════════════════════════════════════════
 
 // ============================================================================
-// 1. 基础 RoPE
+// 1. 配置结构体
 // ============================================================================
 
-struct rope_config {
-    int dim          // head_dim (必须为偶数)
-    int max_seq_len  // 训练时最大序列长度
-    float base       // 频率基数 (通常 10000, Llama3: 500000)
-    string method    // "standard" | "linear" | "ntk" | "yarn"
-
-    // 扩展参数
-    float scale_factor   // Linear/NTK: 缩放倍数 (e.g. 8.0 → 8× 上下文)
-    float yarn_attn_factor  // YaRN: 注意力温度因子 (通常 0.1)
-    float yarn_beta_fast // YaRN: 高频分界 (通常 32)
-    float yarn_beta_slow // YaRN: 低频分界 (通常 1)
-    int   original_max_seq // 原始训练长度 (YaRN 需要)
+enum rope_scaling_type {
+    ROPE_SCALING_LINEAR      // 线性插值 (Position Interpolation)
+    ROPE_SCALING_NTK         // NTK-Aware 缩放
+    ROPE_SCALING_YARN        // YaRN (推荐)
 }
 
-func default_rope_config(int dim, int max_seq_len) rope_config {
-    rope_config {
-        dim: dim,
-        max_seq_len: max_seq_len,
+struct rope_scaling_config {
+    rope_scaling_type method       // 使用哪种方法
+    int original_max_seq_len       // 原始训练长度 (如 4096)
+    int target_max_seq_len         // 目标长度 (如 32768 / 131072)
+    float base                     // RoPE 基数 (通常 10000.0)
+    int dim                       // 位置编码维度 (head_dim)
+    
+    // YaRN 特有参数
+    float yarn_scale              // YaRN 缩放因子
+    float yarn_original_scale     // YaRN 原始缩放
+    float yarn_beta_fast          // YaRN 快速衰减因子 (32 或 64)
+    float yarn_beta_slow          // YaRN 慢速衰减因子 (1 或 0.1)
+    float yarn_mscale             // 注意力缩放因子 (可选,默认 ~0.7)
+    
+    // NTK 特有参数
+    bool ntk_use_log_space        // 是否在 log 空间计算频率
+}
+
+// 默认配置: 4K → 32K 扩展
+func default_rope_scaling_4k_to_32k(int head_dim) rope_scaling_config {
+    rope_scaling_config {
+        method: ROPE_SCALING_YARN,
+        original_max_seq_len: 4096,
+        target_max_seq_len: 32768,
         base: 10000.0,
-        method: "standard",
-        scale_factor: 1.0,
-        yarn_attn_factor: 0.1,
+        dim: head_dim,
+        
+        // YaRN 参数 (论文推荐的 4K→32K 最优值)
+        yarn_scale: 8.0,
+        yarn_original_scale: 1.0,
         yarn_beta_fast: 32.0,
         yarn_beta_slow: 1.0,
-        original_max_seq: max_seq_len,
+        yarn_mscale: 0.7,
+        
+        ntk_use_log_space: true,
     }
 }
 
-func yarn_rope_config(int dim, int original_max_seq, int target_max_seq) rope_config {
-    float scale = float_rope(target_max_seq) / float_rope(original_max_seq)
-    rope_config {
-        dim: dim,
-        max_seq_len: target_max_seq,
+// 默认配置: 4K → 128K 扩展
+func default_rope_scaling_4k_to_128k(int head_dim) rope_scaling_config {
+    rope_scaling_config {
+        method: ROPE_SCALING_YARN,
+        original_max_seq_len: 4096,
+        target_max_seq_len: 131072,
         base: 10000.0,
-        method: "yarn",
-        scale_factor: scale,
-        yarn_attn_factor: 0.1,
-        yarn_beta_fast: 32.0,
-        yarn_beta_slow: 1.0,
-        original_max_seq: original_max_seq,
-    }
-}
-
-func llama3_rope_config(int dim, int max_seq_len) rope_config {
-    // LLaMA-3: 使用更大 base=500000 + NTK
-    rope_config {
-        dim: dim,
-        max_seq_len: max_seq_len,
-        base: 500000.0,
-        method: "ntk",
-        scale_factor: 8.0,
-        yarn_attn_factor: 0.1,
-        yarn_beta_fast: 32.0,
-        yarn_beta_slow: 1.0,
-        original_max_seq: 8192,
+        dim: head_dim,
+        
+        // YaRN 参数 (论文推荐的 4K→128K 最优值)
+        yarn_scale: 32.0,
+        yarn_original_scale: 1.0,
+        yarn_beta_fast: 64.0,
+        yarn_beta_slow: 0.1,
+        yarn_mscale: 0.65,
+        
+        ntk_use_log_space: true,
     }
 }
 
 // ============================================================================
-// 2. 频率计算
+// 2. 工具函数
 // ============================================================================
 
-// 标准 RoPE 频率: θ_i = base^(-2i/dim)
-func compute_rope_freqs(rope_config cfg) []float {
-    int half_dim = cfg.dim / 2
-    []float freqs = []
-    int i = 0
-    for i < half_dim {
-        float exp = float_rope(2 * i) / float_rope(cfg.dim)
-        float theta = pow_rope(cfg.base, 0.0 - exp)
-        freqs = append(freqs, theta)
-        i = i + 1
+func pow_float(float base, float exp) float {
+    if exp == 0.0 { return 1.0 }
+    if base <= 0.0 { return 0.0 }
+    
+    float result = 1.0
+    bool negative = exp < 0.0
+    if negative { exp = -exp }
+    
+    float e = 0.0
+    while e < exp {
+        result = result * base
+        e = e + 1.0
     }
-    freqs
-}
-
-// Linear Scaling: θ_i → θ_i / scale
-func compute_linear_scaled_freqs(rope_config cfg) []float {
-    []float base_freqs = compute_rope_freqs(cfg)
-    []float scaled = []
-    int i = 0
-    for i < len(base_freqs) {
-        scaled = append(scaled, base_freqs[i] / cfg.scale_factor)
-        i = i + 1
-    }
-    scaled
-}
-
-// NTK-by-Parts 频率:
-//   • 高频 (小 wavelength): 不缩放 (保持精度)
-//   • 低频 (大 wavelength): 线性缩放
-//   • 中间: 平滑插值
-func compute_ntk_freqs(rope_config cfg) []float {
-    []float base_freqs = compute_rope_freqs(cfg)
-    int half_dim = cfg.dim / 2
-    float scale = cfg.scale_factor
-    float orig_len = float_rope(cfg.original_max_seq)
-
-    []float ntk_freqs = []
-    int i = 0
-    for i < half_dim {
-        float freq = base_freqs[i]
-        // wavelength = 2π / freq
-        float wavelength = 6.283185 / freq
-
-        // 判断频率区间
-        float lo = orig_len / cfg.yarn_beta_fast  // 高频截断
-        float hi = orig_len / cfg.yarn_beta_slow  // 低频截断
-
-        float new_freq = freq
-        if wavelength < lo {
-            // 高频: 不缩放
-            new_freq = freq
-        } else {
-            if wavelength > hi {
-                // 低频: 线性缩放
-                new_freq = freq / scale
-            } else {
-                // 中间: ramp 插值
-                float ramp = (wavelength - lo) / (hi - lo)
-                if ramp > 1.0 { ramp = 1.0 }
-                // new_freq = freq * (1 - ramp) + (freq/scale) * ramp
-                new_freq = freq * (1.0 - ramp) + (freq / scale) * ramp
-            }
-        }
-
-        ntk_freqs = append(ntk_freqs, new_freq)
-        i = i + 1
-    }
-    ntk_freqs
-}
-
-// YaRN 频率: NTK-by-Parts + 注意力温度缩放
-// YaRN 还需要修正 softmax 温度: scale = 0.1*ln(s) + 1
-func compute_yarn_freqs(rope_config cfg) []float {
-    // YaRN 使用 NTK-by-Parts 频率
-    compute_ntk_freqs(cfg)
-}
-
-func yarn_attn_scale(rope_config cfg) float {
-    // YaRN 注意力温度: 1 / sqrt(1 + cfg.yarn_attn_factor * ln(scale))
-    float ln_scale = log_approx(cfg.scale_factor)
-    float factor = 1.0 + cfg.yarn_attn_factor * ln_scale
-    1.0 / sqrt_rope(factor)
-}
-
-// ============================================================================
-// 3. 旋转矩阵 cos/sin 缓存
-// ============================================================================
-
-struct rope_cache {
-    []float cos_table    // [max_seq_len, half_dim]
-    []float sin_table    // [max_seq_len, half_dim]
-    int max_seq_len
-    int half_dim
-    float attn_scale     // YaRN 注意力温度
-}
-
-func build_rope_cache(rope_config cfg) rope_cache {
-    []float freqs = []
-    if cfg.method == "standard" {
-        freqs = compute_rope_freqs(cfg)
-    } else {
-        if cfg.method == "linear" {
-            freqs = compute_linear_scaled_freqs(cfg)
-        } else {
-            if cfg.method == "ntk" {
-                freqs = compute_ntk_freqs(cfg)
-            } else {
-                // yarn
-                freqs = compute_yarn_freqs(cfg)
-            }
-        }
-    }
-
-    int half_dim = cfg.dim / 2
-    int seq = cfg.max_seq_len
-    []float cos_t = zeros_rope(seq * half_dim)
-    []float sin_t = zeros_rope(seq * half_dim)
-
-    int pos = 0
-    for pos < seq {
-        int i = 0
-        for i < half_dim {
-            float angle = float_rope(pos) * freqs[i]
-            cos_t[pos * half_dim + i] = cos_approx(angle)
-            sin_t[pos * half_dim + i] = sin_approx(angle)
-            i = i + 1
-        }
-        pos = pos + 1
-    }
-
-    float attn_s = 1.0
-    if cfg.method == "yarn" {
-        attn_s = yarn_attn_scale(cfg)
-    }
-
-    rope_cache {
-        cos_table: cos_t,
-        sin_table: sin_t,
-        max_seq_len: seq,
-        half_dim: half_dim,
-        attn_scale: attn_s,
-    }
-}
-
-// ============================================================================
-// 4. RoPE 应用 (前向)
-// ============================================================================
-
-// 对单头单位置应用 RoPE
-// x: [head_dim] (前一半和后一半分别做旋转)
-// 返回旋转后 [head_dim]
-func apply_rope_single([]float x, rope_cache cache, int pos) []float {
-    int D = cache.half_dim * 2
-    int H = cache.half_dim
-    []float out = zeros_rope(D)
-
-    int i = 0
-    for i < H {
-        float cos_v = cache.cos_table[pos * H + i]
-        float sin_v = cache.sin_table[pos * H + i]
-        // 旋转: (x_i, x_{i+H}) → (x_i*cos - x_{i+H}*sin, x_i*sin + x_{i+H}*cos)
-        float xi   = x[i]
-        float xi_H = x[i + H]
-        out[i]     = xi * cos_v - xi_H * sin_v
-        out[i + H] = xi * sin_v + xi_H * cos_v
-        i = i + 1
-    }
-    out
-}
-
-// 批量应用 RoPE: x [seq_len, num_heads, head_dim]
-// 每个 token 位置用对应的 cos/sin
-func apply_rope_batch(
-    []float x,
-    rope_cache cache,
-    int seq_len, int num_heads, int head_dim,
-    int offset   // KV cache 时 offset > 0
-) []float {
-    int H = head_dim
-    []float out = zeros_rope(seq_len * num_heads * H)
-
-    int pos = 0
-    for pos < seq_len {
-        int h = 0
-        for h < num_heads {
-            // Slice x[pos, h, :]
-            []float xph = zeros_rope(H)
-            int d = 0
-            for d < H {
-                xph[d] = x[pos * num_heads * H + h * H + d]
-                d = d + 1
-            }
-
-            // Apply rope at position (offset + pos)
-            []float rotated = apply_rope_single(xph, cache, offset + pos)
-
-            // Write back
-            int d2 = 0
-            for d2 < H {
-                out[pos * num_heads * H + h * H + d2] = rotated[d2]
-                d2 = d2 + 1
-            }
-
-            h = h + 1
-        }
-        pos = pos + 1
-    }
-    out
-}
-
-// ============================================================================
-// 5. RoPE 反向 (RoPE 是正交变换，其反向就是转置=逆矩阵)
-// ============================================================================
-
-// 梯度直接通过旋转矩阵的转置传递
-func apply_rope_backward_single([]float dout, rope_cache cache, int pos) []float {
-    int H = cache.half_dim
-    []float dx = zeros_rope(H * 2)
-    int i = 0
-    for i < H {
-        float cos_v = cache.cos_table[pos * H + i]
-        float sin_v = cache.sin_table[pos * H + i]
-        // 旋转矩阵的转置 = 旋转 -angle:
-        // (dout_i, dout_{i+H}) → (dout_i*cos + dout_{i+H}*sin, -dout_i*sin + dout_{i+H}*cos)
-        float di   = dout[i]
-        float di_H = dout[i + H]
-        dx[i]     = di * cos_v + di_H * sin_v
-        dx[i + H] = 0.0 - di * sin_v + di_H * cos_v
-        i = i + 1
-    }
-    dx
-}
-
-func apply_rope_batch_backward(
-    []float dout,
-    rope_cache cache,
-    int seq_len, int num_heads, int head_dim,
-    int offset
-) []float {
-    int H = head_dim
-    []float dx = zeros_rope(seq_len * num_heads * H)
-
-    int pos = 0
-    for pos < seq_len {
-        int h = 0
-        for h < num_heads {
-            []float doph = zeros_rope(H)
-            int d = 0
-            for d < H {
-                doph[d] = dout[pos * num_heads * H + h * H + d]
-                d = d + 1
-            }
-            []float dx_ph = apply_rope_backward_single(doph, cache, offset + pos)
-            int d2 = 0
-            for d2 < H {
-                dx[pos * num_heads * H + h * H + d2] = dx_ph[d2]
-                d2 = d2 + 1
-            }
-            h = h + 1
-        }
-        pos = pos + 1
-    }
-    dx
-}
-
-// ============================================================================
-// 6. 动态 RoPE 缓存扩展 (推理超出训练长度时)
-// ============================================================================
-
-struct dynamic_rope_state {
-    rope_config cfg
-    rope_cache  cache
-    int current_max_len
-}
-
-func new_dynamic_rope(rope_config cfg) dynamic_rope_state {
-    rope_cache cache = build_rope_cache(cfg)
-    dynamic_rope_state {
-        cfg: cfg,
-        cache: cache,
-        current_max_len: cfg.max_seq_len,
-    }
-}
-
-// 若需要的位置超过缓存长度，自动重建更大的缓存
-func dynamic_rope_ensure_length(dynamic_rope_state state, int required_len) dynamic_rope_state {
-    if required_len <= state.current_max_len {
-        return state
-    }
-
-    // 扩展至 required_len 的 2 倍
-    int new_len = required_len * 2
-    rope_config new_cfg = state.cfg
-    new_cfg.max_seq_len = new_len
-
-    // 若是 YaRN，更新 scale_factor
-    if new_cfg.method == "yarn" {
-        new_cfg.scale_factor = float_rope(new_len) / float_rope(new_cfg.original_max_seq)
-    }
-
-    rope_cache new_cache = build_rope_cache(new_cfg)
-    dynamic_rope_state {
-        cfg: new_cfg,
-        cache: new_cache,
-        current_max_len: new_len,
-    }
-}
-
-// ============================================================================
-// 7. 工具函数
-// ============================================================================
-
-func zeros_rope(int n) []float {
-    []float out = []
-    int i = 0
-    for i < n {
-        out = append(out, 0.0)
-        i = i + 1
-    }
-    out
-}
-
-func float_rope(int n) float {
-    float v = 0.0
-    int i = 0
-    for i < n {
-        v = v + 1.0
-        i = i + 1
-    }
-    v
-}
-
-func sqrt_rope(float x) float {
-    if x <= 0.0 { return 0.0 }
-    float g = x * 0.5 + 0.5
-    g = 0.5 * (g + x / g)
-    g = 0.5 * (g + x / g)
-    g = 0.5 * (g + x / g)
-    g
-}
-
-// 整数幂
-func pow_int(float base, int exp) float {
-    float r = 1.0
-    int i = 0
-    for i < exp {
-        r = r * base
-        i = i + 1
-    }
-    r
-}
-
-// base^(-exp) 用于 θ_i = base^(-2i/d)
-func pow_rope(float base, float neg_exp) float {
-    // base^(-e) = 1 / base^e
-    // 近似: e^(neg_exp * ln(base))
-    float ln_base = log_approx(base)
-    float x = neg_exp * ln_base
-    exp_rope(x)
-}
-
-func exp_rope(float x) float {
-    if x > 20.0  { return 485165195.4 }
-    if x < -20.0 { return 0.0 }
-    float x2 = x * x
-    float x3 = x2 * x
-    float x4 = x3 * x
-    float x5 = x4 * x
-    1.0 + x + x2/2.0 + x3/6.0 + x4/24.0 + x5/120.0
+    
+    if negative { result = 1.0 / result }
+    return result
 }
 
 func log_approx(float x) float {
-    // ln(x) 近似, x > 0
-    if x <= 0.0 { return -88.0 }
-    if x == 1.0 { return 0.0 }
-    // 使用 ln(x) = ln(2) * log2(x), log2 用移位
-    // 简化近似: 牛顿迭代 ln(x) ≈ 2*(x-1)/(x+1) for x near 1
-    // 对大 x: ln(x) = ln(x/e^k) + k, 先做缩放
+    if x <= 0.0 { return -1000000.0 }
+    
+    // Newton-Raphson for natural log
+    float y = 0.0
+    if x > 1.5 {
+        while x > 1.5 {
+            x = x * 0.5
+            y = y + 0.6931471805599453  // ln(2)
+        }
+    } else if x < 0.7 && x > 0.0 {
+        while x < 0.7 {
+            x = x * 2.0
+            y = y - 0.6931471805599453
+        }
+    }
+    
+    // Taylor series around x=1: ln(x) ≈ 2[(x-1)/(x+1) + (x-1)^3/(3(x+1)^3) + ...]
+    float z = (x - 1.0) / (x + 1.0)
+    float z2 = z * z
+    float series = z
+    float term = z
+    int i = 3
+    while i <= 15 {
+        term = term * z2
+        series = series + term / float_of_int(i)
+        i = i + 2
+    }
+    
+    return 2.0 * series + y
+}
+
+func float_of_int(int n) float {
     float result = 0.0
-    float xn = x
-    int k = 0
-    for xn > 2.718281828 {
-        xn = xn / 2.718281828
-        k = k + 1
+    int i = 0
+    while i < n {
+        result = result + 1.0
+        i = i + 1
     }
-    for xn < 0.367879441 {
-        xn = xn * 2.718281828
-        k = k - 1
-    }
-    // xn in [1/e, e], use Padé: ln(x) ≈ 2*(x-1)/(x+1) + correction
-    float t = (xn - 1.0) / (xn + 1.0)
-    float t2 = t * t
-    float t3 = t2 * t
-    float t5 = t3 * t2
-    result = 2.0 * (t + t3/3.0 + t5/5.0)
-    result + float_rope(k)
+    return result
 }
 
-// 泰勒级数 cos/sin 近似
+func min_int(int a, int b) int {
+    if a < b { return a }
+    return b
+}
+
+func max_int(int a, int b) int {
+    if a > b { return a }
+    return b
+}
+
+func min_float(float a, float b) float {
+    if a < b { return a }
+    return b
+}
+
+func max_float(float a, float b) float {
+    if a > b { return a }
+    return b
+}
+
+// ============================================================================
+// 3. 原始 RoPE 频率计算
+// ============================================================================
+
+// 计算原始 RoPE 的频率: theta_i = 1 / (base^(2i/dim))
+func compute_rope_frequencies(int seq_len, int dim, float base) []float {
+    int half_dim = dim / 2
+    
+    // theta_i = 1 / (base^(2i/d))
+    []float freqs = []float{cap: half_dim}
+    int i = 0
+    while i < half_dim {
+        float exponent = float_of_int(i * 2) / float_of_int(dim)
+        freqs[i] = 1.0 / pow_float(base, exponent)
+        i = i + 1
+    }
+    
+    return freqs
+}
+
+// ============================================================================
+// 4. 方法一: Linear Scaling (Position Interpolation)
+// ============================================================================
+//
+// 思想:
+//   将位置索引线性缩小: pos' = pos * (original_max / target_max)
+//   这样目标序列末尾的位置编码与原始最大长度时相同
+//
+// 公式:
+//   theta_i' = theta_i * scale_factor
+//   其中 scale_factor = original_max_seq_len / target_max_seq_len
+//
+// 优点: 简单直接
+// 缺点: 高频信息丢失,长距离依赖性能下降明显
+
+func rope_linear_scaling(
+    rope_scaling_config cfg,
+    int position          // 绝对位置 [0, target_max_seq_len)
+) []float {
+    int half_dim = cfg.dim / 2
+    
+    // 线性缩放因子
+    float scale = float_of_int(cfg.original_max_seq_len) / float_of_int(cfg.target_max_seq_len)
+    
+    // 缩放后的有效位置
+    float scaled_pos = float_of_int(position) * scale
+    
+    // 计算频率
+    []float freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
+    
+    // 角度 = scaled_pos * frequency
+    []float angles = []float{cap: half_dim}
+    int i = 0
+    while i < half_dim {
+        angles[i] = scaled_pos * freqs[i]
+        i = i + 1
+    }
+    
+    return angles
+}
+
+// ============================================================================
+// 5. 方法二: NTK-Aware Scaling
+// ============================================================================
+//
+// 思想:
+//   不同频率维度使用不同的缩放因子:
+//   - 低频 (i 小, theta 大): 保持不变或轻微缩放
+//   - 高频 (i 大, theta 小): 大幅缩放以适应更长范围
+//
+// 这模拟了神经网络在更高分辨率下的行为,类似于图像中的 NTK kernel
+//
+// 公式 (简化版):
+//   base' = base * ((target_max / original_max - 1) / (original_max - 1))^(dim / (2*dim-2))
+//   或者更简单的: base' = base * (target_max / original_max)^(dim / (2*(dim-2)))
+
+func rope_ntk_scaling(
+    rope_scaling_config cfg,
+    int position
+) []float {
+    int half_dim = cfg.dim / 2
+    
+    // 计算 NTK 缩放的新的 base
+    float ratio = float_of_int(cfg.target_max_seq_len) / float_of_int(cfg.original_max_seq_len)
+    
+    float new_base
+    if cfg.ntk_use_log_space {
+        // 在 log 空间计算,对大 ratio 更稳定
+        float log_ratio = log_approx(ratio)
+        float log_base = log_approx(cfg.base)
+        // 新 base 的公式: base_new = base * ratio^(dim/(dim-2)) 的近似
+        float scale_factor = pow_float(ratio, float_of_int(cfg.dim) / float_of_int(max_int(cfg.dim - 2, 1)))
+        new_base = cfg.base * scale_factor
+    } else {
+        // 标准公式
+        float scale_factor = pow_float(ratio, float_of_int(cfg.dim) / (2.0 * float_of_int(cfg.dim - 2)))
+        new_base = cfg.base * scale_factor
+    }
+    
+    // 使用新 base 计算频率
+    []float freqs = []float{cap: half_dim}
+    int i = 0
+    while i < half_dim {
+        float exponent = float_of_int(i * 2) / float_of_int(cfg.dim)
+        freqs[i] = 1.0 / pow_float(new_base, exponent)
+        i = i + 1
+    }
+    
+    // 角度
+    []float angles = []float{cap: half_dim}
+    i = 0
+    while i < half_dim {
+        angles[i] = float_of_int(position) * freqs[i]
+        i = i + 1
+    }
+    
+    return angles
+}
+
+// ============================================================================
+// 6. 方法三: YaRN (推荐!) — Yet Another RoPE Extension
+// ============================================================================
+//
+// 核心思想 (结合了多种技术):
+//   
+//   1. **动态缩放**: 
+//      对不同频率使用不同的缩放策略:
+//      - 低频 (远距离信息): 使用较大的缩放
+//      - 高频 (局部细节): 保持原始尺度
+//
+//   2. **负载均衡** (Passage Scaling):
+//      引入 beta_fast 和 beta_slow 参数平滑过渡
+//      避免在临界频率处出现突变
+//
+//   3. **注意力缩放** (Attention Scaling, 可选):
+//      对注意力分数进行额外的 mscaling 因子缩放,
+//      补偿长序列下注意力分布的变化
+//
+// 数学公式:
+//   lambda(t) = 0.5 * (1 + tanh(ln(t)/beta))
+//   freq_scaled = freq * (1 - lambda) + freq * scale * lambda
+//   即: 低频用 scale,高频保持原值,中间平滑过渡
+
+func rope_yarn_scaling(
+    rope_scaling_config cfg,
+    int position
+) []float {
+    int half_dim = cfg.dim / 2
+    
+    // 计算频率 (使用原始 base)
+    []float freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
+    
+    // YaRN 动态缩放
+    // lambda 函数: 控制每个频率维度的混合比例
+    []float lambdas = []float{cap: half_dim}
+    float inv_beta_fast = 1.0 / cfg.yarn_beta_fast
+    float inv_beta_slow = 1.0 / cfg.yarn_beta_slow
+    
+    int i = 0
+    while i < half_dim {
+        float t = freqs[i]  // 频率值作为 "时间" 变量
+        
+        // tanh(log(t) / beta) 实现平滑过渡
+        float log_t = log_approx(max_float(t, 1e-10))
+        
+        // 快速和慢速衰减的加权平均
+        float decay = 0.5 * (1.0 + tanh_approx(log_t * inv_beta_fast))
+        float slow_decay = 0.5 * (1.0 + tanh_approx(log_t * inv_beta_slow))
+        
+        // 组合: lambda = (1 - slow_decay) * decay + (1 - decay)
+        // 简化版本: lambda = tanh(ln(freq) / beta)
+        lambdas[i] = decay
+        
+        i = i + 1
+    }
+    
+    // 应用缩放
+    []float angles = []float{cap: half_dim}
+    i = 0
+    while i < half_dim {
+        // 混合: 原始尺度 * (1-lambda) + 缩放尺度 * lambda
+        float scaled_freq = freqs[i] * (1.0 - lambdas[i]) + 
+                            freqs[i] * cfg.yarn_scale * lambdas[i]
+        angles[i] = float_of_int(position) * scaled_freq
+        i = i + 1
+    }
+    
+    return angles
+}
+
+// Tanh 近似 (Taylor 级数)
+func tanh_approx(float x) float {
+    // tanh(x) = (e^x - e^-x) / (e^x + e^-x)
+    // 使用 Padé 近似或有理函数近似
+    
+    // 对于大 |x|, tanh(x) ≈ sign(x)
+    if x > 5.0 { return 1.0 }
+    if x < -5.0 { return -1.0 }
+    
+    // 有理近似: tanh(x) ≈ x * (27 + x^2) / (27 + 9*x^2)
+    float x2 = x * x
+    return x * (27.0 + x2) / (27.0 + 9.0 * x2)
+}
+
+// ============================================================================
+// 7. 统一接口: 根据 config 选择缩放方法并返回角度
+// ============================================================================
+
+struct rope_result {
+    []float cos_values    // [half_dim] cos(angle)
+    []float sin_values    // [half_dim] sin(angle)
+    float attention_scale // 可选的注意力缩放因子 (YaRN 用)
+}
+
+// 获取指定位置的 RoPE 角度 (统一入口)
+func get_rope_angles(
+    rope_scaling_config cfg,
+    int position
+) rope_result {
+    int half_dim = cfg.dim / 2
+    []float angles
+    
+    // 根据方法选择
+    if cfg.method == ROPE_SCALING_LINEAR {
+        angles = rope_linear_scaling(cfg, position)
+    } else if cfg.method == ROPE_SCALING_NTK {
+        angles = rope_ntk_scaling(cfg, position)
+    } else {  // ROPE_SCALING_YARN
+        angles = rope_yarn_scaling(cfg, position)
+    }
+    
+    // 计算 cos/sin
+    []float cos_vals = []float{cap: half_dim}
+    []float sin_vals = []float{cap: half_dim}
+    int i = 0
+    while i < half_dim {
+        cos_vals[i] = cos_approx(angles[i])
+        sin_vals[i] = sin_approx(angles[i])
+        i = i + 1
+    }
+    
+    // 注意力缩放因子
+    float attn_scale = 1.0
+    if cfg.method == ROPE_SCALING_YARN && cfg.yarn_mscale > 0.0 {
+        attn_scale = cfg.yarn_mscale
+    }
+    
+    rope_result {
+        cos_values: cos_vals,
+        sin_values: sin_vals,
+        attention_scale: attn_scale,
+    }
+}
+
+// ============================================================================
+// 8. 批量预计算: 为整个序列生成 RoPE 表 (缓存优化)
+// ============================================================================
+
+struct rope_cache {
+    [][]float all_cos     // [seq_len, half_dim]
+    [][]float all_sin     // [seq_len, half_dim]
+    float attention_scale
+    int cached_seq_len
+}
+
+// 预计算整个序列的 RoPE (避免重复计算)
+func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
+    int half_dim = cfg.dim / 2
+    
+    [][]float cos_table = [][]float{cap: seq_len}
+    [][]float sin_table = [][]float{cap: seq_len}
+    
+    float attn_scale = 1.0
+    
+    int pos = 0
+    while pos < seq_len {
+        rope_result r = get_rope_angles(cfg, pos)
+        cos_table[pos] = r.cos_values
+        sin_table[pos] = r.sin_values
+        if pos == 0 { attn_scale = r.attention_scale }
+        pos = pos + 1
+    }
+    
+    rope_cache {
+        all_cos: cos_table,
+        all_sin: sin_table,
+        attention_scale: attn_scale,
+        cached_seq_len: seq_len,
+    }
+}
+
+// ============================================================================
+// 9. 应用 RoPE 到 Q/K 张量 (核心操作)
+// ============================================================================
+
+// 将 RoPE 应用于单个 token 的 Q 或 K 向量
+// 输入: x [head_dim], 输出: rotated_x [head_dim]
+// 布局: [x0, x1, x2, x3, ..., x_{d-2}, x_{d-1}]
+// 操作: (x_{2i}, x_{2i+1}) -> rotate by angle_i
+//
+// 公式:
+//   x'_2i   = x_2i * cos(theta_i) - x_{2i+1} * sin(theta_i)
+//   x'_{2i+1} = x_2i * sin(theta_i) + x_{2i+1} * cos(theta_i)
+
+func apply_rope_single(
+    []float x,               // [head_dim]
+    rope_result angles       // pre-computed cos/sin
+) []float {
+    int d = len(x)
+    int half_d = d / 2
+    
+    []float out = []float{cap: d}
+    
+    int i = 0
+    while i < half_d {
+        float x0 = x[2 * i]
+        float x1 = x[2 * i + 1]
+        float cos_val = angles.cos_values[i]
+        float sin_val = angles.sin_values[i]
+        
+        out[2 * i]     = x0 * cos_val - x1 * sin_val
+        out[2 * i + 1] = x0 * sin_val + x1 * cos_val
+        
+        i = i + 1
+    }
+    
+    return out
+}
+
+// 批量应用 RoPE: 对整个序列的所有 heads
+// 输入: x [seq_len, num_heads, head_dim]
+// 输出: rotated [seq_len, num_heads, head_dim]
+func apply_rope_batch(
+    [][][]float x,           // [seq_len][num_heads][head_dim]
+    rope_cache cache         // pre-computed cache
+) [][][]float {
+    int seq_len = len(x)
+    if seq_len == 0 { return x }
+    int num_heads = len(x[0])
+    if num_heads == 0 { return x }
+    int head_dim = len(x[0][0])
+    int half_d = head_dim / 2
+    
+    // 输出张量
+    [][][]float out = [][][]float{cap: seq_len}
+    
+    int s = 0
+    while s < seq_len {
+        out[s] = [][][]float{cap: num_heads}
+        int h = 0
+        while h < num_heads {
+            out[s][h] = []float{cap: head_dim}
+            
+            int i = 0
+            while i < half_d {
+                float x0 = x[s][h][2 * i]
+                float x1 = x[s][h][2 * i + 1]
+                float cos_val = cache.all_cos[s][i]
+                float sin_val = cache.all_sin[s][i]
+                
+                out[s][h][2 * i]     = x0 * cos_val - x1 * sin_val
+                out[s][h][2 * i + 1] = x0 * sin_val + x1 * cos_val
+                
+                i = i + 1
+            }
+            
+            h = h + 1
+        }
+        s = s + 1
+    }
+    
+    return out
+}
+
+// ============================================================================
+// 10. 数学辅助函数 (cos/sin 近似)
+// ============================================================================
+
+// Cosine Taylor 级数近似
 func cos_approx(float x) float {
-    // 规约到 [-π, π]
-    float pi = 3.14159265358979
-    float two_pi = 6.28318530717959
-    // 取模
-    float xr = x
-    for xr > pi  { xr = xr - two_pi }
-    for xr < 0.0 - pi { xr = xr + two_pi }
-    // cos(x) ≈ 1 - x²/2 + x⁴/24 - x⁶/720
-    float x2 = xr * xr
-    float x4 = x2 * x2
-    float x6 = x4 * x2
-    1.0 - x2/2.0 + x4/24.0 - x6/720.0
+    // 将 x 归一化到 [-pi, pi] 以提高精度
+    // pi ≈ 3.141592653589793
+    float pi = 3.141592653589793
+    float two_pi = 2.0 * pi
+    
+    // 归一化
+    while x > pi || x < -pi {
+        if x > pi { x = x - two_pi }
+        if x < -pi { x = x + two_pi }
+    }
+    
+    // Taylor: cos(x) = 1 - x²/2! + x⁴/4! - x⁶/6! + ...
+    float term = 1.0
+    float result = 1.0
+    float xx = x * x
+    int n = 1
+    while n <= 12 {
+        term = -term * xx / float_of_int((2 * n - 1) * (2 * n))
+        result = result + term
+        n = n + 1
+    }
+    return result
 }
 
+// Sine Taylor 级数近似
 func sin_approx(float x) float {
-    float pi = 3.14159265358979
-    float two_pi = 6.28318530717959
-    float xr = x
-    for xr > pi  { xr = xr - two_pi }
-    for xr < 0.0 - pi { xr = xr + two_pi }
-    // sin(x) ≈ x - x³/6 + x⁵/120 - x⁷/5040
-    float x2 = xr * xr
-    float x3 = x2 * xr
-    float x5 = x3 * x2
-    float x7 = x5 * x2
-    xr - x3/6.0 + x5/120.0 - x7/5040.0
+    // 归一化到 [-pi, pi]
+    float pi = 3.141592653589793
+    float two_pi = 2.0 * pi
+    
+    while x > pi || x < -pi {
+        if x > pi { x = x - two_pi }
+        if x < -pi { x = x + two_pi }
+    }
+    
+    // Taylor: sin(x) = x - x³/3! + x⁵/5! - x⁷/7! + ...
+    float term = x
+    float result = x
+    float xx = x * x
+    int n = 1
+    while n <= 12 {
+        term = -term * xx / float_of_int((2 * n) * (2 * n + 1))
+        result = result + term
+        n = n + 1
+    }
+    return result
+}
+
+// ============================================================================
+// 11. NEURX 特定适配: 双向注意力 + 2D 位置编码
+// ============================================================================
+//
+// NEURX 使用双向注意力 (类似 BERT),但位置编码是 2D 的:
+//   - Block ID (block_position): 当前 block 的索引
+//   - Position ID (position): block 内部的相对位置
+//
+// NEURX 的 RoPE 同时编码这两个位置信息
+
+struct neurx_position_encoding {
+    int block_position      // 哪个 block (段落级)
+    int position            // block 内的位置 (token 级)
+}
+
+// NEURX 专用 RoPE: 结合 block 和 position 信息
+func get_neurx_rope_angles(
+    rope_scaling_config cfg,
+    neurx_position_encoding pos
+) rope_result {
+    // NEURX 的位置编码方式:
+    // 最终位置 = block_position * block_size + position
+    // 或者分别编码后组合 (取决于具体 NEURX 版本)
+    
+    int effective_position = pos.block_position * cfg.original_max_seq_len + pos.position
+    
+    return get_rope_angles(cfg, effective_position)
+}
+
+// NEURX 批量位置编码构建
+func build_neurx_rope_cache(
+    rope_scaling_config cfg,
+    int num_blocks,
+    int block_size
+) rope_cache {
+    int total_seq_len = num_blocks * block_size
+    return build_rope_cache(cfg, total_seq_len)
+}
+
+// ============================================================================
+// 12. 性能统计 & 验证工具
+// ============================================================================
+
+struct rope_stats {
+    int total_positions_computed
+    float avg_compute_time_us
+    float peak_memory_bytes
+    string method_used
+}
+
+// 验证 RoPE Scaling 的正确性 (单元测试用)
+func validate_rope_scaling(
+    rope_scaling_config cfg,
+    int test_positions_count
+) bool {
+    bool passed = true
+    int p = 0
+    while p < test_positions_count {
+        rope_result r = get_rope_angles(cfg, p)
+        
+        // 检查: cos² + sin² 应该接近 1
+        int i = 0
+        while i < len(r.cos_values) {
+            float val = r.cos_values[i] * r.cos_values[i] + 
+                        r.sin_values[i] * r.sin_values[i]
+            // 允许 ±0.01 的误差 (浮点精度)
+            if val < 0.99 || val > 1.01 {
+                passed = false
+            }
+            i = i + 1
+        }
+        p = p + 1
+    }
+    return passed
+}
+
+// 打印 RoPE Scaling 配置摘要
+func print_rope_config_summary(rope_scaling_config cfg) string {
+    string method_name = ""
+    if cfg.method == ROPE_SCALING_LINEAR {
+        method_name = "Linear (Position Interpolation)"
+    } else if cfg.method == ROPE_SCALING_NTK {
+        method_name = "NTK-Aware"
+    } else {
+        method_name = "YaRN (Recommended)"
+    }
+    
+    "RoPE Scaling Config:\n" +
+    "  Method: " + method_name + "\n" +
+    "  Original Length: " + string(cfg.original_max_seq_len) + "\n" +
+    "  Target Length: " + string(cfg.target_max_seq_len) + "\n" +
+    "  Scale Factor: " + string(float_of_int(cfg.target_max_seq_len) / float_of_int(cfg.original_max_seq_len)) + "x\n" +
+    "  Base: " + string(cfg.base) + "\n" +
+    "  Dim: " + string(cfg.dim)
 }

@@ -19,7 +19,7 @@ package neurx.model.tokenizer.chat_template
 //     <|start_header_id|>user<|end_header_id|>\n\n{content}<|eot_id|>
 //     <|start_header_id|>assistant<|end_header_id|>\n\n
 //
-//   DeepSeek-R1:
+//   NeurX-R1:
 //     <｜begin▁of▁sentence｜>{system}<｜User｜>{user}<｜Assistant｜><think>\n
 //
 //   Gemma:
@@ -56,7 +56,7 @@ func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
 // ============================================================================
 
 struct template_config {
-    string format           // "chatml" | "llama2" | "llama3" | "deepseek_r1" | "gemma" | "alpaca"
+    string format           // "chatml" | "llama2" | "llama3" | "neurx_r1" | "gemma" | "alpaca"
     string system_token     // 系统提示标记
     string user_token       // 用户标记
     string assistant_token  // 助手标记
@@ -113,9 +113,9 @@ func llama3_config() template_config {
     }
 }
 
-func deepseek_r1_config() template_config {
+func neurx_r1_config() template_config {
     template_config {
-        format: "deepseek_r1",
+        format: "neurx_r1",
         system_token: "",
         user_token: "<｜User｜>",
         assistant_token: "<｜Assistant｜>",
@@ -234,7 +234,7 @@ func format_system(string content, template_config tmpl) string {
         return str_cat(r, tmpl.nl)
     }
 
-    if tmpl.format == "deepseek_r1" {
+    if tmpl.format == "neurx_r1" {
         // 系统 prompt 直接拼接在 BOS 后
         return str_cat(content, tmpl.nl)
     }
@@ -269,7 +269,7 @@ func format_user(string content, template_config tmpl) string {
         return str_cat(r, tmpl.nl)
     }
 
-    if tmpl.format == "deepseek_r1" {
+    if tmpl.format == "neurx_r1" {
         string r = str_cat(tmpl.user_token, content)
         return r
     }
@@ -315,7 +315,7 @@ func format_assistant(string content, template_config tmpl, bool add_eos) string
         return r
     }
 
-    if tmpl.format == "deepseek_r1" {
+    if tmpl.format == "neurx_r1" {
         // <｜Assistant｜><think>\n{thinking}\n</think>\n{content}
         string r = str_cat(tmpl.assistant_token, content)
         if add_eos {
@@ -367,7 +367,7 @@ func format_generation_prompt(template_config tmpl) string {
     if tmpl.format == "llama3" {
         return tmpl.assistant_token
     }
-    if tmpl.format == "deepseek_r1" {
+    if tmpl.format == "neurx_r1" {
         return str_cat(tmpl.assistant_token, "<think>\n")
     }
     if tmpl.format == "gemma" {
@@ -481,8 +481,8 @@ struct special_tokens {
     string im_start    // ChatML
     string im_end      // ChatML
     string eot_id      // LLaMA-3
-    string think_start // DeepSeek-R1
-    string think_end   // DeepSeek-R1
+    string think_start // NeurX-R1
+    string think_end   // NeurX-R1
     []string extra     // 自定义 special tokens
 }
 
@@ -516,7 +516,7 @@ func llama3_special_tokens() special_tokens {
     }
 }
 
-func deepseek_r1_special_tokens() special_tokens {
+func neurx_r1_special_tokens() special_tokens {
     special_tokens {
         bos: "<｜begin▁of▁sentence｜>",
         eos: "<｜end▁of▁sentence｜>",

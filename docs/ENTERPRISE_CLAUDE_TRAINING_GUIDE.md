@@ -249,23 +249,23 @@ print(f'最小: {min(shard_sizes) / 1e6:.1f} MB, 最大: {max(shard_sizes) / 1e6
 cd /Users/feifei/shuwen/train/neurx
 
 # 启动分布式训练
-srun bash script/run_gpt_large_pretrain.sh
+srun bash script/run_model_large_pretrain.sh
 ```
 
 **本地演示 (单 GPU)**:
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/run_gpt_large_pretrain.sh
+bash script/run_model_large_pretrain.sh
 ```
 
 ### 第三步: 监控训练进度
 
 ```bash
 # 实时查看日志
-tail -f artifacts/logs/gpt_large_pretrain_*.log
+tail -f artifacts/logs/model_large_pretrain_*.log
 
 # 监控关键指标
-watch -n 10 'grep -E "(Step|Loss|Tokens)" artifacts/logs/gpt_large_pretrain_*.log | tail -20'
+watch -n 10 'grep -E "(Step|Loss|Tokens)" artifacts/logs/model_large_pretrain_*.log | tail -20'
 
 # GPU 监控
 nvidia-smi dmon -s pucvmet

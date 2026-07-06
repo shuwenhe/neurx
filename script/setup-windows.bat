@@ -3,8 +3,8 @@ REM ─────────────────────────�
 REM  NeurX Code — Windows LLM/API key setup script
 REM  Usage: scripts\setup-windows.bat
 REM
-REM  This script helps configure API keys for OpenAI-compatible endpoints
-REM  (SiliconFlow, OpenAI, or other compatible services) on Windows.
+REM  This script helps configure API keys for NeurX-compatible endpoints
+REM  (SiliconFlow, NeurX-compatible, or other compatible services) on Windows.
 REM
 REM  Supports three configuration methods (in priority order):
 REM    1. Environment variables (persistent)
@@ -86,8 +86,8 @@ echo Step 2a: Configuring environment variables...
 echo.
 echo   API Provider options:
 echo   [1] SiliconFlow (https://siliconflow.cn/)
-echo   [2] OpenAI (https://openai.com/)
-echo   [3] Other OpenAI-compatible endpoint
+echo   [2] NeurX-compatible endpoint
+echo   [3] Other compatible endpoint
 echo.
 set /p provider="Enter provider [1-3]: "
 
@@ -97,12 +97,12 @@ if "!provider!"=="1" (
     set "key_var=SILICONFLOW_API_KEY"
     set "url_var=SILICONFLOW_API_URL"
 ) else if "!provider!"=="2" (
-    set "provider_name=OpenAI"
-    set "default_url=https://api.openai.com/v1"
+    set "provider_name=NeurX-compatible"
+    set "default_url=https://api.neurx.example/v1"
     set "key_var=OPENAI_API_KEY"
     set "url_var=OPENAI_BASE_URL"
 ) else (
-    set "provider_name=OpenAI-compatible"
+    set "provider_name=NeurX-compatible"
     set "key_var=OPENAI_COMPATIBLE_API_KEY"
     set "url_var=OPENAI_BASE_URL"
 )
@@ -128,7 +128,7 @@ if not "!api_key!"=="" (
 
 echo.
 echo Step 2c: Enter API endpoint URL
-if "!provider_name!"=="OpenAI-compatible" (
+if "!provider_name!"=="NeurX-compatible" (
     echo   (e.g., https://api.yourendpoint.com/v1)
 )
 echo.
@@ -174,8 +174,8 @@ if not exist "!CONFIG_DIR!" (
 echo.
 echo   API Provider options:
 echo   [1] SiliconFlow
-echo   [2] OpenAI
-echo   [3] Other OpenAI-compatible endpoint
+echo   [2] NeurX-compatible endpoint
+echo   [3] Other compatible endpoint
 echo.
 set /p provider="Enter provider [1-3]: "
 
@@ -183,10 +183,10 @@ if "!provider!"=="1" (
     set "provider_name=SiliconFlow"
     set "default_url=https://api.siliconflow.cn/v1"
 ) else if "!provider!"=="2" (
-    set "provider_name=OpenAI"
-    set "default_url=https://api.openai.com/v1"
+    set "provider_name=NeurX-compatible"
+    set "default_url=https://api.neurx.example/v1"
 ) else (
-    set "provider_name=OpenAI-compatible"
+    set "provider_name=NeurX-compatible"
     set "default_url=https://api.yourendpoint.com/v1"
 )
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# NeurX Industrial-Grade Claude Training - Quick Start Script
+# NeurX Industrial-Grade Training - Quick Start Script
 # Run this to verify installation and begin training
 
 set -e
@@ -8,7 +8,7 @@ PROJECT_DIR="/Users/feifei/shuwen/train/neurx"
 cd "$PROJECT_DIR"
 
 echo "============================================================"
-echo "  🚀 NeurX Industrial-Grade Claude Training System"
+echo "  🚀 NeurX Industrial-Grade Training System"
 echo "     Quick Start Guide"
 echo "============================================================"
 echo ""

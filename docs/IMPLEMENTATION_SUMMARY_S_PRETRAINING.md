@@ -11,7 +11,7 @@
 ## 📋 实现内容清单
 
 ### ✅ 1. 完整的S语言训练系统
-**文件**: `pretrain/llm/gpt_large_pretrain.s` (~850行代码)
+**文件**: `pretrain/llm/model_large_pretrain.s` (~850行代码)
 
 #### 架构定义
 - [x] GPTLargeConfig 结构 - 完整的模型配置
@@ -70,7 +70,7 @@ func train_epoch(config, weights, epoch, start_time) (TransformerWeights, f64) {
 ```s
 func save_checkpoint(weights, config, epoch) bool {
     // 序列化所有权重到文件
-    // 保存位置: artifacts/checkpoints/gpt_large_epoch_{epoch}.ckpt
+    // 保存位置: artifacts/checkpoints/model_large_epoch_{epoch}.ckpt
     // 文件大小: 1.4 GB (FP32)
 }
 
@@ -81,7 +81,7 @@ func load_checkpoint(path: string) TransformerWeights {
 ```
 
 ### ✅ 2. 训练执行脚本
-**文件**: `script/run_gpt_large_pretrain.sh` (~300行Bash)
+**文件**: `script/run_model_large_pretrain.sh` (~300行Bash)
 
 #### 智能降级系统
 ```bash
@@ -144,20 +144,20 @@ run_training_demo() {
 
 pretrain: check-bash
 	@echo "Running GPT-large pretraining system"
-	@cd '$(CURDIR_UNIX)' && bash script/run_gpt_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && bash script/run_model_large_pretrain.sh 2>&1
 
 pretrain-watch: check-bash
 	@echo "Running GPT-large pretraining system with live logs"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && \
-		bash script/run_gpt_large_pretrain.sh 2>&1 | \
-		tee artifacts/logs/gpt_large_pretrain_watch.log
+		bash script/run_model_large_pretrain.sh 2>&1 | \
+		tee artifacts/logs/model_large_pretrain_watch.log
 ```
 
 #### 与chat_inference.s集成
 ```s
 // 加载最优权重用于推理
 var best_checkpoint = load_checkpoint(
-    "artifacts/checkpoints/gpt_large_epoch_3.ckpt"
+    "artifacts/checkpoints/model_large_epoch_3.ckpt"
 )
 var model = apply_checkpoint(create_chat_config(), best_checkpoint)
 ```
@@ -165,7 +165,7 @@ var model = apply_checkpoint(create_chat_config(), best_checkpoint)
 #### 与chat.sh集成
 ```bash
 make chat
-# 现在使用 gpt_large_epoch_3.ckpt 中的真实权重
+# 现在使用 model_large_epoch_3.ckpt 中的真实权重
 # 提供更智能的聊天响应
 ```
 
@@ -248,14 +248,14 @@ make chat
 #### 方法2: 直接运行脚本
 ```bash
 cd neurx
-bash script/run_gpt_large_pretrain.sh
+bash script/run_model_large_pretrain.sh
 ```
 
 ### 高级用法
 
 #### 自定义配置
 ```bash
-# 编辑 pretrain/llm/gpt_large_pretrain.s 的 new_gpt_large_pretrain_config()
+# 编辑 pretrain/llm/model_large_pretrain.s 的 new_model_large_pretrain_config()
 # 修改以下参数:
 # - vocab_size: 50257
 # - hidden_dim: 1280
@@ -282,18 +282,18 @@ export NEURX_PRETRAIN_COMPILE_ONLY=1
 #### 检查点文件
 ```
 artifacts/checkpoints/
-├── gpt_large_epoch_1.ckpt  (1.4 GB)
+├── model_large_epoch_1.ckpt  (1.4 GB)
 │   └── 初始权重，loss: 4.12
-├── gpt_large_epoch_2.ckpt  (1.4 GB)
+├── model_large_epoch_2.ckpt  (1.4 GB)
 │   └── 中间权重，loss: 2.05
-└── gpt_large_epoch_3.ckpt  (1.4 GB) ⭐ 最优
+└── model_large_epoch_3.ckpt  (1.4 GB) ⭐ 最优
     └── 最终权重，loss: 1.38
 ```
 
 #### 日志文件
 ```
 artifacts/logs/
-└── gpt_large_pretrain_20260701_120000.log
+└── model_large_pretrain_20260701_120000.log
     ├── 权重初始化信息
     ├── 每个Epoch的进度
     ├─ 损失和学习率跟踪
@@ -340,7 +340,7 @@ var elapsed: i64 = time.now_ms() - start_time
 ### 5. 字符串操作
 ```s
 var checkpoint_name: string = 
-    "gpt_large_epoch_" + strings.itoa(epoch) + ".ckpt"
+    "model_large_epoch_" + strings.itoa(epoch) + ".ckpt"
 ```
 
 ---
@@ -367,7 +367,7 @@ Loop: 1000 steps
   - 学习率预热 (10K steps)
   
 结果: Loss 4.5234 → 4.1234 (-8.8%)
-检查点: artifacts/checkpoints/gpt_large_epoch_1.ckpt
+检查点: artifacts/checkpoints/model_large_epoch_1.ckpt
 ```
 
 ### Step 3: Epoch 2 (158s)
@@ -378,7 +378,7 @@ Loop: 1000 steps
   - 权重更新更有效
   
 结果: Loss 4.1234 → 2.0456 (-50.4%)
-检查点: artifacts/checkpoints/gpt_large_epoch_2.ckpt
+检查点: artifacts/checkpoints/model_large_epoch_2.ckpt
 ```
 
 ### Step 4: Epoch 3 (155s)
@@ -389,7 +389,7 @@ Loop: 1000 steps
   - 准备推理
   
 结果: Loss 2.0456 → 1.3789 (-32.6%)
-检查点: artifacts/checkpoints/gpt_large_epoch_3.ckpt ⭐
+检查点: artifacts/checkpoints/model_large_epoch_3.ckpt ⭐
 ```
 
 ### Step 5: 完成 (467s 总耗时)
@@ -407,7 +407,7 @@ Loop: 1000 steps
 ### chat_inference.s
 ```
 现状: 使用伪随机token生成
-未来: 加载 gpt_large_epoch_3.ckpt
+未来: 加载 model_large_epoch_3.ckpt
 结果: 真实的Transformer推理 → 智能聊天
 ```
 
@@ -431,7 +431,7 @@ make chat      → 使用预训练权重聊天
 ## 📈 扩展和优化方向
 
 ### 短期优化 (1-2周)
-- [ ] 使用真实S编译器编译 pretrain/llm/gpt_large_pretrain.s
+- [ ] 使用真实S编译器编译 pretrain/llm/model_large_pretrain.s
 - [ ] 集成检查点加载到chat_inference.s
 - [ ] 在验证集上评估模型
 
@@ -442,7 +442,7 @@ make chat      → 使用预训练权重聊天
 - [ ] 分布式数据并行
 
 ### 长期优化 (3-6个月)
-- [ ] 支持更大模型 (GPT-XL: 1.5B, GPT-3: 175B)
+- [ ] 支持更大模型 (GPT-XL: 1.5B, Model-v3: 175B)
 - [ ] 多机分布式训练
 - [ ] 模型并行和管道并行
 - [ ] 在线学习和微调

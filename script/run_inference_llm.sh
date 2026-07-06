@@ -28,7 +28,7 @@ S_COMPILER_DIR="${S_COMPILER_DIR:-$NEURX_ROOT/../s}"
 INFERENCE_SOURCE="${INFERENCE_DIR}/production_inference.s"
 IR_OUTPUT="${BUILD_DIR}/inference.ir"
 RUNNER_BIN="${BUILD_DIR}/inference_runner"
-RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
+RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_model_large"
 LOG_FILE="${LOG_DIR}/inference_$(date +%Y%m%d_%H%M%S).log"
 
 # 推理参数 (可通过环境变量覆盖)

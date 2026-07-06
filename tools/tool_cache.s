@@ -1,6 +1,6 @@
 package neurx.tool.tool_cache
 
-// Tool result cache — analogous to Claude's prompt caching.
+// Tool result cache — analogous to NeurX prompt caching.
 // Avoids re-executing expensive tool calls (file reads, grep, shell commands)
 // when the same (tool_name, input) pair is seen again within a session.
 //
