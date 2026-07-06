@@ -1,11 +1,11 @@
-# Claude Code 源代码导航指南
+# NeurX Code 源代码导航指南
 
 ## 文件创建相关的关键文件
 
 ### 🔍 文件位置地图
 
 ```
-/Users/feifei/agent/claude-code/
+/Users/feifei/agent/neurx-code-reference/
 ├── plugins/
 │   ├── hookify/                          # Hook 系统实现
 │   │   ├── core/
@@ -45,7 +45,7 @@
 
 ### 1. Write 工具验证 - validate-write.sh
 
-**路径**：`/Users/feifei/agent/claude-code/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh`
+**路径**：`外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh`
 
 **功能**：演示 Write 工具的 PreToolUse 钩子
 
@@ -76,7 +76,7 @@ fi
 
 ### 2. Bash 工具验证 - validate-bash.sh
 
-**路径**：`/Users/feifei/agent/claude-code/plugins/plugin-dev/skills/hook-development/examples/validate-bash.sh`
+**路径**：`外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-bash.sh`
 
 **功能**：演示 Bash 工具的验证
 
@@ -107,7 +107,7 @@ exit 0  # 允许
 
 ### 3. 规则引擎 - rule_engine.py
 
-**路径**：`/Users/feifei/agent/claude-code/plugins/hookify/core/rule_engine.py`
+**路径**：`外部参考仓库/plugins/hookify/core/rule_engine.py`
 
 **功能**：实现规则匹配和评估逻辑
 
@@ -132,7 +132,7 @@ elif tool_name in ['Write', 'Edit']:
 
 ### 4. 安全提醒钩子 - security_reminder_hook.py
 
-**路径**：`/Users/feifei/agent/claude-code/plugins/security-guidance/hooks/security_reminder_hook.py`
+**路径**：`外部参考仓库/plugins/security-guidance/hooks/security_reminder_hook.py`
 
 **功能**：为文件操作提供安全提醒
 
@@ -159,7 +159,7 @@ def extract_content_from_input(tool_name, tool_input):
 
 ### 5. Bash 命令验证器示例 - bash_command_validator_example.py
 
-**路径**：`/Users/feifei/agent/claude-code/examples/hooks/bash_command_validator_example.py`
+**路径**：`外部参考仓库/examples/hooks/bash_command_validator_example.py`
 
 **功能**：演示如何创建自定义 Bash 命令验证
 
@@ -199,7 +199,7 @@ def main():
 
 ### Hook 配置格式
 
-**在 `.claude/config.json` 中**：
+**在 `.neurx/config.json` 中**：
 ```json
 {
   "hooks": {
@@ -233,7 +233,7 @@ def main():
 
 ### Hook 输入/输出格式
 
-**输入（来自 Claude Code）**：
+**输入（来自外部参考实现）**：
 ```json
 {
   "session_id": "abc123...",
@@ -331,7 +331,7 @@ PostToolUse 钩子 (可选)
   ├─ 反应到执行结果
   └─ 例如：日志、通知
     ↓
-返回结果给 Claude
+返回结果给调用方
 ```
 
 ### 2. Hook 脚本的三种决策
@@ -365,14 +365,14 @@ Layer 3: 用户确认
 
 ### 快速查看文件创建流程
 
-1. **打开 Claude Code 配置**：
+1. **打开对应配置**：
    ```bash
-   cat ~/.claude/config.json
+   cat ~/.neurx/config.json
    ```
 
 2. **查看 Hook 脚本**：
    ```bash
-   ls /Users/feifei/agent/claude-code/plugins/plugin-dev/skills/hook-development/examples/
+   ls 外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/
    ```
 
 3. **运行示例验证**：
@@ -382,12 +382,12 @@ Layer 3: 用户确认
      "hook_event_name": "PreToolUse",
      "tool_name": "Write",
      "tool_input": {"file_path": "/tmp/test.txt", "content": "hello"}
-   }' | bash /Users/feifei/agent/claude-code/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh
+   }' | bash 外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh
    ```
 
 4. **查看规则定义**：
    ```bash
-   grep -r "def _rule_matches" /Users/feifei/agent/claude-code/plugins/
+   grep -r "def _rule_matches" 外部参考仓库/plugins/
    ```
 
 ## 总结
@@ -402,6 +402,6 @@ Layer 3: 用户确认
 
 ## 相关文档
 
-- 📘 [Claude Code 文件创建详解](./CLAUDE_CODE_FILE_CREATION_EXPLAINED.md)
-- 📗 [Claude Code vs NeurX Code 对比](./CLAUDE_CODE_vs_NEURX_CODE_COMPARISON.md)
-- 📙 [NeurX Code 标准工具](./CLAUDE_STANDARD_TOOLS.md)
+- 📘 [NeurX 文件创建详解](./NEURX_FILE_CREATION_EXPLAINED.md)
+- 📗 [NeurX Code 对比](./NEURX_CODE_COMPARISON.md)
+- 📙 [NeurX Code 标准工具](./NEURX_STANDARD_TOOLS.md)

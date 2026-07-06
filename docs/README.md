@@ -1,6 +1,6 @@
 # 🚀 NeurX: Complete LLM Training System
 
-> A production-ready Claude-level LLM training framework with advanced monitoring, mixed precision, distributed training, and automatic optimization.
+> A production-ready NeurX-level LLM training framework with advanced monitoring, mixed precision, distributed training, and automatic optimization.
 
 [![Status](https://img.shields.io/badge/status-production--ready-brightgreen)]()
 [![Code](https://img.shields.io/badge/code-3544%20lines-blue)]()
@@ -28,7 +28,7 @@
 ```
 Initial:           Final (Optimized):
 ━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━
-PPL: 1000+         PPL: <50 (Claude-level) ✅
+PPL: 1000+         PPL: <50 (NeurX-level) ✅
 Speed: 500 tok/s   Speed: 1000+ tok/s (2x faster)
 Memory: 100%       Memory: 50% (50% saved)
 GPU: 1             GPU: 4 (3.7x faster)
@@ -96,7 +96,7 @@ make -f Makefile.complete demo-lr            # Learning rate schedule
 make -f Makefile.complete demo-distributed   # Multi-GPU training
 ```
 
-### Start Training (24-48 hours for Claude-level)
+### Start Training (24-48 hours for NeurX-level)
 
 ```bash
 # Single GPU training with all optimizations

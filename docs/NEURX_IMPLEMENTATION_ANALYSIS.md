@@ -268,7 +268,7 @@ cat << 'EOF'
 训练脚本:
   ✅ complete_training_cycle.sh      - 完整训练循环
   ✅ training_demo.sh                - 交互式演示
-  ✅ claude_complete_pipeline.sh      - 端到端管道
+  ✅ neurx_complete_pipeline.sh      - 端到端管道
   ✅ run_training_pipeline.sh         - 训练执行
 
 推理脚本:

@@ -255,7 +255,7 @@ s run script/cluster_deployment.s
 ### 3️⃣ 训练执行
 ```bash
 # 启动分布式训练
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 # 配合检查点恢复: checkpoint_recovery.s
 ```
 
@@ -330,7 +330,7 @@ s run script/checkpoint_recovery.s
 **完整训练**:
 ```bash
 # 在真实集群上运行
-bash script/claude_complete_pipeline.sh
+bash script/neurx_complete_pipeline.sh
 ```
 
 ---

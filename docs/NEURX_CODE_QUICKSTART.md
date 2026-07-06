@@ -1,4 +1,4 @@
-# Claude Code 文件操作功能快速实现指南
+# NeurX 文件操作功能快速实现指南
 
 **创建日期**: 2026-06-08  
 **用途**: 在 C++ 中实现对应功能的快速参考
@@ -261,7 +261,7 @@ public:
 
 ## 🔗 跨引用
 
-- **完整分析**: CLAUDE-CODE-FILE-OPERATIONS-ANALYSIS.md
+- **完整分析**: [NEURX_FILE_OPERATIONS_ANALYSIS.md](NEURX_FILE_OPERATIONS_ANALYSIS.md)
 - **C++ 参考**: neurx-code/src/services/FileService.h
 - **工具参考**: neurx-code/src/tools/FileSystemTool.h
 
