@@ -131,7 +131,7 @@ zero_stage3_optimizer_step(
 
 ## 模块 4: 损失计算与反向传播
 
-**文件**: `model/llm/gpt_moe_1t_loss.s`
+**文件**: `model/llm/model_moe_1t_loss.s`
 
 **用途**: Cross-entropy + MoE 辅助损失，反向传播
 

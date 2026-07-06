@@ -327,7 +327,7 @@ neurx/
 
 ## 🎉 Summary
 
-Successfully implemented a **complete, modern Transformer and Tokenizer** for the NeurX framework. The architecture follows best practices from recent models (Llama, Claude, GPT-4) with all essential components for training 7B-scale language models.
+Successfully implemented a **complete, modern Transformer and Tokenizer** for the NeurX framework. The architecture follows best practices from recent models (Llama, Claude, Model-v4) with all essential components for training 7B-scale language models.
 
 **Ready for next phase**: Gradient computation, optimization, and full training pipeline integration.
 

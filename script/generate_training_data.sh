@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude级别工业LLM训练数据生成脚本
+# NeurX级别工业LLM训练数据生成脚本
 # 基于S语言数据设计的Bash实现
 
 set -e
@@ -80,5 +80,5 @@ echo "  ✓ 数据科学工作流 (3条)"
 echo "  ✓ 安全和隐私 (2条)"
 echo "  ✓ 创新和前沿技术 (3条)"
 echo ""
-echo "🎯 适合Claude级别的工业LLM预训练"
+echo "🎯 适合NeurX级别的工业LLM预训练"
 echo "🚀 开始训练: make train"

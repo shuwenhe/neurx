@@ -2,46 +2,28 @@ package neurx.inference
 
 // ============================================================================
 // TEXT GENERATOR - High-Level API
-// Orchestrates model inference + sampling strategies
+// Orchestrates generation flow on top of sampling_strategies.
 // ============================================================================
 
-use neurx.inference.sampling.sampling_strategies_impl
-use neurx.inference.sampling.sampling_core
-use neurx.inference.sampling.sampling_advanced
-use neurx.inference.sampling.sampling_utils
-use neurx.inference.sampling.sampling_utils2
-use neurx.inference.sampling.sampling_utils3
-use neurx.inference.sampling.sampling_utils4
-use neurx.inference.sampling.sampling_penalties
-use neurx.inference.sampling.sampling_ngram
-use neurx.inference.sampling.sampling_beam
+use neurx.inference.sampling_strategies
 
-// ---- Generator Configuration ----
 struct generator_config {
     sampling_config sampling
-    
-    // Model settings
-    int eos_token_id           // End-of-sequence token ID
-    int pad_token_id           // Padding token ID (for attention mask)
-    
-    // Generation constraints
-    bool force_eos             // Force EOS at max_length if not generated
-    int min_new_tokens         // Minimum new tokens to generate (beyond prompt)
-    int max_new_tokens         // Maximum new tokens to generate
-    
-    // Output control
-    bool return_scores         // Return log-probabilities of each step
-    bool return_full_text      // Return full sequence including prompt
-    
-    // Streaming/batch
-    int num_return_sequences   // How many different sequences to return
+    int eos_token_id
+    int pad_token_id
+    bool force_eos
+    int min_new_tokens
+    int max_new_tokens
+    bool return_scores
+    bool return_full_text
+    int num_return_sequences
+    int top_logprobs_count
 }
 
-// Create default generator configuration
 func default_generator_config() generator_config {
     generator_config {
-        sampling: default_sampling_config(),
-        eos_token_id: 2,       // Common EOS token for GPT-like models
+        sampling: neurx.inference.sampling_strategies.new_sampling_config(),
+        eos_token_id: 2,
         pad_token_id: 0,
         force_eos: true,
         min_new_tokens: 1,
@@ -49,127 +31,517 @@ func default_generator_config() generator_config {
         return_scores: false,
         return_full_text: true,
         num_return_sequences: 1,
+        top_logprobs_count: 5,
     }
 }
 
-// ---- Generator Result ----
-struct generation_result {
-    []int sequences            // Generated token sequence (stub form)
-    []float scores             // Scores per step (stub form)
-    []string texts             // Decoded text strings (if tokenizer available)
-    bool finished              // Did all sequences end with EOS?
-    float avg_score            // Average score across sequences
+struct top_logprob_candidate {
+    int token_id
+    float logprob
 }
 
-// ========================================================================
-// MAIN GENERATE FUNCTION
-// Takes prompt + config, returns generated text(s)
-// ========================================================================
+struct generation_result {
+    [][]int sequences
+    []float scores
+    [][]float token_logprobs
+    [][][]top_logprob_candidate top_logprobs
+    []string texts
+    bool finished
+    float avg_score
+}
 
-func generate(
-    []int prompt_ids,          // Input/prompt token IDs
-    generator_config cfg
-) generation_result {
-    // Initialize state
-    int total_generated = 0
+func min(int a, int b) int {
+    if a < b {
+        return a
+    }
+    b
+}
+
+func max(int a, int b) int {
+    if a > b {
+        return a
+    }
+    b
+}
+
+func copy_ids([]int data) []int {
+    int n = len(data)
+    []int out = []int{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = data[i]
+        i = i + 1
+    }
+    out
+}
+
+func extract_generated_part([]int full_ids, int prompt_length) []int {
+    int n = len(full_ids) - prompt_length
+    if n <= 0 {
+        return []
+    }
+    []int out = []int{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = full_ids[prompt_length + i]
+        i = i + 1
+    }
+    out
+}
+
+func has_eos([]int seq, int eos_id) bool {
+    int i = 0
+    while i < len(seq) {
+        if seq[i] == eos_id {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+func check_all_finished([][]int sequences, int eos_id) bool {
+    if len(sequences) == 0 {
+        return false
+    }
+    int i = 0
+    while i < len(sequences) {
+        if !has_eos(sequences[i], eos_id) {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
+func append_sequence_score([]float scores, float score) []float {
+    scores.push(score)
+    scores
+}
+
+func append_token_logprob_sequence([][]float all_logprobs, []float seq_logprobs) [][]float {
+    all_logprobs.push(seq_logprobs)
+    all_logprobs
+}
+
+func append_top_logprob_sequence([][][]top_logprob_candidate all_top_logprobs, [][]top_logprob_candidate seq_top_logprobs) [][][]top_logprob_candidate {
+    all_top_logprobs.push(seq_top_logprobs)
+    all_top_logprobs
+}
+
+func compute_avg_score([]float scores) float {
+    if len(scores) == 0 {
+        return 0.0
+    }
+    float total = 0.0
+    int i = 0
+    while i < len(scores) {
+        total = total + scores[i]
+        i = i + 1
+    }
+    total / float(len(scores))
+}
+
+func generator_vocab_size([]int prompt_ids, generator_config cfg) int {
+    int vocab = max(cfg.eos_token_id + 4, 16)
+    int i = 0
+    while i < len(prompt_ids) {
+        if prompt_ids[i] + 4 > vocab {
+            vocab = prompt_ids[i] + 4
+        }
+        i = i + 1
+    }
+    vocab
+}
+
+func stub_next_logits(
+    []int current_ids,
+    generator_config cfg,
+    int step,
+    int max_steps,
+    int vocab_size
+) []float {
+    []float logits = []float{cap: vocab_size}
+    int i = 0
+    while i < vocab_size {
+        logits[i] = -4.0 - float(i % 5)
+        i = i + 1
+    }
+
+    int preferred = (len(current_ids) + step + 3) % vocab_size
+    logits[preferred] = 8.0 + float(step)
+    logits[(preferred + 1) % vocab_size] = 4.0
+    logits[(preferred + 2) % vocab_size] = 2.0
+
+    if step + 1 >= max_steps {
+        logits[cfg.eos_token_id] = 12.0
+    } else if step + 2 >= max_steps {
+        logits[cfg.eos_token_id] = 6.0
+    } else if cfg.min_new_tokens > step {
+        logits[cfg.eos_token_id] = -12.0
+    }
+
+    logits
+}
+
+func take_generation_output([]int prompt_ids, []int generated_ids, bool return_full_text) []int {
+    if return_full_text {
+        []int full = copy_ids(prompt_ids)
+        int i = 0
+        while i < len(generated_ids) {
+            full.push(generated_ids[i])
+            i = i + 1
+        }
+        return full
+    }
+    copy_ids(generated_ids)
+}
+
+func log_softmax([]float logits) []float {
+    int n = len(logits)
+    if n == 0 {
+        return []
+    }
+    float max_val = logits[0]
+    int i = 1
+    while i < n {
+        if logits[i] > max_val {
+            max_val = logits[i]
+        }
+        i = i + 1
+    }
+    float sum_exp = 0.0
+    i = 0
+    while i < n {
+        sum_exp = sum_exp + neurx.inference.sampling_strategies.exp_approx(logits[i] - max_val)
+        i = i + 1
+    }
+    float log_sum_exp = neurx.inference.sampling_strategies.log_approx(sum_exp) + max_val
+    []float out = []float{cap: n}
+    i = 0
+    while i < n {
+        out[i] = logits[i] - log_sum_exp
+        i = i + 1
+    }
+    out
+}
+
+func collect_top_logprobs([]float log_probs, int top_n) []top_logprob_candidate {
+    int n = len(log_probs)
+    if n == 0 || top_n <= 0 {
+        return []
+    }
+    []int ranked = neurx.inference.sampling_strategies.argsort_descending(log_probs)
+    if top_n > n {
+        top_n = n
+    }
+    []top_logprob_candidate out = []top_logprob_candidate{cap: top_n}
+    int i = 0
+    while i < top_n {
+        int token_id = ranked[i]
+        out.push(top_logprob_candidate {
+            token_id: token_id,
+            logprob: log_probs[token_id],
+        })
+        i = i + 1
+    }
+    out
+}
+
+func generate_one_sequence(
+    []int prompt_ids,
+    generator_config cfg,
+    uint64 rng
+) ([]int, float, []float, [][]top_logprob_candidate, bool, uint64) {
     int max_steps = min(cfg.max_new_tokens, cfg.sampling.max_length)
-    uint64 rng = cfg.sampling.seed
-    
-    // Storage for all sequences and scores
-    []int all_sequences = []int{cap: 0}
-    []float all_scores = []float{cap: 0}
-    
-    // Generate multiple sequences if requested
-    int seq_idx = 0
-    while seq_idx < cfg.num_return_sequences {
-        rng = advance_rng(rng)
-        
-        // Initialize with prompt
-        []int current_ids = copy_int_array(prompt_ids)
-        []float step_logits = []float{cap: 0}
-        bool done = false
-        
-        // Generation loop
+    int vocab_size = generator_vocab_size(prompt_ids, cfg)
+    []int current_ids = copy_ids(prompt_ids)
+    float sequence_score = 0.0
+    bool finished = false
+    int generated = 0
+
+    if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
+        [][]float all_logits = [][]float{cap: max_steps}
         int step = 0
         while step < max_steps {
-            if done { break }
-            
-            // Run model forward pass to get next-token logits
-            []float logits = []float{cap: 0}
-            
-            // Store logits (for scoring/debugging)
-            step_logits.push(0.0)
-            
-            // Apply penalties based on already-generated tokens (excluding prompt)
-            []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
-            
-            if cfg.sampling.repetition_penalty != 1.0 {
-                logits = apply_repetition_penalty(logits, gen_part, 
-                                                   cfg.sampling.repetition_penalty)
-            }
-            
-            if cfg.sampling.no_repeat_ngram_size > 0 {
-                logits = apply_ngram_blocking(logits, gen_part,
-                                               cfg.sampling.no_repeat_ngram_size)
-            }
-            
-            // Select next token using configured strategy
-            int next_token
-            
-            if cfg.sampling.strategy == "greedy" {
-                next_token = 0
-            } else if cfg.sampling.strategy == "top_k" {
-                next_token = 0
-            } else if cfg.sampling.strategy == "top_p" {
-                next_token = 0
-            } else if cfg.sampling.strategy == "beam_search" {
-                // Beam search needs all logits at once - handled separately
-                break
-            } else {
-                // Fallback to greedy
-                next_token = 0
-            }
-            
-            // Append token
-            current_ids.push(next_token)
-            total_generated = total_generated + 1
-            
-            // Check stopping conditions
-            if next_token == cfg.eos_token_id && total_generated >= cfg.min_new_tokens {
-                done = true
-            }
-            
-            if total_generated >= cfg.max_new_tokens {
-                if cfg.force_eos && current_ids[len(current_ids)-1] != cfg.eos_token_id {
-                    current_ids.push(cfg.eos_token_id)
-                }
-                done = true
-            }
-
+            all_logits.push(stub_next_logits(current_ids, cfg, step, max_steps, vocab_size))
             step = step + 1
         }
-        
-        if len(current_ids) > 0 {
-            all_sequences.push(current_ids[0])
+        []int beam_tokens = neurx.inference.sampling_strategies.beam_search_decode(
+            all_logits,
+            cfg.sampling,
+            cfg.eos_token_id
+        )
+        int i = 0
+        while i < len(beam_tokens) {
+            current_ids.push(beam_tokens[i])
+            if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
+                finished = true
+                break
+            }
+            i = i + 1
         }
-        if cfg.return_scores {
-            all_scores.push(0.0)
+        generated = len(current_ids) - len(prompt_ids)
+        if cfg.force_eos && !finished && generated >= max_steps {
+            current_ids.push(cfg.eos_token_id)
+            finished = true
         }
-
-        seq_idx = seq_idx + 1
+        return (
+            take_generation_output(prompt_ids, extract_generated_part(current_ids, len(prompt_ids)), cfg.return_full_text),
+            sequence_score,
+            [],
+            [],
+            finished,
+            rng
+        )
     }
-    
-    // Build result
+
+    int step = 0
+    []float step_logprobs = []float{cap: max_steps}
+    [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
+    while step < max_steps {
+        []float raw_logits = stub_next_logits(current_ids, cfg, step, max_steps, vocab_size)
+        []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
+        []float processed = neurx.inference.sampling_strategies.process_logits(raw_logits, gen_part, cfg.sampling)
+        []float log_probs = log_softmax(processed)
+        []top_logprob_candidate top_logprobs = collect_top_logprobs(log_probs, cfg.top_logprobs_count)
+        int next_token = neurx.inference.sampling_strategies.sample_next_token_index(
+            raw_logits,
+            gen_part,
+            cfg.sampling,
+            rng
+        )
+        rng = neurx.inference.sampling_strategies.advance_rng(rng)
+        if next_token < 0 {
+            next_token = cfg.eos_token_id
+        }
+        if next_token < len(processed) {
+            sequence_score = sequence_score + processed[next_token]
+            step_logprobs.push(log_probs[next_token])
+        }
+        step_top_logprobs.push(top_logprobs)
+        current_ids.push(next_token)
+        generated = generated + 1
+
+        if next_token == cfg.eos_token_id && generated >= cfg.min_new_tokens {
+            finished = true
+            break
+        }
+        step = step + 1
+    }
+
+    if cfg.force_eos && !finished && generated >= max_steps {
+        current_ids.push(cfg.eos_token_id)
+        finished = true
+    }
+
+    (
+        take_generation_output(prompt_ids, extract_generated_part(current_ids, len(prompt_ids)), cfg.return_full_text),
+        sequence_score,
+        step_logprobs,
+        step_top_logprobs,
+        finished,
+        rng
+    )
+}
+
+func generate_one_sequence_with_forward(
+    []int prompt_ids,
+    func forward_fn,
+    generator_config cfg,
+    uint64 rng
+) ([]int, float, []float, [][]top_logprob_candidate, bool, uint64) {
+    int max_steps = min(cfg.max_new_tokens, cfg.sampling.max_length)
+    []int current_ids = copy_ids(prompt_ids)
+    float sequence_score = 0.0
+    bool finished = false
+    int generated = 0
+
+    if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
+        [][]float all_logits = [][]float{cap: max_steps}
+        int step = 0
+        while step < max_steps {
+            []float step_logits = forward_fn(current_ids)
+            all_logits.push(step_logits)
+            current_ids.push(0)
+            step = step + 1
+        }
+        current_ids = copy_ids(prompt_ids)
+        []int beam_tokens = neurx.inference.sampling_strategies.beam_search_decode(
+            all_logits,
+            cfg.sampling,
+            cfg.eos_token_id
+        )
+        int i = 0
+        while i < len(beam_tokens) {
+            current_ids.push(beam_tokens[i])
+            if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
+                finished = true
+                break
+            }
+            i = i + 1
+        }
+        generated = len(current_ids) - len(prompt_ids)
+        if cfg.force_eos && !finished && generated >= max_steps {
+            current_ids.push(cfg.eos_token_id)
+            finished = true
+        }
+        return (
+            take_generation_output(prompt_ids, extract_generated_part(current_ids, len(prompt_ids)), cfg.return_full_text),
+            sequence_score,
+            [],
+            [],
+            finished,
+            rng
+        )
+    }
+
+    int step = 0
+    []float step_logprobs = []float{cap: max_steps}
+    [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
+    while step < max_steps {
+        []float raw_logits = forward_fn(current_ids)
+        []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
+        []float processed = neurx.inference.sampling_strategies.process_logits(raw_logits, gen_part, cfg.sampling)
+        []float log_probs = log_softmax(processed)
+        []top_logprob_candidate top_logprobs = collect_top_logprobs(log_probs, cfg.top_logprobs_count)
+        int next_token = neurx.inference.sampling_strategies.sample_next_token_index(
+            raw_logits,
+            gen_part,
+            cfg.sampling,
+            rng
+        )
+        rng = neurx.inference.sampling_strategies.advance_rng(rng)
+        if next_token < 0 {
+            next_token = cfg.eos_token_id
+        }
+        if next_token < len(processed) {
+            sequence_score = sequence_score + processed[next_token]
+            step_logprobs.push(log_probs[next_token])
+        }
+        step_top_logprobs.push(top_logprobs)
+        current_ids.push(next_token)
+        generated = generated + 1
+        if next_token == cfg.eos_token_id && generated >= cfg.min_new_tokens {
+            finished = true
+            break
+        }
+        step = step + 1
+    }
+
+    if cfg.force_eos && !finished && generated >= max_steps {
+        current_ids.push(cfg.eos_token_id)
+        finished = true
+    }
+
+    (
+        take_generation_output(prompt_ids, extract_generated_part(current_ids, len(prompt_ids)), cfg.return_full_text),
+        sequence_score,
+        step_logprobs,
+        step_top_logprobs,
+        finished,
+        rng
+    )
+}
+
+func generate(
+    []int prompt_ids,
+    generator_config cfg
+) generation_result {
+    int count = max(1, cfg.num_return_sequences)
+    [][]int all_sequences = [][]int{cap: count}
+    []float all_scores = []float{cap: count}
+    [][]float all_token_logprobs = [][]float{cap: count}
+    [][][]top_logprob_candidate all_top_logprobs = [][][]top_logprob_candidate{cap: count}
+    uint64 rng = cfg.sampling.seed
+    bool all_finished = true
+
+    int i = 0
+    while i < count {
+        ([]int seq, float score, []float token_logprobs, [][]top_logprob_candidate top_logprobs, bool finished, uint64 next_rng) = generate_one_sequence(prompt_ids, cfg, rng)
+        all_sequences.push(seq)
+        if cfg.return_scores {
+            all_scores = append_sequence_score(all_scores, score)
+        }
+        all_token_logprobs = append_token_logprob_sequence(all_token_logprobs, token_logprobs)
+        all_top_logprobs = append_top_logprob_sequence(all_top_logprobs, top_logprobs)
+        if !finished {
+            all_finished = false
+        }
+        rng = next_rng
+        i = i + 1
+    }
+
     []float result_scores = all_scores
     if !cfg.return_scores {
-        result_scores = []float{cap: 0}
+        result_scores = []
     }
 
     generation_result {
         sequences: all_sequences,
         scores: result_scores,
-        texts: [],  // Will be filled by tokenizer if available
-        finished: check_all_finished(all_sequences, cfg.eos_token_id),
-        avg_score: 0.0,
+        token_logprobs: all_token_logprobs,
+        top_logprobs: all_top_logprobs,
+        texts: [],
+        finished: all_finished && check_all_finished(all_sequences, cfg.eos_token_id),
+        avg_score: compute_avg_score(all_scores),
     }
+}
+
+func generate_with_forward(
+    []int prompt_ids,
+    func forward_fn,
+    generator_config cfg
+) generation_result {
+    int count = max(1, cfg.num_return_sequences)
+    [][]int all_sequences = [][]int{cap: count}
+    []float all_scores = []float{cap: count}
+    [][]float all_token_logprobs = [][]float{cap: count}
+    [][][]top_logprob_candidate all_top_logprobs = [][][]top_logprob_candidate{cap: count}
+    uint64 rng = cfg.sampling.seed
+    bool all_finished = true
+
+    int i = 0
+    while i < count {
+        ([]int seq, float score, []float token_logprobs, [][]top_logprob_candidate top_logprobs, bool finished, uint64 next_rng) = generate_one_sequence_with_forward(
+            prompt_ids,
+            forward_fn,
+            cfg,
+            rng
+        )
+        all_sequences.push(seq)
+        if cfg.return_scores {
+            all_scores = append_sequence_score(all_scores, score)
+        }
+        all_token_logprobs = append_token_logprob_sequence(all_token_logprobs, token_logprobs)
+        all_top_logprobs = append_top_logprob_sequence(all_top_logprobs, top_logprobs)
+        if !finished {
+            all_finished = false
+        }
+        rng = next_rng
+        i = i + 1
+    }
+
+    []float result_scores = all_scores
+    if !cfg.return_scores {
+        result_scores = []
+    }
+
+    generation_result {
+        sequences: all_sequences,
+        scores: result_scores,
+        token_logprobs: all_token_logprobs,
+        top_logprobs: all_top_logprobs,
+        texts: [],
+        finished: all_finished && check_all_finished(all_sequences, cfg.eos_token_id),
+        avg_score: compute_avg_score(all_scores),
+    }
+}
+
+func generate(
+    []int prompt_ids,
+    func forward_fn,
+    generator_config cfg
+) generation_result {
+    generate_with_forward(prompt_ids, forward_fn, cfg)
 }

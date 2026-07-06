@@ -569,7 +569,7 @@ Step 10 / 100000
 - [Attention is All You Need](https://arxiv.org/abs/1706.03762) - Transformer架构
 - [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929) - ViT展示了Attention的通用性
 - [BERT: Pre-training of Deep Bidirectional Transformers](https://arxiv.org/abs/1810.04805) - 预训练方法
-- [Language Models are Unsupervised Multitask Learners](https://d4mucfpksywv.cloudfront.net/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) - GPT-2论文
+- [Language Models are Unsupervised Multitask Learners](https://d4mucfpksywv.cloudfront.net/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) - Model-v2论文
 
 ---
 

@@ -191,7 +191,7 @@ Bandwidth cost per GPU: 2*(P-1)/P * N_bytes ≈ 2N for large P,N
 # 2T GPT Model Training Hyperparameters
 
 Model:
-  architecture: "GPT-2T"
+  architecture: "Model-v2T"
   hidden_dim: 16384
   num_layers: 160
   num_attention_heads: 128

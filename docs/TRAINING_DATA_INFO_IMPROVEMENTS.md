@@ -72,7 +72,7 @@ bash script/print_training_data_info.sh
 ```
 
 ### 2. 增强训练数据加载显示 ✅
-**文件**: `script/run_gpt_large_pretrain.sh`
+**文件**: `script/run_model_large_pretrain.sh`
 
 改进：
 - **自动检测数据源**: 按优先级检测分片、训练集、清洁数据、原始数据
@@ -108,7 +108,7 @@ batch size: 2
 ```
 
 ### 3. 训练过程中的文件显示 ✅
-**文件**: `script/run_gpt_large_pretrain.sh` (train_epoch 函数)
+**文件**: `script/run_model_large_pretrain.sh` (train_epoch 函数)
 
 改进：
 - **实时显示当前处理文件**: 在每个训练步骤显示正在处理的数据文件名
@@ -162,7 +162,7 @@ make train
 | 文件 | 类型 | 改动 |
 |------|------|------|
 | `script/print_training_data_info.sh` | 新增 | 📊 训练数据信息统计脚本 |
-| `script/run_gpt_large_pretrain.sh` | 修改 | 增强数据加载和训练显示 |
+| `script/run_model_large_pretrain.sh` | 修改 | 增强数据加载和训练显示 |
 | `Makefile` | 修改 | 新增 `print-data-info` 目标 |
 | `.gitignore` | 修改 | 添加数据目录排除规则 |
 
@@ -170,7 +170,7 @@ make train
 
 所有训练信息同时记录到日志文件：
 ```
-/Users/feifei/shuwen/train/neurx/artifacts/logs/gpt_large_pretrain_TIMESTAMP.log
+/Users/feifei/shuwen/train/neurx/artifacts/logs/model_large_pretrain_TIMESTAMP.log
 ```
 
 **日志格式示例**:
@@ -199,7 +199,7 @@ make train
 
 ### 查看训练日志
 ```bash
-tail -f artifacts/logs/gpt_large_pretrain_*.log
+tail -f artifacts/logs/model_large_pretrain_*.log
 ```
 
 ### 快速检查数据文件

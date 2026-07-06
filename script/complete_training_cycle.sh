@@ -439,7 +439,7 @@ try:
     
     # Check convergence status
     if final_ppl < 50:
-        print(f"   Status: ✅ Converged (Claude-level)")
+        print(f"   Status: ✅ Converged (reference-level)")
     elif final_ppl < 100:
         print(f"   Status: 🔄 Good progress")
     else:
@@ -478,7 +478,7 @@ if len(lines) >= 2:
     print(f'   Improvement: {improvement:.2f}%')
     
     if final_ppl < 50:
-        print(f'   Status: ✅ Converged (Claude-level)')
+        print(f'   Status: ✅ Converged (reference-level)')
     elif final_ppl < 100:
         print(f'   Status: 🔄 Good progress')
     else:

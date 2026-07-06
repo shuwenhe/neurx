@@ -131,7 +131,7 @@ for step in range(num_steps):
 ### 快速开始
 ```python
 # 加载模型
-engine = new_inference_engine("gpt_large", "cuda")
+engine = new_inference_engine("model_large", "cuda")
 model = load_model(engine, "./checkpoint/model.bin")
 
 # 应用优化
@@ -337,8 +337,8 @@ neurx/
 │  ├─ llm/
 │  │  ├─ transformer.s       # 新增: 完整Transformer
 │  │  ├─ attention.s         # 新增: Attention variants
-│  │  ├─ gpt_large.s         # 已有: 配置框架
-│  │  ├─ gpt_large_train.s   # 新增: 训练脚本
+│  │  ├─ model_large.s         # 已有: 配置框架
+│  │  ├─ model_large_train.s   # 新增: 训练脚本
 │  │  └─ tokenizer.s         # 新增: Tokenizer
 │  └─ ...
 │
@@ -370,8 +370,8 @@ neurx/
 - `WHAT_STILL_NEEDED.md` - 本文件 (详细缺失分析)
 
 代码示例:
-- `model/llm/gpt_large.s` - 模型配置框架
-- `pretrain/llm/gpt_large_pretrain.s` - 预训练框架
+- `model/llm/model_large.s` - 模型配置框架
+- `pretrain/llm/model_large_pretrain.s` - 预训练框架
 - `alignment/supervised_finetuning.s` - SFT实现示例
 
 ---
@@ -405,7 +405,7 @@ A: `pretrain/optimizer/pretrain_adamw.s` 是框架，需要完整实现和测试
 | MoE All-to-All | `distributed/moe_all_to_all.s` | Token 路由与通信 | ✅ |
 | 张量并行 | `distributed/tensor_parallel.s` | 权重分片 | ✅ |
 | ZeRO 梯度规约 | `distributed/zero_gradient_reduce.s` | 参数分片优化 | ✅ |
-| 损失计算 | `model/llm/gpt_moe_1t_loss.s` | CE+MoE+KL 损失 | ✅ |
+| 损失计算 | `model/llm/model_moe_1t_loss.s` | CE+MoE+KL 损失 | ✅ |
 | LR 调度 | `training/lr_scheduler_moe_1t.s` | 余弦预热衰减 | ✅ |
 | 数据加载 | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
 | 监控系统 | `monitoring/moe_1t_metrics.s` | 分布式性能监控 | ✅ |

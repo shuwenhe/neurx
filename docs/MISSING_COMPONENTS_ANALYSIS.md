@@ -39,7 +39,7 @@
 - [ ] 从检查点恢复训练
 - [ ] 最佳模型跟踪
 
-**建议**: 升级 `script/run_gpt_large_pretrain.sh` 中的检查点逻辑
+**建议**: 升级 `script/run_model_large_pretrain.sh` 中的检查点逻辑
 
 #### 4. **实时监控和日志**
 - [ ] 损失函数曲线
@@ -126,7 +126,7 @@ make tokenizer    # 新命令
 make monitor      # 新命令
 
 # 3. 完善检查点
-git update script/run_gpt_large_pretrain.sh
+git update script/run_model_large_pretrain.sh
 
 # 4. 计算困惑度
 make eval         # 新命令
@@ -235,7 +235,7 @@ func detokenize(tokens: []int): string {
 }
 
 func get_vocab_size(): int {
-    return 50257  // GPT-2风格
+    return 50257  // Model-v2风格
 }
 ```
 

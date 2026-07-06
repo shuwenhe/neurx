@@ -104,7 +104,7 @@
 - `train/neurx/train/neurx_foundation_model.s`
 - `train/neurx/train/training_pipeline.s`
 - `train/neurx/train/train_llm.s`
-- `train/neurx/model/llm/gpt_large_train.s`
+- `train/neurx/model/llm/model_large_train.s`
 - `train/neurx/train/train_foundation_model.sh`
 
 主要问题：

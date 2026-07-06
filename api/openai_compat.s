@@ -1,6 +1,6 @@
-package neurx.api.openai_compat
+package neurx.api.llm_compat
 
-// OpenAI API 兼容服务 - 100% 接口兼容
+// NeurX API 兼容服务 - 100% 接口兼容
 // 支持: /v1/chat/completions, /v1/completions, /v1/embeddings
 
 // ============================================================================
@@ -512,7 +512,7 @@ func char_to_string(int c) string {
 // ============================================================================
 
 func main() {
-    println("=== OpenAI Compatible API Service ===")
+    println("=== NeurX Compatible API Service ===")
 
     // 配置
     APIConfig config

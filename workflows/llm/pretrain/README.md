@@ -45,4 +45,4 @@ The canonical model implementation is still shared from `model/llm/`, but the wo
 Presets:
 
 - `config/sample.yaml`: small debug run
-- `config/gpt55_reference.yaml`: reference-only modern GPT-style dense LLM preset, not an official GPT-5.5 spec
+- `config/model55_reference.yaml`: reference-only modern dense LLM preset, not an official model spec

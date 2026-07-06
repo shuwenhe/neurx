@@ -1,12 +1,12 @@
 # neurx 1T MoE 训练 - 主程序依赖关系图
 
 ## 📍 main() 函数入口
-**文件**: pretrain/llm/gpt_large_pretrain.s
+**文件**: pretrain/llm/model_large_pretrain.s
 
 ### 第一层直接导入 (20+ 个包)
 
 ```
-gpt_large_pretrain.s
+model_large_pretrain.s
 │
 ├─ neurx.strings
 │  └─ 字符串处理工具
@@ -18,12 +18,12 @@ gpt_large_pretrain.s
 │  ├─ runtime_write_text_file()
 │  └─ runtime_env_get()
 │
-├─ neurx.model.llm.gpt_moe_1t          ⭐ 核心模型
+├─ neurx.model.llm.model_moe_1t          ⭐ 核心模型
 │  ├─ moe_1t_framework_default()
 │  └─ moe_1t_summary()
 │  └─ 内部包含:
-│      ├─ gpt_large_train.s
-│      ├─ gpt_moe_1t_loss.s
+│      ├─ model_large_train.s
+│      ├─ model_moe_1t_loss.s
 │      ├─ distributed/moe_all_to_all.s
 │      ├─ distributed/tensor_parallel.s
 │      ├─ distributed/zero_gradient_reduce.s
@@ -42,10 +42,10 @@ gpt_large_pretrain.s
 │  ├─ next_batch()
 │  └─ 依赖: data/moe_1t_jsonl_loader.s
 │
-├─ neurx.model.llm.gpt_large_train     ⭐ 训练循环
-│  ├─ gpt_large_training_state
-│  ├─ gpt_large_training_forward()
-│  ├─ gpt_large_training_loss()
+├─ neurx.model.llm.model_large_train     ⭐ 训练循环
+│  ├─ model_large_training_state
+│  ├─ model_large_training_forward()
+│  ├─ model_large_training_loss()
 │  └─ 依赖:
 │      ├─ nn/attention.s
 │      ├─ nn/ffn.s
@@ -148,17 +148,17 @@ gpt_large_pretrain.s
 
 ## 🔄 第二层依赖 (内部递归)
 
-### 从 gpt_moe_1t 展开
+### 从 model_moe_1t 展开
 ```
-model/llm/gpt_moe_1t.s
-├─ gpt_large_train.s
+model/llm/model_moe_1t.s
+├─ model_large_train.s
 │  ├─ nn/attention.s (注意力机制)
 │  ├─ nn/ffn.s (前馈网络)
 │  ├─ nn/layernorm.s (层归一化)
 │  ├─ tensor/ops.s (张量操作)
 │  └─ cuda/kernels.s (GPU 计算)
 │
-├─ gpt_moe_1t_loss.s
+├─ model_moe_1t_loss.s
 │  ├─ ops/math.s (数学函数)
 │  ├─ tensor/new.s (张量创建)
 │  └─ 计算 CE + 辅助损失 + KL
@@ -245,11 +245,11 @@ data/moe_1t_jsonl_loader.s
 
 ### 编译链例子
 ```
-主程序 gpt_large_pretrain.s
+主程序 model_large_pretrain.s
   ↓ 编译
-导入 gpt_moe_1t.s
+导入 model_moe_1t.s
   ↓ 递归编译
-  导入 gpt_large_train.s
+  导入 model_large_train.s
     ↓ 递归编译
     导入 nn/attention.s, nn/ffn.s
       ↓ 递归编译
@@ -266,10 +266,10 @@ data/moe_1t_jsonl_loader.s
 
 ### 必须编译 (无法跳过)
 ```
-✓ pretrain/llm/gpt_large_pretrain.s      主程序
-✓ model/llm/gpt_large_train.s            Transformer
-✓ model/llm/gpt_moe_1t.s                 1T MoE 框架
-✓ model/llm/gpt_moe_1t_loss.s            损失计算
+✓ pretrain/llm/model_large_pretrain.s      主程序
+✓ model/llm/model_large_train.s            Transformer
+✓ model/llm/model_moe_1t.s                 1T MoE 框架
+✓ model/llm/model_moe_1t_loss.s            损失计算
 ✓ model/llm/long_context_32k.s           长上下文
 ✓ distributed/ddp.s                      数据并行
 ✓ distributed/tensor_parallel.s          张量并行
@@ -324,10 +324,10 @@ data/moe_1t_jsonl_loader.s
 ### 方法 1: 追踪 use 语句
 ```bash
 # 从主程序开始
-grep "^use " pretrain/llm/gpt_large_pretrain.s
+grep "^use " pretrain/llm/model_large_pretrain.s
 
 # 追踪第二层
-grep "^use " model/llm/gpt_moe_1t.s
+grep "^use " model/llm/model_moe_1t.s
 
 # 继续递归...
 ```
@@ -335,7 +335,7 @@ grep "^use " model/llm/gpt_moe_1t.s
 ### 方法 2: S 编译器日志
 ```bash
 # 集群上运行时
-/opt/s/bin/s compile pretrain/llm/gpt_large_pretrain.s -v
+/opt/s/bin/s compile pretrain/llm/model_large_pretrain.s -v
 
 # 会输出所有被编译的模块和顺序
 ```
@@ -343,7 +343,7 @@ grep "^use " model/llm/gpt_moe_1t.s
 ### 方法 3: 编译输出分析
 ```bash
 # 编译后检查符号表
-nm build/gpt_large_pretrain | wc -l
+nm build/model_large_pretrain | wc -l
 
 # 只会显示被实际使用的函数和变量
 ```
@@ -354,7 +354,7 @@ nm build/gpt_large_pretrain | wc -l
 
 ```
 S 编译器执行:
-├─ Phase 1: 解析主文件 (gpt_large_pretrain.s)
+├─ Phase 1: 解析主文件 (model_large_pretrain.s)
 │  └─ 时间: 1-2 秒
 │
 ├─ Phase 2: 递归处理 use 导入
@@ -417,9 +417,9 @@ AI Agent:          ~3,000 行
 
 **每次训练时的代码流动**:
 ```
-gpt_large_pretrain.s (1 entry)
-  → gpt_moe_1t.s (模型逻辑)
-    → gpt_large_train.s + distributed/* (计算)
+model_large_pretrain.s (1 entry)
+  → model_moe_1t.s (模型逻辑)
+    → model_large_train.s + distributed/* (计算)
       → nn/* + tensor/* + cuda/* (执行)
         → ops/* + opt/* (算子)
           ↓

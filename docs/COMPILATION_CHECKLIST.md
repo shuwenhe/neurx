@@ -8,7 +8,7 @@
 ✓ distributed/moe_all_to_all.s                (473 行)   MoE All-to-All 路由
 ✓ distributed/tensor_parallel.s              (329 行)   张量并行
 ✓ distributed/zero_gradient_reduce.s         (504 行)   ZeRO Stage 3
-✓ model/llm/gpt_moe_1t_loss.s                (495 行)   损失计算
+✓ model/llm/model_moe_1t_loss.s                (495 行)   损失计算
 ✓ training/lr_scheduler_moe_1t.s             (422 行)   学习率调度
 ✓ data/moe_1t_jsonl_loader.s                 (430 行)   JSONL 数据加载
 ✓ monitoring/moe_1t_metrics.s                (598 行)   监控指标
@@ -23,25 +23,25 @@
 
 ### Phase 1: 主程序检查
 
-- [ ] pretrain/llm/gpt_large_pretrain.s 存在
-  - [ ] 包含 `package neurx.pretrain.llm.gpt_large_pretrain`
+- [ ] pretrain/llm/model_large_pretrain.s 存在
+  - [ ] 包含 `package neurx.pretrain.llm.model_large_pretrain`
   - [ ] 包含 `func main() int {}`
   - [ ] 包含 20+ 个 `use` 导入语句
 
 ### Phase 2: 模型层检查
 
-- [ ] model/llm/gpt_large_train.s
+- [ ] model/llm/model_large_train.s
   - [ ] 包含 Transformer 定义
-  - [ ] struct gpt_large_training_state
-  - [ ] func gpt_large_training_forward()
-  - [ ] func gpt_large_training_loss()
+  - [ ] struct model_large_training_state
+  - [ ] func model_large_training_forward()
+  - [ ] func model_large_training_loss()
 
-- [ ] model/llm/gpt_moe_1t.s
+- [ ] model/llm/model_moe_1t.s
   - [ ] 包含 1T MoE 模型框架
   - [ ] struct gpt_1t_moe_config
   - [ ] 256 个 experts, top-k=2 路由
 
-- [ ] model/llm/gpt_moe_1t_loss.s
+- [ ] model/llm/model_moe_1t_loss.s
   - [ ] 损失计算函数
   - [ ] 支持 CE + 辅助损失 + KL
   - [ ] 495 行完整实现
@@ -282,14 +282,14 @@ bash script/verify_framework.sh
 
 ```bash
 # 1. 编译主程序
-/opt/s/bin/s compile pretrain/llm/gpt_large_pretrain.s -o build/gpt_large_pretrain
+/opt/s/bin/s compile pretrain/llm/model_large_pretrain.s -o build/model_large_pretrain
 
 # 2. 验证编译输出
-file build/gpt_large_pretrain
-nm build/gpt_large_pretrain | head -20
+file build/model_large_pretrain
+nm build/model_large_pretrain | head -20
 
 # 3. 测试单节点
-./build/gpt_large_pretrain --config train_config.yaml --check
+./build/model_large_pretrain --config train_config.yaml --check
 ```
 
 ### 分布式训练提交
@@ -369,7 +369,7 @@ error: out of memory during compilation
 
 ```bash
 # 1. 检查文件存在
-ls -la pretrain/llm/gpt_large_pretrain.s
+ls -la pretrain/llm/model_large_pretrain.s
 
 # 2. 检查主要模块
 ls -la distributed/{moe_all_to_all,tensor_parallel,zero_gradient_reduce}.s
@@ -409,20 +409,20 @@ file /opt/s/bin/s
 
 ```bash
 # 1. 编译一次性检查
-/opt/s/bin/s compile pretrain/llm/gpt_large_pretrain.s --check
+/opt/s/bin/s compile pretrain/llm/model_large_pretrain.s --check
 
 # 2. 单节点测试编译
 salloc -N 1 -t 01:00:00 bash
-/opt/s/bin/s compile pretrain/llm/gpt_large_pretrain.s -o build/gpt_large_pretrain
+/opt/s/bin/s compile pretrain/llm/model_large_pretrain.s -o build/model_large_pretrain
 
 # 3. 验证编译输出
-file build/gpt_large_pretrain
+file build/model_large_pretrain
 
 # 4. 模型初始化测试
-./build/gpt_large_pretrain --config train_config.yaml --check
+./build/model_large_pretrain --config train_config.yaml --check
 
 # 5. 首个 batch 测试 (单 GPU)
-./build/gpt_large_pretrain --config train_config.yaml --steps 1
+./build/model_large_pretrain --config train_config.yaml --steps 1
 ```
 
 ---
@@ -435,7 +435,7 @@ file build/gpt_large_pretrain
 [✓] Parsing source files...
 [✓] Resolving dependencies...
     Dependencies found:
-    - neurx.model.llm.gpt_moe_1t
+    - neurx.model.llm.model_moe_1t
     - neurx.pretrain.distributed
     - neurx.pretrain.optimizer
     - ... (20+ total)
@@ -445,7 +445,7 @@ file build/gpt_large_pretrain
 [✓] Optimization...
 
 BUILD SUCCESSFUL
-Output: build/gpt_large_pretrain
+Output: build/model_large_pretrain
 Size: ~500 MB
 Type: ELF 64-bit LSB executable
 ```

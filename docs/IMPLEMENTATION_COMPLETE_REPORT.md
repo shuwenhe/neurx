@@ -10,7 +10,7 @@
 | **P0** | MoE All-to-All 路由 | `distributed/moe_all_to_all.s` | 600+ | ✅ 完成 |
 | **P0** | 张量并行 (TP) | `distributed/tensor_parallel.s` | 700+ | ✅ 完成 |
 | **P0** | ZeRO 梯度规约 | `distributed/zero_gradient_reduce.s` | 650+ | ✅ 完成 |
-| **P0** | 损失计算与反向 | `model/llm/gpt_moe_1t_loss.s` | 600+ | ✅ 完成 |
+| **P0** | 损失计算与反向 | `model/llm/model_moe_1t_loss.s` | 600+ | ✅ 完成 |
 | **P1** | 学习率调度器 | `training/lr_scheduler_moe_1t.s` | 550+ | ✅ 完成 |
 | **P1** | 实际数据加载 | `data/moe_1t_jsonl_loader.s` | 550+ | ✅ 完成 |
 | **P1** | 分布式监控 | `monitoring/moe_1t_metrics.s` | 600+ | ✅ 完成 |
@@ -99,7 +99,7 @@ Forward (AllGather) → Backward → ReduceScatter → Optimizer
 
 ---
 
-### 4. 损失计算与反向 (`model/llm/gpt_moe_1t_loss.s`)
+### 4. 损失计算与反向 (`model/llm/model_moe_1t_loss.s`)
 
 **功能**: Cross-entropy + MoE 辅助损失，反向传播
 
@@ -339,7 +339,7 @@ neurx/
 │   ├── tensor_parallel.s          ✅ TP 权重分片
 │   └── zero_gradient_reduce.s     ✅ ZeRO 梯度规约
 ├── model/llm/
-│   ├── gpt_moe_1t_loss.s         ✅ 损失计算
+│   ├── model_moe_1t_loss.s         ✅ 损失计算
 │   └── long_context_32k.s        ✅ 长上下文支持
 ├── training/
 │   └── lr_scheduler_moe_1t.s     ✅ 学习率调度

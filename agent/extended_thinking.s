@@ -1,6 +1,6 @@
 package neurx.agent.extended_thinking
 
-// Extended thinking — analogous to Claude's "extended thinking" budget.
+// Extended thinking — analogous to NeurX's "extended thinking" budget.
 // Before producing an answer the agent iterates a private reasoning loop up to
 // a configurable token/step budget, accumulating thoughts and revising its
 // working conclusion before committing to a final response.

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Claude Tool System 快速开始脚本
+# NeurX Tool System 快速开始脚本
 
-echo "🔧 Claude Code工具系统 - neurx完整实现"
+echo "🔧 NeurX 工具系统 - neurx完整实现"
 echo "=========================================="
 echo ""
 echo "✅ 已实现的5大核心功能："
@@ -31,7 +31,7 @@ echo "   - 执行缓存"
 echo "   - 并发控制"
 echo ""
 echo "5️⃣  Integrated System（统一系统）"
-echo "   - ClaudeToolSystem统一接口"
+echo "   - NeurXToolSystem统一接口"
 echo "   - 便利方法"
 echo "   - 智能执行"
 echo "   - 统计报告"
@@ -44,7 +44,7 @@ echo "├── ToolSchemaRegistry.h           (250行) 模式管理"
 echo "├── ToolPermissionManager.h        (200行) 权限管理"
 echo "├── ToolDiscovery.h                (250行) 工具发现"
 echo "├── ToolExecutor.h                 (300行) 执行引擎"
-echo "├── ClaudeToolSystem.h             (100行) 统一系统"
+echo "├── NeurXToolSystem.h              (100行) 统一系统"
 echo "└── CLAUDE_TOOL_SYSTEM.md          (400行) 完整文档"
 echo ""
 echo "📊 统计："
@@ -57,7 +57,7 @@ echo "🚀 快速开始示例："
 echo ""
 cat << 'EOF'
 // 初始化系统
-auto system = std::make_unique<ClaudeToolSystem>();
+auto system = std::make_unique<NeurXToolSystem>();
 system->initialize();
 
 // 注册工具
@@ -88,7 +88,7 @@ EOF
 echo ""
 echo ""
 echo "📚 更多信息："
-echo "- 完整文档：./src/tools/CLAUDE_TOOL_SYSTEM.md"
+echo "- 完整文档：./src/tools/NEURX_TOOL_SYSTEM.md"
 echo "- 类型定义：./src/tools/ToolSchemaTypes.h"
 echo "- 权限管理：./src/tools/ToolPermissionManager.h"
 echo ""

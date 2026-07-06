@@ -183,7 +183,7 @@ s run script/inference_optimization.s
 from neurx.pipeline import claudeTrainingPipeline
 
 config = {
-    "model": "gpt_large",
+    "model": "model_large",
     "phases": ["reward", "ppo", "sft", "eval"],
     "quantization": "INT8",
     "batch_size": 32

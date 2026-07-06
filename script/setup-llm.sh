@@ -1,7 +1,7 @@
 #!/bin/bash
-# CodeMagic + LLM 快速开始指南
+# NeurX + LLM 快速开始指南
 
-echo "🚀 CodeMagic + LLM 快速设置"
+echo "🚀 NeurX + LLM 快速设置"
 echo "=============================="
 echo ""
 
@@ -16,8 +16,8 @@ echo ""
 
 # 第2步：设置API密钥
 echo "✓ 第2步：设置API密钥"
-read -p "请输入 Claude API密钥 (sk-ant-...): " CLAUDE_KEY
-export ANTHROPIC_API_KEY="$CLAUDE_KEY"
+read -p "请输入 LLM API密钥: " LLM_KEY
+export ANTHROPIC_API_KEY="$LLM_KEY"
 echo "✓ API密钥已设置"
 echo ""
 
@@ -34,7 +34,7 @@ echo ""
 # 第4步：验证
 echo "✓ 第4步：验证安装"
 echo ""
-echo "CodeMagic + LLM 现在已可使用！"
+echo "NeurX + LLM 现在已可使用！"
 echo ""
 echo "快速测试代码示例："
 echo ""

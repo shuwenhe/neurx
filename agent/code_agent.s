@@ -1,6 +1,6 @@
 package neurx.agent.code_agent
 
-// code_agent: Codex/Claude-style autonomous code agent
+// code_agent: NeurX-style autonomous code agent
 // Usage:
 //   NEURX_CODE_AGENT_TASK="fix the bug in foo.s" NEURX_AGENT_MODEL_PATH=/path/to/model ./neurx_code_agent
 //

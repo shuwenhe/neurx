@@ -15,8 +15,8 @@ FILES=(
   "/Users/feifei/shuwen/neurx/model/transformer/attention_gradient.s"
   "/Users/feifei/shuwen/neurx/opt/optim.s"
   "/Users/feifei/shuwen/neurx/opt/lr_scheduler.s"
-  "/Users/feifei/shuwen/neurx/model/llm/gpt_large_train.s"
-  "/Users/feifei/shuwen/neurx/pretrain/llm/gpt_large_pretrain.s"
+  "/Users/feifei/shuwen/neurx/model/llm/model_large_train.s"
+  "/Users/feifei/shuwen/neurx/pretrain/llm/model_large_pretrain.s"
   "/Users/feifei/shuwen/neurx/train_llm.s"
 )
 

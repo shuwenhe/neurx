@@ -31,4 +31,4 @@ echo "Starting NeurX pretrain (8 x Ascend310P3). Log -> $LOG"
 
 S_COMPILER="$S_COMPILER" MODEL_SIZE="$MODEL_SIZE" \
 NEURX_PRETRAIN_WORLD_SIZE="$NEURX_PRETRAIN_WORLD_SIZE" NEURX_PRETRAIN_BACKEND="$NEURX_PRETRAIN_BACKEND" \
-bash script/run_gpt_large_pretrain.sh 2>&1 | tee "$LOG"
+bash script/run_model_large_pretrain.sh 2>&1 | tee "$LOG"

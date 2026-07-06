@@ -15,7 +15,7 @@ CHECKPOINT_DIR="${NEURX_ROOT}/artifacts/checkpoints/llm_s_pretrain"
 LOG_DIR="${NEURX_ROOT}/artifacts/logs"
 IR_FILE="${BUILD_DIR}/train_llm.ir"
 RUNNER_BIN="${BUILD_DIR}/s_ir_runner_small_model"
-RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_gpt_large"
+RUNNER_BIN_FALLBACK="${NEURX_ROOT}/build/s_ir_runner_train_model_large"
 LOG_FILE="${LOG_DIR}/small_model_training_$(date +%Y%m%d_%H%M%S).log"
 STDOUT_LOG="${LOG_DIR}/small_model_training_stdout_$(date +%Y%m%d_%H%M%S).log"
 

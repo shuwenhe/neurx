@@ -1,7 +1,7 @@
 // ============================================
 // RLHF PPO Training Framework
 // Proximal Policy Optimization with Reward Model
-// Claude-level LLM alignment through RLHF
+// NeurX-level LLM alignment through RLHF
 // ============================================
 
 package main
@@ -494,7 +494,7 @@ func NewPPOTrainer(config PPOConfig) *PPOTrainer {
 
 func (trainer *PPOTrainer) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  PPO Training for Claude-Level LLM Alignment          ║")
+    fmt.Println("║  PPO Training for NeurX-Level LLM Alignment           ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     
     for step := 0; step < num_steps; step++ {

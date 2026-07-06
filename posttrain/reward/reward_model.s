@@ -18,8 +18,8 @@ package neurx.posttrain.reward.reward_model
 // ============================================================================
 
 use neurx.model.llm.gpt.{
-    gpt_config, gpt_model, gpt_output,
-    new_gpt_model, gpt_forward
+    model_config, language_model, model_output,
+    new_language_model, gpt_forward
 }
 
 // ============================================================================
@@ -27,7 +27,7 @@ use neurx.model.llm.gpt.{
 // ============================================================================
 
 struct reward_model {
-    gpt_model backbone        // 共享 Transformer 主干
+    language_model backbone        // 共享 Transformer 主干
     []float head              // 奖励头权重 [n_embd]
     float bias                // 奖励头偏置
     int n_embd
@@ -80,8 +80,8 @@ func rm_init_head(int n_embd) []float {
     head
 }
 
-func new_reward_model(gpt_config cfg, float lr) reward_model {
-    gpt_model backbone = new_gpt_model(cfg)
+func new_reward_model(model_config cfg, float lr) reward_model {
+    language_model backbone = new_language_model(cfg)
     int n_embd = cfg.n_embd
     reward_model {
         backbone: backbone,
@@ -102,7 +102,7 @@ func new_reward_model(gpt_config cfg, float lr) reward_model {
 }
 
 // 从已训练好的 GPT 模型构建奖励模型 (SFT 后初始化 RM 是标准做法)
-func reward_model_from_backbone(gpt_model backbone, float lr) reward_model {
+func reward_model_from_backbone(language_model backbone, float lr) reward_model {
     int n_embd = backbone.n_embd
     reward_model {
         backbone: backbone,
@@ -203,7 +203,7 @@ func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n
 
 // 计算一批序列的标量奖励
 func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_len) reward_batch_scores {
-    gpt_output out = gpt_forward(rm.backbone, token_ids, batch_size, seq_len)
+    model_output out = gpt_forward(rm.backbone, token_ids, batch_size, seq_len)
     []float pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
 
     []float rewards = rm_alloc(batch_size, 0.0)
@@ -262,8 +262,8 @@ func reward_model_train_step(
     int seq_len
 ) reward_train_result {
     // 前向: 分别得到 chosen / rejected 的隐藏与奖励
-    gpt_output out_c = gpt_forward(rm.backbone, chosen_ids, batch_size, seq_len)
-    gpt_output out_r = gpt_forward(rm.backbone, rejected_ids, batch_size, seq_len)
+    model_output out_c = gpt_forward(rm.backbone, chosen_ids, batch_size, seq_len)
+    model_output out_r = gpt_forward(rm.backbone, rejected_ids, batch_size, seq_len)
     []float pooled_c = rm_pool_last_hidden(out_c.last_hidden, batch_size, seq_len, rm.n_embd)
     []float pooled_r = rm_pool_last_hidden(out_r.last_hidden, batch_size, seq_len, rm.n_embd)
 

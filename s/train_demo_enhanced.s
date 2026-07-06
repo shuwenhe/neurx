@@ -59,7 +59,7 @@ struct GPTConfig {
     string device           // "cpu" | "cuda:0"
 }
 
-func default_gpt_config() GPTConfig {
+func default_model_config() GPTConfig {
     GPTConfig {
         vocab_size: 256,
         embed_dim: 128,
@@ -83,7 +83,7 @@ func default_gpt_config() GPTConfig {
     }
 }
 
-func gpt_config_string(GPTConfig cfg) string {
+func model_config_string(GPTConfig cfg) string {
     string s = ""
     s = s + "GPT Configuration:\n"
     s = s + "  Vocab Size:   " + string(cfg.vocab_size) + "\n"
@@ -119,7 +119,7 @@ struct GPTModel {
     []AutoGradTensor all_parameters
 }
 
-func new_gpt_model(GPTConfig config) GPTModel {
+func new_language_modelGPTConfig config) GPTModel {
     GPTModel model
     model.config = config
     
@@ -255,7 +255,7 @@ func print_model_summary(GPTModel self) void {
     println("============================================================")
     println("GPT Model Summary")
     println("============================================================")
-    print(gpt_config_string(self.config))
+    print(model_config_string(self.config))
     println("------------------------------------------------------------")
 
     int token_params = count_parameters(self.token_embed)
@@ -429,7 +429,7 @@ func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
     content = content + "]\n\n"
     
     content = content + "[model_config]\n"
-    content = content + gpt_config_string(config) + "\n"
+    content = content + model_config_string(config) + "\n"
     content = content + "total_parameters=" + string(param_count) + "\n\n"
     
     content = content + "[optimizer_state]\n"
@@ -485,12 +485,12 @@ func run_training(GPTConfig config) TrainingResult {
     println("║              AI-Native Tensor Library            ║")
     println("╚══════════════════════════════════════════════════╝")
     println("")
-    print(gpt_config_string(config))
+    print(model_config_string(config))
     println("----------------------------------------")
 
     // Initialize model
     println("[1/5] Initializing GPT model...")
-    GPTModel model = new_gpt_model(config)
+    GPTModel model = new_language_model(config)
     int total_params = count_params(model)
     print_model_summary(model)
     println("")
@@ -725,7 +725,7 @@ def rename_file(string old_path, string new_path) void:
 
 func main() int:
     // Parse command-line arguments (simplified)
-    GPTConfig config = default_gpt_config()
+    GPTConfig config = default_model_config()
     
     // Allow overrides via environment or args
     // In real implementation, use proper CLI parsing

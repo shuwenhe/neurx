@@ -20,7 +20,7 @@ for module in \
     "distributed/moe_all_to_all.s" \
     "distributed/tensor_parallel.s" \
     "distributed/zero_gradient_reduce.s" \
-    "model/llm/gpt_moe_1t_loss.s" \
+    "model/llm/model_moe_1t_loss.s" \
     "training/lr_scheduler_moe_1t.s" \
     "data/moe_1t_jsonl_loader.s" \
     "monitoring/moe_1t_metrics.s" \
@@ -40,7 +40,7 @@ echo "📋 配置文件检查:"
 for config in \
     "production_deployment/training_startup.env" \
     "production_deployment/launch_plan.sh" \
-    "script/run_gpt_large_pretrain.sh"; do
+    "script/run_model_large_pretrain.sh"; do
     if [ -f "$NEURX_ROOT/$config" ]; then
         size=$(wc -l < "$NEURX_ROOT/$config")
         echo "  ✓ $config ($size 行)"

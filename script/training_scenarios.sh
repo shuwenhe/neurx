@@ -210,9 +210,9 @@ scenario_tensor_parallel() {
 }
 
 scenario_claude_scale() {
-    print_header "场景 6: Claude 级别训练 (70B+) (数周)"
+    print_header "场景 6: NeurX frontier 训练 (70B+) (数周)"
     echo ""
-    echo "此场景用于大规模 Claude 级别模型训练"
+    echo "此场景用于大规模 NeurX frontier 模型训练"
     echo ""
     echo -e "${YELLOW}配置:${NC}"
     echo "  - 总 GPU: 32"
@@ -226,7 +226,7 @@ scenario_claude_scale() {
     read -p "是否运行此场景? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_info "开始 Claude 级别训练..."
+        print_info "开始 NeurX frontier 训练..."
         make train-llm \
             NEURX_WORLD_SIZE=32 \
             NEURX_DATA_PARALLEL_SIZE=2 \
@@ -239,7 +239,7 @@ scenario_claude_scale() {
             NEURX_WARMUP_STEPS=500 \
             NEURX_MIXED_PRECISION_MODE=bf16 \
             NEURX_CHECKPOINT_INTERVAL=100
-        print_success "Claude 级别训练完成！"
+        print_success "NeurX frontier 训练完成！"
     fi
     echo ""
 }
@@ -291,7 +291,7 @@ main() {
         echo "  3. 单 GPU 训练 (2-4 小时)"
         echo "  4. 多 GPU 数据并行 (1-2 天)"
         echo "  5. 张量并行 (大模型) (多天)"
-        echo "  6. Claude 级别训练 (70B+) (数周)"
+        echo "  6. NeurX frontier 训练 (70B+) (数周)"
         echo "  7. 模型推理"
         echo "  0. 退出"
         echo ""

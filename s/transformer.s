@@ -335,7 +335,7 @@ func transformer_layer_forward(layer transformer_layer, x tensor, config transfo
 
     // ── SwiGLU Feed-Forward Network (replaces ReLU MLP) ──
     // SwiGLU: output = (silu(xW_gate)) * (xW_up) @ W_down
-    // Used by LLaMA, Claude, Mistral, etc.
+    // Used by LLaMA, NeurX, Mistral, etc.
     tensor swiglu_out = swiglu_ffn(x2, layer)
 
     // Residual connection after FFN
@@ -841,7 +841,7 @@ func softmax_3d_last(tensor input) tensor {
 
 // ── RoPE (Rotary Position Embedding) Precomputation ──────────────────────────
 // Generate cos and sin tables for rotary position embeddings.
-// Used by LLaMA, Claude, PaLM, etc.
+// Used by LLaMA, NeurX, PaLM, etc.
 
 struct rope_cache {
     tensor cos_table   // [seq_len, head_dim/2]

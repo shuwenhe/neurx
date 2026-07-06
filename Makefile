@@ -115,7 +115,7 @@ train: check-bash
 			bash clean_data.sh; \
 			bash generate_shards.sh; \
 		fi; \
-		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1; \
+		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_model_large_pretrain.sh 2>&1; \
 	fi
 
 
@@ -125,7 +125,7 @@ infer: check-bash
 	@cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1
 
 pretrain: check-bash
-	@echo "Running GPT-Large production pre-training (alias for make train)"
+	@echo "Running NeurX large-model production pre-training (alias for make train)"
 	@cd '$(CURDIR_UNIX)' && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
 		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
@@ -142,11 +142,11 @@ pretrain: check-bash
 		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
 		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_model_large_pretrain.sh 2>&1
 
 pretrain-watch: check-bash
-	@echo "Running GPT-Large pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/gpt_large_pretrain_watch.log
+	@echo "Running NeurX large-model pre-training with live log monitoring"
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_model_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
 	@echo "Running NeurX interactive chat from real checkpoint"

@@ -32,7 +32,7 @@ type RetrievalResult struct {
     rank                int
 }
 
-type RAGConfig struct {
+type RetrievalSystemConfig struct {
     embedding_model     string
     vector_db_type      string
     top_k               int
@@ -56,7 +56,7 @@ type RAGMetrics struct {
 }
 
 type RAGIntegration struct {
-    config              RAGConfig
+    config              RetrievalSystemConfig
     vector_db           VectorDatabase
     metrics_history     []RAGMetrics
     cache               map[string][]RetrievalResult
@@ -67,7 +67,7 @@ type RAGIntegration struct {
 // RAG Initialization
 // ============================================
 
-func (rag *RAGIntegration) initialize(config RAGConfig) {
+func (rag *RAGIntegration) initialize(config RetrievalSystemConfig) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")
     fmt.Println("║  Retrieval-Augmented Generation for LLMs              ║")
@@ -360,7 +360,7 @@ func NewRAGIntegration() *RAGIntegration {
 
 func (rag *RAGIntegration) run_complete_rag_cycle() {
     // Initialize
-    config := RAGConfig{
+    config := RetrievalSystemConfig{
         embedding_model:     "sentence-transformers/all-MiniLM-L6-v2",
         vector_db_type:      "faiss",
         top_k:               5,

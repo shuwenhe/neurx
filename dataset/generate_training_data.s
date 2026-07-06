@@ -9,7 +9,7 @@ type TrainingData struct {
 }
 
 func main() {
-    io.println("🚀 Claude级别工业LLM训练数据生成器 (S语言实现)")
+    io.println("🚀 NeurX级别工业LLM训练数据生成器 (S语言实现)")
     io.println("")
     
     // 输出文件路径
@@ -202,5 +202,5 @@ func main() {
     io.println("  ✓ 创新和前沿技术 (3条)")
     io.println("")
     io.println("✨ 训练数据已追加到: " + output_file)
-    io.println("🎯 适合Claude级别的工业LLM模型预训练")
+    io.println("🎯 适合NeurX级别的工业LLM模型预训练")
 }

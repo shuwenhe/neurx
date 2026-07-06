@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================
 # NeurX Foundation Model — 训练启动脚本
-# 训练达到 GPT-3.5 / Claude 水平的大语言模型
+# 训练达到 NeurX 参考水平的大语言模型
 #
 # 用法:
 #   ./train_foundation_model.sh [规模] [GPU数量]
@@ -10,12 +10,12 @@
 #     mini    —  124M 参数 (单 GPU，测试用)
 #     small   —  1B 参数   (8 GPU)
 #     medium  —  7B 参数   (32 GPU)
-#     large   —  13B 参数  (64 GPU)  ← GPT-3.5 级 ✓
-#     xl      —  70B 参数  (512 GPU) ← GPT-4/Claude 级 ✓
+#     large   —  13B 参数  (64 GPU)  ← NeurX reference level ✓
+#     xl      —  70B 参数  (512 GPU) ← NeurX frontier level ✓
 #
 #   示例:
 #     ./train_foundation_model.sh mini 1       # 本地测试
-#     ./train_foundation_model.sh large 64     # GPT-3.5 级训练
+#     ./train_foundation_model.sh large 64     # reference-level training
 #     ./train_foundation_model.sh xl 512       # 旗舰级训练
 # ============================================================
 
@@ -33,7 +33,7 @@ mkdir -p "$LOG_DIR" "$CKPT_DIR" "$OUTPUT_DIR"
 
 echo "╔══════════════════════════════════════════════════╗"
 echo "║   NeurX Foundation Model Training               ║"
-echo "║   目标: 达到 GPT-3.5 / Claude 级别              ║"
+echo "║   目标: 达到 NeurX 参考级别                    ║"
 echo "╠══════════════════════════════════════════════════╣"
 echo "║ 规模: ${SCALE}"
 echo "║ GPU 数: ${NUM_GPUS}"
@@ -100,7 +100,7 @@ case "${SCALE}" in
         PRETRAIN_TOKENS_B=10
         LR="3e-4"
         BATCH_TOKENS=524288       # 512K tokens/step
-        echo "  → neurx-mini: 124M 参数, GPT-2 级别测试"
+        echo "  → neurx-mini: 124M 参数, reference-2 级别测试"
         ;;
     small)
         MODEL_NAME="neurx-small-1b"
@@ -128,7 +128,7 @@ case "${SCALE}" in
         PRETRAIN_TOKENS_B=300
         LR="3e-4"
         BATCH_TOKENS=2097152      # 2M tokens/step
-        echo "  → neurx-medium: ~7B 参数, GPT-3 级别"
+        echo "  → neurx-medium: ~7B 参数, reference-3 级别"
         ;;
     large)
         MODEL_NAME="neurx-large-13b"
@@ -142,7 +142,7 @@ case "${SCALE}" in
         PRETRAIN_TOKENS_B=260
         LR="2e-4"
         BATCH_TOKENS=4194304      # 4M tokens/step
-        echo "  → neurx-large: ~13B 参数, GPT-3.5 级别 ✓"
+        echo "  → neurx-large: ~13B 参数, reference-3.5 级别 ✓"
         echo "  → 预计训练时长: ~30天 (64× H100)"
         ;;
     xl)
@@ -157,7 +157,7 @@ case "${SCALE}" in
         PRETRAIN_TOKENS_B=1400
         LR="1e-4"
         BATCH_TOKENS=8388608      # 8M tokens/step
-        echo "  → neurx-xl: ~70B 参数, GPT-4/Claude 级别 ✓"
+        echo "  → neurx-xl: ~70B 参数, NeurX frontier 级别 ✓"
         echo "  → 预计训练时长: ~60天 (512× H100)"
         ;;
     *)
@@ -334,7 +334,7 @@ echo ""
 
 case "${SCALE}" in
     mini)
-        echo "  HellaSwag:    ~76%   (GPT-2 级)"
+        echo "  HellaSwag:    ~76%   (reference-2 级)"
         echo "  MMLU:         ~45%"
         echo "  MT-Bench:     ~4.5 / 10"
         echo "  Perplexity:   ~15 (WikiText-103)"
@@ -346,7 +346,7 @@ case "${SCALE}" in
         echo "  HumanEval:    ~25%"
         ;;
     medium)
-        echo "  HellaSwag:    ~88%   (GPT-3 级)"
+        echo "  HellaSwag:    ~88%   (reference-3 级)"
         echo "  MMLU:         ~65%"
         echo "  HumanEval:    ~42%"
         echo "  GSM8K:        ~58%"
@@ -354,27 +354,27 @@ case "${SCALE}" in
         echo "  Chatbot Arena ELO: ~1100"
         ;;
     large)
-        echo "  HellaSwag:    ~92%   ← GPT-3.5 级 ✓"
+        echo "  HellaSwag:    ~92%   ← reference-3.5 级 ✓"
         echo "  MMLU:         ~70%"
         echo "  HumanEval:    ~56%   (Codex 级)"
         echo "  GSM8K:        ~74%"
         echo "  MATH:         ~35%"
         echo "  MT-Bench:     ~7.6 / 10"
-        echo "  Chatbot Arena ELO: ~1150  (≈ GPT-3.5-turbo)"
+        echo "  Chatbot Arena ELO: ~1150  (≈ reference-3.5)"
         echo ""
-        echo "  ✓ 达到 GPT-3.5 水平"
+        echo "  ✓ 达到 reference-3.5 水平"
         ;;
     xl)
-        echo "  HellaSwag:    ~95%   ← GPT-4/Claude 级 ✓"
+        echo "  HellaSwag:    ~95%   ← NeurX frontier 级 ✓"
         echo "  MMLU:         ~86%"
         echo "  HumanEval:    ~72%"
         echo "  GSM8K:        ~91%"
         echo "  MATH:         ~52%"
         echo "  BBH:          ~85%"
         echo "  MT-Bench:     ~8.8 / 10"
-        echo "  Chatbot Arena ELO: ~1280  (≈ Claude 2 / GPT-4)"
+        echo "  Chatbot Arena ELO: ~1280  (≈ NeurX frontier)"
         echo ""
-        echo "  ✓ 达到 GPT-4 / Claude 水平"
+        echo "  ✓ 达到 NeurX frontier 水平"
         ;;
 esac
 

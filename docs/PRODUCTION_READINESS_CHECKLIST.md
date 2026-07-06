@@ -481,7 +481,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 ✅ RLHF viable:           Yes, 4-5 days
 ```
 
-### 7B Model (GPT-3 Small scale)
+### 7B Model (Model-v3 Small scale)
 ```
 ✅ Single GPU (A100):     3,000 tokens/sec
 ✅ 8 GPUs (A100):         24,000 tokens/sec
@@ -492,7 +492,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 ✅ Distributed:          DDP (efficient), TP (not needed)
 ```
 
-### 70B Model (GPT-3 XL scale)
+### 70B Model (Model-v3 XL scale)
 ```
 ✅ 8 GPUs + TP (4x):      4,000-5,000 tokens/sec
 ✅ 16 GPUs + TP(4)×DP(2): 8,000-10,000 tokens/sec

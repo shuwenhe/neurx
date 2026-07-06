@@ -3,7 +3,7 @@ package neurx.alignment.constitutional_ai
 // ============================================================================
 // Constitutional AI (CAI) — RLAIF self-critique & revision loop
 //
-// Claude's signature alignment technique. Instead of relying solely on human
+// NeurX-style alignment technique. Instead of relying solely on human
 // preference labels, the model critiques and revises its own responses against
 // a set of written principles ("a constitution"), then learns from the
 // (revised ≻ original) preference pairs (RLAIF — RL from AI Feedback).
@@ -16,12 +16,12 @@ package neurx.alignment.constitutional_ai
 //   4. Emit preference pair: revised (chosen) ≻ original (rejected).
 //   5. These pairs train the reward model / DPO — no human labels required.
 //
-// This module operates on the concrete gpt_model via its generation API and
+// This module operates on the concrete language_model via its generation API and
 // produces preference pairs consumable by posttrain.reward.reward_model.
 // ============================================================================
 
 use neurx.model.llm.gpt.{
-    gpt_config, gpt_model,
+    model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
 
@@ -151,7 +151,7 @@ func cai_single(int tok) []int {
 
 // 对单个提示执行完整 critique-revise 循环
 func cai_critique_revise(
-    gpt_model model,
+    language_model model,
     []int prompt_tokens,
     constitutional_principle principle,
     int principle_index,
@@ -203,7 +203,7 @@ func cai_estimate_critique_strength([]int critique, int max_len) float {
 // ============================================================================
 
 func cai_generate_preferences(
-    gpt_model model,
+    language_model model,
     [][]int prompts,
     constitution consti,
     int max_response_tokens,

@@ -1,6 +1,6 @@
 package neurx.agent.parallel_tool
 
-// Parallel tool dispatch — analogous to Claude's multi-tool use in a single turn.
+// Parallel tool dispatch — analogous to NeurX multi-tool use in a single turn.
 // The agent can fan-out N tool calls simultaneously and merge their observations
 // before advancing to the next reasoning step.
 

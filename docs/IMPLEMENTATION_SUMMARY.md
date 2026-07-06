@@ -18,7 +18,7 @@
 | 1 | MoE All-to-All 路由 | `distributed/moe_all_to_all.s` | 500+ | Token 到专家的双向通信 | ✅ |
 | 2 | 张量并行 (TP) | `distributed/tensor_parallel.s` | 600+ | 跨 8 GPU 的权重分片 | ✅ |
 | 3 | ZeRO 梯度规约 | `distributed/zero_gradient_reduce.s` | 550+ | Stage 3 参数分片优化 | ✅ |
-| 4 | 损失计算与反向 | `model/llm/gpt_moe_1t_loss.s` | 550+ | CE + MoE + KL 损失及反向传播 | ✅ |
+| 4 | 损失计算与反向 | `model/llm/model_moe_1t_loss.s` | 550+ | CE + MoE + KL 损失及反向传播 | ✅ |
 
 ### P1 (功能完整 - 4 个模块)
 
@@ -113,7 +113,7 @@ func zero_stage3_clip_gradients(...)
 func zero_stage3_optimizer_step(...)
 ```
 
-### 损失计算 (model/llm/gpt_moe_1t_loss.s)
+### 损失计算 (model/llm/model_moe_1t_loss.s)
 
 ```s
 // 损失与梯度
@@ -186,7 +186,7 @@ func handle_longer_context(...)        // 动态处理超长
 │  ├─ 注意力
 │  ├─ MoE All-to-All (专家路由)
 │  └─ 输出层
-├─ 损失计算 (gpt_moe_1t_loss)
+├─ 损失计算 (model_moe_1t_loss)
 │  ├─ Cross-Entropy
 │  ├─ MoE Aux Loss
 │  └─ 总损失
@@ -353,7 +353,7 @@ Memory: 节省 30-50% 激活值内存
     ↓
 前向传播 ← {MoE路由, TP并行}
     ↓
-损失计算 (gpt_moe_1t_loss)
+损失计算 (model_moe_1t_loss)
     ↓
 反向传播 ← {MoE路由反向, TP反向}
     ↓
