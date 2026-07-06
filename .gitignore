@@ -96,6 +96,38 @@ out/
 # Logs
 *.log
 
+# Chat history and sessions
+chat_history/
+session/
+*.chat*
+
+# Output directories
+output/
+outputs/
+end_to_end_output/
+script/output/
+artifacts/logs/
+artifacts/train_output/
+artifacts/inference_output/
+
+# Cache directories
+*/cache/
+*.cache
+serving/cache/
+compile/cache/
+
+# Backup and temporary files
+*.backup
+*.bak
+*.tmp
+data/training_data*.jsonl.backup
+data/training_data*.jsonl.gpt_backup
+
+# Generated reports and metrics
+reports/
+metrics/
+*.metrics
+
 # Misc
 .DS_Store
 .vscode/
@@ -116,6 +148,33 @@ artifacts/checkpoints/Qwen2.5-VL-7B/
 cann/cache/
 cann/checkpoints/
 cann/compile/
+
+# Large binary files (model weights, datasets, etc.)
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.pb
+*.onnx
+*.neurx
+*.bz2
+*.gz
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# Large dataset files
+*.csv
+*.parquet
+*.arrow
+*.feather
+
+# Model-specific large outputs
+model_output/
+inference_output/
+validation_output/
 cann/dumps/
 cann/kernel_meta/
 cann/logs/
