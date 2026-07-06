@@ -1,8 +1,8 @@
-# Claude Code 功能分析与 neurx-code 实现建议
+# NeurX Code 功能分析与实现建议
 
 ## 📊 概述
 
-claude-code 是 Anthropic 开发的终端 AI 编程助手，拥有成熟的插件生态系统和强大的自动化能力。本文档分析其核心功能，并提供 neurx-code 的实现建议。
+NeurX Code 是一个终端 AI 编程助手，拥有成熟的插件生态系统和强大的自动化能力。本文档分析其核心功能，并提供 NeurX 的实现建议。
 
 ---
 
@@ -13,7 +13,7 @@ claude-code 是 Anthropic 开发的终端 AI 编程助手，拥有成熟的插�
 **标准化目录结构：**
 ```
 plugin-name/
-├── .claude-plugin/
+├── .neurx-plugin/
 │   └── plugin.json          # 插件元数据
 ├── commands/                # Slash commands（可选）
 │   └── command.md
@@ -30,7 +30,7 @@ plugin-name/
 
 **关键特性：**
 - ✅ 自动发现和加载
-- ✅ 环境变量支持（`${CLAUDE_PLUGIN_ROOT}`）
+- ✅ 环境变量支持（`${NEURX_PLUGIN_ROOT}`）
 - ✅ 分层配置（用户级、项目级、本地级）
 - ✅ 热加载/卸载
 
@@ -65,7 +65,7 @@ plugin-name/
 **Hook 输出格式：**
 ```json
 {
-  "systemMessage": "Message for Claude",
+  "systemMessage": "Message for NeurX",
   "userMessage": "Message for user (optional)",
   "blockOperation": false
 }
@@ -229,7 +229,7 @@ private:
 **Layer 2: LLM Diff Review**
 - Stop hook 时触发
 - 快速模型分析 diff
-- Claude 可在用户看到前修复
+- NeurX 可在用户看到前修复
 
 **Layer 3: Agentic Commit Review**
 - `git commit` 时触发
@@ -406,13 +406,13 @@ private:
 ### 🟡 中价值插件（选择性借鉴）
 
 #### 7. **ralph-wiggum** - 自主迭代循环 ⭐⭐
-**核心概念：** 实现持续 AI 循环，Claude 自动重复执行直到完成
+**核心概念：** 实现持续 AI 循环，NeurX 自动重复执行直到完成
 
 **工作原理：**
 ```
 1. 用户：/ralph-loop "实现 TDD 测试" --max-iterations 50
-2. Claude 执行任务
-3. Claude 尝试退出
+2. NeurX 执行任务
+3. NeurX 尝试退出
 4. Stop hook 拦截
 5. 重新注入相同 prompt
 6. 重复 2-5 直到完成或达到最大迭代次数
@@ -477,7 +477,7 @@ private:
 ### 🟢 低价值插件（可选）
 
 10. **agent-sdk-dev** - Agent SDK 开发
-11. **claude-opus-4-5-migration** - 模型迁移
+11. **neurx-opus-4-5-migration** - 模型迁移
 12. **frontend-design** - 前端设计指导
 13. **learning-output-style** - 学习模式
 14. **commit-messages** - Commit 消息规范
@@ -635,7 +635,7 @@ private:
 
 ## 📋 功能对比表
 
-| 功能 | claude-code | neurx-code 现状 | 实现优先级 | 工作量 |
+| 功能 | neurx-code | neurx-code 现状 | 实现优先级 | 工作量 |
 |------|-------------|----------------|----------|--------|
 | **Hooks 系统** | 9 种 hook 类型 | 基础 hooks | 🔴 高 | 3-5 天 |
 | **安全扫描** | 三层防护 | 无 | 🔴 高 | 2-3 天 |
@@ -749,7 +749,7 @@ QString expandVariables(const QString& path) {
     QString result = path;
     
     // 插件根目录
-    result.replace("${CLAUDE_PLUGIN_ROOT}", m_pluginRootDir);
+    result.replace("${NEURX_PLUGIN_ROOT}", m_pluginRootDir);
     result.replace("${NEURX_PLUGIN_ROOT}", m_pluginRootDir);
     
     // 标准路径
@@ -774,7 +774,7 @@ QString expandVariables(const QString& path) {
 
 ## 📊 总结
 
-### claude-code 的核心优势
+### neurx-code 的核心优势
 
 1. **成熟的插件生态**：14 个高质量官方插件
 2. **灵活的 Hooks 系统**：9 种 hook 类型，智能和确定性结合
@@ -821,4 +821,4 @@ QString expandVariables(const QString& path) {
 
 ---
 
-**结论：** claude-code 的插件生态和自动化能力非常强大，neurx-code 可以选择性地借鉴其核心功能（Hooks、安全扫描、Git 工作流、多 Agent），在 1-2 个月内显著提升产品竞争力。
+**结论：** neurx-code 的插件生态和自动化能力非常强大，neurx-code 可以选择性地借鉴其核心功能（Hooks、安全扫描、Git 工作流、多 Agent），在 1-2 个月内显著提升产品竞争力。

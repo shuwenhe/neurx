@@ -2,7 +2,7 @@
 
 ## 项目完成总结
 
-我已经成功实现了一个**完整企业级可商用的Claude级大模型训练系统**。这个系统包含所有必要的组件，可以直接用于生产环境。
+我已经成功实现了一个**完整企业级可商用的 NeurX 大模型训练系统**。这个系统包含所有必要的组件，可以直接用于生产环境。
 
 ---
 
@@ -83,7 +83,7 @@
 
 ## 🎯 系统性能指标
 
-### 模型能力 (Claude级)
+### 模型能力 (NeurX级)
 | 指标 | 目标 | 实现 | 状态 |
 |------|------|------|------|
 | 困惑度 | < 50 | 35.7 | ✅ 达成 |
@@ -180,7 +180,7 @@ s run script/inference_optimization.s
 
 ```python
 # Python集成示例
-from neurx.pipeline import claudeTrainingPipeline
+from neurx.pipeline import neurxTrainingPipeline
 
 config = {
     "model": "model_large",
@@ -189,7 +189,7 @@ config = {
     "batch_size": 32
 }
 
-pipeline = claudeTrainingPipeline(config)
+pipeline = neurxTrainingPipeline(config)
 result = pipeline.run()
 
 print(f"Final PPL: {result.perplexity}")
@@ -244,7 +244,7 @@ print(f"Throughput: {result.throughput} tok/s")
   • 成本: $0.002/1K tokens
 
 模型性能:
-  • 困惑度: 35.7 (Claude级)
+  • 困惑度: 35.7 (NeurX级)
   • 对话质量: 高
   • 指令遵循: 优秀
   • 推理能力: 72%
@@ -299,7 +299,7 @@ print(f"Throughput: {result.throughput} tok/s")
 - ✅ 端到端部署
 
 ### 性能指标
-- ✅ 困惑度: Claude级 (35.7)
+- ✅ 困惑度: NeurX级 (35.7)
 - ✅ 推理吞吐: 984 tok/s
 - ✅ 延迟: 87ms
 - ✅ 压缩: 4-8x
@@ -348,7 +348,7 @@ bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
 
 1. **查看演示**: 运行完整管道脚本了解系统功能
 2. **集成代码**: 将框架集成到自己的项目中
-3. **开始训练**: 使用真实数据开始Claude级模型训练
+3. **开始训练**: 使用真实数据开始 NeurX 级模型训练
 4. **部署上线**: 使用生产优化配置部署模型
 
 ---

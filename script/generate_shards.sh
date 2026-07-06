@@ -6,7 +6,7 @@
 
 set -e
 
-NEURX_HOME="${NEURX_HOME:-$(cd "$(dirname "$0")" && pwd)}"
+NEURX_HOME="${NEURX_HOME:-$(cd "$(dirname "$0")/.." && pwd)}"
 DATASET_ROOT="${DATASET_ROOT:-$NEURX_HOME/data/pretrain_dataset}"
 INPUT_FILE="${INPUT_FILE:-$DATASET_ROOT/cleaned/train.jsonl}"
 SHARD_DIR="${SHARD_DIR:-$DATASET_ROOT/shard}"
@@ -35,6 +35,7 @@ echo ""
 
 # 创建分片目录
 mkdir -p "$SHARD_DIR"
+rm -f "$SHARD_DIR"/shard_*.jsonl
 
 echo "📋 计算分片大小..."
 total_lines=$(wc -l < "$INPUT_FILE")
@@ -79,7 +80,6 @@ split -l "$lines_per_shard" "$INPUT_FILE" "$SHARD_DIR/shard_"
 echo ""
 echo "📊 重命名和计数..."
 
-<<<<<<< Updated upstream
 # 重命名为标准格式
 shard_count=0
 for file in "$SHARD_DIR"/shard_*; do
@@ -89,19 +89,6 @@ for file in "$SHARD_DIR"/shard_*; do
     new_name=$(printf "shard_%05d.jsonl" "$shard_count")
     mv "$file" "$SHARD_DIR/$new_name"
     ((shard_count++))
-=======
-# 重命名为标准格式（使用数组遍历以避免在重命名过程中匹配到已重命名的文件）
-shard_files=( "$SHARD_DIR"/shard_* )
-shard_count=0
-for file in "${shard_files[@]}"; do
-    [ -e "$file" ] || continue
-    new_name=$(printf "shard_%05d.jsonl" "$shard_count")
-    target="$SHARD_DIR/$new_name"
-    if [ "$file" != "$target" ]; then
-        mv -- "$file" "$target"
-    fi
-    shard_count=$((shard_count+1))
->>>>>>> Stashed changes
 done
 
 echo "  • 生成的分片数: $shard_count"

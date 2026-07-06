@@ -1,4 +1,4 @@
-# Claude 标准工具系统 - 快速开始
+# NeurX 标准工具系统 - 快速开始
 
 **5 分钟快速集成指南**
 
@@ -12,7 +12,7 @@
 
 ```cmake
 # 在 add_library 或 add_executable 的源文件列表中添加
-src/tools/ClaudeStandardTools.cpp
+src/tools/NeurXStandardTools.cpp
 ```
 
 ### 步骤 2: 注册工具
@@ -20,10 +20,10 @@ src/tools/ClaudeStandardTools.cpp
 在你的初始化代码中（如 `AgentController::initialize()`）：
 
 ```cpp
-#include "tools/ClaudeStandardTools.h"
+#include "tools/NeurXStandardTools.h"
 
 // 一键注册所有 7 个标准工具
-ClaudeStandardToolFactory::registerAllTools(
+NeurXStandardToolFactory::registerAllTools(
     workspaceRoot,      // QString: 工作空间路径
     m_toolRegistry,     // CoreToolRegistry*: 工具注册表
     m_sandboxManager    // SandboxManager*: 可选，Sandbox 管理器
@@ -172,7 +172,7 @@ result = tool->execute("call-2", {
 ```cpp
 // AgentController.cpp
 
-#include "tools/ClaudeStandardTools.h"
+#include "tools/NeurXStandardTools.h"
 
 void AgentController::initialize()
 {
@@ -183,8 +183,8 @@ void AgentController::initialize()
     m_sandboxManager = new SandboxManager(this);
     m_sandboxManager->allow(m_workspaceRoot, FileSystemAccessMode::ReadWrite);
     
-    // 注册 Claude 标准工具
-    ClaudeStandardToolFactory::registerAllTools(
+    // 注册 NeurX 标准工具
+    NeurXStandardToolFactory::registerAllTools(
         m_workspaceRoot,
         m_toolRegistry,
         m_sandboxManager
@@ -340,20 +340,20 @@ Rectangle {
 运行这段代码验证工具已正确安装：
 
 ```cpp
-void testClaudeStandardTools()
+void testNeurXStandardTools()
 {
     // 创建测试环境
     QString testWorkspace = QDir::tempPath() + "/neurx_test";
     QDir().mkpath(testWorkspace);
     
     auto registry = new DefaultToolRegistry();
-    ClaudeStandardToolFactory::registerAllTools(testWorkspace, registry, nullptr);
+    NeurXStandardToolFactory::registerAllTools(testWorkspace, registry, nullptr);
     
     // 测试 Write 工具
     BaseTool* writeTool = registry->findTool("Write");
     QJsonObject writeParams;
     writeParams["file_path"] = "test.txt";
-    writeParams["new_text"] = "Hello, Claude!";
+    writeParams["new_text"] = "Hello, NeurX!";
     
     ToolResult result = writeTool->execute("test-1", writeParams);
     
@@ -370,7 +370,7 @@ void testClaudeStandardTools()
     
     result = readTool->execute("test-2", readParams);
     
-    if (!result.isError && result.content.contains("Hello, Claude!")) {
+    if (!result.isError && result.content.contains("Hello, NeurX!")) {
         qDebug() << "✅ Read tool works!";
     } else {
         qDebug() << "❌ Read tool failed:" << result.content;
@@ -401,8 +401,8 @@ void testClaudeStandardTools()
 ## 📚 更多资源
 
 - **完整文档**: [NEURX_STANDARD_TOOLS.md](NEURX_STANDARD_TOOLS.md)
-- **头文件**: [src/tools/ClaudeStandardTools.h](../src/tools/ClaudeStandardTools.h)
-- **实现**: [src/tools/ClaudeStandardTools.cpp](../src/tools/ClaudeStandardTools.cpp)
+- **头文件**: [src/tools/NeurXStandardTools.h](../src/tools/NeurXStandardTools.h)
+- **实现**: [src/tools/NeurXStandardTools.cpp](../src/tools/NeurXStandardTools.cpp)
 
 ---
 
@@ -414,4 +414,4 @@ void testClaudeStandardTools()
 3. ✅ 搜索和查找代码
 4. ✅ 构建完整的 AI 编码助手
 
-**开始使用 NeurX Code 的 Claude 标准工具系统吧！🚀**
+**开始使用 NeurX Code 的 NeurX 标准工具系统吧！🚀**

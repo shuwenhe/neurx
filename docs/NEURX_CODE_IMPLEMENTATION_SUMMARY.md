@@ -1,7 +1,7 @@
-# Claude Code 核心功能在 NeurX Code 中的实现 - 执行总结
+# NeurX Code 核心功能实现 - 执行总结
 
 **日期**: 2026年6月4日  
-**任务**: 实现 claude-code 中 neurx-code 缺失的核心功能  
+**任务**: 实现 NeurX Code 缺失的核心功能  
 **状态**: ✅ **已完成**
 
 ---
@@ -158,15 +158,15 @@ neurx-code/src/
 ### 文档文件 (2个)
 ```
 neurx-code/docs/
-├── CLAUDE_CODE_FEATURES_IMPLEMENTATION.md  (~600行) - 完整实现文档
-└── CLAUDE_CODE_QUICK_START.md              (~400行) - 快速入门指南
+├── NEURX_CODE_FEATURES_IMPLEMENTATION.md  (~600行) - 完整实现文档
+└── NEURX_CODE_QUICK_START.md              (~400行) - 快速入门指南
 ```
 
 ---
 
-## 🔄 与 Claude Code 的功能对比
+## 🔄 与 NeurX Code 的功能对比
 
-| 功能类别 | Claude Code | NeurX Code (之前) | NeurX Code (现在) | 完成度 |
+| 功能类别 | NeurX Code | NeurX Code (之前) | NeurX Code (现在) | 完成度 |
 |----------|-------------|-------------------|-------------------|--------|
 | **插件系统基础** | ✅ | ✅ | ✅ | 100% (已有) |
 | **命令系统** | ✅ | ❌ | ✅ | 100% ✨ |
@@ -379,7 +379,7 @@ hookSystem->registerHook(preToolUse, securityCheck);
 ✅ **2 份文档** 详细说明  
 
 ### 功能提升
-- NeurX Code 现在拥有 **95%+** 的 Claude Code 核心功能
+- NeurX Code 现在拥有 **95%+** 的 NeurX Code 核心功能
 - 支持 **命令系统**、**Hook 系统**、**Git 工作流**、**专用 Agent**
 - 提供了完整的 **AI 增强开发体验**
 
@@ -398,7 +398,7 @@ hookSystem->registerHook(preToolUse, securityCheck);
 
 ---
 
-**NeurX Code 现在具备了与 Claude Code 相当的核心功能! 🚀**
+**NeurX Code 现在具备了与 NeurX Code 相当的核心功能! 🚀**
 
 实现者: GitHub Copilot  
 日期: 2026年6月4日  

@@ -195,7 +195,7 @@ func gpt_large_train_step(gpt_large_state state, gpt_large_train_config config, 
     }
 }
 
-func train_model_large_fngpt_large_state state, gpt_large_train_config config) gpt_large_state {
+func train_gpt_large(gpt_large_state state, gpt_large_train_config config) gpt_large_state {
     if !gpt_large_is_transformer_valid(state) {
         return state
     }
