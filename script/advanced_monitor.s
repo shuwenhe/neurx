@@ -27,7 +27,7 @@ type PerplexityMetrics struct {
 }
 
 // TrainingMetrics captures single step metrics
-type TrainingMetrics struct {
+type training_metrics struct {
     step: int
     epoch: int
     batch_idx: int

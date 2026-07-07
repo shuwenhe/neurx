@@ -27,7 +27,7 @@ type APIResponse struct {
     error_message       string
 }
 
-type InferenceRequest struct {
+type inference_request struct {
     prompt              string
     max_tokens          int
     temperature         float64
@@ -36,7 +36,7 @@ type InferenceRequest struct {
     repetition_penalty  float64
 }
 
-type InferenceResponse struct {
+type inference_response struct {
     generated_text      string
     tokens_generated    int
     processing_time_ms  float64

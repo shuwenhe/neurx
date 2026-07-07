@@ -222,6 +222,7 @@ func (manager *ExperimentManager) compare_experiments(
     
     var best_value float64 = math.MaxFloat64
     var best_exp string = ""
+    var second_best float64 = math.MaxFloat64
     
     for _, exp_id := range exp_ids {
         if result, exists := manager.experiments[exp_id]; exists {
@@ -237,14 +238,21 @@ func (manager *ExperimentManager) compare_experiments(
             fmt.Printf("  %s: %.4f\n", exp_id, value)
             
             if value < best_value {
+                second_best = best_value
                 best_value = value
                 best_exp = exp_id
+            } else if value < second_best {
+                second_best = value
             }
         }
     }
     
     comparison.winner = best_exp
-    comparison.significance = (best_value / best_value) * 100
+    if second_best < math.MaxFloat64 && second_best > 0.0 {
+        comparison.significance = ((second_best - best_value) / second_best) * 100.0
+    } else {
+        comparison.significance = 0.0
+    }
     
     fmt.Printf("  Winner: %s (%.4f)\n", best_exp, best_value)
     

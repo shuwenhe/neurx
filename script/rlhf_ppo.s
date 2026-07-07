@@ -83,7 +83,7 @@ type PerformanceMetric struct {
     explained_variance  float64
 }
 
-type PolicyModel struct {
+type policy_model struct {
     model_name          string
     num_layers          int
     hidden_size         int
@@ -461,7 +461,7 @@ func (model *RewardModel) predict_reward(tokens []int) float64 {
 func NewPPOTrainer(config PPOConfig) *PPOTrainer {
     return &PPOTrainer{
         config: config,
-        policy_model: PolicyModel{
+        policy_model: policy_model{
             model_name: "gpt_large",
             num_layers: 12,
             hidden_size: 768,

@@ -316,7 +316,7 @@ func NewMultiTaskLearner(config MultiTaskConfig) *MultiTaskLearner {
     return &MultiTaskLearner{
         config: config,
         tasks: []Task{},
-        shared_encoder: PolicyModel{},
+        shared_encoder: policy_model{},
         task_heads: make(map[int][]float64),
         task_losses: make(map[int][]float64),
         task_performance: make(map[int]float64),
