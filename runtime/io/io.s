@@ -16,6 +16,30 @@ struct runtime_command_result {
     string error
 }
 
+func trim(string s) string {
+    int i = 0
+    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+        i = i + 1
+    }
+
+    int j = len(s) - 1
+    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+        j = j - 1
+    }
+
+    if j < i {
+        return ""
+    }
+
+    string out = ""
+    int k = i
+    while k <= j {
+        out = out + string(s[k])
+        k = k + 1
+    }
+    out
+}
+
 func runtime_shell_escape(string value) string {
     string out = "'"
     int i = 0

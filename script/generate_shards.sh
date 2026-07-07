@@ -83,12 +83,10 @@ echo "📊 重命名和计数..."
 # 重命名为标准格式
 shard_count=0
 for file in "$SHARD_DIR"/shard_*; do
-    # 获取后缀
-    suffix="${file##*shard_}"
     # 生成标准名称
     new_name=$(printf "shard_%05d.jsonl" "$shard_count")
     mv "$file" "$SHARD_DIR/$new_name"
-    ((shard_count++))
+    shard_count=$((shard_count + 1))
 done
 
 echo "  • 生成的分片数: $shard_count"
