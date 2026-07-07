@@ -23,7 +23,7 @@ type InstructionExample struct {
     []int tokens
 }
 
-type InstructionDataset struct {
+type instruction_dataset struct {
     []InstructionExample examples
     map[string]int categories
     int64 total_tokens
@@ -46,8 +46,8 @@ type SFTTrainer struct {
     SFTConfig config
     PolicyModel model
     Optimizer optimizer
-    InstructionDataset dataset
-    InstructionDataset val_dataset
+    instruction_dataset dataset
+    instruction_dataset val_dataset
     int step_count
     []sft_metric training_history
 }
@@ -227,7 +227,7 @@ func (trainer *SFTTrainer) model_forward(tokens []int) [][]float64 {
 // Evaluation
 // ============================================
 
-func (trainer *SFTTrainer) evaluate(dataset InstructionDataset) SFTMetric {
+func (trainer *SFTTrainer) evaluate(dataset instruction_dataset) sft_metric {
     fmt.Printf("[SFT] Evaluating on %d examples\n", len(dataset.examples))
     
     total_loss := 0.0
@@ -375,16 +375,16 @@ func NewSFTTrainer(config SFTConfig) *SFTTrainer {
             epsilon: 1e-8,
             weight_decay: config.weight_decay,
         },
-        dataset: InstructionDataset{
+        dataset: instruction_dataset{
             examples: []InstructionExample{},
             categories: make(map[string]int),
         },
-        val_dataset: InstructionDataset{
+        val_dataset: instruction_dataset{
             examples: []InstructionExample{},
             categories: make(map[string]int),
         },
         step_count: 0,
-        training_history: []SFTMetric{},
+        training_history: []sft_metric{},
     }
 }
 
