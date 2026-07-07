@@ -384,7 +384,7 @@ func (manager *CheckpointManager) run_full_checkpoint_cycle() {
         velocity:       make([]float64, 100),
     }
     
-    train_state := TrainingState{
+    train_state := training_state{
         current_step:       0,
         current_epoch:      0,
         train_loss_history: []float64{},

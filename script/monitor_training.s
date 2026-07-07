@@ -1,6 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_file_exists, runtime_shell_escape}
+use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_file_exists, trim}
 use std.io.println
 
 func main() int {
@@ -11,7 +11,7 @@ func main() int {
     println("NeurX 训练进度监控 (S 入口)")
     println("")
 
-    let latest_log = runtime_run_command_output("cd " + runtime_shell_escape(log_dir) + " && ls -t train_*.log 2>/dev/null | head -1")
+    let latest_log = trim(runtime_run_command_output("cd '" + log_dir + "' && ls -t train_*.log 2>/dev/null | head -1"))
     if latest_log == "" {
         println("未找到训练日志文件")
         return 1
@@ -19,13 +19,13 @@ func main() int {
 
     println("最新日志: " + latest_log)
     println("")
-    println("日志大小: " + runtime_run_command_output("du -h " + runtime_shell_escape(latest_log) + " 2>/dev/null | cut -f1"))
-    println("最后修改: " + runtime_run_command_output("stat -c '%y' " + runtime_shell_escape(latest_log) + " 2>/dev/null || stat -f '%Sm' " + runtime_shell_escape(latest_log) + " 2>/dev/null"))
+    println("日志大小: " + trim(runtime_run_command_output("cd '" + log_dir + "' && du -h '" + latest_log + "' 2>/dev/null | cut -f1")))
+    println("最后修改: " + trim(runtime_run_command_output("cd '" + log_dir + "' && ls -l '" + latest_log + "' 2>/dev/null | awk '{print $6, $7, $8}'")))
     println("")
 
     print_flag("数据清洁进程", runtime_run_command_output("pgrep -f clean_data 2>/dev/null") != "")
     print_flag("训练进程", runtime_run_command_output("pgrep -f 'neurx.*train' 2>/dev/null") != "")
-    print_flag("S 编译进程", runtime_run_command_output("pgrep -f 's.*ir\\|s.*build' 2>/dev/null") != "")
+    print_flag("S 编译器", runtime_file_exists("/home/shuwen/s/bin/s"))
 
     println("")
     if runtime_file_exists(project_root + "/dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl") {
@@ -43,7 +43,7 @@ func main() int {
     println("")
     println("最新日志内容 (最后20行):")
     println("─────────────────────────────────────────────────────────────────")
-    println(runtime_run_command_output("tail -20 " + runtime_shell_escape(latest_log)))
+    println(trim(runtime_run_command_output("cd '" + log_dir + "' && tail -20 '" + latest_log + "'")))
     println("─────────────────────────────────────────────────────────────────")
     0
 }

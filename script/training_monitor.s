@@ -30,7 +30,7 @@ type training_metrics struct {
 // TrainingMonitor tracks training progress
 type TrainingMonitor struct {
     start_time: time.Time
-    steps: []TrainingMetrics
+    steps: []training_metrics
     total_steps: int
     log_file: string
     update_interval: int  // Update UI every N steps
@@ -43,7 +43,7 @@ func (tm *TrainingMonitor) init(
     update_interval: int) error {
     
     tm.start_time = time.Now()
-    tm.steps = make([]TrainingMetrics, 0)
+    tm.steps = make([]training_metrics, 0)
     tm.total_steps = total_steps
     tm.log_file = log_file
     tm.update_interval = update_interval

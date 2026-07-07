@@ -1,11 +1,7 @@
 #!/bin/bash
-
 set -euo pipefail
 
-NEURX_DIR="$(cd "$(dirname "$0")" && pwd)"
-CHECKPOINT_ROOT="${1:-${NEURX_INFER_CHECKPOINT:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}}"
-SEED_TEXT="${2:-${NEURX_INFER_SEED:-neurx }}"
-MAX_NEW_CHARS="${3:-${NEURX_INFER_MAX_NEW_CHARS:-120}}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-cd "$NEURX_DIR"
-node "$NEURX_DIR/tools/infer_llm_checkpoint.mjs" "$CHECKPOINT_ROOT" "$SEED_TEXT" "$MAX_NEW_CHARS"
+exec make -C "$NEURX_ROOT" run-inference-s

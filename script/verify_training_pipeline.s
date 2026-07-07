@@ -1,7 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
-use std.strings
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 use std.io.println
 
 func main() int {
@@ -41,12 +40,13 @@ func main() int {
     }
 
     println("")
-    println("通过: " + strings.from_i32(pass_count) + " / " + strings.from_i32(total_count))
     if pass_count == total_count {
+        println("通过: 全部检查通过")
         println("项目状态: 完成")
         return 0
     }
 
+    println("通过: 部分检查通过")
     println("项目状态: 未完全完成")
     1
 }
@@ -54,7 +54,7 @@ func main() int {
 func check_file(string path, string label) bool {
     if runtime_file_exists(path) {
         println("✅ " + label + " : ready (" + path + ")")
-        let size_text = runtime_run_command_output("wc -l " + runtime_shell_escape(path))
+        let size_text = runtime_run_command_output("wc -l '" + path + "'")
         if size_text != "" {
             println("   " + size_text)
         }

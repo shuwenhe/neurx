@@ -44,7 +44,7 @@ type training_metrics struct {
 // AdvancedTrainingMonitor tracks comprehensive training progress
 type AdvancedTrainingMonitor struct {
     start_time: time.Time
-    steps: []TrainingMetrics
+    steps: []training_metrics
     total_steps: int
     log_file: string
     update_interval: int
@@ -70,7 +70,7 @@ func (atm *AdvancedTrainingMonitor) init(
     convergence_window: int) error {
     
     atm.start_time = time.Now()
-    atm.steps = make([]TrainingMetrics, 0)
+    atm.steps = make([]training_metrics, 0)
     atm.ppl_history = make([]PerplexityMetrics, 0)
     atm.total_steps = total_steps
     atm.log_file = log_file

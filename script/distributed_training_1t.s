@@ -240,7 +240,7 @@ func create_training_loop_1t(rank: int, world_size: int): TrainingLoop1T {
         saved_checkpoints: 0,
     }
     
-    state := TrainingState{
+    state := training_state{
         step: 0,
         epoch: 0,
         tokens_processed: 0,

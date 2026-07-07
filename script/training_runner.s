@@ -81,14 +81,14 @@ type training_metrics struct {
 // Global State
 // ============================================================================
 
-var gTrainingState = &TrainingState{
+var gTrainingState = &training_state{
 	CurrentStep: 0,
 	CurrentEpoch: 0,
 	TotalLoss: 0.0,
 	AvgLoss: 0.0,
 }
 
-var gConfig = &TrainingConfig{
+var gConfig = &training_config{
 	ModelName: "neurx-1t",
 	ModelSize: "1t",
 	ParamCount: 1000000000,
