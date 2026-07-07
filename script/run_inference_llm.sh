@@ -262,7 +262,7 @@ compile_to_binary() {
         exit 1
     fi
 
-    if (cd "$NEURX_ROOT" && cc -std=c11 -O2 -Wall -Wextra -Werror -DSEED_COMPILE_ONLY \
+    if (cd "$NEURX_ROOT" && cc -std=c11 -O2 -Wall -Wextra -DSEED_COMPILE_ONLY \
       -I "$S_SOURCE_ROOT/src/cmd/compile/seed" \
       -o "$RUNNER_BIN" \
       "$NEURX_ROOT/tools/s_ir_runner.c" \

@@ -14,10 +14,13 @@ SESSION_ID="session_$(date +%s)"
 CHAT_LOG="$CHAT_DIR/chat_${SESSION_ID}.txt"
 
 # 推理引擎配置
-S_COMPILER="${S_COMPILER:-/Users/feifei/train/s/.local/bin/s}"
+S_COMPILER="${S_COMPILER:-$(command -v s 2>/dev/null || true)}"
+if [ -z "$S_COMPILER" ]; then
+    S_COMPILER="/home/shuwen/.local/bin/s"
+fi
 CHAT_SOURCE="$NEURX_DIR/inference/production_inference.s"
-RUNNER_IR="$BUILD_DIR/interactive_inference.ir"
-RUNNER_BIN="$NEURX_DIR/build/s_ir_runner_train_model_large"
+RUNNER_IR="$NEURX_DIR/build/inference/inference.ir"
+RUNNER_BIN="$NEURX_DIR/build/inference/inference_runner"
 MODEL_BIN="$BUILD_DIR/interactive_inference.bin"
 CHECKPOINT_PATH="${NEURX_INFER_CHECKPOINT:-$NEURX_DIR/artifacts/checkpoints/llm_s_pretrain}"
 TOKENIZER_PATH="${NEURX_INFER_TOKENIZER_PATH:-$NEURX_DIR/data/corpus}"
@@ -30,6 +33,7 @@ mkdir -p "$OUTPUT_DIR" "$CHAT_DIR" "$BUILD_DIR"
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
@@ -62,6 +66,29 @@ EOF
 build_chat_prompt() {
     local user_input="$1"
     printf '你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：\n%s\n答案：' "$user_input"
+}
+
+ensure_interactive_inference_ready() {
+    if [ -x "$RUNNER_BIN" ] && [ -f "$RUNNER_IR" ]; then
+        return 0
+    fi
+
+    if [ ! -x "$RUNNER_BIN" ]; then
+        echo -e "${YELLOW}⚠ 推理运行器未就绪: $RUNNER_BIN${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}⚠ 推理 IR 未就绪，正在自动编译...${NC}"
+    if "$S_COMPILER" ir "$CHAT_SOURCE" -o "$RUNNER_IR" >> "$BUILD_DIR/chat_inference.log" 2>&1; then
+        return 0
+    fi
+
+    if "$S_COMPILER" "$CHAT_SOURCE" "$RUNNER_IR" >> "$BUILD_DIR/chat_inference.log" 2>&1; then
+        return 0
+    fi
+
+    echo -e "${RED}✗ 自动编译推理 IR 失败，请查看 $BUILD_DIR/chat_inference.log${NC}"
+    return 1
 }
 
 extract_model_response() {
@@ -139,13 +166,8 @@ generate_response() {
     local prompt
     prompt="$(build_chat_prompt "$user_input")"
 
-    if [ ! -x "$RUNNER_BIN" ]; then
-        printf "当前没有可执行的推理运行器，请先运行 \`bash script/run_interactive_inference.sh\` 完成编译。"
-        return
-    fi
-
-    if [ ! -f "$RUNNER_IR" ]; then
-        printf "当前没有找到推理 IR 文件，请先运行 \`bash script/run_interactive_inference.sh\` 生成模型运行产物。"
+    if ! ensure_interactive_inference_ready; then
+        printf "当前没有可执行的推理运行器，请先检查 \`build/inference/inference_runner\` 是否存在。"
         return
     fi
 

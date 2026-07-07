@@ -1,10 +1,7 @@
 package neurx.inference.simple
 
-// Runtime I/O functions - S language implementations
+// Runtime I/O functions - S language implementations (stubs)
 func runtime_env_get(string name, string default_value) string {
-    // Note: Environment variable access not available in IR runtime
-    // IR runtime only supports basic string/int/bool types and println
-    // Return default values to allow program to run
     default_value
 }
 
