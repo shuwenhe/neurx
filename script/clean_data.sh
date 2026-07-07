@@ -32,6 +32,8 @@ export PYTHONUNBUFFERED=1
 TRAIN_FILE="$CLEANED_DIR/train.jsonl"
 VAL_FILE="$CLEANED_DIR/val.jsonl"
 TEST_FILE="$CLEANED_DIR/test.jsonl"
+CHECKPOINT_FILE="${CHECKPOINT_FILE:-$CLEANED_DIR/.cleaning_checkpoint.json}"
+export NEURX_CHECKPOINT_FILE="$CHECKPOINT_FILE"
 
 finalize_cleaned_dataset() {
     local stage="${1:-unknown}"
@@ -103,24 +105,14 @@ PY
 }
 
 cleanup_finalized=0
-trap 'if [ "$cleanup_finalized" -ne 1 ]; then finalize_cleaned_dataset "trap" || true; fi' EXIT INT TERM
-
-if [ "${NEURX_RESUME_CLEANED:-0}" = "1" ] && [ -s "$OUTPUT_FILE" ]; then
-    echo "NEURX_RESUME_CLEANED=1 and existing cleaned output found; skipping raw parsing."
-    cleanup_finalized=1
-    finalize_cleaned_dataset "resume"
-    echo ""
-    echo "✨ 数据清洗流程完成"
-    echo "下一步可执行:"
-    echo "  bash train_1t_moe.sh"
-    exit 0
-fi
+trap 'true' EXIT INT TERM
 
 python3 -u - <<'PY'
 from __future__ import annotations
 
 import bz2
 import html
+import hashlib
 import json
 import os
 import re
@@ -133,6 +125,13 @@ raw_dir = Path(os.environ["NEURX_RAW_DIR"])
 cleaned_dir = Path(os.environ["NEURX_CLEANED_DIR"])
 output_file = Path(os.environ["NEURX_OUTPUT_FILE"])
 manifest_file = Path(os.environ["NEURX_MANIFEST_FILE"])
+checkpoint_file = Path(os.environ.get("NEURX_CHECKPOINT_FILE", str(cleaned_dir / ".cleaning_checkpoint.json")))
+
+checkpoint_interval_pages = int(os.environ.get("NEURX_CLEAN_CHECKPOINT_INTERVAL", "200"))
+
+
+def hash_key(text: str) -> str:
+    return hashlib.sha256(compact_key(text).encode("utf-8")).hexdigest()
 
 
 def normalize_text(text: str) -> str:
@@ -168,11 +167,94 @@ def supported_sources():
     return sorted(files)
 
 
-def process_plain_text(path: Path, seen: set[str], output_handle, stats: dict) -> None:
+def load_checkpoint() -> dict | None:
+    if not checkpoint_file.exists():
+        return None
+    try:
+        data = json.loads(checkpoint_file.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+    return None
+
+
+def save_checkpoint(state: dict) -> None:
+    payload = {
+        "version": 1,
+        "status": "in_progress",
+        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "source_index": state["source_index"],
+        "source_name": state["source_name"],
+        "source_kind": state["source_kind"],
+        "source_progress": state["source_progress"],
+        "stats": state["stats"],
+        "output_file": str(output_file),
+        "raw_dir": str(raw_dir),
+    }
+    checkpoint_file.parent.mkdir(parents=True, exist_ok=True)
+    tmp_file = checkpoint_file.with_suffix(".json.tmp")
+    tmp_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp_file.replace(checkpoint_file)
+
+
+def clear_checkpoint() -> None:
+    if checkpoint_file.exists():
+        checkpoint_file.unlink()
+
+
+def output_summary(path: Path) -> dict:
+    summary = {
+        "valid_documents": 0,
+        "total_tokens_estimate": 0,
+    }
+    if not path.exists() or path.stat().st_size == 0:
+        return summary
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            summary["valid_documents"] += 1
+            metadata = record.get("metadata", {})
+            if isinstance(metadata, dict):
+                tokens = metadata.get("tokens_estimate", 0)
+                if isinstance(tokens, int):
+                    summary["total_tokens_estimate"] += tokens
+    return summary
+
+
+def rebuild_seen(path: Path) -> set[str]:
+    seen: set[str] = set()
+    if not path.exists() or path.stat().st_size == 0:
+        return seen
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            text = record.get("text")
+            if isinstance(text, str) and text:
+                seen.add(hash_key(text))
+    return seen
+
+
+def process_plain_text(path: Path, seen: set[str], output_handle, stats: dict, state: dict) -> None:
     stats["total_size_bytes"] += path.stat().st_size
     log_progress(f"处理纯文本文件: {path.name}")
+    resume_from = int(state.get("source_progress", 0))
     if path.suffix.lower() == ".txt":
-        stats["total_documents"] += 1
+        if resume_from > 0:
+            log_progress(f"  从第 {resume_from + 1} 条文本记录继续")
+            return
         text = normalize_text(path.read_text(encoding="utf-8", errors="ignore"))
         if not text:
             stats["empty_documents"] += 1
@@ -180,10 +262,11 @@ def process_plain_text(path: Path, seen: set[str], output_handle, stats: dict) -
         if len(text) < 50:
             stats["short_documents"] += 1
             return
+        stats["total_documents"] += 1
         clipped = text[:100000]
         if len(text) > 100000:
             stats["long_documents"] += 1
-        key = compact_key(clipped)
+        key = hash_key(clipped)
         if key in seen:
             stats["duplicates_removed"] += 1
             return
@@ -205,6 +288,8 @@ def process_plain_text(path: Path, seen: set[str], output_handle, stats: dict) -
 
     with path.open("r", encoding="utf-8", errors="ignore") as handle:
         for index, line in enumerate(handle, start=1):
+            if index <= resume_from:
+                continue
             stats["total_documents"] += 1
             line = line.strip()
             if not line:
@@ -231,7 +316,7 @@ def process_plain_text(path: Path, seen: set[str], output_handle, stats: dict) -
             clipped = text[:100000]
             if len(text) > 100000:
                 stats["long_documents"] += 1
-            key = compact_key(clipped)
+            key = hash_key(clipped)
             if key in seen:
                 stats["duplicates_removed"] += 1
                 continue
@@ -257,20 +342,26 @@ def strip_namespace(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
-def process_wikipedia_dump(path: Path, seen: set[str], output_handle, stats: dict) -> None:
+def process_wikipedia_dump(path: Path, seen: set[str], output_handle, stats: dict, state: dict) -> None:
     stats["total_size_bytes"] += path.stat().st_size
     log_progress(f"开始解析 Wikipedia dump: {path.name} ({path.stat().st_size} bytes)")
     opener = bz2.open if path.name.endswith(".bz2") else open
     last_report_time = time.monotonic()
     last_report_pages = 0
+    resume_from = int(state.get("source_progress", 0))
+    page_index = 0
     with opener(path, "rb") as stream:
         context = ET.iterparse(stream, events=("end",))
         for _event, elem in context:
             if strip_namespace(elem.tag) != "page":
                 continue
 
+            page_index += 1
+            if page_index <= resume_from:
+                elem.clear()
+                continue
             stats["total_documents"] += 1
-            page_count = stats["total_documents"]
+            page_count = page_index
             now = time.monotonic()
             if page_count - last_report_pages >= 200 or now - last_report_time >= 20:
                 log_progress(
@@ -314,7 +405,7 @@ def process_wikipedia_dump(path: Path, seen: set[str], output_handle, stats: dic
             clipped = text[:100000]
             if len(text) > 100000:
                 stats["long_documents"] += 1
-            key = compact_key(clipped)
+            key = hash_key(clipped)
             if key in seen:
                 stats["duplicates_removed"] += 1
                 continue
@@ -340,6 +431,10 @@ def process_wikipedia_dump(path: Path, seen: set[str], output_handle, stats: dic
                     f"累计 tokens 估计 {stats['total_tokens_estimate']}"
                 )
 
+            if page_index % checkpoint_interval_pages == 0:
+                state["source_progress"] = page_index
+                save_checkpoint(state)
+
 
 def main() -> int:
     cleaned_dir.mkdir(parents=True, exist_ok=True)
@@ -352,25 +447,70 @@ def main() -> int:
     for path in sources:
         log_progress(f"  待处理: {path.name}")
 
-    seen: set[str] = set()
+    checkpoint = load_checkpoint()
+    resume_mode = bool(checkpoint and checkpoint.get("status") == "in_progress")
+    if resume_mode:
+        log_progress(f"检测到断点: {checkpoint.get('source_name')} @ {checkpoint.get('source_progress')}")
+    else:
+        clear_checkpoint()
+
+    seen = rebuild_seen(output_file) if output_file.exists() else set()
+    summary = output_summary(output_file)
     stats = {
         "total_documents": 0,
-        "valid_documents": 0,
+        "valid_documents": summary["valid_documents"],
         "duplicates_removed": 0,
         "empty_documents": 0,
         "short_documents": 0,
         "long_documents": 0,
-        "total_tokens_estimate": 0,
+        "total_tokens_estimate": summary["total_tokens_estimate"],
         "total_size_bytes": 0,
     }
 
-    with output_file.open("w", encoding="utf-8") as output_handle:
-        for path in sources:
+    if resume_mode:
+        checkpoint_stats = checkpoint.get("stats", {})
+        if isinstance(checkpoint_stats, dict):
+            stats["total_documents"] = int(checkpoint_stats.get("total_documents", 0))
+            stats["duplicates_removed"] = int(checkpoint_stats.get("duplicates_removed", 0))
+            stats["empty_documents"] = int(checkpoint_stats.get("empty_documents", 0))
+            stats["short_documents"] = int(checkpoint_stats.get("short_documents", 0))
+            stats["long_documents"] = int(checkpoint_stats.get("long_documents", 0))
+            stats["total_size_bytes"] = int(checkpoint_stats.get("total_size_bytes", 0))
+            stats["valid_documents"] = max(
+                stats["valid_documents"],
+                int(checkpoint_stats.get("valid_documents", 0)),
+            )
+            stats["total_tokens_estimate"] = max(
+                stats["total_tokens_estimate"],
+                int(checkpoint_stats.get("total_tokens_estimate", 0)),
+            )
+        source_index = int(checkpoint.get("source_index", 0))
+    else:
+        source_index = 0
+        if output_file.exists():
+            output_file.unlink()
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    open_mode = "a" if resume_mode and output_file.exists() else "w"
+    with output_file.open(open_mode, encoding="utf-8") as output_handle:
+        for index, path in enumerate(sources):
             name = path.name.lower()
+            if index < source_index:
+                continue
+            state = {
+                "source_index": index,
+                "source_name": path.name,
+                "source_kind": "wikipedia_dump" if name.endswith((".xml.bz2", ".xml")) else "text",
+                "source_progress": int(checkpoint.get("source_progress", 0)) if resume_mode and index == source_index else 0,
+                "stats": stats,
+            }
             if name.endswith((".xml.bz2", ".xml")):
-                process_wikipedia_dump(path, seen, output_handle, stats)
+                process_wikipedia_dump(path, seen, output_handle, stats, state)
             else:
-                process_plain_text(path, seen, output_handle, stats)
+                process_plain_text(path, seen, output_handle, stats, state)
+            state["source_index"] = index + 1
+            state["source_progress"] = 0
+            save_checkpoint(state)
 
     total = stats["valid_documents"]
     log_progress(f"原始清洗完成，开始切分数据: 有效文档 {total}")
@@ -421,6 +561,7 @@ def main() -> int:
     manifest["cleaning_stats"] = stats
     manifest_file.parent.mkdir(parents=True, exist_ok=True)
     manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    clear_checkpoint()
 
     print("╔════════════════════════════════════════════╗")
     print("║     NeurX 数据清洗流程 (Python)            ║")
