@@ -14,6 +14,7 @@ package neurx.scaled_training
 
 use std.io
 use std.math
+use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
 
 // ============================================================================
 // DATA BUNDLE - EXTENDED WITH REAL DATA SUPPORT
@@ -59,38 +60,147 @@ func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) d
     }
 }
 
-// Load WikiText data (interface for real data)
-func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
-    // In production: read from WikiText dataset
-    // For now: return placeholder
-    fmt.printfln("Loading WikiText from: %s", dataset_path)
-    
+func scaled_positive_mod(int value, int modulus) int {
+    if modulus <= 0 {
+        return 0
+    }
+
+    int result = value % modulus
+    if result < 0 {
+        result = result + modulus
+    }
+    result
+}
+
+func scaled_hash_token(string token, int vocab_size) int {
+    int hash = 5381
+    int i = 0
+    while i < len(token) {
+        hash = hash * 33 + int(token[i]) + i
+        i = i + 1
+    }
+    scaled_positive_mod(hash, vocab_size)
+}
+
+func scaled_split_lines(string text) []string {
+    []string lines = []string{cap: 0}
+    string current = ""
+    int i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if ch == 10 {
+            lines.push(current)
+            current = ""
+        } else if ch != 13 {
+            current = current + chr(ch)
+        }
+        i = i + 1
+    }
+    if current != "" || len(text) == 0 {
+        lines.push(current)
+    }
+    lines
+}
+
+func scaled_bundle_from_text(
+    string raw_text,
+    int batch_size,
+    int seq_len,
+    int vocab_size,
+    string source
+) data_bundle {
+    if batch_size <= 0 || seq_len <= 0 {
+        return create_synthetic_data_bundle(1, 1, vocab_size)
+    }
+
+    []string lines = scaled_split_lines(raw_text)
+    if len(lines) == 0 {
+        return create_synthetic_data_bundle(batch_size, seq_len, vocab_size)
+    }
+
+    input_ids := make([][]int, batch_size)
+    labels := make([][]int, batch_size)
+    attention_mask := make([][]int, batch_size)
+
+    int b = 0
+    while b < batch_size {
+        input_ids[b] = make([]int, seq_len)
+        labels[b] = make([]int, seq_len)
+        attention_mask[b] = make([]int, seq_len)
+
+        string line = lines[b % len(lines)]
+        int token_index = 0
+        string current = ""
+        int i = 0
+        while i <= len(line) && token_index < seq_len {
+            int ch = 32
+            if i < len(line) {
+                ch = line[i]
+            }
+
+            if ch == 32 || ch == 9 || ch == 44 || ch == 46 || ch == 58 || ch == 59 || i == len(line) {
+                if current != "" {
+                    int token_id = scaled_hash_token(current, vocab_size)
+                    input_ids[b][token_index] = token_id
+                    labels[b][token_index] = scaled_hash_token(current + "_next", vocab_size)
+                    attention_mask[b][token_index] = 1
+                    token_index = token_index + 1
+                    current = ""
+                }
+            } else {
+                current = current + chr(ch)
+            }
+            i = i + 1
+        }
+
+        while token_index < seq_len {
+            int token_id = scaled_positive_mod(b * seq_len + token_index, vocab_size)
+            input_ids[b][token_index] = token_id
+            labels[b][token_index] = scaled_positive_mod(token_id + 1, vocab_size)
+            attention_mask[b][token_index] = 0
+            token_index = token_index + 1
+        }
+
+        b = b + 1
+    }
+
     data_bundle{
-        input_ids: make([][]int, batch_size),
-        labels: make([][]int, batch_size),
-        attention_mask: make([][]int, batch_size),
+        input_ids: input_ids,
+        labels: labels,
+        attention_mask: attention_mask,
         batch_size: batch_size,
         seq_len: seq_len,
         num_tokens: batch_size * seq_len,
-        source: "wikitext",
+        source: source,
     }
+}
+
+// Load WikiText data (interface for real data)
+func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
+    fmt.printfln("Loading WikiText from: %s", dataset_path)
+
+    if runtime_file_exists(dataset_path) {
+        string raw_text = runtime_read_text_file(dataset_path)
+        if raw_text != "" {
+            return scaled_bundle_from_text(raw_text, batch_size, seq_len, 32000, "wikitext")
+        }
+    }
+
+    create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
 
 // Load C4 data (interface for real data)
 func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
-    // In production: read from C4 dataset
-    // For now: return placeholder
     fmt.printfln("Loading C4 from: %s", dataset_path)
-    
-    data_bundle{
-        input_ids: make([][]int, batch_size),
-        labels: make([][]int, batch_size),
-        attention_mask: make([][]int, batch_size),
-        batch_size: batch_size,
-        seq_len: seq_len,
-        num_tokens: batch_size * seq_len,
-        source: "c4",
+
+    if runtime_file_exists(dataset_path) {
+        string raw_text = runtime_read_text_file(dataset_path)
+        if raw_text != "" {
+            return scaled_bundle_from_text(raw_text, batch_size, seq_len, 32000, "c4")
+        }
     }
+
+    create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
 
 // ============================================================================

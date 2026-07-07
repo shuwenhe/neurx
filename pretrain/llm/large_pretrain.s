@@ -94,7 +94,7 @@ func int_to_str(int n, int fallback) string {
     }
     string s = ""
     while value > 0 {
-        s = string_char(value % 10 + 48) + s
+        s = string_char(value - (value / 10) * 10 + 48) + s
         value = value / 10
     }
     if neg {

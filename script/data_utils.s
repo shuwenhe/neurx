@@ -8,7 +8,7 @@
 // - String utilities
 // ============================================================================
 
-package main
+package neurx.script.data_utils
 
 use std.io
 use std.os
@@ -285,19 +285,19 @@ fn get_env_int(key: string, default_val: int) -> int {
 // Logging
 // ============================================================================
 
-fn log_info(msg: string) {
+pub fn log_info(msg: string) {
     println(msg)
 }
 
-fn log_warn(msg: string) {
+pub fn log_warn(msg: string) {
     println("⚠ " + msg)
 }
 
-fn log_error(msg: string) {
+pub fn log_error(msg: string) {
     println("✗ " + msg)
 }
 
-fn log_success(msg: string) {
+pub fn log_success(msg: string) {
     println("✓ " + msg)
 }
 

@@ -1,7 +1,9 @@
 package main
 
+use neurx.pretrain.llm.gpt_large_pretrain.main as gpt_large_pretrain_main
+
 // Top-level runner package that exposes an unqualified `main` symbol
-// so the runtime can locate the entrypoint. Delegates to the MoE framework.
+// so the runtime can locate the entrypoint. Delegates to the real pretrain entry.
 func main() int {
-    return moe1t.main()
+    return gpt_large_pretrain_main()
 }
