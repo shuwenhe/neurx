@@ -221,6 +221,7 @@ data/**/*.jsonl
 
 # Local pretraining artifacts generated in this workspace
 dataset/pretrain/cleaned/*.jsonl
+dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl
 dataset/pretrain/shard/*
 !dataset/pretrain/shard/.gitkeep
 dataset/pretrain/manifest.json

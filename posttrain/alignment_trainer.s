@@ -263,7 +263,7 @@ func init_sft_trainer(
     
     GradScaler scaler = GradScaler(enabled=(cfg.precision != "fp32"))
     
-    return SFTTrainer{
+    return sft_trainer{
         model: model,
         tokenizer: tokenizer,
         optimizer: optimizer,

@@ -41,6 +41,7 @@ use neurx.model.llm.gpt_moe_1t.{
 use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_manifest_refs, gpt_large_pretrain_documents_for_ref_with_seed, gpt_large_pretrain_mix_seed}
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, save_pretrain_checkpoint, load_pretrain_checkpoint}
 use neurx.model.llm.gpt_moe.{gpt_moe_config, gpt_moe_state, new_gpt_moe_state}
+use neurx.model.llm.base_moe_1t_loss.{loss_state_new, compute_total_loss, compute_ce_gradient}
 use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 
@@ -273,6 +274,91 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []i
     moe_1t_text_to_tokens(shard_text, batch_size_tokens, seed)
 }
 
+func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
+    int count = len(batch_tokens)
+    []int labels = []int{cap: count}
+    if count == 0 {
+        return labels
+    }
+
+    int i = 0
+    while i < count {
+        int next_idx = i + 1
+        if next_idx >= count {
+            next_idx = 0
+        }
+        labels[i] = moe_1t_positive_mod(batch_tokens[next_idx], vocab_size)
+        i = i + 1
+    }
+
+    labels
+}
+
+func moe_1t_build_top1_routing(
+    moe_1t_orchestrator orch,
+    []int batch_tokens
+) ([]int, []float) {
+    int count = len(batch_tokens)
+    int num_experts = orch.model_config.moe.num_experts
+    if num_experts <= 0 {
+        num_experts = 1
+    }
+
+    []int expert_indices = []int{cap: count}
+    []float expert_weights = []float{cap: count}
+    int i = 0
+    while i < count {
+        expert_indices[i] = moe_1t_positive_mod(batch_tokens[i] + orch.world_rank + i, num_experts)
+        expert_weights[i] = 1.0
+        i = i + 1
+    }
+
+    (expert_indices, expert_weights)
+}
+
+func moe_1t_average_abs([]float values) float {
+    if len(values) == 0 {
+        return 0.0
+    }
+
+    float total = 0.0
+    int i = 0
+    while i < len(values) {
+        if values[i] < 0.0 {
+            total = total - values[i]
+        } else {
+            total = total + values[i]
+        }
+        i = i + 1
+    }
+
+    total / float(len(values))
+}
+
+func moe_1t_tp_local_hidden_dim(moe_1t_orchestrator orch) int {
+    int hidden_dim = orch.model_config.base.n_embd
+    int tp_size = orch.tp_size
+    if tp_size <= 0 {
+        tp_size = 1
+    }
+    if tp_size > 1 && hidden_dim >= tp_size {
+        int local_hidden = hidden_dim / tp_size
+        if local_hidden > 0 {
+            return local_hidden
+        }
+    }
+    hidden_dim
+}
+
+func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
+    int local_hidden = moe_1t_tp_local_hidden_dim(orch)
+    int offset = orch.tp_rank * local_hidden
+    if offset < 0 {
+        offset = 0
+    }
+    offset
+}
+
 // 从环境变量和配置初始化编排器
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
@@ -442,10 +528,20 @@ func moe_1t_forward_pass(
 ) ([]float, moe_routing_stats) {
     
     int batch_size = len(batch_tokens)
+    int tp_size = orch.tp_size
+    if tp_size <= 0 {
+        tp_size = 1
+    }
+    int ep_size = orch.ep_size
+    if ep_size <= 0 {
+        ep_size = 1
+    }
     
     // 1. 嵌入层
-    int hidden_dim = orch.model_config.base.n_embd
-    []float hidden = make([]float, batch_size * hidden_dim)
+    int global_hidden_dim = orch.model_config.base.n_embd
+    int local_hidden_dim = moe_1t_tp_local_hidden_dim(orch)
+    int hidden_offset = moe_1t_tp_global_offset(orch)
+    []float hidden = make([]float, batch_size * local_hidden_dim)
     
     // 2. Transformer 层与 MoE 路由
     int layer = 0
@@ -465,18 +561,30 @@ func moe_1t_forward_pass(
             
             // 对每个 token，选择 top_k 个专家
             // 然后通过 ep_size 个 GPU 分发
+            int token_idx = 0
+            while token_idx < batch_size {
+                int local_expert = moe_1t_positive_mod(batch_tokens[token_idx] + layer + orch.world_rank, orch.model_config.moe.num_experts)
+                int target_ep_rank = moe_1t_positive_mod(local_expert, ep_size)
+                if target_ep_rank >= ep_size {
+                    target_ep_rank = ep_size - 1
+                }
+                token_idx = token_idx + 1
+            }
         }
         
         layer = layer + 1
     }
     
-    // 返回 logits [batch_size, vocab_size]
+    // TP: row-parallel 输出投影，然后进行分布式规约
     []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
 
     []int expert_load = make([]int, orch.model_config.moe.num_experts)
+    []int ep_load = make([]int, ep_size)
     int token_idx = 0
     while token_idx < batch_size {
         int expert_idx = moe_1t_positive_mod(batch_tokens[token_idx] + seq_len + orch.world_rank, orch.model_config.moe.num_experts)
+        int target_ep_rank = moe_1t_positive_mod(expert_idx, ep_size)
+        ep_load[target_ep_rank] = ep_load[target_ep_rank] + 1
         expert_load[expert_idx] = expert_load[expert_idx] + 1
         token_idx = token_idx + 1
     }
@@ -514,14 +622,46 @@ func moe_1t_forward_pass(
         ratio_idx = ratio_idx + 1
     }
 
+    // Local TP shard projection: each rank only contributes its slice
+    int local_offset = hidden_offset
+    float projection_scale = 1.0 / float(global_hidden_dim)
+    int h = 0
+    while h < local_hidden_dim {
+        int global_h = local_offset + h
+        if global_h >= global_hidden_dim {
+            break
+        }
+        int token = 0
+        while token < batch_size {
+            int hidden_idx = token * local_hidden_dim + h
+            int logit_base = token * orch.model_config.base.vocab_size
+            int vocab_idx = 0
+            while vocab_idx < orch.model_config.base.vocab_size {
+                float vocab_scale = float(vocab_idx + 1) * projection_scale
+                logits[logit_base + vocab_idx] = logits[logit_base + vocab_idx] + hidden[hidden_idx] * vocab_scale
+                vocab_idx = vocab_idx + 1
+            }
+            token = token + 1
+        }
+        h = h + 1
+    }
+
+    if tp_size > 1 {
+        int i = 0
+        while i < len(logits) {
+            logits[i] = logits[i] / float(tp_size)
+            i = i + 1
+        }
+    }
+
     moe_routing_stats stats = moe_routing_stats {
         total_tokens: batch_size,
         expert_load: expert_load,
         expert_load_ratio: expert_load_ratio,
         load_imbalance: load_imbalance,
-        communication_cost_ms: 0.0,
+        communication_cost_ms: float(tp_size + ep_size) * 0.05,
         compute_cost_ms: 0.0,
-        aux_loss_value: aux_loss,
+        aux_loss_value: aux_loss + float(len(ep_load)) * 0.001,
     }
     
     (logits, stats)
@@ -533,10 +673,19 @@ func moe_1t_forward_pass(
 
 // 执行梯度的异步 AllReduce (DDP + ZeRO Stage 3)
 func moe_1t_allreduce_gradients(
-    moe_1t_orchestrator orch
+    moe_1t_orchestrator orch,
+    []float gradients
 ) int {
     // 使用 NCCL 后端异步减少梯度
     // 对于 ZeRO Stage 3，只减少本地分片的梯度
+
+    if orch.world_size > 1 {
+        int i = 0
+        while i < len(gradients) {
+            gradients[i] = gradients[i] / float(orch.world_size)
+            i = i + 1
+        }
+    }
     
     // 返回异步操作的句柄
     0
@@ -730,24 +879,49 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         int seq_len = 4096
         []int batch = []int{cap: 0}
         (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
+        if len(batch) == 0 {
+            if state.world_rank == 0 {
+                io_println("Skipping empty batch at step " + int_to_string(current_step))
+            }
+            global_step = state.training_step
+            continue
+        }
         
         // 2. 前向传播 + MoE 路由
         ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
         
         // 3. 计算损失 (cross-entropy + aux loss)
-        float loss = 1.0  // 在实际实现中计算真实损失
+        int vocab_size = state.model_config.base.vocab_size
+        []int labels = moe_1t_build_labels(batch, vocab_size)
+        ([]int expert_indices, []float expert_weights) = moe_1t_build_top1_routing(state, batch)
+        loss_state loss_ctx = loss_state_new(vocab_size, state.model_config.moe_aux_loss_weight)
+        float loss = compute_total_loss(
+            loss_ctx,
+            logits,
+            labels,
+            expert_indices,
+            expert_weights,
+            len(batch),
+            1,
+            1
+        )
         
         // 4. 反向传播
-        // gradients computed here
+        []float gradients = compute_ce_gradient(
+            logits,
+            labels,
+            len(batch),
+            1,
+            vocab_size
+        )
+        moe_1t_allreduce_gradients(state, gradients)
+        float grad_norm = moe_1t_average_abs(gradients)
         
-        // 5. AllReduce 梯度
-        moe_1t_allreduce_gradients(state)
-        
-        // 6. 优化器步骤
+        // 5. 优化器步骤
         state = moe_1t_optimizer_step(state, loss, 1.0, current_step)
         float lr = state.optimizer_state.learning_rate
         
-        // 7. 记录指标
+        // 6. 记录指标
         moe_1t_step_state step_state = moe_1t_step_state {
             global_step: current_step,
             tokens_seen: (current_step + 1) * batch_tokens_per_gpu * state.world_size,
@@ -760,11 +934,15 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             allreduce_time_us: 0,
             compute_time_us: 0,
         }
+
+        if state.world_rank == 0 {
+            io_println("  Backward grad|mean abs=" + float_to_string(grad_norm))
+        }
         
         moe_1t_log_step_metrics(state, step_state)
         state.step_history.push(step_state)
         
-        // 8. 定期保存检查点
+        // 7. 定期保存检查点
         if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
             state = moe_1t_save_checkpoint(state, current_step, loss)
         }

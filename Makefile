@@ -63,71 +63,9 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 
 help:
-	@echo "NeurX Training & Data Processing Targets:"
-	@echo ""
-	@echo "Training:"
-	@echo "  make train            - Run full training pipeline (shell version)"
-	@echo "  make infer            - Run inference from checkpoint"
-	@echo "  make chat             - Interactive chat from checkpoint"
-	@echo "  make pretrain         - Alias for train"
-	@echo "  make pretrain-watch   - Training with live log monitoring"
-	@echo ""
-	@echo "Data Processing (Original Shell + Python):"
-	@echo "  make shard            - Generate data shards (industrial)"
-	@echo "  make split            - Split training data (industrial)"
-	@echo ""
-	@echo "Data Processing (S Language - NEW):"
-	@echo "  make build-data-scripts - Compile S data processing scripts"
-	@echo "  make clean-s          - Clean raw data (S version)"
-	@echo "  make shard-s          - Generate shards (S version)"
-	@echo "  make split-data-s     - Split dataset entry (S version)"
-	@echo "  make data-pipeline-s  - Full pipeline: clean + shard (S version)"
-	@echo "  make verify-dataset-s - Verify shard directory (S version)"
-	@echo "  make build-industrial-ops - Compile DPO/RAG/governance runner"
-	@echo "  make industrial-ops   - Run DPO/RAG/governance runner"
-	@echo "  make toolchain-s      - Run S-only toolchain coordinator"
-	@echo "  make analyze-dataset-s - Run dataset analyze wrapper (S version)"
-	@echo "  make run-training-s   - Run S training orchestrator status entry"
-	@echo "  make run-training-pipeline-s - Run S training pipeline entry"
-	@echo "  make train-and-infer-s - Run S train+infer orchestrator status entry"
-	@echo "  make run-inference-s  - Run S inference orchestrator status entry"
-	@echo "  make run-s-pretrain-s - Run S pretrain orchestrator status entry"
-	@echo "  make run-interactive-inference-s - Run S interactive inference entry"
-	@echo "  make quick-start-s    - Run S quick start entry"
-	@echo "  make run-small-model-training-s - Run S small model training entry"
-	@echo "  make run-sft-training-s - Run SFT training entry"
-	@echo "  make verify-setup-s   - Run setup verification entry"
-	@echo "  make quick-test-s     - Run quick test entry"
-	@echo "  make quickstart-s     - Run quickstart entry"
-	@echo "  make verify-training-pipeline-s - Run training pipeline verification entry"
-	@echo "  make monitor-training-s - Run training monitor entry"
-	@echo "  make build-linux-s    - Run Linux build status entry"
-	@echo "  make build-macos-s    - Run macOS build status entry"
-	@echo "  make run-large-pretrain-s - Run large pretrain status entry"
-	@echo "  make run-train-compiled-s - Run compiled train status entry"
-	@echo "  make run-train-large-model-s - Run large model train status entry"
-	@echo "  make run-train-model-ir-s - Run IR train status entry"
-	@echo "  make run-with-logs-s   - Run logs wrapper status entry"
-	@echo "  make verify-framework-s - Run framework verification entry"
-	@echo "  make verify-inference-pipeline-s - Run inference pipeline verification entry"
-	@echo "  make test-build-s      - Run build test entry"
-	@echo "  make test-smart-inference-s - Run smart inference test entry"
-	@echo "  make compile-all-components-s - Run full compilation/test status entry"
-	@echo "  make integration-s     - Run training integration status entry"
-	@echo "  make complete-training-cycle-s - Run complete training cycle status entry"
-	@echo "  make verify-transformer-implementation-s - Run transformer verification entry"
-	@echo "  make cluster-launch-s  - Run cluster launch status entry"
-	@echo "  make setup-production-deployment-s - Run production deployment status entry"
-	@echo "  make run-end-to-end-verification-s - Run end-to-end verification status entry"
-	@echo "  make run-integration-tests-s - Run integration test status entry"
-	@echo "  make minimal-diagnostic-s - Run minimal diagnostic status entry"
-	@echo "  make diagnose-file-creation-s - Run file creation diagnostic status entry"
-	@echo "  make diagnose-tool-registration-s - Run tool registration diagnostic status entry"
-	@echo "  make diagnose-autoscroll-s - Run autoscroll diagnostic status entry"
-	@echo ""
-	@echo "Utilities:"
-	@echo "  make logs             - List available logs"
-	@echo "  make logs-tail        - Tail latest log file"
+	@echo "  make train"
+	@echo "  make infer"
+	@echo "  make chat"
 
 
 
@@ -138,8 +76,12 @@ train: check-bash
 	if [ "$(MODE)" = "industrial" ]; then \
 		echo "Running Industrial 1T GPT training pipeline (MODE=industrial)"; \
 		mkdir -p artifacts/build/industrial_1t; \
+		echo "Resolved command:"; \
+		echo "  NEURX_1T_MANIFEST='$(CURDIR_UNIX)/data/training_data_shards/manifest.txt' NEURX_1T_CHECKPOINT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t' NEURX_1T_BATCH_SIZE=16 NEURX_1T_SEQ_LEN=512 NEURX_1T_VOCAB_SIZE=32000 NEURX_1T_PARAM_COUNT=4096 NEURX_1T_TOTAL_STEPS=1000 $(S_COMPILER) training/industrial_1t_training.s artifacts/build/industrial_1t/industrial_1t_training.ir"; \
 		NEURX_1T_MANIFEST='$(CURDIR_UNIX)/data/training_data_shards/manifest.txt' NEURX_1T_CHECKPOINT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t' NEURX_1T_BATCH_SIZE=16 NEURX_1T_SEQ_LEN=512 NEURX_1T_VOCAB_SIZE=32000 NEURX_1T_PARAM_COUNT=4096 NEURX_1T_TOTAL_STEPS=1000 $(S_COMPILER) training/industrial_1t_training.s artifacts/build/industrial_1t/industrial_1t_training.ir 2>&1; \
 		cd '$(S_COMPILER_EMIT_CWD)'; \
+		echo "Resolved command:"; \
+		echo "  $(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin'"; \
 		$(S_COMPILER) --emit-bin '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.ir' '$(CURDIR_UNIX)/artifacts/build/industrial_1t/industrial_1t_training.bin' 2>&1; \
 	else \
 		echo "Running NeurX 1T MoE GPT-style Production Pre-training"; \
@@ -163,12 +105,20 @@ train: check-bash
 		else \
 			if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
 				echo "Existing cleaned file detected; resuming split/manifest generation"; \
+				echo "Resolved command:"; \
+				echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh"; \
 				NEURX_RESUME_CLEANED=1 bash script/clean_data.sh; \
 			else \
+				echo "Resolved command:"; \
+				echo "  bash script/clean_data.sh"; \
 				bash script/clean_data.sh; \
 			fi; \
+			echo "Resolved command:"; \
+			echo "  bash script/generate_shards.sh"; \
 			bash script/generate_shards.sh; \
 		fi; \
+		echo "Resolved command:"; \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1; \
 	fi; \
 	) 2>&1 | tee -a $(LOG_DIR)/train_$(shell date +%Y%m%d_%H%M%S).log
@@ -193,11 +143,19 @@ pretrain: check-bash
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
 		if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
 			echo "Existing cleaned file detected; resuming split/manifest generation" && \
+			echo "Resolved command:" && \
+			echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh" && \
 			NEURX_RESUME_CLEANED=1 bash script/clean_data.sh && \
 		else \
+			echo "Resolved command:" && \
+			echo "  bash script/clean_data.sh" && \
 			bash script/clean_data.sh && \
 		fi && \
+		echo "Resolved command:" && \
+		echo "  bash script/generate_shards.sh" && \
 		bash script/generate_shards.sh && \
+		echo "Resolved command:" && \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh" && \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
 		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \

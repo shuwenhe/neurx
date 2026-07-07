@@ -300,7 +300,7 @@ struct TrainingState {
     float best_loss
     int best_step
     []float loss_history
-    []TrainingMetrics metrics_history
+    []training_metrics metrics_history
     bool trained
 }
 
@@ -311,7 +311,7 @@ func new_training_state() TrainingState {
         best_loss: INF,
         best_step: 0,
         loss_history: []float{cap: 1000},
-        metrics_history: []TrainingMetrics{cap: 100},
+        metrics_history: []training_metrics{cap: 100},
         trained: false,
     }
 }

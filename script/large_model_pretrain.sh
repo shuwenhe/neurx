@@ -44,6 +44,8 @@ OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT:-$PROJECT_DIR/artifacts/checkpoints/model_la
 LOG_DIR="$PROJECT_DIR/artifacts/logs"
 WEIGHTS_DIR="$OUTPUT_DIR/weights"
 
+export DATASET_PATH
+
 # 创建目录
 mkdir -p "$OUTPUT_DIR" "$LOG_DIR" "$WEIGHTS_DIR"
 
@@ -199,12 +201,12 @@ simulate_training() {
         # 计算学习率 (预热 + 衰减)
         local lr=$LEARNING_RATE
         if [ $step -lt $WARMUP_STEPS ]; then
-            lr=$(echo "scale=6; $LEARNING_RATE * $step / $WARMUP_STEPS" | bc)
+            lr=$(echo "scale=6; $LEARNING_RATE * $step / $WARMUP_STEPS" | bc -l)
         fi
-        
+
         # 模拟loss下降
         local initial_loss=10.0
-        local current_loss=$(echo "scale=4; $initial_loss * e(-$step/5000)" | bc)
+        local current_loss=$(echo "scale=4; $initial_loss * e(-$step/5000)" | bc -l)
         
         # 计算tokens/sec
         local tokens_per_batch=$((BATCH_SIZE * SEQ_LENGTH))
@@ -227,7 +229,13 @@ simulate_training() {
         
         sleep 0.01  # 模拟训练时间
     done
-    
+
+    if [ "$last_ckpt" -ne "$TRAINING_STEPS" ]; then
+        echo ""
+        save_checkpoint "$TRAINING_STEPS"
+        last_ckpt="$TRAINING_STEPS"
+    fi
+
     echo ""
     echo -e "${GREEN}✓ 训练完成!${NC}"
 }
@@ -295,7 +303,11 @@ print_summary() {
     echo -e "${CYAN}📊 训练统计:${NC}"
     echo "  总步数:         $TRAINING_STEPS"
     echo "  总时间:         ${total_time}秒"
-    echo "  平均速度:       $(echo "scale=0; $TRAINING_STEPS / $total_time" | bc) steps/sec"
+    local avg_speed="n/a"
+    if [ "$total_time" -gt 0 ]; then
+        avg_speed="$(echo "scale=0; $TRAINING_STEPS / $total_time" | bc -l)"
+    fi
+    echo "  平均速度:       ${avg_speed} steps/sec"
     
     echo ""
     echo -e "${CYAN}💾 输出文件:${NC}"
@@ -307,7 +319,18 @@ print_summary() {
     if [ -d "$OUTPUT_DIR" ]; then
         echo ""
         echo -e "${CYAN}📁 检查点列表:${NC}"
-        ls -lh "$OUTPUT_DIR"/checkpoint-* 2>/dev/null | tail -5 | awk '{print "  " $9 " (" $5 ")"}'
+        local checkpoint_found=0
+        for checkpoint_dir in "$OUTPUT_DIR"/checkpoint-*; do
+            if [ -d "$checkpoint_dir" ]; then
+                checkpoint_found=1
+                echo "  $(basename "$checkpoint_dir")"
+            fi
+        done
+        if [ "$checkpoint_found" -eq 0 ]; then
+            echo "  (no checkpoints written yet)"
+        else
+            :
+        fi
     fi
     
     echo ""

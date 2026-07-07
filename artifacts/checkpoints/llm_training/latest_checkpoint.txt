@@ -1,1 +1,1 @@
-/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training_validation2/final_model.neurx
+/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_training/checkpoint_step_500.pt
