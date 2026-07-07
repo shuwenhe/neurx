@@ -108,7 +108,7 @@ type RewardModel struct {
     parameters          map[string]interface{}
 }
 
-type Optimizer struct {
+type optimizer struct {
     name                string
     learning_rate       float64
     beta1               float64  // Adam parameter

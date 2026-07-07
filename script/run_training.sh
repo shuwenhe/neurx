@@ -2,27 +2,16 @@
 
 set -euo pipefail
 
-# Usage:
-#   bash run_training.sh
-#   NEURX_S_PRETRAIN_STEPS=3 NEURX_S_PRETRAIN_WARMUP_STEPS=2 bash run_training.sh
-#   NEURX_S_PRETRAIN_OUTPUT_DIR=/tmp/neurx_ckpt bash run_training.sh
-#
-# Environment variables:
-#   NEURX_S_PRETRAIN_STEPS         default: 50
-#   NEURX_S_PRETRAIN_WARMUP_STEPS  default: 10
-#   NEURX_S_PRETRAIN_OUTPUT_DIR    default: artifacts/checkpoints/llm_s_pretrain
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-S_PRETRAIN_RUNNER="$SCRIPT_DIR/run_s_pretrain.sh"
 
 echo "======================================================================="
-echo "NeurX 深度学习框架 - Real Training Entry"
+echo "NeurX 深度学习框架 - S-backed Training Entry"
 echo "======================================================================="
 echo ""
 
-echo "✓ 使用 NeurX S 训练流程..."
-echo "  训练入口: $S_PRETRAIN_RUNNER"
+echo "✓ 使用 NeurX S 调度入口..."
+echo "  训练入口: make run-training-s"
 echo ""
 
-exec bash "$S_PRETRAIN_RUNNER" "$@"
+exec make -C "$NEURX_DIR" run-training-s
