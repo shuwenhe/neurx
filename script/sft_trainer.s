@@ -14,56 +14,56 @@ import (
 )
 
 type InstructionExample struct {
-    instruction     string
-    input           string
-    output          string
-    category        string
-    difficulty      int  // 1-5
-    quality_score   float64
-    tokens          []int
+    string instruction
+    string input
+    string output
+    string category
+    int difficulty  // 1-5
+    float64 quality_score
+    []int tokens
 }
 
 type InstructionDataset struct {
-    examples        []InstructionExample
-    categories      map[string]int
-    total_tokens    int64
+    []InstructionExample examples
+    map[string]int categories
+    int64 total_tokens
 }
 
 type SFTConfig struct {
-    learning_rate           float64
-    warmup_steps            int
-    total_steps             int
-    batch_size              int
-    gradient_accumulation   int
-    max_seq_length          int
-    eval_interval           int
-    save_interval           int
-    weight_decay            float64
-    dropout                 float64
+    float64 learning_rate
+    int warmup_steps
+    int total_steps
+    int batch_size
+    int gradient_accumulation
+    int max_seq_length
+    int eval_interval
+    int save_interval
+    float64 weight_decay
+    float64 dropout
 }
 
 type SFTTrainer struct {
-    config              SFTConfig
-    model               PolicyModel
-    optimizer           Optimizer
-    dataset             InstructionDataset
-    val_dataset         InstructionDataset
-    step_count          int
-    training_history    []SFTMetric
+    SFTConfig config
+    PolicyModel model
+    Optimizer optimizer
+    InstructionDataset dataset
+    InstructionDataset val_dataset
+    int step_count
+    []sft_metric training_history
 }
 
-type SFTMetric struct {
-    step                int
-    loss                float64
-    perplexity          float64
-    accuracy            float64
-    bleu_score          float64
-    rouge_score         float64
-    eval_loss           float64
-    eval_perplexity     float64
-    learning_rate       float64
-    throughput          float64
-    timestamp           int64
+type sft_metric struct {
+    int step
+    float64 loss
+    float64 perplexity
+    float64 accuracy
+    float64 bleu_score
+    float64 rouge_score
+    float64 eval_loss
+    float64 eval_perplexity
+    float64 learning_rate
+    float64 throughput
+    int64 timestamp
 }
 
 // ============================================
@@ -251,7 +251,7 @@ func (trainer *SFTTrainer) evaluate(dataset InstructionDataset) SFTMetric {
     avg_loss := total_loss / float64(len(dataset.examples))
     ppl := trainer.perplexity(avg_loss)
     
-    metric := SFTMetric{
+    metric := sft_metric{
         step: trainer.step_count,
         eval_loss: avg_loss,
         eval_perplexity: ppl,
