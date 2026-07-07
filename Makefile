@@ -81,6 +81,13 @@ train: check-bash
 		echo "  test     : $(PRETRAIN_TEST_SPLIT)"; \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)"; \
 		echo "  manifest : $(PRETRAIN_MANIFEST)"; \
+		if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
+			echo "Resume     : checkpoint not needed, cleaned dataset already complete"; \
+		elif [ -s '$(PRETRAIN_CLEANED_FILE)' ]; then \
+			echo "Resume     : yes, will continue from $(PRETRAIN_CLEANED_FILE) with checkpoint state if present"; \
+		else \
+			echo "Resume     : no, starting from raw data"; \
+		fi; \
 		if [ "$(SKIP_CLEAN)" = "1" ]; then \
 			echo "SKIP_CLEAN=1, skipping data clean and shard generation"; \
 		else \
