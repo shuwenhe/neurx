@@ -13,7 +13,7 @@ import (
     "time"
 )
 
-type InstructionExample struct {
+type instruction_example struct {
     string instruction
     string input
     string output
@@ -24,12 +24,12 @@ type InstructionExample struct {
 }
 
 type instruction_dataset struct {
-    []InstructionExample examples
+    []instruction_example examples
     map[string]int categories
     int64 total_tokens
 }
 
-type SFTConfig struct {
+type sft_config struct {
     float64 learning_rate
     int warmup_steps
     int total_steps
@@ -42,9 +42,9 @@ type SFTConfig struct {
     float64 dropout
 }
 
-type SFTTrainer struct {
-    SFTConfig config
-    PolicyModel model
+type sft_trainer struct {
+    sft_config config
+    policy_model model
     Optimizer optimizer
     instruction_dataset dataset
     instruction_dataset val_dataset
@@ -70,7 +70,7 @@ type sft_metric struct {
 // Data Loading and Processing
 // ============================================
 
-func (trainer *SFTTrainer) load_instruction_data(data_path string) {
+func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
     
     // Simulate loading instruction data
@@ -79,7 +79,7 @@ func (trainer *SFTTrainer) load_instruction_data(data_path string) {
     for i := 0; i < 2000; i++ {
         category := categories[i%len(categories)]
         
-        example := InstructionExample{
+        example := instruction_example{
             instruction: fmt.Sprintf("Solve this problem: %d", i),
             input: fmt.Sprintf("Input data %d", i),
             output: fmt.Sprintf("The solution is %d", i*2),
@@ -105,7 +105,7 @@ func (trainer *SFTTrainer) load_instruction_data(data_path string) {
     fmt.Printf("  Total tokens: %d\n", trainer.dataset.total_tokens)
 }
 
-func (trainer *SFTTrainer) tokenize(text string) []int {
+func (trainer *sft_trainer) tokenize(text string) []int {
     words := strings.Split(text, " ")
     tokens := []int{}
     for i, word := range words {
@@ -119,7 +119,7 @@ func (trainer *SFTTrainer) tokenize(text string) []int {
 // Loss Functions
 // ============================================
 
-func (trainer *SFTTrainer) causal_language_modeling_loss(logits [][]float64, labels []int) float64 {
+func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, labels []int) float64 {
     loss := 0.0
     
     for i := 0; i < len(labels)-1; i++ {
@@ -145,7 +145,7 @@ func (trainer *SFTTrainer) causal_language_modeling_loss(logits [][]float64, lab
     return loss / float64(len(labels)-1)
 }
 
-func (trainer *SFTTrainer) perplexity(loss float64) float64 {
+func (trainer *sft_trainer) perplexity(loss float64) float64 {
     return math.Exp(loss)
 }
 
@@ -153,7 +153,7 @@ func (trainer *SFTTrainer) perplexity(loss float64) float64 {
 // Tokenization and Batching
 // ============================================
 
-func (trainer *SFTTrainer) create_batch(examples []InstructionExample) ([][]int, [][]int) {
+func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]int, [][]int) {
     inputs := [][]int{}
     labels := [][]int{}
     
@@ -180,7 +180,7 @@ func (trainer *SFTTrainer) create_batch(examples []InstructionExample) ([][]int,
 // Training Step
 // ============================================
 
-func (trainer *SFTTrainer) train_step(batch_inputs [][]int, batch_labels [][]int) float64 {
+func (trainer *sft_trainer) train_step(batch_inputs [][]int, batch_labels [][]int) float64 {
     total_loss := 0.0
     
     for i := 0; i < len(batch_inputs); i++ {
@@ -205,7 +205,7 @@ func (trainer *SFTTrainer) train_step(batch_inputs [][]int, batch_labels [][]int
     return total_loss / float64(len(batch_inputs))
 }
 
-func (trainer *SFTTrainer) model_forward(tokens []int) [][]float64 {
+func (trainer *sft_trainer) model_forward(tokens []int) [][]float64 {
     batch_size := 1
     vocab_size := 128000
     seq_len := len(tokens)
@@ -227,7 +227,7 @@ func (trainer *SFTTrainer) model_forward(tokens []int) [][]float64 {
 // Evaluation
 // ============================================
 
-func (trainer *SFTTrainer) evaluate(dataset instruction_dataset) sft_metric {
+func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
     fmt.Printf("[SFT] Evaluating on %d examples\n", len(dataset.examples))
     
     total_loss := 0.0
@@ -265,7 +265,7 @@ func (trainer *SFTTrainer) evaluate(dataset instruction_dataset) sft_metric {
 // Learning Rate Scheduling
 // ============================================
 
-func (trainer *SFTTrainer) get_learning_rate() float64 {
+func (trainer *sft_trainer) get_learning_rate() float64 {
     if trainer.step_count < trainer.config.warmup_steps {
         // Linear warmup
         return trainer.config.learning_rate * float64(trainer.step_count) / float64(trainer.config.warmup_steps)
@@ -281,7 +281,7 @@ func (trainer *SFTTrainer) get_learning_rate() float64 {
 // Generation Quality Metrics
 // ============================================
 
-func (trainer *SFTTrainer) calculate_bleu(reference []int, generated []int, n_gram int) float64 {
+func (trainer *sft_trainer) calculate_bleu(reference []int, generated []int, n_gram int) float64 {
     if len(generated) == 0 {
         return 0.0
     }
@@ -313,7 +313,7 @@ func (trainer *SFTTrainer) calculate_bleu(reference []int, generated []int, n_gr
     return float64(matches) / float64(total)
 }
 
-func (trainer *SFTTrainer) calculate_rouge_l(reference []int, generated []int) float64 {
+func (trainer *sft_trainer) calculate_rouge_l(reference []int, generated []int) float64 {
     if len(reference) == 0 || len(generated) == 0 {
         return 0.0
     }
@@ -331,7 +331,7 @@ func (trainer *SFTTrainer) calculate_rouge_l(reference []int, generated []int) f
     return f1
 }
 
-func (trainer *SFTTrainer) compute_lcs(a []int, b []int) int {
+func (trainer *sft_trainer) compute_lcs(a []int, b []int) int {
     dp := make([][]int, len(a)+1)
     for i := range dp {
         dp[i] = make([]int, len(b)+1)
@@ -358,10 +358,10 @@ func (trainer *SFTTrainer) compute_lcs(a []int, b []int) int {
 // Main Training Interface
 // ============================================
 
-func NewSFTTrainer(config SFTConfig) *SFTTrainer {
-    return &SFTTrainer{
+func NewSFTTrainer(config SFTConfig) *sft_trainer {
+    return &sft_trainer{
         config: config,
-        model: PolicyModel{
+        model: policy_model{
             model_name: "gpt_large",
             num_layers: 12,
             hidden_size: 768,
@@ -376,11 +376,11 @@ func NewSFTTrainer(config SFTConfig) *SFTTrainer {
             weight_decay: config.weight_decay,
         },
         dataset: instruction_dataset{
-            examples: []InstructionExample{},
+            examples: []instruction_example{},
             categories: make(map[string]int),
         },
         val_dataset: instruction_dataset{
-            examples: []InstructionExample{},
+            examples: []instruction_example{},
             categories: make(map[string]int),
         },
         step_count: 0,
@@ -388,7 +388,7 @@ func NewSFTTrainer(config SFTConfig) *SFTTrainer {
     }
 }
 
-func (trainer *SFTTrainer) train() {
+func (trainer *sft_trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Supervised Fine-Tuning (SFT) for Instruction Following║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -424,11 +424,11 @@ func (trainer *SFTTrainer) train() {
     trainer.print_summary()
 }
 
-func (trainer *SFTTrainer) save_checkpoint(step int) {
+func (trainer *sft_trainer) save_checkpoint(step int) {
     fmt.Printf("[SFT] Saving checkpoint at step %d\n", step)
 }
 
-func (trainer *SFTTrainer) print_summary() {
+func (trainer *sft_trainer) print_summary() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  SFT Training Summary                                 ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

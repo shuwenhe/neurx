@@ -20,7 +20,7 @@ type DistributedTrainer1T struct {
     dp_group: int
 }
 
-type TrainingState struct {
+type training_state struct {
     step: int
     epoch: int
     tokens_processed: int64

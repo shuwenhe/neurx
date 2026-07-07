@@ -35,7 +35,7 @@ type OptimizerState struct {
     v_t                 []float64
 }
 
-type TrainingState struct {
+type training_state struct {
     current_step        int64
     current_epoch       int
     train_loss_history  []float64

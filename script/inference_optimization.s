@@ -28,7 +28,7 @@ type KVCache struct {
     max_seq_length      int
 }
 
-type InferenceRequest struct {
+type inference_request struct {
     request_id          string
     prompt              []int
     max_tokens          int
@@ -38,7 +38,7 @@ type InferenceRequest struct {
     timestamp           int64
 }
 
-type InferenceResponse struct {
+type inference_response struct {
     request_id          string
     generated_tokens    []int
     generated_text      string
