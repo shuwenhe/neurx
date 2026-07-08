@@ -26,7 +26,7 @@ export NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/dataset/p
 export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-${NEURX_PRETRAIN_OUTPUT:-$NEURX_ROOT/artifacts/checkpoints/llm_training}}"
 export NEURX_PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-${NEURX_PRETRAIN_BATCH_SIZE:-${NEURX_BATCH_SIZE:-32}}}"
 export NEURX_PRETRAIN_SEQ_LEN="${NEURX_PRETRAIN_SEQ_LEN:-${NEURX_SEQ_LENGTH:-2048}}"
-export NEURX_PRETRAIN_STEPS="${NEURX_PRETRAIN_STEPS:-${NEURX_TOTAL_STEPS:-1000}}"
+export NEURX_PRETRAIN_STEPS="${NEURX_PRETRAIN_STEPS:-${NEURX_TOTAL_STEPS:-10000}}"
 export NEURX_PRETRAIN_WARMUP_STEPS="${NEURX_PRETRAIN_WARMUP_STEPS:-${NEURX_WARMUP_STEPS:-100}}"
 export NEURX_PRETRAIN_MIN_LR="${NEURX_PRETRAIN_MIN_LR:-${NEURX_MIN_LR:-0.00002}}"
 export NEURX_PRETRAIN_LR="${NEURX_PRETRAIN_LR:-${NEURX_LR:-0.0002}}"
@@ -106,7 +106,12 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-"$S_COMPILER" ir 'script/minimal_train.s' -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
+# Create temp S file with configured step count
+TEMP_TRAIN_S="$BUILD_DIR/train_configured.s"
+sed "s/max_steps = 1000/max_steps = $NEURX_PRETRAIN_STEPS/" \
+    'script/minimal_train.s' > "$TEMP_TRAIN_S"
+
+"$S_COMPILER" ir "$TEMP_TRAIN_S" -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
 test -f "$BUILD_DIR/run_large_pretrain.ir" || exit 1
 
 echo "Running training pipeline..."
