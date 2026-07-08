@@ -187,7 +187,7 @@ func moe_1t_positive_mod(int value, int modulus) int {
 func moe_1t_manifest_refs(string manifest_path) []string {
     if moe_1t_trim(manifest_path) == "" {
         []string refs = []string{cap: 1}
-        refs[0] = "data/training_data_splits/train.jsonl"
+        refs[0] = "dataset/pretrain/manifest.json"
         return refs
     }
 

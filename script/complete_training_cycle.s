@@ -10,7 +10,7 @@ func main() int {
     println("Project root: " + project_root)
     println("")
     println("  config file : " + check_path("config_large_model.json"))
-    println("  data splits : " + check_path("data/training_data_splits"))
+    println("  data path   : " + check_path("dataset/pretrain"))
     println("  logs dir    : " + check_path("logs"))
     println("")
     println("This S entrypoint centralizes the complete training cycle status layer.")

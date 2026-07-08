@@ -2,16 +2,15 @@ package neurx.pretrain.llm.gpt_large_pretrain
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, runtime_env_get}
 use neurx.model.llm.gpt_moe_1t.{moe_1t_framework_default, moe_1t_summary}
-use neurx.pretrain.llm.entry
 
 use neurx.dl.dataloader.{dataloader_state, dataloader_config, dataloader_step_output, dataloader_state_dict, dataloader_load_state_dict, has_next, next_batch, new_state, reset_state, with_config, set_shuffle, set_drop_last, new_config}
-use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_state_dict, gpt_large_training_load_state_dict}
+use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_update, gpt_large_training_state_dict, gpt_large_training_load_state_dict, transformer_backward, gpt_large_backward_result}
+use neurx.model.llm.model_large_train.{adamw_step_state, adamw_step_output, embedding_apply_grad, exp_approx, sum_first_dim, sub, softmax_last_dim, one_hot_tensor}
 use neurx.pretrain.distributed.{pretrain_ddp_state, pretrain_ddp_state_dict, pretrain_ddp_load_state_dict, new_pretrain_ddp_state_from_env, pretrain_ddp_enabled, pretrain_ddp_sync_tensor, pretrain_ddp_step, pretrain_ddp_rank, pretrain_ddp_world_size}
 use neurx.pretrain.optimizer.pretrain_adamw.{pretrain_optimizer_state, pretrain_optimizer_step_state, new_pretrain_optimizer_state, pretrain_optimizer_step, pretrain_optimizer_state_dict, pretrain_optimizer_load_state_dict}
 use neurx.pretrain.tokenizer.bpe.{bpe_split_state, bpe_tokenizer_state, bpe_tokenized_corpus_state, bpe_tokenized_corpus_from_documents, bpe_jsonl_records_to_documents, bpe_split_state_dict, bpe_split_load_state_dict, bpe_tokenizer_state_dict, bpe_tokenizer_load_state_dict, bpe_tokenized_corpus_state_dict, bpe_tokenized_corpus_load_state_dict}
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr, pretrain_config_state_dict, pretrain_config_load_state_dict}
-use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_tokens, next_epoch, pretrain_data_state_dict, pretrain_data_load_state_dict}
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
@@ -30,6 +29,9 @@ struct gpt_large_pretrain_state {
     string dataset_manifest
     string output_dir
     []string shard_refs
+    []string train_shard_refs
+    []string valid_shard_refs
+    []string test_shard_refs
     []int shard_order
     int shard_order_index
     int shard_epoch
@@ -46,8 +48,15 @@ struct gpt_large_pretrain_state {
     pretrain_ddp_state ddp
     gpt_large_training_state training
     dataloader_state valid_loader
+    dataloader_state test_loader
     int rng_seed
     int rng_state
+}
+
+struct gpt_large_pretrain_shard_splits {
+    []string train_refs
+    []string valid_refs
+    []string test_refs
 }
 
 struct gpt_large_pretrain_eval_result {
@@ -215,6 +224,182 @@ func gpt_large_pretrain_shuffle_strings([]string values, int seed) []string {
         j = j - 1
     }
     out
+}
+
+func gpt_large_pretrain_slice_strings([]string values, int start, int end) []string {
+    int lo = start
+    int hi = end
+    if lo < 0 {
+        lo = 0
+    }
+    if hi < lo {
+        hi = lo
+    }
+    if hi > len(values) {
+        hi = len(values)
+    }
+    if lo > len(values) {
+        lo = len(values)
+    }
+    []string out = []string{cap: hi - lo}
+    int i = lo
+    int j = 0
+    while i < hi {
+        out[j] = values[i]
+        i = i + 1
+        j = j + 1
+    }
+    out
+}
+
+func gpt_large_pretrain_split_shard_refs([]string refs, int seed) gpt_large_pretrain_shard_splits {
+    []string ordered = gpt_large_pretrain_shuffle_strings(refs, seed)
+    int total = len(ordered)
+    if total == 0 {
+        return gpt_large_pretrain_shard_splits {
+            train_refs: []string{cap: 0},
+            valid_refs: []string{cap: 0},
+            test_refs: []string{cap: 0},
+        }
+    }
+
+    int train_count = (total * 80) / 100
+    int valid_count = (total * 10) / 100
+    int test_count = total - train_count - valid_count
+
+    if train_count < 1 {
+        train_count = 1
+    }
+    if total >= 2 && valid_count < 1 {
+        valid_count = 1
+    }
+    if total >= 3 && test_count < 1 {
+        test_count = 1
+    }
+
+    int assigned = train_count + valid_count + test_count
+    while assigned > total {
+        if test_count > 1 {
+            test_count = test_count - 1
+        } else if valid_count > 1 {
+            valid_count = valid_count - 1
+        } else if train_count > 1 {
+            train_count = train_count - 1
+        } else {
+            break
+        }
+        assigned = train_count + valid_count + test_count
+    }
+
+    int valid_start = train_count
+    int test_start = train_count + valid_count
+    gpt_large_pretrain_shard_splits {
+        train_refs: gpt_large_pretrain_slice_strings(ordered, 0, train_count),
+        valid_refs: gpt_large_pretrain_slice_strings(ordered, valid_start, test_start),
+        test_refs: gpt_large_pretrain_slice_strings(ordered, test_start, total),
+    }
+}
+
+func gpt_large_pretrain_basename(string path) string {
+    int i = len(path) - 1
+    while i >= 0 {
+        if path[i] == 47 {
+            return gpt_large_pretrain_substring(path, i + 1, len(path))
+        }
+        i = i - 1
+    }
+    path
+}
+
+func gpt_large_pretrain_split_csv(string value) []string {
+    string text = trim(value)
+    if text == "" {
+        return []string{cap: 0}
+    }
+    []string parts = []string{cap: len(text)}
+    int count = 0
+    int start = 0
+    int i = 0
+    while i <= len(text) {
+        bool at_end = i == len(text)
+        if at_end || text[i] == 44 {
+            string part = trim(gpt_large_pretrain_substring(text, start, i))
+            if part != "" {
+                parts[count] = part
+                count = count + 1
+            }
+            start = i + 1
+        }
+        i = i + 1
+    }
+    if count == 0 {
+        return []string{cap: 0}
+    }
+    []string out = []string{cap: count}
+    int j = 0
+    while j < count {
+        out[j] = parts[j]
+        j = j + 1
+    }
+    out
+}
+
+func gpt_large_pretrain_string_matches_shard(string value, string shard_path) bool {
+    string cleaned = trim(value)
+    if cleaned == "" {
+        return false
+    }
+    if cleaned == shard_path {
+        return true
+    }
+    string shard_name = gpt_large_pretrain_basename(shard_path)
+    if cleaned == shard_name {
+        return true
+    }
+    if gpt_large_pretrain_find_substring(shard_path, cleaned) >= 0 {
+        return true
+    }
+    if gpt_large_pretrain_find_substring(shard_name, cleaned) >= 0 {
+        return true
+    }
+    false
+}
+
+func gpt_large_pretrain_filter_shard_refs([]string refs, string selection_csv) []string {
+    []string selection = gpt_large_pretrain_split_csv(selection_csv)
+    if len(selection) == 0 {
+        return refs
+    }
+    []string out = []string{cap: len(refs)}
+    int out_len = 0
+    int i = 0
+    while i < len(refs) {
+        string shard_path = refs[i]
+        int j = 0
+        bool matched = false
+        while j < len(selection) {
+            if gpt_large_pretrain_string_matches_shard(selection[j], shard_path) {
+                matched = true
+                break
+            }
+            j = j + 1
+        }
+        if matched {
+            out[out_len] = shard_path
+            out_len = out_len + 1
+        }
+        i = i + 1
+    }
+    if out_len == len(refs) {
+        return refs
+    }
+    []string filtered = []string{cap: out_len}
+    int k = 0
+    while k < out_len {
+        filtered[k] = out[k]
+        k = k + 1
+    }
+    filtered
 }
 
 func fmt_float(float val, int decimals) string {
@@ -412,18 +597,6 @@ func zero_pad_int(int value, int width) string {
     prefix + digits
 }
 
-func gpt_large_pretrain_documents() []string {
-    []string docs = []string{cap: 3}
-    docs[0] = "neurx is a transformer first deep learning framework."
-    docs[1] = "pretraining trains decoder only language models on token streams."
-    docs[2] = "the pretrain layer coordinates loop, checkpoint, and evaluation states."
-    docs
-}
-
-func gpt_large_pretrain_default_documents() []string {
-    gpt_large_pretrain_documents()
-}
-
 func split_lines(string text) []string {
     int capacity = 1
     int i = 0
@@ -549,14 +722,10 @@ func gpt_large_pretrain_find_substring(string text, string pattern) int {
 
 func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     if trim(manifest_path) == "" {
-        []string refs = []string{cap: 1}
-        refs[0] = "data/training_data_splits/train.jsonl"
-        return refs
+        return []string{cap: 0}
     }
     if !runtime_file_exists(manifest_path) {
-        []string refs = []string{cap: 1}
-        refs[0] = "data/training_data_splits/train.jsonl"
-        return refs
+        return []string{cap: 0}
     }
     if gpt_large_pretrain_find_substring(manifest_path, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(manifest_path, ".gz") < 0 {
         []string refs = []string{cap: 1}
@@ -569,6 +738,8 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     []string refs = []string{cap: len(lines)}
     int i = 0
     int refs_len = 0
+    int file_path_refs_len = 0
+    []string file_path_refs = []string{cap: len(lines)}
     string train_ref = gpt_large_pretrain_json_string_value(manifest_text, "train", "")
     if trim(train_ref) != "" && trim(train_ref) != "null" {
         refs[refs_len] = train_ref
@@ -577,17 +748,30 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     while i < len(lines) {
         string ref = trim(lines[i])
         if ref != "" {
-            if ref[0] != 35 && gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
-                refs[refs_len] = ref
-                refs_len = refs_len + 1
+            if ref[0] != 35 {
+                string file_path = gpt_large_pretrain_json_string_value(ref, "file_path", "")
+                if trim(file_path) != "" {
+                    file_path_refs[file_path_refs_len] = file_path
+                    file_path_refs_len = file_path_refs_len + 1
+                } else if gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
+                    refs[refs_len] = ref
+                    refs_len = refs_len + 1
+                }
             }
         }
         i = i + 1
     }
+    if file_path_refs_len > 0 {
+        []string out_paths = []string{cap: file_path_refs_len}
+        int p = 0
+        while p < file_path_refs_len {
+            out_paths[p] = file_path_refs[p]
+            p = p + 1
+        }
+        return out_paths
+    }
     if refs_len == 0 {
-        []string out = []string{cap: 1}
-        out[0] = "data/training_data_splits/train.jsonl"
-        return out
+        return []string{cap: 0}
     }
     if refs_len == len(lines) {
         return refs
@@ -603,7 +787,7 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
 
 func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     if trim(shard_ref) == "" {
-        return gpt_large_pretrain_default_documents()
+        return []string{cap: 0}
     }
     if runtime_file_exists(shard_ref) {
         string text = runtime_read_text_file(shard_ref)
@@ -612,13 +796,11 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
             docs = bpe_jsonl_records_to_documents(docs)
         }
         if len(docs) == 0 {
-            return gpt_large_pretrain_default_documents()
+            return []string{cap: 0}
         }
         docs
     } else {
-        []string docs = []string{cap: 1}
-        docs[0] = shard_ref
-        docs
+        []string{cap: 0}
     }
 }
 
@@ -632,9 +814,6 @@ func gpt_large_pretrain_documents_for_ref_with_seed(string shard_ref, int shard_
 
 func gpt_large_pretrain_corpus_for_ref(string shard_ref, int shard_seed) bpe_tokenized_corpus_state {
     []string documents = gpt_large_pretrain_documents_for_ref_with_seed(shard_ref, shard_seed)
-    if len(documents) == 0 {
-        documents = gpt_large_pretrain_default_documents()
-    }
     bpe_tokenized_corpus_from_documents(documents, 4096, 2, 0.1, 1337)
 }
 
@@ -659,37 +838,6 @@ func gpt_large_pretrain_valid_loader_from_corpus(bpe_tokenized_corpus_state corp
     dataloader_config loader_cfg = set_drop_last(new_config(cfg.micro_batch_size, cfg.seq_len), false)
     loader_cfg = set_shuffle(loader_cfg, false)
     with_config(loader, loader_cfg)
-}
-
-func gpt_large_pretrain_documents_from_manifest(string manifest_path) []string {
-    if trim(manifest_path) == "" {
-        return gpt_large_pretrain_default_documents()
-    }
-    if !runtime_file_exists(manifest_path) {
-        []string docs = gpt_large_pretrain_default_documents()
-        docs.push("manifest_missing: " + manifest_path)
-        return docs
-    }
-
-    string manifest_text = runtime_read_text_file(manifest_path)
-    []string manifest_lines = split_lines(manifest_text)
-    []string docs = []string{cap: len(manifest_lines) + 3}
-    int i = 0
-    while i < len(manifest_lines) {
-        string line = trim(manifest_lines[i])
-        if line != "" {
-            docs.push(line)
-        }
-        i = i + 1
-    }
-    if len(docs) == 0 {
-        return gpt_large_pretrain_default_documents()
-    }
-    if len(docs) < 3 {
-        docs.push("neurx pretrain manifest: " + manifest_path)
-        docs.push("data pipelines, model stacks, backward passes, distributed sync, and stability checks.")
-    }
-    docs
 }
 
 func new_gpt_large_pretrain_config() pretrain_config {
@@ -717,7 +865,7 @@ func new_gpt_large_pretrain_config() pretrain_config {
 }
 
 func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "data/training_data_splits/manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "dataset/pretrain/manifest.json", "artifacts/checkpoints/run_20260518_001")
 }
 
 func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, int seq_len, int max_steps, float lr, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) gpt_large_pretrain_state {
@@ -742,24 +890,35 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
     }
     gpt_large_training_config training_cfg = new_gpt_large_training_config(cfg.micro_batch_size, cfg.seq_len, cfg.max_steps, cfg.lr)
     []string shard_refs = gpt_large_pretrain_manifest_refs(dataset_manifest)
+    gpt_large_pretrain_shard_splits shard_splits = gpt_large_pretrain_split_shard_refs(shard_refs, 1337)
+    []string train_shard_refs = shard_splits.train_refs
+    []string valid_shard_refs = shard_splits.valid_refs
+    []string test_shard_refs = shard_splits.test_refs
+    string shard_selection = trim(runtime_env_get("NEURX_PRETRAIN_SHARDS", ""))
+    if shard_selection != "" {
+        train_shard_refs = gpt_large_pretrain_filter_shard_refs(train_shard_refs, shard_selection)
+    }
     int shard_shuffle_seed = 1337
-    []int shard_order = gpt_large_pretrain_build_shard_order(len(shard_refs), shard_shuffle_seed, 0)
+    []int shard_order = gpt_large_pretrain_build_shard_order(len(train_shard_refs), shard_shuffle_seed, 0)
     int shard_order_index = 0
     int active_shard_index = gpt_large_pretrain_int_at(shard_order, shard_order_index)
-    string active_shard_path = gpt_large_pretrain_string_at(shard_refs, active_shard_index)
+    string active_shard_path = gpt_large_pretrain_string_at(train_shard_refs, active_shard_index)
     []string active_documents = gpt_large_pretrain_documents_for_ref_with_seed(active_shard_path, gpt_large_pretrain_mix_seed(shard_shuffle_seed, 0, active_shard_index + 1))
     bpe_tokenized_corpus_state corpus = gpt_large_pretrain_corpus_for_ref(active_shard_path, gpt_large_pretrain_mix_seed(shard_shuffle_seed, 0, active_shard_index + 1))
     gpt_large_training_state training = new_gpt_large_training_state(active_documents, training_cfg)
     []string train_paths = []string{cap: 1}
-    train_paths[0] = gpt_large_pretrain_string_at(shard_refs, 0)
-    []string valid_paths = []string{cap: 1}
-    if len(shard_refs) > 1 {
-        valid_paths[0] = gpt_large_pretrain_string_at(shard_refs, 1)
-    } else {
-        valid_paths[0] = gpt_large_pretrain_string_at(shard_refs, 0)
+    train_paths[0] = active_shard_path
+    []string valid_paths = valid_shard_refs
+    if len(valid_paths) == 0 {
+        valid_paths = train_shard_refs
+    }
+    []string test_paths = test_shard_refs
+    if len(test_paths) == 0 {
+        test_paths = valid_paths
     }
     dataloader_state train_loader = gpt_large_pretrain_loader_from_paths(train_paths, training_cfg, true)
     dataloader_state valid_loader = gpt_large_pretrain_loader_from_paths(valid_paths, training_cfg, false)
+    dataloader_state test_loader = gpt_large_pretrain_loader_from_paths(test_paths, training_cfg, false)
     string checkpoint_name = "gpt_large_pretrain"
     if gpt_large_pretrain_is_1t_mode() {
         checkpoint_name = "gpt_moe_1t_pretrain"
@@ -790,6 +949,9 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
         dataset_manifest: dataset_manifest,
         output_dir: output_dir,
         shard_refs: shard_refs,
+        train_shard_refs: train_shard_refs,
+        valid_shard_refs: valid_shard_refs,
+        test_shard_refs: test_shard_refs,
         shard_order: shard_order,
         shard_order_index: shard_order_index,
         shard_epoch: 0,
@@ -806,13 +968,14 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
         ddp: ddp,
         training: training,
         valid_loader: valid_loader,
+        test_loader: test_loader,
         rng_seed: 1337,
         rng_state: 1337,
     }
 }
 
 func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len, int max_steps, float lr, int log_interval, int eval_interval, int save_interval) gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "data/training_data_splits/manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "dataset/pretrain/manifest.json", "artifacts/checkpoints/run_20260518_001")
 }
 
 func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
@@ -965,7 +1128,8 @@ func gpt_large_pretrain_loss_value(gpt_large_training_state training, tensor log
 }
 
 func gpt_large_pretrain_data_ready(gpt_large_pretrain_state state) bool {
-    len(state.corpus.split.train_documents) > 0 &&
+    len(state.train_shard_refs) > 0 &&
+        len(state.corpus.split.train_documents) > 0 &&
         len(state.corpus.split.valid_documents) > 0 &&
         len(state.corpus.train_token_ids) > 0 &&
         len(state.corpus.valid_token_ids) > 0 &&
@@ -988,6 +1152,9 @@ func gpt_large_pretrain_backward_ready(gpt_large_pretrain_state state) bool {
 }
 
 func gpt_large_pretrain_distributed_ready(gpt_large_pretrain_state state) bool {
+    if gpt_large_pretrain_allow_full_local() {
+        return true
+    }
     pretrain_ddp_world_size(state.ddp) >= gpt_large_pretrain_expected_world_size() &&
         pretrain_ddp_rank(state.ddp) >= 0
 }
@@ -1018,6 +1185,13 @@ func gpt_large_pretrain_core_status_text(gpt_large_pretrain_state state) string 
     out = out + "stability.ready=" + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0) + "\n"
     out = out + "manifest=" + state.dataset_manifest + "\n"
     out = out + "output_dir=" + state.output_dir + "\n"
+    out = out + "shards.train=" + int_to_str(len(state.train_shard_refs), 0) + "\n"
+    out = out + "shards.valid=" + int_to_str(len(state.valid_shard_refs), 0) + "\n"
+    out = out + "shards.test=" + int_to_str(len(state.test_shard_refs), 0) + "\n"
+    out = out + "shard.active_index=" + int_to_str(state.active_shard_index, 0) + "\n"
+    out = out + "shard.active_path=" + state.active_shard_path + "\n"
+    out = out + "shard.order_index=" + int_to_str(state.shard_order_index, 0) + "\n"
+    out = out + "shard.epoch=" + int_to_str(state.shard_epoch, 0) + "\n"
     out = out + "steps=" + int_to_str(state.cfg.max_steps, 0) + "\n"
     out = out + "micro_batch=" + int_to_str(state.cfg.micro_batch_size, 0) + "\n"
     out = out + "seq_len=" + int_to_str(state.cfg.seq_len, 0) + "\n"
@@ -1048,7 +1222,9 @@ func gpt_large_pretrain_core_summary(gpt_large_pretrain_state state) string {
     out = out + "Stability: " + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0) + "\n"
     out = out + "Manifest: " + state.dataset_manifest + "\n"
     out = out + "Output: " + state.output_dir + "\n"
-    out = out + "Shard: " + int_to_str(state.active_shard_index, 0) + "/" + int_to_str(len(state.shard_refs), 0) + " @ " + state.active_shard_path + "\n"
+    out = out + "Shard: " + int_to_str(state.active_shard_index, 0) + "/" + int_to_str(len(state.train_shard_refs), 0) + " @ " + state.active_shard_path + "\n"
+    out = out + "Split shards(train/valid/test): " + int_to_str(len(state.train_shard_refs), 0) + "/" + int_to_str(len(state.valid_shard_refs), 0) + "/" + int_to_str(len(state.test_shard_refs), 0) + "\n"
+    out = out + "Shard rotation: epoch=" + int_to_str(state.shard_epoch, 0) + ", order_index=" + int_to_str(state.shard_order_index, 0) + "\n"
     out = out + "Corpus docs(train/valid): " + int_to_str(len(state.corpus.split.train_documents), 0) + "/" + int_to_str(len(state.corpus.split.valid_documents), 0) + "\n"
     out = out + "Tokens(train/valid): " + int_to_str(len(state.corpus.train_token_ids), 0) + "/" + int_to_str(len(state.corpus.valid_token_ids), 0) + "\n"
     out = out + "Quality gate: min_score=" + fmt_float(state.corpus.config.min_quality_score, 6) + ", seen=" + int_to_str(state.corpus.total_docs_seen, 0) + ", filtered=" + int_to_str(state.corpus.docs_filtered, 0) + ", deduped=" + int_to_str(state.corpus.docs_deduped, 0) + "\n"
@@ -1068,31 +1244,36 @@ func gpt_large_pretrain_write_system_report(gpt_large_pretrain_state state) () {
 }
 
 func gpt_large_pretrain_apply_shard(gpt_large_pretrain_state state, int shard_index) gpt_large_pretrain_state {
+    []string train_refs = state.train_shard_refs
+    if len(train_refs) == 0 {
+        train_refs = state.shard_refs
+    }
     int idx = shard_index
     if idx < 0 {
         idx = 0
     }
-    if idx >= len(state.shard_refs) {
-        idx = len(state.shard_refs) - 1
+    if idx >= len(train_refs) {
+        idx = len(train_refs) - 1
     }
     if idx < 0 {
         idx = 0
     }
-    string shard_path = gpt_large_pretrain_string_at(state.shard_refs, idx)
+    string shard_path = gpt_large_pretrain_string_at(train_refs, idx)
+    println("[Shard] active=" + shard_path + " | index=" + int_to_str(idx, 0) + "/" + int_to_str(len(train_refs), 0))
     int shard_seed = gpt_large_pretrain_mix_seed(state.shard_shuffle_seed, state.shard_epoch, idx + 1)
     bpe_tokenized_corpus_state corpus = gpt_large_pretrain_corpus_for_ref(shard_path, shard_seed)
     []string train_paths = []string{cap: 1}
     train_paths[0] = shard_path
-    []string valid_paths = []string{cap: 1}
-    valid_paths[0] = shard_path
     dataloader_state train_loader = gpt_large_pretrain_loader_from_paths(train_paths, state.cfg, true)
-    dataloader_state valid_loader = gpt_large_pretrain_loader_from_paths(valid_paths, state.cfg, false)
-    pretrain_data_state data = new_pretrain_data_state(state.training.model.dataset, idx, len(state.shard_refs))
+    pretrain_data_state data = new_pretrain_data_state(state.training.model.dataset, idx, len(train_refs))
     gpt_large_pretrain_state {
         cfg: state.cfg,
         dataset_manifest: state.dataset_manifest,
         output_dir: state.output_dir,
         shard_refs: state.shard_refs,
+        train_shard_refs: train_refs,
+        valid_shard_refs: state.valid_shard_refs,
+        test_shard_refs: state.test_shard_refs,
         shard_order: state.shard_order,
         shard_order_index: state.shard_order_index,
         shard_epoch: state.shard_epoch,
@@ -1136,7 +1317,8 @@ func gpt_large_pretrain_apply_shard(gpt_large_pretrain_state state, int shard_in
             last_perplexity: state.training.last_perplexity,
             finished: state.training.finished,
         },
-        valid_loader: valid_loader,
+        valid_loader: state.valid_loader,
+        test_loader: state.test_loader,
         rng_seed: state.rng_seed,
         rng_state: state.rng_state,
     }
@@ -1144,7 +1326,11 @@ func gpt_large_pretrain_apply_shard(gpt_large_pretrain_state state, int shard_in
 
 func gpt_large_pretrain_advance_shard(gpt_large_pretrain_state state) gpt_large_pretrain_state {
     int next_idx = state.active_shard_index + 1
-    if next_idx >= len(state.shard_refs) {
+    []string train_refs = state.train_shard_refs
+    if len(train_refs) == 0 {
+        train_refs = state.shard_refs
+    }
+    if next_idx >= len(train_refs) {
         next_idx = 0
     }
     gpt_large_pretrain_apply_shard(state, next_idx)
@@ -1155,14 +1341,23 @@ func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_
     int next_shard_epoch = state.shard_epoch
     []int next_order = state.shard_order
     if len(next_order) == 0 {
-        next_order = gpt_large_pretrain_build_shard_order(len(state.shard_refs), state.shard_shuffle_seed, state.shard_epoch)
+        []string train_refs = state.train_shard_refs
+        if len(train_refs) == 0 {
+            train_refs = state.shard_refs
+        }
+        next_order = gpt_large_pretrain_build_shard_order(len(train_refs), state.shard_shuffle_seed, state.shard_epoch)
     }
     if next_order_index >= len(next_order) {
         next_shard_epoch = state.shard_epoch + 1
-        next_order = gpt_large_pretrain_build_shard_order(len(state.shard_refs), state.shard_shuffle_seed, next_shard_epoch)
+        []string train_refs = state.train_shard_refs
+        if len(train_refs) == 0 {
+            train_refs = state.shard_refs
+        }
+        next_order = gpt_large_pretrain_build_shard_order(len(train_refs), state.shard_shuffle_seed, next_shard_epoch)
         next_order_index = 0
     }
     int next_shard_index = gpt_large_pretrain_int_at(next_order, next_order_index)
+    println("[Shard] switching to next shard index=" + int_to_str(next_shard_index, 0) + " order_index=" + int_to_str(next_order_index, 0) + " epoch=" + int_to_str(next_shard_epoch, 0))
     gpt_large_pretrain_state stepped = gpt_large_pretrain_apply_shard(state, next_shard_index)
     stepped.shard_order = next_order
     stepped.shard_order_index = next_order_index
@@ -1631,6 +1826,11 @@ func gpt_large_pretrain_is_1t_mode() bool {
     model_size == "1t" || model_size == "1t-moe" || model_size == "neurx-1t" || model_size == "neurx-1t-moe"
 }
 
+func gpt_large_pretrain_allow_full_local() bool {
+    string allow = trim(runtime_env_get("NEURX_ALLOW_FULL_1T_LOCAL", "0"))
+    allow == "1" || allow == "true" || allow == "yes"
+}
+
 func gpt_large_pretrain_framework_title() string {
     if gpt_large_pretrain_is_1t_mode() {
         return "NeurX 1T MoE Pretraining System"
@@ -1639,6 +1839,9 @@ func gpt_large_pretrain_framework_title() string {
 }
 
 func gpt_large_pretrain_expected_world_size() int {
+    if gpt_large_pretrain_allow_full_local() {
+        return 1
+    }
     if gpt_large_pretrain_is_1t_mode() {
         return moe_1t_framework_default().parallel.world_size
     }
@@ -1647,7 +1850,7 @@ func gpt_large_pretrain_expected_world_size() int {
 
 func gpt_large_pretrain_run_from_env() gpt_large_pretrain_state {
     bool is_1t = gpt_large_pretrain_is_1t_mode()
-    string manifest_default = "data/training_data_splits/manifest.json"
+    string manifest_default = "dataset/pretrain/manifest.json"
     string output_default = "artifacts/checkpoints/gpt_large_pretrain"
     int micro_batch_default = 8
     int seq_len_default = 16
@@ -1728,6 +1931,27 @@ func gpt_large_pretrain_validation_metrics(gpt_large_pretrain_state state) gpt_l
     float ppl = 1.0 + val_loss * val_loss * 3.0
     gpt_large_pretrain_eval_result {
         eval: update_pretrain_eval(state.eval, state.loop.global_step, val_loss, ppl),
+        valid_loader: batch_output.state,
+    }
+}
+
+func gpt_large_pretrain_test_metrics(gpt_large_pretrain_state state) gpt_large_pretrain_eval_result {
+    dataloader_state loader = state.test_loader
+    if len(state.test_shard_refs) == 0 {
+        loader = state.valid_loader
+    }
+    dataloader_step_output batch_output = next_batch(loader)
+    int input_len = len(batch_output.batch.input_ids)
+    int target_len = len(batch_output.batch.target_ids)
+    tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, shape1(input_len))
+    tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, shape1(target_len))
+    tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
+    tensor backbone_out = transformer_forward(state.training.backbone, hidden)
+    tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
+    float test_loss = gpt_large_pretrain_loss_value(state.training, logits, target_ids)
+    float ppl = 1.0 + test_loss * test_loss * 3.0
+    gpt_large_pretrain_eval_result {
+        eval: update_pretrain_eval(state.eval, state.loop.global_step, test_loss, ppl),
         valid_loader: batch_output.state,
     }
 }
@@ -1841,6 +2065,9 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
             dataset_manifest: state.dataset_manifest,
             output_dir: state.output_dir,
             shard_refs: state.shard_refs,
+            train_shard_refs: state.train_shard_refs,
+            valid_shard_refs: state.valid_shard_refs,
+            test_shard_refs: state.test_shard_refs,
             shard_order: state.shard_order,
             shard_order_index: state.shard_order_index,
             shard_epoch: state.shard_epoch,
@@ -1857,6 +2084,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
             ddp: pretrain_ddp_step(state.ddp),
             training: next_training,
             valid_loader: next_valid_loader,
+            test_loader: state.test_loader,
             rng_seed: state.rng_seed,
             rng_state: state.rng_state + 1,
         }
@@ -1891,6 +2119,9 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
         dataset_manifest: state.dataset_manifest,
         output_dir: state.output_dir,
         shard_refs: state.shard_refs,
+        train_shard_refs: state.train_shard_refs,
+        valid_shard_refs: state.valid_shard_refs,
+        test_shard_refs: state.test_shard_refs,
         shard_order: next_shard_order,
         shard_order_index: next_shard_order_index,
         shard_epoch: next_shard_epoch,
@@ -1964,6 +2195,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
             finished: next_training.finished,
         },
         valid_loader: next_valid_loader,
+        test_loader: state.test_loader,
         rng_seed: state.rng_seed,
         rng_state: state.rng_state + 1,
     }
@@ -1991,6 +2223,9 @@ func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pre
         dataset_manifest: state.dataset_manifest,
         output_dir: state.output_dir,
         shard_refs: state.shard_refs,
+        train_shard_refs: state.train_shard_refs,
+        valid_shard_refs: state.valid_shard_refs,
+        test_shard_refs: state.test_shard_refs,
         shard_order: state.shard_order,
         shard_order_index: state.shard_order_index,
         shard_epoch: state.shard_epoch,
@@ -2007,6 +2242,7 @@ func gpt_large_pretrain_state_dict(gpt_large_pretrain_state state) gpt_large_pre
         ddp: pretrain_ddp_state_dict(state.ddp),
         training: gpt_large_training_state_dict(state.training),
         valid_loader: dataloader_state_dict(state.valid_loader),
+        test_loader: dataloader_state_dict(state.test_loader),
         rng_seed: state.rng_seed,
         rng_state: state.rng_state,
     }
@@ -2018,6 +2254,9 @@ func gpt_large_pretrain_load_state_dict(gpt_large_pretrain_state state, gpt_larg
         dataset_manifest: other.dataset_manifest,
         output_dir: other.output_dir,
         shard_refs: other.shard_refs,
+        train_shard_refs: other.train_shard_refs,
+        valid_shard_refs: other.valid_shard_refs,
+        test_shard_refs: other.test_shard_refs,
         shard_order: other.shard_order,
         shard_order_index: other.shard_order_index,
         shard_epoch: other.shard_epoch,
@@ -2034,8 +2273,20 @@ func gpt_large_pretrain_load_state_dict(gpt_large_pretrain_state state, gpt_larg
         ddp: pretrain_ddp_load_state_dict(state.ddp, other.ddp),
         training: gpt_large_training_load_state_dict(state.training, other.training),
         valid_loader: dataloader_load_state_dict(state.valid_loader, other.valid_loader),
+        test_loader: dataloader_load_state_dict(state.test_loader, other.test_loader),
         rng_seed: other.rng_seed,
         rng_state: other.rng_state,
+    }
+}
+
+func gpt_large_pretrain_log_step(int step, float loss, float lr, string shard_path, int save_interval, int log_interval) () {
+    if step == 0 || step % log_interval == 0 {
+        string save_note = ""
+        if save_interval > 0 && step > 0 && step % save_interval == 0 {
+            save_note = " | Saving checkpoint..."
+        }
+        string shard_name = gpt_large_pretrain_basename(shard_path)
+        println("[Step " + int_to_str(step, 0) + "] Shard: " + shard_name + " | Loss: " + fmt_float(loss, 3) + " | LR: " + fmt_float(lr, 6) + " | Path: " + shard_path + save_note)
     }
 }
 
@@ -2043,13 +2294,21 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
     if state.loop.finished {
         return state
     }
-
     dataloader_step_output train_output = gpt_large_pretrain_train_batch(state)
     dataloader_step_output valid_output = gpt_large_pretrain_valid_batch(state)
     gpt_large_pretrain_state next = gpt_large_pretrain_optimizer_update(state, train_output, valid_output)
     if next.loop.global_step < state.loop.global_step {
         return state
     }
+    
+    float current_lr = state.cfg.lr
+    if state.cfg.warmup_steps > 0 && next.loop.global_step < state.cfg.warmup_steps {
+        current_lr = state.cfg.lr * (next.loop.global_step + 1) / state.cfg.warmup_steps
+    }
+    if current_lr < state.cfg.min_lr {
+        current_lr = state.cfg.min_lr
+    }
+    gpt_large_pretrain_log_step(next.loop.global_step, next.training.last_loss, current_lr, next.active_shard_path, state.cfg.save_interval, state.cfg.log_interval)
     next
 }
 
@@ -2100,25 +2359,64 @@ func main() int {
     println("")
     println("Manifest: " + state.dataset_manifest)
     println("Output: " + state.output_dir)
+    println("Shard split: train/valid/test = " + int_to_str(len(state.train_shard_refs), 0) + "/" + int_to_str(len(state.valid_shard_refs), 0) + "/" + int_to_str(len(state.test_shard_refs), 0))
+    println("Shard rotation: epoch " + int_to_str(state.shard_epoch, 0) + ", order index " + int_to_str(state.shard_order_index, 0))
+    string shard_selection = trim(runtime_env_get("NEURX_PRETRAIN_SHARDS", ""))
+    if shard_selection != "" {
+        println("Shard filter: " + shard_selection)
+    }
+    println("Train shard refs:")
+    int preview_count = len(state.train_shard_refs)
+    if preview_count > 5 {
+        preview_count = 5
+    }
+    int idx = 0
+    while idx < preview_count {
+        println("  - " + state.train_shard_refs[idx])
+        idx = idx + 1
+    }
+    if len(state.train_shard_refs) > preview_count {
+        println("  ... (" + int_to_str(len(state.train_shard_refs) - preview_count, 0) + " more)")
+    }
+    println("Current active shard: " + state.active_shard_path)
     println("Steps: " + int_to_str(state.cfg.max_steps, 0))
     println("LR: " + fmt_float(state.cfg.lr, 6))
     println("Warmup: " + int_to_str(state.cfg.warmup_steps, 0))
     println("")
 
     if !gpt_large_pretrain_system_ready(state) {
-        println("Pretraining system is not fully ready; writing status report only.")
-        gpt_large_pretrain_write_system_report(state)
+        println("Pretraining system is not fully ready.")
+        println("Refusing to fall back to report-only mode.")
         return 1
     }
 
+    println("")
+    println("════════════════════════════════════════════════════════════")
+    println("🚀 Starting Real Training Loop")
+    println("════════════════════════════════════════════════════════════")
+    println("Max steps: " + int_to_str(state.cfg.max_steps, 0))
+    println("Log interval: " + int_to_str(state.cfg.log_interval, 0))
+    println("Eval interval: " + int_to_str(state.cfg.eval_interval, 0))
+    println("Save interval: " + int_to_str(state.cfg.save_interval, 0))
+    println("")
+
     gpt_large_pretrain_state final_state = gpt_large_pretrain_execute(state)
-    println("Training finished.")
+    
+    println("")
+    println("════════════════════════════════════════════════════════════")
+    println("✅ Training finished")
+    println("════════════════════════════════════════════════════════════")
     println("Final loss: " + fmt_float(final_state.training.last_loss, 6))
     println("Best metric: " + fmt_float(final_state.checkpoint.best_metric, 6))
     println("Tokens seen: " + int_to_str(final_state.loop.tokens_seen, 0))
+    println("Total steps: " + int_to_str(final_state.loop.global_step, 0))
+    gpt_large_pretrain_eval_result test_result = gpt_large_pretrain_test_metrics(final_state)
+    println("Test loss: " + fmt_float(test_result.eval.loss, 6))
+    println("Test perplexity: " + fmt_float(test_result.eval.perplexity, 6))
     println("Summary written to: " + final_state.output_dir + "/pretrain_summary.txt")
     string release_dir = gpt_large_pretrain_prepare_release(final_state)
     println("Compression release written to: " + release_dir)
+    println("════════════════════════════════════════════════════════════")
     0
 }
 

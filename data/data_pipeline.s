@@ -75,7 +75,7 @@ func new_data_pipeline_config() data_pipeline_config {
         seq_len: 2048,
         num_epochs: 1,
         data_dir: "./data",
-        dataset_path: "./data/training_data_splits/manifest.json",
+        dataset_path: "./dataset/pretrain/manifest.json",
         enable_prefetch: true,
         enable_dedup: true,
         enable_quality_filter: true,
@@ -90,9 +90,14 @@ func new_training_data_pipeline_config() data_pipeline_config {
 // Initialize complete data pipeline
 func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     string manifest_path = data_pipeline_resolve_manifest_path(cfg.dataset_path)
-    dataset_manifest manifest = build_training_dataset_manifest(data_pipeline_resolve_dataset_path(manifest_path))
+    []string shard_paths = data_pipeline_resolve_shard_paths(manifest_path)
+    string dataset_path = data_pipeline_resolve_dataset_path(manifest_path)
+    if len(shard_paths) > 0 {
+        dataset_path = shard_paths[0]
+    }
+    dataset_manifest manifest = build_training_dataset_manifest(dataset_path)
     streaming_reader_state reader = init_streaming_reader(
-        data_pipeline_resolve_dataset_path(manifest_path),
+        dataset_path,
         default_tb_stream_reader_config()
     )
     bpe_tokenizer_state tokenizer = init_bpe_tokenizer(default_llm_tokenizer_config())
@@ -107,12 +112,17 @@ func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     loader_cfg.seq_len = cfg.seq_len
     loader_cfg.num_workers = 4
 
-    []data_shard shards = create_data_shards(data_pipeline_resolve_dataset_path(manifest_path), cfg.world_size, cfg.rank_id)
+    string shard_dir = dataset_path
+    if runtime_file_exists(manifest_path) {
+        shard_dir = path_dirname(manifest_path) + "/shard"
+    } else if runtime_dir_exists(manifest_path) {
+        shard_dir = manifest_path + "/shard"
+    }
+    []data_shard shards = create_data_shards(shard_dir, cfg.world_size, cfg.rank_id)
     distributed_dataloader loader = new_distributed_dataloader(shards, loader_cfg)
-    []string shard_paths = data_pipeline_resolve_shard_paths(manifest_path)
     if len(shard_paths) == 0 {
         shard_paths = []string{cap: 1}
-        shard_paths[0] = data_pipeline_resolve_dataset_path(manifest_path)
+        shard_paths[0] = dataset_path
     }
     int shard_shuffle_seed = cfg.rank_id * 1009 + cfg.world_size * 313 + len(shard_paths)
     
@@ -271,6 +281,10 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
     }
     string text = runtime_read_text_file(manifest_path)
     []string paths = []string{cap: 3}
+    []string shard_paths = data_pipeline_extract_json_manifest_paths(text, "file_path")
+    if len(shard_paths) > 0 {
+        return shard_paths
+    }
     string train_path = data_pipeline_extract_json_manifest_value(text, "train", "")
     if data_pipeline_trim(train_path) != "" {
         paths.push(train_path)
@@ -286,13 +300,50 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
     paths
 }
 
-func data_pipeline_extract_json_manifest_value(string text, string key, string fallback) string {
+func data_pipeline_extract_json_manifest_paths(string text, string key) []string {
+    []string paths = []string{cap: 16}
     []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
     while i < len(lines) {
         string line = data_pipeline_trim(lines[i])
         int key_idx = data_pipeline_find_substring(line, needle)
+        if key_idx >= 0 {
+            int colon_idx = key_idx + len(needle)
+            while colon_idx < len(line) && line[colon_idx] != 58 {
+                colon_idx = colon_idx + 1
+            }
+            if colon_idx < len(line) {
+                int value_start = colon_idx + 1
+                while value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
+                    value_start = value_start + 1
+                }
+                if value_start < len(line) && line[value_start] == 34 {
+                    value_start = value_start + 1
+                    string value = ""
+                    while value_start < len(line) && line[value_start] != 34 {
+                        value = value + chr(line[value_start])
+                        value_start = value_start + 1
+                    }
+                    value = data_pipeline_trim(value)
+                    if value != "" {
+                        paths.push(value)
+                    }
+                }
+            }
+        }
+        i = i + 1
+    }
+    paths
+}
+
+func data_pipeline_extract_json_manifest_value(string text, string key, string fallback) string {
+    []string lines = data_pipeline_split_lines(text)
+    string needle = "\"" + key + "\""
+    int i = 0
+    while i < len(lines) {
+        string line = data_pipeline_trim(lines[i])
+        int key_idx = data_pipeline_find_substring(/home/shuwen/shuwen/train/neurxline, needle)
         if key_idx >= 0 {
             int colon_idx = key_idx + len(needle)
             while colon_idx < len(line) && line[colon_idx] != 58 {
@@ -327,6 +378,10 @@ func data_pipeline_resolve_dataset_path(string source_path) string {
     if runtime_file_exists(path) {
         if data_pipeline_find_substring(path, ".json") >= 0 {
             string manifest_text = runtime_read_text_file(path)
+            []string shard_paths = data_pipeline_extract_json_manifest_paths(manifest_text, "file_path")
+            if len(shard_paths) > 0 {
+                return shard_paths[0]
+            }
             string train_path = data_pipeline_extract_json_manifest_value(manifest_text, "train", "")
             if data_pipeline_trim(train_path) != "" {
                 return train_path
@@ -340,7 +395,7 @@ func data_pipeline_resolve_dataset_path(string source_path) string {
 func data_pipeline_resolve_manifest_path(string source_path) string {
     string path = data_pipeline_trim(source_path)
     if path == "" {
-        return "./data/training_data_splits/manifest.json"
+        return "./dataset/pretrain/manifest.json"
     }
     if data_pipeline_find_substring(path, ".json") >= 0 {
         return path

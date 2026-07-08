@@ -683,7 +683,7 @@ func main() {
         len(state.nodes),
         cluster_recommended_world_size(state),
         "./artifacts/checkpoints",
-        "./data/training_data_splits",
+        "./dataset/pretrain",
         "./artifacts/train_output"
     )
     state = cluster_write_deployment_bundle(state, spec)

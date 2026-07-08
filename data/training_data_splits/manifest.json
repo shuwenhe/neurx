@@ -15,7 +15,7 @@
   },
   "target_tokens": 1000000000000,
   "tokenizer_manifest": "/Users/feifei/shuwen/train/neurx/data/tokenizer.manifest",
-  "shard_manifest": "/Users/feifei/shuwen/train/neurx/data/training_data_shards/manifest.txt",
+  "shard_manifest": "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json",
   "domains": {
     "train": {
       "unknown": 5280
@@ -39,13 +39,13 @@
     }
   },
   "files": {
-    "train": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/train.jsonl",
-    "val": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/val.jsonl",
-    "test": "/Users/feifei/shuwen/train/neurx/data/training_data_splits/test.jsonl"
+    "train": "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json",
+    "val": "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json",
+    "test": "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json"
   },
   "shards": [
-    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/train.jsonl",
-    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/val.jsonl",
-    "/Users/feifei/shuwen/train/neurx/data/training_data_splits/test.jsonl"
+    "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json",
+    "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json",
+    "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json"
   ]
 }

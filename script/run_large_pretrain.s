@@ -1,78 +1,158 @@
 package main
 
-use neurx.runtime.io.{
-    runtime_env_get,
-    runtime_file_exists,
-    runtime_run_command_output
-}
-use std.io.println
+use neurx.pretrain.llm.gpt_large_pretrain.main as gpt_large_pretrain_main
 
-// Main entry point for large model pre-training pipeline
+// Pretraining launcher that delegates to the real training system.
+// This entry point is called by make train via script/run_large_pretrain.sh
 func main() int {
-    let neurx_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    
-    println("════════════════════════════════════════════════════════════")
-    println("🚀 NeurX Large Model Pre-training Pipeline (S Implementation)")
-    println("════════════════════════════════════════════════════════════")
-    println("")
-    println("Project root: " + neurx_root)
-    println("Configuration: Large LLM (1T MoE)")
-    println("")
-    
-    // Step 1: Verify data preparation
-    println("Step 1: Verifying data preparation...")
-    let manifest_path = neurx_root + "/dataset/pretrain/manifest.json"
-    if !runtime_file_exists(manifest_path) {
-        println("❌ Error: manifest.json not found")
-        println("Please run: bash script/clean_data.sh && bash script/generate_shards.sh")
-        return 1
+    // All configuration is passed via environment variables (NEURX_* vars)
+    return gpt_large_pretrain_main()
+}
+
+func str_to_int(string s, int fallback) int {
+    string text = trim(s)
+    if len(text) == 0 {
+        return fallback
     }
-    println("✅ Data preparation verified")
-    println("")
-    
-    // Step 2: Setup environment
-    println("Step 2: Setting up training environment...")
-    let checkpoint_dir = neurx_root + "/artifacts/checkpoints/llm_training"
-    let logs_dir = neurx_root + "/artifacts/logs"
-    
-    // Create directories using shell command
-    runtime_run_command_output("mkdir -p " + checkpoint_dir)
-    runtime_run_command_output("mkdir -p " + logs_dir)
-    
-    println("✅ Training environment ready")
-    println("")
-    
-    // Step 3: Generate and display training simulation
-    println("Step 3: Launching training simulation...")
-    println("════════════════════════════════════════════════════════════")
-    println("")
-    println("[Training] 2026-07-07 16:00:00 - Starting NeurX pre-training")
-    println("[Training] Loading dataset from manifest: " + manifest_path)
-    println("[Training] Data pipeline initialized")
-    println("[Training] Model initialized: decoder-only transformer with 96 layers")
-    println("[Training] Distributed setup: TP=8, PP=8, DP=2")
-    println("[Training] Optimizer: AdamW with learning rate 0.0002")
-    println("")
-    println("[Step 0] Loss: 11.245 | LR: 0.000000")
-    println("[Step 100] Loss: 5.832 | LR: 0.000200")
-    println("[Step 200] Loss: 4.123 | LR: 0.000198")
-    println("[Step 300] Loss: 3.456 | LR: 0.000195")
-    println("[Step 400] Loss: 2.987 | LR: 0.000190")
-    println("[Step 500] Loss: 2.654 | LR: 0.000185 | Saving checkpoint...")
-    println("[Checkpoint] Saved to: " + checkpoint_dir + "/checkpoint_step_500.pt")
-    println("[Step 600] Loss: 2.412 | LR: 0.000175")
-    println("[Step 700] Loss: 2.234 | LR: 0.000160")
-    println("[Step 800] Loss: 2.098 | LR: 0.000140")
-    println("[Step 900] Loss: 2.001 | LR: 0.000120")
-    println("[Step 1000] Loss: 1.934 | LR: 0.000100 | Training complete")
-    println("")
-    println("✅ Training completed successfully")
-    println("📊 Final loss: 1.934")
-    println("💾 Best checkpoint saved to: " + checkpoint_dir + "/checkpoint_step_500.pt")
-    println("")
-    println("════════════════════════════════════════════════════════════")
-    println("Training pipeline finished")
-    println("════════════════════════════════════════════════════════════")
-    
-    0
+    int sign = 1
+    int i = 0
+    if text[0] == 45 {
+        sign = -1
+        i = 1
+    }
+    int value = 0
+    while i < len(text) {
+        int digit = text[i] - 48
+        if digit < 0 || digit > 9 {
+            return fallback
+        }
+        value = value * 10 + digit
+        i = i + 1
+    }
+    sign * value
+}
+
+func str_to_float(string s) float {
+    string text = trim(s)
+    if len(text) == 0 {
+        return 0.0
+    }
+    bool neg = false
+    int i = 0
+    if text[0] == 45 {
+        neg = true
+        i = 1
+    }
+    float whole = 0.0
+    while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+        whole = whole * 10.0 + (text[i] - 48) * 1.0
+        i = i + 1
+    }
+    float frac = 0.0
+    float scale = 1.0
+    if i < len(text) && text[i] == 46 {
+        i = i + 1
+        while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+            frac = frac * 10.0 + (text[i] - 48) * 1.0
+            scale = scale * 10.0
+            i = i + 1
+        }
+    }
+    float value = whole + frac / scale
+    if neg {
+        value = 0.0 - value
+    }
+    value
+}
+
+func clamp_int(int value, int min_value, int max_value) int {
+    if value < min_value {
+        return min_value
+    }
+    if value > max_value {
+        return max_value
+    }
+    value
+}
+
+func trim(string s) string {
+    int i = 0
+    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+        i = i + 1
+    }
+    int j = len(s) - 1
+    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+        j = j - 1
+    }
+    if j < i {
+        return ""
+    }
+    string out = ""
+    int k = i
+    while k <= j {
+        out = out + string_char(s[k])
+        k = k + 1
+    }
+    out
+}
+
+func int_to_str(int n, int fallback) string {
+    int value = n
+    if value == 0 {
+        return "0"
+    }
+    bool neg = value < 0
+    if neg {
+        value = -value
+    }
+    string s = ""
+    while value > 0 {
+        s = string_char(value - (value / 10) * 10 + 48) + s
+        value = value / 10
+    }
+    if neg {
+        s = "-" + s
+    }
+    s
+}
+
+func fmt_float(float val, int decimals) string {
+    float value = val
+    if value == 0.0 {
+        return "0.0"
+    }
+    bool neg = value < 0.0
+    if neg {
+        value = 0.0 - value
+    }
+    int int_part = 0
+    float whole = value
+    while whole >= 1.0 {
+        whole = whole - 1.0
+        int_part = int_part + 1
+    }
+    float frac = value - int_part
+    string s = ""
+    if neg {
+        s = "-"
+    }
+    s = s + int_to_str(int_part, 0) + "."
+    int i = 0
+    while i < decimals {
+        frac = frac * 10.0
+        int digit = 0
+        float tmp = frac
+        while tmp >= 1.0 {
+            tmp = tmp - 1.0
+            digit = digit + 1
+        }
+        s = s + string_char(digit + 48)
+        frac = frac - digit
+        i = i + 1
+    }
+    s
+}
+
+func string_char(int c) string {
+    string(c)
 }

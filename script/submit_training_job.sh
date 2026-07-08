@@ -48,7 +48,7 @@ export EP_SIZE=16          # 16 个专家并行
 export NEURX_ROOT="/opt/neurx"
 export CHECKPOINT_DIR="$NEURX_ROOT/artifacts/checkpoints"
 export LOG_DIR="$NEURX_ROOT/artifacts/logs"
-export DATA_DIR="$NEURX_ROOT/data/training_data_splits"
+export DATA_DIR="$NEURX_ROOT/dataset/pretrain"
 
 # 创建日志目录
 mkdir -p "$LOG_DIR"
