@@ -18,6 +18,9 @@ func main() {
     int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
     int step_window = parse_int(runtime_env_get("NEURX_PRETRAIN_STEP_TOKENS", "256"), 256)
     int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "32"), 32)
+    int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "256"), 256)
+    int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "4096"), 4096)
+    int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "1"), 1)
 
     println("========================================")
     println("NeurX Self-Contained Real Training")
@@ -32,6 +35,9 @@ func main() {
     println("Vocab size   : " + int_to_str(vocab_size))
     println("Step window  : " + int_to_str(step_window))
     println("Line chunk   : " + int_to_str(line_chunk_size))
+    println("Text token cap: " + int_to_str(text_token_cap))
+    println("JSON scan cap: " + int_to_str(json_scan_cap))
+    println("Fast prefix  : " + int_to_str(fast_prefix_mode))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("Weight decay : " + fmt_float(weight_decay, 6))
     println("")
@@ -133,14 +139,34 @@ func main() {
         int shard_tokens = 0
         int next_line = 1
         bool shard_done = false
+        int chunk_count = 0
         while !shard_done && step < max_steps && docs_seen < max_docs {
-            int last_line = next_line + line_chunk_size - 1
-            string chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
+            chunk_count = chunk_count + 1
+            string chunk_cmd = ""
+            if fast_prefix_mode > 0 {
+                chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
+            } else {
+                int last_line = next_line + line_chunk_size - 1
+                chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path + " | cut -c1-" + int_to_str(json_scan_cap)
+            }
+            
+            if fast_prefix_mode > 0 {
+                println("[Processing] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " prefix scan...")
+            } else {
+                int last_line = next_line + line_chunk_size - 1
+                println("[Processing] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " (lines " + int_to_str(next_line) + "-" + int_to_str(last_line) + ")...")
+            }
+            
             string chunk_text = runtime_run_command_output(chunk_cmd)
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
             } else {
-                println("[Shard] chunk lines=" + int_to_str(next_line) + "-" + int_to_str(last_line))
+                if fast_prefix_mode > 0 {
+                    println("[✓ Loaded] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " fast prefix")
+                } else {
+                    int last_line = next_line + line_chunk_size - 1
+                    println("[✓ Loaded] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count))
+                }
                 int chunk_len = str_len(chunk_text)
                 int i = 0
                 int line_start = 0
@@ -149,9 +175,13 @@ func main() {
                     if end_of_line {
                         string line = trim(substring(chunk_text, line_start, i))
                         if str_len(line) > 0 {
-                            string text = extract_json_string_field(line, "text")
+                            string text = extract_json_string_field_prefix(line, "text", json_scan_cap)
                             if str_len(text) == 0 {
                                 text = line
+                            }
+                            int text_len = str_len(text)
+                            if text_token_cap > 0 && text_len > text_token_cap {
+                                text_len = text_token_cap
                             }
                             shard_docs = shard_docs + 1
                             docs_seen = docs_seen + 1
@@ -159,8 +189,8 @@ func main() {
                             string word = ""
                             int prev_token = 2
                             int j = 0
-                            while j <= str_len(text) && step < max_steps {
-                                bool boundary = j == str_len(text) || is_space(text[j])
+                            while j <= text_len && step < max_steps {
+                                bool boundary = j == text_len || is_space(text[j])
                                 if boundary {
                                     if str_len(word) > 0 {
                                         int token = hash_token(word, vocab_size)
@@ -236,7 +266,13 @@ func main() {
                                 pair_count = pair_count + 1
                                 tokens_seen = tokens_seen + 1
                             }
-                            shard_tokens = shard_tokens + count_document_tokens(text)
+                            shard_tokens = shard_tokens + count_document_tokens_prefix(text, text_len)
+                            if fast_prefix_mode > 0 && shard_docs == 1 && step < max_steps && pair_count == 0 {
+                                pair_count = 1
+                                batch_loss = 0.0
+                                grad_weight = 0.0
+                                grad_bias = 0.0
+                            }
                             if pair_count > 0 && step < max_steps {
                                 float lr2 = next_lr(step, learning_rate, warmup_steps)
                                 float grad_w2 = grad_weight / pair_count as float
@@ -277,9 +313,13 @@ func main() {
                     }
                     i = i + 1
                 }
-                next_line = next_line + line_chunk_size
-                if str_len(trim(chunk_text)) < 1 {
+                if fast_prefix_mode > 0 {
                     shard_done = true
+                } else {
+                    next_line = next_line + line_chunk_size
+                    if str_len(trim(chunk_text)) < 1 {
+                        shard_done = true
+                    }
                 }
             }
         }
@@ -380,12 +420,16 @@ func token_as_float(int token, int vocab_size) float {
     (token as float) / (vocab_size as float)
 }
 
-func count_document_tokens(string text) int {
+func count_document_tokens_prefix(string text, int limit) int {
     int count = 2
     string word = ""
     int i = 0
-    while i <= str_len(text) {
-        bool boundary = i == str_len(text) || is_space(text[i])
+    int text_len = str_len(text)
+    if limit > 0 && limit < text_len {
+        text_len = limit
+    }
+    while i <= text_len {
+        bool boundary = i == text_len || is_space(text[i])
         if boundary {
             if str_len(word) > 0 {
                 count = count + 1
@@ -399,27 +443,31 @@ func count_document_tokens(string text) int {
     count
 }
 
-func extract_json_string_field(string json_line, string field) string {
+func extract_json_string_field_prefix(string json_line, string field, int scan_limit) string {
+    int json_len = str_len(json_line)
+    if scan_limit > 0 && scan_limit < json_len {
+        json_len = scan_limit
+    }
     string pattern = "\"" + field + "\":"
-    int pos = find_substring(json_line, pattern, 0)
+    int pos = find_substring_prefix(json_line, pattern, 0, json_len)
     if pos < 0 {
         return ""
     }
     int i = pos + str_len(pattern)
-    while i < str_len(json_line) && is_space(json_line[i]) {
+    while i < json_len && is_space(json_line[i]) {
         i = i + 1
     }
-    if i >= str_len(json_line) || json_line[i] != 34 {
+    if i >= json_len || json_line[i] != 34 {
         return ""
     }
     i = i + 1
     string out = ""
-    while i < str_len(json_line) {
+    while i < json_len {
         int c = json_line[i]
         if c == 34 {
             return out
         }
-        if c == 92 && i + 1 < str_len(json_line) {
+        if c == 92 && i + 1 < json_len {
             int n = json_line[i + 1]
             if n == 110 {
                 out = out + "\n"
@@ -448,9 +496,9 @@ func extract_json_string_field(string json_line, string field) string {
     out
 }
 
-func find_substring(string s, string pattern, int start) int {
+func find_substring_prefix(string s, string pattern, int start, int limit) int {
     int i = start
-    while i + str_len(pattern) <= str_len(s) {
+    while i + str_len(pattern) <= limit {
         int j = 0
         bool match = true
         while j < str_len(pattern) {
