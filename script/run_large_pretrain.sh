@@ -118,17 +118,34 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-PRETRAIN_ENTRY_S="$NEURX_ROOT/script/minimal_train.s"
-if [ ! -f "$PRETRAIN_ENTRY_S" ]; then
-    echo "Error: training entry script not found at $PRETRAIN_ENTRY_S"
+# Calculate real step count from actual dataset
+BATCH_SIZE=32
+DOC_COUNT=$(find "$NEURX_ROOT/dataset/pretrain/shard" -maxdepth 1 -name 'shard_*.jsonl' | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+if [ -z "$DOC_COUNT" ] || [ "$DOC_COUNT" -eq 0 ]; then
+    DOC_COUNT=71451
+    echo "Note: Using default document count ($DOC_COUNT)"
+fi
+MAX_STEPS=$((DOC_COUNT / BATCH_SIZE))
+echo "Calculated max_steps: $MAX_STEPS (from $DOC_COUNT docs / $BATCH_SIZE batch size)"
+
+# Use minimal_train_float.s with dynamic step substitution
+PRETRAIN_ENTRY_TEMPLATE="$NEURX_ROOT/script/minimal_train_float.s"
+if [ ! -f "$PRETRAIN_ENTRY_TEMPLATE" ]; then
+    echo "Error: training template script not found at $PRETRAIN_ENTRY_TEMPLATE"
     exit 1
 fi
 
-echo "Resolved command:"
-echo "  S compilation: $PRETRAIN_ENTRY_S -> $BUILD_DIR/run_large_pretrain.ir"
+# Create temp script with computed max_steps
+TEMP_TRAIN_S="/tmp/train_all_shards_$$.s"
+sed "s/max_steps = 10000/max_steps = $MAX_STEPS/" "$PRETRAIN_ENTRY_TEMPLATE" > "$TEMP_TRAIN_S"
 
-"$S_COMPILER" ir "$PRETRAIN_ENTRY_S" -o "$BUILD_DIR/run_large_pretrain.ir"
-if [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
+echo "Resolved command:"
+echo "  S compilation: $TEMP_TRAIN_S -> $BUILD_DIR/run_large_pretrain.ir"
+
+"$S_COMPILER" ir "$TEMP_TRAIN_S" -o "$BUILD_DIR/run_large_pretrain.ir"
+COMPILE_STATUS=$?
+rm -f "$TEMP_TRAIN_S"
+if [ $COMPILE_STATUS -ne 0 ] || [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
     echo "Error: S compilation failed"
     exit 1
 fi
