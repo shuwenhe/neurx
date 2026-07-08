@@ -106,7 +106,7 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-"$S_COMPILER" ir 'pretrain/llm/large_pretrain.s' -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
+"$S_COMPILER" ir 'script/minimal_train.s' -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
 test -f "$BUILD_DIR/run_large_pretrain.ir" || exit 1
 
 echo "Running training pipeline..."
