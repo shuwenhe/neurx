@@ -71,24 +71,7 @@ help:
 
 train: check-bash
 	mkdir -p $(LOG_DIR); \
-	cd '$(CURDIR_UNIX)' && ( \
-	set -e; \
-	echo "Running NeurX Production Pre-training"; \
-	echo ""; \
-	echo "Data Status:"; \
-	echo "  Shard directory: $(PRETRAIN_SHARD_DIR)"; \
-	echo "  Manifest: $(PRETRAIN_MANIFEST)"; \
-	if [ -d '$(PRETRAIN_SHARD_DIR)' ] && [ -f '$(PRETRAIN_MANIFEST)' ]; then \
-		echo "  Status: ✓ Data shards ready"; \
-	else \
-		echo "  Status: ✗ Data shards missing"; \
-		exit 1; \
-	fi; \
-	echo ""; \
-	echo "Starting training..."; \
-	echo ""; \
-	NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1; \
-	) 2>&1 | tee -a $(LOG_DIR)/train_$(shell date +%Y%m%d_%H%M%S).log
+	cd '$(CURDIR_UNIX)' && bash script/train_with_data.sh 2>&1 | tee -a $(LOG_DIR)/train_$(shell date +%Y%m%d_%H%M%S).log
 
 
 
