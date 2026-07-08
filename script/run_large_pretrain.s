@@ -1,6 +1,6 @@
 package main
 
-use neurx.pretrain.llm.gpt_large_pretrain.gpt_large_pretrain_launch as gpt_large_pretrain_launch
+use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_launch}
 
 // Pretraining launcher that delegates to the real training system.
 // This entry point is called by make train via script/run_large_pretrain.sh
