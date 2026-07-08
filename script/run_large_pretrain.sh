@@ -26,7 +26,33 @@ export NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/dataset/p
 export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-${NEURX_PRETRAIN_OUTPUT:-$NEURX_ROOT/artifacts/checkpoints/llm_training}}"
 export NEURX_PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-${NEURX_PRETRAIN_BATCH_SIZE:-${NEURX_BATCH_SIZE:-32}}}"
 export NEURX_PRETRAIN_SEQ_LEN="${NEURX_PRETRAIN_SEQ_LEN:-${NEURX_SEQ_LENGTH:-2048}}"
-export NEURX_PRETRAIN_STEPS="${NEURX_PRETRAIN_STEPS:-${NEURX_TOTAL_STEPS:-10000}}"
+
+# Calculate total steps based on data volume if not explicitly set
+if [ -z "${NEURX_PRETRAIN_STEPS:-}" ] && [ -z "${NEURX_TOTAL_STEPS:-}" ]; then
+    # Support custom training configurations
+    NEURX_NUM_EPOCHS="${NEURX_NUM_EPOCHS:-1}"
+    NEURX_TRAINING_RATIO="${NEURX_TRAINING_RATIO:-1.0}"  # 1.0 = full data, 0.5 = half data, etc
+    
+    if [ -f "$NEURX_PRETRAIN_MANIFEST" ]; then
+        TOTAL_DOCS=$(grep -o '"num_documents": [0-9]*' "$NEURX_PRETRAIN_MANIFEST" | grep -o '[0-9]*' | awk '{sum+=$1} END {print sum}')
+        if [ -n "$TOTAL_DOCS" ] && [ "$TOTAL_DOCS" -gt 0 ]; then
+            # Apply training ratio to total docs
+            EFFECTIVE_DOCS=$(awk "BEGIN {print int($TOTAL_DOCS * $NEURX_TRAINING_RATIO)}")
+            # steps = effective_docs / batch_size * epochs
+            STEPS_PER_EPOCH=$((($EFFECTIVE_DOCS + $NEURX_PRETRAIN_MICRO_BATCH - 1) / $NEURX_PRETRAIN_MICRO_BATCH))
+            NEURX_PRETRAIN_STEPS=$((STEPS_PER_EPOCH * NEURX_NUM_EPOCHS))
+        else
+            NEURX_PRETRAIN_STEPS=10000
+        fi
+    else
+        NEURX_PRETRAIN_STEPS=10000
+    fi
+else
+    NEURX_PRETRAIN_STEPS="${NEURX_PRETRAIN_STEPS:-${NEURX_TOTAL_STEPS:-10000}}"
+fi
+export NEURX_PRETRAIN_STEPS
+export NEURX_NUM_EPOCHS
+export NEURX_TRAINING_RATIO
 export NEURX_PRETRAIN_WARMUP_STEPS="${NEURX_PRETRAIN_WARMUP_STEPS:-${NEURX_WARMUP_STEPS:-100}}"
 export NEURX_PRETRAIN_MIN_LR="${NEURX_PRETRAIN_MIN_LR:-${NEURX_MIN_LR:-0.00002}}"
 export NEURX_PRETRAIN_LR="${NEURX_PRETRAIN_LR:-${NEURX_LR:-0.0002}}"
@@ -45,8 +71,12 @@ echo "  manifest : $NEURX_PRETRAIN_MANIFEST"
 echo "  output    : $NEURX_PRETRAIN_OUTPUT_DIR"
 echo "  world size: $WORLD_SIZE"
 echo "  backend   : $DDP_BACKEND"
-echo "  steps     : $NEURX_PRETRAIN_STEPS"
+echo "  epochs    : $NEURX_NUM_EPOCHS"
+echo "  data ratio: $NEURX_TRAINING_RATIO"
 echo "  batch     : $NEURX_PRETRAIN_MICRO_BATCH"
+echo "  steps     : $NEURX_PRETRAIN_STEPS"
+echo "    (calculation: docs / batch * epochs)"
+echo ""
 echo ""
 
 if [ -n "${NEURX_PRETRAIN_SHARDS:-}" ]; then
