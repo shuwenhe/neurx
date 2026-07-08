@@ -136,12 +136,14 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-# Create temp S file with configured step count
-TEMP_TRAIN_S="$BUILD_DIR/train_configured.s"
-sed "s/max_steps = 1000/max_steps = $NEURX_PRETRAIN_STEPS/" \
-    'script/minimal_train.s' > "$TEMP_TRAIN_S"
+# Compile the self-contained S training entry
+PRETRAIN_ENTRY_S="$NEURX_ROOT/script/minimal_train.s"
+if [ ! -f "$PRETRAIN_ENTRY_S" ]; then
+    echo "Error: training entry script not found at $PRETRAIN_ENTRY_S"
+    exit 1
+fi
 
-"$S_COMPILER" ir "$TEMP_TRAIN_S" -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
+"$S_COMPILER" ir "$PRETRAIN_ENTRY_S" -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
 test -f "$BUILD_DIR/run_large_pretrain.ir" || exit 1
 
 echo "Running training pipeline..."

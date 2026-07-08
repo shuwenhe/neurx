@@ -2227,7 +2227,7 @@ func gpt_large_pretrain_complete(gpt_large_pretrain_state state) bool {
     state.loop.finished
 }
 
-func gpt_large_pretrain_launch() int {
+pub func gpt_large_pretrain_launch() int {
     gpt_large_pretrain_state state = gpt_large_pretrain_run_from_env()
     println("")
     println("========================================")
