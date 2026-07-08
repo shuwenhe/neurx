@@ -68,7 +68,7 @@ func numel([]int shape) int {
     for i in 0..len(shape) {
         n = n * shape[i]
     }
-    n
+    return n
 }
 
 func copy_float([]float data) []float {
@@ -77,7 +77,7 @@ func copy_float([]float data) []float {
     for i in 0..n {
         out[i] = data[i]
     }
-    out
+    return out
 }
 
 func copy_int([]int data) []int {
@@ -86,7 +86,7 @@ func copy_int([]int data) []int {
     for i in 0..n {
         out[i] = data[i]
     }
-    out
+    return out
 }
 
 func normalize_dim(int dim, int ndim) int {
@@ -94,7 +94,7 @@ func normalize_dim(int dim, int ndim) int {
     if out < 0 {
         out = out + ndim
     }
-    out
+    return out
 }
 
 func fill_like(tensor like, float value) tensor {
@@ -103,19 +103,19 @@ func fill_like(tensor like, float value) tensor {
     for i in 0..n {
         out[i] = value
     }
-    new(out, like.shape, like.requires_grad)
+    return new(out, like.shape, like.requires_grad)
 }
 
 func zeros_like(tensor like) tensor {
-    fill_like(like, 0.0)
+    return fill_like(like, 0.0)
 }
 
 func ones_like(tensor like) tensor {
-    fill_like(like, 1.0)
+    return fill_like(like, 1.0)
 }
 
 func clone(tensor a) tensor {
-    new(copy_float(a.data), copy_int(a.shape), a.requires_grad)
+    return new(copy_float(a.data), copy_int(a.shape), a.requires_grad)
 }
 
 func reshape(tensor a, []int shape) tensor {
