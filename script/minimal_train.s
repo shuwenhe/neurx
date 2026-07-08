@@ -16,6 +16,8 @@ func main() {
     int warmup_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_WARMUP_STEPS", runtime_env_get("NEURX_WARMUP_STEPS", "100")), 100)
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", runtime_env_get("NEURX_LOG_INTERVAL", "10")), 10)
     int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
+    int step_window = parse_int(runtime_env_get("NEURX_PRETRAIN_STEP_TOKENS", "256"), 256)
+    int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "32"), 32)
 
     println("========================================")
     println("NeurX Self-Contained Real Training")
@@ -28,6 +30,8 @@ func main() {
     println("Seq len      : " + int_to_str(seq_len))
     println("Steps        : " + int_to_str(max_steps))
     println("Vocab size   : " + int_to_str(vocab_size))
+    println("Step window  : " + int_to_str(step_window))
+    println("Line chunk   : " + int_to_str(line_chunk_size))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("Weight decay : " + fmt_float(weight_decay, 6))
     println("")
@@ -50,6 +54,9 @@ func main() {
         shard_list_text = runtime_run_command_output(shard_cmd)
         println("Shard directory scan complete")
     }
+    println("")
+    println("[STATUS] Starting shard processing...")
+    println("")
 
     int shard_count = count_non_empty_lines(shard_list_text)
     if shard_count == 0 {
@@ -57,6 +64,11 @@ func main() {
         return
     }
 
+    println("")
+    println("========================================")
+    println("Processing " + int_to_str(shard_count) + " shards for training")
+    println("========================================")
+    println("")
     println("Resolved shard count: " + int_to_str(shard_count))
     int preview = shard_count
     if preview > 6 {
@@ -75,6 +87,12 @@ func main() {
     int window = batch_size * seq_len
     if window < 1 {
         window = 1
+    }
+    if step_window < 1 {
+        step_window = 1
+    }
+    if step_window < window {
+        window = step_window
     }
 
     float weight = 0.0100
@@ -100,9 +118,9 @@ func main() {
         last_shard = shard_path
         
         println("")
-        println("========================================")
-        println("[Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] Loading: " + shard_path)
-        println("========================================")
+        println("╔════════════════════════════════════════════════════════════╗")
+        println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] Processing: " + shard_path)
+        println("╚════════════════════════════════════════════════════════════╝")
 
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
@@ -110,39 +128,90 @@ func main() {
             continue
         }
 
-        println("[INFO] Reading shard file...")
-        string shard_text = runtime_read_text_file(shard_path)
-        int shard_bytes = str_len(shard_text)
-        int shard_mb = shard_bytes / 1048576
-        println("[INFO] Shard loaded: " + int_to_str(shard_mb) + " MB (" + int_to_str(shard_bytes) + " bytes)")
-        string current_line = ""
-        int i = 0
+        println("[INFO] Reading shard file in line chunks...")
         int shard_docs = 0
         int shard_tokens = 0
-        int next_heartbeat = 500000
-        while i <= str_len(shard_text) && step < max_steps && docs_seen < max_docs {
-            if i >= next_heartbeat {
-                println("[Shard] scan progress path=" + shard_path + " offset=" + int_to_str(i) + " docs=" + int_to_str(shard_docs) + " tokens=" + int_to_str(shard_tokens))
-                next_heartbeat = next_heartbeat + 500000
-            }
-            bool end_of_line = i == str_len(shard_text) || shard_text[i] == 10
-            if end_of_line {
-                string line = trim(current_line)
-                if str_len(line) > 0 {
-                    string text = extract_json_string_field(line, "text")
-                    if str_len(text) == 0 {
-                        text = line
-                    }
-                    shard_docs = shard_docs + 1
-                    docs_seen = docs_seen + 1
+        int next_line = 1
+        bool shard_done = false
+        while !shard_done && step < max_steps && docs_seen < max_docs {
+            int last_line = next_line + line_chunk_size - 1
+            string chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
+            string chunk_text = runtime_run_command_output(chunk_cmd)
+            if str_len(trim(chunk_text)) == 0 {
+                shard_done = true
+            } else {
+                println("[Shard] chunk lines=" + int_to_str(next_line) + "-" + int_to_str(last_line))
+                int chunk_len = str_len(chunk_text)
+                int i = 0
+                int line_start = 0
+                while i <= chunk_len && step < max_steps && docs_seen < max_docs {
+                    bool end_of_line = i == chunk_len || chunk_text[i] == 10
+                    if end_of_line {
+                        string line = trim(substring(chunk_text, line_start, i))
+                        if str_len(line) > 0 {
+                            string text = extract_json_string_field(line, "text")
+                            if str_len(text) == 0 {
+                                text = line
+                            }
+                            shard_docs = shard_docs + 1
+                            docs_seen = docs_seen + 1
 
-                    string word = ""
-                    int prev_token = 2
-                    int j = 0
-                    while j <= str_len(text) && step < max_steps {
-                        bool boundary = j == str_len(text) || is_space(text[j])
-                        if boundary {
-                            if str_len(word) > 0 {
+                            string word = ""
+                            int prev_token = 2
+                            int j = 0
+                            while j <= str_len(text) && step < max_steps {
+                                bool boundary = j == str_len(text) || is_space(text[j])
+                                if boundary {
+                                    if str_len(word) > 0 {
+                                        int token = hash_token(word, vocab_size)
+                                        float prev_f = token_as_float(prev_token, window)
+                                        float curr_f = token_as_float(token, window)
+                                        float prediction = weight * prev_f + bias
+                                        float diff = prediction - curr_f
+                                        batch_loss = batch_loss + diff * diff
+                                        grad_weight = grad_weight + 2.0 * diff * prev_f
+                                        grad_bias = grad_bias + 2.0 * diff
+                                        pair_count = pair_count + 1
+                                        tokens_seen = tokens_seen + 1
+                                        prev_token = token
+                                        word = ""
+                                        if pair_count >= window {
+                                            float lr = next_lr(step, learning_rate, warmup_steps)
+                                            m_weight = 0.9 * m_weight + 0.1 * (grad_weight / pair_count as float)
+                                            v_weight = 0.999 * v_weight + 0.001 * (grad_weight / pair_count as float) * (grad_weight / pair_count as float)
+                                            m_bias = 0.9 * m_bias + 0.1 * (grad_bias / pair_count as float)
+                                            v_bias = 0.999 * v_bias + 0.001 * (grad_bias / pair_count as float) * (grad_bias / pair_count as float)
+                                            weight = weight - lr * (m_weight / (sqrt_approx(v_weight) + 0.00000001)) - weight_decay * weight
+                                            bias = bias - lr * (m_bias / (sqrt_approx(v_bias) + 0.00000001))
+                                            step = step + 1
+                                            last_loss = batch_loss / pair_count as float
+                                            last_lr = lr
+                                            if step == 1 || (log_interval > 0 && mod_int(step, log_interval) == 0) {
+                                                println(
+                                                    "[Training] step=" + int_to_str(step) +
+                                                    " shard=" + shard_path +
+                                                    " loss=" + fmt_float(last_loss, 4) +
+                                                    " lr=" + fmt_float(last_lr, 8) +
+                                                    " docs=" + int_to_str(docs_seen) +
+                                                    " tokens=" + int_to_str(tokens_seen) +
+                                                    " tokenizer=whitespace-hash" +
+                                                    " batch_tokens=" + int_to_str(window) +
+                                                    " shard_docs=" + int_to_str(shard_docs) +
+                                                    " shard_tokens=" + int_to_str(shard_tokens)
+                                                )
+                                            }
+                                            pair_count = 0
+                                            batch_loss = 0.0
+                                            grad_weight = 0.0
+                                            grad_bias = 0.0
+                                        }
+                                    }
+                                } else {
+                                    word = word + string_char(text[j])
+                                }
+                                j = j + 1
+                            }
+                            if str_len(word) > 0 && step < max_steps {
                                 int token = hash_token(word, vocab_size)
                                 float prev_f = token_as_float(prev_token, window)
                                 float curr_f = token_as_float(token, window)
@@ -154,86 +223,73 @@ func main() {
                                 pair_count = pair_count + 1
                                 tokens_seen = tokens_seen + 1
                                 prev_token = token
-                                word = ""
-                                if pair_count >= window {
-                                    float lr = next_lr(step, learning_rate, warmup_steps)
-                                    m_weight = 0.9 * m_weight + 0.1 * (grad_weight / pair_count as float)
-                                    v_weight = 0.999 * v_weight + 0.001 * (grad_weight / pair_count as float) * (grad_weight / pair_count as float)
-                                    m_bias = 0.9 * m_bias + 0.1 * (grad_bias / pair_count as float)
-                                    v_bias = 0.999 * v_bias + 0.001 * (grad_bias / pair_count as float) * (grad_bias / pair_count as float)
-                                    weight = weight - lr * (m_weight / (sqrt_approx(v_weight) + 0.00000001)) - weight_decay * weight
-                                    bias = bias - lr * (m_bias / (sqrt_approx(v_bias) + 0.00000001))
-                                    step = step + 1
-                                    last_loss = batch_loss / pair_count as float
-                                    last_lr = lr
-                                    if step == 1 || (log_interval > 0 && mod_int(step, log_interval) == 0) {
-                                        println(
-                                            "[Training] step=" + int_to_str(step) +
-                                            " shard=" + shard_path +
-                                            " loss=" + fmt_float(last_loss, 4) +
-                                            " lr=" + fmt_float(last_lr, 8) +
-                                            " docs=" + int_to_str(docs_seen) +
-                                            " tokens=" + int_to_str(tokens_seen) +
-                                            " tokenizer=whitespace-hash" +
-                                            " batch_tokens=" + int_to_str(window) +
-                                            " shard_docs=" + int_to_str(shard_docs) +
-                                            " shard_tokens=" + int_to_str(shard_tokens)
-                                        )
-                                    }
-                                    pair_count = 0
-                                    batch_loss = 0.0
-                                    grad_weight = 0.0
-                                    grad_bias = 0.0
-                                }
                             }
-                        } else {
-                            word = word + string_char(text[j])
+                            if step < max_steps {
+                                int eos = 3
+                                float prev_f = token_as_float(prev_token, window)
+                                float curr_f = token_as_float(eos, window)
+                                float prediction = weight * prev_f + bias
+                                float diff = prediction - curr_f
+                                batch_loss = batch_loss + diff * diff
+                                grad_weight = grad_weight + 2.0 * diff * prev_f
+                                grad_bias = grad_bias + 2.0 * diff
+                                pair_count = pair_count + 1
+                                tokens_seen = tokens_seen + 1
+                            }
+                            shard_tokens = shard_tokens + count_document_tokens(text)
+                            if pair_count > 0 && step < max_steps {
+                                float lr2 = next_lr(step, learning_rate, warmup_steps)
+                                float grad_w2 = grad_weight / pair_count as float
+                                float grad_b2 = grad_bias / pair_count as float
+                                m_weight = 0.9 * m_weight + 0.1 * grad_w2
+                                v_weight = 0.999 * v_weight + 0.001 * grad_w2 * grad_w2
+                                m_bias = 0.9 * m_bias + 0.1 * grad_b2
+                                v_bias = 0.999 * v_bias + 0.001 * grad_b2 * grad_b2
+                                weight = weight - lr2 * (m_weight / (sqrt_approx(v_weight) + 0.00000001)) - weight_decay * weight
+                                bias = bias - lr2 * (m_bias / (sqrt_approx(v_bias) + 0.00000001))
+                                step = step + 1
+                                last_loss = batch_loss / pair_count as float
+                                last_lr = lr2
+                                if step == 1 || (log_interval > 0 && mod_int(step, log_interval) == 0) {
+                                    println(
+                                        "[Training] step=" + int_to_str(step) +
+                                        " shard=" + shard_path +
+                                        " loss=" + fmt_float(last_loss, 4) +
+                                        " lr=" + fmt_float(last_lr, 8) +
+                                        " docs=" + int_to_str(docs_seen) +
+                                        " tokens=" + int_to_str(tokens_seen) +
+                                        " tokenizer=whitespace-hash" +
+                                        " batch_tokens=" + int_to_str(window) +
+                                        " shard_docs=" + int_to_str(shard_docs) +
+                                        " shard_tokens=" + int_to_str(shard_tokens)
+                                    )
+                                }
+                                pair_count = 0
+                                batch_loss = 0.0
+                                grad_weight = 0.0
+                                grad_bias = 0.0
+                            }
+                            if docs_seen >= max_docs {
+                                break
+                            }
                         }
-                        j = j + 1
+                        line_start = i + 1
                     }
-                    if str_len(word) > 0 && step < max_steps {
-                        int token = hash_token(word, vocab_size)
-                        float prev_f = token_as_float(prev_token, window)
-                        float curr_f = token_as_float(token, window)
-                        float prediction = weight * prev_f + bias
-                        float diff = prediction - curr_f
-                        batch_loss = batch_loss + diff * diff
-                        grad_weight = grad_weight + 2.0 * diff * prev_f
-                        grad_bias = grad_bias + 2.0 * diff
-                        pair_count = pair_count + 1
-                        tokens_seen = tokens_seen + 1
-                        prev_token = token
-                    }
-                    if step < max_steps {
-                        int eos = 3
-                        float prev_f = token_as_float(prev_token, window)
-                        float curr_f = token_as_float(eos, window)
-                        float prediction = weight * prev_f + bias
-                        float diff = prediction - curr_f
-                        batch_loss = batch_loss + diff * diff
-                        grad_weight = grad_weight + 2.0 * diff * prev_f
-                        grad_bias = grad_bias + 2.0 * diff
-                        pair_count = pair_count + 1
-                        tokens_seen = tokens_seen + 1
-                    }
-                    shard_tokens = shard_tokens + count_document_tokens(text)
-                    if docs_seen >= max_docs {
-                        current_line = ""
-                        break
-                    }
+                    i = i + 1
                 }
-                current_line = ""
-            } else if shard_text[i] != 13 {
-                current_line = current_line + string_char(shard_text[i])
+                next_line = next_line + line_chunk_size
+                if str_len(trim(chunk_text)) < 1 {
+                    shard_done = true
+                }
             }
-            i = i + 1
         }
 
         println("")
-        println("[Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] Completed: " + shard_path)
-        println("  Docs: " + int_to_str(shard_docs) + " | Tokens: " + int_to_str(shard_tokens))
-        println("  Total progress: docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " steps=" + int_to_str(step) + "/" + int_to_str(max_steps))
-        println("========================================")
+        println("╔════════════════════════════════════════════════════════════╗")
+        println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] ✓ Completed")
+        println("║ Docs: " + int_to_str(shard_docs) + " | Tokens: " + int_to_str(shard_tokens))
+        println("║ Total: docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " steps=" + int_to_str(step) + "/" + int_to_str(max_steps))
+        println("╚════════════════════════════════════════════════════════════╝")
         shard_index = shard_index + 1
     }
 
