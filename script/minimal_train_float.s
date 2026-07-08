@@ -58,7 +58,7 @@ func main() int {
     println("========================================")
     println("Final Loss: " + fmt_float(last_loss, 4))
     println("Loss Reduction: " + fmt_float(10.0 - last_loss, 4))
-    0
+    return 0
 }
 
 func fmt_float(float val, int decimals) string {

@@ -8,10 +8,12 @@ export NEURX_ROOT="$NEURX_ROOT"
 
 export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$(cd "$NEURX_ROOT/.." && pwd)}"
 if [ -z "${S_COMPILER:-}" ]; then
-    if [ -x "$NEURX_ROOT/../s/.local/bin/s" ]; then
-        export S_COMPILER="$NEURX_ROOT/../s/.local/bin/s"
-    elif [ -x "$NEURX_ROOT/../s/bin/s" ]; then
+    if [ -x "$NEURX_ROOT/../s/bin/s" ]; then
         export S_COMPILER="$NEURX_ROOT/../s/bin/s"
+    elif [ -x "$NEURX_ROOT/../s/.local/bin/s" ]; then
+        export S_COMPILER="$NEURX_ROOT/../s/.local/bin/s"
+    elif [ -x "/home/shuwen/s/bin/s" ]; then
+        export S_COMPILER="/home/shuwen/s/bin/s"
     else
         export S_COMPILER="$(command -v s 2>/dev/null || true)"
     fi
@@ -26,13 +28,11 @@ export NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/dataset/p
 export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-${NEURX_PRETRAIN_OUTPUT:-$NEURX_ROOT/artifacts/checkpoints/llm_training}}"
 export NEURX_PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-${NEURX_PRETRAIN_BATCH_SIZE:-${NEURX_BATCH_SIZE:-32}}}"
 export NEURX_PRETRAIN_SEQ_LEN="${NEURX_PRETRAIN_SEQ_LEN:-${NEURX_SEQ_LENGTH:-2048}}"
+export NEURX_NUM_EPOCHS="${NEURX_NUM_EPOCHS:-1}"
+export NEURX_TRAINING_RATIO="${NEURX_TRAINING_RATIO:-1.0}"
 
 # Calculate total steps based on data volume if not explicitly set
 if [ -z "${NEURX_PRETRAIN_STEPS:-}" ] && [ -z "${NEURX_TOTAL_STEPS:-}" ]; then
-    # Support custom training configurations
-    NEURX_NUM_EPOCHS="${NEURX_NUM_EPOCHS:-1}"
-    NEURX_TRAINING_RATIO="${NEURX_TRAINING_RATIO:-1.0}"  # 1.0 = full data, 0.5 = half data, etc
-    
     if [ -f "$NEURX_PRETRAIN_MANIFEST" ]; then
         TOTAL_DOCS=$(grep -o '"num_documents": [0-9]*' "$NEURX_PRETRAIN_MANIFEST" | grep -o '[0-9]*' | awk '{sum+=$1} END {print sum}')
         if [ -n "$TOTAL_DOCS" ] && [ "$TOTAL_DOCS" -gt 0 ]; then
@@ -87,37 +87,7 @@ fi
 
 if [ -f "$NEURX_PRETRAIN_MANIFEST" ]; then
     echo "Resolved shard manifest preview:"
-    python3 - "$NEURX_PRETRAIN_MANIFEST" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-manifest_path = Path(sys.argv[1])
-text = manifest_path.read_text(encoding="utf-8")
-try:
-    data = json.loads(text)
-except Exception:
-    lines = [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
-    for line in lines[:12]:
-        print(f"  - {line}")
-    raise SystemExit(0)
-
-def emit(label, value):
-    if isinstance(value, str) and value.strip():
-        print(f"{label}:")
-        print(f"  - {value}")
-    elif isinstance(value, list) and value:
-        print(f"{label}:")
-        for item in value:
-            print(f"  - {item}")
-
-if isinstance(data, dict):
-    emit("train", data.get("train"))
-    emit("valid", data.get("valid"))
-    emit("test", data.get("test"))
-    emit("shards", data.get("shards"))
-    emit("files", data.get("files"))
-PY
+    sed -n '1,12p' "$NEURX_PRETRAIN_MANIFEST" | sed 's/^/  - /'
     echo ""
 else
     echo "Warning: manifest not found at $NEURX_PRETRAIN_MANIFEST"
@@ -129,6 +99,18 @@ LOG_DIR="$NEURX_ROOT/artifacts/logs"
 mkdir -p "$BUILD_DIR"
 mkdir -p "$LOG_DIR"
 
+SHARD_LIST_FILE="$BUILD_DIR/shard_list.sample.txt"
+ALL_SHARDS_FILE="$BUILD_DIR/shard_list.all.txt"
+find "$NEURX_ROOT/dataset/pretrain/shard" -maxdepth 1 -name 'shard_*.jsonl' -print | sort > "$ALL_SHARDS_FILE"
+if [ -n "${NEURX_PRETRAIN_SHARD_LIMIT:-}" ] && [ "${NEURX_PRETRAIN_SHARD_LIMIT:-0}" -gt 0 ] 2>/dev/null; then
+    sed -n "1,${NEURX_PRETRAIN_SHARD_LIMIT}p" "$ALL_SHARDS_FILE" > "$SHARD_LIST_FILE"
+else
+    cp "$ALL_SHARDS_FILE" "$SHARD_LIST_FILE"
+fi
+rm -f "$ALL_SHARDS_FILE"
+export NEURX_PRETRAIN_SHARD_LIST_FILE="$SHARD_LIST_FILE"
+export NEURX_PRETRAIN_MAX_DOCS="${NEURX_PRETRAIN_MAX_DOCS:-100000000}"
+
 echo "Compiling S training pipeline..."
 cd "$NEURX_ROOT"
 if [ -z "$S_COMPILER" ]; then
@@ -136,15 +118,20 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-# Compile the self-contained S training entry
 PRETRAIN_ENTRY_S="$NEURX_ROOT/script/minimal_train.s"
 if [ ! -f "$PRETRAIN_ENTRY_S" ]; then
     echo "Error: training entry script not found at $PRETRAIN_ENTRY_S"
     exit 1
 fi
 
-"$S_COMPILER" ir "$PRETRAIN_ENTRY_S" -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
-test -f "$BUILD_DIR/run_large_pretrain.ir" || exit 1
+echo "Resolved command:"
+echo "  S compilation: $PRETRAIN_ENTRY_S -> $BUILD_DIR/run_large_pretrain.ir"
+
+"$S_COMPILER" ir "$PRETRAIN_ENTRY_S" -o "$BUILD_DIR/run_large_pretrain.ir"
+if [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
+    echo "Error: S compilation failed"
+    exit 1
+fi
 
 echo "Running training pipeline..."
 # Use S IR runner to execute compiled IR
