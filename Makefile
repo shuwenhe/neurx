@@ -33,7 +33,7 @@ endif
 .DEFAULT_GOAL := help
 
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
-S_REPO_ROOT := $(CURDIR_UNIX)/../s
+S_REPO_ROOT := $(CURDIR_UNIX)/../../../s
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
@@ -73,49 +73,21 @@ train: check-bash
 	mkdir -p $(LOG_DIR); \
 	cd '$(CURDIR_UNIX)' && ( \
 	set -e; \
-	if [ "$(MODE)" = "industrial" ]; then \
-		echo "MODE=industrial is disabled for make train; real pretraining only"; \
+	echo "Running NeurX Production Pre-training"; \
+	echo ""; \
+	echo "Data Status:"; \
+	echo "  Shard directory: $(PRETRAIN_SHARD_DIR)"; \
+	echo "  Manifest: $(PRETRAIN_MANIFEST)"; \
+	if [ -d '$(PRETRAIN_SHARD_DIR)' ] && [ -f '$(PRETRAIN_MANIFEST)' ]; then \
+		echo "  Status: ✓ Data shards ready"; \
+	else \
+		echo "  Status: ✗ Data shards missing"; \
 		exit 1; \
 	fi; \
-	echo "Running NeurX 1T MoE GPT-style Production Pre-training"; \
-		echo "Training data root: $(PRETRAIN_DATA_ROOT)"; \
-		echo "  raw      : $(PRETRAIN_RAW_DIR)"; \
-		echo "  cleaned  : $(PRETRAIN_CLEANED_FILE)"; \
-		echo "  train    : $(PRETRAIN_TRAIN_SPLIT)"; \
-		echo "  val      : $(PRETRAIN_VAL_SPLIT)"; \
-		echo "  test     : $(PRETRAIN_TEST_SPLIT)"; \
-		echo "  shard dir: $(PRETRAIN_SHARD_DIR)"; \
-		echo "  manifest : $(PRETRAIN_MANIFEST)"; \
-		if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
-			echo "Resume     : checkpoint not needed, cleaned dataset already complete"; \
-		elif [ -s '$(PRETRAIN_CLEANED_FILE)' ]; then \
-			echo "Resume     : yes, will continue from $(PRETRAIN_CLEANED_FILE) with checkpoint state if present"; \
-		else \
-			echo "Resume     : no, starting from raw data"; \
-		fi; \
-		if [ "$(SKIP_CLEAN)" = "1" ]; then \
-			echo "SKIP_CLEAN=1, skipping data clean and shard generation"; \
-		else \
-			if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
-				echo "Existing cleaned file detected; resuming split/manifest generation"; \
-				echo "Resolved command:"; \
-				echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh"; \
-				NEURX_RESUME_CLEANED=1 bash script/clean_data.sh; \
-			else \
-				echo "Resolved command:"; \
-				echo "  bash script/clean_data.sh"; \
-				bash script/clean_data.sh; \
-			fi; \
-			echo "Resolved command:"; \
-			echo "  bash script/generate_shards.sh"; \
-			bash script/generate_shards.sh; \
-		fi; \
-		echo "Resolved command:"; \
-		echo "  S compilation: pretrain/llm/runner.s → artifacts/build/train/runner.ir"; \
-		mkdir -p '$(CURDIR_UNIX)/artifacts/build/train'; \
-		$(S_COMPILER) ir pretrain/llm/runner.s -o '$(CURDIR_UNIX)/artifacts/build/train/runner.ir' 2>&1 || exit 1; \
-		echo "Running S IR training launcher..."; \
-		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 '$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/train/runner.ir' 2>&1; \
+	echo ""; \
+	echo "Starting training..."; \
+	echo ""; \
+	NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1; \
 	) 2>&1 | tee -a $(LOG_DIR)/train_$(shell date +%Y%m%d_%H%M%S).log
 
 
@@ -150,18 +122,18 @@ pretrain: check-bash
 		echo "  bash script/generate_shards.sh" && \
 		bash script/generate_shards.sh && \
 		echo "Resolved command:" && \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh" && \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh" && \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
 		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
 		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
+		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
 
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=1t NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \

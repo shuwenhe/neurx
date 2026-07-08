@@ -6,7 +6,7 @@ NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 export NEURX_ROOT="$NEURX_ROOT"
 
-export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$NEURX_ROOT/../s}"
+export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$(cd "$NEURX_ROOT/.." && pwd)}"
 if [ -z "${S_COMPILER:-}" ]; then
     if [ -x "$NEURX_ROOT/../s/.local/bin/s" ]; then
         export S_COMPILER="$NEURX_ROOT/../s/.local/bin/s"
@@ -21,7 +21,7 @@ export S_RUNNER_BIN="${S_RUNNER_BIN:-$NEURX_ROOT/artifacts/build/s_runner/s_ir_r
 # Bridge the `make train` entry point to the real launcher. Keep the existing
 # Makefile contract, but translate legacy variable names to the ones the
 # pretraining backend actually reads.
-export MODEL_SIZE="${MODEL_SIZE:-1t}"
+export MODEL_SIZE="${MODEL_SIZE:-llm}"
 export NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/dataset/pretrain/manifest.json}"
 export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-${NEURX_PRETRAIN_OUTPUT:-$NEURX_ROOT/artifacts/checkpoints/llm_training}}"
 export NEURX_PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-${NEURX_PRETRAIN_BATCH_SIZE:-${NEURX_BATCH_SIZE:-32}}}"
@@ -49,6 +49,50 @@ echo "  steps     : $NEURX_PRETRAIN_STEPS"
 echo "  batch     : $NEURX_PRETRAIN_MICRO_BATCH"
 echo ""
 
+if [ -n "${NEURX_PRETRAIN_SHARDS:-}" ]; then
+    echo "Shard filter: ${NEURX_PRETRAIN_SHARDS}"
+else
+    echo "Shard filter: <none>"
+fi
+
+if [ -f "$NEURX_PRETRAIN_MANIFEST" ]; then
+    echo "Resolved shard manifest preview:"
+    python3 - "$NEURX_PRETRAIN_MANIFEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+text = manifest_path.read_text(encoding="utf-8")
+try:
+    data = json.loads(text)
+except Exception:
+    lines = [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
+    for line in lines[:12]:
+        print(f"  - {line}")
+    raise SystemExit(0)
+
+def emit(label, value):
+    if isinstance(value, str) and value.strip():
+        print(f"{label}:")
+        print(f"  - {value}")
+    elif isinstance(value, list) and value:
+        print(f"{label}:")
+        for item in value:
+            print(f"  - {item}")
+
+if isinstance(data, dict):
+    emit("train", data.get("train"))
+    emit("valid", data.get("valid"))
+    emit("test", data.get("test"))
+    emit("shards", data.get("shards"))
+    emit("files", data.get("files"))
+PY
+    echo ""
+else
+    echo "Warning: manifest not found at $NEURX_PRETRAIN_MANIFEST"
+fi
+
 # Compile S script to IR
 BUILD_DIR="$NEURX_ROOT/artifacts/build/run_large_pretrain"
 LOG_DIR="$NEURX_ROOT/artifacts/logs"
@@ -61,7 +105,8 @@ if [ -z "$S_COMPILER" ]; then
     echo "Error: S compiler not found"
     exit 1
 fi
-"$S_COMPILER" ir 'script/run_large_pretrain.s' -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
+
+"$S_COMPILER" ir 'pretrain/llm/large_pretrain.s' -o "$BUILD_DIR/run_large_pretrain.ir" 2>&1
 test -f "$BUILD_DIR/run_large_pretrain.ir" || exit 1
 
 echo "Running training pipeline..."

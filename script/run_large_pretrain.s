@@ -1,12 +1,12 @@
 package main
 
-use neurx.pretrain.llm.gpt_large_pretrain.main as gpt_large_pretrain_main
+use neurx.pretrain.llm.gpt_large_pretrain.gpt_large_pretrain_launch as gpt_large_pretrain_launch
 
 // Pretraining launcher that delegates to the real training system.
 // This entry point is called by make train via script/run_large_pretrain.sh
 func main() int {
     // All configuration is passed via environment variables (NEURX_* vars)
-    return gpt_large_pretrain_main()
+    return gpt_large_pretrain_launch()
 }
 
 func str_to_int(string s, int fallback) int {

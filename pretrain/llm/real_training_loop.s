@@ -57,37 +57,37 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     float scale = 2.0 / (hidden_dim as float)
     
     while i < len(embed_data) {
-        embed_data[i] = (i % 100) as float * 0.01 - 0.5  // 简单的初始化
+        embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5  // 简单的初始化
         i = i + 1
     }
     
     i = 0
     while i < len(q_data) {
-        q_data[i] = (i % 50) as float * 0.01 - 0.25
+        q_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     
     i = 0
     while i < len(k_data) {
-        k_data[i] = (i % 50) as float * 0.01 - 0.25
+        k_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     
     i = 0
     while i < len(v_data) {
-        v_data[i] = (i % 50) as float * 0.01 - 0.25
+        v_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     
     i = 0
     while i < len(out_data) {
-        out_data[i] = (i % 50) as float * 0.01 - 0.25
+        out_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     
     i = 0
     while i < len(head_data) {
-        head_data[i] = (i % 100) as float * 0.01 - 0.5
+        head_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5
         i = i + 1
     }
     
@@ -97,12 +97,12 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     []float v_state = []float{cap: param_count}
     
     real_training_state {
-        weights_q: new(q_data, []int{hidden_dim, hidden_dim}, true),
-        weights_k: new(k_data, []int{hidden_dim, hidden_dim}, true),
-        weights_v: new(v_data, []int{hidden_dim, hidden_dim}, true),
-        weights_out: new(out_data, []int{hidden_dim, hidden_dim}, true),
-        embedding: new(embed_data, []int{vocab_size, hidden_dim}, true),
-        lm_head: new(head_data, []int{hidden_dim, vocab_size}, true),
+        weights_q: new(q_data, [hidden_dim, hidden_dim], true),
+        weights_k: new(k_data, [hidden_dim, hidden_dim], true),
+        weights_v: new(v_data, [hidden_dim, hidden_dim], true),
+        weights_out: new(out_data, [hidden_dim, hidden_dim], true),
+        embedding: new(embed_data, [vocab_size, hidden_dim], true),
+        lm_head: new(head_data, [hidden_dim, vocab_size], true),
         adam_m: m_state,
         adam_v: v_state,
         learning_rate: lr,
@@ -174,7 +174,7 @@ func training_step(
     next_state.tokens_seen = next_state.tokens_seen + batch_size
     
     // 6. 打印进度
-    if next_state.step % 100 == 0 {
+    if next_state.step / 100 * 100 == next_state.step {
         float avg_loss = next_state.total_loss / (next_state.step as float)
         print_training_progress(next_state.step, avg_loss, next_state.learning_rate, next_state.tokens_seen)
     }
@@ -251,12 +251,12 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
             id = 0
         }
         if vocab_size > 0 {
-            id = id % vocab_size
+            id = id - (id / vocab_size) * vocab_size
         }
         data[i * vocab_size + id] = 1.0
         i = i + 1
     }
-    new(data, []int{n, vocab_size}, true)
+    new(data, [n, vocab_size], true)
 }
 
 // 从整数数组创建张量
