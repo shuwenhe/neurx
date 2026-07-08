@@ -650,8 +650,8 @@ func gpt_large_run_industrial_backend() int {
     println("=======================================================================")
 
     if !gpt_large_pretrain.gpt_large_pretrain_system_ready(state) {
-        println("industrial pretraining system is not fully ready; writing status report only")
-        gpt_large_pretrain.gpt_large_pretrain_write_system_report(state)
+        println("industrial pretraining system is not fully ready")
+        println("Refusing to fall back to report-only or simulation mode")
         return 1
     }
 

@@ -55,7 +55,7 @@ func int_to_str(int n, int fallback) string {
     }
     string s = ""
     while n > 0 {
-        s = string(n % 10 + 48) + s
+        s = string(n - (n / 10) * 10 + 48) + s
         n = n / 10
     }
     if neg {
@@ -397,7 +397,7 @@ func main() int {
     string output = seed
     int prev_id = 32
     if len(seed) > 0 {
-        prev_id = seed[len(seed) - 1] % vocab
+        prev_id = seed[len(seed) - 1] - (seed[len(seed) - 1] / vocab) * vocab
     }
     int cached_row_id = -1
     []float cached_row = []float{cap: 0}

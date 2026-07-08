@@ -121,7 +121,7 @@ func gpt_5_5_spec_default() gpt_5_5_model_spec {
         peak_lr: 0.0002,
         min_lr: 0.00002,
         tokenizer_manifest: "data/tokenizer.manifest",
-        data_manifest: "data/training_data_splits/manifest.json",
+        data_manifest: "dataset/pretrain/manifest.json",
         checkpoint_dir: "checkpoints/gpt_5_5",
         output_dir: "artifacts/gpt_5_5",
     }

@@ -4,8 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 NEURX_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-# s/ is located at train/s relative to the neurx directory
-S_ROOT="$(cd "$NEURX_DIR/../s" && pwd)"
+# s/ lives alongside the repo workspace, not under train/
+S_ROOT="$(cd "$NEURX_DIR/../../../s" && pwd)"
 BUILD_DIR="$NEURX_DIR/build"
 SOURCE_FILE="$NEURX_DIR/tools/infer_llm_checkpoint.s"
 IR_FILE="$BUILD_DIR/infer_llm.ir"
@@ -32,7 +32,7 @@ echo "  runner bin   : $RUNNER_BIN"
 
 if [[ "${NEURX_INFER_SKIP_BUILD:-0}" != "1" ]]; then
   cd "$S_ROOT"
-  LATEST_COMPILER="$("$COMPILER_BUILDER")"
+  LATEST_COMPILER="$(bash "$COMPILER_BUILDER")"
   echo "  latest compiler: $LATEST_COMPILER"
   "$LATEST_COMPILER" "$SOURCE_FILE" "$IR_FILE"
 

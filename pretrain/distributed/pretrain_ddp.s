@@ -51,10 +51,26 @@ func parse_env_int(string value, int fallback) int {
     parsed
 }
 
+func env_int_with_fallbacks(string primary, string secondary, int fallback) int {
+    int value = parse_env_int(runtime_env_get(primary, ""), -1)
+    if value > 0 {
+        return value
+    }
+    value = parse_env_int(runtime_env_get(secondary, ""), -1)
+    if value > 0 {
+        return value
+    }
+    fallback
+}
+
 func new_pretrain_ddp_state_from_env(string name, int bucket_cap, bool find_unused) pretrain_ddp_state {
-    int rank = parse_env_int(runtime_env_get("RANK", "0"), 0)
-    int world_size = parse_env_int(runtime_env_get("WORLD_SIZE", "1"), 1)
-    process_group_state pg = new_process_group(runtime_env_get("DDP_BACKEND", "gloo"), rank, world_size)
+    int rank = env_int_with_fallbacks("RANK", "NEURX_PRETRAIN_RANK", 0)
+    int world_size = env_int_with_fallbacks("WORLD_SIZE", "NEURX_PRETRAIN_WORLD_SIZE", 1)
+    string backend = runtime_env_get("DDP_BACKEND", "")
+    if trim(backend) == "" {
+        backend = runtime_env_get("NEURX_PRETRAIN_BACKEND", "gloo")
+    }
+    process_group_state pg = new_process_group(backend, rank, world_size)
     ddp_state ddp = ddp_attach_process_group(new_ddp_state(name, bucket_cap, find_unused), pg)
     pretrain_ddp_state {
         ddp: ddp,

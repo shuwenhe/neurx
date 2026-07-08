@@ -1,1 +1,1 @@
-/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_training/checkpoint_step_500.pt
+/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_training/best_model.neurx
