@@ -1,6 +1,6 @@
 package neurx.posttrain.sft.examples
 
-use neurx.posttrain.sft.sft_trainer.*
+use neurx.posttrain.sft.sft_trainer
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
 use std.io.println
@@ -51,7 +51,7 @@ func create_sft_example_trainer(
     int global_rank,
     int world_size
 ) sft_trainer_state {
-    create_sft_trainer(model, tokenizer, config, dataset, global_rank, world_size)
+    neurx.posttrain.sft.sft_trainer.create_sft_trainer(model, tokenizer, config, dataset, global_rank, world_size)
 }
 
 func example_basic_sft_training() {
