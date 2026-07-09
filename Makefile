@@ -224,19 +224,6 @@ run-small-model-training-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_small_model_training_$(shell date +%Y%m%d_%H%M%S).log
 
 verify-setup-s: check-bash
-	@echo "Building LoRA SFT training entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_sft_training
-	@mkdir -p $(LOG_DIR)
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		/home/shuwen/s/bin/s ir 'script/run_lora_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir'
-	@echo "Running LoRA SFT training entry..."
-	@cd '$(CURDIR_UNIX)' && \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_lora_sft_training_$(shell date +%Y%m%d_%H%M%S).log
-
-verify-setup-s: check-bash
 	@echo "Building setup verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_setup
 	@mkdir -p $(LOG_DIR)
