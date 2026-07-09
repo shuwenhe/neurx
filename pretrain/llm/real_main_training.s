@@ -4,11 +4,12 @@ package neurx.pretrain.llm.real_main_training
 // The simulation-only implementation was removed so this package now
 // forwards into the actual data/forward/backward/update pipeline.
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_write_text_file}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
 
 struct real_training_config {
     string manifest_path
+    string data_dir
     string output_dir
     int batch_size
     int seq_length
@@ -20,8 +21,10 @@ struct real_training_config {
 
 func default_training_config() real_training_config {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    let data_root = runtime_env_get("NEURX_PRETRAIN_DATA_DIR", project_root + "/dataset/pretrain")
     real_training_config {
         manifest_path: runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json"),
+        data_dir: data_root,
         output_dir: runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_training"),
         batch_size: clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024),
         seq_length: clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_LLM_SEQ_LEN", "16")), 16), 1, 4096),
@@ -32,12 +35,29 @@ func default_training_config() real_training_config {
     }
 }
 
-func run_real_training_loop(real_training_config config) int {
-    if !runtime_file_exists(config.manifest_path) {
-        println("Missing manifest: " + config.manifest_path)
-        return 1
+func build_fallback_manifest(real_training_config config) string {
+    string shard_dir = config.data_dir + "/shard"
+    string fallback_manifest = config.output_dir + "/shard_manifest.txt"
+    string shard_list = runtime_run_command_output("find '" + shard_dir + "' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort")
+    if len(trim(shard_list)) == 0 {
+        println("No shard files found under: " + shard_dir)
+        return ""
     }
-    let state = run_training_loop(config.manifest_path, config.max_steps, config.batch_size, config.seq_length, config.vocab_size, config.hidden_dim, config.learning_rate)
+    runtime_write_text_file(fallback_manifest, shard_list)
+    println("Using shard list manifest: " + fallback_manifest)
+    fallback_manifest
+}
+
+func run_real_training_loop(real_training_config config) int {
+    string manifest_path = config.manifest_path
+    if !runtime_file_exists(manifest_path) {
+        println("Missing manifest: " + manifest_path)
+        manifest_path = build_fallback_manifest(config)
+        if len(trim(manifest_path)) == 0 {
+            return 1
+        }
+    }
+    let state = run_training_loop(manifest_path, config.max_steps, config.batch_size, config.seq_length, config.vocab_size, config.hidden_dim, config.learning_rate)
     println("Final step: " + int_to_str(state.step, 0))
     println("Tokens seen: " + int_to_str(state.tokens_seen, 0))
     0
