@@ -60,10 +60,6 @@ func main() {
         shard_list_text = runtime_run_command_output(shard_cmd)
         println("Shard directory scan complete")
     }
-    println("")
-    println("[STATUS] Starting shard processing...")
-    println("")
-
     int shard_count = count_non_empty_lines(shard_list_text)
     if shard_count == 0 {
         println("No shard files found under: " + shard_dir)
@@ -75,6 +71,7 @@ func main() {
     println("Processing " + int_to_str(shard_count) + " shards for training")
     println("========================================")
     println("")
+    println("[STATUS] Starting shard processing...")
     println("Resolved shard count: " + int_to_str(shard_count))
     int preview = shard_count
     if preview > 6 {
@@ -122,12 +119,12 @@ func main() {
     while shard_index < shard_count && step < max_steps {
         string shard_path = shard_path_at(shard_list_text, shard_index)
         last_shard = shard_path
-        
+
         println("")
         println("╔════════════════════════════════════════════════════════════╗")
         println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] Processing: " + shard_path)
         println("╚════════════════════════════════════════════════════════════╝")
-        println("[STATUS] shard_index=" + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " path=" + shard_path)
+        println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " started: " + shard_path)
 
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
@@ -157,11 +154,12 @@ func main() {
                 int last_line = next_line + line_chunk_size - 1
                 println("[Processing] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " (lines " + int_to_str(next_line) + "-" + int_to_str(last_line) + ")...")
             }
-            println("[STATUS] reading chunk now...")
-            
+            println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " reading...")
+
             string chunk_text = runtime_run_command_output(chunk_cmd)
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
+                println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " ended")
             } else {
                 if fast_prefix_mode > 0 {
                     println("[✓ Loaded] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " fast prefix")
@@ -169,6 +167,7 @@ func main() {
                     int last_line = next_line + line_chunk_size - 1
                     println("[✓ Loaded] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count))
                 }
+                println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " processing")
                 int chunk_len = str_len(chunk_text)
                 int i = 0
                 int line_start = 0
@@ -305,11 +304,12 @@ func main() {
         }
 
         println("")
-        println("╔════════════════════════════════════════════════════════════╗")
-        println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] ✓ Completed")
-        println("║ Docs: " + int_to_str(shard_docs) + " | Tokens: " + int_to_str(shard_tokens))
-        println("║ Total: docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " steps=" + int_to_str(step) + "/" + int_to_str(max_steps))
-        println("╚════════════════════════════════════════════════════════════╝")
+            println("╔════════════════════════════════════════════════════════════╗")
+            println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] ✓ Completed")
+            println("║ Docs: " + int_to_str(shard_docs) + " | Tokens: " + int_to_str(shard_tokens))
+            println("║ Total: docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " steps=" + int_to_str(step) + "/" + int_to_str(max_steps))
+            println("╚════════════════════════════════════════════════════════════╝")
+            println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " complete: docs=" + int_to_str(shard_docs) + " tokens=" + int_to_str(shard_tokens))
         shard_index = shard_index + 1
     }
 
