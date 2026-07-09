@@ -216,7 +216,7 @@ fn contains_index(haystack: string, needle: string) -> i64 {
     return -1
 }
 
-fn extract_page_record(page_xml: string) -> PageRecord | null {
+fn extract_page_record(page_xml: string) -> PageRecord? {
     // Check if page is in namespace 0 (main article namespace)
     let ns_str = extract_xml_tag_value(page_xml, "ns")
     if ns_str != "0" {
