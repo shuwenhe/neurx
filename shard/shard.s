@@ -145,7 +145,7 @@ func default_manifest(string root) string {
 
 func run_wikipedia() int {
     string root = default_neurx_root()
-    string script_dir = runtime_env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
+    string script_dir = env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
     string build_dir = root + "/artifacts/build/shard"
     string runner_bin = root + "/artifacts/build/s_runner/s_ir_runner"
     string compiler = env_get("S_COMPILER", "/home/shuwen/s/bin/s")
