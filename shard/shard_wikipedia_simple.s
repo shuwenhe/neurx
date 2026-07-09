@@ -98,10 +98,7 @@ func parse_int(string s, int fallback) int {
         if digit < 0 || digit > 9 {
             return fallback
         }
-        value = value + digit
-        if i + 1 < len(text) {
-            value = value * 10
-        }
+        value = value * 10 + digit
         i = i + 1
     }
     value
@@ -133,6 +130,13 @@ func process_wikipedia() int {
     println("[*] Decompressing and sharding Wikipedia dump...")
     string temp_xml = output_dir + "/.wikipedia_dump.xml"
 
+    // Ensure output directory exists
+    let mkdir_result = runtime_make_dirs(output_dir)
+    if !mkdir_result.ok {
+        println("[-] Failed to create output directory: " + output_dir)
+        return 1
+    }
+
     // Clean up previous outputs
     string _ = runtime_run_command_output("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
 
@@ -140,7 +144,9 @@ func process_wikipedia() int {
     string decompress_result = runtime_run_command_output(
         "bzip2 -dc " + shell_escape(input_file) + " > " + shell_escape(temp_xml)
     )
-    println("[*] Decompression started")
+    if len(trim(decompress_result)) > 0 {
+        println(decompress_result)
+    }
 
     // Count pages
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
