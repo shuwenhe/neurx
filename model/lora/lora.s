@@ -180,7 +180,7 @@ struct lora_linear {
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
     int r = cfg.rank
-    float scale = cfg.alpha / float_of_rank(r)
+    float scale = cfg.alpha / float_of_int(r)
 
     // 初始化 A: 高斯噪声
     []float a = init_gaussian(r * in_dim, 0.02)
@@ -225,10 +225,10 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
     }
 }
 
-func float_of_rank(int r) float {
+func float_of_int(int n) float {
     float v = 0.0
     int i = 0
-    for i < r {
+    for i < n {
         v = v + 1.0
         i = i + 1
     }
@@ -251,14 +251,21 @@ func init_gaussian(int n, float std) []float {
     int seed = 42
     int i = 0
     for i < n {
-        // LCG: next = (a*seed + c) mod m
-        seed = (seed * 1664525 + 1013904223) % 2147483647
-        float u1 = float_of_rank(seed % 1000) / 1000.0
-        seed = (seed * 1664525 + 1013904223) % 2147483647
-        float u2 = float_of_rank(seed % 1000) / 1000.0
+        // 使用 i 派生一个稳定的伪随机序列，避免依赖 % 运算符
+        int s1 = i * 37 + 17
+        for s1 >= 1000 {
+            s1 = s1 - 1000
+        }
+        float u1 = float_of_int(s1) / 1000.0
+
+        int s2 = i * 91 + 53
+        for s2 >= 1000 {
+            s2 = s2 - 1000
+        }
+        float u2 = float_of_int(s2) / 1000.0
         // 近似正态: (u1 + u2 + ... + u12 - 6) 中心极限定理
         // 简化: (u1 - 0.5) * sqrt(12) ≈ N(0,1)
-        float z = (u1 - 0.5) * 3.4641   // sqrt(12) ≈ 3.464
+        float z = ((u1 + u2) * 0.5 - 0.5) * 3.4641   // sqrt(12) ≈ 3.464
         out = append(out, z * std)
         i = i + 1
     }
@@ -608,13 +615,13 @@ struct lora_stats {
 func lora_compute_stats(lora_linear layer) lora_stats {
     int base_params = layer.in_dim * layer.out_dim
     int lora_params = layer.rank * (layer.in_dim + layer.out_dim)
-    float ratio = float_of_rank(lora_params) / float_of_rank(base_params + lora_params)
+    float ratio = float_of_int(lora_params) / float_of_int(base_params + lora_params)
 
     // 显存节省: 基础权重 NF4 节省 8× vs fp32
     float saved = 0.0
     if layer.quantized {
-        float base_mb = float_of_rank(base_params * 4) / 1048576.0
-        float nf4_mb  = float_of_rank(base_params) / 2.0 / 1048576.0
+        float base_mb = float_of_int(base_params * 4) / 1048576.0
+        float nf4_mb  = float_of_int(base_params) / 2.0 / 1048576.0
         saved = base_mb - nf4_mb
     }
 
