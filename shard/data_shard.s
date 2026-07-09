@@ -72,7 +72,7 @@ struct shard_manifest {
 // ============================================================================
 
 // Create default shard configuration from environment
-fn new_shard_config_from_env() -> shard_config {
+func new_shard_config_from_env() shard_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     let dataset_root = get_env("DATASET_ROOT", path_join([]string{neurx_home, "dataset", "pretrain"}))
     
@@ -86,7 +86,7 @@ fn new_shard_config_from_env() -> shard_config {
 }
 
 // Generate shards from input file
-fn generate_shards(config: shard_config) -> bool {
+func generate_shards(config: shard_config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
     log_info("║     NeurX Shard Generation (S Lang)        ║")
@@ -216,11 +216,11 @@ fn generate_shards(config: shard_config) -> bool {
 // Helper Functions
 // ============================================================================
 
-fn format_shard_filename(shard_dir: string, index: int) -> string {
+func format_shard_filename(shard_dir: string, index: int) string {
     path_join([]string{shard_dir, format_shard_id(index) + ".jsonl"})
 }
 
-fn format_shard_id(index: int) -> string {
+func format_shard_id(index: int) string {
     // Format as "shard_00000"
     let idx_str = i64_to_string(i64(index))
     let mut padded = ""
@@ -230,7 +230,7 @@ fn format_shard_id(index: int) -> string {
     "shard_" + padded + idx_str
 }
 
-fn write_empty_manifest(config: shard_config) -> bool {
+func write_empty_manifest(config: shard_config) bool {
     let manifest = shard_manifest{
         dataset_name: "neurx-pretrain-dataset",
         version: "1.0",
@@ -244,7 +244,7 @@ fn write_empty_manifest(config: shard_config) -> bool {
     write_manifest(config.manifest_file, manifest)
 }
 
-fn build_manifest(config: shard_config, shards: []shard_metadata) -> shard_manifest {
+func build_manifest(config: shard_config, shards: []shard_metadata) shard_manifest {
     let mut total_docs = i64(0)
     let mut total_size = i64(0)
     
@@ -267,7 +267,7 @@ fn build_manifest(config: shard_config, shards: []shard_metadata) -> shard_manif
     }
 }
 
-fn write_manifest(path: string, manifest: shard_manifest) -> bool {
+func write_manifest(path: string, manifest: shard_manifest) bool {
     let mut json = "{\n"
     json = json + "  \"dataset_name\": \"" + manifest.dataset_name + "\",\n"
     json = json + "  \"version\": \"" + manifest.version + "\",\n"
@@ -303,13 +303,13 @@ fn write_manifest(path: string, manifest: shard_manifest) -> bool {
 // Timestamp and String Conversion
 // ============================================================================
 
-fn get_timestamp() -> string {
+func get_timestamp() string {
     // Placeholder - would use proper datetime library
     // Format: 2026-07-07T12:34:56Z
     "2026-07-07T00:00:00Z"
 }
 
-fn i64_to_string(n: i64) -> string {
+func i64_to_string(n: i64) string {
     // Placeholder for integer to string conversion
     // Would need proper implementation in S
     ""
@@ -319,7 +319,7 @@ fn i64_to_string(n: i64) -> string {
 // Main Entry Point
 // ============================================================================
 
-pub fn main() -> i32 {
+func main() i32 {
     let config = new_shard_config_from_env()
     
     if generate_shards(config) {
