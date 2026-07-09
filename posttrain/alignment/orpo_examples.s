@@ -80,7 +80,7 @@ func example_basic_orpo_training() {
         int s = 0
         while s < cfg.seq_len {
             orpo_trajectory_step step = orpo_trajectory_step {
-                token_id: s % cfg.vocab_size,
+                token_id: mod_int_ex(s, cfg.vocab_size),
                 logits: []float{cap: cfg.vocab_size},
                 log_probability: -2.5 + (s as float) * 0.01,
                 value_estimate: 0.5,
