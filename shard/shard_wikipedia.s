@@ -29,11 +29,11 @@ struct WikipediaConfig {
 // limitations with passing custom struct types as function arguments.
 // ============================================================================
 
-string g_input_bz2_file = ""
-string g_output_dir = ""
-string g_manifest_file = ""
-int g_docs_per_shard = 5000
-int g_max_pages = 0
+string g_input_bz2_file
+string g_output_dir
+string g_manifest_file
+int g_docs_per_shard
+int g_max_pages
 
 struct ShardMetadata {
     string shard_id
