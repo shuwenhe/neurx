@@ -65,6 +65,9 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 help:
 	@echo "  make train"
 	@echo "  make infer"
+	@echo "  make train-supervised"
+	@echo "  make run-sft-training-s"
+	@echo "  make watch-auto-commit-push"
 	@echo "  make chat"
 
 
