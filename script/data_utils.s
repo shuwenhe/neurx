@@ -27,7 +27,7 @@ struct json_value {
 }
 
 // Encode string for JSON
-fn json_encode_string(s: string) -> string {
+func json_encode_string(s: string) string {
     // Escape special characters
     let mut result = "\""
     for i = 0; i < len(s); i = i + 1 {
@@ -52,7 +52,7 @@ fn json_encode_string(s: string) -> string {
 }
 
 // Decode JSON string value
-fn json_decode_string(s: string) -> string {
+func json_decode_string(s: string) string {
     if !string_has_prefix(s, "\"") || !string_has_suffix(s, "\"") {
         ""
     }
@@ -93,7 +93,7 @@ fn json_decode_string(s: string) -> string {
 }
 
 // Simple JSON object builder (limited, for manifest generation)
-fn json_object_to_string(fields: map[string]string, indent: int) -> string {
+func json_object_to_string(fields: map[string]string, indent: int) string {
     let mut result = "{\n"
     let pad = string_repeat(" ", indent)
     let mut first = true
@@ -114,11 +114,11 @@ fn json_object_to_string(fields: map[string]string, indent: int) -> string {
 // Path Operations
 // ============================================================================
 
-fn path_join(parts: []string) -> string {
+func path_join(parts: []string) string {
     string_join(parts, "/")
 }
 
-fn path_dirname(path: string) -> string {
+func path_dirname(path: string) string {
     let parts = string_split(path, "/")
     if len(parts) <= 1 {
         "."
@@ -127,7 +127,7 @@ fn path_dirname(path: string) -> string {
     }
 }
 
-fn path_basename(path: string) -> string {
+func path_basename(path: string) string {
     let parts = string_split(path, "/")
     if len(parts) == 0 {
         ""
@@ -136,11 +136,11 @@ fn path_basename(path: string) -> string {
     }
 }
 
-fn path_exists(path: string) -> bool {
+func path_exists(path: string) bool {
     runtime_file_exists(path)
 }
 
-fn path_is_dir(path: string) -> bool {
+func path_is_dir(path: string) bool {
     runtime_is_dir(path)
 }
 
@@ -152,7 +152,7 @@ fn file_read_text(path: string) -> (string, bool) {
     runtime_read_text_file(path)
 }
 
-fn file_write_text(path: string, content: string) -> bool {
+func file_write_text(path: string, content: string) bool {
     // Ensure parent directory exists
     let dir = path_dirname(path)
     if !path_exists(dir) {
@@ -161,7 +161,7 @@ fn file_write_text(path: string, content: string) -> bool {
     runtime_write_text_file(path, content)
 }
 
-fn file_append_text(path: string, content: string) -> bool {
+func file_append_text(path: string, content: string) bool {
     let (existing, ok) = file_read_text(path)
     if !ok && path_exists(path) {
         return false  // file exists but can't read
@@ -170,11 +170,11 @@ fn file_append_text(path: string, content: string) -> bool {
     file_write_text(path, new_content)
 }
 
-fn file_delete(path: string) -> bool {
+func file_delete(path: string) bool {
     runtime_remove_file(path)
 }
 
-fn file_size(path: string) -> i64 {
+func file_size(path: string) i64 {
     runtime_file_size(path)
 }
 
@@ -190,7 +190,7 @@ fn file_count_lines(path: string) -> (i64, bool) {
 }
 
 // List files in directory matching suffix
-fn dir_list_files(path: string, suffixes: []string) -> []string {
+func dir_list_files(path: string, suffixes: []string) []string {
     if !path_is_dir(path) {
         return []string{}
     }
@@ -215,7 +215,7 @@ fn dir_list_files(path: string, suffixes: []string) -> []string {
 // String Utilities
 // ============================================================================
 
-fn string_repeat(s: string, count: int) -> string {
+func string_repeat(s: string, count: int) string {
     let mut result = ""
     for i = 0; i < count; i = i + 1 {
         result = result + s
@@ -224,13 +224,13 @@ fn string_repeat(s: string, count: int) -> string {
 }
 
 // Normalize whitespace (similar to Python's split/strip)
-fn normalize_whitespace(s: string) -> string {
+func normalize_whitespace(s: string) string {
     let parts = string_split(string_trim(s), " ")
     string_join(parts, " ")
 }
 
 // Hash a string (simplified - would use SHA256 in real impl)
-fn hash_key(s: string) -> string {
+func hash_key(s: string) string {
     // For now, return a placeholder - would integrate proper hash lib
     "hash_" + string_to_lower(s[0 : min(10, len(s))])
 }
@@ -239,14 +239,14 @@ fn hash_key(s: string) -> string {
 // Directory Utilities  
 // ============================================================================
 
-fn ensure_dir(path: string) -> bool {
+func ensure_dir(path: string) bool {
     if path_exists(path) {
         return path_is_dir(path)
     }
     runtime_make_dirs(path)
 }
 
-fn clear_dir(path: string) -> bool {
+func clear_dir(path: string) bool {
     if !path_exists(path) {
         return ensure_dir(path)
     }
@@ -262,7 +262,7 @@ fn clear_dir(path: string) -> bool {
 // Environment and Config
 // ============================================================================
 
-fn get_env(key: string, default_val: string) -> string {
+func get_env(key: string, default_val: string) string {
     let val = runtime_env_get(key)
     if val == "" {
         default_val
@@ -271,7 +271,7 @@ fn get_env(key: string, default_val: string) -> string {
     }
 }
 
-fn get_env_int(key: string, default_val: int) -> int {
+func get_env_int(key: string, default_val: int) int {
     let val = runtime_env_get(key)
     if val == "" {
         default_val
@@ -305,14 +305,14 @@ pub fn log_success(msg: string) {
 // Math Helpers
 // ============================================================================
 
-fn min(a: i64, b: i64) -> i64 {
+func min(a: i64, b: i64) i64 {
     if a < b { a } else { b }
 }
 
-fn max(a: i64, b: i64) -> i64 {
+func max(a: i64, b: i64) i64 {
     if a > b { a } else { b }
 }
 
-fn div_round_up(a: i64, b: i64) -> i64 {
+func div_round_up(a: i64, b: i64) i64 {
     (a + b - 1) / b
 }
