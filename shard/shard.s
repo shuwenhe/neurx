@@ -7,7 +7,7 @@
 
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_run_command_output}
+use std.os.{command, getenv}
 
 func string_char(int c) string {
     string(c)
@@ -122,16 +122,25 @@ func print_help() {
     println("  help         Show this help message")
 }
 
+func env_get(string name, string default_value) string {
+    getenv(name).unwrap_or(default_value)
+}
+
+func path_exists(string path) bool {
+    let (_, code) = command("test -e " + shell_escape(path))
+    code == 0
+}
+
 func default_neurx_root() string {
-    runtime_env_get("NEURX_HOME", ".")
+    env_get("NEURX_HOME", ".")
 }
 
 func default_shard_dir(string root) string {
-    runtime_env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
+    env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
 }
 
 func default_manifest(string root) string {
-    runtime_env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
+    env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
 }
 
 func run_wikipedia() int {
@@ -139,42 +148,42 @@ func run_wikipedia() int {
     string script_dir = runtime_env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
     string build_dir = root + "/artifacts/build/shard"
     string runner_bin = root + "/artifacts/build/s_runner/s_ir_runner"
-    string compiler = runtime_env_get("S_COMPILER", "/home/shuwen/s/bin/s")
+    string compiler = env_get("S_COMPILER", "/home/shuwen/s/bin/s")
 
-    string input = runtime_env_get("ENWIKI_BZ2_FILE", root + "/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2")
-    string output_dir = runtime_env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
-    string manifest = runtime_env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
-    string docs_per_shard = runtime_env_get("DOCS_PER_SHARD", "5000")
-    string max_pages = runtime_env_get("MAX_PAGES", "0")
+    string input = env_get("ENWIKI_BZ2_FILE", root + "/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2")
+    string output_dir = env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
+    string manifest = env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
+    string docs_per_shard = env_get("DOCS_PER_SHARD", "5000")
+    string max_pages = env_get("MAX_PAGES", "0")
 
-    if !runtime_file_exists(input) {
+    if !path_exists(input) {
         println("Error: input file not found: " + input)
         return 1
     }
 
-    let mkdir_result = runtime_run_command("mkdir -p " + shell_escape(build_dir))
-    if !mkdir_result.ok {
+    let (_, mkdir_code) = command("mkdir -p " + shell_escape(build_dir))
+    if mkdir_code != 0 {
         println("Error: failed to create build dir")
         return 1
     }
 
-    let compile_result = runtime_run_command(
+    let (_, compile_code) = command(
         shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia.ir")
     )
-    if !compile_result.ok {
+    if compile_code != 0 {
         println("Error: failed to compile shard_wikipedia.s")
         return 1
     }
 
-    if !runtime_file_exists(runner_bin) {
-        let runner_build = runtime_run_command("make -C " + shell_escape(root) + " build-s-ir-runner")
-        if !runner_build.ok {
+    if !path_exists(runner_bin) {
+        let (_, runner_code) = command("make -C " + shell_escape(root) + " build-s-ir-runner")
+        if runner_code != 0 {
             println("Error: failed to build S IR runner")
             return 1
         }
     }
 
-    let run_result = runtime_run_command(
+    let (_, run_code) = command(
         "NEURX_HOME=" + shell_escape(root) +
         " ENWIKI_BZ2_FILE=" + shell_escape(input) +
         " ENWIKI_SHARD_DIR=" + shell_escape(output_dir) +
@@ -183,7 +192,7 @@ func run_wikipedia() int {
         " MAX_PAGES=" + shell_escape(max_pages) +
         " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia.ir")
     )
-    if !run_result.ok {
+    if run_code != 0 {
         println("Error: shard wikipedia execution failed")
         return 1
     }
@@ -194,7 +203,7 @@ func run_wikipedia() int {
 func run_verify() int {
     string root = default_neurx_root()
     string shard_dir = default_shard_dir(root)
-    if !runtime_file_exists(shard_dir) {
+    if !path_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
@@ -205,8 +214,8 @@ func run_verify() int {
         "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
         "echo \"$(basename \"$shard_file\"): ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\"): Invalid JSON detected\"; exit 1; fi; done"
-    let result = runtime_run_command("sh -c " + shell_escape(verify_cmd))
-    if !result.ok {
+    let (_, code) = command("sh -c " + shell_escape(verify_cmd))
+    if code != 0 {
         return 1
     }
     0
@@ -215,15 +224,15 @@ func run_verify() int {
 func run_list() int {
     string root = default_neurx_root()
     string shard_dir = default_shard_dir(root)
-    if !runtime_file_exists(shard_dir) {
+    if !path_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
 
     string list_cmd = "sh -c " +
         shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
-    let result = runtime_run_command(list_cmd)
-    if !result.ok {
+    let (_, code) = command(list_cmd)
+    if code != 0 {
         return 1
     }
     0
@@ -232,20 +241,20 @@ func run_list() int {
 func run_clean() int {
     string root = default_neurx_root()
     string shard_dir = default_shard_dir(root)
-    if !runtime_file_exists(shard_dir) {
+    if !path_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
 
-    let result = runtime_run_command("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
-    if !result.ok {
+    let (_, code) = command("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
+    if code != 0 {
         return 1
     }
     0
 }
 
 func main() int {
-    string cmd = runtime_env_get("NEURX_SHARD_CMD", "help")
+    string cmd = env_get("NEURX_SHARD_CMD", "help")
     if cmd == "wikipedia" || cmd == "shard" {
         return run_wikipedia()
     }
