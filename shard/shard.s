@@ -162,13 +162,13 @@ func run_wikipedia() int {
     }
 
     string compile_output = runtime_run_command_output(
-        shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia.ir")
+        shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
     )
     if len(trim(compile_output)) > 0 {
         println(compile_output)
     }
-    if !runtime_file_exists(build_dir + "/shard_wikipedia.ir") {
-        println("Error: failed to compile shard_wikipedia.s")
+    if !runtime_file_exists(build_dir + "/shard_wikipedia_simple.ir") {
+        println("Error: failed to compile shard_wikipedia_simple.s")
         return 1
     }
 
@@ -190,7 +190,7 @@ func run_wikipedia() int {
         " ENWIKI_MANIFEST_FILE=" + shell_escape(manifest) +
         " DOCS_PER_SHARD=" + shell_escape(docs_per_shard) +
         " MAX_PAGES=" + shell_escape(max_pages) +
-        " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia.ir")
+        " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
     )
     if len(trim(run_output)) > 0 {
         println(run_output)
