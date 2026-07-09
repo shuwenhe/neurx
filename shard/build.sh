@@ -47,6 +47,7 @@ mkdir -p "${BUILD_DIR}"
 SHARD_FILES=(
     "shard_wikipedia.s"
     "load_shards.s"
+    "generate_shards.s"
     "data_shard.s"
     "shard_enwiki.s"
     "verify_shards.s"
