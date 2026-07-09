@@ -1,7 +1,7 @@
 .PHONY: help train infer pretrain posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
-	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s
+	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
 	verify-setup-s quick-test-s quickstart-s verify-training-pipeline-s monitor-training-s build-linux-s build-macos-s run-large-pretrain-s \
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
