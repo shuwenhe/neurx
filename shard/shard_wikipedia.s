@@ -300,10 +300,10 @@ func process_wikipedia(WikipediaConfig config) int {
         return 1
     }
 
-    // Clean up previous outputs.
-    let _ = command("rm -f " + shell_escape(config.output_dir + "/shard_*.jsonl") + " " + shell_escape(config.output_dir + "/.wikipedia_dump.xml"))
-
     string temp_xml = config.output_dir + "/.wikipedia_dump.xml"
+    // Clean up previous outputs.
+    let _ = command("sh -c " + shell_escape("rm -f " + config.output_dir + "/shard_*.jsonl " + temp_xml))
+
     println("[*] Decompressing Wikipedia dump...")
     let (_, decompress_code) = command(
         "bzip2 -dc " + shell_escape(config.input_bz2_file) + " > " + shell_escape(temp_xml)
