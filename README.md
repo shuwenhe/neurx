@@ -1,22 +1,22 @@
 # NeurX Framework
 
-> 企业级深度学习框架 | Enterprise-grade Deep Learning Framework
+> Enterprise-grade Deep Learning Framework for Large Language Models
 
-## 📋 概述
+## 📋 Overview
 
-NeurX 是一个用 **S 语言** 实现的完整企业级深度学习框架，用于训练和部署大规模语言模型（如参考级别的模型）。
+NeurX is a complete enterprise-grade deep learning framework implemented in the **S language** for training and deploying large-scale language models (such as reference-level models).
 
-### 核心特性
+### Core Features
 
-- ✅ **完整的训练流程**：数据处理、模型构建、分布式训练、推理
-- ✅ **支持 2T 参数模型**：完整的分布式训练基础设施
-- ✅ **多种优化技术**：混合精度训练、量化、知识蒸馏、RLHF
-- ✅ **高性能计算**：支持 CUDA、CANN、MPS 等加速后端
-- ✅ **生产就绪**：完整的监控、检查点、故障恢复
+- ✅ **Complete Training Pipeline**: Data processing, model building, distributed training, inference
+- ✅ **Support for 2T Parameter Models**: Full distributed training infrastructure
+- ✅ **Multiple Optimization Techniques**: Mixed precision training, quantization, knowledge distillation, RLHF
+- ✅ **High-Performance Computing**: Support for CUDA, CANN, MPS and other acceleration backends
+- ✅ **Production-Ready**: Complete monitoring, checkpointing, fault recovery
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 安装
+### Installation
 
 ```bash
 cd /Users/feifei/shuwen/train
@@ -24,90 +24,90 @@ git clone <repository>
 cd neurx
 ```
 
-### 训练小模型
+### Training Small Models
 
 ```bash
-# 预训练
+# Pretraining
 ./script/run_large_pretrain.sh
 
-# 微调
+# Fine-tuning
 make train-supervised
 
-# 评估
+# Evaluation
 make eval
 ```
 
-### 训练大规模模型
+### Training Large-Scale Models
 
-详见 [TRAINING_2T_GUIDE.md](./docs/TRAINING_2T_GUIDE.md)
+See [TRAINING_2T_GUIDE.md](./docs/TRAINING_2T_GUIDE.md) for details
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 neurx/
-├── agent/                 # Agent 和推理系统
-├── alignment/             # RLHF 和对齐方案
-├── arch/                  # 不同计算架构后端
-├── data/                  # 数据处理和加载
-├── distributed/           # 分布式训练
-├── docs/                  # 文档
-├── inference/             # 推理和部署
-├── model/                 # 模型定义
-├── nn/                    # 神经网络层和操作
-├── opt/                   # 优化器
-├── pretrain/              # 预训练流程
-├── script/                # 启动脚本
-├── training/              # 训练循环和工具
+├── agent/                 # Agent and inference systems
+├── alignment/             # RLHF and alignment solutions
+├── arch/                  # Different compute architecture backends
+├── data/                  # Data processing and loading
+├── distributed/           # Distributed training
+├── docs/                  # Documentation
+├── inference/             # Inference and deployment
+├── model/                 # Model definitions
+├── nn/                    # Neural network layers and operations
+├── opt/                   # Optimizers
+├── pretrain/              # Pretraining pipeline
+├── script/                # Launch scripts
+├── training/              # Training loops and utilities
 └── ...
 ```
 
-## 📚 文档
+## 📚 Documentation
 
-- [快速开始指南](./docs/QUICK_START.md)
-- [2T 模型训练指南](./docs/TRAINING_2T_GUIDE.md)
-- [企业级训练指南](./docs/ENTERPRISE_CLAUDE_TRAINING_GUIDE.md)
-- [分布式训练](./docs/DISTRIBUTED_2T_IMPLEMENTATION.md)
-- [完整系统架构](./docs/README_COMPLETE_SYSTEM.md)
+- [Quick Start Guide](./docs/QUICK_START.md)
+- [2T Model Training Guide](./docs/TRAINING_2T_GUIDE.md)
+- [Enterprise Training Guide](./docs/ENTERPRISE_CLAUDE_TRAINING_GUIDE.md)
+- [Distributed Training](./docs/DISTRIBUTED_2T_IMPLEMENTATION.md)
+- [Complete System Architecture](./docs/README_COMPLETE_SYSTEM.md)
 
-## 🔧 系统要求
+## 🔧 System Requirements
 
-- **操作系统**：Linux / macOS
-- **编译器**：支持 S 语言编译器
-- **GPU**：NVIDIA CUDA 11.0+ 或其他支持的加速器
-- **内存**：最少 16GB（推荐 64GB+）
+- **Operating System**: Linux / macOS
+- **Compiler**: S language compiler support
+- **GPU**: NVIDIA CUDA 11.0+ or other supported accelerators
+- **Memory**: Minimum 16GB (recommended 64GB+)
 
-## 📊 性能
+## 📊 Performance
 
-| 模型 | 参数量 | 训练速度 | 推理速度 |
-|------|-------|---------|---------|
+| Model | Parameters | Training Speed | Inference Speed |
+|-------|-----------|-----------------|-----------------|
 | Small | 350M | ~100 tokens/s | ~500 tokens/s |
 | Large | 7B | ~50 tokens/s | ~200 tokens/s |
 | 2T | 2T | ~0.5 tokens/s | ~50 tokens/s |
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 PR！
+Issues and PRs are welcome!
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 **MIT License** 发布。详见 [LICENSE](./LICENSE) 和 [COPYING](./COPYING) 文件。
+This project is released under the **MIT License**. See [LICENSE](./LICENSE) and [COPYING](./COPYING) files for details.
 
-### 第三方依赖
+### Third-Party Dependencies
 
-- **MMLU**：CC-BY-4.0 许可证
-- **HumanEval**：MIT 许可证
-- **公开偏好数据集**：按各自来源许可证使用
+- **MMLU**: CC-BY-4.0 License
+- **HumanEval**: MIT License
+- **Public Preference Datasets**: Licensed according to their respective sources
 
-## 📞 联系信息
+## 📞 Contact Information
 
-**项目维护者**：Shuwen He
+**Maintainer**: Shuwen He
 
-**问题报告**：提交 GitHub Issue
+**Bug reports**: open a GitHub Issue
 
-## 免责声明
+## Disclaimer
 
-本项目代码"按现状"提供，不提供任何保证。详见 [COPYING](./COPYING) 文件中的免责声明。
+This project code is provided "as is" without any warranty. See the disclaimer in [COPYING](./COPYING).
 
 ---
 
-**最后更新**：2024年7月6日
+**Last updated**: 2024-07-06
