@@ -14,7 +14,7 @@ cat << 'EOF'
     ├── shard/                      ← New: Dedicated shard module
     │   ├── shard.sh               ← New: Unified CLI (main entry)
     │   ├── README.md              ← New: Complete documentation
-    │   ├── shard_wikipedia_enwiki.py
+    │   ├── shard_wikipedia.s
     │   ├── shard_enwiki.s/.sh
     │   ├── shard_manager.s
     │   ├── data_shard.s
@@ -28,8 +28,8 @@ cat << 'EOF'
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Via Makefile (Original):
-  $ make shard                    # Python implementation
-  $ make shard-enwiki            # S implementation
+  $ make shard                    # S implementation
+  $ make shard-enwiki            # Shell/S implementation
   $ make shard-s                 # Full S pipeline
 
 Via Unified CLI (New):
@@ -44,7 +44,6 @@ Via Unified CLI (New):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Core Implementations:
-  ✓ shard_wikipedia_enwiki.py    Python - Main Wikipedia sharding
   ✓ shard_wikipedia.s            S language - High-performance version
   ✓ shard_enwiki.s/.sh          Alternative S/shell implementations
 
@@ -65,7 +64,7 @@ CLI & Documentation:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   Total Files:    12 files
-  Python:          1 file (shard_wikipedia_enwiki.py)
+  Python:          0 files
   S Language:      7 files (*.s files)
   Shell Scripts:   3 files (*.sh files)
   Documentation:   2 files (README.md, this file)
@@ -131,7 +130,7 @@ Full Documentation:
 
 Source Files:
   $ cat shard/shard.sh                 # Main CLI implementation
-  $ cat shard/shard_wikipedia_enwiki.py # Python sharding logic
+  $ cat shard/shard_wikipedia.s        # S sharding logic
 
 
 ✨ KEY IMPROVEMENTS
@@ -156,7 +155,7 @@ Documentation:
   ../MAKE_TRAIN_QUICKSTART.md     Training quick start
 
 Makefile Targets:
-  make shard                      Shard Wikipedia (Python)
+  make shard                      Shard Wikipedia (S)
   make shard-enwiki               Shard Wikipedia (Shell/S)
   make shard-s                    Full S pipeline
   make data-pipeline-s            Complete data pipeline
