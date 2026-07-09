@@ -16,7 +16,8 @@ This directory contains all data sharding-related utilities for the NeurX traini
 
 ### S Language Implementations
 - **shard.s** - Unified shard CLI entry point
-- **shard_wikipedia.s** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
+- **shard_wikipedia_simple.s** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
+- **shard_wikipedia.s** - Archived Wikipedia sharding variant
 - **shard_enwiki.s** - Alternative S implementation for enwiki processing
 - **load_shards.s** - S implementation for shard metadata loading and summary reporting
 - **shard_manager.s** - Shard management utilities
@@ -75,6 +76,7 @@ neurx/
   ├── shard/                      ← Dedicated shard module
   │   ├── shard.md               ← Consolidated documentation (you are here)
   │   ├── shard.s
+  │   ├── shard_wikipedia_simple.s
   │   ├── shard_wikipedia.s
   │   ├── shard_enwiki.s
   │   ├── load_shards.s
@@ -234,7 +236,7 @@ Each line is a JSON record with:
 
 ## Performance Characteristics
 
-### S Language Implementation (shard_wikipedia.s)
+### S Language Implementation (shard_wikipedia_simple.s)
 - Startup time: 50-100ms
 - Memory usage: ~80MB
 - Processing speed: ~5000 pages/second (when compiled)
@@ -283,7 +285,7 @@ Remove all Python dependencies from `/home/shuwen/shuwen/train/neurx/shard/` dir
   - **Old**: Shell wrapper plus Python fallback
   - **New**: S entrypoint compiled and run directly
   - **Strategy**:
-    - Compiles `shard_wikipedia.s` and `shard_enwiki.s` to IR
+    - Compiles `shard_wikipedia_simple.s`, `shard_wikipedia.s`, and `shard_enwiki.s` to IR
     - Runs the IR via the shared S runner
     - Removes the shell wrapper from the execution path
 
@@ -295,6 +297,7 @@ Location: `/home/shuwen/shuwen/train/neurx/shard/`
 - `data_shard.s` - Data shard utilities
 - `shard_enwiki.s` - Wikipedia sharding reference
 - `shard_manager.s` - Shard management system
+- `shard_wikipedia_simple.s` - Primary implementation
 - `shard_wikipedia.s` - Archived implementation
 - `test_shard.s` - Testing utilities
 - `verify_shards.s` - Verification logic
@@ -311,7 +314,7 @@ make shard → python3 shard_wikipedia_enwiki.py → Process XML
 
 **After:**
 ```
-make shard → shard/shard.s → S IR runner → shard_wikipedia.s
+make shard → shard/shard.s → S IR runner → shard_wikipedia_simple.s
 ```
 
 ### Rationale
