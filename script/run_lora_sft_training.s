@@ -19,11 +19,11 @@ func parse_int(string s, int fallback) int {
     bool seen = false
     bool neg = false
     int i = 0
-    if str_len(s) > 0 && s[0] == 45 {
+    if len(s) > 0 && s[0] == 45 {
         neg = true
         i = 1
     }
-    while i < str_len(s) {
+    while i < len(s) {
         int ch = s[i]
         if ch >= 48 && ch <= 57 {
             value = value * 10 + (ch - 48)
@@ -41,7 +41,7 @@ func parse_int(string s, int fallback) int {
 }
 
 func parse_float(string s, float fallback) float {
-    if str_len(s) == 0 {
+    if len(s) == 0 {
         return fallback
     }
     float value = 0.0
@@ -55,7 +55,7 @@ func parse_float(string s, float fallback) float {
         neg = true
         i = 1
     }
-    while i < str_len(s) {
+    while i < len(s) {
         int ch = s[i]
         if ch == 46 {
             after_dot = true
@@ -100,7 +100,7 @@ func text_to_feature_vector(string text, int dim) []float {
     int i = 0
     while i < dim {
         float value = 0.0
-        if i < str_len(text) {
+        if i < len(text) {
             value = (text[i] as float) / 255.0
         }
         out[i] = value
@@ -114,7 +114,7 @@ func text_to_target_vector(string text, int dim) []float {
     int i = 0
     while i < dim {
         float value = 0.0
-        if i + 1 < str_len(text) {
+        if i + 1 < len(text) {
             value = (text[i + 1] as float) / 255.0
         }
         out[i] = value
@@ -125,7 +125,7 @@ func text_to_target_vector(string text, int dim) []float {
 
 func format_lora_sft_text(string instruction, string input_context, string output) string {
     string prompt = "Instruction:\n" + instruction + "\n\n"
-    if str_len(input_context) > 0 {
+    if len(input_context) > 0 {
         prompt = prompt + "Input:\n" + input_context + "\n\n"
     }
     prompt = prompt + "Response:\n" + output
