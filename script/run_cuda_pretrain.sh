@@ -41,7 +41,7 @@ echo "  source : $ENTRY_SOURCE"
 echo "  binary : $BIN_FILE"
 echo "  backend: $NEURX_PRETRAIN_BACKEND"
 
-S_SOURCE_ROOT="$ROOT_DIR" S_COMPILER="$S_COMPILER" "$S_COMPILER" build "$ENTRY_SOURCE" -o "$BIN_FILE"
+S_SOURCE_ROOT="${S_SOURCE_ROOT:-$ROOT_DIR/..}" S_COMPILER="$S_COMPILER" "$S_COMPILER" build "$ENTRY_SOURCE" -o "$BIN_FILE"
 if [[ ! -f "$BIN_FILE" ]]; then
   echo "Failed to build CUDA pretrain launcher: $BIN_FILE" >&2
   exit 1
@@ -56,7 +56,7 @@ fi
 echo "Launching CUDA pretrain..."
 exec env \
   NEURX_ROOT="$ROOT_DIR" \
-  S_SOURCE_ROOT="$ROOT_DIR" \
+  S_SOURCE_ROOT="${S_SOURCE_ROOT:-$ROOT_DIR/..}" \
   NEURX_PRETRAIN_MANIFEST="$NEURX_PRETRAIN_MANIFEST" \
   NEURX_PRETRAIN_DATA_DIR="$NEURX_PRETRAIN_DATA_DIR" \
   NEURX_PRETRAIN_OUTPUT_DIR="$NEURX_PRETRAIN_OUTPUT_DIR" \
