@@ -12,9 +12,7 @@ import argparse
 import bz2
 import html
 import json
-import os
 import re
-import shutil
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
