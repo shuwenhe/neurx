@@ -90,35 +90,19 @@ infer: check-bash
 	cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain: check-bash
-	@echo "Running NeurX large-model production pre-training (alias for make pretrain)"
+	@echo "Running NeurX large-model pre-training on existing shard dataset"
 	@cd '$(CURDIR_UNIX)' && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
-		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
-		echo "  cleaned  : $(PRETRAIN_CLEANED_FILE)" && \
-		echo "  train    : $(PRETRAIN_TRAIN_SPLIT)" && \
-		echo "  val      : $(PRETRAIN_VAL_SPLIT)" && \
-		echo "  test     : $(PRETRAIN_TEST_SPLIT)" && \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
-			if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
-				echo "Existing cleaned file detected; resuming split/manifest generation"; \
-				echo "Resolved command:"; \
-				echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh"; \
-				NEURX_RESUME_CLEANED=1 bash script/clean_data.sh; \
-			else \
-				echo "Resolved command:"; \
-				echo "  bash script/clean_data.sh"; \
-				bash script/clean_data.sh; \
-			fi && \
-			echo "Resolved command:"; \
-			echo "  bash script/generate_shards.sh"; \
-			bash script/generate_shards.sh; \
-			echo "Resolved command:"; \
-			echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
-			NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
-			NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
-			NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
-			NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
+		if [ ! -s '$(PRETRAIN_MANIFEST)' ]; then \
+			echo "Error: missing manifest: $(PRETRAIN_MANIFEST)"; \
+			echo "Run 'make shard' first to generate shard files and manifest."; \
+			exit 1; \
+		fi && \
+		echo "Resolved command:"; \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
+		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
 
