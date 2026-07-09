@@ -94,13 +94,15 @@ pretrain: check-bash
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
-		echo "Refreshing manifest from shard files..."; \
 		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
 		echo "Resolved command:"; \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/gpt_large_pretrain' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
+		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints/gpt_large_pretrain' \
+		NEURX_PRETRAIN_BACKEND=nccl \
+		DDP_BACKEND=nccl \
+		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1
 
 
 posttrain: check-bash
