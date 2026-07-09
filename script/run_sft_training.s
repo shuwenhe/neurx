@@ -75,7 +75,31 @@ func main() int {
             int item = sample_index
             while item < batch_end {
                 string formatted = samples[item]
-                state = train_one_sample(state, formatted, learning_rate)
+                int pos = 0
+                float sample_loss = 0.0
+                int pair_count = 0
+                while pos + 1 < str_len(formatted) {
+                    int prev_token = formatted[pos]
+                    int next_token = formatted[pos + 1]
+                    float x = (prev_token as float) / 255.0
+                    float y = (next_token as float) / 255.0
+                    float pred = state.weight * x + state.bias
+                    float diff = pred - y
+                    sample_loss = sample_loss + diff * diff
+                    state.weight = state.weight - learning_rate * diff * x
+                    state.bias = state.bias - learning_rate * diff
+                    state.step = state.step + 1
+                    state.tokens_seen = state.tokens_seen + 1
+                    pair_count = pair_count + 1
+                    pos = pos + 1
+                }
+                if pair_count > 0 {
+                    state.last_loss = sample_loss / (pair_count as float)
+                    state.total_loss = state.total_loss + state.last_loss
+                } else {
+                    state.last_loss = 0.0
+                }
+                state.examples_seen = state.examples_seen + 1
                 epoch_loss = epoch_loss + state.last_loss
                 epoch_examples = epoch_examples + 1
                 item = item + 1
@@ -205,40 +229,6 @@ func format_sft_text(string instruction, string input_text, string output_text) 
     }
     out = out + "\n\n### Response:\n" + output_text
     out
-}
-
-func train_one_sample(sft_state state, string text, float lr) sft_state {
-    if str_len(text) < 2 {
-        return state
-    }
-
-    int i = 0
-    float loss_sum = 0.0
-    int pair_count = 0
-    while i + 1 < str_len(text) {
-        int prev_token = text[i]
-        int next_token = text[i + 1]
-        float x = (prev_token as float) / 255.0
-        float y = (next_token as float) / 255.0
-        float pred = state.weight * x + state.bias
-        float diff = pred - y
-        loss_sum = loss_sum + diff * diff
-        state.weight = state.weight - lr * diff * x
-        state.bias = state.bias - lr * diff
-        state.step = state.step + 1
-        state.tokens_seen = state.tokens_seen + 1
-        pair_count = pair_count + 1
-        i = i + 1
-    }
-
-    if pair_count > 0 {
-        state.last_loss = loss_sum / (pair_count as float)
-        state.total_loss = state.total_loss + state.last_loss
-    } else {
-        state.last_loss = 0.0
-    }
-    state.examples_seen = state.examples_seen + 1
-    state
 }
 
 func evaluate_samples(sft_state state, []string samples) float {
