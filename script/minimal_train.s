@@ -7,6 +7,7 @@ func main() {
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
+    string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints")
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE", "32")), 32)
     int seq_len = parse_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_SEQ_LENGTH", "2048")), 2048)
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", runtime_env_get("NEURX_TOTAL_STEPS", "1000")), 1000)
@@ -21,6 +22,7 @@ func main() {
     int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "256"), 256)
     int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "4096"), 4096)
     int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "1"), 1)
+    int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
 
     println("========================================")
     println("NeurX Self-Contained Real Training")
