@@ -103,7 +103,7 @@ pretrain: check-bash
 		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
+		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
 
 
 posttrain: check-bash
