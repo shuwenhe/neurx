@@ -182,8 +182,17 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
     int r = cfg.rank
     float scale = cfg.alpha / float_of_int(r)
 
-    // 初始化 A: 高斯噪声
-    []float a = init_gaussian(r * in_dim, 0.02)
+    // 初始化 A: 轻微随机扰动的确定性序列，保证 ΔW 初始接近 0
+    []float a = fill_lora(r * in_dim, 0.0)
+    int ai = 0
+    for ai < r * in_dim {
+        int seed_a = ai * 37 + 17
+        for seed_a >= 1000 {
+            seed_a = seed_a - 1000
+        }
+        a[ai] = (float_of_int(seed_a) / 1000.0 - 0.5) * 0.02
+        ai = ai + 1
+    }
     // 初始化 B: 全零 (初始 ΔW = 0)
     []float b = fill_lora(out_dim * r, 0.0)
 
@@ -240,33 +249,6 @@ func fill_lora(int n, float val) []float {
     int i = 0
     for i < n {
         out = append(out, val)
-        i = i + 1
-    }
-    out
-}
-
-// 使用 LCG 伪随机生成高斯近似权重 (Box-Muller 简化版)
-func init_gaussian(int n, float std) []float {
-    []float out = []
-    int seed = 42
-    int i = 0
-    for i < n {
-        // 使用 i 派生一个稳定的伪随机序列，避免依赖 % 运算符
-        int s1 = i * 37 + 17
-        for s1 >= 1000 {
-            s1 = s1 - 1000
-        }
-        float u1 = float_of_int(s1) / 1000.0
-
-        int s2 = i * 91 + 53
-        for s2 >= 1000 {
-            s2 = s2 - 1000
-        }
-        float u2 = float_of_int(s2) / 1000.0
-        // 近似正态: (u1 + u2 + ... + u12 - 6) 中心极限定理
-        // 简化: (u1 - 0.5) * sqrt(12) ≈ N(0,1)
-        float z = ((u1 + u2) * 0.5 - 0.5) * 3.4641   // sqrt(12) ≈ 3.464
-        out = append(out, z * std)
         i = i + 1
     }
     out
