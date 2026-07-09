@@ -45,6 +45,7 @@ mkdir -p "${BUILD_DIR}"
 
 # Compile each S file
 SHARD_FILES=(
+    "shard_wikipedia.s"
     "data_shard.s"
     "shard_enwiki.s"
     "verify_shards.s"
