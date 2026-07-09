@@ -410,7 +410,7 @@ func process_wikipedia() int {
     println("[+] Wikipedia sharding complete")
     println("[+] Shards   : " + int_to_str(total_shards))
     println("[+] Pages    : " + int_to_str(total_pages))
-    println("[+] Manifest : " + config.manifest_file)
+    println("[+] Manifest : " + g_manifest_file)
 
     return 0
 }
