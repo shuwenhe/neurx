@@ -31,7 +31,7 @@ struct enwiki_shard_config {
 // Main Entry Point
 // ============================================================================
 
-fn main() int {
+func main() int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
     println("║     NeurX Wikipedia Shard Processing (S Language)        ║")
@@ -80,7 +80,7 @@ fn main() int {
 // Processing Functions
 // ============================================================================
 
-fn process_enwiki_dataset(config: enwiki_shard_config) bool {
+func process_enwiki_dataset(config: enwiki_shard_config) bool {
     // Step 1: Check if input file exists
     println("🔍 Checking input file...")
     let check_cmd = "test -f \"" + config.input_bz2_file + "\""
@@ -161,7 +161,7 @@ fn process_enwiki_dataset(config: enwiki_shard_config) bool {
 // XML Sharding
 // ============================================================================
 
-fn split_xml_into_shards(config: enwiki_shard_config, shard_count: int) bool {
+func split_xml_into_shards(config: enwiki_shard_config, shard_count: int) bool {
     // Use split command to divide XML file into approximately equal parts
     let target_size = (config.target_shard_size_mb * 1024) as string
     
@@ -190,7 +190,7 @@ fn split_xml_into_shards(config: enwiki_shard_config, shard_count: int) bool {
 // Manifest Generation
 // ============================================================================
 
-fn generate_enwiki_manifest(config: enwiki_shard_config, shard_count: int) bool {
+func generate_enwiki_manifest(config: enwiki_shard_config, shard_count: int) bool {
     // Count total shards created
     let count_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null | wc -l"
     let (count_output, _) = command(count_cmd)
@@ -279,7 +279,7 @@ fn generate_enwiki_manifest(config: enwiki_shard_config, shard_count: int) bool 
 // Helper Functions
 // ============================================================================
 
-fn atoi(s: string) int {
+func atoi(s: string) int {
     let mut result = 0
     let mut i = 0
     
@@ -307,7 +307,7 @@ fn atoi(s: string) int {
     result
 }
 
-fn itoa(n: int) string {
+func itoa(n: int) string {
     if n == 0 {
         "0"
     }
@@ -328,10 +328,10 @@ fn itoa(n: int) string {
     result
 }
 
-fn max(a: int, b: int) int {
+func max(a: int, b: int) int {
     if a > b { a } else { b }
 }
 
-fn char(n: int) int {
+func char(n: int) int {
     n
 }
