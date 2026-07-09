@@ -325,12 +325,14 @@ struct lora_backward_result {
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
-    []float x  = layer.last_input
-    []float ax = layer.last_Ax
+    []float x  = []float{}
+    []float ax = []float{}
     []float dB = []float{}
     []float dA = []float{}
     []float dx = []float{}
     int in_dim = layer.in_dim
+    x = layer.last_input
+    ax = layer.last_Ax
     int fill_d = 0
     while fill_d < layer.out_dim * layer.rank {
         dB = append(dB, 0.0)
