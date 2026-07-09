@@ -57,19 +57,19 @@ make data-pipeline-s
 
 ```bash
 # Shard Wikipedia dump
-./shard/shard.sh wikipedia --docs-per-shard 5000
+make shard
 
 # Verify shards
-./shard/shard.sh verify
+make shard && NEURX_SHARD_CMD=verify make shard
 
 # List shards
-./shard/shard.sh list
+NEURX_SHARD_CMD=list make shard
 
 # Clean up shards
-./shard/shard.sh clean
+NEURX_SHARD_CMD=clean make shard
 
 # Show help
-./shard/shard.sh help
+NEURX_SHARD_CMD=help make shard
 ```
 
 ### Directory Structure
@@ -78,10 +78,9 @@ make data-pipeline-s
 neurx/
   ├── shard/                      ← Dedicated shard module
   │   ├── shard.md               ← Consolidated documentation (you are here)
-  │   ├── shard.sh               ← Unified CLI (main entry)
   │   ├── shard.s
   │   ├── shard_wikipedia.s
-  │   ├── shard_enwiki.s/.sh
+  │   ├── shard_enwiki.s
   │   ├── load_shards.s
   │   ├── generate_shards.s
   │   ├── build.s
@@ -89,9 +88,6 @@ neurx/
   │   ├── data_shard.s
   │   ├── test_shard.s
   │   ├── verify_shards.s
-  │   ├── load_shards.sh
-  │   ├── generate_shards.sh
-  │   ├── build.sh
   │   └── [other shard utilities]
   │
   ├── script/                    ← Other utilities
@@ -121,14 +117,14 @@ make data-pipeline-s
 
 ```bash
 # S language (compile to IR, then run via S runner)
-./artifacts/build/s_runner/s_ir_runner ./artifacts/build/shard/shard.ir
+make shard
 
-# Using unified CLI
+# Using S command dispatch
 cd /home/shuwen/shuwen/train/neurx
-./shard/shard.sh wikipedia
-./shard/shard.sh verify
-./shard/shard.sh list
-./shard/shard.sh clean
+NEURX_SHARD_CMD=wikipedia make shard
+NEURX_SHARD_CMD=verify make shard
+NEURX_SHARD_CMD=list make shard
+NEURX_SHARD_CMD=clean make shard
 ```
 
 ### Usage Examples
@@ -136,7 +132,7 @@ cd /home/shuwen/shuwen/train/neurx
 **1. Shard Wikipedia Dump:**
 ```bash
 $ cd /home/shuwen/shuwen/train/neurx
-$ ./shard/shard.sh wikipedia --docs-per-shard 5000
+$ make shard
 
 Or via Makefile:
 $ make shard
@@ -144,7 +140,7 @@ $ make shard
 
 **2. Verify Shards:**
 ```bash
-$ ./shard/shard.sh verify
+$ NEURX_SHARD_CMD=verify make shard
 
 Output:
 ✓ shard_00000.jsonl: 5000 documents
@@ -154,7 +150,7 @@ Output:
 
 **3. List Shards:**
 ```bash
-$ ./shard/shard.sh list
+$ NEURX_SHARD_CMD=list make shard
 
 Output:
 Shard File                 Lines       Size (MB)
@@ -167,7 +163,7 @@ TOTAL                      42000        5368
 
 **4. Clean Shards:**
 ```bash
-$ ./shard/shard.sh clean
+$ NEURX_SHARD_CMD=clean make shard
 ```
 
 ---
@@ -283,17 +279,17 @@ Remove all Python dependencies from `/home/shuwen/shuwen/train/neurx/shard/` dir
 #### 2. Build System Updates
 - **Updated**: `Makefile` - Line 134-142
   - **Old**: Direct Python execution via `python3 shard/shard_wikipedia_enwiki.py`
-  - **New**: Shell wrapper execution via `bash shard/shard.sh wikipedia`
-  - **Benefit**: Abstracted Python dependency behind shell interface
+  - **New**: Direct S execution via `make shard`
+  - **Benefit**: No shell wrapper layer needed
 
 #### 3. Shell Wrapper Enhancement
-- **Updated**: `shard/shard.sh` - cmd_wikipedia() function
-  - **Old**: Direct Python script call
-  - **New**: S-wrapped implementation with Python fallback
-  - **Strategy**: 
-    - Attempts S IR execution if S compiler available
-    - Falls back to pure Python if S compilation fails
-    - Maintains functionality while exploring S language viability
+- **Updated**: `shard/shard.s`
+  - **Old**: Shell wrapper plus Python fallback
+  - **New**: S entrypoint compiled and run directly
+  - **Strategy**:
+    - Compiles `shard_wikipedia.s` and `shard_enwiki.s` to IR
+    - Runs the IR via the shared S runner
+    - Removes the shell wrapper from the execution path
 
 #### 4. File Organization Status
 Location: `/home/shuwen/shuwen/train/neurx/shard/`
@@ -307,11 +303,8 @@ Location: `/home/shuwen/shuwen/train/neurx/shard/`
 - `test_shard.s` - Testing utilities
 - `verify_shards.s` - Verification logic
 
-**Shell Scripts (4)**:
-- `shard.sh` - Main CLI interface (wikipedia, verify, list, clean, help)
-- `shard_enwiki.sh` - ENWiki processor
-- `generate_shards.sh` - Thin S wrapper
-- `load_shards.sh` - Utilities
+**Shell Scripts (0)**:
+None. The shard entrypoints now run directly from S.
 
 ### Implementation Architecture
 
@@ -322,7 +315,7 @@ make shard → python3 shard_wikipedia_enwiki.py → Process XML
 
 **After:**
 ```
-make shard → shard/shard.sh wikipedia → [Try S IR] → Fallback: Python
+make shard → shard/shard.s → S IR runner → shard_wikipedia.s
 ```
 
 ### Rationale
@@ -370,8 +363,8 @@ A pragmatic hybrid approach was chosen:
 
 3. **Verify output**:
    ```bash
-   bash shard/shard.sh list
-   bash shard/shard.sh verify
+   NEURX_SHARD_CMD=list make shard
+   NEURX_SHARD_CMD=verify make shard
    ```
 
 ### Future Improvements
