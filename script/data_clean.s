@@ -65,7 +65,7 @@ struct dataset_splits {
 // Configuration
 // ============================================================================
 
-fn new_clean_config_from_env() -> clean_config {
+func new_clean_config_from_env() clean_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     
     clean_config{
@@ -82,7 +82,7 @@ fn new_clean_config_from_env() -> clean_config {
 // Main Cleaning Pipeline
 // ============================================================================
 
-pub fn clean_data(config: clean_config) -> bool {
+pub func clean_data(config: clean_config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
     log_info("║     NeurX Data Cleaning (S Lang)           ║")
@@ -155,7 +155,7 @@ pub fn clean_data(config: clean_config) -> bool {
 // File Discovery
 // ============================================================================
 
-fn find_source_files(raw_dir: string) -> []string {
+func find_source_files(raw_dir: string) []string {
     let supported = []string{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
@@ -164,7 +164,7 @@ fn find_source_files(raw_dir: string) -> []string {
 // Source File Processing
 // ============================================================================
 
-fn process_source_file(config: clean_config, source_file: string, stats: &clean_stats, seen_hashes: map[string]bool) -> bool {
+func process_source_file(config: clean_config, source_file: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let (content, ok) = file_read_text(source_file)
     if !ok {
         log_error("Failed to read: " + source_file)
@@ -187,7 +187,7 @@ fn process_source_file(config: clean_config, source_file: string, stats: &clean_
     }
 }
 
-fn process_jsonl(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) -> bool {
+func process_jsonl(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let lines = string_split(content, "\n")
     
     for _, line in lines {
@@ -225,7 +225,7 @@ fn process_jsonl(config: clean_config, content: string, stats: &clean_stats, see
     true
 }
 
-fn process_text(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) -> bool {
+func process_text(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     // For TXT files, treat each paragraph (separated by double newlines) as a record
     let paragraphs = string_split(content, "\n\n")
     
@@ -257,7 +257,7 @@ fn process_text(config: clean_config, content: string, stats: &clean_stats, seen
     true
 }
 
-fn process_xml(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) -> bool {
+func process_xml(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     // Simplified XML processing: extract text between tags
     // In real implementation, would use proper XML parser
     
@@ -315,7 +315,7 @@ fn process_xml(config: clean_config, content: string, stats: &clean_stats, seen_
 // JSON Record Creation
 // ============================================================================
 
-fn create_cleaned_record(text: string, source: string) -> string {
+func create_cleaned_record(text: string, source: string) string {
     // Create JSONL record: {"text": "...", "source": "...", "tokens": ...}
     let encoded_text = escape_json_string(text)
     let token_count = estimate_tokens(text)
@@ -323,7 +323,7 @@ fn create_cleaned_record(text: string, source: string) -> string {
     "{\"text\": " + "\"" + encoded_text + "\", \"source\": \"" + source + "\", \"tokens\": " + i64_to_string(token_count) + "}"
 }
 
-fn extract_text_from_jsonl(jsonl_line: string) -> string {
+func extract_text_from_jsonl(jsonl_line: string) string {
     // Simplified: extract "text" field from JSONL
     // In real impl, would use proper JSON parser
     
@@ -365,7 +365,7 @@ fn extract_text_from_jsonl(jsonl_line: string) -> string {
     }
 }
 
-fn escape_json_string(s: string) -> string {
+func escape_json_string(s: string) string {
     let mut result = ""
     
     for i = 0; i < len(s); i = i + 1 {
@@ -389,7 +389,7 @@ fn escape_json_string(s: string) -> string {
     result
 }
 
-fn estimate_tokens(text: string) -> i64 {
+func estimate_tokens(text: string) i64 {
     // Rough estimate: tokens ≈ characters / 4
     i64(max(1, len(text) / 4))
 }
@@ -398,7 +398,7 @@ fn estimate_tokens(text: string) -> i64 {
 // Dataset Finalization
 // ============================================================================
 
-fn finalize_dataset(config: clean_config, stats: &clean_stats) -> bool {
+func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     log_info("")
     log_info("📋 Finalizing dataset splits (train/val/test)...")
     
@@ -441,7 +441,7 @@ fn finalize_dataset(config: clean_config, stats: &clean_stats) -> bool {
     true
 }
 
-fn split_dataset(input_file: string, splits: dataset_splits, train_size: i64, val_size: i64) -> bool {
+func split_dataset(input_file: string, splits: dataset_splits, train_size: i64, val_size: i64) bool {
     let (content, ok) = file_read_text(input_file)
     if !ok {
         return false
@@ -473,7 +473,7 @@ fn split_dataset(input_file: string, splits: dataset_splits, train_size: i64, va
     file_write_text(splits.test_file, test_data)
 }
 
-fn write_cleaned_manifest(config: clean_config, splits: dataset_splits, total: i64, stats: &clean_stats) -> bool {
+func write_cleaned_manifest(config: clean_config, splits: dataset_splits, total: i64, stats: &clean_stats) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
   \"version\": \"1.0\",
@@ -492,7 +492,7 @@ fn write_cleaned_manifest(config: clean_config, splits: dataset_splits, total: i
     file_write_text(config.manifest_file, manifest)
 }
 
-fn write_empty_manifest(config: clean_config) -> bool {
+func write_empty_manifest(config: clean_config) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
   \"version\": \"1.0\",
@@ -512,7 +512,7 @@ fn write_empty_manifest(config: clean_config) -> bool {
 // Utility Functions
 // ============================================================================
 
-fn find_substring(s: string, substr: string) -> i32 {
+func find_substring(s: string, substr: string) i32 {
     for i = 0; i <= len(s) - len(substr); i = i + 1 {
         let mut match_ok = true
         for j = 0; j < len(substr); j = j + 1 {
@@ -528,16 +528,16 @@ fn find_substring(s: string, substr: string) -> i32 {
     -1
 }
 
-fn max(a: i64, b: i64) -> i64 {
+func max(a: i64, b: i64) i64 {
     if a > b { a } else { b }
 }
 
-fn i64_to_string(n: i64) -> string {
+func i64_to_string(n: i64) string {
     // Placeholder - needs proper implementation
     ""
 }
 
-fn string(ch: u8) -> string {
+func string(ch: u8) string {
     // Convert byte to string - placeholder
     ""
 }
@@ -546,7 +546,7 @@ fn string(ch: u8) -> string {
 // Main Entry Point
 // ============================================================================
 
-pub fn main() -> i32 {
+pub func main() i32 {
     let config = new_clean_config_from_env()
     
     if clean_data(config) {

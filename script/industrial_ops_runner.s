@@ -530,7 +530,7 @@ fn ops_print_help() {
     io_println("  --output-dir=<path>   Output directory")
 }
 
-pub fn main(args: []string) -> i32 {
+pub func main(args: []string) i32 {
     parsed := ops_parse_args(args)
     output_dir := ops_get_arg(parsed.options, "output-dir", "artifacts/industrial_ops")
 
