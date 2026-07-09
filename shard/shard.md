@@ -25,12 +25,13 @@ This directory contains all data sharding-related utilities for the NeurX traini
 
 ### Shell Scripts
 - **shard.sh** - Unified CLI for all shard operations (main entry point)
-- **generate_shards.sh** - Legacy shell script for shard generation (delegates to make)
+- **generate_shards.sh** - Thin wrapper for `generate_shards.s`
 - **load_shards.sh** - Thin wrapper for `load_shards.s`
 - **shard_enwiki.sh** - Shell script wrapper for Wikipedia sharding
 
 ### Build & Configuration
-- **build.sh** - S compiler automation script
+- **build.s** - S compiler automation entry
+- **build.sh** - Thin wrapper for `build.s`
 - **shard.md** - Consolidated documentation (this file)
 
 ---
@@ -80,6 +81,8 @@ neurx/
   │   ├── shard_wikipedia.s
   │   ├── shard_enwiki.s/.sh
   │   ├── load_shards.s
+  │   ├── generate_shards.s
+  │   ├── build.s
   │   ├── shard_manager.s
   │   ├── data_shard.s
   │   ├── test_shard.s
@@ -308,7 +311,7 @@ Location: `/home/shuwen/shuwen/train/neurx/shard/`
 **Shell Scripts (4)**:
 - `shard.sh` - Main CLI interface (wikipedia, verify, list, clean, help)
 - `shard_enwiki.sh` - ENWiki processor
-- `generate_shards.sh` - Legacy entry point
+- `generate_shards.sh` - Thin S wrapper
 - `load_shards.sh` - Utilities
 
 ### Implementation Architecture
