@@ -139,8 +139,14 @@ chat: check-bash
 
 
 shard: check-bash
-	@echo "Running industrial data pipeline: clean + dedup + stratified sample + reshard"
-	@cd '$(CURDIR_UNIX)' && python3 script/data_pipeline_v2.py --apply 2>&1
+	@echo "Sharding Wikipedia raw corpus into $(PRETRAIN_SHARD_DIR)"
+	@cd '$(CURDIR_UNIX)' && \
+		PYTHONPATH='$(CURDIR_UNIX)' \
+		python3 script/shard_wikipedia_enwiki.py \
+			--input '$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
+			--output-dir '$(PRETRAIN_SHARD_DIR)' \
+			--manifest '$(PRETRAIN_MANIFEST)' \
+			--docs-per-shard 5000 2>&1
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
