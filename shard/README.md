@@ -4,11 +4,8 @@ This directory contains all data sharding-related utilities for the NeurX traini
 
 ## File Organization
 
-### Python Implementation
-- **shard_wikipedia_enwiki.py** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
-
 ### S Language Implementations
-- **shard_wikipedia.s** - S language version of Wikipedia sharding (faster startup, lower memory)
+- **shard_wikipedia.s** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
 - **shard_enwiki.s** - Alternative S implementation for enwiki processing
 - **shard_manager.s** - Shard management utilities
 - **data_shard.s** - Data shard generation from cleaned datasets
@@ -25,7 +22,7 @@ This directory contains all data sharding-related utilities for the NeurX traini
 ### From Makefile
 
 ```bash
-# Python-based sharding
+# Wikipedia sharding
 make shard
 
 # S language-based sharding
@@ -39,13 +36,6 @@ make data-pipeline-s
 ### Direct Execution
 
 ```bash
-# Python
-python3 shard/shard_wikipedia_enwiki.py \
-  --input dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2 \
-  --output-dir dataset/pretrain/shard \
-  --manifest dataset/pretrain/manifest.json \
-  --docs-per-shard 5000
-
 # S language (if compiled)
 ./artifacts/build/shard/shard_wikipedia \
   --input dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2 \
@@ -108,11 +98,6 @@ Each line is a JSON record with:
 
 ## Performance Characteristics
 
-### Python Implementation (shard_wikipedia_enwiki.py)
-- Startup time: 1-2 seconds
-- Memory usage: ~350MB
-- Processing speed: ~1000 pages/second
-
 ### S Language Implementation (shard_wikipedia.s)
 - Startup time: 50-100ms
 - Memory usage: ~80MB
@@ -122,7 +107,7 @@ Each line is a JSON record with:
 ## Development Notes
 
 ### Adding New Sharding Strategies
-1. Create new S or Python file in this directory
+1. Create new S file in this directory
 2. Implement the sharding logic
 3. Update Makefile with new target if needed
 4. Add documentation in this README
