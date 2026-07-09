@@ -1,5 +1,5 @@
 .PHONY: help train infer pretrain posttrain pretrain-watch chat check-bash shard split logs logs-tail \
-	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
+	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
 	verify-setup-s quick-test-s quickstart-s verify-training-pipeline-s monitor-training-s build-linux-s build-macos-s run-large-pretrain-s \
@@ -484,6 +484,24 @@ shard-s:
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' NEURX_SCRIPTS_CMD=shard \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
+
+shard-enwiki: check-bash
+	@echo "Building NeurX Wikipedia sharding entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
+	@mkdir -p $(LOG_DIR)
+	@if [ ! -f "$(S_COMPILER)" ]; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/shard_enwiki.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir'
+	@echo "Running Wikipedia sharding pipeline..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_HOME='$(CURDIR_UNIX)' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
 
 data-pipeline-s: build-data-scripts
 	@echo "Running NeurX full data pipeline (clean + shard, S version)..."
