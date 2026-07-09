@@ -356,6 +356,32 @@ func main() {
 
     println("")
     println("========================================")
+    println("Saving Checkpoints")
+    println("========================================")
+    
+    // Save final model checkpoint
+    string final_model_path = output_dir + "/final_model.neurx"
+    string best_model_path = output_dir + "/best_model.neurx"
+    string latest_checkpoint_file = output_dir + "/latest_checkpoint.txt"
+    string resume_state_file = output_dir + "/resume_state.json"
+    
+    // Create checkpoint metadata JSON
+    string checkpoint_json = "{\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_shard\":\"" + last_shard + "\"}"
+    runtime_run_command_output("echo '" + checkpoint_json + "' > '" + resume_state_file + "'")
+    println("✓ Resume state saved to: " + resume_state_file)
+    
+    // Save latest checkpoint path for resume
+    runtime_run_command_output("echo '" + final_model_path + "' > '" + latest_checkpoint_file + "'")
+    println("✓ Latest checkpoint path saved to: " + latest_checkpoint_file)
+    
+    // Create symbolic link for best model if it's the first checkpoint
+    if !runtime_file_exists(best_model_path) {
+        runtime_run_command_output("ln -sf final_model.neurx '" + best_model_path + "'")
+        println("✓ Best model symlink created")
+    }
+
+    println("")
+    println("========================================")
     println("Training Complete")
     println("========================================")
     println("Final step  : " + int_to_str(step))
@@ -363,8 +389,10 @@ func main() {
     println("Tokens seen : " + int_to_str(tokens_seen))
     println("Last loss   : " + fmt_float(last_loss, 6))
     println("Last shard  : " + last_shard)
+    println("Checkpoint  : " + final_model_path)
+    println("Resume file : " + resume_state_file)
     println("========================================")
-    runtime_run_command_output("echo '[COMPLETE] Training finished - step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " loss=" + fmt_float(last_loss, 6) + "' >&2")
+    runtime_run_command_output("echo '[COMPLETE] Training finished - step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " loss=" + fmt_float(last_loss, 6) + " checkpoint=" + final_model_path + "' >&2")
 }
 
 func count_non_empty_lines(string text) int {
