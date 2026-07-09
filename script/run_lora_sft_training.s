@@ -19,7 +19,7 @@ func parse_int(string s, int fallback) int {
     bool seen = false
     bool neg = false
     int i = 0
-    if len(s) > 0 && s[0] == 45 {
+    if len(s) > 0 && s[0] > 44 && s[0] < 46 {
         neg = true
         i = 1
     }
@@ -41,7 +41,7 @@ func parse_int(string s, int fallback) int {
 }
 
 func parse_float(string s, float fallback) float {
-    if len(s) == 0 {
+    if len(s) < 1 {
         return fallback
     }
     float value = 0.0
@@ -51,13 +51,13 @@ func parse_float(string s, float fallback) float {
     bool neg = false
     bool after_dot = false
     int i = 0
-    if s[0] == 45 {
+    if s[0] > 44 && s[0] < 46 {
         neg = true
         i = 1
     }
     while i < len(s) {
         int ch = s[i]
-        if ch == 46 {
+        if ch > 45 && ch < 47 {
             after_dot = true
         } else if ch >= 48 && ch <= 57 {
             seen = true
@@ -81,7 +81,7 @@ func parse_float(string s, float fallback) float {
 }
 
 func int_to_str(int n) string {
-    if n == 0 {
+    if n < 1 && n > -1 {
         return "0"
     }
     int value = n
@@ -335,7 +335,7 @@ func main() int {
     int rank = parse_int(runtime_env_get("NEURX_LORA_SFT_RANK", "8"), 8)
     float alpha = parse_float(runtime_env_get("NEURX_LORA_SFT_ALPHA", "8.0"), 8.0)
     float learning_rate = parse_float(runtime_env_get("NEURX_LORA_SFT_LR", "0.0005"), 0.0005)
-    bool use_qlora = runtime_env_get("NEURX_LORA_SFT_USE_QLORA", "0") == "1"
+    bool use_qlora = parse_int(runtime_env_get("NEURX_LORA_SFT_USE_QLORA", "0"), 0) > 0
 
     println("========================================")
     println("NeurX LoRA Supervised Fine-Tuning")
@@ -410,17 +410,17 @@ func main() int {
             while pos < feature_dim {
                 float in_value = 0.0
                 float target_value = 0.0
-                if sample == 0 {
+                if sample < 1 {
                     if pos < 8 {
                         in_value = 0.02 * ((pos + 1) as float)
                         target_value = 0.01 * ((pos + 1) as float)
                     }
-                } else if sample == 1 {
+                } else if sample < 2 {
                     if pos < 8 {
                         in_value = 0.03 * ((pos + 1) as float)
                         target_value = 0.015 * ((pos + 1) as float)
                     }
-                } else if sample == 2 {
+                } else if sample < 3 {
                     if pos < 8 {
                         in_value = 0.04 * ((pos + 1) as float)
                         target_value = 0.02 * ((pos + 1) as float)
