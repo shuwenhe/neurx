@@ -137,6 +137,31 @@ sft_trainer_state trainer = create_sft_trainer(
 sft_train_result result = start_sft_training(ref trainer)
 ```
 
+### LoRA-backed SFT entry
+
+NeurX also ships a callable LoRA SFT entry for local runs and smoke tests:
+
+```bash
+make run-lora-sft-training-s
+```
+
+It uses the same SFT data path defaults as the main SFT flow and writes LoRA checkpoints under:
+
+```bash
+artifacts/checkpoints/lora_sft/
+```
+
+Environment overrides:
+
+- `NEURX_LORA_SFT_DATA_FILE`
+- `NEURX_LORA_SFT_OUTPUT_DIR`
+- `NEURX_LORA_SFT_EPOCHS`
+- `NEURX_LORA_SFT_FEATURE_DIM`
+- `NEURX_LORA_SFT_RANK`
+- `NEURX_LORA_SFT_ALPHA`
+- `NEURX_LORA_SFT_LR`
+- `NEURX_LORA_SFT_USE_QLORA`
+
 ## Configuration Parameters
 
 ### Core Training Parameters
