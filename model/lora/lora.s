@@ -282,16 +282,6 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
     }
 }
 
-func fill_lora(int n, float val) []float {
-    []float out = []float{}
-    int i = 0
-    for i < n {
-        out = append(out, val)
-        i = i + 1
-    }
-    out
-}
-
 // ============================================================================
 // 4. LoRA 前向
 // ============================================================================
@@ -329,33 +319,6 @@ func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
     updated.last_input = x
     updated.last_Ax = ax
     updated
-}
-
-// 矩阵乘: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
-func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
-    []float c = fill_lora(M * N, 0.0)
-    int i = 0
-    for i < M {
-        int j = 0
-        for j < N {
-            float s = 0.0
-            int kk = 0
-            for kk < K {
-                float bv = 0.0
-                if transpose_b {
-                    bv = b[j*K+kk]    // B[j,k] (B stored as [N,K])
-                } else {
-                    bv = b[kk*N+j]
-                }
-                s = s + a[i*K+kk] * bv
-                kk = kk + 1
-            }
-            c[i*N+j] = s
-            j = j + 1
-        }
-        i = i + 1
-    }
-    c
 }
 
 // ============================================================================
@@ -532,26 +495,6 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
     }
 
     lora_adamw_result { layer: upd, opt: o2 }
-}
-
-func sqrt_lora(float x) float {
-    if x <= 0.0 { return 0.0 }
-    float g = x * 0.5
-    float r = g + x / g
-    r = 0.5 * r
-    r = 0.5 * (r + x / r)
-    r = 0.5 * (r + x / r)
-    r
-}
-
-func pow_approx(float base, int exp) float {
-    float result = 1.0
-    int i = 0
-    for i < exp {
-        result = result * base
-        i = i + 1
-    }
-    result
 }
 
 // ============================================================================
