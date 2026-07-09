@@ -88,6 +88,8 @@ neurx/
 
 Issues and PRs are welcome!
 
+For local save-to-commit-and-push automation, run `tools/watch-auto-commit-push.sh` from the repository root. It uses `inotifywait` when available and falls back to polling.
+
 ## 📄 License
 
 This project is released under the **MIT License**. See [LICENSE](./LICENSE) and [COPYING](./COPYING) files for details.
