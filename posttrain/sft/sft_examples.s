@@ -60,7 +60,7 @@ func example_basic_sft_training() {
     sft_train_config config = create_sft_example_config()
     sft_dataset dataset = create_sft_example_dataset()
     sft_trainer_state trainer = create_sft_example_trainer(model, tokenizer, config, dataset, 0, 1)
-    sft_train_result result = start_sft_training(ref trainer)
+    sft_train_result result = start_sft_training(trainer)
     println("SFT completed: " + fmt_float(result.final_loss, 4))
 }
 
