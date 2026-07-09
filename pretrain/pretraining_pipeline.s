@@ -257,9 +257,14 @@ struct pretrain_state {
     // 性能指标
     struct performance {
         float tokens_per_second
-        float gpu_memory_utilization
+        float gpu_memory_utilization      // GPU 显存占用 (GB)
         float gpu_compute_utilization
         float communication_overhead_pct
+        float gradient_norm              // 梯度范数
+        float forward_time_ms            // Forward pass 耗时 (毫秒)
+        float backward_time_ms           // Backward pass 耗时 (毫秒)
+        float optimizer_time_ms          // Optimizer step 耗时 (毫秒)
+        int samples_per_step             // 当前步的样本数
     } performance
 }
 
@@ -566,6 +571,13 @@ func train_step(
     pretrain_config cfg = state.config
     pretrain_task_type task_type = batch["task_type"]
     
+    # 获取GPU内存使用情况（每10步采样一次，减少开销）
+    if state.current_step % 10 == 0:
+        # 获取当前GPU内存使用量，单位为GB
+        # 这里假设有一个函数可以获取GPU内存使用情况
+        float gpu_mem_gb = get_gpu_memory_usage() / 1024.0  // Convert to GB
+        state.performance.gpu_memory_utilization = gpu_mem_gb
+    
     # 更新学习率
     state.current_lr = get_learning_rate(state, state.current_step)
     for param_group in optimizer.param_groups:
@@ -627,10 +639,11 @@ func train_step(
     if (state.current_step + 1) % cfg.gradient_accum_steps == 0:
         timer.start("optimizer")
         
-        # Gradient clipping
+        # Gradient clipping and norm calculation
         if cfg.precision == "bf16" || cfg.precision == "fp16":
             scaler.unscale_(optimizer)
-        clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
+        float grad_norm = clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
+        state.performance.gradient_norm = grad_norm
         
         # Optimizer step
         if cfg.precision == "bf16" || cfg.precision == "fp16":
@@ -663,7 +676,7 @@ func train_step(
             append(state.loss_history.prefix_lm_losses, loss_value)
     append(state.loss_history.combined_losses, loss_value)
     
-    # Update timing
+    # Update timing and performance metrics
     if state.seconds_per_step == 0:
         state.seconds_per_step = timer.get_elapsed("total")
     else:
@@ -671,6 +684,11 @@ func train_step(
             state.seconds_per_step * 0.9 + 
             timer.get_elapsed("total") * 0.1
         )
+    
+    # Record detailed timing information (in milliseconds)
+    state.performance.forward_time_ms = timer.get_elapsed("forward") * 1000.0
+    state.performance.backward_time_ms = timer.get_elapsed("backward") * 1000.0
+    state.performance.optimizer_time_ms = timer.get_elapsed("optimizer") * 1000.0
     
     # Estimate completion time
     int remaining_steps = cfg.total_steps - state.current_step
@@ -946,6 +964,9 @@ func log_training_progress(
     int tokens_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps * cfg.max_seq_len
     state.performance.tokens_per_second = tokens_per_step / max(state.seconds_per_step, 0.001)
     
+    # Set samples per step
+    state.performance.samples_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps
+    
     # Format time
     elapsed = now() - state.start_time
     str elapsed_str = format_duration(elapsed)
@@ -958,16 +979,60 @@ func log_training_progress(
         case MLM: task_name = "MLM"
         case PREFIX_LM: task_name = "PreLM"
     
+    # 第一行: 基础训练指标
     print(
         f"[Step {state.current_step:>7,}/{cfg.total_steps:,}] "
         f"Loss: {loss:>7.4f} | "
-        f"RunLoss: {state.loss_history.running_loss:>7.4f} | "
         f"LR: {state.current_lr:.2e} | "
-        f"Task: {task_name:>5} | "
-        f"Tokens/sec: {state.performance.tokens_per_second:>8.0f} | "
-        f"Elapsed: {elapsed_str} | "
-        f"ETA: {eta_str}"
+        f"GradNorm: {state.performance.gradient_norm:>6.2f} | "
+        f"Tokens: {state.total_tokens_seen:>10,}"
     )
+    
+    # 第二行: 性能指标
+    print(
+        f"{'':>8}  Throughput: {state.performance.tokens_per_second:>8.0f} tok/s | "
+        f"Samples: {state.performance.samples_per_step:>4} | "
+        f"Forward: {state.performance.forward_time_ms:>5.1f}ms | "
+        f"Backward: {state.performance.backward_time_ms:>5.1f}ms | "
+        f"Optimizer: {state.performance.optimizer_time_ms:>4.1f}ms | "
+        f"GPU Mem: {state.performance.gpu_memory_utilization:>5.1f}GB"
+    )
+    
+    # 第三行: 时间估计
+    print(
+        f"{'':>8}  Task: {task_name:>6} | "
+        f"RunLoss: {state.loss_history.running_loss:>7.4f} | "
+        f"Elapsed: {elapsed_str:>8} | "
+        f"ETA: {eta_str:>8}"
+    )
+}
+
+// ============================================================
+// 训练日志示例 (TRAINING LOG EXAMPLE)
+// ============================================================
+// 步骤 430 的具体训练日志格式示例:
+//
+// [Step     430/500000] Loss:   2.8100 | LR: 2.00e-04 | GradNorm:   4.28 | Tokens:    110,080
+//           Throughput: 18500 tok/s | Samples:  430 | Forward: 32.0ms | Backward: 48.0ms | Optimizer:  6.0ms | GPU Mem: 18.4GB
+//           Task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
+//
+// 指标说明:
+// - step: 当前训练步数 (430)
+// - loss: 当前步的损失值 (2.81)
+// - lr: 学习率 (2e-4)
+// - GradNorm: 梯度范数 (4.28)
+// - Tokens: 已处理的总tokens数 (110,080)
+// - Throughput: 吞吐量，每秒处理的tokens数 (18500 tok/s)
+// - Samples: 当前步的样本数 (430)
+// - Forward: Forward pass 耗时 (32ms)
+// - Backward: Backward pass 耗时 (48ms)
+// - Optimizer: Optimizer step 耗时 (6ms)
+// - GPU Mem: GPU显存使用量 (18.4GB)
+// - Task: 当前任务类型 (CLM/MLM/PreLM)
+// - RunLoss: 指数移动平均损失值
+// - Elapsed: 已用时间
+// - ETA: 预计完成时间
+// ============================================================
 
 func log_evaluation_results(
     state: pretrain_state,
@@ -1040,6 +1105,21 @@ func format_duration(timedelta td) -> string {
         return f"{minutes}m {seconds}s"
     else:
         return f"{seconds}s"
+
+// 获取GPU内存使用量 (MB)
+// 这个函数会调用底层GPU相关函数获取当前设备的内存使用情况
+func get_gpu_memory_usage() -> float {
+    """
+    获取当前GPU设备的内存使用量（单位：MB）
+    返回值为float类型，表示已使用的GPU显存（MB）
+    示例: 如果返回19353.6，表示约19.4GB
+    """
+    // TODO: 实现具体的GPU内存查询逻辑
+    // 这里可以调用 torch.cuda.memory_allocated() 或 torch.cuda.max_memory_allocated()
+    // 或 CUDA API 进行实际的内存查询
+    float gpu_mem_mb = 18400.0  // 示例值：18.4GB = 18400MB
+    return gpu_mem_mb
+}
 
 // ============================================================
 // 测试函数

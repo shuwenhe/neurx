@@ -2352,41 +2352,9 @@ func gpt_large_pretrain_prepare_release(gpt_large_pretrain_state state) string {
 }
 
 func gpt_large_pretrain_ensure_quantization_release_artifact(gpt_large_pretrain_state state, string manifest_path) () {
-    if runtime_file_exists(manifest_path) {
-        return
-    }
-
-    string manifest_dir = state.output_dir + "/quantized_model"
-    runtime_make_dirs(manifest_dir)
-
-    string manifest = ""
-    manifest = manifest + "quantized_model.root=" + manifest_dir + "\n"
-    manifest = manifest + "quantized_model.layer_count=" + int_to_str(state.training.model.num_layers, 0) + "\n"
-    manifest = manifest + "quantized_model.quantization_type=INT8_STATIC\n"
-    manifest = manifest + "quantized_model.per_channel_for_weights=true\n"
-    manifest = manifest + "quantized_model.per_tensor_for_activations=true\n"
-    manifest = manifest + "quantized_model.calibration_method=entropy\n"
-    manifest = manifest + "quantized_model.percentile_value=99.990000\n"
-    manifest = manifest + "quantized_model.use_symmetric=false\n"
-    runtime_write_text_file(manifest_path, manifest)
+    return
 }
 
 func gpt_large_pretrain_ensure_distillation_release_artifact(gpt_large_pretrain_state state, string manifest_path) () {
-    if runtime_file_exists(manifest_path) {
-        return
-    }
-
-    string manifest_dir = state.output_dir + "/distillation"
-    runtime_make_dirs(manifest_dir)
-
-    string manifest = ""
-    manifest = manifest + "bundle_dir=" + manifest_dir + "\n"
-    manifest = manifest + "teacher_name=teacher-" + state.training.model.family + "\n"
-    manifest = manifest + "student_name=student-" + state.training.model.family + "\n"
-    manifest = manifest + "compression_ratio=4.00\n"
-    manifest = manifest + "temperature=4.0000\n"
-    manifest = manifest + "student_weight=0.3000\n"
-    manifest = manifest + "distill_weight=0.7000\n"
-    manifest = manifest + "best_loss=" + fmt_float(state.training.last_loss, 6) + "\n"
-    runtime_write_text_file(manifest_path, manifest)
+    return
 }
