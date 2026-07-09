@@ -67,7 +67,7 @@ func posttrain_step_with_ppo(posttrain_pipeline_state state, ppo_state ppo, floa
         reward_value,
         value_pred,
         value_target,
-        ppo.kl_coef,
+        ppo.kl_coef
     )
     int effective_samples = samples
     if effective_samples <= 0 {
