@@ -7,7 +7,8 @@
 
 package main
 
-use std.os.{command, getenv}
+use neurx.runtime.io.runtime_env_get
+use std.os.command
 
 func string_char(int c) string {
     string(c)
@@ -123,7 +124,7 @@ func print_help() {
 }
 
 func env_get(string name, string default_value) string {
-    getenv(name).unwrap_or(default_value)
+    runtime_env_get(name, default_value)
 }
 
 func path_exists(string path) bool {
