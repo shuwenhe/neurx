@@ -129,6 +129,7 @@ func main() {
 
     int shard_index = 0
     string last_shard = ""
+    runtime_run_command_output("echo '[STATUS] Entering main shard processing loop' >&2")
     while shard_index < shard_count && step < max_steps {
         string shard_path = shard_path_at(shard_list_text, shard_index)
         last_shard = shard_path
@@ -137,6 +138,7 @@ func main() {
         println("╔════════════════════════════════════════════════════════════╗")
         println("║ [Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + "] Processing: " + shard_path)
         println("╚════════════════════════════════════════════════════════════╝")
+        runtime_run_command_output("echo '[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " started: " + shard_path + "' >&2")
         println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " started: " + shard_path)
 
         if !runtime_file_exists(shard_path) {
