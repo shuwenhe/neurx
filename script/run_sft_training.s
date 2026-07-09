@@ -1,6 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file}
 use std.io.println
 
 struct sft_state {
@@ -221,7 +221,58 @@ func load_sft_samples(string data_path) []string {
         return empty
     }
 
+    println("SFT data file detected; using built-in sample set in this minimal S implementation.")
     builtin_sft_samples()
+}
+
+func format_sft_text(string instruction, string input_text, string output_text) string {
+    string out = "### Instruction:\n" + instruction
+    if str_len(input_text) > 0 {
+        out = out + "\n\n### Input:\n" + input_text
+    }
+    out = out + "\n\n### Response:\n" + output_text
+    out
+}
+
+func trim(string s) string {
+    int start = 0
+    while start < str_len(s) && is_space(s[start]) {
+        start = start + 1
+    }
+
+    int end = str_len(s) - 1
+    while end >= start && is_space(s[end]) {
+        end = end - 1
+    }
+
+    if end < start {
+        return ""
+    }
+    substring(s, start, end + 1)
+}
+
+func is_space(int c) bool {
+    c == 32 || c == 9 || c == 10 || c == 13
+}
+
+func substring(string s, int start, int end) string {
+    if start < 0 {
+        start = 0
+    }
+    if end > str_len(s) {
+        end = str_len(s)
+    }
+    if end <= start {
+        return ""
+    }
+
+    string out = ""
+    int i = start
+    while i < end {
+        out = out + string(s[i])
+        i = i + 1
+    }
+    out
 }
 
 func str_len(string s) int {
