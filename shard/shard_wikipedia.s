@@ -23,6 +23,18 @@ struct WikipediaConfig {
     int max_pages
 }
 
+// ============================================================================
+// Global Configuration Variables
+// Using global variables instead of struct parameters due to S IR runtime
+// limitations with passing custom struct types as function arguments.
+// ============================================================================
+
+string g_input_bz2_file = ""
+string g_output_dir = ""
+string g_manifest_file = ""
+int g_docs_per_shard = 5000
+int g_max_pages = 0
+
 struct ShardMetadata {
     string shard_id
     string file_path
@@ -238,7 +250,7 @@ func json_escape(string s) string {
     out
 }
 
-func generate_manifest_json(WikipediaConfig config, int total_pages, int total_shards, []ShardMetadata shards) string {
+func generate_manifest_json(int total_pages, int total_shards, []ShardMetadata shards) string {
     string json = "{\n"
     json = json + "  \"dataset_name\": \"neurx-wikipedia\",\n"
     json = json + "  \"source_file\": " + json_escape(config.input_bz2_file) + ",\n"
@@ -274,40 +286,40 @@ func generate_manifest_json(WikipediaConfig config, int total_pages, int total_s
 // Core processing
 // ============================================================================
 
-func process_wikipedia(WikipediaConfig config) int {
+func process_wikipedia() int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
     println("║    NeurX Wikipedia Shard Processing (S Language)        ║")
     println("╚══════════════════════════════════════════════════════════╝")
     println("")
-    println("Input      : " + config.input_bz2_file)
-    println("Output dir : " + config.output_dir)
-    println("Manifest   : " + config.manifest_file)
-    println("Docs/shard : " + int_to_str(config.docs_per_shard))
-    println("Max pages  : " + int_to_str(config.max_pages))
+    println("Input      : " + g_input_bz2_file)
+    println("Output dir : " + g_output_dir)
+    println("Manifest   : " + g_manifest_file)
+    println("Docs/shard : " + int_to_str(g_docs_per_shard))
+    println("Max pages  : " + int_to_str(g_max_pages))
     println("")
 
-    if !file_exists(config.input_bz2_file) {
-        println("[-] Input file not found: " + config.input_bz2_file)
+    if !file_exists(g_input_bz2_file) {
+        println("[-] Input file not found: " + g_input_bz2_file)
         return 1
     }
 
-    if !make_dir(config.output_dir) {
-        println("[-] Failed to create output directory: " + config.output_dir)
+    if !make_dir(g_output_dir) {
+        println("[-] Failed to create output directory: " + g_output_dir)
         return 1
     }
-    if !make_dir(parent_dir(config.manifest_file)) {
+    if !make_dir(parent_dir(g_manifest_file)) {
         println("[-] Failed to create manifest directory")
         return 1
     }
 
-    string temp_xml = config.output_dir + "/.wikipedia_dump.xml"
+    string temp_xml = g_output_dir + "/.wikipedia_dump.xml"
     // Clean up previous outputs.
-    let _ = command("sh -c " + shell_escape("rm -f " + config.output_dir + "/shard_*.jsonl " + temp_xml))
+    let _ = command("sh -c " + shell_escape("rm -f " + g_output_dir + "/shard_*.jsonl " + temp_xml))
 
     println("[*] Decompressing Wikipedia dump...")
     let (_, decompress_code) = command(
-        "bzip2 -dc " + shell_escape(config.input_bz2_file) + " > " + shell_escape(temp_xml)
+        "bzip2 -dc " + shell_escape(g_input_bz2_file) + " > " + shell_escape(temp_xml)
     )
     if decompress_code != 0 {
         println("[-] Failed to decompress input file")
@@ -316,13 +328,13 @@ func process_wikipedia(WikipediaConfig config) int {
 
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
     int total_pages = parse_int(read_command_output(count_cmd), 0)
-    if config.max_pages > 0 && total_pages > config.max_pages {
-        total_pages = config.max_pages
+    if g_max_pages > 0 && total_pages > g_max_pages {
+        total_pages = g_max_pages
     }
 
     int total_shards = 0
-    if config.docs_per_shard > 0 {
-        total_shards = (total_pages + config.docs_per_shard - 1) / config.docs_per_shard
+    if g_docs_per_shard > 0 {
+        total_shards = (total_pages + g_docs_per_shard - 1) / g_docs_per_shard
     }
     if total_shards < 1 {
         total_shards = 1
@@ -411,12 +423,12 @@ func main() int {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
 
-    WikipediaConfig config
-    config.input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
-    config.output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
-    config.manifest_file = runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
-    config.docs_per_shard = parse_int(runtime_env_get("DOCS_PER_SHARD", "5000"), 5000)
-    config.max_pages = parse_int(runtime_env_get("MAX_PAGES", "0"), 0)
+    // Initialize global configuration variables from environment
+    g_input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
+    g_output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
+    g_manifest_file = runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
+    g_docs_per_shard = parse_int(runtime_env_get("DOCS_PER_SHARD", "5000"), 5000)
+    g_max_pages = parse_int(runtime_env_get("MAX_PAGES", "0"), 0)
 
-    process_wikipedia(config)
+    process_wikipedia()
 }
