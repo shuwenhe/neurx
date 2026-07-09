@@ -3,12 +3,6 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
 use std.io.println
 
-struct sft_sample {
-    string instruction
-    string input_text
-    string output_text
-}
-
 struct sft_state {
     float weight
     float bias
@@ -41,7 +35,7 @@ func main() int {
 
     runtime_make_dirs(output_dir).ok
 
-    []sft_sample samples = load_sft_samples(data_path)
+    []string samples = load_sft_samples(data_path)
     if len(samples) == 0 {
         samples = builtin_sft_samples()
     }
@@ -120,47 +114,31 @@ func main() int {
     0
 }
 
-func builtin_sft_samples() []sft_sample {
-    []sft_sample samples = []sft_sample{cap: 4}
-    samples[0] = sft_sample {
-        instruction: "Explain gradient descent",
-        input_text: "",
-        output_text: "Gradient descent updates parameters by following the negative loss gradient.",
-    }
-    samples[1] = sft_sample {
-        instruction: "Write a short apology",
-        input_text: "late delivery",
-        output_text: "Sorry for the late delivery. I will fix it immediately.",
-    }
-    samples[2] = sft_sample {
-        instruction: "Summarize the task",
-        input_text: "train a model",
-        output_text: "The task is to train a model on the given data.",
-    }
-    samples[3] = sft_sample {
-        instruction: "Answer politely",
-        input_text: "Can you help me?",
-        output_text: "Yes, I can help you with that.",
-    }
+func builtin_sft_samples() []string {
+    []string samples = []string{cap: 4}
+    samples[0] = format_sft_text("Explain gradient descent", "", "Gradient descent updates parameters by following the negative loss gradient.")
+    samples[1] = format_sft_text("Write a short apology", "late delivery", "Sorry for the late delivery. I will fix it immediately.")
+    samples[2] = format_sft_text("Summarize the task", "train a model", "The task is to train a model on the given data.")
+    samples[3] = format_sft_text("Answer politely", "Can you help me?", "Yes, I can help you with that.")
     samples
 }
 
-func load_sft_samples(string data_path) []sft_sample {
+func load_sft_samples(string data_path) []string {
     if !runtime_file_exists(data_path) {
-        []sft_sample empty = []sft_sample{cap: 0}
+        []string empty = []string{cap: 0}
         return empty
     }
 
     string raw = runtime_read_text_file(data_path)
     []string lines = split_lines(raw)
-    []sft_sample samples = []sft_sample{cap: len(lines)}
+    []string samples = []string{cap: len(lines)}
     int sample_count = 0
     int i = 0
     while i < len(lines) {
         string line = trim(lines[i])
         if str_len(line) > 0 {
-            sft_sample sample = parse_sample_line(line)
-            if str_len(sample.instruction) > 0 || str_len(sample.output_text) > 0 {
+            string sample = parse_sample_line(line)
+            if str_len(sample) > 0 {
                 samples[sample_count] = sample
                 sample_count = sample_count + 1
             }
@@ -169,7 +147,7 @@ func load_sft_samples(string data_path) []sft_sample {
     }
 
     if sample_count == 0 {
-        []sft_sample empty = []sft_sample{cap: 0}
+        []string empty = []string{cap: 0}
         return empty
     }
 
@@ -177,7 +155,7 @@ func load_sft_samples(string data_path) []sft_sample {
         return samples
     }
 
-    []sft_sample out = []sft_sample{cap: sample_count}
+    []string out = []string{cap: sample_count}
     int j = 0
     while j < sample_count {
         out[j] = samples[j]
@@ -186,7 +164,7 @@ func load_sft_samples(string data_path) []sft_sample {
     out
 }
 
-func parse_sample_line(string line) sft_sample {
+func parse_sample_line(string line) string {
     if find_substring(line, "|||", 0) >= 0 {
         return parse_pipe_sample(line)
     }
@@ -198,50 +176,30 @@ func parse_sample_line(string line) sft_sample {
         if str_len(output_text) == 0 {
             output_text = extract_json_string_field(line, "response")
         }
-        return sft_sample {
-            instruction: instruction,
-            input_text: input_text,
-            output_text: output_text,
-        }
+        return format_sft_text(instruction, input_text, output_text)
     }
 
-    sft_sample {
-        instruction: line,
-        input_text: "",
-        output_text: line,
-    }
+    format_sft_text(line, "", line)
 }
 
-func parse_pipe_sample(string line) sft_sample {
+func parse_pipe_sample(string line) string {
     int first = find_substring(line, "|||", 0)
     int second = find_substring(line, "|||", first + 3)
     if first < 0 {
-        return sft_sample {
-            instruction: line,
-            input_text: "",
-            output_text: line,
-        }
+        return format_sft_text(line, "", line)
     }
     if second < 0 {
-        return sft_sample {
-            instruction: trim(substring(line, 0, first)),
-            input_text: "",
-            output_text: trim(substring(line, first + 3, str_len(line))),
-        }
+        return format_sft_text(trim(substring(line, 0, first)), "", trim(substring(line, first + 3, str_len(line))))
     }
-    sft_sample {
-        instruction: trim(substring(line, 0, first)),
-        input_text: trim(substring(line, first + 3, second)),
-        output_text: trim(substring(line, second + 3, str_len(line))),
-    }
+    format_sft_text(trim(substring(line, 0, first)), trim(substring(line, first + 3, second)), trim(substring(line, second + 3, str_len(line))))
 }
 
-func format_sft_example(sft_sample sample) string {
-    string out = "### Instruction:\n" + sample.instruction
-    if str_len(sample.input_text) > 0 {
-        out = out + "\n\n### Input:\n" + sample.input_text
+func format_sft_text(string instruction, string input_text, string output_text) string {
+    string out = "### Instruction:\n" + instruction
+    if str_len(input_text) > 0 {
+        out = out + "\n\n### Input:\n" + input_text
     }
-    out = out + "\n\n### Response:\n" + sample.output_text
+    out = out + "\n\n### Response:\n" + output_text
     out
 }
 
@@ -279,7 +237,7 @@ func train_one_sample(sft_state state, string text, float lr) sft_state {
     state
 }
 
-func evaluate_samples(sft_state state, []sft_sample samples) float {
+func evaluate_samples(sft_state state, []string samples) float {
     if len(samples) == 0 {
         return 0.0
     }
@@ -288,7 +246,7 @@ func evaluate_samples(sft_state state, []sft_sample samples) float {
     int valid = 0
     int i = 0
     while i < len(samples) {
-        string text = format_sft_example(samples[i])
+        string text = samples[i]
         if str_len(text) >= 2 {
             int j = 0
             float sample_loss = 0.0
