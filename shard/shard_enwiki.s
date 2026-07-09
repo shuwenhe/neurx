@@ -206,18 +206,18 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
     let (timestamp, _) = command(date_cmd)
     
     // Build manifest JSON
-    let manifest = "{" + "\n"
-    let manifest = manifest + "  \"dataset_name\": \"enwiki-latest\",\n"
-    let manifest = manifest + "  \"dataset_version\": \"latest\",\n"
-    let manifest = manifest + "  \"source_file\": \"" + config.input_bz2_file + "\",\n"
-    let manifest = manifest + "  \"created_at\": \"" + timestamp + "\",\n"
-    let manifest = manifest + "  \"total_shards\": " + itoa(actual_shard_count) + ",\n"
-    let manifest = manifest + "  \"total_size_bytes\": " + itoa(total_size_bytes) + ",\n"
-    let manifest = manifest + "  \"total_size_mb\": " + itoa(total_size_mb) + ",\n"
-    let manifest = manifest + "  \"shard_dir\": \"" + config.shard_dir + "\",\n"
-    let manifest = manifest + "  \"target_shard_size_mb\": " + itoa(config.target_shard_size_mb) + ",\n"
-    let manifest = manifest + "  \"format\": \"xml\",\n"
-    let manifest = manifest + "  \"shards\": [\n"
+    string manifest = "{" + "\n"
+    manifest = manifest + "  \"dataset_name\": \"enwiki-latest\",\n"
+    manifest = manifest + "  \"dataset_version\": \"latest\",\n"
+    manifest = manifest + "  \"source_file\": \"" + config.input_bz2_file + "\",\n"
+    manifest = manifest + "  \"created_at\": \"" + timestamp + "\",\n"
+    manifest = manifest + "  \"total_shards\": " + itoa(actual_shard_count) + ",\n"
+    manifest = manifest + "  \"total_size_bytes\": " + itoa(total_size_bytes) + ",\n"
+    manifest = manifest + "  \"total_size_mb\": " + itoa(total_size_mb) + ",\n"
+    manifest = manifest + "  \"shard_dir\": \"" + config.shard_dir + "\",\n"
+    manifest = manifest + "  \"target_shard_size_mb\": " + itoa(config.target_shard_size_mb) + ",\n"
+    manifest = manifest + "  \"format\": \"xml\",\n"
+    manifest = manifest + "  \"shards\": [\n"
     
     // Add shard entries
     let list_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null"
