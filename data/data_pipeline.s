@@ -3,7 +3,7 @@ package neurx.data.data_pipeline
 // Complete data pipeline orchestrator
 // Integrates: distributed loading, preprocessing, quality filtering, batching
 
-use neurx.data.shard_manager.{dataset_manifest, build_training_dataset_manifest, default_training_dataset_path}
+use neurx.shard.shard_manager.{dataset_manifest, build_training_dataset_manifest, default_training_dataset_path}
 use neurx.data.streaming_reader.{batch_read_result, streaming_reader_state, init_streaming_reader, read_batch_of_lines, default_tb_stream_reader_config}
 use neurx.data.distributed_dataloader.{data_shard, distributed_dataloader, distributed_loader_config, create_data_shards, new_distributed_loader_config}
 use neurx.data.tokenizer_pipeline.{bpe_tokenizer_state, streaming_encode_state, streaming_batch_result, default_llm_tokenizer_config, init_bpe_tokenizer, init_streaming_encode, streaming_next_batch}

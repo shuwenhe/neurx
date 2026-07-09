@@ -1,4 +1,4 @@
-package neurx.test
+package neurx.shard.test_shard
 
 use std.io.{println}
 

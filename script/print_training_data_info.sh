@@ -231,7 +231,7 @@ main() {
         echo "请确保已执行:"
         echo "  1. make train (自动执行清洁和分片)"
         echo "  或"
-        echo "  2. bash clean_data.sh && bash generate_shards.sh"
+        echo "  2. bash clean_data.sh && bash shard/generate_shards.sh"
     else
         print_info "将使用: $SELECTED_SOURCE"
         echo ""

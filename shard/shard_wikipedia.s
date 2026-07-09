@@ -15,7 +15,7 @@
 // - Generates manifest.json with metadata
 // ============================================================================
 
-package neurx.script.shard_wikipedia
+package neurx.shard.shard_wikipedia
 
 use std.io.{println}
 use std.os.{command, getenv, getenv_int}

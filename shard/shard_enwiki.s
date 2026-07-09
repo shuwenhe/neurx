@@ -8,7 +8,7 @@
 // - Generates manifest with metadata
 // ============================================================================
 
-package neurx.script.shard_enwiki
+package neurx.shard.shard_enwiki
 
 use std.io.{println, exit}
 use std.os.{command, getenv}

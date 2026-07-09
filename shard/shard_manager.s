@@ -2,7 +2,7 @@
 // Automatically partitions massive datasets into optimal shards
 // Supports: load balancing across nodes, incremental updates, fault tolerance
 
-package neurx.data.shard_manager
+package neurx.shard.shard_manager
 
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_write_text_file, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
