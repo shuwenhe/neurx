@@ -63,7 +63,7 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 
 help:
-	@echo "  make train"
+	@echo "  make pretrain"
 	@echo "  make infer"
 	@echo "  make posttrain"
 	@echo "  make chat"
@@ -80,7 +80,7 @@ infer: check-bash
 	cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain: check-bash
-	@echo "Running NeurX large-model production pre-training (alias for make train)"
+	@echo "Running NeurX large-model production pre-training (alias for make pretrain)"
 	@cd '$(CURDIR_UNIX)' && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
 		echo "  raw      : $(PRETRAIN_RAW_DIR)" && \
