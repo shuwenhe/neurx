@@ -32,6 +32,13 @@ endif
 
 .DEFAULT_GOAL := help
 
+# Color definitions
+BLUE := \033[0;34m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+RED := \033[0;31m
+NC := \033[0m  # No Color
+
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
 S_REPO_ROOT := $(CURDIR_UNIX)/../../../s
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
