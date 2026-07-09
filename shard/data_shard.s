@@ -9,7 +9,7 @@
 // - Validate and count shards
 // ============================================================================
 
-package neurx.script.data_shard
+package neurx.shard.data_shard
 
 use neurx.script.data_utils.{
     file_read_text,
