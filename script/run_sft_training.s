@@ -108,7 +108,36 @@ func main() int {
             sample_index = batch_end
         }
 
-        float eval_loss = evaluate_samples(state, samples)
+        float eval_loss = 0.0
+        int eval_valid = 0
+        int eval_i = 0
+        while eval_i < len(samples) {
+            string eval_text = samples[eval_i]
+            if str_len(eval_text) >= 2 {
+                int eval_pos = 0
+                float eval_sample_loss = 0.0
+                int eval_pairs = 0
+                while eval_pos + 1 < str_len(eval_text) {
+                    int prev_token = eval_text[eval_pos]
+                    int next_token = eval_text[eval_pos + 1]
+                    float x = (prev_token as float) / 255.0
+                    float y = (next_token as float) / 255.0
+                    float pred = state.weight * x + state.bias
+                    float diff = pred - y
+                    eval_sample_loss = eval_sample_loss + diff * diff
+                    eval_pairs = eval_pairs + 1
+                    eval_pos = eval_pos + 1
+                }
+                if eval_pairs > 0 {
+                    eval_loss = eval_loss + eval_sample_loss / (eval_pairs as float)
+                    eval_valid = eval_valid + 1
+                }
+            }
+            eval_i = eval_i + 1
+        }
+        if eval_valid > 0 {
+            eval_loss = eval_loss / (eval_valid as float)
+        }
         if eval_loss < state.best_eval_loss {
             state.best_eval_loss = eval_loss
         }
@@ -229,45 +258,6 @@ func format_sft_text(string instruction, string input_text, string output_text) 
     }
     out = out + "\n\n### Response:\n" + output_text
     out
-}
-
-func evaluate_samples(sft_state state, []string samples) float {
-    if len(samples) == 0 {
-        return 0.0
-    }
-
-    float total_loss = 0.0
-    int valid = 0
-    int i = 0
-    while i < len(samples) {
-        string text = samples[i]
-        if str_len(text) >= 2 {
-            int j = 0
-            float sample_loss = 0.0
-            int pair_count = 0
-            while j + 1 < str_len(text) {
-                int prev_token = text[j]
-                int next_token = text[j + 1]
-                float x = (prev_token as float) / 255.0
-                float y = (next_token as float) / 255.0
-                float pred = state.weight * x + state.bias
-                float diff = pred - y
-                sample_loss = sample_loss + diff * diff
-                pair_count = pair_count + 1
-                j = j + 1
-            }
-            if pair_count > 0 {
-                total_loss = total_loss + sample_loss / (pair_count as float)
-                valid = valid + 1
-            }
-        }
-        i = i + 1
-    }
-
-    if valid == 0 {
-        return 0.0
-    }
-    total_loss / (valid as float)
 }
 
 func build_checkpoint_text(sft_state state, string checkpoint_path, string data_path, int sample_count, int epochs, float lr) string {
