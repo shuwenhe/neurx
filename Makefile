@@ -1,7 +1,8 @@
 .PHONY: help train infer pretrain posttrain orpo pretrain-watch watch-auto-commit-push chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
-	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s
+	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s \
+	run-lora-sft-training-s
 	verify-setup-s quick-test-s quickstart-s verify-training-pipeline-s monitor-training-s build-linux-s build-macos-s run-large-pretrain-s \
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
@@ -68,6 +69,7 @@ help:
 	@echo "  make posttrain"
 	@echo "  make orpo"
 	@echo "  make run-sft-training-s"
+	@echo "  make run-lora-sft-training-s"
 	@echo "  make watch-auto-commit-push"
 	@echo "  make chat"
 
@@ -260,6 +262,19 @@ run-sft-training-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/sft_training/run_sft_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_sft_training_$(shell date +%Y%m%d_%H%M%S).log
+
+run-lora-sft-training-s: check-bash
+	@echo "Building LoRA SFT training entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_sft_training
+	@mkdir -p $(LOG_DIR)
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
+		/home/shuwen/s/bin/s ir 'script/run_lora_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir'
+	@echo "Running LoRA SFT training entry..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/lora_sft_training/run_lora_sft_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_lora_sft_training_$(shell date +%Y%m%d_%H%M%S).log
 
 verify-setup-s: check-bash
 	@echo "Building setup verification entry..."
