@@ -249,7 +249,7 @@ func create_sft_trainer(
         config: config,
         dataset: dataset,
         global_rank: global_rank,
-        local_rank: global_rank % 8,
+        local_rank: mod_int(global_rank, 8),
         world_size: world_size,
         dp_rank: global_rank,
         dp_degree: world_size,
@@ -480,11 +480,11 @@ func start_sft_training(
             trainer.loss_history = append(trainer.loss_history, result.loss)
             trainer.perplexity_history = append(trainer.perplexity_history, result.perplexity)
 
-            if trainer.config.log_interval > 0 && trainer.current_step % trainer.config.log_interval == 0 && trainer.global_rank == 0 {
+            if trainer.config.log_interval > 0 && mod_int(trainer.current_step, trainer.config.log_interval) == 0 && trainer.global_rank == 0 {
                 print_sft_training_progress(trainer)
             }
 
-            if trainer.config.eval_interval > 0 && trainer.current_step > 0 && trainer.current_step % trainer.config.eval_interval == 0 {
+            if trainer.config.eval_interval > 0 && trainer.current_step > 0 && mod_int(trainer.current_step, trainer.config.eval_interval) == 0 {
                 sft_eval_metrics metrics = evaluate_sft(ref trainer, trainer.dataset.eval_examples)
                 trainer.eval_loss_history = append(trainer.eval_loss_history, metrics.eval_loss)
                 if metrics.eval_loss < trainer.best_eval_loss {
@@ -497,7 +497,7 @@ func start_sft_training(
                 }
             }
 
-            if trainer.config.save_interval > 0 && trainer.current_step > 0 && trainer.current_step % trainer.config.save_interval == 0 {
+            if trainer.config.save_interval > 0 && trainer.current_step > 0 && mod_int(trainer.current_step, trainer.config.save_interval) == 0 {
                 save_sft_checkpoint(trainer, trainer.config.checkpoint_dir)
             }
 
@@ -799,4 +799,18 @@ func fmt_float(float value, int decimals) string {
         i = i + 1
     }
     out
+}
+
+func mod_int(int a, int b) int {
+    if b <= 0 {
+        return 0
+    }
+    int value = a
+    while value < 0 {
+        value = value + b
+    }
+    while value >= b {
+        value = value - b
+    }
+    value
 }
