@@ -57,12 +57,18 @@ func main() {
     if str_len(trim(shard_list_text)) == 0 {
         string shard_cmd = "find " + shard_dir + " -maxdepth 1 -name 'shard_*.jsonl' -print | sort"
         println("Shard list file empty, scanning shard directory...")
+        runtime_run_command_output("echo '[STATUS] Scanning for shard files...' >&2")
         shard_list_text = runtime_run_command_output(shard_cmd)
+        runtime_run_command_output("echo '[STATUS] Shard directory scan complete' >&2")
         println("Shard directory scan complete")
     }
+    runtime_run_command_output("echo '[DEBUG] Counting non-empty lines in shard list...' >&2")
     int shard_count = count_non_empty_lines(shard_list_text)
+    runtime_run_command_output("echo '[DEBUG] Found " + int_to_str(shard_count) + " shards' >&2")
+    
     if shard_count == 0 {
         println("No shard files found under: " + shard_dir)
+        runtime_run_command_output("echo '[ERROR] No shard files found' >&2")
         return
     }
 
@@ -71,7 +77,9 @@ func main() {
     println("Processing " + int_to_str(shard_count) + " shards for training")
     println("========================================")
     println("")
+    runtime_run_command_output("echo '[STATUS] Starting shard processing...' >&2")
     println("[STATUS] Starting shard processing...")
+    runtime_run_command_output("echo 'Resolved shard count: " + int_to_str(shard_count) + "' >&2")
     println("Resolved shard count: " + int_to_str(shard_count))
     int preview = shard_count
     if preview > 6 {
