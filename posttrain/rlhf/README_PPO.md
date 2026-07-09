@@ -2,17 +2,16 @@
 
 ## Overview
 
-**Proximal Policy Optimization (PPO)** is the gold-standard reinforcement learning algorithm for RLHF (Reinforcement Learning from Human Feedback). This implementation provides production-ready PPO training with distributed support.
+**Proximal Policy Optimization (PPO)** is a standard reinforcement learning algorithm for RLHF (Reinforcement Learning from Human Feedback). This repository provides a compileable PPO scaffold in S, with deterministic placeholder data flow for tokenizer, policy logits, reward, and value estimates.
 
 **Key Characteristics**:
-- ✅ Requires: Reward Model + Value Network (critic)
-- ✅ Policy-gradient based optimization
-- ✅ Clipped objective for stable training
-- ✅ KL divergence constraints
-- ✅ Generalized Advantage Estimation (GAE)
-- ✅ Full distributed training support
+- ✅ PPO trainer scaffold with trajectory collection and GAE
+- ✅ Clipped objective, KL monitoring, and entropy term
+- ✅ Deterministic placeholder policy/reward/value pipeline
+- ✅ Example entrypoints for training and configuration
+- ✅ Compileable S implementation for local experimentation
 
-**Training Time**: ~2 weeks on 64 A100s for 7B-13B models
+**Training Time**: depends on the underlying model and data pipeline; the current S implementation is a local scaffold, not a full large-scale training stack.
 
 ## Algorithm Overview
 
@@ -155,11 +154,19 @@ ppo_state state = start_ppo_training(config, 100)
 ### 3. Integration with Reward Model
 
 ```s
-// Inside collect_trajectory():
-float reward = reward_model.score(response)
-float value = value_network.predict(prompt)
-float advantage = reward - value
+// In a full system, these values come from model inference:
+// float reward = reward_model.score(response)
+// float value = value_network.predict(prompt)
+// float advantage = reward - value
 ```
+
+### Implementation Notes
+
+- `ppo_trainer.s` contains the main compileable PPO scaffold.
+- `ppo_examples.s` shows how to configure and run the scaffold.
+- `ppo.s` provides a smaller core PPO primitive layer.
+- `value_model_trainer.s` is a standalone value network trainer scaffold that can be used as the critic side of PPO.
+- The current code uses deterministic stand-ins where a full deployment would wire in tokenizer, policy, reward model, and value network inference.
 
 ## Mathematical Details
 
@@ -399,4 +406,3 @@ PPO is the proven method for stable, sample-efficient RLHF training. This implem
 - Easy integration with reward models
 
 For typical 13B model alignment: ~2 weeks on 64 A100s with 1M high-quality preference pairs.
-
