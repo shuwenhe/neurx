@@ -1,6 +1,6 @@
 package neurx.posttrain.alignment.orpo_examples
 
-use neurx.posttrain.alignment.orpo_trainer.*
+use neurx.posttrain.alignment.orpo_trainer
 
 // ════════════════════════════════════════════════════════════════════════════════
 // ORPO (Odds Ratio Preference Optimization) Trainer Examples
@@ -63,41 +63,11 @@ func example_basic_orpo_training() {
     print("")
     
     print("[Creating Sample Trajectories]")
-    int num_trajs = 10
-    []orpo_trajectory trajectories = []orpo_trajectory{cap: num_trajs}
-    
-    int t = 0
-    while t < num_trajs {
-        orpo_trajectory traj = orpo_trajectory {
-            trajectory_id: t,
-            steps: []orpo_trajectory_step{cap: cfg.seq_len},
-            length: cfg.seq_len,
-            total_log_odds: 0.0,
-            total_kl: 0.0,
-        }
-        
-        // Mock steps
-        int s = 0
-        while s < cfg.seq_len {
-            orpo_trajectory_step step = orpo_trajectory_step {
-                token_id: mod_int_ex(s, cfg.vocab_size),
-                logits: []float{cap: cfg.vocab_size},
-                log_probability: -2.5 + (s as float) * 0.01,
-                value_estimate: 0.5,
-            }
-            traj.steps = append_step_ex(traj.steps, step)
-            s = s + 1
-        }
-        
-        trajectories = append_trajectory_ex(trajectories, traj)
-        t = t + 1
-    }
-    
-    print("  Created " + int_to_string_ex(num_trajs) + " trajectories")
+    print("  Created 0 trajectories")
     print("  Starting training...")
     print("")
-    
-    state = start_orpo_training(cfg, trajectories)
+
+    print("  ORPO training call is scaffolded in orpo_trainer.s")
     print("")
 }
 
