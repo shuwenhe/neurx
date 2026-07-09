@@ -67,6 +67,7 @@ PRETRAIN_VAL_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/val.jsonl
 PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
+PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
 
 
 help:
@@ -153,7 +154,7 @@ shard: check-bash
 			--input '$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 			--output-dir '$(PRETRAIN_SHARD_DIR)' \
 			--manifest '$(PRETRAIN_MANIFEST)' \
-			--docs-per-shard 5000 2>&1
+			--docs-per-shard '$(PRETRAIN_SHARD_DOCS_PER_FILE)' 2>&1
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
