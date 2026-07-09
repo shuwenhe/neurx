@@ -1,8 +1,7 @@
-.PHONY: help train infer pretrain posttrain orpo pretrain-watch watch-auto-commit-push chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
-	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s \
-	run-lora-sft-training-s
+	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s
 	verify-setup-s quick-test-s quickstart-s verify-training-pipeline-s monitor-training-s build-linux-s build-macos-s run-large-pretrain-s \
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
@@ -67,10 +66,6 @@ help:
 	@echo "  make train"
 	@echo "  make infer"
 	@echo "  make posttrain"
-	@echo "  make orpo"
-	@echo "  make run-sft-training-s"
-	@echo "  make run-lora-sft-training-s"
-	@echo "  make watch-auto-commit-push"
 	@echo "  make chat"
 
 
@@ -132,31 +127,9 @@ posttrain: check-bash
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'
 	@echo "✓ posttrain entry compiled to S IR"
 
-orpo: check-bash
-	@echo "Building NeurX ORPO alignment entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/orpo
-	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
-		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
-		exit 1; \
-	fi
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'posttrain/alignment/orpo_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_trainer.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_trainer.ir'
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'posttrain/alignment/orpo_examples.s' -o '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_examples.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_examples.ir'
-	@echo "✓ ORPO trainer/examples compiled to S IR"
-
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
-
-watch-auto-commit-push: check-bash
-	@echo "Starting local save-to-commit-and-push watcher on branch main"
-	@cd '$(CURDIR_UNIX)' && bash tools/watch-auto-commit-push.sh
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
@@ -250,20 +223,7 @@ run-small-model-training-s: check-bash
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_small_model_training_$(shell date +%Y%m%d_%H%M%S).log
 
-run-sft-training-s: check-bash
-	@echo "Building SFT training entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/sft_training
-	@mkdir -p $(LOG_DIR)
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'script/run_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/sft_training/run_sft_training.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/sft_training/run_sft_training.ir'
-	@echo "Running SFT training entry..."
-	@cd '$(CURDIR_UNIX)' && \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/sft_training/run_sft_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_sft_training_$(shell date +%Y%m%d_%H%M%S).log
-
-run-lora-sft-training-s: check-bash
+verify-setup-s: check-bash
 	@echo "Building LoRA SFT training entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_sft_training
 	@mkdir -p $(LOG_DIR)
