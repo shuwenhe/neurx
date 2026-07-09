@@ -70,7 +70,7 @@ func main() int {
 
             int item = sample_index
             while item < batch_end {
-                string formatted = format_sft_example(samples[item])
+                string formatted = samples[item]
                 state = train_one_sample(state, formatted, learning_rate)
                 epoch_loss = epoch_loss + state.last_loss
                 epoch_examples = epoch_examples + 1
