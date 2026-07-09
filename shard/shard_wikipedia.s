@@ -395,9 +395,9 @@ func process_wikipedia() int {
 
     string perl_cmd = "perl -e " + shell_escape(perl_script) + " " +
         shell_escape(temp_xml) + " " +
-        shell_escape(config.output_dir) + " " +
-        shell_escape(int_to_str(config.docs_per_shard)) + " " +
-        shell_escape(int_to_str(config.max_pages))
+        shell_escape(g_output_dir) + " " +
+        shell_escape(int_to_str(g_docs_per_shard)) + " " +
+        shell_escape(int_to_str(g_max_pages))
 
     println("[*] Writing JSONL shards and manifest...")
     let (_, shard_code) = command(perl_cmd)
