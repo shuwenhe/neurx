@@ -226,28 +226,20 @@ struct lora_linear {
 }
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
-    int r = cfg.rank
-    float scale = cfg.alpha
-
-    // 初始化 A: 小常数，B 为 0，保证初始 ΔW = 0
-    []float a = []float{cap: r * in_dim}
-    // 初始化 B: 全零 (初始 ΔW = 0)
-    []float b = []float{cap: out_dim * r}
-
     if cfg.use_qlora {
         nf4_tensor q = quantize_nf4(base_weight, in_dim * out_dim)
         lora_linear {
             base_weight: []float{},
             base_nf4: q,
             quantized: true,
-            lora_A: a,
-            lora_B: b,
-            lora_A_grad: []float{cap: r * in_dim},
-            lora_B_grad: []float{cap: out_dim * r},
+            lora_A: []float{cap: cfg.rank * in_dim},
+            lora_B: []float{cap: out_dim * cfg.rank},
+            lora_A_grad: []float{cap: cfg.rank * in_dim},
+            lora_B_grad: []float{cap: out_dim * cfg.rank},
             in_dim: in_dim,
             out_dim: out_dim,
-            rank: r,
-            scaling: scale,
+            rank: cfg.rank,
+            scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
             last_input: []float{},
             last_Ax: []float{},
@@ -257,14 +249,14 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             base_weight: base_weight,
             base_nf4: nf4_tensor{ codes: []int{}, absmax: 0.0, num_elem: 0, codebook: []float{} },
             quantized: false,
-            lora_A: a,
-            lora_B: b,
-            lora_A_grad: []float{cap: r * in_dim},
-            lora_B_grad: []float{cap: out_dim * r},
+            lora_A: []float{cap: cfg.rank * in_dim},
+            lora_B: []float{cap: out_dim * cfg.rank},
+            lora_A_grad: []float{cap: cfg.rank * in_dim},
+            lora_B_grad: []float{cap: out_dim * cfg.rank},
             in_dim: in_dim,
             out_dim: out_dim,
-            rank: r,
-            scaling: scale,
+            rank: cfg.rank,
+            scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
             last_input: []float{},
             last_Ax: []float{},
