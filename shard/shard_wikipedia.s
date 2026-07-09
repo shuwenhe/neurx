@@ -349,7 +349,6 @@ func process_wikipedia(WikipediaConfig config) int {
     perl_script = perl_script + "  my $path = sprintf('%s/shard_%05d.jsonl', $out_dir, $shard);\n"
     perl_script = perl_script + "  open($out, '>', $path) or die $!;\n"
     perl_script = perl_script + "}\n"
-    perl_script = perl_script + "sub esc { my ($v) = @_; $v =~ s/\\\\/\\\\\\\\/g; $v =~ s/\"/\\\\\"/g; $v =~ s/\\n/\\\\n/g; $v =~ s/\\r/\\\\r/g; $v =~ s/\\t/\\\\t/g; return $v; }\n"
     perl_script = perl_script + "open_shard();\n"
     perl_script = perl_script + "for my $page (@pages) {\n"
     perl_script = perl_script + "  last if $page_limit > 0 && $count >= $page_limit;\n"
@@ -359,7 +358,7 @@ func process_wikipedia(WikipediaConfig config) int {
     perl_script = perl_script + "  $title = '' unless defined $title;\n"
     perl_script = perl_script + "  $page_id = '' unless defined $page_id;\n"
     perl_script = perl_script + "  $text = '' unless defined $text;\n"
-    perl_script = perl_script + "  my $json = encode_json({title => esc($title), page_id => esc($page_id), text => esc($text), source => 'enwiki'});\n"
+    perl_script = perl_script + "  my $json = encode_json({title => $title, page_id => $page_id, text => $text, source => 'enwiki'});\n"
     perl_script = perl_script + "  print {$out} $json, \"\\n\";\n"
     perl_script = perl_script + "  $count++;\n"
     perl_script = perl_script + "  if ($docs_limit > 0 && ($count % $docs_limit) == 0 && $count < ($page_limit > 0 ? $page_limit : $count + 1)) {\n"
@@ -394,23 +393,9 @@ func process_wikipedia(WikipediaConfig config) int {
         return 1
     }
 
-    let shard_count_output = read_command_output("ls -1 " + shell_escape(config.output_dir + "/shard_*.jsonl") + " 2>/dev/null | wc -l")
-    int actual_shards = parse_int(shard_count_output, total_shards)
-    if actual_shards < 1 {
-        actual_shards = total_shards
-    }
-
-    string manifest_json = generate_manifest_json(config, total_pages, actual_shards, []ShardMetadata{cap: 0})
-    // The Perl side already writes a manifest; replace it with the S-generated
-    // one so the entrypoint stays self-consistent.
-    if !write_text_file(config.manifest_file, manifest_json) {
-        println("[-] Failed to write manifest")
-        return 1
-    }
-
     println("")
     println("[+] Wikipedia sharding complete")
-    println("[+] Shards   : " + int_to_str(actual_shards))
+    println("[+] Shards   : " + int_to_str(total_shards))
     println("[+] Pages    : " + int_to_str(total_pages))
     println("[+] Manifest : " + config.manifest_file)
 
