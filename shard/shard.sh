@@ -138,15 +138,40 @@ cmd_wikipedia() {
         esac
     done
     
-    log_info "Sharding Wikipedia dataset"
+    log_info "Sharding Wikipedia dataset (S language implementation)"
     cd "${NEURX_ROOT}"
     
-    python3 "${SCRIPT_DIR}/shard_wikipedia_enwiki.py" \
-        --input "${input}" \
-        --output-dir "${output_dir}" \
-        --manifest "${manifest}" \
-        --docs-per-shard "${docs_per_shard}" \
-        ${max_pages:+--max-pages "${max_pages}"}
+    # Compile S language implementation
+    local s_compiler="${S_COMPILER:-/home/shuwen/s/bin/s}"
+    local build_dir="${NEURX_ROOT}/artifacts/build/shard"
+    local ir_file="${build_dir}/shard_enwiki.ir"
+    
+    mkdir -p "${build_dir}"
+    
+    log_info "Compiling S implementation..."
+    if ! "$s_compiler" ir "${SCRIPT_DIR}/shard_enwiki.s" -o "$ir_file" 2>&1; then
+        log_error "Failed to compile shard_enwiki.s"
+        return 1
+    fi
+    
+    log_success "S compilation complete"
+    log_info "Running S IR executor..."
+    
+    # Execute S IR
+    local s_runner="${S_RUNNER_BIN:-/home/shuwen/s/bin/s-runner}"
+    export NEURX_HOME="${NEURX_ROOT}"
+    export ENWIKI_BZ2_FILE="${input}"
+    export ENWIKI_SHARD_DIR="${output_dir}"
+    export ENWIKI_MANIFEST_FILE="${manifest}"
+    export DOCS_PER_SHARD="${docs_per_shard}"
+    export MAX_PAGES="${max_pages}"
+    
+    if ! "$s_runner" "$ir_file"; then
+        log_error "S execution failed"
+        return 1
+    fi
+    
+    log_success "Wikipedia sharding complete"
     
     log_success "Wikipedia sharding complete"
 }
