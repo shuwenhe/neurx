@@ -270,33 +270,22 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
 
 // x: [batch, in_dim] → out: [batch, out_dim]
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
-    int I = layer.in_dim
-    int O = layer.out_dim
-    int R = layer.rank
-
-    // 基础权重前向
     []float base_w = layer.base_weight
     if layer.quantized {
         base_w = dequantize_nf4(layer.base_nf4)
     }
 
-    // y_base = x @ W^T  [batch, O]
-    []float y = matmul_lora(x, base_w, batch, I, O, true)
+    []float y = matmul_lora(x, base_w, batch, layer.in_dim, layer.out_dim, true)
 
-    // LoRA: y_lora = (x @ A^T) @ B^T * scaling
-    // Ax [batch, R]
-    []float ax = matmul_lora(x, layer.lora_A, batch, I, R, true)
-    // y_lora = ax @ B^T  [batch, O]
-    []float y_lora = matmul_lora(ax, layer.lora_B, batch, R, O, true)
+    []float ax = matmul_lora(x, layer.lora_A, batch, layer.in_dim, layer.rank, true)
+    []float y_lora = matmul_lora(ax, layer.lora_B, batch, layer.rank, layer.out_dim, true)
 
-    // y += y_lora * scaling
     int idx = 0
-    for idx < batch * O {
+    for idx < batch * layer.out_dim {
         y[idx] = y[idx] + y_lora[idx] * layer.scaling
         idx = idx + 1
     }
 
-    // Cache for backward
     lora_linear updated = layer
     updated.last_input = x
     updated.last_Ax = ax
@@ -313,30 +302,24 @@ struct lora_backward_result {
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
-    int I = layer.in_dim
-    int O = layer.out_dim
-    int R = layer.rank
     []float x  = layer.last_input
     []float ax = layer.last_Ax
 
-    // dL/dB = (dy * scaling)^T @ Ax  → dB [O, R]
-    // dy_scaled [batch, O]
-    []float dy_scaled = []float{cap: batch * O}
+    []float dy_scaled = []float{cap: batch * layer.out_dim}
     int si = 0
-    for si < batch * O {
+    for si < batch * layer.out_dim {
         dy_scaled[si] = dy[si] * layer.scaling
         si = si + 1
     }
 
-    // dB += dy_scaled^T @ ax:  dB[o,r] += dy_scaled[b,o] * ax[b,r]
-    []float dB = []float{cap: O * R}
+    []float dB = []float{cap: layer.out_dim * layer.rank}
     int bi = 0
     for bi < batch {
         int oi = 0
-        for oi < O {
+        for oi < layer.out_dim {
             int ri = 0
-            for ri < R {
-                dB[oi*R+ri] = dB[oi*R+ri] + dy_scaled[bi*O+oi] * ax[bi*R+ri]
+            for ri < layer.rank {
+                dB[oi*layer.rank+ri] = dB[oi*layer.rank+ri] + dy_scaled[bi*layer.out_dim+oi] * ax[bi*layer.rank+ri]
                 ri = ri + 1
             }
             oi = oi + 1
@@ -344,18 +327,16 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
         bi = bi + 1
     }
 
-    // dL/d(Ax) = dy_scaled @ B  [batch, R]
-    []float dAx = matmul_lora(dy_scaled, layer.lora_B, batch, O, R, false)
+    []float dAx = matmul_lora(dy_scaled, layer.lora_B, batch, layer.out_dim, layer.rank, false)
 
-    // dL/dA = dAx^T @ x  → dA [R, I]
-    []float dA = []float{cap: R * I}
+    []float dA = []float{cap: layer.rank * layer.in_dim}
     int bi2 = 0
     for bi2 < batch {
         int ri2 = 0
-        for ri2 < R {
+        for ri2 < layer.rank {
             int ii = 0
-            for ii < I {
-                dA[ri2*I+ii] = dA[ri2*I+ii] + dAx[bi2*R+ri2] * x[bi2*I+ii]
+            for ii < layer.in_dim {
+                dA[ri2*layer.in_dim+ii] = dA[ri2*layer.in_dim+ii] + dAx[bi2*layer.rank+ri2] * x[bi2*layer.in_dim+ii]
                 ii = ii + 1
             }
             ri2 = ri2 + 1
@@ -363,29 +344,27 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
         bi2 = bi2 + 1
     }
 
-    // dx = dy @ W_base + dAx @ A  (gradient flows through frozen W too)
     []float base_w = layer.base_weight
     if layer.quantized {
         base_w = dequantize_nf4(layer.base_nf4)
     }
-    []float dx_base = matmul_lora(dy, base_w, batch, O, I, false)
-    []float dx_lora = matmul_lora(dAx, layer.lora_A, batch, R, I, false)
-    []float dx = []float{cap: batch * I}
+    []float dx_base = matmul_lora(dy, base_w, batch, layer.out_dim, layer.in_dim, false)
+    []float dx_lora = matmul_lora(dAx, layer.lora_A, batch, layer.rank, layer.in_dim, false)
+    []float dx = []float{cap: batch * layer.in_dim}
     int di = 0
-    for di < batch * I {
+    for di < batch * layer.in_dim {
         dx[di] = dx_base[di] + dx_lora[di]
         di = di + 1
     }
 
-    // 累积梯度
     lora_linear updated = layer
     int ga = 0
-    for ga < R * I {
+    for ga < layer.rank * layer.in_dim {
         updated.lora_A_grad[ga] = updated.lora_A_grad[ga] + dA[ga]
         ga = ga + 1
     }
     int gb = 0
-    for gb < O * R {
+    for gb < layer.out_dim * layer.rank {
         updated.lora_B_grad[gb] = updated.lora_B_grad[gb] + dB[gb]
         gb = gb + 1
     }
