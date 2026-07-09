@@ -1,3 +1,16 @@
-#!/bin/bash
-# Auto-push after commit to main branch
-git push origin main 2>/dev/null
+#!/bin/sh
+
+set -eu
+
+if [ "${NEURX_SKIP_AUTO_PUSH:-0}" = "1" ]; then
+    exit 0
+fi
+
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [ "$branch" != "main" ]; then
+    exit 0
+fi
+
+if ! git push origin main; then
+    echo "post-commit hook: auto-push to origin/main failed" >&2
+fi
