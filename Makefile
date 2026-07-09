@@ -132,15 +132,28 @@ chat: check-bash
 
 
 shard: check-bash
-	@echo "Running Wikipedia shard processor..."
+	@echo "Building NeurX shard entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
 	@mkdir -p $(LOG_DIR)
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
+		$(S_COMPILER) ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
+	@$(MAKE) build-s-ir-runner
+	@echo "Running Wikipedia shard processor..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
+		NEURX_SHARD_CMD=wikipedia \
 		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
 		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
-		bash shard/shard.sh wikipedia 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
@@ -487,10 +500,24 @@ shard-s:
 
 shard-enwiki: check-bash
 	@echo "$(BLUE)📦 Sharding Wikipedia dataset...$(NC)"
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
 	@mkdir -p $(LOG_DIR)
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
+		$(S_COMPILER) ir 'shard/shard_enwiki.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir'
+	@$(MAKE) build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		bash shard/shard_enwiki.sh 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
+		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
+		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
+		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
 	@echo "$(GREEN)✓ Wikipedia sharding complete$(NC)"
 
 data-pipeline-s: build-data-scripts
