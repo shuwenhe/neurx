@@ -8,7 +8,8 @@
 
 package neurx.shard.shard_wikipedia
 
-use std.os.{command, getenv}
+use std.os.command
+use neurx.runtime.io.runtime_env_get
 
 // ============================================================================
 // Configuration
@@ -407,15 +408,15 @@ func process_wikipedia(WikipediaConfig config) int {
 // ============================================================================
 
 func main() int {
-    string neurx_home = getenv("NEURX_HOME", ".")
+    string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
 
     WikipediaConfig config
-    config.input_bz2_file = getenv("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
-    config.output_dir = getenv("ENWIKI_SHARD_DIR", dataset_root + "/shard")
-    config.manifest_file = getenv("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
-    config.docs_per_shard = parse_int(getenv("DOCS_PER_SHARD", "5000"), 5000)
-    config.max_pages = parse_int(getenv("MAX_PAGES", "0"), 0)
+    config.input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
+    config.output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
+    config.manifest_file = runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
+    config.docs_per_shard = parse_int(runtime_env_get("DOCS_PER_SHARD", "5000"), 5000)
+    config.max_pages = parse_int(runtime_env_get("MAX_PAGES", "0"), 0)
 
     process_wikipedia(config)
 }

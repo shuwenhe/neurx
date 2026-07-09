@@ -10,9 +10,13 @@
 
 package neurx.shard.shard_enwiki
 
-use std.io.{println, exit}
+use std.io.{exit}
 use std.os.{command, getenv}
 use std.strings.{split, join, contains, has_prefix, has_suffix}
+
+func string_char(int c) string {
+    string(c)
+}
 
 // ============================================================================
 // Configuration
@@ -42,18 +46,13 @@ func main() int {
     let neurx_home = getenv("NEURX_HOME", ".")
     let dataset_root = neurx_home + "/dataset/pretrain"
     
-    let config = enwiki_shard_config{
-        input_bz2_file: getenv("ENWIKI_BZ2_FILE", 
-            dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2"),
-        temp_xml_file: getenv("ENWIKI_TEMP_XML",
-            dataset_root + "/tmp/enwiki-latest-pages-articles.xml"),
-        shard_dir: getenv("ENWIKI_SHARD_DIR",
-            dataset_root + "/shard"),
-        manifest_file: getenv("ENWIKI_MANIFEST_FILE",
-            dataset_root + "/enwiki_manifest.json"),
-        target_shard_size_mb: 500,  // 500MB shards
-        cleanup_temp: true,
-    }
+    enwiki_shard_config config
+    config.input_bz2_file = getenv("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
+    config.temp_xml_file = getenv("ENWIKI_TEMP_XML", dataset_root + "/tmp/enwiki-latest-pages-articles.xml")
+    config.shard_dir = getenv("ENWIKI_SHARD_DIR", dataset_root + "/shard")
+    config.manifest_file = getenv("ENWIKI_MANIFEST_FILE", dataset_root + "/enwiki_manifest.json")
+    config.target_shard_size_mb = 500
+    config.cleanup_temp = true
     
     // Print configuration
     println("📋 Configuration:")
@@ -80,7 +79,7 @@ func main() int {
 // Processing Functions
 // ============================================================================
 
-func process_enwiki_dataset(config: enwiki_shard_config) bool {
+func process_enwiki_dataset(enwiki_shard_config config) bool {
     // Step 1: Check if input file exists
     println("🔍 Checking input file...")
     let check_cmd = "test -f \"" + config.input_bz2_file + "\""
@@ -161,9 +160,9 @@ func process_enwiki_dataset(config: enwiki_shard_config) bool {
 // XML Sharding
 // ============================================================================
 
-func split_xml_into_shards(config: enwiki_shard_config, shard_count: int) bool {
+func split_xml_into_shards(enwiki_shard_config config, int shard_count) bool {
     // Use split command to divide XML file into approximately equal parts
-    let target_size = (config.target_shard_size_mb * 1024) as string
+    let target_size = itoa(config.target_shard_size_mb * 1024)
     
     let split_cmd = "split -b " + target_size + "M \"" + config.temp_xml_file + "\" \"" + config.shard_dir + "/shard_\""
     let (output, exit_code) = command(split_cmd)
@@ -190,7 +189,7 @@ func split_xml_into_shards(config: enwiki_shard_config, shard_count: int) bool {
 // Manifest Generation
 // ============================================================================
 
-func generate_enwiki_manifest(config: enwiki_shard_config, shard_count: int) bool {
+func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool {
     // Count total shards created
     let count_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null | wc -l"
     let (count_output, _) = command(count_cmd)
@@ -279,24 +278,24 @@ func generate_enwiki_manifest(config: enwiki_shard_config, shard_count: int) boo
 // Helper Functions
 // ============================================================================
 
-func atoi(s: string) int {
+func atoi(string s) int {
     let mut result = 0
     let mut i = 0
     
     // Skip whitespace (space and tab)
-    while i < len(s) && (s[i] == ' ' || s[i] == 9) {
+    while i < len(s) && (string_char(s[i]) == " " || s[i] == 9) {
         i = i + 1
     }
     
     // Skip sign
-    let negative = i < len(s) && s[i] == '-'
-    if negative || (i < len(s) && s[i] == '+') {
+    let negative = i < len(s) && string_char(s[i]) == "-"
+    if negative || (i < len(s) && string_char(s[i]) == "+") {
         i = i + 1
     }
     
     // Convert digits
-    while i < len(s) && s[i] >= '0' && s[i] <= '9' {
-        result = result * 10 + (s[i] - '0')
+    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+        result = result * 10 + (s[i] - 48)
         i = i + 1
     }
     
@@ -307,7 +306,7 @@ func atoi(s: string) int {
     result
 }
 
-func itoa(n: int) string {
+func itoa(int n) string {
     if n == 0 {
         "0"
     }
@@ -317,8 +316,14 @@ func itoa(n: int) string {
     let mut result = ""
     
     while n > 0 {
-        result = string(char(n % 10 + 48)) + result
-        n = n / 10
+        let mut digit = n
+        let mut quotient = 0
+        while digit >= 10 {
+            digit = digit - 10
+            quotient = quotient + 1
+        }
+        result = string_char(digit + 48) + result
+        n = quotient
     }
     
     if negative {
@@ -328,10 +333,10 @@ func itoa(n: int) string {
     result
 }
 
-func max(a: int, b: int) int {
+func max(int a, int b) int {
     if a > b { a } else { b }
 }
 
-func char(n: int) int {
+func char(int n) int {
     n
 }

@@ -17,6 +17,7 @@ This directory contains all data sharding-related utilities for the NeurX traini
 ### S Language Implementations
 - **shard_wikipedia.s** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
 - **shard_enwiki.s** - Alternative S implementation for enwiki processing
+- **load_shards.s** - S implementation for shard metadata loading and summary reporting
 - **shard_manager.s** - Shard management utilities
 - **data_shard.s** - Data shard generation from cleaned datasets
 - **test_shard.s** - Testing utilities for shard validation
@@ -25,7 +26,7 @@ This directory contains all data sharding-related utilities for the NeurX traini
 ### Shell Scripts
 - **shard.sh** - Unified CLI for all shard operations (main entry point)
 - **generate_shards.sh** - Legacy shell script for shard generation (delegates to make)
-- **load_shards.sh** - Utilities for loading shard metadata
+- **load_shards.sh** - Thin wrapper for `load_shards.s`
 - **shard_enwiki.sh** - Shell script wrapper for Wikipedia sharding
 
 ### Build & Configuration
@@ -78,6 +79,7 @@ neurx/
   │   ├── shard.sh               ← Unified CLI (main entry)
   │   ├── shard_wikipedia.s
   │   ├── shard_enwiki.s/.sh
+  │   ├── load_shards.s
   │   ├── shard_manager.s
   │   ├── data_shard.s
   │   ├── test_shard.s
