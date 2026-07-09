@@ -283,8 +283,8 @@ func atoi(s: string) int {
     let mut result = 0
     let mut i = 0
     
-    // Skip whitespace
-    while i < len(s) && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n') {
+    // Skip whitespace (space and tab)
+    while i < len(s) && (s[i] == ' ' || s[i] == 9) {
         i = i + 1
     }
     
