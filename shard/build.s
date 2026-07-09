@@ -79,6 +79,7 @@ func main() int {
     }
 
     if !compile_one(compiler, script_dir, build_dir, "shard.s") { return 1 }
+    if !compile_one(compiler, script_dir, build_dir, "shard_wikipedia_simple.s") { return 1 }
     if !compile_one(compiler, script_dir, build_dir, "shard_wikipedia.s") { return 1 }
     if !compile_one(compiler, script_dir, build_dir, "load_shards.s") { return 1 }
     if !compile_one(compiler, script_dir, build_dir, "generate_shards.s") { return 1 }
