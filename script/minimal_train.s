@@ -330,6 +330,7 @@ func main() {
             println("║ Docs: " + int_to_str(shard_docs) + " | Tokens: " + int_to_str(shard_tokens))
             println("║ Total: docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " steps=" + int_to_str(step) + "/" + int_to_str(max_steps))
             println("╚════════════════════════════════════════════════════════════╝")
+            runtime_run_command_output("echo '[STATUS] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " complete: docs=" + int_to_str(shard_docs) + " tokens=" + int_to_str(shard_tokens) + "' >&2")
             println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " complete: docs=" + int_to_str(shard_docs) + " tokens=" + int_to_str(shard_tokens))
         shard_index = shard_index + 1
     }
@@ -347,6 +348,7 @@ func main() {
         step = step + 1
         last_loss = batch_loss / pair_count as float
         last_lr = lr
+        runtime_run_command_output("echo '[TRAIN] Step " + int_to_str(step) + ": loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8) + " shard=" + last_shard + "' >&2")
         println("[Training] flush shard=" + last_shard + " step=" + int_to_str(step) + " loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8))
     }
 
@@ -360,6 +362,7 @@ func main() {
     println("Last loss   : " + fmt_float(last_loss, 6))
     println("Last shard  : " + last_shard)
     println("========================================")
+    runtime_run_command_output("echo '[COMPLETE] Training finished - step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " loss=" + fmt_float(last_loss, 6) + "' >&2")
 }
 
 func count_non_empty_lines(string text) int {
