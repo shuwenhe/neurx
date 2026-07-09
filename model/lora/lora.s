@@ -67,24 +67,24 @@ func qlora_config_7b() lora_config {
 
 // NF4 的 16 个量化点 (正态分布分位数)
 func nf4_codebook() []float {
-    []float cb = []
-    cb = append(cb, -1.0)
-    cb = append(cb, -0.6961928009986877)
-    cb = append(cb, -0.5250730514526367)
-    cb = append(cb, -0.39491748809814453)
-    cb = append(cb, -0.28444138169288635)
-    cb = append(cb, -0.18477343022823334)
-    cb = append(cb, -0.09105003625154495)
-    cb = append(cb, 0.0)
-    cb = append(cb, 0.07958029955625534)
-    cb = append(cb, 0.16093020141124725)
-    cb = append(cb, 0.24611230194568634)
-    cb = append(cb, 0.33791524171829224)
-    cb = append(cb, 0.44070982933044434)
-    cb = append(cb, 0.5626170039176941)
-    cb = append(cb, 0.7229568362236023)
-    cb = append(cb, 1.0)
-    cb
+    []float codebook = []
+    codebook = append(codebook, -1.0)
+    codebook = append(codebook, -0.6961928009986877)
+    codebook = append(codebook, -0.5250730514526367)
+    codebook = append(codebook, -0.39491748809814453)
+    codebook = append(codebook, -0.28444138169288635)
+    codebook = append(codebook, -0.18477343022823334)
+    codebook = append(codebook, -0.09105003625154495)
+    codebook = append(codebook, 0.0)
+    codebook = append(codebook, 0.07958029955625534)
+    codebook = append(codebook, 0.16093020141124725)
+    codebook = append(codebook, 0.24611230194568634)
+    codebook = append(codebook, 0.33791524171829224)
+    codebook = append(codebook, 0.44070982933044434)
+    codebook = append(codebook, 0.5626170039176941)
+    codebook = append(codebook, 0.7229568362236023)
+    codebook = append(codebook, 1.0)
+    codebook
 }
 
 struct nf4_tensor {
