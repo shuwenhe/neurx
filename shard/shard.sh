@@ -1,370 +1,75 @@
 #!/bin/bash
 
-# ============================================================================
-# NeurX Shard Manager - Unified interface for all sharding operations
-# 
-# Usage: shard/shard.sh [command] [options]
-# 
-# Commands:
-#   wikipedia    - Shard Wikipedia dump (ENWIKI)
-#   verify       - Verify shard integrity
-#   list         - List available shards
-#   clean        - Clean up shard files
-#   help         - Show this help message
-# ============================================================================
-
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+S_COMPILER="${S_COMPILER:-/home/shuwen/s/bin/s}"
+BUILD_DIR="${NEURX_ROOT}/artifacts/build/shard"
+OUTPUT_IR="${BUILD_DIR}/shard.ir"
+S_RUNNER_BIN="${NEURX_ROOT}/artifacts/build/s_runner/s_ir_runner"
 
-# Colors for output
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+mkdir -p "${BUILD_DIR}"
 
-# ============================================================================
-# Helper Functions
-# ============================================================================
+if ! command -v "${S_COMPILER}" >/dev/null 2>&1; then
+    echo "Error: S compiler not found: ${S_COMPILER}" >&2
+    exit 1
+fi
 
-log_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
-}
+"${S_COMPILER}" ir "${SCRIPT_DIR}/shard.s" -o "${OUTPUT_IR}"
 
-log_success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
+if [ ! -x "${S_RUNNER_BIN}" ]; then
+    make -C "${NEURX_ROOT}" build-s-ir-runner
+fi
 
-log_warn() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
+cmd="${1:-help}"
+shift || true
 
-log_error() {
-    echo -e "${RED}✗${NC} $1" >&2
-}
+input="${ENWIKI_BZ2_FILE:-${NEURX_ROOT}/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2}"
+output_dir="${ENWIKI_SHARD_DIR:-${NEURX_ROOT}/dataset/pretrain/shard}"
+manifest="${ENWIKI_MANIFEST_FILE:-${NEURX_ROOT}/dataset/pretrain/manifest.json}"
+docs_per_shard="${DOCS_PER_SHARD:-5000}"
+max_pages="${MAX_PAGES:-0}"
 
-show_help() {
-    cat << 'EOF'
-NeurX Shard Manager
-
-Usage: shard/shard.sh [command] [options]
-
-Commands:
-  wikipedia               Shard Wikipedia dump (ENWIKI)
-    Options:
-      --input FILE        Input bz2 file (default: from ENWIKI_BZ2_FILE env)
-      --output DIR        Output directory (default: from ENWIKI_SHARD_DIR env)
-      --manifest FILE     Manifest file (default: from ENWIKI_MANIFEST_FILE env)
-      --docs-per-shard N  Documents per shard (default: 5000)
-      --max-pages N       Max pages to process for testing (default: 0=unlimited)
-  
-  verify                  Verify shard integrity
-    Options:
-      --shard-dir DIR     Shard directory (default: from ENWIKI_SHARD_DIR env)
-  
-  list                    List available shards
-    Options:
-      --shard-dir DIR     Shard directory (default: from ENWIKI_SHARD_DIR env)
-  
-  clean                   Clean up shard files
-    Options:
-      --shard-dir DIR     Shard directory (default: from ENWIKI_SHARD_DIR env)
-  
-  help                    Show this help message
-
-Environment Variables:
-  NEURX_HOME              Project root (default: current directory)
-  ENWIKI_BZ2_FILE         Wikipedia dump file
-  ENWIKI_SHARD_DIR        Output directory for shards
-  ENWIKI_MANIFEST_FILE    Output manifest file
-  DOCS_PER_SHARD          Documents per shard (default: 5000)
-  MAX_PAGES               Max pages to process (default: 0)
-
-Examples:
-  # Shard Wikipedia dump
-  ./shard/shard.sh wikipedia
-
-  # Verify shards
-  ./shard/shard.sh verify
-
-  # List shards
-  ./shard/shard.sh list
-
-  # Clean up
-  ./shard/shard.sh clean
-EOF
-}
-
-# ============================================================================
-# Command: wikipedia
-# ============================================================================
-
-cmd_wikipedia() {
-    local input="${ENWIKI_BZ2_FILE:-${NEURX_ROOT}/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2}"
-    local output_dir="${ENWIKI_SHARD_DIR:-${NEURX_ROOT}/dataset/pretrain/shard}"
-    local manifest="${ENWIKI_MANIFEST_FILE:-${NEURX_ROOT}/dataset/pretrain/manifest.json}"
-    local docs_per_shard="${DOCS_PER_SHARD:-5000}"
-    local max_pages="${MAX_PAGES:-0}"
-    local build_dir="${NEURX_ROOT}/artifacts/build/shard"
-    local output_ir="${build_dir}/shard_wikipedia.ir"
-    local s_compiler="${S_COMPILER:-/home/shuwen/s/bin/s}"
-    local s_runner_bin="${NEURX_ROOT}/artifacts/build/s_runner/s_ir_runner"
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --input)
-                input="$2"
-                shift 2
-                ;;
-            --output)
-                output_dir="$2"
-                shift 2
-                ;;
-            --manifest)
-                manifest="$2"
-                shift 2
-                ;;
-            --docs-per-shard)
-                docs_per_shard="$2"
-                shift 2
-                ;;
-            --max-pages)
-                max_pages="$2"
-                shift 2
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                return 1
-                ;;
-        esac
-    done
-    
-    log_info "Sharding Wikipedia dataset"
-    cd "${NEURX_ROOT}"
-
-    mkdir -p "${build_dir}"
-
-    if ! command -v "${s_compiler}" >/dev/null 2>&1; then
-        log_error "S compiler not found: ${s_compiler}"
-        return 1
-    fi
-
-    log_info "Compiling shard_wikipedia.s"
-    "${s_compiler}" ir "${SCRIPT_DIR}/shard_wikipedia.s" -o "${output_ir}" || return 1
-
-    if [ ! -x "${s_runner_bin}" ]; then
-        log_info "Building S IR runner"
-        make build-s-ir-runner || return 1
-    fi
-
-    log_info "Running shard_wikipedia.s"
-    NEURX_HOME="${NEURX_ROOT}" \
-    ENWIKI_BZ2_FILE="${input}" \
-    ENWIKI_SHARD_DIR="${output_dir}" \
-    ENWIKI_MANIFEST_FILE="${manifest}" \
-    DOCS_PER_SHARD="${docs_per_shard}" \
-    MAX_PAGES="${max_pages}" \
-    "${s_runner_bin}" "${output_ir}" || return 1
-
-    log_success "Wikipedia sharding complete"
-}
-
-# ============================================================================
-# Command: verify
-# ============================================================================
-
-cmd_verify() {
-    local shard_dir="${ENWIKI_SHARD_DIR:-${NEURX_ROOT}/dataset/pretrain/shard}"
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --shard-dir)
-                shard_dir="$2"
-                shift 2
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                return 1
-                ;;
-        esac
-    done
-    
-    if [ ! -d "${shard_dir}" ]; then
-        log_error "Shard directory not found: ${shard_dir}"
-        return 1
-    fi
-    
-    log_info "Verifying shards in ${shard_dir}"
-    
-    local total=0
-    local valid=0
-    local invalid=0
-    
-    for shard_file in "${shard_dir}"/shard_*.jsonl; do
-        if [ ! -f "${shard_file}" ]; then
-            continue
-        fi
-        
-        total=$((total + 1))
-        local line_count=$(wc -l < "${shard_file}")
-        
-        # Try to parse each line as JSON
-        if tail -n 5 "${shard_file}" | python3 -c "import sys, json; [json.loads(line) for line in sys.stdin]" 2>/dev/null; then
-            valid=$((valid + 1))
-            log_success "$(basename "${shard_file}"): ${line_count} documents"
-        else
-            invalid=$((invalid + 1))
-            log_error "$(basename "${shard_file}"): Invalid JSON detected"
-        fi
-    done
-    
-    echo ""
-    log_info "Verification Results:"
-    echo "  Total shards: ${total}"
-    echo "  Valid shards: ${valid}"
-    echo "  Invalid shards: ${invalid}"
-    
-    if [ "${invalid}" -gt 0 ]; then
-        return 1
-    fi
-}
-
-# ============================================================================
-# Command: list
-# ============================================================================
-
-cmd_list() {
-    local shard_dir="${ENWIKI_SHARD_DIR:-${NEURX_ROOT}/dataset/pretrain/shard}"
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --shard-dir)
-                shard_dir="$2"
-                shift 2
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                return 1
-                ;;
-        esac
-    done
-    
-    if [ ! -d "${shard_dir}" ]; then
-        log_error "Shard directory not found: ${shard_dir}"
-        return 1
-    fi
-    
-    log_info "Listing shards in ${shard_dir}"
-    echo ""
-    
-    printf "%-30s %10s %15s\n" "Shard File" "Lines" "Size (MB)"
-    printf "%-30s %10s %15s\n" "--------------------" "----------" "---------------"
-    
-    local total_size=0
-    local total_lines=0
-    
-    for shard_file in "${shard_dir}"/shard_*.jsonl; do
-        if [ ! -f "${shard_file}" ]; then
-            continue
-        fi
-        
-        local filename=$(basename "${shard_file}")
-        local line_count=$(wc -l < "${shard_file}")
-        local file_size=$(($(stat -c%s "${shard_file}" 2>/dev/null || stat -f%z "${shard_file}") / 1024 / 1024))
-        
-        printf "%-30s %10d %15d\n" "${filename}" "${line_count}" "${file_size}"
-        
-        total_size=$((total_size + file_size))
-        total_lines=$((total_lines + line_count))
-    done
-    
-    echo ""
-    printf "%-30s %10d %15d\n" "TOTAL" "${total_lines}" "${total_size}"
-}
-
-# ============================================================================
-# Command: clean
-# ============================================================================
-
-cmd_clean() {
-    local shard_dir="${ENWIKI_SHARD_DIR:-${NEURX_ROOT}/dataset/pretrain/shard}"
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --shard-dir)
-                shard_dir="$2"
-                shift 2
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                return 1
-                ;;
-        esac
-    done
-    
-    if [ ! -d "${shard_dir}" ]; then
-        log_error "Shard directory not found: ${shard_dir}"
-        return 1
-    fi
-    
-    log_warn "Cleaning shard files in ${shard_dir}"
-    
-    local count=0
-    for shard_file in "${shard_dir}"/shard_*.jsonl; do
-        if [ -f "${shard_file}" ]; then
-            rm -f "${shard_file}"
-            count=$((count + 1))
-        fi
-    done
-    
-    if [ "${count}" -gt 0 ]; then
-        log_success "Removed ${count} shard files"
-    else
-        log_info "No shard files found to remove"
-    fi
-}
-
-# ============================================================================
-# Main Entry Point
-# ============================================================================
-
-main() {
-    if [ $# -eq 0 ]; then
-        show_help
-        return 0
-    fi
-    
-    local command="$1"
-    shift || true
-    
-    case "${command}" in
-        wikipedia|shard)
-            cmd_wikipedia "$@"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --input)
+            input="$2"
+            shift 2
             ;;
-        verify)
-            cmd_verify "$@"
+        --output)
+            output_dir="$2"
+            shift 2
             ;;
-        list)
-            cmd_list "$@"
+        --manifest)
+            manifest="$2"
+            shift 2
             ;;
-        clean)
-            cmd_clean "$@"
+        --docs-per-shard)
+            docs_per_shard="$2"
+            shift 2
             ;;
-        help|--help|-h)
-            show_help
+        --max-pages)
+            max_pages="$2"
+            shift 2
+            ;;
+        --shard-dir)
+            output_dir="$2"
+            shift 2
             ;;
         *)
-            log_error "Unknown command: ${command}"
-            show_help
-            return 1
+            echo "Unknown option: $1" >&2
+            exit 1
             ;;
     esac
-}
+done
 
-main "$@"
+NEURX_SHARD_CMD="${cmd}" \
+NEURX_HOME="${NEURX_ROOT}" \
+NEURX_SHARD_SCRIPT_DIR="${SCRIPT_DIR}" \
+ENWIKI_BZ2_FILE="${input}" \
+ENWIKI_SHARD_DIR="${output_dir}" \
+ENWIKI_MANIFEST_FILE="${manifest}" \
+DOCS_PER_SHARD="${docs_per_shard}" \
+MAX_PAGES="${max_pages}" \
+"${S_RUNNER_BIN}" "${OUTPUT_IR}"
