@@ -31,7 +31,7 @@
 
 涉及文件：
 
-- `train/neurx/data/shard_manager.s`
+- `train/neurx/shard/shard_manager.s`
 - `train/neurx/data/dataloader.s`
 - `train/neurx/pretrain/data/pretrain_data.s`
 - `train/neurx/data/data_pipeline.s`
@@ -123,7 +123,7 @@
 
 ### Phase 0.1
 
-- 文件：`train/neurx/data/shard_manager.s`
+- 文件：`train/neurx/shard/shard_manager.s`
 - 目标：真实 I/O、manifest、checksum、路径检测
 
 ### Phase 0.2
@@ -155,7 +155,6 @@ P0 完成时，至少满足以下条件：
 
 如果继续往下做，优先顺序是：
 
-1. `train/neurx/data/shard_manager.s`
+1. `train/neurx/shard/shard_manager.s`
 2. `train/neurx/train/sharded_checkpoint.s`
 3. `train/neurx/train/training_pipeline.s`
-

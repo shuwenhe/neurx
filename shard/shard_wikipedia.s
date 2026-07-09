@@ -17,7 +17,7 @@
 
 package neurx.script.shard_wikipedia
 
-use std.io.{println, eprint, printf}
+use std.io.{println}
 use std.os.{command, getenv, getenv_int}
 use std.path.{join, dirname}
 use std.strings.{split, has_prefix, has_suffix, contains, trim, replace}
@@ -47,19 +47,19 @@ struct ShardMetadata {
 // ============================================================================
 
 fn log_info(msg: string) {
-    eprint("[ℹ️ ] " + msg + "\n")
+    println("[i] " + msg)
 }
 
 fn log_success(msg: string) {
-    eprint("[✓ ] " + msg + "\n")
+    println("[+] " + msg)
 }
 
 fn log_error(msg: string) {
-    eprint("[✗ ] " + msg + "\n")
+    println("[-] " + msg)
 }
 
 fn log_progress(msg: string) {
-    eprint("[⏳] " + msg + "\n")
+    println("[*] " + msg)
 }
 
 fn strip_xml_tags(text: string) -> string {
@@ -182,6 +182,16 @@ struct PageRecord {
     string text
 }
 
+struct PageRecordResult {
+    PageRecord record
+    bool valid
+}
+
+struct PageRecordResult {
+    PageRecord record
+    bool valid
+}
+
 fn extract_xml_tag_value(xml: string, tag_name: string) -> string {
     let open_tag = "<" + tag_name + ">"
     let close_tag = "</" + tag_name + ">"
@@ -216,16 +226,22 @@ fn contains_index(haystack: string, needle: string) -> i64 {
     return -1
 }
 
-fn extract_page_record(page_xml: string) -> PageRecord? {
+fn extract_page_record(page_xml: string) -> PageRecordResult {
     // Check if page is in namespace 0 (main article namespace)
     let ns_str = extract_xml_tag_value(page_xml, "ns")
     if ns_str != "0" {
-        return null
+        return PageRecordResult{
+            record: PageRecord{title: "", page_id: "", text: ""},
+            valid: false,
+        }
     }
     
     // Skip redirects
     if contains_index(page_xml, "<redirect") >= 0 {
-        return null
+        return PageRecordResult{
+            record: PageRecord{title: "", page_id: "", text: ""},
+            valid: false,
+        }
     }
     
     // Extract fields
@@ -234,7 +250,10 @@ fn extract_page_record(page_xml: string) -> PageRecord? {
     let text = extract_xml_tag_value(page_xml, "text")
     
     if len(title) == 0 || len(text) == 0 {
-        return null
+        return PageRecordResult{
+            record: PageRecord{title: "", page_id: "", text: ""},
+            valid: false,
+        }
     }
     
     // Clean up text
@@ -242,13 +261,19 @@ fn extract_page_record(page_xml: string) -> PageRecord? {
     let text_clean = normalize_whitespace(html_unescape(strip_xml_tags(text)))
     
     if len(text_clean) == 0 {
-        return null
+        return PageRecordResult{
+            record: PageRecord{title: "", page_id: "", text: ""},
+            valid: false,
+        }
     }
     
-    return PageRecord{
-        title: title_clean,
-        page_id: page_id,
-        text: text_clean,
+    return PageRecordResult{
+        record: PageRecord{
+            title: title_clean,
+            page_id: page_id,
+            text: text_clean,
+        },
+        valid: true,
     }
 }
 
@@ -307,10 +332,10 @@ fn process_wikipedia(config: WikipediaConfig) -> i32 {
     
     // Log configuration
     log_info("Configuration:")
-    printf("  Input      : %s\n", []interface{}{config.input_bz2_file})
-    printf("  Output dir : %s\n", []interface{}{config.output_dir})
-    printf("  Manifest   : %s\n", []interface{}{config.manifest_file})
-    printf("  Docs/shard : %d\n", []interface{}{config.docs_per_shard})
+    println("  Input      : " + config.input_bz2_file)
+    println("  Output dir : " + config.output_dir)
+    println("  Manifest   : " + config.manifest_file)
+    println("  Docs/shard : " + i64_to_string(i64(config.docs_per_shard)))
     println("")
     
     // Step 1: Verify input file
@@ -382,16 +407,16 @@ fn process_wikipedia(config: WikipediaConfig) -> i32 {
                 total_pages = total_pages + 1
                 
                 let page_xml = join(page_lines, "\n")
-                let record = extract_page_record(page_xml)
+                let result = extract_page_record(page_xml)
                 
-                if record != null {
+                if result.valid {
                     // Create output filename
                     if len(shard_file) == 0 {
                         shard_file = join([]string{config.output_dir, shard_name(shard_index)}, "/")
                     }
                     
                     // Write record to shard file
-                    let json_record = create_json_record(record.title, record.page_id, record.text)
+                    let json_record = create_json_record(result.record.title, result.record.page_id, result.record.text)
                     let (_, code) = command("echo '" + json_record + "' >> \"" + shard_file + "\"")
                     if code == 0 {
                         docs_in_shard = docs_in_shard + 1
@@ -423,9 +448,8 @@ fn process_wikipedia(config: WikipediaConfig) -> i32 {
                     break
                 }
                 
-                if total_pages % 1000 == 0 {
-                    printf("Processed pages: %d | current shard: %s | docs: %d\n", 
-                        []interface{}{total_pages, shard_name(shard_index), docs_in_shard})
+                if total_pages / 1000 * 1000 == total_pages {
+                    log_progress("Processed pages: " + i64_to_string(total_pages) + " | current shard: " + shard_name(shard_index) + " | docs: " + i64_to_string(docs_in_shard))
                 }
             }
         }
@@ -472,10 +496,10 @@ fn process_wikipedia(config: WikipediaConfig) -> i32 {
     
     // Print summary
     println("Summary:")
-    printf("  Total pages   : %d\n", []interface{}{total_pages})
-    printf("  Total shards  : %d\n", []interface{}{len(shards)})
-    printf("  Total docs    : %d\n", []interface{}{total_docs})
-    printf("  Total size    : %d bytes\n", []interface{}{total_size_bytes})
+    println("  Total pages   : " + i64_to_string(total_pages))
+    println("  Total shards  : " + i64_to_string(i64(len(shards))))
+    println("  Total docs    : " + i64_to_string(total_docs))
+    println("  Total size    : " + i64_to_string(total_size_bytes) + " bytes")
     println("")
     
     println("✅ Wikipedia sharding complete")
