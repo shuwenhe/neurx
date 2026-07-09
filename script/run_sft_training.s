@@ -33,7 +33,11 @@ func main() int {
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
 
-    runtime_make_dirs(output_dir).ok
+    runtime_command_result mkdir_result = runtime_make_dirs(output_dir)
+    if !mkdir_result.ok {
+        println("Failed to create output dir: " + output_dir)
+        return 1
+    }
 
     []string samples = load_sft_samples(data_path)
     if len(samples) == 0 {
