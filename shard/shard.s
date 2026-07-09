@@ -183,7 +183,7 @@ func run_wikipedia() int {
         " MAX_PAGES=" + shell_escape(max_pages) +
         " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia.ir")
     )
-    if !runtime_file_exists(output_dir) {
+    if !runtime_file_exists(manifest) {
         println("Error: shard wikipedia execution failed")
         return 1
     }
@@ -206,9 +206,6 @@ func run_verify() int {
         "echo \"$(basename \"$shard_file\"): ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\"): Invalid JSON detected\"; exit 1; fi; done"
     runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
-    if false {
-        return 1
-    }
     0
 }
 
