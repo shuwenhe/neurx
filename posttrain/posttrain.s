@@ -80,7 +80,7 @@ func posttrain_step_with_ppo(posttrain_pipeline_state state, ppo_state ppo, floa
         margin,
         ppo_result.policy_loss,
         ppo_result.value_loss,
-        effective_samples,
+        effective_samples
     )
 }
 
@@ -90,7 +90,7 @@ func posttrain_step_with_dpo(posttrain_pipeline_state state, dpo_state dpo, floa
         chosen_logp,
         rejected_logp,
         ref_chosen_logp,
-        ref_rejected_logp,
+        ref_rejected_logp
     )
     int effective_samples = samples
     if effective_samples <= 0 {
@@ -103,7 +103,7 @@ func posttrain_step_with_dpo(posttrain_pipeline_state state, dpo_state dpo, floa
         dpo_result.reward_margin,
         dpo_result.loss,
         0.0,
-        effective_samples,
+        effective_samples
     )
 }
 
@@ -123,7 +123,7 @@ func run_posttrain_steps(posttrain_pipeline_state state, int steps) posttrain_pi
             0.0,
             current.metrics.policy_loss,
             current.metrics.value_loss,
-            current.loop.cfg.micro_batch_size,
+            current.loop.cfg.micro_batch_size
         )
         if current.loop.finished {
             return current
