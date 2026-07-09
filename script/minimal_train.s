@@ -86,14 +86,19 @@ func main() {
         preview = 6
     }
     int p = 0
+    runtime_run_command_output("echo '[STATUS] Shard list preview:' >&2")
     while p < preview {
-        println("  - " + shard_path_at(shard_list_text, p))
+        string preview_path = shard_path_at(shard_list_text, p)
+        println("  - " + preview_path)
+        runtime_run_command_output("echo '    [" + int_to_str(p + 1) + "] " + preview_path + "' >&2")
         p = p + 1
     }
     if shard_count > preview {
         println("  ... (" + int_to_str(shard_count - preview) + " more)")
+        runtime_run_command_output("echo '    ... (" + int_to_str(shard_count - preview) + " more)' >&2")
     }
     println("")
+    runtime_run_command_output("echo '[STATUS] Beginning main training loop' >&2")
 
     int window = batch_size * seq_len
     if window < 1 {
