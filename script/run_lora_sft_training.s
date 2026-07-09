@@ -80,6 +80,62 @@ func parse_float(string s, float fallback) float {
     out
 }
 
+func int_to_str(int n) string {
+    if n == 0 {
+        return "0"
+    }
+    int value = n
+    bool neg = false
+    if value < 0 {
+        neg = true
+        value = 0 - value
+    }
+    string out = ""
+    while value > 0 {
+        int quotient = 0
+        int digit = value
+        while digit >= 10 {
+            digit = digit - 10
+            quotient = quotient + 1
+        }
+        out = string(digit + 48) + out
+        value = quotient
+    }
+    if neg {
+        out = "-" + out
+    }
+    out
+}
+
+func fmt_float(float value, int decimals) string {
+    bool neg = value < 0.0
+    if neg {
+        value = 0.0 - value
+    }
+    int whole = 0
+    while value >= 1.0 {
+        value = value - 1.0
+        whole = whole + 1
+    }
+    string out = ""
+    if neg {
+        out = "-"
+    }
+    out = out + int_to_str(whole) + "."
+    int i = 0
+    while i < decimals {
+        value = value * 10.0
+        int digit = 0
+        while value >= 1.0 {
+            value = value - 1.0
+            digit = digit + 1
+        }
+        out = out + string(digit + 48)
+        i = i + 1
+    }
+    out
+}
+
 func make_identity_weights(int dim) []float {
     []float weights = []float{cap: dim * dim}
     int i = 0
