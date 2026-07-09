@@ -129,6 +129,45 @@ if [ "${NEURX_PRETRAIN_FAST_PREFIX:-0}" -gt 0 ] 2>/dev/null; then
     fi
 fi
 
+echo ""
+echo "=========================================="
+echo "Checkpoint & Resume Configuration"
+echo "=========================================="
+
+# 创建输出目录
+mkdir -p "$NEURX_PRETRAIN_OUTPUT_DIR"
+
+# 检查是否存在最新检查点
+LATEST_CHECKPOINT_FILE="$NEURX_PRETRAIN_OUTPUT_DIR/latest_checkpoint.txt"
+CHECKPOINT_INFO_FILE="$NEURX_PRETRAIN_OUTPUT_DIR/checkpoint_info.json"
+RESUME_STATE_FILE="$NEURX_PRETRAIN_OUTPUT_DIR/resume_state.json"
+
+# 检查点续训支持
+if [ "${NEURX_PRETRAIN_RESUME:-1}" = "1" ] && [ -f "$LATEST_CHECKPOINT_FILE" ]; then
+    LATEST_CHECKPOINT=$(cat "$LATEST_CHECKPOINT_FILE" 2>/dev/null)
+    if [ -n "$LATEST_CHECKPOINT" ] && [ -f "$LATEST_CHECKPOINT" ]; then
+        echo "✓ Found latest checkpoint: $LATEST_CHECKPOINT"
+        export NEURX_PRETRAIN_CHECKPOINT_PATH="$LATEST_CHECKPOINT"
+        
+        # 如果存在恢复状态文件，提取之前的训练状态
+        if [ -f "$RESUME_STATE_FILE" ]; then
+            echo "✓ Found resume state file"
+            export NEURX_PRETRAIN_RESUME_STATE_FILE="$RESUME_STATE_FILE"
+        fi
+    else
+        echo "ℹ Checkpoint file referenced in latest_checkpoint.txt not found, starting fresh training"
+        unset NEURX_PRETRAIN_CHECKPOINT_PATH
+        unset NEURX_PRETRAIN_RESUME_STATE_FILE
+    fi
+else
+    echo "ℹ Resume disabled or no checkpoint found, starting fresh training"
+    unset NEURX_PRETRAIN_CHECKPOINT_PATH
+    unset NEURX_PRETRAIN_RESUME_STATE_FILE
+fi
+
+echo "Output directory: $NEURX_PRETRAIN_OUTPUT_DIR"
+echo ""
+
 echo "Compiling S training pipeline..."
 cd "$NEURX_ROOT"
 if [ -z "$S_COMPILER" ]; then
