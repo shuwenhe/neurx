@@ -270,9 +270,9 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
 
 // x: [batch, in_dim] → out: [batch, out_dim]
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
-    int in_dim = layer.in_dim
     []float y = []float{}
     []float ax = []float{}
+    int in_dim = layer.in_dim
 
     int b = 0
     while b < batch {
@@ -325,12 +325,12 @@ struct lora_backward_result {
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
-    int in_dim = layer.in_dim
     []float x  = layer.last_input
     []float ax = layer.last_Ax
     []float dB = []float{}
     []float dA = []float{}
     []float dx = []float{}
+    int in_dim = layer.in_dim
     int fill_d = 0
     while fill_d < layer.out_dim * layer.rank {
         dB = append(dB, 0.0)
@@ -475,8 +475,8 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
 // ============================================================================
 
 func lora_merge_weights(lora_linear layer) lora_linear {
-    int in_dim = layer.in_dim
     []float merged = []float{}
+    int in_dim = layer.in_dim
     int fill_m = 0
     while fill_m < layer.out_dim * in_dim {
         merged = append(merged, 0.0)
