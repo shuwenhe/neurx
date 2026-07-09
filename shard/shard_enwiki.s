@@ -219,43 +219,7 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
     manifest = manifest + "  \"format\": \"xml\",\n"
     manifest = manifest + "  \"shards\": [\n"
     
-    // Add shard entries
-    let list_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null"
-    let (shards_list, _) = command(list_cmd)
-    let shard_files = split(shards_list, "\n")
-    
-    let mut i = 0
-    while i < len(shard_files) {
-        let shard_file = shard_files[i]
-        if shard_file == "" {
-            i = i + 1
-            continue
-        }
-        
-        // Get shard size
-        let stat_cmd = "stat -f%z \"" + shard_file + "\" 2>/dev/null || stat -c%s \"" + shard_file + "\""
-        let (size_str, _) = command(stat_cmd)
-        let shard_size = atoi(size_str)
-        
-        let basename_cmd = "basename \"" + shard_file + "\""
-        let (basename, _) = command(basename_cmd)
-        
-        manifest = manifest + "    {\n"
-        manifest = manifest + "      \"shard_id\": " + itoa(i) + ",\n"
-        manifest = manifest + "      \"filename\": \"" + basename + "\",\n"
-        manifest = manifest + "      \"size_bytes\": " + itoa(shard_size) + ",\n"
-        manifest = manifest + "      \"size_mb\": " + itoa(shard_size / (1024 * 1024)) + "\n"
-        
-        if i < len(shard_files) - 2 {
-            manifest = manifest + "    },\n"
-        } else {
-            manifest = manifest + "    }\n"
-        }
-        
-        i = i + 1
-    }
-    
-    manifest = manifest + "  ]\n"
+    manifest = manifest + "  \"shards\": []\n"
     manifest = manifest + "}\n"
     
     // Write manifest file
