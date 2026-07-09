@@ -147,11 +147,14 @@ if [ "${NEURX_PRETRAIN_RESUME:-1}" = "1" ] && [ -f "$LATEST_CHECKPOINT_FILE" ]; 
     LATEST_CHECKPOINT=$(cat "$LATEST_CHECKPOINT_FILE" 2>/dev/null)
     if [ -n "$LATEST_CHECKPOINT" ] && [ -f "$LATEST_CHECKPOINT" ]; then
         echo "✓ Found latest checkpoint: $LATEST_CHECKPOINT"
+        echo "  latest pointer : $LATEST_CHECKPOINT_FILE"
+        echo "  checkpoint file: $LATEST_CHECKPOINT"
         export NEURX_PRETRAIN_CHECKPOINT_PATH="$LATEST_CHECKPOINT"
         
         # 如果存在恢复状态文件，提取之前的训练状态
         if [ -f "$RESUME_STATE_FILE" ]; then
             echo "✓ Found resume state file"
+            echo "  resume state   : $RESUME_STATE_FILE"
             export NEURX_PRETRAIN_RESUME_STATE_FILE="$RESUME_STATE_FILE"
         fi
     else
@@ -201,3 +204,12 @@ if command -v stdbuf >/dev/null 2>&1; then
 else
     "$S_RUNNER_BIN" "$BUILD_DIR/run_large_pretrain.ir" 2>&1 | tee -a "$RUN_LOG"
 fi
+
+echo ""
+echo "Checkpoint fragments on disk:"
+for fragment in final_model.neurx best_model.neurx latest_checkpoint.txt resume_state.json; do
+    fragment_path="$NEURX_PRETRAIN_OUTPUT_DIR/$fragment"
+    if [ -e "$fragment_path" ]; then
+        echo "  - $fragment_path"
+    fi
+done
