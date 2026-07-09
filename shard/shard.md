@@ -15,6 +15,7 @@ This directory contains all data sharding-related utilities for the NeurX traini
 ## File Organization
 
 ### S Language Implementations
+- **shard.s** - Unified shard CLI entry point
 - **shard_wikipedia.s** - Main Wikipedia sharding script (processes Wikipedia dumps into JSONL shards)
 - **shard_enwiki.s** - Alternative S implementation for enwiki processing
 - **load_shards.s** - S implementation for shard metadata loading and summary reporting
@@ -24,7 +25,7 @@ This directory contains all data sharding-related utilities for the NeurX traini
 - **verify_shards.s** - Shard verification and validation
 
 ### Shell Scripts
-- **shard.sh** - Unified CLI for all shard operations (main entry point)
+- **shard.sh** - Thin wrapper for `shard.s`
 - **generate_shards.sh** - Thin wrapper for `generate_shards.s`
 - **load_shards.sh** - Thin wrapper for `load_shards.s`
 - **shard_enwiki.sh** - Shell script wrapper for Wikipedia sharding
@@ -78,6 +79,7 @@ neurx/
   ├── shard/                      ← Dedicated shard module
   │   ├── shard.md               ← Consolidated documentation (you are here)
   │   ├── shard.sh               ← Unified CLI (main entry)
+  │   ├── shard.s
   │   ├── shard_wikipedia.s
   │   ├── shard_enwiki.s/.sh
   │   ├── load_shards.s
@@ -119,10 +121,7 @@ make data-pipeline-s
 
 ```bash
 # S language (compile to IR, then run via S runner)
-./artifacts/build/s_runner/s_ir_runner ./artifacts/build/shard/shard_wikipedia.ir \
-  --input dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2 \
-  --output-dir dataset/pretrain/shard \
-  --docs-per-shard 5000
+./artifacts/build/s_runner/s_ir_runner ./artifacts/build/shard/shard.ir
 
 # Using unified CLI
 cd /home/shuwen/shuwen/train/neurx
