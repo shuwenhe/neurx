@@ -68,6 +68,7 @@ PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
+NEURX_SHARD_CMD ?= wikipedia
 
 
 help:
@@ -148,7 +149,7 @@ shard: check-bash
 	@echo "Running Wikipedia shard processor..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		NEURX_SHARD_CMD=wikipedia \
+		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
 		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
