@@ -17,6 +17,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from datetime import datetime, timezone
 
 
 DEFAULT_INPUT = Path(
@@ -28,8 +29,10 @@ DEFAULT_MANIFEST = Path("/home/shuwen/shuwen/train/neurx/dataset/pretrain/manife
 
 
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
+NS_RE = re.compile(r"<ns>(\d+)</ns>")
 PAGEID_RE = re.compile(r"<id>(\d+)</id>")
 TEXT_RE = re.compile(r"<text[^>]*>(.*?)</text>", re.S)
+REDIRECT_RE = re.compile(r"<redirect\b", re.I)
 TAG_RE = re.compile(r"<[^>]+>")
 PAGE_START_RE = re.compile(r"<page>")
 PAGE_END_RE = re.compile(r"</page>")
@@ -58,6 +61,12 @@ def strip_markup(text: str) -> str:
 
 
 def extract_page_record(page_xml: str) -> dict[str, str] | None:
+    ns_match = NS_RE.search(page_xml)
+    if not ns_match or ns_match.group(1) != "0":
+        return None
+    if REDIRECT_RE.search(page_xml):
+        return None
+
     title_match = TITLE_RE.search(page_xml)
     text_match = TEXT_RE.search(page_xml)
     if not title_match or not text_match:
@@ -197,7 +206,7 @@ def main() -> int:
     manifest = {
         "dataset_name": "neurx-pretrain-wikipedia",
         "version": "1.0",
-        "created_at": "2026-07-09T00:00:00Z",
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "source_file": str(args.input),
         "total_shards": len(shards),
         "total_documents": total_documents,
