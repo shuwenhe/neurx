@@ -38,7 +38,7 @@ S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
-S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
+S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
@@ -69,9 +69,7 @@ help:
 
 
 
-train: check-bash
-	mkdir -p $(LOG_DIR); \
-	cd '$(CURDIR_UNIX)' && bash script/train_with_data.sh 2>&1 | tee -a $(LOG_DIR)/train_$(shell date +%Y%m%d_%H%M%S).log
+train: pretrain
 
 
 
@@ -91,24 +89,24 @@ pretrain: check-bash
 		echo "  test     : $(PRETRAIN_TEST_SPLIT)" && \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
-		if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
-			echo "Existing cleaned file detected; resuming split/manifest generation" && \
-			echo "Resolved command:" && \
-			echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh" && \
-			NEURX_RESUME_CLEANED=1 bash script/clean_data.sh && \
-		else \
-			echo "Resolved command:" && \
-			echo "  bash script/clean_data.sh" && \
-			bash script/clean_data.sh && \
-		fi && \
-		echo "Resolved command:" && \
-		echo "  bash script/generate_shards.sh" && \
-		bash script/generate_shards.sh && \
-		echo "Resolved command:" && \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh" && \
-		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
-		NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
-		NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
+			if [ -s '$(PRETRAIN_CLEANED_FILE)' ] && [ ! -s '$(PRETRAIN_TRAIN_SPLIT)' ]; then \
+				echo "Existing cleaned file detected; resuming split/manifest generation"; \
+				echo "Resolved command:"; \
+				echo "  NEURX_RESUME_CLEANED=1 bash script/clean_data.sh"; \
+				NEURX_RESUME_CLEANED=1 bash script/clean_data.sh; \
+			else \
+				echo "Resolved command:"; \
+				echo "  bash script/clean_data.sh"; \
+				bash script/clean_data.sh; \
+			fi && \
+			echo "Resolved command:"; \
+			echo "  bash script/generate_shards.sh"; \
+			bash script/generate_shards.sh; \
+			echo "Resolved command:"; \
+			echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh"; \
+			NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
+			NEURX_TRAIN_SPLIT_PATH='$(PRETRAIN_TRAIN_SPLIT)' \
+			NEURX_VAL_SPLIT_PATH='$(PRETRAIN_VAL_SPLIT)' \
 		NEURX_TEST_SPLIT_PATH='$(PRETRAIN_TEST_SPLIT)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
@@ -541,20 +539,19 @@ build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		cc -std=c11 -O2 -Wall -Wextra -Werror -DSEED_COMPILE_ONLY \
-		-I '$(S_REPO_ROOT)/src/cmd/compile/seed' \
-		-o '$(S_RUNNER_BIN)' \
-		'$(S_RUNNER_SRC)' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/runtime/runtime.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/error/error.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/code/native_backend.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/lexical/lexer.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/syntax/parser.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/semantic/analyzer.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/intermediate/ir.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/code/generator.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/bootstrap/bootstrap.c' \
-		'$(S_REPO_ROOT)/src/cmd/compile/seed/s_seed.c'
+		'$(S_COMPILER)' ir '$(S_RUNNER_SRC)' -o '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' 2>&1 && \
+		printf '%s\n' \
+			'#!/usr/bin/env bash' \
+			'set -euo pipefail' \
+			'' \
+			'if [ "$$#" -lt 1 ] || [ "$$#" -gt 2 ]; then' \
+			'    echo "usage: s_ir_runner <input.ir> [entry]" >&2' \
+			'    exit 2' \
+			'fi' \
+			'' \
+			'S_IR_RUNNER_INPUT="$$1" S_IR_RUNNER_ENTRY="$${2:-main}" exec '\''$(S_COMPILER)'\'' run '\''$(S_RUNNER_SRC)'\''' > '$(S_RUNNER_BIN)' && \
+		chmod +x '$(S_RUNNER_BIN)' && \
+		test -f '$(S_RUNNER_BIN)'
 
 toolchain-s: check-bash
 	@echo "Building S-only toolchain coordinator..."

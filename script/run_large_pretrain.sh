@@ -62,6 +62,9 @@ export NEURX_PRETRAIN_EVAL_INTERVAL="${NEURX_PRETRAIN_EVAL_INTERVAL:-${NEURX_EVA
 export NEURX_PRETRAIN_SAVE_INTERVAL="${NEURX_PRETRAIN_SAVE_INTERVAL:-${NEURX_SAVE_INTERVAL:-100}}"
 export NEURX_PRETRAIN_RESUME="${NEURX_PRETRAIN_RESUME:-1}"
 export NEURX_ALLOW_FULL_1T_LOCAL="${NEURX_ALLOW_FULL_1T_LOCAL:-1}"
+export NEURX_PRETRAIN_FAST_PREFIX="${NEURX_PRETRAIN_FAST_PREFIX:-0}"
+export NEURX_PRETRAIN_FAST_PREFIX_LINES="${NEURX_PRETRAIN_FAST_PREFIX_LINES:-1}"
+export NEURX_PRETRAIN_FAST_PREFIX_BYTES="${NEURX_PRETRAIN_FAST_PREFIX_BYTES:-1024}"
 export WORLD_SIZE="${WORLD_SIZE:-${NEURX_PRETRAIN_WORLD_SIZE:-${NEURX_WORLD_SIZE:-1}}}"
 export RANK="${RANK:-${NEURX_PRETRAIN_RANK:-0}}"
 export DDP_BACKEND="${DDP_BACKEND:-${NEURX_PRETRAIN_BACKEND:-gloo}}"
@@ -111,6 +114,21 @@ rm -f "$ALL_SHARDS_FILE"
 export NEURX_PRETRAIN_SHARD_LIST_FILE="$SHARD_LIST_FILE"
 export NEURX_PRETRAIN_MAX_DOCS="${NEURX_PRETRAIN_MAX_DOCS:-100000000}"
 
+if [ "${NEURX_PRETRAIN_FAST_PREFIX:-0}" -gt 0 ] 2>/dev/null; then
+    FIRST_SHARD_PATH="$(sed -n '1p' "$SHARD_LIST_FILE")"
+    FAST_PREFIX_SHARD_FILE="$BUILD_DIR/shard_fast_prefix.jsonl"
+    if [ -n "$FIRST_SHARD_PATH" ] && [ -f "$FIRST_SHARD_PATH" ]; then
+        head -n "${NEURX_PRETRAIN_FAST_PREFIX_LINES:-1}" "$FIRST_SHARD_PATH" | cut -c1-"${NEURX_PRETRAIN_FAST_PREFIX_BYTES:-1024}" > "$FAST_PREFIX_SHARD_FILE"
+        printf '%s\n' "$FAST_PREFIX_SHARD_FILE" > "$SHARD_LIST_FILE"
+        export NEURX_PRETRAIN_FAST_PREFIX=0
+        echo "Fast prefix sample shard created:"
+        echo "  source : $FIRST_SHARD_PATH"
+        echo "  sample  : $FAST_PREFIX_SHARD_FILE"
+        echo "  lines   : $NEURX_PRETRAIN_FAST_PREFIX_LINES"
+        echo "  bytes   : $NEURX_PRETRAIN_FAST_PREFIX_BYTES"
+    fi
+fi
+
 echo "Compiling S training pipeline..."
 cd "$NEURX_ROOT"
 if [ -z "$S_COMPILER" ]; then
@@ -118,34 +136,11 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-# Calculate real step count from actual dataset
-BATCH_SIZE=32
-DOC_COUNT=$(find "$NEURX_ROOT/dataset/pretrain/shard" -maxdepth 1 -name 'shard_*.jsonl' | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
-if [ -z "$DOC_COUNT" ] || [ "$DOC_COUNT" -eq 0 ]; then
-    DOC_COUNT=71451
-    echo "Note: Using default document count ($DOC_COUNT)"
-fi
-MAX_STEPS=$((DOC_COUNT / BATCH_SIZE))
-echo "Calculated max_steps: $MAX_STEPS (from $DOC_COUNT docs / $BATCH_SIZE batch size)"
-
-# Use minimal_train_float.s with dynamic step substitution
-PRETRAIN_ENTRY_TEMPLATE="$NEURX_ROOT/script/minimal_train_float.s"
-if [ ! -f "$PRETRAIN_ENTRY_TEMPLATE" ]; then
-    echo "Error: training template script not found at $PRETRAIN_ENTRY_TEMPLATE"
-    exit 1
-fi
-
-# Create temp script with computed max_steps
-TEMP_TRAIN_S="/tmp/train_all_shards_$$.s"
-sed "s/max_steps = 10000/max_steps = $MAX_STEPS/" "$PRETRAIN_ENTRY_TEMPLATE" > "$TEMP_TRAIN_S"
-
 echo "Resolved command:"
-echo "  S compilation: $TEMP_TRAIN_S -> $BUILD_DIR/run_large_pretrain.ir"
+echo "  S compilation: $NEURX_ROOT/script/minimal_train.s -> $BUILD_DIR/run_large_pretrain.ir"
 
-"$S_COMPILER" ir "$TEMP_TRAIN_S" -o "$BUILD_DIR/run_large_pretrain.ir"
-COMPILE_STATUS=$?
-rm -f "$TEMP_TRAIN_S"
-if [ $COMPILE_STATUS -ne 0 ] || [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
+"$S_COMPILER" ir "$NEURX_ROOT/script/minimal_train.s" -o "$BUILD_DIR/run_large_pretrain.ir"
+if [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
     echo "Error: S compilation failed"
     exit 1
 fi

@@ -2163,7 +2163,19 @@ func gpt_large_pretrain_load_state_dict(gpt_large_pretrain_state state, gpt_larg
     }
 }
 
-func gpt_large_pretrain_log_step(int step, float loss, float lr, string shard_path, int save_interval, int log_interval) () {
+func gpt_large_pretrain_log_step(
+    int step,
+    float loss,
+    float lr,
+    string shard_path,
+    int save_interval,
+    int log_interval,
+    int batch_tokens,
+    int batch_valid_tokens,
+    int docs_seen,
+    int corpus_tokens_seen,
+    int tokenizer_vocab_size
+) () {
     bool should_log = step == 0
     if log_interval > 0 && step / log_interval * log_interval == step {
         should_log = true
@@ -2174,7 +2186,18 @@ func gpt_large_pretrain_log_step(int step, float loss, float lr, string shard_pa
             save_note = " | Saving checkpoint..."
         }
         string shard_name = gpt_large_pretrain_basename(shard_path)
-        println("[Step " + int_to_str(step, 0) + "] Shard: " + shard_name + " | Loss: " + fmt_float(loss, 3) + " | LR: " + fmt_float(lr, 6) + " | Path: " + shard_path + save_note)
+        println(
+            "[Step " + int_to_str(step, 0) + "] " +
+            "Shard=" + shard_name +
+            " | Loss=" + fmt_float(loss, 3) +
+            " | LR=" + fmt_float(lr, 6) +
+            " | BatchTokens=" + int_to_str(batch_tokens, 0) +
+            " | ValidTokens=" + int_to_str(batch_valid_tokens, 0) +
+            " | DocsSeen=" + int_to_str(docs_seen, 0) +
+            " | CorpusTokens=" + int_to_str(corpus_tokens_seen, 0) +
+            " | TokenizerVocab=" + int_to_str(tokenizer_vocab_size, 0) +
+            " | Path=" + shard_path + save_note
+        )
     }
 }
 
@@ -2196,7 +2219,19 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
     if current_lr < state.cfg.min_lr {
         current_lr = state.cfg.min_lr
     }
-    gpt_large_pretrain_log_step(next.loop.global_step, next.training.last_loss, current_lr, next.active_shard_path, state.cfg.save_interval, state.cfg.log_interval)
+    gpt_large_pretrain_log_step(
+        next.loop.global_step,
+        next.training.last_loss,
+        current_lr,
+        next.active_shard_path,
+        state.cfg.save_interval,
+        state.cfg.log_interval,
+        len(train_output.batch.input_ids),
+        train_output.batch.valid_tokens,
+        next.corpus.total_docs_seen,
+        next.corpus.total_tokens_seen,
+        len(next.corpus.tokenizer.vocab)
+    )
     next
 }
 
