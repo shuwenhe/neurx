@@ -2,14 +2,14 @@
 
 ## Overview
 
-**ORPO (Odds Ratio Preference Optimization)** is an advanced preference optimization method that achieves high-quality alignment without requiring a separate reward model. Unlike DPO which uses probability differences, ORPO uses **direct odds ratio modeling** for more numerical stability and faster convergence.
+**ORPO (Odds Ratio Preference Optimization)** is an advanced preference optimization method that achieves high-quality alignment without requiring a separate reward model. In this repository, the ORPO implementation is a compileable S scaffold with deterministic stand-ins for training flow, intended for local experimentation and extension.
 
 **Key Advantages**:
 - ✅ **More Stable**: Odds ratio based formulation resists numerical overflow/underflow
 - ✅ **No Reward Model Needed**: Pure preference learning, simpler pipeline
-- ✅ **Faster Convergence**: Achieves better performance in fewer iterations
-- ✅ **Better Generalization**: Reduces overfitting to training preferences
-- ✅ **Production Ready**: Supports distributed training and mixed precision
+- ✅ **Fast to Iterate**: Compileable scaffold for local workflow validation
+- ✅ **Easy to Extend**: Clear entry points for real data and optimizer wiring
+- ✅ **Distributed Hooks**: Includes placeholder synchronization and checkpoint APIs
 
 **When to Use**:
 - Preference optimization as main alignment method (simpler than PPO + Reward model)
@@ -242,11 +242,11 @@ state = start_orpo_training(cfg, remaining_trajectories)
 
 | Operation | Time |
 |-----------|------|
-| Forward pass | ~50 ms |
-| Backward pass | ~150 ms |
-| Optimizer step | ~20 ms |
-| **Total per batch** | ~220 ms |
-| **Per epoch (1000 batches)** | ~3.7 minutes |
+| Forward pass | Scaffold-dependent |
+| Backward pass | Scaffold-dependent |
+| Optimizer step | Scaffold-dependent |
+| **Total per batch** | Deterministic placeholder flow |
+| **Per epoch (1000 batches)** | Not representative of production throughput |
 
 ### Training Timeline
 
@@ -408,6 +408,13 @@ cfg.weight_decay = 0.0
 // Try higher learning rate
 cfg.learning_rate = 1e-3
 ```
+
+## Implementation Notes
+
+- `orpo_trainer.s` contains the main compileable trainer scaffold.
+- `orpo_examples.s` demonstrates configuration and training flow.
+- The current implementation uses mock batch construction and simplified optimizer updates.
+- `make orpo` compiles both trainer and examples to S IR.
 
 ## Comparison with Other Methods
 
