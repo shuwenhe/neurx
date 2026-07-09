@@ -109,7 +109,7 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     }
     if amax < 1e-10 { amax = 1.0 }
 
-    []int codes = []
+    []int codes = []int{}
     int j = 0
     for j < n {
         float wn = w[j] / amax   // 归一化到 [-1, 1]
@@ -140,7 +140,7 @@ func quantize_nf4([]float w, int n) nf4_tensor {
 
 // 反量化 NF4 → fp32
 func dequantize_nf4(nf4_tensor t) []float {
-    []float out = []
+    []float out = []float{}
     int i = 0
     for i < t.num_elem {
         float val = t.codebook[t.codes[i]] * t.absmax
@@ -180,26 +180,17 @@ struct lora_linear {
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
     int r = cfg.rank
-    float scale = cfg.alpha / float_of_int(r)
+    float scale = cfg.alpha
 
-    // 初始化 A: 轻微随机扰动的确定性序列，保证 ΔW 初始接近 0
-    []float a = fill_lora(r * in_dim, 0.0)
-    int ai = 0
-    for ai < r * in_dim {
-        int seed_a = ai * 37 + 17
-        for seed_a >= 1000 {
-            seed_a = seed_a - 1000
-        }
-        a[ai] = (float_of_int(seed_a) / 1000.0 - 0.5) * 0.02
-        ai = ai + 1
-    }
+    // 初始化 A: 小常数，B 为 0，保证初始 ΔW = 0
+    []float a = fill_lora(r * in_dim, 0.01)
     // 初始化 B: 全零 (初始 ΔW = 0)
     []float b = fill_lora(out_dim * r, 0.0)
 
     if cfg.use_qlora {
         nf4_tensor q = quantize_nf4(base_weight, in_dim * out_dim)
         lora_linear {
-            base_weight: [],
+            base_weight: []float{},
             base_nf4: q,
             quantized: true,
             lora_A: a,
@@ -211,13 +202,13 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             rank: r,
             scaling: scale,
             dropout_rate: cfg.dropout,
-            last_input: [],
-            last_Ax: [],
+            last_input: []float{},
+            last_Ax: []float{},
         }
     } else {
         lora_linear {
             base_weight: base_weight,
-            base_nf4: nf4_tensor{ codes: [], absmax: 0.0, num_elem: 0, codebook: [] },
+            base_nf4: nf4_tensor{ codes: []int{}, absmax: 0.0, num_elem: 0, codebook: []float{} },
             quantized: false,
             lora_A: a,
             lora_B: b,
@@ -228,24 +219,14 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             rank: r,
             scaling: scale,
             dropout_rate: cfg.dropout,
-            last_input: [],
-            last_Ax: [],
+            last_input: []float{},
+            last_Ax: []float{},
         }
     }
 }
 
-func float_of_int(int n) float {
-    float v = 0.0
-    int i = 0
-    for i < n {
-        v = v + 1.0
-        i = i + 1
-    }
-    v
-}
-
 func fill_lora(int n, float val) []float {
-    []float out = []
+    []float out = []float{}
     int i = 0
     for i < n {
         out = append(out, val)
@@ -597,13 +578,13 @@ struct lora_stats {
 func lora_compute_stats(lora_linear layer) lora_stats {
     int base_params = layer.in_dim * layer.out_dim
     int lora_params = layer.rank * (layer.in_dim + layer.out_dim)
-    float ratio = float_of_int(lora_params) / float_of_int(base_params + lora_params)
+    float ratio = (lora_params * 1.0) / ((base_params + lora_params) * 1.0)
 
     // 显存节省: 基础权重 NF4 节省 8× vs fp32
     float saved = 0.0
     if layer.quantized {
-        float base_mb = float_of_int(base_params * 4) / 1048576.0
-        float nf4_mb  = float_of_int(base_params) / 2.0 / 1048576.0
+        float base_mb = (base_params * 4 * 1.0) / 1048576.0
+        float nf4_mb  = (base_params * 1.0) / 2.0 / 1048576.0
         saved = base_mb - nf4_mb
     }
 
