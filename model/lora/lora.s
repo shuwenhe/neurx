@@ -150,6 +150,63 @@ func dequantize_nf4(nf4_tensor t) []float {
     out
 }
 
+func fill_lora(int n, float val) []float {
+    []float out = []float{cap: n}
+    int i = 0
+    while i < n {
+        out[i] = val
+        i = i + 1
+    }
+    out
+}
+
+// 矩阵乘: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
+func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
+    []float c = fill_lora(M * N, 0.0)
+    int i = 0
+    while i < M {
+        int j = 0
+        while j < N {
+            float s = 0.0
+            int kk = 0
+            while kk < K {
+                float bv = 0.0
+                if transpose_b {
+                    bv = b[j*K+kk]
+                } else {
+                    bv = b[kk*N+j]
+                }
+                s = s + a[i*K+kk] * bv
+                kk = kk + 1
+            }
+            c[i*N+j] = s
+            j = j + 1
+        }
+        i = i + 1
+    }
+    c
+}
+
+func sqrt_lora(float x) float {
+    if x <= 0.0 { return 0.0 }
+    float g = x * 0.5
+    float r = g + x / g
+    r = 0.5 * r
+    r = 0.5 * (r + x / r)
+    r = 0.5 * (r + x / r)
+    r
+}
+
+func pow_approx(float base, int exp) float {
+    float result = 1.0
+    int i = 0
+    while i < exp {
+        result = result * base
+        i = i + 1
+    }
+    result
+}
+
 // ============================================================================
 // 3. LoRA 线性层
 // ============================================================================
