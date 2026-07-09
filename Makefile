@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-watch watch-auto-commit-push chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s
@@ -115,6 +115,10 @@ pretrain: check-bash
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
+
+watch-auto-commit-push: check-bash
+	@echo "Starting local save-to-commit-and-push watcher on branch main"
+	@cd '$(CURDIR_UNIX)' && bash tools/watch-auto-commit-push.sh
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
