@@ -381,6 +381,13 @@ func main() {
     }
 
     println("")
+    println("Checkpoint fragments:")
+    println("  final model  : " + final_model_path)
+    println("  best model   : " + best_model_path)
+    println("  latest ptr   : " + latest_checkpoint_file)
+    println("  resume state : " + resume_state_file)
+
+    println("")
     println("========================================")
     println("Training Complete")
     println("========================================")
