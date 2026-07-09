@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 S_COMPILER="${S_COMPILER:-/home/shuwen/s/bin/s}"
-ENTRY_SOURCE="${NEURX_PRETRAIN_ENTRY_SOURCE:-$ROOT_DIR/pretrain/llm/runner.s}"
+ENTRY_SOURCE="${NEURX_PRETRAIN_ENTRY_SOURCE:-$ROOT_DIR/pretrain/llm/large_pretrain.s}"
 BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$ROOT_DIR/artifacts/build/pretrain_cuda}"
 BIN_FILE="$BUILD_DIR/pretrain_cuda_runner"
 
