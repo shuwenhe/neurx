@@ -199,7 +199,7 @@ func run_verify() int {
         return 1
     }
 
-    string verify_cmd = "for shard_file in " + shell_escape(shard_dir + "/shard_*.jsonl") + "; do " +
+    string verify_cmd = "for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do " +
         "if [ ! -f \"$shard_file\" ]; then continue; fi; " +
         "line_count=$(wc -l < \"$shard_file\"); " +
         "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
@@ -221,7 +221,7 @@ func run_list() int {
     }
 
     string list_cmd = "sh -c " +
-        shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shard_dir + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
+        shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
     let result = runtime_run_command(list_cmd)
     if !result.ok {
         return 1
@@ -237,7 +237,7 @@ func run_clean() int {
         return 1
     }
 
-    let result = runtime_run_command("rm -f " + shell_escape(shard_dir + "/shard_*.jsonl"))
+    let result = runtime_run_command("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
     if !result.ok {
         return 1
     }
