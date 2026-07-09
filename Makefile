@@ -121,7 +121,7 @@ posttrain: check-bash
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
