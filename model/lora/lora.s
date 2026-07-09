@@ -150,19 +150,9 @@ func dequantize_nf4(nf4_tensor t) []float {
     out
 }
 
-func fill_lora(int n, float val) []float {
-    []float out = []float{cap: n}
-    int i = 0
-    while i < n {
-        out[i] = val
-        i = i + 1
-    }
-    out
-}
-
 // 矩阵乘: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
 func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
-    []float c = fill_lora(M * N, 0.0)
+    []float c = []float{cap: M * N}
     int i = 0
     while i < M {
         int j = 0
@@ -240,9 +230,9 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
     float scale = cfg.alpha
 
     // 初始化 A: 小常数，B 为 0，保证初始 ΔW = 0
-    []float a = fill_lora(r * in_dim, 0.01)
+    []float a = []float{cap: r * in_dim}
     // 初始化 B: 全零 (初始 ΔW = 0)
-    []float b = fill_lora(out_dim * r, 0.0)
+    []float b = []float{cap: out_dim * r}
 
     if cfg.use_qlora {
         nf4_tensor q = quantize_nf4(base_weight, in_dim * out_dim)
@@ -252,8 +242,8 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             quantized: true,
             lora_A: a,
             lora_B: b,
-            lora_A_grad: fill_lora(r * in_dim, 0.0),
-            lora_B_grad: fill_lora(out_dim * r, 0.0),
+            lora_A_grad: []float{cap: r * in_dim},
+            lora_B_grad: []float{cap: out_dim * r},
             in_dim: in_dim,
             out_dim: out_dim,
             rank: r,
@@ -269,8 +259,8 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             quantized: false,
             lora_A: a,
             lora_B: b,
-            lora_A_grad: fill_lora(r * in_dim, 0.0),
-            lora_B_grad: fill_lora(out_dim * r, 0.0),
+            lora_A_grad: []float{cap: r * in_dim},
+            lora_B_grad: []float{cap: out_dim * r},
             in_dim: in_dim,
             out_dim: out_dim,
             rank: r,
@@ -339,7 +329,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
 
     // dL/dB = (dy * scaling)^T @ Ax  → dB [O, R]
     // dy_scaled [batch, O]
-    []float dy_scaled = fill_lora(batch * O, 0.0)
+    []float dy_scaled = []float{cap: batch * O}
     int si = 0
     for si < batch * O {
         dy_scaled[si] = dy[si] * layer.scaling
@@ -347,7 +337,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     }
 
     // dB += dy_scaled^T @ ax:  dB[o,r] += dy_scaled[b,o] * ax[b,r]
-    []float dB = fill_lora(O * R, 0.0)
+    []float dB = []float{cap: O * R}
     int bi = 0
     for bi < batch {
         int oi = 0
@@ -366,7 +356,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     []float dAx = matmul_lora(dy_scaled, layer.lora_B, batch, O, R, false)
 
     // dL/dA = dAx^T @ x  → dA [R, I]
-    []float dA = fill_lora(R * I, 0.0)
+    []float dA = []float{cap: R * I}
     int bi2 = 0
     for bi2 < batch {
         int ri2 = 0
@@ -388,7 +378,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     }
     []float dx_base = matmul_lora(dy, base_w, batch, O, I, false)
     []float dx_lora = matmul_lora(dAx, layer.lora_A, batch, R, I, false)
-    []float dx = fill_lora(batch * I, 0.0)
+    []float dx = []float{cap: batch * I}
     int di = 0
     for di < batch * I {
         dx[di] = dx_base[di] + dx_lora[di]
@@ -433,10 +423,10 @@ struct lora_adamw_state {
 
 func new_lora_adamw(int rank, int in_dim, int out_dim, float lr) lora_adamw_state {
     lora_adamw_state {
-        mA: fill_lora(rank * in_dim, 0.0),
-        vA: fill_lora(rank * in_dim, 0.0),
-        mB: fill_lora(out_dim * rank, 0.0),
-        vB: fill_lora(out_dim * rank, 0.0),
+        mA: []float{cap: rank * in_dim},
+        vA: []float{cap: rank * in_dim},
+        mB: []float{cap: out_dim * rank},
+        vB: []float{cap: out_dim * rank},
         lr: lr,
         beta1: 0.9,
         beta2: 0.999,
@@ -509,7 +499,7 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     // ΔW = B @ A * scaling  [O, I]
     []float delta = matmul_lora(layer.lora_B, layer.lora_A, O, R, I, false)
 
-    []float merged = fill_lora(O * I, 0.0)
+    []float merged = []float{cap: O * I}
     []float base_w = layer.base_weight
     if layer.quantized {
         base_w = dequantize_nf4(layer.base_nf4)
@@ -524,8 +514,8 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     result.base_weight = merged
     result.quantized = false
     // 清零适配器 (已合并)
-    result.lora_A = fill_lora(R * I, 0.0)
-    result.lora_B = fill_lora(O * R, 0.0)
+    result.lora_A = []float{cap: R * I}
+    result.lora_B = []float{cap: O * R}
     result
 }
 
