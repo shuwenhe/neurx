@@ -285,19 +285,19 @@ func get_env_int(key: string, default_val: int) int {
 // Logging
 // ============================================================================
 
-pub fn log_info(msg: string) {
+pub func log_info(msg: string) {
     println(msg)
 }
 
-pub fn log_warn(msg: string) {
+pub func log_warn(msg: string) {
     println("⚠ " + msg)
 }
 
-pub fn log_error(msg: string) {
+pub func log_error(msg: string) {
     println("✗ " + msg)
 }
 
-pub fn log_success(msg: string) {
+pub func log_success(msg: string) {
     println("✓ " + msg)
 }
 
