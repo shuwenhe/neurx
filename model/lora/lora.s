@@ -270,39 +270,42 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
 
 // x: [batch, in_dim] → out: [batch, out_dim]
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
-    []float y = []float{cap: batch * layer.out_dim}
-    []float ax = []float{cap: batch * layer.rank}
+    int in_dim = layer.in_dim
+    int out_dim = layer.out_dim
+    int rank = layer.rank
+    []float y = []float{}
+    []float ax = []float{}
 
     int b = 0
     while b < batch {
         int r = 0
-        while r < layer.rank {
+        while r < rank {
             float ax_sum = 0.0
             int i = 0
-            while i < layer.in_dim {
-                ax_sum = ax_sum + x[b*layer.in_dim+i] * layer.lora_A[r*layer.in_dim+i]
+            while i < in_dim {
+                ax_sum = ax_sum + x[b*in_dim+i] * layer.lora_A[r*in_dim+i]
                 i = i + 1
             }
-            ax[b*layer.rank+r] = ax_sum
+            ax = append(ax, ax_sum)
             r = r + 1
         }
 
         int o = 0
-        while o < layer.out_dim {
+        while o < out_dim {
             float sum = 0.0
             int i2 = 0
-            while i2 < layer.in_dim {
-                float base_w = layer.base_weight[o*layer.in_dim+i2]
-                sum = sum + x[b*layer.in_dim+i2] * base_w
+            while i2 < in_dim {
+                float base_w = layer.base_weight[o*in_dim+i2]
+                sum = sum + x[b*in_dim+i2] * base_w
                 i2 = i2 + 1
             }
             int r2 = 0
             float lora_sum = 0.0
-            while r2 < layer.rank {
-                lora_sum = lora_sum + ax[b*layer.rank+r2] * layer.lora_B[o*layer.rank+r2]
+            while r2 < rank {
+                lora_sum = lora_sum + ax[b*rank+r2] * layer.lora_B[o*rank+r2]
                 r2 = r2 + 1
             }
-            y[b*layer.out_dim+o] = sum + lora_sum * layer.scaling
+            y = append(y, sum + lora_sum * layer.scaling)
             o = o + 1
         }
         b = b + 1
@@ -324,42 +327,60 @@ struct lora_backward_result {
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
+    int in_dim = layer.in_dim
+    int out_dim = layer.out_dim
+    int rank = layer.rank
     []float x  = layer.last_input
     []float ax = layer.last_Ax
-    []float dB = []float{cap: layer.out_dim * layer.rank}
-    []float dA = []float{cap: layer.rank * layer.in_dim}
-    []float dx = []float{cap: batch * layer.in_dim}
+    []float dB = []float{}
+    []float dA = []float{}
+    []float dx = []float{}
+    int fill_d = 0
+    while fill_d < out_dim * rank {
+        dB = append(dB, 0.0)
+        fill_d = fill_d + 1
+    }
+    fill_d = 0
+    while fill_d < rank * in_dim {
+        dA = append(dA, 0.0)
+        fill_d = fill_d + 1
+    }
+    fill_d = 0
+    while fill_d < batch * in_dim {
+        dx = append(dx, 0.0)
+        fill_d = fill_d + 1
+    }
 
     int b = 0
     while b < batch {
         int o = 0
-        while o < layer.out_dim {
-            float dy_scaled = dy[b*layer.out_dim+o] * layer.scaling
+        while o < out_dim {
+            float dy_scaled = dy[b*out_dim+o] * layer.scaling
             int r = 0
-            while r < layer.rank {
-                dB[o*layer.rank+r] = dB[o*layer.rank+r] + dy_scaled * ax[b*layer.rank+r]
+            while r < rank {
+                dB[o*rank+r] = dB[o*rank+r] + dy_scaled * ax[b*rank+r]
                 r = r + 1
             }
             int i = 0
-            while i < layer.in_dim {
-                dx[b*layer.in_dim+i] = dx[b*layer.in_dim+i] + dy_scaled * layer.base_weight[o*layer.in_dim+i]
+            while i < in_dim {
+                dx[b*in_dim+i] = dx[b*in_dim+i] + dy_scaled * layer.base_weight[o*in_dim+i]
                 i = i + 1
             }
             o = o + 1
         }
 
         int r2 = 0
-        while r2 < layer.rank {
+        while r2 < rank {
             int i2 = 0
-            while i2 < layer.in_dim {
+            while i2 < in_dim {
                 float accum = 0.0
                 int o2 = 0
-                while o2 < layer.out_dim {
-                    accum = accum + dy[b*layer.out_dim+o2] * layer.scaling * layer.lora_B[o2*layer.rank+r2]
+                while o2 < out_dim {
+                    accum = accum + dy[b*out_dim+o2] * layer.scaling * layer.lora_B[o2*rank+r2]
                     o2 = o2 + 1
                 }
-                dA[r2*layer.in_dim+i2] = dA[r2*layer.in_dim+i2] + accum * x[b*layer.in_dim+i2]
-                dx[b*layer.in_dim+i2] = dx[b*layer.in_dim+i2] + accum * layer.lora_A[r2*layer.in_dim+i2]
+                dA[r2*in_dim+i2] = dA[r2*in_dim+i2] + accum * x[b*in_dim+i2]
+                dx[b*in_dim+i2] = dx[b*in_dim+i2] + accum * layer.lora_A[r2*in_dim+i2]
                 i2 = i2 + 1
             }
             r2 = r2 + 1
@@ -458,18 +479,26 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
 // ============================================================================
 
 func lora_merge_weights(lora_linear layer) lora_linear {
-    []float merged = []float{cap: layer.out_dim * layer.in_dim}
+    int in_dim = layer.in_dim
+    int out_dim = layer.out_dim
+    int rank = layer.rank
+    []float merged = []float{}
+    int fill_m = 0
+    while fill_m < out_dim * in_dim {
+        merged = append(merged, 0.0)
+        fill_m = fill_m + 1
+    }
     int o = 0
-    while o < layer.out_dim {
+    while o < out_dim {
         int i = 0
-        while i < layer.in_dim {
-            float sum = layer.base_weight[o*layer.in_dim+i]
+        while i < in_dim {
+            float sum = layer.base_weight[o*in_dim+i]
             int r = 0
-            while r < layer.rank {
-                sum = sum + layer.lora_B[o*layer.rank+r] * layer.lora_A[r*layer.in_dim+i] * layer.scaling
+            while r < rank {
+                sum = sum + layer.lora_B[o*rank+r] * layer.lora_A[r*in_dim+i] * layer.scaling
                 r = r + 1
             }
-            merged[o*layer.in_dim+i] = sum
+            merged[o*in_dim+i] = sum
             i = i + 1
         }
         o = o + 1
@@ -478,8 +507,8 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     lora_linear result = layer
     result.base_weight = merged
     result.quantized = false
-    result.lora_A = []float{cap: layer.rank * layer.in_dim}
-    result.lora_B = []float{cap: layer.out_dim * layer.rank}
+    result.lora_A = []float{}
+    result.lora_B = []float{}
     result
 }
 
