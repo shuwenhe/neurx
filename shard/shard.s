@@ -156,25 +156,34 @@ func run_wikipedia() int {
         return 1
     }
 
-    runtime_run_command_output("mkdir -p " + shell_escape(build_dir))
+    string mkdir_output = runtime_run_command_output("mkdir -p " + shell_escape(build_dir))
+    if len(trim(mkdir_output)) > 0 {
+        println(mkdir_output)
+    }
 
-    runtime_run_command_output(
+    string compile_output = runtime_run_command_output(
         shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia.ir")
     )
+    if len(trim(compile_output)) > 0 {
+        println(compile_output)
+    }
     if !runtime_file_exists(build_dir + "/shard_wikipedia.ir") {
         println("Error: failed to compile shard_wikipedia.s")
         return 1
     }
 
     if !runtime_file_exists(runner_bin) {
-        runtime_run_command_output("make -C " + shell_escape(root) + " build-s-ir-runner")
+        string runner_output = runtime_run_command_output("make -C " + shell_escape(root) + " build-s-ir-runner")
+        if len(trim(runner_output)) > 0 {
+            println(runner_output)
+        }
         if !runtime_file_exists(runner_bin) {
             println("Error: failed to build S IR runner")
             return 1
         }
     }
 
-    runtime_run_command_output(
+    string run_output = runtime_run_command_output(
         "NEURX_HOME=" + shell_escape(root) +
         " ENWIKI_BZ2_FILE=" + shell_escape(input) +
         " ENWIKI_SHARD_DIR=" + shell_escape(output_dir) +
@@ -183,6 +192,9 @@ func run_wikipedia() int {
         " MAX_PAGES=" + shell_escape(max_pages) +
         " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia.ir")
     )
+    if len(trim(run_output)) > 0 {
+        println(run_output)
+    }
     if !runtime_file_exists(manifest) {
         println("Error: shard wikipedia execution failed")
         return 1
@@ -205,7 +217,10 @@ func run_verify() int {
         "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
         "echo \"$(basename \"$shard_file\"): ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\"): Invalid JSON detected\"; exit 1; fi; done"
-    runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
+    string verify_output = runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
+    if len(trim(verify_output)) > 0 {
+        println(verify_output)
+    }
     0
 }
 
@@ -219,7 +234,10 @@ func run_list() int {
 
     string list_cmd = "sh -c " +
         shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
-    runtime_run_command_output(list_cmd)
+    string list_output = runtime_run_command_output(list_cmd)
+    if len(trim(list_output)) > 0 {
+        println(list_output)
+    }
     0
 }
 
@@ -231,7 +249,10 @@ func run_clean() int {
         return 1
     }
 
-    runtime_run_command_output("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
+    string clean_output = runtime_run_command_output("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
+    if len(trim(clean_output)) > 0 {
+        println(clean_output)
+    }
     0
 }
 
