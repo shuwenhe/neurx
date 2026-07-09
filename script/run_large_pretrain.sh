@@ -6,7 +6,7 @@ NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 export NEURX_ROOT="$NEURX_ROOT"
 
-export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$(cd "$NEURX_ROOT/.." && pwd)}"
+export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$NEURX_ROOT}"
 if [ -z "${S_COMPILER:-}" ]; then
     if [ -x "$NEURX_ROOT/../s/bin/s" ]; then
         export S_COMPILER="$NEURX_ROOT/../s/bin/s"
