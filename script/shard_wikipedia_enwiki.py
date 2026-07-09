@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def log(msg: str) -> None:
-    print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr, flush=True)
 
 
 def strip_markup(text: str) -> str:
@@ -121,12 +121,14 @@ def main() -> int:
     log(f"Output dir : {args.output_dir}")
     log(f"Manifest   : {args.manifest}")
     log(f"Docs/shard : {args.docs_per_shard}")
+    log(f"Starting   : {current_path.name}")
     log("")
 
     def rotate_shard() -> None:
         nonlocal shard_index, docs_in_shard, shard_docs, shard_size_bytes
         nonlocal current_file, current_path
 
+        completed_name = current_path.name
         current_file.flush()
         current_file.close()
         if current_path.exists():
@@ -139,6 +141,10 @@ def main() -> int:
                     "size_bytes": shard_size_bytes,
                 }
             )
+            log(
+                f"Completed  : {completed_name} "
+                f"(docs={shard_docs}, bytes={shard_size_bytes})"
+            )
 
         shard_index += 1
         docs_in_shard = 0
@@ -146,6 +152,7 @@ def main() -> int:
         shard_size_bytes = 0
         current_path = args.output_dir / shard_name(shard_index)
         current_file = current_path.open("w", encoding="utf-8")
+        log(f"Starting   : {current_path.name}")
 
     with bz2.open(args.input, "rt", encoding="utf-8", errors="replace") as fh:
         for raw_line in fh:
@@ -176,8 +183,12 @@ def main() -> int:
                     if docs_in_shard >= args.docs_per_shard:
                         rotate_shard()
 
-                    if total_pages % 10000 == 0:
-                        log(f"Processed pages: {total_pages}")
+                    if total_pages % 1000 == 0:
+                        log(
+                            f"Processed pages: {total_pages} | "
+                            f"current shard: {current_path.name} | "
+                            f"docs in shard: {docs_in_shard}"
+                        )
 
     if current_file and not current_file.closed:
         current_file.flush()
