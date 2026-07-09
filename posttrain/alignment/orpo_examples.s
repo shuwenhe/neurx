@@ -60,6 +60,7 @@ func example_basic_orpo_training() {
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("  Beta (KL weight): " + float_to_string_ex(cfg.beta))
     print("  Gamma (log odds scale): " + float_to_string_ex(cfg.gamma))
+    print("  Initial training steps: " + int_to_string_ex(state.training_step))
     print("")
     
     print("[Creating Sample Trajectories]")
