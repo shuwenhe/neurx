@@ -486,22 +486,12 @@ shard-s:
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
 
 shard-enwiki: check-bash
-	@echo "Building NeurX Wikipedia sharding entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
+	@echo "$(BLUE)📦 Sharding Wikipedia dataset...$(NC)"
 	@mkdir -p $(LOG_DIR)
-	@if [ ! -f "$(S_COMPILER)" ]; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
-		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
-		exit 1; \
-	fi
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/shard_enwiki.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir'
-	@echo "Running Wikipedia sharding pipeline..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/shard_enwiki.ir' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
+		bash script/shard_enwiki.sh 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
+	@echo "$(GREEN)✓ Wikipedia sharding complete$(NC)"
 
 data-pipeline-s: build-data-scripts
 	@echo "Running NeurX full data pipeline (clean + shard, S version)..."
