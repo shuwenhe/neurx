@@ -158,9 +158,10 @@ func compute_log_odds([]float log_probs) float {
 // Compute log probabilities from logits (numerically stable softmax)
 func logits_to_log_probs([]float logits) []float {
     // Find max for numerical stability
+    int n = len_array_ex(logits)
     float max_logit = logits[0]
     int i = 1
-    while i < len_array_ex(logits) {
+    while i < n {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -169,9 +170,9 @@ func logits_to_log_probs([]float logits) []float {
     
     // exp(logits - max) and sum
     float sum_exp = 0.0
-    []float exp_shifted = []float{cap: len_array_ex(logits)}
+    []float exp_shifted = []float{cap: n}
     i = 0
-    while i < len_array_ex(logits) {
+    while i < n {
         float exp_val = exp_approx_ex(logits[i] - max_logit)
         exp_shifted = append_float_ex(exp_shifted, exp_val)
         sum_exp = sum_exp + exp_val
@@ -180,9 +181,9 @@ func logits_to_log_probs([]float logits) []float {
     
     // log(exp / sum_exp) = logits - max - log(sum_exp)
     float log_sum_exp = log_approx_ex(sum_exp) + max_logit
-    []float log_probs = []float{cap: len_array_ex(logits)}
+    []float log_probs = []float{cap: n}
     i = 0
-    while i < len_array_ex(logits) {
+    while i < n {
         float log_prob = logits[i] - log_sum_exp
         log_probs = append_float_ex(log_probs, log_prob)
         i = i + 1
@@ -437,7 +438,7 @@ func start_orpo_training(
                 cfg.learning_rate,
                 0.9,
                 0.999,
-                1e-8
+                0.00000001
             )
             
             // Log progress every 10 batches
