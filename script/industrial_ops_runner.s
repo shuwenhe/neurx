@@ -509,7 +509,7 @@ func ops_parse_args([]string args) command_args {
     }
 }
 
-fn ops_print_help() {
+func ops_print_help() {
     io_println("NeurX Industrial Ops Runner")
     io_println("")
     io_println("Usage:")
