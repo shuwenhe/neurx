@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain posttrain pretrain-watch watch-auto-commit-push train-supervised chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain posttrain orpo pretrain-watch watch-auto-commit-push train-supervised chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s
@@ -67,6 +67,7 @@ help:
 	@echo "  make infer"
 	@echo "  make train-supervised"
 	@echo "  make posttrain"
+	@echo "  make orpo"
 	@echo "  make run-sft-training-s"
 	@echo "  make watch-auto-commit-push"
 	@echo "  make chat"
@@ -129,6 +130,24 @@ posttrain: check-bash
 		$(S_COMPILER) ir 'posttrain/posttrain.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'
 	@echo "✓ posttrain entry compiled to S IR"
+
+orpo: check-bash
+	@echo "Building NeurX ORPO alignment entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/orpo
+	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
+		$(S_COMPILER) ir 'posttrain/alignment/orpo_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_trainer.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_trainer.ir'
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
+		$(S_COMPILER) ir 'posttrain/alignment/orpo_examples.s' -o '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_examples.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/orpo/orpo_examples.ir'
+	@echo "✓ ORPO trainer/examples compiled to S IR"
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
