@@ -8,7 +8,7 @@ cd "$ROOT_DIR"
 BRANCH="${NEURX_WATCH_BRANCH:-main}"
 INTERVAL="${NEURX_WATCH_INTERVAL:-2}"
 DEBOUNCE="${NEURX_WATCH_DEBOUNCE:-1}"
-PREFIX="${NEURX_AUTO_COMMIT_PREFIX:-chore: auto-save}"
+PREFIX="${NEURX_AUTO_COMMIT_PREFIX:-feat: auto-save}"
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     cat <<'EOF'
@@ -104,7 +104,7 @@ generate_commit_message() {
             echo "feat: implement model improvement ($lines_added lines)"
         fi
     elif [ "$has_config" -eq 1 ]; then
-        echo "chore: update configuration and parameters"
+        echo "feat: update configuration and parameters"
     elif [ "$has_tests" -eq 1 ]; then
         echo "test: add comprehensive test coverage ($lines_added lines)"
     else
@@ -114,7 +114,7 @@ generate_commit_message() {
         elif [ "$lines_added" -gt 100 ]; then
             echo "feat: add functionality ($lines_added lines)"
         else
-            echo "chore: update code ($lines_added added, $lines_removed removed)"
+            echo "feat: update code ($lines_added added, $lines_removed removed)"
         fi
     fi
 }
