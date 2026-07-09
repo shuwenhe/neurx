@@ -46,23 +46,23 @@ struct ShardMetadata {
 // Helper Functions
 // ============================================================================
 
-func log_info(msg: string) {
+func log_info(string msg) {
     println("[i] " + msg)
 }
 
-func log_success(msg: string) {
+func log_success(string msg) {
     println("[+] " + msg)
 }
 
-func log_error(msg: string) {
+func log_error(string msg) {
     println("[-] " + msg)
 }
 
-func log_progress(msg: string) {
+func log_progress(string msg) {
     println("[*] " + msg)
 }
 
-func strip_xml_tags(text: string) string {
+func strip_xml_tags(string text) string {
     // Remove <tag>...</tag> patterns
     let mut result = ""
     let mut in_tag = false
@@ -82,7 +82,7 @@ func strip_xml_tags(text: string) string {
     return result
 }
 
-func html_unescape(text: string) string {
+func html_unescape(string text) string {
     let mut result = text
     
     // Replace common HTML entities
@@ -96,7 +96,7 @@ func html_unescape(text: string) string {
     return result
 }
 
-func normalize_whitespace(text: string) string {
+func normalize_whitespace(string text) string {
     // Remove leading/trailing whitespace and collapse multiple spaces
     let trimmed = trim(text)
     
@@ -121,7 +121,7 @@ func normalize_whitespace(text: string) string {
     return result
 }
 
-func shard_name(index: i64) string {
+func shard_name(i64 index) string {
     // Format: shard_00000.jsonl
     let mut s = i64_to_string(index)
     while len(s) < 5 {
@@ -130,7 +130,7 @@ func shard_name(index: i64) string {
     return "shard_" + s + ".jsonl"
 }
 
-func json_escape_string(s: string) string {
+func json_escape_string(string s) string {
     let mut result = "\""
     
     for i = 0; i < len(s); i = i + 1 {
@@ -155,11 +155,11 @@ func json_escape_string(s: string) string {
     return result
 }
 
-func json_object_entry(key: string, value: string) string {
+func json_object_entry(string, value key: string) string {
     return json_escape_string(key) + ": " + value
 }
 
-func create_json_record(title: string, page_id: string, text: string) string {
+func create_json_record(string, page_id title: string string, text) string {
     let title_escaped = json_escape_string(title)
     let page_id_escaped = json_escape_string(page_id)
     let text_escaped = json_escape_string(text)
@@ -192,7 +192,7 @@ struct PageRecordResult {
     bool valid
 }
 
-func extract_xml_tag_value(xml: string, tag_name: string) string {
+func extract_xml_tag_value(string, tag_name xml: string) string {
     let open_tag = "<" + tag_name + ">"
     let close_tag = "</" + tag_name + ">"
     
@@ -212,7 +212,7 @@ func extract_xml_tag_value(xml: string, tag_name: string) string {
     return value
 }
 
-func contains_index(haystack: string, needle: string) i64 {
+func contains_index(string, needle haystack: string) i64 {
     if len(needle) == 0 {
         return 0
     }
@@ -226,7 +226,7 @@ func contains_index(haystack: string, needle: string) i64 {
     return -1
 }
 
-func extract_page_record(page_xml: string) PageRecordResult {
+func extract_page_record(string page_xml) PageRecordResult {
     // Check if page is in namespace 0 (main article namespace)
     let ns_str = extract_xml_tag_value(page_xml, "ns")
     if ns_str != "0" {
@@ -281,17 +281,17 @@ func extract_page_record(page_xml: string) PageRecordResult {
 // File Operations
 // ============================================================================
 
-func file_exists(path: string) bool {
+func file_exists(string path) bool {
     let (_, code) = command("test -f \"" + path + "\"")
     return code == 0
 }
 
-func dir_exists(path: string) bool {
+func dir_exists(string path) bool {
     let (_, code) = command("test -d \"" + path + "\"")
     return code == 0
 }
 
-func get_file_size(path: string) i64 {
+func get_file_size(string path) i64 {
     if !file_exists(path) {
         return 0
     }
@@ -323,7 +323,7 @@ func get_file_size(path: string) i64 {
 // Main Shard Processing
 // ============================================================================
 
-func process_wikipedia(config: WikipediaConfig) i32 {
+func process_wikipedia(WikipediaConfig config) i32 {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")
     println("║    NeurX Wikipedia Shard Processing (S Language)           ║")
@@ -506,7 +506,7 @@ func process_wikipedia(config: WikipediaConfig) i32 {
     return 0
 }
 
-func generate_manifest_json(config: WikipediaConfig, shards: []ShardMetadata, total_pages: i64, total_docs: i64, total_size_bytes: i64, avg_docs: i64) string {
+func generate_manifest_json(WikipediaConfig, shards config: []i64, total_docs ShardMetadata, total_pages: i64, avg_docs i64, total_size_bytes: i64) string {
     let mut json = "{\n"
     json = json + "  \"dataset_name\": \"neurx-pretrain-wikipedia\",\n"
     json = json + "  \"version\": \"1.0\",\n"
