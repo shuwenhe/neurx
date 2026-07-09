@@ -132,19 +132,15 @@ chat: check-bash
 
 
 shard: check-bash
-	@echo "Building Wikipedia shard processor (S language implementation)..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard $(LOG_DIR)
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'shard/shard_enwiki.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1
 	@echo "Running Wikipedia shard processor..."
+	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
 		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
 		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
+		bash shard/shard.sh wikipedia 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"

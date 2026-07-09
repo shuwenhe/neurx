@@ -1,562 +1,436 @@
 // ============================================================================
-// NeurX Wikipedia (enwiki) Shard Processing — S Language Implementation
+// NeurX Wikipedia Shard Processing
 //
-// Replaces: shard_wikipedia_enwiki.py
-//
-// This script streams the compressed Wikipedia dump, extracts page text, and
-// writes shard_00000.jsonl-style files plus a manifest under the pretrain
-// shard directory.
-//
-// Features:
-// - Decompresses .bz2 files using bzip2
-// - Parses XML and extracts article text
-// - Strips HTML/XML markup and entities
-// - Splits into manageable shards
-// - Generates manifest.json with metadata
+// S-language entry point for Wikipedia dump sharding.
+// This version keeps the implementation self-contained and shell-driven so it
+// can compile to IR and be used by `make shard` / `shard.sh` directly.
 // ============================================================================
 
 package neurx.shard.shard_wikipedia
 
-use std.io.{println}
-use std.os.{command, getenv, getenv_int}
-use std.path.{join, dirname}
-use std.strings.{split, has_prefix, has_suffix, contains, trim, replace}
-use std.json.{encode, object, array, string as json_string, number, null}
+use std.os.{command, getenv}
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 struct WikipediaConfig {
-    string input_bz2_file      // Path to enwiki-latest-pages-articles.xml.bz2
-    string output_dir          // Directory for output shards
-    string manifest_file       // Output manifest.json path
-    int docs_per_shard         // Documents per shard file
-    int max_pages              // Optional test limit (0 = unlimited)
+    string input_bz2_file
+    string output_dir
+    string manifest_file
+    int docs_per_shard
+    int max_pages
 }
 
 struct ShardMetadata {
     string shard_id
     string file_path
-    i64 num_documents
-    i64 size_bytes
+    int num_documents
+    int size_bytes
 }
 
 // ============================================================================
-// Helper Functions
+// Small helpers
 // ============================================================================
 
-fn log_info(msg: string) {
-    println("[i] " + msg)
+func string_char(int c) string {
+    string(c)
 }
 
-fn log_success(msg: string) {
-    println("[+] " + msg)
-}
-
-fn log_error(msg: string) {
-    println("[-] " + msg)
-}
-
-fn log_progress(msg: string) {
-    println("[*] " + msg)
-}
-
-fn strip_xml_tags(text: string) string {
-    // Remove <tag>...</tag> patterns
-    let mut result = ""
-    let mut in_tag = false
-    
-    for i = 0; i < len(text); i = i + 1 {
-        let ch = text[i:i+1]
-        if ch == "<" {
-            in_tag = true
-        } else if ch == ">" {
-            in_tag = false
-            result = result + " "
-        } else if !in_tag {
-            result = result + ch
-        }
-    }
-    
-    return result
-}
-
-fn html_unescape(text: string) string {
-    let mut result = text
-    
-    // Replace common HTML entities
-    result = replace(result, "&nbsp;", " ")
-    result = replace(result, "&lt;", "<")
-    result = replace(result, "&gt;", ">")
-    result = replace(result, "&amp;", "&")
-    result = replace(result, "&quot;", "\"")
-    result = replace(result, "&apos;", "'")
-    
-    return result
-}
-
-fn normalize_whitespace(text: string) string {
-    // Remove leading/trailing whitespace and collapse multiple spaces
-    let trimmed = trim(text)
-    
-    let mut result = ""
-    let mut prev_space = false
-    
-    for i = 0; i < len(trimmed); i = i + 1 {
-        let ch = trimmed[i:i+1]
-        let is_space = (ch == " " || ch == "\t" || ch == "\n" || ch == "\r")
-        
-        if is_space {
-            if !prev_space {
-                result = result + " "
-                prev_space = true
-            }
+func trim(string s) string {
+    int begin = 0
+    while begin < len(s) {
+        string ch = string_char(s[begin])
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
+            begin = begin + 1
         } else {
-            result = result + ch
-            prev_space = false
+            break
         }
     }
-    
-    return result
+
+    int end = len(s)
+    while end > begin {
+        string ch = string_char(s[end - 1])
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
+            end = end - 1
+        } else {
+            break
+        }
+    }
+
+    string out = ""
+    int i = begin
+    while i < end {
+        out = out + string_char(s[i])
+        i = i + 1
+    }
+    out
 }
 
-fn shard_name(index: i64) string {
-    // Format: shard_00000.jsonl
-    let mut s = i64_to_string(index)
+func parse_int(string s, int fallback) int {
+    string text = trim(s)
+    if len(text) == 0 {
+        return fallback
+    }
+
+    int sign = 1
+    int i = 0
+    if string_char(text[0]) == "-" {
+        sign = -1
+        i = 1
+    } else if string_char(text[0]) == "+" {
+        i = 1
+    }
+
+    int value = 0
+    while i < len(text) {
+        int digit = text[i] - 48
+        if digit < 0 || digit > 9 {
+            return fallback
+        }
+        value = value * 10 + digit
+        i = i + 1
+    }
+
+    sign * value
+}
+
+func int_to_str(int n) string {
+    if n == 0 {
+        return "0"
+    }
+
+    bool negative = n < 0
+    if negative {
+        n = 0 - n
+    }
+
+    string out = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        out = string_char(digit + 48) + out
+        n = n / 10
+    }
+
+    if negative {
+        out = "-" + out
+    }
+
+    out
+}
+
+func shell_escape(string s) string {
+    string out = "'"
+    int i = 0
+    while i < len(s) {
+        string ch = string_char(s[i])
+        if ch == "'" {
+            out = out + "'\"'\"'"
+        } else {
+            out = out + ch
+        }
+        i = i + 1
+    }
+    out = out + "'"
+    out
+}
+
+func basename(string path) string {
+    int last = -1
+    int i = 0
+    while i < len(path) {
+        if string_char(path[i]) == "/" {
+            last = i
+        }
+        i = i + 1
+    }
+    if last < 0 {
+        return path
+    }
+    if last + 1 >= len(path) {
+        return ""
+    }
+    string out = ""
+    i = last + 1
+    while i < len(path) {
+        out = out + string_char(path[i])
+        i = i + 1
+    }
+    out
+}
+
+func parent_dir(string path) string {
+    int last = -1
+    int i = 0
+    while i < len(path) {
+        if string_char(path[i]) == "/" {
+            last = i
+        }
+        i = i + 1
+    }
+    if last <= 0 {
+        return "."
+    }
+    string out = ""
+    i = 0
+    while i < last {
+        out = out + string_char(path[i])
+        i = i + 1
+    }
+    out
+}
+
+func file_exists(string path) bool {
+    let (_, code) = command("test -f " + shell_escape(path))
+    code == 0
+}
+
+func dir_exists(string path) bool {
+    let (_, code) = command("test -d " + shell_escape(path))
+    code == 0
+}
+
+func make_dir(string path) bool {
+    let (_, code) = command("mkdir -p " + shell_escape(path))
+    code == 0
+}
+
+func write_text_file(string path, string content) bool {
+    let (_, code) = command("printf %s " + shell_escape(content) + " > " + shell_escape(path))
+    code == 0
+}
+
+func read_command_output(string cmd) string {
+    let (out, _) = command(cmd)
+    trim(out)
+}
+
+func shard_name(int index) string {
+    string s = int_to_str(index)
     while len(s) < 5 {
         s = "0" + s
     }
-    return "shard_" + s + ".jsonl"
+    "shard_" + s + ".jsonl"
 }
 
-fn json_escape_string(s: string) string {
-    let mut result = "\""
-    
-    for i = 0; i < len(s); i = i + 1 {
-        let ch = s[i:i+1]
-        
+func json_escape(string s) string {
+    string out = "\""
+    int i = 0
+    while i < len(s) {
+        string ch = string_char(s[i])
         if ch == "\"" {
-            result = result + "\\\""
+            out = out + "\\\""
         } else if ch == "\\" {
-            result = result + "\\\\"
+            out = out + "\\\\"
         } else if ch == "\n" {
-            result = result + "\\n"
+            out = out + "\\n"
         } else if ch == "\r" {
-            result = result + "\\r"
+            out = out + "\\r"
         } else if ch == "\t" {
-            result = result + "\\t"
+            out = out + "\\t"
         } else {
-            result = result + ch
+            out = out + ch
         }
+        i = i + 1
     }
-    
-    result = result + "\""
-    return result
+    out = out + "\""
+    out
 }
 
-fn json_object_entry(key: string, value: string) string {
-    return json_escape_string(key) + ": " + value
-}
-
-fn create_json_record(title: string, page_id: text: string string,) string {
-    let title_escaped = json_escape_string(title)
-    let page_id_escaped = json_escape_string(page_id)
-    let text_escaped = json_escape_string(text)
-    
-    return "{" +
-        json_object_entry("title", title_escaped) + ", " +
-        json_object_entry("page_id", page_id_escaped) + ", " +
-        json_object_entry("text", text_escaped) + ", " +
-        json_object_entry("source", json_escape_string("enwiki-latest-pages-articles.xml.bz2")) +
-        "}"
-}
-
-// ============================================================================
-// XML Parsing
-// ============================================================================
-
-struct PageRecord {
-    string title
-    string page_id
-    string text
-}
-
-struct PageRecordResult {
-    PageRecord record
-    bool valid
-}
-
-struct PageRecordResult {
-    PageRecord record
-    bool valid
-}
-
-fn extract_xml_tag_value(xml: string, tag_name: string) string {
-    let open_tag = "<" + tag_name + ">"
-    let close_tag = "</" + tag_name + ">"
-    
-    let start_idx = contains_index(xml, open_tag)
-    if start_idx < 0 {
-        return ""
-    }
-    
-    let end_idx = contains_index(xml, close_tag)
-    if end_idx < 0 {
-        return ""
-    }
-    
-    let value_start = start_idx + len(open_tag)
-    let value = xml[value_start:end_idx]
-    
-    return value
-}
-
-fn contains_index(haystack: string, needle: string) i64 {
-    if len(needle) == 0 {
-        return 0
-    }
-    
-    for i = 0; i <= len(haystack) - len(needle); i = i + 1 {
-        if haystack[i:i+len(needle)] == needle {
-            return i64(i)
-        }
-    }
-    
-    return -1
-}
-
-fn extract_page_record(page_xml: string) PageRecordResult {
-    // Check if page is in namespace 0 (main article namespace)
-    let ns_str = extract_xml_tag_value(page_xml, "ns")
-    if ns_str != "0" {
-        return PageRecordResult{
-            record: PageRecord{title: "", page_id: "", text: ""},
-            valid: false,
-        }
-    }
-    
-    // Skip redirects
-    if contains_index(page_xml, "<redirect") >= 0 {
-        return PageRecordResult{
-            record: PageRecord{title: "", page_id: "", text: ""},
-            valid: false,
-        }
-    }
-    
-    // Extract fields
-    let title = extract_xml_tag_value(page_xml, "title")
-    let page_id = extract_xml_tag_value(page_xml, "id")
-    let text = extract_xml_tag_value(page_xml, "text")
-    
-    if len(title) == 0 || len(text) == 0 {
-        return PageRecordResult{
-            record: PageRecord{title: "", page_id: "", text: ""},
-            valid: false,
-        }
-    }
-    
-    // Clean up text
-    let title_clean = normalize_whitespace(html_unescape(title))
-    let text_clean = normalize_whitespace(html_unescape(strip_xml_tags(text)))
-    
-    if len(text_clean) == 0 {
-        return PageRecordResult{
-            record: PageRecord{title: "", page_id: "", text: ""},
-            valid: false,
-        }
-    }
-    
-    return PageRecordResult{
-        record: PageRecord{
-            title: title_clean,
-            page_id: page_id,
-            text: text_clean,
-        },
-        valid: true,
-    }
-}
-
-// ============================================================================
-// File Operations
-// ============================================================================
-
-fn file_exists(path: string) bool {
-    let (_, code) = command("test -f \"" + path + "\"")
-    return code == 0
-}
-
-fn dir_exists(path: string) bool {
-    let (_, code) = command("test -d \"" + path + "\"")
-    return code == 0
-}
-
-fn get_file_size(path: string) i64 {
-    if !file_exists(path) {
-        return 0
-    }
-    
-    let (output, code) = command("stat -c '%s' \"" + path + "\" 2>/dev/null || stat -f '%z' \"" + path + "\"")
-    if code != 0 {
-        return 0
-    }
-    
-    // Parse the size from output
-    let lines = split(output, "\n")
-    if len(lines) > 0 {
-        let size_str = trim(lines[0])
-        // Simple string to i64 conversion
-        let mut size: i64 = 0
-        for i = 0; i < len(size_str); i = i + 1 {
-            let ch = size_str[i:i+1]
-            if ch >= "0" && ch <= "9" {
-                size = size * 10 + i64(ch[0] - "0"[0])
-            }
-        }
-        return size
-    }
-    
-    return 0
-}
-
-// ============================================================================
-// Main Shard Processing
-// ============================================================================
-
-fn process_wikipedia(config: WikipediaConfig) i32 {
-    println("")
-    println("╔════════════════════════════════════════════════════════════╗")
-    println("║    NeurX Wikipedia Shard Processing (S Language)           ║")
-    println("╚════════════════════════════════════════════════════════════╝")
-    println("")
-    
-    // Log configuration
-    log_info("Configuration:")
-    println("  Input      : " + config.input_bz2_file)
-    println("  Output dir : " + config.output_dir)
-    println("  Manifest   : " + config.manifest_file)
-    println("  Docs/shard : " + i64_to_string(i64(config.docs_per_shard)))
-    println("")
-    
-    // Step 1: Verify input file
-    log_progress("Checking input file...")
-    if !file_exists(config.input_bz2_file) {
-        log_error("Input file not found: " + config.input_bz2_file)
-        return 1
-    }
-    log_success("Input file exists")
-    println("")
-    
-    // Step 2: Create output directories
-    log_progress("Creating output directories...")
-    let (_, code) = command("mkdir -p \"" + config.output_dir + "\" \"" + dirname(config.manifest_file) + "\"")
-    if code != 0 {
-        log_error("Failed to create directories")
-        return 1
-    }
-    log_success("Directories created")
-    println("")
-    
-    // Step 3: Clean old shard files
-    log_progress("Cleaning old shard files...")
-    command("rm -f \"" + config.output_dir + "/shard_\"*.jsonl")
-    log_success("Cleanup complete")
-    println("")
-    
-    // Step 4: Process Wikipedia dump using bzcat piped to Python helper
-    // For now, we'll use a hybrid approach with bzcat and awk for parsing
-    log_progress("Processing Wikipedia dump...")
-    
-    let mut shard_index: i64 = 0
-    let mut docs_in_shard: i64 = 0
-    let mut total_pages: i64 = 0
-    let mut total_docs: i64 = 0
-    let mut shard_file: string = ""
-    let mut shards: []ShardMetadata = []
-    
-    // Use bzcat to decompress and process
-    let bzcat_cmd = "bzcat \"" + config.input_bz2_file + "\" 2>/dev/null || bzip2 -dc \"" + config.input_bz2_file + "\""
-    
-    // We need to invoke the bzcat command and process line by line
-    // This is a simplified version - in production, consider a more robust implementation
-    
-    let (output, code) = command(bzcat_cmd)
-    if code != 0 {
-        log_error("Failed to decompress input file")
-        return 1
-    }
-    
-    let lines = split(output, "\n")
-    let mut page_lines: []string = []
-    let mut in_page = false
-    
-    for i = 0; i < len(lines); i = i + 1 {
-        let line = lines[i]
-        
-        if contains_index(line, "<page>") >= 0 {
-            in_page = true
-            page_lines = []string{line}
-            continue
-        }
-        
-        if in_page {
-            page_lines = append(page_lines, line)
-            
-            if contains_index(line, "</page>") >= 0 {
-                in_page = false
-                total_pages = total_pages + 1
-                
-                let page_xml = join(page_lines, "\n")
-                let result = extract_page_record(page_xml)
-                
-                if result.valid {
-                    // Create output filename
-                    if len(shard_file) == 0 {
-                        shard_file = join([]string{config.output_dir, shard_name(shard_index)}, "/")
-                    }
-                    
-                    // Write record to shard file
-                    let json_record = create_json_record(result.record.title, result.record.page_id, result.record.text)
-                    let (_, code) = command("echo '" + json_record + "' >> \"" + shard_file + "\"")
-                    if code == 0 {
-                        docs_in_shard = docs_in_shard + 1
-                        total_docs = total_docs + 1
-                    }
-                    
-                    // Rotate shard if needed
-                    if docs_in_shard >= i64(config.docs_per_shard) {
-                        if file_exists(shard_file) {
-                            let size = get_file_size(shard_file)
-                            shards = append(shards, ShardMetadata{
-                                shard_id: shard_name(shard_index),
-                                file_path: shard_file,
-                                num_documents: docs_in_shard,
-                                size_bytes: size,
-                            })
-                            log_success("Completed: " + shard_name(shard_index) + " (docs=" + i64_to_string(docs_in_shard) + ", bytes=" + i64_to_string(size) + ")")
-                        }
-                        
-                        shard_index = shard_index + 1
-                        docs_in_shard = 0
-                        shard_file = join([]string{config.output_dir, shard_name(shard_index)}, "/")
-                    }
-                }
-                
-                page_lines = []
-                
-                if config.max_pages > 0 && total_pages >= i64(config.max_pages) {
-                    break
-                }
-                
-                if total_pages / 1000 * 1000 == total_pages {
-                    log_progress("Processed pages: " + i64_to_string(total_pages) + " | current shard: " + shard_name(shard_index) + " | docs: " + i64_to_string(docs_in_shard))
-                }
-            }
-        }
-    }
-    
-    // Finalize last shard
-    if len(shard_file) > 0 && file_exists(shard_file) {
-        let size = get_file_size(shard_file)
-        if size > 0 {
-            shards = append(shards, ShardMetadata{
-                shard_id: shard_name(shard_index),
-                file_path: shard_file,
-                num_documents: docs_in_shard,
-                size_bytes: size,
-            })
-        }
-    }
-    
-    // Calculate totals
-    let mut total_size_bytes: i64 = 0
-    for i = 0; i < len(shards); i = i + 1 {
-        total_size_bytes = total_size_bytes + shards[i].size_bytes
-    }
-    
-    let avg_docs_per_shard: i64 = 0
-    if len(shards) > 0 {
-        avg_docs_per_shard = total_docs / i64(len(shards))
-    }
-    
-    // Generate manifest
-    log_progress("Generating manifest...")
-    let manifest_json = generate_manifest_json(config, shards, total_pages, total_docs, total_size_bytes, avg_docs_per_shard)
-    
-    // Write manifest file
-    let write_cmd = "cat > \"" + config.manifest_file + "\" << 'EOF'\n" + manifest_json + "\nEOF"
-    let (_, code) = command(write_cmd)
-    if code != 0 {
-        log_error("Failed to write manifest file")
-        return 1
-    }
-    
-    log_success("Manifest saved: " + config.manifest_file)
-    println("")
-    
-    // Print summary
-    println("Summary:")
-    println("  Total pages   : " + i64_to_string(total_pages))
-    println("  Total shards  : " + i64_to_string(i64(len(shards))))
-    println("  Total docs    : " + i64_to_string(total_docs))
-    println("  Total size    : " + i64_to_string(total_size_bytes) + " bytes")
-    println("")
-    
-    println("✅ Wikipedia sharding complete")
-    return 0
-}
-
-fn generate_manifest_json(config: WikipediaConfig, shards: []total_pages: i64, total_docs ShardMetadata,: total_size_bytes: i64, avg_docs i64,: i64) string {
-    let mut json = "{\n"
-    json = json + "  \"dataset_name\": \"neurx-pretrain-wikipedia\",\n"
-    json = json + "  \"version\": \"1.0\",\n"
-    json = json + "  \"created_at\": \"2026-07-09T00:00:00Z\",\n"
-    json = json + "  \"source_file\": \"" + config.input_bz2_file + "\",\n"
-    json = json + "  \"total_shards\": " + i64_to_string(i64(len(shards))) + ",\n"
-    json = json + "  \"total_documents\": " + i64_to_string(total_docs) + ",\n"
-    json = json + "  \"total_size_bytes\": " + i64_to_string(total_size_bytes) + ",\n"
-    json = json + "  \"average_docs_per_shard\": " + i64_to_string(avg_docs) + ",\n"
+func generate_manifest_json(WikipediaConfig config, int total_pages, int total_shards, []ShardMetadata shards) string {
+    string json = "{\n"
+    json = json + "  \"dataset_name\": \"neurx-wikipedia\",\n"
+    json = json + "  \"source_file\": " + json_escape(config.input_bz2_file) + ",\n"
+    json = json + "  \"shard_dir\": " + json_escape(config.output_dir) + ",\n"
+    json = json + "  \"manifest_file\": " + json_escape(config.manifest_file) + ",\n"
+    json = json + "  \"docs_per_shard\": " + int_to_str(config.docs_per_shard) + ",\n"
+    json = json + "  \"max_pages\": " + int_to_str(config.max_pages) + ",\n"
+    json = json + "  \"total_pages\": " + int_to_str(total_pages) + ",\n"
+    json = json + "  \"total_shards\": " + int_to_str(total_shards) + ",\n"
     json = json + "  \"shards\": [\n"
-    
-    for i = 0; i < len(shards); i = i + 1 {
+
+    int i = 0
+    while i < len(shards) {
         json = json + "    {\n"
-        json = json + "      \"shard_id\": \"" + shards[i].shard_id + "\",\n"
-        json = json + "      \"file_path\": \"" + shards[i].file_path + "\",\n"
-        json = json + "      \"num_documents\": " + i64_to_string(shards[i].num_documents) + ",\n"
-        json = json + "      \"size_bytes\": " + i64_to_string(shards[i].size_bytes) + "\n"
+        json = json + "      \"shard_id\": " + json_escape(shards[i].shard_id) + ",\n"
+        json = json + "      \"file_path\": " + json_escape(shards[i].file_path) + ",\n"
+        json = json + "      \"num_documents\": " + int_to_str(shards[i].num_documents) + ",\n"
+        json = json + "      \"size_bytes\": " + int_to_str(shards[i].size_bytes) + "\n"
         json = json + "    }"
-        
-        if i < len(shards) - 1 {
+        if i + 1 < len(shards) {
             json = json + ","
         }
         json = json + "\n"
+        i = i + 1
     }
-    
+
     json = json + "  ]\n"
     json = json + "}\n"
-    
-    return json
+    json
 }
 
 // ============================================================================
-// Main Entry Point
+// Core processing
 // ============================================================================
 
-fn main() i32 {
-    // Parse configuration from environment
-    let neurx_home = getenv("NEURX_HOME", ".")
-    let dataset_root = neurx_home + "/dataset/pretrain"
-    
-    let config = WikipediaConfig{
-        input_bz2_file: getenv("ENWIKI_BZ2_FILE",
-            dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2"),
-        output_dir: getenv("ENWIKI_SHARD_DIR",
-            dataset_root + "/shard"),
-        manifest_file: getenv("ENWIKI_MANIFEST_FILE",
-            dataset_root + "/manifest.json"),
-        docs_per_shard: getenv_int("DOCS_PER_SHARD", 5000),
-        max_pages: getenv_int("MAX_PAGES", 0),
+func process_wikipedia(WikipediaConfig config) int {
+    println("")
+    println("╔══════════════════════════════════════════════════════════╗")
+    println("║    NeurX Wikipedia Shard Processing (S Language)        ║")
+    println("╚══════════════════════════════════════════════════════════╝")
+    println("")
+    println("Input      : " + config.input_bz2_file)
+    println("Output dir : " + config.output_dir)
+    println("Manifest   : " + config.manifest_file)
+    println("Docs/shard : " + int_to_str(config.docs_per_shard))
+    println("Max pages  : " + int_to_str(config.max_pages))
+    println("")
+
+    if !file_exists(config.input_bz2_file) {
+        println("[-] Input file not found: " + config.input_bz2_file)
+        return 1
     }
-    
-    return process_wikipedia(config)
+
+    if !make_dir(config.output_dir) {
+        println("[-] Failed to create output directory: " + config.output_dir)
+        return 1
+    }
+    if !make_dir(parent_dir(config.manifest_file)) {
+        println("[-] Failed to create manifest directory")
+        return 1
+    }
+
+    // Clean up previous outputs.
+    let _ = command("rm -f " + shell_escape(config.output_dir + "/shard_*.jsonl") + " " + shell_escape(config.output_dir + "/.wikipedia_dump.xml"))
+
+    string temp_xml = config.output_dir + "/.wikipedia_dump.xml"
+    println("[*] Decompressing Wikipedia dump...")
+    let (_, decompress_code) = command(
+        "bzip2 -dc " + shell_escape(config.input_bz2_file) + " > " + shell_escape(temp_xml)
+    )
+    if decompress_code != 0 {
+        println("[-] Failed to decompress input file")
+        return 1
+    }
+
+    string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
+    int total_pages = parse_int(read_command_output(count_cmd), 0)
+    if config.max_pages > 0 && total_pages > config.max_pages {
+        total_pages = config.max_pages
+    }
+
+    int total_shards = 0
+    if config.docs_per_shard > 0 {
+        total_shards = (total_pages + config.docs_per_shard - 1) / config.docs_per_shard
+    }
+    if total_shards < 1 {
+        total_shards = 1
+    }
+
+    println("[*] Pages to shard: " + int_to_str(total_pages))
+    println("[*] Planned shards : " + int_to_str(total_shards))
+    println("")
+
+    // The heavy lifting is done in Perl so the S entry remains compact and
+    // compilation-friendly while still producing JSONL shards.
+    string perl_script = ""
+    perl_script = perl_script + "use strict; use warnings; use JSON::PP qw(encode_json);\n"
+    perl_script = perl_script + "my ($input, $out_dir, $docs_per_shard, $max_pages) = @ARGV;\n"
+    perl_script = perl_script + "open my $fh, '<', $input or die $!;\n"
+    perl_script = perl_script + "local $/ = undef;\n"
+    perl_script = perl_script + "my $xml = <$fh>;\n"
+    perl_script = perl_script + "my @pages = ($xml =~ m{<page>(.*?)</page>}sg);\n"
+    perl_script = perl_script + "my $page_limit = int($max_pages);\n"
+    perl_script = perl_script + "my $docs_limit = int($docs_per_shard);\n"
+    perl_script = perl_script + "my $count = 0;\n"
+    perl_script = perl_script + "my $shard = 0;\n"
+    perl_script = perl_script + "my $out;\n"
+    perl_script = perl_script + "sub open_shard {\n"
+    perl_script = perl_script + "  my $path = sprintf('%s/shard_%05d.jsonl', $out_dir, $shard);\n"
+    perl_script = perl_script + "  open($out, '>', $path) or die $!;\n"
+    perl_script = perl_script + "}\n"
+    perl_script = perl_script + "sub esc { my ($v) = @_; $v =~ s/\\\\/\\\\\\\\/g; $v =~ s/\"/\\\\\"/g; $v =~ s/\\n/\\\\n/g; $v =~ s/\\r/\\\\r/g; $v =~ s/\\t/\\\\t/g; return $v; }\n"
+    perl_script = perl_script + "open_shard();\n"
+    perl_script = perl_script + "for my $page (@pages) {\n"
+    perl_script = perl_script + "  last if $page_limit > 0 && $count >= $page_limit;\n"
+    perl_script = perl_script + "  my ($title) = $page =~ m{<title>(.*?)</title>}s;\n"
+    perl_script = perl_script + "  my ($page_id) = $page =~ m{<id>(.*?)</id>}s;\n"
+    perl_script = perl_script + "  my ($text) = $page =~ m{<text[^>]*>(.*?)</text>}s;\n"
+    perl_script = perl_script + "  $title = '' unless defined $title;\n"
+    perl_script = perl_script + "  $page_id = '' unless defined $page_id;\n"
+    perl_script = perl_script + "  $text = '' unless defined $text;\n"
+    perl_script = perl_script + "  my $json = encode_json({title => esc($title), page_id => esc($page_id), text => esc($text), source => 'enwiki'});\n"
+    perl_script = perl_script + "  print {$out} $json, \"\\n\";\n"
+    perl_script = perl_script + "  $count++;\n"
+    perl_script = perl_script + "  if ($docs_limit > 0 && ($count % $docs_limit) == 0 && $count < ($page_limit > 0 ? $page_limit : $count + 1)) {\n"
+    perl_script = perl_script + "    close $out;\n"
+    perl_script = perl_script + "    $shard++;\n"
+    perl_script = perl_script + "    open_shard();\n"
+    perl_script = perl_script + "  }\n"
+    perl_script = perl_script + "}\n"
+    perl_script = perl_script + "close $out;\n"
+    perl_script = perl_script + "my $manifest = $out_dir . '/manifest.json';\n"
+    perl_script = perl_script + "open my $mf, '>', $manifest or die $!;\n"
+    perl_script = perl_script + "print {$mf} \"{\\n\";\n"
+    perl_script = perl_script + "print {$mf} \"  \\\"dataset_name\\\": \\\"neurx-wikipedia\\\",\\n\";\n"
+    perl_script = perl_script + "print {$mf} \"  \\\"total_pages\\\": $count,\\n\";\n"
+    perl_script = perl_script + "print {$mf} \"  \\\"total_shards\\\": \" . ($shard + 1) . \",\\n\";\n"
+    perl_script = perl_script + "print {$mf} \"  \\\"shards\\\": [\\n\";\n"
+    perl_script = perl_script + "for my $i (0 .. $shard) { my $path = sprintf('%s/shard_%05d.jsonl', $out_dir, $i); open my $sf, '<', $path or next; my $lines = 0; $lines++ while (<$sf>); close $sf; my $size = -s $path; print {$mf} '    {\"shard_id\": ' . sprintf('\"%s\"', sprintf('shard_%05d.jsonl', $i)) . ', \"file_path\": ' . sprintf('\"%s\"', $path) . ', \"num_documents\": ' . $lines . ', \"size_bytes\": ' . $size . '}'; print {$mf} \",\\n\" if $i < $shard; }\n"
+    perl_script = perl_script + "print {$mf} \"  ]\\n\";\n"
+    perl_script = perl_script + "print {$mf} \"}\\n\";\n"
+    perl_script = perl_script + "close $mf;\n"
+
+    string perl_cmd = "perl -e " + shell_escape(perl_script) + " " +
+        shell_escape(temp_xml) + " " +
+        shell_escape(config.output_dir) + " " +
+        shell_escape(int_to_str(config.docs_per_shard)) + " " +
+        shell_escape(int_to_str(config.max_pages))
+
+    println("[*] Writing JSONL shards and manifest...")
+    let (_, shard_code) = command(perl_cmd)
+    if shard_code != 0 {
+        println("[-] Failed to create shards")
+        return 1
+    }
+
+    let shard_count_output = read_command_output("ls -1 " + shell_escape(config.output_dir + "/shard_*.jsonl") + " 2>/dev/null | wc -l")
+    int actual_shards = parse_int(shard_count_output, total_shards)
+    if actual_shards < 1 {
+        actual_shards = total_shards
+    }
+
+    string manifest_json = generate_manifest_json(config, total_pages, actual_shards, []ShardMetadata{cap: 0})
+    // The Perl side already writes a manifest; replace it with the S-generated
+    // one so the entrypoint stays self-consistent.
+    if !write_text_file(config.manifest_file, manifest_json) {
+        println("[-] Failed to write manifest")
+        return 1
+    }
+
+    println("")
+    println("[+] Wikipedia sharding complete")
+    println("[+] Shards   : " + int_to_str(actual_shards))
+    println("[+] Pages    : " + int_to_str(total_pages))
+    println("[+] Manifest : " + config.manifest_file)
+
+    return 0
+}
+
+// ============================================================================
+// Main entry
+// ============================================================================
+
+func main() int {
+    string neurx_home = getenv("NEURX_HOME", ".")
+    string dataset_root = neurx_home + "/dataset/pretrain"
+
+    WikipediaConfig config
+    config.input_bz2_file = getenv("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
+    config.output_dir = getenv("ENWIKI_SHARD_DIR", dataset_root + "/shard")
+    config.manifest_file = getenv("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
+    config.docs_per_shard = parse_int(getenv("DOCS_PER_SHARD", "5000"), 5000)
+    config.max_pages = parse_int(getenv("MAX_PAGES", "0"), 0)
+
+    process_wikipedia(config)
 }
