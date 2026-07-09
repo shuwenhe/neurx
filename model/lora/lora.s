@@ -315,6 +315,57 @@ func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
     updated
 }
 
+struct lora_forward_result {
+    lora_linear updated_layer
+    []float output
+}
+
+func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forward_result {
+    []float y = []float{}
+    []float ax = []float{}
+    int in_dim = layer.in_dim
+
+    int b = 0
+    while b < batch {
+        int r = 0
+        while r < layer.rank {
+            float ax_sum = 0.0
+            int i = 0
+            while i < in_dim {
+                ax_sum = ax_sum + x[b*in_dim+i] * layer.lora_A[r*in_dim+i]
+                i = i + 1
+            }
+            ax = append(ax, ax_sum)
+            r = r + 1
+        }
+
+        int o = 0
+        while o < layer.out_dim {
+            float sum = 0.0
+            int i2 = 0
+            while i2 < in_dim {
+                float base_w = layer.base_weight[o*in_dim+i2]
+                sum = sum + x[b*in_dim+i2] * base_w
+                i2 = i2 + 1
+            }
+            int r2 = 0
+            float lora_sum = 0.0
+            while r2 < layer.rank {
+                lora_sum = lora_sum + ax[b*layer.rank+r2] * layer.lora_B[o*layer.rank+r2]
+                r2 = r2 + 1
+            }
+            y = append(y, sum + lora_sum * layer.scaling)
+            o = o + 1
+        }
+        b = b + 1
+    }
+
+    lora_linear updated = layer
+    updated.last_input = x
+    updated.last_Ax = ax
+    lora_forward_result { updated_layer: updated, output: y }
+}
+
 // ============================================================================
 // 5. LoRA 反向
 // ============================================================================
