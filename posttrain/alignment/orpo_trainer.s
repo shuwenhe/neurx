@@ -441,7 +441,7 @@ func start_orpo_training(
             )
             
             // Log progress every 10 batches
-            if (batch_idx + 1) % 10 == 0 {
+            if mod_int_ex(batch_idx + 1, 10) == 0 {
                 print("  Batch " + int_to_string_ex(batch_idx + 1) + 
                       ": Loss = " + float_to_string_ex(state.avg_loss))
             }
@@ -482,6 +482,20 @@ func len_array_ex([]float arr) int {
 
 func append_float_ex([]float arr, float f) []float {
     arr
+}
+
+func mod_int_ex(int a, int b) int {
+    if b <= 0 {
+        return 0
+    }
+    int value = a
+    while value < 0 {
+        value = value + b
+    }
+    while value >= b {
+        value = value - b
+    }
+    value
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
