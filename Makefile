@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-watch watch-auto-commit-push chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-watch watch-auto-commit-push train-supervised chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s run-sft-training-s
@@ -224,6 +224,8 @@ run-sft-training-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/sft_training/run_sft_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_sft_training_$(shell date +%Y%m%d_%H%M%S).log
+
+train-supervised: run-sft-training-s
 
 verify-setup-s: check-bash
 	@echo "Building setup verification entry..."
