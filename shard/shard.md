@@ -25,14 +25,10 @@ This directory contains all data sharding-related utilities for the NeurX traini
 - **verify_shards.s** - Shard verification and validation
 
 ### Shell Scripts
-- **shard.sh** - Thin wrapper for `shard.s`
-- **generate_shards.sh** - Thin wrapper for `generate_shards.s`
-- **load_shards.sh** - Thin wrapper for `load_shards.s`
-- **shard_enwiki.sh** - Shell script wrapper for Wikipedia sharding
+None. All shard entrypoints now live in `.s` files.
 
 ### Build & Configuration
 - **build.s** - S compiler automation entry
-- **build.sh** - Thin wrapper for `build.s`
 - **shard.md** - Consolidated documentation (this file)
 
 ---
@@ -60,7 +56,7 @@ make data-pipeline-s
 make shard
 
 # Verify shards
-make shard && NEURX_SHARD_CMD=verify make shard
+NEURX_SHARD_CMD=verify make shard
 
 # List shards
 NEURX_SHARD_CMD=list make shard
@@ -295,7 +291,7 @@ Remove all Python dependencies from `/home/shuwen/shuwen/train/neurx/shard/` dir
 Location: `/home/shuwen/shuwen/train/neurx/shard/`
 
 **S Language Files (7)**:
-- `build.sh` - S compiler automation
+- `build.s` - S compiler automation
 - `data_shard.s` - Data shard utilities
 - `shard_enwiki.s` - Wikipedia sharding reference
 - `shard_manager.s` - Shard management system
@@ -390,10 +386,10 @@ Successfully removed Python dependency from shard module through abstraction lay
 
 ## Statistics
 
-- **Total Files**: 12 files
+- **Total Files**: 8 files
 - **Python Files**: 0 ✅
 - **S Language Files**: 7 (*.s files)
-- **Shell Scripts**: 5 (*.sh files)
+- **Shell Scripts**: 0 (*.sh files)
 - **Documentation**: 1 file (shard.md - this consolidated file)
 - **Total Size**: ~150 KB
 
