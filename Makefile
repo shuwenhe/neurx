@@ -132,27 +132,14 @@ chat: check-bash
 
 
 shard: check-bash
-	@echo "Building Wikipedia shard entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
-	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
-		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
-		exit 1; \
-	fi
+	@echo "Running Wikipedia shard processing via Python implementation..."
+	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/shard_wikipedia.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir'
-	@$(MAKE) build-s-ir-runner
-	@echo "✓ Shard entry compiled to S IR"
-	@echo "Running Wikipedia shard processing..."
-	@cd '$(CURDIR_UNIX)' && \
-		NEURX_HOME='$(CURDIR_UNIX)' \
-		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
-		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
-		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
-		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
+		python3 shard/shard_wikipedia_enwiki.py \
+			--input '$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
+			--output-dir '$(PRETRAIN_SHARD_DIR)' \
+			--manifest '$(PRETRAIN_MANIFEST)' \
+			--docs-per-shard '$(PRETRAIN_SHARD_DOCS_PER_FILE)' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
@@ -502,7 +489,7 @@ shard-enwiki: check-bash
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		bash script/shard_enwiki.sh 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
+		bash shard/shard_enwiki.sh 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
 	@echo "$(GREEN)✓ Wikipedia sharding complete$(NC)"
 
 data-pipeline-s: build-data-scripts
