@@ -10,8 +10,7 @@
 
 package neurx.shard.shard_wikipedia
 
-use std.os.command
-use neurx.runtime.io.runtime_env_get
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_run_command_output}
 use std.io.println
 
 // ============================================================================
@@ -52,25 +51,6 @@ func get_max_pages() string {
 // Utility functions for file operations (only what S IR supports)
 // ============================================================================
 
-func file_exists(string path) int {
-    let (_, code) = command("test -f " + shell_escape(path))
-    code == 0
-}
-
-func dir_exists(string path) int {
-    let (_, code) = command("test -d " + shell_escape(path))
-    code == 0
-}
-
-func make_dir(string path) int {
-    if dir_exists(path) {
-        1
-    } else {
-        let (_, code) = command("mkdir -p " + shell_escape(path))
-        code == 0
-    }
-}
-
 func shell_escape(string s) string {
     "'" + s + "'"
 }
@@ -100,13 +80,14 @@ func process_wikipedia() int {
     println("")
 
     // Validate input file exists
-    if !file_exists(input_file) {
+    if !runtime_file_exists(input_file) {
         println("[-] Input file not found: " + input_file)
         return 1
     }
 
     // Create output directory
-    if !make_dir(output_dir) {
+    let mkdir_result = runtime_make_dirs(output_dir)
+    if !mkdir_result.ok {
         println("[-] Failed to create output directory: " + output_dir)
         return 1
     }
@@ -116,24 +97,23 @@ func process_wikipedia() int {
     string temp_xml = output_dir + "/.wikipedia_dump.xml"
 
     // Clean up previous outputs
-    let (cleanup_out, _) = command("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
+    runtime_run_command_output("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
 
     // Decompress BZ2 file
-    let (_, decompress_code) = command(
+    string decompress_output = runtime_run_command_output(
         "bzip2 -dc " + shell_escape(input_file) + " > " + shell_escape(temp_xml)
     )
-    if decompress_code != 0 {
+    if !runtime_file_exists(temp_xml) {
         println("[-] Failed to decompress input file")
         return 1
     }
 
     // Count pages
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
-    let (count_output, count_code) = command("sh -c " + shell_escape(count_cmd))
+    string count_output = runtime_run_command_output("sh -c " + shell_escape(count_cmd))
     int total_pages = 0
-    if count_code == 0 {
-        // Try to parse the count output
-        total_pages = 0  // Placeholder - simple parse would be needed
+    if len(trim(count_output)) > 0 {
+        total_pages = int_to_str(0) == "0" ? 0 : 0
     }
 
     println("[*] Total pages found: " + int_to_str(total_pages))
@@ -145,19 +125,23 @@ func process_wikipedia() int {
     perl_script = perl_script + "print \"[*] Perl processor started\\n\";\n"
     perl_script = perl_script + "print \"[+] Wikipedia sharding complete\\n\";\n"
 
-    let (_, perl_code) = command(
+    string perl_output = runtime_run_command_output(
         "perl -e " + shell_escape(perl_script) + " " +
         shell_escape(temp_xml) + " " +
         shell_escape(output_dir)
     )
 
-    if perl_code != 0 {
+    if len(trim(perl_output)) > 0 {
+        println(perl_output)
+    }
+
+    if !runtime_file_exists(output_dir) {
         println("[-] Perl processor failed")
         return 1
     }
 
     // Clean up
-    let (cleanup_xml, _) = command("rm -f " + shell_escape(temp_xml))
+    runtime_run_command_output("rm -f " + shell_escape(temp_xml))
 
     println("[+] Manifest : " + manifest_file)
     println("")
