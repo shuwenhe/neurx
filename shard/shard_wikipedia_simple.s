@@ -10,7 +10,7 @@
 
 package neurx.shard.shard_wikipedia
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_run_command_output}
+use neurx.runtime.io.{runtime_env_get, runtime_run_command_output}
 use std.io.println
 
 // ============================================================================
@@ -83,10 +83,9 @@ func process_wikipedia() int {
 
     // Ensure output directory exists
     println("[*] creating output dir...")
-    let mkdir_result = runtime_make_dirs(output_dir)
-    if !mkdir_result.ok {
-        println("[-] Failed to create output directory: " + output_dir)
-        return 1
+    string mkdir_output = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
+    if len(mkdir_output) > 0 {
+        println(mkdir_output)
     }
     println("[*] output dir ready")
 
