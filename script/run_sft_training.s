@@ -39,7 +39,7 @@ func main() int {
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
 
-    runtime_make_dirs(output_dir)
+    runtime_make_dirs(output_dir).ok
 
     []sft_sample samples = load_sft_samples(data_path)
     if len(samples) == 0 {
