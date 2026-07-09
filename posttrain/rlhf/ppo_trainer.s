@@ -147,16 +147,25 @@ func collect_trajectory(
     traj.episode_length = 0
     
     // 生成轨迹步骤
+    int prompt_len = len(prompt)
     int t = 0
     while t < config.horizon {
         ppo_step step
         step.step_id = t
         
-        // 模拟 tokenization (实际中通过 tokenizer)
-        step.tokens = []float{}
+        // 确定性的伪 token 序列，替代真实 tokenizer 输出
+        step.tokens = []float{cap: 4}
+        step.tokens[0] = float(prompt_len)
+        step.tokens[1] = float(t)
+        step.tokens[2] = float(config.seq_len)
+        step.tokens[3] = float(config.hidden_size)
         
-        // 前向传播获取 logits (实际通过模型)
-        step.logits = []float{}
+        // 确定性的伪 logits，替代真实前向传播输出
+        step.logits = []float{cap: 4}
+        step.logits[0] = 0.10 + float(t) * 0.01
+        step.logits[1] = 0.20 + float(prompt_len) * 0.001
+        step.logits[2] = 0.30 + float(config.num_layers) * 0.001
+        step.logits[3] = 0.40 + float(mod_int(config.vocab_size, 10)) * 0.01
         
         // 计算 log prob
         step.log_prob_old = compute_log_prob(step.logits)
@@ -164,8 +173,8 @@ func collect_trajectory(
         // 获取价值估计 (通过价值网络)
         step.value_estimate = compute_value_estimate(step.tokens, config)
         
-        // 获取奖励 (通过 reward model 或环境)
-        step.reward = 0.5  // 示例奖励
+        // 获取奖励 (通过 reward model 或环境的确定性替代)
+        step.reward = float(mod_int(prompt_len + t, 5) + 1)
         
         // 记录步骤
         traj.steps = append_ppo_step(traj.steps, step)
@@ -186,6 +195,9 @@ func collect_trajectory(
 func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajectory {
     
     int T = len(traj.steps)
+    if T == 0 {
+        return traj
+    }
     
     // 初始化优势和回报数组
     []float advantages = make_float_array(T, 0.0)
@@ -295,6 +307,10 @@ func compute_ppo_value_loss(
 // 计算熵 (用于鼓励探索)
 func compute_entropy([]float logits) float {
     
+    if len(logits) == 0 {
+        return 0.0
+    }
+    
     []float probs = softmax_approx(logits)
     float entropy = 0.0
     
@@ -394,6 +410,9 @@ func ppo_training_step(
     }
     
     int num_steps = len(trajectory.steps)
+    if num_steps == 0 {
+        return result
+    }
     
     // 平均损失
     result.policy_loss = result.policy_loss / float(num_steps)
@@ -540,9 +559,11 @@ func start_ppo_training(
             state.avg_value_loss = 0.9 * state.avg_value_loss + 0.1 * result.value_loss
             state.avg_entropy = 0.9 * state.avg_entropy + 0.1 * result.entropy_loss
             state.avg_kl_divergence = 0.9 * state.avg_kl_divergence + 0.1 * result.kl_divergence
+            state.avg_reward = 0.9 * state.avg_reward + 0.1 * float(trajectory.total_reward)
             state.avg_advantage_magnitude = 0.9 * state.avg_advantage_magnitude + 
                                            0.1 * abs_float(result.advantage_mean)
             state.clip_fraction = 0.9 * state.clip_fraction + 0.1 * result.clip_fraction
+            state.current_epoch = epoch
             
             // 检查 KL 是否超过目标 (早停)
             if result.kl_divergence > config.target_kl {
@@ -605,19 +626,25 @@ func print_ppo_evaluation(ppo_state state, int step) {
 // ════════════════════════════════════════════════════════════════════════════════
 
 func make_float_array(int size, float init_value) []float {
-    []float arr = []float{}
+    []float arr = []float{cap: size}
     int i = 0
     while i < size {
+        arr[i] = init_value
         i = i + 1
     }
     arr
 }
 
 func append_ppo_step([]ppo_step arr, ppo_step s) []ppo_step {
+    arr = append(arr, s)
     arr
 }
 
 func compute_log_prob([]float logits) float {
+    if len(logits) == 0 {
+        return 0.0
+    }
+    
     float log_prob = 0.0
     int i = 0
     while i < len(logits) {
@@ -628,6 +655,10 @@ func compute_log_prob([]float logits) float {
 }
 
 func compute_value_estimate([]float tokens, ppo_config config) float {
+    if len(tokens) == 0 {
+        return 0.0
+    }
+    
     float value = 0.0
     int i = 0
     while i < len(tokens) {
@@ -679,12 +710,45 @@ func abs_float(float x) float {
 }
 
 func softmax_approx([]float logits) []float {
-    // 简化实现
-    []float probs = []float{}
+    int n = len(logits)
+    []float probs = []float{cap: n}
+    if n == 0 {
+        return probs
+    }
+    
+    float max_logit = logits[0]
     int i = 0
-    while i < len(logits) {
+    while i < n {
+        if logits[i] > max_logit {
+            max_logit = logits[i]
+        }
         i = i + 1
     }
+    
+    float total = 0.0
+    i = 0
+    while i < n {
+        probs[i] = exp_approx(logits[i] - max_logit)
+        total = total + probs[i]
+        i = i + 1
+    }
+    
+    if total <= 0.0 {
+        float inv_n = 1.0 / float(n)
+        i = 0
+        while i < n {
+            probs[i] = inv_n
+            i = i + 1
+        }
+        return probs
+    }
+    
+    i = 0
+    while i < n {
+        probs[i] = probs[i] / total
+        i = i + 1
+    }
+    
     probs
 }
 
@@ -696,4 +760,18 @@ func float_to_string_ppo(float f) string {
 
 func int_to_string_ppo(int i) string {
     string(i)
+}
+
+func mod_int(int a, int b) int {
+    if b <= 0 {
+        return 0
+    }
+    int value = a
+    while value < 0 {
+        value = value + b
+    }
+    while value >= b {
+        value = value - b
+    }
+    value
 }
