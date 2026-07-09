@@ -155,14 +155,49 @@ func main() int {
         println("  tokens     : " + int_to_str(state.tokens_seen))
 
         string checkpoint_path = output_dir + "/sft_checkpoint_epoch_" + int_to_str(epoch + 1) + ".txt"
-        runtime_write_text_file(checkpoint_path, build_checkpoint_text(state, checkpoint_path, data_path, len(samples), epochs, learning_rate))
+        runtime_write_text_file(
+            checkpoint_path,
+            "NeurX SFT Checkpoint\n" +
+            "path=" + checkpoint_path + "\n" +
+            "data_path=" + data_path + "\n" +
+            "samples=" + int_to_str(len(samples)) + "\n" +
+            "epochs=" + int_to_str(epochs) + "\n" +
+            "learning_rate=" + fmt_float(learning_rate, 6) + "\n" +
+            "step=" + int_to_str(state.step) + "\n" +
+            "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
+            "tokens_seen=" + int_to_str(state.tokens_seen) + "\n" +
+            "weight=" + fmt_float(state.weight, 8) + "\n" +
+            "bias=" + fmt_float(state.bias, 8) + "\n" +
+            "last_loss=" + fmt_float(state.last_loss, 6) + "\n" +
+            "best_eval_loss=" + fmt_float(state.best_eval_loss, 6) + "\n"
+        )
 
         epoch = epoch + 1
     }
 
     string latest_checkpoint = output_dir + "/sft_latest.txt"
-    runtime_write_text_file(latest_checkpoint, build_summary_text(state, data_path, len(samples), epochs, learning_rate))
-    runtime_write_text_file(output_dir + "/sft_manifest.txt", build_manifest_text(state, data_path, latest_checkpoint))
+    runtime_write_text_file(
+        latest_checkpoint,
+        "NeurX SFT Summary\n" +
+        "data_path=" + data_path + "\n" +
+        "samples=" + int_to_str(len(samples)) + "\n" +
+        "epochs=" + int_to_str(epochs) + "\n" +
+        "learning_rate=" + fmt_float(learning_rate, 6) + "\n" +
+        "step=" + int_to_str(state.step) + "\n" +
+        "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
+        "tokens_seen=" + int_to_str(state.tokens_seen) + "\n" +
+        "weight=" + fmt_float(state.weight, 8) + "\n" +
+        "bias=" + fmt_float(state.bias, 8) + "\n" +
+        "last_loss=" + fmt_float(state.last_loss, 6) + "\n" +
+        "best_eval_loss=" + fmt_float(state.best_eval_loss, 6) + "\n"
+    )
+    runtime_write_text_file(
+        output_dir + "/sft_manifest.txt",
+        "latest_checkpoint=" + latest_checkpoint + "\n" +
+        "data_path=" + data_path + "\n" +
+        "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
+        "tokens_seen=" + int_to_str(state.tokens_seen) + "\n"
+    )
 
     println("")
     println("SFT training complete")
@@ -258,44 +293,6 @@ func format_sft_text(string instruction, string input_text, string output_text) 
     }
     out = out + "\n\n### Response:\n" + output_text
     out
-}
-
-func build_checkpoint_text(sft_state state, string checkpoint_path, string data_path, int sample_count, int epochs, float lr) string {
-    "NeurX SFT Checkpoint\n" +
-    "path=" + checkpoint_path + "\n" +
-    "data_path=" + data_path + "\n" +
-    "samples=" + int_to_str(sample_count) + "\n" +
-    "epochs=" + int_to_str(epochs) + "\n" +
-    "learning_rate=" + fmt_float(lr, 6) + "\n" +
-    "step=" + int_to_str(state.step) + "\n" +
-    "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
-    "tokens_seen=" + int_to_str(state.tokens_seen) + "\n" +
-    "weight=" + fmt_float(state.weight, 8) + "\n" +
-    "bias=" + fmt_float(state.bias, 8) + "\n" +
-    "last_loss=" + fmt_float(state.last_loss, 6) + "\n" +
-    "best_eval_loss=" + fmt_float(state.best_eval_loss, 6) + "\n"
-}
-
-func build_summary_text(sft_state state, string data_path, int sample_count, int epochs, float lr) string {
-    "NeurX SFT Summary\n" +
-    "data_path=" + data_path + "\n" +
-    "samples=" + int_to_str(sample_count) + "\n" +
-    "epochs=" + int_to_str(epochs) + "\n" +
-    "learning_rate=" + fmt_float(lr, 6) + "\n" +
-    "step=" + int_to_str(state.step) + "\n" +
-    "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
-    "tokens_seen=" + int_to_str(state.tokens_seen) + "\n" +
-    "weight=" + fmt_float(state.weight, 8) + "\n" +
-    "bias=" + fmt_float(state.bias, 8) + "\n" +
-    "last_loss=" + fmt_float(state.last_loss, 6) + "\n" +
-    "best_eval_loss=" + fmt_float(state.best_eval_loss, 6) + "\n"
-}
-
-func build_manifest_text(sft_state state, string data_path, string latest_checkpoint) string {
-    "latest_checkpoint=" + latest_checkpoint + "\n" +
-    "data_path=" + data_path + "\n" +
-    "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
-    "tokens_seen=" + int_to_str(state.tokens_seen) + "\n"
 }
 
 func extract_json_string_field(string line, string key) string {
