@@ -66,37 +66,43 @@ generate_commit_message() {
         has_config=1
     fi
     
-    # Extract component/feature name from path
+    # Extract component name from trainer file
     local component=""
-    if echo "$files_changed" | grep -q "posttrain/alignment/"; then
-        component=$(echo "$files_changed" | grep "posttrain/alignment/" | head -1 | sed 's/.*alignment\/\([^/]*\).*/\1/' | sed 's/_trainer\|_examples\|\.s//')
+    local trainer_file=$(echo "$files_changed" | grep -o "[^ ]*_trainer\.s" | head -1)
+    if [ -n "$trainer_file" ]; then
+        component=$(basename "$trainer_file" _trainer.s)
     fi
+    
+    # Format component name (e.g., ipo_trainer -> IPO)
+    local component_name=$(echo "$component" | sed 's/_trainer//;s/_/ /g' | \
+        awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) tolower(substr($i,2))}} 1')
     
     # Generate meaningful commit message
     if [ "$has_trainer" -eq 1 ] && [ "$has_examples" -eq 1 ] && [ "$has_readme" -eq 1 ]; then
         # Complete feature implementation
-        local component_name=$(echo "$component" | sed 's/_/ /g' | tr '[:lower:]' '[:upper:]')
         echo "feat: implement $component_name trainer with comprehensive examples and documentation ($lines_added lines)"
     elif [ "$has_trainer" -eq 1 ]; then
         # Trainer implementation/update
-        local component_name=$(echo "$component" | sed 's/_/ /g' | tr '[:lower:]' '[:upper:]')
         echo "feat: implement $component_name trainer ($lines_added lines of production code)"
     elif [ "$has_examples" -eq 1 ]; then
         # Examples for trainer
-        local component_name=$(echo "$component" | sed 's/_/ /g' | tr '[:lower:]' '[:upper:]')
         echo "feat: add $component_name training examples ($lines_added lines)"
     elif [ "$has_readme" -eq 1 ]; then
         # Documentation update
-        local component_name=$(echo "$files_changed" | sed 's/.*README_//' | sed 's/\.md//')
-        if [ -z "$component_name" ] || [ "$component_name" = "README" ]; then
+        local readme_name=$(echo "$files_changed" | sed 's/.*README_//' | sed 's/\.md//' | head -1)
+        if [ -z "$readme_name" ] || [ "$readme_name" = "README" ] || [ "$readme_name" = "*" ]; then
             echo "docs: update documentation and guides ($lines_added lines added)"
         else
-            echo "docs: add $component_name documentation ($lines_added lines)"
+            echo "docs: add $readme_name documentation ($lines_added lines)"
         fi
     elif [ "$has_model" -eq 1 ] && [ "$has_tests" -eq 1 ]; then
         echo "feat: implement model feature with tests ($lines_added lines)"
     elif [ "$has_model" -eq 1 ]; then
-        echo "feat: implement model improvement ($lines_added lines, $lines_removed removed)"
+        if [ "$lines_removed" -gt 10 ]; then
+            echo "refactor: optimize model implementation ($lines_added added, $lines_removed removed)"
+        else
+            echo "feat: implement model improvement ($lines_added lines)"
+        fi
     elif [ "$has_config" -eq 1 ]; then
         echo "chore: update configuration and parameters"
     elif [ "$has_tests" -eq 1 ]; then
