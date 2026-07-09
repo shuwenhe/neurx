@@ -82,19 +82,25 @@ func process_wikipedia() int {
     string temp_xml = output_dir + "/.wikipedia_dump.xml"
 
     // Ensure output directory exists
+    println("[*] creating output dir...")
     let mkdir_result = runtime_make_dirs(output_dir)
     if !mkdir_result.ok {
         println("[-] Failed to create output directory: " + output_dir)
         return 1
     }
+    println("[*] output dir ready")
 
     // Clean up previous outputs
+    println("[*] cleaning previous outputs...")
     string _ = runtime_run_command_output("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
+    println("[*] cleanup done")
 
     // Decompress BZ2 file
+    println("[*] decompressing input...")
     string decompress_result = runtime_run_command_output(
         "bzip2 -dc " + shell_escape(input_file) + " > " + shell_escape(temp_xml)
     )
+    println("[*] decompress returned")
     if len(decompress_result) > 0 {
         println(decompress_result)
     }
