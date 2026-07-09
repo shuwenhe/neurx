@@ -1,17 +1,14 @@
 // ============================================================================
-// NeurX Wikipedia Shard Processing - Simplified S Version
+// NeurX Wikipedia Shard Processing - S Language Wrapper
 //
-// This is a minimal wrapper that:
-// 1. Reads configuration from environment variables
-// 2. Validates input parameters
-// 3. Delegates actual processing to shell scripts
+// Minimal implementation that reads environment variables and logs info.
+// Actual Wikipedia processing is delegated to shell scripts.
 // ============================================================================
 
 package neurx.shard.shard_wikipedia
 
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
-use std.os.command
 
 // ============================================================================
 // Helper functions - read config from environment
@@ -48,46 +45,30 @@ func get_max_pages() string {
 }
 
 // ============================================================================
-// Main processing function
+// Main entry point
 // ============================================================================
 
 func main() int {
     println("")
-    println("[*] NeurX Wikipedia Shard Processing (S Language)")
+    println("[*] NeurX Wikipedia Shard Processing")
     println("")
 
     string input_file = get_input_file()
     string output_dir = get_output_dir()
     string manifest_file = get_manifest_file()
+    string docs_per_shard = get_docs_per_shard()
+    string max_pages = get_max_pages()
 
-    println("Input      : " + input_file)
-    println("Output dir : " + output_dir)
-    println("Manifest   : " + manifest_file)
+    println("Configuration:")
+    println("  Input file    : " + input_file)
+    println("  Output dir    : " + output_dir)
+    println("  Manifest file : " + manifest_file)
+    println("  Docs/shard    : " + docs_per_shard)
+    println("  Max pages     : " + max_pages)
     println("")
 
-    // Validate that output directory can be created
-    println("[*] Preparing output directory...")
-    let (mkdir_out, mkdir_code) = command("mkdir -p " + output_dir)
-    
-    if mkdir_code != 0 {
-        println("[-] Failed to create output directory: " + output_dir)
-        return 1
-    }
-
-    println("[+] Output directory ready: " + output_dir)
-    println("")
-
-    // Create empty manifest
-    println("[*] Initializing manifest...")
-    let manifest_json = "{\"status\": \"initialized\"}"
-    let (write_out, write_code) = command("printf '%s' " + manifest_json + " > " + manifest_file)
-    
-    if write_code == 0 {
-        println("[+] Manifest initialized: " + manifest_file)
-    }
-
-    println("")
-    println("[+] Shard processor initialized successfully")
+    println("[+] Wikipedia shard processor initialized")
+    println("[+] Delegating actual processing to shell scripts")
     println("")
 
     0
