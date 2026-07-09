@@ -143,16 +143,19 @@ func main() {
 
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
+            runtime_run_command_output("echo '[ERROR] Shard file not found: " + shard_path + "' >&2")
             shard_index = shard_index + 1
             continue
         }
 
+        runtime_run_command_output("echo '[STATUS] Reading shard file in line chunks: " + shard_path + "' >&2")
         println("[INFO] Reading shard file in line chunks...")
         int shard_docs = 0
         int shard_tokens = 0
         int next_line = 1
         bool shard_done = false
         int chunk_count = 0
+        runtime_run_command_output("echo '[DEBUG] Starting chunk processing for shard " + int_to_str(shard_index + 1) + "' >&2")
         while !shard_done && step < max_steps && docs_seen < max_docs {
             chunk_count = chunk_count + 1
             string chunk_cmd = ""
@@ -165,17 +168,20 @@ func main() {
             
             if fast_prefix_mode > 0 {
                 println("[Processing] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " prefix scan...")
+                runtime_run_command_output("echo '[STATUS] Processing chunk prefix scan for shard " + int_to_str(shard_index + 1) + "' >&2")
             } else {
                 int last_line = next_line + line_chunk_size - 1
                 println("[Processing] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " (lines " + int_to_str(next_line) + "-" + int_to_str(last_line) + ")...")
+                runtime_run_command_output("echo '[STATUS] Processing chunk " + int_to_str(chunk_count) + " (lines " + int_to_str(next_line) + "-" + int_to_str(last_line) + ") for shard " + int_to_str(shard_index + 1) + "' >&2")
             }
-            println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " reading...")
 
             string chunk_text = runtime_run_command_output(chunk_cmd)
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
+                runtime_run_command_output("echo '[STATUS] Shard " + int_to_str(shard_index + 1) + " chunk " + int_to_str(chunk_count) + " completed (empty)' >&2")
                 println("[STATUS] shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " chunk " + int_to_str(chunk_count) + " ended")
             } else {
+                runtime_run_command_output("echo '[DEBUG] Shard " + int_to_str(shard_index + 1) + " chunk " + int_to_str(chunk_count) + " loaded (" + int_to_str(str_len(chunk_text)) + " bytes)' >&2")
                 if fast_prefix_mode > 0 {
                     println("[✓ Loaded] Shard " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " fast prefix")
                 } else {
