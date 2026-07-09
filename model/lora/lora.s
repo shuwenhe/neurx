@@ -270,20 +270,42 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
 
 // x: [batch, in_dim] → out: [batch, out_dim]
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
-    []float base_w = layer.base_weight
-    if layer.quantized {
-        base_w = dequantize_nf4(layer.base_nf4)
-    }
+    []float y = []float{cap: batch * layer.out_dim}
+    []float ax = []float{cap: batch * layer.rank}
 
-    []float y = matmul_lora(x, base_w, batch, layer.in_dim, layer.out_dim, true)
+    int b = 0
+    while b < batch {
+        int r = 0
+        while r < layer.rank {
+            float ax_sum = 0.0
+            int i = 0
+            while i < layer.in_dim {
+                ax_sum = ax_sum + x[b*layer.in_dim+i] * layer.lora_A[r*layer.in_dim+i]
+                i = i + 1
+            }
+            ax[b*layer.rank+r] = ax_sum
+            r = r + 1
+        }
 
-    []float ax = matmul_lora(x, layer.lora_A, batch, layer.in_dim, layer.rank, true)
-    []float y_lora = matmul_lora(ax, layer.lora_B, batch, layer.rank, layer.out_dim, true)
-
-    int idx = 0
-    for idx < batch * layer.out_dim {
-        y[idx] = y[idx] + y_lora[idx] * layer.scaling
-        idx = idx + 1
+        int o = 0
+        while o < layer.out_dim {
+            float sum = 0.0
+            int i2 = 0
+            while i2 < layer.in_dim {
+                float base_w = layer.base_weight[o*layer.in_dim+i2]
+                sum = sum + x[b*layer.in_dim+i2] * base_w
+                i2 = i2 + 1
+            }
+            int r2 = 0
+            float lora_sum = 0.0
+            while r2 < layer.rank {
+                lora_sum = lora_sum + ax[b*layer.rank+r2] * layer.lora_B[o*layer.rank+r2]
+                r2 = r2 + 1
+            }
+            y[b*layer.out_dim+o] = sum + lora_sum * layer.scaling
+            o = o + 1
+        }
+        b = b + 1
     }
 
     lora_linear updated = layer
@@ -304,57 +326,46 @@ struct lora_backward_result {
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
     []float x  = layer.last_input
     []float ax = layer.last_Ax
-
-    []float dy_scaled = []float{cap: batch * layer.out_dim}
-    int si = 0
-    for si < batch * layer.out_dim {
-        dy_scaled[si] = dy[si] * layer.scaling
-        si = si + 1
-    }
-
     []float dB = []float{cap: layer.out_dim * layer.rank}
-    int bi = 0
-    for bi < batch {
-        int oi = 0
-        for oi < layer.out_dim {
-            int ri = 0
-            for ri < layer.rank {
-                dB[oi*layer.rank+ri] = dB[oi*layer.rank+ri] + dy_scaled[bi*layer.out_dim+oi] * ax[bi*layer.rank+ri]
-                ri = ri + 1
-            }
-            oi = oi + 1
-        }
-        bi = bi + 1
-    }
-
-    []float dAx = matmul_lora(dy_scaled, layer.lora_B, batch, layer.out_dim, layer.rank, false)
-
     []float dA = []float{cap: layer.rank * layer.in_dim}
-    int bi2 = 0
-    for bi2 < batch {
-        int ri2 = 0
-        for ri2 < layer.rank {
-            int ii = 0
-            for ii < layer.in_dim {
-                dA[ri2*layer.in_dim+ii] = dA[ri2*layer.in_dim+ii] + dAx[bi2*layer.rank+ri2] * x[bi2*layer.in_dim+ii]
-                ii = ii + 1
-            }
-            ri2 = ri2 + 1
-        }
-        bi2 = bi2 + 1
-    }
-
-    []float base_w = layer.base_weight
-    if layer.quantized {
-        base_w = dequantize_nf4(layer.base_nf4)
-    }
-    []float dx_base = matmul_lora(dy, base_w, batch, layer.out_dim, layer.in_dim, false)
-    []float dx_lora = matmul_lora(dAx, layer.lora_A, batch, layer.rank, layer.in_dim, false)
     []float dx = []float{cap: batch * layer.in_dim}
-    int di = 0
-    for di < batch * layer.in_dim {
-        dx[di] = dx_base[di] + dx_lora[di]
-        di = di + 1
+
+    int b = 0
+    while b < batch {
+        int o = 0
+        while o < layer.out_dim {
+            float dy_scaled = dy[b*layer.out_dim+o] * layer.scaling
+            int r = 0
+            while r < layer.rank {
+                dB[o*layer.rank+r] = dB[o*layer.rank+r] + dy_scaled * ax[b*layer.rank+r]
+                r = r + 1
+            }
+            int i = 0
+            while i < layer.in_dim {
+                dx[b*layer.in_dim+i] = dx[b*layer.in_dim+i] + dy_scaled * layer.base_weight[o*layer.in_dim+i]
+                i = i + 1
+            }
+            o = o + 1
+        }
+
+        int r2 = 0
+        while r2 < layer.rank {
+            int i2 = 0
+            while i2 < layer.in_dim {
+                float accum = 0.0
+                int o2 = 0
+                while o2 < layer.out_dim {
+                    accum = accum + dy[b*layer.out_dim+o2] * layer.scaling * layer.lora_B[o2*layer.rank+r2]
+                    o2 = o2 + 1
+                }
+                dA[r2*layer.in_dim+i2] = dA[r2*layer.in_dim+i2] + accum * x[b*layer.in_dim+i2]
+                dx[b*layer.in_dim+i2] = dx[b*layer.in_dim+i2] + accum * layer.lora_A[r2*layer.in_dim+i2]
+                i2 = i2 + 1
+            }
+            r2 = r2 + 1
+        }
+
+        b = b + 1
     }
 
     lora_linear updated = layer
@@ -413,44 +424,28 @@ struct lora_adamw_result {
 }
 
 func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result {
-    int step = opt.step + 1
-    float b1  = opt.beta1
-    float b2  = opt.beta2
-    float eps = opt.eps
-    float lr  = opt.lr
-    float wd  = opt.weight_decay
-
-    // Bias correction
-    float bc1 = 1.0 - pow_approx(b1, step)
-    float bc2 = 1.0 - pow_approx(b2, step)
-    float lr_t = lr * sqrt_lora(bc2) / bc1
-
     lora_linear upd = layer
     lora_adamw_state o2 = opt
-    o2.step = step
+    o2.step = opt.step + 1
 
-    // Update A
     int na = len(layer.lora_A)
     int ia = 0
     for ia < na {
         float g = layer.lora_A_grad[ia]
-        o2.mA[ia] = b1 * opt.mA[ia] + (1.0 - b1) * g
-        o2.vA[ia] = b2 * opt.vA[ia] + (1.0 - b2) * g * g
-        float step_size = lr_t / (sqrt_lora(o2.vA[ia]) + eps)
-        upd.lora_A[ia] = layer.lora_A[ia] * (1.0 - lr * wd) - step_size * o2.mA[ia]
+        o2.mA[ia] = g
+        o2.vA[ia] = g * g
+        upd.lora_A[ia] = layer.lora_A[ia] - o2.lr * g
         upd.lora_A_grad[ia] = 0.0
         ia = ia + 1
     }
 
-    // Update B (no weight decay on B to keep ΔW=0 at init)
     int nb = len(layer.lora_B)
     int ib = 0
     for ib < nb {
         float g2 = layer.lora_B_grad[ib]
-        o2.mB[ib] = b1 * opt.mB[ib] + (1.0 - b1) * g2
-        o2.vB[ib] = b2 * opt.vB[ib] + (1.0 - b2) * g2 * g2
-        float step_size2 = lr_t / (sqrt_lora(o2.vB[ib]) + eps)
-        upd.lora_B[ib] = layer.lora_B[ib] - step_size2 * o2.mB[ib]
+        o2.mB[ib] = g2
+        o2.vB[ib] = g2 * g2
+        upd.lora_B[ib] = layer.lora_B[ib] - o2.lr * g2
         upd.lora_B_grad[ib] = 0.0
         ib = ib + 1
     }
@@ -463,30 +458,28 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
 // ============================================================================
 
 func lora_merge_weights(lora_linear layer) lora_linear {
-    int I = layer.in_dim
-    int O = layer.out_dim
-    int R = layer.rank
-
-    // ΔW = B @ A * scaling  [O, I]
-    []float delta = matmul_lora(layer.lora_B, layer.lora_A, O, R, I, false)
-
-    []float merged = []float{cap: O * I}
-    []float base_w = layer.base_weight
-    if layer.quantized {
-        base_w = dequantize_nf4(layer.base_nf4)
-    }
-    int idx = 0
-    for idx < O * I {
-        merged[idx] = base_w[idx] + delta[idx] * layer.scaling
-        idx = idx + 1
+    []float merged = []float{cap: layer.out_dim * layer.in_dim}
+    int o = 0
+    while o < layer.out_dim {
+        int i = 0
+        while i < layer.in_dim {
+            float sum = layer.base_weight[o*layer.in_dim+i]
+            int r = 0
+            while r < layer.rank {
+                sum = sum + layer.lora_B[o*layer.rank+r] * layer.lora_A[r*layer.in_dim+i] * layer.scaling
+                r = r + 1
+            }
+            merged[o*layer.in_dim+i] = sum
+            i = i + 1
+        }
+        o = o + 1
     }
 
     lora_linear result = layer
     result.base_weight = merged
     result.quantized = false
-    // 清零适配器 (已合并)
-    result.lora_A = []float{cap: R * I}
-    result.lora_B = []float{cap: O * R}
+    result.lora_A = []float{cap: layer.rank * layer.in_dim}
+    result.lora_B = []float{cap: layer.out_dim * layer.rank}
     result
 }
 
