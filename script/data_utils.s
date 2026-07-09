@@ -148,7 +148,7 @@ func path_is_dir(path: string) bool {
 // File Operations
 // ============================================================================
 
-fn file_read_text(path: string) -> (string, bool) {
+func file_read_text(path: string) (string, bool) {
     runtime_read_text_file(path)
 }
 
@@ -179,7 +179,7 @@ func file_size(path: string) i64 {
 }
 
 // Count lines in a file
-fn file_count_lines(path: string) -> (i64, bool) {
+func file_count_lines(path: string) (i64, bool) {
     let (content, ok) = file_read_text(path)
     if !ok {
         (0, false)

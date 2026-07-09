@@ -464,14 +464,14 @@ func run_all_industrial_ops(
 // CLI entry point
 // ---------------------------------------------------------------------------
 
-fn ops_get_arg(map[string]string options, string key, string fallback) string {
+func ops_get_arg(map[string]string options, string key, string fallback) string {
     if value, ok := options[key]; ok {
         return value
     }
     fallback
 }
 
-fn ops_parse_args([]string args) command_args {
+func ops_parse_args([]string args) command_args {
     if len(args) < 2 {
         return command_args{
             command: "help",
