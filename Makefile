@@ -64,8 +64,8 @@ PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 
 help:
 	@echo "  make pretrain"
-	@echo "  make infer"
 	@echo "  make posttrain"
+	@echo "  make infer"
 	@echo "  make chat"
 
 
