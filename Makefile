@@ -71,6 +71,8 @@ PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
 
 
 help:
+	@echo "  make"
+	@echo "  make shard"
 	@echo "  make pretrain"
 	@echo "  make posttrain"
 	@echo "  make infer"
