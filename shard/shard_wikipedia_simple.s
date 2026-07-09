@@ -55,6 +55,58 @@ func shell_escape(string s) string {
     "'" + s + "'"
 }
 
+func trim(string s) string {
+    int begin = 0
+    while begin < len(s) {
+        string ch = string(s[begin])
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
+            begin = begin + 1
+        } else {
+            break
+        }
+    }
+
+    int end = len(s)
+    while end > begin {
+        string ch = string(s[end - 1])
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
+            end = end - 1
+        } else {
+            break
+        }
+    }
+
+    string out = ""
+    int i = begin
+    while i < end {
+        out = out + string(s[i])
+        i = i + 1
+    }
+    out
+}
+
+func parse_int(string s, int fallback) int {
+    string text = trim(s)
+    if len(text) == 0 {
+        return fallback
+    }
+
+    int value = 0
+    int i = 0
+    while i < len(text) {
+        int digit = text[i] - 48
+        if digit < 0 || digit > 9 {
+            return fallback
+        }
+        value = value + digit
+        if i + 1 < len(text) {
+            value = value * 10
+        }
+        i = i + 1
+    }
+    value
+}
+
 // ============================================================================
 // Main processing function - no parameters
 // ============================================================================
@@ -111,10 +163,7 @@ func process_wikipedia() int {
     // Count pages
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
     string count_output = runtime_run_command_output("sh -c " + shell_escape(count_cmd))
-    int total_pages = 0
-    if len(trim(count_output)) > 0 {
-        total_pages = int_to_str(0) == "0" ? 0 : 0
-    }
+    int total_pages = parse_int(count_output, 0)
 
     println("[*] Total pages found: " + int_to_str(total_pages))
     
