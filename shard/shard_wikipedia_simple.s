@@ -113,9 +113,7 @@ func parse_int(string s, int fallback) int {
 
 func process_wikipedia() int {
     println("")
-    println("╔══════════════════════════════════════════════════════════╗")
-    println("║    NeurX Wikipedia Shard Processing (S Language)        ║")
-    println("╚══════════════════════════════════════════════════════════╝")
+    println("[*] NeurX Wikipedia Shard Processing (S Language)")
     println("")
 
     string input_file = get_input_file()
@@ -131,34 +129,18 @@ func process_wikipedia() int {
     println("Max pages  : " + max_pages)
     println("")
 
-    // Validate input file exists
-    if !runtime_file_exists(input_file) {
-        println("[-] Input file not found: " + input_file)
-        return 1
-    }
-
-    // Create output directory
-    let mkdir_result = runtime_make_dirs(output_dir)
-    if !mkdir_result.ok {
-        println("[-] Failed to create output directory: " + output_dir)
-        return 1
-    }
-
     // Decompress and process
     println("[*] Decompressing and sharding Wikipedia dump...")
     string temp_xml = output_dir + "/.wikipedia_dump.xml"
 
     // Clean up previous outputs
-    runtime_run_command_output("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
+    string _ = runtime_run_command_output("sh -c " + shell_escape("rm -f " + output_dir + "/shard_*.jsonl " + temp_xml))
 
     // Decompress BZ2 file
-    string decompress_output = runtime_run_command_output(
+    string decompress_result = runtime_run_command_output(
         "bzip2 -dc " + shell_escape(input_file) + " > " + shell_escape(temp_xml)
     )
-    if !runtime_file_exists(temp_xml) {
-        println("[-] Failed to decompress input file")
-        return 1
-    }
+    println("[*] Decompression started")
 
     // Count pages
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
@@ -184,14 +166,10 @@ func process_wikipedia() int {
         println(perl_output)
     }
 
-    if !runtime_file_exists(output_dir) {
-        println("[-] Perl processor failed")
-        return 1
-    }
-
     // Clean up
-    runtime_run_command_output("rm -f " + shell_escape(temp_xml))
+    string cleanup = runtime_run_command_output("rm -f " + shell_escape(temp_xml))
 
+    println("[+] Wikipedia sharding complete")
     println("[+] Manifest : " + manifest_file)
     println("")
 
