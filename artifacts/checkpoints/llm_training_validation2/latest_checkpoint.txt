@@ -1,1 +1,0 @@
-/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training_validation2/final_model.neurx

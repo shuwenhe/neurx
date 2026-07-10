@@ -40,7 +40,7 @@ RED := \033[0;31m
 NC := \033[0m  # No Color
 
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
-S_REPO_ROOT := $(CURDIR_UNIX)/../../../s
+S_REPO_ROOT := $(CURDIR_UNIX)/../s
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
@@ -97,14 +97,14 @@ pretrain: check-bash
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
 		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
 		echo "Resolved command:"; \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 S_SOURCE_ROOT='$(CURDIR_UNIX)/..' bash script/run_large_pretrain.sh"; \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' bash script/run_large_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints' \
 		NEURX_PRETRAIN_RESUME=1 \
 		NEURX_PRETRAIN_BACKEND=nccl \
 		DDP_BACKEND=nccl \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
 
 
 posttrain: check-bash
@@ -123,7 +123,7 @@ posttrain: check-bash
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='$(CURDIR_UNIX)/..' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
@@ -143,18 +143,26 @@ shard: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
+		$(S_COMPILER) 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
 	@echo "Running Wikipedia shard processor..."
-	@cd '$(CURDIR_UNIX)' && \
+	@SHARD_LOG="$(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log"; \
+	echo "Shard processing log: $$SHARD_LOG"; \
+	cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
+		S_COMPILER='$(S_COMPILER)' \
+		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
+		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
 		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
 		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
 		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
+		S_IR_RUNNER_ENTRY='main' \
+		'$(S_RUNNER_BIN)' >> $$SHARD_LOG 2>&1 && \
+	echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1)
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
@@ -577,17 +585,9 @@ build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		'$(S_COMPILER)' ir '$(S_RUNNER_SRC)' -o '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' 2>&1 && \
-		printf '%s\n' \
-			'#!/usr/bin/env bash' \
-			'set -euo pipefail' \
-			'' \
-			'if [ "$$#" -lt 1 ] || [ "$$#" -gt 2 ]; then' \
-			'    echo "usage: s_ir_runner <input.ir> [entry]" >&2' \
-			'    exit 2' \
-			'fi' \
-			'' \
-			'S_IR_RUNNER_INPUT="$$1" S_IR_RUNNER_ENTRY="$${2:-main}" exec '\''$(S_COMPILER)'\'' run '\''$(S_RUNNER_SRC)'\''' > '$(S_RUNNER_BIN)' && \
+		'$(S_COMPILER)' '$(S_RUNNER_SRC)' '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' 2>&1 && \
+		cd '$(S_COMPILER_EMIT_CWD)' && \
+		'$(S_COMPILER)' --emit-bin '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' '$(S_RUNNER_BIN)' 2>&1 && \
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 

@@ -550,18 +550,20 @@ func trim(string s) string {
 }
 
 func substring(string s, int start, int end) string {
-    if start < 0 {
-        start = 0
+    int s_start = start
+    int s_end = end
+    if s_start < 0 {
+        s_start = 0
     }
-    if end > str_len(s) {
-        end = str_len(s)
+    if s_end > str_len(s) {
+        s_end = str_len(s)
     }
-    if end <= start {
+    if s_end <= s_start {
         return ""
     }
     string out = ""
-    int i = start
-    while i < end {
+    int i = s_start
+    while i < s_end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -654,13 +656,14 @@ func next_lr(int step, float base_lr, int warmup_steps) float {
 }
 
 func fmt_float(float value, int decimals) string {
-    bool neg = value < 0.0
+    float val = value
+    bool neg = val < 0.0
     if neg {
-        value = 0.0 - value
+        val = 0.0 - val
     }
     int whole = 0
-    while value >= 1.0 {
-        value = value - 1.0
+    while val >= 1.0 {
+        val = val - 1.0
         whole = whole + 1
     }
     string out = ""
@@ -670,10 +673,10 @@ func fmt_float(float value, int decimals) string {
     out = out + int_to_str(whole) + "."
     int i = 0
     while i < decimals {
-        value = value * 10.0
+        val = val * 10.0
         int digit = 0
-        while value >= 1.0 {
-            value = value - 1.0
+        while val >= 1.0 {
+            val = val - 1.0
             digit = digit + 1
         }
         out = out + string_char(digit + 48)
