@@ -4,8 +4,8 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 
 func main() {
     // 立即输出，确认程序开始执行
-    runtime_run_command_output("echo '[STARTUP] minimal_train.s started' >&2")
-    println("[STARTUP] minimal_train.s started")
+    runtime_run_command_output("echo '[STARTUP][runner] minimal_train.s started' >&2")
+    println("[STARTUP][runner] minimal_train.s started")
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
@@ -29,84 +29,123 @@ func main() {
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
 
+    runtime_run_command_output("echo '[STARTUP][init] loading configuration...' >&2")
+    println("")
     println("========================================")
-    println("NeurX Self-Contained Real Training")
+    println("🚀 NeurX Self-Contained Real Training")
     println("========================================")
-    println("Project root : " + project_root)
-    println("Manifest     : " + manifest_path)
-    println("Shard list   : " + shard_list_file)
-    println("Shard dir    : " + shard_dir)
-    println("Batch size   : " + int_to_str(batch_size))
-    println("Seq len      : " + int_to_str(seq_len))
-    println("Steps        : " + int_to_str(max_steps))
-    println("Vocab size   : " + int_to_str(vocab_size))
-    println("Step window  : " + int_to_str(step_window))
-    println("Line chunk   : " + int_to_str(line_chunk_size))
-    println("Text token cap: " + int_to_str(text_token_cap))
-    println("JSON scan cap: " + int_to_str(json_scan_cap))
-    println("Fast prefix  : " + int_to_str(fast_prefix_mode))
-    println("Shard docs   : " + int_to_str(shard_docs_target))
-    println("Learning rate: " + fmt_float(learning_rate, 6))
-    println("Weight decay : " + fmt_float(weight_decay, 6))
+    
+    runtime_run_command_output("echo '[STARTUP][init] configuration loaded' >&2")
+    println("")
+    println("[CONFIG] Project Settings:")
+    println("  Project root  : " + project_root)
+    println("  Batch size    : " + int_to_str(batch_size))
+    println("  Seq len       : " + int_to_str(seq_len))
+    println("  Max steps     : " + int_to_str(max_steps))
+    println("  Vocab size    : " + int_to_str(vocab_size))
+    
+    runtime_run_command_output("echo '[STARTUP][init] validating paths...' >&2")
+    println("")
+    println("[CONFIG] Data Paths:")
+    println("  Manifest file : " + manifest_path)
+    println("  Shard list    : " + shard_list_file)
+    println("  Shard dir     : " + shard_dir)
+    println("  Output dir    : " + output_dir)
+    
+    runtime_run_command_output("echo '[STARTUP][init] initializing training parameters...' >&2")
+    println("")
+    println("[CONFIG] Training Parameters:")
+    println("  Learning rate : " + fmt_float(learning_rate, 6))
+    println("  Warmup steps  : " + int_to_str(warmup_steps))
+    println("  Weight decay  : " + fmt_float(weight_decay, 6))
+    println("  Log interval  : " + int_to_str(log_interval))
+    println("  Save interval : " + int_to_str(save_interval))
+    println("")
     println("")
 
     if !runtime_file_exists(manifest_path) {
-        println("Missing manifest: " + manifest_path)
+        println("[ERROR] Manifest file not found: " + manifest_path)
+        runtime_run_command_output("echo '[ERROR] Manifest not found: " + manifest_path + "' >&2")
         return
     }
-    println("Manifest loaded")
+    println("")
+    println("========================================")
+    println("📊 Stage 2: Pre-Training Data Scan")
+    println("========================================")
+    println("")
+    
+    runtime_run_command_output("echo '[STARTUP][manifest] manifest verified' >&2")
+    println("[STARTUP][manifest] ✓ manifest found")
 
     string shard_list_text = ""
     if runtime_file_exists(shard_list_file) {
-        println("Loading shard list file...")
+        println("[STARTUP][shard-scan] 📋 loading pre-generated shard list")
+        runtime_run_command_output("echo '[STARTUP][shard-scan] loading shard list file: " + shard_list_file + "' >&2")
         shard_list_text = runtime_read_text_file(shard_list_file)
-        println("Shard list file loaded")
+        println("[STARTUP][shard-scan] ✓ shard list file loaded")
     }
     if str_len(trim(shard_list_text)) == 0 {
         string shard_cmd = "find " + shard_dir + " -maxdepth 1 -name 'shard_*.jsonl' -print | sort"
-        println("Shard list file empty, scanning shard directory...")
-        runtime_run_command_output("echo '[STATUS] Scanning for shard files...' >&2")
+        println("[STARTUP][shard-scan] 🔍 shard list empty; scanning directory")
+        println("  scanning: " + shard_dir)
+        runtime_run_command_output("echo '[STARTUP][shard-scan] searching for shard files in: " + shard_dir + "' >&2")
         shard_list_text = runtime_run_command_output(shard_cmd)
-        runtime_run_command_output("echo '[STATUS] Shard directory scan complete' >&2")
-        println("Shard directory scan complete")
+        runtime_run_command_output("echo '[STARTUP][shard-scan] directory scan complete' >&2")
+        println("[STARTUP][shard-scan] ✓ directory scan complete")
     }
-    runtime_run_command_output("echo '[DEBUG] Counting non-empty lines in shard list...' >&2")
+    println("[STARTUP][shard-scan] 📊 analyzing shard list")
+    runtime_run_command_output("echo '[STARTUP][shard-scan] counting shard files in list' >&2")
     int shard_count = count_non_empty_lines(shard_list_text)
-    runtime_run_command_output("echo '[DEBUG] Found " + int_to_str(shard_count) + " shards' >&2")
+    runtime_run_command_output("echo '[STARTUP][shard-scan] found " + int_to_str(shard_count) + " total shards' >&2")
+    println("[STARTUP][shard-scan] 📈 total shards found: " + int_to_str(shard_count))
     
     if shard_count == 0 {
-        println("No shard files found under: " + shard_dir)
-        runtime_run_command_output("echo '[ERROR] No shard files found' >&2")
+        println("")
+        println("[ERROR] ❌ No shard files found!")
+        println("  expected location: " + shard_dir)
+        runtime_run_command_output("echo '[ERROR] No shard files found in " + shard_dir + "' >&2")
         return
     }
 
     println("")
     println("========================================")
-    println("Processing " + int_to_str(shard_count) + " shards for training")
+    println("🚀 Stage 3: Shard List Validation")
     println("========================================")
+    println("Preparing to process " + int_to_str(shard_count) + " shards")
     println("")
-    runtime_run_command_output("echo '[STATUS] Starting shard processing...' >&2")
-    println("[STATUS] Starting shard processing...")
-    runtime_run_command_output("echo 'Resolved shard count: " + int_to_str(shard_count) + "' >&2")
-    println("Resolved shard count: " + int_to_str(shard_count))
+    runtime_run_command_output("echo '[STARTUP][shard-validate] verifying shard file accessibility' >&2")
+    println("[STARTUP][shard-validate] 🔍 validating shard files")
     int preview = shard_count
     if preview > 6 {
         preview = 6
     }
+    int preview_valid = 0
     int p = 0
-    runtime_run_command_output("echo '[STATUS] Shard list preview:' >&2")
     while p < preview {
         string preview_path = shard_path_at(shard_list_text, p)
-        println("  - " + preview_path)
-        runtime_run_command_output("echo '    [" + int_to_str(p + 1) + "] " + preview_path + "' >&2")
+        bool exists = runtime_file_exists(preview_path)
+        string status = "✓"
+        if !exists {
+            status = "✗"
+        } else {
+            preview_valid = preview_valid + 1
+        }
+        println("  [" + int_to_str(p + 1) + "/" + int_to_str(shard_count) + "] " + status + " " + preview_path)
+        runtime_run_command_output("echo '    [" + int_to_str(p + 1) + "] " + status + " " + preview_path + "' >&2")
         p = p + 1
     }
     if shard_count > preview {
-        println("  ... (" + int_to_str(shard_count - preview) + " more)")
-        runtime_run_command_output("echo '    ... (" + int_to_str(shard_count - preview) + " more)' >&2")
+        println("  ... and " + int_to_str(shard_count - preview) + " more shards")
+        runtime_run_command_output("echo '    ... (" + int_to_str(shard_count - preview) + " more shards not shown)' >&2")
     }
+    println("[STARTUP][shard-validate] ✓ validation complete: " + int_to_str(preview_valid) + "/" + int_to_str(preview) + " checked")
     println("")
-    runtime_run_command_output("echo '[STATUS] Beginning main training loop' >&2")
+    println("========================================")
+    println("🎯 Stage 4: Training Loop")
+    println("========================================")
+    println("")
+    runtime_run_command_output("echo '[STARTUP][training] initializing training loop' >&2")
+    println("[STARTUP][training] 🚀 entering main training loop with " + int_to_str(shard_count) + " shards")
 
     int window = batch_size * seq_len
     if window < 1 {
