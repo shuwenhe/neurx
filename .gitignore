@@ -48,6 +48,8 @@ data/training_data_*.jsonl
 # Checkpoints and temporary training outputs
 checkpoint/
 checkpoint_*/
+checkpoint/NeurX-1.3/
+checkpoint/NeurX-1.3/logs/
 tmp/
 script/.run/
 *.pid

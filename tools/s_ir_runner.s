@@ -1,6 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_run_command_output}
 use std.io.println
 
 func main() int {
@@ -29,14 +29,17 @@ func main() int {
         return 1
     }
 
-    string run_output = runtime_run_command_output(
+    let run_result = runtime_run_command(
         "S_IR_RUNNER_INPUT=" + ir_path +
         " S_IR_RUNNER_ENTRY=" + entry +
         " " + binary_path
     )
-    if len(run_output) == 0 && !runtime_file_exists(binary_path) {
+    if !run_result.ok {
         println("error: failed to run runner binary")
-        return 1
+        if len(run_result.error) > 0 {
+            println(run_result.error)
+        }
+        return run_result.exit_code
     }
-    return 0
+    return run_result.exit_code
 }

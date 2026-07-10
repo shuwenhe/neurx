@@ -35,111 +35,46 @@ if command -v inotifywait >/dev/null 2>&1; then
 fi
 
 generate_commit_message() {
-    local files_changed="$1"
-    local lines_added="$2"
-    local lines_removed="$3"
-    
-    # Analyze changed files to determine commit type
-    local has_trainer=0
-    local has_examples=0
-    local has_readme=0
-    local has_tests=0
-    local has_model=0
-    local has_config=0
-    
-    if echo "$files_changed" | grep -q "_trainer\.s"; then
-        has_trainer=1
+    changed_paths="$1"
+    lines_added="$2"
+    lines_removed="$3"
+
+    if echo "$changed_paths" | grep -q 'script/'; then
+        echo "$PREFIX: update training scripts ($lines_added added, $lines_removed removed)"
+        return
     fi
-    if echo "$files_changed" | grep -q "_examples\.s"; then
-        has_examples=1
+    if echo "$changed_paths" | grep -q 'shard/'; then
+        echo "$PREFIX: update shard pipeline ($lines_added added, $lines_removed removed)"
+        return
     fi
-    if echo "$files_changed" | grep -q "README"; then
-        has_readme=1
+    if echo "$changed_paths" | grep -q 'tools/'; then
+        echo "$PREFIX: update tooling ($lines_added added, $lines_removed removed)"
+        return
     fi
-    if echo "$files_changed" | grep -q "test"; then
-        has_tests=1
+    if echo "$changed_paths" | grep -q 'docs/'; then
+        echo "$PREFIX: update docs ($lines_added added, $lines_removed removed)"
+        return
     fi
-    if echo "$files_changed" | grep -q "model/"; then
-        has_model=1
-    fi
-    if echo "$files_changed" | grep -q "config\|\.toml\|\.yaml"; then
-        has_config=1
-    fi
-    
-    # Extract component name from trainer file
-    local component=""
-    local trainer_file=$(echo "$files_changed" | grep -o "[^ ]*_trainer\.s" | head -1)
-    if [ -n "$trainer_file" ]; then
-        component=$(basename "$trainer_file" _trainer.s)
-    fi
-    
-    # Format component name (e.g., ipo_trainer -> IPO)
-    local component_name=$(echo "$component" | sed 's/_trainer//;s/_/ /g' | \
-        awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) tolower(substr($i,2))}} 1')
-    
-    # Generate meaningful commit message
-    if [ "$has_trainer" -eq 1 ] && [ "$has_examples" -eq 1 ] && [ "$has_readme" -eq 1 ]; then
-        # Complete feature implementation
-        echo "feat: implement $component_name trainer with comprehensive examples and documentation ($lines_added lines)"
-    elif [ "$has_trainer" -eq 1 ]; then
-        # Trainer implementation/update
-        echo "feat: implement $component_name trainer ($lines_added lines of production code)"
-    elif [ "$has_examples" -eq 1 ]; then
-        # Examples for trainer
-        echo "feat: add $component_name training examples ($lines_added lines)"
-    elif [ "$has_readme" -eq 1 ]; then
-        # Documentation update
-        local readme_name=$(echo "$files_changed" | sed 's/.*README_//' | sed 's/\.md//' | head -1)
-        if [ -z "$readme_name" ] || [ "$readme_name" = "README" ] || [ "$readme_name" = "*" ]; then
-            echo "docs: update documentation and guides ($lines_added lines added)"
-        else
-            echo "docs: add $readme_name documentation ($lines_added lines)"
-        fi
-    elif [ "$has_model" -eq 1 ] && [ "$has_tests" -eq 1 ]; then
-        echo "feat: implement model feature with tests ($lines_added lines)"
-    elif [ "$has_model" -eq 1 ]; then
-        if [ "$lines_removed" -gt 10 ]; then
-            echo "refactor: optimize model implementation ($lines_added added, $lines_removed removed)"
-        else
-            echo "feat: implement model improvement ($lines_added lines)"
-        fi
-    elif [ "$has_config" -eq 1 ]; then
-        echo "feat: update configuration and parameters"
-    elif [ "$has_tests" -eq 1 ]; then
-        echo "test: add comprehensive test coverage ($lines_added lines)"
-    else
-        # Fallback: generic message with line count
-        if [ "$lines_added" -gt 500 ]; then
-            echo "feat: major implementation update ($lines_added lines added)"
-        elif [ "$lines_added" -gt 100 ]; then
-            echo "feat: add functionality ($lines_added lines)"
-        else
-            echo "feat: update code ($lines_added added, $lines_removed removed)"
-        fi
-    fi
+    echo "$PREFIX: update code ($lines_added added, $lines_removed removed)"
 }
 
-commit_and_push() {
+commit_changes() {
     if [ -z "$(git status --porcelain)" ]; then
         return 0
     fi
 
     git add -A
-
     if git diff --cached --quiet; then
         return 0
     fi
 
-    # Get statistics about changes
-    local files_changed=$(git diff --cached --name-only | tr '\n' ' ')
-    local stats=$(git diff --cached --numstat | awk '{added+=$1; removed+=$2} END {print added " " removed}')
-    local lines_added=$(echo "$stats" | awk '{print $1}' | grep -o '^[0-9]*' || echo "0")
-    local lines_removed=$(echo "$stats" | awk '{print $2}' | grep -o '^[0-9]*' || echo "0")
-    
-    # Generate meaningful commit message
-    local message=$(generate_commit_message "$files_changed" "$lines_added" "$lines_removed")
-    
-    if NEURX_SKIP_AUTO_STAGE=1 NEURX_SKIP_AUTO_PUSH=1 git commit -m "$message"; then
+    changed_paths="$(git diff --cached --name-only | tr '\n' ' ')"
+    stats="$(git diff --cached --numstat | awk '{added+=$1; removed+=$2} END {print added " " removed}')"
+    lines_added="$(echo "$stats" | awk '{print $1}' | grep -o '^[0-9]*' || echo "0")"
+    lines_removed="$(echo "$stats" | awk '{print $2}' | grep -o '^[0-9]*' || echo "0")"
+    message="$(generate_commit_message "$changed_paths" "$lines_added" "$lines_removed")"
+
+    if NEURX_SKIP_AUTO_PUSH=1 git commit -m "$message"; then
         echo "watcher: committed: $message"
         git push origin "$BRANCH"
     else
@@ -178,6 +113,6 @@ while :; do
 
     sleep "$DEBOUNCE"
     if [ -n "$(git status --porcelain)" ]; then
-        commit_and_push || true
+        commit_changes || true
     fi
 done
