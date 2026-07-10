@@ -151,7 +151,14 @@ shard: check-bash
 	@$(MAKE) build-s-ir-runner
 	@echo "Running Wikipedia shard processor..."
 	@SHARD_LOG="$(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log"; \
+	SHARD_PROGRESS_LOG="$(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).progress.log"; \
 	echo "Shard processing log: $$SHARD_LOG"; \
+	echo "Shard progress log: $$SHARD_PROGRESS_LOG"; \
+	: > "$$SHARD_PROGRESS_LOG"; \
+	tail -n 0 -F "$$SHARD_PROGRESS_LOG" & \
+	TAIL_PID=$$!; \
+	trap 'kill $$TAIL_PID >/dev/null 2>&1 || true' EXIT; \
+	set -o pipefail; \
 	cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
 		S_COMPILER='$(S_COMPILER)' \
@@ -164,7 +171,8 @@ shard: check-bash
 		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
 		S_IR_RUNNER_ENTRY='main' \
-		'$(S_RUNNER_BIN)' >> $$SHARD_LOG 2>&1 && \
+		NEURX_SHARD_PROGRESS_LOG="$$SHARD_PROGRESS_LOG" \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a "$$SHARD_LOG" && \
 	echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1)
 
 split: check-bash
