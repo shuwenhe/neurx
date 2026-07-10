@@ -87,6 +87,11 @@ func get_docs_per_shard() string {
     runtime_env_get("DOCS_PER_SHARD", "5000")
 }
 
+func emit_progress(string message) {
+    // 输出到标准错误，带换行符
+    runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
+}
+
 func get_max_pages() string {
     runtime_env_get("MAX_PAGES", "0")
 }
@@ -141,6 +146,21 @@ func main() int {
     awk_program = awk_program + "return \"\\\"\" t \"\\\"\" "
     awk_program = awk_program + "} "
     awk_program = awk_program + "function emit(msg) { if (progress_log != \"\") { print msg >> progress_log; fflush(progress_log) } else { print msg > \"/dev/stderr\"; fflush(\"/dev/stderr\") } } "
+    awk_program = awk_program + "function emit_line(msg) { emit(msg \"\\n\") } "
+    awk_program = awk_program + "function progress_bar(done, total, width,   filled, i, out) { "
+    awk_program = awk_program + "if (total < 1) total = 1; "
+    awk_program = awk_program + "filled = int((done * width) / total); "
+    awk_program = awk_program + "if (filled < 0) filled = 0; "
+    awk_program = awk_program + "if (filled > width) filled = width; "
+    awk_program = awk_program + "out = \"[\"; "
+    awk_program = awk_program + "for (i = 0; i < filled; i = i + 1) out = out \"#\"; "
+    awk_program = awk_program + "for (i = filled; i < width; i = i + 1) out = out \"-\"; "
+    awk_program = awk_program + "out = out \"]\"; "
+    awk_program = awk_program + "out "
+    awk_program = awk_program + "} "
+    awk_program = awk_program + "function shard_status(prefix, shard_no, shard_done, shard_total, shard_file) { "
+    awk_program = awk_program + "emit_line(prefix \" shard \" shard_no \" file=\" shard_file \" \" progress_bar(shard_done, shard_total, 40) \" \" shard_done \"/\" shard_total \" docs\") "
+    awk_program = awk_program + "} "
     awk_program = awk_program + "function shard_path(idx) { return sprintf(\"%s/shard_%05d.jsonl\", out_dir, idx) } "
     awk_program = awk_program + "BEGIN { "
     awk_program = awk_program + "RS = \"</page>\"; ORS = \"\"; "
@@ -148,17 +168,18 @@ func main() int {
     awk_program = awk_program + "max_pages = max_pages + 0; "
     awk_program = awk_program + "if (docs_per_shard < 1) docs_per_shard = 1; "
     awk_program = awk_program + "doc_count = 0; shard_index = 0; in_shard = 0; current = shard_path(0); "
-    awk_program = awk_program + "emit(\"[shard] started processing Wikipedia dump\") "
+    awk_program = awk_program + "emit_line(\"[shard] shard 0 started processing Wikipedia dump\") "
     awk_program = awk_program + "} "
     awk_program = awk_program + "{ "
     awk_program = awk_program + "page = $0; "
     awk_program = awk_program + "if (page !~ /<page>/) next; "
     awk_program = awk_program + "if (max_pages > 0 && doc_count >= max_pages) next; "
     awk_program = awk_program + "page = page \"</page>\"; "
-    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index); emit(\"[shard] switching to shard \" shard_index) } "
+    awk_program = awk_program + "if (doc_count == 0) { shard_status(\"[shard] active\", shard_index, in_shard, docs_per_shard, current) } "
+    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index); shard_status(\"[shard] switching to\", shard_index, in_shard, docs_per_shard, current) } "
     awk_program = awk_program + "print \"{\\\"document_index\\\":\" doc_count \",\\\"shard_index\\\":\" shard_index \",\\\"xml\\\":\" json_escape(page) \"}\\n\" >> current; "
     awk_program = awk_program + "doc_count = doc_count + 1; in_shard = in_shard + 1; "
-    awk_program = awk_program + "if (doc_count % 5000 == 0) { emit(\"[shard] processed \" doc_count \" documents...\") } "
+    awk_program = awk_program + "if (doc_count % 100 == 0 || in_shard == 1) { shard_status(\"[shard] progress\", shard_index, in_shard, docs_per_shard, current) } "
     awk_program = awk_program + "} "
     awk_program = awk_program + "END { "
     awk_program = awk_program + "total_shards = (doc_count == 0) ? 0 : (shard_index + 1); "
@@ -180,7 +201,7 @@ func main() int {
     awk_program = awk_program + "} "
     awk_program = awk_program + "print \"  ]\" >> manifest; "
     awk_program = awk_program + "print \"}\" >> manifest; "
-    awk_program = awk_program + "emit(\"[shard] generated \" doc_count \" documents into \" total_shards \" shards\") "
+    awk_program = awk_program + "emit_line(\"[shard] generated \" doc_count \" documents into \" total_shards \" shards\") "
     awk_program = awk_program + "} "
 
     string process_cmd = ""
@@ -194,6 +215,7 @@ func main() int {
     process_cmd = process_cmd + "-v max_pages=" + shell_escape(max_pages) + " "
     process_cmd = process_cmd + "-v input_file=" + shell_escape(input_file) + " "
     process_cmd = process_cmd + "-v created_at=\"$created_at\" "
+    process_cmd = process_cmd + "-v progress_log=" + shell_escape(progress_log) + " "
     process_cmd = process_cmd + shell_escape(awk_program)
 
     println("[shard] launching Wikipedia shard pipeline")
