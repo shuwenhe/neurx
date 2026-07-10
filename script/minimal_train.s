@@ -1,13 +1,6 @@
 package main
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
-use std.process.run_process
-
-struct runtime_command_result {
-    bool ok
-    int exit_code
-    string error
-}
 
 func main() {
     // 立即输出，确认程序开始执行
@@ -424,36 +417,7 @@ func main() {
 }
 
 func emit_heartbeat(string message) {
-    runtime_run_command("printf '%s\\n' " + runtime_shell_escape(message) + " >&2")
-}
-
-func runtime_run_command(string command) runtime_command_result {
-    string cmd = trim(command)
-    if cmd == "" {
-        return runtime_command_result {
-            ok: false,
-            exit_code: 1,
-            error: "empty_command",
-        }
-    }
-
-    []string argv = []string{cap: 3}
-    argv[0] = "sh"
-    argv[1] = "-c"
-    argv[2] = cmd
-    var out = run_process(argv)
-    if out.is_ok() {
-        return runtime_command_result {
-            ok: true,
-            exit_code: 0,
-            error: "",
-        }
-    }
-    runtime_command_result {
-        ok: false,
-        exit_code: 1,
-        error: out.unwrap_err().message,
-    }
+    runtime_run_command_output("printf '%s\\n' " + runtime_shell_escape(message) + " >&2")
 }
 
 func count_non_empty_lines(string text) int {

@@ -1,6 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_run_command_output}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 use std.io.println
 
 func main() int {
@@ -19,27 +19,21 @@ func main() int {
     if compiler_cwd != "" {
         compile_command = "cd " + compiler_cwd + " && S_SOURCE_ROOT=" + compiler_cwd + " " + compile_command
     }
-    let compile_output = runtime_run_command_output(compile_command)
-    if len(compile_output) > 0 {
-        println(compile_output)
-    }
+    runtime_run_command_output(compile_command)
 
     if !runtime_file_exists(binary_path) {
         println("error: failed to build runner binary")
         return 1
     }
 
-    let run_result = runtime_run_command(
+    string run_command =
         "S_IR_RUNNER_INPUT=" + ir_path +
         " S_IR_RUNNER_ENTRY=" + entry +
         " " + binary_path
-    )
-    if !run_result.ok {
+    runtime_run_command_output(run_command)
+    if !runtime_file_exists(binary_path) {
         println("error: failed to run runner binary")
-        if len(run_result.error) > 0 {
-            println(run_result.error)
-        }
-        return run_result.exit_code
+        return 1
     }
-    return run_result.exit_code
+    return 0
 }

@@ -101,6 +101,7 @@ func main() int {
     string manifest_file = get_manifest_file()
     string docs_per_shard = get_docs_per_shard()
     string max_pages = get_max_pages()
+    string progress_log = runtime_env_get("NEURX_SHARD_PROGRESS_LOG", "")
 
     println("Configuration:")
     println("  Input file    : " + input_file)
@@ -139,6 +140,7 @@ func main() int {
     awk_program = awk_program + "gsub(/\\n/, \"\\\\n\", t); "
     awk_program = awk_program + "return \"\\\"\" t \"\\\"\" "
     awk_program = awk_program + "} "
+    awk_program = awk_program + "function emit(msg) { if (progress_log != \"\") { print msg >> progress_log; fflush(progress_log) } else { print msg > \"/dev/stderr\"; fflush(\"/dev/stderr\") } } "
     awk_program = awk_program + "function shard_path(idx) { return sprintf(\"%s/shard_%05d.jsonl\", out_dir, idx) } "
     awk_program = awk_program + "BEGIN { "
     awk_program = awk_program + "RS = \"</page>\"; ORS = \"\"; "
@@ -146,17 +148,17 @@ func main() int {
     awk_program = awk_program + "max_pages = max_pages + 0; "
     awk_program = awk_program + "if (docs_per_shard < 1) docs_per_shard = 1; "
     awk_program = awk_program + "doc_count = 0; shard_index = 0; in_shard = 0; current = shard_path(0); "
-    awk_program = awk_program + "print \"[shard] started processing Wikipedia dump\" > \"/dev/stderr\"; fflush(\"/dev/stderr\") "
+    awk_program = awk_program + "emit(\"[shard] started processing Wikipedia dump\") "
     awk_program = awk_program + "} "
     awk_program = awk_program + "{ "
     awk_program = awk_program + "page = $0; "
     awk_program = awk_program + "if (page !~ /<page>/) next; "
     awk_program = awk_program + "if (max_pages > 0 && doc_count >= max_pages) next; "
     awk_program = awk_program + "page = page \"</page>\"; "
-    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index); print \"[shard] switching to shard \" shard_index > \"/dev/stderr\"; fflush(\"/dev/stderr\") } "
+    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index); emit(\"[shard] switching to shard \" shard_index) } "
     awk_program = awk_program + "print \"{\\\"document_index\\\":\" doc_count \",\\\"shard_index\\\":\" shard_index \",\\\"xml\\\":\" json_escape(page) \"}\\n\" >> current; "
     awk_program = awk_program + "doc_count = doc_count + 1; in_shard = in_shard + 1; "
-    awk_program = awk_program + "print \"[shard] processed document \" doc_count \" in shard \" shard_index > \"/dev/stderr\"; fflush(\"/dev/stderr\") "
+    awk_program = awk_program + "if (doc_count % 5000 == 0) { emit(\"[shard] processed \" doc_count \" documents...\") } "
     awk_program = awk_program + "} "
     awk_program = awk_program + "END { "
     awk_program = awk_program + "total_shards = (doc_count == 0) ? 0 : (shard_index + 1); "
@@ -178,7 +180,7 @@ func main() int {
     awk_program = awk_program + "} "
     awk_program = awk_program + "print \"  ]\" >> manifest; "
     awk_program = awk_program + "print \"}\" >> manifest; "
-    awk_program = awk_program + "print \"generated \" doc_count \" documents into \" total_shards \" shards\\n\"; fflush(); "
+    awk_program = awk_program + "emit(\"[shard] generated \" doc_count \" documents into \" total_shards \" shards\") "
     awk_program = awk_program + "} "
 
     string process_cmd = ""
@@ -195,7 +197,7 @@ func main() int {
     process_cmd = process_cmd + shell_escape(awk_program)
 
     println("[shard] launching Wikipedia shard pipeline")
-    string process_out = runtime_run_command_output(process_cmd)
+    runtime_run_command_output(process_cmd)
     if !runtime_file_exists(manifest_file) {
         println("Error: shard generation command failed")
         return 1

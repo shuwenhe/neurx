@@ -192,7 +192,7 @@ func run_wikipedia() int {
         " S_IR_RUNNER_ENTRY=" + shell_escape("main") +
         " " + shell_escape(runner_bin)
     println("[shard] launching runner for compiled shard IR")
-    string run_output = runtime_run_command_output(run_command)
+    runtime_run_command_output(run_command)
     if !runtime_file_exists(manifest) {
         println("Error: shard wikipedia execution failed")
         return 1
