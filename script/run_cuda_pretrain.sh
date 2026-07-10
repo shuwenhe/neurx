@@ -4,9 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-S_COMPILER="${S_COMPILER:-/home/shuwen/s/bin/s}"
+S_COMPILER="${S_COMPILER:-$ROOT_DIR/../s/.local/bin/s}"
 ENTRY_SOURCE="${NEURX_PRETRAIN_ENTRY_SOURCE:-$ROOT_DIR/pretrain/llm/large_pretrain.s}"
 BUILD_DIR="${NEURX_PRETRAIN_BUILD_DIR:-$ROOT_DIR/artifacts/build/pretrain_cuda}"
+IR_FILE="$BUILD_DIR/pretrain_cuda_runner.ir"
 BIN_FILE="$BUILD_DIR/pretrain_cuda_runner"
 
 NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$ROOT_DIR/dataset/pretrain/manifest.json}"
@@ -38,10 +39,12 @@ cd "$ROOT_DIR"
 
 echo "Building CUDA pretrain launcher..."
 echo "  source : $ENTRY_SOURCE"
+echo "  ir     : $IR_FILE"
 echo "  binary : $BIN_FILE"
 echo "  backend: $NEURX_PRETRAIN_BACKEND"
 
-S_SOURCE_ROOT="${S_SOURCE_ROOT:-$ROOT_DIR/..}" S_COMPILER="$S_COMPILER" "$S_COMPILER" build "$ENTRY_SOURCE" -o "$BIN_FILE"
+S_SOURCE_ROOT="${S_SOURCE_ROOT:-$ROOT_DIR/..}" S_COMPILER="$S_COMPILER" "$S_COMPILER" "$ENTRY_SOURCE" "$IR_FILE"
+S_SOURCE_ROOT="${S_SOURCE_ROOT:-$ROOT_DIR/..}" S_COMPILER="$S_COMPILER" "$S_COMPILER" --emit-bin "$IR_FILE" "$BIN_FILE"
 if [[ ! -f "$BIN_FILE" ]]; then
   echo "Failed to build CUDA pretrain launcher: $BIN_FILE" >&2
   exit 1

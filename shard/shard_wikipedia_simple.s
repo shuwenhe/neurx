@@ -146,15 +146,17 @@ func main() int {
     awk_program = awk_program + "max_pages = max_pages + 0; "
     awk_program = awk_program + "if (docs_per_shard < 1) docs_per_shard = 1; "
     awk_program = awk_program + "doc_count = 0; shard_index = 0; in_shard = 0; current = shard_path(0); "
+    awk_program = awk_program + "print \"[shard] started processing Wikipedia dump\" > \"/dev/stderr\"; fflush(\"/dev/stderr\") "
     awk_program = awk_program + "} "
     awk_program = awk_program + "{ "
     awk_program = awk_program + "page = $0; "
     awk_program = awk_program + "if (page !~ /<page>/) next; "
     awk_program = awk_program + "if (max_pages > 0 && doc_count >= max_pages) next; "
     awk_program = awk_program + "page = page \"</page>\"; "
-    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index) } "
+    awk_program = awk_program + "if (in_shard >= docs_per_shard) { shard_index = shard_index + 1; in_shard = 0; current = shard_path(shard_index); print \"[shard] switching to shard \" shard_index > \"/dev/stderr\"; fflush(\"/dev/stderr\") } "
     awk_program = awk_program + "print \"{\\\"document_index\\\":\" doc_count \",\\\"shard_index\\\":\" shard_index \",\\\"xml\\\":\" json_escape(page) \"}\\n\" >> current; "
     awk_program = awk_program + "doc_count = doc_count + 1; in_shard = in_shard + 1; "
+    awk_program = awk_program + "print \"[shard] processed document \" doc_count \" in shard \" shard_index > \"/dev/stderr\"; fflush(\"/dev/stderr\") "
     awk_program = awk_program + "} "
     awk_program = awk_program + "END { "
     awk_program = awk_program + "total_shards = (doc_count == 0) ? 0 : (shard_index + 1); "
@@ -176,12 +178,13 @@ func main() int {
     awk_program = awk_program + "} "
     awk_program = awk_program + "print \"  ]\" >> manifest; "
     awk_program = awk_program + "print \"}\" >> manifest; "
-    awk_program = awk_program + "print \"generated \" doc_count \" documents into \" total_shards \" shards\\n\"; "
+    awk_program = awk_program + "print \"generated \" doc_count \" documents into \" total_shards \" shards\\n\"; fflush(); "
     awk_program = awk_program + "} "
 
     string process_cmd = ""
     process_cmd = process_cmd + "set -e; "
     process_cmd = process_cmd + "created_at=" + shell_escape(created_at) + "; "
+    process_cmd = process_cmd + "echo '[shard] decoding Wikipedia dump...' >&2; "
     process_cmd = process_cmd + "bzip2 -dc " + shell_escape(input_file) + " | awk "
     process_cmd = process_cmd + "-v out_dir=" + shell_escape(output_dir) + " "
     process_cmd = process_cmd + "-v manifest=" + shell_escape(manifest_file) + " "
@@ -191,13 +194,10 @@ func main() int {
     process_cmd = process_cmd + "-v created_at=\"$created_at\" "
     process_cmd = process_cmd + shell_escape(awk_program)
 
+    println("[shard] launching Wikipedia shard pipeline")
     string process_out = runtime_run_command_output(process_cmd)
-    if len(trim(process_out)) > 0 {
-        println(process_out)
-    }
-
     if !runtime_file_exists(manifest_file) {
-        println("Error: shard generation did not produce manifest: " + manifest_file)
+        println("Error: shard generation command failed")
         return 1
     }
 

@@ -92,16 +92,17 @@ func int_to_str(int n) string {
         return "0"
     }
 
+    int value = n
     bool negative = n < 0
     if negative {
-        n = 0 - n
+        value = 0 - value
     }
 
     string out = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
+    while value > 0 {
+        int digit = value - (value / 10) * 10
         out = string_char(digit + 48) + out
-        n = n / 10
+        value = value / 10
     }
 
     if negative {
@@ -162,11 +163,8 @@ func run_wikipedia() int {
     }
 
     string compile_output = runtime_run_command_output(
-        shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
+        shell_escape(compiler) + " " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
     )
-    if len(trim(compile_output)) > 0 {
-        println(compile_output)
-    }
     if !runtime_file_exists(build_dir + "/shard_wikipedia_simple.ir") {
         println("Error: failed to compile shard_wikipedia_simple.s")
         return 1
@@ -174,27 +172,27 @@ func run_wikipedia() int {
 
     if !runtime_file_exists(runner_bin) {
         string runner_output = runtime_run_command_output("make -C " + shell_escape(root) + " build-s-ir-runner")
-        if len(trim(runner_output)) > 0 {
-            println(runner_output)
-        }
         if !runtime_file_exists(runner_bin) {
             println("Error: failed to build S IR runner")
             return 1
         }
     }
 
-    string run_output = runtime_run_command_output(
+    string run_command = 
         "NEURX_HOME=" + shell_escape(root) +
+        " S_COMPILER=" + shell_escape(compiler) +
+        " S_COMPILER_EMIT_CWD=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +
+        " S_SOURCE_ROOT=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +
         " ENWIKI_BZ2_FILE=" + shell_escape(input) +
         " ENWIKI_SHARD_DIR=" + shell_escape(output_dir) +
         " ENWIKI_MANIFEST_FILE=" + shell_escape(manifest) +
         " DOCS_PER_SHARD=" + shell_escape(docs_per_shard) +
         " MAX_PAGES=" + shell_escape(max_pages) +
-        " " + shell_escape(runner_bin) + " " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
-    )
-    if len(trim(run_output)) > 0 {
-        println(run_output)
-    }
+        " S_IR_RUNNER_INPUT=" + shell_escape(build_dir + "/shard_wikipedia_simple.ir") +
+        " S_IR_RUNNER_ENTRY=" + shell_escape("main") +
+        " " + shell_escape(runner_bin)
+    println("[shard] launching runner for compiled shard IR")
+    string run_output = runtime_run_command_output(run_command)
     if !runtime_file_exists(manifest) {
         println("Error: shard wikipedia execution failed")
         return 1

@@ -7,13 +7,12 @@ NEURX_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 export NEURX_ROOT="$NEURX_ROOT"
 
 export S_SOURCE_ROOT="${S_SOURCE_ROOT:-$NEURX_ROOT}"
+export S_COMPILER_EMIT_CWD="${S_COMPILER_EMIT_CWD:-$NEURX_ROOT/../s}"
 if [ -z "${S_COMPILER:-}" ]; then
     if [ -x "$NEURX_ROOT/../s/bin/s" ]; then
         export S_COMPILER="$NEURX_ROOT/../s/bin/s"
     elif [ -x "$NEURX_ROOT/../s/.local/bin/s" ]; then
         export S_COMPILER="$NEURX_ROOT/../s/.local/bin/s"
-    elif [ -x "/home/shuwen/s/bin/s" ]; then
-        export S_COMPILER="/home/shuwen/s/bin/s"
     else
         export S_COMPILER="$(command -v s 2>/dev/null || true)"
     fi
@@ -181,10 +180,15 @@ fi
 echo "Resolved command:"
 echo "  S compilation: $NEURX_ROOT/script/minimal_train.s -> $BUILD_DIR/run_large_pretrain.ir"
 
-"$S_COMPILER" ir "$NEURX_ROOT/script/minimal_train.s" -o "$BUILD_DIR/run_large_pretrain.ir"
+"$S_COMPILER" "$NEURX_ROOT/script/minimal_train.s" "$BUILD_DIR/run_large_pretrain.ir"
 if [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
     echo "Error: S compilation failed"
     exit 1
+fi
+
+if [ "${NEURX_PRETRAIN_COMPILE_ONLY:-0}" = "1" ]; then
+    echo "Compile-only mode enabled; skipping execution."
+    exit 0
 fi
 
 echo "Running training pipeline..."
@@ -199,10 +203,16 @@ if [ ! -f "$S_RUNNER_BIN" ]; then
 fi
 RUN_LOG="$LOG_DIR/run_large_pretrain_$(date +%Y%m%d_%H%M%S).log"
 echo "Real training log: $RUN_LOG"
-if command -v stdbuf >/dev/null 2>&1; then
-    stdbuf -oL -eL "$S_RUNNER_BIN" "$BUILD_DIR/run_large_pretrain.ir" 2>&1 | tee -a "$RUN_LOG"
+echo "Training started. Monitor progress with: tail -f $RUN_LOG"
+# Redirect all output to log file only (no console spam)
+S_IR_RUNNER_INPUT="$BUILD_DIR/run_large_pretrain.ir" S_IR_RUNNER_ENTRY="main" S_COMPILER="$S_COMPILER" S_COMPILER_EMIT_CWD="$S_COMPILER_EMIT_CWD" "$S_RUNNER_BIN" >> "$RUN_LOG" 2>&1
+TRAIN_EXIT_CODE=$?
+if [ $TRAIN_EXIT_CODE -eq 0 ]; then
+    echo "✓ Training completed successfully!"
 else
-    "$S_RUNNER_BIN" "$BUILD_DIR/run_large_pretrain.ir" 2>&1 | tee -a "$RUN_LOG"
+    echo "✗ Training failed with exit code $TRAIN_EXIT_CODE"
+    echo "Check log for details: cat $RUN_LOG"
+    exit $TRAIN_EXIT_CODE
 fi
 
 echo ""
