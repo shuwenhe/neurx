@@ -103,32 +103,64 @@ mkdir -p "$LOG_DIR"
 
 SHARD_LIST_FILE="$BUILD_DIR/shard_list.sample.txt"
 ALL_SHARDS_FILE="$BUILD_DIR/shard_list.all.txt"
+echo ""
+echo "=========================================="
+echo "📂 Stage 1: Scanning Shard Data Directory"
+echo "=========================================="
+echo "Preparing shard list..."
+echo "  source dir: $NEURX_ROOT/dataset/pretrain/shard"
+echo "  output    : $SHARD_LIST_FILE"
+echo ""
+echo "[STARTUP][shard-scan] scanning shard directory for training slices"
 find "$NEURX_ROOT/dataset/pretrain/shard" -maxdepth 1 -name 'shard_*.jsonl' -print | sort > "$ALL_SHARDS_FILE"
+TOTAL_SHARDS=$(wc -l < "$ALL_SHARDS_FILE" 2>/dev/null || echo 0)
+echo "[STARTUP][shard-scan] found $TOTAL_SHARDS total shards"
+
+if [ "$TOTAL_SHARDS" -eq 0 ]; then
+    echo "[ERROR] No shard files found in $NEURX_ROOT/dataset/pretrain/shard"
+    exit 1
+fi
+
 if [ -n "${NEURX_PRETRAIN_SHARD_LIMIT:-}" ] && [ "${NEURX_PRETRAIN_SHARD_LIMIT:-0}" -gt 0 ] 2>/dev/null; then
+    echo "[STARTUP][shard-scan] limiting to ${NEURX_PRETRAIN_SHARD_LIMIT} shards"
     sed -n "1,${NEURX_PRETRAIN_SHARD_LIMIT}p" "$ALL_SHARDS_FILE" > "$SHARD_LIST_FILE"
+    ACTIVE_SHARDS=$NEURX_PRETRAIN_SHARD_LIMIT
 else
     cp "$ALL_SHARDS_FILE" "$SHARD_LIST_FILE"
+    ACTIVE_SHARDS=$TOTAL_SHARDS
 fi
 rm -f "$ALL_SHARDS_FILE"
 export NEURX_PRETRAIN_SHARD_LIST_FILE="$SHARD_LIST_FILE"
 export NEURX_PRETRAIN_MAX_DOCS="${NEURX_PRETRAIN_MAX_DOCS:-100000000}"
+echo "[STARTUP][shard-scan] using $ACTIVE_SHARDS shards for training"
+echo ""
+echo "  📋 First 3 shards in training set:"
+sed -n '1,3p' "$SHARD_LIST_FILE" | while read shard; do
+    if [ -f "$shard" ]; then
+        size=$(du -h "$shard" 2>/dev/null | cut -f1)
+        lines=$(wc -l < "$shard" 2>/dev/null || echo "?")
+        printf "     • %s (%s, ~%s docs)\n" "$(basename "$shard")" "$size" "$lines"
+    fi
+done
+echo ""
 
 if [ "${NEURX_PRETRAIN_FAST_PREFIX:-0}" -gt 0 ] 2>/dev/null; then
+    echo "[STARTUP][shard-scan] fast prefix mode enabled"
     FIRST_SHARD_PATH="$(sed -n '1p' "$SHARD_LIST_FILE")"
     FAST_PREFIX_SHARD_FILE="$BUILD_DIR/shard_fast_prefix.jsonl"
     if [ -n "$FIRST_SHARD_PATH" ] && [ -f "$FIRST_SHARD_PATH" ]; then
+        echo "[STARTUP][shard-scan] creating fast prefix sample from first shard"
         head -n "${NEURX_PRETRAIN_FAST_PREFIX_LINES:-1}" "$FIRST_SHARD_PATH" | cut -c1-"${NEURX_PRETRAIN_FAST_PREFIX_BYTES:-1024}" > "$FAST_PREFIX_SHARD_FILE"
         printf '%s\n' "$FAST_PREFIX_SHARD_FILE" > "$SHARD_LIST_FILE"
         export NEURX_PRETRAIN_FAST_PREFIX=0
-        echo "Fast prefix sample shard created:"
-        echo "  source : $FIRST_SHARD_PATH"
-        echo "  sample  : $FAST_PREFIX_SHARD_FILE"
-        echo "  lines   : $NEURX_PRETRAIN_FAST_PREFIX_LINES"
-        echo "  bytes   : $NEURX_PRETRAIN_FAST_PREFIX_BYTES"
+        echo "[STARTUP][shard-scan] fast prefix sample created:"
+        echo "          source : $FIRST_SHARD_PATH"
+        echo "          sample : $FAST_PREFIX_SHARD_FILE"
+        echo "          lines  : $NEURX_PRETRAIN_FAST_PREFIX_LINES"
+        echo "          bytes  : $NEURX_PRETRAIN_FAST_PREFIX_BYTES"
     fi
+    echo ""
 fi
-
-echo ""
 echo "=========================================="
 echo "Checkpoint & Resume Configuration"
 echo "=========================================="
@@ -143,6 +175,7 @@ RESUME_STATE_FILE="$NEURX_PRETRAIN_OUTPUT_DIR/resume_state.json"
 
 # 检查点续训支持
 if [ "${NEURX_PRETRAIN_RESUME:-1}" = "1" ] && [ -f "$LATEST_CHECKPOINT_FILE" ]; then
+    echo "[STARTUP][checkpoint] latest pointer file exists"
     LATEST_CHECKPOINT=$(cat "$LATEST_CHECKPOINT_FILE" 2>/dev/null)
     if [ -n "$LATEST_CHECKPOINT" ] && [ -f "$LATEST_CHECKPOINT" ]; then
         echo "✓ Found latest checkpoint: $LATEST_CHECKPOINT"
@@ -157,11 +190,12 @@ if [ "${NEURX_PRETRAIN_RESUME:-1}" = "1" ] && [ -f "$LATEST_CHECKPOINT_FILE" ]; 
             export NEURX_PRETRAIN_RESUME_STATE_FILE="$RESUME_STATE_FILE"
         fi
     else
-        echo "ℹ Checkpoint file referenced in latest_checkpoint.txt not found, starting fresh training"
+        echo "[STARTUP][checkpoint] latest pointer is stale; starting fresh training"
         unset NEURX_PRETRAIN_CHECKPOINT_PATH
         unset NEURX_PRETRAIN_RESUME_STATE_FILE
     fi
 else
+    echo "[STARTUP][checkpoint] no usable latest pointer found"
     echo "ℹ Resume disabled or no checkpoint found, starting fresh training"
     unset NEURX_PRETRAIN_CHECKPOINT_PATH
     unset NEURX_PRETRAIN_RESUME_STATE_FILE
@@ -177,13 +211,52 @@ if [ -z "$S_COMPILER" ]; then
     exit 1
 fi
 
-echo "Resolved command:"
-echo "  S compilation: $NEURX_ROOT/script/minimal_train.s -> $BUILD_DIR/run_large_pretrain.ir"
+# Check if incremental compilation is needed
+SOURCE_FILE="$NEURX_ROOT/script/minimal_train.s"
+IR_OUTPUT="$BUILD_DIR/run_large_pretrain.ir"
+RUNNER_BIN_OUTPUT="$BUILD_DIR/run_large_pretrain.ir.runner.bin"
 
-"$S_COMPILER" "$NEURX_ROOT/script/minimal_train.s" "$BUILD_DIR/run_large_pretrain.ir"
-if [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
-    echo "Error: S compilation failed"
-    exit 1
+# Function to check if recompilation is needed
+needs_recompile() {
+    local src="$1"
+    local output="$2"
+    
+    if [ ! -f "$output" ]; then
+        return 0  # Output doesn't exist, needs compilation
+    fi
+    
+    # Check if source is newer than output
+    if [ "$src" -nt "$output" ]; then
+        return 0  # Source is newer, needs recompilation
+    fi
+    
+    return 1  # Output is up to date
+}
+
+# Check if IR compilation is needed
+if needs_recompile "$SOURCE_FILE" "$IR_OUTPUT"; then
+    echo "Resolved command:"
+    echo "  S compilation: $NEURX_ROOT/script/minimal_train.s -> $BUILD_DIR/run_large_pretrain.ir"
+    echo "Compiling S source to IR (this may take 30-60 seconds on first run)..."
+    
+    START_TIME=$(date +%s)
+    "$S_COMPILER" "$NEURX_ROOT/script/minimal_train.s" "$BUILD_DIR/run_large_pretrain.ir"
+    COMPILE_EXIT=$?
+    END_TIME=$(date +%s)
+    COMPILE_TIME=$((END_TIME - START_TIME))
+    
+    if [ $COMPILE_EXIT -ne 0 ] || [ ! -f "$BUILD_DIR/run_large_pretrain.ir" ]; then
+        echo "Error: S compilation failed"
+        exit 1
+    fi
+    
+    echo "✓ S source compiled successfully (took ${COMPILE_TIME}s)"
+    # Reset runner binary timestamp so it gets recompiled too
+    REBUILD_RUNNER=1
+else
+    echo "✓ Using cached S IR: $IR_OUTPUT"
+    echo "  (source unchanged since last compilation)"
+    REBUILD_RUNNER=0
 fi
 
 if [ "${NEURX_PRETRAIN_COMPILE_ONLY:-0}" = "1" ]; then
@@ -191,7 +264,9 @@ if [ "${NEURX_PRETRAIN_COMPILE_ONLY:-0}" = "1" ]; then
     exit 0
 fi
 
+echo ""
 echo "Running training pipeline..."
+echo "[STARTUP][runner] entering training runner launch"
 # Use S IR runner to execute compiled IR
 if [ ! -f "$S_RUNNER_BIN" ]; then
     echo "S IR runner not found at $S_RUNNER_BIN; building it now..."
@@ -201,9 +276,35 @@ if [ ! -f "$S_RUNNER_BIN" ]; then
     echo "Error: S IR runner not found at $S_RUNNER_BIN"
     exit 1
 fi
+
+# Check if runner binary needs to be regenerated from IR
+if [ -n "${REBUILD_RUNNER:-}" ] && [ "$REBUILD_RUNNER" = "1" ]; then
+    echo "[STARTUP][runner] building runner executable from IR"
+    echo "  source : $IR_OUTPUT"
+    echo "  output : $RUNNER_BIN_OUTPUT"
+    # The runner binary will be regenerated during execution
+    rm -f "$RUNNER_BIN_OUTPUT" 2>/dev/null || true
+    echo "[STARTUP][runner] runner binary cleared; it will be regenerated on first execution"
+else
+    if [ -f "$RUNNER_BIN_OUTPUT" ]; then
+        echo "[STARTUP][runner] using cached S IR runner binary"
+    fi
+fi
+
 RUN_LOG="$LOG_DIR/run_large_pretrain_$(date +%Y%m%d_%H%M%S).log"
+echo ""
+echo "=========================================="
+echo "📊 Stage 3: Launching S IR Runner"
+echo "=========================================="
+echo ""
 echo "Real training log: $RUN_LOG"
 echo "Training started. Monitor progress with: tail -f $RUN_LOG"
+echo ""
+echo "[STARTUP][runner] S IR runner launching now"
+echo "[STARTUP][runner] executing training pipeline from $BUILD_DIR/run_large_pretrain.ir"
+echo "[STARTUP][runner] waiting for the first training heartbeat"
+echo ""
+
 # Stream output to both terminal and log file so shard/progress lines stay visible.
 # Capture both stdout and stderr, redirect to both log and terminal
 # Export all environment variables to the runner
@@ -215,12 +316,16 @@ export NEURX_ROOT NEURX_PRETRAIN_MANIFEST NEURX_PRETRAIN_DATA_DIR NEURX_PRETRAIN
        NEURX_PRETRAIN_FAST_PREFIX NEURX_PRETRAIN_FAST_PREFIX_LINES NEURX_PRETRAIN_FAST_PREFIX_BYTES \
        WORLD_SIZE RANK DDP_BACKEND MODEL_SIZE NEURX_PRETRAIN_SHARD_LIST_FILE NEURX_PRETRAIN_MAX_DOCS
 
-S_IR_RUNNER_INPUT="$BUILD_DIR/run_large_pretrain.ir" \
-S_IR_RUNNER_ENTRY="main" \
-S_COMPILER="$S_COMPILER" \
-S_COMPILER_EMIT_CWD="$S_COMPILER_EMIT_CWD" \
-NEURX_ROOT="$NEURX_ROOT" \
-"$S_RUNNER_BIN" 2>&1 | tee -a "$RUN_LOG"
+# Run the S IR runner with unbuffered output
+# Add spinner to show progress while waiting for IR compilation
+{
+    S_IR_RUNNER_INPUT="$BUILD_DIR/run_large_pretrain.ir" \
+    S_IR_RUNNER_ENTRY="main" \
+    S_COMPILER="$S_COMPILER" \
+    S_COMPILER_EMIT_CWD="$S_COMPILER_EMIT_CWD" \
+    NEURX_ROOT="$NEURX_ROOT" \
+    stdbuf -oL -eL "$S_RUNNER_BIN" 2>&1
+} | tee -a "$RUN_LOG"
 TRAIN_EXIT_CODE=${PIPESTATUS[0]}
 if [ $TRAIN_EXIT_CODE -eq 0 ]; then
     echo "✓ Training completed successfully!"
