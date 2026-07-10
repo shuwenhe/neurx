@@ -27,6 +27,7 @@ PLATFORM := macos
 else
 PLATFORM := linux
 endif
+SHELL := /bin/bash
 BASH ?= bash
 endif
 
@@ -50,7 +51,7 @@ S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
 INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
-INDUSTRIAL_CHECKPOINT_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/industrial_1t
+INDUSTRIAL_CHECKPOINT_DIR ?= $(CURDIR_UNIX)/checkpoint/industrial_1t
 INDUSTRIAL_EXPORT_DIR ?= $(CURDIR_UNIX)/artifacts/export/industrial_1t
 INDUSTRIAL_DEPLOY_DIR ?= $(CURDIR_UNIX)/artifacts/deploy/industrial_1t
 INDUSTRIAL_BATCH_SIZE ?= 16
@@ -68,6 +69,7 @@ PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
+PRETRAIN_LOG_DIR := $(CURDIR_UNIX)/checkpoint/NeurX-1.3/logs
 NEURX_SHARD_CMD ?= wikipedia
 
 
@@ -91,20 +93,21 @@ infer: check-bash
 
 pretrain: check-bash
 	@echo "Running NeurX large-model pre-training on existing shard dataset"
-	@cd '$(CURDIR_UNIX)' && \
+	@mkdir -p $(PRETRAIN_LOG_DIR)
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
 		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
 		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
 		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
 		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
 		echo "Resolved command:"; \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' bash script/run_large_pretrain.sh"; \
+		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' bash script/run_large_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
-		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/checkpoints' \
+		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' \
 		NEURX_PRETRAIN_RESUME=1 \
 		NEURX_PRETRAIN_BACKEND=nccl \
 		DDP_BACKEND=nccl \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_large_pretrain.sh 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
 
 
 posttrain: check-bash

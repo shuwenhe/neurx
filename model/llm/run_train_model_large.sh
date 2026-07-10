@@ -12,6 +12,6 @@ if [[ ! -f "$NEW_SCRIPT" ]]; then
 fi
 
 export NEURX_PRETRAIN_SOURCE="${NEURX_PRETRAIN_SOURCE:-$NEURX_DIR/pretrain/llm/model_large_pretrain.s}"
-export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/artifacts/checkpoints/model_llm_model_large}"
+export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-$NEURX_DIR/checkpoint/NeurX-1.3}"
 
 exec bash "$NEW_SCRIPT"

@@ -88,7 +88,7 @@ neurx/
 
 Issues and PRs are welcome!
 
-For local save-to-commit-and-push automation, run `tools/watch-auto-commit-push.sh` from the repository root. It uses `inotifywait` when available and falls back to polling.
+For local save-to-commit-and-push automation, run `tools/install-auto-save-hooks.sh` once, then start `tools/watch-auto-commit-push.sh` from the repository root. The watcher uses `inotifywait` when available and falls back to polling.
 
 ## 📄 License
 
