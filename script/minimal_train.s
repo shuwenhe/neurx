@@ -4,6 +4,10 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 
 func main() {
     // 立即输出，确认程序开始执行
+    string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
+    if str_len(startup_marker_file) > 0 {
+        runtime_run_command_output("echo 'started' > " + shell_escape(startup_marker_file))
+    }
     runtime_run_command_output("echo '[STARTUP][runner] minimal_train.s started' >&2")
     println("[STARTUP][runner] minimal_train.s started")
     
