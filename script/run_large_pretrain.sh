@@ -292,6 +292,8 @@ else
 fi
 
 RUN_LOG="$LOG_DIR/run_large_pretrain_$(date +%Y%m%d_%H%M%S).log"
+STARTUP_MARKER_FILE="$BUILD_DIR/runner_startup.marker"
+rm -f "$STARTUP_MARKER_FILE" 2>/dev/null || true
 echo ""
 echo "=========================================="
 echo "📊 Stage 3: Launching S IR Runner"
@@ -314,7 +316,19 @@ export NEURX_ROOT NEURX_PRETRAIN_MANIFEST NEURX_PRETRAIN_DATA_DIR NEURX_PRETRAIN
        NEURX_PRETRAIN_WEIGHT_DECAY NEURX_PRETRAIN_LOG_INTERVAL NEURX_PRETRAIN_EVAL_INTERVAL \
        NEURX_PRETRAIN_SAVE_INTERVAL NEURX_PRETRAIN_RESUME NEURX_ALLOW_FULL_1T_LOCAL \
        NEURX_PRETRAIN_FAST_PREFIX NEURX_PRETRAIN_FAST_PREFIX_LINES NEURX_PRETRAIN_FAST_PREFIX_BYTES \
-       WORLD_SIZE RANK DDP_BACKEND MODEL_SIZE NEURX_PRETRAIN_SHARD_LIST_FILE NEURX_PRETRAIN_MAX_DOCS
+       WORLD_SIZE RANK DDP_BACKEND MODEL_SIZE NEURX_PRETRAIN_SHARD_LIST_FILE NEURX_PRETRAIN_MAX_DOCS \
+       NEURX_STARTUP_MARKER_FILE="$STARTUP_MARKER_FILE"
+
+(
+    while [ ! -f "$STARTUP_MARKER_FILE" ]; do
+        sleep 15
+        if [ ! -f "$STARTUP_MARKER_FILE" ]; then
+            echo "[STARTUP][runner] still waiting for minimal_train.s startup heartbeat..."
+        fi
+    done
+) &
+STARTUP_WATCHER_PID=$!
+trap 'kill $STARTUP_WATCHER_PID >/dev/null 2>&1 || true' EXIT
 
 # Run the S IR runner with unbuffered output
 # Add spinner to show progress while waiting for IR compilation
