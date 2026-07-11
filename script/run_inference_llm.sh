@@ -77,6 +77,7 @@ materialize_checkpoint() {
 DEFAULT_CHECKPOINT_CANDIDATES=(
   "${NEURX_INFER_CHECKPOINT_PATH:-}"
   "${NEURX_INFER_CHECKPOINT:-}"
+  "$NEURX_ROOT/checkpoint/NeurX-1.3"
   "$NEURX_ROOT/artifacts/checkpoints/llm_training_validation2"
   "$NEURX_ROOT/artifacts/checkpoints/llm_training"
   "$NEURX_ROOT/artifacts/checkpoints/industrial_gpt_local"
