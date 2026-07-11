@@ -5,13 +5,18 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 func main() {
     // 立即输出，确认程序开始执行
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
+    string startup_log_file = runtime_env_get("NEURX_STARTUP_LOG_FILE", "")
     if str_len(startup_marker_file) > 0 {
         runtime_run_command_output("echo 'started' > " + shell_escape(startup_marker_file))
+    }
+    if str_len(startup_log_file) > 0 {
+        runtime_run_command_output("printf '%s\\n' " + shell_escape("[STARTUP][runner] minimal_train.s started") + " >> " + shell_escape(startup_log_file))
     }
     runtime_run_command_output("echo '[STARTUP][runner] minimal_train.s started' >&2")
     println("[STARTUP][runner] minimal_train.s started")
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
+    runtime_run_command_output("echo '[STARTUP][init] 📥 phase 1: loading environment variables' >&2")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
@@ -33,13 +38,14 @@ func main() {
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
 
-    runtime_run_command_output("echo '[STARTUP][init] loading configuration...' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] ✓ phase 1 complete: environment variables loaded' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] 📥 phase 2: loading configuration...' >&2")
     println("")
     println("========================================")
     println("🚀 NeurX Self-Contained Real Training")
     println("========================================")
     
-    runtime_run_command_output("echo '[STARTUP][init] configuration loaded' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] ✓ phase 2 complete: configuration loaded' >&2")
     println("")
     println("[CONFIG] Project Settings:")
     println("  Project root  : " + project_root)
@@ -48,7 +54,7 @@ func main() {
     println("  Max steps     : " + int_to_str(max_steps))
     println("  Vocab size    : " + int_to_str(vocab_size))
     
-    runtime_run_command_output("echo '[STARTUP][init] validating paths...' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] 📥 phase 3: validating paths...' >&2")
     println("")
     println("[CONFIG] Data Paths:")
     println("  Manifest file : " + manifest_path)
@@ -56,7 +62,8 @@ func main() {
     println("  Shard dir     : " + shard_dir)
     println("  Output dir    : " + output_dir)
     
-    runtime_run_command_output("echo '[STARTUP][init] initializing training parameters...' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] ✓ phase 3 complete: paths validated' >&2")
+    runtime_run_command_output("echo '[STARTUP][init] 📥 phase 4: initializing training parameters...' >&2")
     println("")
     println("[CONFIG] Training Parameters:")
     println("  Learning rate : " + fmt_float(learning_rate, 6))
@@ -65,6 +72,7 @@ func main() {
     println("  Log interval  : " + int_to_str(log_interval))
     println("  Save interval : " + int_to_str(save_interval))
     println("")
+    runtime_run_command_output("echo '[STARTUP][init] ✓ phase 4 complete: training parameters ready' >&2")
     println("")
 
     if !runtime_file_exists(manifest_path) {

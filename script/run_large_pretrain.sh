@@ -291,9 +291,15 @@ else
     fi
 fi
 
-RUN_LOG="$LOG_DIR/run_large_pretrain_$(date +%Y%m%d_%H%M%S).log"
+RUN_TS="$(date +%Y%m%d_%H%M%S)"
+RUN_LOG="$LOG_DIR/run_large_pretrain_${RUN_TS}.log"
+STARTUP_LOG="$LOG_DIR/run_large_pretrain_${RUN_TS}.startup.log"
 STARTUP_MARKER_FILE="$BUILD_DIR/runner_startup.marker"
 rm -f "$STARTUP_MARKER_FILE" 2>/dev/null || true
+printf '' > "$STARTUP_LOG"
+startup_log() {
+    printf '%s\n' "$1" | tee -a "$STARTUP_LOG"
+}
 echo ""
 echo "=========================================="
 echo "📊 Stage 3: Launching S IR Runner"
@@ -302,9 +308,9 @@ echo ""
 echo "Real training log: $RUN_LOG"
 echo "Training started. Monitor progress with: tail -f $RUN_LOG"
 echo ""
-echo "[STARTUP][runner] S IR runner launching now"
-echo "[STARTUP][runner] executing training pipeline from $BUILD_DIR/run_large_pretrain.ir"
-echo "[STARTUP][runner] waiting for the first training heartbeat"
+startup_log "[STARTUP][runner] S IR runner launching now"
+startup_log "[STARTUP][runner] executing training pipeline from $BUILD_DIR/run_large_pretrain.ir"
+startup_log "[STARTUP][runner] waiting for the first training heartbeat"
 echo ""
 
 # Stream output to both terminal and log file so shard/progress lines stay visible.
@@ -317,13 +323,50 @@ export NEURX_ROOT NEURX_PRETRAIN_MANIFEST NEURX_PRETRAIN_DATA_DIR NEURX_PRETRAIN
        NEURX_PRETRAIN_SAVE_INTERVAL NEURX_PRETRAIN_RESUME NEURX_ALLOW_FULL_1T_LOCAL \
        NEURX_PRETRAIN_FAST_PREFIX NEURX_PRETRAIN_FAST_PREFIX_LINES NEURX_PRETRAIN_FAST_PREFIX_BYTES \
        WORLD_SIZE RANK DDP_BACKEND MODEL_SIZE NEURX_PRETRAIN_SHARD_LIST_FILE NEURX_PRETRAIN_MAX_DOCS \
-       NEURX_STARTUP_MARKER_FILE="$STARTUP_MARKER_FILE"
+       NEURX_STARTUP_MARKER_FILE="$STARTUP_MARKER_FILE" \
+       NEURX_STARTUP_LOG_FILE="$STARTUP_LOG"
 
+# Monitor startup progress with spinner and compilation detection
 (
+    spinner_frames=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+    spinner_idx=0
+    wait_count=0
+    max_wait=60  # 60 * 0.5 seconds = 30 seconds max wait
+    runner_bin_size_prev=0
+    
     while [ ! -f "$STARTUP_MARKER_FILE" ]; do
-        sleep 15
-        if [ ! -f "$STARTUP_MARKER_FILE" ]; then
-            echo "[STARTUP][runner] still waiting for minimal_train.s startup heartbeat..."
+        # Check if S IR runner binary is being generated (size increasing)
+        if [ -f "$RUNNER_BIN_OUTPUT" ]; then
+            runner_bin_size=$(stat -f%z "$RUNNER_BIN_OUTPUT" 2>/dev/null || echo 0)
+            if [ "$runner_bin_size" -gt "$runner_bin_size_prev" ]; then
+                startup_log "[STARTUP][compiler] ⚙️  JIT compiling: $(printf "%0.1f" "$(echo "scale=1; $runner_bin_size / 1048576" | bc)") MB generated"
+                runner_bin_size_prev=$runner_bin_size
+            fi
+        fi
+        
+        # Shorter sleep for more responsive feedback
+        sleep 0.5
+        wait_count=$((wait_count + 1))
+        
+        # Show spinner every second (2 iterations of 0.5s)
+        if [ $((wait_count % 2)) -eq 0 ]; then
+            spinner_char="${spinner_frames[$((spinner_idx % 10))]}"
+            echo "[STARTUP][runner] $spinner_char JIT compiling S IR runner binary (waiting for heartbeat)..." >&2
+            spinner_idx=$((spinner_idx + 1))
+        fi
+        
+        # Timeout warning at 15 seconds
+        if [ $wait_count -eq 30 ]; then
+            startup_log "[STARTUP][compiler] ⚠️  JIT compilation taking longer than expected (~15s)"
+            startup_log "[STARTUP][compiler] This is normal for the first run; subsequent runs will use cached binary"
+        fi
+        
+        # Hard timeout at 60 seconds
+        if [ $wait_count -ge $max_wait ]; then
+            startup_log "[ERROR] ❌ Startup timeout: S IR runner did not start within 30 seconds"
+            startup_log "[ERROR] Check if S compiler is properly configured"
+            startup_log "[ERROR] Log file: $RUN_LOG"
+            exit 1
         fi
     done
 ) &
@@ -331,7 +374,6 @@ STARTUP_WATCHER_PID=$!
 trap 'kill $STARTUP_WATCHER_PID >/dev/null 2>&1 || true' EXIT
 
 # Run the S IR runner with unbuffered output
-# Add spinner to show progress while waiting for IR compilation
 {
     S_IR_RUNNER_INPUT="$BUILD_DIR/run_large_pretrain.ir" \
     S_IR_RUNNER_ENTRY="main" \
