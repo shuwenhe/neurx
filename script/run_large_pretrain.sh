@@ -88,9 +88,7 @@ else
 fi
 
 if [ -f "$NEURX_PRETRAIN_MANIFEST" ]; then
-    echo "Resolved shard manifest preview:"
-    sed -n '1,12p' "$NEURX_PRETRAIN_MANIFEST" | sed 's/^/  - /'
-    echo ""
+    echo "[STARTUP][shard-scan] manifest file found"
 else
     echo "Warning: manifest not found at $NEURX_PRETRAIN_MANIFEST"
 fi
@@ -134,15 +132,6 @@ export NEURX_PRETRAIN_SHARD_LIST_FILE="$SHARD_LIST_FILE"
 export NEURX_PRETRAIN_MAX_DOCS="${NEURX_PRETRAIN_MAX_DOCS:-100000000}"
 echo "[STARTUP][shard-scan] using $ACTIVE_SHARDS shards for training"
 echo ""
-echo "  📋 First 3 shards in training set:"
-sed -n '1,3p' "$SHARD_LIST_FILE" | while read shard; do
-    if [ -f "$shard" ]; then
-        size=$(du -h "$shard" 2>/dev/null | cut -f1)
-        lines=$(wc -l < "$shard" 2>/dev/null || echo "?")
-        printf "     • %s (%s, ~%s docs)\n" "$(basename "$shard")" "$size" "$lines"
-    fi
-done
-echo ""
 
 if [ "${NEURX_PRETRAIN_FAST_PREFIX:-0}" -gt 0 ] 2>/dev/null; then
     echo "[STARTUP][shard-scan] fast prefix mode enabled"
@@ -153,11 +142,7 @@ if [ "${NEURX_PRETRAIN_FAST_PREFIX:-0}" -gt 0 ] 2>/dev/null; then
         head -n "${NEURX_PRETRAIN_FAST_PREFIX_LINES:-1}" "$FIRST_SHARD_PATH" | cut -c1-"${NEURX_PRETRAIN_FAST_PREFIX_BYTES:-1024}" > "$FAST_PREFIX_SHARD_FILE"
         printf '%s\n' "$FAST_PREFIX_SHARD_FILE" > "$SHARD_LIST_FILE"
         export NEURX_PRETRAIN_FAST_PREFIX=0
-        echo "[STARTUP][shard-scan] fast prefix sample created:"
-        echo "          source : $FIRST_SHARD_PATH"
-        echo "          sample : $FAST_PREFIX_SHARD_FILE"
-        echo "          lines  : $NEURX_PRETRAIN_FAST_PREFIX_LINES"
-        echo "          bytes  : $NEURX_PRETRAIN_FAST_PREFIX_BYTES"
+        echo "[STARTUP][shard-scan] fast prefix sample created"
     fi
     echo ""
 fi
