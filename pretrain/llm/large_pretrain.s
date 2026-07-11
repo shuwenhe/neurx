@@ -536,9 +536,12 @@ func tensor_numel([]int shape) int {
 }
 
 func tensor_from_ints([]int values, []int shape) tensor {
-    []float data = []float{cap: 0}
-    while len(data) < len(values) {
-        data.push(values[len(data)])
+    int n = len(values)
+    []float data = []float{cap: n}
+    int i = 0
+    while i < n {
+        data[i] = values[i]
+        i = i + 1
     }
     new(data, copy_int(shape), false)
 }
@@ -550,9 +553,12 @@ func shape1(int size) []int {
 }
 
 func scale_tensor(tensor value, float scale) tensor {
-    []float data = []float{cap: 0}
-    while len(data) < len(value.data) {
-        data.push(value.data[len(data)] * scale)
+    int n = len(value.data)
+    []float data = []float{cap: n}
+    int i = 0
+    while i < n {
+        data[i] = value.data[i] * scale
+        i = i + 1
     }
     new(data, copy_int(value.shape), value.requires_grad)
 }
@@ -573,13 +579,13 @@ func zero_pad_int(int value, int width) string {
 }
 
 func split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+    int count = 0
     string current = ""
     int i = 0
     while i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             if len(current) > 0 {
-                lines.push(current)
+                count = count + 1
                 current = ""
             }
             i = i + 1
@@ -589,7 +595,30 @@ func split_lines(string text) []string {
         i = i + 1
     }
     if len(current) > 0 {
-        lines.push(current)
+        count = count + 1
+    }
+    if count <= 0 {
+        return []string{cap: 0}
+    }
+    []string lines = []string{cap: count}
+    current = ""
+    int out_idx = 0
+    i = 0
+    while i < len(text) {
+        if text[i] == 10 || text[i] == 13 {
+            if len(current) > 0 {
+                lines[out_idx] = current
+                out_idx = out_idx + 1
+                current = ""
+            }
+            i = i + 1
+            continue
+        }
+        current = current + string_char(text[i])
+        i = i + 1
+    }
+    if len(current) > 0 {
+        lines[out_idx] = current
     }
     lines
 }
@@ -692,16 +721,16 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
         return []string{cap: 0}
     }
     if gpt_large_pretrain_find_substring(manifest_path, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(manifest_path, ".gz") < 0 {
-        []string refs = []string{cap: 0}
-        refs.push(manifest_path)
+        []string refs = []string{cap: 1}
+        refs[0] = manifest_path
         return refs
     }
 
-    []string refs = []string{cap: 0}
     string manifest_text = runtime_read_text_file(manifest_path)
+    int ref_count = 0
     string train_ref = gpt_large_pretrain_json_string_value(manifest_text, "train", "")
     if trim(train_ref) != "" && trim(train_ref) != "null" {
-        refs.push(train_ref)
+        ref_count = ref_count + 1
     }
     string line = ""
     int i = 0
@@ -712,9 +741,9 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
                 if ref[0] != 35 {
                     string file_path = gpt_large_pretrain_json_string_value(ref, "file_path", "")
                     if trim(file_path) != "" {
-                        refs.push(file_path)
+                        ref_count = ref_count + 1
                     } else if gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
-                        refs.push(ref)
+                        ref_count = ref_count + 1
                     }
                 }
             }
@@ -730,9 +759,54 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
             if ref[0] != 35 {
                 string file_path = gpt_large_pretrain_json_string_value(ref, "file_path", "")
                 if trim(file_path) != "" {
-                    refs.push(file_path)
+                    ref_count = ref_count + 1
                 } else if gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
-                    refs.push(ref)
+                    ref_count = ref_count + 1
+                }
+            }
+        }
+    }
+    if ref_count <= 0 {
+        return []string{cap: 0}
+    }
+    []string refs = []string{cap: ref_count}
+    int ref_idx = 0
+    if trim(train_ref) != "" && trim(train_ref) != "null" {
+        refs[ref_idx] = train_ref
+        ref_idx = ref_idx + 1
+    }
+    line = ""
+    i = 0
+    while i < len(manifest_text) {
+        if manifest_text[i] == 10 || manifest_text[i] == 13 {
+            string ref = trim(line)
+            if ref != "" {
+                if ref[0] != 35 {
+                    string file_path = gpt_large_pretrain_json_string_value(ref, "file_path", "")
+                    if trim(file_path) != "" {
+                        refs[ref_idx] = file_path
+                        ref_idx = ref_idx + 1
+                    } else if gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
+                        refs[ref_idx] = ref
+                        ref_idx = ref_idx + 1
+                    }
+                }
+            }
+            line = ""
+        } else {
+            line = line + string_char(manifest_text[i])
+        }
+        i = i + 1
+    }
+    if len(trim(line)) > 0 {
+        string ref = trim(line)
+        if ref != "" {
+            if ref[0] != 35 {
+                string file_path = gpt_large_pretrain_json_string_value(ref, "file_path", "")
+                if trim(file_path) != "" {
+                    refs[ref_idx] = file_path
+                } else if gpt_large_pretrain_find_substring(ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(ref, ".gz") < 0 {
+                    refs[ref_idx] = ref
                 }
             }
         }
@@ -938,22 +1012,38 @@ func gpt_large_pretrain_checkpoint_dir(gpt_large_pretrain_state state) string {
 }
 
 func gpt_large_pretrain_checkpoint_params(gpt_large_pretrain_state state) []tensor {
-    []tensor params = []tensor{cap: 0}
-    params.push(state.training.token_embedding)
-    params.push(state.training.lm_head_weight)
-    params.push(state.training.lm_head_bias)
+    int layer_count = len(state.training.backbone.layers)
+    int param_count = 3 + layer_count * 10
+    []tensor params = []tensor{cap: param_count}
+    int idx = 0
+    params[idx] = state.training.token_embedding
+    idx = idx + 1
+    params[idx] = state.training.lm_head_weight
+    idx = idx + 1
+    params[idx] = state.training.lm_head_bias
+    idx = idx + 1
     int i = 0
-    while i < len(state.training.backbone.layers) {
-        params.push(state.training.backbone.layers[i].w_q)
-        params.push(state.training.backbone.layers[i].w_k)
-        params.push(state.training.backbone.layers[i].w_v)
-        params.push(state.training.backbone.layers[i].w_o)
-        params.push(state.training.backbone.layers[i].w_ff1)
-        params.push(state.training.backbone.layers[i].w_up)
-        params.push(state.training.backbone.layers[i].w_ff2)
-        params.push(state.training.backbone.layers[i].b_ff1)
-        params.push(state.training.backbone.layers[i].b_up)
-        params.push(state.training.backbone.layers[i].b_ff2)
+    while i < layer_count {
+        params[idx] = state.training.backbone.layers[i].w_q
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_k
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_v
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_o
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_ff1
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_up
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].w_ff2
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].b_ff1
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].b_up
+        idx = idx + 1
+        params[idx] = state.training.backbone.layers[i].b_ff2
+        idx = idx + 1
         i = i + 1
     }
     params
