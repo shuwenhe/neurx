@@ -50,7 +50,7 @@ struct tokenizer_config {
 func default_llm_tokenizer_config() tokenizer_config {
     tokenizer_config cfg
     cfg.tokenizer_type = "bpe"
-    cfg.vocab_size = 32000          // Standard LLM vocab size
+    cfg.vocab_size = 16000          // NeurX fixed tokenizer size
     cfg.vocab_file = "./vocab.json"
     cfg.merges_file = "./merges.txt"
     cfg.model_file = ""

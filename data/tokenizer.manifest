@@ -1,7 +1,7 @@
 tokenizer_manifest_v1
-name=neurx-bpe-128k
+name=neurx-bpe-16k
 tokenizer_type=bpe
-vocab_size=128000
+vocab_size=16000
 vocab_file=/home/shuwen/shuwen/train/neurx/data/corpus/vocab.json
 merges_file=/home/shuwen/shuwen/train/neurx/data/corpus/merges.txt
 pad_token=<pad>
