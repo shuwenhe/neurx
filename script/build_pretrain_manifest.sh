@@ -29,7 +29,10 @@ if not shard_paths:
 shards = []
 total_documents = 0
 total_size_bytes = 0
-for path in shard_paths:
+total_shards = len(shard_paths)
+print(f"[pretrain-manifest] scanning {total_shards} shard files", file=sys.stderr)
+for index, path in enumerate(shard_paths, start=1):
+    print(f"[pretrain-manifest] shard {index}/{total_shards}: {path.name}", file=sys.stderr)
     num_documents = sum(1 for _ in path.open("r", encoding="utf-8", errors="replace"))
     size_bytes = path.stat().st_size
     total_documents += num_documents
@@ -41,6 +44,10 @@ for path in shard_paths:
             "num_documents": num_documents,
             "size_bytes": size_bytes,
         }
+    )
+    print(
+        f"[pretrain-manifest] shard {index}/{total_shards}: documents={num_documents} bytes={size_bytes}",
+        file=sys.stderr,
     )
 
 manifest = {
