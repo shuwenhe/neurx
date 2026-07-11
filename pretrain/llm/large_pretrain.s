@@ -11,7 +11,7 @@ use neurx.pretrain.distributed.{pretrain_ddp_state, pretrain_ddp_state_dict, pre
 use neurx.pretrain.optimizer.pretrain_adamw.{pretrain_optimizer_state, pretrain_optimizer_step_state, new_pretrain_optimizer_state, pretrain_optimizer_step, pretrain_optimizer_state_dict, pretrain_optimizer_load_state_dict}
 use neurx.pretrain.tokenizer.bpe.{bpe_split_state, bpe_tokenizer_state, bpe_tokenized_corpus_state, bpe_tokenized_corpus_from_documents, bpe_jsonl_records_to_documents, bpe_split_state_dict, bpe_split_load_state_dict, bpe_tokenizer_state_dict, bpe_tokenizer_load_state_dict, bpe_tokenized_corpus_state_dict, bpe_tokenized_corpus_load_state_dict}
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
-use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr, pretrain_config_state_dict, pretrain_config_load_state_dict}
+use neurx.pretrain.config.{pretrain_config, pretrain_config_state_dict, pretrain_config_load_state_dict}
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
@@ -871,26 +871,23 @@ func gpt_large_pretrain_valid_loader_from_corpus(bpe_tokenized_corpus_state corp
 }
 
 func new_gpt_large_pretrain_config() pretrain_config {
-    pretrain_config cfg = new_pretrain_config()
-    cfg = with_max_steps(cfg, 64)
-    cfg = with_lr(cfg, 0.00015)
     pretrain_config {
-        global_batch_size: cfg.global_batch_size,
+        global_batch_size: 256,
         micro_batch_size: 8,
         seq_len: 16,
-        max_steps: cfg.max_steps,
-        warmup_steps: cfg.warmup_steps,
-        lr: cfg.lr,
-        min_lr: cfg.min_lr,
-        weight_decay: cfg.weight_decay,
+        max_steps: 64,
+        warmup_steps: 128,
+        lr: 0.00015,
+        min_lr: 0.00003,
+        weight_decay: 0.1,
         log_interval: 8,
         eval_interval: 16,
         save_interval: 32,
-        bf16: cfg.bf16,
-        grad_checkpoint: cfg.grad_checkpoint,
+        bf16: true,
+        grad_checkpoint: true,
         optimizer: "adamw",
         scheduler: "cosine",
-        backend: cfg.backend,
+        backend: "cuda",
     }
 }
 
