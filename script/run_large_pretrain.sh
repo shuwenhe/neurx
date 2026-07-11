@@ -134,7 +134,7 @@ if [ -z "$S_COMPILER" ]; then
 fi
 
 # Check if incremental compilation is needed
-SOURCE_FILE="$NEURX_ROOT/script/minimal_train.s"
+SOURCE_FILE="$NEURX_ROOT/script/tiny_transformer_train.s"
 IR_OUTPUT="$BUILD_DIR/run_large_pretrain.ir"
 RUNNER_BIN_OUTPUT="$BUILD_DIR/run_large_pretrain.ir.runner.bin"
 
@@ -158,7 +158,7 @@ needs_recompile() {
 # Check if IR compilation is needed
 if needs_recompile "$SOURCE_FILE" "$IR_OUTPUT"; then
     START_TIME=$(date +%s)
-    "$S_COMPILER" "$NEURX_ROOT/script/minimal_train.s" "$BUILD_DIR/run_large_pretrain.ir" >/dev/null 2>&1
+    "$S_COMPILER" "$NEURX_ROOT/script/tiny_transformer_train.s" "$BUILD_DIR/run_large_pretrain.ir" >/dev/null 2>&1
     COMPILE_EXIT=$?
     END_TIME=$(date +%s)
     COMPILE_TIME=$((END_TIME - START_TIME))
