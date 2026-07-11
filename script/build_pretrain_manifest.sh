@@ -45,10 +45,6 @@ for index, path in enumerate(shard_paths, start=1):
             "size_bytes": size_bytes,
         }
     )
-    print(
-        f"[pretrain-manifest] shard {index}/{total_shards}: documents={num_documents} bytes={size_bytes}",
-        file=sys.stderr,
-    )
 
 manifest = {
     "dataset_name": "neurx-pretrain-wikipedia",
