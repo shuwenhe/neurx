@@ -58,7 +58,7 @@ struct bpe_cache_stats {
 
 func new_tokenizer_config() token_config {
     token_config {
-        vocab_size: 50257,
+        vocab_size: 16000,
         min_frequency: 2,
         add_eos_token: true,
         add_bos_token: true,
