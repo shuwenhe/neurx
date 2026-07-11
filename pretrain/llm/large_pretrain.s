@@ -133,6 +133,20 @@ func bool_to_int(bool value) int {
     0
 }
 
+func gpt_large_pretrain_shard_progress_text(int shard_token_cursor, int shard_total_tokens) string {
+    if shard_total_tokens <= 0 {
+        return "ShardProgress=0/0 (0.0%)"
+    }
+    float progress = shard_token_cursor * 1.0 / shard_total_tokens * 100.0
+    if progress < 0.0 {
+        progress = 0.0
+    }
+    if progress > 100.0 {
+        progress = 100.0
+    }
+    "ShardProgress=" + int_to_str(shard_token_cursor, 0) + "/" + int_to_str(shard_total_tokens, 0) + " (" + fmt_float(progress, 1) + "%)"
+}
+
 func gpt_large_pretrain_string_at([]string values, int idx) string {
     int i = idx
     if i < 0 {
@@ -2168,6 +2182,8 @@ func gpt_large_pretrain_log_step(
     float loss,
     float lr,
     string shard_path,
+    int shard_token_cursor,
+    int shard_total_tokens,
     int save_interval,
     int log_interval,
     int batch_tokens,
@@ -2186,9 +2202,11 @@ func gpt_large_pretrain_log_step(
             save_note = " | Saving checkpoint..."
         }
         string shard_name = gpt_large_pretrain_basename(shard_path)
+        string shard_progress = gpt_large_pretrain_shard_progress_text(shard_token_cursor, shard_total_tokens)
         println(
             "[Step " + int_to_str(step, 0) + "] " +
             "Shard=" + shard_name +
+            " | " + shard_progress +
             " | Loss=" + fmt_float(loss, 3) +
             " | LR=" + fmt_float(lr, 6) +
             " | BatchTokens=" + int_to_str(batch_tokens, 0) +
@@ -2224,6 +2242,8 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
         next.training.last_loss,
         current_lr,
         next.active_shard_path,
+        next.data.token_cursor,
+        next.active_shard_tokens,
         state.cfg.save_interval,
         state.cfg.log_interval,
         len(train_output.batch.input_ids),
