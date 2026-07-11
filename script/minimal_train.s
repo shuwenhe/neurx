@@ -3,14 +3,9 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
 
 func main() {
-    // 立即输出，确认程序开始执行
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
-    string startup_log_file = runtime_env_get("NEURX_STARTUP_LOG_FILE", "")
     if str_len(startup_marker_file) > 0 {
         runtime_run_command_output("echo 'started' > " + shell_escape(startup_marker_file))
-    }
-    if str_len(startup_log_file) > 0 {
-        runtime_run_command_output("printf '%s\\n' " + shell_escape("[STARTUP] training started") + " >> " + shell_escape(startup_log_file))
     }
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
@@ -36,11 +31,8 @@ func main() {
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
 
     if !runtime_file_exists(manifest_path) {
-        println("[ERROR] Manifest not found: " + manifest_path)
         return
     }
-    
-    println("[STARTUP] training initialized, loading shards...")
 
     string shard_list_text = ""
     if runtime_file_exists(shard_list_file) {
@@ -52,13 +44,10 @@ func main() {
     }
     
     int shard_count = count_non_empty_lines(shard_list_text)
-    
+
     if shard_count == 0 {
-        println("[ERROR] No shard files found in: " + shard_dir)
         return
     }
-
-    println("[STARTUP] ready to start training with " + int_to_str(shard_count) + " shards")
 
     int window = batch_size * seq_len
     if window < 1 {
@@ -90,8 +79,6 @@ func main() {
     int shard_index = 0
     int last_shard_no = 0
     string last_shard = ""
-    runtime_run_command_output("echo '[STATUS] Entering main shard processing loop' >&2")
-    emit_heartbeat("loop-enter shard_count=" + int_to_str(shard_count) + " max_steps=" + int_to_str(max_steps) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen))
     while shard_index < shard_count && step < max_steps {
         string shard_path = shard_path_at(shard_list_text, shard_index)
         last_shard = shard_path
@@ -99,18 +86,13 @@ func main() {
         string shard_slice = int_to_str(last_shard_no) + "/" + int_to_str(shard_count)
         string shard_name_start = extract_filename(shard_path)
 
-        println("")
-        println("[" + shard_slice + "] Processing: " + shard_name_start)
-        runtime_run_command_output("echo '[PROGRESS] Slice " + shard_slice + " processing: " + shard_name_start + " (step " + int_to_str(step) + "/" + int_to_str(max_steps) + ")' >&2")
-        emit_heartbeat("shard-start slice=" + shard_slice + " shard_name=" + shard_name_start)
-
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
             shard_index = shard_index + 1
             continue
         }
 
-        emit_heartbeat("shard-read slice=" + shard_slice + " path=" + shard_path)
+        println("[" + shard_slice + "] " + shard_name_start)
         int shard_docs = 0
         int shard_tokens = 0
         int next_line = 1
@@ -129,9 +111,8 @@ func main() {
             string chunk_text = runtime_run_command_output(chunk_cmd)
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
-                emit_heartbeat("chunk-empty slice=" + shard_slice + " chunk=" + int_to_str(chunk_count))
+                shard_done = true
             } else {
-                emit_heartbeat("chunk-loaded slice=" + shard_slice + " chunk=" + int_to_str(chunk_count))
                 int chunk_len = str_len(chunk_text)
                 int i = 0
                 int line_start = 0
@@ -176,13 +157,6 @@ func main() {
                                     step = step + 1
                                     last_loss = batch_loss / pair_count as float
                                     last_lr = lr
-                                    if step == 1 || (log_interval > 0 && mod_int(step, log_interval) == 0) {
-                                        string shard_name = extract_filename(shard_path)
-                                        string progress_msg = "[Step " + int_to_str(step) + "/" + int_to_str(max_steps) + "] Slice " + shard_slice + ": " + shard_name + " | docs=" + int_to_str(shard_docs) + " | loss=" + fmt_float(last_loss, 4)
-                                        emit_heartbeat("train-step slice=" + shard_slice + " shard_name=" + shard_name + " step=" + int_to_str(step) + "/" + int_to_str(max_steps) + " loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8))
-                                        runtime_run_command_output("echo " + shell_escape(progress_msg) + " >&2")
-                                        println(progress_msg)
-                                    }
                                     pair_count = 0
                                     batch_loss = 0.0
                                     grad_weight = 0.0
@@ -203,9 +177,6 @@ func main() {
                                 tokens_seen = tokens_seen + 1
                             }
                             shard_tokens = shard_tokens + text_len + 2
-                            if mod_int(shard_docs, 100) == 0 {
-                                runtime_run_command_output("echo " + shell_escape(shard_progress_line(shard_index + 1, shard_count, shard_path, shard_docs, shard_docs_target)) + " >&2")
-                            }
                             if fast_prefix_mode > 0 && shard_docs == 1 && step < max_steps && pair_count == 0 {
                                 pair_count = 1
                                 batch_loss = 0.0
@@ -225,19 +196,6 @@ func main() {
                                 step = step + 1
                                 last_loss = batch_loss / pair_count as float
                                 last_lr = lr2
-                                if step == 1 || (log_interval > 0 && mod_int(step, log_interval) == 0) {
-                                    string global_bar_2 = progress_bar(step, max_steps, 30)
-                                    string shard_bar_2 = progress_bar(shard_index + 1, shard_count, 20)
-                                    string shard_name_2 = extract_filename(shard_path)
-                                    string training_msg_2 = "[Training] step=" + int_to_str(step) + "/" + int_to_str(max_steps) + " " + global_bar_2 + " | slice=" + shard_slice + " | shard=" + shard_name_2 + " (docs: " + int_to_str(shard_docs) + "/" + int_to_str(shard_docs_target) + ") " + shard_bar_2 + " | loss=" + fmt_float(last_loss, 4) + " | lr=" + fmt_float(last_lr, 8) + " | total_docs=" + int_to_str(docs_seen) + " | total_tokens=" + int_to_str(tokens_seen) + " | shard_tokens=" + int_to_str(shard_tokens)
-                                    emit_heartbeat("train-step slice=" + shard_slice + " shard_name=" + shard_name_2 + " chunk=" + int_to_str(chunk_count) + " path=" + shard_path + " step=" + int_to_str(step) + "/" + int_to_str(max_steps) + " loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen))
-                                    runtime_run_command_output("echo " + shell_escape(training_msg_2) + " >&2")
-                                    println(training_msg_2)
-                                }
-                                pair_count = 0
-                                batch_loss = 0.0
-                                grad_weight = 0.0
-                                grad_bias = 0.0
                             }
                             if docs_seen >= max_docs {
                                 break
@@ -258,11 +216,7 @@ func main() {
             }
         }
 
-        println("")
         string shard_name_complete = extract_filename(shard_path)
-        println("[✓ Complete] Slice " + shard_slice + ": " + shard_name_complete + " | step=" + int_to_str(step) + "/" + int_to_str(max_steps))
-        runtime_run_command_output("echo '[PROGRESS] Slice " + shard_slice + " complete: " + shard_name_complete + " | step " + int_to_str(step) + "/" + int_to_str(max_steps) + "' >&2")
-        emit_heartbeat("shard-complete slice=" + shard_slice + " shard_name=" + shard_name_complete + " step=" + int_to_str(step) + "/" + int_to_str(max_steps))
         shard_index = shard_index + 1
     }
 
@@ -279,63 +233,19 @@ func main() {
         step = step + 1
         last_loss = batch_loss / pair_count as float
         last_lr = lr
-        string final_shard_name = extract_filename(last_shard)
-        runtime_run_command_output("echo '[TRAIN] ✓ FINAL FLUSH Step " + int_to_str(step) + ": loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8) + " shard=" + final_shard_name + " (" + last_shard + ")' >&2")
-        println("[Training] ✓ FINAL FLUSH shard=" + final_shard_name + " step=" + int_to_str(step) + "/" + int_to_str(max_steps) + " loss=" + fmt_float(last_loss, 4) + " lr=" + fmt_float(last_lr, 8))
-        println("[PROGRESS] final slice=" + int_to_str(last_shard_no) + "/" + int_to_str(shard_count) + " shard=" + final_shard_name + " step=" + int_to_str(step) + "/" + int_to_str(max_steps) + " loss=" + fmt_float(last_loss, 4))
     }
 
-    println("")
-    println("========================================")
-    println("Saving Checkpoints")
-    println("========================================")
-    
-    // Save final model checkpoint
     string final_model_path = output_dir + "/final_model.neurx"
     string best_model_path = output_dir + "/best_model.neurx"
     string latest_checkpoint_file = output_dir + "/latest_checkpoint.txt"
     string resume_state_file = output_dir + "/resume_state.json"
-    
-    // Create checkpoint metadata JSON
+
     string checkpoint_json = "{\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_slice\":" + int_to_str(last_shard_no) + ",\"last_shard\":\"" + last_shard + "\"}"
     runtime_run_command_output("echo '" + checkpoint_json + "' > '" + resume_state_file + "'")
-    println("✓ Resume state saved to: " + resume_state_file)
-    
-    // Save latest checkpoint path for resume
     runtime_run_command_output("echo '" + final_model_path + "' > '" + latest_checkpoint_file + "'")
-    println("✓ Latest checkpoint path saved to: " + latest_checkpoint_file)
-    
-    // Create symbolic link for best model if it's the first checkpoint
     if !runtime_file_exists(best_model_path) {
         runtime_run_command_output("ln -sf final_model.neurx '" + best_model_path + "'")
-        println("✓ Best model symlink created")
     }
-
-    println("")
-    println("Checkpoint fragments:")
-    println("  final model  : " + final_model_path)
-    println("  best model   : " + best_model_path)
-    println("  latest ptr   : " + latest_checkpoint_file)
-    println("  resume state : " + resume_state_file)
-
-    println("")
-    println("========================================")
-    println("Training Complete")
-    println("========================================")
-    println("Final step  : " + int_to_str(step))
-    println("Docs seen   : " + int_to_str(docs_seen))
-    println("Tokens seen : " + int_to_str(tokens_seen))
-    println("Last loss   : " + fmt_float(last_loss, 6))
-    println("Last slice  : " + int_to_str(last_shard_no) + "/" + int_to_str(shard_count))
-    println("Last shard  : " + last_shard)
-    println("Checkpoint  : " + final_model_path)
-    println("Resume file : " + resume_state_file)
-    println("========================================")
-    runtime_run_command_output("echo '[COMPLETE] Training finished - step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " loss=" + fmt_float(last_loss, 6) + " checkpoint=" + final_model_path + "' >&2")
-}
-
-func emit_heartbeat(string message) {
-    runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
 }
 
 func shard_progress_bar(int done, int total, int width) string {
