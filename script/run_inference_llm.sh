@@ -34,16 +34,18 @@ resolve_checkpoint() {
   fi
 
   if [[ -d "$candidate" ]]; then
-    local latest_file="$candidate/latest_checkpoint.txt"
-    if [[ -f "$latest_file" ]]; then
-      local latest_target
-      latest_target="$(tr -d '\r\n' < "$latest_file")"
-      latest_target="$(remap_checkpoint_path "$latest_target")"
-      if [[ -n "$latest_target" && -e "$latest_target" ]]; then
-        printf '%s\n' "$latest_target"
-        return 0
+    for latest_name in latest_checkpoint.txt latest_checkpoint_ref.txt; do
+      local latest_file="$candidate/$latest_name"
+      if [[ -f "$latest_file" ]]; then
+        local latest_target
+        latest_target="$(tr -d '\r\n' < "$latest_file")"
+        latest_target="$(remap_checkpoint_path "$latest_target")"
+        if [[ -n "$latest_target" && -e "$latest_target" ]]; then
+          printf '%s\n' "$latest_target"
+          return 0
+        fi
       fi
-    fi
+    done
 
     for fallback in \
       "$candidate/final_model.neurx" \
