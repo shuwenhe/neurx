@@ -92,15 +92,9 @@ infer: check-bash
 	cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain: check-bash
-	@echo "Running NeurX large-model pre-training on existing shard dataset"
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
-		echo "Training data root: $(PRETRAIN_DATA_ROOT)" && \
-		echo "  shard dir: $(PRETRAIN_SHARD_DIR)" && \
-		echo "  manifest : $(PRETRAIN_MANIFEST)" && \
 		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
-		echo "Resolved command:"; \
-		echo "  NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' NEURX_PRETRAIN_BACKEND=nccl DDP_BACKEND=nccl MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' bash script/run_large_pretrain.sh"; \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' \

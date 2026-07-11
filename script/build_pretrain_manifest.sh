@@ -57,5 +57,4 @@ manifest = {
 
 manifest_file.parent.mkdir(parents=True, exist_ok=True)
 manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-print(f"Generated pretrain manifest: {manifest_file}", file=sys.stderr)
 PY
