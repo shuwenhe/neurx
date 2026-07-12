@@ -114,8 +114,8 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
         agent_workspace_result r = agent_workspace_git_status()
         obs = r.observation
         ok = r.ok
-    } else if call.tool_name == "shell" {
-        agent_workspace_command_result r = agent_workspace_shell(call.input)
+    } else if call.tool_name == "s" {
+        agent_workspace_command_result r = agent_workspace_s(call.input)
         obs = r.observation
         ok = r.ok
     } else {

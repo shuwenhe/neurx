@@ -24,6 +24,7 @@ export S_RUNNER_BIN="${S_RUNNER_BIN:-$NEURX_ROOT/artifacts/build/s_runner/s_ir_r
 # pretraining backend actually reads.
 export MODEL_SIZE="${MODEL_SIZE:-llm}"
 export NEURX_PRETRAIN_MANIFEST="${NEURX_PRETRAIN_MANIFEST:-$NEURX_ROOT/dataset/pretrain/manifest.json}"
+export NEURX_PRETRAIN_SHARD_DIR="${NEURX_PRETRAIN_SHARD_DIR:-${NEURX_PRETRAIN_DATA_DIR:-$NEURX_ROOT/dataset/pretrain/shard}}"
 export NEURX_PRETRAIN_OUTPUT_DIR="${NEURX_PRETRAIN_OUTPUT_DIR:-${NEURX_PRETRAIN_OUTPUT:-$NEURX_ROOT/checkpoint/NeurX-1.3}}"
 export NEURX_PRETRAIN_MICRO_BATCH="${NEURX_PRETRAIN_MICRO_BATCH:-${NEURX_PRETRAIN_BATCH_SIZE:-${NEURX_BATCH_SIZE:-32}}}"
 export NEURX_PRETRAIN_SEQ_LEN="${NEURX_PRETRAIN_SEQ_LEN:-${NEURX_SEQ_LENGTH:-2048}}"
@@ -76,11 +77,11 @@ mkdir -p "$LOG_DIR"
 
 SHARD_LIST_FILE="$BUILD_DIR/shard_list.sample.txt"
 ALL_SHARDS_FILE="$BUILD_DIR/shard_list.all.txt"
-find "$NEURX_ROOT/dataset/pretrain/shard" -maxdepth 1 -name 'shard_*.jsonl' -print | sort > "$ALL_SHARDS_FILE"
+find "$NEURX_PRETRAIN_SHARD_DIR" -maxdepth 1 -name 'shard_*.jsonl' -print | sort > "$ALL_SHARDS_FILE"
 TOTAL_SHARDS=$(wc -l < "$ALL_SHARDS_FILE" 2>/dev/null || echo 0)
 
 if [ "$TOTAL_SHARDS" -eq 0 ]; then
-    echo "[ERROR] No shard files found in $NEURX_ROOT/dataset/pretrain/shard"
+    echo "[ERROR] No shard files found in $NEURX_PRETRAIN_SHARD_DIR"
     exit 1
 fi
 

@@ -119,7 +119,7 @@ func agent_skill_steps_for_feedback(agent_skill_feedback_state feedback, string 
         steps = agent_skill_append_unique(steps, "decode")
         return steps
     }
-    if feedback.task == "shell" || action == "shell" || action == "run_shell" || action == "bash" {
+    if feedback.task == "s" || action == "s" || action == "run_shell" || action == "bash" {
         steps = agent_skill_append_unique(steps, "run_shell")
         steps = agent_skill_append_unique(steps, "capture_output")
         return steps

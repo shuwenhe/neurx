@@ -795,8 +795,8 @@ function create_builtin_code_executor_tool() -> tuple<ToolDefinition, ToolExecut
                 },
                 "language": PropertyDefinition{
                     type="string",
-                    description="Programming language (python, javascript, shell, sql)",
-                    enum=["python", "javascript", "shell", "sql"],
+                    description="Programming language (python, javascript, s, sql)",
+                    enum=["python", "javascript", "s", "sql"],
                     default="python"
                 }
             },

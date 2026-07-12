@@ -19,7 +19,7 @@ struct CodeInterpreterConfig {
     max_file_size_mb: int = 10                  // 生成的文件最大大小
     
     // 支持的语言
-    supported_languages: list<string> = ["python", "javascript", "shell", "sql"]
+    supported_languages: list<string> = ["python", "javascript", "s", "sql"]
     default_language: string = "python"
     
     // 安全配置
@@ -78,7 +78,7 @@ struct ImageData {
 }
 
 struct CodeBlock {
-    language: string                           // 代码语言 (python/javascript/shell/sql)
+    language: string                           // 代码语言 (python/javascript/s/sql)
     code: string                               // 代码内容
     filename: string?                          // 可选的文件名 (用于保存)
 }
@@ -94,7 +94,7 @@ class SandboxEnvironment {
     // 语言运行时
     python_runtime: PythonRuntime?
     javascript_runtime: JavaScriptRuntime?
-    shell_runtime: ShellRuntime?
+    s_runtime: ShellRuntime?
     sql_runtime: SQLRuntime?
     
     init(config: CodeInterpreterConfig) {
@@ -125,8 +125,8 @@ class SandboxEnvironment {
         if "javascript" in config.supported_languages {
             this.javascript_runtime = new JavaScriptRuntime()
         }
-        if "shell" in config.supported_languages {
-            this.shell_runtime = new ShellRuntime(allow_network=config.allow_network_access)
+        if "s" in config.supported_languages {
+            this.s_runtime = new ShellRuntime(allow_network=config.allow_network_access)
         }
         if "sql" in config.supported_languages {
             this.sql_runtime = new SQLRuntime(db_path=this.working_dir + "sandbox.db")
@@ -161,9 +161,9 @@ class SandboxEnvironment {
                 assert this.javascript_runtime != null, "JavaScript runtime not initialized"
                 result = this.javascript_runtime!.execute(code_block.code)
             }
-            "shell" | "bash" | "sh" => {
-                assert this.shell_runtime != null, "Shell runtime not initialized"
-                result = this.shell_runtime!.execute(code_block.code)
+            "s" | "bash" | "sh" => {
+                assert this.s_runtime != null, "S runtime not initialized"
+                result = this.s_runtime!.execute(code_block.code)
             }
             "sql" => {
                 assert this.sql_runtime != null, "SQL runtime not initialized"
@@ -639,7 +639,7 @@ class ShellRuntime {
                 ["bash", "-c", command],
                 capture_output=true,
                 text=true,
-                timeout=30,  // Short timeout for shell commands
+                timeout=30,  // Short timeout for command execution
                 shell=false
             )
             
@@ -1109,8 +1109,12 @@ class CodeInterpreter {
         return this.execute_code(code, "python")
     }
 
+    run_s(command: string) -> FormattedOutput {
+        return this.execute_code(command, "s")
+    }
+
     run_shell(command: string) -> FormattedOutput {
-        return this.execute_code(command, "shell")
+        return this.run_s(command)
     }
 
     run_sql(query: string) -> FormattedOutput {
@@ -1188,9 +1192,9 @@ print(f"The answer is: {{y}}")
     
     // Test 3: Shell execution (safe commands)
     print("  ✓ Test 3: Safe Shell Command Execution")
-    result3 = ci.run_shell("echo 'Hello from shell'")
-    assert result3.raw.success, "Shell exec failed"
-    assert "Hello from shell" in result3.raw.output, "Unexpected shell output"
+    result3 = ci.run_s("echo 'Hello from s'")
+    assert result3.raw.success, "S exec failed"
+    assert "Hello from s" in result3.raw.output, "Unexpected s output"
     
     // Test 4: SQL execution
     print("  ✓ Test 4: SQL Execution")

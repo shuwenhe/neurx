@@ -277,9 +277,11 @@ func agent_action_detect_tool(string raw, string fallback) string {
     }
     if agent_action_text_contains(text, "\"action\":\"write_file\"") || agent_action_text_contains(text, "\"tool\":\"write_file\"") {
         return "write"
-    }    if agent_action_text_contains(text, ""action":"create_file"") || agent_action_text_contains(text, ""tool":"create_file"") {
+    }
+    if agent_action_text_contains(text, "\"action\":\"create_file\"") || agent_action_text_contains(text, "\"tool\":\"create_file\"") {
         return "write"
-    }    if agent_action_text_contains(text, "\"action\":\"patch\"") || agent_action_text_contains(text, "\"tool\":\"patch\"") {
+    }
+    if agent_action_text_contains(text, "\"action\":\"patch\"") || agent_action_text_contains(text, "\"tool\":\"patch\"") {
         return "apply_patch"
     }
     if agent_action_text_contains(text, "\"action\":\"search_files\"") || agent_action_text_contains(text, "\"tool\":\"search_files\"") {
@@ -297,8 +299,11 @@ func agent_action_detect_tool(string raw, string fallback) string {
     if agent_action_text_contains(text, "\"action\":\"run_test\"") || agent_action_text_contains(text, "\"tool\":\"run_test\"") {
         return "test"
     }
+    if agent_action_text_contains(text, "\"action\":\"s\"") || agent_action_text_contains(text, "\"tool\":\"s\"") {
+        return "s"
+    }
     if agent_action_text_contains(text, "\"action\":\"shell\"") || agent_action_text_contains(text, "\"tool\":\"shell\"") {
-        return "shell"
+        return "s"
     }
     if agent_action_text_contains(text, "tool=show_pending_changes") || agent_action_text_contains(text, "\"tool\":\"show_pending_changes\"") {
         return "show_pending_changes"
@@ -308,9 +313,11 @@ func agent_action_detect_tool(string raw, string fallback) string {
     }
     if agent_action_text_contains(text, "tool=write_file") || agent_action_text_contains(text, "\"tool\":\"write_file\"") {
         return "write"
-    }    if agent_action_text_contains(text, "tool=create_file") || agent_action_text_contains(text, ""tool":"create_file"") {
+    }
+    if agent_action_text_contains(text, "tool=create_file") || agent_action_text_contains(text, "\"tool\":\"create_file\"") {
         return "write"
-    }    if agent_action_text_contains(text, "tool=mkdir") || agent_action_text_contains(text, "\"tool\":\"mkdir\"") || agent_action_text_contains(text, "tool=create_directory") || agent_action_text_contains(text, "\"tool\":\"create_directory\"") {
+    }
+    if agent_action_text_contains(text, "tool=mkdir") || agent_action_text_contains(text, "\"tool\":\"mkdir\"") || agent_action_text_contains(text, "tool=create_directory") || agent_action_text_contains(text, "\"tool\":\"create_directory\"") {
         return "mkdir"
     }
     if agent_action_text_contains(text, "tool=delete_path") || agent_action_text_contains(text, "\"tool\":\"delete_path\"") {

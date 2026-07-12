@@ -127,8 +127,8 @@ func agent_model_route_normalize(string raw) string {
     if raw == "review" || raw == "audit" || raw == "check" {
         return "review"
     }
-    if raw == "shell" || raw == "bash" || raw == "run_command" || raw == "exec" || raw == "cmd" || raw == "run_shell" {
-        return "shell"
+    if raw == "s" || raw == "shell" || raw == "bash" || raw == "run_command" || raw == "exec" || raw == "cmd" || raw == "run_shell" {
+        return "s"
     }
     if raw == "apply_unified_diff" || raw == "unified_diff" || raw == "diff" || raw == "udiff" {
         return "apply_unified_diff"
@@ -176,7 +176,7 @@ func agent_model_route_build_prompt(string goal, string task, string input) stri
     prompt = prompt + "  search      - find files, symbols, or text in the codebase (`search_files`)\n"
     prompt = prompt + "  build       - compile or build the project (`run_build`)\n"
     prompt = prompt + "  test        - run tests (`run_test`)\n"
-    prompt = prompt + "  shell       - run an arbitrary bash command\n"
+    prompt = prompt + "  s           - run an arbitrary command via the S toolchain\n"
     prompt = prompt + "  infer       - use model reasoning or generation\n"
     prompt = prompt + "  code        - implement a feature or fix a bug\n"
     prompt = prompt + "  apply_unified_diff - apply a unified diff patch\n"
@@ -319,7 +319,7 @@ func agent_model_tool_call_build_prompt(agent_tool_registry_state tools, agent_m
     prompt = prompt + "\nAVAILABLE TOOLS:\n" + tools_list + "\n"
     prompt = prompt + "\nRespond with EXACTLY ONE tool call object and nothing else.\n"
     prompt = prompt + "Use this JSON-like shape:\n"
-    prompt = prompt + "{\"action\":\"read_file|write_file|patch|search_files|mkdir|delete_path|run_build|run_test|shell|infer|code|review|repo|sql|git_status|git_diff|git_log|git_commit|subagent|general\",\"path\":\"relative/path\",\"query\":\"text\",\"command\":\"bash command\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false}\n"
+    prompt = prompt + "{\"action\":\"read_file|write_file|patch|search_files|mkdir|delete_path|run_build|run_test|s|infer|code|review|repo|sql|git_status|git_diff|git_log|git_commit|subagent|general\",\"path\":\"relative/path\",\"query\":\"text\",\"command\":\"command\",\"old_text\":\"exact old text\",\"new_text\":\"replacement text\",\"replace_all\":false}\n"
     prompt = prompt + "Rules:\n"
     prompt = prompt + "- Use action=read_file to inspect a specific file\n"
     prompt = prompt + "- Use action=search_files to search by text or filename\n"
@@ -377,7 +377,7 @@ func agent_model_plan_build_prompt(string goal, string route, string analysis, s
     prompt = prompt + "  delete           - delete a file\n"
     prompt = prompt + "  build            - compile or build the project\n"
     prompt = prompt + "  test             - run tests\n"
-    prompt = prompt + "  shell            - run any bash command (install, lint, format, etc.)\n"
+    prompt = prompt + "  s                - run any command (install, lint, format, etc.)\n"
     prompt = prompt + "  review           - review or audit code\n"
     prompt = prompt + "  subagent         - delegate a sub-task to a parallel sub-agent\n"
     prompt = prompt + "\nRespond with ONLY this line (no explanation):\n"
@@ -412,7 +412,7 @@ func agent_model_code_error_context(agent_memory_state memory) string {
     string errors = ""
     agent_memory_lookup_result build_err = agent_memory_lookup_long(memory, "last_build")
     if build_err.found && build_err.value != "" {
-        bool is_failure = agent_model_route_line_starts_with(lower(build_err.value), "build:status=failed") || agent_model_route_line_starts_with(lower(build_err.value), "shell:status=failed")
+        bool is_failure = agent_model_route_line_starts_with(lower(build_err.value), "build:status=failed") || agent_model_route_line_starts_with(lower(build_err.value), "s:status=failed")
         if is_failure {
             errors = errors + "BUILD ERROR:\n" + build_err.value + "\n"
         }
@@ -420,17 +420,17 @@ func agent_model_code_error_context(agent_memory_state memory) string {
     }
     agent_memory_lookup_result test_err = agent_memory_lookup_long(memory, "last_test")
     if test_err.found && test_err.value != "" {
-        bool is_failure = agent_model_route_line_starts_with(lower(test_err.value), "test:status=failed") || agent_model_route_line_starts_with(lower(test_err.value), "shell:status=failed")
+        bool is_failure = agent_model_route_line_starts_with(lower(test_err.value), "test:status=failed") || agent_model_route_line_starts_with(lower(test_err.value), "s:status=failed")
         if is_failure {
             errors = errors + "TEST ERROR:\n" + test_err.value + "\n"
         }
         memory = test_err.state
     }
-    agent_memory_lookup_result shell_err = agent_memory_lookup_long(memory, "last_shell")
-    if shell_err.found && shell_err.value != "" {
-        bool is_failure = agent_model_route_line_starts_with(lower(shell_err.value), "shell:status=failed")
+    agent_memory_lookup_result s_err = agent_memory_lookup_long(memory, "last_s")
+    if s_err.found && s_err.value != "" {
+        bool is_failure = agent_model_route_line_starts_with(lower(s_err.value), "s:status=failed")
         if is_failure {
-            errors = errors + "SHELL ERROR:\n" + shell_err.value + "\n"
+            errors = errors + "S ERROR:\n" + s_err.value + "\n"
         }
     }
     errors
@@ -596,10 +596,10 @@ func agent_model_verify(agent_memory_state memory, string goal, string route, st
         evidence = evidence + "last_test: " + agent_model_clip(test_result.value, 600) + "\n"
         memory = test_result.state
     }
-    agent_memory_lookup_result shell_result = agent_memory_lookup_long(memory, "last_shell")
-    if shell_result.found && shell_result.value != "" {
-        evidence = evidence + "last_shell: " + agent_model_clip(shell_result.value, 600) + "\n"
-        memory = shell_result.state
+    agent_memory_lookup_result s_result = agent_memory_lookup_long(memory, "last_s")
+    if s_result.found && s_result.value != "" {
+        evidence = evidence + "last_s: " + agent_model_clip(s_result.value, 600) + "\n"
+        memory = s_result.state
     }
     agent_memory_lookup_result git_diff_result = agent_memory_lookup_long(memory, "last_git_diff")
     if git_diff_result.found && git_diff_result.value != "" {
