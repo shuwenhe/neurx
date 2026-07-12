@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  verification script : " + check_path("script/run_end_to_end_verification.sh"))
+    println("  verification script : " + check_path("script/run_end_to_end_verification.s"))
     println("  training src        : " + check_path("train/training_orchestrator.s"))
     println("  tests src           : " + check_path("tests/test_suite_complete.s"))
     println("")
