@@ -32,7 +32,7 @@ train-large: check-bash
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
 	export NEURX_LOSS_SCALE="$${NEURX_LOSS_SCALE:-1.0}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	if [ $$STATUS -eq 0 ]; then \
 		echo "✅ Large model training completed successfully!"; \
@@ -59,7 +59,7 @@ train-large-watch: check-bash
 	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-2}"; \
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/train_large_watch_pid.txt; \
 	sleep 0.5; \
@@ -86,7 +86,7 @@ train-xlarge: check-bash
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-2}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
 	export NEURX_LOSS_SCALE="$${NEURX_LOSS_SCALE:-65536.0}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	if [ $$STATUS -eq 0 ]; then \
 		echo "✅ XLarge model training completed!"; \
@@ -113,7 +113,7 @@ train-xlarge-watch: check-bash
 	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-8}"; \
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-2}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/train_xlarge_watch_pid.txt; \
 	sleep 0.5; \
@@ -139,7 +139,7 @@ train-tensor: check-bash
 	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-8}"; \
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-1}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -154,7 +154,7 @@ train-tensor-watch: check-bash
 	export NEURX_WORLD_SIZE="$${NEURX_WORLD_SIZE:-8}"; \
 	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-8}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/train_tensor_watch_pid.txt; \
 	sleep 0.5; \
@@ -180,7 +180,7 @@ train-pipeline: check-bash
 	export NEURX_TENSOR_PARALLEL_SIZE="$${NEURX_TENSOR_PARALLEL_SIZE:-2}"; \
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-4}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -191,7 +191,7 @@ train-pipeline-watch: check-bash
 	LOG_FILE="/tmp/neurx_pipeline_train.log" && \
 	export NEURX_WORLD_SIZE="$${NEURX_WORLD_SIZE:-16}"; \
 	export NEURX_PIPELINE_PARALLEL_SIZE="$${NEURX_PIPELINE_PARALLEL_SIZE:-4}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/train_pipeline_watch_pid.txt; \
 	sleep 0.5; \
@@ -214,7 +214,7 @@ train-dist: check-bash
 	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-32}"; \
 	export NEURX_SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-4096}"; \
 	export NEURX_MIXED_PRECISION_MODE="$${NEURX_MIXED_PRECISION_MODE:-bf16}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -224,7 +224,7 @@ train-dist-watch: check-bash
 	mkdir -p .run && \
 	LOG_FILE="/tmp/neurx_dist_train.log" && \
 	export NEURX_WORLD_SIZE="$${NEURX_WORLD_SIZE:-32}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/train_dist_watch_pid.txt; \
 	tail --pid=$$TRAIN_PID -F "$$LOG_FILE"; \
@@ -247,7 +247,7 @@ infer-batch: check-bash
 	export NEURX_TEMPERATURE="$${NEURX_TEMPERATURE:-0.7}"; \
 	export NEURX_TOP_K="$${NEURX_TOP_K:-40}"; \
 	export NEURX_TOP_P="$${NEURX_TOP_P:-0.9}"; \
-	bash script/run_full_inference.sh 2>&1; \
+	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	if [ $$STATUS -eq 0 ]; then \
 		echo "✅ Batch inference completed! Output: artifacts/inference_output/"; \
@@ -262,7 +262,7 @@ infer-batch-watch: check-bash
 	LOG_FILE="/tmp/neurx_infer_batch.log" && \
 	export NEURX_INFER_MODE="batch"; \
 	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-32}"; \
-	bash script/run_full_inference.sh 2>&1 | tee "$$LOG_FILE"; \
+	$(MAKE) run-full-inference-s 2>&1 | tee "$$LOG_FILE"; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -275,7 +275,7 @@ infer-stream: check-bash
 	export NEURX_STREAM_CHUNK_SIZE="$${NEURX_STREAM_CHUNK_SIZE:-32}"; \
 	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-1}"; \
 	export NEURX_TEMPERATURE="$${NEURX_TEMPERATURE:-0.7}"; \
-	bash script/run_full_inference.sh 2>&1; \
+	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -292,7 +292,7 @@ infer-serving: check-bash
 	echo "📝 API endpoints:"; \
 	echo "   POST /generate - Generate text"; \
 	echo "   GET /health - Health check"; \
-	bash script/run_full_inference.sh 2>&1; \
+	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -312,7 +312,7 @@ finetune: check-bash
 	export NEURX_LORA_RANK="$${NEURX_LORA_RANK:-8}"; \
 	export NEURX_LORA_ALPHA="$${NEURX_LORA_ALPHA:-16}"; \
 	export NEURX_CHECKPOINT_PATH="$${NEURX_CHECKPOINT_PATH:-artifacts/checkpoints/llm_training/}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -323,7 +323,7 @@ finetune-watch: check-bash
 	LOG_FILE="/tmp/neurx_finetune.log" && \
 	export NEURX_FINETUNE_MODE="true"; \
 	export NEURX_TOTAL_STEPS="$${NEURX_TOTAL_STEPS:-1000}"; \
-	bash script/run_llm_training_with_compiler.sh 2>&1 | tee "$$LOG_FILE" & \
+	$(MAKE) run-large-pretrain-s 2>&1 | tee "$$LOG_FILE" & \
 	TRAIN_PID=$$!; \
 	echo "$$TRAIN_PID" > .run/finetune_watch_pid.txt; \
 	tail --pid=$$TRAIN_PID -F "$$LOG_FILE"; \
@@ -341,7 +341,7 @@ eval: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 	export NEURX_EVAL_MODE="true"; \
 	export NEURX_CHECKPOINT_PATH="$${NEURX_CHECKPOINT_PATH:-artifacts/checkpoints/llm_training/}"; \
-	bash script/run_full_inference.sh 2>&1; \
+	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	echo "✅ Evaluation completed. Results: artifacts/eval_results/"; \
 	exit $$STATUS
@@ -351,7 +351,7 @@ eval-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 	LOG_FILE="/tmp/neurx_eval.log" && \
 	export NEURX_EVAL_MODE="true"; \
-	bash script/run_full_inference.sh 2>&1 | tee "$$LOG_FILE"; \
+	$(MAKE) run-full-inference-s 2>&1 | tee "$$LOG_FILE"; \
 	STATUS=$$?; \
 	exit $$STATUS
 
@@ -364,7 +364,7 @@ benchmark: check-bash
 	export NEURX_BATCH_SIZE="$${NEURX_BATCH_SIZE:-32}"; \
 	export NEURX_SEQ_LENGTH="$${NEURX_SEQ_LENGTH:-2048}"; \
 	echo "🚀 Benchmarking started..."; \
-	bash script/run_llm_training_with_compiler.sh 2>&1; \
+	$(MAKE) run-large-pretrain-s 2>&1; \
 	STATUS=$$?; \
 	echo "✅ Benchmark completed. Report: artifacts/benchmark_report/"; \
 	exit $$STATUS
