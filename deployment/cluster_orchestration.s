@@ -477,7 +477,7 @@ func cluster_generate_training_startup_lines(cluster_orchestration_state state, 
     lines.push("OUTPUT_DIR=" + spec.output_dir)
     lines.push("DEPLOYMENT_DIR=" + state.deployment_dir)
     lines.push("NODE_MANIFEST=" + cluster_node_manifest_path())
-    lines.push("LAUNCH_PLAN=" + state.deployment_dir + "/launch_plan.sh")
+    lines.push("LAUNCH_PLAN=" + state.deployment_dir + "/launch_plan.s")
     lines.push("SUMMARY_FILE=" + state.deployment_dir + "/cluster_summary.txt")
     lines.push("NEURX_PRETRAIN_OUTPUT_DIR=" + pretrain_output_dir)
     lines.push("NEURX_PRETRAIN_MANIFEST=" + pretrain_manifest)
@@ -645,8 +645,8 @@ func cluster_write_deployment_bundle(cluster_orchestration_state state, cluster_
 
 func cluster_write_launch_plan(cluster_orchestration_state state, cluster_deployment_spec spec) cluster_orchestration_state {
     cluster_orchestration_state next = state
-    string launch_path = next.deployment_dir + "/launch_plan.sh"
-    string launch_plan = "#!/bin/bash\nset -euo pipefail\nROOT_DIR=\"$(cd \"$(dirname \"$0\")/..\" && pwd)\"\ncd \"$ROOT_DIR\"\nsource \"" + next.deployment_dir + "/training_startup.env\"\nexport NEURX_PRETRAIN_USE_LAUNCH_PLAN=0\nexport NEURX_CLUSTER_DISABLE=1\n" + cluster_training_launch_command(spec) + "\n"
+    string launch_path = next.deployment_dir + "/launch_plan.s"
+    string launch_plan = "package main\n\nuse neurx.runtime.io.{runtime_run_command, runtime_shell_escape}\nuse std.io.println\n\nfunc main() int {\n    string startup_env = \"" + next.deployment_dir + "/training_startup.env\"\n    println(\"NeurX cluster launch plan (S Lang)\")\n    println(\"\")\n    println(\"Startup env : \" + startup_env)\n    println(\"Target      : make run-training-s\")\n    println(\"\")\n\n    string cmd = \". \" + runtime_shell_escape(startup_env) + \" && export NEURX_PRETRAIN_USE_LAUNCH_PLAN=0 NEURX_CLUSTER_DISABLE=1 && " + cluster_training_launch_command(spec) + "\"\n    if !runtime_run_command(cmd).ok {\n        return 1\n    }\n    0\n}\n"
     runtime_write_text_file(launch_path, launch_plan)
     next.last_summary = next.last_summary + "launch_plan=" + launch_path + "\n"
     next

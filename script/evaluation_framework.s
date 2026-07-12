@@ -209,7 +209,7 @@ func (framework *EvaluationFramework) evaluate_accuracy(predictions []string, re
 func (framework *EvaluationFramework) evaluate_f1(predictions []string, references []string) float64 {
     tp := 0.0
     fp := 0.0
-    fn := 0.0
+    false_negatives := 0.0
     
     for i, pred := range predictions {
         if pred == references[i] {
@@ -218,17 +218,17 @@ func (framework *EvaluationFramework) evaluate_f1(predictions []string, referenc
             if len(pred) > len(references[i]) {
                 fp += 1.0
             } else {
-                fn += 1.0
+                false_negatives += 1.0
             }
         }
     }
     
-    if tp+fp == 0 || tp+fn == 0 {
+    if tp+fp == 0 || tp+false_negatives == 0 {
         return 0.0
     }
     
     precision := tp / (tp + fp)
-    recall := tp / (tp + fn)
+    recall := tp / (tp + false_negatives)
     
     if precision+recall == 0 {
         return 0.0

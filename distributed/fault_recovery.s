@@ -421,8 +421,8 @@ func execute_recovery(
 func distributed_training_with_recovery(
     training_steps: int,
     checkpoint_interval: int,
-    model_forward: fn(vector): vector,
-    compute_loss_fn: fn(vector, vector): float,
+    model_forward: func(vector): vector,
+    compute_loss_func: func(vector, vector): float,
     inputs: vector,
     targets: vector,
     model_params: vector,
@@ -450,7 +450,7 @@ func distributed_training_with_recovery(
         // Forward pass
         var predictions: vector = model_forward(current_params)
         prev_loss = current_loss
-        current_loss = compute_loss_fn(predictions, targets)
+        current_loss = compute_loss_func(predictions, targets)
         
         // Backward pass
         var gradients: vector = backward_pass(current_loss)

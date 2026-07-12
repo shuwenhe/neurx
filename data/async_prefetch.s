@@ -551,7 +551,7 @@ func sleep_ms(int ms) void:
 struct thread_handle:
     int id
 
-func thread_handle(func fn, void* arg) thread_handle:
+func thread_handle(func callback, void* arg) thread_handle:
     return thread_handle{id: 0}
 
 func join_thread(thread_handle handle) void:
