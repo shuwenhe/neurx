@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  integration script : " + check_path("script/run_integration_tests.sh"))
+    println("  integration script : " + check_path("script/run_integration_tests.s"))
     println("  core modules       : " + check_path("distributed"))
     println("  checkpoints dir    : " + check_path("artifacts/checkpoints"))
     println("")

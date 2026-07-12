@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  build script : " + check_path("script/build-linux.sh"))
+    println("  build script : " + check_path("script/build-linux.s"))
     println("  cmake cache  : " + check_path("build/linux-Release/CMakeCache.txt"))
     println("  qt bundle    : " + check_path("build/linux-Release"))
     println("")

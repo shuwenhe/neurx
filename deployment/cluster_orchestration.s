@@ -350,7 +350,7 @@ func cluster_training_launch_command(cluster_deployment_spec spec) string {
     cmd = cmd + " NEURX_CLUSTER_MASTER_PORT=" + cluster_int_to_string(spec.master_port)
     cmd = cmd + " NEURX_CHECKPOINT_DIR=" + spec.checkpoint_dir
     cmd = cmd + " NEURX_TRAIN_OUTPUT_DIR=" + spec.output_dir
-    cmd = cmd + " bash script/run_gpt_large_pretrain.sh"
+    cmd = cmd + " make run-training-s"
     cmd
 }
 

@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  launch script : " + check_path("script/cluster_launch.sh"))
+    println("  launch script : " + check_path("script/cluster_launch.s"))
     println("  deployment dir : " + check_path("production_deployment"))
     println("  checkpoints   : " + check_path("artifacts/checkpoints"))
     println("")
