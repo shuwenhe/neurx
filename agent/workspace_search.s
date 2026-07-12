@@ -50,7 +50,7 @@ func agent_search_candidate_paths(string route) []string {
     paths.push("action/action_schema.s")
     paths.push("README.md")
     if route == "sql" {
-        paths.push("sql/neurx_init.sql")
+        paths.push("sql/neurx_init.s")
     }
     if route == "repo" || route == "code" {
         paths.push("app/README.md")

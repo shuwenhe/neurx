@@ -41,15 +41,33 @@ func main() int {
 
     println("")
     println("--- Generating Checkpoint Files ---")
-    string materialize_steps = runtime_env_get("NEURX_S_PRETRAIN_STEPS", step)
-    string materialize_warmup_steps = runtime_env_get("NEURX_S_PRETRAIN_WARMUP_STEPS", "12")
-    string materialize_corpus_path = runtime_env_get("NEURX_CORPUS_PATH", script_dir + "/data/corpus/train_corpus.txt")
+    string materializer = runtime_env_get("NEURX_MATERIALIZE_BIN", script_dir + "/artifacts/build/materialize_llm_checkpoint")
+    string materializer_source = script_dir + "/tools/materialize_llm_checkpoint.s"
+    string compiler = runtime_env_get("S_COMPILER", script_dir + "/../s/.local/bin/s")
+    if !runtime_run_command("test -x " + runtime_shell_escape(materializer)).ok {
+        _ = runtime_run_command("mkdir -p " + runtime_shell_escape(script_dir + "/artifacts/build"))
+        string materializer_ir = materializer + ".ir"
+        string compiler_cwd = runtime_env_get("S_COMPILER_EMIT_CWD", script_dir + "/../s")
+        string compile_cmd = "cd " + runtime_shell_escape(script_dir)
+        compile_cmd = compile_cmd + " && cd " + runtime_shell_escape(compiler_cwd)
+        compile_cmd = compile_cmd + " && " + runtime_shell_escape(compiler)
+        compile_cmd = compile_cmd + " " + runtime_shell_escape(materializer_source)
+        compile_cmd = compile_cmd + " " + runtime_shell_escape(materializer_ir)
+        compile_cmd = compile_cmd + " && " + runtime_shell_escape(compiler)
+        compile_cmd = compile_cmd + " --emit-bin " + runtime_shell_escape(materializer_ir)
+        compile_cmd = compile_cmd + " " + runtime_shell_escape(materializer)
+        if !runtime_run_command(compile_cmd).ok {
+            println("[ERROR] Failed to build S checkpoint materializer")
+            return 1
+        }
+    }
 
-    string cmd = "NEURX_OUTPUT_DIR=" + runtime_shell_escape(checkpoint_dir)
-    cmd = cmd + " NEURX_S_PRETRAIN_STEPS=" + runtime_shell_escape(materialize_steps)
-    cmd = cmd + " NEURX_S_PRETRAIN_WARMUP_STEPS=" + runtime_shell_escape(materialize_warmup_steps)
-    cmd = cmd + " NEURX_CORPUS_PATH=" + runtime_shell_escape(materialize_corpus_path)
-    cmd = cmd + " node " + runtime_shell_escape(script_dir + "/tools/materialize_llm_checkpoint.mjs")
+    string final_path = checkpoint_dir + "/final_model.neurx"
+    string best_path = checkpoint_dir + "/best_model.neurx"
+    string latest_path = checkpoint_dir + "/latest_checkpoint.txt"
+    string cmd = runtime_shell_escape(materializer) + " > " + runtime_shell_escape(final_path)
+    cmd = cmd + " && cp " + runtime_shell_escape(final_path) + " " + runtime_shell_escape(best_path)
+    cmd = cmd + " && printf '%s\\n' " + runtime_shell_escape(best_path) + " > " + runtime_shell_escape(latest_path)
     if !runtime_run_command(cmd).ok {
         return 1
     }
