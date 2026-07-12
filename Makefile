@@ -71,6 +71,8 @@ PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
 PRETRAIN_LOG_DIR := $(CURDIR_UNIX)/checkpoint/NeurX-1.3/logs
+PRETRAIN_ENTRY_SOURCE ?= $(CURDIR_UNIX)/pretrain/llm/large_pretrain.s
+PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.bin
 NEURX_SHARD_CMD ?= wikipedia
 
 
@@ -375,20 +377,24 @@ run-large-pretrain-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'script/run_large_pretrain.s' -o '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) '$(PRETRAIN_ENTRY_SOURCE)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir'
+	@echo "Building large pretrain executable..."
+	@cd '$(S_COMPILER_EMIT_CWD)' && \
+		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		'$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' '$(PRETRAIN_RUNNER_BIN)' 2>&1
 	@echo "Running large pretrain status entry..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		script -q /dev/null '$(PRETRAIN_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
+		$(S_COMPILER) 'script/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
 	@echo "Running pretrain manifest entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -396,7 +402,10 @@ build-pretrain-manifest-s: check-bash
 		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_REBUILD_MANIFEST='$(NEURX_PRETRAIN_REBUILD_MANIFEST)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
+		S_COMPILER='$(S_COMPILER)' \
+		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' \
+		'$(S_RUNNER_BIN)'
 
 run-train-compiled-s: check-bash
 	@echo "Building compiled train status entry..."

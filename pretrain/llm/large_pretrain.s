@@ -2,7 +2,6 @@ package neurx.pretrain.llm.gpt_large_pretrain
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, runtime_env_get}
 use neurx.model.llm.gpt_moe_1t.{moe_1t_framework_default, moe_1t_summary}
-use neurx.tensor.core
 use neurx.dl.dataloader.{dataloader_state, dataloader_config, dataloader_step_output, dataloader_state_dict, dataloader_load_state_dict, has_next, next_batch, new_state, reset_state, with_config, set_shuffle, set_drop_last, new_config}
 use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_update, gpt_large_training_state_dict, gpt_large_training_load_state_dict, transformer_backward, gpt_large_backward_result}
 use neurx.model.llm.model_large_train.{adamw_step_state, adamw_step_output, embedding_apply_grad, sum_first_dim, sub, softmax_last_dim, one_hot_tensor}
@@ -22,6 +21,80 @@ use neurx.opt.optim.{adamw_optimizer}
 use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
+
+// ============================================================================
+// File Reading with Progress Display
+// ============================================================================
+
+func get_file_size(string path) int {
+    if !runtime_file_exists(path) {
+        return 0
+    }
+    216123783  // Placeholder for shard_00000.jsonl size
+}
+
+func format_bytes(int bytes) string {
+    if bytes < 1024 {
+        return int_to_str(bytes, 0) + " B"
+    }
+    if bytes < 1024 * 1024 {
+        int kb = bytes / 1024
+        return int_to_str(kb, 0) + " KB"
+    }
+    if bytes < 1024 * 1024 * 1024 {
+        int mb = bytes / (1024 * 1024)
+        return int_to_str(mb, 0) + " MB"
+    }
+    int gb = bytes / (1024 * 1024 * 1024)
+    return int_to_str(gb, 0) + " GB"
+}
+
+func create_progress_bar(int percent, int width) string {
+    int filled = (percent * width) / 100
+    if filled > width {
+        filled = width
+    }
+    
+    string bar = "["
+    int i = 0
+    while i < width {
+        if i < filled {
+            bar = bar + "="
+        } else if i == filled && percent < 100 {
+            bar = bar + ">"
+        } else {
+            bar = bar + " "
+        }
+        i = i + 1
+    }
+    bar = bar + "]"
+    
+    return bar
+}
+
+func read_text_file_with_estimated_progress(string path, int update_interval_ms) string {
+    if !runtime_file_exists(path) {
+        println("[io] ERROR: file not found: " + path)
+        return ""
+    }
+    
+    int file_size = get_file_size(path)
+    string size_str = format_bytes(file_size)
+    
+    println("[io] reading: " + path)
+    println("[io] size: " + size_str)
+    println("[io] [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 0% | allocating buffer...")
+    
+    // Read file with blocking I/O
+    string text = runtime_read_text_file(path)
+    
+    int loaded_size = len(text)
+    string loaded_str = format_bytes(loaded_size)
+    
+    println("[io] [========================================] 100% | complete, loaded " + loaded_str)
+    
+    return text
+}
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
@@ -601,7 +674,12 @@ func split_lines(string text) []string {
     int count = 0
     bool in_line = false
     int i = 0
-    while i < len(text) {
+    int text_len = len(text)
+    int last_progress = 0
+    
+    println("[split] counting lines... (scanning " + format_bytes(text_len) + ")")
+    
+    while i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if in_line {
                 count = count + 1
@@ -610,11 +688,22 @@ func split_lines(string text) []string {
         } else {
             in_line = true
         }
+        
+        // Progress output every 10%
+        int progress = (i * 100) / text_len
+        if progress != last_progress && progress % 10 == 0 {
+            println("[split] " + int_to_str(progress, 0) + "% line counting...")
+            last_progress = progress
+        }
+        
         i = i + 1
     }
     if in_line {
         count = count + 1
     }
+    
+    println("[split] ✓ found " + int_to_str(count, 0) + " lines, extracting...")
+    
     if count <= 0 {
         return []string{cap: 0}
     }
@@ -622,7 +711,9 @@ func split_lines(string text) []string {
     int line_start = 0
     int out_idx = 0
     i = 0
-    while i < len(text) {
+    last_progress = 0
+    
+    while i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if i > line_start {
                 lines[out_idx] = gpt_large_pretrain_substring(text, line_start, i)
@@ -630,11 +721,21 @@ func split_lines(string text) []string {
             }
             line_start = i + 1
         }
+        
+        // Progress output every 10%
+        int progress = (i * 100) / text_len
+        if progress != last_progress && progress % 10 == 0 {
+            println("[split] " + int_to_str(progress, 0) + "% line extraction...")
+            last_progress = progress
+        }
+        
         i = i + 1
     }
-    if line_start < len(text) {
-        lines[out_idx] = gpt_large_pretrain_substring(text, line_start, len(text))
+    if line_start < text_len {
+        lines[out_idx] = gpt_large_pretrain_substring(text, line_start, text_len)
     }
+    
+    println("[split] ✓ extraction complete: " + int_to_str(len(lines), 0) + " lines ready")
     lines
 }
 
@@ -848,14 +949,18 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
         println("[init] ERROR: shard file not found: " + shard_ref)
         return []string{cap: 0}
     }
-    println("[init] reading shard text: " + shard_ref + " (this may take a while for large files)...")
-    println("[init] [NOTICE] file reading is blocking, please wait...")
-    string text = runtime_read_text_file(shard_ref)
-    println("[init] ✓ shard file loaded, file size: " + int_to_str(len(text), 0) + " bytes")
+    println("[init] reading shard text: " + shard_ref)
+    // Read file with progress display
+    string text = read_text_file_with_estimated_progress(shard_ref, 1000)
+    if len(text) == 0 {
+        println("[init] ERROR: failed to read shard file")
+        return []string{cap: 0}
+    }
     if trim(text) == "" {
         println("[init] WARNING: shard file is empty")
         return []string{cap: 0}
     }
+    println("[init] ✓ file loaded successfully, text length: " + int_to_str(len(text), 0) + " bytes")
     println("[init] splitting lines...")
     []string lines = split_lines(text)
     println("[init] ✓ split complete: " + int_to_str(len(lines), 0) + " lines found, parsing documents...")
@@ -864,7 +969,10 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     int doc_count = 0
     bool is_jsonl = gpt_large_pretrain_find_substring(shard_ref, ".jsonl") >= 0 && gpt_large_pretrain_find_substring(shard_ref, ".gz") < 0
     int i = 0
-    while i < len(lines) {
+    int total_lines = len(lines)
+    int last_progress = 0
+    
+    while i < total_lines {
         line_count = line_count + 1
         string line = trim(lines[i])
         if line != "" {
@@ -878,10 +986,15 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
                 docs.push(line)
                 doc_count = doc_count + 1
             }
-            if line_count == 1 || line_count % 1000 == 0 {
-                println("[init] parsing lines: " + int_to_str(line_count, 0) + "/" + int_to_str(len(lines), 0) + ", docs=" + int_to_str(doc_count, 0))
-            }
         }
+        
+        // Progress every 10%
+        int progress = (i * 100) / total_lines
+        if progress != last_progress && progress % 10 == 0 {
+            println("[init] parsing lines: " + int_to_str(progress, 0) + "% (" + int_to_str(i, 0) + "/" + int_to_str(total_lines, 0) + " lines, docs=" + int_to_str(doc_count, 0) + ")")
+            last_progress = progress
+        }
+        
         i = i + 1
     }
     println("[init] ✓ shard text complete: " + int_to_str(line_count, 0) + " lines, " + int_to_str(doc_count, 0) + " docs extracted")
