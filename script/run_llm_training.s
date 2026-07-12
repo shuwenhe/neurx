@@ -26,7 +26,7 @@ func main() int {
     print_flag("manifest", runtime_file_exists(manifest))
     println("")
     println("This S entrypoint currently acts as the orchestration/status layer.")
-    println("Use make train / run_s_pretrain.sh for the compiled training backend.")
+    println("Use make train / make run-s-pretrain-s for the compiled training backend.")
     0
 }
 

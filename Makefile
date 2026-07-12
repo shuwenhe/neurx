@@ -4,8 +4,9 @@
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
 	verify-setup-s quick-test-s quickstart-s verify-training-pipeline-s monitor-training-s build-linux-s build-macos-s run-large-pretrain-s \
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
-	compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
-	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s
+	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
+	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
+	build-pretrain-manifest-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -89,12 +90,12 @@ train: pretrain
 infer: check-bash
 	mkdir -p $(LOG_DIR); \
 	echo "Running NeurX inference from real checkpoint"; \
-	cd '$(CURDIR_UNIX)' && bash script/run_inference_llm.sh 2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
+	cd '$(CURDIR_UNIX)' && $(MAKE) run-inference-s 2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
-		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
+		$(MAKE) build-pretrain-manifest-s && \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
 		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
@@ -129,7 +130,7 @@ pretrain: check-bash
 		NEURX_LLM_LOG_INTERVAL=1 \
 		NEURX_LLM_EVAL_INTERVAL=8 \
 		NEURX_LLM_SAVE_INTERVAL=16 \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
 
 
 posttrain: check-bash
@@ -148,12 +149,12 @@ posttrain: check-bash
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
-	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 bash script/run_cuda_pretrain.sh 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
+	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
 	echo "Running NeurX interactive chat from real checkpoint"; \
-	cd '$(CURDIR_UNIX)' && bash script/chat.sh 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+	cd '$(CURDIR_UNIX)' && $(MAKE) run-interactive-inference-s 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 
 
@@ -199,7 +200,7 @@ shard: check-bash
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
-	@cd '$(CURDIR_UNIX)' && bash script/split_industrial_dataset.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && $(MAKE) split-data-s 2>&1
 
 split-data-s: check-bash
 	@echo "Building dataset split entry..."
@@ -381,6 +382,21 @@ run-large-pretrain-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+
+build-pretrain-manifest-s: check-bash
+	@echo "Building pretrain manifest entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
+	@echo "Running pretrain manifest entry..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
+		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
+		NEURX_PRETRAIN_REBUILD_MANIFEST='$(NEURX_PRETRAIN_REBUILD_MANIFEST)' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
 
 run-train-compiled-s: check-bash
 	@echo "Building compiled train status entry..."
@@ -725,6 +741,27 @@ run-inference-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/inference_orchestrator/run_inference_llm.ir' 2>&1 | tee -a $(LOG_DIR)/run_inference_$(shell date +%Y%m%d_%H%M%S).log
+
+run-full-inference-s: check-bash
+	@echo "Building S full inference orchestrator..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/full_inference
+	@mkdir -p $(LOG_DIR)
+	@if [ ! -f "$(S_COMPILER)" ]; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/run_full_inference.s' -o 'artifacts/build/full_inference/run_full_inference.ir' 2>&1
+	@$(MAKE) build-s-ir-runner
+	@echo "Running S full inference orchestrator..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_INFER_MODE="$${NEURX_INFER_MODE:-batch}" \
+		NEURX_CHECKPOINT_DIR="$${NEURX_CHECKPOINT_DIR:-$(CURDIR_UNIX)/artifacts/checkpoints/llm_training}" \
+		NEURX_OUTPUT_DIR="$${NEURX_OUTPUT_DIR:-$(CURDIR_UNIX)/artifacts/inference_output}" \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/full_inference/run_full_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_full_inference_$(shell date +%Y%m%d_%H%M%S).log
 
 run-s-pretrain-s: check-bash
 	@echo "Building S pretrain orchestrator..."
