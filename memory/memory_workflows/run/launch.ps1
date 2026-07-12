@@ -12,5 +12,5 @@ if (-not $SBin) {
     throw "Unable to resolve S binary. Set S_BIN or install the launcher under ~/s/bin."
 }
 
-$scriptPath = Join-Path $repoRoot "workflows/agent/memory/run/launch.sh"
+$scriptPath = Join-Path $repoRoot "memory/memory_workflows/run/launch.s"
 Invoke-BashWorkflow -RepoRoot $repoRoot -ScriptPath $scriptPath -SBinaryPath $SBin
