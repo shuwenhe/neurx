@@ -87,7 +87,7 @@ func mixed_precision_forward(
 
 // Forward pass with automatic precision conversion
 func mixed_precision_forward(
-    layer_fn: fn(vector): vector,  // Layer computation function
+    layer_fn: func(vector): vector,  // Layer computation function
     inputs: vector,                // Input tensor
     state: mixed_precision_state
 ): vector {
@@ -235,8 +235,8 @@ func mixed_precision_optimizer_step(
 
 // Full mixed precision training step
 func mixed_precision_training_step(
-    model_forward: fn(vector): vector,  // Forward pass function
-    compute_loss_fn: fn(vector, vector): float,  // Loss function
+    model_forward: func(vector): vector,  // Forward pass function
+    compute_loss_func: func(vector, vector): float,  // Loss function
     targets: vector,                    // Target labels
     inputs: vector,                     // Input data
     params: vector,                     // Model parameters
@@ -256,7 +256,7 @@ func mixed_precision_training_step(
     
     // Compute loss in FP32 (more stable)
     var fp32_predictions: vector = convert_to_precision(predictions, FP32)
-    var loss: float = compute_loss_fn(fp32_predictions, targets)
+    var loss: float = compute_loss_func(fp32_predictions, targets)
     
     // Scale loss to prevent underflow
     var scaled_loss: float = loss * state.current_loss_scale
