@@ -78,9 +78,9 @@ func agent_safety_check_destructive(string action, string input) agent_safety_re
     new_agent_safety_result_allow()
 }
 
-// agent_safety_check_shell checks shell commands for dangerous patterns.
+// agent_safety_check_s checks command strings for dangerous patterns.
 // Covers: remote code execution, disk destruction, fork bombs, recursive root deletes.
-func agent_safety_check_shell(string cmd) agent_safety_result {
+func agent_safety_check_s(string cmd) agent_safety_result {
     string c = lower(trim(cmd))
 
     // Remote code execution via pipe to shell interpreter
@@ -147,6 +147,10 @@ func agent_safety_check_shell(string cmd) agent_safety_result {
     new_agent_safety_result_allow()
 }
 
+func agent_safety_check_shell(string cmd) agent_safety_result {
+    agent_safety_check_s(cmd)
+}
+
 func agent_safety_check(string action, string input, string goal) agent_safety_result {
     agent_safety_result inject_result = agent_safety_check_injection(input)
     if !inject_result.allowed {
@@ -156,8 +160,8 @@ func agent_safety_check(string action, string input, string goal) agent_safety_r
     if !destroy_result.allowed {
         return destroy_result
     }
-    if action == "shell" || action == "bash" {
-        agent_safety_result shell_result = agent_safety_check_shell(input)
+    if action == "s" || action == "bash" {
+        agent_safety_result shell_result = agent_safety_check_s(input)
         if !shell_result.allowed {
             return shell_result
         }

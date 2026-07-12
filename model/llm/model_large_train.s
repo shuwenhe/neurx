@@ -840,6 +840,10 @@ func gpt_large_training_load_state_dict(gpt_large_training_state state, gpt_larg
 func new_gpt_large_training_state([]string documents, gpt_large_training_config config) gpt_large_training_state {
     string corpus = gpt_large_training_corpus(documents)
     []int token_ids = gpt_large_training_tokens_from_text(corpus)
+    return new_gpt_large_training_state_from_token_ids(token_ids, config)
+}
+
+func new_gpt_large_training_state_from_token_ids([]int token_ids, gpt_large_training_config config) gpt_large_training_state {
     gpt_large_state model = new_gpt_large_state()
     transformer_config backbone_config = transformer_config {
         num_layers: model.num_layers,

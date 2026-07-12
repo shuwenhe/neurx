@@ -14,7 +14,7 @@ string PARAM_TYPE_INT     = "int"
 string PARAM_TYPE_BOOL    = "bool"
 string PARAM_TYPE_FLOAT   = "float"
 string PARAM_TYPE_PATH    = "path"     // string restricted to workspace paths
-string PARAM_TYPE_COMMAND = "command"  // shell command string
+string PARAM_TYPE_COMMAND = "command"  // command string
 
 // ── data structures ───────────────────────────────────────────────────────────
 
@@ -168,9 +168,9 @@ func tool_schema_workspace_defaults() tool_schema_registry {
     s_ls = tool_schema_add_param(s_ls, new_tool_param("path", PARAM_TYPE_PATH, "Directory path to list.", true, ""))
     reg = tool_schema_registry_register(reg, s_ls)
 
-    // shell
-    tool_schema s_shell = new_tool_schema("shell", "Run a shell command in the workspace.")
-    s_shell = tool_schema_add_param(s_shell, new_tool_param("command", PARAM_TYPE_COMMAND, "Shell command to execute.", true, ""))
+    // s
+    tool_schema s_shell = new_tool_schema("s", "Run a command in the workspace.")
+    s_shell = tool_schema_add_param(s_shell, new_tool_param("command", PARAM_TYPE_COMMAND, "Command to execute.", true, ""))
     reg = tool_schema_registry_register(reg, s_shell)
 
     // delete

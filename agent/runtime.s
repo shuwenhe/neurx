@@ -722,7 +722,7 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
         tools = agent_tool_registry_add(tools, "review", true, 32000, 1)
     }
     tools = agent_tool_registry_add(tools, "repo", true, 5000, 1)
-    tools = agent_tool_registry_add(tools, "shell", true, 30000, 0)
+    tools = agent_tool_registry_add(tools, "s", true, 30000, 0)
     tools = agent_tool_registry_add(tools, "git_status", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "git_diff", true, 5000, 1)
     tools = agent_tool_registry_add(tools, "git_log", true, 5000, 1)
@@ -777,7 +777,7 @@ func agent_runtime_should_synthesize_skill(agent_skill_feedback_state feedback) 
     if !feedback.success {
         return false
     }
-    feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize" || feedback.task == "shell"
+        feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize" || feedback.task == "s"
 }
 
 func agent_runtime_retire_failure_threshold() int {

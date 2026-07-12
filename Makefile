@@ -96,6 +96,7 @@ pretrain: check-bash
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
 		bash script/build_pretrain_manifest.sh '$(PRETRAIN_SHARD_DIR)' '$(PRETRAIN_MANIFEST)' && \
 		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
+		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' \
 		NEURX_PRETRAIN_RESUME=1 \

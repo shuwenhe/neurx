@@ -207,7 +207,7 @@ func agent_route_for_goal(string goal, string input) string {
         return "review"
     }
     if agent_text_contains(text, "shell") || agent_text_contains(text, "bash") || agent_text_contains(text, "run command") || agent_text_contains(text, "execute command") {
-        return "shell"
+        return "s"
     }
     "general"
 }
@@ -665,28 +665,28 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         if ok {
             next_memory = agent_memory_write_long(next_memory, "repo_map", repo_map)
         }
-    } else if dispatch == "shell" || dispatch == "bash" || dispatch == "run_shell" {
-        action = "shell"
-        if agent_tool_registry_has_enabled(tools, "shell") {
-            string shell_cmd = parsed_action.command
-            if shell_cmd == "" {
-                shell_cmd = parsed_action.query
+    } else if dispatch == "s" || dispatch == "shell" || dispatch == "bash" || dispatch == "run_shell" {
+        action = "s"
+        if agent_tool_registry_has_enabled(tools, "s") {
+            string s_cmd = parsed_action.command
+            if s_cmd == "" {
+                s_cmd = parsed_action.query
             }
-            if shell_cmd == "" {
-                shell_cmd = input
+            if s_cmd == "" {
+                s_cmd = input
             }
-            agent_safety_result shell_safety = agent_safety_check("shell", shell_cmd, goal)
-            if !shell_safety.allowed {
-                observation = agent_execute_observation("shell", "blocked", "reason=" + shell_safety.reason + ";category=" + shell_safety.category + ";severity=" + string(shell_safety.severity))
+            agent_safety_result s_safety = agent_safety_check("s", s_cmd, goal)
+            if !s_safety.allowed {
+                observation = agent_execute_observation("s", "blocked", "reason=" + s_safety.reason + ";category=" + s_safety.category + ";severity=" + string(s_safety.severity))
                 ok = false
             } else {
-                agent_workspace_command_result shell_result = agent_workspace_shell(shell_cmd)
-                observation = shell_result.observation
-                ok = shell_result.ok
-                next_memory = agent_memory_write_long(next_memory, "last_shell", observation)
+                agent_workspace_command_result s_result = agent_workspace_s(s_cmd)
+                observation = s_result.observation
+                ok = s_result.ok
+                next_memory = agent_memory_write_long(next_memory, "last_s", observation)
             }
         } else {
-            observation = "shell:status=blocked;reason=tool_disabled"
+            observation = "s:status=blocked;reason=tool_disabled"
         }
     } else if dispatch == "apply_unified_diff" || dispatch == "unified_diff" || dispatch == "udiff" {
         action = "apply_unified_diff"
@@ -947,10 +947,10 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             final_answer = final_answer + "\ntest=" + agent_execute_clip(fa_test.value, 240)
             next_memory = fa_test.state
         }
-        agent_memory_lookup_result fa_shell = agent_memory_lookup_long(next_memory, "last_shell")
-        if fa_shell.found && fa_shell.value != "" {
-            final_answer = final_answer + "\nshell=" + agent_execute_clip(fa_shell.value, 240)
-            next_memory = fa_shell.state
+        agent_memory_lookup_result fa_s = agent_memory_lookup_long(next_memory, "last_s")
+        if fa_s.found && fa_s.value != "" {
+            final_answer = final_answer + "\ns=" + agent_execute_clip(fa_s.value, 240)
+            next_memory = fa_s.state
         }
         agent_memory_lookup_result fa_sql = agent_memory_lookup_long(next_memory, "last_sql")
         if fa_sql.found && fa_sql.value != "" {

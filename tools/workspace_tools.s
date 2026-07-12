@@ -616,13 +616,13 @@ func agent_workspace_repo_map(int max_files) string {
     agent_workspace_observation("repo_map", "ok", "file_count=" + string(agent_workspace_count_lines(output))) + "\n" + output
 }
 
-func agent_workspace_shell(string command) agent_workspace_command_result {
+func agent_workspace_s(string command) agent_workspace_command_result {
     if trim(command) == "" {
-        return agent_workspace_command_result_fail("", agent_workspace_observation("shell", "blocked", "reason=empty_command"))
+        return agent_workspace_command_result_fail("", agent_workspace_observation("s", "blocked", "reason=empty_command"))
     }
     string output = trim(runtime_run_command_output(command))
     runtime_command_result run = runtime_run_command(command)
-    // Cap shell output to prevent context overflow. Large outputs (logs, find /,
+    // Cap command output to prevent context overflow. Large outputs (logs, find /,
     // compilation noise) must be read with retrieve/grep instead.
     int max_out = 2000
     bool truncated = len(output) > max_out
@@ -631,17 +631,21 @@ func agent_workspace_shell(string command) agent_workspace_command_result {
         capped = agent_workspace_clip(output, max_out) + ";note=output_truncated_use_retrieve_or_grep_for_full_output"
     }
     if run.ok {
-        string obs = agent_workspace_observation("shell", "ok", "command=" + agent_workspace_clip(command, 160))
+        string obs = agent_workspace_observation("s", "ok", "command=" + agent_workspace_clip(command, 160))
         if capped != "" {
             obs = obs + ";output=" + capped
         }
         return agent_workspace_command_result_ok(command, obs)
     }
-    string failure = agent_workspace_observation("shell", "failed", "command=" + agent_workspace_clip(command, 160) + ";exit_code=" + string(run.exit_code))
+    string failure = agent_workspace_observation("s", "failed", "command=" + agent_workspace_clip(command, 160) + ";exit_code=" + string(run.exit_code))
     if capped != "" {
         failure = failure + ";output=" + capped
     }
     agent_workspace_command_result_fail(command, failure)
+}
+
+func agent_workspace_shell(string command) agent_workspace_command_result {
+    agent_workspace_s(command)
 }
 
 func agent_workspace_sql_run(string query) agent_workspace_command_result {

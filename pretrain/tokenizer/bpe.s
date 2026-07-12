@@ -229,8 +229,12 @@ func token_pair_index([]string pair_keys, string key) int {
 }
 
 func count_pair_occurrences([]string documents, bpe_tokenizer_state tokenizer, []string pair_keys, []string pair_lefts, []string pair_rights, []int pair_counts) {
+    int total_docs = len(documents)
     int d = 0
     while d < len(documents) {
+        if d == 0 || d + 1 == total_docs || ((d + 1) % 100 == 0) {
+            println("[bpe] counting pairs: " + int_to_str(d + 1, 0) + "/" + int_to_str(total_docs, 0) + ", pairs found=" + int_to_str(len(pair_keys), 0))
+        }
         []string tokens = bpe_tokenize_text(documents[d], tokenizer)
         int i = 0
         while i + 1 < len(tokens) {
@@ -276,6 +280,8 @@ func find_best_pair([]string pair_lefts, []string pair_rights, []int pair_counts
 func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequency) bpe_tokenizer_state {
     bpe_tokenizer_state tokenizer = bpe_tokenizer_new(vocab_limit, min_pair_frequency)
     []string vocab = []string{cap: 0}
+    int total_docs = len(documents)
+    println("[bpe] tokenizer train start: docs=" + int_to_str(total_docs, 0) + ", vocab_limit=" + int_to_str(vocab_limit, 0) + ", min_pair_frequency=" + int_to_str(min_pair_frequency, 0))
     int d = 0
     while d < len(documents) {
         []string tokens = tokenize_chars(documents[d])
@@ -284,11 +290,17 @@ func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequ
             vocab = append_unique_string(vocab, tokens[i])
             i = i + 1
         }
+        if d == 0 || d + 1 == total_docs || ((d + 1) % 10 == 0) {
+            println("[bpe] vocab scan progress: " + int_to_str(d + 1, 0) + "/" + int_to_str(total_docs, 0) + ", vocab=" + int_to_str(len(vocab), 0))
+        }
         d = d + 1
     }
 
     tokenizer.vocab = copy_strings(vocab)
     int current_vocab_size = len(tokenizer.vocab)
+    int merge_round = 0
+    println("[bpe] initial vocab size: " + int_to_str(current_vocab_size, 0))
+    println("[bpe] starting merge iterations (will print progress every 10 rounds)...")
     while current_vocab_size < vocab_limit {
         []string pair_keys = []string{cap: 0}
         []string pair_lefts = []string{cap: 0}
@@ -308,8 +320,13 @@ func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequ
         tokenizer.merge_tokens.push(merged)
         tokenizer.vocab = append_unique_string(tokenizer.vocab, merged)
         current_vocab_size = len(tokenizer.vocab)
+        merge_round = merge_round + 1
+        if merge_round == 1 || merge_round % 10 == 0 || current_vocab_size >= vocab_limit {
+            println("[bpe] merge round " + int_to_str(merge_round, 0) + ": vocab=" + int_to_str(current_vocab_size, 0) + ", best_count=" + int_to_str(best_count, 0))
+        }
     }
     tokenizer.trained = true
+    println("[bpe] tokenizer train complete: merges=" + int_to_str(len(tokenizer.merge_tokens), 0) + ", vocab=" + int_to_str(len(tokenizer.vocab), 0))
     tokenizer
 }
 
@@ -336,21 +353,35 @@ func bpe_encode_text(string text, bpe_tokenizer_state tokenizer) []int {
 }
 
 func bpe_encode_documents([]string documents, bpe_tokenizer_state tokenizer) []int {
+    println("[bpe] encoding documents: docs=" + int_to_str(len(documents), 0))
+    println("[bpe] joining documents into corpus...")
     string corpus = join_documents(documents)
     if trim(corpus) == "" {
+        println("[bpe] encoding documents: empty corpus")
         return []int{cap: 0}
     }
-    bpe_encode_text(corpus, tokenizer)
+    println("[bpe] tokenizing corpus (corpus size=" + int_to_str(len(corpus), 0) + " chars)...")
+    []int token_ids = bpe_encode_text(corpus, tokenizer)
+    println("[bpe] encoding documents complete: tokens=" + int_to_str(len(token_ids), 0))
+    token_ids
 }
 
 func bpe_tokenized_corpus_from_documents([]string documents, int vocab_limit, int min_pair_frequency, float valid_ratio, int seed) bpe_tokenized_corpus_state {
+    println("[bpe] corpus build start: docs=" + int_to_str(len(documents), 0))
     bpe_split_state split = split_documents(documents, valid_ratio, seed)
+    println("[bpe] split complete: train=" + int_to_str(len(split.train_documents), 0) + ", valid=" + int_to_str(len(split.valid_documents), 0))
+    println("[bpe] training tokenizer")
     bpe_tokenizer_state tokenizer = bpe_tokenizer_train(split.train_documents, vocab_limit, min_pair_frequency)
+    println("[bpe] encoding train corpus")
+    []int train_token_ids = bpe_encode_documents(split.train_documents, tokenizer)
+    println("[bpe] encoding valid corpus")
+    []int valid_token_ids = bpe_encode_documents(split.valid_documents, tokenizer)
+    println("[bpe] corpus build complete")
     bpe_tokenized_corpus_state {
         split: split,
         tokenizer: tokenizer,
-        train_token_ids: bpe_encode_documents(split.train_documents, tokenizer),
-        valid_token_ids: bpe_encode_documents(split.valid_documents, tokenizer),
+        train_token_ids: train_token_ids,
+        valid_token_ids: valid_token_ids,
     }
 }
 

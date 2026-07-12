@@ -429,7 +429,7 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
     out
 }
 
-func find_substring_prefix(string s, string pattern, int start, int limit) int {
+func find_string_prefix(string s, string pattern, int start, int limit) int {
     int i = start
     while i + str_len(pattern) <= limit {
         int j = 0

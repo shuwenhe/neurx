@@ -176,7 +176,7 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
     bool has_code = agent_tool_registry_has_enabled(tools, "code")
     bool has_review = agent_tool_registry_has_enabled(tools, "review")
     bool has_repo = agent_tool_registry_has_enabled(tools, "repo")
-    bool has_shell = agent_tool_registry_has_enabled(tools, "shell")
+    bool has_s = agent_tool_registry_has_enabled(tools, "s")
     bool has_git_status = agent_tool_registry_has_enabled(tools, "git_status")
     bool has_git_diff = agent_tool_registry_has_enabled(tools, "git_diff")
     bool has_git_log = agent_tool_registry_has_enabled(tools, "git_log")
@@ -276,10 +276,10 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
                     next_task = "verify"
                     status = "verifying:" + route
                 }
-            } else if route == "shell" {
-                if has_shell {
-                    next_task = "shell"
-                    status = "shell:" + route
+            } else if route == "s" || route == "shell" {
+                if has_s {
+                    next_task = "s"
+                    status = "s:" + route
                 } else {
                     next_task = "verify"
                     status = "verifying:" + route
@@ -454,7 +454,7 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
                 next_task = "verify"
                 status = "verifying:" + route
             }
-        } else if state.current_task == "shell" {
+        } else if state.current_task == "s" || state.current_task == "shell" {
             next_task = "analyze"
             status = "analyzing:" + route
         } else if state.current_task == "git_status" || state.current_task == "git_diff" || state.current_task == "git_log" {
