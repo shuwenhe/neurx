@@ -9,8 +9,8 @@ This workflow wires together:
 
 Launch:
 
-- `workflows/llm/pretrain/run/launch.sh`
-- or `workflows/llm/pretrain/run/run_with_config.sh --config workflows/llm/pretrain/config/sample.yaml`
+- `workflows/llm/pretrain/run/launch.s`
+- or `workflows/llm/pretrain/run/run_with_config.s`
 
 Supported config keys:
 

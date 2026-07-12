@@ -4,10 +4,14 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape
 
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    string cmd = "cd " + runtime_shell_escape(project_root) + " && workflows/robotics/train/run/run_with_config.sh --config workflows/robotics/train/config/sample.yaml"
-    if !runtime_run_command(cmd).ok {
+    string s_bin = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", "s"))
+    string src = project_root + "/workflows/robotics/train/run/run_with_config.s"
+    string ir = "/tmp/neurx_robotics_launch.ir"
+    if !runtime_run_command(runtime_shell_escape(s_bin) + " " + runtime_shell_escape(src) + " " + runtime_shell_escape(ir)).ok {
         return 1
     }
-
+    if !runtime_run_command(runtime_shell_escape(s_bin) + " " + runtime_shell_escape(ir)).ok {
+        return 1
+    }
     0
 }

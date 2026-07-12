@@ -14,7 +14,7 @@ if (-not $SBin) {
     throw "Unable to resolve S binary. Set S_BIN or install the launcher under ~/s/bin."
 }
 
-$scriptPath = Join-Path $repoRoot "workflows/agent/skills/run/run_with_config.sh"
+$scriptPath = Join-Path $repoRoot "workflows/agent/skills/run/run_with_config.s"
 $args = @()
 if ($Config) {
     $args += "--config"
