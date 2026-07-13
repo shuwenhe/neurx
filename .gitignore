@@ -240,6 +240,11 @@ outputs/
 end_to_end_output/
 output/
 
+# Local one-off S training/debug probes
+script/debug_train.s
+script/simple_train.s
+script/test_read.s
+
 # Common CMake / build files
 CMakeFiles/
 CMakeCache.txt
