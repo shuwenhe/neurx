@@ -75,6 +75,8 @@ PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
+PRETRAIN_STEPS ?= 64
+PRETRAIN_SHARD_LIMIT ?= $(PRETRAIN_STEPS)
 PRETRAIN_LOG_DIR := $(CURDIR_UNIX)/checkpoint/NeurX-1.3/logs
 PRETRAIN_ENTRY_SOURCE ?= $(CURDIR_UNIX)/pretrain/llm/large_pretrain.s
 PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.bin
@@ -107,9 +109,15 @@ pretrain: check-bash
 		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		NEURX_PRETRAIN_DATA_DIR='$(PRETRAIN_DATA_ROOT)' \
 		NEURX_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' \
-		NEURX_S_PRETRAIN_OUTPUT_DIR='$(CURDIR_UNIX)/checkpoint/NeurX-1.3' \
-		NEURX_S_PRETRAIN_STEPS=64 \
-		NEURX_S_PRETRAIN_WARMUP_STEPS=8 \
+		NEURX_PRETRAIN_STEPS='$(PRETRAIN_STEPS)' \
+		NEURX_PRETRAIN_MICRO_BATCH=4 \
+		NEURX_PRETRAIN_SEQ_LEN=256 \
+		NEURX_PRETRAIN_LR=0.0002 \
+		NEURX_PRETRAIN_WARMUP_STEPS=8 \
+		NEURX_PRETRAIN_WEIGHT_DECAY=0.01 \
+		NEURX_PRETRAIN_LOG_INTERVAL=1 \
+		NEURX_PRETRAIN_SAVE_INTERVAL=16 \
+		NEURX_LLM_VOCAB_SIZE=16000 \
 		$(MAKE) run-s-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
 
 
@@ -759,8 +767,9 @@ run-full-inference-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/full_inference/run_full_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_full_inference_$(shell date +%Y%m%d_%H%M%S).log
 
 run-s-pretrain-s: check-bash
-	@echo "Building S pretrain orchestrator..."
+	@echo "Building S real pretrain runner..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@if [ ! -f "$(S_COMPILER)" ]; then \
 		echo "Error: S compiler not found at $(S_COMPILER)"; \
@@ -769,14 +778,19 @@ run-s-pretrain-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/run_s_pretrain.s' -o 'artifacts/build/pretrain_orchestrator/run_s_pretrain.ir' 2>&1
+		$(S_COMPILER) ir 'script/minimal_train.s' -o 'artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1
+	@cd '$(CURDIR_UNIX)' && \
+		find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort | sed -n '1,$(PRETRAIN_SHARD_LIMIT)p' > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi
-	@echo "Running S pretrain orchestrator..."
+	@echo "Running S real pretrain runner..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/run_s_pretrain.ir' 2>&1 | tee -a $(LOG_DIR)/run_s_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
+		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
+		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(CURDIR_UNIX)/checkpoint/NeurX-1.3}" \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1 | tee -a $(LOG_DIR)/run_s_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."

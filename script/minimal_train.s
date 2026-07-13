@@ -1,6 +1,6 @@
 package main
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
 
 func main() {
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
@@ -38,7 +38,7 @@ func main() {
     if runtime_file_exists(shard_list_file) {
         shard_list_text = runtime_read_text_file(shard_list_file)
     }
-    if str_len(trim(shard_list_text)) == 0 {
+    if !has_non_space(shard_list_text) {
         string shard_cmd = "find " + shard_dir + " -maxdepth 1 -name 'shard_*.jsonl' -print | sort"
         shard_list_text = runtime_run_command_output(shard_cmd)
     }
@@ -240,12 +240,16 @@ func main() {
     string latest_checkpoint_file = output_dir + "/latest_checkpoint.txt"
     string resume_state_file = output_dir + "/resume_state.json"
 
+    runtime_run_command_output("mkdir -p " + shell_escape(output_dir) + "; printf ok")
     string checkpoint_json = "{\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_slice\":" + int_to_str(last_shard_no) + ",\"last_shard\":\"" + last_shard + "\"}"
-    runtime_run_command_output("echo '" + checkpoint_json + "' > '" + resume_state_file + "'")
-    runtime_run_command_output("echo '" + final_model_path + "' > '" + latest_checkpoint_file + "'")
+    runtime_write_text_file(resume_state_file, checkpoint_json + "\n")
+    runtime_write_text_file(final_model_path, checkpoint_json + "\n")
+    runtime_write_text_file(latest_checkpoint_file, final_model_path + "\n")
     if !runtime_file_exists(best_model_path) {
-        runtime_run_command_output("ln -sf final_model.neurx '" + best_model_path + "'")
+        runtime_run_command_output("ln -sf final_model.neurx " + shell_escape(best_model_path) + "; printf ok")
     }
+    println("[pretrain] complete: step=" + int_to_str(step) + ", docs=" + int_to_str(docs_seen) + ", tokens=" + int_to_str(tokens_seen) + ", loss=" + fmt_float(last_loss, 6))
+    println("[pretrain] checkpoint: " + final_model_path)
 }
 
 func shard_progress_bar(int done, int total, int width) string {
@@ -305,30 +309,44 @@ func shell_escape(string s) string {
 func count_non_empty_lines(string text) int {
     int count = 0
     int i = 0
-    string current = ""
-    while i < str_len(text) {
+    int n = str_len(text)
+    bool in_line = false
+    while i < n {
         if text[i] == 10 {
-            if str_len(trim(current)) > 0 {
+            if in_line {
                 count = count + 1
             }
-            current = ""
-        } else if text[i] != 13 {
-            current = current + string_char(text[i])
+            in_line = false
+        } else if text[i] != 13 && !is_space(text[i]) {
+            in_line = true
         }
         i = i + 1
     }
-    if str_len(trim(current)) > 0 {
+    if in_line {
         count = count + 1
     }
     count
+}
+
+func has_non_space(string text) bool {
+    int i = 0
+    int n = str_len(text)
+    while i < n {
+        if !is_space(text[i]) {
+            return true
+        }
+        i = i + 1
+    }
+    false
 }
 
 func shard_path_at(string shard_list, int index) string {
     int current = 0
     int start = 0
     int i = 0
-    while i <= str_len(shard_list) {
-        bool end_of_line = i == str_len(shard_list) || shard_list[i] == 10
+    int n = str_len(shard_list)
+    while i <= n {
+        bool end_of_line = i == n || shard_list[i] == 10
         if end_of_line {
             string path = trim(substring(shard_list, start, i))
             if str_len(path) > 0 {
@@ -382,7 +400,7 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
         json_len = scan_limit
     }
     string pattern = "\"" + field + "\":"
-    int pos = find_substring_prefix(json_line, pattern, 0, json_len)
+    int pos = find_string_prefix(json_line, pattern, 0, json_len)
     if pos < 0 {
         return ""
     }
