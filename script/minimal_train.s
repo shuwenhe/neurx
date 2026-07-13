@@ -9,10 +9,11 @@ func main() {
     }
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
+    string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
-    string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/NeurX-1.3")
+    string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/" + model_name)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE", "32")), 32)
     int seq_len = parse_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_SEQ_LENGTH", "2048")), 2048)
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", runtime_env_get("NEURX_TOTAL_STEPS", "1000")), 1000)
@@ -250,7 +251,7 @@ func main() {
     string resume_state_file = output_dir + "/resume_state.json"
 
     runtime_run_command_output("mkdir -p " + shell_escape(output_dir) + "; printf ok")
-    string checkpoint_json = "{\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_slice\":" + int_to_str(last_shard_no) + ",\"last_shard\":\"" + last_shard + "\"}"
+    string checkpoint_json = "{\"model_name\":\"" + model_name + "\",\"output_dir\":\"" + output_dir + "\",\"model_path\":\"" + final_model_path + "\",\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_slice\":" + int_to_str(last_shard_no) + ",\"last_shard\":\"" + last_shard + "\"}"
     runtime_write_text_file(resume_state_file, checkpoint_json + "\n")
     runtime_write_text_file(final_model_path, checkpoint_json + "\n")
     runtime_write_text_file(latest_checkpoint_file, final_model_path + "\n")
@@ -258,6 +259,8 @@ func main() {
         runtime_run_command_output("ln -sf final_model.neurx " + shell_escape(best_model_path) + "; printf ok")
     }
     println("[pretrain] complete: step=" + int_to_str(step) + ", docs=" + int_to_str(docs_seen) + ", tokens=" + int_to_str(tokens_seen) + ", loss=" + fmt_float(last_loss, 6))
+    println("[pretrain] model: " + model_name)
+    println("[pretrain] output: " + output_dir)
     println("[pretrain] checkpoint: " + final_model_path)
 }
 
