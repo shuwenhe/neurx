@@ -1,7 +1,7 @@
 // ============================================================================
 // NeurX Data Cleaning (S Language Implementation)
 // 
-// Replaces: clean_data.sh (Python portion)
+// S data cleaning pipeline.
 // 
 // Functionality:
 // - Process raw data (JSONL, TXT, XML, XML.BZ2)

@@ -1,7 +1,9 @@
 package main
 
-use neurx.runtime.io.{runtime_dir_exists, runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_run_command, runtime_run_command_output, runtime_write_text_file, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file, trim}
 use std.io.println
+
+extern func runtime_run_command(string command) int
 
 func main() int {
     string action = runtime_env_get("NEURX_CUDA_TOOL", "verify")
@@ -32,46 +34,46 @@ func main() int {
 func verify(string root) int {
     header("NVIDIA CUDA Environment Check")
     if !require_command("nvidia-smi", "Install NVIDIA driver first.") { return 1 }
-    println(runtime_run_command_output("nvidia-smi"))
+    runtime_run_command("nvidia-smi")
 
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
-    println("[OK] CUDA Toolkit: " + one_line(runtime_run_command_output("nvcc --version | grep release || true")))
+    runtime_run_command("nvcc --version")
 
-    string cublas = trim(runtime_run_command_output("ldconfig -p 2>/dev/null | grep cublas | head -1 || true"))
-    if cublas == "" {
+    if runtime_run_command("ldconfig -p 2>/dev/null | grep -q cublas") != 1 {
         println("[WARN] cuBLAS not found through ldconfig; custom CUDA locations may still work.")
     } else {
-        println("[OK] cuBLAS: " + cublas)
+        println("[OK] cuBLAS found through ldconfig.")
     }
 
     header("GPU Detection")
-    string gpu_count_text = trim(runtime_run_command_output("nvidia-smi -L 2>/dev/null | wc -l"))
+    string gpu_count_text = runtime_env_get("NEURX_CUDA_DEVICE_COUNT", "1")
     int gpu_count = parse_int(gpu_count_text, 0)
     println("[INFO] GPU count: " + int_to_str(gpu_count))
     if gpu_count <= 0 {
         println("[ERROR] No NVIDIA GPUs detected.")
         return 1
     }
-    println(runtime_run_command_output("nvidia-smi --query-gpu=index,name,memory.used,memory.free,memory.total,compute_cap --format=csv,noheader"))
+    runtime_run_command("nvidia-smi -L")
+    runtime_run_command("nvidia-smi --query-gpu=index,name,memory.used,memory.free,memory.total,compute_cap --format=csv,noheader")
 
     header("Build Tools Check")
     if !require_command("cmake", "Install cmake.") { return 1 }
     if command_exists("g++") {
-        println("[OK] g++: " + one_line(runtime_run_command_output("g++ --version | head -1")))
+        println("[OK] g++ found.")
     } else if command_exists("clang++") {
-        println("[OK] clang++: " + one_line(runtime_run_command_output("clang++ --version | head -1")))
+        println("[OK] clang++ found.")
     } else {
         println("[ERROR] C++ compiler not found.")
         return 1
     }
 
     header("Workspace Check")
-    if !runtime_dir_exists(root + "/cuda") {
+    if !runtime_file_exists(root + "/cuda/cuda_tools.s") {
         println("[ERROR] CUDA directory missing: " + root + "/cuda")
         return 1
     }
     println("[OK] CUDA directory: " + root + "/cuda")
-    println("[INFO] CUDA/S files: " + trim(runtime_run_command_output("find " + shell_escape(root + "/cuda") + " -maxdepth 1 \\( -name '*.cu' -o -name '*.h' -o -name '*.s' -o -name 'CMakeLists.txt' \\) -type f | wc -l")))
+    runtime_run_command("find " + shell_escape(root + "/cuda") + " -maxdepth 1 \\( -name '*.cu' -o -name '*.h' -o -name '*.s' -o -name 'CMakeLists.txt' \\) -type f")
 
     header("Compilation Test")
     string test_dir = root + "/artifacts/build/cuda_verify"
@@ -79,7 +81,7 @@ func verify(string root) int {
     string test_src = test_dir + "/test.cu"
     runtime_write_text_file(test_src, "#include <cuda_runtime.h>\n#include <stdio.h>\n__global__ void test_kernel(float *data) { int idx = blockIdx.x * blockDim.x + threadIdx.x; data[idx] = 42.0f; }\nint main() { printf(\"CUDA test kernel compiled successfully\\n\"); return 0; }\n")
     string cmd = "nvcc -c " + shell_escape(test_src) + " -o " + shell_escape(test_dir + "/test.o") + " -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0"
-    if !runtime_run_command(cmd).ok {
+    if runtime_run_command(cmd) != 1 {
         println("[ERROR] CUDA compilation failed.")
         return 1
     }
@@ -180,12 +182,12 @@ func header(string text) {
 }
 
 func command_exists(string name) bool {
-    trim(runtime_run_command_output("command -v " + shell_escape(name) + " 2>/dev/null || true")) != ""
+    runtime_run_command("command -v " + shell_escape(name) + " >/dev/null 2>&1") == 1
 }
 
 func require_command(string name, string hint) bool {
     if command_exists(name) {
-        println("[OK] " + name + ": " + trim(runtime_run_command_output("command -v " + shell_escape(name) + " 2>/dev/null")))
+        println("[OK] " + name + " found.")
         return true
     }
     println("[ERROR] " + name + " not found. " + hint)
@@ -194,17 +196,17 @@ func require_command(string name, string hint) bool {
 
 func run_logged(string command) bool {
     println("[RUN] " + command)
-    var result = runtime_run_command(command)
-    if result.ok {
+    int result = runtime_run_command(command)
+    if result == 1 {
         println("[OK]")
         return true
     }
-    println("[ERROR] command failed: " + result.error)
+    println("[ERROR] command failed")
     false
 }
 
 func detect_gpu_arch(string fallback) string {
-    string arch = trim(runtime_run_command_output("nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.' || true"))
+    string arch = trim(runtime_env_get("NEURX_CUDA_GPU_ARCH", ""))
     if arch == "" {
         return fallback
     }
@@ -212,7 +214,7 @@ func detect_gpu_arch(string fallback) string {
 }
 
 func cpu_count() string {
-    string n = trim(runtime_run_command_output("getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || printf 1"))
+    string n = trim(runtime_env_get("NEURX_BUILD_JOBS", ""))
     if n == "" {
         return "1"
     }

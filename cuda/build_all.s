@@ -1,6 +1,6 @@
 // ============================================================================
 // NeurX CUDA Build System - S Language Implementation
-// Replaces all .sh scripts with pure S (no shell/bash)
+// Unified CUDA build coordinator implemented in S.
 // ============================================================================
 
 package main
@@ -325,13 +325,9 @@ func check_file_exists(string path) {
 }
 
 func create_env_script(string build_dir, BuildConfig cfg) {
-    string script = "#!/bin/bash\n" +
-        "export LD_LIBRARY_PATH=\"" + cfg.cuda_lib + ":" + build_dir + ":$LD_LIBRARY_PATH\"\n" +
-        "export CUDA_HOME=\"" + cfg.cuda_home + "\"\n" +
-        "echo \"[CUDA] Environment configured\"\n"
-    
-    runtime_write_text_file(build_dir + "/env.sh", script)
-    runtime_run_command_output("chmod +x " + build_dir + "/env.sh 2>&1")
+    string text = "CUDA_HOME=" + cfg.cuda_home + "\n" +
+        "CUDA_LIBRARY_PATH=" + cfg.cuda_lib + ":" + build_dir + "\n"
+    runtime_write_text_file(build_dir + "/env.txt", text)
 }
 
 func create_cuda_wrapper(string build_dir) {
