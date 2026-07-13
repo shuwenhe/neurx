@@ -29,7 +29,7 @@ func main() {
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", runtime_env_get("NEURX_LOG_INTERVAL", "10")), 10)
     int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
     int step_window = parse_int(runtime_env_get("NEURX_PRETRAIN_STEP_TOKENS", "256"), 256)
-    int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "32"), 32)
+    int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "10000"), 10000)
     int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "0"), 0)
     int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "0"), 0)
     int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "0"), 0)
@@ -125,86 +125,68 @@ func main() {
         int shard_docs = 0
         int shard_tokens = 0
         int shard_start_step = step
+        int next_line = 1
         bool shard_done = false
         int chunk_count = 0
-        
-        // Read entire shard file once instead of using sed multiple times
-        string full_shard_content = runtime_read_text_file(shard_path)
-        int full_shard_len = str_len(full_shard_content)
-        
-        println("[shard] loaded full shard " + shard_slice + " " + shard_name_start + " size=" + int_to_str(full_shard_len))
-        
-        // Process entire shard in memory
-        int file_pos = 0
-        while file_pos < full_shard_len && step < max_steps && docs_seen < max_docs && !shard_done {
+        while !shard_done && step < max_steps && docs_seen < max_docs {
             chunk_count = chunk_count + 1
-            
-            // Find end of current chunk (32 lines max)
-            int chunk_start = file_pos
-            int chunk_end = file_pos
-            int lines_in_chunk = 0
-            
-            while chunk_end < full_shard_len && lines_in_chunk < line_chunk_size {
-                if full_shard_content[chunk_end] == 10 {
-                    lines_in_chunk = lines_in_chunk + 1
+            string chunk_cmd = ""
+            if fast_prefix_mode > 0 {
+                chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
+            } else {
+                int last_line = next_line + line_chunk_size - 1
+                if json_scan_cap > 0 {
+                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path + " | cut -c1-" + int_to_str(json_scan_cap)
+                } else {
+                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
                 }
-                chunk_end = chunk_end + 1
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
             }
             
-            if chunk_end == chunk_start {
-                shard_done = true
-                break
-            }
-            
-            // Process chunk directly without creating substring
-            int chunk_text_len = chunk_end - chunk_start
+            string chunk_text = runtime_run_command_output(chunk_cmd)
+            int chunk_text_len = str_len(chunk_text)
             println("[shard] read-complete " + shard_slice + " " + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len))
             write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len) + " step=" + int_to_str(step))
-            if chunk_text_len == 0 {
+            if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
             } else {
-                // Process lines directly from original buffer without substring
-                int i = chunk_start
-                int lines_in_chunk = 0
-                int processed_docs = 0
+                // Simplified block processing: count lines and advance steps
+                int chunk_len = chunk_text_len
+                int i = 0
+                int lines_counted = 0
                 
-                while i < chunk_end && step < max_steps && docs_seen < max_docs {
-                    // Find end of line
-                    int line_end = i
-                    while line_end < chunk_end && full_shard_content[line_end] != 10 {
-                        line_end = line_end + 1
-                    }
-                    
-                    // Skip empty lines
-                    if line_end > i {
-                        lines_in_chunk = lines_in_chunk + 1
-                        
-                        // Simple training: just count documents and advance steps
-                        processed_docs = processed_docs + 1
-                        shard_docs = shard_docs + 1
+                while i < chunk_len {
+                    if chunk_text[i] == 10 {
+                        lines_counted = lines_counted + 1
                         docs_seen = docs_seen + 1
-                        
-                        // Simulate processing a line of text
-                        int line_len = line_end - i
-                        shard_tokens = shard_tokens + line_len
-                        tokens_seen = tokens_seen + line_len
-                        
-                        // One step per document (simplified)
+                        shard_docs = shard_docs + 1
                         step = step + 1
-                        last_loss = 0.5 + (0.0001 * step as float) - (0.0001 * docs_seen as float)
                         
                         if should_log_step(step, log_interval) {
-                            string progress_line = "step=" + int_to_str(step) + " loss=" + fmt_float(last_loss, 6) + " docs=" + int_to_str(docs_seen) + " shard=" + shard_name_start
-                            println(progress_line)
-                            write_progress(progress_file, progress_line)
+                            string log_msg = "step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen)
+                            println(log_msg)
+                            write_progress(progress_file, log_msg)
+                        }
+                        
+                        if step >= max_steps || docs_seen >= max_docs {
+                            break
                         }
                     }
-                    
-                    i = line_end + 1
+                    i = i + 1
                 }
                 
-                println("[shard] chunk-processed chunk=" + int_to_str(chunk_count) + " lines=" + int_to_str(lines_in_chunk) + " docs=" + int_to_str(processed_docs) + " step=" + int_to_str(step))
-                file_pos = chunk_end
+                shard_tokens = shard_tokens + chunk_len
+                if fast_prefix_mode > 0 {
+                    shard_done = true
+                } else {
+                    next_line = next_line + line_chunk_size
+                    if str_len(trim(chunk_text)) < 1 {
+                        shard_done = true
+                    }
+                }
             }
         }
 
@@ -770,30 +752,4 @@ func str_len(string s) int {
 
 func string_char(int c) string {
     string(c)
-}
-
-func float_to_str(float f) string {
-    int i = f as int
-    float frac = f - (i as float)
-    if frac < 0.0 {
-        frac = -frac
-    }
-    int frac_int = (frac * 10000.0) as int
-    int_to_str(i) + "." + int_to_str(frac_int)
-}
-
-func extract_substring(string s, int start, int end) string {
-    if start > end { end = start }
-    if start < 0 { start = 0 }
-    int len = str_len(s)
-    if end > len { end = len }
-    if end <= start { return "" }
-    
-    string result = ""
-    int i = start
-    while i < end {
-        result = result + string_char(s[i])
-        i = i + 1
-    }
-    result
 }
