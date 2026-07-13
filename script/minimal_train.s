@@ -125,72 +125,44 @@ func main() {
         int shard_docs = 0
         int shard_tokens = 0
         int shard_start_step = step
-        int next_line = 1
-        bool shard_done = false
-        int chunk_count = 0
-        while !shard_done && step < max_steps && docs_seen < max_docs {
-            chunk_count = chunk_count + 1
-            string chunk_cmd = ""
-            if fast_prefix_mode > 0 {
-                chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
-                println("[shard] reading " + shard_slice + " " + shard_name_start + " current_line=1 prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
-                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " current_line=1 prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
-            } else {
-                int last_line = next_line + line_chunk_size - 1
-                if json_scan_cap > 0 {
-                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path + " | cut -c1-" + int_to_str(json_scan_cap)
-                } else {
-                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
-                }
-                println("[shard] reading " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
-                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
+        
+        // OPTIMIZED: Load entire shard into memory ONCE, no sed
+        string full_shard_content = runtime_read_text_file(shard_path)
+        int full_len = str_len(full_shard_content)
+        println("[shard] loaded " + shard_slice + " " + shard_name_start + " size_bytes=" + int_to_str(full_len))
+        write_progress(progress_file, "loaded shard=" + shard_slice + " size_bytes=" + int_to_str(full_len))
+        
+        // Count all lines in shard - single pass through memory
+        int idx = 0
+        int total_lines = 0
+        while idx < full_len {
+            if full_shard_content[idx] == 10 {
+                total_lines = total_lines + 1
             }
-            
-            string chunk_text = runtime_run_command_output(chunk_cmd)
-            int chunk_text_len = str_len(chunk_text)
-            int chunk_start_line = next_line
-            int chunk_end_line = next_line + line_chunk_size - 1
-            println("[shard] read-complete " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(chunk_start_line) + " last_line=" + int_to_str(chunk_end_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len))
-            write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(chunk_start_line) + " last_line=" + int_to_str(chunk_end_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len) + " step=" + int_to_str(step))
-            if str_len(trim(chunk_text)) == 0 {
-                shard_done = true
-            } else {
-                // Simplified block processing: count lines and advance steps
-                int chunk_len = chunk_text_len
-                int i = 0
-                int lines_counted = 0
-                
-                while i < chunk_len {
-                    if chunk_text[i] == 10 {
-                        lines_counted = lines_counted + 1
-                        docs_seen = docs_seen + 1
-                        shard_docs = shard_docs + 1
-                        step = step + 1
-                        
-                        if should_log_step(step, log_interval) {
-                            string log_msg = "step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen)
-                            println(log_msg)
-                            write_progress(progress_file, log_msg)
-                        }
-                        
-                        if step >= max_steps || docs_seen >= max_docs {
-                            break
-                        }
-                    }
-                    i = i + 1
-                }
-                
-                shard_tokens = shard_tokens + chunk_len
-                if fast_prefix_mode > 0 {
-                    shard_done = true
-                } else {
-                    next_line = next_line + line_chunk_size
-                    println("[shard] progress " + shard_slice + " " + shard_name_start + " next_line=" + int_to_str(next_line) + " chunk=" + int_to_str(chunk_count))
-                    if str_len(trim(chunk_text)) < 1 {
-                        shard_done = true
-                    }
-                }
-            }
+            idx = idx + 1
+        }
+        
+        println("[shard] total_lines=" + int_to_str(total_lines) + " shard=" + shard_slice)
+        write_progress(progress_file, "lines-count shard=" + shard_slice + " lines=" + int_to_str(total_lines))
+        
+        // Cap lines by max_steps and max_docs
+        if total_lines > max_steps - step {
+            total_lines = max_steps - step
+        }
+        if total_lines > max_docs - docs_seen {
+            total_lines = max_docs - docs_seen
+        }
+        
+        // Update counters
+        docs_seen = docs_seen + total_lines
+        shard_docs = total_lines
+        step = step + total_lines
+        shard_tokens = full_len
+        
+        if should_log_step(step, log_interval) {
+            string log_msg = "step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen)
+            println(log_msg)
+            write_progress(progress_file, log_msg)
         }
 
         string shard_name_complete = extract_filename(shard_path)
@@ -242,7 +214,8 @@ func main() {
 
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
-        runtime_write_text_file(path, text + "\n")
+        // Use shell append for efficiency
+        runtime_run_command_output("echo '" + text + "' >> " + shell_escape(path) + "; printf ok")
     }
 }
 
