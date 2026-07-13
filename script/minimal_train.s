@@ -29,7 +29,7 @@ func main() {
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", runtime_env_get("NEURX_LOG_INTERVAL", "10")), 10)
     int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
     int step_window = parse_int(runtime_env_get("NEURX_PRETRAIN_STEP_TOKENS", "256"), 256)
-    int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "10000"), 10000)
+    int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "1"), 1)
     int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "0"), 0)
     int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "0"), 0)
     int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "0"), 0)
@@ -133,8 +133,8 @@ func main() {
             string chunk_cmd = ""
             if fast_prefix_mode > 0 {
                 chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
-                println("[shard] reading " + shard_slice + " " + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap))
-                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " current_line=1 prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " current_line=1 prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
             } else {
                 int last_line = next_line + line_chunk_size - 1
                 if json_scan_cap > 0 {
@@ -142,14 +142,16 @@ func main() {
                 } else {
                     chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
                 }
-                println("[shard] reading " + shard_slice + " " + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
-                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
             }
             
             string chunk_text = runtime_run_command_output(chunk_cmd)
             int chunk_text_len = str_len(chunk_text)
-            println("[shard] read-complete " + shard_slice + " " + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len))
-            write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len) + " step=" + int_to_str(step))
+            int chunk_start_line = next_line
+            int chunk_end_line = next_line + line_chunk_size - 1
+            println("[shard] read-complete " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(chunk_start_line) + " last_line=" + int_to_str(chunk_end_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len))
+            write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(chunk_start_line) + " last_line=" + int_to_str(chunk_end_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len) + " step=" + int_to_str(step))
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
             } else {
@@ -183,6 +185,7 @@ func main() {
                     shard_done = true
                 } else {
                     next_line = next_line + line_chunk_size
+                    println("[shard] progress " + shard_slice + " " + shard_name_start + " next_line=" + int_to_str(next_line) + " chunk=" + int_to_str(chunk_count))
                     if str_len(trim(chunk_text)) < 1 {
                         shard_done = true
                     }
