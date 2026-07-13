@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s run-gpu-pretrain-s
+	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -54,6 +54,10 @@ S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
+CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_cuda_train_bridge.cu
+CUDA_TRAIN_BRIDGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/cuda_train
+CUDA_TRAIN_BRIDGE_BIN := $(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_train_bridge$(BIN_EXT)
 CC ?= cc
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
 INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
@@ -678,6 +682,25 @@ build-s-ir-runner: check-bash
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 
+build-cuda-train-bridge: check-bash
+	@echo "Building native CUDA/cuBLAS train bridge..."
+	@if [ '$(PLATFORM)' != 'linux' ]; then \
+		echo "Error: NVIDIA CUDA Runtime/cuBLAS training is supported on Linux hosts only in this Makefile."; \
+		echo "       macOS can run the S launcher, but NVIDIA CUDA is not available on modern macOS."; \
+		exit 1; \
+	fi
+	@if [ -z '$(CUDA_NVCC)' ]; then \
+		echo "Error: nvcc not found. Install NVIDIA CUDA Toolkit, then run: make pretrain-gpu"; \
+		exit 1; \
+	fi
+	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
+	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		'$(CUDA_TRAIN_BRIDGE_SRC)' \
+		-lcublas \
+		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
+	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
+	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
+
 toolchain-s: check-bash
 	@echo "Building S-only toolchain coordinator..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/toolchain
@@ -882,6 +905,7 @@ run-s-pretrain-s: check-bash
 run-gpu-pretrain-s: check-bash
 	@echo "Building S GPU pretrain launcher..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/gpu_pretrain
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@if [ ! -f "$(S_COMPILER)" ]; then \
 		echo "Error: S compiler not found at $(S_COMPILER)"; \
@@ -900,9 +924,18 @@ run-gpu-pretrain-s: check-bash
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi
+	@$(MAKE) build-cuda-train-bridge
 	@echo "Running S GPU pretrain launcher..."
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		echo "[pretrain-gpu] queued shards: $$SHARD_COUNT"; \
+		echo "[pretrain-gpu] first shard: $$FIRST_SHARD"; \
+		echo "[pretrain-gpu] last shard: $$LAST_SHARD"; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_TRAIN_BRIDGE='$(CUDA_TRAIN_BRIDGE_BIN)' \
+		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
 		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
 		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-32}" \
@@ -910,7 +943,20 @@ run-gpu-pretrain-s: check-bash
 		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-8}" \
 		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
 		PRETRAIN_SHARD_LIMIT="$${PRETRAIN_SHARD_LIMIT:-$(PRETRAIN_SHARD_LIMIT)}" \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/gpu_pretrain/pretrain_gpu.ir' 2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/gpu_pretrain/pretrain_gpu.ir'; \
+		echo "[pretrain-gpu] launching native CUDA/cuBLAS trainer..."; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_DEVICE=0 \
+		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
+		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
+		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
+		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-32}" \
+		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-512}" \
+		NEURX_PRETRAIN_LR="$${NEURX_PRETRAIN_LR:-0.0002}" \
+		NEURX_PRETRAIN_LOG_INTERVAL="$${NEURX_PRETRAIN_LOG_INTERVAL:-1}" \
+		NEURX_CUDA_BATCH_PAIRS="$${NEURX_CUDA_BATCH_PAIRS:-256}" \
+		NEURX_CUDA_VOCAB_SIZE="$${NEURX_CUDA_VOCAB_SIZE:-4096}" \
+		'$(CUDA_TRAIN_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."

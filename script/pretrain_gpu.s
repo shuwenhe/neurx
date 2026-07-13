@@ -6,22 +6,21 @@ use std.io.println
 // GPU-accelerated pretraining with multi-shard parallel processing
 
 func main() {
-    println("[PRETRAIN-GPU] === NVIDIA CUDA Concurrent Pretraining (S) ===")
+    println("[PRETRAIN-GPU] === NVIDIA CUDA Runtime/cuBLAS Pretraining (S launcher) ===")
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
-    string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.txt")
-    string shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/NeurX-1.3")
     string progress_file = runtime_env_get("NEURX_PRETRAIN_PROGRESS_FILE", "")
+    string bridge = runtime_env_get("NEURX_CUDA_TRAIN_BRIDGE", project_root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
     
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", "1000000000"), 1000000000)
-    int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", "1"), 1)
     int num_gpus = parse_int(runtime_env_get("NEURX_NUM_GPUS", runtime_env_get("NEURX_CUDA_DEVICES", "1")), 1)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", "32"), 32)
-    int line_chunk = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "1"), 1)
-    int concurrent_shards = parse_int(runtime_env_get("NEURX_PRETRAIN_CONCURRENT_SHARDS", int_to_str(num_gpus)), num_gpus)
+    int seq_len = parse_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", "512"), 512)
+    int batch_pairs = parse_int(runtime_env_get("NEURX_CUDA_BATCH_PAIRS", "256"), 256)
+    int cuda_vocab = parse_int(runtime_env_get("NEURX_CUDA_VOCAB_SIZE", "4096"), 4096)
     
     int available_gpus = detect_gpus()
     if available_gpus <= 0 {
@@ -33,75 +32,36 @@ func main() {
         println("[PRETRAIN-GPU] Requested " + int_to_str(num_gpus) + " GPUs but only " + int_to_str(available_gpus) + " available")
         num_gpus = available_gpus
     }
-    if concurrent_shards < 1 {
-        concurrent_shards = num_gpus
-    }
     
     println("[PRETRAIN-GPU] Configuration:")
+    println("  - Native bridge: " + bridge)
+    println("  - Shard list: " + shard_list_file)
+    println("  - Output dir: " + output_dir)
     println("  - Max steps: " + int_to_str(max_steps))
-    println("  - Max docs: " + int_to_str(max_docs))
     println("  - GPUs: " + int_to_str(num_gpus))
-    println("  - Batch size: " + int_to_str(batch_size))
-    println("  - Line chunk: " + int_to_str(line_chunk))
-    println("  - Concurrent shards: " + int_to_str(concurrent_shards))
+    println("  - Micro batch: " + int_to_str(batch_size))
+    println("  - Seq len: " + int_to_str(seq_len))
+    println("  - CUDA batch pairs: " + int_to_str(batch_pairs))
+    println("  - CUDA vocab: " + int_to_str(cuda_vocab))
     println("  - Log interval: " + int_to_str(log_interval))
     
-    write_progress(progress_file, "gpu-train-start gpus=" + int_to_str(num_gpus) + " batch_size=" + int_to_str(batch_size))
-    
-    // Load shard list
     if !runtime_file_exists(shard_list_file) {
         println("[ERROR] Shard list not found: " + shard_list_file)
+        return
+    }
+    if !runtime_file_exists(bridge) {
+        println("[ERROR] CUDA train bridge not found: " + bridge)
+        println("[ERROR] Run make build-cuda-train-bridge or make pretrain-gpu.")
         return
     }
     
     string shard_list_text = runtime_read_text_file(shard_list_file)
     int shard_count = count_lines(shard_list_text)
     println("[PRETRAIN-GPU] Found " + int_to_str(shard_count) + " shards")
-    
-    initialize_gpu_contexts(num_gpus)
-    
-    int step = 0
-    int docs_seen = 0
-    int shard_index = 0
-    int current_gpu = 0
-    
-    while shard_index < shard_count && step < max_steps && docs_seen < max_docs {
-        string shard_path = get_shard_path(shard_list_text, shard_index)
-        
-        if !runtime_file_exists(shard_path) {
-            println("[PRETRAIN-GPU] Shard not found: " + shard_path)
-            shard_index = shard_index + 1
-            continue
-        }
-        
-        int shard_lines = process_shard_on_gpu(current_gpu, shard_index, shard_count, shard_path, batch_size, line_chunk, max_steps - step, max_docs - docs_seen)
-        
-        step = step + shard_lines
-        docs_seen = docs_seen + shard_lines
-        
-        if should_log_step(step, log_interval) {
-            string msg = "[GPU] step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " shard=" + int_to_str(shard_index) + "/" + int_to_str(shard_count) + " gpu=" + int_to_str(current_gpu)
-            println(msg)
-            write_progress(progress_file, msg)
-        }
-        
-        shard_index = shard_index + 1
-        current_gpu = current_gpu + 1
-        if current_gpu >= num_gpus {
-            current_gpu = 0
-        }
-    }
-    
-    synchronize_all_gpus(num_gpus)
-    
-    runtime_run_command_output("mkdir -p " + shell_escape(output_dir) + "; printf ok")
-    string checkpoint_json = "{\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"gpus\":" + int_to_str(num_gpus) + "}"
-    runtime_write_text_file(output_dir + "/checkpoint_gpu.json", checkpoint_json + "\n")
-    
-    println("[PRETRAIN-GPU] === Training Complete ===")
-    println("[PRETRAIN-GPU] Total steps: " + int_to_str(step))
-    println("[PRETRAIN-GPU] Total docs: " + int_to_str(docs_seen))
-    write_progress(progress_file, "gpu-train-complete steps=" + int_to_str(step) + " docs=" + int_to_str(docs_seen))
+
+    write_progress(progress_file, "gpu-launcher-ready shards=" + int_to_str(shard_count) + " bridge=" + bridge)
+    println("[PRETRAIN-GPU] S launcher validation complete.")
+    println("[PRETRAIN-GPU] Makefile now execs the native CUDA bridge directly for real-time terminal logs.")
 }
 
 // Detect number of available GPUs

@@ -1,0 +1,150 @@
+# NeurX CUDA Runtime Makefile
+# Integrates CUDA library build with S trainer compilation
+
+.PHONY: all build-cuda build-trainer train-gpu clean help
+
+NEURX_ROOT ?= $(CURDIR)
+CUDA_DIR = $(NEURX_ROOT)/cuda
+BUILD_DIR = $(NEURX_ROOT)/build
+CUDA_BUILD = $(BUILD_DIR)/cuda
+ARTIFACTS = $(NEURX_ROOT)/artifacts
+CUDA_LIB = $(ARTIFACTS)/lib/libneurx_cuda_runtime.so
+
+# NVIDIA CUDA settings
+CUDA_COMPUTE_CAP ?= 89  # RTX 4060 Ti is Ada (compute capability 89)
+NVCC_OPTS ?= -O3 -std=c++14 -gencode arch=compute_$(CUDA_COMPUTE_CAP),code=sm_$(CUDA_COMPUTE_CAP)
+
+# S Language settings
+S_COMPILER ?= /home/shuwen/.local/bin/s
+S_RUNNER ?= $(ARTIFACTS)/build/s_runner/s_ir_runner
+PRETRAIN_BATCH = 32
+PRETRAIN_SEQ_LEN = 256
+PRETRAIN_LR = 0.0002
+PRETRAIN_STEPS = 1000000000
+
+# ============================================================================
+# BUILD RULES
+# ============================================================================
+
+all: build-cuda build-trainer
+
+help:
+	@echo "NeurX CUDA Pretraining"
+	@echo "====================="
+	@echo ""
+	@echo "Targets:"
+	@echo "  make build-cuda         - Compile CUDA runtime library"
+	@echo "  make build-trainer      - Compile S trainer with CUDA support"
+	@echo "  make train-gpu          - Run GPU-accelerated training"
+	@echo "  make clean              - Remove build artifacts"
+	@echo ""
+	@echo "Environment Variables:"
+	@echo "  PRETRAIN_BATCH=N        - Batch size (default: $(PRETRAIN_BATCH))"
+	@echo "  PRETRAIN_SEQ_LEN=N      - Sequence length (default: $(PRETRAIN_SEQ_LEN))"
+	@echo "  PRETRAIN_LR=N           - Learning rate (default: $(PRETRAIN_LR))"
+	@echo "  PRETRAIN_STEPS=N        - Max steps (default: $(PRETRAIN_STEPS))"
+
+# ============================================================================
+# CUDA LIBRARY BUILD
+# ============================================================================
+
+build-cuda: $(CUDA_LIB)
+
+$(CUDA_LIB): $(CUDA_DIR)/cuda_runtime_binding.cu $(CUDA_DIR)/cuda_runtime_binding.h $(CUDA_DIR)/CMakeLists.txt
+	@echo "[CUDA] Building CUDA runtime library..."
+	@mkdir -p $(CUDA_BUILD)
+	@cd $(CUDA_BUILD) && \
+		cmake $(CUDA_DIR) \
+			-DCMAKE_INSTALL_PREFIX=$(ARTIFACTS) \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_CUDA_GENCODE="-gencode arch=compute_$(CUDA_COMPUTE_CAP),code=sm_$(CUDA_COMPUTE_CAP)" && \
+		cmake --build . --config Release -j $$(nproc) && \
+		cmake --install .
+	@echo "[CUDA] ✓ Library built: $@"
+
+# ============================================================================
+# S TRAINER COMPILATION
+# ============================================================================
+
+build-trainer: $(S_RUNNER) script/gpu_train_cuda.ir
+
+script/gpu_train_cuda.ir: script/gpu_train_cuda.s
+	@echo "[S] Compiling GPU trainer..."
+	@$(S_COMPILER) ir script/gpu_train_cuda.s > $@
+	@echo "[S] ✓ Compiled: $@"
+
+# ============================================================================
+# TRAINING EXECUTION
+# ============================================================================
+
+train-gpu: build-cuda build-trainer
+	@echo ""
+	@echo "=== GPU-Accelerated Pretraining ==="
+	@echo "Batch size: $(PRETRAIN_BATCH)"
+	@echo "Sequence length: $(PRETRAIN_SEQ_LEN)"
+	@echo "Learning rate: $(PRETRAIN_LR)"
+	@echo "Max steps: $(PRETRAIN_STEPS)"
+	@echo ""
+	@export NEURX_PRETRAIN_BATCH_SIZE=$(PRETRAIN_BATCH) && \
+	export NEURX_PRETRAIN_SEQ_LEN=$(PRETRAIN_SEQ_LEN) && \
+	export NEURX_PRETRAIN_LR=$(PRETRAIN_LR) && \
+	export NEURX_PRETRAIN_STEPS=$(PRETRAIN_STEPS) && \
+	export LD_LIBRARY_PATH=$(ARTIFACTS)/lib:$$LD_LIBRARY_PATH && \
+	$(S_RUNNER) script/gpu_train_cuda.ir
+
+# ============================================================================
+# VERIFICATION
+# ============================================================================
+
+check-cuda:
+	@echo "Checking CUDA setup..."
+	@which nvcc || (echo "ERROR: nvcc not found"; exit 1)
+	@nvcc --version
+	@nvidia-smi -L || (echo "ERROR: No NVIDIA GPUs found"; exit 1)
+
+check-s:
+	@echo "Checking S compiler..."
+	@which $(S_COMPILER) || (echo "ERROR: S compiler not found"; exit 1)
+	@$(S_COMPILER) --version || echo "S version info not available"
+
+check-all: check-cuda check-s
+	@echo "✓ CUDA: Found"
+	@echo "✓ S compiler: Found"
+
+# ============================================================================
+# CLEANUP
+# ============================================================================
+
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@rm -f script/gpu_train_cuda.ir
+	@echo "✓ Clean complete"
+
+clean-install:
+	@echo "Cleaning installed libraries..."
+	@rm -rf $(ARTIFACTS)/lib/libneurx_cuda_runtime*
+	@rm -rf $(ARTIFACTS)/include/cuda_runtime_binding.h
+	@echo "✓ Install cleaned"
+
+distclean: clean clean-install
+	@echo "✓ Full clean complete"
+
+# ============================================================================
+# DEBUG
+# ============================================================================
+
+debug-cuda:
+	@echo "CUDA Configuration:"
+	@echo "  Compute capability: $(CUDA_COMPUTE_CAP)"
+	@echo "  NVCC options: $(NVCC_OPTS)"
+	@echo "  Build directory: $(CUDA_BUILD)"
+	@echo "  Library path: $(CUDA_LIB)"
+
+debug-s:
+	@echo "S Configuration:"
+	@echo "  Compiler: $(S_COMPILER)"
+	@echo "  Runner: $(S_RUNNER)"
+	@echo "  Script: script/gpu_train_cuda.s"
+
+.PHONY: check-cuda check-s check-all debug-cuda debug-s clean clean-install distclean
