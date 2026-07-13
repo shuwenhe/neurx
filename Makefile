@@ -804,7 +804,18 @@ run-s-pretrain-s: check-bash
 	@echo "Running S real pretrain runner..."
 	@cd '$(CURDIR_UNIX)' && \
 		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		echo "[pretrain] queued shards: $$SHARD_COUNT"; \
+		echo "[pretrain] runner: $(S_RUNNER_BIN)"; \
+		echo "[pretrain] ir: $(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir"; \
+		echo "[pretrain] output: $${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}"; \
+		echo "[pretrain] first shard: $$FIRST_SHARD"; \
+		echo "[pretrain] last shard: $$LAST_SHARD"; \
+		echo "[pretrain] launching S runner..."; \
+		( while true; do sleep 10; echo "[pretrain] runner active: waiting for trainer output or current shard completion..."; done ) & \
+		HEARTBEAT_PID=$$!; \
+		trap 'kill '"$$HEARTBEAT_PID"' >/dev/null 2>&1 || true' EXIT; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
@@ -816,7 +827,10 @@ run-s-pretrain-s: check-bash
 		NEURX_PRETRAIN_JSON_SCAN_CAP="$${NEURX_PRETRAIN_JSON_SCAN_CAP:-$(PRETRAIN_JSON_SCAN_CAP)}" \
 		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
 		NEURX_PRETRAIN_SHARD_INDEX_MODE="$${NEURX_PRETRAIN_SHARD_INDEX_MODE:-$(PRETRAIN_SHARD_INDEX_MODE)}" \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1 | tee -a $(LOG_DIR)/run_s_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1 | tee -a $(LOG_DIR)/run_s_pretrain_$(shell date +%Y%m%d_%H%M%S).log; \
+		RUN_STATUS=$${PIPESTATUS[0]}; \
+		kill "$$HEARTBEAT_PID" >/dev/null 2>&1 || true; \
+		exit "$$RUN_STATUS"
 
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."
