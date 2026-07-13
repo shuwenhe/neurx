@@ -806,6 +806,10 @@ run-s-pretrain-s: check-bash
 		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		STARTUP_MARKER_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/startup.marker'; \
+		PROGRESS_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/progress.txt'; \
+		: > "$$STARTUP_MARKER_FILE"; \
+		: > "$$PROGRESS_FILE"; \
 		echo "[pretrain] queued shards: $$SHARD_COUNT"; \
 		echo "[pretrain] runner: $(S_RUNNER_BIN)"; \
 		echo "[pretrain] ir: $(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir"; \
@@ -813,10 +817,22 @@ run-s-pretrain-s: check-bash
 		echo "[pretrain] first shard: $$FIRST_SHARD"; \
 		echo "[pretrain] last shard: $$LAST_SHARD"; \
 		echo "[pretrain] launching S runner..."; \
-		( while true; do sleep 10; echo "[pretrain] runner active: waiting for trainer output or current shard completion..."; done ) & \
+		( while true; do \
+			sleep 10; \
+			if [ -s "$$PROGRESS_FILE" ]; then \
+				PROGRESS_LINE="$$(tail -n 1 "$$PROGRESS_FILE" 2>/dev/null)"; \
+				echo "[pretrain] runner active: $$PROGRESS_LINE"; \
+			elif [ -s "$$STARTUP_MARKER_FILE" ]; then \
+				echo "[pretrain] runner active: trainer main entered, waiting for first progress record..."; \
+			else \
+				echo "[pretrain] runner active: S runner launched, trainer main not reached yet..."; \
+			fi; \
+		done ) & \
 		HEARTBEAT_PID=$$!; \
 		trap 'kill '"$$HEARTBEAT_PID"' >/dev/null 2>&1 || true' EXIT; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_STARTUP_MARKER_FILE="$$STARTUP_MARKER_FILE" \
+		NEURX_PRETRAIN_PROGRESS_FILE="$$PROGRESS_FILE" \
 		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_SHARD_COUNT="$$SHARD_COUNT" \
