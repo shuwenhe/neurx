@@ -6,9 +6,11 @@ use std.io.println
 func main() {
     println("[TRAINER] Initializing minimal_train.s...")
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
+    string progress_file = runtime_env_get("NEURX_PRETRAIN_PROGRESS_FILE", "")
     if str_len(startup_marker_file) > 0 {
-        runtime_run_command_output("echo 'started' > " + shell_escape(startup_marker_file))
+        runtime_write_text_file(startup_marker_file, "started\n")
     }
+    write_progress(progress_file, "trainer-main-entered")
     
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
@@ -36,13 +38,17 @@ func main() {
     int shard_index_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_INDEX_MODE", "1"), 1)
 
     println("[TRAINER] Checking manifest exists...")
+    write_progress(progress_file, "checking-manifest path=" + manifest_path)
     if !runtime_file_exists(manifest_path) {
         println("[ERROR] Manifest not found: " + manifest_path)
+        write_progress(progress_file, "error manifest-not-found path=" + manifest_path)
         return
     }
     println("[TRAINER] Manifest found!")
+    write_progress(progress_file, "manifest-ok path=" + manifest_path)
 
     println("[TRAINER] Loading shard list...")
+    write_progress(progress_file, "loading-shard-list file=" + shard_list_file)
     int shard_count = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_COUNT", "0"), 0)
     println("[TRAINER] Shard count from env: " + int_to_str(shard_count))
     string shard_list_text = ""
@@ -63,9 +69,11 @@ func main() {
 
     if shard_count == 0 {
         println("[ERROR] No shards found!")
+        write_progress(progress_file, "error no-shards-found")
         return
     }
     println("[TRAINER] Starting training with " + int_to_str(shard_count) + " shards")
+    write_progress(progress_file, "queue-ready shards=" + int_to_str(shard_count))
 
     int window = batch_size * seq_len
     if window < 1 {
@@ -104,9 +112,11 @@ func main() {
         string shard_slice = int_to_str(last_shard_no) + "/" + int_to_str(shard_count)
         string shard_name_start = extract_filename(shard_path)
         println("[shard] loading " + shard_slice + " " + shard_name_start)
+        write_progress(progress_file, "loading shard=" + shard_slice + " file=" + shard_name_start + " step=" + int_to_str(step))
 
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
+            write_progress(progress_file, "error shard-not-found shard=" + shard_slice + " path=" + shard_path)
             shard_index = shard_index + 1
             continue
         }
@@ -123,6 +133,8 @@ func main() {
             string chunk_cmd = ""
             if fast_prefix_mode > 0 {
                 chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " prefix_bytes=" + int_to_str(json_scan_cap) + " chunk=" + int_to_str(chunk_count))
             } else {
                 int last_line = next_line + line_chunk_size - 1
                 if json_scan_cap > 0 {
@@ -130,6 +142,8 @@ func main() {
                 } else {
                     chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
                 }
+                println("[shard] reading " + shard_slice + " " + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
+                write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " lines=" + int_to_str(next_line) + "-" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
             }
             
             string chunk_text = runtime_run_command_output(chunk_cmd)
@@ -182,7 +196,9 @@ func main() {
                                     last_loss = batch_loss / pair_count as float
                                     last_lr = lr
                                     if should_log_step(step, log_interval) {
-                                        println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start))
+                                        string progress_line = training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start)
+                                        println(progress_line)
+                                        write_progress(progress_file, progress_line)
                                     }
                                     pair_count = 0
                                     batch_loss = 0.0
@@ -224,7 +240,9 @@ func main() {
                                 last_loss = batch_loss / pair_count as float
                                 last_lr = lr2
                                 if should_log_step(step, log_interval) {
-                                    println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start))
+                                    string progress_line2 = training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start)
+                                    println(progress_line2)
+                                    write_progress(progress_file, progress_line2)
                                 }
                             }
                             if docs_seen >= max_docs {
@@ -247,7 +265,9 @@ func main() {
         }
 
         string shard_name_complete = extract_filename(shard_path)
-        println(shard_complete_line(last_shard_no, shard_count, shard_name_complete, shard_docs, shard_tokens, step - shard_start_step, step, docs_seen, tokens_seen, last_loss))
+        string shard_done_line = shard_complete_line(last_shard_no, shard_count, shard_name_complete, shard_docs, shard_tokens, step - shard_start_step, step, docs_seen, tokens_seen, last_loss)
+        println(shard_done_line)
+        write_progress(progress_file, shard_done_line)
         shard_index = shard_index + 1
     }
 
@@ -265,7 +285,9 @@ func main() {
         last_loss = batch_loss / pair_count as float
         last_lr = lr
         if should_log_step(step, log_interval) {
-            println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, extract_filename(last_shard)))
+            string final_progress_line = training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, extract_filename(last_shard))
+            println(final_progress_line)
+            write_progress(progress_file, final_progress_line)
         }
     }
 
@@ -286,6 +308,13 @@ func main() {
     println("[pretrain] model: " + model_name)
     println("[pretrain] output: " + output_dir)
     println("[pretrain] checkpoint: " + final_model_path)
+    write_progress(progress_file, "complete step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " checkpoint=" + final_model_path)
+}
+
+func write_progress(string path, string text) {
+    if str_len(path) > 0 {
+        runtime_write_text_file(path, text + "\n")
+    }
 }
 
 func should_log_step(int step, int log_interval) bool {
