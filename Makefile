@@ -801,9 +801,12 @@ run-s-pretrain-s: check-bash
 	fi
 	@echo "Running S real pretrain runner..."
 	@cd '$(CURDIR_UNIX)' && \
+		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		echo "[pretrain] queued shards: $$SHARD_COUNT"; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
+		NEURX_PRETRAIN_SHARD_COUNT="$$SHARD_COUNT" \
 		NEURX_PRETRAIN_MODEL_NAME="$${NEURX_PRETRAIN_MODEL_NAME:-$(PRETRAIN_MODEL_NAME)}" \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
 		NEURX_PRETRAIN_FAST_PREFIX="$${NEURX_PRETRAIN_FAST_PREFIX:-$(PRETRAIN_FAST_PREFIX)}" \

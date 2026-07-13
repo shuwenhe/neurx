@@ -35,16 +35,18 @@ func main() {
         return
     }
 
+    int shard_count = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_COUNT", "0"), 0)
     string shard_list_text = ""
-    if runtime_file_exists(shard_list_file) {
+    if shard_count <= 0 && runtime_file_exists(shard_list_file) {
         shard_list_text = runtime_read_text_file(shard_list_file)
     }
-    if !has_non_space(shard_list_text) {
+    if shard_count <= 0 && !has_non_space(shard_list_text) {
         string shard_cmd = "find " + shard_dir + " -maxdepth 1 -name 'shard_*.jsonl' -print | sort"
         shard_list_text = runtime_run_command_output(shard_cmd)
     }
-    
-    int shard_count = count_non_empty_lines(shard_list_text)
+    if shard_count <= 0 {
+        shard_count = count_non_empty_lines(shard_list_text)
+    }
 
     if shard_count == 0 {
         return
@@ -81,7 +83,7 @@ func main() {
     int last_shard_no = 0
     string last_shard = ""
     while shard_index < shard_count && step < max_steps {
-        string shard_path = shard_path_at(shard_list_text, shard_index)
+        string shard_path = shard_path_for_index(shard_list_text, shard_list_file, shard_index)
         last_shard = shard_path
         last_shard_no = shard_index + 1
         string shard_slice = int_to_str(last_shard_no) + "/" + int_to_str(shard_count)
@@ -407,6 +409,13 @@ func shard_path_at(string shard_list, int index) string {
         i = i + 1
     }
     ""
+}
+
+func shard_path_for_index(string shard_list, string shard_list_file, int index) string {
+    if has_non_space(shard_list) {
+        return shard_path_at(shard_list, index)
+    }
+    trim(runtime_run_command_output("sed -n '" + int_to_str(index + 1) + "p' " + shell_escape(shard_list_file)))
 }
 
 func extract_filename(string path) string {
