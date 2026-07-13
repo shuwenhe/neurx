@@ -42,14 +42,19 @@ RED := \033[0;31m
 NC := \033[0m  # No Color
 
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
-S_REPO_ROOT := $(CURDIR_UNIX)/../s
+UNAME_S := $(shell uname -s 2>/dev/null)
+PLATFORM := $(if $(filter Darwin,$(UNAME_S)),macos,$(if $(filter Linux,$(UNAME_S)),linux,linux))
+BIN_EXT := $(if $(filter macos,$(PLATFORM)),,)
+S_REPO_ROOT ?= $(firstword $(wildcard /home/shuwen/s /home/shuwen/mining $(CURDIR_UNIX)/../../s $(CURDIR_UNIX)/../s /home/shuwen/shuwen/train/s) $(CURDIR_UNIX)/../s)
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
 S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
+S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
-S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner
+S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+CC ?= cc
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
 INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
 INDUSTRIAL_CHECKPOINT_DIR ?= $(CURDIR_UNIX)/checkpoint/industrial_1t
@@ -161,7 +166,7 @@ chat: check-bash
 
 
 shard: check-bash
-	@echo "Building NeurX shard entry..."
+	@echo "Building NeurX shard entry ($(PLATFORM))..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
 	@mkdir -p $(LOG_DIR)
 	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
@@ -171,12 +176,12 @@ shard: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
+		$(S_COMPILER) ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
-	@echo "Running Wikipedia shard processor..."
-	@SHARD_LOG="$(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log"; \
-	SHARD_PROGRESS_LOG="$(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).progress.log"; \
+	@echo "Running Wikipedia shard processor on $(PLATFORM)..."
+	@SHARD_LOG="$(LOG_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).log"; \
+	SHARD_PROGRESS_LOG="$(LOG_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).progress.log"; \
 	echo "Shard processing log: $$SHARD_LOG"; \
 	echo "Shard progress log: $$SHARD_PROGRESS_LOG"; \
 	: > "$$SHARD_PROGRESS_LOG"; \
@@ -378,7 +383,7 @@ run-large-pretrain-s: check-bash
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) '$(PRETRAIN_ENTRY_SOURCE)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 && \
+		$(S_COMPILER) ir '$(PRETRAIN_ENTRY_SOURCE)' -o '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir'
 	@echo "Building large pretrain executable..."
 	@cd '$(S_COMPILER_EMIT_CWD)' && \
@@ -394,7 +399,7 @@ build-pretrain-manifest-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) 'script/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
+		$(S_COMPILER) ir 'script/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
 	@echo "Running pretrain manifest entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -618,7 +623,7 @@ build-industrial-ops: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) script/industrial_ops_runner.s $(INDUSTRIAL_OPS_IR) 2>&1
+		$(S_COMPILER) ir script/industrial_ops_runner.s -o $(INDUSTRIAL_OPS_IR) 2>&1
 	@cd '$(S_COMPILER_EMIT_CWD)' && \
 		$(S_COMPILER) --emit-bin '$(INDUSTRIAL_OPS_IR)' '$(INDUSTRIAL_OPS_BIN)' 2>&1
 	@if [ ! -f "$(INDUSTRIAL_OPS_BIN)" ]; then \
@@ -642,10 +647,18 @@ industrial-ops: build-industrial-ops
 build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
-	@cd '$(CURDIR_UNIX)' && \
-		'$(S_COMPILER)' '$(S_RUNNER_SRC)' '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' 2>&1 && \
-		cd '$(S_COMPILER_EMIT_CWD)' && \
-		'$(S_COMPILER)' --emit-bin '$(S_RUNNER_BUILD_DIR)/s_ir_runner.ir' '$(S_RUNNER_BIN)' 2>&1 && \
+	@'$(CC)' -std=c11 -O2 -Wall -Wextra -Werror \
+		-I'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed' \
+		-o '$(S_RUNNER_BIN)' \
+		'$(S_RUNNER_C_SRC)' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/runtime/runtime.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/error/error.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/lexical/lexer.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/syntax/parser.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/semantic/analyzer.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/intermediate/ir.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/code/generator.c' \
+		2>&1 && \
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 

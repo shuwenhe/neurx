@@ -163,7 +163,7 @@ func run_wikipedia() int {
     }
 
     string compile_output = runtime_run_command_output(
-        shell_escape(compiler) + " " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
+        shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia_simple.ir")
     )
     if !runtime_file_exists(build_dir + "/shard_wikipedia_simple.ir") {
         println("Error: failed to compile shard_wikipedia_simple.s")
