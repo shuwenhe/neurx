@@ -1,8 +1,10 @@
 package main
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
+use std.io.println
 
 func main() {
+    println("[TRAINER] Initializing minimal_train.s...")
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
     if str_len(startup_marker_file) > 0 {
         runtime_run_command_output("echo 'started' > " + shell_escape(startup_marker_file))
@@ -11,6 +13,7 @@ func main() {
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    println("[TRAINER] Manifest: " + manifest_path)
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/" + model_name)
@@ -30,27 +33,39 @@ func main() {
     int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "0"), 0)
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
+    int shard_index_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_INDEX_MODE", "1"), 1)
 
+    println("[TRAINER] Checking manifest exists...")
     if !runtime_file_exists(manifest_path) {
+        println("[ERROR] Manifest not found: " + manifest_path)
         return
     }
+    println("[TRAINER] Manifest found!")
 
+    println("[TRAINER] Loading shard list...")
     int shard_count = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_COUNT", "0"), 0)
+    println("[TRAINER] Shard count from env: " + int_to_str(shard_count))
     string shard_list_text = ""
     if shard_count <= 0 && runtime_file_exists(shard_list_file) {
+        println("[TRAINER] Reading shard list from: " + shard_list_file)
         shard_list_text = runtime_read_text_file(shard_list_file)
+        println("[TRAINER] Shard list loaded, counting lines...")
     }
     if shard_count <= 0 && !has_non_space(shard_list_text) {
+        println("[TRAINER] Discovering shards via find command...")
         string shard_cmd = "find " + shard_dir + " -maxdepth 1 -name 'shard_*.jsonl' -print | sort"
         shard_list_text = runtime_run_command_output(shard_cmd)
     }
     if shard_count <= 0 {
         shard_count = count_non_empty_lines(shard_list_text)
+        println("[TRAINER] Counted shards: " + int_to_str(shard_count))
     }
 
     if shard_count == 0 {
+        println("[ERROR] No shards found!")
         return
     }
+    println("[TRAINER] Starting training with " + int_to_str(shard_count) + " shards")
 
     int window = batch_size * seq_len
     if window < 1 {
@@ -83,11 +98,12 @@ func main() {
     int last_shard_no = 0
     string last_shard = ""
     while shard_index < shard_count && step < max_steps {
-        string shard_path = shard_path_for_index(shard_list_text, shard_list_file, shard_index)
+        string shard_path = shard_path_for_index(shard_list_text, shard_list_file, shard_dir, shard_index, shard_index_mode)
         last_shard = shard_path
         last_shard_no = shard_index + 1
         string shard_slice = int_to_str(last_shard_no) + "/" + int_to_str(shard_count)
         string shard_name_start = extract_filename(shard_path)
+        println("[shard] loading " + shard_slice + " " + shard_name_start)
 
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
@@ -411,11 +427,26 @@ func shard_path_at(string shard_list, int index) string {
     ""
 }
 
-func shard_path_for_index(string shard_list, string shard_list_file, int index) string {
+func shard_path_for_index(string shard_list, string shard_list_file, string shard_dir, int index, int index_mode) string {
+    if index_mode > 0 {
+        return shard_dir + "/shard_" + zero_pad_int(index, 5) + ".jsonl"
+    }
     if has_non_space(shard_list) {
         return shard_path_at(shard_list, index)
     }
     trim(runtime_run_command_output("sed -n '" + int_to_str(index + 1) + "p' " + shell_escape(shard_list_file)))
+}
+
+func zero_pad_int(int value, int width) string {
+    string digits = int_to_str(value)
+    string out = ""
+    int missing = width - str_len(digits)
+    int i = 0
+    while i < missing {
+        out = out + "0"
+        i = i + 1
+    }
+    out + digits
 }
 
 func extract_filename(string path) string {
