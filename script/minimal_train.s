@@ -147,11 +147,14 @@ func main() {
             }
             
             string chunk_text = runtime_run_command_output(chunk_cmd)
+            int chunk_text_len = str_len(chunk_text)
+            println("[shard] read-complete " + shard_slice + " " + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len))
+            write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_text_len) + " step=" + int_to_str(step))
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
                 shard_done = true
             } else {
-                int chunk_len = str_len(chunk_text)
+                int chunk_len = chunk_text_len
                 int i = 0
                 int line_start = 0
                 while i <= chunk_len && step < max_steps && docs_seen < max_docs {
