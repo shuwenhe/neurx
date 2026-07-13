@@ -25,9 +25,9 @@ func main() {
     int max_docs = parse_int(runtime_env_get("NEURX_PRETRAIN_MAX_DOCS", "100000000"), 100000000)
     int step_window = parse_int(runtime_env_get("NEURX_PRETRAIN_STEP_TOKENS", "256"), 256)
     int line_chunk_size = parse_int(runtime_env_get("NEURX_PRETRAIN_LINE_CHUNK", "32"), 32)
-    int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "256"), 256)
-    int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "4096"), 4096)
-    int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "1"), 1)
+    int text_token_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_TEXT_TOKEN_CAP", "0"), 0)
+    int json_scan_cap = parse_int(runtime_env_get("NEURX_PRETRAIN_JSON_SCAN_CAP", "0"), 0)
+    int fast_prefix_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_FAST_PREFIX", "0"), 0)
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
 
@@ -96,6 +96,7 @@ func main() {
         println("[" + shard_slice + "] " + shard_name_start)
         int shard_docs = 0
         int shard_tokens = 0
+        int shard_start_step = step
         int next_line = 1
         bool shard_done = false
         int chunk_count = 0
@@ -106,7 +107,11 @@ func main() {
                 chunk_cmd = "head -c " + int_to_str(json_scan_cap) + " " + shard_path
             } else {
                 int last_line = next_line + line_chunk_size - 1
-                chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path + " | cut -c1-" + int_to_str(json_scan_cap)
+                if json_scan_cap > 0 {
+                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path + " | cut -c1-" + int_to_str(json_scan_cap)
+                } else {
+                    chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shard_path
+                }
             }
             
             string chunk_text = runtime_run_command_output(chunk_cmd)
@@ -224,6 +229,7 @@ func main() {
         }
 
         string shard_name_complete = extract_filename(shard_path)
+        println(shard_complete_line(last_shard_no, shard_count, shard_name_complete, shard_docs, shard_tokens, step - shard_start_step, step, docs_seen, tokens_seen, last_loss))
         shard_index = shard_index + 1
     }
 
@@ -279,6 +285,18 @@ func training_progress_line(int step, int max_steps, int docs_seen, int tokens_s
         " docs=" + int_to_str(docs_seen) +
         " tokens=" + int_to_str(tokens_seen) +
         " shard=" + shard_name
+}
+
+func shard_complete_line(int shard_no, int shard_count, string shard_name, int shard_docs, int shard_tokens, int shard_steps, int total_steps, int total_docs, int total_tokens, float loss) string {
+    "[shard] done " + int_to_str(shard_no) + "/" + int_to_str(shard_count) +
+        " shard=" + shard_name +
+        " shard_steps=" + int_to_str(shard_steps) +
+        " shard_docs=" + int_to_str(shard_docs) +
+        " shard_tokens=" + int_to_str(shard_tokens) +
+        " total_steps=" + int_to_str(total_steps) +
+        " total_docs=" + int_to_str(total_docs) +
+        " total_tokens=" + int_to_str(total_tokens) +
+        " loss=" + fmt_float(loss, 6)
 }
 
 func shard_progress_bar(int done, int total, int width) string {

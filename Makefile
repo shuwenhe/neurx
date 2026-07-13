@@ -75,8 +75,12 @@ PRETRAIN_TEST_SPLIT := $(PRETRAIN_DATA_ROOT)/cleaned/test.jsonl
 PRETRAIN_MANIFEST := $(PRETRAIN_DATA_ROOT)/manifest.json
 PRETRAIN_SHARD_DIR := $(PRETRAIN_DATA_ROOT)/shard
 PRETRAIN_SHARD_DOCS_PER_FILE ?= 5000
-PRETRAIN_STEPS ?= 64
-PRETRAIN_SHARD_LIMIT ?= $(PRETRAIN_STEPS)
+PRETRAIN_STEPS ?= 1000000000
+PRETRAIN_SHARD_LIMIT ?= all
+PRETRAIN_FAST_PREFIX ?= 0
+PRETRAIN_TEXT_TOKEN_CAP ?= 0
+PRETRAIN_JSON_SCAN_CAP ?= 0
+PRETRAIN_LINE_CHUNK ?= 32
 PRETRAIN_MODEL_NAME ?= NeurX-1.3
 PRETRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/checkpoint/$(PRETRAIN_MODEL_NAME)
 PRETRAIN_LOG_DIR := $(PRETRAIN_OUTPUT_DIR)/logs
@@ -120,6 +124,10 @@ pretrain: check-bash
 		NEURX_PRETRAIN_WEIGHT_DECAY=0.01 \
 		NEURX_PRETRAIN_LOG_INTERVAL=1 \
 		NEURX_PRETRAIN_SAVE_INTERVAL=16 \
+		NEURX_PRETRAIN_FAST_PREFIX='$(PRETRAIN_FAST_PREFIX)' \
+		NEURX_PRETRAIN_TEXT_TOKEN_CAP='$(PRETRAIN_TEXT_TOKEN_CAP)' \
+		NEURX_PRETRAIN_JSON_SCAN_CAP='$(PRETRAIN_JSON_SCAN_CAP)' \
+		NEURX_PRETRAIN_LINE_CHUNK='$(PRETRAIN_LINE_CHUNK)' \
 		NEURX_LLM_VOCAB_SIZE=16000 \
 		$(MAKE) run-s-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
 
@@ -783,7 +791,11 @@ run-s-pretrain-s: check-bash
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
 		$(S_COMPILER) ir 'script/minimal_train.s' -o 'artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1
 	@cd '$(CURDIR_UNIX)' && \
-		find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort | sed -n '1,$(PRETRAIN_SHARD_LIMIT)p' > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'
+		if [ '$(PRETRAIN_SHARD_LIMIT)' = 'all' ]; then \
+			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+		else \
+			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort | sed -n '1,$(PRETRAIN_SHARD_LIMIT)p' > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+		fi
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi
@@ -794,6 +806,10 @@ run-s-pretrain-s: check-bash
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_MODEL_NAME="$${NEURX_PRETRAIN_MODEL_NAME:-$(PRETRAIN_MODEL_NAME)}" \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
+		NEURX_PRETRAIN_FAST_PREFIX="$${NEURX_PRETRAIN_FAST_PREFIX:-$(PRETRAIN_FAST_PREFIX)}" \
+		NEURX_PRETRAIN_TEXT_TOKEN_CAP="$${NEURX_PRETRAIN_TEXT_TOKEN_CAP:-$(PRETRAIN_TEXT_TOKEN_CAP)}" \
+		NEURX_PRETRAIN_JSON_SCAN_CAP="$${NEURX_PRETRAIN_JSON_SCAN_CAP:-$(PRETRAIN_JSON_SCAN_CAP)}" \
+		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator/minimal_train.ir' 2>&1 | tee -a $(LOG_DIR)/run_s_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 compile-all-components-s: check-bash
