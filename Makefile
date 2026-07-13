@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s
+	build-pretrain-manifest-s run-gpu-pretrain-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -93,6 +93,7 @@ NEURX_SHARD_CMD ?= wikipedia
 help:
 	@echo "  make shard"
 	@echo "  make pretrain"
+	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
 	@echo "  make infer"
 	@echo "  make chat"
@@ -132,6 +133,27 @@ pretrain: check-bash
 		NEURX_PRETRAIN_SHARD_INDEX_MODE='$(PRETRAIN_SHARD_INDEX_MODE)' \
 		NEURX_LLM_VOCAB_SIZE=16000 \
 		$(MAKE) run-s-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
+
+pretrain-gpu: check-bash
+	@mkdir -p $(PRETRAIN_LOG_DIR)
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
+		if [ "$${GPU_COUNT:-0}" -le 0 ]; then \
+			echo "error: NVIDIA GPU driver is not available; nvidia-smi detected 0 GPUs."; \
+			echo "       Fix NVIDIA driver/CUDA runtime, then run: make pretrain-gpu"; \
+			exit 1; \
+		fi; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_DEVICE_COUNT="$$GPU_COUNT" \
+		NEURX_NUM_GPUS="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		NEURX_PRETRAIN_OUTPUT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_PRETRAIN_STEPS='$(PRETRAIN_STEPS)' \
+		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-32}" \
+		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-512}" \
+		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-8}" \
+		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
+		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
+		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 
 
 posttrain: check-bash
@@ -856,6 +878,39 @@ run-s-pretrain-s: check-bash
 		RUN_STATUS=$${PIPESTATUS[0]}; \
 		kill "$$HEARTBEAT_PID" >/dev/null 2>&1 || true; \
 		exit "$$RUN_STATUS"
+
+run-gpu-pretrain-s: check-bash
+	@echo "Building S GPU pretrain launcher..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/gpu_pretrain
+	@mkdir -p $(LOG_DIR)
+	@if [ ! -f "$(S_COMPILER)" ]; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/pretrain_gpu.s' -o 'artifacts/build/gpu_pretrain/pretrain_gpu.ir' 2>&1
+	@cd '$(CURDIR_UNIX)' && \
+		if [ '$(PRETRAIN_SHARD_LIMIT)' = 'all' ]; then \
+			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+		else \
+			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort | sed -n '1,$(PRETRAIN_SHARD_LIMIT)p' > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+		fi
+	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
+		$(MAKE) build-s-ir-runner; \
+	fi
+	@echo "Running S GPU pretrain launcher..."
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
+		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
+		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-32}" \
+		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-512}" \
+		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-8}" \
+		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
+		PRETRAIN_SHARD_LIMIT="$${PRETRAIN_SHARD_LIMIT:-$(PRETRAIN_SHARD_LIMIT)}" \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/gpu_pretrain/pretrain_gpu.ir' 2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."

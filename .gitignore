@@ -244,6 +244,8 @@ output/
 script/debug_train.s
 script/simple_train.s
 script/test_read.s
+script/train_gpu.py
+script/run_gpu_pretrain.s
 
 # Common CMake / build files
 CMakeFiles/
