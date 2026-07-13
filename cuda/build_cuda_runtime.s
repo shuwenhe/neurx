@@ -1,5 +1,5 @@
 // ============================================================================
-// Build CUDA Runtime - S Language Implementation (replaces build_cuda_runtime_*.sh)
+// Build CUDA Runtime - S Language Implementation
 // ============================================================================
 
 package main
@@ -8,7 +8,9 @@ use std.io.println
 use neurx.runtime.io.{
     runtime_env_get,
     runtime_file_exists,
+    runtime_make_dirs,
     runtime_run_command_output,
+    runtime_write_text_file,
 }
 
 func main() {
@@ -49,8 +51,8 @@ func main() {
     
     println("[OK] Runtime compiled")
     
-    println("[2/2] Creating environment script...")
-    create_runtime_env_sh(build_dir, cuda_lib)
+    println("[2/2] Creating environment metadata...")
+    create_runtime_env_metadata(build_dir, cuda_lib)
     
     println("")
     println("[SUCCESS] libcuda_runtime.so created")
@@ -75,16 +77,14 @@ func get_cuda_home() string {
     "/usr"
 }
 
-func create_runtime_env_sh(string build_dir, string cuda_lib) {
-    string script = "#!/bin/bash" + chr(10) +
-        "export LD_LIBRARY_PATH=\"" + cuda_lib + ":" + build_dir + ":$LD_LIBRARY_PATH\"" + chr(10) +
-        "echo \"[CUDA Runtime] Environment configured\"" + chr(10)
-    
-    runtime_run_command_output("bash -c 'echo " + escape_quotes(script) + " > " + build_dir + "/env.sh && chmod +x " + build_dir + "/env.sh' 2>&1")
+func create_runtime_env_metadata(string build_dir, string cuda_lib) {
+    string text = "CUDA_RUNTIME_LIB=" + build_dir + "/libcuda_runtime.so" + chr(10) +
+        "CUDA_LIBRARY_PATH=" + cuda_lib + ":" + build_dir + chr(10)
+    runtime_write_text_file(build_dir + "/env.txt", text)
 }
 
 func create_dir(string path) {
-    runtime_run_command_output("mkdir -p " + path + " 2>&1")
+    runtime_make_dirs(path)
 }
 
 func str_len(string s) int {
