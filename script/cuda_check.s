@@ -29,7 +29,7 @@ func main() {
     println("✓ CUDA environment verification complete")
     println("")
     println("To run full verification, execute:")
-    println("  bash cuda/verify_environment.sh")
+    println("  make cuda-verify-s")
     println("")
     println("GPU Training Setup:")
     println("  make pretrain-gpu")

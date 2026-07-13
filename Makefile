@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s
+	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -700,6 +700,44 @@ build-cuda-train-bridge: check-bash
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
+
+cuda-tools-s: check-bash
+	@echo "Building S CUDA tools entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/cuda_tools
+	@mkdir -p $(LOG_DIR)
+	@if [ ! -f "$(S_COMPILER)" ]; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
+	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
+		$(MAKE) build-s-ir-runner; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_TOOL="$${NEURX_CUDA_TOOL:-verify}" \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/cuda_tools/cuda_tools.ir' 2>&1 | tee -a $(LOG_DIR)/cuda_tools_$(shell date +%Y%m%d_%H%M%S).log
+
+cuda-verify-s:
+	@NEURX_CUDA_TOOL=verify $(MAKE) cuda-tools-s
+
+cuda-build-s:
+	@NEURX_CUDA_TOOL=build $(MAKE) cuda-tools-s
+
+cuda-build-runtime-s:
+	@NEURX_CUDA_TOOL=build-runtime $(MAKE) cuda-tools-s
+
+cuda-build-runtime-alt-s:
+	@NEURX_CUDA_TOOL=build-runtime-alt $(MAKE) cuda-tools-s
+
+cuda-build-kernels-s:
+	@NEURX_CUDA_TOOL=build-kernels $(MAKE) cuda-tools-s
+
+cuda-build-kernels-simple-s:
+	@NEURX_CUDA_TOOL=build-kernels-simple $(MAKE) cuda-tools-s
 
 toolchain-s: check-bash
 	@echo "Building S-only toolchain coordinator..."
