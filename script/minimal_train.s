@@ -157,6 +157,9 @@ func main() {
                                     step = step + 1
                                     last_loss = batch_loss / pair_count as float
                                     last_lr = lr
+                                    if should_log_step(step, log_interval) {
+                                        println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start))
+                                    }
                                     pair_count = 0
                                     batch_loss = 0.0
                                     grad_weight = 0.0
@@ -196,6 +199,9 @@ func main() {
                                 step = step + 1
                                 last_loss = batch_loss / pair_count as float
                                 last_lr = lr2
+                                if should_log_step(step, log_interval) {
+                                    println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, shard_name_start))
+                                }
                             }
                             if docs_seen >= max_docs {
                                 break
@@ -233,6 +239,9 @@ func main() {
         step = step + 1
         last_loss = batch_loss / pair_count as float
         last_lr = lr
+        if should_log_step(step, log_interval) {
+            println(training_progress_line(step, max_steps, docs_seen, tokens_seen, last_loss, last_lr, extract_filename(last_shard)))
+        }
     }
 
     string final_model_path = output_dir + "/final_model.neurx"
@@ -250,6 +259,23 @@ func main() {
     }
     println("[pretrain] complete: step=" + int_to_str(step) + ", docs=" + int_to_str(docs_seen) + ", tokens=" + int_to_str(tokens_seen) + ", loss=" + fmt_float(last_loss, 6))
     println("[pretrain] checkpoint: " + final_model_path)
+}
+
+func should_log_step(int step, int log_interval) bool {
+    int interval = log_interval
+    if interval < 1 {
+        interval = 1
+    }
+    step == 1 || step == interval || step - (step / interval) * interval == 0
+}
+
+func training_progress_line(int step, int max_steps, int docs_seen, int tokens_seen, float loss, float lr, string shard_name) string {
+    "[train] step=" + int_to_str(step) + "/" + int_to_str(max_steps) +
+        " loss=" + fmt_float(loss, 6) +
+        " lr=" + fmt_float(lr, 8) +
+        " docs=" + int_to_str(docs_seen) +
+        " tokens=" + int_to_str(tokens_seen) +
+        " shard=" + shard_name
 }
 
 func shard_progress_bar(int done, int total, int width) string {
