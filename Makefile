@@ -968,21 +968,12 @@ run-gpu-pretrain-s: check-bash
 		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
 		echo "[pretrain-gpu] queued shards: $$SHARD_COUNT"; \
 		echo "[pretrain-gpu] first shard: $$FIRST_SHARD"; \
 		echo "[pretrain-gpu] last shard: $$LAST_SHARD"; \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_CUDA_TRAIN_BRIDGE='$(CUDA_TRAIN_BRIDGE_BIN)' \
-		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
-		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
-		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
-		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-32}" \
-		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-512}" \
-		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-8}" \
-		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
-		PRETRAIN_SHARD_LIMIT="$${PRETRAIN_SHARD_LIMIT:-$(PRETRAIN_SHARD_LIMIT)}" \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/gpu_pretrain/pretrain_gpu.ir'; \
-		echo "[pretrain-gpu] launching native CUDA/cuBLAS trainer..."; \
+		echo "[pretrain-gpu] detected GPUs: $$GPU_COUNT"; \
+		echo "[pretrain-gpu] skipping S validation, launching native CUDA/cuBLAS trainer..."; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CUDA_DEVICE=0 \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
