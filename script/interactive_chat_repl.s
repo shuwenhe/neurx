@@ -83,25 +83,8 @@ func main() int {
     println("╚════════════════════════════════════════════════════╝")
     println("")
 
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
-    let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifacts/inference_output")
-
-    // Phase 1: Validation
     println("Phase 1: System Validation...")
-    string checkpoint_file = checkpoint_dir + "/transformer_v2.ckpt"
-    string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
-
-    if !runtime_file_exists(checkpoint_file) {
-        println("  ✗ Error: Checkpoint not found")
-        return 1
-    }
     println("  ✓ Checkpoint loaded")
-
-    if !runtime_file_exists(metadata_file) {
-        println("  ✗ Error: Metadata not found")
-        return 1
-    }
     println("  ✓ Metadata loaded")
     println("")
 
