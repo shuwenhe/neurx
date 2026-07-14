@@ -278,7 +278,7 @@ ps aux | grep distributed_pretrain_entry
 ```
 neurx/
 ├── distributed/
-│   ├── cuda_bridge.s              # CUDA通信桥接 (NCCL AllReduce)
+│   ├── cuda_bridge.s                    # CUDA通信桥接 (NCCL AllReduce)
 │   ├── distributed_pretrain_launcher.s  # 分布式启动器
 │   ├── ddp/
 │   └── ...
@@ -287,7 +287,7 @@ neurx/
 │   ├── pretrain_config.toml             # 训练配置
 │   └── ...
 └── script/
-    ├── launch_pretrain_multi_gpu.sh     # 多GPU启动脚本
+    ├── launch_pretrain_distributed.s    # 多GPU启动脚本 (纯S语言)
     └── ...
 ```
 
@@ -296,8 +296,8 @@ neurx/
 ## 下一步
 
 1. **编译S语言代码**: `make build-distributed`
-2. **运行单GPU测试**: `./script/launch_pretrain_multi_gpu.sh 1`
-3. **运行多GPU训练**: `./script/launch_pretrain_multi_gpu.sh 4`
+2. **运行单GPU测试**: `./script/launch_pretrain_distributed.s` (自动使用1块GPU)
+3. **运行多GPU训练**: `export NUM_GPUS=4 && ./script/launch_pretrain_distributed.s`
 4. **监控训练进度**: 查看 `artifacts/logs/distributed_pretrain/` 下的日志
 
 ---
