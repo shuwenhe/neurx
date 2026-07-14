@@ -1,0 +1,55 @@
+#!/bin/bash
+# NeurX Training Progress Monitor
+# 在另一个终端运行这个脚本来查看实时训练进度
+# Usage: ./scripts/monitor_training.sh
+
+set -e
+
+NEURX_ROOT="${NEURX_ROOT:-.}"
+LOG_DIR="${LOG_DIR:-$NEURX_ROOT/checkpoint/NeurX-1.3/logs}"
+ARTIFACT_LOG_DIR="${ARTIFACT_LOG_DIR:-$NEURX_ROOT/artifacts/logs}"
+
+# 自动查找最新的日志文件
+find_latest_log() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        return 1
+    fi
+    ls -t "$dir"/pretrain_gpu_*.log 2>/dev/null | head -1
+}
+
+LOG_FILE=$(find_latest_log "$ARTIFACT_LOG_DIR")
+if [ -z "$LOG_FILE" ]; then
+    LOG_FILE=$(find_latest_log "$LOG_DIR")
+fi
+
+if [ -z "$LOG_FILE" ]; then
+    echo "❌ No training log file found in:"
+    echo "   - $ARTIFACT_LOG_DIR"
+    echo "   - $LOG_DIR"
+    echo ""
+    echo "✓ Start training with: make pretrain-gpu"
+    exit 1
+fi
+
+echo "📊 Monitoring training progress..."
+echo "📄 Log file: $LOG_FILE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# 实时显示训练进度
+tail -f "$LOG_FILE" | while IFS= read -r line; do
+    # 查找训练输出
+    if echo "$line" | grep -q "trainer-v2"; then
+        # 提取step, loss等信息
+        echo "$line" | sed -E 's/.*step=([0-9]+)\/([0-9]+).*loss=([0-9.]+).*/✓ Step \1\/\2, Loss: \3/'
+    elif echo "$line" | grep -q "checkpoint"; then
+        echo "💾 $line"
+    elif echo "$line" | grep -q "error\|Error\|ERROR"; then
+        echo "❌ $line"
+    elif echo "$line" | grep -q "rank\|CUDA\|NCCL\|tokenizer"; then
+        echo "ℹ  $line"
+    elif echo "$line" | grep -q "complete"; then
+        echo "✅ $line"
+    fi
+done
