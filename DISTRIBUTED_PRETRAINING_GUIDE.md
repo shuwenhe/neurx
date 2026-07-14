@@ -45,20 +45,22 @@ MASTER_PORT=29500     # 通信端口
 
 ## 启动方式
 
-### 单机多GPU启动 (推荐)
+### 单机多GPU启动 (推荐 - 纯S语言)
 
 ```bash
 # 启动4块GPU分布式训练
-bash ./script/launch_pretrain_multi_gpu.sh 4
+export NUM_GPUS=4 MASTER_ADDR=localhost MASTER_PORT=29500
+./script/launch_pretrain_distributed.s
 
-# 或使用torchrun
-torchrun --nproc_per_node=4 \
-    ./pretrain/distributed_pretrain_entry.s \
-    --config=./pretrain/pretrain_config.toml \
-    --epochs=1
+# 启动2块GPU
+export NUM_GPUS=2
+./script/launch_pretrain_distributed.s
+
+# 启动1块GPU (单GPU模式)
+./script/launch_pretrain_distributed.s
 ```
 
-### 手动启动多个进程
+### 手动启动多个进程 (如果需要细粒度控制)
 
 ```bash
 # Terminal 1 - rank 0
