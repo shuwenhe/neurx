@@ -144,28 +144,28 @@ func decode_token(int token) string {
 // Real model inference
 func model_generate_response(InferenceContext ctx, string user_input) string {
     // Tokenize input
-    []int input_tokens = tokenize_input(user_input)
+    int input_token = tokenize_input(user_input)
     
-    // Run forward pass
-    []int output_tokens = model_forward(ctx, input_tokens)
-    
-    // Generate multiple tokens for better response
+    // Generate response tokens
+    string model_response = ""
+    int current_token = input_token
     int token_count = 0
-    int max_gen_tokens = 50
+    int max_gen_tokens = 20
     
     while token_count < max_gen_tokens {
-        []int next_tokens = model_forward(ctx, output_tokens)
-        output_tokens = append(output_tokens, next_tokens[0])
+        // Run forward pass
+        int next_token = model_forward(ctx, current_token)
+        
+        // Decode and append
+        model_response = model_response + decode_token(next_token)
+        current_token = next_token
         token_count = token_count + 1
         
-        // Stop if end-of-sequence token (id 2)
-        if next_tokens[0] == 2 {
+        // Stop if space token or end-of-sequence
+        if next_token == 32 || next_token == 2 {
             break
         }
     }
-    
-    // Decode output
-    string model_response = decode_tokens(output_tokens)
     
     if len(trim(model_response)) == 0 {
         return "我正在思考你的问题...基于我的模型理解，这是一个有趣的话题。"
