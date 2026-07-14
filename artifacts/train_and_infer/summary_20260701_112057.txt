@@ -1,0 +1,25 @@
+NeurX Training + Inference Summary
+===================================
+
+Mode: all
+Timestamp: 20260701_112057
+
+Training
+--------
+Steps: 1
+Checkpoint interval: 1
+Log: /Users/feifei/shuwen/train/neurx/artifacts/logs/train_and_infer_train_20260701_112057.log
+Checkpoint dir: /Users/feifei/shuwen/train/neurx/artifacts/checkpoints/llm_training
+
+Inference
+---------
+Smoke test: 1
+Validate only: 
+Max new chars: 120
+Log: /Users/feifei/shuwen/train/neurx/artifacts/logs/train_and_infer_infer_20260701_112057.log
+Output dir: /Users/feifei/shuwen/train/neurx/artifacts/inference_output
+
+Artifacts
+---------
+Master log: /Users/feifei/shuwen/train/neurx/artifacts/logs/train_and_infer_20260701_112057.log
+Summary: /Users/feifei/shuwen/train/neurx/artifacts/train_and_infer/summary_20260701_112057.txt

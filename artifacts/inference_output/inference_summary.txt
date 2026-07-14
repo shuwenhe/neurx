@@ -1,0 +1,32 @@
+LLM 推理系统摘要
+=====================================
+
+编译信息:
+---------
+源文件: /Users/feifei/shuwen/train/neurx/inference/inference_engine.s
+IR文件: /Users/feifei/shuwen/train/neurx/build/llm_inference/inference_engine.ir (大小: 1.7K)
+二进制文件: /Users/feifei/shuwen/train/neurx/build/llm_inference/inference_engine.bin (大小: 103K)
+编译时间: 1782876060
+
+推理配置:
+---------
+最大新tokens: 50
+温度: 0.7
+Beam大小: 3
+输入tokens: 1,5,3,2
+
+系统信息:
+---------
+NeurX根目录: /Users/feifei/shuwen/train/neurx
+检查点目录: /Users/feifei/shuwen/train/neurx/artifacts/checkpoints/llm_training
+输出目录: /Users/feifei/shuwen/train/neurx/artifacts/inference_output
+日志目录: /Users/feifei/shuwen/train/neurx/artifacts/logs
+
+完成状态:
+---------
+✅ 编译成功
+✅ 二进制生成成功
+✅ 推理执行成功
+✅ 摘要生成成功
+
+推理时间戳: 2026-07-01 11:21:00

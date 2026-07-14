@@ -1,0 +1,20 @@
+# Sample pretrain config for workflows/llm/pretrain
+dataset_manifest: "data/pretrain/mini_manifest.json"
+output_dir: "artifacts/checkpoints/run_20260518_001"
+checkpoint_root: "artifacts/checkpoints/two_t_pretrain"
+micro_batch_size: 8
+seq_len: 16
+max_steps: 64
+lr: 0.00015
+min_lr: 0.00003
+warmup_steps: 128
+weight_decay: 0.1
+log_interval: 8
+backend: "cuda"
+save_interval: 32
+eval_interval: 16
+tensor_parallel_degree: 4
+pipeline_parallel_degree: 2
+data_parallel_degree: 1
+sequence_parallel_degree: 1
+zero_stage: 2

@@ -1,0 +1,29 @@
+#include "transformer_kernels.cuh"
+#include <cublas_v2.h>
+#define NEURX_TRANSFORMER_REFERENCE_NO_MAIN
+#include "../test/transformer_reference.cpp"
+#include <map>
+
+using namespace neurx_cuda_transformer;
+#define CK(x) do{auto e=(x);if(e!=cudaSuccess){printf("CUDA: %s\n",cudaGetErrorString(e));return false;}}while(0)
+static float* mf(int n){float*p;cudaMallocManaged(&p,n*sizeof(float));return p;} static int* mi(int n){int*p;cudaMallocManaged(&p,n*sizeof(int));return p;}
+static void z(float*p,int n){cudaMemset(p,0,n*sizeof(float));}
+static cublasHandle_t blas=nullptr;static void ensure_blas(){if(!blas)cublasCreate(&blas);}
+
+struct GP { float *v,*g,*m,*s; int n; GP(int n=0):n(n){v=mf(n);g=mf(n);m=mf(n);s=mf(n);z(m,n);z(s,n);} };
+struct GM { Config c; GP emb,nq,nk,wq,wk,wv,wo,nf,wg,wu,wd,out; GM(Config x):c(x),emb(x.vocab*x.dim),nq(x.dim),nk(x.dim),wq(x.dim*x.dim),wk(x.dim*x.dim),wv(x.dim*x.dim),wo(x.dim*x.dim),nf(x.dim),wg(x.dim*x.ffn),wu(x.dim*x.ffn),wd(x.ffn*x.dim),out(x.dim*x.vocab){} std::vector<GP*> ps(){return{&emb,&nq,&nk,&wq,&wk,&wv,&wo,&nf,&wg,&wu,&wd,&out};}};
+struct GC {int*ids,*targets;float *x,*n1,*iq,*ik,*q,*k,*v,*att,*ctx,*proj,*res,*n2,*iff,*gate,*up,*sw,*down,*h,*logits,*loss,*dl,*dh,*dres,*dsw,*dg,*du,*dn2,*tmp,*dctx,*dq,*dk,*dv,*dn1,*dx;};
+static GC cache(Config c){GC a{};int td=c.seq*c.dim,tf=c.seq*c.ffn,tv=c.seq*c.vocab;a.ids=mi(c.seq);a.targets=mi(c.seq);a.x=mf(td);a.n1=mf(td);a.iq=mf(c.seq);a.ik=mf(c.seq);a.q=mf(td);a.k=mf(td);a.v=mf(td);a.att=mf(c.heads*c.seq*c.seq);a.ctx=mf(td);a.proj=mf(td);a.res=mf(td);a.n2=mf(td);a.iff=mf(c.seq);a.gate=mf(tf);a.up=mf(tf);a.sw=mf(tf);a.down=mf(td);a.h=mf(td);a.logits=mf(tv);a.loss=mf(1);a.dl=mf(tv);a.dh=mf(td);a.dres=mf(td);a.dsw=mf(tf);a.dg=mf(tf);a.du=mf(tf);a.dn2=mf(td);a.tmp=mf(td);a.dctx=mf(td);a.dq=mf(td);a.dk=mf(td);a.dv=mf(td);a.dn1=mf(td);a.dx=mf(td);return a;}
+static void gm(float*a,float*b,float*c,int m,int k,int n){ensure_blas();const float one=1,zero=0;cublasSgemm(blas,CUBLAS_OP_N,CUBLAS_OP_N,n,m,k,&one,b,n,a,k,&zero,c,n);}
+static void gb(float*x,GP&w,float*dy,float*dx,int m,int k,int n){ensure_blas();const float one=1,zero=0;cublasSgemm(blas,CUBLAS_OP_T,CUBLAS_OP_N,k,m,n,&one,w.v,n,dy,n,&zero,dx,k);cublasSgemm(blas,CUBLAS_OP_N,CUBLAS_OP_T,n,k,m,&one,dy,n,x,k,&zero,w.g,n);}
+
+static bool step(GM&m,GC&a){int t=m.c.seq,d=m.c.dim,f=m.c.ffn,v=m.c.vocab,td=t*d,tf=t*f;for(auto p:m.ps())z(p->g,p->n);z(a.loss,1);
+ embedding_fwd<<<blocks(td),256>>>(a.ids,m.emb.v,a.x,t,d);rms_fwd<<<1,32>>>(a.x,m.nq.v,a.n1,a.iq,t,d);gm(a.n1,m.wq.v,a.q,t,d,d);gm(a.n1,m.wk.v,a.k,t,d,d);gm(a.n1,m.wv.v,a.v,t,d,d);rope<<<1,64>>>(a.q,t,d,m.c.heads,false);rope<<<1,64>>>(a.k,t,d,m.c.heads,false);attention_fwd<<<m.c.heads*t,1>>>(a.q,a.k,a.v,a.att,a.ctx,t,d,m.c.heads);gm(a.ctx,m.wo.v,a.proj,t,d,d);add<<<blocks(td),256>>>(a.x,a.proj,a.res,td);rms_fwd<<<1,32>>>(a.res,m.nf.v,a.n2,a.iff,t,d);gm(a.n2,m.wg.v,a.gate,t,d,f);gm(a.n2,m.wu.v,a.up,t,d,f);swiglu_fwd<<<blocks(tf),256>>>(a.gate,a.up,a.sw,tf);gm(a.sw,m.wd.v,a.down,t,f,d);add<<<blocks(td),256>>>(a.res,a.down,a.h,td);gm(a.h,m.out.v,a.logits,t,d,v);cross_entropy_fwd_bwd<<<1,32>>>(a.logits,a.targets,a.loss,a.dl,t,v);
+ gb(a.h,m.out,a.dl,a.dh,t,d,v);cudaMemcpy(a.dres,a.dh,td*4,cudaMemcpyDeviceToDevice);gb(a.sw,m.wd,a.dh,a.dsw,t,f,d);swiglu_bwd<<<blocks(tf),256>>>(a.gate,a.up,a.dsw,a.dg,a.du,tf);gb(a.n2,m.wg,a.dg,a.dn2,t,d,f);gb(a.n2,m.wu,a.du,a.tmp,t,d,f);add_inplace<<<blocks(td),256>>>(a.dn2,a.tmp,td);rms_dx<<<1,32>>>(a.res,m.nf.v,a.iff,a.dn2,a.tmp,t,d);rms_dg<<<1,32>>>(a.res,a.iff,a.dn2,m.nf.g,t,d);add_inplace<<<blocks(td),256>>>(a.dres,a.tmp,td);gb(a.ctx,m.wo,a.dres,a.dctx,t,d,d);z(a.dq,td);z(a.dk,td);z(a.dv,td);attention_bwd<<<m.c.heads*t,1,2*t*sizeof(float)>>>(a.q,a.k,a.v,a.att,a.dctx,a.dq,a.dk,a.dv,t,d,m.c.heads);rope<<<1,64>>>(a.dq,t,d,m.c.heads,true);rope<<<1,64>>>(a.dk,t,d,m.c.heads,true);gb(a.n1,m.wq,a.dq,a.dn1,t,d,d);gb(a.n1,m.wk,a.dk,a.tmp,t,d,d);add_inplace<<<blocks(td),256>>>(a.dn1,a.tmp,td);gb(a.n1,m.wv,a.dv,a.tmp,t,d,d);add_inplace<<<blocks(td),256>>>(a.dn1,a.tmp,td);rms_dx<<<1,32>>>(a.x,m.nq.v,a.iq,a.dn1,a.dx,t,d);rms_dg<<<1,32>>>(a.x,a.iq,a.dn1,m.nq.g,t,d);add_inplace<<<blocks(td),256>>>(a.dx,a.dres,td);embedding_bwd<<<blocks(td),256>>>(a.ids,a.dx,m.emb.g,t,d);CK(cudaDeviceSynchronize());return true;}
+
+static bool cmp(const char*n,const float*g,const Vec&w,double tol){double e=0;for(size_t i=0;i<w.size();i++)e=std::max(e,std::abs(double(g[i])-w[i]));printf("gpu-step-%s %s max_abs_error=%.3g\n",n,e<tol?"PASS":"FAIL",e);return e<tol;}
+static void update(GM&m,int step,float lr){for(GP*p:m.ps())adamw<<<blocks(p->n),256>>>(p->v,p->g,p->m,p->s,p->n,step,lr,.01f);}
+#ifndef NEURX_TRANSFORMER_INTEGRATION_NO_MAIN
+int main(){Config c;Model cpu(c);GM gpu(c);auto cp=cpu.params();auto gp=gpu.ps();for(size_t p=0;p<cp.size();p++)for(int i=0;i<gp[p]->n;i++)gp[p]->v[i]=float(cp[p]->v[i]);GC a=cache(c);std::vector<int>x={1,2,3,4},y={2,3,4,5};for(int i=0;i<c.seq;i++){a.ids[i]=x[i];a.targets[i]=y[i];}Cache cc;double cl=forward(cpu,x,y,cc);backward(cpu,y,cc);if(!step(gpu,a))return 2;bool ok=std::abs(*a.loss-cl)<1e-5;printf("gpu-step-loss %s cpu=%.9g gpu=%.9g\n",ok?"PASS":"FAIL",cl,*a.loss);ok&=cmp("logits",a.logits,cc.logits,1e-4);const char*names[]={"emb","norm1","norm2","wq","wk","wv","wo","norm_ffn","wg","wu","wd","lm_head"};for(size_t p=0;p<cp.size();p++)ok&=cmp(names[p],gp[p]->g,cp[p]->g,2e-4);
+ float initial=*a.loss;for(int s=1;s<=300;s++){if(!step(gpu,a))return 2;update(gpu,s,.01f);}if(!step(gpu,a))return 2;int correct=0;for(int i=0;i<c.seq;i++){int best=0;for(int j=1;j<c.vocab;j++)if(a.logits[i*c.vocab+j]>a.logits[i*c.vocab+best])best=j;correct+=best==y[i];}bool fit=*a.loss<.1f&&correct==c.seq;printf("gpu-adamw-overfit %s initial_loss=%.6f final_loss=%.6f next_token_accuracy=%d/%d\n",fit?"PASS":"FAIL",initial,*a.loss,correct,c.seq);ok&=fit;printf("cuda-transformer-integration %s\n",ok?"PASS":"FAIL");return ok?0:1;}
+#endif

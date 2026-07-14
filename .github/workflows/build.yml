@@ -1,0 +1,127 @@
+name: Build
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Linux ──────────────────────────────────────────────────────────────────
+  linux:
+    name: Linux (Ubuntu 22.04)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt6 & dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            cmake ninja-build \
+            qt6-base-dev qt6-base-dev-tools \
+            qt6-declarative-dev qt6-declarative-dev-tools \
+            qt6-tools-dev qt6-tools-dev-tools \
+            libqt6concurrent6t64 \
+            libgl1-mesa-dev libvulkan-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libxcb1-dev libxcb-xkb-dev libxcb-util-dev \
+            libxcb-keysyms1-dev libxcb-image0-dev \
+            libxcb-shm0-dev libxcb-icccm4-dev \
+            libxcb-sync-dev libxcb-xfixes0-dev \
+            libxcb-shape0-dev libxcb-randr0-dev \
+            libxcb-render-util0-dev
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/linux \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLINK_INSIGHT=OFF \
+            -DBUILD_QDS_COMPONENTS=OFF
+
+      - name: Build
+        run: cmake --build build/linux --parallel $(nproc)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neurx-code-linux
+          path: build/linux/neurx-codeApp
+          if-no-files-found: error
+
+  # ── Windows ────────────────────────────────────────────────────────────────
+  windows:
+    name: Windows (MSVC 2022)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.7.*'
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          modules: ''
+          cache: true
+
+      - name: Configure (MSVC)
+        run: |
+          cmake -S . -B build/windows `
+            -G "Ninja" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DLINK_INSIGHT=OFF `
+            -DBUILD_QDS_COMPONENTS=OFF
+
+      - name: Build
+        run: cmake --build build/windows --config Release --parallel
+
+      - name: windeployqt
+        run: |
+          windeployqt6 --qmldir . --dir build/windows/deploy build/windows/neurx-codeApp.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neurx-code-windows
+          path: build/windows/deploy/
+          if-no-files-found: error
+
+  # ── macOS ──────────────────────────────────────────────────────────────────
+  macos:
+    name: macOS (Ventura, Universal)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt6 via Homebrew
+        run: |
+          brew update
+          brew install qt cmake ninja
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/macos \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DLINK_INSIGHT=OFF \
+            -DBUILD_QDS_COMPONENTS=OFF
+
+      - name: Build
+        run: cmake --build build/macos --parallel $(sysctl -n hw.logicalcpu)
+
+      - name: macdeployqt
+        run: |
+          APP=$(find build/macos -name "*.app" | head -1)
+          macdeployqt "$APP" -qmldir=. -dmg -always-overwrite
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neurx-code-macos
+          path: build/macos/*.dmg
+          if-no-files-found: error

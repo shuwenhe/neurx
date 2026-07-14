@@ -1,0 +1,8 @@
+# Sample config for workflows/agent/code_agent
+goal: "implement a Codex-style code agent in NeurX"
+input: "Inspect the repository, update the agent runtime for coding tasks, and verify the result."
+max_steps: 16
+model_path: ""
+build_command: "make s-compile-runtime"
+test_command: "make test"
+output_dir: "artifacts/checkpoints/agent/code_agent"
