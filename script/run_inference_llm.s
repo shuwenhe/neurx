@@ -6,7 +6,8 @@ use std.io.println
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let inference_source = runtime_env_get("NEURX_INFERENCE_SOURCE", project_root + "/inference/production_inference.s")
-    let checkpoint_dir = runtime_env_get("NEURX_INFER_CHECKPOINT", project_root + "/artifacts/checkpoints/llm_s_pretrain")
+    // Use NEURX_CHECKPOINT_DIR if set, otherwise fall back to default
+    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", runtime_env_get("NEURX_INFER_CHECKPOINT", project_root + "/checkpoint/NeurX-1.3"))
     let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifacts/inference_output")
 
     println("NeurX LLM Inference Orchestrator (S Lang)")

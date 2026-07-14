@@ -867,7 +867,7 @@ train-and-infer-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/train_and_infer/run_train_and_infer.ir' 2>&1 | tee -a $(LOG_DIR)/train_and_infer_$(shell date +%Y%m%d_%H%M%S).log
 
 run-inference-s: check-bash
-	@echo "Building S inference orchestrator..."
+	@echo "Building S full model inference pipeline..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/inference_orchestrator
 	@mkdir -p $(LOG_DIR)
 	@if [ ! -f "$(S_COMPILER)" ]; then \
@@ -877,12 +877,14 @@ run-inference-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/run_inference_llm.s' -o 'artifacts/build/inference_orchestrator/run_inference_llm.ir' 2>&1
+		$(S_COMPILER) ir 'script/run_full_model_inference.s' -o 'artifacts/build/inference_orchestrator/run_full_model_inference.ir' 2>&1
 	@$(MAKE) build-s-ir-runner
-	@echo "Running S inference orchestrator..."
+	@echo "Running S full model inference pipeline..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/inference_orchestrator/run_inference_llm.ir' 2>&1 | tee -a $(LOG_DIR)/run_inference_$(shell date +%Y%m%d_%H%M%S).log
+		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_INFER_PROMPT='$(NEURX_INFER_PROMPT)' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/inference_orchestrator/run_full_model_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_inference_$(shell date +%Y%m%d_%H%M%S).log
 
 run-full-inference-s: check-bash
 	@echo "Building S full inference orchestrator..."
