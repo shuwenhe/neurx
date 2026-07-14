@@ -8,6 +8,7 @@ __global__ void add(const float* a,const float* b,float* y,int n){int i=blockIdx
 __global__ void add_inplace(float* a,const float* b,int n){int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n)a[i]+=b[i];}
 __global__ void embedding_fwd(const int* ids,const float* w,float* x,int t,int d){int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<t*d)x[i]=w[ids[i/d]*d+i%d];}
 __global__ void embedding_bwd(const int* ids,const float* dx,float* dw,int t,int d){int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<t*d)atomicAdd(&dw[ids[i/d]*d+i%d],dx[i]);}
+__global__ void adamw(float* p,const float* g,float* m,float* v,int n,int step,float lr,float wd){int i=blockIdx.x*blockDim.x+threadIdx.x;if(i>=n)return;float b1=.9f,b2=.999f;m[i]=b1*m[i]+(1-b1)*g[i];v[i]=b2*v[i]+(1-b2)*g[i]*g[i];float mh=m[i]/(1-powf(b1,step)),vh=v[i]/(1-powf(b2,step));p[i]-=lr*(mh/(sqrtf(vh)+1e-8f)+wd*p[i]);}
 
 __global__ void gemm_fwd(const float* a,const float* b,float* c,int m,int k,int n) {
     int q=blockIdx.x*blockDim.x+threadIdx.x; if(q>=m*n)return; int i=q/n,j=q%n; float s=0;
