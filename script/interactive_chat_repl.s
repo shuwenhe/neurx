@@ -127,8 +127,6 @@ func tokenize_input(string text) []int {
 func modulo(int a, int b) int {
     a - (a / b) * b
 }
-    tokens
-}
 
 // Simulate transformer forward pass
 func model_forward(InferenceContext ctx, []int token_ids) []int {
