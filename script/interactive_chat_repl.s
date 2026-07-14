@@ -267,25 +267,34 @@ func main() int {
     println("╚════════════════════════════════════════════════════╝")
     println("")
 
-    println("Phase 1: System Validation...")
-    println("  ✓ Checkpoint loaded")
-    println("  ✓ Metadata loaded")
+    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
+    
+    println("Phase 1: Loading Model...")
+    InferenceContext ctx = initialize_inference_context(checkpoint_dir)
+    
+    if ctx.model_loaded {
+        println("  ✓ Checkpoint loaded: " + ctx.checkpoint_path)
+        println("  ✓ Model initialized")
+    } else {
+        println("  ✗ Warning: Checkpoint not found, using fallback mode")
+    }
     println("")
 
     // Phase 2: Model Info
-    println("Phase 2: Model Information...")
+    println("Phase 2: Model Configuration...")
     println("  Architecture: Decoder-only Transformer")
-    println("  Hidden Size:  1024")
-    println("  Attention Heads: 16")
-    println("  FFN Size:     4096")
-    println("  Layers:       24")
-    println("  Vocab Size:   374")
-    println("  Context:      256 tokens")
+    println("  Hidden Size:  " + int_to_string(ctx.config.hidden_size))
+    println("  Attention Heads: " + int_to_string(ctx.config.num_heads))
+    println("  FFN Size:     " + int_to_string(ctx.config.ffn_size))
+    println("  Layers:       " + int_to_string(ctx.config.num_layers))
+    println("  Vocab Size:   " + int_to_string(ctx.config.vocab_size))
+    println("  Context:      " + int_to_string(ctx.config.context_length) + " tokens")
     println("")
 
     // Phase 3: Training Status
     println("Phase 3: Training Status...")
-    println("  Current Step: 215+")
+    println("  Current Step: 100+")
     println("  Current Loss: ~10.5")
     println("  Status:       Ready for inference")
     println("")
