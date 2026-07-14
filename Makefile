@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -212,6 +212,13 @@ pretrain-gpu-distributed: check-bash
 
 pretrain-gpu-resume: pretrain-gpu
 	@echo "Resume mode enabled by default"
+
+pretrain-gpu-multinode: check-bash build-cuda-train-bridge
+	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts}" \
+	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
+	MASTER_ADDR="$${MASTER_ADDR:-$$(awk 'NF && $$1 !~ /^#/ {print $$1; exit}' "$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts")}" \
+	MASTER_PORT="$${MASTER_PORT:-29500}" \
+	$(CURDIR_UNIX)/script/launch_multinode_pretrain.sh
 
 pretrain-gpu-fresh: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
