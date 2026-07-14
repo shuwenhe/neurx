@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -701,6 +701,24 @@ build-cuda-train-bridge: check-bash
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
+
+transformer-reference-test:
+	@mkdir -p artifacts/build/transformer_reference
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		test/transformer_reference.cpp -o artifacts/build/transformer_reference/transformer_reference
+	@artifacts/build/transformer_reference/transformer_reference
+
+transformer-cuda-kernels-test:
+	@mkdir -p artifacts/build/transformer_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 cuda/transformer_kernels_test.cu \
+		-o artifacts/build/transformer_cuda/transformer_kernels_test
+	@artifacts/build/transformer_cuda/transformer_kernels_test
+
+transformer-cuda-integration-test:
+	@mkdir -p artifacts/build/transformer_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		cuda/transformer_integration_test.cu -o artifacts/build/transformer_cuda/transformer_integration_test
+	@artifacts/build/transformer_cuda/transformer_integration_test
 
 cuda-tools-s: check-bash
 	@echo "Building S CUDA tools entry..."
