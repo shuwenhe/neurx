@@ -210,7 +210,7 @@ pretrain-gpu-distributed: check-bash
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_distributed_$(shell date +%Y%m%d_%H%M%S).log'
 
-pretrain-gpu: check-bash
+pretrain-gpu-legacy: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@echo "=== NeurX Multi-GPU Distributed Pretraining (Default) ==="
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
@@ -256,6 +256,9 @@ pretrain-gpu-multinode: check-bash build-cuda-train-bridge
 	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
 	$(CURDIR_UNIX)/script/launch_multinode_pretrain.sh
+
+pretrain-gpu: pretrain-gpu-multinode
+	@echo "Default GPU pretraining target uses the multi-node launcher"
 
 pretrain-gpu-fresh: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
@@ -1182,11 +1185,17 @@ run-gpu-pretrain-s: check-bash
 			set -e; \
 			world="$${WORLD_SIZE:-1}"; id_file="$${NEURX_NCCL_ID_FILE}"; \
 			rm -f "$$id_file" "$$id_file.tmp"; pids=""; \
+			echo "[training] Starting $$world GPU rank(s)..."; \
 			for rank in $$(seq 0 $$((world - 1))); do \
+				echo "[training] Launching rank $$rank on GPU $$rank..."; \
 				CUDA_VISIBLE_DEVICES="$$rank" RANK="$$rank" LOCAL_RANK=0 WORLD_SIZE="$$world" NEURX_CUDA_DEVICE=0 NEURX_NCCL_ID_FILE="$$id_file" \
 				NEURX_PRETRAIN_RESUME_FROM="$${NEURX_PRETRAIN_OUTPUT_DIR}/rank_$${rank}/transformer_v2.ckpt" \
 					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "s/^/[rank $$rank] /" & pids="$$pids $$!"; \
-			 done; status=0; for pid in $$pids; do wait $$pid || status=$$?; done; exit $$status' \
+			 done; \
+			 echo "[training] Waiting for all ranks to complete..."; \
+			 status=0; for pid in $$pids; do wait $$pid || status=$$?; done; \
+			 if [ $$status -eq 0 ]; then echo "[training] All ranks completed successfully!"; fi; \
+			 exit $$status' \
 		2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 test-neurx-1-3: check-bash

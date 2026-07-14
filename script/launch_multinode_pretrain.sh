@@ -21,7 +21,9 @@ cleanup() {
   for pid in "${PIDS[@]:-}"; do kill "$pid" 2>/dev/null || true; done
   for node in "${HOSTS[@]}"; do
     host="${node%% *}"
-    ssh "$host" "pkill -TERM -f 'neurx_cuda_train_bridge'" 2>/dev/null || true
+    if [[ "$host" != "localhost" && "$host" != "127.0.0.1" && "$host" != "$(hostname)" ]]; then
+      ssh "$host" "pkill -TERM -f 'neurx_cuda_train_bridge'" 2>/dev/null || true
+    fi
   done
 }
 trap cleanup EXIT INT TERM
@@ -29,7 +31,10 @@ trap cleanup EXIT INT TERM
 world=0
 for node in "${HOSTS[@]}"; do
   gpus="${node#* }"
-  [[ "$gpus" != "$node" && "$gpus" =~ ^[0-9]+$ ]] || gpus="${GPUS_PER_NODE:?set GPU count in hostfile or NEURX_GPUS_PER_NODE}"
+  if [[ "$gpus" == "$node" || ! "$gpus" =~ ^[0-9]+$ ]]; then
+    gpus="${GPUS_PER_NODE:-$(nvidia-smi -L 2>/dev/null | wc -l)}"
+  fi
+  [[ "$gpus" =~ ^[1-9][0-9]*$ ]] || { echo "cannot determine GPU count for $node" >&2; exit 2; }
   world=$((world + gpus))
 done
 mkdir -p "$(dirname "$SHARED_ID")" "$OUT"

@@ -1,0 +1,5 @@
+# One node per line. Omit GPU count to auto-detect all local GPUs.
+localhost
+# For multi-node training, replace/add nodes, for example:
+# node-01 4
+# node-02 4
