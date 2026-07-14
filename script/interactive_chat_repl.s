@@ -113,11 +113,20 @@ func tokenize_input(string text) []int {
     int len_text = len(text)
     int i = 0
     while i < len_text && i < max_tokens {
-        int token_id = int(text[i]) % 374  // Limit to vocab size
+        int char_code = int(text[i])
+        // Simple modulo: token_id = char_code - (char_code / 374) * 374
+        int token_id = char_code - (char_code / 374) * 374
         tokens = append(tokens, token_id)
         i = i + 1
     }
     
+    tokens
+}
+
+// Simulate transformer forward pass - modulo helper
+func modulo(int a, int b) int {
+    a - (a / b) * b
+}
     tokens
 }
 
