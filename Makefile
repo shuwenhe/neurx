@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -55,7 +55,8 @@ S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
-CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_cuda_train_bridge.cu
+CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train.cu
+CUDA_BIGRAM_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_cuda_train_bridge.cu
 CUDA_TRAIN_BRIDGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/cuda_train
 CUDA_TRAIN_BRIDGE_BIN := $(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_train_bridge$(BIN_EXT)
 CC ?= cc
@@ -701,6 +702,19 @@ build-cuda-train-bridge: check-bash
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
+
+build-cuda-bigram-bridge: check-bash
+	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
+	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		'$(CUDA_BIGRAM_BRIDGE_SRC)' -lcublas -o '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_bigram_bridge'
+
+pretrain-bigram-gpu: build-cuda-bigram-bridge build-pretrain-manifest-s
+	@NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
+		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(CURDIR_UNIX)/checkpoint/NeurX-Bigram-Smoke}" \
+		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-1}" \
+		NEURX_CUDA_VOCAB_SIZE="$${NEURX_CUDA_VOCAB_SIZE:-4096}" \
+		NEURX_CUDA_BATCH_PAIRS="$${NEURX_CUDA_BATCH_PAIRS:-256}" \
+		'$(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_bigram_bridge'
 
 transformer-reference-test:
 	@mkdir -p artifacts/build/transformer_reference
