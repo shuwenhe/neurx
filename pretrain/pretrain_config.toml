@@ -17,12 +17,17 @@ max_seq_length = 2048       # 最大序列长度
 
 [training]
 # 基础训练配置
-total_steps = 100000        # 总训练步数
-warmup_steps = 10000        # 预热步数
-learning_rate = 0.0001      # 学习率
+total_steps = 50000         # 总训练步数 (已优化以适应显存)
+warmup_steps = 5000         # 预热步数
+learning_rate = 0.0002      # 学习率 (RTX 4060 Ti优化)
 lr_schedule = "cosine"      # 学习率调度: linear, cosine, constant
 weight_decay = 0.01         # 权重衰减 (L2正则化)
 gradient_clip_norm = 1.0    # 梯度裁剪
+max_grad_norm = 1.0         # 最大梯度范数
+
+# 数据并发和优化
+enable_data_offload = true  # 启用数据卸载优化
+enable_cpu_offload = true   # CPU显存卸载 (优化显存)
 
 # 批处理配置 (RTX 4060 Ti优化)
 batch_size = 64             # 全局批大小 (梯度积累后)
