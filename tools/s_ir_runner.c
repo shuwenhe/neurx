@@ -34,6 +34,10 @@ int main(int argc, char **argv) {
     const char *ir_path = NULL;
     const char *entry = "main";
 
+    /* Keep interactive prompts visible when output is piped through tee. */
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+
     error_clear(&err);
 
     ir_path = getenv("S_IR_RUNNER_INPUT");
