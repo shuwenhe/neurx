@@ -216,7 +216,6 @@ pretrain-gpu-resume: pretrain-gpu
 pretrain-gpu-multinode: check-bash build-cuda-train-bridge
 	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts}" \
 	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
-	MASTER_ADDR="$${MASTER_ADDR:-$$(awk 'NF && $$1 !~ /^#/ {print $$1; exit}' "$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts")}" \
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
 	$(CURDIR_UNIX)/script/launch_multinode_pretrain.sh
 
