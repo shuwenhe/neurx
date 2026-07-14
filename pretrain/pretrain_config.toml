@@ -62,8 +62,8 @@ save_optimizer_state = true # 保存优化器状态
 save_training_state = true  # 保存训练状态
 
 [distributed]
-# 分布式训练配置。运行时可用 NEURX_NUM_GPUS 覆盖此值。
-world_size = 2              # 默认使用 2 个 GPU
+# 分布式训练配置。0 表示由启动器读取 WORLD_SIZE/NEURX_NUM_GPUS 自动确定。
+world_size = 0              # 单机使用全部 GPU，多机使用全局 WORLD_SIZE
 rank = 0                    # 当前进程rank
 backend = "nccl"            # 通信后端: nccl, gloo
 find_unused_parameters = false
@@ -107,5 +107,5 @@ gpu_model = "RTX4060Ti"     # GPU型号
 gpu_memory_mb = 16384       # GPU显存大小
 fp16_loss_scale = 65536     # FP16损失缩放初始值
 enable_tf32 = true          # 启用TF32加速 (NVIDIA Ampere+优化)
-num_gpu_devices = 2         # 默认 GPU 设备数量
+num_gpu_devices = 0         # 0 表示自动使用当前节点全部 GPU
 torch_compile = false       # PyTorch编译优化 (可选)
