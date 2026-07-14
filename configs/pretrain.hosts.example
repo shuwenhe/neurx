@@ -1,0 +1,4 @@
+# host GPU-count
+localhost 2
+# worker-01 4
+# worker-02 4
