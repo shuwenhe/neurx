@@ -104,23 +104,16 @@ func initialize_inference_context(string checkpoint_dir) InferenceContext {
 }
 
 // Simple embedding tokenization (demo)
-func tokenize_input(string text) []int {
-    // In real implementation, use BPE tokenizer
-    // For demo: create simple token IDs based on character codes
-    int max_tokens = 256
-    []int tokens = make([]int, 0)
-    
+func tokenize_input(string text) int {
+    // Simplified: return hash of input text
+    int hash = 0
     int len_text = len(text)
     int i = 0
-    while i < len_text && i < max_tokens {
-        int char_code = int(text[i])
-        // Simple modulo: token_id = char_code - (char_code / 374) * 374
-        int token_id = char_code - (char_code / 374) * 374
-        tokens = append(tokens, token_id)
+    while i < len_text {
+        hash = hash + int(text[i])
         i = i + 1
     }
-    
-    tokens
+    modulo(hash, 374)
 }
 
 // Simulate transformer forward pass - modulo helper
@@ -129,40 +122,23 @@ func modulo(int a, int b) int {
 }
 
 // Simulate transformer forward pass
-func model_forward(InferenceContext ctx, []int token_ids) []int {
+func model_forward(InferenceContext ctx, int input_token) int {
     // Simplified transformer forward pass
-    // In production: implement actual matmul, attention, FFN
-    
-    // Get last hidden state dimension
-    int seq_len = len(token_ids)
-    if seq_len == 0 {
-        seq_len = 1
-    }
-    
-    // Create logits (output probabilities over vocab)
-    []int output_tokens = make([]int, 0)
-    
     // Generate next token based on input
-    int base = token_ids[seq_len - 1] + 17
-    int next_token = modulo(base, ctx.config.vocab_size)
-    output_tokens = append(output_tokens, next_token)
-    
-    output_tokens
+    int next_token = modulo(input_token + 17, ctx.config.vocab_size)
+    next_token
 }
 
-// Decode token IDs back to text
-func decode_tokens([]int token_ids) string {
-    string result = ""
-    int i = 0
-    while i < len(token_ids) {
-        int token = token_ids[i]
-        // Map token to character (simplified)
-        if token >= 32 && token <= 126 {
-            result = result + string(token)
-        }
-        i = i + 1
+// Decode token ID back to text character
+func decode_token(int token) string {
+    // Map token to printable character
+    if token >= 32 && token <= 126 {
+        return string(token)
     }
-    result
+    if token >= 97 && token <= 122 {
+        return string(token)
+    }
+    "."
 }
 
 // Real model inference
