@@ -118,7 +118,7 @@ func main() int {
     bool running = true
 
     while running {
-        println("You [" + int_to_string(turn) + "]: ")
+        println("You [" + to_string(turn) + "]: ")
         string user_input = read_stdin_line()
         
         // Check for exit commands
@@ -146,7 +146,7 @@ func main() int {
     println("╚════════════════════════════════════════════════════╝")
     println("")
     println("Summary:")
-    println("  ✓ " + int_to_string(turn - 1) + " conversation turns completed")
+    println("  ✓ " + to_string(turn - 1) + " conversation turns completed")
     println("  ✓ Interactive mode active")
     println("  ✓ All 24 transformer layers operational")
     println("")
@@ -154,24 +154,4 @@ func main() int {
     println("")
     
     0
-}
-
-func int_to_string(int n) string {
-    if n == 0 {
-        return "0"
-    }
-    bool neg = n < 0
-    if neg {
-        n = 0 - n
-    }
-    string result = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        result = string(digit + 48) + result
-        n = n / 10
-    }
-    if neg {
-        result = "-" + result
-    }
-    result
 }
