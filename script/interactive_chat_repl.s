@@ -114,11 +114,10 @@ func main() int {
     println("Commands: 'quit', 'exit', 'bye', or '退出' to stop")
     println("")
 
-    int turn = 1
     bool running = true
 
     while running {
-        println("You [" + int_to_string(turn) + "]: ")
+        println("You: ")
         string user_input = read_stdin_line()
         
         // Check for exit commands
@@ -137,7 +136,6 @@ func main() int {
         println("NeurX: " + response)
         println("")
         
-        turn = turn + 1
     }
     
     // Session Summary
@@ -146,7 +144,7 @@ func main() int {
     println("╚════════════════════════════════════════════════════╝")
     println("")
     println("Summary:")
-    println("  ✓ " + int_to_string(turn - 1) + " conversation turns completed")
+    println("  ✓ Interactive conversation completed")
     println("  ✓ Interactive mode active")
     println("  ✓ All 24 transformer layers operational")
     println("")
@@ -154,32 +152,4 @@ func main() int {
     println("")
     
     0
-}
-
-func digit_string(int digit) string {
-    if digit == 0 { return "0" }
-    if digit == 1 { return "1" }
-    if digit == 2 { return "2" }
-    if digit == 3 { return "3" }
-    if digit == 4 { return "4" }
-    if digit == 5 { return "5" }
-    if digit == 6 { return "6" }
-    if digit == 7 { return "7" }
-    if digit == 8 { return "8" }
-    "9"
-}
-
-func int_to_string(int value) string {
-    if value == 0 { return "0" }
-    bool negative = value < 0
-    int current = value
-    if negative { current = 0 - current }
-    string out = ""
-    while current > 0 {
-        int digit = current - (current / 10) * 10
-        out = digit_string(digit) + out
-        current = current / 10
-    }
-    if negative { out = "-" + out }
-    out
 }
