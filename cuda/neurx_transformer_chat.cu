@@ -24,9 +24,9 @@ struct InferenceCache {
   }
 
   ~InferenceCache() {
-    for (void *p : {static_cast<void *>(ids), embedding, x, n1, inv1, q, k,
-                    v, att, ctx, proj, res, n2, inv2, gate, up, sw, down,
-                    h, logits}) {
+    void *allocations[] = {ids, embedding, x, n1, inv1, q, k, v, att, ctx,
+                           proj, res, n2, inv2, gate, up, sw, down, h, logits};
+    for (void *p : allocations) {
       if (p) cudaFree(p);
     }
   }
