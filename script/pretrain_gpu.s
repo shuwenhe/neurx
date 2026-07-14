@@ -260,17 +260,6 @@ func int(float f) int {
     0
 }
 
-// Detect number of available GPUs
-func detect_gpus() int {
-    int count = parse_int(runtime_env_get("NEURX_CUDA_DEVICE_COUNT", "0"), 0)
-    if count > 0 {
-        println("[PRETRAIN-GPU] Detected " + int_to_str(count) + " NVIDIA GPU(s)")
-    } else {
-        println("[PRETRAIN-GPU] No NVIDIA GPUs detected")
-    }
-    count
-}
-
 // Initialize GPU contexts for multi-GPU processing
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
