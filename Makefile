@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s
+	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -193,7 +193,7 @@ pretrain-watch: check-bash
 chat: check-bash
 	mkdir -p $(LOG_DIR); \
 	echo "Running NeurX interactive chat from real checkpoint"; \
-	cd '$(CURDIR_UNIX)' && $(MAKE) run-interactive-inference-s 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+	cd '$(CURDIR_UNIX)' && $(MAKE) run-interactive-chat-repl-s 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 
 
@@ -307,6 +307,26 @@ run-interactive-inference-s: check-bash
 		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
 		NEURX_INFER_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/inference_output' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+
+run-interactive-chat-repl-s: check-bash
+	@echo "Building S interactive chat REPL..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/interactive_repl
+	@mkdir -p $(LOG_DIR)
+	@if [ ! -f "$(S_COMPILER)" ]; then \
+		echo "Error: S compiler not found at $(S_COMPILER)"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/interactive_chat_repl.s' -o '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir'
+	@$(MAKE) build-s-ir-runner
+	@echo "Starting NeurX-1.3 Interactive REPL..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_INFER_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/inference_output' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir' 2>&1 | tee -a $(LOG_DIR)/chat_repl_$(shell date +%Y%m%d_%H%M%S).log
 
 run-small-model-training-s: check-bash
 	@echo "Building S small model training entry..."
