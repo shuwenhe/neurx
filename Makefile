@@ -745,7 +745,7 @@ build-cuda-train-bridge: check-bash
 	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
 	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		'$(CUDA_TRAIN_BRIDGE_SRC)' \
-		-lcublas \
+		-lcublas -lnccl \
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
@@ -1074,7 +1074,7 @@ run-gpu-pretrain-s: check-bash
 		fi; \
 		echo "[pretrain-gpu] skipping S validation, launching native CUDA/cuBLAS trainer..."; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_CUDA_DEVICE=0 \
+		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
 		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
@@ -1095,7 +1095,16 @@ run-gpu-pretrain-s: check-bash
 		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
 		NEURX_CUDA_BATCH_PAIRS="$${NEURX_CUDA_BATCH_PAIRS:-256}" \
 		NEURX_CUDA_VOCAB_SIZE="$${NEURX_CUDA_VOCAB_SIZE:-4096}" \
-		'$(CUDA_TRAIN_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		NEURX_NCCL_ID_FILE="$${NEURX_NCCL_ID_FILE:-/tmp/neurx_nccl_id_$$}" \
+		bash -c '\
+			set -e; \
+			world="$${WORLD_SIZE:-1}"; id_file="$${NEURX_NCCL_ID_FILE}"; \
+			rm -f "$$id_file" "$$id_file.tmp"; pids=""; \
+			for rank in $$(seq 0 $$((world - 1))); do \
+				CUDA_VISIBLE_DEVICES="$$rank" RANK="$$rank" LOCAL_RANK=0 WORLD_SIZE="$$world" NEURX_CUDA_DEVICE=0 NEURX_NCCL_ID_FILE="$$id_file" \
+					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "s/^/[rank $$rank] /" & pids="$$pids $$!"; \
+			 done; status=0; for pid in $$pids; do wait $$pid || status=$$?; done; exit $$status' \
+		2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 test-neurx-1-3: check-bash
 	@echo "Building NeurX-1.3 Model Test (S Language)..."
