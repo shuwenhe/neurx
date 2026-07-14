@@ -106,6 +106,11 @@ func main() {
     string resume_step_str = int_to_str(state.current_step)
     string resume_docs_str = int_to_str(state.completed_docs)
     string resume_shards_str = int_to_str(state.completed_shards)
+    string resume_loss_str = float_to_str(state.loss)
+    string resume_flag = "0"
+    if has_checkpoint && resume_mode != "no" {
+        resume_flag = "1"
+    }
     
     println("[PRETRAIN-GPU] Phase 3: Training Parameters")
     println("  - Starting from step: " + resume_step_str)
@@ -113,14 +118,31 @@ func main() {
     println("  - Remaining steps: " + int_to_str(max_steps - state.current_step))
     println("  - Resume docs: " + resume_docs_str)
     println("  - Resume shards: " + resume_shards_str)
+    println("  - Last loss: " + resume_loss_str)
+    println("  - Resume enabled: " + (if resume_flag == "1" { "yes" } else { "no" }))
+    if str_len(latest_weights_path) > 0 {
+        println("  - Weights checkpoint: " + latest_weights_path)
+    }
     
     // Save initial state
     save_training_state(output_dir, state)
     
-    write_progress(progress_file, "gpu-launcher-ready shards=" + int_to_str(shard_count) + " bridge=" + bridge + " resume_step=" + resume_step_str)
+    // Create resume state file for CUDA bridge
+    if resume_flag == "1" {
+        create_cuda_resume_state(checkpoint_state_file, state, latest_weights_path)
+    }
     
+    write_progress(progress_file, "gpu-launcher-ready shards=" + int_to_str(shard_count) + " bridge=" + bridge + " resume_step=" + resume_step_str + " resume=" + resume_flag)
+    
+    println("[PRETRAIN-GPU] Phase 4: Bridge Invocation")
     println("[PRETRAIN-GPU] S launcher validation complete.")
-    println("[PRETRAIN-GPU] Makefile now execs the native CUDA bridge directly for real-time terminal logs.")
+    println("[PRETRAIN-GPU] Makefile will now exec the native CUDA bridge with resume parameters.")
+    println("[PRETRAIN-GPU] Environment variables set:")
+    println("  - NEURX_PRETRAIN_RESUME: " + resume_flag)
+    println("  - NEURX_PRETRAIN_RESUME_FROM: " + checkpoint_state_file)
+    if str_len(latest_weights_path) > 0 {
+        println("  - Model weights will be loaded from checkpoint")
+    }
     println("[PRETRAIN-GPU] Resume state will be automatically saved every NEURX_PRETRAIN_SAVE_INTERVAL steps.")
 }
 
