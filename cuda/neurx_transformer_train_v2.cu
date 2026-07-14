@@ -39,9 +39,12 @@ static bool exists(const std::string&p){return std::filesystem::exists(p);}
 struct Param {
   float *v=nullptr,*g=nullptr,*m=nullptr,*s=nullptr; int64_t n=0;
   explicit Param(int64_t count=0):n(count){
-    if(!n)return; cudaMallocManaged(&v,n*4);cudaMallocManaged(&g,n*4);
+    if(!n)return; cudaMallocManaged(&v,n*4);
+#ifndef NEURX_INFERENCE_ONLY
+    cudaMallocManaged(&g,n*4);
     cudaMallocManaged(&m,n*4);cudaMallocManaged(&s,n*4);
     cudaMemset(g,0,n*4);cudaMemset(m,0,n*4);cudaMemset(s,0,n*4);
+#endif
   }
   Param(const Param&)=delete; Param&operator=(const Param&)=delete;
   ~Param(){if(v)cudaFree(v);if(g)cudaFree(g);if(m)cudaFree(m);if(s)cudaFree(s);}
@@ -57,7 +60,10 @@ struct Layer {
 struct Model {
   int vocab,seq,dim,heads,ffn,nlayers; Param emb,out; std::vector<std::unique_ptr<Layer>> layers;
   Model(int v,int t,int d,int h,int f,int n):vocab(v),seq(t),dim(d),heads(h),ffn(f),nlayers(n),emb(int64_t(v)*d),out(int64_t(d)*v){
-    for(int i=0;i<n;i++)layers.emplace_back(std::make_unique<Layer>(d,f)); init();
+    for(int i=0;i<n;i++)layers.emplace_back(std::make_unique<Layer>(d,f));
+#ifndef NEURX_INFERENCE_ONLY
+    init();
+#endif
   }
   std::vector<Param*> params(){std::vector<Param*>p{&emb};for(auto&l:layers){auto q=l->params();p.insert(p.end(),q.begin(),q.end());}p.push_back(&out);return p;}
   void init(){std::mt19937 rng(1337);std::normal_distribution<float>nd(0,.02f);for(Param*p:params())for(int64_t i=0;i<p->n;i++)p->v[i]=nd(rng);for(auto&l:layers)for(int i=0;i<dim;i++){l->nq.v[i]=1;l->nk.v[i]=1;l->nf.v[i]=1;}}
@@ -165,6 +171,7 @@ static bool load_v1(Model&m,Tokenizer&t,const std::string&path,uint64_t&step){st
 
 } // namespace
 
+#ifndef NEURX_TRANSFORMER_NO_MAIN
 int main(){
   int device_count=0;cudaError_t device_status=cudaGetDeviceCount(&device_count);if(device_status!=cudaSuccess||device_count<1){std::fprintf(stderr,"CUDA device unavailable: %s\n",cudaGetErrorString(device_status));return 2;}
   std::string root=env_str("NEURX_ROOT","."),out=env_str("NEURX_PRETRAIN_OUTPUT_DIR",root+"/checkpoint/NeurX-Transformer");
@@ -188,3 +195,4 @@ int main(){
   }
   if(!save_v2(model,tok,reader,out,step,optstep,accumulated,mb,ga,tokens))return 8;std::printf("[trainer-v2] complete checkpoint=%s/transformer_v2.ckpt\n",out.c_str());return 0;
 }
+#endif
