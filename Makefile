@@ -191,6 +191,10 @@ pretrain-gpu-fresh: check-bash
 test-pretrain-model: check-bash
 	@NEURX_VALIDATE_CHECKPOINT=1 $(MAKE) run-gpu-pretrain-s
 
+test-checkpoint-resume: check-bash
+	@echo "Running End-to-End Checkpoint Resume Test..."
+	@mkdir -p $(CURDIR_UNIX)/test
+	@bash $(CURDIR_UNIX)/test/checkpoint_resume_e2e.sh
 
 posttrain: check-bash
 	@echo "Building NeurX posttrain entry..."
