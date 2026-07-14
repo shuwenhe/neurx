@@ -24,13 +24,13 @@ lr_schedule = "cosine"      # 学习率调度: linear, cosine, constant
 weight_decay = 0.01         # 权重衰减 (L2正则化)
 gradient_clip_norm = 1.0    # 梯度裁剪
 
-# 批处理配置
-batch_size = 128            # 全局批大小
-micro_batch_size = 32       # 微批大小 (梯度积累)
-num_accumulation_steps = 4  # 梯度积累步数
+# 批处理配置 (RTX 4060 Ti优化)
+batch_size = 64             # 全局批大小 (梯度积累后)
+micro_batch_size = 8        # 微批大小 (单步GPU显存)
+num_accumulation_steps = 8  # 梯度积累步数 (64/8=8步)
 
 # 数据加载
-num_workers = 8             # 数据加载工作进程
+num_workers = 4             # 数据加载工作进程 (RTX 4060 Ti优化)
 prefetch_factor = 2         # 预加载因子
 
 [optimization]
