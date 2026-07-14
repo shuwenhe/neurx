@@ -7,7 +7,7 @@ use std.io.println
 // Supports checkpoint resumption for fault tolerance
 
 // Training state structure (saved to checkpoint)
-type training_state struct {
+struct training_state {
     int current_step
     int completed_docs
     int completed_shards
