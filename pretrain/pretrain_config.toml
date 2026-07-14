@@ -39,9 +39,15 @@ optimizer = "adamw"         # adamw, adam, sgd
 betas = [0.9, 0.999]       # Adam beta参数
 eps = 1e-8                  # Adam epsilon
 
-# 混合精度训练
+# 混合精度训练 (RTX 4060 Ti优化)
 mixed_precision = "bf16"    # bf16, fp16, fp32
 scale_loss = true           # 损失缩放 (for fp16)
+
+# 内存优化
+gradient_checkpointing = true    # 启用梯度检查点 (降低显存占用)
+activation_checkpointing = true  # 激活检查点
+flash_attention = true           # Flash Attention优化
+fused_kernels = true             # 融合CUDA核心优化
 
 [checkpointing]
 # 检查点配置
