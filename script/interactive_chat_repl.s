@@ -325,7 +325,7 @@ func main() int {
         }
         
         // Generate and display response
-        string response = generate_response(user_input)
+        string response = generate_response(user_input, ctx)
         println("NeurX: " + response)
         println("")
         
