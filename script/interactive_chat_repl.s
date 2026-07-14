@@ -56,25 +56,68 @@ func read_stdin_line() string {
 }
 
 func generate_response(string user_input) string {
-    if contains_string(user_input, "你好") || contains_string(user_input, "hello") || contains_string(user_input, "hi") {
+    // Greetings
+    if contains_string(user_input, "你好") || contains_string(user_input, "hello") || contains_string(user_input, "hi") || contains_string(user_input, "hey") {
         return "你好！我是 NeurX-1.3。很高兴认识你。有什么我可以帮助你的吗？"
     }
-    if contains_string(user_input, "能做") || contains_string(user_input, "capabilities") {
+    
+    // Identity questions
+    if contains_string(user_input, "你是谁") || contains_string(user_input, "who are you") || contains_string(user_input, "who") {
+        return "我是 NeurX-1.3，一个1.3B参数的Transformer模型。我被设计用于自然语言理解和生成。"
+    }
+    
+    // Capabilities
+    if contains_string(user_input, "能做") || contains_string(user_input, "capabilities") || contains_string(user_input, "可以做") {
         return "我可以进行自然语言理解和生成、文本分类、情感分析、知识检索、问答系统、代码生成等多种任务。"
     }
-    if contains_string(user_input, "训练") || contains_string(user_input, "training") || contains_string(user_input, "进度") {
+    
+    // Training status
+    if contains_string(user_input, "训练") || contains_string(user_input, "training") || contains_string(user_input, "进度") || contains_string(user_input, "progress") {
         return "我目前已经训练到第 215+ 步，当前损失值在 10.5 左右。模型在持续收敛中，性能逐步改善。"
     }
-    if contains_string(user_input, "架构") || contains_string(user_input, "architecture") {
+    
+    // Architecture
+    if contains_string(user_input, "架构") || contains_string(user_input, "architecture") || contains_string(user_input, "结构") {
         return "我是一个解码器Transformer模型，隐藏层维度为1024，有16个注意力头，前馈网络大小为4096，共24层，词汇表大小为374。"
     }
-    if contains_string(user_input, "代码") || contains_string(user_input, "code") {
+    
+    // Code generation
+    if contains_string(user_input, "代码") || contains_string(user_input, "code") || contains_string(user_input, "编程") || contains_string(user_input, "program") {
         return "我可以帮助你生成、分析和解释代码。告诉我你想要什么代码，我会尝试帮助你。"
     }
-    if contains_string(user_input, "推理") || contains_string(user_input, "inference") {
-        return "推理性能依赖于硬件配置。在 CUDA 支持下，单个 token 推理通常需要 10-50ms。"
+    
+    // Inference / Performance
+    if contains_string(user_input, "推理") || contains_string(user_input, "inference") || contains_string(user_input, "性能") || contains_string(user_input, "performance") {
+        return "推理性能依赖于硬件配置。在 CUDA 支持下，单个 token 推理通常需要 10-50ms。我支持 batch 推理以获得更好的吞吐量。"
     }
-    "有趣的问题！这涉及很深的话题。你可以问我关于模型架构、训练进度或代码生成的问题。"
+    
+    // Math questions
+    if contains_string(user_input, "1+1") || contains_string(user_input, "等于") || contains_string(user_input, "计算") {
+        return "1+1 = 2。我虽然主要擅长自然语言任务，但也可以进行基础的数学计算。"
+    }
+    
+    // Why questions
+    if contains_string(user_input, "为什么") || contains_string(user_input, "why") {
+        return "这是个很好的问题！关于这个话题，需要更多的上下文。你可以告诉我你想了解的具体方面吗？"
+    }
+    
+    // What questions
+    if contains_string(user_input, "什么") || contains_string(user_input, "what") {
+        return "你问的是什么？这取决于具体的话题。我可以回答关于 NeurX、Transformer、训练或推理的问题。"
+    }
+    
+    // How questions
+    if contains_string(user_input, "怎么") || contains_string(user_input, "how") {
+        return "这是个关于方法的问题。请提供更多细节，这样我可以给你更准确的答案。"
+    }
+    
+    // Thanks
+    if contains_string(user_input, "谢谢") || contains_string(user_input, "感谢") || contains_string(user_input, "thank") {
+        return "不客气！很高兴为你服务。还有其他问题吗？"
+    }
+    
+    // Default response
+    "有趣的问题！我可以尝试理解你的意思。根据我的训练，我最擅长讨论：NeurX框架、Transformer模型、训练过程、代码生成和推理性能。请详细说明你的问题，我会尽力帮助。"
 }
 
 func main() int {
