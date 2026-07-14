@@ -194,9 +194,14 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
-	@mkdir -p $(LOG_DIR); \
-	echo "Starting NeurX interactive chat (S Language - Real Model Inference)"; \
-	cd '$(CURDIR_UNIX)' && $(MAKE) run-interactive-chat-repl-s 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+	@$(MAKE) build-cuda-chat-bridge
+	@mkdir -p $(LOG_DIR)
+	@echo "Running NeurX interactive chat from NXTRFMV2 checkpoint"
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		NEURX_CHECKPOINT='$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt' \
+		NEURX_TOKENIZER_VOCAB='$(CURDIR_UNIX)/data/corpus/vocab.json' \
+		NEURX_TOKENIZER_MERGES='$(CURDIR_UNIX)/data/corpus/merges.txt' \
+		'$(CUDA_CHAT_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 
 
