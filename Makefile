@@ -172,6 +172,44 @@ pretrain-gpu: check-bash
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 
+pretrain-gpu-distributed: check-bash
+	@mkdir -p $(PRETRAIN_LOG_DIR)
+	@echo "=== NeurX Multi-GPU Distributed Pretraining ==="
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
+		if [ "$${GPU_COUNT:-0}" -le 0 ]; then \
+			echo "error: NVIDIA GPU driver is not available; nvidia-smi detected 0 GPUs."; \
+			echo "       Fix NVIDIA driver/CUDA runtime, then run: make pretrain-gpu-distributed"; \
+			exit 1; \
+		fi; \
+		echo "[DDP] Detected GPUs: $$GPU_COUNT"; \
+		echo "[DDP] Starting DDP training with $$GPU_COUNT GPUs..."; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_DEVICE_COUNT="$$GPU_COUNT" \
+		NEURX_NUM_GPUS="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		NEURX_PRETRAIN_OUTPUT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-50000}" \
+		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-8}" \
+		NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS="$${NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS:-8}" \
+		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-2048}" \
+		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-4}" \
+		NEURX_PRETRAIN_LEARNING_RATE="$${NEURX_PRETRAIN_LEARNING_RATE:-0.0002}" \
+		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
+		NEURX_PRETRAIN_RESUME="$${NEURX_PRETRAIN_RESUME:-auto}" \
+		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
+		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
+		NEURX_TRANSFORMER_DIM="$${NEURX_TRANSFORMER_DIM:-1024}" \
+		NEURX_TRANSFORMER_HEADS="$${NEURX_TRANSFORMER_HEADS:-16}" \
+		NEURX_TRANSFORMER_FFN="$${NEURX_TRANSFORMER_FFN:-4096}" \
+		NEURX_TRANSFORMER_NUM_LAYERS="$${NEURX_TRANSFORMER_NUM_LAYERS:-24}" \
+		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
+		NEURX_DDP_BACKEND="$${NEURX_DDP_BACKEND:-nccl}" \
+		NEURX_MASTER_ADDR="$${NEURX_MASTER_ADDR:-localhost}" \
+		NEURX_MASTER_PORT="$${NEURX_MASTER_PORT:-29500}" \
+		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
+		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_distributed_$(shell date +%Y%m%d_%H%M%S).log'
+
 pretrain-gpu-resume: pretrain-gpu
 	@echo "Resume mode enabled by default"
 
