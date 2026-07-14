@@ -1102,6 +1102,7 @@ run-gpu-pretrain-s: check-bash
 			rm -f "$$id_file" "$$id_file.tmp"; pids=""; \
 			for rank in $$(seq 0 $$((world - 1))); do \
 				CUDA_VISIBLE_DEVICES="$$rank" RANK="$$rank" LOCAL_RANK=0 WORLD_SIZE="$$world" NEURX_CUDA_DEVICE=0 NEURX_NCCL_ID_FILE="$$id_file" \
+				NEURX_PRETRAIN_RESUME_FROM="$${NEURX_PRETRAIN_OUTPUT_DIR}/rank_$${rank}/transformer_v2.ckpt" \
 					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "s/^/[rank $$rank] /" & pids="$$pids $$!"; \
 			 done; status=0; for pid in $$pids; do wait $$pid || status=$$?; done; exit $$status' \
 		2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
