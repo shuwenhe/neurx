@@ -161,6 +161,7 @@ pretrain-gpu: check-bash
 		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-256}" \
 		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-8}" \
 		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
+		NEURX_PRETRAIN_RESUME="$${NEURX_PRETRAIN_RESUME:-auto}" \
 		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
 		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
 		NEURX_TRANSFORMER_DIM="$${NEURX_TRANSFORMER_DIM:-1024}" \
@@ -170,6 +171,22 @@ pretrain-gpu: check-bash
 		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
+
+pretrain-gpu-resume: pretrain-gpu
+	@echo "Resume mode enabled by default"
+
+pretrain-gpu-fresh: check-bash
+	@mkdir -p $(PRETRAIN_LOG_DIR)
+	@echo "Starting fresh training (ignoring any existing checkpoint)..."
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_DEVICE_COUNT="$$GPU_COUNT" \
+		NEURX_NUM_GPUS="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		NEURX_PRETRAIN_OUTPUT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_PRETRAIN_STEPS='$(PRETRAIN_STEPS)' \
+		NEURX_PRETRAIN_RESUME="no" \
+		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_fresh_$(shell date +%Y%m%d_%H%M%S).log'
 
 test-pretrain-model: check-bash
 	@NEURX_VALIDATE_CHECKPOINT=1 $(MAKE) run-gpu-pretrain-s
