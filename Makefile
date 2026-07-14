@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -143,7 +143,7 @@ pretrain: check-bash
 		NEURX_LLM_VOCAB_SIZE=16000 \
 		$(MAKE) run-s-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_$(shell date +%Y%m%d_%H%M%S).log'
 
-pretrain-gpu: check-bash
+pretrain-gpu-single-node: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
 		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
@@ -209,6 +209,44 @@ pretrain-gpu-distributed: check-bash
 		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_distributed_$(shell date +%Y%m%d_%H%M%S).log'
+
+pretrain-gpu: check-bash
+	@mkdir -p $(PRETRAIN_LOG_DIR)
+	@echo "=== NeurX Multi-GPU Distributed Pretraining (Default) ==="
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
+		if [ "$${GPU_COUNT:-0}" -le 0 ]; then \
+			echo "error: NVIDIA GPU driver is not available; nvidia-smi detected 0 GPUs."; \
+			echo "       Fix NVIDIA driver/CUDA runtime, then run: make pretrain-gpu"; \
+			exit 1; \
+		fi; \
+		echo "[DDP] Detected GPUs: $$GPU_COUNT"; \
+		echo "[DDP] Starting distributed training with $$GPU_COUNT GPUs..."; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CUDA_DEVICE_COUNT="$$GPU_COUNT" \
+		NEURX_NUM_GPUS="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		NEURX_PRETRAIN_OUTPUT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-50000}" \
+		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-8}" \
+		NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS="$${NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS:-8}" \
+		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-2048}" \
+		NEURX_PRETRAIN_NUM_WORKERS="$${NEURX_PRETRAIN_NUM_WORKERS:-4}" \
+		NEURX_PRETRAIN_LEARNING_RATE="$${NEURX_PRETRAIN_LEARNING_RATE:-0.0002}" \
+		NEURX_PRETRAIN_LINE_CHUNK="$${NEURX_PRETRAIN_LINE_CHUNK:-$(PRETRAIN_LINE_CHUNK)}" \
+		NEURX_PRETRAIN_RESUME="$${NEURX_PRETRAIN_RESUME:-auto}" \
+		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
+		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
+		NEURX_TRANSFORMER_DIM="$${NEURX_TRANSFORMER_DIM:-1024}" \
+		NEURX_TRANSFORMER_HEADS="$${NEURX_TRANSFORMER_HEADS:-16}" \
+		NEURX_TRANSFORMER_FFN="$${NEURX_TRANSFORMER_FFN:-4096}" \
+		NEURX_TRANSFORMER_NUM_LAYERS="$${NEURX_TRANSFORMER_NUM_LAYERS:-24}" \
+		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
+		NEURX_DDP_BACKEND="$${NEURX_DDP_BACKEND:-nccl}" \
+		NEURX_MASTER_ADDR="$${NEURX_MASTER_ADDR:-localhost}" \
+		NEURX_MASTER_PORT="$${NEURX_MASTER_PORT:-29500}" \
+		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
+		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 
 pretrain-gpu-resume: pretrain-gpu
 	@echo "Resume mode enabled by default"
