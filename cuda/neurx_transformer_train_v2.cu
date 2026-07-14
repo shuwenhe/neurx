@@ -191,12 +191,16 @@ static bool load_v1(Model&m,Tokenizer&t,const std::string&path,uint64_t&step){st
 
 #ifndef NEURX_TRANSFORMER_NO_MAIN
 int main(){
+  DistributedContext dist;if(!init_distributed(dist)){std::fprintf(stderr,"distributed CUDA/NCCL initialization failed\n");return 2;}
   int device_count=0;cudaError_t device_status=cudaGetDeviceCount(&device_count);if(device_status!=cudaSuccess||device_count<1){std::fprintf(stderr,"CUDA device unavailable: %s\n",cudaGetErrorString(device_status));return 2;}
-  std::string root=env_str("NEURX_ROOT","."),out=env_str("NEURX_PRETRAIN_OUTPUT_DIR",root+"/checkpoint/NeurX-Transformer");
+  std::string root=env_str("NEURX_ROOT","."),base_out=env_str("NEURX_PRETRAIN_OUTPUT_DIR",root+"/checkpoint/NeurX-Transformer");
+  std::string out=base_out+(dist.world>1?"/rank_"+std::to_string(dist.rank):"");
   Tokenizer tok;if(!tok.load(env_str("NEURX_TOKENIZER_VOCAB",""),env_str("NEURX_TOKENIZER_MERGES","")))return 2;
   int seq=std::max(2,env_int("NEURX_PRETRAIN_SEQ_LEN",128)),dim=std::max(8,env_int("NEURX_TRANSFORMER_DIM",256)),heads=std::max(1,env_int("NEURX_TRANSFORMER_HEADS",8));
   int ffn=std::max(8,env_int("NEURX_TRANSFORMER_FFN",dim*3)),nl=std::max(1,env_int("NEURX_TRANSFORMER_NUM_LAYERS",4));int mb=std::max(1,env_int("NEURX_PRETRAIN_MICRO_BATCH",4)),ga=std::max(1,env_int("NEURX_GRADIENT_ACCUMULATION_STEPS",1));
   if(dim%heads){std::fprintf(stderr,"hidden size must be divisible by heads\n");return 2;}Model model(tok.size(),seq,dim,heads,ffn,nl);TrainCache cache(model);JsonlStream reader;reader.tok=&tok;if(!reader.load_list(env_str("NEURX_PRETRAIN_SHARD_LIST_FILE",root+"/artifacts/build/run_large_pretrain/shard_list.txt"))){std::fprintf(stderr,"empty shard list\n");return 3;}
+  if(dist.world>1){std::vector<std::string>local;for(size_t i=dist.rank;i<reader.shards.size();i+=dist.world)local.push_back(reader.shards[i]);reader.shards.swap(local);if(reader.shards.empty())return 3;}
+  std::printf("[trainer-v2] rank=%d world_size=%d local_rank=%d shards=%zu checkpoint=%s\n",dist.rank,dist.world,dist.local_rank,reader.shards.size(),out.c_str());
   uint64_t step=0,optstep=0,micro=0,tokens=0;std::string resume=env_str("NEURX_PRETRAIN_RESUME_FROM",out+"/transformer_v2.ckpt");if(env_int("NEURX_PRETRAIN_RESUME",1)&&exists(resume)){if(!load_v2(model,tok,reader,resume,step,optstep,micro,tokens,mb,ga))return 4;std::printf("[checkpoint] restored v2 step=%llu shard=%d line=%llu micro=%llu\n",(unsigned long long)step,reader.cur.shard,(unsigned long long)reader.cur.line,(unsigned long long)micro);}else if(env_int("NEURX_PRETRAIN_RESUME",1)&&exists(out+"/transformer.ckpt")){if(!load_v1(model,tok,out+"/transformer.ckpt",step))return 4;optstep=step;if(!save_v2(model,tok,reader,out,step,optstep,0,mb,ga,tokens))return 5;}
   if(env_int("NEURX_VALIDATE_CHECKPOINT",0)){
     std::vector<int>sample(seq+1);if(!reader.sequence(sample)){std::fprintf(stderr,"checkpoint validation could not read a token sequence\n");return 6;}
@@ -207,7 +211,7 @@ int main(){
   uint64_t total=std::max(1,env_int("NEURX_PRETRAIN_STEPS",1000)),save_every=std::max(1,env_int("NEURX_PRETRAIN_SAVE_INTERVAL",100)),log_every=std::max(1,env_int("NEURX_PRETRAIN_LOG_INTERVAL",10));float lr=env_float("NEURX_PRETRAIN_LR",2e-4f);std::vector<int>ids(seq+1);float loss_sum=0;int accumulated=int(micro);
   if(accumulated==0)zero_grads(model);std::printf("[trainer-v2] tokenizer=%s vocab=%d layers=%d seq=%d dim=%d heads=%d ffn=%d micro_batch=%d grad_accum=%d effective_sequences=%d\n",tok.kind.c_str(),model.vocab,nl,seq,dim,heads,ffn,mb,ga,mb*ga);
   while(step<total){int this_batch=0;for(int b=0;b<mb;b++){if(!reader.sequence(ids))return 6;for(int i=0;i<seq;i++){cache.ids[i]=ids[i];cache.targets[i]=ids[i+1];}if(!forward_backward(model,cache))return 7;loss_sum+=*cache.loss;this_batch++;tokens+=seq;}micro++;accumulated++;step++;
-    if(accumulated>=ga){optstep++;optimizer_step(model,optstep,lr,1.0f/float(accumulated*mb));zero_grads(model);accumulated=0;micro=0;}
+    if(accumulated>=ga){if(!sync_gradients(model,dist))return 7;optstep++;optimizer_step(model,optstep,lr,1.0f/float(accumulated*mb));zero_grads(model);accumulated=0;micro=0;}
     if(step==1||step%log_every==0)std::printf("[trainer-v2] step=%llu/%llu optimizer_step=%llu loss=%.6f tokens=%llu shard=%d line=%llu accum=%d/%d\n",(unsigned long long)step,(unsigned long long)total,(unsigned long long)optstep,loss_sum/std::max(1,this_batch),(unsigned long long)tokens,reader.cur.shard,(unsigned long long)reader.cur.line,accumulated,ga);loss_sum=0;
     if(step%save_every==0&&!save_v2(model,tok,reader,out,step,optstep,accumulated,mb,ga,tokens))return 8;
   }
