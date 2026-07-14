@@ -748,3 +748,34 @@ func str_len(string s) int {
     }
     n
 }
+
+// ============================================================================
+// Checkpoint Recovery Functions for CUDA Bridge Integration
+// ============================================================================
+
+func find_latest_checkpoint_weights(string checkpoint_dir, int resume_step) string {
+    // Look for checkpoint_step_<N>.weights.f32 files
+    // Find the one closest to or equal to resume_step
+    string cmd = "ls -1 '" + checkpoint_dir + "/checkpoint_step_'*.weights.f32 2>/dev/null | sort -V | tail -1"
+    string latest = runtime_run_command_output(cmd)
+    string trimmed = trim(latest)
+    trimmed
+}
+
+func create_cuda_resume_state(string state_file, training_state state, string weights_path) {
+    // Write checkpoint.state file in the format CUDA bridge expects
+    // Format: key=value per line
+    string content = ""
+    content = content + "completed_step=" + int_to_str(state.current_step) + "\n"
+    content = content + "pairs_seen=" + int_to_str(state.completed_docs * 100) + "\n"
+    content = content + "shard_index=" + int_to_str(state.completed_shards) + "\n"
+    content = content + "line_in_shard=0\n"
+    content = content + "pending_offset=0\n"
+    content = content + "vocab_size=4096\n"
+    content = content + "batch_pairs=256\n"
+    content = content + "loss=" + float_to_str(state.loss) + "\n"
+    content = content + "weights=" + (if str_len(weights_path) > 0 { weights_path } else { "" }) + "\n"
+    
+    runtime_write_text_file(state_file, content)
+    println("[PRETRAIN-GPU] \u2713 Created CUDA resume state: " + state_file)
+}
