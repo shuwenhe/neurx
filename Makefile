@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -59,6 +59,9 @@ CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
 CUDA_BIGRAM_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_cuda_train_bridge.cu
 CUDA_TRAIN_BRIDGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/cuda_train
 CUDA_TRAIN_BRIDGE_BIN := $(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_train_bridge$(BIN_EXT)
+CUDA_CHAT_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_chat.cu
+CUDA_CHAT_BRIDGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/cuda_chat
+CUDA_CHAT_BRIDGE_BIN := $(CUDA_CHAT_BRIDGE_BUILD_DIR)/neurx_transformer_chat$(BIN_EXT)
 CC ?= cc
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
 INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
@@ -191,9 +194,14 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat: check-bash
-	mkdir -p $(LOG_DIR); \
-	echo "Running NeurX interactive chat from real checkpoint"; \
-	cd '$(CURDIR_UNIX)' && $(MAKE) run-interactive-chat-repl-s 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+	@$(MAKE) build-cuda-chat-bridge
+	@mkdir -p $(LOG_DIR)
+	@echo "Running NeurX interactive chat from NXTRFMV2 checkpoint"
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		NEURX_CHECKPOINT='$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt' \
+		NEURX_TOKENIZER_VOCAB='$(CURDIR_UNIX)/data/corpus/vocab.json' \
+		NEURX_TOKENIZER_MERGES='$(CURDIR_UNIX)/data/corpus/merges.txt' \
+		'$(CUDA_CHAT_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 
 
@@ -735,6 +743,22 @@ build-cuda-train-bridge: check-bash
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
+
+build-cuda-chat-bridge: check-bash
+	@echo "Building native NXTRFMV2 CUDA chat bridge..."
+	@if [ '$(PLATFORM)' != 'linux' ]; then \
+		echo "Error: native CUDA chat is supported on Linux hosts only."; \
+		exit 1; \
+	fi
+	@if [ -z '$(CUDA_NVCC)' ]; then \
+		echo "Error: nvcc not found. Install NVIDIA CUDA Toolkit, then run: make chat"; \
+		exit 1; \
+	fi
+	@mkdir -p '$(CUDA_CHAT_BRIDGE_BUILD_DIR)'
+	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		'$(CUDA_CHAT_BRIDGE_SRC)' -lcublas -o '$(CUDA_CHAT_BRIDGE_BIN)'
+	@chmod +x '$(CUDA_CHAT_BRIDGE_BIN)'
+	@test -x '$(CUDA_CHAT_BRIDGE_BIN)'
 
 build-cuda-bigram-bridge: check-bash
 	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
