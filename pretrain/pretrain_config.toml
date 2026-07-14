@@ -62,10 +62,16 @@ save_optimizer_state = true # 保存优化器状态
 save_training_state = true  # 保存训练状态
 
 [distributed]
-# 分布式训练配置
-world_size = 1              # GPU数量 (分布式时)
+# 分布式训练配置 (RTX 4060 Ti单GPU优化)
+world_size = 1              # GPU数量 (当前为单GPU)
+rank = 0                    # 当前进程rank
 backend = "nccl"            # 通信后端: nccl, gloo
 find_unused_parameters = false
+
+# RTX 4060 Ti优化参数
+pin_memory = true           # 固定内存以加快数据传输
+prefetch_distance = 2       # 预加载距离
+async_grad_reduce = true    # 异步梯度归约
 
 [logging]
 # 日志配置
