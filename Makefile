@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -167,6 +167,9 @@ pretrain-gpu: check-bash
 		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
+
+test-pretrain-model: check-bash
+	@NEURX_VALIDATE_CHECKPOINT=1 $(MAKE) run-gpu-pretrain-s
 
 
 posttrain: check-bash
@@ -1025,6 +1028,7 @@ run-gpu-pretrain-s: check-bash
 		NEURX_PRETRAIN_LOG_INTERVAL="$${NEURX_PRETRAIN_LOG_INTERVAL:-1}" \
 		NEURX_PRETRAIN_SAVE_INTERVAL="$${NEURX_PRETRAIN_SAVE_INTERVAL:-$(PRETRAIN_SAVE_INTERVAL)}" \
 		NEURX_PRETRAIN_RESUME="$${NEURX_PRETRAIN_RESUME:-1}" \
+		NEURX_VALIDATE_CHECKPOINT="$${NEURX_VALIDATE_CHECKPOINT:-0}" \
 		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
 		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
 		NEURX_TRANSFORMER_DIM="$${NEURX_TRANSFORMER_DIM:-1024}" \
@@ -1035,6 +1039,22 @@ run-gpu-pretrain-s: check-bash
 		NEURX_CUDA_BATCH_PAIRS="$${NEURX_CUDA_BATCH_PAIRS:-256}" \
 		NEURX_CUDA_VOCAB_SIZE="$${NEURX_CUDA_VOCAB_SIZE:-4096}" \
 		'$(CUDA_TRAIN_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+
+test-neurx-1-3: check-bash
+	@echo "Building NeurX-1.3 Model Test (S Language)..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test
+	@mkdir -p $(LOG_DIR)
+	@cd '$(CURDIR_UNIX)' && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/test_neurx_1_3_model.s' -o '$(CURDIR_UNIX)/artifacts/build/test/neurx_1_3_test.ir' 2>&1
+	@echo "Compiling IR runner..."
+	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
+		$(MAKE) build-s-ir-runner; \
+	fi
+	@echo "Running NeurX-1.3 Model Test..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		$(S_RUNNER_BIN) '$(CURDIR_UNIX)/artifacts/build/test/neurx_1_3_test.ir' 2>&1 | tee -a $(LOG_DIR)/test_neurx_1_3_$(shell date +%Y%m%d_%H%M%S).log
 
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."
