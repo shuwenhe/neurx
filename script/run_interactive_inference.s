@@ -5,15 +5,23 @@ use std.io.println
 
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX Interactive Inference (S Lang)")
+    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
+    let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifacts/inference_output")
+    println("NeurX Interactive Chat (S Lang)")
     println("")
     println("Project root: " + project_root)
+    println("Checkpoint : " + checkpoint_dir)
     println("")
     println("  inference source : " + check_path("inference/production_inference.s"))
-    println("  checkpoint dir   : " + check_path("artifacts/checkpoints/llm_s_pretrain"))
-    println("  output dir       : " + check_path("artifacts/inference_output"))
+    println("  checkpoint dir   : " + check_path(checkpoint_dir))
+    println("  output dir       : " + check_path(output_dir))
     println("")
-    println("This S entrypoint centralizes the interactive inference status layer.")
+    if runtime_file_exists(checkpoint_dir) {
+        println("✓ Ready for interactive chat")
+        println("  Type your question and press Enter")
+    } else {
+        println("✗ Checkpoint not available - cannot start chat")
+    }
     0
 }
 

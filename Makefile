@@ -293,17 +293,20 @@ quick-start-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quick_start/quick_start.ir' 2>&1 | tee -a $(LOG_DIR)/quick_start_$(shell date +%Y%m%d_%H%M%S).log
 
 run-interactive-inference-s: check-bash
-	@echo "Building S interactive inference entry..."
+	@echo "Building S interactive chat system..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/interactive_inference
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'script/run_interactive_inference.s' -o '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_inference.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_inference.ir'
-	@echo "Running S interactive inference entry..."
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'script/run_interactive_chat.s' -o '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir'
+	@$(MAKE) build-s-ir-runner
+	@echo "Starting NeurX-1.3 Interactive Chat..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_interactive_inference_$(shell date +%Y%m%d_%H%M%S).log
+		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
+		NEURX_INFER_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/inference_output' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 run-small-model-training-s: check-bash
 	@echo "Building S small model training entry..."
