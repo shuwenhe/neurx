@@ -100,3 +100,12 @@ output_dir = "checkpoint/NeurX-1.3"
 model_name = "NeurX-1.3.neurx"
 resume_from_checkpoint = null  # 从检查点恢复
 seed = 42                   # 随机种子
+
+[hardware]
+# RTX 4060 Ti硬件优化配置
+gpu_model = "RTX4060Ti"     # GPU型号
+gpu_memory_mb = 16384       # GPU显存大小
+fp16_loss_scale = 65536     # FP16损失缩放初始值
+enable_tf32 = true          # 启用TF32加速 (NVIDIA Ampere+优化)
+num_gpu_devices = 1         # GPU设备数量
+torch_compile = false       # PyTorch编译优化 (可选)
