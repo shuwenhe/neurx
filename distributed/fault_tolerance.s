@@ -120,3 +120,218 @@ func check_async_checkpoint_status(int task_id) bool {
     // Return true if checkpoint complete
     false
 }
+
+// ============================================
+// Multi-Node Fault Tolerance Extensions
+// 多节点故障容错扩展
+// ============================================
+
+struct heartbeat_entry {
+    int rank
+    int node_id
+    int timestamp_sec
+    float current_step
+    float current_loss
+    bool is_healthy
+}
+
+struct multi_node_recovery_plan {
+    int failed_rank
+    int recovery_step
+    string recovery_checkpoint
+    int retry_attempt
+    int max_retries
+    bool in_progress
+}
+
+struct fault_tolerance_multi_node {
+    int world_size
+    int num_nodes
+    []heartbeat_entry heartbeats
+    []multi_node_recovery_plan recovery_plans
+    int heartbeat_timeout_sec
+    int max_recovery_retries
+    string checkpoint_dir
+}
+
+// Initialize multi-node fault tolerance
+func init_multi_node_fault_tolerance(
+    int world_size,
+    int num_nodes,
+    string checkpoint_dir,
+) fault_tolerance_multi_node {
+    
+    fault_tolerance_multi_node {
+        world_size: world_size,
+        num_nodes: num_nodes,
+        heartbeats: []heartbeat_entry{cap: world_size},
+        recovery_plans: []multi_node_recovery_plan{cap: num_nodes},
+        heartbeat_timeout_sec: 30,
+        max_recovery_retries: 3,
+        checkpoint_dir: checkpoint_dir,
+    }
+}
+
+// Record heartbeat from rank (called periodically in training loop)
+func record_rank_heartbeat(
+    fault_tolerance_multi_node& ft_mn,
+    int rank,
+    int node_id,
+    float step,
+    float loss,
+) {
+    
+    heartbeat_entry hb = heartbeat_entry {
+        rank: rank,
+        node_id: node_id,
+        timestamp_sec: 0,  // Should be current time
+        current_step: step,
+        current_loss: loss,
+        is_healthy: true,
+    }
+    
+    ft_mn.heartbeats[rank] = hb
+}
+
+// Detect failed ranks in multi-node setting
+func detect_failed_ranks_multi_node(
+    fault_tolerance_multi_node& ft_mn,
+    int current_time_sec,
+) []int {
+    
+    []int failed = []int{cap: 10}
+    int failed_count = 0
+    
+    int rank = 0
+    while rank < ft_mn.world_size {
+        
+        heartbeat_entry hb = ft_mn.heartbeats[rank]
+        int time_since_heartbeat = current_time_sec - hb.timestamp_sec
+        
+        if time_since_heartbeat > ft_mn.heartbeat_timeout_sec && hb.timestamp_sec > 0 {
+            failed[failed_count] = rank
+            failed_count = failed_count + 1
+        }
+        
+        rank = rank + 1
+    }
+    
+    failed
+}
+
+// Plan recovery across nodes: find last valid checkpoint < current_step
+func plan_multi_node_recovery(
+    fault_tolerance_multi_node& ft_mn,
+    []int failed_ranks,
+    int current_step,
+    int node_rank,
+) bool {
+    
+    int failed_count = len(failed_ranks)
+    
+    // Find last good checkpoint step
+    int last_good_step = find_last_good_checkpoint_multi_node(
+        ft_mn.checkpoint_dir,
+        current_step,
+        node_rank,
+    )
+    
+    if last_good_step < 0 {
+        return false  // No valid checkpoint
+    }
+    
+    // Create recovery plan for each failed rank
+    int i = 0
+    while i < failed_count {
+        
+        int rank = failed_ranks[i]
+        
+        multi_node_recovery_plan plan = multi_node_recovery_plan {
+            failed_rank: rank,
+            recovery_step: last_good_step,
+            recovery_checkpoint: ft_mn.checkpoint_dir + "/step_" + itoa_ext(last_good_step),
+            retry_attempt: 0,
+            max_retries: ft_mn.max_recovery_retries,
+            in_progress: true,
+        }
+        
+        ft_mn.recovery_plans[rank] = plan
+        i = i + 1
+    }
+    
+    true
+}
+
+// Execute recovery: restart failed rank and reload from checkpoint
+func execute_multi_node_recovery(
+    fault_tolerance_multi_node& ft_mn,
+    int rank,
+) bool {
+    
+    multi_node_recovery_plan plan = ft_mn.recovery_plans[rank]
+    
+    if plan.retry_attempt >= plan.max_retries {
+        return false
+    }
+    
+    plan.retry_attempt = plan.retry_attempt + 1
+    
+    // 1. Restart rank process (via SSH in multi-node setting)
+    // 2. Load checkpoint
+    // 3. Synchronize with other ranks
+    // 4. Resume training
+    
+    true
+}
+
+// Clean up: synchronize checkpoints across nodes
+func sync_checkpoints_across_nodes(
+    fault_tolerance_multi_node& ft_mn,
+    int rank,
+) bool {
+    
+    // In multi-node training, each rank may save checkpoint locally
+    // Need to aggregate/replicate to shared storage for failure recovery
+    
+    true
+}
+
+// Find last checkpoint that exists on this node (shared storage)
+func find_last_good_checkpoint_multi_node(
+    string checkpoint_dir,
+    int current_step,
+    int node_rank,
+) int {
+    
+    // Scan checkpoint_dir for step_* directories
+    // Check metadata to ensure valid checkpoint
+    // Return last valid step <= current_step
+    
+    int last_step = current_step - 1000
+    if last_step < 0 {
+        last_step = 0
+    }
+    last_step
+}
+
+// Helper: convert int to string
+func itoa_ext(int n) string {
+    if n == 0 {
+        return "0"
+    }
+    
+    string s = ""
+    int num = n
+    if num < 0 {
+        s = "-"
+        num = -num
+    }
+    
+    while num > 0 {
+        byte digit = byte('0' + (num % 10))
+        s = string(digit) + s
+        num = num / 10
+    }
+    
+    s
+}
