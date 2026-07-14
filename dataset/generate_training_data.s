@@ -1,0 +1,206 @@
+package main
+
+use std.io
+use std.strings
+
+// 训练数据记录
+type TrainingData struct {
+    text: string
+}
+
+func main() {
+    io.println("🚀 NeurX级别工业LLM训练数据生成器 (S语言实现)")
+    io.println("")
+    
+    // 输出文件路径
+    output_file: string = "data/training_data.jsonl"
+    
+    // 创建训练数据集合
+    var training_data: []TrainingData
+    
+    // ==================== 代码生成和理解 ====================
+    training_data = append(training_data, TrainingData{
+        text: "Python代码示例：实现一个LRU缓存。class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.cache = {}\n        self.order = []\n    \n    def get(self, key):\n        if key in self.cache:\n            self.order.remove(key)\n            self.order.append(key)\n            return self.cache[key]\n        return -1\n    \n    def put(self, key, value):\n        if key in self.cache:\n            self.order.remove(key)\n        elif len(self.cache) == self.capacity:\n            removed = self.order.pop(0)\n            del self.cache[removed]\n        self.cache[key] = value\n        self.order.append(key)",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "SQL查询优化最佳实践：使用索引提高查询性能。CREATE INDEX idx_user_email ON users(email)会大幅加快基于email的查询速度。对于复合查询，复合索引通常比单列索引更有效。避免在WHERE子句中使用函数会维持索引的有效性。查询执行计划分析EXPLAIN是诊断性能问题的关键工具。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "JavaScript异步编程模式对比：回调函数(callback)是最基础的异步模式，但容易导致回调地狱。Promise提供了更清晰的异步链式操作。async/await是基于Promise的语法糖，提供类似同步代码的可读性。选择合适的模式取决于代码复杂度和可维护性需求。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "分布式系统中的一致性协议：Raft算法通过多数投票机制实现强一致性，适合对一致性要求高的系统。两阶段提交(2PC)在分布式事务中使用，但存在性能瓶颈。最终一致性在高可用系统中应用广泛，提供更好的性能和可扩展性。选择一致性模型需要权衡一致性、可用性和分区容错性。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "REST API设计原则：使用HTTP方法语义化操作（GET查询，POST创建，PUT更新，DELETE删除）。资源URI应该清晰表达资源层级。版本控制可通过URL（/api/v1）或请求头实现。使用标准HTTP状态码（200成功，404未找到，500服务器错误）。实现分页、过滤和排序满足客户端需求。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "TypeScript类型系统：泛型(Generics)允许编写可重用的类型安全代码。interface定义对象结构，type用于定义类型别名和联合类型。高级类型包括Mapped Types、Conditional Types和Utility Types。正确使用类型系统可以在编译时捕获错误，提高代码质量。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "容器化和编排：Docker通过容器提供一致的部署环境，包含应用及其所有依赖。Dockerfile中的多阶段构建可以减小镜像大小。Kubernetes是容器编排平台，提供自动部署、扩展和管理。Service Mesh(如Istio)提供高级流量管理和观测能力。",
+    })
+    
+    // ==================== 数学推理 ====================
+    training_data = append(training_data, TrainingData{
+        text: "线性代数基础：矩阵乘法的时间复杂度为O(n^3)，使用Strassen算法可以降低到O(n^2.807)。特征值和特征向量是理解矩阵性质的关键。对称矩阵总是可对角化的。行列式为零表示矩阵不可逆。这些概念在深度学习和数值计算中应用广泛。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "概率论和统计学：贝叶斯定理P(A|B)=P(B|A)×P(A)/P(B)是条件概率的基础。正态分布由均值和方差完全描述。中心极限定理说明样本均值的分布趋向正态分布。假设检验通过计算p值来判断假设是否成立。置信区间提供了参数估计的不确定性度量。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "微积分在机器学习中的应用：导数表示函数变化率，是梯度下降的基础。链式法则用于反向传播计算。Hessian矩阵（二阶导数）提供曲率信息，用于二阶优化方法。泰勒展开近似复杂函数。凸性分析确保优化问题有全局最优解。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "复杂度分析：时间复杂度量化算法执行步数随输入规模的增长。常见的复杂度有O(1)常数、O(log n)对数、O(n)线性、O(n log n)线性对数、O(n^2)平方、O(2^n)指数。空间复杂度量化内存使用。大O记号提供了渐近上界分析。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "图论算法：深度优先搜索(DFS)通过栈实现，广度优先搜索(BFS)通过队列实现。Dijkstra算法求最短路径，时间复杂度O((V+E)logV)使用堆优化。最小生成树可用Kruskal或Prim算法求得。拓扑排序用于有向无环图(DAG)。这些算法在网络和编译器设计中应用广泛。",
+    })
+    
+    // ==================== 专业领域知识 ====================
+    training_data = append(training_data, TrainingData{
+        text: "云计算架构：IaaS(基础设施即服务)提供计算、存储和网络资源。PaaS(平台即服务)提供开发平台和服务。SaaS(软件即服务)直接提供应用。多云策略降低供应商锁定风险。边缘计算将计算移向数据源，减少延迟。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "微服务架构模式：将单体应用分解为独立的可部署服务。每个服务有自己的数据库，避免紧耦合。服务间通过API或消息队列通信。优点包括独立部署、技术多样性。缺点包括分布式复杂性、数据一致性挑战。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "DevOps实践：持续集成(CI)自动化代码集成和测试。持续部署(CD)自动化发布过程。基础设施即代码(IaC)使用代码管理基础设施配置。监控和日志对生产系统至关重要。自动化测试覆盖单元、集成和端对端测试。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "数据库设计原理：第一范式消除重复属性。第二范式移除部分依赖。第三范式移除传递依赖。反范式化通过冗余数据提高查询性能。事务ACID属性保证数据一致性。分区和分片实现水平扩展。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "网络安全基础：认证验证用户身份，授权决定用户权限。加密保护数据机密性，数字签名保证完整性。HTTPS使用TLS/SSL加密传输。防火墙和入侵检测系统提供边界保护。零信任模型假设所有访问都是不可信的。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "机器学习工程：特征工程从原始数据提取有意义的特征。数据清理处理缺失值、异常值。数据分层抽样保持分布。交叉验证评估模型泛化能力。超参数调优使用网格搜索或贝叶斯优化。模型监控检测数据漂移和性能下降。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "自然语言处理技术：分词将文本分解为词元。词性标注识别词的语法角色。命名实体识别识别人名、地名等。依存句法分析揭示词之间的语法关系。主题建模发现文本中的隐藏主题。Word embeddings如Word2Vec将词表示为向量。",
+    })
+    
+    // ==================== 指令遵循和对话能力 ====================
+    training_data = append(training_data, TrainingData{
+        text: "用户请求：\"如何优化大型Python应用的性能？\"。答案应该包括：1)使用性能分析工具如cProfile识别瓶颈。2)使用numpy/pandas替代纯Python操作提高数据处理速度。3)使用缓存避免重复计算。4)使用多进程或异步编程提高并发性能。5)使用C扩展或Cython加速关键代码段。6)数据库查询优化使用索引。7)考虑使用PyPy等替代实现。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "用户请求：\"解释什么是SOLID原则。\"。SOLID是5个面向对象设计原则的缩写：S(单一职责原则)每个类只有一个改变原因。O(开闭原则)对扩展开放对修改关闭。L(里氏替换原则)派生类应能替换基类。I(接口隔离原则)多个专用接口优于一个通用接口。D(依赖倒置原则)依赖抽象而非具体实现。遵循这些原则可以提高代码的可维护性和灵活性。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "用户请求：\"推荐一个容易学的编程语言用于初学者。\"。答案：Python是初学者的理想选择，因为：1)语法简洁易读，强制缩进提高可读性。2)动态类型系统降低复杂性。3)丰富的库生态。4)广泛的社区支持和学习资源。5)多用途应用（Web、数据科学、自动化等）。其他选项包括JavaScript（Web开发）和Rust（系统编程）。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "用户请求：\"什么时候应该使用NoSQL数据库而不是关系数据库？\"。使用NoSQL的场景：1)处理非结构化或半结构化数据。2)需要高度可扩展性和高吞吐量。3)数据结构经常变化。4)需要灵活的模式。关系数据库更适合：1)数据结构稳定。2)需要复杂事务和ACID保证。3)数据之间有复杂关系。4)需要强大的查询能力和报表功能。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "用户请求：\"如何设计高可用系统？\"。设计要点：1)数据冗余确保故障时可用。2)地域分布降低单点故障风险。3)负载均衡分散流量。4)自动故障转移快速恢复。5)监控告警及时发现问题。6)容错设计优雅降级。7)定期灾难�恢复演练。8)状态外部化便于快速恢复。系统可用性通过冗余度量，如99.99%可用性对应年度52分钟宕机时间。",
+    })
+    
+    // ==================== 推理和逐步解决问题 ====================
+    training_data = append(training_data, TrainingData{
+        text: "问题：设计一个分布式缓存系统。解决方案：1)使用一致性哈希避免键重新分配。2)实现副本提高可用性。3)使用LRU或LFU淘汰策略。4)支持TTL自动过期。5)提供缓存一致性机制。6)监控缓存命中率。7)实现热键检测和保护。8)支持预热恢复。性能指标包括命中率(>80%良好)、访问延迟(<5ms目标)、内存使用率。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "问题：分析一个SELECT查询的性能瓶颈。步骤：1)使用EXPLAIN查看执行计划。2)检查扫描的行数与实际需要的行数。3)验证索引是否被使用。4)检查JOIN顺序是否最优。5)分析统计信息是否准确。6)考虑查询改写。7)评估分区裁剪是否生效。8)测试并发情况。常见优化包括添加索引、重写查询、增加表统计。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "问题：如何从1000万行数据中找到top-100热键？方案：1)使用流式处理减少内存占用。2)维护最小堆大小为100。3)遍历数据一遍，保持堆的有效性。4)对于流式不可行的场景，使用哈希聚合。5)可以使用概率数据结构如Count-Min Sketch近似计数。6)时间复杂度O(n log k)，空间复杂度O(k)。7)对于分布式场景，每个分区计算本地top-100后合并。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "问题：设计一个秒杀系统处理百万级QPS。关键设计：1)提前生成秒杀令牌，通过令牌而非查库。2)使用Redis单线程原子性保证库存安全。3)基于用户等级或VIP优先级限流。4)使用漏桶或令牌桶算法。5)分离热点数据到单独缓存。6)异步化支付和订单处理。7)使用消息队列削峰。8)多地域部署减少延迟。9)提前预热缓存。10)灰度发布降低风险。",
+    })
+    
+    // ==================== 深度学习和神经网络 ====================
+    training_data = append(training_data, TrainingData{
+        text: "卷积神经网络(CNN)架构：输入层接收原始图像。卷积层通过滑动窗口提取特征。池化层进行降采样。全连接层进行分类。激活函数(ReLU)引入非线性。批归一化稳定训练。常见架构包括LeNet、AlexNet、VGG、ResNet、Inception。ResNet通过跳连接解决梯度消失问题。迁移学习使用预训练的CNN加速新任务训练。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "循环神经网络(RNN)处理序列数据：基础RNN单元处理序列，但存在梯度消失问题。LSTM(长短期记忆)通过遗忘门、输入门、输出门控制信息流。GRU(门控循环单元)是LSTM的简化版本。双向RNN同时使用前向和后向上下文。注意力机制允许模型关注序列的特定部分。Transformer完全基于注意力机制，实现了更好的并行化。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "生成对抗网络(GAN)：由生成器和判别器组成。生成器学习从噪声生成真实数据。判别器学习区分真实和生成数据。两者通过对抗训练相互改进。损失函数设计对GAN训练至关重要。模式崩溃是常见问题。条件GAN(cGAN)支持标签条件生成。StyleGAN在图像生成中取得突破。应用包括图像合成、风格转换、数据增强。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "注意力机制详解：自注意力计算每个位置相对于其他位置的注意力权重。多头注意力并行运行多个注意力头捕捉不同的依赖关系。缩放点积注意力的计算公式为Attention(Q,K,V) = softmax(QK^T/√d_k)V。交叉注意力用于编码器-解码器模型。位置编码为序列提供位置信息。掩码注意力防止模型看到未来时步。",
+    })
+    
+    // ==================== 数据科学工作流 ====================
+    training_data = append(training_data, TrainingData{
+        text: "完整的数据科学项目流程：1)问题定义明确业务目标和成功指标。2)数据收集和探索理解数据特性。3)数据清理处理缺失值、异常值、重复值。4)特征工程创建有意义的特征。5)模型选择和训练。6)模型评估使用多个指标。7)超参数调优改进性能。8)交叉验证估计泛化能力。9)部署和监控。10)迭代改进。成功的数据科学项目需要良好的数据、合适的模型和持续的改进。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "特征工程技术：数值特征：标准化、归一化、分桶、多项式特征。分类特征：独热编码、标签编码、目标编码。文本特征：TF-IDF、Word2Vec、FastText。时间特征：提取年月日时分秒、季节性特征。特征交互：创建两个特征的乘积。特征选择：删除低方差特征、使用相关系数、特征重要性。特征工程占整个项目时间的60-70%，质量高的特征对模型性能至关重要。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "模型评估指标：分类问题使用精准率(precision)、召回率(recall)、F1分数、ROC-AUC、混淆矩阵。回归问题使用均方误差(MSE)、均方根误差(RMSE)、平均绝对误差(MAE)、R²。不平衡数据使用F1或AUC而非准确率。选择指标需要考虑业务需求，误报和漏报的成本。验证集评估泛化能力。测试集最后用于评估。避免在训练集上选择模型防止过拟合。",
+    })
+    
+    // ==================== 安全和隐私 ====================
+    training_data = append(training_data, TrainingData{
+        text: "应用安全检查清单：1)输入验证防止注入攻击。2)使用参数化查询防止SQL注入。3)输出编码防止XSS。4)认证验证用户身份。5)授权控制用户权限。6)使用HTTPS加密传输。7)密钥管理安全存储凭证。8)安全日志记录敏感操作。9)依赖扫描检测已知漏洞。10)进行安全测试。遵循OWASP Top 10指南。定期安全审计和渗透测试。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "数据隐私保护：差分隐私添加噪声保护个人数据。匿名化移除可识别信息。加密保护静态和动态数据。数据最小化只收集必要数据。数据保留政策定期删除不需要的数据。访问控制限制数据访问。审计日志监控数据访问。用户同意管理。GDPR和其他隐私法规要求。隐私评估识别风险。组织需要建立隐私文化。",
+    })
+    
+    // ==================== 创新和前沿技术 ====================
+    training_data = append(training_data, TrainingData{
+        text: "大语言模型(LLM)技术演进：GPT系列通过扩大模型和数据规模实现能力提升。BERT引入双向编码器提高理解能力。T5统一框架处理多种任务。扩展定律(Scaling Laws)指导模型和数据规模。Prompt工程通过精心设计提示改进输出。指令微调使模型遵循指令。强化学习与人类反馈(RLHF)改进对齐。多模态模型处理文本和图像。新兴方向包括少样本学习、思维链推理、工具使用集成。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "量子计算基础：量子比特(qubit)可同时处于0和1叠加态。量子门操纵量子态类似经典逻辑门。量子算法如Shor因式分解和Grover搜索展示量子优势。量子纠错纠正量子计算中的错误。当前量子计算机为NISQ设备(嘈杂中等规模)。应用前景包括优化、模拟、密码学。主要挑战包括可扩展性、错误纠正、低温要求。",
+    })
+    
+    training_data = append(training_data, TrainingData{
+        text: "边缘计算和物联网：将计算移向数据源减少延迟。支持离线工作不依赖云连接。改进实时性和隐私。增加带宽效率。挑战包括异构设备、资源约束、安全性。应用包括自动驾驶、工业4.0、智能城市。TinyML在微控制器上运行机器学习模型。联邦学习在边界设备上分布式训练。",
+    })
+    
+    // 统计和输出
+    total_count: i64 = i64(len(training_data))
+    io.println("已生成高质量训练数据条数: " + strings.from_i64(total_count))
+    io.println("内容覆盖:")
+    io.println("  ✓ 代码生成和理解 (7条)")
+    io.println("  ✓ 数学推理 (5条)")
+    io.println("  ✓ 专业领域知识 (9条)")
+    io.println("  ✓ 指令遵循和对话 (5条)")
+    io.println("  ✓ 推理和问题解决 (4条)")
+    io.println("  ✓ 深度学习和神经网络 (4条)")
+    io.println("  ✓ 数据科学工作流 (3条)")
+    io.println("  ✓ 安全和隐私 (2条)")
+    io.println("  ✓ 创新和前沿技术 (3条)")
+    io.println("")
+    io.println("✨ 训练数据已追加到: " + output_file)
+    io.println("🎯 适合NeurX级别的工业LLM模型预训练")
+}

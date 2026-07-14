@@ -1,0 +1,283 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+env/
+venv/
+
+# Build artifacts and binaries
+/build/
+/bin/
+/out/
+/dist/
+*.o
+*.a
+*.so
+s_ir_runner
+build/s_ir_runner*
+
+# Logs and runtime files
+*.log
+/tmp/
+/var/tmp/
+core*
+
+# Secrets / env
+.env
+secrets.env
+*.pem
+*.key
+
+# Data and shards
+data/pretrain_dataset/raw/
+data/training_data_shards/
+data/training_data_splits/
+data/training_data_*.jsonl
+
+# Checkpoints and temporary training outputs
+checkpoint/
+checkpoint_*/
+checkpoint/NeurX-1.3/
+checkpoint/NeurX-1.3/logs/
+tmp/
+script/.run/
+*.pid
+# Native cache
+__pycache__/
+*.so
+
+# Build
+build/
+dist/
+reports/
+kernel_meta/
+logs/
+
+# C++/CUDA
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.dylib
+*.exp
+*.pdb
+*.ilk
+
+# CUDA
+*.cubin
+*.ptx
+*.fatbin
+*.nvvp
+
+# Qt Creator user files
+*.user
+*.user.*
+
+# Node / frontend
+node_modules/
+.next/
+out/
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Chat history and sessions
+chat_history/
+session/
+*.chat*
+
+# Output directories
+output/
+outputs/
+end_to_end_output/
+script/output/
+artifacts/logs/
+artifacts/train_output/
+artifacts/inference_output/
+
+# Cache directories
+*/cache/
+*.cache
+serving/cache/
+compile/cache/
+
+# Backup and temporary files
+*.backup
+*.bak
+*.tmp
+data/training_data*.jsonl.backup
+data/training_data*.jsonl.gpt_backup
+
+# Generated reports and metrics
+reports/
+metrics/
+*.metrics
+
+# Misc
+.DS_Store
+.vscode/
+.idea/
+.venv/
+
+# Trained model artifacts
+artifacts/checkpoints/*.neurx
+artifacts/checkpoints/**/*.neurx
+artifacts/checkpoints/llm_s_pretrain/
+artifacts/checkpoints/Qwen2.5-0.5B-Instruct/
+artifacts/checkpoints/Qwen2.5-VL-7B/
+
+# Auto push
+.auto_push_state/
+
+# CANN generated artifacts
+cann/cache/
+cann/checkpoints/
+cann/compile/
+
+# Large binary files (model weights, datasets, etc.)
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.pb
+*.onnx
+*.neurx
+*.bz2
+*.gz
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# Large dataset files
+*.csv
+*.parquet
+*.arrow
+*.feather
+
+# Model-specific large outputs
+model_output/
+inference_output/
+validation_output/
+cann/dumps/
+cann/kernel_meta/
+cann/logs/
+cann/output/
+cann/outputs/
+cann/profiling/
+cann/runs/
+cann/workdir/
+cann/**/*.air
+cann/**/*.bin
+cann/**/*.mindir
+cann/**/*.om
+cann/**/*.pbtxt
+cann/**/*.prof
+
+# S build artifacts
+*.ir
+s/*.ir
+ad/*.ir
+tensor/*.ir
+engine/*.ir
+nn/*.ir
+opt/*.ir
+dl/*.ir
+lf/*.ir
+train/*.ir
+runtime/*.ir
+
+# Prebuilt neurx binaries (kept out of git; use CI releases)
+# top-level bin/ directory for prebuilt artifacts
+/bin/
+
+# Ollama temp installer files
+/tmp/neurx-ollama/
+
+# Training data (large datasets)
+data/pretrain_dataset/raw/
+data/pretrain_dataset/cleaned/
+data/pretrain_dataset/shard/
+data/pretrain_dataset/manifest.json
+data/training_data_splits/
+data/*.jsonl
+data/**/*.jsonl
+
+# Local pretraining artifacts generated in this workspace
+dataset/pretrain/cleaned/*.jsonl
+dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl
+dataset/pretrain/shard/*
+!dataset/pretrain/shard/.gitkeep
+dataset/pretrain/manifest.json
+
+# Training outputs and logs
+artifacts/checkpoints/
+artifacts/logs/
+artifacts/train_output/
+train_output.log
+*.log.gz
+
+# Model inference outputs
+outputs/
+end_to_end_output/
+output/
+
+# Local one-off S training/debug probes
+script/debug_train.s
+script/simple_train.s
+script/test_read.s
+script/train_gpu.py
+script/run_gpu_pretrain.s
+
+# Common CMake / build files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Executables and linker outputs
+*.exe
+*.out
+
+# Archives and packages
+*.zip
+*.tar.gz
+*.tar
+*.gz
+
+# Top-level checkpoints and binaries
+/checkpoints/
+
+# Android / Qt mobile build artifacts
+app/mobile/build/
+app/mobile/.gradle/
+app/mobile/build/android-arm64-v8a/
+app/mobile/build/android-*/
+app/mobile/android-build/
+app/mobile/**/android-build/
+*.apk
+*.aab
+*.keystore
+# Gradle wrapper dists are machine-local
+.gradle/
+gradle/wrapper/gradle-wrapper.jar

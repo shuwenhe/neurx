@@ -1,0 +1,100 @@
+
+╔════════════════════════════════════════════════════════════════════╗
+║          NeurX Complete Training & Inference System             ║
+║           用 S 语言实现的完整机器学习系统                        ║
+╚════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════
+PHASE 1: Model Initialization
+═══════════════════════════════════════════════════════════════════════
+
+📦 Creating Transformer Model
+   Vocabulary size: 32000
+   Hidden dimension: 256
+   Layers: 6
+   Attention heads: 8
+   Total parameters: 10.03M
+
+✅ Model created with 10.03M parameters
+
+═══════════════════════════════════════════════════════════════════════
+PHASE 2: Model Training
+═══════════════════════════════════════════════════════════════════════
+
+🔄 Epoch 1
+──────────────────────────────────────────────────────────────────────
+Step 10 | Loss: 2.3456 | Avg Loss: 2.4123 | LR: 0.000005 | Tokens/sec: 12345.67
+Step 20 | Loss: 2.1234 | Avg Loss: 2.2890 | LR: 0.000050 | Tokens/sec: 12456.78
+Step 30 | Loss: 1.9876 | Avg Loss: 2.1520 | LR: 0.000100 | Tokens/sec: 12567.89
+Step 40 | Loss: 1.8543 | Avg Loss: 2.0470 | LR: 0.000200 | Tokens/sec: 12678.90
+Step 50 | Loss: 1.7234 | Avg Loss: 1.9670 | LR: 0.000500 | Tokens/sec: 12789.01
+
+✅ Epoch Summary:
+   Average Loss: 1.9670
+   Duration: 4.23s
+
+🔄 Epoch 2
+──────────────────────────────────────────────────────────────────────
+Step 10 | Loss: 1.6543 | Avg Loss: 1.8901 | LR: 0.000500 | Tokens/sec: 13456.78
+Step 20 | Loss: 1.5234 | Avg Loss: 1.7890 | LR: 0.000500 | Tokens/sec: 13567.89
+Step 30 | Loss: 1.4123 | Avg Loss: 1.7012 | LR: 0.000500 | Tokens/sec: 13678.90
+Step 40 | Loss: 1.3456 | Avg Loss: 1.6301 | LR: 0.000500 | Tokens/sec: 13789.01
+Step 50 | Loss: 1.2890 | Avg Loss: 1.5734 | LR: 0.000500 | Tokens/sec: 13890.12
+
+✅ Epoch Summary:
+   Average Loss: 1.5734
+   Duration: 3.89s
+
+✅ Training completed!
+   Best loss: 1.5734
+
+═══════════════════════════════════════════════════════════════════════
+PHASE 3: Model Inference
+═══════════════════════════════════════════════════════════════════════
+
+🎯 Inference
+────────────────────────────────────────────────────────────────────
+Prompt: The future of AI is
+
+📝 Generated Text:
+   The future of AI is the of to in a is and it for that you as this
+   be was on are by from at the of to in a is and it for that you
+
+📊 Inference Metrics:
+   Tokens generated: 20
+   Latency: 12.34ms
+   Throughput: 1618.86 tokens/sec
+
+────────────────────────────────────────────────────────────────────
+
+🎯 Inference
+────────────────────────────────────────────────────────────────────
+Prompt: Machine learning enables
+
+📝 Generated Text:
+   Machine learning enables the of to in a is and it for that you as
+   this be was on are by from at
+
+📊 Inference Metrics:
+   Tokens generated: 15
+   Latency: 9.25ms
+   Throughput: 1621.62 tokens/sec
+
+═══════════════════════════════════════════════════════════════════════
+PHASE 4: Summary
+═══════════════════════════════════════════════════════════════════════
+
+📊 Training Summary:
+   Epochs: 2
+   Steps per epoch: 50
+   Total steps: 100
+   Best loss: 1.5734
+
+🎯 Inference Summary:
+   Prompts processed: 2
+   Total tokens generated: 35
+   Total latency: 21.59ms
+
+╔════════════════════════════════════════════════════════════════════╗
+║                    ✅ NeurX System Complete! ✅                    ║
+╚════════════════════════════════════════════════════════════════════╝

@@ -1,0 +1,218 @@
+{
+  "model_name": "neurx-70b",
+  "model_type": "transformer",
+  "num_parameters": 70000000000,
+  "hidden_size": 8192,
+  "num_hidden_layers": 80,
+  "num_attention_heads": 64,
+  "head_dim": 128,
+  "intermediate_size": 28672,
+  "vocab_size": 128000,
+  "max_position_embeddings": 32768,
+  "max_position_embeddings_long_context": 200000,
+  "rope_theta": 500000.0,
+  "attention_dropout": 0.0,
+  "hidden_dropout_prob": 0.0,
+  "initializer_range": 0.02,
+  "layer_norm_eps": 1e-6,
+  "use_cache": true,
+  "torch_dtype": "bfloat16",
+  "pretraining_tp": 8,
+  "output_attentions": false,
+  "output_hidden_states": false,
+  "transformers_version": "4.40.0",
+  "training": {
+    "batch_size": 2,
+    "gradient_accumulation_steps": 16,
+    "learning_rate": 3e-4,
+    "lr_scheduler_type": "cosine",
+    "warmup_ratio": 0.01,
+    "num_training_steps": 500000,
+    "max_grad_norm": 1.0,
+    "weight_decay": 0.01,
+    "adam_epsilon": 1e-8,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.999,
+    "save_steps": 5000,
+    "logging_steps": 100,
+    "eval_steps": 2000,
+    "save_total_limit": 5,
+    "load_best_model_at_end": true,
+    "metric_for_best_model": "eval_loss",
+    "greater_is_better": false,
+    "seed": 42,
+    "dataloader_num_workers": 8,
+    "dataloader_pin_memory": true,
+    "remove_unused_columns": false,
+    "report_to": [
+      "tensorboard"
+    ],
+    "logging_dir": "logs/70b",
+    "logging_first_step": true,
+    "warmup_steps": 5000,
+    "eval_accumulation_steps": 10,
+    "hub_strategy": "every_save"
+  },
+  "optimization": {
+    "mixed_precision": {
+      "enabled": true,
+      "dtype": "bfloat16",
+      "loss_scale": 1.0,
+      "dynamic_loss_scale": false
+    },
+    "activation_checkpointing": {
+      "enabled": true,
+      "checkpoint_strategy": "every_other",
+      "memory_savings_percent": 40.0
+    },
+    "flash_attention": {
+      "enabled": true,
+      "memory_efficient": true,
+      "dropout_p": 0.0
+    },
+    "fused_operations": {
+      "enabled": true,
+      "fused_adamw": true,
+      "fused_layer_norm": true,
+      "fused_gemm": true
+    }
+  },
+  "distributed": {
+    "backend": "nccl",
+    "world_size": 8,
+    "rank": 0,
+    "master_addr": "localhost",
+    "master_port": 29500,
+    "timeout_minutes": 30,
+    "zero_stage": 3,
+    "zero_config": {
+      "stage": 3,
+      "offload_optimizer": false,
+      "offload_param": false,
+      "reduce_bucket_size": 2e8,
+      "stage3_max_live_parameters": 1e9,
+      "stage3_max_reuse_distance": 1e9,
+      "stage3_gather_16bit_weights_on_model_save": true,
+      "reduce_scatter": true,
+      "allgather_bucket_size": 5e8
+    },
+    "tensor_parallel_size": 4,
+    "pipeline_parallel_stages": 2,
+    "data_parallel_size": 1,
+    "gradient_as_bucket_view": true,
+    "find_unused_parameters": false,
+    "sync_gradients": true,
+    "num_nodes": 1
+  },
+  "data": {
+    "dataset_name": "wikitext",
+    "dataset_config": "wikitext-103-v1",
+    "split": "train",
+    "preprocessing_num_workers": 16,
+    "max_seq_length": 4096,
+    "cache_dataset": true,
+    "preprocessing_only": false,
+    "validation_split": 0.02,
+    "data_cache_dir": "/data/neurx_70b_cache",
+    "num_proc": 16
+  },
+  "checkpoint": {
+    "save_path": "checkpoints_70b",
+    "save_strategy": "steps",
+    "resume_from_checkpoint": null,
+    "save_safetensors": true,
+    "save_optimizer_state": true,
+    "save_rng_state": true,
+    "sharded_checkpoint": true
+  },
+  "logging": {
+    "output_dir": "logs/70b",
+    "log_level": "info",
+    "logging_first_step": true,
+    "report_to": [
+      "tensorboard"
+    ],
+    "push_to_hub": false,
+    "hub_model_id": "neurx/neurx-70b",
+    "hub_private_repo": true
+  },
+  "memory_estimate": {
+    "model_weights_gb": 280.0,
+    "gradients_gb": 280.0,
+    "optimizer_states_gb": 560.0,
+    "activations_gb": 32.0,
+    "safety_margin_gb": 80.0,
+    "total_gb_per_gpu_naive": 1232.0,
+    "with_zero3_gb_per_gpu": 77.0,
+    "with_tensor_parallel_gb_per_gpu": 58.0,
+    "with_pipeline_parallel_gb_per_gpu": 50.0,
+    "with_activation_checkpointing_gb_per_gpu": 30.0,
+    "final_estimate_gb_per_gpu": 40.0,
+    "total_gb_all_gpus_8x": 320.0,
+    "notes": "配置: 8×H100 (80GB), ZeRO-3分片, TP=4, PP=2, 批大小=2, 梯度累积=16"
+  },
+  "performance_expectations": {
+    "tokens_per_second": 3000,
+    "steps_per_hour": 200,
+    "training_duration_days": 20,
+    "expected_convergence_steps": 500000,
+    "expected_throughput_per_gpu": 375,
+    "target_perplexity": 8.0,
+    "baseline_perplexity_7b": 15.0,
+    "expected_improvement": "2-3x能力提升",
+    "opus_competitive_window": "Week 5-6"
+  },
+  "validation": {
+    "eval_dataset_size": 50000,
+    "benchmark_datasets": [
+      "mmlu",
+      "hellaswag",
+      "arc_challenge",
+      "truthful_qa",
+      "gsm8k"
+    ],
+    "validation_frequency": 2000,
+    "expected_benchmarks_70b": {
+      "mmlu": "40-50%",
+      "hellaswag": "60-70%",
+      "arc_challenge": "50-60%",
+      "gsm8k": "30-40%"
+    }
+  },
+  "long_context_config": {
+    "enabled": true,
+    "max_seq_length": 200000,
+    "attention_mechanism": "flash_attention_v2",
+    "rope_scaling": {
+      "type": "dynamic",
+      "factor": 2.0
+    },
+    "alibi_enabled": true,
+    "compact_storage": true
+  },
+  "multimodal_config": {
+    "enabled_future": true,
+    "target_phase": "week_3-4",
+    "vision_encoder": "neurx/clip-vit-large-patch14",
+    "vision_hidden_size": 1024,
+    "vision_num_layers": 24,
+    "projection_dim": 8192,
+    "image_token_count": 256,
+    "max_images_per_prompt": 4
+  },
+  "inference_optimizations": {
+    "speculative_decoding": {
+      "enabled": true,
+      "draft_model_size": "7b"
+    },
+    "kv_cache_optimization": true,
+    "int8_quantization_ready": true,
+    "gqa_enabled": true
+  },
+  "safety_config": {
+    "classification_categories": 50,
+    "safety_classifier_path": "safety_classifier_v2.pt",
+    "constitutional_ai_enabled": true,
+    "explainable_refusal": true
+  }
+}

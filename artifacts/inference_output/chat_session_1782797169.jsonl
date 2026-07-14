@@ -1,0 +1,7 @@
+{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
+{"role": "user", "content": "hello", "turn": 1}
+{"role": "assistant", "content": "NeurX推理系统已收到您的输入: "hello"", "turn": 1}
+{"role": "user", "content": "你是", "turn": 2}
+{"role": "assistant", "content": "NeurX推理系统已收到您的输入: "你是"", "turn": 2}
+{"role": "user", "content": "hello", "turn": 3}
+{"role": "assistant", "content": "NeurX推理系统已收到您的输入: "hello"", "turn": 3}

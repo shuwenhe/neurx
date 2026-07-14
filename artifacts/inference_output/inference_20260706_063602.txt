@@ -1,0 +1,27 @@
+DEBUG checkpoint_arg=/app/shuwen/train/neurx/artifacts/checkpoints/llm_s_pretrain/latest.neurx
+[phase] load_model:start
+[phase] load_model:done
+================================================
+NeurX S inference engine
+================================================
+Model: llm_s
+Backend: cpu
+Checkpoint path: /app/shuwen/train/neurx/artifacts/checkpoints/llm_s_pretrain/latest.neurx
+Step: 1
+Loss:      0.0
+Param count: 6
+Weight shape: 2x3
+Quantized: true
+Graph mode: true
+Seed: neurx 
+Answer mode: qa
+Prompt: 你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
+人工智能是什么？请直接回答。
+答案：
+[phase] generate:start
+Generated:
+你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
+人工智能是什么？请直接回答。
+答案：
+[phase] generate:done
+================================================

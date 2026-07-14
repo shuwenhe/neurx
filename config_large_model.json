@@ -1,0 +1,118 @@
+{
+  "name": "NeurX Large Model Training Config",
+  "description": "Complete LLM training configuration with all advanced features",
+  
+  "model": {
+    "vocab_size": 128000,
+    "hidden_dim": 768,
+    "num_layers": 12,
+    "num_heads": 12,
+    "ffn_dim": 3072,
+    "max_seq_len": 4096,
+    "dropout_prob": 0.1,
+    "initializer": "xavier_uniform",
+    "dtype": "float32"
+  },
+
+  "training": {
+    "batch_size": 32,
+    "micro_batch_size": 8,
+    "gradient_accumulation_steps": 4,
+    "max_steps": 100000,
+    "warmup_steps": 1000,
+    "eval_steps": 500,
+    "save_steps": 1000,
+    "log_steps": 10
+  },
+
+  "optimizer": {
+    "name": "adamw",
+    "learning_rate": 5e-4,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-8,
+    "weight_decay": 0.01,
+    "max_grad_norm": 1.0,
+    "warmup_type": "linear",
+    "lr_schedule": "cosine",
+    "min_lr_ratio": 0.1
+  },
+
+  "data": {
+    "train_path": "./data/large_model/train.jsonl",
+    "val_path": "./data/large_model/val.jsonl",
+    "num_workers": 4,
+    "prefetch_factor": 2,
+    "shuffle": true,
+    "seed": 42,
+    "data_cache": false
+  },
+
+  "distributed": {
+    "enabled": false,
+    "backend": "nccl",
+    "world_size": 1,
+    "rank": 0,
+    "local_rank": 0,
+    "data_parallel": true,
+    "tensor_parallel": false,
+    "pipeline_parallel": false,
+    "dp_size": 1,
+    "tp_size": 1,
+    "pp_size": 1
+  },
+
+  "mixed_precision": {
+    "enabled": false,
+    "precision": "float32",
+    "loss_scale": 1024,
+    "loss_scale_type": "dynamic"
+  },
+
+  "checkpointing": {
+    "save_dir": "./checkpoints/large_model",
+    "save_strategy": "steps",
+    "save_total_limit": 5,
+    "resume_from_checkpoint": null,
+    "save_best_metric": "eval_loss",
+    "save_best_model": true
+  },
+
+  "output": {
+    "output_dir": "./output/large_model",
+    "logging_dir": "./logs/large_model",
+    "logging_level": "info",
+    "report_to": ["tensorboard"],
+    "push_to_hub": false
+  },
+
+  "evaluation": {
+    "do_eval": true,
+    "eval_strategy": "steps",
+    "eval_steps": 500,
+    "eval_accumulation_steps": null,
+    "metric_for_best_model": "eval_loss",
+    "greater_is_better": false
+  },
+
+  "hardware": {
+    "use_cuda": false,
+    "device_map": "auto",
+    "per_device_train_batch_size": 32,
+    "per_device_eval_batch_size": 64,
+    "fp16": false,
+    "bf16": false,
+    "dataloader_pin_memory": true,
+    "dataloader_num_workers": 4
+  },
+
+  "advanced": {
+    "gradient_checkpointing": true,
+    "flash_attn": false,
+    "fused_kernels": false,
+    "memory_efficient_attention": true,
+    "use_cache": true,
+    "label_smoothing_factor": 0.0,
+    "tf32": false
+  }
+}

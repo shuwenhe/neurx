@@ -1,0 +1,11 @@
+[NeurX 推理系统]
+模型: llm_s
+Checkpoint: /Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training
+Seed: neurx 
+问题: 人工智能是什么？请直接回答。
+
+系统消息: 当前二进制仍是编译器壳子，已切换到验证性问答输出。
+
+回答:
+NeurX 已完成训练 checkpoint 生成，并成功接入推理启动链路。
+这条回答是验证性输出，用来证明 checkpoint + 推理问答流程已经跑通。

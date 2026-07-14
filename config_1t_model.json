@@ -1,0 +1,150 @@
+{
+  "model_config_1t": {
+    "name": "neurx-1t",
+    "description": "1 Trillion Parameter Industrial-Grade LLM",
+    "parameters": 1000000000000,
+    "architecture": {
+      "type": "transformer",
+      "hidden_dim": 12800,
+      "num_layers": 96,
+      "num_attention_heads": 128,
+      "head_dim": 100,
+      "vocab_size": 128000,
+      "max_position_embeddings": 32768,
+      "intermediate_size": 51200,
+      "layer_norm_eps": 1e-6,
+      "attention_dropout": 0.0,
+      "attention_implementation": "flash_attention_2"
+    },
+
+    "training_config": {
+      "batch_size": 4096,
+      "micro_batch_size": 2,
+      "gradient_accumulation_steps": 512,
+      "learning_rate": 0.0001,
+      "warmup_steps": 2000,
+      "max_steps": 500000,
+      "eval_steps": 500,
+      "save_steps": 1000,
+      "log_steps": 10,
+      "optimizer": "adamw",
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.95,
+      "adam_epsilon": 1e-8,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "lr_scheduler": "cosine",
+      "warmup_type": "linear",
+      "min_lr_ratio": 0.1
+    },
+
+    "distributed_config": {
+      "backend": "nccl",
+      "world_size": 1024,
+      "tensor_parallel_size": 64,
+      "pipeline_parallel_stages": 8,
+      "data_parallel_size": 2,
+      "sequence_parallel": true,
+      "zero_stage": 3,
+      "use_flash_attention": true,
+      "activation_checkpointing": true,
+      "activation_checkpoint_segments": 10,
+      "fused_kernels": true
+    },
+
+    "mixed_precision_config": {
+      "enabled": true,
+      "precision": "bfloat16",
+      "loss_scale": "dynamic",
+      "loss_scale_window": 1000,
+      "min_loss_scale": 1.0,
+      "max_loss_scale": 65536.0
+    },
+
+    "data_config": {
+      "train_data_path": "./data/1t_pretraining/train.jsonl",
+      "val_data_path": "./data/1t_pretraining/val.jsonl",
+      "test_data_path": "./data/1t_pretraining/test.jsonl",
+      "num_workers": 32,
+      "prefetch_factor": 4,
+      "pin_memory": true,
+      "drop_last": true,
+      "shuffle": true,
+      "seed": 42,
+      "data_cache_dir": "./data/cache",
+      "use_distributed_sampler": true
+    },
+
+    "checkpoint_config": {
+      "save_dir": "./checkpoints/neurx-1t",
+      "save_strategy": "steps",
+      "save_total_limit": 5,
+      "resume_from_checkpoint": null,
+      "save_best_metric": "eval_loss",
+      "greater_is_better": false,
+      "async_checkpoint": true
+    },
+
+    "hardware_requirements": {
+      "total_gpus": 1024,
+      "gpu_model": "NVIDIA H100 PCIe 80GB",
+      "gpu_memory_per_device_gb": 80,
+      "total_memory_tb": 80,
+      "interconnect": "NVLink + NVIDIA ConnectX-7",
+      "network_bandwidth_gbps": 400,
+      "estimated_training_days": 4,
+      "estimated_cost_usd": 2400000
+    },
+
+    "performance_targets": {
+      "tokens_per_second": 3000,
+      "model_flops_utilization": "55-60%",
+      "gpu_utilization": "70-80%",
+      "network_utilization": "65-75%",
+      "memory_efficiency": "92-95%"
+    },
+
+    "output_config": {
+      "output_dir": "./output/neurx-1t",
+      "logging_dir": "./logs/neurx-1t",
+      "logging_level": "info",
+      "logging_strategy": "steps",
+      "logging_steps": 10,
+      "report_to": ["tensorboard", "wandb"],
+      "push_to_hub": false
+    },
+
+    "evaluation_config": {
+      "do_eval": true,
+      "eval_strategy": "steps",
+      "eval_steps": 500,
+      "eval_accumulation_steps": null,
+      "eval_dataset_size": 10000,
+      "metric_for_best_model": "eval_loss",
+      "greater_is_better": false,
+      "load_best_model_at_end": true
+    },
+
+    "advanced_features": {
+      "gradient_checkpointing": true,
+      "use_cache": false,
+      "use_flash_attention": true,
+      "rope_scaling": {
+        "type": "linear",
+        "factor": 4.0
+      },
+      "attn_implementation": "flash_attention_2",
+      "pretraining_tp": 64,
+      "tie_word_embeddings": false
+    }
+  },
+
+  "deployment_info": {
+    "version": "1.0.0",
+    "created_date": "2026-07-02",
+    "production_ready": true,
+    "deployment_target": "GPU Cluster (1024x H100)",
+    "estimated_inference_cost_per_1m_tokens": 1.50,
+    "estimated_throughput_tokens_per_second": 3000
+  }
+}
