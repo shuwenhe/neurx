@@ -92,7 +92,7 @@ func load_model_config(string checkpoint_dir) ModelConfig {
     config.num_layers = 24
     config.context_length = 256
     
-    config
+    return config
 }
 
 func initialize_inference_context(string checkpoint_dir) InferenceContext {
@@ -100,7 +100,7 @@ func initialize_inference_context(string checkpoint_dir) InferenceContext {
     ctx.config = load_model_config(checkpoint_dir)
     ctx.checkpoint_path = checkpoint_dir + "/transformer_v2.ckpt"
     ctx.model_loaded = runtime_file_exists(ctx.checkpoint_path)
-    ctx
+    return ctx
 }
 
 // Simple embedding tokenization (demo)
