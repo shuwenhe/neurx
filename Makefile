@@ -1035,18 +1035,9 @@ run-s-pretrain-s: check-bash
 		exit "$$RUN_STATUS"
 
 run-gpu-pretrain-s: check-bash
-	@echo "Building S GPU pretrain launcher..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/gpu_pretrain
+	@echo "Preparing native GPU pretrain launcher..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
-	@if [ ! -f "$(S_COMPILER)" ]; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
-		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
-		exit 1; \
-	fi
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/pretrain_gpu.s' -o 'artifacts/build/gpu_pretrain/pretrain_gpu.ir' 2>&1
 	@cd '$(CURDIR_UNIX)' && \
 		if [ '$(PRETRAIN_SHARD_LIMIT)' = 'all' ]; then \
 			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
