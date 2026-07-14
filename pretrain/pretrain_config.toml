@@ -79,6 +79,7 @@ max_seq_length = 2048
 
 [output]
 # 输出配置
-output_dir = "artifacts/checkpoints/model_large_pretrain"
+output_dir = "checkpoint/NeurX-1.3"
+model_name = "NeurX-1.3.neurx"
 resume_from_checkpoint = null  # 从检查点恢复
 seed = 42                   # 随机种子
