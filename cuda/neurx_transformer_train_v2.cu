@@ -18,6 +18,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -40,18 +41,6 @@ static bool exists(const std::string&p){return std::filesystem::exists(p);}
 static bool nccl_ok(ncclResult_t e,const char*expr){if(e==ncclSuccess)return true;std::fprintf(stderr,"NCCL error %s: %s\n",expr,ncclGetErrorString(e));return false;}
 #define NCCL_CHECK(x) do{if(!nccl_ok((x),#x))return false;}while(0)
 
-struct DistributedContext {int rank=0,world=1,local_rank=0;ncclComm_t comm=nullptr;cudaStream_t stream=nullptr;};
-static bool read_nccl_id(const std::string&path,ncclUniqueId&id){std::ifstream f(path,std::ios::binary);if(!f)return false;f.read(reinterpret_cast<char*>(&id),sizeof(id));return bool(f);}
-static bool write_nccl_id(const std::string&path,const ncclUniqueId&id){std::string tmp=path+".tmp";std::ofstream f(tmp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(&id),sizeof(id));f.close();if(!f)return false;std::error_code ec;std::filesystem::rename(tmp,path,ec);return!ec;}
-static bool init_distributed(DistributedContext&d){
-  d.rank=std::max(0,env_int("RANK",0));d.world=std::max(1,env_int("WORLD_SIZE",1));d.local_rank=std::max(0,env_int("LOCAL_RANK",d.rank));
-  if(d.rank>=d.world)return false;CUDA_CHECK(cudaSetDevice(d.local_rank));CUDA_CHECK(cudaStreamCreate(&d.stream));
-  if(d.world==1)return true;std::string id_path=env_str("NEURX_NCCL_ID_FILE","/tmp/neurx_nccl_id");ncclUniqueId id{};
-  if(d.rank==0){NCCL_CHECK(ncclGetUniqueId(&id));if(!write_nccl_id(id_path,id)){std::fprintf(stderr,"cannot write NCCL id: %s\n",id_path.c_str());return false;}}
-  else {for(int i=0;i<600&&!read_nccl_id(id_path,id);i++)std::this_thread::sleep_for(std::chrono::milliseconds(100));if(!read_nccl_id(id_path,id))return false;}
-  NCCL_CHECK(ncclCommInitRank(&d.comm,d.world,id,d.rank));return true;
-}
-static bool sync_gradients(Model&m,DistributedContext&d){if(d.world==1)return true;for(Param*p:m.params())NCCL_CHECK(ncclAllReduce(p->g,p->g,p->n,ncclFloat,ncclSum,d.comm,d.stream));CUDA_CHECK(cudaStreamSynchronize(d.stream));for(Param*p:m.params())scale_values<<<blocks(p->n),256,0,d.stream>>>(p->g,p->n,1.0f/float(d.world));CUDA_CHECK(cudaStreamSynchronize(d.stream));return true;}
 
 struct Param {
   float *v=nullptr,*g=nullptr,*m=nullptr,*s=nullptr; int64_t n=0;
