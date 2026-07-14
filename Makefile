@@ -312,24 +312,14 @@ run-interactive-inference-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
 run-interactive-chat-repl-s: check-bash
-	@echo "Building S interactive chat REPL..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/interactive_repl
+	@$(MAKE) build-cuda-chat-bridge
 	@mkdir -p $(LOG_DIR)
-	@if [ ! -f "$(S_COMPILER)" ]; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
-		exit 1; \
-	fi
-	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'script/interactive_chat_repl.s' -o '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir'
-	@$(MAKE) build-s-ir-runner
-	@echo "Starting NeurX-1.3 Interactive REPL..."
-	@cd '$(CURDIR_UNIX)' && \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
-		NEURX_INFER_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/inference_output' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_repl/interactive_chat_repl.ir' 2>&1 | tee -a $(LOG_DIR)/chat_repl_$(shell date +%Y%m%d_%H%M%S).log
+	@echo "Starting NeurX NXTRFMV2 native CUDA inference..."
+	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+		NEURX_CHECKPOINT='$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt' \
+		NEURX_TOKENIZER_VOCAB='$(CURDIR_UNIX)/data/corpus/vocab.json' \
+		NEURX_TOKENIZER_MERGES='$(CURDIR_UNIX)/data/corpus/merges.txt' \
+		'$(CUDA_CHAT_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/chat_repl_$(shell date +%Y%m%d_%H%M%S).log
 
 run-small-model-training-s: check-bash
 	@echo "Building S small model training entry..."
