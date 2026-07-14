@@ -145,7 +145,8 @@ func model_forward(InferenceContext ctx, []int token_ids) []int {
     []int output_tokens = make([]int, 0)
     
     // Generate next token based on input
-    int next_token = (token_ids[seq_len - 1] + 17) % ctx.config.vocab_size
+    int base = token_ids[seq_len - 1] + 17
+    int next_token = modulo(base, ctx.config.vocab_size)
     output_tokens = append(output_tokens, next_token)
     
     output_tokens
