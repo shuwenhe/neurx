@@ -1,7 +1,7 @@
 #include "transformer_kernels.cuh"
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
-#include <nccl.h>
+#include "nccl_compat.h"
 #include <algorithm>
 #include <cctype>
 #include <cmath>

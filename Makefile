@@ -745,7 +745,7 @@ build-cuda-train-bridge: check-bash
 	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
 	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		'$(CUDA_TRAIN_BRIDGE_SRC)' \
-		-lcublas -lnccl \
+		-lcublas -ldl \
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
