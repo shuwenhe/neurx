@@ -1,0 +1,46 @@
+{
+  "model_config_optimized": {
+    "name": "neurx-1.5b-optimized",
+    "description": "1.5B Parameter model optimized for RTX 4060 Ti",
+    "parameters": 1500000000,
+    "architecture": {
+      "type": "transformer",
+      "hidden_dim": 1024,
+      "num_layers": 24,
+      "num_attention_heads": 16,
+      "head_dim": 64,
+      "vocab_size": 374,
+      "max_position_embeddings": 256,
+      "intermediate_size": 4096,
+      "layer_norm_eps": 1e-6,
+      "attention_dropout": 0.0,
+      "attention_implementation": "flash_attention_2"
+    },
+    "training_config": {
+      "batch_size": 32,
+      "micro_batch_size": 4,
+      "gradient_accumulation_steps": 8,
+      "learning_rate": 0.0002,
+      "warmup_steps": 100,
+      "max_steps": 100000,
+      "eval_steps": 500,
+      "save_steps": 100,
+      "log_steps": 10,
+      "optimizer": "adamw",
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.95,
+      "adam_epsilon": 1e-8,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0
+    },
+    "distributed_config": {
+      "world_size": 1,
+      "tensor_parallel_size": 1,
+      "data_parallel_size": 1,
+      "use_flash_attention": true,
+      "activation_checkpointing": false,
+      "use_bf16": true,
+      "use_cpu_offload": false
+    }
+  }
+}
