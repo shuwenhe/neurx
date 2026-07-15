@@ -63,11 +63,11 @@ neurx/
 
 ## 📚 Documentation
 
-- [Quick Start Guide](./docs/QUICK_START.md)
-- [2T Model Training Guide](./docs/TRAINING_2T_GUIDE.md)
-- [Enterprise Training Guide](./docs/ENTERPRISE_CLAUDE_TRAINING_GUIDE.md)
-- [Distributed Training](./docs/DISTRIBUTED_2T_IMPLEMENTATION.md)
-- [Complete System Architecture](./docs/README_COMPLETE_SYSTEM.md)
+- [Quick Start Guide](./QUICK_START.md)
+- [2T Model Training Guide](./TRAINING_2T_GUIDE.md)
+- [Enterprise Training Guide](./ENTERPRISE_NEURX_TRAINING_GUIDE.md)
+- [Distributed Training](./DISTRIBUTED_2T_IMPLEMENTATION.md)
+- [Complete System Architecture](./README_COMPLETE_SYSTEM.md)
 
 ## 🔧 System Requirements
 
