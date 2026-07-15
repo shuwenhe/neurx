@@ -281,3 +281,5 @@ app/mobile/**/android-build/
 # Gradle wrapper dists are machine-local
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
+# S language project - separate repository
+s/
