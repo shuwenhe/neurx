@@ -1144,17 +1144,17 @@ run-gpu-pretrain-s: check-bash
 		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
 		CHECKPOINT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}"; \
-		RESUME_STATE_FILE="$$CHECKPOINT_DIR/checkpoint.state"; \
+		RESUME_CHECKPOINT_FILE="$$CHECKPOINT_DIR/transformer_v2.ckpt"; \
 		echo "[pretrain-gpu] queued shards: $$SHARD_COUNT"; \
 		echo "[pretrain-gpu] first shard: $$FIRST_SHARD"; \
 		echo "[pretrain-gpu] last shard: $$LAST_SHARD"; \
 		echo "[pretrain-gpu] detected GPUs: $$GPU_COUNT"; \
 		echo "[pretrain-gpu] checkpoint dir: $$CHECKPOINT_DIR"; \
-		if [ -f "$$RESUME_STATE_FILE" ]; then \
-			echo "[pretrain-gpu] checkpoint state found, resuming..."; \
+		if [ -f "$$RESUME_CHECKPOINT_FILE" ]; then \
+			echo "[pretrain-gpu] transformer-v2 checkpoint found, resuming: $$RESUME_CHECKPOINT_FILE"; \
 			RESUME_FLAG=1; \
 		else \
-			echo "[pretrain-gpu] no checkpoint state, starting fresh"; \
+			echo "[pretrain-gpu] no transformer-v2 checkpoint, starting fresh"; \
 			RESUME_FLAG=0; \
 		fi; \
 		echo "[pretrain-gpu] skipping S validation, launching native CUDA/cuBLAS trainer..."; \
@@ -1169,7 +1169,7 @@ run-gpu-pretrain-s: check-bash
 		NEURX_PRETRAIN_LOG_INTERVAL="$${NEURX_PRETRAIN_LOG_INTERVAL:-1}" \
 		NEURX_PRETRAIN_SAVE_INTERVAL="$${NEURX_PRETRAIN_SAVE_INTERVAL:-$(PRETRAIN_SAVE_INTERVAL)}" \
 		NEURX_PRETRAIN_RESUME="$$RESUME_FLAG" \
-		NEURX_PRETRAIN_RESUME_FROM="$$RESUME_STATE_FILE" \
+		NEURX_PRETRAIN_RESUME_FROM="$$RESUME_CHECKPOINT_FILE" \
 		NEURX_VALIDATE_CHECKPOINT="$${NEURX_VALIDATE_CHECKPOINT:-0}" \
 		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
 		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
