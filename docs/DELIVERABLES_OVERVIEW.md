@@ -9,8 +9,8 @@
 
 ### Core S Language Modules (5 Files)
 
-#### 1. **COMPLETE_S_IMPLEMENTATION.s** (500+ lines)
-- **Location**: `/Users/shuwen/shuwen/train/neurx/`
+#### 1. **cmd/complete-system/main.s** (500+ lines)
+- **Location**: `/Users/shuwen/shuwen/train/neurx/cmd/complete-system/`
 - **Purpose**: Master orchestrator and unified CLI entry point
 - **Key Components**:
   - `main()` function - Entry point for all commands
@@ -203,7 +203,7 @@
 ### Code Statistics
 ```
 New S Code:           ~2,600 lines
-├─ COMPLETE_S_IMPLEMENTATION.s:     500 lines
+├─ cmd/complete-system/main.s:     500 lines
 ├─ transformer_block.s:             400 lines
 ├─ model_loader.s:                  600 lines
 ├─ end_to_end_training.s:           800 lines
@@ -286,7 +286,7 @@ Total Documentation:  7 comprehensive guides
 ### Core Modules
 ```
 neurx/
-├── COMPLETE_S_IMPLEMENTATION.s           ← Master entry
+├── cmd/complete-system/main.s           ← Master entry
 ├── model/
 │   ├── transformer/
 │   │   └── transformer_block.s           ← Transformer
