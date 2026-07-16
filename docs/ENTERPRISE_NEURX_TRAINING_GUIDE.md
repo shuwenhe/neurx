@@ -156,10 +156,10 @@ cd /Users/feifei/shuwen/train/neurx
 cp cleaned_data.jsonl data/pretrain_dataset/raw/
 
 # 步骤 2: 运行清洁脚本
-bash script/clean_data.sh
+bash scripts/legacy/clean_data.sh
 
 # 步骤 3: 生成分片 (676 分片用于演示，实际需要 8192+)
-bash script/generate_shards.sh
+bash scripts/legacy/generate_shards.sh
 
 # 步骤 4: 验证数据完整性
 python -c "
@@ -249,13 +249,13 @@ print(f'最小: {min(shard_sizes) / 1e6:.1f} MB, 最大: {max(shard_sizes) / 1e6
 cd /Users/feifei/shuwen/train/neurx
 
 # 启动分布式训练
-srun bash script/run_model_large_pretrain.sh
+srun bash scripts/legacy/run_model_large_pretrain.sh
 ```
 
 **本地演示 (单 GPU)**:
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 ```
 
 ### 第三步: 监控训练进度

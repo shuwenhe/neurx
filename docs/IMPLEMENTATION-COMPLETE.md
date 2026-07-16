@@ -310,7 +310,7 @@ Tool::execute(callId, parameters)
    - 测试用例生成
    - 集成测试框架
 
-✅ /tmp/neurx-file-writing-test/
+✅ /tmp/neurx-file-writing-tests/
    - test_write.json
    - test_read.json
    - test_edit.json
@@ -416,10 +416,10 @@ QT_LOGGING_RULES='*=true' /Users/feifei/agent/neurx-code/build/neurx-codeApp.app
 bash /Users/feifei/agent/test-neurx-file-writing.sh
 
 # 查看测试用例
-ls /tmp/neurx-file-writing-test/test_*.json
+ls /tmp/neurx-file-writing-tests/test_*.json
 
 # 运行集成测试
-bash /tmp/neurx-file-writing-test/integration_test.sh
+bash /tmp/neurx-file-writing-tests/integration_test.sh
 ```
 
 ### 查看文档

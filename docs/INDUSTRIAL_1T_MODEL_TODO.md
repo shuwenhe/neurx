@@ -11,7 +11,7 @@
 ### 1. 训练主循环
 
 优先文件:
-- [script/LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/script/LAUNCH_1T_TRAINING.sh)
+- [scripts/legacy/LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh)
 - [training/moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s)
 - [training/end_to_end_training.s](/Users/shuwen/shuwen/train/neurx/training/end_to_end_training.s)
 
@@ -102,8 +102,8 @@
 优先文件:
 - [tests/system_verification.s](/Users/shuwen/shuwen/train/neurx/tests/system_verification.s)
 - [tests/test_suite_complete.s](/Users/shuwen/shuwen/train/neurx/tests/test_suite_complete.s)
-- [test/test_training_pipeline.s](/Users/shuwen/shuwen/train/neurx/test/test_training_pipeline.s)
-- [test/test_training_integration.s](/Users/shuwen/shuwen/train/neurx/test/test_training_integration.s)
+- [tests/test_training_pipeline.s](/Users/shuwen/shuwen/train/neurx/tests/test_training_pipeline.s)
+- [tests/test_training_integration.s](/Users/shuwen/shuwen/train/neurx/tests/test_training_integration.s)
 
 要补的内容:
 - perplexity
@@ -120,7 +120,7 @@
 - [distillation/knowledge_distillation.s](/Users/shuwen/shuwen/train/neurx/distillation/knowledge_distillation.s)
 - [quantization/quantizer.s](/Users/shuwen/shuwen/train/neurx/quantization/quantizer.s)
 - [export/model_export.s](/Users/shuwen/shuwen/train/neurx/export/model_export.s)
-- [deployment/model_deployment_chain.s](/Users/shuwen/shuwen/train/neurx/deployment/model_deployment_chain.s)
+- [deploy/cluster/model_deployment_chain.s](/Users/shuwen/shuwen/train/neurx/deploy/cluster/model_deployment_chain.s)
 
 ### 9. 推理服务
 

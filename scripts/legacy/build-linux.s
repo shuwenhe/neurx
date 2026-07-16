@@ -5,15 +5,15 @@ use std.io.println
 
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX Integration Tests Status (S Lang)")
+    println("NeurX Linux Build Status (S Lang)")
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  integration script : " + check_path("script/run_integration_tests.s"))
-    println("  core modules       : " + check_path("distributed"))
-    println("  checkpoints dir    : " + check_path("artifacts/checkpoints"))
+    println("  build script : " + check_path("scripts/legacy/build-linux.s"))
+    println("  cmake cache  : " + check_path("build/linux-Release/CMakeCache.txt"))
+    println("  qt bundle    : " + check_path("build/linux-Release"))
     println("")
-    println("This S entrypoint centralizes the integration test status layer.")
+    println("This S entrypoint centralizes the Linux build status layer.")
     0
 }
 

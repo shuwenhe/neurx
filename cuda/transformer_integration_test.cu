@@ -1,7 +1,7 @@
 #include "transformer_kernels.cuh"
 #include <cublas_v2.h>
 #define NEURX_TRANSFORMER_REFERENCE_NO_MAIN
-#include "../test/transformer_reference.cpp"
+#include "../tests/transformer_reference.cpp"
 #include <map>
 
 using namespace neurx_cuda_transformer;

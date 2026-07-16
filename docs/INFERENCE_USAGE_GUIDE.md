@@ -5,7 +5,7 @@
 ### 运行推理
 ```bash
 cd /home/shuwen/shuwen/train/neurx
-bash script/run_inference_llm.sh
+bash scripts/legacy/run_inference_llm.sh
 ```
 
 ### 预期输出
@@ -34,7 +34,7 @@ string model_name = trim(runtime_env_get("NEURX_INFER_MODEL_NAME", "your_model")
 ```
 
 ### 方法2：修改脚本
-编辑 `script/run_inference_llm.sh` 中的默认值：
+编辑 `scripts/legacy/run_inference_llm.sh` 中的默认值：
 ```bash
 MODEL_NAME="${NEURX_INFER_MODEL_NAME:-llm_s}"
 # 改为:

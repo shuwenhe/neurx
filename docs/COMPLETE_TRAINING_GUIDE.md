@@ -498,14 +498,14 @@ RESUME_FROM=artifacts/checkpoints/checkpoint-50000 make train
 - [CRITICAL_COMPONENTS_CREATED.md](docs/CRITICAL_COMPONENTS_CREATED.md) - 实现细节
 
 ### S语言框架源代码
-- [advanced_monitor.s](script/advanced_monitor.s) - 高级监控
-- [mixed_precision_trainer.s](script/mixed_precision_trainer.s) - AMP实现
-- [distributed_training.s](script/distributed_training.s) - 分布式训练
+- [advanced_monitor.s](scripts/legacy/advanced_monitor.s) - 高级监控
+- [mixed_precision_trainer.s](scripts/legacy/mixed_precision_trainer.s) - AMP实现
+- [distributed_training.s](scripts/legacy/distributed_training.s) - 分布式训练
 
 ### 集成脚本
-- [complete_training_cycle.sh](script/complete_training_cycle.sh) - 完整训练周期
-- [training_demo.sh](script/training_demo.sh) - 演示脚本
-- [integration.sh](script/integration.sh) - 工具集成
+- [complete_training_cycle.sh](scripts/legacy/complete_training_cycle.sh) - 完整训练周期
+- [training_demo.sh](scripts/legacy/training_demo.sh) - 演示脚本
+- [integration.sh](scripts/legacy/integration.sh) - 工具集成
 
 ---
 

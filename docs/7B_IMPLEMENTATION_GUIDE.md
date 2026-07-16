@@ -23,13 +23,13 @@ cat << 'EOF'
 【PHASE 1: INFRASTRUCTURE (Complete)】
 
 ✅ Created Files:
-   1. script/large_model_trainer.s
+   1. scripts/legacy/large_model_trainer.s
       - 7B/13B/70B model configurations
       - Memory estimation engine
       - Gradient accumulation manager
       - Activation checkpointing system
       
-   2. script/distributed_training_v2.s
+   2. scripts/legacy/distributed_training_v2.s
       - Multi-GPU distributed training enhancements
       - Gradient accumulation for effective batch scaling
       - Mixed precision (FP16/BF16) support
@@ -185,7 +185,7 @@ Benchmark Tests:
    $ bash START_7B_TRAINING.sh
 
 2. Single GPU test:
-   $ MODEL_SIZE=7b WORLD_SIZE=1 RANK=0 s run script/model_trainer_7b.s
+   $ MODEL_SIZE=7b WORLD_SIZE=1 RANK=0 s run scripts/legacy/model_trainer_7b.s
 
 3. Generate training config:
    $ python3 -c "

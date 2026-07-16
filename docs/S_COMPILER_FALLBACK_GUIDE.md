@@ -6,11 +6,11 @@
 
 ## ✅ 解决方案
 
-已更新 `script/run_model_large_pretrain.sh` 以支持灵活的回退机制：
+已更新 `scripts/legacy/run_model_large_pretrain.sh` 以支持灵活的回退机制：
 
 ### 默认行为（保持向后兼容）
 ```bash
-./script/run_model_large_pretrain.sh --model 1t
+./scripts/legacy/run_model_large_pretrain.sh --model 1t
 # 结果: S 编译器不可用时失败，并提示：
 # ✗ S编译器不可用（1T 模式不回退到演示）
 # 💡 提示: 设置 NEURX_ALLOW_DEMO=1 来启用演示模式回退
@@ -18,7 +18,7 @@
 
 ### 启用 1T 模式演示回退
 ```bash
-NEURX_ALLOW_DEMO=1 ./script/run_model_large_pretrain.sh --model 1t
+NEURX_ALLOW_DEMO=1 ./scripts/legacy/run_model_large_pretrain.sh --model 1t
 # 结果: S 编译器不可用时会优雅地回退到演示模式
 # ⚠ S编译器不可用，1T 模式将以演示模式运行
 #   (这仅用于本地开发测试，完整训练需要 S 编译器)
@@ -28,7 +28,7 @@ NEURX_ALLOW_DEMO=1 ./script/run_model_large_pretrain.sh --model 1t
 
 ### 其他模型的行为（不受影响）
 ```bash
-./script/run_model_large_pretrain.sh --model gpt-large
+./scripts/legacy/run_model_large_pretrain.sh --model gpt-large
 # 结果: S 编译器不可用时总是回退到演示模式（原有行为保持不变）
 ```
 
@@ -101,19 +101,19 @@ NEURX_ALLOW_DEMO=1 make train
 ### 场景 2: 本地验证框架（但要求编译）
 ```bash
 # 使用 gpt-large 模型进行本地验证（默认回退到演示）
-./script/run_model_large_pretrain.sh --model gpt-large
+./scripts/legacy/run_model_large_pretrain.sh --model gpt-large
 ```
 
 ### 场景 3: 集群部署（完整编译和训练）
 ```bash
 # 在集群上执行，S 编译器可用
-sbatch script/submit_training_job.sh
+sbatch scripts/legacy/submit_training_job.sh
 ```
 
 ### 场景 4: 集群配置生成（不编译）
 ```bash
 # 仅生成集群配置，跳过编译
-NEURX_CLUSTER_CONFIG_ONLY=1 ./script/run_model_large_pretrain.sh --model 1t
+NEURX_CLUSTER_CONFIG_ONLY=1 ./scripts/legacy/run_model_large_pretrain.sh --model 1t
 ```
 
 ## 🚀 演示模式能力
@@ -179,8 +179,8 @@ NEURX_CLUSTER_CONFIG_ONLY=1 ./script/run_model_large_pretrain.sh --model 1t
 
 ## 🔗 相关文件
 
-- `script/run_model_large_pretrain.sh` - 主训练脚本（已改进）
-- `script/verify_framework.sh` - 框架验证脚本
+- `scripts/legacy/run_model_large_pretrain.sh` - 主训练脚本（已改进）
+- `scripts/legacy/verify_framework.sh` - 框架验证脚本
 - `Makefile` - 构建系统
 
 ## 💡 故障排除

@@ -32,7 +32,7 @@
 cd /Users/feifei/shuwen/train/neurx
 
 # 1️⃣ 查看当前数据
-bash script/print_training_data_info.sh
+bash scripts/legacy/print_training_data_info.sh
 
 # 2️⃣ 运行本地演示训练 (单 GPU)
 make train 2>&1 | tee demo_training.log
@@ -149,8 +149,8 @@ print(f'Too long: {stats[\"too_long\"]}')
 
 ```bash
 # 运行完整的数据处理管道
-bash script/clean_data.sh      # 清洗数据
-bash script/generate_shards.sh # 生成分片
+bash scripts/legacy/clean_data.sh      # 清洗数据
+bash scripts/legacy/generate_shards.sh # 生成分片
 
 # 验证结果
 ls -lh data/pretrain_dataset/cleaned/
@@ -196,7 +196,7 @@ export LOCAL_RANK=${SLURM_LOCALID}
 export WORLD_SIZE=$((SLURM_NNODES * SLURM_NTASKS_PER_NODE))
 
 # 启动训练
-srun bash script/run_model_large_pretrain.sh
+srun bash scripts/legacy/run_model_large_pretrain.sh
 EOF
 
 # 3. 提交训练任务
@@ -575,7 +575,7 @@ curl http://localhost:8000/v1/completions \
 ### ✅ 任务 1: 本地演示 (1 小时)
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/print_training_data_info.sh
+bash scripts/legacy/print_training_data_info.sh
 make train 2>&1 | head -100
 ```
 
@@ -694,7 +694,7 @@ cat PROJECT_PLAN.md
 
 1. **框架问题** → 查看 `QUICK_START.md`
 2. **训练配置** → 编辑 `config_1t_model.json`
-3. **数据问题** → 运行 `script/print_training_data_info.sh`
+3. **数据问题** → 运行 `scripts/legacy/print_training_data_info.sh`
 4. **故障排查** → 查看 `artifacts/logs/`
 
 ---
@@ -703,7 +703,7 @@ cat PROJECT_PLAN.md
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/print_training_data_info.sh
+bash scripts/legacy/print_training_data_info.sh
 make train
 ```
 

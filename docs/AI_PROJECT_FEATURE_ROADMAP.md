@@ -61,7 +61,7 @@ What to bring into NeurX:
 
 - diff-first editing as the default
 - command streaming, command interruption, and command history
-- tighter build/test/lint verification loops
+- tighter build/tests/lint verification loops
 - better file, git, and search tool composition
 
 Why this matters:

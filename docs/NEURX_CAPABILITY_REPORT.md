@@ -184,18 +184,18 @@ HellaSwag         81.2%          96.2%         15%
    bash PHASE7_COMPLETE_STATUS.sh
 
 2️⃣ 运行演示流程
-   bash script/neurx_complete_pipeline.sh
+   bash scripts/legacy/neurx_complete_pipeline.sh
 
 3️⃣ 单个功能演示
-   s run script/data_synthesis_engine.s        # 数据合成
-   s run script/rlhf_ppo.s                     # RLHF 对齐
-   s run script/sft_trainer.s                  # 指令微调
-   s run script/evaluation_framework.s         # 评估
-   s run script/inference_optimization.s       # 推理优化
+   s run scripts/legacy/data_synthesis_engine.s        # 数据合成
+   s run scripts/legacy/rlhf_ppo.s                     # RLHF 对齐
+   s run scripts/legacy/sft_trainer.s                  # 指令微调
+   s run scripts/legacy/evaluation_framework.s         # 评估
+   s run scripts/legacy/inference_optimization.s       # 推理优化
 
 4️⃣ 完整训练运行
    # 编辑 config_large_model.json 配置
-   bash script/neurx_complete_pipeline.sh
+   bash scripts/legacy/neurx_complete_pipeline.sh
 
 5️⃣ 部署到生产
    # 编辑分布式配置

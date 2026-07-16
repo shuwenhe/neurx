@@ -220,7 +220,7 @@ save_best_only: false       # Save periodic + best
 3. **`neurx/training/validator.s`** - Validation metrics and early stopping
 4. **`neurx/training/monitor.s`** - Real-time metrics logging and reporting
 5. **`neurx/training/orchestrator.s`** - Full pipeline orchestration
-6. **`neurx/test/test_training_integration.s`** - 16 comprehensive tests
+6. **`neurx/tests/test_training_integration.s`** - 16 comprehensive tests
 7. **Documentation** - ARCHITECTURE.md, QUICK_START.md, PROJECT_COMPLETE.md
 
 ---

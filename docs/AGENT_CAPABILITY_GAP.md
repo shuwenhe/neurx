@@ -79,7 +79,7 @@ GPT/Codex-style agents often have:
 - shell execution
 - repository inspection
 - browser/web access
-- test/build loops
+- tests/build loops
 - file editing with diffs
 - optional GUI/computer use
 
@@ -166,7 +166,7 @@ Keep heuristic routing as fallback, but let a model propose:
 
 This is the biggest difference between the current runtime and a GPT/Codex-style agent.
 
-### P3: add build/test/review loops
+### P3: add build/tests/review loops
 
 For coding work, the agent should be able to:
 

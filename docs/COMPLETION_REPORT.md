@@ -156,7 +156,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 # 16-GPU training
 # Deploy via SLURM/Docker/K8s
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 ```
 
 ---
@@ -178,7 +178,7 @@ Full production deployment infrastructure created:
 **1. SLURM HPC**
 ```bash
 neurx run generate_deployment_configs.s
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 ```
 - 4 nodes × 4 GPUs = 16 total
 - NCCL Infiniband support
@@ -186,7 +186,7 @@ sbatch production_deployment/scripts/slurm_submit.sh
 
 **2. Docker Local**
 ```bash
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 ```
 - Multi-container setup
 - Shared volumes for data
@@ -194,17 +194,17 @@ docker-compose -f production_deployment/docker-compose.yml up
 
 **3. Kubernetes Cloud**
 ```bash
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 ```
 - Scalable job definition
 - Persistent volume support
 - Auto-scaling ready
 
 ✅ **Generated Artifacts**
-- `production_deployment/scripts/slurm_submit.sh` - SLURM job
-- `production_deployment/docker-compose.yml` - Docker config
-- `production_deployment/kubernetes_deployment.yaml` - K8s manifest
-- `production_deployment/configs/cluster_config.json` - Cluster setup
+- `deploy/production/scripts/slurm_submit.sh` - SLURM job
+- `deploy/production/docker-compose.yml` - Docker config
+- `deploy/production/kubernetes_deployment.yaml` - K8s manifest
+- `deploy/production/configs/cluster_config.json` - Cluster setup
 
 ---
 
@@ -402,13 +402,13 @@ neurx run performance_benchmark.s
 ### Step 4: Deploy
 ```bash
 # SLURM
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # Or Docker
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # Or Kubernetes
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 ```
 
 ---

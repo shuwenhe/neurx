@@ -98,4 +98,4 @@ IR运行器是S编译器的seed runtime，它提供：
 - `inference/production_inference.s.backup` - 原始复杂版本（备份）
 - `inference/production_inference_simple.s` - 简化版本的原始文件
 - `runtime/io/io.s` - 修复了缺失的`trim()`函数实现
-- `script/run_inference_llm.sh` - 推理启动脚本（无需修改，自动适配）
+- `scripts/legacy/run_inference_llm.sh` - 推理启动脚本（无需修改，自动适配）

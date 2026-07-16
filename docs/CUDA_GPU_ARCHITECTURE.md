@@ -7,7 +7,7 @@ NeurX GPU训练采用**分层架构**：
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Layer 1: S Language (High-level Logic)              │
-│ - script/gpu_train.s                                │
+│ - scripts/legacy/gpu_train.s                                │
 │ - Shard loading, training loop, logging             │
 │ - Environment variables parsing                     │
 │ - Memory management orchestration                   │
@@ -63,7 +63,7 @@ NeurX GPU训练采用**分层架构**：
 
 ## 代码组织
 
-### 1. S Language Training Loop (`script/gpu_train.s`)
+### 1. S Language Training Loop (`scripts/legacy/gpu_train.s`)
 
 ```s
 // 入口点 - 全用S实现
@@ -173,7 +173,7 @@ bash cuda/build_cuda_runtime_alt.sh
 ### Step 3: 编译S语言训练脚本
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
-s ir script/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
+s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 ```
 
 **产物:**
@@ -336,7 +336,7 @@ extern "C" int cuda_my_kernel(...) {
 extern func cuda_my_kernel(...) int
 ```
 
-3. **在script/gpu_train.s中使用**
+3. **在scripts/legacy/gpu_train.s中使用**
 ```s
 int status = cuda_my_kernel(...)
 ```
@@ -344,7 +344,7 @@ int status = cuda_my_kernel(...)
 4. **重新编译**
 ```bash
 bash cuda/build_kernels.sh
-s ir script/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
+s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 ```
 
 ## 对比CPU实现

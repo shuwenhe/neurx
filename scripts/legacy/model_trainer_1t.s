@@ -385,6 +385,6 @@ func main() {
     
     // Save configuration
     fmt.Println("\n💾 Configuration saved for deployment")
-    fmt.Println("Command: s run script/model_trainer_1t.s")
+    fmt.Println("Command: s run scripts/legacy/model_trainer_1t.s")
     fmt.Println("\n✅ Ready for 1T model training on H100 cluster")
 }

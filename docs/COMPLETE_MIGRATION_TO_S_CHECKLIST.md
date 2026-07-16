@@ -80,13 +80,13 @@
 ### 2.2 构建脚本（2 个）
 | # | 文件 | 路径 | 功能 | 平台 | 工作量 | 状态 |
 |---|------|------|------|------|-------|------|
-| 2.2.1 | `build-windows.bat` | `script/build-windows.bat` | Windows 构建 | Windows | ⭐⭐ | ⏳ |
-| 2.2.2 | `setup-windows.bat` | `script/setup-windows.bat` | Windows 设置 | Windows | ⭐⭐ | ⏳ |
+| 2.2.1 | `build-windows.bat` | `scripts/legacy/build-windows.bat` | Windows 构建 | Windows | ⭐⭐ | ⏳ |
+| 2.2.2 | `setup-windows.bat` | `scripts/legacy/setup-windows.bat` | Windows 设置 | Windows | ⭐⭐ | ⏳ |
 
 ### 2.3 文件处理和工具（4 个）
 | # | 文件 | 路径 | 功能 | 工作量 | 状态 |
 |---|------|------|------|-------|------|
-| 2.3.1 | `create-file.js` | `script/create-file.js` | 原子文件创建 CLI | ⭐⭐⭐ | ⏳ |
+| 2.3.1 | `create-file.js` | `scripts/legacy/create-file.js` | 原子文件创建 CLI | ⭐⭐⭐ | ⏳ |
 | 2.3.2 | `file-creation-examples.js` | `examples/file-creation-examples.js` | 文件创建示例 | ⭐⭐ | ⏳ |
 | 2.3.3 | `cleanup-old-commits.sh` | `tools/cleanup-old-commits.sh` | 清理旧提交 | ⭐⭐ | ⏳ |
 | 2.3.4 | `rewrite-commit-messages.sh` | `tools/rewrite-commit-messages.sh` | 重写提交信息 | ⭐⭐ | ⏳ |

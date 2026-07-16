@@ -38,10 +38,10 @@
 cd /home/shuwen/shuwen/train/neurx
 
 # 批量编译（复制粘贴执行）
-s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline && \
-s script/training_runner.s -o artifacts/build/training/runner && \
-s script/inference_server.s -o artifacts/build/inference/server && \
-s script/s_toolchain.s -o artifacts/build/toolchain/s_toolchain && \
+s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline && \
+s scripts/legacy/training_runner.s -o artifacts/build/training/runner && \
+s scripts/legacy/inference_server.s -o artifacts/build/inference/server && \
+s scripts/legacy/s_toolchain.s -o artifacts/build/toolchain/s_toolchain && \
 chmod +x artifacts/build/*/* && \
 echo "✓ All components compiled successfully!"
 ```
@@ -178,7 +178,7 @@ make run-inference-server
 **Q: 如何编译？**  
 A: 使用 S 编译器编译 .s 文件到二进制：
 ```bash
-s script/component.s -o artifacts/build/component/binary
+s scripts/legacy/component.s -o artifacts/build/component/binary
 ```
 
 **Q: 支持哪些平台？**  
@@ -201,10 +201,10 @@ A: 通过 Makefile 或直接调用二进制
 项目根目录：/home/shuwen/shuwen/train/neurx/
   
 源代码：
-  script/data_pipeline.s          ← 数据处理
-  script/training_runner.s        ← 训练驱动
-  script/inference_server.s       ← 推理服务
-  script/s_toolchain.s            ← 工具链协调
+  scripts/legacy/data_pipeline.s          ← 数据处理
+  scripts/legacy/training_runner.s        ← 训练驱动
+  scripts/legacy/inference_server.s       ← 推理服务
+  scripts/legacy/s_toolchain.s            ← 工具链协调
 
 编译输出：
   artifacts/build/data_pipeline/

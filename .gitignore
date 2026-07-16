@@ -51,7 +51,7 @@ checkpoint_*/
 checkpoint/NeurX-1.3/
 checkpoint/NeurX-1.3/logs/
 tmp/
-script/.run/
+scripts/legacy/.run/
 *.pid
 # Native cache
 __pycache__/
@@ -107,7 +107,7 @@ session/
 output/
 outputs/
 end_to_end_output/
-script/output/
+scripts/legacy/output/
 artifacts/logs/
 artifacts/train_output/
 artifacts/inference_output/
@@ -241,11 +241,11 @@ end_to_end_output/
 output/
 
 # Local one-off S training/debug probes
-script/debug_train.s
-script/simple_train.s
-script/test_read.s
-script/train_gpu.py
-script/run_gpu_pretrain.s
+scripts/legacy/debug_train.s
+scripts/legacy/simple_train.s
+scripts/legacy/test_read.s
+scripts/legacy/train_gpu.py
+scripts/legacy/run_gpu_pretrain.s
 
 # Common CMake / build files
 CMakeFiles/

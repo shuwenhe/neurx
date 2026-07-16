@@ -3,7 +3,7 @@
 ## 文件说明
 
 ### 1. 原Shell脚本（已修复）
-**文件**: `script/launch_multinode_pretrain.sh`
+**文件**: `scripts/legacy/launch_multinode_pretrain.sh`
 
 **修复内容**: 修复了单节点训练时的checkpoint路径问题
 ```bash
@@ -21,7 +21,7 @@ fi
 ---
 
 ### 2. S语言启动器框架
-**文件**: `script/launch_multinode_pretrain.s`
+**文件**: `scripts/legacy/launch_multinode_pretrain.s`
 
 **功能**:
 - 读取和解析hostfile
@@ -38,7 +38,7 @@ fi
 ```bash
 # 编译
 cd /home/shuwen/shuwen/train/neurx
-s compile script/launch_multinode_pretrain.s -o artifacts/build/launcher
+s compile scripts/legacy/launch_multinode_pretrain.s -o artifacts/build/launcher
 
 # 运行
 ./artifacts/build/launcher
@@ -47,7 +47,7 @@ s compile script/launch_multinode_pretrain.s -o artifacts/build/launcher
 ---
 
 ### 3. S语言脚本生成器（推荐）
-**文件**: `script/generate_launcher.s`
+**文件**: `scripts/legacy/generate_launcher.s`
 
 **功能**:
 - 从环境变量读取配置
@@ -64,13 +64,13 @@ s compile script/launch_multinode_pretrain.s -o artifacts/build/launcher
 ```bash
 # 1. 编译生成器
 cd /home/shuwen/shuwen/train/neurx
-s compile script/generate_launcher.s -o artifacts/build/generate_launcher
+s compile scripts/legacy/generate_launcher.s -o artifacts/build/generate_launcher
 
 # 2. 生成脚本
 NEURX_ROOT=$(pwd) ./artifacts/build/generate_launcher
 
 # 3. 执行生成的脚本
-bash script/launch_multinode_pretrain_generated.sh
+bash scripts/legacy/launch_multinode_pretrain_generated.sh
 ```
 
 ---
@@ -85,7 +85,7 @@ cd /home/shuwen/shuwen/train/neurx
 make pretrain-gpu
 
 # 方式2: 直接执行
-bash script/launch_multinode_pretrain.sh
+bash scripts/legacy/launch_multinode_pretrain.sh
 ```
 
 **输出应该显示断点续训**:
@@ -106,7 +106,7 @@ node3 8
 EOF
 
 # 启动训练
-NEURX_HOSTFILE=$(pwd)/configs/pretrain.hosts bash script/launch_multinode_pretrain.sh
+NEURX_HOSTFILE=$(pwd)/configs/pretrain.hosts bash scripts/legacy/launch_multinode_pretrain.sh
 ```
 
 ---
@@ -166,7 +166,7 @@ ls -lh checkpoint/NeurX-1.3/rank_1/transformer_v2.ckpt
 echo $NEURX_PRETRAIN_RESUME_FROM
 
 # 或从启动脚本中提取
-grep "NEURX_PRETRAIN_RESUME_FROM" script/launch_multinode_pretrain.sh
+grep "NEURX_PRETRAIN_RESUME_FROM" scripts/legacy/launch_multinode_pretrain.sh
 ```
 
 ### 监控训练日志
@@ -210,7 +210,7 @@ tail -f checkpoint/NeurX-1.3/rank_*/rank_*.log
 ls -lh checkpoint/NeurX-1.3/transformer_v2.ckpt
 
 # 检查launcher脚本中的NEURX_PRETRAIN_RESUME_FROM
-grep "ckpt_path" script/launch_multinode_pretrain.sh
+grep "ckpt_path" scripts/legacy/launch_multinode_pretrain.sh
 
 # 确保不添加rank后缀
 # ✅ 正确: $OUT/transformer_v2.ckpt
@@ -256,7 +256,7 @@ make pretrain-gpu
 
 ## 性能优化建议
 
-1. **单节点多GPU**: 使用 `script/launch_multinode_pretrain.sh`，world_size自动设置
+1. **单节点多GPU**: 使用 `scripts/legacy/launch_multinode_pretrain.sh`，world_size自动设置
 2. **多节点**: 使用低延迟网络（InfiniBand）和设置 `NCCL_SOCKET_IFNAME`
 3. **大模型**: 启用混合精度：`NEURX_MIXED_PRECISION=bf16`
 4. **数据加载**: 使用SSD存储shards，开启异步数据加载

@@ -83,22 +83,22 @@ Module 1: 视觉编码器集成
   - 选项 A: 集成 CLIP (更通用)
   - 选项 B: 集成 Qwen-VL (更高效)
   - 选项 C: 集成 LLaVA (更轻量)
-  - 文件: script/vision_encoder.s (500 行)
+  - 文件: scripts/legacy/vision_encoder.s (500 行)
 
 Module 2: 跨模态融合
   - 实现 cross-attention 机制
   - 动态分辨率处理 (384-2048px)
-  - 文件: script/multimodal_fusion.s (600 行)
+  - 文件: scripts/legacy/multimodal_fusion.s (600 行)
 
 Module 3: 图像-文本对齐
   - 准备 COCO/Flickr 等数据集
   - 实现对齐数据加载
-  - 文件: script/vision_text_alignment.s (400 行)
+  - 文件: scripts/legacy/vision_text_alignment.s (400 行)
 
 Module 4: 文档理解
   - PDF 页面转图像
   - 表格提取和理解
-  - 文件: script/document_processing.s (500 行)
+  - 文件: scripts/legacy/document_processing.s (500 行)
 ```
 
 **预期收益**:
@@ -246,7 +246,7 @@ Module 4: 合规检查器 (200 行)
 - Day 6-7: 初始化 7B 模型并运行测试
 
 **预期产出**:
-- 新文件: script/large_model_trainer.s (800 行)
+- 新文件: scripts/legacy/large_model_trainer.s (800 行)
 - 修改: distributed_training.s (+ 300 行)
 - 验证: 7B 模型可在 4×H100 上训练
 
@@ -273,9 +273,9 @@ Module 4: 合规检查器 (200 行)
   - 修改数据加载
 
 **预期产出**:
-- 新文件: script/vision_encoder.s (500 行)
-- 新文件: script/multimodal_fusion.s (600 行)
-- 新文件: script/multilingual_tokenizer.s (400 行)
+- 新文件: scripts/legacy/vision_encoder.s (500 行)
+- 新文件: scripts/legacy/multimodal_fusion.s (600 行)
+- 新文件: scripts/legacy/multilingual_tokenizer.s (400 行)
 
 **关键指标**:
 - 视觉编码: 10ms per image
@@ -295,10 +295,10 @@ Module 4: 合规检查器 (200 行)
 - 版本管理: 400 行
 
 **预期产出**:
-- 新文件: script/lora_hot_patch.s (200 行)
-- 新文件: script/incremental_sft.s (600 行)
-- 新文件: script/ab_testing_framework.s (600 行)
-- 新文件: script/model_version_manager.s (400 行)
+- 新文件: scripts/legacy/lora_hot_patch.s (200 行)
+- 新文件: scripts/legacy/incremental_sft.s (600 行)
+- 新文件: scripts/legacy/ab_testing_framework.s (600 行)
+- 新文件: scripts/legacy/model_version_manager.s (400 行)
 
 **关键指标**:
 - 模型切换: <1 秒
@@ -318,9 +318,9 @@ Module 4: 合规检查器 (200 行)
 - 复杂度适应: 200 行
 
 **预期产出**:
-- 新文件: script/thinking_tokens.s (400 行)
-- 新文件: script/tree_search_reasoning.s (600 行)
-- 新文件: script/step_verification.s (300 行)
+- 新文件: scripts/legacy/thinking_tokens.s (400 行)
+- 新文件: scripts/legacy/tree_search_reasoning.s (600 行)
+- 新文件: scripts/legacy/step_verification.s (300 行)
 - 修改: inference_optimization.s (+ 200 行)
 
 **关键指标**:
@@ -342,9 +342,9 @@ Module 4: 合规检查器 (200 行)
 
 **预期产出**:
 - 修改: safety_filter.s (+ 500 行新分类)
-- 新文件: script/constitutional_ai.s (500 行)
-- 新文件: script/explainable_refusal.s (300 行)
-- 新文件: script/compliance_checker.s (200 行)
+- 新文件: scripts/legacy/constitutional_ai.s (500 行)
+- 新文件: scripts/legacy/explainable_refusal.s (300 行)
+- 新文件: scripts/legacy/compliance_checker.s (200 行)
 
 **关键指标**:
 - 安全准确率: >98%

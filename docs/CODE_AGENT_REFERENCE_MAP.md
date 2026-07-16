@@ -36,7 +36,7 @@
 - `NeurX` 当前最缺的不是更多 agent 概念，而是真实可用的 coding loop
 - `Aider` 最接近“本地仓库里真实改代码”
 - `OpenHands` 最适合后续抽象成更完整的 agent runtime
-- `SWE-agent` 最适合指导 build/test/retry/eval
+- `SWE-agent` 最适合指导 build/tests/retry/eval
 
 ## Mapping By NeurX Layer
 
@@ -115,7 +115,7 @@
 - 太早引入过重的平台复杂度
 - 浏览器/桌面/远程执行等与你当前主线无关的子系统
 
-## 3. `build/test/retry/eval`
+## 3. `build/tests/retry/eval`
 
 最优先参考：`SWE-agent`
 
@@ -135,7 +135,7 @@
 在 `NeurX` 对应目录：
 
 - `executor/executor.s`
-- `test/`
+- `tests/`
 - `doc/LOCAL_CODE_AGENT_EXECUTION_PLAN.md`
 - 后续新增的 agent smoke tests / task fixtures
 
@@ -186,7 +186,7 @@
 
 1. `Aider` 的最小代码修改闭环
 2. `OpenHands` 的 action/runtime 分层
-3. `SWE-agent` 的 build/test/retry 验收逻辑
+3. `SWE-agent` 的 build/tests/retry 验收逻辑
 
 ## What NeurX Should Not Copy Yet
 
@@ -225,7 +225,7 @@
 
 参考 `SWE-agent`
 
-- 加 build/test/retry loop
+- 加 build/tests/retry loop
 - 加固定 smoke tasks
 - 加任务成功率统计
 

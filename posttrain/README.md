@@ -15,4 +15,4 @@ Entry module:
 
 - posttrain.s: default pipeline bootstrap and iterative posttrain runner
 - posttrain.s: input-driven step APIs and train-pipeline adapter APIs
-- script/run_lora_sft_training.s: callable LoRA SFT training entry
+- scripts/legacy/run_lora_sft_training.s: callable LoRA SFT training entry

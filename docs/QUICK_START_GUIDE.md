@@ -511,11 +511,11 @@ make status --verbose
 - [config_large_model.json](config_large_model.json) - 完整的模型和训练配置
 
 ### 脚本
-- [script/integration.sh](script/integration.sh) - 训练集成脚本
-- [script/tokenizer.s](script/tokenizer.s) - Tokenizer框架
-- [script/evaluator.s](script/evaluator.s) - 评估框架
-- [script/checkpoint_manager.s](script/checkpoint_manager.s) - 检查点管理
-- [script/training_monitor.s](script/training_monitor.s) - 监控框架
+- [scripts/legacy/integration.sh](scripts/legacy/integration.sh) - 训练集成脚本
+- [scripts/legacy/tokenizer.s](scripts/legacy/tokenizer.s) - Tokenizer框架
+- [scripts/legacy/evaluator.s](scripts/legacy/evaluator.s) - 评估框架
+- [scripts/legacy/checkpoint_manager.s](scripts/legacy/checkpoint_manager.s) - 检查点管理
+- [scripts/legacy/training_monitor.s](scripts/legacy/training_monitor.s) - 监控框架
 
 ---
 

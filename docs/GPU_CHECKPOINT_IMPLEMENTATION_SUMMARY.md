@@ -8,7 +8,7 @@
 
 ### 1. S语言脚本实现 (S Language Implementation)
 
-**文件**: [script/pretrain_gpu.s](../script/pretrain_gpu.s)
+**文件**: [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s)
 
 **核心功能**：
 - ✅ `training_state` 结构体：存储训练步数、文档数、分片数、损失值
@@ -297,7 +297,7 @@ grep "Resuming" artifacts/logs/pretrain_gpu_*.log
 
 | 文件 | 类型 | 修改 | 目的 |
 |------|------|------|------|
-| script/pretrain_gpu.s | S代码 | ✅ 创建 | Checkpoint管理逻辑 |
+| scripts/legacy/pretrain_gpu.s | S代码 | ✅ 创建 | Checkpoint管理逻辑 |
 | Makefile | 构建 | ✅ 更新 | 目标配置和环境变量 |
 | docs/CHECKPOINT_RESUME_GUIDE.md | 文档 | ✅ 更新 | 用户指南 |
 | cuda/neurx_cuda_train_bridge.cu | C++代码 | ⏳ 待做 | 权重恢复 |

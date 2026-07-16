@@ -142,7 +142,7 @@ Advanced: 6条 (架构、优化、调试)
 ### 使用的脚本
 ```bash
 # 生成Claude级别数据
-bash script/gen_neurx_training_data.sh
+bash scripts/legacy/gen_neurx_training_data.sh
 
 # 生成结果存储在
 data/training_data_claude.jsonl
@@ -152,8 +152,8 @@ cat data/training_data_claude.jsonl >> data/training_data.jsonl
 ```
 
 ### 实现文件
-- **Bash**: `script/gen_neurx_training_data.sh` - 生产实现 ✅
-- **S语言**: `script/gen_neurx_data.s` - 框架定义
+- **Bash**: `scripts/legacy/gen_neurx_training_data.sh` - 生产实现 ✅
+- **S语言**: `scripts/legacy/gen_neurx_data.s` - 框架定义
 
 ## 💡 使用建议
 
@@ -173,7 +173,7 @@ jq 'select(.text | contains("Transformer") or contains("API") or contains("分�
 ### 3. 继续扩展
 ```bash
 # 可以继续添加更多Claude级别的数据
-bash script/gen_neurx_training_data.sh >> data/training_data.jsonl
+bash scripts/legacy/gen_neurx_training_data.sh >> data/training_data.jsonl
 ```
 
 ## 📝 集成到训练流程
@@ -245,8 +245,8 @@ echo "使用数据集: $DATASET_FILE"
 |------|------|------|
 | `data/training_data.jsonl` | 主数据集（5,624行） | ✅ 已更新 |
 | `data/training_data_claude.jsonl` | Claude数据（14条） | ✅ 已生成 |
-| `script/gen_neurx_training_data.sh` | 数据生成脚本 | ✅ 生产就绪 |
-| `script/gen_neurx_data.s` | S语言框架 | ✅ 已创建 |
+| `scripts/legacy/gen_neurx_training_data.sh` | 数据生成脚本 | ✅ 生产就绪 |
+| `scripts/legacy/gen_neurx_data.s` | S语言框架 | ✅ 已创建 |
 | 本文档 | Claude数据说明 | ✅ 完成 |
 
 ## 🏁 总结

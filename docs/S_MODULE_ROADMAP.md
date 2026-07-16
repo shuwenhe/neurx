@@ -50,8 +50,8 @@ Suggested S APIs:
 
 Minimum tests:
 
-- `test/test_s_serving_admission.s`
-- `test/test_s_serving_runtime.s`
+- `tests/test_s_serving_admission.s`
+- `tests/test_s_serving_runtime.s`
 
 ## 2. Distributed Training
 
@@ -93,13 +93,13 @@ Suggested S APIs:
 
 Minimum tests:
 
-- `test/test_distributed_comm.s`
-- `test/test_distributed_ddp.s`
-- `test/test_distributed_launcher.s`
-- `test/test_s_distributed_comm_runtime.s`
-- `test/test_s_distributed_ddp_runtime.s`
-- `test/test_s_distributed_tp_runtime.s`
-- `test/test_s_distributed_zero_runtime.s`
+- `tests/test_distributed_comm.s`
+- `tests/test_distributed_ddp.s`
+- `tests/test_distributed_launcher.s`
+- `tests/test_s_distributed_comm_runtime.s`
+- `tests/test_s_distributed_ddp_runtime.s`
+- `tests/test_s_distributed_tp_runtime.s`
+- `tests/test_s_distributed_zero_runtime.s`
 
 ## 3. Compiler and Lowering
 
@@ -134,9 +134,9 @@ Suggested S APIs:
 
 Minimum tests:
 
-- `test/test_compile_compiler.s`
-- `test/test_compile_runtime.s`
-- `test/test_s_compile_passes_runtime.s`
+- `tests/test_compile_compiler.s`
+- `tests/test_compile_runtime.s`
+- `tests/test_s_compile_passes_runtime.s`
 
 ## 4. Autograd and Module Ergonomics
 
@@ -178,13 +178,13 @@ Suggested S APIs:
 
 Minimum tests:
 
-- `test/test_autograd.s`
-- `test/test_tensor.s`
-- `test/test_transformer.s`
-- `test/test_s_autograd_gradcheck_runtime.s`
-- `test/test_s_autograd_anomaly_runtime.s`
-- `test/test_s_nn_container_runtime.s`
-- `test/test_s_attention_runtime.s`
+- `tests/test_autograd.s`
+- `tests/test_tensor.s`
+- `tests/test_transformer.s`
+- `tests/test_s_autograd_gradcheck_runtime.s`
+- `tests/test_s_autograd_anomaly_runtime.s`
+- `tests/test_s_nn_container_runtime.s`
+- `tests/test_s_attention_runtime.s`
 
 ## 5. Quantization, Export, and Diagnostics
 
@@ -215,9 +215,9 @@ Suggested S APIs:
 
 Minimum tests:
 
-- `test/test_s_quant_runtime.s`
-- `test/test_s_export_runtime.s`
-- `test/test_s_profiler_runtime.s`
+- `tests/test_s_quant_runtime.s`
+- `tests/test_s_export_runtime.s`
+- `tests/test_s_profiler_runtime.s`
 
 ## Migration Rule
 

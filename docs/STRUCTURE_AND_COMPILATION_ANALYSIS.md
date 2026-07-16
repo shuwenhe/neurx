@@ -131,7 +131,7 @@
 - `.neurx/` - neurx 配置
 - `configs/` - YAML/JSON 配置
 - `docs/` - 文档
-- `production_deployment/` - 生产配置
+- `deploy/production/` - 生产配置
 - 其他辅助目录
 
 ---
@@ -285,7 +285,7 @@ model_large_pretrain.s (主程序)
 - training/* (通用训练工具)
 - data/* (数据处理)
 - eval/* (评估)
-- test/* (测试)
+- tests/* (测试)
 - examples/* (示例)
 
 **这些模块可以不编译，但会影响数据加载和评估等功能**
@@ -309,7 +309,7 @@ model_large_pretrain.s (主程序)
 ### 本地验证 (单机演示)
 ```
 make train
-  ├─ script/run_model_large_pretrain.sh
+  ├─ scripts/legacy/run_model_large_pretrain.sh
   │  ├─ 检查 S 编译器 (不可用，演示模式)
   │  └─ 运行训练演示 (输出假数据)
   └─ 生成假的检查点和日志
@@ -319,7 +319,7 @@ make train
 
 ### 集群运行 (1024 GPU)
 ```
-sbatch script/submit_training_job.sh
+sbatch scripts/legacy/submit_training_job.sh
   ├─ 集群 SLURM 初始化
   ├─ 1024 个进程启动
   ├─ S 编译器编译 model_large_pretrain.s
@@ -344,7 +344,7 @@ sbatch script/submit_training_job.sh
 
 ### 本地环境检查
 ```bash
-✓ bash script/verify_framework.sh
+✓ bash scripts/legacy/verify_framework.sh
   → 检查 8 个核心模块是否存在
   → 验证配置文件完整性
   → 确认文档齐全
@@ -353,8 +353,8 @@ sbatch script/submit_training_job.sh
   → 生产集群才有 /opt/s/bin/s
 
 ✓ 训练启动脚本可执行
-  → script/run_model_large_pretrain.sh 存在
-  → script/submit_training_job.sh 存在
+  → scripts/legacy/run_model_large_pretrain.sh 存在
+  → scripts/legacy/submit_training_job.sh 存在
 ```
 
 ### 集群部署前检查

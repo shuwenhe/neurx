@@ -88,7 +88,7 @@ neurx/
   │   ├── verify_shards.s
   │   └── [other shard utilities]
   │
-  ├── script/                    ← Other utilities
+  ├── scripts/legacy/                    ← Other utilities
   ├── Makefile                   ← Updated to use shard/
   └── README.md                  ← Main project README
 ```

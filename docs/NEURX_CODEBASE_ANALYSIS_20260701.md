@@ -64,7 +64,7 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 - `neurx/model/transformer/attention.s`
 - `neurx/model/transformer/attention_implementation.s`
 - `neurx/model/transformer/attention_gradient.s`
-- `neurx/test/test_attention.s` (10+ comprehensive tests)
+- `neurx/tests/test_attention.s` (10+ comprehensive tests)
 
 **Implemented Components**:
 - ✅ Scaled dot-product attention forward pass
@@ -98,7 +98,7 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 **Files**:
 - `neurx/data/tokenizer_pipeline.s` (1,000+ lines)
 - `neurx/tokenizer/bpe_tokenizer.s` (500+ lines)
-- `neurx/test/test_tokenizer.s` (comprehensive test suite)
+- `neurx/tests/test_tokenizer.s` (comprehensive test suite)
 
 **Implemented Features**:
 - ✅ BPE (Byte-Pair Encoding) tokenizer
@@ -136,7 +136,7 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 - `neurx/opt/adamw.s` (500+ lines) - Complete AdamW implementation
 - `neurx/opt/core_optim.s` (400+ lines) - Optimizer base classes
 - `neurx/opt/optimizer.s` (300+ lines) - High-level interfaces
-- `neurx/test/test_optimizer.s` (10+ comprehensive tests)
+- `neurx/tests/test_optimizer.s` (10+ comprehensive tests)
 
 **AdamW Optimizer Features**:
 - ✅ First moment estimation (momentum):
@@ -724,7 +724,7 @@ neurx/posttrain/
 
 ### Test Suite
 ```
-neurx/test/
+neurx/tests/
 ├── test_attention.s - 10+ attention tests
 ├── test_optimizer.s - 10+ optimizer tests
 ├── test_transformer_*.s - Transformer variants

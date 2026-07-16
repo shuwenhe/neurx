@@ -23,7 +23,7 @@ func main() int {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/test/test_training_pipeline.s", "测试套件") {
+    if check_file(project_root + "/tests/test_training_pipeline.s", "测试套件") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1

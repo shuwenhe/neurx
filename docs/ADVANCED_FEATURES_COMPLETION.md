@@ -76,7 +76,7 @@
   - 性能数据
 
 ### 测试
-- **`neurx/test/test_advanced_features.s`** (400+ 行)
+- **`neurx/tests/test_advanced_features.s`** (400+ 行)
   - 20+ 综合测试
   - 单元测试
   - 集成测试
@@ -200,7 +200,7 @@ neurx/distributed/tensor_parallel.s     (500+ 行)
 
 ### 测试
 ```
-neurx/test/test_advanced_features.s     (400+ 行)
+neurx/tests/test_advanced_features.s     (400+ 行)
 ```
 
 ### 文档
@@ -254,7 +254,7 @@ neurx/
 ├── distributed/                   │
 │   └── tensor_parallel.s ────────┤
 │                                 │
-├── test/                          │
+├── tests/                          │
 │   └── test_advanced_features.s ─┤
 │                                 │
 └── ADVANCED_FEATURES_GUIDE.md ◄──┘

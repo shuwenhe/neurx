@@ -198,7 +198,7 @@ s ir cuda/build_cuda_runtime.s
 ### 5. 编译训练脚本
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
-s ir script/gpu_train.s -o artifacts/build/gpu_train.ir
+s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train.ir
 ```
 
 ### 6. 运行训练
@@ -331,7 +331,7 @@ cuda-verify:
 
 - [CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) - 架构详解
 - [S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) - 实现指南
-- [script/gpu_train.s](../script/gpu_train.s) - GPU训练脚本
+- [scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) - GPU训练脚本
 - [cuda/cuda_kernels.cu](cuda_kernels.cu) - CUDA核函数源代码
 
 ## 📋 总结

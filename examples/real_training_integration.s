@@ -1,7 +1,7 @@
 // ================================================================================
 // Example: Real Training Integration
 // ================================================================================
-// This file shows how to modify script/run_large_pretrain.s to use real training
+// This file shows how to modify scripts/legacy/run_large_pretrain.s to use real training
 // instead of the demo/simulation mode.
 //
 // OPTION 1: Minimal integration (recommended for testing)
@@ -191,9 +191,9 @@ func int_to_str(int n) string {
 /*
 STEP 1: Choose an integration option above (OPTION 1 is simplest to start)
 
-STEP 2: Copy the chosen option code to script/run_large_pretrain.s
+STEP 2: Copy the chosen option code to scripts/legacy/run_large_pretrain.s
         WARNING: This will replace the current main() function
-        Backup first: cp script/run_large_pretrain.s script/run_large_pretrain.s.bak
+        Backup first: cp scripts/legacy/run_large_pretrain.s scripts/legacy/run_large_pretrain.s.bak
 
 STEP 3: Verify imports are correct
         - Check that neurx.pretrain.llm.real_main_training exists

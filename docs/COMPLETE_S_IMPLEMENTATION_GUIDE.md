@@ -78,10 +78,10 @@ NeurX Architecture (Pure S Language)
 │   └── model/lora/lora.s            - LoRA/QLoRA adapters
 │
 ├── 9. Deployment & Serving Layer
-│   ├── deployment/deploy.s          - Deployment management
-│   ├── deployment/docker.s          - Container management
-│   ├── deployment/kubernetes.s      - K8s integration
-│   └── deployment/monitoring.s      - Production monitoring
+│   ├── deploy/cluster/deploy.s          - Deployment management
+│   ├── deploy/cluster/docker.s          - Container management
+│   ├── deploy/cluster/kubernetes.s      - K8s integration
+│   └── deploy/cluster/monitoring.s      - Production monitoring
 │
 ├── 10. CLI & Orchestration Layer
 │   ├── cmd/neurx_cli.s              - Main CLI interface

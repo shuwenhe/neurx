@@ -12,10 +12,10 @@
 
 | 组件 | 文件 | 行数 | 功能 | 状态 |
 |------|------|------|------|------|
-| **数据处理** | `script/data_pipeline.s` | 700+ | 清洗、去重、分片 | ✅ |
-| **训练框架** | `script/training_runner.s` | 500+ | 模型训练驱动 | ✅ |
-| **推理服务** | `script/inference_server.s` | 600+ | REST API 服务器 | ✅ |
-| **工具链** | `script/s_toolchain.s` | 250+ | 统一 CLI 入口 | ✅ |
+| **数据处理** | `scripts/legacy/data_pipeline.s` | 700+ | 清洗、去重、分片 | ✅ |
+| **训练框架** | `scripts/legacy/training_runner.s` | 500+ | 模型训练驱动 | ✅ |
+| **推理服务** | `scripts/legacy/inference_server.s` | 600+ | REST API 服务器 | ✅ |
+| **工具链** | `scripts/legacy/s_toolchain.s` | 250+ | 统一 CLI 入口 | ✅ |
 
 ### 总代码量：2000+ 行 S 语言
 
@@ -27,7 +27,7 @@
 
 **编译：**
 ```bash
-s /home/shuwen/shuwen/train/neurx/script/data_pipeline.s \
+s /home/shuwen/shuwen/train/neurx/scripts/legacy/data_pipeline.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/data_pipeline/data_pipeline
 ```
 
@@ -61,7 +61,7 @@ export NEURX_MAX_SHARDS=256
 
 **编译：**
 ```bash
-s /home/shuwen/shuwen/train/neurx/script/training_runner.s \
+s /home/shuwen/shuwen/train/neurx/scripts/legacy/training_runner.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/training/runner
 ```
 
@@ -118,7 +118,7 @@ export NEURX_MIXED_PRECISION=fp16
 
 **编译：**
 ```bash
-s /home/shuwen/shuwen/train/neurx/script/inference_server.s \
+s /home/shuwen/shuwen/train/neurx/scripts/legacy/inference_server.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/inference/server
 ```
 
@@ -175,7 +175,7 @@ GET /metrics
 
 **编译：**
 ```bash
-s /home/shuwen/shuwen/train/neurx/script/s_toolchain.s \
+s /home/shuwen/shuwen/train/neurx/scripts/legacy/s_toolchain.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/toolchain/s_toolchain
 ```
 
@@ -277,19 +277,19 @@ mkdir -p $BUILD_DIR/{data_pipeline,training,inference,toolchain}
 
 # 编译所有组件
 echo "Compiling data pipeline..."
-$S_COMPILER $NEURX_HOME/script/data_pipeline.s \
+$S_COMPILER $NEURX_HOME/scripts/legacy/data_pipeline.s \
   -o $BUILD_DIR/data_pipeline/data_pipeline
 
 echo "Compiling training runner..."
-$S_COMPILER $NEURX_HOME/script/training_runner.s \
+$S_COMPILER $NEURX_HOME/scripts/legacy/training_runner.s \
   -o $BUILD_DIR/training/runner
 
 echo "Compiling inference server..."
-$S_COMPILER $NEURX_HOME/script/inference_server.s \
+$S_COMPILER $NEURX_HOME/scripts/legacy/inference_server.s \
   -o $BUILD_DIR/inference/server
 
 echo "Compiling s-toolchain..."
-$S_COMPILER $NEURX_HOME/script/s_toolchain.s \
+$S_COMPILER $NEURX_HOME/scripts/legacy/s_toolchain.s \
   -o $BUILD_DIR/toolchain/s_toolchain
 
 echo "All components compiled successfully!"
@@ -321,7 +321,7 @@ NEURX_INFERENCE_PORT=8080 ./artifacts/build/inference/server start
 
 ```
 neurx/
-├── script/
+├── scripts/legacy/
 │   ├── data_pipeline.s           # Phase 1: 数据处理
 │   ├── training_runner.s         # Phase 2: 训练框架
 │   ├── inference_server.s        # Phase 3: 推理服务
@@ -352,10 +352,10 @@ neurx/
 
 ```bash
 # 显示编译错误
-s script/data_pipeline.s -o /tmp/test.bin
+s scripts/legacy/data_pipeline.s -o /tmp/test.bin
 
 # 查看编译信息
-s script/data_pipeline.s --verbose -o /tmp/test.bin
+s scripts/legacy/data_pipeline.s --verbose -o /tmp/test.bin
 ```
 
 ### 运行调试
@@ -438,13 +438,13 @@ COPY /home/shuwen/.local/bin/s /usr/local/bin/s
 WORKDIR /neurx
 
 # 复制源代码
-COPY script/ script/
+COPY scripts/legacy/ scripts/legacy/
 COPY dataset/ dataset/
 
 # 编译
-RUN s script/data_pipeline.s -o /usr/local/bin/data_pipeline && \
-    s script/training_runner.s -o /usr/local/bin/training_runner && \
-    s script/inference_server.s -o /usr/local/bin/inference_server
+RUN s scripts/legacy/data_pipeline.s -o /usr/local/bin/data_pipeline && \
+    s scripts/legacy/training_runner.s -o /usr/local/bin/training_runner && \
+    s scripts/legacy/inference_server.s -o /usr/local/bin/inference_server
 
 # 运行
 CMD ["inference_server", "start"]
@@ -460,9 +460,9 @@ CMD ["inference_server", "start"]
 - [S_ONLY_ENVIRONMENT_PLAN.md](S_ONLY_ENVIRONMENT_PLAN.md) — 实现计划
 
 ### 示例代码
-- [data_pipeline.s](script/data_pipeline.s) — 数据处理参考实现
-- [training_runner.s](script/training_runner.s) — 训练框架参考实现
-- [inference_server.s](script/inference_server.s) — 推理服务参考实现
+- [data_pipeline.s](scripts/legacy/data_pipeline.s) — 数据处理参考实现
+- [training_runner.s](scripts/legacy/training_runner.s) — 训练框架参考实现
+- [inference_server.s](scripts/legacy/inference_server.s) — 推理服务参考实现
 
 ### 相关资源
 - S 编译器：`/home/shuwen/.local/bin/s`

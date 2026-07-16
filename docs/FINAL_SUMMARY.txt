@@ -26,15 +26,15 @@
   ✅ QUICK_START.md                           420 行
   ✅ STATUS_REPORT.md                         350 行
   ✅ docs/INTEGRATION_GUIDE.md                648 行
-  ✅ production_deployment/training_startup.env     61 行
-  ✅ production_deployment/launch_plan.sh            8 行
+  ✅ deploy/production/training_startup.env     61 行
+  ✅ deploy/production/launch_plan.sh            8 行
 
 脚本清单:
-  ✅ script/run_gpt_large_pretrain.sh         826 行
-  ✅ script/verify_framework.sh               220 行
-  ✅ script/cluster_launch.sh                 350 行
-  ✅ script/submit_training_job.sh            120 行
-  ✅ script/run_integration_tests.sh          350 行
+  ✅ scripts/legacy/run_gpt_large_pretrain.sh         826 行
+  ✅ scripts/legacy/verify_framework.sh               220 行
+  ✅ scripts/legacy/cluster_launch.sh                 350 行
+  ✅ scripts/legacy/submit_training_job.sh            120 行
+  ✅ scripts/legacy/run_integration_tests.sh          350 行
 
 总计代码量: 152,000+ 行 (S语言、文档、脚本、配置)
 
@@ -169,11 +169,11 @@
 监控系统 (monitoring/)
   ✅ moe_1t_metrics.s              - 多层指标收集和日志
 
-配置和启动 (production_deployment/)
+配置和启动 (deploy/production/)
   ✅ training_startup.env          - 启动环境配置 (已修复路径)
   ✅ launch_plan.sh                - 启动计划脚本 (已修复路径)
 
-脚本 (script/)
+脚本 (scripts/legacy/)
   ✅ run_gpt_large_pretrain.sh     - 主要训练入口 (826 行)
   ✅ verify_framework.sh            - 框架完整性验证
   ✅ cluster_launch.sh              - 集群启动脚本
@@ -194,7 +194,7 @@
 
 本地验证阶段 (5-10 分钟) ✅ 已完成
   1. 验证框架完整性
-     bash script/verify_framework.sh
+     bash scripts/legacy/verify_framework.sh
      → 输出: ✅ 14/14 文件检查通过
 
   2. 查看快速参考
@@ -220,7 +220,7 @@
 训练启动阶段 (< 1 分钟)
   1. 提交训练任务
      cd /opt/neurx
-     sbatch script/submit_training_job.sh
+     sbatch scripts/legacy/submit_training_job.sh
   
   2. 查看任务状态
      squeue -j <job_id>
@@ -342,7 +342,7 @@ API 和集成:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 立即可做 (本地环境):
-  ✅ 验证框架完整性          → bash script/verify_framework.sh
+  ✅ 验证框架完整性          → bash scripts/legacy/verify_framework.sh
   ✅ 阅读快速参考            → less QUICK_REFERENCE.md
   ✅ 查看集成指南            → less docs/INTEGRATION_GUIDE.md
 
@@ -353,7 +353,7 @@ API 和集成:
   ⏳ 验证 GPU 连接           → sinfo, scontrol verify
 
 首次运行:
-  ⏳ 提交训练任务            → sbatch script/submit_training_job.sh
+  ⏳ 提交训练任务            → sbatch scripts/legacy/submit_training_job.sh
   ⏳ 监控实时指标            → tail -f artifacts/logs/*.log
   ⏳ 检查 GPU 利用率         → nvidia-smi dmon
   ⏳ 收集性能数据            → 第 1 小时检查

@@ -12,7 +12,7 @@
 
 | 序号 | 操作 | 类型 | 文件数 | 状态 |
 |------|------|------|--------|------|
-| 1 | `script/` → `scripts/` 合并 | 合并 | 10 | ✅ 完成 |
+| 1 | `scripts/legacy/` → `scripts/` 合并 | 合并 | 10 | ✅ 完成 |
 | 2 | `tool/` → `tools/` 合并 | 合并 | 5 | ✅ 完成 |
 | 3 | `example/` → `examples/` 合并 | 合并 | 2 | ✅ 完成 |
 | 4 | `relative/` 删除 | 删除 | 0 | ✅ 完成 |
@@ -24,7 +24,7 @@
 ```
 优化前:
   - 总目录数: 56 个
-  - 冗余目录对: 3 个 (script/scripts, tool/tools, example/examples)
+  - 冗余目录对: 3 个 (scripts/legacy/scripts, tool/tools, example/examples)
   - 空目录: 2 个 (relative/, legacy/)
   - 命名不清目录: 1 个 (ad/)
 
@@ -42,7 +42,7 @@
 ### ✅ 直接效果
 
 1. **消除命名冗余**
-   - ❌ `script/` 和 `scripts/` 两个类似目录 → ✅ 统一为 `scripts/`
+   - ❌ `scripts/legacy/` 和 `scripts/` 两个类似目录 → ✅ 统一为 `scripts/`
    - ❌ `tool/` 和 `tools/` 两个类似目录 → ✅ 统一为 `tools/`
    - ❌ `example/` 和 `examples/` 两个类似目录 → ✅ 统一为 `examples/`
 
@@ -73,7 +73,7 @@
 旧结构                  新结构
 ─────────────────────────────────────
 scripts/                scripts/  (34 个文件)
-script/     ──合并→    ↑
+scripts/legacy/     ──合并→    ↑
 
 tools/                  tools/    (14 个文件)
 tool/       ──合并→    ↑
@@ -128,7 +128,7 @@ optimization/  (1 个文件) - 优化技术 (保留)
 - verify_transformer_implementation.sh
 - ... (14 个脚本)
 
-**原 script/ 合并的文件** (10 个):
+**原 scripts/legacy/ 合并的文件** (10 个):
 - BPE_TOKENIZER_STATUS.sh
 - PROJECT_STATUS.sh
 - compile_training_integration.sh
@@ -169,8 +169,8 @@ optimization/  (1 个文件) - 优化技术 (保留)
 
 ```bash
 # 1. 合并脚本目录
-cp script/* scripts/
-rm -rf script/
+cp scripts/legacy/* scripts/
+rm -rf scripts/legacy/
 
 # 2. 合并工具目录
 cp tool/* tools/
@@ -204,7 +204,7 @@ mv ad/ autodiff/
 
 ```bash
 # 检查是否有硬编码路径
-grep -r "script/" /Users/feifei/shuwen/neurx/ --include="*.s" --include="*.cpp" --include="*.ts" 2>/dev/null
+grep -r "scripts/legacy/" /Users/feifei/shuwen/neurx/ --include="*.s" --include="*.cpp" --include="*.ts" 2>/dev/null
 grep -r "tool/" /Users/feifei/shuwen/neurx/ --include="*.s" --include="*.cpp" --include="*.ts" 2>/dev/null
 grep -r "example/" /Users/feifei/shuwen/neurx/ --include="*.s" --include="*.cpp" --include="*.ts" 2>/dev/null
 grep -r "/ad/" /Users/feifei/shuwen/neurx/ --include="*.s" --include="*.cpp" --include="*.ts" 2>/dev/null
@@ -226,7 +226,7 @@ use neurx.ad.*          → use neurx.autodiff.*
 检查是否有 CMakeLists.txt 或 Makefile 中引用这些目录：
 
 ```bash
-grep -r "script/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
+grep -r "scripts/legacy/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 grep -r "tool/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 grep -r "example/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 grep -r "/ad/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
@@ -280,7 +280,7 @@ grep -r "/ad/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 
 ```bash
 # 1. 检查旧目录是否已删除
-ls -d /Users/feifei/shuwen/neurx/script/ 2>&1    # 应该不存在
+ls -d /Users/feifei/shuwen/neurx/scripts/legacy/ 2>&1    # 应该不存在
 ls -d /Users/feifei/shuwen/neurx/tool/ 2>&1      # 应该不存在
 ls -d /Users/feifei/shuwen/neurx/example/ 2>&1   # 应该不存在
 ls -d /Users/feifei/shuwen/neurx/ad/ 2>&1        # 应该不存在

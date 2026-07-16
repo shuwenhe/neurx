@@ -85,7 +85,7 @@ Flow:
 
 ---
 
-### 4. Cluster Launcher (`script/launch_cluster_training.s`)
+### 4. Cluster Launcher (`scripts/legacy/launch_cluster_training.s`)
 **Purpose**: SSH-based multi-node process management
 
 ```
@@ -260,7 +260,7 @@ cd /home/neurx/train/neurx
 export NEURX_NUM_NODES=4
 export NEURX_NODE_LIST="10.0.0.1,10.0.0.2,10.0.0.3,10.0.0.4"
 export NEURX_MASTER_ADDR=10.0.0.1
-./script/launch_cluster_training.s
+./scripts/legacy/launch_cluster_training.s
 
 # Option 2: Manual per-node
 export NEURX_NUM_NODES=4
@@ -399,7 +399,7 @@ NEURX_PRETRAIN_LEARNING_RATE=0.0002
 ls -lh distributed/nccl_id_manager.s
 ls -lh distributed/multi_node_launcher.s
 ls -lh pretrain/distributed_pretrain_multi_node_entry.s
-ls -lh script/launch_cluster_training.s
+ls -lh scripts/legacy/launch_cluster_training.s
 ls -lh distributed/fault_tolerance.s
 
 # Documentation?
@@ -470,7 +470,7 @@ cd ../pretrain && s -c distributed_pretrain_multi_node_entry.s
 | `distributed/nccl_id_manager.s` | 280 | NCCL ID generation & sharing |
 | `distributed/multi_node_launcher.s` | 350 | Multi-node orchestration |
 | `pretrain/distributed_pretrain_multi_node_entry.s` | 200 | Training entry point |
-| `script/launch_cluster_training.s` | 380 | Cluster launcher (SSH) |
+| `scripts/legacy/launch_cluster_training.s` | 380 | Cluster launcher (SSH) |
 | `distributed/fault_tolerance.s` | +200 | FT extensions |
 | `MULTI_NODE_DEPLOYMENT_GUIDE.md` | 500+ | Complete guide |
 | `MULTI_NODE_QUICK_REFERENCE.md` | 350+ | Quick ref |

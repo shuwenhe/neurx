@@ -81,7 +81,7 @@ func load_checkpoint(path: string) TransformerWeights {
 ```
 
 ### ✅ 2. 训练执行脚本
-**文件**: `script/run_model_large_pretrain.sh` (~300行Bash)
+**文件**: `scripts/legacy/run_model_large_pretrain.sh` (~300行Bash)
 
 #### 智能降级系统
 ```bash
@@ -144,12 +144,12 @@ run_training_demo() {
 
 pretrain: check-bash
 	@echo "Running GPT-large pretraining system"
-	@cd '$(CURDIR_UNIX)' && bash script/run_model_large_pretrain.sh 2>&1
+	@cd '$(CURDIR_UNIX)' && bash scripts/legacy/run_model_large_pretrain.sh 2>&1
 
 pretrain-watch: check-bash
 	@echo "Running GPT-large pretraining system with live logs"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && \
-		bash script/run_model_large_pretrain.sh 2>&1 | \
+		bash scripts/legacy/run_model_large_pretrain.sh 2>&1 | \
 		tee artifacts/logs/model_large_pretrain_watch.log
 ```
 
@@ -248,7 +248,7 @@ make chat
 #### 方法2: 直接运行脚本
 ```bash
 cd neurx
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 ```
 
 ### 高级用法

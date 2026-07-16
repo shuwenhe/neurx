@@ -163,14 +163,14 @@ bash /Users/feifei/shuwen/train/neurx/PHASE9_INDUSTRIAL_SYSTEMS_COMPLETE.sh
 
 # 2. 运行各个模块
 cd /Users/feifei/shuwen/train/neurx
-s run script/experiment_manager.s              # 实验管理
-s run script/data_version_control.s            # 数据治理
-s run script/dpo_trainer.s                     # DPO 对齐
-s run script/rag_integration.s                 # RAG 集成
-s run script/cost_optimizer.s                  # 成本优化
+s run scripts/legacy/experiment_manager.s              # 实验管理
+s run scripts/legacy/data_version_control.s            # 数据治理
+s run scripts/legacy/dpo_trainer.s                     # DPO 对齐
+s run scripts/legacy/rag_integration.s                 # RAG 集成
+s run scripts/legacy/cost_optimizer.s                  # 成本优化
 
 # 3. 完整训练流程
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 ### 生产部署
@@ -180,7 +180,7 @@ bash script/neurx_complete_pipeline.sh
 kubectl apply -f neurx-k8s-manifest.yaml
 
 # 启动训练
-bash script/run_distributed_training.sh \
+bash scripts/legacy/run_distributed_training.sh \
   --gpus 8 \
   --model neurx-346m \
   --data real_dataset \
@@ -188,7 +188,7 @@ bash script/run_distributed_training.sh \
   --enable-rag
 
 # 启动推理服务
-s run script/rest_api_service.s
+s run scripts/legacy/rest_api_service.s
 ```
 
 ---

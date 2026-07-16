@@ -72,7 +72,7 @@
 ```
 
 #### 3. 测试套件
-**文件**: `neurx/test/test_training_pipeline.s` (500+ 行)
+**文件**: `neurx/tests/test_training_pipeline.s` (500+ 行)
 
 ```
 ✅ 前向传播测试 (3个)

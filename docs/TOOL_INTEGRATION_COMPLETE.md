@@ -47,7 +47,7 @@ Successfully integrated Claude Standard Tools from Claude Code into NeurX Code a
 ### Generated/Test Files
 - `test_tool_registration.py`: Verification script ✅
 - `diagnose_tool_registration.sh`: Diagnostic script
-- `src/test/ToolRegistrationTest.cpp`: C++ unit test template
+- `src/tests/ToolRegistrationTest.cpp`: C++ unit test template
 
 ## How It Works Now
 

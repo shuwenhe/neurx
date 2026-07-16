@@ -92,7 +92,7 @@ make train-real
 ## 文件清单
 
 ### 核心训练文件
-- `script/run_real_training.s` - ✨ 新的真实训练启动脚本（已创建）
+- `scripts/legacy/run_real_training.s` - ✨ 新的真实训练启动脚本（已创建）
 - `pretrain/llm/large_pretrain.s` - 主训练循环（需要验证）
 - `model/llm/model_large_train.s` - 训练更新函数（需要验证反向传播）
 

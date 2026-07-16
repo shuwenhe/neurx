@@ -141,7 +141,7 @@
 
 ## Week 3
 
-主题：加入 build/test/repair loop，让 agent 开始“闭环”。
+主题：加入 build/tests/repair loop，让 agent 开始“闭环”。
 
 交付：
 

@@ -328,7 +328,7 @@ configs/
 ├─ 1t_moe_config.json (完整配置)
 └─ deepspeed_1t_moe.json (DeepSpeed配置)
 
-script/
+scripts/legacy/
 ├─ train_1t_moe.s (S语言框架)
 └─ train_moe_distributed.py (分布式训练)
 

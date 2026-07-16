@@ -11,7 +11,7 @@
 
 ### 1. 真实数据集集成系统
 ```
-文件: /Users/feifei/shuwen/train/neurx/script/real_dataset_integration.s
+文件: /Users/feifei/shuwen/train/neurx/scripts/legacy/real_dataset_integration.s
 行数: 750 行
 状态: ✅ COMPLETE
 
@@ -42,7 +42,7 @@
 
 ### 2. 集群部署与编排系统
 ```
-文件: /Users/feifei/shuwen/train/neurx/script/cluster_deployment.s
+文件: /Users/feifei/shuwen/train/neurx/scripts/legacy/cluster_deployment.s
 行数: 900 行
 状态: ✅ COMPLETE
 
@@ -78,7 +78,7 @@
 
 ### 3. REST API 推理服务
 ```
-文件: /Users/feifei/shuwen/train/neurx/script/rest_api_service.s
+文件: /Users/feifei/shuwen/train/neurx/scripts/legacy/rest_api_service.s
 行数: 750 行
 状态: ✅ COMPLETE
 
@@ -122,7 +122,7 @@ API 端点:
 
 ### 4. 检查点完全恢复系统
 ```
-文件: /Users/feifei/shuwen/train/neurx/script/checkpoint_recovery.s
+文件: /Users/feifei/shuwen/train/neurx/scripts/legacy/checkpoint_recovery.s
 行数: 900 行
 状态: ✅ COMPLETE
 
@@ -184,7 +184,7 @@ API 端点:
 │   ├── 代码结构
 │   └── 使用方式
 
-└── script/
+└── scripts/legacy/
     ├── real_dataset_integration.s           (实现代码)
     ├── cluster_deployment.s                 (实现代码)
     ├── rest_api_service.s                   (实现代码)
@@ -240,23 +240,23 @@ Inference API
 
 ```bash
 # 1. 查看概览
-bash script/phase8_production_systems.sh
+bash scripts/legacy/phase8_production_systems.sh
 
 # 2. 查看快速开始
-bash script/PHASE8_QUICK_START.sh
+bash scripts/legacy/PHASE8_QUICK_START.sh
 
 # 3. 运行各系统
-s run script/real_dataset_integration.s
-s run script/cluster_deployment.s
-s run script/rest_api_service.s
-s run script/checkpoint_recovery.s
+s run scripts/legacy/real_dataset_integration.s
+s run scripts/legacy/cluster_deployment.s
+s run scripts/legacy/rest_api_service.s
+s run scripts/legacy/checkpoint_recovery.s
 ```
 
 ### 集成到完整流程
 
 ```bash
 # 完整训练管道
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 ---
@@ -339,7 +339,7 @@ Phase 8 Production    4      3,300    ✅
 ## 🎓 推荐阅读顺序
 
 1. **快速概览**: PHASE8_PRODUCTION_SYSTEMS_COMPLETE.md
-2. **快速开始**: script/PHASE8_QUICK_START.sh
+2. **快速开始**: scripts/legacy/PHASE8_QUICK_START.sh
 3. **详细实现**: 各 .s 源文件
 4. **集成指南**: 本文件中的集成章节
 5. **最佳实践**: 参考 Phase 1-7 的已验证模式

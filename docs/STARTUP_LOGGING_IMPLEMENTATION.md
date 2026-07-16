@@ -17,8 +17,8 @@ A comprehensive logging system was added at three levels:
 ### Level 1: Real-Time Startup Logging ✅ **COMPLETE**
 
 **Files Modified:**
-- `script/minimal_train.s` (875 lines)
-- `script/run_large_pretrain.sh` (340+ lines)
+- `scripts/legacy/minimal_train.s` (875 lines)
+- `scripts/legacy/run_large_pretrain.sh` (340+ lines)
 
 **Features:**
 - `[STARTUP][init]` - Configuration loading phases
@@ -135,7 +135,7 @@ For quick visual scanning:
 
 ## Files Modified
 
-### 1. `script/minimal_train.s`
+### 1. `scripts/legacy/minimal_train.s`
 - **Lines 1-75:** Enhanced main() startup section with 5-stage logging
 - **Lines 90-140:** Improved manifest loading with progress markers
 - **Lines 110-160:** Better shard discovery and validation with previews
@@ -146,7 +146,7 @@ For quick visual scanning:
 - Organized config display in sections
 - Stage headers with emoji indicators
 
-### 2. `script/run_large_pretrain.sh`  
+### 2. `scripts/legacy/run_large_pretrain.sh`
 - **Lines ~100-140:** Stage 1 - Shard discovery logging
 - **Lines ~200-250:** Stage 2 - Environment setup logging
 - **Lines ~290-340:** Stage 3 - IR runner launch logging
@@ -174,7 +174,7 @@ For quick visual scanning:
 
 ✅ **Bash Syntax Validation:**
 ```bash
-bash -n script/run_large_pretrain.sh  # ✓ Passed
+bash -n scripts/legacy/run_large_pretrain.sh  # ✓ Passed
 ```
 
 ✅ **Git Commit:**

@@ -65,14 +65,14 @@ MASTER_PORT=29500     # 通信端口
 ```bash
 # 启动4块GPU分布式训练
 export NUM_GPUS=4 MASTER_ADDR=localhost MASTER_PORT=29500
-./script/launch_pretrain_distributed.s
+./scripts/legacy/launch_pretrain_distributed.s
 
 # 启动2块GPU
 export NUM_GPUS=2
-./script/launch_pretrain_distributed.s
+./scripts/legacy/launch_pretrain_distributed.s
 
 # 启动1块GPU (单GPU模式)
-./script/launch_pretrain_distributed.s
+./scripts/legacy/launch_pretrain_distributed.s
 ```
 
 ### 手动启动多个进程 (如果需要细粒度控制)
@@ -301,7 +301,7 @@ neurx/
 │   ├── distributed_pretrain_entry.s     # 主入口
 │   ├── pretrain_config.toml             # 训练配置
 │   └── ...
-└── script/
+└── scripts/legacy/
     ├── launch_pretrain_distributed.s    # 多GPU启动脚本 (纯S语言)
     └── ...
 ```
@@ -311,8 +311,8 @@ neurx/
 ## 下一步
 
 1. **编译S语言代码**: `make build-distributed`
-2. **运行单GPU测试**: `./script/launch_pretrain_distributed.s` (自动使用1块GPU)
-3. **运行多GPU训练**: `export NUM_GPUS=4 && ./script/launch_pretrain_distributed.s`
+2. **运行单GPU测试**: `./scripts/legacy/launch_pretrain_distributed.s` (自动使用1块GPU)
+3. **运行多GPU训练**: `export NUM_GPUS=4 && ./scripts/legacy/launch_pretrain_distributed.s`
 4. **监控训练进度**: 查看 `artifacts/logs/distributed_pretrain/` 下的日志
 
 ---

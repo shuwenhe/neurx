@@ -178,10 +178,10 @@ jq 'select(.domain == "ml" and .quality_score > 0.85)' data/training_data_indust
 
 ```bash
 # 使用转换脚本
-bash script/convert_data.sh
+bash scripts/legacy/convert_data.sh
 
 # 或手动指定文件
-SOURCE_FILE=data/training_data.jsonl OUTPUT_FILE=data/training_data_industrial_v2.jsonl bash script/convert_data.sh
+SOURCE_FILE=data/training_data.jsonl OUTPUT_FILE=data/training_data_industrial_v2.jsonl bash scripts/legacy/convert_data.sh
 ```
 
 ## 💡 后续步骤
@@ -210,8 +210,8 @@ SOURCE_FILE=data/training_data.jsonl OUTPUT_FILE=data/training_data_industrial_v
 
 | 文件 | 说明 |
 |------|------|
-| `script/convert_data.sh` | Bash转换实现 |
-| `script/convert_to_industrial_format.s` | S语言实现（框架） |
+| `scripts/legacy/convert_data.sh` | Bash转换实现 |
+| `scripts/legacy/convert_to_industrial_format.s` | S语言实现（框架） |
 | `docs/INDUSTRIAL_JSONL_FORMAT.md` | 格式详细说明 |
 | `data/training_data.jsonl` | 原始数据 |
 | `data/training_data_industrial.jsonl` | ✅ 转换后的数据 |

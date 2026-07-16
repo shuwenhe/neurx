@@ -667,7 +667,7 @@ class HTMLCleaner {
         text = raw_text
         
         if this.config.remove_scripts_styles:
-            # Remove any remaining script/style blocks that might have been missed
+            # Remove any remaining scripts/legacy/style blocks that might have been missed
             text = regex.sub(r'<script[^>]*>.*?</script>', '', text, flags=regex.DOTALL)
             text = regex.sub(r'<style[^>]*>.*?</style>', '', text, flags=regex.DOTALL)
         

@@ -79,7 +79,7 @@ watch -n 2 'du -sh artifacts/checkpoints/*'
 
 ### 修复步骤
 
-编辑 `script/clean_data.sh`，找到分割代码部分：
+编辑 `scripts/legacy/clean_data.sh`，找到分割代码部分：
 
 ```bash
 # 查找这一部分:
@@ -130,10 +130,10 @@ tail -f artifacts/logs/train_*.log
 ### 快速方案3：分阶段运行
 ```bash
 # 只运行数据清洁（已完成，可以跳过）
-bash script/clean_data.sh
+bash scripts/legacy/clean_data.sh
 
 # 单独运行大模型预训练
-bash script/run_large_pretrain.sh
+bash scripts/legacy/run_large_pretrain.sh
 ```
 
 ## run_large_pretrain.sh 应该做什么
