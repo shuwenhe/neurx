@@ -58,7 +58,7 @@ package neurx.data.moe_1t_data_pipeline
 
 use neurx.strings
 use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recursive}
-use neurx.tokenizer.bpe.{bpe_tokenizer_state}
+use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
 
 // ============================================================================
 // 1. 数据分片管理
