@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: neurx-inference-ascend, labels: {app: neurx-inference, backend: ascend}}
+spec:
+  replicas: 2
+  strategy: {type: RollingUpdate, rollingUpdate: {maxUnavailable: 0, maxSurge: 1}}
+  selector: {matchLabels: {app: neurx-inference, backend: ascend}}
+  template:
+    metadata:
+      labels: {app: neurx-inference, backend: ascend}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8080", prometheus.io/path: "/metrics"}
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: neurx
+          image: neurx/inference-ascend:latest
+          ports: [{name: http, containerPort: 8080}, {name: grpc, containerPort: 8081}]
+          env: [{name: NEURX_BACKEND, value: ascend}, {name: NEURX_DRAIN_TIMEOUT_MS, value: "110000"}]
+          readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 10}
+          lifecycle: {preStop: {httpGet: {path: /admin/drain, port: http}}}
+          resources:
+            requests: {cpu: "4", memory: 16Gi, huawei.com/Ascend910: "1"}
+            limits: {cpu: "16", memory: 64Gi, huawei.com/Ascend910: "1"}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: neurx-inference-ascend}
+spec: {minAvailable: 1, selector: {matchLabels: {app: neurx-inference, backend: ascend}}}

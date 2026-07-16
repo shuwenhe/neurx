@@ -10,6 +10,10 @@ This directory is the canonical home for NeurX serving runtime modules.
 - `serving/vllm/` now contains the canonical request queue, scheduler, metrics, prefix cache, paged attention, and runtime entrypoint.
 - `serving/runtime/production_runtime.s` provides decode-priority disaggregated scheduling, homogeneous CUDA/Ascend batches, admission backpressure and explicit batch completion.
 - `serving/protocol/openai_tgi.s` provides OpenAI and TGI route classification plus SSE wire-format encoding.
+- `serving/security/request_governance.s` provides API-key fingerprint validation, tenant RBAC and token/request quotas.
+- `serving/lifecycle/request_lifecycle.s` provides timeout, cancellation, bounded retry and graceful drain state.
+- `serving/network/native_socket.s` binds the S control plane to the tested non-blocking POSIX socket ABI in `serving/native/`.
+- `serving/cache/physical_paged_kv.s` owns physical device-address block tables, reference counts and shared prefixes.
 - The runtime bridge prefers `serving/*` IR when available and falls back to `infer/*` for the remaining compatibility modules.
 - More serving modules will move here in batches, starting with cache, decode, and sampling helpers.
 

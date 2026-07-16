@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test serving-native-socket-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -876,6 +876,13 @@ inference-runtime-test:
 		tests/inference_runtime_test.cpp inference/runtime/backends/ascend_adapter.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
+
+serving-native-socket-test:
+	@mkdir -p artifacts/build/serving_native
+	@$(CC) -O2 -std=c11 -Wall -Wextra -Werror \
+		serving/native/serving_socket.c tests/serving_native_socket_test.c \
+		-o artifacts/build/serving_native/serving_native_socket_test
+	@artifacts/build/serving_native/serving_native_socket_test
 
 transformer-cuda-kernels-test:
 	@mkdir -p artifacts/build/transformer_cuda
