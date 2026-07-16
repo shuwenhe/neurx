@@ -257,8 +257,8 @@ pretrain-gpu-multinode: check-bash build-cuda-train-bridge
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
 	s run $(CURDIR_UNIX)/script/launch_multinode_pretrain.s
 
-pretrain-gpu: pretrain-gpu-multinode
-	@echo "Default GPU pretraining target uses the multi-node launcher"
+pretrain-gpu: pretrain-gpu-single-node
+	@echo "Default GPU pretraining target uses the single-node foreground launcher"
 
 pretrain-gpu-fresh: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
