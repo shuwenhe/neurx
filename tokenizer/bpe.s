@@ -1,4 +1,4 @@
-package neurx.pretrain.tokenizer.bpe
+package neurx.tokenizer.bpe
 
 use neurx.strings
 
