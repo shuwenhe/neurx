@@ -155,7 +155,7 @@ func (b *BuildOrchestrator) build_core() error {
     components := []string{
         "core/tensor.s",
         "core/autograd.s",
-        "model/tokenizer/bpe.s",
+        "tokenizer/model_bpe.s",
         "opt/adamw.s",
     }
     
