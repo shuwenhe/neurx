@@ -10,7 +10,7 @@
 ## 📚 生成的分析文档
 
 ### 1. 📊 **CLAUDE_LEVEL_GAP_ANALYSIS_2026_07_16.md** (3,500+ 行)
-**位置**: `/train/neurx/CLAUDE_LEVEL_GAP_ANALYSIS_2026_07_16.md`  
+**位置**: [`docs/CLAUDE_LEVEL_GAP_ANALYSIS_2026_07_16.md`](CLAUDE_LEVEL_GAP_ANALYSIS_2026_07_16.md)
 **用途**: 完整的深度分析报告  
 **读者**: 决策层 + 技术领导
 
@@ -39,7 +39,7 @@
 ---
 
 ### 2. 📈 **VISUAL_COMPETITIVE_ANALYSIS.md** (2,500+ 行)
-**位置**: `/train/neurx/VISUAL_COMPETITIVE_ANALYSIS.md`  
+**位置**: [`docs/VISUAL_COMPETITIVE_ANALYSIS.md`](VISUAL_COMPETITIVE_ANALYSIS.md)
 **用途**: 可视化对标分析  
 **读者**: 产品 + 市场 + 投资方
 
@@ -69,7 +69,7 @@ ROI: 10-20 倍 = $4.35-9.55M 成本节省
 ---
 
 ### 3. ⚡ **P0_ACTION_PLAN_IMMEDIATE.md** (2,000+ 行)
-**位置**: `/train/neurx/P0_ACTION_PLAN_IMMEDIATE.md`  
+**位置**: [`docs/P0_ACTION_PLAN_IMMEDIATE.md`](P0_ACTION_PLAN_IMMEDIATE.md)
 **用途**: 立即可执行的优先行动  
 **读者**: 项目经理 + 执行团队
 
@@ -352,11 +352,11 @@ A: 第 3 阶段 (第 15-18 周)，目标 "部分支持"
 ## 📖 文档导航
 
 ```
-📁 /train/neurx/
+📁 /train/neurx/docs/
 ├─ 📄 CLAUDE_LEVEL_GAP_ANALYSIS_2026_07_16.md       ← 详细分析 (START HERE!)
 ├─ 📄 VISUAL_COMPETITIVE_ANALYSIS.md                ← 可视化对标
 ├─ 📄 P0_ACTION_PLAN_IMMEDIATE.md                   ← 立即行动 (QUICK START!)
-├─ 📄 README.md (该文件)                             ← 导航索引
+├─ 📄 ANALYSIS_REPORT_INDEX.md                       ← 导航索引
 ├─ 📁 model/llm/
 │  └─ gpt.s (1482 行)                              ← 核心模型
 ├─ 📁 inference/
@@ -381,4 +381,3 @@ A: 第 3 阶段 (第 15-18 周)，目标 "部分支持"
 
 **准备好开始了吗?** 📍
 点击上方任一文档开始阅读，或从 P0_ACTION_PLAN_IMMEDIATE.md 开始立即行动。
-
