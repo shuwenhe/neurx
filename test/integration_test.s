@@ -4,7 +4,7 @@ use neurx.model.transformer.moe
 use neurx.model.transformer.attention
 use neurx.data.streaming
 use neurx.distributed.fsdp
-use neurx.pretrain.tokenizer
+use neurx.tokenizer.bpe_trainer
 
 func test_all_modules() {
     print("=== NeurX Integration Test ===\n")
