@@ -190,7 +190,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "data/tokenizer_pipeline.s",
+        "tokenizer/data_pipeline.s",
         "replace placeholder whitespace paths with production BPE/SentencePiece flow"
     )
     caps[2] = make_capability(
@@ -402,4 +402,3 @@ func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     }
     work
 }
-
