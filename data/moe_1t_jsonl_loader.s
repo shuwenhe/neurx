@@ -23,7 +23,7 @@ package neurx.data.jsonl_loader
 
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_file_exists, runtime_read_text_file}
-use neurx.model.tokenizer.bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
+use neurx.tokenizer.model_bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
 
 // ============================================================================
 // 2. JSONL 文件读取

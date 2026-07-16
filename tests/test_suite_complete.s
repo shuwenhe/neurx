@@ -12,7 +12,7 @@ use neurx.training.industrial_gpt_training
 use neurx.model.transformer
 use neurx.training.mixed_precision
 use neurx.opt.adamw
-use neurx.data.tokenizer_pipeline
+use neurx.tokenizer.data_pipeline
 
 // ========================================================================
 // TEST RUNNER INFRASTRUCTURE
