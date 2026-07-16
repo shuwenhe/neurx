@@ -1,4 +1,4 @@
-package neurx.model.tokenizer.chat_template
+package neurx.tokenizer.chat_template
 
 // ============================================================================
 // Chat Template — 对话格式化
