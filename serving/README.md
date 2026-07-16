@@ -8,6 +8,8 @@ This directory is the canonical home for NeurX serving runtime modules.
 - `serving/serve/serve.s` now owns the canonical request/response state plus the serving control plane.
 - `serving/cache/kv_cache.s`, `serving/cache/paged_kv_cache.s`, `serving/cache/prefix_cache.s`, `serving/decode/decode.s`, and `serving/sampling/sampling.s` are also canonical.
 - `serving/vllm/` now contains the canonical request queue, scheduler, metrics, prefix cache, paged attention, and runtime entrypoint.
+- `serving/runtime/production_runtime.s` provides decode-priority disaggregated scheduling, homogeneous CUDA/Ascend batches, admission backpressure and explicit batch completion.
+- `serving/protocol/openai_tgi.s` provides OpenAI and TGI route classification plus SSE wire-format encoding.
 - The runtime bridge prefers `serving/*` IR when available and falls back to `infer/*` for the remaining compatibility modules.
 - More serving modules will move here in batches, starting with cache, decode, and sampling helpers.
 
