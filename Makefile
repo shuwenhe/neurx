@@ -255,7 +255,7 @@ pretrain-gpu-multinode: check-bash build-cuda-train-bridge
 	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts}" \
 	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
-	$(CURDIR_UNIX)/script/launch_multinode_pretrain.sh
+	s $(CURDIR_UNIX)/script/launch_multinode_pretrain.s
 
 pretrain-gpu: pretrain-gpu-multinode
 	@echo "Default GPU pretraining target uses the multi-node launcher"
