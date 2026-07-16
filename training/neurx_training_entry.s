@@ -1,3 +1,4 @@
+// neurx/training/neurx_training_entry.s
 package neurx.training
 
 // ═══════════════════════════════════════════════════════════════════

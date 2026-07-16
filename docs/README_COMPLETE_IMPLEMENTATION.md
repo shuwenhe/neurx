@@ -93,7 +93,7 @@ chmod +x build_complete_s_system.sh
 ## 🏗️ Architecture Overview
 
 ```
-CLI Layer (COMPLETE_S_IMPLEMENTATION.s)
+CLI Layer (cmd/complete-system/main.s)
     ↓ 25+ commands
 Model Layer (transformer_block.s + model_loader.s)
     ├─ Embeddings
@@ -161,7 +161,7 @@ Foundation Layer (tensor, autograd, memory)
 
 ```
 neurx/
-├── COMPLETE_S_IMPLEMENTATION.s          ← Master entry point
+├── cmd/complete-system/main.s          ← Master entry point
 ├── QUICK_START_S_IMPLEMENTATION.md      ← Setup guide
 ├── FINAL_SUMMARY.md                     ← Project summary
 ├── NEURX_COMPLETE_S_IMPLEMENTATION.md   ← Architecture guide
@@ -352,7 +352,7 @@ nvidia-smi dmon
 - Inference: `inference/inference_server.s`
 
 ### Integration
-- CLI system: `COMPLETE_S_IMPLEMENTATION.s`
+- CLI system: `cmd/complete-system/main.s`
 - Build system: `build_complete_s_system.sh`
 - Documentation: See docs/ directory
 

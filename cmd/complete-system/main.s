@@ -1,4 +1,4 @@
-// neurx/COMPLETE_S_IMPLEMENTATION.s
+// neurx/cmd/complete-system/main.s
 // Master integration file - Unified S implementation of NeurX
 // Combines all 647+ S files into a cohesive training system
 
@@ -8,15 +8,15 @@ import (
     "fmt"
     "os"
     "time"
-    "./model/llm"
-    "./model/transformer"
-    "./training"
-    "./distributed"
-    "./inference"
-    "./data"
-    "./opt"
-    "./cmd"
-    "./scripts"
+    "../../model/llm"
+    "../../model/transformer"
+    "../../training"
+    "../../distributed"
+    "../../inference"
+    "../../data"
+    "../../opt"
+    "../../cmd"
+    "../../scripts"
 )
 
 // ============================================================

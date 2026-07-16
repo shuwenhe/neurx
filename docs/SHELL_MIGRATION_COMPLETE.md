@@ -29,7 +29,7 @@
 - ✅ **inference_runner.s** - 推理执行器
 
 ### 第三阶段：自动迁移脚本（完成）
-- ✅ **QUICK_REFERENCE.s**
+- ✅ **examples/quick_reference.s**
 - ✅ **arch/cann/env.s**
 - ✅ **dataset/fetch_github_datasets.s**
 - ✅ **docs/flowchart/convert_to_image.s**

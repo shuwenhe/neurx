@@ -15,7 +15,7 @@
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
-| `COMPLETE_S_IMPLEMENTATION.s` | 500+ | Master entry point, CLI routing, all commands | ✅ Complete |
+| `cmd/complete-system/main.s` | 500+ | Master entry point, CLI routing, all commands | ✅ Complete |
 | `model/transformer/transformer_block.s` | 400+ | Transformer block with attention+FFN+norm | ✅ Complete |
 | `model/llm/model_loader.s` | 600+ | GPT model init, checkpoint save/load | ✅ Complete |
 | `training/end_to_end_training.s` | 800+ | End-to-end training pipeline | ✅ Enhanced |
@@ -87,7 +87,7 @@ Inference Layer (100%)
 
 CLI & Integration (100%)
 ├─ Unified CLI (neurx_cli.s)
-├─ Command orchestrator (COMPLETE_S_IMPLEMENTATION.s) ← NEW
+├─ Command orchestrator (cmd/complete-system/main.s) ← NEW
 ├─ Shell utilities (shell_compat.s)
 ├─ Build orchestration (build_orchestrator.s)
 └─ Training orchestration (train_orchestrator.s)
@@ -328,7 +328,7 @@ neurx/
 - Inference: `inference/inference_server.s`
 
 ### For Integration
-- CLI system: `COMPLETE_S_IMPLEMENTATION.s`
+- CLI system: `cmd/complete-system/main.s`
 - Orchestration: `scripts/train_orchestrator.s`
 - Utilities: `scripts/shell_compat.s`
 

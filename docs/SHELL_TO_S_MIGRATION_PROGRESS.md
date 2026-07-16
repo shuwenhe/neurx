@@ -102,7 +102,7 @@
 ### 参考脚本（1 个）
 | # | 脚本名 | 原始路径 | 功能 | 复杂度 | 预计 LOC |
 |---|--------|---------|------|--------|---------|
-| 23 | QUICK_REFERENCE.s | QUICK_REFERENCE.sh | 快速参考 | ⭐ | 60+ |
+| 23 | examples/quick_reference.s | QUICK_REFERENCE.sh | 快速参考 | ⭐ | 60+ |
 
 ---
 
@@ -175,7 +175,7 @@ Day 1-2: Git 工具脚本
 
 Day 3-4: 观察和参考脚本
   - observe_with_config.s
-  - QUICK_REFERENCE.s
+  - examples/quick_reference.s
 
 Day 5: 最终验证和文档
 ```

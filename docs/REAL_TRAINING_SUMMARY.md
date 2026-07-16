@@ -42,7 +42,7 @@ Enterprise-grade training entry point:
 
 ### 4. Integration Documentation
 - `REAL_TRAINING_IMPLEMENTATION.md` - Complete integration guide with troubleshooting
-- `REAL_TRAINING_INTEGRATION_EXAMPLE.s` - Three integration options (minimal, full, hybrid)
+- `examples/real_training_integration.s` - Three integration options (minimal, full, hybrid)
 
 ## Key Features
 
@@ -99,7 +99,7 @@ func main() int {
 
 ### Full Integration Option
 
-See `REAL_TRAINING_INTEGRATION_EXAMPLE.s` for:
+See `examples/real_training_integration.s` for:
 - **OPTION 1:** Minimal (2 imports, 4 lines)
 - **OPTION 2:** Full with existing infrastructure integration
 - **OPTION 3:** Hybrid with monitoring/telemetry
@@ -113,7 +113,7 @@ See `REAL_TRAINING_INTEGRATION_EXAMPLE.s` for:
 
 2. **Update script with real training:**
    ```bash
-   # Copy OPTION 1 from REAL_TRAINING_INTEGRATION_EXAMPLE.s to script/run_large_pretrain.s
+   # Copy OPTION 1 from examples/real_training_integration.s to script/run_large_pretrain.s
    ```
 
 3. **Clean build:**
@@ -194,7 +194,7 @@ The real training implementation seamlessly integrates with existing NeurX compo
 | `pretrain/llm/real_training_loop.s` | Training orchestration | 300+ |
 | `pretrain/llm/real_main_training.s` | Production system | 600+ |
 | `REAL_TRAINING_IMPLEMENTATION.md` | Integration guide | ~200 |
-| `REAL_TRAINING_INTEGRATION_EXAMPLE.s` | Code examples | ~180 |
+| `examples/real_training_integration.s` | Code examples | ~180 |
 
 **Total New Code:** ~1,680 lines of pure S language
 

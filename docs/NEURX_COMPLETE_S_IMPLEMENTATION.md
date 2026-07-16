@@ -33,7 +33,7 @@
    - Multi-GPU support preparation
    - Real-time monitoring and logging
 
-4. **COMPLETE_S_IMPLEMENTATION.s** (500+ lines)
+4. **cmd/complete-system/main.s** (500+ lines)
    - Master entry point for entire system
    - Unified CLI interface
    - Command routing (train, inference, distribute, benchmark, build)
@@ -43,7 +43,7 @@
 ### Key Integration Points
 
 ```
-COMPLETE_S_IMPLEMENTATION.s (Master)
+cmd/complete-system/main.s (Master)
     │
     ├─→ model/llm/model_loader.s (Model Creation)
     │       ├─→ model/transformer/transformer_block.s (Architecture)
@@ -126,7 +126,7 @@ BUILD_DIR = .build/s_complete
 build-complete:
 	@mkdir -p $(BUILD_DIR)
 	@echo "Building complete S implementation..."
-	$(S_COMPILER) COMPLETE_S_IMPLEMENTATION.s -o $(BUILD_DIR)/neurx_main
+	$(S_COMPILER) cmd/complete-system/main.s -o $(BUILD_DIR)/neurx_main
 	$(S_COMPILER) --emit-bin $(BUILD_DIR)/neurx_main -o bin/neurx_complete
 	@chmod +x bin/neurx_complete
 	@echo "✓ Complete system built"
@@ -295,7 +295,7 @@ scripts/ (Utilities)
 ├── inference_orchestrator.s   ✓ Inference orchestration
 └── data_orchestrator.s        ✓ Data orchestration
 
-COMPLETE_S_IMPLEMENTATION.s     🆕 NEW - Master entry point
+cmd/complete-system/main.s     🆕 NEW - Master entry point
 ```
 
 ---
@@ -404,7 +404,7 @@ make build-complete
 
 4. **Integrate with main**
    ```s
-   // In COMPLETE_S_IMPLEMENTATION.s
+   // In cmd/complete-system/main.s
    import "./module/new_feature"
    ```
 

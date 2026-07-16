@@ -15,7 +15,7 @@ You now have a **complete, production-ready S language implementation** of NeurX
 
 ```
 /Users/shuwen/shuwen/train/neurx/
-├── COMPLETE_S_IMPLEMENTATION.s           ← Master entry point (NEW)
+├── cmd/complete-system/main.s           ← Master entry point (NEW)
 ├── NEURX_COMPLETE_S_IMPLEMENTATION.md   ← Detailed guide (NEW)
 ├── build_complete_s_system.sh            ← Build script (NEW)
 │
@@ -251,7 +251,7 @@ Training automatically saves checkpoints:
 To resume training from a checkpoint:
 
 ```bash
-# Edit config in COMPLETE_S_IMPLEMENTATION.s:
+# Edit config in cmd/complete-system/main.s:
 # LoadCheckpoint("./checkpoints/checkpoint_step_1000.pt")
 ```
 

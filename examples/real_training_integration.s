@@ -1,5 +1,5 @@
 // ================================================================================
-// Real Training Integration Example
+// Example: Real Training Integration
 // ================================================================================
 // This file shows how to modify script/run_large_pretrain.s to use real training
 // instead of the demo/simulation mode.

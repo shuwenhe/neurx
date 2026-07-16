@@ -37,7 +37,7 @@
 ## 🎯 System Entry Points
 
 ```
-                      COMPLETE_S_IMPLEMENTATION.s
+                      cmd/complete-system/main.s
                               (Main)
                                 │
                 ┌───────────────┬┼┬───────────────┬──────────────┐
@@ -58,7 +58,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    COMPLETE_S_IMPLEMENTATION.s              │
+│                    cmd/complete-system/main.s              │
 │                         (Master Orchestrator)               │
 └──────────────┬──────────────────────────────────────────────┘
                │
@@ -226,7 +226,7 @@ Input Data
 
 ```
 neurx/
-├── COMPLETE_S_IMPLEMENTATION.s              ← Master entry
+├── cmd/complete-system/main.s              ← Master entry
 ├── NEURX_COMPLETE_S_IMPLEMENTATION.md       ← Architecture guide
 ├── QUICK_START_S_IMPLEMENTATION.md          ← Quick start
 ├── build_complete_s_system.sh               ← Build script
