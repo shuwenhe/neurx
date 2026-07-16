@@ -1,4 +1,4 @@
-package neurx.script
+package main
 
 // ============================================================================
 // NeurX Multi-node Training Launcher (S Language Implementation)
