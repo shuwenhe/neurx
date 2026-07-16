@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  config file : " + check_path("config_large_model.json"))
+    println("  config file : " + check_path("configs/config_large_model.json"))
     println("  data path   : " + check_path("dataset/pretrain"))
     println("  logs dir    : " + check_path("logs"))
     println("")

@@ -14,7 +14,7 @@ BIN_DIR := $(PROJECT_ROOT)/bin
 SCRIPT_DIR := $(PROJECT_ROOT)/script
 CHECKPOINT_DIR := $(PROJECT_ROOT)/artifacts/checkpoints
 LOG_DIR := $(PROJECT_ROOT)/logs
-CONFIG_FILE := $(PROJECT_ROOT)/config_large_model.json
+CONFIG_FILE := $(PROJECT_ROOT)/configs/config_large_model.json
 
 # Detect OS
 UNAME_S := $(shell uname -s)
