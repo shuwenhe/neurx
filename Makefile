@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -881,6 +881,16 @@ transformer-cuda-integration-test:
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
 	@artifacts/build/transformer_cuda/transformer_integration_test
+
+transformer-cuda-checkpoint-resume-test:
+	@if [ -z '$(CUDA_NVCC)' ]; then \
+		echo "Error: nvcc not found. Run this CUDA checkpoint test on a Linux NVIDIA CUDA host."; \
+		exit 1; \
+	fi
+	@mkdir -p artifacts/build/transformer_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
+	@artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 
 cuda-tools-s: check-bash
 	@echo "Building S CUDA tools entry..."

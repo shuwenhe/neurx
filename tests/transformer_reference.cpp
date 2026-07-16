@@ -2,7 +2,10 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstdint>
+#include <fstream>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -37,6 +40,97 @@ struct Model {
     std::vector<Param*> params() { return {&emb,&nq,&nk,&wq,&wk,&wv,&wo,&nf,&wg,&wu,&wd,&out}; }
     void zero_grad() { for (Param* p:params()) p->zero_grad(); }
 };
+
+// CPU reference AdamW.  This intentionally optimizes real parameter vectors
+// produced by backward(), rather than modelling an optimizer with metadata.
+struct AdamW {
+    double lr=0.03, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0.01;
+    int64_t step_count=0;
+    std::vector<Vec> m, v;
+
+    explicit AdamW(const Model& model) {
+        for (Param* p : const_cast<Model&>(model).params()) {
+            m.emplace_back(p->v.size(), 0.0);
+            v.emplace_back(p->v.size(), 0.0);
+        }
+    }
+
+    void step(Model& model) {
+        std::vector<Param*> ps=model.params();
+        assert(ps.size()==m.size() && ps.size()==v.size());
+        ++step_count;
+        double bias1=1.0-std::pow(beta1,double(step_count));
+        double bias2=1.0-std::pow(beta2,double(step_count));
+        for(size_t n=0;n<ps.size();++n) for(size_t i=0;i<ps[n]->v.size();++i) {
+            double g=ps[n]->g[i];
+            m[n][i]=beta1*m[n][i]+(1.0-beta1)*g;
+            v[n][i]=beta2*v[n][i]+(1.0-beta2)*g*g;
+            double update=(m[n][i]/bias1)/(std::sqrt(v[n][i]/bias2)+eps);
+            ps[n]->v[i]-=lr*(update+weight_decay*ps[n]->v[i]);
+        }
+    }
+};
+
+template <typename T>
+static bool write_scalar(std::ofstream& out,const T& value) {
+    out.write(reinterpret_cast<const char*>(&value),sizeof(value)); return bool(out);
+}
+template <typename T>
+static bool read_scalar(std::ifstream& in,T& value) {
+    in.read(reinterpret_cast<char*>(&value),sizeof(value)); return bool(in);
+}
+static bool write_vec(std::ofstream& out,const Vec& values) {
+    uint64_t count=values.size();
+    if(!write_scalar(out,count)) return false;
+    out.write(reinterpret_cast<const char*>(values.data()),std::streamsize(count*sizeof(double)));
+    return bool(out);
+}
+static bool read_vec(std::ifstream& in,Vec& values,size_t expected) {
+    uint64_t count=0;
+    if(!read_scalar(in,count) || count!=expected) return false;
+    values.resize(size_t(count));
+    in.read(reinterpret_cast<char*>(values.data()),std::streamsize(count*sizeof(double)));
+    return bool(in);
+}
+
+// The checkpoint includes model parameters, all AdamW moments, optimizer
+// hyperparameters, and the completed training step.  Any schema/configuration
+// mismatch fails closed instead of silently resuming with partial state.
+static bool save_checkpoint(const std::string& path,const Model& model,const AdamW& opt,int64_t train_step) {
+    std::ofstream out(path,std::ios::binary|std::ios::trunc);
+    const uint64_t magic=0x4e45555258434b31ULL; // "NEURXCK1"
+    if(!out || !write_scalar(out,magic)) return false;
+    if(!write_scalar(out,model.c.vocab) || !write_scalar(out,model.c.seq) ||
+       !write_scalar(out,model.c.dim) || !write_scalar(out,model.c.heads) ||
+       !write_scalar(out,model.c.ffn) || !write_scalar(out,train_step) ||
+       !write_scalar(out,opt.lr) || !write_scalar(out,opt.beta1) || !write_scalar(out,opt.beta2) ||
+       !write_scalar(out,opt.eps) || !write_scalar(out,opt.weight_decay) || !write_scalar(out,opt.step_count)) return false;
+    std::vector<Param*> ps=const_cast<Model&>(model).params();
+    uint64_t count=ps.size();
+    if(!write_scalar(out,count) || count!=opt.m.size() || count!=opt.v.size()) return false;
+    for(size_t i=0;i<ps.size();++i)
+        if(!write_vec(out,ps[i]->v) || !write_vec(out,opt.m[i]) || !write_vec(out,opt.v[i])) return false;
+    return bool(out);
+}
+
+static bool load_checkpoint(const std::string& path,Model& model,AdamW& opt,int64_t& train_step) {
+    std::ifstream in(path,std::ios::binary);
+    const uint64_t magic=0x4e45555258434b31ULL;
+    uint64_t found_magic=0, count=0; int vocab=0,seq=0,dim=0,heads=0,ffn=0;
+    if(!in || !read_scalar(in,found_magic) || found_magic!=magic ||
+       !read_scalar(in,vocab) || !read_scalar(in,seq) || !read_scalar(in,dim) ||
+       !read_scalar(in,heads) || !read_scalar(in,ffn) ||
+       vocab!=model.c.vocab || seq!=model.c.seq || dim!=model.c.dim ||
+       heads!=model.c.heads || ffn!=model.c.ffn || !read_scalar(in,train_step) ||
+       !read_scalar(in,opt.lr) || !read_scalar(in,opt.beta1) || !read_scalar(in,opt.beta2) ||
+       !read_scalar(in,opt.eps) || !read_scalar(in,opt.weight_decay) || !read_scalar(in,opt.step_count) ||
+       !read_scalar(in,count)) return false;
+    std::vector<Param*> ps=model.params();
+    if(count!=ps.size() || count!=opt.m.size() || count!=opt.v.size()) return false;
+    for(size_t i=0;i<ps.size();++i)
+        if(!read_vec(in,ps[i]->v,ps[i]->v.size()) || !read_vec(in,opt.m[i],ps[i]->v.size()) || !read_vec(in,opt.v[i],ps[i]->v.size())) return false;
+    return bool(in.peek()==std::ifstream::traits_type::eof());
+}
 
 static Vec mm(const Vec& a,const Vec& b,int m,int k,int n) {
     Vec o(m*n);
@@ -182,10 +276,67 @@ static bool overfit_check(Model& m) {
     std::printf("tiny-overfit %s initial_loss=%.6f final_loss=%.6f next_token_accuracy=%d/%d\n",ok?"PASS":"FAIL",first,loss,correct,m.c.seq); return ok;
 }
 
+static double max_parameter_difference(Model& a,Model& b) {
+    double maximum=0.0; std::vector<Param*> ap=a.params(),bp=b.params();
+    if(ap.size()!=bp.size()) return INFINITY;
+    for(size_t p=0;p<ap.size();++p) {
+        if(ap[p]->v.size()!=bp[p]->v.size()) return INFINITY;
+        for(size_t i=0;i<ap[p]->v.size();++i) maximum=std::max(maximum,std::abs(ap[p]->v[i]-bp[p]->v[i]));
+    }
+    return maximum;
+}
+
+static void train_steps(Model& model,AdamW& optimizer,const std::vector<int>& x,const std::vector<int>& y,int count) {
+    for(int step=0;step<count;++step) {
+        Cache cache; forward(model,x,y,cache); backward(model,y,cache); optimizer.step(model);
+    }
+}
+
+// This is the end-to-end contract required before a GPU/S-language port can
+// claim resumable training: an interrupted AdamW run must be bit-identical to
+// the uninterrupted run when weights and optimizer state are restored.
+static bool checkpoint_resume_check() {
+    Config cfg; std::vector<int>x={1,2,3,4},y={2,3,4,5};
+    constexpr int total_steps=48, save_after=19;
+    const std::string path="transformer_reference_resume.ckpt";
+
+    Model uninterrupted(cfg); AdamW uninterrupted_opt(uninterrupted);
+    train_steps(uninterrupted,uninterrupted_opt,x,y,total_steps);
+    Cache uninterrupted_cache; double uninterrupted_loss=forward(uninterrupted,x,y,uninterrupted_cache);
+
+    Model interrupted(cfg); AdamW interrupted_opt(interrupted);
+    train_steps(interrupted,interrupted_opt,x,y,save_after);
+    bool saved=save_checkpoint(path,interrupted,interrupted_opt,save_after);
+
+    Model resumed(cfg); AdamW resumed_opt(resumed); int64_t restored_step=-1;
+    bool loaded=saved && load_checkpoint(path,resumed,resumed_opt,restored_step);
+    if(loaded) train_steps(resumed,resumed_opt,x,y,total_steps-int(restored_step));
+    Cache resumed_cache; double resumed_loss=loaded?forward(resumed,x,y,resumed_cache):INFINITY;
+    double max_diff=loaded?max_parameter_difference(uninterrupted,resumed):INFINITY;
+    bool ok=loaded && restored_step==save_after && resumed_opt.step_count==total_steps &&
+            max_diff<1e-14 && std::abs(uninterrupted_loss-resumed_loss)<1e-14;
+    std::remove(path.c_str());
+    std::printf("checkpoint-resume %s restored_step=%lld optimizer_step=%lld max_parameter_difference=%.3g loss_difference=%.3g\n",
+        ok?"PASS":"FAIL",static_cast<long long>(restored_step),static_cast<long long>(resumed_opt.step_count),
+        max_diff,std::abs(uninterrupted_loss-resumed_loss));
+    return ok;
+}
+
+static bool checkpoint_rejects_corruption_check() {
+    Config cfg; Model model(cfg); AdamW optimizer(model); int64_t step=0;
+    const std::string path="transformer_reference_corrupt.ckpt";
+    { std::ofstream out(path,std::ios::binary|std::ios::trunc); out << "not-a-neurx-checkpoint"; }
+    bool rejected=!load_checkpoint(path,model,optimizer,step);
+    std::remove(path.c_str());
+    std::printf("checkpoint-corruption %s\n",rejected?"PASS":"FAIL");
+    return rejected;
+}
+
 #ifndef NEURX_TRANSFORMER_REFERENCE_NO_MAIN
 int main() {
     Config cfg; Model model(cfg); std::vector<int>x={1,2,3,4},y={2,3,4,5};
-    bool ok=causal_check(model) && gradient_check(model,x,y) && overfit_check(model);
+    bool ok=causal_check(model) && gradient_check(model,x,y) && overfit_check(model) &&
+            checkpoint_resume_check() && checkpoint_rejects_corruption_check();
     std::printf("transformer-reference %s architecture=decoder-only layers=1 heads=%d dim=%d ffn=%d\n",ok?"PASS":"FAIL",cfg.heads,cfg.dim,cfg.ffn);
     return ok?0:1;
 }
