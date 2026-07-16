@@ -84,10 +84,10 @@ neurx/
 │   └── moe_1t_jsonl_loader.s         (430 行)
 ├── monitoring/
 │   └── moe_1t_metrics.s              (598 行)
-├── production_deployment/
+├── deploy/production/
 │   ├── training_startup.env          (已修复路径)
 │   └── launch_plan.sh                (已修复路径)
-├── script/
+├── scripts/legacy/
 │   ├── run_model_large_pretrain.sh      (826 行)
 │   ├── verify_framework.sh            (新建)
 │   └── run_integration_tests.sh       (新建)
@@ -163,7 +163,7 @@ neurx/
 ### 集群配置文件 📋
 - [ ] `/etc/slurm/slurm.conf` - SLURM 配置
 - [ ] `/root/.ssh/config` - 无密码 SSH
-- [ ] `$NEURX_HOME/production_deployment/cluster_nodes.manifest` - 节点清单
+- [ ] `$NEURX_HOME/deploy/production/cluster_nodes.manifest` - 节点清单
 - [ ] `$NEURX_HOME/data/training_data_shards/manifest.txt` - 数据清单
 
 ---
@@ -173,7 +173,7 @@ neurx/
 ### 1. 验证框架完整性
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/verify_framework.sh
+bash scripts/legacy/verify_framework.sh
 ```
 
 ### 2. 查看快速参考
@@ -197,7 +197,7 @@ make train
 # 在集群主节点上：
 ssh user@cluster-master
 cd /opt/neurx
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 ```
 
 ---
@@ -276,7 +276,7 @@ func zero_stage3_accumulate_gradients(
                           ↓
 ┌─────────────────────────────────────────────────────────┐
 │  步骤 3: 启动训练 (< 5 分钟)                           │
-│  • sbatch neurx/script/run_model_large_pretrain.sh       │
+│  • sbatch neurx/scripts/legacy/run_model_large_pretrain.sh       │
 │  • 监控日志: tail -f logs/*.log                         │
 │  • 监控指标: watch -n 10 'tail -20 metrics.log'        │
 └─────────────────────────────────────────────────────────┘
@@ -327,8 +327,8 @@ func zero_stage3_accumulate_gradients(
 | 快速参考 | API 签名和用法 | `QUICK_REFERENCE.md` |
 | 集成指南 | 代码示例和集成 | `docs/INTEGRATION_GUIDE.md` |
 | 总结文档 | 项目概述 | `IMPLEMENTATION_SUMMARY.md` |
-| 验证脚本 | 框架检查 | `script/verify_framework.sh` |
-| 启动配置 | 训练参数 | `production_deployment/training_startup.env` |
+| 验证脚本 | 框架检查 | `scripts/legacy/verify_framework.sh` |
+| 启动配置 | 训练参数 | `deploy/production/training_startup.env` |
 
 ---
 

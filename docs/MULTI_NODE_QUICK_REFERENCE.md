@@ -24,7 +24,7 @@
    - Checkpoint加载和保存
    - 故障恢复集成
 
-4. **`script/launch_cluster_training.s`** (9.2KB)
+4. **`scripts/legacy/launch_cluster_training.s`** (9.2KB)
    - SSH集群启动器
    - 自动秩启动
    - 日志聚合
@@ -247,7 +247,7 @@ export NEURX_NODE_RANK=1
 # Option 2: Automatic cluster launcher
 export NEURX_NUM_NODES=4
 export NEURX_NODE_LIST="10.0.0.1,10.0.0.2,10.0.0.3,10.0.0.4"
-./script/launch_cluster_training.s
+./scripts/legacy/launch_cluster_training.s
 ```
 
 ### Monitoring
@@ -325,7 +325,7 @@ pretrain/
 ├── distributed_pretrain_entry.s              # Single-node entry
 └── pretrain_config.toml                      # Training config
 
-script/
+scripts/legacy/
 └── launch_cluster_training.s   # Cluster-wide SSH launcher
 
 docs/

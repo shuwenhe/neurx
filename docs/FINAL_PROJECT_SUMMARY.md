@@ -285,7 +285,7 @@ neurx/
 │   ├── validator.s (350+ lines) - Validation
 │   ├── monitor.s (400+ lines) - Metrics tracking
 │   └── orchestrator.s (250+ lines) - Orchestration
-├── test/
+├── tests/
 │   ├── test_attention.s (10 tests)
 │   ├── test_optimizer.s (10 tests)
 │   ├── test_tokenizer.s (12 tests)

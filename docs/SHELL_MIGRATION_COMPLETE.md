@@ -75,13 +75,13 @@
 ### Windows Batch 脚本（2 个）
 | 脚本 | 路径 | 功能 | 复杂度 |
 |------|------|------|--------|
-| build-windows.bat | script/ | Windows 构建 | ⭐⭐ |
-| setup-windows.bat | script/ | Windows 设置 | ⭐⭐ |
+| build-windows.bat | scripts/legacy/ | Windows 构建 | ⭐⭐ |
+| setup-windows.bat | scripts/legacy/ | Windows 设置 | ⭐⭐ |
 
 ### JavaScript 脚本（4 个）
 | 脚本 | 路径 | 功能 | 复杂度 |
 |------|------|------|--------|
-| create-file.js | script/ | 原子文件创建 | ⭐⭐⭐ |
+| create-file.js | scripts/legacy/ | 原子文件创建 | ⭐⭐⭐ |
 | file-creation-examples.js | examples/ | 文件创建示例 | ⭐⭐ |
 | materialize_llm_checkpoint.mjs | tools/ | 检查点物化 | ⭐⭐⭐⭐ |
 | infer_llm_checkpoint.mjs | tools/ | 检查点推理 | ⭐⭐⭐⭐ |

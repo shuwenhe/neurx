@@ -247,7 +247,7 @@ Expected output:
 
 ```bash
 # Compile S training script to IR
-/home/shuwen/.local/bin/s ir script/gpu_train_cuda.s > script/gpu_train_cuda.ir
+/home/shuwen/.local/bin/s ir scripts/legacy/gpu_train_cuda.s > scripts/legacy/gpu_train_cuda.ir
 ```
 
 ### Run GPU Training
@@ -260,7 +260,7 @@ export NEURX_PRETRAIN_LR=0.0002
 export NEURX_PRETRAIN_STEPS=1000000000
 export LD_LIBRARY_PATH=/home/shuwen/shuwen/train/neurx/artifacts/lib:$LD_LIBRARY_PATH
 
-/home/shuwen/shuwen/train/neurx/artifacts/build/s_runner/s_ir_runner script/gpu_train_cuda.ir
+/home/shuwen/shuwen/train/neurx/artifacts/build/s_runner/s_ir_runner scripts/legacy/gpu_train_cuda.ir
 ```
 
 Or use the Makefile:

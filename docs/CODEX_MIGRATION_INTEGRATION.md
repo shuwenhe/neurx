@@ -375,7 +375,7 @@ Dialog {
 ### 单元测试
 
 ```cpp
-// test/TestThreadSystem.cpp
+// tests/TestThreadSystem.cpp
 void TestThreadSystem::testCreateThread()
 {
     FileBasedThreadStore store(m_tempDir);

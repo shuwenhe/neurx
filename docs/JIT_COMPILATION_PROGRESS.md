@@ -150,7 +150,7 @@ This creates touchpoints every 1-2 seconds during initialization.
 
 ✅ **Syntax validation:**
 ```bash
-bash -n script/run_large_pretrain.sh  # Passed
+bash -n scripts/legacy/run_large_pretrain.sh  # Passed
 ```
 
 ✅ **Expected behavior on next run:**

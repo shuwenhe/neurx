@@ -26,12 +26,12 @@
 - 训练日志与指标记录
 
 证据:
-- `script/LAUNCH_1T_TRAINING.sh` 里的 Python 训练脚本仍是 `TODO`
+- `scripts/legacy/LAUNCH_1T_TRAINING.sh` 里的 Python 训练脚本仍是 `TODO`
 - `training/moe_1t_orchestrator.s` 里数据加载还是占位实现
 - `optimization/mixed_precision.s` 里有 placeholder backward
 
 相关文件:
-- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/script/LAUNCH_1T_TRAINING.sh#L178-L181)
+- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L178-L181)
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
 - [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimization/mixed_precision.s#L512-L515)
 
@@ -47,12 +47,12 @@
 证据:
 - `dataset/real_data_loader.s` 目前是 mock dataset
 - `training/moe_1t_orchestrator.s` 里 `moe_1t_load_data_manifest()` 只是打印
-- `script/LAUNCH_1T_TRAINING.sh` 要求 1T token，但仓库里没有对应的真实大规模数据流闭环
+- `scripts/legacy/LAUNCH_1T_TRAINING.sh` 要求 1T token，但仓库里没有对应的真实大规模数据流闭环
 
 相关文件:
 - [real_data_loader.s](/Users/shuwen/shuwen/train/neurx/dataset/real_data_loader.s#L25-L41)
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
-- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/script/LAUNCH_1T_TRAINING.sh#L224-L242)
+- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L224-L242)
 
 ### 3. 分布式编排还缺“可落地执行”
 
@@ -69,7 +69,7 @@
 
 相关文件:
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L131-L224)
-- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/script/LAUNCH_1T_TRAINING.sh#L110-L129)
+- [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L110-L129)
 
 ### 4. Checkpoint 需要可验证恢复
 

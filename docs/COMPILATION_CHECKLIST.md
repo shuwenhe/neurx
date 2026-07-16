@@ -270,7 +270,7 @@
 
 ```bash
 # 1. 验证框架结构
-bash script/verify_framework.sh
+bash scripts/legacy/verify_framework.sh
 
 # 预期输出:
 #   ✓ Module distributed/moe_all_to_all.s (473 lines)
@@ -296,10 +296,10 @@ nm build/model_large_pretrain | head -20
 
 ```bash
 # 1. 生成集群配置
-bash script/cluster_launch.sh 1024
+bash scripts/legacy/cluster_launch.sh 1024
 
 # 2. 提交 SLURM 任务
-sbatch script/submit_training_job.sh
+sbatch scripts/legacy/submit_training_job.sh
 
 # 3. 监控训练
 squeue -u $USER -l
@@ -375,7 +375,7 @@ ls -la pretrain/llm/model_large_pretrain.s
 ls -la distributed/{moe_all_to_all,tensor_parallel,zero_gradient_reduce}.s
 
 # 3. 运行框架检查
-bash script/verify_framework.sh
+bash scripts/legacy/verify_framework.sh
 
 # 期望结果: ✅ All 14 checks passed
 ```

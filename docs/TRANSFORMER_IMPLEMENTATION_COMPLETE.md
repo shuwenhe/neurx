@@ -345,7 +345,7 @@ neurx/
 │   ├── ffn.s                        (existing)
 │   └── transformer.s                (existing)
 │
-├── test/
+├── tests/
 │   └── test_transformer_complete.s  ✅ NEW - Test suite
 │
 └── example/

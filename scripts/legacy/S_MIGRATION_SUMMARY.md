@@ -89,7 +89,7 @@ make data-pipeline-s
 ## 📝 代码架构
 
 ```
-script/
+scripts/legacy/
 ├── data_utils.s          # 工具库 (文件、路径、字符串、JSON)
 │   ├── File operations
 │   ├── Path manipulation  
@@ -196,7 +196,7 @@ MAX_SHARDS              # 最大分片数
 
 ## 📚 相关文件
 
-- 迁移指南：`script/S_MIGRATION_GUIDE.md`
+- 迁移指南：`scripts/legacy/S_MIGRATION_GUIDE.md`
 - 编译配置：`Makefile` (新增目标)
 - 项目偏好：`/memories/repo/s_project_preferences.md`
 

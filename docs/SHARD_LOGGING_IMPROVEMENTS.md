@@ -21,7 +21,7 @@ Shard list file loaded
 ## ✅ 解决方案
 
 ### 1️⃣ 增强训练脚本
-**文件**: `script/minimal_train.s`
+**文件**: `scripts/legacy/minimal_train.s`
 
 在关键处理步骤添加了 `runtime_run_command_output` 调用，直接将状态消息输出到 stderr（unbuffered）：
 
@@ -89,7 +89,7 @@ bash tools/run-with-shard-monitor.sh /home/shuwen/s/bin/s
 cd /home/shuwen/shuwen/train/neurx
 
 # 编译
-/home/shuwen/s/bin/s ir script/minimal_train.s -o artifacts/build/run_large_pretrain/minimal_train.ir
+/home/shuwen/s/bin/s ir scripts/legacy/minimal_train.s -o artifacts/build/run_large_pretrain/minimal_train.ir
 
 # 运行（自动实时输出）
 export NEURX_ROOT=/home/shuwen/shuwen/train/neurx
@@ -102,7 +102,7 @@ export NEURX_ROOT=/home/shuwen/shuwen/train/neurx
 
 | 文件 | 类型 | 功能 |
 |------|------|------|
-| `script/minimal_train.s` | 改进 | 添加实时日志输出（4 处改进） |
+| `scripts/legacy/minimal_train.s` | 改进 | 添加实时日志输出（4 处改进） |
 | `tools/monitor-shard-processing.sh` | 新增 | 实时日志解析与监控 |
 | `tools/run-with-shard-monitor.sh` | 新增 | 自动编译与运行 |
 | `tools/quick-start-shard-logging.sh` | 新增 | 快速启动向导 |

@@ -23,7 +23,7 @@
 
 ### 源文件
 
-**文件：** `script/data_pipeline.s` (700+ 行)
+**文件：** `scripts/legacy/data_pipeline.s` (700+ 行)
 
 **功能：**
 ```
@@ -42,10 +42,10 @@ Data Pipeline (S Language)
 cd /home/shuwen/shuwen/train/neurx
 
 # 使用项目的 S 编译器
-$S_COMPILER script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+$S_COMPILER scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # 或指定完整路径
-/home/shuwen/.local/bin/s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+/home/shuwen/.local/bin/s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 ```
 
 #### 方式 2: 通过 Makefile
@@ -55,7 +55,7 @@ $S_COMPILER script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipelin
 make build-data-scripts
 
 # 实际编译需要运行：
-/home/shuwen/.local/bin/s script/data_pipeline.s \
+/home/shuwen/.local/bin/s scripts/legacy/data_pipeline.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/data_pipeline/data_pipeline
 ```
 
@@ -179,7 +179,7 @@ export LINES_PER_SHARD=100               # 最小行数/分片
 ```makefile
 # 编译 S 管道
 build-data-pipeline:
-	$(S_COMPILER) script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+	$(S_COMPILER) scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # 执行清洗
 clean-s:
@@ -202,7 +202,7 @@ set -e
 
 # 编译
 echo "Compiling S pipeline..."
-s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # 执行
 export NEURX_HOME=$(pwd)
@@ -215,7 +215,7 @@ export NEURX_HOME=$(pwd)
 
 ### Phase 1: 数据处理工具 ✓ (已完成)
 
-- [x] `script/data_pipeline.s` — 统一数据处理 (700 行)
+- [x] `scripts/legacy/data_pipeline.s` — 统一数据处理 (700 行)
 - [x] 包含所有清洗、分片、辅助函数
 - [x] 标准库依赖：`fmt`, `os`, `io/ioutil`, `json`, `crypto/sha256`
 
@@ -245,7 +245,7 @@ export NEURX_HOME=$(pwd)
 最终目标 - 替换所有工具：
 neurx/
 ├── Makefile               (S 编译配置)
-├── script/
+├── scripts/legacy/
 │   ├── data_pipeline.s    ✓
 │   ├── training_runner.s  (in progress)
 │   ├── deployment.s       (planned)
@@ -254,7 +254,7 @@ neurx/
     └── build/
         ├── data_pipeline/
         ├── training/
-        └── deployment/
+        └── deploy/cluster/
 ```
 
 ---
@@ -401,8 +401,8 @@ cat dataset/pretrain/manifest.json
 ## 📚 相关文档
 
 - 项目偏好：`/memories/repo/s_project_preferences.md`
-- S 语言迁移指南：`script/S_MIGRATION_GUIDE.md`
-- S 语言迁移总结：`script/S_MIGRATION_SUMMARY.md`
+- S 语言迁移指南：`scripts/legacy/S_MIGRATION_GUIDE.md`
+- S 语言迁移总结：`scripts/legacy/S_MIGRATION_SUMMARY.md`
 
 ---
 
@@ -420,7 +420,7 @@ cat dataset/pretrain/manifest.json
 
 ### 扩展阅读
 
-在 `script/` 目录中查看其他 S 脚本的实现：
+在 `scripts/legacy/` 目录中查看其他 S 脚本的实现：
 - `experiment_manager.s` — 实验管理
 - `distributed_training.s` — 分布式训练
 - `checkpoint_manager.s` — 检查点管理
@@ -433,7 +433,7 @@ cat dataset/pretrain/manifest.json
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx && \
-/home/shuwen/.local/bin/s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline && \
+/home/shuwen/.local/bin/s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline && \
 NEURX_HOME=$(pwd) ./artifacts/build/data_pipeline/data_pipeline pipeline
 ```
 

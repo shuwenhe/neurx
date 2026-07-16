@@ -17,7 +17,7 @@
 
 ## 仍需补齐
 
-- 让 `script/large_model_trainer.s` 直接消费 `NEURX_7B_*` 环境变量，而不是继续依赖手写默认值
+- 让 `scripts/legacy/large_model_trainer.s` 直接消费 `NEURX_7B_*` 环境变量，而不是继续依赖手写默认值
 - 把数据侧真正接到流式 token 管线、shuffle 和 epoch 级采样
 - 把 checkpoint 细化到 optimizer state 分片恢复与严格校验
 - 把 7B 路线升级成 70B / 长上下文 / 多模态的统一配置族
@@ -152,7 +152,7 @@ torchrun --nproc_per_node=8 train_full.py \
 pip install flash-attn==2.5.0
 
 # 修改train_full.py中的attention mechanism为FlashAttentionV2
-# 参考script/long_context_handler.s的RoPE实现，但启用ALiBi调整支持200K
+# 参考scripts/legacy/long_context_handler.s的RoPE实现，但启用ALiBi调整支持200K
 
 # 验证长上下文
 python3 << 'EOF'
@@ -207,7 +207,7 @@ EOF
 pip install open_clip_torch
 
 # 2. 创建多模态数据加载器
-# script/multimodal_loader.py (~400行)
+# scripts/legacy/multimodal_loader.py (~400行)
 # - 加载图像-文本配对
 # - 动态分辨率处理
 # - 视觉token化
@@ -343,7 +343,7 @@ class EnhancedSafetyFilter:
 **立即行动**:
 ```bash
 # 1. 扩展安全分类器
-cp script/safety_filter.s script/advanced_safety_filter.s
+cp scripts/legacy/safety_filter.s scripts/legacy/advanced_safety_filter.s
 # 修改类别从10→50
 
 # 2. 微调安全判别器

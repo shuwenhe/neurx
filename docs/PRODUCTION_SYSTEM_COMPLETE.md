@@ -261,7 +261,7 @@ Bandwidth: 100 Gbps per node link
    - `launch_training.sh` - Training launcher
    - `slurm_submit.sh` - SLURM job script
    - `monitor_training.sh` - Live monitoring
-   - `launch_training.sh` now delegates to `script/run_llm_training_with_compiler.sh` so production runs reuse the same compiler-backed training path as local verification
+   - `launch_training.sh` now delegates to `scripts/legacy/run_llm_training_with_compiler.sh` so production runs reuse the same compiler-backed training path as local verification
 
 3. **Docker** 
    - `docker-compose.yml` - Local multi-GPU testing
@@ -457,13 +457,13 @@ neurx compile ddp_distributed_training.s
 bash setup_production_deployment.sh
 
 # Submit SLURM job
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # Or run with Docker
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # Monitor training
-./production_deployment/scripts/monitor_training.sh
+./deploy/production/scripts/monitor_training.sh
 ```
 
 ---
@@ -532,7 +532,7 @@ Total throughput: ~300K tokens/sec
 ├── cuda_accelerated_training.s           ✅ (750 lines)
 ├── ddp_distributed_training.s            ✅ (800 lines)
 ├── setup_production_deployment.sh         ✅ (500 lines)
-└── production_deployment/
+└── deploy/production/
     ├── configs/
     │   ├── cluster_config.yaml           ✅
     │   └── kubernetes_deployment.yaml    ✅

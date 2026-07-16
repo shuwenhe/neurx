@@ -276,7 +276,7 @@ cuda-verify:
 | [BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | 完整使用指南 |
 | [../CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPU架构详解 |
 | [../S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA 实现指南 |
-| [../script/gpu_train.s](../script/gpu_train.s) | GPU训练脚本 |
+| [../scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPU训练脚本 |
 | [cuda_kernels.cu](cuda_kernels.cu) | CUDA核函数源代码 |
 
 ## 🎓 学习要点

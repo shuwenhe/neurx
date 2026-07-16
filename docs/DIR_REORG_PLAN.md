@@ -89,7 +89,7 @@ neurx/
 | `example/` | `examples/` | End-to-end runnable examples |
 | `app/neurx/` | `examples/app/neurx/` or `apps/neurx/` | UI / bridge application code |
 | `s/` | `legacy/s/` | Old S prototypes and compatibility shims |
-| `script/` and `scripts/` | `tools/` or `devtools/` | Developer utilities and automation |
+| `scripts/legacy/` and `scripts/` | `tools/` or `devtools/` | Developer utilities and automation |
 
 ## Priority order
 

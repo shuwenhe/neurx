@@ -235,7 +235,7 @@ cd /Users/feifei/shuwen/train/neurx
 make -f Makefile.complete demo-all
 
 # 2. 启动完整训练
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 
 # 3. 监控进度
 tail -f logs/training_*.jsonl | jq .
@@ -251,25 +251,25 @@ python3 deploy/inference_server.py
 
 ```bash
 # Reward模型
-s run script/reward_model.s
+s run scripts/legacy/reward_model.s
 
 # PPO训练
-s run script/rlhf_ppo.s
+s run scripts/legacy/rlhf_ppo.s
 
 # SFT微调
-s run script/sft_trainer.s
+s run scripts/legacy/sft_trainer.s
 
 # 评估
-s run script/evaluation_framework.s
+s run scripts/legacy/evaluation_framework.s
 
 # LoRA适配
-s run script/lora_finetuning.s
+s run scripts/legacy/lora_finetuning.s
 
 # 量化
-s run script/quantization_system.s
+s run scripts/legacy/quantization_system.s
 
 # 推理
-s run script/inference_optimization.s
+s run scripts/legacy/inference_optimization.s
 ```
 
 ---
@@ -278,7 +278,7 @@ s run script/inference_optimization.s
 
 ```
 neurx/
-├── script/
+├── scripts/legacy/
 │   ├── rlhf_ppo.s                (PPO框架)
 │   ├── reward_model.s            (Reward模型)
 │   ├── sft_trainer.s             (SFT框架)
@@ -355,7 +355,7 @@ neurx/
 
 ```bash
 # 一键启动完整系统
-bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 **系统状态**: 🟢 **完全就绪，可投入生产** 🟢

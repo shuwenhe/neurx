@@ -20,10 +20,10 @@ Successfully completed **Phase 10 - Large Model Support** for NeurX parameter sc
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `script/large_model_trainer.s` | 7B/13B/70B configs, memory estimation, gradient accumulation | ✅ Complete |
-| `script/distributed_training_v2.s` | Distributed training with large model optimizations | ✅ Complete |
+| `scripts/legacy/large_model_trainer.s` | 7B/13B/70B configs, memory estimation, gradient accumulation | ✅ Complete |
+| `scripts/legacy/distributed_training_v2.s` | Distributed training with large model optimizations | ✅ Complete |
 | `configs/7b_training.json` | Full training configuration (hyperparams + memory) | ✅ Complete |
-| `script/model_trainer_7b.s` | Simplified S trainer (future compilation) | ✅ Complete |
+| `scripts/legacy/model_trainer_7b.s` | Simplified S trainer (future compilation) | ✅ Complete |
 
 ### 2. Launch & Documentation
 
@@ -284,7 +284,7 @@ checkpoints/
 
 ```
 /Users/feifei/shuwen/train/neurx/
-├── script/
+├── scripts/legacy/
 │   ├── large_model_trainer.s          (7B/13B/70B configs)
 │   ├── distributed_training_v2.s      (enhanced DDP)
 │   └── model_trainer_7b.s             (simplified S trainer)

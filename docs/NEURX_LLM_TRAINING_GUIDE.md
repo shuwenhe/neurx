@@ -408,7 +408,7 @@ export NEURX_LR=0.001
 export NEURX_SEQ_LENGTH=8
 
 # 直接运行脚本
-bash script/run_llm_training_with_compiler.sh
+bash scripts/legacy/run_llm_training_with_compiler.sh
 
 # 查看日志
 tail -f /tmp/neurx_llm_train.log
@@ -622,7 +622,7 @@ cat Makefile | head -100
 
 ```bash
 # 查看完整的训练脚本
-cat script/run_llm_training_with_compiler.sh
+cat scripts/legacy/run_llm_training_with_compiler.sh
 
 # 查看 S 语言训练代码
 cat train_and_infer.s
@@ -641,7 +641,7 @@ make train-llm NEURX_TOTAL_STEPS=10 -v
 env | grep NEURX
 
 # 查看编译输出
-bash -x script/run_llm_training_with_compiler.sh
+bash -x scripts/legacy/run_llm_training_with_compiler.sh
 ```
 
 ---

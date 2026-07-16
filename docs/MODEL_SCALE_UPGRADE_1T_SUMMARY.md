@@ -25,14 +25,14 @@
 ## 🏗️ 已实现的核心组件
 
 ### 1️⃣ 模型定义框架 ✅
-**文件**: `script/model_trainer_1t.s`
+**文件**: `scripts/legacy/model_trainer_1t.s`
 - ✓ 1T 参数模型配置生成器
 - ✓ 内存估算系统（精确到 GB/TB）
 - ✓ 分布式训练参数计算
 - ✓ 硬件需求分析（1024 GPU）
 
 ### 2️⃣ 分布式训练框架 ✅
-**文件**: `script/distributed_training_1t.s`
+**文件**: `scripts/legacy/distributed_training_1t.s`
 - ✓ 张量并行 (TP=64)
 - ✓ 管道并行 (PP=8 阶段)
 - ✓ 数据并行 (DP=2x)
@@ -54,7 +54,7 @@
 - 硬件需求声明
 
 ### 4️⃣ 启动脚本 ✅
-**文件**: `script/LAUNCH_1T_TRAINING.sh`
+**文件**: `scripts/legacy/LAUNCH_1T_TRAINING.sh`
 - ✓ 预检查列表 (GPU, CUDA, 依赖)
 - ✓ 内存分析报告
 - ✓ 分布式配置验证
@@ -63,7 +63,7 @@
 - ✓ 快速启动选项
 
 ### 5️⃣ 部署指南 ✅
-**文件**: `script/DEPLOYMENT_GUIDE_1T_MODEL.sh`
+**文件**: `scripts/legacy/DEPLOYMENT_GUIDE_1T_MODEL.sh`
 - ✓ 执行摘要
 - ✓ 架构规范
 - ✓ 分布式配置详解
@@ -302,22 +302,22 @@ cat /Users/feifei/shuwen/train/neurx/config_1t_model.json | jq .
 ### 2. 运行本地仿真（验证架构）
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-s run script/model_trainer_1t.s
+s run scripts/legacy/model_trainer_1t.s
 ```
 
 ### 3. 查看分布式训练框架
 ```bash
-s run script/distributed_training_1t.s
+s run scripts/legacy/distributed_training_1t.s
 ```
 
 ### 4. 查看完整部署指南
 ```bash
-bash script/DEPLOYMENT_GUIDE_1T_MODEL.sh
+bash scripts/legacy/DEPLOYMENT_GUIDE_1T_MODEL.sh
 ```
 
 ### 5. 启动实际训练（需要 1024 GPU）
 ```bash
-bash script/LAUNCH_1T_TRAINING.sh --start-training
+bash scripts/legacy/LAUNCH_1T_TRAINING.sh --start-training
 ```
 
 ---
@@ -360,14 +360,14 @@ bash script/LAUNCH_1T_TRAINING.sh --start-training
 ## 📚 相关文件清单
 
 ### 模型和训练
-- `script/model_trainer_1t.s` - 1T 参数模型定义
-- `script/distributed_training_1t.s` - 分布式训练框架
+- `scripts/legacy/model_trainer_1t.s` - 1T 参数模型定义
+- `scripts/legacy/distributed_training_1t.s` - 分布式训练框架
 - `config_1t_model.json` - 完整模型配置
 
 ### 部署和启动
-- `script/LAUNCH_1T_TRAINING.sh` - 训练启动脚本
-- `script/DEPLOYMENT_GUIDE_1T_MODEL.sh` - 完整部署指南
-- `script/run_1t_training.py` - PyTorch 训练循环
+- `scripts/legacy/LAUNCH_1T_TRAINING.sh` - 训练启动脚本
+- `scripts/legacy/DEPLOYMENT_GUIDE_1T_MODEL.sh` - 完整部署指南
+- `scripts/legacy/run_1t_training.py` - PyTorch 训练循环
 
 ### 文档
 - 本文件（1T 升级总结）
@@ -380,7 +380,7 @@ bash script/LAUNCH_1T_TRAINING.sh --start-training
 ### 立即执行（本周）
 1. **审查架构**
    ```bash
-   s run script/model_trainer_1t.s
+   s run scripts/legacy/model_trainer_1t.s
    ```
 
 2. **评估成本**

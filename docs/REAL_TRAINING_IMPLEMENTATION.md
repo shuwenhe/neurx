@@ -98,7 +98,7 @@ cd /home/shuwen/shuwen/train/neurx
 
 ### 步骤2：修改main()函数以使用真实训练
 
-在 `script/run_large_pretrain.s` 中替换：
+在 `scripts/legacy/run_large_pretrain.s` 中替换：
 
 ```s
 package main
@@ -232,7 +232,7 @@ Epochs: 3
 | `pretrain/llm/real_training.s` | 核心数学和算法 |
 | `pretrain/llm/real_training_loop.s` | 训练循环框架 |
 | `pretrain/llm/real_main_training.s` | 生产级主程序 |
-| `script/run_large_pretrain.s` | 启动器（需要修改） |
+| `scripts/legacy/run_large_pretrain.s` | 启动器（需要修改） |
 | `pretrain/llm/large_pretrain.s` | 现有完整实现（参考） |
 
 ## 性能指标
@@ -248,7 +248,7 @@ Epochs: 3
 
 ### 问题：训练仍然很快完成
 **解决方案：** 检查是否有其他地方覆盖了main()函数，或者编译的IR仍然包含旧的硬编码值。确保：
-1. script/run_large_pretrain.s已更新
+1. scripts/legacy/run_large_pretrain.s已更新
 2. 旧的artifacts/build目录已删除
 3. 使用`make clean-build`后重新编译
 

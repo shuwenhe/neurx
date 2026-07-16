@@ -94,7 +94,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 neurx run generate_deployment_configs.s
 
 # Submit job
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # Check status
 squeue -j <job_id>
@@ -109,22 +109,22 @@ tail -f logs/slurm-<job_id>.out
 ### Docker (Local Multi-GPU)
 ```bash
 # Start training
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # Run in background
-docker-compose -f production_deployment/docker-compose.yml up -d
+docker-compose -f deploy/production/docker-compose.yml up -d
 
 # Stop containers
-docker-compose -f production_deployment/docker-compose.yml down
+docker-compose -f deploy/production/docker-compose.yml down
 
 # Check logs
-docker-compose -f production_deployment/docker-compose.yml logs -f
+docker-compose -f deploy/production/docker-compose.yml logs -f
 ```
 
 ### Kubernetes (Cloud/On-Prem)
 ```bash
 # Apply deployment
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 
 # Check job status
 kubectl get jobs
@@ -153,7 +153,7 @@ nvidia-smi -pm 1 # Show Power Management
 ### Training Progress (SLURM)
 ```bash
 # Monitor real-time
-./production_deployment/scripts/monitor_training.sh
+./deploy/production/scripts/monitor_training.sh
 
 # View recent output
 tail -100 logs/slurm-<job_id>.out
@@ -226,7 +226,7 @@ cat logs/scaled_training_system_compile.log
 cat test_output/scaled_training_system_output.txt
 
 # Training logs
-tail -f production_deployment/logs/training.log
+tail -f deploy/production/logs/training.log
 ```
 
 ---
@@ -328,13 +328,13 @@ neurx run performance_benchmark.s
 neurx run generate_deployment_configs.s
 
 # 2. Deploy to SLURM
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # 3. Monitor
-./production_deployment/scripts/monitor_training.sh
+./deploy/production/scripts/monitor_training.sh
 
 # 4. View results
-tail -f production_deployment/logs/training.log
+tail -f deploy/production/logs/training.log
 ```
 
 ### Workflow 4: Docker Deployment
@@ -343,7 +343,7 @@ tail -f production_deployment/logs/training.log
 docker build -t neurx:latest .
 
 # 2. Start training
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # 3. Monitor
 docker-compose logs -f

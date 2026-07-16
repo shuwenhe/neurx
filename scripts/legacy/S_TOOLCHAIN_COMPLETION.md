@@ -4,7 +4,7 @@
 
 ### 1. 统一数据处理管道 ✅
 
-**文件：** `script/data_pipeline.s` (700+ 行)
+**文件：** `scripts/legacy/data_pipeline.s` (700+ 行)
 
 **功能：**
 ```
@@ -99,7 +99,7 @@ export MAX_SHARDS=256
 
 ```
 neurx/
-├── script/
+├── scripts/legacy/
 │   ├── data_pipeline.s              ← 主实现 ✓
 │   ├── data_utils.s                 ← 参考 (已弃用)
 │   ├── data_clean.s                 ← 参考 (已弃用)
@@ -188,7 +188,7 @@ data_pipeline.s
 cd /home/shuwen/shuwen/train/neurx
 
 # 使用 S 编译器 (确保已安装)
-/home/shuwen/.local/bin/s script/data_pipeline.s \
+/home/shuwen/.local/bin/s scripts/legacy/data_pipeline.s \
   -o artifacts/build/data_pipeline/data_pipeline
 
 chmod +x artifacts/build/data_pipeline/data_pipeline

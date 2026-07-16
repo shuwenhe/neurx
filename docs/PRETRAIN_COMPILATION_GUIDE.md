@@ -6,7 +6,7 @@
 
 ```
 Compiling S training pipeline...
-compiled /Users/shuwen/shuwen/train/neurx/script/minimal_train.s -> /Users/shuwen/shuwen/train/neurx/artifacts/build/run_large_pretrain/run_large_pretrain.ir
+compiled /Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s -> /Users/shuwen/shuwen/train/neurx/artifacts/build/run_large_pretrain/run_large_pretrain.ir
 Running training pipeline...
 compiled /Users/shuwen/shuwen/train/neurx/artifacts/build/run_large_pretrain/run_large_pretrain.ir -> /Users/shuwen/shuwen/train/neurx/artifacts/build/run_large_pretrain/run_large_pretrain.ir.runner.bin
 ```
@@ -85,7 +85,7 @@ make pretrain
 
 ### 情况 3：修改了训练脚本
 ```bash
-# 修改 script/minimal_train.s 后
+# 修改 scripts/legacy/minimal_train.s 后
 make pretrain
 # 自动检测到源文件改变，重新编译
 ```
@@ -171,7 +171,7 @@ IR 转换为二进制:
 
 ## ✅ 你已经获得的改进
 
-文件已修改: `/Users/shuwen/shuwen/train/neurx/script/run_large_pretrain.sh`
+文件已修改: `/Users/shuwen/shuwen/train/neurx/scripts/legacy/run_large_pretrain.sh`
 
 **新增功能**:
 - ✅ 自动检查源文件时间戳
@@ -191,7 +191,7 @@ A: S 编译器需要进行完整的编译过程（词法/语法/类型检查/代
 A: 缓存基于源文件时间戳。确保你的编辑器正确保存了文件。
 ```bash
 # 强制重新编译
-touch script/minimal_train.s
+touch scripts/legacy/minimal_train.s
 make pretrain
 ```
 
@@ -227,5 +227,5 @@ Compiling S source to IR (this may take 30-60 seconds on first run)...
 ---
 
 **修改日期**: 2026-07-11  
-**文件**: `/Users/shuwen/shuwen/train/neurx/script/run_large_pretrain.sh`  
+**文件**: `/Users/shuwen/shuwen/train/neurx/scripts/legacy/run_large_pretrain.sh`
 **改进**: 增量编译缓存机制

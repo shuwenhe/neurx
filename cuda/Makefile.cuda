@@ -66,11 +66,11 @@ $(CUDA_LIB): $(CUDA_DIR)/cuda_runtime_binding.cu $(CUDA_DIR)/cuda_runtime_bindin
 # S TRAINER COMPILATION
 # ============================================================================
 
-build-trainer: $(S_RUNNER) script/gpu_train_cuda.ir
+build-trainer: $(S_RUNNER) scripts/legacy/gpu_train_cuda.ir
 
-script/gpu_train_cuda.ir: script/gpu_train_cuda.s
+scripts/legacy/gpu_train_cuda.ir: scripts/legacy/gpu_train_cuda.s
 	@echo "[S] Compiling GPU trainer..."
-	@$(S_COMPILER) ir script/gpu_train_cuda.s > $@
+	@$(S_COMPILER) ir scripts/legacy/gpu_train_cuda.s > $@
 	@echo "[S] ✓ Compiled: $@"
 
 # ============================================================================
@@ -90,7 +90,7 @@ train-gpu: build-cuda build-trainer
 	export NEURX_PRETRAIN_LR=$(PRETRAIN_LR) && \
 	export NEURX_PRETRAIN_STEPS=$(PRETRAIN_STEPS) && \
 	export LD_LIBRARY_PATH=$(ARTIFACTS)/lib:$$LD_LIBRARY_PATH && \
-	$(S_RUNNER) script/gpu_train_cuda.ir
+	$(S_RUNNER) scripts/legacy/gpu_train_cuda.ir
 
 # ============================================================================
 # VERIFICATION
@@ -118,7 +118,7 @@ check-all: check-cuda check-s
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
-	@rm -f script/gpu_train_cuda.ir
+	@rm -f scripts/legacy/gpu_train_cuda.ir
 	@echo "✓ Clean complete"
 
 clean-install:
@@ -145,6 +145,6 @@ debug-s:
 	@echo "S Configuration:"
 	@echo "  Compiler: $(S_COMPILER)"
 	@echo "  Runner: $(S_RUNNER)"
-	@echo "  Script: script/gpu_train_cuda.s"
+	@echo "  Script: scripts/legacy/gpu_train_cuda.s"
 
 .PHONY: check-cuda check-s check-all debug-cuda debug-s clean clean-install distclean

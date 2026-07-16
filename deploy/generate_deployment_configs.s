@@ -396,10 +396,10 @@ func main() {
     
     // Create output directories
     println("📁 Creating directories...")
-    // In production S: os.mkdir_all("production_deployment/scripts")
-    // os.mkdir_all("production_deployment/configs")
-    println("  ✅ production_deployment/scripts/")
-    println("  ✅ production_deployment/configs/")
+    // In production S: os.mkdir_all("deploy/production/scripts")
+    // os.mkdir_all("deploy/production/configs")
+    println("  ✅ deploy/production/scripts/")
+    println("  ✅ deploy/production/configs/")
     println("")
     
     // Generate configurations
@@ -408,28 +408,28 @@ func main() {
     println("")
     
     // SLURM
-    let slurm_ok = generate_slurm_script(config, "production_deployment/scripts/slurm_submit.sh")
+    let slurm_ok = generate_slurm_script(config, "deploy/production/scripts/slurm_submit.sh")
     if slurm_ok {
         println("  ✅ SLURM job script generated")
     }
     println("")
     
     // Docker Compose
-    let docker_ok = generate_docker_compose(config, "production_deployment/docker-compose.yml")
+    let docker_ok = generate_docker_compose(config, "deploy/production/docker-compose.yml")
     if docker_ok {
         println("  ✅ Docker Compose configuration generated")
     }
     println("")
     
     // Kubernetes
-    let k8s_ok = generate_kubernetes_deployment(config, "production_deployment/kubernetes_deployment.yaml")
+    let k8s_ok = generate_kubernetes_deployment(config, "deploy/production/kubernetes_deployment.yaml")
     if k8s_ok {
         println("  ✅ Kubernetes deployment manifest generated")
     }
     println("")
     
     // Cluster config
-    let cluster_ok = generate_cluster_config(config, "production_deployment/configs/cluster_config.json")
+    let cluster_ok = generate_cluster_config(config, "deploy/production/configs/cluster_config.json")
     if cluster_ok {
         println("  ✅ Cluster configuration generated")
     }
@@ -441,7 +441,7 @@ func main() {
     println("✅ ALL DEPLOYMENT CONFIGURATIONS GENERATED SUCCESSFULLY")
     println("")
     println("📄 Generated Files:")
-    println("  production_deployment/")
+    println("  deploy/production/")
     println("    ├── scripts/")
     println("    │   ├── slurm_submit.sh          (SLURM job submission)")
     println("    │   ├── launch_training.sh       (Training launcher)")
@@ -457,13 +457,13 @@ func main() {
     println("🚀 DEPLOYMENT OPTIONS:")
     println("")
     println("1. SLURM (HPC Cluster):")
-    println("   sbatch production_deployment/scripts/slurm_submit.sh")
+    println("   sbatch deploy/production/scripts/slurm_submit.sh")
     println("")
     println("2. Docker (Local Multi-GPU):")
-    println("   docker-compose -f production_deployment/docker-compose.yml up")
+    println("   docker-compose -f deploy/production/docker-compose.yml up")
     println("")
     println("3. Kubernetes (Cloud/On-Premises):")
-    println("   kubectl apply -f production_deployment/kubernetes_deployment.yaml")
+    println("   kubectl apply -f deploy/production/kubernetes_deployment.yaml")
     println("")
     println("═" + strings.repeat("═", 61))
     println("")

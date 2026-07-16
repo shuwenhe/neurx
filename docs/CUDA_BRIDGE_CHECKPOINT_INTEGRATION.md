@@ -42,7 +42,7 @@
 
 ## 文件结构
 
-### 1. S 语言脚本 (script/pretrain_gpu.s)
+### 1. S 语言脚本 (scripts/legacy/pretrain_gpu.s)
 
 **新增函数**：
 - `find_latest_checkpoint_weights(dir, step)` - 查找最新的权重文件

@@ -198,7 +198,7 @@ neurx-code/content/
 │   ├── LanguageClient.h/cpp
 │   ├── GitService.h/cpp
 │   └── TerminalService.h/cpp
-└── test/              # 单元测试
+└── tests/              # 单元测试
     ├── FindServiceTest.cpp
     ├── FoldingManagerTest.cpp
     └── ...

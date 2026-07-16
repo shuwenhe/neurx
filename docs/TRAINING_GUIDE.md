@@ -613,7 +613,7 @@ neurx train --config config.yaml
 遇到问题？查看：
 1. 框架文档（见上方链接）
 2. 示例脚本（`examples/`）
-3. 集成测试（`test/`）
+3. 集成测试（`tests/`）
 4. GitHub Issues
 
 ---

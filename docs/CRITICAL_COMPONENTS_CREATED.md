@@ -7,7 +7,7 @@
 
 ## 📦 新创建的S语言框架
 
-### 1. **Tokenizer Framework** (`script/tokenizer.s`)
+### 1. **Tokenizer Framework** (`scripts/legacy/tokenizer.s`)
 用于将训练文本转换为模型可处理的token序列
 
 **关键功能**:
@@ -33,12 +33,12 @@ batch := tokenizer.encode_batch(texts, 4096, true)
 
 **编译命令** (待实现):
 ```bash
-s build script/tokenizer.s -o bin/tokenizer
+s build scripts/legacy/tokenizer.s -o bin/tokenizer
 ```
 
 ---
 
-### 2. **Evaluator Framework** (`script/evaluator.s`)
+### 2. **Evaluator Framework** (`scripts/legacy/evaluator.s`)
 用于计算训练过程中的关键指标(困惑度、交叉熵等)
 
 **关键功能**:
@@ -88,7 +88,7 @@ Claude级目标: 困惑度 < 50
 
 ---
 
-### 3. **Checkpoint Manager** (`script/checkpoint_manager.s`)
+### 3. **Checkpoint Manager** (`scripts/legacy/checkpoint_manager.s`)
 用于自动保存、验证和恢复训练检查点
 
 **关键功能**:
@@ -147,7 +147,7 @@ println(stats)
 
 ---
 
-### 4. **Training Monitor** (`script/training_monitor.s`)
+### 4. **Training Monitor** (`scripts/legacy/training_monitor.s`)
 实时监控训练进度、计算ETA、生成报告
 
 **关键功能**:
@@ -206,7 +206,7 @@ Loss: 1.2345 | Speed: 1050 tok/s | Elapsed: 12h 30m | ETA: 17h 15m
 
 ### 在训练脚本中的使用方式
 
-修改 `script/run_model_large_pretrain.sh`:
+修改 `scripts/legacy/run_model_large_pretrain.sh`:
 
 ```bash
 #!/bin/bash
@@ -291,16 +291,16 @@ NeurX目标: > 1000 tok/s
 cd /Users/feifei/shuwen/train/neurx
 
 # 编译Tokenizer
-s build script/tokenizer.s -o bin/tokenizer
+s build scripts/legacy/tokenizer.s -o bin/tokenizer
 
 # 编译Evaluator
-s build script/evaluator.s -o bin/evaluator
+s build scripts/legacy/evaluator.s -o bin/evaluator
 
 # 编译Checkpoint Manager
-s build script/checkpoint_manager.s -o bin/checkpoint_manager
+s build scripts/legacy/checkpoint_manager.s -o bin/checkpoint_manager
 
 # 编译Training Monitor
-s build script/training_monitor.s -o bin/training_monitor
+s build scripts/legacy/training_monitor.s -o bin/training_monitor
 ```
 
 ### 需要更新的Makefile目标:
@@ -308,10 +308,10 @@ s build script/training_monitor.s -o bin/training_monitor
 .PHONY: build-eval-tools
 build-eval-tools:
 	@echo "🔨 Compiling evaluation tools..."
-	$(S_COMPILER) build script/tokenizer.s -o bin/tokenizer
-	$(S_COMPILER) build script/evaluator.s -o bin/evaluator
-	$(S_COMPILER) build script/checkpoint_manager.s -o bin/checkpoint_manager
-	$(S_COMPILER) build script/training_monitor.s -o bin/training_monitor
+	$(S_COMPILER) build scripts/legacy/tokenizer.s -o bin/tokenizer
+	$(S_COMPILER) build scripts/legacy/evaluator.s -o bin/evaluator
+	$(S_COMPILER) build scripts/legacy/checkpoint_manager.s -o bin/checkpoint_manager
+	$(S_COMPILER) build scripts/legacy/training_monitor.s -o bin/training_monitor
 
 .PHONY: eval
 eval: build-eval-tools
@@ -380,7 +380,7 @@ which s
 s -version
 
 # 若无法编译，使用Bash包装器
-bash script/tokenizer.sh
+bash scripts/legacy/tokenizer.sh
 ```
 
 ### 运行时错误

@@ -11,9 +11,9 @@ func main() int {
     println("Project root: " + project_root)
     println("Pipeline mode: train -> checkpoint -> infer")
     println("")
-    println("  training runner : " + check_path("script/run_llm_training.s"))
-    println("  inference entry : " + check_path("script/run_inference_llm.s"))
-    println("  split entry     : " + check_path("script/split_data.s"))
+    println("  training runner : " + check_path("scripts/legacy/run_llm_training.s"))
+    println("  inference entry : " + check_path("scripts/legacy/run_inference_llm.s"))
+    println("  split entry     : " + check_path("scripts/legacy/split_data.s"))
     println("")
     println("This S entrypoint centralizes the pipeline selection layer.")
     0

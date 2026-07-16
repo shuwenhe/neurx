@@ -37,19 +37,19 @@ tail -f artifacts/logs/train_20260707_094802.log
 #### 🚀 快速方案2：使用监控脚本
 ```bash
 # 直接运行监控脚本
-bash script/monitor_training.sh
+bash scripts/legacy/monitor_training.sh
 
 # 或查看当前状态
-bash script/monitor_training.sh status
+bash scripts/legacy/monitor_training.sh status
 
 # 或实时监控日志
-bash script/monitor_training.sh realtime
+bash scripts/legacy/monitor_training.sh realtime
 ```
 
 #### 🚀 快速方案3：启动并监控
 ```bash
 # 一条命令启动训练和监控
-bash script/start_train.sh
+bash scripts/legacy/start_train.sh
 ```
 
 #### 🚀 快速方案4：后台启动+手动监控
@@ -85,7 +85,7 @@ make train
 ```
 
 **或临时跳过验证集**：
-在 `script/run_large_pretrain.sh` 中添加：
+在 `scripts/legacy/run_large_pretrain.sh` 中添加：
 ```bash
 export NEURX_SKIP_VAL=1
 export NEURX_SKIP_TEST=1
@@ -130,11 +130,11 @@ tail -f artifacts/logs/train_*.log
 ### 方案B：分阶段执行
 ```bash
 # 1. 检查数据准备（已完成，可跳过）
-bash script/clean_data.sh
-bash script/generate_shards.sh
+bash scripts/legacy/clean_data.sh
+bash scripts/legacy/generate_shards.sh
 
 # 2. 运行训练
-bash script/run_large_pretrain.sh
+bash scripts/legacy/run_large_pretrain.sh
 
 # 3. 在另一个终端监控
 tail -f artifacts/logs/train_*.log
@@ -146,12 +146,12 @@ tail -f artifacts/logs/train_*.log
 # 或使用脚本直接调用而不经过make
 
 cd /home/shuwen/shuwen/train/neurx
-bash script/run_large_pretrain.sh 2>&1
+bash scripts/legacy/run_large_pretrain.sh 2>&1
 ```
 
 ## 🔧 配置环境变量
 
-在 `script/run_large_pretrain.sh` 中可以设置：
+在 `scripts/legacy/run_large_pretrain.sh` 中可以设置：
 ```bash
 # 模型大小
 export MODEL_SIZE=1t
@@ -259,11 +259,11 @@ tail -f artifacts/logs/train_*.log
   artifacts/checkpoints/                  # 训练检查点
 
 监控工具:
-  script/monitor_training.sh              # 监控脚本
-  script/start_train.sh                   # 快速启动脚本
-  script/clean_data.sh                    # 数据清洁脚本
-  script/generate_shards.sh               # 分片生成脚本
-  script/run_large_pretrain.sh            # 训练脚本
+  scripts/legacy/monitor_training.sh              # 监控脚本
+  scripts/legacy/start_train.sh                   # 快速启动脚本
+  scripts/legacy/clean_data.sh                    # 数据清洁脚本
+  scripts/legacy/generate_shards.sh               # 分片生成脚本
+  scripts/legacy/run_large_pretrain.sh            # 训练脚本
 ```
 
 ## 🎯 建议的操作步骤
@@ -280,7 +280,7 @@ tail -30 artifacts/logs/train_*.log | grep -v "^$"
 
 ### 第三步：实时监控
 ```bash
-bash script/monitor_training.sh
+bash scripts/legacy/monitor_training.sh
 # 或
 tail -f artifacts/logs/train_*.log
 ```
@@ -292,4 +292,4 @@ tail -f artifacts/logs/train_*.log
 
 **相关文档**：
 - `MAKE_TRAIN_DIAGNOSIS.md` - 详细诊断报告
-- `script/monitor_training.sh` - 监控脚本源代码
+- `scripts/legacy/monitor_training.sh` - 监控脚本源代码

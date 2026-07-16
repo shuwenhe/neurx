@@ -126,7 +126,7 @@ make pretrain-watch
 
 - [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md)
 - [S语言特性](pretrain/llm/model_large_pretrain.s)
-- [运行脚本](script/run_model_large_pretrain.sh)
+- [运行脚本](scripts/legacy/run_model_large_pretrain.sh)
 - [推理集成](chat_inference.s)
 
 ## 🎉 关键成果
@@ -148,7 +148,7 @@ cd neurx && make pretrain
 make pretrain-watch
 
 # 直接运行脚本
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 
 # 只编译，不执行
 NEURX_PRETRAIN_COMPILE_ONLY=1 make pretrain
@@ -172,4 +172,4 @@ make chat
 
 ---
 
-**快速链接**: [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md) | [源代码](pretrain/llm/model_large_pretrain.s) | [运行脚本](script/run_model_large_pretrain.sh)
+**快速链接**: [完整指南](S_LANGUAGE_PRETRAINING_GUIDE.md) | [源代码](pretrain/llm/model_large_pretrain.s) | [运行脚本](scripts/legacy/run_model_large_pretrain.sh)

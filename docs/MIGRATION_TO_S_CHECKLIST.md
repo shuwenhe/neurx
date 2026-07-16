@@ -7,11 +7,11 @@
 
 ## 优先级 1（高）：CLI 工具迁移
 
-### 📌 任务 1.1：`script/create-file.js` → `script/file_creation_tool.s`
+### 📌 任务 1.1：`scripts/legacy/create-file.js` → `scripts/legacy/file_creation_tool.s`
 
-**当前位置**：[script/create-file.js](script/create-file.js)  
-**文件大小**：8.7K  
-**优先级**：🔴 **高** - 这是开发工作流的核心工具  
+**当前位置**：[scripts/legacy/create-file.js](scripts/legacy/create-file.js)
+**文件大小**：8.7K
+**优先级**：🔴 **高** - 这是开发工作流的核心工具
 
 **功能概述**：
 - 原子式文件创建 CLI 工具
@@ -34,7 +34,7 @@
 ```
 
 **迁移策略**：
-1. 创建 `script/file_creation_tool.s`
+1. 创建 `scripts/legacy/file_creation_tool.s`
 2. 实现命令行参数解析
 3. 实现文件 I/O 操作
 4. 添加权限管理
@@ -43,9 +43,9 @@
 **预期结果**：
 ```bash
 # S 语言版本的用法
-s script/file_creation_tool.s --file path/to/file --text "content"
-s script/file_creation_tool.s --file path/config.json --mode 0o600 --text "{...}"
-s script/file_creation_tool.s --batch operations.json
+s scripts/legacy/file_creation_tool.s --file path/to/file --text "content"
+s scripts/legacy/file_creation_tool.s --file path/config.json --mode 0o600 --text "{...}"
+s scripts/legacy/file_creation_tool.s --batch operations.json
 ```
 
 **相关依赖**：
@@ -101,7 +101,7 @@ func example2_CreateProtectedConfig() {
 ```
 
 **相关依赖**：
-- `script/file_creation_tool.s` (依赖于任务 1.1 完成)
+- `scripts/legacy/file_creation_tool.s` (依赖于任务 1.1 完成)
 
 ---
 
@@ -126,7 +126,7 @@ func example2_CreateProtectedConfig() {
 ## 迁移后验证检查清单
 
 ### 任务 1.1 验证
-- [ ] `s script/file_creation_tool.s --help` 输出正确
+- [ ] `s scripts/legacy/file_creation_tool.s --help` 输出正确
 - [ ] 单文件创建功能正常
 - [ ] 批量操作功能正常
 - [ ] 权限设置正确（`ls -l` 验证）
@@ -162,4 +162,3 @@ func example2_CreateProtectedConfig() {
 - 🎯 **100% S 实现** - 完全零外部依赖
 - 🎯 **0 个非 S 文件** - 纯粹的 S 语言项目
 - 🎯 **完全自洽** - 所有工具都用 S 编写
-

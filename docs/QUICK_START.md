@@ -30,7 +30,7 @@
 cd /Users/feifei/shuwen/train/neurx
 
 # 验证框架完整性
-bash script/verify_framework.sh
+bash scripts/legacy/verify_framework.sh
 ```
 
 **预期输出:**
@@ -58,7 +58,7 @@ ls data/training_data_splits/*.jsonl > data/training_data_shards/manifest.txt
 ```bash
 # 在集群主节点上提交训练任务
 cd /opt/neurx
-sbatch script/submit_training_job.sh
+sbatch scripts/legacy/submit_training_job.sh
 
 # 查看任务状态
 squeue -j <job_id>

@@ -33,7 +33,7 @@ bash app/service/run_neurx_code_agent.sh --json --prompt "your task" --repo .
 export NEURX_CODE_AGENT_BASE_URL=https://api.example.com
 export NEURX_CODE_AGENT_MODEL=your-model
 export NEURX_API_KEY=sk-...
-make code-agent TASK="fix the failing test in test/"
+make code-agent TASK="fix the failing test in tests/"
 ```
 
 Set `NEURX_CODE_AGENT_USE_RUNTIME=1` on `code_agent_runner.sh` to force the NeurX runtime path.

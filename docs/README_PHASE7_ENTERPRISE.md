@@ -13,42 +13,42 @@ We've completed the final phase of the NeurX enterprise system with **5,850 line
 - Shared encoder with task-specific heads
 - 3 loss balancing strategies: fixed, adaptive, uncertainty
 - **Benefits**: 90% parameter reduction, 15% sample efficiency gain
-- **File**: `script/multitask_learning.s`
+- **File**: `scripts/legacy/multitask_learning.s`
 
 ### 2. **Data Synthesis Engine** (650 lines)
 - Automatically generate 10,000+ high-quality training samples
 - 6 task types: QA, Writing, Coding, Math, Reasoning, Translation
 - Quality scoring (0.0-1.0) and diversity metrics
 - Preference pair annotation for RLHF
-- **File**: `script/data_synthesis_engine.s`
+- **File**: `scripts/legacy/data_synthesis_engine.s`
 
 ### 3. **Knowledge Distillation System** (500 lines)
 - Compress large models efficiently (346M → 86M, 4.0x compression)
 - Temperature scaling softmax with KL divergence loss
 - Maintain 80-90% of teacher model performance
 - 1.5-2.0x inference speedup
-- **File**: `script/knowledge_distillation.s`
+- **File**: `scripts/legacy/knowledge_distillation.s`
 
 ### 4. **Long Context Handler** (650 lines)
 - Support for 32K+ token contexts (8x extension from 4K)
 - RoPE (Rotary Position Embeddings) implementation
 - Sliding window attention for efficiency
 - Chunked processing with overlap
-- **File**: `script/long_context_handler.s`
+- **File**: `scripts/legacy/long_context_handler.s`
 
 ### 5. **Safety Filter System** (550 lines)
 - Multi-layer harm detection (keyword + model-based)
 - 10 harm categories: hate speech, violence, sexual, harassment, illegal, self-harm, etc.
 - 3 safety policies: strict, moderate, relaxed
 - Confidence scoring and violation logging
-- **File**: `script/safety_filter.s`
+- **File**: `scripts/legacy/safety_filter.s`
 
 ### 6. **Performance Monitor** (550 lines)
 - Real-time metrics collection (throughput, latency, memory, GPU)
 - System health assessment (healthy/degraded/critical)
 - Adaptive optimization recommendations
 - Alert generation with configurable thresholds
-- **File**: `script/performance_monitor.s`
+- **File**: `scripts/legacy/performance_monitor.s`
 
 ### 7. **Model Merger** (750 lines)
 - Merge LoRA adapters into base model
@@ -56,7 +56,7 @@ We've completed the final phase of the NeurX enterprise system with **5,850 line
 - SLERP (Spherical Linear Interpolation) for smooth merging
 - Dequantize and merge quantized weights
 - 50% size reduction, 10% inference speedup
-- **File**: `script/model_merger.s`
+- **File**: `scripts/legacy/model_merger.s`
 
 ---
 
@@ -103,35 +103,35 @@ NeurX Enterprise System (12,000+ lines)
 
 ```bash
 # Generate synthetic training data
-s run script/data_synthesis_engine.s
+s run scripts/legacy/data_synthesis_engine.s
 
 # Train on multiple tasks simultaneously  
-s run script/multitask_learning.s
+s run scripts/legacy/multitask_learning.s
 
 # Compress a model via knowledge distillation
-s run script/knowledge_distillation.s
+s run scripts/legacy/knowledge_distillation.s
 
 # Process long documents (32K+ tokens)
-s run script/long_context_handler.s
+s run scripts/legacy/long_context_handler.s
 
 # Check content safety
-s run script/safety_filter.s
+s run scripts/legacy/safety_filter.s
 
 # Monitor system performance
-s run script/performance_monitor.s
+s run scripts/legacy/performance_monitor.s
 
 # Merge multiple models or adapters
-s run script/model_merger.s
+s run scripts/legacy/model_merger.s
 ```
 
 ### Complete Pipeline
 
 ```bash
 # Run entire enterprise training pipeline
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 
 # Validate all new features
-bash script/validate_enterprise_features.sh
+bash scripts/legacy/validate_enterprise_features.sh
 ```
 
 ---
@@ -204,13 +204,13 @@ bash script/validate_enterprise_features.sh
 
 ### New Files
 ```
-✅ script/multitask_learning.s (850 lines)
-✅ script/data_synthesis_engine.s (650 lines)
-✅ script/knowledge_distillation.s (500 lines)
-✅ script/long_context_handler.s (650 lines)
-✅ script/safety_filter.s (550 lines)
-✅ script/performance_monitor.s (550 lines)
-✅ script/model_merger.s (750 lines)
+✅ scripts/legacy/multitask_learning.s (850 lines)
+✅ scripts/legacy/data_synthesis_engine.s (650 lines)
+✅ scripts/legacy/knowledge_distillation.s (500 lines)
+✅ scripts/legacy/long_context_handler.s (650 lines)
+✅ scripts/legacy/safety_filter.s (550 lines)
+✅ scripts/legacy/performance_monitor.s (550 lines)
+✅ scripts/legacy/model_merger.s (750 lines)
 ```
 
 ---

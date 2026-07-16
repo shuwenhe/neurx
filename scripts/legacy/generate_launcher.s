@@ -323,7 +323,7 @@ func main() {
     string script = generate_launcher_script(cfg, hosts)
     
     // 5. 输出脚本到文件
-    string output_script = cfg.root_dir + "/script/launch_multinode_pretrain_generated.sh"
+    string output_script = cfg.root_dir + "/scripts/legacy/launch_multinode_pretrain_generated.sh"
     if !fs::write_file(output_script, script) {
         io::eprintln("ERROR: cannot write script to " + output_script)
         os::exit(1)

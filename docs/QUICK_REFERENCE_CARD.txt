@@ -86,7 +86,7 @@ A: ❌ 不是。只有 30-40 个核心模块会在每次训练时被执行。
 ⚠ data/*
   └─ 数据处理工具
   
-⚠ test/* / examples/*
+⚠ tests/* / examples/*
   └─ 测试和示例代码
 
 [不编译这些模块仍然可以训练，但会缺少某些功能]
@@ -196,13 +196,13 @@ pretrain/llm/gpt_large_pretrain.s (主程序)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 本地验证:
-  bash script/verify_framework.sh
+  bash scripts/legacy/verify_framework.sh
 
 集群编译:
   /opt/s/bin/s compile pretrain/llm/gpt_large_pretrain.s -o build/gpt_large_pretrain
 
 集群部署:
-  sbatch script/submit_training_job.sh
+  sbatch scripts/legacy/submit_training_job.sh
 
 监控训练:
   squeue -u $USER -l

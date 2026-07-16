@@ -223,7 +223,7 @@ else: \
 
 shard:
 	@echo "$(BLUE)📦 Sharding training data...$(NC)"
-	@make -f Makefile shard 2>/dev/null || $(PYTHON) script/data_pipeline_v2.py shard
+	@make -f Makefile shard 2>/dev/null || $(PYTHON) scripts/legacy/data_pipeline_v2.py shard
 	@echo "$(GREEN)✓ Sharding complete$(NC)"
 
 split:

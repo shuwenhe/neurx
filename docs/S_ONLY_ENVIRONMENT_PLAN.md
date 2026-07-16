@@ -12,13 +12,13 @@
 
 | 组件 | 文件 | 状态 | 功能 |
 |------|------|------|------|
-| 数据管道 | `script/data_pipeline.s` | ✅ | 清洗、去重、分片、manifest 生成 |
+| 数据管道 | `scripts/legacy/data_pipeline.s` | ✅ | 清洗、去重、分片、manifest 生成 |
 | 数据验证 | `dataset/verify_dataset.s` | ⏳ | 需要完善 |
 
 **编译命令：**
 ```bash
 # 数据管道
-s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # 数据验证
 s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
@@ -31,17 +31,17 @@ s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
 #### 2.1 训练运行器
 | 组件 | 文件 | 优先级 | 功能 |
 |------|------|--------|------|
-| 训练驱动 | `script/training_runner.s` | 🔴 高 | 模型训练主控 |
-| 检查点管理 | `script/checkpoint_manager.s` | 🟠 中 | 检查点保存、恢复、版本控制 |
-| 分布式训练 | `script/distributed_training.s` | 🟠 中 | 多 GPU/节点协调 |
-| 性能监控 | `script/training_monitor.s` | 🟡 低 | 训练过程监控 |
+| 训练驱动 | `scripts/legacy/training_runner.s` | 🔴 高 | 模型训练主控 |
+| 检查点管理 | `scripts/legacy/checkpoint_manager.s` | 🟠 中 | 检查点保存、恢复、版本控制 |
+| 分布式训练 | `scripts/legacy/distributed_training.s` | 🟠 中 | 多 GPU/节点协调 |
+| 性能监控 | `scripts/legacy/training_monitor.s` | 🟡 低 | 训练过程监控 |
 
 #### 2.2 优化工具
 | 组件 | 文件 | 优先级 | 功能 |
 |------|------|--------|------|
-| 混合精度 | `script/mixed_precision_trainer.s` | 🟡 低 | FP16/BF16 混合精度训练 |
-| 梯度累积 | `script/gradient_accumulation.s` | 🟡 低 | 梯度积累和检查点 |
-| 学习率调度 | `script/lr_scheduler.s` | 🟡 低 | 学习率衰减策略 |
+| 混合精度 | `scripts/legacy/mixed_precision_trainer.s` | 🟡 低 | FP16/BF16 混合精度训练 |
+| 梯度累积 | `scripts/legacy/gradient_accumulation.s` | 🟡 低 | 梯度积累和检查点 |
+| 学习率调度 | `scripts/legacy/lr_scheduler.s` | 🟡 低 | 学习率衰减策略 |
 
 ---
 
@@ -49,10 +49,10 @@ s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
 
 | 组件 | 文件 | 优先级 | 功能 |
 |------|------|--------|------|
-| 推理服务器 | `script/inference_server.s` | 🔴 高 | 模型推理 REST API |
-| 模型优化 | `script/inference_optimizer.s` | 🟠 中 | 量化、蒸馏、优化 |
-| REST API | `script/rest_api_handler.s` | 🟠 中 | HTTP 请求处理 |
-| 模型导出 | `script/model_exporter.s` | 🟡 低 | ONNX/TorchScript 导出 |
+| 推理服务器 | `scripts/legacy/inference_server.s` | 🔴 高 | 模型推理 REST API |
+| 模型优化 | `scripts/legacy/inference_optimizer.s` | 🟠 中 | 量化、蒸馏、优化 |
+| REST API | `scripts/legacy/rest_api_handler.s` | 🟠 中 | HTTP 请求处理 |
+| 模型导出 | `scripts/legacy/model_exporter.s` | 🟡 低 | ONNX/TorchScript 导出 |
 
 ---
 
@@ -60,10 +60,10 @@ s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
 
 | 组件 | 文件 | 优先级 | 功能 |
 |------|------|--------|------|
-| 工具链协调 | `script/s_toolchain.s` | 🔴 高 | 统一的 CLI 入口和编排 |
-| 工业级运算 | `script/industrial_ops_runner.s` | 🟠 中 | DPO、RAG、数据治理 |
-| 知识蒸馏 | `script/knowledge_distillation.s` | 🟡 低 | 模型蒸馏框架 |
-| RLHF 训练 | `script/rlhf_trainer.s` | 🟡 低 | RLHF 强化学习框架 |
+| 工具链协调 | `scripts/legacy/s_toolchain.s` | 🔴 高 | 统一的 CLI 入口和编排 |
+| 工业级运算 | `scripts/legacy/industrial_ops_runner.s` | 🟠 中 | DPO、RAG、数据治理 |
+| 知识蒸馏 | `scripts/legacy/knowledge_distillation.s` | 🟡 低 | 模型蒸馏框架 |
+| RLHF 训练 | `scripts/legacy/rlhf_trainer.s` | 🟡 低 | RLHF 强化学习框架 |
 
 ---
 
@@ -194,7 +194,7 @@ COMPONENTS = data-pipeline training-runner inference-server industrial-ops
 ```
 neurx/
 ├── S_ONLY_ENVIRONMENT_PLAN.md        ← 本文件
-├── script/
+├── scripts/legacy/
 │   ├── S_TOOLCHAIN_GUIDE.md          ✅ 使用指南
 │   ├── S_TOOLCHAIN_COMPLETION.md     ✅ 完成总结
 │   ├── S_IMPLEMENTATION_GUIDE.md     ⏳ 待创建
@@ -215,7 +215,7 @@ neurx/
 cd /home/shuwen/shuwen/train/neurx
 
 # 编译数据管道
-s script/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
+s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # 运行完整流程
 ./artifacts/build/data_pipeline/data_pipeline pipeline
@@ -227,7 +227,7 @@ make data-pipeline-s
 ### 计划中（Phase 2）
 ```bash
 # 编译训练框架
-s script/training_runner.s -o artifacts/build/training/runner
+s scripts/legacy/training_runner.s -o artifacts/build/training/runner
 
 # 启动训练
 ./artifacts/build/training/runner --config pretrain_config.toml
@@ -236,7 +236,7 @@ s script/training_runner.s -o artifacts/build/training/runner
 ### 计划中（Phase 3）
 ```bash
 # 编译推理服务器
-s script/inference_server.s -o artifacts/build/inference/server
+s scripts/legacy/inference_server.s -o artifacts/build/inference/server
 
 # 启动服务
 ./artifacts/build/inference/server --model artifacts/models/1t.bin --port 8080
@@ -261,9 +261,9 @@ s script/inference_server.s -o artifacts/build/inference/server
 ## 📚 参考资源
 
 ### 项目文件
-- [data_pipeline.s](script/data_pipeline.s) — 参考实现
-- [tokenizer.s](script/tokenizer.s) — Go-like 语法示例
-- [experiment_manager.s](script/experiment_manager.s) — 高级用法
+- [data_pipeline.s](scripts/legacy/data_pipeline.s) — 参考实现
+- [tokenizer.s](scripts/legacy/tokenizer.s) — Go-like 语法示例
+- [experiment_manager.s](scripts/legacy/experiment_manager.s) — 高级用法
 
 ### 编译器
 - S 编译器位置：`/home/shuwen/.local/bin/s`

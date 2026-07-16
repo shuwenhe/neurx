@@ -13,11 +13,11 @@
 {"text": "数学说明 547:线性代数:矩阵可逆的充分必要条件是行列式不为零。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
 {"text": "翻译样例 444:This dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\nThis dataset mixes English and 中文 so that the tokenizer sees cross-lingual transitions.\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
 {"text": "对话 462:\n用户:我们要把一个语言模型部署到生产环境,第一步应该做什么?\n助手:先确认数据、评估、checkpoint 和回滚链路能闭环,再谈性能优化。\n用户:如果模型在长上下文下变慢怎么办?\n助手:通常要检查注意力缓存、批处理策略和 token 预算。"}
-{"text": "Bash 示例 236:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "Bash 示例 236:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash scripts/legacy/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
 {"text": "问题 656:为什么要做分层采样?\n回答:因为不同领域的样本密度和长度差异很大,分层采样能让模型更均衡地学习。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
 {"text": "问题 416:如何降低训练不稳定性?\n回答:建议从学习率、warmup、梯度裁剪、数据清洗和混合精度溢出五个方向同时排查。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
 {"text": "数学说明 404:线性代数:矩阵可逆的充分必要条件是行列式不为零。\n进一步解释:把问题拆成定义、条件、结论和边界情况,更容易验证推导是否正确。"}
-{"text": "Bash 示例 185:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash script/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
+{"text": "Bash 示例 185:启动训练并记录日志。\n```bash\nexport NEURX_TOTAL_STEPS=1000\nbash scripts/legacy/run_gpt_large_pretrain.sh 2>&1 | tee artifacts/logs/train.log\n```"}
 {"text": "翻译样例 16:模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\n模型需要从中英混合文本里学习代码、术语、数字和自然语言的边界。\nTranslate the following requirement into a concise engineering note: 支持分片流式读取和 epoch 级采样。"}
 {"text": "问题 514:如何设计 checkpoint?\n回答:应保存模型参数、优化器状态、调度器状态、数据位置和随机数状态。\n补充:实际生产系统还要结合日志、指标和回滚策略一起验证。"}
 {"text": "[INFO] sample=91 [WARN] gradient_norm=18.4 exceeded threshold; applying clip and continuing"}

@@ -68,15 +68,15 @@
 
 ```bash
 # 1. 检查 extract_filename 函数是否存在
-grep -c "func extract_filename" /Users/shuwen/shuwen/train/neurx/script/minimal_train.s
+grep -c "func extract_filename" /Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s
 # 预期输出: 1
 
 # 2. 检查新的日志标记
-grep -c "SHARD_START\|SHARD_PROGRESS\|SHARD_COMPLETE" /Users/shuwen/shuwen/train/neurx/script/minimal_train.s
+grep -c "SHARD_START\|SHARD_PROGRESS\|SHARD_COMPLETE" /Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s
 # 预期输出: 3
 
 # 3. 检查文件总行数（应该增加了约30行）
-wc -l /Users/shuwen/shuwen/train/neurx/script/minimal_train.s
+wc -l /Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s
 # 预期输出: 875 minimal_train.s
 ```
 
@@ -113,5 +113,5 @@ wc -l /Users/shuwen/shuwen/train/neurx/script/minimal_train.s
 ---
 
 **文件修改日期**: 2026-07-10  
-**修改文件**: `/Users/shuwen/shuwen/train/neurx/script/minimal_train.s`  
+**修改文件**: `/Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s`
 **新增工具函数**: `extract_filename(string) string`

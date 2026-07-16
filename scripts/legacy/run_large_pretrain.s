@@ -3,7 +3,7 @@ package main
 use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_launch}
 
 // Pretraining launcher that delegates to the real training system.
-// This entry point is called by make train via script/run_large_pretrain.s
+// This entry point is called by make train via scripts/legacy/run_large_pretrain.s
 func main() int {
     // All configuration is passed via environment variables (NEURX_* vars)
     return gpt_large_pretrain_launch()

@@ -9,7 +9,7 @@
 ## 📦 完成的核心组件 (8500+ 行代码)
 
 ### ✅ 1. RLHF对齐系统 (PPO + Reward Model)
-**文件**: `script/rlhf_ppo.s` (800行) + `script/reward_model.s` (700行)
+**文件**: `scripts/legacy/rlhf_ppo.s` (800行) + `scripts/legacy/reward_model.s` (700行)
 
 - **PPO Framework**: 
   - 轨迹收集和GAE advantage计算
@@ -24,7 +24,7 @@
   - AUC: 0.89
 
 ### ✅ 2. SFT指令微调系统
-**文件**: `script/sft_trainer.s` (600行)
+**文件**: `scripts/legacy/sft_trainer.s` (600行)
 
 - 指令数据集按类别加载
 - 因果语言模型损失
@@ -33,7 +33,7 @@
 - 最终困惑度: 1.86
 
 ### ✅ 3. 多维度评估框架
-**文件**: `script/evaluation_framework.s` (800行)
+**文件**: `scripts/legacy/evaluation_framework.s` (800行)
 
 集成4个标准基准:
 - **MMLU**: 14,000问题 → 61.2%准确度
@@ -42,7 +42,7 @@
 - **HellaSwag**: 10,000问题 → 81.2%准确度
 
 ### ✅ 4. LoRA参数高效微调
-**文件**: `script/lora_finetuning.s` (500行)
+**文件**: `scripts/legacy/lora_finetuning.s` (500行)
 
 - 低秩分解 (rank=8)
 - 可训练参数: 仅1.2M (0.1%的模型)
@@ -50,7 +50,7 @@
 - 推理零开销
 
 ### ✅ 5. INT8/INT4量化压缩
-**文件**: `script/quantization_system.s` (600行)
+**文件**: `scripts/legacy/quantization_system.s` (600行)
 
 - INT8: 26.5GB → 6.6GB (4.0x压缩)
 - INT4: 26.5GB → 3.3GB (8.0x压缩)
@@ -58,7 +58,7 @@
 - QAT (Quantization Aware Training)
 
 ### ✅ 6. 生产推理优化
-**文件**: `script/inference_optimization.s` (700行)
+**文件**: `scripts/legacy/inference_optimization.s` (700行)
 
 - KV缓存管理 (内存最优化)
 - Flash Attention实现 (O(N)内存)
@@ -68,7 +68,7 @@
 - 延迟: 87ms (单请求)
 
 ### ✅ 7. 完整训练管道
-**文件**: `script/neurx_complete_pipeline.sh` (400行)
+**文件**: `scripts/legacy/neurx_complete_pipeline.sh` (400行)
 
 - 7个阶段端到端演示
   1. 数据准备
@@ -108,7 +108,7 @@
 ### 核心实现文件
 
 ```
-neurx/script/
+neurx/scripts/legacy/
 ├── rlhf_ppo.s                    (800行)  - PPO对齐框架
 ├── reward_model.s                (700行)  - Reward模型
 ├── sft_trainer.s                 (600行)  - SFT微调
@@ -126,7 +126,7 @@ neurx/docs/
 ### 已有支持框架
 
 ```
-neurx/script/
+neurx/scripts/legacy/
 ├── advanced_monitor.s            (471行)  - 高级监控
 ├── mixed_precision_trainer.s    (466行)  - 混合精度训练
 ├── distributed_training.s       (459行)  - 分布式训练
@@ -142,7 +142,7 @@ neurx/script/
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 这会显示:
@@ -155,25 +155,25 @@ bash script/neurx_complete_pipeline.sh
 
 ```bash
 # Reward模型
-s run script/reward_model.s
+s run scripts/legacy/reward_model.s
 
 # PPO训练
-s run script/rlhf_ppo.s
+s run scripts/legacy/rlhf_ppo.s
 
 # SFT微调
-s run script/sft_trainer.s
+s run scripts/legacy/sft_trainer.s
 
 # 评估
-s run script/evaluation_framework.s
+s run scripts/legacy/evaluation_framework.s
 
 # LoRA
-s run script/lora_finetuning.s
+s run scripts/legacy/lora_finetuning.s
 
 # 量化
-s run script/quantization_system.s
+s run scripts/legacy/quantization_system.s
 
 # 推理
-s run script/inference_optimization.s
+s run scripts/legacy/inference_optimization.s
 ```
 
 ### 3. 集成到实际项目
@@ -339,7 +339,7 @@ cat /Users/feifei/shuwen/train/neurx/docs/IMPLEMENTATION_REPORT.md
 
 ```bash
 # 完整演示 (10分钟)
-bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 ---
@@ -366,7 +366,7 @@ bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
 **准备商用部署?** 🚀
 
 ```bash
-bash /Users/feifei/shuwen/train/neurx/script/neurx_complete_pipeline.sh
+bash /Users/feifei/shuwen/train/neurx/scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 **系统状态**: 🟢 **完全就绪，可投入生产** 🟢

@@ -250,7 +250,7 @@ for epoch in epochs:
 | Mixed Precision Examples | `neurx/training/mixed_precision.s` | Loss scale scheduling, overflow detection |
 | Gradient Accumulation | `neurx/training/gradient_accumulation.s` | Multi-worker support, statistics |
 | Tensor Parallelism | `neurx/distributed/tensor_parallel.s` | Communication primitives, sharding |
-| Test Suite | `neurx/test/test_advanced_features.s` | 20+ comprehensive tests |
+| Test Suite | `neurx/tests/test_advanced_features.s` | 20+ comprehensive tests |
 
 ---
 
@@ -351,7 +351,7 @@ neurx/training/
 neurx/distributed/
   └── tensor_parallel.s (500+ lines)
 
-neurx/test/
+neurx/tests/
   └── test_advanced_features.s (400+ lines)
 
 neurx/

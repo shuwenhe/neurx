@@ -246,7 +246,7 @@ ToolResult SearchTool::opGrepSearch(const QString &callId, const QJsonObject &ar
 - **核心实现逻辑**:
 ```cpp
 ToolResult SearchTool::opFindFiles(const QString &callId, const QJsonObject &args) {
-  // Glob 模式匹配：*.cpp, src/**, test/*.h 等
+  // Glob 模式匹配：*.cpp, src/**, tests/*.h 等
   QDirIterator it(m_workspaceRoot, QDir::Files | QDir::Dirs);
   // 应用通配符模式过滤
 }

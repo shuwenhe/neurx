@@ -19,12 +19,12 @@ Shell should become a compatibility layer, not the primary workflow.
 
 Already present:
 
-- `script/data_clean.s`
-- `script/data_shard.s`
-- `script/scripts.s`
+- `scripts/legacy/data_clean.s`
+- `scripts/legacy/data_shard.s`
+- `scripts/legacy/scripts.s`
 - `dataset/verify_dataset.s`
-- `script/industrial_ops_runner.s`
-- `script/s_toolchain.s`
+- `scripts/legacy/industrial_ops_runner.s`
+- `scripts/legacy/s_toolchain.s`
 
 Current Makefile targets expose:
 

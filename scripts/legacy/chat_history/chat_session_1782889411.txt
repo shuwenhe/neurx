@@ -20,4 +20,4 @@
 ✓ 我认为这是一个很好的想法。
 ✓ 建议进一步探索相关的方面。
 ✓ 这需要考虑实际的应用场景。
-[2026-07-01 15:05:44] You: echo 'exit' | cd /Users/feifei/shuwen/train/neurx && grep "script/demo_complete_pipeline.sh" Makefile
+[2026-07-01 15:05:44] You: echo 'exit' | cd /Users/feifei/shuwen/train/neurx && grep "scripts/legacy/demo_complete_pipeline.sh" Makefile

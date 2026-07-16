@@ -16,7 +16,7 @@ Shard list file loaded
 
 ### 1. 增强的实时日志输出
 
-改进了 `script/minimal_train.s`：
+改进了 `scripts/legacy/minimal_train.s`：
 - 每个关键步骤都添加了 `runtime_run_command_output` 调用，将状态消息直接输出到 stderr
 - 这确保了日志立即显示，不会被缓冲
 
@@ -64,7 +64,7 @@ bash tools/run-with-shard-monitor.sh /home/shuwen/s/bin/s
 cd /home/shuwen/shuwen/train/neurx
 
 # 编译
-/home/shuwen/s/bin/s ir script/minimal_train.s -o artifacts/build/run_large_pretrain/minimal_train.ir
+/home/shuwen/s/bin/s ir scripts/legacy/minimal_train.s -o artifacts/build/run_large_pretrain/minimal_train.ir
 
 # 运行（有实时日志输出）
 export NEURX_ROOT=/home/shuwen/shuwen/train/neurx
@@ -196,7 +196,7 @@ export NEURX_PRETRAIN_SEQ_LEN=1024
 
 ## 相关文件
 
-- `script/minimal_train.s` - 改进的训练脚本（增加实时日志）
+- `scripts/legacy/minimal_train.s` - 改进的训练脚本（增加实时日志）
 - `tools/monitor-shard-processing.sh` - 实时日志监控器
 - `tools/run-with-shard-monitor.sh` - 完整启动脚本
 - `tools/cleanup-old-commits.sh` - 提交历史清理工具

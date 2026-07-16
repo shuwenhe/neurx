@@ -36,7 +36,7 @@ Warmup步数:     10,000
 ```
 neurx/
 ├── pretrain/llm/model_large_pretrain.s  # S语言训练实现 (完整代码)
-├── script/
+├── scripts/legacy/
 │   └── run_model_large_pretrain.sh  # 训练运行脚本
 ├── Makefile                        # 构建命令
 ├── artifacts/
@@ -58,7 +58,7 @@ make pretrain-watch    # 监视模式（实时显示日志）
 #### 方式2: 直接运行脚本
 ```bash
 cd neurx
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 ```
 
 ## 📊 S语言实现特性
@@ -292,7 +292,7 @@ tail -f artifacts/logs/model_large_pretrain_*.log
 ### 快速验证
 ```bash
 cd neurx
-bash script/run_model_large_pretrain.sh
+bash scripts/legacy/run_model_large_pretrain.sh
 # 应该看到：
 # ✓ 权重初始化
 # ✓ 3个Epoch的训练进度

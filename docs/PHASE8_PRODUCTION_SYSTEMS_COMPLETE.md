@@ -32,7 +32,7 @@
 
 **使用**:
 ```bash
-s run script/real_dataset_integration.s
+s run scripts/legacy/real_dataset_integration.s
 ```
 
 **输出**:
@@ -78,7 +78,7 @@ Cluster Manager
 
 **使用**:
 ```bash
-s run script/cluster_deployment.s
+s run scripts/legacy/cluster_deployment.s
 ```
 
 **输出**:
@@ -124,7 +124,7 @@ GET  /models/{model_id}    - 模型信息
 
 **使用**:
 ```bash
-s run script/rest_api_service.s
+s run scripts/legacy/rest_api_service.s
 ```
 
 **性能**:
@@ -167,7 +167,7 @@ s run script/rest_api_service.s
 
 **使用**:
 ```bash
-s run script/checkpoint_recovery.s
+s run scripts/legacy/checkpoint_recovery.s
 ```
 
 **恢复场景**:
@@ -241,28 +241,28 @@ Phase 8: Production Deployment
 ### 1️⃣ 数据准备
 ```bash
 # 加载真实数据集
-s run script/real_dataset_integration.s
+s run scripts/legacy/real_dataset_integration.s
 # 输出: 10,000+ 训练样本，质量 95%+
 ```
 
 ### 2️⃣ 基础设施部署
 ```bash
 # 配置集群
-s run script/cluster_deployment.s
+s run scripts/legacy/cluster_deployment.s
 # 输出: 4 GPU 集群，K8s 配置就绪
 ```
 
 ### 3️⃣ 训练执行
 ```bash
 # 启动分布式训练
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 # 配合检查点恢复: checkpoint_recovery.s
 ```
 
 ### 4️⃣ 模型推理
 ```bash
 # 启动 API 服务
-s run script/rest_api_service.s
+s run scripts/legacy/rest_api_service.s
 # 输出: 推理 API 就绪，可处理请求
 ```
 
@@ -271,7 +271,7 @@ s run script/rest_api_service.s
 ## 📁 新增文件清单
 
 ```
-script/
+scripts/legacy/
 ├── real_dataset_integration.s          (750 lines)
 ├── cluster_deployment.s                (900 lines)
 ├── rest_api_service.s                  (750 lines)
@@ -315,22 +315,22 @@ script/
 **立即开始**:
 ```bash
 # 1. 测试数据加载
-s run script/real_dataset_integration.s
+s run scripts/legacy/real_dataset_integration.s
 
 # 2. 验证集群配置
-s run script/cluster_deployment.s
+s run scripts/legacy/cluster_deployment.s
 
 # 3. 启动 API 服务
-s run script/rest_api_service.s
+s run scripts/legacy/rest_api_service.s
 
 # 4. 测试检查点恢复
-s run script/checkpoint_recovery.s
+s run scripts/legacy/checkpoint_recovery.s
 ```
 
 **完整训练**:
 ```bash
 # 在真实集群上运行
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 ```
 
 ---

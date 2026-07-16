@@ -53,7 +53,7 @@
 
 | 目录 | 文件数 | 功能 | 状态 | 建议 |
 |------|--------|------|------|------|
-| `script/` | 10 | 脚本 | 🔴 冗余 | 删除 → scripts/ |
+| `scripts/legacy/` | 10 | 脚本 | 🔴 冗余 | 删除 → scripts/ |
 | `scripts/` | 24 | 脚本集合 | ✅ 标准 | 保留 |
 | `tool/` | 15 | 工具 | 🔴 冗余 | 删除 → tools/ |
 | `tools/` | 9 | 工具集 | ✅ 标准 | 保留 |
@@ -145,16 +145,16 @@
 
 ### PRIORITY 1: 明显冗余 (0-1 小时)
 
-#### 1. script/ vs scripts/
-- **script/** 有 10 个文件
+#### 1. scripts/legacy/ vs scripts/
+- **scripts/legacy/** 有 10 个文件
 - **scripts/** 有 24 个文件
-- **建议**: 合并到 scripts/，删除 script/
+- **建议**: 合并到 scripts/，删除 scripts/legacy/
 
 **操作**:
 ```bash
 cd /Users/feifei/shuwen/neurx
-cp script/* scripts/
-rm -rf script/
+cp scripts/legacy/* scripts/
+rm -rf scripts/legacy/
 ```
 
 #### 2. tool/ vs tools/
@@ -256,7 +256,7 @@ neurx/
 │
 ├── 【工具库】
 ├── tools/         # 工具 ✅ (删除 tool/)
-├── scripts/       # 脚本 ✅ (删除 script/)
+├── scripts/       # 脚本 ✅ (删除 scripts/legacy/)
 ├── examples/      # 示例 ✅ (删除 example/)
 ├── doc/           # 文档
 │
@@ -275,8 +275,8 @@ neurx/
 
 ## 🛠️ 执行清单
 
-- [ ] 检查 script/ 和 scripts/ 内容
-- [ ] 合并到 scripts/，删除 script/
+- [ ] 检查 scripts/legacy/ 和 scripts/ 内容
+- [ ] 合并到 scripts/，删除 scripts/legacy/
 - [ ] 检查 tool/ 和 tools/ 内容  
 - [ ] 合并到 tools/，删除 tool/
 - [ ] 检查 example/ 和 examples/ 内容

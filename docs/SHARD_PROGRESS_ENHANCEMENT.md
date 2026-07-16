@@ -8,7 +8,7 @@
 ## 📋 改动清单 (Changes Made)
 
 ### 文件
-- **修改文件**: `/Users/shuwen/shuwen/train/neurx/script/minimal_train.s`
+- **修改文件**: `/Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s`
 - **共 6 处主要改动** + **1 个新函数**
 
 ### 1. 新增 `extract_filename()` 函数
@@ -316,4 +316,4 @@ cd /Users/shuwen/shuwen/train/neurx/script
 ---
 
 **生成日期**: 2026-07-10
-**文件**: `/Users/shuwen/shuwen/train/neurx/script/minimal_train.s`
+**文件**: `/Users/shuwen/shuwen/train/neurx/scripts/legacy/minimal_train.s`

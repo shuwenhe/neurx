@@ -454,7 +454,7 @@ make pretrain-gpu-fresh
 
 ## 相关文件和脚本
 
-- **主脚本**: [script/pretrain_gpu.s](../script/pretrain_gpu.s)
+- **主脚本**: [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s)
 - **Makefile配置**: [Makefile](../Makefile) (pretrain-gpu 目标)
 - **模型配置**: [config_1t_model.json](../config_1t_model.json)
 - **CUDA桥接**: [neurx_cuda_train_bridge.cu](../cuda/neurx_cuda_train_bridge.cu)

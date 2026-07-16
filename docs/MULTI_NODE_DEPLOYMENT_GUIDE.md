@@ -198,7 +198,7 @@ export NEURX_MASTER_ADDR=10.0.0.1
 export NEURX_SSH_USER=root
 export NEURX_SSH_KEY=/root/.ssh/id_rsa
 
-./script/launch_cluster_training.s
+./scripts/legacy/launch_cluster_training.s
 ```
 
 ---
@@ -610,7 +610,7 @@ export NEURX_MASTER_ADDR=10.0.0.1
 export NEURX_NODE_LIST="10.0.0.1,10.0.0.2,...,10.0.0.8"
 
 # Use cluster launcher for automatic SSH deployment
-./script/launch_cluster_training.s
+./scripts/legacy/launch_cluster_training.s
 ```
 
 **Result**: 64 GPUs, ~50× speedup, ~15 min training

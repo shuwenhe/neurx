@@ -104,7 +104,7 @@ NEURX_NUM_GPUS=4 \
 RANK=4 LOCAL_RANK=0 WORLD_SIZE=8 \
   NEURX_MASTER_ADDR=192.168.1.100 \
   NEURX_MASTER_PORT=29500 \
-  ./script/pretrain_gpu_distributed.s
+  ./scripts/legacy/pretrain_gpu_distributed.s
 ```
 
 ---
@@ -264,7 +264,7 @@ tail -f artifacts/logs/run_gpu_pretrain_*.log | tail -100
 
 ### 关键脚本
 
-- **启动脚本**: [script/launch_pretrain_distributed.s](../script/launch_pretrain_distributed.s)
+- **启动脚本**: [scripts/legacy/launch_pretrain_distributed.s](../scripts/legacy/launch_pretrain_distributed.s)
 - **分布式入口**: [pretrain/distributed_pretrain_entry.s](../pretrain/distributed_pretrain_entry.s)
 - **CUDA桥接**: [distributed/cuda_bridge.s](../distributed/cuda_bridge.s)
 

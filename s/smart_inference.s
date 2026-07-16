@@ -320,7 +320,7 @@ func generate_model_response(string question) string {
 
     string ir_path = resolve_real_inference_ir()
     if ir_path == "" {
-        return "模型 IR 文件未找到，请先运行 `script/run_interactive_inference.s` 生成 `interactive_inference.ir`。"
+        return "模型 IR 文件未找到，请先运行 `scripts/legacy/run_interactive_inference.s` 生成 `interactive_inference.ir`。"
     }
 
     string prompt = build_real_inference_prompt(question)

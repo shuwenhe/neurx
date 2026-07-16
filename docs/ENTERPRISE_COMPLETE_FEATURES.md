@@ -323,13 +323,13 @@
 
 ### 新增企业级功能 (7个)
 ```
-✅ script/data_synthesis_engine.s     (800行)  - 数据合成
-✅ script/knowledge_distillation.s    (700行)  - 知识蒸馏
-✅ script/long_context_handler.s      (900行)  - 长上下文
-✅ script/safety_filter.s             (800行)  - 安全过滤
-✅ script/performance_monitor.s       (900行)  - 性能监控
-✅ script/multitask_learning.s        (850行)  - 多任务学习
-✅ script/model_merger.s              (750行)  - 模型合并
+✅ scripts/legacy/data_synthesis_engine.s     (800行)  - 数据合成
+✅ scripts/legacy/knowledge_distillation.s    (700行)  - 知识蒸馏
+✅ scripts/legacy/long_context_handler.s      (900行)  - 长上下文
+✅ scripts/legacy/safety_filter.s             (800行)  - 安全过滤
+✅ scripts/legacy/performance_monitor.s       (900行)  - 性能监控
+✅ scripts/legacy/multitask_learning.s        (850行)  - 多任务学习
+✅ scripts/legacy/model_merger.s              (750行)  - 模型合并
 ```
 
 ### 原有完整框架 (17个)
@@ -350,41 +350,41 @@
 
 ```bash
 # 1. 生成训练数据
-s run script/data_synthesis_engine.s
+s run scripts/legacy/data_synthesis_engine.s
 
 # 2. 训练Reward模型
-s run script/reward_model.s
+s run scripts/legacy/reward_model.s
 
 # 3. PPO对齐
-s run script/rlhf_ppo.s
+s run scripts/legacy/rlhf_ppo.s
 
 # 4. SFT微调
-s run script/sft_trainer.s
+s run scripts/legacy/sft_trainer.s
 
 # 5. 多任务学习
-s run script/multitask_learning.s
+s run scripts/legacy/multitask_learning.s
 
 # 6. 知识蒸馏
-s run script/knowledge_distillation.s
+s run scripts/legacy/knowledge_distillation.s
 
 # 7. 量化和合并
-s run script/quantization_system.s
-s run script/model_merger.s
+s run scripts/legacy/quantization_system.s
+s run scripts/legacy/model_merger.s
 
 # 8. 长上下文推理
-s run script/long_context_handler.s
+s run scripts/legacy/long_context_handler.s
 
 # 9. 安全检查
-s run script/safety_filter.s
+s run scripts/legacy/safety_filter.s
 
 # 10. 性能监控
-s run script/performance_monitor.s
+s run scripts/legacy/performance_monitor.s
 
 # 11. 评估
-s run script/evaluation_framework.s
+s run scripts/legacy/evaluation_framework.s
 
 # 12. 推理优化
-s run script/inference_optimization.s
+s run scripts/legacy/inference_optimization.s
 ```
 
 ---
@@ -450,16 +450,16 @@ s run script/inference_optimization.s
 
 ```bash
 # 完整训练演示
-bash script/neurx_complete_pipeline.sh
+bash scripts/legacy/neurx_complete_pipeline.sh
 
 # 单个模块演示
-s run script/data_synthesis_engine.s        # 数据
-s run script/knowledge_distillation.s       # 蒸馏
-s run script/long_context_handler.s         # 长文本
-s run script/safety_filter.s                # 安全
-s run script/performance_monitor.s          # 监控
-s run script/multitask_learning.s          # 多任务
-s run script/model_merger.s                 # 合并
+s run scripts/legacy/data_synthesis_engine.s        # 数据
+s run scripts/legacy/knowledge_distillation.s       # 蒸馏
+s run scripts/legacy/long_context_handler.s         # 长文本
+s run scripts/legacy/safety_filter.s                # 安全
+s run scripts/legacy/performance_monitor.s          # 监控
+s run scripts/legacy/multitask_learning.s          # 多任务
+s run scripts/legacy/model_merger.s                 # 合并
 ```
 
 ---

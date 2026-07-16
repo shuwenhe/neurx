@@ -6,10 +6,10 @@
 
 ### 迁移目标
 
-- ✅ `script/clean_data.sh` → `script/data_clean.s`
-- ✅ `script/generate_shards.sh` → `script/data_shard.s`
-- ✅ 核心工具库 → `script/data_utils.s`
-- ✅ 统一 CLI 入口 → `script/scripts.s`
+- ✅ `scripts/legacy/clean_data.sh` → `scripts/legacy/data_clean.s`
+- ✅ `scripts/legacy/generate_shards.sh` → `scripts/legacy/data_shard.s`
+- ✅ 核心工具库 → `scripts/legacy/data_utils.s`
+- ✅ 统一 CLI 入口 → `scripts/legacy/scripts.s`
 
 ## 编译脚本
 
@@ -107,7 +107,7 @@ export MAX_SHARDS=128                      # 最大分片数
 # 编译数据处理脚本
 build-data-scripts: check-bash
 	mkdir -p $(ARTIFACTS_DIR)/build/data_scripts
-	$(S_COMPILER) script/scripts.s $(ARTIFACTS_DIR)/build/data_scripts/data_scripts.ir
+	$(S_COMPILER) scripts/legacy/scripts.s $(ARTIFACTS_DIR)/build/data_scripts/data_scripts.ir
 	$(S_COMPILER) --emit-bin $(ARTIFACTS_DIR)/build/data_scripts/data_scripts.ir \
 		$(ARTIFACTS_DIR)/build/data_scripts/data_scripts.bin
 
@@ -130,8 +130,8 @@ data-pipeline-s: build-data-scripts
 
 ```makefile
 # 原有版本 (shell + Python)
-# bash script/clean_data.sh
-# bash script/generate_shards.sh
+# bash scripts/legacy/clean_data.sh
+# bash scripts/legacy/generate_shards.sh
 
 # 新版本 (S 语言)
 $(ARTIFACTS_DIR)/build/data_scripts/data_scripts.bin clean-and-shard
@@ -211,13 +211,13 @@ export NEURX_HOME=$(pwd)
 如果发现问题或有改进建议：
 
 1. 检查 [已知限制](#已知限制) 部分
-2. 在 `script/data_*.s` 中添加 TODO 注释
+2. 在 `scripts/legacy/data_*.s` 中添加 TODO 注释
 3. 提交 issue 或 PR
 
 ## 相关文件
 
-- `script/data_utils.s` - 核心工具库
-- `script/data_clean.s` - 数据清洗模块
-- `script/data_shard.s` - 数据分片模块
-- `script/scripts.s` - 统一 CLI 入口
+- `scripts/legacy/data_utils.s` - 核心工具库
+- `scripts/legacy/data_clean.s` - 数据清洗模块
+- `scripts/legacy/data_shard.s` - 数据分片模块
+- `scripts/legacy/scripts.s` - 统一 CLI 入口
 - `Makefile` - 编译和执行目标

@@ -302,7 +302,7 @@ data/moe_1t_jsonl_loader.s
 ⚠ training/loop.s
 ⚠ pretrain/eval/metrics.s
 ⚠ data/moe_1t_jsonl_loader.s
-⚠ test/*.s
+⚠ tests/*.s
 ⚠ examples/*.s
 ```
 

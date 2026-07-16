@@ -516,7 +516,7 @@ To train an LLM end-to-end:
 5. **`neurx/training/orchestrator.s`** (250+ lines)
    - Full pipeline orchestration
 
-6. **`neurx/test/test_training_integration.s`** (300+ lines)
+6. **`neurx/tests/test_training_integration.s`** (300+ lines)
    - 16 comprehensive tests
 
 7. **`compile_training_integration.sh`**

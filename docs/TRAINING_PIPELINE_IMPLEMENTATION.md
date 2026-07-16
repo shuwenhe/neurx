@@ -342,7 +342,7 @@ neurx/
 ├─ example/
 │  └─ complete_training_example.s  (300+ 行) - 完整示例
 │
-├─ test/
+├─ tests/
 │  └─ test_training_pipeline.s     (500+ 行) - 20+ 测试用例
 │
 └─ TRAINING_PIPELINE_GUIDE.md      (800+ 行) - 完整文档
@@ -843,7 +843,7 @@ if checkpoint != nil {
 
 - **文档**: [TRAINING_PIPELINE_GUIDE.md](./TRAINING_PIPELINE_GUIDE.md)
 - **示例**: [complete_training_example.s](./neurx/example/complete_training_example.s)
-- **测试**: [test_training_pipeline.s](./neurx/test/test_training_pipeline.s)
+- **测试**: [test_training_pipeline.s](./neurx/tests/test_training_pipeline.s)
 - **Issue**: Report bugs and feature requests
 
 ---

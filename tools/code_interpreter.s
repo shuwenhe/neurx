@@ -78,7 +78,7 @@ struct ImageData {
 }
 
 struct CodeBlock {
-    language: string                           // 代码语言 (python/javascript/s/sql)
+    language: string                           // 代码语言 (python/javascripts/legacy/s/sql)
     code: string                               // 代码内容
     filename: string?                          // 可选的文件名 (用于保存)
 }

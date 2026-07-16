@@ -58,7 +58,7 @@ while (std::getline(file, line)) {   // 每行一次malloc
 
 ### 架构图
 ```
-S语言 (script/gpu_train.s)
+S语言 (scripts/legacy/gpu_train.s)
 ├─ 参数解析 ✅
 ├─ 文件I/O ✅
 ├─ 训练循环 ✅
@@ -99,7 +99,7 @@ extern "C" int cuda_relu_forward(int64_t out, int64_t in, int size) {
 
 ### ✅ S语言实现（调用CUDA）
 ```s
-// script/gpu_train.s - S语言调用CUDA
+// scripts/legacy/gpu_train.s - S语言调用CUDA
 extern func cuda_relu_forward(int64 out, int64 in, int size) int
 
 func apply_activation(GPUBuffer input, GPUBuffer output) {
@@ -118,7 +118,7 @@ func apply_activation(GPUBuffer input, GPUBuffer output) {
 
 ### ✅ S语言实现（文件处理）
 ```s
-// script/gpu_train.s - S处理文件I/O
+// scripts/legacy/gpu_train.s - S处理文件I/O
 func load_shards_into_gpu(GPUContext ctx, string shard_list) int {
     // S语言读取文件
     string content = runtime_read_text_file(shard_list)
@@ -146,12 +146,12 @@ func load_shards_into_gpu(GPUContext ctx, string shard_list) int {
 
 | 原始CUDA代码 | 现在的位置 | 语言 | 说明 |
 |-------------|---------|------|------|
-| `PairReader` class | `script/gpu_train.s` | S | Shard行处理 |
-| `env_str/env_int` | `script/gpu_train.s` | S | 参数解析 |
+| `PairReader` class | `scripts/legacy/gpu_train.s` | S | Shard行处理 |
+| `env_str/env_int` | `scripts/legacy/gpu_train.s` | S | 参数解析 |
 | `error_loss_kernel` | `cuda/cuda_kernels.cu` | CUDA | GPU核函数 |
 | `sgd_update_kernel` | `cuda/cuda_kernels.cu` | CUDA | GPU核函数 |
-| 训练循环 | `script/gpu_train.s` | S | 主逻辑 |
-| 文件I/O | `script/gpu_train.s` | S | 文件读取 |
+| 训练循环 | `scripts/legacy/gpu_train.s` | S | 主逻辑 |
+| 文件I/O | `scripts/legacy/gpu_train.s` | S | 文件读取 |
 
 ## 编译和运行
 
@@ -164,7 +164,7 @@ bash cuda/build_kernels_simple.sh
 ### Step 2: 编译S训练脚本
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:$LD_LIBRARY_PATH"
-s ir script/gpu_train.s -o artifacts/build/gpu_train.ir
+s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train.ir
 ```
 
 ### Step 3: 运行训练

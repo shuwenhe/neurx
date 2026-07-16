@@ -19,7 +19,7 @@ A production-quality tokenizer with:
 - **Vocabulary management** → token lookup and statistics
 - **Caching system** → performance optimization for repeated texts
 
-### Test Suite: `neurx/test/test_tokenizer.s` (12 tests)
+### Test Suite: `neurx/tests/test_tokenizer.s` (12 tests)
 
 Comprehensive testing covering:
 - Configuration and initialization
@@ -285,7 +285,7 @@ The tokenizer is now ready to integrate with:
    - All encoding/decoding functions
    - Batch operations and utilities
 
-2. **`neurx/test/test_tokenizer.s`**
+2. **`neurx/tests/test_tokenizer.s`**
    - New file: 12 comprehensive tests
    - Configuration, initialization, encoding, batch operations
 

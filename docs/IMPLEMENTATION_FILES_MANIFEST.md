@@ -229,16 +229,16 @@ Communication overhead:
 ```
 
 **Generated Files**:
-1. **Configurations** (`production_deployment/configs/`)
+1. **Configurations** (`deploy/production/configs/`)
    - `cluster_config.yaml` - Cluster topology
    - `kubernetes_deployment.yaml` - K8s manifest
 
-2. **Scripts** (`production_deployment/scripts/`)
+2. **Scripts** (`deploy/production/scripts/`)
    - `launch_training.sh` - Training launcher
    - `slurm_submit.sh` - SLURM job script
    - `monitor_training.sh` - Live monitoring
 
-3. **Container** (`production_deployment/`)
+3. **Container** (`deploy/production/`)
    - `docker-compose.yml` - Docker Compose
 
 4. **Documentation**
@@ -253,17 +253,17 @@ Communication overhead:
 
 1. **SLURM (HPC)**
    ```bash
-   sbatch production_deployment/scripts/slurm_submit.sh
+   sbatch deploy/production/scripts/slurm_submit.sh
    ```
 
 2. **Docker (Local)**
    ```bash
-   docker-compose -f production_deployment/docker-compose.yml up
+   docker-compose -f deploy/production/docker-compose.yml up
    ```
 
 3. **Kubernetes (Cloud)**
    ```bash
-   kubectl apply -f production_deployment/configs/kubernetes_deployment.yaml
+   kubectl apply -f deploy/production/configs/kubernetes_deployment.yaml
    ```
 
 ---
@@ -477,7 +477,7 @@ All files are located in:
 - `PRODUCTION_SYSTEM_COMPLETE.md` - Main guide
 
 ### Generated
-- `production_deployment/` - All configs and scripts
+- `deploy/production/` - All configs and scripts
 
 ---
 

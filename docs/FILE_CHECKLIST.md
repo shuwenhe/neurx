@@ -196,7 +196,7 @@
 │   └── COMPLETION_REPORT.md               ✅ (2,000+ lines)
 │
 └── 📂 Generated Directories
-    └── production_deployment/
+    └── deploy/production/
         ├── configs/
         │   ├── cluster_config.json
         │   └── kubernetes_deployment.yaml
@@ -335,13 +335,13 @@ neurx run system_verification.s
 ### Deploy
 ```bash
 # SLURM
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # Docker
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # Kubernetes
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 ```
 
 ---

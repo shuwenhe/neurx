@@ -80,7 +80,7 @@ tensor next_params = adamw_update(adamw_state)
 
 ### Quick Start (Minimal Integration)
 
-**File:** `script/run_large_pretrain.s`
+**File:** `scripts/legacy/run_large_pretrain.s`
 
 ```s
 package main
@@ -108,12 +108,12 @@ See `examples/real_training_integration.s` for:
 
 1. **Backup current version:**
    ```bash
-   cp script/run_large_pretrain.s script/run_large_pretrain.s.backup
+   cp scripts/legacy/run_large_pretrain.s scripts/legacy/run_large_pretrain.s.backup
    ```
 
 2. **Update script with real training:**
    ```bash
-   # Copy OPTION 1 from examples/real_training_integration.s to script/run_large_pretrain.s
+   # Copy OPTION 1 from examples/real_training_integration.s to scripts/legacy/run_large_pretrain.s
    ```
 
 3. **Clean build:**
@@ -202,7 +202,7 @@ The real training implementation seamlessly integrates with existing NeurX compo
 
 ### Immediate (Make it work)
 1. ✅ Understand the architecture (this document)
-2. Update `script/run_large_pretrain.s` with Option 1
+2. Update `scripts/legacy/run_large_pretrain.s` with Option 1
 3. Test compilation and basic training
 4. Verify loss values are real (not hardcoded)
 
@@ -238,7 +238,7 @@ make build-train
 ### Loss Values Identical to Previous Runs
 **Cause:** Possibly still using hardcoded values
 **Solution:**
-- Check `script/run_large_pretrain.s` was updated
+- Check `scripts/legacy/run_large_pretrain.s` was updated
 - Verify imports from `real_main_training` are correct
 - Check that old files aren't being referenced
 

@@ -125,7 +125,7 @@ cat > configs/4gpu.hosts << 'EOF'
 localhost 4
 EOF
 
-bash script/launch_multinode_pretrain.sh
+bash scripts/legacy/launch_multinode_pretrain.sh
 
 # 预期性能:
 # ├─ tokens/step: 100-200 (4卡并行)

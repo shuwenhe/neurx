@@ -24,14 +24,14 @@
 - [ ] 特殊token处理
 - [ ] 序列长度优化
 
-**建议**: 创建 `script/tokenizer.s` (S语言实现)
+**建议**: 创建 `scripts/legacy/tokenizer.s` (S语言实现)
 
 #### 2. **困惑度(Perplexity)计算**
 - [ ] 验证集困惑度
 - [ ] 测试集困惑度
 - [ ] 中间检查点困惑度
 
-**建议**: 创建 `script/eval_perplexity.sh`
+**建议**: 创建 `scripts/legacy/eval_perplexity.sh`
 
 #### 3. **检查点管理与恢复**
 - [ ] 自动保存检查点
@@ -39,7 +39,7 @@
 - [ ] 从检查点恢复训练
 - [ ] 最佳模型跟踪
 
-**建议**: 升级 `script/run_model_large_pretrain.sh` 中的检查点逻辑
+**建议**: 升级 `scripts/legacy/run_model_large_pretrain.sh` 中的检查点逻辑
 
 #### 4. **实时监控和日志**
 - [ ] 损失函数曲线
@@ -47,7 +47,7 @@
 - [ ] 内存使用情况
 - [ ] 训练ETA估计
 
-**建议**: 创建 `script/monitor.sh`
+**建议**: 创建 `scripts/legacy/monitor.sh`
 
 ---
 
@@ -126,7 +126,7 @@ make tokenizer    # 新命令
 make monitor      # 新命令
 
 # 3. 完善检查点
-git update script/run_model_large_pretrain.sh
+git update scripts/legacy/run_model_large_pretrain.sh
 
 # 4. 计算困惑度
 make eval         # 新命令
@@ -223,7 +223,7 @@ make eval
 
 ### 1. Tokenizer (优先级最高)
 ```s
-// script/tokenizer.s
+// scripts/legacy/tokenizer.s
 package main
 
 func tokenize(text: string): []int {
@@ -241,7 +241,7 @@ func get_vocab_size(): int {
 
 ### 2. 困惑度计算
 ```s
-// script/eval.s
+// scripts/legacy/eval.s
 func calculate_perplexity(logits: tensor, labels: tensor): float {
     loss := cross_entropy(logits, labels)
     return exp(loss)
@@ -250,7 +250,7 @@ func calculate_perplexity(logits: tensor, labels: tensor): float {
 
 ### 3. 监控仪表板
 ```bash
-# script/monitor.sh
+# scripts/legacy/monitor.sh
 - 实时损失图表
 - 吞吐量显示
 - 内存使用

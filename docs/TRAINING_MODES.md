@@ -8,7 +8,7 @@ make pretrain
 ```
 
 **当前配置:**
-- ✓ 脚本: `script/minimal_train.s` (纯S语言，CPU计算)
+- ✓ 脚本: `scripts/legacy/minimal_train.s` (纯S语言，CPU计算)
 - ❌ 不使用GPU
 - ❌ 不使用CUDA
 - 运行模式: 单线程CPU训练 (容易hang在str_len())
@@ -17,7 +17,7 @@ make pretrain
 ```
 make pretrain
   ↓ 编译
-script/minimal_train.s → minimal_train.ir
+scripts/legacy/minimal_train.s → minimal_train.ir
   ↓ 运行
 S_RUNNER minimal_train.ir
   ↓ 执行
@@ -37,7 +37,7 @@ make pretrain-gpu
 ```
 
 **当前配置:**
-- ✓ 脚本: `script/pretrain_gpu.s` (S语言 + CUDA)
+- ✓ 脚本: `scripts/legacy/pretrain_gpu.s` (S语言 + CUDA)
 - ✓ 使用GPU并发训练
 - ✓ 调用CUDA核函数
 - 运行模式: GPU加速矩阵运算
@@ -48,7 +48,7 @@ make pretrain-gpu
   ↓ GPU检测 (nvidia-smi)
 NEURX_CUDA_DEVICE_COUNT 自动检测
   ↓ 编译
-script/pretrain_gpu.s → pretrain_gpu.ir
+scripts/legacy/pretrain_gpu.s → pretrain_gpu.ir
   ↓ 调用CUDA桥接
 build-cuda-train-bridge
   ↓ 运行
@@ -67,15 +67,15 @@ CUDA核函数 (cublasSgemm, relu, loss等)
 
 ## 新增脚本状态
 
-### script/gpu_train.s (新创建 - 未集成)
+### scripts/legacy/gpu_train.s (新创建 - 未集成)
 **状态:** ✅ 完成但未集成到Makefile
 
-- 位置: `script/gpu_train.s` (500+ 行)
+- 位置: `scripts/legacy/gpu_train.s` (500+ 行)
 - 功能: GPU训练完整实现 (文件I/O + CUDA FFI)
 - 库依赖: 
   - libcuda_kernels.so (已生成)
   - libcuda_runtime.so (已生成)
-- 编译: `s ir script/gpu_train.s -o artifacts/build/gpu_train.ir`
+- 编译: `s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train.ir`
 - 状态: 已编译可运行
 
 **这个脚本比pretrain_gpu.s更完善，但还未集成到Makefile中**
@@ -152,7 +152,7 @@ pretrain_gpu.s
 └─ 结果返回 → 主存
 ```
 
-### GPU 路径 (script/gpu_train.s - 新)
+### GPU 路径 (scripts/legacy/gpu_train.s - 新)
 ```
 gpu_train.s (更完善)
 ├─ 完整的文件I/O
@@ -168,18 +168,18 @@ gpu_train.s (更完善)
 
 ### CPU 版本编译
 ```bash
-s ir script/minimal_train.s -o artifacts/build/pretrain_orchestrator/minimal_train.ir
+s ir scripts/legacy/minimal_train.s -o artifacts/build/pretrain_orchestrator/minimal_train.ir
 ```
 
 ### GPU 版本编译
 ```bash
-s ir script/pretrain_gpu.s -o artifacts/build/gpu_pretrain/pretrain_gpu.ir
+s ir scripts/legacy/pretrain_gpu.s -o artifacts/build/gpu_pretrain/pretrain_gpu.ir
 ```
 
 ### 新GPU脚本编译
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
-s ir script/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
+s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 ```
 
 ---
@@ -210,10 +210,10 @@ make pretrain-gpu
 ### 立即可做
 1. ✓ 使用 `make pretrain-gpu` 进行GPU训练
 2. ✓ CUDA库已编译完成 (libcuda_kernels.so, libcuda_runtime.so)
-3. ✓ script/gpu_train.s 已准备好
+3. ✓ scripts/legacy/gpu_train.s 已准备好
 
 ### 短期改进
-1. 将 script/gpu_train.s 集成到Makefile
+1. 将 scripts/legacy/gpu_train.s 集成到Makefile
 2. 修复 str_len() bug (make pretrain才能工作)
 3. 性能优化 (批处理、梯度累积)
 
@@ -231,8 +231,8 @@ make pretrain-gpu
 | [CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPU架构详解 |
 | [S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA 实现 |
 | [cuda/BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | CUDA构建系统 |
-| [script/gpu_train.s](../script/gpu_train.s) | GPU训练脚本 (新) |
-| [script/pretrain_gpu.s](../script/pretrain_gpu.s) | GPU训练脚本 (现有) |
+| [scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPU训练脚本 (新) |
+| [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s) | GPU训练脚本 (现有) |
 
 ---
 

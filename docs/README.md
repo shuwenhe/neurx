@@ -28,7 +28,7 @@ cd neurx
 
 ```bash
 # Pretraining
-./script/run_large_pretrain.sh
+./scripts/legacy/run_large_pretrain.sh
 
 # Fine-tuning
 make train-supervised
@@ -56,7 +56,7 @@ neurx/
 ├── nn/                    # Neural network layers and operations
 ├── opt/                   # Optimizers
 ├── pretrain/              # Pretraining pipeline
-├── script/                # Launch scripts
+├── scripts/legacy/                # Launch scripts
 ├── training/              # Training loops and utilities
 └── ...
 ```

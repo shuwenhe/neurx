@@ -230,13 +230,13 @@ fn analyze_scaling() -> scaling_report
 **Deployment Options**:
 ```bash
 # SLURM
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 
 # Docker
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 
 # Kubernetes
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 ```
 
 ---
@@ -391,17 +391,17 @@ neurx run system_verification.s
 
 **Option A: SLURM**
 ```bash
-sbatch production_deployment/scripts/slurm_submit.sh
+sbatch deploy/production/scripts/slurm_submit.sh
 ```
 
 **Option B: Docker**
 ```bash
-docker-compose -f production_deployment/docker-compose.yml up
+docker-compose -f deploy/production/docker-compose.yml up
 ```
 
 **Option C: Kubernetes**
 ```bash
-kubectl apply -f production_deployment/kubernetes_deployment.yaml
+kubectl apply -f deploy/production/kubernetes_deployment.yaml
 ```
 
 ---

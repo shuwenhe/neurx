@@ -463,13 +463,13 @@ The NeurX system now includes:
 
 ### New S Language Modules (7 files)
 ```
-✅ script/data_synthesis_engine.s     (650 lines)
-✅ script/knowledge_distillation.s    (500 lines)
-✅ script/long_context_handler.s      (650 lines)
-✅ script/safety_filter.s             (550 lines)
-✅ script/performance_monitor.s       (550 lines)
-✅ script/multitask_learning.s        (850 lines)
-✅ script/model_merger.s              (750 lines)
+✅ scripts/legacy/data_synthesis_engine.s     (650 lines)
+✅ scripts/legacy/knowledge_distillation.s    (500 lines)
+✅ scripts/legacy/long_context_handler.s      (650 lines)
+✅ scripts/legacy/safety_filter.s             (550 lines)
+✅ scripts/legacy/performance_monitor.s       (550 lines)
+✅ scripts/legacy/multitask_learning.s        (850 lines)
+✅ scripts/legacy/model_merger.s              (750 lines)
 ```
 
 ### Documentation
