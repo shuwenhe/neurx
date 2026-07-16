@@ -1,4 +1,4 @@
-package neurx.model.tokenizer.manager
+package neurx.tokenizer.manager
 
 // Tokenizer Manager - Unified tokenization interface for training
 // - Vocabulary management
