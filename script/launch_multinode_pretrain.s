@@ -406,7 +406,6 @@ func build_full_command(string cmd, []string env_vars, string output_dir,
 // 主函数
 // ============================================================================
 
-func main() {
-    int exit_code = launch_multinode_pretrain()
-    os::exit(exit_code)
+func main() int {
+    return launch_multinode_pretrain()
 }
