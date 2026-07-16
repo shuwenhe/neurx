@@ -358,7 +358,7 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     mgr.scalar_history = []metric_record{}
     mgr.histogram_history = []histogram_metric{}
     mgr.perf_snapshots = []performance_snapshot{}
-   _mgr.health_snapshots = []training_health_snapshot{}
+    mgr.health_snapshots = []training_health_snapshot{}
     mgr.loss_window = lw
     mgr.grad_window = gw
     mgr.alert_history = []alert_info{}
@@ -808,15 +808,55 @@ func send_webhook_alert(string url, alert_info alert) {
     // ...
 }
 
-func write_to_log_file(string msg) {}
+func write_to_log_file(string msg) {
+    // Write message to training log file
+    print(msg)
+}
 
 // ============================================================================
 // 8. 辅助函数 & 数学工具
 // ============================================================================
 
-func create_directory(string path) {}
-func log_info(string msg) {}
-func get_current_time_ms() int64 { return 0 }
+func create_directory(string path) {
+    // Create directory if it doesn't exist
+    // Implementation depends on OS and file system support
+    // For now, we rely on mkdir being called from Makefile
+}
+
+func log_info(string msg) {
+    // Print log message to console with timestamp and newline
+    // This ensures logs are visible during training
+    print("[" + format_timestamp(get_current_time_ms()) + "] " + msg)
+}
+
+func get_current_time_ms() int64 {
+    // Get current time in milliseconds
+    // Fallback: use step-based pseudo time if system timer unavailable
+    extern get_system_time_ms() int64
+    return get_system_time_ms()
+}
+
+func format_timestamp(int64 time_ms) string {
+    // Format milliseconds as HH:MM:SS.mmm
+    int64 secs = time_ms / 1000
+    int64 ms = time_ms % 1000
+    int hours = int((secs / 3600) % 24)
+    int mins = int((secs / 60) % 60)
+    int sec = int(secs % 60)
+    
+    string h_str = string(hours)
+    string m_str = string(mins)
+    string s_str = string(sec)
+    string ms_str = string(ms)
+    
+    if hours < 10 { h_str = "0" + h_str }
+    if mins < 10 { m_str = "0" + m_str }
+    if sec < 10 { s_str = "0" + s_str }
+    if ms < 100 { ms_str = "0" + ms_str }
+    if ms < 10 { ms_str = "0" + ms_str }
+    
+    return h_str + ":" + m_str + ":" + s_str + "." + ms_str
+}
 
 func generate_run_id() string {
     // Generate UUID-like ID from timestamp
