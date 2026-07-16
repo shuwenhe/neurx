@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neurx-inference-cuda
+  labels: {app: neurx-inference, backend: cuda}
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels: {app: neurx-inference, backend: cuda}
+  template:
+    metadata:
+      labels: {app: neurx-inference, backend: cuda}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8080", prometheus.io/path: "/metrics"}
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: neurx
+          image: neurx/inference:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8080}
+            - {name: grpc, containerPort: 8081}
+          env:
+            - {name: NEURX_BACKEND, value: cuda}
+            - {name: NEURX_DRAIN_TIMEOUT_MS, value: "110000"}
+            - name: NEURX_API_KEY_FILE
+              value: /var/run/secrets/neurx/api-keys
+          volumeMounts:
+            - {name: api-keys, mountPath: /var/run/secrets/neurx, readOnly: true}
+          readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5, failureThreshold: 3}
+          livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 10, failureThreshold: 3}
+          startupProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5, failureThreshold: 60}
+          lifecycle:
+            preStop: {httpGet: {path: /admin/drain, port: http}}
+          resources:
+            requests: {cpu: "4", memory: 16Gi, nvidia.com/gpu: "1"}
+            limits: {cpu: "16", memory: 64Gi, nvidia.com/gpu: "1"}
+      volumes:
+        - name: api-keys
+          secret: {secretName: neurx-api-keys}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: neurx-inference}
+spec:
+  selector: {app: neurx-inference, backend: cuda}
+  ports:
+    - {name: http, port: 80, targetPort: http}
+    - {name: grpc, port: 8081, targetPort: grpc}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: neurx-inference-cuda}
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: neurx-inference-cuda}
+  minReplicas: 2
+  maxReplicas: 20
+  behavior:
+    scaleDown: {stabilizationWindowSeconds: 300}
+    scaleUp: {stabilizationWindowSeconds: 15}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: neurx-inference-cuda}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {app: neurx-inference, backend: cuda}
