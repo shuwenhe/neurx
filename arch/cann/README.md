@@ -7,6 +7,9 @@
 - `env.sh`: 初始化 Ascend CANN 运行环境变量。
 - `configs/ascend_910b_train.json`: 910B 训练入口示例，默认指向 `S` 训练脚本。
 - `configs/ascend_310p3_train.json`: 310P3 推理入口示例，默认指向 `S` 服务脚本。
+- `kernels/`: Ascend C / TBE 自定义推理算子。
+- `operators/`: ACLNN / Graph Engine 算子封装。
+- `runtime/`: ACL 设备、stream、内存及动态运行时加载。
 
 ## Notes
 
