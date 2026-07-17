@@ -222,6 +222,45 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(rope_, pack, "RoPE");
   }
 
+  Status attention_qkv_rope(
+      const TensorView& input, const DeviceWeight& norm_scale,
+      const DeviceWeight& query_weight, const DeviceWeight& key_weight,
+      const DeviceWeight& value_weight, const TensorView& normalized,
+      const TensorView& query, const TensorView& key,
+      const TensorView& value, const TransformerBatchPlan& plan,
+      Stream stream) override {
+    set_stream(stream);
+    if (query_weight.type != WeightStorage::fp16 ||
+        key_weight.type != WeightStorage::fp16 ||
+        value_weight.type != WeightStorage::fp16) {
+      return TransformerPrimitiveBackend::attention_qkv_rope(
+          input, norm_scale, query_weight, key_weight, value_weight,
+          normalized, query, key, value, plan, stream);
+    }
+    Status status = prepare_rope(plan);
+    if (!status.ok) return status;
+    GraphEntry* graph = graph_for(
+        {GraphKind::attention_qkv_rope, input.rows, input.columns});
+    if (!graph) return last_error_;
+    atb::VariantPack pack;
+    pack.inTensors = {
+        fp16(input),
+        device_tensor(norm_scale.storage.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(input.columns)}),
+        fp16_weight(query_weight), fp16_weight(key_weight),
+        fp16_weight(value_weight),
+        device_tensor(cos_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(plan.token_count),
+                       static_cast<int64_t>(plan.head_size / 2)}),
+        device_tensor(sin_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(plan.token_count),
+                       static_cast<int64_t>(plan.head_size / 2)}),
+        host_i32(q_sequence_lengths_)};
+    pack.outTensors = {
+        fp16(normalized), fp16(query), fp16(key), fp16(value)};
+    return run_graph(*graph, pack, "AttentionQkvRopeGraph");
+  }
+
   Status store_kv(const TensorView& key, const TensorView& value,
                   std::size_t layer, const TransformerBatchPlan& plan,
                   PagedKvCache& cache, Stream stream) override {
@@ -555,7 +594,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return result;
   }
 
-  enum class GraphKind { swiglu, add_rms_norm };
+  enum class GraphKind { swiglu, add_rms_norm, attention_qkv_rope };
 
   struct GraphKey {
     GraphKind kind;
@@ -605,8 +644,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     if (!entry) return Status::failure("ATB graph cache entry is null");
     entry->key = key;
     atb::GraphParam graph;
-    graph.name = key.kind == GraphKind::swiglu ? "NeurxSwiGLU"
-                                               : "NeurxAddRmsNorm";
+    graph.name =
+        key.kind == GraphKind::swiglu
+            ? "NeurxSwiGLU"
+            : (key.kind == GraphKind::add_rms_norm
+                   ? "NeurxAddRmsNorm"
+                   : "NeurxAttentionQkvRope");
     if (key.kind == GraphKind::swiglu) {
       graph.inTensorNum = 2;
       graph.outTensorNum = 1;
@@ -634,7 +677,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       graph.nodes[1].operation = multiply_operation;
       graph.nodes[1].inTensorIds = {3, 1};
       graph.nodes[1].outTensorIds = {2};
-    } else {
+    } else if (key.kind == GraphKind::add_rms_norm) {
       graph.inTensorNum = 3;
       graph.outTensorNum = 2;
       graph.internalTensorNum = 0;
@@ -661,6 +704,55 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       graph.nodes[1].operation = norm_operation;
       graph.nodes[1].inTensorIds = {3, 2};
       graph.nodes[1].outTensorIds = {4};
+    } else {
+      graph.inTensorNum = 8;
+      graph.outTensorNum = 4;
+      graph.internalTensorNum = 2;
+      graph.nodes.resize(5);
+
+      atb::infer::RmsNormParam norm;
+      norm.layerType = atb::infer::RmsNormParam::RMS_NORM_NORM;
+      norm.normParam.epsilon = 1.0e-5F;
+      atb::Operation* norm_operation = nullptr;
+      atb::Status code = atb::CreateOperation(norm, &norm_operation);
+      if (code != atb::NO_ERROR) return atb_error("Graph QKV RmsNorm", code);
+      entry->nodes.push_back(norm_operation);
+      graph.nodes[0].operation = norm_operation;
+      graph.nodes[0].inTensorIds = {0, 1};
+      graph.nodes[0].outTensorIds = {8};
+
+      atb::infer::LinearParam linear;
+      linear.transposeA = false;
+      linear.transposeB = false;
+      linear.hasBias = false;
+      constexpr uint32_t projection_outputs[] = {12, 13, 11};
+      for (std::size_t projection = 0; projection < 3; ++projection) {
+        atb::Operation* linear_operation = nullptr;
+        code = atb::CreateOperation(linear, &linear_operation);
+        if (code != atb::NO_ERROR) {
+          destroy_graph(*entry);
+          return atb_error("Graph QKV Linear", code);
+        }
+        entry->nodes.push_back(linear_operation);
+        graph.nodes[projection + 1].operation = linear_operation;
+        graph.nodes[projection + 1].inTensorIds = {
+            8, static_cast<uint32_t>(projection + 2)};
+        graph.nodes[projection + 1].outTensorIds = {
+            projection_outputs[projection]};
+      }
+
+      atb::infer::RopeParam rope;
+      rope.rotaryCoeff = 2;
+      atb::Operation* rope_operation = nullptr;
+      code = atb::CreateOperation(rope, &rope_operation);
+      if (code != atb::NO_ERROR) {
+        destroy_graph(*entry);
+        return atb_error("Graph QKV RoPE", code);
+      }
+      entry->nodes.push_back(rope_operation);
+      graph.nodes[4].operation = rope_operation;
+      graph.nodes[4].inTensorIds = {12, 13, 5, 6, 7};
+      graph.nodes[4].outTensorIds = {9, 10};
     }
     const atb::Status code = atb::CreateOperation(graph, &entry->graph);
     if (code != atb::NO_ERROR) {
@@ -725,6 +817,13 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return device_tensor(view.data, ACL_FLOAT16, ACL_FORMAT_ND,
                          {static_cast<int64_t>(view.rows),
                           static_cast<int64_t>(view.columns)});
+  }
+
+  atb::Tensor fp16_weight(const DeviceWeight& weight) const {
+    return device_tensor(
+        weight.storage.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+        {static_cast<int64_t>(weight.rows),
+         static_cast<int64_t>(weight.columns)});
   }
 
   atb::Tensor fp16_3d(const TensorView& view,

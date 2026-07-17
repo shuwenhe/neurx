@@ -101,6 +101,10 @@ endif()
 
 install(TARGETS neurx_cann_runtime ARCHIVE DESTINATION lib)
 install(TARGETS neurx_ascend_worker RUNTIME DESTINATION bin)
+install(PROGRAMS
+        scripts/launch_8card_310p3_inference.sh
+        scripts/benchmark_8card_310p3.py
+        DESTINATION bin)
 install(DIRECTORY runtime cache model operators inference
         DESTINATION include/neurx/cann
         FILES_MATCHING PATTERN "*.h")
