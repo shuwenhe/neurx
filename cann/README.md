@@ -49,7 +49,6 @@ CPU fallback 误报为已经完成的 NPU 算子加速。
 ```bash
 cmake -S cann -B artifacts/build/cann
 cmake --build artifacts/build/cann
-make cann-runtime-test
 ```
 
 自定义算子编译为 `libneurx_cann_operators.so`，必须实现
