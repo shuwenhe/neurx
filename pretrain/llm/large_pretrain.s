@@ -1072,6 +1072,10 @@ func gpt_large_pretrain_valid_loader_from_corpus(bpe_tokenized_corpus_state corp
 }
 
 func new_gpt_large_pretrain_config() pretrain_config {
+    string compute_backend = trim(runtime_env_get("NEURX_COMPUTE_BACKEND", "cuda"))
+    if compute_backend == "" {
+        compute_backend = "cuda"
+    }
     pretrain_config {
         global_batch_size: 256,
         micro_batch_size: 8,
@@ -1088,7 +1092,7 @@ func new_gpt_large_pretrain_config() pretrain_config {
         grad_checkpoint: true,
         optimizer: "adamw",
         scheduler: "cosine",
-        backend: "cuda",
+        backend: compute_backend,
     }
 }
 
