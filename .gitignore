@@ -114,6 +114,7 @@ artifacts/inference_output/
 
 # Cache directories
 */cache/
+!cann/cache/
 *.cache
 serving/cache/
 compile/cache/
@@ -147,7 +148,6 @@ artifacts/checkpoints/Qwen2.5-VL-7B/
 .auto_push_state/
 
 # CANN generated artifacts
-cann/cache/
 cann/checkpoints/
 cann/compile/
 

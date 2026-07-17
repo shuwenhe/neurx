@@ -284,13 +284,32 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
     weights_.push_back(std::move(weight));
   }
   loaded_ = true;
+  precision_ = options.precision;
   return Status::success();
 }
 
 void Nxtrfmv2Model::reset() {
   weights_.clear();
   metadata_ = {};
+  precision_ = ModelPrecision::fp16;
   loaded_ = false;
+}
+
+const DeviceWeight* Nxtrfmv2Model::token_embedding() const {
+  return loaded_ && !weights_.empty() ? &weights_.front() : nullptr;
+}
+
+const DeviceWeight* Nxtrfmv2Model::layer_weight(
+    std::size_t layer, LayerWeightKind kind) const {
+  if (!loaded_ || layer >= metadata_.layers) return nullptr;
+  constexpr std::size_t tensors_per_layer = 9;
+  const std::size_t index =
+      1 + layer * tensors_per_layer + static_cast<std::size_t>(kind);
+  return index < weights_.size() ? &weights_[index] : nullptr;
+}
+
+const DeviceWeight* Nxtrfmv2Model::lm_head() const {
+  return loaded_ && !weights_.empty() ? &weights_.back() : nullptr;
 }
 
 }  // namespace neurx::cann

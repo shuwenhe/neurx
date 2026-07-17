@@ -2,6 +2,7 @@
 
 #include "../runtime/acl_runtime.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -34,6 +35,18 @@ struct DeviceWeight {
   DeviceBuffer storage;
 };
 
+enum class LayerWeightKind : std::size_t {
+  attention_norm = 0,
+  q_projection = 1,
+  k_projection = 2,
+  v_projection = 3,
+  output_projection = 4,
+  ffn_norm = 5,
+  gate_projection = 6,
+  up_projection = 7,
+  down_projection = 8,
+};
+
 Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata);
 uint16_t float_to_fp16_bits(float value);
 
@@ -44,12 +57,18 @@ class Nxtrfmv2Model {
   void reset();
 
   bool loaded() const { return loaded_; }
+  ModelPrecision precision() const { return precision_; }
   const ModelMetadata& metadata() const { return metadata_; }
   const std::vector<DeviceWeight>& weights() const { return weights_; }
+  const DeviceWeight* token_embedding() const;
+  const DeviceWeight* layer_weight(std::size_t layer,
+                                   LayerWeightKind kind) const;
+  const DeviceWeight* lm_head() const;
 
  private:
   ModelMetadata metadata_;
   std::vector<DeviceWeight> weights_;
+  ModelPrecision precision_ = ModelPrecision::fp16;
   bool loaded_ = false;
 };
 
