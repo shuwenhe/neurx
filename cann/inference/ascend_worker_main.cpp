@@ -280,9 +280,17 @@ struct RequestRelease {
 struct BatchRequestRelease {
   neurx::inference::AscendWorker* worker;
   std::vector<std::string> ids;
+  void release(std::size_t row) {
+    if (worker && row < ids.size() && !ids[row].empty()) {
+      worker->release_request(ids[row]);
+      ids[row].clear();
+    }
+  }
   ~BatchRequestRelease() {
     if (!worker) return;
-    for (const std::string& id : ids) worker->release_request(id);
+    for (const std::string& id : ids) {
+      if (!id.empty()) worker->release_request(id);
+    }
   }
 };
 
@@ -394,7 +402,11 @@ neurx::inference::AdapterStatus generate_batch(
     const bool stopped =
         std::find(stop_tokens.begin(), stop_tokens.end(), token) !=
         stop_tokens.end();
-    if (!stopped && max_new_tokens > 1) active.push_back(row);
+    if (!stopped && max_new_tokens > 1) {
+      active.push_back(row);
+    } else {
+      release.release(row);
+    }
   }
 
   for (int step = 1; !active.empty() && step < max_new_tokens; ++step) {
@@ -430,7 +442,11 @@ neurx::inference::AdapterStatus generate_batch(
       const bool stopped =
           std::find(stop_tokens.begin(), stop_tokens.end(), token) !=
           stop_tokens.end();
-      if (!stopped && step + 1 < max_new_tokens) next_active.push_back(row);
+      if (!stopped && step + 1 < max_new_tokens) {
+        next_active.push_back(row);
+      } else {
+        release.release(row);
+      }
     }
     active.swap(next_active);
   }

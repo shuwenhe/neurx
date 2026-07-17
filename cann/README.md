@@ -110,6 +110,10 @@ CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 `/health/ready`、`/metrics`、`/admin/drain` 和
 `POST /v1/token-completions`。推理接口接收 `input_ids`、
 `max_new_tokens`、采样参数及可选 `stop_token_ids`，返回生成的 token IDs。
+`POST /v1/batch-token-completions` 接收二维 `input_ids`，将所有 prompt
+合并为一次 Prefill，并在后续轮次将尚未结束的请求组成 Decode batch；
+达到停止 token 的请求会立即释放 KV Cache。默认最多 64 个序列，可用
+`NEURX_ASCEND_HTTP_MAX_BATCH` 调整，上限为 2000。
 部署时可直接设置：
 
 ```bash
@@ -140,7 +144,8 @@ python3 cann/scripts/benchmark_8card_310p3.py compare \
   --fp16 /tmp/neurx-fp16.json --int8 /tmp/neurx-int8.json
 ```
 
-采集覆盖八个 worker 的 readiness、固定 prompt 的 top-k logits、greedy
-生成吞吐及 p50/p95 请求延迟。比较阶段检查 top-1 一致率、top-k 重合率、
+采集覆盖八个 worker 的 readiness、固定 prompt 的 top-k logits、批量 greedy
+生成吞吐及 p50/p95 请求延迟，默认每次请求包含 8 个序列，可通过
+`--batch-size` 调整。比较阶段检查 top-1 一致率、top-k 重合率、
 共同 token 的 logit 误差和 INT8/FP16 吞吐比；任何阈值不满足都会返回非零。
 可通过 `--prompts` 传入业务 tokenizer 生成的 token ID 数组。
