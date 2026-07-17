@@ -33,6 +33,14 @@ class TransformerPrimitiveBackend {
                            Stream stream) = 0;
   virtual Status add(const TensorView& left, const TensorView& right,
                      const TensorView& output, Stream stream) = 0;
+  virtual Status add_rms_norm(const TensorView& left,
+                              const TensorView& right,
+                              const DeviceWeight& scale,
+                              const TensorView& residual,
+                              const TensorView& normalized, Stream stream) {
+    Status status = add(left, right, residual, stream);
+    return status.ok ? rms_norm(residual, scale, normalized, stream) : status;
+  }
   virtual Status swiglu(const TensorView& gate, const TensorView& up,
                         const TensorView& output, Stream stream) = 0;
   virtual Status gather_last(const TensorView& hidden,

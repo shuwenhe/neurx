@@ -93,6 +93,11 @@ KV block 不会共享，避免后续 Decode 改写其他请求正在使用的缓
 `NEURX_ASCEND_PREFIX_CACHE_BLOCKS` 调整容量，设置为 `0` 可禁用。命中、
 查询、淘汰和 retained block 数量由 `/metrics` 暴露。
 
+ATB 插件对重复执行的子图启用 shape-keyed LRU GraphOperation cache：
+`Add+RMSNorm` 和 `Swish+Multiply(SwiGLU)` 分别作为图算子执行，并为每个
+精确的 rows/columns shape 复用图实例与 workspace。缓存最多保留 32 个图，
+淘汰前同步当前 stream。310P3 不启用仅适用于更新硬件的整图下沉 capture。
+
 CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 `/health/ready`、`/metrics`、`/admin/drain` 和
 `POST /v1/token-completions`。推理接口接收 `input_ids`、
