@@ -62,7 +62,7 @@ cmake -S cann -B artifacts/build/cann-310p \
 cmake --build artifacts/build/cann-310p
 ```
 
-插件实现 `operators/operator_abi.h` 中的 ABI v1 prefill/decode 接口，执行
+插件实现 `operators/operator_abi.h` 中的 ABI v2 prefill/decode 接口，执行
 Gather、RMSNorm、Linear、RoPE、ReshapeAndCache、PagedAttention、残差、
 SwiGLU 和 LM Head。KV Cache 使用 310P
 `FRACTAL_NZ` 格式。
@@ -76,6 +76,12 @@ pinned host/device token 与 logits 缓冲，执行 Prefill/Decode，把 FP16
 logits 转换为 host FP32，并支持 temperature、top-k、top-p 和 repetition
 penalty 采样。HTTP/OpenAI 协议、tokenizer 和请求调度仍由通用 serving 层
 负责。
+
+ATB 插件支持 NPU device-side sampling：对 temperature 为 `0`（greedy）
+或 `1` 且无 repetition penalty 的请求执行 FP16 Softmax 和
+TopkToppSampling，只向 host 回传每个请求的 INT32 token ID。其他采样组合
+自动使用 CPU reference sampler，保证已有接口语义不变。ATB 采样要求 batch
+不超过 512。
 
 CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 `/health/ready`、`/metrics`、`/admin/drain` 和

@@ -43,8 +43,10 @@ class AscendWorker {
   AscendExecutor executor_;
   cann::DeviceBuffer device_tokens_;
   cann::DeviceBuffer device_logits_;
+  cann::DeviceBuffer device_sampled_tokens_;
   cann::HostBuffer host_tokens_;
   cann::HostBuffer host_logits_;
+  cann::HostBuffer host_sampled_tokens_;
 };
 
 }  // namespace neurx::inference

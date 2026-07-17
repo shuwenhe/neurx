@@ -106,6 +106,17 @@ AdapterStatus AscendWorker::execute(
   }
   const std::size_t token_bytes = token_ids.size() * sizeof(int32_t);
   const std::size_t logit_bytes = logit_count * sizeof(uint16_t);
+  const std::size_t sampled_token_bytes = batch_size * sizeof(int32_t);
+  bool use_device_sampling = batch_size <= 512;
+  const SamplingConfig default_sampling;
+  for (std::size_t row = 0; row < batch_size; ++row) {
+    const SamplingConfig& config =
+        sampling.empty() ? default_sampling : sampling[row];
+    if (!supports_atb_device_sampling(config, vocabulary)) {
+      use_device_sampling = false;
+      break;
+    }
+  }
 
   if (cann::set_current_context(executor_.context()) != cann::kSuccess) {
     return AdapterStatus::failure(std::string("aclrtSetCurrentContext: ") +
@@ -116,10 +127,21 @@ AdapterStatus AscendWorker::execute(
   if (!status.ok) return status;
   status = ensure_capacity(device_logits_, logit_bytes, "device logits buffer");
   if (!status.ok) return status;
+  if (use_device_sampling) {
+    status = ensure_capacity(device_sampled_tokens_, sampled_token_bytes,
+                             "device sampled-token buffer");
+    if (!status.ok) return status;
+  }
   status = ensure_capacity(host_tokens_, token_bytes, "host token buffer");
   if (!status.ok) return status;
-  status = ensure_capacity(host_logits_, logit_bytes, "host logits buffer");
-  if (!status.ok) return status;
+  if (use_device_sampling) {
+    status = ensure_capacity(host_sampled_tokens_, sampled_token_bytes,
+                             "host sampled-token buffer");
+    if (!status.ok) return status;
+  } else {
+    status = ensure_capacity(host_logits_, logit_bytes, "host logits buffer");
+    if (!status.ok) return status;
+  }
 
   std::memcpy(host_tokens_.data(), token_ids.data(), token_bytes);
   if (cann::memcpy_async(device_tokens_.data(), device_tokens_.size(),
@@ -135,15 +157,32 @@ AdapterStatus AscendWorker::execute(
   launch.token_ids = device_tokens_.data();
   launch.logits = device_logits_.data();
   launch.stream = executor_.stream();
+  launch.device_sampling = use_device_sampling;
+  launch.sampling_params =
+      use_device_sampling
+          ? static_cast<const void*>(sampling.empty() ? nullptr
+                                                       : sampling.data())
+          : nullptr;
+  launch.sampled_token_ids =
+      use_device_sampling ? device_sampled_tokens_.data() : nullptr;
   status = executor_.execute(launch);
   if (!status.ok) return status;
 
-  if (cann::memcpy_async(host_logits_.data(), host_logits_.size(),
-                         device_logits_.data(), logit_bytes,
-                         cann::MemcpyKind::device_to_host,
+  void* copy_destination =
+      use_device_sampling ? host_sampled_tokens_.data() : host_logits_.data();
+  const void* copy_source = use_device_sampling
+                                ? device_sampled_tokens_.data()
+                                : device_logits_.data();
+  const std::size_t copy_bytes =
+      use_device_sampling ? sampled_token_bytes : logit_bytes;
+  const std::size_t destination_bytes = use_device_sampling
+                                            ? host_sampled_tokens_.size()
+                                            : host_logits_.size();
+  if (cann::memcpy_async(copy_destination, destination_bytes, copy_source,
+                         copy_bytes, cann::MemcpyKind::device_to_host,
                          executor_.stream()) != cann::kSuccess) {
     for (const auto& item : batch.items) executor_.release_request(item.request_id);
-    return AdapterStatus::failure(std::string("logits D2H copy: ") +
+    return AdapterStatus::failure(std::string("sampling output D2H copy: ") +
                                   cann::recent_error());
   }
   status = executor_.synchronize();
@@ -154,13 +193,27 @@ AdapterStatus AscendWorker::execute(
     return status;
   }
 
+  result->next_tokens.resize(batch_size);
+  if (use_device_sampling) {
+    result->logits.clear();
+    std::memcpy(result->next_tokens.data(), host_sampled_tokens_.data(),
+                sampled_token_bytes);
+    for (std::size_t row = 0; row < batch_size; ++row) {
+      const int32_t token = result->next_tokens[row];
+      if (token < 0 || static_cast<std::size_t>(token) >= vocabulary) {
+        return AdapterStatus::failure(
+            batch.items[row].request_id +
+            ": ATB sampler returned an invalid token id");
+      }
+    }
+    return AdapterStatus::success();
+  }
+
   result->logits.resize(logit_count);
   const auto* fp16 = static_cast<const uint16_t*>(host_logits_.data());
   for (std::size_t index = 0; index < logit_count; ++index) {
     result->logits[index] = fp16_to_float(fp16[index]);
   }
-  result->next_tokens.resize(batch_size);
-  const SamplingConfig default_sampling;
   const std::vector<int32_t> empty_history;
   for (std::size_t row = 0; row < batch_size; ++row) {
     const SamplingConfig& config =

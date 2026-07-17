@@ -22,6 +22,7 @@ int main() {
   top_k.seed = 7;
   assert(neurx::inference::sample_logits(logits, 4, top_k, {}, &token).ok);
   assert(token == 1);
+  assert(neurx::inference::supports_atb_device_sampling(top_k, 4));
 
   SamplingConfig penalty;
   penalty.temperature = 0.0F;
@@ -30,6 +31,15 @@ int main() {
              logits, 4, penalty, std::vector<int32_t>{1}, &token)
              .ok);
   assert(token == 2);
+  assert(!neurx::inference::supports_atb_device_sampling(penalty, 4));
+
+  SamplingConfig temperature;
+  temperature.temperature = 0.7F;
+  assert(!neurx::inference::supports_atb_device_sampling(temperature, 4));
+
+  SamplingConfig greedy_device;
+  greedy_device.temperature = 0.0F;
+  assert(neurx::inference::supports_atb_device_sampling(greedy_device, 4));
 
   SamplingConfig invalid;
   invalid.top_p = 0.0F;

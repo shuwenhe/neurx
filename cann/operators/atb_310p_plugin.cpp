@@ -1,5 +1,6 @@
 #include "operator_abi.h"
 #include "transformer_engine.h"
+#include "../inference/logits_sampler.h"
 
 #if !__has_include(<acl/acl.h>) || !__has_include(<atb/atb_infer.h>)
 #error "Ascend310P plugin requires CANN ACL and ATB headers"
@@ -111,6 +112,17 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     atb::infer::ElewiseParam multiply;
     multiply.elewiseType = atb::infer::ElewiseParam::ELEWISE_MUL;
     if (!(create(multiply, &multiply_, "Multiply").ok)) return last_error_;
+
+    atb::infer::SoftmaxParam softmax;
+    softmax.axes = {-1};
+    if (!(create(softmax, &softmax_, "Softmax").ok)) return last_error_;
+
+    atb::infer::TopkToppSamplingParam sampling;
+    sampling.topkToppSamplingType =
+        atb::infer::TopkToppSamplingParam::BATCH_TOPK_MULTINOMIAL_SAMPLING;
+    if (!(create(sampling, &sampling_, "TopkToppSampling").ok)) {
+      return last_error_;
+    }
 
     model_ = model;
     cache_ = cache;
@@ -268,6 +280,103 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return Status::success();
   }
 
+  Status sample_logits(const inference::DeviceBatch& batch,
+                       std::size_t vocabulary) {
+    if (!batch.device_sampling || !batch.sampled_token_ids ||
+        batch.batch_size == 0 || batch.batch_size > 512) {
+      return Status::failure("ATB device sampling metadata is invalid");
+    }
+    const auto* requested = static_cast<const inference::SamplingConfig*>(
+        batch.sampling_params);
+    std::vector<inference::SamplingConfig> defaults;
+    if (!requested) {
+      defaults.resize(batch.batch_size);
+      requested = defaults.data();
+    }
+
+    std::vector<int32_t> topk_host;
+    std::vector<uint16_t> topp_host;
+    topk_host.reserve(batch.batch_size);
+    topp_host.reserve(batch.batch_size);
+    atb::infer::TopkToppSamplingParam sampling_param;
+    sampling_param.topkToppSamplingType =
+        atb::infer::TopkToppSamplingParam::BATCH_TOPK_MULTINOMIAL_SAMPLING;
+    sampling_param.randSeeds.reserve(batch.batch_size);
+    for (std::size_t row = 0; row < batch.batch_size; ++row) {
+      const inference::SamplingConfig& config = requested[row];
+      if (!inference::supports_atb_device_sampling(config, vocabulary)) {
+        return Status::failure(
+            "sampling parameters require the CPU fallback");
+      }
+      const int32_t topk =
+          config.temperature == 0.0F
+              ? 1
+              : (config.top_k == 0 ? static_cast<int32_t>(vocabulary)
+                                   : config.top_k);
+      topk_host.push_back(topk);
+      topp_host.push_back(
+          float_to_fp16_bits(config.temperature == 0.0F ? 1.0F
+                                                        : config.top_p));
+      sampling_param.randSeeds.push_back(static_cast<uint32_t>(config.seed));
+    }
+    Status status = upload_i32(sampling_topk_, topk_host);
+    if (!status.ok) return status;
+    const std::size_t topp_bytes = topp_host.size() * sizeof(uint16_t);
+    status = ensure(sampling_topp_, topp_bytes);
+    if (!status.ok) return status;
+    if (memcpy_async(sampling_topp_.data(), sampling_topp_.size(),
+                     topp_host.data(), topp_bytes, MemcpyKind::host_to_device,
+                     batch.stream) != kSuccess) {
+      return Status::failure(std::string("sampling top-p upload: ") +
+                             recent_error());
+    }
+    const std::size_t probability_bytes =
+        batch.batch_size * vocabulary * sizeof(uint16_t);
+    status = ensure(sampling_probs_, probability_bytes);
+    if (!status.ok) return status;
+    status = ensure(sampling_prob_output_,
+                    batch.batch_size * sizeof(uint16_t));
+    if (!status.ok) return status;
+
+    atb::VariantPack softmax_pack;
+    softmax_pack.inTensors = {
+        device_tensor(batch.logits, ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size),
+                       static_cast<int64_t>(vocabulary)})};
+    softmax_pack.outTensors = {
+        device_tensor(sampling_probs_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size),
+                       static_cast<int64_t>(vocabulary)})};
+    status = run(softmax_, softmax_pack, "SamplingSoftmax");
+    if (!status.ok) return status;
+
+    const atb::Status update =
+        atb::UpdateOperationParam(sampling_, sampling_param);
+    if (update != atb::NO_ERROR) {
+      return atb_error("TopkToppSampling update", update);
+    }
+    atb::VariantPack sampling_pack;
+    sampling_pack.inTensors = {
+        device_tensor(sampling_probs_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size),
+                       static_cast<int64_t>(vocabulary)}),
+        device_tensor(sampling_topk_.data(), ACL_INT32, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size), 1}),
+        device_tensor(sampling_topp_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size), 1})};
+    sampling_pack.outTensors = {
+        device_tensor(batch.sampled_token_ids, ACL_INT32, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size), 1}),
+        device_tensor(sampling_prob_output_.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(batch.batch_size), 1})};
+    status = run(sampling_, sampling_pack, "TopkToppSampling");
+    if (!status.ok) return status;
+    return synchronize_stream(batch.stream) == kSuccess
+               ? Status::success()
+               : Status::failure(std::string("device sampling synchronize: ") +
+                                 recent_error());
+  }
+
  private:
   template <typename Param>
   Status create(const Param& param, atb::Operation** output,
@@ -391,7 +500,10 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   atb::Operation *rope_ = nullptr, *reshape_cache_ = nullptr;
   atb::Operation* paged_attention_ = nullptr;
   atb::Operation *add_ = nullptr, *swish_ = nullptr, *multiply_ = nullptr;
+  atb::Operation *softmax_ = nullptr, *sampling_ = nullptr;
   DeviceBuffer workspace_, slot_, blocks_, cos_, sin_;
+  DeviceBuffer sampling_topk_, sampling_topp_, sampling_probs_;
+  DeviceBuffer sampling_prob_output_;
   std::vector<int32_t> slot_host_, block_host_, sequence_lengths_;
   std::vector<int32_t> q_sequence_lengths_;
 };
@@ -424,6 +536,9 @@ class Plugin {
     launch.workspace = activation_.data();
     launch.workspace_bytes = activation_.size();
     status = execute_transformer(launch, *model, *cache, backend_);
+    if (status.ok && batch.device_sampling) {
+      status = backend_.sample_logits(batch, model->metadata().vocabulary);
+    }
     return status.ok ? inference::AdapterStatus::success()
                      : inference::AdapterStatus::failure(status.message);
   }
@@ -442,7 +557,7 @@ Plugin& plugin() {
 }  // namespace
 }  // namespace neurx::cann
 
-extern "C" uint32_t neurx_cann_operator_abi_version() { return 1; }
+extern "C" uint32_t neurx_cann_operator_abi_version() { return 2; }
 
 namespace {
 NeurxCannOperatorStatus abi_status(
