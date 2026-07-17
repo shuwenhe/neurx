@@ -17,6 +17,7 @@ class AscendAdapter final : public BackendAdapter {
   AdapterStatus synchronize() override;
   void bind_launchers(KernelLauncher prefill, KernelLauncher decode);
   cann::DeviceSession& native_session() { return session_; }
+  const cann::DeviceSession& native_session() const { return session_; }
 
  private:
   KernelLauncher prefill_ = nullptr;
