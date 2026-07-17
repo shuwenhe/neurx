@@ -9,6 +9,21 @@
 
 namespace neurx::inference {
 
+bool supports_atb_device_sampling(const SamplingConfig& config,
+                                  std::size_t vocabulary) {
+  return vocabulary > 0 &&
+         vocabulary <=
+             static_cast<std::size_t>(std::numeric_limits<int32_t>::max()) &&
+         std::isfinite(config.temperature) &&
+         (config.temperature == 0.0F || config.temperature == 1.0F) &&
+         config.top_k >= 0 &&
+         (config.top_k == 0 ||
+          static_cast<std::size_t>(config.top_k) <= vocabulary) &&
+         std::isfinite(config.top_p) && config.top_p > 0.0F &&
+         config.top_p <= 1.0F && config.repetition_penalty == 1.0F &&
+         config.seed <= std::numeric_limits<uint32_t>::max();
+}
+
 AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
                             const SamplingConfig& config,
                             const std::vector<int32_t>& token_history,

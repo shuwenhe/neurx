@@ -25,4 +25,10 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
                             const std::vector<int32_t>& token_history,
                             int32_t* token);
 
+// ATB TopkToppSampling consumes FP16 probabilities. Until a device logits
+// processor is added, temperature scaling and repetition penalties retain the
+// exact CPU implementation.
+bool supports_atb_device_sampling(const SamplingConfig& config,
+                                  std::size_t vocabulary);
+
 }  // namespace neurx::inference
