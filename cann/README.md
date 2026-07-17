@@ -83,6 +83,16 @@ TopkToppSampling，只向 host 回传每个请求的 INT32 token ID。其他采�
 自动使用 CPU reference sampler，保证已有接口语义不变。ATB 采样要求 batch
 不超过 512。
 
+`cache/prefix_cache.{h,cpp}` 缓存完整、不可变的 prompt KV blocks。新请求
+执行 Prefill 前会查找最长的 block-aligned token prefix，并通过引用计数共享
+物理 KV blocks；至少保留一个未缓存 token 用于生成当前请求的首个 logits。
+缓存使用 LRU 淘汰，默认最多 256 个条目或 128 个 retained blocks。Worker
+在新 batch 分配 KV 前会按需淘汰缓存，避免 retained blocks 阻塞活跃请求。部分
+KV block 不会共享，避免后续 Decode 改写其他请求正在使用的缓存。
+可通过 `NEURX_ASCEND_PREFIX_CACHE_ENTRIES` 和
+`NEURX_ASCEND_PREFIX_CACHE_BLOCKS` 调整容量，设置为 `0` 可禁用。命中、
+查询、淘汰和 retained block 数量由 `/metrics` 暴露。
+
 CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 `/health/ready`、`/metrics`、`/admin/drain` 和
 `POST /v1/token-completions`。推理接口接收 `input_ids`、

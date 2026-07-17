@@ -258,10 +258,14 @@ int main() {
   const long blocks = environment_long("NEURX_ASCEND_KV_BLOCKS", 512);
   const long block_tokens =
       environment_long("NEURX_ASCEND_KV_BLOCK_TOKENS", 16);
+  const long prefix_entries =
+      environment_long("NEURX_ASCEND_PREFIX_CACHE_ENTRIES", 256);
+  const long prefix_blocks =
+      environment_long("NEURX_ASCEND_PREFIX_CACHE_BLOCKS", 128);
   const long device = environment_long("NEURX_ASCEND_DEVICE_ID", 0);
   const long port = environment_long("NEURX_HTTP_PORT", 8080);
-  if (blocks <= 0 || block_tokens <= 0 || device < 0 || port <= 0 ||
-      port > 65535) {
+  if (blocks <= 0 || block_tokens <= 0 || prefix_entries < 0 ||
+      prefix_blocks < 0 || device < 0 || port <= 0 || port > 65535) {
     std::cerr << "invalid Ascend worker environment configuration\n";
     return 2;
   }
@@ -273,7 +277,11 @@ int main() {
       static_cast<std::size_t>(blocks), static_cast<std::size_t>(block_tokens),
       metadata.layers, metadata.attention_heads,
       metadata.hidden_size / metadata.attention_heads);
-  neurx::inference::AscendWorker worker(std::move(config));
+  neurx::cann::PrefixCacheConfig prefix_config;
+  prefix_config.max_entries = static_cast<std::size_t>(prefix_entries);
+  prefix_config.max_retained_blocks =
+      static_cast<std::size_t>(prefix_blocks);
+  neurx::inference::AscendWorker worker(std::move(config), prefix_config);
   neurx::inference::AdapterStatus initialized =
       worker.initialize(static_cast<int>(device));
   if (!initialized.ok) {
@@ -314,11 +322,23 @@ int main() {
               healthy ? "{\"status\":\"ok\"}"
                       : "{\"status\":\"draining\"}");
     } else if (method == "GET" && path == "/metrics") {
+      const neurx::cann::PrefixCacheStats prefix =
+          worker.prefix_cache_stats();
       std::ostringstream metrics;
       metrics << "neurx_ascend_requests_total " << requests << '\n'
               << "neurx_ascend_failures_total " << failures << '\n'
               << "neurx_ascend_generated_tokens_total " << generated_total
-              << '\n';
+              << '\n'
+              << "neurx_ascend_prefix_cache_entries " << prefix.entries
+              << '\n'
+              << "neurx_ascend_prefix_cache_retained_blocks "
+              << prefix.retained_blocks << '\n'
+              << "neurx_ascend_prefix_cache_lookups_total " << prefix.lookups
+              << '\n'
+              << "neurx_ascend_prefix_cache_hits_total " << prefix.hits
+              << '\n'
+              << "neurx_ascend_prefix_cache_evictions_total "
+              << prefix.evictions << '\n';
       respond(client, 200, "OK", metrics.str(), "text/plain");
     } else if (method == "POST" && path == "/admin/drain") {
       draining = true;

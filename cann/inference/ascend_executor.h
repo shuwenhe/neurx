@@ -34,6 +34,7 @@ class AscendExecutor final : public BackendAdapter {
   bool release_request(const std::string& request_id);
   const cann::Nxtrfmv2Model& model() const { return model_; }
   const cann::PagedKvCache& kv_cache() const { return kv_cache_; }
+  cann::PagedKvCache& mutable_kv_cache() { return kv_cache_; }
   cann::Stream stream() const { return adapter_.native_session().stream(); }
   cann::Context context() const { return adapter_.native_session().context(); }
 

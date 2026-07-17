@@ -104,6 +104,7 @@ Status PagedKvCache::initialize() {
       allocator_->allocate(&storage_, config_.block_count * config_.block_bytes);
   if (!allocated.ok) return allocated;
   free_blocks_.reserve(config_.block_count);
+  block_refcounts_.assign(config_.block_count, 0);
   // Pop from the back while preserving stable low-to-high allocation order.
   for (std::size_t index = config_.block_count; index > 0; --index) {
     free_blocks_.push_back(static_cast<uint32_t>(index - 1));
@@ -141,8 +142,13 @@ Status PagedKvCache::reserve_locked(const std::string& request_id,
     return Status::failure("KV cache is out of blocks");
   }
   for (std::size_t index = 0; index < additional; ++index) {
-    allocation.blocks.push_back(free_blocks_.back());
+    const uint32_t block = free_blocks_.back();
     free_blocks_.pop_back();
+    if (block_refcounts_[block] != 0) {
+      return Status::failure("KV cache free-list reference count is corrupt");
+    }
+    block_refcounts_[block] = 1;
+    allocation.blocks.push_back(block);
   }
   allocation.tokens = total_tokens;
   return Status::success();
@@ -161,7 +167,7 @@ Status PagedKvCache::resize(const std::string& request_id,
   RequestAllocation& allocation = it->second;
   const std::size_t required = blocks_for(total_tokens);
   while (allocation.blocks.size() > required) {
-    free_blocks_.push_back(allocation.blocks.back());
+    release_block_locked(allocation.blocks.back());
     allocation.blocks.pop_back();
   }
   allocation.tokens = total_tokens;
@@ -189,9 +195,87 @@ bool PagedKvCache::release(const std::string& request_id) {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto it = requests_.find(request_id);
   if (it == requests_.end()) return false;
-  for (const uint32_t block : it->second.blocks) free_blocks_.push_back(block);
+  for (const uint32_t block : it->second.blocks) release_block_locked(block);
   requests_.erase(it);
   return true;
+}
+
+void PagedKvCache::release_block_locked(uint32_t block) {
+  if (block >= block_refcounts_.size() || block_refcounts_[block] == 0) return;
+  --block_refcounts_[block];
+  if (block_refcounts_[block] == 0) free_blocks_.push_back(block);
+}
+
+Status PagedKvCache::retain_prefix(
+    const std::string& request_id, std::size_t prefix_tokens,
+    std::vector<uint32_t>* retained_blocks) {
+  if (!retained_blocks) {
+    return Status::failure("retained KV block output is null");
+  }
+  std::lock_guard<std::mutex> lock(mutex_);
+  const auto it = requests_.find(request_id);
+  if (!storage_ || it == requests_.end()) {
+    return Status::failure("KV cache request does not exist");
+  }
+  if (prefix_tokens == 0 ||
+      prefix_tokens % config_.tokens_per_block != 0 ||
+      prefix_tokens > it->second.tokens) {
+    return Status::failure(
+        "retained KV prefix must contain complete allocated blocks");
+  }
+  const std::size_t count = prefix_tokens / config_.tokens_per_block;
+  if (count > it->second.blocks.size()) {
+    return Status::failure("retained KV prefix block table is too short");
+  }
+  for (std::size_t index = 0; index < count; ++index) {
+    const uint32_t block = it->second.blocks[index];
+    if (block >= block_refcounts_.size() ||
+        block_refcounts_[block] == 0 ||
+        block_refcounts_[block] == std::numeric_limits<uint32_t>::max()) {
+      return Status::failure("KV block reference count cannot be retained");
+    }
+  }
+  retained_blocks->assign(it->second.blocks.begin(),
+                          it->second.blocks.begin() + count);
+  for (const uint32_t block : *retained_blocks) ++block_refcounts_[block];
+  return Status::success();
+}
+
+Status PagedKvCache::attach_retained_prefix(
+    const std::string& request_id,
+    const std::vector<uint32_t>& retained_blocks,
+    std::size_t prefix_tokens) {
+  if (request_id.empty() || retained_blocks.empty() || prefix_tokens == 0) {
+    return Status::failure("retained KV prefix attachment is invalid");
+  }
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (!storage_) return Status::failure("KV cache is not initialized");
+  if (requests_.count(request_id)) {
+    return Status::failure("KV cache request already has an allocation");
+  }
+  if (prefix_tokens % config_.tokens_per_block != 0 ||
+      retained_blocks.size() != prefix_tokens / config_.tokens_per_block) {
+    return Status::failure("retained KV prefix shape is inconsistent");
+  }
+  for (const uint32_t block : retained_blocks) {
+    if (block >= block_refcounts_.size() ||
+        block_refcounts_[block] == 0 ||
+        block_refcounts_[block] == std::numeric_limits<uint32_t>::max()) {
+      return Status::failure("retained KV prefix references an invalid block");
+    }
+  }
+  RequestAllocation allocation;
+  allocation.blocks = retained_blocks;
+  allocation.tokens = prefix_tokens;
+  for (const uint32_t block : retained_blocks) ++block_refcounts_[block];
+  requests_.emplace(request_id, std::move(allocation));
+  return Status::success();
+}
+
+void PagedKvCache::release_retained_blocks(
+    const std::vector<uint32_t>& retained_blocks) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  for (const uint32_t block : retained_blocks) release_block_locked(block);
 }
 
 std::vector<uint32_t> PagedKvCache::block_table(

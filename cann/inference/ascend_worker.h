@@ -2,6 +2,7 @@
 
 #include "ascend_executor.h"
 #include "logits_sampler.h"
+#include "../cache/prefix_cache.h"
 
 #include <cstdint>
 #include <vector>
@@ -18,7 +19,9 @@ struct WorkerBatchResult {
 // invokes AscendExecutor, copies logits back, and performs reference sampling.
 class AscendWorker {
  public:
-  explicit AscendWorker(AscendExecutorConfig config);
+  explicit AscendWorker(
+      AscendExecutorConfig config,
+      cann::PrefixCacheConfig prefix_cache_config = {});
 
   AdapterStatus initialize(int device_id);
   bool ready() const { return executor_.ready(); }
@@ -33,6 +36,9 @@ class AscendWorker {
     return executor_.release_request(request_id);
   }
   const AscendExecutor& executor() const { return executor_; }
+  cann::PrefixCacheStats prefix_cache_stats() const {
+    return prefix_cache_.stats();
+  }
 
  private:
   AdapterStatus ensure_capacity(cann::DeviceBuffer& buffer,
@@ -41,6 +47,7 @@ class AscendWorker {
                                 std::size_t bytes, const char* name);
 
   AscendExecutor executor_;
+  cann::PrefixCache prefix_cache_;
   cann::DeviceBuffer device_tokens_;
   cann::DeviceBuffer device_logits_;
   cann::DeviceBuffer device_sampled_tokens_;
