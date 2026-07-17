@@ -8,7 +8,7 @@ func main() int {
 
     if !runtime_file_exists(ascend_home) {
         println("Ascend toolkit not found: " + ascend_home)
-        println("Set ASCEND_HOME_PATH before using arch/cann/env.s")
+        println("Set ASCEND_HOME_PATH before using cann/env.s")
         return 1
     }
 

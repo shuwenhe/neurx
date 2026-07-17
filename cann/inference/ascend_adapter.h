@@ -1,6 +1,6 @@
 #pragma once
 
-#include "backend_adapter.h"
+#include "../../inference/runtime/backends/backend_adapter.h"
 
 namespace neurx::inference {
 

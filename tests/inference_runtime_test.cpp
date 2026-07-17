@@ -1,6 +1,6 @@
 #include "../inference/runtime/inference_runtime.h"
-#include "../inference/runtime/backends/ascend_adapter.h"
-#include "../distributed/hccl/hccl_dynamic.h"
+#include "../cann/inference/ascend_adapter.h"
+#include "../cann/hccl/hccl_dynamic.h"
 
 #include <cassert>
 #include <cstdio>
