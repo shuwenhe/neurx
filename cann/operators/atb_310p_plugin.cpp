@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <list>
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -56,6 +57,7 @@ Status atb_error(const char* operation, atb::Status code) {
 class Atb310PBackend final : public TransformerPrimitiveBackend {
  public:
   ~Atb310PBackend() override {
+    clear_graph_cache();
     for (atb::Operation* operation : operations_) {
       if (operation) atb::DestroyOperation(operation);
     }
@@ -103,15 +105,6 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     atb::infer::ElewiseParam add;
     add.elewiseType = atb::infer::ElewiseParam::ELEWISE_ADD;
     if (!(create(add, &add_, "Add").ok)) return last_error_;
-
-    atb::infer::ActivationParam swish;
-    swish.activationType = atb::infer::ACTIVATION_SWISH;
-    swish.scale = 1.0F;
-    if (!(create(swish, &swish_, "Swish").ok)) return last_error_;
-
-    atb::infer::ElewiseParam multiply;
-    multiply.elewiseType = atb::infer::ElewiseParam::ELEWISE_MUL;
-    if (!(create(multiply, &multiply_, "Multiply").ok)) return last_error_;
 
     atb::infer::SoftmaxParam softmax;
     softmax.axes = {-1};
@@ -244,18 +237,33 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(add_, pack, "Add");
   }
 
+  Status add_rms_norm(const TensorView& left, const TensorView& right,
+                      const DeviceWeight& scale,
+                      const TensorView& residual,
+                      const TensorView& normalized, Stream stream) override {
+    set_stream(stream);
+    GraphEntry* graph = graph_for(
+        {GraphKind::add_rms_norm, left.rows, left.columns});
+    if (!graph) return last_error_;
+    atb::VariantPack pack;
+    pack.inTensors = {
+        fp16(left), fp16(right),
+        device_tensor(scale.storage.data(), ACL_FLOAT16, ACL_FORMAT_ND,
+                      {static_cast<int64_t>(left.columns)})};
+    pack.outTensors = {fp16(residual), fp16(normalized)};
+    return run_graph(*graph, pack, "AddRmsNormGraph");
+  }
+
   Status swiglu(const TensorView& gate, const TensorView& up,
                 const TensorView& output, Stream stream) override {
     set_stream(stream);
-    atb::VariantPack activation;
-    activation.inTensors = {fp16(gate)};
-    activation.outTensors = {fp16(output)};
-    Status status = run(swish_, activation, "Swish");
-    if (!status.ok) return status;
-    atb::VariantPack multiply;
-    multiply.inTensors = {fp16(output), fp16(up)};
-    multiply.outTensors = {fp16(output)};
-    return run(multiply_, multiply, "SwiGLU");
+    GraphEntry* graph =
+        graph_for({GraphKind::swiglu, gate.rows, gate.columns});
+    if (!graph) return last_error_;
+    atb::VariantPack pack;
+    pack.inTensors = {fp16(gate), fp16(up)};
+    pack.outTensors = {fp16(output)};
+    return run_graph(*graph, pack, "SwiGLUGraph");
   }
 
   Status gather_last(const TensorView& hidden,
@@ -378,6 +386,26 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   }
 
  private:
+  enum class GraphKind { swiglu, add_rms_norm };
+
+  struct GraphKey {
+    GraphKind kind;
+    std::size_t rows;
+    std::size_t columns;
+
+    bool operator==(const GraphKey& other) const {
+      return kind == other.kind && rows == other.rows &&
+             columns == other.columns;
+    }
+  };
+
+  struct GraphEntry {
+    GraphKey key;
+    atb::Operation* graph = nullptr;
+    std::vector<atb::Operation*> nodes;
+    DeviceBuffer workspace;
+  };
+
   template <typename Param>
   Status create(const Param& param, atb::Operation** output,
                 const char* name) {
@@ -388,6 +416,135 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     }
     operations_.push_back(*output);
     return Status::success();
+  }
+
+  void destroy_graph(GraphEntry& entry) {
+    if (entry.graph) atb::DestroyOperation(entry.graph);
+    entry.graph = nullptr;
+    for (atb::Operation* operation : entry.nodes) {
+      if (operation) atb::DestroyOperation(operation);
+    }
+    entry.nodes.clear();
+  }
+
+  void clear_graph_cache() {
+    for (GraphEntry& entry : graph_cache_) destroy_graph(entry);
+    graph_cache_.clear();
+  }
+
+  Status create_graph(const GraphKey& key, GraphEntry* entry) {
+    if (!entry) return Status::failure("ATB graph cache entry is null");
+    entry->key = key;
+    atb::GraphParam graph;
+    graph.name = key.kind == GraphKind::swiglu ? "NeurxSwiGLU"
+                                               : "NeurxAddRmsNorm";
+    if (key.kind == GraphKind::swiglu) {
+      graph.inTensorNum = 2;
+      graph.outTensorNum = 1;
+      graph.internalTensorNum = 1;
+      graph.nodes.resize(2);
+      atb::infer::ActivationParam swish;
+      swish.activationType = atb::infer::ACTIVATION_SWISH;
+      swish.scale = 1.0F;
+      atb::Operation* swish_operation = nullptr;
+      atb::Status code = atb::CreateOperation(swish, &swish_operation);
+      if (code != atb::NO_ERROR) return atb_error("Graph Swish", code);
+      entry->nodes.push_back(swish_operation);
+      atb::infer::ElewiseParam multiply;
+      multiply.elewiseType = atb::infer::ElewiseParam::ELEWISE_MUL;
+      atb::Operation* multiply_operation = nullptr;
+      code = atb::CreateOperation(multiply, &multiply_operation);
+      if (code != atb::NO_ERROR) {
+        destroy_graph(*entry);
+        return atb_error("Graph Multiply", code);
+      }
+      entry->nodes.push_back(multiply_operation);
+      graph.nodes[0].operation = swish_operation;
+      graph.nodes[0].inTensorIds = {0};
+      graph.nodes[0].outTensorIds = {3};
+      graph.nodes[1].operation = multiply_operation;
+      graph.nodes[1].inTensorIds = {3, 1};
+      graph.nodes[1].outTensorIds = {2};
+    } else {
+      graph.inTensorNum = 3;
+      graph.outTensorNum = 2;
+      graph.internalTensorNum = 0;
+      graph.nodes.resize(2);
+      atb::infer::ElewiseParam add;
+      add.elewiseType = atb::infer::ElewiseParam::ELEWISE_ADD;
+      atb::Operation* add_operation = nullptr;
+      atb::Status code = atb::CreateOperation(add, &add_operation);
+      if (code != atb::NO_ERROR) return atb_error("Graph Add", code);
+      entry->nodes.push_back(add_operation);
+      atb::infer::RmsNormParam norm;
+      norm.layerType = atb::infer::RmsNormParam::RMS_NORM_NORM;
+      norm.normParam.epsilon = 1.0e-5F;
+      atb::Operation* norm_operation = nullptr;
+      code = atb::CreateOperation(norm, &norm_operation);
+      if (code != atb::NO_ERROR) {
+        destroy_graph(*entry);
+        return atb_error("Graph RmsNorm", code);
+      }
+      entry->nodes.push_back(norm_operation);
+      graph.nodes[0].operation = add_operation;
+      graph.nodes[0].inTensorIds = {0, 1};
+      graph.nodes[0].outTensorIds = {3};
+      graph.nodes[1].operation = norm_operation;
+      graph.nodes[1].inTensorIds = {3, 2};
+      graph.nodes[1].outTensorIds = {4};
+    }
+    const atb::Status code = atb::CreateOperation(graph, &entry->graph);
+    if (code != atb::NO_ERROR) {
+      destroy_graph(*entry);
+      return atb_error("Create GraphOperation", code);
+    }
+    return Status::success();
+  }
+
+  GraphEntry* graph_for(const GraphKey& key) {
+    for (auto entry = graph_cache_.begin(); entry != graph_cache_.end();
+         ++entry) {
+      if (entry->key == key) {
+        graph_cache_.splice(graph_cache_.begin(), graph_cache_, entry);
+        return &graph_cache_.front();
+      }
+    }
+    GraphEntry entry;
+    Status status = create_graph(key, &entry);
+    if (!status.ok) {
+      last_error_ = status;
+      return nullptr;
+    }
+    graph_cache_.push_front(std::move(entry));
+    while (graph_cache_.size() > kMaxGraphCacheEntries) {
+      if (stream_ && synchronize_stream(stream_) != kSuccess) {
+        last_error_ =
+            Status::failure("ATB graph eviction synchronization failed");
+        destroy_graph(graph_cache_.front());
+        graph_cache_.pop_front();
+        return nullptr;
+      }
+      destroy_graph(graph_cache_.back());
+      graph_cache_.pop_back();
+    }
+    return &graph_cache_.front();
+  }
+
+  Status run_graph(GraphEntry& entry, atb::VariantPack& pack,
+                   const char* name) {
+    uint64_t workspace_bytes = 0;
+    atb::Status code =
+        entry.graph->Setup(pack, workspace_bytes, context_);
+    if (code != atb::NO_ERROR) return atb_error(name, code);
+    if (workspace_bytes > entry.workspace.size()) {
+      Status status = ensure(entry.workspace, workspace_bytes);
+      if (!status.ok) return status;
+    }
+    code = entry.graph->Execute(
+        pack, static_cast<uint8_t*>(entry.workspace.data()), workspace_bytes,
+        context_);
+    return code == atb::NO_ERROR ? Status::success()
+                                 : atb_error(name, code);
   }
 
   void set_stream(Stream stream) {
@@ -499,13 +656,15 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   atb::Operation *gather_ = nullptr, *norm_ = nullptr, *linear_ = nullptr;
   atb::Operation *rope_ = nullptr, *reshape_cache_ = nullptr;
   atb::Operation* paged_attention_ = nullptr;
-  atb::Operation *add_ = nullptr, *swish_ = nullptr, *multiply_ = nullptr;
+  atb::Operation* add_ = nullptr;
   atb::Operation *softmax_ = nullptr, *sampling_ = nullptr;
   DeviceBuffer workspace_, slot_, blocks_, cos_, sin_;
   DeviceBuffer sampling_topk_, sampling_topp_, sampling_probs_;
   DeviceBuffer sampling_prob_output_;
   std::vector<int32_t> slot_host_, block_host_, sequence_lengths_;
   std::vector<int32_t> q_sequence_lengths_;
+  static constexpr std::size_t kMaxGraphCacheEntries = 32;
+  std::list<GraphEntry> graph_cache_;
 };
 
 class Plugin {

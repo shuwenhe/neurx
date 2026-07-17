@@ -112,10 +112,11 @@ Status execute_transformer(const inference::DeviceBatch& batch,
     if (!status.ok) return stage_status(status, "attention");
     status = backend.linear(auxiliary, *o_weight, query, batch.stream);
     if (!status.ok) return stage_status(status, "attention output projection");
-    status = backend.add(hidden, query, auxiliary, batch.stream);
-    if (!status.ok) return stage_status(status, "attention residual");
-    status = backend.rms_norm(auxiliary, *ffn_norm, norm, batch.stream);
-    if (!status.ok) return stage_status(status, "ffn rmsnorm");
+    status = backend.add_rms_norm(hidden, query, *ffn_norm, auxiliary, norm,
+                                  batch.stream);
+    if (!status.ok) {
+      return stage_status(status, "attention residual and ffn rmsnorm");
+    }
     status = backend.linear(norm, *gate_weight, gate, batch.stream);
     if (!status.ok) return stage_status(status, "gate projection");
     status = backend.linear(norm, *up_weight, up, batch.stream);
