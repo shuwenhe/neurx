@@ -1,3 +1,6 @@
 # CANN runtime
 
-The runtime layer owns ACL initialization, devices, contexts, streams, events and memory pools. `acl_dynamic.h` supplies the minimal dynamically loaded lifecycle used by the inference adapter; production builds may replace it with the matching vendor headers and link libraries.
+The runtime layer owns ACL initialization, devices, contexts, streams, events
+and memory. `acl_dynamic.h` dynamically resolves lifecycle, memory-copy and
+event APIs. `acl_runtime.h` provides RAII device sessions plus device and
+pinned-host buffers.

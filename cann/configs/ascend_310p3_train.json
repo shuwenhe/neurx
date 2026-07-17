@@ -1,19 +1,19 @@
 {
-  "name": "neurx-ascend-310p3-8card-training",
+  "name": "neurx-ascend-310p3-8worker-inference",
   "mode": "infer",
   "target": {
     "soc": "Ascend310P3"
   },
-  "allow_train_on_310p3": true,
   "env": {
     "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3,4,5,6,7",
-    "HCCL_CONNECT_TIMEOUT": "7200"
+    "NEURX_ASCEND_PRECISION": "fp16",
+    "NEURX_ASCEND_WORKER_COUNT": "8"
   },
-  "train": {
+  "serve": {
     "workdir": "/app/neurx",
     "command": [
-      "s",
-      "serving/serve/serve.s"
+      "bash",
+      "cann/scripts/launch_8card_310p3_inference.sh"
     ]
   }
 }
