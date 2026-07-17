@@ -34,6 +34,14 @@ target_compile_options(neurx_ascend_worker PRIVATE -Wall -Wextra -Werror)
 
 include(CTest)
 if(BUILD_TESTING)
+  add_executable(cann_paged_kv_cache_test
+    ../tests/cann_paged_kv_cache_test.cpp
+  )
+  target_link_libraries(cann_paged_kv_cache_test PRIVATE neurx_cann_runtime)
+  target_compile_options(cann_paged_kv_cache_test PRIVATE
+    -Wall -Wextra -Werror)
+  add_test(NAME cann_paged_kv_cache COMMAND cann_paged_kv_cache_test)
+
   add_executable(cann_logits_sampler_test
     ../tests/cann_logits_sampler_test.cpp
     inference/logits_sampler.cpp
@@ -72,7 +80,7 @@ if(NEURX_ENABLE_ATB_310P)
     "$ENV{ATB_HOME_PATH}/lib"
   )
   target_link_libraries(neurx_cann_operators PRIVATE
-    neurx_cann_runtime atb ascendcl)
+    neurx_cann_runtime atb ascendcl nnopbase)
   set_target_properties(neurx_cann_operators PROPERTIES
     OUTPUT_NAME neurx_cann_operators)
   install(TARGETS neurx_cann_operators LIBRARY DESTINATION lib)

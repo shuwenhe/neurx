@@ -9,7 +9,9 @@
 
 namespace neurx::cann {
 
-enum class ModelPrecision { fp16, fp32 };
+enum class ModelPrecision { fp16, fp32, int8_weight_only };
+
+enum class WeightStorage { fp16, fp32, int8_per_channel };
 
 struct ModelMetadata {
   uint64_t step = 0;
@@ -32,7 +34,14 @@ struct ModelLoadOptions {
 struct DeviceWeight {
   std::string name;
   uint64_t elements = 0;
+  uint64_t rows = 0;
+  uint64_t columns = 0;
+  WeightStorage type = WeightStorage::fp16;
   DeviceBuffer storage;
+  // FP16 per-output-channel antiquantization scales for INT8 matrices.
+  DeviceBuffer scales;
+
+  bool quantized() const { return type == WeightStorage::int8_per_channel; }
 };
 
 enum class LayerWeightKind : std::size_t {
@@ -49,6 +58,11 @@ enum class LayerWeightKind : std::size_t {
 
 Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata);
 uint16_t float_to_fp16_bits(float value);
+// Quantizes row-major [rows, columns] input and writes the transposed INT8
+// matrix [columns, rows] required by the 310P weight-transform path.
+Status quantize_int8_per_channel(const float* input, std::size_t rows,
+                                 std::size_t columns, int8_t* output,
+                                 uint16_t* scales);
 
 class Nxtrfmv2Model {
  public:

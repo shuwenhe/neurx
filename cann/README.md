@@ -98,6 +98,12 @@ ATB 插件对重复执行的子图启用 shape-keyed LRU GraphOperation cache：
 精确的 rows/columns shape 复用图实例与 workspace。缓存最多保留 32 个图，
 淘汰前同步当前 stream。310P3 不启用仅适用于更新硬件的整图下沉 capture。
 
+模型加载器支持 `NEURX_ASCEND_PRECISION=int8` 的 W8A16 weight-only
+推理。Embedding 和 RMSNorm 权重保持 FP16；Q/K/V/O、FFN 与 LM Head
+矩阵按输出通道对称量化为 INT8，并保存 FP16 antiquant scale。310P3 插件
+使用 `aclnnWeightQuantBatchMatmulV2` 输出 FP16 activation；设置为 `fp16`
+可回退到原 ATB Linear 路径。
+
 CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 `/health/ready`、`/metrics`、`/admin/drain` 和
 `POST /v1/token-completions`。推理接口接收 `input_ids`、
@@ -108,7 +114,8 @@ CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
 export NEURX_ASCEND_WORKER_BIN=/app/neurx/bin/neurx_ascend_worker
 ```
 
-当前实现要求 FP16、head size 为16的倍数且不超过256、KV block size 为16的
+当前实现要求 FP16 activation（权重可为 FP16 或 per-channel INT8）、
+head size 为16的倍数且不超过256、KV block size 为16的
 倍数且不超过128。Prefill 支持分块：每个 query token 使用独立的 block-table
 行和递增 context length，从已经写入的分页 KV Cache 中读取历史上下文。数值
 正确性和性能仍必须在 310P3+CANN/ATB 环境与 CPU/CUDA golden 对齐。

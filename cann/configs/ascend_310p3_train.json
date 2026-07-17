@@ -6,7 +6,7 @@
   },
   "env": {
     "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3,4,5,6,7",
-    "NEURX_ASCEND_PRECISION": "fp16",
+    "NEURX_ASCEND_PRECISION": "int8",
     "NEURX_ASCEND_WORKER_COUNT": "8"
   },
   "serve": {

@@ -1,6 +1,7 @@
 #include "nxtrfmv2_loader.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <limits>
@@ -118,6 +119,28 @@ uint64_t expected_weight_elements(uint64_t index, const HeaderV2& header) {
   return dim * header.vocab;
 }
 
+struct WeightShape {
+  uint64_t rows;
+  uint64_t columns;
+  bool matrix;
+};
+
+WeightShape weight_shape(uint64_t index, const HeaderV2& header) {
+  const uint64_t dim = header.dim;
+  if (index == 0) return {header.vocab, dim, false};
+  const uint64_t layer_tensors = static_cast<uint64_t>(header.layers) * 9;
+  if (index <= layer_tensors) {
+    const uint64_t within_layer = (index - 1) % 9;
+    if (within_layer == 0 || within_layer == 5) return {1, dim, false};
+    if (within_layer == 6 || within_layer == 7) {
+      return {dim, header.ffn, true};
+    }
+    if (within_layer == 8) return {header.ffn, dim, true};
+    return {dim, dim, true};
+  }
+  return {dim, header.vocab, true};
+}
+
 Status skip_training_state(std::ifstream& input, uint64_t elements) {
   constexpr uint64_t state_copies = 3;
   if (elements > static_cast<uint64_t>(std::numeric_limits<std::streamoff>::max()) /
@@ -184,6 +207,36 @@ uint16_t float_to_fp16_bits(float value) {
                                half_mantissa);
 }
 
+Status quantize_int8_per_channel(const float* input, std::size_t rows,
+                                 std::size_t columns, int8_t* output,
+                                 uint16_t* scales) {
+  if (!input || !output || !scales || rows == 0 || columns == 0) {
+    return Status::failure("INT8 per-channel quantization arguments are invalid");
+  }
+  std::vector<float> channel_scales(columns, 1.0F);
+  for (std::size_t column = 0; column < columns; ++column) {
+    float maximum = 0.0F;
+    for (std::size_t row = 0; row < rows; ++row) {
+      const float value = input[row * columns + column];
+      if (!std::isfinite(value)) {
+        return Status::failure("INT8 quantization input contains NaN or infinity");
+      }
+      maximum = std::max(maximum, std::fabs(value));
+    }
+    channel_scales[column] = maximum == 0.0F ? 1.0F : maximum / 127.0F;
+    scales[column] = float_to_fp16_bits(channel_scales[column]);
+  }
+  for (std::size_t row = 0; row < rows; ++row) {
+    for (std::size_t column = 0; column < columns; ++column) {
+      const float quantized =
+          std::round(input[row * columns + column] / channel_scales[column]);
+      output[column * rows + row] = static_cast<int8_t>(
+          std::max(-127.0F, std::min(127.0F, quantized)));
+    }
+  }
+  return Status::success();
+}
+
 Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
                            const ModelLoadOptions& options) {
   reset();
@@ -214,8 +267,7 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
   if (!input) return Status::failure("NXTRFMV2 metadata is truncated");
 
   std::vector<float> fp32(kTransferElements);
-  std::vector<uint16_t> fp16;
-  if (options.precision == ModelPrecision::fp16) fp16.resize(kTransferElements);
+  std::vector<uint16_t> fp16(kTransferElements);
   weights_.reserve(static_cast<std::size_t>(header.param_count));
 
   for (uint64_t index = 0; index < header.param_count; ++index) {
@@ -229,8 +281,13 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
       return Status::failure(weight_name(index, header) +
                              ": checkpoint tensor shape is inconsistent");
     }
+    const WeightShape shape = weight_shape(index, header);
+    const bool quantized =
+        options.precision == ModelPrecision::int8_weight_only && shape.matrix;
     const std::size_t element_bytes =
-        options.precision == ModelPrecision::fp16 ? sizeof(uint16_t) : sizeof(float);
+        quantized ? sizeof(int8_t)
+                  : (options.precision == ModelPrecision::fp32 ? sizeof(float)
+                                                               : sizeof(uint16_t));
     if (elements > std::numeric_limits<std::size_t>::max() / element_bytes) {
       reset();
       return Status::failure("NXTRFMV2 weight allocation overflows size_t");
@@ -239,13 +296,61 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
     DeviceWeight weight;
     weight.name = weight_name(index, header);
     weight.elements = elements;
+    weight.rows = shape.rows;
+    weight.columns = shape.columns;
+    weight.type = quantized
+                      ? WeightStorage::int8_per_channel
+                      : (options.precision == ModelPrecision::fp32
+                             ? WeightStorage::fp32
+                             : WeightStorage::fp16);
     status = weight.storage.allocate(static_cast<std::size_t>(elements) * element_bytes);
     if (!status.ok) {
       reset();
       return Status::failure(weight.name + ": " + status.message);
     }
 
-    uint64_t copied = 0;
+    if (quantized) {
+      if (elements > std::numeric_limits<std::size_t>::max() / sizeof(float)) {
+        reset();
+        return Status::failure(weight.name + ": host quantization allocation overflows");
+      }
+      std::vector<float> values(static_cast<std::size_t>(elements));
+      if (!read_exact(input, values.data(), values.size() * sizeof(float))) {
+        reset();
+        return Status::failure(weight.name + ": checkpoint weight data is truncated");
+      }
+      std::vector<int8_t> int8(values.size());
+      std::vector<uint16_t> scales(static_cast<std::size_t>(shape.columns));
+      status = quantize_int8_per_channel(
+          values.data(), static_cast<std::size_t>(shape.rows),
+          static_cast<std::size_t>(shape.columns), int8.data(), scales.data());
+      if (!status.ok) {
+        reset();
+        return Status::failure(weight.name + ": " + status.message);
+      }
+      status = weight.scales.allocate(scales.size() * sizeof(uint16_t));
+      if (!status.ok) {
+        reset();
+        return Status::failure(weight.name + ": " + status.message);
+      }
+      if (memcpy_async(weight.storage.data(), weight.storage.size(), int8.data(),
+                       int8.size(), MemcpyKind::host_to_device,
+                       session.stream()) != kSuccess ||
+          memcpy_async(weight.scales.data(), weight.scales.size(), scales.data(),
+                       scales.size() * sizeof(uint16_t),
+                       MemcpyKind::host_to_device, session.stream()) != kSuccess) {
+        reset();
+        return Status::failure(weight.name + ": INT8 weight upload failed: " +
+                               recent_error());
+      }
+      status = session.synchronize();
+      if (!status.ok) {
+        reset();
+        return Status::failure(weight.name + ": " + status.message);
+      }
+    }
+
+    uint64_t copied = quantized ? elements : 0;
     while (copied < elements) {
       const std::size_t chunk = static_cast<std::size_t>(
           std::min<uint64_t>(kTransferElements, elements - copied));
@@ -254,7 +359,7 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
         return Status::failure(weight.name + ": checkpoint weight data is truncated");
       }
       const void* source = fp32.data();
-      if (options.precision == ModelPrecision::fp16) {
+      if (options.precision != ModelPrecision::fp32) {
         for (std::size_t item = 0; item < chunk; ++item) {
           fp16[item] = float_to_fp16_bits(fp32[item]);
         }

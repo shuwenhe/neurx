@@ -2,17 +2,21 @@
 #include "transformer_engine.h"
 #include "../inference/logits_sampler.h"
 
-#if !__has_include(<acl/acl.h>) || !__has_include(<atb/atb_infer.h>)
+#if !__has_include(<acl/acl.h>) || !__has_include(<atb/atb_infer.h>) || \
+    !__has_include(<aclnnop/aclnn_weight_quant_batch_matmul_v2.h>)
 #error "Ascend310P plugin requires CANN ACL and ATB headers"
 #endif
 
 #include <acl/acl.h>
+#include <aclnnop/aclnn_trans_matmul_weight.h>
+#include <aclnnop/aclnn_weight_quant_batch_matmul_v2.h>
 #include <atb/atb_infer.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -54,10 +58,41 @@ Status atb_error(const char* operation, atb::Status code) {
                          std::to_string(code));
 }
 
+class AclTensorHandle {
+ public:
+  AclTensorHandle(void* data, aclDataType type,
+                  std::initializer_list<int64_t> dimensions) {
+    dimensions_.assign(dimensions);
+    strides_.resize(dimensions_.size());
+    int64_t stride = 1;
+    for (std::size_t index = dimensions_.size(); index-- > 0;) {
+      strides_[index] = stride;
+      stride *= dimensions_[index];
+    }
+    tensor_ = aclCreateTensor(
+        dimensions_.data(), dimensions_.size(), type, strides_.data(), 0,
+        ACL_FORMAT_ND, dimensions_.data(), dimensions_.size(), data);
+  }
+
+  ~AclTensorHandle() {
+    if (tensor_) aclDestroyTensor(tensor_);
+  }
+
+  AclTensorHandle(const AclTensorHandle&) = delete;
+  AclTensorHandle& operator=(const AclTensorHandle&) = delete;
+  aclTensor* get() const { return tensor_; }
+
+ private:
+  std::vector<int64_t> dimensions_;
+  std::vector<int64_t> strides_;
+  aclTensor* tensor_ = nullptr;
+};
+
 class Atb310PBackend final : public TransformerPrimitiveBackend {
  public:
   ~Atb310PBackend() override {
     clear_graph_cache();
+    quant_weights_.clear();
     for (atb::Operation* operation : operations_) {
       if (operation) atb::DestroyOperation(operation);
     }
@@ -151,6 +186,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   Status linear(const TensorView& input, const DeviceWeight& weight,
                 const TensorView& output, Stream stream) override {
     set_stream(stream);
+    if (weight.quantized()) {
+      return quantized_linear(input, weight, output, stream);
+    }
+    if (weight.type != WeightStorage::fp16) {
+      return Status::failure("ATB Linear received an unsupported weight type");
+    }
     atb::VariantPack pack;
     pack.inTensors = {
         fp16(input),
@@ -386,6 +427,134 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   }
 
  private:
+  Status quantized_linear(const TensorView& input, const DeviceWeight& weight,
+                          const TensorView& output, Stream stream) {
+    if (!weight.storage.data() || !weight.scales.data() ||
+        weight.rows != input.columns || weight.columns != output.columns) {
+      return Status::failure("ACLNN INT8 Linear weight shape is invalid");
+    }
+    AclTensorHandle x(
+        input.data, ACL_FLOAT16,
+        {static_cast<int64_t>(input.rows),
+         static_cast<int64_t>(input.columns)});
+    aclTensor* w = transformed_weight(weight, stream);
+    if (!w) return last_error_;
+    AclTensorHandle scale(
+        weight.scales.data(), ACL_FLOAT16,
+        {static_cast<int64_t>(weight.columns)});
+    AclTensorHandle y(
+        output.data, ACL_FLOAT16,
+        {static_cast<int64_t>(output.rows),
+         static_cast<int64_t>(output.columns)});
+    if (!x.get() || !scale.get() || !y.get()) {
+      return Status::failure("aclCreateTensor failed for INT8 Linear");
+    }
+
+    uint64_t workspace_bytes = 0;
+    aclOpExecutor* executor = nullptr;
+    const aclnnStatus prepared =
+        aclnnWeightQuantBatchMatmulV2GetWorkspaceSize(
+            x.get(), w, scale.get(), nullptr, nullptr, nullptr, nullptr,
+            0, y.get(), &workspace_bytes, &executor);
+    if (prepared != ACLNN_SUCCESS) {
+      return Status::failure(
+          "aclnnWeightQuantBatchMatmulV2GetWorkspaceSize status=" +
+          std::to_string(prepared));
+    }
+    if (workspace_bytes > quant_workspace_.size()) {
+      Status status = ensure(quant_workspace_, workspace_bytes);
+      if (!status.ok) return status;
+    }
+    const aclnnStatus launched = aclnnWeightQuantBatchMatmulV2(
+        quant_workspace_.data(), workspace_bytes, executor, stream);
+    return launched == ACLNN_SUCCESS
+               ? Status::success()
+               : Status::failure("aclnnWeightQuantBatchMatmulV2 status=" +
+                                 std::to_string(launched));
+  }
+
+  struct QuantWeightEntry {
+    const void* source = nullptr;
+    DeviceBuffer formatted;
+    aclTensor* tensor = nullptr;
+
+    ~QuantWeightEntry() {
+      if (tensor) aclDestroyTensor(tensor);
+    }
+  };
+
+  aclTensor* transformed_weight(const DeviceWeight& weight, Stream stream) {
+    for (const auto& entry : quant_weights_) {
+      if (entry->source == weight.storage.data()) return entry->tensor;
+    }
+    auto entry = std::make_unique<QuantWeightEntry>();
+    entry->source = weight.storage.data();
+    const int64_t dimensions[] = {
+        static_cast<int64_t>(weight.columns),
+        static_cast<int64_t>(weight.rows)};
+    const aclIntArray* shape = aclCreateIntArray(dimensions, 2);
+    if (!shape) {
+      last_error_ = Status::failure("aclCreateIntArray failed for INT8 weight");
+      return nullptr;
+    }
+    uint64_t formatted_bytes = 0;
+    const aclnnStatus sized =
+        aclnnCalculateMatmulWeightSizeV2(shape, ACL_INT8, &formatted_bytes);
+    aclDestroyIntArray(shape);
+    if (sized != ACLNN_SUCCESS || formatted_bytes < weight.storage.size()) {
+      last_error_ = Status::failure(
+          "aclnnCalculateMatmulWeightSizeV2 status=" +
+          std::to_string(sized));
+      return nullptr;
+    }
+    Status status = entry->formatted.allocate(formatted_bytes);
+    if (!status.ok) {
+      last_error_ = status;
+      return nullptr;
+    }
+    if (memcpy_async(entry->formatted.data(), entry->formatted.size(),
+                     weight.storage.data(), weight.storage.size(),
+                     MemcpyKind::device_to_device, stream) != kSuccess) {
+      last_error_ = Status::failure(
+          std::string("INT8 transformed-weight copy: ") + recent_error());
+      return nullptr;
+    }
+    const int64_t strides[] = {dimensions[1], 1};
+    entry->tensor = aclCreateTensor(
+        dimensions, 2, ACL_INT8, strides, 0, ACL_FORMAT_ND, dimensions, 2,
+        entry->formatted.data());
+    if (!entry->tensor) {
+      last_error_ =
+          Status::failure("aclCreateTensor failed for transformed INT8 weight");
+      return nullptr;
+    }
+    uint64_t workspace_bytes = 0;
+    aclOpExecutor* executor = nullptr;
+    const aclnnStatus prepared = aclnnTransMatmulWeightGetWorkspaceSize(
+        entry->tensor, &workspace_bytes, &executor);
+    if (prepared != ACLNN_SUCCESS) {
+      last_error_ = Status::failure(
+          "aclnnTransMatmulWeightGetWorkspaceSize status=" +
+          std::to_string(prepared));
+      return nullptr;
+    }
+    status = ensure(quant_transform_workspace_, workspace_bytes);
+    if (!status.ok) {
+      last_error_ = status;
+      return nullptr;
+    }
+    const aclnnStatus transformed = aclnnTransMatmulWeight(
+        quant_transform_workspace_.data(), workspace_bytes, executor, stream);
+    if (transformed != ACLNN_SUCCESS) {
+      last_error_ = Status::failure("aclnnTransMatmulWeight status=" +
+                                    std::to_string(transformed));
+      return nullptr;
+    }
+    aclTensor* result = entry->tensor;
+    quant_weights_.push_back(std::move(entry));
+    return result;
+  }
+
   enum class GraphKind { swiglu, add_rms_norm };
 
   struct GraphKey {
@@ -658,13 +827,15 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   atb::Operation* paged_attention_ = nullptr;
   atb::Operation* add_ = nullptr;
   atb::Operation *softmax_ = nullptr, *sampling_ = nullptr;
-  DeviceBuffer workspace_, slot_, blocks_, cos_, sin_;
+  DeviceBuffer workspace_, quant_workspace_, quant_transform_workspace_;
+  DeviceBuffer slot_, blocks_, cos_, sin_;
   DeviceBuffer sampling_topk_, sampling_topp_, sampling_probs_;
   DeviceBuffer sampling_prob_output_;
   std::vector<int32_t> slot_host_, block_host_, sequence_lengths_;
   std::vector<int32_t> q_sequence_lengths_;
   static constexpr std::size_t kMaxGraphCacheEntries = 32;
   std::list<GraphEntry> graph_cache_;
+  std::list<std::unique_ptr<QuantWeightEntry>> quant_weights_;
 };
 
 class Plugin {

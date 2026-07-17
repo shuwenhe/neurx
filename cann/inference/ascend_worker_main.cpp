@@ -264,6 +264,10 @@ int main() {
       environment_long("NEURX_ASCEND_PREFIX_CACHE_BLOCKS", 128);
   const long device = environment_long("NEURX_ASCEND_DEVICE_ID", 0);
   const long port = environment_long("NEURX_HTTP_PORT", 8080);
+  const std::string precision =
+      environment("NEURX_ASCEND_PRECISION").empty()
+          ? "fp16"
+          : environment("NEURX_ASCEND_PRECISION");
   if (blocks <= 0 || block_tokens <= 0 || prefix_entries < 0 ||
       prefix_blocks < 0 || device < 0 || port <= 0 || port > 65535) {
     std::cerr << "invalid Ascend worker environment configuration\n";
@@ -273,6 +277,15 @@ int main() {
   neurx::inference::AscendExecutorConfig config;
   config.operator_library = operators;
   config.checkpoint = checkpoint;
+  if (precision == "fp16") {
+    config.model.precision = neurx::cann::ModelPrecision::fp16;
+  } else if (precision == "int8" || precision == "int8_weight_only") {
+    config.model.precision =
+        neurx::cann::ModelPrecision::int8_weight_only;
+  } else {
+    std::cerr << "NEURX_ASCEND_PRECISION must be fp16 or int8\n";
+    return 2;
+  }
   config.kv_cache = neurx::cann::KvCacheConfig::fp16_310p(
       static_cast<std::size_t>(blocks), static_cast<std::size_t>(block_tokens),
       metadata.layers, metadata.attention_heads,
