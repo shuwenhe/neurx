@@ -18,7 +18,7 @@ spec:
           env:
             - {name: NEURX_BACKEND, value: ascend}
             - {name: NEURX_ASCEND_DEVICE_ID, value: "0"}
-            - {name: NEURX_ASCEND_PRECISION, value: fp16}
+            - {name: NEURX_ASCEND_PRECISION, value: int8}
             - {name: NEURX_CHECKPOINT, value: /models/transformer_v2.ckpt}
             - {name: NEURX_CANN_OPERATOR_LIBRARY, value: /app/neurx/lib/libneurx_cann_operators.so}
             - {name: NEURX_DRAIN_TIMEOUT_MS, value: "110000"}

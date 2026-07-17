@@ -3,6 +3,7 @@
 #include "../cann/operators/transformer_plan.h"
 
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <cstdio>
 #include <fstream>
@@ -125,6 +126,20 @@ int main() {
   assert(neurx::cann::float_to_fp16_bits(1.0F) == 0x3c00);
   assert(neurx::cann::float_to_fp16_bits(-2.0F) == 0xc000);
   assert(neurx::cann::float_to_fp16_bits(65504.0F) == 0x7bff);
+  const float quant_input[] = {1.0F, -2.0F, 0.0F, 4.0F, -1.0F, 2.0F};
+  int8_t quant_output[6] = {};
+  uint16_t quant_scales[2] = {};
+  assert(neurx::cann::quantize_int8_per_channel(
+             quant_input, 3, 2, quant_output, quant_scales)
+             .ok);
+  assert(quant_output[0] == 127 && quant_output[1] == 0);
+  assert(quant_output[2] == -127 && quant_output[3] == -64);
+  assert(quant_output[4] == 127 && quant_output[5] == 64);
+  assert(quant_scales[0] != 0 && quant_scales[1] != 0);
+  const float invalid_quant_input[] = {NAN};
+  assert(!neurx::cann::quantize_int8_per_channel(
+              invalid_quant_input, 1, 1, quant_output, quant_scales)
+              .ok);
 
   const char* checkpoint = "/tmp/neurx_nxtrfmv2_loader_test.ckpt";
   TestHeaderV2 header{};

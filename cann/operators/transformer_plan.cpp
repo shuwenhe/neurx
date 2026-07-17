@@ -62,8 +62,10 @@ Status build_transformer_batch_plan(
     const PagedKvCache& cache, TransformerBatchPlan* plan) {
   if (!plan) return Status::failure("transformer batch plan output is null");
   if (!model.loaded()) return Status::failure("Ascend model weights are not loaded");
-  if (model.precision() != ModelPrecision::fp16) {
-    return Status::failure("Ascend310P operator plugin requires FP16 weights");
+  if (model.precision() != ModelPrecision::fp16 &&
+      model.precision() != ModelPrecision::int8_weight_only) {
+    return Status::failure(
+        "Ascend310P operator plugin requires FP16 or INT8 weight-only weights");
   }
   if (!batch.token_ids || !batch.logits) {
     return Status::failure("device token ids and logits buffers are required");
