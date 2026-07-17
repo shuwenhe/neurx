@@ -28,6 +28,7 @@ inline const char* backend_name(Backend backend) {
 
 struct BackendCapabilities {
   Backend backend;
+  bool fp16;
   bool bf16;
   bool fp8;
   bool paged_attention;
@@ -40,11 +41,11 @@ struct BackendCapabilities {
 inline BackendCapabilities capabilities(Backend backend) {
   switch (backend) {
     case Backend::cuda:
-      return {backend, true, true, true, true, "FlashAttention/paged-attention", "NCCL", "cudaMemcpyPeerAsync/RDMA"};
+      return {backend, true, true, true, true, true, "FlashAttention/paged-attention", "NCCL", "cudaMemcpyPeerAsync/RDMA"};
     case Backend::ascend:
-      return {backend, true, false, true, true, "CANN FlashAttention/paged-attention", "HCCL", "ACL runtime/RDMA"};
+      return {backend, true, false, false, true, true, "CANN paged-attention", "none (single-card replica)", "ACL runtime"};
     case Backend::cpu:
-      return {backend, false, false, false, false, "reference attention", "none", "host memcpy"};
+      return {backend, false, false, false, false, false, "reference attention", "none", "host memcpy"};
   }
   throw std::logic_error("unreachable backend");
 }
@@ -62,7 +63,9 @@ struct ExecutionPlan {
 inline ExecutionPlan make_execution_plan(Backend backend, bool fp8_requested) {
   const auto caps = capabilities(backend);
   return {backend,
-          fp8_requested && caps.fp8 ? "fp8" : (caps.bf16 ? "bf16" : "fp32"),
+          fp8_requested && caps.fp8
+              ? "fp8"
+              : (caps.bf16 ? "bf16" : (caps.fp16 ? "fp16" : "fp32")),
           caps.attention_kernel,
           caps.collective,
           caps.graph_decode,

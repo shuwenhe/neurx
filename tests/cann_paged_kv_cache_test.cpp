@@ -1,0 +1,103 @@
+#include "../cann/cache/paged_kv_cache.h"
+#include "../cann/model/nxtrfmv2_loader.h"
+
+#include <cassert>
+#include <cstring>
+#include <cstdio>
+#include <fstream>
+#include <new>
+
+namespace {
+
+class HostAllocator final : public neurx::cann::DeviceAllocator {
+ public:
+  neurx::cann::Status allocate(void** address, std::size_t bytes) override {
+    if (!address || bytes == 0) {
+      return neurx::cann::Status::failure("invalid test allocation");
+    }
+    *address = ::operator new(bytes, std::nothrow);
+    return *address ? neurx::cann::Status::success()
+                    : neurx::cann::Status::failure("test allocation failed");
+  }
+
+  void release(void* address) override { ::operator delete(address); }
+};
+
+#pragma pack(push, 1)
+struct TestHeaderV2 {
+  char magic[8];
+  uint32_t version, header_bytes;
+  uint64_t step, optimizer_step, micro_step, shard, line, docs, tokens;
+  uint32_t vocab, seq, dim, heads, ffn, layers, micro_batch, grad_accum;
+  uint32_t tokenizer_kind, vocab_path_bytes, merges_path_bytes;
+  uint64_t tokenizer_hash, pending_count, param_count;
+};
+#pragma pack(pop)
+
+static_assert(sizeof(TestHeaderV2) == 140, "test checkpoint header ABI changed");
+
+}  // namespace
+
+int main() {
+  HostAllocator allocator;
+  neurx::cann::PagedKvCache cache({4, 64, 4}, &allocator);
+  assert(cache.initialize().ok);
+  assert(cache.initialize().ok);
+
+  assert(cache.reserve("request-a", 5).ok);
+  auto table = cache.block_table("request-a");
+  assert(table.size() == 2 && table[0] == 0 && table[1] == 1);
+  assert(cache.token_count("request-a") == 5);
+  assert(cache.append("request-a", 4).ok);
+  assert(cache.block_table("request-a").size() == 3);
+  assert(cache.block_address(0) != nullptr);
+  assert(cache.block_address(4) == nullptr);
+
+  const auto exhausted = cache.reserve("request-b", 8);
+  assert(!exhausted.ok && cache.block_table("request-b").empty());
+  auto stats = cache.stats();
+  assert(stats.used_blocks == 3 && stats.free_blocks == 1);
+  assert(stats.active_requests == 1 && stats.allocated_tokens == 9);
+
+  assert(cache.release("request-a"));
+  assert(!cache.release("request-a"));
+  assert(cache.reserve("request-b", 8).ok);
+  stats = cache.stats();
+  assert(stats.used_blocks == 2 && stats.free_blocks == 2);
+  assert(stats.active_requests == 1 && stats.allocated_tokens == 8);
+
+  assert(neurx::cann::float_to_fp16_bits(0.0F) == 0x0000);
+  assert(neurx::cann::float_to_fp16_bits(1.0F) == 0x3c00);
+  assert(neurx::cann::float_to_fp16_bits(-2.0F) == 0xc000);
+  assert(neurx::cann::float_to_fp16_bits(65504.0F) == 0x7bff);
+
+  const char* checkpoint = "/tmp/neurx_nxtrfmv2_loader_test.ckpt";
+  TestHeaderV2 header{};
+  std::memcpy(header.magic, "NXTRFMV2", 8);
+  header.version = 2;
+  header.header_bytes = sizeof(header);
+  header.step = 42;
+  header.vocab = 128;
+  header.seq = 64;
+  header.dim = 32;
+  header.heads = 4;
+  header.ffn = 96;
+  header.layers = 2;
+  header.tokenizer_hash = 1234;
+  header.param_count = 20;
+  {
+    std::ofstream output(checkpoint, std::ios::binary | std::ios::trunc);
+    output.write(reinterpret_cast<const char*>(&header), sizeof(header));
+    assert(output.good());
+  }
+  neurx::cann::ModelMetadata metadata;
+  assert(neurx::cann::inspect_nxtrfmv2(checkpoint, &metadata).ok);
+  assert(metadata.step == 42 && metadata.vocabulary == 128);
+  assert(metadata.hidden_size == 32 && metadata.layers == 2);
+  assert(metadata.parameter_tensors == 20 && metadata.tokenizer_hash == 1234);
+  std::remove(checkpoint);
+
+  std::printf("cann-paged-kv-cache PASS blocks=%zu used=%zu free=%zu\n",
+              stats.total_blocks, stats.used_blocks, stats.free_blocks);
+  return 0;
+}

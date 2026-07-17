@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test serving-native-socket-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test transformer-cuda-kernels-test transformer-cuda-integration-test build-cann-runtime inference-runtime-test cann-runtime-test serving-native-socket-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -106,6 +106,8 @@ help:
 	@echo "  make shard"
 	@echo "  make pretrain"
 	@echo "  make pretrain-npu"
+	@echo "  make build-cann-runtime"
+	@echo "  make cann-runtime-test"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
 	@echo "  make infer"
@@ -973,8 +975,23 @@ inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/inference_runtime_test.cpp cann/inference/ascend_adapter.cpp \
+		cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
+
+build-cann-runtime:
+	@cmake -S cann -B artifacts/build/cann
+	@cmake --build artifacts/build/cann
+
+cann-runtime-test: inference-runtime-test
+	@mkdir -p artifacts/build/cann_runtime
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/cann_paged_kv_cache_test.cpp \
+		cann/cache/paged_kv_cache.cpp cann/model/nxtrfmv2_loader.cpp \
+		cann/operators/operator_library.cpp cann/runtime/acl_runtime.cpp \
+		cann/inference/ascend_adapter.cpp cann/inference/ascend_executor.cpp \
+		-ldl -o artifacts/build/cann_runtime/cann_paged_kv_cache_test
+	@artifacts/build/cann_runtime/cann_paged_kv_cache_test
 
 serving-native-socket-test:
 	@mkdir -p artifacts/build/serving_native

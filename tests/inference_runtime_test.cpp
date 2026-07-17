@@ -16,7 +16,8 @@ int main() {
   const auto cuda = neurx::inference::make_execution_plan(Backend::cuda, true);
   const auto ascend = neurx::inference::make_execution_plan(Backend::ascend, true);
   assert(cuda.dtype == "fp8" && cuda.collective == "NCCL" && cuda.use_cuda_or_acl_graph);
-  assert(ascend.dtype == "bf16" && ascend.collective == "HCCL" && ascend.use_cuda_or_acl_graph);
+  assert(ascend.dtype == "fp16" && ascend.collective == "none (single-card replica)" &&
+         ascend.use_cuda_or_acl_graph);
 
   // Runtime probing must fail explicitly on a development host without CANN;
   // on an Ascend host it must leave the adapter ready for bound operators.
@@ -32,7 +33,7 @@ int main() {
   DisaggregatedScheduler scheduler(config);
   scheduler.submit("cuda-long", {Backend::cuda, "bf16"}, 12, 3);
   scheduler.submit("cuda-short", {Backend::cuda, "bf16"}, 4, 2);
-  scheduler.submit("ascend", {Backend::ascend, "bf16"}, 4, 2);
+  scheduler.submit("ascend", {Backend::ascend, "fp16"}, 4, 2);
 
   auto prefill = scheduler.schedule();
   assert(prefill.phase == Phase::prefill && prefill.key.backend == Backend::cuda);
