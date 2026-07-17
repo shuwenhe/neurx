@@ -51,14 +51,27 @@ cmake -S cann -B artifacts/build/cann
 cmake --build artifacts/build/cann
 ```
 
-自定义算子编译为 `libneurx_cann_operators.so`，必须实现
-`operators/operator_abi.h` 中的 ABI v1 prefill/decode 接口。构建算子时通过
-`-DNEURX_CANN_OPERATOR_SOURCES=...` 传入匹配当前 CANN 和 Ascend310P3 的
-ACLNN/Ascend C 源文件。
+310P3 ATB 算子插件实现位于 `operators/atb_310p_plugin.cpp`，编译后生成
+`libneurx_cann_operators.so`：
+
+```bash
+source "${ASCEND_HOME_PATH}/set_env.sh"
+source "${ATB_HOME_PATH}/set_env.sh"
+cmake -S cann -B artifacts/build/cann-310p \
+  -DNEURX_ENABLE_ATB_310P=ON
+cmake --build artifacts/build/cann-310p
+```
+
+插件实现 `operators/operator_abi.h` 中的 ABI v1 prefill/decode 接口，执行
+Gather、RMSNorm、Linear、RoPE、ReshapeAndCache、PagedAttention、残差、
+SwiGLU 和 LM Head。KV Cache 使用 310P
+`FRACTAL_NZ` 格式。
 
 八卡进程入口为 `scripts/launch_8card_310p3_inference.sh`。它要求设置
 `NEURX_ASCEND_WORKER_BIN`、`NEURX_CHECKPOINT` 和
 `NEURX_CANN_OPERATOR_LIBRARY`。
 
-当前仓库已经实现运行时、checkpoint 加载、KV Cache、executor 和插件 ABI；
-模型数值算子的 Ascend C/ACLNN 实现仍必须在 310P3+CANN 环境完成并验证。
+当前实现要求 FP16、head size 为16的倍数且不超过256、KV block size 为16的
+倍数且不超过128。Prefill 支持分块：每个 query token 使用独立的 block-table
+行和递增 context length，从已经写入的分页 KV Cache 中读取历史上下文。数值
+正确性和性能仍必须在 310P3+CANN/ATB 环境与 CPU/CUDA golden 对齐。

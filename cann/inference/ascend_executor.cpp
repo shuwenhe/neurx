@@ -1,4 +1,5 @@
 #include "ascend_executor.h"
+#include "../operators/transformer_plan.h"
 
 #include <map>
 #include <utility>
@@ -16,9 +17,11 @@ AdapterStatus AscendExecutor::initialize(int device_id) {
                           operators_.decode_launcher());
   auto adapter_status = adapter_.initialize(device_id);
   if (!adapter_status.ok) return adapter_status;
-  status = kv_cache_.initialize();
-  if (!status.ok) return AdapterStatus::failure(status.message);
   status = model_.load(config_.checkpoint, adapter_.native_session(), config_.model);
+  if (!status.ok) return AdapterStatus::failure(status.message);
+  status = cann::validate_310p_model(model_.metadata(), config_.kv_cache);
+  if (!status.ok) return AdapterStatus::failure(status.message);
+  status = kv_cache_.initialize();
   if (!status.ok) return AdapterStatus::failure(status.message);
   ready_ = true;
   return AdapterStatus::success();

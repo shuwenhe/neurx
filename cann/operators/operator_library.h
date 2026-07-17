@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../inference/runtime/backends/backend_adapter.h"
+#include "operator_abi.h"
 #include "../runtime/acl_runtime.h"
 
 #include <string>
@@ -9,8 +10,8 @@ namespace neurx::cann {
 
 // ABI exported by a CANN operator plugin:
 //   uint32_t neurx_cann_operator_abi_version();
-//   AdapterStatus neurx_cann_prefill(const DeviceBatch&);
-//   AdapterStatus neurx_cann_decode(const DeviceBatch&);
+//   NeurxCannOperatorStatus neurx_cann_prefill(const DeviceBatch&);
+//   NeurxCannOperatorStatus neurx_cann_decode(const DeviceBatch&);
 class OperatorLibrary {
  public:
   OperatorLibrary() = default;
@@ -25,7 +26,8 @@ class OperatorLibrary {
   inference::KernelLauncher decode_launcher() const;
 
  private:
-  using RawLauncher = inference::AdapterStatus (*)(const inference::DeviceBatch&);
+  using RawLauncher = NeurxCannOperatorStatus (*)(
+      const inference::DeviceBatch&);
   void* handle_ = nullptr;
   RawLauncher prefill_ = nullptr;
   RawLauncher decode_ = nullptr;

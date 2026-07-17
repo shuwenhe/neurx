@@ -10,9 +10,12 @@ add_library(neurx_cann_runtime STATIC
   cache/paged_kv_cache.cpp
   model/nxtrfmv2_loader.cpp
   operators/operator_library.cpp
+  operators/transformer_engine.cpp
+  operators/transformer_plan.cpp
   inference/ascend_adapter.cpp
   inference/ascend_executor.cpp
 )
+set_target_properties(neurx_cann_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(neurx_cann_runtime PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
@@ -21,9 +24,27 @@ target_link_libraries(neurx_cann_runtime PUBLIC ${CMAKE_DL_LIBS})
 
 # These sources are supplied on an Ascend build host because they require the
 # matching CANN toolkit and target-SoC compiler.
+option(NEURX_ENABLE_ATB_310P
+       "Build the production Ascend310P ATB operator plugin" OFF)
 set(NEURX_CANN_OPERATOR_SOURCES "" CACHE STRING
     "Semicolon-separated Ascend C/ACLNN operator plugin sources")
-if(NEURX_CANN_OPERATOR_SOURCES)
+if(NEURX_ENABLE_ATB_310P)
+  add_library(neurx_cann_operators SHARED operators/atb_310p_plugin.cpp)
+  target_include_directories(neurx_cann_operators PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    "$ENV{ASCEND_HOME_PATH}/include"
+    "$ENV{ATB_HOME_PATH}/include"
+  )
+  target_link_directories(neurx_cann_operators PRIVATE
+    "$ENV{ASCEND_HOME_PATH}/lib64"
+    "$ENV{ATB_HOME_PATH}/lib"
+  )
+  target_link_libraries(neurx_cann_operators PRIVATE
+    neurx_cann_runtime atb ascendcl)
+  set_target_properties(neurx_cann_operators PROPERTIES
+    OUTPUT_NAME neurx_cann_operators)
+  install(TARGETS neurx_cann_operators LIBRARY DESTINATION lib)
+elseif(NEURX_CANN_OPERATOR_SOURCES)
   add_library(neurx_cann_operators SHARED ${NEURX_CANN_OPERATOR_SOURCES})
   target_include_directories(neurx_cann_operators PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/.."

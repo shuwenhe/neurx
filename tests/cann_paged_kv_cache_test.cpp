@@ -1,5 +1,6 @@
 #include "../cann/cache/paged_kv_cache.h"
 #include "../cann/model/nxtrfmv2_loader.h"
+#include "../cann/operators/transformer_plan.h"
 
 #include <cassert>
 #include <cstring>
@@ -65,6 +66,60 @@ int main() {
   stats = cache.stats();
   assert(stats.used_blocks == 2 && stats.free_blocks == 2);
   assert(stats.active_requests == 1 && stats.allocated_tokens == 8);
+
+  const auto tensor_config =
+      neurx::cann::KvCacheConfig::fp16_transformer(2, 16, 2, 2, 4);
+  neurx::cann::PagedKvCache tensor_cache(tensor_config, &allocator);
+  assert(tensor_cache.initialize().ok);
+  auto* key0 = static_cast<unsigned char*>(tensor_cache.key_layer_address(0));
+  auto* key1 = static_cast<unsigned char*>(tensor_cache.key_layer_address(1));
+  auto* value0 = static_cast<unsigned char*>(tensor_cache.value_layer_address(0));
+  assert(key0 != nullptr && key1 - key0 == 512);
+  assert(value0 - key0 == 1024);
+  assert(tensor_cache.block_tensor_bytes() == 256);
+  assert(tensor_cache.layer_tensor_bytes() == 512);
+  assert(static_cast<unsigned char*>(
+             tensor_cache.key_slot_address(1, 1, 3)) -
+             key0 ==
+         816);
+
+  neurx::cann::ModelMetadata compatible_model;
+  compatible_model.vocabulary = 128;
+  compatible_model.hidden_size = 256;
+  compatible_model.attention_heads = 2;
+  compatible_model.ffn_size = 512;
+  compatible_model.layers = 2;
+  const auto compatible_config =
+      neurx::cann::KvCacheConfig::fp16_310p(2, 16, 2, 2, 128);
+  assert(neurx::cann::validate_310p_model(compatible_model, compatible_config).ok);
+  compatible_model.hidden_size = 260;
+  assert(!neurx::cann::validate_310p_model(compatible_model, compatible_config).ok);
+
+  neurx::cann::TransformerBatchPlan prefill_plan;
+  prefill_plan.phase = neurx::inference::Phase::prefill;
+  prefill_plan.batch_size = 2;
+  prefill_plan.token_count = 3;
+  prefill_plan.max_blocks_per_request = 2;
+  prefill_plan.requests = {
+      {"a", 5, {0, 1}, {3, 4}},
+      {"b", 1, {2}, {32}},
+  };
+  neurx::cann::PagedAttentionMetadata attention_metadata;
+  assert(neurx::cann::build_paged_attention_metadata(
+             prefill_plan, &attention_metadata)
+             .ok);
+  assert(attention_metadata.rows == 3);
+  assert((attention_metadata.context_lengths == std::vector<int32_t>{4, 5, 1}));
+  assert((attention_metadata.block_tables ==
+          std::vector<int32_t>{0, 1, 0, 1, 2, -1}));
+
+  prefill_plan.phase = neurx::inference::Phase::decode;
+  prefill_plan.batch_size = 2;
+  prefill_plan.token_count = 2;
+  assert(neurx::cann::build_paged_attention_metadata(
+             prefill_plan, &attention_metadata)
+             .ok);
+  assert((attention_metadata.context_lengths == std::vector<int32_t>{5, 1}));
 
   assert(neurx::cann::float_to_fp16_bits(0.0F) == 0x0000);
   assert(neurx::cann::float_to_fp16_bits(1.0F) == 0x3c00);

@@ -8,3 +8,8 @@ the supplied ACL stream.
 The launcher receives the loaded `Nxtrfmv2Model` through `batch.model` and the
 worker `PagedKvCache` through `batch.kv_cache`. It populates `batch.logits`
 without synchronizing the whole device.
+
+`transformer_plan.cpp` validates the 310P tensor constraints and constructs
+request block tables and write slots. `transformer_engine.cpp` owns the complete
+decoder layer order. `atb_310p_plugin.cpp` supplies the production ATB primitive
+backend and exports the ABI entry points.

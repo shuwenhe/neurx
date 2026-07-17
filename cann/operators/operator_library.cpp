@@ -38,11 +38,35 @@ void OperatorLibrary::unload() {
 }
 
 inference::KernelLauncher OperatorLibrary::prefill_launcher() const {
-  return prefill_;
+  const RawLauncher launcher = prefill_;
+  return [launcher](const inference::DeviceBatch& batch) {
+    if (!launcher) {
+      return inference::AdapterStatus::failure(
+          "CANN prefill launcher is unavailable");
+    }
+    const NeurxCannOperatorStatus status = launcher(batch);
+    return status.code == 0
+               ? inference::AdapterStatus::success()
+               : inference::AdapterStatus::failure(
+                     status.message ? status.message
+                                    : "CANN prefill operator failed");
+  };
 }
 
 inference::KernelLauncher OperatorLibrary::decode_launcher() const {
-  return decode_;
+  const RawLauncher launcher = decode_;
+  return [launcher](const inference::DeviceBatch& batch) {
+    if (!launcher) {
+      return inference::AdapterStatus::failure(
+          "CANN decode launcher is unavailable");
+    }
+    const NeurxCannOperatorStatus status = launcher(batch);
+    return status.code == 0
+               ? inference::AdapterStatus::success()
+               : inference::AdapterStatus::failure(
+                     status.message ? status.message
+                                    : "CANN decode operator failed");
+  };
 }
 
 }  // namespace neurx::cann
