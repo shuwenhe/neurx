@@ -159,7 +159,7 @@ def collect(args):
     ) as executor:
         futures = [
             executor.submit(
-                completion,
+                completion_batch,
                 urls[index % len(urls)],
                 [
                     prompts[(index * args.batch_size + row) % len(prompts)]
