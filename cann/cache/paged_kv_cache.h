@@ -73,6 +73,13 @@ class PagedKvCache {
   Status resize(const std::string& request_id, std::size_t total_tokens);
   Status append(const std::string& request_id, std::size_t token_count);
   bool release(const std::string& request_id);
+  Status retain_prefix(const std::string& request_id,
+                       std::size_t prefix_tokens,
+                       std::vector<uint32_t>* retained_blocks);
+  Status attach_retained_prefix(const std::string& request_id,
+                                const std::vector<uint32_t>& retained_blocks,
+                                std::size_t prefix_tokens);
+  void release_retained_blocks(const std::vector<uint32_t>& retained_blocks);
 
   std::vector<uint32_t> block_table(const std::string& request_id) const;
   std::size_t token_count(const std::string& request_id) const;
@@ -97,6 +104,7 @@ class PagedKvCache {
   Status validate_config() const;
   std::size_t blocks_for(std::size_t tokens) const;
   Status reserve_locked(const std::string& request_id, std::size_t total_tokens);
+  void release_block_locked(uint32_t block);
   void* layer_address(bool value, std::size_t layer) const;
   void* slot_address(bool value, std::size_t layer, uint32_t block,
                      std::size_t token_offset) const;
@@ -107,6 +115,7 @@ class PagedKvCache {
   void* storage_ = nullptr;
   mutable std::mutex mutex_;
   std::vector<uint32_t> free_blocks_;
+  std::vector<uint32_t> block_refcounts_;
   std::map<std::string, RequestAllocation> requests_;
 };
 

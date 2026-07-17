@@ -38,8 +38,10 @@ float fp16_to_float(uint16_t value) {
 
 }  // namespace
 
-AscendWorker::AscendWorker(AscendExecutorConfig config)
-    : executor_(std::move(config)) {}
+AscendWorker::AscendWorker(AscendExecutorConfig config,
+                           cann::PrefixCacheConfig prefix_cache_config)
+    : executor_(std::move(config)),
+      prefix_cache_(&executor_.mutable_kv_cache(), prefix_cache_config) {}
 
 AdapterStatus AscendWorker::initialize(int device_id) {
   return executor_.initialize(device_id);
@@ -99,12 +101,75 @@ AdapterStatus AscendWorker::execute(
           "Ascend worker token id is outside the model vocabulary");
     }
   }
+
+  Batch execution_batch = batch;
+  std::vector<int32_t> execution_tokens;
+  execution_tokens.reserve(token_ids.size());
+  std::vector<std::vector<int32_t>> prefill_prompts(batch_size);
+  std::size_t token_offset = 0;
+  execution_batch.total_tokens = 0;
+  for (std::size_t row = 0; row < batch_size; ++row) {
+    const WorkItem& item = batch.items[row];
+    if (item.token_count <= 0 ||
+        static_cast<std::size_t>(item.token_count) >
+            token_ids.size() - token_offset) {
+      return AdapterStatus::failure(
+          "Ascend worker work-item token range is invalid");
+    }
+    const std::size_t count = static_cast<std::size_t>(item.token_count);
+    const auto begin = token_ids.begin() + token_offset;
+    const auto end = begin + count;
+    std::size_t prefix_tokens = 0;
+    if (batch.phase == Phase::prefill &&
+        executor_.kv_cache().token_count(item.request_id) == 0) {
+      prefill_prompts[row].assign(begin, end);
+      if (count > 1) {
+        cann::PrefixCacheHit hit;
+        const cann::Status prefix_status = prefix_cache_.attach_longest(
+            item.request_id, prefill_prompts[row], count - 1, &hit);
+        if (!prefix_status.ok) {
+          return AdapterStatus::failure(item.request_id + ": " +
+                                        prefix_status.message);
+        }
+        prefix_tokens = hit.token_count;
+      }
+    }
+    execution_tokens.insert(execution_tokens.end(), begin + prefix_tokens, end);
+    execution_batch.items[row].token_count =
+        static_cast<int>(count - prefix_tokens);
+    execution_batch.total_tokens += execution_batch.items[row].token_count;
+    token_offset += count;
+  }
+  if (token_offset != token_ids.size() || execution_tokens.empty()) {
+    return AdapterStatus::failure(
+        "Ascend worker effective Prefill batch is invalid");
+  }
+  std::size_t additional_blocks = 0;
+  const std::size_t tokens_per_block =
+      executor_.kv_cache().config().tokens_per_block;
+  for (const WorkItem& item : execution_batch.items) {
+    const std::size_t current =
+        executor_.kv_cache().token_count(item.request_id);
+    const std::size_t required_tokens =
+        current + static_cast<std::size_t>(item.token_count);
+    const std::size_t required_blocks =
+        required_tokens == 0
+            ? 0
+            : 1 + (required_tokens - 1) / tokens_per_block;
+    const std::size_t current_blocks =
+        executor_.kv_cache().block_table(item.request_id).size();
+    if (required_blocks > current_blocks) {
+      additional_blocks += required_blocks - current_blocks;
+    }
+  }
+  prefix_cache_.ensure_free_blocks(additional_blocks);
+
   const std::size_t logit_count = batch_size * vocabulary;
   if (logit_count >
       std::numeric_limits<std::size_t>::max() / sizeof(uint16_t)) {
     return AdapterStatus::failure("Ascend worker logits allocation overflows size_t");
   }
-  const std::size_t token_bytes = token_ids.size() * sizeof(int32_t);
+  const std::size_t token_bytes = execution_tokens.size() * sizeof(int32_t);
   const std::size_t logit_bytes = logit_count * sizeof(uint16_t);
   const std::size_t sampled_token_bytes = batch_size * sizeof(int32_t);
   bool use_device_sampling = batch_size <= 512;
@@ -143,7 +208,7 @@ AdapterStatus AscendWorker::execute(
     if (!status.ok) return status;
   }
 
-  std::memcpy(host_tokens_.data(), token_ids.data(), token_bytes);
+  std::memcpy(host_tokens_.data(), execution_tokens.data(), token_bytes);
   if (cann::memcpy_async(device_tokens_.data(), device_tokens_.size(),
                          host_tokens_.data(), token_bytes,
                          cann::MemcpyKind::host_to_device,
@@ -153,7 +218,7 @@ AdapterStatus AscendWorker::execute(
   }
 
   DeviceBatch launch;
-  launch.schedule = batch;
+  launch.schedule = execution_batch;
   launch.token_ids = device_tokens_.data();
   launch.logits = device_logits_.data();
   launch.stream = executor_.stream();
@@ -191,6 +256,17 @@ AdapterStatus AscendWorker::execute(
     // state unsafe to reuse.
     for (const auto& item : batch.items) executor_.release_request(item.request_id);
     return status;
+  }
+
+  if (batch.phase == Phase::prefill) {
+    for (std::size_t row = 0; row < batch_size; ++row) {
+      if (prefill_prompts[row].empty()) continue;
+      // Prefix caching is an optimization. A too-short prompt or a cache
+      // capacity race must not turn a successful model execution into a failed
+      // request.
+      prefix_cache_.insert(batch.items[row].request_id,
+                           prefill_prompts[row]);
+    }
   }
 
   result->next_tokens.resize(batch_size);

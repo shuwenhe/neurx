@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(neurx_cann_runtime STATIC
   runtime/acl_runtime.cpp
   cache/paged_kv_cache.cpp
+  cache/prefix_cache.cpp
   model/nxtrfmv2_loader.cpp
   operators/operator_library.cpp
   operators/transformer_engine.cpp
@@ -43,6 +44,14 @@ if(BUILD_TESTING)
   target_compile_options(cann_logits_sampler_test PRIVATE
     -Wall -Wextra -Werror)
   add_test(NAME cann_logits_sampler COMMAND cann_logits_sampler_test)
+
+  add_executable(cann_prefix_cache_test
+    ../tests/cann_prefix_cache_test.cpp
+  )
+  target_link_libraries(cann_prefix_cache_test PRIVATE neurx_cann_runtime)
+  target_compile_options(cann_prefix_cache_test PRIVATE
+    -Wall -Wextra -Werror)
+  add_test(NAME cann_prefix_cache COMMAND cann_prefix_cache_test)
 endif()
 
 # These sources are supplied on an Ascend build host because they require the
