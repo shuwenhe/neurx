@@ -95,16 +95,12 @@ Status execute_transformer(const inference::DeviceBatch& batch,
                              " has incomplete weights");
     }
 
-    status = backend.rms_norm(hidden, *attention_norm, norm, batch.stream);
-    if (!status.ok) return stage_status(status, "attention rmsnorm");
-    status = backend.linear(norm, *q_weight, query, batch.stream);
-    if (!status.ok) return stage_status(status, "q projection");
-    status = backend.linear(norm, *k_weight, key, batch.stream);
-    if (!status.ok) return stage_status(status, "k projection");
-    status = backend.linear(norm, *v_weight, value, batch.stream);
-    if (!status.ok) return stage_status(status, "v projection");
-    status = backend.rope(query, key, plan, batch.stream);
-    if (!status.ok) return stage_status(status, "rope");
+    status = backend.attention_qkv_rope(
+        hidden, *attention_norm, *q_weight, *k_weight, *v_weight, norm,
+        query, key, value, plan, batch.stream);
+    if (!status.ok) {
+      return stage_status(status, "attention rmsnorm/qkv/rope");
+    }
     status = backend.store_kv(key, value, layer, plan, cache, batch.stream);
     if (!status.ok) return stage_status(status, "reshape and cache");
     status = backend.attention(query, key, value, layer, plan, cache,

@@ -22,6 +22,22 @@ class TransformerPrimitiveBackend {
                         const TensorView& output, Stream stream) = 0;
   virtual Status rope(const TensorView& query, const TensorView& key,
                       const TransformerBatchPlan& plan, Stream stream) = 0;
+  virtual Status attention_qkv_rope(
+      const TensorView& input, const DeviceWeight& norm_scale,
+      const DeviceWeight& query_weight, const DeviceWeight& key_weight,
+      const DeviceWeight& value_weight, const TensorView& normalized,
+      const TensorView& query, const TensorView& key,
+      const TensorView& value, const TransformerBatchPlan& plan,
+      Stream stream) {
+    Status status = rms_norm(input, norm_scale, normalized, stream);
+    if (!status.ok) return status;
+    status = linear(normalized, query_weight, query, stream);
+    if (!status.ok) return status;
+    status = linear(normalized, key_weight, key, stream);
+    if (!status.ok) return status;
+    status = linear(normalized, value_weight, value, stream);
+    return status.ok ? rope(query, key, plan, stream) : status;
+  }
   virtual Status store_kv(const TensorView& key, const TensorView& value,
                           std::size_t layer,
                           const TransformerBatchPlan& plan,

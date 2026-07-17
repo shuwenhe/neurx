@@ -95,7 +95,9 @@ KV block 不会共享，避免后续 Decode 改写其他请求正在使用的缓
 
 ATB 插件对重复执行的子图启用 shape-keyed LRU GraphOperation cache：
 `Add+RMSNorm` 和 `Swish+Multiply(SwiGLU)` 分别作为图算子执行，并为每个
-精确的 rows/columns shape 复用图实例与 workspace。缓存最多保留 32 个图，
+精确的 rows/columns shape 复用图实例与 workspace。FP16 attention 前处理
+也将 `RMSNorm+Q/K/V Linear+RoPE` 合并为单个 GraphOperation；INT8 权重
+则继续使用 ACLNN W8A16 路径，保持 310P3 兼容。缓存最多保留 32 个图，
 淘汰前同步当前 stream。310P3 不启用仅适用于更新硬件的整图下沉 capture。
 
 模型加载器支持 `NEURX_ASCEND_PRECISION=int8` 的 W8A16 weight-only
@@ -119,3 +121,26 @@ head size 为16的倍数且不超过256、KV block size 为16的
 倍数且不超过128。Prefill 支持分块：每个 query token 使用独立的 block-table
 行和递增 context length，从已经写入的分页 KV Cache 中读取历史上下文。数值
 正确性和性能仍必须在 310P3+CANN/ATB 环境与 CPU/CUDA golden 对齐。
+
+## 310P3 FP16 / INT8 对齐
+
+真实八卡环境可依次启动 FP16 和 INT8 worker，避免同时占用 16 张卡。
+基准 logits 接口默认关闭，测试时设置
+`NEURX_ASCEND_ENABLE_BENCHMARK_API=1`。每组 worker 就绪后分别采集：
+
+```bash
+python3 cann/scripts/benchmark_8card_310p3.py collect \
+  --precision fp16 --output /tmp/neurx-fp16.json
+
+# 用 NEURX_ASCEND_PRECISION=int8 重启同一组八卡 worker 后
+python3 cann/scripts/benchmark_8card_310p3.py collect \
+  --precision int8 --output /tmp/neurx-int8.json
+
+python3 cann/scripts/benchmark_8card_310p3.py compare \
+  --fp16 /tmp/neurx-fp16.json --int8 /tmp/neurx-int8.json
+```
+
+采集覆盖八个 worker 的 readiness、固定 prompt 的 top-k logits、greedy
+生成吞吐及 p50/p95 请求延迟。比较阶段检查 top-1 一致率、top-k 重合率、
+共同 token 的 logit 误差和 INT8/FP16 吞吐比；任何阈值不满足都会返回非零。
+可通过 `--prompts` 传入业务 tokenizer 生成的 token ID 数组。
