@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+msg_file="$1"
+subject=$(sed -n '1p' "$msg_file")
+
+# Enforce English-only subjects for feat commits to keep remote history consistent.
+case "$subject" in
+  feat:*)
+    if printf '%s' "$subject" | LC_ALL=C grep -q '[^ -~]'; then
+      echo "ERROR: feat commit subject must be English-only (ASCII)."
+      echo "Current subject: $subject"
+      echo "Example: feat: implement NeurX large-model inference framework"
+      exit 1
+    fi
+    ;;
+esac
+
+exit 0
