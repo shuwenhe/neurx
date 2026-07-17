@@ -51,7 +51,7 @@
 | # | 文件 | 路径 | 功能 | 工作量 | 状态 |
 |---|------|------|------|-------|------|
 | 1.5.1 | `install.sh` | `install/auto/install.sh` | 自动安装脚本 | ⭐⭐⭐ | ⏳ |
-| 1.5.2 | `env.sh` | `arch/cann/env.sh` | CANN 环境配置 | ⭐⭐ | ⏳ |
+| 1.5.2 | `env.sh` | `cann/env.sh` | CANN 环境配置 | ⭐⭐ | ⏳ |
 | 1.5.3 | `find_s.sh` | `workflows/agent/common/find_s.sh` | S 编译器查找 | ⭐ | ⏳ |
 
 ### 1.6 内存工作流（3 个）
@@ -356,4 +356,3 @@ func main() {
 - 🟩 **已完成** (0 个)
 
 **总体进度**: 0 / 46 (0%)
-

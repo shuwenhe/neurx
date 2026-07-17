@@ -1,15 +1,19 @@
-# NeurX CANN / Ascend Scaffold
+# NeurX CANN / Ascend
 
-这个目录保留 Ascend CANN 相关的环境脚手架，但运行入口已经改为 `S`。
+这个目录集中保存 NeurX 项目中所有华为昇腾 CANN/NPU 专属代码、配置和部署入口。
 
 ## Layout
 
-- `env.sh`: 初始化 Ascend CANN 运行环境变量。
+- `env.s`: 输出 Ascend CANN 运行环境变量。
 - `configs/ascend_910b_train.json`: 910B 训练入口示例，默认指向 `S` 训练脚本。
 - `configs/ascend_310p3_train.json`: 310P3 推理入口示例，默认指向 `S` 服务脚本。
 - `kernels/`: Ascend C / TBE 自定义推理算子。
 - `operators/`: ACLNN / Graph Engine 算子封装。
 - `runtime/`: ACL 设备、stream、内存及动态运行时加载。
+- `hccl/`: 华为集合通信运行时动态加载。
+- `inference/`: CANN 推理后端适配器。
+- `deploy/`: 昇腾专属部署清单。
+- `scripts/`: 昇腾专属运行脚本。
 
 ## Notes
 
@@ -22,7 +26,7 @@
 
 ```bash
 cd /app/neurx
-source arch/cann/env.sh
+eval "$(s cann/env.s)"
 s train/loop.s
 ```
 

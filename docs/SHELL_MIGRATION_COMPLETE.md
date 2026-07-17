@@ -30,7 +30,7 @@
 
 ### 第三阶段：自动迁移脚本（完成）
 - ✅ **examples/quick_reference.s**
-- ✅ **arch/cann/env.s**
+- ✅ **cann/env.s**
 - ✅ **dataset/fetch_github_datasets.s**
 - ✅ **docs/flowchart/convert_to_image.s**
 - ✅ **install/auto/install.s**
@@ -230,4 +230,3 @@ Week 3:
 - 零外部脚本依赖
 - 完全自包含的框架
 - 跨平台原生支持
-

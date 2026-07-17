@@ -36,4 +36,4 @@ make inference-runtime-test
 
 CUDA 适配器应复用 `cuda/transformer_kernels.cuh` 和 NCCL；Ascend 适配器应通过 ACL/CANN graph、FlashAttention 与 HCCL 实现相同的批次契约。真实设备内核、KV pool 分配和 RPC/HTTP transport 不在控制面内，必须在对应后端运行时实现并做端到端压测。
 
-设备代码目录：CUDA kernel 位于 `cuda/`，CUDA/Ascend 调度适配器位于 `inference/runtime/backends/`，Ascend kernel、算子封装和 ACL runtime 位于 `arch/cann/`，集合通信分别位于 `distributed/nccl/` 与 `distributed/hccl/`。
+设备代码目录：CUDA kernel 和适配器位于 `cuda/` 与 `inference/runtime/backends/`，Ascend 适配器、kernel、算子封装、ACL runtime 与 HCCL 位于 `cann/`，NCCL 位于 `distributed/nccl/`。

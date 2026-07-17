@@ -1,6 +1,6 @@
 #include "ascend_adapter.h"
 
-#include "../../../arch/cann/runtime/acl_dynamic.h"
+#include "../runtime/acl_dynamic.h"
 
 namespace neurx::inference {
 

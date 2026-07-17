@@ -47,8 +47,8 @@
    - 依赖: core/path_utils, core/env_utils
 
 ### 预存脚本（2 个）
-6. **arch/cann/env.s** ✅
-   - 原始: `arch/cann/env.sh`
+6. **cann/env.s** ✅
+   - 原始: `cann/env.sh`
    - 功能: CANN 环境配置
    - 行数: 30+ LOC (旧版本 S 语法)
    - 状态: 已存在，需要更新到新语法
@@ -234,4 +234,3 @@ Day 5: 最终验证和文档
 ```
 
 **下一步**: 迁移优先级 1 核心功能脚本
-

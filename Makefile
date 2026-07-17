@@ -873,7 +873,7 @@ transformer-reference-test:
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/inference_runtime_test.cpp inference/runtime/backends/ascend_adapter.cpp \
+		tests/inference_runtime_test.cpp cann/inference/ascend_adapter.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
 
