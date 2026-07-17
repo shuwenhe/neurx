@@ -34,11 +34,15 @@ class AscendExecutor final : public BackendAdapter {
   bool release_request(const std::string& request_id);
   const cann::Nxtrfmv2Model& model() const { return model_; }
   const cann::PagedKvCache& kv_cache() const { return kv_cache_; }
+  cann::Stream stream() const { return adapter_.native_session().stream(); }
+  cann::Context context() const { return adapter_.native_session().context(); }
 
  private:
   AscendExecutorConfig config_;
-  cann::OperatorLibrary operators_;
   AscendAdapter adapter_;
+  // Declared after the ACL session so dlclose destroys ATB plugin state before
+  // DeviceSession finalizes ACL during reverse-order member destruction.
+  cann::OperatorLibrary operators_;
   cann::Nxtrfmv2Model model_;
   cann::PagedKvCache kv_cache_;
   bool ready_ = false;

@@ -71,6 +71,22 @@ SwiGLU 和 LM Head。KV Cache 使用 310P
 `NEURX_ASCEND_WORKER_BIN`、`NEURX_CHECKPOINT` 和
 `NEURX_CANN_OPERATOR_LIBRARY`。
 
+`inference/ascend_worker.{h,cpp}` 提供单个 worker 的 CANN 数据面：复用
+pinned host/device token 与 logits 缓冲，执行 Prefill/Decode，把 FP16
+logits 转换为 host FP32，并支持 temperature、top-k、top-p 和 repetition
+penalty 采样。HTTP/OpenAI 协议、tokenizer 和请求调度仍由通用 serving 层
+负责。
+
+CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
+`/health/ready`、`/metrics`、`/admin/drain` 和
+`POST /v1/token-completions`。推理接口接收 `input_ids`、
+`max_new_tokens`、采样参数及可选 `stop_token_ids`，返回生成的 token IDs。
+部署时可直接设置：
+
+```bash
+export NEURX_ASCEND_WORKER_BIN=/app/neurx/bin/neurx_ascend_worker
+```
+
 当前实现要求 FP16、head size 为16的倍数且不超过256、KV block size 为16的
 倍数且不超过128。Prefill 支持分块：每个 query token 使用独立的 block-table
 行和递增 context length，从已经写入的分页 KV Cache 中读取历史上下文。数值

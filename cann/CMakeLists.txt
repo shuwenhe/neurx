@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(neurx_cann LANGUAGES CXX)
+project(neurx_cann LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,6 +14,8 @@ add_library(neurx_cann_runtime STATIC
   operators/transformer_plan.cpp
   inference/ascend_adapter.cpp
   inference/ascend_executor.cpp
+  inference/ascend_worker.cpp
+  inference/logits_sampler.cpp
 )
 set_target_properties(neurx_cann_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(neurx_cann_runtime PUBLIC
@@ -21,6 +23,27 @@ target_include_directories(neurx_cann_runtime PUBLIC
 )
 target_compile_options(neurx_cann_runtime PRIVATE -Wall -Wextra -Werror)
 target_link_libraries(neurx_cann_runtime PUBLIC ${CMAKE_DL_LIBS})
+
+add_executable(neurx_ascend_worker
+  inference/ascend_worker_main.cpp
+  ../serving/native/serving_socket.c
+)
+target_link_libraries(neurx_ascend_worker PRIVATE neurx_cann_runtime)
+target_compile_options(neurx_ascend_worker PRIVATE -Wall -Wextra -Werror)
+
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(cann_logits_sampler_test
+    ../tests/cann_logits_sampler_test.cpp
+    inference/logits_sampler.cpp
+  )
+  target_include_directories(cann_logits_sampler_test PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  )
+  target_compile_options(cann_logits_sampler_test PRIVATE
+    -Wall -Wextra -Werror)
+  add_test(NAME cann_logits_sampler COMMAND cann_logits_sampler_test)
+endif()
 
 # These sources are supplied on an Ascend build host because they require the
 # matching CANN toolkit and target-SoC compiler.
@@ -60,6 +83,7 @@ elseif(NEURX_CANN_OPERATOR_SOURCES)
 endif()
 
 install(TARGETS neurx_cann_runtime ARCHIVE DESTINATION lib)
+install(TARGETS neurx_ascend_worker RUNTIME DESTINATION bin)
 install(DIRECTORY runtime cache model operators inference
         DESTINATION include/neurx/cann
         FILES_MATCHING PATTERN "*.h")
