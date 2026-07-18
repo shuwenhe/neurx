@@ -431,7 +431,7 @@ shard: check-bash
 	set -o pipefail; \
 	cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		S_COMPILER='$(S_COMPILER)' \
+		S_COMPILER='$(if $(wildcard $(CURDIR_UNIX)/tools/s_wrapper.sh),$(CURDIR_UNIX)/tools/s_wrapper.sh,$(S_COMPILER))' \
 		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
 		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
 		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
