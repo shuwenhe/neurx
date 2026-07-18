@@ -45,7 +45,7 @@ CURDIR_UNIX := $(subst \,/,$(CURDIR))
 UNAME_S := $(shell uname -s 2>/dev/null)
 PLATFORM := $(if $(filter Darwin,$(UNAME_S)),macos,$(if $(filter Linux,$(UNAME_S)),linux,linux))
 BIN_EXT := $(if $(filter macos,$(PLATFORM)),,)
-S_REPO_ROOT ?= $(firstword $(wildcard /home/shuwen/s /home/shuwen/mining $(CURDIR_UNIX)/../../s $(CURDIR_UNIX)/../s /home/shuwen/shuwen/train/s) $(CURDIR_UNIX)/../s)
+S_REPO_ROOT ?= $(firstword $(wildcard $(S_COMPILER_EMIT_CWD) /home/shuwen/mining $(CURDIR_UNIX)/../../s $(CURDIR_UNIX)/../s $(S_COMPILER_EMIT_CWD)huwen/train/s) $(CURDIR_UNIX)/../s)
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
@@ -411,11 +411,11 @@ shard: check-bash
 		exit 1; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$(S_COMPILER)" 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		export S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
+		if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			"$$S_COMPILER" 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
 		else \
-			"$(S_COMPILER)" ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+			"$$S_COMPILER" ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
@@ -492,8 +492,8 @@ quick-start-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quick_start
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/quick_start.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_start/quick_start.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/quick_start.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_start/quick_start.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/quick_start/quick_start.ir'
 	@echo "Running S quick start entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -531,8 +531,8 @@ run-small-model-training-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/small_model_training
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_small_model_training.s' -o '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_small_model_training.s' -o '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir'
 	@echo "Running S small model training entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -544,8 +544,8 @@ verify-setup-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_setup
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/verify_setup.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_setup/verify_setup.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/verify_setup.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_setup/verify_setup.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/verify_setup/verify_setup.ir'
 	@echo "Running setup verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -557,8 +557,8 @@ quick-test-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quick_test
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/quick_test.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/quick_test.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir'
 	@echo "Running quick test entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -570,8 +570,8 @@ quickstart-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quickstart
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/quickstart.s' -o '$(CURDIR_UNIX)/artifacts/build/quickstart/quickstart.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/quickstart.s' -o '$(CURDIR_UNIX)/artifacts/build/quickstart/quickstart.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/quickstart/quickstart.ir'
 	@echo "Running quickstart entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -583,8 +583,8 @@ verify-training-pipeline-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_training_pipeline
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/verify_training_pipeline.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_training_pipeline/verify_training_pipeline.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/verify_training_pipeline.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_training_pipeline/verify_training_pipeline.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/verify_training_pipeline/verify_training_pipeline.ir'
 	@echo "Running training pipeline verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -596,8 +596,8 @@ monitor-training-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/monitor_training
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/monitor_training.s' -o '$(CURDIR_UNIX)/artifacts/build/monitor_training/monitor_training.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/monitor_training.s' -o '$(CURDIR_UNIX)/artifacts/build/monitor_training/monitor_training.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/monitor_training/monitor_training.ir'
 	@echo "Running training monitor entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -609,8 +609,8 @@ build-linux-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_linux
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/build-linux.s' -o '$(CURDIR_UNIX)/artifacts/build/build_linux/build_linux.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/build-linux.s' -o '$(CURDIR_UNIX)/artifacts/build/build_linux/build_linux.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_linux/build_linux.ir'
 	@echo "Running Linux build status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -622,8 +622,8 @@ build-macos-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_macos
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/build-macos.s' -o '$(CURDIR_UNIX)/artifacts/build/build_macos/build_macos.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/build-macos.s' -o '$(CURDIR_UNIX)/artifacts/build/build_macos/build_macos.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_macos/build_macos.ir'
 	@echo "Running macOS build status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -674,8 +674,8 @@ run-train-compiled-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_compiled
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_train_compiled.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_compiled/run_train_compiled.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_train_compiled.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_compiled/run_train_compiled.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_train_compiled/run_train_compiled.ir'
 	@echo "Running compiled train status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -687,8 +687,8 @@ run-train-large-model-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_large_model
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_train_large_model.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_large_model/run_train_large_model.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_train_large_model.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_large_model/run_train_large_model.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_train_large_model/run_train_large_model.ir'
 	@echo "Running large model train status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -700,8 +700,8 @@ run-train-model-ir-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_model_ir
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_train_model_ir.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_model_ir/run_train_model_ir.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_train_model_ir.s' -o '$(CURDIR_UNIX)/artifacts/build/run_train_model_ir/run_train_model_ir.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_train_model_ir/run_train_model_ir.ir'
 	@echo "Running IR train status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -713,8 +713,8 @@ run-with-logs-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_with_logs
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_with_logs.s' -o '$(CURDIR_UNIX)/artifacts/build/run_with_logs/run_with_logs.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_with_logs.s' -o '$(CURDIR_UNIX)/artifacts/build/run_with_logs/run_with_logs.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_with_logs/run_with_logs.ir'
 	@echo "Running logs wrapper status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -726,8 +726,8 @@ verify-framework-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_framework
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/verify_framework.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/verify_framework.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir'
 	@echo "Running framework verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -739,8 +739,8 @@ verify-inference-pipeline-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/verify_inference_pipeline.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline/verify_inference_pipeline.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/verify_inference_pipeline.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline/verify_inference_pipeline.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline/verify_inference_pipeline.ir'
 	@echo "Running inference pipeline verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -752,8 +752,8 @@ test-build-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test_build
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/test_build.s' -o '$(CURDIR_UNIX)/artifacts/build/test_build/test_build.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/test_build.s' -o '$(CURDIR_UNIX)/artifacts/build/test_build/test_build.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/test_build/test_build.ir'
 	@echo "Running build test entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -765,8 +765,8 @@ test-smart-inference-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test_smart_inference
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/test_smart_inference.s' -o '$(CURDIR_UNIX)/artifacts/build/test_smart_inference/test_smart_inference.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/test_smart_inference.s' -o '$(CURDIR_UNIX)/artifacts/build/test_smart_inference/test_smart_inference.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/test_smart_inference/test_smart_inference.ir'
 	@echo "Running smart inference test entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -806,8 +806,8 @@ clean-s:
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/scripts.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/scripts.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir'
 	@echo "Running NeurX data cleaning entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -819,8 +819,8 @@ shard-s:
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/scripts.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/scripts.s' -o '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir'
 	@echo "Running NeurX data sharding entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -904,13 +904,14 @@ industrial-ops: build-industrial-ops
 build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
-	@'$(CC)' -std=c11 -O2 -Wall -Wextra -Werror \
+	@'$(CC)' -D_GNU_SOURCE -std=c11 -O2 -Wall -Wextra -Werror \
 		-I'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed' \
 		-o '$(S_RUNNER_BIN)' \
 		'$(S_RUNNER_C_SRC)' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/runtime/runtime.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/error/error.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/lexical/lexer.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/lexical/selfhost_bridge.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/syntax/parser.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/semantic/analyzer.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/intermediate/ir.c' \
@@ -1347,8 +1348,8 @@ compile-all-components-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/compile_all_components
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/compile_all_components.s' -o '$(CURDIR_UNIX)/artifacts/build/compile_all_components/compile_all_components.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/compile_all_components.s' -o '$(CURDIR_UNIX)/artifacts/build/compile_all_components/compile_all_components.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/compile_all_components/compile_all_components.ir'
 	@echo "Running full compilation/test status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1360,8 +1361,8 @@ integration-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/integration
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/integration.s' -o '$(CURDIR_UNIX)/artifacts/build/integration/integration.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/integration.s' -o '$(CURDIR_UNIX)/artifacts/build/integration/integration.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/integration/integration.ir'
 	@echo "Running training integration status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1373,8 +1374,8 @@ complete-training-cycle-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/complete_training_cycle
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/complete_training_cycle.s' -o '$(CURDIR_UNIX)/artifacts/build/complete_training_cycle/complete_training_cycle.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/complete_training_cycle.s' -o '$(CURDIR_UNIX)/artifacts/build/complete_training_cycle/complete_training_cycle.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/complete_training_cycle/complete_training_cycle.ir'
 	@echo "Running complete training cycle status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1386,8 +1387,8 @@ verify-transformer-implementation-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/verify_transformer_implementation.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation/verify_transformer_implementation.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/verify_transformer_implementation.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation/verify_transformer_implementation.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation/verify_transformer_implementation.ir'
 	@echo "Running transformer verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1399,8 +1400,8 @@ cluster-launch-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/cluster_launch
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/cluster_launch.s' -o '$(CURDIR_UNIX)/artifacts/build/cluster_launch/cluster_launch.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/cluster_launch.s' -o '$(CURDIR_UNIX)/artifacts/build/cluster_launch/cluster_launch.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/cluster_launch/cluster_launch.ir'
 	@echo "Running cluster launch status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1412,8 +1413,8 @@ setup-production-deployment-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/setup_production_deployment
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/setup_production_deployment.s' -o '$(CURDIR_UNIX)/artifacts/build/setup_deploy/production/setup_production_deployment.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/setup_production_deployment.s' -o '$(CURDIR_UNIX)/artifacts/build/setup_deploy/production/setup_production_deployment.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/setup_deploy/production/setup_production_deployment.ir'
 	@echo "Running production deployment status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1425,8 +1426,8 @@ run-end-to-end-verification-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_end_to_end_verification.s' -o '$(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification/run_end_to_end_verification.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_end_to_end_verification.s' -o '$(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification/run_end_to_end_verification.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification/run_end_to_end_verification.ir'
 	@echo "Running end-to-end verification status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1438,8 +1439,8 @@ run-integration-tests-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_integration_tests
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/run_integration_tests.s' -o '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/run_integration_tests.s' -o '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir'
 	@echo "Running integration tests status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1451,8 +1452,8 @@ minimal-diagnostic-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/minimal_diagnostic
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/minimal_diagnostic.s' -o '$(CURDIR_UNIX)/artifacts/build/minimal_diagnostic/minimal_diagnostic.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/minimal_diagnostic.s' -o '$(CURDIR_UNIX)/artifacts/build/minimal_diagnostic/minimal_diagnostic.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/minimal_diagnostic/minimal_diagnostic.ir'
 	@echo "Running minimal diagnostic status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1464,8 +1465,8 @@ diagnose-file-creation-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_file_creation
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/diagnose_file_creation.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_file_creation/diagnose_file_creation.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/diagnose_file_creation.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_file_creation/diagnose_file_creation.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/diagnose_file_creation/diagnose_file_creation.ir'
 	@echo "Running file creation diagnostic status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1477,8 +1478,8 @@ diagnose-tool-registration-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/diagnose_tool_registration.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration/diagnose_tool_registration.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/diagnose_tool_registration.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration/diagnose_tool_registration.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration/diagnose_tool_registration.ir'
 	@echo "Running tool registration diagnostic status entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -1490,8 +1491,8 @@ diagnose-autoscroll-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/home/shuwen/s/bin/s' S_SOURCE_ROOT='/home/shuwen/s' \
-		/home/shuwen/s/bin/s ir 'scripts/legacy/diagnose_autoscroll.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll/diagnose_autoscroll.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		$(S_COMPILER) ir 'scripts/legacy/diagnose_autoscroll.s' -o '$(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll/diagnose_autoscroll.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll/diagnose_autoscroll.ir'
 	@echo "Running autoscroll diagnostic status entry..."
 	@cd '$(CURDIR_UNIX)' && \
