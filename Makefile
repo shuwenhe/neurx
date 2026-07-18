@@ -646,21 +646,17 @@ run-large-pretrain-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir '$(PRETRAIN_ENTRY_SOURCE)' -o '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
+		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			"$(S_COMPILER)" '$(PRETRAIN_ENTRY_SOURCE)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 || exit 1; \
+		else \
+			"$(S_COMPILER)" ir '$(PRETRAIN_ENTRY_SOURCE)' -o '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 || exit 1; \
+		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir'
-	@echo "Building large pretrain executable..."
-	@cd '$(S_COMPILER_EMIT_CWD)' && \
-		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		'$(S_COMPILER)' --emit-bin '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' '$(PRETRAIN_RUNNER_BIN)' 2>&1
-	@echo "Running large pretrain status entry..."
+	@echo "Running large pretrain status entry (interpreter)..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		if [ '$(PLATFORM)' = 'linux' ]; then \
-			script -q -c "'$(PRETRAIN_RUNNER_BIN)'" /dev/null; \
-		else \
-			script -q /dev/null '$(PRETRAIN_RUNNER_BIN)'; \
-		fi 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
 
 build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
