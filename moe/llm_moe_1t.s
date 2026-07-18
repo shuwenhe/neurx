@@ -1,4 +1,4 @@
-package neurx.model.llm.base_moe_1t
+package neurx.moe.llm_1t
 
 // ============================================================================
 // NeurX 1T+ MoE Framework
@@ -15,8 +15,8 @@ package neurx.model.llm.base_moe_1t
 // ============================================================================
 
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
-use neurx.model.llm.gpt_moe.{gpt_moe_config, gpt_moe_param_count}
-use neurx.model.transformer.moe.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
+use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
+use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
 
 // ============================================================================
 // 1. 规模与训练计划

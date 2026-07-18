@@ -640,7 +640,7 @@ neurx/model/transformer/
 ├── model_class.s (250) - Model container
 ├── norm_embed.s (250) - Norm + embedding fusion
 ├── moe.s (400) - Mixture of Experts
-└── moe_backward.s (350) - MoE backward
+└── transformer_moe_backward.s (350) - MoE backward
 ```
 
 ### Optimizer Components

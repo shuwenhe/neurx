@@ -8,7 +8,7 @@
 ✓ distributed/moe_all_to_all.s                (473 行)   MoE All-to-All 路由
 ✓ distributed/tensor_parallel.s              (329 行)   张量并行
 ✓ distributed/zero_gradient_reduce.s         (504 行)   ZeRO Stage 3
-✓ model/llm/model_moe_1t_loss.s                (495 行)   损失计算
+✓ moe/llm_moe_1t_loss.s                (495 行)   损失计算
 ✓ training/lr_scheduler_moe_1t.s             (422 行)   学习率调度
 ✓ data/moe_1t_jsonl_loader.s                 (430 行)   JSONL 数据加载
 ✓ monitoring/moe_1t_metrics.s                (598 行)   监控指标
@@ -36,12 +36,12 @@
   - [ ] func model_large_training_forward()
   - [ ] func model_large_training_loss()
 
-- [ ] model/llm/model_moe_1t.s
+- [ ] moe/llm_moe_1t.s
   - [ ] 包含 1T MoE 模型框架
   - [ ] struct gpt_1t_moe_config
   - [ ] 256 个 experts, top-k=2 路由
 
-- [ ] model/llm/model_moe_1t_loss.s
+- [ ] moe/llm_moe_1t_loss.s
   - [ ] 损失计算函数
   - [ ] 支持 CE + 辅助损失 + KL
   - [ ] 495 行完整实现
@@ -435,7 +435,7 @@ file build/model_large_pretrain
 [✓] Parsing source files...
 [✓] Resolving dependencies...
     Dependencies found:
-    - neurx.model.llm.model_moe_1t
+    - neurx.moe.llm_1t
     - neurx.pretrain.distributed
     - neurx.pretrain.optimizer
     - ... (20+ total)

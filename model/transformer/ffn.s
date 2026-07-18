@@ -1,7 +1,7 @@
 package neurx.model.transformer.ffn
 
 // Feed-forward network utilities for transformer blocks.
-// Flat-vector implementation with GELU, SwiGLU, and MoE-friendly hooks.
+// Flat-vector implementation with GELU and SwiGLU.
 
 struct ffn_config {
     int hidden_dim
@@ -32,17 +32,10 @@ struct glu_ffn_state {
     []float down_bias
 }
 
-struct moe_ffn_state {
-    int num_experts
-    int num_active_experts
-    float expert_capacity_factor
-}
-
 struct feed_forward_network {
     ffn_config config
     standard_ffn_state standard_ffn
     glu_ffn_state glu_ffn
-    moe_ffn_state moe_ffn
     string active_type
 }
 
@@ -196,18 +189,6 @@ func new_glu_ffn(ffn_config cfg) feed_forward_network {
     }
 }
 
-func new_moe_ffn(ffn_config cfg, int num_experts) feed_forward_network {
-    feed_forward_network {
-        config: cfg,
-        moe_ffn: moe_ffn_state {
-            num_experts: num_experts,
-            num_active_experts: num_experts / 2,
-            expert_capacity_factor: 1.25,
-        },
-        active_type: "moe",
-    }
-}
-
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -331,16 +312,6 @@ func forward_swiglu_ffn(
         i = i + 1
     }
     down
-}
-
-func forward_moe_ffn(
-    feed_forward_network ffn,
-    []float hidden_states,
-    int tokens
-) []float {
-    // Minimal MoE hook: route through the standard FFN path until a
-    // dedicated expert dispatcher is wired up.
-    forward_standard_ffn(ffn, hidden_states, tokens)
 }
 
 func apply_dropout(

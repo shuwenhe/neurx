@@ -34,14 +34,14 @@ package neurx.training.moe_1t_orchestrator
 //
 // ============================================================================
 
-use neurx.model.llm.gpt_moe_1t.{
+use neurx.moe.llm_1t.{
     moe_1t_framework, moe_1t_scale_profile, moe_1t_parallel_plan,
     moe_1t_training_plan, moe_1t_framework_default, moe_1t_summary
 }
 use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_manifest_refs, gpt_large_pretrain_documents_for_ref_with_seed, gpt_large_pretrain_mix_seed}
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, save_pretrain_checkpoint, load_pretrain_checkpoint}
-use neurx.model.llm.gpt_moe.{gpt_moe_config, gpt_moe_state, new_gpt_moe_state}
-use neurx.model.llm.base_moe_1t_loss.{loss_state_new, compute_total_loss, compute_ce_gradient}
+use neurx.moe.llm.{gpt_moe_config, gpt_moe_state, new_gpt_moe_state}
+use neurx.moe.llm_1t_loss.{loss_state_new, compute_total_loss, compute_ce_gradient}
 use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 

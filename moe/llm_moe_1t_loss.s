@@ -1,4 +1,4 @@
-package neurx.model.llm.base_moe_1t_loss
+package neurx.moe.llm_1t_loss
 
 // ============================================================================
 // 1T MoE 损失计算与反向传播

@@ -117,7 +117,7 @@ NeurX Architecture (Pure S Language)
 - [x] BPE tokenizer (model/tokenizer/bpe.s)
 - [x] LayerNorm and embeddings
 - [x] Flash attention (model/transformer/flash_attention.s)
-- [x] Mixture of Experts (model/transformer/moe.s)
+- [x] Mixture of Experts (moe/transformer_moe.s)
 - [ ] **TODO**: Complete transformer stack orchestration
 - [ ] **TODO**: Position embedding completion (RoPE full implementation)
 - [ ] **TODO**: Causal masking (for autoregressive generation)

@@ -1,4 +1,4 @@
-package neurx.model.transformer.trae_moe
+package neurx.moe.trae
 
 import "neurx.util.math"
 

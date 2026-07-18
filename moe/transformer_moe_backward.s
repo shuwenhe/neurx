@@ -1,4 +1,4 @@
-package neurx.model.transformer.moe_backward
+package neurx.moe.transformer_backward
 
 // ============================================================================
 // MoE Backward Pass — exact gradients for router + expert FFNs
@@ -20,7 +20,7 @@ package neurx.model.transformer.moe_backward
 //   d_router_weight  += hidden[t]^T @ d_router_logit[e]
 // ============================================================================
 
-use neurx.model.transformer.moe.{
+use neurx.moe.transformer.{
     moe_layer, moe_config, moe_expert, routing_decision, moe_output,
     moe_route, moe_expert_forward, moe_capacity
 }

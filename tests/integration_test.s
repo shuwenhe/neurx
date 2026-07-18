@@ -1,6 +1,6 @@
 package neurx.test.integration
 
-use neurx.model.transformer.moe
+use neurx.moe.transformer
 use neurx.model.transformer.attention
 use neurx.data.streaming
 use neurx.distributed.fsdp
