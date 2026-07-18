@@ -412,7 +412,11 @@ shard: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 && \
+		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			"$(S_COMPILER)" 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		else \
+			"$(S_COMPILER)" ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
 	@echo "Running Wikipedia shard processor on $(PLATFORM)..."
