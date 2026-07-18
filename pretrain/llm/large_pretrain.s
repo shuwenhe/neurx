@@ -2183,6 +2183,8 @@ func gpt_large_pretrain_execute(gpt_large_pretrain_state state) gpt_large_pretra
         steps_to_run = state.cfg.max_steps
     }
     println("[training] Starting training execution: " + int_to_str(steps_to_run, 0) + " steps (current global_step=" + int_to_str(state.loop.global_step, 0) + ")")
+    // Print active shard at start of execution for clearer console visibility
+    println("TRAINING SHARD: " + state.active_shard_path)
     gpt_large_pretrain_state current = gpt_large_pretrain_run_and_save(state, steps_to_run)
     println("[training] Training execution complete")
     gpt_large_pretrain_write_system_report(current)
@@ -2586,6 +2588,12 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
         next.corpus.total_tokens_seen,
         len(next.corpus.tokenizer.vocab)
     )
+    // Announce shard switch when active shard path changes
+    string prev_shard = state.active_shard_path
+    string new_shard = next.active_shard_path
+    if prev_shard != new_shard {
+        println("TRAINING SHARD: " + new_shard)
+    }
     next
 }
 
