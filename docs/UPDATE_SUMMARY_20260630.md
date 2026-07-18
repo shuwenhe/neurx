@@ -62,7 +62,7 @@
 ---
 
 ### 3. Flash Attention v3 推理引擎 ⚙️
-**文件**: `neurx/inference/flash_attention_v3.s` (800 行)
+**文件**: `neurx/attention/flash_attention_v3.s` (800 行)
 
 ```
 高性能特性:
@@ -476,7 +476,7 @@ API 文档:      ✅ 完整
 ### 代码位置
 - Transformer: `/neurx/model/gpt_transformer.s`
 - 混合精度: `/neurx/training/mixed_precision.s`
-- Flash Attention: `/neurx/inference/flash_attention_v3.s`
+- Flash Attention: `/neurx/attention/flash_attention_v3.s`
 
 ### 快速命令
 ```bash

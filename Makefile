@@ -161,7 +161,8 @@ hybrid-moe-s: check-bash build-s-ir-runner
 		bash tools/bundle_s_modules.sh \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.bundle.s' \
 			'moe/hybrid_moe.s' \
-			'moe/moe_core.s' && \
+			'moe/moe_core.s' \
+			'attention/nda.s' && \
 		'$(S_COMPILER)' \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.bundle.s' \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.ir'

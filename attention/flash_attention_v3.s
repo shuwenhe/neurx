@@ -1,4 +1,4 @@
-package neurx.inference.flash_attention_v3
+package neurx.attention.flash_v3
 
 // ⚡ Flash Attention v3 - 极致推理性能
 // 对标: NVIDIA FlashAttention-3

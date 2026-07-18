@@ -10,7 +10,7 @@
 // 这是 NEURX 与 GPT 最关键的架构差异所在!
 // ============================================================
 
-package neurx.model.transformer.attention
+package neurx.attention.mechanism
 
 import neurx.arch.cuda.bindings.*
 import neurx.tensor.*

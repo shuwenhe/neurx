@@ -53,7 +53,7 @@ var y = []int{1, 2, 3}
 
 - `neurx/infer/text_generator.s`
 - `neurx/infer/sampling_beam.s`
-- `neurx/model/transformer/attention.s`
+- `neurx/attention/attention.s`
 - `neurx/data/tokenizer_pipeline.s`
 
 ### 3. Map / 字典
@@ -97,7 +97,7 @@ tokens[idx] = next_id
 
 - `neurx/train/optimizer.s`
 - `neurx/model/transformer/transformer.s`
-- `neurx/model/transformer/attention.s`
+- `neurx/attention/attention.s`
 - `neurx/distributed/*`
 
 ### 5. 条件表达式 / 分支表达式
@@ -202,7 +202,7 @@ while i < n {
 ## 对 NeurX 最该先改的文件
 
 1. `neurx/model/transformer/transformer.s`
-2. `neurx/model/transformer/attention.s`
+2. `neurx/attention/attention.s`
 3. `neurx/train/optimizer.s`
 4. `neurx/train/checkpoint_manager.s`
 5. `neurx/data/tokenizer_pipeline.s`

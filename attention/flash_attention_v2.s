@@ -1,4 +1,4 @@
-package neurx.model.transformer.flash_attention
+package neurx.attention.flash_v2
 
 // ============================================================================
 // Flash Attention 2 — IO-Aware Exact Attention
@@ -19,7 +19,7 @@ package neurx.model.transformer.flash_attention
 //   • 支持 bf16/fp16/fp32
 // ============================================================================
 
-use neurx.model.transformer.attention_implementation.{
+use neurx.attention.core.{
     attention_config, multi_head_attention_module
 }
 

@@ -48,7 +48,7 @@
 
 #### NeurX 现状：
 ```
-✅ 已有: Flash Attention v2 (inference/flash_attention_v3.s)
+✅ 已有: Flash Attention v2 (attention/flash_attention_v3.s)
 ✅ 已有: KV 缓存管理 (inference/kv_cache_manager.s)
 ✅ 已有: 投机解码框架 (serving/speculative_decoding.s)
 ✅ 已有: 采样策略 (inference/sampling/)
@@ -89,7 +89,7 @@
 ```
 ✅ 已有: RoPE 扩展框架 (model/transformer/rope_scaling.s - 350行)
 ✅ 已有: YaRN/NTK-by-Parts 实现
-✅ 已有: Ring Attention 框架 (distributed/ring_attention.s)
+✅ 已有: Ring Attention 框架 (attention/ring_attention.s)
 ❌ 缺失: 实际 200K token 训练与验证
 ❌ 缺失: 滑动窗口注意力的完整实现
 ❌ 缺失: 缓存压缩的动态机制
@@ -304,7 +304,7 @@
   - 因果注意力 + RoPE + SwiGLU + GQA
 ✅ 已有: moe/transformer_moe.s（MoE 实现）
   - Mixtral 式路由, Switch 负载均衡
-✅ 已有: model/transformer/flash_attention.s（FA v2）
+✅ 已有: attention/flash_attention_v2.s（FA v2）
 ✅ 已有: model/transformer/rope_scaling.s（RoPE 扩展）
 ✅ 已有: 完整反向传播（gpt_backward.s）
 ❌ 缺失: Flash Attention v3/v4（最新优化）
@@ -563,7 +563,7 @@
 
 ### 🔴 P0 - 立即启动（本周）
 ```
-1. [估时: 3-4天] 审视 inference/flash_attention_v3.s
+1. [估时: 3-4天] 审视 attention/flash_attention_v3.s
    → 确认实现正确性
    → 与参考论文对标
    

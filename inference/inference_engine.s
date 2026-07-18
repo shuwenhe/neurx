@@ -14,7 +14,7 @@
 package neurx.inference.neurx
 
 import neurx.model.llm.neurx.*
-import neurx.model.transformer.attention.*
+import neurx.attention.*
 import neurx.tokenizer.neurx.*
 
 // ============================================================

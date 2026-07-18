@@ -13,7 +13,7 @@
 
 | # | 模块名 | 行数 | 功能 | 优先级 |
 |---|--------|------|------|--------|
-| 1️⃣ | `compute/flash_attention.s` | 800 | 3x性能，1/10显存，Ring Attention | 必须 |
+| 1️⃣ | `attention/flash_attention_compute.s` | 800 | 3x性能，1/10显存，Ring Attention | 必须 |
 | 2️⃣ | `train/mixed_precision.s` | 700 | BF16/FP32混合，动态损失缩放，梯度溢出检测 | 必须 |
 | 3️⃣ | `distributed/fault_recovery.s` | 850 | 99.9%可用性，自动检查点恢复，梯度一致性验证 | 必须 |
 | 4️⃣ | `monitoring/distributed_metrics.s` | 750 | 实时指标收集，异常检测，性能分析 | 必须 |

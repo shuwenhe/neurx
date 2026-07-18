@@ -4,7 +4,7 @@ use neurx.serving.vllm.request_queue
 use neurx.serving.vllm.scheduler
 use neurx.serving.vllm.metrics
 use neurx.serving.vllm.prefix_cache
-use neurx.serving.vllm.paged_attention
+use neurx.attention.serving_paged
 
 struct vllm_runtime_state {
     vllm_request_queue_state queue

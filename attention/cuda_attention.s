@@ -1,4 +1,4 @@
-package neurx.cuda
+package neurx.attention.cuda
 
 // ============================================================================
 // CUDA Kernels - Scaled Dot-Product Attention (SDPA)

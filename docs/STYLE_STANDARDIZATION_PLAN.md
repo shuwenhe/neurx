@@ -51,7 +51,7 @@ CORRECT:
 
 | # | File | Lines | Status |
 |---|------|-------|--------|
-| 1 | compute/flash_attention.s | 800 | PENDING |
+| 1 | attention/flash_attention_compute.s | 800 | PENDING |
 | 2 | train/mixed_precision.s | 700 | PENDING |
 | 3 | distributed/fault_recovery.s | 850 | PENDING |
 | 4 | monitoring/distributed_metrics.s | 750 | PENDING |
@@ -125,4 +125,4 @@ func new_tensor_parallel_config(int degree) tensor_parallel_config {
 - Files fixed: 0/6
 - Completion: 0%
 
-Start with compute/flash_attention.s next...
+Start with attention/flash_attention_compute.s next...

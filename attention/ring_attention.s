@@ -1,4 +1,4 @@
-package neurx.distributed.ring_attention
+package neurx.attention.ring
 
 // ═══════════════════════════════════════════════════════════════════
 // Ring Attention — 超长序列分布式注意力机制
@@ -29,7 +29,7 @@ package neurx.distributed.ring_attention
 //   • 支持 GQA/MQA 以减少 KV cache 大小
 // ═══════════════════════════════════════════════════════════════════
 
-use neurx.model.transformer.flash_attention.{
+use neurx.attention.flash_v2.{
     flash_attn_config, flash_attn_forward_head, flash_attn_backward
 }
 

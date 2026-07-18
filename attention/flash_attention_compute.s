@@ -2,7 +2,7 @@
 // Reduces attention memory from O(N²) to O(N) and provides 3x speedup
 // Compatible with tensor parallelism and sequence parallelism
 
-package neurx.compute.flash_attention
+package neurx.attention.flash_compute
 
 // Flash Attention configuration
 struct flash_attention_config {

@@ -1,6 +1,6 @@
-package neurx.inference.vllm.paged_attention
+package neurx.attention.serving_paged
 
-use neurx.inference.cache.paged_kv_cache
+use neurx.serving.cache.paged_kv_cache
 
 struct vllm_paged_attention_state {
     paged_kv_cache_state kv

@@ -84,7 +84,7 @@ func test_compilation() TestResult {
         "neurx/distributed/data_parallel.s",
         "neurx/alignment/rlhf_complete.s",
         "neurx/training/mixed_precision.s",
-        "neurx/inference/flash_attention_v3.s",
+        "neurx/attention/flash_attention_v3.s",
     ]
     
     int i = 0

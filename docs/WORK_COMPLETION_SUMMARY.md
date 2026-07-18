@@ -35,7 +35,7 @@
 
 ### 第二层：Multi-Head Attention ✅ COMPLETE
 
-**文件**: `/Users/feifei/train/neurx/model/transformer/attention_implementation.s`  
+**文件**: `/Users/feifei/train/neurx/attention/attention_implementation.s`
 **行数**: 400+ 行  
 **功能**:
 

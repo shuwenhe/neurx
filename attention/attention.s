@@ -1,7 +1,7 @@
-package neurx.model.transformer.attention
+package neurx.attention
 
 use neurx.model.transformer.norm.{rope_embedding, rope_apply_result, apply_rope}
-use neurx.compute.flash_attention
+use neurx.attention.flash_compute
 
 // Multi-head attention for transformer blocks.
 // Supports standard attention, GQA, MQA, and a flash-attention-style entry
@@ -336,10 +336,10 @@ func forward_flash_attention(
     
     project_qkv_result projected = project_qkv(attn, hidden_states, total_tokens)
     
-    flash_attention.flash_attention_config config = flash_attention.new_flash_attention_config()
+    flash_compute.flash_attention_config config = flash_compute.new_flash_attention_config()
     config.enable_sequence_parallel = false
     
-    flash_attention.flash_attention_state state = flash_attention.new_flash_attention_state(
+    flash_compute.flash_attention_state state = flash_compute.new_flash_attention_state(
         1, seq_len, num_heads, head_dim, config
     )
     
@@ -358,7 +358,7 @@ func forward_flash_attention(
     []float k_reshaped = reshape_for_flash(projected.key, seq_len, num_heads, head_dim)
     []float v_reshaped = reshape_for_flash(projected.value, seq_len, num_heads, head_dim)
     
-    []float attended = flash_attention.flash_attention_forward(
+    []float attended = flash_compute.flash_attention_forward(
         q_reshaped, k_reshaped, v_reshaped, causal_mask, state
     )
     

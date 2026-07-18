@@ -13,7 +13,7 @@
 | 文件 | 行数 | 功能 | 状态 |
 |------|------|------|------|
 | `train/loss_functions.s` | 350+ | 损失函数 (Cross-Entropy, 标签平滑, 困惑度) | ✅ |
-| `model/transformer/attention_implementation.s` | 400+ | Multi-Head Attention 完整实现 | ✅ |
+| `attention/attention_implementation.s` | 400+ | Multi-Head Attention 完整实现 | ✅ |
 | `train/training_loop.s` | 450+ | 训练循环 (Forward/Backward/Update) | ✅ |
 | `bin/train_complete.s` | 200+ | 端到端训练脚本示例 | ✅ |
 
@@ -206,7 +206,7 @@ float loss = cross_entropy_loss_masked(logits, targets, mask, config)
 ```
 ✓ model/transformer/ - 架构已有，现已完成前向传播
 ✓ opt/ - 优化器框架，已集成到训练循环
-✓ compute/flash_attention.s - 高效注意力选项
+✓ attention/flash_attention_compute.s - 高效注意力选项
 ```
 
 ---
@@ -322,7 +322,7 @@ neurx/
 
 ### 参考代码
 - [train/loss_functions.s](./train/loss_functions.s) - Loss 实现
-- [model/transformer/attention_implementation.s](./model/transformer/attention_implementation.s) - Attention 实现
+- [attention/attention_implementation.s](./attention/attention_implementation.s) - Attention 实现
 - [train/training_loop.s](./train/training_loop.s) - 训练循环
 - [bin/train_complete.s](./bin/train_complete.s) - 完整示例
 

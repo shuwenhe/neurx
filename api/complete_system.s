@@ -5,7 +5,7 @@
 //   1. 模型架构 (model/llm/neurx.s)
 //   2. Tokenizer (tokenizer/tokenizer_core.s)
 //   3. 预训练框架 (pretrain/pretraining_pipeline.s)
-//   4. 注意力机制 (model/transformer/attention_mechanism.s)
+//   4. 注意力机制 (attention/attention_mechanism.s)
 //   5. 对齐训练 (posttrain/alignment_trainer.s)
 //   6. 推理优化 (inference/inference_engine.s)
 //
@@ -30,7 +30,7 @@ package neurx.complete_system
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.pretrain.pipeline.*
-import neurx.model.transformer.attention.*
+import neurx.attention.*
 import neurx.posttrain.alignment.*
 import neurx.inference.engine.*
 

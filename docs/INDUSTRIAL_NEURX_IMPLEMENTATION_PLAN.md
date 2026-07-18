@@ -304,7 +304,7 @@ Benchmarking:
 ### Task 3.3: Deployment & Inference Readiness 🎬
 
 **Status**: Inference skeleton present - needs production polish  
-**Files**: `neurx/inference/inference_server.s`, `neurx/inference/flash_attention_v3.s`
+**Files**: `neurx/inference/inference_server.s`, `neurx/attention/flash_attention_v3.s`
 
 **What needs to be done**:
 ```

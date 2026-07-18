@@ -15,7 +15,7 @@ package neurx.model.llm.base
 //   • Greedy / Top-K / Nucleus 采样生成
 // ============================================================================
 
-use neurx.model.transformer.attention.{
+use neurx.attention.{
     attention_config, multi_head_attention,
     new_attention_config, new_multi_head_attention,
     project_qkv, project_qkv_result

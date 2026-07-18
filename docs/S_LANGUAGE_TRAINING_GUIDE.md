@@ -63,7 +63,7 @@ neurx compile-all \
   distributed/zero_optimizer.s \
   alignment/rlhf_complete.s \
   training/mixed_precision.s \
-  inference/flash_attention_v3.s
+  attention/flash_attention_v3.s
 
 # 输出: bin/train_full bin/test_distributed_rlhf
 ```
@@ -184,7 +184,7 @@ ZeRO 阶段: 0
   ✅ 文件存在: neurx/distributed/data_parallel.s
   ✅ 文件存在: neurx/alignment/rlhf_complete.s
   ✅ 文件存在: neurx/training/mixed_precision.s
-  ✅ 文件存在: neurx/inference/flash_attention_v3.s
+  ✅ 文件存在: neurx/attention/flash_attention_v3.s
 
 ============================================================
 🧪 分布式训练验证

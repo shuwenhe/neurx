@@ -1,7 +1,7 @@
 package neurx.test.integration
 
 use neurx.moe.transformer
-use neurx.model.transformer.attention
+use neurx.attention
 use neurx.data.streaming
 use neurx.distributed.fsdp
 use neurx.tokenizer.bpe_trainer

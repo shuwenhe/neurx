@@ -5,7 +5,7 @@
 | 文件 | 职责 |
 |---|---|
 | `moe_core.s` | 可执行的共享路由、Top-K、共享专家和路由专家核心 |
-| `hybrid_moe.s` | KDA、Gated MLA、AttnRes 与共享MoE核心组成的混合骨干 |
+| `hybrid_moe.s` | Gated MLA、AttnRes 与 `attention/nda.s`、MoE 模块组成的混合骨干 |
 | `transformer_moe.s` | Transformer MoE层 |
 | `transformer_moe_backward.s` | Router与Expert FFN反向传播 |
 | `llm_moe.s` | GPT/LLM MoE模型 |

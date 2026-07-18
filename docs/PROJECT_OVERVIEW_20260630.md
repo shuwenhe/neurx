@@ -276,7 +276,7 @@ python infer.py \
 ### 核心文件
 - **模型架构**: `neurx/model/gpt_transformer.s` (1,200 行)
 - **训练系统**: `neurx/training/mixed_precision.s` (1,200 行)
-- **推理优化**: `neurx/inference/flash_attention_v3.s` (800 行)
+- **推理优化**: `neurx/attention/flash_attention_v3.s` (800 行)
 
 ### 规划文档
 - **战略蓝图**: `INDUSTRIAL_GPU_IMPLEMENTATION.md`
