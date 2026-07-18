@@ -666,8 +666,12 @@ build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'scripts/legacy/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 && \
+		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
+		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			"$(S_COMPILER)" 'scripts/legacy/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
+		else \
+			"$(S_COMPILER)" ir 'scripts/legacy/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
+		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
 	@echo "Running pretrain manifest entry..."
 	@cd '$(CURDIR_UNIX)' && \
