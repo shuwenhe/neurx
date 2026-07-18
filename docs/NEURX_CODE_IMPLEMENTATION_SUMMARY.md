@@ -400,6 +400,6 @@ hookSystem->registerHook(preToolUse, securityCheck);
 
 **NeurX Code 现在具备了与 NeurX Code 相当的核心功能! 🚀**
 
-实现者: GitHub Copilot  
+实现者: shuwenhe  
 日期: 2026年6月4日  
 状态: ✅ 架构完成，准备实现

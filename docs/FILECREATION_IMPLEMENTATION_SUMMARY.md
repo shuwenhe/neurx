@@ -415,5 +415,5 @@ cat /Users/feifei/agent/neurx-code/FILECREATION_INTEGRATION.md
 
 **版本**: 1.0  
 **最后更新**: 2026年6月4日  
-**实现者**: Claude (GitHub Copilot)  
+**实现者**: shuwenhe  
 **许可证**: NeurX Code Project

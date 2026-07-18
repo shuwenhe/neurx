@@ -373,4 +373,4 @@ void TestStickyScroll::testScopeHierarchy() {
 
 **创建日期**: 2026-06-05  
 **文档版本**: 1.0  
-**实现者**: AI Assistant (GitHub Copilot)
+**实现者**: shuwenhe

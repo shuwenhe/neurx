@@ -798,7 +798,7 @@ tool->setSandboxManager(nullptr);
 **NeurX Code 现在拥有完整的标准工具能力! 🚀**
 
 **实现日期**: 2026年6月4日  
-**实现者**: GitHub Copilot  
+**实现者**: shuwenhe  
 **文件位置**:
 - 头文件: `src/tools/NeurXStandardTools.h`
 - 实现: `src/tools/NeurXStandardTools.cpp`

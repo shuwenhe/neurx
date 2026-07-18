@@ -355,7 +355,7 @@ bash /Users/feifei/shuwen/train/neurx/scripts/legacy/neurx_complete_pipeline.sh
 
 ## 📝 许可证和属性
 
-- **实现者**: GitHub Copilot
+- **实现者**: shuwenhe
 - **完成日期**: 2026-07-01
 - **系统版本**: 2.0 Enterprise Edition
 - **代码行数**: 8500+
