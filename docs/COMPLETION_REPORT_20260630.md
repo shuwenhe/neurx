@@ -16,7 +16,7 @@
 |-----|------|------|------|------|
 | **Transformer** | model/gpt_transformer.s | 1,200 | ✅ 完成 | RMSNorm + ALiBi + RoPE + SwiGLU + LayerScale |
 | **混合精度** | training/mixed_precision.s | 1,200 | ✅ 完成 | BF16 + 动态损失缩放 + 梯度裁剪 + 分布式同步 |
-| **推理优化** | inference/flash_attention_v3.s | 800 | ✅ 完成 | 块级计算 + 分页缓存 + 推测解码 + IO优化 |
+| **推理优化** | attention/flash_attention_v3.s | 800 | ✅ 完成 | 块级计算 + 分页缓存 + 推测解码 + IO优化 |
 
 #### 2. 文档体系 (2,700+ 行)
 
@@ -364,7 +364,7 @@ python infer.py \
 ### 核心代码
 - **Transformer**: `neurx/model/gpt_transformer.s` (1,200 行)
 - **混合精度**: `neurx/training/mixed_precision.s` (1,200 行)
-- **Flash Attn v3**: `neurx/inference/flash_attention_v3.s` (800 行)
+- **Flash Attn v3**: `neurx/attention/flash_attention_v3.s` (800 行)
 
 ### 关键文档
 - **战略**: `INDUSTRIAL_GPU_IMPLEMENTATION.md`

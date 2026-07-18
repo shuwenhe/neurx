@@ -186,7 +186,7 @@
   - [x] 分页 KV 缓存
   - [x] 推测解码
   - [x] IO 最优化
-  - **文件**: `neurx/inference/flash_attention_v3.s` (800 行)
+  - **文件**: `neurx/attention/flash_attention_v3.s` (800 行)
 
 - [ ] **量化推理**
   - [ ] INT8 量化

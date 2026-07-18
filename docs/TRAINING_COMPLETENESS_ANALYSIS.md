@@ -221,7 +221,7 @@ func training_loop() {
 4. `distributed/sequence_parallel.s` - 序列并行
 5. `distributed/zero_optimizer.s` - 内存优化
 6. `data/distributed_dataloader.s` - 数据加载
-7. `compute/flash_attention.s` - 高效注意力
+7. `attention/flash_attention_compute.s` - 高效注意力
 8. `train/mixed_precision.s` - 混合精度框架
 9. `monitoring/distributed_metrics.s` - 监控系统
 10. `distributed/fault_recovery.s` - 故障恢复
@@ -258,7 +258,7 @@ func training_loop() {
 
 ### 立即行动项目
 ```
-1. 完成 model/transformer/attention.s
+1. 完成 attention/attention.s
    (现在只有框架，需要实现核心注意力计算)
 
 2. 完成 train/loss.s 的cross-entropy实现

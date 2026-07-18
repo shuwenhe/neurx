@@ -116,7 +116,7 @@ NeurX Architecture (Pure S Language)
 - [x] Attention mechanism (multi-head forward & backward)
 - [x] BPE tokenizer (model/tokenizer/bpe.s)
 - [x] LayerNorm and embeddings
-- [x] Flash attention (model/transformer/flash_attention.s)
+- [x] Flash attention (attention/flash_attention_v2.s)
 - [x] Mixture of Experts (moe/transformer_moe.s)
 - [ ] **TODO**: Complete transformer stack orchestration
 - [ ] **TODO**: Position embedding completion (RoPE full implementation)
@@ -522,7 +522,7 @@ test FullPipelineTest() {
 ## 📚 Resources & References
 
 ### Key Implementation Files (Existing)
-- Transformer: `model/transformer/attention_implementation.s`
+- Transformer: `attention/attention_implementation.s`
 - Training: `training/train_loop.s`
 - Distributed: `distributed/training_coordinator.s`
 - Serving: `serving/serve/serve.s`

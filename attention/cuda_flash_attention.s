@@ -1,4 +1,4 @@
-package neurx.cuda
+package neurx.attention.cuda
 
 // ============================================================================
 // FlashAttention Kernel Launch

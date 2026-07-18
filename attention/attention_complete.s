@@ -3,7 +3,7 @@
 // 多头注意力机制 - 包含完整的反向传播
 // =====================================================================
 
-package neurx.ml.attention
+package neurx.attention.complete
 
 use neurx.tensor.{tensor, new, zeros, ones, fill, reshape}
 use neurx.ml.math_ops.{softmax, softmax_backward, scale_tensor, add_tensors, matmul_2d, transpose_2d}

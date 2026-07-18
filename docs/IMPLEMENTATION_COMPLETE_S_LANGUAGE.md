@@ -18,7 +18,7 @@
 | **ZeRO 优化** | `distributed/zero_optimizer.s` | 400 | Stages 1-3 内存优化 (4x/8x/8x) | ✅ |
 | **RLHF 系统** | `alignment/rlhf_complete.s` | 600 | SFT + 奖励模型 + PPO + 评估 | ✅ |
 | **混合精度** | `training/mixed_precision.s` | 1200 | BF16/FP16/FP32 + 动态损失缩放 | ✅ |
-| **Flash Attention v3** | `inference/flash_attention_v3.s` | 800 | 块级注意力 + 分页 KV 缓存 | ✅ |
+| **Flash Attention v3** | `attention/flash_attention_v3.s` | 800 | 块级注意力 + 分页 KV 缓存 | ✅ |
 
 ### 🚀 新增训练工具 (S 语言)
 

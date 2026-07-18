@@ -1,4 +1,4 @@
-package neurx.model.transformer.attention_core
+package neurx.attention.core
 
 // =====================================================================
 // Multi-Head Attention Implementation

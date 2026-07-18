@@ -41,7 +41,7 @@ float ppl = compute_perplexity(loss)
 ---
 
 ### 2️⃣ Multi-Head Attention ✅ 完成
-**文件**: `/Users/feifei/train/neurx/model/transformer/attention_implementation.s` (400+ 行)
+**文件**: `/Users/feifei/train/neurx/attention/attention_implementation.s` (400+ 行)
 
 **实现内容**:
 ```s
@@ -154,7 +154,7 @@ bin/train_complete.s (主训练脚本)
     │   ├─→ Backward Pass
     │   └─→ Parameter Update
     │
-    ├─→ model/transformer/attention_implementation.s (Attention)
+    ├─→ attention/attention_implementation.s (Attention)
     │   ├─→ Q/K/V Projection
     │   ├─→ Scaled Dot-Product
     │   └─→ Multi-Head Aggregation
@@ -218,7 +218,7 @@ bin/train_complete.s (主训练脚本)
 | 文件 | 行数 | 功能 | 状态 |
 |-----|------|------|------|
 | train/loss_functions.s | 350+ | Loss计算 | ✅ 完成 |
-| model/transformer/attention_implementation.s | 400+ | Attention | ✅ 完成 |
+| attention/attention_implementation.s | 400+ | Attention | ✅ 完成 |
 | train/training_loop.s | 450+ | 训练循环 | ✅ 完成 |
 | bin/train_complete.s | 200+ | 端到端脚本 | ✅ 完成 |
 | **总计** | **1400+** | **完整系统** | **✅ 就绪** |

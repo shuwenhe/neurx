@@ -55,7 +55,7 @@ Lines 1-30 verified:
 
 | # | File | Lines | Pattern | Status |
 |---|------|-------|---------|--------|
-| 2 | compute/flash_attention.s | 800 | structure → struct; fn → func | READY |
+| 2 | attention/flash_attention_compute.s | 800 | structure → struct; fn → func | READY |
 | 3 | train/mixed_precision.s | 700 | structure → struct; fn → func | READY |
 | 4 | distributed/fault_recovery.s | 850 | structure → struct; fn → func | READY |
 | 5 | monitoring/distributed_metrics.s | 750 | structure → struct; fn → func | READY |
@@ -157,7 +157,7 @@ After each file:
 
 ## FILE-BY-FILE CONVERSION TEMPLATE
 
-### For: compute/flash_attention.s (800 lines)
+### For: attention/flash_attention_compute.s (800 lines)
 ```
 Estimated replacements: ~35-40
 Structures: ~8 (flash_attention_config, online_softmax_state, etc.)

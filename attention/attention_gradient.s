@@ -1,4 +1,4 @@
-package neurx.model.transformer.attention_grad
+package neurx.attention.gradient
 
 // =====================================================================
 // Multi-Head Attention Backward Pass (Gradient Computation)

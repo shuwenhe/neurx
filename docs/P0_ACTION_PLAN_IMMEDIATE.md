@@ -15,7 +15,7 @@
 #### 任务细节
 ```
 1. 文件审视 (1天)
-   - 打开: /train/neurx/inference/flash_attention_v3.s
+   - 打开: /train/neurx/attention/flash_attention_v3.s
    - 检查清单:
      ☐ Forward pass 是否实现 tiling 策略
      ☐ Backward pass 是否支持梯度计算
@@ -57,7 +57,7 @@
 ```
 
 #### 相关文件
-- 实现: `inference/flash_attention_v3.s`
+- 实现: `attention/flash_attention_v3.s`
 - 相关: `model/llm/gpt.s` (调用点), `model/transformer/transformer_block.s`
 - 参考: Flash-Attention 论文集 & DeepSeek/Ollama 实现
 

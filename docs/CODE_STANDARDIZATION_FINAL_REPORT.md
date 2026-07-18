@@ -68,7 +68,7 @@ Lines 1-30:
 ### Files to Complete
 | File | Lines | Structures | Functions | Status |
 |------|-------|-----------|-----------|--------|
-| compute/flash_attention.s | 800 | 3 | 15 | 40% (partial) |
+| attention/flash_attention_compute.s | 800 | 3 | 15 | 40% (partial) |
 | train/mixed_precision.s | 700 | 6 | 12 | 0% |
 | distributed/fault_recovery.s | 850 | 8 | 16 | 0% |
 | monitoring/distributed_metrics.s | 750 | 7 | 13 | 0% |
@@ -182,7 +182,7 @@ Estimated time: ~45-60 minutes
 
 ### 3. Converted Files
 - ✅ [quantization/quantizer.s](./quantization/quantizer.s) - 650 lines, fully converted
-- ⏳ [compute/flash_attention.s](./compute/flash_attention.s) - 800 lines, partially converted
+- ⏳ [attention/flash_attention_compute.s](./attention/flash_attention_compute.s) - 800 lines, partially converted
 
 ---
 
@@ -251,7 +251,7 @@ Functional Correctness
 
 **This Session's Work**:
 - Quantizer standardization: `quantization/quantizer.s` (reference implementation)
-- Partial flash_attention: `compute/flash_attention.s` (pattern demonstration)
+- Partial flash_attention: `attention/flash_attention_compute.s` (pattern demonstration)
 - Automation tools: `scripts/` directory
 
 **Related Framework Files**:

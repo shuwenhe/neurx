@@ -189,8 +189,8 @@ wandb_log_metric(&run, "val/perplexity", ppl, step)
 - `cuda/kernels_softmax.s` - Softmax kernels (numerically stable)
 - `cuda/kernels_norm.s` - LayerNorm/RMSNorm kernels
 - `cuda/kernels_embedding.s` - Embedding lookup kernel
-- `cuda/kernels_attention.s` - Attention score computation
-- `cuda/kernels_flash_attention.s` ⭐ - FlashAttention v2 implementation
+- `attention/cuda_attention.s` - Attention score computation
+- `attention/cuda_flash_attention.s` ⭐ - FlashAttention v2 implementation
 
 **NCCL Files:**
 - `distributed/nccl_backend.s` - NCCL communicator setup

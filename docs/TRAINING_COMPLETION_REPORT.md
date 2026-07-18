@@ -99,7 +99,7 @@ for step in range(max_steps):
    - 支持7种操作类型
    - 拓扑排序的反向传播
 
-3. **ml/attention_complete.s** (350行)
+3. **attention/attention_complete.s** (350行)
    - 多头自注意力
    - Q/K/V投影
    - 缩放点积注意力

@@ -16,7 +16,7 @@
 | | | | | | • log_softmax_stable() |
 | | | | | | • apply_label_smoothing() |
 | | | | | | • compute_perplexity() |
-| **Layer 2** | **Multi-Head Attention** | `model/transformer/attention_implementation.s` | 400+ | ✅ 100% | 完整的注意力机制 |
+| **Layer 2** | **Multi-Head Attention** | `attention/attention_implementation.s` | 400+ | ✅ 100% | 完整的注意力机制 |
 | | 关键函数 | | | | • forward_attention() |
 | | | | | | • scaled_dot_product_attention() |
 | | | | | | • project_qkv() |

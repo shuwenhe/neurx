@@ -27,8 +27,8 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 - `neurx/model/transformer/transformer.s` (1,200+ lines)
 - `neurx/model/transformer/transformer_forward.s` (450 lines)
 - `neurx/model/transformer/transformer_backward.s` (450 lines)
-- `neurx/model/transformer/attention_implementation.s` (400 lines)
-- `neurx/model/transformer/attention_gradient.s` (350 lines)
+- `neurx/attention/attention_implementation.s` (400 lines)
+- `neurx/attention/attention_gradient.s` (350 lines)
 
 **Implemented Features**:
 - ✅ Token embedding (learnable lookup tables)
@@ -61,9 +61,9 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 **Status**: FULLY FUNCTIONAL for both forward and backward passes
 
 **Files**:
-- `neurx/model/transformer/attention.s`
-- `neurx/model/transformer/attention_implementation.s`
-- `neurx/model/transformer/attention_gradient.s`
+- `neurx/attention/attention.s`
+- `neurx/attention/attention_implementation.s`
+- `neurx/attention/attention_gradient.s`
 - `neurx/tests/test_attention.s` (10+ comprehensive tests)
 
 **Implemented Components**:
@@ -323,7 +323,7 @@ Total steps: 400K
 
 **Files**:
 - `neurx/inference/inference_engine.s` (1,000+ lines)
-- `neurx/inference/flash_attention_v3.s` (800 lines) - Flash Attention optimization
+- `neurx/attention/flash_attention_v3.s` (800 lines) - Flash Attention optimization
 - `neurx/inference/inference_server.s` (500+ lines)
 - `neurx/inference/decode/decode.s` - Decoding strategies
 - `neurx/inference/sampling_strategies.s` (500+ lines)

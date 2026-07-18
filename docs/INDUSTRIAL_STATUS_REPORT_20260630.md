@@ -91,7 +91,7 @@ Flash Attn v3            500-1000 t/s <30ms
 Flash Attn v3 + 量化     1000-2000 t/s <15ms
 ```
 
-**文件**: `neurx/inference/flash_attention_v3.s`
+**文件**: `neurx/attention/flash_attention_v3.s`
 
 ---
 

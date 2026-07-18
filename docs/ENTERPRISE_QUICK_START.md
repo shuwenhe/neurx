@@ -95,7 +95,7 @@ python scripts/quantize_model.py --method=INT8
 Problem:  Attention O(N²) memory, slow computation
 Solution: Block-wise computation, online softmax
 Result:   3x faster, 10x less memory
-Code:     compute/flash_attention.s
+Code:     attention/flash_attention_compute.s
 ```
 
 ### Mixed Precision
@@ -402,7 +402,7 @@ Inference: 0.5TB (INT4 quantized)
 ## 📚 Files to Review
 
 1. **Architecture**: `ENTERPRISE_2T_IMPLEMENTATION.md`
-2. **Flash Attention**: `compute/flash_attention.s`
+2. **Flash Attention**: `attention/flash_attention_compute.s`
 3. **Mixed Precision**: `train/mixed_precision.s`
 4. **Fault Recovery**: `distributed/fault_recovery.s`
 5. **Monitoring**: `monitoring/distributed_metrics.s`

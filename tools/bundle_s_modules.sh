@@ -18,6 +18,7 @@ for source in "$@"; do
   awk '
     /^package[[:space:]]/ { next }
     /^use[[:space:]]+neurx\.moe\.core/ { next }
+    /^use[[:space:]]+neurx\.attention\.nda/ { next }
     { print }
   ' "$source" >>"$temporary"
   printf '\n' >>"$temporary"
@@ -26,6 +27,7 @@ done
 awk '
   /^package[[:space:]]/ { next }
   /^use[[:space:]]+neurx\.moe\.core/ { next }
+  /^use[[:space:]]+neurx\.attention\.nda/ { next }
   { print }
 ' "$entry" >>"$temporary"
 

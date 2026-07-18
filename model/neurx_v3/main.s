@@ -17,7 +17,7 @@
 
 package neurx.model.neurx.main
 
-use neurx.model.neurx.mla
+use neurx.attention.mla
 use neurx.moe.fine_grained
 use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training

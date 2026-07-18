@@ -120,7 +120,7 @@ $$\theta_t = \theta_{t-1} - \alpha \left(\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsi
 
 ### 1️⃣ 多头注意力 (Multi-Head Attention)
 
-来自 `ml/attention_complete.s`:
+来自 `attention/attention_complete.s`:
 
 - ✓ Query/Key/Value 投影权重
 - ✓ 缩放点积注意力机制

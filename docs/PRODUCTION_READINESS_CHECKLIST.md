@@ -303,7 +303,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Causal masking
 - [x] Backward pass
 
-**Files**: `neurx/inference/flash_attention_v3.s` (~800 lines)
+**Files**: `neurx/attention/flash_attention_v3.s` (~800 lines)
 
 #### ✅ Quantization (85%)
 - [x] 8-bit quantization (INT8)
