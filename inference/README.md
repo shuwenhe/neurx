@@ -4,21 +4,23 @@ This directory contains the current inference entry points and compatibility lay
 
 ## Quick Start
 
-Ask a question with the LLM inference launcher:
+Build and run the native NXTRFMV2 CPU reference backend:
 
 ```bash
-cd /Users/feifei/shuwen/neurx
-NEURX_INFER_CHECKPOINT_PATH=artifacts/checkpoints/llm_training \
-NEURX_INFER_QUESTION="人工智能是什么？请直接回答。" \
-bash run_inference_llm.sh
+make build-cpu-inference
+NEURX_INFER_CHECKPOINT_PATH=checkpoint/NeurX-1.3/transformer_v2.ckpt \
+NEURX_INFER_PROMPT="NeurX can" \
+make infer
 ```
 
 Interactive chat mode:
 
 ```bash
-cd /Users/feifei/shuwen/neurx
-NEURX_INFER_CHECKPOINT_PATH=artifacts/checkpoints/llm_training \
-bash run_interactive_inference.sh
+artifacts/build/cpu_inference/neurx_cpu_inference \
+  --checkpoint checkpoint/NeurX-1.3/transformer_v2.ckpt \
+  --vocab data/corpus/vocab.json \
+  --merges data/corpus/merges.txt \
+  --interactive
 ```
 
 ## Environment Variables
@@ -30,7 +32,9 @@ bash run_interactive_inference.sh
 - `NEURX_INFERENCE_INPUT`: legacy alias accepted by the launcher
 - `NEURX_INFER_ANSWER_MODE`: `qa` for direct answers, `chat` for multi-turn chat
 - `NEURX_INFER_FALLBACK_PROMPT`: fallback prompt used when no question is provided
-- `NEURX_INFER_MAX_NEW_CHARS`: maximum number of generated characters
+- `NEURX_INFER_MAX_NEW_TOKENS`: maximum number of generated tokens
+- `NEURX_INFER_TEMPERATURE`, `NEURX_INFER_TOP_K`, `NEURX_INFER_TOP_P`
+- `NEURX_INFER_REPETITION_PENALTY`: sampling controls
 - `NEURX_INFER_DEVICE`: runtime device, for example `cpu`
 - `NEURX_INFER_SEED`: seed for generation
 
@@ -44,6 +48,10 @@ bash run_inference_llm.sh
 
 ## Notes
 
-- The production inference entry point is [`production_inference.s`](./production_inference.s).
-- The launcher now prefers question-answer style prompting by default.
-- Interactive mode keeps a chat-style prompt template.
+- `make infer` uses the native CPU reference backend and fails explicitly when
+  the checkpoint or tokenizer is missing or incompatible.
+- The CPU backend reads the same NXTRFMV2 checkpoint and BPE tokenizer ABI as
+  CUDA and Ascend. It is intended for correctness and fallback use; CUDA/CANN
+  should be used for production throughput.
+- Run `make cpu-inference-test` for a deterministic end-to-end checkpoint,
+  forward-pass, and generation test.

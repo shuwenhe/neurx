@@ -12,6 +12,11 @@ struct optimizer_param_group {
     float beta2
     float eps
     string kind
+    []tensor first_moments
+    []tensor second_moments
+    []int param_steps
+    []float beta1_pows
+    []float beta2_pows
 }
 
 struct optimizer {
@@ -52,19 +57,39 @@ func copy_int([]int data) []int {
     return out
 }
 
+func optimizer_zero_moment(tensor value) tensor {
+    int n = len(value.data)
+    []float data = []float{cap: n}
+    int i = 0
+    while i < n {
+        data[i] = 0.0
+        i = i + 1
+    }
+    return neurx.tensor.new(data, value.shape, false)
+}
+
+func copy_param_group(optimizer_param_group group) optimizer_param_group {
+    return optimizer_param_group {
+        params: copy_tensors(group.params),
+        lr: group.lr,
+        weight_decay: group.weight_decay,
+        beta1: group.beta1,
+        beta2: group.beta2,
+        eps: group.eps,
+        kind: group.kind,
+        first_moments: copy_tensors(group.first_moments),
+        second_moments: copy_tensors(group.second_moments),
+        param_steps: copy_int(group.param_steps),
+        beta1_pows: copy_float(group.beta1_pows),
+        beta2_pows: copy_float(group.beta2_pows),
+    }
+}
+
 func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
     []optimizer_param_group out = []optimizer_param_group{cap: len(groups)}
     int i = 0
     while i < len(groups) {
-        out[i] = optimizer_param_group {
-            params: copy_tensors(groups[i].params),
-            lr: groups[i].lr,
-            weight_decay: groups[i].weight_decay,
-            beta1: groups[i].beta1,
-            beta2: groups[i].beta2,
-            eps: groups[i].eps,
-            kind: groups[i].kind,
-        }
+        out[i] = copy_param_group(groups[i])
         i = i + 1
     }
     return out
@@ -81,6 +106,22 @@ func new_optimizer() optimizer {
 }
 
 func optimizer_make_group([]tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer_param_group {
+    int n = len(params)
+    []tensor first_moments = []tensor{cap: n}
+    []tensor second_moments = []tensor{cap: n}
+    []int param_steps = []int{cap: n}
+    []float beta1_pows = []float{cap: n}
+    []float beta2_pows = []float{cap: n}
+    int i = 0
+    while i < n {
+        first_moments[i] = optimizer_zero_moment(params[i])
+        second_moments[i] = optimizer_zero_moment(params[i])
+        param_steps[i] = 0
+        beta1_pows[i] = 1.0
+        beta2_pows[i] = 1.0
+        i = i + 1
+    }
+
     return optimizer_param_group {
         params: copy_tensors(params),
         lr: lr,
@@ -89,6 +130,11 @@ func optimizer_make_group([]tensor params, float lr, float weight_decay, float b
         beta2: beta2,
         eps: eps,
         kind: kind,
+        first_moments: first_moments,
+        second_moments: second_moments,
+        param_steps: param_steps,
+        beta1_pows: beta1_pows,
+        beta2_pows: beta2_pows,
     }
 }
 
@@ -157,7 +203,7 @@ func optimizer_zero_grad_tensor(tensor value) tensor {
 }
 
 func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_group {
-    optimizer_param_group next = optimizer_make_group(group.params, group.lr, group.weight_decay, group.beta1, group.beta2, group.eps, group.kind)
+    optimizer_param_group next = copy_param_group(group)
     int i = 0
     while i < len(next.params) {
         next.params[i] = optimizer_zero_grad_tensor(next.params[i])
@@ -181,7 +227,7 @@ func optimizer_step_tensor_group(optimizer_param_group group, []tensor grads, fl
 }
 
 func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grads, int start, float lr_override) optimizer_param_group {
-    optimizer_param_group next = optimizer_make_group(group.params, group.lr, group.weight_decay, group.beta1, group.beta2, group.eps, group.kind)
+    optimizer_param_group next = copy_param_group(group)
     int i = 0
     int g = start
     while i < len(next.params) && g < len(grads) {
@@ -192,9 +238,44 @@ func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grad
             lr = lr_override
         }
         if group.kind == "adamw" {
-            adamw_optimizer opt_state = new_adamw(lr, group.beta1, group.beta2, group.eps, group.weight_decay)
+            adamw_optimizer opt_state = adamw_optimizer {
+                lr: lr,
+                beta1: group.beta1,
+                beta2: group.beta2,
+                eps: group.eps,
+                weight_decay: group.weight_decay,
+                step: group.param_steps[i],
+                beta1_pow: group.beta1_pows[i],
+                beta2_pow: group.beta2_pows[i],
+                m: group.first_moments[i].data,
+                v: group.second_moments[i].data,
+            }
             adamw_step_output step_out = adamw_step_state(opt_state, param, grad)
             next.params[i] = step_out.params
+            next.first_moments[i] = neurx.tensor.new(step_out.optimizer.m, param.shape, false)
+            next.second_moments[i] = neurx.tensor.new(step_out.optimizer.v, param.shape, false)
+            next.param_steps[i] = step_out.optimizer.step
+            next.beta1_pows[i] = step_out.optimizer.beta1_pow
+            next.beta2_pows[i] = step_out.optimizer.beta2_pow
+        } else if group.kind == "adam" {
+            adam_optimizer opt_state = adam_optimizer {
+                lr: lr,
+                beta1: group.beta1,
+                beta2: group.beta2,
+                eps: group.eps,
+                step: group.param_steps[i],
+                beta1_pow: group.beta1_pows[i],
+                beta2_pow: group.beta2_pows[i],
+                m: group.first_moments[i].data,
+                v: group.second_moments[i].data,
+            }
+            adam_step_output step_out = adam_step_state(opt_state, param, grad)
+            next.params[i] = step_out.params
+            next.first_moments[i] = neurx.tensor.new(step_out.optimizer.m, param.shape, false)
+            next.second_moments[i] = neurx.tensor.new(step_out.optimizer.v, param.shape, false)
+            next.param_steps[i] = step_out.optimizer.step
+            next.beta1_pows[i] = step_out.optimizer.beta1_pow
+            next.beta2_pows[i] = step_out.optimizer.beta2_pow
         } else {
             sgd_optimizer sgd = new_sgd(lr)
             next.params[i] = step_tensor(sgd, param, grad)
