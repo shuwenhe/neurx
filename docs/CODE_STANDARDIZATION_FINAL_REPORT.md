@@ -287,5 +287,5 @@ After completing remaining conversions:
 ---
 
 *Last Updated: [Current Session]*  
-*Prepared by: GitHub Copilot*  
+*Prepared by: shuwenhe*  
 *Quality Assurance: S Language Code Standardization Project*

@@ -357,4 +357,4 @@ nm -gC libneurx_ui.a | grep StickyScroll | head -5
 ---
 
 **最后更新**: 2026-06-05  
-**实现者**: AI Assistant (GitHub Copilot)
+**实现者**: shuwenhe

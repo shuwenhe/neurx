@@ -464,7 +464,7 @@ s run scripts/legacy/model_merger.s                 # 合并
 
 ---
 
-*实现者: GitHub Copilot*  
+*实现者: shuwenhe*  
 *完成日期: 2026-07-01*  
 *版本: 3.0 Enterprise Edition*  
 *代码行数: 12000+*  
