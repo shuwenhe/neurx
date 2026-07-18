@@ -18,12 +18,12 @@ model_large_pretrain.s
 │  ├─ runtime_write_text_file()
 │  └─ runtime_env_get()
 │
-├─ neurx.model.llm.model_moe_1t          ⭐ 核心模型
+├─ neurx.moe.llm_1t          ⭐ 核心模型
 │  ├─ moe_1t_framework_default()
 │  └─ moe_1t_summary()
 │  └─ 内部包含:
 │      ├─ model_large_train.s
-│      ├─ model_moe_1t_loss.s
+│      ├─ llm_moe_1t_loss.s
 │      ├─ distributed/moe_all_to_all.s
 │      ├─ distributed/tensor_parallel.s
 │      ├─ distributed/zero_gradient_reduce.s
@@ -148,9 +148,9 @@ model_large_pretrain.s
 
 ## 🔄 第二层依赖 (内部递归)
 
-### 从 model_moe_1t 展开
+### 从 llm_moe_1t 展开
 ```
-model/llm/model_moe_1t.s
+moe/llm_moe_1t.s
 ├─ model_large_train.s
 │  ├─ nn/attention.s (注意力机制)
 │  ├─ nn/ffn.s (前馈网络)
@@ -158,7 +158,7 @@ model/llm/model_moe_1t.s
 │  ├─ tensor/ops.s (张量操作)
 │  └─ cuda/kernels.s (GPU 计算)
 │
-├─ model_moe_1t_loss.s
+├─ llm_moe_1t_loss.s
 │  ├─ ops/math.s (数学函数)
 │  ├─ tensor/new.s (张量创建)
 │  └─ 计算 CE + 辅助损失 + KL
@@ -247,7 +247,7 @@ data/moe_1t_jsonl_loader.s
 ```
 主程序 model_large_pretrain.s
   ↓ 编译
-导入 model_moe_1t.s
+导入 llm_moe_1t.s
   ↓ 递归编译
   导入 model_large_train.s
     ↓ 递归编译
@@ -268,8 +268,8 @@ data/moe_1t_jsonl_loader.s
 ```
 ✓ pretrain/llm/model_large_pretrain.s      主程序
 ✓ model/llm/model_large_train.s            Transformer
-✓ model/llm/model_moe_1t.s                 1T MoE 框架
-✓ model/llm/model_moe_1t_loss.s            损失计算
+✓ moe/llm_moe_1t.s                 1T MoE 框架
+✓ moe/llm_moe_1t_loss.s            损失计算
 ✓ model/llm/long_context_32k.s           长上下文
 ✓ distributed/ddp.s                      数据并行
 ✓ distributed/tensor_parallel.s          张量并行
@@ -327,7 +327,7 @@ data/moe_1t_jsonl_loader.s
 grep "^use " pretrain/llm/model_large_pretrain.s
 
 # 追踪第二层
-grep "^use " model/llm/model_moe_1t.s
+grep "^use " moe/llm_moe_1t.s
 
 # 继续递归...
 ```
@@ -418,7 +418,7 @@ AI Agent:          ~3,000 行
 **每次训练时的代码流动**:
 ```
 model_large_pretrain.s (1 entry)
-  → model_moe_1t.s (模型逻辑)
+  → llm_moe_1t.s (模型逻辑)
     → model_large_train.s + distributed/* (计算)
       → nn/* + tensor/* + cuda/* (执行)
         → ops/* + opt/* (算子)

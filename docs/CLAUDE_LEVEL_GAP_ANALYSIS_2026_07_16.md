@@ -302,7 +302,7 @@
 ```
 ✅ 已有: model/llm/gpt.s（完整 GPT 实现）
   - 因果注意力 + RoPE + SwiGLU + GQA
-✅ 已有: model/transformer/moe.s（MoE 实现）
+✅ 已有: moe/transformer_moe.s（MoE 实现）
   - Mixtral 式路由, Switch 负载均衡
 ✅ 已有: model/transformer/flash_attention.s（FA v2）
 ✅ 已有: model/transformer/rope_scaling.s（RoPE 扩展）

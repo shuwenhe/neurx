@@ -86,7 +86,7 @@
 ### 6. 模型核心
 
 优先文件:
-- [model/llm/model_moe_1t_loss.s](/Users/shuwen/shuwen/train/neurx/model/llm/model_moe_1t_loss.s)
+- [moe/llm_moe_1t_loss.s](/Users/shuwen/shuwen/train/neurx/moe/llm_moe_1t_loss.s)
 - [model/llm/long_context_32k.s](/Users/shuwen/shuwen/train/neurx/model/llm/long_context_32k.s)
 - [distributed/moe_all_to_all.s](/Users/shuwen/shuwen/train/neurx/distributed/moe_all_to_all.s)
 - [distributed/tensor_parallel.s](/Users/shuwen/shuwen/train/neurx/distributed/tensor_parallel.s)

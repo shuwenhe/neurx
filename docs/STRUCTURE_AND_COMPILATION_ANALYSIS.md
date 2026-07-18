@@ -33,7 +33,7 @@
    ```
    ✅ pretrain/llm/model_large_pretrain.s    (主入口)
    ✅ model/llm/model_large_train.s          (大规模训练)
-   ✅ model/llm/model_moe_1t.s               (1T MoE 模型)
+   ✅ moe/llm_moe_1t.s               (1T MoE 模型)
    ✅ pretrain/distributed/               (分布式训练)
    ✅ pretrain/optimizer/                  (优化器)
    ✅ pretrain/tokenizer/bpe.s             (BPE 分词)
@@ -140,12 +140,12 @@
 
 ```
 model_large_pretrain.s (主程序)
-├─ model_moe_1t.s
+├─ llm_moe_1t.s
 │  ├─ model_large_train.s (Transformer 定义)
 │  │  ├─ nn/attention.s
 │  │  ├─ nn/ffn.s
 │  │  └─ tensor/ops.s
-│  ├─ model/llm/model_moe_1t_loss.s
+│  ├─ moe/llm_moe_1t_loss.s
 │  └─ distributed/moe_all_to_all.s
 ├─ pretrain/distributed/
 │  ├─ ddp.s
@@ -270,7 +270,7 @@ model_large_pretrain.s (主程序)
 ### ✅ 必须编译 (完整功能)
 - pretrain/llm/model_large_pretrain.s (主程序)
 - model/llm/model_large_train.s (Transformer)
-- model/llm/model_moe_1t.s (1T MoE)
+- moe/llm_moe_1t.s (1T MoE)
 - distributed/* (DDP, TP, PP, EP)
 - pretrain/optimizer/* (AdamW)
 - pretrain/tokenizer/bpe.s (分词)
@@ -327,7 +327,7 @@ sbatch scripts/legacy/submit_training_job.sh
   └─ 1024 个 GPU 上并行训练
      ├─ 数据加载 (pretrain/data)
      ├─ 前向传播 (model/llm)
-     ├─ 损失计算 (model/llm/model_moe_1t_loss.s)
+     ├─ 损失计算 (moe/llm_moe_1t_loss.s)
      ├─ 后向传播 (autodiff)
      ├─ 优化器更新 (pretrain/optimizer)
      ├─ 梯度同步 (distributed)

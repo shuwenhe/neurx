@@ -36,7 +36,7 @@
 
 | 模块 | 文件 | 行数 | 关键功能 | 状态 |
 |------|------|------|---------|------|
-| **MoE 损失** | `model/llm/model_moe_1t_loss.s` | 495 | CE损失 + 辅助损失 + KL散度 | ✅ |
+| **MoE 损失** | `moe/llm_moe_1t_loss.s` | 495 | CE损失 + 辅助损失 + KL散度 | ✅ |
 | **长上下文** | `model/llm/long_context_32k.s` | 461 | RoPE + NTK缩放 + 32K上下文 | ✅ |
 
 **模型规模**: 1T 参数，256 专家，top-k=2 路由
@@ -76,7 +76,7 @@ neurx/
 │   ├── tensor_parallel.s             (329 行)
 │   └── zero_gradient_reduce.s        (504 行)
 ├── model/llm/
-│   ├── model_moe_1t_loss.s             (495 行)
+│   ├── llm_moe_1t_loss.s             (495 行)
 │   └── long_context_32k.s            (461 行)
 ├── training/
 │   └── lr_scheduler_moe_1t.s         (422 行)

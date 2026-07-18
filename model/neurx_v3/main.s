@@ -18,7 +18,7 @@
 package neurx.model.neurx.main
 
 use neurx.model.neurx.mla
-use neurx.model.neurx.moe
+use neurx.moe.fine_grained
 use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training
 use neurx.alignment.neurx_r1_grpo
@@ -495,7 +495,7 @@ func main() {
     println("")
     println("Files:")
     println("  neurx/model/neurx/mla.s")
-    println("  neurx/model/neurx/moe.s")
+    println("  moe/fine_grained_moe.s")
     println("  neurx/model/neurx/mtp.s")
     println("  neurx/model/neurx/fp8_training.s")
     println("  neurx/alignment/neurx_r1_grpo.s")

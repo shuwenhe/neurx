@@ -11,7 +11,7 @@
 // Reference config: 256 routed experts, 2 shared, 671B total / 37B activated
 // ============================================================================
 
-package neurx.model.neurx.moe
+package neurx.moe.fine_grained
 
 // ============================================================================
 // 1. NeurX MoE Config

@@ -52,7 +52,7 @@ package neurx.alignment.moe_1t_dpo_grpo_alignment
 
 use neurx.strings
 use neurx.runtime.io.{io_println, io_mkdir_recursive}
-use neurx.model.llm.gpt_moe_1t.{moe_1t_framework}
+use neurx.moe.llm_1t.{moe_1t_framework}
 use neurx.distributed.collective.{collective_state}
 
 // ============================================================================

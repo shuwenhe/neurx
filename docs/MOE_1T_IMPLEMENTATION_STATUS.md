@@ -133,7 +133,7 @@
 
 1. **张量并行的完整实现**
    - 需要: 分割 QKV、FFN 权重跨 TP_SIZE 个 GPU
-   - 位置: `model/llm/model_moe_1t.s` 扩展
+   - 位置: `moe/llm_moe_1t.s` 扩展
    - 工作量: 3-5 天
    - 关键: AllGather/ReduceScatter 通信融合
 
@@ -151,7 +151,7 @@
 
 4. **损失计算与反向传播**
    - 需要: Cross-entropy loss + MoE aux loss
-   - 位置: `model/llm/model_moe_1t.s` 中的 `backward()` 函数
+   - 位置: `moe/llm_moe_1t.s` 中的 `backward()` 函数
    - 工作量: 2-3 天
    - 关键: 数值稳定性 (BF16 支持)
 
@@ -207,7 +207,7 @@
 **Day 1-2: 张量并行实现**
 ```bash
 # 创建张量并行模块
-touch neurx/model/llm/model_moe_1t_tp_impl.s
+touch moe/llm_moe_1t_tp_impl.s
 
 # 实现:
 # - split_qkv() - Q/K/V 跨 TP 切分
@@ -240,7 +240,7 @@ touch neurx/distributed/zero_stage3_reduce.s
 
 **Day 6-7: 损失与反向传播**
 ```bash
-# 在 model_moe_1t.s 中完善
+# 在 llm_moe_1t.s 中完善
 # - compute_loss() - Cross-entropy + MoE aux loss
 # - backward() - 自动微分
 # - update_model_weights() - 参数更新

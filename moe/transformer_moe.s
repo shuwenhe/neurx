@@ -1,4 +1,4 @@
-package neurx.model.transformer.moe
+package neurx.moe.transformer
 
 struct moe_config {
     int num_experts

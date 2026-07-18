@@ -126,7 +126,7 @@ func zero_stage3_optimizer_step(state: &ZeroState, lr: f64)
 
 ### 4. 损失计算
 
-**文件**: `model/llm/model_moe_1t_loss.s` (495 行)
+**文件**: `moe/llm_moe_1t_loss.s` (495 行)
 
 **损失函数**:
 ```

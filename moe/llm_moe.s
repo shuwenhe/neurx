@@ -1,4 +1,4 @@
-package neurx.model.llm.base_moe
+package neurx.moe.llm
 
 // ============================================================================
 // Sparse GPT-MoE — interleaves dense + MoE transformer layers
@@ -22,7 +22,7 @@ use neurx.model.llm.gpt.{
     gpt_softmax_row, gpt_causal_sdpa, gpt_alloc_int,
     embed_tokens, gpt_perplexity, gpt_param_count
 }
-use neurx.model.transformer.moe.{
+use neurx.moe.transformer.{
     moe_config, moe_layer, moe_output,
     new_moe_layer, moe_forward,
     moe_mixtral_config, moe_large_config, moe_fine_grained_config

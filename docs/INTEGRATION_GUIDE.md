@@ -405,7 +405,7 @@ A: `pretrain/optimizer/pretrain_adamw.s` 是框架，需要完整实现和测试
 | MoE All-to-All | `distributed/moe_all_to_all.s` | Token 路由与通信 | ✅ |
 | 张量并行 | `distributed/tensor_parallel.s` | 权重分片 | ✅ |
 | ZeRO 梯度规约 | `distributed/zero_gradient_reduce.s` | 参数分片优化 | ✅ |
-| 损失计算 | `model/llm/model_moe_1t_loss.s` | CE+MoE+KL 损失 | ✅ |
+| 损失计算 | `moe/llm_moe_1t_loss.s` | CE+MoE+KL 损失 | ✅ |
 | LR 调度 | `training/lr_scheduler_moe_1t.s` | 余弦预热衰减 | ✅ |
 | 数据加载 | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
 | 监控系统 | `monitoring/moe_1t_metrics.s` | 分布式性能监控 | ✅ |
