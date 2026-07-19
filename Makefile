@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-s-p0-test moe-core-s-test hybrid-moe-s hybrid-moe-s-test test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain pretrain-watch chat check-bash shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-s-p0-test pretrain-eval-test moe-core-s-test hybrid-moe-s hybrid-moe-s-test test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -100,6 +100,8 @@ PRETRAIN_LOG_DIR := $(PRETRAIN_OUTPUT_DIR)/logs
 PRETRAIN_ENTRY_SOURCE ?= $(CURDIR_UNIX)/pretrain/llm/large_pretrain.s
 PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.bin
 NEURX_SHARD_CMD ?= wikipedia
+NEURX_SHARD_RESUME ?= 1
+NEURX_SHARD_FORCE_REBUILD ?= 0
 
 
 help:
@@ -154,6 +156,19 @@ moe-core-s-test: check-bash build-s-ir-runner
 			'artifacts/build/moe_core_s/moe_core_test.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' 'artifacts/build/moe_core_s/moe_core_test.ir'
+
+pretrain-eval-test: check-bash build-s-ir-runner
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/pretrain_eval_s'
+	@cd '$(CURDIR_UNIX)' && \
+		bash tools/bundle_s_modules.sh \
+			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
+			'tests/pretrain_eval_test.s' \
+			'pretrain/eval/pretrain_eval.s' && \
+		'$(S_COMPILER)' \
+			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
+			'artifacts/build/pretrain_eval_s/pretrain_eval_test.ir'
+	@cd '$(CURDIR_UNIX)' && \
+		'$(S_RUNNER_BIN)' 'artifacts/build/pretrain_eval_s/pretrain_eval_test.ir'
 
 hybrid-moe-s: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s'
@@ -503,6 +518,8 @@ shard: check-bash
 		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
 		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
 		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
+		NEURX_SHARD_RESUME='$(NEURX_SHARD_RESUME)' \
+		NEURX_SHARD_FORCE_REBUILD='$(NEURX_SHARD_FORCE_REBUILD)' \
 		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
 		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
 		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
@@ -1049,6 +1066,13 @@ adam-optimizer-test:
 		-o artifacts/build/adam_optimizer/adam_optimizer_regression_test
 	@artifacts/build/adam_optimizer/adam_optimizer_regression_test
 
+training-policy-test:
+	@mkdir -p artifacts/build/training_policy
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/training_policy_test.cpp \
+		-o artifacts/build/training_policy/training_policy_test
+	@artifacts/build/training_policy/training_policy_test
+
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1079,13 +1103,19 @@ serving-native-socket-test:
 		-o artifacts/build/serving_native/serving_native_socket_test
 	@artifacts/build/serving_native/serving_native_socket_test
 
-transformer-cuda-kernels-test:
+check-nvcc:
+	@if [ -z '$(CUDA_NVCC)' ]; then \
+		echo "Error: nvcc not found. Run CUDA tests on a Linux NVIDIA CUDA host."; \
+		exit 1; \
+	fi
+
+transformer-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 cuda/transformer_kernels_test.cu \
 		-o artifacts/build/transformer_cuda/transformer_kernels_test
 	@artifacts/build/transformer_cuda/transformer_kernels_test
 
-transformer-cuda-integration-test:
+transformer-cuda-integration-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
@@ -1362,8 +1392,15 @@ run-gpu-pretrain-s: check-bash
 		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
 		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
+		REQUESTED_WORLD="$${NEURX_NUM_GPUS:-$$GPU_COUNT}"; \
+		GIT_SHA="$$(git rev-parse HEAD 2>/dev/null || printf unknown)"; \
+		if [ -n "$$(git status --porcelain 2>/dev/null)" ]; then GIT_SHA="$${GIT_SHA}-dirty"; fi; \
 		CHECKPOINT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}"; \
-		RESUME_CHECKPOINT_FILE="$$CHECKPOINT_DIR/transformer_v2.ckpt"; \
+		if [ "$$REQUESTED_WORLD" -gt 1 ]; then \
+			RESUME_CHECKPOINT_FILE="$$CHECKPOINT_DIR/rank_0/transformer_v2.ckpt"; \
+		else \
+			RESUME_CHECKPOINT_FILE="$$CHECKPOINT_DIR/transformer_v2.ckpt"; \
+		fi; \
 		echo "[pretrain-gpu] queued shards: $$SHARD_COUNT"; \
 		echo "[pretrain-gpu] first shard: $$FIRST_SHARD"; \
 		echo "[pretrain-gpu] last shard: $$LAST_SHARD"; \
@@ -1378,14 +1415,27 @@ run-gpu-pretrain-s: check-bash
 		fi; \
 		echo "[pretrain-gpu] skipping S validation, launching native CUDA/cuBLAS trainer..."; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
+		WORLD_SIZE="$$REQUESTED_WORLD" \
 		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(PRETRAIN_OUTPUT_DIR)}" \
 		NEURX_PRETRAIN_STEPS="$${NEURX_PRETRAIN_STEPS:-$(PRETRAIN_STEPS)}" \
 		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-4}" \
 		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-256}" \
 		NEURX_PRETRAIN_LR="$${NEURX_PRETRAIN_LR:-0.0002}" \
+		NEURX_PRETRAIN_MIN_LR="$${NEURX_PRETRAIN_MIN_LR:-0.00002}" \
+		NEURX_PRETRAIN_LR_SCHEDULE="$${NEURX_PRETRAIN_LR_SCHEDULE:-cosine}" \
+		NEURX_PRETRAIN_WARMUP_STEPS="$${NEURX_PRETRAIN_WARMUP_STEPS:-2000}" \
+		NEURX_PRETRAIN_WEIGHT_DECAY="$${NEURX_PRETRAIN_WEIGHT_DECAY:-0.01}" \
+		NEURX_MAX_GRAD_NORM="$${NEURX_MAX_GRAD_NORM:-1.0}" \
+		NEURX_FINITE_CHECK_INTERVAL="$${NEURX_FINITE_CHECK_INTERVAL:-100}" \
+		NEURX_FAIL_ON_NONFINITE="$${NEURX_FAIL_ON_NONFINITE:-1}" \
+		NEURX_SEED="$${NEURX_SEED:-1337}" \
+		NEURX_GIT_SHA="$$GIT_SHA" \
 		NEURX_PRETRAIN_LOG_INTERVAL="$${NEURX_PRETRAIN_LOG_INTERVAL:-1}" \
+		NEURX_PRETRAIN_VALIDATION_SHARD_LIST_FILE="$${NEURX_PRETRAIN_VALIDATION_SHARD_LIST_FILE:-}" \
+		NEURX_PRETRAIN_VALIDATION_FILE="$${NEURX_PRETRAIN_VALIDATION_FILE:-}" \
+		NEURX_PRETRAIN_EVAL_INTERVAL="$${NEURX_PRETRAIN_EVAL_INTERVAL:-100}" \
+		NEURX_PRETRAIN_EVAL_BATCHES="$${NEURX_PRETRAIN_EVAL_BATCHES:-8}" \
 		NEURX_PRETRAIN_SAVE_INTERVAL="$${NEURX_PRETRAIN_SAVE_INTERVAL:-$(PRETRAIN_SAVE_INTERVAL)}" \
 		NEURX_PRETRAIN_RESUME="$$RESUME_FLAG" \
 		NEURX_PRETRAIN_RESUME_FROM="$$RESUME_CHECKPOINT_FILE" \
@@ -1407,8 +1457,16 @@ run-gpu-pretrain-s: check-bash
 			echo "[training] Starting $$world GPU rank(s)..."; \
 			for rank in $$(seq 0 $$((world - 1))); do \
 				echo "[training] Launching rank $$rank on GPU $$rank..."; \
+				if [ "$$world" -gt 1 ]; then \
+					rank_checkpoint_dir="$${NEURX_PRETRAIN_OUTPUT_DIR}/rank_$${rank}"; \
+				else \
+					rank_checkpoint_dir="$${NEURX_PRETRAIN_OUTPUT_DIR}"; \
+				fi; \
+				rank_resume_path="$$rank_checkpoint_dir/transformer_v2.ckpt"; \
+				if [ -f "$$rank_resume_path" ]; then rank_resume=1; else rank_resume=0; fi; \
 				CUDA_VISIBLE_DEVICES="$$rank" RANK="$$rank" LOCAL_RANK=0 WORLD_SIZE="$$world" NEURX_CUDA_DEVICE=0 NEURX_NCCL_ID_FILE="$$id_file" \
-				NEURX_PRETRAIN_RESUME_FROM="$${NEURX_PRETRAIN_OUTPUT_DIR}/rank_$${rank}/transformer_v2.ckpt" \
+				NEURX_PRETRAIN_RESUME="$$rank_resume" \
+				NEURX_PRETRAIN_RESUME_FROM="$$rank_resume_path" \
 					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "s/^/[rank $$rank] /" & pids="$$pids $$!"; \
 			 done; \
 			 echo "[training] Waiting for all ranks to complete..."; \

@@ -2,6 +2,7 @@ package neurx.model.llm.train_gpt_large
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 use neurx.pretrain.llm.gpt_large_pretrain
+use neurx.util.math.{exp_approx}
 
 func trim(string s) string {
     int i = 0
@@ -466,7 +467,7 @@ func gpt_large_validation_loss(float train_loss) float {
 }
 
 func gpt_large_perplexity_from_loss(float loss) float {
-    1.0 + loss * loss * 3.0
+    exp_approx(loss)
 }
 
 func gpt_large_training_corpus_text() string {

@@ -14,6 +14,7 @@ struct ncclUniqueId { char internal[128]; };
 
 static constexpr ncclResult_t ncclSuccess = 0;
 static constexpr ncclDataType_t ncclFloat = 7;
+static constexpr ncclDataType_t ncclDouble = 8;
 static constexpr ncclRedOp_t ncclSum = 0;
 
 inline void* neurx_nccl_symbol(const char* name) {

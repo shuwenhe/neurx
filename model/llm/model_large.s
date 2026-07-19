@@ -1,5 +1,7 @@
 package neurx.model.llm.base_large
 
+use neurx.util.math.{exp_approx}
+
 struct gpt_large_state {
     string name
     string family
@@ -143,7 +145,7 @@ func gpt_large_loss_after_step(gpt_large_state state, gpt_large_train_config con
 }
 
 func gpt_large_perplexity_from_loss(float loss) float {
-    1.0 + loss * loss * 3.0
+    exp_approx(loss)
 }
 
 func gpt_large_validation_loss_from_train(float train_loss) float {

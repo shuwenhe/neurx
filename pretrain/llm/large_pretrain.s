@@ -10,7 +10,7 @@ use neurx.pretrain.optimizer.pretrain_adamw.{pretrain_optimizer_state, pretrain_
 use neurx.tokenizer.bpe_trainer.{bpe_split_state, bpe_tokenizer_state, bpe_tokenized_corpus_state, bpe_tokenized_corpus_from_documents, bpe_split_state_dict, bpe_split_load_state_dict, bpe_tokenizer_state_dict, bpe_tokenizer_load_state_dict, bpe_tokenized_corpus_state_dict, bpe_tokenized_corpus_load_state_dict}
 use neurx.pretrain.checkpoint.{pretrain_checkpoint_state, pretrain_checkpoint_bundle_state, new_pretrain_checkpoint_state, new_pretrain_checkpoint_bundle_state, mark_saved, mark_best, pretrain_checkpoint_state_dict, pretrain_checkpoint_load_state_dict}
 use neurx.pretrain.config.{pretrain_config, pretrain_config_state_dict, pretrain_config_load_state_dict}
-use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
+use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_perplexity_from_loss, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
 use neurx.compression.release.{compression_release_config, prepare_compression_release}
@@ -2201,7 +2201,7 @@ func gpt_large_pretrain_validation_metrics(gpt_large_pretrain_state state) gpt_l
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
     tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
     float val_loss = gpt_large_pretrain_loss_value(state.training, logits, target_ids)
-    float ppl = 1.0 + val_loss * val_loss * 3.0
+    float ppl = pretrain_eval_perplexity_from_loss(val_loss)
     gpt_large_pretrain_eval_result {
         eval: update_pretrain_eval(state.eval, state.loop.global_step, val_loss, ppl),
         valid_loader: batch_output.state,
@@ -2222,7 +2222,7 @@ func gpt_large_pretrain_test_metrics(gpt_large_pretrain_state state) gpt_large_p
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
     tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
     float test_loss = gpt_large_pretrain_loss_value(state.training, logits, target_ids)
-    float ppl = 1.0 + test_loss * test_loss * 3.0
+    float ppl = pretrain_eval_perplexity_from_loss(test_loss)
     gpt_large_pretrain_eval_result {
         eval: update_pretrain_eval(state.eval, state.loop.global_step, test_loss, ppl),
         valid_loader: batch_output.state,
@@ -2301,7 +2301,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     tensor valid_backbone_out = transformer_forward(next_training.backbone, valid_hidden)
     tensor valid_logits = ops.lm_head_logits(valid_backbone_out, next_training.lm_head_weight, next_training.lm_head_bias)
     validation_loss = gpt_large_pretrain_loss_value(next_training, valid_logits, valid_target_ids)
-    validation_perplexity = 1.0 + validation_loss * validation_loss * 3.0
+    validation_perplexity = pretrain_eval_perplexity_from_loss(validation_loss)
     if validation_loss < best_validation_loss {
         best_validation_loss = validation_loss
     }
