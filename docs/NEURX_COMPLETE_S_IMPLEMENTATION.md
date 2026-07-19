@@ -51,8 +51,8 @@ cmd/complete-system/main.s (Master)
     │       └─→ model/lora/lora.s (Adapter Support)
     │
     ├─→ training/end_to_end_training.s (Training)
-    │       ├─→ opt/adamw.s (Optimization)
-    │       ├─→ opt/lr_scheduler.s (Learning Rate)
+    │       ├─→ optimizer/adamw.s (Optimization)
+    │       ├─→ optimizer/lr_scheduler.s (Learning Rate)
     │       ├─→ distributed/ddp/ddp.s (Distributed)
     │       └─→ data/data_pipeline.s (Data Loading)
     │
@@ -206,7 +206,7 @@ model/ (Model implementations)
 
 ### Layer 4: Training (Optimization)
 ```
-opt/ (Optimizers & Scheduling)
+optimizer/ (Optimizers & Scheduling)
 ├── adamw.s                    ✓ AdamW optimizer
 ├── lr_scheduler.s             ✓ Learning rate schedules
 └── warmup.s                   ✓ Warmup strategies

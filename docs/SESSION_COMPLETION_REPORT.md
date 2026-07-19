@@ -205,7 +205,7 @@ float loss = cross_entropy_loss_masked(logits, targets, mask, config)
 ✅ **English text** (RequiredEnglish text)
 ```
 ✓ model/transformer/ - English text, English text
-✓ opt/ - optimizeEnglish textframework, English texttrainingEnglish text
+✓ optimizer/ - optimizeEnglish textframework, English texttrainingEnglish text
 ✓ attention/flash_attention_compute.s - English text
 ```
 

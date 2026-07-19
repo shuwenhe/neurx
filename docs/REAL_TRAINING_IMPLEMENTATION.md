@@ -151,7 +151,7 @@ tensor logits = lm_head_projection(backbone_out, state.lm_head)
 **optimizeEnglish text:**
 ```s
 // useEnglish textAdamWimplementation
-use neurx.opt.optim.{adamw_step_state, adamw_step_output}
+use neurx.optimizer.optim.{adamw_step_state, adamw_step_output}
 
 // English textupdate_parameters()English text:
 adamw_step_output result = adamw_step_state(

@@ -1,7 +1,7 @@
 package neurx.main
 
 use neurx.multimodal.multimodal_batch
-use neurx.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer, adam_step_output, rmsprop_step_output, new_sgd, new_adam, new_rmsprop, step_tensor, adam_step, rmsprop_step}
+use neurx.optimizer.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer, adam_step_output, rmsprop_step_output, new_sgd, new_adam, new_rmsprop, step_tensor, adam_step, rmsprop_step}
 use neurx.tensor.tensor
 use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
 use neurx.checkpoint.{checkpoint, new_checkpoint, checkpoint_state_dict, checkpoint_load_state_dict, save_checkpoint, load_checkpoint}

@@ -414,7 +414,7 @@ Week 4 (Jul 22-28):
 ## 📚 Key References
 
 - Core implementation in `neurx/model/`, `neurx/training/`, `neurx/distributed/`
-- Existing frameworks in `neurx/opt/`, `neurx/data/`, `neurx/alignment/`
+- Existing frameworks in `neurx/optimizer/`, `neurx/data/`, `neurx/alignment/`
 - Test templates in `neurx/tests/`
 - Documentation in `neurx/doc/`
 

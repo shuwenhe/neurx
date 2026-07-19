@@ -13,7 +13,7 @@ func main() int {
     println("  distributed/tensor_parallel.s     : " + check_path("distributed/tensor_parallel.s"))
     println("  distributed/zero_gradient_reduce.s: " + check_path("distributed/zero_gradient_reduce.s"))
     println("  monitoring/moe_1t_metrics.s       : " + check_path("monitoring/moe_1t_metrics.s"))
-    println("  training/lr_scheduler_moe_1t.s    : " + check_path("training/lr_scheduler_moe_1t.s"))
+    println("  optimizer/lr_scheduler_moe_1t.s    : " + check_path("optimizer/lr_scheduler_moe_1t.s"))
     println("")
     println("This S entrypoint centralizes the framework verification status layer.")
     0

@@ -1,7 +1,7 @@
 package neurx.training
 
 import "neurx.autodiff"
-import "neurx.opt"
+import "neurx.optimizer"
 
 enum checkpoint_type {
     FULL = 0

@@ -83,7 +83,7 @@ RequiredEnglish text:
 ```
 
 #### B. optimizeEnglish textcompleteEnglish text
-**English textstate**: `pretrain/optimizer/pretrain_adamw.s` English text
+**English textstate**: `optimizer/pretrain_adamw.s` English text
 **RequiredEnglish text**:
 - [ ] AdamWEnglish textcompleteimplementation
   - [ ] Bias correction

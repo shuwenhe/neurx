@@ -105,7 +105,7 @@ for step in range(max_steps):
    - English text
    - English textcompute
 
-4. **ml/optimizer_adamw.s** (350English text)
+4. **optimizer/optimizer_adamw.s** (350English text)
    - AdamW optimizeEnglish textimplementation
    - English text/English text
    - weightEnglish textgradientEnglish text

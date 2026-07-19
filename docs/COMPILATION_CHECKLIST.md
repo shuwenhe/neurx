@@ -9,7 +9,7 @@
 ✓ distributed/tensor_parallel.s              (329 English text)   English text
 ✓ distributed/zero_gradient_reduce.s         (504 English text)   ZeRO Stage 3
 ✓ moe/llm_moe_1t_loss.s                (495 English text)   losscompute
-✓ training/lr_scheduler_moe_1t.s             (422 English text)   learning rateEnglish text
+✓ optimizer/lr_scheduler_moe_1t.s             (422 English text)   learning rateEnglish text
 ✓ data/moe_1t_jsonl_loader.s                 (430 English text)   JSONL dataload
 ✓ monitoring/moe_1t_metrics.s                (598 English text)   monitoringEnglish text
 ✓ model/llm/long_context_32k.s               (461 English text)   32K English text
@@ -72,7 +72,7 @@ English text: 3,712 English text ✅
 
 ### Phase 4: optimizeEnglish text
 
-- [ ] pretrain/optimizer/adamw.s (AdamW optimizeEnglish text)
+- [ ] optimizer/pretrain_adamw.s (AdamW optimizeEnglish text)
   - [ ] English text (m)
   - [ ] English text (v)
   - [ ] English text
@@ -145,13 +145,13 @@ English text: 3,712 English text ✅
 
 ### Phase 11: optimizeEnglish text
 
-- [ ] opt/optim/adamw.s
+- [ ] optimizer/optim/adamw.s
   - [ ] Adam with Weight Decay
   - [ ] learning rateEnglish text
 
 ### Phase 12: learning rateEnglish text
 
-- [ ] training/lr_scheduler_moe_1t.s
+- [ ] optimizer/lr_scheduler_moe_1t.s
   - [ ] Cosine Annealing (default)
   - [ ] Linear Warmup (10K steps)
   - [ ] English textlearning rate 0.0002
@@ -437,7 +437,7 @@ file build/model_large_pretrain
     Dependencies found:
     - neurx.moe.llm_1t
     - neurx.pretrain.distributed
-    - neurx.pretrain.optimizer
+    - neurx.optimizer
     - ... (20+ total)
 [✓] Type checking...
 [✓] Code generation...

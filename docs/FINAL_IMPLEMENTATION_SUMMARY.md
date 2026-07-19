@@ -98,7 +98,7 @@ mpirun -np 8 ./bin/train_orchestrator \
 - `engine/training_orchestrator_complete.s` - Main training loop
 - `training/mixed_precision.s` - FP16/BF16 support
 - `model/transformer/transformer.s` - Model architecture
-- `opt/adamw.s` - Optimizer
+- `optimizer/adamw.s` - Optimizer
 
 **For Distributed Training**:
 - `distributed/nccl_backend_complete.s` - GPU communication

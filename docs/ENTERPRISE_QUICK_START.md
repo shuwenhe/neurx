@@ -42,7 +42,7 @@
 neurx/
 ├── compute/
 │   └── flash_attention.s           [800 lines] ✅
-├── optimization/
+├── optimizer/
 │   └── mixed_precision.s           [700 lines] ✅
 ├── distributed/
 │   └── fault_recovery.s            [850 lines] ✅

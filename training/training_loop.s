@@ -1,7 +1,7 @@
 package neurx.training
 
 import "neurx.autodiff"
-import "neurx.opt"
+import "neurx.optimizer"
 import "neurx.lf"
 import "neurx.distributed.zero"
 import "neurx.training.mixed_precision_training"

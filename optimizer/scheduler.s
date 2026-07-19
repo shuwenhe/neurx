@@ -1,6 +1,6 @@
-package neurx.opt.scheduler
+package neurx.optimizer.scheduler
 
-use neurx.opt.schedulers
+use neurx.optimizer.schedulers
 
 struct lr_scheduler {
     float lr

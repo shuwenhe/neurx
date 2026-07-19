@@ -1,4 +1,4 @@
-package neurx.distributed.fsdp
+package neurx.optimizer.fsdp_optimizer
 
 // ═══════════════════════════════════════════════════════════════════
 // NeurX FSDP (Fully Sharded Data Parallel) Optimizer

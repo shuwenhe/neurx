@@ -37,7 +37,7 @@
 |------|------|------|----------|
 | `distributed/collective/collective.s` | ~650 | **English text** | AllReduce(Ring+Tree), AllGather, ReduceScatter, AllToAll, P2P, Barrier |
 | `distributed/mixed_precision/mixed_precision.s` | ~450 | **English text** | BF16/FP16/FP8, Loss Scaling(English text+English text), Master Weight, English text |
-| `distributed/fsdp/fsdp_optimizer.s` | ~550 | **FSDPoptimizeEnglish text** | FullShard/GradShard, Pre-Forward AllGather, Post-Backward ReduceScatter, AdamWEnglish text |
+| `optimizer/fsdp_optimizer.s` | ~550 | **FSDPoptimizeEnglish text** | FullShard/GradShard, Pre-Forward AllGather, Post-Backward ReduceScatter, AdamWEnglish text |
 | `distributed/tensor_parallel/tensor_parallel_v2.s` | ~700 | **English textV2** | Megatron Column/Row Linear, TP Attention(GQA), SwiGLU MLP, RoPE, RMSNorm |
 | `distributed/pipeline_parallel/pipeline_parallel_v2.s` | ~500 | **English textV2** | 1F1BEnglish text(Warmup/Steady/Cooldown), P2PEnglish text, English textcheckpointEnglish text |
 | `distributed/training_orchestrator/orchestrator_2t.s` | ~600 | **trainingEnglish text** | 3DEnglish text(TP×PP×DP), LREnglish text(Cosine), English text, Checkpointmanagement |
@@ -49,7 +49,7 @@
 |------|------|------|
 | `distributed/tensor_parallel.s` | ✅ English textcomplete | 330English text, English textV2English text |
 | `distributed/pipeline_parallel.s` | ✅ English textcomplete | 381English text GPipe/1F1Bframework, V2English textactualEnglish text |
-| `distributed/zero_optimizer.s` | ✅ English textcomplete | 409English text ZeRO-1/2/3framework, English textFSDPEnglish textimplementation |
+| `optimizer/zero_optimizer.s` | ✅ English textcomplete | 409English text ZeRO-1/2/3framework, English textFSDPEnglish textimplementation |
 | `distributed/distributed_training_coordinator.s` | ✅ English textcomplete | 445English text, English textOrchestratorEnglish text |
 | `distributed/sequence_parallel.s` | ✅ English textcomplete | 326English text Ulysses/Ring SP, English textTPEnglish textuse |
 | `distributed/synchronization.s` | ✅ English text | 122English text Barrier/DeadlockEnglish text |

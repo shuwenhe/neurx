@@ -254,7 +254,7 @@ neurx/
 │   ├── monitor.s                            ← Monitoring
 │   └── orchestrator.s                       ← Orchestration
 │
-├── opt/
+├── optimizer/
 │   ├── adamw.s                              ← AdamW optimizer
 │   ├── optimizer.s                          ← Optimizer interface
 │   ├── lr_scheduler.s                       ← LR scheduling

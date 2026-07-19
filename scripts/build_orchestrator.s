@@ -156,7 +156,7 @@ func (b *BuildOrchestrator) build_core() error {
         "core/tensor.s",
         "core/autograd.s",
         "tokenizer/model_bpe.s",
-        "opt/adamw.s",
+        "optimizer/adamw.s",
     }
     
     sCompiler := b.get_s_compiler()

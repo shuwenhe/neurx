@@ -36,8 +36,8 @@
 |------|--------|------|------|
 | `train/` | ? | trainingEnglish text | ✅ English text |
 | `training/` | ? | trainingEnglish text | ✅ English text |
-| `optimization/` | 1 | optimizeEnglish text | ⚠️ contentEnglish text |
-| `opt/` | 8 | optimizeEnglish text | 🔴 English text |
+| `optimizer/` | 1 | optimizeEnglish text | ⚠️ contentEnglish text |
+| `optimizer/` | 8 | optimizeEnglish text | 🔴 English text |
 | `pretrain/` | ? | English texttraining | ✅ English text |
 | `posttrain/` | ? | English texttrainingEnglish text | ✅ English text |
 
@@ -184,11 +184,11 @@ rm -rf example/
 
 ### PRIORITY 2: RequiredEnglish text
 
-#### 1. opt/ vs optimization/
-- **opt/** English text 8 English textfile
-- **optimization/** English text 1 English textfile
+#### 1. optimizer/ vs optimizer/
+- **optimizer/** English text 8 English textfile
+- **optimizer/** English text 1 English textfile
 - **English text**: English textoptimize, English text
-- **English text**: English textcontentEnglish text, English text(English text optimization/ English text)
+- **English text**: English textcontentEnglish text, English text(English text optimizer/ English text)
 
 #### 2. legacy/
 - **legacy/** English text 1 English textfile
@@ -233,7 +233,7 @@ neurx/
 ├──  trainingoptimize
 ├── train/         # training
 ├── training/      # English text
-├── optimization/  # optimize ✅ (English text opt/)
+├── optimizer/  # optimize ✅ (English text optimizer/)
 ├── pretrain/      # English texttraining
 ├── posttrain/     # English texttraining
 │
@@ -281,7 +281,7 @@ neurx/
 - [ ] English text tools/, English text tool/
 - [ ] English text example/ English text examples/ content
 - [ ] English text examples/, English text example/
-- [ ] English text opt/ English text optimization/ content
+- [ ] English text optimizer/ English text optimizer/ content
 - [ ] English text, English text
 - [ ] English text legacy/, relative/, lf/, ad/
 - [ ] English textdirectory

@@ -326,7 +326,7 @@ save_distributed_checkpoint(model_params, optimizer_state, step, dist_state, che
 | `distributed/tensor_parallel.s` | TP implementation |
 | `distributed/pipeline_parallel.s` | PP implementation |
 | `distributed/sequence_parallel.s` | SP implementation |
-| `distributed/zero_optimizer.s` | ZeRO implementation |
+| `optimizer/zero_optimizer.s` | ZeRO implementation |
 | `model/model_2t_config.s` | 2T model specification |
 | `bin/train_2t.s` | Training script |
 

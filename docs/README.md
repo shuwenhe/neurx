@@ -54,7 +54,7 @@ neurx/
 ├── inference/             # Inference and deployment
 ├── model/                 # Model definitions
 ├── nn/                    # Neural network layers and operations
-├── opt/                   # Optimizers
+├── optimizer/                   # Optimizers
 ├── pretrain/              # Pretraining pipeline
 ├── scripts/legacy/                # Launch scripts
 ├── training/              # Training loops and utilities

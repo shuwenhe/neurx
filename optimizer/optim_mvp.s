@@ -1,4 +1,4 @@
-package neurx.optim_mvp
+package neurx.optimizer.optim_mvp
 
 use neurx.tensor.tensor
 use neurx.tensor.new

@@ -9,7 +9,7 @@ package neurx.training
 use neurx.core.bundle
 use neurx.core.autograd
 use neurx.model.mini_transformer
-use neurx.opt.adamw_optimizer
+use neurx.optimizer.adamw
 
 import fmt
 import math

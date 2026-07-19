@@ -50,7 +50,7 @@ compileEnglish text:
   └─ moe_all_to_all.s          (MoE English text)
   └─ zero_gradient_reduce.s    (ZeRO gradient)
 
-✓ pretrain/optimizer/adamw.s
+✓ optimizer/pretrain_adamw.s
   └─ AdamW optimizeEnglish text
 
 ✓ pretrain/tokenizer/bpe.s
@@ -125,7 +125,7 @@ pretrain/llm/gpt_large_pretrain.s (mainEnglish text)
   │  ├─ tensor_parallel.s
   │  └─ zero_gradient_reduce.s
   │
-  ├─ neurx.pretrain.optimizer              [optimizeEnglish text]
+  ├─ neurx.optimizer              [optimizeEnglish text]
   │  └─ adamw.s
   │
   ├─ neurx.pretrain.tokenizer              [English text]

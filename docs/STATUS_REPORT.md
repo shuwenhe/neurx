@@ -45,7 +45,7 @@
 
 | English text | file | English text | English text | state |
 |------|------|------|---------|------|
-| **LR English text** | `training/lr_scheduler_moe_1t.s` | 422 | English text + English text + One-Cycle | ✅ |
+| **LR English text** | `optimizer/lr_scheduler_moe_1t.s` | 422 | English text + English text + One-Cycle | ✅ |
 | **dataload** | `data/moe_1t_jsonl_loader.s` | 430 | JSONL load + BPE English text + DP English text | ✅ |
 | **monitoringsystem** | `monitoring/moe_1t_metrics.s` | 598 | English textlogoutput | ✅ |
 

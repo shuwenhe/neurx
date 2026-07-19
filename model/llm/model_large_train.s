@@ -9,7 +9,7 @@ use neurx.model.llm.gpt_large.{gpt_large_state, new_gpt_large_state, gpt_large_s
 use neurx.strings
 use neurx.nn.{embedding_lookup, transformer, transformer_config, transformer_forward, transformer_init, transformer_state_dict, transformer_load_state_dict}
 use neurx.strings
-use neurx.opt.optim.{adamw_optimizer, adamw_step_output, adamw_step_state, new_adamw}
+use neurx.optimizer.optim.{adamw_optimizer, adamw_step_output, adamw_step_state, new_adamw}
 use neurx.strings
 use neurx.ops
 use neurx.strings

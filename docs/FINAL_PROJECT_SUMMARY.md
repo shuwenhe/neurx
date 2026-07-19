@@ -276,7 +276,7 @@ neurx/
 │   └── transformer/
 │       ├── attention_implementation.s (300+ lines)
 │       └── attention_gradient.s (280+ lines)
-├── opt/
+├── optimizer/
 │   ├── adamw.s (540+ lines) - AdamW optimizer
 │   └── lr_scheduler.s (380+ lines) - LR scheduling
 ├── training/

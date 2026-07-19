@@ -98,15 +98,15 @@ ad/        (7 English textfile) ──English text→ autodiff/ ✅
 ### English textdirectory
 
 ```
-opt/           (8 English textfile) - optimizeEnglish textimplementation (English text)
+optimizer/           (8 English textfile) - optimizeEnglish textimplementation (English text)
                - adamw.s, optim.s, scheduler.s English text
 
-optimization/  (1 English textfile) - optimizeEnglish text (English text)
+optimizer/  (1 English textfile) - optimizeEnglish text (English text)
                - mixed_precision.s
 
 English text: English textdirectoryEnglish text, English text, English text.
-    - opt/: English textoptimizeEnglish textimplementation
-    - optimization/: advancedoptimizeEnglish text(English text)
+    - optimizer/: English textoptimizeEnglish textimplementation
+    - optimizer/: advancedoptimizeEnglish text(English text)
 ```
 
 ---
@@ -250,7 +250,7 @@ grep -r "/ad/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 
 ### English text (English text)
 
-- [ ] English text `opt/` English text `optimizers/` (English text)
+- [ ] English text `optimizer/` English text `optimizers/` (English text)
 - [ ] English text
 - [ ] English text Wiki English text
 

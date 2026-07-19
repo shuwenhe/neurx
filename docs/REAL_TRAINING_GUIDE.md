@@ -23,7 +23,7 @@
    - Token English textmanagement
    - dataEnglish text
 
-5. **optimizeEnglish text** (`opt/optim.s`)
+5. **optimizeEnglish text** (`optimizer/optim.s`)
    - AdamW optimizeEnglish textimplementation
    - learning rateEnglish text
 

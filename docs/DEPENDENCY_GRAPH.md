@@ -65,13 +65,13 @@ model_large_pretrain.s
 │      ├─ distributed/expert_parallel.s
 │      └─ distributed/allreduce.s
 │
-├─ neurx.pretrain.optimizer.pretrain_adamw    ⭐ optimizeEnglish text
+├─ neurx.optimizer.pretrain_adamw    ⭐ optimizeEnglish text
 │  ├─ pretrain_optimizer_state
 │  ├─ new_pretrain_optimizer_state()
 │  ├─ pretrain_optimizer_step()
 │  └─ English text:
 │      ├─ distributed/zero_gradient_reduce.s
-│      ├─ opt/optim/adamw.s
+│      ├─ optimizer/optim/adamw.s
 │      └─ tensor/ops.s
 │
 ├─ neurx.pretrain.tokenizer.bpe        ⭐ English text
@@ -128,9 +128,9 @@ model_large_pretrain.s
 │      ├─ nn/ffn.s
 │      └─ nn/layernorm.s
 │
-├─ neurx.opt.optim
+├─ neurx.optimizer.optim
 │  ├─ adamw_optimizer
-│  └─ English text: opt/optim/adamw.s
+│  └─ English text: optimizer/optim/adamw.s
 │
 ├─ neurx.ops
 │  └─ English text
@@ -208,8 +208,8 @@ pretrain/distributed/
 
 ### English textoptimizeEnglish text
 ```
-pretrain/optimizer/adamw.s
-├─ opt/optim/adamw.s
+optimizer/pretrain_adamw.s
+├─ optimizer/optim/adamw.s
 │  ├─ tensor/ops.s (English text)
 │  └─ ops/math.s (English text)
 │
@@ -277,7 +277,7 @@ English text llm_moe_1t.s
 ✓ distributed/expert_parallel.s          English text
 ✓ distributed/moe_all_to_all.s           MoE English text
 ✓ distributed/zero_gradient_reduce.s     ZeRO gradient
-✓ pretrain/optimizer/adamw.s             optimizeEnglish text
+✓ optimizer/pretrain_adamw.s             optimizeEnglish text
 ✓ pretrain/tokenizer/bpe.s               English text
 ✓ nn/attention.s                         English text
 ✓ nn/ffn.s                               English text
@@ -287,7 +287,7 @@ English text llm_moe_1t.s
 ✓ tensor/new.s                           English text
 ✓ cuda/kernels.s                         GPU English text
 ✓ ops/math.s                             English text
-✓ opt/optim/adamw.s                      AdamW
+✓ optimizer/optim/adamw.s                      AdamW
 ✓ pretrain/data/moe_1t_data_pipeline.s   dataEnglish text
 ✓ pretrain/checkpoint/io.s               checkpoint I/O
 ✓ pretrain/config/parser.s               configurationEnglish text
@@ -421,7 +421,7 @@ model_large_pretrain.s (1 entry)
   → llm_moe_1t.s (modelEnglish text)
     → model_large_train.s + distributed/* (compute)
       → nn/* + tensor/* + cuda/* (English text)
-        → ops/* + opt/* (English text)
+        → ops/* + optimizer/* (English text)
           ↓
       4-6 English texttrainingEnglish text
 ```

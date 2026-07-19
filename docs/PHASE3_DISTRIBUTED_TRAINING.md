@@ -120,7 +120,7 @@ ZeRO + English text:    mainEnglish textparameterEnglish text CPU, GPU English t
 ```
 
 ### implementationfile
-- `neurx/distributed/zero_optimizer.s` (600+ English text)
+- `neurx/optimizer/zero_optimizer.s` (600+ English text)
 
 ### English textfunctionEnglish text
 ```s

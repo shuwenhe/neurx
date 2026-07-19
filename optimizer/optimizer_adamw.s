@@ -3,7 +3,7 @@
 // completeEnglish textAdamWoptimizeEnglish text - English textweight decayEnglish textlearning rate schedule
 // =====================================================================
 
-package neurx.ml.optimizer
+package neurx.optimizer.optimizer_adamw
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 

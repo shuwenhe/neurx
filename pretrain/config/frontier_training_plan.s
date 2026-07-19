@@ -262,7 +262,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "pretrain/optimizer/pretrain_adamw.s",
+        "optimizer/pretrain_adamw.s",
         "support ZeRO/FSDP partitioned AdamW with overflow and grad clipping"
     )
     caps[10] = make_capability(

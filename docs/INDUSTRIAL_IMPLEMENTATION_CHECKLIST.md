@@ -103,7 +103,7 @@
   - [ ] Stage 2: gradientEnglish text
   - [ ] Stage 3: parameterEnglish text
   - [ ] English text
-  - **file**: `neurx/distributed/zero_optimizer.s` (400 English text)
+  - **file**: `neurx/optimizer/zero_optimizer.s` (400 English text)
 
 #### 2.3 learning rateEnglish text
 - [ ] **advancedEnglish text**

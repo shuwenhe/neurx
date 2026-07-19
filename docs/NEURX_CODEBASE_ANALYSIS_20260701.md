@@ -133,9 +133,9 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 **Status**: FULLY FUNCTIONAL with multiple variants
 
 **Files**:
-- `neurx/opt/adamw.s` (500+ lines) - Complete AdamW implementation
-- `neurx/opt/core_optim.s` (400+ lines) - Optimizer base classes
-- `neurx/opt/optimizer.s` (300+ lines) - High-level interfaces
+- `neurx/optimizer/adamw.s` (500+ lines) - Complete AdamW implementation
+- `neurx/optimizer/core_optim.s` (400+ lines) - Optimizer base classes
+- `neurx/optimizer/optimizer.s` (300+ lines) - High-level interfaces
 - `neurx/tests/test_optimizer.s` (10+ comprehensive tests)
 
 **AdamW Optimizer Features**:
@@ -157,7 +157,7 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 - ✅ Warmup support
 - ✅ Checkpoint save/load functionality
 
-**Learning Rate Scheduler** (neurx/opt/lr_scheduler.s):
+**Learning Rate Scheduler** (neurx/optimizer/lr_scheduler.s):
 - ✅ Linear warmup phase
 - ✅ Cosine annealing decay
 - ✅ Linear decay variant
@@ -229,7 +229,7 @@ Total steps: 400K
 - `neurx/distributed/tensor_parallel/tensor_parallel.s`
 - `neurx/distributed/pipeline_parallel.s` (400+ lines)
 - `neurx/distributed/zero/zero.s` - ZeRO optimizer
-- `neurx/distributed/zero_optimizer.s` (400+ lines)
+- `neurx/optimizer/zero_optimizer.s` (400+ lines)
 - `neurx/distributed/training_coordinator.s`
 - `neurx/distributed/distributed_training_coordinator.s`
 
@@ -403,8 +403,8 @@ Total steps: 400K
 
 **Files Present**:
 - `neurx/training/mixed_precision.s` - handles mixed precision
-- `neurx/opt/adamw.s` - has optimizer
-- `neurx/opt/lr_scheduler.s` - has LR scheduling
+- `neurx/optimizer/adamw.s` - has optimizer
+- `neurx/optimizer/lr_scheduler.s` - has LR scheduling
 - `neurx/train_full.s` - attempts full integration but needs verification
 
 **Gap**: Main training loop needs orchestration and testing with all components together
@@ -645,7 +645,7 @@ neurx/model/transformer/
 
 ### Optimizer Components
 ```
-neurx/opt/
+neurx/optimizer/
 ├── adamw.s (500+) - AdamW optimizer
 ├── core_optim.s (400+) - Base classes
 ├── optimizer.s (300+) - High-level API

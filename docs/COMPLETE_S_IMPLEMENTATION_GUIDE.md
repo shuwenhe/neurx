@@ -32,8 +32,8 @@ NeurX Architecture (Pure S Language)
 │   └── model/llm/gpt.s              - GPT model implementation
 │
 ├── 3. Training Layer
-│   ├── opt/adamw.s                  - AdamW optimizer
-│   ├── opt/lr_scheduler.s           - Learning rate scheduling
+│   ├── optimizer/adamw.s                  - AdamW optimizer
+│   ├── optimizer/lr_scheduler.s           - Learning rate scheduling
 │   ├── training/train_loop.s        - Main training loop
 │   ├── training/checkpoint.s        - Checkpointing system
 │   ├── training/validator.s         - Validation pipeline
@@ -105,7 +105,7 @@ NeurX Architecture (Pure S Language)
 
 - [x] Tensor operations (tensor/tensor.s)
 - [x] Autograd system (autodiff/autograd.s)
-- [x] Basic optimizers (opt/adamw.s)
+- [x] Basic optimizers (optimizer/adamw.s)
 - [x] Loss functions (cross-entropy, MSE, L1)
 - [x] Activation functions (ReLU, GELU, Tanh, LayerNorm)
 
@@ -130,7 +130,7 @@ NeurX Architecture (Pure S Language)
 - [x] Training loop (training/train_loop.s)
 - [x] Checkpoint system (training/checkpoint.s)
 - [x] Validation pipeline (training/validator.s)
-- [x] Learning rate scheduling (opt/lr_scheduler.s)
+- [x] Learning rate scheduling (optimizer/lr_scheduler.s)
 - [x] Gradient clipping and accumulation
 - [x] Monitoring system (training/monitor.s)
 - [ ] **TODO**: Mixed precision training integration

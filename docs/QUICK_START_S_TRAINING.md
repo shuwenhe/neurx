@@ -225,7 +225,7 @@ English texttrainingsystemAllowedEnglish text:
 2. **compile/** - modelcompileoptimize
 3. **data/** - dataload
 4. **monitoring/** - English textmonitoring
-5. **optimization/** - English textstepoptimize
+5. **optimizer/** - English textstepoptimize
 
 ## ⚡ English text
 

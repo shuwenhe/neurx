@@ -28,12 +28,12 @@ RequiredEnglish text:
 English text:
 - `scripts/legacy/LAUNCH_1T_TRAINING.sh` English text Python trainingEnglish text `TODO`
 - `training/moe_1t_orchestrator.s` English textdataloadEnglish textimplementation
-- `optimization/mixed_precision.s` English text placeholder backward
+- `optimizer/mixed_precision.s` English text placeholder backward
 
 English textfile:
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L178-L181)
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
-- [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimization/mixed_precision.s#L512-L515)
+- [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimizer/mixed_precision.s#L512-L515)
 
 ### 2. dataEnglish text
 
@@ -98,11 +98,11 @@ RequiredEnglish text:
 - gradientEnglish text
 
 English text:
-- `optimization/mixed_precision.s` English text placeholder backward
+- `optimizer/mixed_precision.s` English text placeholder backward
 - `distributed/zero_gradient_reduce.s` English text AdamW English textimplementation
 
 English textfile:
-- [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimization/mixed_precision.s#L512-L515)
+- [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimizer/mixed_precision.s#L512-L515)
 - [zero_gradient_reduce.s](/Users/shuwen/shuwen/train/neurx/distributed/zero_gradient_reduce.s#L472-L484)
 
 ### 6. English text

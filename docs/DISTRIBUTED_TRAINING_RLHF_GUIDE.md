@@ -15,7 +15,7 @@
 | `distributed/data_parallel.s` | 450 | DP + AllReduce + gradientEnglish text | ✅ |
 | `distributed/tensor_parallel.s` (English text) | 500 | English text/English text + AllGather | ✅ |
 | `distributed/pipeline_parallel.s` (English text) | 400 | GPipe + 1F1B English text | ✅ |
-| `distributed/zero_optimizer.s` (English text) | 400 | ZeRO-1/2/3 English textoptimize | ✅ |
+| `optimizer/zero_optimizer.s` (English text) | 400 | ZeRO-1/2/3 English textoptimize | ✅ |
 
 ### alignmentsystem
 

@@ -64,7 +64,7 @@ English text:
 ✓ frameworkEnglish text
 ```
 
-### 5. optimizeEnglish textcompleteimplementation (opt/optimizer.s)
+### 5. optimizeEnglish textcompleteimplementation (optimizer/optimizer.s)
 ```
 English text:
 ✗ AdamW implementation
@@ -219,7 +219,7 @@ func training_loop() {
 2. `distributed/tensor_parallel.s` - English text
 3. `distributed/pipeline_parallel.s` - English text
 4. `distributed/sequence_parallel.s` - English text
-5. `distributed/zero_optimizer.s` - English textoptimize
+5. `optimizer/zero_optimizer.s` - English textoptimize
 6. `data/distributed_dataloader.s` - dataload
 7. `attention/flash_attention_compute.s` - English text
 8. `train/mixed_precision.s` - English textframework

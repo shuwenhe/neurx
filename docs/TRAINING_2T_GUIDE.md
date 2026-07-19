@@ -319,7 +319,7 @@ Communication Time: 15%
    - Ring attention
    - Unified sequence parallel (USP)
 
-4. **`distributed/zero_optimizer.s`** (700 lines)
+4. **`optimizer/zero_optimizer.s`** (700 lines)
    - ZeRO stage 1, 2, 3
    - Optimizer state partitioning
    - Gradient partitioning

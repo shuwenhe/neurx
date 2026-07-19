@@ -15,7 +15,7 @@
 | **dataEnglish text** | `distributed/data_parallel.s` | 450 | AllReduce + gradientEnglish text + English textstepEnglish text | ✅ |
 | **English text** | `distributed/tensor_parallel.s` | 500 | English text/English text + AllGather English text | ✅ |
 | **English text** | `distributed/pipeline_parallel.s` | 400 | GPipe + 1F1B English text + English text | ✅ |
-| **ZeRO optimize** | `distributed/zero_optimizer.s` | 400 | Stages 1-3 English textoptimize (4x/8x/8x) | ✅ |
+| **ZeRO optimize** | `optimizer/zero_optimizer.s` | 400 | Stages 1-3 English textoptimize (4x/8x/8x) | ✅ |
 | **RLHF system** | `alignment/rlhf_complete.s` | 600 | SFT + rewardmodel + PPO + evaluation | ✅ |
 | **English text** | `training/mixed_precision.s` | 1200 | BF16/FP16/FP32 + English textlossEnglish text | ✅ |
 | **Flash Attention v3** | `attention/flash_attention_v3.s` | 800 | English text + English text KV cache | ✅ |

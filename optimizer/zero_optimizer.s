@@ -1,4 +1,4 @@
-package neurx.distributed
+package neurx.optimizer.zero_optimizer
 
 // ZeRO (Zero Redundancy Optimizer) Module
 // Implements memory optimization techniques to reduce redundancy in distributed training

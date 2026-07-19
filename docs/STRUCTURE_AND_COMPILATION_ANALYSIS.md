@@ -35,7 +35,7 @@ English text, actualcompileEnglish textrunpipelineEnglish text:
    ✅ model/llm/model_large_train.s          (English texttraining)
    ✅ moe/llm_moe_1t.s               (1T MoE model)
    ✅ pretrain/distributed/               (English texttraining)
-   ✅ pretrain/optimizer/                  (optimizeEnglish text)
+   ✅ optimizer/                  (optimizeEnglish text)
    ✅ pretrain/tokenizer/bpe.s             (BPE English text)
    ✅ pretrain/checkpoint/                 (checkpointmanagement)
    ✅ pretrain/data/                       (dataload)
@@ -43,7 +43,7 @@ English text, actualcompileEnglish textrunpipelineEnglish text:
    ✅ pretrain/loop/                       (trainingEnglish text)
    ✅ pretrain/config/                     (configuration)
    ✅ nn/                                  (English text)
-   ✅ opt/optim/                           (optimizeEnglish text)
+   ✅ optimizer/optim/                           (optimizeEnglish text)
    ✅ tensor/                              (English text)
    ✅ ops/                                 (English text)
    ✅ cuda/ English text backends/                   (GPU English text)
@@ -72,7 +72,7 @@ English text, actualcompileEnglish textrunpipelineEnglish text:
 | **tensor** | 11 | ✅ | ✅ | English text |
 | **ops** | 2 | ✅ | ✅ | English text |
 | **cuda** | 10 | ✅ | ✅ | GPU computeEnglish text |
-| **opt/optim** | 8 | ✅ | ✅ | optimizeEnglish text |
+| **optimizer/optim** | 8 | ✅ | ✅ | optimizeEnglish text |
 
 ### B. English text/helperEnglish text (English textcompile, English text)
 
@@ -151,7 +151,7 @@ model_large_pretrain.s (mainEnglish text)
 │  ├─ ddp.s
 │  ├─ tensor_parallel.s
 │  └─ zero_gradient_reduce.s
-├─ pretrain/optimizer/adamw.s
+├─ optimizer/pretrain_adamw.s
 ├─ pretrain/tokenizer/bpe.s
 ├─ pretrain/checkpoint/
 ├─ pretrain/data/
@@ -272,7 +272,7 @@ model_large_pretrain.s (mainEnglish text)
 - model/llm/model_large_train.s (Transformer)
 - moe/llm_moe_1t.s (1T MoE)
 - distributed/* (DDP, TP, PP, EP)
-- pretrain/optimizer/* (AdamW)
+- optimizer/* (AdamW)
 - pretrain/tokenizer/bpe.s (English text)
 - nn/* (English text, FFN English text)
 - tensor/* (English text)
@@ -329,7 +329,7 @@ sbatch scripts/legacy/submit_training_job.sh
      ├─ English text (model/llm)
      ├─ losscompute (moe/llm_moe_1t_loss.s)
      ├─ English text (autodiff)
-     ├─ optimizeEnglish text (pretrain/optimizer)
+     ├─ optimizeEnglish text (optimizer)
      ├─ gradientEnglish textstep (distributed)
      ├─ checkpointsave (pretrain/checkpoint)
      ├─ English text (monitoring)

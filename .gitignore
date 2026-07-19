@@ -199,7 +199,7 @@ ad/*.ir
 tensor/*.ir
 engine/*.ir
 nn/*.ir
-opt/*.ir
+optimizer/*.ir
 dl/*.ir
 lf/*.ir
 train/*.ir

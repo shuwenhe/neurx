@@ -10,7 +10,7 @@ use neurx.model.transformer
 use neurx.training.mixed_precision
 use neurx.distributed.nccl_backend
 use neurx.cuda.device_manager
-use neurx.opt.adamw
+use neurx.optimizer.adamw
 use neurx.data.tokenizer
 
 // ---- Training Configuration ----

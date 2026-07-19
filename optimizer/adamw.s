@@ -1,4 +1,4 @@
-package neurx.opt.adamw
+package neurx.optimizer.adamw
 
 // =====================================================================
 // AdamW Optimizer Implementation

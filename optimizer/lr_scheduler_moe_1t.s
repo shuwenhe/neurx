@@ -1,4 +1,4 @@
-package neurx.training.lr_scheduler
+package neurx.optimizer.lr_scheduler_moe_1t
 
 // ============================================================================
 // learning rateEnglish text (Cosine Annealing with Warmup)

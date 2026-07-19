@@ -78,11 +78,11 @@ English textfile:
 
 - `train/neurx/distributed/distributed_training_coordinator.s`
 - `train/neurx/distributed/ddp/ddp.s`
-- `train/neurx/distributed/fsdp/fsdp_optimizer.s`
+- `train/neurx/optimizer/fsdp_optimizer.s`
 - `train/neurx/distributed/tensor_parallel.s`
 - `train/neurx/distributed/pipeline_parallel.s`
 - `train/neurx/distributed/sequence_parallel.s`
-- `train/neurx/distributed/zero_optimizer.s`
+- `train/neurx/optimizer/zero_optimizer.s`
 
 mainEnglish text:
 

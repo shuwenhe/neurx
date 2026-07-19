@@ -255,7 +255,7 @@ After each file conversion, verify:
 
 **Recommended Approach**:
 1. Continue with automated batch replacements for next 3-4 files
-2. Focus on enterprise modules first (compute/, optimization/, distributed/, monitoring/)
+2. Focus on enterprise modules first (compute/, optimizer/, distributed/, monitoring/)
 3. Save train_enterprise_2t.s for final verification pass
 4. Generate comprehensive compliance report
 

@@ -254,7 +254,7 @@ func backward(loss) {
 
 #### 5. learning rateEnglish text
 ```s
-// neurx/training/lr_scheduler_moe_1t.s
+// neurx/optimizer/lr_scheduler_moe_1t.s
 
 func linear_warmup(step) {
   // English text 10K stepEnglish text peak_lr = 0.0002

@@ -11,7 +11,7 @@ use neurx.engine.training_orchestrator
 use neurx.training.industrial_gpt_training
 use neurx.model.transformer
 use neurx.training.mixed_precision
-use neurx.opt.adamw
+use neurx.optimizer.adamw
 use neurx.tokenizer.data_pipeline
 
 // ========================================================================

@@ -119,8 +119,8 @@ void test_state_resume_matches_continuous_run() {
 }
 
 void test_s_implementation_wires_persistent_state() {
-    const std::string optim = read_file("opt/optim.s");
-    const std::string optimizer = read_file("opt/optimizer.s");
+    const std::string optim = read_file("optimizer/optim.s");
+    const std::string optimizer = read_file("optimizer/optimizer.s");
     require(optim.find("func adam_step_state") != std::string::npos,
             "state-returning Adam update is present");
     require(optim.find("float decayed_param = params.data[i] * "

@@ -1,8 +1,8 @@
-package neurx.opt.optimizer
+package neurx.optimizer.optimizer
 
 use neurx.tensor.tensor
-use neurx.opt.optim
-use neurx.opt.scheduler
+use neurx.optimizer.optim
+use neurx.optimizer.scheduler
 
 struct optimizer_param_group {
     []tensor params

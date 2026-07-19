@@ -78,7 +78,7 @@ neurx/
 | `nn/` | `core/nn/` | Neural network modules |
 | `data/` | `core/data/` | Dataset and dataloader |
 | `lf/` | `core/losses/` | Loss functions |
-| `opt/` | `core/optim/` | Optimizers and schedulers |
+| `optimizer/` | `core/optim/` | Optimizers and schedulers |
 | `train/` | `core/train/` | AMP, logging, checkpointing, loops |
 | `runtime/` | `runtime/` | Keep runtime orchestration here |
 | `compile/` | `compile/` | Keep compilation spine here |

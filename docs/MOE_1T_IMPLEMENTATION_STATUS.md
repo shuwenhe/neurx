@@ -253,7 +253,7 @@ touch neurx/distributed/zero_stage3_reduce.s
 **Day 8-9: learning rateEnglish text**
 ```bash
 # English text
-touch neurx/training/lr_scheduler_moe_1t.s
+touch neurx/optimizer/lr_scheduler_moe_1t.s
 
 # implementation:
 # - linear_warmup() - English text 2K stepEnglish text

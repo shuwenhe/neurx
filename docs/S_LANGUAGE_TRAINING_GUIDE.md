@@ -60,7 +60,7 @@ neurx compile-all \
   distributed/data_parallel.s \
   distributed/tensor_parallel.s \
   distributed/pipeline_parallel.s \
-  distributed/zero_optimizer.s \
+  optimizer/zero_optimizer.s \
   alignment/rlhf_complete.s \
   training/mixed_precision.s \
   attention/flash_attention_v3.s

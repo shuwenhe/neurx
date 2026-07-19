@@ -44,7 +44,7 @@ import neurx.model.model_2t_config            // 2T Model Architecture Spec
 import neurx.nn.nn                             // Neural Network Primitives
 import neurx.tensor.tensor                     // Core Tensor Operations
 import neurx.lf.losses                        // Loss Functions
-import neurx.opt.optim                         // Optimizers
+import neurx.optimizer.optim                         // Optimizers
 
 // ============================================================
 // SECTION 1: CONFIGURATION

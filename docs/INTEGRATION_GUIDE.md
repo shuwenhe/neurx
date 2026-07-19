@@ -224,7 +224,7 @@ English textAllowedEnglish textquickEnglish text:
    └─ RequiredEnglish text: gradientcompute + English text + parameterEnglish text
 
 ❌ completeEnglish textAdamWoptimizeEnglish text
-   └─ RequiredEnglish text: pretrain/optimizer/pretrain_adamw.s
+   └─ RequiredEnglish text: optimizer/pretrain_adamw.s
 
 ❌ Tokenization
    └─ Requiredimplementation: BPE tokenizerEnglish text
@@ -347,7 +347,7 @@ neurx/
 │  ├─ trainer.s              # English text: TrainerEnglish text
 │  └─ ...
 │
-├─ opt/                      # optimizeEnglish text
+├─ optimizer/                      # optimizeEnglish text
 │  ├─ adamw.s                # English text: completeAdamW
 │  ├─ scheduler.s            # English text: learning rateEnglish text
 │  └─ ...
@@ -388,7 +388,7 @@ A: 2-3English textAllowedEnglish texttraining3BmodelEnglish textcompletesystem.
 A: English text: (1) Tokenizer → (2) Transformer → (3) trainingEnglish text → (4) optimizeEnglish text → (5) English texttest
 
 **Q: English textoptimizeEnglish text?**
-A: `pretrain/optimizer/pretrain_adamw.s` English textframework, RequiredcompleteimplementationEnglish texttest.
+A: `optimizer/pretrain_adamw.s` English textframework, RequiredcompleteimplementationEnglish texttest.
 
 ---
 
@@ -406,7 +406,7 @@ English textNeurXframeworkEnglish textcompleteEnglish text!🚀
 | English text | `distributed/tensor_parallel.s` | weightEnglish text | ✅ |
 | ZeRO gradientEnglish text | `distributed/zero_gradient_reduce.s` | parameterEnglish textoptimize | ✅ |
 | losscompute | `moe/llm_moe_1t_loss.s` | CE+MoE+KL loss | ✅ |
-| LR English text | `training/lr_scheduler_moe_1t.s` | English text | ✅ |
+| LR English text | `optimizer/lr_scheduler_moe_1t.s` | English text | ✅ |
 | dataload | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
 | monitoringsystem | `monitoring/moe_1t_metrics.s` | English textmonitoring | ✅ |
 | English text | `model/llm/long_context_32k.s` | 32K RoPE extension | ✅ |

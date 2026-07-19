@@ -153,7 +153,7 @@ English text `ml/autodiff_complete.s`:
 
 ### 3️⃣ AdamW optimizeEnglish text
 
-English text `ml/optimizer_adamw.s`:
+English text `optimizer/optimizer_adamw.s`:
 
 - ✓ English text(Adaptive Learning Rate)
 - ✓ English text(Bias Correction)

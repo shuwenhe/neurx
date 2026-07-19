@@ -82,7 +82,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Decoupled weight decay (L2 regularization)
 - [x] Parameter update with numerical stability
 
-**Files**: `neurx/opt/adamw.s` (~600 lines)
+**Files**: `neurx/optimizer/adamw.s` (~600 lines)
 
 #### ✅ Learning Rate Scheduling (95%)
 - [x] Linear warmup
@@ -192,7 +192,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Memory reduction calculations
 - [x] Communication patterns
 
-**Files**: `neurx/distributed/zero_optimizer.s` (~400 lines)
+**Files**: `neurx/optimizer/zero_optimizer.s` (~400 lines)
 
 ---
 
