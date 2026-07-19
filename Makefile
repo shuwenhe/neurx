@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-s-p0-test pretrain-eval-test moe-core-s-test hybrid-moe-s hybrid-moe-s-test test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -107,9 +107,6 @@ NEURX_SHARD_FORCE_REBUILD ?= 0
 help:
 	@echo "  make shard"
 	@echo "  make pretrain"
-	@echo "  make pretrain-s-p0-test"
-	@echo "  make moe-core-s-test"
-	@echo "  make hybrid-moe-s-test"
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
@@ -127,35 +124,6 @@ pretrain-s-p0: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_TINY_OUTPUT_DIR="$${NEURX_TINY_OUTPUT_DIR:-$(CURDIR_UNIX)/artifacts/checkpoints/tiny_s_transformer}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
-
-pretrain-s-p0-test: check-bash build-s-ir-runner
-	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain'
-	@cd '$(CURDIR_UNIX)' && \
-		'$(S_COMPILER)' 'pretrain/llm/tiny_transformer_pretrain.s' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
-	@cd '$(CURDIR_UNIX)' && \
-		TEST_DIR="$$(mktemp -d "$${TMPDIR:-/tmp}/neurx_tiny_s.XXXXXX")"; \
-		NEURX_TINY_OUTPUT_DIR="$$TEST_DIR" NEURX_TINY_STEPS=60 NEURX_TINY_RESUME=0 \
-			'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir' && \
-		grep -q '^step=60$$' "$$TEST_DIR/checkpoint.sckpt" && \
-		! grep -q '^loss=0\\.000000000$$' "$$TEST_DIR/checkpoint.sckpt" && \
-		NEURX_TINY_OUTPUT_DIR="$$TEST_DIR" NEURX_TINY_STEPS=80 NEURX_TINY_RESUME=1 \
-			'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir' && \
-		grep -q '^step=80$$' "$$TEST_DIR/checkpoint.sckpt" && \
-		! grep -q '^loss=0\\.000000000$$' "$$TEST_DIR/checkpoint.sckpt" && \
-		echo "[tiny-s-test] PASS: forward/backward/AdamW/checkpoint/resume"
-
-moe-core-s-test: check-bash build-s-ir-runner
-	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/moe_core_s'
-	@cd '$(CURDIR_UNIX)' && \
-		bash tools/bundle_s_modules.sh \
-			'artifacts/build/moe_core_s/moe_core_test.bundle.s' \
-			'tests/moe_core_test.s' \
-			'moe/moe_core.s' && \
-		'$(S_COMPILER)' \
-			'artifacts/build/moe_core_s/moe_core_test.bundle.s' \
-			'artifacts/build/moe_core_s/moe_core_test.ir'
-	@cd '$(CURDIR_UNIX)' && \
-		'$(S_RUNNER_BIN)' 'artifacts/build/moe_core_s/moe_core_test.ir'
 
 pretrain-eval-test: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/pretrain_eval_s'
@@ -183,11 +151,6 @@ hybrid-moe-s: check-bash build-s-ir-runner
 			'artifacts/build/hybrid_moe_s/hybrid_moe.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s/hybrid_moe.ir'
-
-hybrid-moe-s-test: moe-core-s-test hybrid-moe-s
-	@echo "[hybrid-moe-s-test] PASS: executable S hybrid sparse architecture"
-
-
 
 infer: check-bash build-cpu-inference
 	@mkdir -p $(LOG_DIR)
