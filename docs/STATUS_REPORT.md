@@ -36,7 +36,7 @@
 
 | English text | file | English text | English text | state |
 |------|------|------|---------|------|
-| **MoE loss** | `moe/llm_moe_1t_loss.s` | 495 | CEloss + helperloss + KLEnglish text | ✅ |
+| **MoE loss** | `loss/llm_moe_1t_loss.s` | 495 | CEloss + helperloss + KLEnglish text | ✅ |
 | **English text** | `model/llm/long_context_32k.s` | 461 | RoPE + NTKEnglish text + 32KEnglish text | ✅ |
 
 **modelEnglish text**: 1T parameter, 256 English text, top-k=2 English text

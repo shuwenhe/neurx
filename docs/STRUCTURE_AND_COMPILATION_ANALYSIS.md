@@ -145,7 +145,7 @@ model_large_pretrain.s (mainEnglish text)
 │  │  ├─ nn/attention.s
 │  │  ├─ nn/ffn.s
 │  │  └─ tensor/ops.s
-│  ├─ moe/llm_moe_1t_loss.s
+│  ├─ loss/llm_moe_1t_loss.s
 │  └─ distributed/moe_all_to_all.s
 ├─ pretrain/distributed/
 │  ├─ ddp.s
@@ -327,7 +327,7 @@ sbatch scripts/legacy/submit_training_job.sh
   └─ 1024 English text GPU English texttraining
      ├─ dataload (pretrain/data)
      ├─ English text (model/llm)
-     ├─ losscompute (moe/llm_moe_1t_loss.s)
+     ├─ losscompute (loss/llm_moe_1t_loss.s)
      ├─ English text (autograd)
      ├─ optimizeEnglish text (optimizer)
      ├─ gradientEnglish textstep (distributed)

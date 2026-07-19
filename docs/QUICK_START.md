@@ -126,7 +126,7 @@ func zero_stage3_optimizer_step(state: &ZeroState, lr: f64)
 
 ### 4. losscompute
 
-**file**: `moe/llm_moe_1t_loss.s` (495 English text)
+**file**: `loss/llm_moe_1t_loss.s` (495 English text)
 
 **lossfunction**:
 ```

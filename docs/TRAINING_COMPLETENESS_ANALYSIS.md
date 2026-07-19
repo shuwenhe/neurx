@@ -52,7 +52,7 @@ English text:
 ✓ cacheframework
 ```
 
-### 4. lossfunctioncompleteimplementation (lf/losses.s)
+### 4. lossfunctioncompleteimplementation (loss/losses.s)
 ```
 English text:
 ✗ Cross-entropy loss (English texttrainingloss)

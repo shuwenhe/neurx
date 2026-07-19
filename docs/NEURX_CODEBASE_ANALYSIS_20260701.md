@@ -276,7 +276,7 @@ Total steps: 400K
 
 **Files**:
 - `neurx/posttrain/rlhf/ppo.s` (400+ lines) - PPO algorithm
-- `neurx/posttrain/dpo/dpo_loss.s` - Direct Preference Optimization
+- `neurx/loss/dpo_loss.s` - Direct Preference Optimization
 - `neurx/posttrain/dpo/dpo_state.s`
 - `neurx/posttrain/dpo/dpo_step.s`
 - `neurx/posttrain/reward/reward.s` - Reward model base

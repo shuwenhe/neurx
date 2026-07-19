@@ -10,7 +10,7 @@ English textdirectoryEnglish textsave NeurX English text Mixture-of-Experts Engl
 | `transformer_moe_backward.s` | RouterEnglish textExpert FFNEnglish text |
 | `llm_moe.s` | GPT/LLM MoEmodel |
 | `llm_moe_1t.s` | 1TEnglish textmodelconfigurationEnglish text |
-| `llm_moe_1t_loss.s` | MoElossEnglish textgradient |
+| `../loss/llm_moe_1t_loss.s` | MoElossEnglish textgradient |
 | `fine_grained_moe.s` | English text, English texthelperlossEnglish text |
 | `trae_moe.s` | English textMoEEnglish textimplementation |
 | `moe_optimizer.s` | English text, English text, English text |

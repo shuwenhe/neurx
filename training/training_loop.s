@@ -2,10 +2,10 @@ package neurx.training
 
 import "neurx.autograd"
 import "neurx.optimizer"
-import "neurx.lf"
+import "neurx.loss"
 import "neurx.distributed.zero"
 import "neurx.training.mixed_precision_training"
-import "neurx.training.gradient_checkpointing"
+import "neurx.autograd.gradient_checkpointing"
 import "neurx.training.checkpoint_manager"
 
 enum training_mode {
@@ -199,7 +199,7 @@ func train_step(training_loop loop, []autograd.tensor batch, []int labels) float
             logits = loop.model.forward(inputs)
         }
         
-        float loss = lf.cross_entropy_loss(logits, labels)
+        float loss = loss.cross_entropy_loss(logits, labels)
         
         if loop.config.enable_amp {
             loss = mixed_precision_training.amp_scale_loss(loss, loop.amp.amp_state)
@@ -245,7 +245,7 @@ func validate_step(training_loop loop, []autograd.tensor batch, []int labels) fl
     autograd.disable_grad()
     
     []autograd.tensor logits = loop.model.forward(batch)
-    float loss = lf.cross_entropy_loss(logits, labels)
+    float loss = loss.cross_entropy_loss(logits, labels)
     
     autograd.enable_grad()
     

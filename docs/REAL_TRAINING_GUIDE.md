@@ -8,7 +8,7 @@
    - English textfunction(ReLU, GELUEnglish text)
    - English text
 
-2. **lossfunction** (`lf/losses.s`)
+2. **lossfunction** (`loss/losses.s`)
    - `cross_entropy_loss` - completeEnglish textlossimplementation
    - English textlog_softmax
    - Perplexity compute
@@ -155,6 +155,6 @@ make train-real
 ## English text
 
 - English text: `neurx/tensor/*.s`
-- lossfunction: `neurx/lf/losses.s`
+- lossfunction: `neurx/loss/losses.s`
 - modelEnglish text: `neurx/model/llm/*.s`
 - dataEnglish text: `neurx/data/dataloader.s`

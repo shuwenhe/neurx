@@ -246,7 +246,7 @@ grep -r "/ad/" /Users/feifei/shuwen/neurx/CMakeLists.txt 2>/dev/null
 
 - [ ] English text `DIRECTORY_STRUCTURE.md` English text
 - [ ] English text (CONTRIBUTING.md)
-- [ ] English textRequired `lf/losses.s` English text
+- [ ] English textRequired `loss/losses.s` English text
 
 ### English text (English text)
 

@@ -269,7 +269,7 @@ English text llm_moe_1t.s
 ✓ pretrain/llm/model_large_pretrain.s      mainEnglish text
 ✓ model/llm/model_large_train.s            Transformer
 ✓ moe/llm_moe_1t.s                 1T MoE framework
-✓ moe/llm_moe_1t_loss.s            losscompute
+✓ loss/llm_moe_1t_loss.s            losscompute
 ✓ model/llm/long_context_32k.s           English text
 ✓ distributed/ddp.s                      dataEnglish text
 ✓ distributed/tensor_parallel.s          English text

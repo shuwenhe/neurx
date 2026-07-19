@@ -1,4 +1,4 @@
-package neurx.moe.llm_1t_loss
+package neurx.loss.llm_moe_1t_loss
 
 // ============================================================================
 // 1T MoE losscomputeEnglish text

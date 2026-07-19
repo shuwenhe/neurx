@@ -99,7 +99,7 @@
 | directory | fileEnglish text | English text | English text |
 |------|--------|------|------|
 | `relative/` | 1 | English text"English text"? | English text |
-| `lf/` | 1 | English text | English text |
+| `loss/` | 1 | English text | English text |
 | `ad/` | 7 | English text(Accelerator?Descriptor?) | English text |
 | `legacy/` | 1 | English text | English text |
 | `insight/` | ? | English text observability/ English text? | English text |

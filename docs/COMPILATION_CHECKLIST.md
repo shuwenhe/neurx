@@ -8,7 +8,7 @@
 ✓ distributed/moe_all_to_all.s                (473 English text)   MoE All-to-All English text
 ✓ distributed/tensor_parallel.s              (329 English text)   English text
 ✓ distributed/zero_gradient_reduce.s         (504 English text)   ZeRO Stage 3
-✓ moe/llm_moe_1t_loss.s                (495 English text)   losscompute
+✓ loss/llm_moe_1t_loss.s                (495 English text)   losscompute
 ✓ optimizer/lr_scheduler_moe_1t.s             (422 English text)   learning rateEnglish text
 ✓ data/moe_1t_jsonl_loader.s                 (430 English text)   JSONL dataload
 ✓ monitoring/moe_1t_metrics.s                (598 English text)   monitoringEnglish text
@@ -41,7 +41,7 @@ English text: 3,712 English text ✅
   - [ ] struct gpt_1t_moe_config
   - [ ] 256 English text experts, top-k=2 English text
 
-- [ ] moe/llm_moe_1t_loss.s
+- [ ] loss/llm_moe_1t_loss.s
   - [ ] losscomputefunction
   - [ ] support CE + helperloss + KL
   - [ ] 495 English textcompleteimplementation

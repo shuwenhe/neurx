@@ -18,7 +18,7 @@ package neurx.posttrain.dpo.dpo_trainer
 // ════════════════════════════════════════════════════════════════════════════════
 
 use neurx.posttrain.dpo.dpo_state.*
-use neurx.posttrain.dpo.dpo_loss.*
+use neurx.loss.dpo_loss.*
 use neurx.posttrain.dpo.dpo_step.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*

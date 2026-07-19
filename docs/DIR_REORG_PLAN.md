@@ -77,7 +77,7 @@ neurx/
 | `engine/` | `core/engine/` | Backward execution |
 | `nn/` | `core/nn/` | Neural network modules |
 | `data/` | `core/data/` | Dataset and dataloader |
-| `lf/` | `core/losses/` | Loss functions |
+| `loss/` | `core/losses/` | Loss functions |
 | `optimizer/` | `core/optim/` | Optimizers and schedulers |
 | `train/` | `core/train/` | AMP, logging, checkpointing, loops |
 | `runtime/` | `runtime/` | Keep runtime orchestration here |

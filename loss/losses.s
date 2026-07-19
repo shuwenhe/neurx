@@ -1,4 +1,4 @@
-package neurx.lf.losses
+package neurx.loss
 
 use neurx.tensor.tensor
 use neurx.tensor.new

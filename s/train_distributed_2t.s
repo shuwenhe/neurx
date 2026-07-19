@@ -43,7 +43,7 @@ import neurx.distributed.training_orchestrator // 2T Training Coordinator
 import neurx.model.model_2t_config            // 2T Model Architecture Spec
 import neurx.nn.nn                             // Neural Network Primitives
 import neurx.tensor.tensor                     // Core Tensor Operations
-import neurx.lf.losses                        // Loss Functions
+import neurx.loss.losses                        // Loss Functions
 import neurx.optimizer.optim                         // Optimizers
 
 // ============================================================
