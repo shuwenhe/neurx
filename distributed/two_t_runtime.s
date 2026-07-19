@@ -5,7 +5,7 @@ use neurx.distributed.ddp.{ddp_state, new_ddp_state, ddp_attach_process_group, d
 use neurx.distributed.pp.{pipeline_parallel_state, new_pipeline_parallel_state, pipeline_parallel_state_dict, pipeline_parallel_load_state_dict, pp_assign_default_stage_ranks, pp_prepare_schedule, pp_next_microbatch, pp_pipeline_depth, pp_total_slots, pp_stage_id, pp_microbatch_id, pp_step}
 use neurx.distributed.tp.{tp_state, new_tp_state, tp_enabled, tp_state_dict, tp_load_state_dict}
 use neurx.distributed.two_t_training.{two_t_training_plan, new_two_t_training_plan, two_t_training_plan_state_dict, two_t_training_plan_load_state_dict, two_t_training_plan_step, two_t_training_plan_summary, two_t_mod_nonneg}
-use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, new_state, next_batch, reset_state, has_next}
+use neurx.data.loader.dataloader.{dataloader_state, dataloader_step_output, new_state, next_batch, reset_state, has_next}
 use neurx.dataset_text.{text_corpus_state, load_text_corpus, build_vocab, encode_text}
 use neurx.model.model_2t_config.{model_2t_config, new_2t_model_config, calculate_2t_model_parameters, calculate_2t_memory_requirements, calculate_2t_communication_volume, estimate_2t_training_time}
 use neurx.model.llm.gpt_large_train.{gpt_large_backward_result, transformer_backward, embedding_apply_grad, tensor_from_ints, one_hot_tensor, scale_tensor, exp_approx, ramp_tensor, zero_tensor, transformer_layer_optimizer_state, new_backbone_optimizer_states, copy_layer_optimizer_state}

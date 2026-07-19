@@ -65,7 +65,7 @@ phase 4: advancedEnglish text    ░░░░░░░░░░░░░░░�
 
 #### 1.3a deduplicationsystem
 - [x] **Bloom Filter implementation**
-  - file: `neurx/data/deduplication.s` (400+ English text)
+  - file: `neurx/data/pipeline/deduplication.s` (400+ English text)
   - quickdeduplication: O(1) query
   - English textconfigurationEnglish text
 
@@ -88,7 +88,7 @@ phase 4: advancedEnglish text    ░░░░░░░░░░░░░░░�
 
 #### 1.3b English textsystem
 - [x] **English textevaluation**
-  - file: `neurx/data/quality_filter.s` (English text)
+  - file: `neurx/data/pipeline/quality_filter.s` (English text)
   - English text (English text)
   - languageEnglish text (English text)
   - English text (English text/English text)

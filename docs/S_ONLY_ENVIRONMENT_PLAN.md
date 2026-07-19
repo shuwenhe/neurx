@@ -13,7 +13,7 @@
 | English text | file | state | English text |
 |------|------|------|------|
 | dataEnglish text | `scripts/legacy/data_pipeline.s` | ✅ | clean, deduplication, English text, manifest generate |
-| dataEnglish text | `dataset/verify_dataset.s` | ⏳ | RequiredEnglish text |
+| dataEnglish text | `data/tools/verify_dataset.s` | ⏳ | RequiredEnglish text |
 
 **compileEnglish text: **
 ```bash
@@ -21,7 +21,7 @@
 s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
 # dataEnglish text
-s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
+s data/tools/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
 ```
 
 ---

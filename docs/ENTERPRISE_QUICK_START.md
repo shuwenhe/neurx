@@ -127,7 +127,7 @@ Code:     monitoring/distributed_metrics.s
 Problem:  Data loading is bottleneck
 Solution: Multi-threaded prefetch, caching, validation
 Result:   10x faster data loading
-Code:     data/distributed_dataloader.s
+Code:     data/loader/distributed.s
 ```
 
 ---
@@ -406,7 +406,7 @@ Inference: 0.5TB (INT4 quantized)
 3. **Mixed Precision**: `train/mixed_precision.s`
 4. **Fault Recovery**: `distributed/fault_recovery.s`
 5. **Monitoring**: `monitoring/distributed_metrics.s`
-6. **Data Loading**: `data/distributed_dataloader.s`
+6. **Data Loading**: `data/loader/distributed.s`
 7. **Quantization**: `quantization/quantizer.s`
 8. **Training Script**: `bin/train_enterprise_2t.s`
 

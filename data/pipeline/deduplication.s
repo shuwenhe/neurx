@@ -1,4 +1,4 @@
-package neurx.data.deduplication
+package neurx.data.pipeline.deduplication
 
 // English textdatadeduplicationsystem - MinHash + Bloom Filter
 

@@ -326,7 +326,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Streaming (doesn't load all data to memory)
 - [x] Validation split
 
-**Files**: `neurx/data/dataloader.s` (~500 lines)
+**Files**: `neurx/data/loader/dataloader.s` (~500 lines)
 
 #### ✅ Preprocessing (90%)
 - [x] Text cleaning
@@ -335,7 +335,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Data augmentation (optional)
 - [x] Parallel preprocessing
 
-**Files**: `neurx/data/preprocessing.s` (~400 lines)
+**Files**: `neurx/data/pipeline/preprocessing.s` (~400 lines)
 
 ---
 

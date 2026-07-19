@@ -33,7 +33,7 @@ model_large_pretrain.s
 ├─ neurx.pretrain.llm.entry
 │  └─ English texttrainingEnglish textfunction
 │
-├─ neurx.dl.dataloader                 ⭐ dataload
+├─ neurx.data.loader.dataloader                 ⭐ dataload
 │  ├─ dataloader_state
 │  ├─ dataloader_config
 │  ├─ new_state()

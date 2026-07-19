@@ -25,8 +25,8 @@ English textcontent:
 ### 2. truthfuldataEnglish text
 
 English textfile:
-- [dataset/real_data_loader.s](/Users/shuwen/shuwen/train/neurx/dataset/real_data_loader.s)
-- [dataset/generate_training_data.s](/Users/shuwen/shuwen/train/neurx/dataset/generate_training_data.s)
+- [data/tools/real_data_loader.s](/Users/shuwen/shuwen/train/neurx/data/tools/real_data_loader.s)
+- [data/tools/generate_training_data.s](/Users/shuwen/shuwen/train/neurx/data/tools/generate_training_data.s)
 - [tokenizer/bpe_tokenizer.s](/Users/shuwen/shuwen/train/neurx/tokenizer/bpe_tokenizer.s)
 - [tokenizer/vocab_builder.s](/Users/shuwen/shuwen/train/neurx/tokenizer/vocab_builder.s)
 

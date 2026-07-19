@@ -914,7 +914,7 @@ verify-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'dataset/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
+		$(S_COMPILER) ir 'data/tools/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir'
 	@echo "✓ Dataset verification entry compiled to S IR"
 
@@ -1165,7 +1165,7 @@ analyze-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'dataset/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
+		$(S_COMPILER) ir 'data/tools/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
 	@if [ ! -f "$(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir" ]; then \
 		echo "Error: failed to generate $(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir"; \
 		exit 1; \

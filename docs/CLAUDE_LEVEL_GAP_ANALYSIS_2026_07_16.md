@@ -341,9 +341,9 @@
 #### NeurX English text:
 ```
 ✅ English text: data/data_pipeline.s(completeEnglish text)
-✅ English text: data/corpus_loader.s(JSONL English text)
-✅ English text: data/quality_filter.s(English text)
-✅ English text: data/deduplication.s(deduplication)
+✅ English text: data/dataset/corpus_loader.s(JSONL English text)
+✅ English text: data/pipeline/quality_filter.s(English text)
+✅ English text: data/pipeline/deduplication.s(deduplication)
 ✅ English text: distributed_dataloader.s(English textload)
 ✅ English text: async_prefetch.s(English textstepEnglish text)
 ❌ English text: actualEnglish textdata

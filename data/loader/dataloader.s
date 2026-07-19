@@ -1,4 +1,4 @@
-package neurx.data.dataloader
+package neurx.data.loader.dataloader
 
 // ═══════════════════════════════════════════════════════════════════
 // High-Performance Data Pipeline — English textdataEnglish text

@@ -22,7 +22,7 @@ Already present:
 - `scripts/legacy/data_clean.s`
 - `scripts/legacy/data_shard.s`
 - `scripts/legacy/scripts.s`
-- `dataset/verify_dataset.s`
+- `data/tools/verify_dataset.s`
 - `scripts/legacy/industrial_ops_runner.s`
 - `scripts/legacy/s_toolchain.s`
 

@@ -128,7 +128,7 @@ truthfultrainingimplementationRequiredEnglish textNeurXEnglish text.English text
 **dataload:**
 ```s
 // useEnglish textdataloader
-use neurx.dl.dataloader.{next_batch, has_next}
+use neurx.data.loader.dataloader.{next_batch, has_next}
 
 // English texttraining_step()English text:
 dataloader_step_output batch = next_batch(state.loader)

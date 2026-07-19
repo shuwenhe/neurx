@@ -135,7 +135,7 @@ Located in `examples/transformer_training.s`
 ### Data Pipeline
 - Tokenizer output → `data/data_pipeline.s`
 - Batch optimization → `data/batch_optimization.s`
-- Distributed loading → `data/distributed_dataloader.s`
+- Distributed loading → `data/loader/distributed.s`
 
 ### Distributed Training
 - Gradient sync → `distributed/synchronization.s`

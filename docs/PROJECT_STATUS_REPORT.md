@@ -51,7 +51,7 @@ NeurX frameworkEnglish text (Model-v2 English text) English text (Model-v3.5 Eng
 ✅ MinHash (English textcompute)
 ✅ 99%+ English text
 ```
-**file**: `neurx/data/deduplication.s`
+**file**: `neurx/data/pipeline/deduplication.s`
 **English text**: English text 1B+ English text
 
 ### 4️⃣ English textsystem (English text)
@@ -61,7 +61,7 @@ NeurX frameworkEnglish text (Model-v2 English text) English text (Model-v3.5 Eng
 ✅ English text (English text/English text)
 ✅ English textevaluation (English text/completeEnglish text)
 ```
-**file**: `neurx/data/quality_filter.s`
+**file**: `neurx/data/pipeline/quality_filter.s`
 **English text**: excellent/good/fair/poor
 
 ### 5️⃣ RLHF alignmentframework (600+ English text)

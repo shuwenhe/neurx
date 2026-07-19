@@ -1,6 +1,6 @@
 package neurx.model.robotics.train_robotics
 
-use neurx.dl.dataloader.{dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
+use neurx.data.loader.dataloader.{dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
 
 struct robotics_training_config {

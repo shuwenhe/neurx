@@ -181,7 +181,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "data/corpus_loader.s",
+        "data/dataset/corpus_loader.s",
         "wire corpus_loader into pretrain loop and remove synthetic fallback"
     )
     caps[1] = make_capability(
@@ -199,7 +199,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "missing",
         "p0",
         true,
-        "data/quality_filter.s",
+        "data/pipeline/quality_filter.s",
         "add benchmark contamination detection before pretraining shard emission"
     )
     caps[3] = make_capability(

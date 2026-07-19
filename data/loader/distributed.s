@@ -1,4 +1,4 @@
-package neurx.data.distributed_dataloader
+package neurx.data.loader.distributed
 
 // Distributed dataloader for large-scale training
 // - Efficient data loading with prefetching
@@ -6,7 +6,7 @@ package neurx.data.distributed_dataloader
 // - Dynamic batching and sampling
 
 use neurx.runtime.io.{runtime_run_command_output}
-use neurx.data.dataset.{dataset}
+use neurx.data.dataset.dataset.{dataset}
 
 struct data_shard {
     string shard_id

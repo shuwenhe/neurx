@@ -42,10 +42,10 @@ NeurX Architecture (Pure S Language)
 │
 ├── 4. Data Pipeline Layer
 │   ├── data/data_pipeline.s         - Data loading and batching
-│   ├── data/distributed_dataloader.s - Distributed data loading
-│   ├── data/corpus_loader.s         - Corpus management
+│   ├── data/loader/distributed.s - Distributed data loading
+│   ├── data/dataset/corpus_loader.s         - Corpus management
 │   ├── data/async_prefetch.s        - Asynchronous prefetching
-│   └── data/quality_filter.s        - Data quality filters
+│   └── data/pipeline/quality_filter.s        - Data quality filters
 │
 ├── 5. Distributed Training Layer
 │   ├── distributed/training_coordinator.s - Coordination
@@ -141,8 +141,8 @@ NeurX Architecture (Pure S Language)
 ### Phase 4: Data Pipeline (Weeks 7-8) ✅ MOSTLY COMPLETE
 
 - [x] Data loading (data/data_pipeline.s)
-- [x] Distributed data loading (data/distributed_dataloader.s)
-- [x] Quality filtering (data/quality_filter.s)
+- [x] Distributed data loading (data/loader/distributed.s)
+- [x] Quality filtering (data/pipeline/quality_filter.s)
 - [x] Async prefetching (data/async_prefetch.s)
 - [x] Multi-source mixing
 - [ ] **TODO**: Real corpus integration (Common Crawl, GitHub, Books)

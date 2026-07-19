@@ -220,7 +220,7 @@ func training_loop() {
 3. `distributed/pipeline_parallel.s` - English text
 4. `distributed/sequence_parallel.s` - English text
 5. `optimizer/zero_optimizer.s` - English textoptimize
-6. `data/distributed_dataloader.s` - dataload
+6. `data/loader/distributed.s` - dataload
 7. `attention/flash_attention_compute.s` - English text
 8. `train/mixed_precision.s` - English textframework
 9. `monitoring/distributed_metrics.s` - monitoringsystem

@@ -72,7 +72,7 @@
 ### English text 1.5 - English texttool(2 English text)
 | # | English text | English textpath | English text | English text | English text LOC |
 |---|--------|---------|------|--------|---------|
-| 9 | dataset/fetch_github_datasets.s | fetch_github_datasets.sh | GitHub dataEnglish text | ⭐⭐⭐ | 140+ |
+| 9 | data/tools/fetch_github_datasets.s | fetch_github_datasets.sh | GitHub dataEnglish text | ⭐⭐⭐ | 140+ |
 | 10 | memory/memory_workflows/run/run_memory_workflow_with_config.s | run_with_config.sh | English textconfigurationrun | ⭐⭐⭐ | 160+ |
 
 ### English text 1.5 - English text(2 English text)

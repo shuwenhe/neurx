@@ -37,7 +37,7 @@ English texttraining, inference, English textcomputeEnglish text, English textmi
 ### 1.3 dataEnglish text(2 English text)
 | # | file | path | English text | English text | state |
 |---|------|------|------|-------|------|
-| 1.3.1 | `fetch_github_datasets.sh` | `dataset/fetch_github_datasets.sh` | GitHub dataEnglish text | ⭐⭐⭐ | ⏳ |
+| 1.3.1 | `fetch_github_datasets.sh` | `data/tools/fetch_github_datasets.sh` | GitHub dataEnglish text | ⭐⭐⭐ | ⏳ |
 | 1.3.2 | `build_transformer_e2e_bundle.sh` | `tools/build_transformer_e2e_bundle.sh` | Transformer E2E English text | ⭐⭐⭐⭐ | ⏳ |
 
 ### 1.4 English texttraining(3 English text)

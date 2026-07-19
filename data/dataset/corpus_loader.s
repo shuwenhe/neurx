@@ -1,4 +1,4 @@
-package neurx.data.corpus_loader
+package neurx.data.dataset.corpus_loader
 
 // ============================================================================
 // Real Pre-Training Corpus Loader

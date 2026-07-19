@@ -25,7 +25,7 @@ use neurx.tokenizer.neurx.*
 use neurx.training.mixed_precision.*
 use neurx.distributed.training_3d.*
 use neurx.distributed.checkpoint.*
-use neurx.data.dataloader.*
+use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
 
 // ════════════════════════════════════════════════════════════════════════════════

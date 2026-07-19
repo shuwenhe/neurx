@@ -129,7 +129,7 @@ func compile_all_components(bin_dir: string, log_dir: string) CompilationResult[
     
     let components = [
         "training/scaled_training_system.s",
-        "dataset/real_data_loader.s",
+        "data/tools/real_data_loader.s",
         "cuda/cuda_accelerated_training.s",
         "distributed/ddp_distributed_training.s"
     ]

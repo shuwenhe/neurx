@@ -66,7 +66,7 @@ func check_all_components() ComponentStatus[] {
     // Real data loader
     let data = verify_component(
         "Real Data Loader",
-        "dataset/real_data_loader.s",
+        "data/tools/real_data_loader.s",
         650
     )
     data.description = "WikiText-2, C4, 32K BPE tokenizer"
@@ -210,7 +210,7 @@ func verify_integration() {
     println("")
     
     println("✅ Data flow integration:")
-    println("  training/scaled_training_system.s ←→ dataset/real_data_loader.s")
+    println("  training/scaled_training_system.s ←→ data/tools/real_data_loader.s")
     println("  Provides batch data to model")
     println("")
     

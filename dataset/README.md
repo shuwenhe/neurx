@@ -113,10 +113,10 @@ English text OBS (`obsutil`):
 
 dataEnglish text
 ----------------
-English text `dataset/verify_dataset.sh`, English text shards English text, statisticsEnglish text, English text JSON English text:
+English text `data/tools/verify_dataset.sh`, English text shards English text, statisticsEnglish text, English text JSON English text:
 
 ```bash
-bash dataset/verify_dataset.sh /app/train/neurx/dataset/the-stack
+bash data/tools/verify_dataset.sh /app/train/neurx/dataset/the-stack
 ```
 
 English text(English text license statistics, English textdeduplicationEnglish text)English text, English textAllowedEnglish textextension.

@@ -3,7 +3,7 @@
 // Real-time quality scoring to filter low-quality training samples
 // Critical for: improving model quality, reducing wasted compute on bad data
 
-package neurx.data.quality_filter
+package neurx.data.pipeline.quality_filter
 
 use neurx.strings
 

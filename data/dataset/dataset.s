@@ -1,4 +1,4 @@
-package neurx.dl.dataset
+package neurx.data.dataset.dataset
 
 struct dataset_state {
     []float items

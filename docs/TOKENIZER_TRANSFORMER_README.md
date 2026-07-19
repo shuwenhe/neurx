@@ -253,7 +253,7 @@ This document describes the complete implementation of **Tokenizer** and **Trans
 ### Data Pipeline Integration
 - Tokenizer output feeds directly into `data/data_pipeline.s`
 - Batch preparation uses `data/batch_optimization.s`
-- Compatible with distributed dataloading via `data/distributed_dataloader.s`
+- Compatible with distributed dataloading via `data/loader/distributed.s`
 
 ### Distributed Training Integration
 - Uses `distributed/training_coordinator.s` for multi-GPU synchronization

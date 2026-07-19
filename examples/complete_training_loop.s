@@ -14,9 +14,9 @@ package neurx.examples
 // ============================================================================
 
 use neurx.autograd.autograd_engine
-use neurx.data.dataloader_full
-use neurx.data.dataset_loaders
-use neurx.data.dataloader_collator
+use neurx.data.loader.dataloader_full
+use neurx.data.dataset.dataset_loaders
+use neurx.data.loader.dataloader_collator
 use neurx.train.optimizer
 use neurx.train.gradient_checkpoint
 use neurx.checkpoint_operations

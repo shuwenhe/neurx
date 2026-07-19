@@ -1,4 +1,4 @@
-package neurx.data.preprocessing
+package neurx.data.pipeline.preprocessing
 
 // Data preprocessing and quality filtering
 // - Text normalization

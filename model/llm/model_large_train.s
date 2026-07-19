@@ -1,7 +1,7 @@
 package neurx.model.llm.base_large_train
 use neurx.strings
 
-use neurx.dl.dataloader.{dataloader_batch, dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
+use neurx.data.loader.dataloader.{dataloader_batch, dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
 use neurx.strings
 use neurx.dataset_text.{build_vocab, encode_text}
 use neurx.strings

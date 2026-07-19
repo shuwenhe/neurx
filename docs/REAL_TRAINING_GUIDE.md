@@ -18,7 +18,7 @@
    - `gpt_large_training_update` - completeEnglish text/English text
    - `gpt_large_training_loss` - losscompute
 
-4. **datamanagement** (`data/dataloader.s`)
+4. **datamanagement** (`data/loader/dataloader.s`)
    - English textdataload
    - Token English textmanagement
    - dataEnglish text
@@ -157,4 +157,4 @@ make train-real
 - English text: `neurx/tensor/*.s`
 - lossfunction: `neurx/loss/losses.s`
 - modelEnglish text: `neurx/model/llm/*.s`
-- dataEnglish text: `neurx/data/dataloader.s`
+- dataEnglish text: `neurx/data/loader/dataloader.s`

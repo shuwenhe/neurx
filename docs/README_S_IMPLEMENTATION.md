@@ -277,7 +277,7 @@ English textimplementation, English textAllowedEnglish text:
 
 English texttrainingsystemAllowedEnglish text:
 
-1. **dataload** (neurx/data/distributed_dataloader.s)
+1. **dataload** (neurx/data/loader/distributed.s)
    - loadtruthfuldataEnglish text
    - English textgenerate
 

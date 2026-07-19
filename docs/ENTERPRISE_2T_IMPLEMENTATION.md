@@ -17,7 +17,7 @@
 | 2️⃣ | `train/mixed_precision.s` | 700 | BF16/FP32English text, English textlossEnglish text, gradientEnglish text | English text |
 | 3️⃣ | `distributed/fault_recovery.s` | 850 | 99.9%English text, English textcheckpointrecover, gradientEnglish text | English text |
 | 4️⃣ | `monitoring/distributed_metrics.s` | 750 | English text, English text, English text | English text |
-| 5️⃣ | `data/distributed_dataloader.s`* | 600 | 10xEnglish text, English text, LRUcache | English text |
+| 5️⃣ | `data/loader/distributed.s`* | 600 | 10xEnglish text, English text, LRUcache | English text |
 | 6️⃣ | `quantization/quantizer.s` | 650 | INT8/INT4English text, PTQ/QAT, 10xinferenceEnglish text | English text |
 | 7️⃣ | `bin/train_enterprise_2t.s` | 800 | 11phasecompletetrainingEnglish text, English text | English text |
 | 8️⃣ | *English text* | 500+ | English text, English text, English text | support |

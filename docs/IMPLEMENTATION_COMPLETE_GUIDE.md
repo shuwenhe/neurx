@@ -159,7 +159,7 @@ bin/train_complete.s (maintrainingEnglish text)
     │   ├─→ Scaled Dot-Product
     │   └─→ Multi-Head Aggregation
     │
-    ├─→ data/distributed_dataloader.s (Data Loading)
+    ├─→ data/loader/distributed.s (Data Loading)
     │
     └─→ monitoring/ (Logging & Monitoring)
 ```

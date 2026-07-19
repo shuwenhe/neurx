@@ -1,4 +1,4 @@
-package neurx.data.streaming
+package neurx.data.loader.streaming
 
 struct streaming_config {
     string data_dir

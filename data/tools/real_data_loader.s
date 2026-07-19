@@ -1,4 +1,4 @@
-package neurx.data_loader
+package neurx.data.tools.real_data_loader
 
 // ============================================================================
 // REAL DATA LOADER - WikiText and C4 Support

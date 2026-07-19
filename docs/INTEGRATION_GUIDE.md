@@ -12,8 +12,8 @@ English textimplementationEnglish text15English text, English textAllowedEnglish
 
 ```
 useframework:
-  • data/distributed_dataloader.s    - English textload
-  • data/preprocessing.s              - English text
+  • data/loader/distributed.s    - English textload
+  • data/pipeline/preprocessing.s              - English text
   • data/batch_optimization.s         - English textbatching
   • data/data_pipeline.s              - completeEnglish text
 ```

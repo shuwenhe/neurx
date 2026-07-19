@@ -32,7 +32,7 @@ English text, `train/neurx` English text"trainingframeworkEnglish text", English
 English textfile:
 
 - `train/neurx/shard/shard_manager.s`
-- `train/neurx/data/dataloader.s`
+- `train/neurx/data/loader/dataloader.s`
 - `train/neurx/pretrain/data/pretrain_data.s`
 - `train/neurx/data/data_pipeline.s`
 

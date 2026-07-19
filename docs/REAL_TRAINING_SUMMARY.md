@@ -156,7 +156,7 @@ Real-time loss computation from actual forward/backward passes
 The real training implementation seamlessly integrates with existing NeurX components:
 
 ### Data Layer
-- Connects to `neurx.dl.dataloader` for batch loading
+- Connects to `neurx.data.loader.dataloader` for batch loading
 - Works with tokenized datasets
 - Supports streaming data pipeline
 

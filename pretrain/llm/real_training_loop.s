@@ -9,7 +9,7 @@ use neurx.pretrain.llm.real_training.{
     print_training_progress, int_to_str, fmt_float
 }
 use neurx.pretrain.llm.gpt_large_pretrain.{gpt_large_pretrain_manifest_refs}
-use neurx.data.corpus_loader.{corpus_state, corpus_batch_result, new_corpus_state_from_paths, corpus_next_batch}
+use neurx.data.dataset.corpus_loader.{corpus_state, corpus_batch_result, new_corpus_state_from_paths, corpus_next_batch}
 
 use neurx.tensor.tensor
 use neurx.tensor.new

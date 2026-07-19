@@ -363,7 +363,7 @@ cat /Users/feifei/train/neurx/training_results.json
 # English text neurx/distributed/ English text
 
 # 5. English textdataload
-# English text neurx/data/distributed_dataloader.s
+# English text neurx/data/loader/distributed.s
 ```
 
 ---
