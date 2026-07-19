@@ -139,7 +139,7 @@ bash scripts/legacy/run_large_pretrain.sh
 ## run_large_pretrain.sh English text
 
 English textMakefile, English text:
-1. compile `training/industrial_1t_training.s` English textfileEnglish textIR
+1. compile `trainer/industrial_1t_training.s` English textfileEnglish textIR
 2. generateEnglish textfile
 3. runtrainingEnglish text
 4. generatecheckpointfileEnglish text `artifacts/checkpoints/`

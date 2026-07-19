@@ -290,7 +290,7 @@ func buildAllComponents() {
     components := []string{
         "model/transformer/transformer_block.s",
         "model/llm/model_loader.s",
-        "training/end_to_end_training.s",
+        "trainer/end_to_end_training.s",
         "inference/inference_server.s",
         "distributed/distributed_training.s",
     }

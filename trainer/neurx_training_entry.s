@@ -1,5 +1,5 @@
-// neurx/training/neurx_training_entry.s
-package neurx.training
+// neurx/trainer/neurx_training_entry.s
+package neurx.trainer.neurx_training_entry
 
 // ═══════════════════════════════════════════════════════════════════
 // NEURX-5.2 Large Model Training Entry Point
@@ -22,7 +22,7 @@ package neurx.training
 //
 // quickstart:
 //   // English text main.s English text:
-//   use neurx.training.*
+//   use neurx.trainer.*
 //
 //   model_parallel_config model_cfg = create_neurx_200b_model_config()
 //   training_config train_cfg = create_64gpu_training_config()

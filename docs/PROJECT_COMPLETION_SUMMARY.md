@@ -18,7 +18,7 @@
 | `cmd/complete-system/main.s` | 500+ | Master entry point, CLI routing, all commands | ✅ Complete |
 | `model/transformer/transformer_block.s` | 400+ | Transformer block with attention+FFN+norm | ✅ Complete |
 | `model/llm/model_loader.s` | 600+ | GPT model init, checkpoint save/load | ✅ Complete |
-| `training/end_to_end_training.s` | 800+ | End-to-end training pipeline | ✅ Enhanced |
+| `trainer/end_to_end_training.s` | 800+ | End-to-end training pipeline | ✅ Enhanced |
 | `build_complete_s_system.sh` | 300+ | Complete build system | ✅ Complete |
 
 ### Documentation Created (5 Guides)
@@ -323,7 +323,7 @@ neurx/
 
 ### For Deep Learning
 - Architecture: `model/transformer/transformer_block.s`
-- Training: `training/end_to_end_training.s`
+- Training: `trainer/end_to_end_training.s`
 - Distributed: `distributed/ddp/ddp.s`
 - Inference: `inference/inference_server.s`
 

@@ -3,7 +3,7 @@
 **English text**: English text 1T GPT trainingEnglish textfile, English text.
 
 **English textimplementation**:
-- [training/industrial_1t_training.s](/Users/shuwen/shuwen/train/neurx/training/industrial_1t_training.s)
+- [trainer/industrial_1t_training.s](/Users/shuwen/shuwen/train/neurx/trainer/industrial_1t_training.s)
 - English textfileEnglish texttrainingmainEnglish text, dataEnglish text, checkpoint, English text, English textoptimizeEnglish textrunEnglish text S English text.
 
 ## P0 - English text, English texttrainingEnglish text
@@ -12,8 +12,8 @@
 
 English textfile:
 - [scripts/legacy/LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh)
-- [training/moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s)
-- [training/end_to_end_training.s](/Users/shuwen/shuwen/train/neurx/training/end_to_end_training.s)
+- [trainer/moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/trainer/moe_1t_orchestrator.s)
+- [trainer/end_to_end_training.s](/Users/shuwen/shuwen/train/neurx/trainer/end_to_end_training.s)
 
 English textcontent:
 - dataload -> forward -> loss -> backward -> optimizer.step
@@ -41,7 +41,7 @@ English textcontent:
 
 English textfile:
 - [checkpoint/moe_1t_distributed_checkpoint.s](/Users/shuwen/shuwen/train/neurx/checkpoint/moe_1t_distributed_checkpoint.s)
-- [training/moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s)
+- [trainer/moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/trainer/moe_1t_orchestrator.s)
 
 English textcontent:
 - parameter shard save

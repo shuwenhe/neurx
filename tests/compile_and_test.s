@@ -128,7 +128,7 @@ func compile_all_components(bin_dir: string, log_dir: string) CompilationResult[
     print_section("PHASE 1: COMPILATION")
     
     let components = [
-        "training/scaled_training_system.s",
+        "trainer/scaled_training_system.s",
         "data/tools/real_data_loader.s",
         "cuda/cuda_accelerated_training.s",
         "distributed/ddp_distributed_training.s"

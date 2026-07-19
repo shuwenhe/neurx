@@ -18,7 +18,7 @@
   - state: ✅ English text
 
 - [x] **training_orchestrator.s** (600+ English text)
-  - English text: `/Users/feifei/shuwen/neurx/train/training_orchestrator.s`
+  - English text: `/Users/feifei/shuwen/neurx/trainer/trainer.s`
   - English text: 17 KB
   - English text: trainingpipelineEnglish text
   - state: ✅ English text
@@ -192,11 +192,11 @@ bash run_llm_training.sh
 
 ```bash
 # English textfileEnglish text
-ls -l /Users/feifei/shuwen/neurx/train/training_orchestrator.s
+ls -l /Users/feifei/shuwen/neurx/trainer/trainer.s
 ls -l /Users/feifei/shuwen/neurx/run_llm_training.sh
 
 # English textfileEnglish text
-file /Users/feifei/shuwen/neurx/train/training_orchestrator.s
+file /Users/feifei/shuwen/neurx/trainer/trainer.s
 file /Users/feifei/shuwen/neurx/run_llm_training.sh
 ```
 
@@ -400,7 +400,7 @@ cat IMPLEMENTATION_SUMMARY.md       # implementationEnglish text
 
 ```bash
 less train/train_llm_enhanced.s
-less train/training_orchestrator.s
+less trainer/trainer.s
 ```
 
 ---

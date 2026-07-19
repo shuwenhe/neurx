@@ -27,12 +27,12 @@ RequiredEnglish text:
 
 English text:
 - `scripts/legacy/LAUNCH_1T_TRAINING.sh` English text Python trainingEnglish text `TODO`
-- `training/moe_1t_orchestrator.s` English textdataloadEnglish textimplementation
+- `trainer/moe_1t_orchestrator.s` English textdataloadEnglish textimplementation
 - `amp/optimizer.s` English text placeholder backward
 
 English textfile:
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L178-L181)
-- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
+- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/trainer/moe_1t_orchestrator.s#L231-L257)
 - [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/amp/optimizer.s#L512-L515)
 
 ### 2. dataEnglish text
@@ -46,12 +46,12 @@ RequiredEnglish text:
 
 English text:
 - `data/tools/real_data_loader.s` English text mock dataset
-- `training/moe_1t_orchestrator.s` English text `moe_1t_load_data_manifest()` English text
+- `trainer/moe_1t_orchestrator.s` English text `moe_1t_load_data_manifest()` English text
 - `scripts/legacy/LAUNCH_1T_TRAINING.sh` English text 1T token, English texttruthfulEnglish textdataEnglish text
 
 English textfile:
 - [real_data_loader.s](/Users/shuwen/shuwen/train/neurx/data/tools/real_data_loader.s#L25-L41)
-- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
+- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/trainer/moe_1t_orchestrator.s#L231-L257)
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L224-L242)
 
 ### 3. English text"English text"
@@ -68,7 +68,7 @@ English text:
 - `LAUNCH_1T_TRAINING.sh` English text 1024 GPU, English text launcher
 
 English textfile:
-- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L131-L224)
+- [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/trainer/moe_1t_orchestrator.s#L131-L224)
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L110-L129)
 
 ### 4. Checkpoint RequiredEnglish textrecover

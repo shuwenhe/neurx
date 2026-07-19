@@ -57,7 +57,7 @@ func check_all_components() ComponentStatus[] {
     // Scaled training system
     let scaled = verify_component(
         "Scaled Training System",
-        "training/scaled_training_system.s",
+        "trainer/scaled_training_system.s",
         850
     )
     scaled.description = "6-layer Transformer, 256-dim, 100M params"
@@ -210,17 +210,17 @@ func verify_integration() {
     println("")
     
     println("✅ Data flow integration:")
-    println("  training/scaled_training_system.s ←→ data/tools/real_data_loader.s")
+    println("  trainer/scaled_training_system.s ←→ data/tools/real_data_loader.s")
     println("  Provides batch data to model")
     println("")
     
     println("✅ Compute acceleration:")
-    println("  training/scaled_training_system.s ←→ cuda/cuda_accelerated_training.s")
+    println("  trainer/scaled_training_system.s ←→ cuda/cuda_accelerated_training.s")
     println("  Executes forward/backward on GPU")
     println("")
     
     println("✅ Distributed training:")
-    println("  training/scaled_training_system.s ←→ distributed/ddp_distributed_training.s")
+    println("  trainer/scaled_training_system.s ←→ distributed/ddp_distributed_training.s")
     println("  Synchronizes gradients across GPUs")
     println("")
     

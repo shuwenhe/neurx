@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.trainer.loop
 
 import "neurx.autograd"
 import "neurx.optimizer"

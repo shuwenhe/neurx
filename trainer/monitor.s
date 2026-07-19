@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.trainer.monitor
 
 import "neurx.arch.mps"
 

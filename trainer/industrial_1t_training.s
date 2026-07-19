@@ -1,4 +1,4 @@
-package neurx.training.industrial_1t_training
+package neurx.trainer.industrial_1t_training
 
 // ============================================================================
 // Industrial 1T GPT Training Pipeline

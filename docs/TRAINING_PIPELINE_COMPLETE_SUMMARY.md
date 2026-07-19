@@ -395,7 +395,7 @@ training_loop_with_accumulation(config, model)
 ### English text
 
 ```s
-import "neurx/training/mixed_precision"
+import "neurx/amp/training"
 
 var mp_config = mixed_precision.mixed_precision_config
 mp_config.use_mixed_precision = true
@@ -408,7 +408,7 @@ loss_scale = update_loss_scale(loss_scale, overflow, step)
 ### English textgradientEnglish text
 
 ```s
-import "neurx/training/gradient_accumulation"
+import "neurx/checkpoint/gradient"
 
 var acc = gradient_accumulation.accumulated_gradients
 acc.accumulation_steps = 4

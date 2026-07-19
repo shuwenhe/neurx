@@ -346,7 +346,7 @@
 
 #### English textfile
 - framework: `serving/speculative_decoding.s` (English text336English text)
-- training: `training/end_to_end_training.s` (English text)
+- training: `trainer/end_to_end_training.s` (English text)
 - English text: "Medusa: Simple LLM Inference Acceleration Framework"
 
 ---

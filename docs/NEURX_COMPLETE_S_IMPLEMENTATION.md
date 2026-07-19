@@ -26,7 +26,7 @@
    - Pre-configured models: Mini, 7B, 13B, 70B
    - Parameter counting and model introspection
 
-3. **training/end_to_end_training.s** (ENHANCED)
+3. **trainer/end_to_end_training.s** (ENHANCED)
    - Complete training pipeline
    - Integration with data loader, optimizer, scheduler
    - Checkpoint management and early stopping
@@ -50,7 +50,7 @@ cmd/complete-system/main.s (Master)
     │       ├─→ model/tokenizer/bpe.s (Tokenization)
     │       └─→ model/lora/lora.s (Adapter Support)
     │
-    ├─→ training/end_to_end_training.s (Training)
+    ├─→ trainer/end_to_end_training.s (Training)
     │       ├─→ optimizer/adamw.s (Optimization)
     │       ├─→ scheduler/lr_scheduler.s (Learning Rate)
     │       ├─→ distributed/ddp/ddp.s (Distributed)
@@ -91,7 +91,7 @@ cd /Users/shuwen/shuwen/train/neurx
 echo "=== Compiling Core Modules ==="
 s model/transformer/transformer_block.s -o .build/transformer_block.ir
 s model/llm/model_loader.s -o .build/model_loader.ir
-s training/end_to_end_training.s -o .build/training.ir
+s trainer/end_to_end_training.s -o .build/training.ir
 
 # Step 2: Link modules
 echo "=== Linking Modules ==="

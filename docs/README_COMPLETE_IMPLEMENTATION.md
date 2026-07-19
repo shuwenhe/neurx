@@ -347,7 +347,7 @@ nvidia-smi dmon
 
 ### Deep Learning
 - Model implementation: `model/transformer/transformer_block.s`
-- Training pipeline: `training/end_to_end_training.s`
+- Training pipeline: `trainer/end_to_end_training.s`
 - Distributed training: `distributed/ddp/ddp.s`
 - Inference: `inference/inference_server.s`
 

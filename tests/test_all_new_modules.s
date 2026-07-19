@@ -1,7 +1,7 @@
 package neurx.test.test_all_new_modules
 
 import "neurx.moe.trae"
-import "neurx.training.rl_training"
+import "neurx.trainer.rl_training"
 import "neurx.model.multimodal.vision_encoder"
 import "neurx.model.transformer.long_context"
 import "neurx.inference.speculative_decoding"

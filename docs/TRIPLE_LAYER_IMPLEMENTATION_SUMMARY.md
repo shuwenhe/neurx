@@ -21,7 +21,7 @@
 | | | | | | • scaled_dot_product_attention() |
 | | | | | | • project_qkv() |
 | | | | | | • softmax_stable() |
-| **Layer 3** | **trainingEnglish text** | `train/training_loop.s` | 450+ | ✅ 100% | completeEnglish texttrainingpipeline |
+| **Layer 3** | **trainingEnglish text** | `trainer/loop.s` | 450+ | ✅ 100% | completeEnglish texttrainingpipeline |
 | | English textfunction | | | | • training_loop() |
 | | | | | | • training_step() |
 | | | | | | • forward_pass() |

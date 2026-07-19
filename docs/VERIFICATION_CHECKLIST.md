@@ -32,7 +32,7 @@
   - LoadCheckpoint ✅
   - Pre-configured sizes ✅
 
-- [x] **training/end_to_end_training.s** (800 lines)
+- [x] **trainer/end_to_end_training.s** (800 lines)
   - TrainingState ✅
   - TrainingConfig ✅
   - TrainingPipeline ✅
@@ -338,7 +338,7 @@
 - [x] cmd/complete-system/main.s ✅
 - [x] model/transformer/transformer_block.s ✅
 - [x] model/llm/model_loader.s ✅
-- [x] training/end_to_end_training.s (enhanced) ✅
+- [x] trainer/end_to_end_training.s (enhanced) ✅
 - [x] build_complete_s_system.sh ✅
 
 ### Documentation Created

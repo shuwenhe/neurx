@@ -1,4 +1,4 @@
-package neurx.training.rl_training
+package neurx.trainer.rl_training
 
 import "neurx.util.math"
 

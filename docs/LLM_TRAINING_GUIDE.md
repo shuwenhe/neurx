@@ -62,7 +62,7 @@ bash run_llm_training.sh
 ```bash
 # useScompileEnglish textcompiletrainingEnglish text
 /Users/shuwen/shuwen/train/s/bin/s \
-  /Users/feifei/shuwen/neurx/train/training_orchestrator.s \
+  /Users/feifei/shuwen/neurx/trainer/trainer.s \
   -o /Users/feifei/shuwen/neurx/build/llm_training/training_orchestrator
 ```
 

@@ -9,7 +9,7 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  training/scaled_training_system.s : " + check_path("training/scaled_training_system.s"))
+    println("  trainer/scaled_training_system.s : " + check_path("trainer/scaled_training_system.s"))
     println("  data/tools/real_data_loader.s         : " + check_path("data/tools/real_data_loader.s"))
     println("  cuda/cuda_accelerated_training.s   : " + check_path("cuda/cuda_accelerated_training.s"))
     println("  distributed/ddp_distributed_training.s : " + check_path("distributed/ddp_distributed_training.s"))

@@ -26,7 +26,7 @@ Your NeurX framework is now **100% implemented in pure S language** and ready fo
    - Pre-configured model sizes
    - Parameter counting
 
-4. **training/end_to_end_training.s** (800 lines)
+4. **trainer/end_to_end_training.s** (800 lines)
    - Complete training pipeline
    - Learning rate scheduling
    - Checkpointing and validation

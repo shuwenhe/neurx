@@ -133,7 +133,7 @@ neurx/
 **recommendedstepEnglish text:**
 1. English text: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) (15English text)
 2. English text: [train_llm_enhanced.s](../train/train_llm_enhanced.s) (20English text)
-3. English text: [training_orchestrator.s](../train/training_orchestrator.s) (15English text)
+3. English text: [training_orchestrator.s](../trainer/trainer.s) (15English text)
 
 **English text**: 50English text
 
@@ -163,7 +163,7 @@ English text: 180-650
 
 #### trainingEnglish text
 ```
-English text: train/training_orchestrator.s English text
+English text: trainer/trainer.s English text
       train/train_llm_enhanced.s
 search: func run_complete_training_pipeline,
       func run_training_loop
@@ -172,14 +172,14 @@ English text: 1000+
 
 #### learning rateEnglish text
 ```
-English text: train/training_orchestrator.s
+English text: trainer/trainer.s
 search: struct LRScheduler, func get_learning_rate
 English text: 250-300
 ```
 
 #### checkpointmanagementEnglish text
 ```
-English text: train/training_orchestrator.s
+English text: trainer/trainer.s
 search: struct CheckpointManager, func save_checkpoint
 English text: 180-220
 ```

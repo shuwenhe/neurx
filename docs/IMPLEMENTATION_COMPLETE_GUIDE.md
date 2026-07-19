@@ -94,7 +94,7 @@ multi_head_attention_module attn = new_multi_head_attention(cfg)
 ---
 
 ### 3️⃣ trainingEnglish text ✅ English text
-**file**: `/Users/feifei/train/neurx/train/training_loop.s` (450+ English text)
+**file**: `/Users/feifei/train/neurx/trainer/loop.s` (450+ English text)
 
 **implementationcontent**:
 ```s
@@ -148,7 +148,7 @@ cfg.warmup_steps = 1000
 ```
 bin/train_complete.s (maintrainingEnglish text)
     │
-    ├─→ train/training_loop.s
+    ├─→ trainer/loop.s
     │   ├─→ Forward Pass
     │   ├─→ train/loss_functions.s (Loss Computation)
     │   ├─→ Backward Pass
@@ -219,7 +219,7 @@ bin/train_complete.s (maintrainingEnglish text)
 |-----|------|------|------|
 | train/loss_functions.s | 350+ | Losscompute | ✅ English text |
 | attention/attention_implementation.s | 400+ | Attention | ✅ English text |
-| train/training_loop.s | 450+ | trainingEnglish text | ✅ English text |
+| trainer/loop.s | 450+ | trainingEnglish text | ✅ English text |
 | bin/train_complete.s | 200+ | English text | ✅ English text |
 | **English text** | **1400+** | **completesystem** | **✅ English text** |
 

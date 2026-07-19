@@ -1,4 +1,4 @@
-package neurx.training.moe_1t_orchestrator
+package neurx.trainer.moe_1t_orchestrator
 
 // ============================================================================
 // 1T MoE Training Orchestrator

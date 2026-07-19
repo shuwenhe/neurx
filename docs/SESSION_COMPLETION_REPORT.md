@@ -14,7 +14,7 @@
 |------|------|------|------|
 | `train/loss_functions.s` | 350+ | lossfunction (Cross-Entropy, English text, English text) | ✅ |
 | `attention/attention_implementation.s` | 400+ | Multi-Head Attention completeimplementation | ✅ |
-| `train/training_loop.s` | 450+ | trainingEnglish text (Forward/Backward/Update) | ✅ |
+| `trainer/loop.s` | 450+ | trainingEnglish text (Forward/Backward/Update) | ✅ |
 | `bin/train_complete.s` | 200+ | English texttrainingEnglish textexample | ✅ |
 
 ### English text (3English text)
@@ -323,7 +323,7 @@ neurx/
 ### English text
 - [train/loss_functions.s](./train/loss_functions.s) - Loss implementation
 - [attention/attention_implementation.s](./attention/attention_implementation.s) - Attention implementation
-- [train/training_loop.s](./train/training_loop.s) - trainingEnglish text
+- [trainer/loop.s](./trainer/loop.s) - trainingEnglish text
 - [bin/train_complete.s](./bin/train_complete.s) - completeexample
 
 ---

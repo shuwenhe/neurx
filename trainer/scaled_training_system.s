@@ -1,4 +1,4 @@
-package neurx.scaled_training
+package neurx.trainer.scaled_training_system
 
 // ============================================================================
 // SCALED END-TO-END TRAINING SYSTEM

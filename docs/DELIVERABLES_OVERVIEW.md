@@ -51,7 +51,7 @@
   - `NumParams()` - Parameter counting
 - **Status**: ✅ Production-ready model loader
 
-#### 4. **training/end_to_end_training.s** (800+ lines)
+#### 4. **trainer/end_to_end_training.s** (800+ lines)
 - **Location**: `/Users/shuwen/shuwen/train/neurx/training/`
 - **Purpose**: Complete end-to-end training pipeline
 - **Key Components**:

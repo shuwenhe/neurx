@@ -60,7 +60,7 @@
 
 ### English text: trainingEnglish text ✅ COMPLETE
 
-**file**: `/Users/feifei/train/neurx/train/training_loop.s`
+**file**: `/Users/feifei/train/neurx/trainer/loop.s`
 **English text**: 450+ English text
 **English text**:
 

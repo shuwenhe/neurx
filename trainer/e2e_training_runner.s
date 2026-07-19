@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.trainer.e2e_training_runner
 
 // ============================================================================
 // End-to-End Training System - Mini GPT Training

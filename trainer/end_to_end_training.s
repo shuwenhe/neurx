@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.trainer.end_to_end_training
 
 // ============================================================================
 // End-to-End Training System - Verifiable Implementation

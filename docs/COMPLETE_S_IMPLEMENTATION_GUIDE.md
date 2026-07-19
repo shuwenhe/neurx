@@ -269,7 +269,7 @@ fn (tb *TransformerBlock) Backward(dOut Tensor) Tensor {
 **Problem**: Individual modules work but haven't been tested in full integration
 **Solution**:
 ```s
-// neurx/training/end_to_end_training.s (NEW)
+// neurx/trainer/end_to_end_training.s (NEW)
 fn CompleteTrainingPipeline() error {
     // 1. Load and preprocess data
     // 2. Initialize model (GPT-style)
@@ -390,7 +390,7 @@ fn DistributedTrainingStep(model *GPTModel, batch *DataBatch) error {
 # 1. Compile individual modules
 cd neurx
 s model/transformer/transformer_block.s -o .build/transformer.ir
-s training/end_to_end_training.s -o .build/training.ir
+s trainer/end_to_end_training.s -o .build/training.ir
 s distributed/distributed_training.s -o .build/distributed.ir
 
 # 2. Link modules
@@ -414,7 +414,7 @@ BUILD_DIR ?= .build/s_implementation
 # Core modules
 CORE_MODULES := \
     model/transformer/transformer_block.s \
-    training/end_to_end_training.s \
+    trainer/end_to_end_training.s \
     distributed/distributed_training.s \
     model/llm/model_loader.s
 
@@ -450,7 +450,7 @@ benchmark-s: build-complete-s
 
 2. **Create End-to-End Training**
    ```bash
-   touch neurx/training/end_to_end_training.s
+   touch neurx/trainer/end_to_end_training.s
    # Implement complete training pipeline
    ```
 

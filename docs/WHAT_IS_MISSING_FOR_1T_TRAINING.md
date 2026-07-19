@@ -29,7 +29,7 @@ neurx English textAllowedtrainingEnglish text 1T Claude English textmodel, Engli
 
 ### 1️⃣ **MoE 1T trainingEnglish text** ✅
 
-**file**: `training/moe_1t_orchestrator.s` (700+ English text)
+**file**: `trainer/moe_1t_orchestrator.s` (700+ English text)
 
 **English text**:
 - English text 1024 GPU English text 4 English text (DP×TP×PP×EP)
@@ -385,7 +385,7 @@ English text: 40% ✅ (frameworkEnglish text)
 
 English textimplementationfile:
 
-1. **`training/moe_1t_orchestrator.s`** (700 English text)
+1. **`trainer/moe_1t_orchestrator.s`** (700 English text)
    - maintrainingEnglish text
    - 4 English text
    - completetrainingEnglish textframework

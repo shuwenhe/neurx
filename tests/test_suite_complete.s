@@ -8,7 +8,7 @@ package neurx.tests
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
 use neurx.engine.training_orchestrator
-use neurx.training.industrial_gpt_training
+use neurx.trainer.industrial_gpt_training
 use neurx.model.transformer
 use neurx.amp.scaler
 use neurx.optimizer.adamw
