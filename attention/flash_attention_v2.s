@@ -3,20 +3,20 @@ package neurx.attention.flash_v2
 // ============================================================================
 // Flash Attention 2 — IO-Aware Exact Attention
 //
-// 论文: "FlashAttention-2: Faster Attention with Better Parallelism and Work
+// English text: "FlashAttention-2: Faster Attention with Better Parallelism and Work
 //        Partitioning" (Dao, 2023)
 //
-// 核心思想:
-//   传统注意力需要将 NxN 注意力矩阵物化到 HBM，内存复杂度 O(N²)。
-//   Flash Attention 将 Q/K/V 分块 (tiling)，在 SRAM 中完成 softmax+matmul，
-//   避免大矩阵读写，内存复杂度 O(N)，速度提升 2-4×。
+// English text:
+//   English textRequiredEnglish text NxN English text HBM, English text O(N²).
+//   Flash Attention English text Q/K/V English text (tiling), English text SRAM English text softmax+matmul,
+//   English text, English text O(N), English text 2-4×.
 //
-// 实现:
-//   • 前向: Online softmax (Milakov & Gimelshein) + 分块累积
-//   • 反向: 重计算注意力矩阵（不保存），再分块求梯度
-//   • 因果掩码: 块对角线下方跳过，块内三角掩码
-//   • GQA: key/value head 广播到 query groups
-//   • 支持 bf16/fp16/fp32
+// implementation:
+//   • English text: Online softmax (Milakov & Gimelshein) + English text
+//   • English text: English textcomputeEnglish text(English textsave), English textgradient
+//   • English text: English text, English text
+//   • GQA: key/value head English text query groups
+//   • support bf16/fp16/fp32
 // ============================================================================
 
 use neurx.attention.core.{
@@ -24,16 +24,16 @@ use neurx.attention.core.{
 }
 
 // ============================================================================
-// 1. 分块配置
+// 1. English textconfiguration
 // ============================================================================
 
 struct flash_attn_config {
-    int block_q          // Q 方向块大小 (典型: 64 or 128)
-    int block_kv         // KV 方向块大小 (典型: 64 or 128)
-    int head_dim         // 每个注意力头维度
-    int num_q_heads      // Query 头数
-    int num_kv_heads     // KV 头数 (GQA: < num_q_heads)
-    bool causal          // 因果掩码 (autoregressive)
+    int block_q          // Q English text (English text: 64 or 128)
+    int block_kv         // KV English text (English text: 64 or 128)
+    int head_dim         // English text
+    int num_q_heads      // Query English text
+    int num_kv_heads     // KV English text (GQA: < num_q_heads)
+    bool causal          // English text (autoregressive)
     float softmax_scale  // 1 / sqrt(head_dim)
     string dtype         // "fp32" | "fp16" | "bf16"
 }
@@ -53,14 +53,14 @@ func new_flash_attn_config(int head_dim, int num_q_heads, int num_kv_heads, bool
 }
 
 // ============================================================================
-// 2. 前向传播中间状态 (per-head tiling accumulators)
+// 2. English textstate (per-head tiling accumulators)
 // ============================================================================
 
-// 每个 Q 块的 online softmax 累加器
+// English text Q English text online softmax English text
 struct flash_block_acc {
-    []float output      // [Br, head_dim] 累积输出
-    []float row_max     // [Br] 当前各行最大值 (online softmax m)
-    []float row_sum     // [Br] 当前各行 exp 归一化因子 (online softmax l)
+    []float output      // [Br, head_dim] English textoutput
+    []float row_max     // [Br] English text (online softmax m)
+    []float row_sum     // [Br] English text exp English text (online softmax l)
 }
 
 func new_flash_block_acc(int block_q, int head_dim) flash_block_acc {
@@ -71,14 +71,14 @@ func new_flash_block_acc(int block_q, int head_dim) flash_block_acc {
     }
 }
 
-// 完整注意力前向结果
+// completeEnglish textresult
 struct flash_attn_output {
     []float out         // [batch, seq_len, num_q_heads, head_dim]
-    []float lse         // [batch, num_q_heads, seq_len] log-sum-exp (用于反向)
+    []float lse         // [batch, num_q_heads, seq_len] log-sum-exp (English text)
 }
 
 // ============================================================================
-// 3. 工具函数
+// 3. toolfunction
 // ============================================================================
 
 func sqrt_approx(float x) float {
@@ -126,7 +126,7 @@ func fill(int n, float val) []float {
 }
 
 func exp_stable(float x) float {
-    // 稳定指数：截断防止溢出
+    // English text: English text
     if x > 88.0 {
         return 2.41549527e38
     }
@@ -147,13 +147,13 @@ func max_float(float a, float b) float {
 }
 
 // ============================================================================
-// 4. 核心分块前向 (单头单批次)
+// 4. English text (English textbatch)
 //
-// 输入:
+// input:
 //   q:  [seq_len, head_dim]  (Query for this head)
 //   k:  [kv_len,  head_dim]  (Key, kv_head)
 //   v:  [kv_len,  head_dim]  (Value, kv_head)
-// 输出: [seq_len, head_dim]
+// output: [seq_len, head_dim]
 // ============================================================================
 
 func flash_attn_forward_head(
@@ -312,10 +312,10 @@ func flash_attn_forward_head(
 }
 
 // ============================================================================
-// 5. 多头前向 (batch=1)
+// 5. English text (batch=1)
 //
-// q/k/v 布局: [seq_len, num_heads, head_dim] 展平
-// 输出: [seq_len, num_q_heads, head_dim]
+// q/k/v English text: [seq_len, num_heads, head_dim] English text
+// output: [seq_len, num_q_heads, head_dim]
 // ============================================================================
 
 struct flash_attn_fwd_state {
@@ -332,7 +332,7 @@ func flash_attn_forward(
     int H_q  = cfg.num_q_heads
     int H_kv = cfg.num_kv_heads
     int D    = cfg.head_dim
-    int kv_group = H_q / H_kv   // GQA 组比
+    int kv_group = H_q / H_kv   // GQA English text
 
     []float out = zeros(seq_len * H_q * D)
     []float lse = zeros(H_q * seq_len)
@@ -398,7 +398,7 @@ func flash_attn_forward(
 }
 
 // ============================================================================
-// 6. 反向传播 (重计算注意力，无需保存 N×N 矩阵)
+// 6. English text (English textcomputeEnglish text, English textsave N×N English text)
 // ============================================================================
 
 struct flash_attn_grad_result {
@@ -591,7 +591,7 @@ func flash_attn_backward(
 }
 
 // ============================================================================
-// 7. 公共接口：无缝替换标准注意力
+// 7. English text: English text
 // ============================================================================
 
 struct flash_mha_state {
@@ -643,7 +643,7 @@ func flash_mha_forward(flash_mha_state mha, []float x, int seq_len) []float {
 }
 
 // ============================================================================
-// 8. 矩阵/形状工具
+// 8. English text/English texttool
 // ============================================================================
 
 // C = A @ B:  A [M, K], B [K, N] → C [M, N]
@@ -667,13 +667,13 @@ func matmul_2d([]float a, []float b, int M, int K, int N) []float {
     c
 }
 
-// 将 [seq, heads*D] 重排为 [seq, heads, D] (连续存储不变，只是逻辑重排)
+// English text [seq, heads*D] English text [seq, heads, D] (English text, English text)
 func reshape_to_heads([]float x, int seq, int heads, int D) []float {
-    // 布局已经是 seq * heads * D，无需物理移动
+    // English text seq * heads * D, English text
     x
 }
 
 func merge_heads([]float x, int seq, int heads, int D) []float {
-    // 同上，heads*D 展平即为 [seq, hidden]
+    // English text, heads*D English text [seq, hidden]
     x
 }

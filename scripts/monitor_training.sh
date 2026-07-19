@@ -1,6 +1,6 @@
 #!/bin/bash
 # NeurX Training Progress Monitor
-# 在另一个终端运行这个脚本来查看实时训练进度
+# English textrunEnglish texttrainingEnglish text
 # Usage: ./scripts/monitor_training.sh
 
 set -e
@@ -9,7 +9,7 @@ NEURX_ROOT="${NEURX_ROOT:-.}"
 LOG_DIR="${LOG_DIR:-$NEURX_ROOT/checkpoint/NeurX-1.3/logs}"
 ARTIFACT_LOG_DIR="${ARTIFACT_LOG_DIR:-$NEURX_ROOT/artifacts/logs}"
 
-# 自动查找最新的日志文件
+# English textlogfile
 find_latest_log() {
     local dir="$1"
     if [ ! -d "$dir" ]; then
@@ -37,11 +37,11 @@ echo "📄 Log file: $LOG_FILE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# 实时显示训练进度
+# English texttrainingEnglish text
 tail -f "$LOG_FILE" | while IFS= read -r line; do
-    # 查找训练输出
+    # English texttrainingoutput
     if echo "$line" | grep -q "trainer-v2"; then
-        # 提取step, loss等信息
+        # English textstep, lossEnglish textinformation
         echo "$line" | sed -E 's/.*step=([0-9]+)\/([0-9]+).*loss=([0-9.]+).*/✓ Step \1\/\2, Loss: \3/'
     elif echo "$line" | grep -q "checkpoint"; then
         echo "💾 $line"

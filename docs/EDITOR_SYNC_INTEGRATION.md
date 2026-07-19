@@ -1,73 +1,73 @@
 # NeurX-Code Editor File Synchronization Integration
 
-## 实现概述
+## implementationEnglish text
 
-当编辑的文件在外部被修改时（例如通过 WriteTool 或其他工具），编辑器会自动同步更新内容。
+English textfileEnglish text(English text WriteTool English texttool), English textstepEnglish textcontent.
 
-## 集成步骤
+## English textstepEnglish text
 
-### 1. AgentController.h 中的添加
+### 1. AgentController.h English text
 
 ```cpp
 #pragma once
 
-// 在包含头部添加
+// English text
 #include "editor/FileWatcher.h"
 
 class AgentController : public QObject {
     Q_OBJECT
-    // ... 现有代码 ...
+    // ... English text ...
 
 private slots:
-    // 当监听的文件被外部修改时
+    // English textfileEnglish text
     void onWatchedFileModified(const QString &filePath);
-    
+
 private:
     FileWatcher *m_fileWatcher;
 };
 ```
 
-### 2. AgentController.cpp 中的实现
+### 2. AgentController.cpp English textimplementation
 
 ```cpp
 AgentController::AgentController(QObject *parent)
     : QObject(parent)
-    // ... 现有初始化 ...
+    // ... English textinitialize ...
 {
-    // 初始化文件监听
+    // initializefileEnglish text
     m_fileWatcher = new FileWatcher(this);
-    
-    // 连接文件修改信号
+
+    // English textfileEnglish text
     connect(m_fileWatcher, &FileWatcher::fileModified,
             this, &AgentController::onWatchedFileModified);
 }
 
 void AgentController::onOpenFileRequested(const QString &filePath)
 {
-    // 打开文件的现有代码...
+    // English textfileEnglish text...
     m_currentFilePath = filePath;
-    
-    // 开始监听这个文件
+
+    // startEnglish textfile
     m_fileWatcher->watchFile(filePath);
-    
-    // ... 加载文件内容 ...
+
+    // ... loadfilecontent ...
 }
 
 void AgentController::onWatchedFileModified(const QString &filePath)
 {
-    // 只在当前打开的文件被修改时更新
+    // English textfileEnglish text
     if (filePath == m_currentFilePath) {
-        // 从磁盘重新加载文件内容
+        // English textloadfilecontent
         QFile file(filePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QString content = QString::fromUtf8(file.readAll());
             file.close();
-            
-            // 更新内容（会触发 currentFileContentChanged 信号）
+
+            // English textcontent(English text currentFileContentChanged English text)
             if (content != m_currentFileContent) {
                 m_currentFileContent = content;
                 emit currentFileContentChanged();
-                
+
                 qDebug() << "[AgentController] File updated from disk:" << filePath;
             }
         }
@@ -77,15 +77,15 @@ void AgentController::onWatchedFileModified(const QString &filePath)
 void AgentController::setCurrentFilePath(const QString &newPath)
 {
     if (m_currentFilePath != newPath) {
-        // 停止监听旧文件
+        // English textfile
         if (!m_currentFilePath.isEmpty()) {
             m_fileWatcher->unwatchFile(m_currentFilePath);
         }
-        
+
         m_currentFilePath = newPath;
         emit currentFilePathChanged();
-        
-        // 开始监听新文件
+
+        // startEnglish textfile
         if (!newPath.isEmpty()) {
             m_fileWatcher->watchFile(newPath);
         }
@@ -95,37 +95,37 @@ void AgentController::setCurrentFilePath(const QString &newPath)
 void AgentController::setWorkspacePath(const QString &newPath)
 {
     if (m_workspacePath != newPath) {
-        // 停止监听旧工作空间
+        // English text
         m_fileWatcher->clear();
-        
+
         m_workspacePath = newPath;
         emit workspacePathChanged();
-        
-        // 监听新工作空间（可选：递归监听所有文件）
-        // 注意：这可能会很消耗资源，建议只监听当前打开的文件
+
+        // English text(English text: English textfile)
+        // English text: English text, English textfile
     }
 }
 ```
 
-### 3. EditorPanel.qml 中的增强
+### 3. EditorPanel.qml English text
 
-EditorPanel 中已经有了自动同步机制：
+EditorPanel English textstepEnglish text:
 
 ```qml
 Connections {
     target: agent
-    
-    // 当文件路径改变时（例如打开新文件）
-    function onCurrentFilePathChanged() { 
-        root.syncFromAgent(true)  // 从 agent 重新加载内容
+
+    // English textfilepathEnglish text(English textfile)
+    function onCurrentFilePathChanged() {
+        root.syncFromAgent(true)  // English text agent English textloadcontent
     }
-    
-    // 当文件内容改变时（例如外部修改被加载）
-    function onCurrentFileContentChanged() { 
-        root.syncFromAgent()  // 同步编辑器显示
+
+    // English textfilecontentEnglish text(English textload)
+    function onCurrentFileContentChanged() {
+        root.syncFromAgent()  // English textstepEnglish text
     }
-    
-    // 当打开的文件列表改变时
+
+    // English textfileEnglish text
     function onOpenFilesChanged() {
         if (agent.currentFilePath)
             root.syncFromAgent()
@@ -133,74 +133,74 @@ Connections {
 }
 ```
 
-## 工作流程
+## English textpipeline
 
-1. **用户打开文件**
+1. **English textfile**
    ```
    User → Agent.openFile(path) → FileWatcher.watchFile(path) → Editor displays content
    ```
 
-2. **外部修改文件（例如 WriteTool）**
+2. **English textfile(English text WriteTool)**
    ```
    WriteTool → writes to disk → FileWatcher detects change
    ```
 
-3. **编辑器自动同步**
+3. **English textstep**
    ```
    FileWatcher detects → onWatchedFileModified() → reload content from disk
    → update Agent.currentFileContent → sync EditorPanel.qml → Editor shows new content
    ```
 
-## 功能特性
+## English text
 
-✓ **实时监听** - 立即检测文件系统变化
-✓ **防抖动** - 500ms 防抖，避免多次重复加载
-✓ **路径安全** - 验证文件存在和权限
-✓ **递归监听** - 支持目录级别的递归监听（可选）
-✓ **自动缓存** - 追踪文件修改时间，避免重复更新
-✓ **错误处理** - 完整的异常处理和日志记录
+✓ **English text** - English textfilesystemEnglish text
+✓ **English text** - 500ms English text, English textload
+✓ **pathsafety** - English textfileEnglish text
+✓ **English text** - supportdirectoryEnglish text(English text)
+✓ **English textcache** - English textfileEnglish texttime, English text
+✓ **errorEnglish text** - completeEnglish textlogEnglish text
 
-## 配置选项
+## configurationEnglish text
 
-在 AgentController 中可配置：
+English text AgentController English textconfiguration:
 
 ```cpp
-// 修改防抖时间（毫秒）
-m_fileWatcher->setDebounceInterval(1000);  // 改为 1 秒
+// English texttime(English text)
+m_fileWatcher->setDebounceInterval(1000);  // English text 1 English text
 
-// 启用/禁用特定文件的监听
+// English text/English textfileEnglish text
 m_fileWatcher->watchFile(filePath);
 m_fileWatcher->unwatchFile(filePath);
 
-// 监听整个目录（谨慎使用，可能性能影响）
+// English textdirectory(English textuse, English text)
 m_fileWatcher->watchDirectory(dirPath, true);
 ```
 
-## 性能考虑
+## English text
 
-- **单个文件监听** - 极小资源占用（推荐）
-- **多文件监听** - 为每个打开的文件启用监听
-- **目录监听** - 仅在必要时启用，监听深层目录可能影响性能
+- **English textfileEnglish text** - English text(recommended)
+- **English textfileEnglish text** - English textfileEnglish text
+- **directoryEnglish text** - English text, English textdirectoryEnglish text
 
-## 测试验证
+## testEnglish text
 
 ```bash
-# 1. 打开 hello.cc 在编辑器中
-# 2. 运行 WriteTool 或其他工具修改 hello.cc
-# 3. 编辑器应该自动显示更新的内容
+# 1. English text hello.cc English text
+# 2. run WriteTool English texttoolEnglish text hello.cc
+# 3. English textcontent
 
-# 示例测试：
+# exampletest:
 cat >> /path/to/file.cc << 'EOF'
 // Added by external tool
 EOF
 
-# 编辑器应该立即显示新内容
+# English textcontent
 ```
 
-## 未来增强
+## English text
 
-- [ ] 配置文件排除模式（例如排除 .git）
-- [ ] 支持文件重命名检测
-- [ ] 支持新建文件检测
-- [ ] 与版本控制集成
-- [ ] 冲突检测（编辑器有改动且文件被外部修改时的提示）
+- [ ] configurationfileEnglish text(English text .git)
+- [ ] supportfileEnglish text
+- [ ] supportEnglish textfileEnglish text
+- [ ] English text
+- [ ] English text(English textfileEnglish textprompt)

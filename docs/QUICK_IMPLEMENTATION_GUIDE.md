@@ -1,22 +1,22 @@
-# neurx-code VS Code 功能快速实现指南
+# neurx-code VS Code English textquickimplementationEnglish text
 
-## 🚀 立即开始 - 5 分钟设置
+## 🚀 English textstart - 5 English text
 
-### 1. 项目结构
+### 1. English text
 ```
 neurx-code/
 ├── src/
-│   ├── filesystem/          ✅ 文件系统 (已完成)
-│   ├── tools/               ✅ 工具集
-│   ├── editor/              ⏳ 编辑器增强 (新增)
-│   ├── search/              ⏳ 搜索功能 (新增)
-│   └── commands/            ⏳ 命令系统 (新增)
+│   ├── filesystem/          ✅ filesystem (English text)
+│   ├── tools/               ✅ toolEnglish text
+│   ├── editor/              ⏳ English text (English text)
+│   ├── search/              ⏳ searchEnglish text (English text)
+│   └── commands/            ⏳ English textsystem (English text)
 ├── content/
-│   ├── EditorPanel.qml      ✅ 基础编辑器
-│   ├── FileTreePanel.qml    ✅ 文件树
-│   ├── SearchPanel.qml      ⏳ 搜索面板 (新增)
-│   ├── CommandPalette.qml   ⏳ 命令面板 (新增)
-│   └── TerminalPanel.qml    ⏳ 终端 (新增)
+│   ├── EditorPanel.qml      ✅ English text
+│   ├── FileTreePanel.qml    ✅ fileEnglish text
+│   ├── SearchPanel.qml      ⏳ searchEnglish text (English text)
+│   ├── CommandPalette.qml   ⏳ English text (English text)
+│   └── TerminalPanel.qml    ⏳ English text (English text)
 └── docs/
     ├── VSCODE_FEATURES_ANALYSIS.md
     ├── IMPLEMENTATION_ROADMAP.md
@@ -25,11 +25,11 @@ neurx-code/
 
 ---
 
-## 🔧 第一个功能: Undo/Redo
+## 🔧 English text: Undo/Redo
 
-### 第 1 步: 创建历史管理器
+### English text 1 step: English textmanagementEnglish text
 
-**文件**: `src/editor/EditorHistory.h`
+**file**: `src/editor/EditorHistory.h`
 
 ```cpp
 #pragma once
@@ -50,20 +50,20 @@ class EditorHistory : public QObject {
 
 public:
     explicit EditorHistory(QObject* parent = nullptr);
-    
-    // 记录状态变化
+
+    // English textstateEnglish text
     void pushState(const EditorState& state);
-    
-    // Undo/Redo 操作
+
+    // Undo/Redo English text
     bool canUndo() const;
     bool canRedo() const;
     EditorState undo();
     EditorState redo();
-    
-    // 清空历史
+
+    // English text
     void clear();
-    
-    // 配置最大历史条目数
+
+    // configurationEnglish text
     void setMaxHistorySize(int size) { m_maxSize = size; }
 
 signals:
@@ -77,7 +77,7 @@ private:
 };
 ```
 
-**文件**: `src/editor/EditorHistory.cpp`
+**file**: `src/editor/EditorHistory.cpp`
 
 ```cpp
 #include "editor/EditorHistory.h"
@@ -89,14 +89,14 @@ EditorHistory::EditorHistory(QObject* parent)
 
 void EditorHistory::pushState(const EditorState& state)
 {
-    // 新操作后清空 redo 栈
+    // English text redo English text
     m_redoStack.clear();
-    
-    // 控制栈大小
+
+    // English text
     if (m_undoStack.size() >= m_maxSize) {
         m_undoStack.removeFirst();
     }
-    
+
     m_undoStack.push(state);
     emit canUndoChanged(true);
     emit canRedoChanged(false);
@@ -117,7 +117,7 @@ EditorState EditorHistory::undo()
     if (!canUndo()) {
         return EditorState();
     }
-    
+
     EditorState state = m_undoStack.pop();
     emit canUndoChanged(canUndo());
     emit canRedoChanged(true);
@@ -129,7 +129,7 @@ EditorState EditorHistory::redo()
     if (!canRedo()) {
         return EditorState();
     }
-    
+
     EditorState state = m_redoStack.pop();
     emit canRedoChanged(canRedo());
     emit canUndoChanged(true);
@@ -143,9 +143,9 @@ void EditorHistory::clear()
 }
 ```
 
-### 第 2 步: 集成到 EditorPanel
+### English text 2 step: English text EditorPanel
 
-**修改**: `content/EditorPanel.qml`
+**English text**: `content/EditorPanel.qml`
 
 ```qml
 import QtQuick
@@ -154,10 +154,10 @@ import NeurXCode
 
 Rectangle {
     id: root
-    
-    // ... 现有代码 ...
-    
-    // 快捷键处理
+
+    // ... English text ...
+
+    // English text
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Z && event.modifiers & Qt.ControlModifier) {
             editorHistory.undo()
@@ -168,15 +168,15 @@ Rectangle {
             event.accepted = true
         }
     }
-    
+
     TextEdit {
         id: textEdit
         onTextChanged: {
-            // 延迟保存状态（避免每个字符都保存）
+            // English textsavestate(English textsave)
             saveStateTimer.restart()
         }
     }
-    
+
     Timer {
         id: saveStateTimer
         interval: 500
@@ -192,9 +192,9 @@ Rectangle {
 }
 ```
 
-### 第 3 步: 在 C++ 中连接
+### English text 3 step: English text C++ English text
 
-**修改**: `src/bridge/AgentController.cpp`
+**English text**: `src/bridge/AgentController.cpp`
 
 ```cpp
 #include "editor/EditorHistory.h"
@@ -205,12 +205,12 @@ private:
 
 public:
     void init() {
-        // ... 现有初始化 ...
-        
-        // 创建历史管理器
+        // ... English textinitialize ...
+
+        // English textmanagementEnglish text
         m_editorHistory = new EditorHistory(this);
-        
-        // 暴露给 QML
+
+        // English text QML
         rootContext()->setContextProperty("editorHistory", m_editorHistory);
     }
 };
@@ -218,11 +218,11 @@ public:
 
 ---
 
-## 🔎 第二个功能: 全局搜索
+## 🔎 secondEnglish text: English textsearch
 
-### 第 1 步: 搜索引擎
+### English text 1 step: searchEnglish text
 
-**文件**: `src/search/GlobalSearchEngine.h`
+**file**: `src/search/GlobalSearchEngine.h`
 
 ```cpp
 #pragma once
@@ -245,12 +245,12 @@ class GlobalSearchEngine : public QObject {
 
 public:
     explicit GlobalSearchEngine(QObject* parent = nullptr);
-    
-    // 执行搜索
-    void search(const QString& pattern, const QString& rootPath, 
+
+    // English textsearch
+    void search(const QString& pattern, const QString& rootPath,
                 bool useRegex = false, bool caseSensitive = false);
-    
-    // 替换
+
+    // English text
     void replace(const QString& pattern, const QString& replacement,
                  const QString& rootPath);
 
@@ -266,9 +266,9 @@ private:
 };
 ```
 
-### 第 2 步: SearchPanel QML
+### English text 2 step: SearchPanel QML
 
-**文件**: `content/SearchPanel.qml`
+**file**: `content/SearchPanel.qml`
 
 ```qml
 import QtQuick
@@ -278,66 +278,66 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     color: Theme.backgroundColor
-    
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 10
-        
-        // 搜索输入
+
+        // searchinput
         RowLayout {
             Layout.fillWidth: true
-            
+
             TextField {
                 id: searchField
                 Layout.fillWidth: true
-                placeholderText: "搜索..."
+                placeholderText: "search..."
                 onTextChanged: {
                     if (text.length > 2) {
                         searchEngine.search(text, agent.workspacePath)
                     }
                 }
             }
-            
+
             Button {
-                text: "匹配大小写"
+                text: "English text"
                 checkable: true
             }
-            
+
             Button {
-                text: "正则表达式"
+                text: "English text"
                 checkable: true
             }
         }
-        
-        // 搜索结果
+
+        // searchresult
         ListView {
             id: resultsList
             Layout.fillWidth: true
             Layout.fillHeight: true
-            
+
             model: searchResults
-            
+
             delegate: Rectangle {
                 width: resultsList.width
                 height: 50
                 color: index % 2 ? Theme.altBackgroundColor : Theme.backgroundColor
-                
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 5
-                    
+
                     Text {
                         text: modelData.filePath
                         color: Theme.textColor
                     }
-                    
+
                     Text {
                         text: `Line ${modelData.lineNumber}: ${modelData.lineContent}`
                         color: Theme.accentColor
                         font.family: "monospace"
                     }
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -346,27 +346,27 @@ Rectangle {
                 }
             }
         }
-        
-        // 替换区域
+
+        // English text
         RowLayout {
             Layout.fillWidth: true
-            
+
             TextField {
                 id: replaceField
                 Layout.fillWidth: true
-                placeholderText: "替换为..."
+                placeholderText: "English text..."
             }
-            
+
             Button {
-                text: "替换"
+                text: "English text"
                 onClicked: {
                     searchEngine.replace(searchField.text, replaceField.text,
                                        agent.workspacePath)
                 }
             }
-            
+
             Button {
-                text: "替换全部"
+                text: "English text"
                 onClicked: {
                     searchEngine.replace(searchField.text, replaceField.text,
                                        agent.workspacePath)
@@ -379,11 +379,11 @@ Rectangle {
 
 ---
 
-## ⌨️ 第三个功能: 命令面板
+## ⌨️ English text: English text
 
-### 第 1 步: 命令管理器
+### English text 1 step: English textmanagementEnglish text
 
-**文件**: `src/commands/CommandManager.h`
+**file**: `src/commands/CommandManager.h`
 
 ```cpp
 #pragma once
@@ -406,17 +406,17 @@ class CommandManager : public QObject {
 
 public:
     explicit CommandManager(QObject* parent = nullptr);
-    
-    // 注册命令
+
+    // English text
     void registerCommand(const Command& cmd);
-    
-    // 执行命令
+
+    // English text
     void executeCommand(const QString& id);
-    
-    // 获取所有命令
+
+    // English text
     QList<Command> getAllCommands() const;
-    
-    // 搜索命令
+
+    // searchEnglish text
     QList<Command> searchCommands(const QString& query) const;
 
 signals:
@@ -427,7 +427,7 @@ private:
 };
 ```
 
-### 第 2 步: CommandPalette QML
+### English text 2 step: CommandPalette QML
 
 ```qml
 import QtQuick
@@ -438,31 +438,31 @@ Popup {
     id: palette
     width: 600
     height: 400
-    
+
     ColumnLayout {
         anchors.fill: parent
-        
+
         TextField {
             id: commandInput
             Layout.fillWidth: true
-            placeholderText: "输入命令..."
+            placeholderText: "inputEnglish text..."
             focus: true
-            
+
             onTextChanged: {
                 filteredCommands = commandManager.searchCommands(text)
             }
         }
-        
+
         ListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            
+
             model: filteredCommands
-            
+
             delegate: Rectangle {
                 width: parent.width
                 height: 40
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -470,7 +470,7 @@ Popup {
                         palette.close()
                     }
                 }
-                
+
                 Text {
                     text: modelData.title + " (" + modelData.keybinding + ")"
                     anchors.verticalCenter: parent.verticalCenter
@@ -485,78 +485,78 @@ Popup {
 
 ---
 
-## 📋 快速集成清单
+## 📋 quickEnglish text
 
-### ✅ 今日任务
-- [ ] 创建 `EditorHistory.h/cpp`
-- [ ] 修改 `EditorPanel.qml` 集成 Undo/Redo
-- [ ] 连接快捷键 (Ctrl+Z, Ctrl+Y)
-- [ ] 测试基本功能
+### ✅ English text
+- [ ] English text `EditorHistory.h/cpp`
+- [ ] English text `EditorPanel.qml` English text Undo/Redo
+- [ ] English text (Ctrl+Z, Ctrl+Y)
+- [ ] testEnglish text
 
-### ✅ 明日任务
-- [ ] 创建 `GlobalSearchEngine.h/cpp`
-- [ ] 创建 `SearchPanel.qml`
-- [ ] 集成 grep 搜索
-- [ ] 实现搜索结果导航
+### ✅ English text
+- [ ] English text `GlobalSearchEngine.h/cpp`
+- [ ] English text `SearchPanel.qml`
+- [ ] English text grep search
+- [ ] implementationsearchresultEnglish text
 
-### ✅ 本周任务
-- [ ] 创建 `CommandManager.h/cpp`
-- [ ] 创建 `CommandPalette.qml`
-- [ ] 注册基础命令
-- [ ] Ctrl+Shift+P 快捷键
+### ✅ English text
+- [ ] English text `CommandManager.h/cpp`
+- [ ] English text `CommandPalette.qml`
+- [ ] English text
+- [ ] Ctrl+Shift+P English text
 
 ---
 
-## 🔗 文件树右键菜单实现
+## 🔗 fileEnglish textimplementation
 
-**修改**: `content/FileTreeItem.qml`
+**English text**: `content/FileTreeItem.qml`
 
 ```qml
 Rectangle {
     id: item
     width: parent.width
     height: 30
-    
+
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        
+
         onClicked: (mouse) => {
             if (mouse.button === Qt.RightButton) {
                 contextMenu.popup()
             }
         }
     }
-    
+
     Menu {
         id: contextMenu
-        
+
         MenuItem {
-            text: "新建文件"
+            text: "English textfile"
             onTriggered: createFile(item.filePath)
         }
-        
+
         MenuItem {
-            text: "新建文件夹"
+            text: "English textfileEnglish text"
             onTriggered: createFolder(item.filePath)
         }
-        
+
         MenuSeparator {}
-        
+
         MenuItem {
-            text: "删除"
+            text: "English text"
             onTriggered: deleteFile(item.filePath)
         }
-        
+
         MenuItem {
-            text: "重命名"
+            text: "English text"
             onTriggered: startRename(item.filePath)
         }
-        
+
         MenuSeparator {}
-        
+
         MenuItem {
-            text: "复制路径"
+            text: "English textpath"
             onTriggered: copyToClipboard(item.filePath)
         }
     }
@@ -565,9 +565,9 @@ Rectangle {
 
 ---
 
-## 🎯 代码折叠实现概览
+## 🎯 English textimplementationEnglish text
 
-**文件**: `src/editor/CodeFolder.h`
+**file**: `src/editor/CodeFolder.h`
 
 ```cpp
 struct FoldRegion {
@@ -587,68 +587,68 @@ public:
 
 ---
 
-## 📚 学习资源
+## 📚 English text
 
-### Qt 相关
-- [Qt QML 官方文档](https://doc.qt.io/qt-6/qml-index.html)
+### Qt English text
+- [Qt QML English text](https://doc.qt.io/qt-6/qml-index.html)
 - [Qt C++ API](https://doc.qt.io/qt-6/classes.html)
-- [Qt Creator 示例](https://doc.qt.io/qtcreator/creator-examples.html)
+- [Qt Creator example](https://doc.qt.io/qtcreator/creator-examples.html)
 
-### VS Code 相关
-- [VS Code 文档](https://code.visualstudio.com/docs)
-- [VS Code 扩展 API](https://code.visualstudio.com/api)
-- [VS Code 源码](https://github.com/microsoft/vscode)
+### VS Code English text
+- [VS Code English text](https://code.visualstudio.com/docs)
+- [VS Code extension API](https://code.visualstudio.com/api)
+- [VS Code English text](https://github.com/microsoft/vscode)
 
-### 相关技术
+### English text
 - [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
 - [Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/)
 
 ---
 
-## 🚀 执行步骤
+## 🚀 English textstepEnglish text
 
-### 第 1 天: Undo/Redo
+### English text 1 English text: Undo/Redo
 ```bash
-1. 创建 EditorHistory.h/cpp (200 行)
-2. 修改 EditorPanel.qml (100 行)
-3. 修改 AgentController.cpp (20 行)
-4. 测试快捷键
-预计时间: 2-3 小时
+1. English text EditorHistory.h/cpp (200 English text)
+2. English text EditorPanel.qml (100 English text)
+3. English text AgentController.cpp (20 English text)
+4. testEnglish text
+English texttime: 2-3 English text
 ```
 
-### 第 2 天: 全局搜索
+### English text 2 English text: English textsearch
 ```bash
-1. 创建 GlobalSearchEngine.h/cpp (300 行)
-2. 创建 SearchPanel.qml (400 行)
-3. 集成到 App.qml (50 行)
-4. 测试搜索功能
-预计时间: 4-5 小时
+1. English text GlobalSearchEngine.h/cpp (300 English text)
+2. English text SearchPanel.qml (400 English text)
+3. English text App.qml (50 English text)
+4. testsearchEnglish text
+English texttime: 4-5 English text
 ```
 
-### 第 3 天: 命令面板
+### English text 3 English text: English text
 ```bash
-1. 创建 CommandManager.h/cpp (200 行)
-2. 创建 CommandPalette.qml (250 行)
-3. 注册基础命令 (100 行)
-4. 集成快捷键
-预计时间: 3-4 小时
+1. English text CommandManager.h/cpp (200 English text)
+2. English text CommandPalette.qml (250 English text)
+3. English text (100 English text)
+4. English text
+English texttime: 3-4 English text
 ```
 
 ---
 
-## ✨ 总结
+## ✨ English text
 
-**可在本周完成**:
-- ✅ Undo/Redo (编辑器必需)
-- ✅ 全局搜索 (基本功能)  
-- ✅ 命令面板 (效率工具)
-- ✅ 右键菜单 (用户体验)
+**English text**:
+- ✅ Undo/Redo (English text)
+- ✅ English textsearch (English text)
+- ✅ English text (English texttool)
+- ✅ English text (English text)
 
-**预计代码新增**: ~1,500 行  
-**预计时间**: 1-2 周
+**English text**: ~1,500 English text
+**English texttime**: 1-2 English text
 
 ---
 
-**版本**: 1.0  
-**更新**: 2026年6月4日  
-**下一个指南**: `ADVANCED_FEATURES.md` (LSP, 调试器, Git)
+**English text**: 1.0
+**English text**: 2026English text6English text4English text
+**English text**: `ADVANCED_FEATURES.md` (LSP, English text, Git)

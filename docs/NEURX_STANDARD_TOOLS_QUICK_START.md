@@ -1,36 +1,36 @@
-# NeurX 标准工具系统 - 快速开始
+# NeurX English texttoolsystem - quickstart
 
-**5 分钟快速集成指南**
+**5 English textquickEnglish text**
 
 ---
 
-## 🎯 三步集成
+## 🎯 English textstepEnglish text
 
-### 步骤 1: 添加到构建系统
+### stepEnglish text 1: English textsystem
 
-在 `CMakeLists.txt` 中添加：
+English text `CMakeLists.txt` English text:
 
 ```cmake
-# 在 add_library 或 add_executable 的源文件列表中添加
+# English text add_library English text add_executable English textfileEnglish text
 src/tools/NeurXStandardTools.cpp
 ```
 
-### 步骤 2: 注册工具
+### stepEnglish text 2: English texttool
 
-在你的初始化代码中（如 `AgentController::initialize()`）：
+English textinitializeEnglish text(English text `AgentController::initialize()`):
 
 ```cpp
 #include "tools/NeurXStandardTools.h"
 
-// 一键注册所有 7 个标准工具
+// English text 7 English texttool
 NeurXStandardToolFactory::registerAllTools(
-    workspaceRoot,      // QString: 工作空间路径
-    m_toolRegistry,     // CoreToolRegistry*: 工具注册表
-    m_sandboxManager    // SandboxManager*: 可选，Sandbox 管理器
+    workspaceRoot,      // QString: English textpath
+    m_toolRegistry,     // CoreToolRegistry*: toolEnglish text
+    m_sandboxManager    // SandboxManager*: English text, Sandbox managementEnglish text
 );
 ```
 
-### 步骤 3: 在 LLM 提示词中添加工具说明
+### stepEnglish text 3: English text LLM promptEnglish texttoolexplanation
 
 ```cpp
 QString systemPrompt = R"(
@@ -63,13 +63,13 @@ When you need to use a tool, respond with JSON:
 
 ---
 
-## 🚀 使用示例
+## 🚀 useexample
 
-### 示例 1: 创建文件
+### example 1: English textfile
 
-**用户输入**: "创建一个 C++ 类 MyClass"
+**English textinput**: "English text C++ English text MyClass"
 
-**LLM 生成**:
+**LLM generate**:
 ```json
 {
   "tool": "Write",
@@ -80,7 +80,7 @@ When you need to use a tool, respond with JSON:
 }
 ```
 
-**执行代码**:
+**English text**:
 ```cpp
 BaseTool* tool = m_toolRegistry->findTool("Write");
 QJsonObject params;
@@ -91,17 +91,17 @@ ToolResult result = tool->execute("call-123", params);
 // result.content: "Created/Updated file: src/MyClass.h (50 bytes)"
 ```
 
-### 示例 2: 编辑文件
+### example 2: English textfile
 
-**用户输入**: "在 main.cpp 添加日志输出"
+**English textinput**: "English text main.cpp English textlogoutput"
 
-**LLM 执行流程**:
+**LLM English textpipeline**:
 ```cpp
-// 1. 读取文件
+// 1. English textfile
 tool = findTool("Read");
 result = tool->execute("call-1", {{"file_path", "src/main.cpp"}});
 
-// 2. 编辑文件
+// 2. English textfile
 tool = findTool("Edit");
 result = tool->execute("call-2", {
     {"file_path", "src/main.cpp"},
@@ -110,11 +110,11 @@ result = tool->execute("call-2", {
 });
 ```
 
-### 示例 3: 批量操作
+### example 3: English text
 
-**用户输入**: "更新版本号和调试标志"
+**English textinput**: "English text"
 
-**LLM 生成**:
+**LLM generate**:
 ```json
 {
   "tool": "MultiEdit",
@@ -134,11 +134,11 @@ result = tool->execute("call-2", {
 }
 ```
 
-### 示例 4: 搜索代码
+### example 4: searchEnglish text
 
-**用户输入**: "查找所有使用 qDebug 的地方"
+**English textinput**: "English textuse qDebug English text"
 
-**LLM 生成**:
+**LLM generate**:
 ```json
 {
   "tool": "Grep",
@@ -153,21 +153,21 @@ result = tool->execute("call-2", {
 
 ---
 
-## 📊 可用工具一览
+## 📊 English texttoolEnglish text
 
-| 工具 | 功能 | 主要参数 | 返回 |
+| tool | English text | mainEnglish textparameter | English text |
 |------|------|----------|------|
-| **Write** | 创建/覆盖文件 | `file_path`, `new_text` | 创建消息 |
-| **Edit** | 替换文本 | `file_path`, `old_text`, `new_text` | 编辑消息 |
-| **MultiEdit** | 批量编辑 | `file_path`, `edits[]` | 编辑统计 |
-| **Read** | 读取文件 | `file_path`, `start_line?`, `end_line?` | 文件内容 |
-| **Bash** | 执行命令 | `command`, `timeout?` | 命令输出 |
-| **Grep** | 搜索模式 | `pattern`, `path?` | 匹配列表 |
-| **Glob** | 列出文件 | `pattern` | 文件列表 |
+| **Write** | English text/English textfile | `file_path`, `new_text` | English text |
+| **Edit** | English text | `file_path`, `old_text`, `new_text` | English text |
+| **MultiEdit** | English text | `file_path`, `edits[]` | English textstatistics |
+| **Read** | English textfile | `file_path`, `start_line?`, `end_line?` | filecontent |
+| **Bash** | English text | `command`, `timeout?` | English textoutput |
+| **Grep** | searchEnglish text | `pattern`, `path?` | English text |
+| **Glob** | English textfile | `pattern` | fileEnglish text |
 
 ---
 
-## 🔧 完整集成示例
+## 🔧 completeEnglish textexample
 
 ```cpp
 // AgentController.cpp
@@ -176,55 +176,55 @@ result = tool->execute("call-2", {
 
 void AgentController::initialize()
 {
-    // 创建工具注册表
+    // English texttoolEnglish text
     m_toolRegistry = new DefaultToolRegistry(this);
-    
-    // 创建 Sandbox 管理器
+
+    // English text Sandbox managementEnglish text
     m_sandboxManager = new SandboxManager(this);
     m_sandboxManager->allow(m_workspaceRoot, FileSystemAccessMode::ReadWrite);
-    
-    // 注册 NeurX 标准工具
+
+    // English text NeurX English texttool
     NeurXStandardToolFactory::registerAllTools(
         m_workspaceRoot,
         m_toolRegistry,
         m_sandboxManager
     );
-    
+
     qDebug() << "Registered tools:" << m_toolRegistry->listTools();
 }
 
 void AgentController::handleLLMResponse(const QString& response)
 {
-    // 解析 LLM 返回的工具调用
+    // English text LLM English texttoolEnglish text
     QJsonObject toolCall = parseToolCallFromResponse(response);
-    
+
     if (toolCall.isEmpty()) {
-        // 不是工具调用，是普通回复
+        // English texttoolEnglish text, English text
         emit messageReceived(response);
         return;
     }
-    
-    // 执行工具调用
+
+    // English texttoolEnglish text
     QString toolName = toolCall["tool"].toString();
     QJsonObject params = toolCall["parameters"].toObject();
-    
+
     BaseTool* tool = m_toolRegistry->findTool(toolName);
     if (!tool) {
         emit errorOccurred("Tool not found: " + toolName);
         return;
     }
-    
-    // 执行
+
+    // English text
     QString callId = generateCallId();
     ToolResult result = tool->execute(callId, params);
-    
-    // 处理结果
+
+    // English textresult
     if (result.isError) {
         emit toolExecutionFailed(callId, result.content);
     } else {
         emit toolExecutionSucceeded(callId, result.content);
-        
-        // 将结果返回给 LLM 继续对话
+
+        // English textresultEnglish text LLM English text
         appendToolResultToConversation(result);
         continueLLMConversation();
     }
@@ -232,23 +232,23 @@ void AgentController::handleLLMResponse(const QString& response)
 
 QJsonObject AgentController::parseToolCallFromResponse(const QString& response)
 {
-    // 简单的 JSON 提取（实际可能需要更复杂的解析）
+    // English text JSON English text(actualEnglish textRequiredEnglish text)
     QRegularExpression jsonRegex(R"(\{[^{}]*"tool"[^{}]*\})");
     QRegularExpressionMatch match = jsonRegex.match(response);
-    
+
     if (match.hasMatch()) {
         QString jsonStr = match.captured(0);
         QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
         return doc.object();
     }
-    
+
     return QJsonObject();
 }
 ```
 
 ---
 
-## 🎨 QML 集成示例
+## 🎨 QML English textexample
 
 ```qml
 // AgentView.qml
@@ -258,49 +258,49 @@ import QtQuick.Controls 2.15
 
 Rectangle {
     id: root
-    
+
     property var agentController
-    
+
     Column {
         anchors.fill: parent
         spacing: 10
-        
-        // 用户输入
+
+        // English textinput
         TextField {
             id: userInput
             width: parent.width
-            placeholderText: "输入你的指令..."
-            
+            placeholderText: "inputEnglish text..."
+
             onAccepted: {
                 agentController.sendMessage(text)
                 text = ""
             }
         }
-        
-        // 工具执行反馈
+
+        // toolEnglish text
         ListView {
             id: toolExecutionList
             width: parent.width
             height: parent.height - userInput.height - 20
-            
+
             model: ListModel {
                 id: toolExecutionModel
             }
-            
+
             delegate: Rectangle {
                 width: parent.width
                 height: 60
                 color: model.isError ? "#ffe0e0" : "#e0ffe0"
-                
+
                 Column {
                     anchors.fill: parent
                     padding: 5
-                    
+
                     Text {
                         text: "Tool: " + model.toolName
                         font.bold: true
                     }
-                    
+
                     Text {
                         text: model.result
                         wrapMode: Text.WordWrap
@@ -310,10 +310,10 @@ Rectangle {
             }
         }
     }
-    
+
     Connections {
         target: agentController
-        
+
         function onToolExecutionSucceeded(callId, result) {
             toolExecutionModel.append({
                 toolName: getTool NameFromCallId(callId),
@@ -321,7 +321,7 @@ Rectangle {
                 isError: false
             })
         }
-        
+
         function onToolExecutionFailed(callId, error) {
             toolExecutionModel.append({
                 toolName: getToolNameFromCallId(callId),
@@ -335,83 +335,83 @@ Rectangle {
 
 ---
 
-## ✅ 验证安装
+## ✅ English text
 
-运行这段代码验证工具已正确安装：
+runEnglish texttoolEnglish text:
 
 ```cpp
 void testNeurXStandardTools()
 {
-    // 创建测试环境
+    // English texttestEnglish text
     QString testWorkspace = QDir::tempPath() + "/neurx_test";
     QDir().mkpath(testWorkspace);
-    
+
     auto registry = new DefaultToolRegistry();
     NeurXStandardToolFactory::registerAllTools(testWorkspace, registry, nullptr);
-    
-    // 测试 Write 工具
+
+    // test Write tool
     BaseTool* writeTool = registry->findTool("Write");
     QJsonObject writeParams;
     writeParams["file_path"] = "test.txt";
     writeParams["new_text"] = "Hello, NeurX!";
-    
+
     ToolResult result = writeTool->execute("test-1", writeParams);
-    
+
     if (!result.isError) {
         qDebug() << "✅ Write tool works!";
     } else {
         qDebug() << "❌ Write tool failed:" << result.content;
     }
-    
-    // 测试 Read 工具
+
+    // test Read tool
     BaseTool* readTool = registry->findTool("Read");
     QJsonObject readParams;
     readParams["file_path"] = "test.txt";
-    
+
     result = readTool->execute("test-2", readParams);
-    
+
     if (!result.isError && result.content.contains("Hello, NeurX!")) {
         qDebug() << "✅ Read tool works!";
     } else {
         qDebug() << "❌ Read tool failed:" << result.content;
     }
-    
-    // 测试 Glob 工具
+
+    // test Glob tool
     BaseTool* globTool = registry->findTool("Glob");
     QJsonObject globParams;
     globParams["pattern"] = "*.txt";
-    
+
     result = globTool->execute("test-3", globParams);
-    
+
     if (!result.isError && result.content.contains("test.txt")) {
         qDebug() << "✅ Glob tool works!";
     } else {
         qDebug() << "❌ Glob tool failed:" << result.content;
     }
-    
+
     qDebug() << "All tests completed!";
-    
-    // 清理
+
+    // English text
     QDir(testWorkspace).removeRecursively();
 }
 ```
 
 ---
 
-## 📚 更多资源
+## 📚 English text
 
-- **完整文档**: [NEURX_STANDARD_TOOLS.md](NEURX_STANDARD_TOOLS.md)
-- **头文件**: [src/tools/NeurXStandardTools.h](../src/tools/NeurXStandardTools.h)
-- **实现**: [src/tools/NeurXStandardTools.cpp](../src/tools/NeurXStandardTools.cpp)
+- **completeEnglish text**: [NEURX_STANDARD_TOOLS.md](NEURX_STANDARD_TOOLS.md)
+- **English textfile**: [src/tools/NeurXStandardTools.h](../src/tools/NeurXStandardTools.h)
+- **implementation**: [src/tools/NeurXStandardTools.cpp](../src/tools/NeurXStandardTools.cpp)
 
 ---
 
-## 🎉 你已经准备好了！
+## 🎉 English text!
 
-现在你可以：
-1. ✅ 使用 LLM 通过自然语言创建和编辑文件
-2. ✅ 执行 Shell 命令自动化任务
-3. ✅ 搜索和查找代码
-4. ✅ 构建完整的 AI 编码助手
+English textAllowed:
+1. ✅ use LLM English textlanguageEnglish textfile
+2. ✅ English text Shell English text
+3. ✅ searchEnglish text
+4. ✅ English textcompleteEnglish text AI English text
 
-**开始使用 NeurX Code 的 NeurX 标准工具系统吧！🚀**
+**startuse NeurX Code English text NeurX English texttoolsystemEnglish text!🚀**

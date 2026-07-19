@@ -1,12 +1,12 @@
 package neurx.tokenizer.chat_template
 
 // ============================================================================
-// Chat Template — 对话格式化
+// Chat Template — English text
 //
-// 工业级 LLM 微调需要统一的对话格式把 messages 转换为 token 序列。
-// 不同模型使用不同格式：
+// English text LLM English textRequiredEnglish text messages English text token English text.
+// English textmodeluseEnglish text:
 //
-//   ChatML (主流模型):
+//   ChatML (mainEnglish textmodel):
 //     <|im_start|>system\n{content}<|im_end|>\n
 //     <|im_start|>user\n{content}<|im_end|>\n
 //     <|im_start|>assistant\n
@@ -28,19 +28,19 @@ package neurx.tokenizer.chat_template
 // ============================================================================
 
 // ============================================================================
-// 1. 消息角色 & 对话结构
+// 1. English text & English text
 // ============================================================================
 
 struct chat_message {
     string role       // "system" | "user" | "assistant" | "tool"
-    string content    // 消息内容
-    string name       // 可选: function/tool 名称
+    string content    // English textcontent
+    string name       // English text: function/tool Name
 }
 
 struct chat_conversation {
     []chat_message messages
-    bool add_generation_prompt  // 是否追加模型生成提示 (训练时 false, 推理时 true)
-    string system_prompt        // 默认系统 prompt (若 messages 中没有)
+    bool add_generation_prompt  // English textmodelgenerateprompt (trainingEnglish text false, inferenceEnglish text true)
+    string system_prompt        // defaultsystem prompt (English text messages English text)
 }
 
 func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
@@ -52,20 +52,20 @@ func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
 }
 
 // ============================================================================
-// 2. 模板格式枚举 & 配置
+// 2. English text & configuration
 // ============================================================================
 
 struct template_config {
     string format           // "chatml" | "llama2" | "llama3" | "neurx_r1" | "gemma" | "alpaca"
-    string system_token     // 系统提示标记
-    string user_token       // 用户标记
-    string assistant_token  // 助手标记
-    string end_token        // 对话结束标记
-    string bos_token        // 序列开始
-    string eos_token        // 序列结束
-    string nl               // 换行符 (通常 "\n")
-    bool add_bos            // 是否添加 BOS
-    bool add_eos_turn       // 每轮结束是否加 EOS
+    string system_token     // systempromptEnglish text
+    string user_token       // English text
+    string assistant_token  // English text
+    string end_token        // English text
+    string bos_token        // English textstart
+    string eos_token        // English text
+    string nl               // English text (English text "\n")
+    bool add_bos            // English text BOS
+    bool add_eos_turn       // English text EOS
 }
 
 func chatml_config() template_config {
@@ -159,10 +159,10 @@ func alpaca_config() template_config {
 }
 
 // ============================================================================
-// 3. 格式化函数
+// 3. English textfunction
 // ============================================================================
 
-// 格式化整个对话
+// English text
 func apply_chat_template(chat_conversation conv, template_config tmpl) string {
     string result = ""
 
@@ -179,7 +179,7 @@ func apply_chat_template(chat_conversation conv, template_config tmpl) string {
         i = i + 1
     }
 
-    // 追加生成提示 (推理时: 告诉模型开始生成)
+    // English textgenerateprompt (inferenceEnglish text: English textmodelstartgenerate)
     if conv.add_generation_prompt {
         result = str_cat(result, format_generation_prompt(tmpl))
     }
@@ -196,7 +196,7 @@ func format_turn(chat_message msg, template_config tmpl, bool is_first, string d
 
     if msg.role == "user" {
         string result = ""
-        // 若是第一轮用户消息且有默认系统 prompt, 注入 system
+        // English textdefaultsystem prompt, English text system
         if is_first && str_len(default_system) > 0 {
             result = str_cat(result, format_system(default_system, tmpl))
         }
@@ -235,12 +235,12 @@ func format_system(string content, template_config tmpl) string {
     }
 
     if tmpl.format == "neurx_r1" {
-        // 系统 prompt 直接拼接在 BOS 后
+        // system prompt English text BOS English text
         return str_cat(content, tmpl.nl)
     }
 
     if tmpl.format == "gemma" {
-        // Gemma 不支持 system role, 降级为 user
+        // Gemma English textsupport system role, English text user
         return format_user(content, tmpl)
     }
 
@@ -285,7 +285,7 @@ func format_user(string content, template_config tmpl) string {
     str_cat(r, tmpl.nl)
 }
 
-// add_eos: 训练时 true (加 EOS 作为终止学习目标), 推理生成时 false
+// add_eos: trainingEnglish text true (English text EOS English text), inferencegenerateEnglish text false
 func format_assistant(string content, template_config tmpl, bool add_eos) string {
     if tmpl.format == "chatml" {
         string r = str_cat(tmpl.assistant_token, tmpl.nl)
@@ -341,7 +341,7 @@ func format_assistant(string content, template_config tmpl, bool add_eos) string
 }
 
 func format_tool(string name, string content, template_config tmpl) string {
-    // Tool 消息: <|im_start|>tool\n[{name}]: {content}<|im_end|>\n
+    // Tool English text: <|im_start|>tool\n[{name}]: {content}<|im_end|>\n
     if tmpl.format == "chatml" {
         string r = "<|im_start|>tool\n"
         if str_len(name) > 0 {
@@ -353,7 +353,7 @@ func format_tool(string name, string content, template_config tmpl) string {
         r = str_cat(r, tmpl.end_token)
         return str_cat(r, tmpl.nl)
     }
-    // 其他格式降级为 user
+    // English text user
     format_user(content, tmpl)
 }
 
@@ -378,20 +378,20 @@ func format_generation_prompt(template_config tmpl) string {
 }
 
 // ============================================================================
-// 4. SFT 数据集格式化 (用于训练)
+// 4. SFT dataEnglish text (English texttraining)
 // ============================================================================
 
-// SFT 样本: 输入文本 + loss mask (只对 assistant 回复计算 loss)
+// SFT English text: inputEnglish text + loss mask (English text assistant English textcompute loss)
 struct sft_sample {
-    string full_text        // 完整对话文本
-    []int  loss_mask        // [token_len] 0=忽略 1=计算 loss
-    int    input_len        // 前缀 (prompt) 长度 (不计 loss)
-    int    target_len       // 响应长度 (计 loss)
+    string full_text        // completeEnglish text
+    []int  loss_mask        // [token_len] 0=English text 1=compute loss
+    int    input_len        // English text (prompt) English text (English text loss)
+    int    target_len       // responseEnglish text (English text loss)
 }
 
-// 格式化 SFT 样本，返回 full_text 和 loss_mask_boundary (input_len)
+// English text SFT English text, English text full_text English text loss_mask_boundary (input_len)
 func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample {
-    // 构造两版: 带生成提示的版本 (获取 input_len) + 完整版本
+    // English text: English textgeneratepromptEnglish text (English text input_len) + completeEnglish text
     chat_conversation input_only = chat_conversation {
         messages: drop_last_assistant(conv.messages),
         add_generation_prompt: true,
@@ -425,7 +425,7 @@ func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample 
     }
 }
 
-// 移除最后一条 assistant 消息 (若有), 返回剩余 messages
+// English text assistant English text (English text), English text messages
 func drop_last_assistant([]chat_message msgs) []chat_message {
     int n = len(msgs)
     if n == 0 { return msgs }
@@ -443,12 +443,12 @@ func drop_last_assistant([]chat_message msgs) []chat_message {
 }
 
 // ============================================================================
-// 5. 批量格式化
+// 5. English text
 // ============================================================================
 
 struct sft_batch {
-    []string texts       // 批次文本
-    [][]int  loss_masks  // 批次 loss mask
+    []string texts       // batchEnglish text
+    [][]int  loss_masks  // batch loss mask
     int batch_size
 }
 
@@ -470,7 +470,7 @@ func format_sft_batch([]chat_conversation convs, template_config tmpl) sft_batch
 }
 
 // ============================================================================
-// 6. 特殊 Token 注册 (与 BPE tokenizer 对接)
+// 6. English text Token English text (English text BPE tokenizer English text)
 // ============================================================================
 
 struct special_tokens {
@@ -483,7 +483,7 @@ struct special_tokens {
     string eot_id      // LLaMA-3
     string think_start // NeurX-R1
     string think_end   // NeurX-R1
-    []string extra     // 自定义 special tokens
+    []string extra     // English text special tokens
 }
 
 func chatml_special_tokens() special_tokens {
@@ -532,15 +532,15 @@ func neurx_r1_special_tokens() special_tokens {
 }
 
 // ============================================================================
-// 7. 字符串工具
+// 7. English texttool
 // ============================================================================
 
 func str_cat(string a, string b) string {
-    // runtime 实现字符串拼接
+    // runtime implementationEnglish text
     a
 }
 
 func str_len(string s) int {
-    // runtime 实现
+    // runtime implementation
     0
 }

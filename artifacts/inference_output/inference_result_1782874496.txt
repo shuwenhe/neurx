@@ -1,35 +1,35 @@
-LLM 推理结果
+LLM inferenceresult
 =====================================
 
-输入配置:
+inputconfiguration:
 ---------
-最大新tokens: 50
-温度: 0.7
-Beam大小: 3
-输入token序列: [1, 5, 3, 2]
+English texttokens: 50
+English text: 0.7
+BeamEnglish text: 3
+inputtokenEnglish text: [1, 5, 3, 2]
 
-生成的tokens:
+generateEnglish texttokens:
 ---------
-步骤 1: token=127, logits=0.53, 置信度=82%
-步骤 2: token=45, logits=0.48, 置信度=78%
-步骤 3: token=203, logits=0.61, 置信度=89%
-步骤 4: token=18, logits=0.42, 置信度=71%
-步骤 5: token=156, logits=0.55, 置信度=85%
+stepEnglish text 1: token=127, logits=0.53, English text=82%
+stepEnglish text 2: token=45, logits=0.48, English text=78%
+stepEnglish text 3: token=203, logits=0.61, English text=89%
+stepEnglish text 4: token=18, logits=0.42, English text=71%
+stepEnglish text 5: token=156, logits=0.55, English text=85%
 
-推理指标:
+inferenceEnglish text:
 ---------
-生成tokens数: 5
-推理时间: 12ms
-吞吐量: 416 tokens/sec
-平均延迟: 2.4ms/token
-内存使用: 0.9 MB
+generatetokensEnglish text: 5
+inferencetime: 12ms
+English text: 416 tokens/sec
+English text: 2.4ms/token
+English textuse: 0.9 MB
 
-检查点信息:
+checkpointinformation:
 ---------
-模型参数: 56,448
-隐层维度: 32
-层数: 2
-注意力头: 4
-词汇表大小: 256
+modelparameter: 56,448
+English text: 32
+English text: 2
+English text: 4
+English text: 256
 
-完成时间: 2026-07-01 10:54:56
+English texttime: 2026-07-01 10:54:56

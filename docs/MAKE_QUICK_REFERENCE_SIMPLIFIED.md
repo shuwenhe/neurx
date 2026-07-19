@@ -1,98 +1,98 @@
-# 🚀 NeurX 简化版 - 两个命令
+# 🚀 NeurX English text - English text
 
-**原则**: 简洁就是力量
+**principle**: English text
 
 ---
 
-## 两个命令，掌握一切
+## English text, English text
 
-### **1. 训练**
+### **1. training**
 ```bash
 make train
 ```
 
-### **2. 推理**
+### **2. inference**
 ```bash
 make infer
 ```
 
 ---
 
-## 常用配置
+## English textconfiguration
 
-### 训练
+### training
 ```bash
-# 快速测试 (5 min)
+# quicktest (5 min)
 make train NEURX_TOTAL_STEPS=10
 
-# 标准训练 (1-2 小时)
+# English texttraining (1-2 English text)
 make train NEURX_TOTAL_STEPS=1000 NEURX_BATCH_SIZE=32
 
-# 大规模 (多天，多 GPU)
+# English text (English text, English text GPU)
 make train NEURX_TOTAL_STEPS=100000 NEURX_BATCH_SIZE=64 NEURX_WORLD_SIZE=8
 ```
 
-### 推理
+### inference
 ```bash
-# 基础
+# English text
 make infer
 
-# 高质量
+# English text
 make infer NEURX_TEMPERATURE=0.5 NEURX_MAX_TOKENS=256
 ```
 
 ---
 
-## 环境变量一览
+## English text
 
-| 变量 | 训练 | 推理 | 说明 |
+| English text | training | inference | explanation |
 |------|------|------|------|
-| `NEURX_TOTAL_STEPS` | ✅ | - | 训练步数 |
-| `NEURX_BATCH_SIZE` | ✅ | ✅ | 批大小 |
-| `NEURX_LR` | ✅ | - | 学习率 |
-| `NEURX_SEQ_LENGTH` | ✅ | - | 序列长度 |
-| `NEURX_WORLD_SIZE` | ✅ | - | GPU 数 |
-| `NEURX_TEMPERATURE` | - | ✅ | 采样温度 |
+| `NEURX_TOTAL_STEPS` | ✅ | - | trainingstepEnglish text |
+| `NEURX_BATCH_SIZE` | ✅ | ✅ | English text |
+| `NEURX_LR` | ✅ | - | learning rate |
+| `NEURX_SEQ_LENGTH` | ✅ | - | English text |
+| `NEURX_WORLD_SIZE` | ✅ | - | GPU English text |
+| `NEURX_TEMPERATURE` | - | ✅ | English text |
 | `NEURX_TOP_K` | - | ✅ | Top-K |
 | `NEURX_TOP_P` | - | ✅ | Nucleus |
-| `NEURX_MAX_TOKENS` | - | ✅ | 最大长度 |
+| `NEURX_MAX_TOKENS` | - | ✅ | English text |
 
 ---
 
-## 实际例子
+## actualEnglish text
 
 ```bash
-# 例 1: 快速验证环境
+# English text 1: quickEnglish text
 make train NEURX_TOTAL_STEPS=10
 
-# 例 2: 实际训练一个模型
+# English text 2: actualtrainingEnglish textmodel
 make train NEURX_TOTAL_STEPS=1000 NEURX_BATCH_SIZE=32 NEURX_SEQ_LENGTH=512
 
-# 例 3: 多 GPU 训练
+# English text 3: English text GPU training
 make train NEURX_WORLD_SIZE=4 NEURX_BATCH_SIZE=32 NEURX_TOTAL_STEPS=5000
 
-# 例 4: 运行推理
+# English text 4: runinference
 make infer
 
-# 例 5: 高质量推理
+# English text 5: English textinference
 make infer NEURX_TEMPERATURE=0.3 NEURX_TOP_P=0.9 NEURX_MAX_TOKENS=512
 ```
 
 ---
 
-## 监控
+## monitoring
 
 ```bash
-# 查看训练状态
+# English texttrainingstate
 make monitor
 
-# 查看日志
+# English textlog
 tail -f /tmp/neurx_llm_train.log
 
-# 查看检查点
+# English textcheckpoint
 ls artifacts/checkpoints/
 ```
 
 ---
 
-**简洁优雅** ✨
+**English text** ✨

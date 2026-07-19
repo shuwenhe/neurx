@@ -3,15 +3,15 @@ package neurx.training.moe_1t_orchestrator
 // ============================================================================
 // 1T MoE Training Orchestrator
 //
-// 核心职责:
-//   1. 协调 1024 GPU 集群的 4 维并行 (DP+TP+PP+EP)
-//   2. 管理流式 token 管道，支持 1T+ token 规模
-//   3. 实现 ZeRO Stage 3 内存优化
-//   4. 处理 MoE 专家负载均衡和路由
-//   5. 管理分布式检查点和故障恢复
-//   6. 监控性能和通信开销
+// English text:
+//   1. English text 1024 GPU English text 4 English text (DP+TP+PP+EP)
+//   2. managementEnglish text token English text, support 1T+ token English text
+//   3. implementation ZeRO Stage 3 English textoptimize
+//   4. English text MoE English text
+//   5. managementEnglish textcheckpointEnglish textrecover
+//   6. monitoringEnglish text
 //
-// 架构:
+// English text:
 //   ┌──────────────────────────────────┐
 //   │  MoE 1T Training Orchestrator    │
 //   └─────────────┬──────────────────┘
@@ -46,13 +46,13 @@ use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 
 // ============================================================================
-// 1. 核心状态结构体
+// 1. English textstateEnglish text
 // ============================================================================
 
-// MoE 路由和负载统计
+// MoE English textstatistics
 struct moe_routing_stats {
     int total_tokens
-    []int expert_load        // [num_experts] — 每个专家处理的 token 数
+    []int expert_load        // [num_experts] — English text token English text
     []float expert_load_ratio
     float load_imbalance     // max_load / avg_load
     float communication_cost_ms
@@ -60,7 +60,7 @@ struct moe_routing_stats {
     float aux_loss_value
 }
 
-// 1T 训练步骤的状态
+// 1T trainingstepEnglish textstate
 struct moe_1t_step_state {
     int global_step
     int tokens_seen
@@ -74,12 +74,12 @@ struct moe_1t_step_state {
     int compute_time_us
 }
 
-// 1T 训练器主结构
+// 1T trainingEnglish textmainEnglish text
 struct moe_1t_orchestrator {
     moe_1t_framework framework
     gpt_moe_config model_config
-    
-    // 并行拓扑
+
+    // English text
     int world_rank
     int world_size
     int tp_rank
@@ -90,39 +90,39 @@ struct moe_1t_orchestrator {
     int ep_size
     int dp_rank
     int dp_size
-    
-    // 训练状态
+
+    // trainingstate
     gpt_moe_state model_state
     zero_optimizer_state optimizer_state
     collective_state comm
-    
-    // 数据管道
+
+    // dataEnglish text
     string data_manifest_path
     []string token_shards
     int current_shard_index
     int tokens_in_shard
-    
-    // 检查点和恢复
+
+    // checkpointEnglish textrecover
     string checkpoint_dir
     int last_saved_step
     int training_step
     int resumeable
     string latest_checkpoint_path
-    
-    // 监控
+
+    // monitoring
     []moe_1t_step_state step_history
     int log_interval
     int eval_interval
     int save_interval
-    
-    // 运行时标志
+
+    // runEnglish text
     int should_stop
     int fault_recovery_enabled
     int profile_enabled
 }
 
 // ============================================================================
-// 2. 初始化函数
+// 2. initializefunction
 // ============================================================================
 
 func moe_1t_trim(string s) string {
@@ -359,11 +359,11 @@ func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
     offset
 }
 
-// 从环境变量和配置初始化编排器
+// English textconfigurationinitializeEnglish text
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
-    
-    // 从分布式环境获取排名信息
+
+    // English textinformation
     string rank_str = io_get_env("RANK", "0")
     string world_size_str = io_get_env("WORLD_SIZE", "1")
     string tp_rank_str = io_get_env("TP_RANK", "0")
@@ -374,7 +374,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     string ep_size_str = io_get_env("EP_SIZE", "1")
     string dp_rank_str = io_get_env("DP_RANK", "0")
     string dp_size_str = io_get_env("DP_SIZE", "1")
-    
+
     int world_rank = string_to_int(rank_str)
     int world_size = string_to_int(world_size_str)
     int tp_rank = string_to_int(tp_rank_str)
@@ -385,11 +385,11 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     int ep_size = string_to_int(ep_size_str)
     int dp_rank = string_to_int(dp_rank_str)
     int dp_size = string_to_int(dp_size_str)
-    
-    // 初始化模型状态
+
+    // initializemodelstate
     gpt_moe_state model = new_gpt_moe_state(fw.model)
-    
-    // 初始化优化器状态 (ZeRO Stage 3)
+
+    // initializeoptimizeEnglish textstate (ZeRO Stage 3)
     zero_optimizer_state optimizer = zero_optimizer_state {
         learning_rate: fw.training.peak_lr,
         min_lr: fw.training.min_lr,
@@ -404,24 +404,24 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         sharded_params: 1,
         partitioned_grads: 1,
     }
-    
-    // 初始化集体通信
+
+    // initializeEnglish text
     collective_state comm = collective_state {
         backend: "nccl",
         rank: world_rank,
         world_size: world_size,
     }
-    
-    // 创建检查点目录
+
+    // English textcheckpointdirectory
     string checkpoint_dir = fw.training.checkpoint_dir
     io_mkdir_recursive(checkpoint_dir)
     []string shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
-    
-    // 初始化编排器
+
+    // initializeEnglish text
     moe_1t_orchestrator orch = moe_1t_orchestrator {
         framework: fw,
         model_config: fw.model,
-        
+
         world_rank: world_rank,
         world_size: world_size,
         tp_rank: tp_rank,
@@ -432,40 +432,40 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         ep_size: ep_size,
         dp_rank: dp_rank,
         dp_size: dp_size,
-        
+
         model_state: model,
         optimizer_state: optimizer,
         comm: comm,
-        
+
         data_manifest_path: fw.training.data_manifest_path,
         token_shards: shard_refs,
         current_shard_index: 0,
         tokens_in_shard: 0,
-        
+
         checkpoint_dir: checkpoint_dir,
         last_saved_step: 0,
         training_step: 0,
         resumeable: fw.training.resumeable,
         latest_checkpoint_path: "",
-        
+
         step_history: make([]moe_1t_step_state, 0),
         log_interval: fw.training.log_steps,
         eval_interval: fw.training.eval_steps,
         save_interval: fw.training.save_steps,
-        
+
         should_stop: 0,
         fault_recovery_enabled: 1,
         profile_enabled: 0,
     }
-    
+
     orch
 }
 
 // ============================================================================
-// 3. 数据管道函数
+// 3. dataEnglish textfunction
 // ============================================================================
 
-// 从 manifest 加载 token 分片列表
+// English text manifest load token English text
 func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     moe_1t_orchestrator next_orch = orch
     next_orch.token_shards = moe_1t_manifest_refs(orch.data_manifest_path)
@@ -477,8 +477,8 @@ func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     next_orch
 }
 
-// 获取下一批 token (1T 流式管道的核心)
-// 在实际部署中，这会流式地从分布式存储读取
+// English text token (1T English text)
+// English textactualEnglish text, English text
 func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
     int batch_size_tokens,
@@ -517,16 +517,16 @@ func moe_1t_get_next_batch(
 }
 
 // ============================================================================
-// 4. MoE 前向与路由
+// 4. MoE English text
 // ============================================================================
 
-// MoE 前向传播，包括路由和专家并行通信
+// MoE English text, English text
 func moe_1t_forward_pass(
     moe_1t_orchestrator orch,
     []int batch_tokens,
     int seq_len
 ) ([]float, moe_routing_stats) {
-    
+
     int batch_size = len(batch_tokens)
     int tp_size = orch.tp_size
     if tp_size <= 0 {
@@ -536,31 +536,31 @@ func moe_1t_forward_pass(
     if ep_size <= 0 {
         ep_size = 1
     }
-    
-    // 1. 嵌入层
+
+    // 1. English text
     int global_hidden_dim = orch.model_config.base.n_embd
     int local_hidden_dim = moe_1t_tp_local_hidden_dim(orch)
     int hidden_offset = moe_1t_tp_global_offset(orch)
     []float hidden = make([]float, batch_size * local_hidden_dim)
-    
-    // 2. Transformer 层与 MoE 路由
+
+    // 2. Transformer English text MoE English text
     int layer = 0
     int num_layers = orch.model_config.base.n_layer
-    
+
     while layer < num_layers {
-        // Self-attention (张量并行)
-        // 计算 Q, K, V，跨 TP 通信
-        
-        // MoE 路由 (如果这层使用 MoE)
+        // Self-attention (English text)
+        // compute Q, K, V, English text TP English text
+
+        // MoE English text (English textuse MoE)
         if layer % orch.model_config.moe_frequency == 0 {
-            // 路由策略：Top-K 选择
+            // English text: Top-K English text
             int top_k = orch.model_config.moe.top_k
-            
-            // 计算路由分数并选择专家
-            // 这需要专家并行的 All-to-All 通信
-            
-            // 对每个 token，选择 top_k 个专家
-            // 然后通过 ep_size 个 GPU 分发
+
+            // computeEnglish text
+            // English textRequiredEnglish text All-to-All English text
+
+            // English text token, English text top_k English text
+            // English text ep_size English text GPU English text
             int token_idx = 0
             while token_idx < batch_size {
                 int local_expert = moe_1t_positive_mod(batch_tokens[token_idx] + layer + orch.world_rank, orch.model_config.moe.num_experts)
@@ -571,11 +571,11 @@ func moe_1t_forward_pass(
                 token_idx = token_idx + 1
             }
         }
-        
+
         layer = layer + 1
     }
-    
-    // TP: row-parallel 输出投影，然后进行分布式规约
+
+    // TP: row-parallel outputEnglish text, English text
     []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
 
     []int expert_load = make([]int, orch.model_config.moe.num_experts)
@@ -663,21 +663,21 @@ func moe_1t_forward_pass(
         compute_cost_ms: 0.0,
         aux_loss_value: aux_loss + float(len(ep_load)) * 0.001,
     }
-    
+
     (logits, stats)
 }
 
 // ============================================================================
-// 5. 梯度同步与优化器步骤
+// 5. gradientEnglish textstepEnglish textoptimizeEnglish textstepEnglish text
 // ============================================================================
 
-// 执行梯度的异步 AllReduce (DDP + ZeRO Stage 3)
+// English textgradientEnglish textstep AllReduce (DDP + ZeRO Stage 3)
 func moe_1t_allreduce_gradients(
     moe_1t_orchestrator orch,
     []float gradients
 ) int {
-    // 使用 NCCL 后端异步减少梯度
-    // 对于 ZeRO Stage 3，只减少本地分片的梯度
+    // use NCCL English textstepEnglish textgradient
+    // English text ZeRO Stage 3, English textgradient
 
     if orch.world_size > 1 {
         int i = 0
@@ -686,21 +686,21 @@ func moe_1t_allreduce_gradients(
             i = i + 1
         }
     }
-    
-    // 返回异步操作的句柄
+
+    // English textstepEnglish text
     0
 }
 
-// 执行优化器步骤 (AdamW with ZeRO Stage 3 sharding)
+// English textoptimizeEnglish textstepEnglish text (AdamW with ZeRO Stage 3 sharding)
 func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
     float loss,
     float loss_scale,
     int global_step
 ) moe_1t_orchestrator {
-    // 1. 不同的 GPU 各自更新其分片的参数
-    // 2. 使用动态损失缩放处理 BF16 下溢
-    // 3. 梯度裁剪在分布式设置中进行
+    // 1. English text GPU English textparameter
+    // 2. useEnglish textlossEnglish text BF16 English text
+    // 3. gradientEnglish text
 
     int step_index = global_step
     int warmup_steps = orch.framework.training.warmup_steps
@@ -736,10 +736,10 @@ func moe_1t_optimizer_step(
 }
 
 // ============================================================================
-// 6. 检查点与恢复
+// 6. checkpointEnglish textrecover
 // ============================================================================
 
-// 保存分布式检查点 (所有排名中止，一个 GPU 协调保存)
+// saveEnglish textcheckpoint (English text, English text GPU English textsave)
 func moe_1t_zero_pad_int(int value, int width) string {
     string text = int_to_string(value)
     if len(text) >= width {
@@ -793,7 +793,7 @@ func moe_1t_save_checkpoint(
     orch
 }
 
-// 加载检查点并恢复所有分布式状态
+// loadcheckpointEnglish textrecoverEnglish textstate
 func moe_1t_load_checkpoint(
     moe_1t_orchestrator orch,
     string checkpoint_path
@@ -837,10 +837,10 @@ func moe_1t_load_checkpoint(
 }
 
 // ============================================================================
-// 7. 性能监控和日志
+// 7. English textmonitoringEnglish textlog
 // ============================================================================
 
-// 记录单步的性能指标
+// English textstepEnglish text
 func moe_1t_log_step_metrics(
     moe_1t_orchestrator orch,
     moe_1t_step_state step_state
@@ -855,10 +855,10 @@ func moe_1t_log_step_metrics(
 }
 
 // ============================================================================
-// 8. 主训练循环
+// 8. maintrainingEnglish text
 // ============================================================================
 
-// 1T 模型的完整训练循环
+// 1T modelEnglish textcompletetrainingEnglish text
 func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     moe_1t_orchestrator state = moe_1t_load_data_manifest(orch)
     if state.world_rank == 0 {
@@ -866,16 +866,16 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         io_println("Starting 1T MoE Training")
         io_println(summary)
     }
-    
+
     int global_step = 0
     (state, global_step) = moe_1t_load_checkpoint(state, "")
     int total_steps = state.framework.training.total_steps
     int save_interval = state.framework.training.save_steps
-    
+
     while global_step < total_steps && state.should_stop == 0 {
         int current_step = state.training_step
-        // 1. 加载下一批 token
-        int batch_tokens_per_gpu = 512  // 可调整
+        // 1. loadEnglish text token
+        int batch_tokens_per_gpu = 512  // English text
         int seq_len = 4096
         []int batch = []int{cap: 0}
         (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
@@ -886,11 +886,11 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             global_step = state.training_step
             continue
         }
-        
-        // 2. 前向传播 + MoE 路由
+
+        // 2. English text + MoE English text
         ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
-        
-        // 3. 计算损失 (cross-entropy + aux loss)
+
+        // 3. computeloss (cross-entropy + aux loss)
         int vocab_size = state.model_config.base.vocab_size
         []int labels = moe_1t_build_labels(batch, vocab_size)
         ([]int expert_indices, []float expert_weights) = moe_1t_build_top1_routing(state, batch)
@@ -905,8 +905,8 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             1,
             1
         )
-        
-        // 4. 反向传播
+
+        // 4. English text
         []float gradients = compute_ce_gradient(
             logits,
             labels,
@@ -916,12 +916,12 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         )
         moe_1t_allreduce_gradients(state, gradients)
         float grad_norm = moe_1t_average_abs(gradients)
-        
-        // 5. 优化器步骤
+
+        // 5. optimizeEnglish textstepEnglish text
         state = moe_1t_optimizer_step(state, loss, 1.0, current_step)
         float lr = state.optimizer_state.learning_rate
-        
-        // 6. 记录指标
+
+        // 6. English text
         moe_1t_step_state step_state = moe_1t_step_state {
             global_step: current_step,
             tokens_seen: (current_step + 1) * batch_tokens_per_gpu * state.world_size,
@@ -938,34 +938,34 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         if state.world_rank == 0 {
             io_println("  Backward grad|mean abs=" + float_to_string(grad_norm))
         }
-        
+
         moe_1t_log_step_metrics(state, step_state)
         state.step_history.push(step_state)
-        
-        // 7. 定期保存检查点
+
+        // 7. English textsavecheckpoint
         if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
             state = moe_1t_save_checkpoint(state, current_step, loss)
         }
-        
+
         global_step = state.training_step
     }
-    
+
     if orch.world_rank == 0 {
         io_println("Training completed at step " + int_to_string(global_step))
     }
-    
+
     0
 }
 
 // ============================================================================
-// 9. 工具函数
+// 9. toolfunction
 // ============================================================================
 
 func string_to_int(string s) int {
     int result = 0
     int i = 0
     int len_s = len(s)
-    
+
     while i < len_s {
         int digit = int(s[i]) - 48
         if digit < 0 || digit > 9 {
@@ -974,7 +974,7 @@ func string_to_int(string s) int {
         result = result * 10 + digit
         i = i + 1
     }
-    
+
     result
 }
 
@@ -982,37 +982,37 @@ func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     bool neg = false
     int val = n
     if val < 0 {
         neg = true
         val = -val
     }
-    
+
     string result = ""
     while val > 0 {
         int digit = val % 10
         result = chr(digit + 48) + result
         val = val / 10
     }
-    
+
     if neg {
         result = "-" + result
     }
-    
+
     result
 }
 
 func float_to_string(float x) string {
     int whole = int(x)
     string result = int_to_string(whole) + "."
-    
+
     float frac = x - float(whole)
     if frac < 0.0 {
         frac = -frac
     }
-    
+
     int frac_int = int(frac * 1000.0)
     if frac_int < 100 {
         result = result + "0"
@@ -1020,7 +1020,7 @@ func float_to_string(float x) string {
     if frac_int < 10 {
         result = result + "0"
     }
-    
+
     result = result + int_to_string(frac_int)
     result
 }

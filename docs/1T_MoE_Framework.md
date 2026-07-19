@@ -1,169 +1,169 @@
-# NeurX 1T+ Mixture of Experts (MoE) 模型框架
+# NeurX 1T+ Mixture of Experts (MoE) modelframework
 
-## 核心设计
+## English text
 
-### 模型规模
-- **总参数**: 1 Trillion (1T)
-- **活跃参数**: 111 Billion (10% 激活率)
-- **稀疏度**: 99.2% (每个token只激活2个专家)
-- **架构**: Transformer with Mixture of Experts
+### modelEnglish text
+- **English textparameter**: 1 Trillion (1T)
+- **English textparameter**: 111 Billion (10% English text)
+- **English text**: 99.2% (English texttokenEnglish text2English text)
+- **English text**: Transformer with Mixture of Experts
 
-### MoE架构
+### MoEEnglish text
 ```
-80个Transformer层
-├─ 每层256个Expert网络
-├─ 每个token路由到Top-2个Expert
-├─ 专家输出加权组合
-└─ 辅助损失平衡负载
+80English textTransformerEnglish text
+├─ English text256English textExpertEnglish text
+├─ English texttokenEnglish textTop-2English textExpert
+├─ English textoutputEnglish text
+└─ helperlossEnglish text
 ```
 
-### 关键参数
-| 参数 | 值 | 说明 |
+### English textparameter
+| parameter | English text | explanation |
 |------|-----|------|
-| 隐层大小 | 12288 | 比70B更宽 |
-| 注意头数 | 96 | 多头注意力 |
-| FFN中间维度 | 49152 | 4倍隐层大小 |
-| 词表大小 | 128000 | BPE token词表 |
-| 最大序列长度 | 32768 | 32K上下文 |
-| 长上下文 | 200000 | 200K可选 |
+| English text | 12288 | English text70BEnglish text |
+| English text | 96 | English text |
+| FFNEnglish text | 49152 | 4English text |
+| English text | 128000 | BPE tokenEnglish text |
+| English text | 32768 | 32KEnglish text |
+| English text | 200000 | 200KEnglish text |
 
 ---
 
-## 分布式训练架构
+## English texttrainingEnglish text
 
-### GPU集群配置
+### GPUEnglish textconfiguration
 ```
-总配置: 16x H100 (每个80GB)
+English textconfiguration: 16x H100 (English text80GB)
 │
 ├─ Data Parallelism (DP)
-│  └─ 1个数据并行度 (全量复制)
+│  └─ 1English textdataEnglish text (English text)
 │
 ├─ Tensor Parallelism (TP)
-│  └─ 4向张量并行 (权重分片)
+│  └─ 4English text (weightEnglish text)
 │
 ├─ Pipeline Parallelism (PP)
-│  └─ 2阶段管道 (层分片)
+│  └─ 2phaseEnglish text (English text)
 │
 └─ Expert Parallelism (EP)
-   └─ 2向专家并行 (每8个专家/GPU)
+   └─ 2English text (English text8English text/GPU)
 
-总有效并行度: 4 × 2 × 2 = 16倍
+English text: 4 × 2 × 2 = 16English text
 ```
 
-### 内存分析
+### English text
 ```
-原始需求 (无优化): 
-  模型权重: 1000 GB
-  梯度: 1000 GB
-  优化器状态 (Adam): 2000 GB
+English text (English textoptimize):
+  modelweight: 1000 GB
+  gradient: 1000 GB
+  optimizeEnglish textstate (Adam): 2000 GB
   ────────────────
-  总计: 4000 GB → 需要50个H100!
+  English text: 4000 GB → Required50English textH100!
 
-优化后 (with ZeRO-3 + FA2 + 梯度检查点):
-  模型权重: 1000 GB ÷ 4 (TP) = 250 GB
-  活跃参数: 250 GB × 0.1 (稀疏) = 25 GB
-  梯度: 25 GB
-  优化器: 50 GB (ZeRO-3)
-  缓冲: 100 GB
+optimizeEnglish text (with ZeRO-3 + FA2 + gradientcheckpoint):
+  modelweight: 1000 GB ÷ 4 (TP) = 250 GB
+  English textparameter: 250 GB × 0.1 (English text) = 25 GB
+  gradient: 25 GB
+  optimizeEnglish text: 50 GB (ZeRO-3)
+  English text: 100 GB
   ────────────────
-  每GPU: 75 GB ← 可行! ✓
+  English textGPU: 75 GB ← English text! ✓
 ```
 
 ---
 
-## 稀疏路由策略
+## English text
 
 ### Top-K Expert Routing
 ```
-输入token
+inputtoken
     ↓
-[计算router affinity]
+[computerouter affinity]
     ↓
-[选择Top-2 Expert]
+[English textTop-2 Expert]
     ↓
     ├─→ Expert-1 (forward pass)
     │
     └─→ Expert-2 (forward pass)
     ↓
-[加权组合输出]
+[English textoutput]
     ↓
-[应用辅助损失]
+[English texthelperloss]
     ↓
-输出token
+outputtoken
 ```
 
-### 路由损失函数
+### English textlossfunction
 ```
-总损失 = 主损失 + 0.001 × 辅助损失
+English textloss = mainloss + 0.001 × helperloss
 
-辅助损失 = 
-  Σ(Expert-选择概率 × Expert-容量概率)
-  
-目标: 让所有Expert被均匀激活
+helperloss =
+  Σ(Expert-English text × Expert-English text)
+
+English text: English textExpertEnglish text
 ```
 
 ---
 
-## 训练超参数
+## trainingEnglish textparameter
 
-### 基础配置
-- **批大小**: 2 tokens/GPU (受内存限制)
-- **梯度累积**: 8步
-- **有效批大小**: 2 × 8 × 16 = 256 tokens
-- **学习率**: 2e-4 (余弦衰减)
-- **热身**: 10K步 (2% of total)
-- **总步数**: 500K步
-- **训练数据**: 1T tokens
+### English textconfiguration
+- **English text**: 2 tokens/GPU (English text)
+- **gradientEnglish text**: 8step
+- **English text**: 2 × 8 × 16 = 256 tokens
+- **learning rate**: 2e-4 (English text)
+- **English text**: 10Kstep (2% of total)
+- **English textstepEnglish text**: 500Kstep
+- **trainingdata**: 1T tokens
 
-### 优化器配置
-- **算法**: AdamW
+### optimizeEnglish textconfiguration
+- **English text**: AdamW
 - **β1**: 0.9
 - **β2**: 0.95
 - **ε**: 1e-8
-- **权重衰减**: 0.01
-- **梯度裁剪**: 1.0
+- **weightEnglish text**: 0.01
+- **gradientEnglish text**: 1.0
 
 ---
 
-## 优化技术栈
+## optimizeEnglish text
 
-### 1. 混合精度训练 (BF16)
+### 1. English texttraining (BF16)
 ```
-优势:
-✓ 计算: BF16 (速度快)
-✓ 主权重: FP32 (精度高)
-✓ 内存: 50% 节省
+English text:
+✓ compute: BF16 (English text)
+✓ mainweight: FP32 (English text)
+✓ English text: 50% English text
 ```
 
-### 2. 激活检查点
+### 2. English textcheckpoint
 ```
-策略: 每隔1层检查点
-效果: 50% 激活内存节省
-代价: 5-10% 计算开销
+English text: English text1English textcheckpoint
+English text: 50% English text
+English text: 5-10% computeEnglish text
 ```
 
 ### 3. Flash Attention V2
 ```
-改进:
-✓ IO感知注意力
-✓ 减少HBM访问
-✓ 30% 内存节省
+English text:
+✓ IOEnglish text
+✓ English textHBMEnglish text
+✓ 30% English text
 ```
 
-### 4. ZeRO-3 分片
+### 4. ZeRO-3 English text
 ```
-优化: 
-✓ 权重分片
-✓ 梯度分片
-✓ 优化器状态分片
-✓ 4x内存缩放效率
+optimize:
+✓ weightEnglish text
+✓ gradientEnglish text
+✓ optimizeEnglish textstateEnglish text
+✓ 4xEnglish text
 ```
 
 ---
 
-## 预期性能
+## English text
 
-### 困惑度曲线
+### English text
 ```
 Step → Perplexity
 1K:    6.0
@@ -171,111 +171,111 @@ Step → Perplexity
 10K:   3.8
 50K:   2.8
 100K:  2.2
-500K:  1.2 (目标)
+500K:  1.2 (English text)
 ```
 
-### 基准评估
-| 基准 | 目标 | Opus | 差距 |
+### English textevaluation
+| English text | English text | Opus | English text |
 |------|------|------|------|
 | MMLU | 70-75% | 88-92% | 15-20% |
 | HellaSwag | 85-90% | 95%+ | 5-10% |
 | TruthfulQA | 55-60% | 70%+ | 10-15% |
 | GSM8K | 70-75% | 95%+ | 20% |
 
-### 推理性能
+### inferenceEnglish text
 ```
-吞吐量: 5000 tokens/sec (vs 500 for dense 1T)
-延迟: 200ms/token (单个token)
-批处理: 100K tokens/sec (最大吞吐)
-```
-
----
-
-## 实现路线图
-
-### Phase 1: 基础 (Week 1-2)
-```
-□ Expert网络架构
-□ 稀疏路由器实现
-□ 辅助损失系统
-□ 负载平衡逻辑
-
-交付: 可编译的MoE块
-```
-
-### Phase 2: 分布式 (Week 3-4)
-```
-□ Expert并行通信
-□ 所有对所有通信
-□ 梯度同步
-□ 负载平衡验证
-
-交付: 多GPU训练可用
-```
-
-### Phase 3: 优化 (Week 5-6)
-```
-□ 核心融合 (专家内)
-□ 内存高效路由
-□ 激活检查点集成
-□ 性能基准
-
-交付: 75GB/GPU内存
-```
-
-### Phase 4+: 训练 (Week 7+)
-```
-□ 启动1T预训练
-□ 逐步检查点保存
-□ 分布式检查点
-□ 监控和可视化
-
-交付: 收敛的1T MoE模型
+English text: 5000 tokens/sec (vs 500 for dense 1T)
+English text: 200ms/token (English texttoken)
+English text: 100K tokens/sec (English text)
 ```
 
 ---
 
-## 关键创新点
+## implementationEnglish text
 
-### 1. 稀疏激活
-- 只有2/256个专家活跃
-- 99.2%的参数保持不活跃
-- FLOPs = 111B密集模型
+### Phase 1: English text (Week 1-2)
+```
+□ ExpertEnglish text
+□ English textimplementation
+□ helperlosssystem
+□ English text
 
-### 2. 负载平衡
-- 辅助损失确保均匀分布
-- Expert dropout防止模式崩溃
-- 动态容量因子(1.25x)
+English text: English textcompileEnglish textMoEEnglish text
+```
 
-### 3. 高效通信
-- 专家并行最小化数据移动
+### Phase 2: English text (Week 3-4)
+```
+□ ExpertEnglish text
+□ English text
+□ gradientEnglish textstep
+□ English text
+
+English text: English textGPUtrainingEnglish text
+```
+
+### Phase 3: optimize (Week 5-6)
+```
+□ English text (English text)
+□ English text
+□ English textcheckpointEnglish text
+□ English text
+
+English text: 75GB/GPUEnglish text
+```
+
+### Phase 4+: training (Week 7+)
+```
+□ start1TEnglish texttraining
+□ English textstepcheckpointsave
+□ English textcheckpoint
+□ monitoringEnglish text
+
+English text: English text1T MoEmodel
+```
+
+---
+
+## English text
+
+### 1. English text
+- English text2/256English text
+- 99.2%English textparameterEnglish text
+- FLOPs = 111BEnglish textmodel
+
+### 2. English text
+- helperlossEnglish text
+- Expert dropoutEnglish text
+- English text(1.25x)
+
+### 3. English text
+- English textdataEnglish text
 - Ring all-reduce for gradients
-- 异步Expert处理
+- English textstepExpertEnglish text
 
-### 4. 内存优化
-- ZeRO-3分片到16个GPU
-- 梯度检查点激活
-- Flash Attention节省
+### 4. English textoptimize
+- ZeRO-3English text16English textGPU
+- gradientcheckpointEnglish text
+- Flash AttentionEnglish text
 
 ---
 
-## 快速启动
+## quickstart
 
-### 环境准备
+### English text
 ```bash
-# 检查16xH100可用
+# English text16xH100English text
 nvidia-smi --query-gpu=name,memory.total --format=csv
 
-# 准备数据 (1T tokens)
+# English textdata (1T tokens)
 python prepare_pretraining_data.py --size 1T
 
-# 配置分布式
+# configurationEnglish text
 export MASTER_ADDR=localhost
 export MASTER_PORT=29500
 export WORLD_SIZE=16
 ```
 
-### 启动训练
+### starttraining
 ```bash
 torchrun --nproc_per_node=8 \
   train_moe_1t.py \
@@ -285,52 +285,52 @@ torchrun --nproc_per_node=8 \
   --output_dir checkpoints_1t_moe
 ```
 
-### 监控进度
+### monitoringEnglish text
 ```bash
 # Tensorboard
 tensorboard --logdir logs/1t_moe
 
-# GPU监控
+# GPUmonitoring
 watch -n 1 nvidia-smi
 
-# 日志
+# log
 tail -f logs/1t_moe/training.log
 ```
 
 ---
 
-## 成功标志
+## successEnglish text
 
-✅ **Week 1**: 10K步完成, PPL 3.8, 无OOM
-✅ **Week 2**: 50K步完成, PPL 2.8, Expert均衡激活
-✅ **Week 4**: 100K步完成, PPL 2.2, Checkpoint保存
-✅ **Week 6**: 500K步完成, PPL 1.2, 基准达标
-✅ **Week 8+**: 1T tokens完成, 模型锁定
+✅ **Week 1**: 10KstepEnglish text, PPL 3.8, English textOOM
+✅ **Week 2**: 50KstepEnglish text, PPL 2.8, ExpertEnglish text
+✅ **Week 4**: 100KstepEnglish text, PPL 2.2, Checkpointsave
+✅ **Week 6**: 500KstepEnglish text, PPL 1.2, English text
+✅ **Week 8+**: 1T tokensEnglish text, modelEnglish text
 
 ---
 
-## 与Claude Opus对标
+## English textClaude OpusEnglish text
 
-| 维度 | NeurX-1T-MoE | Claude-Opus | 达成度 |
+| English text | NeurX-1T-MoE | Claude-Opus | English text |
 |------|--------------|------------|--------|
-| 参数规模 | 1T (111B活跃) | 200B+ | 70% |
-| 困惑度 | 6-8 PPL | 6-8 PPL | ✓ 相当 |
+| parameterEnglish text | 1T (111BEnglish text) | 200B+ | 70% |
+| English text | 6-8 PPL | 6-8 PPL | ✓ English text |
 | MMLU | 70-75% | 88-92% | 80% |
-| 推理速度 | 5K tok/s | 2K tok/s | 250% |
-| 内存 | 75GB/H100 | N/A | 可行 |
+| inferenceEnglish text | 5K tok/s | 2K tok/s | 250% |
+| English text | 75GB/H100 | N/A | English text |
 
 ---
 
-## 文件清单
+## fileEnglish text
 
 ```
 configs/
-├─ 1t_moe_config.json (完整配置)
-└─ deepspeed_1t_moe.json (DeepSpeed配置)
+├─ 1t_moe_config.json (completeconfiguration)
+└─ deepspeed_1t_moe.json (DeepSpeedconfiguration)
 
 scripts/legacy/
-├─ train_1t_moe.s (S语言框架)
-└─ train_moe_distributed.py (分布式训练)
+├─ train_1t_moe.s (Slanguageframework)
+└─ train_moe_distributed.py (English texttraining)
 
 checkpoints_1t_moe/
 ├─ checkpoint-5000/
@@ -345,4 +345,4 @@ logs/
 
 ---
 
-**NeurX 1T+ MoE 框架已就绪，可立即启动训练！**
+**NeurX 1T+ MoE frameworkEnglish text, English textstarttraining!**

@@ -1,164 +1,164 @@
-# NeurX 待迁移到 S 的清单
+# NeurX English textmigrationEnglish text S English text
 
-## 概述
-当前 NeurX 项目中有 **2 个 JavaScript 文件**需要迁移到 S 语言实现。这份清单按照优先级和迁移复杂度排列。
+## English text
+English text NeurX English text **2 English text JavaScript file**RequiredmigrationEnglish text S languageimplementation.English textmigrationEnglish text.
 
 ---
 
-## 优先级 1（高）：CLI 工具迁移
+## English text 1(English text): CLI toolmigration
 
-### 📌 任务 1.1：`scripts/legacy/create-file.js` → `scripts/legacy/file_creation_tool.s`
+### 📌 English text 1.1: `scripts/legacy/create-file.js` → `scripts/legacy/file_creation_tool.s`
 
-**当前位置**：[scripts/legacy/create-file.js](scripts/legacy/create-file.js)
-**文件大小**：8.7K
-**优先级**：🔴 **高** - 这是开发工作流的核心工具
+**English text**: [scripts/legacy/create-file.js](scripts/legacy/create-file.js)
+**fileEnglish text**: 8.7K
+**English text**: 🔴 **English text** - English texttool
 
-**功能概述**：
-- 原子式文件创建 CLI 工具
-- 支持单文件和批量操作
-- 自动权限管理（如 0o600 用于敏感文件）
-- 目录自动创建
-- 行尾符处理（LF/CRLF）
-- 文件覆写保护
+**English text**:
+- English textfileEnglish text CLI tool
+- supportEnglish textfileEnglish text
+- English textmanagement(English text 0o600 English textfile)
+- directoryEnglish text
+- English text(LF/CRLF)
+- fileEnglish text
 
-**当前实现细节**：
+**English textimplementationEnglish text**:
 ```javascript
-// 主要功能模块
-- parseArgs()          // 命令行参数解析
-- createFile()         // 原子式文件创建
-- processBatch()       // 批量操作
-- validateSyntax()     // 语法检查
-- setPermissions()     // 权限设置
-- createDirs()         // 目录创建
-- handleCheckpoint()   // 检查点管理
+// mainEnglish text
+- parseArgs()          // English textparameterEnglish text
+- createFile()         // English textfileEnglish text
+- processBatch()       // English text
+- validateSyntax()     // English text
+- setPermissions()     // English text
+- createDirs()         // directoryEnglish text
+- handleCheckpoint()   // checkpointmanagement
 ```
 
-**迁移策略**：
-1. 创建 `scripts/legacy/file_creation_tool.s`
-2. 实现命令行参数解析
-3. 实现文件 I/O 操作
-4. 添加权限管理
-5. 实现批量操作
+**migrationEnglish text**:
+1. English text `scripts/legacy/file_creation_tool.s`
+2. implementationEnglish textparameterEnglish text
+3. implementationfile I/O English text
+4. English textmanagement
+5. implementationEnglish text
 
-**预期结果**：
+**English textresult**:
 ```bash
-# S 语言版本的用法
+# S languageEnglish text
 s scripts/legacy/file_creation_tool.s --file path/to/file --text "content"
 s scripts/legacy/file_creation_tool.s --file path/config.json --mode 0o600 --text "{...}"
 s scripts/legacy/file_creation_tool.s --batch operations.json
 ```
 
-**相关依赖**：
-- `core/fs` (文件系统操作)
-- `core/args` (参数解析)
-- `util/io` (I/O 工具)
+**English text**:
+- `core/fs` (filesystemEnglish text)
+- `core/args` (parameterEnglish text)
+- `util/io` (I/O tool)
 
 ---
 
-## 优先级 2（中）：示例代码迁移
+## English text 2(English text): exampleEnglish textmigration
 
-### 📌 任务 2.1：`examples/file-creation-examples.js` → `examples/file_creation_examples.s`
+### 📌 English text 2.1: `examples/file-creation-examples.js` → `examples/file_creation_examples.s`
 
-**当前位置**：[examples/file-creation-examples.js](examples/file-creation-examples.js)  
-**文件大小**：13K  
-**优先级**：🟡 **中** - 文档/示例性质，不影响核心功能  
+**English text**: [examples/file-creation-examples.js](examples/file-creation-examples.js)
+**fileEnglish text**: 13K
+**English text**: 🟡 **English text** - English text/exampleEnglish text, English text
 
-**功能概述**：
-- 展示文件创建工具的使用示例
-- 8+ 个实际可运行的示例
-- 覆盖典型使用场景
+**English text**:
+- English textfileEnglish texttoolEnglish textuseexample
+- 8+ English textactualEnglish textrunEnglish textexample
+- English textuseEnglish text
 
-**当前示例包括**：
-1. 创建源代码文件 (C++)
-2. 创建受保护的配置文件 (JSON)
-3. 创建可执行脚本 (Bash)
-4. 创建 Markdown 文档
-5. 批量创建文件
-6. 错误处理示例
-7. 权限管理示例
-8. 检查点管理示例
+**English textexampleEnglish text**:
+1. English textfile (C++)
+2. English textconfigurationfile (JSON)
+3. English text (Bash)
+4. English text Markdown English text
+5. English textfile
+6. errorEnglish textexample
+7. English textmanagementexample
+8. checkpointmanagementexample
 
-**迁移策略**：
-1. 创建 `examples/file_creation_examples.s`
-2. 将每个 JavaScript 示例转换为 S 语言
-3. 保持示例的教学意义
-4. 添加 S 特有的说明
+**migrationEnglish text**:
+1. English text `examples/file_creation_examples.s`
+2. English text JavaScript exampleEnglish text S language
+3. English textexampleEnglish text
+4. English text S English textexplanation
 
-**预期结果**：
+**English textresult**:
 ```s
-// S 语言示例的结构
+// S languageexampleEnglish text
 func example1_CreateSourceFile() {
-    // C++ 源文件示例
+    // C++ English textfileexample
     content := `#include <iostream>...`
     createFile("src/main.cpp", content)
 }
 
 func example2_CreateProtectedConfig() {
-    // 敏感配置文件示例
+    // English textconfigurationfileexample
     config := `{"apiKey": "..."`
     createFileWithMode("config/secrets.json", config, 0o600)
 }
 ```
 
-**相关依赖**：
-- `scripts/legacy/file_creation_tool.s` (依赖于任务 1.1 完成)
+**English text**:
+- `scripts/legacy/file_creation_tool.s` (English text 1.1 English text)
 
 ---
 
-## 迁移计划表
+## migrationEnglish text
 
-| 任务 ID | 文件名 | 优先级 | 估计工作量 | 依赖关系 | 状态 |
+| English text ID | fileEnglish text | English text | English text | English text | state |
 |--------|--------|--------|----------|---------|------|
-| 1.1 | `create-file.js` | 🔴 高 | 4-6 小时 | 无 | ⏳ 待迁移 |
-| 2.1 | `file-creation-examples.js` | 🟡 中 | 2-3 小时 | 1.1 | ⏳ 待迁移 |
+| 1.1 | `create-file.js` | 🔴 English text | 4-6 English text | English text | ⏳ English textmigration |
+| 2.1 | `file-creation-examples.js` | 🟡 English text | 2-3 English text | 1.1 | ⏳ English textmigration |
 
 ---
 
-## 迁移前准备检查清单
+## migrationEnglish text
 
-- [ ] 理解原始 JavaScript 代码的完整功能
-- [ ] 确认 S 语言已有必要的库支持（文件 I/O、权限管理）
-- [ ] 准备 S 语言的单元测试框架
-- [ ] 计划向后兼容性（如 CLI 参数格式）
-
----
-
-## 迁移后验证检查清单
-
-### 任务 1.1 验证
-- [ ] `s scripts/legacy/file_creation_tool.s --help` 输出正确
-- [ ] 单文件创建功能正常
-- [ ] 批量操作功能正常
-- [ ] 权限设置正确（`ls -l` 验证）
-- [ ] 目录自动创建功能正常
-- [ ] 行尾符处理正确
-- [ ] 错误处理完善
-
-### 任务 2.1 验证
-- [ ] 所有 8+ 个示例都能正确执行
-- [ ] 输出格式与原始 JavaScript 版本一致
-- [ ] 文档注释清晰
+- [ ] English text JavaScript English textcompleteEnglish text
+- [ ] English text S languageEnglish textsupport(file I/O, English textmanagement)
+- [ ] English text S languageEnglish texttestframework
+- [ ] English text(English text CLI parameterEnglish text)
 
 ---
 
-## 完成标志
+## migrationEnglish text
 
-✅ **目标达成**：当以下条件满足时，迁移完成
-1. 所有 2 个 JavaScript 文件成功迁移到 S 语言
-2. 所有验证检查清单项目通过
-3. 文档更新完毕
-4. 代码通过审查
+### English text 1.1 English text
+- [ ] `s scripts/legacy/file_creation_tool.s --help` outputEnglish text
+- [ ] English textfileEnglish text
+- [ ] English text
+- [ ] English text(`ls -l` English text)
+- [ ] directoryEnglish text
+- [ ] English text
+- [ ] errorEnglish text
+
+### English text 2.1 English text
+- [ ] English text 8+ English textexampleEnglish text
+- [ ] outputEnglish text JavaScript English text
+- [ ] English text
 
 ---
 
-## 备注
+## English text
 
-### 当前 100% S 实现覆盖
-- ✅ **652 个 S 文件** - 核心框架
-- ✅ **~105,000 LOC** - S 语言代码
-- ✅ **99.7% 纯度** - 仅有 2 个 JavaScript 文件
+✅ **English text**: English text, migrationEnglish text
+1. English text 2 English text JavaScript filesuccessmigrationEnglish text S language
+2. English text
+3. English text
+4. English text
 
-### 迁移后预期
-- 🎯 **100% S 实现** - 完全零外部依赖
-- 🎯 **0 个非 S 文件** - 纯粹的 S 语言项目
-- 🎯 **完全自洽** - 所有工具都用 S 编写
+---
+
+## English text
+
+### English text 100% S implementationEnglish text
+- ✅ **652 English text S file** - English textframework
+- ✅ **~105,000 LOC** - S languageEnglish text
+- ✅ **99.7% English text** - English text 2 English text JavaScript file
+
+### migrationEnglish text
+- 🎯 **100% S implementation** - English text
+- 🎯 **0 English text S file** - English text S languageEnglish text
+- 🎯 **English text** - English texttoolEnglish text S English text

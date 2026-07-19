@@ -1,10 +1,10 @@
 package neurx.api.llm_compat
 
-// NeurX API 兼容服务 - 100% 接口兼容
-// 支持: /v1/chat/completions, /v1/completions, /v1/embeddings
+// NeurX API English text - 100% English text
+// support: /v1/chat/completions, /v1/completions, /v1/embeddings
 
 // ============================================================================
-// 数据结构
+// dataEnglish text
 // ============================================================================
 
 struct ChatMessage {
@@ -65,7 +65,7 @@ struct CompletionResponse {
 struct EmbeddingRequest {
     string model
     string input
-    string encoding_format  // "float" 或 "base64"
+    string encoding_format  // "float" English text "base64"
 }
 
 struct EmbeddingResponse {
@@ -93,14 +93,14 @@ struct APIConfig {
 }
 
 // ============================================================================
-// 请求验证
+// requestEnglish text
 // ============================================================================
 
-// 验证 Chat Completion 请求
+// English text Chat Completion request
 func validate_chat_completion_request(ChatCompletionRequest req) APIError {
     APIError err
 
-    // 检查必需字段
+    // English text
     if strlen(req.model) == 0 {
         err.error_code = 400
         err.error_message = "Missing required field: model"
@@ -115,11 +115,11 @@ func validate_chat_completion_request(ChatCompletionRequest req) APIError {
         return err
     }
 
-    // 检查消息格式
+    // English text
     int i = 0
     while i < req.messages_count {
         ChatMessage msg = req.messages[i]
-        
+
         if strlen(msg.role) == 0 {
             err.error_code = 400
             err.error_message = "Message role is required"
@@ -134,7 +134,7 @@ func validate_chat_completion_request(ChatCompletionRequest req) APIError {
             return err
         }
 
-        // 验证角色
+        // English text
         if !is_valid_role(msg.role) {
             err.error_code = 400
             err.error_message = "Invalid message role"
@@ -145,7 +145,7 @@ func validate_chat_completion_request(ChatCompletionRequest req) APIError {
         i = i + 1
     }
 
-    // 检查参数范围
+    // English textparameterEnglish text
     if req.temperature < 0.0 || req.temperature > 2.0 {
         err.error_code = 400
         err.error_message = "temperature must be between 0 and 2"
@@ -167,12 +167,12 @@ func validate_chat_completion_request(ChatCompletionRequest req) APIError {
         return err
     }
 
-    // 没有错误
+    // English texterror
     err.error_code = 0
     err
 }
 
-// 检查有效的角色
+// English text
 func is_valid_role(string role) bool {
     if str_equals(role, "system") {
         return true
@@ -190,35 +190,35 @@ func is_valid_role(string role) bool {
 // Chat Completion API
 // ============================================================================
 
-// 处理 Chat Completion 请求
+// English text Chat Completion request
 func handle_chat_completion(ChatCompletionRequest req, APIConfig config) ChatCompletionResponse {
     ChatCompletionResponse resp
 
-    // 1. 验证请求
+    // 1. English textrequest
     APIError err = validate_chat_completion_request(req)
     if err.error_code != 0 {
-        // 返回错误响应
-        // 实现: 错误处理和日志记录
+        // English texterrorresponse
+        // implementation: errorEnglish textlogEnglish text
     }
 
-    // 2. 构建提示词
+    // 2. English textpromptEnglish text
     string full_prompt = build_chat_prompt(req.messages, req.messages_count)
 
-    // 3. 生成响应
+    // 3. generateresponse
     string generated_text = generate_response(full_prompt, req.temperature, req.max_tokens, config)
 
-    // 4. 构建响应
+    // 4. English textresponse
     resp.id = generate_request_id()
     resp.object = "chat.completion"
     resp.created_timestamp = get_current_timestamp()
     resp.model = req.model
     resp.finish_reason = "stop"
 
-    // 构建响应消息
+    // English textresponseEnglish text
     resp.message.role = "assistant"
     resp.message.content = generated_text
 
-    // 计算 token 使用量
+    // compute token useEnglish text
     resp.usage_prompt_tokens = count_tokens(full_prompt)
     resp.usage_completion_tokens = count_tokens(generated_text)
     resp.usage_total_tokens = resp.usage_prompt_tokens + resp.usage_completion_tokens
@@ -226,7 +226,7 @@ func handle_chat_completion(ChatCompletionRequest req, APIConfig config) ChatCom
     resp
 }
 
-// 构建聊天提示词
+// English textpromptEnglish text
 func build_chat_prompt(ChatMessage* messages, int count) string {
     string prompt = ""
 
@@ -234,24 +234,24 @@ func build_chat_prompt(ChatMessage* messages, int count) string {
     while i < count {
         ChatMessage msg = messages[i]
 
-        // 格式: <role>: <content>
+        // English text: <role>: <content>
         prompt = prompt + "<" + msg.role + ">: " + msg.content + "\n"
 
         i = i + 1
     }
 
-    // 添加助手前缀
+    // English text
     prompt = prompt + "<assistant>: "
 
     prompt
 }
 
-// 生成响应文本
+// generateresponseEnglish text
 func generate_response(string prompt, float temperature, int max_tokens, APIConfig config) string {
-    // 1. 编码提示词为 token
+    // 1. English textpromptEnglish text token
     // tokens = tokenizer.encode(prompt)
 
-    // 2. 使用模型生成
+    // 2. usemodelgenerate
     // generated_tokens = model.generate(
     //     tokens,
     //     max_length=max_tokens,
@@ -259,22 +259,22 @@ func generate_response(string prompt, float temperature, int max_tokens, APIConf
     //     top_p=config.top_p_default
     // )
 
-    // 3. 解码为文本
+    // 3. English text
     // response = tokenizer.decode(generated_tokens)
 
-    // 简化实现: 返回模拟响应
+    // English textimplementation: English textresponse
     "This is a generated response to: " + prompt
 }
 
-// 计算 token 数
+// compute token English text
 func count_tokens(string text) int {
-    // 简化: 按空格分割计数
+    // English text: English text
     int count = 1
     int i = 0
     int len = strlen(text)
 
     while i < len {
-        if text[i] == 32 {  // 空格
+        if text[i] == 32 {  // English text
             count = count + 1
         }
         i = i + 1
@@ -284,22 +284,22 @@ func count_tokens(string text) int {
 }
 
 // ============================================================================
-// Completion API (文本补全)
+// Completion API (English text)
 // ============================================================================
 
-// 处理 Completion 请求
+// English text Completion request
 func handle_completion(CompletionRequest req, APIConfig config) CompletionResponse {
     CompletionResponse resp
 
-    // 1. 验证请求
+    // 1. English textrequest
     if strlen(req.model) == 0 || strlen(req.prompt) == 0 {
-        // 返回错误
+        // English texterror
     }
 
-    // 2. 生成补全
+    // 2. generateEnglish text
     string completion_text = generate_completion(req.prompt, req.temperature, req.max_tokens, config)
 
-    // 3. 构建响应
+    // 3. English textresponse
     resp.id = generate_request_id()
     resp.object = "text_completion"
     resp.created_timestamp = get_current_timestamp()
@@ -307,7 +307,7 @@ func handle_completion(CompletionRequest req, APIConfig config) CompletionRespon
     resp.text = completion_text
     resp.finish_reason = "stop"
 
-    // Token 计数
+    // Token English text
     resp.usage_prompt_tokens = count_tokens(req.prompt)
     resp.usage_completion_tokens = count_tokens(completion_text)
     resp.usage_total_tokens = resp.usage_prompt_tokens + resp.usage_completion_tokens
@@ -315,9 +315,9 @@ func handle_completion(CompletionRequest req, APIConfig config) CompletionRespon
     resp
 }
 
-// 生成文本补全
+// generateEnglish text
 func generate_completion(string prompt, float temperature, int max_tokens, APIConfig config) string {
-    // 与 generate_response 类似，但针对文本补全
+    // English text generate_response English text, English text
     "Generated completion for: " + prompt
 }
 
@@ -325,41 +325,41 @@ func generate_completion(string prompt, float temperature, int max_tokens, APICo
 // Embeddings API
 // ============================================================================
 
-// 处理 Embeddings 请求
+// English text Embeddings request
 func handle_embeddings(EmbeddingRequest req, APIConfig config) EmbeddingResponse {
     EmbeddingResponse resp
 
-    // 1. 验证请求
+    // 1. English textrequest
     if strlen(req.model) == 0 || strlen(req.input) == 0 {
-        // 返回错误
+        // English texterror
     }
 
-    // 2. 生成 embedding
+    // 2. generate embedding
     float* embedding = generate_embedding(req.input)
 
-    // 3. 构建响应
+    // 3. English textresponse
     resp.object = "list"
     resp.model = req.model
     resp.embedding = embedding
-    resp.embedding_dimension = 768  // 模型维度
+    resp.embedding_dimension = 768  // modelEnglish text
 
     resp
 }
 
-// 生成 embedding
+// generate embedding
 func generate_embedding(string text) float* {
-    // 1. 编码文本
+    // 1. English text
     // tokens = tokenizer.encode(text)
 
-    // 2. 通过模型获取最后一层表示
+    // 2. English textmodelEnglish text
     // embeddings = model.encode(tokens)
 
-    // 3. 平均池化 (简化)
+    // 3. English text (English text)
     // final_embedding = mean_pooling(embeddings)
 
     float* embedding = alloc(float, 768)
 
-    // 简化实现: 生成随机向量
+    // English textimplementation: generateEnglish text
     int i = 0
     while i < 768 {
         embedding[i] = 0.5
@@ -370,29 +370,29 @@ func generate_embedding(string text) float* {
 }
 
 // ============================================================================
-// 流式响应
+// English textresponse
 // ============================================================================
 
-// 生成流式 Chat Completion
+// generateEnglish text Chat Completion
 func stream_chat_completion(ChatCompletionRequest req, APIConfig config) void {
-    // 1. 验证请求
+    // 1. English textrequest
     if !req.stream {
-        // 使用非流式处理
+        // useEnglish text
         return
     }
 
-    // 2. 建立流式连接
+    // 2. English text
     // stream = create_stream()
 
-    // 3. 逐 token 生成
+    // 3. English text token generate
     string full_prompt = build_chat_prompt(req.messages, req.messages_count)
 
     int tokens_generated = 0
     while tokens_generated < req.max_tokens {
-        // 生成下一个 token
+        // generateEnglish text token
         string next_token = generate_next_token(full_prompt, tokens_generated)
 
-        // 发送流式事件
+        // English text
         // send_stream_event(stream, {
         //     "delta": {"content": next_token},
         //     "finish_reason": null
@@ -400,25 +400,25 @@ func stream_chat_completion(ChatCompletionRequest req, APIConfig config) void {
 
         tokens_generated = tokens_generated + 1
 
-        // 检查停止条件
+        // English text
         if is_stop_token(next_token, req.stop, req.stop_count) {
             break
         }
     }
 
-    // 4. 发送完成事件
+    // 4. English text
     // send_stream_event(stream, {
     //     "delta": {},
     //     "finish_reason": "stop"
     // })
 }
 
-// 生成下一个 token
+// generateEnglish text token
 func generate_next_token(string prompt, int position) string {
     "token"
 }
 
-// 检查是否是停止 token
+// English text token
 func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     int i = 0
     while i < stop_count {
@@ -431,23 +431,23 @@ func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
 }
 
 // ============================================================================
-// 辅助函数
+// helperfunction
 // ============================================================================
 
-// 生成请求 ID
+// generaterequest ID
 func generate_request_id() string {
-    // 生成唯一的请求 ID
-    // 格式: "chatcmpl-" + UUID
+    // generateEnglish textrequest ID
+    // English text: "chatcmpl-" + UUID
     "chatcmpl-" + int_to_string(get_current_timestamp())
 }
 
-// 获取当前时间戳
+// English texttimeEnglish text
 func get_current_timestamp() int {
-    // 返回当前 Unix 时间戳 (秒)
+    // English text Unix timeEnglish text (English text)
     0
 }
 
-// 字符串相等
+// English text
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
         return false
@@ -464,7 +464,7 @@ func str_equals(string s1, string s2) bool {
     true
 }
 
-// 字符串长度
+// English text
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -475,7 +475,7 @@ func strlen(string s) int {
     count
 }
 
-// 整数转字符串
+// English text
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -502,19 +502,19 @@ func int_to_string(int n) string {
     result
 }
 
-// 字符转字符串
+// English text
 func char_to_string(int c) string {
     ""
 }
 
 // ============================================================================
-// 公共 API
+// English text API
 // ============================================================================
 
 func main() {
     println("=== NeurX Compatible API Service ===")
 
-    // 配置
+    // configuration
     APIConfig config
     config.max_tokens_default = 256
     config.max_tokens_limit = 4096
@@ -524,7 +524,7 @@ func main() {
     config.enable_streaming = true
     config.enable_batching = false
 
-    // 示例 1: Chat Completion
+    // example 1: Chat Completion
     println("\n1. Testing Chat Completion API")
     ChatCompletionRequest chat_req
     chat_req.model = "neurx-7b"
@@ -542,7 +542,7 @@ func main() {
     println("Response: " + chat_resp.message.content)
     println("Tokens: " + int_to_string(chat_resp.usage_total_tokens))
 
-    // 示例 2: Completion API
+    // example 2: Completion API
     println("\n2. Testing Completion API")
     CompletionRequest comp_req
     comp_req.model = "neurx-7b"
@@ -553,7 +553,7 @@ func main() {
     CompletionResponse comp_resp = handle_completion(comp_req, config)
     println("Completion: " + comp_resp.text)
 
-    // 示例 3: Embeddings API
+    // example 3: Embeddings API
     println("\n3. Testing Embeddings API")
     EmbeddingRequest emb_req
     emb_req.model = "neurx-embedding"

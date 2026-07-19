@@ -15,39 +15,39 @@ func main() int {
     let total_count = 0
 
     total_count = total_count + 1
-    if check_file(project_root + "/training/training_pipeline.s", "训练管道主模块") {
+    if check_file(project_root + "/training/training_pipeline.s", "trainingEnglish textmainEnglish text") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/example/complete_training_example.s", "完整训练示例") {
+    if check_file(project_root + "/example/complete_training_example.s", "completetrainingexample") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/tests/test_training_pipeline.s", "测试套件") {
+    if check_file(project_root + "/tests/test_training_pipeline.s", "testEnglish text") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/TRAINING_PIPELINE_GUIDE.md", "API参考和使用指南") {
+    if check_file(project_root + "/TRAINING_PIPELINE_GUIDE.md", "APIEnglish textuseEnglish text") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/TRAINING_PIPELINE_IMPLEMENTATION.md", "实现总结文档") {
+    if check_file(project_root + "/TRAINING_PIPELINE_IMPLEMENTATION.md", "implementationEnglish text") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/TRAINING_PIPELINE_COMPLETE_SUMMARY.md", "项目完成总结") {
+    if check_file(project_root + "/TRAINING_PIPELINE_COMPLETE_SUMMARY.md", "English text") {
         pass_count = pass_count + 1
     }
 
     println("")
     if pass_count == total_count {
-        println("通过: 全部检查通过")
-        println("项目状态: 完成")
+        println("English text: English text")
+        println("English textstate: English text")
         return 0
     }
 
-    println("通过: 部分检查通过")
-    println("项目状态: 未完全完成")
+    println("English text: English text")
+    println("English textstate: English text")
     1
 }
 

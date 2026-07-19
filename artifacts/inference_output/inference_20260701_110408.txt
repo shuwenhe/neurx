@@ -14,15 +14,15 @@ Weight shape: 256x256
 Bias shape: 256
 Quantized: true
 Graph mode: true
-Seed: neurx 
+Seed: neurx
 Answer mode: qa
-Prompt: 你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
-人工智能是什么？请直接回答。
-答案：
+Prompt: English text, English text.English text, English text:
+English text?English text.
+English text:
 [phase] generate:start
 Generated:
-你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
-人工智能是什么？请直接回答。
-答案：
+English text, English text.English text, English text:
+English text?English text.
+English text:
 [phase] generate:done
 ================================================

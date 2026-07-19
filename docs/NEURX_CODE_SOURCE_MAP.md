@@ -1,121 +1,121 @@
-# NeurX Code 源代码导航指南
+# NeurX Code English text
 
-## 文件创建相关的关键文件
+## fileEnglish textfile
 
-### 🔍 文件位置地图
+### 🔍 fileEnglish text
 
 ```
 /Users/feifei/agent/neurx-code-reference/
 ├── plugins/
-│   ├── hookify/                          # Hook 系统实现
+│   ├── hookify/                          # Hook systemimplementation
 │   │   ├── core/
-│   │   │   └── rule_engine.py           # 规则引擎（验证文件操作）
+│   │   │   └── rule_engine.py           # English text(English textfileEnglish text)
 │   │   └── hooks/
-│   │       ├── security_reminder_hook.py # 安全提醒
+│   │       ├── security_reminder_hook.py # safetyEnglish text
 │   │       └── ...
 │   │
-│   ├── plugin-dev/                       # 插件开发文档
+│   ├── plugin-dev/                       # pluginEnglish text
 │   │   ├── skills/hook-development/
 │   │   │   └── examples/
-│   │   │       ├── validate-write.sh    # ✅ Write 工具验证例子
-│   │   │       ├── validate-bash.sh     # ✅ Bash 工具验证例子
+│   │   │       ├── validate-write.sh    # ✅ Write toolEnglish text
+│   │   │       ├── validate-bash.sh     # ✅ Bash toolEnglish text
 │   │   │       └── ...
 │   │   └── SKILL.md
 │   │
-│   ├── security-guidance/                # 安全指导插件
+│   ├── security-guidance/                # safetyEnglish textplugin
 │   │   └── hooks/
-│   │       └── security_reminder_hook.py # ✅ 从工具输入提取内容
+│   │       └── security_reminder_hook.py # ✅ English texttoolinputEnglish textcontent
 │   │
 │   └── ...
 │
 ├── examples/
 │   ├── hooks/
-│   │   └── bash_command_validator_example.py  # Bash 命令验证
+│   │   └── bash_command_validator_example.py  # Bash English text
 │   ├── mdm/
 │   └── settings/
 │
-├── scripts/                               # 脚本目录
+├── scripts/                               # English textdirectory
 │   └── ...
 │
-└── docs/                                  # 文档
+└── docs/                                  # English text
     └── ...
 ```
 
-## 关键代码片段及其位置
+## English text
 
-### 1. Write 工具验证 - validate-write.sh
+### 1. Write toolEnglish text - validate-write.sh
 
-**路径**：`外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh`
+**path**: `English text/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh`
 
-**功能**：演示 Write 工具的 PreToolUse 钩子
+**English text**: English text Write toolEnglish text PreToolUse English text
 
-**关键代码**：
+**English text**:
 ```bash
 #!/bin/bash
-# 提取文件路径
+# English textfilepath
 file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 
-# 检查路径遍历
+# English textpathEnglish text
 if [[ "$file_path" == *".."* ]]; then
   echo '{"hookSpecificOutput": {"permissionDecision": "deny"}}'
-  exit 2  # 拒绝
+  exit 2  # English text
 fi
 
-# 检查系统目录
+# English textsystemdirectory
 if [[ "$file_path" == /etc/* ]] || [[ "$file_path" == /sys/* ]]; then
   echo '{"hookSpecificOutput": {"permissionDecision": "deny"}}'
-  exit 2  # 拒绝
+  exit 2  # English text
 fi
 ```
 
-**学到的**：
-- ✅ Hook 从 JSON stdin 接收输入
-- ✅ 提取 `.tool_input.file_path`
-- ✅ 返回 `permissionDecision: "deny"` 拒绝
-- ✅ 退出码 2 表示拒绝
+**English text**:
+- ✅ Hook English text JSON stdin English textinput
+- ✅ English text `.tool_input.file_path`
+- ✅ English text `permissionDecision: "deny"` English text
+- ✅ English text 2 English text
 
-### 2. Bash 工具验证 - validate-bash.sh
+### 2. Bash toolEnglish text - validate-bash.sh
 
-**路径**：`外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-bash.sh`
+**path**: `English text/plugins/plugin-dev/skills/hook-development/examples/validate-bash.sh`
 
-**功能**：演示 Bash 工具的验证
+**English text**: English text Bash toolEnglish text
 
-**关键代码**：
+**English text**:
 ```bash
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
-# 拒绝危险命令
+# English text
 if [[ "$command" == *"rm -rf"* ]]; then
-  exit 2  # 拒绝
+  exit 2  # English text
 fi
 
 if [[ "$command" == *"chmod 777"* ]]; then
-  exit 2  # 拒绝
+  exit 2  # English text
 fi
 
 if [[ "$command" == *"dd if=/dev/"* ]]; then
-  exit 2  # 拒绝
+  exit 2  # English text
 fi
 
-exit 0  # 允许
+exit 0  # English text
 ```
 
-**学到的**：
-- ✅ Bash 工具参数是 `.tool_input.command`
-- ✅ 检查危险命令模式
-- ✅ 退出码 0 表示允许
+**English text**:
+- ✅ Bash toolparameterEnglish text `.tool_input.command`
+- ✅ English text
+- ✅ English text 0 English text
 
-### 3. 规则引擎 - rule_engine.py
+### 3. English text - rule_engine.py
 
-**路径**：`外部参考仓库/plugins/hookify/core/rule_engine.py`
+**path**: `English text/plugins/hookify/core/rule_engine.py`
 
-**功能**：实现规则匹配和评估逻辑
+**English text**: implementationEnglish textevaluationEnglish text
 
-**关键代码片段**（约 235 行附近）：
+**English text**(English text 235 English text):
 ```python
 elif tool_name in ['Write', 'Edit']:
     if field == 'content':
-        # Write 使用 'content'，Edit 使用 'new_string'
+        # Write use 'content', Edit use 'new_string'
         return tool_input.get('content') or tool_input.get('new_string', '')
     elif field == 'new_text' or field == 'new_string':
         return tool_input.get('new_string', '')
@@ -125,21 +125,21 @@ elif tool_name in ['Write', 'Edit']:
         return tool_input.get('file_path', '')
 ```
 
-**学到的**：
-- ✅ Write 和 Edit 工具的参数字段
-- ✅ 如何从 tool_input 提取字段
-- ✅ 规则引擎支持正则表达式匹配
+**English text**:
+- ✅ Write English text Edit toolEnglish textparameterEnglish text
+- ✅ English text tool_input English text
+- ✅ English textsupportEnglish text
 
-### 4. 安全提醒钩子 - security_reminder_hook.py
+### 4. safetyEnglish text - security_reminder_hook.py
 
-**路径**：`外部参考仓库/plugins/security-guidance/hooks/security_reminder_hook.py`
+**path**: `English text/plugins/security-guidance/hooks/security_reminder_hook.py`
 
-**功能**：为文件操作提供安全提醒
+**English text**: English textfileEnglish textsafetyEnglish text
 
-**关键代码片段**（约 429 行附近）：
+**English text**(English text 429 English text):
 ```python
 def extract_content_from_input(tool_name, tool_input):
-    """从工具输入提取内容用于检查"""
+    """English texttoolinputEnglish textcontentEnglish text"""
     if tool_name == "Write":
         return tool_input.get("content", "")
     elif tool_name == "Edit":
@@ -152,21 +152,21 @@ def extract_content_from_input(tool_name, tool_input):
     return ""
 ```
 
-**学到的**：
-- ✅ 不同工具的内容字段不同
-- ✅ MultiEdit 有 edits 数组
-- ✅ 如何统一提取内容
+**English text**:
+- ✅ English texttoolEnglish textcontentEnglish text
+- ✅ MultiEdit English text edits English text
+- ✅ English textcontent
 
-### 5. Bash 命令验证器示例 - bash_command_validator_example.py
+### 5. Bash English textexample - bash_command_validator_example.py
 
-**路径**：`外部参考仓库/examples/hooks/bash_command_validator_example.py`
+**path**: `English text/examples/hooks/bash_command_validator_example.py`
 
-**功能**：演示如何创建自定义 Bash 命令验证
+**English text**: English text Bash English text
 
-**关键代码**：
+**English text**:
 ```python
 def _validate_command(command: str) -> list[str]:
-    """验证 bash 命令"""
+    """English text bash English text"""
     issues = []
     for pattern, message in _VALIDATION_RULES:
         if re.search(pattern, command):
@@ -178,28 +178,28 @@ def main():
     tool_name = input_data.get("tool_name", "")
     if tool_name != "Bash":
         sys.exit(0)
-    
+
     tool_input = input_data.get("tool_input", {})
     command = tool_input.get("command", "")
-    
+
     issues = _validate_command(command)
     if issues:
         for message in issues:
             print(f"• {message}", file=sys.stderr)
-        sys.exit(2)  # 拒绝
+        sys.exit(2)  # English text
 ```
 
-**学到的**：
-- ✅ 完整的钩子脚本结构
-- ✅ 通过 sys.stdin 读取 JSON
-- ✅ 通过 sys.stderr 输出消息
-- ✅ 退出码控制决策（0=允许，2=拒绝）
+**English text**:
+- ✅ completeEnglish text
+- ✅ English text sys.stdin English text JSON
+- ✅ English text sys.stderr outputEnglish text
+- ✅ English text(0=English text, 2=English text)
 
-## Hook 系统的工作流
+## Hook systemEnglish text
 
-### Hook 配置格式
+### Hook configurationEnglish text
 
-**在 `.neurx/config.json` 中**：
+**English text `.neurx/config.json` English text**:
 ```json
 {
   "hooks": {
@@ -231,9 +231,9 @@ def main():
 }
 ```
 
-### Hook 输入/输出格式
+### Hook input/outputEnglish text
 
-**输入（来自外部参考实现）**：
+**input(English textimplementation)**:
 ```json
 {
   "session_id": "abc123...",
@@ -247,7 +247,7 @@ def main():
 }
 ```
 
-**输出（从 Hook 脚本）**：
+**output(English text Hook English text)**:
 ```json
 {
   "hookSpecificOutput": {
@@ -257,34 +257,34 @@ def main():
 }
 ```
 
-## 关键工具参数参考
+## English texttoolparameterEnglish text
 
-### Write 工具参数
+### Write toolparameter
 
 ```bash
 {
   "tool_name": "Write",
   "tool_input": {
-    "file_path": "string",    # 必需
-    "content": "string"       # 必需
+    "file_path": "string",    # English text
+    "content": "string"       # English text
   }
 }
 ```
 
-### Edit 工具参数
+### Edit toolparameter
 
 ```bash
 {
   "tool_name": "Edit",
   "tool_input": {
-    "file_path": "string",    # 必需
-    "old_string": "string",   # 必需
-    "new_string": "string"    # 必需
+    "file_path": "string",    # English text
+    "old_string": "string",   # English text
+    "new_string": "string"    # English text
   }
 }
 ```
 
-### MultiEdit 工具参数
+### MultiEdit toolparameter
 
 ```bash
 {
@@ -301,107 +301,107 @@ def main():
 }
 ```
 
-### Bash 工具参数
+### Bash toolparameter
 
 ```bash
 {
   "tool_name": "Bash",
   "tool_input": {
-    "command": "string"       # 必需，例如 "mkdir -p src/app"
+    "command": "string"       # English text, English text "mkdir -p src/app"
   }
 }
 ```
 
-## 关键概念
+## English text
 
-### 1. Hook 事件生命周期
+### 1. Hook English text
 
 ```
-工具调用请求
+toolEnglish textrequest
     ↓
-PreToolUse 钩子
-  ├─ 验证工具调用
-  ├─ 可以修改或拒绝
-  └─ 决策：allow/deny/ask
+PreToolUse English text
+  ├─ English texttoolEnglish text
+  ├─ AllowedEnglish text
+  └─ English text: allow/deny/ask
     ↓
-执行工具 (如果允许)
-  └─ 实际文件操作
+English texttool (English text)
+  └─ actualfileEnglish text
     ↓
-PostToolUse 钩子 (可选)
-  ├─ 反应到执行结果
-  └─ 例如：日志、通知
+PostToolUse English text (English text)
+  ├─ English textresult
+  └─ English text: log, English text
     ↓
-返回结果给调用方
+English textresultEnglish text
 ```
 
-### 2. Hook 脚本的三种决策
+### 2. Hook English text
 
 ```bash
-exit 0  # ✅ 允许 - 工具继续执行
-exit 1  # ⚠️ 询问 - 需要用户确认（显示在 stderr）
-exit 2  # ❌ 拒绝 - 阻止工具执行（显示在 stderr）
+exit 0  # ✅ English text - toolEnglish text
+exit 1  # ⚠️ English text - RequiredEnglish text(English text stderr)
+exit 2  # ❌ English text - English texttoolEnglish text(English text stderr)
 ```
 
-### 3. 安全验证的三层
+### 3. safetyEnglish text
 
 ```
-Layer 1: Hook 预验证
-  - 路径遍历检查（.. 不允许）
-  - 系统目录检查（/etc, /sys 不允许）
-  - 敏感文件检查（.env, secrets 警告）
+Layer 1: Hook English text
+  - pathEnglish text(.. English text)
+  - systemdirectoryEnglish text(/etc, /sys English text)
+  - English textfileEnglish text(.env, secrets English text)
 
-Layer 2: 规则引擎
-  - 正则表达式匹配
-  - 条件组合（AND/OR）
-  - 优先级处理（block > warn > allow）
+Layer 2: English text
+  - English text
+  - English text(AND/OR)
+  - English text(block > warn > allow)
 
-Layer 3: 用户确认
-  - 可疑操作询问用户
-  - 显示详细信息
-  - 用户决定是否继续
+Layer 3: English text
+  - English text
+  - English textinformation
+  - English text
 ```
 
-## 实用参考
+## English text
 
-### 快速查看文件创建流程
+### quickEnglish textfileEnglish textpipeline
 
-1. **打开对应配置**：
+1. **English textconfiguration**:
    ```bash
    cat ~/.neurx/config.json
    ```
 
-2. **查看 Hook 脚本**：
+2. **English text Hook English text**:
    ```bash
-   ls 外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/
+   ls English text/plugins/plugin-dev/skills/hook-development/examples/
    ```
 
-3. **运行示例验证**：
+3. **runexampleEnglish text**:
    ```bash
-   # 手动测试 Write 钩子
+   # English texttest Write English text
    echo '{
      "hook_event_name": "PreToolUse",
      "tool_name": "Write",
      "tool_input": {"file_path": "/tmp/test.txt", "content": "hello"}
-   }' | bash 外部参考仓库/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh
+   }' | bash English text/plugins/plugin-dev/skills/hook-development/examples/validate-write.sh
    ```
 
-4. **查看规则定义**：
+4. **English text**:
    ```bash
-   grep -r "def _rule_matches" 外部参考仓库/plugins/
+   grep -r "def _rule_matches" English text/plugins/
    ```
 
-## 总结
+## English text
 
-| 文件 | 位置 | 功能 |
+| file | English text | English text |
 |------|------|------|
-| validate-write.sh | plugins/plugin-dev/skills/hook-development/examples/ | Write 工具验证 |
-| validate-bash.sh | plugins/plugin-dev/skills/hook-development/examples/ | Bash 工具验证 |
-| rule_engine.py | plugins/hookify/core/ | 规则匹配引擎 |
-| security_reminder_hook.py | plugins/security-guidance/hooks/ | 安全提醒 |
-| bash_command_validator_example.py | examples/hooks/ | Bash 验证示例 |
+| validate-write.sh | plugins/plugin-dev/skills/hook-development/examples/ | Write toolEnglish text |
+| validate-bash.sh | plugins/plugin-dev/skills/hook-development/examples/ | Bash toolEnglish text |
+| rule_engine.py | plugins/hookify/core/ | English text |
+| security_reminder_hook.py | plugins/security-guidance/hooks/ | safetyEnglish text |
+| bash_command_validator_example.py | examples/hooks/ | Bash English textexample |
 
-## 相关文档
+## English text
 
-- 📘 [NeurX 文件创建详解](./NEURX_FILE_CREATION_EXPLAINED.md)
-- 📗 [NeurX Code 对比](./NEURX_CODE_COMPARISON.md)
-- 📙 [NeurX Code 标准工具](./NEURX_STANDARD_TOOLS.md)
+- 📘 [NeurX fileEnglish text](./NEURX_FILE_CREATION_EXPLAINED.md)
+- 📗 [NeurX Code English text](./NEURX_CODE_COMPARISON.md)
+- 📙 [NeurX Code English texttool](./NEURX_STANDARD_TOOLS.md)

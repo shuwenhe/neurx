@@ -1,7 +1,7 @@
 package neurx.data.data_cleaning
 
 // ============================================================================
-// 数据清洗模块 - 将 raw/ 数据处理为 cleaned/ 版本
+// datacleanEnglish text - English text raw/ dataEnglish text cleaned/ English text
 // ============================================================================
 
 use neurx.strings.{string_contains, string_index_of, string_split, string_trim, string_length}
@@ -11,17 +11,17 @@ use neurx.runtime.io.{
 }
 
 // ============================================================================
-// 1. 数据清洗配置
+// 1. datacleanconfiguration
 // ============================================================================
 
 struct cleaning_config {
-    string raw_dir              // 原始数据目录
-    string cleaned_dir          // 清洁数据输出目录
-    string output_file          // 合并输出文件
-    int min_text_length         // 最小文本长度
-    int max_text_length         // 最大文本长度
-    bool enable_dedup           // 是否去重
-    bool enable_filtering       // 是否过滤
+    string raw_dir              // English textdatadirectory
+    string cleaned_dir          // English textdataoutputdirectory
+    string output_file          // English textoutputfile
+    int min_text_length         // English text
+    int max_text_length         // English text
+    bool enable_dedup           // English textdeduplication
+    bool enable_filtering       // English text
 }
 
 struct cleaning_stats {
@@ -35,7 +35,7 @@ struct cleaning_stats {
 }
 
 // ============================================================================
-// 2. 初始化函数
+// 2. initializefunction
 // ============================================================================
 
 func new_cleaning_config() cleaning_config {
@@ -63,7 +63,7 @@ func new_cleaning_stats() cleaning_stats {
 }
 
 // ============================================================================
-// 3. 核心清洗函数
+// 3. English textcleanfunction
 // ============================================================================
 
 struct cleaning_result {
@@ -72,10 +72,10 @@ struct cleaning_result {
     cleaning_stats stats
 }
 
-// 简单的哈希函数用于去重
+// English textfunctionEnglish textdeduplication
 func simple_hash(string text) string {
-    // 对于 S 语言版本，使用文本长度 + 前缀作为去重键
-    // 实际生产环境应使用 MD5 或 SHA256
+    // English text S languageEnglish text, useEnglish text + English textdeduplicationEnglish text
+    // actualEnglish textuse MD5 English text SHA256
     int len = string_length(text)
     string prefix = ""
     if len > 32 {
@@ -86,31 +86,31 @@ func simple_hash(string text) string {
     return prefix + "_" + string(len)
 }
 
-// 检查文本是否为空或全空白
+// English text
 func is_empty_text(string text) bool {
     string trimmed = string_trim(text)
     return string_length(trimmed) == 0
 }
 
-// 清洗单条记录
+// cleanEnglish text
 func clean_record(string line) cleaning_result {
     cleaning_stats stats = new_cleaning_stats()
     stats.total_documents = 1
-    
+
     cleaning_result result
     result.stats = stats
     result.is_valid = false
     result.cleaned_text = ""
-    
-    // 解析 JSON 字段
-    // 简单的 JSON 解析逻辑（处理 {"text": "..."} 格式）
-    
+
+    // English text JSON English text
+    // English text JSON English text(English text {"text": "..."} English text)
+
     string text = ""
-    
-    // 查找 "text" 字段
+
+    // English text "text" English text
     int text_start = string_index_of(line, "\"text\":")
     if text_start >= 0 {
-        // 找到文本起点
+        // English text
         int quote_start = string_index_of(substring(line, text_start, string_length(line)), "\"")
         if quote_start >= 0 {
             int actual_start = text_start + quote_start + 1
@@ -120,171 +120,171 @@ func clean_record(string line) cleaning_result {
             }
         }
     }
-    
-    // 过滤空文本
+
+    // English text
     if is_empty_text(text) {
         result.stats.empty_documents = 1
         return result
     }
-    
+
     string trimmed = string_trim(text)
     int text_len = string_length(trimmed)
-    
-    // 过滤长度
+
+    // English text
     if text_len < 50 {
         result.stats.short_documents = 1
         return result
     }
-    
+
     if text_len > 100000 {
         result.stats.long_documents = 1
         trimmed = substring(trimmed, 0, 100000)
     }
-    
-    // 构造清洁记录
+
+    // English text
     string cleaned = "{\"text\":\"" + trimmed + "\",\"source\":\"raw\",\"length\":" + string(text_len) + "}"
     result.is_valid = true
     result.cleaned_text = cleaned
     result.stats.valid_documents = 1
-    result.stats.total_tokens_estimate = long(text_len / 4)  // 粗略估计
-    
+    result.stats.total_tokens_estimate = long(text_len / 4)  // English text
+
     return result
 }
 
 // ============================================================================
-// 4. 主清洗流程
+// 4. maincleanpipeline
 // ============================================================================
 
 func clean_raw_data(cleaning_config cfg) cleaning_stats {
-    io_println("🔄 开始数据清洗流程...\n")
-    
-    // 创建输出目录
+    io_println("🔄 startdatacleanpipeline...\n")
+
+    // English textoutputdirectory
     io_mkdir_recursive(cfg.cleaned_dir)
-    
+
     cleaning_stats total_stats = new_cleaning_stats()
-    []string seen_texts = []string{cap: 10000}  // 去重集合
+    []string seen_texts = []string{cap: 10000}  // deduplicationEnglish text
     int seen_count = 0
-    
-    // 读取所有原始文件
+
+    // English textfile
     []string raw_files = io_list_files(cfg.raw_dir, "*.jsonl")
-    
-    // 打开输出文件
-    // 注意：这里使用伪代码，实际需要文件 I/O 支持
-    
-    io_println("📖 开始处理 " + string(len(raw_files)) + " 个文件...\n")
-    
+
+    // English textoutputfile
+    // English text: English textuseEnglish text, actualRequiredfile I/O support
+
+    io_println("📖 startEnglish text " + string(len(raw_files)) + " English textfile...\n")
+
     for i := 0; i < len(raw_files); i = i + 1 {
         string raw_file = raw_files[i]
-        io_println("📄 处理: " + raw_file)
-        
+        io_println("📄 English text: " + raw_file)
+
         []string lines = io_read_lines(raw_file)
-        
+
         for j := 0; j < len(lines); j = j + 1 {
             string line = lines[j]
-            
-            // 清洗单条记录
+
+            // cleanEnglish text
             cleaning_result cr = clean_record(line)
-            
+
             total_stats.total_documents = total_stats.total_documents + cr.stats.total_documents
             total_stats.empty_documents = total_stats.empty_documents + cr.stats.empty_documents
             total_stats.short_documents = total_stats.short_documents + cr.stats.short_documents
             total_stats.long_documents = total_stats.long_documents + cr.stats.long_documents
-            
+
             if cr.is_valid {
-                // 去重检查
+                // deduplicationEnglish text
                 string hash = simple_hash(cr.cleaned_text)
                 bool is_duplicate = false
-                
+
                 for k := 0; k < seen_count; k = k + 1 {
                     if seen_texts[k] == hash {
                         is_duplicate = true
                         break
                     }
                 }
-                
+
                 if is_duplicate {
                     total_stats.duplicates_removed = total_stats.duplicates_removed + 1
                 } else {
-                    // 写入有效的清洁记录
+                    // English text
                     // io_append_line(cfg.output_file, cr.cleaned_text)
-                    
-                    // 添加到去重集合
+
+                    // English textdeduplicationEnglish text
                     if seen_count < len(seen_texts) {
                         seen_texts[seen_count] = hash
                         seen_count = seen_count + 1
                     }
-                    
+
                     total_stats.valid_documents = total_stats.valid_documents + 1
                     total_stats.total_tokens_estimate = total_stats.total_tokens_estimate + cr.stats.total_tokens_estimate
                 }
             }
-            
+
             if total_stats.valid_documents % 1000 == 0 {
-                io_println("  ✓ 已处理 " + string(total_stats.valid_documents) + " 个文档")
+                io_println("  ✓ English text " + string(total_stats.valid_documents) + " English text")
             }
         }
     }
-    
-    io_println("\n✅ 清洗完成!")
-    io_println("  • 有效文档: " + string(total_stats.valid_documents))
-    io_println("  • 去重数量: " + string(total_stats.duplicates_removed))
-    io_println("  • 空文档: " + string(total_stats.empty_documents))
-    io_println("  • 短文档: " + string(total_stats.short_documents))
-    io_println("  • 长文档: " + string(total_stats.long_documents))
-    io_println("  • 估计 tokens: " + string(total_stats.total_tokens_estimate))
-    io_println("  • 输出文件: " + cfg.output_file)
-    
+
+    io_println("\n✅ cleanEnglish text!")
+    io_println("  • English text: " + string(total_stats.valid_documents))
+    io_println("  • deduplicationcount: " + string(total_stats.duplicates_removed))
+    io_println("  • English text: " + string(total_stats.empty_documents))
+    io_println("  • English text: " + string(total_stats.short_documents))
+    io_println("  • English text: " + string(total_stats.long_documents))
+    io_println("  • English text tokens: " + string(total_stats.total_tokens_estimate))
+    io_println("  • outputfile: " + cfg.output_file)
+
     return total_stats
 }
 
 // ============================================================================
-// 5. 生成数据集分割
+// 5. generatedataEnglish text
 // ============================================================================
 
 func generate_dataset_splits(cleaning_config cfg) {
-    io_println("\n📊 生成数据集分割...")
-    
+    io_println("\n📊 generatedataEnglish text...")
+
     []string all_lines = io_read_lines(cfg.output_file)
     int total = len(all_lines)
-    
-    // 分割比例: 80% train, 10% val, 10% test
+
+    // English text: 80% train, 10% val, 10% test
     int train_size = (total * 80) / 100
     int val_size = (total * 10) / 100
-    
-    // 生成训练集
-    io_println("  ✓ 生成训练集: " + string(train_size) + " 文档")
+
+    // generatetrainingEnglish text
+    io_println("  ✓ generatetrainingEnglish text: " + string(train_size) + " English text")
     // io_write_lines(cfg.cleaned_dir + "/train.jsonl", all_lines[0:train_size])
-    
-    // 生成验证集
-    io_println("  ✓ 生成验证集: " + string(val_size) + " 文档")
+
+    // generateEnglish text
+    io_println("  ✓ generateEnglish text: " + string(val_size) + " English text")
     // io_write_lines(cfg.cleaned_dir + "/val.jsonl", all_lines[train_size:train_size+val_size])
-    
-    // 生成测试集
+
+    // generatetestEnglish text
     int test_size = total - train_size - val_size
-    io_println("  ✓ 生成测试集: " + string(test_size) + " 文档")
+    io_println("  ✓ generatetestEnglish text: " + string(test_size) + " English text")
     // io_write_lines(cfg.cleaned_dir + "/test.jsonl", all_lines[train_size+val_size:])
 }
 
 // ============================================================================
-// 6. 主入口
+// 6. mainEnglish text
 // ============================================================================
 
 func run_data_cleaning() {
     cleaning_config cfg = new_cleaning_config()
-    
+
     io_println("╔════════════════════════════════════════════╗")
-    io_println("║       NeurX 数据清洗模块 (S语言实现)       ║")
+    io_println("║       NeurX datacleanEnglish text (Slanguageimplementation)       ║")
     io_println("╚════════════════════════════════════════════╝\n")
-    
+
     cleaning_stats stats = clean_raw_data(cfg)
-    
-    io_println("\n📁 数据清洗管道信息:")
-    io_println("  • 原始数据: " + cfg.raw_dir)
-    io_println("  • 清洁输出: " + cfg.cleaned_dir)
-    io_println("  • 生效率: " + string((stats.valid_documents * 100) / stats.total_documents) + "%")
-    
+
+    io_println("\n📁 datacleanEnglish textinformation:")
+    io_println("  • English textdata: " + cfg.raw_dir)
+    io_println("  • English textoutput: " + cfg.cleaned_dir)
+    io_println("  • English text: " + string((stats.valid_documents * 100) / stats.total_documents) + "%")
+
     generate_dataset_splits(cfg)
-    
-    io_println("\n✨ 数据清洗流程完成!")
-    io_println("下一步: 生成分片数据到 shard/ 目录")
+
+    io_println("\n✨ datacleanpipelineEnglish text!")
+    io_println("English textstep: generateEnglish textdataEnglish text shard/ directory")
 }

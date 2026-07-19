@@ -1,51 +1,51 @@
-# NeurX Code 文件创建对比
+# NeurX Code fileEnglish text
 
-## 快速总结
+## quickEnglish text
 
-### 外部参考实现的方式
+### English textimplementationEnglish text
 ```
-Agent 决定 → 调用 标准 Tool Use API → 工具执行
+Agent English text → English text English text Tool Use API → toolEnglish text
                           ↓
                     Bash (mkdir -p)
-                    Write (文件内容)
-                    Edit (修改内容)
+                    Write (filecontent)
+                    Edit (English textcontent)
                           ↓
-                    Hook 验证安全性
+                    Hook English textsafetyEnglish text
                           ↓
-                    文件系统操作
+                    filesystemEnglish text
 ```
 
-### NeurX Code 的方式
+### NeurX Code English text
 ```
-Agent 决定 → 本地工具注册表 → 工具执行
+Agent English text → English texttoolEnglish text → toolEnglish text
                     ↓
               WriteTool (C++)
               EditTool (C++)
               BashTool (C++)
                     ↓
-              SandboxManager 验证
+              SandboxManager English text
                     ↓
-              Qt 文件操作
+              Qt fileEnglish text
 ```
 
-## 工具对比表
+## toolEnglish text
 
-| 功能 | 外部参考实现 | NeurX Code |
+| English text | English textimplementation | NeurX Code |
 |------|------------|-----------|
-| **创建文件** | Write 工具 | WriteTool::execute() |
-| **编辑文件** | Edit 工具 | EditTool::execute() |
-| **批量编辑** | MultiEdit 工具 | MultiEditTool::execute() |
-| **创建目录** | Bash: mkdir -p | 通过 WriteTool 自动创建 |
-| **执行命令** | Bash 工具 | BashTool::execute() |
-| **查找文件** | Glob 工具 | GlobTool::execute() |
-| **搜索内容** | Grep 工具 | GrepTool::execute() |
-| **读取文件** | Read 工具 | ReadTool::execute() |
+| **English textfile** | Write tool | WriteTool::execute() |
+| **English textfile** | Edit tool | EditTool::execute() |
+| **English text** | MultiEdit tool | MultiEditTool::execute() |
+| **English textdirectory** | Bash: mkdir -p | English text WriteTool English text |
+| **English text** | Bash tool | BashTool::execute() |
+| **English textfile** | Glob tool | GlobTool::execute() |
+| **searchcontent** | Grep tool | GrepTool::execute() |
+| **English textfile** | Read tool | ReadTool::execute() |
 
-## 代码对比
+## English text
 
-### 创建文件 - 外部参考实现
+### English textfile - English textimplementation
 
-**标准 API 响应**：
+**English text API response**:
 ```json
 {
   "type": "tool_use",
@@ -58,62 +58,62 @@ Agent 决定 → 本地工具注册表 → 工具执行
 }
 ```
 
-**外部参考实现执行**：
+**English textimplementationEnglish text**:
 ```bash
-# 如果父目录不存在，会失败！
+# English textdirectoryEnglish text, English textfailure!
 echo "print('Hello')" > /workspace/main.py
-# Error: /workspace 不存在
+# Error: /workspace English text
 
-# 必须分两步
-mkdir -p /workspace  # Step 1: 用 Bash 工具创建目录
-echo "print('Hello')" > /workspace/main.py  # Step 2: 用 Write 工具创建文件
+# English textstep
+mkdir -p /workspace  # Step 1: English text Bash toolEnglish textdirectory
+echo "print('Hello')" > /workspace/main.py  # Step 2: English text Write toolEnglish textfile
 ```
 
-### 创建文件 - NeurX Code
+### English textfile - NeurX Code
 
-**请求**：
+**request**:
 ```python
-# Agent 调用 WriteTool
+# Agent English text WriteTool
 WriteTool.execute({
     "file_path": "/workspace/main.cpp",
     "new_text": "#include <iostream>\nint main() { }"
 })
 ```
 
-**源代码实现** (src/tools/NeurXStandardTools.cpp)：
+**English textimplementation** (src/tools/NeurXStandardTools.cpp):
 ```cpp
 bool WriteTool::execute(const QJsonObject &parameters, QJsonObject &output) {
     QString filePath = parameters.value("file_path").toString();
     QString content = parameters.value("new_text").toString();
-    
-    // ✅ 自动创建父目录
+
+    // ✅ English textdirectory
     QDir dir;
     dir.mkpath(QFileInfo(filePath).absolutePath());
-    
-    // 验证路径安全
+
+    // English textpathsafety
     QString safePath = safePath(filePath);
     if (safePath.isEmpty()) {
-        return false;  // 路径遍历攻击
+        return false;  // pathEnglish text
     }
-    
-    // 创建文件
+
+    // English textfile
     QFile file(safePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return false;
     }
     file.write(content.toUtf8());
     file.close();
-    
+
     return true;
 }
 ```
 
-## 安全验证对比
+## safetyEnglish text
 
-### NeurX Code - Hook 系统
+### NeurX Code - Hook system
 
 ```python
-# /path/to/hook.py - 在工具执行前运行
+# /path/to/hook.py - English texttoolEnglish textrun
 import json, sys
 
 input_data = json.load(sys.stdin)
@@ -122,23 +122,23 @@ tool_input = input_data["tool_input"]
 
 if tool_name == "Write":
     file_path = tool_input["file_path"]
-    
-    # ❌ 检查路径遍历
+
+    # ❌ English textpathEnglish text
     if ".." in file_path:
         sys.exit(2)  # Deny
-    
-    # ❌ 检查系统目录
+
+    # ❌ English textsystemdirectory
     if file_path.startswith("/etc") or file_path.startswith("/sys"):
         sys.exit(2)  # Deny
-    
-    # ⚠️ 检查敏感文件
+
+    # ⚠️ English textfile
     if ".env" in file_path:
         sys.exit(1)  # Ask user
 
 sys.exit(0)  # Allow
 ```
 
-**配置**（.neurx/config.json）：
+**configuration**(.neurx/config.json):
 ```json
 {
   "hooks": {
@@ -166,169 +166,169 @@ public:
     void setWorkspaceRoot(const QString &path) {
         m_workspaceRoot = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
     }
-    
+
     bool canWriteFile(const QString &filePath) const {
-        // 检查是否在工作空间内
+        // English text
         QString absPath = QDir::cleanPath(QFileInfo(filePath).absoluteFilePath());
-        
+
         if (!absPath.startsWith(m_workspaceRoot)) {
             qWarning() << "Path outside workspace:" << filePath;
-            return false;  // ❌ 拒绝
+            return false;  // ❌ English text
         }
-        
-        return true;  // ✓ 允许
+
+        return true;  // ✓ English text
     }
 };
 ```
 
-**使用**（src/bridge/AgentController.cpp）：
+**use**(src/bridge/AgentController.cpp):
 ```cpp
 void AgentController::setWorkspacePath(const QString &workspacePath) {
     m_sandboxManager->setWorkspaceRoot(workspacePath);
     m_sandboxManager->setFileSystemAccessMode(
-        SandboxManager::FileSystemAccessMode::Read | 
+        SandboxManager::FileSystemAccessMode::Read |
         SandboxManager::FileSystemAccessMode::Write
     );
 }
 ```
 
-## 关键差异分析
+## English text
 
-### 1. 文件夹创建
+### 1. fileEnglish text
 
-**NeurX Code**：
-- ❌ Write 工具不创建父目录
-- ✅ 必须显式使用 `Bash` 工具和 `mkdir -p`
-- 需要两步操作
+**NeurX Code**:
+- ❌ Write toolEnglish textdirectory
+- ✅ English textuse `Bash` toolEnglish text `mkdir -p`
+- RequiredEnglish textstepEnglish text
 
 ```
-NeurX Code 流程：
+NeurX Code pipeline:
 Bash mkdir -p → Write file
     ↓             ↓
   Step 1       Step 2
 ```
 
-**NeurX Code**：
-- ✅ WriteTool 自动创建父目录
-- ✅ 一次操作完成
-- 更方便用户
+**NeurX Code**:
+- ✅ WriteTool English textdirectory
+- ✅ English text
+- English text
 
 ```
-NeurX Code 流程：
-WriteTool (自动 mkdir)
+NeurX Code pipeline:
+WriteTool (English text mkdir)
     ↓
-一步完成
+English textstepEnglish text
 ```
 
-### 2. 安全验证时机
+### 2. safetyEnglish text
 
-**NeurX Code**：
+**NeurX Code**:
 ```
-工具调用
-  ↓ (Hook 验证)
+toolEnglish text
+  ↓ (Hook English text)
 Pre Validation
   ↓
-执行工具
-  ↓ (Hook 反应)
+English texttool
+  ↓ (Hook English text)
 Post Validation
 ```
 
-**NeurX Code**：
+**NeurX Code**:
 ```
-工具调用
+toolEnglish text
   ↓
-SandboxManager 验证
+SandboxManager English text
   ↓
-执行工具
+English texttool
 ```
 
-### 3. 实现方式
+### 3. implementationEnglish text
 
-| 方面 | NeurX Code | NeurX Code |
+| English text | NeurX Code | NeurX Code |
 |------|------------|-----------|
-| **语言** | JavaScript/Node.js | C++/Qt |
-| **运行方式** | CLI 工具 | Qt GUI 应用 |
-| **API 依赖** | 标准 API | 本地实现 |
-| **验证方式** | 外部 Hook 脚本 | C++ SandboxManager |
-| **集成方式** | 命令行调用 | Qt 信号/槽 |
+| **language** | JavaScript/Node.js | C++/Qt |
+| **runEnglish text** | CLI tool | Qt GUI English text |
+| **API English text** | English text API | English textimplementation |
+| **English text** | English text Hook English text | C++ SandboxManager |
+| **English text** | English text | Qt English text/English text |
 
-## 工具链对比
+## toolEnglish text
 
-### NeurX Code 工具链
+### NeurX Code toolEnglish text
 
 ```
-NeurX 输出 Write 工具调用
+NeurX output Write toolEnglish text
           ↓
-   NeurX Code 接收
+   NeurX Code English text
           ↓
-   验证 Hook (Python/Bash)
+   English text Hook (Python/Bash)
           ↓
-   检查通过 ✓
+   English text ✓
           ↓
-   Node.js 执行文件操作
+   Node.js English textfileEnglish text
           ↓
    fs.writeFileSync()
           ↓
-   返回结果给 NeurX
+   English textresultEnglish text NeurX
 ```
 
-### NeurX Code 工具链
+### NeurX Code toolEnglish text
 
 ```
-Agent 决定调用 WriteTool
+Agent English text WriteTool
           ↓
-AgentToolRegistry 查找
+AgentToolRegistry English text
           ↓
-NeurXStandardToolFactory 创建工具
+NeurXStandardToolFactory English texttool
           ↓
-WriteTool::execute() 被调用
+WriteTool::execute() English text
           ↓
-safePath() 验证路径
+safePath() English textpath
           ↓
-SandboxManager 验证权限
+SandboxManager English text
           ↓
-QFile 操作
+QFile English text
           ↓
-Agent 接收结果
+Agent English textresult
 ```
 
-## 实现建议
+## implementationEnglish text
 
-### 从 NeurX Code 学到的
+### English text NeurX Code English text
 
-1. ✅ **Hook 系统** → 灵活的安全验证
-   - NeurX Code 用 SandboxManager 实现
-   
-2. ✅ **Bash 工具** → 保留复杂命令的灵活性
-   - NeurX Code 实现了 BashTool
-   
-3. ✅ **MultiEdit 工具** → 原子性操作
-   - NeurX Code 实现了 MultiEditTool
-   
-4. ❌ **分步创建** → 在 NeurX 中改进
-   - WriteTool 自动创建父目录（更好！）
+1. ✅ **Hook system** → English textsafetyEnglish text
+   - NeurX Code English text SandboxManager implementation
 
-### NeurX Code 的优化
+2. ✅ **Bash tool** → English text
+   - NeurX Code implementationEnglish text BashTool
 
-1. ✅ **自动 mkdir** - 减少步骤
-2. ✅ **C++ 本地实现** - 不依赖外部 API
-3. ✅ **Qt 集成** - 与 GUI 紧密结合
-4. ✅ **SandboxManager** - 集中管理权限
+3. ✅ **MultiEdit tool** → English text
+   - NeurX Code implementationEnglish text MultiEditTool
 
-## 完整工作流示例
+4. ❌ **English textstepEnglish text** → English text NeurX English text
+   - WriteTool English textdirectory(English text!)
 
-### 场景：创建 React 项目结构
+### NeurX Code English textoptimize
 
-**NeurX Code 方式**（3 步）：
+1. ✅ **English text mkdir** - English textstepEnglish text
+2. ✅ **C++ English textimplementation** - English text API
+3. ✅ **Qt English text** - English text GUI English text
+4. ✅ **SandboxManager** - English textmanagementEnglish text
+
+## completeEnglish textexample
+
+### English text: English text React English text
+
+**NeurX Code English text**(3 step):
 
 ```json
-Step 1: Bash 工具创建目录
+Step 1: Bash toolEnglish textdirectory
 {
   "tool_name": "Bash",
   "input": {"command": "mkdir -p src/components src/pages"}
 }
 
-Step 2: Write 工具创建 package.json
+Step 2: Write toolEnglish text package.json
 {
   "tool_name": "Write",
   "input": {
@@ -337,7 +337,7 @@ Step 2: Write 工具创建 package.json
   }
 }
 
-Step 3: Write 工具创建 src/App.jsx
+Step 3: Write toolEnglish text src/App.jsx
 {
   "tool_name": "Write",
   "input": {
@@ -347,35 +347,35 @@ Step 3: Write 工具创建 src/App.jsx
 }
 ```
 
-**NeurX Code 方式**（1 步 + 自动）：
+**NeurX Code English text**(1 step + English text):
 
 ```python
-# Agent 调用 WriteTool 3 次
-# 但不需要显式创建目录 - WriteTool 自动处理
+# Agent English text WriteTool 3 English text
+# English textRequiredEnglish textdirectory - WriteTool English text
 
 write_tool.execute({
     "file_path": "src/components/Button.cpp",
     "new_text": "..."
-})  # ✓ 自动创建 src/components 目录
+})  # ✓ English text src/components directory
 
 write_tool.execute({
     "file_path": "include/Button.h",
     "new_text": "..."
-})  # ✓ 自动创建 include 目录
+})  # ✓ English text include directory
 ```
 
-## 总结
+## English text
 
-**NeurX Code**：
-- 使用 标准 API 的 Tool Use 功能
-- Hook 系统做安全验证
-- 需要显式 mkdir 创建目录
-- CLI 工具形式
+**NeurX Code**:
+- use English text API English text Tool Use English text
+- Hook systemEnglish textsafetyEnglish text
+- RequiredEnglish text mkdir English textdirectory
+- CLI toolEnglish text
 
-**NeurX Code**：
-- C++/Qt 本地实现
-- SandboxManager 做安全验证
-- WriteTool 自动创建目录
-- GUI 应用形式
+**NeurX Code**:
+- C++/Qt English textimplementation
+- SandboxManager English textsafetyEnglish text
+- WriteTool English textdirectory
+- GUI English text
 
-两者都遵循相同的**工具模型**，但 NeurX Code **改进了用户体验**！
+English text**toolmodel**, English text NeurX Code **English text**!

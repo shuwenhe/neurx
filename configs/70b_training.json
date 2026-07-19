@@ -149,7 +149,7 @@
     "with_activation_checkpointing_gb_per_gpu": 30.0,
     "final_estimate_gb_per_gpu": 40.0,
     "total_gb_all_gpus_8x": 320.0,
-    "notes": "配置: 8×H100 (80GB), ZeRO-3分片, TP=4, PP=2, 批大小=2, 梯度累积=16"
+    "notes": "configuration: 8×H100 (80GB), ZeRO-3English text, TP=4, PP=2, English text=2, gradientEnglish text=16"
   },
   "performance_expectations": {
     "tokens_per_second": 3000,
@@ -159,7 +159,7 @@
     "expected_throughput_per_gpu": 375,
     "target_perplexity": 8.0,
     "baseline_perplexity_7b": 15.0,
-    "expected_improvement": "2-3x能力提升",
+    "expected_improvement": "2-3xEnglish text",
     "opus_competitive_window": "Week 5-6"
   },
   "validation": {

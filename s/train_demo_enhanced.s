@@ -1,10 +1,10 @@
 // ============================================
 // NeurX GPT Training - Enhanced Version
-// 使用 S 语言 AI 原生模块进行训练
+// use S language AI English texttraining
 // ============================================
 package neurx.train.demo
 
-use std.math.{exp, log, sqrt, tanh, sigmoid, relu, gelu, 
+use std.math.{exp, log, sqrt, tanh, sigmoid, relu, gelu,
               abs, max, min, mod, pow, EPSILON}
 use std.tensor.{Tensor, tensor, zeros, ones, randn, xavier_uniform, kaiming_normal,
                  arange, linspace, eye, scalar,
@@ -28,7 +28,7 @@ use std.ai.nn.modules.{Linear, Embedding, LayerNorm, MultiHeadAttention,
                          new_sequential, count_parameters, print_module_summary}
 
 // ============================================
-// Training Configuration (训练配置)
+// Training Configuration (trainingconfiguration)
 // ============================================
 
 struct GPTConfig {
@@ -39,22 +39,22 @@ struct GPTConfig {
     int ffn_dim             // Feed-forward hidden dimension
     int num_layers          // Number of transformer blocks
     int max_seq_len         // Maximum sequence length
-    
+
     // Training hyperparameters
     float learning_rate     // Learning rate α
     string optimizer        // "sgd" | "adam" | "adamw"
     float weight_decay      // Weight decay λ
     float dropout_prob      // Dropout probability
-    
+
     // Data settings
     int batch_size          // Batch size B
     int seq_len             // Sequence length S
     int max_steps           // Total training steps T
     int save_every_n        // Save checkpoint every N steps
-    
+
     // Precision
     bool mixed_precision    // Use FP16/BF16 (future)
-    
+
     // Device
     string device           // "cpu" | "cuda:0"
 }
@@ -67,17 +67,17 @@ func default_model_config() GPTConfig {
         ffn_dim: 512,
         num_layers: 4,
         max_seq_len: 32,
-        
+
         learning_rate: 0.001,
         optimizer: "adam",
         weight_decay: 0.01,
         dropout_prob: 0.1,
-        
+
         batch_size: 8,
         seq_len: 32,
         max_steps: 50,
         save_every_n: 25,
-        
+
         mixed_precision: false,
         device: "cpu",
     }
@@ -105,7 +105,7 @@ func model_config_string(GPTConfig cfg) string {
 }
 
 // ============================================
-// GPT Model Definition (GPT 模型定义)
+// GPT Model Definition (GPT modelEnglish text)
 // ============================================
 
 struct GPTModel {
@@ -115,20 +115,20 @@ struct GPTModel {
     []TransformerBlock blocks
     LayerNorm final_norm
     Linear output_head
-    
+
     []AutoGradTensor all_parameters
 }
 
 func new_language_modelGPTConfig config) GPTModel {
     GPTModel model
     model.config = config
-    
+
     // Token embedding: (vocab_size, embed_dim)
     model.token_embed = new_embedding(config.vocab_size, config.embed_dim, -1)
-    
+
     // Position embedding: (max_seq_len, embed_dim)
     model.pos_embed = new_embedding(config.max_seq_len, config.embed_dim, -1)
-    
+
     // Transformer blocks
     model.blocks = new TransformerBlock[config.num_layers]
     int i = 0
@@ -142,16 +142,16 @@ func new_language_modelGPTConfig config) GPTModel {
         )
         i = i + 1
     }
-    
+
     // Final layer norm
     model.final_norm = new_layer_norm([config.embed_dim], 1e-5)
-    
+
     // Output head (tied with token embedding weights in some implementations)
     model.output_head = new_linear(config.embed_dim, config.vocab_size, false)
-    
+
     // Collect all parameters
     model.all_parameters = collect_gpt_parameters(model)
-    
+
     model
 }
 
@@ -207,10 +207,10 @@ func forward(GPTModel self, []int token_ids) AutoGradTensor {
     int batch_size = self.config.batch_size
     int seq_len = self.config.seq_len
     int d_model = self.config.embed_dim
-    
+
     // Get token embeddings
     AutoGradTensor token_emb = forward(self.token_embed, token_ids, batch_size, seq_len)
-    
+
     // Get position embeddings
     []int pos_ids = new int[batch_size * seq_len]
     int idx = 0
@@ -219,23 +219,23 @@ func forward(GPTModel self, []int token_ids) AutoGradTensor {
         idx = idx + 1
     }
     AutoGradTensor pos_emb = forward(self.pos_embed, pos_ids, batch_size, seq_len)
-    
+
     // Combine embeddings
     AutoGradTensor x = add(token_emb, pos_emb)
-    
+
     // Pass through transformer blocks
     int i = 0
     while i < len(self.blocks) {
         x = forward(self.blocks[i], x)
         i = i + 1
     }
-    
+
     // Final layer normalization
     x = forward(self.final_norm, x)
-    
+
     // Project to vocabulary
     AutoGradTensor logits = forward(self.output_head, x)
-    
+
     logits
 }
 
@@ -281,7 +281,7 @@ func print_model_summary(GPTModel self) void {
 }
 
 // ============================================
-// Training State & Metrics (训练状态和指标)
+// Training State & Metrics (trainingstateEnglish text)
 // ============================================
 
 struct TrainingMetrics {
@@ -317,7 +317,7 @@ func new_training_state() TrainingState {
 }
 
 // ============================================
-// Data Loading & Preprocessing (数据加载与预处理)
+// Data Loading & Preprocessing (dataloadEnglish text)
 // ============================================
 
 // Simulated data loader for demonstration
@@ -343,11 +343,11 @@ func new_data_loader([]int tokens, int batch_size, int seq_len) DataLoader {
 // Generate synthetic training data (for demo purposes)
 func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
-    
+
     // Simple pattern: repeating sequence with some noise
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
-    
+
     int seed = 42
     int i = 0
     while i < n_tokens {
@@ -361,7 +361,7 @@ func generate_synthetic_data(int n_tokens, int vocab_size) []int {
         }
         i = i + 1
     }
-    
+
     data
 }
 
@@ -378,7 +378,7 @@ func next_batch(DataLoader loader) int {
 }
 
 // ============================================
-// Loss Functions (损失函数)
+// Loss Functions (lossfunction)
 // ============================================
 
 // Compute cross entropy loss from logits and targets
@@ -387,7 +387,7 @@ func compute_cross_entropy_loss(AutoGradTensor logits, []int targets) AutoGradTe
 }
 
 // ============================================
-// Checkpoint Management (检查点管理)
+// Checkpoint Management (checkpointmanagement)
 // ============================================
 
 struct CheckpointInfo {
@@ -407,7 +407,7 @@ func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
     content = content + "# NeurX GPT Checkpoint v2\n"
     content = content + "# Generated by S Language Runtime\n"
     content = content + "# ============================================\n\n"
-    
+
     content = content + "[metadata]\n"
     content = content + "format_version=2.0\n"
     content = content + "framework=S-AI-Lib-v1.0\n"
@@ -427,11 +427,11 @@ func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
         i = i + 1
     }
     content = content + "]\n\n"
-    
+
     content = content + "[model_config]\n"
     content = content + model_config_string(config) + "\n"
     content = content + "total_parameters=" + string(param_count) + "\n\n"
-    
+
     content = content + "[optimizer_state]\n"
     content = content + "step_count=" + string(step) + "\n\n"
 
@@ -449,23 +449,23 @@ func save_checkpoint_v2(string output_dir, int step, float loss, float best_loss
                           []float loss_window) string {
     string filename = "step_" + string(step) + ".neurx"
     string filepath = output_dir + "/" + filename
-    
+
     int param_count = count_params(model)
-    
+
     string content = format_checkpoint_v2(step, loss, best_loss, best_step,
                                             param_count, config, loss_window)
-    
+
     var r = write_text_file(filepath, content)
     if r.is_ok() {
         println("  ✓ Saved checkpoint: ", filepath)
         return filepath
     }
-    
+
     "[ERROR] Failed to save checkpoint"
 }
 
 // ============================================
-// Main Training Loop (主训练循环)
+// Main Training Loop (maintrainingEnglish text)
 // ============================================
 
 struct TrainingResult {
@@ -537,7 +537,7 @@ func run_training(GPTConfig config) TrainingResult {
     println("")
     println("Step |   Loss   |  Best   | GradNorm | LR       | Time(ms)")
     println("-----|----------|---------|----------|----------|--------")
-    
+
     int start_time = get_time_ms()
 
     int step = 0
@@ -548,7 +548,7 @@ func run_training(GPTConfig config) TrainingResult {
         next_batch(dataloader)
         []int input_ids = []int{}
         []int target_ids = []int{}
-        
+
         AutoGradTensor logits = forward(model, input_ids)
         AutoGradTensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)
@@ -576,7 +576,7 @@ func run_training(GPTConfig config) TrainingResult {
             state.best_loss = loss_val
             state.best_step = step + 1
         }
-        
+
         // Record loss history
         if step < len(state.loss_history) {
             state.loss_history[step] = loss_val
@@ -607,7 +607,7 @@ func run_training(GPTConfig config) TrainingResult {
     // === Final checkpoints ===
     println("")
     println("[5/5] Saving final checkpoints...")
-    
+
     // Save final model
     string final_ckpt = save_checkpoint_v2(
         "artifacts/checkpoints",
@@ -617,7 +617,7 @@ func run_training(GPTConfig config) TrainingResult {
     )
     if not final_ckpt.startswith("[ERROR]"):
         append(checkpoints_saved, final_ckpt)
-    
+
     // Save best model
     string best_ckpt = save_checkpoint_v2(
         "artifacts/checkpoints",
@@ -655,38 +655,38 @@ func run_training(GPTConfig config) TrainingResult {
     }
 
 // Format a single line of training progress
-func format_step_line(int step, float loss, float best_loss, 
+func format_step_line(int step, float loss, float best_loss,
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
-    
+
     // Pad step number
     string step_str = string(step)
     while len(step_str) < 4: step_str = " " + step_str
     line = line + step_str + " | "
-    
+
     // Pad loss
     string loss_str = format_float(loss, 6)
     while len(loss_str) < 8: loss_str = " " + loss_str
     line = line + loss_str + " | "
-    
+
     // Pad best loss
     string best_str = format_float(best_loss, 6)
     while len(best_str) < 7: best_str = " " + best_str
     line = line + best_str + " | "
-    
+
     // Pad grad norm
     string grad_str = format_float(grad_norm, 4)
     while len(grad_str) < 8: grad_str = " " + grad_str
     line = line + grad_str + " | "
-    
+
     // Pad learning rate
     string lr_str = format_float(lr, 6)
     while len(lr_str) < 8: lr_str = " " + lr_str
     line = line + lr_str + " | "
-    
+
     // Time
     line = line + string(time_ms) + " ms"
-    
+
     line
 
 // Helper: check if should save at this step
@@ -700,10 +700,10 @@ func save_manifest(string manifest_path, []string checkpoints) void:
     content = "# NeurX Checkpoint Manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"
     content += "[checkpoints]\n"
-    
+
     for ckpt in checkpoints:
         content += ckpt + "\n"
-    
+
     write_text_file(manifest_path, content)
 
 // Get current time in milliseconds (platform-specific stub)
@@ -720,23 +720,23 @@ def rename_file(string old_path, string new_path) void:
     pass
 
 // ============================================
-// Entry Point (程序入口)
+// Entry Point (English text)
 // ============================================
 
 func main() int:
     // Parse command-line arguments (simplified)
     GPTConfig config = default_model_config()
-    
+
     // Allow overrides via environment or args
     // In real implementation, use proper CLI parsing
-    
+
     println("NeurX GPT Training - AI Native Edition")
     println("======================================")
     println("")
-    
+
     // Run training
     TrainingResult result = run_training(config)
-    
+
     // Return success if training completed normally
     if result.state.trained and result.best_loss < 3.0:
         println("\n✓ Training completed successfully!")

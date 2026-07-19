@@ -1,16 +1,16 @@
-// S语言实现：生成NeurX级别的工业LLM训练数据
-// 此脚本生成多样化、高质量的训练数据用于预训练
+// Slanguageimplementation: generateNeurXEnglish textLLMtrainingdata
+// English textgenerateEnglish text, English texttrainingdataEnglish texttraining
 
 package main
 
-// 数据类型定义
+// dataEnglish text
 struct TrainingData {
     text: string
     category: string  // python, llm_training, qa, distributed_training, etc.
     quality_score: float
 }
 
-// 类别枚举
+// English text
 const (
     CATEGORY_PYTHON = "python"
     CATEGORY_LLM = "llm_training"
@@ -28,9 +28,9 @@ const (
     CATEGORY_PROJECT = "project"
 )
 
-// 生成Python性能优化数据
+// generatePythonEnglish textoptimizedata
 func generate_python_data(): TrainingData {
-    text := "# Python性能优化指南..."
+    text := "# PythonEnglish textoptimizeEnglish text..."
     return TrainingData{
         text: text,
         category: CATEGORY_PYTHON,
@@ -38,9 +38,9 @@ func generate_python_data(): TrainingData {
     }
 }
 
-// 生成LLM训练数据
+// generateLLMtrainingdata
 func generate_llm_training_data(): TrainingData {
-    text := "# 大语言模型训练指南..."
+    text := "# English textlanguagemodeltrainingEnglish text..."
     return TrainingData{
         text: text,
         category: CATEGORY_LLM,
@@ -48,9 +48,9 @@ func generate_llm_training_data(): TrainingData {
     }
 }
 
-// 生成问答对
+// generateEnglish text
 func generate_qa_data(): TrainingData {
-    text := "# 问题：如何使用Python实现快速排序算法？"
+    text := "# English text: English textusePythonimplementationquickrankingEnglish text?"
     return TrainingData{
         text: text,
         category: CATEGORY_QA,
@@ -58,11 +58,11 @@ func generate_qa_data(): TrainingData {
     }
 }
 
-// 主函数
+// mainfunction
 func main() {
-    println("🚀 生成NeurX级别的工业LLM训练数据...")
+    println("🚀 generateNeurXEnglish textLLMtrainingdata...")
     println("")
-    println("📝 数据生成框架已建立")
-    println("✅ 支持14种数据类型")
-    println("📚 适合工业级预训练")
+    println("📝 datagenerateframeworkEnglish text")
+    println("✅ support14English textdataEnglish text")
+    println("📚 English texttraining")
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 # NeurX CUDA Training Diagnostic
-# 检查CUDA训练器是否正确配置
+# English textCUDAtrainingEnglish textconfiguration
 
 set -e
 
@@ -12,7 +12,7 @@ echo "🔍 NeurX CUDA Training Environment Diagnostic"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# 1. 检查NVIDIA GPU
+# 1. English textNVIDIA GPU
 echo "📌 Step 1: Checking NVIDIA GPU..."
 if command -v nvidia-smi &> /dev/null; then
     GPU_COUNT=$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || echo 0)
@@ -24,7 +24,7 @@ else
 fi
 echo ""
 
-# 2. 检查CUDA训练二进制文件
+# 2. English textCUDAtrainingEnglish textfile
 echo "📌 Step 2: Checking CUDA training binary..."
 if [ ! -f "$CUDA_TRAIN_BIN" ]; then
     echo "   ❌ Binary not found: $CUDA_TRAIN_BIN"
@@ -34,7 +34,7 @@ echo "   ✓ Binary exists: $CUDA_TRAIN_BIN"
 ls -lh "$CUDA_TRAIN_BIN" | sed 's/^/   /'
 echo ""
 
-# 3. 检查需要的文件
+# 3. English textRequiredEnglish textfile
 echo "📌 Step 3: Checking required files..."
 REQUIRED_FILES=(
     "$CURDIR/data/corpus/vocab.json"
@@ -51,7 +51,7 @@ for file in "${REQUIRED_FILES[@]}"; do
 done
 echo ""
 
-# 4. 运行CUDA训练器（仅1步）
+# 4. runCUDAtrainingEnglish text(English text1step)
 echo "📌 Step 4: Testing CUDA binary (timeout 30s)..."
 echo "   Running: timeout 30s $CUDA_TRAIN_BIN"
 echo ""
@@ -59,7 +59,7 @@ echo ""
 mkdir -p "/tmp/neurx_diagnostic"
 TEST_OUTPUT="/tmp/neurx_diagnostic/test_output.txt"
 
-# 设置最小配置以加快测试
+# English textconfigurationEnglish texttest
 export NEURX_ROOT="$CURDIR"
 export NEURX_PRETRAIN_OUTPUT_DIR="/tmp/neurx_diagnostic/checkpoint"
 export NEURX_PRETRAIN_STEPS=1
@@ -77,18 +77,18 @@ export WORLD_SIZE=1
 export CUDA_VISIBLE_DEVICES=0
 export NEURX_NCCL_ID_FILE="/tmp/neurx_diagnostic/nccl_id"
 
-# 创建空的NCCL文件以避免等待
+# English textNCCLfileEnglish text
 mkdir -p "$(dirname "$NEURX_NCCL_ID_FILE")"
 touch "$NEURX_NCCL_ID_FILE"
 
-# 运行二进制文件并捕获输出
+# runEnglish textfileEnglish textoutput
 timeout 30s "$CUDA_TRAIN_BIN" > "$TEST_OUTPUT" 2>&1 || EXIT_CODE=$?
 
 if [ -z "$EXIT_CODE" ]; then
     EXIT_CODE=0
 fi
 
-# 显示输出
+# English textoutput
 if [ -s "$TEST_OUTPUT" ]; then
     echo "   Output:"
     head -20 "$TEST_OUTPUT" | sed 's/^/   /'
@@ -97,7 +97,7 @@ else
 fi
 echo ""
 
-# 5. 总结
+# 5. English text
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📊 Summary:"
 if [ "$EXIT_CODE" -eq 0 ]; then

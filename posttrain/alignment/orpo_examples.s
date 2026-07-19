@@ -4,39 +4,39 @@ use neurx.posttrain.alignment.orpo_trainer
 
 // ════════════════════════════════════════════════════════════════════════════════
 // ORPO (Odds Ratio Preference Optimization) Trainer Examples
-// 
-// 展示如何使用 ORPO 进行稳定的偏好优化对齐
+//
+// English textuse ORPO English textpreferenceoptimizealignment
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 创建基础 ORPO 配置
+// English text ORPO configuration
 func create_base_orpo_config() orpo_config {
     orpo_config {
         // Model architecture
         seq_len: 128,
         hidden_size: 256,
         vocab_size: 32000,
-        
+
         // Optimization parameters
         learning_rate: 5e-4,
         beta: 0.05,              // KL divergence weight
         gamma: 0.5,              // Log odds scaling
-        
+
         // Training parameters
         batch_size: 32,
         num_epochs: 3,
         gradient_accumulation_steps: 4,
         weight_decay: 0.01,
         max_grad_norm: 0.5,
-        
+
         // Reference model
         use_reference_model: true,
         kl_penalty_coef: 0.1,
-        
+
         // Distributed training
         global_rank: 0,
         world_size: 1,
         dp_degree: 1,
-        
+
         // Training mechanics
         use_mixed_precision: false,
         save_interval: 10,
@@ -44,16 +44,16 @@ func create_base_orpo_config() orpo_config {
     }
 }
 
-// 示例 1: 基础 ORPO 训练
+// example 1: English text ORPO training
 func example_basic_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic ORPO Training                           ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     orpo_config cfg = create_base_orpo_config()
     orpo_state state = create_orpo_state(cfg)
-    
+
     print("[Configuration]")
     print("  Sequence length: " + int_to_string_ex(cfg.seq_len))
     print("  Hidden size: " + int_to_string_ex(cfg.hidden_size))
@@ -62,7 +62,7 @@ func example_basic_orpo_training() {
     print("  Gamma (log odds scale): " + float_to_string_ex(cfg.gamma))
     print("  Initial training steps: " + int_to_string_ex(state.training_step))
     print("")
-    
+
     print("[Creating Sample Trajectories]")
     print("  Created 0 trajectories")
     print("  Starting training...")
@@ -72,19 +72,19 @@ func example_basic_orpo_training() {
     print("")
 }
 
-// 示例 2: 奇偶比 (Log Odds) 详解
+// example 2: English text (Log Odds) English text
 func example_log_odds_explanation() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Log Odds Ratio Explanation                    ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     print("[What is Log Odds?]")
     print("  Standard probability: P(chosen) = 0.8, P(rejected) = 0.2")
     print("  Odds ratio: P(chosen) / P(rejected) = 0.8 / 0.2 = 4.0")
     print("  Log odds: log(4.0) = 1.386")
     print("")
-    
+
     print("[ORPO vs DPO Comparison]")
     print("")
     print("DPO Loss:")
@@ -95,7 +95,7 @@ func example_log_odds_explanation() {
     print("  L_ORPO = -log(sigmoid(gamma * log_odds_margin))")
     print("  Uses odds ratio, more numerically stable")
     print("")
-    
+
     print("[Example Calculation]")
     print("  Chosen log prob: -2.5")
     print("  Rejected log prob: -3.2")
@@ -106,7 +106,7 @@ func example_log_odds_explanation() {
     print("                   = -log(sigmoid(0.35))")
     print("                   ≈ 0.58")
     print("")
-    
+
     print("[Key Insight]")
     print("  • Log odds is more stable numerically")
     print("  • Handles extreme probability values better")
@@ -114,28 +114,28 @@ func example_log_odds_explanation() {
     print("")
 }
 
-// 示例 3: KL 散度约束
+// example 3: KL English text
 func example_kl_constraint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: KL Divergence Constraint                      ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     print("[Why KL Divergence?]")
     print("  • Prevents model from drifting too far from reference")
     print("  • Maintains language quality and coherence")
     print("  • Balances alignment and capability preservation")
     print("")
-    
+
     print("[KL Divergence Calculation]")
     print("  D_KL(policy || reference) = E[log(policy) - log(reference)]")
     print("")
-    
+
     print("[ORPO Total Loss]")
     print("  L_total = L_odds_ratio + lambda * D_KL")
     print("  where lambda = 0.1 (typical)")
     print("")
-    
+
     print("[KL Penalty Values]")
     print("  | Step | Log Odds Loss | KL Div | Total Loss |")
     print("  |------|---------------|--------|-----------|")
@@ -145,7 +145,7 @@ func example_kl_constraint() {
     print("  |  4   | 0.401         | 0.035  | 0.436     |")
     print("  |  5   | 0.345         | 0.038  | 0.383     |")
     print("")
-    
+
     print("[Effect of KL Weight (lambda)]")
     print("  • lambda=0.0:  Pure preference, may diverge from reference")
     print("  • lambda=0.05: Good balance, slightly favor new behavior")
@@ -154,30 +154,30 @@ func example_kl_constraint() {
     print("")
 }
 
-// 示例 4: 与参考模型的对比
+// example 4: English textmodelEnglish text
 func example_reference_model_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Reference Model Role                          ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     print("[Two Model Modes]")
     print("")
-    
+
     print("Mode A: Without Reference Model (Pure ORPO)")
     print("  • Only use policy network")
     print("  • Faster (one model forward pass)")
     print("  • Less stable (can diverge)")
     print("  • Recommended for: Stable preference data")
     print("")
-    
+
     print("Mode B: With Reference Model (ORPO + KL)")
     print("  • Use both policy and reference networks")
     print("  • Slower (two forward passes)")
     print("  • More stable (KL regularization)")
     print("  • Recommended for: Production, safety-critical")
     print("")
-    
+
     print("[Forward Pass Diagram]")
     print("  Policy Network:")
     print("    Input → [Linear] → [ReLU] → [Linear] → log_odds_policy")
@@ -190,24 +190,24 @@ func example_reference_model_comparison() {
     print("")
 }
 
-// 示例 5: 分布式训练配置
+// example 5: English texttrainingconfiguration
 func example_distributed_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Distributed ORPO Training (Multi-GPU)         ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     print("[8-GPU Distributed Setup]")
-    
+
     int num_gpus = 8
     int global_batch = 256
     int batch_per_gpu = global_batch / num_gpus
-    
+
     print("  Total GPUs: " + int_to_string_ex(num_gpus))
     print("  Global batch size: " + int_to_string_ex(global_batch))
     print("  Batch per GPU: " + int_to_string_ex(batch_per_gpu))
     print("")
-    
+
     print("[DDP (Distributed Data Parallel) Flow]")
     print("  1. Each GPU loads " + int_to_string_ex(batch_per_gpu) + " pairs")
     print("  2. Forward pass on each GPU")
@@ -216,7 +216,7 @@ func example_distributed_orpo_training() {
     print("  5. AllReduce: Average gradients across GPUs")
     print("  6. Each GPU updates parameters identically")
     print("")
-    
+
     print("[Speedup Analysis]")
     print("  GPUs | Speedup | Efficiency")
     print("  -----|---------|----------")
@@ -225,7 +225,7 @@ func example_distributed_orpo_training() {
     print("   4   | 3.88x   | 97%")
     print("   8   | 7.75x   | 97%")
     print("")
-    
+
     print("[Synchronization Points]")
     print("  • After each gradient computation (AllReduce)")
     print("  • Every 10 batches (checkpoint sync)")
@@ -233,29 +233,29 @@ func example_distributed_orpo_training() {
     print("")
 }
 
-// 示例 6: 完整对齐管道集成
+// example 6: completealignmentEnglish text
 func example_full_orpo_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline with ORPO              ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    
+
     print("[Pipeline Overview]")
     print("")
-    
+
     print("Stage 1: Supervised Fine-Tuning (SFT)")
     print("  ├─ Input: Base model + 10K instruction pairs")
     print("  ├─ Output: SFT checkpoint (base_sft.pt)")
     print("  └─ Duration: 1 week (64 A100s)")
     print("")
-    
+
     print("Stage 2: Preference Data Collection")
     print("  ├─ Generate multiple responses per prompt")
     print("  ├─ Collect human preferences (or use LLM judge)")
     print("  ├─ Create preference pairs (~50K pairs)")
     print("  └─ Duration: 2-3 days (annotation/evaluation)")
     print("")
-    
+
     print("Stage 3: ORPO Training (THIS STAGE)")
     print("  ├─ Input: SFT model + 50K preference pairs")
     print("  ├─ Methods: ORPO (odds ratio optimization)")
@@ -264,21 +264,21 @@ func example_full_orpo_alignment_pipeline() {
     print("  ├─ Gamma parameter: 0.5 (log odds scale)")
     print("  └─ Duration: 2-4 days (8 A100s)")
     print("")
-    
+
     print("Stage 4: Evaluation & Safety Check")
     print("  ├─ Benchmark on eval sets (MMLU, HumanEval, etc.)")
     print("  ├─ Safety testing (jailbreak, toxicity)")
     print("  ├─ Preference accuracy on held-out test set")
     print("  └─ Duration: 1 day")
     print("")
-    
+
     print("[Key Metrics Tracked]")
     print("  • Log odds margin (chosen - rejected)")
     print("  • KL divergence from reference")
     print("  • Preference accuracy on test set")
     print("  • Model quality on benchmarks")
     print("")
-    
+
     print("[Total Timeline]")
     print("  SFT (1w) → Data (2-3d) → ORPO (2-4d) → Eval (1d)")
     print("  Total: ~2-2.5 weeks from base to aligned model")
@@ -292,14 +292,14 @@ func main() {
     print("  NEURX ORPO Trainer Examples                              ")
     print("═════════════════════════════════════════════════════════════")
     print("")
-    
+
     example_basic_orpo_training()
     example_log_odds_explanation()
     example_kl_constraint()
     example_reference_model_comparison()
     example_distributed_orpo_training()
     example_full_orpo_alignment_pipeline()
-    
+
     print("═════════════════════════════════════════════════════════════")
     print("     All ORPO examples completed!                           ")
     print("═════════════════════════════════════════════════════════════")

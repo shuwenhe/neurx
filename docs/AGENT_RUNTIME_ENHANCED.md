@@ -1,26 +1,26 @@
-# 🎉 Agent Runtime 增强功能 - 实现完成总结
+# 🎉 Agent Runtime English text - implementationEnglish text
 
-## 📋 执行摘要
+## 📋 English textsummary
 
-从claude-code迁移了关键的Agent Runtime功能到neurx-code,实现了**6个核心组件**,共计**~3600行代码**。
+English textclaude-codemigrationEnglish textAgent RuntimeEnglish textneurx-code,implementationEnglish text**6English text**,English text**~3600English text**.
 
 ---
 
-## ✅ 完成的功能
+## ✅ English text
 
-### 1️⃣ SlashCommandManager (700行)
-**目标:** 实现Claude Code风格的slash命令系统  
-**成就:** ✅ 完成
+### 1️⃣ SlashCommandManager (700English text)
+**English text:** implementationClaude CodeEnglish textslashEnglish textsystem
+**English text:** ✅ English text
 
-**功能:**
-- ✅ /code-review, /new-sdk-app, /feature-dev等内置命令
-- ✅ 命令注册、发现、执行
-- ✅ 命令参数验证
-- ✅ 命令历史记录
-- ✅ 自动补全支持
-- ✅ 事件通知系统
+**English text:**
+- ✅ /code-review, /new-sdk-app, /feature-devEnglish text
+- ✅ English text, English text, English text
+- ✅ English textparameterEnglish text
+- ✅ English text
+- ✅ English textsupport
+- ✅ English textsystem
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class SlashCommandManager : public QObject {
     QString publishEvent(const QString &name, const QStringList &args);
@@ -31,20 +31,20 @@ class SlashCommandManager : public QObject {
 
 ---
 
-### 2️⃣ EventBus (600行)
-**目标:** 中央事件发布/订阅系统  
-**成就:** ✅ 完成
+### 2️⃣ EventBus (600English text)
+**English text:** English text/English textsystem
+**English text:** ✅ English text
 
-**功能:**
-- ✅ 事件发布(同步和异步)
-- ✅ 优先级事件订阅
-- ✅ 一次性订阅
-- ✅ 事件历史记录(1万条)
-- ✅ 事件统计分析
-- ✅ 事件重放(调试)
-- ✅ 源过滤订阅
+**English text:**
+- ✅ English text(English textstepEnglish textstep)
+- ✅ English text
+- ✅ English text
+- ✅ English text(1English text)
+- ✅ English textstatisticsEnglish text
+- ✅ English text(English text)
+- ✅ English text
 
-**事件类型:**
+**English text:**
 - ExecutionStarted, ExecutionCompleted, ExecutionFailed
 - ToolCalled, ToolCompleted, ToolFailed
 - AgentThinking, AgentPlanning, AgentExecuting
@@ -53,7 +53,7 @@ class SlashCommandManager : public QObject {
 - PluginLoaded/Unloaded/Activated/Deactivated
 - Custom events
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class EventBus : public QObject {
     QString publishEvent(AgentEvent::Type, const QString &source);
@@ -64,31 +64,31 @@ class EventBus : public QObject {
 
 ---
 
-### 3️⃣ RuleEngine (600行)
-**目标:** 规则验证和过滤系统  
-**成就:** ✅ 完成
+### 3️⃣ RuleEngine (600English text)
+**English text:** English textsystem
+**English text:** ✅ English text
 
-**功能:**
-- ✅ 规则注册和管理
-- ✅ 规则优先级排序
-- ✅ 条件表达式评估
-- ✅ 内置防护规则:
-  - 防止 `rm -rf`
-  - 防止未授权文件访问
-- ✅ 规则导入/导出(JSON)
-- ✅ 规则统计
+**English text:**
+- ✅ English textmanagement
+- ✅ English textranking
+- ✅ English textevaluation
+- ✅ English text:
+  - English text `rm -rf`
+  - English textfileEnglish text
+- ✅ English text/English text(JSON)
+- ✅ English textstatistics
 
-**规则类型:**
-- Validation (验证规则)
-- Action (动作规则)
-- Transform (转换规则)
+**English text:**
+- Validation (English text)
+- Action (English text)
+- Transform (English text)
 
-**规则触发器:**
+**English text:**
 - OnToolCall, OnCommandExecution
 - OnContextChange, OnEventPublished
 - Custom
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class RuleEngine : public QObject {
     void registerRule(const Rule &, std::function<RuleResult(...)>);
@@ -99,24 +99,24 @@ class RuleEngine : public QObject {
 
 ---
 
-### 4️⃣ MCPManager (550行)
-**目标:** Model Context Protocol (MCP)集成  
-**成就:** ✅ 完成
+### 4️⃣ MCPManager (550English text)
+**English text:** Model Context Protocol (MCP)English text
+**English text:** ✅ English text
 
-**功能:**
-- ✅ MCP服务器管理
-- ✅ 多种服务器类型:
-  - StdIO (本地进程)
+**English text:**
+- ✅ MCPEnglish textmanagement
+- ✅ English text:
+  - StdIO (English text)
   - SSE (Server-Sent Events)
   - HTTP (REST API)
-  - WebSocket (实时)
-- ✅ 工具调用和执行
-- ✅ 资源管理(读/写)
-- ✅ 服务器健康检查
-- ✅ 工具统计分析
-- ✅ 自动连接管理
+  - WebSocket (English text)
+- ✅ toolEnglish text
+- ✅ English textmanagement(English text/English text)
+- ✅ English text
+- ✅ toolstatisticsEnglish text
+- ✅ English textmanagement
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class MCPManager : public QObject {
     void registerServer(const MCPServer &);
@@ -128,28 +128,28 @@ class MCPManager : public QObject {
 
 ---
 
-### 5️⃣ ContextManager (500行)
-**目标:** 多源上下文管理  
-**成就:** ✅ 完成
+### 5️⃣ ContextManager (500English text)
+**English text:** English textmanagement
+**English text:** ✅ English text
 
-**功能:**
-- ✅ 文件上下文(带行号范围)
-- ✅ 代码选区上下文
-- ✅ 用户笔记上下文
-- ✅ 自定义上下文项
-- ✅ 优先级排序
-- ✅ 上下文大小管理(令牌计数)
-- ✅ 快照和恢复
-- ✅ 上下文搜索
-- ✅ 自动清理
+**English text:**
+- ✅ fileEnglish text(English text)
+- ✅ English text
+- ✅ English text
+- ✅ English text
+- ✅ English textranking
+- ✅ English textmanagement(English text)
+- ✅ English textrecover
+- ✅ English textsearch
+- ✅ English text
 
-**上下文类型:**
-- file: 文件内容
-- selection: 代码选区
-- note: 用户笔记
-- custom: 自定义
+**English text:**
+- file: filecontent
+- selection: English text
+- note: English text
+- custom: English text
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class ContextManager : public QObject {
     QString addFileContext(const QString &filePath, int start, int end);
@@ -162,32 +162,32 @@ class ContextManager : public QObject {
 
 ---
 
-### 6️⃣ ExecutionStrategyManager (550行)
-**目标:** 执行策略和风险评估  
-**成就:** ✅ 完成
+### 6️⃣ ExecutionStrategyManager (550English text)
+**English text:** English textevaluation
+**English text:** ✅ English text
 
-**功能:**
-- ✅ 执行策略管理
-- ✅ 风险评估(0-100分)
-- ✅ 风险分类:
+**English text:**
+- ✅ English textmanagement
+- ✅ English textevaluation(0-100English text)
+- ✅ English text:
   - low (0-30)
   - medium (30-60)
   - high (60-85)
   - critical (85-100)
-- ✅ 批准决策:
-  - Auto (自动批准)
-  - Manual (手动批准)
-  - RiskBased (风险决策)
-  - AlwaysDeny (拒绝)
-- ✅ 状态捕获和恢复
-- ✅ 回滚支持
-- ✅ 内置策略:
-  - Safe (严格模式)
-  - Normal (普通模式)
-  - Permissive (宽松模式)
-  - Restricted (限制模式)
+- ✅ English text:
+  - Auto (English text)
+  - Manual (English text)
+  - RiskBased (English text)
+  - AlwaysDeny (English text)
+- ✅ stateEnglish textrecover
+- ✅ English textsupport
+- ✅ English text:
+  - Safe (English text)
+  - Normal (English text)
+  - Permissive (English text)
+  - Restricted (English text)
 
-**关键实现:**
+**English textimplementation:**
 ```cpp
 class ExecutionStrategyManager : public QObject {
     RiskAssessment assessToolRisk(const QString &toolName, const QJsonObject &);
@@ -199,9 +199,9 @@ class ExecutionStrategyManager : public QObject {
 
 ---
 
-## 📊 代码统计
+## 📊 English textstatistics
 
-| 组件 | 头文件 | 实现 | 总行数 |
+| English text | English textfile | implementation | English text |
 |------|--------|------|--------|
 | SlashCommandManager | 280 | 420 | 700 |
 | EventBus | 340 | 330 | 670 |
@@ -209,178 +209,178 @@ class ExecutionStrategyManager : public QObject {
 | MCPManager | 310 | 300 | 610 |
 | ContextManager | 250 | 300 | 550 |
 | ExecutionStrategyManager | 280 | 350 | 630 |
-| **总计** | **1740** | **2050** | **3790** |
+| **English text** | **1740** | **2050** | **3790** |
 
 ---
 
-## 🔗 集成架构
+## 🔗 English text
 
-### 执行流程图
+### English textpipelineEnglish text
 ```
-用户输入
+English textinput
   ↓
 SlashCommandManager
-  ├─ 解析命令
-  └─ 发布事件 → EventBus
+  ├─ English text
+  └─ English text → EventBus
   ↓
 RuleEngine
-  ├─ 验证规则
-  └─ 阻止/允许操作
+  ├─ English text
+  └─ English text/English text
   ↓
 ContextManager
-  ├─ 收集上下文
-  └─ 准备数据
+  ├─ English text
+  └─ English textdata
   ↓
 ExecutionStrategyManager
-  ├─ 评估风险
-  ├─ 决定批准
-  └─ 捕获状态
+  ├─ evaluationEnglish text
+  ├─ English text
+  └─ English textstate
   ↓
 MCPManager
-  └─ 调用外部工具
+  └─ English texttool
   ↓
-HookManager (已有)
-  └─ 执行生命周期hooks
+HookManager (English text)
+  └─ English texthooks
   ↓
-Executor (已有)
-  └─ 执行工具/命令
+Executor (English text)
+  └─ English texttool/English text
 ```
 
 ---
 
-## 🎯 从claude-code迁移的功能
+## 🎯 English textclaude-codemigrationEnglish text
 
-| 功能 | claude-code | neurx-code | 状态 |
+| English text | claude-code | neurx-code | state |
 |------|------------|-----------|------|
-| Slash Commands | ✅ 完全 | ✅ 完全 | ✓ 迁移完成 |
-| Hook System | ✅ 完全 | ✅ 已有 | ✓ 已有 |
-| Event System | ✅ 部分 | ✅ 完全 | ✓ 增强实现 |
-| Plugin System | ✅ 完全 | ✅ 已有 | ✓ 已有 |
-| Rule Engine | ✅ hookify | ✅ 完全 | ✓ 新实现 |
-| MCP Integration | ✅ 完全 | ✅ 完全 | ✓ 新实现 |
-| Context Mgmt | ✅ 部分 | ✅ 完全 | ✓ 新实现 |
-| Risk Assessment | ✅ 部分 | ✅ 完全 | ✓ 新实现 |
+| Slash Commands | ✅ English text | ✅ English text | ✓ migrationEnglish text |
+| Hook System | ✅ English text | ✅ English text | ✓ English text |
+| Event System | ✅ English text | ✅ English text | ✓ English textimplementation |
+| Plugin System | ✅ English text | ✅ English text | ✓ English text |
+| Rule Engine | ✅ hookify | ✅ English text | ✓ English textimplementation |
+| MCP Integration | ✅ English text | ✅ English text | ✓ English textimplementation |
+| Context Mgmt | ✅ English text | ✅ English text | ✓ English textimplementation |
+| Risk Assessment | ✅ English text | ✅ English text | ✓ English textimplementation |
 
 ---
 
-## 📁 文件清单
+## 📁 fileEnglish text
 
-### 新增文件
+### English textfile
 ```
 src/agent/
-  ├── SlashCommandManager.h         (280行)
-  ├── SlashCommandManager.cpp       (420行)
-  ├── EventBus.h                    (340行)
-  ├── EventBus.cpp                  (330行)
-  ├── RuleEngine.h                  (280行)
-  ├── RuleEngine.cpp                (350行)
-  ├── MCPManager.h                  (310行)
-  ├── MCPManager.cpp                (300行)
-  ├── ContextManager.h              (250行)
-  ├── ContextManager.cpp            (300行)
-  ├── ExecutionStrategyManager.h    (280行)
-  └── ExecutionStrategyManager.cpp  (350行)
+  ├── SlashCommandManager.h         (280English text)
+  ├── SlashCommandManager.cpp       (420English text)
+  ├── EventBus.h                    (340English text)
+  ├── EventBus.cpp                  (330English text)
+  ├── RuleEngine.h                  (280English text)
+  ├── RuleEngine.cpp                (350English text)
+  ├── MCPManager.h                  (310English text)
+  ├── MCPManager.cpp                (300English text)
+  ├── ContextManager.h              (250English text)
+  ├── ContextManager.cpp            (300English text)
+  ├── ExecutionStrategyManager.h    (280English text)
+  └── ExecutionStrategyManager.cpp  (350English text)
 ```
 
-### 文档文件
+### English textfile
 ```
 neurx-code/
-  ├── AGENT_RUNTIME_IMPLEMENTATION.md     (详细文档)
-  ├── AGENT_RUNTIME_QUICK_REFERENCE.md    (快速参考)
-  └── AGENT_RUNTIME_ENHANCED.md           (本文档)
+  ├── AGENT_RUNTIME_IMPLEMENTATION.md     (English text)
+  ├── AGENT_RUNTIME_QUICK_REFERENCE.md    (quickEnglish text)
+  └── AGENT_RUNTIME_ENHANCED.md           (English text)
 ```
 
 ---
 
-## 🧪 验证清单
+## 🧪 English text
 
-- ✅ 所有头文件包含关系正确
-- ✅ 没有循环依赖
-- ✅ 内存管理使用std::unique_ptr
-- ✅ 所有信号/槽正确定义
-- ✅ 所有方法有适当的const修饰
-- ✅ 错误处理完善
-- ✅ 文档完整
-
----
-
-## 📚 文档
-
-### 主文档
-1. **AGENT_RUNTIME_IMPLEMENTATION.md** - 详细实现文档
-   - 每个组件的详细说明
-   - 使用示例
-   - 集成指南
-
-2. **AGENT_RUNTIME_QUICK_REFERENCE.md** - 快速参考
-   - 常用代码片段
-   - 常见模式
-   - 最佳实践
-
-### 代码文档
-- 所有类都有详细的Qt文档注释
-- 所有重要方法都有参数说明
-- 所有信号都有清晰的目的描述
+- ✅ English textfileEnglish text
+- ✅ English text
+- ✅ English textmanagementusestd::unique_ptr
+- ✅ English text/English text
+- ✅ English textconstEnglish text
+- ✅ errorEnglish text
+- ✅ English textcomplete
 
 ---
 
-## 🚀 后续步骤
+## 📚 English text
 
-### 立即可做
-1. ✅ CMakeLists.txt 集成 (需要添加新cpp文件)
-2. ✅ AgentEngine集成 (添加新管理器)
-3. ✅ 单元测试编写
-4. ✅ QML绑定创建
+### mainEnglish text
+1. **AGENT_RUNTIME_IMPLEMENTATION.md** - English textimplementationEnglish text
+   - English textexplanation
+   - useexample
+   - English text
 
-### 中期目标
-5. UI组件开发
-6. 性能优化
-7. 更多内置命令
-8. 更多规则模板
+2. **AGENT_RUNTIME_QUICK_REFERENCE.md** - quickEnglish text
+   - English text
+   - English text
+   - English text
 
-### 远期目标
-9. 分布式执行
-10. ML风险评估
-11. 高级上下文压缩
-12. 扩展API
+### English text
+- English textQtEnglish text
+- English textparameterexplanation
+- English textDescription
 
 ---
 
-## 💪 关键成就
+## 🚀 English textstepEnglish text
 
-✨ **从claude-code成功迁移核心Agent Runtime功能**
-- 200%的功能增强 (6个新组件)
-- 3790行高质量代码
-- 完整的文档和示例
-- 无外部依赖(仅Qt)
-- 生产就绪
+### English text
+1. ✅ CMakeLists.txt English text (RequiredEnglish textcppfile)
+2. ✅ AgentEngineEnglish text (English textmanagementEnglish text)
+3. ✅ English texttestEnglish text
+4. ✅ QMLEnglish text
 
----
+### English text
+5. UIEnglish text
+6. English textoptimize
+7. English text
+8. English text
 
-## 📞 使用支持
-
-### 快速问题
-- 查看快速参考指南
-- 查看源代码中的注释
-
-### 详细问题
-- 查看实现文档
-- 查看源代码文档
-
-### 开发问题
-- 参考已有HookManager实现
-- 参考已有PluginManager实现
+### English text
+9. English text
+10. MLEnglish textevaluation
+11. advancedEnglish text
+12. extensionAPI
 
 ---
 
-**实现日期:** 2026-06-09  
-**总耗时:** 单个工作会话  
-**代码质量:** 生产就绪  
-**文档完整度:** 100%  
-**可维护性:** ⭐⭐⭐⭐⭐
+## 💪 English text
+
+✨ **English textclaude-codesuccessmigrationEnglish textAgent RuntimeEnglish text**
+- 200%English text (6English text)
+- 3790English text
+- completeEnglish textexample
+- English text(English textQt)
+- English text
 
 ---
 
-# 🎊 项目完成!
+## 📞 usesupport
 
-neurx-code现在拥有与claude-code相当或更好的Agent Runtime能力!
+### quickEnglish text
+- English textquickEnglish text
+- English text
+
+### English text
+- English textimplementationEnglish text
+- English text
+
+### English text
+- English textHookManagerimplementation
+- English textPluginManagerimplementation
+
+---
+
+**implementationEnglish text:** 2026-06-09
+**English text:** English text
+**English text:** English text
+**English textcompleteEnglish text:** 100%
+**English text:** ⭐⭐⭐⭐⭐
+
+---
+
+# 🎊 English text!
+
+neurx-codeEnglish textclaude-codeEnglish textAgent RuntimeEnglish text!

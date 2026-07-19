@@ -1,24 +1,24 @@
 package main
 
 func main() {
-    // 测试模运算 (%) 操作符
-    
+    // testEnglish text (%) English text
+
     println("======================================================================")
-    println("S 语言模运算 (%) 操作符测试")
+    println("S languageEnglish text (%) English texttest")
     println("======================================================================")
     println("")
-    
-    // 基本模运算测试
+
+    // English texttest
     a := 10
     b := 3
     result := a % b
-    
-    println("测试 1: 基本模运算")
+
+    println("test 1: English text")
     println("  10 % 3 = " + string(result))
     println("")
-    
-    // 更多测试
-    println("测试 2: 其他模运算")
+
+    // English texttest
+    println("test 2: English text")
     r1 := 15 % 4
     r2 := 20 % 6
     r3 := 7 % 7
@@ -28,16 +28,16 @@ func main() {
     println("  7 % 7 = " + string(r3))
     println("  5 % 2 = " + string(r4))
     println("")
-    
-    // 在表达式中使用
-    println("测试 3: 在表达式中使用")
+
+    // English textuse
+    println("test 3: English textuse")
     x := 100
     y := 7
     z := x % y
     println("  100 % 7 = " + string(z))
     println("")
-    
+
     println("======================================================================")
-    println("✅ 模运算 (%) 操作符支持成功！")
+    println("✅ English text (%) English textsupportsuccess!")
     println("======================================================================")
 }

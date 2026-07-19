@@ -20,7 +20,7 @@ cat << 'EOF'
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 1: INFRASTRUCTURE (Complete)】
+[PHASE 1: INFRASTRUCTURE (Complete)]
 
 ✅ Created Files:
    1. scripts/legacy/large_model_trainer.s
@@ -43,7 +43,7 @@ cat << 'EOF'
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 2: CONFIGURATION (Now)】
+[PHASE 2: CONFIGURATION (Now)]
 
 Key Configuration Values for 7B Model:
 
@@ -83,9 +83,9 @@ Actual w/ Optimizations:
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 3: DEPLOYMENT】
+[PHASE 3: DEPLOYMENT]
 
-【Option A: Single GPU Test】
+[Option A: Single GPU Test]
 $ cd /Users/feifei/shuwen/train/neurx
 
 $ export MODEL_SIZE=7b
@@ -93,7 +93,7 @@ $ export WORLD_SIZE=1
 $ export RANK=0
 $ python3 train_full.py --config configs/7b_training.json
 
-【Option B: 4-GPU Distributed Training】
+[Option B: 4-GPU Distributed Training]
 
 Terminal 1:
 $ export RANK=0 WORLD_SIZE=4 MASTER_ADDR=localhost MASTER_PORT=29500
@@ -102,7 +102,7 @@ $ python3 -m torch.distributed.launch --nproc_per_node=4 train_full.py
 Or using torchrun:
 $ torchrun --nproc_per_node=4 train_full.py --config configs/7b_training.json
 
-【Option C: Direct S Language Execution】
+[Option C: Direct S Language Execution]
 
 Setup distributed environment:
 $ export WORLD_SIZE=4
@@ -116,7 +116,7 @@ $ s distributed_training_v2.s
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 4: MONITORING】
+[PHASE 4: MONITORING]
 
 Key Metrics to Track:
 
@@ -145,7 +145,7 @@ Training Speed:
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 5: CHECKPOINT MANAGEMENT】
+[PHASE 5: CHECKPOINT MANAGEMENT]
 
 Save Frequency:
   - Every 1,000 steps: Temporary checkpoint
@@ -165,7 +165,7 @@ Resume Training:
 
 ════════════════════════════════════════════════════════════════
 
-【PHASE 6: VALIDATION & TESTING】
+[PHASE 6: VALIDATION & TESTING]
 
 Perplexity Validation:
   - Validate on 10K token held-out set every 1K steps
@@ -179,7 +179,7 @@ Benchmark Tests:
 
 ════════════════════════════════════════════════════════════════
 
-【QUICK START COMMANDS】
+[QUICK START COMMANDS]
 
 1. Verify setup:
    $ bash START_7B_TRAINING.sh
@@ -212,7 +212,7 @@ Benchmark Tests:
 
 ════════════════════════════════════════════════════════════════
 
-【TROUBLESHOOTING】
+[TROUBLESHOOTING]
 
 Issue: Out of Memory (OOM)
 Solution:
@@ -237,7 +237,7 @@ Solution:
 
 ════════════════════════════════════════════════════════════════
 
-【NEXT IMMEDIATE ACTIONS】
+[NEXT IMMEDIATE ACTIONS]
 
 Week 1 (THIS WEEK):
   [ ] Day 1-2: Integrate distributed_training_v2.s with train_full.py
@@ -255,7 +255,7 @@ Week 2:
 
 ════════════════════════════════════════════════════════════════
 
-【SUCCESS CRITERIA】
+[SUCCESS CRITERIA]
 
 ✓ Architecture:
   - 7B model initializes without error

@@ -1,2 +1,2 @@
 [2026-07-03 10:16:49] You: hello
-[2026-07-03 10:16:49] NeurX: 模型没有返回内容，请检查 checkpoint 和推理运行器。
+[2026-07-03 10:16:49] NeurX: modelEnglish textcontent, English text checkpoint English textinferencerunEnglish text.

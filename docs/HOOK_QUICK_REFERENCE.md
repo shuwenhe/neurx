@@ -1,76 +1,76 @@
-# Hook 系统 - 快速参考
+# Hook system - quickEnglish text
 
-## 一句话：Hook 是什么？
+## English text: Hook English text?
 
-**Hook 是在工具执行前/后自动运行的脚本，用于验证、拦截或记录操作。**
+**Hook English texttoolEnglish text/English textrunEnglish text, English text, English text.**
 
 ```
-工具调用
+toolEnglish text
     ↓
-🔒 PreToolUse Hook (检查是否允许)
+🔒 PreToolUse Hook (English text)
     ↓
-    ├─ ❌ 拒绝
-    ├─ ✅ 允许
-    └─ ⚠️ 询问用户
+    ├─ ❌ English text
+    ├─ ✅ English text
+    └─ ⚠️ English text
     ↓
-执行工具 (如果允许)
+English texttool (English text)
     ↓
-📋 PostToolUse Hook (记录结果)
+📋 PostToolUse Hook (English textresult)
 ```
 
 ---
 
-## Hook 的核心作用
+## Hook English text
 
-| 作用 | 示例 |
+| English text | example |
 |------|------|
-| **安全验证** | 拒绝写入 `/etc` 目录 |
-| **命令检查** | 阻止 `rm -rf` |
-| **敏感文件** | 询问 `.env` 文件修改 |
-| **审批流程** | 数据库修改需要批准 |
-| **审计日志** | 记录所有操作 |
-| **用户通知** | 关键操作发邮件 |
+| **safetyEnglish text** | English text `/etc` directory |
+| **English text** | English text `rm -rf` |
+| **English textfile** | English text `.env` fileEnglish text |
+| **English textpipeline** | dataEnglish textRequiredEnglish text |
+| **English textlog** | English text |
+| **English text** | English text |
 
 ---
 
-## Hook 的两个事件
+## Hook English text
 
-### 1️⃣ PreToolUse (执行前)
-
-```
-Claude: 我要写入 /tmp/app.py
-        ↓
-    Hook 检查
-    ├─ 是否路径遍历? → NO ✅
-    ├─ 是否系统目录? → NO ✅
-    ├─ 是否敏感文件? → NO ✅
-        ↓
-    结果: 允许执行
-```
-
-**可以返回的决策**：
-- `exit 0` = ✅ 允许
-- `exit 1` = ⚠️ 询问用户
-- `exit 2` = ❌ 拒绝
-
-### 2️⃣ PostToolUse (执行后)
+### 1️⃣ PreToolUse (English text)
 
 ```
-工具执行完成
+Claude: English text /tmp/app.py
         ↓
-    Hook 记录结果
-    ├─ 日志: [2024-06-04] Modified /tmp/app.py
-    ├─ 通知: 📧 发送通知
-    └─ 统计: 📊 记录操作
+    Hook English text
+    ├─ English textpathEnglish text? → NO ✅
+    ├─ English textsystemdirectory? → NO ✅
+    ├─ English textfile? → NO ✅
         ↓
-    继续进行
+    result: English text
+```
+
+**AllowedEnglish text**:
+- `exit 0` = ✅ English text
+- `exit 1` = ⚠️ English text
+- `exit 2` = ❌ English text
+
+### 2️⃣ PostToolUse (English text)
+
+```
+toolEnglish text
+        ↓
+    Hook English textresult
+    ├─ log: [2024-06-04] Modified /tmp/app.py
+    ├─ English text: 📧 English text
+    └─ statistics: 📊 English text
+        ↓
+    English text
 ```
 
 ---
 
-## 实际 Hook 脚本例子
+## actual Hook English text
 
-### 例子 1: 拒绝危险操作（Bash）
+### English text 1: English text(Bash)
 
 ```bash
 #!/bin/bash
@@ -79,16 +79,16 @@ Claude: 我要写入 /tmp/app.py
 input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
-# ❌ 拒绝删除操作
+# ❌ English text
 if [[ "$command" == *"rm -rf"* ]]; then
   exit 2
 fi
 
-# ✅ 允许
+# ✅ English text
 exit 0
 ```
 
-### 例子 2: 询问敏感操作（Bash）
+### English text 2: English text(Bash)
 
 ```bash
 #!/bin/bash
@@ -96,16 +96,16 @@ exit 0
 input=$(cat)
 file_path=$(echo "$input" | jq -r '.tool_input.file_path')
 
-# ⚠️ 询问：修改 .env 文件
+# ⚠️ English text: English text .env file
 if [[ "$file_path" == *.env ]]; then
-  echo '{"systemMessage": "正在修改 .env 文件，需要确认"}' >&2
-  exit 1  # 询问用户
+  echo '{"systemMessage": "English text .env file, RequiredEnglish text"}' >&2
+  exit 1  # English text
 fi
 
 exit 0
 ```
 
-### 例子 3: 记录日志（Bash）
+### English text 3: English textlog(Bash)
 
 ```bash
 #!/bin/bash
@@ -115,11 +115,11 @@ result=$(cat)
 tool_name=$(echo "$result" | jq -r '.tool_name')
 file_path=$(echo "$result" | jq -r '.tool_input.file_path // empty')
 
-# 记录到日志
+# English textlog
 echo "[$(date)] $tool_name: $file_path" >> ~/.claude/audit.log
 ```
 
-### 例子 4: 企业审批（Python）
+### English text 4: English text(Python)
 
 ```python
 #!/usr/bin/env python3
@@ -127,30 +127,30 @@ echo "[$(date)] $tool_name: $file_path" >> ~/.claude/audit.log
 import json, sys
 
 def is_sensitive(tool_input):
-    # 检查是否涉及数据库
+    # English textdataEnglish text
     return 'database' in tool_input.get('file_path', '')
 
 input_data = json.load(sys.stdin)
 
 if is_sensitive(input_data['tool_input']):
-    # 发送审批请求
-    print('{"systemMessage": "需要管理员批准"}', file=sys.stderr)
-    sys.exit(1)  # 询问
+    # English textrequest
+    print('{"systemMessage": "RequiredmanagementEnglish text"}', file=sys.stderr)
+    sys.exit(1)  # English text
 
-sys.exit(0)  # 允许
+sys.exit(0)  # English text
 ```
 
 ---
 
-## Hook 的配置
+## Hook English textconfiguration
 
-### 配置文件位置
+### configurationfileEnglish text
 
 ```
 ~/.claude/config.json
 ```
 
-### 配置示例
+### configurationexample
 
 ```json
 {
@@ -190,16 +190,16 @@ sys.exit(0)  # 允许
 }
 ```
 
-**说明**：
-- `matcher`: 匹配哪个工具 (`Bash`, `Write`, `*` 等)
-- `type`: `command` 或 `prompt`
-- `command`: 要执行的脚本路径
+**explanation**:
+- `matcher`: English texttool (`Bash`, `Write`, `*` English text)
+- `type`: `command` English text `prompt`
+- `command`: English textpath
 
 ---
 
-## Hook 的输入格式
+## Hook English textinputEnglish text
 
-### JSON 输入示例
+### JSON inputexample
 
 ```json
 {
@@ -215,7 +215,7 @@ sys.exit(0)  # 允许
 }
 ```
 
-**提取方式**：
+**English text**:
 ```bash
 tool_name=$(echo "$input" | jq -r '.tool_name')
 file_path=$(echo "$input" | jq -r '.tool_input.file_path')
@@ -224,23 +224,23 @@ command=$(echo "$input" | jq -r '.tool_input.command')
 
 ---
 
-## Hook 的输出格式
+## Hook English textoutputEnglish text
 
-### 拒绝
+### English text
 
 ```bash
-echo '{"systemMessage": "不允许的操作"}' >&2
+echo '{"systemMessage": "English text"}' >&2
 exit 2
 ```
 
-### 询问
+### English text
 
 ```bash
-echo '{"systemMessage": "需要用户确认"}' >&2
+echo '{"systemMessage": "RequiredEnglish text"}' >&2
 exit 1
 ```
 
-### 允许
+### English text
 
 ```bash
 exit 0
@@ -248,133 +248,133 @@ exit 0
 
 ---
 
-## Hook 能做什么
+## Hook English text
 
-### ✅ 可以做
-
-```
-1. 验证路径安全性
-   ├─ 检查路径遍历 (..)
-   ├─ 检查系统目录 (/etc, /sys)
-   └─ 检查权限
-
-2. 检查命令安全
-   ├─ 拒绝 rm -rf
-   ├─ 拒绝 chmod 777
-   └─ 拒绝 dd 操作
-
-3. 记录审计日志
-   ├─ 所有操作记录
-   ├─ 时间戳
-   └─ 操作者信息
-
-4. 发送通知
-   ├─ 邮件通知
-   ├─ Slack 通知
-   └─ SMS 提醒
-
-5. 集成审批系统
-   ├─ 请求批准
-   ├─ 等待结果
-   └─ 记录批准信息
-
-6. 数据安全检查
-   ├─ 检查敏感信息泄露
-   ├─ 验证加密
-   └─ 检查合规性
-```
-
-### ❌ 不应该做
+### ✅ AllowedEnglish text
 
 ```
-1. 修改文件或数据
+1. English textpathsafetyEnglish text
+   ├─ English textpathEnglish text (..)
+   ├─ English textsystemdirectory (/etc, /sys)
+   └─ English text
+
+2. English textsafety
+   ├─ English text rm -rf
+   ├─ English text chmod 777
+   └─ English text dd English text
+
+3. English textlog
+   ├─ English text
+   ├─ timeEnglish text
+   └─ English textauthorinformation
+
+4. English text
+   ├─ English text
+   ├─ Slack English text
+   └─ SMS English text
+
+5. English textsystem
+   ├─ requestEnglish text
+   ├─ English textresult
+   └─ English textinformation
+
+6. datasafetyEnglish text
+   ├─ English textinformationEnglish text
+   ├─ English text
+   └─ English text
+```
+
+### ❌ English text
+
+```
+1. English textfileEnglish textdata
    ❌ rm /tmp/file
    ❌ git push
-   
-2. 做耗时操作
-   ❌ 调用外部 API（太慢）
-   ❌ 数据库查询
 
-3. 调用其他 Claude Code 工具
-   ❌ 会导致循环
+2. English text
+   ❌ English text API(English text)
+   ❌ dataEnglish textquery
 
-4. 修改 Hook 规则本身
-   ❌ 可能导致混乱
+3. English text Claude Code tool
+   ❌ English text
 
-5. 忽略错误
-   ❌ 应该正确处理异常
+4. English text Hook English text
+   ❌ English text
+
+5. English texterror
+   ❌ English text
 ```
 
 ---
 
-## Hook 的应用场景
+## Hook English text
 
-### 场景 1: 个人开发者
-
-```
-保护自己不犯低级错误
-├─ 防止删除整个项目
-├─ 防止修改重要文件
-└─ 提醒敏感操作
-```
-
-### 场景 2: 小团队
+### English text 1: English text
 
 ```
-基本的安全规则
-├─ 不能修改 package.json
-├─ 不能修改部署脚本
-└─ 记录所有改动
+English texterror
+├─ English text
+├─ English textfile
+└─ English text
 ```
 
-### 场景 3: 中型公司
+### English text 2: English text
 
 ```
-带审批的企业流程
-├─ 数据库改动需要审批
-├─ 上线前需要review
-└─ 完整的审计日志
+English textsafetyEnglish text
+├─ English text package.json
+├─ English text
+└─ English text
 ```
 
-### 场景 4: 大型企业
+### English text 3: English text
 
 ```
-完整的合规系统
-├─ GDPR/HIPAA 检查
-├─ 自动化审批工作流
-├─ 密钥管理
-└─ 实时监控
+English textpipeline
+├─ dataEnglish textRequiredEnglish text
+├─ English textRequiredreview
+└─ completeEnglish textlog
+```
+
+### English text 4: English text
+
+```
+completeEnglish textsystem
+├─ GDPR/HIPAA English text
+├─ English text
+├─ English textmanagement
+└─ English textmonitoring
 ```
 
 ---
 
-## Hook vs 硬编码规则
+## Hook vs English text
 
 ```
-❌ 硬编码规则
+❌ English text
 if (path.startsWith("/etc")) {
-  deny();  // 在源代码里固定
+  deny();  // English text
 }
-问题:
-- 用户无法改
-- 每次改规则都要改代码
-- 所有用户一样的规则
+English text:
+- English text
+- English text
+- English texthelpfulEnglish text
 
-✅ Hook 脚本
+✅ Hook English text
 if [[ "$path" == /etc/* ]]; then
   exit 2
-fi  # 用户自己的脚本
-优点:
-- 用户完全控制
-- 改规则无需改代码
-- 每个用户可以有不同规则
+fi  # English text
+English text:
+- English text
+- English text
+- English textAllowedEnglish text
 ```
 
 ---
 
-## 快速开始：创建你的第一个 Hook
+## quickstart: English text Hook
 
-### Step 1: 创建 Hook 文件
+### Step 1: English text Hook file
 
 ```bash
 mkdir -p ~/.claude/hooks
@@ -382,7 +382,7 @@ touch ~/.claude/hooks/validate.sh
 chmod +x ~/.claude/hooks/validate.sh
 ```
 
-### Step 2: 写入 Hook 脚本
+### Step 2: English text Hook English text
 
 ```bash
 cat > ~/.claude/hooks/validate.sh << 'EOF'
@@ -392,7 +392,7 @@ set -euo pipefail
 input=$(cat)
 file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 
-# 拒绝系统目录
+# English textsystemdirectory
 if [[ "$file_path" == /etc/* ]] || [[ "$file_path" == /sys/* ]]; then
   exit 2
 fi
@@ -401,7 +401,7 @@ exit 0
 EOF
 ```
 
-### Step 3: 配置 Claude Code
+### Step 3: configuration Claude Code
 
 ```bash
 cat > ~/.claude/config.json << 'EOF'
@@ -423,68 +423,68 @@ cat > ~/.claude/config.json << 'EOF'
 EOF
 ```
 
-### Step 4: 测试
+### Step 4: test
 
 ```bash
-# 试试让 Claude Code 创建文件
+# English text Claude Code English textfile
 claude
-# 输入: Create a file in /tmp/test.py
-# 结果: ✅ 允许 (不在受限目录)
+# input: Create a file in /tmp/test.py
+# result: ✅ English text (English textdirectory)
 
-# 再试试
-# 输入: Create a file in /etc/test.py
-# 结果: ❌ 拒绝 (Hook 工作了!)
+# English text
+# input: Create a file in /etc/test.py
+# result: ❌ English text (Hook English text!)
 ```
 
 ---
 
-## 常见 Hook 错误
+## English text Hook error
 
-### ❌ 错误 1: 忘记 `exit` 命令
+### ❌ error 1: English text `exit` English text
 
 ```bash
 #!/bin/bash
 if [[ "$path" == /etc/* ]]; then
-  # 问题: 没有 exit，继续执行
+  # English text: English text exit, English text
 fi
-# 这会允许操作!
+# English text!
 exit 0
 ```
 
-✅ 正确做法：
+✅ English text:
 ```bash
 if [[ "$path" == /etc/* ]]; then
-  exit 2  # 立即返回，不继续
+  exit 2  # English text, English text
 fi
 exit 0
 ```
 
-### ❌ 错误 2: JSON 格式错误
+### ❌ error 2: JSON English texterror
 
 ```bash
-# 问题: 无效的 JSON
-echo '{"message": "error"}' >&2  # 引号问题
+# English text: English text JSON
+echo '{"message": "error"}' >&2  # English text
 exit 2
 ```
 
-✅ 正确做法：
+✅ English text:
 ```bash
-# 使用 jq 或确保 JSON 有效
+# use jq English text JSON English text
 echo '{"systemMessage": "error"}' >&2
 exit 2
 ```
 
-### ❌ 错误 3: 没有处理空值
+### ❌ error 3: English text
 
 ```bash
-# 问题: 如果没有 file_path
-if [[ "$file_path" == /etc/* ]]; then  # 可能出错
+# English text: English text file_path
+if [[ "$file_path" == /etc/* ]]; then  # English text
 ```
 
-✅ 正确做法：
+✅ English text:
 ```bash
 if [ -z "$file_path" ]; then
-  exit 0  # 没有路径就允许
+  exit 0  # English textpathEnglish text
 fi
 
 if [[ "$file_path" == /etc/* ]]; then
@@ -494,22 +494,22 @@ fi
 
 ---
 
-## 总结
+## English text
 
-| 概念 | 说明 |
+| English text | explanation |
 |------|------|
-| **Hook 是什么** | 在工具执行前/后运行的脚本 |
-| **两种类型** | PreToolUse (检查) + PostToolUse (记录) |
-| **核心用途** | 安全验证 + 灵活定制 + 审计日志 |
-| **为什么需要** | 让用户完全控制规则，无需改源代码 |
-| **与硬编码对比** | Hook 更灵活、更易维护 |
-| **最佳实践** | 清晰的错误信息 + 快速失败 + 记录决策 |
+| **Hook English text** | English texttoolEnglish text/English textrunEnglish text |
+| **English text** | PreToolUse (English text) + PostToolUse (English text) |
+| **English text** | safetyEnglish text + English text + English textlog |
+| **English textRequired** | English text, English text |
+| **English text** | Hook English text, English text |
+| **English text** | English texterrorinformation + quickfailure + English text |
 
-**最关键的一点**：Hook 让 Claude Code 对所有用户都通用，但每个用户都能按自己的需求定制！
+**English text**: Hook English text Claude Code English texthelpfulEnglish text, English text!
 
 ---
 
-**相关文档**：
-- 📘 [完整 Hook 系统详解](./HOOK_SYSTEM_EXPLAINED.md)
-- 📗 [架构分析](./WHY_CLAUDE_CODE_ARCHITECTURE.md)
-- 📙 [方案对比](./AI_SOLUTIONS_COMPARISON.md)
+**English text**:
+- 📘 [complete Hook systemEnglish text](./HOOK_SYSTEM_EXPLAINED.md)
+- 📗 [English text](./WHY_CLAUDE_CODE_ARCHITECTURE.md)
+- 📙 [English text](./AI_SOLUTIONS_COMPARISON.md)

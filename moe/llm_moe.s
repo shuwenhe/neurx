@@ -34,13 +34,13 @@ use neurx.model.transformer.norm.{rms_norm, rms_normalize, layer_norm_config, ne
 // ============================================================================
 
 struct gpt_moe_config {
-    model_config base             // 基础 模型配置 (含 n_layer, n_embd, …)
-    moe_config moe              // MoE 配置 (expert_dim, num_experts, top_k, …)
-    int moe_frequency           // 每几层使用一个 MoE 层 (1 = 全 MoE, 2 = 每隔一层)
-    float moe_aux_loss_weight   // aux loss 在总损失中的权重
+    model_config base             // English text modelconfiguration (English text n_layer, n_embd, …)
+    moe_config moe              // MoE configuration (expert_dim, num_experts, top_k, …)
+    int moe_frequency           // English textuseEnglish text MoE English text (1 = English text MoE, 2 = English text)
+    float moe_aux_loss_weight   // aux loss English textlossEnglish textweight
 }
 
-// 预设: Mixtral-8x7B 风格 (全 MoE, 8 专家, top-2)
+// English text: Mixtral-8x7B English text (English text MoE, 8 English text, top-2)
 func gpt_moe_mixtral(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -50,7 +50,7 @@ func gpt_moe_mixtral(model_config base) gpt_moe_config {
     }
 }
 
-// 预设: reference-4 风格 (每隔一层, 16 专家, top-2)
+// English text: reference-4 English text (English text, 16 English text, top-2)
 func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -60,7 +60,7 @@ func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
     }
 }
 
-// 预设: NeurX-V3 风格 (全 MoE, 64 细粒度专家, top-6)
+// English text: NeurX-V3 English text (English text MoE, 64 English text, top-6)
 func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -71,18 +71,18 @@ func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
 }
 
 // ============================================================================
-// 2. GPT-MoE 块 (注意力相同; FFN 替换为 MoE)
+// 2. GPT-MoE English text (English text; FFN English text MoE)
 // ============================================================================
 
 struct gpt_moe_block {
-    transformer_layer dense_block       // 注意力、norm1、norm2 取自标准 GPT 层
+    transformer_layer dense_block       // English text, norm1, norm2 English text GPT English text
     moe_layer moe_ffn           // MoE FFN
-    bool is_moe                 // 此层是否为 MoE (false = 使用 dense_block.ffn)
+    bool is_moe                 // English text MoE (false = use dense_block.ffn)
     int layer_idx
 }
 
 // ============================================================================
-// 3. 完整模型
+// 3. completemodel
 // ============================================================================
 
 struct gpt_moe_model {
@@ -92,28 +92,28 @@ struct gpt_moe_model {
     []gpt_moe_block blocks
     rms_norm final_norm
     []float lm_head
-    []float rope_freqs          // 从 language_model.rope.frequencies 提取
+    []float rope_freqs          // English text language_model.rope.frequencies English text
     int n_layer
     int vocab_size
     int n_embd
     int block_size
-    int num_moe_layers          // 统计 MoE 层数量
+    int num_moe_layers          // statistics MoE English textcount
 }
 
 struct gpt_moe_output {
     []float logits
     []float last_hidden
-    float lm_loss               // 语言模型交叉熵损失
-    float aux_loss              // MoE 负载均衡辅助损失 (加权)
+    float lm_loss               // languagemodelEnglish textloss
+    float aux_loss              // MoE English texthelperloss (English text)
     float total_loss            // lm_loss + aux_loss
 }
 
 // ============================================================================
-// 4. 初始化
+// 4. initialize
 // ============================================================================
 
 func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
-    // 先建立标准 GPT 模型用于初始化权重
+    // English text GPT modelEnglish textinitializeweight
     language_model base = new_language_model(cfg.base)
 
     int nl = cfg.base.n_layer
@@ -184,7 +184,7 @@ struct gpt_moe_block_forward_ret {
 }
 
 // ============================================================================
-// 5. 单块前向传播
+// 5. English text
 // ============================================================================
 
 func gpt_moe_block_forward(
@@ -204,7 +204,7 @@ func gpt_moe_block_forward(
     // ── Pre-Attn RMSNorm ──
     []float normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
 
-    // ── QKV 投影 ──
+    // ── QKV English text ──
     []float q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
     []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_D, H)
     []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_D, H)
@@ -253,7 +253,7 @@ func gpt_moe_block_forward(
         b = b + 1
     }
 
-    // ── 因果 SDPA ──
+    // ── English text SDPA ──
     []float attn_out = gpt_alloc(total * H, 0.0)
     b = 0
     while b < batch_size {
@@ -272,7 +272,7 @@ func gpt_moe_block_forward(
         b = b + 1
     }
 
-    // 输出投影
+    // outputEnglish text
     []float attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
     []float h_attn = gpt_add(x, attn_proj)
 
@@ -287,14 +287,14 @@ func gpt_moe_block_forward(
         ffn_out = mo.hidden
         aux_loss = mo.aux_loss
     } else {
-        // 用 transformer_layer 原有的 FFN (SwiGLU 重建)
+        // English text transformer_layer English text FFN (SwiGLU English text)
         ffn_out = gpt_dense_ffn_forward(block.dense_block, normed2, total)
     }
 
     gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
 
-// 重建稠密 SwiGLU 前向 (用于 is_moe=false 的块)
+// English text SwiGLU English text (English text is_moe=false English text)
 func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) []float {
     int H = layer.hidden_dim
     int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / H
@@ -322,7 +322,7 @@ func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) 
 }
 
 // ============================================================================
-// 6. 完整 GPT-MoE 前向传播
+// 6. complete GPT-MoE English text
 // ============================================================================
 
 func gpt_moe_forward(
@@ -335,10 +335,10 @@ func gpt_moe_forward(
     int V = model.vocab_size
     int total = batch_size * seq_len
 
-    // 嵌入
+    // English text
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
 
-    // 逐层
+    // English text
     float total_aux = 0.0
     int l = 0
     while l < model.n_layer {
@@ -351,7 +351,7 @@ func gpt_moe_forward(
         l = l + 1
     }
 
-    // 最终 norm
+    // English text norm
     []float normed = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
 
     // LM head
@@ -362,7 +362,7 @@ func gpt_moe_forward(
         logits = gpt_matmul(normed, model.lm_head, total, H, V)
     }
 
-    // 平均 aux loss (各 MoE 层 aux 之和 / MoE 层数)
+    // English text aux loss (English text MoE English text aux English text / MoE English text)
     float avg_aux = 0.0
     if model.num_moe_layers > 0 {
         avg_aux = total_aux / (model.num_moe_layers * 1.0)
@@ -378,11 +378,11 @@ func gpt_moe_forward(
 }
 
 // ============================================================================
-// 7. 参数量统计
+// 7. parameterEnglish textstatistics
 // ============================================================================
 
 func gpt_moe_param_count(gpt_moe_config cfg) int {
-    int base = gpt_param_count(cfg.base)   // 注意力 + 非 MoE FFN 部分
+    int base = gpt_param_count(cfg.base)   // English text + English text MoE FFN English text
     int nl = cfg.base.n_layer
     int H = cfg.base.n_embd
     int moe_freq = cfg.moe_frequency
@@ -390,14 +390,14 @@ func gpt_moe_param_count(gpt_moe_config cfg) int {
 
     int moe_count = nl / moe_freq
 
-    // 每个 MoE 层替换掉的稠密 FFN 参数 = 3 * H * ffn_dim
+    // English text MoE English text FFN parameter = 3 * H * ffn_dim
     int dense_ffn = 3 * H * cfg.base.ffn_dim
 
-    // MoE 层参数 = num_experts * per_expert + router
+    // MoE English textparameter = num_experts * per_expert + router
     int per_expert = 3 * H * cfg.moe.expert_dim
     int moe_layer_params = per_expert * cfg.moe.num_experts + H * cfg.moe.num_experts
 
-    // 净增量
+    // English text
     int delta = moe_count * (moe_layer_params - dense_ffn)
 
     base + delta

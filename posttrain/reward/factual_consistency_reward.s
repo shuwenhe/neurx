@@ -1,93 +1,93 @@
 package neurx.posttrain.reward.factual_consistency_reward
 
 // ════════════════════════════════════════════════════════════════════════════════
-// Factual Consistency Reward (事实一致性奖励)
-// 
-// 用于评估生成文本的事实准确性、一致性和真实性：
-//   1. 事实提取 (Fact Extraction)
-//   2. 事实验证 (Fact Verification)
-//   3. 一致性检查 (Consistency Checking)
-//   4. 幻觉检测 (Hallucination Detection)
-//   5. 引用覆盖 (Citation Coverage)
+// Factual Consistency Reward (English textreward)
 //
-// 应用于：
-//   - FAQ 和知识问答
-//   - 新闻和事实性文本生成
-//   - 医学和科学文本
-//   - 历史和传记内容
+// English textevaluationgenerateEnglish text, English texttruthfulEnglish text:
+//   1. English text (Fact Extraction)
+//   2. English text (Fact Verification)
+//   3. English text (Consistency Checking)
+//   4. English text (Hallucination Detection)
+//   5. English text (Citation Coverage)
+//
+// English text:
+//   - FAQ English text
+//   - English textgenerate
+//   - English text
+//   - English textcontent
 // ════════════════════════════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 1. 数据结构
+// 1. dataEnglish text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 单个事实表示
+// English text
 struct fact {
-    string subject          // 主体 (Who/What)
-    string predicate        // 谓词 (What relation)
-    string obj              // 宾体 (What object)
-    string temporal         // 时间信息 (optional)
-    string location         // 地点信息 (optional)
-    float confidence        // 事实确信度 (0-1)
-    string source          // 来源
+    string subject          // mainEnglish text (Who/What)
+    string predicate        // English text (What relation)
+    string obj              // English text (What object)
+    string temporal         // timeinformation (optional)
+    string location         // English textinformation (optional)
+    float confidence        // English text (0-1)
+    string source          // Source
 }
 
-// 事实对 (检验用)
+// English text (English text)
 struct fact_pair {
-    fact reference_fact     // 参考事实
-    fact generated_fact     // 生成的事实
-    float similarity        // 相似度 (0-1)
-    bool is_consistent      // 是否一致
-    string divergence_type  // 不一致类型: "missing", "extra", "contradiction", "hallucination"
+    fact reference_fact     // English text
+    fact generated_fact     // generateEnglish text
+    float similarity        // English text (0-1)
+    bool is_consistent      // English text
+    string divergence_type  // English text: "missing", "extra", "contradiction", "hallucination"
 }
 
-// 事实集合
+// English text
 struct factual_content {
-    []fact facts            // 提取的事实列表
-    []string key_entities   // 关键实体
-    []string temporal_refs   // 时间参考
+    []fact facts            // English text
+    []string key_entities   // English text
+    []string temporal_refs   // timeEnglish text
     int total_facts
 }
 
-// 一致性报告
+// English text
 struct consistency_report {
     float consistency_score         // 0-1
     float factual_accuracy          // 0-1
-    float hallucination_rate        // 0-1 (越低越好)
+    float hallucination_rate        // 0-1 (English text)
     float coverage_score            // 0-1
     float citation_coverage         // 0-1
-    
+
     []fact_pair inconsistencies
     []string hallucinated_facts
     []string missing_facts
     []string contradictions
-    
+
     int total_reference_facts
     int total_generated_facts
     int consistent_facts
     int inconsistent_facts
 }
 
-// 事实验证配置
+// English textconfiguration
 struct factual_config {
-    // 提取参数
+    // English textparameter
     int max_facts_per_doc
     bool extract_temporal
     bool extract_location
-    
-    // 验证参数
+
+    // English textparameter
     float similarity_threshold
     float confidence_threshold
-    
-    // 幻觉检测
+
+    // English text
     bool detect_hallucinations
     float hallucination_threshold
-    
-    // 引用处理
+
+    // English text
     bool require_citations
     bool check_citation_accuracy
-    
-    // 权重
+
+    // weight
     float accuracy_weight
     float hallucination_weight
     float coverage_weight
@@ -95,46 +95,46 @@ struct factual_config {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 2. 事实提取
+// 2. English text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 从文本中提取主要事实
+// English textmainEnglish text
 func extract_facts(string text, factual_config config) factual_content {
-    
+
     factual_content content
     content.facts = []fact{}
     content.key_entities = []string{}
     content.temporal_refs = []string{}
     content.total_facts = 0
-    
-    // 简单的事实提取逻辑 (基于模式匹配)
-    // 在实际实现中应使用更复杂的 NLP
-    
-    // 提取主要句子
+
+    // English text (English text)
+    // English textactualimplementationEnglish textuseEnglish text NLP
+
+    // English textmainEnglish text
     []string sentences = split_sentences(text)
-    
+
     int i = 0
     while i < len(sentences) && content.total_facts < config.max_facts_per_doc {
         string sent = sentences[i]
-        
-        // 跳过短句子
+
+        // English text
         if len(sent) < 10 {
             i = i + 1
             continue
         }
-        
-        // 提取实体对
+
+        // English text
         fact f = extract_fact_from_sentence(sent)
-        
+
         if len(f.subject) > 0 && len(f.obj) > 0 {
-            // 计算置信度 (基于句子结构)
+            // computeEnglish text (English text)
             f.confidence = compute_fact_confidence(sent)
-            
-            // 记录事实
+
+            // English text
             content.facts = append_fact(content.facts, f)
             content.total_facts = content.total_facts + 1
-            
-            // 提取时间信息
+
+            // English texttimeinformation
             if config.extract_temporal {
                 string temp = extract_temporal_info(sent)
                 if len(temp) > 0 {
@@ -142,16 +142,16 @@ func extract_facts(string text, factual_config config) factual_content {
                     content.temporal_refs = append_string(content.temporal_refs, temp)
                 }
             }
-            
-            // 提取地点信息
+
+            // English textinformation
             if config.extract_location {
                 string loc = extract_location_info(sent)
                 if len(loc) > 0 {
                     f.location = loc
                 }
             }
-            
-            // 记录实体
+
+            // English text
             if !contains_string(content.key_entities, f.subject) {
                 content.key_entities = append_string(content.key_entities, f.subject)
             }
@@ -159,18 +159,18 @@ func extract_facts(string text, factual_config config) factual_content {
                 content.key_entities = append_string(content.key_entities, f.obj)
             }
         }
-        
+
         i = i + 1
     }
-    
+
     content
 }
 
-// 从句子提取单个事实
+// English text
 func extract_fact_from_sentence(string sentence) fact {
     fact f
-    
-    // 模式 1: "Subject is Object"
+
+    // English text 1: "Subject is Object"
     int is_pos = find_substring(sentence, " is ")
     if is_pos > 0 {
         f.subject = substring(sentence, 0, is_pos)
@@ -178,53 +178,53 @@ func extract_fact_from_sentence(string sentence) fact {
         f.predicate = "is"
         return trim_fact(f)
     }
-    
-    // 模式 2: "Subject verb Object"
-    // 简化: 使用第一个和最后一个主要单词
+
+    // English text 2: "Subject verb Object"
+    // English text: useEnglish textmainEnglish text
     []string words = split_words(sentence)
     if len(words) >= 3 {
         f.subject = words[0]
         f.predicate = words[1]
         f.obj = words[len(words) - 1]
     }
-    
+
     trim_fact(f)
 }
 
-// 计算单个事实的置信度
+// computeEnglish text
 func compute_fact_confidence(string sentence) float {
     float conf = 0.5
-    
-    // 句子长度越合理，置信度越高
+
+    // English text, English text
     int len_sent = len(sentence)
     if len_sent > 20 && len_sent < 200 {
         conf = conf + 0.2
     }
-    
-    // 包含数字/日期提高置信度
+
+    // English text/English text
     if contains_digit(sentence) {
         conf = conf + 0.15
     }
-    
-    // 包含量词提高置信度
+
+    // English text
     if contains_quantifier(sentence) {
         conf = conf + 0.1
     }
-    
-    // 包含不确定词降低置信度
+
+    // English text
     if contains_uncertainty_words(sentence) {
         conf = conf - 0.2
     }
-    
+
     if conf > 1.0 { conf = 1.0 }
     if conf < 0.0 { conf = 0.0 }
-    
+
     conf
 }
 
-// 提取时间信息
+// English texttimeinformation
 func extract_temporal_info(string sentence) string {
-    // 检查常见时间表达
+    // English texttimeEnglish text
     if contains_substring(sentence, "2024") || contains_substring(sentence, "2025") {
         return "2024-2025"
     }
@@ -237,9 +237,9 @@ func extract_temporal_info(string sentence) string {
     ""
 }
 
-// 提取地点信息
+// English textinformation
 func extract_location_info(string sentence) string {
-    // 检查常见地名
+    // English text
     if contains_substring(sentence, "China") {
         return "China"
     }
@@ -253,55 +253,55 @@ func extract_location_info(string sentence) string {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 3. 事实验证和一致性检查
+// 3. English text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 比对参考事实和生成事实
+// English textgenerateEnglish text
 func verify_factual_consistency(
     factual_content reference_content,
     factual_content generated_content,
     factual_config config
 ) consistency_report {
-    
+
     consistency_report report
     report.inconsistencies = []fact_pair{}
     report.hallucinated_facts = []string{}
     report.missing_facts = []string{}
     report.contradictions = []string{}
-    
+
     report.total_reference_facts = reference_content.total_facts
     report.total_generated_facts = generated_content.total_facts
     report.consistent_facts = 0
     report.inconsistent_facts = 0
-    
-    // 匹配事实
+
+    // English text
     int i = 0
     while i < len(reference_content.facts) {
         fact ref_fact = reference_content.facts[i]
-        
-        // 在生成内容中寻找匹配的事实
+
+        // English textgeneratecontentEnglish text
         fact_pair best_match = find_best_matching_fact(ref_fact, generated_content.facts, config)
-        
+
         if best_match.similarity >= config.similarity_threshold {
-            // 找到一致的事实
+            // English text
             report.consistent_facts = report.consistent_facts + 1
             report.inconsistencies = append_fact_pair(report.inconsistencies, best_match)
         } else {
-            // 缺失的事实
-            report.missing_facts = append_string(report.missing_facts, 
+            // English text
+            report.missing_facts = append_string(report.missing_facts,
                 fact_to_string(ref_fact))
         }
-        
+
         i = i + 1
     }
-    
-    // 检测幻觉 (生成中有但参考中没有的事实)
+
+    // English text (generateEnglish text)
     if config.detect_hallucinations {
         i = 0
         while i < len(generated_content.facts) {
             fact gen_fact = generated_content.facts[i]
-            
-            // 检查这个事实是否在参考中
+
+            // English text
             bool found = false
             int j = 0
             while j < len(reference_content.facts) {
@@ -310,104 +310,104 @@ func verify_factual_consistency(
                 }
                 j = j + 1
             }
-            
+
             if !found && config.detect_hallucinations {
-                // 检查这是否是真正的幻觉 (不是推理延伸)
+                // English text (English textinferenceEnglish text)
                 if is_likely_hallucination(gen_fact, reference_content, config) {
                     report.hallucinated_facts = append_string(report.hallucinated_facts,
                         fact_to_string(gen_fact))
                 }
             }
-            
+
             i = i + 1
         }
     }
-    
-    // 计算一致性分数
+
+    // computeEnglish text
     float consistency_score = 0.0
     if report.total_reference_facts > 0 {
         consistency_score = float(report.consistent_facts) / float(report.total_reference_facts)
     }
     report.consistency_score = consistency_score
-    
-    // 计算准确度 (正确 / 总生成)
+
+    // computeEnglish text (English text / English textgenerate)
     float accuracy = 0.0
     if report.total_generated_facts > 0 {
         accuracy = float(report.consistent_facts) / float(report.total_generated_facts)
     }
     report.factual_accuracy = accuracy
-    
-    // 计算幻觉率
+
+    // computeEnglish text
     float hallucination_rate = 0.0
     if report.total_generated_facts > 0 {
         hallucination_rate = float(len(report.hallucinated_facts)) / float(report.total_generated_facts)
     }
     report.hallucination_rate = hallucination_rate
-    
-    // 计算覆盖率
+
+    // computeEnglish text
     float coverage = 0.0
     if report.total_reference_facts > 0 {
         coverage = 1.0 - (float(len(report.missing_facts)) / float(report.total_reference_facts))
     }
     report.coverage_score = coverage
-    
+
     report
 }
 
-// 寻找最匹配的事实
+// English text
 func find_best_matching_fact(
     fact reference,
     []fact candidates,
     factual_config config
 ) fact_pair {
-    
+
     fact_pair best_pair
     best_pair.reference_fact = reference
     best_pair.similarity = 0.0
     best_pair.is_consistent = false
-    
+
     int i = 0
     while i < len(candidates) {
         float sim = fact_similarity(reference, candidates[i])
-        
+
         if sim > best_pair.similarity {
             best_pair.similarity = sim
             best_pair.generated_fact = candidates[i]
-            
+
             if sim >= config.similarity_threshold {
                 best_pair.is_consistent = true
             }
         }
-        
+
         i = i + 1
     }
-    
+
     best_pair
 }
 
-// 计算两个事实的相似度
+// computeEnglish text
 func fact_similarity(fact f1, fact f2) float {
-    
-    // 主要成分匹配
+
+    // mainEnglish text
     float subject_sim = string_similarity(f1.subject, f2.subject)
     float predicate_sim = string_similarity(f1.predicate, f2.predicate)
     float object_sim = string_similarity(f1.obj, f2.obj)
-    
-    // 加权组合
+
+    // English text
     float similarity = subject_sim * 0.4 + predicate_sim * 0.3 + object_sim * 0.3
-    
-    // 时间/地点匹配会增加相似度
+
+    // time/English text
     if len(f1.temporal) > 0 && len(f2.temporal) > 0 {
         if string_equals(f1.temporal, f2.temporal) {
             similarity = similarity + 0.1
         }
     }
-    
+
     if similarity > 1.0 { similarity = 1.0 }
     similarity
 }
 
-// 字符串相似度 (简单 Jaccard)
+// English text (English text Jaccard)
 func string_similarity(string s1, string s2) float {
     if len(s1) == 0 && len(s2) == 0 {
         return 1.0
@@ -415,55 +415,55 @@ func string_similarity(string s1, string s2) float {
     if len(s1) == 0 || len(s2) == 0 {
         return 0.0
     }
-    
-    // 完全匹配
+
+    // English text
     if string_equals(s1, s2) {
         return 1.0
     }
-    
-    // 包含关系
+
+    // English text
     if contains_substring(s1, s2) || contains_substring(s2, s1) {
         return 0.8
     }
-    
-    // 编辑距离 (简化)
+
+    // English text (English text)
     int dist = edit_distance(s1, s2)
     int max_len = len(s1)
     if len(s2) > max_len {
         max_len = len(s2)
     }
-    
+
     float sim = 1.0 - float(dist) / float(max_len)
     if sim < 0.0 { sim = 0.0 }
     sim
 }
 
-// 检查是否是幻觉
+// English text
 func is_likely_hallucination(fact f, factual_content reference, factual_config config) bool {
-    
-    // 幻觉特征：
-    // 1. 事实置信度很低
+
+    // English text:
+    // 1. English text
     if f.confidence < 0.3 {
         return true
     }
-    
-    // 2. 包含罕见/不寻常的组合
+
+    // 2. English text/English text
     bool is_rare = is_rare_combination(f, reference)
     if is_rare && f.confidence < 0.7 {
         return true
     }
-    
-    // 3. 与参考时间/地点严重不符
+
+    // 3. English texttime/English text
     if len(f.temporal) > 0 && len(reference.temporal_refs) > 0 {
         if !temporal_is_compatible(f.temporal, reference.temporal_refs) {
             return true
         }
     }
-    
+
     false
 }
 
-// 检查时间兼容性
+// English texttimeEnglish text
 func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
     int i = 0
     while i < len(reference_temporals) {
@@ -479,63 +479,63 @@ func temporal_is_compatible(string fact_temporal, []string reference_temporals) 
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 4. 奖励计算
+// 4. rewardcompute
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 计算事实一致性奖励
+// computeEnglish textreward
 func compute_factual_consistency_reward(
     string reference_text,
     string generated_text,
     factual_config config
 ) float {
-    
-    // Step 1: 提取事实
+
+    // Step 1: English text
     factual_content reference_facts = extract_facts(reference_text, config)
     factual_content generated_facts = extract_facts(generated_text, config)
-    
-    // Step 2: 验证一致性
+
+    // Step 2: English text
     consistency_report report = verify_factual_consistency(
         reference_facts,
         generated_facts,
         config
     )
-    
-    // Step 3: 计算综合奖励
+
+    // Step 3: computeEnglish textreward
     float reward = 0.0
-    
-    // 准确度分数 (有多少生成的事实是正确的)
+
+    // English text (English textgenerateEnglish text)
     float accuracy_reward = report.factual_accuracy * config.accuracy_weight
     reward = reward + accuracy_reward
-    
-    // 幻觉惩罚 (越少幻觉越好)
+
+    // English text (English text)
     float hallucination_penalty = (1.0 - report.hallucination_rate) * config.hallucination_weight
     reward = reward + hallucination_penalty
-    
-    // 覆盖率奖励 (覆盖多少参考事实)
+
+    // English textreward (English text)
     float coverage_reward = report.coverage_score * config.coverage_weight
     reward = reward + coverage_reward
-    
-    // 引用覆盖 (可选)
+
+    // English text (English text)
     if config.require_citations {
         float citation_reward = compute_citation_coverage(generated_text) * config.citation_weight
         reward = reward + citation_reward
     }
-    
-    // 标准化到 [0, 1]
-    float total_weight = config.accuracy_weight + config.hallucination_weight + 
+
+    // English text [0, 1]
+    float total_weight = config.accuracy_weight + config.hallucination_weight +
                         config.coverage_weight + config.citation_weight
     reward = reward / total_weight
-    
+
     if reward > 1.0 { reward = 1.0 }
     if reward < 0.0 { reward = 0.0 }
-    
+
     reward
 }
 
-// 计算引用覆盖
+// computeEnglish text
 func compute_citation_coverage(string text) float {
-    
-    // 检查是否有引用标记 [1], [2] 等
+
+    // English text [1], [2] English text
     int citation_count = 0
     int i = 0
     while i < len(text) {
@@ -544,42 +544,42 @@ func compute_citation_coverage(string text) float {
         }
         i = i + 1
     }
-    
+
     if citation_count > 0 {
-        return 0.8  // 有引用
+        return 0.8  // English text
     }
-    0.2  // 无引用
+    0.2  // English text
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 5. 详细诊断报告
+// 5. English text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 生成详细的诊断报告
+// generateEnglish text
 func generate_detailed_report(consistency_report report) string {
-    
+
     string output = ""
-    
+
     output = output + "════════════════════════════════════════════════════════════\n"
     output = output + "FACTUAL CONSISTENCY REPORT\n"
     output = output + "════════════════════════════════════════════════════════════\n\n"
-    
-    // 总体分数
+
+    // English text
     output = output + "[Overall Scores]\n"
     output = output + "  Consistency Score:  " + float_to_string(report.consistency_score) + "/1.0\n"
     output = output + "  Factual Accuracy:   " + float_to_string(report.factual_accuracy) + "/1.0\n"
     output = output + "  Hallucination Rate: " + float_to_string(report.hallucination_rate) + " (lower is better)\n"
     output = output + "  Coverage Score:     " + float_to_string(report.coverage_score) + "/1.0\n"
     output = output + "  Citation Coverage:  " + float_to_string(report.citation_coverage) + "/1.0\n\n"
-    
-    // 事实统计
+
+    // English textstatistics
     output = output + "[Fact Statistics]\n"
     output = output + "  Reference Facts:    " + int_to_string(report.total_reference_facts) + "\n"
     output = output + "  Generated Facts:    " + string_int(report.total_generated_facts) + "\n"
     output = output + "  Consistent Facts:   " + string_int(report.consistent_facts) + "\n"
     output = output + "  Inconsistent Facts: " + string_int(report.inconsistent_facts) + "\n\n"
-    
-    // 问题列表
+
+    // English text
     if len(report.hallucinated_facts) > 0 {
         output = output + "[⚠️ Hallucinated Facts]\n"
         int i = 0
@@ -589,7 +589,7 @@ func generate_detailed_report(consistency_report report) string {
         }
         output = output + "\n"
     }
-    
+
     if len(report.missing_facts) > 0 {
         output = output + "[❌ Missing Facts]\n"
         int i = 0
@@ -599,7 +599,7 @@ func generate_detailed_report(consistency_report report) string {
         }
         output = output + "\n"
     }
-    
+
     if len(report.contradictions) > 0 {
         output = output + "[🔄 Contradictions]\n"
         int i = 0
@@ -609,49 +609,49 @@ func generate_detailed_report(consistency_report report) string {
         }
         output = output + "\n"
     }
-    
+
     output = output + "════════════════════════════════════════════════════════════\n"
     output
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 6. 工具函数
+// 6. toolfunction
 // ════════════════════════════════════════════════════════════════════════════════
 
 func split_sentences(string text) []string {
     []string sentences = []string{}
     string current = ""
-    
+
     int i = 0
     while i < len(text) {
         string ch = substring(text, i, i+1)
         current = current + ch
-        
+
         if string_equals(ch, ".") || string_equals(ch, "!") || string_equals(ch, "?") {
             if len(current) > 0 {
                 sentences = append_string(sentences, trim_string(current))
                 current = ""
             }
         }
-        
+
         i = i + 1
     }
-    
+
     if len(current) > 0 {
         sentences = append_string(sentences, trim_string(current))
     }
-    
+
     sentences
 }
 
 func split_words(string text) []string {
     []string words = []string{}
     string current = ""
-    
+
     int i = 0
     while i < len(text) {
         string ch = substring(text, i, i+1)
-        
+
         if string_equals(ch, " ") || string_equals(ch, "\n") || string_equals(ch, "\t") {
             if len(current) > 0 {
                 words = append_string(words, current)
@@ -660,21 +660,21 @@ func split_words(string text) []string {
         } else {
             current = current + ch
         }
-        
+
         i = i + 1
     }
-    
+
     if len(current) > 0 {
         words = append_string(words, current)
     }
-    
+
     words
 }
 
 func contains_substring(string text, string substr) bool {
     if len(substr) == 0 { return true }
     if len(text) < len(substr) { return false }
-    
+
     int i = 0
     while i <= len(text) - len(substr) {
         bool match = true
@@ -696,7 +696,7 @@ func contains_substring(string text, string substr) bool {
 func find_substring(string text, string substr) int {
     if len(substr) == 0 { return 0 }
     if len(text) < len(substr) { return -1 }
-    
+
     int i = 0
     while i <= len(text) - len(substr) {
         bool match = true
@@ -719,7 +719,7 @@ func substring(string text, int start, int end) string {
     if start < 0 { start = 0 }
     if end > len(text) { end = len(text) }
     if start >= end { return "" }
-    
+
     string result = ""
     int i = start
     while i < end {
@@ -731,7 +731,7 @@ func substring(string text, int start, int end) string {
 
 func string_equals(string s1, string s2) bool {
     if len(s1) != len(s2) { return false }
-    
+
     int i = 0
     while i < len(s1) {
         if !string_equals(substring(s1, i, i+1), substring(s2, i, i+1)) {
@@ -802,7 +802,7 @@ func contains_digit(string s) bool {
 }
 
 func contains_quantifier(string s) bool {
-    contains_substring(s, "many") || contains_substring(s, "some") || 
+    contains_substring(s, "many") || contains_substring(s, "some") ||
     contains_substring(s, "all") || contains_substring(s, "most")
 }
 
@@ -812,10 +812,10 @@ func contains_uncertainty_words(string s) bool {
 }
 
 func is_rare_combination(fact f, factual_content reference) bool {
-    // 检查这个组合是否在参考中出现过
+    // English text
     int i = 0
     while i < len(reference.facts) {
-        if string_equals(reference.facts[i].subject, f.subject) && 
+        if string_equals(reference.facts[i].subject, f.subject) &&
            string_equals(reference.facts[i].predicate, f.predicate) {
             return false
         }
@@ -825,7 +825,7 @@ func is_rare_combination(fact f, factual_content reference) bool {
 }
 
 func edit_distance(string s1, string s2) int {
-    // 简化实现: 返回长度差
+    // English textimplementation: English text
     int len1 = len(s1)
     int len2 = len(s2)
     if len1 > len2 {

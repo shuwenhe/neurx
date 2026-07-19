@@ -1,390 +1,390 @@
-# Codex 迁移快速参考卡
+# Codex migrationquickEnglish text
 
-## 🎯 核心指标
+## 🎯 English text
 
-| 指标 | 数值 |
+| English text | English text |
 |------|------|
-| 总体迁移复杂性 | **7.5/10** (高) |
-| 预计工作量 | **8-10 周** |
-| 关键文件数 | **25+** |
-| 代码行数 | **~6900** |
-| 子模块数 | **3** (审批、沙箱、线程) |
+| English textmigrationEnglish text | **7.5/10** (English text) |
+| English text | **8-10 English text** |
+| English textfileEnglish text | **25+** |
+| English text | **~6900** |
+| English text | **3** (English text, English text, English text) |
 
 ---
 
-## 📋 三大核心模块速览
+## 📋 English text
 
-### 1️⃣ 审批系统 (8/10)
+### 1️⃣ English textsystem (8/10)
 
-**关键文件**: 6 个
+**English textfile**: 6 English text
 ```
-✓ protocol/src/approvals.rs          (400 行，核心定义)
+✓ protocol/src/approvals.rs          (400 English text, English text)
 ✓ protocol/src/protocol.rs           (AskForApproval enum)
 ✓ protocol/src/config_types.rs       (ApprovalsReviewer enum)
 ✓ execpolicy/src/decision.rs         (Allow/Prompt/Forbidden)
-✓ core/src/guardian/...              (Guardian 集成)
-✓ core/src/tools/network_approval.rs (网络审批)
+✓ core/src/guardian/...              (Guardian English text)
+✓ core/src/tools/network_approval.rs (English text)
 ```
 
-**关键枚举**:
+**English text**:
 - `AskForApproval`: UnlessTrusted | OnFailure | OnRequest | Granular | Never
 - `ApprovalsReviewer`: User | AutoReview
 - `NetworkApprovalProtocol`: Http | Https | Socks5Tcp | Socks5Udp
 - `GuardianAssessmentStatus`: InProgress | Approved | Denied | TimedOut | Aborted
 
-**关键结构**:
-- `ExecApprovalRequestEvent` - 执行审批请求
-- `GuardianAssessmentEvent` - Guardian 评估事件
-- `NetworkApprovalContext` - 网络上下文
-- `GranularApprovalConfig` - 细粒度配置
+**English text**:
+- `ExecApprovalRequestEvent` - English textrequest
+- `GuardianAssessmentEvent` - Guardian evaluationEnglish text
+- `NetworkApprovalContext` - English text
+- `GranularApprovalConfig` - English textconfiguration
 
-**工作量**: 11-15 天
+**English text**: 11-15 English text
 
 ---
 
-### 2️⃣ 沙箱系统 (8.5/10)
+### 2️⃣ English textsystem (8.5/10)
 
-**关键文件**: 8 个
+**English textfile**: 8 English text
 ```
-✓ protocol/src/permissions.rs        (1000 行，核心定义)
+✓ protocol/src/permissions.rs        (1000 English text, English text)
 ✓ protocol/src/config_types.rs       (SandboxMode enum)
 ✓ protocol/src/protocol.rs           (SandboxPolicy enum)
-✓ sandboxing/src/manager.rs          (管理器)
+✓ sandboxing/src/manager.rs          (managementEnglish text)
 ✓ sandboxing/src/bwrap.rs            (Linux bubblewrap)
 ✓ sandboxing/src/seatbelt.rs         (macOS Seatbelt)
 ✓ sandboxing/src/landlock.rs         (Linux LSM)
-✓ sandboxing/src/policy_transforms.rs (策略转换)
+✓ sandboxing/src/policy_transforms.rs (English text)
 ```
 
-**关键枚举**:
+**English text**:
 - `FileSystemAccessMode`: Read | Write | Deny
 - `FileSystemSandboxKind`: Restricted | Unrestricted | ExternalSandbox
 - `NetworkSandboxPolicy`: Restricted | Enabled
 - `SandboxMode`: ReadOnly | WorkspaceWrite | DangerFullAccess
 - `SandboxType`: None | MacosSeatbelt | LinuxSeccomp | WindowsRestrictedToken
 
-**关键结构**:
-- `FileSystemSandboxPolicy` - 文件系统沙箱策略
-- `FileSystemSandboxEntry` - 文件系统项
-- `SandboxExecRequest` - 执行请求
-- `SandboxTransformRequest` - 转换请求
+**English text**:
+- `FileSystemSandboxPolicy` - filesystemEnglish text
+- `FileSystemSandboxEntry` - filesystemEnglish text
+- `SandboxExecRequest` - English textrequest
+- `SandboxTransformRequest` - English textrequest
 
-**保护元数据**: `.git` | `.agents` | `.codex`
+**English textdata**: `.git` | `.agents` | `.codex`
 
-**工作量**: 15-21 天
+**English text**: 15-21 English text
 
 ---
 
-### 3️⃣ 线程支持 (7/10)
+### 3️⃣ English textsupport (7/10)
 
-**关键文件**: 7 个
+**English textfile**: 7 English text
 ```
 ✓ protocol/src/thread_id.rs          (ThreadId, UUID v7)
-✓ thread-store/src/types.rs          (参数和类型)
+✓ thread-store/src/types.rs          (parameterEnglish text)
 ✓ thread-store/src/store.rs          (ThreadStore trait)
-✓ thread-store/src/live_thread.rs    (活跃线程生命周期)
-✓ thread-store/src/local/mod.rs      (本地存储实现)
-✓ thread-store/src/in_memory.rs      (内存存储)
-✓ analytics/src/facts.rs             (初始化模式)
+✓ thread-store/src/live_thread.rs    (English text)
+✓ thread-store/src/local/mod.rs      (English textimplementation)
+✓ thread-store/src/in_memory.rs      (English text)
+✓ analytics/src/facts.rs             (initializeEnglish text)
 ```
 
-**关键类型**:
-- `ThreadId` - UUID v7 包装
+**English text**:
+- `ThreadId` - UUID v7 English text
 - `ThreadInitializationMode`: Fresh | Resumed | Forked
-- `ThreadPersistenceMetadata` - 元数据
-- `CreateThreadParams` - 创建参数
-- `ResumeThreadParams` - 恢复参数
-- `StoredThread` - 存储的线程
+- `ThreadPersistenceMetadata` - English textdata
+- `CreateThreadParams` - English textparameter
+- `ResumeThreadParams` - recoverparameter
+- `StoredThread` - English text
 
-**关键 Trait**:
-- `ThreadStore` - 15+ 个异步方法
+**English text Trait**:
+- `ThreadStore` - 15+ English textstepEnglish text
 
-**工作量**: 14-21 天
+**English text**: 14-21 English text
 
 ---
 
-## 🔗 关键依赖关系
+## 🔗 English text
 
-### 跨模块流
+### English text
 
 ```
                   ┌─────────────┐
-                  │  审批系统   │
+                  │  English textsystem   │
                   └──────┬──────┘
-                         │ 请求权限升级
+                         │ requestEnglish text
                          ▼
          ┌────────────────────────────┐
-         │      沙箱系统             │
-         │ (权限验证/应用)           │
+         │      English textsystem             │
+         │ (English text/English text)           │
          └────────────┬───────────────┘
-                      │ 记录到线程
+                      │ English text
                       ▼
          ┌────────────────────────────┐
-         │      线程系统             │
-         │ (持久化/恢复)             │
+         │      English textsystem             │
+         │ (English text/recover)             │
          └────────────────────────────┘
 ```
 
-### 外部集成
+### English text
 
 ```
-Guardian 子代理 ─┐
-                ├─► 审批系统
+Guardian English text ─┐
+                ├─► English textsystem
 NetworkProxy ────┤
-                └─► 沙箱系统
+                └─► English textsystem
 
-Rollout 系统 ────► 线程系统
+Rollout system ────► English textsystem
 ```
 
 ---
 
-## 📊 模块优先级和依赖顺序
+## 📊 English text
 
 ```
-第 1 步: 线程基础 (3-5 天)
-  └─ ThreadId + 基础类型
-     └─ LocalThreadStore 框架
+English text 1 step: English text (3-5 English text)
+  └─ ThreadId + English text
+     └─ LocalThreadStore framework
 
-第 2 步: 权限模型 (4-6 天)
+English text 2 step: English textmodel (4-6 English text)
   └─ FileSystemAccessMode
      └─ FileSystemSandboxPolicy
-        └─ 保护元数据检查
+        └─ English textdataEnglish text
 
-第 3 步: 沙箱应用 (5-8 天)
+English text 3 step: English text (5-8 English text)
   └─ SandboxManager
-     └─ 平台选择
-        └─ 执行转换
+     └─ English text
+        └─ English text
 
-第 4 步: 审批基础 (3-4 天)
+English text 4 step: English text (3-4 English text)
   └─ AskForApproval
      └─ ApprovalsReviewer
         └─ ExecApprovalRequestEvent
 
-第 5 步: Guardian 集成 (4-5 天)
+English text 5 step: Guardian English text (4-5 English text)
   └─ GuardianAssessmentEvent
-     └─ 决策应用
+     └─ English text
 
-第 6 步: 集成和测试 (2-3 周)
-  └─ 端到端流程
-     └─ 平台特定测试
-        └─ 性能优化
+English text 6 step: English texttest (2-3 English text)
+  └─ English textpipeline
+     └─ English texttest
+        └─ English textoptimize
 ```
 
 ---
 
-## 🚀 快速迁移清单
+## 🚀 quickmigrationEnglish text
 
-### 准备阶段
+### English textphase
 
-- [ ] 审阅所有 6,900 行代码
-- [ ] 理解 Guardian 子代理架构
-- [ ] 了解 neurx 的异步运行时 (Tokio)
-- [ ] 获得平台访问权限 (Linux/macOS/Windows)
-- [ ] 建立测试基础设施
+- [ ] English text 6,900 English text
+- [ ] English text Guardian English text
+- [ ] English text neurx English textsteprunEnglish text (Tokio)
+- [ ] English text (Linux/macOS/Windows)
+- [ ] English texttestEnglish text
 
-### 第一周: 基础设施
+### English text: English text
 
-- [ ] 移植 `ThreadId` 和相关类型
-- [ ] 实现 `LocalThreadStore`
-- [ ] 建立线程生命周期管理
-- [ ] 创建测试框架
+- [ ] English text `ThreadId` English text
+- [ ] implementation `LocalThreadStore`
+- [ ] English textmanagement
+- [ ] English texttestframework
 
-### 第二周: 权限和沙箱
+### English text: English text
 
-- [ ] 迁移 `FileSystemAccessMode` 等权限类型
-- [ ] 实现 `FileSystemSandboxPolicy` 检查
-- [ ] 实现保护元数据强制执行
-- [ ] 对 Linux 沙箱进行初始测试
+- [ ] migration `FileSystemAccessMode` English text
+- [ ] implementation `FileSystemSandboxPolicy` English text
+- [ ] implementationEnglish textdataEnglish text
+- [ ] English text Linux English texttest
 
-### 第三周: 高级沙箱
+### English text: advancedEnglish text
 
-- [ ] 实现 `SandboxManager` 核心
-- [ ] 移植 bwrap 支持 (Linux)
-- [ ] 移植 seatbelt 支持 (macOS)
-- [ ] 平台特定测试
+- [ ] implementation `SandboxManager` English text
+- [ ] English text bwrap support (Linux)
+- [ ] English text seatbelt support (macOS)
+- [ ] English texttest
 
-### 第四周: 审批系统
+### English text: English textsystem
 
-- [ ] 迁移审批基础类型
-- [ ] 实现 `ExecApprovalRequestEvent` 处理
-- [ ] 集成 Guardian 评估
-- [ ] 实现决策应用
+- [ ] migrationEnglish text
+- [ ] implementation `ExecApprovalRequestEvent` English text
+- [ ] English text Guardian evaluation
+- [ ] implementationEnglish text
 
-### 第五周及以后: 集成和优化
+### English text: English textoptimize
 
-- [ ] 端到端集成测试
-- [ ] 性能优化
-- [ ] Windows 支持 (如需要)
-- [ ] 文档和知识转移
+- [ ] English texttest
+- [ ] English textoptimize
+- [ ] Windows support (English textRequired)
+- [ ] English text
 
 ---
 
-## ⚠️ 关键风险和缓解
+## ⚠️ English text
 
-| 风险 | 影响 | 缓解 |
+| English text | English text | English text |
 |------|------|------|
-| Guardian 依赖 | 高 | 早期设计审查 |
-| 平台差异 | 中 | 逐个平台迁移 |
-| 持久化一致性 | 中 | 完整单元测试 |
-| 性能回归 | 中 | 基准测试 |
-| 向后兼容性 | 高 | API 版本控制 |
+| Guardian English text | English text | English text |
+| English text | English text | English textmigration |
+| English text | English text | completeEnglish texttest |
+| English text | English text | English texttest |
+| English text | English text | API English text |
 
 ---
 
-## 🔑 关键决策点
+## 🔑 English text
 
-### 1. 存储后端选择
-- **选项 A**: LocalThreadStore (基于 Rollout 文件)
-  - ✅ 与 Codex 兼容
-  - ✅ 相对简单
-  - ❌ 单机限制
-- **选项 B**: 分布式存储 (未来)
-  - ✅ 可扩展
-  - ❌ 复杂度高
-- **推荐**: 从 A 开始，为 B 预留接口
+### 1. English text
+- **English text A**: LocalThreadStore (English text Rollout file)
+  - ✅ English text Codex English text
+  - ✅ English text
+  - ❌ English text
+- **English text B**: English text (English text)
+  - ✅ English textextension
+  - ❌ English text
+- **recommended**: English text A start, English text B English text
 
-### 2. 审批评审者
-- **选项 A**: 用户批准 (简单)
-- **选项 B**: Guardian 子代理 (高级)
-- **推荐**: 支持两者，配置可选
+### 2. English text
+- **English text A**: English text (English text)
+- **English text B**: Guardian English text (advanced)
+- **recommended**: supportEnglish text, configurationEnglish text
 
-### 3. 沙箱后端优先级
-- **阶段 1**: Linux (bwrap + landlock)
-- **阶段 2**: macOS (seatbelt)
-- **阶段 3**: Windows (restricted token, 可选)
+### 3. English text
+- **phase 1**: Linux (bwrap + landlock)
+- **phase 2**: macOS (seatbelt)
+- **phase 3**: Windows (restricted token, English text)
 
 ---
 
-## 📚 文件导航
+## 📚 fileEnglish text
 
 ```
-关键定义文件:
-├─ 审批系统
-│  ├─ codex-rs/protocol/src/approvals.rs        ← 开始这里
+English textfile:
+├─ English textsystem
+│  ├─ codex-rs/protocol/src/approvals.rs        ← startEnglish text
 │  ├─ codex-rs/protocol/src/protocol.rs
 │  └─ codex-rs/protocol/src/config_types.rs
-├─ 沙箱系统
-│  ├─ codex-rs/protocol/src/permissions.rs      ← 开始这里
+├─ English textsystem
+│  ├─ codex-rs/protocol/src/permissions.rs      ← startEnglish text
 │  ├─ codex-rs/sandboxing/src/manager.rs
 │  └─ codex-rs/sandboxing/src/policy_transforms.rs
-└─ 线程系统
-   ├─ codex-rs/protocol/src/thread_id.rs        ← 开始这里
+└─ English textsystem
+   ├─ codex-rs/protocol/src/thread_id.rs        ← startEnglish text
    ├─ codex-rs/thread-store/src/types.rs
    └─ codex-rs/thread-store/src/store.rs
 
-实现文件:
-├─ 沙箱平台
+implementationfile:
+├─ English text
 │  ├─ codex-rs/sandboxing/src/bwrap.rs          (Linux)
 │  ├─ codex-rs/sandboxing/src/seatbelt.rs       (macOS)
 │  └─ codex-rs/sandboxing/src/landlock.rs       (Linux LSM)
-├─ 存储实现
-│  ├─ codex-rs/thread-store/src/local/mod.rs    (默认)
-│  └─ codex-rs/thread-store/src/in_memory.rs    (测试)
-└─ 集成
+├─ English textimplementation
+│  ├─ codex-rs/thread-store/src/local/mod.rs    (default)
+│  └─ codex-rs/thread-store/src/in_memory.rs    (test)
+└─ English text
    ├─ codex-rs/core/src/guardian/approval_request.rs
    └─ codex-rs/core/src/tools/network_approval.rs
 
-测试文件:
+testfile:
 ├─ codex-rs/core/tests/suite/approvals.rs
 ├─ codex-rs/sandboxing/src/*_tests.rs
-└─ codex-rs/thread-store/ (集成测试)
+└─ codex-rs/thread-store/ (English texttest)
 ```
 
 ---
 
-## 💡 关键概念总结
+## 💡 English text
 
-### 审批流
-
-```
-用户请求
-    ↓
-AskForApproval 策略
-    ├─ UnlessTrusted: 安全命令自动通过
-    ├─ OnFailure: 失败时请求 (已弃用)
-    ├─ OnRequest: 模型决定
-    ├─ Granular: 按类别细粒度
-    └─ Never: 全部拒绝
-    ↓
-ApprovalsReviewer 路由
-    ├─ User: 显示给用户
-    └─ AutoReview: Guardian 子代理
-    ↓
-决策应用
-    ├─ ExecPolicyAmendment: 更新执行策略
-    ├─ NetworkPolicyAmendment: 更新网络策略
-    └─ AdditionalPermissions: 扩展权限
-```
-
-### 沙箱模式
+### English text
 
 ```
-请求执行
+English textrequest
     ↓
-选择 SandboxMode
-    ├─ ReadOnly (默认): 只读 + 网络限制
-    ├─ WorkspaceWrite: 工作区写入 + 保护元数据
-    ├─ ExternalSandbox: 使用外部沙箱
-    └─ DangerFullAccess: 完全访问 (危险)
+AskForApproval English text
+    ├─ UnlessTrusted: safetyEnglish text
+    ├─ OnFailure: failureEnglish textrequest (English text)
+    ├─ OnRequest: modelEnglish text
+    ├─ Granular: English text
+    └─ Never: English text
     ↓
-平台选择
+ApprovalsReviewer English text
+    ├─ User: English text
+    └─ AutoReview: Guardian English text
+    ↓
+English text
+    ├─ ExecPolicyAmendment: English text
+    ├─ NetworkPolicyAmendment: English text
+    └─ AdditionalPermissions: extensionEnglish text
+```
+
+### English text
+
+```
+requestEnglish text
+    ↓
+English text SandboxMode
+    ├─ ReadOnly (default): English text + English text
+    ├─ WorkspaceWrite: English text + English textdata
+    ├─ ExternalSandbox: useEnglish text
+    └─ DangerFullAccess: English text (English text)
+    ↓
+English text
     ├─ Linux: bwrap (bubblewrap) + landlock
     ├─ macOS: seatbelt
     └─ Windows: restricted token
     ↓
-应用 SandboxTransformRequest
-    ├─ 文件系统权限
-    ├─ 网络限制
-    └─ 平台参数
+English text SandboxTransformRequest
+    ├─ filesystemEnglish text
+    ├─ English text
+    └─ English textparameter
     ↓
-执行受限命令
+English text
 ```
 
-### 线程生命周期
+### English text
 
 ```
-会话开始
+English textstart
     ↓
-ThreadId 生成 (UUID v7)
+ThreadId generate (UUID v7)
     ↓
-线程初始化
-    ├─ Fresh: 新创建
-    ├─ Resumed: 从存储恢复
-    └─ Forked: 从现有线程分叉
+English textinitialize
+    ├─ Fresh: English text
+    ├─ Resumed: English textrecover
+    └─ Forked: English text
     ↓
-项目追加 (RolloutItem)
+English text (RolloutItem)
     ↓
-持久化/刷新
+English text/English text
     ↓
-会话关闭
-    └─ 归档或删除
+English text
+    └─ English text
 ```
 
 ---
 
-## 🎓 学习资源
+## 🎓 English text
 
-### 必读代码
+### English text
 
-1. **审批系统入门** (2 小时)
-   - `codex-rs/protocol/src/approvals.rs` (全文)
-   - 关注: 所有 pub struct/enum
+1. **English textsystemEnglish text** (2 English text)
+   - `codex-rs/protocol/src/approvals.rs` (English text)
+   - English text: English text pub struct/enum
 
-2. **沙箱系统入门** (3 小时)
-   - `codex-rs/protocol/src/permissions.rs` (前 500 行)
+2. **English textsystemEnglish text** (3 English text)
+   - `codex-rs/protocol/src/permissions.rs` (English text 500 English text)
    - `codex-rs/sandboxing/src/manager.rs`
 
-3. **线程系统入门** (2 小时)
-   - `codex-rs/protocol/src/thread_id.rs` (全文)
-   - `codex-rs/thread-store/src/store.rs` (trait 定义)
+3. **English textsystemEnglish text** (2 English text)
+   - `codex-rs/protocol/src/thread_id.rs` (English text)
+   - `codex-rs/thread-store/src/store.rs` (trait English text)
 
-### 重要测试
+### English texttest
 
 - `codex-rs/core/tests/suite/approvals.rs`
 - `codex-rs/sandboxing/src/manager_tests.rs`
 - `codex-rs/sandboxing/src/policy_transforms_tests.rs`
 
-### 外部参考
+### English text
 
 - UUID v7: https://github.com/uuid-rs/uuid
 - Serde: https://serde.rs/
@@ -394,25 +394,25 @@ ThreadId 生成 (UUID v7)
 
 ---
 
-## 📞 常见问题
+## 📞 English text
 
-**Q: 可以并行迁移这三个模块吗?**  
-A: 不建议。线程系统是基础，其他两个模块都依赖它。建议按顺序: 线程 → 权限/沙箱 → 审批
+**Q: AllowedEnglish textmigrationEnglish text?**
+A: English text.English textsystemEnglish text, English text.English text: English text → English text/English text → English text
 
-**Q: Guardian 子代理必须迁移吗?**  
-A: 不是。可以先实现基础审批 (用户批准)，后续再添加 Guardian
+**Q: Guardian English textmigrationEnglish text?**
+A: English text.AllowedEnglish textimplementationEnglish text (English text), English text Guardian
 
-**Q: 需要支持 Windows 吗?**  
-A: 可选。Linux/macOS 是必需的。Windows 支持可以延后
+**Q: Requiredsupport Windows English text?**
+A: English text.Linux/macOS English text.Windows supportAllowedEnglish text
 
-**Q: 如何处理向后兼容性?**  
-A: 通过 serde 别名和版本化配置格式。参见 `config_types.rs` 中的 `#[serde(alias)]` 示例
+**Q: English text?**
+A: English text serde English textconfigurationEnglish text.English text `config_types.rs` English text `#[serde(alias)]` example
 
-**Q: 迁移过程中如何测试?**  
-A: 建立完整的单元测试、集成测试和端到端测试。参见 Codex 中的 `tests/` 目录
+**Q: migrationEnglish texttest?**
+A: English textcompleteEnglish texttest, English texttestEnglish texttest.English text Codex English text `tests/` directory
 
 ---
 
-**更新**: 2026-06-02  
-**源**: `/Users/feifei/agent/codex`  
-**目标**: neurx Agent Framework
+**English text**: 2026-06-02
+**English text**: `/Users/feifei/agent/codex`
+**English text**: neurx Agent Framework

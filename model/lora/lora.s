@@ -4,35 +4,35 @@ package neurx.model.lora
 // LoRA — Low-Rank Adaptation (Hu et al., 2021)
 // QLoRA — Quantized LoRA (Dettmers et al., 2023)
 //
-// 核心思想:
-//   冻结预训练权重 W ∈ R^{d×k}，仅训练低秩分解:
+// English text:
+//   English texttrainingweight W ∈ R^{d×k}, English texttrainingEnglish text:
 //   W' = W + ΔW = W + B·A
-//   其中 A ∈ R^{r×k}, B ∈ R^{d×r}, r << min(d,k)
-//   ΔW 在初始化时为 0: B=0, A~N(0,σ²)
-//   推理时合并: W_merged = W + (α/r)·B·A
+//   English text A ∈ R^{r×k}, B ∈ R^{d×r}, r << min(d,k)
+//   ΔW English textinitializeEnglish text 0: B=0, A~N(0,σ²)
+//   inferenceEnglish text: W_merged = W + (α/r)·B·A
 //
-// QLoRA 扩展:
-//   将冻结权重 W 量化为 NF4 (Normal Float 4-bit) 或 INT8，
-//   大幅降低显存，使单卡可微调 65B 参数模型。
+// QLoRA extension:
+//   English textweight W English text NF4 (Normal Float 4-bit) English text INT8,
+//   English text, English text 65B parametermodel.
 //
-// 支持的层:
-//   • Linear (全连接): Q, K, V, O 投影，FFN gate/up/down
-//   • Embedding (选项)
+// supportEnglish text:
+//   • Linear (English text): Q, K, V, O English text, FFN gate/up/down
+//   • Embedding (English text)
 // ============================================================================
 
 // ============================================================================
-// 1. 配置
+// 1. configuration
 // ============================================================================
 
 struct lora_config {
-    int rank              // LoRA 秩 r (通常 4, 8, 16, 32, 64)
-    float alpha           // 缩放因子 α (通常等于 r 或 2r)
-    float dropout         // LoRA dropout (0.0 = 不用)
-    string target_modules // 目标层名称前缀, 逗号分隔 "q,k,v,o,gate,up,down"
-    bool merge_weights    // 推理前合并 ΔW 到 W
-    bool use_qlora        // 是否量化基础权重 (QLoRA)
-    string qlora_dtype    // "nf4" | "int8" (QLoRA 量化类型)
-    float lora_lr         // LoRA 专属学习率 (若 0 继承全局)
+    int rank              // LoRA English text r (English text 4, 8, 16, 32, 64)
+    float alpha           // English text α (English text r English text 2r)
+    float dropout         // LoRA dropout (0.0 = English text)
+    string target_modules // English textNameEnglish text, English text "q,k,v,o,gate,up,down"
+    bool merge_weights    // inferenceEnglish text ΔW English text W
+    bool use_qlora        // English textweight (QLoRA)
+    string qlora_dtype    // "nf4" | "int8" (QLoRA English text)
+    float lora_lr         // LoRA English textlearning rate (English text 0 English text)
 }
 
 func default_lora_config() lora_config {
@@ -62,10 +62,10 @@ func qlora_config_7b() lora_config {
 }
 
 // ============================================================================
-// 2. NF4 量化 (QLoRA 基础权重量化)
+// 2. NF4 English text (QLoRA English textweightEnglish text)
 // ============================================================================
 
-// NF4 的 16 个量化点 (正态分布分位数)
+// NF4 English text 16 English text (English text)
 func nf4_codebook() []float {
     []float nf4_values = []float{cap: 16}
     nf4_values[0] = -1.0
@@ -88,17 +88,17 @@ func nf4_codebook() []float {
 }
 
 struct nf4_tensor {
-    []int   codes       // [N] 每个元素的 4-bit 编码 (0-15)
-    float   absmax      // 分块绝对值最大 (用于反量化)
-    int     num_elem    // 元素数量
-    []float codebook    // NF4 量化点
+    []int   codes       // [N] English text 4-bit English text (0-15)
+    float   absmax      // English text (English text)
+    int     num_elem    // English textcount
+    []float codebook    // NF4 English text
 }
 
-// 量化 fp32 向量 → NF4
+// English text fp32 English text → NF4
 func quantize_nf4([]float w, int n) nf4_tensor {
     []float cb = nf4_codebook()
 
-    // 计算 absmax
+    // compute absmax
     float amax = 0.0
     int i = 0
     for i < n {
@@ -112,8 +112,8 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     []int codes = []int{}
     int j = 0
     for j < n {
-        float wn = w[j] / amax   // 归一化到 [-1, 1]
-        // 最近邻查找
+        float wn = w[j] / amax   // English text [-1, 1]
+        // English text
         int best_k = 0
         float best_d = 999.0
         int k = 0
@@ -138,7 +138,7 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     }
 }
 
-// 反量化 NF4 → fp32
+// English text NF4 → fp32
 func dequantize_nf4(nf4_tensor t) []float {
     []float out = []float{}
     int i = 0
@@ -150,7 +150,7 @@ func dequantize_nf4(nf4_tensor t) []float {
     out
 }
 
-// 矩阵乘: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
+// English text: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
 func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
     []float c = []float{cap: M * N}
     int i = 0
@@ -198,31 +198,31 @@ func pow_approx(float base, int exp) float {
 }
 
 // ============================================================================
-// 3. LoRA 线性层
+// 3. LoRA English text
 // ============================================================================
 
 struct lora_linear {
-    // 基础权重 (冻结)
+    // English textweight (English text)
     []float base_weight     // [out_dim, in_dim]  fp32 or quantized
-    nf4_tensor base_nf4     // NF4 量化权重 (QLoRA)
-    bool quantized          // 是否使用 NF4
+    nf4_tensor base_nf4     // NF4 English textweight (QLoRA)
+    bool quantized          // English textuse NF4
 
-    // LoRA 适配器 (可训练)
-    []float lora_A          // [rank, in_dim]   初始化: N(0, σ²)
-    []float lora_B          // [out_dim, rank]  初始化: 0
+    // LoRA English text (English texttraining)
+    []float lora_A          // [rank, in_dim]   initialize: N(0, σ²)
+    []float lora_B          // [out_dim, rank]  initialize: 0
     []float lora_A_grad     // dL/dA
     []float lora_B_grad     // dL/dB
 
-    // 配置
+    // configuration
     int in_dim
     int out_dim
     int rank
     float scaling           // α / r
     float dropout_rate
 
-    // 前向缓存 (用于反向)
-    []float last_input      // 上次前向输入 [batch*seq, in_dim]
-    []float last_Ax         // B·A·x (LoRA 贡献, 反向用)
+    // English textcache (English text)
+    []float last_input      // English textinput [batch*seq, in_dim]
+    []float last_Ax         // B·A·x (LoRA English text, English text)
 }
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
@@ -265,7 +265,7 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
 }
 
 // ============================================================================
-// 4. LoRA 前向
+// 4. LoRA English text
 // ============================================================================
 
 // x: [batch, in_dim] → out: [batch, out_dim]
@@ -367,12 +367,12 @@ func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forw
 }
 
 // ============================================================================
-// 5. LoRA 反向
+// 5. LoRA English text
 // ============================================================================
 
 struct lora_backward_result {
-    lora_linear updated_layer   // 含新梯度
-    []float dx                  // [batch, in_dim] 输入梯度
+    lora_linear updated_layer   // English textgradient
+    []float dx                  // [batch, in_dim] inputgradient
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
@@ -454,17 +454,17 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
 }
 
 // ============================================================================
-// 6. AdamW 更新 LoRA 参数
+// 6. AdamW English text LoRA parameter
 // ============================================================================
 
 struct lora_adamw_state {
-    // A 的动量
-    []float mA      // 一阶矩 (momentum)
-    []float vA      // 二阶矩 (variance)
-    // B 的动量
+    // A English text
+    []float mA      // English text (momentum)
+    []float vA      // English text (variance)
+    // B English text
     []float mB
     []float vB
-    // 超参数
+    // English textparameter
     float lr
     float beta1
     float beta2
@@ -524,7 +524,7 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
 }
 
 // ============================================================================
-// 7. 权重合并 (推理前合并 ΔW 到 W)
+// 7. weightEnglish text (inferenceEnglish text ΔW English text W)
 // ============================================================================
 
 func lora_merge_weights(lora_linear layer) lora_linear {
@@ -560,7 +560,7 @@ func lora_merge_weights(lora_linear layer) lora_linear {
 }
 
 // ============================================================================
-// 8. 保存 / 加载 LoRA 适配器 (仅保存 A, B, 不保存冻结 W)
+// 8. save / load LoRA English text (English textsave A, B, English textsaveEnglish text W)
 // ============================================================================
 
 struct lora_checkpoint {
@@ -594,15 +594,15 @@ func lora_load_checkpoint(lora_linear layer, lora_checkpoint ckpt) lora_linear {
 }
 
 // ============================================================================
-// 9. 统计信息
+// 9. statisticsinformation
 // ============================================================================
 
 struct lora_stats {
-    int total_base_params       // 冻结参数数
-    int total_lora_params       // 可训练 LoRA 参数数
+    int total_base_params       // English textparameterEnglish text
+    int total_lora_params       // English texttraining LoRA parameterEnglish text
     float trainable_ratio       // LoRA / total
     int rank
-    float memory_saved_mb       // 相比全量微调节省的显存 (估计)
+    float memory_saved_mb       // English text (English text)
 }
 
 func lora_compute_stats(lora_linear layer) lora_stats {
@@ -610,7 +610,7 @@ func lora_compute_stats(lora_linear layer) lora_stats {
     int lora_params = layer.rank * (layer.in_dim + layer.out_dim)
     float ratio = (lora_params * 1.0) / ((base_params + lora_params) * 1.0)
 
-    // 显存节省: 基础权重 NF4 节省 8× vs fp32
+    // English text: English textweight NF4 English text 8× vs fp32
     float saved = 0.0
     if layer.quantized {
         float base_mb = (base_params * 4 * 1.0) / 1048576.0

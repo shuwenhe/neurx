@@ -1,270 +1,270 @@
-# VS Code 核心功能在 NeurX-Code 中的实现分析
+# VS Code English text NeurX-Code English textimplementationEnglish text
 
-**分析时间**: 2026-06-05  
-**分析范围**: /Users/feifei/agent/vscode (完整 VS Code 源代码)  
-**目标**: neurx-code (Qt/C++ 框架)
+**English texttime**: 2026-06-05
+**English text**: /Users/feifei/agent/vscode (complete VS Code English text)
+**English text**: neurx-code (Qt/C++ framework)
 
 ---
 
-## 📊 总体评估
+## 📊 English textevaluation
 
-| 指标 | 数值 |
+| English text | English text |
 |------|------|
-| **可直接移植的功能** | 70+ 个 |
-| **已实现的功能** | 32 个 |
-| **推荐实现的功能** | 15 个 |
-| **可选功能** | 30+ 个 |
-| **总耗时估计** | 8-12 周（80% 功能完成度） |
-| **代码减少率** | ~90%（相比原始 VS Code） |
+| **English text** | 70+ English text |
+| **English textimplementationEnglish text** | 32 English text |
+| **recommendedimplementationEnglish text** | 15 English text |
+| **English text** | 30+ English text |
+| **English text** | 8-12 English text(80% English text) |
+| **English text** | ~90%(English text VS Code) |
 
 ---
 
-## 🎯 按优先级分类的可实现功能
+## 🎯 English textimplementationEnglish text
 
-### ✅ 第 1 阶段：已完成 (32 个功能)
+### ✅ English text 1 phase: English text (32 English text)
 
-#### 核心服务 (12 个)
-- **NotificationService** - 信息、警告、错误、成功提示
-- **ProgressService** - 长操作进度跟踪
-- **StorageService** - 多级存储（全局、工作区、会话、临时）
-- **FileService** - 文件读写、监视、编码检测
-- **WorkspaceService** - 多工作区管理、文件查找
-- **SearchService** - 全局搜索、正则表达式、替换
-- **QuickAccessManager** - 快速命令面板（模糊搜索）
-- **LanguageClient** - LSP 客户端（Hover、Completions、Diagnostics）
-- **GitService** - Git 操作（提交、推送、拉取、分支）
-- **TasksManager** - 任务执行、进程管理
-- **TerminalService** - 嵌入式终端
-- **DebugSession** - DAP 客户端（断点、堆栈、变量）
+#### English text (12 English text)
+- **NotificationService** - information, English text, error, successprompt
+- **ProgressService** - English text
+- **StorageService** - English text(English text, English text, English text, English text)
+- **FileService** - fileEnglish text, English text, English text
+- **WorkspaceService** - English textmanagement, fileEnglish text
+- **SearchService** - English textsearch, English text, English text
+- **QuickAccessManager** - quickEnglish text(English textsearch)
+- **LanguageClient** - LSP English text(Hover, Completions, Diagnostics)
+- **GitService** - Git English text(English text, English text, English text, English text)
+- **TasksManager** - English text, English textmanagement
+- **TerminalService** - English text
+- **DebugSession** - DAP English text(English text, English text, English text)
 
-#### 编辑器功能 (20 个)
-| # | 功能 | VS Code 模块 | 复杂度 |
+#### English text (20 English text)
+| # | English text | VS Code English text | English text |
 |---|------|------------|--------|
-| 1 | **代码注释** | comments | ⭐⭐ |
-| 2 | **代码折叠** | folding | ⭐⭐⭐ |
-| 3 | **代码片段** | snippet | ⭐⭐⭐ |
-| 4 | **查找替换** | find | ⭐⭐⭐ |
-| 5 | **大纲导航** | documentSymbols | ⭐⭐⭐ |
-| 6 | **错误诊断** | diagnostics | ⭐⭐⭐ |
-| 7 | **快捷键绑定** | keybindings | ⭐⭐ |
-| 8 | **主题管理** | theme | ⭐⭐ |
-| 9 | **括号匹配** | bracketMatching | ⭐⭐ |
-| 10 | **词汇高亮** | wordHighlight | ⭐ |
-| 11 | **编辑历史** | cursorUndo | ⭐⭐ |
-| 12 | **大小写转换** | inPlaceReplace | ⭐ |
-| 13 | **转到定义** | gotoSymbol | ⭐⭐⭐ |
-| 14 | **内联重命名** | rename | ⭐⭐⭐ |
-| 15 | **行操作** | linesOperations | ⭐⭐ |
-| 16 | **多光标** | multicursor | ⭐⭐⭐ |
-| 17 | **区域选择** | smartSelect | ⭐⭐ |
-| 18 | **选中到括号** | bracketSelection | ⭐ |
-| 19 | **字数统计** | wordOperations | ⭐ |
-| 20 | **配置服务** | configuration | ⭐⭐ |
+| 1 | **English text** | comments | ⭐⭐ |
+| 2 | **English text** | folding | ⭐⭐⭐ |
+| 3 | **English text** | snippet | ⭐⭐⭐ |
+| 4 | **English text** | find | ⭐⭐⭐ |
+| 5 | **English text** | documentSymbols | ⭐⭐⭐ |
+| 6 | **errorEnglish text** | diagnostics | ⭐⭐⭐ |
+| 7 | **English text** | keybindings | ⭐⭐ |
+| 8 | **mainEnglish textmanagement** | theme | ⭐⭐ |
+| 9 | **English text** | bracketMatching | ⭐⭐ |
+| 10 | **English text** | wordHighlight | ⭐ |
+| 11 | **English text** | cursorUndo | ⭐⭐ |
+| 12 | **English text** | inPlaceReplace | ⭐ |
+| 13 | **English text** | gotoSymbol | ⭐⭐⭐ |
+| 14 | **English text** | rename | ⭐⭐⭐ |
+| 15 | **English text** | linesOperations | ⭐⭐ |
+| 16 | **English text** | multicursor | ⭐⭐⭐ |
+| 17 | **English text** | smartSelect | ⭐⭐ |
+| 18 | **English text** | bracketSelection | ⭐ |
+| 19 | **English textstatistics** | wordOperations | ⭐ |
+| 20 | **configurationEnglish text** | configuration | ⭐⭐ |
 
 ---
 
-### 🟡 第 2 阶段：推荐优先实现 (15 个功能)
+### 🟡 English text 2 phase: recommendedEnglish textimplementation (15 English text)
 
-按实现难度和价值排序：
+English textimplementationEnglish textranking:
 
-#### A. 编辑增强 (3-5 周)
+#### A. English text (3-5 English text)
 
-| # | 功能 | 模块 | 难度 | 优先级 | 产值 |
+| # | English text | English text | English text | English text | English text |
 |---|------|------|------|--------|------|
-| 1 | **内联完成** | inlineCompletions | ⭐⭐⭐ | 🔴 高 | 🔴 高 |
-| 2 | **参数提示** | parameterHints | ⭐⭐ | 🔴 高 | 🔴 高 |
-| 3 | **代码动作** | codeAction | ⭐⭐⭐ | 🔴 高 | 🔴 高 |
-| 4 | **格式化文档** | format | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 5 | **语义高亮** | semanticTokens | ⭐⭐⭐ | 🟡 中 | 🟡 中 |
+| 1 | **English text** | inlineCompletions | ⭐⭐⭐ | 🔴 English text | 🔴 English text |
+| 2 | **parameterprompt** | parameterHints | ⭐⭐ | 🔴 English text | 🔴 English text |
+| 3 | **English text** | codeAction | ⭐⭐⭐ | 🔴 English text | 🔴 English text |
+| 4 | **English text** | format | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 5 | **English text** | semanticTokens | ⭐⭐⭐ | 🟡 English text | 🟡 English text |
 
-**实现时间**: 2-3 周  
-**依赖**: LanguageClient, DiagnosticsService
+**implementationtime**: 2-3 English text
+**English text**: LanguageClient, DiagnosticsService
 
-#### B. 代码导航 (1-2 周)
+#### B. English text (1-2 English text)
 
-| # | 功能 | 模块 | 难度 | 优先级 | 产值 |
+| # | English text | English text | English text | English text | English text |
 |---|------|------|------|--------|------|
-| 1 | **面包屑导航** | breadcrumbs | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 2 | **查找所有引用** | references | ⭐⭐⭐ | 🟡 中 | 🟡 中 |
-| 3 | **转到声明** | gotoDeclaration | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 4 | **类型定义** | typeDefinition | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 5 | **调用层次** | callHierarchy | ⭐⭐⭐ | 🟢 低 | 🟡 中 |
+| 1 | **English text** | breadcrumbs | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 2 | **English text** | references | ⭐⭐⭐ | 🟡 English text | 🟡 English text |
+| 3 | **English text** | gotoDeclaration | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 4 | **English text** | typeDefinition | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 5 | **English text** | callHierarchy | ⭐⭐⭐ | 🟢 English text | 🟡 English text |
 
-**实现时间**: 1-2 周  
-**依赖**: LanguageClient, OutlineProvider
+**implementationtime**: 1-2 English text
+**English text**: LanguageClient, OutlineProvider
 
-#### C. 文本编辑增强 (1 周)
+#### C. English text (1 English text)
 
-| # | 功能 | 模块 | 难度 | 优先级 | 产值 |
+| # | English text | English text | English text | English text | English text |
 |---|------|------|------|--------|------|
-| 1 | **链接编辑** | linkedEditing | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 2 | **拆分选择** | smartSelect | ⭐ | 🟢 低 | 🟢 低 |
-| 3 | **删除行尾空格** | trimWhitespace | ⭐ | 🟢 低 | 🟢 低 |
+| 1 | **English text** | linkedEditing | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 2 | **English text** | smartSelect | ⭐ | 🟢 English text | 🟢 English text |
+| 3 | **English text** | trimWhitespace | ⭐ | 🟢 English text | 🟢 English text |
 
-**实现时间**: 1 周
+**implementationtime**: 1 English text
 
-#### D. 工作区增强 (2-3 周)
+#### D. English text (2-3 English text)
 
-| # | 功能 | 模块 | 难度 | 优先级 | 产值 |
+| # | English text | English text | English text | English text | English text |
 |---|------|------|------|--------|------|
-| 1 | **文件监视** | fileSystemWatcher | ⭐⭐ | 🔴 高 | 🔴 高 |
-| 2 | **路径自动完成** | pathCompletion | ⭐⭐ | 🟡 中 | 🟡 中 |
-| 3 | **最近文件** | recentFiles | ⭐ | 🟢 低 | 🟢 低 |
-| 4 | **工作区符号** | workspaceSymbols | ⭐⭐⭐ | 🔴 高 | 🔴 高 |
+| 1 | **fileEnglish text** | fileSystemWatcher | ⭐⭐ | 🔴 English text | 🔴 English text |
+| 2 | **pathEnglish text** | pathCompletion | ⭐⭐ | 🟡 English text | 🟡 English text |
+| 3 | **English textfile** | recentFiles | ⭐ | 🟢 English text | 🟢 English text |
+| 4 | **English text** | workspaceSymbols | ⭐⭐⭐ | 🔴 English text | 🔴 English text |
 
-**实现时间**: 2-3 周  
-**依赖**: FileService, WorkspaceService
+**implementationtime**: 2-3 English text
+**English text**: FileService, WorkspaceService
 
 ---
 
-### 🔴 第 3 阶段：可选功能 (30+ 个)
+### 🔴 English text 3 phase: English text (30+ English text)
 
-#### 高级编辑功能
-- **Emmet 支持** - HTML/CSS 快速编写
-- **正则表达式辅助** - Regex 调试和测试
-- **列编辑模式** - 列级别的编辑操作
-- **撤销/重做** - 完整的编辑历史
-- **括号彩色化** - 嵌套括号着色
-- **缩进指南** - 代码缩进可视化
+#### advancedEnglish text
+- **Emmet support** - HTML/CSS quickEnglish text
+- **English texthelper** - Regex English texttest
+- **English text** - English text
+- **English text/English text** - completeEnglish text
+- **English text** - English text
+- **English text** - English text
 
-#### 协作功能
-- **Live Share** - 实时协作编辑
-- **评论和批注** - 代码评论系统
-- **编辑会话同步** - 会话共享
+#### English text
+- **Live Share** - English text
+- **English text** - English textsystem
+- **English textstep** - English text
 
-#### 扩展系统
-- **扩展市场** - 扩展包管理
-- **主题扩展** - 自定义主题
-- **语言扩展** - 新语言支持
-- **扩展 API** - 第三方扩展接口
+#### extensionsystem
+- **extensionEnglish text** - extensionEnglish textmanagement
+- **mainEnglish textextension** - English textmainEnglish text
+- **languageextension** - English textlanguagesupport
+- **extension API** - English textextensionEnglish text
 
-#### 测试和调试
-- **测试浏览器** - 单元测试管理
-- **覆盖率显示** - 代码覆盖率可视化
-- **断点编辑** - 条件断点
-- **调试控制台** - 交互式调试
+#### testEnglish text
+- **testEnglish text** - English texttestmanagement
+- **English text** - English text
+- **English text** - English text
+- **English text** - English text
 
-#### 其他高级功能
-- **AI 助手集成** - IntelliSense AI
-- **Markdown 预览** - Markdown 渲染
-- **Notebook 支持** - Jupyter 笔记本
-- **远程开发** - SSH/Docker 开发
-- **版本控制增强** - Merge 编辑器、Rebase
-- **性能分析** - Profiler 集成
-- **搜索历史** - 搜索记录管理
-
----
-
-## 📈 完整的 VS Code 功能映射表
-
-### 核心平台服务 (102 个模块)
-
-#### 基础设施层 (10 个)
-```
-✅ Accessibility       - 无障碍访问支持
-✅ Actions            - 操作系统
-✅ Clipboard          - 剪贴板管理
-✅ Commands           - 命令系统
-✅ Configuration      - 配置管理
-✅ Environment        - 环境变量
-✅ Files              - 文件系统
-✅ Keybinding         - 快捷键
-✅ Notifications      - 通知系统
-✅ Progress           - 进度跟踪
-```
-
-#### 编辑器服务层 (15 个)
-```
-✅ Diagnostics        - 错误诊断
-✅ Editor             - 编辑器核心
-✅ History            - 编辑历史
-✅ Hover              - 悬停提示
-✅ Language           - 语言服务
-✅ Markers            - 标记管理
-✅ Search             - 搜索服务
-✅ Suggest            - 代码建议
-✅ TextFile           - 文本文件
-✅ Theme              - 主题管理
-✅ UriIdentity        - URI 识别
-✅ Workspace          - 工作区服务
-🟡 Debug              - 调试器 (已有框架)
-🟡 Terminal           - 终端 (已有框架)
-🟡 Git                - 版本控制 (已有框架)
-```
-
-#### 高级服务层 (20 个+)
-```
-🟡 Authentication     - 认证系统
-🟡 Extensions         - 扩展系统
-🟡 Update             - 更新管理
-🟡 Remote             - 远程开发
-🟡 Tunnel             - SSH 隧道
-🟡 Encryption         - 加密服务
-🟡 Secrets            - 密钥管理
-🟡 Storage            - 数据存储
-🟡 UserData           - 用户数据
-🟡 UserDataSync       - 云同步
-🟢 Chat               - AI 聊天
-🟢 AI Features        - AI 功能
-🟢 Profiling          - 性能分析
-```
+#### English textadvancedEnglish text
+- **AI English text** - IntelliSense AI
+- **Markdown English text** - Markdown English text
+- **Notebook support** - Jupyter English text
+- **English text** - SSH/Docker English text
+- **English text** - Merge English text, Rebase
+- **English text** - Profiler English text
+- **searchEnglish text** - searchEnglish textmanagement
 
 ---
 
-## 🏗️ 实现难度和优先级矩阵
+## 📈 completeEnglish text VS Code English text
+
+### English text (102 English text)
+
+#### English text (10 English text)
+```
+✅ Accessibility       - English textsupport
+✅ Actions            - English textsystem
+✅ Clipboard          - English textmanagement
+✅ Commands           - English textsystem
+✅ Configuration      - configurationmanagement
+✅ Environment        - English text
+✅ Files              - filesystem
+✅ Keybinding         - English text
+✅ Notifications      - English textsystem
+✅ Progress           - English text
+```
+
+#### English text (15 English text)
+```
+✅ Diagnostics        - errorEnglish text
+✅ Editor             - English text
+✅ History            - English text
+✅ Hover              - English textprompt
+✅ Language           - languageEnglish text
+✅ Markers            - English textmanagement
+✅ Search             - searchEnglish text
+✅ Suggest            - English text
+✅ TextFile           - English textfile
+✅ Theme              - mainEnglish textmanagement
+✅ UriIdentity        - URI English text
+✅ Workspace          - English text
+🟡 Debug              - English text (English textframework)
+🟡 Terminal           - English text (English textframework)
+🟡 Git                - English text (English textframework)
+```
+
+#### advancedEnglish text (20 English text+)
+```
+🟡 Authentication     - English textsystem
+🟡 Extensions         - extensionsystem
+🟡 Update             - English textmanagement
+🟡 Remote             - English text
+🟡 Tunnel             - SSH English text
+🟡 Encryption         - English text
+🟡 Secrets            - English textmanagement
+🟡 Storage            - dataEnglish text
+🟡 UserData           - English textdata
+🟡 UserDataSync       - English textstep
+🟢 Chat               - AI English text
+🟢 AI Features        - AI English text
+🟢 Profiling          - English text
+```
+
+---
+
+## 🏗️ implementationEnglish text
 
 ```
-                    简单 (⭐)              中等 (⭐⭐)           复杂 (⭐⭐⭐+)
-                   
-高优先级 ┌─────────────────────────────────────────────────────────┐
-(必需)   │ ✅ 括号匹配      ✅ 查找替换        ⭐ LSP 集成         │
-         │ ✅ 词高亮        ✅ 多光标          ⭐ Git 集成         │
-         │ ✅ 主题管理      ✅ 内联重命名      ⭐ 代码折叠         │
+                    English text (⭐)              English text (⭐⭐)           English text (⭐⭐⭐+)
+
+English text ┌─────────────────────────────────────────────────────────┐
+(English text)   │ ✅ English text      ✅ English text        ⭐ LSP English text         │
+         │ ✅ English text        ✅ English text          ⭐ Git English text         │
+         │ ✅ mainEnglish textmanagement      ✅ English text      ⭐ English text         │
          └─────────────────────────────────────────────────────────┘
-         
-中优先级 ┌─────────────────────────────────────────────────────────┐
-(推荐)   │ ✅ 大小写转换    🟡 参数提示        🟡 代码动作         │
-         │ ✅ 行操作        🟡 调用层次        🟡 语义高亮         │
-         │ 🟡 链接编辑      🟡 面包屑导航      🟡 Emmet 支持       │
+
+English text ┌─────────────────────────────────────────────────────────┐
+(recommended)   │ ✅ English text    🟡 parameterprompt        🟡 English text         │
+         │ ✅ English text        🟡 English text        🟡 English text         │
+         │ 🟡 English text      🟡 English text      🟡 Emmet support       │
          └─────────────────────────────────────────────────────────┘
-         
-低优先级 ┌─────────────────────────────────────────────────────────┐
-(可选)   │ 🟢 删除空格      🟢 文件图标        🔴 AI 助手          │
-         │ 🟢 拆分选择      🟢 搜索历史        🔴 Live Share       │
-         │                🟡 正则表达式      🔴 Notebook 支持    │
+
+English text ┌─────────────────────────────────────────────────────────┐
+(English text)   │ 🟢 English text      🟢 fileEnglish text        🔴 AI English text          │
+         │ 🟢 English text      🟢 searchEnglish text        🔴 Live Share       │
+         │                🟡 English text      🔴 Notebook support    │
          └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💡 关键可实现功能详解
+## 💡 English textimplementationEnglish text
 
-### 1. 编辑功能中最有价值的 5 个
+### 1. English text 5 English text
 
-| # | 功能 | 好处 | 工作量 | ROI |
+| # | English text | English text | English text | ROI |
 |---|------|------|--------|-----|
-| 1 | **代码折叠** | 导航大文件 | 3天 | 🔴 高 |
-| 2 | **查找替换** | 批量编辑 | 2天 | 🔴 高 |
-| 3 | **多光标** | 同时编辑 | 2天 | 🔴 高 |
-| 4 | **代码片段** | 快速模板 | 2天 | 🔴 高 |
-| 5 | **大纲导航** | 代码浏览 | 2天 | 🔴 高 |
+| 1 | **English text** | English textfile | 3English text | 🔴 English text |
+| 2 | **English text** | English text | 2English text | 🔴 English text |
+| 3 | **English text** | English text | 2English text | 🔴 English text |
+| 4 | **English text** | quickEnglish text | 2English text | 🔴 English text |
+| 5 | **English text** | English text | 2English text | 🔴 English text |
 
-### 2. 服务中最有价值的 5 个
+### 2. English text 5 English text
 
-| # | 功能 | 好处 | 工作量 | ROI |
+| # | English text | English text | English text | ROI |
 |---|------|------|--------|-----|
-| 1 | **搜索服务** | 全局查找 | 2天 | 🔴 高 |
-| 2 | **Git 集成** | 版本控制 | 3天 | 🔴 高 |
-| 3 | **LSP 集成** | 语言智能 | 3天 | 🔴 高 |
-| 4 | **任务系统** | 自动化 | 2天 | 🟡 中 |
-| 5 | **调试器** | 程序调试 | 3天 | 🟡 中 |
+| 1 | **searchEnglish text** | English text | 2English text | 🔴 English text |
+| 2 | **Git English text** | English text | 3English text | 🔴 English text |
+| 3 | **LSP English text** | languageEnglish text | 3English text | 🔴 English text |
+| 4 | **English textsystem** | English text | 2English text | 🟡 English text |
+| 5 | **English text** | English text | 3English text | 🟡 English text |
 
 ---
 
-## 🔌 依赖关系图
+## 🔌 English text
 
 ```
-                    独立模块
+                    English text
                        ↓
     ┌──────────────────────────────────┐
     │  • CommandSystem                 │
@@ -274,7 +274,7 @@
     │  • Progress                      │
     └──────────────────────────────────┘
                        ↓
-                  基础服务层
+                  English text
                        ↓
     ┌──────────────────────────────────┐
     │  • FileService                   │
@@ -283,7 +283,7 @@
     │  • Themes                        │
     └──────────────────────────────────┘
                        ↓
-                  核心编辑层
+                  English text
                        ↓
     ┌──────────────────────────────────┐
     │  • Outline                       │
@@ -292,7 +292,7 @@
     │  • Diagnostics                   │
     └──────────────────────────────────┘
                        ↓
-                  高级功能层
+                  advancedEnglish text
                        ↓
     ┌──────────────────────────────────┐
     │  • LSP Client                    │
@@ -305,61 +305,61 @@
 
 ---
 
-## 🚀 推荐实现路线
+## 🚀 recommendedimplementationEnglish text
 
-### 第 1 阶段 (已完成 ✅)
-**32 个基础功能** - ~25 小时
+### English text 1 phase (English text ✅)
+**32 English text** - ~25 English text
 
-### 第 2 阶段 (推荐: 2-3 周)
-**15 个增强功能** - 编辑、导航、工作区
-- 内联完成
-- 参数提示  
-- 代码动作
-- 工作区符号
-- 链接编辑
+### English text 2 phase (recommended: 2-3 English text)
+**15 English text** - English text, English text, English text
+- English text
+- parameterprompt
+- English text
+- English text
+- English text
 
-### 第 3 阶段 (可选: 3-4 周)
-**10 个工作流功能**
-- Emmet 支持
-- 正则表达式工具
-- 撤销/重做
-- 括号彩色化
-- 代码覆盖率
+### English text 3 phase (English text: 3-4 English text)
+**10 English text**
+- Emmet support
+- English texttool
+- English text/English text
+- English text
+- English text
 
-### 第 4 阶段 (未来)
-**30+ 个扩展功能**
-- 扩展系统
-- AI 集成
-- 协作编辑
-- 远程开发
+### English text 4 phase (English text)
+**30+ English textextensionEnglish text**
+- extensionsystem
+- AI English text
+- English text
+- English text
 
 ---
 
-## 📊 投入产出分析
+## 📊 English text
 
-| 阶段 | 功能数 | 预计时间 | 代码行数 | 用户价值 |
+| phase | English text | English texttime | English text | English text |
 |------|--------|---------|---------|---------|
-| 已完成 | 32 | 25h | ~5,500 | ⭐⭐⭐⭐ |
-| 推荐 | 15 | 2-3w | ~4,000 | ⭐⭐⭐⭐⭐ |
-| 可选 | 10 | 3-4w | ~3,000 | ⭐⭐⭐⭐ |
-| 扩展 | 30+ | 8-12w | ~10,000 | ⭐⭐⭐ |
+| English text | 32 | 25h | ~5,500 | ⭐⭐⭐⭐ |
+| recommended | 15 | 2-3w | ~4,000 | ⭐⭐⭐⭐⭐ |
+| English text | 10 | 3-4w | ~3,000 | ⭐⭐⭐⭐ |
+| extension | 30+ | 8-12w | ~10,000 | ⭐⭐⭐ |
 
-**总计**: 87+ 个功能，可达到 VS Code 90% 的功能完成度，总耗时 12-16 周
-
----
-
-## ✨ 关键优势
-
-1. **模块化** - 每个功能独立，可增量实现
-2. **低耦合** - 功能间依赖关系清晰
-3. **高复用** - Qt 组件可跨功能共享
-4. **快速迭代** - 每个功能 1-3 天完成
-5. **清晰路线** - 优先级明确，易于规划
+**English text**: 87+ English text, English text VS Code 90% English text, English text 12-16 English text
 
 ---
 
-## 📝 结论
+## ✨ English text
 
-**建议**: 优先实现第 2 阶段的 15 个功能，可以显著提升 neurx-code 的开发体验，预计 2-3 周内完成。这样可以达到一个功能完整、易用的开发环境。
+1. **English text** - English text, English textimplementation
+2. **English text** - English text
+3. **English text** - Qt English text
+4. **quickEnglish text** - English text 1-3 English text
+5. **English text** - English text, English text
 
-已完成的 32 个功能 + 推荐的 15 个功能 = **47 个核心功能**，可满足 95% 的日常开发需求。
+---
+
+## 📝 English text
+
+**English text**: English textimplementationEnglish text 2 phaseEnglish text 15 English text, AllowedEnglish text neurx-code English text, English text 2-3 English text.English textAllowedEnglish textcomplete, English text.
+
+English text 32 English text + recommendedEnglish text 15 English text = **47 English text**, English text 95% English text.

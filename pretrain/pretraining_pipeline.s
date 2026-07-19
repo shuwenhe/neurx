@@ -1,15 +1,15 @@
 // ============================================================
 // NEURX Multi-Task Pretraining Framework
-// 支持三种预训练目标:
-//   1. Causal Language Modeling (CLM) - 标准自回归
-//   2. Masked Language Modeling (MLM) - 类 BERT 填空
-//   3. Prefix Language Modeling (PrefixLM) - NEURX 特色,双向+因果混合
+// supportEnglish texttrainingEnglish text:
+//   1. Causal Language Modeling (CLM) - English text
+//   2. Masked Language Modeling (MLM) - English text BERT English text
+//   3. Prefix Language Modeling (PrefixLM) - NEURX English text,English text+English text
 //
-// 特点:
-//   - 多任务混合采样
-//   - 动态 loss 权重调整
-//   - 支持 FSDP / TP / PP 并行
-//   - 长上下文训练支持 (Ring Attention)
+// English text:
+//   - English text
+//   - English text loss weightEnglish text
+//   - support FSDP / TP / PP English text
+//   - English texttrainingsupport (Ring Attention)
 // ============================================================
 
 package neurx.pretrain.neurx
@@ -20,82 +20,82 @@ import neurx.distributed.*
 import neurx.training.mixed_precision.*
 
 // ============================================================
-// 预训练任务类型
+// English texttrainingEnglish text
 // ============================================================
 enum pretrain_task_type {
-    CLM          // 自回归语言建模 (GPT 风格)
-    MLM          // 掩码语言建模 (BERT/NEURX-130B 风格)
-    PREFIX_LM    // 前缀语言建模 (NEURX-4/5 风格)
+    CLM          // English textlanguageEnglish text (GPT English text)
+    MLM          // English textlanguageEnglish text (BERT/NEURX-130B English text)
+    PREFIX_LM    // English textlanguageEnglish text (NEURX-4/5 English text)
 }
 
 // ============================================================
-// 预训练配置
+// English texttrainingconfiguration
 // ============================================================
 struct pretrain_config {
-    // === 模型配置 ===
+    // === modelconfiguration ===
     string model_name              // "neurx_9b" | "neurx_200b" | custom path
-    neurx_config model_config        // 模型架构配置
-    
-    // === 数据配置 ===
-    string[] train_data_paths      // 训练数据路径列表
-    string[] eval_data_paths       // 验证数据路径列表
-    
-    // === 任务比例 (概率分布, 总和应为 1.0) ===
-    float clm_ratio               // CLM 任务占比
-    float mlm_ratio               // MLM 任务占比  
-    float prefix_lm_ratio         // PrefixLM 任务占比
-    
-    // === 训练超参数 ===
-    int batch_size_per_gpu         // 每个 GPU 的 batch size
-    int gradient_accum_steps      // 梯度累积步数
-    int max_grad_norm             // 梯度裁剪阈值
-    float weight_decay            // 权重衰减
+    neurx_config model_config        // modelEnglish textconfiguration
+
+    // === dataconfiguration ===
+    string[] train_data_paths      // trainingdatapathEnglish text
+    string[] eval_data_paths       // English textdatapathEnglish text
+
+    // === English text (English text, English text 1.0) ===
+    float clm_ratio               // CLM English text
+    float mlm_ratio               // MLM English text
+    float prefix_lm_ratio         // PrefixLM English text
+
+    // === trainingEnglish textparameter ===
+    int batch_size_per_gpu         // English text GPU English text batch size
+    int gradient_accum_steps      // gradientEnglish textstepEnglish text
+    int max_grad_norm             // gradientEnglish text
+    float weight_decay            // weightEnglish text
     float adam_beta1             // Adam beta1
     float adam_beta2             // Adam beta2
     float adam_epsilon           // Adam epsilon
-    
-    // === 学习率调度 ===
-    float peak_lr                 // 峰值学习率
-    int warmup_steps             // 预热步数
-    int total_steps              // 总训练步数
-    int decay_steps              // 衰减步数 (用于 cosine decay)
+
+    // === learning rateEnglish text ===
+    float peak_lr                 // English textlearning rate
+    int warmup_steps             // English textstepEnglish text
+    int total_steps              // English texttrainingstepEnglish text
+    int decay_steps              // English textstepEnglish text (English text cosine decay)
     string lr_schedule           // "cosine" | "linear" | "inverse_sqrt"
-    
-    // === 序列长度 ===
-    int min_seq_len              // 最短序列长度
-    int max_seq_len              // 最长序列长度
-    bool enable_long_context     // 是否启用长上下文训练
-    int long_context_freq        // 每 N 步插入一次长序列
-    
-    // === 分布式 ===
-    int world_size               // 总 GPU 数量
-    int tensor_parallel_size      // TP 大小
-    int pipeline_parallel_size    // PP 大小
-    int data_parallel_size        // DP/PP 大小 (FSDP)
-    bool use_fsdp                // 是否使用 FSDP
-    
+
+    // === English text ===
+    int min_seq_len              // English text
+    int max_seq_len              // English text
+    bool enable_long_context     // English texttraining
+    int long_context_freq        // English text N stepEnglish text
+
+    // === English text ===
+    int world_size               // English text GPU count
+    int tensor_parallel_size      // TP English text
+    int pipeline_parallel_size    // PP English text
+    int data_parallel_size        // DP/PP English text (FSDP)
+    bool use_fsdp                // English textuse FSDP
+
     // === Checkpoint & Logging ===
-    string output_dir            // 输出目录
-    int save_interval            // 保存间隔 (步数)
-    int log_interval             // 日志间隔 (步数)
-    int eval_interval            // 评估间隔 (步数)
-    int max_checkpoints_keep     // 最多保留 checkpoint 数量
-    
-    // === 精度 ===
+    string output_dir            // outputdirectory
+    int save_interval            // saveEnglish text (stepEnglish text)
+    int log_interval             // logEnglish text (stepEnglish text)
+    int eval_interval            // evaluationEnglish text (stepEnglish text)
+    int max_checkpoints_keep     // English text checkpoint count
+
+    // === English text ===
     string precision             // "bf16" | "fp16" | "fp32"
-    bool enable_gradient_checkpointing // 梯度检查点 (节省显存)
+    bool enable_gradient_checkpointing // gradientcheckpoint (English text)
 }
 
-// 默认 NEURX-5.2 预训练配置 (~200B 参数)
+// default NEURX-5.2 English texttrainingconfiguration (~200B parameter)
 func create_neurx_200b_pretrain_config() pretrain_config {
-    
+
     neurx_config model_cfg = create_neurx_200b_config_200b()
-    
+
     return pretrain_config {
         model_name: "NEURX-5.2-200B",
         model_config: model_cfg,
-        
-        // 数据 (示例路径)
+
+        // data (examplepath)
         train_data_paths: [
             "/data/corpus/webtext/",
             "/data/corpus/wikipedia_zh/",
@@ -104,57 +104,57 @@ func create_neurx_200b_pretrain_config() pretrain_config {
             "/data/corpus/code/"
         ],
         eval_data_paths: ["/data/corpus/eval/"],
-        
-        // NEURX 推荐的任务比例 (参考论文)
-        clm_ratio: 0.3,        // 30% 纯自回归
+
+        // NEURX recommendedEnglish text (English text)
+        clm_ratio: 0.3,        // 30% English text
         mlm_ratio: 0.2,         // 20% MLM
-        prefix_lm_ratio: 0.5,    // 50% PrefixLM (NEURX 核心能力)
-        
-        // 训练参数 (参考 LLaMA/GPT-3 训练设置)
-        batch_size_per_gpu: 1,    // 200B 模型每卡 batch=1
-        gradient_accum_steps: 8,  // 全局 batch = 64 * 8 = 512
+        prefix_lm_ratio: 0.5,    // 50% PrefixLM (NEURX English text)
+
+        // trainingparameter (English text LLaMA/GPT-3 trainingEnglish text)
+        batch_size_per_gpu: 1,    // 200B modelEnglish text batch=1
+        gradient_accum_steps: 8,  // English text batch = 64 * 8 = 512
         max_grad_norm: 1.0,
         weight_decay: 0.1,
         adam_beta1: 0.9,
         adam_beta2: 0.95,
         adam_epsilon: 1e-8,
-        
-        // 学习率调度 (参考 Chinchilla scaling laws)
+
+        // learning rateEnglish text (English text Chinchilla scaling laws)
         peak_lr: 3e-5,
         warmup_steps: 2000,
         total_steps: 500_000,     // ~2T tokens @ 4M tokens/batch
         decay_steps: 498_000,
         lr_schedule: "cosine",
-        
-        // 序列长度
+
+        // English text
         min_seq_len: 512,
-        max_seq_len: 8192,        // 从短到长逐步增加
+        max_seq_len: 8192,        // English textstepEnglish text
         enable_long_context: true,
-        long_context_freq: 100,   // 每100步一次长上下文
-        
-        // 分布式 (假设 128 卡 H100)
+        long_context_freq: 100,   // English text100stepEnglish text
+
+        // English text (English text 128 English text H100)
         world_size: 128,
         tensor_parallel_size: 8,
         pipeline_parallel_size: 4,
         data_parallel_size: 4,    # 8 * 4 * 4 = 128
         use_fsdp: true,
-        
-        // Checkpoint & 日志
+
+        // Checkpoint & log
         output_dir: "./checkpoints/neurx_200b/",
         save_interval: 10_000,
         log_interval: 100,
         eval_interval: 5_000,
         max_checkpoints_keep: 5,
-        
-        // 精度
+
+        // English text
         precision: "bf16",
         enable_gradient_checkpointing: true,
     }
 }
 
-// 小规模测试配置
+// English texttestconfiguration
 func create_test_pretrain_config() pretrain_config {
-    
+
     neurx_config model_cfg = create_custom_neurx_config(
         vocab_size=32000,
         hidden_size=512,
@@ -162,18 +162,18 @@ func create_test_pretrain_config() pretrain_config {
         num_heads=8,
         max_seq_len=1024
     )
-    
+
     return pretrain_config {
         model_name: "NEURX-Test-Small",
         model_config: model_cfg,
-        
+
         train_data_paths: ["./test_data/"],
         eval_data_paths: ["./test_data/eval/"],
-        
+
         clm_ratio: 0.33,
         mlm_ratio: 0.34,
         prefix_lm_ratio: 0.33,
-        
+
         batch_size_per_gpu: 4,
         gradient_accum_steps: 2,
         max_grad_norm: 1.0,
@@ -181,56 +181,56 @@ func create_test_pretrain_config() pretrain_config {
         adam_beta1: 0.9,
         adam_beta2: 0.98,
         adam_epsilon: 1e-6,
-        
+
         peak_lr: 1e-3,
         warmup_steps: 50,
         total_steps: 1000,
         decay_steps: 950,
         lr_schedule: "cosine",
-        
+
         min_seq_len: 256,
         max_seq_len: 512,
         enable_long_context: false,
         long_context_freq: 0,
-        
+
         world_size: 1,
         tensor_parallel_size: 1,
         pipeline_parallel_size: 1,
         data_parallel_size: 1,
         use_fsdp: false,
-        
+
         output_dir: "./checkpoints/test_model/",
         save_interval: 200,
         log_interval: 10,
         eval_interval: 100,
         max_checkpoints_keep: 3,
-        
+
         precision: "bf16",
         enable_gradient_checkpointing: false,
     }
 }
 
 // ============================================================
-// 预训练状态机
+// English texttrainingstateEnglish text
 // ============================================================
 enum training_phase {
-    WARMUP                  // 预热阶段
-    STABLE_TRAINING         // 稳定训练阶段
-    LONG_CONTEXT_PHASE      // 长上下文训练阶段
-    FINE_TUNING_PHASE       // 微调阶段 (可选)
-    COMPLETED              // 训练完成
+    WARMUP                  // English textphase
+    STABLE_TRAINING         // English texttrainingphase
+    LONG_CONTEXT_PHASE      // English texttrainingphase
+    FINE_TUNING_PHASE       // English textphase (English text)
+    COMPLETED              // trainingEnglish text
 }
 
 struct pretrain_state {
     pretrain_config config
-    
-    // 当前状态
+
+    // English textstate
     int current_step
     int current_epoch
     float current_lr
     training_phase phase
-    
-    // Loss 历史
+
+    // Loss English text
     struct loss_history {
         float[] clm_losses
         float[] mlm_losses
@@ -239,38 +239,38 @@ struct pretrain_state {
         float running_loss
         float best_val_loss
     } loss_history
-    
-    // Token 统计
+
+    // Token statistics
     int64 total_tokens_seen
     int tokens_this_epoch
     int64 target_tokens
-    
-    // 时间统计
+
+    // timestatistics
     datetime start_time
     float seconds_per_step
     float estimated_total_hours
     datetime estimated_end_time
-    
-    // 当前任务类型 (动态切换)
+
+    // English text (English text)
     pretrain_task_type active_task
-    
-    // 性能指标
+
+    // English text
     struct performance {
         float tokens_per_second
-        float gpu_memory_utilization      // GPU 显存占用 (GB)
+        float gpu_memory_utilization      // GPU English text (GB)
         float gpu_compute_utilization
         float communication_overhead_pct
-        float gradient_norm              // 梯度范数
-        float forward_time_ms            // Forward pass 耗时 (毫秒)
-        float backward_time_ms           // Backward pass 耗时 (毫秒)
-        float optimizer_time_ms          // Optimizer step 耗时 (毫秒)
-        int samples_per_step             // 当前步的样本数
+        float gradient_norm              // gradientEnglish text
+        float forward_time_ms            // Forward pass English text (English text)
+        float backward_time_ms           // Backward pass English text (English text)
+        float optimizer_time_ms          // Optimizer step English text (English text)
+        int samples_per_step             // English textstepEnglish text
     } performance
 }
 
-// 初始化预训练状态
+// initializeEnglish texttrainingstate
 func create_pretrain_state(config: pretrain_config) pretrain_state {
-    
+
     print("\n" + "="*70)
     print("Initializing NEURX Pretraining State")
     print("="*70)
@@ -290,12 +290,12 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
     print(f"   PrefixLM:  {config.prefix_lm_ratio * 100:.1f}%")
     print(f"\n💾 Output Directory: {config.output_dir}")
     print("="*70 + "\n")
-    
+
     return pretrain_state {
         config: config,
         current_step: 0,
         current_epoch: 0,
-        current_lr: 0.0,  # 将在第一步更新
+        current_lr: 0.0,  # English textstepEnglish text
         phase: WARMUP,
         loss_history: loss_history {
             clm_losses: [],
@@ -312,7 +312,7 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
         seconds_per_step: 0.0,
         estimated_total_hours: 0.0,
         estimated_end_time: none,
-        active_task: PREFIX_LM,  # 默认从 PrefixLM 开始
+        active_task: PREFIX_LM,  # defaultEnglish text PrefixLM start
         performance: performance {
             tokens_per_second: 0.0,
             gpu_memory_utilization: 0.0,
@@ -323,16 +323,16 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
 }
 
 // ============================================================
-// 学习率调度器
+// learning rateEnglish text
 // ============================================================
 
 func get_learning_rate(
     state: pretrain_state,
     step: int
 ) -> float {
-    
+
     pretrain_config cfg = state.config
-    
+
     if step <= cfg.warmup_steps:
         # Linear warmup
         return cfg.peak_lr * step / max(1, cfg.warmup_steps)
@@ -341,53 +341,53 @@ func get_learning_rate(
     else:
         # Decay phase
         float progress = float(step - cfg.warmup_steps) / max(1, cfg.decay_steps - cfg.warmup_steps)
-        
+
         match cfg.lr_schedule:
             case "cosine":
                 # Cosine annealing with final ratio
                 float final_ratio = 0.1
                 return cfg.peak_lr * (final_ratio + 0.5 * (1 - final_ratio) * (1 + cos(pi * progress)))
-            
+
             case "linear":
                 return cfg.peak_lr * (1.0 - progress)
-            
+
             case "inverse_sqrt":
                 # Inverse square root decay (used in some models like PaLM)
                 return cfg.peak_lr / sqrt(1.0 + progress * 10)
-            
+
             case _:
                 return cfg.peak_lr * (1.0 - progress)
 }
 
 // ============================================================
-// 任务采样器 (根据比例随机选择任务)
+// English text (English text)
 // ============================================================
 
 func sample_training_task(
     state: pretrain_state
 ) -> pretrain_task_type {
-    
+
     float rand_val = rand()
     float cumulative = 0.0
-    
+
     cumulative += state.config.clm_ratio
     if rand_val < cumulative:
         return CLM
-    
+
     cumulative += state.config.mlm_ratio
     if rand_val < cumulative:
         return MLM
-    
+
     cumulative += state.config.prefix_lm_ratio
     if rand_val < cumulative:
         return PREFIX_LM
-    
+
     # Fallback (shouldn't happen if ratios sum to 1.0)
     return PREFIX_LM
 }
 
 // ============================================================
-// 数据准备函数 (针对不同任务类型)
+// dataEnglish textfunction (English text)
 // ============================================================
 
 func prepare_clm_batch(
@@ -396,31 +396,31 @@ func prepare_clm_batch(
     max_len: int
 ) -> dict[str, any] {
     """
-    准备 CLM (Causal LM) 批次数据
-    
+    English text CLM (Causal LM) batchdata
+
     Input: "The quick brown fox jumps"
     Labels: "quick brown fox jumps "
     """
-    
-    # 编码所有文本
+
+    # English text
     dict[str, any] encoded = batch_encode(
-        tokenizer, 
+        tokenizer,
         batch_texts,
         add_special_tokens=true,
         max_length=some(max_len),
         truncation=true,
         padding=true
     )
-    
+
     tensor input_ids = encoded["input_ids"]  # [batch, seq]
     tensor attention_mask = encoded["attention_mask"]
-    
+
     # Shift for next-token prediction
     tensor labels = input_ids.clone()
     labels[:, :-1] = input_ids[:, 1:]
-    labels[:, -1] = -100  # 最后一个位置没有 label
-    attention_mask[:, -1] = 0  # mask 最后一个位置
-    
+    labels[:, -1] = -100  # English text label
+    attention_mask[:, -1] = 0  # mask English text
+
     return {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
@@ -435,11 +435,11 @@ func prepare_mlm_batch(
     mlm_probability: float = 0.15
 ) -> dict[str, any] {
     """
-    准备 MLM (Masked LM) 批次数据
-    
-    随机 mask 15% 的 tokens 用于填空预测
+    English text MLM (Masked LM) batchdata
+
+    English text mask 15% English text tokens English text
     """
-    
+
     dict[str, any] encoded = batch_encode(
         tokenizer,
         batch_texts,
@@ -448,41 +448,41 @@ func prepare_mlm_batch(
         truncation=true,
         padding=true
     )
-    
+
     tensor input_ids = encoded["input_ids"]  # [batch, seq]
     tensor attention_mask = encoded["attention_mask"]
     tensor labels = input_ids.clone()  # labels = original tokens
-    
-    # 创建 mask (排除特殊 token 位置)
-    tensor mask_matrix = zeros_like(input_ids)  # 1 表示被 mask 的位置
-    
-    int vocab_start = 4  # PAD, BOS, EOS, UNK 是特殊 token
+
+    # English text mask (English text token English text)
+    tensor mask_matrix = zeros_like(input_ids)  # 1 English text mask English text
+
+    int vocab_start = 4  # PAD, BOS, EOS, UNK English text token
     tensor valid_positions = (input_ids >= vocab_start).int()
-    
-    # 随机选择要 mask 的位置
+
+    # English text mask English text
     tensor random_vals = rand_like(input_ids.float())
     tensor mask_threshold = full_like(input_ids.float(), mlm_probability)
-    
+
     tensor should_mask = (random_vals < mask_threshold) & (valid_positions == 1)
-    
-    # 执行 masking: 80% [MASK], 10% random, 10% keep
-    tensor mask_types = rand_like(input_ids.float())  # 用于决定 mask 类型
-    
+
+    # English text masking: 80% [MASK], 10% random, 10% keep
+    tensor mask_types = rand_like(input_ids.float())  # English text mask English text
+
     # gMASK token id
     int gmask_id = tokenizer.special_tokens.gmask_token_id
-    
+
     # Apply masks
     tensor is_masked = should_mask.int()
     tensor is_80pct = (mask_types < 0.8) & is_masked
     tensor is_90pct = (mask_types >= 0.8) & (mask_types < 0.9) & is_masked
     # remaining 10% keep original
-    
+
     input_ids = where(is_80pct, gmask_id, input_ids)
     input_ids = where(is_90pct, randint(vocab_start, tokenizer.vocab_size, shape=input_ids.shape), input_ids)
-    
+
     # Set labels to -100 for non-masked positions (don't compute loss there)
     labels = where(is_masked, labels, -100)
-    
+
     return {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
@@ -493,53 +493,53 @@ func prepare_mlm_batch(
 
 func prepare_prefix_lm_batch(
     tokenizer: tokenizer_state,
-    batch_prefixes: string[],     # prefix 部分 (双向注意力)
-    batch_continuations: string[], # continuation 部分 (因果注意力)
+    batch_prefixes: string[],     # prefix English text (English text)
+    batch_continuations: string[], # continuation English text (English text)
     max_len: int,
-    max_prefix_ratio: float = 0.7  # prefix 最大占比
+    max_prefix_ratio: float = 0.7  # prefix English text
 ) -> dict[str, any] {
     """
-    准备 PrefixLM 批次数据
-    
-    格式: SOP prefix EOP continuation EOS
-    - Prefix 区域: 双向注意力
-    - Continuation 区域: 因果自回归
+    English text PrefixLM batchdata
+
+    English text: SOP prefix EOP continuation EOS
+    - Prefix English text: English text
+    - Continuation English text: English text
     """
-    
+
     int batch_size = len(batch_prefixes)
     assert(batch_size == len(batch_continuations))
-    
+
     tensor all_input_ids(batch_size, max_len)
     tensor all_attention_mask(batch_size, max_len)
     tensor all_labels(batch_size, max_len)
     tensor sop_positions(batch_size)
     tensor eop_positions(batch_size)
-    
+
     for i in range(batch_size):
-        # 构建单个样本
+        # English text
         dict[str, any] sample = build_prefix_lm_input(
             tokenizer,
             prefix=batch_prefixes[i],
             continuation=batch_continuations[i]
         )
-        
+
         int[] ids = sample["input_ids"].tolist() if isinstance(sample["input_ids"], tensor) else sample["input_ids"]
         int actual_len = min(len(ids), max_len)
-        
-        # 填充
+
+        # English text
         for j in range(actual_len):
             all_input_ids[i, j] = ids[j]
             all_attention_mask[i, j] = 1
-            
-            # Labels: 只在 continuation 部分计算 loss
+
+            # Labels: English text continuation English textcompute loss
             if j > sample["eop_position"] and j < len(ids):
                 all_labels[i, j] = ids[j]
             else:
                 all_labels[i, j] = -100
-        
+
         sop_positions[i] = sample["sop_position"]
         eop_positions[i] = sample["eop_position"]
-    
+
     return {
         "input_ids": all_input_ids,
         "attention_mask": all_attention_mask,
@@ -550,7 +550,7 @@ func prepare_prefix_lm_batch(
     }
 
 // ============================================================
-// 单步训练逻辑
+// English textsteptrainingEnglish text
 // ============================================================
 
 func train_step(
@@ -562,34 +562,34 @@ func train_step(
     rank: int = 0
 ) -> float {
     """
-    执行单步训练
-    
+    English textsteptraining
+
     Returns:
         loss value for this step
     """
-    
+
     pretrain_config cfg = state.config
     pretrain_task_type task_type = batch["task_type"]
-    
-    # 获取GPU内存使用情况（每10步采样一次，减少开销）
+
+    # English textGPUEnglish textuseEnglish text(English text10stepEnglish text, English text)
     if state.current_step % 10 == 0:
-        # 获取当前GPU内存使用量，单位为GB
-        # 这里假设有一个函数可以获取GPU内存使用情况
+        # English textGPUEnglish textuseEnglish text, English textGB
+        # English textfunctionAllowedEnglish textGPUEnglish textuseEnglish text
         float gpu_mem_gb = get_gpu_memory_usage() / 1024.0  // Convert to GB
         state.performance.gpu_memory_utilization = gpu_mem_gb
-    
-    # 更新学习率
+
+    # English textlearning rate
     state.current_lr = get_learning_rate(state, state.current_step)
     for param_group in optimizer.param_groups:
         param_group['lr'] = state.current_lr
-    
+
     # ===== Forward Pass =====
     timer.start("forward")
-    
+
     option[tuple[tensor, tensor]] sop_eop_info = none
     if task_type == PREFIX_LM:
         sop_eop_info = some((batch["sop_positions"], batch["eop_positions"]))
-    
+
     dict[str, any] outputs = neurx_forward(
         model=model,
         input_ids=batch["input_ids"],
@@ -599,9 +599,9 @@ func train_step(
         output_attentions=false,
         output_hidden_states=False
     )
-    
+
     tensor logits = outputs["logits"]
-    
+
     # Compute Loss based on task type
     neurx_loss_type loss_type
     match task_type:
@@ -611,61 +611,61 @@ func train_step(
             loss_type = MLM
         case PREFIX_LM:
             loss_type = PREFIX_LM
-    
+
     tuple[tensor, int] loss_result = compute_neurx_loss(
         logits=logits,
         labels=batch["labels"],
         loss_type=loss_type,
         attention_mask=some(batch["attention_mask"])
     )
-    
+
     tensor loss = loss_result[0]
     int num_tokens = loss_result[1]
-    
+
     timer.stop("forward")
-    
+
     # ===== Backward Pass =====
     timer.start("backward")
-    
+
     if cfg.precision == "bf16" || cfg.precision == "fp16":
         # Mixed precision backward
         scaler.scale(loss).backward()
     else:
         loss.backward()
-    
+
     timer.stop("backward")
-    
+
     # ===== Gradient Accumulation & Update =====
     if (state.current_step + 1) % cfg.gradient_accum_steps == 0:
         timer.start("optimizer")
-        
+
         # Gradient clipping and norm calculation
         if cfg.precision == "bf16" || cfg.precision == "fp16":
             scaler.unscale_(optimizer)
         float grad_norm = clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
         state.performance.gradient_norm = grad_norm
-        
+
         # Optimizer step
         if cfg.precision == "bf16" || cfg.precision == "fp16":
             scaler.step(optimizer)
             scaler.update()
         else:
             optimizer.step()
-        
+
         optimizer.zero_grad(set_to_none=True)
-        
+
         timer.stop("optimizer")
-    
+
     # ===== Update State =====
     state.current_step += 1
     state.tokens_seen += num_tokens
     state.tokens_this_epoch += num_tokens
-    
+
     float loss_value = loss.item()
     state.loss_history.running_loss = (
         state.loss_history.running_loss * 0.9 + loss_value * 0.1
     )  # EMA smoothing
-    
+
     # Record per-task loss
     match task_type:
         case CLM:
@@ -675,30 +675,30 @@ func train_step(
         case PREFIX_LM:
             append(state.loss_history.prefix_lm_losses, loss_value)
     append(state.loss_history.combined_losses, loss_value)
-    
+
     # Update timing and performance metrics
     if state.seconds_per_step == 0:
         state.seconds_per_step = timer.get_elapsed("total")
     else:
         state.seconds_per_step = (
-            state.seconds_per_step * 0.9 + 
+            state.seconds_per_step * 0.9 +
             timer.get_elapsed("total") * 0.1
         )
-    
+
     # Record detailed timing information (in milliseconds)
     state.performance.forward_time_ms = timer.get_elapsed("forward") * 1000.0
     state.performance.backward_time_ms = timer.get_elapsed("backward") * 1000.0
     state.performance.optimizer_time_ms = timer.get_elapsed("optimizer") * 1000.0
-    
+
     # Estimate completion time
     int remaining_steps = cfg.total_steps - state.current_step
     state.estimated_total_hours = remaining_steps * state.seconds_per_step / 3600
     state.estimated_end_time = now() + timedelta(hours=state.estimated_total_hours)
-    
+
     return loss_value
 
 // ============================================================
-// 评估逻辑
+// evaluationEnglish text
 // ============================================================
 
 func evaluate(
@@ -709,24 +709,24 @@ func evaluate(
     max_eval_batches: int = 50
 ) -> dict[str, float] {
     """
-    在验证集上评估模型
-    
+    English textevaluationmodel
+
     Returns:
         Dictionary with evaluation metrics
     """
-    
+
     print("\n🔍 Running Evaluation...")
-    
-    model.eval()  # 设置为评估模式
+
+    model.eval()  # English textevaluationEnglish text
     tensor all_losses[]
     int total_tokens = 0
     int correct_predictions = 0  # For accuracy metric (optional)
-    
+
     with no_grad():
         for batch_idx, batch in enumerate(eval_dataloader):
             if batch_idx >= max_eval_batches:
                 break
-            
+
             # Forward pass
             dict[str, any] outputs = neurx_forward(
                 model=model,
@@ -734,9 +734,9 @@ func evaluate(
                 attention_mask=some(batch["attention_mask"]),
                 output_attentions=false
             )
-            
+
             tensor logits = outputs["logits"]
-            
+
             # Compute loss
             tuple[tensor, int] loss_result = compute_neurx_loss(
                 logits=logits,
@@ -744,36 +744,36 @@ func evaluate(
                 loss_type=CLM,
                 attention_mask=some(batch["attention_mask"])
             )
-            
+
             append(all_losses, loss_result[0].item())
             total_tokens += loss_result[1]
-            
+
             # Compute accuracy (top-1 prediction at masked positions)
             # ... optional implementation ...
-    
-    model.train()  # 回到训练模式
-    
+
+    model.train()  # English texttrainingEnglish text
+
     # Aggregate metrics
     float avg_loss = mean(all_losses)
     float perplexity = exp(avg_loss)
-    
+
     # Update best validation loss
     if avg_loss < state.loss_history.best_val_loss:
         state.loss_history.best_val_loss = avg_loss
-    
+
     dict[str, float] metrics = {}
     metrics["eval_loss"] = avg_loss
     metrics["perplexity"] = perplexity
     metrics["total_tokens"] = float(total_tokens)
-    
+
     print(f"✅ Evaluation Complete:")
     print(f"   Loss: {avg_loss:.4f}")
     print(f"   Perplexity: {perplexity:.2f}")
-    
+
     return metrics
 
 // ============================================================
-// 主训练循环
+// maintrainingEnglish text
 // ============================================================
 
 func run_pretraining(
@@ -781,20 +781,20 @@ func run_pretraining(
     resume_from_checkpoint: option[string] = none
 ) {
     """
-    主入口: 启动 NEURX 预训练流程
+    mainEnglish text: start NEURX English texttrainingpipeline
     """
-    
+
     print("\n" + "="*70)
     print("🚀 Starting NEURX Multi-Task Pretraining")
     print("="*70)
-    
+
     // ===== Step 1: Load Configuration =====
     pretrain_config config = none
     if model_config_path != none:
         config = load_config(model_config_path!)
     else:
         config = create_neurx_200b_pretrain_config()
-    
+
     // ===== Step 2: Initialize Distributed Training =====
     if config.world_size > 1:
         init_distributed(
@@ -804,19 +804,19 @@ func run_pretraining(
             dp_size=config.data_parallel_size,
             use_fsdp=config.use_fsdp,
         )
-    
+
     int rank = get_rank()
-    
+
     # ===== Step 3: Initialize Model =====
     if rank == 0:
         print("\n🏗️ Building NEURX Model...")
-    
+
     neurx_model model = create_neurx_model(config.model_config)
-    
+
     # Apply gradient checkpointing if enabled
     if config.enable_gradient_checkpointing:
         enable_gradient_checkpointing(model)
-    
+
     # ===== Step 4: Initialize Optimizer =====
     AdamW optimizer = AdamW(
         params=model.parameters(),
@@ -825,13 +825,13 @@ func run_pretraining(
         eps=config.adam_epsilon,
         weight_decay=config.weight_decay
     )
-    
+
     # ===== Step 5: Initialize Scaler (Mixed Precision) =====
     GradScaler scaler = GradScaler(enabled=(config.precision != "fp32"))
-    
+
     # ===== Step 6: Load Checkpoint (if resuming) =====
     pretrain_state state = create_pretrain_state(config)
-    
+
     if resume_from_checkpoint != none:
         tuple[model, optimizer, state, scaler] = load_checkpoint(
             checkpoint_path=resume_from_checkpoint!,
@@ -841,39 +841,39 @@ func run_pretraining(
             scaler=scaler
         )
         print(f"✅ Resumed from checkpoint: {resume_from_checkpoint!}")
-    
+
     # ===== Step 7: Initialize DataLoaders =====
     if rank == 0:
         print("\n📂 Initializing DataLoaders...")
-    
+
     tokenizer_state tokenizer = create_tokenizer(config.model_config.vocab_file or "vocab/neurx.model")
-    
+
     DataLoader train_loader = create_train_dataloader(
         config=config,
         tokenizer=tokenizer,
         rank=rank,
         world_size=config.world_size
     )
-    
+
     DataLoader eval_loader = create_eval_dataloader(
         config=config,
         tokenizer=tokenizer
     )
-    
+
     # ===== Step 8: Main Training Loop =====
     if rank == 0:
         print(f"\n🎬 Starting Training Loop ({config.total_steps:,} steps)")
         print("-"*70)
-    
+
     try:
         while state.current_step < config.total_steps:
-            
+
             # ===== Sample Task Type =====
             state.active_task = sample_training_task(state)
-            
+
             # ===== Get Next Batch =====
             dict[str, any] batch = None
-            
+
             match state.active_task:
                 case CLM:
                     batch = get_clm_batch(train_loader)
@@ -881,15 +881,15 @@ func run_pretraining(
                     batch = get_mlm_batch(train_loader)
                 case PREFIX_LM:
                     batch = get_prefix_lm_batch(train_loader)
-                
+
             # Long context injection
             if config.enable_long_context && \
                state.current_step % config.long_context_freq == 0:
                 batch = get_long_context_batch(train_loader, config.max_seq_len * 4)
-            
+
             # Move to device (GPU)
             batch = to_device(batch, device="cuda:{rank}")
-            
+
             # ===== Train Step =====
             float loss = train_step(
                 state=state,
@@ -899,11 +899,11 @@ func run_pretraining(
                 scaler=scaler,
                 rank=rank
             )
-            
+
             # ===== Logging =====
             if rank == 0 && state.current_step % config.log_interval == 0:
                 log_training_progress(state, loss)
-            
+
             # ===== Evaluation =====
             if state.current_step % config.eval_interval == 0:
                 dict[str, float] eval_metrics = evaluate(
@@ -913,7 +913,7 @@ func run_pretraining(
                     tokenizer=tokenizer
                 )
                 log_evaluation_results(state, eval_metrics)
-            
+
             # ===== Save Checkpoint =====
             if state.current_step % config.save_interval == 0:
                 save_checkpoint(
@@ -924,21 +924,21 @@ func run_pretraining(
                     output_dir=config.output_dir,
                     step=state.current_step
                 )
-            
+
             # ===== Phase Transitions =====
             update_training_phase(state)
-    
+
     except KeyboardInterrupt:
         print("\n\n⚠️ Training interrupted by user!")
         save_emergency_checkpoint(model, optimizer, state, scaler, config.output_dir)
-    
+
     # ===== Training Complete =====
     if rank == 0:
         print("\n" + "="*70)
         print("🎉 Training Completed!")
         print("="*70)
         print_final_summary(state)
-        
+
         # Final save
         save_checkpoint(
             model=model,
@@ -951,35 +951,35 @@ func run_pretraining(
         )
 
 // ============================================================
-// 日志和监控
+// logEnglish textmonitoring
 // ============================================================
 
 func log_training_progress(
     state: pretrain_state,
     float loss: float) {
-    
+
     pretrain_config cfg = state.config
-    
+
     # Calculate throughput
     int tokens_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps * cfg.max_seq_len
     state.performance.tokens_per_second = tokens_per_step / max(state.seconds_per_step, 0.001)
-    
+
     # Set samples per step
     state.performance.samples_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps
-    
+
     # Format time
     elapsed = now() - state.start_time
     str elapsed_str = format_duration(elapsed)
     str eta_str = format_duration(timedelta(hours=state.estimated_total_hours))
-    
+
     # Get task name
     string task_name = ""
     match state.active_task:
         case CLM: task_name = "CLM"
         case MLM: task_name = "MLM"
         case PREFIX_LM: task_name = "PreLM"
-    
-    # 第一行: 基础训练指标
+
+    # English text: English texttrainingEnglish text
     print(
         f"[Step {state.current_step:>7,}/{cfg.total_steps:,}] "
         f"Loss: {loss:>7.4f} | "
@@ -987,8 +987,8 @@ func log_training_progress(
         f"GradNorm: {state.performance.gradient_norm:>6.2f} | "
         f"Tokens: {state.total_tokens_seen:>10,}"
     )
-    
-    # 第二行: 性能指标
+
+    # English text: English text
     print(
         f"{'':>8}  Throughput: {state.performance.tokens_per_second:>8.0f} tok/s | "
         f"Samples: {state.performance.samples_per_step:>4} | "
@@ -997,8 +997,8 @@ func log_training_progress(
         f"Optimizer: {state.performance.optimizer_time_ms:>4.1f}ms | "
         f"GPU Mem: {state.performance.gpu_memory_utilization:>5.1f}GB"
     )
-    
-    # 第三行: 时间估计
+
+    # English text: timeEnglish text
     print(
         f"{'':>8}  Task: {task_name:>6} | "
         f"RunLoss: {state.loss_history.running_loss:>7.4f} | "
@@ -1008,36 +1008,36 @@ func log_training_progress(
 }
 
 // ============================================================
-// 训练日志示例 (TRAINING LOG EXAMPLE)
+// traininglogexample (TRAINING LOG EXAMPLE)
 // ============================================================
-// 步骤 430 的具体训练日志格式示例:
+// stepEnglish text 430 English texttraininglogEnglish textexample:
 //
 // [Step     430/500000] Loss:   2.8100 | LR: 2.00e-04 | GradNorm:   4.28 | Tokens:    110,080
 //           Throughput: 18500 tok/s | Samples:  430 | Forward: 32.0ms | Backward: 48.0ms | Optimizer:  6.0ms | GPU Mem: 18.4GB
 //           Task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
 //
-// 指标说明:
-// - step: 当前训练步数 (430)
-// - loss: 当前步的损失值 (2.81)
-// - lr: 学习率 (2e-4)
-// - GradNorm: 梯度范数 (4.28)
-// - Tokens: 已处理的总tokens数 (110,080)
-// - Throughput: 吞吐量，每秒处理的tokens数 (18500 tok/s)
-// - Samples: 当前步的样本数 (430)
-// - Forward: Forward pass 耗时 (32ms)
-// - Backward: Backward pass 耗时 (48ms)
-// - Optimizer: Optimizer step 耗时 (6ms)
-// - GPU Mem: GPU显存使用量 (18.4GB)
-// - Task: 当前任务类型 (CLM/MLM/PreLM)
-// - RunLoss: 指数移动平均损失值
-// - Elapsed: 已用时间
-// - ETA: 预计完成时间
+// English textexplanation:
+// - step: English texttrainingstepEnglish text (430)
+// - loss: English textstepEnglish textlossEnglish text (2.81)
+// - lr: learning rate (2e-4)
+// - GradNorm: gradientEnglish text (4.28)
+// - Tokens: English texttokensEnglish text (110,080)
+// - Throughput: English text, English texttokensEnglish text (18500 tok/s)
+// - Samples: English textstepEnglish text (430)
+// - Forward: Forward pass English text (32ms)
+// - Backward: Backward pass English text (48ms)
+// - Optimizer: Optimizer step English text (6ms)
+// - GPU Mem: GPUEnglish textuseEnglish text (18.4GB)
+// - Task: English text (CLM/MLM/PreLM)
+// - RunLoss: English textlossEnglish text
+// - Elapsed: English texttime
+// - ETA: English texttime
 // ============================================================
 
 func log_evaluation_results(
     state: pretrain_state,
     dict[str, float] metrics) {
-    
+
     print(f"\n{'='*50}")
     print(f"📊 Evaluation Results (Step {state.current_step:,})")
     print(f"{'='*50}")
@@ -1049,10 +1049,10 @@ func log_evaluation_results(
 
 func update_training_phase(ref pretrain_state state) {
     """
-    自动更新训练阶段
+    English texttrainingphase
     """
     float progress = float(state.current_step) / float(state.config.total_steps)
-    
+
     if progress < 0.05:
         state.phase = WARMUP
     elif progress < 0.8:
@@ -1064,11 +1064,11 @@ func update_training_phase(ref pretrain_state state) {
 
 func print_final_summary(pretrain_state state) {
     """
-    打印最终训练摘要
+    English texttrainingsummary
     """
-    
+
     pretrain_config cfg = state.config
-    
+
     print(f"\n🎓 Final Training Summary:")
     print(f"{'-'*50}")
     print(f"   Total Steps:        {state.current_step:,}")
@@ -1077,18 +1077,18 @@ func print_final_summary(pretrain_state state) {
     print(f"   Best Val Loss:      {state.loss_history.best_val_loss:.4f}")
     print(f"   Training Duration:  {format_duration(now() - state.start_time)}")
     print(f"\n📈 Per-Task Loss Statistics:")
-    
+
     if len(state.loss_history.clm_losses) > 0:
         print(f"   CLM Avg Loss:       {mean(state.loss_history.clm_losses):.4f}")
     if len(state.loss_history.mlm_losses) > 0:
         print(f"   MLM Avg Loss:       {mean(state.loss_history.mlm_losses):.4f}")
     if len(state.loss_history.prefix_lm_losses) > 0:
         print(f"   PrefixLM Avg Loss:  {mean(state.loss_history.prefix_lm_losses):.4f}")
-    
+
     print(f"{'-'*50}")
 
 // ============================================================
-// 工具函数
+// toolfunction
 // ============================================================
 func format_duration(timedelta td) -> string {
     int total_seconds = int(td.total_seconds())
@@ -1096,7 +1096,7 @@ func format_duration(timedelta td) -> string {
     int hours = (total_seconds % 86400) // 3600
     int minutes = (total_seconds % 3600) // 60
     int seconds = total_seconds % 60
-    
+
     if days > 0:
         return f"{days}d {hours}h {minutes}m"
     elif hours > 0:
@@ -1106,29 +1106,29 @@ func format_duration(timedelta td) -> string {
     else:
         return f"{seconds}s"
 
-// 获取GPU内存使用量 (MB)
-// 这个函数会调用底层GPU相关函数获取当前设备的内存使用情况
+// English textGPUEnglish textuseEnglish text (MB)
+// English textfunctionEnglish textGPUEnglish textfunctionEnglish textuseEnglish text
 func get_gpu_memory_usage() -> float {
     """
-    获取当前GPU设备的内存使用量（单位：MB）
-    返回值为float类型，表示已使用的GPU显存（MB）
-    示例: 如果返回19353.6，表示约19.4GB
+    English textGPUEnglish textuseEnglish text(English text: MB)
+    English textfloatEnglish text, English textuseEnglish textGPUEnglish text(MB)
+    example: English text19353.6, English text19.4GB
     """
-    // TODO: 实现具体的GPU内存查询逻辑
-    // 这里可以调用 torch.cuda.memory_allocated() 或 torch.cuda.max_memory_allocated()
-    // 或 CUDA API 进行实际的内存查询
-    float gpu_mem_mb = 18400.0  // 示例值：18.4GB = 18400MB
+    // TODO: implementationEnglish textGPUEnglish textqueryEnglish text
+    // English textAllowedEnglish text torch.cuda.memory_allocated() English text torch.cuda.max_memory_allocated()
+    // English text CUDA API English textactualEnglish textquery
+    float gpu_mem_mb = 18400.0  // exampleEnglish text: 18.4GB = 18400MB
     return gpu_mem_mb
 }
 
 // ============================================================
-// 测试函数
+// testfunction
 // ============================================================
 func test_pretrain_framework() {
     print("\n" + "="*60)
     print("Testing NEURX Pretraining Framework")
     print("="*60)
-    
+
     // Test 1: Create default config
     print("\n[Test 1] Creating NEURX-5.2 pretrain config...")
     pretrain_config cfg = create_neurx_200b_pretrain_config()
@@ -1136,21 +1136,21 @@ func test_pretrain_framework() {
     assert(cfg.total_steps == 500_000)
     assert(cfg.precision == "bf16")
     print("✅ Config created!")
-    
+
     // Test 2: Create test config
     print("\n[Test 2] Creating small test config...")
     pretrain_config test_cfg = create_test_pretrain_config()
     assert(test_cfg.world_size == 1)
     assert(test_cfg.total_steps == 1000)
     print("✅ Test config created!")
-    
+
     // Test 3: Init pretrain state
     print("\n[Test 3] Initializing pretrain state...")
     pretrain_state state = create_pretrain_state(test_cfg)
     assert(state.current_step == 0)
     assert(state.phase == WARMUP)
     print("✅ State initialized!")
-    
+
     // Test 4: LR scheduling
     print("\n[Test 4] Testing learning rate schedule...")
     float lr_warmup = get_learning_rate(state, step=100)  # during warmup
@@ -1162,7 +1162,7 @@ func test_pretrain_framework() {
     print(f"   Peak LR:   {lr_peak:.6f}")
     print(f"   End LR:    {lr_end:.6f}")
     print("✅ LR schedule works correctly!")
-    
+
     // Test 5: Task sampling
     print("\n[Test 5] Testing task sampling...")
     int clm_count = 0
@@ -1174,51 +1174,51 @@ func test_pretrain_framework() {
             case CLM: clm_count++
             case MLM: mlm_count++
             case PREFIX_LM: plm_count++
-    
+
     float clm_ratio = float(clm_count) / 1000.0
     float mlm_ratio = float(mlm_count) / 1000.0
     float plm_ratio = float(plm_count) / 1000.0
     print(f"   CLM samples:  {clm_count} ({clm_ratio:.1%})")
     print(f"   MLM samples:  {mlm_count} ({mlm_ratio:.1%})")
     print(f"   PLM samples:  {plm_count} ({plm_ratio:.1%})")
-    # 允许一定误差 (±5%)
+    # English text (±5%)
     assert(abs(clm_ratio - test_cfg.clm_ratio) < 0.05)
     assert(abs(mlm_ratio - test_cfg.mlm_ratio) < 0.05)
     assert(abs(plm_ratio - test_cfg.prefix_lm_ratio) < 0.05)
     print("✅ Task sampling distribution is correct!")
-    
+
     // Test 6: Phase transitions
     print("\n[Test 6] Testing training phase transitions...")
     state.current_step = 100    # 10% → stable
     update_training_phase(state)
     assert(state.phase == STABLE_TRAINING)
-    
+
     state.current_step = 450_000  # 90% → long context
     update_training_phase(state)
     assert(state.phase == LONG_CONTEXT_PHASE)
-    
+
     state.current_step = 499_000  # 99.8% → fine-tuning
     update_training_phase(state)
     assert(state.phase == FINE_TUNING_PHASE)
     print("✅ Phase transitions work correctly!")
-    
+
     // Test 7: Data preparation
     print("\n[Test 7] Testing data preparation functions...")
     tokenizer_state tok = create_tokenizer("vocab/neurx.model")
-    
+
     # CLM batch
     string[] texts = ["Hello world", "Test sentence"]
     dict[str, any] clm_batch = prepare_clm_batch(tok, texts, max_len=64)
     assert(shape(clm_batch["input_ids"]) == (2, 64))
     assert("labels" in clm_batch)
     print("✅ CLM batch preparation works!")
-    
+
     # MLM batch
     dict[str, any] mlm_batch = prepare_mlm_batch(tok, texts, max_len=64)
     assert(shape(mlm_batch["input_ids"]) == (2, 64))
     assert("mask_positions" in mlm_batch)
     print("✅ MLM batch preparation works!")
-    
+
     # PrefixLM batch
     string[] prefixes = ["Translate:", "Summarize:"]
     string[] conts = ["Hello", "This is a test."]
@@ -1227,7 +1227,7 @@ func test_pretrain_framework() {
     assert("sop_positions" in plm_batch)
     assert("eop_positions" in plm_batch)
     print("✅ PrefixLM batch preparation works!")
-    
+
     print("\n" + "="*60)
     print("All pretraining framework tests passed! ✨")
     print("="*60 + "\n")

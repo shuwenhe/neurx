@@ -1,91 +1,91 @@
-# 🚀 NeurX Make 命令 - 快速参考卡
+# 🚀 NeurX Make English text - quickEnglish text
 
-**两个命令，掌握一切** - 简洁优雅
+**English text, English text** - English text
 
 ---
 
-## 最快开始 (2 步)
+## English textstart (2 step)
 
 ```bash
-# 1️⃣  进入目录
+# 1️⃣  English textdirectory
 cd /Users/feifei/shuwen/train/neurx
 
-# 2️⃣  运行命令
-make train          # 训练
-make infer          # 推理
+# 2️⃣  runEnglish text
+make train          # training
+make infer          # inference
 ```
 
 ---
 
-## 🚀 训练命令
+## 🚀 trainingEnglish text
 
-### 基础训练
-| 命令 | 时间 | GPU | 场景 |
+### English texttraining
+| English text | time | GPU | English text |
 |------|------|-----|------|
-| `make train-llm` | 可配 | 1× | 单 GPU 训练 |
-| `make train-dp` | 可配 | 2-4× | 数据并行 |
-| `make train-large` | 1-2 天 | 8× | 中等规模 |
-| `make train-xlarge` | 1-4 周 | 32× | 超大规模 |
+| `make train-llm` | English text | 1× | English text GPU training |
+| `make train-dp` | English text | 2-4× | dataEnglish text |
+| `make train-large` | 1-2 English text | 8× | English text |
+| `make train-xlarge` | 1-4 English text | 32× | English text |
 
-### 并行策略
-| 命令 | GPU | 模型 | 说明 |
+### English text
+| English text | GPU | model | explanation |
 |------|-----|------|------|
-| `make train-tensor` | 8-16× | 20B-70B | 权重分割 |
-| `make train-pipeline` | 16× | 70B-175B | 层分割 |
-| `make train-dist` | 32+ | 任何 | 多节点 |
+| `make train-tensor` | 8-16× | 20B-70B | weightEnglish text |
+| `make train-pipeline` | 16× | 70B-175B | English text |
+| `make train-dist` | 32+ | English text | English text |
 
 ---
 
-## 🔮 推理命令
+## 🔮 inferenceEnglish text
 
-| 命令 | 用途 | 说明 |
+| English text | English text | explanation |
 |------|------|------|
-| `make infer-interactive` | 💬 对话 | 多轮对话 REPL |
-| `make infer-batch` | 📊 批处理 | 处理文件中的提示 |
-| `make infer-stream` | ⚡ 实时 | 流式令牌生成 |
-| `make infer-serving` | 🌐 服务 | 生产推理 API |
+| `make infer-interactive` | 💬 English text | English text REPL |
+| `make infer-batch` | 📊 English text | English textfileEnglish textprompt |
+| `make infer-stream` | ⚡ English text | English textgenerate |
+| `make infer-serving` | 🌐 English text | English textinference API |
 
 ---
 
-## 🎛️ 关键环境变量
+## 🎛️ English text
 
-### 训练
+### training
 ```
-NEURX_TOTAL_STEPS=1000         # 步数
-NEURX_BATCH_SIZE=32            # 批大小
-NEURX_LR=0.00005               # 学习率
-NEURX_SEQ_LENGTH=2048          # 序列长度
-NEURX_WORLD_SIZE=8             # GPU 总数
+NEURX_TOTAL_STEPS=1000         # stepEnglish text
+NEURX_BATCH_SIZE=32            # English text
+NEURX_LR=0.00005               # learning rate
+NEURX_SEQ_LENGTH=2048          # English text
+NEURX_WORLD_SIZE=8             # GPU English text
 NEURX_MIXED_PRECISION_MODE=bf16 # bf16/fp16/fp32
 ```
 
-### 推理
+### inference
 ```
-NEURX_TEMPERATURE=0.7          # 采样温度
+NEURX_TEMPERATURE=0.7          # English text
 NEURX_TOP_K=40                 # Top-K
 NEURX_TOP_P=0.9                # Nucleus
-NEURX_MAX_TOKENS=256           # 最大长度
-NEURX_BATCH_SIZE=32            # 批大小
+NEURX_MAX_TOKENS=256           # English text
+NEURX_BATCH_SIZE=32            # English text
 ```
 
-### 分布式
+### English text
 ```
-NEURX_WORLD_SIZE=8             # 总 GPU
-NEURX_DATA_PARALLEL_SIZE=4     # 数据并行
-NEURX_TENSOR_PARALLEL_SIZE=2   # 张量并行
-NEURX_PIPELINE_PARALLEL_SIZE=1 # 管道并行
+NEURX_WORLD_SIZE=8             # English text GPU
+NEURX_DATA_PARALLEL_SIZE=4     # dataEnglish text
+NEURX_TENSOR_PARALLEL_SIZE=2   # English text
+NEURX_PIPELINE_PARALLEL_SIZE=1 # English text
 ```
 
 ---
 
-## 💡 常见组合
+## 💡 English text
 
-### 快速原型 (5 分钟)
+### quickEnglish text (5 English text)
 ```bash
 make train-llm NEURX_TOTAL_STEPS=10
 ```
 
-### 单 GPU 完整训练 (2-4 小时)
+### English text GPU completetraining (2-4 English text)
 ```bash
 make train-llm \
   NEURX_TOTAL_STEPS=1000 \
@@ -93,7 +93,7 @@ make train-llm \
   NEURX_MIXED_PRECISION_MODE=bf16
 ```
 
-### 4 GPU DDP (1-2 小时)
+### 4 GPU DDP (1-2 English text)
 ```bash
 make train-dp \
   NEURX_WORLD_SIZE=4 \
@@ -101,7 +101,7 @@ make train-dp \
   NEURX_BATCH_SIZE=32
 ```
 
-### 8 GPU 混合并行 (1-2 天)
+### 8 GPU English text (1-2 English text)
 ```bash
 make train-large \
   NEURX_WORLD_SIZE=8 \
@@ -109,12 +109,12 @@ make train-large \
   NEURX_TENSOR_PARALLEL_SIZE=2
 ```
 
-### 32 GPU 多并行 (1-4 周)
+### 32 GPU English text (1-4 English text)
 ```bash
 make train-xlarge
 ```
 
-### 高质量推理
+### English textinference
 ```bash
 make infer-batch \
   NEURX_TEMPERATURE=0.5 \
@@ -124,99 +124,99 @@ make infer-batch \
 
 ---
 
-## ⚠️ 故障排查
+## ⚠️ English text
 
-| 问题 | 解决 |
+| English text | English text |
 |------|------|
-| 内存不足 | ↓ 批大小，↓ 序列长度，启用 BF16 |
-| 训练慢 | ↑ 批大小，启用 BF16，↑ GPU 数 |
-| 无 GPU | 检查 `nvidia-smi`，确认 CUDA 安装 |
-| 日志未找到 | 运行后检查 `/tmp/neurx*.log` |
-| 检查点缺失 | 查看 `artifacts/checkpoints/llm_training/` |
+| English text | ↓ English text, ↓ English text, English text BF16 |
+| trainingEnglish text | ↑ English text, English text BF16, ↑ GPU English text |
+| English text GPU | English text `nvidia-smi`, English text CUDA English text |
+| logEnglish text | runEnglish text `/tmp/neurx*.log` |
+| checkpointEnglish text | English text `artifacts/checkpoints/llm_training/` |
 
 ---
 
-## 📊 性能期望
+## 📊 English text
 
-### 单 GPU (A100-40GB)
-- **1B 参数**: 50ms/step = 6K tokens/sec
-- **7B 参数**: 100ms/step = 12K tokens/sec
+### English text GPU (A100-40GB)
+- **1B parameter**: 50ms/step = 6K tokens/sec
+- **7B parameter**: 100ms/step = 12K tokens/sec
 
-### 多 GPU (4× A100)
-- **DDP 4×**: 4ms/step = 8K tokens/sec (93% 效率)
-- **Tensor TP 4×**: 30ms/step = 25K tokens/sec (90% 效率)
+### English text GPU (4× A100)
+- **DDP 4×**: 4ms/step = 8K tokens/sec (93% English text)
+- **Tensor TP 4×**: 30ms/step = 25K tokens/sec (90% English text)
 
 ---
 
-## 🔍 监控
+## 🔍 monitoring
 
 ```bash
-# 查看当前状态
+# English textstate
 make monitor
 
-# 实时日志（已运行）
+# English textlog(English textrun)
 make train-llm-watch
 
-# 查看日志
+# English textlog
 tail -f /tmp/neurx_llm_train.log
 
-# 列出检查点
+# English textcheckpoint
 ls artifacts/checkpoints/llm_training/
 ```
 
 ---
 
-## 🧹 清理
+## 🧹 English text
 
 ```bash
-# 清理日志
+# English textlog
 make clean-logs
 
-# 清理所有产物
+# English text
 make clean
 ```
 
 ---
 
-## 📚 完整文档
+## 📚 completeEnglish text
 
-- **快速查找**: [MAKE_COMMANDS_CHEATSHEET.md](MAKE_COMMANDS_CHEATSHEET.md)
-- **详细指南**: [LARGE_MODEL_MAKE_GUIDE.md](LARGE_MODEL_MAKE_GUIDE.md)
-- **交互脚本**: `bash make_launcher.sh`
+- **quickEnglish text**: [MAKE_COMMANDS_CHEATSHEET.md](MAKE_COMMANDS_CHEATSHEET.md)
+- **English text**: [LARGE_MODEL_MAKE_GUIDE.md](LARGE_MODEL_MAKE_GUIDE.md)
+- **English text**: `bash make_launcher.sh`
 
 ---
 
-## 🎯 按用例选择
+## 🎯 English text
 
-| 我想... | 命令 |
+| English text... | English text |
 |---------|------|
-| 快速测试 | `make train-llm NEURX_TOTAL_STEPS=10` |
-| 单 GPU 训练 | `make train-llm NEURX_TOTAL_STEPS=1000` |
-| 多 GPU 训练 | `make train-dp NEURX_WORLD_SIZE=4` |
-| 大模型训练 | `make train-large` |
-| 多轮对话 | `make infer-interactive` |
-| 批量推理 | `make infer-batch` |
-| API 服务 | `make infer-serving` |
-| 监控训练 | `make monitor` |
-| 查看帮助 | `make train-help` |
+| quicktest | `make train-llm NEURX_TOTAL_STEPS=10` |
+| English text GPU training | `make train-llm NEURX_TOTAL_STEPS=1000` |
+| English text GPU training | `make train-dp NEURX_WORLD_SIZE=4` |
+| English textmodeltraining | `make train-large` |
+| English text | `make infer-interactive` |
+| English textinference | `make infer-batch` |
+| API English text | `make infer-serving` |
+| monitoringtraining | `make monitor` |
+| English text | `make train-help` |
 
 ---
 
-## 🚀 立即开始
+## 🚀 English textstart
 
 ```bash
-# 1. 进入目录
+# 1. English textdirectory
 cd /Users/feifei/shuwen/train/neurx
 
-# 2. 快速测试
+# 2. quicktest
 make train-llm NEURX_TOTAL_STEPS=10
 
-# 3. 完整指南
+# 3. completeEnglish text
 bash make_launcher.sh
 ```
 
 ---
 
-**打印日期**: 2026-07-01  
-**命令版本**: v1.0  
-**状态**: ✅ 完全可用
+**English text**: 2026-07-01
+**English text**: v1.0
+**state**: ✅ English text

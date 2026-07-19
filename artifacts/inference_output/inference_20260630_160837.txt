@@ -1,11 +1,11 @@
-[NeurX 推理系统]
-模型: llm_s
+[NeurX inferencesystem]
+model: llm_s
 Checkpoint: checkpoints/large_model
-Seed: neurx 
-问题: NeurX框架有什么特点？
+Seed: neurx
+English text: NeurXframeworkEnglish text?
 
-系统消息: 推理二进制执行失败，已回退到验证性输出。
+systemEnglish text: inferenceEnglish textfailure, English textoutput.
 
-回答:
-NeurX 已成功生成并保存训练 checkpoint。
-推理二进制当前未能直接运行，但问答入口和 checkpoint 解析链路已验证。
+English text:
+NeurX English textsuccessgenerateEnglish textsavetraining checkpoint.
+inferenceEnglish textrun, English text checkpoint English text.

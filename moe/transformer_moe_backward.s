@@ -27,7 +27,7 @@ use neurx.moe.transformer.{
 use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
 
 // ============================================================================
-// 1. 结构体
+// 1. English text
 // ============================================================================
 
 struct moe_expert_grads {
@@ -44,7 +44,7 @@ struct moe_layer_grads {
 }
 
 // ============================================================================
-// 2. 单专家反向 (SwiGLU)
+// 2. English text (SwiGLU)
 // ============================================================================
 
 // swish'(x) = sigma(x) + x * sigma(x) * (1 - sigma(x))
@@ -53,17 +53,17 @@ func moe_swish_grad(float x) float {
     s + x * s * (1.0 - s)
 }
 
-// 对 SwiGLU 专家做反向:
+// English text SwiGLU English text:
 //   out = (swish(gate) * value) @ down
-// 已知: token_hidden [H], gate_pre [D], value_pre [D], d_out [H]
-// 返回 (d_hidden [H], d_gate_w [H,D], d_value_w [H,D], d_down_w [D,H])
+// English text: token_hidden [H], gate_pre [D], value_pre [D], d_out [H]
+// English text (d_hidden [H], d_gate_w [H,D], d_value_w [H,D], d_down_w [D,H])
 func moe_expert_backward(
     moe_expert expert,
     []float token_hidden,     // [H]
     []float d_out,            // [H]
     int H, int D
 ) ([]float, moe_expert_grads) {
-    // 重建 gate_pre 和 value_pre (需再做一次前向以获得中间值)
+    // English text gate_pre English text value_pre (English text)
     []float gate_pre = moe_alloc(D, 0.0)
     []float value_pre = moe_alloc(D, 0.0)
     int j = 0
@@ -159,7 +159,7 @@ func moe_expert_backward(
 }
 
 // ============================================================================
-// 3. 路由反向 (softmax gate 梯度)
+// 3. English text (softmax gate gradient)
 // ============================================================================
 
 // softmax backward for one row
@@ -177,7 +177,7 @@ func moe_softmax_bk([]float probs, []float d_logprob, int E) []float {
 }
 
 // ============================================================================
-// 4. 完整 MoE 层反向
+// 4. complete MoE English text
 // ============================================================================
 
 func moe_backward(
@@ -195,7 +195,7 @@ func moe_backward(
     []float d_hidden = moe_alloc(tokens * H, 0.0)
     []float d_router_weight = moe_alloc(H * E, 0.0)
 
-    // 初始化专家梯度累加器
+    // initializeEnglish textgradientEnglish text
     []moe_expert_grads expert_grads = []moe_expert_grads{cap: E}
     int e = 0
     while e < E {
@@ -214,15 +214,15 @@ func moe_backward(
 
     int t = 0
     while t < tokens {
-        // 提取该 token 的 hidden 向量
+        // English text token English text hidden English text
         []float h_t = moe_alloc(H, 0.0)
         int d = 0
         while d < H { h_t[d] = hidden[t * H + d]; d = d + 1 }
 
-        // 该 token 路由的 top-k 专家的 d_gate 信号 (用于路由器反向)
+        // English text token English text top-k English text d_gate English text (English text)
         []float d_gate_logit = moe_alloc(E, 0.0)  // d_loss/d_router_prob[e]
 
-        // 重建该 token 的 router probs
+        // English text token English text router probs
         []float probs_t = moe_alloc(E, 0.0)
         e = 0
         while e < E {
@@ -246,19 +246,19 @@ func moe_backward(
                     d = d + 1
                 }
 
-                // 专家反向
+                // English text
                 []float d_h_e
                 moe_expert_grads eg
                 (d_h_e, eg) = moe_expert_backward(layer.experts[eid], h_t, d_eo, H, D)
 
-                // 累加到 d_hidden[t]
+                // English text d_hidden[t]
                 d = 0
                 while d < H {
                     d_hidden[t * H + d] = d_hidden[t * H + d] + d_h_e[d]
                     d = d + 1
                 }
 
-                // 累加专家权重梯度
+                // English textweightgradient
                 int n = H * D
                 d = 0
                 while d < n {
@@ -274,7 +274,7 @@ func moe_backward(
                 }
 
                 // d_gate_logit[eid]: ∂L/∂g_k = d_output[t] · expert_out[k]
-                // 再重计算专家输出以获得值 (或在前向缓存; 这里重计算)
+                // English textcomputeEnglish textoutputEnglish text (English textcache; English textcompute)
                 moe_expert ex = layer.experts[eid]
                 []float eo = moe_expert_forward(ex, h_t, H, D)
                 float dot_eo_do = 0.0
@@ -283,14 +283,14 @@ func moe_backward(
                     dot_eo_do = dot_eo_do + d_output[t * H + d] * eo[d]
                     d = d + 1
                 }
-                // 对 normalize_top_k 的 gate 权重做简化近似:
-                // grad 流回 unnormalized gate prob[eid]
+                // English text normalize_top_k English text gate weightEnglish text:
+                // grad English text unnormalized gate prob[eid]
                 d_gate_logit[eid] = d_gate_logit[eid] + dot_eo_do
             }
             k = k + 1
         }
 
-        // Softmax 反向 → d_router_logit[t, :]
+        // Softmax English text → d_router_logit[t, :]
         []float d_router_logit = moe_softmax_bk(probs_t, d_gate_logit, E)
 
         // d_router_weight += h_t^T @ d_router_logit
@@ -316,7 +316,7 @@ func moe_backward(
 }
 
 // ============================================================================
-// 5. AdamW 专家参数更新
+// 5. AdamW English textparameterEnglish text
 // ============================================================================
 
 struct moe_adamw_state {
@@ -403,7 +403,7 @@ func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt)
 }
 
 // ============================================================================
-// 6. 辅助
+// 6. helper
 // ============================================================================
 
 func moe_alloc(int n, float v) []float {

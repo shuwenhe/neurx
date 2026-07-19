@@ -1,150 +1,150 @@
-# VS Code 核心功能在 neurx-code 中的实现清单
+# VS Code English text neurx-code English textimplementationEnglish text
 
-## 📊 优先级矩阵 (可行性 × 价值)
+## 📊 English text (English text × English text)
 
 ```
-高价值 ┤
+English text ┤
        │  ⭐⭐ Find      ⭐⭐⭐ Folding
        │  ⭐⭐ Snippet   ⭐⭐⭐ Comment
        │  ⭐⭐ Outline   ⭐⭐⭐ QA
        │  ⭐⭐ Keybind   ⭐⭐⭐ LineOps
-低价值 ┤
+English text ┤
        └─────────────────────────────
-         低难度          高难度
+         English text          English text
 ```
 
 ---
 
-## 🚀 **第 1 轮：极高优先级** (立即实现 - 本周)
+## 🚀 **English text 1 English text: English text** (English textimplementation - English text)
 
-### ✅ 1. **文件操作增强** 
-**状态**: ✅ 已完成 (Codex FileSystem)
-- 创建/删除/重命名文件
-- 批量操作
-- 原子写入
+### ✅ 1. **fileEnglish text**
+**state**: ✅ English text (Codex FileSystem)
+- English text/English text/English textfile
+- English text
+- English text
 
-**代码位置**: 
+**English text**:
 - [ExecutorFileSystem.h](src/filesystem/ExecutorFileSystem.h)
 - [DirectFileSystem.cpp](src/filesystem/DirectFileSystem.cpp)
 
 ---
 
-### ✅ 2. **命令系统** 
-**状态**: ✅ 已完成 (CommandManager)
-- 命令注册/执行
-- 快捷键绑定
-- 命令搜索
+### ✅ 2. **English textsystem**
+**state**: ✅ English text (CommandManager)
+- English text/English text
+- English text
+- English textsearch
 
-**代码位置**: 
+**English text**:
 - [CommandManager.h](src/commands/CommandManager.h)
 - [CommandManager.cpp](src/commands/CommandManager.cpp)
 
-**快捷键**:
+**English text**:
 ```
-Ctrl+Shift+P  → 命令面板
-Ctrl+K, Ctrl+S → 快捷键设置
+Ctrl+Shift+P  → English text
+Ctrl+K, Ctrl+S → English text
 ```
 
 ---
 
-### ✅ 3. **搜索面板** 
-**状态**: ✅ 已完成 (GlobalSearchEngine)
-- 全局搜索
-- 正则表达式
-- 大小写敏感
+### ✅ 3. **searchEnglish text**
+**state**: ✅ English text (GlobalSearchEngine)
+- English textsearch
+- English text
+- English text
 
-**代码位置**: 
+**English text**:
 - [GlobalSearchEngine.h](src/search/GlobalSearchEngine.h)
 - [GlobalSearchEngine.cpp](src/search/GlobalSearchEngine.cpp)
 - [SearchPanel.qml](content/SearchPanel.qml)
 
-**快捷键**:
+**English text**:
 ```
-Ctrl+Shift+F  → 打开搜索面板
+Ctrl+Shift+F  → English textsearchEnglish text
 ```
 
 ---
 
-### ✅ 4. **编辑撤销/重做** 
-**状态**: ✅ 已完成 (EditorHistory)
-- 堆栈式撤销
-- 自动 Redo 清空
-- 最多 100 条历史
+### ✅ 4. **English text/English text**
+**state**: ✅ English text (EditorHistory)
+- English text
+- English text Redo English text
+- English text 100 English text
 
-**代码位置**: 
+**English text**:
 - [EditorHistory.h](src/editor/EditorHistory.h)
 - [EditorHistory.cpp](src/editor/EditorHistory.cpp)
 
-**快捷键**:
+**English text**:
 ```
-Ctrl+Z        → 撤销
-Ctrl+Y        → 重做
+Ctrl+Z        → English text
+Ctrl+Y        → English text
 ```
 
 ---
 
-### ✅ 5. **文件树上下文菜单** 
-**状态**: ✅ 已完成 (FileTreeContextMenu)
-- 新建文件/文件夹
-- 删除/重命名
-- 复制路径
+### ✅ 5. **fileEnglish text**
+**state**: ✅ English text (FileTreeContextMenu)
+- English textfile/fileEnglish text
+- English text/English text
+- English textpath
 
-**代码位置**: 
+**English text**:
 - [FileTreeContextMenu.qml](content/FileTreeContextMenu.qml)
 
-**操作**:
+**English text**:
 ```
-右键点击文件 → 显示上下文菜单
+English textfile → English text
 ```
 
 ---
 
-## ⭐⭐⭐⭐⭐ **第 2 轮：高优先级** (第 1-2 周)
+## ⭐⭐⭐⭐⭐ **English text 2 English text: English text** (English text 1-2 English text)
 
-### 📝 6. **行操作** (Line Operations)
-**VS Code 源**: `src/vs/editor/contrib/lineOperations`
-**复杂度**: ⭐⭐ (1-2 天)
-**核心功能**:
-- `Ctrl+X` - 删除行
-- `Ctrl+C` / `Ctrl+V` - 复制/剪切行
-- `Alt+↑` / `Alt+↓` - 上下移动行
-- `Ctrl+Shift+K` - 删除行
-- `Ctrl+Shift+D` - 复制行
-- `Ctrl+Shift+Backspace` - 删除到行首
-- `Ctrl+Shift+End` - 删除到行尾
+### 📝 6. **English text** (Line Operations)
+**VS Code English text**: `src/vs/editor/contrib/lineOperations`
+**English text**: ⭐⭐ (1-2 English text)
+**English text**:
+- `Ctrl+X` - English text
+- `Ctrl+C` / `Ctrl+V` - English text/English text
+- `Alt+↑` / `Alt+↓` - English text
+- `Ctrl+Shift+K` - English text
+- `Ctrl+Shift+D` - English text
+- `Ctrl+Shift+Backspace` - English text
+- `Ctrl+Shift+End` - English text
 
-**实现框架**:
+**implementationframework**:
 ```cpp
 class LineOperations {
-    // 删除行
+    // English text
     void deleteLines(Editor *editor, int startLine, int endLine);
-    
-    // 复制/剪切行
+
+    // English text/English text
     void duplicateLines(Editor *editor);
     void deleteLines(Editor *editor);
-    
-    // 移动行
+
+    // English text
     void moveLineUp(Editor *editor);
     void moveLineDown(Editor *editor);
-    
-    // 排序
+
+    // ranking
     void sortLines(Editor *editor, SortOrder order = Ascending);
     void reverseLines(Editor *editor);
-    
-    // 删除空白
+
+    // English text
     void deleteDuplicateLines(Editor *editor);
     void removeTrailingWhitespace(Editor *editor);
 };
 ```
 
-**关键代码片段**:
+**English text**:
 ```cpp
 void LineOperations::moveLineUp(Editor *editor) {
     int currentLine = editor->currentLine();
     if (currentLine > 0) {
         QString line = editor->getLine(currentLine);
         QString prevLine = editor->getLine(currentLine - 1);
-        
+
         editor->setLine(currentLine - 1, line);
         editor->setLine(currentLine, prevLine);
         editor->setCursor(currentLine - 1, editor->column());
@@ -152,46 +152,46 @@ void LineOperations::moveLineUp(Editor *editor) {
 }
 ```
 
-**UI 集成**: 编辑菜单 + 快捷键
+**UI English text**: English text + English text
 
 ---
 
-### 🔍 7. **搜索和替换** (Find & Replace)
-**VS Code 源**: `src/vs/editor/contrib/find/browser` (4,807 行)
-**复杂度**: ⭐⭐⭐⭐ (2-3 天)
-**核心功能**:
-- `Ctrl+F` - 打开搜索
-- `Ctrl+H` - 打开替换
-- `Ctrl+G` - 转到行
-- `Alt+Enter` - 选择所有匹配项
-- 正则表达式支持
-- 增量搜索
-- 替换预览
+### 🔍 7. **searchEnglish text** (Find & Replace)
+**VS Code English text**: `src/vs/editor/contrib/find/browser` (4,807 English text)
+**English text**: ⭐⭐⭐⭐ (2-3 English text)
+**English text**:
+- `Ctrl+F` - English textsearch
+- `Ctrl+H` - English text
+- `Ctrl+G` - English text
+- `Alt+Enter` - English text
+- English textsupport
+- English textsearch
+- English text
 
-**实现框架**:
+**implementationframework**:
 ```cpp
 class FindService : public QObject {
     Q_OBJECT
-    
+
     struct FindMatch {
         int line;
         int column;
         int length;
         QString preview;
     };
-    
-    // 搜索接口
+
+    // searchEnglish text
     void search(const QString &pattern, SearchOptions options);
     QList<FindMatch> findAll(const QString &pattern);
-    
-    // 替换接口
+
+    // English text
     void replace(int matchIndex, const QString &replacement);
     int replaceAll(const QString &pattern, const QString &replacement);
-    
-    // 高亮
+
+    // English text
     void highlightMatches(const QList<FindMatch> &matches);
     void clearHighlight();
-    
+
 signals:
     void matchesFound(int count);
     void noMatches();
@@ -199,18 +199,18 @@ signals:
 };
 ```
 
-**关键算法**:
+**English text**:
 ```cpp
-// 增量搜索 (使用 Boyer-Moore 优化)
+// English textsearch (use Boyer-Moore optimize)
 QList<FindMatch> FindService::findAll(const QString &pattern) {
     QList<FindMatch> matches;
     const QString &text = editor->allText();
-    
+
     int index = 0;
     while ((index = text.indexOf(pattern, index)) != -1) {
         int line = text.left(index).count('\n');
         int col = index - text.lastIndexOf('\n', index - 1) - 1;
-        
+
         matches.append({line, col, pattern.length(), ""});
         index += pattern.length();
     }
@@ -218,67 +218,67 @@ QList<FindMatch> FindService::findAll(const QString &pattern) {
 }
 ```
 
-**UI 集成**: 分离的 FindPanel.qml + 编辑器集成显示
+**UI English text**: English text FindPanel.qml + English text
 
 ---
 
-### 📚 8. **代码折叠** (Code Folding)
-**VS Code 源**: `src/vs/editor/contrib/folding` (4,921 行)
-**复杂度**: ⭐⭐⭐⭐ (2-3 天)
-**核心功能**:
-- `Ctrl+Shift+[` - 折叠区块
-- `Ctrl+Shift+]` - 展开区块
-- `Ctrl+K, Ctrl+0` - 折叠所有
-- `Ctrl+K, Ctrl+J` - 展开所有
-- 自动识别代码块 (函数、类、注释)
+### 📚 8. **English text** (Code Folding)
+**VS Code English text**: `src/vs/editor/contrib/folding` (4,921 English text)
+**English text**: ⭐⭐⭐⭐ (2-3 English text)
+**English text**:
+- `Ctrl+Shift+[` - English text
+- `Ctrl+Shift+]` - English text
+- `Ctrl+K, Ctrl+0` - English text
+- `Ctrl+K, Ctrl+J` - English text
+- English text (function, English text, English text)
 
-**实现框架**:
+**implementationframework**:
 ```cpp
 class FoldingManager : public QObject {
     Q_OBJECT
-    
+
     struct FoldRange {
         int startLine;
         int endLine;
         int indent;
         QString type;  // "function", "class", "comment", etc.
     };
-    
-    // 计算折叠范围
+
+    // computeEnglish text
     QList<FoldRange> computeFoldRanges(const QString &language);
-    
-    // 折叠操作
+
+    // English text
     void toggleFold(int line);
     void fold(int line);
     void unfold(int line);
     void foldAll();
     void unfoldAll();
-    
-    // 查询
+
+    // query
     bool isFolded(int line) const;
     FoldRange getFoldRange(int line) const;
 };
 ```
 
-**关键算法**:
+**English text**:
 ```cpp
-// 识别代码块边界
+// English text
 QList<FoldRange> FoldingManager::computeFoldRanges(const QString &language) {
     QList<FoldRange> ranges;
-    
+
     auto lines = text.split('\n');
     for (int i = 0; i < lines.size(); ++i) {
         const QString &line = lines[i];
         int indent = getIndentation(line);
-        
-        // 检测函数/类定义
+
+        // English textfunction/English text
         if (line.contains(QRegExp("^\\s*(def|class|function)\\s+"))) {
             int endLine = findBlockEnd(i, indent);
             ranges.append({i, endLine, indent, "function"});
-            i = endLine;  // 跳过已处理的行
+            i = endLine;  // English text
         }
-        
-        // 检测注释块
+
+        // English text
         if (line.contains("/*")) {
             int endLine = findCommentEnd(i);
             ranges.append({i, endLine, indent, "comment"});
@@ -289,33 +289,33 @@ QList<FoldRange> FoldingManager::computeFoldRanges(const QString &language) {
 }
 ```
 
-**UI 集成**: 行号栏折叠指示器 + 快捷键
+**UI English text**: English text + English text
 
 ---
 
-### 💬 9. **注释切换** (Comment)
-**VS Code 源**: `src/vs/editor/contrib/comment` (1,000 行)
-**复杂度**: ⭐⭐ (1-2 天)
-**核心功能**:
-- `Ctrl+/` - 切换行注释
-- `Ctrl+Shift+/` - 切换块注释
-- 智能缩进
+### 💬 9. **English text** (Comment)
+**VS Code English text**: `src/vs/editor/contrib/comment` (1,000 English text)
+**English text**: ⭐⭐ (1-2 English text)
+**English text**:
+- `Ctrl+/` - English text
+- `Ctrl+Shift+/` - English text
+- English text
 
-**实现框架**:
+**implementationframework**:
 ```cpp
 class CommentManager : public QObject {
     Q_OBJECT
-    
+
     struct CommentSyntax {
         QString lineComment;      // "//"
         QString blockStart;       // "/*"
         QString blockEnd;         // "*/"
     };
-    
-    // 获取语言特定的注释语法
+
+    // English textlanguageEnglish text
     CommentSyntax getSyntax(const QString &language);
-    
-    // 注释操作
+
+    // English text
     void toggleLineComment(Editor *editor);
     void toggleBlockComment(Editor *editor);
     void addLineComment(Editor *editor);
@@ -324,12 +324,12 @@ class CommentManager : public QObject {
 };
 ```
 
-**关键实现**:
+**English textimplementation**:
 ```cpp
 void CommentManager::toggleLineComment(Editor *editor) {
     auto [startLine, endLine] = editor->getSelectionLines();
     CommentSyntax syntax = getSyntax(editor->language());
-    
+
     bool hasComment = false;
     for (int i = startLine; i <= endLine; ++i) {
         QString line = editor->getLine(i);
@@ -338,14 +338,14 @@ void CommentManager::toggleLineComment(Editor *editor) {
             break;
         }
     }
-    
+
     for (int i = startLine; i <= endLine; ++i) {
         QString line = editor->getLine(i);
         if (hasComment) {
-            // 移除注释
+            // English text
             line.replace(syntax.lineComment, "");
         } else {
-            // 添加注释，保持缩进
+            // English text, English text
             int indent = getIndentation(line);
             line = QString(indent, ' ') + syntax.lineComment + " " + line.trimmed();
         }
@@ -354,20 +354,20 @@ void CommentManager::toggleLineComment(Editor *editor) {
 }
 ```
 
-**UI 集成**: 编辑菜单 + 快捷键
+**UI English text**: English text + English text
 
 ---
 
-### 🔤 10. **代码片段** (Snippets)
-**VS Code 源**: `src/vs/editor/contrib/snippet` (2,800 行)
-**复杂度**: ⭐⭐⭐ (2-3 天)
-**核心功能**:
-- 片段定义 (JSON 格式)
-- 变量替换 ($0, $1, $name, etc.)
-- 占位符编辑
-- 自动补全集成
+### 🔤 10. **English text** (Snippets)
+**VS Code English text**: `src/vs/editor/contrib/snippet` (2,800 English text)
+**English text**: ⭐⭐⭐ (2-3 English text)
+**English text**:
+- English text (JSON English text)
+- English text ($0, $1, $name, etc.)
+- placeholderEnglish text
+- English text
 
-**片段格式**:
+**English text**:
 ```json
 {
   "C++ main": {
@@ -386,11 +386,11 @@ void CommentManager::toggleLineComment(Editor *editor) {
 }
 ```
 
-**实现框架**:
+**implementationframework**:
 ```cpp
 class SnippetManager : public QObject {
     Q_OBJECT
-    
+
     struct Snippet {
         QString id;
         QString prefix;
@@ -398,7 +398,7 @@ class SnippetManager : public QObject {
         QString description;
         QString language;
     };
-    
+
     struct SnippetVariable {
         int id;           // $0, $1, $2...
         QString name;     // $name
@@ -406,143 +406,143 @@ class SnippetManager : public QObject {
         int startLine, startCol;
         int endLine, endCol;
     };
-    
-    // 加载片段
+
+    // loadEnglish text
     void loadSnippets(const QString &language);
-    
-    // 插入片段
+
+    // English text
     void insertSnippet(const Snippet &snippet, int line, int col);
-    
-    // 变量解析
+
+    // English text
     QString resolveVariables(const QString &snippet);
-    
-    // 占位符管理
+
+    // placeholdermanagement
     void selectNextPlaceholder();
     void selectPreviousPlaceholder();
 };
 ```
 
-**关键实现**:
+**English textimplementation**:
 ```cpp
 void SnippetManager::insertSnippet(const Snippet &snippet, int line, int col) {
     QString content = snippet.body.join('\n');
-    
-    // 替换变量
+
+    // English text
     content.replace("${TM_FILENAME}", QFileInfo(editor->filePath()).fileName());
     content.replace("${TM_DATE}", QDate::currentDate().toString("yyyy-MM-dd"));
     content.replace("${TM_YEAR}", QString::number(QDate::currentDate().year()));
-    
-    // 插入内容
+
+    // English textcontent
     editor->insertText(line, col, content);
-    
-    // 处理占位符
+
+    // English textplaceholder
     QRegExp placeholderPattern(R"(\$\{(\d+)(?::([^}]*))?\})");
     int pos = 0;
     while ((pos = placeholderPattern.indexIn(content, pos)) != -1) {
-        // 提取 $1, $2 等并高亮显示
+        // English text $1, $2 English text
         pos += placeholderPattern.matchedLength();
     }
-    
-    // 跳转到第一个占位符
+
+    // English textplaceholder
     selectNextPlaceholder();
 }
 ```
 
-**UI 集成**: 自动补全触发器 + 占位符导航
+**UI English text**: English text + placeholderEnglish text
 
 ---
 
-## ⭐⭐⭐ **第 3 轮：中等优先级** (第 3-4 周)
+## ⭐⭐⭐ **English text 3 English text: English text** (English text 3-4 English text)
 
-### 📍 11. **Outline / 符号导航**
-**VS Code 源**: `src/vs/workbench/contrib/outline`
-**复杂度**: ⭐⭐ (1.5 天)
-**核心功能**:
-- 快速查看代码结构
-- 跳转到函数/类
-- 导航面包屑
-- `Ctrl+Shift+O` - 显示 Outline
+### 📍 11. **Outline / English text**
+**VS Code English text**: `src/vs/workbench/contrib/outline`
+**English text**: ⭐⭐ (1.5 English text)
+**English text**:
+- quickEnglish text
+- English textfunction/English text
+- English text
+- `Ctrl+Shift+O` - English text Outline
 
-### 📊 12. **诊断显示** (Problems/Markers)
-**复杂度**: ⭐⭐ (1.5 天)
-**核心功能**:
-- 显示编译错误
-- 显示 Linter 警告
-- 快速跳转到错误行
-- 错误面板
+### 📊 12. **English text** (Problems/Markers)
+**English text**: ⭐⭐ (1.5 English text)
+**English text**:
+- English textcompileerror
+- English text Linter English text
+- quickEnglish texterrorEnglish text
+- errorEnglish text
 
-### 🔗 13. **全局搜索** (Search in Files)
-**VS Code 源**: `src/vs/workbench/contrib/search` (99 个文件)
-**复杂度**: ⭐⭐⭐⭐ (3-4 天)
-**核心功能**:
-- `Ctrl+Shift+F` - 搜索所有文件
-- 递归搜索目录
-- 排除模式
-- 替换预览
-- 搜索历史
+### 🔗 13. **English textsearch** (Search in Files)
+**VS Code English text**: `src/vs/workbench/contrib/search` (99 English textfile)
+**English text**: ⭐⭐⭐⭐ (3-4 English text)
+**English text**:
+- `Ctrl+Shift+F` - searchEnglish textfile
+- English textsearchdirectory
+- English text
+- English text
+- searchEnglish text
 
-### ⚙️ 14. **配置系统** (Configuration)
-**复杂度**: ⭐⭐ (1 天)
-**核心功能**:
-- `settings.json` 支持
-- 用户/工作区/全局配置
-- 配置验证
+### ⚙️ 14. **configurationsystem** (Configuration)
+**English text**: ⭐⭐ (1 English text)
+**English text**:
+- `settings.json` support
+- English text/English text/English textconfiguration
+- configurationEnglish text
 
-### 🎨 15. **主题系统** (Themes)
-**复杂度**: ⭐⭐ (1 天)
-**核心功能**:
-- 内置主题
-- 自定义主题加载
-- 主题切换
-
----
-
-## ⭐⭐ **第 4 轮：高级功能** (第 5+ 周)
-
-### 📌 16. **快捷键管理** (Keybindings)
-- 快捷键查看/编辑
-- 快捷键冲突检测
-- `Ctrl+K, Ctrl+S` - 打开快捷键编辑器
-
-### 👆 17. **悬停提示** (Hover)
-- 变量类型提示
-- 文档展示
-- 依赖 LSP
-
-### 💡 18. **代码操作** (Code Actions)
-- 快速修复
-- 重构
-- 依赖 LSP
-
-### 🔤 19. **参数提示** (Parameter Hints)
-- 函数签名显示
-- 参数导航
-- 依赖 LSP
-
-### 🌐 20. **LSP 集成** (Language Server Protocol)
-- 连接语言服务器
-- 代码补全
-- 定义跳转
-- 引用查找
+### 🎨 15. **mainEnglish textsystem** (Themes)
+**English text**: ⭐⭐ (1 English text)
+**English text**:
+- English textmainEnglish text
+- English textmainEnglish textload
+- mainEnglish text
 
 ---
 
-## 📈 **实现时间表** (8 周加速开发)
+## ⭐⭐ **English text 4 English text: advancedEnglish text** (English text 5+ English text)
+
+### 📌 16. **English textmanagement** (Keybindings)
+- English text/English text
+- English text
+- `Ctrl+K, Ctrl+S` - English text
+
+### 👆 17. **English textprompt** (Hover)
+- English textprompt
+- English text
+- English text LSP
+
+### 💡 18. **English text** (Code Actions)
+- quickEnglish text
+- English text
+- English text LSP
+
+### 🔤 19. **parameterprompt** (Parameter Hints)
+- functionEnglish text
+- parameterEnglish text
+- English text LSP
+
+### 🌐 20. **LSP English text** (Language Server Protocol)
+- English textlanguageEnglish text
+- English text
+- English text
+- English text
+
+---
+
+## 📈 **implementationtimeEnglish text** (8 English text)
 
 ```
 ┌─ Week 1-2 ─────────────────────────────────────────┐
-│ ✅ Undo/Redo (完成)                                   │
-│ ✅ Command System (完成)                              │
-│ ✅ Search Panel (完成)                                │
-│ ✅ File Operations (完成)                             │
-│ ⏳ Line Operations (开始)                             │
+│ ✅ Undo/Redo (English text)                                   │
+│ ✅ Command System (English text)                              │
+│ ✅ Search Panel (English text)                                │
+│ ✅ File Operations (English text)                             │
+│ ⏳ Line Operations (start)                             │
 └─────────────────────────────────────────────────────┘
 
 ┌─ Week 3-4 ─────────────────────────────────────────┐
-│ ⏳ Find & Replace (开始)                             │
-│ ⏳ Code Folding (开始)                               │
-│ ⏳ Snippets (开始)                                   │
-│ ⏳ Comment Toggle (开始)                             │
+│ ⏳ Find & Replace (start)                             │
+│ ⏳ Code Folding (start)                               │
+│ ⏳ Snippets (start)                                   │
+│ ⏳ Comment Toggle (start)                             │
 └─────────────────────────────────────────────────────┘
 
 ┌─ Week 5-6 ─────────────────────────────────────────┐
@@ -561,20 +561,20 @@ void SnippetManager::insertSnippet(const Snippet &snippet, int line, int col) {
 
 ---
 
-## 🎯 **立即可做的 (本周)**
+## 🎯 **English text (English text)**
 
-### ✅ 已完成（5 个功能）
+### ✅ English text(5 English text)
 1. Undo/Redo ✅
 2. Command System ✅
 3. Search Panel ✅
 4. File Operations ✅
 5. Context Menu ✅
 
-### 📝 建议下一步实现顺序
+### 📝 English textstepimplementationEnglish text
 
-#### 优先级 1: **Line Operations** (1-2 天)
+#### English text 1: **Line Operations** (1-2 English text)
 ```cpp
-// src/editor/LineOperations.h (新文件)
+// src/editor/LineOperations.h (English textfile)
 class LineOperations {
     void deleteLines(int startLine, int endLine);
     void duplicateLines(int startLine, int endLine);
@@ -585,9 +585,9 @@ class LineOperations {
 };
 ```
 
-#### 优先级 2: **Find & Replace** (2-3 天)
+#### English text 2: **Find & Replace** (2-3 English text)
 ```cpp
-// src/editor/FindService.h (新文件)
+// src/editor/FindService.h (English textfile)
 class FindService : public QObject {
     Q_OBJECT
 public:
@@ -596,9 +596,9 @@ public:
 };
 ```
 
-#### 优先级 3: **Comment Toggle** (1 天)
+#### English text 3: **Comment Toggle** (1 English text)
 ```cpp
-// src/editor/CommentManager.h (新文件)
+// src/editor/CommentManager.h (English textfile)
 class CommentManager {
     void toggleLineComment(int startLine, int endLine);
     void toggleBlockComment(int startLine, int endLine);
@@ -607,45 +607,45 @@ class CommentManager {
 
 ---
 
-## 📊 **代码统计预估**
+## 📊 **English textstatisticsEnglish text**
 
-| 功能 | C++ 行数 | QML 行数 | 总计 | 时间 |
+| English text | C++ English text | QML English text | English text | time |
 |------|---------|---------|------|------|
-| 已完成 | 1,200 | 600 | 1,800 | 1 周 |
-| Line Ops | 400 | 100 | 500 | 2 天 |
-| Find | 800 | 200 | 1,000 | 3 天 |
-| Folding | 600 | 200 | 800 | 3 天 |
-| Snippet | 700 | 150 | 850 | 3 天 |
-| Comment | 300 | 50 | 350 | 1 天 |
-| **总计** | **4,000** | **1,300** | **5,300** | **8 周** |
+| English text | 1,200 | 600 | 1,800 | 1 English text |
+| Line Ops | 400 | 100 | 500 | 2 English text |
+| Find | 800 | 200 | 1,000 | 3 English text |
+| Folding | 600 | 200 | 800 | 3 English text |
+| Snippet | 700 | 150 | 850 | 3 English text |
+| Comment | 300 | 50 | 350 | 1 English text |
+| **English text** | **4,000** | **1,300** | **5,300** | **8 English text** |
 
 ---
 
-## 🔗 **参考资源**
+## 🔗 **English text**
 
-### VS Code 源代码位置
+### VS Code English text
 - **Line Ops**: `src/vs/editor/contrib/lineOperations`
 - **Find**: `src/vs/editor/contrib/find/browser`
 - **Folding**: `src/vs/editor/contrib/folding`
 - **Snippets**: `src/vs/editor/contrib/snippet`
 - **Comment**: `src/vs/editor/contrib/comment`
 
-### neurx-code 文件结构
+### neurx-code fileEnglish text
 ```
 neurx-code/
 ├── src/
-│   ├── editor/               ← 编辑器功能
+│   ├── editor/               ← English text
 │   │   ├── EditorHistory.h   ✅
 │   │   ├── LineOperations.h  📝
 │   │   ├── FindService.h     📝
 │   │   └── ...
-│   ├── search/               ← 搜索功能
+│   ├── search/               ← searchEnglish text
 │   │   ├── GlobalSearchEngine.h ✅
 │   │   └── ...
-│   ├── commands/             ← 命令系统
+│   ├── commands/             ← English textsystem
 │   │   ├── CommandManager.h  ✅
 │   │   └── ...
-│   └── filesystem/           ← 文件系统
+│   └── filesystem/           ← filesystem
 │       ├── ExecutorFileSystem.h ✅
 │       └── ...
 ├── content/
@@ -658,18 +658,18 @@ neurx-code/
 
 ---
 
-## ⚡ **快速开始清单**
+## ⚡ **quickstartEnglish text**
 
-- [ ] 审查本文档
-- [ ] 选择下一个优先级 1 功能 (Line Operations)
-- [ ] 创建 `src/editor/LineOperations.h`
-- [ ] 实现核心方法
-- [ ] 集成到 EditorPanel.qml
-- [ ] 编译测试
-- [ ] 迁移到下一个功能
+- [ ] English text
+- [ ] English text 1 English text (Line Operations)
+- [ ] English text `src/editor/LineOperations.h`
+- [ ] implementationEnglish text
+- [ ] English text EditorPanel.qml
+- [ ] compiletest
+- [ ] migrationEnglish text
 
 ---
 
-**版本**: 1.0  
-**日期**: 2026年6月4日  
-**作者**: VS Code 功能分析
+**English text**: 1.0
+**English text**: 2026English text6English text4English text
+**author**: VS Code English text

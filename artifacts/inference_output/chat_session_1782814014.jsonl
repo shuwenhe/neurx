@@ -1,2 +1,2 @@
-{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
+{"role": "system", "content": "NeurX LLM English textinferencesystemEnglish textstart"}
 {"role": "assistant", "content": "smoke checkpoint ok: final_model.neurx, 1-token preview: 7", "turn": 0}

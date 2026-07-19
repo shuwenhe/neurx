@@ -1,41 +1,41 @@
-# NeurX 语法优化优先级清单
+# NeurX English textoptimizeEnglish text
 
-目标：让 `s` 更适合编译训练/推理类深度学习框架，减少 NeurX 里为了兼容语法而写出的绕路代码。
+English text: English text `s` English textcompiletraining/inferenceEnglish textframework, English text NeurX English text.
 
-## P0: 必须先统一
+## P0: English text
 
-### 1. 绑定语法
+### 1. English text
 
-建议统一为：
+English text:
 
 ```s
 let x: int = 1
 var y: []float = []
 ```
 
-保留类型推断：
+English text:
 
 ```s
 let x = 1
 var y = []int{1, 2, 3}
 ```
 
-原因：
+English text:
 
-- 训练和推理代码里配置项、循环索引、cache/state 变量非常多
-- 现在 NeurX 中 `let` / `var` / 类型标注风格不完全一致
-- 绑定可变性需要在语义层明确区分，否则 optimizer、checkpoint、transformer 状态更新会反复踩坑
+- trainingEnglish textinferenceEnglish textconfigurationEnglish text, English text, cache/state English text
+- English text NeurX English text `let` / `var` / English text
+- English textRequiredEnglish text, English text optimizer, checkpoint, transformer stateEnglish text
 
-优先文件：
+English textfile:
 
 - `neurx/model/transformer/transformer.s`
 - `neurx/train/optimizer.s`
 - `neurx/train/checkpoint_manager.s`
 - `neurx/data/tokenizer_pipeline.s`
 
-### 2. 数组 / 切片 / 固定数组
+### 2. English text / English text / English text
 
-建议统一为：
+English text:
 
 ```s
 []T
@@ -44,21 +44,21 @@ var y = []int{1, 2, 3}
 [N]T{...}
 ```
 
-原因：
+English text:
 
-- 训练输入 batch、token 序列、attention mask、KV cache 都高度依赖这套写法
-- 推理路径里生成结果、beam、scores、prompt cache 也都依赖容器语法
+- traininginput batch, token English text, attention mask, KV cache English text
+- inferencepathEnglish textgenerateresult, beam, scores, prompt cache English text
 
-优先文件：
+English textfile:
 
 - `neurx/infer/text_generator.s`
 - `neurx/infer/sampling_beam.s`
 - `neurx/attention/attention.s`
 - `neurx/data/tokenizer_pipeline.s`
 
-### 3. Map / 字典
+### 3. Map / English text
 
-建议统一为：
+English text:
 
 ```s
 map[K]V
@@ -66,21 +66,21 @@ map[K]V{}
 map[K]V{ "k": v }
 ```
 
-原因：
+English text:
 
-- tokenizer vocab、merge ranks、cache、metrics、registry 都大量用 map
-- 训练/推理框架里 map 是配置和索引的基础容器
+- tokenizer vocab, merge ranks, cache, metrics, registry English text map
+- training/inferenceframeworkEnglish text map English textconfigurationEnglish text
 
-优先文件：
+English textfile:
 
 - `neurx/data/tokenizer_pipeline.s`
 - `neurx/train/optimizer.s`
 - `neurx/infer/text_generator.s`
 - `neurx/logging/*.s`
 
-### 4. 成员 / 下标左值赋值
+### 4. English text / English text
 
-建议必须支持：
+English textsupport:
 
 ```s
 state.cache[i] = value
@@ -88,42 +88,42 @@ model.layers[j].weight = w
 tokens[idx] = next_id
 ```
 
-原因：
+English text:
 
-- 这是训练里更新参数、状态、缓存的核心动作
-- 没有这项，NeurX 很多实现只能靠 workaround
+- English texttrainingEnglish textparameter, state, cacheEnglish text
+- English text, NeurX English textimplementationEnglish text workaround
 
-优先文件：
+English textfile:
 
 - `neurx/train/optimizer.s`
 - `neurx/model/transformer/transformer.s`
 - `neurx/attention/attention.s`
 - `neurx/distributed/*`
 
-### 5. 条件表达式 / 分支表达式
+### 5. English text / English text
 
-建议统一为：
+English text:
 
 ```s
 let v = if cond { a } else { b }
 ```
 
-原因：
+English text:
 
-- 配置选择、fallback、采样策略、mask 选择都很常见
-- 能减少临时变量和重复分支
+- configurationEnglish text, fallback, English text, mask English text
+- English text
 
-优先文件：
+English textfile:
 
 - `neurx/infer/text_generator.s`
 - `neurx/infer/sampling_core.s`
 - `neurx/train/loss.s`
 
-## P1: 强烈建议统一
+## P1: English text
 
-### 6. 结构体字面量
+### 6. English text
 
-建议统一为：
+English text:
 
 ```s
 Config {
@@ -131,14 +131,14 @@ Config {
 }
 ```
 
-原因：
+English text:
 
-- transformer、optimizer、dataloader、checkpoint 的配置对象非常多
-- 这是 NeurX 最常见的初始化方式之一
+- transformer, optimizer, dataloader, checkpoint English textconfigurationEnglish text
+- English text NeurX English textinitializeEnglish text
 
-### 7. 函数参数与返回类型
+### 7. functionparameterEnglish text
 
-建议统一为：
+English text:
 
 ```s
 func f(x: int, y: []float) map[string]int {
@@ -146,14 +146,14 @@ func f(x: int, y: []float) map[string]int {
 }
 ```
 
-原因：
+English text:
 
-- 训练/推理代码函数签名长，返回类型复杂
-- 统一能明显降低阅读成本
+- training/inferenceEnglish textfunctionEnglish text, English text
+- English text
 
-### 8. 范围循环 / 计数循环
+### 8. English text / English text
 
-建议只保留一种主写法：
+English textmainEnglish text:
 
 ```s
 for i in 0..n {
@@ -161,7 +161,7 @@ for i in 0..n {
 }
 ```
 
-或：
+English text:
 
 ```s
 var i = 0
@@ -171,24 +171,24 @@ while i < n {
 }
 ```
 
-原因：
+English text:
 
-- 当前 NeurX 里两种风格混用
-- 对 tokenizer、attention、optimizer 的迭代结构尤其明显
+- English text NeurX English text
+- English text tokenizer, attention, optimizer English text
 
-## P2: 可后做
+## P2: English text
 
-### 9. 可空 / 可选值
+### 9. English text / English text
 
-建议统一 `option[T]` / `result[T, E]` / `?` 传播。
+English text `option[T]` / `result[T, E]` / `?` English text.
 
-### 10. 复合返回值
+### 10. English text
 
-建议统一多返回值、tuple destructuring、函数调用参数解包。
+English text, tuple destructuring, functionEnglish textparameterEnglish text.
 
-### 11. 宏观容器 API
+### 11. English text API
 
-建议补齐：
+English text:
 
 - `push`
 - `pop`
@@ -197,9 +197,9 @@ while i < n {
 - `reserve`
 - `clear`
 
-这类 API 在 tokenizer cache、beam search、dataloader 和 checkpoint 路径都高频出现。
+English text API English text tokenizer cache, beam search, dataloader English text checkpoint pathEnglish text.
 
-## 对 NeurX 最该先改的文件
+## English text NeurX English textfile
 
 1. `neurx/model/transformer/transformer.s`
 2. `neurx/attention/attention.s`
@@ -210,12 +210,12 @@ while i < n {
 7. `neurx/infer/sampling_beam.s`
 8. `neurx/logging/logger_core.s`
 
-## 推荐落地顺序
+## recommendedEnglish text
 
-1. 绑定语法 + 不可变性检查
-2. 数组 / map 容器统一
-3. 左值赋值统一
-4. 结构体字面量统一
-5. 条件表达式与循环风格统一
+1. English text + English text
+2. English text / map English text
+3. English text
+4. English text
+5. English text
 
-如果目标是“让 NeurX 真正稳定编译训练/推理大模型”，这五项的收益最高。
+English text"English text NeurX English textcompiletraining/inferenceEnglish textmodel", English text.

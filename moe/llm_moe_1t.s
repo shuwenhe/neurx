@@ -3,15 +3,15 @@ package neurx.moe.llm_1t
 // ============================================================================
 // NeurX 1T+ MoE Framework
 //
-// 目标:
-//   - 参数总量进入 1T+ 级别
-//   - 采用稀疏 MoE 扩展，而不是把所有 FLOPs 都堆在 dense FFN 上
-//   - 将模型结构、并行拓扑、数据流和 checkpoint 策略统一成一个框架
+// English text:
+//   - parameterEnglish text 1T+ English text
+//   - English text MoE extension, English text FLOPs English text dense FFN English text
+//   - English textmodelEnglish text, English text, dataEnglish text checkpoint English textframework
 //
-// 说明:
-//   这不是单层 MoE 的局部实现，而是一个用于 1T+ 训练编排的框架层。
-//   它复用仓库中已有的 GPT / GPT-MoE / MoE 内核，只负责把规模参数、
-//   专家路由、并行切分和训练预算聚合到一个可执行的规格里。
+// explanation:
+//   English text MoE English textimplementation, English text 1T+ trainingEnglish textframeworkEnglish text.
+//   English text GPT / GPT-MoE / MoE English text, English textparameter,
+//   English text, English texttrainingEnglish text.
 // ============================================================================
 
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
@@ -19,7 +19,7 @@ use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
 use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
 
 // ============================================================================
-// 1. 规模与训练计划
+// 1. English texttrainingEnglish text
 // ============================================================================
 
 struct moe_1t_scale_profile {
@@ -78,7 +78,7 @@ struct moe_1t_framework {
 }
 
 // ============================================================================
-// 2. 基础模型与 MoE 配置
+// 2. English textmodelEnglish text MoE configuration
 // ============================================================================
 
 func moe_1t_base_arch() model_config {
@@ -117,7 +117,7 @@ func moe_1t_model_config() gpt_moe_config {
 }
 
 // ============================================================================
-// 3. 规模计算
+// 3. English textcompute
 // ============================================================================
 
 func moe_1t_profile(gpt_moe_config cfg) moe_1t_scale_profile {
@@ -219,7 +219,7 @@ func moe_1t_framework_default() moe_1t_framework {
 }
 
 // ============================================================================
-// 4. 文本摘要
+// 4. English textsummary
 // ============================================================================
 
 func int_to_string(int n) string {
@@ -306,7 +306,7 @@ func int_from_float(float x) int {
 }
 
 // ============================================================================
-// 5. 主入口
+// 5. mainEnglish text
 // ============================================================================
 
 func main() {

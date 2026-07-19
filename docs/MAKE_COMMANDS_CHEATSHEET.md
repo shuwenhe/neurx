@@ -1,44 +1,44 @@
-# 🚀 NeurX Make 命令速查表
+# 🚀 NeurX Make English text
 
-**快速参考** | 最常用的命令一目了然
-
----
-
-## 📋 核心命令
-
-### 训练命令
-```bash
-make train              # 基础训练
-make train-llm          # LLM 训练 ⭐ 推荐
-make train-llm-watch    # LLM 训练 + 日志
-make train-dp           # 2 GPU 数据并行
-make train-dp-watch     # 2 GPU + 日志
-make train-small        # 小模型训练
-```
-
-### 推理命令
-```bash
-make infer              # 运行推理
-make infer-watch        # 推理 + 日志
-make infer-interactive  # 交互式推理（多轮对话）
-```
-
-### 测试命令
-```bash
-make test               # Transformer 单元测试
-make test-transformer-e2e  # 端到端测试
-```
+**quickEnglish text** | English text
 
 ---
 
-## ⚡ 快速示例
+## 📋 English text
 
-### 最快开始 (1 分钟)
+### trainingEnglish text
+```bash
+make train              # English texttraining
+make train-llm          # LLM training ⭐ recommended
+make train-llm-watch    # LLM training + log
+make train-dp           # 2 GPU dataEnglish text
+make train-dp-watch     # 2 GPU + log
+make train-small        # English textmodeltraining
+```
+
+### inferenceEnglish text
+```bash
+make infer              # runinference
+make infer-watch        # inference + log
+make infer-interactive  # English textinference(English text)
+```
+
+### testEnglish text
+```bash
+make test               # Transformer English texttest
+make test-transformer-e2e  # English texttest
+```
+
+---
+
+## ⚡ quickexample
+
+### English textstart (1 English text)
 ```bash
 make train-llm NEURX_TOTAL_STEPS=10
 ```
 
-### 标准训练 (30 分钟)
+### English texttraining (30 English text)
 ```bash
 make train-llm \
   NEURX_TOTAL_STEPS=100 \
@@ -46,7 +46,7 @@ make train-llm \
   NEURX_SEQ_LENGTH=512
 ```
 
-### 多 GPU 训练 (2+ 小时)
+### English text GPU training (2+ English text)
 ```bash
 make train-dp \
   NEURX_WORLD_SIZE=4 \
@@ -57,9 +57,9 @@ make train-dp \
 
 ---
 
-## 🎛️ 环境变量配置
+## 🎛️ English textconfiguration
 
-| 变量 | 默认 | 示例用法 |
+| English text | default | exampleEnglish text |
 |------|------|--------|
 | `NEURX_TOTAL_STEPS` | 100 | `NEURX_TOTAL_STEPS=1000` |
 | `NEURX_BATCH_SIZE` | 4 | `NEURX_BATCH_SIZE=32` |
@@ -74,21 +74,21 @@ make train-dp \
 
 ---
 
-## 🔥 常用命令组合
+## 🔥 English text
 
-### 场景 1: 快速测试（5 分钟）
+### English text 1: quicktest(5 English text)
 ```bash
 make train-llm NEURX_TOTAL_STEPS=10
 ```
 
-### 场景 2: 验证模型（30 分钟）
+### English text 2: English textmodel(30 English text)
 ```bash
 make train-llm \
   NEURX_TOTAL_STEPS=100 \
   NEURX_BATCH_SIZE=4
 ```
 
-### 场景 3: 单 GPU 完整训练（2-4 小时）
+### English text 3: English text GPU completetraining(2-4 English text)
 ```bash
 make train-llm \
   NEURX_TOTAL_STEPS=1000 \
@@ -98,7 +98,7 @@ make train-llm \
   NEURX_MIXED_PRECISION_MODE=bf16
 ```
 
-### 场景 4: 多 GPU 训练（多天）
+### English text 4: English text GPU training(English text)
 ```bash
 make train-dp \
   NEURX_WORLD_SIZE=8 \
@@ -110,7 +110,7 @@ make train-dp \
   NEURX_MIXED_PRECISION_MODE=bf16
 ```
 
-### 场景 5: 张量并行（大模型）
+### English text 5: English text(English textmodel)
 ```bash
 make train-llm \
   NEURX_WORLD_SIZE=8 \
@@ -121,9 +121,9 @@ make train-llm \
 
 ---
 
-## 📊 推荐配置模板
+## 📊 recommendedconfigurationEnglish text
 
-### 小模型（< 100M）
+### English textmodel(< 100M)
 ```bash
 make train-llm \
   NEURX_BATCH_SIZE=32 \
@@ -131,7 +131,7 @@ make train-llm \
   NEURX_LR=0.001
 ```
 
-### 中等模型（100M - 1B）
+### English textmodel(100M - 1B)
 ```bash
 make train-dp \
   NEURX_WORLD_SIZE=2 \
@@ -142,7 +142,7 @@ make train-dp \
   NEURX_MIXED_PRECISION_MODE=bf16
 ```
 
-### 大模型（1B - 10B）
+### English textmodel(1B - 10B)
 ```bash
 make train-dp \
   NEURX_WORLD_SIZE=8 \
@@ -154,7 +154,7 @@ make train-dp \
   NEURX_MIXED_PRECISION_MODE=bf16
 ```
 
-### Claude 级别（70B+）
+### Claude English text(70B+)
 ```bash
 make train-llm \
   NEURX_WORLD_SIZE=32 \
@@ -169,113 +169,113 @@ make train-llm \
 
 ---
 
-## 📂 输出位置
+## 📂 outputEnglish text
 
-| 类型 | 位置 | 说明 |
+| English text | English text | explanation |
 |------|------|------|
-| 检查点 | `artifacts/checkpoints/llm_training/` | 模型权重 |
-| 日志 | `/tmp/neurx_llm_train.log` | 训练日志 |
-| 输出 | `artifacts/checkpoints/llm_s_pretrain/` | 预训练输出 |
+| checkpoint | `artifacts/checkpoints/llm_training/` | modelweight |
+| log | `/tmp/neurx_llm_train.log` | traininglog |
+| output | `artifacts/checkpoints/llm_s_pretrain/` | English texttrainingoutput |
 
 ---
 
-## 🔧 故障排查
+## 🔧 English text
 
-### 问题: "make: command not found"
+### English text: "make: command not found"
 ```bash
-# 安装 make
+# English text make
 apt-get install make      # Linux
 brew install make         # macOS
 ```
 
-### 问题: 内存不足
+### English text: English text
 ```bash
-# 减少批大小和序列长度
+# English text
 make train-llm NEURX_BATCH_SIZE=2 NEURX_SEQ_LENGTH=256
 ```
 
-### 问题: GPU 未检测到
+### English text: GPU English text
 ```bash
-# 检查 GPU
+# English text GPU
 nvidia-smi
 
-# 检查 CUDA
+# English text CUDA
 nvcc --version
 ```
 
-### 问题: 训练缓慢
+### English text: trainingEnglish text
 ```bash
-# 启用混合精度
+# English text
 make train-llm NEURX_MIXED_PRECISION_MODE=bf16
 
-# 增加批大小
+# English text
 make train-llm NEURX_BATCH_SIZE=64
 ```
 
 ---
 
-## 💡 性能建议
+## 💡 English text
 
-| 优化 | 命令 | 效果 |
+| optimize | English text | English text |
 |------|------|------|
-| 启用混合精度 | `NEURX_MIXED_PRECISION_MODE=bf16` | 🚀 2× 快速 |
-| 增加批大小 | `NEURX_BATCH_SIZE=64` | 📈 更高吞吐 |
-| 多 GPU | `make train-dp` | ⚡ 线性扩展 |
-| 长序列 | `NEURX_SEQ_LENGTH=2048` | 📊 更好的学习 |
-| 降低学习率 | `NEURX_LR=0.0001` | 🎯 稳定收敛 |
+| English text | `NEURX_MIXED_PRECISION_MODE=bf16` | 🚀 2× quick |
+| English text | `NEURX_BATCH_SIZE=64` | 📈 English text |
+| English text GPU | `make train-dp` | ⚡ English textextension |
+| English text | `NEURX_SEQ_LENGTH=2048` | 📊 English text |
+| English textlearning rate | `NEURX_LR=0.0001` | 🎯 English text |
 
 ---
 
-## 📖 详细文档
+## 📖 English text
 
-- **完整指南**: [NEURX_LLM_TRAINING_GUIDE.md](NEURX_LLM_TRAINING_GUIDE.md)
-- **快速开始**: [QUICK_START.md](QUICK_START.md)
-- **训练指南**: [TRAINING_GUIDE.md](TRAINING_GUIDE.md)
-- **管道说明**: [COMPLETE_PIPELINE_GUIDE.md](COMPLETE_PIPELINE_GUIDE.md)
+- **completeEnglish text**: [NEURX_LLM_TRAINING_GUIDE.md](NEURX_LLM_TRAINING_GUIDE.md)
+- **quickstart**: [QUICK_START.md](QUICK_START.md)
+- **trainingEnglish text**: [TRAINING_GUIDE.md](TRAINING_GUIDE.md)
+- **English textexplanation**: [COMPLETE_PIPELINE_GUIDE.md](COMPLETE_PIPELINE_GUIDE.md)
 
 ---
 
-## 🎯 常见目标
+## 🎯 English text
 
 ```bash
-make help                   # 显示所有可用命令
-make install                # 安装 NeurX
-make clean                  # 清理构建产物
-make neurx                  # 编译 NeurX 框架
-make code-agent             # 运行代码助手
+make help                   # English text
+make install                # English text NeurX
+make clean                  # English text
+make neurx                  # compile NeurX framework
+make code-agent             # runEnglish text
 ```
 
 ---
 
-## ✅ 检查清单
+## ✅ English text
 
-启动训练前：
+starttrainingEnglish text:
 
-- [ ] `nvidia-smi` 显示 GPU
-- [ ] `neurx --version` 正常
-- [ ] `make help` 显示命令
-- [ ] 有足够磁盘空间
-- [ ] 网络连接正常
+- [ ] `nvidia-smi` English text GPU
+- [ ] `neurx --version` English text
+- [ ] `make help` English text
+- [ ] English text
+- [ ] English text
 
 ---
 
-## 🚀 立即开始
+## 🚀 English textstart
 
 ```bash
-# 1. 查看所有命令
+# 1. English text
 make help
 
-# 2. 运行快速测试
+# 2. runquicktest
 make train-llm NEURX_TOTAL_STEPS=10
 
-# 3. 查看日志
+# 3. English textlog
 tail -f /tmp/neurx_llm_train.log
 
-# 4. 完整训练
+# 4. completetraining
 make train-llm NEURX_TOTAL_STEPS=1000
 ```
 
 ---
 
-**状态**: ✅ 完整可用  
-**最后更新**: 2026-07-01
+**state**: ✅ completeEnglish text
+**English text**: 2026-07-01

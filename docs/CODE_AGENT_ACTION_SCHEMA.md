@@ -2,44 +2,44 @@
 
 ## Goal
 
-定义 `app/service/code_agent_runner.sh`、`app/bridge/` 与 `neurx/agent/` 共享的最小动作协议。
+English text `app/service/code_agent_runner.sh`, `app/bridge/` English text `neurx/agent/` English text.
 
-当前阶段只覆盖：
+English textphaseEnglish text:
 
-- 动作提议
-- 动作执行结果
-- 审批标记
-- 基础上下文摘要
+- English text
+- English textresult
+- English text
+- English textsummary
 
 ## Runner Envelope
 
-runner 必须返回一个 JSON object。
+runner English text JSON object.
 
-顶层字段：
+English text:
 
-- `protocol_version`: 当前固定为 `neurx.code_agent.v1`
-- `status`: `completed`、`unhandled`、`requires_approval`、`failed`
-- `mode`: 例如 `template`、`planner`、`model-loop-cpp`
-- `summary`: 面向 bridge/UI 的简短摘要
-- `response`: 直接返回给用户的文本结果；若没有则为空字符串
-- `plan`: 兼容旧逻辑的文本计划；后续可逐步弱化
-- `file_context`: 初始文件上下文摘要
-- `actions`: action 数组
-- `action_results`: action result 数组
+- `protocol_version`: English text `neurx.code_agent.v1`
+- `status`: `completed`, `unhandled`, `requires_approval`, `failed`
+- `mode`: English text `template`, `planner`, `model-loop-cpp`
+- `summary`: English text bridge/UI English textsummary
+- `response`: English textresult; English text
+- `plan`: English text; English textstepEnglish text
+- `file_context`: English textfileEnglish textsummary
+- `actions`: action English text
+- `action_results`: action result English text
 - `prompt`
 - `file_path`
 - `repo_root`
 
 ## Action Object
 
-每个 action 至少包含：
+English text action English text:
 
-- `tool`: 动作名
+- `tool`: English text
 - `args`: JSON object
-- `summary`: 动作摘要
-- `requires_approval`: 是否需要审批
+- `summary`: English textsummary
+- `requires_approval`: English textRequiredEnglish text
 
-首批标准动作名：
+English text:
 
 - `read_file`
 - `search_files`
@@ -48,7 +48,7 @@ runner 必须返回一个 JSON object。
 - `run_build`
 - `run_test`
 
-示例：
+example:
 
 ```json
 {
@@ -65,16 +65,16 @@ runner 必须返回一个 JSON object。
 
 ## Action Result Object
 
-每个 action result 至少包含：
+English text action result English text:
 
-- `ok`: 布尔值
-- `tool`: 动作名
-- `summary`: 执行结果摘要
-- `output`: 规范化后的输出文本
-- `changed_paths`: 路径数组
-- `requires_approval`: 是否因审批而未执行
+- `ok`: English text
+- `tool`: English text
+- `summary`: English textresultsummary
+- `output`: English textoutputEnglish text
+- `changed_paths`: pathEnglish text
+- `requires_approval`: English text
 
-示例：
+example:
 
 ```json
 {
@@ -91,30 +91,30 @@ runner 必须返回一个 JSON object。
 
 ### `completed`
 
-- `response` 可直接展示
-- `action_results` 记录 runner 已完成的动作摘要
+- `response` English text
+- `action_results` English text runner English textsummary
 
 ### `unhandled`
 
-- `response` 为空
-- `actions` 给出下一步建议动作
-- `plan` 和 `file_context` 继续保留给旧逻辑与调试使用
+- `response` English text
+- `actions` English textstepEnglish text
+- `plan` English text `file_context` English textuse
 
 ### `requires_approval`
 
-- `actions` 中至少一个动作 `requires_approval=true`
-- bridge/UI 应展示审批提示，而不是直接执行
+- `actions` English text `requires_approval=true`
+- bridge/UI English textprompt, English text
 
 ## Compatibility
 
-为了避免一次性打断现有逻辑：
+English text:
 
-- `plan` 和 `file_context` 继续保留
-- `response` 继续作为 completed 的直接返回体
-- 新消费者优先读 `actions` 与 `action_results`
+- `plan` English text `file_context` English text
+- `response` English text completed English text
+- English text `actions` English text `action_results`
 
 ## Constraints
 
-- 所有路径默认必须是 repo-scoped
-- destructive action 必须显式标记 `requires_approval=true`
-- `output` 与 `file_context` 应经过长度裁剪
+- English textpathdefaultEnglish text repo-scoped
+- destructive action English text `requires_approval=true`
+- `output` English text `file_context` English text

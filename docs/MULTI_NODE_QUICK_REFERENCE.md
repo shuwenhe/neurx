@@ -5,43 +5,43 @@
 ### Core Multi-Node Modules
 
 1. **`distributed/nccl_id_manager.s`** (5.2KB)
-   - `generate_nccl_unique_id()` - 主节点生成NCCL ID
-   - `save_nccl_id_to_shared_storage()` - 保存到NFS
-   - `load_nccl_id_from_shared_storage()` - 从节点读取(轮询)
+   - `generate_nccl_unique_id()` - mainEnglish textgenerateNCCL ID
+   - `save_nccl_id_to_shared_storage()` - saveEnglish textNFS
+   - `load_nccl_id_from_shared_storage()` - English text(English text)
    - Support for Redis/Etcd backend
 
 2. **`distributed/multi_node_launcher.s`** (8.5KB)
-   - `init_multi_node_config()` - 从环境变量读取多机配置
-   - `generate_rank_info()` - 生成rank信息
-   - `synchronize_across_nodes()` - 节点间同步屏障
-   - `check_node_health()` - 心跳检测
-   - `save_distributed_checkpoint()` - 多机checkpoint保存
-   - `load_distributed_checkpoint()` - 多机checkpoint加载
+   - `init_multi_node_config()` - English textconfiguration
+   - `generate_rank_info()` - generaterankinformation
+   - `synchronize_across_nodes()` - English textstepEnglish text
+   - `check_node_health()` - English text
+   - `save_distributed_checkpoint()` - English textcheckpointsave
+   - `load_distributed_checkpoint()` - English textcheckpointload
 
 3. **`pretrain/distributed_pretrain_multi_node_entry.s`** (7.8KB)
-   - 完整的多节点训练主入口
-   - NCCL ID协调流程
-   - Checkpoint加载和保存
-   - 故障恢复集成
+   - completeEnglish texttrainingmainEnglish text
+   - NCCL IDEnglish textpipeline
+   - CheckpointloadEnglish textsave
+   - English textrecoverEnglish text
 
 4. **`scripts/legacy/launch_cluster_training.s`** (9.2KB)
-   - SSH集群启动器
-   - 自动秩启动
-   - 日志聚合
-   - 进程监控
+   - SSHEnglish textstartEnglish text
+   - English textstart
+   - logEnglish text
+   - English textmonitoring
 
-5. **`distributed/fault_tolerance.s`** (已扩展)
-   - 多机故障容错扩展
-   - 心跳监测
-   - 自动恢复
+5. **`distributed/fault_tolerance.s`** (English textextension)
+   - English textextension
+   - English text
+   - English textrecover
 
 ### Documentation
 
 6. **`docs/MULTI_NODE_DEPLOYMENT_GUIDE.md`** (18KB)
-   - 完整的多节点部署指南
-   - NFS设置说明
-   - SSH配置
-   - 性能调优
+   - completeEnglish text
+   - NFSEnglish textexplanation
+   - SSHconfiguration
+   - English text
 
 ---
 
@@ -187,7 +187,7 @@ save_distributed_checkpoint(
 [Training Loop - Every Rank]
   ├─ Every 10 steps: write_heartbeat(rank, step, loss)
   │  └─ /mnt/nccl_shared/heartbeat/rank_N = current_timestamp
-  
+
 [Monitor - Master Node]
   ├─ Every 5 seconds:
   │  ├─ Read all heartbeat files

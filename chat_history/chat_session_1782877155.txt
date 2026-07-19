@@ -1,24 +1,24 @@
 [2026-07-01 11:39:20] You: hello
-[2026-07-01 11:39:20] NeurX: 👋 你好！很高兴见到你。我是 NeurX AI 助手，有什么我可以帮助你的吗？
-[2026-07-01 11:39:23] You: 你是
-[2026-07-01 11:39:23] NeurX: 🧠 [推理中...] 关于'你是...'的思考:
+[2026-07-01 11:39:20] NeurX: 👋 English text!English text.English text NeurX AI English text, English textAllowedEnglish text?
+[2026-07-01 11:39:23] You: English text
+[2026-07-01 11:39:23] NeurX: 🧠 [inferenceEnglish text...] English text'English text...'English text:
 
-这是一个有趣的问题。根据我的分析:
-• 核心要点已理解
-• 多角度思考中...
-• 综合评估后的建议:
+English text.English text:
+• English text
+• English text...
+• English textevaluationEnglish text:
 
-✓ 我认为这是一个很好的想法。
-✓ 建议进一步探索相关的方面。
-✓ 这需要考虑实际的应用场景。
-[2026-07-01 11:39:26] You: 分析
-[2026-07-01 11:39:26] NeurX: 🧠 [推理中...] 关于'分析...'的思考:
+✓ English text.
+✓ English textstepEnglish text.
+✓ English textRequiredEnglish textactualEnglish text.
+[2026-07-01 11:39:26] You: English text
+[2026-07-01 11:39:26] NeurX: 🧠 [inferenceEnglish text...] English text'English text...'English text:
 
-这是一个有趣的问题。根据我的分析:
-• 核心要点已理解
-• 多角度思考中...
-• 综合评估后的建议:
+English text.English text:
+• English text
+• English text...
+• English textevaluationEnglish text:
 
-✓ 我认为这是一个很好的想法。
-✓ 建议进一步探索相关的方面。
-✓ 这需要考虑实际的应用场景。
+✓ English text.
+✓ English textstepEnglish text.
+✓ English textRequiredEnglish textactualEnglish text.

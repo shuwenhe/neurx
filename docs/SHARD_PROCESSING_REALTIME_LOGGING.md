@@ -1,77 +1,77 @@
-# Shard Processing 实时监控指南
+# Shard Processing English textmonitoringEnglish text
 
-## 问题
+## English text
 
-原来的 `minimal_train.s` 训练脚本在处理 shard 数据时，日志输出不够实时，无法清楚地看到处理进度。
+English text `minimal_train.s` trainingEnglish text shard dataEnglish text, logoutputEnglish text, English text.
 
-### 症状
+### English text
 ```
 Manifest loaded
 Loading shard list file...
 Shard list file loaded
-（然后没有更多输出）
+(English textoutput)
 ```
 
-## 解决方案
+## English text
 
-### 1. 增强的实时日志输出
+### 1. English textlogoutput
 
-改进了 `scripts/legacy/minimal_train.s`：
-- 每个关键步骤都添加了 `runtime_run_command_output` 调用，将状态消息直接输出到 stderr
-- 这确保了日志立即显示，不会被缓冲
+English text `scripts/legacy/minimal_train.s`:
+- English textstepEnglish text `runtime_run_command_output` English text, English textstateEnglish textoutputEnglish text stderr
+- English textlogEnglish text, English text
 
-### 2. 关键步骤的日志标记
+### 2. English textstepEnglish textlogEnglish text
 
-添加了以下标记类型的日志输出：
+English textlogoutput:
 
-| 标记 | 含义 | 示例 |
+| English text | English text | example |
 |------|------|------|
-| `[STATUS]` | 主要流程状态 | Starting shard processing, shard 1/100 started |
-| `[DEBUG]` | 调试信息 | Found 100 shards, Shard 1 chunk loaded (4096 bytes) |
-| `[ERROR]` | 错误信息 | Shard file not found |
-| `[INFO]` | 信息性消息 | Reading shard file in line chunks |
-| `[TRAIN]` | 训练进度 | Step 10: loss=2.5432 lr=0.00012345 |
-| `[COMPLETE]` | 完成信息 | Training finished - step=100 docs=5000 tokens=100000 |
+| `[STATUS]` | mainEnglish textpipelinestate | Starting shard processing, shard 1/100 started |
+| `[DEBUG]` | English textinformation | Found 100 shards, Shard 1 chunk loaded (4096 bytes) |
+| `[ERROR]` | errorinformation | Shard file not found |
+| `[INFO]` | informationEnglish text | Reading shard file in line chunks |
+| `[TRAIN]` | trainingEnglish text | Step 10: loss=2.5432 lr=0.00012345 |
+| `[COMPLETE]` | English textinformation | Training finished - step=100 docs=5000 tokens=100000 |
 
-### 3. 实时监控脚本
+### 3. English textmonitoringEnglish text
 
-创建了 `tools/monitor-shard-processing.sh`：
-- 实时读取和解析日志输出
-- 对不同类型的消息进行彩色编码
-- 显示进度条和统计信息
-- 计算总耗时
+English text `tools/monitor-shard-processing.sh`:
+- English textlogoutput
+- English text
+- English textstatisticsinformation
+- computeEnglish text
 
-### 4. 启动脚本
+### 4. startEnglish text
 
-创建了 `tools/run-with-shard-monitor.sh`：
-- 自动编译 S 语言脚本
-- 启动实时监控器
-- 运行训练程序
-- 统一管理日志输出
+English text `tools/run-with-shard-monitor.sh`:
+- English textcompile S languageEnglish text
+- startEnglish textmonitoringEnglish text
+- runtrainingEnglish text
+- English textmanagementlogoutput
 
-## 使用方法
+## useEnglish text
 
-### 方法 1: 直接运行（推荐）
+### English text 1: English textrun(recommended)
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 bash tools/run-with-shard-monitor.sh /home/shuwen/s/bin/s
 ```
 
-### 方法 2: 手动运行编译后的 IR
+### English text 2: English textruncompileEnglish text IR
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 编译
+# compile
 /home/shuwen/s/bin/s ir scripts/legacy/minimal_train.s -o artifacts/build/run_large_pretrain/minimal_train.ir
 
-# 运行（有实时日志输出）
+# run(English textlogoutput)
 export NEURX_ROOT=/home/shuwen/shuwen/train/neurx
 /home/shuwen/s/bin/s artifacts/build/run_large_pretrain/minimal_train.ir 2>&1
 ```
 
-### 方法 3: 配置环境变量自定义
+### English text 3: configurationEnglish text
 
 ```bash
 export NEURX_PRETRAIN_BATCH_SIZE=64
@@ -82,7 +82,7 @@ export NEURX_PRETRAIN_SHARD_LIST_FILE=/path/to/shard_list.txt
 /home/shuwen/s/bin/s artifacts/build/run_large_pretrain/minimal_train.ir 2>&1
 ```
 
-## 实时日志输出示例
+## English textlogoutputexample
 
 ```
 ═══════════════════════════════════════════════
@@ -107,109 +107,109 @@ NeurX Shard Processing - Real-time Monitor
   Total time: 0h 9m 30s
 ```
 
-## 主要改进
+## mainEnglish text
 
-### 1. println 缓冲问题解决
+### 1. println English text
 
-使用 `runtime_run_command_output` 将日志直接输出到 stderr，绕过 println 的缓冲：
+use `runtime_run_command_output` English textlogEnglish textoutputEnglish text stderr, English text println English text:
 
 ```s
 runtime_run_command_output("echo '[STATUS] Starting shard processing...' >&2")
 ```
 
-### 2. 分阶段的日志输出
+### 2. English textphaseEnglish textlogoutput
 
-关键处理阶段的前后都有日志标记：
+English textphaseEnglish textlogEnglish text:
 
 ```s
 runtime_run_command_output("echo '[STATUS] Reading shard file...' >&2")
-// ... 处理代码 ...
+// ... English text ...
 runtime_run_command_output("echo '[DEBUG] Shard loaded (" + ... + " bytes)' >&2")
 ```
 
-### 3. 实时进度追踪
+### 3. English text
 
-每个 shard 和每个训练 step 都有独立的日志标记
+English text shard English texttraining step English textlogEnglish text
 
-### 4. 错误和调试信息
+### 4. errorEnglish textinformation
 
-立即捕捉和输出错误状态，便于问题诊断
+English textoutputerrorstate, English text
 
-## 环境变量配置
+## English textconfiguration
 
-训练程序支持以下环境变量：
+trainingEnglish textsupportEnglish text:
 
 ```bash
-NEURX_ROOT                      # 项目根目录
-NEURX_PRETRAIN_MANIFEST         # Manifest 文件路径
-NEURX_PRETRAIN_SHARD_LIST_FILE  # Shard 列表文件
-NEURX_PRETRAIN_BATCH_SIZE       # 批大小（默认 32）
-NEURX_PRETRAIN_SEQ_LEN          # 序列长度（默认 2048）
-NEURX_PRETRAIN_STEPS            # 总步数（默认 1000）
-NEURX_PRETRAIN_LR               # 学习率（默认 0.0002）
-NEURX_PRETRAIN_WEIGHT_DECAY     # 权重衰减（默认 0.01）
-NEURX_PRETRAIN_WARMUP_STEPS     # 预热步数（默认 100）
-NEURX_PRETRAIN_LOG_INTERVAL     # 日志间隔（默认 10）
-NEURX_PRETRAIN_MAX_DOCS         # 最大文档数（默认 100000000）
-NEURX_PRETRAIN_STEP_TOKENS      # 每步 token 数（默认 256）
-NEURX_PRETRAIN_LINE_CHUNK       # 行块大小（默认 32）
-NEURX_PRETRAIN_TEXT_TOKEN_CAP   # 文本 token 上限（默认 256）
-NEURX_PRETRAIN_JSON_SCAN_CAP    # JSON 扫描上限（默认 4096）
-NEURX_PRETRAIN_FAST_PREFIX      # 快速前缀模式（默认 1）
+NEURX_ROOT                      # English textdirectory
+NEURX_PRETRAIN_MANIFEST         # Manifest filepath
+NEURX_PRETRAIN_SHARD_LIST_FILE  # Shard English textfile
+NEURX_PRETRAIN_BATCH_SIZE       # English text(default 32)
+NEURX_PRETRAIN_SEQ_LEN          # English text(default 2048)
+NEURX_PRETRAIN_STEPS            # English textstepEnglish text(default 1000)
+NEURX_PRETRAIN_LR               # learning rate(default 0.0002)
+NEURX_PRETRAIN_WEIGHT_DECAY     # weightEnglish text(default 0.01)
+NEURX_PRETRAIN_WARMUP_STEPS     # English textstepEnglish text(default 100)
+NEURX_PRETRAIN_LOG_INTERVAL     # logEnglish text(default 10)
+NEURX_PRETRAIN_MAX_DOCS         # English text(default 100000000)
+NEURX_PRETRAIN_STEP_TOKENS      # English textstep token English text(default 256)
+NEURX_PRETRAIN_LINE_CHUNK       # English text(default 32)
+NEURX_PRETRAIN_TEXT_TOKEN_CAP   # English text token English text(default 256)
+NEURX_PRETRAIN_JSON_SCAN_CAP    # JSON English text(default 4096)
+NEURX_PRETRAIN_FAST_PREFIX      # quickEnglish text(default 1)
 ```
 
-## 故障排查
+## English text
 
-### 问题：仍然看不到 "[STATUS] Starting shard processing..." 消息
+### English text: English text "[STATUS] Starting shard processing..." English text
 
-**原因**：可能 shard 计数为 0
+**English text**: English text shard English text 0
 
-**解决**：
+**English text**:
 ```bash
-# 检查 shard 目录
+# English text shard directory
 ls -la /home/shuwen/shuwen/train/neurx/dataset/pretrain/shard/
 
-# 检查 manifest 文件
+# English text manifest file
 cat /home/shuwen/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json | head -20
 
-# 手动指定 shard 列表文件
+# English text shard English textfile
 export NEURX_PRETRAIN_SHARD_LIST_FILE=/path/to/your/shard_list.txt
 ```
 
-### 问题：处理速度很慢
+### English text: English text
 
-**原因**：可能在大量 JSON 解析上花费时间
+**English text**: English text JSON English texttime
 
-**解决**：
-- 增加 `NEURX_PRETRAIN_FAST_PREFIX=1`（已启用）
-- 减小 `NEURX_PRETRAIN_JSON_SCAN_CAP` 和 `NEURX_PRETRAIN_TEXT_TOKEN_CAP`
+**English text**:
+- English text `NEURX_PRETRAIN_FAST_PREFIX=1`(English text)
+- English text `NEURX_PRETRAIN_JSON_SCAN_CAP` English text `NEURX_PRETRAIN_TEXT_TOKEN_CAP`
 
-### 问题：内存使用过高
+### English text: English textuseEnglish text
 
-**原因**：批大小和序列长度设置过大
+**English text**: English text
 
-**解决**：
+**English text**:
 ```bash
 export NEURX_PRETRAIN_BATCH_SIZE=16
 export NEURX_PRETRAIN_SEQ_LEN=1024
 ```
 
-## 相关文件
+## English textfile
 
-- `scripts/legacy/minimal_train.s` - 改进的训练脚本（增加实时日志）
-- `tools/monitor-shard-processing.sh` - 实时日志监控器
-- `tools/run-with-shard-monitor.sh` - 完整启动脚本
-- `tools/cleanup-old-commits.sh` - 提交历史清理工具
+- `scripts/legacy/minimal_train.s` - English texttrainingEnglish text(English textlog)
+- `tools/monitor-shard-processing.sh` - English textlogmonitoringEnglish text
+- `tools/run-with-shard-monitor.sh` - completestartEnglish text
+- `tools/cleanup-old-commits.sh` - English texttool
 
-## 后续改进计划
+## English text
 
-1. ✅ 实时日志输出
-2. ✅ 分阶段的处理进度显示  
-3. 计划中：性能指标收集（吞吐量、延迟）
-4. 计划中：错误自动恢复机制
-5. 计划中：分布式训练日志聚合
+1. ✅ English textlogoutput
+2. ✅ English textphaseEnglish text
+3. English text: English text(English text, English text)
+4. English text: errorEnglish textrecoverEnglish text
+5. English text: English texttraininglogEnglish text
 
 ---
 
-**最后更新**: 2026-07-09  
-**版本**: 1.0
+**English text**: 2026-07-09
+**English text**: 1.0

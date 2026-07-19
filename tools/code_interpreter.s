@@ -1,111 +1,111 @@
 // ============================================================
-// NEURX Code Interpreter - 代码解释器系统
-// 完整实现: 沙箱执行环境 + 多语言支持 + 结果解析 + 安全隔离
-// 兼容 NEURX-4 All Tools / 通用代码解释器 / Jupyter Kernel
+// NEURX Code Interpreter - English textsystem
+// completeimplementation: English text + English textlanguagesupport + resultEnglish text + safetyEnglish text
+// English text NEURX-4 All Tools / English text / Jupyter Kernel
 // ============================================================
 
 module code_interpreter
 
-// ==================== 核心配置 ====================
+// ==================== English textconfiguration ====================
 
 struct CodeInterpreterConfig {
-    // 超时设置
-    execution_timeout_seconds: int = 120        // 单次代码执行最大时间
-    total_session_timeout: int = 600            // 整个会话最大时间
-    
-    // 资源限制
-    max_memory_mb: int = 512                    // 最大内存使用 (MB)
-    max_output_size_bytes: int = 10 * 1024 * 1024  // 最大输出大小 (10MB)
-    max_file_size_mb: int = 10                  // 生成的文件最大大小
-    
-    // 支持的语言
+    // English text
+    execution_timeout_seconds: int = 120        // English texttime
+    total_session_timeout: int = 600            // English texttime
+
+    // English text
+    max_memory_mb: int = 512                    // English textuse (MB)
+    max_output_size_bytes: int = 10 * 1024 * 1024  // English textoutputEnglish text (10MB)
+    max_file_size_mb: int = 10                  // generateEnglish textfileEnglish text
+
+    // supportEnglish textlanguage
     supported_languages: list<string> = ["python", "javascript", "s", "sql"]
     default_language: string = "python"
-    
-    // 安全配置
-    sandbox_enabled: bool = true                // 是否启用沙箱隔离
-    allow_network_access: bool = false          // 是否允许网络访问
-    allowed_modules: list<string> = [           // 白名单模块
+
+    // safetyconfiguration
+    sandbox_enabled: bool = true                // English text
+    allow_network_access: bool = false          // English text
+    allowed_modules: list<string> = [           // English text
         "math", "random", "datetime", "json", "re", "collections",
         "itertools", "functools", "operator", "statistics",
         "numpy", "pandas", "matplotlib", "scipy"
     ]
-    blocked_modules: list<string> = [           // 黑名单模块
+    blocked_modules: list<string> = [           // English text
         "os", "subprocess", "sys", "importlib", "__import__",
-        "eval", "exec", "compile", "open"  # 需要安全包装器
+        "eval", "exec", "compile", "open"  # RequiredsafetyEnglish text
     ]
-    
-    // 环境配置
+
+    // English textconfiguration
     working_directory: string = "/tmp/code_interpreter_sessions/"
-    install_dependencies: bool = true           // 允许 pip install
-    persist_files_between_calls: bool = true   // 跨调用保持文件状态
-    
-    // 可视化支持
-    enable_plotting: bool = true                // 支持 matplotlib/seaborn 绘图
-    enable_dataframe_display: bool = true       # DataFrame 美化显示
-    image_format: string = "png"               # 输出图片格式 (svg/png/jpeg)
+    install_dependencies: bool = true           // English text pip install
+    persist_files_between_calls: bool = true   // English textfilestate
+
+    // English textsupport
+    enable_plotting: bool = true                // support matplotlib/seaborn English text
+    enable_dataframe_display: bool = true       # DataFrame English text
+    image_format: string = "png"               # outputEnglish text (svg/png/jpeg)
 }
 
 struct ExecutionResult {
-    success: bool                              // 执行是否成功
-    output: string                             // stdout 输出
-    error: string?                             // stderr 错误信息 (如果有)
-    error_type: string?                        // 错误类型 (SyntaxError, RuntimeError, etc.)
-    traceback: list<string>?                   // 完整堆栈跟踪
-    return_value: any                          // 最后一个表达式的返回值 (如果有)
-    variables: map<string, any>?              // 执行后的变量状态 (调试用)
-    generated_files: list<FileInfo>?           // 生成的文件列表
-    plots: list<ImageData>?                    // 生成的图表
-    execution_time_ms: float                   // 执行耗时 (毫秒)
-    memory_used_mb: float                      // 内存使用量 (MB)
-    line_count: int                            // 代码行数
+    success: bool                              // English textsuccess
+    output: string                             // stdout output
+    error: string?                             // stderr errorinformation (English text)
+    error_type: string?                        // errorEnglish text (SyntaxError, RuntimeError, etc.)
+    traceback: list<string>?                   // completeEnglish text
+    return_value: any                          // English text (English text)
+    variables: map<string, any>?              // English textstate (English text)
+    generated_files: list<FileInfo>?           // generateEnglish textfileEnglish text
+    plots: list<ImageData>?                    // generateEnglish text
+    execution_time_ms: float                   // English text (English text)
+    memory_used_mb: float                      // English textuseEnglish text (MB)
+    line_count: int                            // English text
 }
 
 struct FileInfo {
-    path: string                               // 文件路径
-    size_bytes: int                            // 文件大小
-    content_type: string                       // MIME 类型
-    preview: string?                           // 文件内容预览 (前几行)
-    is_image: bool                             // 是否是图像文件
+    path: string                               // filepath
+    size_bytes: int                            // fileEnglish text
+    content_type: string                       // MIME English text
+    preview: string?                           // filecontentEnglish text (English text)
+    is_image: bool                             // English textfile
 }
 
 struct ImageData {
-    data: bytes                                // 图像二进制数据
-    format: string                             // 图像格式 (png/svg/jpeg)
-    width: int                                 // 图像宽度
-    height: int                                // 图像高度
-    alt_text: string?                          // 描述文字
+    data: bytes                                // English textdata
+    format: string                             // English text (png/svg/jpeg)
+    width: int                                 // English text
+    height: int                                // English text
+    alt_text: string?                          // DescriptionEnglish text
 }
 
 struct CodeBlock {
-    language: string                           // 代码语言 (python/javascripts/legacy/s/sql)
-    code: string                               // 代码内容
-    filename: string?                          // 可选的文件名 (用于保存)
+    language: string                           // English textlanguage (python/javascripts/legacy/s/sql)
+    code: string                               // English textcontent
+    filename: string?                          // English textfileEnglish text (English textsave)
 }
 
-// ==================== 沙箱执行环境 ====================
+// ==================== English text ====================
 
 class SandboxEnvironment {
     config: CodeInterpreterConfig
     session_id: string
     working_dir: string
     state: SessionState
-    
-    // 语言运行时
+
+    // languagerunEnglish text
     python_runtime: PythonRuntime?
     javascript_runtime: JavaScriptRuntime?
     s_runtime: ShellRuntime?
     sql_runtime: SQLRuntime?
-    
+
     init(config: CodeInterpreterConfig) {
         this.config = config
         this.session_id = generate_uuid()
         this.working_dir = config.working_directory + this.session_id + "/"
-        
-        // 创建工作目录
+
+        // English textdirectory
         create_directory(this.working_dir)
-        
-        // 初始化会话状态
+
+        // initializeEnglish textstate
         this.state = new SessionState(
             session_id=this.session_id,
             created_at=current_timestamp(),
@@ -113,8 +113,8 @@ class SandboxEnvironment {
             files_created=list<string>{},
             execution_history=list<ExecutionRecord>{}
         )
-        
-        // 初始化语言运行时
+
+        // initializelanguagerunEnglish text
         if "python" in config.supported_languages {
             this.python_runtime = new PythonRuntime(
                 sandbox_dir=this.working_dir,
@@ -135,7 +135,7 @@ class SandboxEnvironment {
 
     execute(code_block: CodeBlock) -> ExecutionResult {
         let start_time = current_time_millis()
-        
+
         // Step 1: Security check
         let security_result = this._security_check(code_block.code)
         if !security_result.allowed {
@@ -149,7 +149,7 @@ class SandboxEnvironment {
                 memory_used_mb=0
             }
         }
-        
+
         // Step 2: Language dispatch
         result: ExecutionResult
         match code_block.language.lower() {
@@ -180,11 +180,11 @@ class SandboxEnvironment {
                 }
             }
         }
-        
+
         // Step 3: Post-processing (collect outputs, plots, etc.)
         result.execution_time_ms = current_time_millis() - start_time
         result = this._post_process(result, code_block)
-        
+
         // Step 4: Update session state
         this.state.add_execution_record(ExecutionRecord{
             code=code_block.code,
@@ -192,15 +192,15 @@ class SandboxEnvironment {
             result=result,
             timestamp=current_timestamp()
         })
-        
+
         return result
     }
 
     _security_check(code: string) -> SecurityCheckResult {
         // Comprehensive security analysis of code
-        
+
         issues: list<string> = []
-        
+
         // Pattern 1: Dangerous imports/operations
         dangerous_patterns = [
             ("__import__", "Dynamic import detected"),
@@ -219,30 +219,30 @@ class SandboxEnvironment {
             ("chmod 777", "Permission modification"),
             ("mkfs", "Filesystem formatting command")
         ]
-        
+
         for pattern, message in dangerous_patterns {
             if pattern.to_lower() in code.to_lower() {
                 issues.append(message)
             }
         }
-        
+
         // Pattern 2: Check for infinite loops (basic heuristic)
         if "while True:" in code || "while(1)" in code || "while(true)" in code {
             // Allow but warn about potential infinite loop
             if "break" not in code && "return" not in code:
                 issues.append("Potential infinite loop without break condition")
         }
-        
+
         // Pattern 3: Check for excessive resource usage patterns
         large_allocations = [
             (r"\[\s*0\s*\]\s*\*\s*(\d{6,})", "Large array allocation may exceed memory limit")
         ]
         // ... regex matching ...
-        
+
         if issues.length > 0 {
             return SecurityCheckResult{allowed=false, reason="\n".join(issues)}
         }
-        
+
         return SecurityCheckResult{allowed=true, reason=""}
     }
 
@@ -254,21 +254,21 @@ class SandboxEnvironment {
                 since=this.state.last_execution_time
             )
             result.generated_files = files
-            
+
             // Update state with new files
             for f in files {
                 this.state.files_created.append(f.path)
             }
         }
-        
+
         // Extract plots from matplotlib if Python and plotting enabled
         if code_block.language == "python" && this.config.enable_plotting && result.success {
             result.plots = this._extract_matplotlib_plots()
         }
-        
+
         // Estimate memory used (simplified)
         result.memory_used_mb = estimate_memory_usage(result.output.length)
-        
+
         return result
     }
 
@@ -276,7 +276,7 @@ class SandboxEnvironment {
         plots: list<ImageData> = []
         // In real implementation, check for saved figure files or capture from backend
         // For now, scan for .png/.svg files created during execution
-        
+
         plot_files = find_files_with_extension(this.working_dir, [".png", ".svg", ".jpeg"])
         for plot_file in plot_files {
             img_data = read_file_as_bytes(plot_file)
@@ -315,7 +315,7 @@ struct SecurityCheckResult {
     reason: string
 }
 
-// ==================== 会话状态管理 ====================
+// ==================== English textstatemanagement ====================
 
 class SessionState {
     session_id: string
@@ -326,7 +326,7 @@ class SessionState {
     execution_history: list<ExecutionRecord>
     total_execution_time_ms: float = 0
 
-    init(session_id: string, created_at: float, variables: map<string, any>, 
+    init(session_id: string, created_at: float, variables: map<string, any>,
          files_created: list<string>, execution_history: list<ExecutionRecord>) {
         this.session_id = session_id
         this.created_at = created_at
@@ -379,7 +379,7 @@ struct SessionSummary {
     success_rate: float
 }
 
-// ==================== Python 运行时实现 ====================
+// ==================== Python runEnglish textimplementation ====================
 
 class PythonRuntime {
     sandbox_dir: string
@@ -392,7 +392,7 @@ class PythonRuntime {
         this.sandbox_dir = sandbox_dir
         this.memory_limit = memory_limit
         this.timeout = timeout
-        
+
         // Verify Python availability
         if !check_command_available(this.interpreter_path) {
             throw error(f"Python interpreter not found: {this.interpreter_path}")
@@ -403,7 +403,7 @@ class PythonRuntime {
         // Write code to temporary file within sandbox
         let script_path = this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
         write_file(script_path, code)
-        
+
         try {
             // Execute with resource limits using subprocess
             // In production, use proper sandboxing (docker, nsjail, etc.)
@@ -413,7 +413,7 @@ class PythonRuntime {
                 "-B",  # Don't write .pyc files
                 script_path
             ]
-            
+
             // Set environment variables for sandboxing
             env_vars = {
                 "PYTHONPATH": this.sandbox_dir,
@@ -421,7 +421,7 @@ class PythonRuntime {
                 "TMPDIR": this.sandbox_dir,
                 "PYTHONDONTWRITEBYTECODE": "1"
             }
-            
+
             // Execute with timeout
             let proc = subprocess_run(
                 cmd,
@@ -431,11 +431,11 @@ class PythonRuntime {
                 cwd=this.sandbox_dir,
                 env=env_vars
             )
-            
+
             // Parse output
             output = proc.stdout
             error_output = proc.stderr
-            
+
             // Detect errors
             if proc.returncode != 0 {
                 let error_info = this._parse_python_error(error_output)
@@ -451,10 +451,10 @@ class PythonRuntime {
                     memory_used_mb=0
                 }
             }
-            
+
             // Try to extract return value (last expression)
             return_value = this._extract_return_value(output)
-            
+
             return ExecutionResult{
                 success=true,
                 output=output,
@@ -466,7 +466,7 @@ class PythonRuntime {
                 line_count=count_lines(code),
                 memory_used_mb=0
             }
-            
+
         } catch TimeoutExpired {
             kill_process(this.process)
             return ExecutionResult{
@@ -495,7 +495,7 @@ class PythonRuntime {
         error_type = ""
         message = ""
         traceback: list<string> = []
-        
+
         in_traceback = false
         for line in lines {
             if line.startswith("Traceback") || line.startswith("  File ") or line.startswith("    "):
@@ -507,7 +507,7 @@ class PythonRuntime {
                 message = parts[1].strip() if parts.length > 1 else line.strip()
             }
         }
-        
+
         return ErrorInfo{
             error_type=error_type ?: "UnknownError",
             message=message ?: stderr_output,
@@ -521,17 +521,17 @@ class PythonRuntime {
         lines = stdout.strip().split("\n")
         if lines.length > 0 {
             last_line = lines[-1]
-            
+
             // Try JSON parsing
             try {
                 return json_parse(last_line)
             }
-            
+
             // Try numeric parsing
             try {
                 return parseFloat(last_line)
             }
-            
+
             // Return as string
             return last_line
         }
@@ -545,7 +545,7 @@ struct ErrorInfo {
     traceback: list<string>
 }
 
-// ==================== JavaScript 运行时 ====================
+// ==================== JavaScript runEnglish text ====================
 
 class JavaScriptRuntime {
     vm_context: any  // V8 context or Node.js vm module reference
@@ -564,10 +564,10 @@ class JavaScriptRuntime {
                     let __output = [];
                     const originalLog = console.log;
                     console.log = (...args) => { __output.push(args.join(' ')); };
-                    
+
                     try {
                         ${code}
-                        
+
                         // Capture last expression value (simplified)
                         const __result = typeof __last_expression !== 'undefined' ? __last_expression : undefined;
                         console.log = originalLog;
@@ -578,9 +578,9 @@ class JavaScriptRuntime {
                     }
                 })();
             """
-            
+
             let result = run_in_vm(this.vm_context, wrapped_code)
-            
+
             return ExecutionResult{
                 success=true,
                 output=result.output,
@@ -603,7 +603,7 @@ class JavaScriptRuntime {
     }
 }
 
-// ==================== Shell 运行时 ====================
+// ==================== Shell runEnglish text ====================
 
 class ShellRuntime {
     allow_network: bool
@@ -633,7 +633,7 @@ class ShellRuntime {
                 memory_used_mb=0
             }
         }
-        
+
         try {
             let proc = subprocess_run(
                 ["bash", "-c", command],
@@ -642,7 +642,7 @@ class ShellRuntime {
                 timeout=30,  // Short timeout for command execution
                 shell=false
             )
-            
+
             return ExecutionResult{
                 success=proc.returncode == 0,
                 output=proc.stdout,
@@ -674,7 +674,7 @@ class ShellRuntime {
     }
 }
 
-// ==================== SQL 运行时 ====================
+// ==================== SQL runEnglish text ====================
 
 class SQLRuntime {
     db_path: string
@@ -690,24 +690,24 @@ class SQLRuntime {
         try {
             // Parse SQL to determine type
             query_type = detect_sql_query_type(query)
-            
+
             match query_type {
                 "SELECT" | "SHOW" | "DESCRIBE" | "EXPLAIN" => {
                     // Query returning rows
                     let cursor = this.connection!.execute(query)
                     columns = cursor.column_names
                     rows = cursor.fetchall()
-                    
+
                     // Format output as table
                     output = format_sql_table(columns, rows)
-                    
+
                     // Return structured data
                     return_value = SQLQueryResult{
                         columns=columns,
                         rows=rows,
                         row_count=rows.length
                     }
-                    
+
                     return ExecutionResult{
                         success=true,
                         output=output,
@@ -717,12 +717,12 @@ class SQLRuntime {
                         memory_used_mb=0
                     }
                 }
-                
+
                 "CREATE" | "ALTER" | "DROP" | "INSERT" | "UPDATE" | "DELETE" => {
                     // DDL/DML statement
                     this.connection!.execute(query)
                     affected_rows = this.connection!.rows_affected
-                    
+
                     return ExecutionResult{
                         success=true,
                         output=f"Query executed successfully. Affected rows: {affected_rows}",
@@ -732,7 +732,7 @@ class SQLRuntime {
                         memory_used_mb=0
                     }
                 }
-                
+
                 _ => {
                     return ExecutionResult{
                         success=false,
@@ -767,7 +767,7 @@ struct SQLQueryResult {
     row_count: int
 }
 
-// ==================== 结果解析和格式化 ====================
+// ==================== resultEnglish text ====================
 
 class ResultFormatter {
     config: CodeInterpreterConfig
@@ -779,30 +779,30 @@ class ResultFormatter {
     format_for_llm(result: ExecutionResult) -> FormattedOutput {
         // Format execution results for LLM consumption
         sections: list<string> = []
-        
+
         // Status section
         status_icon = result.success ? "✅" : "❌"
         status_text = result.success ? "Success" : f"Error ({result.error_type})"
         sections.append(f"{status_icon} **Status**: {status_text}")
-        
+
         // Output section
         if result.output.length > 0 {
             truncated_output = this._truncate(result.output, max_chars=5000)
             formatted_output = this._format_code_block(truncated_output, "output")
             sections.append(f"**Output**:\n{formatted_output}")
         }
-        
+
         // Error section
         if result.error != null {
             formatted_error = this._format_code_block(result.error!, "error")
             sections.append(f"**Error**:\n{formatted_error}")
-            
+
             if result.traceback != null && result.traceback!.length > 0 {
                 formatted_tb = this._format_code_block("\n".join(result.traceback!), "traceback")
                 sections.append(f"**Traceback**:\n{formatted_tb}")
             }
         }
-        
+
         // Execution metrics
         metrics_parts: list<string> = []
         metrics_parts.append(f"Time: {result.execution_time_ms:.1f}ms")
@@ -811,7 +811,7 @@ class ResultFormatter {
             metrics_parts.append(f"Memory: ~{result.memory_used_mb:.1f}MB")
         }
         sections.append(f"*Metrics*: {', '.join(metrics_parts)}")
-        
+
         // Generated files
         if result.generated_files != null && result.generated_files!.length > 0 {
             file_list: list<string> = []
@@ -820,7 +820,7 @@ class ResultFormatter {
             }
             sections.append("**Generated Files**:\n" + "\n".join(file_list))
         }
-        
+
         // Plots/Figures
         if result.plots != null && result.plots!.length > 0 {
             plot_descriptions: list<string> = []
@@ -829,7 +829,7 @@ class ResultFormatter {
             }
             sections.append("**Plots Generated**: " + ", ".join(plot_descriptions))
         }
-        
+
         // Return value (if meaningful)
         if result.return_value != null {
             rv_str = format_value_for_display(result.return_value!)
@@ -837,7 +837,7 @@ class ResultFormatter {
                 sections.append(f"**Return Value**: `{rv_str}`")
             }
         }
-        
+
         return FormattedOutput{
             raw=result,
             formatted_text="\n\n".join(sections),
@@ -865,7 +865,7 @@ struct FormattedOutput {
     has_files: bool
 }
 
-// ==================== 高级功能: 数据分析助手 ====================
+// ==================== advancedEnglish text: dataEnglish text ====================
 
 class DataAnalysisHelper {
     sandbox: SandboxEnvironment
@@ -928,7 +928,7 @@ print(f"Total: {{mem.sum() / 1024 / 1024:.2f}} MB")
     }
 
     // Generate visualization code
-    visualize_data(csv_path: string, chart_type: string, x_col: string, y_col: string?, 
+    visualize_data(csv_path: string, chart_type: string, x_col: string, y_col: string?,
                    group_by: string?) -> ExecutionResult {
         viz_templates: map<string, string> = {
             "bar": f"""
@@ -1007,7 +1007,7 @@ plt.savefig('chart_correlation.png', dpi=150, bbox_inches='tight')
 print("Chart saved as chart_correlation.png")
 """
         }
-        
+
         if chart_type.to_lower() not in viz_templates {
             return ExecutionResult{
                 success=false,
@@ -1016,7 +1016,7 @@ print("Chart saved as chart_correlation.png")
                 line_count=0
             }
         }
-        
+
         code = viz_templates[chart_type.to_lower()]
         let code_block = CodeBlock{language="python", code=code}
         return this.sandbox.execute(code_block)
@@ -1046,7 +1046,7 @@ elif test_type == "anova":
     f_stat, p_val = stats.f_oneway(*groups)
     print(f"F-statistic: {{f_stat:.4f}}")
     print(f"P-value: {{p_val:.4e}}")
-    
+
 elif test_type == "normality":
     stat, p_val = stats.shapiro(df["{col1}"])
     print(f"Shapiro-Wilk statistic: {{stat:.4f}}")
@@ -1066,7 +1066,7 @@ else:
     }
 }
 
-// ==================== NEURX Code Interpreter 主接口 ====================
+// ==================== NEURX Code Interpreter mainEnglish text ====================
 
 class CodeInterpreter {
     config: CodeInterpreterConfig
@@ -1080,7 +1080,7 @@ class CodeInterpreter {
         this.config = config ?? new CodeInterpreterConfig()
         this.formatter = new ResultFormatter(this.config)
         this.active_sessions = map<string, SandboxEnvironment>{}
-        
+
         // Create default session
         this.default_session = this.create_session("default")
         this.data_helper = new DataAnalysisHelper(this.default_session!)
@@ -1094,12 +1094,12 @@ class CodeInterpreter {
 
     execute_code(code: string, language?: string, session?: string) -> FormattedOutput {
         let target_session = this.active_sessions[session ?? "default"] ?? this.default_session!
-        
+
         let code_block = CodeBlock{
             language=language ?? this.config.default_language,
             code=code
         }
-        
+
         let result = target_session.execute(code_block)
         return this.formatter.format_for_llm(result)
     }
@@ -1127,7 +1127,7 @@ class CodeInterpreter {
         return this.formatter.format_for_llm(result)
     }
 
-    plot_chart(csv_path: string, chart_type: string, x: string, y?: string, 
+    plot_chart(csv_path: string, chart_type: string, x: string, y?: string,
                group_by?: string) -> FormattedOutput {
         let result = this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
         return this.formatter.format_for_llm(result)
@@ -1163,7 +1163,7 @@ class CodeInterpreter {
     }
 }
 
-// ==================== 工厂函数和测试 ====================
+// ==================== English textfunctionEnglish texttest ====================
 
 function create_code_interpreter(config?: CodeInterpreterConfig) -> CodeInterpreter {
     return new CodeInterpreter(config=config)
@@ -1171,9 +1171,9 @@ function create_code_interpreter(config?: CodeInterpreterConfig) -> CodeInterpre
 
 function test_code_interpreter() -> bool {
     print("🧪 Testing NEURX Code Interpreter...")
-    
+
     ci = new CodeInterpreter()
-    
+
     // Test 1: Basic Python execution
     print("  ✓ Test 1: Basic Python Execution")
     result1 = ci.run_python("""
@@ -1183,19 +1183,19 @@ print(f"The answer is: {{y}}")
 """)
     assert result1.raw.success, f"Python exec failed: {result1.raw.error}"
     assert "84" in result1.raw.output, "Unexpected output"
-    
+
     // Test 2: Security violation detection
     print("  ✓ Test 2: Security Violation Detection")
     result2 = ci.run_python("import os; os.system('rm -rf /')")
     assert !result2.raw.success, "Should block dangerous code"
     assert result2.raw.error_type == "SecurityError", "Should be security error"
-    
+
     // Test 3: Shell execution (safe commands)
     print("  ✓ Test 3: Safe Shell Command Execution")
     result3 = ci.run_s("echo 'Hello from s'")
     assert result3.raw.success, "S exec failed"
     assert "Hello from s" in result3.raw.output, "Unexpected s output"
-    
+
     // Test 4: SQL execution
     print("  ✓ Test 4: SQL Execution")
     result4 = ci.run_sql("""
@@ -1204,14 +1204,14 @@ INSERT INTO users VALUES (1, 'Alice', 30), (2, 'Bob', 25);
 SELECT * FROM users ORDER BY age DESC;
 """)
     assert result4.raw.success, "SQL failed"
-    
+
     // Test 5: Multi-step state persistence
     print("  ✓ Test 5: State Persistence Across Calls")
     ci.run_python("counter = 0")
     ci.run_python("counter += 1")
     result5 = ci.run_python("print(counter)")
     assert "1" in result5.raw.output, "State should persist"
-    
+
     // Test 6: Data analysis helper
     print("  ✓ Test 6: Data Analysis Helper")
     // Create a sample CSV first
@@ -1224,10 +1224,10 @@ print("CSV created")
 """)
     summary = ci.analyze_csv(ci.default_session!.working_dir + "sample.csv")
     assert summary.raw.success, "Data analysis failed"
-    
+
     // Cleanup
     ci.cleanup()
-    
+
     print("\n✅ All Code Interpreter Tests Passed!")
     return true
 }

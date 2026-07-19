@@ -1,46 +1,46 @@
 package neurx.serving.speculative_decoding
 
 // ============================================================================
-// Speculative Decoding — 投机解码
+// Speculative Decoding — English text
 //
-// 论文: "Fast Inference from Transformers via Speculative Decoding"
+// English text: "Fast Inference from Transformers via Speculative Decoding"
 //        (Leviathan et al., 2023)
 //        "SpecInfer: Accelerating LLM Serving..." (Miao et al., 2023)
 //
-// 核心思想:
-//   用一个小草稿模型 (draft model, ~7B) 快速生成 γ 个 token 候选，
-//   再用大目标模型 (target model, ~70B) 并行验证，拒绝不符合目标分布的 token。
-//   由于验证可并行而串行生成不能，整体吞吐量提升 2-3×，且输出分布与只用大模型完全相同。
+// English text:
+//   English textmodel (draft model, ~7B) quickgenerate γ English text token English text,
+//   English textmodel (target model, ~70B) English text, English text token.
+//   English textgenerateEnglish text, English text 2-3×, English textoutputEnglish textmodelEnglish text.
 //
-// 算法 (标准投机解码):
-//   1. 草稿模型自回归生成 γ 个 token: x_{t+1},...,x_{t+γ}
-//   2. 目标模型一次前向计算 q(x|prefix+drafts)
-//   3. 对每个草稿 token xᵢ:
-//      接受概率 α_i = min(1, q(xᵢ|ctx) / p(xᵢ|ctx))
-//      以概率 αᵢ 接受，否则从 (q - p)₊ 的归一化分布采样新 token 并停止
-//   4. 若全部接受，从目标模型采样第 γ+1 个 token
+// English text (English text):
+//   1. English textmodelEnglish textgenerate γ English text token: x_{t+1},...,x_{t+γ}
+//   2. English textmodelEnglish textcompute q(x|prefix+drafts)
+//   3. English text token xᵢ:
+//      English text α_i = min(1, q(xᵢ|ctx) / p(xᵢ|ctx))
+//      English text αᵢ English text, English text (q - p)₊ English text token English text
+//   4. English text, English textmodelEnglish text γ+1 English text token
 //
-// 变体:
-//   • 自投机解码 (Self-speculative): 跳层作为草稿模型
-//   • Medusa: 多头并行预测
-//   • EAGLE: 特征级草稿
+// English text:
+//   • English text (Self-speculative): English textmodel
+//   • Medusa: English text
+//   • EAGLE: English text
 // ============================================================================
 
 // ============================================================================
-// 1. 配置
+// 1. configuration
 // ============================================================================
 
 struct spec_decode_config {
-    int gamma              // 草稿步数 (通常 3-8)
-    float acceptance_threshold  // 接受阈值 (0.0 = 原始算法, >0 = 宽松)
-    int vocab_size         // 词表大小
-    bool use_top_p         // 是否用 nucleus 采样
-    float top_p            // nucleus 采样参数
-    float temperature      // 采样温度
-    int max_seq_len        // 最大序列长度
+    int gamma              // English textstepEnglish text (English text 3-8)
+    float acceptance_threshold  // English text (0.0 = English text, >0 = English text)
+    int vocab_size         // English text
+    bool use_top_p         // English text nucleus English text
+    float top_p            // nucleus English textparameter
+    float temperature      // English text
+    int max_seq_len        // English text
     string draft_type      // "separate" | "self" | "medusa"
-    int medusa_heads       // Medusa 头数 (draft_type="medusa")
-    int self_skip_layers   // 自投机跳过的层数
+    int medusa_heads       // Medusa English text (draft_type="medusa")
+    int self_skip_layers   // English text
 }
 
 func default_spec_decode_config(int vocab_size) spec_decode_config {
@@ -59,10 +59,10 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
 }
 
 // ============================================================================
-// 2. 概率分布操作
+// 2. English text
 // ============================================================================
 
-// softmax (数值稳定)
+// softmax (English text)
 func spec_softmax([]float logits, int V) []float {
     float m = logits[0]
     int i = 0
@@ -90,7 +90,7 @@ func spec_softmax([]float logits, int V) []float {
     probs
 }
 
-// 带温度的 softmax
+// English text softmax
 func spec_softmax_temp([]float logits, int V, float temp) []float {
     []float scaled = []
     int i = 0
@@ -101,10 +101,10 @@ func spec_softmax_temp([]float logits, int V, float temp) []float {
     spec_softmax(scaled, V)
 }
 
-// nucleus (top-p) 采样
+// nucleus (top-p) English text
 func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
-    // 找到 top-p 截断点
-    // 简化: 贪心选最高概率 token (seed 预留随机接口)
+    // English text top-p English text
+    // English text: English text token (seed English text)
     int best = 0
     float best_p = probs[0]
     int i = 1
@@ -118,7 +118,7 @@ func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     best
 }
 
-// 截断差分采样: 从 max(0, q - p) / Z 采样
+// English text: English text max(0, q - p) / Z English text
 func spec_residual_sample([]float q, []float p, int V, int seed) int {
     []float diff = []
     float sum = 0.0
@@ -131,13 +131,13 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
         i = i + 1
     }
 
-    // 从 diff / sum 采样
+    // English text diff / sum English text
     if sum < 1e-10 {
-        // 退回 argmax(q)
+        // English text argmax(q)
         return spec_top_p_sample(q, V, 1.0, seed)
     }
 
-    // 随机均匀采样 (简化: 取 sum/2 处的分位点)
+    // English text (English text: English text sum/2 English text)
     float threshold = sum * 0.5
     float cumsum = 0.0
     int j = 0
@@ -152,48 +152,48 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
 }
 
 // ============================================================================
-// 3. 投机解码核心算法
+// 3. English text
 // ============================================================================
 
 struct spec_draft_output {
-    []int   token_ids      // [gamma] 草稿 token
-    []float log_probs      // [gamma] 草稿 log p(xᵢ|ctx)
-    [][]float all_probs    // [gamma][vocab] 草稿完整分布
+    []int   token_ids      // [gamma] English text token
+    []float log_probs      // [gamma] English text log p(xᵢ|ctx)
+    [][]float all_probs    // [gamma][vocab] English textcompleteEnglish text
 }
 
 struct spec_verify_result {
-    []int accepted_tokens  // 最终接受的 token 序列 (包括最终 target token)
-    int   num_accepted      // 接受了几个草稿 token
-    float acceptance_rate  // 接受率 num_accepted / gamma
-    bool  all_accepted      // 全部接受
+    []int accepted_tokens  // English text token English text (English text target token)
+    int   num_accepted      // English text token
+    float acceptance_rate  // English text num_accepted / gamma
+    bool  all_accepted      // English text
 }
 
-// 接受/拒绝一步
+// English text/English textstep
 func spec_accept_reject(
-    float q_prob,   // 目标模型 q(xᵢ|ctx)
-    float p_prob,   // 草稿模型 p(xᵢ|ctx)
+    float q_prob,   // English textmodel q(xᵢ|ctx)
+    float p_prob,   // English textmodel p(xᵢ|ctx)
     int   token_id,
     float alpha_threshold,
     int   seed
 ) bool {
     if p_prob < 1e-10 {
-        // 草稿概率极低，一定接受 (q/p 趋于无穷)
+        // English text, English text (q/p English text)
         return true
     }
     float ratio = q_prob / p_prob
     if ratio >= 1.0 {
         return true
     }
-    // 以概率 ratio 接受
-    // 用 seed 简化: 用固定比较模拟随机
+    // English text ratio English text
+    // English text seed English text: English text
     float rand_val = pseudo_rand(seed)
     rand_val < ratio
 }
 
-// 投机解码验证步 (核心)
+// English textstep (English text)
 func spec_verify(
-    spec_draft_output draft,     // 草稿模型输出
-    [][]float target_probs,      // 目标模型对 gamma 个位置的分布 [gamma][V]
+    spec_draft_output draft,     // English textmodeloutput
+    [][]float target_probs,      // English textmodelEnglish text gamma English text [gamma][V]
     int V,
     spec_decode_config cfg
 ) spec_verify_result {
@@ -213,17 +213,17 @@ func spec_verify(
             accepted = append(accepted, tok)
             num_acc = num_acc + 1
         } else {
-            // 从残差分布采样一个修正 token
+            // English text token
             int fix_tok = spec_residual_sample(target_probs[i], draft.all_probs[i], V, i)
             accepted = append(accepted, fix_tok)
             all_ok = false
-            // 停止验证
+            // English text
             i = gamma  // break
         }
         i = i + 1
     }
 
-    // 若全部接受，追加目标模型第 gamma+1 个 token
+    // English text, English textmodelEnglish text gamma+1 English text token
     if all_ok && len(target_probs) > gamma {
         int bonus_tok = spec_top_p_sample(target_probs[gamma], V, cfg.top_p, 99999)
         accepted = append(accepted, bonus_tok)
@@ -243,19 +243,19 @@ func spec_verify(
 }
 
 // ============================================================================
-// 4. 解码循环状态
+// 4. English textstate
 // ============================================================================
 
 struct spec_decode_state {
     spec_decode_config cfg
-    []int  token_buffer      // 当前生成序列
-    int    seq_len           // 当前长度
-    int    total_tokens_gen  // 总生成 token 数
-    int    total_draft_calls // 草稿模型调用次数
-    int    total_verify_calls// 目标模型验证次数
-    float  avg_acceptance    // 平均接受率
-    int    step              // 解码步数
-    int    seed_state        // 随机种子状态
+    []int  token_buffer      // English textgenerateEnglish text
+    int    seq_len           // English text
+    int    total_tokens_gen  // English textgenerate token English text
+    int    total_draft_calls // English textmodelEnglish text
+    int    total_verify_calls// English textmodelEnglish text
+    float  avg_acceptance    // English text
+    int    step              // English textstepEnglish text
+    int    seed_state        // English textstate
 }
 
 func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode_state {
@@ -274,18 +274,18 @@ func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode
 
 struct spec_decode_step_result {
     spec_decode_state state
-    []int new_tokens          // 本步新增 token
-    int   tokens_added        // 新增 token 数
+    []int new_tokens          // English textstepEnglish text token
+    int   tokens_added        // English text token English text
     float step_acceptance_rate
-    bool  done                // 遇到 EOS
+    bool  done                // English text EOS
 }
 
-// 单步投机解码
-// (在实际系统中, draft_fn 和 target_fn 调用真实模型)
+// English textstepEnglish text
+// (English textactualsystemEnglish text, draft_fn English text target_fn English texttruthfulmodel)
 func spec_decode_step(
     spec_decode_state state,
-    spec_draft_output draft,     // 外部提供: 草稿模型输出
-    [][]float target_probs,      // 外部提供: 目标模型对 gamma+1 位置的分布
+    spec_draft_output draft,     // English text: English textmodeloutput
+    [][]float target_probs,      // English text: English textmodelEnglish text gamma+1 English text
     int eos_token_id
 ) spec_decode_step_result {
     spec_verify_result vr = spec_verify(draft, target_probs, state.cfg.vocab_size, state.cfg)
@@ -296,12 +296,12 @@ func spec_decode_step(
     updated.total_verify_calls = state.total_verify_calls + 1
     updated.total_tokens_gen   = state.total_tokens_gen + len(vr.accepted_tokens)
 
-    // 更新平均接受率
+    // English text
     float old_avg = state.avg_acceptance
     float new_acc = vr.acceptance_rate
     updated.avg_acceptance = (old_avg * float_spec(state.step) + new_acc) / float_spec(state.step + 1)
 
-    // 追加新 token 到缓冲区
+    // English text token English text
     bool done = false
     []int new_toks = []
     int i = 0
@@ -328,23 +328,23 @@ func spec_decode_step(
 }
 
 // ============================================================================
-// 5. Medusa — 多头投机
+// 5. Medusa — English text
 // ============================================================================
 
 struct medusa_config {
-    int num_heads       // 预测头数 (每头预测 t+1, t+2, ...t+k)
+    int num_heads       // English text (English text t+1, t+2, ...t+k)
     int hidden_dim      // backbone hidden dim
     int vocab_size
     float temperature
-    float posterior_threshold  // 树验证阈值 (通常 0.09)
-    float posterior_alpha      // 树验证 α (通常 0.3)
+    float posterior_threshold  // English text (English text 0.09)
+    float posterior_alpha      // English text α (English text 0.3)
 }
 
-// Medusa head (简单线性层)
+// Medusa head (English text)
 struct medusa_head {
     []float weight      // [vocab_size, hidden_dim]
     []float bias        // [vocab_size]
-    int head_idx        // 预测 t+head_idx+1
+    int head_idx        // English text t+head_idx+1
 }
 
 func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
@@ -355,7 +355,7 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
     }
 }
 
-// Medusa 前向: hidden [hidden_dim] → logits [vocab_size]
+// Medusa English text: hidden [hidden_dim] → logits [vocab_size]
 func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float {
     []float logits = zeros_spec(V)
     int j = 0
@@ -373,9 +373,9 @@ func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float
 }
 
 struct medusa_output {
-    [][]float head_logits    // [num_heads][vocab_size] 各头的 logit
-    []int     candidates     // 树搜索候选 token 序列
-    int       tree_depth     // 实际树深度
+    [][]float head_logits    // [num_heads][vocab_size] English text logit
+    []int     candidates     // English textsearchEnglish text token English text
+    int       tree_depth     // actualEnglish text
 }
 
 func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medusa_output {
@@ -400,15 +400,15 @@ func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medu
 }
 
 // ============================================================================
-// 6. 性能统计
+// 6. English textstatistics
 // ============================================================================
 
 struct spec_perf_stats {
-    float speedup_ratio        // 相比标准解码的理论加速比
-    float avg_acceptance_rate  // 平均 token 接受率
+    float speedup_ratio        // English text
+    float avg_acceptance_rate  // English text token English text
     int total_tokens
-    int total_target_calls     // 目标模型前向次数
-    float tokens_per_call      // 平均每次目标模型前向产出 token 数
+    int total_target_calls     // English textmodelEnglish text
+    float tokens_per_call      // English textmodelEnglish text token English text
 }
 
 func compute_spec_perf(spec_decode_state state) spec_perf_stats {
@@ -416,7 +416,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     if calls == 0 { calls = 1 }
     float tpc = float_spec(state.total_tokens_gen) / float_spec(calls)
 
-    // 理论加速比 ≈ (gamma+1) * alpha / (1 + alpha*(gamma-1))  近似
+    // English text ≈ (gamma+1) * alpha / (1 + alpha*(gamma-1))  English text
     float alpha = state.avg_acceptance
     int gamma = state.cfg.gamma
     float gamma_f = float_spec(gamma)
@@ -435,7 +435,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
 }
 
 // ============================================================================
-// 7. 工具函数
+// 7. toolfunction
 // ============================================================================
 
 func zeros_spec(int n) []float {

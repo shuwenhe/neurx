@@ -1,74 +1,74 @@
-# NeurX 对标 Claude Opus 4.8 - 关键优先级与行动计划
+# NeurX English text Claude Opus 4.8 - English text
 
-**现状**: 7B 训练入口已接入配置驱动启动链，Phase 1-9 完成  
-**目标**: 达到Claude Opus 4.8竞争力（企业级工业模型）  
-**时间**: 6周内实现关键特性  
+**English text**: 7B trainingEnglish textconfigurationEnglish textstartEnglish text, Phase 1-9 English text
+**English text**: English textClaude Opus 4.8English text(English textmodel)
+**time**: 6English textimplementationEnglish text
 
-## 当前已落地
+## English text
 
-- `make train-7b` 已可从 [`configs/7b_training.json`](/Users/feifei/shuwen/train/neurx/configs/7b_training.json) 生成 7B 启动环境并进入 launcher
-- `make train` 已切到纯 S 生成的 `launch_plan.sh` 入口
-- 训练启动链已包含：
-  - 数据 manifest / shard 目录
-  - tokenizer 配置
-  - checkpoint 恢复路径
-  - optimizer state 保存开关
-  - 分布式 world size / backend / master 配置
+- `make train-7b` English text [`configs/7b_training.json`](/Users/feifei/shuwen/train/neurx/configs/7b_training.json) generate 7B startEnglish text launcher
+- `make train` English text S generateEnglish text `launch_plan.sh` English text
+- trainingstartEnglish text:
+  - data manifest / shard directory
+  - tokenizer configuration
+  - checkpoint recoverpath
+  - optimizer state saveEnglish text
+  - English text world size / backend / master configuration
 
-## 仍需补齐
+## English text
 
-- 让 `scripts/legacy/large_model_trainer.s` 直接消费 `NEURX_7B_*` 环境变量，而不是继续依赖手写默认值
-- 把数据侧真正接到流式 token 管线、shuffle 和 epoch 级采样
-- 把 checkpoint 细化到 optimizer state 分片恢复与严格校验
-- 把 7B 路线升级成 70B / 长上下文 / 多模态的统一配置族
+- English text `scripts/legacy/large_model_trainer.s` English text `NEURX_7B_*` English text, English textdefaultEnglish text
+- English textdataEnglish text token English text, shuffle English text epoch English text
+- English text checkpoint English text optimizer state English textrecoverEnglish text
+- English text 7B English text 70B / English text / English textconfigurationEnglish text
 
 ---
 
-## 📊 能力对标分析
+## 📊 English text
 
-### Claude Opus 4.8 核心能力
-| 维度 | Claude Opus | NeurX 7B 现状 | 缺口 | 优先级 |
+### Claude Opus 4.8 English text
+| English text | Claude Opus | NeurX 7B English text | English text | English text |
 |------|-------------|---------|------|------|
-| **参数规模** | 200B+ | 7B | 28x | 🔴 P0 |
-| **长上下文** | 200K tokens | 32K tokens | 6x | 🔴 P0 |
-| **多模态** | 视觉+文本 | 文本仅 | 完全缺失 | 🔴 P0 |
-| **推理能力** | 链式思维+搜索树 | 贪心解码 | 显著 | 🟡 P1 |
-| **对齐质量** | 宪法AI+微调 | 基础RLHF | 中等 | 🟡 P1 |
-| **更新频率** | 连续微调 | 一次性训练 | 完全缺失 | 🟡 P1 |
+| **parameterEnglish text** | 200B+ | 7B | 28x | 🔴 P0 |
+| **English text** | 200K tokens | 32K tokens | 6x | 🔴 P0 |
+| **English text** | English text+English text | English text | English text | 🔴 P0 |
+| **inferenceEnglish text** | English text+searchEnglish text | English text | English text | 🟡 P1 |
+| **alignmentEnglish text** | English textAI+English text | English textRLHF | English text | 🟡 P1 |
+| **English text** | English text | English texttraining | English text | 🟡 P1 |
 
 ---
 
-## 🎯 关键行动优先级（对标Opus）
+## 🎯 English text(English textOpus)
 
-### 【第1优先：参数规模升级】⭐⭐⭐⭐⭐
-**为什么最重要**: 参数本身 = 能力基础，300%的影响力
+###  English text1English text: parameterEnglish text ⭐⭐⭐⭐⭐
+**English text**: parameterEnglish text = English text, 300%English text
 
-**当前状态**：7B 配置和启动链已完成  
-**下一步**：先把 7B 入口收敛到配置驱动，再复制为 70B 配置族
+**English textstate**: 7B configurationEnglish textstartEnglish text
+**English textstep**: English text 7B English textconfigurationEnglish text, English text 70B configurationEnglish text
 
 ```
-7B → 70B升级路线:
-├─ Week 1: 70B架构集成
-│  ├─ 增加layers: 32 → 80
-│  ├─ 增加hidden_dim: 4096 → 8192  
-│  ├─ 调整head数: 32 → 64
-│  ├─ 启用tensor parallelism: TP=4
-│  └─ 验证内存（需要128GB per GPU或8×H100）
+7B → 70BEnglish text:
+├─ Week 1: 70BEnglish text
+│  ├─ English textlayers: 32 → 80
+│  ├─ English texthidden_dim: 4096 → 8192
+│  ├─ English textheadEnglish text: 32 → 64
+│  ├─ English texttensor parallelism: TP=4
+│  └─ English text(Required128GB per GPUEnglish text8×H100)
 │
-├─ Week 2-3: 70B初步收敛
-│  ├─ 1-10K步基础验证
-│  ├─ 损失应该从6.0 → 3.5-4.0
-│  ├─ 困惑度: 50+ → 25-30
-│  └─ 如果收敛正常，继续全量训练
+├─ Week 2-3: 70BEnglish textstepEnglish text
+│  ├─ 1-10KstepEnglish text
+│  ├─ lossEnglish text6.0 → 3.5-4.0
+│  ├─ English text: 50+ → 25-30
+│  └─ English text, English texttraining
 │
-└─ Week 4-6: 完整收敛
-   ├─ 目标: 50-100K步达到Opus级别
-   ├─ 困惑度目标: 8-10（Opus: 6-8，允许接近）
-   ├─ 基准测试: MMLU 40%+, HellaSwag 60%+
-   └─ 模型锁定用于后续微调
+└─ Week 4-6: completeEnglish text
+   ├─ English text: 50-100KstepEnglish textOpusEnglish text
+   ├─ English text: 8-10(Opus: 6-8, English text)
+   ├─ English texttest: MMLU 40%+, HellaSwag 60%+
+   └─ modelEnglish text
 ```
 
-**关键配置（70B）**:
+**English textconfiguration(70B)**:
 ```json
 {
   "num_parameters": 70000000000,
@@ -91,13 +91,13 @@
 }
 ```
 
-**立即行动**：
+**English text**:
 ```bash
-# 1. 复制 7B 配置作为 70B 起点
+# 1. English text 7B configurationEnglish text 70B English text
 cd /Users/feifei/shuwen/train/neurx
 cp configs/7b_training.json configs/70b_training.json
 
-# 2. 手工或用脚本调整 70B 参数族
+# 2. English text 70B parameterEnglish text
 # - hidden_size: 4096 -> 8192
 # - num_hidden_layers: 32 -> 80
 # - num_attention_heads: 32 -> 64
@@ -105,7 +105,7 @@ cp configs/7b_training.json configs/70b_training.json
 # - pipeline_parallel_stages: 1 -> 2
 # - zero_stage: 1 -> 3
 
-# 3. 启动 70B 训练
+# 3. start 70B training
 torchrun --nproc_per_node=8 train_full.py \
   --config configs/70b_training.json \
   --output_dir checkpoints_70b
@@ -113,51 +113,51 @@ torchrun --nproc_per_node=8 train_full.py \
 
 ---
 
-### 【第2优先：长上下文处理】⭐⭐⭐⭐
-**为什么重要**: Claude的200K上下文 vs NeurX的32K = 关键竞争力
+###  English text2English text: English text ⭐⭐⭐⭐
+**English text**: ClaudeEnglish text200KEnglish text vs NeurXEnglish text32K = English text
 
-**当前状态**：RoPE + 滑动窗口 = 32K  
-**目标**：200K tokens（与Opus一致）
+**English textstate**: RoPE + English text = 32K
+**English text**: 200K tokens(English textOpusEnglish text)
 
-**方案**（选一个立即实施）：
+**English text**(English text):
 
-**选项A：Ring Attention**（最快）
+**English textA: Ring Attention**(English text)
 ```
-特点：可扩展到任意长度
-实施成本：1000行代码
-时间：1-2周
-集成：与第1优先并行
-```
-
-**选项B：Flash-Attention-2 + Segment补丁**
-```
-特点：内存高效
-实施成本：1500行代码  
-时间：2-3周
-集成：可与第1优先并行
+English text: English textextensionEnglish text
+English text: 1000English text
+time: 1-2English text
+English text: English text1English text
 ```
 
-**选项C：使用第三方库** (最快上线)
+**English textB: Flash-Attention-2 + SegmentEnglish text**
 ```
-采用：xFormers或Flash-Attention库
-优势：立即可用，性能已验证
-成本：最低，约100行集成代码
-时间：3-5天
-建议：优先此方案
+English text: English text
+English text: 1500English text
+time: 2-3English text
+English text: English text1English text
 ```
 
-**立即行动**:
+**English textC: useEnglish text** (English text)
+```
+English text: xFormersEnglish textFlash-AttentionEnglish text
+English text: English text, English text
+English text: English text, English text100English text
+time: 3-5English text
+English text: English text
+```
+
+**English text**:
 ```bash
-# 安装flash-attention
+# English textflash-attention
 pip install flash-attn==2.5.0
 
-# 修改train_full.py中的attention mechanism为FlashAttentionV2
-# 参考scripts/legacy/long_context_handler.s的RoPE实现，但启用ALiBi调整支持200K
+# English texttrain_full.pyEnglish textattention mechanismEnglish textFlashAttentionV2
+# English textscripts/legacy/long_context_handler.sEnglish textRoPEimplementation, English textALiBiEnglish textsupport200K
 
-# 验证长上下文
+# English text
 python3 << 'EOF'
 import torch
-# 测试200K长度的前向传播
+# test200KEnglish text
 batch_size = 1
 seq_len = 200000
 hidden_dim = 8192
@@ -170,60 +170,60 @@ EOF
 
 ---
 
-### 【第3优先：多模态支持】⭐⭐⭐⭐
-**为什么重要**: Claude 3的核心优势，70%企业用例需要
+###  English text3English text: English textsupport ⭐⭐⭐⭐
+**English text**: Claude 3English text, 70%English textRequired
 
-**当前状态**：文本仅  
-**目标**：文本 + 图像 + 表格 + PDF
+**English textstate**: English text
+**English text**: English text + English text + English text + PDF
 
-**快速方案**（2周内上线）：
+**quickEnglish text**(2English text):
 
 ```
-架构设计:
+English text:
 ┌─────────────────────────────────────┐
-│  输入处理层                           │
+│  inputEnglish text                           │
 ├─────────────────────────────────────┤
-│  图像输入  ──┬──> 视觉编码器(CLIP)    │
+│  English textinput  ──┬──> English text(CLIP)    │
 │            │     (300M params)      │
-│            ├──> 视觉token序列        │
-│  文本输入  ──┤    (4096 tokens)      │
+│            ├──> English texttokenEnglish text        │
+│  English textinput  ──┤    (4096 tokens)      │
 │            │                       │
-│            └──> 融合层(MLP, 150M)   │
+│            └──> English text(MLP, 150M)   │
 ├─────────────────────────────────────┤
 │  7B/70B Transformer                 │
-│  处理 [visual_tokens + text_tokens] │
+│  English text [visual_tokens + text_tokens] │
 ├─────────────────────────────────────┤
-│  输出层（分布预测）                  │
+│  outputEnglish text(English text)                  │
 └─────────────────────────────────────┘
 
-代码行数：~1500行
-集成周期：2周
-训练时间：100-200 GPU小时
+English text: ~1500English text
+English text: 2English text
+trainingtime: 100-200 GPUEnglish text
 ```
 
-**立即行动**:
+**English text**:
 ```bash
-# 1. 准备视觉编码器
+# 1. English text
 pip install open_clip_torch
 
-# 2. 创建多模态数据加载器
-# scripts/legacy/multimodal_loader.py (~400行)
-# - 加载图像-文本配对
-# - 动态分辨率处理
-# - 视觉token化
+# 2. English textdataloadEnglish text
+# scripts/legacy/multimodal_loader.py (~400English text)
+# - loadEnglish text-English text
+# - English text
+# - English texttokenEnglish text
 
-# 3. 集成架构修改
-# train_full.py中添加:
-# - VisonEncoder初始化（冻结CLIP参数）
-# - 视觉投影层（4096维）
-# - 多模态训练循环
+# 3. English text
+# train_full.pyEnglish text:
+# - VisonEncoderinitialize(English textCLIPparameter)
+# - English text(4096English text)
+# - English texttrainingEnglish text
 
-# 4. 准备数据集
-# - COCO Captions 100M对
-# - Visual Genome 100M对
-# - 内部企业数据
+# 4. English textdataEnglish text
+# - COCO Captions 100MEnglish text
+# - Visual Genome 100MEnglish text
+# - English textdata
 
-# 5. 预训练第一个多模态检查点
+# 5. English texttrainingEnglish textcheckpoint
 torchrun --nproc_per_node=8 train_multimodal.py \
   --config configs/7b_multimodal.json \
   --vision_encoder openai/clip-vit-large-patch14 \
@@ -232,59 +232,59 @@ torchrun --nproc_per_node=8 train_multimodal.py \
 
 ---
 
-### 【第4优先：推理能力增强】⭐⭐⭐
-**为什么重要**: Claude的数学/代码能力 = 差异化竞争力
+###  English text4English text: inferenceEnglish text ⭐⭐⭐
+**English text**: ClaudeEnglish text/English text = English text
 
-**当前状态**：贪心解码  
-**目标**：链式思维 + 搜索树
+**English textstate**: English text
+**English text**: English text + searchEnglish text
 
-**快速实现**（选一个立即做）：
+**quickimplementation**(English text):
 
-**选项A：思维tokens系统**（最快）
+**English textA: English texttokenssystem**(English text)
 ```python
-# 核心思想：让模型显式输出思考过程
+# English text: English textmodelEnglish textoutputEnglish text
 class ThinkingTokenTrainer:
     def __init__(self):
-        self.thinking_budget = 3000  # tokens用于思考
-        
+        self.thinking_budget = 3000  # tokensEnglish text
+
     def forward(self, prompt):
-        # 阶段1：思考（hidden tokens）
+        # phase1: English text(hidden tokens)
         thinking_tokens = self.generate(prompt, max=3000)
-        
-        # 阶段2：回答
+
+        # phase2: English text
         answer = self.generate(thinking_tokens + prompt, max=1000)
-        
+
         return thinking_tokens + answer
 
-实施成本：500行代码
-训练数据：现有SFT数据 + 人标思过程
-时间：1-2周集成
+English text: 500English text
+trainingdata: English textSFTdata + English text
+time: 1-2English text
 ```
 
-**选项B：树搜索解码**
+**English textB: English textsearchEnglish text**
 ```python
-# 使用beam search的增强版
+# usebeam searchEnglish text
 class TreeSearchDecoder:
     def __init__(self, beam_width=4):
-        self.beam_width = beam_width  # 并行搜索路径
-        
+        self.beam_width = beam_width  # English textsearchpath
+
     def decode(self, prompt):
-        # 维护多个候选序列
-        # 基于中间logits概率修剪
-        # 保留top-K最可能路径
+        # English text
+        # English textlogitsEnglish text
+        # English texttop-KEnglish textpath
         return best_path
 
-成本：800行代码
-时间：2周
-效果：数学题 +15-25%准确率
+English text: 800English text
+time: 2English text
+English text: English text +15-25%English text
 ```
 
-**立即行动**:
+**English text**:
 ```bash
-# 方案A（推荐）：思维tokens
-# 1. 准备训练数据（数学/编程题 + 思考过程标注）
-# 2. 修改训练循环支持思维tokens
-# 3. 微调第7B模型 1000步
+# English textA(recommended): English texttokens
+# 1. English texttrainingdata(English text/English text + English text)
+# 2. English texttrainingEnglish textsupportEnglish texttokens
+# 3. English text7Bmodel 1000step
 python3 train_thinking_tokens.py \
   --checkpoint checkpoints/7b_step_10000.pt \
   --data thinking_data.jsonl \
@@ -294,211 +294,211 @@ python3 train_thinking_tokens.py \
 
 ---
 
-### 【第5优先：安全对齐**优化】⭐⭐⭐
-**为什么重要**: 企业部署必须条件
+###  English text5English text: safetyalignment**optimize ⭐⭐⭐
+**English text**: English text
 
-**当前状态**：10类安全分类器  
-**目标**：50类 + 宪法AI对齐
+**English textstate**: 10English textsafetyEnglish text
+**English text**: 50English text + English textAIalignment
 
-**快速升级**（1周）：
+**quickEnglish text**(1English text):
 
 ```python
-# 从Phase 9的安全过滤器扩展
+# English textPhase 9English textsafetyEnglish textextension
 
 class EnhancedSafetyFilter:
     def __init__(self):
-        # 50个分类维度
+        # 50English text
         self.categories = {
-            # 传统安全类
+            # English textsafetyEnglish text
             'violence': {...},
             'sexual_content': {...},
             'hate_speech': {...},
-            
-            # 企业特定类
+
+            # English text
             'financial_advice': {...},
             'medical_guidance': {...},
             'legal_opinion': {...},
             'personal_data_exposure': {...},
-            
-            # 新增高阶类
+
+            # English text
             'misinformation': {...},
             'manipulation': {...},
             'autonomy_violation': {...},
-            # ... 40+个类
+            # ... 40+English text
         }
-    
+
     def classify(self, response):
         scores = self.classifier.predict(response)
         return {cat: score for cat, score in scores.items() if score > 0.5}
-    
+
     def filter(self, response):
         risks = self.classify(response)
         return self.handle_risks(risks, response)
 
-代码成本：1000行
-训练数据：Phase 9数据集 + 50K标注样本
-时间：1-2周
+English text: 1000English text
+trainingdata: Phase 9dataEnglish text + 50KEnglish text
+time: 1-2English text
 ```
 
-**立即行动**:
+**English text**:
 ```bash
-# 1. 扩展安全分类器
+# 1. extensionsafetyEnglish text
 cp scripts/legacy/safety_filter.s scripts/legacy/advanced_safety_filter.s
-# 修改类别从10→50
+# English text10→50
 
-# 2. 微调安全判别器
+# 2. English textsafetyEnglish text
 python3 train_safety_classifier.py \
   --categories 50 \
   --data safety_annotations.jsonl \
   --output safety_classifier_v2.pt
 
-# 3. 集成到推理流程
+# 3. English textinferencepipeline
 python3 infer.py --use_advanced_safety
 ```
 
 ---
 
-## 📈 7周并行执行计划（对标Opus）
+## 📈 7English text(English textOpus)
 
 ```
 Week 1 (NOW):
-├─ ✅ 7B基线完成
-├─ 🔴 启动70B架构设计 (P0)
-├─ 🟡 长上下文库集成 (P1 并行)
-└─ 📊 多模态数据准备开始
+├─ ✅ 7BEnglish text
+├─ 🔴 start70BEnglish text (P0)
+├─ 🟡 English text (P1 English text)
+└─ 📊 English textdataEnglish textstart
 
 Week 2-3:
-├─ 🔴 70B预训练启动，1-10K步验证 (P0)
-├─ 🟡 完成长上下文集成，测试100K+ (P1)
-├─ 🟡 多模态视觉编码器集成 (P2)
-└─ 测试checkpoint系列质量
+├─ 🔴 70BEnglish texttrainingstart, 1-10KstepEnglish text (P0)
+├─ 🟡 English text, test100K+ (P1)
+├─ 🟡 English text (P2)
+└─ testcheckpointEnglish text
 
 Week 4:
-├─ 🔴 70B继续训练，20-50K步质量评估 (P0)
-├─ 🟡 多模态SFT启动，5K-10K步 (P2)
-├─ 🟡 思维tokens系统集成 (P3)
-└─ 基准测试对标
+├─ 🔴 70BEnglish texttraining, 20-50KstepEnglish textevaluation (P0)
+├─ 🟡 English textSFTstart, 5K-10Kstep (P2)
+├─ 🟡 English texttokenssystemEnglish text (P3)
+└─ English texttestEnglish text
 
 Week 5:
-├─ 🔴 70B达到收敛，PPL = 8-12 (P0)
-├─ 🟡 多模态达到MVP，图像理解测试 (P2)
-├─ 🟡 树搜索解码集成，数学题测试 (P3)
-└─ 质量评估+迭代
+├─ 🔴 70BEnglish text, PPL = 8-12 (P0)
+├─ 🟡 English textMVP, English texttest (P2)
+├─ 🟡 English textsearchEnglish text, English texttest (P3)
+└─ English textevaluation+English text
 
 Week 6:
-├─ 🔴 70B 模型锁定，用于微调 (P0)
-├─ 🟡 多模态SFT完成，性能稳定 (P2)
-├─ 🟡 安全对齐扩展到50类 (P4)
-└─ 企业级评估
+├─ 🔴 70B modelEnglish text, English text (P0)
+├─ 🟡 English textSFTEnglish text, English text (P2)
+├─ 🟡 safetyalignmentextensionEnglish text50English text (P4)
+└─ English textevaluation
 
 Week 7:
-├─ 集成全部特性
-├─ 端到端测试套件
-├─ 基准测试完整评估
-└─ ✨ Claude Opus级别模型就绪
+├─ English text
+├─ English texttestEnglish text
+├─ English texttestcompleteevaluation
+└─ ✨ Claude OpusEnglish textmodelEnglish text
 ```
 
 ---
 
-## 💡 立即执行清单（优先度顺序）
+## 💡 English text(English text)
 
-### 现在立即做（今天）：
-- [ ] **启动70B训练配置**
+### English text(English text):
+- [ ] **start70Btrainingconfiguration**
   ```bash
   python3 configs/create_70b_config.py > configs/70b_training.json
   ```
-- [ ] **安装多模态依赖**
+- [ ] **English text**
   ```bash
   pip install clip-vit-base-patch32 einops timm
   ```
-- [ ] **准备长上下文集成**
+- [ ] **English text**
   ```bash
   pip install flash-attn==2.5.0
   ```
 
-### 本周内（优先P0）：
-1. 启动70B预训练（8×H100）
-2. 验证70B架构稳定性（前1000步）
-3. 集成Flash-Attention V2支持200K
+### English text(English textP0):
+1. start70BEnglish texttraining(8×H100)
+2. English text70BEnglish text(English text1000step)
+3. English textFlash-Attention V2support200K
 
-### 下周（P1并行）：
-1. 多模态视觉编码器集成
-2. 思维tokens系统设计
-3. 长上下文测试验证
+### English text(P1English text):
+1. English text
+2. English texttokenssystemEnglish text
+3. English texttestEnglish text
 
 ---
 
-## 🎯 成功指标（对标Opus）
+## 🎯 successEnglish text(English textOpus)
 
 ### Week 1-2:
-- ✅ 7B基线：PPL = 15-18（基准达成）
-- ✅ 70B启动：PPL = 35-40（收敛中）
-- ✅ 长上下文：支持100K+ tokens
+- ✅ 7BEnglish text: PPL = 15-18(English text)
+- ✅ 70Bstart: PPL = 35-40(English text)
+- ✅ English text: support100K+ tokens
 
 ### Week 3-4:
-- ✅ 70B进度：PPL = 20-25（改善中）
-- ✅ 多模态MVP：图像描述≥80%准确
-- ✅ 推理能力：数学题+5%准确率
+- ✅ 70BEnglish text: PPL = 20-25(English text)
+- ✅ English textMVP: English textDescription≥80%English text
+- ✅ inferenceEnglish text: English text+5%English text
 
 ### Week 5-6:
-- ✅ 70B最终：PPL = 8-12（Opus级别）
-- ✅ 多模态完整：表格/图表理解
-- ✅ 安全对齐：50类分类，0误报
+- ✅ 70BEnglish text: PPL = 8-12(OpusEnglish text)
+- ✅ English textcomplete: English text/English text
+- ✅ safetyalignment: 50English text, 0English text
 
 ### Week 7:
-- ✅ **综合能力达到Opus 80%级别**
-- ✅ **企业级模型就绪**
+- ✅ **English textOpus 80%English text**
+- ✅ **English textmodelEnglish text**
 
 ---
 
-## 资源需求
+## English text
 
 ```
-计算资源:
-├─ 70B预训练：8×H100 (80GB)
-│  ├─ 6-8周连续运行
-│  ├─ 成本: $80-120K
-│  └─ 时间: 600-1000 GPU小时
+computeEnglish text:
+├─ 70BEnglish texttraining: 8×H100 (80GB)
+│  ├─ 6-8English textrun
+│  ├─ English text: $80-120K
+│  └─ time: 600-1000 GPUEnglish text
 │
-├─ 多模态训练：4×H100 (需要并行)
-│  ├─ 2-4周
-│  ├─ 成本: $20-30K
-│  └─ 时间: 200-400 GPU小时
+├─ English texttraining: 4×H100 (RequiredEnglish text)
+│  ├─ 2-4English text
+│  ├─ English text: $20-30K
+│  └─ time: 200-400 GPUEnglish text
 │
-└─ 总计: 12×H100容量, $100-150K, 800-1400小时
+└─ English text: 12×H100English text, $100-150K, 800-1400English text
 
-数据资源:
-├─ 预训练：500B tokens (已有)
-├─ 多模态：100M 图像-文本对 (需准备)
-├─ SFT: 500K高质量指令 (已有Phase 9)
-└─ 对齐：50K安全标注 (扩展现有)
+dataEnglish text:
+├─ English texttraining: 500B tokens (English text)
+├─ English text: 100M English text-English text (English text)
+├─ SFT: 500KEnglish text (English textPhase 9)
+└─ alignment: 50KsafetyEnglish text (extensionEnglish text)
 
-人力资源:
-├─ 模型工程师：1人（全职70B）
-├─ 多模态工程师：1人
-├─ 基础设施工程师：1人支持
-└─ 总计：2.5 FTE
+English text:
+├─ modelEnglish text: 1English text(English text70B)
+├─ English text: 1English text
+├─ English text: 1English textsupport
+└─ English text: 2.5 FTE
 ```
 
 ---
 
-## 关键风险与缓解
+## English text
 
-| 风险 | 影响 | 缓解方案 |
+| English text | English text | English text |
 |------|------|--------|
-| 70B OOM | 停工4周 | 预先验证ZeRO-3配置 |
-| 多模态性能差 | 推迟2周 | 先用小规模（7B）验证 |
-| 长上下文低效 | 推理成本↑5x | 提前基准测试 |
-| 安全对齐退化 | 发布延迟 | 分离安全微调通道 |
+| 70B OOM | English text4English text | English textZeRO-3configuration |
+| English text | English text2English text | English text(7B)English text |
+| English text | inferenceEnglish text↑5x | English texttest |
+| safetyalignmentEnglish text | English text | English textsafetyEnglish text |
 
 ---
 
-## 最后：为什么这个顺序
+## English text: English text
 
-1. **70B（P0）**：参数本身是所有其他能力的基础
-2. **长上下文（P1并行）**：与参数升级无冲突，立即增加价值
-3. **多模态（P1并行）**：高价值但独立，可与70B同时进行
-4. **推理能力（P2）**：建立在大模型基础上，效果更好
-5. **安全对齐（P3）**：最后微调，确保整体质量
+1. **70B(P0)**: parameterEnglish text
+2. **English text(P1English text)**: English textparameterEnglish text, English text
+3. **English text(P1English text)**: English text, English text70BEnglish text
+4. **inferenceEnglish text(P2)**: English textmodelEnglish text, English text
+5. **safetyalignment(P3)**: English text, English text
 
-**Bottom line**: 6周内使用当前 NeurX 框架，把 7B 训练入口做成工业可恢复形态，并并行推进 70B / 长上下文 / 多模态能力
+**Bottom line**: 6English textuseEnglish text NeurX framework, English text 7B trainingEnglish textrecoverEnglish text, English text 70B / English text / English text

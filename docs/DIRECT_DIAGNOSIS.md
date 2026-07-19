@@ -1,51 +1,51 @@
-# 🔴 直接诊断：工具注册和工作空间设置
+# 🔴 English text: toolEnglish text
 
-## 🎯 关键问题诊断
+## 🎯 English text
 
-你的问题很可能在这三个地方之一：
+English text:
 
-1. **工作空间未被设置**
-2. **工作空间设置了，但工具未注册**
-3. **工具已注册，但 LLM 未调用它们**
+1. **English text**
+2. **English text, English texttoolEnglish text**
+3. **toolEnglish text, English text LLM English text**
 
-现在有了**详细的日志来追踪每一个步骤**，可以快速定位问题。
+English text**English textlogEnglish textstepEnglish text**, AllowedquickEnglish text.
 
 ---
 
-## 🚀 立即运行（3 步）
+## 🚀 English textrun(3 step)
 
-### 步骤 1：启动应用并查看日志
+### stepEnglish text 1: startEnglish textlog
 
 ```bash
 cd /Users/feifei/agent/neurx-code/build
 
-# 启动应用并过滤日志
+# startEnglish textlog
 ./neurx-codeApp.app/Contents/MacOS/neurx-codeApp 2>&1 | grep -E "setWorkspacePath|AgentController|Tool.*Regist|Registry|Planner|agent"
 ```
 
-**保持终端打开，不要关闭**
+**English text, English text**
 
 ---
 
-### 步骤 2：在应用中打开工作空间
+### stepEnglish text 2: English text
 
-**关键步骤**（必须做）：
+**English textstepEnglish text**(English text):
 
-在 NeurX Code 应用中：
-1. 点击菜单 `File`
-2. 选择 `Open Workspace`
-3. 选择目录：`/Users/feifei/agent/neurx-code`
-4. 点击 `Open`
+English text NeurX Code English text:
+1. English text `File`
+2. English text `Open Workspace`
+3. English textdirectory: `/Users/feifei/agent/neurx-code`
+4. English text `Open`
 
-**立即回到终端，查看日志输出**
+**English text, English textlogoutput**
 
 ---
 
-## 📊 应该看到的关键日志
+## 📊 English textlog
 
-打开工作空间后，**必须**看到这些日志：
+English text, **English text**English textlog:
 
-### ✅ 工作空间设置成功
+### ✅ English textsuccess
 
 ```
 [AgentController::setWorkspacePath] Called with path: /Users/feifei/agent/neurx-code
@@ -55,15 +55,15 @@ cd /Users/feifei/agent/neurx-code/build
 [AgentController] Sandbox configured with path: /Users/feifei/agent/neurx-code
 ```
 
-**如果看到这些，说明工作空间已成功设置**
+**English text, explanationEnglish textsuccessEnglish text**
 
-### ✅ 工具注册成功
+### ✅ toolEnglish textsuccess
 
 ```
 [AgentController] About to register Claude Standard Tools
 [AgentController] Workspace path: /Users/feifei/agent/neurx-code
-[AgentController] Registry: 0x... (非零地址)
-[AgentController] SandboxManager: 0x... (非零地址)
+[AgentController] Registry: 0x... (English text)
+[AgentController] SandboxManager: 0x... (English text)
 
 [AgentToolRegistry] Registering tool: Write
 [AgentToolRegistry] Registering tool: Edit
@@ -76,70 +76,70 @@ cd /Users/feifei/agent/neurx-code/build
 [AgentController] Claude Standard Tools registered
 ```
 
-**如果看到这些，说明 Claude Standard Tools 已成功注册**
+**English text, explanation Claude Standard Tools English textsuccessEnglish text**
 
 ---
 
-## ❌ 如果看不到这些日志
+## ❌ English textlog
 
-### 情况 1：没有看到 "setWorkspacePath" 日志
+### English text 1: English text "setWorkspacePath" log
 
-**问题**：工作空间未被打开  
-**解决**：再次尝试 `File -> Open Workspace`，确保选择了正确的目录
+**English text**: English text
+**English text**: English text `File -> Open Workspace`, English textdirectory
 
-### 情况 2：看到 "setWorkspacePath"，但没有看到 "Registering tool" 日志
+### English text 2: English text "setWorkspacePath", English text "Registering tool" log
 
-**问题**：工作空间被设置了，但工具未注册  
-**日志线索**：
-- 如果看到 `Registry: 0x0`（为零），说明 registry 为 nullptr
-- 如果看到 `SandboxManager: 0x0`，说明 SandboxManager 为 nullptr
+**English text**: English text, English texttoolEnglish text
+**logEnglish text**:
+- English text `Registry: 0x0`(English text), explanation registry English text nullptr
+- English text `SandboxManager: 0x0`, explanation SandboxManager English text nullptr
 
-**解决**：
-1. 重启应用
-2. 再次打开工作空间
-3. 如果仍然失败，这是代码问题
+**English text**:
+1. English text
+2. English text
+3. English textfailure, English text
 
-### 情况 3：看到工具注册，但 Agent 未调用工具
+### English text 3: English texttoolEnglish text, English text Agent English texttool
 
-**问题**：工具已注册，但 LLM 未调用  
-**下一步**：继续步骤 3
+**English text**: toolEnglish text, English text LLM English text
+**English textstep**: English textstepEnglish text 3
 
 ---
 
-### 步骤 3：测试 LLM 是否调用工具
+### stepEnglish text 3: test LLM English texttool
 
-在应用中，在 Agent 对话框中输入：
+English text, English text Agent English textinput:
 
 ```
-请立即使用 Write 工具创建一个新文件。
-在 /Users/feifei/agent/neurx-code/src 下创建 test.txt，内容是 "Hello"。
+English textuse Write toolEnglish textfile.
+English text /Users/feifei/agent/neurx-code/src English text test.txt, contentEnglish text "Hello".
 ```
 
-**立即回到终端，查看日志**
+**English text, English textlog**
 
-### ✅ 成功的日志
+### ✅ successEnglish textlog
 
 ```
 [Planner] Registry has 20 tools:
   - Write
   - Edit
-  ... (其他工具)
+  ... (English texttool)
 
 [Planner] Built 20 tools for provider: anthropic
 [Planner] Built Anthropic schema with 20 tools
 
 [AnthropicProvider] Adding 20 tools to request
   - Tool 0: Write
-  ... (其他工具)
+  ... (English texttool)
 
 [agent] request start: ... tools=20
 [agent] response received: toolCalls=1
 [agent] tool executing: Write
 ```
 
-**如果看到这些，工具已被 LLM 调用，现在查看执行结果**
+**English text, toolEnglish text LLM English text, English textresult**
 
-### 执行结果日志
+### English textresultlog
 
 ```
 [WriteTool] Executing with file_path: ...
@@ -148,39 +148,39 @@ cd /Users/feifei/agent/neurx-code/build
 [agent] tool result: Write error=false
 ```
 
-✅ **成功！文件应该已创建**
+✅ **success!fileEnglish text**
 
 ---
 
-## 🔍 诊断决策树
+## 🔍 English text
 
 ```
-运行应用后立即检查：
+runEnglish text:
 
-1️⃣  看到 "setWorkspacePath" 日志?
-    ├─ 是 → 继续
-    └─ 否 → 工作空间未打开，File -> Open Workspace
+1️⃣  English text "setWorkspacePath" log?
+    ├─ English text → English text
+    └─ English text → English text, File -> Open Workspace
 
-2️⃣  看到 "Registering tool: Write" 日志?
-    ├─ 是 → 继续
-    └─ 否 → 工作空间设置失败，重启应用后重试
+2️⃣  English text "Registering tool: Write" log?
+    ├─ English text → English text
+    └─ English text → English textfailure, English text
 
-3️⃣  工具已注册，现在在 Agent 中输入创建文件指令
+3️⃣  toolEnglish text, English text Agent English textinputEnglish textfileEnglish text
 
-4️⃣  看到 "tool executing: Write" 日志?
-    ├─ 是 → 继续查看执行结果
-    └─ 否 → LLM 未调用工具，可能需要更明确的指令
+4️⃣  English text "tool executing: Write" log?
+    ├─ English text → English textresult
+    └─ English text → LLM English texttool, English textRequiredEnglish text
 
-5️⃣  看到 "Successfully wrote" 日志?
-    ├─ 是 → 🎉 成功！
-    └─ 否 → 查看错误消息
+5️⃣  English text "Successfully wrote" log?
+    ├─ English text → 🎉 success!
+    └─ English text → English texterrorEnglish text
 ```
 
 ---
 
-## 📋 完整测试示例
+## 📋 completetestexample
 
-### 终端输出示例（成功）
+### English textoutputexample(success)
 
 ```bash
 $ ./neurx-codeApp 2>&1 | grep -E "setWorkspacePath|Regist|Planner|tool"
@@ -197,7 +197,7 @@ $ ./neurx-codeApp 2>&1 | grep -E "setWorkspacePath|Regist|Planner|tool"
 [AgentToolRegistry] Registering tool: Glob
 [AgentController] Claude Standard Tools registered
 
-# 现在在 Agent 中输入指令...
+# English text Agent English textinputEnglish text...
 
 [Planner] Registry has 20 tools:
   - Write
@@ -218,53 +218,53 @@ $ ./neurx-codeApp 2>&1 | grep -E "setWorkspacePath|Regist|Planner|tool"
 
 ---
 
-## 🆘 如果还是不工作
+## 🆘 English text
 
-### 收集诊断信息
+### English textinformation
 
 ```bash
-# 运行应用并保存完整日志
+# runEnglish textsavecompletelog
 cd /Users/feifei/agent/neurx-code/build
 ./neurx-codeApp.app/Contents/MacOS/neurx-codeApp 2>&1 > full_debug.log 2>&1
 
-# 在应用中：File -> Open Workspace -> /Users/feifei/agent/neurx-code
-# 等待日志输出 "Claude Standard Tools registered"
-# 然后在 Agent 中输入创建文件指令
-# Ctrl+C 停止应用
+# English text: File -> Open Workspace -> /Users/feifei/agent/neurx-code
+# English textlogoutput "Claude Standard Tools registered"
+# English text Agent English textinputEnglish textfileEnglish text
+# Ctrl+C English text
 
-# 查看关键日志
+# English textlog
 grep -E "setWorkspacePath|Registering|Created|error|Error" full_debug.log | tail -50
 ```
 
-### 提供给我的信息
+### English textinformation
 
-1. 上述 `grep` 命令的输出
-2. 你在 Agent 中输入的确切指令
-3. Agent 的响应
-
----
-
-## ✅ 快速检查清单
-
-在应用启动时：
-
-- [ ] 看到 "[AgentController::setWorkspacePath]" → 工作空间设置成功
-- [ ] 看到 "[AgentToolRegistry] Registering tool: Write" → 工具注册成功
-- [ ] 看到 "[AgentController] Claude Standard Tools registered" → 工具注册完成
-
-在 Agent 中输入指令后：
-
-- [ ] 看到 "[Planner] Built X tools" (X > 0) → 工具已传递给 LLM
-- [ ] 看到 "[agent] tool executing: Write" → LLM 已调用工具
-- [ ] 看到 "[WriteTool] Successfully wrote" → 文件已创建 ✅
+1. English text `grep` English textoutput
+2. English text Agent English textinputEnglish text
+3. Agent English textresponse
 
 ---
 
-**现在就运行应用吧！** 🚀
+## ✅ quickEnglish text
 
-记住关键步骤：
-1. 启动应用
-2. **File -> Open Workspace**（这是最关键的！）
-3. 在终端查看日志
-4. 在 Agent 中输入指令
-5. 观察执行结果
+English textstartEnglish text:
+
+- [ ] English text "[AgentController::setWorkspacePath]" → English textsuccess
+- [ ] English text "[AgentToolRegistry] Registering tool: Write" → toolEnglish textsuccess
+- [ ] English text "[AgentController] Claude Standard Tools registered" → toolEnglish text
+
+English text Agent English textinputEnglish text:
+
+- [ ] English text "[Planner] Built X tools" (X > 0) → toolEnglish text LLM
+- [ ] English text "[agent] tool executing: Write" → LLM English texttool
+- [ ] English text "[WriteTool] Successfully wrote" → fileEnglish text ✅
+
+---
+
+**English textrunEnglish text!** 🚀
+
+English textstepEnglish text:
+1. startEnglish text
+2. **File -> Open Workspace**(English text!)
+3. English textlog
+4. English text Agent English textinputEnglish text
+5. English textresult

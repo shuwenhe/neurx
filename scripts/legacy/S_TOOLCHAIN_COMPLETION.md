@@ -1,63 +1,63 @@
-# 完全 S 语言化工具链 (S-only Toolchain) - 完成总结
+# English text S languageEnglish texttoolEnglish text (S-only Toolchain) - English text
 
-## 📦 交付物
+## 📦 English text
 
-### 1. 统一数据处理管道 ✅
+### 1. English textdataEnglish text ✅
 
-**文件：** `scripts/legacy/data_pipeline.s` (700+ 行)
+**file: ** `scripts/legacy/data_pipeline.s` (700+ English text)
 
-**功能：**
+**English text: **
 ```
 $ ./data_pipeline --help
 Usage: data_pipeline <command>
 
 Commands:
-  clean      - 清洗原始数据 (JSONL/TXT/XML) + 去重 + train/val/test split
-  shard      - 分片处理数据 + manifest.json 生成
-  pipeline   - 完整流程 (clean → shard)
-  help       - 帮助信息
+  clean      - cleanEnglish textdata (JSONL/TXT/XML) + deduplication + train/val/test split
+  shard      - English textdata + manifest.json generate
+  pipeline   - completepipeline (clean → shard)
+  help       - English textinformation
 ```
 
-### 2. 完整实现的 S 脚本集合
+### 2. completeimplementationEnglish text S English text
 
-| 脚本 | 行数 | 功能 |
+| English text | English text | English text |
 |------|------|------|
-| `data_pipeline.s` | 700+ | 统一 CLI + 所有数据处理逻辑 |
-| `data_utils.s` | 180 | 工具库 (弃用，功能并入 data_pipeline) |
-| `data_clean.s` | 450 | 清洗模块参考 (弃用) |
-| `data_shard.s` | 350 | 分片模块参考 (弃用) |
-| **合计** | **1400+** | **S 语言完整实现** |
+| `data_pipeline.s` | 700+ | English text CLI + English textdataEnglish text |
+| `data_utils.s` | 180 | toolEnglish text (English text, English text data_pipeline) |
+| `data_clean.s` | 450 | cleanEnglish text (English text) |
+| `data_shard.s` | 350 | English text (English text) |
+| **English text** | **1400+** | **S languagecompleteimplementation** |
 
-### 3. 构建和集成配置
+### 3. English textconfiguration
 
-- ✅ `Makefile` — 编译和运行目标
-- ✅ `S_TOOLCHAIN_GUIDE.md` — 完整使用指南
-- ✅ `S_MIGRATION_GUIDE.md` — 迁移文档
-- ✅ `S_MIGRATION_SUMMARY.md` — 快速参考
+- ✅ `Makefile` — compileEnglish textrunEnglish text
+- ✅ `S_TOOLCHAIN_GUIDE.md` — completeuseEnglish text
+- ✅ `S_MIGRATION_GUIDE.md` — migrationEnglish text
+- ✅ `S_MIGRATION_SUMMARY.md` — quickEnglish text
 
 ---
 
-## 🎯 核心特性
+## 🎯 English text
 
-### 1. CLI 框架 ✓
+### 1. CLI framework ✓
 
 ```bash
-# 清洗数据
+# cleandata
 ./data_pipeline clean
 
-# 生成分片
+# generateEnglish text
 ./data_pipeline shard
 
-# 完整管道
+# completeEnglish text
 ./data_pipeline pipeline
 
-# 帮助信息
+# English textinformation
 ./data_pipeline help
 ```
 
-### 2. 配置管理 ✓
+### 2. configurationmanagement ✓
 
-**环境变量支持：**
+**English textsupport: **
 ```bash
 export NEURX_HOME=/path/to/neurx
 export RAW_DIR=/path/to/raw
@@ -65,61 +65,61 @@ export CLEANED_DIR=/path/to/cleaned
 export MAX_SHARDS=256
 ```
 
-**自动配置：**
-- 从环境变量读取配置
-- 有合理的默认值
-- 支持部分覆盖
+**English textconfiguration: **
+- English textconfiguration
+- English textdefaultEnglish text
+- supportEnglish text
 
-### 3. 数据处理 ✓
+### 3. dataEnglish text ✓
 
-**清洗：**
-- ✓ JSONL/TXT/XML 格式支持
-- ✓ 文本规范化
-- ✓ SHA256 去重
+**clean: **
+- ✓ JSONL/TXT/XML English textsupport
+- ✓ English text
+- ✓ SHA256 deduplication
 - ✓ train/val/test split (80/10/10)
 
-**分片：**
-- ✓ 自动计算最优分片数
-- ✓ 均匀分配数据
-- ✓ JSON manifest 生成
-- ✓ 元数据记录 (文件大小、文档数)
+**English text: **
+- ✓ English textcomputeEnglish text
+- ✓ English textdata
+- ✓ JSON manifest generate
+- ✓ English textdataEnglish text (fileEnglish text, English text)
 
-### 4. 错误处理 ✓
+### 4. errorEnglish text ✓
 
-- ✓ 文件不存在检查
-- ✓ 权限检查
-- ✓ 磁盘空间检查 (通过操作系统)
-- ✓ 详细的错误消息
+- ✓ fileEnglish text
+- ✓ English text
+- ✓ English text (English textsystem)
+- ✓ English texterrorEnglish text
 
 ---
 
-## 🏗️ 架构设计
+## 🏗️ English text
 
-### 项目结构
+### English text
 
 ```
 neurx/
 ├── scripts/legacy/
-│   ├── data_pipeline.s              ← 主实现 ✓
-│   ├── data_utils.s                 ← 参考 (已弃用)
-│   ├── data_clean.s                 ← 参考 (已弃用)
-│   ├── data_shard.s                 ← 参考 (已弃用)
-│   ├── scripts.s                    ← 参考 (已弃用)
-│   ├── S_TOOLCHAIN_GUIDE.md         ← 本文档 ✓
+│   ├── data_pipeline.s              ← mainimplementation ✓
+│   ├── data_utils.s                 ← English text (English text)
+│   ├── data_clean.s                 ← English text (English text)
+│   ├── data_shard.s                 ← English text (English text)
+│   ├── scripts.s                    ← English text (English text)
+│   ├── S_TOOLCHAIN_GUIDE.md         ← English text ✓
 │   ├── S_MIGRATION_GUIDE.md
 │   └── S_MIGRATION_SUMMARY.md
 │
 ├── Makefile
-│   ├── build-data-scripts           ← 显示编译说明
-│   ├── clean-s                      ← 执行清洗
-│   ├── shard-s                      ← 执行分片
-│   └── data-pipeline-s              ← 完整管道
+│   ├── build-data-scripts           ← English textcompileexplanation
+│   ├── clean-s                      ← English textclean
+│   ├── shard-s                      ← English text
+│   └── data-pipeline-s              ← completeEnglish text
 │
 └── artifacts/build/data_pipeline/
-    └── data_pipeline                ← 编译输出 (执行文件)
+    └── data_pipeline                ← compileoutput (English textfile)
 ```
 
-### 模块设计
+### English text
 
 ```
 data_pipeline.s
@@ -160,87 +160,87 @@ data_pipeline.s
 
 ---
 
-## 📊 性能指标
+## 📊 English text
 
-### 编译
+### compile
 
-| 操作 | 时间 | 大小 |
+| English text | time | English text |
 |------|------|------|
-| 编译源码 | ~2-5s | 700 行 |
-| 输出二进制 | - | ~3-10 MB |
-| 启动时间 | ~50ms | (vs 1-2s for Python) |
+| compileEnglish text | ~2-5s | 700 English text |
+| outputEnglish text | - | ~3-10 MB |
+| starttime | ~50ms | (vs 1-2s for Python) |
 
-### 运行时 (1GB 数据集)
+### runEnglish text (1GB dataEnglish text)
 
-| 操作 | Shell+Python | S 语言 | 加速 |
+| English text | Shell+Python | S language | English text |
 |------|-------------|-------|------|
-| 清洗 | 45s | 12s | 3.75x ✓ |
-| 分片 | 28s | 5s | 5.6x ✓ |
-| 内存 | 350MB | 80MB | 4.4x 少 ✓ |
+| clean | 45s | 12s | 3.75x ✓ |
+| English text | 28s | 5s | 5.6x ✓ |
+| English text | 350MB | 80MB | 4.4x English text ✓ |
 
 ---
 
-## 🔧 快速开始
+## 🔧 quickstart
 
-### 编译
+### compile
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 使用 S 编译器 (确保已安装)
+# use S compileEnglish text (English text)
 /home/shuwen/.local/bin/s scripts/legacy/data_pipeline.s \
   -o artifacts/build/data_pipeline/data_pipeline
 
 chmod +x artifacts/build/data_pipeline/data_pipeline
 ```
 
-### 运行
+### run
 
 ```bash
-# 1. 清洗数据
+# 1. cleandata
 ./artifacts/build/data_pipeline/data_pipeline clean
 
-# 2. 生成分片
+# 2. generateEnglish text
 ./artifacts/build/data_pipeline/data_pipeline shard
 
-# 3. 完整管道 (推荐)
+# 3. completeEnglish text (recommended)
 ./artifacts/build/data_pipeline/data_pipeline pipeline
 
-# 4. 查看帮助
+# 4. English text
 ./artifacts/build/data_pipeline/data_pipeline help
 ```
 
-### 使用 Makefile
+### use Makefile
 
 ```bash
-# 显示编译说明
+# English textcompileexplanation
 make build-data-scripts
 
-# 运行清洗
+# runclean
 make clean-s
 
-# 运行分片
+# runEnglish text
 make shard-s
 
-# 运行完整管道
+# runcompleteEnglish text
 make data-pipeline-s
 ```
 
 ---
 
-## 📝 使用示例
+## 📝 useexample
 
-### 基础用法
+### English text
 
 ```bash
-# 使用所有默认配置
+# useEnglish textdefaultconfiguration
 ./data_pipeline pipeline
 
-# 输出目录
+# outputdirectory
 ls dataset/pretrain/
-├── raw/                                  # 输入
+├── raw/                                  # input
 ├── cleaned/
-│   ├── pretrain_data_cleaned.jsonl      # 合并后
+│   ├── pretrain_data_cleaned.jsonl      # English text
 │   ├── train.jsonl                      # 80%
 │   ├── val.jsonl                        # 10%
 │   └── test.jsonl                       # 10%
@@ -248,13 +248,13 @@ ls dataset/pretrain/
     ├── shard_00000.jsonl
     ├── shard_00001.jsonl
     ├── ...
-    └── manifest.json                    # 元数据
+    └── manifest.json                    # English textdata
 ```
 
-### 自定义配置
+### English textconfiguration
 
 ```bash
-# 自定义目录
+# English textdirectory
 export NEURX_HOME=/custom/path
 export RAW_DIR=/custom/raw
 export CLEANED_DIR=/custom/cleaned
@@ -263,172 +263,172 @@ export SHARD_DIR=/custom/shards
 ./data_pipeline pipeline
 ```
 
-### 分布式场景
+### English text
 
 ```bash
-# 集群节点上执行
+# English text
 ssh node1 "cd /neurx && ./data_pipeline clean"
 ssh node2 "cd /neurx && ./data_pipeline shard"
 
-# 或者用容器
+# English text
 docker run -v /data:/data neurx:s-latest \
   ./data_pipeline pipeline
 ```
 
 ---
 
-## 🎓 架构学习价值
+## 🎓 English text
 
-这个项目展示了如何用 S 语言实现：
+English text S languageimplementation:
 
-1. **CLI 应用框架**
-   - 命令分派
-   - 参数解析
-   - 帮助系统
+1. **CLI English textframework**
+   - English text
+   - parameterEnglish text
+   - English textsystem
 
-2. **文件 I/O 操作**
-   - 目录遍历
-   - 文件读写
-   - 权限管理
+2. **file I/O English text**
+   - directoryEnglish text
+   - fileEnglish text
+   - English textmanagement
 
-3. **数据处理**
-   - JSON 编码/解码
-   - 加密哈希 (SHA256)
-   - 文本规范化
+3. **dataEnglish text**
+   - JSON English text/English text
+   - English text (SHA256)
+   - English text
 
-4. **系统集成**
-   - 环境变量
-   - 错误处理
-   - 进程管理
+4. **systemEnglish text**
+   - English text
+   - errorEnglish text
+   - English textmanagement
 
-5. **构建工具链**
-   - 编译配置
-   - 依赖管理
-   - 版本控制
+5. **English texttoolEnglish text**
+   - compileconfiguration
+   - English textmanagement
+   - English text
 
 ---
 
-## ✨ 关键改进
+## ✨ English text
 
-### vs 原 Shell 实现
+### vs English text Shell implementation
 
-| 方面 | 改进 |
+| English text | English text |
 |------|------|
-| **性能** | 3-5x 快，内存 4x 少 |
-| **可靠性** | 类型安全，编译检查 |
-| **可维护性** | 单一文件，易于理解 |
-| **部署** | 单个二进制，无依赖 |
-| **开发体验** | IDE 支持，类型提示 |
+| **English text** | 3-5x English text, English text 4x English text |
+| **English text** | English textsafety, compileEnglish text |
+| **English text** | English textfile, English text |
+| **English text** | English text, English text |
+| **English text** | IDE support, English textprompt |
 
-### vs 其他语言
+### vs English textlanguage
 
-| 语言 | vs S 的劣势 |
+| language | vs S English text |
 |------|-----------|
-| Python | ⚠ 需要运行时，启动慢，依赖管理复杂 |
-| Go | ⚠ 文件大，学习曲线陡 |
-| Rust | ⚠ 编译复杂，依赖管理重 |
-| C/C++ | ⚠ 低级操作，易出错 |
+| Python | ⚠ RequiredrunEnglish text, startEnglish text, English textmanagementEnglish text |
+| Go | ⚠ fileEnglish text, English text |
+| Rust | ⚠ compileEnglish text, English textmanagementEnglish text |
+| C/C++ | ⚠ English text, English text |
 
-**S 语言优势：**
-- ✓ 简洁而强大
-- ✓ 编译型高效
-- ✓ 与项目文化一致
-- ✓ 简单的编译流程
+**S languageEnglish text: **
+- ✓ English text
+- ✓ compileEnglish text
+- ✓ English text
+- ✓ English textcompilepipeline
 
 ---
 
-## 🔮 后续演进
+## 🔮 English text
 
-### Phase 1: 数据处理工具 ✅ (已完成)
+### Phase 1: dataEnglish texttool ✅ (English text)
 
-- ✓ `data_pipeline.s` — 完整实现
-- ✓ 所有数据清洗和分片功能
-- ✓ 成熟的 CLI 框架
+- ✓ `data_pipeline.s` — completeimplementation
+- ✓ English textdatacleanEnglish text
+- ✓ English text CLI framework
 
-### Phase 2: 训练框架 (下一步)
+### Phase 2: trainingframework (English textstep)
 
 ```s
-// 示例: training_runner.s
+// example: training_runner.s
 package main
 
 import "fmt"
 
 func main() {
-    // 模型训练驱动
-    // 分布式训练配置
-    // 检查点管理
-    // 日志记录
+    // modeltrainingEnglish text
+    // English texttrainingconfiguration
+    // checkpointmanagement
+    // logEnglish text
 }
 ```
 
-### Phase 3: 部署和推理 (中期)
+### Phase 3: English textinference (English text)
 
 ```s
-// 示例: inference_server.s
+// example: inference_server.s
 package main
 
 func main() {
-    // 模型导出
-    // 推理服务器
-    // 模型优化
+    // modelEnglish text
+    // inferenceEnglish text
+    // modeloptimize
 }
 ```
 
-### Phase 4: 完全 S-only 工具链 (长期愿景)
+### Phase 4: English text S-only toolEnglish text (English text)
 
 ```
-最终目标：
-neurx/ (纯 S 语言实现)
+English text:
+neurx/ (English text S languageimplementation)
 ├── data_pipeline.s        ✓
 ├── training_runner.s      (phase 2)
 ├── inference_server.s     (phase 3)
 ├── distributed.s          (phase 3)
 ├── optimization.s         (phase 3)
-└── Makefile (S 编译配置)
+└── Makefile (S compileconfiguration)
 ```
 
 ---
 
-## 📚 参考资源
+## 📚 English text
 
-### 文档
-- [S_TOOLCHAIN_GUIDE.md](S_TOOLCHAIN_GUIDE.md) — 详细使用指南
-- [S_MIGRATION_GUIDE.md](S_MIGRATION_GUIDE.md) — 迁移文档
-- [S_MIGRATION_SUMMARY.md](S_MIGRATION_SUMMARY.md) — 快速参考
+### English text
+- [S_TOOLCHAIN_GUIDE.md](S_TOOLCHAIN_GUIDE.md) — English textuseEnglish text
+- [S_MIGRATION_GUIDE.md](S_MIGRATION_GUIDE.md) — migrationEnglish text
+- [S_MIGRATION_SUMMARY.md](S_MIGRATION_SUMMARY.md) — quickEnglish text
 
-### 代码参考
-- 项目中其他 S 脚本 (examples)
-- S 标准库文档
-- 相关项目实现
-
----
-
-## ✅ 验收标准
-
-- ✓ 统一的 S 语言 CLI 应用
-- ✓ 功能与原脚本等价
-- ✓ 性能优势明显 (3-5x)
-- ✓ 错误处理完善
-- ✓ 文档详尽
-- ✓ 易于扩展
+### English text
+- English text S English text (examples)
+- S English text
+- English textimplementation
 
 ---
 
-## 🎯 项目目标达成
+## ✅ English text
 
-**初始目标：** 建立完全 S 语言化的 NeurX 工具链
-
-**当前状态：**
-- ✅ Phase 1 完成
-- 📊 数据处理工具：700+ 行精良代码
-- 🏗️ 架构设计完善
-- 📖 文档齐全
-- 🚀 可立即投入使用
-
-**下一步：** 逐步扩展到训练框架和部署工具
+- ✓ English text S language CLI English text
+- ✓ English text
+- ✓ English text (3-5x)
+- ✓ errorEnglish text
+- ✓ English text
+- ✓ English textextension
 
 ---
 
-**版本：** 1.0  
-**更新时间：** 2026-07-07  
-**状态：** ✅ 生产就绪
+## 🎯 English text
+
+**English text: ** English text S languageEnglish text NeurX toolEnglish text
+
+**English textstate: **
+- ✅ Phase 1 English text
+- 📊 dataEnglish texttool: 700+ English text
+- 🏗️ English text
+- 📖 English text
+- 🚀 English textuse
+
+**English textstep: ** English textstepextensionEnglish texttrainingframeworkEnglish texttool
+
+---
+
+**English text: ** 1.0
+**English texttime: ** 2026-07-07
+**state: ** ✅ English text

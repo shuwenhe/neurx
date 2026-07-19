@@ -1,178 +1,178 @@
 # neurx-code Flowchart Collection
 
-本目录包含 neurx-code 项目的流程图和架构图。
+English textdirectoryEnglish text neurx-code English textpipelineEnglish text.
 
-## 📁 文件清单
+## 📁 fileEnglish text
 
 ### 1. **neurx-code-architecture.md**
-- Markdown 格式的架构文档
-- 包含嵌入式 Mermaid 流程图代码
-- 可直接在 VS Code 或 GitHub 中预览
-- **预览方法**: 按 `Cmd+Shift+V` (macOS) 在 VS Code 中预览
+- Markdown English text
+- English text Mermaid pipelineEnglish text
+- English text VS Code English text GitHub English text
+- **English text**: English text `Cmd+Shift+V` (macOS) English text VS Code English text
 
 ### 2. **neurx-code-architecture.mmd**
-- 纯 Mermaid 图表源代码
-- 可用于各种 Mermaid 工具和编辑器
-- 文本格式，便于版本控制
+- English text Mermaid English text
+- English text Mermaid toolEnglish text
+- English text, English text
 
 ### 3. **neurx-code-architecture.png** ✅
-- 生成的 PNG 图像
-- 分辨率: 高质量向量导出
-- 大小: 192 KB
-- 用途: 报告、演示、文档
+- generateEnglish text PNG English text
+- English text: English text
+- English text: 192 KB
+- English text: English text, English text, English text
 
-## 🎨 架构组件
+## 🎨 English text
 
-流程图展示了 neurx-code 的主要架构组件：
+pipelineEnglish text neurx-code English textmainEnglish text:
 
-### Core Systems (核心系统)
-- **Agent System** - AI 代理生命周期管理
-- **Bridge Layer** - LLM 集成和工具通信
-- **Editor Core** - 编辑器功能和代码分析
-- **Execution Engine** - 代码执行和插件管理
+### Core Systems (English textsystem)
+- **Agent System** - AI English textmanagement
+- **Bridge Layer** - LLM English texttoolEnglish text
+- **Editor Core** - English text
+- **Execution Engine** - English textpluginmanagement
 
-### Tool Ecosystem (工具生态)
-- **File Operations** - 文件操作工具集
-- **Code Tools** - 代码分析和重构
-- **Search Tools** - 搜索和文件管理
-- **Shell Tools** - 命令执行
+### Tool Ecosystem (toolEnglish text)
+- **File Operations** - fileEnglish texttoolEnglish text
+- **Code Tools** - English text
+- **Search Tools** - searchEnglish textfilemanagement
+- **Shell Tools** - English text
 
-### Infrastructure (基础设施)
-- **Plugin System** - 插件验证和加载
-- **Persistence Layer** - 状态和配置管理
-- **Security Layer** - 沙箱和权限管理
-- **UI Layer** - QML 用户界面
+### Infrastructure (English text)
+- **Plugin System** - pluginEnglish textload
+- **Persistence Layer** - stateEnglish textconfigurationmanagement
+- **Security Layer** - English textmanagement
+- **UI Layer** - QML English text
 
-## 🔄 生成或更新图像
+## 🔄 generateEnglish text
 
-### 方法 1: 使用 Mermaid Live Editor (在线，最简单)
-1. 访问: https://mermaid.live
-2. 复制 `neurx-code-architecture.mmd` 的内容
-3. 粘贴到编辑器中
-4. 点击 "Download" 下载为 PNG/SVG/PDF
+### English text 1: use Mermaid Live Editor (English text, English text)
+1. English text: https://mermaid.live
+2. English text `neurx-code-architecture.mmd` English textcontent
+3. English text
+4. English text "Download" English text PNG/SVG/PDF
 
-### 方法 2: 使用自动转换脚本 (推荐)
+### English text 2: useEnglish text (recommended)
 ```bash
 bash convert_to_image.sh
 ```
 
-这将自动尝试多种方法生成图像。
+English textgenerateEnglish text.
 
-### 方法 3: 使用 mermaid-cli (最灵活)
+### English text 3: use mermaid-cli (English text)
 ```bash
-# 全局安装
+# English text
 npm install -g @mermaid-js/mermaid-cli
 
-# 生成 PNG
+# generate PNG
 mmdc -i neurx-code-architecture.mmd -o neurx-code-architecture.png
 
-# 生成 SVG
+# generate SVG
 mmdc -i neurx-code-architecture.mmd -o neurx-code-architecture.svg
 
-# 生成 PDF
+# generate PDF
 mmdc -i neurx-code-architecture.mmd -o neurx-code-architecture.pdf
 ```
 
-### 方法 4: VS Code Markdown 预览
-1. 打开 `neurx-code-architecture.md` 文件
-2. 按 `Cmd+Shift+V` (macOS) 或 `Ctrl+Shift+V` (Linux/Windows)
-3. Markdown 预览会渲染 Mermaid 图表
-4. 右键点击图表选择 "Save as image"
+### English text 4: VS Code Markdown English text
+1. English text `neurx-code-architecture.md` file
+2. English text `Cmd+Shift+V` (macOS) English text `Ctrl+Shift+V` (Linux/Windows)
+3. Markdown English text Mermaid English text
+4. English text "Save as image"
 
-## 📋 流程图说明
+## 📋 pipelineEnglish textexplanation
 
-### 数据流
+### dataEnglish text
 ```
-User Input → UI Layer → Agent System 
-→ LLM via Bridge Layer → Tool Registry 
+User Input → UI Layer → Agent System
+→ LLM via Bridge Layer → Tool Registry
 → Execution Engine → Results → UI Update
 ```
 
-### 关键特性
-- ✅ 模块化架构，关注点分离清晰
-- ✅ 基于插件的可扩展性系统
-- ✅ 完整的安全沙箱
-- ✅ 多层持久化系统
-- ✅ 集成的 LLM 桥接
-- ✅ 丰富的 QML 用户界面
+### English text
+- ✅ English text, English text
+- ✅ English textpluginEnglish textextensionEnglish textsystem
+- ✅ completeEnglish textsafetyEnglish text
+- ✅ English textsystem
+- ✅ English text LLM English text
+- ✅ English text QML English text
 
-## 🛠️ 依赖和工具
+## 🛠️ English texttool
 
-| 工具 | 用途 | 安装方法 |
+| tool | English text | English text |
 |------|------|---------|
-| Mermaid CLI | 本地生成图像 | `npm install -g @mermaid-js/mermaid-cli` |
-| kroki.io | 在线渲染 API | 无需安装，脚本自动使用 |
-| jq | JSON 处理 | `brew install jq` |
-| python3 | JSON 编码 | 内置或 `brew install python3` |
+| Mermaid CLI | English textgenerateEnglish text | `npm install -g @mermaid-js/mermaid-cli` |
+| kroki.io | English text API | English text, English textuse |
+| jq | JSON English text | `brew install jq` |
+| python3 | JSON English text | English text `brew install python3` |
 
-## 📝 编辑流程图
+## 📝 English textpipelineEnglish text
 
-要编辑流程图：
+English textpipelineEnglish text:
 
-1. 打开 `neurx-code-architecture.mmd` 文件
-2. 修改 Mermaid 代码
-3. 运行转换脚本重新生成图像:
+1. English text `neurx-code-architecture.mmd` file
+2. English text Mermaid English text
+3. runEnglish textgenerateEnglish text:
    ```bash
    bash convert_to_image.sh
    ```
-4. 或在 Mermaid Live Editor 中预览实时更新
+4. English text Mermaid Live Editor English text
 
-## 🔗 相关资源
+## 🔗 English text
 
-- [Mermaid 官方文档](https://mermaid.js.org)
+- [Mermaid English text](https://mermaid.js.org)
 - [Mermaid Live Editor](https://mermaid.live)
-- [kroki.io 在线渲染](https://kroki.io)
-- [neurx-code 项目文档](../README.md)
+- [kroki.io English text](https://kroki.io)
+- [neurx-code English text](../README.md)
 
-## 📊 文件大小和格式
+## 📊 fileEnglish text
 
-| 文件 | 格式 | 大小 | 用途 |
+| file | English text | English text | English text |
 |------|------|------|------|
-| .md | Markdown | ~2 KB | 文档和演示 |
-| .mmd | Mermaid Source | ~1.5 KB | 编辑和版本控制 |
-| .png | 光栅图像 | 192 KB | 报告和演示 |
-| .svg | 向量图像 | ~50 KB | Web 和高分辨率 |
+| .md | Markdown | ~2 KB | English text |
+| .mmd | Mermaid Source | ~1.5 KB | English text |
+| .png | English text | 192 KB | English text |
+| .svg | English text | ~50 KB | Web English text |
 
-## ⚙️ 转换脚本说明
+## ⚙️ English textexplanation
 
 ### convert_to_image.sh
-- 自动尝试多种转换方法
-- 优先使用 kroki.io API (无需本地依赖)
-- macOS 兼容
-- 支持 PNG 和 SVG 输出
+- English text
+- English textuse kroki.io API (English text)
+- macOS English text
+- support PNG English text SVG output
 
 ### convert_to_image.py
-- Python 版本的转换工具
-- 更灵活的配置选项
-- 需要 requests 库
+- Python English texttool
+- English textconfigurationEnglish text
+- Required requests English text
 
-## 💡 最佳实践
+## 💡 English text
 
-1. **版本控制**: 保留 `.mmd` 源文件在 Git 中
-2. **图像生成**: PNG/SVG 图像可不追踪（`git ignore`），按需生成
-3. **文档更新**: 修改后始终运行转换脚本更新图像
-4. **在线协作**: 使用 Mermaid Live Editor 进行团队协作
+1. **English text**: English text `.mmd` English textfileEnglish text Git English text
+2. **English textgenerate**: PNG/SVG English text(`git ignore`), English textgenerate
+3. **English text**: English textrunEnglish text
+4. **English text**: use Mermaid Live Editor English text
 
-## 🐛 故障排除
+## 🐛 English text
 
-### 问题: 脚本运行失败
-**解决方案**: 检查 `curl` 和 `jq` 是否安装
+### English text: English textrunfailure
+**English text**: English text `curl` English text `jq` English text
 ```bash
 which curl
 which jq
 ```
 
-### 问题: PNG 生成为空文件
-**解决方案**: 检查网络连接，尝试使用 Mermaid Live Editor
+### English text: PNG generateEnglish textfile
+**English text**: English text, English textuse Mermaid Live Editor
 
-### 问题: 无法在 VS Code 中预览 Mermaid
-**解决方案**: 安装 "Markdown Preview Mermaid Support" 扩展
+### English text: English text VS Code English text Mermaid
+**English text**: English text "Markdown Preview Mermaid Support" extension
 
-## 📞 更新日志
+## 📞 English textlog
 
-- **2026-06-09**: 初始创建，PNG 图像生成成功
-- **2026-06-09**: 添加转换脚本和文档
+- **2026-06-09**: English text, PNG English textgeneratesuccess
+- **2026-06-09**: English text
 
 ---
 
-**最后更新**: 2026-06-09
+**English text**: 2026-06-09

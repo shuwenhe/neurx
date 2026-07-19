@@ -1,93 +1,93 @@
-# neurx-code 特性实现路线图
+# neurx-code English textimplementationEnglish text
 
-## 快速参考
+## quickEnglish text
 
-### ✅ 已完成功能 (可立即使用)
-- **文件系统**: 读写、批量、原子操作、沙箱隔离
-- **编辑器基础**: 文本编辑、语法高亮
-- **文件浏览**: 树形展示、刷新
-- **主题系统**: 浅色/深色切换
-- **设置面板**: 编辑器配置
-- **聊天界面**: 与 agent 交互
+### ✅ English textsuccessEnglish text (English textuse)
+- **filesystem**: English text, English text, English text, English text
+- **English text**: English text, English text
+- **fileEnglish text**: English text, English text
+- **mainEnglish textsystem**: English text/English text
+- **English text**: English textconfiguration
+- **English text**: English text agent English text
 
-### 🔄 进行中 (设计/部分实现)
-- **任务运行**: TaskPlanPanel 框架存在
-- **调试面板**: 设计中
-- **终端**: 基础设施准备中
+### 🔄 English text (English text/English textimplementation)
+- **English textrun**: TaskPlanPanel frameworkEnglish text
+- **English text**: English text
+- **English text**: English text
 
-### ⏳ 待实现 (已规划)
-- **搜索/替换**
-- **代码导航** (Goto, References)
-- **快捷键系统**
-- **Git 集成**
-- **调试器**
+### ⏳ English textimplementation (English text)
+- **search/English text**
+- **English text** (Goto, References)
+- **English textsystem**
+- **Git English text**
+- **English text**
 
 ---
 
-## 立即可实现的 5 个功能 (< 1 周)
+## English textimplementationEnglish text 5 English text (< 1 English text)
 
-### 1️⃣ **编辑器 Undo/Redo**
+### 1️⃣ **English text Undo/Redo**
 
-**当前状态**: EditorPanel.qml 有文本编辑，但缺少历史记录
+**English textstate**: EditorPanel.qml English text, English text
 
-**实现步骤**:
+**implementationstepEnglish text**:
 ```cpp
-// 1. 在 EditorPanel.cpp 中添加历史栈
+// 1. English text EditorPanel.cpp English text
 class EditorHistory {
     QStack<EditorState> undoStack;
     QStack<EditorState> redoStack;
 };
 
-// 2. 侦听文本变化
+// 2. English text
 onTextChanged: {
     editorHistory.push(currentState)
 }
 
-// 3. 快捷键绑定
+// 3. English text
 Ctrl+Z  → undo()
 Ctrl+Y  → redo()
 ```
 
-**代码量**: ~200 行 C++ + ~100 行 QML  
-**复杂度**: ⭐⭐ (简单)  
-**收益**: 高 (用户期望)
+**English text**: ~200 English text C++ + ~100 English text QML
+**English text**: ⭐⭐ (English text)
+**English text**: English text (English text)
 
 ---
 
-### 2️⃣ **全局搜索/替换**
+### 2️⃣ **English textsearch/English text**
 
-**当前状态**: Grep 工具存在，缺少 UI
+**English textstate**: Grep toolEnglish text, English text UI
 
-**实现步骤**:
+**implementationstepEnglish text**:
 ```cpp
-// 1. 创建 SearchPanel.qml
+// 1. English text SearchPanel.qml
 SearchPanel {
-    TextField { placeholder: "搜索..." }
-    TextField { placeholder: "替换..." }
+    TextField { placeholder: "search..." }
+    TextField { placeholder: "English text..." }
     ListView { model: searchResults }
 }
 
-// 2. 后端搜索引擎
+// 2. English textsearchEnglish text
 class GlobalSearchEngine {
     QStringList search(QString pattern, QString path);
     void replace(QString pattern, QString replacement, QString path);
 };
 
-// 3. 集成 Bash Grep
+// 3. English text Bash Grep
 agentController.executeCommand("grep -r " + pattern + " " + path);
 ```
 
-**代码量**: ~400 行 C++ + ~300 行 QML  
-**复杂度**: ⭐⭐⭐ (中等)  
-**收益**: 很高 (基本需求)
+**English text**: ~400 English text C++ + ~300 English text QML
+**English text**: ⭐⭐⭐ (English text)
+**English text**: English text (English text)
 
 ---
 
-### 3️⃣ **文件树右键菜单**
+### 3️⃣ **fileEnglish text**
 
-**当前状态**: FileTreePanel 存在，缺少上下文菜单
+**English textstate**: FileTreePanel English text, English text
 
-**实现步骤**:
+**implementationstepEnglish text**:
 ```qml
 // FileTreeItem.qml
 FileTreeItem {
@@ -99,37 +99,37 @@ FileTreeItem {
             }
         }
     }
-    
+
     Menu {
         id: contextMenu
-        MenuItem { text: "打开" }
-        MenuItem { text: "新建文件" }
-        MenuItem { text: "新建文件夹" }
-        MenuItem { text: "删除" }
-        MenuItem { text: "重命名" }
-        MenuItem { text: "复制路径" }
+        MenuItem { text: "English text" }
+        MenuItem { text: "English textfile" }
+        MenuItem { text: "English textfileEnglish text" }
+        MenuItem { text: "English text" }
+        MenuItem { text: "English text" }
+        MenuItem { text: "English textpath" }
     }
 }
 ```
 
-**代码量**: ~200 行 QML  
-**复杂度**: ⭐⭐ (简单)  
-**收益**: 高 (用户体验)
+**English text**: ~200 English text QML
+**English text**: ⭐⭐ (English text)
+**English text**: English text (English text)
 
 ---
 
-### 4️⃣ **代码折叠/展开**
+### 4️⃣ **English text/English text**
 
-**当前状态**: 需要实现
+**English textstate**: Requiredimplementation
 
-**实现步骤**:
+**implementationstepEnglish text**:
 ```cpp
-// 1. 词法分析识别块 (函数、类、if/for等)
+// 1. English text (function, English text, if/forEnglish text)
 class CodeFolder {
     QVector<FoldRegion> detectFolds(const QString& code);
 };
 
-// 2. 渲染折叠指示器
+// 2. English text
 QML:
 Rectangle {
     width: 20
@@ -140,33 +140,33 @@ Rectangle {
     Text { text: isFolded ? "▶" : "▼" }
 }
 
-// 3. 切换代码可见性
+// 3. English text
 textEdit.setFoldRegion(region, isFolded);
 ```
 
-**代码量**: ~300 行 C++ + ~150 行 QML  
-**复杂度**: ⭐⭐⭐ (中等)  
-**收益**: 中等 (代码导航)
+**English text**: ~300 English text C++ + ~150 English text QML
+**English text**: ⭐⭐⭐ (English text)
+**English text**: English text (English text)
 
 ---
 
-### 5️⃣ **命令面板** (Ctrl+Shift+P)
+### 5️⃣ **English text** (Ctrl+Shift+P)
 
-**当前状态**: 命令系统框架存在
+**English textstate**: English textsystemframeworkEnglish text
 
-**实现步骤**:
+**implementationstepEnglish text**:
 ```qml
 // CommandPalette.qml
 Rectangle {
     TextField {
         id: searchField
         onTextChanged: {
-            filteredCommands = allCommands.filter(cmd => 
+            filteredCommands = allCommands.filter(cmd =>
                 cmd.name.includes(searchField.text)
             )
         }
     }
-    
+
     ListView {
         model: filteredCommands
         delegate: CommandItem {
@@ -177,10 +177,10 @@ Rectangle {
 ```
 
 ```cpp
-// 注册命令
-registerCommand("editor.formatDocument", 
-    [this]() { 
-        currentEditor->formatDocument(); 
+// English text
+registerCommand("editor.formatDocument",
+    [this]() {
+        currentEditor->formatDocument();
     }
 );
 
@@ -191,68 +191,68 @@ registerCommand("file.newFile",
 );
 ```
 
-**代码量**: ~250 行 C++ + ~200 行 QML  
-**复杂度**: ⭐⭐⭐ (中等)  
-**收益**: 很高 (效率提升)
+**English text**: ~250 English text C++ + ~200 English text QML
+**English text**: ⭐⭐⭐ (English text)
+**English text**: English text (English text)
 
 ---
 
-## 中期实现 (2-4 周)
+## English textimplementation (2-4 English text)
 
-### 6️⃣ **快捷键绑定系统**
+### 6️⃣ **English textsystem**
 
 ```cpp
 class KeyBindingManager {
-    // keybindings.json 支持
+    // keybindings.json support
     struct KeyBinding {
         QString key;        // "Ctrl+S"
         QString command;    // "file.save"
         QString when;       // "editorTextFocus"
     };
-    
+
     void loadBindings(const QString& path);
     void registerBinding(const KeyBinding& binding);
     void executeBinding(const QString& keySequence);
 };
 ```
 
-**代码量**: ~500 行  
-**复杂度**: ⭐⭐⭐  
-**收益**: 高
+**English text**: ~500 English text
+**English text**: ⭐⭐⭐
+**English text**: English text
 
 ---
 
-### 7️⃣ **LSP 集成** (语言服务器)
+### 7️⃣ **LSP English text** (languageEnglish text)
 
 ```cpp
 class LanguageServerClient {
-    // 支持任意 LSP 服务器
+    // supportEnglish text LSP English text
     void initialize(const QString& serverPath);
-    
-    // 基本 LSP 方法
-    void hover(const Position& pos);           // 悬停提示
-    void completion(const Position& pos);       // 自动完成
-    void definition(const Position& pos);       // 转到定义
-    void references(const Position& pos);       // 查找引用
+
+    // English text LSP English text
+    void hover(const Position& pos);           // English textprompt
+    void completion(const Position& pos);       // English text
+    void definition(const Position& pos);       // English text
+    void references(const Position& pos);       // English text
     void rename(const Position& pos, QString newName);
-    void documentSymbol();                      // 大纲
+    void documentSymbol();                      // English text
 };
 ```
 
-**支持的服务器**:
+**supportEnglish text**:
 - clangd (C/C++)
 - pylsp (Python)
 - ts-language-server (TypeScript/JavaScript)
 - gopls (Go)
 - rust-analyzer (Rust)
 
-**代码量**: ~800-1000 行  
-**复杂度**: ⭐⭐⭐⭐  
-**收益**: 很高
+**English text**: ~800-1000 English text
+**English text**: ⭐⭐⭐⭐
+**English text**: English text
 
 ---
 
-### 8️⃣ **代码片段支持**
+### 8️⃣ **English textsupport**
 
 ```json
 // snippets.json
@@ -264,7 +264,7 @@ class LanguageServerClient {
       "    ${2:// code}",
       "}"
     ],
-    "description": "for 循环"
+    "description": "for English text"
   }
 }
 ```
@@ -272,55 +272,55 @@ class LanguageServerClient {
 ```cpp
 class SnippetEngine {
     void expandSnippet(const QString& trigger);
-    void nextPlaceholder();  // Tab 跳转
+    void nextPlaceholder();  // Tab English text
     void insertSnippet(const SnippetDefinition& snippet);
 };
 ```
 
-**代码量**: ~400 行  
-**复杂度**: ⭐⭐⭐  
-**收益**: 中等
+**English text**: ~400 English text
+**English text**: ⭐⭐⭐
+**English text**: English text
 
 ---
 
-### 9️⃣ **Git 集成** (基础)
+### 9️⃣ **Git English text** (English text)
 
 ```cpp
 class GitManager {
-    // 基础 Git 操作
-    void status();              // 显示变更
+    // English text Git English text
+    void status();              // English text
     void commit(const QString& message);
     void push();
     void pull();
-    
+
     // Git Diff
     void showDiff(const QString& file);
-    
-    // 分支管理
+
+    // English textmanagement
     QStringList getBranches();
     void createBranch(const QString& name);
     void switchBranch(const QString& name);
 };
 
-// 集成到 FileTreePanel
-// - 文件旁显示 Git 状态 (M = 修改, + = 新增, etc)
-// - 右键菜单: Commit, Push, Pull
+// English text FileTreePanel
+// - fileEnglish text Git state (M = English text, + = English text, etc)
+// - English text: Commit, Push, Pull
 ```
 
-**代码量**: ~600-800 行  
-**复杂度**: ⭐⭐⭐⭐  
-**收益**: 很高
+**English text**: ~600-800 English text
+**English text**: ⭐⭐⭐⭐
+**English text**: English text
 
 ---
 
-### 🔟 **内嵌终端**
+### 🔟 **English text**
 
 ```cpp
 class TerminalPanel : public QWidget {
-    // 使用 QProcess 或 PTY 库
+    // use QProcess English text PTY English text
     QProcess* process;
     QPlainTextEdit* terminalDisplay;
-    
+
     void executeCommand(const QString& cmd);
     void sendInput(const QString& input);
     void resizeTerminal(int cols, int rows);
@@ -336,15 +336,15 @@ TerminalPanel {
 }
 ```
 
-**代码量**: ~400-600 行  
-**复杂度**: ⭐⭐⭐⭐  
-**收益**: 很高
+**English text**: ~400-600 English text
+**English text**: ⭐⭐⭐⭐
+**English text**: English text
 
 ---
 
-## 长期规划 (1-3 月)
+## English text (1-3 English text)
 
-### 调试器 (DAP)
+### English text (DAP)
 ```cpp
 class DebugAdapter {
     // Debug Adapter Protocol
@@ -356,7 +356,7 @@ class DebugAdapter {
 };
 ```
 
-### 扩展系统
+### extensionsystem
 ```cpp
 class ExtensionHost {
     void loadExtension(const QString& path);
@@ -365,7 +365,7 @@ class ExtensionHost {
 };
 ```
 
-### 测试框架集成
+### testframeworkEnglish text
 ```cpp
 class TestRunner {
     void discoverTests();
@@ -376,95 +376,95 @@ class TestRunner {
 
 ---
 
-## 🎯 按开发优先级排序
+## 🎯 English textranking
 
-### 优先级 1 - 立即做 (这周)
-1. ✅ **Undo/Redo** - 编辑器必需
-2. ✅ **全局搜索** - 基本功能
-3. ✅ **右键菜单** - 用户体验
-4. ✅ **命令面板** - 效率提升
+### English text 1 - English text (English text)
+1. ✅ **Undo/Redo** - English text
+2. ✅ **English textsearch** - English text
+3. ✅ **English text** - English text
+4. ✅ **English text** - English text
 
-### 优先级 2 - 短期 (2-4 周)
-5. ⏳ **快捷键系统** - 定制化需求
-6. ⏳ **代码折叠** - 代码导航
-7. ⏳ **LSP 集成** - 智能补全
-8. ⏳ **代码片段** - 代码生成
+### English text 2 - English text (2-4 English text)
+5. ⏳ **English textsystem** - English text
+6. ⏳ **English text** - English text
+7. ⏳ **LSP English text** - English text
+8. ⏳ **English text** - English textgenerate
 
-### 优先级 3 - 中期 (1-2 月)
-9. ⏳ **Git 集成** - 版本控制
-10. ⏳ **内嵌终端** - 开发流程
-11. ⏳ **调试器** - 调试需求
-12. ⏳ **测试集成** - 质量保证
+### English text 3 - English text (1-2 English text)
+9. ⏳ **Git English text** - English text
+10. ⏳ **English text** - English textpipeline
+11. ⏳ **English text** - English text
+12. ⏳ **testEnglish text** - English text
 
-### 优先级 4 - 长期 (2-3 月+)
-13. ⏳ **扩展系统** - 生态建设
-14. ⏳ **高级搜索** - AI 增强
-15. ⏳ **协作编辑** - 多人开发
+### English text 4 - English text (2-3 English text+)
+13. ⏳ **extensionsystem** - English text
+14. ⏳ **advancedsearch** - AI English text
+15. ⏳ **English text** - English text
 
 ---
 
-## 📊 实现成本估算
+## 📊 implementationEnglish text
 
-| 功能 | 代码量 | 时间 | 难度 | 优先级 |
+| English text | English text | time | English text | English text |
 |------|-------|------|------|--------|
-| Undo/Redo | 300 | 2小时 | ⭐⭐ | 1 |
-| 全局搜索 | 700 | 1天 | ⭐⭐⭐ | 1 |
-| 右键菜单 | 200 | 3小时 | ⭐⭐ | 1 |
-| 命令面板 | 450 | 1天 | ⭐⭐⭐ | 1 |
-| 快捷键系统 | 500 | 2天 | ⭐⭐⭐ | 2 |
-| 代码折叠 | 450 | 1.5天 | ⭐⭐⭐ | 2 |
-| LSP 集成 | 1000 | 3天 | ⭐⭐⭐⭐ | 2 |
-| 代码片段 | 400 | 1.5天 | ⭐⭐⭐ | 2 |
-| Git 集成 | 700 | 2天 | ⭐⭐⭐⭐ | 3 |
-| 内嵌终端 | 500 | 2天 | ⭐⭐⭐⭐ | 3 |
-| 调试器 | 1200 | 5天 | ⭐⭐⭐⭐⭐ | 3 |
-| 扩展系统 | 800 | 3天 | ⭐⭐⭐⭐ | 4 |
-| **总计** | **8,300** | **25天** | | |
+| Undo/Redo | 300 | 2English text | ⭐⭐ | 1 |
+| English textsearch | 700 | 1English text | ⭐⭐⭐ | 1 |
+| English text | 200 | 3English text | ⭐⭐ | 1 |
+| English text | 450 | 1English text | ⭐⭐⭐ | 1 |
+| English textsystem | 500 | 2English text | ⭐⭐⭐ | 2 |
+| English text | 450 | 1.5English text | ⭐⭐⭐ | 2 |
+| LSP English text | 1000 | 3English text | ⭐⭐⭐⭐ | 2 |
+| English text | 400 | 1.5English text | ⭐⭐⭐ | 2 |
+| Git English text | 700 | 2English text | ⭐⭐⭐⭐ | 3 |
+| English text | 500 | 2English text | ⭐⭐⭐⭐ | 3 |
+| English text | 1200 | 5English text | ⭐⭐⭐⭐⭐ | 3 |
+| extensionsystem | 800 | 3English text | ⭐⭐⭐⭐ | 4 |
+| **English text** | **8,300** | **25English text** | | |
 
 ---
 
-## 代码复用来源
+## English textSource
 
-### 直接复用
-- ✅ Qt 官方文档 (编辑器、主题、快捷键)
-- ✅ VS Code 源码 (算法、架构)
-- ✅ 现有 neurx-code (EditorPanel, FileTreePanel)
+### English text
+- ✅ Qt English text (English text, mainEnglish text, English text)
+- ✅ VS Code English text (English text, English text)
+- ✅ English text neurx-code (EditorPanel, FileTreePanel)
 
-### 外部库
-- 📦 Qt (UI 框架)
-- 📦 libgit2 (Git 操作)
-- 📦 Hunspell (拼写检查)
-- 📦 Protocol Buffers (LSP 通信)
+### English text
+- 📦 Qt (UI framework)
+- 📦 libgit2 (Git English text)
+- 📦 Hunspell (English text)
+- 📦 Protocol Buffers (LSP English text)
 
-### 参考实现
+### English textimplementation
 - 🔗 VS Code: `/src/vs/workbench/contrib/`
-- 🔗 Monaco Editor: 开源编辑器
-- 🔗 Qt Creator: IDE 参考
+- 🔗 Monaco Editor: English text
+- 🔗 Qt Creator: IDE English text
 
 ---
 
-## 下一步行动计划
+## English textstepEnglish text
 
-### 📋 本周任务
-- [ ] 实现 Undo/Redo
-- [ ] 添加全局搜索 UI
-- [ ] 实现文件树右键菜单
-- [ ] 完成命令面板基础
+### 📋 English text
+- [ ] implementation Undo/Redo
+- [ ] English textsearch UI
+- [ ] implementationfileEnglish text
+- [ ] English text
 
-### 📋 下周任务
-- [ ] 集成 grep 搜索引擎
-- [ ] 快捷键绑定系统框架
-- [ ] 代码折叠识别器
-- [ ] LSP 客户端框架
+### 📋 English text
+- [ ] English text grep searchEnglish text
+- [ ] English textsystemframework
+- [ ] English text
+- [ ] LSP English textframework
 
-### 📋 2 周后
-- [ ] LSP 集成完成
-- [ ] 代码片段引擎
-- [ ] Git 基础集成
-- [ ] 内嵌终端框架
+### 📋 2 English text
+- [ ] LSP English text
+- [ ] English text
+- [ ] Git English text
+- [ ] English textframework
 
 ---
 
-**更新时间**: 2026年6月4日  
-**作者**: neurx-code 开发团队  
-**关联**: VSCODE_FEATURES_ANALYSIS.md
+**English texttime**: 2026English text6English text4English text
+**author**: neurx-code English text
+**English text**: VSCODE_FEATURES_ANALYSIS.md

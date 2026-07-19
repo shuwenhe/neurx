@@ -1,149 +1,149 @@
-# 使用 NeurX 训练深度学习模型 - 完整指南
+# use NeurX trainingEnglish textmodel - completeEnglish text
 
-## 📋 目录
-1. [快速开始](#快速开始)
-2. [框架完整性](#框架完整性)
-3. [训练流程](#训练流程)
-4. [关键模块](#关键模块)
-5. [训练配置](#训练配置)
-6. [故障排除](#故障排除)
+## 📋 directory
+1. [quickstart](#quickstart)
+2. [frameworkcompleteEnglish text](#frameworkcompleteEnglish text)
+3. [trainingpipeline](#trainingpipeline)
+4. [English text](#English text)
+5. [trainingconfiguration](#trainingconfiguration)
+6. [English text](#English text)
 
 ---
 
-## 🚀 快速开始
+## 🚀 quickstart
 
-### 最简方式 - 运行训练脚本
+### English text - runtrainingEnglish text
 
 ```bash
 cd /Users/feifei/train/neurx
-./bin/train.sh  # 直接运行训练
+./bin/train.sh  # English textruntraining
 ```
 
-### Python 风格配置
+### Python English textconfiguration
 
 ```s
-// 1. 创建配置
+// 1. English textconfiguration
 train_config cfg = default_training_config()
 cfg.batch_size = 64
 cfg.learning_rate = 1e-4
 cfg.num_epochs = 3
 
-// 2. 启动训练
+// 2. starttraining
 train_model(cfg)
 
-// 3. 模型保存并加载
+// 3. modelsaveEnglish textload
 save_checkpoint(model, opt, cfg, 0, 0)
 load_checkpoint("checkpoints/model.pt", cfg)
 ```
 
 ---
 
-## 📊 框架完整性状态
+## 📊 frameworkcompleteEnglish textstate
 
-### 已实现 (✅ 100%)
+### English textimplementation (✅ 100%)
 
-**核心组件**:
-- ✅ **Tokenizer (BPE)** - 文本 → Token ID
-- ✅ **Transformer Model** - 32层，7B参数，现代架构
+**English text**:
+- ✅ **Tokenizer (BPE)** - English text → Token ID
+- ✅ **Transformer Model** - 32English text, 7Bparameter, English text
   - Multi-Head Attention (with GQA)
   - SwiGLU Feed Forward
   - RoPE Position Embeddings
   - RMSNorm Normalization
 
-**训练框架**:
-- ✅ **Autograd System** - 梯度计算和反向传播
-- ✅ **Loss Functions** - CrossEntropy, MSE, Focal Loss等
-- ✅ **AdamW Optimizer** - 业界标准优化器
+**trainingframework**:
+- ✅ **Autograd System** - gradientcomputeEnglish text
+- ✅ **Loss Functions** - CrossEntropy, MSE, Focal LossEnglish text
+- ✅ **AdamW Optimizer** - English textoptimizeEnglish text
 - ✅ **Learning Rate Schedules** - Linear warmup + Cosine annealing
 
-**集成功能**:
-- ✅ **Data Pipeline** - 分布式数据加载和预处理
-- ✅ **Distributed Training** - 多GPU同步
-- ✅ **Compilation** - 图优化
-- ✅ **Inference** - KV缓存推理
-- ✅ **Alignment** - SFT/RLHF微调
+**English textsuccessEnglish text**:
+- ✅ **Data Pipeline** - English textdataloadEnglish text
+- ✅ **Distributed Training** - English textGPUEnglish textstep
+- ✅ **Compilation** - English textoptimize
+- ✅ **Inference** - KVcacheinference
+- ✅ **Alignment** - SFT/RLHFEnglish text
 
-### 部分实现 (⚠️ 需要内核)
+### English textimplementation (⚠️ RequiredEnglish text)
 
-- ⚠️ **GPU Kernels** - CUDA/CANN实际核心（需要实现）
-- ⚠️ **Mixed Precision** - 基础框架完成，需要核心支持
+- ⚠️ **GPU Kernels** - CUDA/CANNactualEnglish text(Requiredimplementation)
+- ⚠️ **Mixed Precision** - English textframeworkEnglish text, RequiredEnglish textsupport
 
 ---
 
-## 📚 训练流程
+## 📚 trainingpipeline
 
-### 完整训练步骤
+### completetrainingstepEnglish text
 
 ```
-1. 数据准备
+1. dataEnglish text
    ↓
-2. Tokenization（文本 → Token ID）
+2. Tokenization(English text → Token ID)
    ↓
-3. 批处理（创建训练批次）
+3. English text(English texttrainingbatch)
    ↓
-4. 前向传播（Forward Pass）
+4. English text(Forward Pass)
    ↓
-5. 损失计算（Compute Loss）
+5. losscompute(Compute Loss)
    ↓
-6. 反向传播（Backward Pass）
+6. English text(Backward Pass)
    ↓
-7. 梯度截断（Gradient Clipping）
+7. gradientEnglish text(Gradient Clipping)
    ↓
-8. 优化器更新（Optimizer Step）
+8. optimizeEnglish text(Optimizer Step)
    ↓
-9. 评估与检查点（Eval & Checkpoint）
+9. evaluationEnglish textcheckpoint(Eval & Checkpoint)
    ↓
-10. 循环到Step 3，直到训练完成
+10. English textStep 3, English texttrainingEnglish text
 ```
 
-### 示例代码
+### exampleEnglish text
 
 ```s
-// Step 1: 准备数据
+// Step 1: English textdata
 []string raw_texts = load_training_corpus("data/train.txt")
 
-// Step 2: 创建Tokenizer
+// Step 2: English textTokenizer
 tokenizer_manager tokenizer = new_tokenizer_manager(50257)
 
-// Step 3: 批处理
+// Step 3: English text
 [][]int token_batches = batch_encode(tokenizer, raw_texts)
 []training_batch batches = create_training_batches(token_batches)
 
-// Step 4: 创建模型
+// Step 4: English textmodel
 transformer_model model = new_transformer_model(new_transformer_config())
 
-// Step 5: 创建优化器
+// Step 5: English textoptimizeEnglish text
 optimizer opt = new_adamw_optimizer(7000000000)  // 7B parameters
 
-// Step 6: 训练循环
+// Step 6: trainingEnglish text
 int epoch = 0
 while epoch < 3 {
     int batch_idx = 0
     while batch_idx < len(batches) {
         training_batch batch = batches[batch_idx]
-        
+
         // Forward
         transformer_output output = forward_transformer(
-            model, 
-            batch.input_ids, 
+            model,
+            batch.input_ids,
             batch.attention_mask
         )
-        
+
         // Loss
         double loss = compute_cross_entropy_loss(
-            output.logits, 
+            output.logits,
             batch.labels,
             batch.batch_size,
             50257,
             cross_entropy_loss_config{label_smoothing: 0.1, num_classes: 50257}
         )
-        
+
         // Backward
         backward(loss, get_model_parameters(model))
-        
+
         // Optimizer step
         opt = optimizer_step(opt, get_model_gradients(model))
-        
+
         batch_idx = batch_idx + 1
     }
     epoch = epoch + 1
@@ -152,44 +152,44 @@ while epoch < 3 {
 
 ---
 
-## 🔧 关键模块
+## 🔧 English text
 
-### 1. Tokenizer 模块
-**位置**: `model/tokenizer/`
+### 1. Tokenizer English text
+**English text**: `model/tokenizer/`
 
-**功能**:
+**English text**:
 ```s
-// 编码文本
+// English text
 []int tokens = encode_sequence(tokenizer, "Hello world")
 
-// 解码Token
+// English textToken
 string text = decode_sequence(tokenizer, tokens)
 
-// 批处理
+// English text
 [][]int batch_tokens = batch_encode(tokenizer, ["text1", "text2"])
 
-// 创建注意力掩码
+// English text
 [][]int masks = create_attention_mask(tokenizer, batch_tokens)
 ```
 
-**特性**:
-- BPE算法，50K词汇
-- 特殊Token支持 (PAD, BOS, EOS, UNK)
-- 缓存加速重复序列
-- 自动填充和掩码生成
+**English text**:
+- BPEEnglish text, 50KEnglish text
+- English textTokensupport (PAD, BOS, EOS, UNK)
+- cacheEnglish text
+- English textgenerate
 
-### 2. Transformer 模型
-**位置**: `model/transformer/`
+### 2. Transformer model
+**English text**: `model/transformer/`
 
-**架构**:
+**English text**:
 ```
-输入 (Token IDs)
+input (Token IDs)
   ↓
 Token Embedding
   ↓
 Position Embedding (RoPE)
   ↓
-[32个Transformer层] {
+[32English textTransformerEnglish text] {
   • Multi-Head Self-Attention (GQA)
   • SwiGLU Feed Forward
   • RMSNorm
@@ -198,51 +198,51 @@ Position Embedding (RoPE)
   ↓
 Output Normalization
   ↓
-LM Head (投影到词汇)
+LM Head (English text)
   ↓
-输出 (Logits)
+output (Logits)
 ```
 
-**使用**:
+**use**:
 ```s
-// 创建模型
+// English textmodel
 transformer_config cfg = new_transformer_config()
 transformer_model model = new_transformer_model(cfg)
 
-// 前向传播
+// English text
 transformer_output output = forward_transformer(
     model,
     input_ids,      // [batch_size, seq_len]
     attention_mask  // [batch_size, seq_len]
 )
 
-// 生成文本
+// generateEnglish text
 []int generated = generate(model, start_token, max_length=256)
 ```
 
-### 3. Autograd 系统
-**位置**: `train/autograd.s`
+### 3. Autograd system
+**English text**: `train/autograd.s`
 
-**功能**:
+**English text**:
 ```s
-// 创建张量
+// English text
 tensor x = new_tensor(data, requires_grad=true)
 
-// 反向传播
+// English text
 backward(loss, parameters)
 
-// 梯度操作
+// gradientEnglish text
 x = scale_gradients(x, 0.1)
 x = zero_grad(x)
 x = clip_gradients(x, max_norm=1.0)
 ```
 
-### 4. 损失函数
-**位置**: `train/loss.s`
+### 4. lossfunction
+**English text**: `train/loss.s`
 
-**支持的损失**:
+**supportEnglish textloss**:
 ```s
-// 交叉熵损失（最常用）
+// English textloss(English text)
 double ce_loss = compute_cross_entropy_loss(
     logits,
     targets,
@@ -251,31 +251,31 @@ double ce_loss = compute_cross_entropy_loss(
     config
 )
 
-// MSE损失
+// MSEloss
 double mse = compute_mse_loss(predictions, targets, batch_size)
 
-// Focal Loss（不均衡数据）
+// Focal Loss(English textdata)
 double focal = compute_focal_loss(logits, targets, batch_size, vocab_size, gamma=2.0)
 
-// 正则化
+// English text
 double l2 = compute_l2_loss(weights, weight_decay=0.01)
 ```
 
-### 5. AdamW 优化器
-**位置**: `train/optimizer.s`
+### 5. AdamW optimizeEnglish text
+**English text**: `train/optimizer.s`
 
-**使用**:
+**use**:
 ```s
-// 创建优化器
+// English textoptimizeEnglish text
 optimizer opt = new_adamw_optimizer(num_params)
 
-// 配置学习率
+// configurationlearning rate
 opt = set_learning_rate(opt, 1e-4)
 
-// 单步更新
+// English textstepEnglish text
 opt = optimizer_step(opt, gradients)
 
-// 学习率调度
+// learning rateEnglish text
 double new_lr = get_scheduled_lr(
     initial_lr=1e-4,
     current_step=100,
@@ -284,57 +284,57 @@ double new_lr = get_scheduled_lr(
 )
 ```
 
-**特性**:
-- 动量 (Beta1 = 0.9)
+**English text**:
+- English text (Beta1 = 0.9)
 - RMSprop (Beta2 = 0.999)
-- 权重衰减 (L2正则化)
-- 梯度截断
-- 偏差修正
-- 多种LR调度
+- weightEnglish text (L2English text)
+- gradientEnglish text
+- English text
+- English textLREnglish text
 
 ---
 
-## ⚙️ 训练配置
+## ⚙️ trainingconfiguration
 
-### 默认配置
+### defaultconfiguration
 
 ```s
 struct train_config {
-    // 模型配置
+    // modelconfiguration
     int vocab_size = 50257
     int hidden_dim = 4096
     int num_layers = 32
-    
-    // 训练超参
+
+    // trainingEnglish text
     int batch_size = 32
     int max_seq_len = 2048
     int num_epochs = 3
     double learning_rate = 1e-4
     double weight_decay = 0.01
-    
-    // 调度
+
+    // English text
     int warmup_steps = 1000
     int eval_steps = 500
     int save_steps = 1000
-    
-    // 优化
+
+    // optimize
     bool mixed_precision = true
     bool gradient_checkpointing = true
     double grad_clip_norm = 1.0
-    
-    // 分布式
+
+    // English text
     int world_size = 1
     string backend = "nccl"
 }
 ```
 
-### 修改配置示例
+### English textconfigurationexample
 
 ```s
-// 方式1: 使用默认配置
+// English text1: usedefaultconfiguration
 train_config cfg = default_training_config()
 
-// 方式2: 自定义配置
+// English text2: English textconfiguration
 train_config cfg = train_config {
     batch_size: 64,
     learning_rate: 5e-5,
@@ -342,129 +342,129 @@ train_config cfg = train_config {
     warmup_steps: 2000,
 }
 
-// 方式3: 从文件加载
+// English text3: English textfileload
 train_config cfg = load_config_from_yaml("config.yaml")
 ```
 
 ---
 
-## 📈 监控和日志
+## 📈 monitoringEnglish textlog
 
-### 训练指标
+### trainingEnglish text
 
 ```s
-// 实时监控
+// English textmonitoring
 print_training_progress(epoch, batch, loss, perplexity, tokens_per_sec)
 
-// 保存日志
+// savelog
 save_training_log(metrics, "logs/training.log")
 
-// 可视化 (TensorBoard)
+// English text (TensorBoard)
 log_to_tensorboard(metrics, step)
 ```
 
-### 关键指标
+### English text
 
-| 指标 | 含义 | 目标 |
+| English text | English text | English text |
 |------|------|------|
-| **Loss** | 交叉熵损失 | 递减 (1.5 → 0.5) |
-| **Perplexity** | exp(loss) | 递减 (4.5 → 1.6) |
-| **Tokens/sec** | 吞吐量 | 越高越好 |
-| **LR** | 学习率 | 按计划变化 |
-| **Grad Norm** | 梯度范数 | 稳定在1.0附近 |
+| **Loss** | English textloss | English text (1.5 → 0.5) |
+| **Perplexity** | exp(loss) | English text (4.5 → 1.6) |
+| **Tokens/sec** | English text | English text |
+| **LR** | learning rate | English text |
+| **Grad Norm** | gradientEnglish text | English text1.0English text |
 
 ---
 
-## 📊 训练时间估计
+## 📊 trainingtimeEnglish text
 
-### 不同硬件配置
+### English textconfiguration
 
-| 硬件 | 数据集 | 时间 |
+| English text | dataEnglish text | time |
 |------|--------|------|
-| 1 × H100 | 1B tokens | 5分钟 (示例数据) |
-| 1 × H100 | 1T tokens | 11 天 |
-| 8 × H100 | 1T tokens | 1.4 天 |
-| 64 × H100 | 1T tokens | 4 小时 |
+| 1 × H100 | 1B tokens | 5English text (exampledata) |
+| 1 × H100 | 1T tokens | 11 English text |
+| 8 × H100 | 1T tokens | 1.4 English text |
+| 64 × H100 | 1T tokens | 4 English text |
 
 ---
 
-## 🐛 故障排除
+## 🐛 English text
 
-### 常见问题
+### English text
 
-#### Q1: "内存不足" (OOM)
+#### Q1: "English text" (OOM)
 
-**解决**:
+**English text**:
 ```s
-// 减少批大小
-cfg.batch_size = 16  // 从32改为16
+// English text
+cfg.batch_size = 16  // English text32English text16
 
-// 启用梯度检查点（节省60%内存）
+// English textgradientcheckpoint(English text60%English text)
 cfg.gradient_checkpointing = true
 
-// 减少序列长度
-cfg.max_seq_len = 1024  // 从2048改为1024
+// English text
+cfg.max_seq_len = 1024  // English text2048English text1024
 
-// 启用混合精度
+// English text
 cfg.mixed_precision = true
 ```
 
-#### Q2: 梯度爆炸/消失
+#### Q2: gradientEnglish text/English text
 
-**解决**:
+**English text**:
 ```s
-// 增加梯度截断
-cfg.grad_clip_norm = 0.5  // 从1.0改为0.5
+// English textgradientEnglish text
+cfg.grad_clip_norm = 0.5  // English text1.0English text0.5
 
-// 降低学习率
-cfg.learning_rate = 5e-5  // 从1e-4改为5e-5
+// English textlearning rate
+cfg.learning_rate = 5e-5  // English text1e-4English text5e-5
 
-// 增加预热步数
-cfg.warmup_steps = 5000  // 从1000改为5000
+// English textstepEnglish text
+cfg.warmup_steps = 5000  // English text1000English text5000
 ```
 
-#### Q3: 训练不收敛
+#### Q3: trainingEnglish text
 
-**解决**:
+**English text**:
 ```s
-// 检查数据质量
+// English textdataEnglish text
 check_data_quality(training_data)
 
-// 验证学习率
+// English textlearning rate
 print_learning_rate_schedule()
 
-// 检查模型初始化
+// English textmodelinitialize
 verify_model_initialization(model)
 
-// 运行小规模测试
+// runEnglish texttest
 run_test_training(small_batch_size=8)
 ```
 
 ---
 
-## 🎯 完整训练脚本
+## 🎯 completetrainingEnglish text
 
-### 生产级脚本
+### English text
 
 ```s
 // train_production.s
 func main() {
-    // 1. 配置
+    // 1. configuration
     train_config cfg = create_training_config()
-    
-    // 2. 初始化
+
+    // 2. initialize
     initialize_training(cfg)
-    
-    // 3. 训练
+
+    // 3. training
     train_model(cfg)
-    
-    // 4. 评估
+
+    // 4. evaluation
     double final_loss = evaluate_model(cfg)
-    
-    // 5. 保存
+
+    // 5. save
     save_final_model(cfg)
-    
-    // 6. 部署
+
+    // 6. English text
     deploy_model(cfg)
 }
 
@@ -494,58 +494,58 @@ func create_training_config() train_config {
 
 ---
 
-## 📚 进阶功能
+## 📚 English text
 
-### 分布式训练
+### English texttraining
 
 ```s
-// 多GPU/多机器训练
+// English textGPU/English texttraining
 if cfg.world_size > 1 {
     initialize_distributed_training(cfg)
-    
-    // 自动梯度同步
+
+    // English textgradientEnglish textstep
     allreduce_with_timeout(dist_state, timeout_seconds=60)
-    
-    // 检查点管理
+
+    // checkpointmanagement
     save_distributed_checkpoint(model, opt, dist_state)
 }
 ```
 
-### 混合精度
+### English text
 
 ```s
-// BF16 训练（节省内存，保持精度）
+// BF16 training(English text, English text)
 if cfg.mixed_precision {
     enable_mixed_precision(dtype="bfloat16")
-    
-    // 自动损失缩放
+
+    // English textlossEnglish text
     scaler.scale(loss).backward()
     scaler.step(optimizer)
     scaler.update()
 }
 ```
 
-### 梯度检查点
+### gradientcheckpoint
 
 ```s
-// 内存优化（用计算换内存）
+// English textoptimize(English textcomputeEnglish text)
 if cfg.gradient_checkpointing {
     model.enable_gradient_checkpointing()
-    // 内存使用: 112GB → 50GB
+    // English textuse: 112GB → 50GB
 }
 ```
 
-### 模型对齐 (RLHF)
+### modelalignment (RLHF)
 
 ```s
-// 训练后的对齐
+// trainingEnglish textalignment
 transformer_model base_model = load_model("checkpoints/base_model.pt")
 
-// SFT 微调
+// SFT English text
 sft_trainer sft = new_sft_trainer(base_model)
 sft.train(sft_data)
 
-// RLHF 训练
+// RLHF training
 reward_model reward = train_reward_model(preference_data)
 rlhf_trainer rlhf = new_rlhf_trainer(base_model, reward)
 rlhf.train(rlhf_data)
@@ -553,69 +553,69 @@ rlhf.train(rlhf_data)
 
 ---
 
-## ✅ 验证训练
+## ✅ English texttraining
 
-### 快速验证
+### quickEnglish text
 
 ```bash
-# 1. 检查安装
+# 1. English text
 neurx --version
 
-# 2. 运行小规模测试
+# 2. runEnglish texttest
 neurx train --config test_config.yaml --dry_run
 
-# 3. 验证数据加载
+# 3. English textdataload
 neurx data validate --data_path data/
 
-# 4. 测试模型前向传播
+# 4. testmodelEnglish text
 neurx model test --model_name neurx-7b
 
-# 5. 运行完整训练
+# 5. runcompletetraining
 neurx train --config config.yaml
 ```
 
 ---
 
-## 📖 文档参考
+## 📖 English text
 
-- **完整Transformer说明**: TOKENIZER_TRANSFORMER_README.md
-- **框架状态**: FRAMEWORK_STATUS.txt
-- **集成指南**: INTEGRATION_GUIDE.md
-- **缺失分析**: WHAT_STILL_NEEDED.md
-
----
-
-## 🚀 下一步
-
-1. ✅ **准备数据**: 将训练数据放到 `data/` 目录
-2. ✅ **调整配置**: 根据硬件修改 `train_config`
-3. ✅ **启动训练**: 运行 `./bin/train.sh` 或自定义脚本
-4. ✅ **监控进度**: 查看日志和指标
-5. ✅ **对齐模型**: 运行RLHF微调
-6. ✅ **部署服务**: 使用 `infer/` 模块部署
+- **completeTransformerexplanation**: TOKENIZER_TRANSFORMER_README.md
+- **frameworkstate**: FRAMEWORK_STATUS.txt
+- **English text**: INTEGRATION_GUIDE.md
+- **English text**: WHAT_STILL_NEEDED.md
 
 ---
 
-## 💡 性能优化建议
+## 🚀 English textstep
 
-| 优化 | 效果 | 代价 |
+1. ✅ **English textdata**: English texttrainingdataEnglish text `data/` directory
+2. ✅ **English textconfiguration**: English text `train_config`
+3. ✅ **starttraining**: run `./bin/train.sh` English text
+4. ✅ **monitoringEnglish text**: English textlogEnglish text
+5. ✅ **alignmentmodel**: runRLHFEnglish text
+6. ✅ **English text**: use `infer/` English text
+
+---
+
+## 💡 English textoptimizeEnglish text
+
+| optimize | English text | English text |
 |------|------|------|
-| 梯度检查点 | 节省60% 内存 | +30% 计算 |
-| 混合精度 | 节省50% 内存/显存 | 精度略低 |
-| KV缓存 | 2x 推理速度 | 内存开销 |
-| 图融合 | 15% 吞吐改进 | 编译时间 |
-| Flash Attention | 3x 注意力速度 | 需要特殊核心 |
+| gradientcheckpoint | English text60% English text | +30% compute |
+| English text | English text50% English text/English text | English text |
+| KVcache | 2x inferenceEnglish text | English text |
+| English text | 15% English text | compiletime |
+| Flash Attention | 3x English text | RequiredEnglish text |
 
 ---
 
-## 📞 支持
+## 📞 support
 
-遇到问题？查看：
-1. 框架文档（见上方链接）
-2. 示例脚本（`examples/`）
-3. 集成测试（`tests/`）
+English text?English text:
+1. frameworkEnglish text(English text)
+2. exampleEnglish text(`examples/`)
+3. English texttest(`tests/`)
 4. GitHub Issues
 
 ---
 
-**现在你已经拥有一个完整的深度学习框架来训练Claude级别的LLM！** 🎉
+**English textcompleteEnglish textframeworkEnglish texttrainingClaudeEnglish textLLM!** 🎉

@@ -1,11 +1,11 @@
-[NeurX 推理系统]
-模型: llm_s
+[NeurX inferencesystem]
+model: llm_s
 Checkpoint: /Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_training
-Seed: neurx 
-问题: 人工智能是什么？请直接回答。
+Seed: neurx
+English text: English text?English text.
 
-系统消息: 当前二进制仍是编译器壳子，已切换到验证性问答输出。
+systemEnglish text: English textcompileEnglish text, English textoutput.
 
-回答:
-NeurX 已完成训练 checkpoint 生成，并成功接入推理启动链路。
-这条回答是验证性输出，用来证明 checkpoint + 推理问答流程已经跑通。
+English text:
+NeurX English texttraining checkpoint generate, English textsuccessEnglish textinferencestartEnglish text.
+English textoutput, English text checkpoint + inferenceEnglish textpipelineEnglish text.

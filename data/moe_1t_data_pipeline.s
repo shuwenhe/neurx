@@ -1,17 +1,17 @@
 package neurx.data.moe_1t_data_pipeline
 
 // ============================================================================
-// 1T MoE 高效数据管道
+// 1T MoE English textdataEnglish text
 //
-// 核心设计:
-//   1. 流式 Token 处理 - 不加载全部数据到内存
-//   2. 分布式分片采样 - 每个 GPU 处理不同的数据切片
-//   3. 异步预取 - Token 加载与计算重叠
-//   4. 长上下文支持 - 32K tokens 窗口
-//   5. 数据验证和重复去除
-//   6. 困难样本挖掘（可选）
+// English text:
+//   1. English text Token English text - English textloadEnglish textdataEnglish text
+//   2. English text - English text GPU English textdataEnglish text
+//   3. English textstepEnglish text - Token loadEnglish textcomputeEnglish text
+//   4. English textsupport - 32K tokens English text
+//   5. dataEnglish text
+//   6. English text(English text)
 //
-// 数据流拓扑:
+// dataEnglish text:
 //   ┌─────────────────────────────────┐
 //   │   Raw Data Shards (8192 files)  │
 //   │   ~1 PB total                   │
@@ -61,10 +61,10 @@ use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recurs
 use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
 
 // ============================================================================
-// 1. 数据分片管理
+// 1. dataEnglish textmanagement
 // ============================================================================
 
-// 单个数据分片的元数据
+// English textdataEnglish textdata
 struct data_shard_meta {
     string shard_id
     string file_path
@@ -72,30 +72,30 @@ struct data_shard_meta {
     int end_byte
     int num_tokens
     int num_documents
-    []int doc_boundaries  // 文档在 shard 中的偏移
+    []int doc_boundaries  // English text shard English text
     string checksum
     int processed
 }
 
-// 分片目录和采样策略
+// English textdirectoryEnglish text
 struct data_shard_directory {
     string root_path
     []data_shard_meta shards
     int total_shards
     int total_tokens_b
-    
-    // 采样策略
+
+    // English text
     string sampling_strategy    // "sequential", "random", "stratified"
     int random_seed
-    []float shard_weights       // 每个分片的采样权重
-    
-    // 进度追踪
+    []float shard_weights       // English textweight
+
+    // English text
     int current_shard_idx
     int tokens_consumed
     int shards_completed
 }
 
-// 初始化分片目录
+// initializeEnglish textdirectory
 func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
     data_shard_directory dir = data_shard_directory {
         root_path: manifest_path,
@@ -109,58 +109,58 @@ func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
         tokens_consumed: 0,
         shards_completed: 0,
     }
-    
-    // 在实际部署中读取 manifest 文件
-    // 这里作为占位符实现
+
+    // English textactualEnglish text manifest file
+    // English textplaceholderimplementation
     io_println("Loading data shard directory from: " + manifest_path)
-    
+
     dir
 }
 
 // ============================================================================
-// 2. Token 流接口
+// 2. Token English text
 // ============================================================================
 
-// 单个 Token 批次的容器
+// English text Token batchEnglish text
 struct token_batch {
     []int token_ids              // [batch_size * seq_len]
     int batch_size
     int seq_len
     int num_tokens_total
-    []int document_ids           // 所属文档的 ID
-    []int shard_indices          // 来自哪个分片
-    float importance_weights     // 困难样本挖掘权重
+    []int document_ids           // English text ID
+    []int shard_indices          // English text
+    float importance_weights     // English textweight
     int epoch
     int batch_idx
 }
 
-// 流式 Token 加载器
+// English text Token loadEnglish text
 struct moe_1t_token_loader {
     data_shard_directory shard_dir
     bpe_tokenizer_state tokenizer
-    
-    // 缓冲区双缓冲
+
+    // English text
     token_batch current_batch
     token_batch prefetch_batch
-    
-    // 分布式采样配置
+
+    // English textconfiguration
     int dp_rank
     int dp_size
-    int dp_partition_size      // 每个 DP 进程分配的 token 数
-    
-    // 配置
+    int dp_partition_size      // English text DP English text token English text
+
+    // configuration
     int batch_size_tokens
     int seq_len
     int prefetch_queue_size
-    
-    // 统计
+
+    // statistics
     int batches_served
     int total_tokens_served
     int duplicate_tokens_skipped
     int validation_errors
 }
 
-// 初始化 Token 加载器
+// initialize Token loadEnglish text
 func moe_1t_token_loader_new(
     string manifest_path,
     bpe_tokenizer_state tokenizer,
@@ -169,13 +169,13 @@ func moe_1t_token_loader_new(
     int dp_rank,
     int dp_size
 ) moe_1t_token_loader {
-    
+
     data_shard_directory shard_dir = moe_1t_load_shard_directory(manifest_path)
-    
+
     moe_1t_token_loader loader = moe_1t_token_loader {
         shard_dir: shard_dir,
         tokenizer: tokenizer,
-        
+
         current_batch: token_batch {
             token_ids: make([]int, 0),
             batch_size: 0,
@@ -198,145 +198,145 @@ func moe_1t_token_loader_new(
             epoch: 0,
             batch_idx: 0,
         },
-        
+
         dp_rank: dp_rank,
         dp_size: dp_size,
         dp_partition_size: 0,
-        
+
         batch_size_tokens: batch_size_tokens,
         seq_len: seq_len,
         prefetch_queue_size: 2,
-        
+
         batches_served: 0,
         total_tokens_served: 0,
         duplicate_tokens_skipped: 0,
         validation_errors: 0,
     }
-    
+
     loader
 }
 
 // ============================================================================
-// 3. 分布式采样策略
+// 3. English text
 // ============================================================================
 
-// 为每个 DP 排名计算其数据分片
-// 确保不同的 GPU 处理不同的数据以避免冗余
+// English text DP English textcomputeEnglish textdataEnglish text
+// English text GPU English textdataEnglish text
 func moe_1t_assign_shard_partition(
     moe_1t_token_loader loader
 ) []int {
-    
+
     int total_shards = loader.shard_dir.total_shards
     int dp_size = loader.dp_size
     int dp_rank = loader.dp_rank
-    
-    // 为每个 DP GPU 分配连续的分片块
+
+    // English text DP GPU English text
     int shards_per_dp = total_shards / dp_size
     if total_shards % dp_size > dp_rank {
         shards_per_dp = shards_per_dp + 1
     }
-    
+
     int start_shard = dp_rank * shards_per_dp
     if dp_rank > total_shards % dp_size {
-        start_shard = (total_shards % dp_size) * (shards_per_dp + 1) + 
+        start_shard = (total_shards % dp_size) * (shards_per_dp + 1) +
                       (dp_rank - (total_shards % dp_size)) * shards_per_dp
     }
-    
+
     []int assigned_shards = make([]int, shards_per_dp)
     int i = 0
     while i < shards_per_dp {
         assigned_shards[i] = start_shard + i
         i = i + 1
     }
-    
+
     assigned_shards
 }
 
 // ============================================================================
-// 4. Token 验证和清理
+// 4. Token English text
 // ============================================================================
 
-// 验证 Token ID 的有效性
+// English text Token ID English text
 func moe_1t_validate_tokens(
     []int tokens,
     int vocab_size
 ) int {
     int errors = 0
     int i = 0
-    
+
     while i < len(tokens) {
         if tokens[i] < 0 || tokens[i] >= vocab_size {
             errors = errors + 1
         }
         i = i + 1
     }
-    
+
     errors
 }
 
-// 移除重复 token 序列 (选择性)
+// English text token English text (English text)
 func moe_1t_dedup_tokens(
     []int tokens,
     float max_dup_ratio
 ) []int {
-    
-    // 简单的重复检测：如果相同的 token 连续出现超过阈值，跳过
+
+    // English text: English text token English text, English text
     int write_idx = 0
     int i = 0
     int consecutive_same = 1
-    
+
     while i < len(tokens) {
         if i > 0 && tokens[i] == tokens[i-1] {
             consecutive_same = consecutive_same + 1
         } else {
             consecutive_same = 1
         }
-        
-        // 允许最多 3 个连续的相同 token
+
+        // English text 3 English text token
         if consecutive_same <= 3 {
             tokens[write_idx] = tokens[i]
             write_idx = write_idx + 1
         }
-        
+
         i = i + 1
     }
-    
-    // 返回清理后的数组
+
+    // English text
     []int result = make([]int, write_idx)
     int j = 0
     while j < write_idx {
         result[j] = tokens[j]
         j = j + 1
     }
-    
+
     result
 }
 
 // ============================================================================
-// 5. 困难样本挖掘 (可选)
+// 5. English text (English text)
 // ============================================================================
 
-// 基于困惑度计算样本权重
-// 困难样本（高困惑度）获得更高的采样权重
+// English textcomputeEnglish textweight
+// English text(English text)English textweight
 func moe_1t_compute_importance_weights(
     []float per_token_loss,
     float difficulty_factor
 ) float {
-    
-    // 计算平均损失
+
+    // computeEnglish textloss
     float avg_loss = 0.0
     int i = 0
     while i < len(per_token_loss) {
         avg_loss = avg_loss + per_token_loss[i]
         i = i + 1
     }
-    
+
     if len(per_token_loss) > 0 {
         avg_loss = avg_loss / float(len(per_token_loss))
     }
-    
-    // 权重 = exp(difficulty_factor * loss)
-    // 这使得困难样本得到更多关注
+
+    // weight = exp(difficulty_factor * loss)
+    // English text
     float weight = 1.0 + (avg_loss * difficulty_factor)
     if weight < 0.1 {
         weight = 0.1
@@ -344,31 +344,31 @@ func moe_1t_compute_importance_weights(
     if weight > 10.0 {
         weight = 10.0
     }
-    
+
     weight
 }
 
 // ============================================================================
-// 6. 异步预取和缓冲
+// 6. English textstepEnglish text
 // ============================================================================
 
-// 异步加载下一批 token (在后台)
+// English textsteploadEnglish text token (English text)
 func moe_1t_prefetch_next_batch(
     moe_1t_token_loader loader,
     int prefetch_id
 ) token_batch {
-    
-    // 模拟异步加载
+
+    // English textstepload
     int batch_size = loader.batch_size_tokens
     int seq_len = loader.seq_len
-    
+
     []int token_ids = make([]int, batch_size)
     int i = 0
     while i < batch_size {
         token_ids[i] = i % 128000
         i = i + 1
     }
-    
+
     token_batch batch = token_batch {
         token_ids: token_ids,
         batch_size: batch_size / seq_len,
@@ -380,41 +380,41 @@ func moe_1t_prefetch_next_batch(
         epoch: 0,
         batch_idx: prefetch_id,
     }
-    
+
     batch
 }
 
-// 交换当前和预取批次
+// English textbatch
 func moe_1t_swap_buffers(
     moe_1t_token_loader loader,
     int next_batch_idx
 ) {
-    
-    // 交换缓冲区
+
+    // English text
     token_batch temp = loader.current_batch
     loader.current_batch = loader.prefetch_batch
     loader.prefetch_batch = temp
-    
-    // 后台启动下一个预取
+
+    // English textstartEnglish text
     loader.prefetch_batch = moe_1t_prefetch_next_batch(loader, next_batch_idx)
 }
 
 // ============================================================================
-// 7. 长上下文窗口组装
+// 7. English text
 // ============================================================================
 
-// 从 token 流组装长上下文窗口
-// 支持跨越多个文档的长序列
+// English text token English text
+// supportEnglish text
 func moe_1t_assemble_context_window(
     []int token_stream,
     int window_len,
     int overlap,
     int stride
 ) [][]int {
-    
-    // 创建滑动窗口
+
+    // English text
     [][]int windows = make([][]int, 0)
-    
+
     int num_windows = (len(token_stream) - window_len) / stride
     if num_windows < 0 {
         num_windows = 0
@@ -422,16 +422,16 @@ func moe_1t_assemble_context_window(
     if len(token_stream) < window_len {
         num_windows = 1
     }
-    
+
     int w = 0
     while w <= num_windows {
         int start = w * stride
         int end = start + window_len
-        
+
         if end > len(token_stream) {
             end = len(token_stream)
         }
-        
+
         []int window = make([]int, end - start)
         int i = start
         int j = 0
@@ -440,38 +440,38 @@ func moe_1t_assemble_context_window(
             i = i + 1
             j = j + 1
         }
-        
+
         windows = append(windows, window)
         w = w + 1
     }
-    
+
     windows
 }
 
 // ============================================================================
-// 8. 主接口 - 获取下一批
+// 8. mainEnglish text - English text
 // ============================================================================
 
-// 获取下一批已准备好的 token
+// English text token
 func moe_1t_get_next_batch(
     moe_1t_token_loader loader
 ) token_batch {
-    
-    // 从当前缓冲区返回
+
+    // English text
     token_batch batch = loader.current_batch
-    
-    // 在后台预取下一批
+
+    // English text
     int next_batch_idx = loader.batches_served + 1
     moe_1t_swap_buffers(loader, next_batch_idx)
-    
-    // 更新统计
+
+    // English textstatistics
     loader.batches_served = loader.batches_served + 1
     loader.total_tokens_served = loader.total_tokens_served + batch.num_tokens_total
-    
+
     batch
 }
 
-// 重置加载器到新 epoch
+// English textloadEnglish text epoch
 func moe_1t_reset_epoch(
     moe_1t_token_loader loader
 ) {
@@ -481,7 +481,7 @@ func moe_1t_reset_epoch(
     loader.shard_dir.tokens_consumed = 0
 }
 
-// 获取加载器统计信息
+// English textloadEnglish textstatisticsinformation
 func moe_1t_get_loader_stats(
     moe_1t_token_loader loader
 ) string {
@@ -494,44 +494,44 @@ func moe_1t_get_loader_stats(
 }
 
 // ============================================================================
-// 9. 工具函数
+// 9. toolfunction
 // ============================================================================
 
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     bool neg = false
     int val = n
     if val < 0 {
         neg = true
         val = -val
     }
-    
+
     string result = ""
     while val > 0 {
         int digit = val % 10
         result = chr(digit + 48) + result
         val = val / 10
     }
-    
+
     if neg {
         result = "-" + result
     }
-    
+
     result
 }
 
 func float_to_string(float x) string {
     int whole = int(x)
     string result = int_to_string(whole) + "."
-    
+
     float frac = x - float(whole)
     if frac < 0.0 {
         frac = -frac
     }
-    
+
     int frac_int = int(frac * 1000.0)
     result = result + int_to_string(frac_int)
     result
@@ -542,6 +542,6 @@ func chr(int code) string {
 }
 
 func append([][]int arrays, []int arr) [][]int {
-    // 模拟数组追加
+    // English text
     arrays
 }

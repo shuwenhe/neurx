@@ -1,6 +1,6 @@
 package neurx.pretrain.llm.real_training_loop
 
-// 真实的训练循环实现 - 包含完整的前向传播、反向传播和参数更新
+// truthfulEnglish texttrainingEnglish textimplementation - English textcompleteEnglish text, English textparameterEnglish text
 
 use neurx.pretrain.llm.real_training.{
     relu, relu_backward, softmax_last_dim, cross_entropy_loss,
@@ -16,19 +16,19 @@ use neurx.tensor.new
 use neurx.strings
 
 struct real_training_state {
-    // 模型参数
-    tensor weights_q    // Query投影
-    tensor weights_k    // Key投影
-    tensor weights_v    // Value投影
-    tensor weights_out  // 输出投影
-    tensor embedding    // 嵌入层
-    tensor lm_head      // 语言模型头
-    
-    // 优化器状态
-    []float adam_m      // 一阶矩
-    []float adam_v      // 二阶矩
-    
-    // 配置
+    // modelparameter
+    tensor weights_q    // QueryEnglish text
+    tensor weights_k    // KeyEnglish text
+    tensor weights_v    // ValueEnglish text
+    tensor weights_out  // outputEnglish text
+    tensor embedding    // English text
+    tensor lm_head      // languagemodelEnglish text
+
+    // optimizeEnglish textstate
+    []float adam_m      // English text
+    []float adam_v      // English text
+
+    // configuration
     float learning_rate
     int total_steps
     int step
@@ -42,60 +42,60 @@ func shape1(int n) []int {
     s
 }
 
-// 初始化真实训练状态
+// initializetruthfultrainingstate
 func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr) real_training_state {
-    // 初始化权重张量
+    // initializeweightEnglish text
     []float embed_data = []float{cap: vocab_size * hidden_dim}
     []float q_data = []float{cap: hidden_dim * hidden_dim}
     []float k_data = []float{cap: hidden_dim * hidden_dim}
     []float v_data = []float{cap: hidden_dim * hidden_dim}
     []float out_data = []float{cap: hidden_dim * hidden_dim}
     []float head_data = []float{cap: hidden_dim * vocab_size}
-    
-    // 随机初始化 (Kaiming初始化)
+
+    // English textinitialize (Kaiminginitialize)
     int i = 0
     float scale = 2.0 / (hidden_dim as float)
-    
+
     while i < len(embed_data) {
-        embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5  // 简单的初始化
+        embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5  // English textinitialize
         i = i + 1
     }
-    
+
     i = 0
     while i < len(q_data) {
         q_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
-    
+
     i = 0
     while i < len(k_data) {
         k_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
-    
+
     i = 0
     while i < len(v_data) {
         v_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
-    
+
     i = 0
     while i < len(out_data) {
         out_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
-    
+
     i = 0
     while i < len(head_data) {
         head_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5
         i = i + 1
     }
-    
-    // 初始化优化器状态
+
+    // initializeoptimizeEnglish textstate
     int param_count = len(embed_data) + len(q_data) + len(k_data) + len(v_data) + len(out_data) + len(head_data)
     []float m_state = []float{cap: param_count}
     []float v_state = []float{cap: param_count}
-    
+
     real_training_state {
         weights_q: new(q_data, [hidden_dim, hidden_dim], true),
         weights_k: new(k_data, [hidden_dim, hidden_dim], true),
@@ -113,23 +113,23 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     }
 }
 
-// 前向传播：输入 -> 嵌入 -> Attention -> 输出
+// English text: input -> English text -> Attention -> output
 func forward_pass(real_training_state state, tensor input_ids) tensor {
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     ops.matmul(hidden, state.lm_head)
 }
 
-// 计算损失
+// computeloss
 func compute_loss(tensor logits, tensor targets) float {
     return cross_entropy_loss(logits, targets)
 }
 
-// 反向传播
+// English text
 func backward_pass(tensor logits, tensor targets) tensor {
     return grad_logits(logits, targets)
 }
 
-// 参数更新
+// parameterEnglish text
 func update_parameters(real_training_state state, tensor hidden, tensor grad) real_training_state {
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_lm_head = matmul(hidden_t, grad)
@@ -148,41 +148,41 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     state
 }
 
-// 执行单个训练步骤
+// English texttrainingstepEnglish text
 func training_step(
     real_training_state state,
     tensor input_ids,
     tensor target_ids
 ) real_training_state {
-    // 1. 前向传播
+    // 1. English text
     tensor logits = forward_pass(state, input_ids)
-    
-    // 2. 计算损失
+
+    // 2. computeloss
     float loss = compute_loss(logits, target_ids)
-    
-    // 3. 反向传播
+
+    // 3. English text
     tensor grad = backward_pass(logits, target_ids)
-    
-    // 4. 更新参数
+
+    // 4. English textparameter
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     real_training_state next_state = update_parameters(state, hidden, grad)
-    
-    // 5. 更新状态
+
+    // 5. English textstate
     int batch_size = input_ids.shape[0]
     next_state.step = next_state.step + 1
     next_state.total_loss = next_state.total_loss + loss
     next_state.tokens_seen = next_state.tokens_seen + batch_size
-    
-    // 6. 打印进度
+
+    // 6. English text
     if next_state.step / 100 * 100 == next_state.step {
         float avg_loss = next_state.total_loss / (next_state.step as float)
         print_training_progress(next_state.step, avg_loss, next_state.learning_rate, next_state.tokens_seen)
     }
-    
+
     next_state
 }
 
-// 运行完整的训练循环
+// runcompleteEnglish texttrainingEnglish text
 func run_training_loop(
     string manifest_path,
     int num_steps,
@@ -192,7 +192,7 @@ func run_training_loop(
     int hidden_dim,
     float learning_rate
 ) real_training_state {
-    
+
     println("========================================")
     println("Starting Real Neural Network Training")
     println("========================================")
@@ -204,14 +204,14 @@ func run_training_loop(
     println("Hidden dim: " + int_to_str(hidden_dim, 0))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
-    
-    // 初始化状态
+
+    // initializestate
     real_training_state state = init_real_training(vocab_size, hidden_dim, 12, learning_rate)
     state.total_steps = num_steps
     []string data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
     corpus_state corpus = new_corpus_state_from_paths(data_paths, batch_size, seq_len, true)
-    
-    // 训练循环
+
+    // trainingEnglish text
     int step = 0
     while step < num_steps {
         corpus_batch_result batch_result = corpus_next_batch(corpus)
@@ -221,20 +221,20 @@ func run_training_loop(
         }
         tensor input_tensor = new_from_ints(batch_result.batch.input_ids, shape1(len(batch_result.batch.input_ids)))
         tensor target_tensor = one_hot_from_ints(batch_result.batch.target_ids, vocab_size)
-        
-        // 执行训练步骤
+
+        // English texttrainingstepEnglish text
         state = training_step(state, input_tensor, target_tensor)
-        
+
         step = step + 1
     }
-    
+
     println("")
     println("========================================")
     println("Training Complete!")
     println("Final loss: " + fmt_float(state.total_loss / (state.step as float), 4))
     println("Tokens seen: " + int_to_str(state.tokens_seen, 0))
     println("========================================")
-    
+
     state
 }
 
@@ -259,7 +259,7 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
     new(data, [n, vocab_size], true)
 }
 
-// 从整数数组创建张量
+// English text
 func new_from_ints([]int values, []int shape) tensor {
     []float data = []float{cap: len(values)}
     int i = 0

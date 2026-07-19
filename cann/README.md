@@ -1,28 +1,28 @@
 # NeurX CANN / Ascend
 
-这个目录集中保存 NeurX 项目中所有华为昇腾 CANN/NPU 专属代码、配置和部署入口。
+English textdirectoryEnglish textsave NeurX English text CANN/NPU English text, configurationEnglish text.
 
 ## Layout
 
-- `env.s`: 输出 Ascend CANN 运行环境变量。
-- `configs/ascend_910b_train.json`: 910B 训练入口示例，默认指向 `S` 训练脚本。
-- `configs/ascend_310p3_train.json`: 310P3 推理入口示例，默认指向 `S` 服务脚本。
-- `kernels/`: Ascend C / TBE 自定义推理算子。
-- `operators/`: ACLNN / Graph Engine 算子封装。
-- `runtime/`: ACL 设备、stream、内存及动态运行时加载。
-- `model/`: NXTRFMV2 checkpoint 检查、FP16 转换与设备权重加载。
-- `cache/`: 单卡物理分页 KV Cache 和请求 block table。
-- `hccl/`: 华为集合通信运行时动态加载。
-- `inference/`: CANN 推理后端适配器。
-- `deploy/`: 昇腾专属部署清单。
-- `scripts/`: 昇腾专属运行脚本。
+- `env.s`: output Ascend CANN runEnglish text.
+- `configs/ascend_910b_train.json`: 910B trainingEnglish textexample, defaultEnglish text `S` trainingEnglish text.
+- `configs/ascend_310p3_train.json`: 310P3 inferenceEnglish textexample, defaultEnglish text `S` English text.
+- `kernels/`: Ascend C / TBE English textinferenceEnglish text.
+- `operators/`: ACLNN / Graph Engine English text.
+- `runtime/`: ACL English text, stream, English textrunEnglish textload.
+- `model/`: NXTRFMV2 checkpoint English text, FP16 English textweightload.
+- `cache/`: English text KV Cache English textrequest block table.
+- `hccl/`: English textrunEnglish textload.
+- `inference/`: CANN inferenceEnglish text.
+- `deploy/`: English text.
+- `scripts/`: English textrunEnglish text.
 
 ## Notes
 
-`Ascend 310/310P/310P3` 通常定位于推理场景，不适合做完整训练任务。建议：
+`Ascend 310/310P/310P3` English textinferenceEnglish text, English textcompletetrainingEnglish text.English text:
 
-- `910/910B`: 用于训练。
-- `310P3`: 用于推理或服务验证。
+- `910/910B`: English texttraining.
+- `310P3`: English textinferenceEnglish text.
 
 ## Quick Start
 
@@ -33,26 +33,26 @@ ASCEND_RT_VISIBLE_DEVICES=0 \
 make pretrain-npu
 ```
 
-训练多卡运行时将设备列表改为逗号分隔形式，例如
-`ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`。目标会检查 Linux、CANN
-Runtime、`npu-smi`，多卡时还会检查 HCCL，然后以 `cann`/`hccl` 后端配置
-启动统一 S 预训练器。
+trainingEnglish textrunEnglish text, English text
+`ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`.English text Linux, CANN
+Runtime, `npu-smi`, English text HCCL, English text `cann`/`hccl` English textconfiguration
+startEnglish text S English texttrainingEnglish text.
 
-当前原生 CANN 训练算子尚未绑定，S 预训练器仍使用可移植 kernel；该入口不会把
-CPU fallback 误报为已经完成的 NPU 算子加速。
+English text CANN trainingEnglish text, S English texttrainingEnglish textuseEnglish text kernel; English text
+CPU fallback English text NPU English text.
 
 ## 310P3 inference
 
-310P3 服务采用 8 个单卡副本，不在 token 执行路径使用 HCCL。每个 worker
-拥有独立的 ACL context、模型权重和分页 KV Cache。
+310P3 English text 8 English text, English text token English textpathuse HCCL.English text worker
+English text ACL context, modelweightEnglish text KV Cache.
 
 ```bash
 cmake -S cann -B artifacts/build/cann
 cmake --build artifacts/build/cann
 ```
 
-310P3 ATB 算子插件实现位于 `operators/atb_310p_plugin.cpp`，编译后生成
-`libneurx_cann_operators.so`：
+310P3 ATB English textpluginimplementationEnglish text `operators/atb_310p_plugin.cpp`, compileEnglish textgenerate
+`libneurx_cann_operators.so`:
 
 ```bash
 source "${ASCEND_HOME_PATH}/set_env.sh"
@@ -62,81 +62,81 @@ cmake -S cann -B artifacts/build/cann-310p \
 cmake --build artifacts/build/cann-310p
 ```
 
-插件实现 `operators/operator_abi.h` 中的 ABI v2 prefill/decode 接口，执行
-Gather、RMSNorm、Linear、RoPE、ReshapeAndCache、PagedAttention、残差、
-SwiGLU 和 LM Head。KV Cache 使用 310P
-`FRACTAL_NZ` 格式。
+pluginimplementation `operators/operator_abi.h` English text ABI v2 prefill/decode English text, English text
+Gather, RMSNorm, Linear, RoPE, ReshapeAndCache, PagedAttention, English text,
+SwiGLU English text LM Head.KV Cache use 310P
+`FRACTAL_NZ` English text.
 
-八卡进程入口为 `scripts/launch_8card_310p3_inference.sh`。它要求设置
-`NEURX_ASCEND_WORKER_BIN`、`NEURX_CHECKPOINT` 和
-`NEURX_CANN_OPERATOR_LIBRARY`。
+English text `scripts/launch_8card_310p3_inference.sh`.English text
+`NEURX_ASCEND_WORKER_BIN`, `NEURX_CHECKPOINT` English text
+`NEURX_CANN_OPERATOR_LIBRARY`.
 
-`inference/ascend_worker.{h,cpp}` 提供单个 worker 的 CANN 数据面：复用
-pinned host/device token 与 logits 缓冲，执行 Prefill/Decode，把 FP16
-logits 转换为 host FP32，并支持 temperature、top-k、top-p 和 repetition
-penalty 采样。HTTP/OpenAI 协议、tokenizer 和请求调度仍由通用 serving 层
-负责。
+`inference/ascend_worker.{h,cpp}` English text worker English text CANN dataEnglish text: English text
+pinned host/device token English text logits English text, English text Prefill/Decode, English text FP16
+logits English text host FP32, English textsupport temperature, top-k, top-p English text repetition
+penalty English text.HTTP/OpenAI English text, tokenizer English textrequestEnglish text serving English text
+English text.
 
-ATB 插件支持 NPU device-side sampling：对 temperature 为 `0`（greedy）
-或 `1` 且无 repetition penalty 的请求执行 FP16 Softmax 和
-TopkToppSampling，只向 host 回传每个请求的 INT32 token ID。其他采样组合
-自动使用 CPU reference sampler，保证已有接口语义不变。ATB 采样要求 batch
-不超过 512。
+ATB pluginsupport NPU device-side sampling: English text temperature English text `0`(greedy)
+English text `1` English text repetition penalty English textrequestEnglish text FP16 Softmax English text
+TopkToppSampling, English text host English textrequestEnglish text INT32 token ID.English text
+English textuse CPU reference sampler, English text.ATB English text batch
+English text 512.
 
-`cache/prefix_cache.{h,cpp}` 缓存完整、不可变的 prompt KV blocks。新请求
-执行 Prefill 前会查找最长的 block-aligned token prefix，并通过引用计数共享
-物理 KV blocks；至少保留一个未缓存 token 用于生成当前请求的首个 logits。
-缓存使用 LRU 淘汰，默认最多 256 个条目或 128 个 retained blocks。Worker
-在新 batch 分配 KV 前会按需淘汰缓存，避免 retained blocks 阻塞活跃请求。部分
-KV block 不会共享，避免后续 Decode 改写其他请求正在使用的缓存。
-可通过 `NEURX_ASCEND_PREFIX_CACHE_ENTRIES` 和
-`NEURX_ASCEND_PREFIX_CACHE_BLOCKS` 调整容量，设置为 `0` 可禁用。命中、
-查询、淘汰和 retained block 数量由 `/metrics` 暴露。
+`cache/prefix_cache.{h,cpp}` cachecomplete, English text prompt KV blocks.English textrequest
+English text Prefill English text block-aligned token prefix, English text
+English text KV blocks; English textcache token English textgenerateEnglish textrequestEnglish text logits.
+cacheuse LRU English text, defaultEnglish text 256 English text 128 English text retained blocks.Worker
+English text batch English text KV English textcache, English text retained blocks English textrequest.English text
+KV block English text, English text Decode English textrequestEnglish textuseEnglish textcache.
+English text `NEURX_ASCEND_PREFIX_CACHE_ENTRIES` English text
+`NEURX_ASCEND_PREFIX_CACHE_BLOCKS` English text, English text `0` English text.English text,
+query, English text retained block countEnglish text `/metrics` English text.
 
-ATB 插件对重复执行的子图启用 shape-keyed LRU GraphOperation cache：
-`Add+RMSNorm` 和 `Swish+Multiply(SwiGLU)` 分别作为图算子执行，并为每个
-精确的 rows/columns shape 复用图实例与 workspace。FP16 attention 前处理
-也将 `RMSNorm+Q/K/V Linear+RoPE` 合并为单个 GraphOperation；INT8 权重
-则继续使用 ACLNN W8A16 路径，保持 310P3 兼容。缓存最多保留 32 个图，
-淘汰前同步当前 stream。310P3 不启用仅适用于更新硬件的整图下沉 capture。
+ATB pluginEnglish text shape-keyed LRU GraphOperation cache:
+`Add+RMSNorm` English text `Swish+Multiply(SwiGLU)` English text, English text
+English text rows/columns shape English text workspace.FP16 attention English text
+English text `RMSNorm+Q/K/V Linear+RoPE` English text GraphOperation; INT8 weight
+English textuse ACLNN W8A16 path, English text 310P3 English text.cacheEnglish text 32 English text,
+English textstepEnglish text stream.310P3 English text capture.
 
-模型加载器支持 `NEURX_ASCEND_PRECISION=int8` 的 W8A16 weight-only
-推理。Embedding 和 RMSNorm 权重保持 FP16；Q/K/V/O、FFN 与 LM Head
-矩阵按输出通道对称量化为 INT8，并保存 FP16 antiquant scale。310P3 插件
-使用 `aclnnWeightQuantBatchMatmulV2` 输出 FP16 activation；设置为 `fp16`
-可回退到原 ATB Linear 路径。
+modelloadEnglish textsupport `NEURX_ASCEND_PRECISION=int8` English text W8A16 weight-only
+inference.Embedding English text RMSNorm weightEnglish text FP16; Q/K/V/O, FFN English text LM Head
+English textoutputEnglish text INT8, English textsave FP16 antiquant scale.310P3 plugin
+use `aclnnWeightQuantBatchMatmulV2` output FP16 activation; English text `fp16`
+English text ATB Linear path.
 
-CMake 同时生成 `neurx_ascend_worker`。它提供 `/health/live`、
-`/health/ready`、`/metrics`、`/admin/drain` 和
-`POST /v1/token-completions`。推理接口接收 `input_ids`、
-`max_new_tokens`、采样参数及可选 `stop_token_ids`，返回生成的 token IDs。
-`POST /v1/batch-token-completions` 接收二维 `input_ids`，将所有 prompt
-合并为一次 Prefill，并在后续轮次将尚未结束的请求组成 Decode batch；
-达到停止 token 的请求会立即释放 KV Cache。默认最多 64 个序列，可用
-`NEURX_ASCEND_HTTP_MAX_BATCH` 调整，上限为 2000。
-部署时可直接设置：
+CMake English textgenerate `neurx_ascend_worker`.English text `/health/live`,
+`/health/ready`, `/metrics`, `/admin/drain` English text
+`POST /v1/token-completions`.inferenceEnglish text `input_ids`,
+`max_new_tokens`, English textparameterEnglish text `stop_token_ids`, English textgenerateEnglish text token IDs.
+`POST /v1/batch-token-completions` English text `input_ids`, English text prompt
+English text Prefill, English textrequestEnglish text Decode batch;
+English text token English textrequestEnglish text KV Cache.defaultEnglish text 64 English text, English text
+`NEURX_ASCEND_HTTP_MAX_BATCH` English text, English text 2000.
+English text:
 
 ```bash
 export NEURX_ASCEND_WORKER_BIN=/app/neurx/bin/neurx_ascend_worker
 ```
 
-当前实现要求 FP16 activation（权重可为 FP16 或 per-channel INT8）、
-head size 为16的倍数且不超过256、KV block size 为16的
-倍数且不超过128。Prefill 支持分块：每个 query token 使用独立的 block-table
-行和递增 context length，从已经写入的分页 KV Cache 中读取历史上下文。数值
-正确性和性能仍必须在 310P3+CANN/ATB 环境与 CPU/CUDA golden 对齐。
+English textimplementationEnglish text FP16 activation(weightEnglish text FP16 English text per-channel INT8),
+head size English text16English text256, KV block size English text16English text
+English text128.Prefill supportEnglish text: English text query token useEnglish text block-table
+English text context length, English text KV Cache English text.English text
+English text 310P3+CANN/ATB English text CPU/CUDA golden alignment.
 
-## 310P3 FP16 / INT8 对齐
+## 310P3 FP16 / INT8 alignment
 
-真实八卡环境可依次启动 FP16 和 INT8 worker，避免同时占用 16 张卡。
-基准 logits 接口默认关闭，测试时设置
-`NEURX_ASCEND_ENABLE_BENCHMARK_API=1`。每组 worker 就绪后分别采集：
+truthfulEnglish textstart FP16 English text INT8 worker, English text 16 English text.
+English text logits English textdefaultEnglish text, testEnglish text
+`NEURX_ASCEND_ENABLE_BENCHMARK_API=1`.English text worker English text:
 
 ```bash
 python3 cann/scripts/benchmark_8card_310p3.py collect \
   --precision fp16 --output /tmp/neurx-fp16.json
 
-# 用 NEURX_ASCEND_PRECISION=int8 重启同一组八卡 worker 后
+# English text NEURX_ASCEND_PRECISION=int8 English text worker English text
 python3 cann/scripts/benchmark_8card_310p3.py collect \
   --precision int8 --output /tmp/neurx-int8.json
 
@@ -144,8 +144,8 @@ python3 cann/scripts/benchmark_8card_310p3.py compare \
   --fp16 /tmp/neurx-fp16.json --int8 /tmp/neurx-int8.json
 ```
 
-采集覆盖八个 worker 的 readiness、固定 prompt 的 top-k logits、批量 greedy
-生成吞吐及 p50/p95 请求延迟，默认每次请求包含 8 个序列，可通过
-`--batch-size` 调整。比较阶段检查 top-1 一致率、top-k 重合率、
-共同 token 的 logit 误差和 INT8/FP16 吞吐比；任何阈值不满足都会返回非零。
-可通过 `--prompts` 传入业务 tokenizer 生成的 token ID 数组。
+English text worker English text readiness, English text prompt English text top-k logits, English text greedy
+generateEnglish text p50/p95 requestEnglish text, defaultEnglish textrequestEnglish text 8 English text, English text
+`--batch-size` English text.English textphaseEnglish text top-1 English text, top-k English text,
+English text token English text logit English text INT8/FP16 English text; English text.
+English text `--prompts` English text tokenizer generateEnglish text token ID English text.

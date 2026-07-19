@@ -3,46 +3,46 @@ package neurx.posttrain.grpo
 // ============================================================================
 // GRPO — Group Relative Policy Optimization
 //
-// 论文: GRPO / R1-style reasoning reference implementations
+// English text: GRPO / R1-style reasoning reference implementations
 //
-// 核心思想:
-//   对每个问题 q 采样 G 个输出 {o₁,...,o_G}，用组内相对奖励代替价值函数:
+// English text:
+//   English text q English text G English textoutput {o₁,...,o_G}, English textrewardEnglish textfunction:
 //     Advantage_i = (r_i - mean(r)) / (std(r) + ε)
-//   策略梯度目标 (带 PPO clip + KL 惩罚):
+//   English textgradientEnglish text (English text PPO clip + KL English text):
 //     L_GRPO = -E[ min(ρ_i · A_i, clip(ρ_i, 1-ε, 1+ε) · A_i) ] + β·KL
-//   其中 ρ_i = π_θ(o_i|q) / π_ref(o_i|q)  (重要性采样比)
+//   English text ρ_i = π_θ(o_i|q) / π_ref(o_i|q)  (English text)
 //
-// 相比 PPO 的优势:
-//   • 无需独立训练价值网络 (节省 2× 显存)
-//   • 组内相对奖励方差更小，收敛更稳
-//   • 天然适合推理/数学: 同一题多种解法评分
+// English text PPO English text:
+//   • English texttrainingEnglish text (English text 2× English text)
+//   • English textrewardEnglish text, English text
+//   • English textinference/English text: English text
 //
-// 奖励设计 (R1-style):
-//   r_format: <think>...</think><answer>...</answer> 格式正确 +0.1
-//   r_accuracy: 答案正确 +1.0
-//   r_length: 过长惩罚 -0.01/100token
+// rewardEnglish text (R1-style):
+//   r_format: <think>...</think><answer>...</answer> English text +0.1
+//   r_accuracy: English text +1.0
+//   r_length: English text -0.01/100token
 // ============================================================================
 
 use neurx.posttrain.config
 
 // ============================================================================
-// 1. 配置
+// 1. configuration
 // ============================================================================
 
 struct grpo_config {
-    int group_size          // G: 每题采样输出数 (通常 4-16)
-    float clip_eps          // PPO clip ε (通常 0.2)
-    float kl_coef           // KL 惩罚系数 β (通常 0.01-0.1)
-    float gamma             // 折扣因子 (单步推理用 1.0)
-    int max_gen_len         // 最大生成长度
-    int min_gen_len         // 最小生成长度
-    float temperature       // 采样温度
+    int group_size          // G: English textoutputEnglish text (English text 4-16)
+    float clip_eps          // PPO clip ε (English text 0.2)
+    float kl_coef           // KL English text β (English text 0.01-0.1)
+    float gamma             // English text (English textstepinferenceEnglish text 1.0)
+    int max_gen_len         // English textgenerateEnglish text
+    int min_gen_len         // English textgenerateEnglish text
+    float temperature       // English text
     float top_p             // nucleus sampling
-    int num_iterations      // GRPO 内循环次数 (通常 1-4)
-    bool use_format_reward  // 开启格式奖励
-    bool use_length_penalty // 开启长度惩罚
-    float length_penalty_per_100  // 每100 token 的惩罚
-    float advantage_eps     // 优势归一化 ε (防止方差为0)
+    int num_iterations      // GRPO English text (English text 1-4)
+    bool use_format_reward  // English textreward
+    bool use_length_penalty // English text
+    float length_penalty_per_100  // English text100 token English text
+    float advantage_eps     // English text ε (English text0)
     string reward_type      // "math" | "code" | "general"
 }
 
@@ -85,26 +85,26 @@ func neurx_r1_grpo_config() grpo_config {
 }
 
 // ============================================================================
-// 2. 单条样本的 GRPO 数据
+// 2. English text GRPO data
 // ============================================================================
 
-// 一个"组"= 同一问题的 G 条输出
+// English text"English text"= English text G English textoutput
 struct grpo_group {
-    string question             // 原始问题
-    string reference_answer     // 参考答案 (用于评分)
-    []string outputs            // [G] 模型采样输出
-    []int    output_lengths     // [G] 各输出 token 数
-    []float  rewards            // [G] 各输出原始奖励
-    []float  advantages         // [G] 归一化优势
-    []float  log_probs_policy   // [G] 当前策略 log π_θ(o|q)
-    []float  log_probs_ref      // [G] 参考策略 log π_ref(o|q)
+    string question             // English text
+    string reference_answer     // English text (English text)
+    []string outputs            // [G] modelEnglish textoutput
+    []int    output_lengths     // [G] English textoutput token English text
+    []float  rewards            // [G] English textoutputEnglish textreward
+    []float  advantages         // [G] English text
+    []float  log_probs_policy   // [G] English text log π_θ(o|q)
+    []float  log_probs_ref      // [G] English text log π_ref(o|q)
 }
 
 // ============================================================================
-// 3. 奖励函数
+// 3. rewardfunction
 // ============================================================================
 
-// 检查答案是否包含正确格式 <think>...</think><answer>...</answer>
+// English text <think>...</think><answer>...</answer>
 func check_format_reward(string output) float {
     bool has_think  = string_contains(output, "<think>") && string_contains(output, "</think>")
     bool has_answer = string_contains(output, "<answer>") && string_contains(output, "</answer>")
@@ -117,26 +117,26 @@ func check_format_reward(string output) float {
     0.0
 }
 
-// 提取 <answer>...</answer> 中的内容并与参考答案对比
+// English text <answer>...</answer> English textcontentEnglish text
 func check_accuracy_reward(string output, string reference) float {
     string extracted = extract_answer_tag(output)
     if string_equals(extracted, reference) {
         return 1.0
     }
-    // 宽松匹配: 数字类答案去除空格后对比
+    // English text: English text
     string trimmed_out = string_trim(extracted)
     string trimmed_ref = string_trim(reference)
     if string_equals(trimmed_out, trimmed_ref) {
         return 1.0
     }
-    // 部分分 (包含正确答案子串)
+    // English text (English text)
     if string_contains(trimmed_out, trimmed_ref) {
         return 0.3
     }
     0.0
 }
 
-// 长度惩罚: 超过 max_gen_len 的 50% 开始惩罚
+// English text: English text max_gen_len English text 50% startEnglish text
 func compute_length_penalty(int token_len, int max_len, float penalty_per_100) float {
     int threshold = max_len / 2
     if token_len <= threshold {
@@ -159,7 +159,7 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
 }
 
 // ============================================================================
-// 4. 优势计算 (组内归一化)
+// 4. English textcompute (English text)
 // ============================================================================
 
 func compute_group_advantages([]float rewards, float eps) []float {
@@ -196,11 +196,11 @@ func compute_group_advantages([]float rewards, float eps) []float {
 }
 
 // ============================================================================
-// 5. GRPO 目标函数 (单样本 单token)
+// 5. GRPO English textfunction (English text English texttoken)
 // ============================================================================
 
-// 计算单个输出 i 的 GRPO loss 贡献
-// log_ratio = log π_θ - log π_ref (单 token)
+// computeEnglish textoutput i English text GRPO loss English text
+// log_ratio = log π_θ - log π_ref (English text token)
 func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage, float clip_eps, float kl_coef) float {
     float log_ratio = log_prob_policy - log_prob_ref
     float ratio = exp_grpo(log_ratio)
@@ -217,25 +217,25 @@ func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage,
 }
 
 // ============================================================================
-// 6. GRPO 步骤 (整组前向)
+// 6. GRPO stepEnglish text (English text)
 // ============================================================================
 
 struct grpo_step_result {
-    float total_loss          // 总 GRPO loss
-    float policy_loss         // 策略目标 loss
-    float kl_loss             // KL 惩罚
-    float mean_reward         // 组均奖励
-    float reward_std          // 奖励标准差
-    float mean_advantage      // 均值优势 (应接近 0)
-    float clip_fraction       // clip 触发比例
-    []float advantages        // [G] 各输出优势值
-    int accepted_outputs      // 正奖励输出数
+    float total_loss          // English text GRPO loss
+    float policy_loss         // English text loss
+    float kl_loss             // KL English text
+    float mean_reward         // English textreward
+    float reward_std          // rewardEnglish text
+    float mean_advantage      // English text (English text 0)
+    float clip_fraction       // clip English text
+    []float advantages        // [G] English textoutputEnglish text
+    int accepted_outputs      // English textrewardoutputEnglish text
 }
 
 func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     int G = len(group.outputs)
 
-    // 计算每个输出的奖励
+    // computeEnglish textoutputEnglish textreward
     []float rewards = []
     int i = 0
     for i < G {
@@ -249,10 +249,10 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         i = i + 1
     }
 
-    // 计算组内优势
+    // computeEnglish text
     []float adv = compute_group_advantages(rewards, cfg.advantage_eps)
 
-    // 计算 loss
+    // compute loss
     float total_loss = 0.0
     float kl_total   = 0.0
     float clips      = 0.0
@@ -282,7 +282,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     total_loss = total_loss / fG
     kl_total   = kl_total / fG
 
-    // 统计
+    // statistics
     float mean_r = 0.0
     int k = 0
     for k < G {
@@ -323,7 +323,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
 }
 
 // ============================================================================
-// 7. GRPO 训练循环状态
+// 7. GRPO trainingEnglish textstate
 // ============================================================================
 
 struct grpo_trainer_state {
@@ -332,11 +332,11 @@ struct grpo_trainer_state {
     float total_reward
     float total_loss
     int total_groups
-    // 移动平均 (用于监控)
-    float ema_reward       // 指数移动平均奖励
-    float ema_kl           // 指数移动平均 KL
-    float ema_clip_frac    // 指数移动平均 clip 率
-    float ema_decay        // EMA 衰减系数 (0.98)
+    // English text (English textmonitoring)
+    float ema_reward       // English textreward
+    float ema_kl           // English text KL
+    float ema_clip_frac    // English text clip English text
+    float ema_decay        // EMA English text (0.98)
 }
 
 func new_grpo_trainer(grpo_config cfg) grpo_trainer_state {
@@ -375,16 +375,16 @@ func grpo_train_step(grpo_trainer_state trainer, grpo_group group) grpo_train_st
 }
 
 // ============================================================================
-// 8. 课程学习 (Curriculum) — 难度自适应
+// 8. English text (Curriculum) — English text
 // ============================================================================
 
-// 根据近期准确率动态调整组大小和温度
+// English text
 struct grpo_curriculum_state {
-    float recent_accuracy    // 近 N 步平均准确率
-    int adaptive_group_size  // 自适应组大小
-    float adaptive_temp      // 自适应采样温度
-    int steps_since_update   // 上次更新以来的步数
-    int update_interval      // 每 N 步调整一次
+    float recent_accuracy    // English text N stepEnglish text
+    int adaptive_group_size  // English text
+    float adaptive_temp      // English text
+    int steps_since_update   // English textstepEnglish text
+    int update_interval      // English text N stepEnglish text
 }
 
 func new_grpo_curriculum(grpo_config base_cfg) grpo_curriculum_state {
@@ -406,14 +406,14 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
 
     if updated.steps_since_update >= cur.update_interval {
         updated.steps_since_update = 0
-        // 准确率高 → 加难 (减小 temperature, 增大 group)
-        // 准确率低 → 减难 (增大 temperature, 减小 group)
+        // English text → English text (English text temperature, English text group)
+        // English text → English text (English text temperature, English text group)
         if acc > 0.9 {
-            // 已经很高，增大温度探索更难问题
+            // English text, English text
             updated.adaptive_temp = min_float(base_cfg.temperature * 1.2, 1.0)
         } else {
             if acc < 0.3 {
-                // 太难，降温
+                // English text, English text
                 updated.adaptive_temp = base_cfg.temperature * 0.8
             }
         }
@@ -423,7 +423,7 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
 }
 
 // ============================================================================
-// 9. 工具函数
+// 9. toolfunction
 // ============================================================================
 
 func float_grpo(int n) float {
@@ -466,14 +466,14 @@ func min_float(float a, float b) float {
     b
 }
 
-// 字符串工具 (依赖运行时)
+// English texttool (English textrunEnglish text)
 func string_contains(string s, string sub) bool {
-    // runtime 实现
+    // runtime implementation
     false
 }
 
 func string_equals(string a, string b) bool {
-    // runtime 实现
+    // runtime implementation
     false
 }
 
@@ -482,7 +482,7 @@ func string_trim(string s) string {
 }
 
 func extract_answer_tag(string output) string {
-    // 提取 <answer>...</answer> 内容
-    // runtime 实现
+    // English text <answer>...</answer> content
+    // runtime implementation
     output
 }

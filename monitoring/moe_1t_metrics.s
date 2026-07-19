@@ -1,28 +1,28 @@
 package neurx.monitoring.moe_1t_metrics
 
 // ============================================================================
-// 1T MoE 分布式监控系统
+// 1T MoE English textmonitoringsystem
 //
-// 收集的指标:
-//   1. 训练指标
+// English text:
+//   1. trainingEnglish text
 //      - loss, perplexity, tokens/sec
-//      - 梯度范数, 权重范数
-//   
-//   2. MoE 指标
-//      - 每个专家的负载
-//      - 路由分布
-//      - 专家利用率
-//   
-//   3. 通信指标
-//      - AllGather/ReduceScatter/AllReduce 延迟
-//      - 带宽利用率
-//      - 通信与计算的重叠比例
-//   
-//   4. 系统指标
-//      - GPU 内存用量
-//      - 热度/功耗
-//      - 吞吐量
-//      - 墙钟时间
+//      - gradientEnglish text, weightEnglish text
+//
+//   2. MoE English text
+//      - English text
+//      - English text
+//      - English text
+//
+//   3. English text
+//      - AllGather/ReduceScatter/AllReduce English text
+//      - English text
+//      - English textcomputeEnglish text
+//
+//   4. systemEnglish text
+//      - GPU English text
+//      - English text/English text
+//      - English text
+//      - English texttime
 //
 // ============================================================================
 
@@ -30,7 +30,7 @@ use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
 
 // ============================================================================
-// 1. 指标类型定义
+// 1. English text
 // ============================================================================
 
 struct training_metrics {
@@ -48,9 +48,9 @@ struct training_metrics {
 struct moe_metrics {
     []float expert_load           // [num_experts]
     []float expert_utilization    // [num_experts]
-    []int expert_dropout_count    // [num_experts] 超容量的 token 数
+    []int expert_dropout_count    // [num_experts] English text token English text
     float load_balance_ratio      // max_load / mean_load
-    float expert_diversity        // 使用的不同专家比例
+    float expert_diversity        // useEnglish text
 }
 
 struct communication_metrics {
@@ -78,7 +78,7 @@ struct metrics_frame {
     int step
     int global_rank
     long timestamp_ms
-    
+
     training_metrics train_metrics
     moe_metrics moe_metrics
     communication_metrics comm_metrics
@@ -86,7 +86,7 @@ struct metrics_frame {
 }
 
 // ============================================================================
-// 2. 指标收集器
+// 2. English text
 // ============================================================================
 
 struct metrics_collector {
@@ -94,27 +94,27 @@ struct metrics_collector {
     int world_size
     int local_rank
     int local_world_size
-    
-    // 当前帧
+
+    // English text
     metrics_frame current_frame
-    
-    // 历史帧
+
+    // English text
     []metrics_frame frames_history
     int max_history_size
-    
-    // 聚合统计
+
+    // English textstatistics
     float avg_loss
     float max_loss
     float min_loss
     int steps_logged
-    
-    // 输出配置
-    int log_frequency            // 每 N 步输出一次
+
+    // outputconfiguration
+    int log_frequency            // English text N stepoutputEnglish text
     int save_frequency
     string metrics_output_dir
 }
 
-// 初始化指标收集器
+// initializeEnglish text
 func metrics_collector_new(
     int global_rank,
     int world_size,
@@ -122,7 +122,7 @@ func metrics_collector_new(
     int local_world_size,
     string output_dir
 ) metrics_collector {
-    
+
     metrics_collector collector = metrics_collector {
         global_rank: global_rank,
         world_size: world_size,
@@ -184,15 +184,15 @@ func metrics_collector_new(
     if output_dir != "" {
         runtime_make_dirs(output_dir)
     }
-    
+
     collector
 }
 
 // ============================================================================
-// 3. 训练指标更新
+// 3. trainingEnglish text
 // ============================================================================
 
-// 更新训练指标
+// English texttrainingEnglish text
 func update_training_metrics(
     metrics_collector collector,
     float loss,
@@ -201,26 +201,26 @@ func update_training_metrics(
     float learning_rate,
     float gradient_norm
 ) {
-    
+
     collector.current_frame.train_metrics.loss = loss
     collector.current_frame.train_metrics.loss_ce = loss_ce
     collector.current_frame.train_metrics.loss_aux = loss_aux
     collector.current_frame.train_metrics.learning_rate = learning_rate
     collector.current_frame.train_metrics.gradient_norm = gradient_norm
     collector.current_frame.train_metrics.weight_norm = collector.current_frame.train_metrics.weight_norm
-    
-    // 计算 perplexity
+
+    // compute perplexity
     float perplexity = 0.0
     if loss > 0.0 {
         perplexity = exp(loss)
     }
     collector.current_frame.train_metrics.perplexity = perplexity
     collector.current_frame.timestamp_ms = current_timestamp_ms()
-    
-    // 更新聚合统计
-    collector.avg_loss = (collector.avg_loss * float(collector.steps_logged) + loss) / 
+
+    // English textstatistics
+    collector.avg_loss = (collector.avg_loss * float(collector.steps_logged) + loss) /
                         float(collector.steps_logged + 1)
-    
+
     if loss > collector.max_loss || collector.steps_logged == 0 {
         collector.max_loss = loss
     }
@@ -230,26 +230,26 @@ func update_training_metrics(
 }
 
 // ============================================================================
-// 4. MoE 指标更新
+// 4. MoE English text
 // ============================================================================
 
-// 更新 MoE 指标
+// English text MoE English text
 func update_moe_metrics(
     metrics_collector collector,
     []float expert_load,              // [num_experts]
     []float expert_utilization,       // [num_experts]
     []int expert_dropout_count
 ) {
-    
+
     collector.current_frame.moe_metrics.expert_load = expert_load
     collector.current_frame.moe_metrics.expert_utilization = expert_utilization
     collector.current_frame.moe_metrics.expert_dropout_count = expert_dropout_count
-    
-    // 计算负载平衡比率
+
+    // computeEnglish text
     float max_load = 0.0
     float sum_load = 0.0
     float active_experts = 0.0
-    
+
     int e = 0
     while e < len(expert_load) {
         if expert_load[e] > 0.0 {
@@ -261,30 +261,30 @@ func update_moe_metrics(
         sum_load = sum_load + expert_load[e]
         e = e + 1
     }
-    
+
     float mean_load = 0.0
     if len(expert_load) > 0 {
         mean_load = sum_load / float(len(expert_load))
     }
-    
+
     float load_balance = 1.0
     if mean_load > 0.0 {
         load_balance = max_load / mean_load
     }
-    
+
     collector.current_frame.moe_metrics.load_balance_ratio = load_balance
-    
-    // 专家多样性 = 活跃专家数 / 总专家数
+
+    // English text = English text / English text
     if len(expert_load) > 0 {
         collector.current_frame.moe_metrics.expert_diversity = active_experts / float(len(expert_load))
     }
 }
 
 // ============================================================================
-// 5. 通信指标更新
+// 5. English text
 // ============================================================================
 
-// 更新通信指标
+// English text
 func update_communication_metrics(
     metrics_collector collector,
     long allgather_bytes,
@@ -294,7 +294,7 @@ func update_communication_metrics(
     float allreduce_time_ms,
     float reduce_scatter_time_ms
 ) {
-    
+
     collector.current_frame.comm_metrics.allgather_bytes = allgather_bytes
     collector.current_frame.comm_metrics.allreduce_bytes = allreduce_bytes
     collector.current_frame.comm_metrics.reduce_scatter_bytes = reduce_scatter_bytes
@@ -304,10 +304,10 @@ func update_communication_metrics(
 }
 
 // ============================================================================
-// 6. 系统指标更新
+// 6. systemEnglish text
 // ============================================================================
 
-// 更新系统指标
+// English textsystemEnglish text
 func update_system_metrics(
     metrics_collector collector,
     long gpu_memory_used,
@@ -316,52 +316,52 @@ func update_system_metrics(
     float throughput,
     float iteration_time
 ) {
-    
+
     collector.current_frame.sys_metrics.gpu_memory_used_bytes = gpu_memory_used
     collector.current_frame.sys_metrics.gpu_power_watts = gpu_power
     collector.current_frame.sys_metrics.gpu_temperature_celsius = gpu_temp
     collector.current_frame.sys_metrics.throughput_tokens_per_sec = throughput
     collector.current_frame.sys_metrics.iteration_time_ms = iteration_time
     collector.current_frame.sys_metrics.wall_clock_time_ms = current_timestamp_ms()
-    
-    // 计算内存百分比
+
+    // computeEnglish text
     long total_mem = collector.current_frame.sys_metrics.gpu_memory_total_bytes
     if total_mem > 0 {
-        collector.current_frame.sys_metrics.gpu_memory_percent = 
+        collector.current_frame.sys_metrics.gpu_memory_percent =
             float(gpu_memory_used) / float(total_mem) * 100.0
     }
 }
 
 // ============================================================================
-// 7. 日志输出
+// 7. logoutput
 // ============================================================================
 
-// 记录当前指标帧
+// English text
 func log_step(
     metrics_collector collector,
     int step
 ) {
-    
+
     collector.current_frame.step = step
     collector.steps_logged = collector.steps_logged + 1
-    
-    // 添加到历史
+
+    // English text
     if len(collector.frames_history) < collector.max_history_size {
         collector.frames_history = append_frame(collector.frames_history, collector.current_frame)
     }
     if len(collector.frames_history) > collector.max_history_size {
         collector.frames_history = trim_history(collector.frames_history, collector.max_history_size)
     }
-    
-    // 定期输出日志
+
+    // English textoutputlog
     if step % collector.log_frequency == 0 {
         log_metrics_frame(collector.current_frame)
     }
 }
 
-// 输出指标帧
+// outputEnglish text
 func log_metrics_frame(metrics_frame frame) {
-    
+
     string log_str = ""
     log_str = log_str + "Step=" + int_to_string(frame.step) + " "
     log_str = log_str + "Loss=" + float_to_string(frame.train_metrics.loss, 4) + " "
@@ -371,27 +371,27 @@ func log_metrics_frame(metrics_frame frame) {
     log_str = log_str + "MoE-Load=" + float_to_string(frame.moe_metrics.load_balance_ratio, 2) + " "
     log_str = log_str + "Throughput=" + float_to_string(frame.sys_metrics.throughput_tokens_per_sec, 0) + " tokens/sec "
     log_str = log_str + "Memory=" + float_to_string(frame.sys_metrics.gpu_memory_percent, 1) + "%"
-    
+
     io_println(log_str)
 }
 
 // ============================================================================
-// 8. 聚合统计
+// 8. English textstatistics
 // ============================================================================
 
-// 收集全局统计 (AllReduce)
+// English textstatistics (AllReduce)
 func collect_global_stats(
     metrics_collector collector,
     collective_state comm
 ) {
-    
-    // 在实际实现中，需要对所有 GPU 进行 AllReduce
-    // 这里只是本地统计
-    
+
+    // English textactualimplementationEnglish text, RequiredEnglish text GPU English text AllReduce
+    // English textstatistics
+
     io_println("Global stats collected for rank=" + int_to_string(collector.global_rank))
 }
 
-// 保存指标到文件
+// saveEnglish textfile
 func save_metrics(
     metrics_collector collector,
     string filename
@@ -402,7 +402,7 @@ func save_metrics(
 }
 
 // ============================================================================
-// 9. 工具函数
+// 9. toolfunction
 // ============================================================================
 
 func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {

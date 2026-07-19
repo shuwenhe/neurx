@@ -1,105 +1,105 @@
 // ============================================================
-// NEURX ADVANCED RAG 系统 - 检索增强生成
-// 完整实现: 向量数据库 + 混合检索 + 智能重排序 + 多源融合
-// 兼容: FAISS / Chroma / Milvus / Pinecone / 自研向量引擎
+// NEURX ADVANCED RAG system - English textgenerate
+// completeimplementation: English textdataEnglish text + English text + English textranking + English text
+// English text: FAISS / Chroma / Milvus / Pinecone / English text
 // ============================================================
 
 module rag_system
 
-// ==================== 核心配置 ====================
+// ==================== English textconfiguration ====================
 
 struct RetrievalSystemConfig {
-    // 向量数据库配置
+    // English textdataEnglish textconfiguration
     vector_db_backend: string = "faiss"           // faiss | chroma | milvus | pinecone | in_memory
-    vector_dim: int = 768                          // 嵌入维度 (取决于使用的 Embedding Model)
-    index_type: string = "IVF_FLAT"                // 索引类型: FLAT / IVF_FLAT / HNSW / IVF_PQ
-    metric: string = "cosine"                      // 相似度度量: cosine / l2 / inner_product
-    nprobe: int = 10                               // IVF 探测簇数 (越大越精确但越慢)
-    nlist: int = 100                               // IVF 簇数量
-    
-    // 检索参数
-    top_k: int = 5                                 // 初始检索返回数量
-    rerank_top_k: int = 3                          // 重排序后返回数量
-    similarity_threshold: float = 0.7              // 最低相似度阈值 (低于此值的结果被过滤)
-    max_chunk_length: int = 512                    // 文档分块最大长度
-    
-    // 嵌入模型配置
-    embedding_model_name: string = "bge-large-zh-v1.5"  // 默认使用 BGE 中文嵌入模型
-    embedding_batch_size: int = 32                 // 批量嵌入大小
-    normalize_embeddings: bool = true              // 是否归一化向量
-    
-    // 混合检索权重
-    vector_weight: float = 0.7                     // 向量检索权重
-    keyword_weight: float = 0.3                    # 关键词检索权重
-    
-    // 重排序配置
-    enable_reranking: bool = true                  # 是否启用重排序
-    reranker_model: string = "bge-reranker-v2-m3"  # 重排序模型
-    reranker_score_threshold: float = 0.5          # 重排序最低分数
-    
-    // 高级功能
-    enable_hybrid_search: bool = true              # 启用混合检索 (向量+关键词)
-    enable_query_expansion: bool = true            # 启用查询扩展
-    enable_cross_encoder_rerank: bool = true       # 使用 Cross-Encoder 重排
-    max_context_tokens: int = 4096                 # 注入上下文的最大 token 数
-    citation_format: string = "[doc{index}]"       # 引用格式
+    vector_dim: int = 768                          // English text (English textuseEnglish text Embedding Model)
+    index_type: string = "IVF_FLAT"                // English text: FLAT / IVF_FLAT / HNSW / IVF_PQ
+    metric: string = "cosine"                      // English text: cosine / l2 / inner_product
+    nprobe: int = 10                               // IVF English text (English text)
+    nlist: int = 100                               // IVF English textcount
+
+    // English textparameter
+    top_k: int = 5                                 // English textcount
+    rerank_top_k: int = 3                          // English textrankingEnglish textcount
+    similarity_threshold: float = 0.7              // English text (English textresultEnglish text)
+    max_chunk_length: int = 512                    // English text
+
+    // English textmodelconfiguration
+    embedding_model_name: string = "bge-large-zh-v1.5"  // defaultuse BGE English textmodel
+    embedding_batch_size: int = 32                 // English text
+    normalize_embeddings: bool = true              // English text
+
+    // English textweight
+    vector_weight: float = 0.7                     // English textweight
+    keyword_weight: float = 0.3                    # keywordsEnglish textweight
+
+    // English textrankingconfiguration
+    enable_reranking: bool = true                  # English textranking
+    reranker_model: string = "bge-reranker-v2-m3"  # English textrankingmodel
+    reranker_score_threshold: float = 0.5          # English textrankingEnglish text
+
+    // advancedEnglish text
+    enable_hybrid_search: bool = true              # English text (English text+keywords)
+    enable_query_expansion: bool = true            # English textqueryextension
+    enable_cross_encoder_rerank: bool = true       # use Cross-Encoder English text
+    max_context_tokens: int = 4096                 # English text token English text
+    citation_format: string = "[doc{index}]"       # English text
 }
 
 struct DocumentChunk {
     id: string                                     // Chunk ID (UUID)
-    content: string                                // 文本内容
-    metadata: DocumentMetadata                     // 元数据
-    embedding: tensor?                             // 预计算的嵌入向量 (可选)
-    chunk_index: int                               // 在原文档中的位置索引
-    token_count: int                               // Token 数量估计
+    content: string                                // English textcontent
+    metadata: DocumentMetadata                     // English textdata
+    embedding: tensor?                             // English textcomputeEnglish text (English text)
+    chunk_index: int                               // English text
+    token_count: int                               // Token countEnglish text
 }
 
 struct DocumentMetadata {
-    source_id: string                              // 来源文档 ID
-    source_path: string?                           // 文件路径或 URL
-    title: string                                  // 文档标题
-    author: string?                                // 作者
-    created_at: float?                             // 创建时间戳
-    document_type: string                          // 类型: pdf/html/markdown/text/webpage
-    language: string = "zh"                        // 语言
-    tags: list<string>                             // 标签列表
-    url?: string                                   // 原始 URL (如果是网页)
-    page_number?: int                              // 页码 (PDF)
-    section?: string                               // 章节/段落标题
-    relevance_score?: float                        // 相关性分数 (由检索器填充)
+    source_id: string                              // SourceEnglish text ID
+    source_path: string?                           // filepathEnglish text URL
+    title: string                                  // English texttitle
+    author: string?                                // author
+    created_at: float?                             // English texttimeEnglish text
+    document_type: string                          // English text: pdf/html/markdown/text/webpage
+    language: string = "zh"                        // language
+    tags: list<string>                             // English text
+    url?: string                                   // English text URL (English textweb page)
+    page_number?: int                              // English text (PDF)
+    section?: string                               // section/English texttitle
+    relevance_score?: float                        // English text (English text)
 }
 
 struct SearchResult {
-    chunks: list<DocumentChunk>                    // 检索到的文档块
-    scores: list<float>                            // 相似度/相关性分数
-    query: string                                  // 原始查询
-    expanded_query: string?                        # 扩展后的查询
-    retrieval_metadata: RetrievalMetadata          # 检索元数据
+    chunks: list<DocumentChunk>                    // English text
+    scores: list<float>                            // English text/English text
+    query: string                                  // English textquery
+    expanded_query: string?                        # extensionEnglish textquery
+    retrieval_metadata: RetrievalMetadata          # English textdata
 }
 
 struct RetrievalMetadata {
-    total_scanned: int                             // 总扫描文档数
-    total_returned: int                            // 返回结果数
-    vector_search_time_ms: float                   # 向量搜索耗时
-    keyword_search_time_ms: float                  # 关键词搜索耗时
-    rerank_time_ms: float                          # 重排序耗时
-    fusion_time_ms: float                          # 结果融合耗时
-    used_hybrid_search: bool                       # 是否使用了混合检索
-    used_query_expansion: bool                     # 是否使用了查询扩展
+    total_scanned: int                             // English text
+    total_returned: int                            // English textresultEnglish text
+    vector_search_time_ms: float                   # English textsearchEnglish text
+    keyword_search_time_ms: float                  # keywordssearchEnglish text
+    rerank_time_ms: float                          # English textrankingEnglish text
+    fusion_time_ms: float                          # resultEnglish text
+    used_hybrid_search: bool                       # English textuseEnglish text
+    used_query_expansion: bool                     # English textuseEnglish textqueryextension
 }
 
-// ==================== 向量数据库抽象层 ====================
+// ==================== English textdataEnglish text ====================
 
 interface VectorDBInterface {
     init(config: RetrievalSystemConfig) -> void
-    insert(chunks: list<DocumentChunk>) -> void                           // 插入文档块
-    delete(chunk_ids: list<string>) -> void                               # 删除指定块
-    search(query_embedding: tensor, top_k: int) -> list<SearchResultItem>  // 向量相似度搜索
-    save(path: string) -> void                                           // 持久化到磁盘
-    load(path: string) -> void                                           // 从磁盘加载
-    count() -> int                                                       // 返回总文档数
-    clear() -> void                                                      # 清空所有数据
-    get_status() -> DBStatus                                             // 获取数据库状态信息
+    insert(chunks: list<DocumentChunk>) -> void                           // English text
+    delete(chunk_ids: list<string>) -> void                               # English text
+    search(query_embedding: tensor, top_k: int) -> list<SearchResultItem>  // English textsearch
+    save(path: string) -> void                                           // English text
+    load(path: string) -> void                                           // English textload
+    count() -> int                                                       // English text
+    clear() -> void                                                      # English textdata
+    get_status() -> DBStatus                                             // English textdataEnglish textstateinformation
 }
 
 struct SearchResultItem {
@@ -116,7 +116,7 @@ struct DBStatus {
     last_updated: float
 }
 
-// ==================== In-Memory 向量数据库 (默认实现) ====================
+// ==================== In-Memory English textdataEnglish text (defaultimplementation) ====================
 
 class InMemoryVectorDB implements VectorDBInterface {
     config: RetrievalSystemConfig
@@ -155,10 +155,10 @@ class InMemoryVectorDB implements VectorDBInterface {
 
     search(query_embedding: tensor, top_k: int) -> list<SearchResultItem> {
         results: list<SearchResultItem> = []
-        
+
         for chunk_id, doc_emb in this.embeddings {
             let score = compute_similarity(query_embedding, doc_emb, this.config.metric)
-            
+
             if score >= this.config.similarity_threshold {
                 results.append(SearchResultItem{
                     chunk_id=chunk_id,
@@ -167,10 +167,10 @@ class InMemoryVectorDB implements VectorDBInterface {
                 })
             }
         }
-        
+
         // Sort by score descending and return top-k
         results.sort_by_descending(r => r.score)
-        
+
         if results.length > top_k {
             return results[:top_k]
         }
@@ -191,15 +191,15 @@ class InMemoryVectorDB implements VectorDBInterface {
     load(path: string) {
         data = read_json_file(path)
         this.config = deserialize(data["config"])
-        
+
         for doc_data in data["documents"]:
             let doc = deserialize(doc_data)
             this.documents[doc.id] = doc
-        
+
         for id_str, emb_array in data["embeddings"] {
             this.embeddings[id_str] = tensor(emb_array)
         }
-        
+
         this.index_built = true
         this.last_updated = data["last_updated"]
     }
@@ -226,7 +226,7 @@ class InMemoryVectorDB implements VectorDBInterface {
     }
 }
 
-// ==================== FAISS 向量数据库后端 ====================
+// ==================== FAISS English textdataEnglish text ====================
 
 class FAISSVectorDB implements VectorDBInterface {
     config: RetrievalSystemConfig
@@ -277,7 +277,7 @@ class FAISSVectorDB implements VectorDBInterface {
             }
             _ => throw error(f"Unsupported FAISS index type: {config.index_type}")
         }
-        
+
         // Set nprobe for IVF indexes
         if "IVF" in config.index_type {
             this.index.nprobe = config.nprobe
@@ -286,7 +286,7 @@ class FAISSVectorDB implements VectorDBInterface {
 
     insert(chunks: list<DocumentChunk>) {
         if chunks.length == 0 { return }
-        
+
         // Collect embeddings that are not null
         valid_chunks: list<(DocumentChunk, tensor)> = []
         for chunk in chunks {
@@ -294,33 +294,33 @@ class FAISSVectorDB implements VectorDBInterface {
                 valid_chunks.append((chunk, chunk.embedding!))
             }
         }
-        
+
         if valid_chunks.length == 0 { return }
-        
+
         // Build matrix of embeddings: [N, dim]
         embeddings_matrix = stack([emb for _, emb in valid_chunks])
-        
+
         // Normalize for cosine similarity if needed
         if this.config.normalize_embeddings || this.config.metric == "cosine" {
             embeddings_matrix = l2_normalize(embeddings_matrix, axis=1)
         }
-        
+
         // Train index if needed (for IVF types)
         if !this.is_trained && embeddings_matrix.shape[0] >= 256 {
             this.index.train(embeddings_matrix)
             this.is_trained = true
         }
-        
+
         // Add to index
         start_id = this.next_id
         ids_to_add = arange(start_id, start_id + valid_chunks.length).astype('int64')
         this.index.add_with_ids(embeddings_matrix, ids_to_add)
-        
+
         // Store mapping from internal ID to chunk
         for i, (chunk, _) in enumerate(valid_chunks) {
             this.id_to_chunk[start_id + i] = chunk
         }
-        
+
         this.next_id += valid_chunks.length
     }
 
@@ -343,50 +343,50 @@ class FAISSVectorDB implements VectorDBInterface {
         if query_embedding.ndim == 1 {
             query_embedding = query_embedding.unsqueeze(0)
         }
-        
+
         // Normalize query if needed
         if this.config.normalize_embeddings || this.config.metric == "cosine" {
             query_embedding = l2_normalize(query_embedding, axis=1)
         }
-        
+
         // Search (search a bit more than needed for safety margin)
         k_actual = min(top_k * 2, this.index.ntotal)  // Get extra for potential filtering
         if k_actual == 0 { return [] }
-        
+
         distances, indices = this.index.search(query_embedding, k_actual)
-        
+
         results: list<SearchResultItem> = []
         for i in range(distances.shape[1]) {
             int_id = indices[0][i]
-            
+
             // Skip invalid IDs (deleted or out of range)
             if int_id < 0 || int_id not in this.id_to_chunk { continue }
-            
+
             score = distances[0][i]
-            
+
             // For IP/Cosine: higher is better, already correct
             // For L2: convert to similarity (lower distance = better)
             if this.config.metric == "l2" {
                 score = 1.0 / (1.0 + score)  # Convert L2 to similarity-like score
             }
-            
+
             if score >= this.config.similarity_threshold {
                 results.append(SearchResultItem{
                     chunk_id=this.id_to_chunk[int_id].id,
                     score=float(score),
                     metadata=this.id_to_chunk[int_id].metadata
                 })
-                
+
                 if results.length >= top_k { break }
             }
         }
-        
+
         return results
     }
 
     save(path: string) {
         faiss.write_index(this.index, path + ".index")
-        
+
         # Save mapping
         mapping_data = [(int_id, serialize(chunk)) for int_id, chunk in this.id_to_chunk]
         write_pickle_file(path + ".mapping", {"mapping": mapping_data, "next_id": this.next_id})
@@ -394,7 +394,7 @@ class FAISSVectorDB implements VectorDBInterface {
 
     load(path: string) {
         this.index = faiss.read_index(path + ".index")
-        
+
         mapping_info = read_pickle_file(path + ".mapping")
         for int_id, chunk_data in mapping_info["mapping"] {
             this.id_to_chunk[int_id] = deserialize(chunk_data)
@@ -425,7 +425,7 @@ class FAISSVectorDB implements VectorDBInterface {
     }
 }
 
-// ==================== Embedding 服务 ====================
+// ==================== Embedding English text ====================
 
 class EmbeddingService {
     model_name: string
@@ -438,7 +438,7 @@ class EmbeddingService {
         this.model_name = model_name
         this.config = config
         this.cache = new LRUCache(capacity=10000)
-        
+
         // Load model and tokenizer based on backend
         match model_name.split("/")[0].split("-")[0].to_lower() {
             "bge" => {
@@ -468,7 +468,7 @@ class EmbeddingService {
                 )
             }
         }
-        
+
         # Set model to eval mode
         this.model.eval()
         if has_gpu():
@@ -477,16 +477,16 @@ class EmbeddingService {
 
     embed(texts: list<string>) -> list<tensor> {
         embeddings: list<tensor> = []
-        
+
         # Process in batches
         for batch_start in range(0, texts.length, this.config.embedding_batch_size) {
             batch_texts = texts[batch_start : batch_start + this.config.embedding_batch_size]
-            
+
             # Check cache first
             uncached_texts: list<string> = []
             uncached_indices: list<int> = []
             cached_results: map<int, tensor> = {}
-            
+
             for i, text in enumerate(batch_texts) {
                 cache_key = text[:200]  # Use first 200 chars as key
                 if cache_key in this.cache {
@@ -496,11 +496,11 @@ class EmbeddingService {
                     uncached_indices.append(i)
                 }
             }
-            
+
             # Compute uncached embeddings
             if uncached_texts.length > 0 {
                 batch_embeddings = this._compute_embeddings(uncached_texts)
-                
+
                 # Cache and store results
                 for j, emb in enumerate(batch_embeddings) {
                     original_idx = uncached_indices[j]
@@ -509,13 +509,13 @@ class EmbeddingService {
                     cached_results[original_idx] = emb
                 }
             }
-            
+
             # Reorder back to original sequence
             for i in range(batch_texts.length) {
                 embeddings.append(cached_results[i])
             }
         }
-        
+
         return embeddings
     }
 
@@ -533,35 +533,35 @@ class EmbeddingService {
             max_length=512,
             return_tensors="pt"
         )
-        
+
         # Move to GPU if available
         if has_gpu() {
             encoded = {k: v.to("cuda") for k, v in encoded}
-        
+
         # Forward pass (no grad for inference)
         with no_grad():
             outputs = this.model(**encoded)
-        
+
         # Extract embeddings (use mean pooling or [CLS] token)
         # Most Chinese models use mean pooling over attention mask
         attention_mask = encoded["attention_mask"]
         hidden_states = outputs.last_hidden_state
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.shape).float()
-        
+
         sum_embeddings = (hidden_states * input_mask_expanded).sum(dim=1)
         sum_mask = input_mask_expanded.sum(dim=1).clamp(min=1e-9)
-        
+
         embeddings = sum_embeddings / sum_mask  # [batch, hidden_dim]
-        
+
         # Normalize if configured
         if this.config.normalize_embeddings {
             embeddings = l2_normalize(embeddings, p=2, dim=1)
-        
+
         # Move to CPU and convert to list of tensors
         result: list<tensor> = []
         for i in range(embeddings.shape[0]):
             result.append(embeddings[i].detach().cpu())
-        
+
         return result
     }
 }
@@ -574,7 +574,7 @@ class LRUCache<K, V> {
     init(capacity: int) {
         this.capacity = capacity
         this.cache = new OrderedMap<K, V>()
-    
+
     __getitem__(key: K) -> V {
         if key not in this.cache {
             raise KeyError(key)
@@ -583,7 +583,7 @@ class LRUCache<K, V> {
         this.cache.move_to_end(key)
         return value
     }
-    
+
     __setitem__(key: K, value: V) {
         if key in this.cache:
             this.cache.move_to_end(key)
@@ -591,16 +591,16 @@ class LRUCache<K, V> {
             # Evict least recently used (first item)
             this.cache.popitem(last=false)
         this.cache[key] = value
-    
+
     __contains__(key: K) -> bool {
         return key in this.cache
-    
+
     size() -> int {
         return this.cache.size()
     }
 }
 
-// ==================== 文档处理器和分块策略 ====================
+// ==================== English text ====================
 
 class DocumentProcessor {
     config: RetrievalSystemConfig
@@ -617,7 +617,7 @@ class DocumentProcessor {
     process_document(content: string, metadata: DocumentMetadata) -> list<DocumentChunk> {
         // Split into chunks
         raw_chunks = this.splitter.split_text(content)
-        
+
         // Wrap into DocumentChunk objects with IDs and metadata
         chunks: list<DocumentChunk> = []
         for i, chunk_text in enumerate(raw_chunks) {
@@ -629,7 +629,7 @@ class DocumentProcessor {
                 token_count=estimate_token_count(chunk_text)
             })
         }
-        
+
         return chunks
     }
 
@@ -652,7 +652,7 @@ class RecursiveCharacterTextSplitter {
     init(chunk_size: int, chunk_overlap: int) {
         this.chunk_size = chunk_size
         this.chunk_overlap = chunk_overlap
-        this.separators = ["\n\n", "\n", ". ", "。", " ", ""]
+        this.separators = ["\n\n", "\n", ". ", ".", " ", ""]
     }
 
     split_text(text: string) -> list<string> {
@@ -664,25 +664,25 @@ class RecursiveCharacterTextSplitter {
             # Final fallback: split by character
             return this._split_by_length(text)
         }
-        
+
         separator = separators[0]
         remaining_separators = separators[1:]
-        
+
         if separator.empty() {
             return this._split_by_length(text)
         }
-        
+
         parts = text.split(separator)
         chunks: list<string> = []
         current_chunk = ""
-        
+
         for part in parts {
             new_text = current_chunk + (current_chunk.empty() ? "" : separator) + part
-            
+
             if new_text.length > this.chunk_size {
                 if !current_chunk.empty() {
                     chunks.append(current_chunk)
-                    
+
                     # Handle overlap
                     overlap_text = current_chunk[-this.chunk_overlap:] if this.chunk_overlap > 0 else ""
                     current_chunk = overlap_text + part
@@ -695,11 +695,11 @@ class RecursiveCharacterTextSplitter {
                 current_chunk = new_text
             }
         }
-        
+
         if !current_chunk.empty() {
             chunks.append(current_chunk)
         }
-        
+
         return chunks
     }
 
@@ -718,7 +718,7 @@ class RecursiveCharacterTextSplitter {
     }
 }
 
-// ==================== 查询扩展模块 ====================
+// ==================== queryextensionEnglish text ====================
 
 class QueryExpander {
     llm_client: any  // Reference to LLM for generating expansions
@@ -733,10 +733,10 @@ class QueryExpander {
         if !this.enabled {
             return QueryExpansionResult{original=query, expanded=[]}
         }
-        
+
         # Use LLM to generate query variations/expansions
         prompt = f"""
-Given the following user query, generate {num_expansions} alternative phrasings 
+Given the following user query, generate {num_expansions} alternative phrasings
 that could improve information retrieval. The expanded queries should:
 - Preserve the original intent
 - Include synonyms or related terms
@@ -748,9 +748,9 @@ Return only a JSON array of strings, e.g.: ["expansion1", "expansion2", "expansi
 
 Expanded queries:
 """
-        
+
         response = this.llm_client.generate(prompt, temperature=0.7, max_tokens=150)
-        
+
         # Parse JSON response
         try {
             expanded_queries = json_parse(response.text.strip())
@@ -765,27 +765,27 @@ Expanded queries:
             expanded = this._simple_expand(query, num_expansions)
             return QueryExpansionResult{original=query, expanded=expanded}
         }
-        
+
         return QueryExpansionResult{original=query, expanded=[]}
     }
 
     _simple_expand(query: string, num: int) -> list<string> {
         # Basic expansion using rules/synonyms (fallback when LLM unavailable)
         synonyms_map: map<string, list<string>> = {
-            "how": ["如何", "怎样", "怎么"],
-            "what": ["什么", "哪些", "何为"],
-            "why": ["为什么", "为何", "原因"],
-            "best": ["最好", "最佳", "最优", "推荐"],
-            "method": ["方法", "方式", "途径", "手段"],
-            "problem": ["问题", "难题", "挑战", "故障"],
-            "solution": ["解决方案", "解决办法", "对策"],
-            "example": ["例子", "实例", "案例", "示例"],
-            "compare": ["比较", "对比", "区别", "差异"]
+            "how": ["English text", "English text", "English text"],
+            "what": ["English text", "English text", "English text"],
+            "why": ["English text", "English text", "English text"],
+            "best": ["English text", "English text", "English text", "recommended"],
+            "method": ["English text", "English text", "English text", "English text"],
+            "problem": ["English text", "English text", "English text", "English text"],
+            "solution": ["English text", "English text", "English text"],
+            "example": ["English text", "English text", "English text", "example"],
+            "compare": ["English text", "English text", "English text", "English text"]
         }
-        
+
         expanded: list<string> = []
         words = query.split_whitespace()
-        
+
         for word in words {
             lower_word = word.lower()
             if lower_word in synonyms_map {
@@ -797,7 +797,7 @@ Expanded queries:
             }
             if expanded.length >= num { break }
         }
-        
+
         return expanded[:num]
     }
 }
@@ -807,7 +807,7 @@ struct QueryExpansionResult {
     expanded: list<string>
 }
 
-// ==================== 关键词检索 (BM25) ====================
+// ==================== keywordsEnglish text (BM25) ====================
 
 class BM25Retriever {
     corpus: list<string>
@@ -829,42 +829,42 @@ class BM25Retriever {
     build_index(documents: list<DocumentChunk>) {
         this.doc_ids = [doc.id for doc in documents]
         this.corpus = [doc.content.lower() for doc in documents]
-        
+
         total_len = 0
         for doc_content in this.corpus {
             tokens = this._tokenize(doc_content)
-            
+
             term_counts: map<string, int> = {}
             unique_terms: set<string> = set{}
-            
+
             for token in tokens {
                 term_counts[token] = term_counts.get(token, 0) + 1
                 unique_terms.add(token)
             }
-            
+
             this.tf.append(term_counts)
             total_len += tokens.length
-            
+
             for term in unique_terms {
                 this.df[term] = this.df.get(term, 0) + 1
             }
         }
-        
+
         this.avg_doc_len = total_len / this.corpus.length if this.corpus.length > 0 else 1.0
     }
 
     search(query: string, top_k: int) -> list<BM25Result> {
         query_tokens = this._tokenize(query.lower())
         scores: list<tuple<int, float>> = []
-        
+
         for doc_idx in range(this.corpus.length) {
             score = this._score_bm25(query_tokens, doc_idx)
             scores.append((doc_idx, score))
         }
-        
+
         # Sort by score descending
         scores.sort_by_descending(s => s[1])
-        
+
         results: list<BM25Result> = []
         for doc_idx, score in scores[:top_k] {
             if score > 0 {
@@ -874,31 +874,31 @@ class BM25Retriever {
                 })
             }
         }
-        
+
         return results
     }
 
     _score_bm25(query_tokens: list<string>, doc_idx: int) -> float {
         doc_tf = this.tf[doc_idx]
         doc_len = sum(doc_tf.values())  # Total terms in document
-        
+
         score = 0.0
         for term in query_tokens {
             if term not in this.df { continue }
-            
+
             tf_val = doc_tf.get(term, 0)
             df_val = this.df[term]
             n = this.corpus.length
-            
+
             # IDF component (Robertson-Sparck Jones)
             idf = log((n - df_val + 0.5) / (df_val + 0.5) + 1.0)
-            
+
             # TF component with saturation
             tf_component = (tf_val * (this.k1 + 1)) / (tf_val + this.k1 * (1 - this.b + this.b * doc_len / this.avg_doc_len))
-            
+
             score += idf * tf_component
         }
-        
+
         return score
     }
 
@@ -915,7 +915,7 @@ struct BM25Result {
     score: float
 }
 
-// ==================== Cross-Encoder 重排序器 ====================
+// ==================== Cross-Encoder English textrankingEnglish text ====================
 
 class CrossEncoderReranker {
     model: any
@@ -926,7 +926,7 @@ class CrossEncoderReranker {
     init(model_name: string) {
         this.model_name = model_name
         this.device = "cuda" if has_gpu() else "cpu"
-        
+
         # Load cross-encoder model
         this.model, this.tokenizer = load_cross_encoder_model(model_name)
         this.model.eval()
@@ -935,13 +935,13 @@ class CrossEncoderReranker {
 
     rerank(query: string, candidates: list<DocumentChunk>, top_k: int) -> list<RerankedResult> {
         if candidates.length == 0 { return [] }
-        
+
         # Prepare query-document pairs
         pairs: list<tuple<string, string>> = []
         for candidate in candidates {
             pairs.append((query, candidate.content))
         }
-        
+
         # Tokenize pairs
         features = this.tokenizer(
             pairs,
@@ -950,23 +950,23 @@ class CrossEncoderReranker {
             max_length=512,
             return_tensors="pt"
         ).to(this.device)
-        
+
         # Compute relevance scores
         with no_grad():
             scores = this.model(**features).logits.squeeze(-1)
-        
+
         # Convert to probabilities if binary classification model
         if scores.ndim == 2 && scores.shape[1] == 2:
             scores = softmax(scores, dim=-1)[:, 1]  # Probability of relevant class
-        
+
         # Pair scores with candidates and sort
         scored_candidates: list<tuple<DocumentChunk, float>> = []
         for i, candidate in enumerate(candidates) {
             scored_candidates.append((candidate, float(scores[i])))
         }
-        
+
         scored_candidates.sort_by_descending(x => x[1])
-        
+
         # Return top-k
         results: list<RerankedResult> = []
         for candidate, score in scored_candidates[:top_k] {
@@ -975,7 +975,7 @@ class CrossEncoderReranker {
                 rerank_score=score
             })
         }
-        
+
         return results
     }
 }
@@ -985,7 +985,7 @@ struct RerankedResult {
     rerank_score: float
 }
 
-// ==================== 混合检索融合器 ====================
+// ==================== English text ====================
 
 class HybridFusionEngine {
     vector_weight: float
@@ -999,10 +999,10 @@ class HybridFusionEngine {
         this.normalization_method = method
     }
 
-    fuse(vector_results: list<SearchResultItem>, 
+    fuse(vector_results: list<SearchResultItem>,
          bm25_results: list<BM25Result>,
          top_k: int) -> list<FusedResult> {
-        
+
         match this.normalization_method {
             "rrf" => {
                 return this._reciprocal_rank_fusion(vector_results, bm25_results, top_k)
@@ -1019,41 +1019,41 @@ class HybridFusionEngine {
         }
     }
 
-    _reciprocal_rank_fusion(vector_results: list<SearchResultItem>, 
+    _reciprocal_rank_fusion(vector_results: list<SearchResultItem>,
                             bm25_results: list<BM25Result>,
                             top_k: int,
                             k_constant: int = 60) -> list<FusedResult> {
         # RRF: score = Σ(1 / (k + rank_i))
         scores: map<string, float> = {}  # chunk_id -> fused_score
-        
+
         # Add vector search ranks
         for rank, vr in enumerate(vector_results):
             rrf_score = 1.0 / (k_constant + rank + 1)
             scores[vr.chunk_id] = scores.get(vr.chunk_id, 0.0) + rrf_score * this.vector_weight
-        
+
         # Add BM25 ranks
         for rank, br in enumerate(bm25_results):
             rrf_score = 1.0 / (k_constant + rank + 1)
             scores[br.chunk_id] = scores.get(br.chunk_id, 0.0) + rrf_score * this.keyword_weight
-        
+
         # Sort by fused score
         sorted_scores = list(scores.items()).sort_by_descending(x => x[1])
-        
+
         results: list<FusedResult> = []
         for chunk_id, score in sorted_scores[:top_k] {
             results.append(FusedResult{chunk_id=chunk_id, fused_score=score})
         }
-        
+
         return results
     }
 
-    _weighted_average_fusion(vector_results: list<SearchResultItem>, 
+    _weighted_average_fusion(vector_results: list<SearchResultItem>,
                              bm25_results: list<BM25Result>,
                              top_k: int) -> list<FusedResult> {
         # Need normalized scores for fair comparison
         vec_scores: map<string, float> = {}
         kw_scores: map<string, float> = {}
-        
+
         # Min-max normalize vector scores
         if vector_results.length > 0 {
             min_v = min(vr.score for vr in vector_results)
@@ -1064,7 +1064,7 @@ class HybridFusionEngine {
                 vec_scores[vr.chunk_id] = norm_score
             }
         }
-        
+
         # Min-max normalize BM25 scores
         if bm25_results.length > 0 {
             min_b = min(br.score for br in bm25_results)
@@ -1075,17 +1075,17 @@ class HybridFusionEngine {
                 kw_scores[br.chunk_id] = norm_score
             }
         }
-        
+
         # Combine
         combined: map<string, float> = {}
         all_ids = set(list(vec_scores.keys()) + list(kw_scores.keys()))
-        
+
         for chunk_id in all_ids {
             v_s = vec_scores.get(chunk_id, 0.0) * this.vector_weight
             k_s = kw_scores.get(chunk_id, 0.0) * this.keyword_weight
             combined[chunk_id] = v_s + k_s
         }
-        
+
         # Sort and return top-k
         sorted_combined = list(combined.items()).sort_by_descending(x => x[1])
         results: list<FusedResult> = []
@@ -1095,7 +1095,7 @@ class HybridFusionEngine {
         return results
     }
 
-    _normalized_score_fusion(vector_results: list<SearchResultItem>, 
+    _normalized_score_fusion(vector_results: list<SearchResultItem>,
                              bm25_results: list<BM25Result>,
                              top_k: int) -> list<FusedResult> {
         # Similar to weighted average but uses z-score normalization
@@ -1109,7 +1109,7 @@ struct FusedResult {
     fused_score: float
 }
 
-// ==================== NEURX RAG 主系统 ====================
+// ==================== NEURX RAG mainsystem ====================
 
 class RetrievalEngine {
     config: RetrievalSystemConfig
@@ -1125,16 +1125,16 @@ class RetrievalEngine {
     init(config: RetrievalSystemConfig, llm_client?: any) {
         this.config = config
         this.documents_store = map<string, DocumentChunk>{}
-        
+
         # Initialize components
         this.document_processor = new DocumentProcessor(config=config)
-        
+
         # Initialize embedding service
         this.embedding_service = new EmbeddingService(
             model_name=config.embedding_model_name,
             config=config
         )
-        
+
         # Initialize vector database based on configuration
         match config.vector_db_backend.to_lower() {
             "faiss" => {
@@ -1148,20 +1148,20 @@ class RetrievalEngine {
                 this.vector_db = new InMemoryVectorDB(config=config)
             }
         }
-        
+
         # Initialize optional advanced components
         if llm_client != null && config.enable_query_expansion {
             this.query_expander = new QueryExpander(llm_client=llm_client!)
         }
-        
+
         if config.enable_hybrid_search {
             this.bm25_retriever = new BM25Retriever()
         }
-        
+
         if config.enable_cross_encoder_rerank {
             this.reranker = new CrossEncoderReranker(config.reranker_model)
         }
-        
+
         this.fusion_engine = new HybridFusionEngine(
             vector_w=config.vector_weight,
             keyword_w=config.keyword_weight
@@ -1172,33 +1172,33 @@ class RetrievalEngine {
 
     ingest(documents: list<{content: string, metadata: DocumentMetadata}>, compute_embeddings: bool = true) -> IngestionReport {
         start_time = current_time_millis()
-        
+
         // Step 1: Process documents (chunking)
         chunks = this.document_processor.process_documents(documents)
-        
+
         // Step 2: Compute embeddings if requested
         if compute_embeddings {
             chunk_texts = [c.content for c in chunks]
             embeddings_list = this.embedding_service.embed(chunk_texts)
-            
+
             for i, chunk in enumerate(chunks) {
                 chunk.embedding = embeddings_list[i]
             }
         }
-        
+
         // Step 3: Store in vector DB
         this.vector_db.insert(chunks)
-        
+
         # Store in local store for retrieval
         for chunk in chunks {
             this.documents_store[chunk.id] = chunk
         }
-        
+
         # Step 4: Update BM25 index if hybrid search enabled
         if this.bm25_retriever != null {
             this.bm25_retriever!.build_index(chunks)
         }
-        
+
         elapsed = current_time_millis() - start_time
         return IngestionReport{
             documents_ingested=documents.length,
@@ -1212,7 +1212,7 @@ class RetrievalEngine {
     retrieve(query: string, top_k?: int) -> SearchResult {
         effective_top_k = top_k ?? this.config.top_k
         start_total = current_time_millis()
-        
+
         // Step 1: Query Expansion (optional)
         expanded_query = query
         if this.query_expander != null && this.config.enable_query_expansion {
@@ -1222,13 +1222,13 @@ class RetrievalEngine {
                 expanded_query = query + " " + " ".join(exp_result.expanded[:2])
             }
         }
-        
+
         // Step 2: Vector Search
         vec_start = current_time_millis()
         query_embedding = this.embedding_service.embed_single(query)
         vec_results = this.vector_db.search(query_embedding, effective_top_k * 2)
         vec_time = current_time_millis() - vec_start
-        
+
         // Step 3: Keyword Search (if hybrid)
         bm25_results: list<BM25Result> = []
         bm25_time = 0.0
@@ -1237,11 +1237,11 @@ class RetrievalEngine {
             bm25_results = this.bm25_retriever!.search(query, effective_top_k * 2)
             bm25_time = current_time_millis() - bm25_start
         }
-        
+
         // Step 4: Fuse results
         fuse_start = current_time_millis()
         fused_results: list<FusedResult> = []
-        
+
         if bm25_results.length > 0 && vec_results.length > 0 {
             fused_results = this.fusion_engine.fuse(vec_results, bm25_results, effective_top_k)
         } else if vec_results.length > 0 {
@@ -1251,14 +1251,14 @@ class RetrievalEngine {
             # Only keyword results
             fused_results = [FusedResult{chunk_id=b.chunk_id, fused_score=b.score} for b in bm25_results[:effective_top_k]]
         }
-        
+
         fuse_time = current_time_millis() - fuse_start
-        
+
         # Step 5: Reranking (if enabled)
         final_chunks: list<DocumentChunk> = []
         final_scores: list<float> = []
         rerank_time = 0.0
-        
+
         if this.reranker != null && this.config.enable_reranking && fused_results.length > 0 {
             # Gather candidate documents
             candidates: list<DocumentChunk> = []
@@ -1267,11 +1267,11 @@ class RetrievalEngine {
                     candidates.append(this.documents_store[fr.chunk_id])
                 }
             }
-            
+
             rerank_start = current_time_millis()
             reranked = this.reranker!.rerank(query, candidates, this.config.rerank_top_k)
             rerank_time = current_time_millis() - rerank_start
-            
+
             for rr in reranked {
                 final_chunks.append(rr.chunk)
                 final_scores.append(rr.rerank_score)
@@ -1285,9 +1285,9 @@ class RetrievalEngine {
                 }
             }
         }
-        
+
         total_time = current_time_millis() - start_total
-        
+
         return SearchResult{
             chunks=final_chunks,
             scores=final_scores,
@@ -1308,23 +1308,23 @@ class RetrievalEngine {
 
     generate_context_for_llm(search_result: SearchResult, max_tokens?: int) -> string {
         effective_max_tokens = max_tokens ?? this.config.max_context_tokens
-        
+
         context_parts: list<string> = []
         total_tokens = 0
-        
+
         for i, chunk in enumerate(search_result.chunks) {
             if total_tokens + chunk.token_count > effective_max_tokens {
                 break
             }
-            
+
             # Format with citation
             source_info = chunk.metadata.source_path ?? chunk.metadata.source_id
             formatted = f"[{this.config.citation.format(index=i)}] {source_info}\n{chunk.content}\n"
-            
+
             context_parts.append(formatted)
             total_tokens += chunk.token_count
         }
-        
+
         return "\n".join(context_parts)
     }
 
@@ -1382,7 +1382,7 @@ struct RAGStatistics {
     query_expansion_enabled: bool
 }
 
-// ==================== 工厂函数与测试 ====================
+// ==================== English textfunctionEnglish texttest ====================
 
 function create_retrieval_system(config?: RetrievalSystemConfig, llm_client?: any) -> RetrievalEngine {
     return new RetrievalEngine(config=config ?? new RetrievalSystemConfig(), llm_client=llm_client)
@@ -1390,31 +1390,31 @@ function create_retrieval_system(config?: RetrievalSystemConfig, llm_client?: an
 
 function test_retrieval_system() -> bool {
     print("🧪 Testing NEURX RAG System...")
-    
+
     cfg = RetrievalSystemConfig(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)
     rag = create_retrieval_system(cfg)
-    
+
     # Test 1: Document ingestion
     print("  ✓ Test 1: Document Ingestion & Chunking")
     sample_docs = [
         {
-            content="人工智能是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的系统。机器学习是人工智能的核心子领域。",
+            content="English textcomputeEnglish text, English textRequiredEnglish textsystem.English text.",
             metadata=DocumentMetadata{source_id="doc1", title="AI Introduction", document_type="text"}
         },
         {
-            content="深度学习是机器学习的一个子集，它基于人工神经网络，特别是卷积神经网络(CNN)和循环神经网络(RNN)。Transformer架构彻底改变了自然语言处理领域。",
+            content="English text, English text, English text(CNN)English text(RNN).TransformerEnglish textlanguageEnglish text.",
             metadata=DocumentMetadata{source_id="doc2", title="Deep Learning Overview", document_type="text"}
         },
         {
-            content="NEURX（General Language Model）是智谱AI开发的大语言模型系列。NEURX-4支持长文本理解、多模态处理、工具调用等先进功能。MULTIMODAL-VISION具备强大的视觉理解能力。",
+            content="NEURX(General Language Model)English textAIEnglish textlanguagemodelEnglish text.NEURX-4supportEnglish text, English text, toolEnglish text.MULTIMODAL-VISIONEnglish text.",
             metadata=DocumentMetadata{source_id="doc3", title="NEURX Model Series", document_type="text"}
         }
     ]
-    
+
     report = rag.ingest(sample_docs, compute_embeddings=false)  # Skip actual embedding for test
     assert report.documents_ingested == 3, f"Ingestion count mismatch: {report.documents_ingested}"
     assert report.chunks_created >= 3, f"Chunks created too few: {report.chunks_created}"
-    
+
     # Test 2: Vector search (with mock embeddings)
     print("  ✓ Test 2: Vector Similarity Search")
     # Manually set some mock embeddings
@@ -1423,25 +1423,25 @@ function test_retrieval_system() -> bool {
         chunk.embedding = randn(cfg.vector_dim)  # Random vectors for testing
     }
     rag.vector_db.insert(chunks)
-    
+
     query_vec = randn(cfg.vector_dim)
     search_results = rag.vector_db.search(query_vec, top_k=3)
     assert search_results.length <= 3, f"Too many results: {search_results.length}"
-    
+
     # Test 3: BM25 keyword search
     print("  ✓ Test 3: BM25 Keyword Search")
     if rag.bm25_retriever != null {
         rag.bm25_retriever!.build_index(chunks)
-        bm25_res = rag.bm25_retriever!.search("人工智能 NEURX", top_k=3)
+        bm25_res = rag.bm25_retriever!.search("English text NEURX", top_k=3)
         assert bm25_res.length > 0, "BM25 should find results"
     }
-    
+
     # Test 4: Full retrieve pipeline
     print("  ✓ Test 4: Full Retrieve Pipeline")
     # Since we don't have real embedding service, we'll test structure
     stats = rag.get_statistics()
     assert stats.total_documents >= 3, f"Stats doc count wrong: {stats.total_documents}"
-    
+
     print("\n✅ All RAG System Tests Passed!")
     return true
 }

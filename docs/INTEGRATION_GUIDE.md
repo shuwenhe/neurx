@@ -1,95 +1,95 @@
-# NeurX Claude级模型训练集成指南
+# NeurX ClaudeEnglish textmodeltrainingEnglish text
 
-## 🎯 现在可以做什么
+## 🎯 English textAllowedEnglish text
 
-基于已实现的15个新模块，你现在可以立即开始的工作：
+English textimplementationEnglish text15English text, English textAllowedEnglish textstartEnglish text:
 
 ---
 
-## 1️⃣ 数据管道集成 ✅
+## 1️⃣ dataEnglish text ✅
 
-### 即插即用的数据处理
+### English textdataEnglish text
 
 ```
-使用框架:
-  • data/distributed_dataloader.s    - 分布式加载
-  • data/preprocessing.s              - 质量过滤
-  • data/batch_optimization.s         - 动态batching
-  • data/data_pipeline.s              - 完整管道
+useframework:
+  • data/distributed_dataloader.s    - English textload
+  • data/preprocessing.s              - English text
+  • data/batch_optimization.s         - English textbatching
+  • data/data_pipeline.s              - completeEnglish text
 ```
 
-### 快速开始
+### quickstart
 ```python
-# 加载配置
+# loadconfiguration
 config = new_data_pipeline_config()
 config.rank_id = get_rank()
 config.world_size = get_world_size()
 config.batch_size = 32
 config.seq_len = 2048
 
-# 创建管道
+# English text
 pipeline = new_data_pipeline(config)
 
-# 预热缓存
+# English textcache
 pipeline = warmup_pipeline(pipeline, 10)
 
-# 获取批次
+# English textbatch
 for step in range(num_steps):
     batch = get_next_batch(pipeline)
-    # 使用batch进行训练
+    # usebatchEnglish texttraining
 ```
 
-**优势**: ✓ 无阻塞加载 ✓ 自动去重 ✓ 质量过滤
+**English text**: ✓ English textload ✓ English textdeduplication ✓ English text
 
 ---
 
-## 2️⃣ 编译优化 ✅
+## 2️⃣ compileoptimize ✅
 
-### 即插即用的图优化
+### English textoptimize
 
 ```
-使用框架:
-  • compile/optimization_pipeline.s  - 完整优化
-  • compile/passes/fusion.s          - kernel融合
-  • compile/passes/memory.s          - 内存优化
-  • compile/cache/cache_manager.s    - 编译缓存
+useframework:
+  • compile/optimization_pipeline.s  - completeoptimize
+  • compile/passes/fusion.s          - kernelEnglish text
+  • compile/passes/memory.s          - English textoptimize
+  • compile/cache/cache_manager.s    - compilecache
 ```
 
-### 快速开始
+### quickstart
 ```python
-# 创建优化管道
+# English textoptimizeEnglish text
 pipeline = new_optimization_pipeline()
 
-# 优化计算图
+# optimizecomputeEnglish text
 optimized_graph = optimize_graph(pipeline, input_graph)
 
-# 缓存优化结果
+# cacheoptimizeresult
 cache_mgr = new_cache_manager("./.cache", 4096)
 cache_store(cache_mgr, optimized_graph, [])
 
-# 获取统计信息
+# English textstatisticsinformation
 stats = get_optimization_stats(input_graph, optimized_graph)
 ```
 
-**优势**: ✓ +15-20% 吞吐 ✓ 智能缓存 ✓ 内存优化
+**English text**: ✓ +15-20% English text ✓ English textcache ✓ English textoptimize
 
 ---
 
-## 3️⃣ 分布式训练 ✅
+## 3️⃣ English texttraining ✅
 
-### 即插即用的多卡支持
+### English textsupport
 
 ```
-使用框架:
-  • distributed/training_coordinator.s    - 训练协调
-  • distributed/synchronization.s         - 同步
-  • distributed/fault_tolerance.s         - 故障恢复
-  • distributed/performance_monitor.s     - 性能监控
+useframework:
+  • distributed/training_coordinator.s    - trainingEnglish text
+  • distributed/synchronization.s         - English textstep
+  • distributed/fault_tolerance.s         - English textrecover
+  • distributed/performance_monitor.s     - English textmonitoring
 ```
 
-### 快速开始
+### quickstart
 ```python
-# 初始化分布式训练
+# initializeEnglish texttraining
 strategy = parallel_strategy {
     name: "ddp",
     data_parallel_size: world_size,
@@ -102,74 +102,74 @@ strategy = parallel_strategy {
 state = new_distributed_training_state(rank_id, world_size, strategy)
 state = init_distributed_training(state)
 
-# 训练循环
+# trainingEnglish text
 for step in range(num_steps):
-    # 执行一步
+    # English textstep
     state = execute_distributed_step(state, compute_t, comm_t, gpu_util, mem)
-    
-    # 定期checkpoint
+
+    # English textcheckpoint
     if step % 100 == 0:
         state = handle_checkpoint_step(state)
 ```
 
-**优势**: ✓ 可靠同步 ✓ 自动故障恢复 ✓ 性能监控
+**English text**: ✓ English textstep ✓ English textrecover ✓ English textmonitoring
 
 ---
 
-## 4️⃣ 推理服务 ✅
+## 4️⃣ inferenceEnglish text ✅
 
-### 即插即用的推理系统
+### English textinferencesystem
 
 ```
-使用框架:
-  • infer/kv_cache_manager.s      - 高效缓存
-  • infer/sampling_strategies.s   - 采样算法
-  • infer/inference_server.s      - 服务器
-  • infer/production_inference.s  - 生产优化
+useframework:
+  • infer/kv_cache_manager.s      - English textcache
+  • infer/sampling_strategies.s   - English text
+  • infer/inference_server.s      - English text
+  • infer/production_inference.s  - English textoptimize
 ```
 
-### 快速开始
+### quickstart
 ```python
-# 加载模型
+# loadmodel
 engine = new_inference_engine("model_large", "cuda")
 model = load_model(engine, "./checkpoint/model.bin")
 
-# 应用优化
+# English textoptimize
 model = apply_quantization(model, "fp8")
 model = compile_for_backend(model, "cuda")
 model = enable_graph_mode(model)
 
-# 预热
+# English text
 warmup_model(model, 10)
 
-# 推理
+# inference
 response = run_inference(model, "Hello, how are you?", max_tokens=100)
 
-# 批量推理
+# English textinference
 responses = run_batch_inference(model, prompts, max_tokens=100)
 
-# 获取统计
+# English textstatistics
 stats = get_server_stats(server)
 ```
 
-**优势**: ✓ 3-5x 加速 ✓ 多采样策略 ✓ 流式生成
+**English text**: ✓ 3-5x English text ✓ English text ✓ English textgenerate
 
 ---
 
-## 5️⃣ 对齐训练 ✅
+## 5️⃣ alignmenttraining ✅
 
-### 即插即用的多阶段对齐
+### English textphasealignment
 
 ```
-使用框架:
+useframework:
   • alignment/supervised_finetuning.s  - SFT
   • alignment/rlhf_training.s          - RLHF/DPO
-  • alignment/alignment_coordinator.s  - 协调
+  • alignment/alignment_coordinator.s  - English text
 ```
 
-### 快速开始
+### quickstart
 
-**第一阶段: SFT**
+**English textphase: SFT**
 ```python
 sft_config = new_sft_config()
 sft_config.batch_size = 32
@@ -177,248 +177,248 @@ sft_config.num_epochs = 3
 
 trainer = new_sft_trainer(sft_config)
 
-# 训练
+# training
 for epoch in range(sft_config.num_epochs):
     for batch in dataloader:
         trainer = sft_training_step(trainer, batch)
-    
-    # 评估
+
+    # evaluation
     eval_loss = evaluate_sft(trainer, eval_data)
-    
-    # 保存
+
+    # save
     save_sft_checkpoint(trainer, f"./checkpoints/sft_epoch_{epoch}")
 ```
 
-**第二阶段: RLHF**
+**English textphase: RLHF**
 ```python
 ppo_config = new_ppo_config()
 rlhf_trainer = rlhf_training_loop(trainer, preferences, 5000)
 ```
 
-**完整流程**
+**completepipeline**
 ```python
 config = new_alignment_config("./checkpoint/pretrained.bin")
 coordinator = new_alignment_trainer(config)
 
-# 运行完整流程
+# runcompletepipeline
 coordinator = run_full_alignment_pipeline(coordinator)
 
-# 生成报告
+# generateEnglish text
 report = generate_alignment_report(coordinator)
 ```
 
-**优势**: ✓ 多对齐方法 ✓ 安全检查 ✓ 版本管理
+**English text**: ✓ English textalignmentEnglish text ✓ safetyEnglish text ✓ English textmanagement
 
 ---
 
-## 🔧 现在缺少但容易集成的
+## 🔧 English text
 
-这些缺失的组件可以相对快速地添加：
+English textAllowedEnglish textquickEnglish text:
 
-### 紧急需要 (1-2周内)
+### English textRequired (1-2English text)
 ```
-❌ 完整Transformer实现
-   └─ 需要集成existing的: nn/nn.s + attention + feedforward
-   
-❌ 训练循环框架
-   └─ 需要集成: 梯度计算 + 反向传播 + 参数更新
-   
-❌ 完整的AdamW优化器
-   └─ 需要增强: pretrain/optimizer/pretrain_adamw.s
-   
+❌ completeTransformerimplementation
+   └─ RequiredEnglish textexistingEnglish text: nn/nn.s + attention + feedforward
+
+❌ trainingEnglish textframework
+   └─ RequiredEnglish text: gradientcompute + English text + parameterEnglish text
+
+❌ completeEnglish textAdamWoptimizeEnglish text
+   └─ RequiredEnglish text: pretrain/optimizer/pretrain_adamw.s
+
 ❌ Tokenization
-   └─ 需要实现: BPE tokenizer或集成第三方库
-   
-❌ 学习率调度
-   └─ 需要添加: warmup + cosine annealing
+   └─ Requiredimplementation: BPE tokenizerEnglish text
+
+❌ learning rateEnglish text
+   └─ RequiredEnglish text: warmup + cosine annealing
 ```
 
-### 重要 (2-3周内)
+### English text (2-3English text)
 ```
-❌ 混合精度训练 (AMP)
-   └─ FP16/BF16支持
-   
-❌ 梯度检查点
-   └─ 内存优化技术
-   
-❌ 基础监控
-   └─ Loss日志 + Checkpoint保存
-   
-❌ 完整kernel实现
-   └─ CUDA/CANN kernel库
+❌ English texttraining (AMP)
+   └─ FP16/BF16support
+
+❌ gradientcheckpoint
+   └─ English textoptimizeEnglish text
+
+❌ English textmonitoring
+   └─ Losslog + Checkpointsave
+
+❌ completekernelimplementation
+   └─ CUDA/CANN kernelEnglish text
 ```
 
 ---
 
-## 📊 功能矩阵
+## 📊 English text
 
-| 功能 | 状态 | 是否可用 |
+| English text | state | English text |
 |------|------|---------|
-| 数据加载 | ✅ 完成 | 立即使用 |
-| 分布式同步 | ✅ 完成 | 立即使用 |
-| 图优化 | ✅ 完成 | 立即使用 |
-| 推理服务 | ✅ 完成 | 立即使用 |
-| SFT训练 | ✅ 完成 | 立即使用 |
-| RLHF对齐 | ✅ 完成 | 立即使用 |
-| **Transformer实现** | ❌ 缺失 | 需要2周 |
-| **完整训练循环** | ⚠️ 部分 | 需要1周补充 |
-| **优化器实现** | ⚠️ 部分 | 需要改进 |
-| **Tokenization** | ❌ 缺失 | 需要1周 |
-| **混合精度** | ❌ 缺失 | 需要1周 |
-| **监控和日志** | ⚠️ 部分 | 需要改进 |
+| dataload | ✅ English text | English textuse |
+| English textstep | ✅ English text | English textuse |
+| English textoptimize | ✅ English text | English textuse |
+| inferenceEnglish text | ✅ English text | English textuse |
+| SFTtraining | ✅ English text | English textuse |
+| RLHFalignment | ✅ English text | English textuse |
+| **Transformerimplementation** | ❌ English text | Required2English text |
+| **completetrainingEnglish text** | ⚠️ English text | Required1English text |
+| **optimizeEnglish textimplementation** | ⚠️ English text | RequiredEnglish text |
+| **Tokenization** | ❌ English text | Required1English text |
+| **English text** | ❌ English text | Required1English text |
+| **monitoringEnglish textlog** | ⚠️ English text | RequiredEnglish text |
 
 ---
 
-## 🚀 立即可以做的项目
+## 🚀 English textAllowedEnglish text
 
-### 项目1: 完整的数据处理管道 (1周)
-**目标**: 从原始文本到训练batch的完整流程
+### English text1: completeEnglish textdataEnglish text (1English text)
+**English text**: English texttrainingbatchEnglish textcompletepipeline
 
-1. 集成tokenizer (BPE或Tiktoken)
-2. 实现去重检测
-3. 添加质量过滤
-4. 完成多源混合
+1. English texttokenizer (BPEEnglish textTiktoken)
+2. implementationdeduplicationEnglish text
+3. English text
+4. English text
 
-**输出**: 可以处理任意大小数据集的管道
+**output**: AllowedEnglish textdataEnglish text
 
-### 项目2: 最小化训练系统 (2周)
-**目标**: 能够训练小模型的完整系统
+### English text2: English texttrainingsystem (2English text)
+**English text**: English texttrainingEnglish textmodelEnglish textcompletesystem
 
-1. 集成现有的Transformer框架
-2. 实现完整的前向/反向传播
-3. 添加优化器和学习率调度
-4. 集成数据和分布式框架
+1. English textTransformerframework
+2. implementationcompleteEnglish text/English text
+3. English textoptimizeEnglish textlearning rateEnglish text
+4. English textdataEnglish textframework
 
-**输出**: 可以训练3B模型的系统
+**output**: Allowedtraining3BmodelEnglish textsystem
 
-### 项目3: 生产级推理服务 (1周)
-**目标**: 部署和服务训练好的模型
+### English text3: English textinferenceEnglish text (1English text)
+**English text**: English texttrainingEnglish textmodel
 
-1. 实现模型导出
-2. 集成量化工具
-3. 部署推理服务器
-4. 添加API接口
+1. implementationmodelEnglish text
+2. English texttool
+3. English textinferenceEnglish text
+4. English textAPIEnglish text
 
-**输出**: 可以服务Claude级模型的系统
+**output**: AllowedEnglish textClaudeEnglish textmodelEnglish textsystem
 
 ---
 
-## 📁 推荐的集成路径
+## 📁 recommendedEnglish textpath
 
 ```
-第1阶段 (1周):
-├─ 实现Transformer
-├─ 集成tokenizer
-└─ 添加基础监控
+English text1phase (1English text):
+├─ implementationTransformer
+├─ English texttokenizer
+└─ English textmonitoring
 
-第2阶段 (1周):
-├─ 完整优化器
-├─ 学习率调度
-└─ checkpoint管理
+English text2phase (1English text):
+├─ completeoptimizeEnglish text
+├─ learning rateEnglish text
+└─ checkpointmanagement
 
-第3阶段 (1周):
-├─ 混合精度
-├─ 梯度检查点
-└─ 完整测试
+English text3phase (1English text):
+├─ English text
+├─ gradientcheckpoint
+└─ completetest
 
-第4阶段 (持续):
-├─ 性能优化
-├─ 更多对齐方法
-└─ 生产部署工具
+English text4phase (English text):
+├─ English textoptimize
+├─ English textalignmentEnglish text
+└─ English texttool
 ```
 
 ---
 
-## 💻 代码结构建议
+## 💻 English text
 
 ```
 neurx/
-├─ model/                    # 模型定义
+├─ model/                    # modelEnglish text
 │  ├─ llm/
-│  │  ├─ transformer.s       # 新增: 完整Transformer
-│  │  ├─ attention.s         # 新增: Attention variants
-│  │  ├─ model_large.s         # 已有: 配置框架
-│  │  ├─ model_large_train.s   # 新增: 训练脚本
-│  │  └─ tokenizer.s         # 新增: Tokenizer
+│  │  ├─ transformer.s       # English text: completeTransformer
+│  │  ├─ attention.s         # English text: Attention variants
+│  │  ├─ model_large.s         # English text: configurationframework
+│  │  ├─ model_large_train.s   # English text: trainingEnglish text
+│  │  └─ tokenizer.s         # English text: Tokenizer
 │  └─ ...
 │
-├─ train/                    # 训练框架
-│  ├─ training_loop.s        # 新增: 主训练循环
-│  ├─ trainer.s              # 新增: Trainer类
+├─ train/                    # trainingframework
+│  ├─ training_loop.s        # English text: maintrainingEnglish text
+│  ├─ trainer.s              # English text: TrainerEnglish text
 │  └─ ...
 │
-├─ opt/                      # 优化器
-│  ├─ adamw.s                # 改进: 完整AdamW
-│  ├─ scheduler.s            # 新增: 学习率调度
+├─ opt/                      # optimizeEnglish text
+│  ├─ adamw.s                # English text: completeAdamW
+│  ├─ scheduler.s            # English text: learning rateEnglish text
 │  └─ ...
 │
-└─ [现有框架]
-   ├─ compile/               ✅ 已有6个模块
-   ├─ distributed/           ✅ 已有4个模块
-   ├─ data/                  ✅ 已有4个模块
-   ├─ infer/                 ✅ 已有4个模块
-   └─ alignment/             ✅ 已有3个模块
+└─ [English textframework]
+   ├─ compile/               ✅ English text6English text
+   ├─ distributed/           ✅ English text4English text
+   ├─ data/                  ✅ English text4English text
+   ├─ infer/                 ✅ English text4English text
+   └─ alignment/             ✅ English text3English text
 ```
 
 ---
 
-## 🎓 学习资源
+## 🎓 English text
 
-参考文档:
-- `IMPLEMENTATION_SUMMARY.md` - 已实现功能详解
-- `QUICK_START.md` - 快速开始指南
-- `WHAT_STILL_NEEDED.md` - 本文件 (详细缺失分析)
+English text:
+- `IMPLEMENTATION_SUMMARY.md` - English textimplementationEnglish text
+- `QUICK_START.md` - quickstartEnglish text
+- `WHAT_STILL_NEEDED.md` - English textfile (English text)
 
-代码示例:
-- `model/llm/model_large.s` - 模型配置框架
-- `pretrain/llm/model_large_pretrain.s` - 预训练框架
-- `alignment/supervised_finetuning.s` - SFT实现示例
-
----
-
-## ❓ 常见问题
-
-**Q: 我现在可以开始训练吗？**  
-A: 可以，但只能使用框架的数据、分布式、推理、对齐部分。需要自己实现Transformer和训练循环。
-
-**Q: 最快多久能有完整系统？**  
-A: 2-3周内可以搭建出能训练3B模型的完整系统。
-
-**Q: 应该从哪里开始？**  
-A: 建议顺序: (1) Tokenizer → (2) Transformer → (3) 训练循环 → (4) 优化器 → (5) 集成测试
-
-**Q: 现有的优化器够用吗？**  
-A: `pretrain/optimizer/pretrain_adamw.s` 是框架，需要完整实现和测试。
+English textexample:
+- `model/llm/model_large.s` - modelconfigurationframework
+- `pretrain/llm/model_large_pretrain.s` - English texttrainingframework
+- `alignment/supervised_finetuning.s` - SFTimplementationexample
 
 ---
 
-现在你对NeurX框架的完整情况有了清楚的了解！🚀
+## ❓ English text
+
+**Q: English textAllowedstarttrainingEnglish text?**
+A: Allowed, English textuseframeworkEnglish textdata, English text, inference, alignmentEnglish text.RequiredEnglish textimplementationTransformerEnglish texttrainingEnglish text.
+
+**Q: English textcompletesystem?**
+A: 2-3English textAllowedEnglish texttraining3BmodelEnglish textcompletesystem.
+
+**Q: English textstart?**
+A: English text: (1) Tokenizer → (2) Transformer → (3) trainingEnglish text → (4) optimizeEnglish text → (5) English texttest
+
+**Q: English textoptimizeEnglish text?**
+A: `pretrain/optimizer/pretrain_adamw.s` English textframework, RequiredcompleteimplementationEnglish texttest.
 
 ---
 
-# 📋 完整 P0/P1 模块集成指南 (新增)
+English textNeurXframeworkEnglish textcompleteEnglish text!🚀
 
-## 已实现的 8 个核心模块
+---
 
-| 模块 | 文件 | 功能 | 状态 |
+# 📋 complete P0/P1 English text (English text)
+
+## English textimplementationEnglish text 8 English text
+
+| English text | file | English text | state |
 |------|------|------|------|
-| MoE All-to-All | `distributed/moe_all_to_all.s` | Token 路由与通信 | ✅ |
-| 张量并行 | `distributed/tensor_parallel.s` | 权重分片 | ✅ |
-| ZeRO 梯度规约 | `distributed/zero_gradient_reduce.s` | 参数分片优化 | ✅ |
-| 损失计算 | `moe/llm_moe_1t_loss.s` | CE+MoE+KL 损失 | ✅ |
-| LR 调度 | `training/lr_scheduler_moe_1t.s` | 余弦预热衰减 | ✅ |
-| 数据加载 | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
-| 监控系统 | `monitoring/moe_1t_metrics.s` | 分布式性能监控 | ✅ |
-| 长上下文 | `model/llm/long_context_32k.s` | 32K RoPE 扩展 | ✅ |
+| MoE All-to-All | `distributed/moe_all_to_all.s` | Token English text | ✅ |
+| English text | `distributed/tensor_parallel.s` | weightEnglish text | ✅ |
+| ZeRO gradientEnglish text | `distributed/zero_gradient_reduce.s` | parameterEnglish textoptimize | ✅ |
+| losscompute | `moe/llm_moe_1t_loss.s` | CE+MoE+KL loss | ✅ |
+| LR English text | `training/lr_scheduler_moe_1t.s` | English text | ✅ |
+| dataload | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
+| monitoringsystem | `monitoring/moe_1t_metrics.s` | English textmonitoring | ✅ |
+| English text | `model/llm/long_context_32k.s` | 32K RoPE extension | ✅ |
 
-## 立即可用的集成代码框架
+## English textframework
 
-### 1. 初始化所有组件
+### 1. initializeEnglish text
 
 ```s
-// 在 main 训练脚本中
+// English text main trainingEnglish text
 
-// 初始化分布式环境
+// initializeEnglish text
 int rank = get_rank()
 int world_size = get_world_size()
 int dp_size = 8
@@ -426,7 +426,7 @@ int tp_size = 8
 int pp_size = 8
 int ep_size = 16
 
-// 创建所有管理器
+// English textmanagementEnglish text
 moe_1t_orchestrator orch = moe_1t_orchestrator_new(rank, world_size)
 jsonl_data_loader loader = jsonl_data_loader_new(
     data_dir: "/data/shards",
@@ -454,7 +454,7 @@ zero_stage3_state zero = zero_stage3_new(
 )
 ```
 
-### 2. 单步完整前向+反向+优化
+### 2. English textstepcompleteEnglish text+English text+optimize
 
 ```s
 func train_step(
@@ -466,36 +466,36 @@ func train_step(
     zero_stage3_state zero,
     int step
 ) {
-    // 1. 加载数据
+    // 1. loaddata
     jsonl_batch batch = get_next_batch(loader)
-    
-    // 2. 前向传播 (自动包含 TP All-Gather 和 MoE All-to-All)
+
+    // 2. English text (English text TP All-Gather English text MoE All-to-All)
     []float logits = moe_1t_forward_pass(orch, batch.token_ids)
-    
-    // 3. 计算损失
+
+    // 3. computeloss
     float loss_val = compute_total_loss(
-        loss, logits, batch.labels, 
+        loss, logits, batch.labels,
         batch.expert_indices, batch.expert_weights,
         batch.batch_size, batch.seq_len, top_k: 2
     )
-    
-    // 4. 反向传播
+
+    // 4. English text
     []float grad_logits = compute_ce_gradient(
         logits, batch.labels, batch.batch_size, batch.seq_len, 128000
     )
-    moe_1t_allreduce_gradients(orch)  // 自动梯度规约
-    
-    // 5. 梯度裁剪
+    moe_1t_allreduce_gradients(orch)  // English textgradientEnglish text
+
+    // 5. gradientEnglish text
     zero_stage3_clip_gradients(zero, comm, max_grad_norm: 1.0)
-    
-    // 6. 优化器步骤
+
+    // 6. optimizeEnglish textstepEnglish text
     float lr = compute_lr(scheduler)
     zero_stage3_optimizer_step(zero, orch.parameters, lr, 0.9, 0.999, 1e-8, 0.01)
-    
-    // 7. LR 调度
+
+    // 7. LR English text
     step(scheduler)
-    
-    // 8. 监控
+
+    // 8. monitoring
     if step % 100 == 0 {
         update_training_metrics(metrics, loss_val, loss.loss_ce, loss.loss_aux, lr, 0.5)
         update_moe_metrics(metrics, orch.moe_state.expert_load, orch.moe_state.expert_utilization, [])
@@ -504,26 +504,26 @@ func train_step(
 }
 ```
 
-### 3. 完整训练循环模板
+### 3. completetrainingEnglish text
 
 ```s
 func main() {
-    // 初始化
+    // initialize
     (orch, loader, loss, scheduler, metrics, zero) = initialize_training()
-    
-    // 训练循环
+
+    // trainingEnglish text
     int num_steps = 750000
     for step in 0..num_steps {
         train_step(orch, loader, loss, scheduler, metrics, zero, step)
-        
-        // 定期检查点保存
+
+        // English textcheckpointsave
         if step % 5000 == 0 && step > 0 {
             moe_1t_save_checkpoint_full(orch.checkpoint_manager, step)
         }
-        
-        // 定期性能报告
+
+        // English text
         if step % 1000 == 0 {
-            io_println("Step " + int_to_string(step) + 
+            io_println("Step " + int_to_string(step) +
                       ": Loss=" + float_to_string(loss.loss_total) +
                       " LR=" + float_to_string(scheduler.current_lr) +
                       " Throughput=" + float_to_string(loader.total_tokens_processed / elapsed_time()))
@@ -532,60 +532,60 @@ func main() {
 }
 ```
 
-## 模块使用速查表
+## English textuseEnglish text
 
-### MoE All-to-All 路由
+### MoE All-to-All English text
 ```s
-// 核心函数
+// English textfunction
 (output, aux_loss) = moe_alltoall_forward(
     state, comm, hidden_states, router_weight, expert_weights,
     ep_rank, ep_size, batch_size, seq_len
 )
 ```
 
-### 张量并行 QKV/FFN
+### English text QKV/FFN
 ```s
-// TP 前向 (自动处理 AllGather/ReduceScatter)
+// TP English text (English text AllGather/ReduceScatter)
 qkv_out = tp_qkv_forward(hidden_states)    // [H] → [H/8]
-ffn_out = tp_ffn_column_parallel(...)      // W_up 列并行
+ffn_out = tp_ffn_column_parallel(...)      // W_up English text
 ```
 
-### ZeRO 梯度规约
+### ZeRO gradientEnglish text
 ```s
-// 累积 → AllReduce → ReduceScatter → Optimizer
+// English text → AllReduce → ReduceScatter → Optimizer
 zero_stage3_accumulate_gradients(state, gradients, start, end)
-zero_stage3_start_async_reduce(state, comm)      // 异步启动
-// ... 其他计算 ...
-zero_stage3_wait_async_reduce(state)             // 等待完成
+zero_stage3_start_async_reduce(state, comm)      // English textstepstart
+// ... English textcompute ...
+zero_stage3_wait_async_reduce(state)             // English text
 zero_stage3_optimizer_step(state, params, lr, beta1, beta2, eps, wd)
 ```
 
-### 损失计算
+### losscompute
 ```s
-// CE + MoE 辅助损失
+// CE + MoE helperloss
 loss_ce = compute_ce_loss(logits, labels, batch_size, seq_len, vocab, label_smoothing)
 loss_aux = compute_moe_aux_loss(expert_idx, expert_wt, num_tokens, top_k, num_experts, weight)
 loss_total = loss_ce + 0.01 * loss_aux
 ```
 
-### 学习率调度
+### learning rateEnglish text
 ```s
-// Cosine annealing with warmup (默认)
+// Cosine annealing with warmup (default)
 scheduler = lr_scheduler_new(base_lr: 0.0002, warmup: 10000, total: 750000)
-lr = compute_lr(scheduler)  // 自动判断 warmup/annealing 阶段
-step(scheduler)             // 前进一步
+lr = compute_lr(scheduler)  // English text warmup/annealing phase
+step(scheduler)             // English textstep
 ```
 
-### 数据加载
+### dataload
 ```s
-// 从 JSONL 分片加载并 tokenize
+// English text JSONL English textloadEnglish text tokenize
 loader = jsonl_data_loader_new(data_dir, batch_size: 16, seq_len: 4096, dp_rank, dp_size)
-batch = get_next_batch(loader)  // 返回 [token_ids, attention_mask, ...]
+batch = get_next_batch(loader)  // English text [token_ids, attention_mask, ...]
 ```
 
-### 性能监控
+### English textmonitoring
 ```s
-// 创建收集器并按步更新
+// English textstepEnglish text
 collector = metrics_collector_new(rank, world_size, local_rank, local_ws, output_dir)
 update_training_metrics(collector, loss, loss_ce, loss_aux, lr, grad_norm)
 update_moe_metrics(collector, expert_load, expert_util, dropout_count)
@@ -593,56 +593,56 @@ update_system_metrics(collector, mem_used, power, temp, throughput, iter_time)
 log_step(collector, step)
 ```
 
-### 长上下文 RoPE
+### English text RoPE
 ```s
-// 初始化支持 32K 长度的 RoPE
+// initializesupport 32K English text RoPE
 rope = rope_state_new(config)  // base=500000, scaling="ntk"
 (rotated_q, rotated_k) = apply_rope_to_qk(
     rope, query, key, batch_size, seq_len, num_heads, head_dim
 )
 ```
 
-## 性能预期
+## English text
 
-| 配置 | 吞吐量 | 内存用量 | 训练时间 |
+| configuration | English text | English text | trainingtime |
 |------|--------|---------|---------|
-| 单 GPU H100 | ~5K tokens/sec | ~18GB | - |
-| 8 GPU TP | ~35K tokens/sec | 144GB 总 | - |
+| English text GPU H100 | ~5K tokens/sec | ~18GB | - |
+| 8 GPU TP | ~35K tokens/sec | 144GB English text | - |
 | 64 GPU (TP+DP) | ~280K tokens/sec | - | - |
-| 1024 GPU (4D) | **3K+ tokens/sec** | - | **4-6 天 (3T)** |
+| 1024 GPU (4D) | **3K+ tokens/sec** | - | **4-6 English text (3T)** |
 
-## 验证清单
+## English text
 
-- [ ] 编译所有 8 个模块
-- [ ] 单 GPU 前向/反向 10 steps
-- [ ] 检查内存占用 < 80GB per GPU
-- [ ] 8 GPU TP 验证 (梯度同步)
+- [ ] compileEnglish text 8 English text
+- [ ] English text GPU English text/English text 10 steps
+- [ ] English text < 80GB per GPU
+- [ ] 8 GPU TP English text (gradientEnglish textstep)
 - [ ] 64 GPU DP+TP
-- [ ] 256 GPU 包含 MoE
-- [ ] 1024 GPU 全规模
-- [ ] 检查点 save/load
-- [ ] 生成 TensorBoard 日志
+- [ ] 256 GPU English text MoE
+- [ ] 1024 GPU English text
+- [ ] checkpoint save/load
+- [ ] generate TensorBoard log
 
-## 常见集成问题
+## English text
 
-**Q: 模块间如何通信?**
-A: 通过 `moe_1t_orchestrator` 统一管理，内部保留各模块状态指针。
+**Q: English text?**
+A: English text `moe_1t_orchestrator` English textmanagement, English textstateEnglish text.
 
-**Q: 梯度如何在各模块间流通?**
-A: 自动反向传播链，`zero_stage3_accumulate_gradients()` 统一收集。
+**Q: gradientEnglish text?**
+A: English text, `zero_stage3_accumulate_gradients()` English text.
 
-**Q: 通信延迟是否被隐藏?**
-A: 是，异步 AllGather/ReduceScatter 与计算重叠，目标 > 80% 隐藏率。
+**Q: English text?**
+A: English text, English textstep AllGather/ReduceScatter English textcomputeEnglish text, English text > 80% English text.
 
-**Q: 如何调试性能瓶颈?**
-A: 使用 `metrics_collector` 收集详细指标，检查 comm_metrics 中的各项延迟。
+**Q: English text?**
+A: use `metrics_collector` English text, English text comm_metrics English text.
 
 ---
 
-**所有 P0/P1 模块已完成实现，可直接集成训练系统。**
+**English text P0/P1 English textimplementation, English texttrainingsystem.**
 
-推荐下一步:
-1. 编译 & 单 GPU 测试 (2 天)
-2. 小规模集群 64-256 GPU (1 周)
-3. 全规模 1024 GPU 训练 (4-6 周)
+recommendedEnglish textstep:
+1. compile & English text GPU test (2 English text)
+2. English text 64-256 GPU (1 English text)
+3. English text 1024 GPU training (4-6 English text)
 

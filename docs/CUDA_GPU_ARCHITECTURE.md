@@ -1,8 +1,8 @@
 # GPU Training Architecture: S Language + CUDA
 
-## 概述
+## English text
 
-NeurX GPU训练采用**分层架构**：
+NeurX GPUtrainingEnglish text**English text**:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -40,67 +40,67 @@ NeurX GPU训练采用**分层架构**：
 └─────────────────────────────────────────────────────┘
 ```
 
-## 为什么S + CUDA混合？
+## English textS + CUDAEnglish text?
 
-### ✅ S语言擅长的事
-- 文件I/O和Shard处理
-- 环境变量解析
-- 训练循环逻辑（CPU端）
-- 内存管理编排
-- 自举语言（不依赖外部运行时）
+### ✅ SlanguageEnglish text
+- fileI/OEnglish textShardEnglish text
+- English text
+- trainingEnglish text(CPUEnglish text)
+- English textmanagementEnglish text
+- English textlanguage(English textrunEnglish text)
 
-### ✅ CUDA必须做的事
-- 并行GPU核函数（`__global__`）
-- 原子操作（`atomicAdd`）
-- GPU内存同步（`cudaDeviceSynchronize()`）
-- WARP级并行化
+### ✅ CUDAEnglish text
+- English textGPUEnglish textfunction(`__global__`)
+- English text(`atomicAdd`)
+- GPUEnglish textstep(`cudaDeviceSynchronize()`)
+- WARPEnglish text
 
-### ❌ S语言**不能**做
-- 写`__global__` kernel代码
-- GPU原子操作
-- CUDA流管理
-- WARP同步原语
+### ❌ Slanguage**English text**English text
+- English text`__global__` kernelEnglish text
+- GPUEnglish text
+- CUDAEnglish textmanagement
+- WARPEnglish textstepEnglish text
 
-## 代码组织
+## English text
 
 ### 1. S Language Training Loop (`scripts/legacy/gpu_train.s`)
 
 ```s
-// 入口点 - 全用S实现
+// English text - English textSimplementation
 func main() {
-    // 参数解析（S）
+    // parameterEnglish text(S)
     int batch_size = parse_int(...)
-    
-    // GPU上下文初始化（S调用C）
+
+    // GPUEnglish textinitialize(SEnglish textC)
     GPUContext ctx = init_gpu_context(...)
-    
-    // 加载Shard（S）
+
+    // loadShard(S)
     string shard_content = runtime_read_text_file(...)
-    
-    // 处理Shard（S调用CUDA）
+
+    // English textShard(SEnglish textCUDA)
     process_shard_gpu(ctx, shard_path)
-    
-    // 清理（S调用C）
+
+    // English text(SEnglish textC)
     cleanup_gpu_context(ctx)
 }
 ```
 
-**特点:**
-- 直观的训练流程
-- 调用extern函数到CUDA库
-- 所有I/O和逻辑用S编写
+**English text:**
+- English texttrainingpipeline
+- English textexternfunctionEnglish textCUDAEnglish text
+- English textI/OEnglish textSEnglish text
 
 ### 2. CUDA Kernels (`cuda/cuda_kernels.cu`)
 
 ```cuda
-// GPU并行代码 - **必须用CUDA**
+// GPUEnglish text - **English textCUDA**
 __global__ void relu_forward_kernel(float *out, const float *in, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= n) return;
     out[idx] = (in[idx] > 0.0f) ? in[idx] : 0.0f;
 }
 
-// C包装函数 - 被S调用
+// CEnglish textfunction - English textSEnglish text
 extern "C" int cuda_relu_forward(
     int64_t output_ptr, int64_t input_ptr, int size
 ) {
@@ -112,25 +112,25 @@ extern "C" int cuda_relu_forward(
         (float*)input_ptr,
         size
     );
-    
+
     // Sync and error check
     cudaDeviceSynchronize();
     return 0;
 }
 ```
 
-**特点:**
-- GPU并行通过`__global__`标记
-- 由nvcc编译
-- 暴露C包装函数给S调用
+**English text:**
+- GPUEnglish text`__global__`English text
+- English textnvcccompile
+- English textCEnglish textfunctionEnglish textSEnglish text
 
-### 3. FFI绑定 (`cuda/cublas_bindings.s`)
+### 3. FFIEnglish text (`cuda/cublas_bindings.s`)
 
 ```s
-// S中声明外部C函数
+// SEnglish textCfunction
 extern func cuda_relu_forward(int64 out, int64 in, int size) int
 
-// S中调用
+// SEnglish text
 func apply_relu(GPUTensor input, GPUTensor output) {
     int status = cuda_relu_forward(
         output.device_ptr,
@@ -143,87 +143,87 @@ func apply_relu(GPUTensor input, GPUTensor output) {
 }
 ```
 
-**特点:**
-- 简洁的FFI声明
-- S语言直接调用CUDA函数
-- 类型安全（int64, float等）
+**English text:**
+- English textFFIEnglish text
+- SlanguageEnglish textCUDAfunction
+- English textsafety(int64, floatEnglish text)
 
-## 编译流程
+## compilepipeline
 
-### Step 1: 编译CUDA核函数库
+### Step 1: compileCUDAEnglish textfunctionEnglish text
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 bash cuda/build_kernels.sh
 # Output: artifacts/build/cuda_kernels/libcuda_kernels.so
 ```
 
-**产物:**
-- `libcuda_kernels.so` - 包含所有GPU kernels
-- `env.sh` - 环境变量设置脚本
+**English text:**
+- `libcuda_kernels.so` - English textGPU kernels
+- `env.sh` - English text
 
-### Step 2: 编译CUDA Runtime库
+### Step 2: compileCUDA RuntimeEnglish text
 ```bash
 bash cuda/build_cuda_runtime_alt.sh
 # Output: artifacts/build/cuda_runtime/libcuda_runtime.so
 ```
 
-**产物:**
-- `libcuda_runtime.so` - CUDA运行时包装
+**English text:**
+- `libcuda_runtime.so` - CUDArunEnglish text
 
-### Step 3: 编译S语言训练脚本
+### Step 3: compileSlanguagetrainingEnglish text
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
 s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 ```
 
-**产物:**
-- `gpu_train.ir` - S运行时字节码
+**English text:**
+- `gpu_train.ir` - SrunEnglish text
 
-### Step 4: 运行
+### Step 4: run
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
 s_runner artifacts/build/gpu_train/gpu_train.ir
 ```
 
-## 集成点详解
+## English text
 
-### 1. Shard处理（S中实现）
+### 1. ShardEnglish text(SEnglish textimplementation)
 
 ```s
 func process_shard_gpu(GPUContext ctx, string shard_path, ...) int {
-    // S: 文件读取
+    // S: fileEnglish text
     string content = runtime_read_text_file(shard_path)
-    
-    // S: 行数计数
+
+    // S: English text
     int lines = count_lines(content)
-    
-    // S: 批次循环
+
+    // S: batchEnglish text
     while batch_idx < lines {
-        // S: 分配GPU内存
+        // S: English textGPUEnglish text
         GPUBuffer input = allocate_gpu_buffer(...)
-        
-        // S: 调用GPU kernel - 核心计算
+
+        // S: English textGPU kernel - English textcompute
         cublasSgemm(ctx.cublas_handle, ...)
-        
-        // S: 调用损失核
+
+        // S: English textlossEnglish text
         float loss = cuda_error_loss_kernel(...)
-        
-        // S: 调用反向核
+
+        // S: English text
         cuda_relu_backward(...)
-        
-        // S: 调用优化核
+
+        // S: English textoptimizeEnglish text
         cuda_sgd_update_kernel(...)
-        
-        // S: 清理GPU内存
+
+        // S: English textGPUEnglish text
         free_gpu_buffer(input)
     }
 }
 ```
 
-### 2. GPU矩阵乘法（cuBLAS + FFI）
+### 2. GPUEnglish text(cuBLAS + FFI)
 
 ```s
-// S中声明
+// SEnglish text
 extern func cublasSgemm(
     int64 handle, int transa, int transb,
     int m, int n, int k,
@@ -232,7 +232,7 @@ extern func cublasSgemm(
     int64 C, int ldc
 ) int
 
-// S中使用
+// SEnglish textuse
 int status = cublasSgemm(
     ctx.cublas_handle,
     0, 0,  // No transpose
@@ -245,18 +245,18 @@ int status = cublasSgemm(
 )
 ```
 
-### 3. GPU核函数（CUDA中实现）
+### 3. GPUEnglish textfunction(CUDAEnglish textimplementation)
 
 ```cuda
-// cuda_kernels.cu中
+// cuda_kernels.cuEnglish text
 __global__ void sgd_update_kernel(...) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < n) {
-        w[idx] -= lr * grad[idx] * inv_batch;  // GPU并行
+        w[idx] -= lr * grad[idx] * inv_batch;  // GPUEnglish text
     }
 }
 
-// 暴露给S
+// English textS
 extern "C" int cuda_sgd_update_kernel(
     int64_t w_ptr, int64_t grad_ptr, float lr, int n
 ) {
@@ -267,99 +267,99 @@ extern "C" int cuda_sgd_update_kernel(
 }
 ```
 
-## 性能特性
+## English text
 
-### S层的开销
-- 文件I/O: ~50ms per 1GB shard
-- 参数解析: <1ms
-- 内存编排: <1ms
-- **总CPU时间**: ~10-20% of GPU compute time
+### SEnglish text
+- fileI/O: ~50ms per 1GB shard
+- parameterEnglish text: <1ms
+- English text: <1ms
+- **English textCPUtime**: ~10-20% of GPU compute time
 
-### GPU层的开销
-- 核函数启动: ~10μs
-- 矩阵乘法(1024×1024): ~0.5ms
-- 反向传播: ~1ms
-- **总GPU时间**: ~100-500ms per batch
+### GPUEnglish text
+- English textfunctionstart: ~10μs
+- English text(1024×1024): ~0.5ms
+- English text: ~1ms
+- **English textGPUtime**: ~100-500ms per batch
 
-### 通信开销
+### English text
 - Host→Device: ~50GB/s
 - Device→Host: ~50GB/s
-- 对于512长序列、16GB批次: ~30ms
+- English text512English text, 16GBbatch: ~30ms
 
-## 故障排查
+## English text
 
-### 问题: 核函数未被找到
+### English text: English textfunctionEnglish text
 ```
 error: undefined reference to `cuda_relu_forward'
 ```
 
-**解决:**
+**English text:**
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:$LD_LIBRARY_PATH"
 ```
 
-### 问题: CUDA内存不足
+### English text: CUDAEnglish text
 ```
 CUDA error: out of memory
 ```
 
-**解决:**
-- 减小batch_size
-- 减小seq_len
-- 启用gradient checkpointing
+**English text:**
+- English textbatch_size
+- English textseq_len
+- English textgradient checkpointing
 
-### 问题: S编译失败，extern声明
+### English text: Scompilefailure, externEnglish text
 ```
 error: unknown type int64
 ```
 
-**解决:**
-- S中使用标准类型: int, float, string
-- 对于指针用int64: `extern func cuda_malloc(int size) int64`
+**English text:**
+- SEnglish textuseEnglish text: int, float, string
+- English textint64: `extern func cuda_malloc(int size) int64`
 
-## 扩展CUDA核
+## extensionCUDAEnglish text
 
-### 添加新kernel的步骤
+### English textkernelEnglish textstepEnglish text
 
-1. **在cuda/cuda_kernels.cu中添加**
+1. **English textcuda/cuda_kernels.cuEnglish text**
 ```cuda
 __global__ void my_kernel(...) { ... }
 
-extern "C" int cuda_my_kernel(...) { 
+extern "C" int cuda_my_kernel(...) {
     my_kernel<<<...>>>(...);
     return 0;
 }
 ```
 
-2. **在cuda/cublas_bindings.s中声明**
+2. **English textcuda/cublas_bindings.sEnglish text**
 ```s
 extern func cuda_my_kernel(...) int
 ```
 
-3. **在scripts/legacy/gpu_train.s中使用**
+3. **English textscripts/legacy/gpu_train.sEnglish textuse**
 ```s
 int status = cuda_my_kernel(...)
 ```
 
-4. **重新编译**
+4. **English textcompile**
 ```bash
 bash cuda/build_kernels.sh
 s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 ```
 
-## 对比CPU实现
+## English textCPUimplementation
 
-| 方面 | CPU (bash/Python) | GPU (S + CUDA) |
+| English text | CPU (bash/Python) | GPU (S + CUDA) |
 |------|------------------|-----------------|
-| 启动时间 | 快 (ms) | 慢 (500ms初始化) |
-| 吞吐量 | ~100 docs/s | ~10K docs/s |
-| 内存用量 | 低 | 中等 (16GB) |
-| 开发难度 | 低 | 中等 |
-| 维护成本 | 低 | 中等 |
+| starttime | English text (ms) | English text (500msinitialize) |
+| English text | ~100 docs/s | ~10K docs/s |
+| English text | English text | English text (16GB) |
+| English text | English text | English text |
+| English text | English text | English text |
 
-## 推荐配置
+## recommendedconfiguration
 
-### 小规模测试（RTX 4060 Ti）
+### English texttest(RTX 4060 Ti)
 ```
 BATCH_SIZE=32
 SEQ_LEN=512
@@ -367,7 +367,7 @@ HIDDEN_DIM=768
 LEARNING_RATE=0.001
 ```
 
-### 中等规模（RTX 4090）
+### English text(RTX 4090)
 ```
 BATCH_SIZE=256
 SEQ_LEN=2048
@@ -375,7 +375,7 @@ HIDDEN_DIM=2048
 LEARNING_RATE=0.0005
 ```
 
-### 生产环境（多GPU）
+### English text(English textGPU)
 ```
 BATCH_SIZE=1024
 SEQ_LEN=4096
@@ -384,11 +384,11 @@ LEARNING_RATE=0.0001
 GRADIENT_ACCUMULATION=4
 ```
 
-## 总结
+## English text
 
-- **S语言**: 高层逻辑、I/O、编排
-- **CUDA**: 低层并行计算
-- **cuBLAS**: 优化矩阵操作
-- **FFI**: S→CUDA的安全桥梁
+- **Slanguage**: English text, I/O, English text
+- **CUDA**: English textcompute
+- **cuBLAS**: optimizeEnglish text
+- **FFI**: S→CUDAEnglish textsafetyEnglish text
 
-这种架构结合了S语言的易用性和CUDA的计算能力，实现高效的GPU训练！
+English textSlanguageEnglish textCUDAEnglish textcomputeEnglish text, implementationEnglish textGPUtraining!

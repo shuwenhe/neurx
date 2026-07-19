@@ -1,112 +1,112 @@
-# 🚀 NeurX 简化版 - 两个基本 Make 命令
+# 🚀 NeurX English text - English text Make English text
 
-**原则**: 简洁 = 力量
+**principle**: English text = English text
 
 ---
 
-## 📋 仅有的两个命令
+## 📋 English text
 
-### 1. **make train** - 训练
+### 1. **make train** - training
 
 ```bash
 make train
 ```
 
-**功能**: 运行模型训练  
-**配置**: 通过环境变量
+**English text**: runmodeltraining
+**configuration**: English text
 
-**常用配置**:
+**English textconfiguration**:
 ```bash
-# 快速测试 (5 分钟)
+# quicktest (5 English text)
 make train NEURX_TOTAL_STEPS=10
 
-# 标准训练 (1-2 小时)
+# English texttraining (1-2 English text)
 make train NEURX_TOTAL_STEPS=1000 NEURX_BATCH_SIZE=32
 
-# 大规模训练 (多天)
+# English texttraining (English text)
 make train NEURX_TOTAL_STEPS=100000 NEURX_BATCH_SIZE=64 NEURX_WORLD_SIZE=8
 ```
 
-### 2. **make infer** - 推理
+### 2. **make infer** - inference
 
 ```bash
 make infer
 ```
 
-**功能**: 运行模型推理  
-**配置**: 通过环境变量
+**English text**: runmodelinference
+**configuration**: English text
 
-**常用配置**:
+**English textconfiguration**:
 ```bash
-# 基础推理
+# English textinference
 make infer
 
-# 高质量推理
+# English textinference
 make infer NEURX_TEMPERATURE=0.5 NEURX_MAX_TOKENS=256
 ```
 
 ---
 
-## 🎯 快速使用
+## 🎯 quickuse
 
-### 训练模型
+### trainingmodel
 
 ```bash
-# 步骤 1: 基础训练
+# stepEnglish text 1: English texttraining
 make train NEURX_TOTAL_STEPS=100 NEURX_BATCH_SIZE=4
 
-# 步骤 2: 查看日志
+# stepEnglish text 2: English textlog
 tail -f /tmp/neurx_llm_train.log
 
-# 步骤 3: 检查检查点
+# stepEnglish text 3: English textcheckpoint
 ls -lh artifacts/checkpoints/
 ```
 
-### 推理
+### inference
 
 ```bash
-# 运行推理
+# runinference
 make infer
 
-# 交互式推理
+# English textinference
 make infer-interactive
 ```
 
 ---
 
-## 🎛️ 环境变量
+## 🎛️ English text
 
-### 训练参数
-
-```
-NEURX_TOTAL_STEPS         训练步数 (默认: 100)
-NEURX_BATCH_SIZE          批大小 (默认: 4)
-NEURX_LR                  学习率 (默认: 0.001)
-NEURX_SEQ_LENGTH          序列长度 (默认: 8)
-NEURX_WARMUP_STEPS        预热步数 (默认: 10)
-NEURX_WORLD_SIZE          GPU 总数 (默认: 1)
-NEURX_MIXED_PRECISION_MODE 精度模式: bf16/fp16/fp32 (默认: bf16)
-```
-
-### 推理参数
+### trainingparameter
 
 ```
-NEURX_TEMPERATURE         采样温度 (默认: 0.7)
-NEURX_TOP_K              Top-K 采样 (默认: 40)
-NEURX_TOP_P              Nucleus 采样 (默认: 0.9)
-NEURX_MAX_TOKENS         最大生成令牌 (默认: 50)
+NEURX_TOTAL_STEPS         trainingstepEnglish text (default: 100)
+NEURX_BATCH_SIZE          English text (default: 4)
+NEURX_LR                  learning rate (default: 0.001)
+NEURX_SEQ_LENGTH          English text (default: 8)
+NEURX_WARMUP_STEPS        English textstepEnglish text (default: 10)
+NEURX_WORLD_SIZE          GPU English text (default: 1)
+NEURX_MIXED_PRECISION_MODE English text: bf16/fp16/fp32 (default: bf16)
+```
+
+### inferenceparameter
+
+```
+NEURX_TEMPERATURE         English text (default: 0.7)
+NEURX_TOP_K              Top-K English text (default: 40)
+NEURX_TOP_P              Nucleus English text (default: 0.9)
+NEURX_MAX_TOKENS         English textgenerateEnglish text (default: 50)
 ```
 
 ---
 
-## 💡 使用示例
+## 💡 useexample
 
-### 例 1: 快速原型 (5 分钟)
+### English text 1: quickEnglish text (5 English text)
 ```bash
 make train NEURX_TOTAL_STEPS=10
 ```
 
-### 例 2: 单 GPU 训练 (2 小时)
+### English text 2: English text GPU training (2 English text)
 ```bash
 make train \
   NEURX_TOTAL_STEPS=1000 \
@@ -114,7 +114,7 @@ make train \
   NEURX_SEQ_LENGTH=512
 ```
 
-### 例 3: 多 GPU 训练 (1 小时)
+### English text 3: English text GPU training (1 English text)
 ```bash
 make train \
   NEURX_WORLD_SIZE=4 \
@@ -122,7 +122,7 @@ make train \
   NEURX_TOTAL_STEPS=1000
 ```
 
-### 例 4: 高精度推理
+### English text 4: English textinference
 ```bash
 make infer \
   NEURX_TEMPERATURE=0.5 \
@@ -132,21 +132,21 @@ make infer \
 
 ---
 
-## ✅ 就是这么简单
+## ✅ English text
 
-**训练**: 
+**training**:
 ```bash
 make train NEURX_TOTAL_STEPS=1000
 ```
 
-**推理**:
+**inference**:
 ```bash
 make infer
 ```
 
-**完成！** 🎉
+**English text!** 🎉
 
 ---
 
-**日期**: 2026-07-01  
-**哲学**: Keep It Simple, Stupid (KISS)
+**English text**: 2026-07-01
+**English text**: Keep It Simple, Stupid (KISS)

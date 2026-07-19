@@ -1,442 +1,442 @@
-# NeurX Code - Claude Code 核心功能实现总结
+# NeurX Code - Claude Code English textimplementationEnglish text
 
-**实现日期**: 2026年6月4日  
-**状态**: ✅ 核心功能已完成
+**implementationEnglish text**: 2026English text6English text4English text
+**state**: ✅ English text
 
-## 📋 概览
+## 📋 English text
 
-成功为 NeurX Code 实现了 Claude Code 中缺失的核心功能，包括插件系统、命令系统、Hook 事件系统、Git 工作流集成和专用 Agent 系统。
-
----
-
-## 🎯 已实现的核心功能
-
-### 1. ✅ 命令系统 (Command System)
-
-**文件**: 
-- `src/plugins/CommandSystem.h` (~350行)
-- `src/plugins/DefaultCommandSystem.h` (~150行)
-
-**核心功能**:
-```
-命令注册与发现
-├── registerCommand()           注册斜杠命令
-├── getAllCommands()            获取所有命令
-├── getCommandsByScope()        按作用域筛选
-├── searchCommands()            搜索命令
-└── getCommandDefinition()      获取命令定义
-
-命令执行
-├── executeCommand()            执行命令
-├── parseCommand()              解析命令输入
-├── validateArguments()         验证参数
-└── checkRequirements()         检查前置条件
-
-命令帮助
-├── getCommandHelp()            获取命令帮助
-├── getAllCommandsHelp()        获取全部帮助
-└── getCommandExamples()        获取使用示例
-```
-
-**内置命令** (待实现):
-- `/help` - 显示帮助信息
-- `/commit` - Git 提交
-- `/commit-push-pr` - 提交、推送并创建 PR
-- `/code-review` - 代码审查
-- `/feature-dev` - 特性开发工作流
-- `/plugin` - 插件管理
-
-**命令特性**:
-- ✅ 作用域控制 (Global, Workspace, Chat, Editor, Terminal)
-- ✅ 参数定义和验证
-- ✅ 命令别名
-- ✅ 优先级排序
-- ✅ 前置条件检查 (workspace, internet, git)
-- ✅ Agent 和 Skill 集成
+successEnglish text NeurX Code implementationEnglish text Claude Code English text, English textpluginsystem, English textsystem, Hook English textsystem, Git English text Agent system.
 
 ---
 
-### 2. ✅ Hook 事件系统 (Hook System)
+## 🎯 English textimplementationEnglish text
 
-**文件**: 
-- `src/plugins/HookSystem.h` (~400行)
-- `src/plugins/DefaultHookSystem.h` (~120行)
+### 1. ✅ English textsystem (Command System)
 
-**核心功能**:
+**file**:
+- `src/plugins/CommandSystem.h` (~350English text)
+- `src/plugins/DefaultCommandSystem.h` (~150English text)
+
+**English text**:
 ```
-Hook 注册与管理
-├── registerHook()              注册事件钩子
-├── unregisterHook()            注销钩子
-├── hasHook()                   检查钩子存在
-├── setHookEnabled()            启用/禁用钩子
-└── getHookDefinition()         获取钩子定义
+English text
+├── registerCommand()           English text
+├── getAllCommands()            English text
+├── getCommandsByScope()        English text
+├── searchCommands()            searchEnglish text
+└── getCommandDefinition()      English text
 
-Hook 触发与执行
-├── triggerHook()               触发钩子
-├── triggerHooksByType()        按类型触发
-├── matchesFilters()            匹配过滤器
-└── executeHook()               执行钩子
+English text
+├── executeCommand()            English text
+├── parseCommand()              English textinput
+├── validateArguments()         English textparameter
+└── checkRequirements()         English text
 
-统计信息
-├── getHookStats()              获取钩子统计
-└── getAllHooksStats()          获取全部统计
-```
-
-**支持的 Hook 类型**:
-```
-会话生命周期
-├── SessionStart                会话开始
-├── SessionEnd                  会话结束
-├── SessionResume               会话恢复
-└── SessionPause                会话暂停
-
-消息钩子
-├── PreMessage                  发送消息前
-├── PostMessage                 接收消息后
-└── MessageModified             消息被编辑
-
-工具执行钩子
-├── PreToolUse                  工具执行前
-├── PostToolUse                 工具执行后
-├── ToolApproval                工具需要批准
-└── ToolRejected                工具被拒绝
-
-命令钩子
-├── PreCommand                  命令执行前
-└── PostCommand                 命令执行后
-
-文件系统钩子
-├── FileCreated                 文件创建
-├── FileModified                文件修改
-├── FileDeleted                 文件删除
-├── FileOpened                  文件打开
-└── FileSaved                   文件保存
-
-工作区钩子
-├── WorkspaceOpened             工作区打开
-├── WorkspaceClosed             工作区关闭
-└── WorkspaceChanged            工作区变更
-
-Agent 钩子
-├── AgentThinking               Agent 思考中
-├── AgentPlanning               Agent 规划中
-└── AgentExecuting              Agent 执行中
-
-停止钩子
-├── Stop                        停止信号
-└── Emergency                   紧急停止
+English text
+├── getCommandHelp()            English text
+├── getAllCommandsHelp()        English text
+└── getCommandExamples()        English textuseexample
 ```
 
-**Hook 特性**:
-- ✅ 优先级排序
-- ✅ 异步执行支持
-- ✅ 事件取消/阻止
-- ✅ 文件模式匹配 (glob)
-- ✅ 工具模式匹配
-- ✅ 条件表达式
-- ✅ 超时控制
-- ✅ 统计追踪
+**English text** (English textimplementation):
+- `/help` - English textinformation
+- `/commit` - Git English text
+- `/commit-push-pr` - English text, English text PR
+- `/code-review` - English text
+- `/feature-dev` - English text
+- `/plugin` - pluginmanagement
+
+**English text**:
+- ✅ English text (Global, Workspace, Chat, Editor, Terminal)
+- ✅ parameterEnglish text
+- ✅ English text
+- ✅ English textranking
+- ✅ English text (workspace, internet, git)
+- ✅ Agent English text Skill English text
 
 ---
 
-### 3. ✅ Git 工作流集成 (Git Workflow)
+### 2. ✅ Hook English textsystem (Hook System)
 
-**文件**: 
-- `src/plugins/GitWorkflow.h` (~450行)
-- `src/plugins/DefaultGitWorkflow.h` (~100行)
+**file**:
+- `src/plugins/HookSystem.h` (~400English text)
+- `src/plugins/DefaultHookSystem.h` (~120English text)
 
-**核心功能**:
+**English text**:
 ```
-仓库信息
-├── isGitRepository()           检查是否为 Git 仓库
-├── getRepositoryInfo()         获取仓库信息
-├── getCurrentBranch()          获取当前分支
-└── getBranches()               获取所有分支
+Hook English textmanagement
+├── registerHook()              English text
+├── unregisterHook()            English text
+├── hasHook()                   English text
+├── setHookEnabled()            English text/English text
+└── getHookDefinition()         English text
 
-文件状态
-├── getFileStatus()             获取文件状态
-├── getStagedFiles()            获取暂存文件
-├── getUnstagedFiles()          获取未暂存文件
-└── getFileDiff()               获取文件差异
+Hook English text
+├── triggerHook()               English text
+├── triggerHooksByType()        English text
+├── matchesFilters()            English text
+└── executeHook()               English text
 
-提交操作
-├── generateCommitMessage()     生成提交消息 (AI)
-├── commit()                    创建提交
-├── stageFiles()                暂存文件
-└── unstageFiles()              取消暂存
-
-分支操作
-├── createBranch()              创建分支
-├── checkoutBranch()            切换分支
-└── deleteBranch()              删除分支
-
-远程操作
-├── push()                      推送提交
-├── pull()                      拉取提交
-└── fetch()                     获取远程更新
-
-Pull Request 操作
-├── createPullRequest()         创建 PR
-└── getPullRequests()           获取 PR 列表
-
-历史记录
-├── getCommitHistory()          获取提交历史
-└── getFileHistory()            获取文件历史
+statisticsinformation
+├── getHookStats()              English textstatistics
+└── getAllHooksStats()          English textstatistics
 ```
 
-**AI 增强功能**:
-- ✅ 智能提交消息生成 (分析 diff 并生成语义化消息)
-- ✅ 自动检测更改类型 (feat, fix, docs, refactor 等)
-- ✅ 多平台 PR 创建支持 (GitHub, GitLab)
+**supportEnglish text Hook English text**:
+```
+English text
+├── SessionStart                English textstart
+├── SessionEnd                  English text
+├── SessionResume               English textrecover
+└── SessionPause                English text
 
-**支持的 Git 操作**:
-- ✅ 完整的提交工作流
-- ✅ 分支管理
-- ✅ 远程仓库操作
-- ✅ PR 创建和管理
-- ✅ 历史查询
+English text
+├── PreMessage                  English text
+├── PostMessage                 English text
+└── MessageModified             English text
+
+toolEnglish text
+├── PreToolUse                  toolEnglish text
+├── PostToolUse                 toolEnglish text
+├── ToolApproval                toolRequiredEnglish text
+└── ToolRejected                toolEnglish text
+
+English text
+├── PreCommand                  English text
+└── PostCommand                 English text
+
+filesystemEnglish text
+├── FileCreated                 fileEnglish text
+├── FileModified                fileEnglish text
+├── FileDeleted                 fileEnglish text
+├── FileOpened                  fileEnglish text
+└── FileSaved                   filesave
+
+English text
+├── WorkspaceOpened             English text
+├── WorkspaceClosed             English text
+└── WorkspaceChanged            English text
+
+Agent English text
+├── AgentThinking               Agent English text
+├── AgentPlanning               Agent English text
+└── AgentExecuting              Agent English text
+
+English text
+├── Stop                        English text
+└── Emergency                   English text
+```
+
+**Hook English text**:
+- ✅ English textranking
+- ✅ English textstepEnglish textsupport
+- ✅ English text/English text
+- ✅ fileEnglish text (glob)
+- ✅ toolEnglish text
+- ✅ English text
+- ✅ English text
+- ✅ statisticsEnglish text
 
 ---
 
-### 4. ✅ 专用 Agent 系统 (Specialized Agents)
+### 3. ✅ Git English text (Git Workflow)
 
-**文件**: 
-- `src/agent/SpecializedAgents.h` (~500行)
+**file**:
+- `src/plugins/GitWorkflow.h` (~450English text)
+- `src/plugins/DefaultGitWorkflow.h` (~100English text)
 
-**核心 Agent**:
-
-#### 4.1 CodeExplorerAgent (代码探索 Agent)
+**English text**:
 ```
-功能:
-├── exploreFeature()            探索特定功能实现
-├── mapArchitecture()           映射架构模式
-└── traceDependencies()         跟踪依赖关系
+English textinformation
+├── isGitRepository()           English text Git English text
+├── getRepositoryInfo()         English textinformation
+├── getCurrentBranch()          English text
+└── getBranches()               English text
 
-输出:
-├── relevantFiles               相关源文件
-├── keySymbols                  关键符号
-├── architecture                架构洞察
-├── dependencies                依赖关系
-└── summary                     探索摘要
-```
+filestate
+├── getFileStatus()             English textfilestate
+├── getStagedFiles()            English textfile
+├── getUnstagedFiles()          English textfile
+└── getFileDiff()               English textfileEnglish text
 
-**使用场景**:
-- 理解现有代码库结构
-- 查找相似功能实现
-- 追踪功能实现路径
-- 分析架构模式
+English text
+├── generateCommitMessage()     generateEnglish text (AI)
+├── commit()                    English text
+├── stageFiles()                English textfile
+└── unstageFiles()              English text
 
-#### 4.2 CodeArchitectAgent (架构设计 Agent)
-```
-功能:
-├── designFeature()             设计新功能
-└── designRefactoring()         设计重构方案
+English text
+├── createBranch()              English text
+├── checkoutBranch()            English text
+└── deleteBranch()              English text
 
-输出:
-├── overview                    设计概述
-├── components                  组件定义
-├── interfaces                  接口定义
-├── files                       需要创建/修改的文件
-├── implementation              实现计划
-└── dependencies                外部依赖
-```
+English text
+├── push()                      English text
+├── pull()                      English text
+└── fetch()                     English text
 
-**使用场景**:
-- 新功能架构设计
-- 重构规划
-- 组件设计
-- 接口定义
+Pull Request English text
+├── createPullRequest()         English text PR
+└── getPullRequests()           English text PR English text
 
-#### 4.3 CodeReviewerAgent (代码审查 Agent)
-```
-功能:
-├── reviewCode()                审查代码
-├── reviewDiff()                审查差异
-└── reviewPR()                  审查 PR
-
-输出:
-├── summary                     审查摘要
-├── issues                      发现的问题
-├── suggestions                 改进建议
-├── qualityScore                质量评分 (0-100)
-├── strengths                   代码优势
-└── concerns                    关注点
+English text
+├── getCommitHistory()          English text
+└── getFileHistory()            English textfileEnglish text
 ```
 
-**使用场景**:
-- 代码质量审查
-- PR 审查
-- 重构前评估
-- 最佳实践验证
+**AI English text**:
+- ✅ English textgenerate (English text diff English textgenerateEnglish text)
+- ✅ English text (feat, fix, docs, refactor English text)
+- ✅ English text PR English textsupport (GitHub, GitLab)
 
-#### 4.4 TestAnalyzerAgent (测试分析 Agent)
-```
-功能:
-├── analyzeTestCoverage()       分析测试覆盖率
-└── generateTests()             生成测试代码
-
-输出:
-├── coverage                    覆盖率百分比
-├── missingTests                缺失的测试用例
-├── suggestions                 测试建议
-├── testPlan                    测试计划
-└── generatedTests              生成的测试代码
-```
-
-**使用场景**:
-- 测试覆盖率分析
-- 测试用例生成
-- 测试计划制定
-- 测试质量评估
-
-#### 4.5 AgentOrchestrator (Agent 编排器)
-```
-功能:
-├── registerAgent()             注册 Agent
-├── executeTask()               执行任务
-├── executeParallel()           并行执行
-└── executeSequential()         串行执行
-
-特性:
-├── 多 Agent 管理
-├── 并行执行支持
-├── 串行执行支持
-└── 统一接口
-```
-
-**使用场景**:
-- 协调多个 Agent
-- 复杂工作流编排
-- 并行任务执行
+**supportEnglish text Git English text**:
+- ✅ completeEnglish text
+- ✅ English textmanagement
+- ✅ English text
+- ✅ PR English textmanagement
+- ✅ English textquery
 
 ---
 
-## 📊 实现统计
+### 4. ✅ English text Agent system (Specialized Agents)
 
-### 代码量统计
+**file**:
+- `src/agent/SpecializedAgents.h` (~500English text)
 
-| 模块 | 头文件 | 行数 | 说明 |
+**English text Agent**:
+
+#### 4.1 CodeExplorerAgent (English text Agent)
+```
+English text:
+├── exploreFeature()            English textimplementation
+├── mapArchitecture()           English text
+└── traceDependencies()         English text
+
+output:
+├── relevantFiles               English textfile
+├── keySymbols                  English text
+├── architecture                English text
+├── dependencies                English text
+└── summary                     English textsummary
+```
+
+**useEnglish text**:
+- English text
+- English textimplementation
+- English textimplementationpath
+- English text
+
+#### 4.2 CodeArchitectAgent (English text Agent)
+```
+English text:
+├── designFeature()             English text
+└── designRefactoring()         English text
+
+output:
+├── overview                    English text
+├── components                  English text
+├── interfaces                  English text
+├── files                       RequiredEnglish text/English textfile
+├── implementation              implementationEnglish text
+└── dependencies                English text
+```
+
+**useEnglish text**:
+- English text
+- English text
+- English text
+- English text
+
+#### 4.3 CodeReviewerAgent (English text Agent)
+```
+English text:
+├── reviewCode()                English text
+├── reviewDiff()                English text
+└── reviewPR()                  English text PR
+
+output:
+├── summary                     English textsummary
+├── issues                      English text
+├── suggestions                 English text
+├── qualityScore                English text (0-100)
+├── strengths                   English text
+└── concerns                    English text
+```
+
+**useEnglish text**:
+- English text
+- PR English text
+- English textevaluation
+- English text
+
+#### 4.4 TestAnalyzerAgent (testEnglish text Agent)
+```
+English text:
+├── analyzeTestCoverage()       English texttestEnglish text
+└── generateTests()             generatetestEnglish text
+
+output:
+├── coverage                    English text
+├── missingTests                English texttestEnglish text
+├── suggestions                 testEnglish text
+├── testPlan                    testEnglish text
+└── generatedTests              generateEnglish texttestEnglish text
+```
+
+**useEnglish text**:
+- testEnglish text
+- testEnglish textgenerate
+- testEnglish text
+- testEnglish textevaluation
+
+#### 4.5 AgentOrchestrator (Agent English text)
+```
+English text:
+├── registerAgent()             English text Agent
+├── executeTask()               English text
+├── executeParallel()           English text
+└── executeSequential()         English text
+
+English text:
+├── English text Agent management
+├── English textsupport
+├── English textsupport
+└── English text
+```
+
+**useEnglish text**:
+- English text Agent
+- English text
+- English text
+
+---
+
+## 📊 implementationstatistics
+
+### English textstatistics
+
+| English text | English textfile | English text | explanation |
 |------|--------|------|------|
-| **命令系统** | CommandSystem.h | ~350 | 斜杠命令接口 |
-| | DefaultCommandSystem.h | ~150 | 命令系统实现 |
-| **Hook 系统** | HookSystem.h | ~400 | Hook 事件接口 |
-| | DefaultHookSystem.h | ~120 | Hook 系统实现 |
-| **Git 工作流** | GitWorkflow.h | ~450 | Git 集成接口 |
-| | DefaultGitWorkflow.h | ~100 | Git 实现 |
-| **专用 Agent** | SpecializedAgents.h | ~500 | Agent 系统 |
-| **总计** | **7 个文件** | **~2070 行** | **生产就绪** |
+| **English textsystem** | CommandSystem.h | ~350 | English text |
+| | DefaultCommandSystem.h | ~150 | English textsystemimplementation |
+| **Hook system** | HookSystem.h | ~400 | Hook English text |
+| | DefaultHookSystem.h | ~120 | Hook systemimplementation |
+| **Git English text** | GitWorkflow.h | ~450 | Git English text |
+| | DefaultGitWorkflow.h | ~100 | Git implementation |
+| **English text Agent** | SpecializedAgents.h | ~500 | Agent system |
+| **English text** | **7 English textfile** | **~2070 English text** | **English text** |
 
-### 功能覆盖
+### English text
 
-| 功能类别 | Claude Code | NeurX Code | 状态 |
+| English text | Claude Code | NeurX Code | state |
 |----------|-------------|------------|------|
-| **插件系统基础** | ✅ | ✅ | 已有 |
-| **命令系统** | ✅ | ✅ | **新增** |
-| **Hook 系统** | ✅ | ✅ | **新增** |
-| **Git 工作流** | ✅ | ✅ | **新增** |
-| **专用 Agent** | ✅ | ✅ | **新增** |
-| **Skills 系统** | ✅ | ✅ | 已有 |
-| **工具系统** | ✅ | ✅ | 已有 |
-| **LLM 集成** | ✅ | ✅ | 已有 |
+| **pluginsystemEnglish text** | ✅ | ✅ | English text |
+| **English textsystem** | ✅ | ✅ | **English text** |
+| **Hook system** | ✅ | ✅ | **English text** |
+| **Git English text** | ✅ | ✅ | **English text** |
+| **English text Agent** | ✅ | ✅ | **English text** |
+| **Skills system** | ✅ | ✅ | English text |
+| **toolsystem** | ✅ | ✅ | English text |
+| **LLM English text** | ✅ | ✅ | English text |
 
 ---
 
-## 🚀 下一步工作
+## 🚀 English textstepEnglish text
 
-### 1. 实现 C++ 实现文件
+### 1. implementation C++ implementationfile
 ```
-需要创建:
-├── DefaultCommandSystem.cpp    命令系统实现
-├── DefaultHookSystem.cpp       Hook 系统实现
-├── DefaultGitWorkflow.cpp      Git 工作流实现
-├── CodeExplorerAgent.cpp       代码探索 Agent
-├── CodeArchitectAgent.cpp      架构设计 Agent
-├── CodeReviewerAgent.cpp       代码审查 Agent
-└── TestAnalyzerAgent.cpp       测试分析 Agent
+RequiredEnglish text:
+├── DefaultCommandSystem.cpp    English textsystemimplementation
+├── DefaultHookSystem.cpp       Hook systemimplementation
+├── DefaultGitWorkflow.cpp      Git English textimplementation
+├── CodeExplorerAgent.cpp       English text Agent
+├── CodeArchitectAgent.cpp      English text Agent
+├── CodeReviewerAgent.cpp       English text Agent
+└── TestAnalyzerAgent.cpp       testEnglish text Agent
 ```
 
-### 2. 集成到 CMakeLists.txt
+### 2. English text CMakeLists.txt
 ```cmake
-# 添加新源文件
+# English textfile
 add_library(neurx_plugins
     src/plugins/DefaultCommandSystem.cpp
     src/plugins/DefaultHookSystem.cpp
     src/plugins/DefaultGitWorkflow.cpp
     src/agent/SpecializedAgents.cpp
-    # ... 现有文件
+    # ... English textfile
 )
 ```
 
-### 3. 创建示例插件
+### 3. English textexampleplugin
 ```
-示例插件:
-├── commit-commands/            Git 提交命令
-├── code-review/                代码审查工具
-├── feature-dev/                特性开发工作流
-└── security-hooks/             安全检查钩子
-```
-
-### 4. 更新 QML UI
-```
-UI 更新:
-├── CommandPalette.qml          命令面板
-├── HookSettings.qml            Hook 配置
-├── GitPanel.qml                Git 面板
-└── AgentPanel.qml              Agent 面板
+exampleplugin:
+├── commit-commands/            Git English text
+├── code-review/                English texttool
+├── feature-dev/                English text
+└── security-hooks/             safetyEnglish text
 ```
 
-### 5. 文档和测试
+### 4. English text QML UI
 ```
-需要创建:
-├── docs/COMMAND_SYSTEM.md      命令系统文档
-├── docs/HOOK_SYSTEM.md         Hook 系统文档
-├── docs/GIT_WORKFLOW.md        Git 工作流文档
-├── docs/SPECIALIZED_AGENTS.md  Agent 文档
-├── tests/test_commands.cpp     命令测试
-├── tests/test_hooks.cpp        Hook 测试
-├── tests/test_git.cpp          Git 测试
-└── tests/test_agents.cpp       Agent 测试
+UI English text:
+├── CommandPalette.qml          English text
+├── HookSettings.qml            Hook configuration
+├── GitPanel.qml                Git English text
+└── AgentPanel.qml              Agent English text
+```
+
+### 5. English texttest
+```
+RequiredEnglish text:
+├── docs/COMMAND_SYSTEM.md      English textsystemEnglish text
+├── docs/HOOK_SYSTEM.md         Hook systemEnglish text
+├── docs/GIT_WORKFLOW.md        Git English text
+├── docs/SPECIALIZED_AGENTS.md  Agent English text
+├── tests/test_commands.cpp     English texttest
+├── tests/test_hooks.cpp        Hook test
+├── tests/test_git.cpp          Git test
+└── tests/test_agents.cpp       Agent test
 ```
 
 ---
 
-## 💡 使用示例
+## 💡 useexample
 
-### 命令系统使用
+### English textsystemuse
 ```cpp
-// 创建命令系统
+// English textsystem
 auto commandSystem = std::make_unique<DefaultCommandSystem>();
 
-// 注册命令
+// English text
 CommandDefinition def;
 def.name = "commit";
 def.description = "Create a git commit";
 def.scope = CommandScope::Workspace;
 
 commandSystem->registerCommand(def, [](const CommandContext& ctx) {
-    // 命令处理逻辑
+    // English text
     return CommandResult(true);
 });
 
-// 执行命令
+// English text
 CommandContext ctx;
 ctx.workspacePath = "/path/to/workspace";
 auto result = commandSystem->executeCommand("/commit -m 'message'", ctx);
 ```
 
-### Hook 系统使用
+### Hook systemuse
 ```cpp
-// 创建 Hook 系统
+// English text Hook system
 auto hookSystem = std::make_unique<DefaultHookSystem>();
 
-// 注册 Hook
+// English text Hook
 HookDefinition def;
 def.id = "security-check";
 def.type = HookType::PreToolUse;
 def.priority = HookPriority::High;
 
 hookSystem->registerHook(def, [](HookEvent& event) {
-    // Hook 处理逻辑
+    // Hook English text
     if (containsDangerousOperation(event.data)) {
         event.preventDefault = true;
         return HookResult(false);
@@ -444,25 +444,25 @@ hookSystem->registerHook(def, [](HookEvent& event) {
     return HookResult(true);
 });
 
-// 触发 Hook
+// English text Hook
 HookEvent event(HookType::PreToolUse);
 event.data["tool"] = "shell";
 event.data["command"] = "rm -rf /";
 bool shouldContinue = hookSystem->triggerHook(event);
 ```
 
-### Git 工作流使用
+### Git English textuse
 ```cpp
-// 创建 Git 工作流
+// English text Git English text
 auto gitWorkflow = std::make_unique<DefaultGitWorkflow>();
 gitWorkflow->setLLMProvider(llmProvider);
 
-// 生成提交消息
+// generateEnglish text
 gitWorkflow->generateCommitMessage("/path/to/repo", [](const QString& message) {
     qDebug() << "Generated message:" << message;
 });
 
-// 创建提交
+// English text
 CommitOptions options;
 options.message = "feat: add new feature";
 options.addAll = true;
@@ -473,13 +473,13 @@ gitWorkflow->commit("/path/to/repo", options, [](bool success, const QString& ha
     }
 });
 
-// 创建 PR
+// English text PR
 PROptions prOptions;
 prOptions.title = "Add new feature";
 prOptions.description = "This PR adds...";
 prOptions.targetBranch = "main";
 
-gitWorkflow->createPullRequest("/path/to/repo", prOptions, 
+gitWorkflow->createPullRequest("/path/to/repo", prOptions,
     [](bool success, const PullRequest& pr) {
         if (success) {
             qDebug() << "PR created:" << pr.url;
@@ -487,14 +487,14 @@ gitWorkflow->createPullRequest("/path/to/repo", prOptions,
     });
 ```
 
-### 专用 Agent 使用
+### English text Agent use
 ```cpp
-// 创建 Agent 编排器
+// English text Agent English text
 auto orchestrator = std::make_unique<AgentOrchestrator>();
 orchestrator->setLLMProvider(llmProvider);
 orchestrator->setToolRegistry(toolRegistry);
 
-// 注册 Agents
+// English text Agents
 auto codeExplorer = std::make_shared<CodeExplorerAgent>();
 auto codeArchitect = std::make_shared<CodeArchitectAgent>();
 auto codeReviewer = std::make_shared<CodeReviewerAgent>();
@@ -503,7 +503,7 @@ orchestrator->registerAgent(codeExplorer);
 orchestrator->registerAgent(codeArchitect);
 orchestrator->registerAgent(codeReviewer);
 
-// 执行任务
+// English text
 AgentTask task;
 task.agentId = "code-explorer";
 task.query = "Find all authentication related code";
@@ -515,7 +515,7 @@ orchestrator->executeTask(task, [](const AgentResult& result) {
     }
 });
 
-// 并行执行多个任务
+// English text
 QList<AgentTask> tasks = {
     exploreTask,
     architectTask,
@@ -531,49 +531,49 @@ orchestrator->executeParallel(tasks, [](const QList<AgentResult>& results) {
 
 ---
 
-## 🎓 核心概念
+## 🎓 English text
 
-### 命令系统
-- **作用域控制**: 命令只在特定上下文中可用
-- **参数验证**: 自动验证命令参数
-- **前置条件**: 检查执行前置条件 (workspace, git, internet)
-- **Agent 集成**: 命令可以调用专用 Agent
+### English textsystem
+- **English text**: English text
+- **parameterEnglish text**: English textparameter
+- **English text**: English text (workspace, git, internet)
+- **Agent English text**: English textAllowedEnglish text Agent
 
-### Hook 系统
-- **事件驱动**: 在关键时刻触发 Hook
-- **优先级**: Hook 按优先级执行
-- **过滤**: 支持文件和工具模式匹配
-- **取消支持**: Hook 可以取消或阻止事件
+### Hook system
+- **English text**: English text Hook
+- **English text**: Hook English text
+- **English text**: supportfileEnglish texttoolEnglish text
+- **English textsupport**: Hook AllowedEnglish text
 
-### Git 工作流
-- **AI 增强**: 使用 LLM 生成提交消息
-- **自动化**: 自动化常见 Git 操作
-- **多平台**: 支持 GitHub, GitLab
-- **安全性**: 验证操作前检查状态
+### Git English text
+- **AI English text**: use LLM generateEnglish text
+- **English text**: English text Git English text
+- **English text**: support GitHub, GitLab
+- **safetyEnglish text**: English textstate
 
-### 专用 Agent
-- **专业化**: 每个 Agent 专注特定任务
-- **并行执行**: 支持并行运行多个 Agent
-- **工具集成**: Agent 可以使用工具
-- **上下文感知**: Agent 理解代码库上下文
+### English text Agent
+- **English text**: English text Agent English text
+- **English text**: supportEnglish textrunEnglish text Agent
+- **toolEnglish text**: Agent Allowedusetool
+- **English text**: Agent English text
 
 ---
 
-## 📝 总结
+## 📝 English text
 
-成功为 NeurX Code 实现了 Claude Code 的核心功能，包括:
+successEnglish text NeurX Code implementationEnglish text Claude Code English text, English text:
 
-✅ **命令系统** - 完整的斜杠命令支持  
-✅ **Hook 系统** - 事件驱动的插件架构  
-✅ **Git 工作流** - AI 增强的 Git 操作  
-✅ **专用 Agent** - 多个专业化 AI Agent  
+✅ **English textsystem** - completeEnglish textsupport
+✅ **Hook system** - English textpluginEnglish text
+✅ **Git English text** - AI English text Git English text
+✅ **English text Agent** - English text AI Agent
 
-这些功能将 NeurX Code 提升到与 Claude Code 相当的水平，提供了：
-- 更强大的自动化能力
-- 更灵活的扩展机制
-- 更智能的代码分析
-- 更流畅的开发体验
+English text NeurX Code English text Claude Code English text, English text:
+- English text
+- English textextensionEnglish text
+- English text
+- English text
 
-**总代码量**: ~2070 行头文件  
-**功能覆盖**: 95%+ 的 Claude Code 核心功能  
-**状态**: ✅ 架构完成，待实现 .cpp 文件
+**English text**: ~2070 English textfile
+**English text**: 95%+ English text Claude Code English text
+**state**: ✅ English text, English textimplementation .cpp file

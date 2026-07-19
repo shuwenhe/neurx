@@ -56,18 +56,18 @@ func main() int {
     println("")
 
     // Example conversation
-    println("User: NeurX 可以做什么？")
+    println("User: NeurX AllowedEnglish text?")
     println("")
-    println("Model: NeurX 是一个强大的自然语言处理系统，具有以下功能：")
-    println("  • 自然语言理解和生成")
-    println("  • 文本分类和情感分析")
-    println("  • 知识检索和问答")
-    println("  • 代码生成和分析")
-    println("  • 多语言支持")
+    println("Model: NeurX English textlanguageEnglish textsystem, English text: ")
+    println("  • English textlanguageEnglish textgenerate")
+    println("  • English text")
+    println("  • English text")
+    println("  • English textgenerateEnglish text")
+    println("  • English textlanguagesupport")
     println("")
-    println("  当前模型规模：1.3B 参数")
-    println("  已训练步数：215+ 步")
-    println("  当前困惑度：正在收敛中")
+    println("  English textmodelEnglish text: 1.3B parameter")
+    println("  English texttrainingstepEnglish text: 215+ step")
+    println("  English text: English text")
     println("")
 
     // Phase 4: Session statistics

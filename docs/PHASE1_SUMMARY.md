@@ -1,35 +1,35 @@
-# Phase 1 实现总结 - Hooks + Security + Git Workflow
+# Phase 1 implementationEnglish text - Hooks + Security + Git Workflow
 
-## 🎯 任务概述
+## 🎯 English text
 
-用户要求：**"do"** - 立即开始实现 Phase 1 全部功能（1-2周完整实现）
-实现方式：**接口和框架（快速原型）**
+English text: **"do"** - English textstartimplementation Phase 1 English text(1-2English textcompleteimplementation)
+implementationEnglish text: **English textframework(quickEnglish text)**
 
-## ✅ 完成情况
+## ✅ English text
 
-### 1. HookManager - Hooks 系统核心
+### 1. HookManager - Hooks systemEnglish text
 
-**文件**：
+**file**:
 - `src/agent/HookManager.h` (183 lines)
 - `src/agent/HookManager.cpp` (373 lines)
 
-**实现功能**：
-- ✅ 9 种 Hook 类型：
-  - `PreToolUse` - 工具调用前拦截
-  - `PostToolUse` - 工具调用后处理
-  - `SessionStart` - 会话开始注入上下文
-  - `SessionEnd` - 会话结束清理
-  - `Stop` - 退出前拦截（自动循环）
-  - `SubagentStop` - 子 Agent 停止
-  - `UserPromptSubmit` - 用户提交前处理
-  - `PreCompact` - 上下文压缩前保存
-  - `Notification` - 通知事件
-  
-- ✅ 双模式支持：
-  - **Prompt-based**：通过 LLM 决策（灵活、智能）
-  - **Command-based**：通过脚本执行（确定性、快速）
+**implementationEnglish text**:
+- ✅ 9 English text Hook English text:
+  - `PreToolUse` - toolEnglish text
+  - `PostToolUse` - toolEnglish text
+  - `SessionStart` - English textstartEnglish text
+  - `SessionEnd` - English text
+  - `Stop` - English text(English text)
+  - `SubagentStop` - English text Agent English text
+  - `UserPromptSubmit` - English text
+  - `PreCompact` - English textsave
+  - `Notification` - English text
 
-- ✅ 核心 API：
+- ✅ English textsupport:
+  - **Prompt-based**: English text LLM English text(English text, English text)
+  - **Command-based**: English text(English text, quick)
+
+- ✅ English text API:
   ```cpp
   void registerHook(const HookConfig& config);
   QList<HookResult> executeHooks(HookType type, const QJsonObject& context);
@@ -38,27 +38,27 @@
   bool shouldContinueSession(const QJsonObject& context);
   ```
 
-- ✅ 变量展开：`${HOME}`, `${PWD}`, context 中的动态变量
-- ✅ 超时控制：默认 5000ms，可配置
-- ✅ 信号机制：`hookExecuted`, `hookError`
+- ✅ English text: `${HOME}`, `${PWD}`, context English text
+- ✅ English text: default 5000ms, English textconfiguration
+- ✅ English text: `hookExecuted`, `hookError`
 
-**待完善**（标记为 TODO）：
-- [ ] LLM 集成（executePromptHook）
-- [ ] Markdown + YAML frontmatter 配置文件解析
-- [ ] Hook 配置 UI
-- [ ] Hook 市场/仓库
+**English text**(English text TODO):
+- [ ] LLM English text(executePromptHook)
+- [ ] Markdown + YAML frontmatter configurationfileEnglish text
+- [ ] Hook configuration UI
+- [ ] Hook English text/English text
 
 ---
 
-### 2. SecurityScanner - 安全模式扫描器
+### 2. SecurityScanner - safetyEnglish text
 
-**文件**：
+**file**:
 - `src/security/SecurityScanner.h` (145 lines)
 - `src/security/SecurityScanner.cpp` (502 lines)
 
-**实现功能**：
-- ✅ **20+ 危险模式检测**（6 个类别）：
-  
+**implementationEnglish text**:
+- ✅ **20+ English text**(6 English text):
+
   **Python** (7 patterns):
   1. `unsafe_yaml` - yaml.load() without SafeLoader (CWE-502)
   2. `unsafe_pickle` - pickle.load() from untrusted source (CWE-502)
@@ -67,94 +67,94 @@
   5. `python_exec` - exec() code injection (CWE-95)
   6. `os_system` - os.system() command injection (CWE-78)
   7. `subprocess_shell` - subprocess with shell=True (CWE-78)
-  
+
   **JavaScript** (4 patterns):
   8. `js_eval` - eval() code injection (CWE-95)
   9. `innerHTML` - Direct innerHTML XSS (CWE-79)
   10. `dangerouslySetInnerHTML` - React XSS (CWE-79)
   11. `document_write` - Deprecated and dangerous (CWE-79)
-  
+
   **Shell** (2 patterns):
   12. `rm_rf` - Dangerous rm -rf command (CWE-78)
   13. `curl_pipe_sh` - Piping curl/wget to shell (CWE-494)
-  
+
   **Secrets** (3 patterns):
   14. `hardcoded_api_key` - Hardcoded API keys (CWE-798)
   15. `hardcoded_password` - Hardcoded passwords (CWE-798)
   16. `aws_access_key` - AWS Access Key in code (CWE-798)
-  
+
   **SQL** (2 patterns):
   17. `sql_concat` - SQL string concatenation (CWE-89)
   18. `sql_fstring` - Python f-string in SQL (CWE-89)
-  
+
   **XSS** (2 patterns):
   19. `vue_v_html` - Vue.js v-html directive (CWE-79)
   20. `angular_bypass` - Angular security bypass (CWE-79)
 
-- ✅ **三种扫描模式**：
-  - `scanFile(filePath)` - 扫描完整文件
-  - `scanContent(content)` - 扫描文本内容
-  - `scanDiff(diff)` - 只扫描 diff 中的新增行
+- ✅ **English text**:
+  - `scanFile(filePath)` - English textcompletefile
+  - `scanContent(content)` - English textcontent
+  - `scanDiff(diff)` - English text diff English text
 
-- ✅ **元数据系统**：
-  - 每个模式都有名称、描述、严重程度、CWE 编号、修复建议、标签
-  - 可启用/禁用特定模式
-  - 严重程度阈值过滤
+- ✅ **English textdatasystem**:
+  - English textName, Description, English text, CWE English text, English text, English text
+  - English text/English text
+  - English text
 
-- ✅ 信号机制：`issueFound(SecurityIssue)`
+- ✅ English text: `issueFound(SecurityIssue)`
 
-**待完善**（标记为 TODO）：
-- [ ] Layer 2: LLM Diff 审查
-- [ ] Layer 3: Agentic Commit 审查
-- [ ] 更多语言支持（Rust, Go, Java, Ruby）
-- [ ] 自定义规则编辑器
+**English text**(English text TODO):
+- [ ] Layer 2: LLM Diff English text
+- [ ] Layer 3: Agentic Commit English text
+- [ ] English textlanguagesupport(Rust, Go, Java, Ruby)
+- [ ] English text
 
 ---
 
-### 3. GitWorkflowTool - Git 自动化工具
+### 3. GitWorkflowTool - Git English texttool
 
-**文件**：
+**file**:
 - `src/tools/GitWorkflowTool.h` (121 lines)
 - `src/tools/GitWorkflowTool.cpp` (432 lines)
 
-**实现功能**：
-- ✅ **6 种 Git 操作**：
-  1. `generate_commit_message` - AI 生成 commit message
-  2. `auto_commit` - 自动提交（带安全检查）
-  3. `commit_push` - 提交 + 推送
-  4. `commit_push_pr` - 提交 + 推送 + 创建 PR
-  5. `generate_pr_content` - 生成 PR 标题和正文
-  6. `check_sensitive` - 检查敏感文件
+**implementationEnglish text**:
+- ✅ **6 English text Git English text**:
+  1. `generate_commit_message` - AI generate commit message
+  2. `auto_commit` - English text(English textsafetyEnglish text)
+  3. `commit_push` - English text + English text
+  4. `commit_push_pr` - English text + English text + English text PR
+  5. `generate_pr_content` - generate PR titleEnglish text
+  6. `check_sensitive` - English textfile
 
-- ✅ **安全检查**：
-  - 敏感文件模式：`*.env`, `*.key`, `*.pem`, `*.p12`, `.aws/credentials`, 等
-  - 敏感信息检测：AWS 密钥、硬编码密码、API 密钥
-  - 提交前自动阻止
+- ✅ **safetyEnglish text**:
+  - English textfileEnglish text: `*.env`, `*.key`, `*.pem`, `*.p12`, `.aws/credentials`, English text
+  - English textinformationEnglish text: AWS English text, English text, API English text
+  - English text
 
-- ✅ **Conventional Commits 支持**：
-  - 格式验证：`feat:`, `fix:`, `chore:`, 等
-  - 自动添加前缀（如果缺失）
+- ✅ **Conventional Commits support**:
+  - English text: `feat:`, `fix:`, `chore:`, English text
+  - English text(English text)
 
-- ✅ **GitHub 集成准备**：
-  - 解析 GitHub 仓库信息（owner/repo）
-  - 支持多种 URL 格式（https, git@）
+- ✅ **GitHub English text**:
+  - English text GitHub English textinformation(owner/repo)
+  - supportEnglish text URL English text(https, git@)
 
-- ✅ BaseTool 接口：
-  - 标准 `parametersSchema()` 和 `execute()` 方法
-  - ToolResult 返回格式
-  - callId 追踪
+- ✅ BaseTool English text:
+  - English text `parametersSchema()` English text `execute()` English text
+  - ToolResult English text
+  - callId English text
 
-**待完善**（标记为 TODO）：
-- [ ] LLM 集成（generateCommitMessage, generatePRContent）
-- [ ] GitHub API 集成（创建 PR）
-- [ ] GitLab / Gitea 支持
-- [ ] 提交模板系统
+**English text**(English text TODO):
+- [ ] LLM English text(generateCommitMessage, generatePRContent)
+- [ ] GitHub API English text(English text PR)
+- [ ] GitLab / Gitea support
+- [ ] English textsystem
 
 ---
 
-## 📁 文件清单
+## 📁 fileEnglish text
 
-### 核心代码（6 个文件，2004 行）
+### English text(6 English textfile, 2004 English text)
 ```
 src/agent/HookManager.h            183 lines
 src/agent/HookManager.cpp          373 lines
@@ -164,19 +164,19 @@ src/tools/GitWorkflowTool.h        121 lines
 src/tools/GitWorkflowTool.cpp      432 lines
 ```
 
-### 集成指南（1 个文件，423 行）
+### English text(1 English textfile, 423 English text)
 ```
 PHASE1_INTEGRATION_GUIDE.md        423 lines
 ```
 
-### 构建配置
+### English textconfiguration
 ```
-CMakeLists.txt                     已更新（+3 lines）
+CMakeLists.txt                     English text(+3 lines)
 ```
 
 ---
 
-## 🏗️ 架构设计
+## 🏗️ English text
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -185,264 +185,264 @@ CMakeLists.txt                     已更新（+3 lines）
 │  ┌────────────────┐  ┌──────────────────┐  ┌─────────────────┐│
 │  │  HookManager   │  │ SecurityScanner  │  │ GitWorkflowTool ││
 │  │                │  │                  │  │                 ││
-│  │  9 Hook 类型   │  │  20+ 危险模式    │  │  AI 生成 commit ││
-│  │  提示/命令模式 │  │  CWE 编号        │  │  一键 Push+PR   ││
+│  │  9 Hook English text   │  │  20+ English text    │  │  AI generate commit ││
+│  │  prompt/English text │  │  CWE English text        │  │  English text Push+PR   ││
 │  └────────────────┘  └──────────────────┘  └─────────────────┘│
 │                                                                 │
-│  生命周期流程：                                                  │
+│  English textpipeline:                                                   │
 │  SessionStart → PreToolUse → execute() → PostToolUse → Stop    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔗 集成点
+## 🔗 English text
 
-### 1. AgentController 初始化
+### 1. AgentController initialize
 ```cpp
 AgentController::AgentController(QObject *parent) {
     m_hookManager = new HookManager(this);
     m_securityScanner = new SecurityScanner(this);
-    registerTools(); // 包括 GitWorkflowTool
+    registerTools(); // English text GitWorkflowTool
 }
 ```
 
-### 2. 工具调用前拦截
+### 2. toolEnglish text
 ```cpp
 void AgentController::executeTool(...) {
     // 1. PreToolUse Hook
     if (!m_hookManager->shouldAllowToolUse(toolName, args)) {
-        return; // 阻止执行
+        return; // English text
     }
-    
-    // 2. 执行工具
+
+    // 2. English texttool
     ToolResult result = tool->execute(callId, args);
-    
+
     // 3. PostToolUse Hook
     m_hookManager->executeHooks(HookType::PostToolUse, context);
 }
 ```
 
-### 3. 文件写入前安全扫描
+### 3. fileEnglish textsafetyEnglish text
 ```cpp
 void AgentController::onToolWriteFile(const QString& path, const QString& content) {
     QList<SecurityIssue> issues = m_securityScanner->scanContent(content, path);
     if (!issues.isEmpty()) {
-        emit securityWarning(issues); // 显示警告
+        emit securityWarning(issues); // English text
     }
 }
 ```
 
 ---
 
-## ✅ 编译状态
+## ✅ compilestate
 
-**状态**：✅ **编译成功**
+**state**: ✅ **compilesuccess**
 
-**已修复的问题**：
-1. ❌ SecurityScanner 聚合初始化错误 → ✅ 改为显式赋值
-2. ❌ 缺少 PatternMetadata 构造 → ✅ 添加默认构造函数
+**English text**:
+1. ❌ SecurityScanner English textinitializeerror → ✅ English text
+2. ❌ English text PatternMetadata English text → ✅ English textdefaultEnglish textfunction
 
-**编译命令**：
+**compileEnglish text**:
 ```bash
 cd /Users/feifei/agent/neurx-code
 cmake --build build
 ```
 
-**验证**：
-- [x] HookManager 编译通过
-- [x] SecurityScanner 编译通过
-- [x] GitWorkflowTool 编译通过
-- [x] CMakeLists.txt 配置正确
-- [x] 无链接错误
+**English text**:
+- [x] HookManager compileEnglish text
+- [x] SecurityScanner compileEnglish text
+- [x] GitWorkflowTool compileEnglish text
+- [x] CMakeLists.txt configurationEnglish text
+- [x] English texterror
 
 ---
 
-## 📊 Git 提交历史
+## 📊 Git English text
 
-### Commit 1: Phase 1 核心功能
+### Commit 1: Phase 1 English text
 ```
 Commit: 44817b5
 Message: feat: Implement Phase 1 framework - Hooks + Security + Git workflow
 Files: 7 files changed, 2004 insertions(+), 9 deletions(-)
 ```
 
-### Commit 2: 集成指南
+### Commit 2: English text
 ```
 Commit: 0ce4781
 Message: docs: Add Phase 1 integration guide
 Files: 1 file changed, 423 insertions(+)
 ```
 
-**推送状态**：✅ **已推送到 origin/main**
+**English textstate**: ✅ **English text origin/main**
 
 ---
 
-## 🎯 实现质量评估
+## 🎯 implementationEnglish textevaluation
 
-### ✅ 优势
+### ✅ English text
 
-1. **完整的接口设计**：
-   - HookManager 支持 9 种 Hook 类型，覆盖完整生命周期
-   - SecurityScanner 提供 20+ 模式，6 大类别
-   - GitWorkflowTool 实现 6 种操作，满足常见需求
+1. **completeEnglish text**:
+   - HookManager support 9 English text Hook English text, English textcompleteEnglish text
+   - SecurityScanner English text 20+ English text, 6 English text
+   - GitWorkflowTool implementation 6 English text, English text
 
-2. **良好的架构**：
-   - 清晰的职责划分
-   - 标准化的 Qt 信号/槽机制
-   - BaseTool 接口一致性
+2. **English text**:
+   - English text
+   - English text Qt English text/English text
+   - BaseTool English text
 
-3. **可扩展性**：
-   - Hook 可动态注册/注销
-   - 安全模式可启用/禁用
-   - Git 操作可组合
+3. **English textextensionEnglish text**:
+   - Hook English text/English text
+   - safetyEnglish text/English text
+   - Git English text
 
-4. **文档完善**：
-   - 详细的注释（英文+中文）
-   - 完整的集成指南
-   - 代码示例丰富
+4. **English text**:
+   - English text(English text+English text)
+   - completeEnglish text
+   - English textexampleEnglish text
 
-### ⚠️ 待改进
+### ⚠️ English text
 
-1. **LLM 集成缺失**：
-   - HookManager 的 Prompt-based hook 需要 LLM
-   - GitWorkflowTool 的 AI 生成功能需要 LLM
-   - 这是下一步最重要的工作
+1. **LLM English text**:
+   - HookManager English text Prompt-based hook Required LLM
+   - GitWorkflowTool English text AI generateEnglish textRequired LLM
+   - English textstepEnglish text
 
-2. **测试不足**：
-   - 没有单元测试
-   - 需要编写测试用例验证功能
+2. **testEnglish text**:
+   - English texttest
+   - RequiredEnglish texttestEnglish text
 
-3. **UI 缺失**：
-   - Hook 管理需要 UI
-   - 安全警告需要更好的展示
-   - Git 操作需要交互界面
+3. **UI English text**:
+   - Hook managementRequired UI
+   - safetyEnglish textRequiredEnglish text
+   - Git English textRequiredEnglish text
 
 ---
 
-## 🚀 下一步计划
+## 🚀 English textstepEnglish text
 
-### 立即行动（本周）
+### English text(English text)
 
-1. **集成到 AgentController**：
-   - [ ] 在 AgentController 中初始化三个组件
-   - [ ] 在工具调用流程中插入 Hook 执行点
-   - [ ] 连接安全扫描器的信号
-   - [ ] 注册 GitWorkflowTool
+1. **English text AgentController**:
+   - [ ] English text AgentController English textinitializeEnglish text
+   - [ ] English texttoolEnglish textpipelineEnglish text Hook English text
+   - [ ] English textsafetyEnglish text
+   - [ ] English text GitWorkflowTool
 
-2. **编写单元测试**：
-   - [ ] HookManager 测试用例
-   - [ ] SecurityScanner 测试用例
-   - [ ] GitWorkflowTool 测试用例
+2. **English texttest**:
+   - [ ] HookManager testEnglish text
+   - [ ] SecurityScanner testEnglish text
+   - [ ] GitWorkflowTool testEnglish text
 
-3. **基础 LLM 集成**：
-   - [ ] 为 HookManager 添加 LLM 调用
-   - [ ] 为 GitWorkflowTool 添加 commit message 生成
+3. **English text LLM English text**:
+   - [ ] English text HookManager English text LLM English text
+   - [ ] English text GitWorkflowTool English text commit message generate
 
-### 短期计划（2-4 周）
+### English text(2-4 English text)
 
-4. **UI 开发**：
-   - [ ] Hook 配置面板（QML）
-   - [ ] 安全警告对话框
-   - [ ] Git 操作面板
+4. **UI English text**:
+   - [ ] Hook configurationEnglish text(QML)
+   - [ ] safetyEnglish text
+   - [ ] Git English text
 
-5. **高级功能**：
-   - [ ] Markdown + YAML Hook 配置文件
+5. **advancedEnglish text**:
+   - [ ] Markdown + YAML Hook configurationfile
    - [ ] SecurityScanner Layer 2/3
-   - [ ] GitHub API 集成（创建 PR）
+   - [ ] GitHub API English text(English text PR)
 
-### 长期计划（Phase 2-4）
+### English text(Phase 2-4)
 
-6. **Hookify 规则创建**（Phase 2）
-7. **多 Agent 系统**（Phase 2）
-8. **Feature-dev 工作流**（Phase 3）
-9. **Ralph Wiggum 自循环**（Phase 3）
+6. **Hookify English text**(Phase 2)
+7. **English text Agent system**(Phase 2)
+8. **Feature-dev English text**(Phase 3)
+9. **Ralph Wiggum English text**(Phase 3)
 
 ---
 
-## 📈 对比 Claude Code
+## 📈 English text Claude Code
 
-### neurx-code 当前进度
+### neurx-code English text
 
-| 功能 | Claude Code | neurx-code Phase 1 | 差距 |
+| English text | Claude Code | neurx-code Phase 1 | English text |
 |------|-------------|-------------------|------|
-| Hook 系统 | ✅ 9 种 Hook | ✅ 9 种 Hook（框架） | 需要 LLM 集成 |
-| 安全扫描 | ✅ 3 层防护 | ✅ Layer 1（20+ 模式） | 需要 Layer 2/3 |
-| Git 自动化 | ✅ 完整 | ✅ 框架（6 种操作） | 需要 LLM + GitHub API |
-| Plugin 系统 | ✅ 14 个插件 | ❌ 无 | 未启动 |
-| Multi-agent | ✅ 置信度评分 | ❌ 无 | 未启动 |
+| Hook system | ✅ 9 English text Hook | ✅ 9 English text Hook(framework) | Required LLM English text |
+| safetyEnglish text | ✅ 3 English text | ✅ Layer 1(20+ English text) | Required Layer 2/3 |
+| Git English text | ✅ complete | ✅ framework(6 English text) | Required LLM + GitHub API |
+| Plugin system | ✅ 14 English textplugin | ❌ English text | English textstart |
+| Multi-agent | ✅ English text | ❌ English text | English textstart |
 
-**结论**：Phase 1 成功建立了框架基础，接下来 2-4 周完成 LLM 集成和测试后，可以达到 Claude Code 30-40% 的功能水平。
-
----
-
-## 💡 经验总结
-
-### 技术难点
-
-1. **Qt 聚合初始化问题**：
-   - C++ brace-initialization 在 Qt 中不总是有效
-   - 解决：显式赋值每个成员
-
-2. **BaseTool 接口理解**：
-   - 需要返回 ToolResult，不是 QJsonObject
-   - parametersSchema() 不需要 "function" 包装
-
-3. **安全模式设计**：
-   - 正则表达式需要平衡准确性和误报率
-   - CWE 编号提供标准化参考
-
-### 成功经验
-
-1. **快速原型方法**：
-   - 先完成接口和框架
-   - 标记 TODO 留待后续实现
-   - 确保编译通过
-
-2. **分层设计**：
-   - HookManager 处理生命周期
-   - SecurityScanner 处理模式匹配
-   - GitWorkflowTool 处理 Git 操作
-   - 职责清晰，易于测试
-
-3. **文档驱动开发**：
-   - 集成指南帮助理解架构
-   - 代码注释提高可维护性
+**English text**: Phase 1 successEnglish textframeworkEnglish text, English text 2-4 English text LLM English texttestEnglish text, AllowedEnglish text Claude Code 30-40% English text.
 
 ---
 
-## 🎉 总结
+## 💡 English text
 
-### 成果
+### English text
 
-- ✅ **3 个核心组件**：HookManager、SecurityScanner、GitWorkflowTool
-- ✅ **2004 行代码**：完整的框架实现
-- ✅ **423 行文档**：集成指南
-- ✅ **编译成功**：无错误、无警告
-- ✅ **已推送 GitHub**：2 个 commit
+1. **Qt English textinitializeEnglish text**:
+   - C++ brace-initialization English text Qt English text
+   - English text: English text
 
-### 意义
+2. **BaseTool English text**:
+   - RequiredEnglish text ToolResult, English text QJsonObject
+   - parametersSchema() English textRequired "function" English text
 
-Phase 1 为 neurx-code 建立了**可扩展性基础**：
-- 用户可以通过 Hook 定制行为
-- 开发者可以检测危险代码
-- 自动化 Git 工作流提升效率
+3. **safetyEnglish text**:
+   - English textRequiredEnglish text
+   - CWE English text
 
-这是向 Claude Code、Codex、Gemini CLI 看齐的**第一步**，也是最重要的一步。
+### successEnglish text
 
-### 用户价值
+1. **quickEnglish text**:
+   - English textframework
+   - English text TODO English textimplementation
+   - English textcompileEnglish text
 
-1. **安全性**：20+ 模式保护代码安全
-2. **效率**：自动生成 commit message 和 PR
-3. **可定制性**：Hook 系统允许无限扩展
-4. **专业性**：CWE 标准、Conventional Commits
+2. **English text**:
+   - HookManager English text
+   - SecurityScanner English text
+   - GitWorkflowTool English text Git English text
+   - English text, English texttest
+
+3. **English text**:
+   - English text
+   - English text
 
 ---
 
-**创建时间**：2025-01-XX  
-**完成时间**：约 2 小时（快速原型）  
-**代码行数**：2004 lines (code) + 423 lines (docs)  
-**Git 提交**：2 commits, pushed to main  
-**状态**：✅ **Phase 1 框架完成**
+## 🎉 English text
 
-下一步：集成 + LLM + 测试 🚀
+### English text
+
+- ✅ **3 English text**: HookManager, SecurityScanner, GitWorkflowTool
+- ✅ **2004 English text**: completeEnglish textframeworkimplementation
+- ✅ **423 English text**: English text
+- ✅ **compilesuccess**: English texterror, English text
+- ✅ **English text GitHub**: 2 English text commit
+
+### English text
+
+Phase 1 English text neurx-code English text**English textextensionEnglish text**:
+- English textAllowedEnglish text Hook English text
+- English textAllowedEnglish text
+- English text Git English text
+
+English text Claude Code, Codex, Gemini CLI English text**English textstep**, English textstep.
+
+### English text
+
+1. **safetyEnglish text**: 20+ English textsafety
+2. **English text**: English textgenerate commit message English text PR
+3. **English text**: Hook systemEnglish textextension
+4. **English text**: CWE English text, Conventional Commits
+
+---
+
+**English texttime**: 2025-01-XX
+**English texttime**: English text 2 English text(quickEnglish text)
+**English text**: 2004 lines (code) + 423 lines (docs)
+**Git English text**: 2 commits, pushed to main
+**state**: ✅ **Phase 1 frameworkEnglish text**
+
+English textstep: English text + LLM + test 🚀

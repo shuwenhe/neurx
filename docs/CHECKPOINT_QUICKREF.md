@@ -1,171 +1,171 @@
-# GPU 预训练断点续训 - 快速参考 (Quick Reference)
+# GPU English texttrainingEnglish text - quickEnglish text (Quick Reference)
 
-## 三行上手
+## English text
 
 ```bash
-# 首次训练（自动从头开始）
+# English texttraining(English textstart)
 make pretrain-gpu
 
-# 中断后恢复训练（自动检测checkpoint）
+# English textrecovertraining(English textcheckpoint)
 make pretrain-gpu
 
-# 强制新训练（忽略现有checkpoint）
+# English texttraining(English textcheckpoint)
 make pretrain-gpu-fresh
 ```
 
-## 4种模式
+## 4English text
 
-| 命令 | 行为 | 何时使用 |
+| English text | English text | English textuse |
 |------|------|--------|
-| `make pretrain-gpu` | 自动恢复或新训练 | ✅ 推荐，默认模式 |
-| `make pretrain-gpu-resume` | 显式恢复 | 明确指定意图 |
-| `make pretrain-gpu-fresh` | 强制新训练 | 要从头开始 |
-| `NEURX_PRETRAIN_RESUME=no make pretrain-gpu` | 新训练 | 命令行覆盖 |
+| `make pretrain-gpu` | English textrecoverEnglish texttraining | ✅ recommended, defaultEnglish text |
+| `make pretrain-gpu-resume` | English textrecover | English text |
+| `make pretrain-gpu-fresh` | English texttraining | English textstart |
+| `NEURX_PRETRAIN_RESUME=no make pretrain-gpu` | English texttraining | English text |
 
-## Checkpoint文件位置
+## CheckpointfileEnglish text
 
 ```
 checkpoint/NeurX-1.3/training_state.txt
 ```
 
-**格式**: `step=<N> docs=<N> shards=<N> loss=<F>`
+**English text**: `step=<N> docs=<N> shards=<N> loss=<F>`
 
-**示例**: `step=1000 docs=5000 shards=3 loss=2.45`
+**example**: `step=1000 docs=5000 shards=3 loss=2.45`
 
-## 常见操作
+## English text
 
-### 查看当前训练状态
+### English texttrainingstate
 ```bash
 cat checkpoint/NeurX-1.3/training_state.txt
 ```
 
-### 实时监控训练进度
+### English textmonitoringtrainingEnglish text
 ```bash
 watch -n 1 'cat checkpoint/NeurX-1.3/training_state.txt'
 ```
 
-### 查看训练日志
+### English texttraininglog
 ```bash
 tail -f artifacts/logs/pretrain_gpu_*.log
 ```
 
-### 清除checkpoint并重新开始
+### English textcheckpointEnglish textstart
 ```bash
 make pretrain-gpu-fresh
 ```
 
-### 在N个GPU上训练并恢复
+### English textNEnglish textGPUEnglish texttrainingEnglish textrecover
 ```bash
 NEURX_NUM_GPUS=4 make pretrain-gpu
 ```
 
-### 手动编辑checkpoint（谨慎！）
+### English textcheckpoint(English text!)
 ```bash
-# 从步数5000恢复
+# English textstepEnglish text5000recover
 echo "step=5000 docs=25000 shards=15 loss=2.10" > checkpoint/NeurX-1.3/training_state.txt
 
-# 然后继续训练
+# English texttraining
 make pretrain-gpu
 ```
 
-## 环境变量
+## English text
 
-| 变量 | 默认值 | 说明 |
+| English text | defaultEnglish text | explanation |
 |------|--------|------|
-| `NEURX_PRETRAIN_RESUME` | `auto` | 恢复模式: auto/yes/no |
-| `NEURX_NUM_GPUS` | 自动检测 | GPU数量 |
-| `NEURX_PRETRAIN_STEPS` | 1000000000 | 最大训练步数 |
-| `NEURX_PRETRAIN_OUTPUT_DIR` | `checkpoint/NeurX-1.3` | Checkpoint保存目录 |
+| `NEURX_PRETRAIN_RESUME` | `auto` | recoverEnglish text: auto/yes/no |
+| `NEURX_NUM_GPUS` | English text | GPUcount |
+| `NEURX_PRETRAIN_STEPS` | 1000000000 | English texttrainingstepEnglish text |
+| `NEURX_PRETRAIN_OUTPUT_DIR` | `checkpoint/NeurX-1.3` | Checkpointsavedirectory |
 
-## 完整工作流示例
+## completeEnglish textexample
 
 ```bash
-# 1. 首次训练（60分钟）
+# 1. English texttraining(60English text)
 make pretrain-gpu
-# 日志: [Phase 1] No existing checkpoint found, starting fresh training
-# 训练进行中... 
-# 最后保存: checkpoint/NeurX-1.3/training_state.txt
+# log: [Phase 1] No existing checkpoint found, starting fresh training
+# trainingEnglish text...
+# English textsave: checkpoint/NeurX-1.3/training_state.txt
 
-# 2. 中断（Ctrl+C）
-# [中断信号收到]
+# 2. English text(Ctrl+C)
+# [English text]
 
-# 3. 查看保存状态
+# 3. English textsavestate
 cat checkpoint/NeurX-1.3/training_state.txt
-# 输出: step=1000 docs=5000 shards=3 loss=2.45
+# output: step=1000 docs=5000 shards=3 loss=2.45
 
-# 4. 恢复训练
+# 4. recovertraining
 make pretrain-gpu
-# 日志: [Phase 1] Existing checkpoint found
+# log: [Phase 1] Existing checkpoint found
 #       [Phase 1] Loaded state: step=1000 docs=5000 shards=3 loss=2.45
 #       [Phase 3] Starting training from step 1000
-# 训练继续... 从第1000步继续
+# trainingEnglish text... English text1000stepEnglish text
 
-# 5. 完成后或想重新开始
+# 5. English textstart
 make pretrain-gpu-fresh
-# 日志: Starting fresh training (ignoring any existing checkpoint)
+# log: Starting fresh training (ignoring any existing checkpoint)
 # [Phase 1] No existing checkpoint found, starting fresh training
 ```
 
-## 故障排除
+## English text
 
-### Checkpoint检测失败
+### CheckpointEnglish textfailure
 ```bash
-# 验证文件存在
-test -f checkpoint/NeurX-1.3/training_state.txt && echo "存在" || echo "不存在"
+# English textfileEnglish text
+test -f checkpoint/NeurX-1.3/training_state.txt && echo "English text" || echo "English text"
 
-# 如果不存在，强制新训练
+# English text, English texttraining
 make pretrain-gpu-fresh
 ```
 
-### GPU不可用
+### GPUEnglish text
 ```bash
-# 检查GPU
+# English textGPU
 nvidia-smi
 
-# 降级到CPU训练
+# English textCPUtraining
 make pretrain
 ```
 
-### 想使用不同的checkpoint目录
+### English textuseEnglish textcheckpointdirectory
 ```bash
 NEURX_PRETRAIN_OUTPUT_DIR=checkpoint/NeurX-1.3-v2 make pretrain-gpu
 ```
 
-## 查看详细文档
+## English text
 
-- 完整指南: [docs/CHECKPOINT_RESUME_GUIDE.md](docs/CHECKPOINT_RESUME_GUIDE.md)
-- 实现细节: [docs/GPU_CHECKPOINT_IMPLEMENTATION_SUMMARY.md](docs/GPU_CHECKPOINT_IMPLEMENTATION_SUMMARY.md)
+- completeEnglish text: [docs/CHECKPOINT_RESUME_GUIDE.md](docs/CHECKPOINT_RESUME_GUIDE.md)
+- implementationEnglish text: [docs/GPU_CHECKPOINT_IMPLEMENTATION_SUMMARY.md](docs/GPU_CHECKPOINT_IMPLEMENTATION_SUMMARY.md)
 
-## 一行命令集合
+## English text
 
 ```bash
-# 首次训练
+# English texttraining
 make pretrain-gpu
 
-# 恢复训练
+# recovertraining
 make pretrain-gpu
 
-# 新训练
+# English texttraining
 make pretrain-gpu-fresh
 
-# 监控
+# monitoring
 watch -n 1 'cat checkpoint/NeurX-1.3/training_state.txt'
 
-# 日志
+# log
 tail -f artifacts/logs/pretrain_gpu_*.log
 
-# 4GPU恢复
+# 4GPUrecover
 NEURX_NUM_GPUS=4 make pretrain-gpu
 ```
 
-## 关键点
+## English text
 
-1. ✅ 默认自动检测checkpoint并恢复
-2. ✅ Checkpoint保存在 `checkpoint/NeurX-1.3/training_state.txt`
-3. ✅ 格式: `step=<N> docs=<N> shards=<N> loss=<F>`
-4. ✅ 随时可以中断（Ctrl+C），下次会自动恢复
-5. ✅ 要重新开始用 `make pretrain-gpu-fresh`
+1. ✅ defaultEnglish textcheckpointEnglish textrecover
+2. ✅ CheckpointsaveEnglish text `checkpoint/NeurX-1.3/training_state.txt`
+3. ✅ English text: `step=<N> docs=<N> shards=<N> loss=<F>`
+4. ✅ English textAllowedEnglish text(Ctrl+C), English textrecover
+5. ✅ English textstartEnglish text `make pretrain-gpu-fresh`
 
 ---
 
-**更多帮助**: `make help | grep pretrain` 或查看完整文档
+**English text**: `make help | grep pretrain` English textcompleteEnglish text

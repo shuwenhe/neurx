@@ -1,134 +1,134 @@
-# 📊 如何获得高质量训练数据 - NeurX 企业级方案
+# 📊 English texttrainingdata - NeurX English text
 
-> **本指南仅使用 S 语言和 Bash 实现，没有 Python 依赖**  
-> 如何用 ~$1,500 获得足以训练 Claude 级大模型的 3-5TB 高质量数据，时间 2-4 周
+> **English textuse S languageEnglish text Bash implementation, English text Python English text**
+> English text ~$1,500 English texttraining Claude English textmodelEnglish text 3-5TB English textdata, time 2-4 English text
 
 ---
 
-## 🎯 快速概览
+## 🎯 quickEnglish text
 
-| 指标 | 目标 | 预期 |
+| English text | English text | English text |
 |------|------|------|
-| 数据规模 | 3-5TB | 3-5T tokens |
-| 质量评分 | > 0.75 | 平均 0.80 |
-| 去重率 | > 99% | 99.2% |
-| 获取时间 | 2-4 周 | 实际 2 周 |
-| 总成本 | $1,500 | $30-100 (仅 AWS) |
+| dataEnglish text | 3-5TB | 3-5T tokens |
+| English text | > 0.75 | English text 0.80 |
+| deduplicationEnglish text | > 99% | 99.2% |
+| English texttime | 2-4 English text | actual 2 English text |
+| English text | $1,500 | $30-100 (English text AWS) |
 
 ---
 
-## 📈 6 大高质量数据源
+## 📈 6 English textdataEnglish text
 
-### 🥇 **推荐优先** (必选)
+### 🥇 **recommendedEnglish text** (English text)
 
-#### 1. **Wikipedia** (80GB, 质量 0.95)
+#### 1. **Wikipedia** (80GB, English text 0.95)
 ```bash
-# 特点: 最高质量，百科全书式知识
-# 成本: 完全免费
-# 时间: 30 分钟下载
+# English text: English text, English text
+# English text: English text
+# time: 30 English text
 
-# 使用 Hugging Face 下载
+# use Hugging Face English text
 huggingface-cli download wikipedia \
   --repo-type dataset --revision main
 ```
 
-#### 2. **ArXiv Papers** (200GB, 质量 0.92)
+#### 2. **ArXiv Papers** (200GB, English text 0.92)
 ```bash
-# 特点: 学术论文，推理能力关键
-# 成本: 完全免费
-# 时间: 1-2 小时下载
+# English text: English text, inferenceEnglish text
+# English text: English text
+# time: 1-2 English text
 
 huggingface-cli download arxiv-dataset/arxiv \
   --repo-type dataset
 ```
 
-#### 3. **The Pile** (800GB, 质量 0.85)
+#### 3. **The Pile** (800GB, English text 0.85)
 ```bash
-# 特点: 多源融合，覆盖广泛
-# 成本: 完全免费
-# 时间: 2-4 小时下载 (需要好的网络)
+# English text: English text, English text
+# English text: English text
+# time: 2-4 English text (RequiredEnglish text)
 
 huggingface-cli download EleutherAI/the_pile \
   --repo-type dataset
 ```
 
-### 🥈 **推荐补充** (可选但推荐)
+### 🥈 **recommendedEnglish text** (English textrecommended)
 
-#### 4. **GitHub Code** (1.3TB, 质量 0.80)
+#### 4. **GitHub Code** (1.3TB, English text 0.80)
 ```bash
-# 特点: 代码能力至关重要
-# 成本: 完全免费
-# 时间: 2-3 小时下载
+# English text: English text
+# English text: English text
+# time: 2-3 English text
 
-# 需要过滤去除测试代码、配置文件等
+# RequiredEnglish texttestEnglish text, configurationfileEnglish text
 ```
 
-#### 5. **Project Gutenberg** (50GB, 质量 0.94)
+#### 5. **Project Gutenberg** (50GB, English text 0.94)
 ```bash
-# 特点: 经典文学，合法开源
-# 成本: 完全免费
-# 时间: 30 分钟下载
+# English text: English text, English text
+# English text: English text
+# time: 30 English text
 
-# Books 提供高质量的自然语言示例
+# Books English textlanguageexample
 ```
 
-### 🥉 **可选** (资源充足时添加)
+### 🥉 **English text** (English text)
 
-#### 6. **Common Crawl** (750GB, 质量 0.75)
+#### 6. **Common Crawl** (750GB, English text 0.75)
 ```bash
-# 特点: 网页内容，需要大量过滤
-# 成本: ~$50-100 (AWS S3 出网费)
-# 时间: 4-8 小时下载
+# English text: web pagecontent, RequiredEnglish text
+# English text: ~$50-100 (AWS S3 English text)
+# time: 4-8 English text
 
-# 警告: 含有大量垃圾内容，需要严格质量控制
+# English text: English textcontent, RequiredEnglish text
 ```
 
 ---
 
-## 🔍 数据质量评估标准
+## 🔍 dataEnglish textevaluationEnglish text
 
-### 使用 NeurX 内置工具评估
+### use NeurX English texttoolevaluation
 
 ```bash
-# 编译质量评估工具
+# compileEnglish textevaluationtool
 s compile data/quality_assessor.s -o bin/quality_assessor
 
-# 评估单个文件 (抽样 1000 条)
+# evaluationEnglish textfile (English text 1000 English text)
 ./bin/quality_assessor wikipedia.jsonl 1000
 
-# 输出示例:
-# ✨ 质量指标:
-#   平均质量评分: 0.95 / 1.0
-#   有效率: 99.85%
-#   去重率: 98.9%
+# outputexample:
+# ✨ English text:
+#   English text: 0.95 / 1.0
+#   English text: 99.85%
+#   deduplicationEnglish text: 98.9%
 ```
 
-### 质量评分指标 (0.0 - 1.0)
+### English text (0.0 - 1.0)
 
-| 组件 | 权重 | 标准 | 说明 |
+| English text | weight | English text | explanation |
 |------|------|------|------|
-| 文档长度 | 20% | 100-100K 字符 | 太短/太长都是垃圾 |
-| 空格密度 | 20% | 15%-35% | 自然语言标志 |
-| 字符多样性 | 20% | >0.3 熵值 | 高多样性 = 真实内容 |
-| URL 密度 | 20% | <10% | 高 URL = 垃圾/广告 |
-| 自然语言特征 | 20% | 有连续长词 | 机器生成内容缺乏 |
+| English text | 20% | 100-100K English text | English text/English text |
+| English text | 20% | 15%-35% | English textlanguageEnglish text |
+| English text | 20% | >0.3 English text | English text = truthfulcontent |
+| URL English text | 20% | <10% | English text URL = English text/English text |
+| English textlanguageEnglish text | 20% | English text | English textgeneratecontentEnglish text |
 
-**质量等级**:
-- 🟢 **高质量** (>0.80): 70% 的最终数据应来自此
-- 🟡 **中等质量** (0.60-0.80): 25% 的最终数据可包含此
-- 🔴 **低质量** (<0.60): 完全过滤掉
+**English text**:
+- 🟢 **English text** (>0.80): 70% English textdataEnglish text
+- 🟡 **English text** (0.60-0.80): 25% English textdataEnglish text
+- 🔴 **English text** (<0.60): English text
 
 ---
 
-## 🔧 完整数据处理流程
+## 🔧 completedataEnglish textpipeline
 
-### 第 1 步: 下载并转为 JSONL
+### English text 1 step: English text JSONL
 
-所有源都需转为统一格式:
+English text:
 
 ```json
 {
-  "text": "文档内容...",
+  "text": "English textcontent...",
   "source": "wikipedia",
   "language": "en",
   "metadata": {
@@ -138,114 +138,114 @@ s compile data/quality_assessor.s -o bin/quality_assessor
 }
 ```
 
-### 第 2 步: 质量评估和过滤
+### English text 2 step: English textevaluationEnglish text
 
 ```bash
-# 使用 S 语言工具评估质量
+# use S languagetoolevaluationEnglish text
 ./bin/quality_assessor combined_data.jsonl 100000
 
-# 只保留高质量文档 (Score > 0.75)
+# English text (Score > 0.75)
 ```
 
-### 第 3 步: 去重 (使用 MD5 哈希)
+### English text 3 step: deduplication (use MD5 English text)
 
 ```bash
-# S 语言实现去重
+# S languageimplementationdeduplication
 s compile data/dedup.s -o bin/dedup
 ./bin/dedup
 ```
 
-**去重策略**:
+**deduplicationEnglish text**:
 ```
-目标去重率: > 99%
-方法: MD5 哈希 + 集合
-时间复杂度: O(n)
-空间复杂度: O(n)
+English textdeduplicationEnglish text: > 99%
+English text: MD5 English text + English text
+timeEnglish text: O(n)
+English text: O(n)
 ```
 
-### 第 4 步: 按质量分层
+### English text 4 step: English text
 
 ```bash
-# 分为 3 层:
-├─ 高质量 (>0.80): 用于主训练
-├─ 中等质量 (0.60-0.80): 用于填充
-└─ 低质量 (<0.60): 丢弃
+# English text 3 English text:
+├─ English text (>0.80): English textmaintraining
+├─ English text (0.60-0.80): English text
+└─ English text (<0.60): English text
 ```
 
-### 第 5 步: 多源融合
+### English text 5 step: English text
 
 ```bash
-# 混合比例 (推荐):
-├─ Wikipedia: 25% [最高质量]
-├─ ArXiv: 20% [学术能力]
-├─ The Pile: 35% [多样性]
-├─ GitHub: 15% [代码能力]
-└─ Gutenberg: 5% [文学特征]
+# English text (recommended):
+├─ Wikipedia: 25% [English text]
+├─ ArXiv: 20% [English text]
+├─ The Pile: 35% [English text]
+├─ GitHub: 15% [English text]
+└─ Gutenberg: 5% [English text]
 ```
 
 ---
 
-## 📊 实际成本与时间
+## 📊 actualEnglish texttime
 
-### 时间估算
+### timeEnglish text
 
-| 阶段 | 任务 | 预计时间 | 并行性 |
+| phase | English text | English texttime | English text |
 |------|------|---------|--------|
-| 下载 | 多源并行下载 | 4-8 小时 | 高 (6+ 源) |
-| 转换 | 统一为 JSONL | 2-4 小时 | 中 (3-4 任务) |
-| 评估 | 质量打分 | 2-3 小时 | 低 (单文件) |
-| 去重 | MD5 哈希去重 | 1-2 小时 | 低 (单线程) |
-| 过滤 | 质量过滤 | 1 小时 | 中 (多线程) |
-| **总计** | - | **10-18 小时** | - |
+| English text | English text | 4-8 English text | English text (6+ English text) |
+| English text | English text JSONL | 2-4 English text | English text (3-4 English text) |
+| evaluation | English text | 2-3 English text | English text (English textfile) |
+| deduplication | MD5 English textdeduplication | 1-2 English text | English text (English text) |
+| English text | English text | 1 English text | English text (English text) |
+| **English text** | - | **10-18 English text** | - |
 
-**实际日程** (假设 24 小时运行):
+**actualEnglish text** (English text 24 English textrun):
 ```
-Day 1:  下载 + 转换 (6-12 小时)
-Day 2:  评估 + 去重 + 过滤 (4-6 小时)
-结果:   2 天完成数据准备 ✅
+Day 1:  English text + English text (6-12 English text)
+Day 2:  evaluation + deduplication + English text (4-6 English text)
+result:   2 English textdataEnglish text ✅
 ```
 
-### 成本分析
+### English text
 
-| 来源 | 容量 | 成本 | 质量 |
+| Source | English text | English text | English text |
 |------|------|------|------|
 | Wikipedia | 80GB | $0 | 0.95 |
 | ArXiv | 200GB | $0 | 0.92 |
 | The Pile | 800GB | $0* | 0.85 |
 | GitHub | 100GB** | $0 | 0.80 |
 | Gutenberg | 50GB | $0 | 0.94 |
-| Common Crawl (可选) | 750GB | $50-100 | 0.75 |
-| **总计** | 1.98TB | **$50-100** | avg 0.85 |
+| Common Crawl (English text) | 750GB | $50-100 | 0.75 |
+| **English text** | 1.98TB | **$50-100** | avg 0.85 |
 
-\* Hugging Face 免费，仅需网络带宽  
-** 建议仅下载精选部分
+\* Hugging Face English text, English text
+** English text
 
 ---
 
-## 🎯 最终数据规格
+## 🎯 English textdataEnglish text
 
-### 预期输出
+### English textoutput
 
 ```
 📦 final_pretrain_data.jsonl
-├─ 总大小: 2-3TB
-├─ 文档数: ~1 billion
-├─ 总 Tokens: 3-5 trillion ⭐
-├─ 平均质量评分: 0.80-0.85
-├─ 去重率: > 99%
-└─ 处理时间: 2-4 周
+├─ English text: 2-3TB
+├─ English text: ~1 billion
+├─ English text Tokens: 3-5 trillion ⭐
+├─ English text: 0.80-0.85
+├─ deduplicationEnglish text: > 99%
+└─ English texttime: 2-4 English text
 ```
 
-### 数据分布
+### dataEnglish text
 
-**质量分布**:
+**English text**:
 ```
-🟢 高质量 (>0.80):  70%
-🟡 中等质量:        25%
-🔴 低质量:          5% (用于边界案例)
+🟢 English text (>0.80):  70%
+🟡 English text:        25%
+🔴 English text:          5% (English text)
 ```
 
-**领域分布**:
+**English text**:
 ```
 📚 General Knowledge: 40% (Wikipedia)
 🔬 Academic/Research: 30% (ArXiv, Gutenberg)
@@ -254,7 +254,7 @@ Day 2:  评估 + 去重 + 过滤 (4-6 小时)
 🎯 Specialized:       5% (Domain-specific)
 ```
 
-**语言分布**:
+**languageEnglish text**:
 ```
 🇬🇧 English:   75%
 🇨🇳 Chinese:   15%
@@ -263,138 +263,138 @@ Day 2:  评估 + 去重 + 过滤 (4-6 小时)
 
 ---
 
-## 🚀 快速启动命令
+## 🚀 quickstartEnglish text
 
-### 一键下载和处理
+### English text
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
 
-# 1️⃣ 准备环境
+# 1️⃣ English text
 mkdir -p data/pretrain_dataset/raw
 mkdir -p data/pretrain_dataset/processed
 
-# 2️⃣ 下载数据 (选择来源)
-# 下载 Wikipedia
+# 2️⃣ English textdata (English textSource)
+# English text Wikipedia
 huggingface-cli download wikipedia --repo-type dataset \
   --local-dir data/pretrain_dataset/raw/wikipedia
 
-# 下载 ArXiv  
+# English text ArXiv
 huggingface-cli download arxiv-dataset/arxiv --repo-type dataset \
   --local-dir data/pretrain_dataset/raw/arxiv
 
-# 下载 The Pile (如果有充足存储)
+# English text The Pile (English text)
 huggingface-cli download EleutherAI/the_pile --repo-type dataset \
   --local-dir data/pretrain_dataset/raw/pile
 
-# 3️⃣ 编译工具
+# 3️⃣ compiletool
 s compile data/quality_assessor.s -o bin/quality_assessor
 s compile data/dedup.s -o bin/dedup
 
-# 4️⃣ 统一格式为 JSONL
-# (使用转换脚本，自动识别每个源的格式)
+# 4️⃣ English text JSONL
+# (useEnglish text, English text)
 
-# 5️⃣ 评估质量
+# 5️⃣ evaluationEnglish text
 ./bin/quality_assessor data/pretrain_dataset/raw/*.jsonl
 
-# 6️⃣ 去重
+# 6️⃣ deduplication
 ./bin/dedup
 
-# 7️⃣ 最终数据
+# 7️⃣ English textdata
 ls -lh data/pretrain_dataset/processed/
-echo "✅ 数据准备完成！"
-echo "文档数: $(wc -l data/pretrain_dataset/processed/final.jsonl)"
-echo "大小: $(du -sh data/pretrain_dataset/processed/final.jsonl)"
+echo "✅ dataEnglish text!"
+echo "English text: $(wc -l data/pretrain_dataset/processed/final.jsonl)"
+echo "English text: $(du -sh data/pretrain_dataset/processed/final.jsonl)"
 ```
 
 ---
 
-## ✅ 检查清单
+## ✅ English text
 
-在开始训练前，确保所有数据检查都通过:
+English textstarttrainingEnglish text, English textdataEnglish text:
 
 ```
-数据质量检查:
-[ ] 平均质量评分 > 0.75
-[ ] 有效文档比例 > 95%
-[ ] 去重率 > 99%
-[ ] 垃圾内容 < 3%
+dataEnglish text:
+[ ] English text > 0.75
+[ ] English text > 95%
+[ ] deduplicationEnglish text > 99%
+[ ] English textcontent < 3%
 
-数据规模检查:
-[ ] 总大小 > 2TB
-[ ] 文档数 > 500M
+dataEnglish text:
+[ ] English text > 2TB
+[ ] English text > 500M
 [ ] Tokens > 2.5T
-[ ] 最小文档长度 > 50 字符
-[ ] 最大文档长度 < 100K 字符
+[ ] English text > 50 English text
+[ ] English text < 100K English text
 
-数据完整性检查:
-[ ] 所有文件 JSONL 格式正确
-[ ] 每行都有 "text" 字段
-[ ] 字符编码统一 (UTF-8)
-[ ] 没有 NaN/null 值
+datacompleteEnglish text:
+[ ] English textfile JSONL English text
+[ ] English text "text" English text
+[ ] English text (UTF-8)
+[ ] English text NaN/null English text
 
-数据多样性检查:
-[ ] 多语言覆盖
-[ ] 多领域覆盖
-[ ] 多源融合
-[ ] 时间跨度充分
+dataEnglish text:
+[ ] English textlanguageEnglish text
+[ ] English text
+[ ] English text
+[ ] timeEnglish text
 ```
 
 ---
 
-## 💡 最佳实践
+## 💡 English text
 
-### ✅ 推荐做法
+### ✅ recommendedEnglish text
 
-1. **优先质量** - 不要追求最大规模
-   - 好的 2T tokens > 差的 5T tokens
+1. **English text** - English text
+   - English text 2T tokens > English text 5T tokens
 
-2. **分层管理** - 按质量分类
-   - 高质量用于核心训练
-   - 中等用于填充
-   - 低质量完全丢弃
+2. **English textmanagement** - English text
+   - English texttraining
+   - English text
+   - English text
 
-3. **多源融合** - 增加多样性
-   - 避免单一来源过度拟合
-   - 平衡不同领域
+3. **English text** - English text
+   - English textSourceEnglish text
+   - English text
 
-4. **严格去重** - 防止过拟合
-   - 去重率必须 > 99%
-   - 使用 MD5 哈希确保准确
+4. **English textdeduplication** - English text
+   - deduplicationEnglish text > 99%
+   - use MD5 English text
 
-5. **定期验证** - 持续监控
-   - 每处理 100M 文档评估一次
-   - 跟踪质量指标
+5. **English text** - English textmonitoring
+   - English text 100M English textevaluationEnglish text
+   - English text
 
-### ❌ 避免做法
+### ❌ English text
 
-- ❌ 混合过多低质量数据
-- ❌ 跳过去重步骤 (会导致严重过拟合)
-- ❌ 使用无许可证的源
-- ❌ 混合不兼容的格式
-- ❌ 忽视语言标签和元数据
-- ❌ 在质量评估前直接训练
+- ❌ English textdata
+- ❌ English textdeduplicationstepEnglish text (English text)
+- ❌ useEnglish text
+- ❌ English text
+- ❌ English textlanguageEnglish textdata
+- ❌ English textevaluationEnglish texttraining
 
 ---
 
-## 📖 参考资源
+## 📖 English text
 
-**推荐数据源**:
+**recommendeddataEnglish text**:
 - 🔗 Wikipedia: https://huggingface.co/datasets/wikipedia
 - 🔗 The Pile: https://huggingface.co/datasets/EleutherAI/the_pile
 - 🔗 ArXiv: https://huggingface.co/datasets/arxiv-dataset/arxiv
 - 🔗 GitHub: https://huggingface.co/datasets/codeparrot/github-code
 
-**工具**:
-- NeurX quality_assessor.s (内置)
-- S 语言编译器: `/opt/s/bin/s`
+**tool**:
+- NeurX quality_assessor.s (English text)
+- S languagecompileEnglish text: `/opt/s/bin/s`
 
-**相关文档**:
+**English text**:
 - [ENTERPRISE_CLAUDE_TRAINING_GUIDE.md](ENTERPRISE_CLAUDE_TRAINING_GUIDE.md)
 - [IMMEDIATE_ACTION_PLAN.md](IMMEDIATE_ACTION_PLAN.md)
 
 ---
 
-**总结**: 用 2-4 周时间，花费 $50-100，获得 3-5TB 高质量数据。使用 NeurX 框架的 S 语言工具确保质量和一致性。
+**English text**: English text 2-4 English texttime, English text $50-100, English text 3-5TB English textdata.use NeurX frameworkEnglish text S languagetoolEnglish text.
 
-🎯 **现在就开始数据收集吧！**
+🎯 **English textstartdataEnglish text!**

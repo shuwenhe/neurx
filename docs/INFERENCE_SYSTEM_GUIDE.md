@@ -1,21 +1,21 @@
-# LLM推理系统 - 完整使用指南
+# LLMinferencesystem - completeuseEnglish text
 # LLM Inference System - Complete User Guide
 
-## 📋 概述
+## 📋 English text
 
-本文档详细介绍NeurX LLM的推理系统，包括推理引擎、启动脚本、交互式演示等功能。
+English textNeurX LLMEnglish textinferencesystem, English textinferenceEnglish text, startEnglish text, English text.
 
-完整的推理系统使LLM从训练阶段转入生产推理阶段，实现真正的端到端应用。
+completeEnglish textinferencesystemEnglish textLLMEnglish texttrainingphaseEnglish textinferencephase, implementationEnglish text.
 
-## 🎯 核心组件
+## 🎯 English text
 
-### 1. 推理引擎 (inference_engine.s)
+### 1. inferenceEnglish text (inference_engine.s)
 
-**位置**: `inference/inference_engine.s`  
-**代码行数**: 400+ 行  
-**功能**: 完整的LLM推理流程
+**English text**: `inference/inference_engine.s`
+**English text**: 400+ English text
+**English text**: completeEnglish textLLMinferencepipeline
 
-#### 关键结构体
+#### English text
 
 ```s
 struct InferenceConfig {
@@ -38,431 +38,431 @@ struct ModelState {
 }
 ```
 
-#### 核心函数
+#### English textfunction
 
-| 函数 | 功能 | 返回值 |
+| function | English text | English text |
 |------|------|--------|
-| init_inference_config() | 初始化推理配置 | InferenceConfig |
-| load_checkpoint(path) | 加载预训练检查点 | ModelState |
-| embed_tokens(ids, config) | 将token转为嵌入向量 | vector<float> |
-| forward_pass(state, config) | 执行前向传播 | vector<float> |
-| apply_temperature(logits, temp) | 应用温度缩放 | vector<float> |
-| sample_token_greedy(logits) | 贪心采样 | int |
-| generate_sequence(state, config) | 生成token序列 | vector<int> |
-| run_inference(path, input, config) | 完整推理流程 | vector<int> |
-| batch_inference(batch, config) | 批量推理 | vector<vector<int>> |
+| init_inference_config() | initializeinferenceconfiguration | InferenceConfig |
+| load_checkpoint(path) | loadEnglish texttrainingcheckpoint | ModelState |
+| embed_tokens(ids, config) | English texttokenEnglish text | vector<float> |
+| forward_pass(state, config) | English text | vector<float> |
+| apply_temperature(logits, temp) | English text | vector<float> |
+| sample_token_greedy(logits) | English text | int |
+| generate_sequence(state, config) | generatetokenEnglish text | vector<int> |
+| run_inference(path, input, config) | completeinferencepipeline | vector<int> |
+| batch_inference(batch, config) | English textinference | vector<vector<int>> |
 
-### 2. 推理启动脚本 (run_inference.sh)
+### 2. inferencestartEnglish text (run_inference.sh)
 
-**位置**: `run_inference.sh`  
-**大小**: 400+ 行  
-**功能**: 完整的编译→执行工作流
+**English text**: `run_inference.sh`
+**English text**: 400+ English text
+**English text**: completeEnglish textcompile→English text
 
-#### 工作流程
+#### English textpipeline
 
 ```
 ┌─────────────┐
-│ 环境检查    │  验证编译器、源文件、检查点
+│ English text    │  English textcompileEnglish text, English textfile, checkpoint
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│ 编译推理    │  S代码 → IR → 二进制
+│ compileinference    │  SEnglish text → IR → English text
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│ 运行推理    │  执行推理程序
+│ runinference    │  English textinferenceEnglish text
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│ 显示结果    │  统计、性能、输出
+│ English textresult    │  statistics, English text, output
 └─────────────┘
 ```
 
-#### 关键参数
+#### English textparameter
 
-| 参数 | 默认值 | 说明 |
+| parameter | defaultEnglish text | explanation |
 |------|--------|------|
-| MAX_NEW_TOKENS | 50 | 生成的最大token数 |
-| TEMPERATURE | 0.7 | 采样温度 |
-| BEAM_SIZE | 3 | Beam搜索宽度 |
-| INPUT_TOKENS | 1,5,3,2 | 输入token序列 |
+| MAX_NEW_TOKENS | 50 | generateEnglish texttokenEnglish text |
+| TEMPERATURE | 0.7 | English text |
+| BEAM_SIZE | 3 | BeamsearchEnglish text |
+| INPUT_TOKENS | 1,5,3,2 | inputtokenEnglish text |
 
-#### 输出文件
+#### outputfile
 
-- `build/inference/inference_engine.ir` - 中间代码
-- `build/inference/inference_engine.bin` - 可执行二进制
-- `artifacts/inference_output/*.txt` - 推理结果
-- `artifacts/logs/inference_*.log` - 执行日志
+- `build/inference/inference_engine.ir` - English text
+- `build/inference/inference_engine.bin` - English text
+- `artifacts/inference_output/*.txt` - inferenceresult
+- `artifacts/logs/inference_*.log` - English textlog
 
-### 3. 交互式演示脚本 (demo_chat.sh)
+### 3. English text (demo_chat.sh)
 
-**位置**: `demo_chat.sh`  
-**大小**: 400+ 行  
-**功能**: 实时LLM聊天界面
+**English text**: `demo_chat.sh`
+**English text**: 400+ English text
+**English text**: English textLLMEnglish text
 
-#### 界面特性
+#### English text
 
-✨ **美观的聊天界面**
-- ASCII艺术横幅
-- 彩色输出
-- 清晰的消息格式
+✨ **English text**
+- ASCIIEnglish text
+- English textoutput
+- English text
 
-💬 **对话管理**
-- 实时用户输入
-- 智能响应生成
-- 会话保存
+💬 **English textmanagement**
+- English textinput
+- English textresponsegenerate
+- English textsave
 
-⚙️ **参数控制**
-- 温度调整
-- Beam大小设置
-- Token数量限制
+⚙️ **parameterEnglish text**
+- English text
+- BeamEnglish text
+- TokencountEnglish text
 
-📊 **统计信息**
-- 对话轮数
-- 会话持续时间
-- 性能指标
+📊 **statisticsinformation**
+- English text
+- English texttime
+- English text
 
-#### 可用命令
+#### English text
 
 ```
-基本命令:
-  exit / quit      - 退出对话
-  help             - 显示帮助
-  clear            - 清空屏幕
-  status           - 显示系统状态
+English text:
+  exit / quit      - English text
+  help             - English text
+  clear            - English text
+  status           - English textsystemstate
 
-模型控制:
-  temperature <值> - 设置温度
-  beam <数字>      - 设置Beam大小
-  max_tokens <数字> - 最大生成tokens
+modelEnglish text:
+  temperature <English text> - English text
+  beam <English text>      - English textBeamEnglish text
+  max_tokens <English text> - English textgeneratetokens
 
-会话管理:
-  history          - 显示对话历史
-  save             - 保存会话
-  stats            - 统计信息
+English textmanagement:
+  history          - English text
+  save             - saveEnglish text
+  stats            - statisticsinformation
 ```
 
-#### 响应类型
+#### responseEnglish text
 
-系统支持不同类型的响应：
+systemsupportEnglish textresponse:
 
-1. **问候 (Greeting)**
-   - 检测: "你好"、"hello"、"hi"
-   - 示例: "你好！很高兴认识你..."
+1. **English text (Greeting)**
+   - English text: "English text", "hello", "hi"
+   - example: "English text!English text..."
 
-2. **故事 (Story)**
-   - 检测: "故事"、"story"、"tale"
-   - 示例: "从前有一个..."
+2. **English text (Story)**
+   - English text: "English text", "story", "tale"
+   - example: "English text..."
 
-3. **解释 (Explanation)**
-   - 检测: "解释"、"explain"、"如何"
-   - 示例: "让我为你解释..."
+3. **English text (Explanation)**
+   - English text: "English text", "explain", "English text"
+   - example: "English text..."
 
-4. **代码 (Code)**
-   - 检测: "代码"、"code"、"program"
-   - 示例: "这是一个Python示例..."
+4. **English text (Code)**
+   - English text: "English text", "code", "program"
+   - example: "English textPythonexample..."
 
-## 🚀 快速开始
+## 🚀 quickstart
 
-### 1. 运行完整推理流程
+### 1. runcompleteinferencepipeline
 
 ```bash
 cd /Users/feifei/shuwen/neurx
 
-# 执行推理引擎编译和推理
+# English textinferenceEnglish textcompileEnglish textinference
 bash run_inference.sh
 
-# 可选：自定义参数
+# English text: English textparameter
 NEURX_MAX_NEW_TOKENS=100 \
 NEURX_TEMPERATURE=0.5 \
 NEURX_BEAM_SIZE=5 \
 bash run_inference.sh
 ```
 
-**执行时间**: ~3-5秒  
-**输出**: 推理结果、统计数据
+**English texttime**: ~3-5English text
+**output**: inferenceresult, statisticsdata
 
-### 2. 交互式聊天演示
+### 2. English text
 
 ```bash
 cd /Users/feifei/shuwen/neurx
 bash demo_chat.sh
 ```
 
-**交互示例**:
+**English textexample**:
 ```
-You: 你好
+You: English text
 Assistant:
-⏳ 生成中 ...
-✓ 生成完成
+⏳ generateEnglish text ...
+✓ generateEnglish text
 
-你好！很高兴认识你。我是一个由NeurX LLM训练系统构建的AI助手。
-我可以帮助你解答问题、进行创意写作、代码编程等各种任务。
-今天有什么我可以帮助你的吗？
+English text!English text.English textNeurX LLMtrainingsystemEnglish textAIEnglish text.
+English textAllowedEnglish text, English text, English text.
+English textAllowedEnglish text?
 
-You: 讲一个故事
+You: English text
 Assistant:
 ...
 ```
 
-## 📊 推理性能
+## 📊 inferenceEnglish text
 
-### 基准测试结果
+### English texttestresult
 
 ```
-模型配置:
-  - 参数数: 56,448
-  - 隐层维度: 32
-  - 层数: 2
-  - 注意力头数: 4
+modelconfiguration:
+  - parameterEnglish text: 56,448
+  - English text: 32
+  - English text: 2
+  - English text: 4
 
-推理性能:
-  - 吞吐量: 200 tokens/秒
-  - 延迟: 5 ms/token
-  - 内存: 0.9 MB
-  - 批大小: 1-4
+inferenceEnglish text:
+  - English text: 200 tokens/English text
+  - English text: 5 ms/token
+  - English text: 0.9 MB
+  - English text: 1-4
 
-生成速度:
-  - 50个tokens: ~250 ms
-  - 100个tokens: ~500 ms
-  - 平均速度: 200 tokens/秒
+generateEnglish text:
+  - 50English texttokens: ~250 ms
+  - 100English texttokens: ~500 ms
+  - English text: 200 tokens/English text
 ```
 
-## 🔧 高级使用
+## 🔧 advanceduse
 
-### 自定义推理参数
+### English textinferenceparameter
 
 ```bash
-# 高温度 - 更随机的生成
+# English text - English textgenerate
 NEURX_TEMPERATURE=1.0 bash run_inference.sh
 
-# 低温度 - 更确定性的生成
+# English text - English textgenerate
 NEURX_TEMPERATURE=0.1 bash run_inference.sh
 
-# 更大的Beam搜索
+# English textBeamsearch
 NEURX_BEAM_SIZE=5 bash run_inference.sh
 
-# 生成更多tokens
+# generateEnglish texttokens
 NEURX_MAX_NEW_TOKENS=200 bash run_inference.sh
 
-# 自定义输入
+# English textinput
 NEURX_INPUT_TOKENS="1,2,3,4,5" bash run_inference.sh
 ```
 
-### 编译推理模块
+### compileinferenceEnglish text
 
 ```bash
 cd /Users/feifei/shuwen/neurx
 
-# 仅编译成IR
+# English textcompileEnglish textIR
 /Users/feifei/train/s/.local/bin/s inference/inference_engine.s build/inference/inference_engine.ir
 
-# 从IR生成二进制
+# English textIRgenerateEnglish text
 cd /Users/feifei/train/s
 /Users/feifei/train/s/.local/bin/s --emit-bin \
   /Users/feifei/shuwen/neurx/build/inference/inference_engine.ir \
   /Users/feifei/shuwen/neurx/build/inference/inference_engine.bin
 ```
 
-## 📁 文件结构
+## 📁 fileEnglish text
 
 ```
 neurx/
 ├── train/
-│   ├── inference_engine.s          # 推理引擎
+│   ├── inference_engine.s          # inferenceEnglish text
 │   ├── llm_training_compiler_compatible.s
-│   └── [其他训练模块...]
+│   └── [English texttrainingEnglish text...]
 │
-├── run_inference.sh                # 推理启动脚本
-├── demo_chat.sh                    # 交互式演示
+├── run_inference.sh                # inferencestartEnglish text
+├── demo_chat.sh                    # English text
 ├── run_llm_training_with_compiler.sh
 └── run_llm_training.sh
 
 build/inference/
-├── inference_engine.ir             # 中间代码
-└── inference_engine.bin            # 可执行二进制
+├── inference_engine.ir             # English text
+└── inference_engine.bin            # English text
 
 artifacts/
-├── inference_output/               # 推理结果
+├── inference_output/               # inferenceresult
 │   └── inference_result_*.txt
-├── chat_sessions/                  # 聊天会话
-│   ├── session_*.txt               # 对话记录
+├── chat_sessions/                  # English text
+│   ├── session_*.txt               # English text
 │   └── ...
-└── logs/                           # 日志
+└── logs/                           # log
     ├── inference_*.log
     ├── compiler_*.log
     └── ...
 ```
 
-## 📈 工作流程总结
+## 📈 English textpipelineEnglish text
 
-### 完整的训练→推理流程
+### completeEnglish texttraining→inferencepipeline
 
 ```
 ┌────────────────────────────────────────┐
-│ 1. 训练阶段                            │
+│ 1. trainingphase                            │
 │ ┌──────────────────────────────────┐   │
-│ │ 运行: bash run_llm_training_with │   │
+│ │ run: bash run_llm_training_with │   │
 │ │      _compiler.sh                │   │
-│ │ 输出: 训练检查点                 │   │
+│ │ output: trainingcheckpoint                 │   │
 │ └──────────────────────────────────┘   │
 └────────────────────────────────────────┘
            │
            ▼
 ┌────────────────────────────────────────┐
-│ 2. 推理阶段                            │
+│ 2. inferencephase                            │
 │ ┌──────────────────────────────────┐   │
-│ │ 运行: bash run_inference.sh       │   │
-│ │ 输出: 推理结果和统计             │   │
+│ │ run: bash run_inference.sh       │   │
+│ │ output: inferenceresultEnglish textstatistics             │   │
 │ └──────────────────────────────────┘   │
 └────────────────────────────────────────┘
            │
            ▼
 ┌────────────────────────────────────────┐
-│ 3. 应用阶段                            │
+│ 3. English textphase                            │
 │ ┌──────────────────────────────────┐   │
-│ │ 运行: bash demo_chat.sh           │   │
-│ │ 交互: 与LLM进行实时对话         │   │
+│ │ run: bash demo_chat.sh           │   │
+│ │ English text: English textLLMEnglish text         │   │
 │ └──────────────────────────────────┘   │
 └────────────────────────────────────────┘
 ```
 
-## 🎓 示例场景
+## 🎓 exampleEnglish text
 
-### 场景1: 快速推理演示
+### English text1: quickinferenceEnglish text
 
 ```bash
-# 运行完整推理流程
+# runcompleteinferencepipeline
 bash run_inference.sh
 
-# 查看结果
+# English textresult
 cat artifacts/inference_output/inference_result_*.txt
 ```
 
-### 场景2: 交互式对话
+### English text2: English text
 
 ```bash
-# 启动聊天演示
+# startEnglish text
 bash demo_chat.sh
 
-# 与LLM进行对话
-You: 解释什么是机器学习
-Assistant: [LLM响应...]
+# English textLLMEnglish text
+You: English text
+Assistant: [LLMresponse...]
 
-You: 给我一个代码例子
-Assistant: [LLM代码示例...]
+You: English text
+Assistant: [LLMEnglish textexample...]
 
 You: help
-# 显示所有可用命令
+# English text
 ```
 
-### 场景3: 批量推理
+### English text3: English textinference
 
 ```bash
-# 编辑推理脚本来处理多个输入
-# 或使用 `inference_engine.s` 中的 `batch_inference` 函数
+# English textinferenceEnglish textinput
+# English textuse `inference_engine.s` English text `batch_inference` function
 ```
 
-## 🐛 故障排除
+## 🐛 English text
 
-### 问题1: 推理编译失败
+### English text1: inferencecompilefailure
 
-**症状**: "推理引擎编译失败"
+**English text**: "inferenceEnglish textcompilefailure"
 
-**解决**:
+**English text**:
 ```bash
-# 检查编译器
+# English textcompileEnglish text
 which s
 
-# 检查源文件
+# English textfile
 ls -l inference/inference_engine.s
 
-# 查看编译日志
+# English textcompilelog
 cat artifacts/logs/compiler_*.log
 ```
 
-### 问题2: 推理速度慢
+### English text2: inferenceEnglish text
 
-**症状**: 生成token缓慢
+**English text**: generatetokenEnglish text
 
-**解决**:
-- 减少BEAM_SIZE
-- 降低max_new_tokens
-- 使用greedy而非beam search
+**English text**:
+- English textBEAM_SIZE
+- English textmax_new_tokens
+- usegreedyEnglish textbeam search
 
-### 问题3: 聊天无响应
+### English text3: English textresponse
 
-**症状**: demo_chat.sh输入无反应
+**English text**: demo_chat.shinputEnglish text
 
-**解决**:
+**English text**:
 ```bash
-# 检查脚本权限
+# English text
 chmod +x demo_chat.sh
 
-# 直接运行
+# English textrun
 bash -x demo_chat.sh
 ```
 
-## 📚 参考资源
+## 📚 English text
 
-### 创建的文件
+### English textfile
 
-| 文件 | 大小 | 描述 |
+| file | English text | Description |
 |------|------|------|
-| inference/inference_engine.s | 400+ 行 | 完整推理引擎 |
-| run_inference.sh | 400+ 行 | 推理启动脚本 |
-| demo_chat.sh | 400+ 行 | 交互式演示 |
-| INFERENCE_SYSTEM_GUIDE.md | 本文档 | 使用指南 |
+| inference/inference_engine.s | 400+ English text | completeinferenceEnglish text |
+| run_inference.sh | 400+ English text | inferencestartEnglish text |
+| demo_chat.sh | 400+ English text | English text |
+| INFERENCE_SYSTEM_GUIDE.md | English text | useEnglish text |
 
-### 快速命令
+### quickEnglish text
 
 ```bash
-# 推理
+# inference
 bash run_inference.sh
 
-# 聊天
+# English text
 bash demo_chat.sh
 
-# 查看推理结果
+# English textinferenceresult
 cat artifacts/inference_output/inference_result_*.txt
 
-# 查看聊天记录
+# English text
 cat artifacts/chat_sessions/session_*.txt
 
-# 查看日志
+# English textlog
 cat artifacts/logs/inference_*.log
 ```
 
-## ✨ 下一步
+## ✨ English textstep
 
-🎉 **推理系统已完成！**
+🎉 **inferencesystemEnglish text!**
 
-### 建议的后续步骤:
+### English textstepEnglish text:
 
-1. **性能优化** (可选)
-   - 实现KV缓存
-   - 添加模型量化
-   - 优化内存使用
+1. **English textoptimize** (English text)
+   - implementationKVcache
+   - English textmodelEnglish text
+   - optimizeEnglish textuse
 
-2. **功能扩展** (可选)
-   - 多语言支持
-   - 长上下文处理
-   - 插件系统
+2. **English textextension** (English text)
+   - English textlanguagesupport
+   - English text
+   - pluginsystem
 
-3. **部署上线** (下一步)
-   - 创建REST API
-   - 部署到云服务
-   - 添加监控和日志
+3. **English text** (English textstep)
+   - English textREST API
+   - English text
+   - English textmonitoringEnglish textlog
 
-### 之后的路线图
+### English text
 
-✅ [第1步] S编译器集成  
-✅ [第2步] 推理系统（当前）  
-🚀 [第3步] 多GPU/分布式训练  
-🔜 [第4步] 模型优化和部署  
+✅ [English text1step] ScompileEnglish text
+✅ [English text2step] inferencesystem(English text)
+🚀 [English text3step] English textGPU/English texttraining
+🔜 [English text4step] modeloptimizeEnglish text
 
 ---
 
-**版本**: 1.0.0  
-**创建日期**: 2026-06-30  
-**状态**: ✅ 完成并生产就绪
+**English text**: 1.0.0
+**English text**: 2026-06-30
+**state**: ✅ English text

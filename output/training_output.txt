@@ -1,7 +1,7 @@
 
 ╔════════════════════════════════════════════════════════════════════╗
 ║          NeurX Complete Training & Inference System             ║
-║           用 S 语言实现的完整机器学习系统                        ║
+║           English text S languageimplementationEnglish textcompleteEnglish textsystem                        ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 ═══════════════════════════════════════════════════════════════════════

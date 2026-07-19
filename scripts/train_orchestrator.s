@@ -122,14 +122,14 @@ struct TrainOrchestrator {
 // new_train_orchestrator creates a new training orchestrator
 func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrator, error) {
     logger := new_logger("TrainOrchestrator")
-    
+
     // Determine NeurX root
     neurxRoot := get_env("NEURX_ROOT", "")
     if neurxRoot == "" {
         pwd, _ := os.Getwd()
         neurxRoot = pwd
     }
-    
+
     // Find S compiler
     sCompiler := get_env("S_COMPILER", "")
     if sCompiler == "" {
@@ -139,21 +139,21 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrato
             sCompiler = filepath.Join(neurxRoot, "..", "s", ".local", "bin", "s")
         }
     }
-    
+
     if !command_exists(sCompiler) && !file_exists(sCompiler) {
         return nil, fmt.Errorf("S compiler not found at %s", sCompiler)
     }
-    
+
     config := TrainingConfig{
         scale:         scale,
         numGpus:       numGpus,
         timestamp:     timestamp(),
     }
-    
+
     config.logDir = filepath.Join(neurxRoot, "logs", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
     config.checkpointDir = filepath.Join(neurxRoot, "checkpoints", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
     config.outputDir = filepath.Join(neurxRoot, "outputs", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
-    
+
     return &TrainOrchestrator{
         logger:    logger,
         config:    config,
@@ -165,14 +165,14 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrato
 // setup prepares directories and environment
 func (t *TrainOrchestrator) setup() error {
     t.logger.log("Setting up training environment...")
-    
+
     // Create directories
     for _, dir := range []string{t.config.logDir, t.config.checkpointDir, t.config.outputDir} {
         if err := mkdir(dir); err != nil {
             return err
         }
     }
-    
+
     // Log configuration
     t.log_config()
     return nil
@@ -181,7 +181,7 @@ func (t *TrainOrchestrator) setup() error {
 // check_environment verifies GPU availability and dependencies
 func (t *TrainOrchestrator) check_environment() error {
     t.logger.log("Checking environment...")
-    
+
     // Check GPU availability
     numGpus, backend := t.detectGPUs()
     if numGpus < t.config.numGpus {
@@ -189,31 +189,31 @@ func (t *TrainOrchestrator) check_environment() error {
         t.config.numGpus = numGpus
     }
     t.logger.success("Detected %d GPUs (%s)", numGpus, backend)
-    
+
     // Check data
     if t.config.dataPath != "" && !file_exists(t.config.dataPath) {
         t.logger.error("Data path not found: %s", t.config.dataPath)
         return fmt.Errorf("data not found")
     }
-    
+
     return nil
 }
 
 // Compile compiles the training module
 func (t *TrainOrchestrator) Compile() error {
     t.logger.log("Compiling NeurX training module...")
-    
+
     sourceFile := filepath.Join(t.config.outputDir, "neurx_training.s")
     irFile := filepath.Join(t.config.outputDir, "neurx_training.ir")
     binFile := filepath.Join(t.config.outputDir, "neurx_train")
-    
+
     // Generate S source if needed
     if !file_exists(sourceFile) {
         if err := t.generateTrainingSource(sourceFile); err != nil {
             return err
         }
     }
-    
+
     // Compile to IR
     t.logger.log("Compiling to IR...")
     result := exec_command(t.sCompiler, sourceFile, irFile)
@@ -222,7 +222,7 @@ func (t *TrainOrchestrator) Compile() error {
         return fmt.Errorf("compilation failed")
     }
     t.logger.success("IR generated: %s", irFile)
-    
+
     // Compile to binary
     t.logger.log("Generating binary...")
     result = exec_command(t.sCompiler, "--emit-bin", irFile, binFile)
@@ -231,19 +231,19 @@ func (t *TrainOrchestrator) Compile() error {
         return fmt.Errorf("binary generation failed")
     }
     t.logger.success("Binary generated: %s", binFile)
-    
+
     return nil
 }
 
 // Run executes the training
 func (t *TrainOrchestrator) Run() error {
     t.logger.log("Starting training...")
-    
+
     binFile := filepath.Join(t.config.outputDir, "neurx_train")
     if !file_exists(binFile) {
         return fmt.Errorf("training binary not found at %s", binFile)
     }
-    
+
     // Build command with environment
     cmd := fmt.Sprintf("cd %s && ", t.neurxRoot)
     cmd += fmt.Sprintf("NEURX_GPUS=%d ", t.config.numGpus)
@@ -251,13 +251,13 @@ func (t *TrainOrchestrator) Run() error {
     cmd += fmt.Sprintf("NEURX_LOG_DIR=%s ", t.config.logDir)
     cmd += fmt.Sprintf("NEURX_CKPT_DIR=%s ", t.config.checkpointDir)
     cmd += fmt.Sprintf("%s 2>&1 | tee -a %s", binFile, filepath.Join(t.config.logDir, "train.log"))
-    
+
     result := shell(cmd)
     if result.ExitCode != 0 {
         t.logger.error("Training failed: %s", result.Stderr)
         return fmt.Errorf("training failed")
     }
-    
+
     t.logger.success("Training completed")
     return nil
 }
@@ -265,9 +265,9 @@ func (t *TrainOrchestrator) Run() error {
 // Monitor monitors training progress
 func (t *TrainOrchestrator) Monitor() error {
     t.logger.log("Starting training monitor...")
-    
+
     logFile := filepath.Join(t.config.logDir, "train.log")
-    
+
     // Wait for log file to be created
     for i := 0; i < 30; i++ {
         if file_exists(logFile) {
@@ -275,17 +275,17 @@ func (t *TrainOrchestrator) Monitor() error {
         }
         sleep_seconds(1)
     }
-    
+
     if !file_exists(logFile) {
         return fmt.Errorf("training log not found")
     }
-    
+
     // Tail log file
     result := shell(fmt.Sprintf("tail -f %s", logFile))
     if result.ExitCode != 0 {
         t.logger.error("Monitoring failed: %s", result.Stderr)
     }
-    
+
     return nil
 }
 
@@ -302,7 +302,7 @@ func (t *TrainOrchestrator) detectGPUs() (int, string) {
             return len(lines), "NVIDIA CUDA"
         }
     }
-    
+
     // Check for Apple Silicon
     if command_exists("system_profiler") {
         result := exec_command("system_profiler", "SPDisplaysDataType")
@@ -310,7 +310,7 @@ func (t *TrainOrchestrator) detectGPUs() (int, string) {
             return 1, "Apple Silicon (MPS)"
         }
     }
-    
+
     // Default to CPU
     return 1, "CPU"
 }
@@ -318,17 +318,17 @@ func (t *TrainOrchestrator) detectGPUs() (int, string) {
 func (t *TrainOrchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   NeurX Foundation Model Training               ║
-║   目标: 达到 NeurX 参考级别                    ║
+║   English text: English text NeurX English text                    ║
 ╠══════════════════════════════════════════════════╣
-║ 规模: %s
-║ GPU 数: %d
-║ 时间戳: %s
-║ 日志: %s
-║ 检查点: %s
+║ English text: %s
+║ GPU English text: %d
+║ timeEnglish text: %s
+║ log: %s
+║ checkpoint: %s
 ╚══════════════════════════════════════════════════╝
 
 `, scaleString(t.config.scale), t.config.numGpus, t.config.timestamp, t.config.logDir, t.config.checkpointDir)
-    
+
     logFile := filepath.Join(t.config.logDir, "config.txt")
     return write_file(logFile, config)
 }
@@ -336,7 +336,7 @@ func (t *TrainOrchestrator) log_config() error {
 func (t *TrainOrchestrator) generateTrainingSource(outputPath string) error {
     // Generate S source based on scale
     scaleConfig := get_scale_config(t.config.scale)
-    
+
     source := fmt.Sprintf(`// Auto-generated training source
 package main
 
@@ -350,7 +350,7 @@ func main() {
     learningRate := %.2e
     seqLen := %d
     layers := %d
-    
+
     fmt.Printf("Training Configuration:\\n")
     fmt.Printf("  Parameters: %%d\\n", params)
     fmt.Printf("  GPUs: %%d\\n", gpus)
@@ -358,12 +358,12 @@ func main() {
     fmt.Printf("  Learning Rate: %%.2e\\n", learningRate)
     fmt.Printf("  Sequence Length: %%d\\n", seqLen)
     fmt.Printf("  Layers: %%d\\n", layers)
-    
+
     // Training loop would go here
     fmt.Println("Training loop started...")
 }
 `, scaleString(t.config.scale), scaleConfig.params, scaleConfig.gpus, scaleConfig.batch, scaleConfig.lr, scaleConfig.seqLen, scaleConfig.layers)
-    
+
     return write_file(outputPath, source)
 }
 
@@ -406,38 +406,38 @@ func run_foundation_model_training(scale string, numGpus int) error {
     default:
         scaleEnum = TrainingScale.Mini
     }
-    
+
     // Create orchestrator
     orchestrator, err := new_train_orchestrator(scaleEnum, numGpus)
     if err != nil {
         return err
     }
-    
+
     // exec_commandute training pipeline
     if err := orchestrator.setup(); err != nil {
         return err
     }
-    
+
     if err := orchestrator.check_environment(); err != nil {
         return err
     }
-    
+
     if err := orchestrator.Compile(); err != nil {
         return err
     }
-    
+
     // Run training
     go func() {
         if err := orchestrator.Run(); err != nil {
             orchestrator.logger.error("Training error: %v", err)
         }
     }()
-    
+
     // Monitor training
     if err := orchestrator.Monitor(); err != nil {
         orchestrator.logger.error("Monitoring error: %v", err)
     }
-    
+
     return nil
 }
 

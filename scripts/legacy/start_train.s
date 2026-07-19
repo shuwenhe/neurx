@@ -8,27 +8,27 @@ func main() int {
     string log_dir = project_root + "/artifacts/logs"
 
     println("════════════════════════════════════════════════════════════════")
-    println("🚀 启动 NeurX 训练")
+    println("🚀 start NeurX training")
     println("════════════════════════════════════════════════════════════════")
     println("")
-    println("▶ 启动make train...")
+    println("▶ startmake train...")
 
     string launch_cmd = "cd " + runtime_shell_escape(project_root) + " && make train > /dev/null 2>&1 & echo $! | tr -d '\\n'"
     string make_pid = runtime_run_command_output(launch_cmd)
     if make_pid == "" {
-        println("✗ 训练启动失败")
+        println("✗ trainingstartfailure")
         return 1
     }
 
-    println("✓ 训练已启动 (PID: " + make_pid + ")")
+    println("✓ trainingEnglish textstart (PID: " + make_pid + ")")
     println("")
-    println("▶ 等待日志文件生成...")
+    println("▶ English textlogfilegenerate...")
     if !runtime_run_command("sleep 2").ok {
         return 1
     }
 
-    println("▶ 启动实时监控...")
-    println("  按 Ctrl+C 停止日志查看（训练会继续进行）")
+    println("▶ startEnglish textmonitoring...")
+    println("  English text Ctrl+C English textlogEnglish text(trainingEnglish text)")
     println("")
     println("════════════════════════════════════════════════════════════════")
 
@@ -39,9 +39,9 @@ func main() int {
             return 1
         }
     } else {
-        println("✗ 未找到日志文件，训练可能失败或尚未启动")
+        println("✗ English textlogfile, trainingEnglish textfailureEnglish textstart")
         println("")
-        println("诊断信息：")
+        println("English textinformation: ")
         string diag_cmd = "cd " + runtime_shell_escape(project_root) + " && make train 2>&1 | head -50"
         if !runtime_run_command(diag_cmd).ok {
             return 1

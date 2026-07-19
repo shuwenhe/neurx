@@ -1,125 +1,125 @@
-# 训练性能优化指南
+# trainingEnglish textoptimizeEnglish text
 
-## 📊 当前性能诊断
+## 📊 English text
 
-### 硬件配置
-- **GPU**: NVIDIA RTX 4060 Ti (16GB显存)
-- **模型**: 1T参数 (配置文件指定)
-- **实际速度**: ~2.5 tokens/step ⚠️ 极低
+### English textconfiguration
+- **GPU**: NVIDIA RTX 4060 Ti (16GBEnglish text)
+- **model**: 1Tparameter (configurationfileEnglish text)
+- **actualEnglish text**: ~2.5 tokens/step ⚠️ English text
 
-### 性能对标
+### English text
 ```
-RTX 4060 Ti理论性能:
-├─ FP32峰值: 10 TFLOPS
-├─ BF16峰值: 20 TFLOPS  
-├─ INT8峰值: 40 TFLOPS
-└─ 预期单卡吞吐:
-    ├─ 1.5B模型: 500-1000 tokens/sec ✓
-    ├─ 7B模型: 50-100 tokens/sec ⚠️ 勉强可行
-    └─ 1T模型: 0.1-1 tokens/sec ❌ 不可行
+RTX 4060 TiEnglish text:
+├─ FP32English text: 10 TFLOPS
+├─ BF16English text: 20 TFLOPS
+├─ INT8English text: 40 TFLOPS
+└─ English text:
+    ├─ 1.5Bmodel: 500-1000 tokens/sec ✓
+    ├─ 7Bmodel: 50-100 tokens/sec ⚠️ English text
+    └─ 1Tmodel: 0.1-1 tokens/sec ❌ English text
 ```
 
-### 核心问题
+### English text
 ```
-配置 vs 硬件 严重不匹配:
+configuration vs English text English text:
 
-1. 模型大小
-   ├─ 配置: 1T参数 (1,000 billion)
-   ├─ 需要: ~4TB显存 (FP32) / ~1TB (BF16)
-   └─ 可用: 16GB ❌ 相差62,500倍
+1. modelEnglish text
+   ├─ configuration: 1Tparameter (1,000 billion)
+   ├─ Required: ~4TBEnglish text (FP32) / ~1TB (BF16)
+   └─ English text: 16GB ❌ English text62,500English text
 
-2. 分布式设置
-   ├─ 配置: world_size=1024, tensor_parallel=64
-   ├─ 用途: 分布式训练1024个GPU
-   └─ 实际: 1个GPU ❌ 过度配置
+2. English text
+   ├─ configuration: world_size=1024, tensor_parallel=64
+   ├─ English text: English texttraining1024English textGPU
+   └─ actual: 1English textGPU ❌ English textconfiguration
 
-3. 批处理
+3. English text
    ├─ global_batch: 4096
    ├─ micro_batch: 2
-   ├─ accumulation: 512步
-   └─ 实际可用: 16-32 ❌ 过大
+   ├─ accumulation: 512step
+   └─ actualEnglish text: 16-32 ❌ English text
 
-4. 内存优化
-   ├─ CPU卸载: 启用 (极低效)
-   ├─ 梯度检查点: 启用 (重复计算)
-   └─ ZeRO-3: 启用 (不适合单卡)
+4. English textoptimize
+   ├─ CPUEnglish text: English text (English text)
+   ├─ gradientcheckpoint: English text (English textcompute)
+   └─ ZeRO-3: English text (English text)
 ```
 
 ---
 
-## 🚀 优化方案
+## 🚀 optimizeEnglish text
 
-### 方案1: 使用适配硬件的模型配置 (推荐)
+### English text1: useEnglish textmodelconfiguration (recommended)
 
-**预期性能提升: 10-100倍**
+**English text: 10-100English text**
 
 ```bash
-# 使用优化的配置
+# useoptimizeEnglish textconfiguration
 cp config_optimized_4060ti.json train_config.yaml
 
-# 启动训练
+# starttraining
 make pretrain-gpu
 ```
 
-**配置变更**:
+**configurationEnglish text**:
 ```json
 {
-  "模型参数": "1.5B (vs 1T)",
-  "隐层维度": "1024 (vs 12800)",
-  "网络层数": "24 (vs 96)",
-  "Batch大小": "32 (vs 4096)",
+  "modelparameter": "1.5B (vs 1T)",
+  "English text": "1024 (vs 12800)",
+  "English text": "24 (vs 96)",
+  "BatchEnglish text": "32 (vs 4096)",
   "MicroBatch": "4 (vs 2)",
-  "梯度累积": "8 (vs 512)",
+  "gradientEnglish text": "8 (vs 512)",
   "world_size": "1 (vs 1024)",
-  "混合精度": "BF16 (自动)",
-  "梯度检查点": "禁用 (显存足够)",
-  "CPU卸载": "禁用"
+  "English text": "BF16 (English text)",
+  "gradientcheckpoint": "English text (English text)",
+  "CPUEnglish text": "English text"
 }
 ```
 
-**预期性能**:
+**English text**:
 - **tokens/step**: 256-512 (vs 2.5)
-- **显存占用**: 12-14GB (vs OOM或极其缓慢)
-- **训练速度**: 250-500 tokens/sec
-- **步进时间**: 0.5-1 sec/step (vs 数秒)
+- **English text**: 12-14GB (vs OOMEnglish text)
+- **trainingEnglish text**: 250-500 tokens/sec
+- **stepEnglish texttime**: 0.5-1 sec/step (vs English text)
 
 ---
 
-### 方案2: 快速参数调优 (如必须用1T配置)
+### English text2: quickparameterEnglish text (English text1Tconfiguration)
 
-如果必须使用1T模型配置，按优先级做以下调整:
+English textuse1Tmodelconfiguration, English text:
 
-#### 第1级 - 立即改进 (减少梯度累积)
+#### English text1English text - English text (English textgradientEnglish text)
 ```bash
 export NEURX_PRETRAIN_MICRO_BATCH=4
 export NEURX_PRETRAIN_GRADIENT_ACCUMULATION=4
-# 预期: 3-5倍提升, tokens/step: 10-12
+# English text: 3-5English text, tokens/step: 10-12
 ```
 
-#### 第2级 - 启用量化 (减少显存)
+#### English text2English text - English text (English text)
 ```bash
 export NEURX_MIXED_PRECISION=int8
 export NEURX_ACTIVATION_CHECKPOINTING=1
-# 预期: 另外3-5倍提升, tokens/step: 30-60
+# English text: English text3-5English text, tokens/step: 30-60
 ```
 
-#### 第3级 - 启用CPU卸载 (最后手段)
+#### English text3English text - English textCPUEnglish text (English text)
 ```bash
 export NEURX_CPU_OFFLOAD=1
 export NEURX_CPU_OFFLOAD_DIR=/tmp/neurx_offload
 mkdir -p /tmp/neurx_offload
-# 预期: 再提升2-3倍, tokens/step: 60-180
-# 副作用: 大量CPU↔GPU数据传输, 可能更慢
+# English text: English text2-3English text, tokens/step: 60-180
+# English text: English textCPU↔GPUdataEnglish text, English text
 ```
 
 ---
 
-### 方案3: 多卡分布式训练 (理想方案)
+### English text3: English texttraining (English text)
 
-如果有多个GPU:
+English textGPU:
 
 ```bash
-# 4个GPU训练1T模型
+# 4English textGPUtraining1Tmodel
 export NEURX_HOSTFILE=configs/4gpu.hosts
 cat > configs/4gpu.hosts << 'EOF'
 localhost 4
@@ -127,140 +127,140 @@ EOF
 
 bash scripts/legacy/launch_multinode_pretrain.sh
 
-# 预期性能:
-# ├─ tokens/step: 100-200 (4卡并行)
-# ├─ 梯度同步开销: ~10-15%
-# └─ 总体吞吐: 400-800 tokens/sec
+# English text:
+# ├─ tokens/step: 100-200 (4English text)
+# ├─ gradientEnglish textstepEnglish text: ~10-15%
+# └─ English text: 400-800 tokens/sec
 ```
 
 ---
 
-## 📈 性能对比 (相同配置下)
+## 📈 English text (English textconfigurationEnglish text)
 
-| 模型 | 显存 | Batch | tokens/sec | steps/day |
+| model | English text | Batch | tokens/sec | steps/day |
 |------|------|-------|-----------|----------|
-| 1.5B (推荐) | 12GB | 32 | **300-500** | **25.9M** |
+| 1.5B (recommended) | 12GB | 32 | **300-500** | **25.9M** |
 | 7B | 14GB | 16 | 80-120 | 6.9M |
 | 13B | OOM | - | - | - |
-| 1T单卡 | OOM | - | **0.1-1** | **8.6k** |
-| 1T 4卡 | 4x16GB | 128 | 300-500 | 25.9M |
+| 1TEnglish text | OOM | - | **0.1-1** | **8.6k** |
+| 1T 4English text | 4x16GB | 128 | 300-500 | 25.9M |
 
 ---
 
-## 🔧 快速优化命令
+## 🔧 quickoptimizeEnglish text
 
-### 诊断当前性能
+### English text
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 查看当前训练速度
+# English texttrainingEnglish text
 tail -100 checkpoint/NeurX-1.3/rank_0.log | grep trainer-v2 | tail -5
 
-# 计算 tokens/sec
+# compute tokens/sec
 # tokens = (step - prev_step) * seq_len
-# 如: step从9010到9030 = 20步, 256 tokens/step
-#     时间差 = 30秒 => 20*256/30 = 170 tokens/sec
+# English text: stepEnglish text9010English text9030 = 20step, 256 tokens/step
+#     timeEnglish text = 30English text => 20*256/30 = 170 tokens/sec
 ```
 
-### 立即使用优化配置
+### English textuseoptimizeconfiguration
 ```bash
-# 1. 停止当前训练 (Ctrl+C)
-# 2. 切换配置
+# 1. English texttraining (Ctrl+C)
+# 2. English textconfiguration
 cat config_optimized_4060ti.json > train_config.yaml
 
-# 3. 清除旧checkpoint以重新开始
+# 3. English textcheckpointEnglish textstart
 rm -f checkpoint/NeurX-1.3/transformer_v2.ckpt
 
-# 4. 重启
+# 4. English text
 make pretrain-gpu
 ```
 
-### 监控性能改进
+### monitoringEnglish text
 ```bash
-# 终端1: 启动训练
+# English text1: starttraining
 make pretrain-gpu
 
-# 终端2: 实时监控
+# English text2: English textmonitoring
 watch -n 10 'tail -20 checkpoint/NeurX-1.3/rank_0.log | grep trainer-v2'
 
-# 终端3: GPU监控
+# English text3: GPUmonitoring
 watch -n 1 'nvidia-smi'
 ```
 
 ---
 
-## 💡 为什么这么慢?
+## 💡 English text?
 
-### 分析原理
+### English text
 
-**1T参数模型需要的显存** (估算):
+**1TparametermodelRequiredEnglish text** (English text):
 ```
-模型权重 (BF16):      1T params * 2 bytes = 2TB
-梯度:                2TB (同样大小)
-优化器状态(AdamW):    2TB * 2 (m, v) = 4TB
-激活值:               ~200GB (batch=4096, seq=256)
-总计:                ~8.2TB ❌❌❌
-```
-
-**RTX 4060 Ti可用: 16GB**
-
-所以系统必须:
-- ✗ 激活值写到磁盘 (随机I/O很慢)
-- ✗ 梯度在CPU和GPU间传输 (PCIe 3.0瓶颈)
-- ✗ 模型权重部分在CPU内存 (显存交换)
-- ✗ 频繁重计算激活值 (CPU时间被占用)
-
-**结果**: 每个step的实际操作时间远大于计算时间
-
-### 最优配置对比
-
-**1.5B模型显存需求**:
-```
-模型权重:        1.5B * 2B = 3GB
-梯度:            3GB
-优化器状态:      6GB
-激活值:          2GB
-总计:            14GB ✓ 可行
+modelweight (BF16):      1T params * 2 bytes = 2TB
+gradient:                2TB (English text)
+optimizeEnglish textstate(AdamW):    2TB * 2 (m, v) = 4TB
+English text:               ~200GB (batch=4096, seq=256)
+English text:                ~8.2TB ❌❌❌
 ```
 
-**显存利用效率**:
-- 1T模型: 16GB中99%用于I/O等待
-- 1.5B模型: 16GB中99%用于实际计算
+**RTX 4060 TiEnglish text: 16GB**
+
+English textsystemEnglish text:
+- ✗ English text (English textI/OEnglish text)
+- ✗ gradientEnglish textCPUEnglish textGPUEnglish text (PCIe 3.0English text)
+- ✗ modelweightEnglish textCPUEnglish text (English text)
+- ✗ English textcomputeEnglish text (CPUtimeEnglish text)
+
+**result**: English textstepEnglish textactualEnglish texttimeEnglish textcomputetime
+
+### English textconfigurationEnglish text
+
+**1.5BmodelEnglish text**:
+```
+modelweight:        1.5B * 2B = 3GB
+gradient:            3GB
+optimizeEnglish textstate:      6GB
+English text:          2GB
+English text:            14GB ✓ English text
+```
+
+**English text**:
+- 1Tmodel: 16GBEnglish text99%English textI/OEnglish text
+- 1.5Bmodel: 16GBEnglish text99%English textactualcompute
 
 ---
 
-## 📋 检查清单
+## 📋 English text
 
-- [ ] 确认当前速度 (tokens/sec)
-- [ ] 选择优化方案 (方案1推荐)
-- [ ] 备份checkpoint
-- [ ] 修改配置
-- [ ] 重启训练
-- [ ] 监控新速度
-- [ ] 计算预期完成时间
-
----
-
-## 常见问题
-
-**Q: 能继续用1T配置吗?**
-A: 可以但强烈不推荐。需要至少32个GPU或进行大量量化。
-
-**Q: 从1.5B改为7B行吗?**
-A: 可以,但显存用量14-15GB,性能会降到100-200 tokens/sec。
-
-**Q: 能用混合精度加速?**
-A: BF16已内置,不会有额外加速。FP8需要特殊硬件支持。
-
-**Q: 为什么不用LoRA?**
-A: 这是预训练,不是微调。LoRA不适用。
+- [ ] English text (tokens/sec)
+- [ ] English textoptimizeEnglish text (English text1recommended)
+- [ ] English textcheckpoint
+- [ ] English textconfiguration
+- [ ] English texttraining
+- [ ] monitoringEnglish text
+- [ ] computeEnglish texttime
 
 ---
 
-## 下一步
+## English text
 
-1. **立即**: 使用方案1 (优化配置) - 10-100倍提升
-2. **可选**: 添加多卡支持以扩展到1T
-3. **长期**: 升级GPU或使用云计算
+**Q: English text1TconfigurationEnglish text?**
+A: AllowedEnglish textrecommended.RequiredEnglish text32English textGPUEnglish text.
 
-性能应该立即从 2.5 tokens/step 提升到 256-512 tokens/step! 🚀
+**Q: English text1.5BEnglish text7BEnglish text?**
+A: Allowed,English text14-15GB,English text100-200 tokens/sec.
+
+**Q: English text?**
+A: BF16English text,English text.FP8RequiredEnglish textsupport.
+
+**Q: English textLoRA?**
+A: English texttraining,English text.LoRAEnglish text.
+
+---
+
+## English textstep
+
+1. **English text**: useEnglish text1 (optimizeconfiguration) - 10-100English text
+2. **English text**: English textsupportEnglish textextensionEnglish text1T
+3. **English text**: English textGPUEnglish textuseEnglish textcompute
+
+English text 2.5 tokens/step English text 256-512 tokens/step! 🚀

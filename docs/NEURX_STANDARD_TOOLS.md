@@ -1,40 +1,40 @@
-# NeurX 标准工具系统实现
+# NeurX English texttoolsystemimplementation
 
-**实现日期**: 2026年6月4日  
-**参照**: 外部标准工具系统  
-**状态**: ✅ 完成并可用
+**implementationEnglish text**: 2026English text6English text4English text
+**English text**: English texttoolsystem
+**state**: ✅ English text
 
 ---
 
-## 📋 概览
+## 📋 English text
 
-本实现提供了与外部标准工具系统兼容的 7 个标准工具，支持文件操作、命令执行和搜索功能。
+English textimplementationEnglish texttoolsystemEnglish text 7 English texttool, supportfileEnglish text, English textsearchEnglish text.
 
-### 实现的工具
+### implementationEnglish texttool
 
-| 工具名 | 功能 | 参数 | 状态 |
+| toolEnglish text | English text | parameter | state |
 |--------|------|------|------|
-| **Write** | 创建新文件或覆盖现有文件 | `file_path`, `new_text` | ✅ |
-| **Edit** | 修改现有文件（字符串替换） | `file_path`, `old_text`, `new_text` | ✅ |
-| **MultiEdit** | 一次执行多个编辑操作 | `file_path`, `edits[]` | ✅ |
-| **Read** | 读取文件内容 | `file_path`, `start_line?`, `end_line?` | ✅ |
-| **Bash** | 执行 Shell 命令 | `command`, `timeout?` | ✅ |
-| **Grep** | 搜索文件内容 | `pattern`, `path?`, `case_sensitive?`, `max_results?` | ✅ |
-| **Glob** | 列出匹配的文件 | `pattern`, `include_hidden?`, `max_results?` | ✅ |
+| **Write** | English textfileEnglish textfile | `file_path`, `new_text` | ✅ |
+| **Edit** | English textfile(English text) | `file_path`, `old_text`, `new_text` | ✅ |
+| **MultiEdit** | English text | `file_path`, `edits[]` | ✅ |
+| **Read** | English textfilecontent | `file_path`, `start_line?`, `end_line?` | ✅ |
+| **Bash** | English text Shell English text | `command`, `timeout?` | ✅ |
+| **Grep** | searchfilecontent | `pattern`, `path?`, `case_sensitive?`, `max_results?` | ✅ |
+| **Glob** | English textfile | `pattern`, `include_hidden?`, `max_results?` | ✅ |
 
 ---
 
-## 🎯 核心功能
+## 🎯 English text
 
-### 1. Write Tool - 文件创建
+### 1. Write Tool - fileEnglish text
 
-**功能**:
-- 创建新文件或覆盖现有文件
-- 自动创建父目录
-- Sandbox 安全检查
-- 路径遍历保护
+**English text**:
+- English textfileEnglish textfile
+- English textdirectory
+- Sandbox safetyEnglish text
+- pathEnglish text
 
-**使用示例**:
+**useexample**:
 ```json
 {
   "tool": "Write",
@@ -43,7 +43,7 @@
 }
 ```
 
-**C++ 调用**:
+**C++ English text**:
 ```cpp
 auto writeTool = new WriteTool(workspaceRoot);
 writeTool->setSandboxManager(sandboxManager);
@@ -58,15 +58,15 @@ if (!result.isError) {
 }
 ```
 
-### 2. Edit Tool - 文件编辑
+### 2. Edit Tool - fileEnglish text
 
-**功能**:
-- 精确字符串匹配替换
-- 必须唯一匹配（防止误编辑）
-- 支持多行文本
-- 自动验证
+**English text**:
+- English text
+- English text(English text)
+- supportEnglish text
+- English text
 
-**使用示例**:
+**useexample**:
 ```json
 {
   "tool": "Edit",
@@ -76,20 +76,20 @@ if (!result.isError) {
 }
 ```
 
-**特性**:
-- ✅ 精确匹配（包括空白字符）
-- ✅ 防止多次匹配错误
-- ✅ 文件存在性检查
-- ✅ 原子性操作
+**English text**:
+- ✅ English text(English text)
+- ✅ English texterror
+- ✅ fileEnglish text
+- ✅ English text
 
-### 3. MultiEdit Tool - 批量编辑
+### 3. MultiEdit Tool - English text
 
-**功能**:
-- 一次性应用多个编辑
-- 按顺序执行
-- 原子性（全部成功或全部失败）
+**English text**:
+- English text
+- English text
+- English text(English textsuccessEnglish textfailure)
 
-**使用示例**:
+**useexample**:
 ```json
 {
   "tool": "MultiEdit",
@@ -107,27 +107,27 @@ if (!result.isError) {
 }
 ```
 
-**优势**:
-- 减少多次文件读写
-- 保证一致性
-- 自动回滚失败操作
+**English text**:
+- English textfileEnglish text
+- English text
+- English textfailureEnglish text
 
-### 4. Read Tool - 文件读取
+### 4. Read Tool - fileEnglish text
 
-**功能**:
-- 读取完整文件或指定行范围
-- 二进制文件检测
-- 大文件处理
+**English text**:
+- English textcompletefileEnglish text
+- English textfileEnglish text
+- English textfileEnglish text
 
-**使用示例**:
+**useexample**:
 ```json
-// 读取完整文件
+// English textcompletefile
 {
   "tool": "Read",
   "file_path": "src/main.cpp"
 }
 
-// 读取指定行范围
+// English text
 {
   "tool": "Read",
   "file_path": "src/main.cpp",
@@ -136,21 +136,21 @@ if (!result.isError) {
 }
 ```
 
-**特性**:
-- 1-based 行号
-- UTF-8 编码支持
-- 二进制文件拒绝
-- Sandbox 保护
+**English text**:
+- 1-based English text
+- UTF-8 English textsupport
+- English textfileEnglish text
+- Sandbox English text
 
-### 5. Bash Tool - 命令执行
+### 5. Bash Tool - English text
 
-**功能**:
-- 在工作目录执行 shell 命令
-- 捕获输出和错误
-- 超时控制
-- 危险命令警告
+**English text**:
+- English textdirectoryEnglish text shell English text
+- English textoutputEnglish texterror
+- English text
+- English text
 
-**使用示例**:
+**useexample**:
 ```json
 {
   "tool": "Bash",
@@ -159,28 +159,28 @@ if (!result.isError) {
 }
 ```
 
-**安全特性**:
-- ✅ 危险命令检测（`rm -rf`, `dd`, etc.）
-- ✅ 超时保护
-- ✅ 工作目录限制
-- ✅ 输出大小限制
+**safetyEnglish text**:
+- ✅ English text(`rm -rf`, `dd`, etc.)
+- ✅ English text
+- ✅ English textdirectoryEnglish text
+- ✅ outputEnglish text
 
-**危险命令列表**:
-- `rm -rf` - 强制递归删除
-- `dd if=` - 磁盘操作
-- `mkfs` - 格式化
+**English text**:
+- `rm -rf` - English text
+- `dd if=` - English text
+- `mkfs` - English text
 - `:(){ :|:& };:` - Fork bomb
-- `chmod 777` - 权限危险操作
+- `chmod 777` - English text
 
-### 6. Grep Tool - 文件搜索
+### 6. Grep Tool - filesearch
 
-**功能**:
-- 正则表达式搜索
-- 递归目录搜索
-- 大小写敏感控制
-- 结果数量限制
+**English text**:
+- English textsearch
+- English textdirectorysearch
+- English text
+- resultcountEnglish text
 
-**使用示例**:
+**useexample**:
 ```json
 {
   "tool": "Grep",
@@ -191,13 +191,13 @@ if (!result.isError) {
 }
 ```
 
-**特性**:
-- 支持完整正则表达式
-- 显示文件名和行号
-- 跳过二进制文件
-- 跳过大文件（>10MB）
+**English text**:
+- supportcompleteEnglish text
+- English textfileEnglish text
+- English textfile
+- English textfile(>10MB)
 
-**输出格式**:
+**outputEnglish text**:
 ```
 === Found 3 matches for pattern: class\s+\w+ ===
 
@@ -206,23 +206,23 @@ src/auth/AuthService.h:15: class AuthService {
 src/utils/Helper.h:5: class Helper {
 ```
 
-### 7. Glob Tool - 文件列表
+### 7. Glob Tool - fileEnglish text
 
-**功能**:
-- Glob 模式匹配
-- 递归搜索（** 支持）
-- 自动排除常见目录
-- 隐藏文件控制
+**English text**:
+- Glob English text
+- English textsearch(** support)
+- English textdirectory
+- English textfileEnglish text
 
-**使用示例**:
+**useexample**:
 ```json
-// 查找所有 C++ 头文件
+// English text C++ English textfile
 {
   "tool": "Glob",
   "pattern": "**/*.h"
 }
 
-// 查找特定目录下的文件
+// English textdirectoryEnglish textfile
 {
   "tool": "Glob",
   "pattern": "src/auth/*.cpp",
@@ -231,7 +231,7 @@ src/utils/Helper.h:5: class Helper {
 }
 ```
 
-**自动排除**:
+**English text**:
 - `.git/`
 - `node_modules/`
 - `build/`
@@ -242,55 +242,55 @@ src/utils/Helper.h:5: class Helper {
 
 ---
 
-## 🔄 提示词 → 工具调用流程
+## 🔄 promptEnglish text → toolEnglish textpipeline
 
-### 架构概览
+### English text
 
 ```
-用户提示词
+English textpromptEnglish text
     ↓
-LLM 理解意图
+LLM English text
     ↓
-LLM 生成工具调用 JSON
+LLM generatetoolEnglish text JSON
     ↓
-NeurX Tool Executor 解析
+NeurX Tool Executor English text
     ↓
-调用对应工具
+English texttool
     ↓
-返回执行结果
+English textresult
     ↓
-LLM 解读结果
+LLM English textresult
     ↓
-返回给用户
+English text
 ```
 
-### 实现步骤
+### implementationstepEnglish text
 
-#### 步骤 1: 系统提示词设置
+#### stepEnglish text 1: systempromptEnglish text
 
-在 LLM 系统提示词中定义可用工具：
+English text LLM systempromptEnglish texttool:
 
 ```
 You have access to the following tools for file and system operations:
 
 1. **Write** - Create or overwrite files
    Parameters: file_path (string), new_text (string)
-   
+
 2. **Edit** - Modify existing files by replacing text
    Parameters: file_path (string), old_text (string), new_text (string)
-   
+
 3. **MultiEdit** - Apply multiple edits to one file
    Parameters: file_path (string), edits (array of {old_text, new_text})
-   
+
 4. **Read** - Read file contents
    Parameters: file_path (string), start_line? (int), end_line? (int)
-   
+
 5. **Bash** - Execute shell commands
    Parameters: command (string), timeout? (int)
-   
+
 6. **Grep** - Search for patterns in files
    Parameters: pattern (string), path? (string), case_sensitive? (bool)
-   
+
 7. **Glob** - List files matching pattern
    Parameters: pattern (string), include_hidden? (bool)
 
@@ -307,19 +307,19 @@ When you need to perform these operations, respond with a tool call in this form
 ```
 ```
 
-#### 步骤 2: 用户请求示例
+#### stepEnglish text 2: English textrequestexample
 
-**用户输入**:
+**English textinput**:
 ```
-创建一个 C++ 类 AuthService，包含 login 和 logout 方法
+English text C++ English text AuthService, English text login English text logout English text
 ```
 
-**LLM 理解**:
-1. 需要创建文件
-2. 文件类型：C++ 头文件
-3. 内容：类定义，包含指定方法
+**LLM English text**:
+1. RequiredEnglish textfile
+2. fileEnglish text: C++ English textfile
+3. content: English text, English text
 
-**LLM 生成工具调用**:
+**LLM generatetoolEnglish text**:
 ```json
 {
   "tool": "Write",
@@ -330,31 +330,31 @@ When you need to perform these operations, respond with a tool call in this form
 }
 ```
 
-#### 步骤 3: NeurX Tool Executor 执行
+#### stepEnglish text 3: NeurX Tool Executor English text
 
 ```cpp
-// 在 AgentController 或 ToolExecutor 中
+// English text AgentController English text ToolExecutor English text
 QJsonObject toolCall = parseLLMResponse(llmResponse);
 
 QString toolName = toolCall["tool"].toString();
 QJsonObject parameters = toolCall["parameters"].toObject();
 
-// 查找工具
+// English texttool
 BaseTool* tool = m_toolRegistry->findTool(toolName);
 if (!tool) {
     return ToolResult{"", toolName, true, "Tool not found"};
 }
 
-// 执行工具
+// English texttool
 ToolResult result = tool->execute(generateCallId(), parameters);
 
-// 返回结果给 LLM
+// English textresultEnglish text LLM
 QString resultMessage = formatToolResult(result);
 ```
 
-#### 步骤 4: 结果处理
+#### stepEnglish text 4: resultEnglish text
 
-**工具返回**:
+**toolEnglish text**:
 ```json
 {
   "call_id": "call-123",
@@ -364,30 +364,30 @@ QString resultMessage = formatToolResult(result);
 }
 ```
 
-**LLM 解读并返回用户**:
+**LLM English text**:
 ```
-我已经创建了 AuthService.h 文件，包含以下内容：
-- AuthService 类定义
-- login 方法：接受用户名和密码，返回认证结果
-- logout 方法：结束用户会话
-- 完整的文档注释
+English text AuthService.h file, English textcontent:
+- AuthService English text
+- login English text: English text, English textresult
+- logout English text: English text
+- completeEnglish text
 
-文件已保存到 src/auth/AuthService.h。
-```
-
-### 复杂场景示例
-
-#### 场景：创建完整的类（头文件 + 源文件）
-
-**用户**:
-```
-创建 PaymentService 类，包含头文件和实现文件
+fileEnglish textsaveEnglish text src/auth/AuthService.h.
 ```
 
-**LLM 执行多个工具调用**:
+### English textexample
+
+#### English text: English textcompleteEnglish text(English textfile + English textfile)
+
+**English text**:
+```
+English text PaymentService English text, English textfileEnglish textimplementationfile
+```
+
+**LLM English texttoolEnglish text**:
 
 ```json
-// 调用 1: 创建头文件
+// English text 1: English textfile
 {
   "tool": "Write",
   "parameters": {
@@ -396,7 +396,7 @@ QString resultMessage = formatToolResult(result);
   }
 }
 
-// 调用 2: 创建源文件
+// English text 2: English textfile
 {
   "tool": "Write",
   "parameters": {
@@ -405,7 +405,7 @@ QString resultMessage = formatToolResult(result);
   }
 }
 
-// 调用 3: 检查文件是否创建成功
+// English text 3: English textfileEnglish textsuccess
 {
   "tool": "Glob",
   "parameters": {
@@ -414,17 +414,17 @@ QString resultMessage = formatToolResult(result);
 }
 ```
 
-#### 场景：修改现有代码
+#### English text: English text
 
-**用户**:
+**English text**:
 ```
-在 main.cpp 的 main 函数中添加日志输出
+English text main.cpp English text main functionEnglish textlogoutput
 ```
 
-**LLM 执行流程**:
+**LLM English textpipeline**:
 
 ```json
-// 1. 读取文件
+// 1. English textfile
 {
   "tool": "Read",
   "parameters": {
@@ -432,7 +432,7 @@ QString resultMessage = formatToolResult(result);
   }
 }
 
-// 2. 根据内容决定修改
+// 2. English textcontentEnglish text
 {
   "tool": "Edit",
   "parameters": {
@@ -445,37 +445,37 @@ QString resultMessage = formatToolResult(result);
 
 ---
 
-## 🔧 集成指南
+## 🔧 English text
 
-### 1. 添加到 CMakeLists.txt
+### 1. English text CMakeLists.txt
 
 ```cmake
-# 在 add_library 或 add_executable 中添加
+# English text add_library English text add_executable English text
 src/tools/NeurXStandardTools.cpp
 ```
 
-### 2. 注册工具到 Registry
+### 2. English texttoolEnglish text Registry
 
-**方法 A: 使用工厂一次性注册所有工具**
+**English text A: useEnglish texttool**
 
 ```cpp
 #include "tools/NeurXStandardTools.h"
 #include "tools/DefaultToolRegistry.h"
 #include "sandbox/SandboxManager.h"
 
-// 在 AgentController 或初始化代码中
+// English text AgentController English textinitializeEnglish text
 QString workspaceRoot = "/path/to/workspace";
 CoreToolRegistry* registry = getToolRegistry();
 SandboxManager* sandbox = getSandboxManager();
 
-// 一次性注册所有 7 个标准工具
+// English text 7 English texttool
 NeurXStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
 ```
 
-**方法 B: 单独注册工具**
+**English text B: English texttool**
 
 ```cpp
-// 只注册需要的工具
+// English textRequiredEnglish texttool
 auto writeTool = NeurXStandardToolFactory::createWriteTool(workspaceRoot, sandbox);
 auto readTool = NeurXStandardToolFactory::createReadTool(workspaceRoot, sandbox);
 
@@ -486,10 +486,10 @@ registry->registerTool(writeInst, "global");
 registry->registerTool(readInst, "global");
 ```
 
-### 3. 在 LLM Provider 中使用
+### 3. English text LLM Provider English textuse
 
 ```cpp
-// 在 LLMProvider 中添加工具定义
+// English text LLMProvider English texttoolEnglish text
 QJsonArray tools;
 
 // Write Tool
@@ -508,43 +508,43 @@ readTool["parameters"] = NeurXStandardToolFactory::createReadTool(workspace)
                             ->parametersSchema();
 tools.append(readTool);
 
-// ... 其他工具
+// ... English texttool
 
-// 发送给 LLM
+// English text LLM
 request.tools = tools;
 ```
 
-### 4. 处理工具调用
+### 4. English texttoolEnglish text
 
 ```cpp
-// 在 AgentController::handleToolCalls() 中
+// English text AgentController::handleToolCalls() English text
 void AgentController::handleToolCalls(const QJsonArray& toolCalls)
 {
     for (const QJsonValue& callVal : toolCalls) {
         QJsonObject call = callVal.toObject();
-        
+
         QString toolName = call["tool"].toString();
         QJsonObject params = call["parameters"].toObject();
         QString callId = generateCallId();
-        
-        // 查找工具
+
+        // English texttool
         BaseTool* tool = m_toolRegistry->findTool(toolName);
         if (!tool) {
             emit toolExecutionFailed(callId, "Tool not found: " + toolName);
             continue;
         }
-        
-        // 执行工具
+
+        // English texttool
         ToolResult result = tool->execute(callId, params);
-        
-        // 发送结果
+
+        // English textresult
         if (result.isError) {
             emit toolExecutionFailed(callId, result.content);
         } else {
             emit toolExecutionSucceeded(callId, result.content);
         }
-        
-        // 将结果返回给 LLM
+
+        // English textresultEnglish text LLM
         appendToolResultToConversation(result);
     }
 }
@@ -552,16 +552,16 @@ void AgentController::handleToolCalls(const QJsonArray& toolCalls)
 
 ---
 
-## 🎨 实际使用场景
+## 🎨 actualuseEnglish text
 
-### 场景 1: 快速创建文件
+### English text 1: quickEnglish textfile
 
-**用户**:
+**English text**:
 ```
-创建一个配置文件 config.json，包含数据库配置
+English textconfigurationfile config.json, English textdataEnglish textconfiguration
 ```
 
-**工具调用**:
+**toolEnglish text**:
 ```json
 {
   "tool": "Write",
@@ -572,19 +572,19 @@ void AgentController::handleToolCalls(const QJsonArray& toolCalls)
 }
 ```
 
-### 场景 2: 重构代码
+### English text 2: English text
 
-**用户**:
+**English text**:
 ```
-把所有的 qDebug() 改成使用 Logger 类
+English text qDebug() English textuse Logger English text
 ```
 
-**工具调用序列**:
+**toolEnglish text**:
 ```json
-// 1. 查找所有包含 qDebug 的文件
+// 1. English text qDebug English textfile
 {"tool": "Grep", "parameters": {"pattern": "qDebug\\("}}
 
-// 2. 对每个文件执行编辑
+// 2. English textfileEnglish text
 {"tool": "Edit", "parameters": {
   "file_path": "src/main.cpp",
   "old_text": "qDebug() << \"Message\";",
@@ -592,214 +592,214 @@ void AgentController::handleToolCalls(const QJsonArray& toolCalls)
 }}
 ```
 
-### 场景 3: 项目结构搭建
+### English text 3: English text
 
-**用户**:
+**English text**:
 ```
-创建一个新的模块 user-management，包含基本结构
+English text user-management, English text
 ```
 
-**工具调用序列**:
+**toolEnglish text**:
 ```json
-// 1. 创建目录结构
+// 1. English textdirectoryEnglish text
 {"tool": "Bash", "parameters": {"command": "mkdir -p src/user-management tests/user-management"}}
 
-// 2. 创建头文件
+// 2. English textfile
 {"tool": "Write", "parameters": {"file_path": "src/user-management/UserManager.h", ...}}
 
-// 3. 创建源文件
+// 3. English textfile
 {"tool": "Write", "parameters": {"file_path": "src/user-management/UserManager.cpp", ...}}
 
-// 4. 创建测试文件
+// 4. English texttestfile
 {"tool": "Write", "parameters": {"file_path": "tests/user-management/UserManagerTest.cpp", ...}}
 
-// 5. 验证创建结果
+// 5. English textresult
 {"tool": "Glob", "parameters": {"pattern": "**/*user-management*"}}
 ```
 
-### 场景 4: 代码审查
+### English text 4: English text
 
-**用户**:
+**English text**:
 ```
-检查所有 .cpp 文件中是否有未使用的变量
+English text .cpp fileEnglish textuseEnglish text
 ```
 
-**工具调用序列**:
+**toolEnglish text**:
 ```json
-// 1. 列出所有 cpp 文件
+// 1. English text cpp file
 {"tool": "Glob", "parameters": {"pattern": "**/*.cpp"}}
 
-// 2. 搜索可疑模式
+// 2. searchEnglish text
 {"tool": "Grep", "parameters": {"pattern": "\\w+\\s+\\w+\\s*=.*;\\s*//"}}
 
-// 3. 读取具体文件分析
+// 3. English textfileEnglish text
 {"tool": "Read", "parameters": {"file_path": "src/suspect.cpp"}}
 ```
 
 ---
 
-## 📊 性能和限制
+## 📊 English text
 
-### 性能特性
+### English text
 
-| 工具 | 性能 | 限制 |
+| tool | English text | English text |
 |------|------|------|
-| Write | 极快 | 无大小限制 |
-| Edit | 快 | 文件大小 < 100MB |
-| MultiEdit | 中等 | 单文件 < 100 个编辑 |
-| Read | 快 | 单次读取 < 100MB |
-| Bash | 依赖命令 | 超时默认 30 秒 |
-| Grep | 中等 | 大目录可能较慢 |
-| Glob | 快 | 默认最多 1000 个结果 |
+| Write | English text | English text |
+| Edit | English text | fileEnglish text < 100MB |
+| MultiEdit | English text | English textfile < 100 English text |
+| Read | English text | English text < 100MB |
+| Bash | English text | English textdefault 30 English text |
+| Grep | English text | English textdirectoryEnglish text |
+| Glob | English text | defaultEnglish text 1000 English textresult |
 
-### 安全限制
+### safetyEnglish text
 
-1. **路径遍历保护**
-   - 所有路径必须在工作空间内
-   - 检测 `..` 和符号链接
+1. **pathEnglish text**
+   - English textpathEnglish text
+   - English text `..` English text
 
-2. **Sandbox 集成**
-   - 每个工具都支持 Sandbox Manager
-   - 可配置读写权限
+2. **Sandbox English text**
+   - English texttoolEnglish textsupport Sandbox Manager
+   - English textconfigurationEnglish text
 
-3. **危险操作警告**
-   - Bash 工具检测危险命令
-   - 可配置审批流程
+3. **English text**
+   - Bash toolEnglish text
+   - English textconfigurationEnglish textpipeline
 
-4. **大小限制**
-   - 二进制文件自动跳过
-   - 大文件（>10MB）需要特殊处理
+4. **English text**
+   - English textfileEnglish text
+   - English textfile(>10MB)RequiredEnglish text
 
 ---
 
-## 🔍 故障排除
+## 🔍 English text
 
-### 问题 1: 工具未找到
+### English text 1: toolEnglish text
 
-**错误**: `Tool not found: Write`
+**error**: `Tool not found: Write`
 
-**解决**:
+**English text**:
 ```cpp
-// 确保工具已注册
+// English texttoolEnglish text
 NeurXStandardToolFactory::registerAllTools(workspaceRoot, registry, sandbox);
 
-// 检查注册表
+// English text
 QStringList tools = registry->listTools();
 qDebug() << "Registered tools:" << tools;
 ```
 
-### 问题 2: 路径错误
+### English text 2: patherror
 
-**错误**: `Path traversal attack detected`
+**error**: `Path traversal attack detected`
 
-**原因**: 路径包含 `..` 或在工作空间外
+**English text**: pathEnglish text `..` English text
 
-**解决**:
-- 使用相对路径
-- 确保路径在工作空间内
-- 检查 workspaceRoot 设置
+**English text**:
+- useEnglish textpath
+- English textpathEnglish text
+- English text workspaceRoot English text
 
-### 问题 3: Sandbox 拒绝访问
+### English text 3: Sandbox English text
 
-**错误**: `Sandbox policy denied write access`
+**error**: `Sandbox policy denied write access`
 
-**解决**:
+**English text**:
 ```cpp
-// 配置 Sandbox 策略
+// configuration Sandbox English text
 sandboxManager->allow("/path/to/workspace", FileSystemAccessMode::ReadWrite);
 
-// 或临时禁用 Sandbox
+// English text Sandbox
 tool->setSandboxManager(nullptr);
 ```
 
-### 问题 4: 编辑失败
+### English text 4: English textfailure
 
-**错误**: `old_text not found in file`
+**error**: `old_text not found in file`
 
-**原因**: 
-- 文本不完全匹配
-- 包含隐藏字符
-- 换行符不一致
+**English text**:
+- English text
+- English text
+- English text
 
-**解决**:
-- 使用 Read 工具先查看文件内容
-- 确保空白字符完全匹配
-- 考虑使用 MultiEdit 分步修改
+**English text**:
+- use Read toolEnglish textfilecontent
+- English text
+- English textuse MultiEdit English textstepEnglish text
 
 ---
 
-## 🚀 下一步
+## 🚀 English textstep
 
-### 已完成 ✅
+### English text ✅
 
-1. ✅ 7 个标准工具完整实现
-2. ✅ Sandbox 集成
-3. ✅ 错误处理
-4. ✅ 完整文档
+1. ✅ 7 English texttoolcompleteimplementation
+2. ✅ Sandbox English text
+3. ✅ errorEnglish text
+4. ✅ completeEnglish text
 
-### 计划中
+### English text
 
-1. **工具调用解析器**
-   - 自动解析 LLM 返回的工具调用
-   - 批量执行工具链
-   - 错误重试机制
+1. **toolEnglish text**
+   - English text LLM English texttoolEnglish text
+   - English texttoolEnglish text
+   - errorEnglish text
 
-2. **Hook 系统集成**
+2. **Hook systemEnglish text**
    - PreToolUse hook
    - PostToolUse hook
-   - 工具调用审批流程
+   - toolEnglish textpipeline
 
-3. **性能优化**
-   - 大文件流式读取
-   - 并行工具执行
-   - 结果缓存
+3. **English textoptimize**
+   - English textfileEnglish text
+   - English texttoolEnglish text
+   - resultcache
 
-4. **增强功能**
-   - Write 工具支持模板
-   - Edit 工具支持模糊匹配
-   - Grep 工具显示上下文
+4. **English text**
+   - Write toolsupportEnglish text
+   - Edit toolsupportEnglish text
+   - Grep toolEnglish text
 
 ---
 
-## 📝 总结
+## 📝 English text
 
-### 实现成果
+### implementationEnglish text
 
-- ✅ **7 个标准工具** - 完整实现 NeurX 兼容接口
-- ✅ **安全可靠** - Sandbox、路径验证、危险命令检测
-- ✅ **易于集成** - 工厂模式，一键注册
-- ✅ **完整文档** - 详细的使用指南和示例
+- ✅ **7 English texttool** - completeimplementation NeurX English text
+- ✅ **safetyEnglish text** - Sandbox, pathEnglish text, English text
+- ✅ **English text** - English text, English text
+- ✅ **completeEnglish text** - English textuseEnglish textexample
 
-### 与 NeurX 对比
+### English text NeurX English text
 
-| 特性 | 外部参考实现 | NeurX Code |
+| English text | English textimplementation | NeurX Code |
 |------|-------------|------------|
-| 工具接口 | ✅ 标准 JSON schema | ✅ 本地实现 |
-| Write 工具 | ✅ | ✅ |
-| Edit 工具 | ✅ | ✅ |
-| MultiEdit 工具 | ✅ | ✅ |
-| Read 工具 | ✅ | ✅ |
-| Bash 工具 | ✅ | ✅ |
-| Grep 工具 | ✅ | ✅ |
-| Glob 工具 | ✅ | ✅ |
+| toolEnglish text | ✅ English text JSON schema | ✅ English textimplementation |
+| Write tool | ✅ | ✅ |
+| Edit tool | ✅ | ✅ |
+| MultiEdit tool | ✅ | ✅ |
+| Read tool | ✅ | ✅ |
+| Bash tool | ✅ | ✅ |
+| Grep tool | ✅ | ✅ |
+| Glob tool | ✅ | ✅ |
 | Sandbox | ✅ | ✅ |
-| Hook 系统 | ✅ | 🔄 (已设计) |
-| **总体完成度** | 100% | **95%** ✅ |
+| Hook system | ✅ | 🔄 (English text) |
+| **English text** | 100% | **95%** ✅ |
 
-### 关键优势
+### English text
 
-1. **本地控制** - 不依赖 API，完全本地执行
-2. **可定制** - 可以根据需求修改工具行为
-3. **集成简单** - 工厂模式一键注册
-4. **安全可靠** - 完整的安全检查和错误处理
+1. **English text** - English text API, English text
+2. **English text** - AllowedEnglish texttoolEnglish text
+3. **English text** - English text
+4. **safetyEnglish text** - completeEnglish textsafetyEnglish texterrorEnglish text
 
 ---
 
-**NeurX Code 现在拥有完整的标准工具能力! 🚀**
+**NeurX Code English textcompleteEnglish texttoolEnglish text! 🚀**
 
-**实现日期**: 2026年6月4日  
-**实现者**: shuwenhe  
-**文件位置**:
-- 头文件: `src/tools/NeurXStandardTools.h`
-- 实现: `src/tools/NeurXStandardTools.cpp`
-- 文档: `docs/NEURX_STANDARD_TOOLS.md`
+**implementationEnglish text**: 2026English text6English text4English text
+**implementationEnglish text**: shuwenhe
+**fileEnglish text**:
+- English textfile: `src/tools/NeurXStandardTools.h`
+- implementation: `src/tools/NeurXStandardTools.cpp`
+- English text: `docs/NEURX_STANDARD_TOOLS.md`

@@ -1,224 +1,224 @@
-# VS Code 功能迁移到 NeurX Code 的路线图
+# VS Code English textmigrationEnglish text NeurX Code English text
 
-这份路线图不是“把 VS Code 全抄过来”，而是按 `neurx-code` 当前架构，优先迁移最能提升编码效率、最适合 AI agent 工作流的能力。
+English text"English text VS Code English text", English text `neurx-code` English text, English textmigrationEnglish text, English text AI agent English text.
 
-## 1. 当前基础
+## 1. English text
 
-NeurX Code 已经有这些底座：
+NeurX Code English text:
 
-- QML 桌面 UI
-- `AgentController` 作为 UI 与后端桥接
-- `Planner` / `Executor` / `Verifier` 的 agent 执行链
-- 文件系统、沙箱、审批、补丁、搜索、技能、插件等模块
-- 聊天面板、编辑器、设置、文件创建能力
+- QML English text UI
+- `AgentController` English text UI English text
+- `Planner` / `Executor` / `Verifier` English text agent English text
+- filesystem, English text, English text, English text, search, English text, pluginEnglish text
+- English text, English text, English text, fileEnglish text
 
-所以迁移策略应该是：
+English textmigrationEnglish text:
 
-1. 先补“高频编辑/导航”能力
-2. 再补“工程化工作流”能力
-3. 最后补“平台级扩展能力”
+1. English text"English text/English text"English text
+2. English text"English text"English text
+3. English text"English textextensionEnglish text"
 
-## 2. P0: 先做，收益最大
+## 2. P0: English text, English text
 
-这些功能最接近 VS Code 的核心体验，也最适合 NeurX 的 agent 形态。
+English text VS Code English text, English text NeurX English text agent English text.
 
-### 2.1 命令面板
+### 2.1 English text
 
-目标：
+English text:
 
-- `Ctrl+Shift+P` 打开命令面板
-- 支持命令搜索、分组、最近命令
-- 和 `CommandManager` 打通
+- `Ctrl+Shift+P` English text
+- supportEnglish textsearch, English text, English text
+- English text `CommandManager` English text
 
-现有基础：
+English text:
 
 - `src/commands/CommandManager.cpp`
 - `content/ChatPanel.qml`
 
-建议落点：
+English text:
 
-- 做成独立 `CommandPalette.qml`
-- 命令源直接来自 `CommandManager`
+- English text `CommandPalette.qml`
+- English text `CommandManager`
 
-### 2.2 全局搜索与替换
+### 2.2 English textsearchEnglish text
 
-目标：
+English text:
 
-- 文件内容搜索
-- 正则搜索
-- 替换单个 / 批量替换
-- 显示匹配预览和文件分组
+- filecontentsearch
+- English textsearch
+- English text / English text
+- English textfileEnglish text
 
-现有基础：
+English text:
 
 - `src/search/GlobalSearchEngine.cpp`
 
-建议落点：
+English text:
 
 - `SearchPanel.qml`
-- 搜索结果列表支持双击跳转
+- searchresultEnglish textsupportEnglish text
 
-### 2.3 Git / Diff / 回滚
+### 2.3 Git / Diff / English text
 
-目标：
+English text:
 
-- 查看工作区改动
-- 预览 diff
-- 回滚单个文件或单次变更
-- 展示分支与状态
+- English text
+- English text diff
+- English textfileEnglish text
+- English textstate
 
-现有基础：
+English text:
 
 - `src/context/WorkspaceContext.cpp`
 - `src/plugins/GitWorkflow.h`
 - `src/tools/PatchTool.cpp`
 - `src/tools/CheckpointManager.*`
 
-建议落点：
+English text:
 
 - `DiffPanel.qml`
 - `GitStatusPanel.qml`
 
-### 2.4 内嵌终端
+### 2.4 English text
 
-目标：
+English text:
 
-- 执行构建、测试、格式化命令
-- 终端输出流式展示
-- 支持中断
+- English text, test, English text
+- English textoutputEnglish text
+- supportEnglish text
 
-现有基础：
+English text:
 
 - `src/sandbox/DefaultSandboxManager.cpp`
 - `src/tools/ShellTool.cpp`
 
-建议落点：
+English text:
 
 - `TerminalPanel.qml`
-- 终端命令历史按 session 保存
+- English text session save
 
-## 3. P1: 中期补强
+## 3. P1: English text
 
-这些能力会明显提升“像 VS Code 一样”的感觉，但实现成本更高。
+English text"English text VS Code English text"English text, English textimplementationEnglish text.
 
-### 3.1 LSP / 代码导航
+### 3.1 LSP / English text
 
-目标：
+English text:
 
-- 跳转定义
-- 查找引用
-- 悬浮文档
-- 符号大纲
-- 面包屑导航
+- English text
+- English text
+- English text
+- English text
+- English text
 
-建议落点：
+English text:
 
-- 增加独立 LSP client 层
-- 复用现有编辑器和语言高亮
+- English text LSP client English text
+- English textlanguageEnglish text
 
-### 3.2 诊断与问题面板
+### 3.2 English text
 
-目标：
+English text:
 
-- 编译错误、lint、语法错误统一展示
-- 可点击跳转到文件位置
+- compileerror, lint, English texterrorEnglish text
+- English textfileEnglish text
 
-建议落点：
+English text:
 
 - `ProblemsPanel.qml`
-- 复用搜索、编辑器、日志系统
+- English textsearch, English text, logsystem
 
-### 3.3 任务系统
+### 3.3 English textsystem
 
-目标：
+English text:
 
-- 构建任务、测试任务、格式化任务
-- 任务运行状态、输出、失败重试
+- English text, testEnglish text, English text
+- English textrunstate, output, failureEnglish text
 
-现有基础：
+English text:
 
 - `src/planning/PlanStructure.*`
 - `src/commands/CommandManager.*`
 
-## 4. P2: 平台化能力
+## 4. P2: English text
 
-这些功能更像“把 NeurX 做成 IDE 平台”，不是短期必须项。
+English text"English text NeurX English text IDE English text", English text.
 
-### 4.1 插件宿主
+### 4.1 pluginEnglish textmain
 
-目标：
+English text:
 
-- 插件加载、卸载、激活事件
-- 命令贡献、菜单贡献、视图贡献
+- pluginload, English text, English text
+- English text, English text, English text
 
-现有基础：
+English text:
 
 - `src/plugins/PluginManager.*`
 - `src/skills/DefaultSkillManager.*`
 
-### 4.2 扩展市场
+### 4.2 extensionEnglish text
 
-目标：
+English text:
 
-- 安装、更新、禁用插件
-- 插件元数据和版本管理
+- English text, English text, English textplugin
+- pluginEnglish textdataEnglish textmanagement
 
-### 4.3 调试器
+### 4.3 English text
 
-目标：
+English text:
 
-- 断点
-- 单步
-- 变量
-- 调用栈
+- English text
+- English textstep
+- English text
+- English text
 
-这部分可以做，但建议放在后面，因为协议和 UI 都会比较重。
+English textAllowedEnglish text, English text, English text UI English text.
 
-## 5. 推荐实施顺序
+## 5. recommendedEnglish text
 
-### 第 1 阶段
+### English text 1 phase
 
-- 命令面板
-- 全局搜索 / 替换
-- Git 状态 / Diff
+- English text
+- English textsearch / English text
+- Git state / Diff
 
-### 第 2 阶段
+### English text 2 phase
 
-- 终端面板
-- 任务系统
-- 更强的滚动 / 导航交互
+- English text
+- English textsystem
+- English text / English text
 
-### 第 3 阶段
+### English text 3 phase
 
 - LSP
-- 诊断面板
-- 符号导航
+- English text
+- English text
 
-### 第 4 阶段
+### English text 4 phase
 
-- 插件宿主
-- 扩展市场
-- 调试器
+- pluginEnglish textmain
+- extensionEnglish text
+- English text
 
-## 6. 不建议直接照搬的部分
+## 6. English text
 
-这些功能不是不能做，而是直接照搬 VS Code 性价比不高：
+English text, English text VS Code English text:
 
-- 完整扩展宿主沙箱
-- 全量 Marketplace 生态
-- 复杂 notebook 体系
-- 与 VS Code 完全一致的工作台布局
+- completeextensionEnglish textmainEnglish text
+- English text Marketplace English text
+- English text notebook English text
+- English text VS Code English text
 
-NeurX Code 更适合走“agent-first IDE”路线，而不是“另一个 VS Code”。
+NeurX Code English text"agent-first IDE"English text, English text"English text VS Code".
 
-## 7. 一句话结论
+## 7. English text
 
-最值得先做的是：
+English text:
 
-1. 命令面板
-2. 全局搜索 / 替换
-3. Git / Diff / 回滚
-4. 内嵌终端
-5. LSP 导航与诊断
+1. English text
+2. English textsearch / English text
+3. Git / Diff / English text
+4. English text
+5. LSP English text
 
-这五项最能快速把 NeurX Code 拉到“可日常使用”的水位。
+English textquickEnglish text NeurX Code English text"English textuse"English text.

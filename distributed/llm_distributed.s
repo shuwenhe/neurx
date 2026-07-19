@@ -26,19 +26,19 @@ use neurx.model.llm.gpt_backward.{
 }
 
 // ============================================================================
-// 1. 分布式配置
+// 1. English textconfiguration
 // ============================================================================
 
 struct dist_config {
-    int world_size            // 总进程数 (= DP × TP × PP)
-    int rank                  // 当前进程 rank
-    int data_parallel_size    // 数据并行度
-    int tensor_parallel_size  // 张量并行度
+    int world_size            // English text (= DP × TP × PP)
+    int rank                  // English text rank
+    int data_parallel_size    // dataEnglish text
+    int tensor_parallel_size  // English text
     int pipeline_parallel_size
     string backend            // "nccl" | "gloo"
     string zero_stage         // "none" | "zero1" | "zero2" | "zero3"
-    int bucket_size_mb        // 梯度桶大小 (通信效率)
-    bool overlap_comm         // 反向与通信重叠
+    int bucket_size_mb        // gradientEnglish text (English text)
+    bool overlap_comm         // English text
 }
 
 func new_dist_config(int world_size, int rank, int dp_size) dist_config {
@@ -56,10 +56,10 @@ func new_dist_config(int world_size, int rank, int dp_size) dist_config {
 }
 
 // ============================================================================
-// 2. 张量级 all-reduce 原语
+// 2. English text all-reduce English text
 // ============================================================================
 
-// 两个梯度向量逐元素相加 (跨 rank 求和的一步)
+// English textgradientEnglish text (English text rank English textstep)
 func dist_add_vec([]float a, []float b) []float {
     int n = len(a)
     []float out = gpt_alloc(n, 0.0)
@@ -75,7 +75,7 @@ func dist_add_vec([]float a, []float b) []float {
     out
 }
 
-// 梯度向量整体缩放 (求和后除以 world_size = 平均)
+// gradientEnglish text (English text world_size = English text)
 func dist_scale_vec([]float v, float scale) []float {
     int n = len(v)
     []float out = gpt_alloc(n, 0.0)
@@ -88,7 +88,7 @@ func dist_scale_vec([]float v, float scale) []float {
 }
 
 // ============================================================================
-// 3. 层级梯度 all-reduce
+// 3. English textgradient all-reduce
 // ============================================================================
 
 func dist_add_layer_grads(transformer_layer_grads a, transformer_layer_grads b) transformer_layer_grads {
@@ -128,10 +128,10 @@ func dist_scale_layer_grads(transformer_layer_grads g, float scale) transformer_
 }
 
 // ============================================================================
-// 4. 完整模型梯度 all-reduce
+// 4. completemodelgradient all-reduce
 // ============================================================================
 
-// 两个 rank 的完整梯度求和
+// English text rank English textcompletegradientEnglish text
 func dist_add_grads(gpt_param_grads a, gpt_param_grads b) gpt_param_grads {
     []transformer_layer_grads merged = []transformer_layer_grads{cap: a.n_layer}
     int l = 0
@@ -149,7 +149,7 @@ func dist_add_grads(gpt_param_grads a, gpt_param_grads b) gpt_param_grads {
     }
 }
 
-// 完整梯度缩放
+// completegradientEnglish text
 func dist_scale_grads(gpt_param_grads g, float scale) gpt_param_grads {
     []transformer_layer_grads scaled = []transformer_layer_grads{cap: g.n_layer}
     int l = 0
@@ -167,19 +167,19 @@ func dist_scale_grads(gpt_param_grads g, float scale) gpt_param_grads {
     }
 }
 
-// DDP all-reduce: 跨所有 rank 求梯度和后取平均
-// per_rank_grads[r] = rank r 在其本地 micro-batch 上算出的梯度
+// DDP all-reduce: English text rank English textgradientEnglish text
+// per_rank_grads[r] = rank r English text micro-batch English textgradient
 func dist_all_reduce_grads([]gpt_param_grads per_rank_grads) gpt_param_grads {
     int world = len(per_rank_grads)
     if world == 0 {
-        // 不该发生; 返回空
+        // English text; English text
         return per_rank_grads[0]
     }
     if world == 1 {
         return per_rank_grads[0]
     }
 
-    // 累加所有 rank 的梯度
+    // English text rank English textgradient
     gpt_param_grads summed = per_rank_grads[0]
     int r = 1
     while r < world {
@@ -187,28 +187,28 @@ func dist_all_reduce_grads([]gpt_param_grads per_rank_grads) gpt_param_grads {
         r = r + 1
     }
 
-    // 平均 (DDP 标准: 梯度对 batch 取均值)
+    // English text (DDP English text: gradientEnglish text batch English text)
     float scale = 1.0 / (world * 1.0)
     dist_scale_grads(summed, scale)
 }
 
 // ============================================================================
-// 5. 分布式训练步
+// 5. English texttrainingstep
 //
-//   每个 DP rank 在自己的 micro-batch 上做前向+反向 → 得到本地梯度，
-//   all-reduce 平均 → 所有 rank 用相同的平均梯度做同步参数更新。
-//   (单进程模拟: 顺序计算每个 rank 的梯度，再聚合)
+//   English text DP rank English text micro-batch English text+English text → English textgradient,
+//   all-reduce English text → English text rank English textgradientEnglish textstepparameterEnglish text.
+//   (English text: English textcomputeEnglish text rank English textgradient, English text)
 // ============================================================================
 
 struct dist_train_result {
     language_model model
     gpt_adamw_state opt
-    float loss              // 跨 rank 平均损失
+    float loss              // English text rank English textloss
     float grad_norm
     int world_size
 }
 
-// 计算单个 rank 的梯度 (内部用 forward_cached + backward)
+// computeEnglish text rank English textgradient (English text forward_cached + backward)
 func dist_compute_rank_grads(
     language_model model,
     []int token_ids,
@@ -222,7 +222,7 @@ func dist_compute_rank_grads(
     gpt_backward(model, fc, targets)
 }
 
-// 全局梯度范数 (跨参数)
+// English textgradientEnglish text (English textparameter)
 func dist_grad_norm(gpt_param_grads grads) float {
     float sq = 0.0
     sq = sq + dist_vec_norm_sq(grads.d_wte)
@@ -262,9 +262,9 @@ func dist_sqrt(float x) float {
     y
 }
 
-// 分布式数据并行训练步
-//   rank_batches[r] = rank r 的 token batch  [micro_batch * seq_len]
-//   rank_targets[r] = rank r 的 targets
+// English textdataEnglish texttrainingstep
+//   rank_batches[r] = rank r English text token batch  [micro_batch * seq_len]
+//   rank_targets[r] = rank r English text targets
 func distributed_train_step(
     language_model model,
     gpt_adamw_state opt,
@@ -277,7 +277,7 @@ func distributed_train_step(
     int world = len(rank_batches)
     if world < 1 { world = 1 }
 
-    // 1. 每个 rank 计算本地梯度
+    // 1. English text rank computeEnglish textgradient
     []gpt_param_grads per_rank = []gpt_param_grads{cap: world}
     int r = 0
     while r < world {
@@ -287,17 +287,17 @@ func distributed_train_step(
         r = r + 1
     }
 
-    // 2. All-reduce: 跨 rank 平均梯度
+    // 2. All-reduce: English text rank English textgradient
     gpt_param_grads avg_grads = dist_all_reduce_grads(per_rank)
 
-    // 3. 梯度裁剪 (在平均后的全局梯度上)
+    // 3. gradientEnglish text (English textgradientEnglish text)
     float gnorm = dist_grad_norm(avg_grads)
     if grad_clip > 0.0 && gnorm > grad_clip {
         float coeff = grad_clip / gnorm
         avg_grads = scale_all_grads(avg_grads, coeff)
     }
 
-    // 4. 同步参数更新 (所有 rank 用相同平均梯度 → 模型保持一致)
+    // 4. English textstepparameterEnglish text (English text rank English textgradient → modelEnglish text)
     language_model updated_model
     gpt_adamw_state updated_opt
     (updated_model, updated_opt) = gpt_adamw_step(model, avg_grads, opt)
@@ -312,28 +312,28 @@ func distributed_train_step(
 }
 
 // ============================================================================
-// 6. ZeRO-1 优化器状态分片
+// 6. ZeRO-1 optimizeEnglish textstateEnglish text
 //
-//   ZeRO-1: 优化器状态 (AdamW 的 m/v) 在 DP rank 间分片，
-//   每个 rank 只持有 1/world_size 的优化器状态，显存占用大幅下降。
-//   参数仍全量复制；梯度 all-reduce 后，每个 rank 更新自己负责的分片，
-//   再 all-gather 同步参数。
+//   ZeRO-1: optimizeEnglish textstate (AdamW English text m/v) English text DP rank English text,
+//   English text rank English text 1/world_size English textoptimizeEnglish textstate, English text.
+//   parameterEnglish text; gradient all-reduce English text, English text rank English text,
+//   English text all-gather English textstepparameter.
 // ============================================================================
 
 struct zero1_partition {
     int rank
     int world_size
-    int start_index     // 本 rank 负责的参数起始下标
-    int end_index       // 结束下标 (不含)
+    int start_index     // English text rank English textparameterEnglish text
+    int end_index       // English text (English text)
     int total_params
 }
 
-// 计算某 rank 负责的参数区间 (按总参数量均分)
+// computeEnglish text rank English textparameterEnglish text (English textparameterEnglish text)
 func zero1_compute_partition(int rank, int world_size, int total_params) zero1_partition {
     int per_rank = total_params / world_size
     int remainder = total_params - per_rank * world_size
     int start = rank * per_rank
-    // 把余数分给前面的 rank
+    // English text rank
     if rank < remainder {
         start = start + rank
         per_rank = per_rank + 1
@@ -353,26 +353,26 @@ func zero1_compute_partition(int rank, int world_size, int total_params) zero1_p
     }
 }
 
-// ZeRO-1 显存节省估算 (优化器状态从 12 字节/参数降到 12/world)
+// ZeRO-1 English text (optimizeEnglish textstateEnglish text 12 English text/parameterEnglish text 12/world)
 func zero1_memory_savings_bytes(int total_params, int world_size) int {
-    // AdamW: fp32 momentum(4) + variance(4) + master(4) = 12 字节/参数
+    // AdamW: fp32 momentum(4) + variance(4) + master(4) = 12 English text/parameter
     int full = total_params * 12
     int sharded = full / world_size
     full - sharded
 }
 
 // ============================================================================
-// 7. 梯度桶 (通信效率): 把小张量打包成桶以减少通信次数
+// 7. gradientEnglish text (English text): English text
 // ============================================================================
 
 struct grad_bucket {
     int bucket_id
     int total_elements
     int num_tensors
-    bool ready          // 桶内所有梯度就绪，可触发 all-reduce
+    bool ready          // English textgradientEnglish text, English text all-reduce
 }
 
-// 估算需要多少个桶 (按 bucket_size_mb)
+// English textRequiredEnglish text (English text bucket_size_mb)
 func compute_num_buckets(int total_params, int bucket_size_mb) int {
     int bucket_elements = bucket_size_mb * 1024 * 1024 / 4   // fp32
     if bucket_elements <= 0 {
@@ -388,12 +388,12 @@ func compute_num_buckets(int total_params, int bucket_size_mb) int {
     num
 }
 
-// 估算通信量 (all-reduce 传输 2*(N-1)/N * 参数字节)
+// English text (all-reduce English text 2*(N-1)/N * parameterEnglish text)
 func estimate_comm_bytes(int total_params, int world_size) int {
     if world_size <= 1 {
         return 0
     }
     int param_bytes = total_params * 4
-    // ring all-reduce: 2(N-1)/N 倍参数量
+    // ring all-reduce: 2(N-1)/N English textparameterEnglish text
     2 * param_bytes * (world_size - 1) / world_size
 }

@@ -1,152 +1,152 @@
 # S Language CUDA Build Scripts - Quick Reference
 
-完整替代bash脚本的纯S语言CUDA构建系统参考卡片。
+completeEnglish textbashEnglish textSlanguageCUDAEnglish textsystemEnglish text.
 
-## 📋 脚本清单
+## 📋 English text
 
-### 核心脚本
+### English text
 
-| 脚本 | 说明 | 编译命令 | 功能 |
+| English text | explanation | compileEnglish text | English text |
 |------|------|---------|------|
-| `build_kernels_simple.s` | GPU核函数编译 | `s ir cuda/build_kernels_simple.s` | PTX生成 → C包装 → libcuda_kernels.so |
-| `build_cuda_runtime.s` | 运行时编译 | `s ir cuda/build_cuda_runtime.s` | 编译libcuda_runtime.so + cuBLAS绑定 |
-| `clean_build.s` | 清理构建 | `s ir cuda/clean_build.s` | 删除artifacts/build/cuda_* |
-| `verify_environment.s` | 环境检查 | `s ir cuda/verify_environment.s` | 验证CUDA/cuBLAS/GPU |
-| `build_cuda.s` | 综合管理 | `CUDA_TARGET=X s ir cuda/build_cuda.s` | 统一入口点 |
+| `build_kernels_simple.s` | GPUEnglish textfunctioncompile | `s ir cuda/build_kernels_simple.s` | PTXgenerate → CEnglish text → libcuda_kernels.so |
+| `build_cuda_runtime.s` | runEnglish textcompile | `s ir cuda/build_cuda_runtime.s` | compilelibcuda_runtime.so + cuBLASEnglish text |
+| `clean_build.s` | English text | `s ir cuda/clean_build.s` | English textartifacts/build/cuda_* |
+| `verify_environment.s` | English text | `s ir cuda/verify_environment.s` | English textCUDA/cuBLAS/GPU |
+| `build_cuda.s` | English textmanagement | `CUDA_TARGET=X s ir cuda/build_cuda.s` | English text |
 
-## 🚀 快速命令
+## 🚀 quickEnglish text
 
-### 编译全部
+### compileEnglish text
 ```bash
 s ir cuda/build_kernels_simple.s && \
 s ir cuda/build_cuda_runtime.s
 ```
 
-### 仅编译核函数
+### English textcompileEnglish textfunction
 ```bash
 s ir cuda/build_kernels_simple.s
 ```
 
-### 仅编译运行时
+### English textcompilerunEnglish text
 ```bash
 s ir cuda/build_cuda_runtime.s
 ```
 
-### 清理并重建
+### English text
 ```bash
 s ir cuda/clean_build.s && \
 s ir cuda/build_kernels_simple.s && \
 s ir cuda/build_cuda_runtime.s
 ```
 
-### 验证环境
+### English text
 ```bash
 s ir cuda/verify_environment.s
 ```
 
-## 📊 脚本功能对照
+## 📊 English text
 
-### 原bash脚本 → 新S脚本
+### English textbashEnglish text → English textSEnglish text
 
 ```
 build_kernels_simple.sh  ──→  build_kernels_simple.s
 build_cuda_runtime.sh    ──→  build_cuda_runtime.s
-build_cuda_runtime_alt.sh ──→ build_cuda_runtime.s (合并)
+build_cuda_runtime_alt.sh ──→ build_cuda_runtime.s (English text)
 build.sh                 ──→  build_cuda.s
 verify_environment.sh    ──→  verify_environment.s
 Makefile targets         ──→  cuda_build.s targets
 ```
 
-## 🔧 环境变量
+## 🔧 English text
 
-| 变量 | 默认值 | 用途 |
+| English text | defaultEnglish text | English text |
 |------|--------|------|
-| `S_COMPILER` | `/home/shuwen/.local/bin/s` | S编译器路径 |
-| `CUDA_HOME` | 自动检测 | CUDA安装位置 |
-| `CUDA_TARGET` | `build-all` | build_cuda.s的目标 |
-| `LD_LIBRARY_PATH` | 自动更新 | 库搜索路径 |
+| `S_COMPILER` | `/home/shuwen/.local/bin/s` | ScompileEnglish textpath |
+| `CUDA_HOME` | English text | CUDAEnglish text |
+| `CUDA_TARGET` | `build-all` | build_cuda.sEnglish text |
+| `LD_LIBRARY_PATH` | English text | English textsearchpath |
 
-## 📝 编译步骤详解
+## 📝 compilestepEnglish text
 
-### build_kernels_simple.s 流程
+### build_kernels_simple.s pipeline
 ```
 main()
- ├─ 检查nvcc → which nvcc
- ├─ 检测CUDA版本 → nvcc --version
- ├─ 检测GPU架构 → nvidia-smi
- ├─ 创建build目录 → mkdir -p
- ├─ 编译PTX → nvcc -ptx
- ├─ 创建C包装 → create_wrapper_c()
- ├─ 编译对象 → gcc -c
- ├─ 链接共享库 → gcc -shared
- └─ 创建env.sh
+ ├─ English textnvcc → which nvcc
+ ├─ English textCUDAEnglish text → nvcc --version
+ ├─ English textGPUEnglish text → nvidia-smi
+ ├─ English textbuilddirectory → mkdir -p
+ ├─ compilePTX → nvcc -ptx
+ ├─ English textCEnglish text → create_wrapper_c()
+ ├─ compileEnglish text → gcc -c
+ ├─ English text → gcc -shared
+ └─ English textenv.sh
 ```
 
-### build_cuda_runtime.s 流程
+### build_cuda_runtime.s pipeline
 ```
 main()
- ├─ 检测CUDA主目录 → get_cuda_home()
- ├─ 创建build目录
- ├─ 编译运行时 → gcc -shared -lcudart -lcublas
- └─ 创建env.sh
+ ├─ English textCUDAmaindirectory → get_cuda_home()
+ ├─ English textbuilddirectory
+ ├─ compilerunEnglish text → gcc -shared -lcudart -lcublas
+ └─ English textenv.sh
 ```
 
-### build_cuda.s 流程 (orchestrator)
+### build_cuda.s pipeline (orchestrator)
 ```
 main()
- ├─ 读取CUDA_TARGET环境变量
- ├─ 路由到对应处理
- │  ├─ build-all → 执行all脚本
- │  ├─ build-kernels → 执行kernels脚本
- │  ├─ build-runtime → 执行runtime脚本
- │  ├─ clean → 清理
- │  └─ verify-env → 验证
- └─ 对应处理函数执行
+ ├─ English textCUDA_TARGETEnglish text
+ ├─ English text
+ │  ├─ build-all → English textallEnglish text
+ │  ├─ build-kernels → English textkernelsEnglish text
+ │  ├─ build-runtime → English textruntimeEnglish text
+ │  ├─ clean → English text
+ │  └─ verify-env → English text
+ └─ English textfunctionEnglish text
 ```
 
-## 🎯 典型工作流
+## 🎯 English text
 
-### 完整构建 (从零开始)
+### completeEnglish text (English textstart)
 ```bash
-# 1. 清理旧构建
+# 1. English text
 s ir cuda/clean_build.s
 
-# 2. 验证环境
+# 2. English text
 s ir cuda/verify_environment.s
 
-# 3. 编译核函数
+# 3. compileEnglish textfunction
 s ir cuda/build_kernels_simple.s
 
-# 4. 编译运行时
+# 4. compilerunEnglish text
 s ir cuda/build_cuda_runtime.s
 
-# 5. 验证输出
+# 5. English textoutput
 ls -lh artifacts/build/cuda_kernels/libcuda_kernels.so
 ls -lh artifacts/build/cuda_runtime/libcuda_runtime.so
 ```
 
-### 快速重建 (已有源代码)
+### quickEnglish text (English text)
 ```bash
-# 假设kernel源代码已修改
+# English textkernelEnglish text
 s ir cuda/build_kernels_simple.s
 
-# 测试
+# test
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:$LD_LIBRARY_PATH"
 ```
 
-### CI/CD集成
+### CI/CDEnglish text
 ```bash
 #!/bin/bash
 set -e
 
-# 编译
+# compile
 s ir cuda/build_cuda.s || {
     echo "[ERROR] Build failed"
     s ir cuda/verify_environment.s
     exit 1
 }
 
-# 验证
+# English text
 if [ ! -f "./artifacts/build/cuda_kernels/libcuda_kernels.so" ]; then
     echo "[ERROR] libcuda_kernels.so not found"
     exit 1
@@ -155,85 +155,85 @@ fi
 echo "[SUCCESS] Build complete"
 ```
 
-## 📦 输出物
+## 📦 outputEnglish text
 
-### 成功编译后的输出
+### successcompileEnglish textoutput
 ```
 artifacts/build/
 ├── cuda_kernels/
 │   ├── libcuda_kernels.so      ✓ 16KB
-│   ├── cuda_kernels.ptx        ✓ (中间文件)
-│   ├── cuda_kernels_wrapper.c  ✓ (源)
-│   ├── cuda_kernels_wrapper.o  ✓ (对象)
-│   └── env.sh                  ✓ (环境脚本)
+│   ├── cuda_kernels.ptx        ✓ (English textfile)
+│   ├── cuda_kernels_wrapper.c  ✓ (English text)
+│   ├── cuda_kernels_wrapper.o  ✓ (English text)
+│   └── env.sh                  ✓ (English text)
 └── cuda_runtime/
     ├── libcuda_runtime.so      ✓ 15KB
-    └── env.sh                  ✓ (环境脚本)
+    └── env.sh                  ✓ (English text)
 ```
 
-## ✅ 验证检查表
+## ✅ English text
 
-编译后验证:
+compileEnglish text:
 ```bash
-# ✓ 文件存在且大小合理
+# ✓ fileEnglish text
 ls -lh artifacts/build/cuda_kernels/libcuda_kernels.so
 ls -lh artifacts/build/cuda_runtime/libcuda_runtime.so
 
-# ✓ 库的依赖关系正确
+# ✓ English text
 ldd artifacts/build/cuda_kernels/libcuda_kernels.so | grep cuda
 
-# ✓ 符号表完整
+# ✓ English textcomplete
 nm artifacts/build/cuda_kernels/libcuda_kernels.so | grep cuda_
 
-# ✓ 可以加载到内存
+# ✓ AllowedloadEnglish text
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:$LD_LIBRARY_PATH"
 python3 -c "import ctypes; ctypes.CDLL('./artifacts/build/cuda_kernels/libcuda_kernels.so')"
 ```
 
-## 🐛 调试技巧
+## 🐛 English text
 
-### 查看编译详细输出
-在S脚本中修改:
+### English textcompileEnglish textoutput
+English textSEnglish text:
 ```s
-string cmd = "nvcc -ptx ... -v"  // 添加 -v 选项
+string cmd = "nvcc -ptx ... -v"  // English text -v English text
 ```
 
-### 查看S脚本执行过程
+### English textSEnglish text
 ```bash
-# 编译到IR后检查
+# compileEnglish textIREnglish text
 s ir cuda/build_kernels_simple.s -o /tmp/build.ir
-# 查看字节码
+# English text
 file /tmp/build.ir
 ```
 
-### 环境变量调试
+### English text
 ```bash
 export CUDA_TARGET=verify-env
 export S_COMPILER=$(which s)
 s ir cuda/build_cuda.s
 ```
 
-## 📚 S脚本关键函数
+## 📚 SEnglish textfunction
 
-### I/O函数
+### I/Ofunction
 ```s
-runtime_run_command_output(cmd)      // 执行命令获取输出
-runtime_env_get(var, default)        // 读取环境变量
-runtime_file_exists(path)            // 检查文件存在
-runtime_read_text_file(path)         // 读取文件
-runtime_write_text_file(path, text)  // 写入文件
+runtime_run_command_output(cmd)      // English textoutput
+runtime_env_get(var, default)        // English text
+runtime_file_exists(path)            // English textfileEnglish text
+runtime_read_text_file(path)         // English textfile
+runtime_write_text_file(path, text)  // English textfile
 ```
 
-### 字符串函数
+### English textfunction
 ```s
-str_len(s)                 // 字符串长度
-trim(s)                    // 移除首尾空格
-substring(s, start, end)   // 子字符串
-contains_string(h, n)      // 包含检查
-eq_string(a, b)            // 字符串相等
+str_len(s)                 // English text
+trim(s)                    // English text
+substring(s, start, end)   // English text
+contains_string(h, n)      // English text
+eq_string(a, b)            // English text
 ```
 
-## 🔄 Makefile集成示例
+## 🔄 MakefileEnglish textexample
 
 ```makefile
 .PHONY: build-cuda-all build-cuda-kernels build-cuda-runtime cuda-clean
@@ -260,35 +260,35 @@ cuda-verify:
 	s ir cuda/verify_environment.s
 ```
 
-## ⚠️ 常见错误
+## ⚠️ English texterror
 
-| 错误 | 原因 | 解决 |
+| error | English text | English text |
 |------|------|------|
-| `nvcc not found` | CUDA未安装 | `export PATH="/usr/local/cuda/bin:$PATH"` |
-| `libcuda_kernels.so not created` | 编译失败 | 查看编译输出，检查gcc/nvcc |
-| `undefined reference to cuda_*` | 链接失败 | 检查LD_LIBRARY_PATH |
-| `S compiler not found` | 路径错误 | `export S_COMPILER=$(which s)` |
+| `nvcc not found` | CUDAEnglish text | `export PATH="/usr/local/cuda/bin:$PATH"` |
+| `libcuda_kernels.so not created` | compilefailure | English textcompileoutput, English textgcc/nvcc |
+| `undefined reference to cuda_*` | English textfailure | English textLD_LIBRARY_PATH |
+| `S compiler not found` | patherror | `export S_COMPILER=$(which s)` |
 
-## 📖 相关文档
+## 📖 English text
 
-| 文件 | 说明 |
+| file | explanation |
 |------|------|
-| [BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | 完整使用指南 |
-| [../CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPU架构详解 |
-| [../S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA 实现指南 |
-| [../scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPU训练脚本 |
-| [cuda_kernels.cu](cuda_kernels.cu) | CUDA核函数源代码 |
+| [BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | completeuseEnglish text |
+| [../CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPUEnglish text |
+| [../S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA implementationEnglish text |
+| [../scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPUtrainingEnglish text |
+| [cuda_kernels.cu](cuda_kernels.cu) | CUDAEnglish textfunctionEnglish text |
 
-## 🎓 学习要点
+## 🎓 English text
 
-1. **S语言优势**: 自包含、跨平台、易维护
-2. **构建流程**: PTX生成 → C包装 → 对象文件 → 共享库
-3. **环境配置**: 自动检测CUDA路径、GPU架构
-4. **模块化**: 每个脚本独立可运行
-5. **集成**: 可无缝集成到现有Makefile
+1. **SlanguageEnglish text**: English text, English text, English text
+2. **English textpipeline**: PTXgenerate → CEnglish text → English textfile → English text
+3. **English textconfiguration**: English textCUDApath, GPUEnglish text
+4. **English text**: English textrun
+5. **English text**: English textMakefile
 
 ---
 
-**版本:** 1.0
-**日期:** 2026-07-13
-**状态:** ✅ 生产就绪
+**English text:** 1.0
+**English text:** 2026-07-13
+**state:** ✅ English text

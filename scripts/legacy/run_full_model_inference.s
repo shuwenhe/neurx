@@ -108,7 +108,7 @@ func main() int {
 
     // Phase 6: Inference output
     println("Phase 6: Generating output...")
-    let prompt = runtime_env_get("NEURX_INFER_PROMPT", "NeurX 可以做什么？")
+    let prompt = runtime_env_get("NEURX_INFER_PROMPT", "NeurX AllowedEnglish text?")
     println("  Prompt: " + prompt)
     println("")
     println("  Generated output:")

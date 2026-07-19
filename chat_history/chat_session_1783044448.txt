@@ -1,6 +1,6 @@
 [2026-07-03 10:07:28] You: hello
 [2026-07-03 10:07:28] NeurX: [phase] generate:start
 Generated:
-你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
-你是一个认真、简洁的中文助手。请直接回答下面的问题，不要复述问题：
+English text, English text.English text, English text:
+English text, English text.English text, English text:
 hello

@@ -2,8 +2,8 @@
 
 // ============================================
 // NeurX Distributed Pretraining Entry Point
-// 多GPU分布式预训练主入口
-// 集成: 分布式启动器 + CUDA桥接 + 数据分片 + 梯度同步
+// English textGPUEnglish texttrainingmainEnglish text
+// English text: English textstartEnglish text + CUDAEnglish text + dataEnglish text + gradientEnglish textstep
 // ============================================
 
 package main
@@ -19,7 +19,7 @@ use neurx.distributed.cuda_bridge.{
 use neurx.runtime.io.{runtime_env_get}
 
 // ============================================
-// 配置结构
+// configurationEnglish text
 // ============================================
 
 struct training_config {
@@ -46,22 +46,22 @@ struct training_metrics {
 }
 
 // ============================================
-// 主训练循环
+// maintrainingEnglish text
 // ============================================
 
 func main() {
-    
-    // 1. 解析命令行参数
+
+    // 1. English textparameter
     training_config config = parse_config()
-    
-    // 2. 初始化分布式环境
+
+    // 2. initializeEnglish text
     distributed_pretrain_launcher launcher = new_distributed_pretrain_launcher(
         config.config_path,
         config.micro_batch_size,
         config.gradient_accum_steps,
     )
-    
-    // 3. 只在rank 0上输出初始化信息
+
+    // 3. English textrank 0English textoutputinitializeinformation
     if launcher.env.rank == 0 {
         launcher.log("="*50)
         launcher.log("NeurX Distributed Pretraining Started")
@@ -77,65 +77,65 @@ func main() {
         launcher.log("  - Data shards allocated to rank: " + itoa(len(launcher.shard_paths)))
         launcher.log("="*50)
     }
-    
-    // 4. 打印rank信息（分布式调试）
+
+    // 4. English textrankinformation(English text)
     launcher.log("Rank info: " + launcher.rank_info())
-    
-    // 5. 初始化GPU内存状态
+
+    // 5. initializeGPUEnglish textstate
     cuda_bridge_log_status(launcher.cb)
-    
+
     // ============================================
-    // 训练循环
+    // trainingEnglish text
     // ============================================
-    
+
     int global_step = 0
     int optimizer_step = 0
     int epoch = 0
-    
+
     while epoch < config.num_epochs {
-        
-        // 遍历分配给当前rank的数据切片
+
+        // English textrankEnglish textdataEnglish text
         int shard_idx = 0
         while shard_idx < len(launcher.shard_paths) {
-            
+
             string shard_path = launcher.shard_paths[shard_idx]
-            
-            // 从切片加载数据并处理
+
+            // English textloaddataEnglish text
             int line_idx = 0
             int accum_step = 0
-            
-            while line_idx < 1024 {  // 假设每个切片1024行
-                
-                // 1. 加载微批数据
+
+            while line_idx < 1024 {  // English text1024English text
+
+                // 1. loadEnglish textdata
                 []float batch_data = load_batch(shard_path, line_idx)
-                
-                // 2. 前向传播 (伪实现)
+
+                // 2. English text (English textimplementation)
                 float loss = forward_pass(batch_data)
-                
-                // 3. 反向传播得到梯度 (伪实现)
+
+                // 3. English textgradient (English textimplementation)
                 []float gradients = backward_pass(loss)
-                
+
                 global_step = global_step + 1
                 accum_step = accum_step + 1
-                
-                // 4. 积累梯度步数到达阈值时进行梯度同步
+
+                // 4. English textgradientstepEnglish textgradientEnglish textstep
                 if accum_step >= config.gradient_accum_steps {
-                    
-                    // ====== 关键: 梯度同步 ======
-                    // 调用NCCL AllReduce在所有GPU间同步梯度
+
+                    // ====== English text: gradientEnglish textstep ======
+                    // English textNCCL AllReduceEnglish textGPUEnglish textstepgradient
                     []float synced_gradients = launcher.sync_gradients_nccl(gradients)
-                    
-                    // 5. 执行优化器更新步
+
+                    // 5. English textoptimizeEnglish textstep
                     launcher.optimizer_step(
                         optimizer_step,
                         config.learning_rate,
                         synced_gradients,
                     )
-                    
+
                     optimizer_step = optimizer_step + 1
                     accum_step = 0
-                    
-                    // 6. 日志记录 (仅rank 0)
+
+                    // 6. logEnglish text (English textrank 0)
                     if optimizer_step % 100 == 0 && launcher.env.rank == 0 {
                         training_metrics metrics = training_metrics {
                             step: global_step,
@@ -146,30 +146,30 @@ func main() {
                             shard_idx: shard_idx,
                             line_idx: line_idx,
                         }
-                        
+
                         print_metrics(metrics)
                     }
-                    
-                    // 7. 检查点保存 (仅rank 0)
+
+                    // 7. checkpointsave (English textrank 0)
                     if optimizer_step % config.save_interval == 0 && launcher.env.rank == 0 {
                         launcher.log("Saving checkpoint at step " + itoa(optimizer_step))
                         // save_checkpoint(config.model_path, optimizer_step)
                     }
                 }
-                
+
                 line_idx = line_idx + 1
             }
-            
+
             shard_idx = shard_idx + 1
         }
-        
+
         epoch = epoch + 1
     }
-    
+
     // ============================================
-    // 训练完成
+    // trainingEnglish text
     // ============================================
-    
+
     if launcher.env.rank == 0 {
         launcher.log("="*50)
         launcher.log("Distributed Pretraining Completed!")
@@ -178,17 +178,17 @@ func main() {
         launcher.log("  - Total epochs: " + itoa(config.num_epochs))
         launcher.log("="*50)
     }
-    
-    // 清理资源
+
+    // English text
     launcher.finalize()
 }
 
 // ============================================
-// 辅助函数
+// helperfunction
 // ============================================
 
 func parse_config() training_config {
-    // 从命令行参数或环境变量读取配置
+    // English textparameterEnglish textconfiguration
     training_config {
         model_path: "./checkpoint/NeurX-1.3/NeurX-1.3.neurx",
         dataset_path: "./dataset/pretrain/shard",
@@ -204,44 +204,44 @@ func parse_config() training_config {
 }
 
 func load_batch(string shard_path, int line_idx) []float {
-    // 从JSONL切片加载一个微批
-    // 返回tokenized数据
-    []float batch = []float{cap: 8 * 2048}  // 8个样本, 2048 tokens
-    
+    // English textJSONLEnglish textloadEnglish text
+    // English texttokenizeddata
+    []float batch = []float{cap: 8 * 2048}  // 8English text, 2048 tokens
+
     int i = 0
     while i < len(batch) {
-        batch[i] = float(i % 256) / 256.0  // 模拟token embeddings
+        batch[i] = float(i % 256) / 256.0  // English texttoken embeddings
         i = i + 1
     }
-    
+
     batch
 }
 
 func forward_pass([]float batch_data) float {
-    // 前向传播
-    // 返回loss值
+    // English text
+    // English textlossEnglish text
     float loss = 0.0
-    
+
     int i = 0
     while i < len(batch_data) {
         loss = loss + batch_data[i]
         i = i + 1
     }
-    
+
     loss / float(len(batch_data))
 }
 
 func backward_pass(float loss) []float {
-    // 反向传播
-    // 返回梯度
-    []float gradients = []float{cap: 1024}  // 模型参数个数
-    
+    // English text
+    // English textgradient
+    []float gradients = []float{cap: 1024}  // modelparameterEnglish text
+
     int i = 0
     while i < len(gradients) {
-        gradients[i] = loss * 0.01  // 模拟梯度值
+        gradients[i] = loss * 0.01  // English textgradientEnglish text
         i = i + 1
     }
-    
+
     gradients
 }
 
@@ -253,7 +253,7 @@ func print_metrics(training_metrics metrics) {
                      " tokens=" + itoa(metrics.tokens_processed) +
                      " shard=" + itoa(metrics.shard_idx) +
                      " line=" + itoa(metrics.line_idx)
-    
+
     print(log_msg)
 }
 
@@ -261,27 +261,27 @@ func itoa(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     string s = ""
     int num = n
     if num < 0 {
         s = "-"
         num = -num
     }
-    
+
     while num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10
     }
-    
+
     s
 }
 
 func ftoa(float f) string {
-    // 简化浮点数转字符串
+    // English text
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000000)
-    
+
     itoa(int_part) + "." + itoa(frac_part)
 }

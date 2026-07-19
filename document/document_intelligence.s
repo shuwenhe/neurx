@@ -1,147 +1,147 @@
 // ============================================================
-// NEURX DOCUMENT智能解析系统
-// 完整实现: PDF/HTML/Markdown/DOCX/PPTX/Excel + 表格抽取 + OCR集成
-// 支持: 结构化数据提取 / 版面分析 / 多模态文档理解
+// NEURX DOCUMENTEnglish textsystem
+// completeimplementation: PDF/HTML/Markdown/DOCX/PPTX/Excel + English text + OCREnglish text
+// support: English textdataEnglish text / English text / English text
 // ============================================================
 
 module document_parser
 
-// ==================== 核心配置与类型定义 ====================
+// ==================== English textconfigurationEnglish text ====================
 
 struct DocumentParserConfig {
-    // 支持的格式
+    // supportEnglish text
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
-    
-    // PDF 解析配置
-    pdf_extract_images: bool = true               # 提取PDF中的图片
-    pdf_ocr_enabled: bool = false                  # OCR扫描件
-    pdf_ocr_language: string = "chi_sim+eng"       # OCR语言 (中文简体+英文)
-    pdf_preserve_layout: bool = true              # 保持原始版面布局
-    pdf_extract_tables: bool = true                # 自动检测并提取表格
-    
-    // HTML 解析配置
-    html_clean_html: bool = true                   # 清理HTML标签和样式
-    html_extract_main_content: bool = true         # 智能提取正文（去除广告、导航等）
-    html_remove_elements: list<string> = ["script", "style", "nav", "footer", "header", "aside"]  # 要移除的元素
-    html_keep_links: bool = true                   # 保留超链接信息
-    
-    // Markdown 解析配置
-    md_extract_code_blocks: bool = true            # 单独处理代码块
-    md_extract_tables: bool = true                 # 解析Markdown表格
-    md_handle_front_matter: bool = true            # 处理YAML front matter
-    md_parse_math: bool = true                     # 解析LaTeX数学公式
-    
-    // Office文档配置
-    office_extract_embedded: bool = true           # 提取嵌入对象
-    office_resolve_styles: bool = true             # 解析样式为文本标记
-    
-    // 表格抽取配置
+
+    // PDF English textconfiguration
+    pdf_extract_images: bool = true               # English textPDFEnglish text
+    pdf_ocr_enabled: bool = false                  # OCREnglish text
+    pdf_ocr_language: string = "chi_sim+eng"       # OCRlanguage (English text+English text)
+    pdf_preserve_layout: bool = true              # English text
+    pdf_extract_tables: bool = true                # English text
+
+    // HTML English textconfiguration
+    html_clean_html: bool = true                   # English textHTMLEnglish text
+    html_extract_main_content: bool = true         # English text(English text, English text)
+    html_remove_elements: list<string> = ["script", "style", "nav", "footer", "header", "aside"]  # English text
+    html_keep_links: bool = true                   # English textinformation
+
+    // Markdown English textconfiguration
+    md_extract_code_blocks: bool = true            # English text
+    md_extract_tables: bool = true                 # English textMarkdownEnglish text
+    md_handle_front_matter: bool = true            # English textYAML front matter
+    md_parse_math: bool = true                     # English textLaTeXEnglish text
+
+    // OfficeEnglish textconfiguration
+    office_extract_embedded: bool = true           # English text
+    office_resolve_styles: bool = true             # English text
+
+    // English textconfiguration
     table_detection_method: string = "auto"        # auto | rule_based | deep_learning
-    table_header_detection: bool = true            # 自动识别表头
-    table_merge_cell_support: bool = true          # 支持合并单元格
-    
-    // 输出配置
+    table_header_detection: bool = true            # English text
+    table_merge_cell_support: bool = true          # supportEnglish text
+
+    // outputconfiguration
     output_format: string = "markdown"             # markdown | plain_text | structured_json
-    max_file_size_mb: int = 100                    # 最大文件大小限制
-    chunk_size: int = 1000                         # 分块大小 (字符数)
-    chunk_overlap: int = 200                       # 分块重叠
-    
-    // 高级功能
-    enable_metadata_extraction: bool = true        # 提取元数据(作者、日期等)
-    enable_section_detection: bool = true          # 自动检测章节标题
-    enable_page_numbering: bool = true             # 保留页码信息 (PDF)
+    max_file_size_mb: int = 100                    # English textfileEnglish text
+    chunk_size: int = 1000                         # English text (English text)
+    chunk_overlap: int = 200                       # English text
+
+    // advancedEnglish text
+    enable_metadata_extraction: bool = true        # English textdata(author, English text)
+    enable_section_detection: bool = true          # English textsectiontitle
+    enable_page_numbering: bool = true             # English textinformation (PDF)
 }
 
 struct ParsedDocument {
-    content: string                                # 主要文本内容 (根据output_format格式化)
-    metadata: DocumentMetadata                     # 文档元数据
-    sections: list<DocumentSection>                # 章节/段落列表
-    tables: list<ExtractedTable>                  # 提取的表格
-    images: list<ExtractedImage>                 # 提取的图片
-    links: list<ExtractedLink>                    # 提取的链接 (HTML)
-    code_blocks: list<CodeBlock>                 # 代码块 (Markdown)
-    statistics: DocumentStatistics                # 文档统计信息
-    raw_structure: any?                            # 原始结构化数据 (如DOM树)
+    content: string                                # mainEnglish textcontent (English textoutput_formatEnglish text)
+    metadata: DocumentMetadata                     # English textdata
+    sections: list<DocumentSection>                # section/English text
+    tables: list<ExtractedTable>                  # English text
+    images: list<ExtractedImage>                 # English text
+    links: list<ExtractedLink>                    # English text (HTML)
+    code_blocks: list<CodeBlock>                 # English text (Markdown)
+    statistics: DocumentStatistics                # English textstatisticsinformation
+    raw_structure: any?                            # English textdata (English textDOMEnglish text)
 }
 
 struct DocumentMetadata {
-    filename: string                               # 原始文件名
-    file_path: string                              # 文件路径
-    file_format: string                            # 格式: pdf/html/md/docx/...
-    file_size_bytes: int                           # 文件大小
-    mime_type: string                              # MIME类型
-    title: string?                                 # 标题 (从内容或元数据中提取)
-    author: string?                                # 作者
-    created_date: string?                          # 创建日期
-    modified_date: string?                         # 修改日期
-    page_count: int?                               # 页数 (PDF)
-    word_count: int?                               # 字数
-    language: string?                              # 检测到的语言
-    encoding: string?                              # 文本编码
+    filename: string                               # English textfileEnglish text
+    file_path: string                              # filepath
+    file_format: string                            # English text: pdf/html/md/docx/...
+    file_size_bytes: int                           # fileEnglish text
+    mime_type: string                              # MIMEEnglish text
+    title: string?                                 # title (English textcontentEnglish textdataEnglish text)
+    author: string?                                # author
+    created_date: string?                          # English text
+    modified_date: string?                         # English text
+    page_count: int?                               # English text (PDF)
+    word_count: int?                               # English text
+    language: string?                              # English textlanguage
+    encoding: string?                              # English text
 }
 
 struct DocumentSection {
     id: string                                     # Section ID
-    title: string                                  # 章节标题 (可为空)
-    level: int                                     # 层级深度 (H1=1, H2=2, ...)
-    content: string                                # 该章节的纯文本内容
-    start_position: int                            # 在全文中的起始位置
-    end_position: int                              # 结束位置
-    page_number?: int                              # 页码 (PDF)
-    subsections: list<DocumentSection>?            # 子章节
+    title: string                                  # sectiontitle (English text)
+    level: int                                     # English text (H1=1, H2=2, ...)
+    content: string                                # English textsectionEnglish textcontent
+    start_position: int                            # English text
+    end_position: int                              # English text
+    page_number?: int                              # English text (PDF)
+    subsections: list<DocumentSection>?            # English textsection
 }
 
 struct ExtractedTable {
     id: string                                     # Table ID
-    headers: list<string>                          # 表头列名
-    rows: list<list<string>>                       # 行数据
-    markdown_representation: string               # Markdown格式的表格
-    html_representation: string?                  # HTML格式 (可选)
-    caption: string?                               # 表格标题/说明
-    row_count: int                                 # 行数
-    column_count: int                              # 列数
-    source_page?: int                              # 来源页码
-    confidence: float                              # 检测置信度 (0-1)
-    bbox?: tuple<float, float, float, float>?      # 在页面中的位置 (x1, y1, x2, y2) 用于PDF
+    headers: list<string>                          # English text
+    rows: list<list<string>>                       # English textdata
+    markdown_representation: string               # MarkdownEnglish text
+    html_representation: string?                  # HTMLEnglish text (English text)
+    caption: string?                               # English texttitle/explanation
+    row_count: int                                 # English text
+    column_count: int                              # English text
+    source_page?: int                              # SourceEnglish text
+    confidence: float                              # English text (0-1)
+    bbox?: tuple<float, float, float, float>?      # English text (x1, y1, x2, y2) English textPDF
 }
 
 struct ExtractedImage {
     id: string                                     # Image ID
-    data: bytes                                    # 图像二进制数据
-    format: string                                 # 图像格式 (png/jpeg/svg/...)
-    alt_text: string?                              # 替代文字 (从alt属性或周围文本推断)
-    width: int                                     # 宽度 (像素)
-    height: int                                    # 高度 (像素)
-    caption: string?                               # 图片说明
-    position: tuple<int, int>?                     # 在文档中的位置 (char_offset, line_number)
+    data: bytes                                    # English textdata
+    format: string                                 # English text (png/jpeg/svg/...)
+    alt_text: string?                              # English text (English textaltEnglish text)
+    width: int                                     # English text (English text)
+    height: int                                    # English text (English text)
+    caption: string?                               # English textexplanation
+    position: tuple<int, int>?                     # English text (char_offset, line_number)
 }
 
 struct ExtractedLink {
-    url: string                                    # 链接URL
-    text: string                                   # 链接文本
+    url: string                                    # English textURL
+    text: string                                   # English text
     link_type: string                              # internal | external | anchor
 }
 
 struct CodeBlock {
-    language: string                               # 编程语言标识符
-    code: string                                   # 代码内容
-    start_line: int                                # 起始行号
-    end_line: int                                  # 结束行号
+    language: string                               # English textlanguageEnglish text
+    code: string                                   # English textcontent
+    start_line: int                                # English text
+    end_line: int                                  # English text
 }
 
 struct DocumentStatistics {
-    total_characters: int                          # 总字符数
-    total_words: int                               # 总词数
-    total_lines: int                               # 总行数
-    section_count: int                             # 章节数
-    table_count: int                               # 表格数量
-    image_count: int                               # 图片数量
-    code_block_count: int                          # 代码块数量
-    link_count: int                                # 链接数量 (HTML)
-    estimated_reading_time_minutes: float          # 预估阅读时间 (分钟)
+    total_characters: int                          # English text
+    total_words: int                               # English text
+    total_lines: int                               # English text
+    section_count: int                             # sectionEnglish text
+    table_count: int                               # English textcount
+    image_count: int                               # English textcount
+    code_block_count: int                          # English textcount
+    link_count: int                                # English textcount (HTML)
+    estimated_reading_time_minutes: float          # English texttime (English text)
 }
 
-// ==================== 主解析器入口 ====================
+// ==================== mainEnglish text ====================
 
 class DocumentParser {
     config: DocumentParserConfig
@@ -152,7 +152,7 @@ class DocumentParser {
 
     init(config?: DocumentParserConfig) {
         this.config = config ?? new DocumentParserConfig()
-        
+
         # Initialize format-specific parsers
         if "pdf" in this.config.enabled_formats {
             this.pdf_parser = new PDFParser(config=this.config)
@@ -171,7 +171,7 @@ class DocumentParser {
     parse(file_path: string) -> ParsedDocument {
         # Detect file format
         ext = get_file_extension(file_path).to_lower()
-        
+
         match ext {
             "pdf" => { return this._parse_pdf(file_path) }
             "html" | "htm" => { return this._parse_html(file_path) }
@@ -246,7 +246,7 @@ class DocumentParser {
         data = read_csv_file(file_path)
         headers = data[0] if data.length > 0 else []
         rows = data[1:]
-        
+
         table = ExtractedTable{
             id="table_0",
             headers=headers,
@@ -256,11 +256,11 @@ class DocumentParser {
             column_count=headers.length,
             confidence=1.0
         }
-        
+
         content = "# CSV Data: " + get_filename(file_path) + "\n\n" + table.markdown_representation
-        
+
         stats = compute_statistics(content)
-        
+
         return ParsedDocument{
             content=content,
             metadata=DocumentMetadata{
@@ -294,7 +294,7 @@ class DocumentParser {
 
     _parse_plain_text_string(content: string, source_path?: string) -> ParsedDocument {
         stats = compute_statistics(content)
-        
+
         # Simple section splitting by double newlines
         raw_sections = content.split("\n\n")
         sections: list<DocumentSection> = []
@@ -311,7 +311,7 @@ class DocumentParser {
             })
             pos += sec_len + 2  # +2 for \n\n
         }
-        
+
         return ParsedDocument{
             content=content,
             metadata=DocumentMetadata{
@@ -332,7 +332,7 @@ class DocumentParser {
     }
 }
 
-// ==================== PDF 解析器 ====================
+// ==================== PDF English text ====================
 
 class PDFParser {
     config: DocumentParserConfig
@@ -344,24 +344,24 @@ class PDFParser {
     parse(file_path: string) -> ParsedDocument {
         # Use PyMuPDF (fitz) or pdfplumber for high-quality extraction
         doc = open_pdf(file_path)
-        
+
         full_text_parts: list<string> = []
         all_sections: list<DocumentSection> = []
         all_tables: list<ExtractedTable> = []
         all_images: list<ExtractedImage> = []
-        
+
         current_pos = 0
-        
+
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
-            
+
             # Extract text with layout preservation
             if this.config.pdf_preserve_layout {
                 text_dict = page.get_text("dict")
-                
+
                 blocks = text_dict["blocks"]
                 page_text_parts: list<string> = []
-                
+
                 for block in blocks:
                     if block["type"] == 0:  # Text block
                         lines_text = ""
@@ -369,13 +369,13 @@ class PDFParser {
                             line_text = "".join(span["text"] for span in line["spans"])
                             lines_text += line_text + "\n"
                         page_text_parts.append(lines_text.strip())
-                        
+
                         # Detect headings (larger font size, bold)
                         if block["lines"].length > 0 && block["lines"][0]["spans"].length > 0:
                             first_span = block["lines"][0]["spans"][0]
                             font_size = first_span["size"]
                             is_bold = "bold" in first_span["font"].to_lower()
-                            
+
                             if font_size > 14 && is_bold && len(lines_text.strip()) < 100:
                                 # Likely a heading
                                 all_sections.append(DocumentSection{
@@ -387,30 +387,30 @@ class PDFParser {
                                     end_position=current_pos + len(lines_text),
                                     page_number=page_num + 1
                                 })
-                    
+
                     elif block["type"] == 1:  # Image block
                         if this.config.pdf_extract_images:
                             img_data = extract_image_from_pdf_block(doc, page_num, block)
                             if img_data != null {
                                 all_images.append(img_data!)
-                    
+
                 page_text = "\n\n".join(page_text_parts)
-            
+
             else:
                 # Simple text extraction without layout
                 page_text = page.get_text()
-            
+
             full_text_parts.append(page_text)
-            
+
             # Table extraction
             if this.config.pdf_extract_tables {
                 tables_on_page = extract_tables_from_pdf_page(page)
                 all_tables.extend(tables_on_page)
-            
+
             current_pos += len(page_text) + 2
-        
+
         full_text = "\n\n--- Page Break ---\n\n".join(full_text_parts)
-        
+
         # If no sections detected from layout, create default page-based sections
         if all_sections.empty() {
             pages_texts = full_text.split("--- Page Break ---")
@@ -425,9 +425,9 @@ class PDFParser {
                     page_number=i + 1
                 })
             }
-        
+
         stats = compute_statistics(full_text)
-        
+
         return ParsedDocument{
             content=full_text,
             metadata=DocumentMetadata{
@@ -447,21 +447,21 @@ class PDFParser {
             statistics={...stats, ...{"page_count": doc.page_count}}
         }
     }
-    
+
     # Helper methods for PDF processing (would use actual libraries like fitz/pdfplumber)
     extract_tables_from_pdf_page(page: any) -> list<ExtractedTable> {
         # Implementation would use camelot/tabula-py or pdfplumber's built-in table detection
         # Returns list of detected tables on the page
         return []  # Placeholder
     }
-    
+
     extract_image_from_pdf_block(doc: any, page_idx: int, image_block: map<string, any>) -> ExtractedImage? {
         # Extract image data from the PDF page at given coordinates
         return null  # Placeholder
     }
 }
 
-// ==================== HTML 解析器 ====================
+// ==================== HTML English text ====================
 
 class HTMLParser {
     config: DocumentParserConfig
@@ -473,27 +473,27 @@ class HTMLParser {
     parse_string(html_content: string, source_url?: string) -> ParsedDocument {
         # Parse HTML into DOM tree using BeautifulSoup/lxml
         soup = parse_html(html_content)
-        
+
         # Step 1: Remove unwanted elements (scripts, styles, navigation, etc.)
         if this.config.html_clean_html {
             for selector in this.config.html_remove_elements {
                 soup.find_all(selector).each(el => el.decompose())
             }
-        
+
         # Step 2: Extract metadata
         meta = this._extract_metadata(soup, source_url)
-        
+
         # Step 3: Extract main content (if smart extraction enabled)
         if this.config.html_extract_main_content:
             main_content = this._extract_main_content(soup)
         } else:
             main_content = soup.body ?? soup
-        
+
         # Step 4: Convert to structured representation
         result = this._convert_element(main_content, source_url)
-        
+
         stats = compute_statistics(result.content)
-        
+
         return ParsedDocument{
             content=result.content,
             metadata=meta,
@@ -509,12 +509,12 @@ class HTMLParser {
 
     _extract_metadata(soup: any, source_url?: string) -> DocumentMetadata {
         title = soup.title?.get_text().trim() ?? ""
-        
+
         # Try to extract OpenGraph/Twitter card metadata
         og_title = soup.find("meta", property="og:title")?.get("content")
         description = soup.find("meta", attrs={"name": "description"})?.get("content")
         author_meta = soup.find("meta", attrs={"name": "author"})?.get("content")
-        
+
         return DocumentMetadata{
             filename=source_url ? extract_filename_from_url(source_url!) : "",
             file_path=source_url ?? "",
@@ -530,15 +530,15 @@ class HTMLParser {
     _extract_main_content(soup: any) -> any {
         # Heuristic-based main content extraction (similar to readability/Mozilla's Readability)
         candidates: list<{element: any, score: float}> = []
-        
+
         # Score each element based on text density and semantic cues
         for elem in soup.find_all(["div", "article", "main", "section"]) {
             score = 0.0
-            
+
             text_length = len(elem.get_text())
             if text_length > 100:
                 score += math.log(text_length)
-            
+
             # Positive indicators
             tag_name = elem.name
             if tag_name in ["article", "main"]:
@@ -548,13 +548,13 @@ class HTMLParser {
             for term in positive_terms:
                 if term in class_id_str.to_lower():
                     score += 15
-            
+
             # Negative indicators
             negative_terms = ["comment", "sidebar", "footer", "header", "nav", "menu", "widget", "ad"]
             for term in negative_terms:
                 if term in class_id_str.to_lower():
                     score -= 30
-            
+
             # Link density penalty (high link density usually means navigation)
             links = elem.find_all("a")
             text = elem.get_text()
@@ -562,15 +562,15 @@ class HTMLParser {
                 link_density = sum(len(link.get_text()) for link in links) / len(text)
                 if link_density > 0.5:
                     score -= 20 * link_density
-            
+
             if score > 0:
                 candidates.append({element=elem, score=score})
-        
+
         # Return highest scoring candidate, or body as fallback
         if candidates.length > 0:
             candidates.sort_by_descending(c => c.score)
             return candidates[0].element
-        
+
         return soup.body ?? soup
     }
 
@@ -581,18 +581,18 @@ class HTMLParser {
         links: list<ExtractedLink> = []
         code_blocks: list<CodeBlock> = []
         content_parts: list<string> = []
-        
+
         pos = 0
-        
+
         def process_node(node: any, depth: int = 0) {
             nonlocal pos
-            
+
             if node.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 # Heading
                 level = int(node.name[1])
                 text = node.get_text().strip()
                 content_parts.append("#".repeat(level) + " " + text + "\n\n")
-                
+
                 sections.append(DocumentSection{
                     id=f"h{level}_{sections.length}",
                     title=text,
@@ -602,35 +602,35 @@ class HTMLParser {
                     end_position=pos + len(text)
                 })
                 pos += len("#".repeat(level) + " " + text + "\n\n")
-                
+
             elif node.name == "p":
                 # Paragraph
                 text = clean_whitespace(node.get_text())
                 if !text.empty():
                     content_parts.append(text + "\n\n")
                     pos += len(text) + 2
-                    
+
                     if sections.length > 0:
                         # Append to last section's content
                         sections[-1].content += text + "\n\n"
-            
+
             elif node.name == "table":
                 # Table
                 table_result = this._extract_table(node)
                 tables.append(table_result.table)
                 content_parts.append(table_result.markdown + "\n\n")
                 pos += len(table_result.markdown) + 2
-                
+
             elif node.name == "img":
                 # Image
                 src = node.get("src") ?? ""
                 alt = node.get("alt") ?? ""
-                
+
                 if src.starts_with("//"):
                     src = "https:" + src
                 elif not (src.starts_with("http://") || src.starts_with("https://")):
                     src = resolve_relative_url(base_url ?? "", src)
-                
+
                 images.append(ExtractedImage{
                     id=f"img_{images.length}",
                     data=b"",  # Would need to download actual image
@@ -642,7 +642,7 @@ class HTMLParser {
                 })
                 content_parts.append(f"![{alt}]({src})\n\n")
                 pos += len(f"![{alt}]({src})\n\n")
-            
+
             elif node.name == "a" and this.config.html_keep_links:
                 href = node.get("href", "")
                 text = node.get_text().strip()
@@ -651,7 +651,7 @@ class HTMLParser {
                     links.append(ExtractedImage{url=href, text=text, link_type=link_type})
                     content_parts.append(f"[{text}]({href})")
                     pos += len(f"[{text}]({href})")
-            
+
             elif node.name in ["pre", "code"]:
                 # Code block
                 lang_class = node.get("class", [])
@@ -663,7 +663,7 @@ class HTMLParser {
                     elif cls.starts_with("lang-"):
                         lang = cls[5:]
                         break
-                
+
                 code_text = node.get_text()
                 code_blocks.append(CodeBlock{
                     language=lang,
@@ -673,24 +673,24 @@ class HTMLParser {
                 })
                 content_parts.append(f"\n```{lang}\n{code_text}\n```\n\n")
                 pos += len(f"\n```{lang}\n{code_text}\n```\n\n")
-            
+
             elif node.name in ["ul", "ol"]:
                 # List items
                 list_items = []
                 for li in node.find_all("li", recursive=false):
                     list_items.append(li.get_text().strip())
-                
+
                 marker = "-" if node.name == "ul" else "1."
                 list_text = "\n".join(f"{marker} {item}" for item in list_items) + "\n\n"
                 content_parts.append(list_text)
                 pos += len(list_text)
-            
+
             # Process children recursively
             for child in node.children:
                 process_node(child, depth + 1)
-        
+
         process_node(element)
-        
+
         return ConversionResult{
             content="\n".join(content_parts),
             sections=sections,
@@ -704,7 +704,7 @@ class HTMLParser {
     _extract_table(table_elem: any) -> TableConversionResult {
         headers: list<string> = []
         rows: list<list<string>> = []
-        
+
         # Find header row (usually <thead> or first <tr>)
         thead = table_elem.find("thead")
         if thead:
@@ -725,7 +725,7 @@ class HTMLParser {
                     avg_length = sum(cell_lengths) / cell_lengths.length
                     if avg_length < 30:  # Short average suggests headers
                         headers = [td.get_text().strip() for td in td_cells]
-        
+
         # Extract body rows
         tbody = table_elem.find("tbody") ?? table_elem
         for tr in tbody.find_all("tr")[1 if (headers.length > 0 and !thead) else 0:]:
@@ -734,10 +734,10 @@ class HTMLParser {
                 cells.append(td.get_text().strip().replace("\n", " "))
             if cells.length > 0:
                 rows.append(cells)
-        
+
         # Generate Markdown representation
         md_repr = format_table_as_markdown(headers, rows)
-        
+
         return TableConversionResult{
             table=ExtractedTable{
                 id=f"table_{generate_short_uuid()}",
@@ -767,7 +767,7 @@ struct TableConversionResult {
     markdown: string
 }
 
-// ==================== Markdown 解析器 ====================
+// ==================== Markdown English text ====================
 
 class MarkdownParser {
     config: DocumentParserConfig
@@ -778,14 +778,14 @@ class MarkdownParser {
 
     parse_string(markdown_content: string, source_path?: string) -> ParsedDocument {
         lines = markdown_content.split("\n")
-        
+
         sections: list<DocumentSection> = []
         tables: list<ExtractedTable> = []
         code_blocks: list<CodeBlock> = []
         images: list<ExtractedImage> = []
         links: list<ExtractedLink> = []
         content_parts: list<string> = []
-        
+
         current_section: DocumentSection? = null
         in_code_block = false
         code_lang = ""
@@ -796,11 +796,11 @@ class MarkdownParser {
         table_headers: list<string> = []
         table_start_idx = 0
         pos = 0
-        
+
         i = 0
         while i < lines.length:
             line = lines[i]
-            
+
             # Code fence
             if line.startswith("```") {
                 if !in_code_block:
@@ -820,23 +820,23 @@ class MarkdownParser {
                     in_code_block = false
                 i++
                 continue
-            
+
             if in_code_block:
                 code_lines.append(line)
                 i++
                 continue
-            
+
             # Heading
             heading_match = regex.match(r'^(#{1,6})\s+(.+)$', line)
             if heading_match != null {
                 level = heading_match.group(1).length
                 title = heading_match.group(2).trim()
-                
+
                 # Save previous section
                 if current_section != null {
                     current_section!.end_position = pos
                     sections.append(current_section!)
-                
+
                 current_section = DocumentSection{
                     id=f"h{level}_{sections.length}",
                     title=title,
@@ -845,12 +845,12 @@ class MarkdownParser {
                     start_position=pos,
                     end_position=0
                 }
-                
+
                 content_parts.append(line + "\n\n")
                 pos += len(line) + 2
                 i++
                 continue
-            
+
             # Table detection (rows starting with |)
             if line.trim().startswith("|") and "|" in line[1:]:
                 if !in_table:
@@ -858,7 +858,7 @@ class MarkdownParser {
                     table_start_idx = i
                     # Parse header
                     table_headers = parse_table_row(line)
-                
+
                 # Check if separator line (| --- | --- |)
                 separator_match = regex.match(r'^\|[\s\-:]+\|', line.trim())
                 if separator_match == null:
@@ -883,11 +883,11 @@ class MarkdownParser {
                     })
                     content_parts.append(md_table + "\n\n")
                     pos += len(md_table) + 2
-                
+
                 in_table = false
                 table_rows = []
                 table_headers = []
-            
+
             # Image: ![alt](url)
             img_match = regex.match(r'!\[([^\]]*)\]\(([^)]+)\)', line)
             if img_match != null {
@@ -901,19 +901,19 @@ class MarkdownParser {
                     width=0, height=0,
                     position=(pos, i)
                 })
-            
+
             # Link: [text](url)
             # ... (link extraction logic similar to above)
-            
+
             # Regular content
             content_parts.append(line + "\n")
             pos += len(line) + 1
-            
+
             if current_section != null:
                 current_section!.content += line + "\n"
-            
+
             i++
-        
+
         # Handle final state
         if in_table and table_rows.length > 0:
             md_table = format_table_as_markdown(table_headers, table_rows)
@@ -922,11 +922,11 @@ class MarkdownParser {
                 markdown_representation=md_table, row_count=table_rows.length,
                 column_count=table_headers.length, confidence=0.95
             })
-        
+
         if current_section != null:
             current_section!.end_position = pos
             sections.append(current_section!)
-        
+
         # Fallback: if no sections found, create one big section
         if sections.empty():
             sections.append(DocumentSection{
@@ -934,10 +934,10 @@ class MarkdownParser {
                 content=markdown_content, start_position=0,
                 end_position=markdown_content.length
             })
-        
+
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
-        
+
         return ParsedDocument{
             content=full_content,
             metadata=DocumentMetadata{
@@ -962,7 +962,7 @@ class MarkdownParser {
     }
 }
 
-// ==================== Office 文档解析器 (DOCX/PPTX/XLSX) ====================
+// ==================== Office English text (DOCX/PPTX/XLSX) ====================
 
 class OfficeDocumentParser {
     config: DocumentParserConfig
@@ -974,30 +974,30 @@ class OfficeDocumentParser {
     parse_docx(file_path: string) -> ParsedDocument {
         # Use python-docx library
         doc = load_docx(file_path)
-        
+
         sections: list<DocumentSection> = []
         tables: list<ExtractedTable> = []
         images: list<ExtractedImage> = []
         content_parts: list<string> = []
         pos = 0
-        
+
         # Process paragraphs
         para_idx = 0
         for para in doc.paragraphs:
             style_name = para.style.name if para.style else "Normal"
             text = para.text.trim()
-            
+
             if text.empty():
                 content_parts.append("")
                 pos += 1
                 para_idx++
                 continue
-            
+
             # Detect headings based on style name
             if style_name.starts_with("Heading") or style_name.starts_with("Title"):
                 level_match = regex.search(r'\d+', style_name)
                 level = int(level_match.group()) if level_match else 1
-                
+
                 sections.append(DocumentSection{
                     id=f"sec_{sections.length}",
                     title=text,
@@ -1006,34 +1006,34 @@ class OfficeDocumentParser {
                     start_position=pos,
                     end_position=pos + len(text)
                 })
-                
+
                 content_parts.append("#".repeat(level) + " " + text + "\n\n")
                 pos += len("#".repeat(level) + " " + text + "\n\n")
-            
+
             else:
                 content_parts.append(text + "\n\n")
-                
+
                 if sections.length > 0:
                     sections[-1].content += text + "\n\n"
                 pos += len(text) + 2
-            
+
             para_idx++
-        
+
         # Process tables
         for t_idx, table in enumerate(doc.tables) {
             headers: list<string> = []
             rows: list<list<string>> = []
-            
+
             for r_idx, row in enumerate(table.rows):
                 cells: list<string> = []
                 for cell in row.cells:
                     cells.append(cell.text.trim())
-                
+
                 if r_idx == 0:
                     headers = cells
                 else:
                     rows.append(cells)
-            
+
             if headers.length > 0 and rows.length > 0:
                 md_table = format_table_as_markdown(headers, rows)
                 tables.append(ExtractedTable{
@@ -1044,7 +1044,7 @@ class OfficeDocumentParser {
                 })
                 content_parts.append(md_table + "\n\n")
                 pos += len(md_table) + 2
-        
+
         # Extract embedded images
         if this.config.office_extract_embedded:
             for rel in doc.part.rels.values():
@@ -1056,10 +1056,10 @@ class OfficeDocumentParser {
                         format=guess_image_format(image_data[:4]),
                         width=0, height=0
                     })
-        
+
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
-        
+
         return ParsedDocument{
             content=full_content,
             metadata=DocumentMetadata{
@@ -1076,22 +1076,22 @@ class OfficeDocumentParser {
     parse_pptx(file_path: string) -> ParsedDocument {
         # Use python-pptx
         pptx = load_pptx(file_path)
-        
+
         sections: list<DocumentSection> = []
         content_parts: list<string> = []
         pos = 0
-        
+
         for slide_idx, slide in enumerate(pptx.slides):
             slide_title = slide.shapes.title?.text.trim() ?? f"Slide {slide_idx + 1}"
-            
+
             # Collect all text from shapes
             shape_texts: list<string> = []
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.trim() != "":
                     shape_texts.append(shape.text.trim())
-            
+
             slide_content = "\n".join(shape_texts)
-            
+
             sections.append(DocumentSection{
                 id=f"slide_{slide_idx}",
                 title=slide_title,
@@ -1100,14 +1100,14 @@ class OfficeDocumentParser {
                 start_position=pos,
                 end_position=pos + len(slide_content)
             })
-            
+
             formatted_slide = f"## {slide_title}\n\n{slide_content}\n\n---\n\n"
             content_parts.append(formatted_slide)
             pos += len(formatted_slide)
-        
+
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
-        
+
         return ParsedDocument{
             content=full_content,
             metadata=DocumentMetadata{
@@ -1124,21 +1124,21 @@ class OfficeDocumentParser {
     parse_xlsx(file_path: string) -> ParsedDocument {
         # Use openpyxl or pandas
         wb = load_excel(file_path)
-        
+
         sheets_content: list<string> = []
         all_tables: list<ExtractedTable> = []
-        
+
         for sheet_name, sheet in wb.items():
             sheet_data = sheet.values
             rows_list = list(sheet_data)
-            
+
             if rows_list.length == 0 { continue }
-            
+
             headers = [str(c) ?? "" for c in rows_list[0]]
             data_rows = [[str(c) ?? "" for c in row] for row in rows_list[1:]]
-            
+
             md_table = format_table_as_markdown(headers, data_rows)
-            
+
             all_tables.append(ExtractedTable{
                 id=f"sheet_{all_tables.length}",
                 headers=headers,
@@ -1148,12 +1148,12 @@ class OfficeDocumentParser {
                 column_count=headers.length,
                 confidence=1.0
             })
-            
+
             sheets_content.append(f"# Sheet: {sheet_name}\n\n{md_table}\n\n")
-        
+
         full_content = "\n".join(sheets_content)
         stats = compute_statistics(full_content)
-        
+
         return ParsedDocument{
             content=full_content,
             metadata=DocumentMetadata{
@@ -1173,11 +1173,11 @@ class OfficeDocumentParser {
     }
 }
 
-// ==================== 辅助函数 ====================
+// ==================== helperfunction ====================
 
 function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) -> string {
     if headers.length == 0 { return "" }
-    
+
     col_widths: list<int> = []
     for h_idx, h in enumerate(headers) {
         max_w = h.length
@@ -1185,19 +1185,19 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
             if h_idx < row.length:
                 max_w = max(max_w, row[h_idx].length)
         col_widths.append(max_w)
-    
+
     # Header row
     header_line = "| "
     for i, h in enumerate(headers):
         header_line += h.ljust(col_widths[i]) + " | "
     header_line = header_line.trim() + "|"
-    
+
     # Separator line
     sep_line = "| "
     for w in col_widths:
         sep_line += "-".repeat(w) + " | "
     sep_line = sep_line.trim() + "|"
-    
+
     # Data rows
     data_lines: list<string> = []
     for row in rows:
@@ -1209,7 +1209,7 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
                 row_line += cell + " | "
         }
         data_lines.append(row_line.trim() + "|")
-    
+
     return header_line + "\n" + sep_line + "\n" + "\n".join(data_lines)
 }
 
@@ -1217,7 +1217,7 @@ function compute_statistics(content: string) -> DocumentStatistics {
     char_count = content.length
     word_count = len(content.split_whitespace())
     line_count = content.count("\n") + 1
-    
+
     return DocumentStatistics{
         total_characters=char_count,
         total_words=word_count,
@@ -1252,7 +1252,7 @@ def generate_short_uuid() -> string {
     import uuid, shortuuid
     return shortuuid.uuid()[:8]
 
-// ==================== 工厂函数与测试 ====================
+// ==================== English textfunctionEnglish texttest ====================
 
 function create_document_parser(config?: DocumentParserConfig) -> DocumentParser {
     return new DocumentParser(config=config)
@@ -1260,9 +1260,9 @@ function create_document_parser(config?: DocumentParserConfig) -> DocumentParser
 
 function test_document_parser() -> bool {
     print("🧪 Testing NEURX Document Parser...")
-    
+
     parser = new DocumentParser()
-    
+
     # Test 1: Markdown parsing with tables and code
     print("  ✓ Test 1: Markdown Parsing")
     sample_md = """
@@ -1299,7 +1299,7 @@ AI is transforming industries.
     assert md_result.tables.length == 1, f"Expected 1 table, got {md_result.tables.length}"
     assert md_result.code_blocks.length == 1, f"Expected 1 code block, got {md_result.code_blocks.length}"
     assert md_result.statistics.word_count > 50, f"Word count too low: {md_result.statistics.word_count}"
-    
+
     # Test 2: HTML parsing
     print("  ✓ Test 2: HTML Parsing")
     sample_html = """
@@ -1322,13 +1322,13 @@ AI is transforming industries.
     assert html_result.sections.length >= 2, f"Expected >=2 sections, got {html_result.sections.length}"
     assert html_result.tables.length == 1, "Table extraction failed"
     assert "Navigation" not in html_result.content, "Nav element not properly removed"
-    
+
     # Test 3: Statistics calculation
     print("  ✓ Test 3: Statistics Calculation")
     stats = html_result.statistics
     assert stats.total_characters > 0, "Char count should be > 0"
     assert stats.estimated_reading_time_minutes > 0, "Reading time should be > 0"
-    
+
     print("\n✅ All Document Parser Tests Passed!")
     return true
 }

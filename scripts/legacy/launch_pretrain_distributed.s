@@ -2,8 +2,8 @@
 
 // ============================================
 // NeurX Multi-GPU Distributed Pretraining Launcher
-// 多GPU分布式预训练启动脚本 (纯S语言实现)
-// 功能: 启动多个进程，分别在不同GPU上运行
+// English textGPUEnglish texttrainingstartEnglish text (English textSlanguageimplementation)
+// English text: startEnglish text, English textGPUEnglish textrun
 // ============================================
 
 package main
@@ -13,7 +13,7 @@ use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
 
 // ============================================
-// 配置结构
+// configurationEnglish text
 // ============================================
 
 struct launcher_config {
@@ -39,25 +39,25 @@ struct gpu_info {
 }
 
 // ============================================
-// 配置初始化
+// configurationinitialize
 // ============================================
 
 func parse_args() launcher_config {
-    // 从命令行参数或环境变量读取配置
-    
+    // English textparameterEnglish textconfiguration
+
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
     int num_gpus = parse_int(num_gpus_str)
     if num_gpus < 1 {
         num_gpus = 1
     }
-    
+
     string master_addr = runtime_env_get("MASTER_ADDR", "localhost")
     string master_port_str = runtime_env_get("MASTER_PORT", "29500")
     int master_port = parse_int(master_port_str)
     if master_port < 1024 {
         master_port = 29500
     }
-    
+
     launcher_config {
         num_gpus: num_gpus,
         master_addr: master_addr,
@@ -69,24 +69,24 @@ func parse_args() launcher_config {
         gradient_accum_steps: 8,
         num_epochs: 1,
         log_dir: "./artifacts/logs/distributed_pretrain",
-        log_file: "",  // 将在main中设置
+        log_file: "",  // English textmainEnglish text
         verbose: true,
     }
 }
 
 // ============================================
-// GPU检查
+// GPUEnglish text
 // ============================================
 
 func query_gpu_info() []gpu_info {
-    // 使用nvidia-smi查询GPU信息
-    // 返回所有可用GPU的信息
-    
-    // 调用: nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
-    
-    []gpu_info gpus = []gpu_info{cap: 16}  // 最多支持16块GPU
-    
-    // 模拟GPU信息（实际应调用nvidia-smi）
+    // usenvidia-smiqueryGPUinformation
+    // English textGPUEnglish textinformation
+
+    // English text: nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
+
+    []gpu_info gpus = []gpu_info{cap: 16}  // English textsupport16English textGPU
+
+    // English textGPUinformation(actualEnglish textnvidia-smi)
     gpu_info gpu0 = gpu_info {
         device_id: 0,
         name: "NVIDIA RTX 4090",
@@ -94,15 +94,15 @@ func query_gpu_info() []gpu_info {
         available: true,
     }
     gpus[0] = gpu0
-    
+
     gpus
 }
 
 func check_gpu_availability(int num_gpus) (bool, int) {
-    // 检查是否有足够的GPU
-    
+    // English textGPU
+
     []gpu_info gpus = query_gpu_info()
-    
+
     int available_count = 0
     int i = 0
     while i < len(gpus) {
@@ -111,33 +111,33 @@ func check_gpu_availability(int num_gpus) (bool, int) {
         }
         i = i + 1
     }
-    
+
     bool sufficient = available_count >= num_gpus
     (sufficient, available_count)
 }
 
 // ============================================
-// 日志和目录管理
+// logEnglish textdirectorymanagement
 // ============================================
 
 func setup_directories(launcher_config config) bool {
-    // 创建必要的目录
-    
+    // English textdirectory
+
     if !create_directory(config.log_dir) {
         print("[ERROR] Failed to create log directory: " + config.log_dir)
         return false
     }
-    
+
     if !create_directory("checkpoint/NeurX-1.3") {
         print("[ERROR] Failed to create checkpoint directory")
         return false
     }
-    
+
     if !create_directory("artifacts/logs") {
         print("[ERROR] Failed to create artifacts directory")
         return false
     }
-    
+
     true
 }
 
@@ -160,7 +160,7 @@ func print_config(launcher_config config) {
 }
 
 // ============================================
-// 分布式进程启动
+// English textstart
 // ============================================
 
 struct process_handle {
@@ -170,21 +170,21 @@ struct process_handle {
     bool running
 }
 
-// 为单个rank启动训练进程
+// English textrankstarttrainingEnglish text
 func launch_rank_process(
     launcher_config config,
     int rank,
     int world_size,
 ) process_handle {
-    
-    // 1. 构建环境变量
+
+    // 1. English text
     runtime_env_set("RANK", itoa(rank))
     runtime_env_set("LOCAL_RANK", itoa(rank))
     runtime_env_set("WORLD_SIZE", itoa(world_size))
     runtime_env_set("MASTER_ADDR", config.master_addr)
     runtime_env_set("MASTER_PORT", itoa(config.master_port))
-    
-    // 2. 构建命令行
+
+    // 2. English text
     string cmd = "./pretrain/distributed_pretrain_entry.s " +
                  "--config=" + config.config_path +
                  " --model_path=" + config.model_path +
@@ -194,13 +194,13 @@ func launch_rank_process(
                  " --epochs=" + itoa(config.num_epochs) +
                  " --rank=" + itoa(rank) +
                  " --world_size=" + itoa(world_size)
-    
-    // 3. 启动进程（异步）
+
+    // 3. startEnglish text(English textstep)
     string log_file = config.log_dir + "/rank_" + itoa(rank) + ".log"
-    
-    // 使用异步执行，这样不会阻塞
+
+    // useEnglish textstepEnglish text, English text
     int pid = exec_process_async(cmd, log_file)
-    
+
     process_handle {
         rank: rank,
         pid: pid,
@@ -209,46 +209,46 @@ func launch_rank_process(
     }
 }
 
-// 启动所有rank的进程
+// startEnglish textrankEnglish text
 func launch_all_processes(
     launcher_config config,
     int world_size,
 ) []process_handle {
-    
+
     []process_handle handles = []process_handle{cap: world_size}
-    
+
     int rank = 0
     while rank < world_size {
         process_handle handle = launch_rank_process(config, rank, world_size)
         handles[rank] = handle
-        
+
         if config.verbose {
             print("[INFO] Launched rank " + itoa(rank) + " with PID " + itoa(handle.pid))
         }
-        
+
         rank = rank + 1
     }
-    
+
     handles
 }
 
-// 等待所有进程完成
+// English text
 func wait_all_processes(
     []process_handle handles,
 ) int {
-    
+
     int overall_exit_code = 0
     int rank = 0
-    
+
     while rank < len(handles) {
         process_handle handle = handles[rank]
-        
+
         if handle.running {
             print("[INFO] Waiting for rank " + itoa(handle.rank) + " (PID " + itoa(handle.pid) + ")...")
-            
-            // 等待进程完成
+
+            // English text
             int exit_code = wait_process(handle.pid)
-            
+
             if exit_code != 0 {
                 print("[ERROR] Rank " + itoa(handle.rank) + " exited with code " + itoa(exit_code))
                 overall_exit_code = exit_code
@@ -256,38 +256,38 @@ func wait_all_processes(
                 print("[SUCCESS] Rank " + itoa(handle.rank) + " completed successfully")
             }
         }
-        
+
         rank = rank + 1
     }
-    
+
     overall_exit_code
 }
 
 // ============================================
-// 日志聚合
+// logEnglish text
 // ============================================
 
 func aggregate_logs(launcher_config config, []process_handle handles) {
-    // 将各rank的日志合并到主日志文件
-    
+    // English textrankEnglish textlogEnglish textmainlogfile
+
     print("[INFO] Aggregating logs from all ranks...")
-    
+
     int rank = 0
     while rank < len(handles) {
         string rank_log = handles[rank].log_file
-        
-        // 检查rank日志文件是否存在
+
+        // English textranklogfileEnglish text
         if file_exists(rank_log) {
             print("[INFO] Rank " + itoa(rank) + " log: " + rank_log)
-            // TODO: 读取并追加到主日志文件
+            // TODO: English textmainlogfile
         }
-        
+
         rank = rank + 1
     }
 }
 
 // ============================================
-// 监控和统计
+// monitoringEnglish textstatistics
 // ============================================
 
 func print_final_stats(launcher_config config, int exit_code) {
@@ -306,66 +306,66 @@ func print_final_stats(launcher_config config, int exit_code) {
 }
 
 // ============================================
-// 主函数
+// mainfunction
 // ============================================
 
 func main() {
-    
-    // 1. 解析配置
+
+    // 1. English textconfiguration
     launcher_config config = parse_args()
-    
-    // 2. 生成日志文件名（带时间戳）
+
+    // 2. generatelogfileEnglish text(English texttimeEnglish text)
     string timestamp = get_timestamp()
     config.log_file = config.log_dir + "/pretrain_" + timestamp + ".log"
-    
-    // 3. 打印配置
+
+    // 3. English textconfiguration
     print_config(config)
-    
-    // 4. 检查GPU可用性
+
+    // 4. English textGPUEnglish text
     print("[INFO] Checking GPU availability...")
     (bool sufficient, int available_gpus) := check_gpu_availability(config.num_gpus)
-    
+
     print("[INFO] Requested GPUs: " + itoa(config.num_gpus))
     print("[INFO] Available GPUs: " + itoa(available_gpus))
-    
+
     if !sufficient {
         print("[ERROR] Insufficient GPUs available!")
         exit(1)
     }
-    
-    // 5. 创建目录
+
+    // 5. English textdirectory
     if !setup_directories(config) {
         print("[ERROR] Failed to setup directories")
         exit(1)
     }
-    
-    // 6. 启动分布式训练进程
+
+    // 6. startEnglish texttrainingEnglish text
     print("[INFO] Launching " + itoa(config.num_gpus) + " training processes...")
-    
+
     []process_handle handles = launch_all_processes(config, config.num_gpus)
-    
-    // 7. 等待所有进程完成
+
+    // 7. English text
     print("[INFO] All processes started. Waiting for completion...")
-    
+
     int exit_code = wait_all_processes(handles)
-    
-    // 8. 聚合日志
+
+    // 8. English textlog
     aggregate_logs(config, handles)
-    
-    // 9. 打印最终统计
+
+    // 9. English textstatistics
     print_final_stats(config, exit_code)
-    
+
     exit(exit_code)
 }
 
 // ============================================
-// 辅助函数
+// helperfunction
 // ============================================
 
 func parse_int(string s) int {
     int result = 0
     int i = 0
-    
+
     while i < len(s) {
         byte b = s[i]
         if b >= '0' && b <= '9' {
@@ -373,7 +373,7 @@ func parse_int(string s) int {
         }
         i = i + 1
     }
-    
+
     result
 }
 
@@ -381,31 +381,31 @@ func itoa(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     string s = ""
     int num = n
-    
+
     if num < 0 {
         s = "-"
         num = -num
     }
-    
+
     while num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10
     }
-    
+
     s
 }
 
 func get_timestamp() string {
-    // 返回格式为 YYYYMMDD_HHMMSS 的时间戳
-    // 实际实现需要调用系统时间函数
-    "20260714_161200"  // 示例值
+    // English text YYYYMMDD_HHMMSS English texttimeEnglish text
+    // actualimplementationRequiredEnglish textsystemtimefunction
+    "20260714_161200"  // exampleEnglish text
 }
 
 func exit(int code) {
-    // 退出程序
-    // 实际实现通过调用OS exit
+    // English text
+    // actualimplementationEnglish textOS exit
 }

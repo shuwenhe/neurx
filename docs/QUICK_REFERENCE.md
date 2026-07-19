@@ -1,43 +1,43 @@
-# 快速参考卡：完全 S 语言化的 NeurX 环境
+# quickEnglish text: English text S languageEnglish text NeurX English text
 
-## 📦 项目交付物
+## 📦 English text
 
-**总代码量：2000+ 行 Go-like S 语言**
+**English text: 2000+ English text Go-like S language**
 
-### 四个核心工具
+### English texttool
 
 ```
-1. data_pipeline.s (700+行)
-   ├─ 清洗：JSONL/TXT/XML 处理 + 去重
-   ├─ 分片：动态分片 + manifest 生成
-   └─ 性能：3.75x-5.6x 快
+1. data_pipeline.s (700+English text)
+   ├─ clean: JSONL/TXT/XML English text + deduplication
+   ├─ English text: English text + manifest generate
+   └─ English text: 3.75x-5.6x English text
 
-2. training_runner.s (500+行)
-   ├─ 配置管理：环境变量 + JSON
-   ├─ 检查点：保存/恢复/版本控制
-   └─ 监控：性能 + 梯度 + 学习率追踪
+2. training_runner.s (500+English text)
+   ├─ configurationmanagement: English text + JSON
+   ├─ checkpoint: save/recover/English text
+   └─ monitoring: English text + gradient + learning rateEnglish text
 
-3. inference_server.s (600+行)
-   ├─ REST API：/completions + /health + /metrics
-   ├─ 配置：量化、缓存、批处理
-   └─ 基准：性能测试 + 吞吐量计算
+3. inference_server.s (600+English text)
+   ├─ REST API: /completions + /health + /metrics
+   ├─ configuration: English text, cache, English text
+   └─ English text: English texttest + English textcompute
 
-4. s_toolchain.s (250+行)
-   ├─ 状态查询：status 命令
-   ├─ 工具列表：list 命令
-   └─ 协调管理：统一 CLI 入口
+4. s_toolchain.s (250+English text)
+   ├─ statequery: status English text
+   ├─ toolEnglish text: list English text
+   └─ English textmanagement: English text CLI English text
 ```
 
 ---
 
-## 🚀 一键快速开始
+## 🚀 English textquickstart
 
-### 编译所有工具
+### compileEnglish texttool
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 批量编译（复制粘贴执行）
+# English textcompile(English text)
 s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline && \
 s scripts/legacy/training_runner.s -o artifacts/build/training/runner && \
 s scripts/legacy/inference_server.s -o artifacts/build/inference/server && \
@@ -46,14 +46,14 @@ chmod +x artifacts/build/*/* && \
 echo "✓ All components compiled successfully!"
 ```
 
-### 验证安装
+### English text
 
 ```bash
-# 查看工具链状态
+# English texttoolEnglish textstate
 ./artifacts/build/toolchain/s_toolchain status
 ```
 
-**预期输出：**
+**English textoutput: **
 ```
 NeurX S-Only Toolchain
 ============================================================
@@ -66,9 +66,9 @@ Component Status:
 
 ---
 
-## 🔧 常用命令
+## 🔧 English text
 
-### 数据处理
+### dataEnglish text
 
 ```bash
 ./artifacts/build/data_pipeline/data_pipeline pipeline
@@ -76,7 +76,7 @@ Component Status:
 ./artifacts/build/data_pipeline/data_pipeline help
 ```
 
-### 训练
+### training
 
 ```bash
 ./artifacts/build/training/runner run
@@ -85,7 +85,7 @@ Component Status:
 ./artifacts/build/training/runner eval
 ```
 
-### 推理
+### inference
 
 ```bash
 NEURX_INFERENCE_PORT=8080 ./artifacts/build/inference/server start
@@ -95,49 +95,49 @@ NEURX_INFERENCE_PORT=8080 ./artifacts/build/inference/server start
 
 ---
 
-## 📊 性能指标
+## 📊 English text
 
-| 操作 | Python | S语言 | 收益 |
+| English text | Python | Slanguage | English text |
 |------|--------|-------|------|
-| 数据清洗 | 45s | 12s | **3.75x** ⚡ |
-| 数据分片 | 28s | 5s | **5.6x** ⚡ |
-| 启动时间 | 1-2s | 50-100ms | **10-20x** ⚡ |
-| 内存占用 | 350MB | 80MB | **4.4x** 少 💾 |
+| dataclean | 45s | 12s | **3.75x** ⚡ |
+| dataEnglish text | 28s | 5s | **5.6x** ⚡ |
+| starttime | 1-2s | 50-100ms | **10-20x** ⚡ |
+| English text | 350MB | 80MB | **4.4x** English text 💾 |
 
 ---
 
-## 🎓 核心特性
+## 🎓 English text
 
-✅ **编译型** - 单一二进制，无依赖  
-✅ **高效** - 3-5x 性能提升  
-✅ **灵活** - 环境变量 + JSON 配置  
-✅ **完整** - 数据 → 训练 → 推理  
-✅ **健壮** - 完善的错误处理和日志  
-✅ **可扩展** - 清晰的模块化架构  
+✅ **compileEnglish text** - English text, English text
+✅ **English text** - 3-5x English text
+✅ **English text** - English text + JSON configuration
+✅ **complete** - data → training → inference
+✅ **English text** - English texterrorEnglish textlog
+✅ **English textextension** - English text
 
 ---
 
-## 📚 文档速查
+## 📚 English text
 
-| 文档 | 用途 |
+| English text | English text |
 |------|------|
-| `S_TOOLCHAIN_GUIDE.md` | 详细使用指南 (300+ 行) |
-| `S_IMPLEMENTATION_GUIDE.md` | 完整实现参考 (400+ 行) |
-| `S_ONLY_ENVIRONMENT_PLAN.md` | 项目计划和路线图 |
-| `S_TOOLCHAIN_COMPLETION.md` | 项目总结和成果 |
+| `S_TOOLCHAIN_GUIDE.md` | English textuseEnglish text (300+ English text) |
+| `S_IMPLEMENTATION_GUIDE.md` | completeimplementationEnglish text (400+ English text) |
+| `S_ONLY_ENVIRONMENT_PLAN.md` | English text |
+| `S_TOOLCHAIN_COMPLETION.md` | English text |
 
 ---
 
-## 🔑 关键环境变量
+## 🔑 English text
 
-### 数据处理
+### dataEnglish text
 ```bash
 export NEURX_HOME=/path/to/neurx
 export NEURX_BATCH_SIZE=32
 export NEURX_MAX_SHARDS=256
 ```
 
-### 训练
+### training
 ```bash
 export NEURX_BATCH_SIZE=16
 export NEURX_SEQ_LEN=512
@@ -146,7 +146,7 @@ export NEURX_NUM_GPUS=8
 export NEURX_LEARNING_RATE=0.0001
 ```
 
-### 推理
+### inference
 ```bash
 export NEURX_INFERENCE_HOST=0.0.0.0
 export NEURX_INFERENCE_PORT=8080
@@ -156,16 +156,16 @@ export NEURX_INFERENCE_MAX_BATCH=32
 
 ---
 
-## 🛠️ Makefile 集成
+## 🛠️ Makefile English text
 
 ```bash
-# 编译
+# compile
 make build-data-pipeline
 make build-training-runner
 make build-inference-server
 make build-s-toolchain
 
-# 运行
+# run
 make run-data-pipeline
 make run-training
 make run-inference-server
@@ -173,46 +173,46 @@ make run-inference-server
 
 ---
 
-## ❓ 常见问题
+## ❓ English text
 
-**Q: 如何编译？**  
-A: 使用 S 编译器编译 .s 文件到二进制：
+**Q: English textcompile?**
+A: use S compileEnglish textcompile .s fileEnglish text:
 ```bash
 s scripts/legacy/component.s -o artifacts/build/component/binary
 ```
 
-**Q: 支持哪些平台？**  
-A: Linux (主要测试)、macOS、Windows (通过 WSL)
+**Q: supportEnglish text?**
+A: Linux (mainEnglish texttest), macOS, Windows (English text WSL)
 
-**Q: 性能如何？**  
-A: 比 Python 快 3-5 倍，内存少 4 倍
+**Q: English text?**
+A: English text Python English text 3-5 English text, English text 4 English text
 
-**Q: 可以自定义配置吗？**  
-A: 支持环境变量、JSON 配置文件、命令行参数
+**Q: AllowedEnglish textconfigurationEnglish text?**
+A: supportEnglish text, JSON configurationfile, English textparameter
 
-**Q: 如何集成到现有流程？**  
-A: 通过 Makefile 或直接调用二进制
+**Q: English textpipeline?**
+A: English text Makefile English text
 
 ---
 
-## 📍 文件位置
+## 📍 fileEnglish text
 
 ```
-项目根目录：/home/shuwen/shuwen/train/neurx/
-  
-源代码：
-  scripts/legacy/data_pipeline.s          ← 数据处理
-  scripts/legacy/training_runner.s        ← 训练驱动
-  scripts/legacy/inference_server.s       ← 推理服务
-  scripts/legacy/s_toolchain.s            ← 工具链协调
+English textdirectory: /home/shuwen/shuwen/train/neurx/
 
-编译输出：
+English text:
+  scripts/legacy/data_pipeline.s          ← dataEnglish text
+  scripts/legacy/training_runner.s        ← trainingEnglish text
+  scripts/legacy/inference_server.s       ← inferenceEnglish text
+  scripts/legacy/s_toolchain.s            ← toolEnglish text
+
+compileoutput:
   artifacts/build/data_pipeline/
   artifacts/build/training/
   artifacts/build/inference/
   artifacts/build/toolchain/
 
-文档：
+English text:
   S_TOOLCHAIN_GUIDE.md
   S_IMPLEMENTATION_GUIDE.md
   S_ONLY_ENVIRONMENT_PLAN.md
@@ -220,29 +220,29 @@ A: 通过 Makefile 或直接调用二进制
 
 ---
 
-## 🚀 下一步
+## 🚀 English textstep
 
-1. **编译** - 按照快速开始编译所有工具
-2. **测试** - 运行 `status` 命令验证
-3. **集成** - 集成到现有 Makefile 和流程
-4. **优化** - 根据实际使用场景调整参数
-5. **扩展** - 按需添加其他 S 语言工具
+1. **compile** - English textquickstartcompileEnglish texttool
+2. **test** - run `status` English text
+3. **English text** - English text Makefile English textpipeline
+4. **optimize** - English textactualuseEnglish textparameter
+5. **extension** - English text S languagetool
 
 ---
 
-## 💼 项目成果总结
+## 💼 English text
 
-| 指标 | 达成情况 |
+| English text | English text |
 |------|---------|
-| 代码量 | **2000+ 行** ✅ |
-| 工具数 | **4 个** ✅ |
-| 文档 | **400+ 行** ✅ |
-| 性能提升 | **3-5 倍** ✅ |
-| 完整性 | **端到端** ✅ |
-| 生产就绪 | **是** ✅ |
+| English text | **2000+ English text** ✅ |
+| toolEnglish text | **4 English text** ✅ |
+| English text | **400+ English text** ✅ |
+| English text | **3-5 English text** ✅ |
+| completeEnglish text | **English text** ✅ |
+| English text | **English text** ✅ |
 
 ---
 
-**版本：** 1.0  
-**更新：** 2026-07-07  
-**状态：** 🟢 完成并可用
+**English text: ** 1.0
+**English text: ** 2026-07-07
+**state: ** 🟢 English text

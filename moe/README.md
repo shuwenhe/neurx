@@ -1,18 +1,18 @@
 # MoE models
 
-该目录集中保存 NeurX 的 Mixture-of-Experts 引擎与模型代码。
+English textdirectoryEnglish textsave NeurX English text Mixture-of-Experts English textmodelEnglish text.
 
-| 文件 | 职责 |
+| file | English text |
 |---|---|
-| `moe_core.s` | 可执行的共享路由、Top-K、共享专家和路由专家核心 |
-| `hybrid_moe.s` | Gated MLA、AttnRes 与 `attention/nda.s`、MoE 模块组成的混合骨干 |
-| `transformer_moe.s` | Transformer MoE层 |
-| `transformer_moe_backward.s` | Router与Expert FFN反向传播 |
-| `llm_moe.s` | GPT/LLM MoE模型 |
-| `llm_moe_1t.s` | 1T级稀疏模型配置与拓扑 |
-| `llm_moe_1t_loss.s` | MoE损失与梯度 |
-| `fine_grained_moe.s` | 细粒度路由、共享专家和无辅助损失均衡 |
-| `trae_moe.s` | 自适应路由MoE实验实现 |
-| `moe_optimizer.s` | 专家专业化、剪枝、合并和效率分析设计 |
+| `moe_core.s` | English text, Top-K, English text |
+| `hybrid_moe.s` | Gated MLA, AttnRes English text `attention/nda.s`, MoE English text |
+| `transformer_moe.s` | Transformer MoEEnglish text |
+| `transformer_moe_backward.s` | RouterEnglish textExpert FFNEnglish text |
+| `llm_moe.s` | GPT/LLM MoEmodel |
+| `llm_moe_1t.s` | 1TEnglish textmodelconfigurationEnglish text |
+| `llm_moe_1t_loss.s` | MoElossEnglish textgradient |
+| `fine_grained_moe.s` | English text, English texthelperlossEnglish text |
+| `trae_moe.s` | English textMoEEnglish textimplementation |
+| `moe_optimizer.s` | English text, English text, English text |
 
-模型、训练和测试代码通过 `neurx.moe.*` 包路径引用这些模块。
+model, trainingEnglish texttestEnglish text `neurx.moe.*` English textpathEnglish text.

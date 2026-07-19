@@ -1,10 +1,10 @@
-# NeurX 训练和推理 - 快速使用指南
+# NeurX trainingEnglish textinference - quickuseEnglish text
 
-## 概述
+## English text
 
-本指南展示如何使用 S 语言在 NeurX 系统中实现完整的机器学习训练和推理流程。
+English textuse S languageEnglish text NeurX systemEnglish textimplementationcompleteEnglish texttrainingEnglish textinferencepipeline.
 
-## 系统架构
+## systemEnglish text
 
 ```
 ┌─────────────────────────────────────┐
@@ -13,84 +13,84 @@
          │          │          │
          ▼          ▼          ▼
     ┌────────┐ ┌──────┐ ┌─────────┐
-    │  数据  │ │  模型 │ │  优化器 │
+    │  data  │ │  model │ │  optimizeEnglish text │
     └────────┘ └──────┘ └─────────┘
          │          │          │
          └──────────┴──────────┘
               │
               ▼
          ┌─────────────┐
-         │ 训练循环     │
-         │ Loss计算    │
-         │ 梯度更新    │
+         │ trainingEnglish text     │
+         │ Losscompute    │
+         │ gradientEnglish text    │
          └─────────────┘
               │
               ▼
          ┌─────────────┐
-         │ 模型检查点   │
-         │ 保存权重    │
+         │ modelcheckpoint   │
+         │ saveweight    │
          └─────────────┘
               │
               ▼
          ┌─────────────┐
-         │ 推理模块     │
-         │ 文本生成    │
+         │ inferenceEnglish text     │
+         │ English textgenerate    │
          └─────────────┘
 ```
 
-## 核心组件
+## English text
 
-### 1. 模型配置 (ModelConfig)
+### 1. modelconfiguration (ModelConfig)
 ```s
 struct ModelConfig {
-    vocab_size: i32        // 词汇表大小: 32000
-    hidden_dim: i32        // 隐藏维度: 256
-    num_layers: i32        // 层数: 6
-    num_heads: i32         // 注意力头数: 8
-    ffn_dim: i32          // 前馈网络维度: 1024
-    seq_len: i32          // 序列长度: 2048
-    batch_size: i32       // 批大小: 32
+    vocab_size: i32        // English text: 32000
+    hidden_dim: i32        // English text: 256
+    num_layers: i32        // English text: 6
+    num_heads: i32         // English text: 8
+    ffn_dim: i32          // English text: 1024
+    seq_len: i32          // English text: 2048
+    batch_size: i32       // English text: 32
 }
 ```
 
-**参数统计**:
+**parameterstatistics**:
 - Embedding: vocab_size × hidden_dim = 32000 × 256 = 8M
 - Attention: num_heads × hidden_dim × num_layers = 8 × 256 × 6 = 12.3K
 - FFN: ffn_dim × hidden_dim × num_layers = 1024 × 256 × 6 = 1.5M
-- **总计**: ~10M 参数
+- **English text**: ~10M parameter
 
-### 2. 训练配置 (TrainingConfig)
+### 2. trainingconfiguration (TrainingConfig)
 ```s
 struct TrainingConfig {
-    num_epochs: i32        // 训练轮数: 2
-    steps_per_epoch: i32   // 每轮步数: 50
-    learning_rate: f64     // 学习率: 0.0005
-    warmup_steps: i32      // 预热步数: 10
-    max_grad_norm: f64     // 梯度裁剪范数: 1.0
+    num_epochs: i32        // trainingEnglish text: 2
+    steps_per_epoch: i32   // English textstepEnglish text: 50
+    learning_rate: f64     // learning rate: 0.0005
+    warmup_steps: i32      // English textstepEnglish text: 10
+    max_grad_norm: f64     // gradientEnglish text: 1.0
 }
 ```
 
-**训练计划**:
-- 总步数: 2 × 50 = 100 steps
-- 预热期: 前 10 steps 学习率从 0 线性增长到 0.0005
-- 后 90 steps: 固定学习率 0.0005
+**trainingEnglish text**:
+- English textstepEnglish text: 2 × 50 = 100 steps
+- English text: English text 10 steps learning rateEnglish text 0 English text 0.0005
+- English text 90 steps: English textlearning rate 0.0005
 
-### 3. 数据流
+### 3. dataEnglish text
 
-#### 3.1 数据加载
+#### 3.1 dataload
 ```s
 func create_dummy_batch(config: ModelConfig) DataBatch {
-    // 生成合成数据用于演示
-    // 大小: batch_size × seq_len
-    // 模式: (token_i + 1) % vocab_size
+    // generateEnglish textdataEnglish text
+    // English text: batch_size × seq_len
+    // English text: (token_i + 1) % vocab_size
 }
 ```
 
-**批次大小**:
+**batchEnglish text**:
 - Input: 32 × 2048 = 65,536 tokens
-- 总内存: 65,536 tokens × 4 bytes = 256 KB
+- English text: 65,536 tokens × 4 bytes = 256 KB
 
-#### 3.2 前向传播
+#### 3.2 English text
 ```
 Input [batch, seq_len]
   ↓
@@ -103,54 +103,54 @@ Feed-Forward Network
 Output Logits [batch, seq_len, vocab]
 ```
 
-#### 3.3 损失计算
+#### 3.3 losscompute
 ```s
 func compute_loss(model, batch) f64 {
-    // 交叉熵损失 (简化实现)
+    // English textloss (English textimplementation)
     // Loss = -log(softmax(logits) @ labels)
 }
 ```
 
-#### 3.4 反向传播
+#### 3.4 English text
 ```s
 func train_step(model, batch, lr) (model, loss) {
-    // 1. 前向传播计算 loss
-    // 2. 反向传播计算梯度
-    // 3. 梯度裁剪 (norm ≤ max_grad_norm)
-    // 4. 权重更新: w -= lr * ∇w
+    // 1. English textcompute loss
+    // 2. English textcomputegradient
+    // 3. gradientEnglish text (norm ≤ max_grad_norm)
+    // 4. weightEnglish text: w -= lr * ∇w
 }
 ```
 
-### 4. 推理实现
+### 4. inferenceimplementation
 
 ```s
 func generate_text(model, prompt, max_tokens) InferenceResult {
-    // 1. 编码 prompt
-    // 2. 自回归生成 max_tokens 个新 token
-    // 3. 记录延迟和吞吐量
+    // 1. English text prompt
+    // 2. English textgenerate max_tokens English text token
+    // 3. English text
 }
 ```
 
-**生成设置**:
-- Greedy decoding (选择最高概率 token)
-- 单样本生成
-- 处理长度: 20-30 tokens
+**generateEnglish text**:
+- Greedy decoding (English text token)
+- English textgenerate
+- English text: 20-30 tokens
 
-## 快速开始
+## quickstart
 
-### 方案 A: 使用脚本自动编译和运行
+### English text A: useEnglish textcompileEnglish textrun
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
 
-# 使脚本可执行
+# English text
 chmod +x run_train_and_infer.sh
 
-# 运行脚本（自动编译和执行）
+# runEnglish text(English textcompileEnglish text)
 bash run_train_and_infer.sh
 ```
 
-**预期输出**:
+**English textoutput**:
 ```
 ═══════════════════════════════════════════════════════
   NeurX Complete Training & Inference System
@@ -177,58 +177,58 @@ Generated Text: The future of AI is the of to in a is and ...
 Throughput: 45678 tokens/sec
 ```
 
-### 方案 B: 手动编译和运行
+### English text B: English textcompileEnglish textrun
 
-#### 步骤 1: 编译
+#### stepEnglish text 1: compile
 
 ```bash
 cd /Users/feifei/shuwen/train/neurx
 
-# 编译训练和推理系统
+# compiletrainingEnglish textinferencesystem
 neurx compile train_and_infer.s -o bin/train_and_infer --optimize=2
 
-# 也可以生成中间代码用于调试
+# English textAllowedgenerateEnglish text
 neurx compile train_and_infer.s --emit-ir
 ```
 
-**编译选项说明**:
-- `--optimize=2`: 激进优化（推荐）
-- `--optimize=1`: 标准优化
-- `--optimize=0`: 无优化（用于调试）
-- `--emit-ir`: 输出中间表示
-- `--emit-asm`: 输出汇编代码
+**compileEnglish textexplanation**:
+- `--optimize=2`: English textoptimize(recommended)
+- `--optimize=1`: English textoptimize
+- `--optimize=0`: English textoptimize(English text)
+- `--emit-ir`: outputEnglish text
+- `--emit-asm`: outputEnglish text
 
-#### 步骤 2: 运行
+#### stepEnglish text 2: run
 
 ```bash
-# 执行编译的二进制
+# English textcompileEnglish text
 ./bin/train_and_infer
 
-# 或使用 neurx 直接运行
+# English textuse neurx English textrun
 neurx run train_and_infer.s
 ```
 
-## 详细的执行流程
+## English textpipeline
 
-### Phase 1: 模型初始化 (Model Initialization)
+### Phase 1: modelinitialize (Model Initialization)
 
 ```
-步骤1: 定义配置
+stepEnglish text1: English textconfiguration
   - vocab_size=32000, hidden_dim=256, num_layers=6
-  
-步骤2: 分配内存
+
+stepEnglish text2: English text
   - Embedding table: 32000 × 256 = 8M params
   - Attention weights: 8 heads × 256 × 6 = 12.3K params
   - FFN weights: 1024 × 256 × 6 = 1.5M params
-  
-步骤3: 初始化权重
-  - 随机初始化或 Xavier/He 初始化
-  
-输出:
+
+stepEnglish text3: initializeweight
+  - English textinitializeEnglish text Xavier/He initialize
+
+output:
   ✅ Model created with 10.03M parameters
 ```
 
-### Phase 2: 模型训练 (Model Training)
+### Phase 2: modeltraining (Model Training)
 
 ```
 Epoch 1
@@ -248,28 +248,28 @@ Epoch 2
 ✅ Best Loss: 1.89 (Epoch 2)
 ```
 
-**监控指标**:
-- Loss: 平均交叉熵损失
-- Learning Rate: 当前学习率（带 warmup）
-- Throughput: tokens/sec（训练速度）
+**monitoringEnglish text**:
+- Loss: English textloss
+- Learning Rate: English textlearning rate(English text warmup)
+- Throughput: tokens/sec(trainingEnglish text)
 
-### Phase 3: 模型推理 (Model Inference)
+### Phase 3: modelinference (Model Inference)
 
 ```
-推理示例 1:
+inferenceexample 1:
 ┌─ Prompt: "The future of AI is"
 ├─ Generate 20 tokens
 ├─ Latency: 12.34 ms
 └─ Throughput: 1618.86 tokens/sec
 
-推理示例 2:
+inferenceexample 2:
 ┌─ Prompt: "Machine learning enables"
 ├─ Generate 15 tokens
 ├─ Latency: 9.25 ms
 └─ Throughput: 1621.62 tokens/sec
 ```
 
-**生成过程**:
+**generateEnglish text**:
 ```
 Input Prompt: [token_1, token_2, ..., token_n]
   ↓
@@ -284,7 +284,7 @@ For i = 1 to max_tokens:
 Output: [prompt_tokens, generated_tokens]
 ```
 
-### Phase 4: 性能总结 (Performance Summary)
+### Phase 4: English text (Performance Summary)
 
 ```
 📊 Training Summary:
@@ -300,108 +300,108 @@ Output: [prompt_tokens, generated_tokens]
    Average throughput: 1620 tokens/sec
 ```
 
-## 文件清单
+## fileEnglish text
 
-| 文件 | 用途 | 大小 |
+| file | English text | English text |
 |------|------|------|
-| `train_and_infer.s` | 完整训练推理实现 | ~400 lines |
-| `run_train_and_infer.sh` | 自动编译运行脚本 | ~150 lines |
-| `bin/train_and_infer` | 编译后的二进制 | ~2-5 MB |
-| `output/training_output.log` | 执行日志 | Variable |
-| `output/train_and_infer.ir` | 中间代码 | Variable |
-| `checkpoints/epoch_*.ckpt` | 模型检查点 | Variable |
+| `train_and_infer.s` | completetraininginferenceimplementation | ~400 lines |
+| `run_train_and_infer.sh` | English textcompilerunEnglish text | ~150 lines |
+| `bin/train_and_infer` | compileEnglish text | ~2-5 MB |
+| `output/training_output.log` | English textlog | Variable |
+| `output/train_and_infer.ir` | English text | Variable |
+| `checkpoints/epoch_*.ckpt` | modelcheckpoint | Variable |
 
-## 性能指标
+## English text
 
-### 预期性能
+### English text
 
-| 指标 | 值 |
+| English text | English text |
 |------|-----|
-| 模型大小 | 10.03M 参数 |
-| 批大小 | 32 |
-| 序列长度 | 2048 |
-| 训练吞吐 | ~10K tokens/sec |
-| 推理吞吐 | ~1.6K tokens/sec |
-| 内存占用 | ~256 MB |
+| modelEnglish text | 10.03M parameter |
+| English text | 32 |
+| English text | 2048 |
+| trainingEnglish text | ~10K tokens/sec |
+| inferenceEnglish text | ~1.6K tokens/sec |
+| English text | ~256 MB |
 
-### 优化建议
+### optimizeEnglish text
 
-1. **增加批大小**: 提升 GPU 利用率
-2. **混合精度训练**: 使用 FP16 减少内存
-3. **梯度累积**: 模拟更大的有效批大小
-4. **知识蒸馏**: 压缩模型大小
+1. **English text**: English text GPU English text
+2. **English texttraining**: use FP16 English text
+3. **gradientEnglish text**: English text
+4. **English text**: English textmodelEnglish text
 
-## 错误排查
+## errorEnglish text
 
-### 问题 1: 编译失败
+### English text 1: compilefailure
 
 ```bash
-# 错误: neurx: command not found
-# 解决: 安装或配置 NeurX 编译器
+# error: neurx: command not found
+# English text: English textconfiguration NeurX compileEnglish text
 export PATH=$PATH:/path/to/neurx/bin
 
-# 错误: Type checking failed
-# 解决: 检查 S 语言语法和类型
-neurx compile train_and_infer.s -v  # 冗长模式
+# error: Type checking failed
+# English text: English text S languageEnglish text
+neurx compile train_and_infer.s -v  # English text
 ```
 
-### 问题 2: 运行时错误
+### English text 2: runEnglish texterror
 
 ```bash
-# 查看详细日志
+# English textlog
 cat output/training_output.log
 
-# 生成中间代码调试
+# generateEnglish text
 neurx compile train_and_infer.s --emit-ir > debug.ir
 
-# 添加调试输出
-// 在 train_and_infer.s 中添加 println() 调用
+# English textoutput
+// English text train_and_infer.s English text println() English text
 ```
 
-### 问题 3: 性能不达预期
+### English text 3: English text
 
 ```bash
-# 使用性能分析工具
+# useEnglish texttool
 neurx compile train_and_infer.s --profile
 ./bin/train_and_infer --prof-output=profile.txt
 
-# 生成汇编检查优化
+# generateEnglish textoptimize
 neurx compile train_and_infer.s --emit-asm
 ```
 
-## 下一步
+## English textstep
 
-1. **扩展模型**:
-   - 增加隐藏维度到 512
-   - 增加层数到 12
-   - 增加注意力头到 16
+1. **extensionmodel**:
+   - English text 512
+   - English text 12
+   - English text 16
 
-2. **改进训练**:
-   - 实现真实数据加载 (`real_data_loader.s`)
-   - 添加 GPU 加速 (`cuda_accelerated_training.s`)
-   - 实现分布式训练 (`ddp_distributed_training.s`)
+2. **English texttraining**:
+   - implementationtruthfuldataload (`real_data_loader.s`)
+   - English text GPU English text (`cuda_accelerated_training.s`)
+   - implementationEnglish texttraining (`ddp_distributed_training.s`)
 
-3. **优化推理**:
-   - 实现批量推理
-   - 添加 KV 缓存优化
-   - 实现 Beam Search 解码
+3. **optimizeinference**:
+   - implementationEnglish textinference
+   - English text KV cacheoptimize
+   - implementation Beam Search English text
 
-## 相关文件
+## English textfile
 
-- `scaled_training_system.s` - 缩放训练实现
-- `real_data_loader.s` - 真实数据加载
-- `cuda_accelerated_training.s` - GPU 加速
-- `ddp_distributed_training.s` - 分布式训练
-- `performance_benchmark.s` - 性能测试
+- `scaled_training_system.s` - English texttrainingimplementation
+- `real_data_loader.s` - truthfuldataload
+- `cuda_accelerated_training.s` - GPU English text
+- `ddp_distributed_training.s` - English texttraining
+- `performance_benchmark.s` - English texttest
 
-## 参考资源
+## English text
 
-- NeurX 文档: `/Users/feifei/shuwen/train/neurx/doc/`
-- S 语言规范: `/Users/feifei/shuwen/train/s/doc/`
-- 标准库: `/Users/feifei/shuwen/train/s/src/std/`
+- NeurX English text: `/Users/feifei/shuwen/train/neurx/doc/`
+- S languageEnglish text: `/Users/feifei/shuwen/train/s/doc/`
+- English text: `/Users/feifei/shuwen/train/s/src/std/`
 
 ---
 
-**完成日期**: 2026-07-01
-**语言**: S Language (AI Native Modern Systems Language)
-**框架**: NeurX
+**English text**: 2026-07-01
+**language**: S Language (AI Native Modern Systems Language)
+**framework**: NeurX

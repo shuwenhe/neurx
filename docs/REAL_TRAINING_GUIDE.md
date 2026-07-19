@@ -1,67 +1,67 @@
-# NeurX 真实训练实现指南
+# NeurX truthfultrainingimplementationEnglish text
 
-## 项目现状分析
+## English text
 
-### ✅ 已实现的组件
-1. **张量操作** (`tensor/`)
-   - `matmul2d` - 矩阵乘法
-   - 激活函数（ReLU、GELU等）
-   - 张量基本操作
+### ✅ English textimplementationEnglish text
+1. **English text** (`tensor/`)
+   - `matmul2d` - English text
+   - English textfunction(ReLU, GELUEnglish text)
+   - English text
 
-2. **损失函数** (`lf/losses.s`)
-   - `cross_entropy_loss` - 完整的交叉熵损失实现
-   - 数值稳定的log_softmax
-   - Perplexity 计算
+2. **lossfunction** (`lf/losses.s`)
+   - `cross_entropy_loss` - completeEnglish textlossimplementation
+   - English textlog_softmax
+   - Perplexity compute
 
-3. **模型结构** (`model/llm/`)
-   - `gpt_large_training_state` - 训练状态管理
-   - `gpt_large_training_update` - 完整的前向/反向传播
-   - `gpt_large_training_loss` - 损失计算
+3. **modelEnglish text** (`model/llm/`)
+   - `gpt_large_training_state` - trainingstatemanagement
+   - `gpt_large_training_update` - completeEnglish text/English text
+   - `gpt_large_training_loss` - losscompute
 
-4. **数据管理** (`data/dataloader.s`)
-   - 批量数据加载
-   - Token 流管理
-   - 数据质量过滤
+4. **datamanagement** (`data/dataloader.s`)
+   - English textdataload
+   - Token English textmanagement
+   - dataEnglish text
 
-5. **优化器** (`opt/optim.s`)
-   - AdamW 优化器实现
-   - 学习率调度
+5. **optimizeEnglish text** (`opt/optim.s`)
+   - AdamW optimizeEnglish textimplementation
+   - learning rateEnglish text
 
-### ❌ 需要完成的部分
+### ❌ RequiredEnglish text
 
-1. **梯度计算**
-   - `transformer_backward` - Transformer 层反向传播
-   - `embedding_apply_grad` - Embedding 梯度更新
-   - 注意力层反向传播
-   - FFN 层反向传播
+1. **gradientcompute**
+   - `transformer_backward` - Transformer English text
+   - `embedding_apply_grad` - Embedding gradientEnglish text
+   - English text
+   - FFN English text
 
-2. **分布式训练**
-   - 实现 DDP AllReduce
-   - 梯度同步
-   - 模型并行支持
+2. **English texttraining**
+   - implementation DDP AllReduce
+   - gradientEnglish textstep
+   - modelEnglish textsupport
 
-3. **GPU 加速** (可选)
-   - CUDA kernel 调用
-   - GPU 内存管理
-   - 混精度训练
+3. **GPU English text** (English text)
+   - CUDA kernel English text
+   - GPU English textmanagement
+   - English texttraining
 
-## 关键实现步骤
+## English textimplementationstepEnglish text
 
-### Step 1: 验证前向传播
-确保以下函数正常工作：
+### Step 1: English text
+English textfunctionEnglish text:
 ```
 - transformer_forward()
 - embedding_lookup()
 - cross_entropy_loss()
 ```
 
-### Step 2: 实现反向传播
-必须实现的反向传播函数：
+### Step 2: implementationEnglish text
+English textimplementationEnglish textfunction:
 ```s
 func transformer_backward(
-    transformer backbone, 
-    tensor hidden, 
-    tensor grad_hidden, 
+    transformer backbone,
+    tensor hidden,
+    tensor grad_hidden,
     []transformer_layer_optimizer_state optimizers
 ) gpt_large_backward_result
 
@@ -72,8 +72,8 @@ struct gpt_large_backward_result {
 }
 ```
 
-### Step 3: 集成梯度更新
-确保 `adamw_step_state()` 正确更新参数：
+### Step 3: English textgradientEnglish text
+English text `adamw_step_state()` English textparameter:
 ```s
 func adamw_step_state(
     adamw_optimizer opt,
@@ -82,79 +82,79 @@ func adamw_step_state(
 ) adamw_step_output
 ```
 
-### Step 4: 运行真实训练
-使用新的启动脚本：
+### Step 4: runtruthfultraining
+useEnglish textstartEnglish text:
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 make train-real
 ```
 
-## 文件清单
+## fileEnglish text
 
-### 核心训练文件
-- `scripts/legacy/run_real_training.s` - ✨ 新的真实训练启动脚本（已创建）
-- `pretrain/llm/large_pretrain.s` - 主训练循环（需要验证）
-- `model/llm/model_large_train.s` - 训练更新函数（需要验证反向传播）
+### English texttrainingfile
+- `scripts/legacy/run_real_training.s` - ✨ English texttruthfultrainingstartEnglish text(English text)
+- `pretrain/llm/large_pretrain.s` - maintrainingEnglish text(RequiredEnglish text)
+- `model/llm/model_large_train.s` - trainingEnglish textfunction(RequiredEnglish text)
 
-### 关键梯度函数 (需要实现/验证)
+### English textgradientfunction (Requiredimplementation/English text)
 - `tensor/core.s` - `matmul_backward`, `embedding_backward`
-- `model/llm/model_backward.s` - Transformer 层反向传播
-- `nn/attention.s` - 注意力反向传播
-- `nn/ffn.s` - FFN 反向传播
+- `model/llm/model_backward.s` - Transformer English text
+- `nn/attention.s` - English text
+- `nn/ffn.s` - FFN English text
 
-## 验证清单
+## English text
 
-### 前向传播验证
-- [ ] 数据加载器返回有效批次
-- [ ] Embedding 层正确查询
-- [ ] 注意力计算无 NaN/Inf
-- [ ] FFN 激活函数工作正常
-- [ ] 输出 logits 形状正确
+### English text
+- [ ] dataloadEnglish textbatch
+- [ ] Embedding English textquery
+- [ ] English textcomputeEnglish text NaN/Inf
+- [ ] FFN English textfunctionEnglish text
+- [ ] output logits English text
 
-### 反向传播验证  
-- [ ] 损失梯度计算正确
-- [ ] 梯度形状与参数形状匹配
-- [ ] 没有梯度爆炸/消失
-- [ ] 参数更新方向正确
+### English text
+- [ ] lossgradientcomputeEnglish text
+- [ ] gradientEnglish textparameterEnglish text
+- [ ] English textgradientEnglish text/English text
+- [ ] parameterEnglish text
 
-### 训练稳定性检查
-- [ ] 损失值持续下降（前100步）
-- [ ] 梯度范数在合理范围内 [0.1, 10.0]
-- [ ] 没有 NaN/Inf 损失值
-- [ ] 学习率调度工作正常
+### trainingEnglish text
+- [ ] lossEnglish text(English text100step)
+- [ ] gradientEnglish text [0.1, 10.0]
+- [ ] English text NaN/Inf lossEnglish text
+- [ ] learning rateEnglish text
 
-## 调试建议
+## English text
 
-### 如果训练不收敛
-1. 检查学习率（太高会导致发散）
-2. 验证批大小（太小导致噪声太大）
-3. 检查梯度是否正确计算
-4. 添加梯度裁剪 (gradient clipping)
+### English texttrainingEnglish text
+1. English textlearning rate(English text)
+2. English text(English text)
+3. English textgradientEnglish textcompute
+4. English textgradientEnglish text (gradient clipping)
 
-### 如果出现 NaN/Inf
-1. 检查数值稳定性（log_softmax, softmax）
-2. 验证 embedding 索引不越界
-3. 检查除以零的情况
-4. 使用梯度检查工具
+### English text NaN/Inf
+1. English text(log_softmax, softmax)
+2. English text embedding English text
+3. English text
+4. usegradientEnglish texttool
 
-### 性能优化
-1. 启用梯度累积减少内存使用
-2. 使用混精度训练 (BF16)
-3. 启用梯度检查点 (gradient checkpointing)
-4. 实现分布式并行
+### English textoptimize
+1. English textgradientEnglish textuse
+2. useEnglish texttraining (BF16)
+3. English textgradientcheckpoint (gradient checkpointing)
+4. implementationEnglish text
 
-## 进度跟踪
+## English text
 
-- [x] 创建真实训练启动脚本
-- [ ] 实现 Transformer 反向传播
-- [ ] 验证梯度计算正确性
-- [ ] 集成 GPU 支持 (可选)
-- [ ] 实现分布式训练
-- [ ] 性能优化
+- [x] English texttruthfultrainingstartEnglish text
+- [ ] implementation Transformer English text
+- [ ] English textgradientcomputeEnglish text
+- [ ] English text GPU support (English text)
+- [ ] implementationEnglish texttraining
+- [ ] English textoptimize
 
-## 资源
+## English text
 
-- 张量操作: `neurx/tensor/*.s`
-- 损失函数: `neurx/lf/losses.s`
-- 模型代码: `neurx/model/llm/*.s`
-- 数据管道: `neurx/data/dataloader.s`
+- English text: `neurx/tensor/*.s`
+- lossfunction: `neurx/lf/losses.s`
+- modelEnglish text: `neurx/model/llm/*.s`
+- dataEnglish text: `neurx/data/dataloader.s`

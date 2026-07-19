@@ -82,7 +82,7 @@ func load_model_config(string checkpoint_dir) ModelConfig {
     // Load NeurX-1.3.neurx metadata
     string metadata_path = checkpoint_dir + "/NeurX-1.3.neurx"
     string metadata = runtime_read_text_file(metadata_path)
-    
+
     // Parse JSON config (simplified - extract key values)
     ModelConfig config
     config.vocab_size = 374
@@ -91,7 +91,7 @@ func load_model_config(string checkpoint_dir) ModelConfig {
     config.ffn_size = 4096
     config.num_layers = 24
     config.context_length = 256
-    
+
     return config
 }
 
@@ -145,32 +145,32 @@ func decode_token(int token) string {
 func model_generate_response(InferenceContext ctx, string user_input) string {
     // Tokenize input
     int input_token = tokenize_input(user_input)
-    
+
     // Generate response tokens
     string model_response = ""
     int current_token = input_token
     int token_count = 0
     int max_gen_tokens = 20
-    
+
     while token_count < max_gen_tokens {
         // Run forward pass
         int next_token = model_forward(ctx, current_token)
-        
+
         // Decode and append
         model_response = model_response + decode_token(next_token)
         current_token = next_token
         token_count = token_count + 1
-        
+
         // Stop if space token or end-of-sequence
         if next_token == 32 || next_token == 2 {
             break
         }
     }
-    
+
     if len(trim(model_response)) == 0 {
-        return "我正在思考你的问题...基于我的模型理解，这是一个有趣的话题。"
+        return "English text...English textmodelEnglish text, English text."
     }
-    
+
     model_response
 }
 
@@ -180,69 +180,69 @@ func generate_response(string user_input, InferenceContext ctx) string {
         // Use keyword matching as fallback while keeping model inference structure
         // In production: always use model_generate_response(ctx, user_input)
     }
-    
+
     // Greetings
-    if contains_string(user_input, "你好") || contains_string(user_input, "hello") || contains_string(user_input, "hi") || contains_string(user_input, "hey") {
-        return "你好！我是 NeurX-1.3。很高兴认识你。有什么我可以帮助你的吗？"
+    if contains_string(user_input, "English text") || contains_string(user_input, "hello") || contains_string(user_input, "hi") || contains_string(user_input, "hey") {
+        return "English text!English text NeurX-1.3.English text.English textAllowedEnglish text?"
     }
-    
+
     // Identity questions
-    if contains_string(user_input, "你是谁") || contains_string(user_input, "who are you") || contains_string(user_input, "who") {
-        return "我是 NeurX-1.3，一个1.3B参数的Transformer模型。我被设计用于自然语言理解和生成。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "who are you") || contains_string(user_input, "who") {
+        return "English text NeurX-1.3, English text1.3BparameterEnglish textTransformermodel.English textlanguageEnglish textgenerate."
     }
-    
+
     // Capabilities
-    if contains_string(user_input, "能做") || contains_string(user_input, "capabilities") || contains_string(user_input, "可以做") {
-        return "我可以进行自然语言理解和生成、文本分类、情感分析、知识检索、问答系统、代码生成等多种任务。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "capabilities") || contains_string(user_input, "AllowedEnglish text") {
+        return "English textAllowedEnglish textlanguageEnglish textgenerate, English text, English text, English text, English textsystem, English textgenerateEnglish text."
     }
-    
+
     // Training status
-    if contains_string(user_input, "训练") || contains_string(user_input, "training") || contains_string(user_input, "进度") || contains_string(user_input, "progress") {
-        return "我目前已经训练到第 215+ 步，当前损失值在 10.5 左右。模型在持续收敛中，性能逐步改善。"
+    if contains_string(user_input, "training") || contains_string(user_input, "training") || contains_string(user_input, "English text") || contains_string(user_input, "progress") {
+        return "English texttrainingEnglish text 215+ step, English textlossEnglish text 10.5 English text.modelEnglish text, English textstepEnglish text."
     }
-    
+
     // Architecture
-    if contains_string(user_input, "架构") || contains_string(user_input, "architecture") || contains_string(user_input, "结构") {
-        return "我是一个解码器Transformer模型，隐藏层维度为1024，有16个注意力头，前馈网络大小为4096，共24层，词汇表大小为374。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "architecture") || contains_string(user_input, "English text") {
+        return "English textTransformermodel, English text1024, English text16English text, English text4096, English text24English text, English text374."
     }
-    
+
     // Code generation
-    if contains_string(user_input, "代码") || contains_string(user_input, "code") || contains_string(user_input, "编程") || contains_string(user_input, "program") {
-        return "我可以帮助你生成、分析和解释代码。告诉我你想要什么代码，我会尝试帮助你。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "code") || contains_string(user_input, "English text") || contains_string(user_input, "program") {
+        return "English textAllowedEnglish textgenerate, English text.English text, English text."
     }
-    
+
     // Inference / Performance
-    if contains_string(user_input, "推理") || contains_string(user_input, "inference") || contains_string(user_input, "性能") || contains_string(user_input, "performance") {
-        return "推理性能依赖于硬件配置。在 CUDA 支持下，单个 token 推理通常需要 10-50ms。我支持 batch 推理以获得更好的吞吐量。"
+    if contains_string(user_input, "inference") || contains_string(user_input, "inference") || contains_string(user_input, "English text") || contains_string(user_input, "performance") {
+        return "inferenceEnglish textconfiguration.English text CUDA supportEnglish text, English text token inferenceEnglish textRequired 10-50ms.English textsupport batch inferenceEnglish text."
     }
-    
+
     // Math questions
-    if contains_string(user_input, "1+1") || contains_string(user_input, "等于") || contains_string(user_input, "计算") {
-        return "1+1 = 2。我虽然主要擅长自然语言任务，但也可以进行基础的数学计算。"
+    if contains_string(user_input, "1+1") || contains_string(user_input, "English text") || contains_string(user_input, "compute") {
+        return "1+1 = 2.English textmainEnglish textlanguageEnglish text, English textAllowedEnglish textcompute."
     }
-    
+
     // Why questions
-    if contains_string(user_input, "为什么") || contains_string(user_input, "why") {
-        return "这是个很好的问题！关于这个话题，需要更多的上下文。你可以告诉我你想了解的具体方面吗？"
+    if contains_string(user_input, "English text") || contains_string(user_input, "why") {
+        return "English text!English text, RequiredEnglish text.English textAllowedEnglish text?"
     }
-    
+
     // What questions
-    if contains_string(user_input, "什么") || contains_string(user_input, "what") {
-        return "你问的是什么？这取决于具体的话题。我可以回答关于 NeurX、Transformer、训练或推理的问题。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "what") {
+        return "English text?English text.English textAllowedEnglish text NeurX, Transformer, trainingEnglish textinferenceEnglish text."
     }
-    
+
     // How questions
-    if contains_string(user_input, "怎么") || contains_string(user_input, "how") {
-        return "这是个关于方法的问题。请提供更多细节，这样我可以给你更准确的答案。"
+    if contains_string(user_input, "English text") || contains_string(user_input, "how") {
+        return "English text.English text, English textAllowedEnglish text."
     }
-    
+
     // Thanks
-    if contains_string(user_input, "谢谢") || contains_string(user_input, "感谢") || contains_string(user_input, "thank") {
-        return "不客气！很高兴为你服务。还有其他问题吗？"
+    if contains_string(user_input, "English text") || contains_string(user_input, "English text") || contains_string(user_input, "thank") {
+        return "English text!English text.English text?"
     }
-    
+
     // Default response
-    "有趣的问题！我可以尝试理解你的意思。根据我的训练，我最擅长讨论：NeurX框架、Transformer模型、训练过程、代码生成和推理性能。请详细说明你的问题，我会尽力帮助。"
+    "English text!English textAllowedEnglish text.English texttraining, English text: NeurXframework, Transformermodel, trainingEnglish text, English textgenerateEnglish textinferenceEnglish text.English textexplanationEnglish text, English text."
 }
 
 func main() int {
@@ -253,10 +253,10 @@ func main() int {
 
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
-    
+
     println("Phase 1: Loading Model...")
     InferenceContext ctx = initialize_inference_context(checkpoint_dir)
-    
+
     if ctx.model_loaded {
         println("  ✓ Checkpoint loaded: " + ctx.checkpoint_path)
         println("  ✓ Model initialized")
@@ -288,7 +288,7 @@ func main() int {
     println("║        Starting Interactive Chat Session         ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-    println("Commands: 'quit', 'exit', 'bye', or '退出' to stop")
+    println("Commands: 'quit', 'exit', 'bye', or 'English text' to stop")
     println("")
 
     bool running = true
@@ -296,25 +296,25 @@ func main() int {
     while running {
         println("You: ")
         string user_input = read_stdin_line()
-        
+
         // Check for exit commands
-        if trim(user_input) == "quit" || trim(user_input) == "exit" || trim(user_input) == "bye" || trim(user_input) == "退出" {
+        if trim(user_input) == "quit" || trim(user_input) == "exit" || trim(user_input) == "bye" || trim(user_input) == "English text" {
             running = false
             break
         }
-        
+
         // Skip empty input
         if trim(user_input) == "" {
             continue
         }
-        
+
         // Generate and display response
         string response = generate_response(user_input, ctx)
         println("NeurX: " + response)
         println("")
-        
+
     }
-    
+
     // Session Summary
     println("╔════════════════════════════════════════════════════╗")
     println("║              Session Ended                        ║")
@@ -327,6 +327,6 @@ func main() int {
     println("")
     println("Goodbye! Run 'make chat' again to start a new session.")
     println("")
-    
+
     0
 }

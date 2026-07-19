@@ -1,328 +1,328 @@
-# 🚀 NeurX 大模型训练 - 完整启动指南
+# 🚀 NeurX English textmodeltraining - completestartEnglish text
 
-## ✅ 系统状态
+## ✅ systemstate
 
 ```
-✓ 项目位置: /Users/feifei/train/neurx/
-✓ 训练程序: training_system.s (纯 S 语言)
-✓ 启动脚本: run_training.sh
-✓ 编译器: /Users/feifei/train/s/bin/s
-✓ Build 目录: build/
+✓ English text: /Users/feifei/train/neurx/
+✓ trainingEnglish text: training_system.s (English text S language)
+✓ startEnglish text: run_training.sh
+✓ compileEnglish text: /Users/feifei/train/s/bin/s
+✓ Build directory: build/
 ```
 
 ---
 
-## 🎯 三种启动方式
+## 🎯 English textstartEnglish text
 
-### 方式 1️⃣ : 一行命令启动 (最快)
+### English text 1️⃣ : English textstart (English text)
 
 ```bash
 cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system
 ```
 
-**复制上面的完整命令到终端并按 Enter**
+**English textcompleteEnglish text Enter**
 
 ---
 
-### 方式 2️⃣ : 分步启动 (详细)
+### English text 2️⃣ : English textstepstart (English text)
 
-**Step 1: 进入项目目录**
+**Step 1: English textdirectory**
 ```bash
 cd /Users/feifei/train/neurx
 ```
 
-**Step 2: 创建 build 目录**
+**Step 2: English text build directory**
 ```bash
 mkdir -p build
 ```
 
-**Step 3: 编译 S 语言文件**
+**Step 3: compile S languagefile**
 ```bash
 /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir
 ```
 
-**Step 4: 运行训练程序**
+**Step 4: runtrainingEnglish text**
 ```bash
 ./build/training_system
 ```
 
 ---
 
-### 方式 3️⃣ : 使用启动脚本 (自动)
+### English text 3️⃣ : usestartEnglish text (English text)
 
 ```bash
 bash /Users/feifei/train/neurx/run_training.sh
 ```
 
-### 方式 4️⃣ : 使用环境变量控制训练时长和输出目录
+### English text 4️⃣ : useEnglish texttrainingEnglish textoutputdirectory
 
-当前仓库里的 `run_training.sh` 会调用 `train_llm.s` 这个 S 语言训练原型。为了避免默认运行过久，可以直接用环境变量覆盖步数、预热步数和 checkpoint 输出目录：
+English text `run_training.sh` English text `train_llm.s` English text S languagetrainingEnglish text.English textdefaultrunEnglish text, AllowedEnglish textstepEnglish text, English textstepEnglish text checkpoint outputdirectory:
 
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
 
-# 最小验证运行
+# English textrun
 NEURX_S_PRETRAIN_STEPS=3 \
 NEURX_S_PRETRAIN_WARMUP_STEPS=2 \
 bash run_training.sh
 
-# 自定义输出目录
+# English textoutputdirectory
 NEURX_S_PRETRAIN_OUTPUT_DIR=/tmp/neurx_ckpt \
 NEURX_S_PRETRAIN_STEPS=10 \
 bash run_training.sh
 ```
 
-支持的变量：
+supportEnglish text:
 
-- `NEURX_S_PRETRAIN_STEPS`：训练步数，默认 `50`
-- `NEURX_S_PRETRAIN_WARMUP_STEPS`：预热步数，默认 `10`
-- `NEURX_S_PRETRAIN_OUTPUT_DIR`：checkpoint 输出目录，默认 `artifacts/checkpoints/llm_s_pretrain`
-
----
-
-## 📊 训练配置详情
-
-### 模型配置
-```
-词汇表大小 (VocabSize): 10,000
-隐藏维度 (HiddenDim): 512
-层数 (NumLayers): 4
-注意力头数 (NumHeads): 8
-序列长度 (SeqLen): 128
-```
-
-### 训练配置
-```
-最大步数: 500
-批大小 (BatchSize): 32
-初始学习率: 0.0001
-预热步数 (WarmupSteps): 50
-学习率调度: Cosine Annealing (余弦衰减)
-权重衰减: 0.01
-梯度裁剪范数: 1.0
-```
+- `NEURX_S_PRETRAIN_STEPS`: trainingstepEnglish text, default `50`
+- `NEURX_S_PRETRAIN_WARMUP_STEPS`: English textstepEnglish text, default `10`
+- `NEURX_S_PRETRAIN_OUTPUT_DIR`: checkpoint outputdirectory, default `artifacts/checkpoints/llm_s_pretrain`
 
 ---
 
-## 📈 训练流程
+## 📊 trainingconfigurationEnglish text
 
-### 初始化阶段
+### modelconfiguration
 ```
-1. 加载模型配置
-2. 初始化训练配置
-3. 准备训练数据 (100 个样本)
-4. 初始化 16 个权重矩阵
-```
-
-### 训练阶段 (500 步)
-```
-每 50 步输出一次进度:
-  - 当前步数和总步数
-  - 损失值 (Loss)
-  - 困惑度 (Perplexity)
-  - 当前学习率 (Learning Rate)
+English text (VocabSize): 10,000
+English text (HiddenDim): 512
+English text (NumLayers): 4
+English text (NumHeads): 8
+English text (SeqLen): 128
 ```
 
-### 预期的损失曲线
+### trainingconfiguration
 ```
-步数  1: Loss = 9.2103, PPL = 10001.50
-步数 50: Loss = 8.5421, PPL = 5234.65
-步数100: Loss = 7.2345, PPL = 1398.50
-步数150: Loss = 6.1234, PPL = 456.78
-步数200: Loss = 5.3445, PPL = 210.45
-步数250: Loss = 4.7832, PPL = 118.34
-步数300: Loss = 4.3421, PPL = 76.45
-步数350: Loss = 4.0123, PPL = 55.23
-步数400: Loss = 3.7654, PPL = 43.21
-步数450: Loss = 3.5321, PPL = 34.34
-步数500: Loss = 3.2145, PPL = 24.98  ← 最终结果
+English textstepEnglish text: 500
+English text (BatchSize): 32
+English textlearning rate: 0.0001
+English textstepEnglish text (WarmupSteps): 50
+learning rateEnglish text: Cosine Annealing (English text)
+weightEnglish text: 0.01
+gradientEnglish text: 1.0
 ```
-
-**总体改进**: 损失↓65.1%, 困惑度↓99.75%
 
 ---
 
-## ✨ 预期输出示例
+## 📈 trainingpipeline
+
+### initializephase
+```
+1. loadmodelconfiguration
+2. initializetrainingconfiguration
+3. English texttrainingdata (100 English text)
+4. initialize 16 English textweightEnglish text
+```
+
+### trainingphase (500 step)
+```
+English text 50 stepoutputEnglish text:
+  - English textstepEnglish textstepEnglish text
+  - lossEnglish text (Loss)
+  - English text (Perplexity)
+  - English textlearning rate (Learning Rate)
+```
+
+### English textlossEnglish text
+```
+stepEnglish text  1: Loss = 9.2103, PPL = 10001.50
+stepEnglish text 50: Loss = 8.5421, PPL = 5234.65
+stepEnglish text100: Loss = 7.2345, PPL = 1398.50
+stepEnglish text150: Loss = 6.1234, PPL = 456.78
+stepEnglish text200: Loss = 5.3445, PPL = 210.45
+stepEnglish text250: Loss = 4.7832, PPL = 118.34
+stepEnglish text300: Loss = 4.3421, PPL = 76.45
+stepEnglish text350: Loss = 4.0123, PPL = 55.23
+stepEnglish text400: Loss = 3.7654, PPL = 43.21
+stepEnglish text450: Loss = 3.5321, PPL = 34.34
+stepEnglish text500: Loss = 3.2145, PPL = 24.98  ← English textresult
+```
+
+**English text**: loss↓65.1%, English text↓99.75%
+
+---
+
+## ✨ English textoutputexample
 
 ```
 ======================================================================
-NeurX 深度学习框架 - 完整训练系统
+NeurX English textframework - completetrainingsystem
 ======================================================================
 
-模型配置:
-  - 词汇表大小: 10000
-  - 隐藏维度: 512
-  - 层数: 4
-  - 注意力头数: 8
-  - 序列长度: 128
+modelconfiguration:
+  - English text: 10000
+  - English text: 512
+  - English text: 4
+  - English text: 8
+  - English text: 128
 
-训练配置:
-  - 最大步数: 500
-  - 批量大小: 32
-  - 初始学习率: 0.0001
-  - Warmup步数: 50
-  - 学习率调度: cosine
-  - 权重衰减: 0.01
-  - 梯度裁剪范数: 1.0
+trainingconfiguration:
+  - English textstepEnglish text: 500
+  - English text: 32
+  - English textlearning rate: 0.0001
+  - WarmupstepEnglish text: 50
+  - learning rateEnglish text: cosine
+  - weightEnglish text: 0.01
+  - gradientEnglish text: 1.0
 
-准备训练数据...
-  - 训练样本: 100
+English texttrainingdata...
+  - trainingEnglish text: 100
 
-初始化模型...
-  - 初始化了 16 个权重矩阵
+initializemodel...
+  - initializeEnglish text 16 English textweightEnglish text
 
-开始训练...
+starttraining...
 ----------------------------------------------------------------------
 
-步数 1/500 | Loss: 9.2103 | PPL: 10001.5000 | LR: 0.0000
-步数 50/500 | Loss: 8.5421 | PPL: 5234.6500 | LR: 0.0001
-步数 100/500 | Loss: 7.2345 | PPL: 1398.5000 | LR: 0.0001
-步数 150/500 | Loss: 6.1234 | PPL: 456.7800 | LR: 0.0001
-步数 200/500 | Loss: 5.3445 | PPL: 210.4500 | LR: 0.0001
-步数 250/500 | Loss: 4.7832 | PPL: 118.3400 | LR: 0.0001
-步数 300/500 | Loss: 4.3421 | PPL: 76.4500 | LR: 0.0001
-步数 350/500 | Loss: 4.0123 | PPL: 55.2300 | LR: 0.0001
-步数 400/500 | Loss: 3.7654 | PPL: 43.2100 | LR: 0.0001
-步数 450/500 | Loss: 3.5321 | PPL: 34.3400 | LR: 0.0001
-步数 500/500 | Loss: 3.2145 | PPL: 24.9800 | LR: 0.0000
+stepEnglish text 1/500 | Loss: 9.2103 | PPL: 10001.5000 | LR: 0.0000
+stepEnglish text 50/500 | Loss: 8.5421 | PPL: 5234.6500 | LR: 0.0001
+stepEnglish text 100/500 | Loss: 7.2345 | PPL: 1398.5000 | LR: 0.0001
+stepEnglish text 150/500 | Loss: 6.1234 | PPL: 456.7800 | LR: 0.0001
+stepEnglish text 200/500 | Loss: 5.3445 | PPL: 210.4500 | LR: 0.0001
+stepEnglish text 250/500 | Loss: 4.7832 | PPL: 118.3400 | LR: 0.0001
+stepEnglish text 300/500 | Loss: 4.3421 | PPL: 76.4500 | LR: 0.0001
+stepEnglish text 350/500 | Loss: 4.0123 | PPL: 55.2300 | LR: 0.0001
+stepEnglish text 400/500 | Loss: 3.7654 | PPL: 43.2100 | LR: 0.0001
+stepEnglish text 450/500 | Loss: 3.5321 | PPL: 34.3400 | LR: 0.0001
+stepEnglish text 500/500 | Loss: 3.2145 | PPL: 24.9800 | LR: 0.0000
 
 ----------------------------------------------------------------------
 
-训练完成!
+trainingEnglish text!
 
-训练统计:
-  - 总步数: 500
-  - 最终损失: 3.2145
-  - 最终困惑度: 24.9800
-  - 最终学习率: 0.0000
+trainingstatistics:
+  - English textstepEnglish text: 500
+  - English textloss: 3.2145
+  - English text: 24.9800
+  - English textlearning rate: 0.0000
 
 ======================================================================
-模型已准备好进行评估或部署
+modelEnglish textevaluationEnglish text
 ======================================================================
 ```
 
 ---
 
-## 🔧 自定义训练配置
+## 🔧 English texttrainingconfiguration
 
-### 修改训练步数
+### English texttrainingstepEnglish text
 
-编辑 `training_system.s` 中的 main 函数:
+English text `training_system.s` English text main function:
 
 ```s
 train_cfg := TrainingConfig{
-    MaxSteps: 1000,          // 从 500 改为 1000
+    MaxSteps: 1000,          // English text 500 English text 1000
     BatchSize: 32,
     LearningRate: 0.0001,
     ...
 }
 ```
 
-### 修改学习率
+### English textlearning rate
 
 ```s
 train_cfg := TrainingConfig{
     MaxSteps: 500,
     BatchSize: 32,
-    LearningRate: 0.0005,    // 从 0.0001 改为 0.0005
+    LearningRate: 0.0005,    // English text 0.0001 English text 0.0005
     ...
 }
 ```
 
-### 修改模型大小
+### English textmodelEnglish text
 
-编辑 `training_system.s` 中的 main 函数:
+English text `training_system.s` English text main function:
 
 ```s
 model_cfg := ModelConfig{
-    VocabSize: 50000,        // 词汇表: 10k → 50k
-    HiddenDim: 768,          // 隐藏维度: 512 → 768
-    NumLayers: 12,           // 层数: 4 → 12
-    NumHeads: 12,            // 注意力头数: 8 → 12
-    SeqLen: 256,             // 序列长度: 128 → 256
+    VocabSize: 50000,        // English text: 10k → 50k
+    HiddenDim: 768,          // English text: 512 → 768
+    NumLayers: 12,           // English text: 4 → 12
+    NumHeads: 12,            // English text: 8 → 12
+    SeqLen: 256,             // English text: 128 → 256
 }
 ```
 
-然后重新编译运行:
+English textcompilerun:
 ```bash
 cd /Users/feifei/train/neurx && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system
 ```
 
 ---
 
-## 🎓 训练系统的三层架构
+## 🎓 trainingsystemEnglish text
 
-### Layer 1: Loss 函数层
+### Layer 1: Loss functionEnglish text
 ```
-softmax()                     // 数值稳定的 Softmax
-cross_entropy_loss_s()        // 交叉熵损失
-perplexity()                  // 困惑度
-```
-
-### Layer 2: Attention 层
-```
-attention_forward()           // Multi-Head Attention 前向计算
+softmax()                     // English text Softmax
+cross_entropy_loss_s()        // English textloss
+perplexity()                  // English text
 ```
 
-### Layer 3: 训练循环层
+### Layer 2: Attention English text
 ```
-compute_learning_rate()       // 学习率计算 + 余弦衰减
-create_batch_logits()         // 生成批数据
-create_batch_targets()        // 生成目标索引
-main()                        // 完整 500 步训练循环
+attention_forward()           // Multi-Head Attention English textcompute
+```
+
+### Layer 3: trainingEnglish text
+```
+compute_learning_rate()       // learning ratecompute + English text
+create_batch_logits()         // generateEnglish textdata
+create_batch_targets()        // generateEnglish text
+main()                        // complete 500 steptrainingEnglish text
 ```
 
 ---
 
-## 📚 相关文件
+## 📚 English textfile
 
-| 文件 | 说明 |
+| file | explanation |
 |------|------|
-| `training_system.s` | 主训练程序 (纯 S 语言) |
-| `run_training.sh` | 自动化启动脚本 |
-| `train_full_system.s` | 详细三层实现 |
-| `train_model.s` | 简化版本 |
-| `run_training.py` | Python 参考版本 |
+| `training_system.s` | maintrainingEnglish text (English text S language) |
+| `run_training.sh` | English textstartEnglish text |
+| `train_full_system.s` | English textimplementation |
+| `train_model.s` | English text |
+| `run_training.py` | Python English text |
 
 ---
 
-## ⚡ 快速参考
+## ⚡ quickEnglish text
 
-| 任务 | 命令 |
+| English text | English text |
 |------|------|
-| 编译 | `cd /Users/feifei/train/neurx && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir` |
-| 运行 | `./build/training_system` |
-| 一键启动 | `cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system` |
-| 使用脚本 | `bash /Users/feifei/train/neurx/run_training.sh` |
+| compile | `cd /Users/feifei/train/neurx && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir` |
+| run | `./build/training_system` |
+| English textstart | `cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system` |
+| useEnglish text | `bash /Users/feifei/train/neurx/run_training.sh` |
 
 ---
 
-## 🎊 现在就开始吧！
+## 🎊 English textstartEnglish text!
 
-### 最简单的方式 (推荐)
+### English text (recommended)
 
-**复制这个完整命令到你的终端:**
+**English textcompleteEnglish text:**
 
 ```bash
 cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system
 ```
 
-**然后按 Enter 键开始训练！**
+**English text Enter English textstarttraining!**
 
 ---
 
-## 🔍 监控训练
+## 🔍 monitoringtraining
 
-训练运行时，你会看到:
-- ✅ 进度条 (每 50 步输出一次)
-- ✅ 实时损失值下降
-- ✅ 困惑度的改进
-- ✅ 学习率的变化 (预热 + 余弦衰减)
-- ✅ 最终训练统计
+trainingrunEnglish text, English text:
+- ✅ English text (English text 50 stepoutputEnglish text)
+- ✅ English textlossEnglish text
+- ✅ English text
+- ✅ learning rateEnglish text (English text + English text)
+- ✅ English texttrainingstatistics
 
 ---
 
-**版本**: 1.0  
-**日期**: 2026-06-23  
-**状态**: ✅ 准备就绪  
-**语言**: 100% 纯 S 语言
+**English text**: 1.0
+**English text**: 2026-06-23
+**state**: ✅ English text
+**language**: 100% English text S language

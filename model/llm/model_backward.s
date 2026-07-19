@@ -1,16 +1,16 @@
 package neurx.model.llm.base_backward
 
 // ============================================================================
-// GPT 完整反向传播 (Backward Pass)
+// GPT completeEnglish text (Backward Pass)
 //
-// 实现从损失到所有参数梯度的完整链式求导:
+// implementationEnglish textlossEnglish textparametergradientEnglish textcompleteEnglish text:
 //   Loss → d_logits → d_final_norm → d_layers[N-1..0] → d_embedding
 //
-// 每一层反向:
+// English text:
 //   d_layer_out → (d_ffn → d_norm2 → d_attn → d_norm1) → d_layer_in
-//   同时计算所有权重梯度 (W_q/k/v/o, W_ffn_gate/value/down, gamma_norm)
+//   English textcomputeEnglish textweightgradient (W_q/k/v/o, W_ffn_gate/value/down, gamma_norm)
 //
-// 内存布局全程保持 position-first [total_tokens, dim] 与 gpt.s 一致
+// English text position-first [total_tokens, dim] English text gpt.s English text
 // ============================================================================
 
 use neurx.model.llm.gpt.{
@@ -27,14 +27,14 @@ use neurx.model.transformer.norm.{rms_norm, rms_normalize}
 use neurx.model.transformer.ffn.{forward_swiglu_ffn, forward_standard_ffn}
 
 // ============================================================================
-// 1. 前向传播缓存 (存储反向传播所需中间激活值)
+// 1. English textcache (English text)
 // ============================================================================
 
 struct gpt_sdpa_cache {
-    []float q            // 加 RoPE 后的 Q: [seq, n_head * head_dim]
-    []float k            // 加 RoPE 后的 K: [seq, n_kv_head * head_dim]
+    []float q            // English text RoPE English text Q: [seq, n_head * head_dim]
+    []float k            // English text RoPE English text K: [seq, n_kv_head * head_dim]
     []float v            // V: [seq, n_kv_head * head_dim]
-    []float weights      // 注意力权重: [n_head * seq * seq] (head-first)
+    []float weights      // English textweight: [n_head * seq * seq] (head-first)
     int seq_len
     int n_head
     int n_kv_head
@@ -42,65 +42,65 @@ struct gpt_sdpa_cache {
 }
 
 struct transformer_layer_cache {
-    []float x_in         // 层输入 [B*S, D]
-    []float normed1      // Pre-Attn RMSNorm 输出
-    []float q_proj       // Q 投影 (未旋转): [B*S, D]
-    []float k_proj       // K 投影 (未旋转): [B*S, kv_D]
-    []float v_proj       // V 投影: [B*S, kv_D]
-    []float q_rope       // RoPE 后的 Q
-    []float k_rope       // RoPE 后的 K
-    []float attn_out     // SDPA 输出: [B*S, D]
-    []float attn_proj    // 输出投影后: [B*S, D]
-    []float h_attn       // 第一残差后: [B*S, D]
-    []float normed2      // Pre-FFN RMSNorm 输出
-    []float ffn_gate_pre // SwiGLU gate 激活前: [B*S, ffn_dim]
-    []float ffn_val_pre  // SwiGLU value 激活前: [B*S, ffn_dim]
-    []float ffn_out      // FFN 输出: [B*S, D]
-    []gpt_sdpa_cache sdpa_per_batch  // 每批的 SDPA 缓存
+    []float x_in         // English textinput [B*S, D]
+    []float normed1      // Pre-Attn RMSNorm output
+    []float q_proj       // Q English text (English text): [B*S, D]
+    []float k_proj       // K English text (English text): [B*S, kv_D]
+    []float v_proj       // V English text: [B*S, kv_D]
+    []float q_rope       // RoPE English text Q
+    []float k_rope       // RoPE English text K
+    []float attn_out     // SDPA output: [B*S, D]
+    []float attn_proj    // outputEnglish text: [B*S, D]
+    []float h_attn       // English text: [B*S, D]
+    []float normed2      // Pre-FFN RMSNorm output
+    []float ffn_gate_pre // SwiGLU gate English text: [B*S, ffn_dim]
+    []float ffn_val_pre  // SwiGLU value English text: [B*S, ffn_dim]
+    []float ffn_out      // FFN output: [B*S, D]
+    []gpt_sdpa_cache sdpa_per_batch  // English text SDPA cache
     int batch_size
     int seq_len
 }
 
 struct gpt_forward_cache {
-    []float embedding      // Token + Pos embedding 输出
+    []float embedding      // Token + Pos embedding output
     []transformer_layer_cache layers
-    []float final_normed   // 最终 RMSNorm 输出
-    []float logits         // LM Head 输出
+    []float final_normed   // English text RMSNorm output
+    []float logits         // LM Head output
     int batch_size
     int seq_len
     int n_layer
 }
 
 // ============================================================================
-// 2. 梯度结构体
+// 2. gradientEnglish text
 // ============================================================================
 
 struct transformer_layer_grads {
-    []float d_norm1_gamma    // RMSNorm1 缩放参数梯度
-    []float d_norm2_gamma    // RMSNorm2 缩放参数梯度
-    []float d_wq             // Query 权重梯度
-    []float d_wk             // Key 权重梯度
-    []float d_wv             // Value 权重梯度
-    []float d_wo             // Output 权重梯度
-    []float d_wq_bias        // Q 偏置梯度 (若存在)
-    []float d_wk_bias        // K 偏置梯度
-    []float d_wv_bias        // V 偏置梯度
-    []float d_wo_bias        // O 偏置梯度
-    []float d_ffn_gate_w     // FFN Gate 权重梯度
-    []float d_ffn_val_w      // FFN Value 权重梯度
-    []float d_ffn_down_w     // FFN Down 权重梯度
+    []float d_norm1_gamma    // RMSNorm1 English textparametergradient
+    []float d_norm2_gamma    // RMSNorm2 English textparametergradient
+    []float d_wq             // Query weightgradient
+    []float d_wk             // Key weightgradient
+    []float d_wv             // Value weightgradient
+    []float d_wo             // Output weightgradient
+    []float d_wq_bias        // Q English textgradient (English text)
+    []float d_wk_bias        // K English textgradient
+    []float d_wv_bias        // V English textgradient
+    []float d_wo_bias        // O English textgradient
+    []float d_ffn_gate_w     // FFN Gate weightgradient
+    []float d_ffn_val_w      // FFN Value weightgradient
+    []float d_ffn_down_w     // FFN Down weightgradient
 }
 
 struct gpt_param_grads {
-    []float d_wte            // Token embedding 梯度 [vocab, D]
-    []float d_wpe            // Pos embedding 梯度 [block, D]
-    []float d_final_gamma    // 最终 RMSNorm gamma 梯度
-    []float d_lm_head        // LM Head 梯度 (若 not tie)
-    []transformer_layer_grads layers // 每层梯度
+    []float d_wte            // Token embedding gradient [vocab, D]
+    []float d_wpe            // Pos embedding gradient [block, D]
+    []float d_final_gamma    // English text RMSNorm gamma gradient
+    []float d_lm_head        // LM Head gradient (English text not tie)
+    []transformer_layer_grads layers // English textgradient
     int n_layer
 }
 
-// AdamW 优化器动量状态
+// AdamW optimizeEnglish textstate
 struct gpt_adamw_state {
     []float m_wte
     []float v_wte
@@ -132,7 +132,7 @@ struct transformer_layer_adamw {
 }
 
 // ============================================================================
-// 3. 数学辅助函数
+// 3. English texthelperfunction
 // ============================================================================
 
 func bk_alloc(int n) []float {
@@ -313,7 +313,7 @@ func bk_swish_grad(float z) float {
 }
 
 // ============================================================================
-// 4. 带缓存的前向传播
+// 4. English textcacheEnglish text
 // ============================================================================
 
 func transformer_layer_forward_cached(
@@ -485,8 +485,8 @@ func transformer_layer_forward_cached(
     (y, cache)
 }
 
-// 计算注意力权重矩阵 (用于 backward)
-// 返回 [n_head, seq, seq] (head-first)
+// computeEnglish textweightEnglish text (English text backward)
+// English text [n_head, seq, seq] (head-first)
 func bk_compute_attn_weights(
     []float q, []float k,
     int seq_len, int nh, int nkv, int hd
@@ -526,7 +526,7 @@ func bk_compute_attn_weights(
     weights
 }
 
-// 带缓存的完整前向传播
+// English textcacheEnglish textcompleteEnglish text
 func gpt_forward_cached(
     language_model model,
     []int token_ids,
@@ -574,10 +574,10 @@ func gpt_forward_cached(
 }
 
 // ============================================================================
-// 5. 交叉熵损失反向 → d_logits
+// 5. English textlossEnglish text → d_logits
 // ============================================================================
 
-// 返回 d_logits [total_tokens, vocab_size]
+// English text d_logits [total_tokens, vocab_size]
 func gpt_ce_backward(
     []float logits,
     []int targets,
@@ -587,7 +587,7 @@ func gpt_ce_backward(
     []float d_logits = bk_alloc(total_tokens * vocab_size)
     int count = 0
 
-    // 先数有效 tokens
+    // English text tokens
     int i = 0
     while i < total_tokens {
         if targets[i] >= 0 { count = count + 1 }
@@ -633,11 +633,11 @@ func gpt_ce_backward(
 }
 
 // ============================================================================
-// 6. RMSNorm 反向
+// 6. RMSNorm English text
 // ============================================================================
 
 // y = (x / rms(x)) * gamma
-// 返回 (d_input, d_gamma)
+// English text (d_input, d_gamma)
 func bk_rmsn(
     rms_norm rn,
     []float d_out,       // [B*S, D]
@@ -697,7 +697,7 @@ func bk_rmsn(
 }
 
 // ============================================================================
-// 7. SDPA 反向 (per-batch, position-first layout)
+// 7. SDPA English text (per-batch, position-first layout)
 // ============================================================================
 
 struct sdpa_bk_result {
@@ -707,7 +707,7 @@ struct sdpa_bk_result {
 }
 
 // d_out: [seq, n_head * head_dim]
-// 返回 (d_q [seq,D], d_k [seq,kv_D], d_v [seq,kv_D])
+// English text (d_q [seq,D], d_k [seq,kv_D], d_v [seq,kv_D])
 func bk_causal_sdpa(
     []float d_out,
     gpt_sdpa_cache cache
@@ -788,7 +788,7 @@ func bk_causal_sdpa(
 }
 
 // ============================================================================
-// 8. RoPE 反向 (旋转的逆 = 用负角度旋转)
+// 8. RoPE English text (English text = English text)
 // ============================================================================
 
 func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, []float freqs) []float {
@@ -855,10 +855,10 @@ func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, i
 }
 
 // ============================================================================
-// 9. 单层 Transformer 反向传播
+// 9. English text Transformer English text
 // ============================================================================
 
-// 返回 (d_input, transformer_layer_grads)
+// English text (d_input, transformer_layer_grads)
 func transformer_layer_backward(
     transformer_layer layer,
     transformer_layer_cache cache,
@@ -873,17 +873,17 @@ func transformer_layer_backward(
     int kv_D = nkv * hd
     int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
 
-    // ── 第二残差: d_h_attn += d_out,  d_ffn_out = d_out ──────────────────
+    // ── English text: d_h_attn += d_out,  d_ffn_out = d_out ──────────────────
     []float d_ffn_out = bk_copy(d_out)
     []float d_h_attn  = bk_copy(d_out)
 
-    // ── FFN 反向 (SwiGLU) ─────────────────────────────────────────────────
+    // ── FFN English text (SwiGLU) ─────────────────────────────────────────────────
     // ffn_out = W_down @ (swish(gate_pre) * val_pre)
     // d_gv = d_ffn_out @ W_down^T
     []float d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_D, D)
     []float d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_D, D)
-    // ↑ 此处用 gv_out (= swish_gate * val_pre), 我们用 cache 重建
-    // 重建 gv_out
+    // ↑ English text gv_out (= swish_gate * val_pre), English text cache English text
+    // English text gv_out
     []float gv_out = bk_alloc(total * ffn_D)
     int idx = 0
     while idx < total * ffn_D {
@@ -914,25 +914,25 @@ func transformer_layer_backward(
     []float d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_D)
     []float d_normed2 = gpt_add(d_normed2_from_gate, d_normed2_from_value)
 
-    // 权重梯度
+    // weightgradient
     []float d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_D)
     []float d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_D)
 
-    // ── Pre-FFN RMSNorm 反向 ──────────────────────────────────────────────
+    // ── Pre-FFN RMSNorm English text ──────────────────────────────────────────────
     []float d_h_attn2
     []float d_norm2_gamma
     (d_h_attn2, d_norm2_gamma) = bk_rmsn(layer.norm2, d_normed2, cache.h_attn, cache.batch_size, cache.seq_len)
     d_h_attn = bk_add_inplace(d_h_attn, d_h_attn2)
 
-    // ── 第一残差: d_x_in += d_h_attn,  d_attn_proj = d_h_attn ────────────
+    // ── English text: d_x_in += d_h_attn,  d_attn_proj = d_h_attn ────────────
     []float d_attn_proj = bk_copy(d_h_attn)
     []float d_x_residual = bk_copy(d_h_attn)
 
-    // ── 输出投影反向 ──────────────────────────────────────────────────────
+    // ── outputEnglish text ──────────────────────────────────────────────────────
     []float d_attn_out = bk_matmul_da(d_attn_proj, layer.attn.output_weight, total, D, D)
     []float d_wo       = bk_matmul_db(cache.attn_out, d_attn_proj, total, D, D)
 
-    // ── SDPA 反向 (分批处理) ──────────────────────────────────────────────
+    // ── SDPA English text (English text) ──────────────────────────────────────────────
     []float d_q_rope_all = bk_alloc(total * D)
     []float d_k_rope_all = bk_alloc(total * kv_D)
     []float d_v_all      = bk_alloc(total * kv_D)
@@ -958,11 +958,11 @@ func transformer_layer_backward(
         b = b + 1
     }
 
-    // ── RoPE 反向 ─────────────────────────────────────────────────────────
+    // ── RoPE English text ─────────────────────────────────────────────────────────
     []float d_q_proj = bk_rope_q(d_q_rope_all, cache.batch_size, cache.seq_len, nh, hd, D,    rope_freqs)
     []float d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_D, rope_freqs)
 
-    // ── QKV 投影权重梯度 ──────────────────────────────────────────────────
+    // ── QKV English textweightgradient ──────────────────────────────────────────────────
     []float d_wq = bk_matmul_db(cache.normed1, d_q_proj, total, D, D)
     []float d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_D, D)
     []float d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_D, D)
@@ -972,12 +972,12 @@ func transformer_layer_backward(
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_k_proj, layer.attn.key_weight,   total, D, kv_D, D))
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_v_all,  layer.attn.value_weight, total, D, kv_D, D))
 
-    // ── Pre-Attn RMSNorm 反向 ─────────────────────────────────────────────
+    // ── Pre-Attn RMSNorm English text ─────────────────────────────────────────────
     []float d_x_from_norm
     []float d_norm1_gamma
     (d_x_from_norm, d_norm1_gamma) = bk_rmsn(layer.norm1, d_normed1, cache.x_in, cache.batch_size, cache.seq_len)
 
-    // ── 合并输入梯度 ──────────────────────────────────────────────────────
+    // ── English textinputgradient ──────────────────────────────────────────────────────
     []float d_input = bk_add_inplace(d_x_residual, d_x_from_norm)
 
     transformer_layer_grads grads = transformer_layer_grads {
@@ -994,7 +994,7 @@ func transformer_layer_backward(
 }
 
 // ============================================================================
-// 10. 完整模型反向传播
+// 10. completemodelEnglish text
 // ============================================================================
 
 func model_backward
@@ -1009,7 +1009,7 @@ func model_backward
     // 1. CE loss → d_logits
     []float d_logits = gpt_ce_backward(fc.logits, targets, total, V)
 
-    // 2. LM Head 反向
+    // 2. LM Head English text
     []float d_final_normed
     []float d_lm_head
     []float d_final_gamma
@@ -1022,14 +1022,14 @@ func model_backward
         d_lm_head      = bk_matmul_db(fc.final_normed, d_logits, total, D, V)
     }
 
-    // 3. 最终 RMSNorm 反向
-    // 取出 hidden (layer_caches最后一层的输出 = final_norm 的输入)
+    // 3. English text RMSNorm English text
+    // English text hidden (layer_cachesEnglish textoutput = final_norm English textinput)
     transformer_layer_cache last_cache = fc.layers[model.n_layer - 1]
     []float hidden_before_norm = gpt_add(last_cache.h_attn, last_cache.ffn_out)
     []float d_hidden
     (d_hidden, d_final_gamma) = bk_rmsn(model.final_norm, d_final_normed, hidden_before_norm, fc.batch_size, fc.seq_len)
 
-    // 4. 逐层反向 (从最后一层到第一层)
+    // 4. English text (English text)
     []transformer_layer_grads layer_grads = []transformer_layer_grads{cap: model.n_layer}
     int l = model.n_layer - 1
     while l >= 0 {
@@ -1043,7 +1043,7 @@ func model_backward
         l = l - 1
     }
 
-    // 5. Token Embedding 反向
+    // 5. Token Embedding English text
     // embedding = wte[token_ids] + wpe[positions]
     // d_wte: scatter d_hidden to token positions
     []float d_wte = bk_alloc(V * D)
@@ -1076,7 +1076,7 @@ func model_backward
 }
 
 // ============================================================================
-// 11. AdamW 参数更新
+// 11. AdamW parameterEnglish text
 // ============================================================================
 
 func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta2, float eps, float wd) gpt_adamw_state {
@@ -1116,7 +1116,7 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     }
 }
 
-// AdamW 单参数更新: θ ← θ - lr * m̂ / (√v̂ + ε) - lr*λ*θ
+// AdamW English textparameterEnglish text: θ ← θ - lr * m̂ / (√v̂ + ε) - lr*λ*θ
 func adamw_update_vec([]float param, []float grad, []float m, []float v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - bk_pow(b1, step)
     float bc2 = 1.0 - bk_pow(b2, step)
@@ -1142,7 +1142,7 @@ func bk_pow(float base, int exp) float {
     r
 }
 
-// 完整模型 AdamW 更新步骤
+// completemodel AdamW English textstepEnglish text
 func gpt_adamw_step(
     language_model model,
     gpt_param_grads grads,
@@ -1153,15 +1153,15 @@ func gpt_adamw_step(
     int s = o.step
     float lr = o.lr; float b1 = o.beta1; float b2 = o.beta2; float eps = o.eps; float wd = o.weight_decay
 
-    // 更新 embedding
+    // English text embedding
     model.wte = adamw_update_vec(model.wte, grads.d_wte, o.m_wte, o.v_wte, s, lr, b1, b2, eps, wd)
     model.wpe = adamw_update_vec(model.wpe, grads.d_wpe, o.m_wpe, o.v_wpe, s, lr, b1, b2, eps, wd)
     model.lm_head = adamw_update_vec(model.lm_head, grads.d_lm_head, o.m_lm_head, o.v_lm_head, s, lr, b1, b2, eps, wd)
 
-    // 更新 final norm gamma (无权重衰减)
+    // English text final norm gamma (English textweightEnglish text)
     model.final_norm.gamma = adamw_update_vec(model.final_norm.gamma, grads.d_final_gamma, o.m_final_gamma, o.v_final_gamma, s, lr, b1, b2, eps, 0.0)
 
-    // 更新每层参数
+    // English textparameter
     int l = 0
     while l < model.n_layer {
         transformer_layer layer = transformer_layer_at(model.layers, l)
@@ -1179,7 +1179,7 @@ func gpt_adamw_step(
         layer.ffn.glu_ffn.value_weight = adamw_update_vec(layer.ffn.glu_ffn.value_weight, lg.d_ffn_val_w,  lo.m_ffn_val_w,  lo.v_ffn_val_w,  s, lr, b1, b2, eps, wd)
         layer.ffn.glu_ffn.down_weight  = adamw_update_vec(layer.ffn.glu_ffn.down_weight,  lg.d_ffn_down_w, lo.m_ffn_down_w, lo.v_ffn_down_w, s, lr, b1, b2, eps, wd)
 
-        // Norm gamma (无权重衰减)
+        // Norm gamma (English textweightEnglish text)
         layer.norm1.gamma = adamw_update_vec(layer.norm1.gamma, lg.d_norm1_gamma, lo.m_norm1_gamma, lo.v_norm1_gamma, s, lr, b1, b2, eps, 0.0)
         layer.norm2.gamma = adamw_update_vec(layer.norm2.gamma, lg.d_norm2_gamma, lo.m_norm2_gamma, lo.v_norm2_gamma, s, lr, b1, b2, eps, 0.0)
 
@@ -1191,7 +1191,7 @@ func gpt_adamw_step(
 }
 
 // ============================================================================
-// 12. 完整训练步骤 (前向 + 反向 + 更新)
+// 12. completetrainingstepEnglish text (English text + English text + English text)
 // ============================================================================
 
 struct gpt_train_step_result {
@@ -1211,7 +1211,7 @@ func train_step
 ) gpt_train_step_result {
     int total = batch_size * seq_len
 
-    // 构造 next-token targets
+    // English text next-token targets
     []int targets = gpt_alloc_int(total)
     int i = 0
     while i < total {
@@ -1224,18 +1224,18 @@ func train_step
         i = i + 1
     }
 
-    // 前向传播 (带缓存)
+    // English text (English textcache)
     gpt_forward_cache fc
     []float logits
     (fc, logits) = gpt_forward_cached(model, token_ids, batch_size, seq_len)
 
-    // 损失计算
+    // losscompute
     float loss = gpt_compute_ce_loss(logits, targets, total, model.vocab_size)
 
-    // 反向传播
+    // English text
     gpt_param_grads grads = gpt_backward(model, fc, targets)
 
-    // 梯度裁剪 (全局 L2 范数)
+    // gradientEnglish text (English text L2 English text)
     float total_norm = 0.0
     total_norm = total_norm + bk_vec_norm_sq(grads.d_final_gamma)
     i = 0
@@ -1257,7 +1257,7 @@ func train_step
         grads = scale_all_grads(grads, clip_coeff)
     }
 
-    // AdamW 参数更新
+    // AdamW parameterEnglish text
     language_model updated_model
     gpt_adamw_state updated_opt
     (updated_model, updated_opt) = gpt_adamw_step(model, grads, opt)
@@ -1271,7 +1271,7 @@ func train_step
 }
 
 // ============================================================================
-// 13. 辅助
+// 13. helper
 // ============================================================================
 
 func gpt_compute_ce_loss([]float logits, []int targets, int total, int vocab) float {

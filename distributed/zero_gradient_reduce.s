@@ -1,33 +1,33 @@
 package neurx.distributed.zero_gradient_reduce
 
 // ============================================================================
-// ZeRO Stage 3 梯度规约
+// ZeRO Stage 3 gradientEnglish text
 //
-// 核心概念:
-//   - 参数分成 WORLD_SIZE 个分片，每个 GPU 存储 1/WORLD_SIZE
-//   - 梯度计算后立即分发到各 GPU
-//   - 各 GPU 分别更新其参数分片
-//   - 无需完整参数副本在单个 GPU 上
-//   - 内存节省: 75% (4 个副本 → 1 个副本)
-//   - 通信成本: AllReduce 减少为 ReduceScatter
+// English text:
+//   - parameterEnglish text WORLD_SIZE English text, English text GPU English text 1/WORLD_SIZE
+//   - gradientcomputeEnglish text GPU
+//   - English text GPU English textparameterEnglish text
+//   - English textcompleteparameterEnglish text GPU English text
+//   - English text: 75% (4 English text → 1 English text)
+//   - English text: AllReduce English text ReduceScatter
 //
-// 流程:
+// pipeline:
 //   ┌─────────────┐
-//   │ Forward     │ (需要 AllGather 获取完整参数)
+//   │ Forward     │ (Required AllGather English textcompleteparameter)
 //   └──────┬──────┘
 //          │
 //   ┌──────▼──────┐
-//   │ Backward    │ (本地梯度计算)
+//   │ Backward    │ (English textgradientcompute)
 //   └──────┬──────┘
 //          │
 //   ┌──────▼─────────────────────┐
 //   │ ReduceScatter Gradient      │
-//   │ 梯度 AllReduce 后 Scatter  │
-//   │ 各 GPU 得到其分片的梯度    │
+//   │ gradient AllReduce English text Scatter  │
+//   │ English text GPU English textgradient    │
 //   └──────┬──────┘
 //          │
 //   ┌──────▼──────┐
-//   │ Optimizer   │ (各 GPU 独立更新其分片)
+//   │ Optimizer   │ (English text GPU English text)
 //   └─────────────┘
 //
 // ============================================================================
@@ -37,16 +37,16 @@ use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, allreduce_async, reduce_scatter_async}
 
 // ============================================================================
-// 1. ZeRO Stage 3 配置与状态
+// 1. ZeRO Stage 3 configurationEnglish textstate
 // ============================================================================
 
 struct zero_stage3_config {
     int rank
     int world_size
-    int partition_size          // 每个 GPU 负责的参数数量
+    int partition_size          // English text GPU English textparametercount
     string precision            // "fp32", "bf16"
-    int overlap_reduce_backward // 与 backward 重叠 ReduceScatter
-    int max_gradient_buffer_mb  // 梯度缓冲区大小
+    int overlap_reduce_backward // English text backward English text ReduceScatter
+    int max_gradient_buffer_mb  // gradientEnglish text
 }
 
 struct gradient_partition {
@@ -54,44 +54,44 @@ struct gradient_partition {
     int start_param_idx
     int end_param_idx
     int num_params
-    
-    // 梯度缓冲区
-    []float gradients           // 本分片的梯度
-    []float accumulated_grad    // 累积梯度 (用于梯度累积)
-    
-    // 统计
+
+    // gradientEnglish text
+    []float gradients           // English textgradient
+    []float accumulated_grad    // English textgradient (English textgradientEnglish text)
+
+    // statistics
     int num_backward_calls
     float grad_norm_local
 }
 
 struct zero_stage3_state {
     zero_stage3_config config
-    
-    // 参数分片信息
+
+    // parameterEnglish textinformation
     []gradient_partition partitions
-    
-    // 全局梯度缓冲 (临时)
-    []float gradient_buffer_full  // 在 AllReduce 时临时使用
-    
-    // 性能统计
+
+    // English textgradientEnglish text (English text)
+    []float gradient_buffer_full  // English text AllReduce English textuse
+
+    // English textstatistics
     long total_allreduce_bytes
     long total_reduce_scatter_bytes
     int num_reduce_operations
     float avg_reduce_time_ms
-    
-    // 标志
+
+    // English text
     int allreduce_in_flight
     int allreduce_handle
 }
 
-// 初始化 ZeRO Stage 3 状态
+// initialize ZeRO Stage 3 state
 func zero_stage3_new(
     int rank,
     int world_size,
     int total_params,
     collective_state comm
 ) zero_stage3_state {
-    
+
     zero_stage3_config cfg = zero_stage3_config {
         rank: rank,
         world_size: world_size,
@@ -100,18 +100,18 @@ func zero_stage3_new(
         overlap_reduce_backward: 1,
         max_gradient_buffer_mb: 512,
     }
-    
-    // 初始化分片
+
+    // initializeEnglish text
     []gradient_partition partitions = make([]gradient_partition, world_size)
-    
+
     int i = 0
     while i < world_size {
         int start_idx = i * cfg.partition_size
         int end_idx = start_idx + cfg.partition_size
         if i == world_size - 1 {
-            end_idx = total_params  // 最后一个分片包含剩余的所有参数
+            end_idx = total_params  // English textparameter
         }
-        
+
         partitions[i] = gradient_partition {
             partition_id: i,
             start_param_idx: start_idx,
@@ -122,10 +122,10 @@ func zero_stage3_new(
             num_backward_calls: 0,
             grad_norm_local: 0.0,
         }
-        
+
         i = i + 1
     }
-    
+
     zero_stage3_state state = zero_stage3_state {
         config: cfg,
         partitions: partitions,
@@ -137,258 +137,258 @@ func zero_stage3_new(
         allreduce_in_flight: 0,
         allreduce_handle: -1,
     }
-    
+
     state
 }
 
 // ============================================================================
-// 2. 梯度累积
+// 2. gradientEnglish text
 // ============================================================================
 
-// 累积本地梯度 (反向传播后)
+// English textgradient (English text)
 func zero_stage3_accumulate_gradients(
     zero_stage3_state state,
-    []float layer_gradients,     // 某层的梯度 [num_params]
+    []float layer_gradients,     // English textgradient [num_params]
     int param_start_idx,
     int param_end_idx
 ) {
-    
-    // 找到负责这个范围的分片
+
+    // English text
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-        
-        // 检查范围重叠
+
+        // English text
         if param_start_idx < partition.end_param_idx && param_end_idx > partition.start_param_idx {
-            
-            // 计算重叠范围
+
+            // computeEnglish text
             int overlap_start = param_start_idx
             if overlap_start < partition.start_param_idx {
                 overlap_start = partition.start_param_idx
             }
-            
+
             int overlap_end = param_end_idx
             if overlap_end > partition.end_param_idx {
                 overlap_end = partition.end_param_idx
             }
-            
-            // 累积梯度
+
+            // English textgradient
             int j = overlap_start
             while j < overlap_end {
                 int partition_offset = j - partition.start_param_idx
                 int gradient_offset = j - param_start_idx
-                
-                partition.accumulated_grad[partition_offset] = 
+
+                partition.accumulated_grad[partition_offset] =
                     partition.accumulated_grad[partition_offset] + layer_gradients[gradient_offset]
-                
-                partition.gradients[partition_offset] = 
+
+                partition.gradients[partition_offset] =
                     partition.accumulated_grad[partition_offset]
-                
+
                 j = j + 1
             }
-            
+
             partition.num_backward_calls = partition.num_backward_calls + 1
         }
-        
+
         i = i + 1
     }
 }
 
 // ============================================================================
-// 3. AllReduce + ReduceScatter 融合
+// 3. AllReduce + ReduceScatter English text
 // ============================================================================
 
-// 同步 AllReduce + ReduceScatter (在线方式)
-// 步骤:
-//   1. 所有 GPU 的梯度进行 AllReduce
-//   2. 结果直接 Scatter，每个 GPU 只保留自己的分片
-//   3. 避免了中间的完整梯度副本
+// English textstep AllReduce + ReduceScatter (English text)
+// stepEnglish text:
+//   1. English text GPU English textgradientEnglish text AllReduce
+//   2. resultEnglish text Scatter, English text GPU English text
+//   3. English textcompletegradientEnglish text
 func zero_stage3_allreduce_reduce_scatter(
     zero_stage3_state state,
     collective_state comm,
     int local_rank,
     int local_world_size
 ) int {
-    
+
     if state.allreduce_in_flight > 0 {
         io_println("ERROR: Previous AllReduce still in flight")
         return -1
     }
-    
-    // 步骤 1: 等待所有 GPU 的梯度就绪
+
+    // stepEnglish text 1: English text GPU English textgradientEnglish text
     // barrier_sync(comm)
-    
-    // 步骤 2: 执行 AllReduce on gradient_buffer_full
-    //         但我们可以在线执行: 读取本地分片 → 持续 reduce
-    
+
+    // stepEnglish text 2: English text AllReduce on gradient_buffer_full
+    //         English textAllowedEnglish text: English text → English text reduce
+
     int total_params = len(state.gradient_buffer_full)
-    
-    // 构建完整梯度缓冲 (临时)
+
+    // English textcompletegradientEnglish text (English text)
     int p = 0
     while p < len(state.partitions) {
         gradient_partition partition = state.partitions[p]
-        
+
         int i = 0
         while i < partition.num_params {
-            state.gradient_buffer_full[partition.start_param_idx + i] = 
+            state.gradient_buffer_full[partition.start_param_idx + i] =
                 partition.gradients[i]
             i = i + 1
         }
-        
+
         p = p + 1
     }
-    
-    // 步骤 3: 异步 AllReduce
+
+    // stepEnglish text 3: English textstep AllReduce
     int handle = allreduce_async(comm, state.gradient_buffer_full, total_params)
     state.allreduce_in_flight = 1
     state.allreduce_handle = handle
-    
-    // 更新统计
+
+    // English textstatistics
     state.total_allreduce_bytes = state.total_allreduce_bytes + (total_params * 4)
-    
+
     handle
 }
 
-// 完成 AllReduce 并进行 ReduceScatter
+// English text AllReduce English text ReduceScatter
 func zero_stage3_finalize_reduce_scatter(
     zero_stage3_state state,
     collective_state comm
 ) {
-    
+
     if state.allreduce_in_flight == 0 {
         io_println("No AllReduce in flight")
         return
     }
-    
-    // 等待 AllReduce 完成
+
+    // English text AllReduce English text
     // wait_handle(state.allreduce_handle)
-    
-    // 现在 gradient_buffer_full 包含完整的减少后梯度
-    // 执行 ReduceScatter: 每个 GPU 取其分片
-    
+
+    // English text gradient_buffer_full English textcompleteEnglish textgradient
+    // English text ReduceScatter: English text GPU English text
+
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-        
-        // 复制该分片的梯度
+
+        // English textgradient
         int j = 0
         while j < partition.num_params {
-            partition.gradients[j] = 
+            partition.gradients[j] =
                 state.gradient_buffer_full[partition.start_param_idx + j]
             j = j + 1
         }
-        
+
         i = i + 1
     }
-    
+
     state.allreduce_in_flight = 0
     state.total_reduce_scatter_bytes = state.total_reduce_scatter_bytes + len(state.gradient_buffer_full) * 4
     state.num_reduce_operations = state.num_reduce_operations + 1
 }
 
 // ============================================================================
-// 4. 异步 AllReduce (与 backward 重叠)
+// 4. English textstep AllReduce (English text backward English text)
 // ============================================================================
 
-// 异步开始梯度规约 (在 backward 进行时)
+// English textstepstartgradientEnglish text (English text backward English text)
 func zero_stage3_start_async_reduce(
     zero_stage3_state state,
     collective_state comm
 ) int {
-    
-    // 对于已经完成的层，立即开始 AllReduce
-    // 而其他层还在计算梯度
-    
+
+    // English text, English textstart AllReduce
+    // English textcomputegradient
+
     int total_params = len(state.gradient_buffer_full)
-    
-    // 构建梯度缓冲
+
+    // English textgradientEnglish text
     int p = 0
     while p < len(state.partitions) {
         gradient_partition partition = state.partitions[p]
-        
+
         int i = 0
         while i < partition.num_params {
-            state.gradient_buffer_full[partition.start_param_idx + i] = 
+            state.gradient_buffer_full[partition.start_param_idx + i] =
                 partition.gradients[i]
             i = i + 1
         }
-        
+
         p = p + 1
     }
-    
-    // 异步 AllReduce
+
+    // English textstep AllReduce
     int handle = allreduce_async(comm, state.gradient_buffer_full, total_params)
-    
+
     state.allreduce_in_flight = 1
     state.allreduce_handle = handle
-    
+
     handle
 }
 
-// 等待异步规约完成
+// English textstepEnglish text
 func zero_stage3_wait_async_reduce(
     zero_stage3_state state
 ) {
-    
+
     if state.allreduce_in_flight == 0 {
         return
     }
-    
-    // 等待 AllReduce
+
+    // English text AllReduce
     // wait_handle(state.allreduce_handle)
-    
-    // 执行 ReduceScatter
+
+    // English text ReduceScatter
     zero_stage3_finalize_reduce_scatter(state, collective_state {})
 }
 
 // ============================================================================
-// 5. 梯度范数计算 (用于梯度裁剪)
+// 5. gradientEnglish textcompute (English textgradientEnglish text)
 // ============================================================================
 
-// 计算本地梯度范数
+// computeEnglish textgradientEnglish text
 func zero_stage3_compute_local_grad_norm(
     zero_stage3_state state,
     int partition_id
 ) float {
-    
+
     if partition_id < 0 || partition_id >= len(state.partitions) {
         return 0.0
     }
-    
+
     gradient_partition partition = state.partitions[partition_id]
-    
+
     float norm_sq = 0.0
     int i = 0
     while i < len(partition.gradients) {
         norm_sq = norm_sq + partition.gradients[i] * partition.gradients[i]
         i = i + 1
     }
-    
+
     float norm = 0.0
     if norm_sq > 0.0 {
         norm = sqrt(norm_sq)
     }
-    
+
     partition.grad_norm_local = norm
     norm
 }
 
-// 全局梯度范数 AllReduce
+// English textgradientEnglish text AllReduce
 func zero_stage3_compute_global_grad_norm(
     zero_stage3_state state,
     collective_state comm
 ) float {
-    
-    // 计算每个分片的范数平方
+
+    // computeEnglish text
     []float local_norms_sq = make([]float, len(state.partitions))
-    
+
     int i = 0
     while i < len(state.partitions) {
         local_norms_sq[i] = state.partitions[i].grad_norm_local * state.partitions[i].grad_norm_local
         i = i + 1
     }
-    
-    // AllReduce 范数平方
+
+    // AllReduce English text
     // total_norm_sq = AllReduce(sum(local_norms_sq))
     float total_norm_sq = 0.0
     i = 0
@@ -396,106 +396,106 @@ func zero_stage3_compute_global_grad_norm(
         total_norm_sq = total_norm_sq + local_norms_sq[i]
         i = i + 1
     }
-    
+
     float global_norm = 0.0
     if total_norm_sq > 0.0 {
         global_norm = sqrt(total_norm_sq / float(state.config.world_size))
     }
-    
+
     global_norm
 }
 
 // ============================================================================
-// 6. 梯度裁剪
+// 6. gradientEnglish text
 // ============================================================================
 
-// 分布式梯度裁剪 (跨所有 GPU)
+// English textgradientEnglish text (English text GPU)
 func zero_stage3_clip_gradients(
     zero_stage3_state state,
     collective_state comm,
     float max_grad_norm
 ) {
-    
-    // 步骤 1: 计算全局梯度范数
+
+    // stepEnglish text 1: computeEnglish textgradientEnglish text
     float global_norm = zero_stage3_compute_global_grad_norm(state, comm)
-    
-    // 步骤 2: 计算裁剪系数
+
+    // stepEnglish text 2: computeEnglish text
     float clip_coeff = 1.0
     if global_norm > max_grad_norm {
         clip_coeff = max_grad_norm / global_norm
     }
-    
-    // 步骤 3: 应用裁剪到本地梯度分片
+
+    // stepEnglish text 3: English textgradientEnglish text
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-        
+
         int j = 0
         while j < len(partition.gradients) {
             partition.gradients[j] = partition.gradients[j] * clip_coeff
             j = j + 1
         }
-        
+
         i = i + 1
     }
 }
 
 // ============================================================================
-// 7. 优化器步骤 (分布式)
+// 7. optimizeEnglish textstepEnglish text (English text)
 // ============================================================================
 
-// ZeRO Stage 3 优化器步骤 (各 GPU 独立更新其分片)
+// ZeRO Stage 3 optimizeEnglish textstepEnglish text (English text GPU English text)
 func zero_stage3_optimizer_step(
     zero_stage3_state state,
-    []float parameters,          // 完整参数 (实际上只有分片在内存中)
+    []float parameters,          // completeparameter (actualEnglish text)
     float learning_rate,
     float beta1,
     float beta2,
     float epsilon,
     float weight_decay
 ) {
-    
-    // 对每个分片，执行 AdamW 更新
+
+    // English text, English text AdamW English text
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-        
-        // 这里假设 m 和 v 缓冲也是分片的
-        // m 和 v 的完整实现会在优化器状态中
-        
+
+        // English text m English text v English text
+        // m English text v English textcompleteimplementationEnglish textoptimizeEnglish textstateEnglish text
+
         int j = 0
         while j < partition.num_params {
             int param_idx = partition.start_param_idx + j
             float grad = partition.gradients[j]
             float param = parameters[param_idx]
-            
-            // AdamW 更新
+
+            // AdamW English text
             // m_t = beta1 * m_{t-1} + (1 - beta1) * grad
             // v_t = beta2 * v_{t-1} + (1 - beta2) * grad^2
             // param = param - lr * m_t / (sqrt(v_t) + eps)
             //         - lr * weight_decay * param
-            
-            // 简化实现
+
+            // English textimplementation
             float update = grad * learning_rate
             if weight_decay > 0.0 {
                 update = update + param * weight_decay * learning_rate
             }
-            
+
             parameters[param_idx] = param - update
-            
+
             j = j + 1
         }
-        
+
         i = i + 1
     }
 }
 
 // ============================================================================
-// 8. 工具函数
+// 8. toolfunction
 // ============================================================================
 
 func sqrt(float x) float {
-    // 占位符
+    // placeholder
     1.0
 }
 

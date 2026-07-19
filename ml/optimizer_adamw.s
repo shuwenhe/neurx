@@ -1,6 +1,6 @@
 // =====================================================================
 // Complete AdamW Optimizer Implementation
-// 完整的AdamW优化器 - 包含weight decay和learning rate schedule
+// completeEnglish textAdamWoptimizeEnglish text - English textweight decayEnglish textlearning rate schedule
 // =====================================================================
 
 package neurx.ml.optimizer
@@ -8,21 +8,21 @@ package neurx.ml.optimizer
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 
 // =====================================================================
-// AdamW优化器状态
+// AdamWoptimizeEnglish textstate
 // =====================================================================
 
 struct adam_state {
-    float learning_rate      // 学习率
-    float beta1              // 一阶矩估计的指数衰减率 (默认0.9)
-    float beta2              // 二阶矩估计的指数衰减率 (默认0.999)
-    float epsilon            // 数值稳定性参数 (默认1e-8)
-    float weight_decay       // L2正则化系数
-    
-    int timestep             // 当前时间步
-    
-    []tensor m               // 一阶矩 (梯度的移动平均)
-    []tensor v               // 二阶矩 (梯度平方的移动平均)
-    []tensor param           // 参数
+    float learning_rate      // learning rate
+    float beta1              // English text (default0.9)
+    float beta2              // English text (default0.999)
+    float epsilon            // English textparameter (default1e-8)
+    float weight_decay       // L2English text
+
+    int timestep             // English texttimestep
+
+    []tensor m               // English text (gradientEnglish text)
+    []tensor v               // English text (gradientEnglish text)
+    []tensor param           // parameter
 }
 
 struct optimizer_config {
@@ -36,7 +36,7 @@ struct optimizer_config {
 }
 
 // =====================================================================
-// 初始化
+// initialize
 // =====================================================================
 
 func init_adam_state(
@@ -45,21 +45,21 @@ func init_adam_state(
 ) adam_state {
     []tensor m_states = []tensor{cap: len(parameters)}
     []tensor v_states = []tensor{cap: len(parameters)}
-    
+
     int i = 0
     while i < len(parameters) {
         m_states.push(zeros(parameters[i].shape))
         v_states.push(zeros(parameters[i].shape))
         i = i + 1
     }
-    
+
     adam_state {
         learning_rate: config.learning_rate,
         beta1: config.beta1,
         beta2: config.beta2,
         epsilon: config.epsilon,
         weight_decay: config.weight_decay,
-        
+
         timestep: 0,
         m: m_states,
         v: v_states,
@@ -68,7 +68,7 @@ func init_adam_state(
 }
 
 // =====================================================================
-// 学习率调度
+// learning rateEnglish text
 // =====================================================================
 
 func get_learning_rate(
@@ -78,40 +78,40 @@ func get_learning_rate(
     int total_steps,
     int warmup_steps
 ) float {
-    // 预热阶段
+    // English textphase
     if timestep < warmup_steps {
         return base_lr * float_from_int(timestep) / float_from_int(warmup_steps)
     }
-    
+
     int warmup_done = timestep - warmup_steps
     int total_after_warmup = total_steps - warmup_steps
-    
+
     if total_after_warmup <= 0 { return base_lr }
-    
+
     float progress = float_from_int(warmup_done) / float_from_int(total_after_warmup)
     if progress > 1.0 { progress = 1.0 }
-    
+
     if schedule == "linear" {
         // Linear decay: lr * (1 - progress)
         return base_lr * (1.0 - progress)
     }
-    
+
     if schedule == "cosine" {
         // Cosine annealing: lr * (1 + cos(pi * progress)) / 2
         float pi = 3.141592653589793
         return base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
     }
-    
+
     // Default: constant
     base_lr
 }
 
 // =====================================================================
-// 梯度剪裁 (Gradient Clipping)
+// gradientEnglish text (Gradient Clipping)
 // =====================================================================
 
 func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
-    // 计算梯度的L2范数
+    // computegradientEnglish textL2English text
     float total_norm = 0.0
     int i = 0
     while i < len(gradients) {
@@ -123,14 +123,14 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
         i = i + 1
     }
     total_norm = sqrt_approx(total_norm)
-    
-    // 计算裁剪比例
+
+    // computeEnglish text
     float scale = 1.0
     if total_norm > max_norm {
         scale = max_norm / total_norm
     }
-    
-    // 应用裁剪
+
+    // English text
     i = 0
     while i < len(gradients) {
         int j = 0
@@ -140,12 +140,12 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
         }
         i = i + 1
     }
-    
+
     gradients
 }
 
 // =====================================================================
-// 单个参数的AdamW更新
+// English textparameterEnglish textAdamWEnglish text
 // =====================================================================
 
 func adam_step_param(
@@ -160,40 +160,40 @@ func adam_step_param(
     float weight_decay,
     int timestep
 ) (tensor, tensor, tensor) {
-    // 偏差修正系数
+    // English text
     float bias_correction1 = 1.0 - pow_approx(beta1, float_from_int(timestep))
     float bias_correction2 = 1.0 - pow_approx(beta2, float_from_int(timestep))
-    
-    // 对每个元素执行更新
+
+    // English text
     int i = 0
     while i < len(param.data) {
-        // 1. 一阶矩更新: m = beta1 * m + (1 - beta1) * grad
+        // 1. English text: m = beta1 * m + (1 - beta1) * grad
         m.data[i] = beta1 * m.data[i] + (1.0 - beta1) * grad.data[i]
-        
-        // 2. 二阶矩更新: v = beta2 * v + (1 - beta2) * grad^2
+
+        // 2. English text: v = beta2 * v + (1 - beta2) * grad^2
         v.data[i] = beta2 * v.data[i] + (1.0 - beta2) * grad.data[i] * grad.data[i]
-        
-        // 3. 偏差修正的矩估计
+
+        // 3. English text
         float m_hat = m.data[i] / bias_correction1
         float v_hat = v.data[i] / bias_correction2
-        
-        // 4. 参数更新: param = param - lr * (m_hat / (sqrt(v_hat) + eps))
+
+        // 4. parameterEnglish text: param = param - lr * (m_hat / (sqrt(v_hat) + eps))
         float denominator = sqrt_approx(v_hat) + eps
         float update = lr * (m_hat / denominator)
-        
-        // 5. Weight decay (L2正则化)
+
+        // 5. Weight decay (L2English text)
         update = update + lr * weight_decay * param.data[i]
-        
+
         param.data[i] = param.data[i] - update
-        
+
         i = i + 1
     }
-    
+
     (param, m, v)
 }
 
 // =====================================================================
-// 完整的优化步骤
+// completeEnglish textoptimizestepEnglish text
 // =====================================================================
 
 func adam_step(
@@ -204,10 +204,10 @@ func adam_step(
     int warmup_steps,
     float max_grad_norm
 ) adam_state {
-    // 增加时间步
+    // English texttimestep
     state.timestep = state.timestep + 1
-    
-    // 计算当前学习率
+
+    // computeEnglish textlearning rate
     float current_lr = get_learning_rate(
         state.learning_rate,
         lr_schedule,
@@ -215,11 +215,11 @@ func adam_step(
         total_steps,
         warmup_steps
     )
-    
-    // 梯度剪裁
+
+    // gradientEnglish text
     []tensor clipped_grads = clip_grad_norm(gradients, max_grad_norm)
-    
-    // 更新每个参数
+
+    // English textparameter
     int i = 0
     while i < len(state.param) {
         (state.param[i], state.m[i], state.v[i]) = adam_step_param(
@@ -236,12 +236,12 @@ func adam_step(
         )
         i = i + 1
     }
-    
+
     state
 }
 
 // =====================================================================
-// 学习率预热策略
+// learning rateEnglish text
 // =====================================================================
 
 func linear_warmup_scheduler(int current_step, int warmup_steps, float base_lr) float {
@@ -258,23 +258,23 @@ func cosine_warmup_scheduler(
     float base_lr
 ) float {
     if current_step < warmup_steps {
-        // 预热阶段: 线性增长
+        // English textphase: English text
         return base_lr * float_from_int(current_step) / float_from_int(warmup_steps)
     }
-    
-    // 余弦衰减阶段
+
+    // English textphase
     float pi = 3.141592653589793
     int remaining_steps = total_steps - warmup_steps
     int step_after_warmup = current_step - warmup_steps
-    
+
     float progress = float_from_int(step_after_warmup) / float_from_int(remaining_steps)
     if progress > 1.0 { progress = 1.0 }
-    
+
     base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
 }
 
 // =====================================================================
-// 学习率表和检查点恢复
+// learning rateEnglish textcheckpointrecover
 // =====================================================================
 
 struct optimizer_checkpoint {
@@ -296,7 +296,7 @@ func restore_optimizer_state(optimizer_checkpoint ckpt) adam_state {
 }
 
 // =====================================================================
-// 工具函数
+// toolfunction
 // =====================================================================
 
 func float_from_int(int x) float {
@@ -315,10 +315,10 @@ func sqrt_approx(float x) float {
 }
 
 func pow_approx(float base, float exp) float {
-    // 简化版 pow 函数: base^exp ≈ exp(exp * ln(base))
+    // English text pow function: base^exp ≈ exp(exp * ln(base))
     if base <= 0.0 { return 0.0 }
     if exp == 0.0 { return 1.0 }
-    
+
     float ln_base = log_approx(base)
     exp_approx(exp * ln_base)
 }

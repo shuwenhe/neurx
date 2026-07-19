@@ -1,84 +1,84 @@
-# 断点续训配置说明
+# English textconfigurationexplanation
 
-## 功能概述
-`make pretrain` 现已支持断点续训功能，训练出来的模型直接存放在 `/home/shuwen/shuwen/train/neurx/artifacts/checkpoints` 目录下。
+## English text
+`make pretrain` English textsupportEnglish text, trainingEnglish textmodelEnglish text `/home/shuwen/shuwen/train/neurx/artifacts/checkpoints` directoryEnglish text.
 
-## 关键改动
+## English text
 
-### 1. Makefile 变更
-- **输出目录**: `$(CURDIR_UNIX)/artifacts/checkpoints/gpt_large_pretrain` → `$(CURDIR_UNIX)/artifacts/checkpoints`
-- **断点续训**: 添加 `NEURX_PRETRAIN_RESUME=1` 环境变量
-- **脚本**: 改用 `run_large_pretrain.sh` 替代 `run_cuda_pretrain.sh`
+### 1. Makefile English text
+- **outputdirectory**: `$(CURDIR_UNIX)/artifacts/checkpoints/gpt_large_pretrain` → `$(CURDIR_UNIX)/artifacts/checkpoints`
+- **English text**: English text `NEURX_PRETRAIN_RESUME=1` English text
+- **English text**: English text `run_large_pretrain.sh` English text `run_cuda_pretrain.sh`
 
-### 2. run_large_pretrain.sh 增强
-- ✅ 添加检查点检测逻辑
-- ✅ 自动发现 `latest_checkpoint.txt` 恢复训练
-- ✅ 自动发现 `resume_state.json` 恢复训练状态
-- ✅ 环境变量 `NEURX_PRETRAIN_CHECKPOINT_PATH` 用于指定恢复点
-- ✅ 环境变量 `NEURX_PRETRAIN_RESUME_STATE_FILE` 用于恢复状态
+### 2. run_large_pretrain.sh English text
+- ✅ English textcheckpointEnglish text
+- ✅ English text `latest_checkpoint.txt` recovertraining
+- ✅ English text `resume_state.json` recovertrainingstate
+- ✅ English text `NEURX_PRETRAIN_CHECKPOINT_PATH` English textrecoverEnglish text
+- ✅ English text `NEURX_PRETRAIN_RESUME_STATE_FILE` English textrecoverstate
 
-### 3. minimal_train.s 增强
-- ✅ 添加 `output_dir` 环境变量支持
-- ✅ 添加 `save_interval` 参数配置（默认100）
-- ✅ 训练完成后自动保存检查点到：
-  - `final_model.neurx` - 最终模型
-  - `best_model.neurx` - 最佳模型（符号链接）
-  - `latest_checkpoint.txt` - 最新检查点路径
-  - `resume_state.json` - 训练状态快照
+### 3. minimal_train.s English text
+- ✅ English text `output_dir` English textsupport
+- ✅ English text `save_interval` parameterconfiguration(default100)
+- ✅ trainingEnglish textsavecheckpointEnglish text:
+  - `final_model.neurx` - English textmodel
+  - `best_model.neurx` - English textmodel(English text)
+  - `latest_checkpoint.txt` - English textcheckpointpath
+  - `resume_state.json` - trainingstateEnglish text
 
-## 输出目录结构
+## outputdirectoryEnglish text
 
 ```
 artifacts/checkpoints/
-├── final_model.neurx              # 最终模型检查点
-├── best_model.neurx               # 最佳模型（symlink指向final_model.neurx）
-├── latest_checkpoint.txt           # 最新检查点路径
-├── resume_state.json               # 恢复状态（JSON格式）
-└── checkpoint_info.json            # 模型配置信息（可选）
+├── final_model.neurx              # English textmodelcheckpoint
+├── best_model.neurx               # English textmodel(symlinkEnglish textfinal_model.neurx)
+├── latest_checkpoint.txt           # English textcheckpointpath
+├── resume_state.json               # recoverstate(JSONEnglish text)
+└── checkpoint_info.json            # modelconfigurationinformation(English text)
 ```
 
-## 使用方式
+## useEnglish text
 
-### 首次训练
+### English texttraining
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 make pretrain
 ```
 
-训练过程会自动：
-1. 检测输出目录 `artifacts/checkpoints`
-2. 如果没有检查点，从头开始训练
-3. 完成后保存模型到 `artifacts/checkpoints/final_model.neurx`
+trainingEnglish text:
+1. English textoutputdirectory `artifacts/checkpoints`
+2. English textcheckpoint, English textstarttraining
+3. English textsavemodelEnglish text `artifacts/checkpoints/final_model.neurx`
 
-### 断点续训
+### English text
 ```bash
-# 直接运行make命令，会自动检测上次的检查点并恢复
+# English textrunmakeEnglish text, English textcheckpointEnglish textrecover
 cd /home/shuwen/shuwen/train/neurx
 make pretrain
 ```
 
-续训过程会自动：
-1. 读取 `artifacts/checkpoints/latest_checkpoint.txt` 获取检查点路径
-2. 读取 `artifacts/checkpoints/resume_state.json` 恢复训练状态
-3. 从上次中断的地方继续训练
+English text:
+1. English text `artifacts/checkpoints/latest_checkpoint.txt` English textcheckpointpath
+2. English text `artifacts/checkpoints/resume_state.json` recovertrainingstate
+3. English texttraining
 
-### 禁用断点续训（强制从头开始）
+### English text(English textstart)
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 NEURX_PRETRAIN_RESUME=0 make pretrain
 ```
 
-## 环境变量配置
+## English textconfiguration
 
-| 变量 | 默认值 | 说明 |
+| English text | defaultEnglish text | explanation |
 |------|--------|------|
-| `NEURX_PRETRAIN_OUTPUT_DIR` | `artifacts/checkpoints` | 模型输出目录 |
-| `NEURX_PRETRAIN_RESUME` | `1` | 是否启用断点续训（1=启用，0=禁用） |
-| `NEURX_PRETRAIN_SAVE_INTERVAL` | `100` | 检查点保存间隔（步数） |
-| `NEURX_PRETRAIN_CHECKPOINT_PATH` | 自动检测 | 指定恢复的检查点路径 |
-| `NEURX_PRETRAIN_RESUME_STATE_FILE` | 自动检测 | 恢复状态文件路径 |
+| `NEURX_PRETRAIN_OUTPUT_DIR` | `artifacts/checkpoints` | modeloutputdirectory |
+| `NEURX_PRETRAIN_RESUME` | `1` | English text(1=English text, 0=English text) |
+| `NEURX_PRETRAIN_SAVE_INTERVAL` | `100` | checkpointsaveEnglish text(stepEnglish text) |
+| `NEURX_PRETRAIN_CHECKPOINT_PATH` | English text | English textrecoverEnglish textcheckpointpath |
+| `NEURX_PRETRAIN_RESUME_STATE_FILE` | English text | recoverstatefilepath |
 
-## 检查点信息格式
+## checkpointinformationEnglish text
 
 ### resume_state.json
 ```json
@@ -96,393 +96,393 @@ NEURX_PRETRAIN_RESUME=0 make pretrain
 /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/final_model.neurx
 ```
 
-## 工作流示例
+## English textexample
 
-### 场景1：首次训练（1000步，100步间隔）
+### English text1: English texttraining(1000step, 100stepEnglish text)
 ```bash
 make pretrain NEURX_PRETRAIN_STEPS=1000 NEURX_PRETRAIN_SAVE_INTERVAL=100
-# 输出: artifacts/checkpoints/final_model.neurx
+# output: artifacts/checkpoints/final_model.neurx
 ```
 
-### 场景2：中途中断并续训
+### English text2: English text
 ```bash
-# 中断（Ctrl+C）后，模型已保存：
+# English text(Ctrl+C)English text, modelEnglish textsave:
 # - artifacts/checkpoints/final_model.neurx
 # - artifacts/checkpoints/resume_state.json
 # - artifacts/checkpoints/latest_checkpoint.txt
 
-# 重新运行make pretrain，自动恢复
+# English textrunmake pretrain, English textrecover
 make pretrain
-# 将从latest_checkpoint.txt中的检查点继续训练
+# English textlatest_checkpoint.txtEnglish textcheckpointEnglish texttraining
 ```
 
-### 场景3：查看训练恢复信息
+### English text3: English texttrainingrecoverinformation
 ```bash
 cat artifacts/checkpoints/latest_checkpoint.txt
 cat artifacts/checkpoints/resume_state.json
 ```
 
-## 技术细节
+## English text
 
-### 断点续训流程
-1. **run_large_pretrain.sh** 检查 `latest_checkpoint.txt` 是否存在
-2. 如果存在且检查点文件有效，设置 `NEURX_PRETRAIN_CHECKPOINT_PATH`
-3. 如果存在 `resume_state.json`，设置 `NEURX_PRETRAIN_RESUME_STATE_FILE`
-4. S编译和执行训练脚本
-5. minimal_train.s 完成训练后保存新的检查点
+### English textpipeline
+1. **run_large_pretrain.sh** English text `latest_checkpoint.txt` English text
+2. English textcheckpointfileEnglish text, English text `NEURX_PRETRAIN_CHECKPOINT_PATH`
+3. English text `resume_state.json`, English text `NEURX_PRETRAIN_RESUME_STATE_FILE`
+4. ScompileEnglish texttrainingEnglish text
+5. minimal_train.s English texttrainingEnglish textsaveEnglish textcheckpoint
 
-### 检查点保存策略
-- **final_model.neurx**: 每次训练完成时更新（包含最新权重）
-- **best_model.neurx**: 指向best的符号链接（初始时等于final_model）
-- **latest_checkpoint.txt**: 存储最新检查点的完整路径
-- **resume_state.json**: 存储训练元数据（步数、文档数、损失等）
+### checkpointsaveEnglish text
+- **final_model.neurx**: English texttrainingEnglish text(English textweight)
+- **best_model.neurx**: English textbestEnglish text(English textfinal_model)
+- **latest_checkpoint.txt**: English textcheckpointEnglish textcompletepath
+- **resume_state.json**: English texttrainingEnglish textdata(stepEnglish text, English text, lossEnglish text)
 
-## 故障排除
+## English text
 
-### 问题：无法恢复检查点
-**解决方案**：
-1. 检查 `latest_checkpoint.txt` 是否存在：
+### English text: English textrecovercheckpoint
+**English text**:
+1. English text `latest_checkpoint.txt` English text:
    ```bash
    cat artifacts/checkpoints/latest_checkpoint.txt
    ```
-2. 检查文件权限：
+2. English textfileEnglish text:
    ```bash
    ls -lah artifacts/checkpoints/
    ```
 
-### 问题：要从头开始训练
-**解决方案**：
+### English text: English textstarttraining
+**English text**:
 ```bash
-# 删除旧的检查点
+# English textcheckpoint
 rm -f artifacts/checkpoints/latest_checkpoint.txt
 rm -f artifacts/checkpoints/resume_state.json
-# 重新开始训练
+# English textstarttraining
 make pretrain
 ```
 
-### 问题：检查点文件丢失
-**解决方案**：
-如果模型文件 `final_model.neurx` 被删除但 `latest_checkpoint.txt` 仍指向它：
+### English text: checkpointfileEnglish text
+**English text**:
+English textmodelfile `final_model.neurx` English text `latest_checkpoint.txt` English text:
 ```bash
-# 清理检查点引用
+# English textcheckpointEnglish text
 rm -f artifacts/checkpoints/latest_checkpoint.txt
 rm -f artifacts/checkpoints/resume_state.json
-# 从头开始
+# English textstart
 make pretrain
 ```
 
 ---
 
-# GPU 预训练断点续训指南 (GPU Pretrain Checkpoint Resume)
+# GPU English texttrainingEnglish text (GPU Pretrain Checkpoint Resume)
 
-## 概述
+## English text
 
-NeurX GPU预训练现已支持完整的断点续训功能。训练状态保存在 `checkpoint/NeurX-1.3/training_state.txt`，中断后可以从上次保存的步数继续训练。
+NeurX GPUEnglish texttrainingEnglish textsupportcompleteEnglish text.trainingstatesaveEnglish text `checkpoint/NeurX-1.3/training_state.txt`, English textAllowedEnglish textsaveEnglish textstepEnglish texttraining.
 
-## GPU 预训练命令
+## GPU English texttrainingEnglish text
 
-### 1. 自动恢复模式（推荐）- Auto Resume (Default)
+### 1. English textrecoverEnglish text(recommended)- Auto Resume (Default)
 
 ```bash
-# 首次训练 - 从步数0开始
+# English texttraining - English textstepEnglish text0start
 make pretrain-gpu
 
-# 中断后 - 自动检测checkpoint并恢复
+# English text - English textcheckpointEnglish textrecover
 make pretrain-gpu
 ```
 
-**工作原理**：
-- 自动检查 `checkpoint/NeurX-1.3/training_state.txt`
-- 如果存在，从上次保存的步数继续
-- 如果不存在，从步数0开始新训练
-- 环境变量：`NEURX_PRETRAIN_RESUME=auto`（默认）
+**English text**:
+- English text `checkpoint/NeurX-1.3/training_state.txt`
+- English text, English textsaveEnglish textstepEnglish text
+- English text, English textstepEnglish text0startEnglish texttraining
+- English text: `NEURX_PRETRAIN_RESUME=auto`(default)
 
-### 2. 强制恢复模式 - Force Resume
+### 2. English textrecoverEnglish text - Force Resume
 
 ```bash
 NEURX_PRETRAIN_RESUME=yes make pretrain-gpu
 ```
 
-**强制从checkpoint恢复，如果不存在则报错**
+**English textcheckpointrecover, English text**
 
-### 3. 新训练模式 - Fresh Start
+### 3. English texttrainingEnglish text - Fresh Start
 
 ```bash
 make pretrain-gpu-fresh
 ```
 
-或使用环境变量：
+English textuseEnglish text:
 
 ```bash
 NEURX_PRETRAIN_RESUME=no make pretrain-gpu
 ```
 
-**删除现有checkpoint并从步数0开始新训练**
+**English textcheckpointEnglish textstepEnglish text0startEnglish texttraining**
 
-### 4. 显式恢复命令 - Explicit Resume
+### 4. English textrecoverEnglish text - Explicit Resume
 
 ```bash
 make pretrain-gpu-resume
 ```
 
-**等同于 `make pretrain-gpu`，但更明确意图**
+**English text `make pretrain-gpu`, English text**
 
-## GPU 预训练 Checkpoint 结构
+## GPU English texttraining Checkpoint English text
 
 ```
 checkpoint/NeurX-1.3/
-├── training_state.txt      # 训练状态（步数、文档数、分片数、损失）
-├── transformer_v2.ckpt     # 模型权重检查点
-├── NeurX-1.3.neurx         # 模型元数据
-└── ...                     # 其他检查点文件
+├── training_state.txt      # trainingstate(stepEnglish text, English text, English text, loss)
+├── transformer_v2.ckpt     # modelweightcheckpoint
+├── NeurX-1.3.neurx         # modelEnglish textdata
+└── ...                     # English textcheckpointfile
 ```
 
-### training_state.txt 格式
+### training_state.txt English text
 
 ```
 step=1000 docs=5000 shards=3 loss=2.45
 ```
 
-**字段说明**：
-- `step`: 当前已完成的训练步数
-- `docs`: 已处理的文档总数
-- `shards`: 已完成的数据分片数
-- `loss`: 最后记录的平均损失值
+**English textexplanation**:
+- `step`: English texttrainingstepEnglish text
+- `docs`: English text
+- `shards`: English textdataEnglish text
+- `loss`: English textlossEnglish text
 
-## GPU 预训练环境变量
+## GPU English texttrainingEnglish text
 
-| 变量 | 说明 | 默认值 | 可选值 |
+| English text | explanation | defaultEnglish text | English text |
 |------|------|--------|--------|
-| `NEURX_PRETRAIN_RESUME` | 恢复模式 | `auto` | `auto` / `yes` / `no` |
-| `NEURX_PRETRAIN_OUTPUT_DIR` | checkpoint保存目录 | `checkpoint/NeurX-1.3` | 任何有效路径 |
-| `NEURX_PRETRAIN_STEPS` | 最大训练步数 | `1000000000` | 整数 |
-| `NEURX_NUM_GPUS` | GPU数量 | 自动检测 | 整数 (1-8) |
+| `NEURX_PRETRAIN_RESUME` | recoverEnglish text | `auto` | `auto` / `yes` / `no` |
+| `NEURX_PRETRAIN_OUTPUT_DIR` | checkpointsavedirectory | `checkpoint/NeurX-1.3` | English textpath |
+| `NEURX_PRETRAIN_STEPS` | English texttrainingstepEnglish text | `1000000000` | English text |
+| `NEURX_NUM_GPUS` | GPUcount | English text | English text (1-8) |
 
-## 高级用法 (Advanced Usage)
+## advancedEnglish text (Advanced Usage)
 
-### 指定checkpoint目录
+### English textcheckpointdirectory
 
 ```bash
 NEURX_PRETRAIN_OUTPUT_DIR=/custom/checkpoint/path make pretrain-gpu
 ```
 
-### 设置训练步数并恢复
+### English texttrainingstepEnglish textrecover
 
 ```bash
 NEURX_PRETRAIN_STEPS=10000 NEURX_PRETRAIN_RESUME=yes make pretrain-gpu
 ```
 
-### 多GPU训练并恢复
+### English textGPUtrainingEnglish textrecover
 
 ```bash
 NEURX_NUM_GPUS=4 make pretrain-gpu
 ```
 
-### 查看当前checkpoint状态
+### English textcheckpointstate
 
 ```bash
 cat checkpoint/NeurX-1.3/training_state.txt
 ```
 
-### 编辑checkpoint状态（高级）
+### English textcheckpointstate(advanced)
 
 ```bash
-# 手动修改training_state.txt（谨慎使用）
+# English texttraining_state.txt(English textuse)
 echo "step=5000 docs=25000 shards=15 loss=2.10" > checkpoint/NeurX-1.3/training_state.txt
 ```
 
-## GPU 预训练工作流示例
+## GPU English texttrainingEnglish textexample
 
-### 场景1：首次GPU预训练
+### English text1: English textGPUEnglish texttraining
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 make pretrain-gpu
 
-# 日志输出:
+# logoutput:
 # [Phase 1] Checking for existing checkpoint...
 # [Phase 1] No existing checkpoint found, starting fresh training
 # [Phase 2] Setting up GPU environment
 # [Phase 3] Starting training from step 0
 ```
 
-### 场景2：中断并恢复
+### English text2: English textrecover
 
 ```bash
-# 训练中（假设已完成1000步）
-# 按 Ctrl+C 中断
+# trainingEnglish text(English text1000step)
+# English text Ctrl+C English text
 
-# 查看checkpoint状态
+# English textcheckpointstate
 cat checkpoint/NeurX-1.3/training_state.txt
-# 输出: step=1000 docs=5000 shards=3 loss=2.45
+# output: step=1000 docs=5000 shards=3 loss=2.45
 
-# 重新运行 - 自动恢复
+# English textrun - English textrecover
 make pretrain-gpu
-# 日志输出:
+# logoutput:
 # [Phase 1] Existing checkpoint found
 # [Phase 1] Loaded state: step=1000 docs=5000 shards=3 loss=2.45
 # [Phase 3] Starting training from step 1000
 ```
 
-### 场景3：从新checkpoint开始
+### English text3: English textcheckpointstart
 
 ```bash
-# 删除现有checkpoint并重新开始
+# English textcheckpointEnglish textstart
 make pretrain-gpu-fresh
 
-# 或等同于：
+# English text:
 NEURX_PRETRAIN_RESUME=no make pretrain-gpu
 ```
 
-### 场景4：在多个GPU上恢复训练
+### English text4: English textGPUEnglish textrecovertraining
 
 ```bash
-# 原始训练在4个GPU上
+# English texttrainingEnglish text4English textGPUEnglish text
 NEURX_NUM_GPUS=4 make pretrain-gpu
 
-# 中断后，继续在4个GPU上恢复
+# English text, English text4English textGPUEnglish textrecover
 NEURX_NUM_GPUS=4 make pretrain-gpu
 ```
 
-## 日志和监控
+## logEnglish textmonitoring
 
-### 查看预训练日志
+### English texttraininglog
 
 ```bash
-# 最新日志
+# English textlog
 tail -f artifacts/logs/pretrain_gpu_*.log
 
-# 特定日期的日志
+# English textlog
 ls -lh artifacts/logs/pretrain_gpu_*.log
 
-# 搜索特定信息
+# searchEnglish textinformation
 grep "checkpoint" artifacts/logs/pretrain_gpu_*.log
 grep "resume" artifacts/logs/pretrain_gpu_*.log
 ```
 
-### 实时监控训练状态
+### English textmonitoringtrainingstate
 
 ```bash
-# 每秒更新一次状态
+# English textstate
 watch -n 1 'cat checkpoint/NeurX-1.3/training_state.txt'
 
-# 或使用tail -f动态监控
+# English textusetail -fEnglish textmonitoring
 tail -f checkpoint/NeurX-1.3/training_state.txt
 ```
 
-## 故障排除
+## English text
 
-### 问题1：无法找到checkpoint
-**症状**：看到 "No existing checkpoint found" 但预期应该恢复
+### English text1: English textcheckpoint
+**English text**: English text "No existing checkpoint found" English textrecover
 
-**解决**：
+**English text**:
 ```bash
-# 检查目录是否存在
+# English textdirectoryEnglish text
 ls -la checkpoint/NeurX-1.3/
 
-# 检查training_state.txt
+# English texttraining_state.txt
 cat checkpoint/NeurX-1.3/training_state.txt
 
-# 如果文件不存在，强制从头开始
+# English textfileEnglish text, English textstart
 make pretrain-gpu-fresh
 ```
 
-### 问题2：checkpoint损坏
-**症状**：恢复失败或产生parse错误
+### English text2: checkpointEnglish text
+**English text**: recoverfailureEnglish textparseerror
 
-**解决**：
+**English text**:
 ```bash
-# 备份旧checkpoint
+# English textcheckpoint
 cp checkpoint/NeurX-1.3/training_state.txt checkpoint/NeurX-1.3/training_state.txt.bak
 
-# 从新checkpoint开始
+# English textcheckpointstart
 make pretrain-gpu-fresh
 ```
 
-### 问题3：GPU不可用
-**症状**：CUDA错误或GPU检测失败
+### English text3: GPUEnglish text
+**English text**: CUDAerrorEnglish textGPUEnglish textfailure
 
-**解决**：
+**English text**:
 ```bash
-# 检查GPU
+# English textGPU
 nvidia-smi
 
-# 指定GPU数量为0（CPU模式）
+# English textGPUcountEnglish text0(CPUEnglish text)
 NEURX_NUM_GPUS=0 make pretrain-gpu
 
-# 或使用CPU预训练
+# English textuseCPUEnglish texttraining
 make pretrain
 ```
 
-### 问题4：想切换配置
+### English text4: English textconfiguration
 
-**解决**：创建新的checkpoint目录
+**English text**: English textcheckpointdirectory
 ```bash
-# 方案A：使用新的输出目录
+# English textA: useEnglish textoutputdirectory
 NEURX_PRETRAIN_OUTPUT_DIR=checkpoint/NeurX-1.3-v2 make pretrain-gpu
 
-# 方案B：备份现有checkpoint
+# English textB: English textcheckpoint
 mv checkpoint/NeurX-1.3 checkpoint/NeurX-1.3-prod
 make pretrain-gpu-fresh
 ```
 
-## 最佳实践
+## English text
 
-1. **定期备份重要checkpoint**：
+1. **English textcheckpoint**:
    ```bash
    cp -r checkpoint/NeurX-1.3 checkpoint/NeurX-1.3-backup-$(date +%Y%m%d-%H%M%S)
    ```
 
-2. **监控training_state.txt**：
+2. **monitoringtraining_state.txt**:
    ```bash
    watch -n 5 'cat checkpoint/NeurX-1.3/training_state.txt'
    ```
 
-3. **检查日志**：
+3. **English textlog**:
    ```bash
    tail -100f artifacts/logs/pretrain_gpu_*.log
    ```
 
-4. **设置合理的训练步数**：
+4. **English texttrainingstepEnglish text**:
    ```bash
    NEURX_PRETRAIN_STEPS=100000 make pretrain-gpu
    ```
 
-5. **在中断前等待checkpoint保存**：
-   - 等待日志显示 "Checkpoint saved" 消息
-   - 然后再按 Ctrl+C
+5. **English textcheckpointsave**:
+   - English textlogEnglish text "Checkpoint saved" English text
+   - English text Ctrl+C
 
-## 相关文件和脚本
+## English textfileEnglish text
 
-- **主脚本**: [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s)
-- **Makefile配置**: [Makefile](../Makefile) (pretrain-gpu 目标)
-- **模型配置**: [config_1t_model.json](../config_1t_model.json)
-- **CUDA桥接**: [neurx_cuda_train_bridge.cu](../cuda/neurx_cuda_train_bridge.cu)
+- **mainEnglish text**: [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s)
+- **Makefileconfiguration**: [Makefile](../Makefile) (pretrain-gpu English text)
+- **modelconfiguration**: [config_1t_model.json](../config_1t_model.json)
+- **CUDAEnglish text**: [neurx_cuda_train_bridge.cu](../cuda/neurx_cuda_train_bridge.cu)
 
-## 相关命令总览
+## English text
 
 ```bash
-# GPU预训练
-make pretrain-gpu          # 自动恢复或新训练
-make pretrain-gpu-resume   # 显式恢复
-make pretrain-gpu-fresh    # 从新checkpoint开始
+# GPUEnglish texttraining
+make pretrain-gpu          # English textrecoverEnglish texttraining
+make pretrain-gpu-resume   # English textrecover
+make pretrain-gpu-fresh    # English textcheckpointstart
 
-# CPU预训练
-make pretrain              # 也支持checkpoint恢复
+# CPUEnglish texttraining
+make pretrain              # English textsupportcheckpointrecover
 
-# 查看所有预训练相关命令
+# English texttrainingEnglish text
 make help | grep pretrain
 
-# 查看logs
-make logs                  # 显示所有日志
-make logs-tail             # 跟踪日志
+# English textlogs
+make logs                  # English textlog
+make logs-tail             # English textlog
 ```
 
-## 后续改进
+## English text
 
-- [ ] 支持多个checkpoint版本管理
-- [ ] 添加checkpoint验证和校验和机制
-- [ ] 实现周期性自动保存
-- [ ] 添加checkpoint压缩功能
-- [ ] 支持分布式训练的checkpoint同步
-- [ ] 实现CUDA桥接与保存状态的集成
+- [ ] supportEnglish textcheckpointEnglish textmanagement
+- [ ] English textcheckpointEnglish text
+- [ ] implementationEnglish textsave
+- [ ] English textcheckpointEnglish text
+- [ ] supportEnglish texttrainingEnglish textcheckpointEnglish textstep
+- [ ] implementationCUDAEnglish textsavestateEnglish text

@@ -1,56 +1,56 @@
-# NeurX Code 架构设计 - 快速参考
+# NeurX Code English text - quickEnglish text
 
-## 一句话总结
+## English text
 
-NeurX Code 采用 **"AI 决策 + 标准验证 + 快速执行"** 的分层架构，实现了很强的功能、跨平台支持和灵活性。
+NeurX Code English text **"AI English text + English text + quickEnglish text"** English text, implementationEnglish text, English textsupportEnglish text.
 
-## 核心三层架构
+## English text
 
-### 第 1 层：AI 决策 (模型适配层)
+### English text 1 English text: AI English text (modelEnglish text)
 
 ```
-任务: "Create a user authentication system"
+English text: "Create a user authentication system"
     ↓
-模型理解并规划
-    ├─ 项目结构
-    ├─ 安全考虑
-    ├─ 最佳实践
-    └─ 具体步骤
+modelEnglish text
+    ├─ English text
+    ├─ safetyEnglish text
+    ├─ English text
+    └─ English textstepEnglish text
     ↓
-输出: 标准化的工具调用 (JSON)
+output: English texttoolEnglish text (JSON)
 {
   "tool_name": "Write",
   "input": {"file_path": "auth.py", "content": "..."}
 }
 ```
 
-**为什么需要 AI 决策？**
-- 理解自然语言意图
-- 推理最佳方案
-- 考虑上下文和约束
-- 学习和改进
+**English textRequired AI English text?**
+- English textlanguageEnglish text
+- inferenceEnglish text
+- English text
+- English text
 
-### 第 2 层：安全验证 (Hook System)
+### English text 2 English text: safetyEnglish text (Hook System)
 
 ```
-工具调用 (JSON)
+toolEnglish text (JSON)
     ↓
-Hook 验证脚本
-    ├─ 路径遍历检查
-    ├─ 权限检查
-    ├─ 敏感信息检查
-    └─ 自定义规则
+Hook English text
+    ├─ pathEnglish text
+    ├─ English text
+    ├─ English textinformationEnglish text
+    └─ English text
     ↓
-决策: Allow / Deny / Ask User
+English text: Allow / Deny / Ask User
 ```
 
-**为什么需要 Hook？**
-- AI 不是完全可靠
-- 用户有不同的安全需求
-- 企业需要审批流程
-- 无需改源代码即可定制
+**English textRequired Hook?**
+- AI English text
+- English textsafetyEnglish text
+- English textRequiredEnglish textpipeline
+- English text
 
-**示例 Hook**：
+**example Hook**:
 ```bash
 # ~/.neurx/hooks/validate.sh
 if [[ "$file_path" == /etc/* ]]; then
@@ -58,248 +58,248 @@ if [[ "$file_path" == /etc/* ]]; then
 fi
 ```
 
-### 第 3 层：快速执行 (Node.js)
+### English text 3 English text: quickEnglish text (Node.js)
 
 ```
-执行工具调用
+English texttoolEnglish text
     ├─ fs.writeFileSync() ← Write
     ├─ execSync()         ← Bash
-    ├─ 字符串替换          ← Edit
-    └─ 其他操作
+    ├─ English text          ← Edit
+    └─ English text
     ↓
-返回结果
+English textresult
 ```
 
-**为什么用 Node.js？**
+**English text Node.js?**
 
-| 原因 | 说明 |
+| English text | explanation |
 |------|------|
-| **跨平台** | npm install 即可，无需编译 |
-| **快速开发** | 简单语法，包管理完善 |
-| **异步 I/O** | 高效处理文件操作 |
-| **无依赖** | 只需 Node.js 18+ |
+| **English text** | npm install English text, English textcompile |
+| **quickEnglish text** | English text, English textmanagementEnglish text |
+| **English textstep I/O** | English textfileEnglish text |
+| **English text** | English text Node.js 18+ |
 
-## 为什么不选择其他方案？
+## English text?
 
-### ❌ 完全本地模型 (Ollama/LLaMA)
-
-```
-用户 → 本地 LLaMA → 工具执行
-```
-
-**问题**：
-- 需要额外接入模型适配层
-- 需要 GPU（昂贵 + 复杂配置）
-- 每个用户下载 GB 级模型
-- 维护困难
-
-### ❌ C++ 实现
+### ❌ English textmodel (Ollama/LLaMA)
 
 ```
-用户 → 模型适配层 → C++ 工具执行
+English text → English text LLaMA → toolEnglish text
 ```
 
-**问题**：
-- 编译慢，部署复杂
-- 跨平台困难
-- 开发速度慢
-- 学习曲线陡峭
+**English text**:
+- RequiredEnglish textmodelEnglish text
+- Required GPU(English text + English textconfiguration)
+- English text GB English textmodel
+- English text
 
-### ✅ Node.js 实现 (外部参考实现)
-
-```
-用户 → 模型适配层 → Node.js 工具执行
-```
-
-**优点**：
-- ✅ 清晰的工具执行链路
-- ✅ 跨平台（npm install）
-- ✅ 快速部署和开发
-- ✅ 灵活的 Hook 系统
-- ✅ 丰富的 npm 生态
-
-## Tool Use 标准接口
+### ❌ C++ implementation
 
 ```
-为什么使用 Tool Use？
+English text → modelEnglish text → C++ toolEnglish text
 ```
 
-**原因 1: 可靠性**
+**English text**:
+- compileEnglish text, English text
+- English text
+- English text
+- English text
+
+### ✅ Node.js implementation (English textimplementation)
+
 ```
-方案 A - 自然语言
+English text → modelEnglish text → Node.js toolEnglish text
+```
+
+**English text**:
+- ✅ English texttoolEnglish text
+- ✅ English text(npm install)
+- ✅ quickEnglish text
+- ✅ English text Hook system
+- ✅ English text npm English text
+
+## Tool Use English text
+
+```
+English textuse Tool Use?
+```
+
+**English text 1: English text**
+```
+English text A - English textlanguage
 Agent: "I'll create app.py with..."
-App: 需要解析自然语言 ❌ 容易出错
+App: RequiredEnglish textlanguage ❌ English text
 
-方案 B - Tool Use (JSON)
+English text B - Tool Use (JSON)
 {
   "tool_name": "Write",
   "input": {"file_path": "app.py", "content": "..."}
 }
-App: 直接执行 ✅ 可靠、可验证
+App: English text ✅ English text, English text
 ```
 
-**原因 2: 标准化**
+**English text 2: English text**
 ```
-各种主流模型提供方都支持 Tool Use
-任何 LLM 都能用同样的工具
-未来可以轻松切换模型提供方
-```
-
-**原因 3: 安全性**
-```
-Tool Use 生成的是结构化 JSON
-可以在执行前进行验证
-比自由格式的自然语言更容易检查
+English textmainEnglish textmodelEnglish textsupport Tool Use
+English text LLM English texttool
+English textAllowedEnglish textmodelEnglish text
 ```
 
-## Hook 系统的妙处
+**English text 3: safetyEnglish text**
+```
+Tool Use generateEnglish text JSON
+AllowedEnglish text
+English textlanguageEnglish text
+```
 
-### 为什么不硬编码验证规则？
+## Hook systemEnglish text
+
+### English text?
 
 ```
-❌ 硬编码版本
-if (path.startsWith('/etc')) deny();  // 在源代码里
-问题: 用户无法定制
+❌ English text
+if (path.startsWith('/etc')) deny();  // English text
+English text: English text
 
-✅ Hook 版本
+✅ Hook English text
 # ~/.neurx/hooks/validate.sh
 if [[ $path == /etc/* ]]; then exit 2; fi
-优点: 用户可以改，无需改源代码
+English text: English textAllowedEnglish text, English text
 ```
 
-### Hook 的强大之处
+### Hook English text
 
 ```
-基础功能: 验证文件操作
+English text: English textfileEnglish text
           ↓
-扩展应用:
-├─ 企业审批流程
-├─ 合规性检查
-├─ 审计日志
-├─ 用户通知
-└─ 自定义规则
+extensionEnglish text:
+├─ English textpipeline
+├─ English text
+├─ English textlog
+├─ English text
+└─ English text
 ```
 
-**企业场景**：
+**English text**:
 ```
-Startup A 的规则: 禁止 /etc
-Startup B 的规则: 禁止 database/ 的修改 + 需要审批
-企业 C 的规则: 需要同意隐私协议
+Startup A English text: English text /etc
+Startup B English text: English text database/ English text + RequiredEnglish text
+English text C English text: RequiredEnglish textprivacyEnglish text
 
-所有都用同一个执行框架，但规则完全不同
-这就是 Hook 系统的妙处！
+English textframework, English text
+English text Hook systemEnglish text!
 ```
 
-## 技术选择对比
+## English text
 
-| 方面 | Node.js | Python | Go | Rust |
+| English text | Node.js | Python | Go | Rust |
 |------|---------|--------|----|----|
-| 跨平台 | ✅✅✅ | ✅✅ | ✅✅ | ✅ |
-| 异步 I/O | ✅✅✅ | ❌ | ✅✅ | ✅✅ |
-| 包管理 | ✅✅✅ | ✅✅ | ✅ | ✅ |
-| 开发速度 | ✅✅✅ | ✅✅✅ | ✅ | ❌ |
-| 部署复杂度 | ✅✅✅ | ✅✅ | ✅ | ❌ |
-| 文件操作 | ✅✅ | ✅✅✅ | ✅✅ | ✅✅ |
-| CLI 成熟度 | ✅✅✅ | ✅✅ | ✅✅ | ✅ |
+| English text | ✅✅✅ | ✅✅ | ✅✅ | ✅ |
+| English textstep I/O | ✅✅✅ | ❌ | ✅✅ | ✅✅ |
+| English textmanagement | ✅✅✅ | ✅✅ | ✅ | ✅ |
+| English text | ✅✅✅ | ✅✅✅ | ✅ | ❌ |
+| English text | ✅✅✅ | ✅✅ | ✅ | ❌ |
+| fileEnglish text | ✅✅ | ✅✅✅ | ✅✅ | ✅✅ |
+| CLI English text | ✅✅✅ | ✅✅ | ✅✅ | ✅ |
 
-**Node.js 总分**：10/10 for 该类工具用例
+**Node.js English text**: 10/10 for English texttoolEnglish text
 
-## 该类工具的优势来自
+## English texttoolEnglish text
 
 ```
-最强大的模型能力
+English textmodelEnglish text
           +
-最佳的跨平台支持 (npm)
+English textsupport (npm)
           +
-最高的灵活性 (Hook System)
+English text (Hook System)
           =
-最好用的 AI 编程工具 ✨
+English text AI English texttool ✨
 ```
 
-## 与 NeurX Code 的对比
+## English text NeurX Code English text
 
 ```
-外部参考实现:
-模型适配层 → Write 工具
+English textimplementation:
+modelEnglish text → Write tool
     ↓
    Node.js
     ↓
-  CLI 界面
+  CLI English text
 
 NeurX Code:
-模型适配层 → WriteTool (C++)
+modelEnglish text → WriteTool (C++)
     ↓
    Qt GUI
     ↓
   GraphQL UI
 
 
-外部参考实现优点:
-✅ 快速部署（npm）
-✅ 跨平台无缝
-✅ Hook 系统灵活
-✅ 社区生态丰富
+English textimplementationEnglish text:
+✅ quickEnglish text(npm)
+✅ English text
+✅ Hook systemEnglish text
+✅ English text
 
-NeurX Code 优点:
-✅ 性能更高
-✅ GUI 更友好
-✅ 与本地编辑器集成
-✅ 功能更丰富
+NeurX Code English text:
+✅ English text
+✅ GUI English text
+✅ English text
+✅ English text
 ```
 
-## 设计哲学
+## English text
 
 ```
-外部参考实现的设计哲学:
+English textimplementationEnglish text:
 
-1. 职责分离
-   模型做决策 (适配层)
-   脚本做验证 (Hook System)
-   Node.js 做执行 (工具)
+1. English text
+   modelEnglish text (English text)
+   English text (Hook System)
+   Node.js English text (tool)
 
-2. 最小化依赖
-   只需 Node.js 18+
-   无需特殊库或驱动
+2. English text
+   English text Node.js 18+
+   English text
 
-3. 最大化灵活性
-   用户通过 Hook 自定义规则
-   无需修改源代码
+3. English text
+   English text Hook English text
+   English text
 
-4. 开放的生态
-   标准的 Tool Use 接口
-   社区可以扩展
-   其他应用可以复用
+4. English text
+   English text Tool Use English text
+   English textAllowedextension
+   English textAllowedEnglish text
 ```
 
-## 关键设计决策
+## English text
 
-| 决策 | 选择 | 原因 |
+| English text | English text | English text |
 |------|------|------|
-| AI 来源 | 模型适配层 | 可替换、可验证 |
-| 接口标准 | Tool Use (JSON) | 可靠、可验证、标准化 |
-| 验证方式 | Hook System | 灵活、用户控制 |
-| 执行环境 | Node.js | 跨平台、快速、简单 |
-| 分发方式 | npm | 零配置、自动更新 |
-| 用户界面 | CLI | 开发者友好、快速 |
+| AI Source | modelEnglish text | English text, English text |
+| English text | Tool Use (JSON) | English text, English text, English text |
+| English text | Hook System | English text, English text |
+| English text | Node.js | English text, quick, English text |
+| English text | npm | English textconfiguration, English text |
+| English text | CLI | English text, quick |
 
-## 总结
+## English text
 
-这种架构不是偶然的选择，而是精心设计的结果：
+English text, English textresult:
 
 ```
-✨ 强大的 AI 决策
-✨ 灵活的验证系统
-✨ 高效的执行环境
-✨ 简洁的部署流程
+✨ English text AI English text
+✨ English textsystem
+✨ English text
+✨ English textpipeline
 
-= 最实用的 AI 编程工具
+= English text AI English texttool
 ```
 
-与其他方案相比，这种架构在**功能、易用性、灵活性和可维护性**之间达到了很好的平衡。
+English text, English text**English text, English text, English text**English text.
 
 ---
 
-**相关文档**：
-- 📘 [完整设计分析](./WHY_NEURX_CODE_ARCHITECTURE.md)
-- 📗 [文件创建详解](./NEURX_FILE_CREATION_EXPLAINED.md)
-- 📙 [源代码导航](./NEURX_CODE_SOURCE_MAP.md)
+**English text**:
+- 📘 [completeEnglish text](./WHY_NEURX_CODE_ARCHITECTURE.md)
+- 📗 [fileEnglish text](./NEURX_FILE_CREATION_EXPLAINED.md)
+- 📙 [English text](./NEURX_CODE_SOURCE_MAP.md)

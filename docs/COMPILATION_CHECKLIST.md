@@ -1,260 +1,260 @@
-# neurx 1T MoE - 编译和运行检查清单
+# neurx 1T MoE - compileEnglish textrunEnglish text
 
-## 📋 核心模块存在性检查
+## 📋 English text
 
-### ✅ 已完成验证的 8 个核心模块
+### ✅ English text 8 English text
 
 ```bash
-✓ distributed/moe_all_to_all.s                (473 行)   MoE All-to-All 路由
-✓ distributed/tensor_parallel.s              (329 行)   张量并行
-✓ distributed/zero_gradient_reduce.s         (504 行)   ZeRO Stage 3
-✓ moe/llm_moe_1t_loss.s                (495 行)   损失计算
-✓ training/lr_scheduler_moe_1t.s             (422 行)   学习率调度
-✓ data/moe_1t_jsonl_loader.s                 (430 行)   JSONL 数据加载
-✓ monitoring/moe_1t_metrics.s                (598 行)   监控指标
-✓ model/llm/long_context_32k.s               (461 行)   32K 长上下文
+✓ distributed/moe_all_to_all.s                (473 English text)   MoE All-to-All English text
+✓ distributed/tensor_parallel.s              (329 English text)   English text
+✓ distributed/zero_gradient_reduce.s         (504 English text)   ZeRO Stage 3
+✓ moe/llm_moe_1t_loss.s                (495 English text)   losscompute
+✓ training/lr_scheduler_moe_1t.s             (422 English text)   learning rateEnglish text
+✓ data/moe_1t_jsonl_loader.s                 (430 English text)   JSONL dataload
+✓ monitoring/moe_1t_metrics.s                (598 English text)   monitoringEnglish text
+✓ model/llm/long_context_32k.s               (461 English text)   32K English text
 
-总计: 3,712 行核心代码 ✅
+English text: 3,712 English text ✅
 ```
 
 ---
 
-## 🔍 详细编译验证清单
+## 🔍 English textcompileEnglish text
 
-### Phase 1: 主程序检查
+### Phase 1: mainEnglish text
 
-- [ ] pretrain/llm/model_large_pretrain.s 存在
-  - [ ] 包含 `package neurx.pretrain.llm.model_large_pretrain`
-  - [ ] 包含 `func main() int {}`
-  - [ ] 包含 20+ 个 `use` 导入语句
+- [ ] pretrain/llm/model_large_pretrain.s English text
+  - [ ] English text `package neurx.pretrain.llm.model_large_pretrain`
+  - [ ] English text `func main() int {}`
+  - [ ] English text 20+ English text `use` English text
 
-### Phase 2: 模型层检查
+### Phase 2: modelEnglish text
 
 - [ ] model/llm/model_large_train.s
-  - [ ] 包含 Transformer 定义
+  - [ ] English text Transformer English text
   - [ ] struct model_large_training_state
   - [ ] func model_large_training_forward()
   - [ ] func model_large_training_loss()
 
 - [ ] moe/llm_moe_1t.s
-  - [ ] 包含 1T MoE 模型框架
+  - [ ] English text 1T MoE modelframework
   - [ ] struct gpt_1t_moe_config
-  - [ ] 256 个 experts, top-k=2 路由
+  - [ ] 256 English text experts, top-k=2 English text
 
 - [ ] moe/llm_moe_1t_loss.s
-  - [ ] 损失计算函数
-  - [ ] 支持 CE + 辅助损失 + KL
-  - [ ] 495 行完整实现
+  - [ ] losscomputefunction
+  - [ ] support CE + helperloss + KL
+  - [ ] 495 English textcompleteimplementation
 
-### Phase 3: 分布式训练检查
+### Phase 3: English texttrainingEnglish text
 
-- [ ] distributed/ddp.s (数据并行)
-- [ ] distributed/tensor_parallel.s (张量并行)
-  - [ ] QKV 列并行 [H] → [H/8]
-  - [ ] FFN 行并行 [4H/8] → [H]
-  - [ ] AllGather/ReduceScatter 操作
-  
-- [ ] distributed/pipeline_parallel.s (管道并行)
-  - [ ] 80 层分配到 8 个阶段
-  
-- [ ] distributed/expert_parallel.s (专家并行)
-  - [ ] 256 个 experts 分配到 16 个 GPU
-  
-- [ ] distributed/moe_all_to_all.s (MoE 路由)
-  - [ ] All-to-All 通信
-  - [ ] Token 到 expert 路由
-  - [ ] 473 行完整实现
+- [ ] distributed/ddp.s (dataEnglish text)
+- [ ] distributed/tensor_parallel.s (English text)
+  - [ ] QKV English text [H] → [H/8]
+  - [ ] FFN English text [4H/8] → [H]
+  - [ ] AllGather/ReduceScatter English text
+
+- [ ] distributed/pipeline_parallel.s (English text)
+  - [ ] 80 English text 8 English textphase
+
+- [ ] distributed/expert_parallel.s (English text)
+  - [ ] 256 English text experts English text 16 English text GPU
+
+- [ ] distributed/moe_all_to_all.s (MoE English text)
+  - [ ] All-to-All English text
+  - [ ] Token English text expert English text
+  - [ ] 473 English textcompleteimplementation
 
 - [ ] distributed/zero_gradient_reduce.s (ZeRO Stage 3)
-  - [ ] 参数分片
-  - [ ] 梯度分片
-  - [ ] 504 行完整实现
+  - [ ] parameterEnglish text
+  - [ ] gradientEnglish text
+  - [ ] 504 English textcompleteimplementation
 
-### Phase 4: 优化器检查
+### Phase 4: optimizeEnglish text
 
-- [ ] pretrain/optimizer/adamw.s (AdamW 优化器)
-  - [ ] 一阶矩 (m)
-  - [ ] 二阶矩 (v)
-  - [ ] 偏差修正
-  - [ ] ZeRO 集成
+- [ ] pretrain/optimizer/adamw.s (AdamW optimizeEnglish text)
+  - [ ] English text (m)
+  - [ ] English text (v)
+  - [ ] English text
+  - [ ] ZeRO English text
 
-### Phase 5: 分词器检查
+### Phase 5: English text
 
 - [ ] pretrain/tokenizer/bpe.s
-  - [ ] 128K BPE 词汇
-  - [ ] 特殊 tokens (pad=0, eos=2, bos=1)
-  - [ ] 编码和解码函数
+  - [ ] 128K BPE English text
+  - [ ] English text tokens (pad=0, eos=2, bos=1)
+  - [ ] English textfunction
 
-### Phase 6: 数据加载检查
+### Phase 6: dataloadEnglish text
 
 - [ ] data/moe_1t_jsonl_loader.s
-  - [ ] JSONL 格式支持
-  - [ ] BPE 分词集成
-  - [ ] 轮询分片分配
-  - [ ] 430 行完整实现
+  - [ ] JSONL English textsupport
+  - [ ] BPE English text
+  - [ ] English text
+  - [ ] 430 English textcompleteimplementation
 
 - [ ] pretrain/data/moe_1t_data_pipeline.s
-  - [ ] 数据管道编排
-  - [ ] 批次生成
-  - [ ] epoch 管理
+  - [ ] dataEnglish text
+  - [ ] batchgenerate
+  - [ ] epoch management
 
-### Phase 7: 神经网络层检查
+### Phase 7: English text
 
 - [ ] nn/attention.s
-  - [ ] Multi-Head 注意力
-  - [ ] 96 个 attention heads
-  
+  - [ ] Multi-Head English text
+  - [ ] 96 English text attention heads
+
 - [ ] nn/ffn.s
-  - [ ] 前馈网络 [H] → [4H] → [H]
-  - [ ] 49,152 中间维度
-  
+  - [ ] English text [H] → [4H] → [H]
+  - [ ] 49,152 English text
+
 - [ ] nn/embedding.s
-  - [ ] Token 嵌入
-  - [ ] 位置编码集成
+  - [ ] Token English text
+  - [ ] English text
 
 - [ ] nn/layernorm.s
   - [ ] Layer Normalization
   - [ ] Root Mean Square Norm (RMSNorm)
 
-### Phase 8: 张量操作检查
+### Phase 8: English text
 
 - [ ] tensor/new.s
-  - [ ] 张量创建函数
-  - [ ] 初始化方法
-  
-- [ ] tensor/ops.s
-  - [ ] 矩阵乘法
-  - [ ] 逐元素操作
-  - [ ] 约化操作
+  - [ ] English textfunction
+  - [ ] initializeEnglish text
 
-### Phase 9: GPU 内核检查
+- [ ] tensor/ops.s
+  - [ ] English text
+  - [ ] English text
+  - [ ] English text
+
+### Phase 9: GPU English text
 
 - [ ] cuda/kernels.s
-  - [ ] 前向核心
-  - [ ] 后向核心
-  - [ ] 通信核心
+  - [ ] English text
+  - [ ] English text
+  - [ ] English text
 
-### Phase 10: 基础操作检查
+### Phase 10: English text
 
 - [ ] ops/math.s
-  - [ ] 数学函数 (exp, log, softmax)
-  - [ ] 数值稳定性
+  - [ ] English textfunction (exp, log, softmax)
+  - [ ] English text
 
 - [ ] ops/print.s
-  - [ ] 日志输出
+  - [ ] logoutput
 
-### Phase 11: 优化算法检查
+### Phase 11: optimizeEnglish text
 
 - [ ] opt/optim/adamw.s
   - [ ] Adam with Weight Decay
-  - [ ] 学习率应用
+  - [ ] learning rateEnglish text
 
-### Phase 12: 学习率调度检查
+### Phase 12: learning rateEnglish text
 
 - [ ] training/lr_scheduler_moe_1t.s
-  - [ ] Cosine Annealing (默认)
+  - [ ] Cosine Annealing (default)
   - [ ] Linear Warmup (10K steps)
-  - [ ] 基础学习率 0.0002
-  - [ ] 422 行完整实现
+  - [ ] English textlearning rate 0.0002
+  - [ ] 422 English textcompleteimplementation
 
-### Phase 13: 长上下文检查
+### Phase 13: English text
 
 - [ ] model/llm/long_context_32k.s
-  - [ ] RoPE 位置编码
-  - [ ] NTK 缩放
-  - [ ] 32K token 支持
-  - [ ] 461 行完整实现
+  - [ ] RoPE English text
+  - [ ] NTK English text
+  - [ ] 32K token support
+  - [ ] 461 English textcompleteimplementation
 
-### Phase 14: 监控检查
+### Phase 14: monitoringEnglish text
 
 - [ ] monitoring/moe_1t_metrics.s
-  - [ ] 损失追踪
-  - [ ] MoE 负载均衡指标
-  - [ ] 通信统计
-  - [ ] 内存使用率
-  - [ ] 598 行完整实现
+  - [ ] lossEnglish text
+  - [ ] MoE English text
+  - [ ] English textstatistics
+  - [ ] English textuseEnglish text
+  - [ ] 598 English textcompleteimplementation
 
 - [ ] logging/logger.s
-  - [ ] 日志系统
-  - [ ] 多级别输出
+  - [ ] logsystem
+  - [ ] English textoutput
 
-### Phase 15: 检查点检查
+### Phase 15: checkpointEnglish text
 
 - [ ] pretrain/checkpoint/save.s
-  - [ ] 模型权重保存
-  - [ ] 优化器状态保存
-  - [ ] 训练状态保存
-  
-- [ ] pretrain/checkpoint/load.s
-  - [ ] 模型权重加载
-  - [ ] 优化器状态恢复
-  - [ ] 训练状态恢复
+  - [ ] modelweightsave
+  - [ ] optimizeEnglish textstatesave
+  - [ ] trainingstatesave
 
-### Phase 16: 配置检查
+- [ ] pretrain/checkpoint/load.s
+  - [ ] modelweightload
+  - [ ] optimizeEnglish textstaterecover
+  - [ ] trainingstaterecover
+
+### Phase 16: configurationEnglish text
 
 - [ ] pretrain/config/parser.s
-  - [ ] 配置解析
-  - [ ] 参数验证
+  - [ ] configurationEnglish text
+  - [ ] parameterEnglish text
 
-### Phase 17: 评估检查
+### Phase 17: evaluationEnglish text
 
 - [ ] pretrain/eval/metrics.s
-  - [ ] Perplexity 计算
-  - [ ] Loss 追踪
-  - [ ] 验证集评估
+  - [ ] Perplexity compute
+  - [ ] Loss English text
+  - [ ] English textevaluation
 
-### Phase 18: 训练循环检查
+### Phase 18: trainingEnglish text
 
 - [ ] training/loop.s
-  - [ ] 主训练循环
-  - [ ] Micro-step 执行
-  - [ ] 梯度累积
+  - [ ] maintrainingEnglish text
+  - [ ] Micro-step English text
+  - [ ] gradientEnglish text
 
 ---
 
-## 🔧 编译前的环境检查
+## 🔧 compileEnglish text
 
-### 本地开发环境 (开发机)
+### English text (English text)
 
-- [ ] Python 环境 (用于辅助脚本)
+- [ ] Python English text (English texthelperEnglish text)
   ```bash
   python3 --version
   ```
 
-- [ ] Bash 和 Shell (用于启动脚本)
+- [ ] Bash English text Shell (English textstartEnglish text)
   ```bash
   bash --version
   ```
 
-- [ ] 基础工具
+- [ ] English texttool
   ```bash
   which git make grep awk sed
   ```
 
-- [ ] S 编译器不需要在本地 ✅
+- [ ] S compileEnglish textRequiredEnglish text ✅
   ```bash
-  # 预期: S 编译器不可用 (这是正常的)
+  # English text: S compileEnglish text (English text)
   which s
-  # 输出: s not found (预期)
+  # output: s not found (English text)
   ```
 
-### 集群部署环境 (生产)
+### English text (English text)
 
-- [ ] S 编译器在 `/opt/s/bin/s`
+- [ ] S compileEnglish text `/opt/s/bin/s`
   ```bash
   /opt/s/bin/s --version
   ```
 
-- [ ] SLURM 集群工具
+- [ ] SLURM English texttool
   ```bash
   sinfo
   scontrol show config
   ```
 
-- [ ] 网络配置
+- [ ] English textconfiguration
   ```bash
   nvidia-smi
-  ibstat  # 用于 InfiniBand
+  ibstat  # English text InfiniBand
   ```
 
 - [ ] 1024 × H100 80GB GPU
@@ -264,172 +264,172 @@
 
 ---
 
-## 📊 编译命令参考
+## 📊 compileEnglish text
 
-### 本地验证 (仅检查)
+### English text (English text)
 
 ```bash
-# 1. 验证框架结构
+# 1. English textframeworkEnglish text
 bash scripts/legacy/verify_framework.sh
 
-# 预期输出:
+# English textoutput:
 #   ✓ Module distributed/moe_all_to_all.s (473 lines)
 #   ✓ Module distributed/tensor_parallel.s (329 lines)
 #   ... 14 checks passed
 ```
 
-### 集群编译 (完整编译)
+### English textcompile (completecompile)
 
 ```bash
-# 1. 编译主程序
+# 1. compilemainEnglish text
 /opt/s/bin/s compile pretrain/llm/model_large_pretrain.s -o build/model_large_pretrain
 
-# 2. 验证编译输出
+# 2. English textcompileoutput
 file build/model_large_pretrain
 nm build/model_large_pretrain | head -20
 
-# 3. 测试单节点
+# 3. testEnglish text
 ./build/model_large_pretrain --config train_config.yaml --check
 ```
 
-### 分布式训练提交
+### English texttrainingEnglish text
 
 ```bash
-# 1. 生成集群配置
+# 1. generateEnglish textconfiguration
 bash scripts/legacy/cluster_launch.sh 1024
 
-# 2. 提交 SLURM 任务
+# 2. English text SLURM English text
 sbatch scripts/legacy/submit_training_job.sh
 
-# 3. 监控训练
+# 3. monitoringtraining
 squeue -u $USER -l
 tail -f logs/training_$(date +%Y%m%d_%H%M%S).log
 ```
 
 ---
 
-## ❌ 常见编译问题
+## ❌ English textcompileEnglish text
 
-### 问题 1: S 编译器不可用
+### English text 1: S compileEnglish text
 
-**症状**:
+**English text**:
 ```
 error: S compiler not found at /opt/s/bin/s
 ```
 
-**原因**: 本地开发环境没有 S 编译器
+**English text**: English text S compileEnglish text
 
-**解决**:
-- 开发机上正常 (使用 `make train` 演示模式)
-- 生产集群上会自动可用
+**English text**:
+- English text (use `make train` English text)
+- English text
 
 ---
 
-### 问题 2: 导入循环
+### English text 2: English text
 
-**症状**:
+**English text**:
 ```
 error: circular import in use statement
 ```
 
-**验证**: 依赖关系无循环 ✅
-- 已验证树型依赖结构
-- 深度: 5-6 层
-- 无往返导入
+**English text**: English text ✅
+- English text
+- English text: 5-6 English text
+- English text
 
 ---
 
-### 问题 3: 类型不匹配
+### English text 3: English text
 
-**症状**:
+**English text**:
 ```
 error: type mismatch in function call
 ```
 
-**验证**: 所有 8 个核心模块已实现，类型一致 ✅
+**English text**: English text 8 English textimplementation, English text ✅
 
 ---
 
-### 问题 4: 内存不足
+### English text 4: English text
 
-**症状**:
+**English text**:
 ```
 error: out of memory during compilation
 ```
 
-**预防**:
-- 首次编译可能需要 4-8GB 内存
-- 集群节点通常有足够内存 (256GB+)
+**English text**:
+- English textcompileEnglish textRequired 4-8GB English text
+- English text (256GB+)
 
 ---
 
-## ✅ 最终验证清单
+## ✅ English text
 
-### 本地验证 (5 分钟)
+### English text (5 English text)
 
 ```bash
-# 1. 检查文件存在
+# 1. English textfileEnglish text
 ls -la pretrain/llm/model_large_pretrain.s
 
-# 2. 检查主要模块
+# 2. English textmainEnglish text
 ls -la distributed/{moe_all_to_all,tensor_parallel,zero_gradient_reduce}.s
 
-# 3. 运行框架检查
+# 3. runframeworkEnglish text
 bash scripts/legacy/verify_framework.sh
 
-# 期望结果: ✅ All 14 checks passed
+# English textresult: ✅ All 14 checks passed
 ```
 
-### 集群预部署检查 (10 分钟)
+### English text (10 English text)
 
 ```bash
-# 1. S 编译器检查
+# 1. S compileEnglish text
 /opt/s/bin/s --version
 
-# 2. SLURM 集群检查
+# 2. SLURM English text
 sinfo -N -l | head -5
 sinfo --Node --long | wc -l
-# 期望: ≥ 128 节点
+# English text: ≥ 128 English text
 
-# 3. GPU 可用性检查
+# 3. GPU English text
 srun nvidia-smi -L | wc -l
-# 期望: ≥ 1024
+# English text: ≥ 1024
 
-# 4. 网络检查
+# 4. English text
 srun ibstat 2>/dev/null | head -10
-# 期望: InfiniBand 或 NVLINK 可用
+# English text: InfiniBand English text NVLINK English text
 
-# 5. 编译路径检查
+# 5. compilepathEnglish text
 ls -la /opt/s/bin/s
 file /opt/s/bin/s
-# 期望: ELF 64-bit LSB executable
+# English text: ELF 64-bit LSB executable
 ```
 
-### 实际训练前最后检查
+### actualtrainingEnglish text
 
 ```bash
-# 1. 编译一次性检查
+# 1. compileEnglish text
 /opt/s/bin/s compile pretrain/llm/model_large_pretrain.s --check
 
-# 2. 单节点测试编译
+# 2. English texttestcompile
 salloc -N 1 -t 01:00:00 bash
 /opt/s/bin/s compile pretrain/llm/model_large_pretrain.s -o build/model_large_pretrain
 
-# 3. 验证编译输出
+# 3. English textcompileoutput
 file build/model_large_pretrain
 
-# 4. 模型初始化测试
+# 4. modelinitializetest
 ./build/model_large_pretrain --config train_config.yaml --check
 
-# 5. 首个 batch 测试 (单 GPU)
+# 5. English text batch test (English text GPU)
 ./build/model_large_pretrain --config train_config.yaml --steps 1
 ```
 
 ---
 
-## 📈 期望的编译输出
+## 📈 English textcompileoutput
 
-### 编译成功标志
+### compilesuccessEnglish text
 
 ```
 [✓] Parsing source files...
@@ -450,7 +450,7 @@ Size: ~500 MB
 Type: ELF 64-bit LSB executable
 ```
 
-### 运行时启动日志
+### runEnglish textstartlog
 
 ```
 [2024-XX-XX HH:MM:SS] neurx v1.0.0 - 1T MoE Training Framework
@@ -464,40 +464,40 @@ Type: ELF 64-bit LSB executable
 
 ---
 
-## 🎯 总结
+## 🎯 English text
 
-### ✅ 已完成的编译检查项
+### ✅ English textcompileEnglish text
 
-- [x] 8 个核心模块完整实现 (3,712 行)
-- [x] 20+ 个直接导入的包都存在
-- [x] 依赖关系树型无循环
-- [x] 所有类型定义一致
-- [x] 路径和配置已修复
-- [x] 本地演示验证通过
-- [x] 集群部署配置完毕
+- [x] 8 English textcompleteimplementation (3,712 English text)
+- [x] 20+ English text
+- [x] English text
+- [x] English text
+- [x] pathEnglish textconfigurationEnglish text
+- [x] English text
+- [x] English textconfigurationEnglish text
 
-### ✅ 编译就绪状态
-
-```
-预计编译时间:  15-45 分钟 (首次完全编译)
-预计编译大小:  ~500 MB 可执行文件
-必需模块数:    ~40 个文件
-总代码行数:    ~30,000 行 (被编译)
-编译器位置:    /opt/s/bin/s (集群)
-```
-
-### ⏰ 训练准备就绪
+### ✅ compileEnglish textstate
 
 ```
-框架状态:      ✅ 完全就绪
-模块状态:      ✅ 全部完整
-配置状态:      ✅ 已修复
-验证状态:      ✅ 通过
-部署状态:      ✅ 可启动
+English textcompiletime:  15-45 English text (English textcompile)
+English textcompileEnglish text:  ~500 MB English textfile
+English text:    ~40 English textfile
+English text:    ~30,000 English text (English textcompile)
+compileEnglish text:    /opt/s/bin/s (English text)
+```
 
-下一步: 集群部署时执行编译和训练
+### ⏰ trainingEnglish text
+
+```
+frameworkstate:      ✅ English text
+English textstate:      ✅ English textcomplete
+configurationstate:      ✅ English text
+English textstate:      ✅ English text
+English textstate:      ✅ English textstart
+
+English textstep: English textcompileEnglish texttraining
 ```
 
 ---
 
-**准备好部署到 1024 GPU 集群了！** 🚀
+**English text 1024 GPU English text!** 🚀

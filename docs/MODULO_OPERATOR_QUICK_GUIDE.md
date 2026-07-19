@@ -1,29 +1,29 @@
-# S 语言 % 操作符 - 快速使用指南
+# S language % English text - quickuseEnglish text
 
-## 基本用法
+## English text
 
-### 简单模运算
+### English text
 ```s
 let result = 10 % 3      // result = 1
 let remainder = 20 % 6   // remainder = 2
 let zero = 7 % 7         // zero = 0
 ```
 
-### 检查数字是否为偶数/奇数
+### English text/English text
 ```s
 let num = 15
 if num % 2 == 0 {
-    println("偶数")
+    println("English text")
 } else {
-    println("奇数")
+    println("English text")
 }
 ```
 
-### 循环中使用（每 N 步执行）
+### English textuse(English text N stepEnglish text)
 ```s
 let step = 0
 for step < 500 {
-    // 每 50 步打印进度
+    // English text 50 stepEnglish text
     let step_mod = (step + 1) % 50
     if step_mod == 0 || step == 0 {
         println("Step: " + int_to_string(step + 1))
@@ -32,67 +32,67 @@ for step < 500 {
 }
 ```
 
-### 数字转字符串（提取各位数字）
+### English text(English text)
 ```s
 func int_to_string(x int) string {
     let result = ""
     let temp = x
     for temp > 0 {
-        let digit = temp % 10          // 获取个位数字
+        let digit = temp % 10          // English text
         result = string_char(digit + 48) + result
-        temp = temp / 10                // 去掉个位
+        temp = temp / 10                // English text
     }
     return result
 }
 ```
 
-### 循环索引
+### English text
 ```s
-// 在 10 个元素的数组中循环
+// English text 10 English text
 let idx = current_idx % 10
 
-// 二维数组访问
+// English text
 let row = index / width
 let col = index % width
 ```
 
-## 注意事项
+## English text
 
-### ✅ 推荐写法
+### ✅ recommendedEnglish text
 ```s
-// 使用中间变量存储结果
+// useEnglish textresult
 let mod_result = value % divisor
 if mod_result == target_value {
     // ...
 }
 ```
 
-### ❌ 避免写法
+### ❌ English text
 ```s
-// 在复杂表达式中直接使用可能有问题
+// English textuseEnglish text
 if (a + b) % c == 0 && condition {
-    // 可能导致解析错误
+    // English texterror
 }
 
-// 推荐改为：
+// recommendedEnglish text:
 let mod_result = (a + b) % c
 if mod_result == 0 && condition {
     // ...
 }
 ```
 
-## 实际应用示例
+## actualEnglish textexample
 
-### 示例 1: 步长进度监控
+### example 1: stepEnglish textmonitoring
 ```s
 let epoch = 0
 for epoch < 10 {
     let step = 0
     for step < 100 {
-        // 每 10 步记录一次
+        // English text 10 stepEnglish text
         let step_mod = (step + 1) % 10
         if step_mod == 0 {
-            println("Epoch " + int_to_string(epoch) + 
+            println("Epoch " + int_to_string(epoch) +
                    " Step " + int_to_string(step + 1))
         }
         step = step + 1
@@ -101,7 +101,7 @@ for epoch < 10 {
 }
 ```
 
-### 示例 2: 循环缓冲区
+### example 2: English text
 ```s
 type RingBuffer struct {
     data [100]int
@@ -111,11 +111,11 @@ type RingBuffer struct {
 
 func append_to_buffer(buf RingBuffer, value int) {
     buf.data[buf.pos] = value
-    buf.pos = (buf.pos + 1) % buf.size    // 环形索引
+    buf.pos = (buf.pos + 1) % buf.size    // English text
 }
 ```
 
-### 示例 3: 批处理
+### example 3: English text
 ```s
 let batch_size = 32
 let data_points = 1000
@@ -126,7 +126,7 @@ for batch * batch_size < data_points {
     for idx < batch_size {
         let data_idx = batch * batch_size + idx
         if data_idx < data_points {
-            // 处理数据点
+            // English textdataEnglish text
             let sample_id = data_idx % 100
         }
         idx = idx + 1
@@ -135,35 +135,35 @@ for batch * batch_size < data_points {
 }
 ```
 
-### 示例 4: 哈希分桶
+### example 4: English text
 ```s
 func hash_mod(value int, num_buckets int) int {
     return value % num_buckets
 }
 
-// 使用
-let bucket = hash_mod(my_value, 16)    // 分到 0-15 号桶
+// use
+let bucket = hash_mod(my_value, 16)    // English text 0-15 English text
 ```
 
-## 性能特点
+## English text
 
-- **操作速度**: 原生 % 比 modulo() 函数调用快
-- **编译时优化**: 编译器可能优化特殊情况
-  - `x % 2` 可能优化为按位与
-  - `x % 256` 可能优化为低 8 位掩码
-- **内存效率**: 直接机器指令，无函数调用开销
+- **English text**: English text % English text modulo() functionEnglish text
+- **compileEnglish textoptimize**: compileEnglish textoptimizeEnglish text
+  - `x % 2` English textoptimizeEnglish text
+  - `x % 256` English textoptimizeEnglish text 8 English text
+- **English text**: English text, English textfunctionEnglish text
 
-## 兼容性
+## English text
 
-| 操作数类型 | 支持 | 说明 |
+| English text | support | explanation |
 |-----------|------|------|
-| int % int | ✅ | 完全支持 |
-| float % float | ❌ | 使用浮点版 modulo() |
-| int % float | ❌ | 转换为 int 后再运算 |
+| int % int | ✅ | English textsupport |
+| float % float | ❌ | useEnglish text modulo() |
+| int % float | ❌ | English text int English text |
 
-## 迁移指南（从旧的 modulo() 到新的 %）
+## migrationEnglish text(English text modulo() English text %)
 
-### 之前
+### English text
 ```s
 func modulo(a int, b int) int {
     result := a
@@ -176,38 +176,38 @@ func modulo(a int, b int) int {
 let targets[i] = modulo(i + step, vocab_size)
 ```
 
-### 现在
+### English text
 ```s
-// modulo() 函数已删除，直接使用 %
+// modulo() functionEnglish text, English textuse %
 let targets[i] = (i + step) % vocab_size
 ```
 
-## 故障排除
+## English text
 
-| 错误 | 原因 | 解决方案 |
+| error | English text | English text |
 |------|------|--------|
-| "expected expression, got %" | 语法上下文问题 | 使用中间变量 |
-| "modulo by zero" | 除数为 0 | 检查 divisor > 0 |
-| 类型不匹配 | 非整数操作数 | 转换为 int |
+| "expected expression, got %" | English text | useEnglish text |
+| "modulo by zero" | English text 0 | English text divisor > 0 |
+| English text | English text | English text int |
 
-## 编译和运行
+## compileEnglish textrun
 
 ```bash
-# 编译包含 % 的 S 程序
+# compileEnglish text % English text S English text
 /Users/feifei/train/s/bin/s myprogram.s build/myprogram.ir
 
-# 检查 IR 中是否有 MOD 指令
+# English text IR English text MOD English text
 grep MOD build/myprogram.ir
 
-# 生成二进制（需要在 S 源目录）
+# generateEnglish text(RequiredEnglish text S English textdirectory)
 cd /Users/feifei/train/s
 ./bin/s --emit-bin /path/to/myprogram.ir build/myprogram.bin
 ```
 
-## 总结
+## English text
 
-✅ 现在 S 语言完全支持原生 % 操作符
-✅ 比旧的 modulo() 函数更高效和优雅
-✅ 遵循 C 风格语言的标准约定
+✅ English text S languageEnglish textsupportEnglish text % English text
+✅ English text modulo() functionEnglish text
+✅ English text C English textlanguageEnglish text
 
-快乐编码！🚀
+English text!🚀

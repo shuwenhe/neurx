@@ -1,81 +1,81 @@
-# NeurX 多GPU分布式预训练系统
+# NeurX English textGPUEnglish texttrainingsystem
 
-## 系统架构
+## systemEnglish text
 
-本系统实现了完整的多GPU分布式预训练管道，包括三个核心模块：
+English textsystemimplementationEnglish textcompleteEnglish textGPUEnglish texttrainingEnglish text, English text:
 
-### 1. **分布式启动器** (`distributed_pretrain_launcher.s`)
-- **功能**: 初始化分布式环境，管理进程间通信
-- **核心组件**:
-  - `distributed_env`: 环境配置（WORLD_SIZE、RANK、LOCAL_RANK）
-  - `distributed_pretrain_launcher`: 主控制器
-  - 数据分片分配：每个rank只处理分配给它的切片
+### 1. **English textstartEnglish text** (`distributed_pretrain_launcher.s`)
+- **English text**: initializeEnglish text, managementEnglish text
+- **English text**:
+  - `distributed_env`: English textconfiguration(WORLD_SIZE, RANK, LOCAL_RANK)
+  - `distributed_pretrain_launcher`: mainEnglish text
+  - dataEnglish text: English textrankEnglish text
 
-**环境变量**:
+**English text**:
 ```bash
-WORLD_SIZE=4          # 总GPU数量
-RANK=0-3              # 当前进程rank
-LOCAL_RANK=0-3        # 本机GPU索引  
-MASTER_ADDR=localhost # 主节点地址
-MASTER_PORT=29500     # 通信端口
+WORLD_SIZE=4          # English textGPUcount
+RANK=0-3              # English textrank
+LOCAL_RANK=0-3        # English textGPUEnglish text
+MASTER_ADDR=localhost # mainEnglish text
+MASTER_PORT=29500     # English text
 ```
 
-### 2. **CUDA通信桥接** (`cuda_bridge.s`)
-- **功能**: 实现GPU间梯度同步
-- **核心操作**:
-  - `cuda_bridge_all_reduce_sum`: NCCL AllReduce同步梯度
-  - `cuda_bridge_reduce_scatter`: 内存高效的梯度分散
-  - `cuda_bridge_broadcast`: 主rank到其他rank的广播
+### 2. **CUDAEnglish text** (`cuda_bridge.s`)
+- **English text**: implementationGPUEnglish textgradientEnglish textstep
+- **English text**:
+  - `cuda_bridge_all_reduce_sum`: NCCL AllReduceEnglish textstepgradient
+  - `cuda_bridge_reduce_scatter`: English textgradientEnglish text
+  - `cuda_bridge_broadcast`: mainrankEnglish textrankEnglish text
 
-**梯度同步流程**:
+**gradientEnglish textsteppipeline**:
 ```
-所有rank的梯度 ─> NCCL AllReduce ─> 求和 ─> 平均 ─> 优化器更新
+English textrankEnglish textgradient ─> NCCL AllReduce ─> English text ─> English text ─> optimizeEnglish text
 ```
 
-### 3. **分布式预训练入口** (`distributed_pretrain_entry.s`)
-- **功能**: 主训练循环，集成上述两个模块
-- **流程**:
-  1. 初始化分布式环境
-  2. 为当前rank加载分配的数据切片
-  3. 梯度积累循环
-  4. 每N步后调用NCCL AllReduce同步梯度
-  5. 执行优化器更新
+### 3. **English texttrainingEnglish text** (`distributed_pretrain_entry.s`)
+- **English text**: maintrainingEnglish text, English text
+- **pipeline**:
+  1. initializeEnglish text
+  2. English textrankloadEnglish textdataEnglish text
+  3. gradientEnglish text
+  4. English textNstepEnglish textNCCL AllReduceEnglish textstepgradient
+  5. English textoptimizeEnglish text
 
-### 4. **多GPU启动脚本** (`launch_pretrain_distributed.s`)
-- **功能**: 多进程启动和管理 (纯S语言实现，无shell依赖)
-- **核心功能**:
-  - 多进程启动：为每个rank启动独立训练进程
-  - GPU可用性检查：验证可用GPU数量
-  - 异步进程管理：后台启动，并等待所有进程完成
-  - 日志聚合：合并所有rank的日志输出
-  - 错误处理：进程失败检测和报告
+### 4. **English textGPUstartEnglish text** (`launch_pretrain_distributed.s`)
+- **English text**: English textstartEnglish textmanagement (English textSlanguageimplementation, English textshellEnglish text)
+- **English text**:
+  - English textstart: English textrankstartEnglish texttrainingEnglish text
+  - GPUEnglish text: English textGPUcount
+  - English textstepEnglish textmanagement: English textstart, English text
+  - logEnglish text: English textrankEnglish textlogoutput
+  - errorEnglish text: English textfailureEnglish text
 
-**优势**：
-- 100% S语言实现，与项目一致
-- 无shell脚本依赖
-- 跨平台兼容性好
-- 集成度高
+**English text**:
+- 100% Slanguageimplementation, English text
+- English textshellEnglish text
+- English text
+- English text
 
 ---
 
-## 启动方式
+## startEnglish text
 
-### 单机多GPU启动 (推荐 - 纯S语言)
+### English textGPUstart (recommended - English textSlanguage)
 
 ```bash
-# 启动4块GPU分布式训练
+# start4English textGPUEnglish texttraining
 export NUM_GPUS=4 MASTER_ADDR=localhost MASTER_PORT=29500
 ./scripts/legacy/launch_pretrain_distributed.s
 
-# 启动2块GPU
+# start2English textGPU
 export NUM_GPUS=2
 ./scripts/legacy/launch_pretrain_distributed.s
 
-# 启动1块GPU (单GPU模式)
+# start1English textGPU (English textGPUEnglish text)
 ./scripts/legacy/launch_pretrain_distributed.s
 ```
 
-### 手动启动多个进程 (如果需要细粒度控制)
+### English textstartEnglish text (English textRequiredEnglish text)
 
 ```bash
 # Terminal 1 - rank 0
@@ -97,227 +97,227 @@ export RANK=3 LOCAL_RANK=3 WORLD_SIZE=4 MASTER_ADDR=localhost MASTER_PORT=29500
 
 ---
 
-## 数据分片分配
+## dataEnglish text
 
-### 数据并行策略
+### dataEnglish text
 
-每个rank处理不同的数据切片，避免重复：
-
-```
-5131个shards分配给4个rank:
-- Rank 0: shard_0, shard_4, shard_8, ...    (处理 5131/4 ≈ 1283个)
-- Rank 1: shard_1, shard_5, shard_9, ...    (处理 5131/4 ≈ 1283个)
-- Rank 2: shard_2, shard_6, shard_10, ...   (处理 5131/4 ≈ 1283个)
-- Rank 3: shard_3, shard_7, shard_11, ...   (处理 5131/4 ≈ 1283个)
-```
-
-### 有效批大小计算
+English textrankEnglish textdataEnglish text, English text:
 
 ```
-micro_batch_size = 8          # 单步GPU显存大小
-gradient_accum_steps = 8      # 梯度积累步数
-world_size = 4                # GPU数量
+5131English textshardsEnglish text4English textrank:
+- Rank 0: shard_0, shard_4, shard_8, ...    (English text 5131/4 ≈ 1283English text)
+- Rank 1: shard_1, shard_5, shard_9, ...    (English text 5131/4 ≈ 1283English text)
+- Rank 2: shard_2, shard_6, shard_10, ...   (English text 5131/4 ≈ 1283English text)
+- Rank 3: shard_3, shard_7, shard_11, ...   (English text 5131/4 ≈ 1283English text)
+```
 
-有效批大小 = 8 × 8 × 4 = 256
+### English textcompute
+
+```
+micro_batch_size = 8          # English textstepGPUEnglish text
+gradient_accum_steps = 8      # gradientEnglish textstepEnglish text
+world_size = 4                # GPUcount
+
+English text = 8 × 8 × 4 = 256
 ```
 
 ---
 
-## 梯度同步细节
+## gradientEnglish textstepEnglish text
 
-### 同步流程
+### English textsteppipeline
 
 ```
-Step 1: 前向传播（micro_batch_size=8）
+Step 1: English text(micro_batch_size=8)
         ├─ Rank 0: loss_0, grad_0
         ├─ Rank 1: loss_1, grad_1
         ├─ Rank 2: loss_2, grad_2
         └─ Rank 3: loss_3, grad_3
 
-Step 2: 梯度积累（积累8步后）
+Step 2: gradientEnglish text(English text8stepEnglish text)
         ├─ Rank 0: sum_0 = Σ(grad_0)
         ├─ Rank 1: sum_1 = Σ(grad_1)
         ├─ Rank 2: sum_2 = Σ(grad_2)
         └─ Rank 3: sum_3 = Σ(grad_3)
 
-Step 3: NCCL AllReduce (所有rank同时执行)
-        ├─ 收集所有rank的梯度
-        ├─ 全局求和: grad_sync = sum_0 + sum_1 + sum_2 + sum_3
-        ├─ 平均: grad_avg = grad_sync / 4
-        └─ 分发回所有rank
+Step 3: NCCL AllReduce (English textrankEnglish text)
+        ├─ English textrankEnglish textgradient
+        ├─ English text: grad_sync = sum_0 + sum_1 + sum_2 + sum_3
+        ├─ English text: grad_avg = grad_sync / 4
+        └─ English textrank
 
-Step 4: 优化器更新（所有rank同步执行）
+Step 4: optimizeEnglish text(English textrankEnglish textstepEnglish text)
         ├─ Rank 0: params_0 -= lr * grad_avg
         ├─ Rank 1: params_1 -= lr * grad_avg
         ├─ Rank 2: params_2 -= lr * grad_avg
         └─ Rank 3: params_3 -= lr * grad_avg
 ```
 
-### NCCL AllReduce的CUDA实现
+### NCCL AllReduceEnglish textCUDAimplementation
 
 ```c
-// 伪代码
+// English text
 ncclAllReduce(
-    d_gradients,        // GPU梯度指针
-    d_gradients,        // 输出到同一位置
-    num_gradients,      // 梯度数量
-    ncclFloat,          // 数据类型
-    ncclSum,            // 操作: 求和
+    d_gradients,        // GPUgradientEnglish text
+    d_gradients,        // outputEnglish text
+    num_gradients,      // gradientcount
+    ncclFloat,          // dataEnglish text
+    ncclSum,            // English text: English text
     comm,               // NCCL communicator
-    stream              // CUDA流
+    stream              // CUDAEnglish text
 );
 
-// 这个操作在GPU上并行执行，效率远高于CPU循环
+// English textGPUEnglish text, English textCPUEnglish text
 ```
 
 ---
 
-## 性能优化
+## English textoptimize
 
-### 1. 异步梯度传输
+### 1. English textstepgradientEnglish text
 
 ```python
-# 在计算下一步时，后台传输梯度
+# English textcomputeEnglish textstepEnglish text, English textgradient
 handle = cuda_bridge_all_reduce_async(launcher.cb, gradients)
-# 执行其他计算
+# English textcompute
 next_batch = load_next_batch()
-# 等待梯度同步完成
+# English textgradientEnglish textstepEnglish text
 synced_grads = async_all_reduce_wait(handle)
 ```
 
-### 2. 内存优化
+### 2. English textoptimize
 
 ```toml
-# pretrain_config.toml配置
-gradient_checkpointing = true    # 减少显存占用
-activation_checkpointing = true  # 激活值不保留
-flash_attention = true           # 高效注意力
-fused_kernels = true             # 融合CUDA核心
+# pretrain_config.tomlconfiguration
+gradient_checkpointing = true    # English text
+activation_checkpointing = true  # English text
+flash_attention = true           # English text
+fused_kernels = true             # English textCUDAEnglish text
 ```
 
-### 3. 通信优化
+### 3. English textoptimize
 
 ```
 Ring AllReduce:
-- 梯度分割成N个chunks
-- 每个rank只与相邻rank通信
-- N-1轮通信完成全局同步
-- 通信复杂度: O(log N) -> O(N)但并行度高
+- gradientEnglish textNEnglish textchunks
+- English textrankEnglish textrankEnglish text
+- N-1English textstep
+- English text: O(log N) -> O(N)English text
 ```
 
 ---
 
-## 预期性能提升
+## English text
 
-### RTX 4060 Ti 单GPU vs 多GPU
+### RTX 4060 Ti English textGPU vs English textGPU
 
-| 配置 | 批大小 | 显存 | 吞吐量 | 单轮时间 |
+| configuration | English text | English text | English text | English texttime |
 |------|--------|------|--------|----------|
-| **1×RTX 4060 Ti** | 64 | 16GB | ~50 samples/s | ~18小时 |
-| **2×RTX 4060 Ti** | 64×2=128 | 16GB×2 | ~95 samples/s | ~10小时 |
-| **4×RTX 4090** | 256 | 24GB×4 | ~400 samples/s | ~4小时 |
+| **1×RTX 4060 Ti** | 64 | 16GB | ~50 samples/s | ~18English text |
+| **2×RTX 4060 Ti** | 64×2=128 | 16GB×2 | ~95 samples/s | ~10English text |
+| **4×RTX 4090** | 256 | 24GB×4 | ~400 samples/s | ~4English text |
 
-**加速倍数**: 
-- 2个GPU: ~1.9x加速
-- 4个GPU: ~4.5x加速（考虑通信开销）
+**English text**:
+- 2English textGPU: ~1.9xEnglish text
+- 4English textGPU: ~4.5xEnglish text(English text)
 
 ---
 
-## 调试和监控
+## English textmonitoring
 
-### 日志输出
+### logoutput
 
 ```
-[trainer-v2] step=531/1000000000 optimizer_step=66 loss=8.665277 
+[trainer-v2] step=531/1000000000 optimizer_step=66 loss=8.665277
              tokens=543744 shard=0 line=70 accum=3/8
 
-解释:
-- step: 全局步数
-- optimizer_step: 优化器更新步数
-- loss: 损失值
-- tokens: 处理的token总数
-- shard: 当前shard索引
-- line: 当前shard中的行索引
-- accum: 梯度积累进度 (3/8)
+English text:
+- step: English textstepEnglish text
+- optimizer_step: optimizeEnglish textstepEnglish text
+- loss: lossEnglish text
+- tokens: English texttokenEnglish text
+- shard: English textshardEnglish text
+- line: English textshardEnglish text
+- accum: gradientEnglish text (3/8)
 ```
 
-### 监控GPU内存
+### monitoringGPUEnglish text
 
 ```bash
-# 实时监控所有GPU
+# English textmonitoringEnglish textGPU
 watch -n 1 'nvidia-smi'
 
-# 在训练脚本中
+# English texttrainingEnglish text
 cuda_bridge_log_status(launcher.cb)
-# 输出: [CUDA Bridge rank=0] device=0 memory=24576MB free=12288MB
+# output: [CUDA Bridge rank=0] device=0 memory=24576MB free=12288MB
 ```
 
-### 进程状态检查
+### English textstateEnglish text
 
 ```bash
-# 查看所有训练进程
+# English texttrainingEnglish text
 ps aux | grep distributed_pretrain_entry
 
-# 查看rank间通信
-# (需要安装NVIDIA NCCL debugger)
+# English textrankEnglish text
+# (RequiredEnglish textNVIDIA NCCL debugger)
 ```
 
 ---
 
-## 常见问题
+## English text
 
-### Q1: 显存溢出
-**A**: 减少micro_batch_size或增加gradient_accum_steps
+### Q1: English text
+**A**: English textmicro_batch_sizeEnglish textgradient_accum_steps
 
-### Q2: 训练速度没有提升
-**A**: 
-- 检查NCCL通信是否初始化成功
-- 确保数据分片确实分散到了各rank
-- 检查AllReduce的梯度尺寸（可能过大）
-
-### Q3: 梯度不一致
-**A**: 
-- 确保所有rank使用相同的随机种子
-- 验证AllReduce操作是否正确
-
-### Q4: 进程间通信超时
+### Q2: trainingEnglish text
 **A**:
-- 增加MASTER_PORT端口范围
-- 检查防火墙设置
-- 验证网络连接
+- English textNCCLEnglish textinitializesuccess
+- English textdataEnglish textrank
+- English textAllReduceEnglish textgradientEnglish text(English text)
+
+### Q3: gradientEnglish text
+**A**:
+- English textrankuseEnglish text
+- English textAllReduceEnglish text
+
+### Q4: English text
+**A**:
+- English textMASTER_PORTEnglish text
+- English text
+- English text
 
 ---
 
-## 文件结构
+## fileEnglish text
 
 ```
 neurx/
 ├── distributed/
-│   ├── cuda_bridge.s                    # CUDA通信桥接 (NCCL AllReduce)
-│   ├── distributed_pretrain_launcher.s  # 分布式启动器
+│   ├── cuda_bridge.s                    # CUDAEnglish text (NCCL AllReduce)
+│   ├── distributed_pretrain_launcher.s  # English textstartEnglish text
 │   ├── ddp/
 │   └── ...
 ├── pretrain/
-│   ├── distributed_pretrain_entry.s     # 主入口
-│   ├── pretrain_config.toml             # 训练配置
+│   ├── distributed_pretrain_entry.s     # mainEnglish text
+│   ├── pretrain_config.toml             # trainingconfiguration
 │   └── ...
 └── scripts/legacy/
-    ├── launch_pretrain_distributed.s    # 多GPU启动脚本 (纯S语言)
+    ├── launch_pretrain_distributed.s    # English textGPUstartEnglish text (English textSlanguage)
     └── ...
 ```
 
 ---
 
-## 下一步
+## English textstep
 
-1. **编译S语言代码**: `make build-distributed`
-2. **运行单GPU测试**: `./scripts/legacy/launch_pretrain_distributed.s` (自动使用1块GPU)
-3. **运行多GPU训练**: `export NUM_GPUS=4 && ./scripts/legacy/launch_pretrain_distributed.s`
-4. **监控训练进度**: 查看 `artifacts/logs/distributed_pretrain/` 下的日志
+1. **compileSlanguageEnglish text**: `make build-distributed`
+2. **runEnglish textGPUtest**: `./scripts/legacy/launch_pretrain_distributed.s` (English textuse1English textGPU)
+3. **runEnglish textGPUtraining**: `export NUM_GPUS=4 && ./scripts/legacy/launch_pretrain_distributed.s`
+4. **monitoringtrainingEnglish text**: English text `artifacts/logs/distributed_pretrain/` English textlog
 
 ---
 
-## 参考资源
+## English text
 
 - [PyTorch Distributed Data Parallel](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)
 - [NCCL Documentation](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/)

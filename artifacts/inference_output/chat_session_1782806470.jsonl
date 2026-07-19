@@ -1,3 +1,3 @@
-{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
-{"role": "user", "content": "人工智能是什么？请直接回答。", "turn": 1}
-{"role": "assistant", "content": "人工智能是让机器具备感知、理解、推理和生成能力的技术集合，常见应用包括问答、翻译、推荐和图像识别。", "turn": 1}
+{"role": "system", "content": "NeurX LLM English textinferencesystemEnglish textstart"}
+{"role": "user", "content": "English text?English text.", "turn": 1}
+{"role": "assistant", "content": "English text, English text, inferenceEnglish textgenerateEnglish text, English text, English text, recommendedEnglish text.", "turn": 1}

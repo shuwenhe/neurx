@@ -23,16 +23,16 @@ use neurx.model.llm.gpt.{
 }
 
 // ============================================================================
-// 1. 结构体
+// 1. English text
 // ============================================================================
 
 struct reward_model {
-    language_model backbone        // 共享 Transformer 主干
-    []float head              // 奖励头权重 [n_embd]
-    float bias                // 奖励头偏置
+    language_model backbone        // English text Transformer mainEnglish text
+    []float head              // rewardEnglish textweight [n_embd]
+    float bias                // rewardEnglish text
     int n_embd
 
-    // AdamW 状态 (奖励头)
+    // AdamW state (rewardEnglish text)
     []float head_m
     []float head_v
     float bias_m
@@ -48,16 +48,16 @@ struct reward_model {
 struct reward_train_result {
     reward_model model
     float loss
-    float accuracy            // 偏好排序正确率 (r_chosen > r_rejected 的比例)
-    float reward_margin       // 平均 (r_chosen - r_rejected)
+    float accuracy            // preferencerankingEnglish text (r_chosen > r_rejected English text)
+    float reward_margin       // English text (r_chosen - r_rejected)
 }
 
 struct reward_batch_scores {
-    []float rewards           // 每个样本的标量奖励 [batch]
+    []float rewards           // English textreward [batch]
 }
 
 // ============================================================================
-// 2. 初始化
+// 2. initialize
 // ============================================================================
 
 func rm_alloc(int n, float v) []float {
@@ -67,12 +67,12 @@ func rm_alloc(int n, float v) []float {
     arr
 }
 
-// 小尺度确定性初始化奖励头
+// English textinitializerewardEnglish text
 func rm_init_head(int n_embd) []float {
     []float head = rm_alloc(n_embd, 0.0)
     int i = 0
     while i < n_embd {
-        // 散列式小值初始化，避免初始奖励恒为 0
+        // English textinitialize, English textrewardEnglish text 0
         float t = (i * 1.0 + 1.0) / (n_embd * 1.0)
         head[i] = (t - 0.5) * 0.02
         i = i + 1
@@ -101,7 +101,7 @@ func new_reward_model(model_config cfg, float lr) reward_model {
     }
 }
 
-// 从已训练好的 GPT 模型构建奖励模型 (SFT 后初始化 RM 是标准做法)
+// English texttrainingEnglish text GPT modelEnglish textrewardmodel (SFT English textinitialize RM English text)
 func reward_model_from_backbone(language_model backbone, float lr) reward_model {
     int n_embd = backbone.n_embd
     reward_model {
@@ -123,7 +123,7 @@ func reward_model_from_backbone(language_model backbone, float lr) reward_model 
 }
 
 // ============================================================================
-// 3. 数学辅助
+// 3. English texthelper
 // ============================================================================
 
 func rm_exp(float x) float {
@@ -179,10 +179,10 @@ func rm_pow(float base, int exp) float {
 }
 
 // ============================================================================
-// 4. 前向: 序列 → 标量奖励
+// 4. English text: English text → English textreward
 // ============================================================================
 
-// 提取每个序列最后一个 token 的隐藏向量 (因果模型中它"看到"整个序列)
+// English text token English text (English textmodelEnglish text"English text"English text)
 // last_hidden: [batch * seq, n_embd]  →  pooled: [batch, n_embd]
 func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n_embd) []float {
     []float pooled = rm_alloc(batch_size * n_embd, 0.0)
@@ -201,7 +201,7 @@ func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n
     pooled
 }
 
-// 计算一批序列的标量奖励
+// computeEnglish textreward
 func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_len) reward_batch_scores {
     model_output out = gpt_forward(rm.backbone, token_ids, batch_size, seq_len)
     []float pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
@@ -221,14 +221,14 @@ func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_le
     reward_batch_scores { rewards: rewards }
 }
 
-// 单序列推理 (供 PPO/RLHF 查询奖励)
+// English textinference (English text PPO/RLHF queryreward)
 func reward_model_score(reward_model rm, []int token_ids, int seq_len) float {
     reward_batch_scores scores = rm_score_batch(rm, token_ids, 1, seq_len)
     scores.rewards[0]
 }
 
 // ============================================================================
-// 5. Bradley-Terry 偏好损失
+// 5. Bradley-Terry preferenceloss
 // ============================================================================
 
 // L = -log(sigmoid(r_chosen - r_rejected))
@@ -245,13 +245,13 @@ func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size)
 }
 
 // ============================================================================
-// 6. 训练步 (精确奖励头梯度 + AdamW)
+// 6. trainingstep (English textrewardEnglish textgradient + AdamW)
 //
 //   r = head · h + bias
-//   L = -log(sigmoid(r_c - r_r)),  令 p = sigmoid(r_c - r_r)
+//   L = -log(sigmoid(r_c - r_r)),  English text p = sigmoid(r_c - r_r)
 //   dL/dr_c = -(1 - p),  dL/dr_r = (1 - p)
 //   dL/d head = (1 - p) * (h_r - h_c)
-//   dL/d bias = 0  (偏置在差值中相消，BT 损失不约束偏置)
+//   dL/d bias = 0  (English text, BT lossEnglish text)
 // ============================================================================
 
 func reward_model_train_step(
@@ -261,13 +261,13 @@ func reward_model_train_step(
     int batch_size,
     int seq_len
 ) reward_train_result {
-    // 前向: 分别得到 chosen / rejected 的隐藏与奖励
+    // English text: English text chosen / rejected English textreward
     model_output out_c = gpt_forward(rm.backbone, chosen_ids, batch_size, seq_len)
     model_output out_r = gpt_forward(rm.backbone, rejected_ids, batch_size, seq_len)
     []float pooled_c = rm_pool_last_hidden(out_c.last_hidden, batch_size, seq_len, rm.n_embd)
     []float pooled_r = rm_pool_last_hidden(out_r.last_hidden, batch_size, seq_len, rm.n_embd)
 
-    // 奖励
+    // reward
     []float reward_c = rm_alloc(batch_size, 0.0)
     []float reward_r = rm_alloc(batch_size, 0.0)
     int b = 0
@@ -285,18 +285,18 @@ func reward_model_train_step(
         b = b + 1
     }
 
-    // 损失 + 统计
+    // loss + statistics
     float loss = rm_bradley_terry_loss(reward_c, reward_r, batch_size)
     int correct = 0
     float margin_sum = 0.0
 
-    // 精确梯度累积
+    // English textgradientEnglish text
     []float grad_head = rm_alloc(rm.n_embd, 0.0)
     b = 0
     while b < batch_size {
         float d_val = reward_c[b] - reward_r[b]
         float p = rm_sigmoid(d_val)
-        float coeff = (1.0 - p)      // dL/d head 的标量系数
+        float coeff = (1.0 - p)      // dL/d head English text
 
         margin_sum = margin_sum + d_val
         if d_val > 0.0 { correct = correct + 1 }
@@ -310,7 +310,7 @@ func reward_model_train_step(
         }
         b = b + 1
     }
-    // 平均
+    // English text
     float inv_b = 1.0 / (batch_size * 1.0)
     int g = 0
     while g < rm.n_embd {
@@ -318,7 +318,7 @@ func reward_model_train_step(
         g = g + 1
     }
 
-    // AdamW 更新奖励头
+    // AdamW English textrewardEnglish text
     rm.step = rm.step + 1
     float bc1 = 1.0 - rm_pow(rm.beta1, rm.step)
     float bc2 = 1.0 - rm_pow(rm.beta2, rm.step)
@@ -332,7 +332,7 @@ func reward_model_train_step(
         rm.head[i] = rm.head[i] - rm.lr * m_hat / (rm_sqrt(v_hat) + rm.eps)
         i = i + 1
     }
-    // bias 梯度为 0 (BT 不约束)，保持不变
+    // bias gradientEnglish text 0 (BT English text), English text
 
     float accuracy = (correct * 1.0) * inv_b
     float reward_margin = margin_sum * inv_b
@@ -346,7 +346,7 @@ func reward_model_train_step(
 }
 
 // ============================================================================
-// 7. 评估 (在验证偏好集上的排序准确率)
+// 7. evaluation (English textpreferenceEnglish textrankingEnglish text)
 // ============================================================================
 
 func reward_model_eval_accuracy(
@@ -370,7 +370,7 @@ func reward_model_eval_accuracy(
 }
 
 // ============================================================================
-// 8. 奖励归一化 (PPO 中常用: 标准化奖励以稳定训练)
+// 8. rewardEnglish text (PPO English text: English textrewardEnglish texttraining)
 // ============================================================================
 
 struct reward_normalizer {

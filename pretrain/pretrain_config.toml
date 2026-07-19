@@ -1,111 +1,111 @@
-# NeurX 大规模预训练配置
-# 这个配置文件定义了用于大规模训练的超参数
+# NeurX English texttrainingconfiguration
+# English textconfigurationfileEnglish texttrainingEnglish textparameter
 
 [model]
-# 模型架构
+# modelEnglish text
 name = "model_large"
-vocab_size = 50257          # GPT-2 词汇表大小
-hidden_dim = 1024           # 隐藏层维度 (GPT-Medium)
-num_layers = 24             # Transformer块数量
-num_heads = 16              # 注意力头数
-ffn_dim = 4096              # FFN隐藏层维度
-max_seq_length = 2048       # 最大序列长度
+vocab_size = 50257          # GPT-2 English text
+hidden_dim = 1024           # English text (GPT-Medium)
+num_layers = 24             # TransformerEnglish textcount
+num_heads = 16              # English text
+ffn_dim = 4096              # FFNEnglish text
+max_seq_length = 2048       # English text
 
-# 计算的参数
-# 总参数 ≈ 1.3B (13亿)
-# 内存需求 ≈ 5GB (bf16精度)
+# computeEnglish textparameter
+# English textparameter ≈ 1.3B (13English text)
+# English text ≈ 5GB (bf16English text)
 
 [training]
-# 基础训练配置
-total_steps = 50000         # 总训练步数 (已优化以适应显存)
-warmup_steps = 5000         # 预热步数
-learning_rate = 0.0002      # 学习率 (RTX 4060 Ti优化)
-lr_schedule = "cosine"      # 学习率调度: linear, cosine, constant
-weight_decay = 0.01         # 权重衰减 (L2正则化)
-gradient_clip_norm = 1.0    # 梯度裁剪
-max_grad_norm = 1.0         # 最大梯度范数
+# English texttrainingconfiguration
+total_steps = 50000         # English texttrainingstepEnglish text (English textoptimizeEnglish text)
+warmup_steps = 5000         # English textstepEnglish text
+learning_rate = 0.0002      # learning rate (RTX 4060 Tioptimize)
+lr_schedule = "cosine"      # learning rateEnglish text: linear, cosine, constant
+weight_decay = 0.01         # weightEnglish text (L2English text)
+gradient_clip_norm = 1.0    # gradientEnglish text
+max_grad_norm = 1.0         # English textgradientEnglish text
 
-# 数据并发和优化
-enable_data_offload = true  # 启用数据卸载优化
-enable_cpu_offload = true   # CPU显存卸载 (优化显存)
+# dataEnglish textoptimize
+enable_data_offload = true  # English textdataEnglish textoptimize
+enable_cpu_offload = true   # CPUEnglish text (optimizeEnglish text)
 
-# 批处理配置 (RTX 4060 Ti优化)
-batch_size = 64             # 全局批大小 (梯度积累后)
-micro_batch_size = 8        # 微批大小 (单步GPU显存)
-num_accumulation_steps = 8  # 梯度积累步数 (64/8=8步)
+# English textconfiguration (RTX 4060 Tioptimize)
+batch_size = 64             # English text (gradientEnglish text)
+micro_batch_size = 8        # English text (English textstepGPUEnglish text)
+num_accumulation_steps = 8  # gradientEnglish textstepEnglish text (64/8=8step)
 
-# 数据加载
-num_workers = 4             # 数据加载工作进程 (RTX 4060 Ti优化)
-prefetch_factor = 2         # 预加载因子
+# dataload
+num_workers = 4             # dataloadEnglish text (RTX 4060 Tioptimize)
+prefetch_factor = 2         # English textloadEnglish text
 
 [optimization]
-# 优化器配置
+# optimizeEnglish textconfiguration
 optimizer = "adamw"         # adamw, adam, sgd
-betas = [0.9, 0.999]       # Adam beta参数
+betas = [0.9, 0.999]       # Adam betaparameter
 eps = 1e-8                  # Adam epsilon
 
-# 混合精度训练 (RTX 4060 Ti优化)
+# English texttraining (RTX 4060 Tioptimize)
 mixed_precision = "bf16"    # bf16, fp16, fp32
-scale_loss = true           # 损失缩放 (for fp16)
+scale_loss = true           # lossEnglish text (for fp16)
 
-# 内存优化
-gradient_checkpointing = true    # 启用梯度检查点 (降低显存占用)
-activation_checkpointing = true  # 激活检查点
-flash_attention = true           # Flash Attention优化
-fused_kernels = true             # 融合CUDA核心优化
+# English textoptimize
+gradient_checkpointing = true    # English textgradientcheckpoint (English text)
+activation_checkpointing = true  # English textcheckpoint
+flash_attention = true           # Flash Attentionoptimize
+fused_kernels = true             # English textCUDAEnglish textoptimize
 
 [checkpointing]
-# 检查点配置
-save_interval = 5000        # 保存检查点间隔
-keep_last_n = 3             # 保留最后N个检查点
-save_optimizer_state = true # 保存优化器状态
-save_training_state = true  # 保存训练状态
+# checkpointconfiguration
+save_interval = 5000        # savecheckpointEnglish text
+keep_last_n = 3             # English textNEnglish textcheckpoint
+save_optimizer_state = true # saveoptimizeEnglish textstate
+save_training_state = true  # savetrainingstate
 
 [distributed]
-# 分布式训练配置。0 表示由启动器读取 WORLD_SIZE/NEURX_NUM_GPUS 自动确定。
-world_size = 0              # 单机使用全部 GPU，多机使用全局 WORLD_SIZE
-rank = 0                    # 当前进程rank
-backend = "nccl"            # 通信后端: nccl, gloo
+# English texttrainingconfiguration.0 English textstartEnglish text WORLD_SIZE/NEURX_NUM_GPUS English text.
+world_size = 0              # English textuseEnglish text GPU, English textuseEnglish text WORLD_SIZE
+rank = 0                    # English textrank
+backend = "nccl"            # English text: nccl, gloo
 find_unused_parameters = false
 
-# RTX 4060 Ti优化参数
-pin_memory = true           # 固定内存以加快数据传输
-prefetch_distance = 2       # 预加载距离
-async_grad_reduce = true    # 异步梯度归约
+# RTX 4060 Tioptimizeparameter
+pin_memory = true           # English textdataEnglish text
+prefetch_distance = 2       # English textloadEnglish text
+async_grad_reduce = true    # English textstepgradientEnglish text
 
 [logging]
-# 日志配置
-log_interval = 100          # 日志打印间隔
-log_dir = "artifacts/logs"  # 日志目录
-save_metrics = true         # 保存指标
-tensorboard = false         # TensorBoard支持
+# logconfiguration
+log_interval = 100          # logEnglish text
+log_dir = "artifacts/logs"  # logdirectory
+save_metrics = true         # saveEnglish text
+tensorboard = false         # TensorBoardsupport
 
 [evaluation]
-# 评估配置
-eval_steps = 2500           # 评估间隔
-eval_samples = 1000         # 评估样本数
+# evaluationconfiguration
+eval_steps = 2500           # evaluationEnglish text
+eval_samples = 1000         # evaluationEnglish text
 eval_metrics = ["perplexity", "loss", "accuracy"]
 
 [data]
-# 数据集配置
+# dataEnglish textconfiguration
 train_dataset_path = "data/pretrain_dataset.jsonl"
 val_dataset_path = "data/val_dataset.jsonl"
 cache_dir = "data/cache"
-tokenizer_name = "gpt2"     # 使用GPT-2分词器
+tokenizer_name = "gpt2"     # useGPT-2English text
 max_seq_length = 2048
 
 [output]
-# 输出配置
+# outputconfiguration
 output_dir = "checkpoint/NeurX-1.3"
 model_name = "NeurX-1.3.neurx"
-resume_from_checkpoint = null  # 从检查点恢复
-seed = 42                   # 随机种子
+resume_from_checkpoint = null  # English textcheckpointrecover
+seed = 42                   # English text
 
 [hardware]
-# RTX 4060 Ti硬件优化配置
-gpu_model = "RTX4060Ti"     # GPU型号
-gpu_memory_mb = 16384       # GPU显存大小
-fp16_loss_scale = 65536     # FP16损失缩放初始值
-enable_tf32 = true          # 启用TF32加速 (NVIDIA Ampere+优化)
-num_gpu_devices = 0         # 0 表示自动使用当前节点全部 GPU
-torch_compile = false       # PyTorch编译优化 (可选)
+# RTX 4060 TiEnglish textoptimizeconfiguration
+gpu_model = "RTX4060Ti"     # GPUEnglish text
+gpu_memory_mb = 16384       # GPUEnglish text
+fp16_loss_scale = 65536     # FP16lossEnglish text
+enable_tf32 = true          # English textTF32English text (NVIDIA Ampere+optimize)
+num_gpu_devices = 0         # 0 English textuseEnglish text GPU
+torch_compile = false       # PyTorchcompileoptimize (English text)

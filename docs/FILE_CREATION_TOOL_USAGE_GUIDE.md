@@ -1,30 +1,30 @@
-# FileCreationTool 使用指南
+# FileCreationTool useEnglish text
 
-## 快速开始
+## quickstart
 
-### 1. 工具注册
+### 1. toolEnglish text
 
-在 Agent 系统中注册 FileCreationTool：
+English text Agent systemEnglish text FileCreationTool:
 
 ```cpp
 #include "tools/FileCreationTool.h"
 
-// 创建工具实例
+// English texttoolEnglish text
 auto fileTool = std::make_unique<FileCreationTool>(workspaceRoot);
 
-// 设置沙箱管理器（可选但推荐）
+// English textmanagementEnglish text(English textrecommended)
 fileTool->setSandboxManager(sandboxManager);
 
-// 设置检查点管理器（可选）
+// English textcheckpointmanagementEnglish text(English text)
 fileTool->setCheckpointManager(checkpointManager);
 
-// 注册到工具注册表
+// English texttoolEnglish text
 toolRegistry->registerTool(fileTool.get());
 ```
 
-### 2. 基本用法
+### 2. English text
 
-#### 创建单个文件
+#### English textfile
 
 ```json
 {
@@ -37,7 +37,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-**响应**:
+**response**:
 ```json
 {
   "bytes_written": 39,
@@ -51,7 +51,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-#### 覆盖现有文件
+#### English textfile
 
 ```json
 {
@@ -62,9 +62,9 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-注意: `write_file` 默认 `overwrite=true`
+English text: `write_file` default `overwrite=true`
 
-#### 批量创建文件
+#### English textfile
 
 ```json
 {
@@ -87,7 +87,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-**响应**:
+**response**:
 ```json
 {
   "total": 3,
@@ -103,72 +103,72 @@ toolRegistry->registerTool(fileTool.get());
 
 ---
 
-## 参数详解
+## parameterEnglish text
 
-### 通用参数
+### English textparameter
 
-#### `operation` (必需)
-- **类型**: string
-- **值**: `"create_file"` | `"write_file"` | `"create_batch"`
-- **说明**: 要执行的操作类型
+#### `operation` (English text)
+- **English text**: string
+- **English text**: `"create_file"` | `"write_file"` | `"create_batch"`
+- **explanation**: English text
 
-#### `path` (必需，除 create_batch 外)
-- **类型**: string
-- **示例**: `"src/hello.py"`, `"config/app.json"`
-- **说明**: 相对于工作区根目录的文件路径
-- **注意**: 自动处理路径遍历攻击
+#### `path` (English text, English text create_batch English text)
+- **English text**: string
+- **example**: `"src/hello.py"`, `"config/app.json"`
+- **explanation**: English textdirectoryEnglish textfilepath
+- **English text**: English textpathEnglish text
 
-#### `content` (必需)
-- **类型**: string
-- **示例**: `"print('hello')"`
-- **说明**: 要写入的文件内容
-- **限制**: 单个文件最大 50MB
+#### `content` (English text)
+- **English text**: string
+- **example**: `"print('hello')"`
+- **explanation**: English textfilecontent
+- **English text**: English textfileEnglish text 50MB
 
-#### `overwrite` (可选)
-- **类型**: boolean
-- **默认值**:
-  - `create_file`: `false` (拒绝覆盖现有文件)
-  - `write_file`: `true` (默认覆盖)
-- **说明**: 是否允许覆盖现有文件
+#### `overwrite` (English text)
+- **English text**: boolean
+- **defaultEnglish text**:
+  - `create_file`: `false` (English textfile)
+  - `write_file`: `true` (defaultEnglish text)
+- **explanation**: English textfile
 
-#### `create_dirs` (可选)
-- **类型**: boolean
-- **默认值**: `true`
-- **说明**: 是否自动创建不存在的父目录
-- **示例**: 创建 `"deep/nested/file.txt"` 时自动创建 `deep/` 和 `deep/nested/`
+#### `create_dirs` (English text)
+- **English text**: boolean
+- **defaultEnglish text**: `true`
+- **explanation**: English textdirectory
+- **example**: English text `"deep/nested/file.txt"` English text `deep/` English text `deep/nested/`
 
-#### `line_ending` (可选)
-- **类型**: string
-- **值**: `"auto"` | `"lf"` | `"crlf"`
-- **默认值**: `"auto"`
-- **说明**:
-  - `"auto"`: 检测现有文件的行结尾格式，默认使用 `"lf"`
-  - `"lf"`: Unix 风格 (`\n`)
-  - `"crlf"`: Windows 风格 (`\r\n`)
+#### `line_ending` (English text)
+- **English text**: string
+- **English text**: `"auto"` | `"lf"` | `"crlf"`
+- **defaultEnglish text**: `"auto"`
+- **explanation**:
+  - `"auto"`: English textfileEnglish text, defaultuse `"lf"`
+  - `"lf"`: Unix English text (`\n`)
+  - `"crlf"`: Windows English text (`\r\n`)
 
-#### `preserve_existing` (可选)
-- **类型**: boolean
-- **默认值**: `true`
-- **说明**: 覆盖现有文件时是否保留其元数据（权限、行结尾等）
+#### `preserve_existing` (English text)
+- **English text**: boolean
+- **defaultEnglish text**: `true`
+- **explanation**: English textfileEnglish textdata(English text, English text)
 
-#### `files` (批量操作必需)
-- **类型**: array of objects
-- **项目结构**:
+#### `files` (English text)
+- **English text**: array of objects
+- **English text**:
   ```json
   {
-    "path": "string (必需)",
-    "content": "string (可选，默认空)",
-    "overwrite": "boolean (可选)",
-    "create_dirs": "boolean (可选)"
+    "path": "string (English text)",
+    "content": "string (English text, defaultEnglish text)",
+    "overwrite": "boolean (English text)",
+    "create_dirs": "boolean (English text)"
   }
   ```
-- **说明**: 批量操作时的文件列表
+- **explanation**: English textfileEnglish text
 
 ---
 
-## 响应格式
+## responseEnglish text
 
-### 成功响应
+### successresponse
 
 ```json
 {
@@ -183,18 +183,18 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-### 字段说明
+### English textexplanation
 
-| 字段 | 类型 | 说明 |
+| English text | English text | explanation |
 |------|------|------|
-| `filepath` | string | 实际写入的文件路径 |
-| `bytes_written` | int | 写入的字节数 |
-| `dirs_created` | boolean | 是否创建了新目录 |
-| `line_ending` | string | 使用的行结尾格式（`"lf"` 或 `"crlf"`）|
-| `lint` | object | 语法检查结果 |
-| `error` | string | 错误信息（仅在失败时出现） |
+| `filepath` | string | actualEnglish textfilepath |
+| `bytes_written` | int | English text |
+| `dirs_created` | boolean | English textdirectory |
+| `line_ending` | string | useEnglish text(`"lf"` English text `"crlf"`)|
+| `lint` | object | English textresult |
+| `error` | string | errorinformation(English textfailureEnglish text) |
 
-### 错误响应
+### errorresponse
 
 ```json
 {
@@ -216,9 +216,9 @@ toolRegistry->registerTool(fileTool.get());
 
 ---
 
-## 常见场景
+## English text
 
-### 场景 1: 创建 Python 项目结构
+### English text 1: English text Python English text
 
 ```json
 {
@@ -248,7 +248,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-### 场景 2: 创建配置文件 (JSON)
+### English text 2: English textconfigurationfile (JSON)
 
 ```json
 {
@@ -259,7 +259,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-响应包含 JSON 语法检查结果：
+responseEnglish text JSON English textresult:
 ```json
 {
   "bytes_written": 67,
@@ -269,7 +269,7 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-### 场景 3: 更新现有文件保留格式
+### English text 3: English textfileEnglish text
 
 ```json
 {
@@ -280,9 +280,9 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-如果 `data.txt` 原本使用 CRLF，新内容也会自动转换为 CRLF。
+English text `data.txt` English textuse CRLF, English textcontentEnglish text CRLF.
 
-### 场景 4: 覆盖文件时进行检查点
+### English text 4: English textfileEnglish textcheckpoint
 
 ```json
 {
@@ -293,27 +293,27 @@ toolRegistry->registerTool(fileTool.get());
 }
 ```
 
-系统会自动：
-1. 创建 `src/app.py` 的检查点备份
-2. 原子写入新内容
-3. 返回成功响应及检查点 ID
+systemEnglish text:
+1. English text `src/app.py` English textcheckpointEnglish text
+2. English textcontent
+3. English textsuccessresponseEnglish textcheckpoint ID
 
 ---
 
-## 与 LLM 集成示例
+## English text LLM English textexample
 
-### Agent 提示词模板
+### Agent promptEnglish text
 
 ```
-你可以使用 file_creation 工具创建和修改文件。
+English textAlloweduse file_creation toolEnglish textfile.
 
-工具支持以下操作:
-- create_file: 创建新文件（如果已存在会报错）
-- write_file: 创建或覆盖文件
-- create_batch: 批量创建多个文件
+toolsupportEnglish text:
+- create_file: English textfile(English text)
+- write_file: English textfile
+- create_batch: English textfile
 
-示例：
-1. 创建单个 Python 文件:
+example:
+1. English text Python file:
    {
      "tool": "file_creation",
      "operation": "create_file",
@@ -321,43 +321,43 @@ toolRegistry->registerTool(fileTool.get());
      "content": "print('Hello, World!')"
    }
 
-2. 创建多个文件时，使用 create_batch 提高效率:
+2. English textfileEnglish text, use create_batch English text:
    {
      "tool": "file_creation",
      "operation": "create_batch",
      "files": [...]
    }
 
-关键点:
-- 路径相对于工作区根目录
-- 默认创建父目录
-- 保留现有文件的格式
-- 保护系统关键文件
+English text:
+- pathEnglish textdirectory
+- defaultEnglish textdirectory
+- English textfileEnglish text
+- English textsystemEnglish textfile
 ```
 
 ---
 
-## 错误处理
+## errorEnglish text
 
-### 常见错误及解决方案
+### English texterrorEnglish text
 
-| 错误 | 原因 | 解决 |
+| error | English text | English text |
 |-----|------|------|
-| "File already exists" | 文件已存在且 `overwrite=false` | 设置 `overwrite: true` 或删除文件 |
-| "Path traversal detected" | 路径试图访问工作区外 | 使用相对路径，避免 `../` |
-| "Path write not allowed" | 沙箱拒绝访问 | 检查沙箱配置 |
-| "Cannot write to protected path" | 目标是受保护的系统路径 | 改用允许的路径 |
-| "Failed to create temporary file" | 磁盘满或权限问题 | 检查磁盘空间和文件权限 |
+| "File already exists" | fileEnglish text `overwrite=false` | English text `overwrite: true` English textfile |
+| "Path traversal detected" | pathEnglish text | useEnglish textpath, English text `../` |
+| "Path write not allowed" | English text | English textconfiguration |
+| "Cannot write to protected path" | English textsystempath | English textpath |
+| "Failed to create temporary file" | English text | English textfileEnglish text |
 
-### 调试建议
+### English text
 
-启用详细日志：
+English textlog:
 ```cpp
-// 在工具执行前
+// English texttoolEnglish text
 fileCreationTool->setVerboseLogging(true);
 ```
 
-检查返回的 `lint` 字段了解语法问题：
+English text `lint` English text:
 ```json
 {
   "lint": {
@@ -369,79 +369,79 @@ fileCreationTool->setVerboseLogging(true);
 
 ---
 
-## 最佳实践
+## English text
 
-### ✅ 推荐做法
+### ✅ recommendedEnglish text
 
-1. **使用原子操作**
+1. **useEnglish text**
    ```json
    {"operation": "write_file", "path": "config.json", "content": "..."}
    ```
-   而不是多步操作
+   English textstepEnglish text
 
-2. **批量创建相关文件**
+2. **English textfile**
    ```json
    {"operation": "create_batch", "files": [...]}
    ```
-   比单个创建更高效
+   English text
 
-3. **设置正确的行结尾**
+3. **English text**
    ```json
-   {"line_ending": "lf"}  // 对 Unix/Linux
-   {"line_ending": "crlf"}  // 对 Windows
+   {"line_ending": "lf"}  // English text Unix/Linux
+   {"line_ending": "crlf"}  // English text Windows
    ```
 
-4. **利用检查点**
+4. **English textcheckpoint**
    ```json
    {"operation": "write_file", "path": "important.txt", "content": "..."}
-   // 系统自动创建备份
+   // systemEnglish text
    ```
 
-5. **验证语法**
+5. **English text**
    ```json
    {"path": "config.json", "content": "{...}"}
-   // 响应包含 lint 结果
+   // responseEnglish text lint result
    ```
 
-### ❌ 避免做法
+### ❌ English text
 
-1. **不要手动处理路径遍历**
+1. **English textpathEnglish text**
    ```json
-   {"path": "../../etc/passwd"}  // 会被拒绝
+   {"path": "../../etc/passwd"}  // English text
    ```
 
-2. **不要创建超大文件**
+2. **English textfile**
    ```json
-   {"content": "..."}  // > 50MB 会被拒绝
+   {"content": "..."}  // > 50MB English text
    ```
 
-3. **不要忽视错误响应**
+3. **English texterrorresponse**
    ```cpp
-   // 总是检查 result.isError
+   // English text result.isError
    if (result.isError) { handle_error(); }
    ```
 
-4. **不要假设文件会立即可见**
+4. **English textfileEnglish text**
    ```cpp
-   // write_file 后立即 read_file 可能有延迟
-   // 使用返回的 bytes_written 验证成功
+   // write_file English text read_file English text
+   // useEnglish text bytes_written English textsuccess
    ```
 
 ---
 
-## 性能优化
+## English textoptimize
 
-### 大量文件创建
+### English textfileEnglish text
 
-对于 100+ 个文件，使用 `create_batch`:
+English text 100+ English textfile, use `create_batch`:
 
 ```cpp
-// ❌ 慢：100 个请求
+// ❌ English text: 100 English textrequest
 for (int i = 0; i < 100; i++) {
     toolRegistry->execute("file_creation", createFileOp());
 }
 
-// ✅ 快：1 个请求
+// ✅ English text: 1 English textrequest
 QJsonArray files;
 for (int i = 0; i < 100; i++) {
     files.append(fileSpec(i));
@@ -450,9 +450,9 @@ batchOp["files"] = files;
 toolRegistry->execute("file_creation", batchOp);
 ```
 
-### 大文件处理
+### English textfileEnglish text
 
-对于接近 50MB 限制的文件：
+English text 50MB English textfile:
 
 ```json
 {
@@ -462,62 +462,62 @@ toolRegistry->execute("file_creation", batchOp);
 }
 ```
 
-如需超大文件，建议分块：
-1. 使用外部工具（`dd`, `split`）
-2. 或实现流式 API（待实现）
+English textfile, English text:
+1. useEnglish texttool(`dd`, `split`)
+2. English textimplementationEnglish text API(English textimplementation)
 
 ---
 
-## 故障排查
+## English text
 
-### 检查清单
+### English text
 
-- [ ] 文件路径有效且不包含遍历模式
-- [ ] 工作区根目录已正确配置
-- [ ] 沙箱管理器已连接（如使用）
-- [ ] 磁盘有足够空间
-- [ ] 目录权限允许写入
-- [ ] 文件不被其他进程锁定
+- [ ] filepathEnglish text
+- [ ] English textdirectoryEnglish textconfiguration
+- [ ] English textmanagementEnglish text(English textuse)
+- [ ] English text
+- [ ] directoryEnglish text
+- [ ] fileEnglish text
 
-### 启用调试模式
+### English text
 
 ```cpp
-// 在创建工具后
+// English texttoolEnglish text
 fileTool->setDebugLogging(true);
 
-// 执行操作
+// English text
 ToolResult result = fileTool->execute(callId, args);
 
-// 查看详细日志输出
+// English textlogoutput
 qDebug() << result.output;
 ```
 
 ---
 
-## 相关工具
+## English texttool
 
-| 工具 | 用途 | 关系 |
+| tool | English text | English text |
 |------|------|------|
-| `FileSystemTool` | 读写文件操作 | 补充工具（无原子性保证） |
-| `CheckpointManager` | 文件备份 | 集成依赖（自动调用） |
-| `SandboxManager` | 沙箱隔离 | 可选但推荐 |
+| `FileSystemTool` | English textfileEnglish text | English texttool(English text) |
+| `CheckpointManager` | fileEnglish text | English text(English text) |
+| `SandboxManager` | English text | English textrecommended |
 
 ---
 
-## 更新日志
+## English textlog
 
-### v1.0 (当前版本)
-- ✅ 原子文件写入
-- ✅ 元数据保留（行结尾、BOM、权限）
-- ✅ 单文件和批量操作
-- ✅ 路径安全检查
-- ✅ JSON/Python 语法验证
-- ✅ 检查点集成
+### v1.0 (English text)
+- ✅ English textfileEnglish text
+- ✅ English textdataEnglish text(English text, BOM, English text)
+- ✅ English textfileEnglish text
+- ✅ pathsafetyEnglish text
+- ✅ JSON/Python English text
+- ✅ checkpointEnglish text
 
-### 计划中 (v2.0+)
-- 🔲 异步写入 API
-- 🔲 流式大文件处理
-- 🔲 Git 自动提交
-- 🔲  代码格式化集成
-- 🔲  加密存储支持
-- 🔲  分布式锁机制
+### English text (v2.0+)
+- 🔲 English textstepEnglish text API
+- 🔲 English textfileEnglish text
+- 🔲 Git English text
+- 🔲  English text
+- 🔲  English textsupport
+- 🔲  English text

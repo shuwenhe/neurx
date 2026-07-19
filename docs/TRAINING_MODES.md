@@ -1,182 +1,182 @@
-# 训练模式对照表
+# trainingEnglish text
 
-## 当前 make pretrain 配置
+## English text make pretrain configuration
 
-### ❌ 默认: make pretrain (CPU模式)
+### ❌ default: make pretrain (CPUEnglish text)
 ```bash
 make pretrain
 ```
 
-**当前配置:**
-- ✓ 脚本: `scripts/legacy/minimal_train.s` (纯S语言，CPU计算)
-- ❌ 不使用GPU
-- ❌ 不使用CUDA
-- 运行模式: 单线程CPU训练 (容易hang在str_len())
+**English textconfiguration:**
+- ✓ English text: `scripts/legacy/minimal_train.s` (English textSlanguage, CPUcompute)
+- ❌ English textuseGPU
+- ❌ English textuseCUDA
+- runEnglish text: English textCPUtraining (English texthangEnglish textstr_len())
 
-**流程:**
+**pipeline:**
 ```
 make pretrain
-  ↓ 编译
+  ↓ compile
 scripts/legacy/minimal_train.s → minimal_train.ir
-  ↓ 运行
+  ↓ run
 S_RUNNER minimal_train.ir
-  ↓ 执行
-CPU计算 (无GPU加速)
+  ↓ English text
+CPUcompute (English textGPUEnglish text)
 ```
 
-**问题:**
-- str_len() 函数会hang (已知bug)
-- 仅处理~147个文档后卡住
-- 无法完成实际训练
+**English text:**
+- str_len() functionEnglish texthang (English textbug)
+- English text~147English text
+- English textactualtraining
 
 ---
 
-### ✅ GPU模式: make pretrain-gpu (推荐)
+### ✅ GPUEnglish text: make pretrain-gpu (recommended)
 ```bash
 make pretrain-gpu
 ```
 
-**当前配置:**
-- ✓ 脚本: `scripts/legacy/pretrain_gpu.s` (S语言 + CUDA)
-- ✓ 使用GPU并发训练
-- ✓ 调用CUDA核函数
-- 运行模式: GPU加速矩阵运算
+**English textconfiguration:**
+- ✓ English text: `scripts/legacy/pretrain_gpu.s` (Slanguage + CUDA)
+- ✓ useGPUEnglish texttraining
+- ✓ English textCUDAEnglish textfunction
+- runEnglish text: GPUEnglish text
 
-**流程:**
+**pipeline:**
 ```
 make pretrain-gpu
-  ↓ GPU检测 (nvidia-smi)
-NEURX_CUDA_DEVICE_COUNT 自动检测
-  ↓ 编译
+  ↓ GPUEnglish text (nvidia-smi)
+NEURX_CUDA_DEVICE_COUNT English text
+  ↓ compile
 scripts/legacy/pretrain_gpu.s → pretrain_gpu.ir
-  ↓ 调用CUDA桥接
+  ↓ English textCUDAEnglish text
 build-cuda-train-bridge
-  ↓ 运行
+  ↓ run
 S_RUNNER pretrain_gpu.ir
-  ↓ GPU执行
-CUDA核函数 (cublasSgemm, relu, loss等)
+  ↓ GPUEnglish text
+CUDAEnglish textfunction (cublasSgemm, relu, lossEnglish text)
 ```
 
-**特性:**
-- ✓ 自动检测GPU数量
-- ✓ 并发执行CUDA核函数
-- ✓ 支持多GPU
-- ✓ 批处理加速
+**English text:**
+- ✓ English textGPUcount
+- ✓ English textCUDAEnglish textfunction
+- ✓ supportEnglish textGPU
+- ✓ English text
 
 ---
 
-## 新增脚本状态
+## English textstate
 
-### scripts/legacy/gpu_train.s (新创建 - 未集成)
-**状态:** ✅ 完成但未集成到Makefile
+### scripts/legacy/gpu_train.s (English text - English text)
+**state:** ✅ English textMakefile
 
-- 位置: `scripts/legacy/gpu_train.s` (500+ 行)
-- 功能: GPU训练完整实现 (文件I/O + CUDA FFI)
-- 库依赖: 
-  - libcuda_kernels.so (已生成)
-  - libcuda_runtime.so (已生成)
-- 编译: `s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train.ir`
-- 状态: 已编译可运行
+- English text: `scripts/legacy/gpu_train.s` (500+ English text)
+- English text: GPUtrainingcompleteimplementation (fileI/O + CUDA FFI)
+- English text:
+  - libcuda_kernels.so (English textgenerate)
+  - libcuda_runtime.so (English textgenerate)
+- compile: `s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train.ir`
+- state: English textcompileEnglish textrun
 
-**这个脚本比pretrain_gpu.s更完善，但还未集成到Makefile中**
+**English textpretrain_gpu.sEnglish text, English textMakefileEnglish text**
 
 ---
 
-## 快速对比
+## quickEnglish text
 
-| 特性 | make pretrain | make pretrain-gpu |
+| English text | make pretrain | make pretrain-gpu |
 |------|---------------|-------------------|
-| 默认选择 | ✓ 是 | ❌ 否 |
-| 脚本 | minimal_train.s | pretrain_gpu.s |
-| CPU计算 | ✓ | ✓ (预处理) |
-| GPU计算 | ❌ | ✓ (核函数) |
-| 速度 | 慢 | 快 (10-100x) |
-| 已知bug | str_len()hang | 无已知bug |
-| 推荐 | ❌ 开发用 | ✓ 生产用 |
+| defaultEnglish text | ✓ English text | ❌ English text |
+| English text | minimal_train.s | pretrain_gpu.s |
+| CPUcompute | ✓ | ✓ (English text) |
+| GPUcompute | ❌ | ✓ (English textfunction) |
+| English text | English text | English text (10-100x) |
+| English textbug | str_len()hang | English textbug |
+| recommended | ❌ English text | ✓ English text |
 
 ---
 
-## 如何选择
+## English text
 
-### 使用 CPU 训练 (make pretrain)
+### use CPU training (make pretrain)
 ```bash
 make pretrain
 ```
-**适用场景:**
-- 调试和测试 (但会hang)
-- CPU集群环境
-- GPU不可用的场景
+**English text:**
+- English texttest (English texthang)
+- CPUEnglish text
+- GPUEnglish text
 
-**问题:** 当前无法正常运行 (str_len() bug)
+**English text:** English textrun (str_len() bug)
 
-### 使用 GPU 训练 (make pretrain-gpu) - 推荐 ⭐
+### use GPU training (make pretrain-gpu) - recommended ⭐
 ```bash
 make pretrain-gpu
 ```
-**适用场景:**
-- 生产环境
-- NVIDIA GPU可用
-- 需要高性能训练
+**English text:**
+- English text
+- NVIDIA GPUEnglish text
+- RequiredEnglish texttraining
 
-**优势:**
-- 自动GPU检测
-- 并发执行
-- 10-100x加速
+**English text:**
+- English textGPUEnglish text
+- English text
+- 10-100xEnglish text
 
 ---
 
-## 架构细节
+## English text
 
-### CPU 路径 (make pretrain)
+### CPU path (make pretrain)
 ```
 minimal_train.s
-├─ runtime_read_text_file() → 加载shard
-├─ 文本解析 (S语言)
-├─ 参数准备
-└─ CPU计算
-   └─ ❌ str_len() 会在这里hang
+├─ runtime_read_text_file() → loadshard
+├─ English text (Slanguage)
+├─ parameterEnglish text
+└─ CPUcompute
+   └─ ❌ str_len() English texthang
 ```
 
-### GPU 路径 (make pretrain-gpu)
+### GPU path (make pretrain-gpu)
 ```
 pretrain_gpu.s
-├─ runtime_read_text_file() → 加载shard
-├─ 文本解析 (S语言)
-├─ CUDA初始化 (cublasCreate)
-├─ 数据转移 → GPU内存
-├─ GPU计算
-│  ├─ cublasSgemm() - 矩阵乘法
-│  ├─ cuda_relu_forward() - 激活
-│  ├─ cuda_error_loss_kernel() - 损失
-│  └─ cuda_sgd_update_kernel() - 更新
-└─ 结果返回 → 主存
+├─ runtime_read_text_file() → loadshard
+├─ English text (Slanguage)
+├─ CUDAinitialize (cublasCreate)
+├─ dataEnglish text → GPUEnglish text
+├─ GPUcompute
+│  ├─ cublasSgemm() - English text
+│  ├─ cuda_relu_forward() - English text
+│  ├─ cuda_error_loss_kernel() - loss
+│  └─ cuda_sgd_update_kernel() - English text
+└─ resultEnglish text → mainEnglish text
 ```
 
-### GPU 路径 (scripts/legacy/gpu_train.s - 新)
+### GPU path (scripts/legacy/gpu_train.s - English text)
 ```
-gpu_train.s (更完善)
-├─ 完整的文件I/O
-├─ GPU上下文管理
-├─ 内存管理 (cuda_malloc/free)
-├─ cuBLAS操作
-└─ 完整的CUDA FFI绑定
+gpu_train.s (English text)
+├─ completeEnglish textfileI/O
+├─ GPUEnglish textmanagement
+├─ English textmanagement (cuda_malloc/free)
+├─ cuBLASEnglish text
+└─ completeEnglish textCUDA FFIEnglish text
 ```
 
 ---
 
-## 编译命令
+## compileEnglish text
 
-### CPU 版本编译
+### CPU English textcompile
 ```bash
 s ir scripts/legacy/minimal_train.s -o artifacts/build/pretrain_orchestrator/minimal_train.ir
 ```
 
-### GPU 版本编译
+### GPU English textcompile
 ```bash
 s ir scripts/legacy/pretrain_gpu.s -o artifacts/build/gpu_pretrain/pretrain_gpu.ir
 ```
 
-### 新GPU脚本编译
+### English textGPUEnglish textcompile
 ```bash
 export LD_LIBRARY_PATH="./artifacts/build/cuda_kernels:./artifacts/build/cuda_runtime:$LD_LIBRARY_PATH"
 s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
@@ -184,9 +184,9 @@ s ir scripts/legacy/gpu_train.s -o artifacts/build/gpu_train/gpu_train.ir
 
 ---
 
-## 环境变量配置
+## English textconfiguration
 
-### CPU 训练
+### CPU training
 ```bash
 export NEURX_PRETRAIN_MICRO_BATCH=4
 export NEURX_PRETRAIN_SEQ_LEN=256
@@ -194,74 +194,74 @@ export NEURX_PRETRAIN_LR=0.0002
 make pretrain
 ```
 
-### GPU 训练
+### GPU training
 ```bash
-export NEURX_PRETRAIN_MICRO_BATCH=32    # GPU可处理更大批次
-export NEURX_PRETRAIN_SEQ_LEN=512       # 更长序列
+export NEURX_PRETRAIN_MICRO_BATCH=32    # GPUEnglish textbatch
+export NEURX_PRETRAIN_SEQ_LEN=512       # English text
 export NEURX_PRETRAIN_LR=0.0002
-export NEURX_NUM_GPUS=1                 # 指定GPU数量
+export NEURX_NUM_GPUS=1                 # English textGPUcount
 make pretrain-gpu
 ```
 
 ---
 
-## 下一步建议
+## English textstepEnglish text
 
-### 立即可做
-1. ✓ 使用 `make pretrain-gpu` 进行GPU训练
-2. ✓ CUDA库已编译完成 (libcuda_kernels.so, libcuda_runtime.so)
-3. ✓ scripts/legacy/gpu_train.s 已准备好
+### English text
+1. ✓ use `make pretrain-gpu` English textGPUtraining
+2. ✓ CUDAEnglish textcompileEnglish text (libcuda_kernels.so, libcuda_runtime.so)
+3. ✓ scripts/legacy/gpu_train.s English text
 
-### 短期改进
-1. 将 scripts/legacy/gpu_train.s 集成到Makefile
-2. 修复 str_len() bug (make pretrain才能工作)
-3. 性能优化 (批处理、梯度累积)
+### English text
+1. English text scripts/legacy/gpu_train.s English textMakefile
+2. English text str_len() bug (make pretrainEnglish text)
+3. English textoptimize (English text, gradientEnglish text)
 
-### 中期目标
-1. 分布式多GPU训练
-2. 混合精度训练 (fp16)
-3. 性能基准测试
+### English text
+1. English textGPUtraining
+2. English texttraining (fp16)
+3. English texttest
 
 ---
 
-## 文档参考
+## English text
 
-| 文档 | 说明 |
+| English text | explanation |
 |------|------|
-| [CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPU架构详解 |
-| [S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA 实现 |
-| [cuda/BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | CUDA构建系统 |
-| [scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPU训练脚本 (新) |
-| [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s) | GPU训练脚本 (现有) |
+| [CUDA_GPU_ARCHITECTURE.md](../CUDA_GPU_ARCHITECTURE.md) | GPUEnglish text |
+| [S_CUDA_IMPLEMENTATION_GUIDE.md](../S_CUDA_IMPLEMENTATION_GUIDE.md) | S vs CUDA implementation |
+| [cuda/BUILD_SYSTEM_S_LANGUAGE.md](BUILD_SYSTEM_S_LANGUAGE.md) | CUDAEnglish textsystem |
+| [scripts/legacy/gpu_train.s](../scripts/legacy/gpu_train.s) | GPUtrainingEnglish text (English text) |
+| [scripts/legacy/pretrain_gpu.s](../scripts/legacy/pretrain_gpu.s) | GPUtrainingEnglish text (English text) |
 
 ---
 
-## 快速开始
+## quickstart
 
-### GPU训练 (推荐)
+### GPUtraining (recommended)
 ```bash
-# 1. 验证GPU
+# 1. English textGPU
 nvidia-smi
 
-# 2. 构建CUDA系统
+# 2. English textCUDAsystem
 make build-cuda-kernels
 make build-cuda-runtime
 
-# 3. 启动GPU训练
+# 3. startGPUtraining
 make pretrain-gpu
 
-# 4. 监控训练
+# 4. monitoringtraining
 tail -f checkpoint/NeurX-1.3/logs/pretrain_gpu_*.log
 ```
 
-### CPU训练 (调试用 - 当前有bug)
+### CPUtraining (English text - English textbug)
 ```bash
-# 当前无法运行 (str_len() hang)
-# 修复后可用:
+# English textrun (str_len() hang)
+# English text:
 make pretrain
 ```
 
 ---
 
-**更新日期:** 2026-07-13
-**状态:** ✅ GPU训练系统完整，推荐使用 `make pretrain-gpu`
+**English text:** 2026-07-13
+**state:** ✅ GPUtrainingsystemcomplete, recommendeduse `make pretrain-gpu`

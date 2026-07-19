@@ -1,47 +1,47 @@
-# NeurX 文件操作功能快速实现指南
+# NeurX fileEnglish textquickimplementationEnglish text
 
-**创建日期**: 2026-06-08  
-**用途**: 在 C++ 中实现对应功能的快速参考
+**English text**: 2026-06-08
+**English text**: English text C++ English textimplementationEnglish textquickEnglish text
 
 ---
 
-## 🚀 快速实现矩阵
+## 🚀 quickimplementationEnglish text
 
-### 表格格式 (易于查找)
+### English text (English text)
 
-| # | 功能 | JS/TS 实现 | 参数 | C++ 对标 | 复杂度 | 状态 |
+| # | English text | JS/TS implementation | parameter | C++ English text | English text | state |
 |---|------|-----------|------|---------|--------|------|
-| 1 | **写文件(原子)** | `writeFileAtomic` | `path,data,mode` | FileSystemTool::opWriteFile | ⭐⭐⭐ | ✅ |
-| 2 | **读文件** | `readFile` | `path,encoding,start_line,end_line` | FileService::readFile | ⭐⭐ | ✅ |
-| 3 | **创建目录** | `ensureDirectoryExists` | `path,recursive,mode` | FileService::createDirectory | ⭐ | ✅ |
-| 4 | **删除文件** | `fs.unlink` | `path,force` | FileSystemTool::opDeleteFile | ⭐⭐ | ✅ |
-| 5 | **移动文件** | `fs.rename` | `source,dest` | FileSystemTool::opMoveFile | ⭐⭐ | ✅ |
-| 6 | **复制文件** | `fs.copyFile` | `source,dest,recursive` | FileSystemTool::opCopyFile | ⭐⭐ | ✅ |
-| 7 | **列目录** | `fs.readdir` | `path,recursive,filter` | FileService::listDirectory | ⭐⭐ | ✅ |
-| 8 | **编辑文件** | 自定义 | `path,operation,text` | ApplyPatchTool | ⭐⭐⭐ | ✅ |
-| 9 | **文件搜索** | 自定义 | `pattern,include,case_sens` | SearchTool::opGrepSearch | ⭐⭐ | ✅ |
-| 10 | **查找文件** | 自定义 | `pattern,exclude,max_res` | SearchTool::opFindFiles | ⭐ | ✅ |
-| 11 | **文件监视** | 自定义 | `path,recursive,debounce` | FileWatcher | ⭐⭐⭐ | ✅ |
-| 12 | **权限操作** | 嵌入式 | `path,mode` | FileService::chmod | ⭐ | ✅ |
-| 13 | **批量操作** | 自定义 | `files,atomic` | FileCreationTool::opCreateBatch | ⭐⭐⭐ | ✅ |
-| 14 | **备份/恢复** | 自定义 | `paths,description` | CheckpointManager | ⭐⭐⭐ | ✅ |
-| 15 | **获取元数据** | `fs.stat` | `path` | FileService::getFileInfo | ⭐ | ✅ |
-| 16 | **编码处理** | 自定义 | `path,encoding,auto_detect` | FileService::detectEncoding | ⭐⭐ | ✅ |
-| 17 | **最近文件** | 自定义 | `maxCount` | FileService::getRecentFiles | ⭐ | ✅ |
+| 1 | **English textfile(English text)** | `writeFileAtomic` | `path,data,mode` | FileSystemTool::opWriteFile | ⭐⭐⭐ | ✅ |
+| 2 | **English textfile** | `readFile` | `path,encoding,start_line,end_line` | FileService::readFile | ⭐⭐ | ✅ |
+| 3 | **English textdirectory** | `ensureDirectoryExists` | `path,recursive,mode` | FileService::createDirectory | ⭐ | ✅ |
+| 4 | **English textfile** | `fs.unlink` | `path,force` | FileSystemTool::opDeleteFile | ⭐⭐ | ✅ |
+| 5 | **English textfile** | `fs.rename` | `source,dest` | FileSystemTool::opMoveFile | ⭐⭐ | ✅ |
+| 6 | **English textfile** | `fs.copyFile` | `source,dest,recursive` | FileSystemTool::opCopyFile | ⭐⭐ | ✅ |
+| 7 | **English textdirectory** | `fs.readdir` | `path,recursive,filter` | FileService::listDirectory | ⭐⭐ | ✅ |
+| 8 | **English textfile** | English text | `path,operation,text` | ApplyPatchTool | ⭐⭐⭐ | ✅ |
+| 9 | **filesearch** | English text | `pattern,include,case_sens` | SearchTool::opGrepSearch | ⭐⭐ | ✅ |
+| 10 | **English textfile** | English text | `pattern,exclude,max_res` | SearchTool::opFindFiles | ⭐ | ✅ |
+| 11 | **fileEnglish text** | English text | `path,recursive,debounce` | FileWatcher | ⭐⭐⭐ | ✅ |
+| 12 | **English text** | English text | `path,mode` | FileService::chmod | ⭐ | ✅ |
+| 13 | **English text** | English text | `files,atomic` | FileCreationTool::opCreateBatch | ⭐⭐⭐ | ✅ |
+| 14 | **English text/recover** | English text | `paths,description` | CheckpointManager | ⭐⭐⭐ | ✅ |
+| 15 | **English textdata** | `fs.stat` | `path` | FileService::getFileInfo | ⭐ | ✅ |
+| 16 | **English text** | English text | `path,encoding,auto_detect` | FileService::detectEncoding | ⭐⭐ | ✅ |
+| 17 | **English textfile** | English text | `maxCount` | FileService::getRecentFiles | ⭐ | ✅ |
 
 ---
 
-## 📝 按类别分组的实现顺序
+## 📝 English textimplementationEnglish text
 
-### Phase 1: 基础 I/O (必须)
+### Phase 1: English text I/O (English text)
 ```
 1. readFile          ← FileService::readFile
-2. writeFileAtomic   ← FileSystemTool::opWriteFile  
+2. writeFileAtomic   ← FileSystemTool::opWriteFile
 3. createDirectory   ← FileService::createDirectory
 4. deleteFile        ← FileSystemTool::opDeleteFile
 ```
 
-### Phase 2: 文件操作 (重要)
+### Phase 2: fileEnglish text (English text)
 ```
 5. moveFile          ← FileSystemTool::opMoveFile
 6. copyFile          ← FileSystemTool::opCopyFile
@@ -49,14 +49,14 @@
 8. getFileInfo       ← FileService::getFileInfo
 ```
 
-### Phase 3: 搜索功能 (辅助)
+### Phase 3: searchEnglish text (helper)
 ```
 9. grepSearch        ← SearchTool::opGrepSearch
 10. findFiles        ← SearchTool::opFindFiles
 11. detectEncoding   ← FileService::detectEncoding
 ```
 
-### Phase 4: 高级功能 (可选)
+### Phase 4: advancedEnglish text (English text)
 ```
 12. watchFile        ← FileWatcher
 13. editFile         ← ApplyPatchTool
@@ -66,48 +66,48 @@
 
 ---
 
-## 🔧 关键实现细节速查
+## 🔧 English textimplementationEnglish text
 
-### 1️⃣ 原子写入
+### 1️⃣ English text
 ```cpp
-// 关键：tmp 文件 → chmod → sync → rename
+// English text: tmp file → chmod → sync → rename
 async writeFileAtomic(targetPath, data, mode) {
   tmpPath = createTempFile(targetPath);
   write(tmpPath, data);
   if (mode) chmod(tmpPath, mode);
   fsync(tmpPath);
-  rename(tmpPath, targetPath);  // 原子！
+  rename(tmpPath, targetPath);  // English text!
 }
 ```
-- **Qt 对标**: `QSaveFile`
-- **难点**: 确保 fsync 后再 rename
+- **Qt English text**: `QSaveFile`
+- **English text**: English text fsync English text rename
 
-### 2️⃣ 路径安全检查
+### 2️⃣ pathsafetyEnglish text
 ```cpp
-// 关键：相对路径 → 绝对路径 → 验证在 workspace 内
+// English text: English textpath → English textpath → English text workspace English text
 QString safePath(const QString &rel) {
   abs = QDir::cleanPath(m_root.absoluteFilePath(rel));
-  if (!abs.startsWith(m_root.path())) return {};  // 拒绝
+  if (!abs.startsWith(m_root.path())) return {};  // English text
 }
 ```
-- **检查**: `path.relative(root, abs).startsWith("..")`
-- **Qt 对标**: `QDir::relativeFilePath`
+- **English text**: `path.relative(root, abs).startsWith("..")`
+- **Qt English text**: `QDir::relativeFilePath`
 
-### 3️⃣ 递归文件遍历
+### 3️⃣ English textfileEnglish text
 ```cpp
-// 关键：QDirIterator + 递归 + 模式过滤
+// English text: QDirIterator + English text + English text
 QDirIterator it(path, nameFilters, QDir::Files, QDirIterator::Subdirectories);
 while (it.hasNext()) {
-  QString file = it.next();  // 自动递归
-  // 处理文件
+  QString file = it.next();  // English text
+  // English textfile
 }
 ```
-- **Qt 对标**: `QDirIterator::Subdirectories`
-- **模式**: Glob 模式或正则
+- **Qt English text**: `QDirIterator::Subdirectories`
+- **English text**: Glob English text
 
-### 4️⃣ 编码检测
+### 4️⃣ English text
 ```cpp
-// 关键：BOM 识别 → 编码名称
+// English text: BOM English text → English textName
 QString detectEncoding(const QByteArray &data) {
   if (data.startsWith("\xEF\xBB\xBF")) return "UTF-8 BOM";
   if (data.startsWith("\xFF\xFE")) return "UTF-16LE";
@@ -115,90 +115,90 @@ QString detectEncoding(const QByteArray &data) {
   return "UTF-8";
 }
 ```
-- **Qt 对标**: `QStringConverter`
-- **常见**: UTF-8, UTF-16, Latin1
+- **Qt English text**: `QStringConverter`
+- **English text**: UTF-8, UTF-16, Latin1
 
-### 5️⃣ 文件监视
+### 5️⃣ fileEnglish text
 ```cpp
-// 关键：QFileSystemWatcher + 防抖
+// English text: QFileSystemWatcher + English text
 m_watcher = new QFileSystemWatcher();
 connect(m_watcher, &QFileSystemWatcher::fileChanged,
         this, [this](const QString &path) {
   m_debounceTimer.stop();
-  m_debounceTimer.start(500);  // 防抖
+  m_debounceTimer.start(500);  // English text
 });
 ```
-- **Qt 对标**: `QFileSystemWatcher`
-- **防抖**: QTimer 延迟处理
+- **Qt English text**: `QFileSystemWatcher`
+- **English text**: QTimer English text
 
-### 6️⃣ 批量原子操作
+### 6️⃣ English text
 ```cpp
-// 关键：创建检查点 → 逐个写入 → 失败则恢复
+// English text: English textcheckpoint → English text → failureEnglish textrecover
 checkpoint = createCheckpoint(paths);
 for (file in files) {
   if (!write(file)) {
-    restore(checkpoint);  // 回滚
+    restore(checkpoint);  // English text
     return error;
   }
 }
 ```
-- **Qt 对标**: CheckpointManager
-- **事务性**: 全部成功或全部失败
+- **Qt English text**: CheckpointManager
+- **English text**: English textsuccessEnglish textfailure
 
 ---
 
-## 🎯 逐个实现的核心代码框架
+## 🎯 English textimplementationEnglish textframework
 
-### 模板 1: 简单文件操作
+### English text 1: English textfileEnglish text
 ```cpp
 class SimpleFileOp {
 public:
   bool execute(const QString &path) {
     QString safePath = validatePath(path);
     if (safePath.isEmpty()) return false;
-    
+
     QFile file(safePath);
     if (!file.open(QIODevice::ReadOnly)) return false;
-    
-    // 处理文件
-    
+
+    // English textfile
+
     return true;
   }
 private:
   QString validatePath(const QString &path) {
     if (path.isEmpty()) return {};
     QString abs = QDir::cleanPath(m_root.absoluteFilePath(path));
-    // 检查 traversal
-    if (QDir(m_root).relativeFilePath(abs).startsWith("..")) 
+    // English text traversal
+    if (QDir(m_root).relativeFilePath(abs).startsWith(".."))
       return {};
     return abs;
   }
 };
 ```
 
-### 模板 2: 写操作 + 检查点
+### English text 2: English text + checkpoint
 ```cpp
 class WriteFileOp {
 public:
   bool execute(const QString &path, const QString &content) {
     QString safePath = validatePath(path);
     if (safePath.isEmpty()) return false;
-    
-    // 创建检查点
+
+    // English textcheckpoint
     QString id = m_checkpoint->checkpoint({path}, "write_file");
-    
-    // 原子写入
+
+    // English text
     QSaveFile file(safePath);
     if (!file.open(QIODevice::WriteOnly)) return false;
     file.write(content.toUtf8());
     if (!file.commit()) return false;
-    
+
     return true;
   }
 };
 ```
 
-### 模板 3: 迭代 + 搜索
+### English text 3: English text + search
 ```cpp
 class SearchOp {
 public:
@@ -206,12 +206,12 @@ public:
     QRegularExpression re(pattern);
     QDirIterator it(m_root, QDir::Files, QDirIterator::Subdirectories);
     QStringList results;
-    
+
     while (it.hasNext()) {
       QString file = it.next();
       QFile f(file);
       if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
-      
+
       QTextStream in(&f);
       int lineNum = 0;
       while (!in.atEnd()) {
@@ -228,43 +228,43 @@ public:
 
 ---
 
-## 📚 源代码快速定位
+## 📚 English textquickEnglish text
 
-| 功能 | 源文件 | 函数/类 | 行数 |
+| English text | English textfile | function/English text | English text |
 |------|--------|--------|------|
-| 写文件 | FileSystemTool.cpp | opWriteFile | ~190 |
-| 读文件 | FileService.cpp | readFile | ~60 |
-| 创建目录 | FileService.cpp | createDirectory | ~50 |
-| 删除文件 | FileSystemTool.cpp | opDeleteFile | ~240 |
-| 移动文件 | FileSystemTool.cpp | opMoveFile | ~250 |
-| 列目录 | FileSystemTool.cpp | opListDir | ~210 |
-| 搜索 | SearchTool.cpp | opGrepSearch | ~32 |
-| 监视 | FileWatcher.cpp | onFileChanged | ~160 |
-| 权限 | FileService.cpp | - | 嵌入 |
-| 编码 | FileService.cpp | detectEncoding | ~75 |
+| English textfile | FileSystemTool.cpp | opWriteFile | ~190 |
+| English textfile | FileService.cpp | readFile | ~60 |
+| English textdirectory | FileService.cpp | createDirectory | ~50 |
+| English textfile | FileSystemTool.cpp | opDeleteFile | ~240 |
+| English textfile | FileSystemTool.cpp | opMoveFile | ~250 |
+| English textdirectory | FileSystemTool.cpp | opListDir | ~210 |
+| search | SearchTool.cpp | opGrepSearch | ~32 |
+| English text | FileWatcher.cpp | onFileChanged | ~160 |
+| English text | FileService.cpp | - | English text |
+| English text | FileService.cpp | detectEncoding | ~75 |
 
 ---
 
-## ✅ 验收标准
+## ✅ English text
 
-每个功能实现完成后检查:
+English textimplementationEnglish text:
 
-- [ ] 路径遍历防护 ✓
-- [ ] 错误处理完整 ✓
-- [ ] 权限验证 ✓
-- [ ] 日志记录 ✓
-- [ ] 单元测试 ✓
-- [ ] 集成测试 ✓
-- [ ] 文档完整 ✓
-
----
-
-## 🔗 跨引用
-
-- **完整分析**: [NEURX_FILE_OPERATIONS_ANALYSIS.md](NEURX_FILE_OPERATIONS_ANALYSIS.md)
-- **C++ 参考**: neurx-code/src/services/FileService.h
-- **工具参考**: neurx-code/src/tools/FileSystemTool.h
+- [ ] pathEnglish text ✓
+- [ ] errorEnglish textcomplete ✓
+- [ ] English text ✓
+- [ ] logEnglish text ✓
+- [ ] English texttest ✓
+- [ ] English texttest ✓
+- [ ] English textcomplete ✓
 
 ---
 
-**最后更新**: 2026-06-08 | **版本**: 1.0
+## 🔗 English text
+
+- **completeEnglish text**: [NEURX_FILE_OPERATIONS_ANALYSIS.md](NEURX_FILE_OPERATIONS_ANALYSIS.md)
+- **C++ English text**: neurx-code/src/services/FileService.h
+- **toolEnglish text**: neurx-code/src/tools/FileSystemTool.h
+
+---
+
+**English text**: 2026-06-08 | **English text**: 1.0

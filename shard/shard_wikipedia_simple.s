@@ -88,7 +88,7 @@ func get_docs_per_shard() string {
 }
 
 func emit_progress(string message) {
-    // 输出到标准错误，带换行符
+    // outputEnglish texterror, English text
     runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
 }
 

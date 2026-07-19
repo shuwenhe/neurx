@@ -1,92 +1,92 @@
 ╔════════════════════════════════════════════════════════════════════╗
-║               NeurX LLM 训练快速参考卡                             ║
+║               NeurX LLM trainingquickEnglish text                             ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-🚀 一行启动:
+🚀 English textstart:
   cd /Users/feifei/shuwen/neurx && bash run_llm_training_with_compiler.sh
 
-⚙️ 常用配置:
-  
-  基础训练 (100步):
+⚙️ English textconfiguration:
+
+  English texttraining (100step):
     bash run_llm_training_with_compiler.sh
-  
-  更长训练 (1000步):
+
+  English texttraining (1000step):
     export NEURX_TOTAL_STEPS=1000 && bash run_llm_training_with_compiler.sh
-  
-  大批处理 (32个样本):
+
+  English text (32English text):
     export NEURX_BATCH_SIZE=32 && bash run_llm_training_with_compiler.sh
-  
-  长序列 (32 tokens):
+
+  English text (32 tokens):
     export NEURX_SEQ_LENGTH=32 && bash run_llm_training_with_compiler.sh
-  
-  低学习率 (更稳定):
+
+  English textlearning rate (English text):
     export NEURX_LR=0.0001 && bash run_llm_training_with_compiler.sh
-  
-  完整自定义:
+
+  completeEnglish text:
     export NEURX_TOTAL_STEPS=2000 \
            NEURX_BATCH_SIZE=16 \
            NEURX_LR=0.0005 \
            NEURX_SEQ_LENGTH=16 && \
     bash run_llm_training_with_compiler.sh
 
-📊 监控:
-  
-  查看实时日志:
+📊 monitoring:
+
+  English textlog:
     tail -f artifacts/logs/training_*.log
-  
-  查看检查点:
+
+  English textcheckpoint:
     ls -la artifacts/checkpoints/llm_training/
-  
-  查看编译输出:
+
+  English textcompileoutput:
     ls -lh build/llm_training_compiler/
 
-✅ 验证:
-  
-  编译器就绪:
+✅ English text:
+
+  compileEnglish text:
     ls /Users/feifei/train/s/.local/bin/s && echo "✓"
-  
-  源代码就绪:
+
+  English text:
     ls train/llm_training_compiler_compatible.s && echo "✓"
-  
-  输出目录:
+
+  outputdirectory:
     ls artifacts/checkpoints/llm_training/
 
-📈 参数速查表:
+📈 parameterEnglish text:
 
-  参数                  | 默认 | 范围         | 说明
+  parameter                  | default | English text         | explanation
   ──────────────────────|──────|──────────────|─────────────────
-  NEURX_TOTAL_STEPS     | 100  | 10-5000      | 训练步数
-  NEURX_BATCH_SIZE      | 4    | 1-64         | 批处理大小
-  NEURX_LR              | 0.001| 0.00001-0.1  | 学习率
-  NEURX_SEQ_LENGTH      | 8    | 4-128        | 序列长度
-  NEURX_WARMUP_STEPS    | 10   | 1-100        | 预热步数
-  NEURX_CHECKPOINT_INTERVAL | 10 | 1-100   | 检查点间隔
+  NEURX_TOTAL_STEPS     | 100  | 10-5000      | trainingstepEnglish text
+  NEURX_BATCH_SIZE      | 4    | 1-64         | English text
+  NEURX_LR              | 0.001| 0.00001-0.1  | learning rate
+  NEURX_SEQ_LENGTH      | 8    | 4-128        | English text
+  NEURX_WARMUP_STEPS    | 10   | 1-100        | English textstepEnglish text
+  NEURX_CHECKPOINT_INTERVAL | 10 | 1-100   | checkpointEnglish text
 
-💡 优化建议:
+💡 optimizeEnglish text:
 
-  训练不稳定?
-    → 降低学习率: NEURX_LR=0.0001
-    → 增加预热: NEURX_WARMUP_STEPS=100
-  
-  训练太慢?
-    → 减少序列长度: NEURX_SEQ_LENGTH=4
-    → 增加批处理: NEURX_BATCH_SIZE=32
-  
-  想要更好的模型?
-    → 增加步数: NEURX_TOTAL_STEPS=5000
-    → 使用长序列: NEURX_SEQ_LENGTH=32
+  trainingEnglish text?
+    → English textlearning rate: NEURX_LR=0.0001
+    → English text: NEURX_WARMUP_STEPS=100
 
-🎯 完整工作流:
+  trainingEnglish text?
+    → English text: NEURX_SEQ_LENGTH=4
+    → English text: NEURX_BATCH_SIZE=32
 
-  1. 启动基础训练:
+  English textmodel?
+    → English textstepEnglish text: NEURX_TOTAL_STEPS=5000
+    → useEnglish text: NEURX_SEQ_LENGTH=32
+
+🎯 completeEnglish text:
+
+  1. startEnglish texttraining:
      bash run_llm_training_with_compiler.sh
-  
-  2. 验证检查点:
+
+  2. English textcheckpoint:
      ls artifacts/checkpoints/llm_training/
-  
-  3. 使用推理:
+
+  3. useinference:
      bash run_full_inference.sh
-  
-  4. 交互演示:
+
+  4. English text:
      bash demo_chat.sh
 

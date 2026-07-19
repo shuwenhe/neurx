@@ -1,67 +1,67 @@
 # Phase 2 Batch 2: File Operation Tools (Compilation in Progress)
 
 ## Overview
-实现了三个新的文件操作工具，适配自 claude-code 项目。这些工具提供了权限管理、目录结构可视化和文本处理功能。
+implementationEnglish textfileEnglish texttool, English text claude-code English text.English texttoolEnglish textmanagement, directoryEnglish text.
 
 ## Tools Implemented
 
 ### 1. PermissionsManagerTool (src/tools/PermissionsManagerTool.h/.cpp)
-**Purpose**: 权限管理 - chmod、chown、权限检查、递归权限修改
+**Purpose**: English textmanagement - chmod, chown, English text, English text
 
 **Operations**:
-- `chmod`: 修改文件/目录权限（支持 755、644、777 等模式）
-- `chown`: 修改文件所有者（占位符，需要 OS 特定实现）
-- `check`: 检查文件权限（可读、可写、可执行）
-- `make_readonly`: 移除写权限
-- `make_writable`: 添加写权限
+- `chmod`: English textfile/directoryEnglish text(support 755, 644, 777 English text)
+- `chown`: English textfileEnglish text(placeholder, Required OS English textimplementation)
+- `check`: English textfileEnglish text(English text, English text, English text)
+- `make_readonly`: English text
+- `make_writable`: English text
 
 **Key Features**:
-- 递归权限修改（带 `recursive` 标志）
-- QFile::Permissions 权限表示
-- 权限字符串转换（rwx 格式）
-- 路径遍历防护
+- English text(English text `recursive` English text)
+- QFile::Permissions English text
+- English text(rwx English text)
+- pathEnglish text
 
 **Lines of Code**: ~280 lines
 
 ### 2. DirectoryTreeTool (src/tools/DirectoryTreeTool.h/.cpp)
-**Purpose**: 目录树和结构管理 - 生成可视化的目录结构
+**Purpose**: directoryEnglish textmanagement - generateEnglish textdirectoryEnglish text
 
 **Operations**:
-- 生成目录树（支持三种格式）
-- 支持的格式: `text`（纯文本树形）、`json`（JSON 结构）、`markdown`（Markdown 列表）
+- generatedirectoryEnglish text(supportEnglish text)
+- supportEnglish text: `text`(English text), `json`(JSON English text), `markdown`(Markdown English text)
 
 **Key Features**:
-- 可配置的最大深度（默认 5）
-- 可忽略的路径模式（默认: `.*`, `node_modules`, `build`, `.git`, `CMakeFiles`）
-- 可选：显示文件大小和权限
-- 正则表达式基于的模式匹配
-- 递归目录遍历
+- English textconfigurationEnglish text(default 5)
+- English textpathEnglish text(default: `.*`, `node_modules`, `build`, `.git`, `CMakeFiles`)
+- English text: English textfileEnglish text
+- English text
+- English textdirectoryEnglish text
 
 **Formats**:
-1. Text: ASCII 树形结构（├──, └──）
-2. JSON: 递归对象结构，包含 name, path, type, children
-3. Markdown: 缩进的 Markdown 列表
+1. Text: ASCII English text(├──, └──)
+2. JSON: English text, English text name, path, type, children
+3. Markdown: English text Markdown English text
 
 **Lines of Code**: ~300 lines
 
 ### 3. TextProcessingTool (src/tools/TextProcessingTool.h/.cpp)
-**Purpose**: 文本处理 - 编码、格式化、字符串转换
+**Purpose**: English text - English text, English text, English text
 
 **Operations**:
-- `base64_encode`: UTF-8 字符串转 Base64
-- `base64_decode`: Base64 字符串转 UTF-8
-- `url_encode`: URL 百分比编码
-- `url_decode`: URL 百分比解码
-- `json_format`: JSON 格式化和验证
-- `convert_lineendings`: LF ↔ CRLF 转换
-- `case_convert`: 字符串转换（snake_case, camelCase, PascalCase, kebab-case, UPPER, lower）
+- `base64_encode`: UTF-8 English text Base64
+- `base64_decode`: Base64 English text UTF-8
+- `url_encode`: URL English text
+- `url_decode`: URL English text
+- `json_format`: JSON English text
+- `convert_lineendings`: LF ↔ CRLF English text
+- `case_convert`: English text(snake_case, camelCase, PascalCase, kebab-case, UPPER, lower)
 
 **Key Features**:
-- Base64 编码/解码（UTF-8 安全）
-- URL 安全编码/解码
-- JSON 验证和格式化
-- 行尾转换（支持 Unix 和 Windows）
-- 多种命名约定转换
+- Base64 English text/English text(UTF-8 safety)
+- URL safetyEnglish text/English text
+- JSON English text
+- English text(support Unix English text Windows)
+- English text
   - `toSnakeCase`: lowercase_with_underscores
   - `toCamelCase`: camelCaseFormat
   - `toPascalCase`: PascalCaseFormat

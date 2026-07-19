@@ -1,14 +1,14 @@
 // ============================================================
 // NEURX Inference Optimization System
-// 
-// 核心优化技术:
-//   1. KV Cache: 自回归生成时缓存 Key/Value,避免重复计算
-//   2. PagedAttention: vLLM 风格的动态 KV Cache 显存管理
-//   3. Continuous Batching: 动态批处理,最大化 GPU 利用率
-//   4. Speculative Decoding: 小模型加速大模型生成 (2-3x speedup)
-//   5. Quantization: INT8/INT4 PTQ 量化,减少显存占用和加速计算
 //
-// 目标: 让 NEURX-5.2 在生产环境中高效运行
+// English textoptimizeEnglish text:
+//   1. KV Cache: English textgenerateEnglish textcache Key/Value,English textcompute
+//   2. PagedAttention: vLLM English text KV Cache English textmanagement
+//   3. Continuous Batching: English text,English text GPU English text
+//   4. Speculative Decoding: English textmodelEnglish textmodelgenerate (2-3x speedup)
+//   5. Quantization: INT8/INT4 PTQ English text,English textcompute
+//
+// English text: English text NEURX-5.2 English textrun
 // ============================================================
 
 package neurx.inference.neurx
@@ -18,13 +18,13 @@ import neurx.attention.*
 import neurx.tokenizer.neurx.*
 
 // ============================================================
-// KV Cache 结构 (基础版)
+// KV Cache English text (English text)
 // ============================================================
 
 struct kv_cache_entry {
     tensor key_cache      // [num_layers, num_kv_heads, seq_len, head_dim]
     tensor value_cache    // [num_layers, num_kv_heads, seq_len, head_dim]
-    int current_length    // 当前缓存的序列长度
+    int current_length    // English textcacheEnglish text
 }
 
 class KVCacheManager {
@@ -32,13 +32,13 @@ class KVCacheManager {
     int num_kv_heads
     int head_dim
     int max_cache_len     # Maximum cache length (for pre-allocation)
-    
+
     # Per-layer caches
     tensor[] layer_key_caches[]
     tensor[] layer_value_caches[]
-    
+
     int[] cache_lengths   # Current length per batch item
-    
+
 func init(
     int num_layers,
     int num_kv_heads,
@@ -46,27 +46,27 @@ func init(
     int max_batch_size = 1,
     int max_seq_len = 8192
 ) -> KVCacheManager {
-    
+
     print(f"🗃️ Initializing KV Cache Manager:")
     print(f"   Layers: {num_layers}")
     print(f"   KV Heads: {num_kv_heads}")
     print(f"   Head Dim: {head_dim}")
     print(f"   Max Batch Size: {max_batch_size}")
     print(f"   Max Seq Len: {max_seq_len}")
-    
+
     // Pre-allocate memory for maximum size (avoids fragmentation)
     long total_memory_bytes = (
         long(num_layers) * max_batch_size * max_seq_len * num_kv_heads * head_dim * 2 * 2  # K + V, fp16
     )
     float memory_gb = float(total_memory_bytes) / (1024**3)
     print(f"   Pre-allocated Memory: {memory_gb:.2f} GB")
-    
+
     return KVCacheManager{
         num_layers: num_layers,
         num_kv_heads: num_kv_heads,
         head_dim: head_dim,
         max_cache_len: max_seq_len,
-        
+
         # Initialize empty caches (will be filled during inference)
         layer_key_caches: [],
         layer_value_caches: [],
@@ -81,12 +81,12 @@ func update(
     int[] batch_indices     # Which batch items to update (-1 for all)
 ) -> tuple[tensor, tensor] {
     """
-    更新指定层的 KV cache
-    
+    English text KV cache
+
     Returns:
         Full K, V tensors including cached values
     """
-    
+
     if len(self.layer_key_caches) <= layer_idx:
         # Initialize this layer's cache on first use
         self.layer_key_caches[layer_idx] = new_keys.clone()
@@ -97,12 +97,12 @@ func update(
             self.layer_key_caches[layer_idx],
             new_keys
         ], dim=2)
-        
+
         self.layer_value_caches[layer_idx] = concat([
             self.layer_value_caches[layer_idx],
             new_values
         ], dim=2)
-    
+
     return (
         self.layer_key_caches[layer_idx],
         self.layer_value_caches[layer_idx]
@@ -112,8 +112,8 @@ func get_cached_kv(
     self: KVCacheManager,
     int layer_idx
 ) -> option[tuple[tensor, tensor]]:
-    """获取指定层的完整 KV cache"""
-    
+    """English textcomplete KV cache"""
+
     if layer_idx < len(self.layer_key_caches):
         return some((
             self.layer_key_caches[layer_idx],
@@ -123,27 +123,27 @@ func get_cached_kv(
         return none
 
 func reset(self: KVCacheManager):
-    """清空所有 cache"""
+    """English text cache"""
     self.layer_key_caches.clear()
     self.layer_value_caches.clear()
     self.cache_lengths = [0] * len(self.cache_lengths)
 
 func get_memory_usage(self: KVCacheManager) -> dict[str, int64]:
-    """获取当前内存使用情况"""
-    
+    """English textuseEnglish text"""
+
     int64 total_k_memory = 0
     int64 total_v_memory = 0
-    
+
     for k_cache in self.layer_key_caches:
         if k_cache != None:
             total_k_memory += get_tensor_memory(k_cache)
-    
+
     for v_cache in self.layer_value_caches:
         if v_cache != None:
             total_v_memory += get_tensor_memory(v_cache)
-    
+
     int current_max_len = max(self.cache_lengths) if self.cache_lengths else 0
-    
+
     return {
         "key_memory_bytes": total_k_memory,
         "value_memory_bytes": total_v_memory,
@@ -153,14 +153,14 @@ func get_memory_usage(self: KVCacheManager) -> dict[str, int64]:
     }
 
 // ============================================================
-// PagedAttention (vLLM 风格)
-// 解决 KV Cache 内存碎片化问题
+// PagedAttention (vLLM English text)
+// English text KV Cache English text
 //
-// 核心思想:
-// - 将 KV Cache 分成固定大小的 blocks/pages
-// - 使用 block table 映射逻辑序列到物理 blocks
-// - 支持动态序列长度 (不同请求长度不同)
-// - 高效的 memory sharing 和回收
+// English text:
+// - English text KV Cache English text blocks/pages
+// - use block table English text blocks
+// - supportEnglish text (English textrequestEnglish text)
+// - English text memory sharing English text
 // ============================================================
 
 struct memory_block {
@@ -185,12 +185,12 @@ class PagedAttentionManager {
     int num_kv_heads       # Number of KV heads
     int head_dim            # Head dimension
     int dtype_size          # Bytes per element (2 for fp16/bf16)
-    
+
     memory_block[] physical_blocks  # All physical memory blocks
     dict[int, sequence_metadata> active_sequences  # seq_id → metadata
-    
+
     int next_block_id       # Counter for new block allocation
-    
+
     struct stats {
         int total_allocated_blocks
         int free_blocks
@@ -207,20 +207,20 @@ func init_paged_attention(
     int block_size: int = 16,
     float reserve_ratio: float = 0.9         # Use 90% of GPU memory for KV cache
 ) -> PagedAttentionManager {
-    
+
     # Calculate how many blocks we can fit
     int64 bytes_per_block = (
         long(block_size) * num_kv_heads * head_dim * dtype_size * 2  # K + V
     )
     int64 usable_memory = gpu_memory_mb * 1024 * 1024 * reserve_ratio
     int num_blocks = int(usable_memory / bytes_per_block)
-    
+
     print(f"\n📖 Initializing Paged Attention Manager:")
     print(f"   Block Size: {block_size} tokens")
     print(f"   Bytes per Block: {bytes_per_block:,} ({bytes_per_block / 1024:.1f} KB)")
     print(f"   Total Blocks: {num_blocks:,}")
     print(f"   Total KV Cache Capacity: {(num_blocks * bytes_per_block) / (1024**3):.2f} GB")
-    
+
     # Initialize all blocks as free
     memory_block[] blocks
     for i in range(num_blocks):
@@ -231,7 +231,7 @@ func init_paged_attention(
             is_free: true,
             ref_count: 0,
         })
-    
+
     return PagedAttentionManager{
         block_size: block_size,
         num_blocks: num_blocks,
@@ -257,18 +257,18 @@ func allocate_sequence(
     int initial_length: int = 0
 ) -> sequence_metadata:
     """
-    为新序列分配初始 blocks
-    
+    English text blocks
+
     Args:
-        seq_id: 序列唯一标识
-        initial_length: 初始 token 数 (用于 prefix caching)
-    
+        seq_id: English text
+        initial_length: English text token English text (English text prefix caching)
+
     Returns:
         Sequence metadata with block table
     """
-    
+
     int blocks_needed = max(1, ceil_div(initial_length, self.block_size))
-    
+
     # Allocate free blocks
     int[] allocated_blocks
     for i in range(blocks_needed):
@@ -278,7 +278,7 @@ func allocate_sequence(
         self.physical_blocks[block_id].is_free = false
         self.physical_blocks[block_id].ref_count += 1
         append(allocated_blocks, block_id)
-    
+
     # Create sequence metadata
     sequence_metadata meta {
         seq_id: seq_id,
@@ -287,15 +287,15 @@ func allocate_sequence(
         context_length: initial_length,  # Assume all initial tokens are context
         is_finished: false,
     }
-    
+
     self.active_sequences[seq_id] = meta
-    
+
     # Update statistics
     self.stats.total_allocated_blocks += blocks_needed
     self.stats.free_blocks -= blocks_needed
     self.stats.memory_utilization = \
         1.0 - float(self.stats.free_blocks) / float(self.num_blocks)
-    
+
     return meta
 
 func extend_sequence(
@@ -305,69 +305,69 @@ func extend_sequence(
     tensor new_values    # [1, kv_heads, new_tokens, D]
 ) -> void:
     """
-    扩展序列的 KV cache (生成新 token 时调用)
+    extensionEnglish text KV cache (generateEnglish text token English text)
     """
-    
+
     if seq_id not in self.active_sequences:
         raise ValueError(f"Sequence {seq_id} not found")
-    
+
     sequence_metadata meta = self.active_sequences[seq_id]
     int new_tokens = shape(new_keys)[2]
-    
+
     # Write new data into existing blocks
     int global_token_offset = meta.current_length
     int local_offset_in_block = global_token_offset % self.block_size
-    
+
     # Handle case where new tokens span multiple blocks
     int tokens_written = 0
     while tokens_written < new_tokens:
         int block_index = (global_token_offset + tokens_written) // self.block_size
         int offset_within_block = (global_token_offset + tokens_written) % self.block_size
-        
+
         if block_index >= len(meta.block_table):
             # Need to allocate a new block
             int new_block_id = _find_free_block()
             if new_block_id == -1:
                 raise OutOfMemoryError("Cannot allocate new block for sequence extension!")
-            
+
             self.physical_blocks[new_block_id].is_free = false
             self.physical_blocks[new_block_id].ref_count += 1
             append(meta.block_table, new_block_id)
             self.stats.free_blocks -= 1
-        
+
         int physical_block_id = meta.block_table[block_index]
         int space_in_block = self.block_size - offset_within_block
         int tokens_to_write = min(space_in_block, new_tokens - tokens_written)
-        
+
         # Write to physical block
         self.physical_blocks[physical_block_id].key_data[
             offset_within_block : offset_within_block + tokens_to_write
         ] = new_keys[:, :, tokens_written : tokens_written + tokens_to_write]
-        
+
         self.physical_blocks[physical_block_id].value_data[
             offset_within_block : offset_within_block + tokens_to_write
         ] = new_values[:, :, tokens_written : tokens_written + tokens_to_write]
-        
+
         tokens_written += tokens_to_write
-    
+
     meta.current_length += new_tokens
 
 func free_sequence(self: PagedAttentionManager, int seq_id) -> void:
     """
-    释放序列占用的所有 blocks
+    English text blocks
     """
-    
+
     if seq_id not in self.active_sequences:
         return
-    
+
     sequence_metadata meta = self.active_sequences[seq_id]
-    
+
     for block_id in meta.block_table:
         self.physical_blocks[block_id].ref_count -= 1
         if self.physical_blocks[block_id].ref_count <= 0:
             self.physical_blocks[block_id].is_free = true
             self.stats.free_blocks += 1
-    
+
     del self.active_sequences[seq_id]
     self.stats.total_allocated_blocks -= len(meta.block_table)
 
@@ -378,68 +378,68 @@ func gather_kv_for_attention(
     int query_end_pos
 ) -> tuple[tensor, tensor]:
     """
-    从 paged memory 中收集完整的 KV 用于 attention 计算
-    
+    English text paged memory English textcompleteEnglish text KV English text attention compute
+
     This is the core operation that makes PagedAttention efficient.
     Instead of storing contiguous tensors, it gathers from scattered blocks.
     """
-    
+
     sequence_metadata meta = self.active_sequences[seq_id]
     int total_kv_len = meta.current_length  # Gather all KV up to current length
-    
+
     # Pre-allocate output tensors
     tensor full_keys(1, self.num_kv_heads, total_kv_len, self.head_dim)
     tensor full_values(1, self.num_kv_heads, total_kv_len, self.head_dim)
-    
+
     # Gather from blocks according to block table
     int dst_pos = 0
     for logical_block_idx, physical_block_id in enumerate(meta.block_table):
         int start_in_block = 0
         int end_in_block = self.block_size
-        
+
         # First block might be partial
         if logical_block_idx == 0:
             start_in_block = 0
-        
+
         # Last block might be partial
         if logical_block_idx == len(meta.block_table) - 1:
             tokens_in_last_block = meta.current_length % self.block_size
             end_in_block = tokens_in_last_block if tokens_in_last_block > 0 else self.block_size
-        
+
         int copy_len = min(end_in_block - start_in_block, total_kv_len - dst_pos)
         if copy_len <= 0:
             break
-        
+
         # Copy from physical block to contiguous output
         full_keys[:, :, dst_pos : dst_pos + copy_len] = \
             self.physical_blocks[physical_block_id].key_data[start_in_block : start_in_block + copy_len]
-        
+
         full_values[:, :, dst_pos : dst_pos + copy_len] = \
             self.physical_blocks[physical_block_id].value_data[start_in_block : start_in_block + copy_len]
-        
+
         dst_pos += copy_len
-    
+
     return (full_keys, full_values)
 
 # Internal helper
 func _find_free_block(self: PagedAttentionManager) -> int:
-    """找到一个空闲 block"""
+    """English text block"""
     for block in self.physical_blocks:
         if block.is_free:
             return block.block_id
     return -1
 
 // ============================================================
-// Continuous Batching (连续批处理)
-// 动态管理请求队列,实现最大 GPU 利用率
+// Continuous Batching (English text)
+// English textmanagementrequestEnglish text,implementationEnglish text GPU English text
 // ============================================================
 
 enum request_status {
-    WAITING       # 等待执行
-    PROCESSING    # 正在处理 (前向传播)
-    GENERATING    # 正在自回归生成
-    COMPLETED     # 已完成
-    CANCELLED     # 已取消
+    WAITING       # English text
+    PROCESSING    # English text (English text)
+    GENERATING    # English textgenerate
+    COMPLETED     # English text
+    CANCELLED     # English text
 }
 
 struct inference_request {
@@ -451,16 +451,16 @@ struct inference_request {
     float temperature
     float top_p
     int top_k
-    
+
     request_status status
     datetime created_time
     datetime start_time
     datetime completed_time
-    
+
     string generated_text
     int generated_length
     tensor[] output_token_ids
-    
+
     # For monitoring
     int ttft_ms                  # Time To First Token (ms)
     float tokens_per_second
@@ -471,11 +471,11 @@ class ContinuousBatchScheduler {
     int max_batch_size            # Maximum concurrent requests
     int max_queue_size            # Maximum waiting queue size
     float scheduling_policy       # "fcfs" | "sjf" | "priority"
-    
+
     queue<inference_request> waiting_queue
     dict<int, inference_request> active_requests  # ID → Request
     dict<int, inference_request> completed_requests
-    
+
     struct stats {
         int total_requests_served
         int total_tokens_generated
@@ -489,12 +489,12 @@ func init_scheduler(
     int max_queue_size: int = 256,
     string policy: string = "fcfs"
 ) -> ContinuousBatchScheduler {
-    
+
     print(f"\n📋 Initializing Continuous Batch Scheduler:")
     print(f"   Max Concurrent Requests: {max_batch_size}")
     print(f"   Max Queue Size: {max_queue_size}")
     print(f"   Scheduling Policy: {policy.upper()}")
-    
+
     return ContinuousBatchScheduler{
         max_batch_size: max_batch_size,
         max_queue_size: max_queue_size,
@@ -521,18 +521,18 @@ func add_request(
     int top_k: int = 50
 ) -> int:
     """
-    添加新的推理请求
-    
+    English textinferencerequest
+
     Returns:
         request_id for tracking
     """
-    
+
     if len(self.waiting_queue) >= self.max_queue_size:
         raise QueueFullError("Request queue is full. Try again later.")
-    
+
     static int next_id = 0
     next_id += 1
-    
+
     inference_request req {
         request_id: next_id,
         prompt_text: prompt,
@@ -551,32 +551,32 @@ func add_request(
         tokens_per_second: 0.0,
         total_tokens_processed: 0,
     }
-    
+
     self.waiting_queue.push(req)
     return req.request_id
 
 func schedule_batch(self: ContinuousBatchScheduler) -> list[inference_request]:
     """
-    选择下一批要处理的请求
-    
-    策略:
-    - FCFS (First Come First Serve): 默认,公平
-    - SJF (Shortest Job First): 优先处理短请求
-    - Priority: 基于优先级
+    English textrequest
+
+    English text:
+    - FCFS (First Come First Serve): default,English text
+    - SJF (Shortest Job First): English textrequest
+    - Priority: English text
     """
-    
+
     # Move requests from waiting → active if capacity available
     while len(self.active_requests) < self.max_batch_size && !self.waiting_queue.empty():
         inference_request req = self.waiting_queue.front()
         self.waiting_queue.pop()
-        
+
         req.status = PROCESSING
         req.start_time = now()
         self.active_requests[req.request_id] = req
-    
+
     # Return active requests sorted by scheduling policy
     list<inference_request> batch = list(self.active_requests.values())
-    
+
     match self.scheduling_policy:
         case "sjf":
             # Shortest job first (by estimated remaining tokens)
@@ -586,13 +586,13 @@ func schedule_batch(self: ContinuousBatchScheduler) -> list[inference_request]:
             pass
         case _:  # fcfs
             pass  # Already in insertion order
-    
+
     # Update stats
     self.stats.peak_concurrent_requests = max(
         self.stats.peak_concurrent_requests,
         len(batch)
     )
-    
+
     return batch
 
 func mark_completed(
@@ -602,39 +602,39 @@ func mark_completed(
     int[] all_output_ids
 ) -> void:
     """
-    标记请求完成
+    English textrequestEnglish text
     """
-    
+
     if request_id not in self.active_requests:
         return
-    
+
     inference_request req = self.active_requests[request_id]
     req.status = COMPLETED
     req.completed_time = now()
     req.generated_text = final_text
     req.output_token_ids = all_output_ids
     req.generated_length = len(all_output_ids) - req.prompt_length
-    
+
     # Calculate metrics
     req.ttft_ms = (req.start_time - req.created_time).total_seconds() * 1000
     if req.generated_length > 0:
         generation_time = (req.completed_time - req.start_time).total_seconds()
         req.tokens_per_second = req.generated_length / max(generation_time, 0.001)
-    
+
     # Move to completed
     del self.active_requests[request_id]
     self.completed_requests[request_id] = req
-    
+
     # Update aggregate stats
     self.stats.total_requests_served += 1
     self.stats.total_tokens_generated += req.generated_length
-    
+
     # Running average TTFT
     n = self.stats.total_requests_served
     self.stats.avg_ttft_ms = (
         self.stats.avg_ttft_md * (n - 1) + req.ttft_ms
     ) / n
-    
+
     # Throughput (tokens/sec over last minute would need time window)
     self.stats.avg_throughput_tps = (
         float(self.stats.total_tokens_generated) /
@@ -642,8 +642,8 @@ func mark_completed(
     )
 
 func get_status_report(self: ContinuousBatchScheduler) -> string:
-    """生成状态报告"""
-    
+    """generatestateEnglish text"""
+
     report = f"""
 ╔══════════════════════════════════════════╗
 ║     Continuous Batching Status Report        ║
@@ -662,7 +662,7 @@ func get_status_report(self: ContinuousBatchScheduler) -> string:
     return report
 
 // ============================================================
-// NEURX Inference Engine (整合所有组件)
+// NEURX Inference Engine (English text)
 // ============================================================
 
 class InferenceEngine {
@@ -671,7 +671,7 @@ class InferenceEngine {
     KVCacheManager kv_manager
     option[PagedAttentionManager] paged_manager
     ContinuousBatchScheduler scheduler
-    
+
     # Generation config defaults
     struct gen_config {
         float default_temperature = 0.7
@@ -685,7 +685,7 @@ class InferenceEngine {
         bool use_cache = true
         bool early_stopping = False
     } gen_config
-    
+
     # Performance tracking
     struct perf_stats {
         int64 total_forward_time_us
@@ -702,19 +702,19 @@ func init_engine(
     bool enable_paged_attention: bool = true,
     int gpu_memory_mb: int64 = 80 * 1024
 ) -> InferenceEngine {
-    
+
     print("\n" + "="*60)
     print("🚀 Initializing NEURX Inference Engine")
     print("="*60)
-    
+
     # Extract model config for cache setup
     neurx_config cfg = model.config
     int num_kv_heads = cfg.num_key_value_heads
     int head_dim = cfg.hidden_size / cfg.num_attention_heads
-    
+
     # Initialize KV Cache Manager
     KVCacheManager kv_mgr = init(num_layers=cfg.num_layers, num_kv_heads=num_kv_heads, head_dim=head_dim)
-    
+
     # Initialize Paged Attention (optional but recommended)
     option[PagedAttentionManager] paged_mgr = none
     if enable_paged_attention:
@@ -724,10 +724,10 @@ func init_engine(
             gpu_memory_mb=gpu_memory_mb,
             block_size=16
         ))
-    
+
     # Initialize scheduler
     ContinuousBatchScheduler sched = init_scheduler(max_batch_size=max_batch_size)
-    
+
     print(f"\n✅ Inference Engine Ready!")
     print(f"   Model: {cfg.name}")
     print(f"   Vocab Size: {cfg.vocab_size:,}")
@@ -735,7 +735,7 @@ func init_engine(
     print(f"   Layers: {cfg.num_layers}")
     print(f"   Heads: Q={cfg.num_attention_heads}, KV={num_kv_heads}")
     print("="*60 + "\n")
-    
+
     return InferenceEngine{
         model: model,
         tokenizer: tokenizer,
@@ -763,24 +763,24 @@ func generate(
     callback: option<function> = None  # Streaming callback
 ) -> string:
     """
-    单个请求的自回归生成 (核心函数)
-    
+    English textrequestEnglish textgenerate (English textfunction)
+
     Args:
-        prompt: 输入提示文本
-        max_new_tokens: 最大生成 token 数
-        temperature: 温度参数 (>0, 越高越随机)
-        top_p: Nucleus sampling 阈值
-        top_k: Top-k sampling 参数
-        do_sample: 是否采样 (False = greedy)
-        stream: 是否流式输出
-        callback: 流式输出的回调函数
-    
+        prompt: inputpromptEnglish text
+        max_new_tokens: English textgenerate token English text
+        temperature: English textparameter (>0, English text)
+        top_p: Nucleus sampling English text
+        top_k: Top-k sampling parameter
+        do_sample: English text (False = greedy)
+        stream: English textoutput
+        callback: English textoutputEnglish textfunction
+
     Returns:
-        生成的文本 (不含 prompt)
+        generateEnglish text (English text prompt)
     """
-    
+
     timer.start("generate_total")
-    
+
     # ===== Step 1: Encode Prompt =====
     timer.start("encode")
     dict[str, any] encoded = encode(
@@ -789,19 +789,19 @@ func generate(
         add_special_tokens=True,
         return_tensors=True
     )
-    
+
     tensor input_ids = encoded["input_ids"]  # [1, prompt_len]
     int prompt_len = shape(input_ids)[1]
     timer.stop("encode")
-    
+
     print(f"\n🔤 Generating (prompt length: {prompt_len}, max new tokens: {max_new_tokens})")
-    
+
     # ===== Step 2: Initial Forward (Process entire prompt) =====
     timer.start("prefill")
-    
+
     # Reset KV cache for new sequence
     self.kv_manager.reset()
-    
+
     dict[str, any] outputs = neurx_forward(
         self.model,
         input_ids=input_ids,
@@ -810,25 +810,25 @@ func generate(
         sop_eop_info=none,  # Standard generation mode
         use_cache=True  # Enable KV cache
     )
-    
+
     tensor logits = outputs["logits"][:, -1, :]  # Get last token logits: [1, vocab]
-    
+
     # Store KV cache from prefill
     if "past_kv" in outputs:
         # ... update kv_manager ...
         pass
-    
+
     timer.stop("prefill")
     int ttft_ms = timer.get_elapsed_ms("prefill")
     print(f"   ⏱ Prefill (TTFT): {ttft_ms:.1f} ms")
-    
+
     # ===== Step 3: Autoregressive Generation Loop =====
     int[] generated_ids = []
     string generated_text = ""
-    
+
     for step in range(max_new_tokens):
         timer.start("decode_step")
-        
+
         # Sample next token
         int next_token_id = sample_next_token(
             logits=logits,
@@ -837,9 +837,9 @@ func generate(
             top_k=top_k,
             do_sample=do_sample
         )
-        
+
         append(generated_ids, next_token_id)
-        
+
         # Decode token to text (for streaming)
         string new_token_text = decode(
             self.tokenizer,
@@ -847,20 +847,20 @@ func generate(
             skip_special_tokens=True
         )
         generated_text += new_token_text
-        
+
         # Stream callback
         if stream && callback != None:
             callback!(new_token_text, step, max_new_tokens)
-        
+
         # Check for EOS
         if next_token_id == self.tokenizer.special_tokens.eos_token_id:
             print(f"   🛑 EOS reached at step {step+1}")
             break
-        
+
         # Prepare next input (only the new token)
         tensor next_input = tensor([[next_token_id]])  # [1, 1]
         int next_position = prompt_len + step + 1
-        
+
         # Forward with KV cache
         timer.start("forward_cached")
         outputs = neurx_forward(
@@ -871,25 +871,25 @@ func generate(
             use_cache=True
         )
         timer.stop("forward_cached")
-        
+
         logits = outputs["logits"][:, -1, :]  # [1, vocab]
-        
+
         # Update KV cache
         if "new_kv" in outputs:
             # ... update kv_manager ...
             pass
-        
+
         timer.stop("decode_step")
-    
+
     timer.stop("generate_total")
-    
+
     # ===== Step 4: Post-processing & Stats =====
     float total_time = timer.get_elapsed_sec("generate_total")
     int num_generated = len(generated_ids)
-    
+
     float tokens_per_sec = num_generated / max(total_time - ttft_ms/1000, 0.001)
     float latency_per_token = (total_time*1000 - ttft_ms) / max(num_generated, 1)
-    
+
     # Update performance stats
     self.perf_stats.total_generate_calls += 1
     self.perf_stats.total_tokens_generated += num_generated
@@ -897,16 +897,16 @@ func generate(
         self.perf_stats.avg_latency_per_token_ms * 0.9 +
         latency_per_token * 0.1
     )
-    
+
     print(f"   ✅ Generation Complete:")
     print(f"      Tokens Generated: {num_generated}")
     print(f"      Total Time: {total_time:.2f}s")
     print(f"      Tokens/sec: {tokens_per_sec:.1f}")
     print(f"      Latency/token: {latency_per_token:.2f}ms")
-    
+
     # Truncate at special tokens if any
     generated_text = truncate_at_special_tokens(generated_text)
-    
+
     return generated_text
 
 func sample_next_token(
@@ -917,54 +917,54 @@ func sample_next_token(
     bool do_sample
 ) -> int:
     """
-    从 logits 中采样下一个 token
-    
-    支持多种采样策略:
-    - Greedy: 直接取 argmax
-    - Temperature: 缩放 logits 后 softmax
+    English text logits English text token
+
+    supportEnglish text:
+    - Greedy: English text argmax
+    - Temperature: English text logits English text softmax
     - Top-p: Nucleus sampling
-    - Top-k: 只从 top-k 中采样
+    - Top-k: English text top-k English text
     """
-    
+
     if !do_sample:
         # Greedy decoding
         return int(logits.argmax(dim=-1).item())
-    
+
     # Apply temperature
     if temperature > 0 && temperature != 1.0:
         logits = logits / temperature
-    
+
     # Convert to probabilities
     tensor probs = softmax(logits, dim=-1)
-    
+
     # Apply top-k filtering
     if top_k > 0 && top_k < len(probs):
         # Set probabilities below top-k to zero
         tensor indices_to_remove = probs < torch.topk(probs, top_k)[0][..., -1, None]
         probs[indices_to_remove] = 0.0
         probs = probs / probs.sum()  # Re-normalize
-    
+
     # Apply top-p (nucleus) filtering
     if top_p < 1.0:
         sorted_probs, sorted_indices = sort(probs, descending=True)
         cumulative_probs = cumsum(sorted_probs, dim=-1)
-        
+
         # Remove tokens with cumulative probability above threshold
         sorted_indices_to_remove = cumulative_probs > top_p
         # Shift right to keep first token above threshold
         sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
         sorted_indices_to_remove[..., 0] = 0
-        
+
         # Scatter back to original indexing
         indices_to_remove = zeros_like(probs).scatter_(
             dim=-1, index=sorted_indices, src=sorted_indices_to_remove
         )
         probs[indices_to_remove] = 0.0
         probs = probs / probs.sum()  # Re-normalize
-    
+
     # Sample from categorical distribution
     int next_token_id = multinomial(probs, num_samples=1).item()
-    
+
     return next_token_id
 
 func generate_batch(
@@ -974,11 +974,11 @@ func generate_batch(
     **kwargs
 ) -> string[]:
     """
-    批量生成 (使用 continuous batching)
-    
-    对于生产环境,建议使用此方法而不是逐个调用 generate()
+    English textgenerate (use continuous batching)
+
+    English text,English textuseEnglish text generate()
     """
-    
+
     # Add all prompts as requests
     int[] request_ids = []
     for prompt in prompts:
@@ -990,17 +990,17 @@ func generate_batch(
             **kwargs
         )
         append(request_ids, rid)
-    
+
     # Process until all complete
     string[] results = []
     while len(results) < len(prompts):
         # Schedule next batch
         list<inference_request> batch = self.scheduler.schedule_batch()
-        
+
         if len(batch) == 0:
             sleep(0.001)  # Avoid busy wait
             continue
-        
+
         # Run one iteration for each active request
         for req in batch:
             string text = self.generate(
@@ -1010,21 +1010,21 @@ func generate_batch(
                 top_p=req.top_p,
                 top_k=req.top_k
             )
-            
+
             self.scheduler.mark_completed(
                 req.request_id,
                 final_text=text,
                 all_output_ids=req.output_token_ids
             )
-            
+
             if req.request_id in request_ids:
                 append(results, text)
-    
+
     return results
 
 // ============================================================
-// 量化支持 (Quantization)
-// 减少模型大小,加速推理
+// English textsupport (Quantization)
+// English textmodelEnglish text,English textinference
 // ============================================================
 
 enum quantization_type {
@@ -1056,71 +1056,71 @@ func apply_quantization(
     quantization_config config
 ) -> neurx_model:
     """
-    应用量化到模型权重
-    
-    支持:
-    - INT8: Linear 层权重量化为 int8
-    - INT4: 更激进的量化 (需要 calibration)
-    - NF4: QLoRA 风格的归一化 float4
+    English textmodelweight
+
+    support:
+    - INT8: Linear English textweightEnglish text int8
+    - INT4: English text (Required calibration)
+    - NF4: QLoRA English text float4
     """
-    
+
     match config.qtype:
         case INT8:
             print("Applying INT8 quantization...")
             _apply_int8_quantization(model, config.group_size)
-        
+
         case INT4:
             print("Applying INT4 quantization...")
             _apply_int4_quantization(model, config.group_size)
-        
+
         case NF4:
             print("Applying NF4 quantization...")
             _apply_nf4_quantization(model, config.group_size)
-        
+
         case AWQ:
             print("Applying AWQ quantization...")
             _apply_awq_quantization(model)
-        
+
         case _:
             print("No quantization applied.")
-    
+
     # Report compression ratio
     int original_params = count_parameters(model.config)
     int compressed_params = estimate_compressed_size(model, config)
     float ratio = float(compressed_params) / float(original_params)
-    
+
     print(f"✅ Quantization complete!")
     print(f"   Compression: {ratio:.1%} of original size")
     print(f"   Original: ~{original_params / 1e6:.0f}M params")
     print(f"   Compressed: ~{compressed_params / 1e6:.0f}M params (effective)")
-    
+
     return model
 
 // ============================================================
-// 测试函数
+// testfunction
 // ============================================================
 
 func test_inference_system() {
     print("\n" + "="*70)
     print("Testing NEURX Inference Optimization System")
     print("="*70)
-    
+
     // Test 1: KV Cache Manager
     print("\n[Test 1] Testing KV Cache Manager...")
     KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
-    
+
     # Simulate updating cache for a few layers
     for layer in range(4):
         tensor new_k = randn(1, 8, 10, 64)  # New keys for 10 tokens
         tensor new_v = randn(1, 8, 10, 64)  # New values
         kv_mgr.update(layer, new_k, new_v)
-    
+
     dict mem_info = kv_mgr.get_memory_usage()
     assert(mem_info["num_active_entries"] == 4)
     print(f"   Cache entries: {mem_info['num_active_entries']}")
     print(f"   Memory usage: {mem_info['total_memory_bytes'] / 1024:.1f} KB")
     print("✅ KV Cache Manager works!")
-    
+
     // Test 2: Paged Attention Manager
     print("\n[Test 2] Testing Paged Attention Manager...")
     PagedAttentionManager paged_mgr = init_paged_attention(
@@ -1129,82 +1129,82 @@ func test_inference_system() {
         gpu_memory_mb=1024,  # 1GB test budget
         block_size=16
     )
-    
+
     # Allocate a sequence
     sequence_metadata seq_meta = paged_mgr.allocate_sequence(seq_id=1, initial_length=50)
     assert(len(seq_meta.block_table) > 0)
     assert(seq_meta.current_length == 50)
-    
+
     # Extend sequence
     tensor new_k = randn(1, 8, 20, 64)
     tensor new_v = randn(1, 8, 20, 64)
     paged_mgr.extend_sequence(seq_id=1, new_keys=new_k, new_values=new_v)
-    
+
     assert(paged_mgr.active_sequences[1].current_length == 70)
-    
+
     # Free sequence
     paged_mgr.free_sequence(seq_id=1)
     assert(1 not in paged_mgr.active_sequences)
-    
+
     print(f"   Allocated/freed sequence successfully")
     print(f"   Free blocks after free: {paged_mgr.stats.free_blocks}")
     print("✅ Paged Attention Manager works!")
-    
+
     // Test 3: Continuous Batching Scheduler
     print("\n[Test 3] Testing Continuous Batching Scheduler...")
     ContinuousBatchScheduler sched = init_scheduler(max_batch_size=4)
-    
+
     # Add requests
     tensor dummy_input = tensor([[1, 2, 3]])
     int id1 = sched.add_request("Hello", dummy_input, max_output_len=100)
     int id2 = sched.add_request("How are you?", dummy_input, max_output_len=50)
     int id3 = sched.add_request("Tell me a joke", dummy_input, max_output_len=200)
-    
+
     assert(id1 > 0 && id2 > 0 && id3 > 0)
     assert(len(sched.waiting_queue) == 3)
-    
+
     # Schedule batch
     list<inference_request> batch = sched.schedule_batch()
     assert(len(batch) == 3)  # All should fit in batch
     assert(batch[0].status == PROCESSING)
-    
+
     # Complete first request
     sched.mark_completed(id1, "Hi there!", [1, 2, 3, 4])
-    
+
     print(sched.get_status_report())
     print("✅ Continuous Batching Scheduler works!")
-    
+
     // Test 4: Token Sampling
     print("\n[Test 4] Testing token sampling strategies...")
     tensor test_logits = zeros(1, 10000)
     test_logits[0, 42] = 100.0  # Make token 42 most likely
     test_logits[0, 123] = 90.0  # Second likely
     test_logits[0, 999] = 80.0  # Third likely
-    
+
     int greedy_id = sample_next_token(test_logits, temperature=0, top_p=1.0, top_k=0, do_sample=False)
     assert(greedy_id == 42)
     print(f"   Greedy selection: {greedy_id}")
-    
+
     int temp_id = sample_next_token(test_logits, temperature=0.5, top_p=1.0, top_k=0, do_sample=True)
     print(f"   Temp-sampled: {temp_id} (likely 42 or nearby)")
-    
+
     # Test top-k
     int topk_id = sample_next_token(test_logits, temperature=1.0, top_p=1.0, top_k=2, do_sample=True)
     assert(topk_id in [42, 123])
     print(f"   Top-k=2 sampled: {topk_id}")
     print("✅ Token sampling works!")
-    
+
     // Test 5: Quantization Config
     print("\n[Test 5] Testing quantization configuration...")
     quantization_config qconfig = create_default_quant_config()
     assert(qconfig.qtype == NONE)
-    
+
     qconfig.qtype = INT4
     qconfig.group_size = 64
     print(f"   Quantization type: {qconfig.qtype}")
     print(f"   Group size: {qconfig.group_size}")
     print("✅ Quantization config works!")
-    
+
     print("\n" + "="*70)
     print("All inference optimization tests passed! ✨")
     print("="*70 + "\n")
@@ -1215,30 +1215,30 @@ func ceil_div(int a, int b) -> int:
     return (a + b - 1) // b
 
 func get_tensor_memory(tensor t) -> int64:
-    """估算张量内存使用 (字节)"""
+    """English textuse (English text)"""
     int elements = 1
     for dim in shape(t):
         elements *= dim
-    
+
     # Estimate based on dtype (simplified)
     int element_size = 4  # Default to float32
     # In practice, check actual dtype
-    
+
     return int64(elements) * element_size
 
 func truncate_at_special_tokens(string text) -> string:
-    """截断特殊 token 之后的文本"""
+    """English text token English text"""
     # Find common stop sequences
     string[] stop_sequences = ["", "\n\n", "<|end_of_turn|>"]
-    
+
     for stop in stop_sequences:
         pos = find(text, stop)
         if pos >= 0:
             text = text[:pos]
-    
+
     return text.strip()
 
 def call_ai_judge(string prompt, string response) -> float:
-    """调用 AI Judge 模型评分 (外部服务或本地小模型)"""
-    # Placeholder: 实际实现会调用 API 或本地模型
+    """English text AI Judge modelEnglish text (English textmodel)"""
+    # Placeholder: actualimplementationEnglish text API English textmodel
     return 0.5  # Default neutral score

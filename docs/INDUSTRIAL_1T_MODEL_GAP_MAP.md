@@ -1,113 +1,113 @@
-# NeurX 工业级 1T GPT 缺口地图
+# NeurX English text 1T GPT English text
 
-**目的**: 识别 `train/neurx` 在 1T 级工业训练场景下还缺什么，以及补齐顺序。
+**English text**: English text `train/neurx` English text 1T English texttrainingEnglish text, English text.
 
-## 结论
+## English text
 
-现在的仓库已经具备了大量模块和文档，但离“可稳定训练、可恢复、可评测、可部署”的工业级 1T GPT 仍有明显差距。
+English text, English text"English texttraining, English textrecover, English text, English text"English text 1T GPT English text.
 
-真正的缺口不在“有没有目录”，而在下面五个闭环：
+English text"English textdirectory", English text:
 
-1. 真实训练主循环
-2. 真实数据管道
-3. 真实分布式执行
-4. 可恢复 checkpoint
-5. 训练门禁与后训练链路
+1. truthfultrainingmainEnglish text
+2. truthfuldataEnglish text
+3. truthfulEnglish text
+4. English textrecover checkpoint
+5. trainingEnglish texttrainingEnglish text
 
-## P0: 不补就不能算能训练
+## P0: English texttraining
 
-### 1. 训练主循环没有闭合
+### 1. trainingmainEnglish text
 
-需要补齐:
+RequiredEnglish text:
 - `forward -> loss -> backward -> optimizer.step`
-- 梯度累积
-- 梯度裁剪
-- 学习率调度
-- 训练日志与指标记录
+- gradientEnglish text
+- gradientEnglish text
+- learning rateEnglish text
+- traininglogEnglish text
 
-证据:
-- `scripts/legacy/LAUNCH_1T_TRAINING.sh` 里的 Python 训练脚本仍是 `TODO`
-- `training/moe_1t_orchestrator.s` 里数据加载还是占位实现
-- `optimization/mixed_precision.s` 里有 placeholder backward
+English text:
+- `scripts/legacy/LAUNCH_1T_TRAINING.sh` English text Python trainingEnglish text `TODO`
+- `training/moe_1t_orchestrator.s` English textdataloadEnglish textimplementation
+- `optimization/mixed_precision.s` English text placeholder backward
 
-相关文件:
+English textfile:
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L178-L181)
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
 - [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimization/mixed_precision.s#L512-L515)
 
-### 2. 数据管道还不是工业级
+### 2. dataEnglish text
 
-需要补齐:
-- 真实语料读取
-- 清洗、去重、过滤
-- 版本化分片
-- tokenization 的稳定实现
-- train/val/test 可重复切分
+RequiredEnglish text:
+- truthfulEnglish text
+- clean, deduplication, English text
+- English text
+- tokenization English textimplementation
+- train/val/test English text
 
-证据:
-- `dataset/real_data_loader.s` 目前是 mock dataset
-- `training/moe_1t_orchestrator.s` 里 `moe_1t_load_data_manifest()` 只是打印
-- `scripts/legacy/LAUNCH_1T_TRAINING.sh` 要求 1T token，但仓库里没有对应的真实大规模数据流闭环
+English text:
+- `dataset/real_data_loader.s` English text mock dataset
+- `training/moe_1t_orchestrator.s` English text `moe_1t_load_data_manifest()` English text
+- `scripts/legacy/LAUNCH_1T_TRAINING.sh` English text 1T token, English texttruthfulEnglish textdataEnglish text
 
-相关文件:
+English textfile:
 - [real_data_loader.s](/Users/shuwen/shuwen/train/neurx/dataset/real_data_loader.s#L25-L41)
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L231-L257)
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L224-L242)
 
-### 3. 分布式编排还缺“可落地执行”
+### 3. English text"English text"
 
-需要补齐:
-- 真实进程组初始化
-- TP / PP / DP / EP 的拓扑发现
-- NCCL 健康检查
-- 节点故障自动重启
-- 多机启动器与环境注入
+RequiredEnglish text:
+- truthfulEnglish textinitialize
+- TP / PP / DP / EP English text
+- NCCL English text
+- English text
+- English textstartEnglish text
 
-证据:
-- `moe_1t_orchestrator.s` 读取了 rank/world size，但调度和实际通信逻辑仍偏框架化
-- `LAUNCH_1T_TRAINING.sh` 假设 1024 GPU，但并未提供真正可执行的集群 launcher
+English text:
+- `moe_1t_orchestrator.s` English text rank/world size, English textactualEnglish textframeworkEnglish text
+- `LAUNCH_1T_TRAINING.sh` English text 1024 GPU, English text launcher
 
-相关文件:
+English textfile:
 - [moe_1t_orchestrator.s](/Users/shuwen/shuwen/train/neurx/training/moe_1t_orchestrator.s#L131-L224)
 - [LAUNCH_1T_TRAINING.sh](/Users/shuwen/shuwen/train/neurx/scripts/legacy/LAUNCH_1T_TRAINING.sh#L110-L129)
 
-### 4. Checkpoint 需要可验证恢复
+### 4. Checkpoint RequiredEnglish textrecover
 
-需要补齐:
-- 分片参数保存和恢复
-- 优化器状态恢复
-- 断点续训
-- checksum / corruption 检测
-- 恢复演练脚本
+RequiredEnglish text:
+- English textparametersaveEnglish textrecover
+- optimizeEnglish textstaterecover
+- English text
+- checksum / corruption English text
+- recoverEnglish text
 
-证据:
-- `checkpoint/moe_1t_distributed_checkpoint.s` 有管理器结构，但仍需要端到端恢复验证
+English text:
+- `checkpoint/moe_1t_distributed_checkpoint.s` English textmanagementEnglish text, English textRequiredEnglish textrecoverEnglish text
 
-相关文件:
+English textfile:
 - [moe_1t_distributed_checkpoint.s](/Users/shuwen/shuwen/train/neurx/checkpoint/moe_1t_distributed_checkpoint.s#L1-L40)
 
-## P1: 不补会严重影响收敛与成本
+## P1: English text
 
-### 5. 优化器与混精稳定性不足
+### 5. optimizeEnglish text
 
-需要补齐:
-- 完整 AdamW
-- BF16 / FP16 训练主路径
+RequiredEnglish text:
+- complete AdamW
+- BF16 / FP16 trainingmainpath
 - loss scaling
-- overflow 检测
-- 梯度裁剪策略
+- overflow English text
+- gradientEnglish text
 
-证据:
-- `optimization/mixed_precision.s` 仍有 placeholder backward
-- `distributed/zero_gradient_reduce.s` 里 AdamW 更新是简化实现
+English text:
+- `optimization/mixed_precision.s` English text placeholder backward
+- `distributed/zero_gradient_reduce.s` English text AdamW English textimplementation
 
-相关文件:
+English textfile:
 - [mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimization/mixed_precision.s#L512-L515)
 - [zero_gradient_reduce.s](/Users/shuwen/shuwen/train/neurx/distributed/zero_gradient_reduce.s#L472-L484)
 
-### 6. 评测门禁不足
+### 6. English text
 
-需要补齐:
+RequiredEnglish text:
 - perplexity
 - validation loss
 - throughput
@@ -115,62 +115,62 @@
 - checkpoint restore test
 - regression benchmark
 
-证据:
-- 仓库里有大量测试文件，但缺少一条“训练前/训练中/训练后”统一评测门禁链路
+English text:
+- English texttestfile, English text"trainingEnglish text/trainingEnglish text/trainingEnglish text"English text
 
-相关文件:
+English textfile:
 - [TRAINING_COMPLETENESS_ANALYSIS.md](/Users/shuwen/shuwen/train/neurx/docs/TRAINING_COMPLETENESS_ANALYSIS.md#L10-L77)
 - [MISSING_COMPONENTS_ANALYSIS.md](/Users/shuwen/shuwen/train/neurx/docs/MISSING_COMPONENTS_ANALYSIS.md#L29-L50)
 
-### 7. 模型能力与结构还偏演示态
+### 7. modelEnglish text
 
-需要补齐:
-- 更完整的 Transformer 层实现
-- 更强的 long context 训练策略
-- 更稳定的 attention / FFN / norm 路径
+RequiredEnglish text:
+- English textcompleteEnglish text Transformer English textimplementation
+- English text long context trainingEnglish text
+- English text attention / FFN / norm path
 
-相关文件:
+English textfile:
 - [TRAINING_COMPLETENESS_ANALYSIS.md](/Users/shuwen/shuwen/train/neurx/docs/TRAINING_COMPLETENESS_ANALYSIS.md#L28-L40)
 
-## P2: 上线前必须有，但不阻塞“能训”
+## P2: English text, English text"English text"
 
-### 8. 后训练链路
+### 8. English texttrainingEnglish text
 
-需要补齐:
+RequiredEnglish text:
 - SFT
-- 蒸馏
-- 量化
-- 导出
-- 推理服务
+- English text
+- English text
+- English text
+- inferenceEnglish text
 - KV cache / batching / speculative decoding
 
-### 9. 生产部署
+### 9. English text
 
-需要补齐:
-- 容器化
-- 集群编排
-- 发布策略
-- 安全与隔离
+RequiredEnglish text:
+- English text
+- English text
+- English text
+- safetyEnglish text
 
-### 10. 监控和运维
+### 10. monitoringEnglish text
 
-需要补齐:
-- GPU 利用率
-- 通信耗时
+RequiredEnglish text:
+- GPU English text
+- English text
 - step ETA
-- 训练告警
-- 历史趋势面板
+- trainingEnglish text
+- English text
 
-## 建议补齐顺序
+## English text
 
-1. 训练主循环
-2. 真实数据管道
-3. 分布式 launcher
-4. checkpoint 恢复
+1. trainingmainEnglish text
+2. truthfuldataEnglish text
+3. English text launcher
+4. checkpoint recover
 5. AdamW + mixed precision
-6. 评测门禁
-7. 后训练与部署
+6. English text
+7. English texttrainingEnglish text
 
-## 一句话判断
+## English text
 
-如果目标是“工业级 GPT 1T 训练”，当前仓库已经有很多模块名和框架壳，但还没把**训练、数据、分布式、恢复、评测**这五个闭环真正打通。
+English text"English text GPT 1T training", English textframeworkEnglish text, English text**training, data, English text, recover, English text**English text.

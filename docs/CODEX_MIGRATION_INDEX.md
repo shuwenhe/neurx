@@ -1,313 +1,313 @@
-# Codex 迁移提取文档索引
+# Codex migrationEnglish text
 
-**生成时间**: 2026-06-02  
-**源仓库**: `/Users/feifei/agent/codex`  
-**目标**: neurx Agent Framework
-
----
-
-## 📖 文档导航
-
-### 🎯 1. 快速参考 (5 分钟阅读)
-📄 **文件**: `CODEX_MIGRATION_QUICK_REFERENCE.md`
-
-**包含内容**:
-- ✅ 三大模块核心指标 (复杂度评分、工作量预估)
-- ✅ 关键枚举和结构速览
-- ✅ 跨模块依赖关系图
-- ✅ 5 周迁移计划概览
-- ✅ 快速决策指南
-- ✅ 常见问题解答
-
-**适合**:
-- 管理人员/产品经理
-- 快速了解全景图
-- 确定优先级和风险
+**generatetime**: 2026-06-02
+**English text**: `/Users/feifei/agent/codex`
+**English text**: neurx Agent Framework
 
 ---
 
-### 📚 2. 详细迁移指南 (2-3 小时阅读)
-📄 **文件**: `CODEX_MIGRATION_EXTRACTION.md`
+## 📖 English text
 
-**包含内容**:
-- ✅ **审批系统** (8/10 复杂度)
-  - 关键源文件清单
-  - 所有类型定义 (8 个 enum, 5 个 struct)
-  - 完整依赖关系
-  - 11-15 天工作量估计
+### 🎯 1. quickEnglish text (5 English text)
+📄 **file**: `CODEX_MIGRATION_QUICK_REFERENCE.md`
 
-- ✅ **沙箱系统** (8.5/10 复杂度)
-  - 关键源文件清单
-  - 权限模型详解 (10 个 enum, 8 个 struct)
-  - 平台特定实现 (bwrap, seatbelt, landlock)
-  - 15-21 天工作量估计
+**English textcontent**:
+- ✅ English text (English text, English text)
+- ✅ English text
+- ✅ English text
+- ✅ 5 English textmigrationEnglish text
+- ✅ quickEnglish text
+- ✅ English text
 
-- ✅ **线程支持** (7/10 复杂度)
-  - 关键源文件清单
-  - 线程生命周期管理 (11 个 struct/trait)
-  - 存储接口 (ThreadStore trait)
-  - 14-21 天工作量估计
-
-- ✅ **综合依赖关系图**
-  - 全局依赖架构
-  - 审批流程图
-  - 沙箱应用流程图
-  - 线程生命周期图
-
-- ✅ **迁移复杂性评分** (7.5/10 总体)
-  - 各模块详细评分
-  - 风险评估矩阵
-  - 阶段化建议
-
-**适合**:
-- 架构师
-- 技术负责人
-- 深入理解系统
+**English text**:
+- managementEnglish text/English text
+- quickEnglish text
+- English text
 
 ---
 
-### 🗂️ 3. 源文件清单 (1 小时参考)
-📄 **文件**: `CODEX_SOURCE_FILES_MANIFEST.md`
+### 📚 2. English textmigrationEnglish text (2-3 English text)
+📄 **file**: `CODEX_MIGRATION_EXTRACTION.md`
 
-**包含内容**:
-- ✅ **完整源文件清单** (25+ 个关键文件)
-  - 审批系统: 7 个文件
-  - 沙箱系统: 8 个文件
-  - 线程系统: 7 个文件
+**English textcontent**:
+- ✅ **English textsystem** (8/10 English text)
+  - English textfileEnglish text
+  - English text (8 English text enum, 5 English text struct)
+  - completeEnglish text
+  - 11-15 English text
 
-- ✅ **每个文件详细信息**
-  - 行数和复杂度
-  - 关键类型列表
-  - 依赖关系
-  - 用途说明
+- ✅ **English textsystem** (8.5/10 English text)
+  - English textfileEnglish text
+  - English textmodelEnglish text (10 English text enum, 8 English text struct)
+  - English textimplementation (bwrap, seatbelt, landlock)
+  - 15-21 English text
 
-- ✅ **依赖关系矩阵** (3 个)
-  - 审批系统依赖矩阵
-  - 沙箱系统依赖矩阵
-  - 线程系统依赖矩阵
+- ✅ **English textsupport** (7/10 English text)
+  - English textfileEnglish text
+  - English textmanagement (11 English text struct/trait)
+  - English text (ThreadStore trait)
+  - 14-21 English text
 
-- ✅ **跨模块依赖** (审批 ↔ 沙箱, 审批 ↔ 线程, 等)
+- ✅ **English text**
+  - English text
+  - English textpipelineEnglish text
+  - English textpipelineEnglish text
+  - English text
 
-- ✅ **代码统计**
-  - 模块行数汇总
-  - 复杂度指标
-  - 总计: ~6900 行代码
+- ✅ **migrationEnglish text** (7.5/10 English text)
+  - English text
+  - English textevaluationEnglish text
+  - phaseEnglish text
 
-- ✅ **关键接口和特性**
-  - 必须实现的 Traits
-  - 关键宏和属性
-  - 错误处理
-
-- ✅ **推荐阅读顺序** (10 天)
-
-- ✅ **配置和常量**
-
-- ✅ **已知问题和限制**
-
-**适合**:
-- 开发人员
-- 代码迁移工作
-- 快速查找参考
+**English text**:
+- English text
+- English text
+- English textsystem
 
 ---
 
-## 🚀 快速开始指南
+### 🗂️ 3. English textfileEnglish text (1 English text)
+📄 **file**: `CODEX_SOURCE_FILES_MANIFEST.md`
 
-### 情景 A: 了解全景图 (15 分钟)
-1. 阅读 **快速参考** - 核心指标和模块概览
-2. 查看 **核心依赖关系图**
-3. 查阅 **快速迁移清单**
+**English textcontent**:
+- ✅ **completeEnglish textfileEnglish text** (25+ English textfile)
+  - English textsystem: 7 English textfile
+  - English textsystem: 8 English textfile
+  - English textsystem: 7 English textfile
 
-### 情景 B: 深入某个模块 (2-3 小时)
-1. 在 **快速参考** 中了解模块基础
-2. 在 **详细指南** 中查找模块详解
-3. 在 **源文件清单** 中查找具体文件路径
-4. 打开对应的 Codex 源文件学习
+- ✅ **English textfileEnglish textinformation**
+  - English text
+  - English text
+  - English text
+  - English textexplanation
 
-### 情景 C: 规划迁移项目 (4-6 小时)
-1. 完整阅读 **快速参考**
-2. 阅读 **详细指南** 的相关部分
-3. 查阅 **源文件清单** 的推荐阅读顺序
-4. 根据 **风险评估** 制定计划
-5. 使用 **快速迁移清单** 建立项目计划
+- ✅ **English text** (3 English text)
+  - English textsystemEnglish text
+  - English textsystemEnglish text
+  - English textsystemEnglish text
 
-### 情景 D: 开发实施 (按需参考)
-1. 使用 **源文件清单** 快速找到代码位置
-2. 参考 **依赖关系矩阵** 了解接口
-3. 查看 **流程图** 了解执行流
-4. 参考代码中的测试文件进行学习
+- ✅ **English text** (English text ↔ English text, English text ↔ English text, English text)
+
+- ✅ **English textstatistics**
+  - English text
+  - English text
+  - English text: ~6900 English text
+
+- ✅ **English text**
+  - English textimplementationEnglish text Traits
+  - English text
+  - errorEnglish text
+
+- ✅ **recommendedEnglish text** (10 English text)
+
+- ✅ **configurationEnglish text**
+
+- ✅ **English text**
+
+**English text**:
+- English text
+- English textmigrationEnglish text
+- quickEnglish text
 
 ---
 
-## 📊 文档统计
+## 🚀 quickstartEnglish text
 
-| 文档 | 文件大小 | 行数 | 时间 | 用途 |
+### English text A: English text (15 English text)
+1. English text **quickEnglish text** - English text
+2. English text **English text**
+3. English text **quickmigrationEnglish text**
+
+### English text B: English text (2-3 English text)
+1. English text **quickEnglish text** English text
+2. English text **English text** English text
+3. English text **English textfileEnglish text** English textfilepath
+4. English text Codex English textfileEnglish text
+
+### English text C: English textmigrationEnglish text (4-6 English text)
+1. completeEnglish text **quickEnglish text**
+2. English text **English text** English text
+3. English text **English textfileEnglish text** English textrecommendedEnglish text
+4. English text **English textevaluation** English text
+5. use **quickmigrationEnglish text** English text
+
+### English text D: English text (English text)
+1. use **English textfileEnglish text** quickEnglish text
+2. English text **English text** English text
+3. English text **pipelineEnglish text** English text
+4. English texttestfileEnglish text
+
+---
+
+## 📊 English textstatistics
+
+| English text | fileEnglish text | English text | time | English text |
 |------|---------|------|------|------|
-| 快速参考 | 小 | ~600 | 5 分钟 | 概览 |
-| 详细指南 | 大 | ~1200 | 2-3 小时 | 深入 |
-| 源文件清单 | 大 | ~800 | 1 小时 | 查询 |
-| **总计** | | ~2600 | | |
+| quickEnglish text | English text | ~600 | 5 English text | English text |
+| English text | English text | ~1200 | 2-3 English text | English text |
+| English textfileEnglish text | English text | ~800 | 1 English text | query |
+| **English text** | | ~2600 | | |
 
 ---
 
-## 🎯 三大模块概览
+## 🎯 English text
 
-### 审批系统 (Approvals) - 8/10 复杂度
-**关键文件**: `protocol/src/approvals.rs`, `protocol/src/protocol.rs`, `execpolicy/`
+### English textsystem (Approvals) - 8/10 English text
+**English textfile**: `protocol/src/approvals.rs`, `protocol/src/protocol.rs`, `execpolicy/`
 
-**核心概念**:
+**English text**:
 ```
-AskForApproval 策略 → ApprovalsReviewer 路由 → 决策应用
-├─ 用户 (User)
-└─ Guardian 子代理 (AutoReview)
+AskForApproval English text → ApprovalsReviewer English text → English text
+├─ English text (User)
+└─ Guardian English text (AutoReview)
 ```
 
-**工作量**: 11-15 天  
-**风险**: Guardian 集成依赖
+**English text**: 11-15 English text
+**English text**: Guardian English text
 
-**快速查找**:
-- [快速参考 - 审批系统](CODEX_MIGRATION_QUICK_REFERENCE.md#1️⃣-审批系统-810)
-- [详细指南 - 审批系统](CODEX_MIGRATION_EXTRACTION.md#审批系统-approvals)
-- [源文件清单 - 审批](CODEX_SOURCE_FILES_MANIFEST.md#1-审批系统-approvals-相关文件)
+**quickEnglish text**:
+- [quickEnglish text - English textsystem](CODEX_MIGRATION_QUICK_REFERENCE.md#1️⃣-English textsystem-810)
+- [English text - English textsystem](CODEX_MIGRATION_EXTRACTION.md#English textsystem-approvals)
+- [English textfileEnglish text - English text](CODEX_SOURCE_FILES_MANIFEST.md#1-English textsystem-approvals-English textfile)
 
 ---
 
-### 沙箱系统 (Sandbox) - 8.5/10 复杂度
-**关键文件**: `protocol/src/permissions.rs`, `sandboxing/src/`
+### English textsystem (Sandbox) - 8.5/10 English text
+**English textfile**: `protocol/src/permissions.rs`, `sandboxing/src/`
 
-**核心概念**:
+**English text**:
 ```
-SandboxMode 选择 → 平台检测 → 权限应用 → 执行
+SandboxMode English text → English text → English text → English text
 ├─ Linux: bwrap + landlock
 ├─ macOS: seatbelt
 └─ Windows: restricted token
 ```
 
-**工作量**: 15-21 天  
-**风险**: 平台特定差异
+**English text**: 15-21 English text
+**English text**: English text
 
-**快速查找**:
-- [快速参考 - 沙箱系统](CODEX_MIGRATION_QUICK_REFERENCE.md#2️⃣-沙箱系统-810)
-- [详细指南 - 沙箱系统](CODEX_MIGRATION_EXTRACTION.md#沙箱系统-sandbox)
-- [源文件清单 - 沙箱](CODEX_SOURCE_FILES_MANIFEST.md#2-沙箱系统-sandbox-相关文件)
-
----
-
-### 线程支持 (Threading) - 7/10 复杂度
-**关键文件**: `protocol/src/thread_id.rs`, `thread-store/src/`
-
-**核心概念**:
-```
-ThreadId (UUID v7) → ThreadStore 实现 → 生命周期管理
-├─ 创建 (Create)
-├─ 恢复 (Resume)
-└─ 分叉 (Fork)
-```
-
-**工作量**: 14-21 天  
-**风险**: 持久化一致性
-
-**快速查找**:
-- [快速参考 - 线程系统](CODEX_MIGRATION_QUICK_REFERENCE.md#3️⃣-线程支持-710)
-- [详细指南 - 线程系统](CODEX_MIGRATION_EXTRACTION.md#线程支持-threading)
-- [源文件清单 - 线程](CODEX_SOURCE_FILES_MANIFEST.md#3-线程支持-threading-相关文件)
+**quickEnglish text**:
+- [quickEnglish text - English textsystem](CODEX_MIGRATION_QUICK_REFERENCE.md#2️⃣-English textsystem-810)
+- [English text - English textsystem](CODEX_MIGRATION_EXTRACTION.md#English textsystem-sandbox)
+- [English textfileEnglish text - English text](CODEX_SOURCE_FILES_MANIFEST.md#2-English textsystem-sandbox-English textfile)
 
 ---
 
-## 💼 建议的工作流程
+### English textsupport (Threading) - 7/10 English text
+**English textfile**: `protocol/src/thread_id.rs`, `thread-store/src/`
 
-### 第 1-2 周: 研究和规划
+**English text**:
 ```
-├─ 阅读所有文档
-├─ 建立测试环境
-├─ 与 Guardian 团队协调
-└─ 确定优先级和风险
-```
-
-### 第 3-5 周: 基础迁移
-```
-├─ Week 3: 线程系统基础
-├─ Week 4: 权限和沙箱模型
-└─ Week 5: 平台特定实现
+ThreadId (UUID v7) → ThreadStore implementation → English textmanagement
+├─ English text (Create)
+├─ recover (Resume)
+└─ English text (Fork)
 ```
 
-### 第 6-8 周: 高级功能
+**English text**: 14-21 English text
+**English text**: English text
+
+**quickEnglish text**:
+- [quickEnglish text - English textsystem](CODEX_MIGRATION_QUICK_REFERENCE.md#3️⃣-English textsupport-710)
+- [English text - English textsystem](CODEX_MIGRATION_EXTRACTION.md#English textsupport-threading)
+- [English textfileEnglish text - English text](CODEX_SOURCE_FILES_MANIFEST.md#3-English textsupport-threading-English textfile)
+
+---
+
+## 💼 English textpipeline
+
+### English text 1-2 English text: English text
 ```
-├─ Week 6: 审批系统
-├─ Week 7: Guardian 集成
-└─ Week 8: 全面测试
+├─ English text
+├─ English texttestEnglish text
+├─ English text Guardian English text
+└─ English text
 ```
 
-### 第 9-10 周: 优化和文档
+### English text 3-5 English text: English textmigration
 ```
-├─ Week 9: 性能优化
-└─ Week 10: 文档和知识转移
+├─ Week 3: English textsystemEnglish text
+├─ Week 4: English textmodel
+└─ Week 5: English textimplementation
+```
+
+### English text 6-8 English text: advancedEnglish text
+```
+├─ Week 6: English textsystem
+├─ Week 7: Guardian English text
+└─ Week 8: English texttest
+```
+
+### English text 9-10 English text: optimizeEnglish text
+```
+├─ Week 9: English textoptimize
+└─ Week 10: English text
 ```
 
 ---
 
-## 🔍 快速查询指南
+## 🔍 quickqueryEnglish text
 
-**我想了解...** → **查看...**
+**English text...** → **English text...**
 
-| 问题 | 文档 | 部分 |
+| English text | English text | English text |
 |------|------|------|
-| 这个迁移有多复杂? | 快速参考 | 核心指标 |
-| 三个模块之间如何交互? | 详细指南 | 依赖关系图 |
-| 某个类型的定义在哪? | 源文件清单 | 完整源文件清单 |
-| 某个模块需要多久? | 快速参考 | 三大核心模块 |
-| 主要风险是什么? | 快速参考 | 关键风险和缓解 |
-| 如何组织代码结构? | 详细指南 | 建议的代码组织 |
-| 有哪些已知问题? | 源文件清单 | 已知问题和限制 |
-| 应该按什么顺序读代码? | 源文件清单 | 推荐阅读顺序 |
-| 某个文件有多少行? | 源文件清单 | 代码行数统计 |
-| 某个模块的关键结构? | 详细指南 | 关键类型定义 |
+| English textmigrationEnglish text? | quickEnglish text | English text |
+| English text? | English text | English text |
+| English text? | English textfileEnglish text | completeEnglish textfileEnglish text |
+| English textRequiredEnglish text? | quickEnglish text | English text |
+| mainEnglish text? | quickEnglish text | English text |
+| English text? | English text | English text |
+| English text? | English textfileEnglish text | English text |
+| English text? | English textfileEnglish text | recommendedEnglish text |
+| English textfileEnglish text? | English textfileEnglish text | English textstatistics |
+| English text? | English text | English text |
 
 ---
 
-## 📞 使用这些文档的提示
+## 📞 useEnglish textprompt
 
-1. **第一次查阅**: 先读 **快速参考** 建立基础理解
-2. **深入学习**: 根据需要参考 **详细指南**
-3. **代码导航**: 使用 **源文件清单** 快速找到文件
-4. **验证理解**: 查看 **流程图** 确认理解正确
-5. **规划工作**: 使用 **快速迁移清单** 制定计划
-
----
-
-## 📋 文档维护
-
-这些文档基于 Codex 源代码的快照，生成于 **2026-06-02**。
-
-**如需更新**, 请:
-1. 检查 Codex 源代码是否有变化
-2. 重新运行提取脚本 (如有)
-3. 更新对应的文档部分
-
-**关键变化需要关注的地方**:
-- `protocol/src/approvals.rs` - 审批系统
-- `protocol/src/permissions.rs` - 权限系统
-- `thread-store/src/store.rs` - 存储接口
-- `sandboxing/src/manager.rs` - 沙箱管理
+1. **English text**: English text **quickEnglish text** English text
+2. **English text**: English textRequiredEnglish text **English text**
+3. **English text**: use **English textfileEnglish text** quickEnglish textfile
+4. **English text**: English text **pipelineEnglish text** English text
+5. **English text**: use **quickmigrationEnglish text** English text
 
 ---
 
-## 🎓 补充资源
+## 📋 English text
 
-### Codex 源代码
-- **路径**: `/Users/feifei/agent/codex`
-- **结构**: 
-  - `codex-rs/protocol/src/` - 协议定义
-  - `codex-rs/thread-store/src/` - 线程存储
-  - `codex-rs/sandboxing/src/` - 沙箱实现
-  - `codex-rs/execpolicy/src/` - 执行策略
-  - `codex-rs/core/` - 核心实现
+English text Codex English text, generateEnglish text **2026-06-02**.
 
-### 相关项目
+**English text**, English text:
+1. English text Codex English text
+2. English textrunEnglish text (English text)
+3. English text
+
+**English textRequiredEnglish text**:
+- `protocol/src/approvals.rs` - English textsystem
+- `protocol/src/permissions.rs` - English textsystem
+- `thread-store/src/store.rs` - English text
+- `sandboxing/src/manager.rs` - English textmanagement
+
+---
+
+## 🎓 English text
+
+### Codex English text
+- **path**: `/Users/feifei/agent/codex`
+- **English text**:
+  - `codex-rs/protocol/src/` - English text
+  - `codex-rs/thread-store/src/` - English text
+  - `codex-rs/sandboxing/src/` - English textimplementation
+  - `codex-rs/execpolicy/src/` - English text
+  - `codex-rs/core/` - English textimplementation
+
+### English text
 - **neurx**: `/Users/feifei/agent/neurx`
 - **hermes-agent**: `/Users/feifei/agent/hermes-agent`
 
-### 外部参考
+### English text
 - UUID v7: https://github.com/uuid-rs/uuid
 - Serde: https://serde.rs/
 - Tokio: https://tokio.rs/
@@ -317,34 +317,34 @@ ThreadId (UUID v7) → ThreadStore 实现 → 生命周期管理
 
 ---
 
-## ✅ 文档完整性检查
+## ✅ English textcompleteEnglish text
 
-- [x] 三个主要模块都有详细文档
-- [x] 所有关键类型都已定义
-- [x] 依赖关系已映射
-- [x] 工作量已估计
-- [x] 风险已识别
-- [x] 源文件已清点
-- [x] 迁移计划已制定
-- [x] 快速参考已准备
-- [x] 流程图已绘制
-- [x] 测试策略已概述
-
----
-
-## 📝 文档协议
-
-这些文档是从 Codex 源代码提取的技术参考资料。
-
-**用途**: 支持 neurx 项目的功能迁移
-
-**创建方**: AI Assistant (Claude Haiku 4.5)  
-**创建时间**: 2026-06-02  
-**源仓库**: `/Users/feifei/agent/codex`
+- [x] English textmainEnglish text
+- [x] English text
+- [x] English text
+- [x] English text
+- [x] English text
+- [x] English textfileEnglish text
+- [x] migrationEnglish text
+- [x] quickEnglish text
+- [x] pipelineEnglish text
+- [x] testEnglish text
 
 ---
 
-**准备好开始迁移了吗?**
+## 📝 English text
 
-👉 **建议**: 从 [快速参考卡](CODEX_MIGRATION_QUICK_REFERENCE.md) 开始，5 分钟内了解全景图！
+English text Codex English text.
+
+**English text**: support neurx English textmigration
+
+**English text**: AI Assistant (Claude Haiku 4.5)
+**English texttime**: 2026-06-02
+**English text**: `/Users/feifei/agent/codex`
+
+---
+
+**English textstartmigrationEnglish text?**
+
+👉 **English text**: English text [quickEnglish text](CODEX_MIGRATION_QUICK_REFERENCE.md) start, 5 English text!
 

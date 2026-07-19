@@ -1,6 +1,6 @@
 // =====================================================================
 // Complete Automatic Differentiation Framework
-// 完整的自动微分框架 - 支持所有Transformer操作
+// completeEnglish textframework - supportEnglish textTransformerEnglish text
 // =====================================================================
 
 package neurx.ml.autodiff
@@ -8,15 +8,15 @@ package neurx.ml.autodiff
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 
 // =====================================================================
-// 梯度计算图数据结构
+// gradientcomputeEnglish textdataEnglish text
 // =====================================================================
 
 struct gradient_node {
     int id
-    tensor value           // 该节点的值
-    string operation       // 操作类型: "add", "mul", "matmul", "softmax", "relu", "norm", 等
-    []int inputs           // 输入节点的id
-    tensor grad            // 当前节点的梯度
+    tensor value           // English text
+    string operation       // English text: "add", "mul", "matmul", "softmax", "relu", "norm", English text
+    []int inputs           // inputEnglish textid
+    tensor grad            // English textgradient
 }
 
 struct gradient_tape {
@@ -26,7 +26,7 @@ struct gradient_tape {
 }
 
 // =====================================================================
-// 前向操作 - 构建计算图
+// English text - English textcomputeEnglish text
 // =====================================================================
 
 func create_tape() gradient_tape {
@@ -41,7 +41,7 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
     if !tape.recording {
         return (tape, -1)
     }
-    
+
     gradient_node node = gradient_node {
         id: tape.node_counter,
         value: value,
@@ -49,16 +49,16 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
         inputs: inputs,
         grad: zeros(value.shape),
     }
-    
+
     tape.nodes.push(node)
     int node_id = tape.node_counter
     tape.node_counter = tape.node_counter + 1
-    
+
     (tape, node_id)
 }
 
 // =====================================================================
-// 基础操作的前向传播
+// English text
 // =====================================================================
 
 func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
@@ -70,7 +70,7 @@ func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
         i = i + 1
     }
     result.requires_grad = a.requires_grad || b.requires_grad
-    
+
     (tape, node_id) = add_node(tape, result, "add", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
 }
@@ -84,7 +84,7 @@ func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
         i = i + 1
     }
     result.requires_grad = a.requires_grad || b.requires_grad
-    
+
     (tape, node_id) = add_node(tape, result, "mul", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
 }
@@ -94,9 +94,9 @@ func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tens
     int m = a.shape[0]
     int n = a.shape[1]
     int p = b.shape[1]
-    
+
     tensor result = zeros([m, p])
-    
+
     int i = 0
     while i < m {
         int j = 0
@@ -112,7 +112,7 @@ func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tens
         }
         i = i + 1
     }
-    
+
     result.requires_grad = a.requires_grad || b.requires_grad
     (tape, node_id) = add_node(tape, result, "matmul", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
@@ -122,7 +122,7 @@ func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
     // Transpose 2D matrix
     int m = a.shape[0]
     int n = a.shape[1]
-    
+
     tensor result = zeros([n, m])
     int i = 0
     while i < m {
@@ -133,7 +133,7 @@ func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
         }
         i = i + 1
     }
-    
+
     result.requires_grad = a.requires_grad
     (tape, node_id) = add_node(tape, result, "transpose", [get_node_id(a)])
     (tape, node_id, result)
@@ -150,7 +150,7 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
         }
         i = i + 1
     }
-    
+
     float sum_exp = 0.0
     i = 0
     while i < len(logits.data) {
@@ -158,14 +158,14 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
         sum_exp = sum_exp + exp_logits.data[i]
         i = i + 1
     }
-    
+
     tensor result = zeros(logits.shape)
     i = 0
     while i < len(exp_logits.data) {
         result.data[i] = exp_logits.data[i] / sum_exp
         i = i + 1
     }
-    
+
     result.requires_grad = logits.requires_grad
     (tape, node_id) = add_node(tape, result, "softmax", [get_node_id(logits)])
     (tape, node_id, result)
@@ -183,7 +183,7 @@ func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
         }
         i = i + 1
     }
-    
+
     result.requires_grad = x.requires_grad
     (tape, node_id) = add_node(tape, result, "relu", [get_node_id(x)])
     (tape, node_id, result)
@@ -198,7 +198,7 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
         i = i + 1
     }
     mean = mean / float_from_int(len(x.data))
-    
+
     float variance = 0.0
     i = 0
     while i < len(x.data) {
@@ -207,21 +207,21 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
         i = i + 1
     }
     variance = variance / float_from_int(len(x.data))
-    
+
     tensor result = zeros(x.shape)
     i = 0
     while i < len(x.data) {
         result.data[i] = (x.data[i] - mean) / sqrt_approx(variance + eps)
         i = i + 1
     }
-    
+
     result.requires_grad = x.requires_grad
     (tape, node_id) = add_node(tape, result, "layer_norm", [get_node_id(x)])
     (tape, node_id, result)
 }
 
 // =====================================================================
-// 反向传播 Backward Pass
+// English text Backward Pass
 // =====================================================================
 
 func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
@@ -252,7 +252,7 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
     int m = a.shape[0]
     int n = a.shape[1]
     int p = b.shape[1]
-    
+
     // Compute grad_a = grad @ b^T
     int i = 0
     while i < m {
@@ -269,7 +269,7 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
         }
         i = i + 1
     }
-    
+
     // Compute grad_b = a^T @ grad
     i = 0
     while i < n {
@@ -286,14 +286,14 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
         }
         i = i + 1
     }
-    
+
     (grad_a, grad_b)
 }
 
 func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) tensor {
     // dL/dx = softmax * (dL/dout - (softmax * dL/dout).sum())
-    // 计算: (softmax * dL/dout).sum() 用于每个样本
-    
+    // compute: (softmax * dL/dout).sum() English text
+
     int i = 0
     while i < len(grad.data) {
         float grad_dot_softmax = 0.0
@@ -302,12 +302,12 @@ func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) ten
             grad_dot_softmax = grad_dot_softmax + softmax_output.data[j] * grad.data[j]
             j = j + 1
         }
-        
-        grad_input.data[i] = grad_input.data[i] + 
+
+        grad_input.data[i] = grad_input.data[i] +
             softmax_output.data[i] * (grad.data[i] - grad_dot_softmax)
         i = i + 1
     }
-    
+
     grad_input
 }
 
@@ -324,76 +324,76 @@ func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
 }
 
 // =====================================================================
-// 主要反向传播循环
+// mainEnglish text
 // =====================================================================
 
 func backward_tape(
     gradient_tape tape,
     tensor final_grad
 ) []tensor {
-    // 返回每个参数的梯度
+    // English textparameterEnglish textgradient
     int num_nodes = tape.node_counter
     []tensor gradients = []tensor{cap: num_nodes}
-    
-    // 初始化所有梯度
+
+    // initializeEnglish textgradient
     int i = 0
     while i < num_nodes {
         gradients.push(zeros(tape.nodes[i].value.shape))
         i = i + 1
     }
-    
-    // 反向遍历计算图（拓扑排序）
+
+    // English textcomputeEnglish text(English textranking)
     i = num_nodes - 1
     while i >= 0 {
         gradient_node node = tape.nodes[i]
         tensor grad = gradients[i]
-        
+
         if node.operation == "add" {
             int input_a = node.inputs[0]
             int input_b = node.inputs[1]
-            (gradients[input_a], gradients[input_b]) = 
+            (gradients[input_a], gradients[input_b]) =
                 backward_add(grad, tape.nodes[input_a].value, tape.nodes[input_b].value,
                             gradients[input_a], gradients[input_b])
         }
-        
+
         if node.operation == "mul" {
             int input_a = node.inputs[0]
             int input_b = node.inputs[1]
-            (gradients[input_a], gradients[input_b]) = 
+            (gradients[input_a], gradients[input_b]) =
                 backward_mul(grad, tape.nodes[input_a].value, tape.nodes[input_b].value,
                             gradients[input_a], gradients[input_b])
         }
-        
+
         if node.operation == "matmul" {
             int input_a = node.inputs[0]
             int input_b = node.inputs[1]
-            (gradients[input_a], gradients[input_b]) = 
+            (gradients[input_a], gradients[input_b]) =
                 backward_matmul(grad, tape.nodes[input_a].value, tape.nodes[input_b].value,
                                gradients[input_a], gradients[input_b])
         }
-        
+
         if node.operation == "relu" {
             int input_id = node.inputs[0]
             gradients[input_id] = backward_relu(grad, tape.nodes[input_id].value, gradients[input_id])
         }
-        
+
         if node.operation == "softmax" {
             int input_id = node.inputs[0]
             gradients[input_id] = backward_softmax(grad, node.value, gradients[input_id])
         }
-        
+
         i = i - 1
     }
-    
+
     gradients
 }
 
 // =====================================================================
-// 工具函数
+// toolfunction
 // =====================================================================
 
 func get_node_id(tensor t) int {
-    // 简化版本，实际需要tracking tensor id
+    // English text, actualRequiredtracking tensor id
     0
 }
 

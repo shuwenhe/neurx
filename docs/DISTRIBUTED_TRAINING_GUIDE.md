@@ -1,68 +1,68 @@
-# NeurX 多GPU分布式训练配置指南
+# NeurX English textGPUEnglish texttrainingconfigurationEnglish text
 
-## 快速开始
+## quickstart
 
-### 1. 使用所有可用GPU进行分布式训练
+### 1. useEnglish textGPUEnglish texttraining
 
 ```bash
-# 自动检测所有GPU并并发训练
+# English textGPUEnglish texttraining
 make pretrain-gpu-distributed
 
-# 例如：有4块GPU
-# GPU 0, 1, 2, 3 将同时运行，处理不同的数据切片
-# 梯度通过NCCL AllReduce同步
+# English text: English text4English textGPU
+# GPU 0, 1, 2, 3 English textrun, English textdataEnglish text
+# gradientEnglish textNCCL AllReduceEnglish textstep
 ```
 
-### 2. 指定GPU数量
+### 2. English textGPUcount
 
 ```bash
-# 仅使用2块GPU
+# English textuse2English textGPU
 NEURX_NUM_GPUS=2 make pretrain-gpu-distributed
 
-# 仅使用1块GPU（单GPU模式）
+# English textuse1English textGPU(English textGPUEnglish text)
 NEURX_NUM_GPUS=1 make pretrain-gpu-distributed
 ```
 
 ---
 
-## 环境变量配置
+## English textconfiguration
 
-### GPU和分布式配置
+### GPUEnglish textconfiguration
 
-| 变量 | 默认值 | 说明 |
+| English text | defaultEnglish text | explanation |
 |------|--------|------|
-| `NEURX_NUM_GPUS` | 自动检测 | GPU数量（1-8） |
-| `NEURX_DDP_BACKEND` | `nccl` | 通信后端：`nccl`或`gloo` |
-| `NEURX_MASTER_ADDR` | `localhost` | 主节点地址 |
-| `NEURX_MASTER_PORT` | `29500` | 通信端口 |
+| `NEURX_NUM_GPUS` | English text | GPUcount(1-8) |
+| `NEURX_DDP_BACKEND` | `nccl` | English text: `nccl`English text`gloo` |
+| `NEURX_MASTER_ADDR` | `localhost` | mainEnglish text |
+| `NEURX_MASTER_PORT` | `29500` | English text |
 
-### 训练参数
+### trainingparameter
 
-| 变量 | 默认值 | 说明 |
+| English text | defaultEnglish text | explanation |
 |------|--------|------|
-| `NEURX_PRETRAIN_STEPS` | 50000 | 总训练步数 |
-| `NEURX_PRETRAIN_MICRO_BATCH` | 8 | 单步GPU批大小 |
-| `NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS` | 8 | 梯度积累步数 |
-| `NEURX_PRETRAIN_SEQ_LEN` | 2048 | 序列长度 |
-| `NEURX_PRETRAIN_LEARNING_RATE` | 0.0002 | 学习率 |
+| `NEURX_PRETRAIN_STEPS` | 50000 | English texttrainingstepEnglish text |
+| `NEURX_PRETRAIN_MICRO_BATCH` | 8 | English textstepGPUEnglish text |
+| `NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS` | 8 | gradientEnglish textstepEnglish text |
+| `NEURX_PRETRAIN_SEQ_LEN` | 2048 | English text |
+| `NEURX_PRETRAIN_LEARNING_RATE` | 0.0002 | learning rate |
 
-### 模型配置
+### modelconfiguration
 
-| 变量 | 默认值 | 说明 |
+| English text | defaultEnglish text | explanation |
 |------|--------|------|
-| `NEURX_TRANSFORMER_DIM` | 1024 | 隐藏层维度 |
-| `NEURX_TRANSFORMER_HEADS` | 16 | 注意力头数 |
-| `NEURX_TRANSFORMER_FFN` | 4096 | FFN隐藏层维度 |
-| `NEURX_TRANSFORMER_NUM_LAYERS` | 24 | Transformer层数 |
+| `NEURX_TRANSFORMER_DIM` | 1024 | English text |
+| `NEURX_TRANSFORMER_HEADS` | 16 | English text |
+| `NEURX_TRANSFORMER_FFN` | 4096 | FFNEnglish text |
+| `NEURX_TRANSFORMER_NUM_LAYERS` | 24 | TransformerEnglish text |
 
 ---
 
-## 使用示例
+## useexample
 
-### 示例1：4GPU并发训练（推荐）
+### example1: 4GPUEnglish texttraining(recommended)
 
 ```bash
-# RTX 4090 × 4 并发训练
+# RTX 4090 × 4 English texttraining
 NEURX_NUM_GPUS=4 \
   NEURX_PRETRAIN_MICRO_BATCH=16 \
   NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS=4 \
@@ -70,13 +70,13 @@ NEURX_NUM_GPUS=4 \
   make pretrain-gpu-distributed
 ```
 
-**效果**：
-- 有效批大小：16 × 4 × 4 = 256
-- 每步处理tokens：256 × 2048 = 524,288 tokens
-- 预期吞吐量：~400 samples/sec
-- 113GB数据单轮：~4小时
+**English text**:
+- English text: 16 × 4 × 4 = 256
+- English textstepEnglish texttokens: 256 × 2048 = 524,288 tokens
+- English text: ~400 samples/sec
+- 113GBdataEnglish text: ~4English text
 
-### 示例2：2GPU并发训练
+### example2: 2GPUEnglish texttraining
 
 ```bash
 NEURX_NUM_GPUS=2 \
@@ -85,22 +85,22 @@ NEURX_NUM_GPUS=2 \
   make pretrain-gpu-distributed
 ```
 
-### 示例3：单GPU测试（调试）
+### example3: English textGPUtest(English text)
 
 ```bash
 NEURX_NUM_GPUS=1 make pretrain-gpu-distributed
 ```
 
-### 示例4：多节点训练（跨节点）
+### example4: English texttraining(English text)
 
 ```bash
-# 节点1（主节点）
+# English text1(mainEnglish text)
 NEURX_NUM_GPUS=4 \
   NEURX_MASTER_ADDR=192.168.1.100 \
   NEURX_MASTER_PORT=29500 \
   make pretrain-gpu-distributed
 
-# 节点2（从节点）- 需要手动配置RANK
+# English text2(English text)- RequiredEnglish textconfigurationRANK
 RANK=4 LOCAL_RANK=0 WORLD_SIZE=8 \
   NEURX_MASTER_ADDR=192.168.1.100 \
   NEURX_MASTER_PORT=29500 \
@@ -109,35 +109,35 @@ RANK=4 LOCAL_RANK=0 WORLD_SIZE=8 \
 
 ---
 
-## 性能优化
+## English textoptimize
 
-### 调整批处理参数
+### English textparameter
 
-**RTX 4090 (24GB显存)**
+**RTX 4090 (24GBEnglish text)**
 ```bash
-NEURX_PRETRAIN_MICRO_BATCH=32         # 可以更大
-NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS=2 # 更少累积步数
+NEURX_PRETRAIN_MICRO_BATCH=32         # AllowedEnglish text
+NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS=2 # English textstepEnglish text
 ```
 
-**RTX 4060 Ti (16GB显存)**
+**RTX 4060 Ti (16GBEnglish text)**
 ```bash
-NEURX_PRETRAIN_MICRO_BATCH=8          # 受显存限制
-NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS=8 # 积累更多步数
+NEURX_PRETRAIN_MICRO_BATCH=8          # English text
+NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS=8 # English textstepEnglish text
 ```
 
-### 数据加载优化
+### dataloadoptimize
 
 ```bash
-NEURX_PRETRAIN_NUM_WORKERS=8           # 增加数据加载线程
-NEURX_PRETRAIN_LINE_CHUNK=256          # 读取块大小
+NEURX_PRETRAIN_NUM_WORKERS=8           # English textdataloadEnglish text
+NEURX_PRETRAIN_LINE_CHUNK=256          # English text
 ```
 
 ---
 
-## 梯度同步流程
+## gradientEnglish textsteppipeline
 
 ```
-4GPU并发训练：
+4GPUEnglish texttraining:
 
 Rank 0        Rank 1        Rank 2        Rank 3
 GPU 0         GPU 1         GPU 2         GPU 3
@@ -149,11 +149,11 @@ GPU 0         GPU 1         GPU 2         GPU 3
 ├─ Backward   ├─ Backward   ├─ Backward   ├─ Backward
 │ Grad        │ Grad        │ Grad        │ Grad
 │             │             │             │
-└─ NCCL AllReduce (梯度同步)
+└─ NCCL AllReduce (gradientEnglish textstep)
        ↓
-所有rank的梯度求和并平均
+English textrankEnglish textgradientEnglish text
        ↓
-┌─ Optimizer step (同步更新)
+┌─ Optimizer step (English textstepEnglish text)
 ├─ Rank 0: params -= lr * avg_grad
 ├─ Rank 1: params -= lr * avg_grad
 ├─ Rank 2: params -= lr * avg_grad
@@ -162,43 +162,43 @@ GPU 0         GPU 1         GPU 2         GPU 3
 
 ---
 
-## 监控和调试
+## monitoringEnglish text
 
-### 查看进程状态
+### English textstate
 
 ```bash
-# 查看所有GPU使用情况
+# English textGPUuseEnglish text
 nvidia-smi
 
-# 查看rank进程
+# English textrankEnglish text
 ps aux | grep pretrain_gpu_distributed
 
-# 查看各rank的日志
+# English textrankEnglish textlog
 tail -f artifacts/logs/run_gpu_pretrain_*.log
 ```
 
-### 检查NCCL通信
+### English textNCCLEnglish text
 
 ```bash
-# 启用NCCL调试
+# English textNCCLEnglish text
 export NCCL_DEBUG=INFO
 make pretrain-gpu-distributed 2>&1 | grep NCCL
 ```
 
-### 性能分析
+### English text
 
 ```bash
-# 记录每个rank的性能指标
+# English textrankEnglish text
 NEURX_PRETRAIN_LOG_INTERVAL=10 \
   make pretrain-gpu-distributed
 ```
 
 ---
 
-## 常见问题
+## English text
 
-### Q1: 显存不足错误
-**A**: 减小 `NEURX_PRETRAIN_MICRO_BATCH` 或增加 `NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS`
+### Q1: English texterror
+**A**: English text `NEURX_PRETRAIN_MICRO_BATCH` English text `NEURX_PRETRAIN_GRADIENT_ACCUM_STEPS`
 
 ```bash
 NEURX_PRETRAIN_MICRO_BATCH=4 \
@@ -206,88 +206,88 @@ NEURX_PRETRAIN_MICRO_BATCH=4 \
   make pretrain-gpu-distributed
 ```
 
-### Q2: 梯度同步超时
-**A**: 增加超时时间或检查网络连接
+### Q2: gradientEnglish textstepEnglish text
+**A**: English texttimeEnglish text
 ```bash
-export NCCL_TIMEOUT=1800  # 30分钟
+export NCCL_TIMEOUT=1800  # 30English text
 make pretrain-gpu-distributed
 ```
 
-### Q3: GPU利用率低
-**A**: 增加 `NEURX_PRETRAIN_NUM_WORKERS` 提高数据加载效率
+### Q3: GPUEnglish text
+**A**: English text `NEURX_PRETRAIN_NUM_WORKERS` English textdataloadEnglish text
 ```bash
 NEURX_PRETRAIN_NUM_WORKERS=16 make pretrain-gpu-distributed
 ```
 
-### Q4: 无法检测到GPU
-**A**: 检查NVIDIA驱动
+### Q4: English textGPU
+**A**: English textNVIDIAEnglish text
 ```bash
-nvidia-smi  # 验证驱动
+nvidia-smi  # English text
 make pretrain-gpu-distributed
 ```
 
 ---
 
-## 预期性能
+## English text
 
-### 训练速度
+### trainingEnglish text
 
-| GPU配置 | 有效批大小 | 吞吐量 | 单轮时间 |
+| GPUconfiguration | English text | English text | English texttime |
 |--------|-----------|--------|----------|
-| 1×RTX 4060 Ti | 64 | 50 samples/s | 18小时 |
-| 2×RTX 4090 | 256 | 190 samples/s | 10小时 |
-| **4×RTX 4090** | **512** | **400 samples/s** | **4小时** |
-| 8×RTX 4090 | 1024 | 800 samples/s | 2小时 |
+| 1×RTX 4060 Ti | 64 | 50 samples/s | 18English text |
+| 2×RTX 4090 | 256 | 190 samples/s | 10English text |
+| **4×RTX 4090** | **512** | **400 samples/s** | **4English text** |
+| 8×RTX 4090 | 1024 | 800 samples/s | 2English text |
 
-### 加速倍数
+### English text
 
-- **2GPU**: ~1.9x 加速
-- **4GPU**: ~4.5x 加速 (考虑通信开销)
-- **8GPU**: ~8.2x 加速
+- **2GPU**: ~1.9x English text
+- **4GPU**: ~4.5x English text (English text)
+- **8GPU**: ~8.2x English text
 
 ---
 
-## 文件和脚本
+## fileEnglish text
 
-### Makefile目标
+### MakefileEnglish text
 
 ```bash
-# 自动检测GPU数量进行分布式训练
+# English textGPUcountEnglish texttraining
 make pretrain-gpu-distributed
 
-# 清空日志
+# English textlog
 rm -rf artifacts/logs/run_gpu_pretrain_*
 
-# 查看最新日志
+# English textlog
 tail -f artifacts/logs/run_gpu_pretrain_*.log | tail -100
 ```
 
-### 关键脚本
+### English text
 
-- **启动脚本**: [scripts/legacy/launch_pretrain_distributed.s](../scripts/legacy/launch_pretrain_distributed.s)
-- **分布式入口**: [pretrain/distributed_pretrain_entry.s](../pretrain/distributed_pretrain_entry.s)
-- **CUDA桥接**: [distributed/cuda_bridge.s](../distributed/cuda_bridge.s)
+- **startEnglish text**: [scripts/legacy/launch_pretrain_distributed.s](../scripts/legacy/launch_pretrain_distributed.s)
+- **English text**: [pretrain/distributed_pretrain_entry.s](../pretrain/distributed_pretrain_entry.s)
+- **CUDAEnglish text**: [distributed/cuda_bridge.s](../distributed/cuda_bridge.s)
 
 ---
 
-## 下一步
+## English textstep
 
-1. **运行单GPU测试**:
+1. **runEnglish textGPUtest**:
    ```bash
    NEURX_NUM_GPUS=1 make pretrain-gpu-distributed
    ```
 
-2. **运行多GPU训练**:
+2. **runEnglish textGPUtraining**:
    ```bash
    make pretrain-gpu-distributed
    ```
 
-3. **监控训练进度**:
+3. **monitoringtrainingEnglish text**:
    ```bash
    tail -f artifacts/logs/run_gpu_pretrain_distributed_*.log
    ```
 
-4. **恢复训练**:
+4. **recovertraining**:
    ```bash
    NEURX_PRETRAIN_RESUME=auto make pretrain-gpu-distributed
    ```

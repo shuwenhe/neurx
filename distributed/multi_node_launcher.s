@@ -2,8 +2,8 @@
 
 // ============================================
 // NeurX Multi-Node Rank Launcher
-// 多节点跨节点rank启动和协调
-// 功能: 跨节点rank启动、进程通信、故障检测
+// English textrankstartEnglish text
+// English text: English textrankstart, English text, English text
 // ============================================
 
 package neurx.distributed.multi_node_launcher
@@ -13,34 +13,34 @@ use neurx.strings.{string_concat}
 use neurx.distributed.nccl_id_manager.{nccl_unique_id, load_nccl_id_from_shared_storage}
 
 // ============================================
-// 多节点配置
+// English textconfiguration
 // ============================================
 
 struct multi_node_config {
-    int num_nodes          // 总节点数
-    int node_rank          // 当前节点排序 (0-based)
-    string node_name       // 节点名称/IP
-    int gpus_per_node      // 每节点GPU数
-    int world_size         // 总rank数 = num_nodes * gpus_per_node
-    string master_addr     // 主节点地址
-    int master_port        // 主节点端口
-    string nccl_store_path // NCCL ID存储路径
+    int num_nodes          // English text
+    int node_rank          // English textranking (0-based)
+    string node_name       // English textName/IP
+    int gpus_per_node      // English textGPUEnglish text
+    int world_size         // English textrankEnglish text = num_nodes * gpus_per_node
+    string master_addr     // mainEnglish text
+    int master_port        // mainEnglish text
+    string nccl_store_path // NCCL IDEnglish textpath
 }
 
 struct rank_info {
-    int global_rank        // 全局rank (0到world_size-1)
-    int local_rank         // 本节点rank (0到gpus_per_node-1)
-    int node_rank          // 节点排序
-    string node_name       // 节点名称
+    int global_rank        // English textrank (0English textworld_size-1)
+    int local_rank         // English textrank (0English textgpus_per_node-1)
+    int node_rank          // English textranking
+    string node_name       // English textName
 }
 
 // ============================================
-// 多节点配置初始化
+// English textconfigurationinitialize
 // ============================================
 
-// 从环境变量读取多节点配置
+// English textconfiguration
 func init_multi_node_config() multi_node_config {
-    
+
     int num_nodes = parse_int(
         runtime_env_get("NEURX_NUM_NODES", "1"), 1)
     int node_rank = parse_int(
@@ -53,9 +53,9 @@ func init_multi_node_config() multi_node_config {
         "NEURX_MASTER_ADDR", runtime_env_get("MASTER_ADDR", "localhost"))
     int master_port = parse_int(
         runtime_env_get("NEURX_MASTER_PORT", runtime_env_get("MASTER_PORT", "29500")), 29500)
-    
+
     int world_size = num_nodes * gpus_per_node
-    
+
     multi_node_config {
         num_nodes: num_nodes,
         node_rank: node_rank,
@@ -69,26 +69,26 @@ func init_multi_node_config() multi_node_config {
 }
 
 // ============================================
-// Rank计算
+// Rankcompute
 // ============================================
 
-// 根据节点信息和本地rank计算全局rank
+// English textinformationEnglish textrankcomputeEnglish textrank
 func calculate_global_rank(
     multi_node_config config,
     int local_rank,
 ) int {
-    // 全局rank = 节点排序 * 每节点GPU数 + 本地rank
+    // English textrank = English textranking * English textGPUEnglish text + English textrank
     (config.node_rank * config.gpus_per_node) + local_rank
 }
 
-// 生成rank信息
+// generaterankinformation
 func generate_rank_info(
     multi_node_config config,
     int local_rank,
 ) rank_info {
-    
+
     int global_rank = calculate_global_rank(config, local_rank)
-    
+
     rank_info {
         global_rank: global_rank,
         local_rank: local_rank,
@@ -98,7 +98,7 @@ func generate_rank_info(
 }
 
 // ============================================
-// 多节点启动协调
+// English textstartEnglish text
 // ============================================
 
 struct node_launch_plan {
@@ -108,13 +108,13 @@ struct node_launch_plan {
     string launch_order
 }
 
-// 生成多节点启动计划
+// generateEnglish textstartEnglish text
 func generate_launch_plan(
     multi_node_config config,
 ) node_launch_plan {
-    
+
     []rank_info ranks = []rank_info{cap: config.world_size}
-    
+
     int rank_idx = 0
     int node = 0
     while node < config.num_nodes {
@@ -131,7 +131,7 @@ func generate_launch_plan(
         }
         node = node + 1
     }
-    
+
     node_launch_plan {
         total_nodes: config.num_nodes,
         total_gpus: config.world_size,
@@ -141,7 +141,7 @@ func generate_launch_plan(
 }
 
 // ============================================
-// 节点间通信
+// English text
 // ============================================
 
 struct node_sync_barrier {
@@ -151,43 +151,43 @@ struct node_sync_barrier {
     bool barrier_reached
 }
 
-// 节点间同步屏障（所有rank必须到达）
+// English textstepEnglish text(English textrankEnglish text)
 func synchronize_across_nodes(
     rank_info rank,
     string shared_storage_path,
 ) bool {
-    
-    // 实现方式1: 文件系统屏障
-    // 每个rank在shared_storage_path中创建一个标记文件
-    // 等待其他所有rank的标记文件出现
-    
+
+    // implementationEnglish text1: filesystemEnglish text
+    // English textrankEnglish textshared_storage_pathEnglish textfile
+    // English textrankEnglish textfileEnglish text
+
     string barrier_dir = shared_storage_path + "/barrier"
     string my_marker = barrier_dir + "/rank_" + itoa(rank.global_rank)
-    
+
     print("[SYNC] Rank " + itoa(rank.global_rank) +
           " reached barrier at " + barrier_dir)
-    
-    // 轮询等待其他rank
-    int timeout = 300  // 5分钟超时
+
+    // English textrank
+    int timeout = 300  // 5English text
     int elapsed = 0
-    
+
     while elapsed < timeout {
-        // 检查是否所有rank都到达
+        // English textrankEnglish text
         // int ready_count = count_marker_files(barrier_dir)
         // if ready_count >= world_size {
         //     return true
         // }
-        
+
         sleep_seconds(1)
         elapsed = elapsed + 1
     }
-    
+
     print("[WARNING] Barrier timeout after " + itoa(elapsed) + " seconds")
     false
 }
 
 // ============================================
-// 故障检测和恢复
+// English textrecover
 // ============================================
 
 struct node_health_status {
@@ -206,22 +206,22 @@ struct fault_recovery_config {
     string checkpoint_dir
 }
 
-// 节点健康检查
+// English text
 func check_node_health(
     rank_info rank,
     int heartbeat_timeout_sec,
 ) node_health_status {
-    
-    // 实现方式：心跳检测
-    // 每个rank定期向共享存储写入心跳时间戳
-    // 主节点检查是否有rank超过timeout没有更新心跳
-    
+
+    // implementationEnglish text: English text
+    // English textrankEnglish texttimeEnglish text
+    // mainEnglish textrankEnglish texttimeoutEnglish text
+
     int current_time = get_current_timestamp()
-    
-    // 模拟检查
+
+    // English text
     bool is_healthy = true
     string error = ""
-    
+
     node_health_status {
         rank: rank.global_rank,
         node_name: rank.node_name,
@@ -231,63 +231,63 @@ func check_node_health(
     }
 }
 
-// 检测故障的rank
+// English textrank
 func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
     int timeout_sec,
 ) []int {
-    
-    // 检查共享存储中各rank的心跳
+
+    // English textrankEnglish text
     []int failed_ranks = []int{cap: 10}
     int failed_count = 0
-    
+
     int rank = 0
     while rank < world_size {
         string heartbeat_file = shared_storage_path + "/heartbeat/rank_" + itoa(rank)
-        
-        // 检查文件是否存在和是否过期
+
+        // English textfileEnglish text
         // if file_is_outdated(heartbeat_file, timeout_sec) {
         //     failed_ranks[failed_count] = rank
         //     failed_count = failed_count + 1
         // }
-        
+
         rank = rank + 1
     }
-    
+
     failed_ranks
 }
 
-// 从故障恢复
+// English textrecover
 func recover_from_failure(
     rank_info rank,
     fault_recovery_config config,
     int attempt_number,
 ) bool {
-    
+
     if attempt_number > config.max_recovery_attempts {
         print("[ERROR] Max recovery attempts (" + itoa(config.max_recovery_attempts) + ") exceeded")
         return false
     }
-    
+
     print("[RECOVERY] Rank " + itoa(rank.global_rank) +
           " attempting recovery (attempt " + itoa(attempt_number) + ")")
-    
-    // 1. 加载最新checkpoint
+
+    // 1. loadEnglish textcheckpoint
     string checkpoint_file = config.checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".ckpt"
     print("[RECOVERY] Loading checkpoint from: " + checkpoint_file)
-    
-    // 2. 重新同步所有rank
+
+    // 2. English textstepEnglish textrank
     // synchronize_across_nodes(rank, config.checkpoint_dir)
-    
-    // 3. 恢复训练
+
+    // 3. recovertraining
     print("[RECOVERY] Resuming training from checkpoint")
-    
+
     true
 }
 
 // ============================================
-// 多机Checkpoint管理
+// English textCheckpointmanagement
 // ============================================
 
 struct distributed_checkpoint {
@@ -299,61 +299,61 @@ struct distributed_checkpoint {
     string timestamp
 }
 
-// 保存分布式checkpoint（每个rank保存自己的部分）
+// saveEnglish textcheckpoint(English textranksaveEnglish text)
 func save_distributed_checkpoint(
     rank_info rank,
     int step,
     float loss,
     string shared_checkpoint_dir,
 ) bool {
-    
-    // 每个rank保存自己的checkpoint
+
+    // English textranksaveEnglish textcheckpoint
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
     string ckpt_file = rank_dir + "/step_" + itoa(step) + ".ckpt"
-    
+
     print("[CHECKPOINT] Rank " + itoa(rank.global_rank) +
           " saving checkpoint at step " + itoa(step) + " to " + ckpt_file)
-    
-    // 内容: step, loss, model_state
+
+    // content: step, loss, model_state
     string content = "step=" + itoa(step) + "\n" +
                      "loss=" + ftoa(loss) + "\n" +
                      "timestamp=" + get_timestamp() + "\n" +
                      "rank=" + itoa(rank.global_rank)
-    
-    // 实际实现中写入model weights等
+
+    // actualimplementationEnglish textmodel weightsEnglish text
     // runtime_write_text_file(ckpt_file, content)
-    
-    // 在shared_checkpoint_dir下创建同步标记
+
+    // English textshared_checkpoint_dirEnglish textstepEnglish text
     string sync_marker = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".done"
     // runtime_write_text_file(sync_marker, "done")
-    
+
     true
 }
 
-// 加载分布式checkpoint（恢复训练）
+// loadEnglish textcheckpoint(recovertraining)
 func load_distributed_checkpoint(
     rank_info rank,
     string shared_checkpoint_dir,
 ) (int, float, bool) {
-    
-    // 查找最新的checkpoint
+
+    // English textcheckpoint
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
-    
-    // 扫描目录找最新的step_*.ckpt文件
-    // 实际实现中应该用文件系统操作
-    
-    // 模拟返回: step, loss
+
+    // English textdirectoryEnglish textstep_*.ckptfile
+    // actualimplementationEnglish textfilesystemEnglish text
+
+    // English text: step, loss
     (50000, 8.5, true)
 }
 
 // ============================================
-// 辅助函数
+// helperfunction
 // ============================================
 
 func parse_int(string s, int fallback) int {
     int result = 0
     int i = 0
-    
+
     while i < len(s) {
         byte b = s[i]
         if b >= '0' && b <= '9' {
@@ -361,7 +361,7 @@ func parse_int(string s, int fallback) int {
         }
         i = i + 1
     }
-    
+
     if result == 0 {
         result = fallback
     }
@@ -372,20 +372,20 @@ func itoa(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     string s = ""
     int num = n
     if num < 0 {
         s = "-"
         num = -num
     }
-    
+
     while num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10
     }
-    
+
     s
 }
 
@@ -400,9 +400,9 @@ func get_timestamp() string {
 }
 
 func get_current_timestamp() int {
-    1721004000  // 模拟Unix时间戳
+    1721004000  // English textUnixtimeEnglish text
 }
 
 func sleep_seconds(int seconds) {
-    // 实际实现: time.Sleep()
+    // actualimplementation: time.Sleep()
 }

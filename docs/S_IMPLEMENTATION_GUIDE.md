@@ -1,54 +1,54 @@
-# 完全 S 语言化的 NeurX 环境 — 实现指南
+# English text S languageEnglish text NeurX English text — implementationEnglish text
 
-**目标：** 建立完整的 S-only 工具链，实现端到端的 S 语言支持  
-**状态：** Phase 1-4 全面实现  
-**时间：** 2026-07-07
+**English text: ** English textcompleteEnglish text S-only toolEnglish text, implementationEnglish text S languagesupport
+**state: ** Phase 1-4 English textimplementation
+**time: ** 2026-07-07
 
 ---
 
-## 📋 实现概览
+## 📋 implementationEnglish text
 
-### 三大核心组件
+### English text
 
-| 组件 | 文件 | 行数 | 功能 | 状态 |
+| English text | file | English text | English text | state |
 |------|------|------|------|------|
-| **数据处理** | `scripts/legacy/data_pipeline.s` | 700+ | 清洗、去重、分片 | ✅ |
-| **训练框架** | `scripts/legacy/training_runner.s` | 500+ | 模型训练驱动 | ✅ |
-| **推理服务** | `scripts/legacy/inference_server.s` | 600+ | REST API 服务器 | ✅ |
-| **工具链** | `scripts/legacy/s_toolchain.s` | 250+ | 统一 CLI 入口 | ✅ |
+| **dataEnglish text** | `scripts/legacy/data_pipeline.s` | 700+ | clean, deduplication, English text | ✅ |
+| **trainingframework** | `scripts/legacy/training_runner.s` | 500+ | modeltrainingEnglish text | ✅ |
+| **inferenceEnglish text** | `scripts/legacy/inference_server.s` | 600+ | REST API English text | ✅ |
+| **toolEnglish text** | `scripts/legacy/s_toolchain.s` | 250+ | English text CLI English text | ✅ |
 
-### 总代码量：2000+ 行 S 语言
+### English text: 2000+ English text S language
 
 ---
 
-## 🔧 编译和使用
+## 🔧 compileEnglish textuse
 
-### 1. 数据处理管道
+### 1. dataEnglish text
 
-**编译：**
+**compile: **
 ```bash
 s /home/shuwen/shuwen/train/neurx/scripts/legacy/data_pipeline.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/data_pipeline/data_pipeline
 ```
 
-**使用：**
+**use: **
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 清洗数据
+# cleandata
 ./artifacts/build/data_pipeline/data_pipeline clean
 
-# 生成分片
+# generateEnglish text
 ./artifacts/build/data_pipeline/data_pipeline shard
 
-# 完整流程
+# completepipeline
 ./artifacts/build/data_pipeline/data_pipeline pipeline
 
-# 帮助
+# English text
 ./artifacts/build/data_pipeline/data_pipeline help
 ```
 
-**环境变量：**
+**English text: **
 ```bash
 export NEURX_HOME=/home/shuwen/shuwen/train/neurx
 export NEURX_BATCH_SIZE=32
@@ -57,38 +57,38 @@ export NEURX_MAX_SHARDS=256
 
 ---
 
-### 2. 训练框架
+### 2. trainingframework
 
-**编译：**
+**compile: **
 ```bash
 s /home/shuwen/shuwen/train/neurx/scripts/legacy/training_runner.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/training/runner
 ```
 
-**使用：**
+**use: **
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 运行训练
+# runtraining
 ./artifacts/build/training/runner run
 
-# 恢复训练
+# recovertraining
 ./artifacts/build/training/runner resume
 
-# 评估模型
+# evaluationmodel
 ./artifacts/build/training/runner eval
 
-# 显示配置
+# English textconfiguration
 ./artifacts/build/training/runner config
 
-# 加载配置文件
+# loadconfigurationfile
 ./artifacts/build/training/runner config-load config.json
 
-# 保存配置
+# saveconfiguration
 ./artifacts/build/training/runner config-save output.json
 ```
 
-**环境变量：**
+**English text: **
 ```bash
 export NEURX_HOME=/home/shuwen/shuwen/train/neurx
 export NEURX_BATCH_SIZE=16
@@ -99,7 +99,7 @@ export NEURX_LEARNING_RATE=0.0001
 export NEURX_MIXED_PRECISION=fp16
 ```
 
-**配置示例 (config.json)：**
+**configurationexample (config.json): **
 ```json
 {
   "model_name": "neurx-1t",
@@ -114,35 +114,35 @@ export NEURX_MIXED_PRECISION=fp16
 
 ---
 
-### 3. 推理服务器
+### 3. inferenceEnglish text
 
-**编译：**
+**compile: **
 ```bash
 s /home/shuwen/shuwen/train/neurx/scripts/legacy/inference_server.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/inference/server
 ```
 
-**使用：**
+**use: **
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 启动服务器
+# startEnglish text
 NEURX_INFERENCE_MODEL=artifacts/models/1t.bin ./artifacts/build/inference/server start
 
-# 交互模式 (模拟)
+# English text (English text)
 ./artifacts/build/inference/server interactive
 
-# 性能基准
+# English text
 ./artifacts/build/inference/server benchmark
 
-# 显示配置
+# English textconfiguration
 ./artifacts/build/inference/server config
 
-# 加载配置
+# loadconfiguration
 ./artifacts/build/inference/server config-load config.json
 ```
 
-**环境变量：**
+**English text: **
 ```bash
 export NEURX_INFERENCE_HOST=0.0.0.0
 export NEURX_INFERENCE_PORT=8080
@@ -152,9 +152,9 @@ export NEURX_INFERENCE_QUANTIZED=0
 export NEURX_INFERENCE_CACHE=1
 ```
 
-**API 端点：**
+**API English text: **
 ```bash
-# 生成文本
+# generateEnglish text
 POST /v1/completions
 {
   "prompt": "What is AI?",
@@ -162,108 +162,108 @@ POST /v1/completions
   "temperature": 0.7
 }
 
-# 健康检查
+# English text
 GET /health
 
-# 指标
+# English text
 GET /metrics
 ```
 
 ---
 
-### 4. 工具链协调器
+### 4. toolEnglish text
 
-**编译：**
+**compile: **
 ```bash
 s /home/shuwen/shuwen/train/neurx/scripts/legacy/s_toolchain.s \
   -o /home/shuwen/shuwen/train/neurx/artifacts/build/toolchain/s_toolchain
 ```
 
-**使用：**
+**use: **
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 显示状态
+# English textstate
 ./artifacts/build/toolchain/s_toolchain status
 
-# 列出工具
+# English texttool
 ./artifacts/build/toolchain/s_toolchain list
 
-# 帮助
+# English text
 ./artifacts/build/toolchain/s_toolchain help
 ```
 
 ---
 
-## 📦 Makefile 集成
+## 📦 Makefile English text
 
-### 编译目标
+### compileEnglish text
 
 ```makefile
-# Phase 1: 数据处理
-make build-data-pipeline        # 编译数据管道
-make build-verify-dataset       # 编译数据验证
+# Phase 1: dataEnglish text
+make build-data-pipeline        # compiledataEnglish text
+make build-verify-dataset       # compiledataEnglish text
 
-# Phase 2: 训练框架
-make build-training-runner      # 编译训练驱动
-make build-checkpoint-manager   # 编译检查点管理
-make build-distributed-training # 编译分布式训练
+# Phase 2: trainingframework
+make build-training-runner      # compiletrainingEnglish text
+make build-checkpoint-manager   # compilecheckpointmanagement
+make build-distributed-training # compileEnglish texttraining
 
-# Phase 3: 推理部署
-make build-inference-server     # 编译推理服务器
-make build-model-exporter       # 编译模型导出工具
+# Phase 3: inferenceEnglish text
+make build-inference-server     # compileinferenceEnglish text
+make build-model-exporter       # compilemodelEnglish texttool
 
-# Phase 4: 工具链
-make build-s-toolchain          # 编译工具链协调器
-make build-industrial-ops       # 编译工业级运算
+# Phase 4: toolEnglish text
+make build-s-toolchain          # compiletoolEnglish text
+make build-industrial-ops       # compileEnglish text
 ```
 
-### 运行目标
+### runEnglish text
 
 ```makefile
-# 数据处理
-make run-data-pipeline          # 运行完整数据管道
-make run-verify-dataset         # 运行数据验证
+# dataEnglish text
+make run-data-pipeline          # runcompletedataEnglish text
+make run-verify-dataset         # rundataEnglish text
 
-# 训练
-make run-training               # 启动训练
-make run-training-resume        # 恢复训练
+# training
+make run-training               # starttraining
+make run-training-resume        # recovertraining
 
-# 推理
-make run-inference-server       # 启动推理服务
-make run-inference-benchmark    # 运行性能基准
+# inference
+make run-inference-server       # startinferenceEnglish text
+make run-inference-benchmark    # runEnglish text
 
-# 工具链
-make run-s-toolchain-status     # 显示工具链状态
+# toolEnglish text
+make run-s-toolchain-status     # English texttoolEnglish textstate
 ```
 
 ---
 
-## 📊 性能基准
+## 📊 English text
 
-### 编译性能
+### compileEnglish text
 
-| 组件 | 编译时间 | 输出大小 | 启动时间 |
+| English text | compiletime | outputEnglish text | starttime |
 |------|---------|---------|---------|
 | data_pipeline | 2-3s | 5-8MB | 50ms |
 | training_runner | 2-3s | 6-10MB | 80ms |
 | inference_server | 2-3s | 7-12MB | 100ms |
 | s_toolchain | 1-2s | 3-5MB | 30ms |
 
-### 运行时性能 (vs Python)
+### runEnglish text (vs Python)
 
-| 操作 | Python | S语言 | 加速 |
+| English text | Python | Slanguage | English text |
 |------|--------|-------|------|
-| 数据清洗 | 45s | 12s | **3.75x** ⚡ |
-| 数据分片 | 28s | 5s | **5.6x** ⚡ |
-| 启动时间 | 1-2s | 50-100ms | **10-20x** ⚡ |
-| 内存占用 | 350MB | 80MB | **4.4x** 少 💾 |
+| dataclean | 45s | 12s | **3.75x** ⚡ |
+| dataEnglish text | 28s | 5s | **5.6x** ⚡ |
+| starttime | 1-2s | 50-100ms | **10-20x** ⚡ |
+| English text | 350MB | 80MB | **4.4x** English text 💾 |
 
 ---
 
-## 🎯 快速开始
+## 🎯 quickstart
 
-### 一键设置
+### English text
 
 ```bash
 #!/bin/bash
@@ -272,10 +272,10 @@ NEURX_HOME=/home/shuwen/shuwen/train/neurx
 S_COMPILER=/home/shuwen/.local/bin/s
 BUILD_DIR=$NEURX_HOME/artifacts/build
 
-# 创建编译目录
+# English textcompiledirectory
 mkdir -p $BUILD_DIR/{data_pipeline,training,inference,toolchain}
 
-# 编译所有组件
+# compileEnglish text
 echo "Compiling data pipeline..."
 $S_COMPILER $NEURX_HOME/scripts/legacy/data_pipeline.s \
   -o $BUILD_DIR/data_pipeline/data_pipeline
@@ -295,80 +295,80 @@ $S_COMPILER $NEURX_HOME/scripts/legacy/s_toolchain.s \
 echo "All components compiled successfully!"
 ```
 
-### 第一次使用
+### English textuse
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 1. 查看工具链状态
+# 1. English texttoolEnglish textstate
 ./artifacts/build/toolchain/s_toolchain status
 
-# 2. 运行数据处理
+# 2. rundataEnglish text
 ./artifacts/build/data_pipeline/data_pipeline pipeline
 
-# 3. 启动训练
+# 3. starttraining
 NEURX_BATCH_SIZE=32 ./artifacts/build/training/runner run
 
-# 4. 启动推理服务
+# 4. startinferenceEnglish text
 NEURX_INFERENCE_PORT=8080 ./artifacts/build/inference/server start
 ```
 
 ---
 
-## 📝 代码架构
+## 📝 English text
 
-### 文件组织
+### fileEnglish text
 
 ```
 neurx/
 ├── scripts/legacy/
-│   ├── data_pipeline.s           # Phase 1: 数据处理
-│   ├── training_runner.s         # Phase 2: 训练框架
-│   ├── inference_server.s        # Phase 3: 推理服务
-│   ├── s_toolchain.s             # Phase 4: 工具链协调
-│   └── [其他辅助脚本]
+│   ├── data_pipeline.s           # Phase 1: dataEnglish text
+│   ├── training_runner.s         # Phase 2: trainingframework
+│   ├── inference_server.s        # Phase 3: inferenceEnglish text
+│   ├── s_toolchain.s             # Phase 4: toolEnglish text
+│   └── [English texthelperEnglish text]
 │
 ├── dataset/
-│   ├── verify_dataset.s          # 数据验证工具
-│   └── [数据文件]
+│   ├── verify_dataset.s          # dataEnglish texttool
+│   └── [datafile]
 │
-├── Makefile                      # 编译和运行配置
-├── S_ONLY_ENVIRONMENT_PLAN.md   # 实现计划
-└── S_IMPLEMENTATION_GUIDE.md     # 本文件
+├── Makefile                      # compileEnglish textrunconfiguration
+├── S_ONLY_ENVIRONMENT_PLAN.md   # implementationEnglish text
+└── S_IMPLEMENTATION_GUIDE.md     # English textfile
 ```
 
-### 设计原则
+### English textprinciple
 
-1. **模块化** - 每个组件独立编译和运行
-2. **可组合** - 通过环境变量和配置文件实现灵活配置
-3. **高性能** - 编译型语言提供 3-5x 性能提升
-4. **易集成** - 标准的 CLI 接口和 JSON 配置
+1. **English text** - English textcompileEnglish textrun
+2. **English text** - English textconfigurationfileimplementationEnglish textconfiguration
+3. **English text** - compileEnglish textlanguageEnglish text 3-5x English text
+4. **English text** - English text CLI English text JSON configuration
 
 ---
 
-## 🔍 调试和测试
+## 🔍 English texttest
 
-### 编译调试
+### compileEnglish text
 
 ```bash
-# 显示编译错误
+# English textcompileerror
 s scripts/legacy/data_pipeline.s -o /tmp/test.bin
 
-# 查看编译信息
+# English textcompileinformation
 s scripts/legacy/data_pipeline.s --verbose -o /tmp/test.bin
 ```
 
-### 运行调试
+### runEnglish text
 
 ```bash
-# 显示配置
+# English textconfiguration
 ./artifacts/build/data_pipeline/data_pipeline config
 
 ./artifacts/build/training/runner config
 
 ./artifacts/build/inference/server config
 
-# 查看帮助
+# English text
 ./artifacts/build/data_pipeline/data_pipeline help
 
 ./artifacts/build/training/runner help
@@ -376,130 +376,130 @@ s scripts/legacy/data_pipeline.s --verbose -o /tmp/test.bin
 ./artifacts/build/inference/server help
 ```
 
-### 性能分析
+### English text
 
 ```bash
-# 数据处理性能
+# dataEnglish text
 time ./artifacts/build/data_pipeline/data_pipeline pipeline
 
-# 训练性能
+# trainingEnglish text
 time ./artifacts/build/training/runner run
 
-# 推理性能
+# inferenceEnglish text
 ./artifacts/build/inference/server benchmark
 ```
 
 ---
 
-## ✅ 验证清单
+## ✅ English text
 
-编译完成后，验证以下项目：
+compileEnglish text, English text:
 
-- [ ] data_pipeline 二进制存在且可执行
-- [ ] training_runner 二进制存在且可执行
-- [ ] inference_server 二进制存在且可执行
-- [ ] s_toolchain 二进制存在且可执行
-- [ ] `./s_toolchain status` 显示所有组件可用
-- [ ] `./data_pipeline --help` 显示帮助信息
-- [ ] `./training_runner --help` 显示帮助信息
-- [ ] `./inference_server --help` 显示帮助信息
-- [ ] 数据处理完成无错误
-- [ ] 训练可以正常启动
-- [ ] 推理服务可以正常启动
+- [ ] data_pipeline English text
+- [ ] training_runner English text
+- [ ] inference_server English text
+- [ ] s_toolchain English text
+- [ ] `./s_toolchain status` English text
+- [ ] `./data_pipeline --help` English textinformation
+- [ ] `./training_runner --help` English textinformation
+- [ ] `./inference_server --help` English textinformation
+- [ ] dataEnglish texterror
+- [ ] trainingAllowedEnglish textstart
+- [ ] inferenceEnglish textAllowedEnglish textstart
 
 ---
 
-## 🚀 部署
+## 🚀 English text
 
-### 本地部署
+### English text
 
 ```bash
-# 编译所有组件
+# compileEnglish text
 make build-all-s-components
 
-# 运行数据处理
+# rundataEnglish text
 make run-data-pipeline
 
-# 启动训练
+# starttraining
 make run-training
 
-# 启动推理服务
+# startinferenceEnglish text
 make run-inference-server &
 ```
 
-### 容器部署
+### English text
 
 ```dockerfile
 FROM ubuntu:22.04
 
-# 安装 S 编译器
+# English text S compileEnglish text
 COPY /home/shuwen/.local/bin/s /usr/local/bin/s
 
 WORKDIR /neurx
 
-# 复制源代码
+# English text
 COPY scripts/legacy/ scripts/legacy/
 COPY dataset/ dataset/
 
-# 编译
+# compile
 RUN s scripts/legacy/data_pipeline.s -o /usr/local/bin/data_pipeline && \
     s scripts/legacy/training_runner.s -o /usr/local/bin/training_runner && \
     s scripts/legacy/inference_server.s -o /usr/local/bin/inference_server
 
-# 运行
+# run
 CMD ["inference_server", "start"]
 ```
 
 ---
 
-## 📚 参考资源
+## 📚 English text
 
-### 官方文档
-- [S_TOOLCHAIN_GUIDE.md](S_TOOLCHAIN_GUIDE.md) — 工具链使用指南
-- [S_TOOLCHAIN_COMPLETION.md](S_TOOLCHAIN_COMPLETION.md) — 项目完成总结
-- [S_ONLY_ENVIRONMENT_PLAN.md](S_ONLY_ENVIRONMENT_PLAN.md) — 实现计划
+### English text
+- [S_TOOLCHAIN_GUIDE.md](S_TOOLCHAIN_GUIDE.md) — toolEnglish textuseEnglish text
+- [S_TOOLCHAIN_COMPLETION.md](S_TOOLCHAIN_COMPLETION.md) — English text
+- [S_ONLY_ENVIRONMENT_PLAN.md](S_ONLY_ENVIRONMENT_PLAN.md) — implementationEnglish text
 
-### 示例代码
-- [data_pipeline.s](scripts/legacy/data_pipeline.s) — 数据处理参考实现
-- [training_runner.s](scripts/legacy/training_runner.s) — 训练框架参考实现
-- [inference_server.s](scripts/legacy/inference_server.s) — 推理服务参考实现
+### exampleEnglish text
+- [data_pipeline.s](scripts/legacy/data_pipeline.s) — dataEnglish textimplementation
+- [training_runner.s](scripts/legacy/training_runner.s) — trainingframeworkEnglish textimplementation
+- [inference_server.s](scripts/legacy/inference_server.s) — inferenceEnglish textimplementation
 
-### 相关资源
-- S 编译器：`/home/shuwen/.local/bin/s`
-- 项目主目录：`/home/shuwen/shuwen/train/neurx/`
-- 构建目录：`artifacts/build/`
+### English text
+- S compileEnglish text: `/home/shuwen/.local/bin/s`
+- English textmaindirectory: `/home/shuwen/shuwen/train/neurx/`
+- English textdirectory: `artifacts/build/`
 
 ---
 
-## 💡 常见问题
+## 💡 English text
 
-### Q: 如何在新环境中使用这些工具？
+### Q: English textuseEnglish texttool?
 
-**A:** 将编译好的二进制文件和必要的配置文件复制到目标环境，设置环境变量即可：
+**A:** English textcompileEnglish textfileEnglish textconfigurationfileEnglish text, English text:
 
 ```bash
 export NEURX_HOME=/path/to/neurx
 ./data_pipeline pipeline
 ```
 
-### Q: 可以自定义配置吗？
+### Q: AllowedEnglish textconfigurationEnglish text?
 
-**A:** 可以。所有工具都支持：
-1. 环境变量配置
-2. JSON 配置文件
-3. 命令行参数
+**A:** Allowed.English texttoolEnglish textsupport:
+1. English textconfiguration
+2. JSON configurationfile
+3. English textparameter
 
-### Q: 性能如何优化？
+### Q: English textoptimize?
 
-**A:** 
-1. 使用编译优化：`--release` 标志
-2. 调整 GPU 数量：`NEURX_NUM_GPUS=16`
-3. 增加 batch size：`NEURX_BATCH_SIZE=64`
-4. 启用量化：`NEURX_INFERENCE_QUANTIZED=1`
+**A:**
+1. usecompileoptimize: `--release` English text
+2. English text GPU count: `NEURX_NUM_GPUS=16`
+3. English text batch size: `NEURX_BATCH_SIZE=64`
+4. English text: `NEURX_INFERENCE_QUANTIZED=1`
 
-### Q: 如何集成到现有流程？
+### Q: English textpipeline?
 
-**A:** 通过 Makefile 或 s_toolchain 协调器：
+**A:** English text Makefile English text s_toolchain English text:
 
 ```bash
 make run-data-pipeline
@@ -509,17 +509,17 @@ make run-inference-server
 
 ---
 
-## 🎓 最佳实践
+## 🎓 English text
 
-1. **总是使用工具链协调器** - 通过 `s_toolchain status` 了解环境状态
-2. **保存配置文件** - 使用 `--config-save` 保存可复用配置
-3. **监控性能** - 定期运行基准测试了解性能趋势
-4. **版本控制** - 追踪编译的二进制版本和配置更改
-5. **日志管理** - 将输出重定向到文件便于后续分析
+1. **English textusetoolEnglish text** - English text `s_toolchain status` English textstate
+2. **saveconfigurationfile** - use `--config-save` saveEnglish textconfiguration
+3. **monitoringEnglish text** - English textrunEnglish texttestEnglish text
+4. **English text** - English textcompileEnglish textconfigurationEnglish text
+5. **logmanagement** - English textoutputEnglish textfileEnglish text
 
 ---
 
-**版本：** 1.0  
-**更新时间：** 2026-07-07  
-**作者：** NeurX 团队  
-**许可证：** MIT
+**English text: ** 1.0
+**English texttime: ** 2026-07-07
+**author: ** NeurX English text
+**English text: ** MIT

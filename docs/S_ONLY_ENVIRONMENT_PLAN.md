@@ -1,76 +1,76 @@
-# 完全 S 语言化的 NeurX 环境实现计划
+# English text S languageEnglish text NeurX English textimplementationEnglish text
 
-**目标：** 建立完整的 S-only 工具链，逐步替换所有 shell/Python 脚本
+**English text: ** English textcompleteEnglish text S-only toolEnglish text, English textstepEnglish text shell/Python English text
 
-**当前状态：** Phase 1 完成 (数据处理)，进入 Phase 2-4 全面推进
+**English textstate: ** Phase 1 English text (dataEnglish text), English text Phase 2-4 English text
 
 ---
 
-## 📋 核心组件清单
+## 📋 English text
 
-### Phase 1: 数据处理 ✅ (已完成)
+### Phase 1: dataEnglish text ✅ (English text)
 
-| 组件 | 文件 | 状态 | 功能 |
+| English text | file | state | English text |
 |------|------|------|------|
-| 数据管道 | `scripts/legacy/data_pipeline.s` | ✅ | 清洗、去重、分片、manifest 生成 |
-| 数据验证 | `dataset/verify_dataset.s` | ⏳ | 需要完善 |
+| dataEnglish text | `scripts/legacy/data_pipeline.s` | ✅ | clean, deduplication, English text, manifest generate |
+| dataEnglish text | `dataset/verify_dataset.s` | ⏳ | RequiredEnglish text |
 
-**编译命令：**
+**compileEnglish text: **
 ```bash
-# 数据管道
+# dataEnglish text
 s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
-# 数据验证
+# dataEnglish text
 s dataset/verify_dataset.s -o artifacts/build/dataset_verify/dataset_verify
 ```
 
 ---
 
-### Phase 2: 训练框架 (下一步)
+### Phase 2: trainingframework (English textstep)
 
-#### 2.1 训练运行器
-| 组件 | 文件 | 优先级 | 功能 |
+#### 2.1 trainingrunEnglish text
+| English text | file | English text | English text |
 |------|------|--------|------|
-| 训练驱动 | `scripts/legacy/training_runner.s` | 🔴 高 | 模型训练主控 |
-| 检查点管理 | `scripts/legacy/checkpoint_manager.s` | 🟠 中 | 检查点保存、恢复、版本控制 |
-| 分布式训练 | `scripts/legacy/distributed_training.s` | 🟠 中 | 多 GPU/节点协调 |
-| 性能监控 | `scripts/legacy/training_monitor.s` | 🟡 低 | 训练过程监控 |
+| trainingEnglish text | `scripts/legacy/training_runner.s` | 🔴 English text | modeltrainingmainEnglish text |
+| checkpointmanagement | `scripts/legacy/checkpoint_manager.s` | 🟠 English text | checkpointsave, recover, English text |
+| English texttraining | `scripts/legacy/distributed_training.s` | 🟠 English text | English text GPU/English text |
+| English textmonitoring | `scripts/legacy/training_monitor.s` | 🟡 English text | trainingEnglish textmonitoring |
 
-#### 2.2 优化工具
-| 组件 | 文件 | 优先级 | 功能 |
+#### 2.2 optimizetool
+| English text | file | English text | English text |
 |------|------|--------|------|
-| 混合精度 | `scripts/legacy/mixed_precision_trainer.s` | 🟡 低 | FP16/BF16 混合精度训练 |
-| 梯度累积 | `scripts/legacy/gradient_accumulation.s` | 🟡 低 | 梯度积累和检查点 |
-| 学习率调度 | `scripts/legacy/lr_scheduler.s` | 🟡 低 | 学习率衰减策略 |
+| English text | `scripts/legacy/mixed_precision_trainer.s` | 🟡 English text | FP16/BF16 English texttraining |
+| gradientEnglish text | `scripts/legacy/gradient_accumulation.s` | 🟡 English text | gradientEnglish textcheckpoint |
+| learning rateEnglish text | `scripts/legacy/lr_scheduler.s` | 🟡 English text | learning rateEnglish text |
 
 ---
 
-### Phase 3: 推理和部署 (中期)
+### Phase 3: inferenceEnglish text (English text)
 
-| 组件 | 文件 | 优先级 | 功能 |
+| English text | file | English text | English text |
 |------|------|--------|------|
-| 推理服务器 | `scripts/legacy/inference_server.s` | 🔴 高 | 模型推理 REST API |
-| 模型优化 | `scripts/legacy/inference_optimizer.s` | 🟠 中 | 量化、蒸馏、优化 |
-| REST API | `scripts/legacy/rest_api_handler.s` | 🟠 中 | HTTP 请求处理 |
-| 模型导出 | `scripts/legacy/model_exporter.s` | 🟡 低 | ONNX/TorchScript 导出 |
+| inferenceEnglish text | `scripts/legacy/inference_server.s` | 🔴 English text | modelinference REST API |
+| modeloptimize | `scripts/legacy/inference_optimizer.s` | 🟠 English text | English text, English text, optimize |
+| REST API | `scripts/legacy/rest_api_handler.s` | 🟠 English text | HTTP requestEnglish text |
+| modelEnglish text | `scripts/legacy/model_exporter.s` | 🟡 English text | ONNX/TorchScript English text |
 
 ---
 
-### Phase 4: 增强功能 (长期)
+### Phase 4: English text (English text)
 
-| 组件 | 文件 | 优先级 | 功能 |
+| English text | file | English text | English text |
 |------|------|--------|------|
-| 工具链协调 | `scripts/legacy/s_toolchain.s` | 🔴 高 | 统一的 CLI 入口和编排 |
-| 工业级运算 | `scripts/legacy/industrial_ops_runner.s` | 🟠 中 | DPO、RAG、数据治理 |
-| 知识蒸馏 | `scripts/legacy/knowledge_distillation.s` | 🟡 低 | 模型蒸馏框架 |
-| RLHF 训练 | `scripts/legacy/rlhf_trainer.s` | 🟡 低 | RLHF 强化学习框架 |
+| toolEnglish text | `scripts/legacy/s_toolchain.s` | 🔴 English text | English text CLI English text |
+| English text | `scripts/legacy/industrial_ops_runner.s` | 🟠 English text | DPO, RAG, dataEnglish text |
+| English text | `scripts/legacy/knowledge_distillation.s` | 🟡 English text | modelEnglish textframework |
+| RLHF training | `scripts/legacy/rlhf_trainer.s` | 🟡 English text | RLHF English textframework |
 
 ---
 
-## 🎯 实现策略
+## 🎯 implementationEnglish text
 
-### 代码风格统一
-所有 S 脚本使用 **Go-like 方言**（项目标准）：
+### English text
+English text S English textuse **Go-like English text**(English text):
 
 ```s
 package main
@@ -96,18 +96,18 @@ func main() {
 }
 ```
 
-### 编译流程标准化
+### compilepipelineEnglish text
 ```bash
-# 单一编译命令
+# English textcompileEnglish text
 s <source>.s -o <target>
 
-# 或通过 Makefile
+# English text Makefile
 make build-<component>
 make run-<component>
 ```
 
-### 配置管理规范
-所有工具使用 **环境变量** 配置：
+### configurationmanagementEnglish text
+English texttooluse **English text** configuration:
 ```bash
 export NEURX_HOME=/path/to/neurx
 export NEURX_DATA_DIR=/path/to/data
@@ -116,42 +116,42 @@ export NEURX_MODEL_DIR=/path/to/models
 
 ---
 
-## 📦 执行路线图
+## 📦 English text
 
-### Week 1-2: 基础设施
-- ✅ 数据处理 (已完成)
-- ⏳ 统一 S 脚本语法
-- ⏳ 建立编译框架
+### Week 1-2: English text
+- ✅ dataEnglish text (English text)
+- ⏳ English text S English text
+- ⏳ English textcompileframework
 
-### Week 3-4: 训练框架
-- ⏳ 训练驱动器
-- ⏳ 检查点管理
-- ⏳ 性能监控
+### Week 3-4: trainingframework
+- ⏳ trainingEnglish text
+- ⏳ checkpointmanagement
+- ⏳ English textmonitoring
 
-### Week 5-6: 推理部署
-- ⏳ 推理服务器
+### Week 5-6: inferenceEnglish text
+- ⏳ inferenceEnglish text
 - ⏳ REST API
-- ⏳ 模型优化
+- ⏳ modeloptimize
 
-### Week 7-8: 完整集成
-- ⏳ 工具链协调
-- ⏳ 工业级功能
-- ⏳ 完全文档
+### Week 7-8: completeEnglish text
+- ⏳ toolEnglish text
+- ⏳ English text
+- ⏳ English text
 
 ---
 
-## 🔧 编译配置
+## 🔧 compileconfiguration
 
-### Makefile 目标设计
+### Makefile English text
 
-**现有目标：**
+**English text: **
 ```makefile
-# Phase 1 数据处理
+# Phase 1 dataEnglish text
 make build-data-scripts
 make clean-s / make shard-s / make data-pipeline-s
 make verify-dataset-s
 
-# Phase 2-4 规划
+# Phase 2-4 English text
 make build-training-runner
 make run-training-runner
 make build-inference-server
@@ -161,7 +161,7 @@ make run-industrial-ops
 make toolchain-s
 ```
 
-**编译变量：**
+**compileEnglish text: **
 ```makefile
 S_COMPILER = /home/shuwen/.local/bin/s
 BUILD_DIR = artifacts/build
@@ -170,36 +170,36 @@ COMPONENTS = data-pipeline training-runner inference-server industrial-ops
 
 ---
 
-## 📊 性能目标
+## 📊 English text
 
-### Phase 1 性能基准 ✅
-- 数据清洗：3-5x 快（45s → 12s）
-- 数据分片：5-6x 快（28s → 5s）
-- 内存消耗：4x 少（350MB → 80MB）
+### Phase 1 English text ✅
+- dataclean: 3-5x English text(45s → 12s)
+- dataEnglish text: 5-6x English text(28s → 5s)
+- English text: 4x English text(350MB → 80MB)
 
-### Phase 2 目标 ⏳
-- 训练速度：相比 Python 提升 2-3x
-- 启动时间：减少 80%（消除 Python 启动开销）
-- 内存峰值：减少 50%
+### Phase 2 English text ⏳
+- trainingEnglish text: English text Python English text 2-3x
+- starttime: English text 80%(English text Python startEnglish text)
+- English text: English text 50%
 
-### Phase 3 目标 ⏳
-- 推理延迟：<100ms（batch size 1）
-- 吞吐量：>100 samples/sec（batch size 32）
-- 内存占用：<2GB（base 模型）
+### Phase 3 English text ⏳
+- inferenceEnglish text: <100ms(batch size 1)
+- English text: >100 samples/sec(batch size 32)
+- English text: <2GB(base model)
 
 ---
 
-## 📝 文档结构
+## 📝 English text
 
 ```
 neurx/
-├── S_ONLY_ENVIRONMENT_PLAN.md        ← 本文件
+├── S_ONLY_ENVIRONMENT_PLAN.md        ← English textfile
 ├── scripts/legacy/
-│   ├── S_TOOLCHAIN_GUIDE.md          ✅ 使用指南
-│   ├── S_TOOLCHAIN_COMPLETION.md     ✅ 完成总结
-│   ├── S_IMPLEMENTATION_GUIDE.md     ⏳ 待创建
-│   ├── S_COMPILATION_REFERENCE.md    ⏳ 待创建
-│   └── S_BEST_PRACTICES.md           ⏳ 待创建
+│   ├── S_TOOLCHAIN_GUIDE.md          ✅ useEnglish text
+│   ├── S_TOOLCHAIN_COMPLETION.md     ✅ English text
+│   ├── S_IMPLEMENTATION_GUIDE.md     ⏳ English text
+│   ├── S_COMPILATION_REFERENCE.md    ⏳ English text
+│   └── S_BEST_PRACTICES.md           ⏳ English text
 ├── data_pipeline.s                   ✅
 ├── training_runner.s                 ⏳
 ├── inference_server.s                ⏳
@@ -208,80 +208,80 @@ neurx/
 
 ---
 
-## 🚀 快速开始指南
+## 🚀 quickstartEnglish text
 
-### 当前（Phase 1）
+### English text(Phase 1)
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 编译数据管道
+# compiledataEnglish text
 s scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline
 
-# 运行完整流程
+# runcompletepipeline
 ./artifacts/build/data_pipeline/data_pipeline pipeline
 
-# 或通过 Makefile
+# English text Makefile
 make data-pipeline-s
 ```
 
-### 计划中（Phase 2）
+### English text(Phase 2)
 ```bash
-# 编译训练框架
+# compiletrainingframework
 s scripts/legacy/training_runner.s -o artifacts/build/training/runner
 
-# 启动训练
+# starttraining
 ./artifacts/build/training/runner --config pretrain_config.toml
 ```
 
-### 计划中（Phase 3）
+### English text(Phase 3)
 ```bash
-# 编译推理服务器
+# compileinferenceEnglish text
 s scripts/legacy/inference_server.s -o artifacts/build/inference/server
 
-# 启动服务
+# startEnglish text
 ./artifacts/build/inference/server --model artifacts/models/1t.bin --port 8080
 ```
 
 ---
 
-## ✅ 验收标准
+## ✅ English text
 
-每个组件必须满足：
-- ✅ Go-like S 语法正确性
-- ✅ 编译通过（S 编译器）
-- ✅ 功能完整性测试
-- ✅ 性能基准测试
-- ✅ 文档完整（API + 示例）
-- ✅ 错误处理完善
-- ✅ 环境变量支持
-- ✅ Makefile 集成
-
----
-
-## 📚 参考资源
-
-### 项目文件
-- [data_pipeline.s](scripts/legacy/data_pipeline.s) — 参考实现
-- [tokenizer.s](scripts/legacy/tokenizer.s) — Go-like 语法示例
-- [experiment_manager.s](scripts/legacy/experiment_manager.s) — 高级用法
-
-### 编译器
-- S 编译器位置：`/home/shuwen/.local/bin/s`
-- 支持的扩展：`.s`
-- 输出格式：IR → 二进制
+English text:
+- ✅ Go-like S English text
+- ✅ compileEnglish text(S compileEnglish text)
+- ✅ English textcompleteEnglish texttest
+- ✅ English texttest
+- ✅ English textcomplete(API + example)
+- ✅ errorEnglish text
+- ✅ English textsupport
+- ✅ Makefile English text
 
 ---
 
-## 🎓 关键学习点
+## 📚 English text
 
-1. **S 语言方言** - 项目特定的 Go-like S 变体
-2. **编译优化** - 静态编译提供 3-5x 性能提升
-3. **系统集成** - 通过 Makefile 和环境变量实现无缝集成
-4. **增量迁移** - Phase 按优先级推进，保持向后兼容
+### English textfile
+- [data_pipeline.s](scripts/legacy/data_pipeline.s) — English textimplementation
+- [tokenizer.s](scripts/legacy/tokenizer.s) — Go-like English textexample
+- [experiment_manager.s](scripts/legacy/experiment_manager.s) — advancedEnglish text
+
+### compileEnglish text
+- S compileEnglish text: `/home/shuwen/.local/bin/s`
+- supportEnglish textextension: `.s`
+- outputEnglish text: IR → English text
 
 ---
 
-**版本：** 1.0  
-**更新时间：** 2026-07-07  
-**所有者：** NeurX 团队  
-**状态：** 🟢 实施中
+## 🎓 English text
+
+1. **S languageEnglish text** - English text Go-like S English text
+2. **compileoptimize** - English textcompileEnglish text 3-5x English text
+3. **systemEnglish text** - English text Makefile English textimplementationEnglish text
+4. **English textmigration** - Phase English text, English text
+
+---
+
+**English text: ** 1.0
+**English texttime: ** 2026-07-07
+**English text: ** NeurX English text
+**state: ** 🟢 English text

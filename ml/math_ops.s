@@ -1,6 +1,6 @@
 // =====================================================================
 // Math Operations Module for ML
-// ML训练所需的数学操作库
+// MLtrainingEnglish text
 // =====================================================================
 
 package neurx.ml.math_ops
@@ -9,11 +9,11 @@ use neurx.backends.compute_backend
 use neurx.tensor.{tensor, zeros}
 
 // =====================================================================
-// 矩阵操作
+// English text
 // =====================================================================
 
 func matmul_2d(tensor A, tensor B) tensor {
-    // 矩阵乘法: [m, n] @ [n, p] -> [m, p]
+    // English text: [m, n] @ [n, p] -> [m, p]
     int m = A.shape[0]
     int n = A.shape[1]
     int p = B.shape[1]
@@ -28,12 +28,12 @@ func matmul_2d(tensor A, tensor B) tensor {
 }
 
 func transpose_2d(tensor A) tensor {
-    // 矩阵转置: [m, n] -> [n, m]
+    // English text: [m, n] -> [n, m]
     int m = A.shape[0]
     int n = A.shape[1]
-    
+
     tensor result = zeros([n, m])
-    
+
     int i = 0
     while i < m {
         int j = 0
@@ -43,12 +43,12 @@ func transpose_2d(tensor A) tensor {
         }
         i = i + 1
     }
-    
+
     result
 }
 
 // =====================================================================
-// 元素操作
+// English text
 // =====================================================================
 
 func scale_tensor(tensor A, float scale) tensor {
@@ -92,7 +92,7 @@ func mul_element_wise(tensor A, tensor B) tensor {
 }
 
 // =====================================================================
-// 激活函数
+// English textfunction
 // =====================================================================
 
 func relu(tensor X) tensor {
@@ -124,13 +124,13 @@ func relu_backward(tensor dY, tensor X) tensor {
 }
 
 func gelu(tensor X) tensor {
-    // GELU: x * Phi(x) 其中 Phi 是正态分布CDF
-    // 近似: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
+    // GELU: x * Phi(x) English text Phi English textCDF
+    // English text: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
     tensor result = zeros(X.shape)
-    
+
     float c1 = 0.7978845608  // sqrt(2/pi)
-    float c2 = 0.044715      // 参数
-    
+    float c2 = 0.044715      // parameter
+
     int i = 0
     while i < len(X.data) {
         float x = X.data[i]
@@ -140,17 +140,17 @@ func gelu(tensor X) tensor {
         result.data[i] = 0.5 * x * (1.0 + tanh_val)
         i = i + 1
     }
-    
+
     result
 }
 
 // =====================================================================
-// Softmax和Softmax梯度
+// SoftmaxEnglish textSoftmaxgradient
 // =====================================================================
 
 func softmax(tensor logits) tensor {
     // Softmax with numerical stability
-    // 找最大值用于数值稳定性
+    // English text
     float max_val = logits.data[0]
     int i = 0
     while i < len(logits.data) {
@@ -159,7 +159,7 @@ func softmax(tensor logits) tensor {
         }
         i = i + 1
     }
-    
+
     // e^(x - max) / sum(e^(x - max))
     float sum_exp = 0.0
     tensor exp_vals = zeros(logits.shape)
@@ -169,36 +169,36 @@ func softmax(tensor logits) tensor {
         sum_exp = sum_exp + exp_vals.data[i]
         i = i + 1
     }
-    
+
     tensor result = zeros(logits.shape)
     i = 0
     while i < len(exp_vals.data) {
         result.data[i] = exp_vals.data[i] / sum_exp
         i = i + 1
     }
-    
+
     result
 }
 
 func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
     // dL/dx = p * (dL/dp - (p * dL/dp).sum())
     tensor result = zeros(grad_output.shape)
-    
-    // 计算 (softmax * grad).sum()
+
+    // compute (softmax * grad).sum()
     float sum_term = 0.0
     int i = 0
     while i < len(softmax_output.data) {
         sum_term = sum_term + softmax_output.data[i] * grad_output.data[i]
         i = i + 1
     }
-    
-    // 应用梯度公式
+
+    // English textgradientEnglish text
     i = 0
     while i < len(grad_output.data) {
         result.data[i] = softmax_output.data[i] * (grad_output.data[i] - sum_term)
         i = i + 1
     }
-    
+
     result
 }
 
@@ -207,7 +207,7 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
 // =====================================================================
 
 func layer_norm(tensor X, float eps) tensor {
-    // 计算均值
+    // computeEnglish text
     float mean = 0.0
     int i = 0
     while i < len(X.data) {
@@ -215,8 +215,8 @@ func layer_norm(tensor X, float eps) tensor {
         i = i + 1
     }
     mean = mean / float_from_int(len(X.data))
-    
-    // 计算方差
+
+    // computeEnglish text
     float variance = 0.0
     i = 0
     while i < len(X.data) {
@@ -225,24 +225,24 @@ func layer_norm(tensor X, float eps) tensor {
         i = i + 1
     }
     variance = variance / float_from_int(len(X.data))
-    
-    // 归一化
+
+    // English text
     tensor result = zeros(X.shape)
     i = 0
     while i < len(X.data) {
         result.data[i] = (X.data[i] - mean) / sqrt_approx(variance + eps)
         i = i + 1
     }
-    
+
     result
 }
 
 // =====================================================================
-// 损失函数
+// lossfunction
 // =====================================================================
 
 func cross_entropy_loss(tensor logits, tensor targets) float {
-    // 简化版本：假设logits已经是概率
+    // English text: English textlogitsEnglish text
     float loss = 0.0
     int i = 0
     while i < len(logits.data) {
@@ -268,7 +268,7 @@ func mse_loss(tensor predictions, tensor targets) float {
 }
 
 // =====================================================================
-// 工具函数
+// toolfunction
 // =====================================================================
 
 func float_from_int(int x) float {

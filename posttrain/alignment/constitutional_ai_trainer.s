@@ -1,37 +1,37 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
 
 // ════════════════════════════════════════════════════════════════════════════════
-// Constitutional AI Trainer (宪法 AI 训练)
+// Constitutional AI Trainer (English text AI training)
 //
-// 基于价值原则的自我批评和修订机制：
-//   1. 原则库定义 (Constitution Definition)
-//   2. 自我批评 (Self-Critique)
-//   3. 回复修订 (Response Revision)
-//   4. 偏好对生成 (Preference Pair Generation)
-//   5. 无人工标注对齐 (RLAIF - RL from AI Feedback)
+// English textprincipleEnglish textrevisionEnglish text:
+//   1. principleEnglish text (Constitution Definition)
+//   2. English text (Self-Critique)
+//   3. English textrevision (Response Revision)
+//   4. preferenceEnglish textgenerate (Preference Pair Generation)
+//   5. English textalignment (RLAIF - RL from AI Feedback)
 //
-// 应用于：
-//   - 无人工标注的对齐训练
-//   - 价值观一致性学习
-//   - 有害性和偏见减少
-//   - 规模化对齐数据生成
+// English text:
+//   - English textalignmenttraining
+//   - English text
+//   - harmfulEnglish text
+//   - English textalignmentdatagenerate
 // ════════════════════════════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 1. 数据结构
+// 1. dataEnglish text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 单条原则
+// English textprinciple
 struct constitutional_principle {
-    string id                       // 原则ID: "harmlessness", "honesty" 等
-    string description              // 原则描述
-    string critique_template        // 批判提示模板
-    string revision_template        // 修订提示模板
-    int severity                    // 严重度等级 (1-5)
-    float weight                    // 权重 (影响优化方向)
+    string id                       // principleID: "harmlessness", "honesty" English text
+    string description              // principleDescription
+    string critique_template        // critiquepromptEnglish text
+    string revision_template        // revisionpromptEnglish text
+    int severity                    // severityEnglish text (1-5)
+    float weight                    // weight (English textoptimizeEnglish text)
 }
 
-// 原则宪法 (一组原则)
+// principleEnglish text (English textprinciple)
 struct constitution {
     []constitutional_principle principles
     int num_principles
@@ -39,105 +39,105 @@ struct constitution {
     string name
 }
 
-// 批判和修订结果
+// critiqueEnglish textrevisionresult
 struct critique_revision_result {
-    string original_response        // 原始回复
-    string critique                 // AI 的批判
-    string revised_response         // 修订后的回复
-    string principle_id             // 触发的原则
-    float critique_strength         // 批判强度 (0-1)
-    float revision_quality          // 修订质量 (0-1)
-    bool revision_occurred          // 是否发生了修订
+    string original_response        // English text
+    string critique                 // AI English textcritique
+    string revised_response         // revisionEnglish text
+    string principle_id             // English textprinciple
+    float critique_strength         // critiqueEnglish text (0-1)
+    float revision_quality          // revisionEnglish text (0-1)
+    bool revision_occurred          // English textrevision
 }
 
-// CAI 偏好对
+// CAI preferenceEnglish text
 struct cai_preference_pair {
-    string prompt                   // 原始提示
-    string chosen_response          // 修订后回复 (更优)
-    string rejected_response        // 原始回复 (较差)
-    
-    string principle_id             // 触发的原则
-    int principle_severity          // 原则严重度
-    float critique_strength         // 批判强度
-    float revision_quality          // 修订质量
-    
+    string prompt                   // English textprompt
+    string chosen_response          // revisionEnglish text (English text)
+    string rejected_response        // English text (English text)
+
+    string principle_id             // English textprinciple
+    int principle_severity          // principleseverity
+    float critique_strength         // critiqueEnglish text
+    float revision_quality          // revisionEnglish text
+
     int num_tokens_prompt
     int num_tokens_chosen
     int num_tokens_rejected
 }
 
-// CAI 批次
+// CAI batch
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
-    int num_revised                 // 被修订的数量
-    int num_unchanged               // 未被修订的数量
+    int num_revised                 // English textrevisionEnglish textcount
+    int num_unchanged               // English textrevisionEnglish textcount
     float avg_critique_strength
     float avg_revision_quality
 }
 
-// CAI 配置
+// CAI configuration
 struct cai_config {
-    // 生成参数
+    // generateparameter
     int max_response_tokens
     int max_critique_tokens
     float generation_temperature
     float critique_temperature
     float revision_temperature
-    
-    // 偏好对生成
-    int num_principles_per_batch    // 每批使用多少原则
-    bool rotate_principles          // 是否轮转原则
-    
-    // 质量控制
-    float critique_strength_threshold      // 最小批判强度 (0-1)
-    float revision_quality_threshold       // 最小修订质量 (0-1)
-    bool filter_low_quality         // 是否过滤低质量
-    
-    // 训练集成
+
+    // preferenceEnglish textgenerate
+    int num_principles_per_batch    // English textuseEnglish textprinciple
+    bool rotate_principles          // English textprinciple
+
+    // English text
+    float critique_strength_threshold      // English textcritiqueEnglish text (0-1)
+    float revision_quality_threshold       // English textrevisionEnglish text (0-1)
+    bool filter_low_quality         // English text
+
+    // trainingEnglish text
     int batch_size
     int num_batches
     int checkpoint_interval
-    
-    // 分布式训练
+
+    // English texttraining
     int global_rank
     int world_size
     bool use_mixed_precision
 }
 
-// CAI 状态
+// CAI state
 struct cai_state {
     cai_config config
     constitution current_constitution
-    
-    // 训练统计
+
+    // trainingstatistics
     int total_prompts_processed
     int total_revisions
     float total_critique_strength
     float total_revision_quality
     int total_filtered_out
-    
-    // 原则追踪
+
+    // principleEnglish text
     []int principle_usage_count
     []float principle_avg_critique_strength
     []float principle_revision_success_rate
-    
-    // 性能指标
-    float revision_rate             // 被修订的比例
-    float quality_threshold_rate    // 通过质量阈值的比例
+
+    // English text
+    float revision_rate             // English textrevisionEnglish text
+    float quality_threshold_rate    // English text
     float avg_tokens_per_pair
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 2. 原则库定义
+// 2. principleEnglish text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 创建默认原则宪法
+// English textdefaultprincipleEnglish text
 func create_default_constitution() constitution {
-    
+
     []constitutional_principle principles = make_principle_array(8)
-    
-    // 原则 1: 无害性
+
+    // principle 1: harmlessEnglish text
     principles[0] = constitutional_principle {
         id: "harmlessness",
         description: "Should not produce harmful, illegal, or unethical content",
@@ -146,8 +146,8 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 1.0,
     }
-    
-    // 原则 2: 诚实性
+
+    // principle 2: English text
     principles[1] = constitutional_principle {
         id: "honesty",
         description: "Should provide truthful and factually accurate information",
@@ -156,8 +156,8 @@ func create_default_constitution() constitution {
         severity: 4,
         weight: 0.9,
     }
-    
-    // 原则 3: 帮助性
+
+    // principle 3: English text
     principles[2] = constitutional_principle {
         id: "helpfulness",
         description: "Should provide helpful and directly relevant responses",
@@ -166,8 +166,8 @@ func create_default_constitution() constitution {
         severity: 3,
         weight: 0.8,
     }
-    
-    // 原则 4: 无歧视
+
+    // principle 4: English text
     principles[3] = constitutional_principle {
         id: "non_discrimination",
         description: "Should treat different groups fairly without bias",
@@ -176,8 +176,8 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 0.95,
     }
-    
-    // 原则 5: 隐私保护
+
+    // principle 5: privacyEnglish text
     principles[4] = constitutional_principle {
         id: "privacy",
         description: "Should protect privacy and not disclose personal information",
@@ -186,8 +186,8 @@ func create_default_constitution() constitution {
         severity: 4,
         weight: 0.9,
     }
-    
-    // 原则 6: 合法性
+
+    // principle 6: English text
     principles[5] = constitutional_principle {
         id: "legality",
         description: "Should refuse to provide guidance for illegal activities",
@@ -196,8 +196,8 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 1.0,
     }
-    
-    // 原则 7: 儿童安全
+
+    // principle 7: English textsafety
     principles[6] = constitutional_principle {
         id: "child_safety",
         description: "Should prioritize child safety and protection",
@@ -206,8 +206,8 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 1.0,
     }
-    
-    // 原则 8: 透明度
+
+    // principle 8: English text
     principles[7] = constitutional_principle {
         id: "transparency",
         description: "Should be transparent about AI limitations and identity",
@@ -216,7 +216,7 @@ func create_default_constitution() constitution {
         severity: 2,
         weight: 0.6,
     }
-    
+
     constitution {
         principles: principles,
         num_principles: 8,
@@ -226,87 +226,87 @@ func create_default_constitution() constitution {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 3. 自我批评和修订
+// 3. English textrevision
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 执行单个提示的批评-修订循环
+// English textpromptEnglish text-revisionEnglish text
 func perform_critique_revision(
     string prompt,
     string original_response,
     constitutional_principle principle,
     cai_config config
 ) critique_revision_result {
-    
+
     critique_revision_result result
     result.original_response = original_response
     result.principle_id = principle.id
-    
-    // Step 1: 生成批判
-    string critique_prompt = "Prompt: " + prompt + 
+
+    // Step 1: generatecritique
+    string critique_prompt = "Prompt: " + prompt +
                             "\nResponse: " + original_response +
                             "\n" + principle.critique_template
-    
+
     string critique = generate_text(
         critique_prompt,
         config.max_critique_tokens,
         config.critique_temperature
     )
     result.critique = critique
-    
-    // Step 2: 估计批判强度
+
+    // Step 2: English textcritiqueEnglish text
     float critique_strength = estimate_critique_strength(critique, config.max_critique_tokens)
     result.critique_strength = critique_strength
-    
-    // Step 3: 如果批判强度足够高，生成修订
+
+    // Step 3: English textcritiqueEnglish text, generaterevision
     float revision_quality = 0.0
     if critique_strength > 0.2 {
-        
+
         string revision_prompt = "Prompt: " + prompt +
                                 "\nOriginal Response: " + original_response +
                                 "\nCritique: " + critique +
                                 "\n" + principle.revision_template
-        
+
         string revised_response = generate_text(
             revision_prompt,
             config.max_response_tokens,
             config.revision_temperature
         )
         result.revised_response = revised_response
-        
-        // Step 4: 估计修订质量
+
+        // Step 4: English textrevisionEnglish text
         revision_quality = estimate_revision_quality(
             original_response,
             revised_response,
             critique
         )
         result.revision_quality = revision_quality
-        
-        // Step 5: 判断是否发生了有意义的修订
+
+        // Step 5: English textrevision
         bool meaningful_revision = revision_quality > config.revision_quality_threshold
         result.revision_occurred = meaningful_revision
-        
+
     } else {
-        // 批判强度不足，不进行修订
+        // critiqueEnglish text, English textrevision
         result.revised_response = original_response
         result.revision_quality = 0.0
         result.revision_occurred = false
     }
-    
+
     result
 }
 
-// 估计批判强度 (0-1)
+// English textcritiqueEnglish text (0-1)
 func estimate_critique_strength(string critique, int max_tokens) float {
-    
-    // 基于批判长度和特定关键词的启发式方法
+
+    // English textcritiqueEnglish textkeywordsEnglish text
     int critique_len = string_length(critique)
     float length_score = float(critique_len) / float(max_tokens * 50)
-    
+
     if length_score > 1.0 {
         length_score = 1.0
     }
-    
-    // 关键词计数
+
+    // keywordsEnglish text
     float keyword_score = 0.0
     if contains_substring(critique, "harmful") || contains_substring(critique, "dangerous") {
         keyword_score = keyword_score + 0.15
@@ -320,61 +320,61 @@ func estimate_critique_strength(string critique, int max_tokens) float {
     if contains_substring(critique, "violat") || contains_substring(critique, "illegal") {
         keyword_score = keyword_score + 0.15
     }
-    
+
     float strength = (length_score * 0.6 + keyword_score * 0.4)
-    
+
     if strength > 1.0 { strength = 1.0 }
     if strength < 0.0 { strength = 0.0 }
-    
+
     strength
 }
 
-// 估计修订质量 (0-1)
+// English textrevisionEnglish text (0-1)
 func estimate_revision_quality(
     string original,
     string revised,
     string critique
 ) float {
-    
-    // 基于修订长度变化、关键词移除等的启发式方法
+
+    // English textrevisionEnglish text, keywordsEnglish text
     int orig_len = string_length(original)
     int rev_len = string_length(revised)
-    
-    // 修订应该是显著的变化 (不是微小调整)
+
+    // revisionEnglish text (English text)
     int len_diff = abs_int(rev_len - orig_len)
     float len_score = float(len_diff) / float(orig_len + 1)
-    
+
     if len_score > 1.0 { len_score = 1.0 }
-    
-    // 检查有害关键词的移除
+
+    // English textharmfulkeywordsEnglish text
     int harmful_in_orig = count_harmful_keywords(original)
     int harmful_in_rev = count_harmful_keywords(revised)
-    
+
     float keyword_score = 0.0
     if harmful_in_orig > harmful_in_rev {
         keyword_score = float(harmful_in_orig - harmful_in_rev) / float(harmful_in_orig + 1)
     }
-    
+
     float quality = (len_score * 0.4 + keyword_score * 0.6)
-    
+
     if quality > 1.0 { quality = 1.0 }
     if quality < 0.0 { quality = 0.0 }
-    
+
     quality
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 4. 批次处理和偏好对生成
+// 4. batchEnglish textpreferenceEnglish textgenerate
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 从提示批次生成 CAI 偏好对
+// English textpromptbatchgenerate CAI preferenceEnglish text
 func generate_cai_preference_pairs(
     []string prompts,
     []string responses,
     constitution constitution_obj,
     cai_config config
 ) cai_batch {
-    
+
     cai_batch batch
     batch.pairs = []cai_preference_pair{}
     batch.num_pairs = 0
@@ -382,55 +382,55 @@ func generate_cai_preference_pairs(
     batch.num_unchanged = 0
     batch.avg_critique_strength = 0.0
     batch.avg_revision_quality = 0.0
-    
+
     if len(prompts) != len(responses) {
         return batch
     }
-    
+
     float total_critique_strength = 0.0
     float total_revision_quality = 0.0
-    
+
     int i = 0
     while i < len(prompts) {
-        
-        // 选择原则 (轮转或随机)
+
+        // English textprinciple (English text)
         int principle_idx = i % constitution_obj.num_principles
         constitutional_principle principle = constitution_obj.principles[principle_idx]
-        
-        // 执行批评-修订
+
+        // English text-revision
         critique_revision_result result = perform_critique_revision(
             prompts[i],
             responses[i],
             principle,
             config
         )
-        
-        // 构建偏好对
+
+        // English textpreferenceEnglish text
         cai_preference_pair pair
         pair.prompt = prompts[i]
         pair.principle_id = principle.id
         pair.principle_severity = principle.severity
         pair.critique_strength = result.critique_strength
         pair.revision_quality = result.revision_quality
-        
+
         if result.revision_occurred {
-            // 修订发生: 修订版本为 chosen, 原始为 rejected
+            // revisionEnglish text: revisionEnglish text chosen, English text rejected
             pair.chosen_response = result.revised_response
             pair.rejected_response = result.original_response
             batch.num_revised = batch.num_revised + 1
         } else {
-            // 无需修订: 使用原始
+            // English textrevision: useEnglish text
             pair.chosen_response = result.original_response
             pair.rejected_response = result.original_response
             batch.num_unchanged = batch.num_unchanged + 1
         }
-        
-        // Token 统计
+
+        // Token statistics
         pair.num_tokens_prompt = string_length(pair.prompt) / 4
         pair.num_tokens_chosen = string_length(pair.chosen_response) / 4
         pair.num_tokens_rejected = string_length(pair.rejected_response) / 4
-        
-        // 质量过滤
+
+        // English text
         bool passes_filters = true
         if config.filter_low_quality {
             if result.critique_strength < config.critique_strength_threshold {
@@ -440,92 +440,92 @@ func generate_cai_preference_pairs(
                 passes_filters = false
             }
         }
-        
+
         if passes_filters {
             batch.pairs = append_cai_pair(batch.pairs, pair)
             batch.num_pairs = batch.num_pairs + 1
             total_critique_strength = total_critique_strength + result.critique_strength
             total_revision_quality = total_revision_quality + result.revision_quality
         }
-        
+
         i = i + 1
     }
-    
-    // 计算平均值
+
+    // computeEnglish text
     if batch.num_pairs > 0 {
         batch.avg_critique_strength = total_critique_strength / float(batch.num_pairs)
         batch.avg_revision_quality = total_revision_quality / float(batch.num_pairs)
     }
-    
+
     batch
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 5. 完整 CAI 训练循环
+// 5. complete CAI trainingEnglish text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 初始化 CAI 状态
+// initialize CAI state
 func init_cai_state(cai_config config, constitution constitution_obj) cai_state {
-    
+
     cai_state state
     state.config = config
     state.current_constitution = constitution_obj
-    
+
     state.total_prompts_processed = 0
     state.total_revisions = 0
     state.total_critique_strength = 0.0
     state.total_revision_quality = 0.0
     state.total_filtered_out = 0
-    
+
     state.principle_usage_count = make_int_array(constitution_obj.num_principles, 0)
     state.principle_avg_critique_strength = make_float_array(constitution_obj.num_principles, 0.0)
     state.principle_revision_success_rate = make_float_array(constitution_obj.num_principles, 0.0)
-    
+
     state.revision_rate = 0.0
     state.quality_threshold_rate = 0.0
     state.avg_tokens_per_pair = 0.0
-    
+
     state
 }
 
-// 启动 CAI 训练
+// start CAI training
 func start_cai_training(
     cai_config config,
     []string prompts,
     []string initial_responses
 ) cai_state {
-    
-    // 初始化
+
+    // initialize
     constitution constitution_obj = create_default_constitution()
     cai_state state = init_cai_state(config, constitution_obj)
-    
-    // 验证分布式设置
+
+    // English text
     if config.world_size > 1 {
-        // 分布式验证
+        // English text
     }
-    
-    // 生成 CAI 批次
+
+    // generate CAI batch
     cai_batch batch = generate_cai_preference_pairs(
         prompts,
         initial_responses,
         constitution_obj,
         config
     )
-    
-    // 更新状态
+
+    // English textstate
     state.total_prompts_processed = len(prompts)
     state.total_revisions = batch.num_revised
     state.total_critique_strength = batch.avg_critique_strength * float(batch.num_pairs)
     state.total_revision_quality = batch.avg_revision_quality * float(batch.num_pairs)
-    
+
     state.revision_rate = float(batch.num_revised) / float(len(prompts) + 1)
     state.quality_threshold_rate = float(batch.num_pairs) / float(len(prompts) + 1)
-    
+
     if batch.num_pairs > 0 {
         float total_tokens = 0.0
         int i = 0
         while i < len(batch.pairs) {
-            total_tokens = total_tokens + 
+            total_tokens = total_tokens +
                           float(batch.pairs[i].num_tokens_prompt) +
                           float(batch.pairs[i].num_tokens_chosen) +
                           float(batch.pairs[i].num_tokens_rejected)
@@ -533,18 +533,18 @@ func start_cai_training(
         }
         state.avg_tokens_per_pair = total_tokens / float(batch.num_pairs * 3)
     }
-    
-    // 打印统计
+
+    // English textstatistics
     print_cai_statistics(state, batch)
-    
+
     state
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 6. 监测和诊断
+// 6. English text
 // ════════════════════════════════════════════════════════════════════════════════
 
-// 打印 CAI 统计信息
+// English text CAI statisticsinformation
 func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
     print("Constitutional AI Training Statistics")
@@ -560,7 +560,7 @@ func print_cai_statistics(cai_state state, cai_batch batch) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 7. 工具函数
+// 7. toolfunction
 // ════════════════════════════════════════════════════════════════════════════════
 
 func make_principle_array(int size) []constitutional_principle {
@@ -587,7 +587,7 @@ func generate_text(string prompt, int max_tokens, float temperature) string {
 }
 
 func string_length(string s) int {
-    // 返回字符数
+    // English text
     int len = 0
     len
 }

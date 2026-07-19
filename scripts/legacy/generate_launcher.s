@@ -2,9 +2,9 @@ package neurx.script
 
 // ============================================================================
 // NeurX Multi-node Launcher Generator (S Language)
-// 
-// 功能: 使用S语言生成优化的shell启动脚本
-// 优势: 配置管理、参数校验在S语言中完成，最后生成高效的shell脚本
+//
+// English text: useSlanguagegenerateoptimizeEnglish textshellstartEnglish text
+// English text: configurationmanagement, parameterEnglish textSlanguageEnglish text, English textgenerateEnglish textshellEnglish text
 // ============================================================================
 
 use std.fs
@@ -12,11 +12,11 @@ use std.os
 use std.strings
 
 // ============================================================================
-// 配置数据结构
+// configurationdataEnglish text
 // ============================================================================
 
 struct TrainingConfig {
-    // 系统配置
+    // systemconfiguration
     string root_dir
     string hostfile
     string output_dir
@@ -25,8 +25,8 @@ struct TrainingConfig {
     string nccl_id_file
     int num_nodes
     int world_size
-    
-    // 模型参数
+
+    // modelparameter
     int pretrain_steps
     int micro_batch
     int seq_len
@@ -38,7 +38,7 @@ struct TrainingConfig {
     int transformer_ffn
     int transformer_layers
     int gradient_accumulation_steps
-    
+
     // Tokenizer
     string tokenizer_vocab
     string tokenizer_merges
@@ -46,52 +46,52 @@ struct TrainingConfig {
 }
 
 // ============================================================================
-// 配置解析
+// configurationEnglish text
 // ============================================================================
 
 func load_config_from_env() TrainingConfig {
     TrainingConfig cfg
-    
-    // 获取NEURX_ROOT
+
+    // English textNEURX_ROOT
     string root = os::getenv("NEURX_ROOT")
     if root == "" {
         root = os::working_dir()
     }
     cfg.root_dir = root
-    
-    // 获取hostfile
+
+    // English texthostfile
     cfg.hostfile = os::getenv("NEURX_HOSTFILE")
     if cfg.hostfile == "" {
         cfg.hostfile = root + "/configs/pretrain.hosts"
     }
-    
-    // 获取输出目录
+
+    // English textoutputdirectory
     cfg.output_dir = os::getenv("NEURX_PRETRAIN_OUTPUT_DIR")
     if cfg.output_dir == "" {
         cfg.output_dir = root + "/checkpoint/NeurX-1.3"
     }
-    
-    // 获取NCCL ID文件路径
+
+    // English textNCCL IDfilepath
     cfg.nccl_id_file = os::getenv("NEURX_SHARED_NCCL_ID_FILE")
     if cfg.nccl_id_file == "" {
         cfg.nccl_id_file = root + "/artifacts/nccl/unique_id"
     }
-    
-    // 获取master地址
+
+    // English textmasterEnglish text
     cfg.master_addr = os::getenv("MASTER_ADDR")
     if cfg.master_addr == "" {
         cfg.master_addr = "localhost"
     }
-    
-    // 获取master端口
+
+    // English textmasterEnglish text
     string port_str = os::getenv("MASTER_PORT")
     if port_str != "" {
         cfg.master_port = strings::parse_int(port_str)
     } else {
         cfg.master_port = 29500
     }
-    
-    // 模型参数
+
+    // modelparameter
     cfg.pretrain_steps = parse_env_int("NEURX_PRETRAIN_STEPS", 1000000000)
     cfg.micro_batch = parse_env_int("NEURX_PRETRAIN_MICRO_BATCH", 1)
     cfg.seq_len = parse_env_int("NEURX_PRETRAIN_SEQ_LEN", 256)
@@ -103,23 +103,23 @@ func load_config_from_env() TrainingConfig {
     cfg.transformer_ffn = parse_env_int("NEURX_TRANSFORMER_FFN", 4096)
     cfg.transformer_layers = parse_env_int("NEURX_TRANSFORMER_NUM_LAYERS", 24)
     cfg.gradient_accumulation_steps = parse_env_int("NEURX_GRADIENT_ACCUMULATION_STEPS", 8)
-    
+
     // Tokenizer
     cfg.tokenizer_vocab = os::getenv("NEURX_TOKENIZER_VOCAB")
     if cfg.tokenizer_vocab == "" {
         cfg.tokenizer_vocab = root + "/data/corpus/vocab.json"
     }
-    
+
     cfg.tokenizer_merges = os::getenv("NEURX_TOKENIZER_MERGES")
     if cfg.tokenizer_merges == "" {
         cfg.tokenizer_merges = root + "/data/corpus/merges.txt"
     }
-    
+
     cfg.shard_list_file = os::getenv("NEURX_PRETRAIN_SHARD_LIST_FILE")
     if cfg.shard_list_file == "" {
         cfg.shard_list_file = root + "/artifacts/build/run_large_pretrain/shard_list.txt"
     }
-    
+
     return cfg
 }
 
@@ -140,54 +140,54 @@ func parse_env_float(string key, float default_val) float {
 }
 
 // ============================================================================
-// Hostfile 解析
+// Hostfile English text
 // ============================================================================
 
 func parse_hostfile(string hostfile_path) []string {
     []string hosts = []string{}
-    
+
     if !fs::exists(hostfile_path) {
         io::eprintln("hostfile not found: " + hostfile_path)
         return hosts
     }
-    
+
     string content = fs::read_file(hostfile_path)
     []string lines = strings::split(content, "\n")
-    
+
     for i := 0; i < len(lines); i++ {
         string line = strings::trim(lines[i])
-        
-        // 跳过空行和注释
+
+        // English text
         if line == "" || strings::has_prefix(line, "#") {
             continue
         }
-        
-        // 提取主机名和GPU数
+
+        // English textmainEnglish textGPUEnglish text
         []string parts = strings::split(line, " ")
         if len(parts) >= 1 {
             hosts.push(line)
         }
     }
-    
+
     return hosts
 }
 
 // ============================================================================
-// Shell脚本生成
+// ShellEnglish textgenerate
 // ============================================================================
 
 func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
     string script = ""
-    
-    // 添加脚本头
+
+    // English text
     script = script + "#!/usr/bin/env bash\n"
     script = script + "set -Eeuo pipefail\n"
     script = script + "\n"
     script = script + "# Auto-generated by NeurX Launcher (S Language)\n"
     script = script + "# Config: " + cfg.root_dir + "\n"
     script = script + "\n"
-    
-    // 添加变量定义
+
+    // English text
     script = script + "# Configuration\n"
     script = script + "ROOT=\"" + cfg.root_dir + "\"\n"
     script = script + "HOSTFILE=\"" + cfg.hostfile + "\"\n"
@@ -196,8 +196,8 @@ func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
     script = script + "MASTER_ADDR=\"" + cfg.master_addr + "\"\n"
     script = script + "MASTER_PORT=" + strings::from_int(cfg.master_port) + "\n"
     script = script + "\n"
-    
-    // 添加环境变量数组
+
+    // English text
     script = script + "# Base environment variables\n"
     script = script + "declare -a base_env=(\n"
     script = script + "  \"NEURX_ROOT=$ROOT\"\n"
@@ -222,8 +222,8 @@ func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
     script = script + "  \"WORLD_SIZE=" + strings::from_int(cfg.world_size) + "\"\n"
     script = script + ")\n"
     script = script + "\n"
-    
-    // 添加主循环
+
+    // English textmainEnglish text
     script = script + "# Cleanup function\n"
     script = script + "declare -a PIDS=()\n"
     script = script + "cleanup() {\n"
@@ -232,19 +232,19 @@ func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
     script = script + "}\n"
     script = script + "trap cleanup EXIT INT TERM\n"
     script = script + "\n"
-    
+
     script = script + "# Create output directories\n"
     script = script + "mkdir -p \"$(dirname \"$SHARED_ID\")\" \"$OUT\"\n"
     script = script + "rm -f \"$SHARED_ID\" \"$SHARED_ID.tmp\"\n"
     script = script + "\n"
-    
-    script = script + "echo \"[multinode] nodes=" + strings::from_int(len(hosts)) + 
-                      " world_size=" + strings::from_int(cfg.world_size) + 
+
+    script = script + "echo \"[multinode] nodes=" + strings::from_int(len(hosts)) +
+                      " world_size=" + strings::from_int(cfg.world_size) +
                       " master=${MASTER_ADDR}:${MASTER_PORT}\"\n"
     script = script + "echo \"[multinode] shared NCCL id: $SHARED_ID\"\n"
     script = script + "\n"
-    
-    // 添加rank启动循环
+
+    // English textrankstartEnglish text
     script = script + "# Launch processes\n"
     script = script + "rank=0\n"
     script = script + "for node in " + generate_hosts_array(hosts) + "; do\n"
@@ -275,12 +275,12 @@ func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
     script = script + "  done\n"
     script = script + "done\n"
     script = script + "\n"
-    
+
     script = script + "# Wait for all processes\n"
     script = script + "status=0\n"
     script = script + "for pid in \"${PIDS[@]}\"; do wait \"$pid\" || status=$?; done\n"
     script = script + "exit \"$status\"\n"
-    
+
     return script
 }
 
@@ -296,43 +296,43 @@ func generate_hosts_array([]string hosts) string {
 }
 
 // ============================================================================
-// 主函数
+// mainfunction
 // ============================================================================
 
 func main() {
-    // 1. 加载配置
+    // 1. loadconfiguration
     TrainingConfig cfg = load_config_from_env()
-    
-    // 2. 解析hostfile
+
+    // 2. English texthostfile
     []string hosts = parse_hostfile(cfg.hostfile)
     if len(hosts) == 0 {
         io::eprintln("ERROR: no valid hosts in hostfile")
         os::exit(2)
     }
-    
-    // 3. 计算world_size
+
+    // 3. computeworld_size
     cfg.num_nodes = len(hosts)
     cfg.world_size = 0
     for i := 0; i < len(hosts); i++ {
-        // 简化: 假设每个主机的GPU数
-        // 实际应该解析"host num_gpus"格式
-        cfg.world_size = cfg.world_size + 1  // 默认1个GPU
+        // English text: English textmainEnglish textGPUEnglish text
+        // actualEnglish text"host num_gpus"English text
+        cfg.world_size = cfg.world_size + 1  // default1English textGPU
     }
-    
-    // 4. 生成脚本
+
+    // 4. generateEnglish text
     string script = generate_launcher_script(cfg, hosts)
-    
-    // 5. 输出脚本到文件
+
+    // 5. outputEnglish textfile
     string output_script = cfg.root_dir + "/scripts/legacy/launch_multinode_pretrain_generated.sh"
     if !fs::write_file(output_script, script) {
         io::eprintln("ERROR: cannot write script to " + output_script)
         os::exit(1)
     }
-    
+
     io::println("✓ Generated launcher script: " + output_script)
-    
-    // 6. 让脚本可执行
+
+    // 6. English text
     os::chmod(output_script, 0755)
-    
+
     io::println("✓ Ready to launch: bash " + output_script)
 }

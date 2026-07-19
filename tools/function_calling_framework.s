@@ -1,64 +1,64 @@
 // ============================================================
-// NEURX FUNCTION Calling - 标准化工具调用框架
-// 完整实现: NeurX 兼容格式 + 工具定义/注册/编排 + 并行执行 + 结果解析
-// 兼容: NeurX Function Calling / 主流 Tool Use / 通用 Function Calling
-// 支持: 单步调用 / 多步链式调用 / 自动工具选择 / 错误恢复
+// NEURX FUNCTION Calling - English texttoolEnglish textframework
+// completeimplementation: NeurX English text + toolEnglish text/English text/English text + English text + resultEnglish text
+// English text: NeurX Function Calling / mainEnglish text Tool Use / English text Function Calling
+// support: English textstepEnglish text / English textstepEnglish text / English texttoolEnglish text / errorrecover
 // ============================================================
 
 module function_calling
 
-// ==================== 核心配置与类型定义 ====================
+// ==================== English textconfigurationEnglish text ====================
 
 struct FunctionCallingConfig {
-    // 执行模式
+    // English text
     execution_mode: string = "auto"               # auto | single_step | multi_step | agent_loop
-    max_tool_calls_per_turn: int = 5             # 单轮最大工具调用次数
-    max_concurrent_calls: int = 3                 # 最大并行调用数
-    
-    // 工具选择策略
+    max_tool_calls_per_turn: int = 5             # English texttoolEnglish text
+    max_concurrent_calls: int = 3                 # English text
+
+    // toolEnglish text
     selection_strategy: string = "confidence"     # confidence | all_relevant | forced_single
-    confidence_threshold: float = 0.7            # 最低置信度阈值 (低于此值不调用)
-    allow_parallel_execution: bool = true         # 允许无依赖的工具并行执行
-    
-    // 结果处理
-    result_truncation_max_chars: int = 8000       # 返回给 LLM 的结果最大长度
-    include_raw_output: bool = false              # 是否包含原始输出 (可能很大)
-    error_handling: string = "continue"          # continue | stop | retry (遇到错误时的行为)
-    max_retries: int = 2                          # 失败重试次数
-    
-    // 输出格式
+    confidence_threshold: float = 0.7            # English text (English text)
+    allow_parallel_execution: bool = true         # English texttoolEnglish text
+
+    // resultEnglish text
+    result_truncation_max_chars: int = 8000       # English text LLM English textresultEnglish text
+    include_raw_output: bool = false              # English textoutput (English text)
+    error_handling: string = "continue"          # continue | stop | retry (English texterrorEnglish text)
+    max_retries: int = 2                          # failureEnglish text
+
+    // outputEnglish text
     output_format: string = "neurx_compatible"  # neurx_compatible | compatible | native
-    strict_schema_validation: bool = true         # 严格验证参数 schema
-    require_permission_for: list<string> = ["write", "delete", "execute", "network"]  # 需要用户确认的操作类型
-    
-    // 调试和日志
-    verbose_logging: bool = false                # 详细日志输出
-    log_all_intermediate_steps: bool = false      # 记录所有中间步骤
+    strict_schema_validation: bool = true         # English textparameter schema
+    require_permission_for: list<string> = ["write", "delete", "execute", "network"]  # RequiredEnglish text
+
+    // English textlog
+    verbose_logging: bool = false                # English textlogoutput
+    log_all_intermediate_steps: bool = false      # English textstepEnglish text
 }
 
 struct ToolDefinition {
-    name: string                                   # 工具名称 (唯一标识符)
-    description: string                            # 详细描述 (LLM 用此决定是否使用)
-    parameters: ParameterSchema                    # JSON Schema 格式的参数定义
-    category?: string                              # 分类 (如 "search", "code", "data", "system")
-    tags?: list<string>                            # 标签用于搜索/过滤
-    requires_permission: bool = false              # 是否需要用户权限确认
-    is_dangerous: bool = false                     # 是否是危险操作
-    rate_limit?: RateLimit                         # 速率限制
-    timeout_seconds: float = 30.0                  # 超时时间
-    metadata?: map<string, any>                    # 自定义元数据
+    name: string                                   # toolName (English text)
+    description: string                            # English textDescription (LLM English textuse)
+    parameters: ParameterSchema                    # JSON Schema English textparameterEnglish text
+    category?: string                              # English text (English text "search", "code", "data", "system")
+    tags?: list<string>                            # English textsearch/English text
+    requires_permission: bool = false              # English textRequiredEnglish text
+    is_dangerous: bool = false                     # English text
+    rate_limit?: RateLimit                         # English text
+    timeout_seconds: float = 30.0                  # English texttime
+    metadata?: map<string, any>                    # English textdata
 }
 
 struct ParameterSchema {
     type: string                                    # object | array | string | number | integer | boolean | null
-    properties?: map<string, PropertyDefinition>   # 当 type=object 时, 属性定义
-    required?: list<string>                        # 必填参数列表
-    items?: ParameterSchema                        # 当 type=array 时, 元素定义
-    enum?: list<any>                               # 枚举值 (用于有限选项)
-    format?: string                                # 格式限定 (如 email, uri, date-time)
-    description?: string                           # 参数描述
-    default?: any                                  # 默认值
-    additionalProperties?: bool | ParameterSchema   # 是否允许额外属性
+    properties?: map<string, PropertyDefinition>   # English text type=object English text, English text
+    required?: list<string>                        # English textparameterEnglish text
+    items?: ParameterSchema                        # English text type=array English text, English text
+    enum?: list<any>                               # English text (English text)
+    format?: string                                # English text (English text email, uri, date-time)
+    description?: string                           # parameterDescription
+    default?: any                                  # defaultEnglish text
+    additionalProperties?: bool | ParameterSchema   # English text
 }
 
 struct PropertyDefinition {
@@ -82,62 +82,62 @@ struct RateLimit {
 }
 
 struct ToolCall {
-    id: string                                     # 唯一调用 ID (UUID)
-    name: string                                   # 工具名称
-    arguments: string                              # JSON 字符串形式的参数
-    parsed_arguments: map<string, any>?            # 解析后的参数字典
-    status: CallStatus = CallStatus.PENDING        # 当前状态
-    result?: ToolCallResult                        # 执行结果
-    error?: ToolCallError                          # 错误信息
-    start_time: float?                             # 开始时间戳
-    end_time: float?                               # 结束时间戳
-    duration_ms?: float                            # 执行耗时
-    parent_id?: string                              # 父调用 ID (链式调用)
-    children_ids: list<string> = []                # 子调用 IDs
-    retry_count: int = 0                           # 已重试次数
+    id: string                                     # English text ID (UUID)
+    name: string                                   # toolName
+    arguments: string                              # JSON English textparameter
+    parsed_arguments: map<string, any>?            # English textparameterEnglish text
+    status: CallStatus = CallStatus.PENDING        # English textstate
+    result?: ToolCallResult                        # English textresult
+    error?: ToolCallError                          # errorinformation
+    start_time: float?                             # starttimeEnglish text
+    end_time: float?                               # English texttimeEnglish text
+    duration_ms?: float                            # English text
+    parent_id?: string                              # English text ID (English text)
+    children_ids: list<string> = []                # English text IDs
+    retry_count: int = 0                           # English text
 }
 
 enum CallStatus {
-    PENDING                                       # 待执行
-    RUNNING                                        # 正在执行
-    COMPLETED                                      # 成功完成
-    FAILED                                         # 执行失败
-    TIMEOUT                                        # 超时
-    PERMISSION_REQUIRED                            # 等待用户授权
-    CANCELLED                                      # 已取消
+    PENDING                                       # English text
+    RUNNING                                        # English text
+    COMPLETED                                      # successEnglish text
+    FAILED                                         # English textfailure
+    TIMEOUT                                        # English text
+    PERMISSION_REQUIRED                            # English text
+    CANCELLED                                      # English text
 }
 
 struct ToolCallResult {
-    success: bool                                  # 是否成功
-    content: any                                   # 返回内容 (可以是字符串、对象、列表等)
+    success: bool                                  # English textsuccess
+    content: any                                   # English textcontent (AllowedEnglish text, English text, English text)
     content_type: string = "text"                  # text | json | image | binary | table | code
-    truncated: bool = false                        # 内容是否被截断
-    raw_output?: string                            # 原始输出 (如果 include_raw_output)
-    metadata?: map<string, any>                    # 结果元数据
+    truncated: bool = false                        # contentEnglish text
+    raw_output?: string                            # English textoutput (English text include_raw_output)
+    metadata?: map<string, any>                    # resultEnglish textdata
 }
 
 struct ToolCallError {
-    code: string                                   # 错误代码 (INVALID_ARGS | TIMEOUT | PERMISSION_DENIED | NOT_FOUND | EXECUTION_ERROR)
-    message: string                                # 用户可读的错误消息
-    details?: map<string, any>                    # 详细错误信息 (调试用)
-    recoverable: bool = false                      # 是否可重试恢复
-    suggestion?: string                            # 修复建议
+    code: string                                   # errorEnglish text (INVALID_ARGS | TIMEOUT | PERMISSION_DENIED | NOT_FOUND | EXECUTION_ERROR)
+    message: string                                # English texterrorEnglish text
+    details?: map<string, any>                    # English texterrorinformation (English text)
+    recoverable: bool = false                      # English textrecover
+    suggestion?: string                            # English text
 }
 
 struct FunctionCallingResponse {
-    tool_calls: list<ToolCall>                     # 所有工具调用记录
-    final_text_response: string?                   # LLM 最终文本回复 (如果没有更多工具调用)
+    tool_calls: list<ToolCall>                     # English texttoolEnglish text
+    final_text_response: string?                   # LLM English text (English texttoolEnglish text)
     finished_reason: string                       # stop | tool_calls | length | content_filter
-    total_tokens_used: int?                        # 总 token 使用量
-    intermediate_messages: list<AssistantMessage>  # 中间交互消息
-    execution_summary: ExecutionSummary?           # 执行摘要
+    total_tokens_used: int?                        # English text token useEnglish text
+    intermediate_messages: list<AssistantMessage>  # English text
+    execution_summary: ExecutionSummary?           # English textsummary
 }
 
 struct AssistantMessage {
     role: string = "assistant"
     content: string? | list<ContentBlock>
-    tool_calls?: list<ToolCall>                    # 模型发起的调用请求
-    reasoning_content?: string                     # 推理过程 (如果有 extended thinking)
+    tool_calls?: list<ToolCall>                    # modelEnglish textrequest
+    reasoning_content?: string                     # inferenceEnglish text (English text extended thinking)
 }
 
 struct ContentBlock {
@@ -150,7 +150,7 @@ struct ContentBlock {
 struct UserMessage {
     role: string = "user"
     content: string | list<ContentBlock>
-    tool_results?: list<ToolCallResultBlock>       # 工具返回的结果
+    tool_results?: list<ToolCallResultBlock>       # toolEnglish textresult
 }
 
 struct ToolCallResultBlock {
@@ -160,17 +160,17 @@ struct ToolCallResultBlock {
 }
 
 struct ExecutionSummary {
-    total_tool_calls_initiated: int                # 发起的总调用数
-    total_tool_calls_completed: int               # 成功完成的调用数
-    total_tool_calls_failed: int                  # 失败的调用数
-    parallel_batches: int                          # 并行批次数
-    total_execution_time_ms: float                 # 总执行时间
-    tools_used: set<string>                        # 实际使用的工具集合
-    avg_duration_per_call_ms: float               # 平均每次调用时长
-    retry_count: int                               # 总重试次数
+    total_tool_calls_initiated: int                # English text
+    total_tool_calls_completed: int               # successEnglish text
+    total_tool_calls_failed: int                  # failureEnglish text
+    parallel_batches: int                          # English textbatchEnglish text
+    total_execution_time_ms: float                 # English texttime
+    tools_used: set<string>                        # actualuseEnglish texttoolEnglish text
+    avg_duration_per_call_ms: float               # English text
+    retry_count: int                               # English text
 }
 
-// ==================== 工具注册表 ====================
+// ==================== toolEnglish text ====================
 
 class ToolRegistry {
     tools: map<string, ToolDefinition>
@@ -183,30 +183,30 @@ class ToolRegistry {
         this.tools = map<string, ToolDefinition>{}
         this.executors = map<string, ToolExecutor>{}
         this.categories = map<string, list<string>>{}
-    
+
     register(definition: ToolDefinition, executor: ToolExecutor) {
         if definition.name in this.tools:
             throw error(f"Tool '{definition.name}' already registered. Use update() to modify.")
-        
+
         this.tools[definition.name] = definition
         this.executors[definition.name] = executor
-        
+
         # Index by category
         cat = definition.category ?? "uncategorized"
         if cat not in this.categories:
             this.categories[cat] = []
         this.categories[cat].append(definition.name)
-        
+
         if this.config.verbose_logging:
             print(f"✓ Registered tool: {definition.name} (category: {cat})")
-        
+
     unregister(tool_name: string) {
         if tool_name in this.tools:
             let defn = this.tools[tool_name]
             cat = defn.category ?? "uncategorized"
             if cat in this.categories:
                 this.categories[cat] = [t for t in this.categories[cat] if t != tool_name]
-            
+
             this.tools.remove(tool_name)
             this.executors.remove(tool_name)
         }
@@ -221,7 +221,7 @@ class ToolRegistry {
 
     list_tools(category?: string, tag?: string) -> list<ToolDefinition> {
         results: list<ToolDefinition> = []
-        
+
         for name, defn in this.tools {
             if category != None && defn.category != category:
                 continue
@@ -229,38 +229,38 @@ class ToolRegistry {
                 continue
             results.append(defn)
         }
-        
+
         return results
     }
-    
+
     search(query: string) -> list<ToolDefinition> {
         # Fuzzy search for tools matching query
         query_terms = set(query.to_lower().split())
         scored: list<tuple<ToolDefinition, float>> = []
-        
+
         for name, defn in this.tools {
             score = 0.0
-            
+
             # Match against name
             name_words = set(name.to_lower().replace("_", " ").split())
             score += len(name_words & query_terms) * 3.0
-            
+
             # Match against description
             desc_words = set(defn.description.to_lower().split())
             score += len(desc_words & query_terms) * 1.5
-            
+
             # Match against tags
             if defn.tags != None:
                 tag_set = set(defn.tags!.map(t => t.to_lower()))
                 score += len(tag_set & query_terms) * 2.0
-            
+
             # Category match bonus
             if defn.category != None and defn.category! in query.to_lower():
                 score += 2.0
-            
+
             if score > 0:
                 scored.append((defn, score))
-        
+
         scored.sort_by_descending(x => x[1])
         return [s[0] for s in scored]
     }
@@ -268,7 +268,7 @@ class ToolRegistry {
     get_definitions_for_llm() -> list<map<string, any>> {
         # Convert to LLM-friendly format (NeurX function calling style)
         result: list<map<string, any>> = []
-        
+
         for _, defn in this.tools {
             llm_def: map<string, any> = {
                 "type": "function",
@@ -280,7 +280,7 @@ class ToolRegistry {
             }
             result.append(llm_def)
         }
-        
+
         return result
     }
 
@@ -301,7 +301,7 @@ struct RegistryStatistics {
     permission_required_tools: int
 }
 
-// ==================== 工具执行器接口 ====================
+// ==================== toolEnglish text ====================
 
 interface ToolExecutor {
     execute(arguments: map<string, any>) -> ToolCallResult
@@ -316,7 +316,7 @@ struct ValidationReport {
     warnings: list<string>
 }
 
-// ==================== 函数调用引擎 ====================
+// ==================== functionEnglish text ====================
 
 class FunctionCallingEngine {
     registry: ToolRegistry
@@ -335,18 +335,18 @@ class FunctionCallingEngine {
 
     async process_user_request(user_message: string, available_tools?: list<ToolDefinition>) -> FunctionCallingResponse {
         total_start = current_time_millis()
-        
+
         if this.config.verbose_logging:
             print(f"\n{'='*60}")
             print(f"🔧 Function Calling Engine - Processing Request")
             print(f"User: {user_message[:100]}...")
             print(f"Mode: {this.config.execution_mode}")
             print(f"Available Tools: {available_tools?.length ?? this.registry.get_statistics().total_tools}\n")
-        
+
         # Add user message to history
         user_msg = UserMessage{content=user_message}
         this.conversation_history.append(user_msg)
-        
+
         match this.config.execution_mode {
             "single_step" => {
                 response = await this._single_step_execution(user_msg, available_tools)
@@ -361,13 +361,13 @@ class FunctionCallingEngine {
                 response = await this._auto_execution(user_msg, available_tools)
             }
         }
-        
+
         # Compute summary statistics
         total_time = current_time_millis() - total_start
-        
+
         completed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.COMPLETED]
         failed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.FAILED or tc.status == CallStatus.TIMEOUT]
-        
+
         response.execution_summary = ExecutionSummary{
             total_tool_calls_initiated=len(response.tool_calls),
             total_tool_calls_completed=len(completed_calls),
@@ -378,26 +378,26 @@ class FunctionCallingEngine {
             avg_duration_per_call_ms=mean([tc.duration_ms ?? 0 for tc in completed_calls]) if !completed_calls.empty() else 0,
             retry_count=sum(tc.retry_count for tc in response.tool_calls)
         }
-        
+
         if this.config.verbose_logging:
             print_execution_log(response)
-        
+
         return response
     }
 
     async _single_stepExecution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
         """Execute at most one round of tool calls, then generate final response."""
-        
+
         # Step 1: Get LLM decision on whether to call tools and which ones
         tool_defs = tools ?? this.registry.list_tools()
         llm_response = await this._call_llm_with_tools(
             messages=[*this.conversation_history],
             tools=tool_defs
         )
-        
+
         assistant_msg = parse_assistant_message(llm_response)
         this.conversation_history.append(assistant_msg)
-        
+
         # Step 2: If no tool calls, return text response directly
         if assistant_msg.tool_calls == null || assistant_msg.tool_calls!.empty():
             return FunctionCallingResponse{
@@ -406,15 +406,15 @@ class FunctionCallingEngine {
                 final_text_response=get_text_from_message(assistant_msg),
                 intermediate_messages=[assistant_msg]
             }
-        
+
         # Step 3: Execute the requested tool calls
         executed_calls = await this._execute_tool_calls(assistant_msg.tool_calls!)
-        
+
         # Step 4: Return results back to LLM for final synthesis
         tool_result_blocks = create_result_blocks(executed_calls)
         follow_up_msg = UserMessage{tool_results=tool_result_blocks}
         this.conversation_history.append(follow_up_msg)
-        
+
         # Step 5: Generate final response with tool context
         final_llm_resp = await this._call_llm_with_tools(
             messages=[*this.conversation_history],
@@ -422,7 +422,7 @@ class FunctionCallingEngine {
         )
         final_msg = parse_assistant_message(final_llm_resp)
         this.conversation_history.append(final_msg)
-        
+
         return FunctionCallingResponse{
             tool_calls=executed_calls,
             finished_reason=final_llm_resp.finished_reason ?? "stop",
@@ -433,26 +433,26 @@ class FunctionCallingEngine {
 
     async _multi_step_execution(user_msg: UserMessage, tools?: list<ToolDefinition>, max_rounds: int = 10) -> FunctionCallingResponse {
         """Allow multiple rounds of tool calls until task completion."""
-        
+
         tool_defs = tools ?? this.registry.list_tools()
         all_executed_calls: list<ToolCall> = []
         rounds = 0
-        
+
         while rounds < max_rounds:
             rounds += 1
-            
+
             if this.config.verbose_logging:
                 print(f"\n--- Round {rounds} ---")
-            
+
             # Get LLM decision
             llm_response = await this._call_llm_with_tools(
                 messages=[*this.conversation_history],
                 tools=tool_defs
             )
-            
+
             assistant_msg = parse_assistant_message(llm_response)
             this.conversation_history.append(assistant_msg)
-            
+
             # Check if LLM wants to stop (no more tool calls)
             if assistant_msg.tool_calls == null or assistant_msg.tool_calls!.empty():
                 return FunctionCallingResponse{
@@ -461,31 +461,31 @@ class FunctionCallingEngine {
                     final_text_response=get_text_from_message(assistant_msg),
                     intermediate_messages=[]
                 }
-            
+
             # Execute tool calls
             executed = await this._execute_tool_calls(assistant_msg.tool_calls!)
             all_executed_calls.extend(executed)
-            
+
             # Check for hard stops (e.g., permission denied and config says stop)
             has_unrecoverable_errors = any(
-                tc.error?.recoverable == false 
-                for tc in executed 
+                tc.error?.recoverable == false
+                for tc in executed
                 if tc.status != CallStatus.COMPLETED
             )
-            
+
             if has_unrecoverable_errors && this.config.error_handling == "stop":
                 break
-            
+
             # Feed results back
             result_blocks = create_result_blocks(executed)
             this.conversation_history.append(UserMessage{tool_results=result_blocks})
-        
+
         # Max rounds reached, force final response
         final_resp = await this._call_llm_with_tools(
             messages=[*this.conversation_history, {"role": "user", "content": "Please provide your final answer based on all the information gathered."}],
             tools=tool_defs
         )
-        
+
         return FunctionCallingResponse{
             tool_calls=all_executed_calls,
             finished_reason="length",
@@ -496,7 +496,7 @@ class FunctionCallingEngine {
 
     async _agent_loop_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
         """Full agent loop with planning, reflection, and self-correction capabilities."""
-        
+
         # This would implement a more sophisticated loop similar to ReAct or Plan-and-Solve
         # For now, delegate to multi-step as a base implementation
         return await this._multi_step_execution(user_msg, tools)
@@ -504,7 +504,7 @@ class FunctionCallingEngine {
     async _auto_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
         # Heuristic: simple queries likely don't need tools, complex ones might
         query_complexity = estimate_query_complexity(user_msg.content as string)
-        
+
         if query_complexity < 3:  # Low complexity
             return await this._single_step_execution(user_msg, tools)
         else:
@@ -513,9 +513,9 @@ class FunctionCallingEngine {
 
     async _call_llm_with_tools(messages: list<any>, tools: list<ToolDefinition>) -> LLMRawResponse {
         """Make LLM API call with tool definitions."""
-        
+
         tool_schemas = [serialize_for_llm(t) for t in tools]
-        
+
         response = await this.llm_client.chat.completions.create(
             model=this.config.model ?? "neurx-4-plus",
             messages=messages,
@@ -524,18 +524,18 @@ class FunctionCallingEngine {
             temperature=0.2,  # Lower temp for more deterministic tool usage
             max_tokens=4096
         )
-        
+
         return response
 
     async _execute_tool_calls(calls: list<ToolCall>) -> list<ToolCall> {
         """Execute multiple tool calls with dependency resolution and parallelism."""
-        
+
         # Step 1: Parse arguments and validate
         validated_calls: list<ToolCall> = []
         for call in calls {
             try {
                 parsed = json_parse(call.arguments)
-                
+
                 # Validate against schema
                 tool_def = this.registry.get(call.name)
                 if tool_def == None {
@@ -547,10 +547,10 @@ class FunctionCallingEngine {
                     }
                     validated_calls.append(call)
                     continue
-                
+
                 executor = this.registry.get_executor(call.name)
                 validation = executor.validate_arguments(parsed, tool_def.parameters)
-                
+
                 if !validation.is_valid {
                     call.status = CallStatus.FAILED
                     call.error = ToolCallError{
@@ -562,11 +562,11 @@ class FunctionCallingEngine {
                     }
                     validated_calls.append(call)
                     continue
-                
+
                 call.parsed_arguments = parsed
                 call.status = CallStatus.PENDING
                 validated_calls.append(call)
-                
+
             } catch Exception as e {
                 call.status = CallStatus.FAILED
                 call.error = ToolCallError{
@@ -578,31 +578,31 @@ class FunctionCallingEngine {
                 validated_calls.append(call)
             }
         }
-        
+
         # Step 2: Permission check for sensitive operations
         pending_permission: list<ToolCall> = []
         ready_to_execute: list<ToolCall> = []
-        
+
         for call in validated_calls {
             if call.status != CallStatus.PENDING:
                 continue
-            
+
             tool_def = this.registry.get(call.name)!
             if tool_def.requires_permission or (tool_def.is_dangerous and this.config.require_permission_for.contains("execute")):
                 call.status = CallStatus.PERMISSION_REQUIRED
                 pending_permission.append(call)
             else:
                 ready_to_execute.append(call)
-        
+
         # Step 3: Execute ready calls (parallelize independent ones)
         executed: list<ToolCall> = []
-        
+
         if ready_to_execute.length > 0:
             # Group by dependencies (simple version: assume all are independent for now)
             # In production, build a DAG and topologically sort
             batches = group_independent_calls(ready_to_execute)
             this.call_tracker.parallel_batch_count = batches.length
-            
+
             for batch in batches:
                 if batch.length <= this.config.max_concurrent_calls:
                     batch_results = await run_concurrently(
@@ -614,41 +614,41 @@ class FunctionCallingEngine {
                     for tc in batch:
                         result = await this._execute_single_call(tc)
                         executed.append(result)
-        
+
         # Combine all results
         all_results = executed + [c for c in validated_calls if c.status == CallStatus.FAILED] + pending_permission
-        
+
         return all_results
     }
 
     async _execute_single_call(call: ToolCall) -> ToolCall {
         """Execute a single tool call with error handling and retries."""
-        
+
         call.start_time = current_time()
         call.status = CallStatus.RUNNING
-        
+
         try {
             executor = this.registry.get_executor(call.name)!
             tool_def = this.registry.get(call.name)!
-            
+
             # Execute with timeout
             result = await wait_for(
                 executor.execute(call.parsed_arguments!),
                 timeout=tool_def.timeout_seconds
             )
-            
+
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
             call.result = result
             call.status = CallStatus.COMPLETED if result.success else CallStatus.FAILED
-            
+
             if !result.success:
                 call.error = ToolCallError{
                     code="EXECUTION_ERROR",
                     message=result.content?.toString() ?? "Tool execution failed",
                     recoverable=true
                 }
-            
+
             # Retry logic for recoverable failures
             if call.status == CallStatus.FAILED and call.error?.recoverable and call.retry_count < this.config.max_retries:
                 call.retry_count += 1
@@ -656,7 +656,7 @@ class FunctionCallingEngine {
                     print(f"   🔄 Retrying {call.name} (attempt {call.retry_count}/{this.config.max_retries})")
                 await sleep(1)  # Brief delay before retry
                 return await this._execute_single_call(call)
-            
+
         } catch TimeoutException:
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
@@ -666,7 +666,7 @@ class FunctionCallingEngine {
                 message=f"Tool execution timed out after {tool_def.timeout_seconds}s",
                 recoverable=false
             }
-        
+
         except Exception as e:
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
@@ -677,7 +677,7 @@ class FunctionCallingEngine {
                 details={"exception_type": e.__class__.__name__},
                 recoverable=isinstance(e, NetworkError) or isinstance(e, RateLimitError)
             }
-        
+
         this.call_tracker.record_call(call)
         return call
     }
@@ -708,7 +708,7 @@ struct ConversationSummary {
     success_rate: float
 }
 
-// ==================== 调用追踪器 ====================
+// ==================== English text ====================
 
 class CallTracker {
     history: list<ToolCall>
@@ -725,7 +725,7 @@ class CallTracker {
         this.history.append(call)
         this.total_calls += 1
         this.tools_used.add(call.name)
-        
+
         if call.status == CallStatus.COMPLETED:
             this.successful_calls += 1
         elif call.status in [CallStatus.FAILED, CallStatus.TIMEOUT]:
@@ -751,7 +751,7 @@ class CallTracker {
     }
 }
 
-// ==================== 预置常用工具定义 ====================
+// ==================== English texttoolEnglish text ====================
 
 function create_builtin_web_search_tool() -> tuple<ToolDefinition, ToolExecutor> {
     defn = ToolDefinition{
@@ -777,7 +777,7 @@ function create_builtin_web_search_tool() -> tuple<ToolDefinition, ToolExecutor>
         category="search",
         tags=["internet", "information", "real-time"]
     }
-    
+
     executor = WebSearchExecutor()
     return (defn, executor)
 }
@@ -807,7 +807,7 @@ function create_builtin_code_executor_tool() -> tuple<ToolDefinition, ToolExecut
         is_dangerous=true,
         requires_permission=True
     }
-    
+
     executor = CodeInterpreterExecutor()
     return (defn, executor)
 }
@@ -843,7 +843,7 @@ function create_builtin_file_operations_tool() -> tuple<ToolDefinition, ToolExec
         category="filesystem",
         tags=["file", "io", "storage"]
     }
-    
+
     executor = FileOperationsExecutor()
     return (defn, executor)
 }
@@ -851,13 +851,13 @@ function create_builtin_file_operations_tool() -> tuple<ToolDefinition, ToolExec
 // Executor implementations (simplified stubs - real implementations would use actual services)
 class WebSearchExecutor implements ToolExecutor {
     get_name() -> string { return "web_search" }
-    
+
     validate_arguments(args, schema) -> ValidationReport {
         if "query" not in args:
             return ValidationReport{is_valid=false, missing_params=["query"], invalid_params=[], warnings=[]}
         return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
-    
+
     async execute(args) -> ToolCallResult {
         // Would integrate with a search service
         mock_results = [
@@ -874,13 +874,13 @@ class WebSearchExecutor implements ToolExecutor {
 
 class CodeInterpreterExecutor implements ToolExecutor {
     get_name() -> string { return "code_interpreter" }
-    
+
     validate_arguments(args, schema) -> ValidationReport {
         if "code" not in args:
             return ValidationReport{is_valid=false, missing_params=["code"], invalid_params=[], warnings=[]}
         return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
-    
+
     async execute(args) -> ToolCallResult {
         # Would use actual code interpreter service
         return ToolCallResult{
@@ -893,17 +893,17 @@ class CodeInterpreterExecutor implements ToolExecutor {
 
 class FileOperationsExecutor implements ToolExecutor {
     get_name() -> string { return "file_operations" }
-    
+
     validate_arguments(args, schema) -> ValidationReport {
         required = ["action", "path"]
         missing = [r for r in required if r not in args]
         return ValidationReport{is_valid=missing.empty(), missing_params=missing, invalid_params=[], warnings=[]}
     }
-    
+
     async execute(args) -> ToolCallResult {
         action = args["action"]
         path = args["path"]
-        
+
         try {
             match action {
                 "read" => {
@@ -932,55 +932,55 @@ class FileOperationsExecutor implements ToolExecutor {
     }
 }
 
-// ==================== 工厂函数与测试 ====================
+// ==================== English textfunctionEnglish texttest ====================
 
 function create_function_calling_engine(llm_client: any, config?: FunctionCallingConfig) -> FunctionCallingEngine {
     engine = new FunctionCallingEngine(llm_client=llm_client, config=config)
-    
+
     # Register built-in tools
     search_def, search_exec = create_builtin_web_search_tool()
     engine.registry.register(search_def, search_exec)
-    
+
     code_def, code_exec = create_builtin_code_executor_tool()
     engine.registry.register(code_def, code_exec)
-    
+
     file_def, file_exec = create_builtin_file_operations_tool()
     engine.registry.register(file_def, file_exec)
-    
+
     return engine
 }
 
 async function test_function_calling() -> bool {
     print("🧪 Testing NEURX FUNCTION Calling System...")
-    
+
     # Create mock LLM client
     mock_llc = MockLLMClientForFC()
-    
+
     # Create engine with built-in tools
     fc_engine = create_function_calling_engine(mock_llc, FunctionCallingConfig(verbose_logging=false))
-    
+
     # Test 1: Tool registration and discovery
     print("  ✓ Test 1: Tool Registration")
     stats = fc_engine.registry.get_statistics()
     assert stats.total_tools >= 3, f"Expected >=3 tools, got {stats.total_tools}"
     assert "web_search" in [t.name for t in fc_engine.registry.list_tools()], "Web search tool should be registered"
-    
+
     # Test 2: Tool search functionality
     print("  ✓ Test 2: Tool Search")
     search_results = fc_engine.registry.search("find information internet")
     assert search_results.length > 0, "Search should find web_search tool"
     assert any(t.name == "web_search" for t in search_results), "Should find web_search"
-    
+
     # Test 3: Argument validation
     print("  ✓ Test 3: Argument Validation")
     web_exec = fc_engine.registry.get_executor("web_search")!
     valid_report = web_exec.validate_arguments({"query": "test"}, ParameterSchema{type="object", properties={}, required=["query"]})
     assert valid_report.is_valid, "Valid args should pass"
-    
+
     invalid_report = web_exec.validate_arguments({}, ParameterSchema{type="object", properties={}, required=["query"]})
     assert !invalid_report.is_valid, "Missing args should fail"
     assert "query" in invalid_report.missing_params, "'query' should be in missing params"
-    
+
     # Test 4: Schema serialization
     print("  ✓ Test 4: Schema Serialization for LLM")
     llm_defs = fc_engine.registry.get_definitions_for_llm()
@@ -990,40 +990,40 @@ async function test_function_calling() -> bool {
         assert "function" in def_dict, "Each should have 'function'"
         assert "name" in def_dict["function"], "Each function should have 'name'"
         assert "parameters" in def_dict["function"], "Each function should have 'parameters'"
-    
+
     # Test 5: Process request (with mock LLM that returns tool calls)
     print("  ✓ Test 5: End-to-End Request Processing")
     response = await fc_engine.process_user_request("Search for the latest news about AI breakthroughs")
-    
+
     assert response.tool_calls.length > 0 or response.final_text_response != null, \
            "Should have either tool calls or text response"
-    
+
     if response.tool_calls.length > 0:
         first_call = response.tool_calls[0]
         assert first_call.id != null, "Tool call should have ID"
         assert first_call.name != null, "Tool call should have name"
         assert first_call.status in [CallStatus.COMPLETED, CallStatus.FAILED, CallStatus.PERMISSION_REQUIRED], \
                f"Unexpected status: {first_call.status}"
-        
+
     assert response.execution_summary != null, "Should have execution summary"
     assert response.execution_summary!.total_tool_calls_initiated == response.tool_calls.length
-    
+
     # Test 6: Conversation tracking
     print("  ✓ Test 6: Conversation Tracking")
     conv_summary = fc_engine.get_conversation_summary()
     assert conv_summary.total_messages >= 2, "Should have at least user+assistant messages"
     assert conv_summary.user_messages >= 1, "Should have user message"
-    
+
     print("\n✅ All Function Calling Tests Passed!")
     return true
 }
 
 class MockLLMClientForFC {
     call_count: int = 0
-    
+
     async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) -> LLMRawResponse {
         this.call_count += 1
-        
+
         # Simulate different responses based on call count
         if this.call_count == 1 {
             # First call: request tool use

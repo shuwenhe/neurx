@@ -498,7 +498,7 @@ func bpe_extract_jsonl_text(string line) string {
     bpe_normalize_text(value)
 }
 
-// 状态字典支持
+// stateEnglish textsupport
 struct bpe_split_state_dict {
     []string train_documents
     []string valid_documents

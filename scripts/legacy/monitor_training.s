@@ -8,40 +8,40 @@ func main() int {
     let log_dir = project_root + "/artifacts/logs"
     let checkpoint_dir = project_root + "/artifacts/checkpoints"
 
-    println("NeurX 训练进度监控 (S 入口)")
+    println("NeurX trainingEnglish textmonitoring (S English text)")
     println("")
 
     let latest_log = trim(runtime_run_command_output("cd '" + log_dir + "' && ls -t train_*.log 2>/dev/null | head -1"))
     if latest_log == "" {
-        println("未找到训练日志文件")
+        println("English texttraininglogfile")
         return 1
     }
 
-    println("最新日志: " + latest_log)
+    println("English textlog: " + latest_log)
     println("")
-    println("日志大小: " + trim(runtime_run_command_output("cd '" + log_dir + "' && du -h '" + latest_log + "' 2>/dev/null | cut -f1")))
-    println("最后修改: " + trim(runtime_run_command_output("cd '" + log_dir + "' && ls -l '" + latest_log + "' 2>/dev/null | awk '{print $6, $7, $8}'")))
+    println("logEnglish text: " + trim(runtime_run_command_output("cd '" + log_dir + "' && du -h '" + latest_log + "' 2>/dev/null | cut -f1")))
+    println("English text: " + trim(runtime_run_command_output("cd '" + log_dir + "' && ls -l '" + latest_log + "' 2>/dev/null | awk '{print $6, $7, $8}'")))
     println("")
 
-    print_flag("数据清洁进程", runtime_run_command_output("pgrep -f clean_data 2>/dev/null") != "")
-    print_flag("训练进程", runtime_run_command_output("pgrep -f 'neurx.*train' 2>/dev/null") != "")
-    print_flag("S 编译器", runtime_file_exists("/home/shuwen/s/bin/s"))
+    print_flag("dataEnglish text", runtime_run_command_output("pgrep -f clean_data 2>/dev/null") != "")
+    print_flag("trainingEnglish text", runtime_run_command_output("pgrep -f 'neurx.*train' 2>/dev/null") != "")
+    print_flag("S compileEnglish text", runtime_file_exists("/home/shuwen/s/bin/s"))
 
     println("")
     if runtime_file_exists(project_root + "/dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl") {
-        println("数据清洁: 完成")
+        println("dataEnglish text: English text")
     } else {
-        println("数据清洁: 未完成或进行中")
+        println("dataEnglish text: English text")
     }
 
     if runtime_file_exists(project_root + "/dataset/pretrain/manifest.json") {
-        println("Manifest: 已生成")
+        println("Manifest: English textgenerate")
     } else {
-        println("Manifest: 未生成")
+        println("Manifest: English textgenerate")
     }
 
     println("")
-    println("最新日志内容 (最后20行):")
+    println("English textlogcontent (English text20English text):")
     println("─────────────────────────────────────────────────────────────────")
     println(trim(runtime_run_command_output("cd '" + log_dir + "' && tail -20 '" + latest_log + "'")))
     println("─────────────────────────────────────────────────────────────────")
@@ -50,8 +50,8 @@ func main() int {
 
 func print_flag(string name, bool ok) {
     if ok {
-        println("✓ " + name + " 运行中")
+        println("✓ " + name + " runEnglish text")
     } else {
-        println("✗ " + name + " 未运行")
+        println("✗ " + name + " English textrun")
     }
 }

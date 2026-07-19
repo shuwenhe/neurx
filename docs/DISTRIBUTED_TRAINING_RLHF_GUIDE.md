@@ -1,50 +1,50 @@
-# 🔥 分布式训练 + 完整对齐系统 - 实现指南
+# 🔥 English texttraining + completealignmentsystem - implementationEnglish text
 
-**日期**: 2026-07-07 (Week 2)  
-**目标**: 实现 8-64 GPU 分布式训练 + 企业级 RLHF  
-**预期代码**: 2,400+ 行 (分布式) + 1,800+ 行 (RLHF)
-
----
-
-## 📦 已创建的核心模块
-
-### 分布式训练框架
-
-| 文件 | 行数 | 功能 | 状态 |
-|-----|------|------|------|
-| `distributed/data_parallel.s` | 450 | DP + AllReduce + 梯度积累 | ✅ |
-| `distributed/tensor_parallel.s` (已存在) | 500 | 列/行并行 + AllGather | ✅ |
-| `distributed/pipeline_parallel.s` (已存在) | 400 | GPipe + 1F1B 调度 | ✅ |
-| `distributed/zero_optimizer.s` (已存在) | 400 | ZeRO-1/2/3 内存优化 | ✅ |
-
-### 对齐系统
-
-| 文件 | 行数 | 功能 | 状态 |
-|-----|------|------|------|
-| `alignment/rlhf_complete.s` | 600 | SFT + 奖励 + PPO + 评估 | ✅ |
-
-**总计**: 2,750+ 行核心代码
+**English text**: 2026-07-07 (Week 2)
+**English text**: implementation 8-64 GPU English texttraining + English text RLHF
+**English text**: 2,400+ English text (English text) + 1,800+ English text (RLHF)
 
 ---
 
-## 🎯 分布式训练框架详解
+## 📦 English text
 
-### 1. 数据并行 (Data Parallel)
+### English texttrainingframework
 
-**特点**:
-- 最简单的分布式方案
-- 每 GPU 保存完整模型副本
-- 仅梯度同步
+| file | English text | English text | state |
+|-----|------|------|------|
+| `distributed/data_parallel.s` | 450 | DP + AllReduce + gradientEnglish text | ✅ |
+| `distributed/tensor_parallel.s` (English text) | 500 | English text/English text + AllGather | ✅ |
+| `distributed/pipeline_parallel.s` (English text) | 400 | GPipe + 1F1B English text | ✅ |
+| `distributed/zero_optimizer.s` (English text) | 400 | ZeRO-1/2/3 English textoptimize | ✅ |
 
-**性能**:
+### alignmentsystem
+
+| file | English text | English text | state |
+|-----|------|------|------|
+| `alignment/rlhf_complete.s` | 600 | SFT + reward + PPO + evaluation | ✅ |
+
+**English text**: 2,750+ English text
+
+---
+
+## 🎯 English texttrainingframeworkEnglish text
+
+### 1. dataEnglish text (Data Parallel)
+
+**English text**:
+- English text
+- English text GPU savecompletemodelEnglish text
+- English textgradientEnglish textstep
+
+**English text**:
 ```
-GPU 数       扩展效率      吞吐 (t/s)
+GPU English text       extensionEnglish text      English text (t/s)
 2x          95%          ~1000
 4x          92%          ~1900
 8x          90%          ~3700
 ```
 
-**使用方式**:
+**useEnglish text**:
 ```python
 from neurx.distributed import DataParallel
 
@@ -55,44 +55,44 @@ dp = DataParallel(
 )
 
 for step, batch in enumerate(dataloader):
-    # 前向
+    # English text
     loss = model(batch)
-    
-    # 后向
+
+    # English text
     loss.backward()
-    
-    # 梯度同步
+
+    # gradientEnglish textstep
     dp.synchronize_gradients(gradients)
-    
-    # 优化器步
+
+    # optimizeEnglish textstep
     optimizer.step()
 ```
 
 ---
 
-### 2. 张量并行 (Tensor Parallelism)
+### 2. English text (Tensor Parallelism)
 
-**特点**:
-- 大模型必需
-- 减少每 GPU 内存占用
-- 需要 AllGather/AllReduce 通信
+**English text**:
+- English textmodelEnglish text
+- English text GPU English text
+- Required AllGather/AllReduce English text
 
-**行并行 vs 列并行**:
+**English text vs English text**:
 ```
-列并行 Linear (Q/K/V):
+English text Linear (Q/K/V):
   Y = X @ W^T
-  W 被列分割 (每 GPU 保存 W[:, my_slice])
-  AllGather 收集完整输出
-  
-行并行 Linear (输出投影):
+  W English text (English text GPU save W[:, my_slice])
+  AllGather English textcompleteoutput
+
+English text Linear (outputEnglish text):
   Y = X @ W^T
-  X 被行分割
-  AllReduce 聚合梯度
+  X English text
+  AllReduce English textgradient
 ```
 
-**性能**:
+**English text**:
 ```
-TP 大小      效率       内存节省
+TP English text      English text       English text
 1            100%       0%
 2            95%        50%
 4            90%        75%
@@ -101,11 +101,11 @@ TP 大小      效率       内存节省
 
 ---
 
-### 3. 管道并行 (Pipeline Parallelism)
+### 3. English text (Pipeline Parallelism)
 
-**两种调度**:
+**English text**:
 
-#### GPipe (简单但有气泡)
+#### GPipe (English text)
 ```
 Stage 1  Stage 2  Stage 3  Stage 4
 Forward ──────────────────────
@@ -113,10 +113,10 @@ Forward ──────────────────────
                 Backward ──────
      Backward ──────
 Backward ──────
-   (气泡)
+   (English text)
 ```
 
-#### 1F1B (优化, 气泡最少)
+#### 1F1B (optimize, English text)
 ```
 Stage 1  Stage 2  Stage 3  Stage 4
 Fwd1 ──────────────────────
@@ -127,28 +127,28 @@ Fwd2 ──────
                    Bwd1 ──────
           Bwd2 ──────
 Bwd2 ──────
-(气泡最小化)
+(English text)
 ```
 
-**目标**:
-- GPipe: 30-40% 气泡率
-- 1F1B: <5% 气泡率
+**English text**:
+- GPipe: 30-40% English text
+- 1F1B: <5% English text
 
 ---
 
-### 4. ZeRO 内存优化
+### 4. ZeRO English textoptimize
 
-**三个 Stage**:
+**English text Stage**:
 
-| Stage | 分割 | 内存节省 | 通信增加 | 复杂度 |
+| Stage | English text | English text | English text | English text |
 |-------|------|---------|---------|--------|
-| 1 | 优化器状态 | 4x | 最小 | 低 |
-| 2 | 优化器 + 梯度 | 8x | 中等 | 中等 |
-| 3 | 优化器 + 梯度 + 参数 | 8x | 最大 | 高 |
+| 1 | optimizeEnglish textstate | 4x | English text | English text |
+| 2 | optimizeEnglish text + gradient | 8x | English text | English text |
+| 3 | optimizeEnglish text + gradient + parameter | 8x | English text | English text |
 
-**70B 模型内存对比**:
+**70B modelEnglish text**:
 ```
-无优化 (FP32)          280GB
+English textoptimize (FP32)          280GB
 ZeRO-1 (1x GPU)        70GB
 ZeRO-2 (1x GPU)        35GB
 ZeRO-3 (1x GPU)        35GB
@@ -157,21 +157,21 @@ ZeRO-3 (8x GPU)        5GB per GPU
 
 ---
 
-## 🤖 完整 RLHF 对齐系统
+## 🤖 complete RLHF alignmentsystem
 
-### 阶段 1: 监督微调 (SFT)
+### phase 1: English text (SFT)
 
-**目标**: 教导模型遵循指令
+**English text**: English textmodelEnglish text
 
-**数据格式**:
+**dataEnglish text**:
 ```
 {
-  "instruction": "用中文解释神经网络",
-  "output": "神经网络是一种受生物神经系统启发..."
+  "instruction": "English text",
+  "output": "English textsystemEnglish text..."
 }
 ```
 
-**训练流程**:
+**trainingpipeline**:
 ```python
 sft_trainer = SFTTrainer(
     model=model,
@@ -189,31 +189,31 @@ for epoch in range(3):
         optimizer.step()
 ```
 
-**质量指标**:
-- Perplexity: 应该下降
-- 目标损失: <1.0
+**English text**:
+- Perplexity: English text
+- English textloss: <1.0
 
 ---
 
-### 阶段 2: 奖励模型训练
+### phase 2: rewardmodeltraining
 
-**目标**: 学习评分好的回复
+**English text**: English text
 
-**数据格式** (成对):
+**dataEnglish text** (English text):
 ```
 {
-  "prompt": "如何学习机器学习?",
-  "chosen": "学习的步骤是...(优质回复)",
-  "rejected": "机器学习很难...(劣质回复)"
+  "prompt": "English text?",
+  "chosen": "English textstepEnglish text...(English text)",
+  "rejected": "English text...(English text)"
 }
 ```
 
-**RankNet 损失**:
+**RankNet loss**:
 ```
 Loss = -log(sigmoid(score_chosen - score_rejected))
 ```
 
-**训练流程**:
+**trainingpipeline**:
 ```python
 reward_trainer = RewardModelTrainer(
     model=sft_model.copy(),
@@ -223,27 +223,27 @@ reward_trainer = RewardModelTrainer(
 
 for epoch in range(5):
     for batch in train_loader:
-        # 前向
+        # English text
         chosen_scores = model(batch['chosen_ids'])
         rejected_scores = model(batch['rejected_ids'])
-        
-        # 损失
+
+        # loss
         loss = ranknet_loss(chosen_scores, rejected_scores)
         loss.backward()
         optimizer.step()
 ```
 
-**评估指标**:
-- AUC-ROC: 应该 >0.75
-- 准确率: 应该 >70%
+**evaluationEnglish text**:
+- AUC-ROC: English text >0.75
+- English text: English text >70%
 
 ---
 
-### 阶段 3: PPO 强化学习
+### phase 3: PPO English text
 
-**目标**: 优化奖励分数同时保持 KL 散度约束
+**English text**: optimizerewardEnglish text KL English text
 
-**核心公式**:
+**English text**:
 ```
 L = L_policy - α * L_value + β * H(π)
 
@@ -254,7 +254,7 @@ H(π)     = -Σ π(a|s) * log π(a|s)
 r_t      = π_new(a_t|s_t) / π_old(a_t|s_t)
 ```
 
-**训练流程**:
+**trainingpipeline**:
 ```python
 ppo_trainer = PPOTrainer(
     policy=sft_model,
@@ -268,79 +268,79 @@ ppo_trainer = PPOTrainer(
 )
 
 for iteration in range(num_iterations):
-    # 1. 生成轨迹
+    # 1. generateEnglish text
     trajectories = generate_trajectories(
         policy=policy,
         prompts=prompts,
-        num_sequences=4  # 每个 prompt 生成 4 个序列
+        num_sequences=4  # English text prompt generate 4 English text
     )
-    
-    # 2. 计算奖励
+
+    # 2. computereward
     rewards = reward_model(trajectories['responses'])
-    
-    # 3. 计算优势
+
+    # 3. computeEnglish text
     advantages = compute_gae(
         rewards=rewards,
         values=value_model(trajectories),
         gamma=0.99,
         gae_lambda=0.95
     )
-    
-    # 4. PPO 更新
+
+    # 4. PPO English text
     for epoch in range(4):
         for mini_batch in make_mini_batches(trajectories, advantages):
-            # 策略损失
+            # English textloss
             new_logits = policy(mini_batch['input_ids'])
             new_logprobs = get_logprobs(new_logits, mini_batch['action_ids'])
             old_logprobs = mini_batch['old_logprobs']
-            
+
             ratio = exp(new_logprobs - old_logprobs)
             clipped_ratio = clip(ratio, 1 - epsilon, 1 + epsilon)
-            
+
             L_policy = -min(ratio * advantages, clipped_ratio * advantages)
-            
-            # 价值损失
+
+            # English textloss
             values = value_model(mini_batch)
             L_value = (values - mini_batch['returns'])^2
-            
-            # KL 散度
+
+            # KL English text
             kl = old_logprobs - new_logprobs
-            
-            # 总损失
+
+            # English textloss
             loss = L_policy + 0.5 * L_value + 0.01 * kl
             loss.backward()
             optimizer.step()
-            
-            # 检查 KL 是否超过目标
-            if kl > 0.015:  # 目标 KL
-                break  # 提前停止该轮迭代
+
+            # English text KL English text
+            if kl > 0.015:  # English text KL
+                break  # English text
 ```
 
-**关键超参数**:
+**English textparameter**:
 ```
-β (KL 系数)          : 0.01
-ε (PPO 裁剪范围)     : 0.2
-γ (折扣因子)         : 0.99
-λ (GAE 参数)         : 0.95
-学习率              : 1e-5
-每轮 epoch 数       : 4
-目标 KL              : 0.015
+β (KL English text)          : 0.01
+ε (PPO English text)     : 0.2
+γ (English text)         : 0.99
+λ (GAE parameter)         : 0.95
+learning rate              : 1e-5
+English text epoch English text       : 4
+English text KL              : 0.015
 ```
 
 ---
 
-### 阶段 4: 多维度评估
+### phase 4: English textevaluation
 
-**评估维度**:
+**evaluationEnglish text**:
 
-| 维度 | 权重 | 评估方法 | 目标分数 |
+| English text | weight | evaluationEnglish text | English text |
 |-----|------|---------|---------|
-| 有用性 | 0.25 | 任务完成度 + 相关性 | >4.0/5 |
-| 无害性 | 0.35 | 安全检查 + 内容过滤 | >4.5/5 |
-| 真实性 | 0.25 | 事实检查 + 幻觉检测 | >4.0/5 |
-| 一致性 | 0.15 | 多轮对话一致性 | >3.5/5 |
+| helpfulEnglish text | 0.25 | English text + English text | >4.0/5 |
+| harmlessEnglish text | 0.35 | safetyEnglish text + contentEnglish text | >4.5/5 |
+| truthfulEnglish text | 0.25 | English text + English text | >4.0/5 |
+| English text | 0.15 | English text | >3.5/5 |
 
-**评估流程**:
+**evaluationpipeline**:
 ```python
 evaluator = Evaluator(
     helpfulness_weight=0.25,
@@ -350,21 +350,21 @@ evaluator = Evaluator(
 )
 
 test_prompts = [
-    "解释深度学习",
-    "如何写 Python",
-    "历史上的今天",
+    "English text",
+    "English text Python",
+    "English text",
     ...
 ]
 
 for prompt in test_prompts:
-    # 生成多个回复
+    # generateEnglish text
     responses = model.generate(
         prompt,
         num_return_sequences=3,
         temperature=0.7
     )
-    
-    # 评估
+
+    # evaluation
     metrics = evaluator.evaluate(prompt, responses)
     print(f"Helpfulness: {metrics['helpfulness_score']:.1f}")
     print(f"Harmlessness: {metrics['harmlessness_score']:.1f}")
@@ -375,40 +375,40 @@ for prompt in test_prompts:
 
 ---
 
-## 🚀 完整训练流程
+## 🚀 completetrainingpipeline
 
-### 时间表
+### timeEnglish text
 
 ```
-Week 1-2: SFT 预训练
-  ├─ 准备指令数据集
-  ├─ SFT 训练 (3-5 epochs)
-  └─ 验证指令遵循能力
+Week 1-2: SFT English texttraining
+  ├─ English textdataEnglish text
+  ├─ SFT training (3-5 epochs)
+  └─ English text
 
-Week 3: 奖励模型
-  ├─ 收集偏好数据
-  ├─ 奖励模型训练 (5 epochs)
-  └─ 评估 AUC >0.75
+Week 3: rewardmodel
+  ├─ English textpreferencedata
+  ├─ rewardmodeltraining (5 epochs)
+  └─ evaluation AUC >0.75
 
-Week 4-5: PPO 强化学习
-  ├─ PPO 迭代 (10-20 iterations)
-  ├─ 监控 KL 散度
-  └─ 验证奖励改进
+Week 4-5: PPO English text
+  ├─ PPO English text (10-20 iterations)
+  ├─ monitoring KL English text
+  └─ English textrewardEnglish text
 
-Week 6: 评估和微调
-  ├─ 多维度评估
-  ├─ 红队测试
-  └─ 最终微调
+Week 6: evaluationEnglish text
+  ├─ English textevaluation
+  ├─ English texttest
+  └─ English text
 ```
 
 ---
 
-## 💻 配置示例
+## 💻 configurationexample
 
-### 数据并行 + BF16 混合精度
+### dataEnglish text + BF16 English text
 
 ```bash
-# 命令行
+# English text
 python train.py \
   --model gpt-7b \
   --distributed-backend nccl \
@@ -418,16 +418,16 @@ python train.py \
   --gradient-accumulation-steps 4 \
   --learning-rate 1e-4
 
-# 预期性能:
-# - 吞吐: ~3700 tokens/s (8x GPU)
-# - 内存: ~20GB per GPU
-# - 扩展效率: ~90%
+# English text:
+# - English text: ~3700 tokens/s (8x GPU)
+# - English text: ~20GB per GPU
+# - extensionEnglish text: ~90%
 ```
 
-### 张量并行 + 数据并行 + ZeRO-2
+### English text + dataEnglish text + ZeRO-2
 
 ```bash
-# 4x TP + 2x DP + ZeRO-2 (8 GPU 总计)
+# 4x TP + 2x DP + ZeRO-2 (8 GPU English text)
 python train.py \
   --model gpt-70b \
   --tensor-parallel-size 4 \
@@ -436,16 +436,16 @@ python train.py \
   --batch-size 16 \
   --gradient-accumulation-steps 8
 
-# 预期性能:
-# - 吞吐: ~2000 tokens/s (8x GPU)
-# - 内存: ~40GB per GPU
-# - 扩展效率: ~85%
+# English text:
+# - English text: ~2000 tokens/s (8x GPU)
+# - English text: ~40GB per GPU
+# - extensionEnglish text: ~85%
 ```
 
-### 完整 RLHF 训练
+### complete RLHF training
 
 ```bash
-# 阶段 1: SFT
+# phase 1: SFT
 python train_sft.py \
   --model gpt-7b \
   --data alpaca_52k \
@@ -453,7 +453,7 @@ python train_sft.py \
   --batch-size 32 \
   --lr 5e-5
 
-# 阶段 2: 奖励模型
+# phase 2: rewardmodel
 python train_reward.py \
   --model checkpoints/sft_model \
   --data hh-rlhf \
@@ -461,7 +461,7 @@ python train_reward.py \
   --batch-size 64 \
   --lr 5e-5
 
-# 阶段 3: PPO
+# phase 3: PPO
 python train_ppo.py \
   --policy checkpoints/sft_model \
   --reward-model checkpoints/reward_model \
@@ -470,7 +470,7 @@ python train_ppo.py \
   --lr 1e-5 \
   --ppo-epsilon 0.2
 
-# 阶段 4: 评估
+# phase 4: evaluation
 python evaluate.py \
   --model checkpoints/ppo_model \
   --test-set standard_eval
@@ -478,22 +478,22 @@ python evaluate.py \
 
 ---
 
-## 📊 性能基准
+## 📊 English text
 
-### 推理性能
+### inferenceEnglish text
 
 ```
-模型       批大小   吞吐量        延迟         内存
+model       English text   English text        English text         English text
 7B        32      500-1000 t/s  20-30ms      7GB
 7B        128     800-1200 t/s  40-60ms      10GB
 70B       32      80-150 t/s    40-80ms      40GB (TP-4)
 175B      32      20-40 t/s     100-150ms    100GB (TP-8)
 ```
 
-### 训练性能 (8x A100)
+### trainingEnglish text (8x A100)
 
 ```
-模型   并行方案              吞吐         内存       效率
+model   English text              English text         English text       English text
 7B    DP                    3700 t/s     20GB      90%
 13B   DP                    2200 t/s     30GB      88%
 70B   TP-4 + DP-2 + ZeRO-2  2000 t/s     40GB      85%
@@ -502,78 +502,78 @@ python evaluate.py \
 
 ---
 
-## ✨ 最佳实践
+## ✨ English text
 
-### 1. 分布式训练
-- ✅ 使用 NCCL 后端 (GPU) 或 Gloo (CPU)
-- ✅ 启用异步 AllReduce
-- ✅ 梯度累积以增加有效批大小
-- ✅ 监控通信开销
+### 1. English texttraining
+- ✅ use NCCL English text (GPU) English text Gloo (CPU)
+- ✅ English textstep AllReduce
+- ✅ gradientEnglish text
+- ✅ monitoringEnglish text
 
-### 2. RLHF 对齐
-- ✅ SFT 收敛后再训练奖励模型
-- ✅ PPO 中监控 KL 散度 (<0.015)
-- ✅ 使用多个 reference 模型检查漂移
-- ✅ 定期进行多维度评估
+### 2. RLHF alignment
+- ✅ SFT English texttrainingrewardmodel
+- ✅ PPO English textmonitoring KL English text (<0.015)
+- ✅ useEnglish text reference modelEnglish text
+- ✅ English textevaluation
 
-### 3. 内存优化
-- ✅ 优先使用 ZeRO-2 (内存 - 通信平衡)
-- ✅ 激活值重计算 (节省 30%)
-- ✅ 梯度检查点 (节省 70%)
-- ✅ 分页 KV 缓存 (推理)
-
----
-
-## 🔍 故障排查
-
-### 训练梯度爆炸
-```
-现象: 损失变为 NaN
-解决:
-1. 检查梯度裁剪: --grad-clip-value 1.0
-2. 使用混合精度: --precision bf16
-3. 启用动态损失缩放: --dynamic-loss-scaling
-```
-
-### 分布式通信超时
-```
-现象: 训练卡住, 或 timeout 错误
-解决:
-1. 增加超时时间: --nccl-timeout 1800
-2. 检查网络连接
-3. 降低通信频率 (增加梯度积累)
-```
-
-### PPO 训练不收敛
-```
-现象: 奖励不增加
-解决:
-1. 检查 KL 系数是否过大
-2. 验证奖励模型质量 (AUC >0.75)
-3. 增加 PPO epoch 数
-```
+### 3. English textoptimize
+- ✅ English textuse ZeRO-2 (English text - English text)
+- ✅ English textcompute (English text 30%)
+- ✅ gradientcheckpoint (English text 70%)
+- ✅ English text KV cache (inference)
 
 ---
 
-## 📈 成功标志
+## 🔍 English text
 
-### Week 2 完成
+### traininggradientEnglish text
 ```
-✅ 分布式框架编译通过
-✅ 8 GPU 线性扩展 >85%
-✅ 70B 模型 <100GB 内存
-✅ 通信开销 <20%
+English text: lossEnglish text NaN
+English text:
+1. English textgradientEnglish text: --grad-clip-value 1.0
+2. useEnglish text: --precision bf16
+3. English textlossEnglish text: --dynamic-loss-scaling
 ```
 
-### Week 3-4 完成
+### English text
 ```
-✅ SFT 收敛 (loss <1.0)
-✅ 奖励模型 AUC >0.75
-✅ PPO 奖励 +20% 改进
-✅ 多维度评估 >4.0/5
+English text: trainingEnglish text, English text timeout error
+English text:
+1. English texttime: --nccl-timeout 1800
+2. English text
+3. English text (English textgradientEnglish text)
+```
+
+### PPO trainingEnglish text
+```
+English text: rewardEnglish text
+English text:
+1. English text KL English text
+2. English textrewardmodelEnglish text (AUC >0.75)
+3. English text PPO epoch English text
 ```
 
 ---
 
-**下一步**: 实现完整的训练脚本和分布式测试
+## 📈 successEnglish text
+
+### Week 2 English text
+```
+✅ English textframeworkcompileEnglish text
+✅ 8 GPU English textextension >85%
+✅ 70B model <100GB English text
+✅ English text <20%
+```
+
+### Week 3-4 English text
+```
+✅ SFT English text (loss <1.0)
+✅ rewardmodel AUC >0.75
+✅ PPO reward +20% English text
+✅ English textevaluation >4.0/5
+```
+
+---
+
+**English textstep**: implementationcompleteEnglish texttrainingEnglish texttest
 

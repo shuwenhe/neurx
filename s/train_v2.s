@@ -1,16 +1,16 @@
 // ============================================
 // NeurX GPT Training - Full AI-Native Implementation
-// 使用 S 语言完整AI原生能力栈进行GPT模型训练
+// use S languagecompleteAIEnglish textGPTmodeltraining
 //
-// 依赖模块 (5大核心能力已补齐):
-//   1. tensor_core.s   → N维张量, 广播, 矩阵运算
-//   2. math_dl.s       → 80+ 数学函数 (sin/exp/log/激活)
-//   3. autograd.s      → 自动微分, 反向传播, 梯度
-//   4. nn.s            → Linear/Embedding/MHA/GPT模型
-//   5. training_io.s  → Checkpoint v2, 日志, 权重IO
+// English text (5English text):
+//   1. tensor_core.s   → NEnglish text, English text, English text
+//   2. math_dl.s       → 80+ English textfunction (sin/exp/log/English text)
+//   3. autograd.s      → English text, English text, gradient
+//   4. nn.s            → Linear/Embedding/MHA/GPTmodel
+//   5. training_io.s  → Checkpoint v2, log, weightIO
 //
-// 编译: s build train_v2.s -o neurx_train
-// 运行: ./neurx_train
+// compile: s build train_v2.s -o neurx_train
+// run: ./neurx_train
 // ============================================
 package neurx.train.v2
 
@@ -21,25 +21,25 @@ use std.nn as NN
 use std.training_io as IO
 
 // ============================================
-// Training Configuration (训练配置)
+// Training Configuration (trainingconfiguration)
 // ============================================
 
 struct TrainConfig {
-    // Model architecture (模型架构)
+    // Model architecture (modelEnglish text)
     int vocab_size           // = 256 (byte-level)
     int embed_dim            // = 128
     int num_heads            // = 4
     int ffn_dim              // = 512
     int num_layers           // = 4
     int max_seq_len          // = 32
-    
-    // Training hyperparams (训练超参数)
+
+    // Training hyperparams (trainingEnglish textparameter)
     float learning_rate      // = 0.001
     string optimizer         // "adam"
     float weight_decay       // = 0.01
     float dropout_prob        // = 0.1
-    
-    // Data settings (数据设置)
+
+    // Data settings (dataEnglish text)
     int batch_size           // = 8
     int seq_len              // = 32
     int max_steps            // = 50
@@ -71,7 +71,7 @@ func config_string(TrainConfig cfg) string {
 }
 
 // ============================================
-// Main Entry Point (程序入口)
+// Main Entry Point (English text)
 // ============================================
 
 func main() int {
@@ -86,12 +86,12 @@ func main() int {
     println("    [v] Training I/O (checkpoint v2)")
     println("========================================")
     println("")
-    
-    // Step 1: 配置
+
+    // Step 1: configuration
     TrainConfig cfg = default_config()
     println(config_string(cfg))
-    
-    // Step 2: 创建GPT模型
+
+    // Step 2: English textGPTmodel
     println("[1/5] Building GPT model...")
     NN.GPTConfig gpt_cfg
     gpt_cfg.vocab_size = cfg.vocab_size
@@ -101,15 +101,15 @@ func main() int {
     gpt_cfg.num_layers = cfg.num_layers
     gpt_cfg.max_seq_len = cfg.max_seq_len
     gpt_cfg.dropout_prob = cfg.dropout_prob
-    
+
     NN.GPTModel model = NN.make_gpt(gpt_cfg)
     NN.print_gpt_summary(model)
-    
+
     int total_params = NN.gpt_total_params(model)
     println("[OK] Model ready: ", format_int(total_params), " parameters")
     println("")
-    
-    // Step 3: 设置优化器
+
+    // Step 3: English textoptimizeEnglish text
     println("[2/5] Setting up optimizer...")
     AG.Optimizer opt
     if cfg.optimizer == "adam" || cfg.optimizer == "adamw" {
@@ -119,109 +119,109 @@ func main() int {
     }
     println("[OK] Optimizer: ", cfg.optimizer, " lr=", M.fmt_float(opt.lr, 6))
     println("")
-    
-    // Step 4: 准备数据 (合成数据用于演示)
+
+    // Step 4: English textdata (English textdataEnglish text)
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2
     []int train_data = generate_data(data_len, cfg.vocab_size)
     println("[OK] Generated ", format_int(data_len), " training tokens")
     println("")
-    
-    // Step 5: 训练循环
+
+    // Step 5: trainingEnglish text
     println("[4/5] Starting training loop...")
     println("")
     println("Step |  Loss   | Best    | GradNorm | LR       | Note")
     println("-----|---------|---------|----------|----------|-----")
-    
+
     IO.TrainState state = IO.initial_train_state()
     string output_dir = "artifacts/checkpoints"
-    
+
     int step = 0
     while step < cfg.max_steps {
-        // --- 前向传播 ---
+        // --- English text ---
         []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
         []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
-        
-        // 通过GPT模型前向传播获取logits
+
+        // English textGPTmodelEnglish textlogits
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
-        
-        // 计算交叉熵损失
+
+        // computeEnglish textloss
         []int targets = make_targets(target_ids, cfg.batch_size)
         AG.AGTensor loss_tensor = AG.ag_cross_entropy(logits, targets)
         float loss_val = AG.item(loss_tensor)
-        
-        // 更新状态
+
+        // English textstate
         state.global_step = state.global_step + 1
         if loss_val < state.best_loss {
             state.best_loss = loss_val
             state.best_step = step + 1
         }
-        
-        // 记录到loss历史窗口
+
+        // English textlossEnglish text
         int wi = mod(step, len(state.loss_history))
         state.loss_history[wi] = loss_val
-        
-        // --- 反向传播 ---
+
+        // --- English text ---
         AG.zero_grad(model.all_params)
         var grads = AG.backward(loss_tensor)
         float grad_norm = AG.clip_grad_norm_(model.all_params, 1.0)
         state.grad_norm = grad_norm
-        
-        // --- 参数更新 ---
+
+        // --- parameterEnglish text ---
         if cfg.optimizer == "adam" { AG.adam_step(opt, model.all_params) }
         else { AG.sgd_step(opt, model.all_params) }
-        
-        // --- 日志记录 ---
+
+        // --- logEnglish text ---
         bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss)
         if should_log {
             string note = ""
             if loss_val < state.best_loss { note = "*NEW BEST*" }
-            
-            print_training_line(step + 1, loss_val, state.best_loss, 
+
+            print_training_line(step + 1, loss_val, state.best_loss,
                                grad_norm, opt.lr, note)
-            
-            IO.log_entry(step + 1, loss_val, state.best_loss, 
+
+            IO.log_entry(step + 1, loss_val, state.best_loss,
                         grad_norm, opt.lr, 0, note)
         }
-        
-        // --- 定期保存检查点 ---
+
+        // --- English textsavecheckpoint ---
         if should_save(step + 1, cfg.save_every) {
             var weights = AG.export_weights(model.all_params)
-            
+
             NN.ModelConfigSnapshot snap = NN.make_config_snapshot(
                 cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
                 cfg.num_layers, cfg.max_seq_len, cfg.dropout_prob, total_params
             )
-            
-            string ckpt_path = IO.quick_save(output_dir, step + 1, loss_val, 
+
+            string ckpt_path = IO.quick_save(output_dir, step + 1, loss_val,
                                              state.best_loss, state.best_step,
                                              snap, weights, state.loss_history)
-            
+
             if len(ckpt_path) > 0 {
                 IO.update_manifest(output_dir + "/latest_checkpoint.txt", ckpt_path)
             }
         }
-        
+
         step = step + 1
     }
-    
-    // Step 6: 最终保存与报告
+
+    // Step 6: English textsaveEnglish text
     println("")
     println("[5/5] Saving final checkpoints...")
-    
+
     // Final checkpoint
     var final_weights = AG.export_weights(model.all_params)
     NN.ModelConfigSnapshot final_snap = NN.make_config_snapshot(
         cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
         cfg.num_layers, cfg.max_seq_len, cfg.dropout_prob, total_params
     )
-    IO.quick_save(output_dir, cfg.max_steps, state.current_loss, 
-                  state.best_loss, state.best_step, final_snap, 
+    IO.quick_save(output_dir, cfg.max_steps, state.current_loss,
+                  state.best_loss, state.best_step, final_snap,
                   final_weights, state.loss_history)
-    
+
     // Save training log
     IO.save_log(output_dir + "/training_log.tsv")
-    
+
     // Print final summary
     println("")
     println("╔══════════════════════════════════════╗")
@@ -233,12 +233,12 @@ func main() int {
     println("║ Params:    ", format_int(total_params), "              ║")
     println("╚══════════════════════════════════════╝")
     println("")
-    
+
     IO.print_log_summary()
     println("")
     println("Checkpoints saved to: " + output_dir + "/")
     println("")
-    
+
     if state.current_loss < 2.0 {
         return 0  // Success
     } else {
@@ -247,17 +247,17 @@ func main() int {
 }
 
 // ============================================
-// Data Generation & Loading (数据生成与加载)
+// Data Generation & Loading (datagenerateEnglish textload)
 // ============================================
 
-// 生成合成训练数据 (用于demo，实际应从文件读取)
+// generateEnglish texttrainingdata (English textdemo, actualEnglish textfileEnglish text)
 func generate_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
-    
-    // 模式 + 噪声混合
+
+    // English text + English text
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
-    
+
     int seed = 42
     int i = 0
     while i < n_tokens {
@@ -272,7 +272,7 @@ func generate_data(int n_tokens, int vocab_size) []int {
     data
 }
 
-// 获取一个batch的数据
+// English textbatchEnglish textdata
 func get_batch([]int data, int offset, int count) []int {
     []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
@@ -284,7 +284,7 @@ func get_batch([]int data, int offset, int count) []int {
     batch
 }
 
-// 将token IDs转为target class indices (简化版)
+// English texttoken IDsEnglish texttarget class indices (English text)
 func make_targets([]int token_ids, int batch_size) []int {
     []int targets = new int[batch_size]
     int i = 0
@@ -296,7 +296,7 @@ func make_targets([]int token_ids, int batch_size) []int {
     targets
 }
 
-// 判断是否需要保存检查点
+// English textRequiredsavecheckpoint
 func should_save(int step, int every) bool {
     if every <= 0 { return true }
     int r = step - (step / every) * every
@@ -304,10 +304,10 @@ func should_save(int step, int every) bool {
 }
 
 // ============================================
-// Display Utilities (显示工具)
+// Display Utilities (English texttool)
 // ============================================
 
-// 打印一行训练进度
+// English texttrainingEnglish text
 func print_training_line(int step, float loss, float best, float gn, float lr, string note) void {
     string line = ""
     line = line + pad_int(step, 4) + " | "
@@ -319,7 +319,7 @@ func print_training_line(int step, float loss, float best, float gn, float lr, s
     println(line)
 }
 
-// 整数格式化
+// English text
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -333,7 +333,7 @@ func int_to_str(int n) string {
     s
 }
 
-// 格式化整数带千分位
+// English text
 func format_int(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -353,14 +353,14 @@ func format_int(int n) string {
     s
 }
 
-// 浮点填充
+// English text
 func pad_float(float val, int w, int d) string {
     string s = M.fmt_float(val, d)
     while len(s) < w { s = " " + s }
     s
 }
 
-// 整数填充
+// English text
 func pad_int(int n, int w) string {
     string s = int_to_str(n)
     while len(s) < w { s = " " + s }

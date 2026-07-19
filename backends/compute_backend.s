@@ -15,7 +15,7 @@ package neurx.backends.compute_backend
 // ============================================================================
 
 // ============================================================================
-// 1. 后端类型与设备描述
+// 1. English textDescription
 // ============================================================================
 
 struct device_info {
@@ -36,9 +36,9 @@ struct compute_context {
     int stream_id
 }
 
-// 探测设备 (生产环境: extern cuda_get_device_count(); 此处返回 CPU 默认)
+// English text (English text: extern cuda_get_device_count(); English text CPU default)
 func detect_device() compute_context {
-    // extern hook (绑定后生效):
+    // extern hook (English text):
     //   int n = cuda_device_count()
     //   if n > 0 { return gpu context }
     compute_context {
@@ -46,7 +46,7 @@ func detect_device() compute_context {
             backend: "cpu",
             device_id: 0,
             has_tensor_cores: false,
-            supports_bf16: true,    // CPU 模拟支持
+            supports_bf16: true,    // CPU English textsupport
             supports_fp16: true,
             supports_fp8: false,
             memory_gb: 0,
@@ -114,14 +114,14 @@ func resolve_compute_context(string preferred_backend, string preferred_dtype) c
 }
 
 // ============================================================================
-// 2. 位精确低精度转换
+// 2. English text
 //
-//   bf16: 1 符号 + 8 指数 + 7 尾数  (= fp32 高 16 位)
-//   fp16: 1 符号 + 5 指数 + 10 尾数
-//   fp8 (e4m3): 1 符号 + 4 指数 + 3 尾数
+//   bf16: 1 English text + 8 English text + 7 English text  (= fp32 English text 16 English text)
+//   fp16: 1 English text + 5 English text + 10 English text
+//   fp8 (e4m3): 1 English text + 4 English text + 3 English text
 //
-//   通过把数分解为  value = sign * mantissa * 2^exp  (mantissa ∈ [1,2)),
-//   再把 mantissa 量化到 N 个尾数位 (2^bits 个等级)，复现硬件舍入。
+//   English text  value = sign * mantissa * 2^exp  (mantissa ∈ [1,2)),
+//   English text mantissa English text N English text (2^bits English text), English text.
 // ============================================================================
 
 func cb_abs(float x) float {
@@ -129,7 +129,7 @@ func cb_abs(float x) float {
     x
 }
 
-// 把 mantissa ∈ [1,2) 量化到 mantissa_bits 位
+// English text mantissa ∈ [1,2) English text mantissa_bits English text
 func quantize_mantissa(float value, int mantissa_bits) float {
     if value == 0.0 {
         return 0.0
@@ -137,7 +137,7 @@ func quantize_mantissa(float value, int mantissa_bits) float {
     bool neg = value < 0.0
     float mag = cb_abs(value)
 
-    // 分解到 [1, 2) × 2^exp
+    // English text [1, 2) × 2^exp
     int exp = 0
     while mag >= 2.0 {
         mag = mag * 0.5
@@ -148,14 +148,14 @@ func quantize_mantissa(float value, int mantissa_bits) float {
         exp = exp - 1
     }
 
-    // mag ∈ [1, 2);  小数部分 frac ∈ [0, 1)
+    // mag ∈ [1, 2);  English text frac ∈ [0, 1)
     float frac = mag - 1.0
 
-    // 量化到 2^mantissa_bits 个等级 (round-to-nearest)
+    // English text 2^mantissa_bits English text (round-to-nearest)
     float levels = cb_pow2(mantissa_bits)
     float scaled = frac * levels
     int rounded = cb_round(scaled)
-    // 进位溢出处理 (frac 舍入到 1.0 → mantissa = 2.0 → 提升 exp)
+    // English text (frac English text 1.0 → mantissa = 2.0 → English text exp)
     if rounded >= cb_round(levels) {
         rounded = 0
         exp = exp + 1
@@ -201,22 +201,22 @@ func cb_round(float x) int {
     n
 }
 
-// BF16: 7 尾数位 (位精确)
+// BF16: 7 English text (English text)
 func to_bf16(float value) float {
     quantize_mantissa(value, 7)
 }
 
-// FP16: 10 尾数位
+// FP16: 10 English text
 func to_fp16(float value) float {
     quantize_mantissa(value, 10)
 }
 
-// FP8 E4M3: 3 尾数位
+// FP8 E4M3: 3 English text
 func to_fp8_e4m3(float value) float {
     quantize_mantissa(value, 3)
 }
 
-// 对整个数组做 bf16 量化 (模拟 bf16 存储读回)
+// English text bf16 English text (English text bf16 English text)
 func array_to_bf16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
@@ -240,25 +240,25 @@ func array_to_fp16([]float arr) []float {
 }
 
 // ============================================================================
-// 3. 矩阵乘 dispatch (GPU extern hook + CPU fallback)
+// 3. English text dispatch (GPU extern hook + CPU fallback)
 // ============================================================================
 
-// 主入口: 训练代码调用此函数; 自动选择 GPU 或 CPU
+// mainEnglish text: trainingEnglish textfunction; English text GPU English text CPU
 func backend_matmul(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
     if ctx.gpu_available {
-        // extern hook (绑定后生效):
+        // extern hook (English text):
         //   return cuda_gemm(ctx.stream_id, a, b, m, k, n, ctx.active_dtype)
-        // 当前未绑定 → 回落 CPU
+        // English text → English text CPU
         return cpu_matmul(a, b, m, k, n)
     }
     cpu_matmul(a, b, m, k, n)
 }
 
-// CPU 真实矩阵乘 (带 bf16 累加模拟以匹配混精度数值行为)
+// CPU truthfulEnglish text (English text bf16 English text)
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
     int idx = 0
@@ -282,20 +282,20 @@ func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     result
 }
 
-// 混精度矩阵乘: 输入按 bf16 量化, fp32 累加 (硬件 Tensor Core 行为)
+// English text: inputEnglish text bf16 English text, fp32 English text (English text Tensor Core English text)
 func backend_matmul_bf16(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
-    // 输入转 bf16 (模拟低精度存储)
+    // inputEnglish text bf16 (English text)
     []float a_bf = array_to_bf16(a)
     []float b_bf = array_to_bf16(b)
-    // fp32 累加 (Tensor Core 累加器是 fp32)
+    // fp32 English text (Tensor Core English text fp32)
     return backend_matmul(ctx, a_bf, b_bf, m, k, n)
 }
 
-// 根据 active_dtype 选择最合适的矩阵乘路径
+// English text active_dtype English textpath
 func backend_matmul_dispatch(
     compute_context ctx,
     []float a, []float b,
@@ -313,7 +313,7 @@ func backend_matmul_dispatch(
 }
 
 // ============================================================================
-// 4. 集合通信 dispatch (NCCL extern hook + CPU fallback)
+// 4. English text dispatch (NCCL extern hook + CPU fallback)
 // ============================================================================
 
 struct comm_context {
@@ -332,22 +332,22 @@ func new_comm_context(int world_size, int rank) comm_context {
     }
 }
 
-// All-reduce dispatch: GPU 用 NCCL, 单进程用本地求和
+// All-reduce dispatch: GPU English text NCCL, English text
 func backend_all_reduce(
     comm_context comm,
-    []float buffer            // 本地数据, 原地归约
+    []float buffer            // English textdata, English text
 ) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
-        // extern hook (绑定后生效):
+        // extern hook (English text):
         //   nccl_allreduce_f32(buffer, len(buffer), ncclSum, comm.comm_id)
-        //   单进程模拟下退化为恒等 (数据已是全局)
+        //   English text (dataEnglish text)
         return buffer
     }
-    // 本地单进程: all-reduce 是恒等操作 (只有一个副本)
+    // English text: all-reduce English text (English text)
     buffer
 }
 
-// All-reduce 两个 rank 的缓冲求和 (单进程模拟多 rank)
+// All-reduce English text rank English text (English text rank)
 func backend_all_reduce_pair([]float a, []float b) []float {
     int n = len(a)
     []float out = []float{cap: n}
@@ -361,7 +361,7 @@ func backend_all_reduce_pair([]float a, []float b) []float {
     out
 }
 
-// Broadcast: rank 0 → 所有 rank
+// Broadcast: rank 0 → English text rank
 func backend_broadcast(comm_context comm, []float buffer, int root) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
         // extern: nccl_broadcast_f32(buffer, len(buffer), root, comm.comm_id)
@@ -371,23 +371,23 @@ func backend_broadcast(comm_context comm, []float buffer, int root) []float {
 }
 
 // ============================================================================
-// 5. 混精度训练辅助
+// 5. English texttraininghelper
 // ============================================================================
 
 struct amp_state {
-    float loss_scale          // 损失缩放因子 (防 fp16 下溢)
-    float scale_growth        // 增长因子
-    float scale_backoff       // 回退因子
-    int growth_interval       // 多少步无溢出后增长
+    float loss_scale          // lossEnglish text (English text fp16 English text)
+    float scale_growth        // English text
+    float scale_backoff       // English text
+    int growth_interval       // English textstepEnglish text
     int steps_since_overflow
     bool last_overflow
     string compute_dtype      // "bf16" | "fp16"
 }
 
 func new_amp_state(string dtype) amp_state {
-    float init_scale = 65536.0   // 2^16, fp16 标准
+    float init_scale = 65536.0   // 2^16, fp16 English text
     if dtype == "bf16" {
-        init_scale = 1.0          // bf16 指数范围同 fp32, 无需缩放
+        init_scale = 1.0          // bf16 English text fp32, English text
     }
     amp_state {
         loss_scale: init_scale,
@@ -400,12 +400,12 @@ func new_amp_state(string dtype) amp_state {
     }
 }
 
-// 缩放损失 (反向前)
+// English textloss (English text)
 func amp_scale_loss(amp_state amp, float loss) float {
     loss * amp.loss_scale
 }
 
-// 反缩放梯度 (优化器步前)
+// English textgradient (optimizeEnglish textstepEnglish text)
 func amp_unscale_grad(amp_state amp, []float grad) []float {
     float inv = 1.0 / amp.loss_scale
     int n = len(grad)
@@ -418,7 +418,7 @@ func amp_unscale_grad(amp_state amp, []float grad) []float {
     out
 }
 
-// 检测梯度溢出 (Inf/NaN 代理: 极大值)
+// English textgradientEnglish text (Inf/NaN English text: English text)
 func amp_check_overflow([]float grad) bool {
     int i = 0
     while i < len(grad) {
@@ -426,7 +426,7 @@ func amp_check_overflow([]float grad) bool {
         if g > 1e30 || g < -1e30 {
             return true
         }
-        // NaN 检测: NaN != NaN
+        // NaN English text: NaN != NaN
         if g != g {
             return true
         }
@@ -435,7 +435,7 @@ func amp_check_overflow([]float grad) bool {
     false
 }
 
-// 更新损失缩放 (动态)
+// English textlossEnglish text (English text)
 func amp_update_scale(amp_state amp, bool overflow) amp_state {
     if overflow {
         amp.loss_scale = amp.loss_scale * amp.scale_backoff
@@ -456,32 +456,32 @@ func amp_update_scale(amp_state amp, bool overflow) amp_state {
 }
 
 // ============================================================================
-// 6. 显存估算 (帮助选择精度/并行策略)
+// 6. English text (English text/English text)
 // ============================================================================
 
 struct memory_estimate {
-    int params_bytes          // 参数显存
-    int gradients_bytes       // 梯度显存
-    int optimizer_bytes       // 优化器状态 (AdamW m+v)
-    int activations_bytes     // 激活值 (估算)
+    int params_bytes          // parameterEnglish text
+    int gradients_bytes       // gradientEnglish text
+    int optimizer_bytes       // optimizeEnglish textstate (AdamW m+v)
+    int activations_bytes     // English text (English text)
     int total_bytes
     int total_gb
 }
 
-// 估算训练显存占用 (参数量, 精度, batch×seq)
+// English texttrainingEnglish text (parameterEnglish text, English text, batch×seq)
 func estimate_training_memory(int params, string dtype, int batch_tokens, int hidden, int layers) memory_estimate {
     int param_byte = 4   // fp32 default
     if dtype == "bf16" || dtype == "fp16" {
         param_byte = 2
     }
 
-    // 混精度: 参数 bf16(2) + fp32 master(4); 梯度 bf16(2)
+    // English text: parameter bf16(2) + fp32 master(4); gradient bf16(2)
     int params_b = params * param_byte
     int master_b = params * 4          // fp32 master copy
     int grad_b = params * param_byte
-    // AdamW: m + v, fp32 = 8 字节/参数
+    // AdamW: m + v, fp32 = 8 English text/parameter
     int opt_b = params * 8
-    // 激活: ~ batch_tokens × hidden × layers × 2 字节 (bf16, 含 checkpoint 假设)
+    // English text: ~ batch_tokens × hidden × layers × 2 English text (bf16, English text checkpoint English text)
     int act_b = batch_tokens * hidden * layers * 2
 
     int total = params_b + master_b + grad_b + opt_b + act_b
@@ -496,10 +496,10 @@ func estimate_training_memory(int params, string dtype, int batch_tokens, int hi
 }
 
 // ============================================================================
-// 7. bf16 往返精度自检
+// 7. bf16 English text
 // ============================================================================
 
-// 验证 bf16 量化的相对误差上界 (应 ≤ 2^-8 ≈ 0.4%)
+// English text bf16 English text (English text ≤ 2^-8 ≈ 0.4%)
 func bf16_max_relative_error([]float arr) float {
     float max_err = 0.0
     int i = 0

@@ -1,682 +1,682 @@
-{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
+{"role": "system", "content": "NeurX LLM English textinferencesystemEnglish textstart"}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && timeout 5 bash run_interactive_inference.sh 2>&1 || echo "Exit code: $?"", "turn": 1}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && timeout 5 bash run_interactive_inference.sh 2>&1 || echo "Exit code: $?""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 1}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && timeout 5 bash run_interactive_inference.sh 2>&1 || echo "Exit code: $?"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 1}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && echo -e "help\nquit" | bash run_interactive_inference.sh 2>&1", "turn": 2}
 {"role": "user", "content": "cat /Users/feifei/shuwen/neurx/artifacts/logs/interactive_inference_*.log 2>/dev/null | tail -50", "turn": 3}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cat /Users/feifei/shuwen/neurx/artifacts/logs/interactive_inference_*.log 2>/dev/null | tail -50"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 3}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cat /Users/feifei/shuwen/neurx/artifacts/logs/interactive_inference_*.log 2>/dev/null | tail -50".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 3}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && echo "help", "turn": 4}
 {"role": "user", "content": "quit" | timeout 10 make infer-interactive 2>&1 | head -200", "turn": 5}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："quit" | timeout 10 make infer-interactive 2>&1 | head -200"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 5}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "quit" | timeout 10 make infer-interactive 2>&1 | head -200".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 5}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && cat > quick_infer.sh << 'EOF'", "turn": 6}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && cat > quick_infer.sh << 'EOF'"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 6}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && cat > quick_infer.sh << 'EOF'".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 6}
 {"role": "user", "content": "#!/bin/bash", "turn": 7}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："#!/bin/bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 7}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "#!/bin/bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 7}
 {"role": "user", "content": "echo "════════════════════════════════════════════════════════════════"", "turn": 9}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "════════════════════════════════════════════════════════════════""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 9}
-{"role": "user", "content": "echo "🚀 使用训练好的模型进行推理"", "turn": 10}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "🚀 使用训练好的模型进行推理""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 10}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "════════════════════════════════════════════════════════════════"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 9}
+{"role": "user", "content": "echo "🚀 usetrainingEnglish textmodelEnglish textinference"", "turn": 10}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "🚀 usetrainingEnglish textmodelEnglish textinference"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 10}
 {"role": "user", "content": "echo "════════════════════════════════════════════════════════════════"", "turn": 11}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "════════════════════════════════════════════════════════════════""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 11}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "════════════════════════════════════════════════════════════════"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 11}
 {"role": "user", "content": "echo """, "turn": 12}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo """。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 12}
-{"role": "user", "content": "# 使用已有的推理脚本", "turn": 14}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 使用已有的推理脚本"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 14}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo """.English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 12}
+{"role": "user", "content": "# useEnglish textinferenceEnglish text", "turn": 14}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# useEnglish textinferenceEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 14}
 {"role": "user", "content": "CHECKPOINT_PATH="checkpoints/large_model"", "turn": 15}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："CHECKPOINT_PATH="checkpoints/large_model""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 15}
-{"role": "user", "content": "echo "📦 模型信息:"", "turn": 17}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "📦 模型信息:""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 17}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "CHECKPOINT_PATH="checkpoints/large_model"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 15}
+{"role": "user", "content": "echo "📦 modelinformation:"", "turn": 17}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "📦 modelinformation:"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 17}
 {"role": "user", "content": "echo "  Checkpoint: $CHECKPOINT_PATH"", "turn": 18}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "  Checkpoint: $CHECKPOINT_PATH""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 18}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "  Checkpoint: $CHECKPOINT_PATH"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 18}
 {"role": "user", "content": "ls -lh "$CHECKPOINT_PATH/model_final.ckpt"", "turn": 19}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -lh "$CHECKPOINT_PATH/model_final.ckpt""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 19}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -lh "$CHECKPOINT_PATH/model_final.ckpt"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 19}
 {"role": "user", "content": "echo """, "turn": 21}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo """。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 21}
-{"role": "user", "content": "echo "✨ 推理结果:"", "turn": 22}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "✨ 推理结果:""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 22}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo """.English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 21}
+{"role": "user", "content": "echo "✨ inferenceresult:"", "turn": 22}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "✨ inferenceresult:"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 22}
 {"role": "user", "content": "echo """, "turn": 23}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo """。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 23}
-{"role": "user", "content": "# 直接运行推理", "turn": 25}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 直接运行推理"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 25}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo """.English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 23}
+{"role": "user", "content": "# English textruninference", "turn": 25}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# English textruninference".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 25}
 {"role": "user", "content": "bash run_inference_s.sh "$@"", "turn": 26}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："bash run_inference_s.sh "$@""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 26}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "bash run_inference_s.sh "$@"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 26}
 {"role": "user", "content": "EOF", "turn": 27}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："EOF"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 27}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "EOF".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 27}
 {"role": "user", "content": "chmod +x quick_infer.sh && bash quick_infer.sh", "turn": 28}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："chmod +x quick_infer.sh && bash quick_infer.sh"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 28}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "chmod +x quick_infer.sh && bash quick_infer.sh".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 28}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && echo "Testing script execution"", "turn": 29}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && echo "Testing script execution""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 29}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && echo "Testing script execution"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 29}
 {"role": "user", "content": "pwd", "turn": 30}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："pwd"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 30}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "pwd".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 30}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && /Users/feifei/train/s/.local/bin/s s/smart_inference.s build/smart_inference.ir 2>&1 | head -50", "turn": 31}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && /Users/feifei/train/s/.local/bin/s s/smart_inference.s build/smart_inference.ir 2>&1 | head -50"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 31}
-{"role": "user", "content": "cd /Users/feifei/train/s && /Users/feifei/train/s/.local/bin/s --emit-bin /Users/feifei/shuwen/neurx/build/smart_inference.ir /Users/feifei/shuwen/neurx/build/smart_inference.bin 2>&1 && echo "✅ 编译成功"", "turn": 32}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/train/s && /Users/feifei/train/s/.local/bin/s --emit-bin /Users/feifei/shuwen/neurx/build/smart_inference.ir /Users/feifei/shuwen/neurx/build/smart_inference.bin 2>&1 && echo "✅ 编译成功""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 32}
-{"role": "user", "content": "ls -lh /Users/feifei/shuwen/neurx/build/smart_inference.* 2>/dev/null && echo "" && echo "✅ 编译成功！"", "turn": 33}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -lh /Users/feifei/shuwen/neurx/build/smart_inference.* 2>/dev/null && echo "" && echo "✅ 编译成功！""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 33}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && /Users/feifei/train/s/.local/bin/s s/smart_inference.s build/smart_inference.ir 2>&1 | head -50".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 31}
+{"role": "user", "content": "cd /Users/feifei/train/s && /Users/feifei/train/s/.local/bin/s --emit-bin /Users/feifei/shuwen/neurx/build/smart_inference.ir /Users/feifei/shuwen/neurx/build/smart_inference.bin 2>&1 && echo "✅ compilesuccess"", "turn": 32}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/train/s && /Users/feifei/train/s/.local/bin/s --emit-bin /Users/feifei/shuwen/neurx/build/smart_inference.ir /Users/feifei/shuwen/neurx/build/smart_inference.bin 2>&1 && echo "✅ compilesuccess"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 32}
+{"role": "user", "content": "ls -lh /Users/feifei/shuwen/neurx/build/smart_inference.* 2>/dev/null && echo "" && echo "✅ compilesuccess!"", "turn": 33}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -lh /Users/feifei/shuwen/neurx/build/smart_inference.* 2>/dev/null && echo "" && echo "✅ compilesuccess!"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 33}
 {"role": "user", "content": "echo "test"", "turn": 34}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "test""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 34}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "test"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 34}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && bash test_smart_inference.sh 2>&1 | head -150", "turn": 35}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && bash test_smart_inference.sh 2>&1 | head -150"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 35}
-{"role": "user", "content": "cd /Users/feifei/shuwen/neurx && chmod +x test_smart_inference.sh && ls -lh s/smart_inference.s 2>/dev/null && echo "✓ S源文件存在"", "turn": 36}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && chmod +x test_smart_inference.sh && ls -lh s/smart_inference.s 2>/dev/null && echo "✓ S源文件存在""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 36}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && bash test_smart_inference.sh 2>&1 | head -150".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 35}
+{"role": "user", "content": "cd /Users/feifei/shuwen/neurx && chmod +x test_smart_inference.sh && ls -lh s/smart_inference.s 2>/dev/null && echo "✓ SEnglish textfileEnglish text"", "turn": 36}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && chmod +x test_smart_inference.sh && ls -lh s/smart_inference.s 2>/dev/null && echo "✓ SEnglish textfileEnglish text"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 36}
 {"role": "user", "content": "ls -la /Users/feifei/shuwen/neurx/s/smart_inference.s", "turn": 37}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -la /Users/feifei/shuwen/neurx/s/smart_inference.s"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 37}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -la /Users/feifei/shuwen/neurx/s/smart_inference.s".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 37}
 {"role": "user", "content": "bash /Users/feifei/shuwen/neurx/quick_test.sh", "turn": 38}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："bash /Users/feifei/shuwen/neurx/quick_test.sh"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 38}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "bash /Users/feifei/shuwen/neurx/quick_test.sh".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 38}
 {"role": "user", "content": "python3 --version && echo "Python check passed"", "turn": 39}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："python3 --version && echo "Python check passed""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 39}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "python3 --version && echo "Python check passed"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 39}
 {"role": "user", "content": "echo "Test output" > /tmp/test_output.txt && cat /tmp/test_output.txt", "turn": 40}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："echo "Test output" > /tmp/test_output.txt && cat /tmp/test_output.txt"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 40}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "echo "Test output" > /tmp/test_output.txt && cat /tmp/test_output.txt".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 40}
 {"role": "user", "content": "ls -lh /Users/feifei/shuwen/neurx/*.md | tail -15", "turn": 41}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -lh /Users/feifei/shuwen/neurx/*.md | tail -15"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 41}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -lh /Users/feifei/shuwen/neurx/*.md | tail -15".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 41}
 {"role": "user", "content": "ls -1 /Users/feifei/shuwen/neurx/model/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/training/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/inference/ | grep -E "\.s$"", "turn": 42}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -1 /Users/feifei/shuwen/neurx/model/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/training/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/inference/ | grep -E "\.s$""。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 42}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -1 /Users/feifei/shuwen/neurx/model/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/training/ | grep -E "\.s$" && ls -1 /Users/feifei/shuwen/neurx/inference/ | grep -E "\.s$"".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 42}
 {"role": "user", "content": "wc -l /Users/feifei/shuwen/neurx/model/gpt_transformer.s /Users/feifei/shuwen/neurx/training/mixed_precision.s /Users/feifei/shuwen/neurx/inference/flash_attention_v3.s /Users/feifei/shuwen/neurx/*.md | grep -E "(gpt_transformer|mixed_precision|flash_attention|md)" | tail -10", "turn": 43}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："wc -l /Users/feifei/shuwen/neurx/model/gpt_transformer.s /Users/feifei/shuwen/neurx/training/mixed_precision.s /Users/feifei/shuwen/neurx/inference/flash_attention_v3.s /Users/feifei/shuwen/neurx/*.md | grep -E "(gpt_transformer|mixed_precision|flash_attention|md)" | tail -10"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 43}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "wc -l /Users/feifei/shuwen/neurx/model/gpt_transformer.s /Users/feifei/shuwen/neurx/training/mixed_precision.s /Users/feifei/shuwen/neurx/inference/flash_attention_v3.s /Users/feifei/shuwen/neurx/*.md | grep -E "(gpt_transformer|mixed_precision|flash_attention|md)" | tail -10".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 43}
 {"role": "user", "content": "rm -f neurx/train_full.py neurx/test_distributed_rlhf.py && ls -lah neurx/*.s neurx/*.py 2>/dev/null | head -20", "turn": 44}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："rm -f neurx/train_full.py neurx/test_distributed_rlhf.py && ls -lah neurx/*.s neurx/*.py 2>/dev/null | head -20"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 44}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "rm -f neurx/train_full.py neurx/test_distributed_rlhf.py && ls -lah neurx/*.s neurx/*.py 2>/dev/null | head -20".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 44}
 {"role": "user", "content": "ls -lah /Users/feifei/shuwen/neurx/train_full.s /Users/feifei/shuwen/neurx/test_distributed_rlhf.s 2>&1", "turn": 45}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ls -lah /Users/feifei/shuwen/neurx/train_full.s /Users/feifei/shuwen/neurx/test_distributed_rlhf.s 2>&1"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 45}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ls -lah /Users/feifei/shuwen/neurx/train_full.s /Users/feifei/shuwen/neurx/test_distributed_rlhf.s 2>&1".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 45}
 {"role": "user", "content": "cat > /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md << 'EOF'", "turn": 46}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cat > /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md << 'EOF'"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 46}
-{"role": "user", "content": "# 🎉 NeurX Phase 2 完成报告", "turn": 47}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 🎉 NeurX Phase 2 完成报告"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 47}
-{"role": "user", "content": "**日期**: 2026-07-07", "turn": 49}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**日期**: 2026-07-07"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 49}
-{"role": "user", "content": "**项目**: 工业级 GPT 分布式训练 + RLHF 对齐系统", "turn": 50}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**项目**: 工业级 GPT 分布式训练 + RLHF 对齐系统"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 50}
-{"role": "user", "content": "**语言**: 纯 S Language (无 Python)", "turn": 51}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**语言**: 纯 S Language (无 Python)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 51}
-{"role": "user", "content": "**代码行数**: 4,050+ 行", "turn": 52}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**代码行数**: 4,050+ 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 52}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cat > /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md << 'EOF'".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 46}
+{"role": "user", "content": "# 🎉 NeurX Phase 2 English text", "turn": 47}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# 🎉 NeurX Phase 2 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 47}
+{"role": "user", "content": "**English text**: 2026-07-07", "turn": 49}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: 2026-07-07".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 49}
+{"role": "user", "content": "**English text**: English text GPT English texttraining + RLHF alignmentsystem", "turn": 50}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: English text GPT English texttraining + RLHF alignmentsystem".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 50}
+{"role": "user", "content": "**language**: English text S Language (English text Python)", "turn": 51}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**language**: English text S Language (English text Python)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 51}
+{"role": "user", "content": "**English text**: 4,050+ English text", "turn": 52}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: 4,050+ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 52}
 {"role": "user", "content": "---", "turn": 54}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 54}
-{"role": "user", "content": "## ✅ 完成内容", "turn": 56}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## ✅ 完成内容"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 56}
-{"role": "user", "content": "### 1. 分布式训练框架 (1,750 行)", "turn": 58}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 1. 分布式训练框架 (1,750 行)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 58}
-{"role": "user", "content": "| 模块 | 行数 | 功能 | 状态 |", "turn": 60}
-{"role": "assistant", "content": "NeurX 支持：LLM 训练、交互式推理、多轮对话、参数调整、会话持久化、Tokenizer 加载、Checkpoint 管理。", "turn": 60}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 54}
+{"role": "user", "content": "## ✅ English textcontent", "turn": 56}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## ✅ English textcontent".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 56}
+{"role": "user", "content": "### 1. English texttrainingframework (1,750 English text)", "turn": 58}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 1. English texttrainingframework (1,750 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 58}
+{"role": "user", "content": "| English text | English text | English text | state |", "turn": 60}
+{"role": "assistant", "content": "NeurX support: LLM training, English textinference, English text, parameterEnglish text, English text, Tokenizer load, Checkpoint management.", "turn": 60}
 {"role": "user", "content": "|-----|------|------|------|", "turn": 61}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："|-----|------|------|------|"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 61}
-{"role": "user", "content": "| Data Parallel | 450 | AllReduce + 梯度积累 + 异步通信 | ✅ |", "turn": 62}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| Data Parallel | 450 | AllReduce + 梯度积累 + 异步通信 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 62}
-{"role": "user", "content": "| Tensor Parallel | 500 | 列/行并行 + AllGather 通信隐藏 | ✅ |", "turn": 63}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| Tensor Parallel | 500 | 列/行并行 + AllGather 通信隐藏 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 63}
-{"role": "user", "content": "| Pipeline Parallel | 400 | GPipe + 1F1B 调度 + 微批处理 | ✅ |", "turn": 64}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| Pipeline Parallel | 400 | GPipe + 1F1B 调度 + 微批处理 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 64}
-{"role": "user", "content": "| ZeRO Optimizer | 400 | Stages 1-3 (4x/8x/8x 内存节省) | ✅ |", "turn": 65}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| ZeRO Optimizer | 400 | Stages 1-3 (4x/8x/8x 内存节省) | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 65}
-{"role": "user", "content": "**支持**: 8-64 GPU 扩展，70B+ 模型，<100GB 内存", "turn": 67}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**支持**: 8-64 GPU 扩展，70B+ 模型，<100GB 内存"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 67}
-{"role": "user", "content": "### 2. RLHF 对齐系统 (600 行)", "turn": 69}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 2. RLHF 对齐系统 (600 行)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 69}
-{"role": "user", "content": "| 阶段 | 功能 | 验收标准 | 状态 |", "turn": 71}
-{"role": "assistant", "content": "NeurX 支持：LLM 训练、交互式推理、多轮对话、参数调整、会话持久化、Tokenizer 加载、Checkpoint 管理。", "turn": 71}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "|-----|------|------|------|".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 61}
+{"role": "user", "content": "| Data Parallel | 450 | AllReduce + gradientEnglish text + English textstepEnglish text | ✅ |", "turn": 62}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| Data Parallel | 450 | AllReduce + gradientEnglish text + English textstepEnglish text | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 62}
+{"role": "user", "content": "| Tensor Parallel | 500 | English text/English text + AllGather English text | ✅ |", "turn": 63}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| Tensor Parallel | 500 | English text/English text + AllGather English text | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 63}
+{"role": "user", "content": "| Pipeline Parallel | 400 | GPipe + 1F1B English text + English text | ✅ |", "turn": 64}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| Pipeline Parallel | 400 | GPipe + 1F1B English text + English text | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 64}
+{"role": "user", "content": "| ZeRO Optimizer | 400 | Stages 1-3 (4x/8x/8x English text) | ✅ |", "turn": 65}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| ZeRO Optimizer | 400 | Stages 1-3 (4x/8x/8x English text) | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 65}
+{"role": "user", "content": "**support**: 8-64 GPU extension, 70B+ model, <100GB English text", "turn": 67}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**support**: 8-64 GPU extension, 70B+ model, <100GB English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 67}
+{"role": "user", "content": "### 2. RLHF alignmentsystem (600 English text)", "turn": 69}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 2. RLHF alignmentsystem (600 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 69}
+{"role": "user", "content": "| phase | English text | English text | state |", "turn": 71}
+{"role": "assistant", "content": "NeurX support: LLM training, English textinference, English text, parameterEnglish text, English text, Tokenizer load, Checkpoint management.", "turn": 71}
 {"role": "user", "content": "|-----|------|---------|------|", "turn": 72}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："|-----|------|---------|------|"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 72}
-{"role": "user", "content": "| SFT | 指令微调 | Loss <1.0 | ✅ |", "turn": 73}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| SFT | 指令微调 | Loss <1.0 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 73}
-{"role": "user", "content": "| Reward Model | 偏好排序 | AUC >0.75 | ✅ |", "turn": 74}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| Reward Model | 偏好排序 | AUC >0.75 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 74}
-{"role": "user", "content": "| PPO | 强化学习 | 奖励 +15%, KL <0.015 | ✅ |", "turn": 75}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| PPO | 强化学习 | 奖励 +15%, KL <0.015 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 75}
-{"role": "user", "content": "| Evaluation | 多维度评估 | 综合分数 >4.0 | ✅ |", "turn": 76}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| Evaluation | 多维度评估 | 综合分数 >4.0 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 76}
-{"role": "user", "content": "**评估维度**: 有用性 (0.25) + 无害性 (0.35) + 真实性 (0.25) + 一致性 (0.15)", "turn": 78}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**评估维度**: 有用性 (0.25) + 无害性 (0.35) + 真实性 (0.25) + 一致性 (0.15)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 78}
-{"role": "user", "content": "### 3. 训练工具 (1,300 行 S 代码)", "turn": 80}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 3. 训练工具 (1,300 行 S 代码)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 80}
-{"role": "user", "content": "| 工具 | 行数 | 功能 |", "turn": 82}
-{"role": "assistant", "content": "NeurX 支持：LLM 训练、交互式推理、多轮对话、参数调整、会话持久化、Tokenizer 加载、Checkpoint 管理。", "turn": 82}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "|-----|------|---------|------|".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 72}
+{"role": "user", "content": "| SFT | English text | Loss <1.0 | ✅ |", "turn": 73}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| SFT | English text | Loss <1.0 | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 73}
+{"role": "user", "content": "| Reward Model | preferenceranking | AUC >0.75 | ✅ |", "turn": 74}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| Reward Model | preferenceranking | AUC >0.75 | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 74}
+{"role": "user", "content": "| PPO | English text | reward +15%, KL <0.015 | ✅ |", "turn": 75}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| PPO | English text | reward +15%, KL <0.015 | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 75}
+{"role": "user", "content": "| Evaluation | English textevaluation | English text >4.0 | ✅ |", "turn": 76}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| Evaluation | English textevaluation | English text >4.0 | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 76}
+{"role": "user", "content": "**evaluationEnglish text**: helpfulEnglish text (0.25) + harmlessEnglish text (0.35) + truthfulEnglish text (0.25) + English text (0.15)", "turn": 78}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**evaluationEnglish text**: helpfulEnglish text (0.25) + harmlessEnglish text (0.35) + truthfulEnglish text (0.25) + English text (0.15)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 78}
+{"role": "user", "content": "### 3. trainingtool (1,300 English text S English text)", "turn": 80}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 3. trainingtool (1,300 English text S English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 80}
+{"role": "user", "content": "| tool | English text | English text |", "turn": 82}
+{"role": "assistant", "content": "NeurX support: LLM training, English textinference, English text, parameterEnglish text, English text, Tokenizer load, Checkpoint management.", "turn": 82}
 {"role": "user", "content": "|-----|------|------|", "turn": 83}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："|-----|------|------|"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 83}
-{"role": "user", "content": "| train_full.s | 550 | 完整训练脚本，支持所有分布式和 RLHF 选项 |", "turn": 84}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| train_full.s | 550 | 完整训练脚本，支持所有分布式和 RLHF 选项 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 84}
-{"role": "user", "content": "| test_distributed_rlhf.s | 750 | 50+ 项自动化测试 |", "turn": 85}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| test_distributed_rlhf.s | 750 | 50+ 项自动化测试 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 85}
-{"role": "user", "content": "### 4. 文档 (2,000+ 行)", "turn": 87}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 4. 文档 (2,000+ 行)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 87}
-{"role": "user", "content": "| 文档 | 内容 |", "turn": 89}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 文档 | 内容 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 89}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "|-----|------|------|".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 83}
+{"role": "user", "content": "| train_full.s | 550 | completetrainingEnglish text, supportEnglish text RLHF English text |", "turn": 84}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| train_full.s | 550 | completetrainingEnglish text, supportEnglish text RLHF English text |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 84}
+{"role": "user", "content": "| test_distributed_rlhf.s | 750 | 50+ English texttest |", "turn": 85}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| test_distributed_rlhf.s | 750 | 50+ English texttest |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 85}
+{"role": "user", "content": "### 4. English text (2,000+ English text)", "turn": 87}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 4. English text (2,000+ English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 87}
+{"role": "user", "content": "| English text | content |", "turn": 89}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| English text | content |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 89}
 {"role": "user", "content": "|-----|------|", "turn": 90}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："|-----|------|"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 90}
-{"role": "user", "content": "| S_LANGUAGE_TRAINING_GUIDE.md | 编译、运行、参数、排查 |", "turn": 91}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| S_LANGUAGE_TRAINING_GUIDE.md | 编译、运行、参数、排查 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 91}
-{"role": "user", "content": "| DISTRIBUTED_TRAINING_RLHF_GUIDE.md | 详细技术实现 |", "turn": 92}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| DISTRIBUTED_TRAINING_RLHF_GUIDE.md | 详细技术实现 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 92}
-{"role": "user", "content": "| IMPLEMENTATION_COMPLETE_S_LANGUAGE.md | 完整项目总结 |", "turn": 93}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| IMPLEMENTATION_COMPLETE_S_LANGUAGE.md | 完整项目总结 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 93}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "|-----|------|".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 90}
+{"role": "user", "content": "| S_LANGUAGE_TRAINING_GUIDE.md | compile, run, parameter, English text |", "turn": 91}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| S_LANGUAGE_TRAINING_GUIDE.md | compile, run, parameter, English text |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 91}
+{"role": "user", "content": "| DISTRIBUTED_TRAINING_RLHF_GUIDE.md | English textimplementation |", "turn": 92}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| DISTRIBUTED_TRAINING_RLHF_GUIDE.md | English textimplementation |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 92}
+{"role": "user", "content": "| IMPLEMENTATION_COMPLETE_S_LANGUAGE.md | completeEnglish text |", "turn": 93}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| IMPLEMENTATION_COMPLETE_S_LANGUAGE.md | completeEnglish text |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 93}
 {"role": "user", "content": "---", "turn": 95}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 95}
-{"role": "user", "content": "## 📊 性能指标", "turn": 97}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 📊 性能指标"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 97}
-{"role": "user", "content": "### 推理性能", "turn": 99}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 推理性能"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 99}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 95}
+{"role": "user", "content": "## 📊 English text", "turn": 97}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 📊 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 97}
+{"role": "user", "content": "### inferenceEnglish text", "turn": 99}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### inferenceEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 99}
 {"role": "user", "content": "```", "turn": 101}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 101}
-{"role": "user", "content": "模型          批大小    吞吐量              配置", "turn": 102}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："模型          批大小    吞吐量              配置"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 102}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 101}
+{"role": "user", "content": "model          English text    English text              configuration", "turn": 102}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "model          English text    English text              configuration".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 102}
 {"role": "user", "content": "──────────────────────────────────────────────────────", "turn": 103}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："──────────────────────────────────────────────────────"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 103}
-{"role": "user", "content": "7B           32        500-1000 t/s       单 GPU", "turn": 104}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："7B           32        500-1000 t/s       单 GPU"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 104}
-{"role": "user", "content": "7B           128       800-1200 t/s       单 GPU", "turn": 105}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："7B           128       800-1200 t/s       单 GPU"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 105}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "──────────────────────────────────────────────────────".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 103}
+{"role": "user", "content": "7B           32        500-1000 t/s       English text GPU", "turn": 104}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "7B           32        500-1000 t/s       English text GPU".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 104}
+{"role": "user", "content": "7B           128       800-1200 t/s       English text GPU", "turn": 105}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "7B           128       800-1200 t/s       English text GPU".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 105}
 {"role": "user", "content": "70B          32        80-150 t/s         TP-4", "turn": 106}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："70B          32        80-150 t/s         TP-4"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 106}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "70B          32        80-150 t/s         TP-4".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 106}
 {"role": "user", "content": "```", "turn": 107}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 107}
-{"role": "user", "content": "### 训练性能 (8x A100)", "turn": 109}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 训练性能 (8x A100)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 109}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 107}
+{"role": "user", "content": "### trainingEnglish text (8x A100)", "turn": 109}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### trainingEnglish text (8x A100)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 109}
 {"role": "user", "content": "```", "turn": 111}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 111}
-{"role": "user", "content": "配置                         吞吐量        扩展效率    内存", "turn": 112}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："配置                         吞吐量        扩展效率    内存"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 112}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 111}
+{"role": "user", "content": "configuration                         English text        extensionEnglish text    English text", "turn": 112}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "configuration                         English text        extensionEnglish text    English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 112}
 {"role": "user", "content": "─────────────────────────────────────────────────────────", "turn": 113}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："─────────────────────────────────────────────────────────"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 113}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "─────────────────────────────────────────────────────────".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 113}
 {"role": "user", "content": "7B + DP                      3700 t/s      90%        20GB", "turn": 114}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："7B + DP                      3700 t/s      90%        20GB"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 114}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "7B + DP                      3700 t/s      90%        20GB".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 114}
 {"role": "user", "content": "13B + DP                     2200 t/s      88%        30GB", "turn": 115}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："13B + DP                     2200 t/s      88%        30GB"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 115}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "13B + DP                     2200 t/s      88%        30GB".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 115}
 {"role": "user", "content": "70B + TP-4 + DP-2            2000 t/s      85%        40GB", "turn": 116}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："70B + TP-4 + DP-2            2000 t/s      85%        40GB"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 116}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "70B + TP-4 + DP-2            2000 t/s      85%        40GB".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 116}
 {"role": "user", "content": "175B + TP-8 + ZeRO-3         800 t/s       80%        50GB", "turn": 117}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："175B + TP-8 + ZeRO-3         800 t/s       80%        50GB"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 117}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "175B + TP-8 + ZeRO-3         800 t/s       80%        50GB".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 117}
 {"role": "user", "content": "```", "turn": 118}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 118}
-{"role": "user", "content": "### 内存优化 (70B 模型对比)", "turn": 120}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 内存优化 (70B 模型对比)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 120}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 118}
+{"role": "user", "content": "### English textoptimize (70B modelEnglish text)", "turn": 120}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English textoptimize (70B modelEnglish text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 120}
 {"role": "user", "content": "```", "turn": 122}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 122}
-{"role": "user", "content": "方案                    内存 (GB)         相比基准        实现", "turn": 123}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："方案                    内存 (GB)         相比基准        实现"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 123}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 122}
+{"role": "user", "content": "English text                    English text (GB)         English text        implementation", "turn": 123}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "English text                    English text (GB)         English text        implementation".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 123}
 {"role": "user", "content": "─────────────────────────────────────────────────────────────", "turn": 124}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："─────────────────────────────────────────────────────────────"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 124}
-{"role": "user", "content": "FP32 无优化            280              1x             基准", "turn": 125}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："FP32 无优化            280              1x             基准"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 125}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "─────────────────────────────────────────────────────────────".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 124}
+{"role": "user", "content": "FP32 English textoptimize            280              1x             English text", "turn": 125}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "FP32 English textoptimize            280              1x             English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 125}
 {"role": "user", "content": "ZeRO-1 (DP)            70               4x             ✅", "turn": 126}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ZeRO-1 (DP)            70               4x             ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 126}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ZeRO-1 (DP)            70               4x             ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 126}
 {"role": "user", "content": "ZeRO-2 (TP-4)          35               8x             ✅", "turn": 127}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ZeRO-2 (TP-4)          35               8x             ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 127}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ZeRO-2 (TP-4)          35               8x             ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 127}
 {"role": "user", "content": "ZeRO-3 (TP-4, 8x GPU)   5 per GPU       56x            ✅", "turn": 128}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ZeRO-3 (TP-4, 8x GPU)   5 per GPU       56x            ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 128}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ZeRO-3 (TP-4, 8x GPU)   5 per GPU       56x            ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 128}
 {"role": "user", "content": "```", "turn": 129}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 129}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 129}
 {"role": "user", "content": "---", "turn": 131}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 131}
-{"role": "user", "content": "## 🧪 测试覆盖", "turn": 133}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 🧪 测试覆盖"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 133}
-{"role": "user", "content": "### 自动化测试 (50+ 项)", "turn": 135}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 自动化测试 (50+ 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 135}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 131}
+{"role": "user", "content": "## 🧪 testEnglish text", "turn": 133}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 🧪 testEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 133}
+{"role": "user", "content": "### English texttest (50+ English text)", "turn": 135}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English texttest (50+ English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 135}
 {"role": "user", "content": "```", "turn": 137}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 137}
-{"role": "user", "content": "✅ 编译验证 (4 项)", "turn": 138}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："✅ 编译验证 (4 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 138}
-{"role": "user", "content": "- 模块文件存在检查", "turn": 139}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 模块文件存在检查"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 139}
-{"role": "user", "content": "- 文件大小验证", "turn": 140}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 文件大小验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 140}
-{"role": "user", "content": "✅ 分布式训练 (10 项)", "turn": 142}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："✅ 分布式训练 (10 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 142}
-{"role": "user", "content": "- 数据并行效率 >90%", "turn": 143}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 数据并行效率 >90%"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 143}
-{"role": "user", "content": "- 张量并行效率 >80%", "turn": 144}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 张量并行效率 >80%"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 144}
-{"role": "user", "content": "- 管道并行气泡 <10%", "turn": 145}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 管道并行气泡 <10%"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 145}
-{"role": "user", "content": "- ZeRO 阶段验证", "turn": 146}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ZeRO 阶段验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 146}
-{"role": "user", "content": "✅ 内存占用 (8 项)", "turn": 148}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："✅ 内存占用 (8 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 148}
-{"role": "user", "content": "- 各配置内存估计", "turn": 149}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 各配置内存估计"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 149}
-{"role": "user", "content": "- ZeRO 阶段验证", "turn": 150}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ZeRO 阶段验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 150}
-{"role": "user", "content": "✅ RLHF 流程 (16 项)", "turn": 152}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："✅ RLHF 流程 (16 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 152}
-{"role": "user", "content": "- SFT 损失递减", "turn": 153}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- SFT 损失递减"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 153}
-{"role": "user", "content": "- AUC 单调递增", "turn": 154}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- AUC 单调递增"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 154}
-{"role": "user", "content": "- 奖励改进 >15%", "turn": 155}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 奖励改进 >15%"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 155}
-{"role": "user", "content": "- KL 散度 <0.015", "turn": 156}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- KL 散度 <0.015"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 156}
-{"role": "user", "content": "- 多维度评估", "turn": 157}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 多维度评估"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 157}
-{"role": "user", "content": "✅ 性能基准 (12 项)", "turn": 159}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："✅ 性能基准 (12 项)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 159}
-{"role": "user", "content": "- 推理吞吐验证", "turn": 160}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 推理吞吐验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 160}
-{"role": "user", "content": "- 训练吞吐验证", "turn": 161}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 训练吞吐验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 161}
-{"role": "user", "content": "- 延迟验证", "turn": 162}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- 延迟验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 162}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 137}
+{"role": "user", "content": "✅ compileEnglish text (4 English text)", "turn": 138}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "✅ compileEnglish text (4 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 138}
+{"role": "user", "content": "- English textfileEnglish text", "turn": 139}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English textfileEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 139}
+{"role": "user", "content": "- fileEnglish text", "turn": 140}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- fileEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 140}
+{"role": "user", "content": "✅ English texttraining (10 English text)", "turn": 142}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "✅ English texttraining (10 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 142}
+{"role": "user", "content": "- dataEnglish text >90%", "turn": 143}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- dataEnglish text >90%".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 143}
+{"role": "user", "content": "- English text >80%", "turn": 144}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English text >80%".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 144}
+{"role": "user", "content": "- English text <10%", "turn": 145}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English text <10%".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 145}
+{"role": "user", "content": "- ZeRO phaseEnglish text", "turn": 146}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ZeRO phaseEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 146}
+{"role": "user", "content": "✅ English text (8 English text)", "turn": 148}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "✅ English text (8 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 148}
+{"role": "user", "content": "- English textconfigurationEnglish text", "turn": 149}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English textconfigurationEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 149}
+{"role": "user", "content": "- ZeRO phaseEnglish text", "turn": 150}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ZeRO phaseEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 150}
+{"role": "user", "content": "✅ RLHF pipeline (16 English text)", "turn": 152}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "✅ RLHF pipeline (16 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 152}
+{"role": "user", "content": "- SFT lossEnglish text", "turn": 153}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- SFT lossEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 153}
+{"role": "user", "content": "- AUC English text", "turn": 154}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- AUC English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 154}
+{"role": "user", "content": "- rewardEnglish text >15%", "turn": 155}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- rewardEnglish text >15%".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 155}
+{"role": "user", "content": "- KL English text <0.015", "turn": 156}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- KL English text <0.015".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 156}
+{"role": "user", "content": "- English textevaluation", "turn": 157}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English textevaluation".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 157}
+{"role": "user", "content": "✅ English text (12 English text)", "turn": 159}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "✅ English text (12 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 159}
+{"role": "user", "content": "- inferenceEnglish text", "turn": 160}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- inferenceEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 160}
+{"role": "user", "content": "- trainingEnglish text", "turn": 161}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- trainingEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 161}
+{"role": "user", "content": "- English text", "turn": 162}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 162}
 {"role": "user", "content": "```", "turn": 163}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 163}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 163}
 {"role": "user", "content": "---", "turn": 165}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 165}
-{"role": "user", "content": "## 🚀 快速开始", "turn": 167}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 🚀 快速开始"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 167}
-{"role": "user", "content": "### 编译", "turn": 169}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 编译"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 169}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 165}
+{"role": "user", "content": "## 🚀 quickstart", "turn": 167}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 🚀 quickstart".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 167}
+{"role": "user", "content": "### compile", "turn": 169}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### compile".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 169}
 {"role": "user", "content": "```bash", "turn": 171}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 171}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 171}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx", "turn": 172}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 172}
-{"role": "user", "content": "# 编译训练脚本", "turn": 174}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 编译训练脚本"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 174}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 172}
+{"role": "user", "content": "# compiletrainingEnglish text", "turn": 174}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# compiletrainingEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 174}
 {"role": "user", "content": "neurx compile train_full.s -o bin/train_full", "turn": 175}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx compile train_full.s -o bin/train_full"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 175}
-{"role": "user", "content": "# 编译测试套件", "turn": 177}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 编译测试套件"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 177}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx compile train_full.s -o bin/train_full".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 175}
+{"role": "user", "content": "# compiletestEnglish text", "turn": 177}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# compiletestEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 177}
 {"role": "user", "content": "neurx compile test_distributed_rlhf.s -o bin/test_distributed_rlhf", "turn": 178}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx compile test_distributed_rlhf.s -o bin/test_distributed_rlhf"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 178}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx compile test_distributed_rlhf.s -o bin/test_distributed_rlhf".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 178}
 {"role": "user", "content": "```", "turn": 179}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 179}
-{"role": "user", "content": "### 运行", "turn": 181}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 运行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 181}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 179}
+{"role": "user", "content": "### run", "turn": 181}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### run".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 181}
 {"role": "user", "content": "```bash", "turn": 183}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 183}
-{"role": "user", "content": "# 验证所有测试", "turn": 184}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 验证所有测试"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 184}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 183}
+{"role": "user", "content": "# English texttest", "turn": 184}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# English texttest".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 184}
 {"role": "user", "content": "./bin/test_distributed_rlhf", "turn": 185}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/test_distributed_rlhf"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 185}
-{"role": "user", "content": "# 训练 7B 模型", "turn": 187}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 训练 7B 模型"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 187}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/test_distributed_rlhf".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 185}
+{"role": "user", "content": "# training 7B model", "turn": 187}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# training 7B model".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 187}
 {"role": "user", "content": "./bin/train_full", "turn": 188}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 188}
-{"role": "user", "content": "# 训练 70B 模型 (8 GPU)", "turn": 190}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 训练 70B 模型 (8 GPU)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 190}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 188}
+{"role": "user", "content": "# training 70B model (8 GPU)", "turn": 190}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# training 70B model (8 GPU)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 190}
 {"role": "user", "content": "./bin/train_full --model 70b --gpus 8 --tp-size 4 --zero-stage 2", "turn": 191}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --model 70b --gpus 8 --tp-size 4 --zero-stage 2"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 191}
-{"role": "user", "content": "# RLHF 流程", "turn": 193}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# RLHF 流程"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 193}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --model 70b --gpus 8 --tp-size 4 --zero-stage 2".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 191}
+{"role": "user", "content": "# RLHF pipeline", "turn": 193}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# RLHF pipeline".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 193}
 {"role": "user", "content": "./bin/train_full --rlhf --stage sft     # SFT", "turn": 194}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --rlhf --stage sft     # SFT"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 194}
-{"role": "user", "content": "./bin/train_full --rlhf --stage reward  # 奖励模型", "turn": 195}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --rlhf --stage reward  # 奖励模型"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 195}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --rlhf --stage sft     # SFT".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 194}
+{"role": "user", "content": "./bin/train_full --rlhf --stage reward  # rewardmodel", "turn": 195}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --rlhf --stage reward  # rewardmodel".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 195}
 {"role": "user", "content": "./bin/train_full --rlhf --stage ppo     # PPO", "turn": 196}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --rlhf --stage ppo     # PPO"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 196}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --rlhf --stage ppo     # PPO".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 196}
 {"role": "user", "content": "```", "turn": 197}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 197}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 197}
 {"role": "user", "content": "---", "turn": 199}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 199}
-{"role": "user", "content": "## 📁 文件清单", "turn": 201}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 📁 文件清单"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 201}
-{"role": "user", "content": "### 新增文件", "turn": 203}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 新增文件"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 203}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 199}
+{"role": "user", "content": "## 📁 fileEnglish text", "turn": 201}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 📁 fileEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 201}
+{"role": "user", "content": "### English textfile", "turn": 203}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English textfile".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 203}
 {"role": "user", "content": "```", "turn": 205}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 205}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 205}
 {"role": "user", "content": "neurx/", "turn": 206}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx/"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 206}
-{"role": "user", "content": "├── train_full.s                          [新] 550 行", "turn": 207}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── train_full.s                          [新] 550 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 207}
-{"role": "user", "content": "├── test_distributed_rlhf.s               [新] 750 行", "turn": 208}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── test_distributed_rlhf.s               [新] 750 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 208}
-{"role": "user", "content": "├── S_LANGUAGE_TRAINING_GUIDE.md          [新] 编译运行指南", "turn": 209}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── S_LANGUAGE_TRAINING_GUIDE.md          [新] 编译运行指南"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 209}
-{"role": "user", "content": "├── IMPLEMENTATION_COMPLETE_S_LANGUAGE.md [新] 项目总结", "turn": 210}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── IMPLEMENTATION_COMPLETE_S_LANGUAGE.md [新] 项目总结"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 210}
-{"role": "user", "content": "└── PHASE2_COMPLETION_SUMMARY.md          [新] 完成报告", "turn": 211}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── PHASE2_COMPLETION_SUMMARY.md          [新] 完成报告"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 211}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx/".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 206}
+{"role": "user", "content": "├── train_full.s                          [English text] 550 English text", "turn": 207}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── train_full.s                          [English text] 550 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 207}
+{"role": "user", "content": "├── test_distributed_rlhf.s               [English text] 750 English text", "turn": 208}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── test_distributed_rlhf.s               [English text] 750 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 208}
+{"role": "user", "content": "├── S_LANGUAGE_TRAINING_GUIDE.md          [English text] compilerunEnglish text", "turn": 209}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── S_LANGUAGE_TRAINING_GUIDE.md          [English text] compilerunEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 209}
+{"role": "user", "content": "├── IMPLEMENTATION_COMPLETE_S_LANGUAGE.md [English text] English text", "turn": 210}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── IMPLEMENTATION_COMPLETE_S_LANGUAGE.md [English text] English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 210}
+{"role": "user", "content": "└── PHASE2_COMPLETION_SUMMARY.md          [English text] English text", "turn": 211}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── PHASE2_COMPLETION_SUMMARY.md          [English text] English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 211}
 {"role": "user", "content": "```", "turn": 212}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 212}
-{"role": "user", "content": "### 已有核心模块", "turn": 214}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 已有核心模块"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 214}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 212}
+{"role": "user", "content": "### English text", "turn": 214}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 214}
 {"role": "user", "content": "```", "turn": 216}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 216}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 216}
 {"role": "user", "content": "neurx/distributed/", "turn": 217}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx/distributed/"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 217}
-{"role": "user", "content": "├── data_parallel.s                       450 行", "turn": 218}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── data_parallel.s                       450 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 218}
-{"role": "user", "content": "├── tensor_parallel.s                     500 行", "turn": 219}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── tensor_parallel.s                     500 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 219}
-{"role": "user", "content": "├── pipeline_parallel.s                   400 行", "turn": 220}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── pipeline_parallel.s                   400 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 220}
-{"role": "user", "content": "└── zero_optimizer.s                      400 行", "turn": 221}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── zero_optimizer.s                      400 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 221}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx/distributed/".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 217}
+{"role": "user", "content": "├── data_parallel.s                       450 English text", "turn": 218}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── data_parallel.s                       450 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 218}
+{"role": "user", "content": "├── tensor_parallel.s                     500 English text", "turn": 219}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── tensor_parallel.s                     500 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 219}
+{"role": "user", "content": "├── pipeline_parallel.s                   400 English text", "turn": 220}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── pipeline_parallel.s                   400 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 220}
+{"role": "user", "content": "└── zero_optimizer.s                      400 English text", "turn": 221}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── zero_optimizer.s                      400 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 221}
 {"role": "user", "content": "neurx/alignment/", "turn": 223}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx/alignment/"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 223}
-{"role": "user", "content": "└── rlhf_complete.s                       600 行", "turn": 224}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── rlhf_complete.s                       600 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 224}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx/alignment/".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 223}
+{"role": "user", "content": "└── rlhf_complete.s                       600 English text", "turn": 224}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── rlhf_complete.s                       600 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 224}
 {"role": "user", "content": "neurx/training/", "turn": 226}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx/training/"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 226}
-{"role": "user", "content": "└── mixed_precision.s                     1200 行", "turn": 227}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── mixed_precision.s                     1200 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 227}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx/training/".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 226}
+{"role": "user", "content": "└── mixed_precision.s                     1200 English text", "turn": 227}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── mixed_precision.s                     1200 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 227}
 {"role": "user", "content": "neurx/inference/", "turn": 229}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx/inference/"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 229}
-{"role": "user", "content": "└── flash_attention_v3.s                  800 行", "turn": 230}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── flash_attention_v3.s                  800 行"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 230}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx/inference/".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 229}
+{"role": "user", "content": "└── flash_attention_v3.s                  800 English text", "turn": 230}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── flash_attention_v3.s                  800 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 230}
 {"role": "user", "content": "```", "turn": 231}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 231}
-{"role": "user", "content": "**总计**: 4,050+ 行 S 代码 + 2,000+ 行文档", "turn": 233}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**总计**: 4,050+ 行 S 代码 + 2,000+ 行文档"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 233}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 231}
+{"role": "user", "content": "**English text**: 4,050+ English text S English text + 2,000+ English text", "turn": 233}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: 4,050+ English text S English text + 2,000+ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 233}
 {"role": "user", "content": "---", "turn": 235}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 235}
-{"role": "user", "content": "## 💡 技术亮点", "turn": 237}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 💡 技术亮点"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 237}
-{"role": "user", "content": "### 1. 完整分布式框架", "turn": 239}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 1. 完整分布式框架"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 239}
-{"role": "user", "content": "- ✅ DP + TP + PP + ZeRO 组合", "turn": 240}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ DP + TP + PP + ZeRO 组合"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 240}
-{"role": "user", "content": "- ✅ 支持 8-64 GPU 线性扩展", "turn": 241}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 支持 8-64 GPU 线性扩展"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 241}
-{"role": "user", "content": "- ✅ <100GB 内存支持 70B+ 模型", "turn": 242}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ <100GB 内存支持 70B+ 模型"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 242}
-{"role": "user", "content": "### 2. 生产级 RLHF", "turn": 244}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 2. 生产级 RLHF"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 244}
-{"role": "user", "content": "- ✅ 4 阶段完整流程", "turn": 245}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 4 阶段完整流程"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 245}
-{"role": "user", "content": "- ✅ 多维度评估系统", "turn": 246}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 多维度评估系统"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 246}
-{"role": "user", "content": "- ✅ KL 散度约束防漂移", "turn": 247}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ KL 散度约束防漂移"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 247}
-{"role": "user", "content": "### 3. 纯 S 语言实现", "turn": 249}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 3. 纯 S 语言实现"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 249}
-{"role": "user", "content": "- ✅ 无外部依赖", "turn": 250}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 无外部依赖"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 250}
-{"role": "user", "content": "- ✅ 编译成原生二进制", "turn": 251}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 编译成原生二进制"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 251}
-{"role": "user", "content": "- ✅ 完全内存控制", "turn": 252}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 完全内存控制"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 252}
-{"role": "user", "content": "### 4. 完整测试覆盖", "turn": 254}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 4. 完整测试覆盖"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 254}
-{"role": "user", "content": "- ✅ 50+ 自动化测试", "turn": 255}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 50+ 自动化测试"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 255}
-{"role": "user", "content": "- ✅ 性能基准验证", "turn": 256}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 性能基准验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 256}
-{"role": "user", "content": "- ✅ 内存使用验证", "turn": 257}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 内存使用验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 257}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 235}
+{"role": "user", "content": "## 💡 English text", "turn": 237}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 💡 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 237}
+{"role": "user", "content": "### 1. completeEnglish textframework", "turn": 239}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 1. completeEnglish textframework".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 239}
+{"role": "user", "content": "- ✅ DP + TP + PP + ZeRO English text", "turn": 240}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ DP + TP + PP + ZeRO English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 240}
+{"role": "user", "content": "- ✅ support 8-64 GPU English textextension", "turn": 241}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ support 8-64 GPU English textextension".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 241}
+{"role": "user", "content": "- ✅ <100GB English textsupport 70B+ model", "turn": 242}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ <100GB English textsupport 70B+ model".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 242}
+{"role": "user", "content": "### 2. English text RLHF", "turn": 244}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 2. English text RLHF".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 244}
+{"role": "user", "content": "- ✅ 4 phasecompletepipeline", "turn": 245}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ 4 phasecompletepipeline".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 245}
+{"role": "user", "content": "- ✅ English textevaluationsystem", "turn": 246}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English textevaluationsystem".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 246}
+{"role": "user", "content": "- ✅ KL English text", "turn": 247}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ KL English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 247}
+{"role": "user", "content": "### 3. English text S languageimplementation", "turn": 249}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 3. English text S languageimplementation".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 249}
+{"role": "user", "content": "- ✅ English text", "turn": 250}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 250}
+{"role": "user", "content": "- ✅ compileEnglish text", "turn": 251}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ compileEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 251}
+{"role": "user", "content": "- ✅ English text", "turn": 252}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 252}
+{"role": "user", "content": "### 4. completetestEnglish text", "turn": 254}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### 4. completetestEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 254}
+{"role": "user", "content": "- ✅ 50+ English texttest", "turn": 255}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ 50+ English texttest".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 255}
+{"role": "user", "content": "- ✅ English text", "turn": 256}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 256}
+{"role": "user", "content": "- ✅ English textuseEnglish text", "turn": 257}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English textuseEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 257}
 {"role": "user", "content": "---", "turn": 259}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 259}
-{"role": "user", "content": "## 📈 成功指标", "turn": 261}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 📈 成功指标"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 261}
-{"role": "user", "content": "| 指标 | 目标 | 实现 | 状态 |", "turn": 263}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 指标 | 目标 | 实现 | 状态 |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 263}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 259}
+{"role": "user", "content": "## 📈 successEnglish text", "turn": 261}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 📈 successEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 261}
+{"role": "user", "content": "| English text | English text | implementation | state |", "turn": 263}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| English text | English text | implementation | state |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 263}
 {"role": "user", "content": "|-----|------|------|------|", "turn": 264}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："|-----|------|------|------|"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 264}
-{"role": "user", "content": "| 代码行数 | 3000+ | 4050+ | ✅ |", "turn": 265}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 代码行数 | 3000+ | 4050+ | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 265}
-{"role": "user", "content": "| 测试覆盖 | 30+ | 50+ | ✅ |", "turn": 266}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 测试覆盖 | 30+ | 50+ | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 266}
-{"role": "user", "content": "| 推理吞吐 | >500 t/s | 500-1000 t/s | ✅ |", "turn": 267}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 推理吞吐 | >500 t/s | 500-1000 t/s | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 267}
-{"role": "user", "content": "| 训练吞吐 (8 GPU) | >3000 t/s | 3700 t/s | ✅ |", "turn": 268}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 训练吞吐 (8 GPU) | >3000 t/s | 3700 t/s | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 268}
-{"role": "user", "content": "| 扩展效率 | >85% | 85-90% | ✅ |", "turn": 269}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 扩展效率 | >85% | 85-90% | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 269}
-{"role": "user", "content": "| 70B 内存 | <100GB | 35-40GB | ✅ |", "turn": 270}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| 70B 内存 | <100GB | 35-40GB | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 270}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "|-----|------|------|------|".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 264}
+{"role": "user", "content": "| English text | 3000+ | 4050+ | ✅ |", "turn": 265}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| English text | 3000+ | 4050+ | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 265}
+{"role": "user", "content": "| testEnglish text | 30+ | 50+ | ✅ |", "turn": 266}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| testEnglish text | 30+ | 50+ | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 266}
+{"role": "user", "content": "| inferenceEnglish text | >500 t/s | 500-1000 t/s | ✅ |", "turn": 267}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| inferenceEnglish text | >500 t/s | 500-1000 t/s | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 267}
+{"role": "user", "content": "| trainingEnglish text (8 GPU) | >3000 t/s | 3700 t/s | ✅ |", "turn": 268}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| trainingEnglish text (8 GPU) | >3000 t/s | 3700 t/s | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 268}
+{"role": "user", "content": "| extensionEnglish text | >85% | 85-90% | ✅ |", "turn": 269}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| extensionEnglish text | >85% | 85-90% | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 269}
+{"role": "user", "content": "| 70B English text | <100GB | 35-40GB | ✅ |", "turn": 270}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| 70B English text | <100GB | 35-40GB | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 270}
 {"role": "user", "content": "| RLHF AUC | >0.75 | 0.78 | ✅ |", "turn": 271}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| RLHF AUC | >0.75 | 0.78 | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 271}
-{"role": "user", "content": "| PPO 改进 | >15% | +20% | ✅ |", "turn": 272}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："| PPO 改进 | >15% | +20% | ✅ |"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 272}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| RLHF AUC | >0.75 | 0.78 | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 271}
+{"role": "user", "content": "| PPO English text | >15% | +20% | ✅ |", "turn": 272}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "| PPO English text | >15% | +20% | ✅ |".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 272}
 {"role": "user", "content": "---", "turn": 274}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 274}
-{"role": "user", "content": "## 🎓 核心代码示例", "turn": 276}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 🎓 核心代码示例"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 276}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 274}
+{"role": "user", "content": "## 🎓 English textexample", "turn": 276}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 🎓 English textexample".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 276}
 {"role": "user", "content": "### DP AllReduce", "turn": 278}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### DP AllReduce"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 278}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### DP AllReduce".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 278}
 {"role": "user", "content": "```s", "turn": 280}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```s"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 280}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```s".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 280}
 {"role": "user", "content": "func allreduce_gradients(float* gradients, int size) {", "turn": 281}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："func allreduce_gradients(float* gradients, int size) {"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 281}
-{"role": "user", "content": "// AllReduce 梯度同步", "turn": 282}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// AllReduce 梯度同步"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 282}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "func allreduce_gradients(float* gradients, int size) {".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 281}
+{"role": "user", "content": "// AllReduce gradientEnglish textstep", "turn": 282}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// AllReduce gradientEnglish textstep".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 282}
 {"role": "user", "content": "int rank = get_rank()", "turn": 283}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："int rank = get_rank()"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 283}
-{"role": "user", "content": "// 梯度桶化 (25-100MB)", "turn": 285}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 梯度桶化 (25-100MB)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 285}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "int rank = get_rank()".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 283}
+{"role": "user", "content": "// gradientEnglish text (25-100MB)", "turn": 285}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// gradientEnglish text (25-100MB)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 285}
 {"role": "user", "content": "int bucket_size = 25 * 1024 * 1024", "turn": 286}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："int bucket_size = 25 * 1024 * 1024"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 286}
-{"role": "user", "content": "// 异步 AllReduce", "turn": 288}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 异步 AllReduce"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 288}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "int bucket_size = 25 * 1024 * 1024".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 286}
+{"role": "user", "content": "// English textstep AllReduce", "turn": 288}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// English textstep AllReduce".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 288}
 {"role": "user", "content": "int i = 0", "turn": 289}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："int i = 0"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 289}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "int i = 0".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 289}
 {"role": "user", "content": "while i < size {", "turn": 290}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："while i < size {"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 290}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "while i < size {".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 290}
 {"role": "user", "content": "int end = min(i + bucket_size, size)", "turn": 291}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："int end = min(i + bucket_size, size)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 291}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "int end = min(i + bucket_size, size)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 291}
 {"role": "user", "content": "allreduce_bucket(gradients, i, end)", "turn": 292}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："allreduce_bucket(gradients, i, end)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 292}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "allreduce_bucket(gradients, i, end)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 292}
 {"role": "user", "content": "i = end", "turn": 293}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："i = end"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 293}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "i = end".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 293}
 {"role": "user", "content": "}", "turn": 294}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："}"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 294}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "}".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 294}
 {"role": "user", "content": "}", "turn": 295}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："}"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 295}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "}".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 295}
 {"role": "user", "content": "```", "turn": 296}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 296}
-{"role": "user", "content": "### PPO 损失", "turn": 298}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### PPO 损失"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 298}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 296}
+{"role": "user", "content": "### PPO loss", "turn": 298}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### PPO loss".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 298}
 {"role": "user", "content": "```s", "turn": 300}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```s"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 300}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```s".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 300}
 {"role": "user", "content": "func ppo_policy_loss(float ratio, float advantages, float epsilon) float {", "turn": 301}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："func ppo_policy_loss(float ratio, float advantages, float epsilon) float {"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 301}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "func ppo_policy_loss(float ratio, float advantages, float epsilon) float {".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 301}
 {"role": "user", "content": "float clipped_ratio = clip(ratio, 1.0 - epsilon, 1.0 + epsilon)", "turn": 302}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："float clipped_ratio = clip(ratio, 1.0 - epsilon, 1.0 + epsilon)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 302}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "float clipped_ratio = clip(ratio, 1.0 - epsilon, 1.0 + epsilon)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 302}
 {"role": "user", "content": "float loss = -min(ratio * advantages, clipped_ratio * advantages)", "turn": 303}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："float loss = -min(ratio * advantages, clipped_ratio * advantages)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 303}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "float loss = -min(ratio * advantages, clipped_ratio * advantages)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 303}
 {"role": "user", "content": "loss", "turn": 304}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："loss"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 304}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "loss".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 304}
 {"role": "user", "content": "}", "turn": 305}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："}"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 305}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "}".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 305}
 {"role": "user", "content": "```", "turn": 306}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 306}
-{"role": "user", "content": "### RLHF 流程", "turn": 308}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### RLHF 流程"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 308}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 306}
+{"role": "user", "content": "### RLHF pipeline", "turn": 308}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### RLHF pipeline".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 308}
 {"role": "user", "content": "```s", "turn": 310}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```s"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 310}
-{"role": "user", "content": "// 阶段 1: SFT", "turn": 311}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 阶段 1: SFT"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 311}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```s".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 310}
+{"role": "user", "content": "// phase 1: SFT", "turn": 311}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// phase 1: SFT".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 311}
 {"role": "user", "content": "sft_trainer.train(sft_data, 3)      // loss -> 0.41", "turn": 312}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："sft_trainer.train(sft_data, 3)      // loss -> 0.41"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 312}
-{"role": "user", "content": "// 阶段 2: 奖励模型", "turn": 314}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 阶段 2: 奖励模型"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 314}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "sft_trainer.train(sft_data, 3)      // loss -> 0.41".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 312}
+{"role": "user", "content": "// phase 2: rewardmodel", "turn": 314}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// phase 2: rewardmodel".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 314}
 {"role": "user", "content": "reward_trainer.train(preference_data, 5)  // AUC -> 0.78", "turn": 315}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："reward_trainer.train(preference_data, 5)  // AUC -> 0.78"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 315}
-{"role": "user", "content": "// 阶段 3: PPO", "turn": 317}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 阶段 3: PPO"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 317}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "reward_trainer.train(preference_data, 5)  // AUC -> 0.78".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 315}
+{"role": "user", "content": "// phase 3: PPO", "turn": 317}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// phase 3: PPO".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 317}
 {"role": "user", "content": "ppo_trainer.train(prompts, 10)      // reward +20%, KL <0.015", "turn": 318}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："ppo_trainer.train(prompts, 10)      // reward +20%, KL <0.015"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 318}
-{"role": "user", "content": "// 阶段 4: 评估", "turn": 320}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："// 阶段 4: 评估"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 320}
-{"role": "user", "content": "evaluator.evaluate(test_prompts)    // 综合分 >4.0", "turn": 321}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："evaluator.evaluate(test_prompts)    // 综合分 >4.0"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 321}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "ppo_trainer.train(prompts, 10)      // reward +20%, KL <0.015".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 318}
+{"role": "user", "content": "// phase 4: evaluation", "turn": 320}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "// phase 4: evaluation".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 320}
+{"role": "user", "content": "evaluator.evaluate(test_prompts)    // English text >4.0", "turn": 321}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "evaluator.evaluate(test_prompts)    // English text >4.0".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 321}
 {"role": "user", "content": "```", "turn": 322}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 322}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 322}
 {"role": "user", "content": "---", "turn": 324}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 324}
-{"role": "user", "content": "## ⏱️ 时间表", "turn": 326}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## ⏱️ 时间表"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 326}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 324}
+{"role": "user", "content": "## ⏱️ timeEnglish text", "turn": 326}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## ⏱️ timeEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 326}
 {"role": "user", "content": "```", "turn": 328}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 328}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 328}
 {"role": "user", "content": "Week 2 (2026-07-07)", "turn": 329}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："Week 2 (2026-07-07)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 329}
-{"role": "user", "content": "├── Monday-Tuesday: 分布式框架实现 (DP+TP+PP+ZeRO)", "turn": 330}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Monday-Tuesday: 分布式框架实现 (DP+TP+PP+ZeRO)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 330}
-{"role": "user", "content": "├── Wednesday-Thursday: RLHF 系统实现 (SFT+Reward+PPO)", "turn": 331}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Wednesday-Thursday: RLHF 系统实现 (SFT+Reward+PPO)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 331}
-{"role": "user", "content": "├── Friday: 训练脚本、测试、文档", "turn": 332}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Friday: 训练脚本、测试、文档"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 332}
-{"role": "user", "content": "└── Status: ✅ 完成", "turn": 333}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── Status: ✅ 完成"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 333}
-{"role": "user", "content": "Week 3-4 (计划)", "turn": 335}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："Week 3-4 (计划)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 335}
-{"role": "user", "content": "├── Tokenizer 升级 (128K 词汇)", "turn": 336}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Tokenizer 升级 (128K 词汇)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 336}
-{"role": "user", "content": "├── 数据增强系统", "turn": 337}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 数据增强系统"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 337}
-{"role": "user", "content": "├── 大规模去重", "turn": 338}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 大规模去重"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 338}
-{"role": "user", "content": "└── 生产部署", "turn": 339}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── 生产部署"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 339}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "Week 2 (2026-07-07)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 329}
+{"role": "user", "content": "├── Monday-Tuesday: English textframeworkimplementation (DP+TP+PP+ZeRO)", "turn": 330}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Monday-Tuesday: English textframeworkimplementation (DP+TP+PP+ZeRO)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 330}
+{"role": "user", "content": "├── Wednesday-Thursday: RLHF systemimplementation (SFT+Reward+PPO)", "turn": 331}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Wednesday-Thursday: RLHF systemimplementation (SFT+Reward+PPO)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 331}
+{"role": "user", "content": "├── Friday: trainingEnglish text, test, English text", "turn": 332}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Friday: trainingEnglish text, test, English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 332}
+{"role": "user", "content": "└── Status: ✅ English text", "turn": 333}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── Status: ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 333}
+{"role": "user", "content": "Week 3-4 (English text)", "turn": 335}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "Week 3-4 (English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 335}
+{"role": "user", "content": "├── Tokenizer English text (128K English text)", "turn": 336}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Tokenizer English text (128K English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 336}
+{"role": "user", "content": "├── dataEnglish textsystem", "turn": 337}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── dataEnglish textsystem".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 337}
+{"role": "user", "content": "├── English textdeduplication", "turn": 338}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── English textdeduplication".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 338}
+{"role": "user", "content": "└── English text", "turn": 339}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 339}
 {"role": "user", "content": "```", "turn": 340}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 340}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 340}
 {"role": "user", "content": "---", "turn": 342}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 342}
-{"role": "user", "content": "## 📞 使用支持", "turn": 344}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 📞 使用支持"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 344}
-{"role": "user", "content": "### 编译常见问题", "turn": 346}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 编译常见问题"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 346}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 342}
+{"role": "user", "content": "## 📞 usesupport", "turn": 344}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 📞 usesupport".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 344}
+{"role": "user", "content": "### compileEnglish text", "turn": 346}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### compileEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 346}
 {"role": "user", "content": "```bash", "turn": 348}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 348}
-{"role": "user", "content": "# 找不到 neurx 命令", "turn": 349}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 348}
+{"role": "user", "content": "# English text neurx English text", "turn": 349}
 {"role": "user", "content": "export PATH=/Users/feifei/shuwen/neurx/bin:$PATH", "turn": 350}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："export PATH=/Users/feifei/shuwen/neurx/bin:$PATH"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 350}
-{"role": "user", "content": "# 编译失败", "turn": 352}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 编译失败"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 352}
-{"role": "user", "content": "neurx compile train_full.s -v  # 详细输出", "turn": 353}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx compile train_full.s -v  # 详细输出"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 353}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "export PATH=/Users/feifei/shuwen/neurx/bin:$PATH".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 350}
+{"role": "user", "content": "# compilefailure", "turn": 352}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# compilefailure".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 352}
+{"role": "user", "content": "neurx compile train_full.s -v  # English textoutput", "turn": 353}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx compile train_full.s -v  # English textoutput".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 353}
 {"role": "user", "content": "```", "turn": 354}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 354}
-{"role": "user", "content": "### 运行常见问题", "turn": 356}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 运行常见问题"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 356}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 354}
+{"role": "user", "content": "### runEnglish text", "turn": 356}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### runEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 356}
 {"role": "user", "content": "```bash", "turn": 358}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 358}
-{"role": "user", "content": "# 内存不足", "turn": 359}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 内存不足"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 359}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 358}
+{"role": "user", "content": "# English text", "turn": 359}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 359}
 {"role": "user", "content": "./bin/train_full --zero-stage 3 --batch-size 16", "turn": 360}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --zero-stage 3 --batch-size 16"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 360}
-{"role": "user", "content": "# GPU 通信超时", "turn": 362}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# GPU 通信超时"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 362}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --zero-stage 3 --batch-size 16".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 360}
+{"role": "user", "content": "# GPU English text", "turn": 362}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# GPU English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 362}
 {"role": "user", "content": "./bin/train_full --grad-accum 4", "turn": 363}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --grad-accum 4"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 363}
-{"role": "user", "content": "# RLHF 不收敛", "turn": 365}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# RLHF 不收敛"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 365}
-{"role": "user", "content": "# 检查奖励模型 AUC >0.75", "turn": 366}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 检查奖励模型 AUC >0.75"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 366}
-{"role": "user", "content": "# 检查 KL <0.015", "turn": 367}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："# 检查 KL <0.015"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 367}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --grad-accum 4".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 363}
+{"role": "user", "content": "# RLHF English text", "turn": 365}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# RLHF English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 365}
+{"role": "user", "content": "# English textrewardmodel AUC >0.75", "turn": 366}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# English textrewardmodel AUC >0.75".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 366}
+{"role": "user", "content": "# English text KL <0.015", "turn": 367}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "# English text KL <0.015".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 367}
 {"role": "user", "content": "```", "turn": 368}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 368}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 368}
 {"role": "user", "content": "---", "turn": 370}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 370}
-{"role": "user", "content": "## ✨ 成果总结", "turn": 372}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## ✨ 成果总结"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 372}
-{"role": "user", "content": "### 代码成果", "turn": 374}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 代码成果"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 374}
-{"role": "user", "content": "- ✅ 4,050+ 行生产级 S 代码", "turn": 375}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 4,050+ 行生产级 S 代码"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 375}
-{"role": "user", "content": "- ✅ 零外部依赖", "turn": 376}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 零外部依赖"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 376}
-{"role": "user", "content": "- ✅ 完整分布式框架", "turn": 377}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 完整分布式框架"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 377}
-{"role": "user", "content": "- ✅ 完整 RLHF 系统", "turn": 378}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 完整 RLHF 系统"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 378}
-{"role": "user", "content": "### 文档成果", "turn": 380}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 文档成果"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 380}
-{"role": "user", "content": "- ✅ 5 份专业文档", "turn": 381}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 5 份专业文档"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 381}
-{"role": "user", "content": "- ✅ 完整编译运行指南", "turn": 382}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 完整编译运行指南"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 382}
-{"role": "user", "content": "- ✅ 详细技术说明", "turn": 383}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 详细技术说明"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 383}
-{"role": "user", "content": "- ✅ API 参考", "turn": 384}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ API 参考"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 384}
-{"role": "user", "content": "### 测试成果", "turn": 386}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 测试成果"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 386}
-{"role": "user", "content": "- ✅ 50+ 自动化测试", "turn": 387}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 50+ 自动化测试"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 387}
-{"role": "user", "content": "- ✅ 性能基准验证", "turn": 388}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 性能基准验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 388}
-{"role": "user", "content": "- ✅ 内存优化验证", "turn": 389}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 内存优化验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 389}
-{"role": "user", "content": "- ✅ RLHF 流程验证", "turn": 390}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ RLHF 流程验证"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 390}
-{"role": "user", "content": "### 性能成果", "turn": 392}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："### 性能成果"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 392}
-{"role": "user", "content": "- ✅ 推理: 500-1000 t/s", "turn": 393}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 推理: 500-1000 t/s"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 393}
-{"role": "user", "content": "- ✅ 训练: 3700 t/s (8 GPU)", "turn": 394}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 训练: 3700 t/s (8 GPU)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 394}
-{"role": "user", "content": "- ✅ 扩展: 85-90% 效率", "turn": 395}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 扩展: 85-90% 效率"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 395}
-{"role": "user", "content": "- ✅ 内存: 70B 用 35GB", "turn": 396}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："- ✅ 内存: 70B 用 35GB"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 396}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 370}
+{"role": "user", "content": "## ✨ English text", "turn": 372}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## ✨ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 372}
+{"role": "user", "content": "### English text", "turn": 374}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 374}
+{"role": "user", "content": "- ✅ 4,050+ English text S English text", "turn": 375}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ 4,050+ English text S English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 375}
+{"role": "user", "content": "- ✅ English text", "turn": 376}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 376}
+{"role": "user", "content": "- ✅ completeEnglish textframework", "turn": 377}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ completeEnglish textframework".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 377}
+{"role": "user", "content": "- ✅ complete RLHF system", "turn": 378}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ complete RLHF system".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 378}
+{"role": "user", "content": "### English text", "turn": 380}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 380}
+{"role": "user", "content": "- ✅ 5 English text", "turn": 381}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ 5 English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 381}
+{"role": "user", "content": "- ✅ completecompilerunEnglish text", "turn": 382}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ completecompilerunEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 382}
+{"role": "user", "content": "- ✅ English textexplanation", "turn": 383}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English textexplanation".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 383}
+{"role": "user", "content": "- ✅ API English text", "turn": 384}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ API English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 384}
+{"role": "user", "content": "### testEnglish text", "turn": 386}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### testEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 386}
+{"role": "user", "content": "- ✅ 50+ English texttest", "turn": 387}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ 50+ English texttest".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 387}
+{"role": "user", "content": "- ✅ English text", "turn": 388}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 388}
+{"role": "user", "content": "- ✅ English textoptimizeEnglish text", "turn": 389}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English textoptimizeEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 389}
+{"role": "user", "content": "- ✅ RLHF pipelineEnglish text", "turn": 390}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ RLHF pipelineEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 390}
+{"role": "user", "content": "### English text", "turn": 392}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "### English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 392}
+{"role": "user", "content": "- ✅ inference: 500-1000 t/s", "turn": 393}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ inference: 500-1000 t/s".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 393}
+{"role": "user", "content": "- ✅ training: 3700 t/s (8 GPU)", "turn": 394}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ training: 3700 t/s (8 GPU)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 394}
+{"role": "user", "content": "- ✅ extension: 85-90% English text", "turn": 395}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ extension: 85-90% English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 395}
+{"role": "user", "content": "- ✅ English text: 70B English text 35GB", "turn": 396}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "- ✅ English text: 70B English text 35GB".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 396}
 {"role": "user", "content": "---", "turn": 398}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 398}
-{"role": "user", "content": "## 🏆 项目状态", "turn": 400}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 🏆 项目状态"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 400}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 398}
+{"role": "user", "content": "## 🏆 English textstate", "turn": 400}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 🏆 English textstate".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 400}
 {"role": "user", "content": "```", "turn": 402}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 402}
-{"role": "user", "content": "Phase 1: 基础架构 (已完成)", "turn": 403}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："Phase 1: 基础架构 (已完成)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 403}
-{"role": "user", "content": "├── Transformer 架构 ✅", "turn": 404}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Transformer 架构 ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 404}
-{"role": "user", "content": "├── 混合精度训练 ✅", "turn": 405}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 混合精度训练 ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 405}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 402}
+{"role": "user", "content": "Phase 1: English text (English text)", "turn": 403}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "Phase 1: English text (English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 403}
+{"role": "user", "content": "├── Transformer English text ✅", "turn": 404}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Transformer English text ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 404}
+{"role": "user", "content": "├── English texttraining ✅", "turn": 405}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── English texttraining ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 405}
 {"role": "user", "content": "└── Flash Attention v3 ✅", "turn": 406}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── Flash Attention v3 ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 406}
-{"role": "user", "content": "Phase 2: 分布式 + RLHF (已完成 ✅)", "turn": 408}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："Phase 2: 分布式 + RLHF (已完成 ✅)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 408}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── Flash Attention v3 ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 406}
+{"role": "user", "content": "Phase 2: English text + RLHF (English text ✅)", "turn": 408}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "Phase 2: English text + RLHF (English text ✅)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 408}
 {"role": "user", "content": "├── DP + TP + PP + ZeRO ✅", "turn": 409}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── DP + TP + PP + ZeRO ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 409}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── DP + TP + PP + ZeRO ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 409}
 {"role": "user", "content": "├── SFT + Reward + PPO + Eval ✅", "turn": 410}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── SFT + Reward + PPO + Eval ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 410}
-{"role": "user", "content": "├── 训练脚本 (S 语言) ✅", "turn": 411}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 训练脚本 (S 语言) ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 411}
-{"role": "user", "content": "└── 测试套件 (50+ 项) ✅", "turn": 412}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── 测试套件 (50+ 项) ✅"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 412}
-{"role": "user", "content": "Phase 3-4: Tokenizer + 数据 + 部署 (计划中)", "turn": 414}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："Phase 3-4: Tokenizer + 数据 + 部署 (计划中)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 414}
-{"role": "user", "content": "├── Tokenizer 升级 (128K)", "turn": 415}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── Tokenizer 升级 (128K)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 415}
-{"role": "user", "content": "├── 数据增强和去重", "turn": 416}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 数据增强和去重"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 416}
-{"role": "user", "content": "├── 生产部署", "turn": 417}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："├── 生产部署"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 417}
-{"role": "user", "content": "└── 监控和优化", "turn": 418}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："└── 监控和优化"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 418}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── SFT + Reward + PPO + Eval ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 410}
+{"role": "user", "content": "├── trainingEnglish text (S language) ✅", "turn": 411}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── trainingEnglish text (S language) ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 411}
+{"role": "user", "content": "└── testEnglish text (50+ English text) ✅", "turn": 412}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── testEnglish text (50+ English text) ✅".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 412}
+{"role": "user", "content": "Phase 3-4: Tokenizer + data + English text (English text)", "turn": 414}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "Phase 3-4: Tokenizer + data + English text (English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 414}
+{"role": "user", "content": "├── Tokenizer English text (128K)", "turn": 415}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── Tokenizer English text (128K)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 415}
+{"role": "user", "content": "├── dataEnglish textdeduplication", "turn": 416}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── dataEnglish textdeduplication".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 416}
+{"role": "user", "content": "├── English text", "turn": 417}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "├── English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 417}
+{"role": "user", "content": "└── monitoringEnglish textoptimize", "turn": 418}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "└── monitoringEnglish textoptimize".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 418}
 {"role": "user", "content": "```", "turn": 419}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 419}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 419}
 {"role": "user", "content": "---", "turn": 421}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 421}
-{"role": "user", "content": "## 🎯 下一步行动", "turn": 423}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："## 🎯 下一步行动"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 423}
-{"role": "user", "content": "1. **编译训练脚本** (5 分钟)", "turn": 425}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："1. **编译训练脚本** (5 分钟)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 425}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 421}
+{"role": "user", "content": "## 🎯 English textstepEnglish text", "turn": 423}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "## 🎯 English textstepEnglish text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 423}
+{"role": "user", "content": "1. **compiletrainingEnglish text** (5 English text)", "turn": 425}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "1. **compiletrainingEnglish text** (5 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 425}
 {"role": "user", "content": "```bash", "turn": 426}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 426}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 426}
 {"role": "user", "content": "neurx compile train_full.s -o bin/train_full", "turn": 427}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："neurx compile train_full.s -o bin/train_full"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 427}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "neurx compile train_full.s -o bin/train_full".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 427}
 {"role": "user", "content": "```", "turn": 428}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 428}
-{"role": "user", "content": "2. **运行测试** (2 分钟)", "turn": 430}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："2. **运行测试** (2 分钟)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 430}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 428}
+{"role": "user", "content": "2. **runtest** (2 English text)", "turn": 430}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "2. **runtest** (2 English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 430}
 {"role": "user", "content": "```bash", "turn": 431}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 431}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 431}
 {"role": "user", "content": "./bin/test_distributed_rlhf", "turn": 432}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/test_distributed_rlhf"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 432}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/test_distributed_rlhf".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 432}
 {"role": "user", "content": "```", "turn": 433}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 433}
-{"role": "user", "content": "3. **启动训练** (取决于资源)", "turn": 435}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："3. **启动训练** (取决于资源)"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 435}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 433}
+{"role": "user", "content": "3. **starttraining** (English text)", "turn": 435}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "3. **starttraining** (English text)".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 435}
 {"role": "user", "content": "```bash", "turn": 436}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```bash"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 436}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```bash".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 436}
 {"role": "user", "content": "./bin/train_full --model 7b", "turn": 437}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："./bin/train_full --model 7b"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 437}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "./bin/train_full --model 7b".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 437}
 {"role": "user", "content": "```", "turn": 438}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："```"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 438}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "```".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 438}
 {"role": "user", "content": "---", "turn": 440}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："---"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 440}
-{"role": "user", "content": "**Phase 2 完成!** 🎉", "turn": 442}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**Phase 2 完成!** 🎉"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 442}
-{"role": "user", "content": "**代码**: 4,050+ 行 S 语言", "turn": 443}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**代码**: 4,050+ 行 S 语言"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 443}
-{"role": "user", "content": "**测试**: 50+ 项全通过", "turn": 444}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**测试**: 50+ 项全通过"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 444}
-{"role": "user", "content": "**性能**: 工业级标准达成", "turn": 445}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**性能**: 工业级标准达成"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 445}
-{"role": "user", "content": "**准备就绪!** 🚀", "turn": 447}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："**准备就绪!** 🚀"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 447}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "---".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 440}
+{"role": "user", "content": "**Phase 2 English text!** 🎉", "turn": 442}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**Phase 2 English text!** 🎉".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 442}
+{"role": "user", "content": "**English text**: 4,050+ English text S language", "turn": 443}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: 4,050+ English text S language".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 443}
+{"role": "user", "content": "**test**: 50+ English text", "turn": 444}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**test**: 50+ English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 444}
+{"role": "user", "content": "**English text**: English text", "turn": 445}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text**: English text".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 445}
+{"role": "user", "content": "**English text!** 🚀", "turn": 447}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "**English text!** 🚀".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 447}
 {"role": "user", "content": "EOF", "turn": 449}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："EOF"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 449}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "EOF".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 449}
 {"role": "user", "content": "cat /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md", "turn": 450}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cat /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 450}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cat /Users/feifei/shuwen/neurx/PHASE2_COMPLETION_SUMMARY.md".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 450}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && find . -maxdepth 1 -type f \( -name "*.s" -o -name "*GUIDE*.md" -o -name "*COMPLETE*.md" -o -name "*SUMMARY*.md" \) -newer /tmp 2>/dev/null | sort", "turn": 451}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && find . -maxdepth 1 -type f \( -name "*.s" -o -name "*GUIDE*.md" -o -name "*COMPLETE*.md" -o -name "*SUMMARY*.md" \) -newer /tmp 2>/dev/null | sort"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 451}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && find . -maxdepth 1 -type f \( -name "*.s" -o -name "*GUIDE*.md" -o -name "*COMPLETE*.md" -o -name "*SUMMARY*.md" \) -newer /tmp 2>/dev/null | sort".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 451}
 {"role": "user", "content": "cd /Users/feifei/shuwen/neurx && ls -lah train_full.s test_distributed_rlhf.s S_LANGUAGE_TRAINING_GUIDE.md IMPLEMENTATION_COMPLETE_S_LANGUAGE.md PHASE2_COMPLETION_SUMMARY.md 2>&1 | tail -10", "turn": 452}
-{"role": "assistant", "content": "NeurX 推理系统已处理您的输入："cd /Users/feifei/shuwen/neurx && ls -lah train_full.s test_distributed_rlhf.s S_LANGUAGE_TRAINING_GUIDE.md IMPLEMENTATION_COMPLETE_S_LANGUAGE.md PHASE2_COMPLETION_SUMMARY.md 2>&1 | tail -10"。为获得更好的演示，请尝试输入：'什么是NeurX', '有哪些功能', '如何调整参数'", "turn": 452}
+{"role": "assistant", "content": "NeurX inferencesystemEnglish textinput: "cd /Users/feifei/shuwen/neurx && ls -lah train_full.s test_distributed_rlhf.s S_LANGUAGE_TRAINING_GUIDE.md IMPLEMENTATION_COMPLETE_S_LANGUAGE.md PHASE2_COMPLETION_SUMMARY.md 2>&1 | tail -10".English text, English textinput: 'English textNeurX', 'English text', 'English textparameter'", "turn": 452}

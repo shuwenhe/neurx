@@ -25,7 +25,7 @@ use neurx.model.llm.gpt.{
 }
 
 // ============================================================================
-// 1. 数学辅助
+// 1. English texthelper
 // ============================================================================
 
 func be_exp(float x) float {
@@ -62,17 +62,17 @@ func be_log(float x) float {
 }
 
 // ============================================================================
-// 2. 序列对数似然 (核心打分原语)
+// 2. English text (English text)
 //
-//   给定完整 token 序列 = prompt ++ continuation，
-//   返回 continuation 部分的 log P(token_t | token_<t) 之和。
-//   prompt_len 是 continuation 开始的位置。
+//   English textcomplete token English text = prompt ++ continuation,
+//   English text continuation English text log P(token_t | token_<t) English text.
+//   prompt_len English text continuation startEnglish text.
 // ============================================================================
 
 struct logprob_result {
     float total_logprob        // sum log P over continuation
-    int num_tokens             // continuation token 数
-    float avg_logprob          // 长度归一化
+    int num_tokens             // continuation token English text
+    float avg_logprob          // English text
 }
 
 func gpt_sequence_logprob(
@@ -85,15 +85,15 @@ func gpt_sequence_logprob(
         return logprob_result { total_logprob: 0.0, num_tokens: 0, avg_logprob: 0.0 }
     }
 
-    // 单序列前向
+    // English text
     model_output out = gpt_forward(model, full_tokens, 1, seq_len)
     int vocab = model.vocab_size
 
     float total_logprob = 0.0
     int num_tokens = 0
 
-    // 对 continuation 的每个位置 t (prompt_len..seq_len-1):
-    //   预测 token_t 的 logits 来自位置 t-1
+    // English text continuation English text t (prompt_len..seq_len-1):
+    //   English text token_t English text logits English text t-1
     int t = prompt_len
     while t < seq_len {
         int logit_base = (t - 1) * vocab
@@ -136,28 +136,28 @@ func gpt_sequence_logprob(
 }
 
 // ============================================================================
-// 3. 多选题评测 (MMLU / HellaSwag / ARC ...)
+// 3. English text (MMLU / HellaSwag / ARC ...)
 // ============================================================================
 
 struct mc_choice {
-    []int continuation_tokens   // 该选项的 token 续写
+    []int continuation_tokens   // English text token English text
 }
 
 struct mc_question {
-    []int prompt_tokens         // 题干 (含 few-shot 示例)
-    []mc_choice choices         // 各选项
+    []int prompt_tokens         // English text (English text few-shot example)
+    []mc_choice choices         // English text
     int num_choices
-    int correct_index           // 正确选项下标
+    int correct_index           // English text
 }
 
 struct mc_eval_result {
     int total
     int correct
     float accuracy
-    float avg_confidence        // 选中项相对次优项的平均对数似然差
+    float avg_confidence        // English text
 }
 
-// 为单题选出模型最偏好的选项 (长度归一化对数似然)
+// English textmodelEnglish textpreferenceEnglish text (English text)
 func mc_predict(language_model model, mc_question q) int {
     int best_idx = 0
     float best_score = -1000000000.0
@@ -165,7 +165,7 @@ func mc_predict(language_model model, mc_question q) int {
     while c < q.num_choices {
         []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
         logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
-        // 长度归一化 (HellaSwag 等用 avg；MMLU 单 token 用 total——这里统一用 avg)
+        // English text (HellaSwag English text avg; MMLU English text token English text total——English text avg)
         float score = lp.avg_logprob
         if score > best_score {
             best_score = score
@@ -186,7 +186,7 @@ func mc_concat([]int a, []int b) []int {
     out
 }
 
-// 评测一组多选题，返回准确率
+// English text, English text
 func evaluate_multiple_choice(language_model model, []mc_question questions) mc_eval_result {
     int total = len(questions)
     int correct = 0
@@ -196,7 +196,7 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     while i < total {
         mc_question q = questions[i]
 
-        // 计算所有选项分数 (用于置信度)
+        // computeEnglish text (English text)
         float best = -1000000000.0
         float second = -1000000000.0
         int best_idx = 0
@@ -237,7 +237,7 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
 }
 
 // ============================================================================
-// 4. 困惑度评测 (WikiText / held-out)
+// 4. English text (WikiText / held-out)
 // ============================================================================
 
 struct ppl_result {
@@ -258,7 +258,7 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
             s = s + 1
             continue
         }
-        // 整条序列的 continuation 从位置 1 开始 (标准 LM 困惑度)
+        // English text continuation English text 1 start (English text LM English text)
         logprob_result lp = gpt_sequence_logprob(model, seq, 1)
         total_loss = total_loss - lp.total_logprob   // NLL
         total_tokens = total_tokens + lp.num_tokens
@@ -277,12 +277,12 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
 }
 
 // ============================================================================
-// 5. 生成式精确匹配 (GSM8K / TriviaQA)
+// 5. generateEnglish text (GSM8K / TriviaQA)
 // ============================================================================
 
 struct gen_question {
     []int prompt_tokens
-    []int answer_tokens         // 标准答案 token
+    []int answer_tokens         // English text token
     int max_new_tokens
 }
 
@@ -292,7 +292,7 @@ struct gen_eval_result {
     float exact_match
 }
 
-// 判断生成结果是否包含答案 token 序列 (子串匹配)
+// English textgenerateresultEnglish text token English text (English text)
 func gen_contains_answer([]int generated, []int answer) bool {
     int g = len(generated)
     int a = len(answer)
@@ -341,7 +341,7 @@ func evaluate_generative(language_model model, []gen_question questions) gen_eva
 }
 
 // ============================================================================
-// 6. 评测套件 (聚合多个基准)
+// 6. English text (English text)
 // ============================================================================
 
 struct benchmark_report {
@@ -352,7 +352,7 @@ struct benchmark_report {
     float wikitext_ppl
     float gsm8k_em
     float humaneval_em
-    float average_score        // 多选基准平均 (不含 ppl)
+    float average_score        // English text (English text ppl)
 }
 
 struct benchmark_suite {
@@ -389,7 +389,7 @@ func run_benchmark_suite(language_model model, benchmark_suite suite) benchmark_
 }
 
 // ============================================================================
-// 7. 报告格式化
+// 7. English text
 // ============================================================================
 
 func be_int_str(int n) string {
@@ -407,7 +407,7 @@ func be_int_str(int n) string {
     s
 }
 
-// 把 [0,1] 准确率转成百分比整数字符串
+// English text [0,1] English text
 func be_pct(float acc) string {
     int pct = 0
     float v = acc * 100.0
@@ -429,7 +429,7 @@ func format_benchmark_report(benchmark_report r) string {
     s = s + "║ WinoGrande:  " + be_pct(r.winogrande_acc) + "\n"
     s = s + "║ GSM8K (EM):  " + be_pct(r.gsm8k_em) + "\n"
     s = s + "║ HumanEval:   " + be_pct(r.humaneval_em) + "\n"
-    s = s + "║ 平均(多选):  " + be_pct(r.average_score) + "\n"
+    s = s + "║ English text(English text):  " + be_pct(r.average_score) + "\n"
     s = s + "╚════════════════════════════════════════╝\n"
     s
 }

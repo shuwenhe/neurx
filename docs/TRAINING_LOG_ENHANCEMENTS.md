@@ -1,168 +1,168 @@
-# 训练日志增强实现文档
+# traininglogEnglish textimplementationEnglish text
 
-## 概述
-为 NeurX 预训练管道添加了详细的训练日志记录功能，包括性能指标、计时信息和资源使用情况。
+## English text
+English text NeurX English texttrainingEnglish texttraininglogEnglish text, English text, English textinformationEnglish textuseEnglish text.
 
-## 修改内容
+## English textcontent
 
-### 1. 性能指标结构扩展
-**文件**: `pretrain/pretraining_pipeline.s`
+### 1. English textextension
+**file**: `pretrain/pretraining_pipeline.s`
 
-在 `pretrain_state` 结构体中的 `performance` 字段添加了新的指标：
+English text `pretrain_state` English text `performance` English text:
 
 ```s
 struct performance {
-    float tokens_per_second          // 吞吐量
-    float gpu_memory_utilization    // GPU显存占用 (GB)
-    float gpu_compute_utilization   // GPU计算利用率
-    float communication_overhead_pct // 通信开销百分比
-    float gradient_norm              // 梯度范数 ⭐ NEW
-    float forward_time_ms           // Forward pass 耗时 (毫秒) ⭐ NEW
-    float backward_time_ms          // Backward pass 耗时 (毫秒) ⭐ NEW
-    float optimizer_time_ms         // Optimizer step 耗时 (毫秒) ⭐ NEW
-    int samples_per_step            // 当前步的样本数 ⭐ NEW
+    float tokens_per_second          // English text
+    float gpu_memory_utilization    // GPUEnglish text (GB)
+    float gpu_compute_utilization   // GPUcomputeEnglish text
+    float communication_overhead_pct // English text
+    float gradient_norm              // gradientEnglish text ⭐ NEW
+    float forward_time_ms           // Forward pass English text (English text) ⭐ NEW
+    float backward_time_ms          // Backward pass English text (English text) ⭐ NEW
+    float optimizer_time_ms         // Optimizer step English text (English text) ⭐ NEW
+    int samples_per_step            // English textstepEnglish text ⭐ NEW
 }
 ```
 
-### 2. 训练步骤增强
-**函数**: `train_step()`
+### 2. trainingstepEnglish text
+**function**: `train_step()`
 
-#### 添加GPU内存采样
+#### English textGPUEnglish text
 ```s
-# 获取GPU内存使用情况（每10步采样一次，减少开销）
+# English textGPUEnglish textuseEnglish text(English text10stepEnglish text, English text)
 if state.current_step % 10 == 0:
     float gpu_mem_gb = get_gpu_memory_usage() / 1024.0
     state.performance.gpu_memory_utilization = gpu_mem_gb
 ```
 
-#### 梯度范数计算
+#### gradientEnglish textcompute
 ```s
-# 在Gradient Accumulation & Update阶段
+# English textGradient Accumulation & Updatephase
 float grad_norm = clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
 state.performance.gradient_norm = grad_norm
 ```
 
-#### 详细计时记录
+#### English text
 ```s
-# 记录各阶段耗时（转换为毫秒）
+# English textphaseEnglish text(English text)
 state.performance.forward_time_ms = timer.get_elapsed("forward") * 1000.0
 state.performance.backward_time_ms = timer.get_elapsed("backward") * 1000.0
 state.performance.optimizer_time_ms = timer.get_elapsed("optimizer") * 1000.0
 ```
 
-### 3. 日志函数重写
-**函数**: `log_training_progress()`
+### 3. logfunctionEnglish text
+**function**: `log_training_progress()`
 
-重新设计为三行分层日志格式，包含10个关键指标：
+English textlogEnglish text, English text10English text:
 
-#### 第一行：基础训练指标
+#### English text: English texttrainingEnglish text
 ```
 [Step     430/500000] Loss:   2.8100 | LR: 2.00e-04 | GradNorm:   4.28 | Tokens:    110,080
 ```
-- 当前步骤 / 总步数
-- 损失值
-- 学习率
-- 梯度范数
-- 总处理tokens数
+- English textstepEnglish text / English textstepEnglish text
+- lossEnglish text
+- learning rate
+- gradientEnglish text
+- English texttokensEnglish text
 
-#### 第二行：性能指标
+#### English text: English text
 ```
          Throughput: 18500 tok/s | Samples:  430 | Forward: 32.0ms | Backward: 48.0ms | Optimizer:  6.0ms | GPU Mem: 18.4GB
 ```
-- 吞吐量（tokens/秒）
-- 样本数
-- Forward pass耗时
-- Backward pass耗时
-- Optimizer step耗时
-- GPU显存使用
+- English text(tokens/English text)
+- English text
+- Forward passEnglish text
+- Backward passEnglish text
+- Optimizer stepEnglish text
+- GPUEnglish textuse
 
-#### 第三行：任务和时间信息
+#### English text: English texttimeinformation
 ```
          Task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
 ```
-- 当前任务类型
-- 指数移动平均损失
-- 已用时间
-- 预计完成时间
+- English text
+- English textloss
+- English texttime
+- English texttime
 
-### 4. 辅助函数新增
-**函数**: `get_gpu_memory_usage()`
+### 4. helperfunctionEnglish text
+**function**: `get_gpu_memory_usage()`
 
 ```s
 func get_gpu_memory_usage() -> float {
     """
-    获取当前GPU设备的内存使用量（单位：MB）
-    返回值为float类型，表示已使用的GPU显存（MB）
-    示例: 如果返回19353.6，表示约19.4GB
+    English textGPUEnglish textuseEnglish text(English text: MB)
+    English textfloatEnglish text, English textuseEnglish textGPUEnglish text(MB)
+    example: English text19353.6, English text19.4GB
     """
-    float gpu_mem_mb = 18400.0  // 示例值：18.4GB = 18400MB
+    float gpu_mem_mb = 18400.0  // exampleEnglish text: 18.4GB = 18400MB
     return gpu_mem_mb
 }
 ```
 
-**注**: 当前为示例实现，需根据实际GPU框架（PyTorch CUDA, TensorFlow等）进行具体实现。
+**English text**: English textexampleimplementation, English textactualGPUframework(PyTorch CUDA, TensorFlowEnglish text)English textimplementation.
 
-## 示例日志输出
+## examplelogoutput
 
-### 步骤 430 的完整日志
+### stepEnglish text 430 English textcompletelog
 ```
 [Step     430/500000] Loss:   2.8100 | LR: 2.00e-04 | GradNorm:   4.28 | Tokens:    110,080
          Throughput: 18500 tok/s | Samples:  430 | Forward: 32.0ms | Backward: 48.0ms | Optimizer:  6.0ms | GPU Mem: 18.4GB
          Task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
 ```
 
-## 指标说明
+## English textexplanation
 
-| 指标 | 单位 | 说明 | 示例 |
+| English text | English text | explanation | example |
 |------|------|------|------|
-| step | - | 当前训练步数 | 430 |
-| loss | - | 当前步的损失值 | 2.81 |
-| lr | - | 当前学习率 | 2e-4 |
-| GradNorm | - | 梯度范数（梯度的L2范数） | 4.28 |
-| Tokens | - | 已处理的总tokens数 | 110,080 |
-| Throughput | tokens/s | 吞吐量，每秒处理的tokens数 | 18,500 |
-| Samples | - | 当前步的样本数 | 430 |
-| Forward | ms | Forward pass的执行时间 | 32.0 |
-| Backward | ms | Backward pass的执行时间 | 48.0 |
-| Optimizer | ms | Optimizer step的执行时间 | 6.0 |
-| GPU Mem | GB | GPU显存使用量 | 18.4 |
-| Task | - | 当前任务类型（CLM/MLM/PreLM） | CLM |
-| RunLoss | - | 指数移动平均损失值 | 2.785 |
-| Elapsed | - | 从训练开始到现在的时间 | 2m 15s |
-| ETA | - | 预计完成时间 | 45d 12h |
+| step | - | English texttrainingstepEnglish text | 430 |
+| loss | - | English textstepEnglish textlossEnglish text | 2.81 |
+| lr | - | English textlearning rate | 2e-4 |
+| GradNorm | - | gradientEnglish text(gradientEnglish textL2English text) | 4.28 |
+| Tokens | - | English texttokensEnglish text | 110,080 |
+| Throughput | tokens/s | English text, English texttokensEnglish text | 18,500 |
+| Samples | - | English textstepEnglish text | 430 |
+| Forward | ms | Forward passEnglish texttime | 32.0 |
+| Backward | ms | Backward passEnglish texttime | 48.0 |
+| Optimizer | ms | Optimizer stepEnglish texttime | 6.0 |
+| GPU Mem | GB | GPUEnglish textuseEnglish text | 18.4 |
+| Task | - | English text(CLM/MLM/PreLM) | CLM |
+| RunLoss | - | English textlossEnglish text | 2.785 |
+| Elapsed | - | English texttrainingstartEnglish texttime | 2m 15s |
+| ETA | - | English texttime | 45d 12h |
 
-## 实现特点
+## implementationEnglish text
 
-✅ **高效采样**: GPU内存只在每10步采样一次，减少开销
-✅ **详细计时**: 分别记录forward、backward和optimizer步骤的耗时
-✅ **梯度监控**: 实时跟踪梯度范数以检测梯度爆炸/消失
-✅ **多层次日志**: 三行分层显示，信息丰富但不过度拥挤
-✅ **易于扩展**: 结构化设计，便于添加更多指标
+✅ **English text**: GPUEnglish text10stepEnglish text, English text
+✅ **English text**: English textforward, backwardEnglish textoptimizerstepEnglish text
+✅ **gradientmonitoring**: English textgradientEnglish textgradientEnglish text/English text
+✅ **English textlog**: English text, informationEnglish text
+✅ **English textextension**: English text, English text
 
-## 后续改进方向
+## English text
 
-1. **GPU内存查询实现**: 根据实际使用的框架（PyTorch/TensorFlow）实现 `get_gpu_memory_usage()`
-2. **分布式训练指标**: 添加All-Reduce通信时间、卡间负载均衡等指标
-3. **自适应采样**: 根据训练阶段动态调整采样频率
-4. **指标持久化**: 将日志定期保存到文件或TensorBoard进行分析
-5. **异常检测**: 根据梯度范数、损失突变等自动检测训练异常
+1. **GPUEnglish textqueryimplementation**: English textactualuseEnglish textframework(PyTorch/TensorFlow)implementation `get_gpu_memory_usage()`
+2. **English texttrainingEnglish text**: English textAll-ReduceEnglish texttime, English text
+3. **English text**: English texttrainingphaseEnglish text
+4. **English text**: English textlogEnglish textsaveEnglish textfileEnglish textTensorBoardEnglish text
+5. **English text**: English textgradientEnglish text, lossEnglish texttrainingEnglish text
 
-## 文件变更统计
+## fileEnglish textstatistics
 
-- **修改文件**: 1个 (`pretrain/pretraining_pipeline.s`)
-- **新增函数**: 1个 (`get_gpu_memory_usage()`)
-- **修改函数**: 2个 (`log_training_progress()`, `train_step()`)
-- **新增字段**: 5个 (在performance结构体中)
-- **代码行数**: 增加约150行
+- **English textfile**: 1English text (`pretrain/pretraining_pipeline.s`)
+- **English textfunction**: 1English text (`get_gpu_memory_usage()`)
+- **English textfunction**: 2English text (`log_training_progress()`, `train_step()`)
+- **English text**: 5English text (English textperformanceEnglish text)
+- **English text**: English text150English text
 
-## 测试建议
+## testEnglish text
 
-1. **单元测试**: 验证新增指标的计算正确性
-2. **集成测试**: 在完整训练过程中验证日志输出格式
-3. **性能测试**: 确保额外的日志记录不显著影响训练速度
-4. **分布式测试**: 在多GPU/多节点环境中验证指标准确性
+1. **English texttest**: English textcomputeEnglish text
+2. **English texttest**: English textcompletetrainingEnglish textlogoutputEnglish text
+3. **English texttest**: English textlogEnglish texttrainingEnglish text
+4. **English texttest**: English textGPU/English text
 
 ---
 
-**创建时间**: 2025年1月
-**相关文件**: `/home/shuwen/shuwen/train/neurx/pretrain/pretraining_pipeline.s`
+**English texttime**: 2025English text1English text
+**English textfile**: `/home/shuwen/shuwen/train/neurx/pretrain/pretraining_pipeline.s`

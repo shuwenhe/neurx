@@ -2,8 +2,8 @@
 
 // ============================================
 // NeurX Distributed Pretraining Launcher
-// 多GPU分布式预训练启动器
-// 功能: 初始化分布式环境、管理数据分片、协调梯度同步
+// English textGPUEnglish texttrainingstartEnglish text
+// English text: initializeEnglish text, managementdataEnglish text, English textgradientEnglish textstep
 // ============================================
 
 package neurx.distributed.launcher
@@ -15,17 +15,17 @@ use neurx.distributed.cuda_bridge
 use neurx.runtime.io.{runtime_env_get}
 
 // ============================================
-// 分布式环境配置
+// English textconfiguration
 // ============================================
 
 struct distributed_env {
-    int world_size          // 总GPU数量
-    int rank                // 当前进程rank (0到world_size-1)
-    int local_rank          // 本机GPU索引 (0到N-1)
-    string master_addr      // 主节点地址
-    int master_port         // 主节点通信端口
-    string backend          // 通信后端: "nccl", "gloo"
-    int num_gpus            // 本机GPU数量
+    int world_size          // English textGPUcount
+    int rank                // English textrank (0English textworld_size-1)
+    int local_rank          // English textGPUEnglish text (0English textN-1)
+    string master_addr      // mainEnglish text
+    int master_port         // mainEnglish text
+    string backend          // English text: "nccl", "gloo"
+    int num_gpus            // English textGPUcount
 }
 
 struct distributed_pretrain_launcher {
@@ -33,29 +33,29 @@ struct distributed_pretrain_launcher {
     process_group_state pg_state
     ddp_state ddp_state
     cuda_bridge cb
-    []string shard_paths    // 各rank分配的数据切片路径
+    []string shard_paths    // English textrankEnglish textdataEnglish textpath
     int micro_batch_size
     int gradient_accum_steps
 }
 
 // ============================================
-// 环境初始化
+// English textinitialize
 // ============================================
 
-// 从环境变量读取分布式配置
+// English textconfiguration
 func init_distributed_env() distributed_env {
     string world_size_str = runtime_env_get("WORLD_SIZE", "1")
     string rank_str = runtime_env_get("RANK", "0")
     string local_rank_str = runtime_env_get("LOCAL_RANK", "0")
     string master_addr = runtime_env_get("MASTER_ADDR", "localhost")
     string master_port_str = runtime_env_get("MASTER_PORT", "29500")
-    
+
     int world_size = parse_int(world_size_str)
     int rank = parse_int(rank_str)
     int local_rank = parse_int(local_rank_str)
     int master_port = parse_int(master_port_str)
-    
-    // 验证环境变量合法性
+
+    // English text
     if world_size < 1 {
         world_size = 1
     }
@@ -68,7 +68,7 @@ func init_distributed_env() distributed_env {
     if master_port < 1024 || master_port > 65535 {
         master_port = 29500
     }
-    
+
     distributed_env {
         world_size: world_size,
         rank: rank,
@@ -76,12 +76,12 @@ func init_distributed_env() distributed_env {
         master_addr: master_addr,
         master_port: master_port,
         backend: "nccl",
-        num_gpus: world_size,  // 单节点情况，GPU数 = world_size
+        num_gpus: world_size,  // English text, GPUEnglish text = world_size
     }
 }
 
 func parse_int(string s) int {
-    // 简单的字符串转整数
+    // English text
     int result = 0
     int i = 0
     while i < len(s) {
@@ -95,7 +95,7 @@ func parse_int(string s) int {
 }
 
 // ============================================
-// 分布式启动器初始化
+// English textstartEnglish textinitialize
 // ============================================
 
 func new_distributed_pretrain_launcher(
@@ -103,11 +103,11 @@ func new_distributed_pretrain_launcher(
     micro_batch_size int,
     gradient_accum_steps int,
 ) distributed_pretrain_launcher {
-    
-    // 1. 初始化分布式环境
+
+    // 1. initializeEnglish text
     distributed_env env = init_distributed_env()
-    
-    // 2. 初始化进程组 (NCCL通信后端)
+
+    // 2. initializeEnglish text (NCCLEnglish text)
     process_group_state pg = new_process_group(
         env.world_size,
         env.rank,
@@ -115,8 +115,8 @@ func new_distributed_pretrain_launcher(
         env.master_port,
         env.backend,
     )
-    
-    // 3. 初始化DDP状态
+
+    // 3. initializeDDPstate
     ddp_state ddp = new_ddp_state(
         "neurx_ddp",
         env.backend,
@@ -124,25 +124,25 @@ func new_distributed_pretrain_launcher(
         env.world_size,
         false,  // find_unused_parameters
     )
-    
-    // 4. 关联进程组到DDP
+
+    // 4. English textDDP
     ddp_attach_process_group(ddp, pg)
-    
-    // 5. 初始化CUDA通信桥接 (NCCL AllReduce)
+
+    // 5. initializeCUDAEnglish text (NCCL AllReduce)
     cuda_bridge cb = new_cuda_bridge(
         env.rank,
         env.local_rank,
         env.world_size,
         env.backend,
     )
-    
-    // 6. 生成各rank的数据分片路径
+
+    // 6. generateEnglish textrankEnglish textdataEnglish textpath
     []string shard_paths = generate_shard_distribution(
         config_path,
         env.rank,
         env.world_size,
     )
-    
+
     distributed_pretrain_launcher {
         env: env,
         pg_state: pg,
@@ -155,22 +155,22 @@ func new_distributed_pretrain_launcher(
 }
 
 // ============================================
-// 数据分片分配
+// dataEnglish text
 // ============================================
 
-// 为各rank分配独立的数据切片 (数据并行)
+// English textrankEnglish textdataEnglish text (dataEnglish text)
 func generate_shard_distribution(
     config_path string,
     rank int,
     world_size int,
 ) []string {
-    
-    // 获取所有shard路径
+
+    // English textshardpath
     []string all_shards = load_shard_list(config_path)
-    
-    // 分片数据 - 每个rank只处理分配给它的切片
+
+    // English textdata - English textrankEnglish text
     []string my_shards = []string{cap: (len(all_shards) / world_size) + 1}
-    
+
     int shard_idx = 0
     int i = rank
     while i < len(all_shards) {
@@ -178,18 +178,18 @@ func generate_shard_distribution(
         shard_idx = shard_idx + 1
         i = i + world_size
     }
-    
+
     my_shards
 }
 
-// 加载数据集的所有shard列表
+// loaddataEnglish textshardEnglish text
 func load_shard_list(string config_path) []string {
-    // TODO: 从配置文件读取shard路径列表
-    []string shards = []string{cap: 5131}  // 5131个shards
-    
+    // TODO: English textconfigurationfileEnglish textshardpathEnglish text
+    []string shards = []string{cap: 5131}  // 5131English textshards
+
     int i = 0
     while i < 5131 {
-        // 构建shard路径
+        // English textshardpath
         string shard_path = format_string(
             "dataset/pretrain/shard/shard_%05d.jsonl",
             i,
@@ -197,31 +197,31 @@ func load_shard_list(string config_path) []string {
         shards[i] = shard_path
         i = i + 1
     }
-    
+
     shards
 }
 
 func format_string(string template, int number) string {
-    // 简化版本 - 实际需要完整格式化
+    // English text - actualRequiredcompleteEnglish text
     template
 }
 
 // ============================================
-// 梯度同步和模型更新
+// gradientEnglish textstepEnglish textmodelEnglish text
 // ============================================
 
-// 在积累指定步数后进行梯度同步
+// English textstepEnglish textgradientEnglish textstep
 func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     []float gradients,
 ) []float {
-    
-    // 1. 调用CUDA桥接进行NCCL AllReduce
+
+    // 1. English textCUDAEnglish textNCCL AllReduce
     []float reduced_grads = cuda_bridge_all_reduce_sum(
         launcher.cb,
         gradients,
     )
-    
-    // 2. 平均梯度 (所有rank的梯度求和后除以rank数)
+
+    // 2. English textgradient (English textrankEnglish textgradientEnglish textrankEnglish text)
     int world_size = launcher.env.world_size
     int i = 0
     []float averaged_grads = []float{cap: len(reduced_grads)}
@@ -229,41 +229,41 @@ func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
         averaged_grads[i] = reduced_grads[i] / float(world_size)
         i = i + 1
     }
-    
+
     averaged_grads
 }
 
-// 执行优化器更新步
+// English textoptimizeEnglish textstep
 func (launcher *distributed_pretrain_launcher) optimizer_step(
     int step,
     float learning_rate,
     []float gradients,
 ) {
-    
-    // 1. 仅在同步步执行梯度同步
+
+    // 1. English textstepstepEnglish textgradientEnglish textstep
     if (step % launcher.gradient_accum_steps) == 0 {
         gradients = launcher.sync_gradients_nccl(gradients)
     }
-    
-    // 2. 更新DDP状态
+
+    // 2. English textDDPstate
     ddp_step(launcher.ddp_state, step)
-    
-    // 3. 执行优化器更新 (SGD/Adam)
-    // TODO: 调用优化器实现
+
+    // 3. English textoptimizeEnglish text (SGD/Adam)
+    // TODO: English textoptimizeEnglish textimplementation
 }
 
 // ============================================
-// 日志和监控
+// logEnglish textmonitoring
 // ============================================
 
-// 只在rank 0上打印日志，避免重复输出
+// English textrank 0English textlog, English textoutput
 func (launcher *distributed_pretrain_launcher) log(string message) {
     if launcher.env.rank == 0 {
         print("[rank=0] " + message)
     }
 }
 
-// 获取当前rank信息
+// English textrankinformation
 func (launcher *distributed_pretrain_launcher) rank_info() string {
     string info = "rank=" + itoa(launcher.env.rank) +
                   " world_size=" + itoa(launcher.env.world_size) +
@@ -273,45 +273,45 @@ func (launcher *distributed_pretrain_launcher) rank_info() string {
 }
 
 // ============================================
-// 清理资源
+// English text
 // ============================================
 
 func (launcher *distributed_pretrain_launcher) finalize() {
-    // 1. 最后一次梯度同步
+    // 1. English textgradientEnglish textstep
     launcher.log("Finalizing distributed training...")
-    
-    // 2. 销毁进程组
+
+    // 2. English text
     // process_group_destroy(launcher.pg_state)
-    
-    // 3. 清理CUDA资源
+
+    // 3. English textCUDAEnglish text
     cuda_bridge_finalize(launcher.cb)
-    
+
     launcher.log("Distributed training finalized.")
 }
 
 // ============================================
-// 辅助函数
+// helperfunction
 // ============================================
 
 func itoa(int n) string {
-    // 整数转字符串
+    // English text
     if n == 0 {
         return "0"
     }
-    
+
     string s = ""
     int num = n
     if num < 0 {
         s = "-"
         num = -num
     }
-    
-    // 逆序构建
+
+    // English text
     while num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10
     }
-    
+
     s
 }

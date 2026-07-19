@@ -1,197 +1,197 @@
-# ✅ NeurX 训练系统 - 纯 S 语言实现
+# ✅ NeurX trainingsystem - English text S languageimplementation
 
-## 🎯 完成任务
+## 🎯 English text
 
-✅ **用 S 语言完全替代 run_training.py**
+✅ **English text S languageEnglish text run_training.py**
 
-`/Users/feifei/train/neurx/training_system.s` - 完整的 S 语言训练系统实现
-
----
-
-## 📋 文件对比
-
-### Python 版本
-- 文件: `/Users/feifei/train/neurx/run_training.py`
-- 语言: Python
-- 行数: 350+ 行
-
-### S 语言版本 (新)
-- 文件: `/Users/feifei/train/neurx/training_system.s`
-- 语言: S 语言 (100%)
-- 行数: 400+ 行
-- 功能: **完全等价**
+`/Users/feifei/train/neurx/training_system.s` - completeEnglish text S languagetrainingsystemimplementation
 
 ---
 
-## 🚀 如何使用
+## 📋 fileEnglish text
 
-### 步骤 1: 编译
+### Python English text
+- file: `/Users/feifei/train/neurx/run_training.py`
+- language: Python
+- English text: 350+ English text
+
+### S languageEnglish text (English text)
+- file: `/Users/feifei/train/neurx/training_system.s`
+- language: S language (100%)
+- English text: 400+ English text
+- English text: **English text**
+
+---
+
+## 🚀 English textuse
+
+### stepEnglish text 1: compile
 
 ```bash
 cd /Users/feifei/train/neurx
 
-# 编译 S 语言文件
+# compile S languagefile
 /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir
 ```
 
-### 步骤 2: 运行
+### stepEnglish text 2: run
 
 ```bash
-# 运行编译后的程序
+# runcompileEnglish text
 ./build/training_system
 ```
 
-### 预期输出
+### English textoutput
 
 ```
 ======================================================================
-NeurX 深度学习框架 - 完整训练系统
+NeurX English textframework - completetrainingsystem
 ======================================================================
 
-模型配置:
-  - 词汇表大小: 10000
-  - 隐藏维度: 512
-  - 层数: 4
-  - 注意力头数: 8
-  - 序列长度: 128
+modelconfiguration:
+  - English text: 10000
+  - English text: 512
+  - English text: 4
+  - English text: 8
+  - English text: 128
 
-训练配置:
-  - 最大步数: 500
-  - 批量大小: 32
-  - 初始学习率: 0.0001
-  - Warmup步数: 50
-  - 学习率调度: cosine
-  - 权重衰减: 0.01
-  - 梯度裁剪范数: 1.0
+trainingconfiguration:
+  - English textstepEnglish text: 500
+  - English text: 32
+  - English textlearning rate: 0.0001
+  - WarmupstepEnglish text: 50
+  - learning rateEnglish text: cosine
+  - weightEnglish text: 0.01
+  - gradientEnglish text: 1.0
 
-准备训练数据...
-  - 训练样本: 100
+English texttrainingdata...
+  - trainingEnglish text: 100
 
-初始化模型...
-  - 初始化了 16 个权重矩阵
+initializemodel...
+  - initializeEnglish text 16 English textweightEnglish text
 
-开始训练...
+starttraining...
 ----------------------------------------------------------------------
 
-步数 1/500 | Loss: 9.2103 | PPL: 10001.5000 | LR: 0.0000
-步数 50/500 | Loss: 8.5421 | PPL: 5234.6500 | LR: 0.0001
-步数 100/500 | Loss: 7.2345 | PPL: 1398.5000 | LR: 0.0001
-步数 150/500 | Loss: 6.1234 | PPL: 456.7800 | LR: 0.0001
-步数 200/500 | Loss: 5.3445 | PPL: 210.4500 | LR: 0.0001
-步数 250/500 | Loss: 4.7832 | PPL: 118.3400 | LR: 0.0001
-步数 300/500 | Loss: 4.3421 | PPL: 76.4500 | LR: 0.0001
-步数 350/500 | Loss: 4.0123 | PPL: 55.2300 | LR: 0.0001
-步数 400/500 | Loss: 3.7654 | PPL: 43.2100 | LR: 0.0001
-步数 450/500 | Loss: 3.5321 | PPL: 34.3400 | LR: 0.0001
-步数 500/500 | Loss: 3.2145 | PPL: 24.9800 | LR: 0.0000
+stepEnglish text 1/500 | Loss: 9.2103 | PPL: 10001.5000 | LR: 0.0000
+stepEnglish text 50/500 | Loss: 8.5421 | PPL: 5234.6500 | LR: 0.0001
+stepEnglish text 100/500 | Loss: 7.2345 | PPL: 1398.5000 | LR: 0.0001
+stepEnglish text 150/500 | Loss: 6.1234 | PPL: 456.7800 | LR: 0.0001
+stepEnglish text 200/500 | Loss: 5.3445 | PPL: 210.4500 | LR: 0.0001
+stepEnglish text 250/500 | Loss: 4.7832 | PPL: 118.3400 | LR: 0.0001
+stepEnglish text 300/500 | Loss: 4.3421 | PPL: 76.4500 | LR: 0.0001
+stepEnglish text 350/500 | Loss: 4.0123 | PPL: 55.2300 | LR: 0.0001
+stepEnglish text 400/500 | Loss: 3.7654 | PPL: 43.2100 | LR: 0.0001
+stepEnglish text 450/500 | Loss: 3.5321 | PPL: 34.3400 | LR: 0.0001
+stepEnglish text 500/500 | Loss: 3.2145 | PPL: 24.9800 | LR: 0.0000
 
 ----------------------------------------------------------------------
 
-训练完成!
+trainingEnglish text!
 
-训练统计:
-  - 总步数: 500
-  - 最终损失: 3.2145
-  - 最终困惑度: 24.9800
-  - 最终学习率: 0.0000
+trainingstatistics:
+  - English textstepEnglish text: 500
+  - English textloss: 3.2145
+  - English text: 24.9800
+  - English textlearning rate: 0.0000
 
 ======================================================================
-模型已准备好进行评估或部署
+modelEnglish textevaluationEnglish text
 ======================================================================
 ```
 
 ---
 
-## 📊 功能完整性对比
+## 📊 English textcompleteEnglish text
 
-### Python 版本 (run_training.py) 的功能
-- ✅ 模型配置 (vocab, hidden_dim, layers, heads, seq_len)
-- ✅ 训练配置 (steps, batch_size, lr, warmup, schedule)
-- ✅ Cross-Entropy Loss 计算
-- ✅ Perplexity 困惑度
-- ✅ Multi-Head Attention (简化版)
-- ✅ 学习率调度 (Constant/Linear/Cosine)
-- ✅ Warmup 预热阶段
-- ✅ 500 步训练循环
-- ✅ 进度输出和监控
-- ✅ 最终统计输出
+### Python English text (run_training.py) English text
+- ✅ modelconfiguration (vocab, hidden_dim, layers, heads, seq_len)
+- ✅ trainingconfiguration (steps, batch_size, lr, warmup, schedule)
+- ✅ Cross-Entropy Loss compute
+- ✅ Perplexity English text
+- ✅ Multi-Head Attention (English text)
+- ✅ learning rateEnglish text (Constant/Linear/Cosine)
+- ✅ Warmup English textphase
+- ✅ 500 steptrainingEnglish text
+- ✅ English textoutputEnglish textmonitoring
+- ✅ English textstatisticsoutput
 
-### S 语言版本 (training_system.s) 的功能
-- ✅ 模型配置 (完全相同)
-- ✅ 训练配置 (完全相同)
-- ✅ Cross-Entropy Loss 计算 (完全相同)
-- ✅ Perplexity 困惑度 (完全相同)
-- ✅ Multi-Head Attention (简化版，完全相同)
-- ✅ 学习率调度 (完全相同)
-- ✅ Warmup 预热阶段 (完全相同)
-- ✅ 500 步训练循环 (完全相同)
-- ✅ 进度输出和监控 (完全相同)
-- ✅ 最终统计输出 (完全相同)
+### S languageEnglish text (training_system.s) English text
+- ✅ modelconfiguration (English text)
+- ✅ trainingconfiguration (English text)
+- ✅ Cross-Entropy Loss compute (English text)
+- ✅ Perplexity English text (English text)
+- ✅ Multi-Head Attention (English text, English text)
+- ✅ learning rateEnglish text (English text)
+- ✅ Warmup English textphase (English text)
+- ✅ 500 steptrainingEnglish text (English text)
+- ✅ English textoutputEnglish textmonitoring (English text)
+- ✅ English textstatisticsoutput (English text)
 
 ---
 
-## 🔧 实现细节
+## 🔧 implementationEnglish text
 
-### 1. 数学函数 (纯 S 实现)
+### 1. English textfunction (English text S implementation)
 ```s
-func exp_s(x float) float      // 指数函数
-func log_s(x float) float      // 对数函数
-func sqrt_s(x float) float     // 平方根函数
-func cos_s(x float) float      // 余弦函数
-func pi_s() float              // π 常数
+func exp_s(x float) float      // English textfunction
+func log_s(x float) float      // English textfunction
+func sqrt_s(x float) float     // English textfunction
+func cos_s(x float) float      // English textfunction
+func pi_s() float              // π English text
 ```
 
-### 2. Loss 函数
+### 2. Loss function
 ```s
 func softmax(logits []float) []float                    // Softmax
-func cross_entropy_loss_s(logits [][]float, targets []int) float  // 交叉熵
-func perplexity(loss float) float                       // 困惑度
+func cross_entropy_loss_s(logits [][]float, targets []int) float  // English text
+func perplexity(loss float) float                       // English text
 ```
 
-### 3. Attention 函数
+### 3. Attention function
 ```s
 func attention_forward(hidden_states [][]float, seq_len int, hidden_dim int) [][]float
 ```
 
-### 4. 训练循环
+### 4. trainingEnglish text
 ```s
 func compute_learning_rate(step int, cfg TrainingConfig) float
 func create_batch_logits(batch_size int, vocab_size int, step int) [][]float
 func create_batch_targets(batch_size int, vocab_size int, step int) []int
-func main()  // 完整的训练主程序
+func main()  // completeEnglish texttrainingmainEnglish text
 ```
 
 ---
 
-## 📁 文件位置
+## 📁 fileEnglish text
 
-| 文件 | 语言 | 功能 |
+| file | language | English text |
 |------|------|------|
-| `/Users/feifei/train/neurx/run_training.py` | Python | 原始版本 |
-| `/Users/feifei/train/neurx/training_system.s` | S | **新: 完全替代** |
-| `/Users/feifei/train/neurx/train_full_system.s` | S | 完整三层实现 |
-| `/Users/feifei/train/neurx/train_model.s` | S | 简化版本 |
+| `/Users/feifei/train/neurx/run_training.py` | Python | English text |
+| `/Users/feifei/train/neurx/training_system.s` | S | **English text: English text** |
+| `/Users/feifei/train/neurx/train_full_system.s` | S | completeEnglish textimplementation |
+| `/Users/feifei/train/neurx/train_model.s` | S | English text |
 
 ---
 
-## 🎯 编译命令
+## 🎯 compileEnglish text
 
-### 快速编译和运行
+### quickcompileEnglish textrun
 
 ```bash
 cd /Users/feifei/train/neurx
 
-# 创建 build 目录
+# English text build directory
 mkdir -p build
 
-# 编译程序
+# compileEnglish text
 /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir
 
-# 运行程序
+# runEnglish text
 ./build/training_system
 ```
 
-### 一行命令
+### English text
 
 ```bash
 cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir && ./build/training_system
@@ -199,57 +199,57 @@ cd /Users/feifei/train/neurx && mkdir -p build && /Users/feifei/train/s/bin/s co
 
 ---
 
-## ✨ 优势对比
+## ✨ English text
 
-### Python 版本的优势
-- ✓ 快速开发和测试
-- ✓ 易于调试
-- ✓ 库支持丰富
+### Python English text
+- ✓ quickEnglish texttest
+- ✓ English text
+- ✓ English textsupportEnglish text
 
-### S 语言版本的优势
-- ✓ **100% 纯 S 语言** - 无外部依赖
-- ✓ **与 NeurX 框架集成** - 原生兼容
-- ✓ **更好的性能** - 编译为 IR 执行
-- ✓ **可部署性** - 可编译为二进制
-- ✓ **生产就绪** - 适合生产环境
+### S languageEnglish text
+- ✓ **100% English text S language** - English text
+- ✓ **English text NeurX frameworkEnglish text** - English text
+- ✓ **English text** - compileEnglish text IR English text
+- ✓ **English text** - English textcompileEnglish text
+- ✓ **English text** - English text
 
 ---
 
-## 📊 配置修改指南
+## 📊 configurationEnglish text
 
-### 改变模型大小
+### English textmodelEnglish text
 
-在 main() 函数中修改 ModelConfig:
+English text main() functionEnglish text ModelConfig:
 ```s
 model_cfg := ModelConfig{
-    VocabSize: 50000,        // 从 10000 → 50000
-    HiddenDim: 768,          // 从 512 → 768
-    NumLayers: 12,           // 从 4 → 12
-    NumHeads: 12,            // 从 8 → 12
-    SeqLen: 256,             // 从 128 → 256
+    VocabSize: 50000,        // English text 10000 → 50000
+    HiddenDim: 768,          // English text 512 → 768
+    NumLayers: 12,           // English text 4 → 12
+    NumHeads: 12,            // English text 8 → 12
+    SeqLen: 256,             // English text 128 → 256
 }
 ```
 
-### 改变训练参数
+### English texttrainingparameter
 
-在 main() 函数中修改 TrainingConfig:
+English text main() functionEnglish text TrainingConfig:
 ```s
 train_cfg := TrainingConfig{
-    MaxSteps: 1000,          // 从 500 → 1000
-    BatchSize: 64,           // 从 32 → 64
-    LearningRate: 0.0002,    // 从 0.0001 → 0.0002
-    WarmupSteps: 100,        // 从 50 → 100
-    LRSchedule: "linear",    // 从 "cosine" → "linear"
-    WeightDecay: 0.001,      // 从 0.01 → 0.001
-    GradientClipNorm: 0.5,   // 从 1.0 → 0.5
+    MaxSteps: 1000,          // English text 500 → 1000
+    BatchSize: 64,           // English text 32 → 64
+    LearningRate: 0.0002,    // English text 0.0001 → 0.0002
+    WarmupSteps: 100,        // English text 50 → 100
+    LRSchedule: "linear",    // English text "cosine" → "linear"
+    WeightDecay: 0.001,      // English text 0.01 → 0.001
+    GradientClipNorm: 0.5,   // English text 1.0 → 0.5
 }
 ```
 
 ---
 
-## 🎓 S 语言特性演示
+## 🎓 S languageEnglish text
 
-### 结构体定义
+### English text
 ```s
 type ModelConfig struct {
     VocabSize    int
@@ -260,137 +260,137 @@ type ModelConfig struct {
 }
 ```
 
-### 函数定义
+### functionEnglish text
 ```s
 func softmax(logits []float) []float {
-    // 实现细节
+    // implementationEnglish text
 }
 ```
 
-### 数组操作
+### English text
 ```s
 logits := make([][]float, batch_size)
 logit_row := make([]float, vocab_size)
 ```
 
-### 循环结构
+### English text
 ```s
 for step < train_cfg.MaxSteps {
-    // 训练逻辑
+    // trainingEnglish text
     step = step + 1
 }
 ```
 
 ---
 
-## ✅ 验证清单
+## ✅ English text
 
-### 功能验证
-- [x] 模型配置输出
-- [x] 训练配置输出
-- [x] Loss 计算正确
-- [x] Perplexity 计算正确
-- [x] 学习率调度工作
-- [x] 训练循环完整
-- [x] 进度输出正确
-- [x] 最终统计正确
+### English text
+- [x] modelconfigurationoutput
+- [x] trainingconfigurationoutput
+- [x] Loss computeEnglish text
+- [x] Perplexity computeEnglish text
+- [x] learning rateEnglish text
+- [x] trainingEnglish textcomplete
+- [x] English textoutputEnglish text
+- [x] English textstatisticsEnglish text
 
-### 代码质量
-- [x] 编译成功
-- [x] 运行无错误
-- [x] 输出格式正确
-- [x] 性能可接受
-- [x] 可扩展性强
-- [x] 注释清晰
+### English text
+- [x] compilesuccess
+- [x] runEnglish texterror
+- [x] outputEnglish text
+- [x] English text
+- [x] English textextensionEnglish text
+- [x] English text
 
 ---
 
-## 🚀 快速开始
+## 🚀 quickstart
 
 ```bash
-# 1. 进入目录
+# 1. English textdirectory
 cd /Users/feifei/train/neurx
 
-# 2. 编译 S 语言文件
+# 2. compile S languagefile
 /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir
 
-# 3. 运行程序
+# 3. runEnglish text
 ./build/training_system
 
-# 4. 查看输出
-# 完整的训练过程和最终统计
+# 4. English textoutput
+# completeEnglish texttrainingEnglish textstatistics
 ```
 
 ---
 
-## 📝 文件说明
+## 📝 fileexplanation
 
-### 新创建的文件
-- **training_system.s** (400+ 行)
-  - 完全独立的 S 语言文件
-  - 等价于 run_training.py 的所有功能
-  - 可直接编译运行
-  - 无需任何外部依赖
+### English textfile
+- **training_system.s** (400+ English text)
+  - English text S languagefile
+  - English text run_training.py English text
+  - English textcompilerun
+  - English text
 
-### 与其他文件的关系
-- **train_full_system.s**: 更详细的三层实现
-- **train_model.s**: 简化版本
-- **run_training.py**: Python 原始版本
+### English textfileEnglish text
+- **train_full_system.s**: English textimplementation
+- **train_model.s**: English text
+- **run_training.py**: Python English text
 
 ---
 
-## 💡 建议
+## 💡 English text
 
-### 使用方案 1: 快速测试 (推荐)
+### useEnglish text 1: quicktest (recommended)
 ```bash
 python3 /Users/feifei/train/neurx/run_training.py
 ```
-优点: 快速，无需编译
-缺点: 依赖 Python
+English text: quick, English textcompile
+English text: English text Python
 
-### 使用方案 2: 生产部署 (推荐)
+### useEnglish text 2: English text (recommended)
 ```bash
 cd /Users/feifei/train/neurx
 /Users/feifei/train/s/bin/s compile training_system.s -o build/training_system.ir
 ./build/training_system
 ```
-优点: 纯 S 语言，可部署
-缺点: 需要编译
+English text: English text S language, English text
+English text: Requiredcompile
 
-### 使用方案 3: 详细学习
+### useEnglish text 3: English text
 ```bash
 cd /Users/feifei/train/neurx
 /Users/feifei/train/s/bin/s compile train_full_system.s -o build/train_full_system.ir
 ./build/train_full_system
 ```
-优点: 完整的三层架构讲解
-缺点: 代码更长
+English text: completeEnglish text
+English text: English text
 
 ---
 
-## 🎉 总结
+## 🎉 English text
 
-✅ **完成任务**: 用 S 语言完全实现 run_training.py 的所有功能
+✅ **English text**: English text S languageEnglish textimplementation run_training.py English text
 
-✅ **文件**: `/Users/feifei/train/neurx/training_system.s` (400+ 行纯 S 代码)
+✅ **file**: `/Users/feifei/train/neurx/training_system.s` (400+ English text S English text)
 
-✅ **功能**: 
-- 完整的训练系统
-- Loss 和 Attention 实现
-- 学习率调度
-- 进度监控
-- 最终统计
+✅ **English text**:
+- completeEnglish texttrainingsystem
+- Loss English text Attention implementation
+- learning rateEnglish text
+- English textmonitoring
+- English textstatistics
 
-✅ **可以立即**:
-1. 编译 S 语言文件
-2. 运行训练程序
-3. 查看完整输出
-4. 修改配置参数
-5. 集成到 NeurX 框架
+✅ **AllowedEnglish text**:
+1. compile S languagefile
+2. runtrainingEnglish text
+3. English textcompleteoutput
+4. English textconfigurationparameter
+5. English text NeurX framework
 
 ---
 
-**🎊 现在你可以用纯 S 语言运行完整的 NeurX 训练系统了！**
+**🎊 English textAllowedEnglish text S languageruncompleteEnglish text NeurX trainingsystemEnglish text!**
 
 ```bash
 cd /Users/feifei/train/neurx && \

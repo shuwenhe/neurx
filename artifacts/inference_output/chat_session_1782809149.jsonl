@@ -1,3 +1,3 @@
-{"role": "system", "content": "NeurX LLM 交互式推理系统已启动"}
-{"role": "user", "content": "你可以回答哪些问题？", "turn": 1}
-{"role": "assistant", "content": "当前没有可用 checkpoint，模型还不能直接生成答案。请先训练并保存 checkpoint。", "turn": 1}
+{"role": "system", "content": "NeurX LLM English textinferencesystemEnglish textstart"}
+{"role": "user", "content": "English textAllowedEnglish text?", "turn": 1}
+{"role": "assistant", "content": "English text checkpoint, modelEnglish textgenerateEnglish text.English texttrainingEnglish textsave checkpoint.", "turn": 1}

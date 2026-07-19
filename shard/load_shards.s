@@ -128,14 +128,14 @@ func main() int {
 
     println("")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("数据加载配置")
+    println("dataloadconfiguration")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("分片目录: " + shard_dir)
-    println("单个分片最大样本: " + int_to_str(max_samples_per_shard))
-    println("最大分片数: " + int_to_str(max_shards))
+    println("English textdirectory: " + shard_dir)
+    println("English text: " + int_to_str(max_samples_per_shard))
+    println("English text: " + int_to_str(max_shards))
     println("")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("加载分片数据")
+    println("loadEnglish textdata")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     let (dir_check, dir_code) = command("test -d " + shell_escape(shard_dir))
@@ -185,21 +185,21 @@ func main() int {
         }
 
         println("  [" + int_to_str(shard_count) + "] " + shard_file)
-        println("      已加载: " + int_to_str(samples_in_shard) + " 个样本")
+        println("      English textload: " + int_to_str(samples_in_shard) + " English text")
     }
 
     println("")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("加载统计")
+    println("loadstatistics")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("分片总数: " + int_to_str(shard_count))
+    println("English text: " + int_to_str(shard_count))
 
     if shard_count > 0 {
-        println("总样本数: " + int_to_str(total_samples))
-        println("平均每分片: " + int_to_str(total_samples / shard_count))
+        println("English text: " + int_to_str(total_samples))
+        println("English text: " + int_to_str(total_samples / shard_count))
     } else {
         total_samples = 0
-        println("未找到数据分片")
+        println("English textdataEnglish text")
     }
     println("")
 

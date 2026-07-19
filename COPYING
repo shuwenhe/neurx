@@ -1,43 +1,43 @@
-# NeurX 许可证信息
+# NeurX License Information
 
-## 许可协议
+## License Agreement
 
-本项目采用 **MIT 许可证** 进行发布。详细内容请参阅 [LICENSE](./LICENSE) 文件。
+This project is released under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
 
-### MIT 许可证简述
+### MIT License Summary
 
-- ✅ **可以**：自由使用、修改、分发、商业化
-- ✅ **可以**：在你的项目中使用本项目代码
-- ⚠️ **需要**：在使用本项目的地方保留许可证和版权声明
-- ⚠️ **不保证**：本项目不提供任何担保
+- ✅ **Allowed**: free use, modification, distribution, and commercial use
+- ✅ **Allowed**: use this project code in your project
+- ⚠️ **Required**: retain the license and copyright notice where this project is used
+- ⚠️ **No Warranty**: this project is provided without warranty
 
-## 使用条款
+## Terms of Use
 
-1. **保留许可证**：使用本项目代码时，必须在源代码和二进制文件中保留许可证和版权声明
-2. **免责声明**：本项目"按现状"提供，不提供任何明示或暗示的担保
-3. **商业使用**：允许商业用途，无需另外许可
+1. **Retain License**: useEnglish text, English textfileEnglish textRetain LicenseEnglish text
+2. **Disclaimer**: This project is provided "as is", without express or implied warranties
+3. **Commercial Use**: Commercial use is allowed without additional permission
 
-## 第三方依赖
+## Third-Party Dependencies
 
-本项目使用的公开数据集和工具：
+Public datasets and tools used by this project:
 
-| 名称 | 来源 | 许可证 | 描述 |
+| Name | Source | English text | Description |
 |------|------|--------|------|
-| MMLU | HuggingFace (cais) | CC-BY-4.0 | 大规模多学科知识评估数据集 |
-| HumanEval | 公开代码生成基准 | MIT | 代码生成评估基准 |
-| HH-RLHF 风格偏好集 | HuggingFace | OpenRAIL | 人类反馈偏好数据集 |
-| WikiPedia | Wikimedia | CC-BY-SA | 维基百科预训练数据 |
+| MMLU | HuggingFace (cais) | CC-BY-4.0 | large-scale multi-discipline knowledge evaluation dataset |
+| HumanEval | public code generation benchmark | MIT | code generation evaluation benchmark |
+| HH-RLHF style preference dataset | HuggingFace | OpenRAIL | human feedback preference dataset |
+| WikiPedia | Wikimedia | CC-BY-SA | Wikipedia pretraining data |
 
-所有第三方依赖均遵循各自的开源许可证。
+English textThird-Party DependenciesEnglish text.
 
-## 归属信息
+## Attribution
 
-**项目维护者**：Shuwen He
+**Project Maintainer**: Shuwen He
 
-## 免责声明
+## Disclaimer
 
-本项目代码"按现状"提供，不提供任何保证。作者对使用本代码造成的任何直接、间接、附带或后果性损害不承担责任。
+This project code is provided "as is", without warranty. The author is not liable for direct, indirect, incidental, or consequential damages caused by use of this code.
 
-## 其他协议
+## Other Agreements
 
-若需在专有或非开源项目中使用本代码，请联系项目维护者进行许可证协商。
+English textuseEnglish text, English textProject MaintainerEnglish text.

@@ -159,11 +159,11 @@ int main() {
 
   std::printf("NeurX real CUDA inference ready (step=%llu, layers=%u, context=%u).\n",
               static_cast<unsigned long long>(header.step), header.layers, header.seq);
-  std::printf("Commands: quit, exit, bye, or 退出\n\n");
+  std::printf("Commands: quit, exit, bye, or English text\n\n");
   for (std::string line;;) {
     std::printf("You: ");
     if (!std::getline(std::cin, line)) break;
-    if (line == "quit" || line == "exit" || line == "bye" || line == "退出") break;
+    if (line == "quit" || line == "exit" || line == "bye" || line == "English text") break;
     if (line.empty()) continue;
     std::vector<int> ids = tok.encode("User: " + line + "\nAssistant:");
     if (tok.eos >= 0 && !ids.empty() && ids.back() == tok.eos) ids.pop_back();

@@ -1,10 +1,10 @@
-# Codex 迁移集成指南
+# Codex migrationEnglish text
 
-## AgentController 集成
+## AgentController English text
 
-### 1. 头文件引入
+### 1. English textfileEnglish text
 
-在 `AgentController.h` 中添加：
+English text `AgentController.h` English text:
 
 ```cpp
 #include "src/thread/ThreadId.h"
@@ -16,57 +16,57 @@
 #include "src/sandbox/DefaultSandboxManager.h"
 ```
 
-### 2. 成员变量
+### 2. English text
 
-在 `AgentController` 私有成员中添加：
+English text `AgentController` English text:
 
 ```cpp
 private:
-    // 线程管理
+    // English textmanagement
     FileBasedThreadStorePtr m_threadStore;
     ThreadId m_currentThreadId;
     QMap<ThreadId, QVariantMap> m_activeThreads;
-    
-    // 审批管理
+
+    // English textmanagement
     ApprovalManagerPtr m_approvalManager;
-    
-    // 沙箱管理
+
+    // English textmanagement
     SandboxManagerPtr m_sandboxManager;
-    
-    // 初始化方法
+
+    // initializeEnglish text
     void initializeThreadSystem();
     void initializeApprovalSystem();
     void initializeSandboxSystem();
 ```
 
-### 3. 初始化代码
+### 3. initializeEnglish text
 
-在 `AgentController::AgentController()` 中添加：
+English text `AgentController::AgentController()` English text:
 
 ```cpp
 AgentController::AgentController(QObject *parent)
     : QObject(parent)
 {
-    // 初始化线程系统
+    // initializeEnglish textsystem
     initializeThreadSystem();
-    
-    // 初始化审批系统
+
+    // initializeEnglish textsystem
     initializeApprovalSystem();
-    
-    // 初始化沙箱系统
+
+    // initializeEnglish textsystem
     initializeSandboxSystem();
 }
 
 void AgentController::initializeThreadSystem()
 {
     QString storePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/threads";
-    
+
     m_threadStore = std::make_shared<FileBasedThreadStore>(storePath);
     if (!m_threadStore->initialize()) {
         qWarning() << "Failed to initialize thread store at" << storePath;
     }
-    
-    // 连接信号
+
+    // English text
     connect(m_threadStore.get(), &ThreadStore::threadModified, this, &AgentController::onThreadModified);
     connect(m_threadStore.get(), &ThreadStore::threadDeleted, this, &AgentController::onThreadDeleted);
 }
@@ -74,22 +74,22 @@ void AgentController::initializeThreadSystem()
 void AgentController::initializeApprovalSystem()
 {
     m_approvalManager = std::make_shared<DefaultApprovalManager>();
-    
-    // 设置默认策略
+
+    // English textdefaultEnglish text
     ApprovalPolicy policy;
     policy.defaultPolicy = AskForApproval::OnRequest;
     policy.defaultReviewer = ApprovalsReviewer::User;
     m_approvalManager->setDefaultPolicy(policy);
-    
-    // 添加常见工具的细粒度规则
+
+    // English texttoolEnglish text
     GranularApprovalConfig gitRule;
     gitRule.toolName = "git";
     gitRule.resourcePattern = ".*";
     gitRule.policy = AskForApproval::OnRequest;
     m_approvalManager->addGranularRule(gitRule);
-    
-    // 连接信号
-    connect(m_approvalManager.get(), &ApprovalManager::approvalRequested, 
+
+    // English text
+    connect(m_approvalManager.get(), &ApprovalManager::approvalRequested,
             this, &AgentController::onApprovalRequested);
     connect(m_approvalManager.get(), &ApprovalManager::approvalDecided,
             this, &AgentController::onApprovalDecided);
@@ -98,27 +98,27 @@ void AgentController::initializeApprovalSystem()
 void AgentController::initializeSandboxSystem()
 {
     m_sandboxManager = std::make_shared<DefaultSandboxManager>();
-    
-    // 设置默认沙箱模式
+
+    // English textdefaultEnglish text
     m_sandboxManager->setDefaultSandboxMode(SandboxMode::WorkspaceWrite);
-    
-    // 配置允许的路径
+
+    // configurationEnglish textpath
     QString workspacePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     m_sandboxManager->addAllowedWritePath(workspacePath);
     m_sandboxManager->addAllowedReadPath("/tmp");
-    
-    // 连接信号
+
+    // English text
     connect(m_sandboxManager.get(), &SandboxManager::accessDenied,
             this, &AgentController::onSandboxAccessDenied);
 }
 ```
 
-### 4. 槽函数实现
+### 4. English textfunctionimplementation
 
-添加槽函数处理各系统的事件：
+English textfunctionEnglish textsystemEnglish text:
 
 ```cpp
-// 线程系统槽函数
+// English textsystemEnglish textfunction
 void AgentController::onThreadModified(const ThreadId &threadId)
 {
     emit threadStateChanged(threadId.toString());
@@ -132,11 +132,11 @@ void AgentController::onThreadDeleted(const ThreadId &threadId)
     emit threadDeleted(threadId.toString());
 }
 
-// 审批系统槽函数
+// English textsystemEnglish textfunction
 void AgentController::onApprovalRequested(const QString &approvalId, const QVariantMap &details)
 {
     qInfo() << "Approval requested:" << approvalId;
-    // 这里可以发送信号给 QML 显示审批对话框
+    // English textAllowedEnglish text QML English text
     emit approvalRequired(approvalId, details);
 }
 
@@ -145,7 +145,7 @@ void AgentController::onApprovalDecided(const QString &approvalId, bool approved
     qInfo() << "Approval decided:" << approvalId << "=" << approved;
 }
 
-// 沙箱系统槽函数
+// English textsystemEnglish textfunction
 void AgentController::onSandboxAccessDenied(const QString &path, int mode, const QString &reason)
 {
     qWarning() << "Sandbox access denied:" << path << reason;
@@ -153,25 +153,25 @@ void AgentController::onSandboxAccessDenied(const QString &path, int mode, const
 }
 ```
 
-### 5. 公共 API 方法
+### 5. English text API English text
 
-添加用于 QML 调用的方法：
+English text QML English text:
 
 ```cpp
 public:
-    // 线程相关
+    // English text
     Q_INVOKABLE void createNewThread();
     Q_INVOKABLE void resumeThread(const QString &threadId);
     Q_INVOKABLE void forkThread(const QString &threadId);
     Q_INVOKABLE void saveThreadCheckpoint(const QString &label);
     Q_INVOKABLE void loadThreadCheckpoint(const QString &checkpointId);
-    
-    // 审批相关
+
+    // English text
     Q_INVOKABLE void approveAction(const QString &approvalId);
     Q_INVOKABLE void rejectAction(const QString &approvalId);
     Q_INVOKABLE QVariantMap getApprovalStats();
-    
-    // 沙箱相关
+
+    // English text
     Q_INVOKABLE bool canAccessPath(const QString &path, int mode);
     Q_INVOKABLE QVariantMap getSandboxStats();
 
@@ -181,14 +181,14 @@ private:
     void forkThread_impl(const ThreadId &threadId);
     void saveThreadCheckpoint_impl(const QString &label);
     void loadThreadCheckpoint_impl(const QString &checkpointId);
-    
+
     void approveAction_impl(const QString &approvalId);
     void rejectAction_impl(const QString &approvalId);
-    
+
     bool canAccessPath_impl(const QString &path, FileSystemAccessMode mode);
 ```
 
-### 6. 实现示例
+### 6. implementationexample
 
 ```cpp
 void AgentController::createNewThread()
@@ -196,7 +196,7 @@ void AgentController::createNewThread()
     CreateThreadParams params;
     params.mode = ThreadInitializationMode::Fresh;
     params.metadata["createdBy"] = "user";
-    
+
     m_threadStore->createThread(params, [this](ThreadStoreError err, ThreadId id) {
         if (err == ThreadStoreError::Success) {
             m_currentThreadId = id;
@@ -215,7 +215,7 @@ void AgentController::approveAction(const QString &approvalId)
 void AgentController::saveThreadCheckpoint(const QString &label)
 {
     QVariantMap state = m_activeThreads[m_currentThreadId];
-    m_threadStore->saveCheckpoint(m_currentThreadId, state, label, 
+    m_threadStore->saveCheckpoint(m_currentThreadId, state, label,
         [this](ThreadStoreError err) {
             if (err == ThreadStoreError::Success) {
                 emit checkpointSaved(label);
@@ -224,73 +224,73 @@ void AgentController::saveThreadCheckpoint(const QString &label)
 }
 ```
 
-### 7. 信号定义
+### 7. English text
 
-在 `AgentController` 中添加信号：
+English text `AgentController` English text:
 
 ```cpp
 signals:
-    // 线程信号
+    // English text
     void threadCreated(const QString &threadId);
     void threadStateChanged(const QString &threadId);
     void threadDeleted(const QString &threadId);
     void checkpointSaved(const QString &label);
     void checkpointLoaded(const QString &checkpointId);
-    
-    // 审批信号
+
+    // English text
     void approvalRequired(const QString &approvalId, const QVariantMap &details);
     void approvalProcessed(const QString &approvalId, bool approved);
-    
-    // 沙箱信号
+
+    // English text
     void sandboxAccessDenied(const QString &path, const QString &reason);
     void sandboxError(const QString &error);
 ```
 
-### 8. CMakeLists.txt 更新
+### 8. CMakeLists.txt English text
 
-确保在 `CMakeLists.txt` 中包含新文件：
+English text `CMakeLists.txt` English textfile:
 
 ```cmake
 set(SOURCES
-    # ... 现有源文件 ...
-    
-    # 线程系统
+    # ... English textfile ...
+
+    # English textsystem
     src/thread/ThreadId.cpp
     src/thread/store/InMemoryThreadStore.cpp
     src/thread/store/FileBasedThreadStore.cpp
-    
-    # 审批系统
+
+    # English textsystem
     src/approvals/DefaultApprovalManager.cpp
-    
-    # 沙箱系统
+
+    # English textsystem
     src/sandbox/DefaultSandboxManager.cpp
 )
 
 set(HEADERS
-    # ... 现有头文件 ...
-    
-    # 线程系统
+    # ... English textfile ...
+
+    # English textsystem
     src/thread/ThreadId.h
     src/thread/ThreadTypes.h
     src/thread/store/ThreadStore.h
     src/thread/store/InMemoryThreadStore.h
     src/thread/store/FileBasedThreadStore.h
-    
-    # 审批系统
+
+    # English textsystem
     src/approvals/ApprovalTypes.h
     src/approvals/ApprovalManager.h
     src/approvals/DefaultApprovalManager.h
-    
-    # 沙箱系统
+
+    # English textsystem
     src/sandbox/SandboxTypes.h
     src/sandbox/SandboxManager.h
     src/sandbox/DefaultSandboxManager.h
 )
 ```
 
-## QML 集成示例
+## QML English textexample
 
-### 新建线程对话框
+### English text
 
 ```qml
 // ThreadDialog.qml
@@ -301,15 +301,15 @@ import org.neurx.agent 1.0
 Dialog {
     id: threadDialog
     title: "New Thread"
-    
+
     Column {
         spacing: 10
-        
+
         TextField {
             id: threadNameField
             placeholderText: "Thread name..."
         }
-        
+
         Button {
             text: "Create"
             onClicked: {
@@ -321,7 +321,7 @@ Dialog {
 }
 ```
 
-### 审批对话框
+### English text
 
 ```qml
 // ApprovalDialog.qml
@@ -332,24 +332,24 @@ import org.neurx.agent 1.0
 Dialog {
     id: approvalDialog
     title: "Approval Required"
-    
+
     property string approvalId
     property var details
-    
+
     Column {
         spacing: 10
-        
+
         Text {
             text: "Tool: " + details.toolName
         }
-        
+
         Text {
             text: "Action: " + details.command
         }
-        
+
         Row {
             spacing: 10
-            
+
             Button {
                 text: "Approve"
                 onClicked: {
@@ -357,7 +357,7 @@ Dialog {
                     approvalDialog.close()
                 }
             }
-            
+
             Button {
                 text: "Reject"
                 onClicked: {
@@ -370,9 +370,9 @@ Dialog {
 }
 ```
 
-## 测试计划
+## testEnglish text
 
-### 单元测试
+### English texttest
 
 ```cpp
 // tests/TestThreadSystem.cpp
@@ -380,46 +380,46 @@ void TestThreadSystem::testCreateThread()
 {
     FileBasedThreadStore store(m_tempDir);
     QVERIFY(store.initialize());
-    
+
     CreateThreadParams params;
     params.mode = ThreadInitializationMode::Fresh;
-    
+
     ThreadId createdId;
     ThreadStoreError error = ThreadStoreError::StorageError;
-    
+
     store.createThread(params, [&](auto err, auto id) {
         error = err;
         createdId = id;
     });
-    
+
     QCOMPARE(error, ThreadStoreError::Success);
     QVERIFY(!createdId.isNull());
 }
 ```
 
-## 性能优化建议
+## English textoptimizeEnglish text
 
-1. **缓存**: 使用 LRU 缓存存储最近访问的线程
-2. **批处理**: 组合多个检查点操作
-3. **异步 I/O**: 使用 QThreadPool 进行文件操作
-4. **索引**: 为线程元数据创建 SQLite 索引
+1. **cache**: use LRU cacheEnglish text
+2. **English text**: English textcheckpointEnglish text
+3. **English textstep I/O**: use QThreadPool English textfileEnglish text
+4. **English text**: English textdataEnglish text SQLite English text
 
-## 故障排查
+## English text
 
-### 常见问题
+### English text
 
-1. **线程存储初始化失败**
-   - 检查数据目录权限
-   - 确保有足够的磁盘空间
+1. **English textinitializefailure**
+   - English textdatadirectoryEnglish text
+   - English text
 
-2. **沙箱执行失败**
-   - 检查 bwrap 是否已安装
-   - 验证允许的路径配置
+2. **English textfailure**
+   - English text bwrap English text
+   - English textpathconfiguration
 
-3. **审批超时**
-   - 增加超时时间
-   - 检查 Guardian 服务连接
+3. **English text**
+   - English texttime
+   - English text Guardian English text
 
 ---
-**版本**: 1.0
-**最后更新**: 2025-06-02
+**English text**: 1.0
+**English text**: 2025-06-02

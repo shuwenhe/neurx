@@ -26,27 +26,27 @@ use neurx.tokenizer.data_pipeline.{
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
 
 // ============================================================================
-// 1. 配置
+// 1. configuration
 // ============================================================================
 
 struct data_source {
     string name
-    string path                 // 目录或 JSONL 文件路径
-    float weight                // 采样权重
-    string text_field           // JSONL 中文本字段名 (通常 "text" 或 "content")
-    bool is_code                // 是否为代码 (影响质量过滤策略)
+    string path                 // directoryEnglish text JSONL filepath
+    float weight                // English textweight
+    string text_field           // JSONL English text (English text "text" English text "content")
+    bool is_code                // English text (English text)
 }
 
 struct corpus_config {
     []data_source sources
     int num_sources
-    int seq_len                 // 目标序列长度
-    int batch_size              // 每批序列数
-    int shuffle_buffer          // 混洗缓冲区大小 (文档数)
-    int min_doc_length          // 最短文档字符数 (过滤)
-    int max_doc_length          // 最长文档字符数 (截断)
-    float min_quality_score     // 最低质量分 (0-1)
-    bool enable_dedup           // 文档级去重
+    int seq_len                 // English text
+    int batch_size              // English text
+    int shuffle_buffer          // English text (English text)
+    int min_doc_length          // English text (English text)
+    int max_doc_length          // English text (English text)
+    float min_quality_score     // English text (0-1)
+    bool enable_dedup           // English textdeduplication
     int bos_token_id
     int eos_token_id
     int pad_token_id
@@ -97,23 +97,23 @@ func default_pretraining_corpus() corpus_config {
 }
 
 // ============================================================================
-// 2. 状态
+// 2. state
 // ============================================================================
 
 struct corpus_state {
     corpus_config config
     bpe_tokenizer_state tokenizer
-    []streaming_reader_state readers   // 每个数据源一个 reader
-    int current_source                 // 轮转或加权采样的当前源
-    int rng                            // LCG 随机状态
-    []string shuffle_buffer            // 文档级混洗缓冲
+    []streaming_reader_state readers   // English textdataEnglish text reader
+    int current_source                 // English text
+    int rng                            // LCG English textstate
+    []string shuffle_buffer            // English text
     int buf_head
     int buf_size
     int total_docs_seen
     int total_tokens_seen
-    int docs_filtered                  // 质量过滤丢弃的文档数
-    int docs_deduped                   // 去重丢弃的文档数
-    []int dedup_hashes                 // 文档哈希值 (用于简单精确去重)
+    int docs_filtered                  // English text
+    int docs_deduped                   // deduplicationEnglish text
+    []int dedup_hashes                 // English text (English textdeduplication)
 }
 
 func new_corpus_state(corpus_config cfg) corpus_state {
@@ -130,7 +130,7 @@ func new_corpus_state(corpus_config cfg) corpus_state {
     }
 
     []string buf = []string{cap: cfg.shuffle_buffer}
-    []int hashes = []int{cap: 1000000}   // 简单哈希集 (生产环境用布隆过滤器)
+    []int hashes = []int{cap: 1000000}   // English text (English text)
 
     corpus_state {
         config: cfg,
@@ -182,11 +182,11 @@ func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bo
 }
 
 // ============================================================================
-// 3. JSONL 解析 (取出指定字段的文本)
+// 3. JSONL English text (English text)
 // ============================================================================
 
-// 从一行 JSONL 中提取某字段值: {"field": "value", ...}
-// 简化实现: 在字符串中查找 "field": 后面的字符串值
+// English text JSONL English text: {"field": "value", ...}
+// English textimplementation: English text "field": English text
 func jsonl_extract_text(string line, string field) string {
     string pattern = "\"" + field + "\":"
     int plen = len(pattern)
@@ -196,7 +196,7 @@ func jsonl_extract_text(string line, string field) string {
         return ""
     }
     int start = pos + plen
-    // 跳过空格
+    // English text
     while start < llen && line[start] == 32 {
         start = start + 1
     }
@@ -206,13 +206,13 @@ func jsonl_extract_text(string line, string field) string {
     if line[start] != 34 {   // '"'
         return ""
     }
-    start = start + 1   // 跳过开始引号
+    start = start + 1   // English textstartEnglish text
     string result = ""
     int i = start
     while i < llen {
         int c = line[i]
-        if c == 34 { break }     // 结束引号
-        if c == 92 && i + 1 < llen {  // 转义 '\'
+        if c == 34 { break }     // English text
+        if c == 92 && i + 1 < llen {  // English text '\'
             int nc = line[i + 1]
             if nc == 110 { result = result + string(10); i = i + 2; continue }  // \n
             if nc == 116 { result = result + string(9);  i = i + 2; continue }  // \t
@@ -226,7 +226,7 @@ func jsonl_extract_text(string line, string field) string {
     result
 }
 
-// 字符串中查找子串
+// English text
 func cl_find(string s, string pattern, int start) int {
     int slen = len(s)
     int plen = len(pattern)
@@ -245,10 +245,10 @@ func cl_find(string s, string pattern, int start) int {
 }
 
 // ============================================================================
-// 4. 质量过滤
+// 4. English text
 // ============================================================================
 
-// 简单质量分: 基于可打印字符比例 + 字符多样性 + 词长合理性
+// English text: English text + English text + English text
 func compute_quality_score(string text) float {
     int n = len(text)
     if n == 0 { return 0.0 }
@@ -296,7 +296,7 @@ func compute_quality_score(string text) float {
         avg_word_len = (total_word_len * 1.0) / (word_count * 1.0)
     }
 
-    // 英文文本: 可打印率 > 0.9, 字母比 > 0.5, 平均词长 3-12
+    // English text: English text > 0.9, English text > 0.5, English text 3-12
     float score = 0.0
     if print_ratio > 0.9 { score = score + 0.4 }
     if alpha_ratio > 0.3 { score = score + 0.3 }
@@ -307,13 +307,13 @@ func compute_quality_score(string text) float {
 }
 
 // ============================================================================
-// 5. 文档级去重 (多项式哈希)
+// 5. English textdeduplication (English text)
 // ============================================================================
 
 func doc_hash(string text) int {
     int h = 2166136261
     int i = 0
-    while i < len(text) && i < 2048 {  // 只哈希前 2KB
+    while i < len(text) && i < 2048 {  // English text 2KB
         h = h * 16777619
         h = h + text[i]
         if h < 0 { h = -h }
@@ -332,10 +332,10 @@ func corpus_is_duplicate(corpus_state state, int hash) bool {
 }
 
 // ============================================================================
-// 6. 序列打包 (Greedy Sequence Packing)
+// 6. English text (Greedy Sequence Packing)
 //
-//   把变长文档的 token 流连续填入长度为 seq_len 的窗口，
-//   文档边界插入 EOS/BOS 分隔。这比简单截断的样本效率高 ~2x。
+//   English text token English text seq_len English text,
+//   English text EOS/BOS English text.English text ~2x.
 // ============================================================================
 
 struct packing_buffer {
@@ -380,10 +380,10 @@ func pb_reset(packing_buffer buf) packing_buffer {
 }
 
 // ============================================================================
-// 7. 加权数据源选择
+// 7. English textdataEnglish text
 // ============================================================================
 
-// 按权重采样下一个数据源 (逆变换采样)
+// English textweightEnglish textdataEnglish text (English text)
 func corpus_select_source(corpus_state state) corpus_source_selection {
     state.rng = state.rng * 1664525 + 1013904223
     int rabs = state.rng
@@ -411,7 +411,7 @@ func corpus_select_source(corpus_state state) corpus_source_selection {
 }
 
 // ============================================================================
-// 8. 核心批次生成 (从真实 JSONL 文件流生成 token 批次)
+// 8. English textbatchgenerate (English texttruthful JSONL fileEnglish textgenerate token batch)
 // ============================================================================
 
 struct corpus_batch {
@@ -420,7 +420,7 @@ struct corpus_batch {
     int batch_size
     int seq_len
     int total_tokens
-    string[] source_names   // 每个序列的来源名称
+    string[] source_names   // English textSourceName
 }
 
 struct corpus_source_selection {
@@ -446,11 +446,11 @@ struct corpus_token_stream_result {
     int tokens_collected
 }
 
-// 读取一个文档:
-//   1. 加权选择源  →  从该源的 streaming reader 读下一行
-//   2. JSONL 解析  →  提取文本字段
-//   3. 质量过滤 / 去重
-// 返回 (doc_text, updated_state, ok)
+// English text:
+//   1. English text  →  English text streaming reader English text
+//   2. JSONL English text  →  English text
+//   3. English text / deduplication
+// English text (doc_text, updated_state, ok)
 func corpus_read_document(corpus_state state) corpus_document_result {
     int attempts = 0
     int max_attempts = 20
@@ -467,7 +467,7 @@ func corpus_read_document(corpus_state state) corpus_document_result {
 
         if !lr.success {
             if lr.end_of_file {
-                // 重置为从头开始 (epoch wrap)
+                // English textstart (epoch wrap)
                 state.readers[src_idx] = reset_reader(state.readers[src_idx])
             }
             attempts = attempts + 1
@@ -519,7 +519,7 @@ func corpus_read_document(corpus_state state) corpus_document_result {
 }
 
 // ============================================================================
-// 9. 主 API: 生成一个打包批次
+// 9. main API: generateEnglish textbatch
 // ============================================================================
 
 func corpus_next_batch(corpus_state state) corpus_batch_result {
@@ -544,7 +544,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
         ok = doc_result.ok
 
         if !ok {
-            // 无有效文档; 用 PAD 填满剩余
+            // English text; English text PAD English text
             while seqs_ready < batch_size {
                 int pos = seqs_ready * seq_len
                 int t = 0
@@ -563,10 +563,10 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
         []int token_ids = encode(state.tokenizer, doc_text)
         state.total_tokens_seen = state.total_tokens_seen + len(token_ids)
 
-        // 插入 BOS
+        // English text BOS
         buf = pb_append(buf, bos)
 
-        // 把文档 token 填入 packing buffer; 满了就刷出一个序列
+        // English text token English text packing buffer; English text
         int i = 0
         while i < len(token_ids) {
             buf = pb_append(buf, token_ids[i])
@@ -577,7 +577,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
                 int t = 0
                 while t < seq_len {
                     all_input[pos + t] = seq[t]
-                    // target = 右移一位 (next-token 预测)
+                    // target = English text (next-token English text)
                     if t + 1 < seq_len {
                         all_target[pos + t] = seq[t + 1]
                     } else {
@@ -585,7 +585,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
                     }
                     t = t + 1
                 }
-                src_names[seqs_ready] = doc_text  // 简化: 实际应存来源名
+                src_names[seqs_ready] = doc_text  // English text: actualEnglish textSourceEnglish text
                 seqs_ready = seqs_ready + 1
                 buf = pb_reset(buf)
 
@@ -594,7 +594,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             i = i + 1
         }
 
-        // 文档结束，插入 EOS
+        // English text, English text EOS
         buf = pb_append(buf, eos)
     }
 
@@ -652,7 +652,7 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
 }
 
 // ============================================================================
-// 10. 统计
+// 10. statistics
 // ============================================================================
 
 struct corpus_stats {
@@ -683,7 +683,7 @@ func corpus_get_stats(corpus_state state) corpus_stats {
 }
 
 // ============================================================================
-// 11. 辅助
+// 11. helper
 // ============================================================================
 
 func cl_substring(string s, int start, int end) string {

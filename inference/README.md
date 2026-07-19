@@ -42,7 +42,7 @@ Example:
 
 ```bash
 NEURX_INFER_CHECKPOINT_PATH=artifacts/checkpoints/llm_training \
-NEURX_INFER_QUESTION="NeurX 可以做什么？" \
+NEURX_INFER_QUESTION="NeurX AllowedEnglish text?" \
 bash run_inference_llm.sh
 ```
 

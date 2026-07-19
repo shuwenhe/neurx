@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     while (true) {
       std::cout << "You: " << std::flush;
       if (!std::getline(std::cin, line) || line == "quit" || line == "exit" ||
-          line == "bye" || line == "退出") {
+          line == "bye" || line == "English text") {
         break;
       }
       if (line.empty()) continue;

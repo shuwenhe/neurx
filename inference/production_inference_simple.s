@@ -64,11 +64,11 @@ func main() int {
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_s_pretrain"))
     string seed = runtime_env_get("NEURX_INFER_SEED", "neurx ")
-    string fallback_prompt = runtime_env_get("NEURX_INFER_FALLBACK_PROMPT", "NeurX 可以做什么？")
-    string prompt_from_env = runtime_env_get("NEURX_INFER_PROMPT", runtime_env_get("NEURX_INFERENCE_INPUT", "NeurX 可以做什么？"))
+    string fallback_prompt = runtime_env_get("NEURX_INFER_FALLBACK_PROMPT", "NeurX AllowedEnglish text?")
+    string prompt_from_env = runtime_env_get("NEURX_INFER_PROMPT", runtime_env_get("NEURX_INFERENCE_INPUT", "NeurX AllowedEnglish text?"))
     string answer_mode = trim(runtime_env_get("NEURX_INFER_ANSWER_MODE", "qa"))
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
-    
+
     // Print header
     println("================================================")
     println("NeurX S Inference Engine (Simplified)")
@@ -79,13 +79,13 @@ func main() int {
     println("Seed: " + seed)
     println("Answer Mode: " + answer_mode)
     println("")
-    
+
     if len(validate_only) > 0 {
         println("Validation only mode")
         println("================================================")
         return 0
     }
-    
+
     println("Prompt: " + prompt_from_env)
     println("")
     println("Generated response:")

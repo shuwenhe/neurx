@@ -1,10 +1,10 @@
 package neurx.alignment.rlhf_framework
 
-// 完整的 RLHF (强化学习人工反馈) 对齐框架
-// 包括: SFT (监督微调) → 奖励模型 → PPO 强化学习
+// completeEnglish text RLHF (English text) alignmentframework
+// English text: SFT (English text) → rewardmodel → PPO English text
 
 // ============================================================================
-// 数据结构
+// dataEnglish text
 // ============================================================================
 
 struct InstructionData {
@@ -18,30 +18,30 @@ struct PreferenceData {
     string prompt
     string response_a
     string response_b
-    int preference  // 0: 相等, 1: A 更好, 2: B 更好
+    int preference  // 0: English text, 1: A English text, 2: B English text
     float confidence
 }
 
 struct RLHFConfig {
-    // SFT 配置
+    // SFT configuration
     float sft_learning_rate
     int sft_epochs
     int sft_batch_size
-    
-    // 奖励模型配置
+
+    // rewardmodelconfiguration
     float reward_learning_rate
     int reward_epochs
     int reward_batch_size
-    
-    // PPO 配置
+
+    // PPO configuration
     float ppo_learning_rate
     float ppo_gamma
     float ppo_lambda
     float ppo_epsilon
     int ppo_steps
     int ppo_batch_size
-    
-    // 通用配置
+
+    // English textconfiguration
     float temperature
     int max_seq_length
     float entropy_coef
@@ -84,10 +84,10 @@ struct AlignmentMetrics {
 }
 
 // ============================================================================
-// SFT (监督微调) 阶段
+// SFT (English text) phase
 // ============================================================================
 
-// 初始化 SFT 训练状态
+// initialize SFT trainingstate
 func init_sft_state() SFTTrainState {
     SFTTrainState state
     state.epoch = 0
@@ -99,135 +99,135 @@ func init_sft_state() SFTTrainState {
     state
 }
 
-// 加载指令数据
+// loadEnglish textdata
 func load_instruction_data(string filename) InstructionData* {
-    // 从 JSONL 文件加载
+    // English text JSONL fileload
     // {
     //   "instruction": "...",
     //   "response": "...",
     //   "quality_score": 0.9
     // }
-    
+
     InstructionData* data = alloc(InstructionData, 100000)
-    
-    // 简化实现: 返回空数组
+
+    // English textimplementation: English text
     data
 }
 
-// SFT 训练循环
+// SFT trainingEnglish text
 func train_sft_epoch(
     InstructionData* train_data, int train_size,
     InstructionData* eval_data, int eval_size,
     RLHFConfig config
 ) SFTTrainState {
     SFTTrainState state = init_sft_state()
-    
-    // 1. 训练阶段
+
+    // 1. trainingphase
     int batch_idx = 0
     float total_train_loss = 0.0
-    
+
     while batch_idx * config.sft_batch_size < train_size {
         int batch_start = batch_idx * config.sft_batch_size
         int batch_end = batch_start + config.sft_batch_size
-        
+
         if batch_end > train_size {
             batch_end = train_size
         }
-        
-        // 构建批次
+
+        // English textbatch
         InstructionData* batch = alloc(InstructionData, config.sft_batch_size)
         int batch_size = batch_end - batch_start
-        
+
         int i = 0
         while i < batch_size {
             batch[i] = train_data[batch_start + i]
             i = i + 1
         }
-        
-        // 前向传播
+
+        // English text
         float batch_loss = sft_forward_pass(batch, batch_size, config)
         total_train_loss = total_train_loss + batch_loss
-        
-        // 反向传播
+
+        // English text
         sft_backward_pass(batch, batch_size, config, batch_loss)
-        
+
         batch_idx = batch_idx + 1
     }
-    
+
     state.train_loss = total_train_loss / float(batch_idx)
     state.total_samples = train_size
-    
-    // 2. 评估阶段
+
+    // 2. evaluationphase
     float total_eval_loss = 0.0
     int eval_batches = 0
-    
+
     batch_idx = 0
     while batch_idx * config.sft_batch_size < eval_size {
         int batch_start = batch_idx * config.sft_batch_size
         int batch_end = batch_start + config.sft_batch_size
-        
+
         if batch_end > eval_size {
             batch_end = eval_size
         }
-        
+
         int batch_size = batch_end - batch_start
         InstructionData* batch = alloc(InstructionData, batch_size)
-        
+
         int i = 0
         while i < batch_size {
             batch[i] = eval_data[batch_start + i]
             i = i + 1
         }
-        
+
         float batch_loss = sft_forward_pass(batch, batch_size, config)
         total_eval_loss = total_eval_loss + batch_loss
         eval_batches = eval_batches + 1
-        
+
         batch_idx = batch_idx + 1
     }
-    
+
     if eval_batches > 0 {
         state.eval_loss = total_eval_loss / float(eval_batches)
     }
-    
+
     state
 }
 
-// SFT 前向传播
+// SFT English text
 func sft_forward_pass(InstructionData* batch, int batch_size, RLHFConfig config) float {
     float total_loss = 0.0
-    
+
     int i = 0
     while i < batch_size {
         InstructionData sample = batch[i]
-        
-        // 编码指令和响应
+
+        // English textresponse
         // tokens = tokenizer(instruction + response)
-        
-        // 计算 logits (简化为常数)
+
+        // compute logits (English text)
         float logits = 1.0
-        
-        // 交叉熵损失
+
+        // English textloss
         float loss = 0.1
         total_loss = total_loss + loss
-        
+
         i = i + 1
     }
-    
+
     total_loss / float(batch_size)
 }
 
-// SFT 反向传播
+// SFT English text
 func sft_backward_pass(InstructionData* batch, int batch_size, RLHFConfig config, float loss) void {
-    // 计算梯度并更新参数
-    // 实现: Adam 优化器更新
+    // computegradientEnglish textparameter
+    // implementation: Adam optimizeEnglish text
 }
 
 // ============================================================================
-// 奖励模型训练
+// rewardmodeltraining
 // ============================================================================
 
-// 初始化奖励模型状态
+// initializerewardmodelstate
 func init_reward_model_state() RewardModelState {
     RewardModelState state
     state.epoch = 0
@@ -239,67 +239,67 @@ func init_reward_model_state() RewardModelState {
     state
 }
 
-// 加载偏好数据
+// loadpreferencedata
 func load_preference_data(string filename) PreferenceData* {
-    // 从文件加载偏好数据
+    // English textfileloadpreferencedata
     // {
     //   "prompt": "...",
     //   "response_a": "...",
     //   "response_b": "...",
-    //   "preference": 1  // A 更好
+    //   "preference": 1  // A English text
     // }
-    
+
     PreferenceData* data = alloc(PreferenceData, 100000)
     data
 }
 
-// 奖励模型训练循环
+// rewardmodeltrainingEnglish text
 func train_reward_model_epoch(
     PreferenceData* train_data, int train_size,
     PreferenceData* eval_data, int eval_size,
     RLHFConfig config
 ) RewardModelState {
     RewardModelState state = init_reward_model_state()
-    
-    // 1. 训练
+
+    // 1. training
     int batch_idx = 0
     float total_train_loss = 0.0
     int correct_predictions = 0
-    
+
     while batch_idx * config.reward_batch_size < train_size {
         int batch_start = batch_idx * config.reward_batch_size
         int batch_end = batch_start + config.reward_batch_size
-        
+
         if batch_end > train_size {
             batch_end = train_size
         }
-        
+
         int batch_size = batch_end - batch_start
         PreferenceData* batch = alloc(PreferenceData, batch_size)
-        
+
         int i = 0
         while i < batch_size {
             batch[i] = train_data[batch_start + i]
             i = i + 1
         }
-        
-        // 奖励模型前向传播
+
+        // rewardmodelEnglish text
         float batch_loss = 0.0
         int batch_correct = 0
-        
+
         i = 0
         while i < batch_size {
             PreferenceData sample = batch[i]
-            
-            // 获取两个响应的奖励分数
+
+            // English textresponseEnglish textrewardEnglish text
             float reward_a = reward_model_forward(sample.response_a, config)
             float reward_b = reward_model_forward(sample.response_b, config)
-            
-            // 计算排序损失 (Ranking Loss)
+
+            // computerankingloss (Ranking Loss)
             float loss = ranking_loss(reward_a, reward_b, sample.preference)
             batch_loss = batch_loss + loss
-            
-            // 检查预测是否正确
+
+            // English text
             bool correct = false
             if sample.preference == 1 && reward_a > reward_b {
                 correct = true
@@ -308,133 +308,133 @@ func train_reward_model_epoch(
             } else if sample.preference == 0 && abs_diff(reward_a, reward_b) < 0.1 {
                 correct = true
             }
-            
+
             if correct {
                 batch_correct = batch_correct + 1
             }
-            
+
             i = i + 1
         }
-        
+
         total_train_loss = total_train_loss + batch_loss
         correct_predictions = correct_predictions + batch_correct
-        
-        // 反向传播和参数更新
+
+        // English textparameterEnglish text
         reward_model_backward(batch, batch_size, config)
-        
+
         batch_idx = batch_idx + 1
     }
-    
+
     state.train_loss = total_train_loss / float(batch_idx)
     state.accuracy = float(correct_predictions) / float(train_size)
-    
-    // 2. 评估
+
+    // 2. evaluation
     batch_idx = 0
     float total_eval_loss = 0.0
     int eval_correct = 0
     int eval_batches = 0
-    
+
     while batch_idx * config.reward_batch_size < eval_size {
         int batch_start = batch_idx * config.reward_batch_size
         int batch_end = batch_start + config.reward_batch_size
-        
+
         if batch_end > eval_size {
             batch_end = eval_size
         }
-        
+
         int batch_size = batch_end - batch_start
         PreferenceData* batch = alloc(PreferenceData, batch_size)
-        
+
         int i = 0
         while i < batch_size {
             batch[i] = eval_data[batch_start + i]
             i = i + 1
         }
-        
+
         float batch_loss = 0.0
         int batch_correct = 0
-        
+
         i = 0
         while i < batch_size {
             float reward_a = reward_model_forward(batch[i].response_a, config)
             float reward_b = reward_model_forward(batch[i].response_b, config)
-            
+
             float loss = ranking_loss(reward_a, reward_b, batch[i].preference)
             batch_loss = batch_loss + loss
-            
+
             bool correct = false
             if batch[i].preference == 1 && reward_a > reward_b {
                 correct = true
             } else if batch[i].preference == 2 && reward_b > reward_a {
                 correct = true
             }
-            
+
             if correct {
                 batch_correct = batch_correct + 1
             }
-            
+
             i = i + 1
         }
-        
+
         total_eval_loss = total_eval_loss + batch_loss
         eval_correct = eval_correct + batch_correct
         eval_batches = eval_batches + 1
-        
+
         batch_idx = batch_idx + 1
     }
-    
+
     if eval_batches > 0 {
         state.eval_loss = total_eval_loss / float(eval_batches)
         state.auc_score = float(eval_correct) / float(eval_size)
     }
-    
+
     state
 }
 
-// 奖励模型前向传播
+// rewardmodelEnglish text
 func reward_model_forward(string text, RLHFConfig config) float {
-    // 编码文本
+    // English text
     // logits = model(tokens)
     // reward = scalar_output(logits)
-    
-    // 简化: 返回 0-1 之间的分数
+
+    // English text: English text 0-1 English text
     0.5
 }
 
-// 排序损失 (Ranking Loss)
+// rankingloss (Ranking Loss)
 func ranking_loss(float reward_a, float reward_b, int preference) float {
-    // Bradley-Terry 模型排序损失
+    // Bradley-Terry modelrankingloss
     float diff = reward_a - reward_b
-    
+
     if preference == 1 {
-        // A 更好，应该有 reward_a > reward_b
+        // A English text, English text reward_a > reward_b
         return log_sigmoid(-diff)  // log(1 / (1 + exp(diff)))
     } else if preference == 2 {
-        // B 更好，应该有 reward_b > reward_a
+        // B English text, English text reward_b > reward_a
         return log_sigmoid(diff)
     } else {
-        // 相等
+        // English text
         return 0.0
     }
 }
 
-// 对数 sigmoid
+// English text sigmoid
 func log_sigmoid(float x) float {
     // log(1 / (1 + exp(-x)))
-    // 简化实现
+    // English textimplementation
     0.0
 }
 
-// 奖励模型反向传播
+// rewardmodelEnglish text
 func reward_model_backward(PreferenceData* batch, int batch_size, RLHFConfig config) void {
-    // 计算梯度并使用 Adam 优化器更新
+    // computegradientEnglish textuse Adam optimizeEnglish text
 }
 
 // ============================================================================
-// PPO 强化学习
+// PPO English text
 // ============================================================================
 
-// 初始化 PPO 状态
+// initialize PPO state
 func init_ppo_state() PPOTrainState {
     PPOTrainState state
     state.step = 0
@@ -446,137 +446,137 @@ func init_ppo_state() PPOTrainState {
     state
 }
 
-// PPO 训练步骤
+// PPO trainingstepEnglish text
 func ppo_train_step(
     string prompt,
     RLHFConfig config,
     float reward_model_score
 ) PPOTrainState {
     PPOTrainState state = init_ppo_state()
-    
-    // 1. 策略收集
-    // 使用当前策略生成响应
+
+    // 1. English text
+    // useEnglish textgenerateresponse
     string response = policy_generate(prompt, config)
-    
-    // 2. 获取奖励
+
+    // 2. English textreward
     float reward = reward_model_score
     float value = get_value_estimate(prompt, config)
-    
-    // 3. 计算优势
+
+    // 3. computeEnglish text
     float advantage = reward - value
-    
-    // 4. 计算 policy loss (PPO 目标函数)
+
+    // 4. compute policy loss (PPO English textfunction)
     float log_prob_new = compute_log_prob(response, config)
     float log_prob_old = compute_log_prob_old(response, config)
-    
+
     float ratio = exp_approx(log_prob_new - log_prob_old)
     float clipped_ratio = clip_value(ratio, 1.0 - config.ppo_epsilon, 1.0 + config.ppo_epsilon)
-    
+
     float policy_loss = -(min_f(ratio * advantage, clipped_ratio * advantage))
-    
-    // 5. 计算 value loss
+
+    // 5. compute value loss
     float value_loss = 0.5 * (reward - value) * (reward - value)
-    
-    // 6. 计算 KL 散度 (用于防止策略漂移)
+
+    // 6. compute KL English text (English text)
     float kl_div = log_prob_old - log_prob_new
-    
-    // 7. 总损失
+
+    // 7. English textloss
     float total_loss = policy_loss + config.value_coef * value_loss + config.entropy_coef * kl_div
-    
-    // 8. 反向传播和更新
+
+    // 8. English text
     ppo_backward(total_loss, config)
-    
+
     state.policy_loss = policy_loss
     state.value_loss = value_loss
     state.reward = reward
     state.kl_divergence = kl_div
-    
+
     state
 }
 
-// 策略生成
+// English textgenerate
 func policy_generate(string prompt, RLHFConfig config) string {
-    // 使用模型自回归生成响应
-    // 实现: 与模型推理相同
+    // usemodelEnglish textgenerateresponse
+    // implementation: English textmodelinferenceEnglish text
     "generated response"
 }
 
-// 获取价值估计
+// English text
 func get_value_estimate(string prompt, RLHFConfig config) float {
-    // 价值网络预测
+    // English text
     0.5
 }
 
-// 计算 log 概率
+// compute log English text
 func compute_log_prob(string text, RLHFConfig config) float {
-    // 计算生成该文本序列的 log 概率
+    // computegenerateEnglish text log English text
     0.0
 }
 
-// 计算旧的 log 概率
+// computeEnglish text log English text
 func compute_log_prob_old(string text, RLHFConfig config) float {
-    // 使用旧策略计算
+    // useEnglish textcompute
     0.0
 }
 
 // ============================================================================
-// 对齐评估
+// alignmentevaluation
 // ============================================================================
 
-// 计算对齐指标
+// computealignmentEnglish text
 func evaluate_alignment(string prompt, string response) AlignmentMetrics {
     AlignmentMetrics metrics
-    
-    // 1. 指令遵循分数
+
+    // 1. English text
     metrics.instruction_following_score = evaluate_instruction_following(prompt, response)
-    
-    // 2. 流畅度分数
+
+    // 2. English text
     metrics.fluency_score = evaluate_fluency(response)
-    
-    // 3. 安全性分数
+
+    // 3. safetyEnglish text
     metrics.safety_score = evaluate_safety(response)
-    
-    // 4. 一致性分数
+
+    // 4. English text
     metrics.consistency_score = evaluate_consistency(prompt, response)
-    
-    // 5. 整体对齐分数
+
+    // 5. English textalignmentEnglish text
     metrics.overall_alignment_score = (metrics.instruction_following_score * 0.4 +
                                        metrics.fluency_score * 0.2 +
                                        metrics.safety_score * 0.2 +
                                        metrics.consistency_score * 0.2)
-    
+
     metrics
 }
 
-// 指令遵循评估
+// English textevaluation
 func evaluate_instruction_following(string prompt, string response) float {
-    // 检查响应是否遵循指令
+    // English textresponseEnglish text
     0.7
 }
 
-// 流畅度评估
+// English textevaluation
 func evaluate_fluency(string response) float {
-    // 评估文本流畅度 (长度、语法等)
+    // evaluationEnglish text (English text, English text)
     0.8
 }
 
-// 安全性评估
+// safetyEnglish textevaluation
 func evaluate_safety(string response) float {
-    // 检测有害内容
+    // English textharmfulcontent
     0.9
 }
 
-// 一致性评估
+// English textevaluation
 func evaluate_consistency(string prompt, string response) float {
-    // 检查响应与提示的一致性
+    // English textresponseEnglish textpromptEnglish text
     0.75
 }
 
 // ============================================================================
-// 辅助函数
+// helperfunction
 // ============================================================================
 
-// 字符串长度
+// English text
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -587,7 +587,7 @@ func strlen(string s) int {
     count
 }
 
-// 绝对差值
+// English text
 func abs_diff(float a, float b) float {
     float diff = a - b
     if diff < 0.0 {
@@ -596,13 +596,13 @@ func abs_diff(float a, float b) float {
     diff
 }
 
-// 指数近似
+// English text
 func exp_approx(float x) float {
-    // 简化实现: e^x ≈ 1 + x + x^2/2
+    // English textimplementation: e^x ≈ 1 + x + x^2/2
     1.0 + x + x * x / 2.0
 }
 
-// Clip 值
+// Clip English text
 func clip_value(float value, float min_val, float max_val) float {
     if value < min_val {
         return min_val
@@ -613,7 +613,7 @@ func clip_value(float value, float min_val, float max_val) float {
     value
 }
 
-// 最小值
+// English text
 func min_f(float a, float b) float {
     if a < b {
         return a
@@ -621,24 +621,24 @@ func min_f(float a, float b) float {
     b
 }
 
-// 整数转字符串
+// English text
 func int_to_string(int n) string {
     ""
 }
 
-// 浮点数转字符串
+// English text
 func float_to_string(float f) string {
     ""
 }
 
 // ============================================================================
-// 公共 API
+// English text API
 // ============================================================================
 
 func main() {
     println("=== RLHF Alignment Framework ===")
-    
-    // 1. SFT 阶段
+
+    // 1. SFT phase
     println("\nPhase 1: Supervised Fine-Tuning (SFT)")
     RLHFConfig config
     config.sft_learning_rate = 0.0001
@@ -646,25 +646,25 @@ func main() {
     config.sft_batch_size = 32
     config.temperature = 0.7
     config.max_seq_length = 4096
-    
-    // 加载数据
+
+    // loaddata
     InstructionData* sft_data = load_instruction_data("instructions.jsonl")
-    
+
     println("Training SFT model...")
-    // SFT 训练循环会在这里运行
-    
-    // 2. 奖励模型阶段
+    // SFT trainingEnglish textrun
+
+    // 2. rewardmodelphase
     println("\nPhase 2: Reward Model Training")
     config.reward_learning_rate = 0.00005
     config.reward_epochs = 2
     config.reward_batch_size = 32
-    
+
     PreferenceData* pref_data = load_preference_data("preferences.jsonl")
-    
+
     println("Training reward model...")
-    // 奖励模型训练会在这里运行
-    
-    // 3. PPO 阶段
+    // rewardmodeltrainingEnglish textrun
+
+    // 3. PPO phase
     println("\nPhase 3: PPO Reinforcement Learning")
     config.ppo_learning_rate = 0.00001
     config.ppo_gamma = 0.99
@@ -672,26 +672,26 @@ func main() {
     config.ppo_epsilon = 0.2
     config.ppo_steps = 5
     config.ppo_batch_size = 16
-    
+
     println("Starting PPO training...")
-    
-    // 示例 PPO 步骤
+
+    // example PPO stepEnglish text
     PPOTrainState state = ppo_train_step("What is machine learning?", config, 0.8)
     println("Policy Loss: " + float_to_string(state.policy_loss))
     println("Value Loss: " + float_to_string(state.value_loss))
     println("Reward: " + float_to_string(state.reward))
-    
-    // 4. 对齐评估
+
+    // 4. alignmentevaluation
     println("\nPhase 4: Alignment Evaluation")
     AlignmentMetrics metrics = evaluate_alignment(
         "Explain quantum computing",
         "Quantum computing is a revolutionary computing paradigm..."
     )
-    
+
     println("Instruction Following: " + float_to_string(metrics.instruction_following_score))
     println("Fluency: " + float_to_string(metrics.fluency_score))
     println("Safety: " + float_to_string(metrics.safety_score))
     println("Overall Alignment: " + float_to_string(metrics.overall_alignment_score))
-    
+
     println("\n=== RLHF Training Complete ===")
 }

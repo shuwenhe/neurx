@@ -2,59 +2,59 @@
 
 ## Directory Structure
 
-已创建的推荐目录结构：
+English textrecommendeddirectoryEnglish text:
 
 ```
 neurx-code/
-├── assets/                           ← 应用图标和资源
-│   ├── README.md                    (此文件)
-│   ├── app.icns                     (macOS 应用图标 - 需添加)
-│   ├── app.ico                      (Windows 图标 - 需添加)
+├── assets/                           ← English text
+│   ├── README.md                    (English textfile)
+│   ├── app.icns                     (macOS English text - English text)
+│   ├── app.ico                      (Windows English text - English text)
 │   └── icons/
-│       ├── logo-light.svg           (Light 主题 logo)
-│       ├── logo-dark.svg            (Dark 主题 logo)
-│       └── splash-logo.svg          (启动屏幕 logo)
+│       ├── logo-light.svg           (Light mainEnglish text logo)
+│       ├── logo-dark.svg            (Dark mainEnglish text logo)
+│       └── splash-logo.svg          (startEnglish text logo)
 │
 └── content/
-    └── assets/                      ← QML UI 资源
+    └── assets/                      ← QML UI English text
         ├── splash-logo.svg
         └── loading-spinner.svg
 ```
 
-## 文件放置建议
+## fileEnglish text
 
-### 1. **应用启动 Icon (macOS/Windows)**
-- **位置**: `assets/app.icns` (macOS) 或 `assets/app.ico` (Windows)
-- **用途**: 
-  - Dock 中的应用图标
-  - Finder 中显示的应用图标
-  - 系统菜单和快捷方式中的图标
-- **格式**: 
-  - `.icns` 文件用于 macOS
-  - `.ico` 文件用于 Windows
+### 1. **English textstart Icon (macOS/Windows)**
+- **English text**: `assets/app.icns` (macOS) English text `assets/app.ico` (Windows)
+- **English text**:
+  - Dock English text
+  - Finder English text
+  - systemEnglish text
+- **English text**:
+  - `.icns` fileEnglish text macOS
+  - `.ico` fileEnglish text Windows
 
-### 2. **启动屏幕 Logo**
-- **位置**: `content/assets/splash-logo.svg`
-- **用途**: 在 QML 启动屏幕中显示
-- **格式**: SVG 或 PNG (建议 SVG 以支持所有分辨率)
+### 2. **startEnglish text Logo**
+- **English text**: `content/assets/splash-logo.svg`
+- **English text**: English text QML startEnglish text
+- **English text**: SVG English text PNG (English text SVG English textsupportEnglish text)
 
 ### 3. **UI Logo (Light/Dark)**
-- **位置**: `assets/icons/logo-light.svg` 和 `assets/icons/logo-dark.svg`
-- **用途**: 在应用界面中显示品牌 logo（菜单栏、对话框等）
-- **格式**: SVG (支持主题切换)
+- **English text**: `assets/icons/logo-light.svg` English text `assets/icons/logo-dark.svg`
+- **English text**: English text logo(English text, English text)
+- **English text**: SVG (supportmainEnglish text)
 
-## 集成步骤
+## English textstepEnglish text
 
-### Step 1: 准备图标文件
+### Step 1: English textfile
 
-#### macOS app.icns 生成
+#### macOS app.icns generate
 ```bash
-# 假设你有一个 1024×1024 的 PNG 文件 neurx-logo.png
+# English text 1024×1024 English text PNG file neurx-logo.png
 
-# 创建 iconset 文件夹
+# English text iconset fileEnglish text
 mkdir neurx-code.iconset
 
-# 使用 sips 生成多个尺寸
+# use sips generateEnglish text
 sips -z 16 16     neurx-logo.png --out neurx-code.iconset/icon_16x16.png
 sips -z 32 32     neurx-logo.png --out neurx-code.iconset/icon_32x32.png
 sips -z 64 64     neurx-logo.png --out neurx-code.iconset/icon_64x64.png
@@ -63,33 +63,33 @@ sips -z 256 256   neurx-logo.png --out neurx-code.iconset/icon_256x256.png
 sips -z 512 512   neurx-logo.png --out neurx-code.iconset/icon_512x512.png
 sips -z 1024 1024 neurx-logo.png --out neurx-code.iconset/icon_1024x1024.png
 
-# 转换为 .icns
+# English text .icns
 iconutil -c icns neurx-code.iconset -o assets/app.icns
 
-# 清理
+# English text
 rm -rf neurx-code.iconset
 ```
 
-#### Windows app.ico 生成
-- 使用在线工具 (如 icoconvert.com) 或 ImageMagick: `convert logo.png -define icon:auto-resize=256,128,96,64,48,32,16 app.ico`
+#### Windows app.ico generate
+- useEnglish texttool (English text icoconvert.com) English text ImageMagick: `convert logo.png -define icon:auto-resize=256,128,96,64,48,32,16 app.ico`
 
-### Step 2: 放置文件
+### Step 2: English textfile
 
-1. 将 `app.icns` 放在 `assets/` 目录
-2. 将 SVG logo 放在 `assets/icons/` 目录
-3. 将启动屏幕 logo 放在 `content/assets/` 目录
+1. English text `app.icns` English text `assets/` directory
+2. English text SVG logo English text `assets/icons/` directory
+3. English textstartEnglish text logo English text `content/assets/` directory
 
-### Step 3: 构建
+### Step 3: English text
 
-CMakeLists.txt 已配置为自动查找这些文件：
+CMakeLists.txt English textconfigurationEnglish textfile:
 ```bash
 cd neurx-code
 make mac
 ```
 
-## CMakeLists.txt 配置说明
+## CMakeLists.txt configurationexplanation
 
-修改后的 CMakeLists.txt 包含：
+English text CMakeLists.txt English text:
 
 ```cmake
 # macOS icon
@@ -108,9 +108,9 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.rc")
 endif()
 ```
 
-## QML 中使用 Logo
+## QML English textuse Logo
 
-### 启动屏幕
+### startEnglish text
 ```qml
 import QtQuick
 import QtQuick.Controls
@@ -125,33 +125,33 @@ Item {
 }
 ```
 
-### 主应用
+### mainEnglish text
 ```qml
 import QtQuick
 import QtQuick.Controls
 
 Button {
-    icon.source: Theme.isDarkTheme 
+    icon.source: Theme.isDarkTheme
                ? "assets/icons/logo-dark.svg"
                : "assets/icons/logo-light.svg"
 }
 ```
 
-## 检查清单
+## English text
 
-- [ ] 创建 `assets/` 目录 ✓ (已完成)
-- [ ] 创建 `assets/icons/` 目录 ✓ (已完成)
-- [ ] 创建 `content/assets/` 目录 ✓ (已完成)
-- [ ] 生成 `app.icns` 文件
-- [ ] 生成 `app.ico` 文件 (可选)
-- [ ] 添加 SVG logo 文件
-- [ ] 更新 CMakeLists.txt (✓ 已完成)
-- [ ] 重新编译应用
-- [ ] 测试应用图标在 Dock 中正确显示
-- [ ] 测试启动屏幕 logo 显示
+- [ ] English text `assets/` directory ✓ (English text)
+- [ ] English text `assets/icons/` directory ✓ (English text)
+- [ ] English text `content/assets/` directory ✓ (English text)
+- [ ] generate `app.icns` file
+- [ ] generate `app.ico` file (English text)
+- [ ] English text SVG logo file
+- [ ] English text CMakeLists.txt (✓ English text)
+- [ ] English textcompileEnglish text
+- [ ] testEnglish text Dock English text
+- [ ] teststartEnglish text logo English text
 
-## 相关文件
+## English textfile
 
-- CMakeLists.txt: 应用构建配置
-- content/App.qml: 主应用界面
-- assets/README.md: 资源详细说明
+- CMakeLists.txt: English textconfiguration
+- content/App.qml: mainEnglish text
+- assets/README.md: English textexplanation

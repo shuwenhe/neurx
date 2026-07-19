@@ -1,89 +1,89 @@
-# Codex 功能迁移提取报告
+# Codex English textmigrationEnglish text
 
-**更新时间**: 2026-06-02  
-**源仓库**: `/Users/feifei/agent/codex`  
-**目标**: neurx Agent 框架
-
----
-
-## 目录
-
-1. [审批系统 (Approvals)](#审批系统approvals)
-2. [沙箱系统 (Sandbox)](#沙箱系统sandbox)
-3. [线程支持 (Threading)](#线程支持threading)
-4. [依赖关系图](#依赖关系图)
-5. [迁移复杂性评分](#迁移复杂性评分)
+**English texttime**: 2026-06-02
+**English text**: `/Users/feifei/agent/codex`
+**English text**: neurx Agent framework
 
 ---
 
-## 审批系统 (Approvals)
+## directory
 
-### 关键源文件
+1. [English textsystem (Approvals)](#English textsystemapprovals)
+2. [English textsystem (Sandbox)](#English textsystemsandbox)
+3. [English textsupport (Threading)](#English textsupportthreading)
+4. [English text](#English text)
+5. [migrationEnglish text](#migrationEnglish text)
 
-| 文件路径 | 用途 | 优先级 |
+---
+
+## English textsystem (Approvals)
+
+### English textfile
+
+| filepath | English text | English text |
 |--------|------|------|
-| `codex-rs/protocol/src/approvals.rs` | 审批数据结构定义 | **必需** |
-| `codex-rs/protocol/src/config_types.rs` | 配置类型（ApprovalsReviewer） | **必需** |
-| `codex-rs/protocol/src/protocol.rs` | 协议定义（AskForApproval） | **必需** |
-| `codex-rs/execpolicy/src/decision.rs` | 执行策略决策 | **必需** |
-| `codex-rs/core/src/guardian/approval_request.rs` | Guardian 审批请求处理 | 重要 |
-| `codex-rs/core/src/tools/network_approval.rs` | 网络审批工具 | 重要 |
-| `codex-rs/protocol/src/mcp_approval_meta.rs` | MCP 审批元数据 | 重要 |
+| `codex-rs/protocol/src/approvals.rs` | English textdataEnglish text | **English text** |
+| `codex-rs/protocol/src/config_types.rs` | configurationEnglish text(ApprovalsReviewer) | **English text** |
+| `codex-rs/protocol/src/protocol.rs` | English text(AskForApproval) | **English text** |
+| `codex-rs/execpolicy/src/decision.rs` | English text | **English text** |
+| `codex-rs/core/src/guardian/approval_request.rs` | Guardian English textrequestEnglish text | English text |
+| `codex-rs/core/src/tools/network_approval.rs` | English texttool | English text |
+| `codex-rs/protocol/src/mcp_approval_meta.rs` | MCP English textdata | English text |
 
-### 关键类型定义
+### English text
 
-#### 1. **审批策略枚举** (`AskForApproval`)
+#### 1. **English text** (`AskForApproval`)
 ```rust
 pub enum AskForApproval {
-    UnlessTrusted,              // 仅自动批准"已知安全"命令
-    OnFailure,                  // 失败时才请求批准（已弃用）
-    OnRequest,                  // 模型决定是否请求批准（默认）
-    Granular(GranularApprovalConfig),  // 细粒度控制
-    Never,                      // 从不请求批准
+    UnlessTrusted,              // English text"English textsafety"English text
+    OnFailure,                  // failureEnglish textrequestEnglish text(English text)
+    OnRequest,                  // modelEnglish textrequestEnglish text(default)
+    Granular(GranularApprovalConfig),  // English text
+    Never,                      // English textrequestEnglish text
 }
 ```
 
-#### 2. **细粒度审批配置** (`GranularApprovalConfig`)
+#### 2. **English textconfiguration** (`GranularApprovalConfig`)
 ```rust
 pub struct GranularApprovalConfig {
-    pub sandbox_approval: bool,        // shell 命令审批
-    pub rules: bool,                   // execpolicy prompt 规则
-    pub skill_approval: bool,          // 技能脚本执行
-    pub request_permissions: bool,     // 权限请求工具
-    pub mcp_elicitations: bool,        // MCP 提示
+    pub sandbox_approval: bool,        // shell English text
+    pub rules: bool,                   // execpolicy prompt English text
+    pub skill_approval: bool,          // English text
+    pub request_permissions: bool,     // English textrequesttool
+    pub mcp_elicitations: bool,        // MCP prompt
 }
 ```
 
-#### 3. **审批审评者枚举** (`ApprovalsReviewer`)
+#### 3. **English text** (`ApprovalsReviewer`)
 ```rust
 pub enum ApprovalsReviewer {
     #[default]
-    User,                       // 用户审批
+    User,                       // English text
     #[serde(rename = "guardian_subagent", alias = "auto_review")]
-    AutoReview,                 // Guardian 子代理审批
+    AutoReview,                 // Guardian English text
 }
 ```
 
-#### 4. **执行审批请求** (`ExecApprovalRequestEvent`)
+#### 4. **English textrequest** (`ExecApprovalRequestEvent`)
 ```rust
 pub struct ExecApprovalRequestEvent {
-    pub call_id: String,                          // 命令执行项 ID
-    pub approval_id: Option<String>,              // 审批回调 ID
-    pub turn_id: String,                          // 转向 ID
-    pub started_at_ms: i64,                       // 开始时间
-    pub command: Vec<String>,                     // 执行命令
-    pub cwd: AbsolutePathBuf,                     // 工作目录
-    pub reason: Option<String>,                   // 审批原因
-    pub network_approval_context: Option<NetworkApprovalContext>,  // 网络上下文
-    pub proposed_execpolicy_amendment: Option<ExecPolicyAmendment>, // 建议执行策略修改
-    pub proposed_network_policy_amendments: Option<Vec<NetworkPolicyAmendment>>, // 网络策略修改
-    pub additional_permissions: Option<AdditionalPermissionProfile>,  // 额外权限
-    pub available_decisions: Option<Vec<ReviewDecision>>,  // 可用决策
-    pub parsed_cmd: Vec<ParsedCommand>,           // 解析后的命令
+    pub call_id: String,                          // English text ID
+    pub approval_id: Option<String>,              // English text ID
+    pub turn_id: String,                          // English text ID
+    pub started_at_ms: i64,                       // starttime
+    pub command: Vec<String>,                     // English text
+    pub cwd: AbsolutePathBuf,                     // English textdirectory
+    pub reason: Option<String>,                   // English text
+    pub network_approval_context: Option<NetworkApprovalContext>,  // English text
+    pub proposed_execpolicy_amendment: Option<ExecPolicyAmendment>, // English text
+    pub proposed_network_policy_amendments: Option<Vec<NetworkPolicyAmendment>>, // English text
+    pub additional_permissions: Option<AdditionalPermissionProfile>,  // English text
+    pub available_decisions: Option<Vec<ReviewDecision>>,  // English text
+    pub parsed_cmd: Vec<ParsedCommand>,           // English text
 }
 ```
 
-#### 5. **网络审批协议** (`NetworkApprovalProtocol`)
+#### 5. **English text** (`NetworkApprovalProtocol`)
 ```rust
 pub enum NetworkApprovalProtocol {
     Http,
@@ -98,20 +98,20 @@ pub struct NetworkApprovalContext {
 }
 ```
 
-#### 6. **Guardian 评估事件** (`GuardianAssessmentEvent`)
+#### 6. **Guardian evaluationEnglish text** (`GuardianAssessmentEvent`)
 ```rust
 pub struct GuardianAssessmentEvent {
-    pub id: String,                              // 稳定标识符
-    pub target_item_id: Option<String>,          // 目标项 ID
-    pub turn_id: String,                         // 转向 ID
-    pub started_at_ms: i64,                      // 开始时间
-    pub completed_at_ms: Option<i64>,            // 完成时间
-    pub status: GuardianAssessmentStatus,        // 评估状态
-    pub risk_level: Option<GuardianRiskLevel>,   // 风险等级
-    pub user_authorization: Option<GuardianUserAuthorization>,  // 用户授权
-    pub rationale: Option<String>,               // 评估理由
-    pub decision_source: Option<GuardianAssessmentDecisionSource>,  // 决策来源
-    pub action: GuardianAssessmentAction,        // 审批动作
+    pub id: String,                              // English text
+    pub target_item_id: Option<String>,          // English text ID
+    pub turn_id: String,                         // English text ID
+    pub started_at_ms: i64,                      // starttime
+    pub completed_at_ms: Option<i64>,            // English texttime
+    pub status: GuardianAssessmentStatus,        // evaluationstate
+    pub risk_level: Option<GuardianRiskLevel>,   // English text
+    pub user_authorization: Option<GuardianUserAuthorization>,  // English text
+    pub rationale: Option<String>,               // evaluationEnglish text
+    pub decision_source: Option<GuardianAssessmentDecisionSource>,  // English textSource
+    pub action: GuardianAssessmentAction,        // English text
 }
 
 pub enum GuardianAssessmentStatus {
@@ -139,32 +139,32 @@ pub enum GuardianAssessmentAction {
 }
 ```
 
-#### 7. **执行策略修改** (`ExecPolicyAmendment`)
+#### 7. **English text** (`ExecPolicyAmendment`)
 ```rust
 pub struct ExecPolicyAmendment {
-    pub command: Vec<String>,  // 命令前缀
+    pub command: Vec<String>,  // English text
 }
 ```
 
-#### 8. **执行策略决策** (`Decision`)
+#### 8. **English text** (`Decision`)
 ```rust
 pub enum Decision {
-    Allow,      // 允许执行，无需进一步批准
-    Prompt,     // 请求显式用户批准
-    Forbidden,  // 直接阻止
+    Allow,      // English text, English textstepEnglish text
+    Prompt,     // requestEnglish text
+    Forbidden,  // English text
 }
 ```
 
-### 审批系统依赖关系
+### English textsystemEnglish text
 
 ```
 AskForApproval
 ├── GranularApprovalConfig
-└── 用于 Protocol, Session, Config
+└── English text Protocol, Session, Config
 
 ApprovalsReviewer
-├── 用于 Session 配置
-└── 用于 Guardian 评估
+├── English text Session configuration
+└── English text Guardian evaluation
 
 ExecApprovalRequestEvent
 ├── ParsedCommand
@@ -181,35 +181,35 @@ GuardianAssessmentEvent
 └── NetworkApprovalProtocol
 
 Decision
-└── 在 Policy, Rule 中使用
+└── English text Policy, Rule English textuse
 ```
 
 ---
 
-## 沙箱系统 (Sandbox)
+## English textsystem (Sandbox)
 
-### 关键源文件
+### English textfile
 
-| 文件路径 | 用途 | 优先级 |
+| filepath | English text | English text |
 |--------|------|------|
-| `codex-rs/protocol/src/permissions.rs` | 权限和沙箱定义 | **必需** |
-| `codex-rs/protocol/src/config_types.rs` | 沙箱模式配置 | **必需** |
-| `codex-rs/sandboxing/src/lib.rs` | 沙箱管理接口 | **必需** |
-| `codex-rs/sandboxing/src/manager.rs` | 沙箱执行管理器 | **必需** |
-| `codex-rs/sandboxing/src/bwrap.rs` | Linux bwrap 实现 | 重要 |
-| `codex-rs/sandboxing/src/seatbelt.rs` | macOS Seatbelt 实现 | 重要 |
-| `codex-rs/sandboxing/src/landlock.rs` | Linux Landlock 实现 | 重要 |
-| `codex-rs/sandboxing/src/policy_transforms.rs` | 策略转换 | 重要 |
+| `codex-rs/protocol/src/permissions.rs` | English text | **English text** |
+| `codex-rs/protocol/src/config_types.rs` | English textconfiguration | **English text** |
+| `codex-rs/sandboxing/src/lib.rs` | English textmanagementEnglish text | **English text** |
+| `codex-rs/sandboxing/src/manager.rs` | English textmanagementEnglish text | **English text** |
+| `codex-rs/sandboxing/src/bwrap.rs` | Linux bwrap implementation | English text |
+| `codex-rs/sandboxing/src/seatbelt.rs` | macOS Seatbelt implementation | English text |
+| `codex-rs/sandboxing/src/landlock.rs` | Linux Landlock implementation | English text |
+| `codex-rs/sandboxing/src/policy_transforms.rs` | English text | English text |
 
-### 关键类型定义
+### English text
 
-#### 1. **沙箱权限模式** (`SandboxPermissions`)
+#### 1. **English text** (`SandboxPermissions`)
 ```rust
 pub enum SandboxPermissions {
     #[default]
-    UseDefault,                // 使用转向配置的沙箱策略
-    RequireEscalated,          // 请求在沙箱外运行
-    WithAdditionalPermissions, // 在沙箱内扩宽权限
+    UseDefault,                // useEnglish textconfigurationEnglish text
+    RequireEscalated,          // requestEnglish textrun
+    WithAdditionalPermissions, // English text
 }
 
 impl SandboxPermissions {
@@ -219,12 +219,12 @@ impl SandboxPermissions {
 }
 ```
 
-#### 2. **文件系统访问模式** (`FileSystemAccessMode`)
+#### 2. **filesystemEnglish text** (`FileSystemAccessMode`)
 ```rust
 pub enum FileSystemAccessMode {
-    Read,   // 只读
-    Write,  // 读写
-    Deny,   // 拒绝访问
+    Read,   // English text
+    Write,  // English text
+    Deny,   // English text
 }
 
 impl FileSystemAccessMode {
@@ -233,11 +233,11 @@ impl FileSystemAccessMode {
 }
 ```
 
-#### 3. **文件系统沙箱项** (`FileSystemSandboxEntry`)
+#### 3. **filesystemEnglish text** (`FileSystemSandboxEntry`)
 ```rust
 pub struct FileSystemSandboxEntry {
-    pub path: FileSystemPath,           // 文件路径
-    pub access: FileSystemAccessMode,   // 访问模式
+    pub path: FileSystemPath,           // filepath
+    pub access: FileSystemAccessMode,   // English text
 }
 
 pub enum FileSystemPath {
@@ -255,35 +255,35 @@ pub enum FileSystemSpecialPath {
 }
 ```
 
-#### 4. **文件系统沙箱策略** (`FileSystemSandboxPolicy`)
+#### 4. **filesystemEnglish text** (`FileSystemSandboxPolicy`)
 ```rust
 pub struct FileSystemSandboxPolicy {
-    pub kind: FileSystemSandboxKind,              // 沙箱类型
-    pub glob_scan_max_depth: Option<usize>,       // Glob 扫描最大深度
-    pub entries: Vec<FileSystemSandboxEntry>,     // 文件系统项
+    pub kind: FileSystemSandboxKind,              // English text
+    pub glob_scan_max_depth: Option<usize>,       // Glob English text
+    pub entries: Vec<FileSystemSandboxEntry>,     // filesystemEnglish text
 }
 
 pub enum FileSystemSandboxKind {
     #[default]
-    Restricted,         // 受限沙箱
-    Unrestricted,       // 无限制
-    ExternalSandbox,    // 外部沙箱
+    Restricted,         // English text
+    Unrestricted,       // English text
+    ExternalSandbox,    // English text
 }
 
-// 保护的元数据名称
+// English textdataName
 pub const PROTECTED_METADATA_PATH_NAMES: &[&str] = &[
     ".git",
-    ".agents", 
+    ".agents",
     ".codex",
 ];
 ```
 
-#### 5. **网络沙箱策略** (`NetworkSandboxPolicy`)
+#### 5. **English text** (`NetworkSandboxPolicy`)
 ```rust
 pub enum NetworkSandboxPolicy {
     #[default]
-    Restricted,  // 网络受限
-    Enabled,     // 网络启用
+    Restricted,  // English text
+    Enabled,     // English text
 }
 
 impl NetworkSandboxPolicy {
@@ -291,22 +291,22 @@ impl NetworkSandboxPolicy {
 }
 ```
 
-#### 6. **沙箱模式** (`SandboxMode`)
+#### 6. **English text** (`SandboxMode`)
 ```rust
 pub enum SandboxMode {
     #[serde(rename = "read-only")]
     #[default]
-    ReadOnly,           // 只读模式
+    ReadOnly,           // English text
 
     #[serde(rename = "workspace-write")]
-    WorkspaceWrite,     // 工作区写入模式
+    WorkspaceWrite,     // English text
 
     #[serde(rename = "danger-full-access")]
-    DangerFullAccess,   // 完全访问（危险）
+    DangerFullAccess,   // English text(English text)
 }
 ```
 
-#### 7. **沙箱策略** (`SandboxPolicy`)
+#### 7. **English text** (`SandboxPolicy`)
 ```rust
 pub enum SandboxPolicy {
     DangerFullAccess,
@@ -316,7 +316,7 @@ pub enum SandboxPolicy {
 }
 ```
 
-#### 8. **沙箱类型** (`SandboxType`)
+#### 8. **English text** (`SandboxType`)
 ```rust
 pub enum SandboxType {
     None,
@@ -330,7 +330,7 @@ impl SandboxType {
 }
 ```
 
-#### 9. **沙箱执行请求** (`SandboxExecRequest`)
+#### 9. **English textrequest** (`SandboxExecRequest`)
 ```rust
 pub struct SandboxExecRequest {
     pub command: Vec<String>,
@@ -347,7 +347,7 @@ pub struct SandboxExecRequest {
 }
 ```
 
-#### 10. **沙箱变换请求** (`SandboxTransformRequest`)
+#### 10. **English textrequest** (`SandboxTransformRequest`)
 ```rust
 pub struct SandboxTransformRequest<'a> {
     pub command: SandboxCommand,
@@ -363,31 +363,31 @@ pub struct SandboxTransformRequest<'a> {
 }
 ```
 
-### 沙箱系统依赖关系
+### English textsystemEnglish text
 
 ```
 FileSystemAccessMode
 ├── FileSystemSandboxEntry
-└── 用于权限检查
+└── English text
 
 FileSystemSandboxPolicy
 ├── FileSystemAccessMode
 ├── FileSystemSandboxEntry
-├── 保护元数据名称
-└── 权限验证
+├── English textdataName
+└── English text
 
 NetworkSandboxPolicy
-├── 网络访问控制
+├── English text
 └── SandboxPolicy
 
 SandboxMode / SandboxPolicy
-├── 配置解析
-└── 运行时决策
+├── configurationEnglish text
+└── runEnglish text
 
 SandboxType
 ├── SandboxManager
-├── 平台特定实现（bwrap, seatbelt, landlock）
-└── 平台检测
+├── English textimplementation(bwrap, seatbelt, landlock)
+└── English text
 
 SandboxExecRequest
 ├── SandboxType
@@ -398,95 +398,95 @@ SandboxExecRequest
 
 ---
 
-## 线程支持 (Threading)
+## English textsupport (Threading)
 
-### 关键源文件
+### English textfile
 
-| 文件路径 | 用途 | 优先级 |
+| filepath | English text | English text |
 |--------|------|------|
-| `codex-rs/protocol/src/thread_id.rs` | 线程 ID 定义 | **必需** |
-| `codex-rs/thread-store/src/types.rs` | 线程存储类型 | **必需** |
-| `codex-rs/thread-store/src/store.rs` | 线程存储接口 | **必需** |
-| `codex-rs/thread-store/src/live_thread.rs` | 活跃线程处理 | **必需** |
-| `codex-rs/analytics/src/facts.rs` | 线程初始化模式 | 重要 |
-| `codex-rs/protocol/src/protocol.rs` | 线程相关协议 | 重要 |
-| `codex-rs/ext/extension-api/src/contributors/thread_lifecycle.rs` | 线程生命周期钩子 | 重要 |
+| `codex-rs/protocol/src/thread_id.rs` | English text ID English text | **English text** |
+| `codex-rs/thread-store/src/types.rs` | English text | **English text** |
+| `codex-rs/thread-store/src/store.rs` | English text | **English text** |
+| `codex-rs/thread-store/src/live_thread.rs` | English text | **English text** |
+| `codex-rs/analytics/src/facts.rs` | English textinitializeEnglish text | English text |
+| `codex-rs/protocol/src/protocol.rs` | English text | English text |
+| `codex-rs/ext/extension-api/src/contributors/thread_lifecycle.rs` | English text | English text |
 
-### 关键类型定义
+### English text
 
-#### 1. **线程 ID** (`ThreadId`)
+#### 1. **English text ID** (`ThreadId`)
 ```rust
 pub struct ThreadId {
     pub(crate) uuid: Uuid,  // UUID v7
 }
 
 impl ThreadId {
-    pub fn new() -> Self { /* 生成新 ID */ }
+    pub fn new() -> Self { /* generateEnglish text ID */ }
     pub fn from_string(s: &str) -> Result<Self, uuid::Error> { /* */ }
 }
 ```
 
-#### 2. **线程初始化模式** (`ThreadInitializationMode`)
+#### 2. **English textinitializeEnglish text** (`ThreadInitializationMode`)
 ```rust
 pub enum ThreadInitializationMode {
-    Fresh,      // 新创建线程
-    Resumed,    // 恢复已有线程
-    Forked,     // 从现有线程分叉
+    Fresh,      // English text
+    Resumed,    // recoverEnglish text
+    Forked,     // English text
 }
 ```
 
-#### 3. **子代理线程启动** (`SubAgentThreadStartedInput`)
+#### 3. **English textstart** (`SubAgentThreadStartedInput`)
 ```rust
 pub struct SubAgentThreadStartedInput {
-    pub thread_id: String,              // 新线程 ID
-    pub parent_thread_id: Option<String>, // 父线程 ID
-    pub initialization_mode: ThreadInitializationMode,  // 初始化模式
+    pub thread_id: String,              // English text ID
+    pub parent_thread_id: Option<String>, // English text ID
+    pub initialization_mode: ThreadInitializationMode,  // initializeEnglish text
 }
 ```
 
-#### 4. **线程持久化元数据** (`ThreadPersistenceMetadata`)
+#### 4. **English textdata** (`ThreadPersistenceMetadata`)
 ```rust
 pub struct ThreadPersistenceMetadata {
-    pub cwd: Option<PathBuf>,           // 工作目录
-    pub model_provider: String,         // 模型提供商
-    pub memory_mode: MemoryMode,        // 内存模式
+    pub cwd: Option<PathBuf>,           // English textdirectory
+    pub model_provider: String,         // modelEnglish text
+    pub memory_mode: MemoryMode,        // English text
 }
 ```
 
-#### 5. **创建线程参数** (`CreateThreadParams`)
+#### 5. **English textparameter** (`CreateThreadParams`)
 ```rust
 pub struct CreateThreadParams {
-    pub thread_id: ThreadId,                      // 线程 ID
-    pub forked_from_id: Option<ThreadId>,         // 分叉源
-    pub parent_thread_id: Option<ThreadId>,       // 父线程（子代理）
-    pub source: SessionSource,                    // 源分类
-    pub thread_source: Option<ThreadSource>,      // 分析源
-    pub base_instructions: BaseInstructions,      // 基础指令
-    pub dynamic_tools: Vec<DynamicToolSpec>,      // 动态工具
-    pub metadata: ThreadPersistenceMetadata,      // 元数据
+    pub thread_id: ThreadId,                      // English text ID
+    pub forked_from_id: Option<ThreadId>,         // English text
+    pub parent_thread_id: Option<ThreadId>,       // English text(English text)
+    pub source: SessionSource,                    // English text
+    pub thread_source: Option<ThreadSource>,      // English text
+    pub base_instructions: BaseInstructions,      // English text
+    pub dynamic_tools: Vec<DynamicToolSpec>,      // English texttool
+    pub metadata: ThreadPersistenceMetadata,      // English textdata
 }
 ```
 
-#### 6. **恢复线程参数** (`ResumeThreadParams`)
+#### 6. **recoverEnglish textparameter** (`ResumeThreadParams`)
 ```rust
 pub struct ResumeThreadParams {
-    pub thread_id: ThreadId,            // 线程 ID
-    pub rollout_path: Option<PathBuf>,  // Rollout 文件路径
-    pub history: Option<Vec<RolloutItem>>, // 已知历史
-    pub include_archived: bool,         // 允许恢复已归档线程
-    pub metadata: ThreadPersistenceMetadata,  // 元数据
+    pub thread_id: ThreadId,            // English text ID
+    pub rollout_path: Option<PathBuf>,  // Rollout filepath
+    pub history: Option<Vec<RolloutItem>>, // English text
+    pub include_archived: bool,         // English textrecoverEnglish text
+    pub metadata: ThreadPersistenceMetadata,  // English textdata
 }
 ```
 
-#### 7. **追加线程项参数** (`AppendThreadItemsParams`)
+#### 7. **English textparameter** (`AppendThreadItemsParams`)
 ```rust
 pub struct AppendThreadItemsParams {
-    pub thread_id: ThreadId,            // 线程 ID
-    pub items: Vec<RolloutItem>,        // 要追加的项
+    pub thread_id: ThreadId,            // English text ID
+    pub items: Vec<RolloutItem>,        // English text
 }
 ```
 
-#### 8. **活跃线程** (`LiveThread`)
+#### 8. **English text** (`LiveThread`)
 ```rust
 pub struct LiveThread {
     thread_id: ThreadId,
@@ -499,7 +499,7 @@ impl LiveThread {
         thread_store: Arc<dyn ThreadStore>,
         params: CreateThreadParams,
     ) -> ThreadStoreResult<Self> { /* */ }
-    
+
     pub async fn resume(/* ... */) -> ThreadStoreResult<Self> { /* */ }
     pub async fn append_items(/* ... */) -> ThreadStoreResult<()> { /* */ }
     pub async fn persist(&self) -> ThreadStoreResult<()> { /* */ }
@@ -508,7 +508,7 @@ impl LiveThread {
 }
 ```
 
-#### 9. **线程存储接口** (`ThreadStore` trait)
+#### 9. **English text** (`ThreadStore` trait)
 ```rust
 #[async_trait]
 pub trait ThreadStore: Any + Send + Sync {
@@ -519,7 +519,7 @@ pub trait ThreadStore: Any + Send + Sync {
     async fn flush_thread(&self, thread_id: ThreadId) -> ThreadStoreResult<()>;
     async fn shutdown_thread(&self, thread_id: ThreadId) -> ThreadStoreResult<()>;
     async fn discard_thread(&self, thread_id: ThreadId) -> ThreadStoreResult<()>;
-    async fn load_history(&self, params: LoadThreadHistoryParams) 
+    async fn load_history(&self, params: LoadThreadHistoryParams)
         -> ThreadStoreResult<StoredThreadHistory>;
     async fn read_thread(&self, params: ReadThreadParams) -> ThreadStoreResult<StoredThread>;
     async fn list_threads(&self, params: ListThreadsParams) -> ThreadStoreResult<ThreadPage>;
@@ -529,7 +529,7 @@ pub trait ThreadStore: Any + Send + Sync {
 }
 ```
 
-#### 10. **已存储线程** (`StoredThread`)
+#### 10. **English text** (`StoredThread`)
 ```rust
 pub struct StoredThread {
     pub thread_id: ThreadId,
@@ -541,11 +541,11 @@ pub struct StoredThread {
     pub parent_thread_id: Option<ThreadId>,
     pub metadata: ThreadPersistenceMetadata,
     pub archived_at: Option<DateTime<Utc>>,
-    pub items: Vec<RolloutItem>,  // 可选，取决于加载参数
+    pub items: Vec<RolloutItem>,  // English text, English textloadparameter
 }
 ```
 
-#### 11. **线程生命周期钩子**
+#### 11. **English text**
 ```rust
 pub struct ThreadStartInput<'a, C> { /* */ }
 pub struct ThreadResumeInput<'a> { /* */ }
@@ -553,18 +553,18 @@ pub struct ThreadIdleInput<'a> { /* */ }
 pub struct ThreadStopInput<'a> { /* */ }
 ```
 
-### 线程系统依赖关系
+### English textsystemEnglish text
 
 ```
 ThreadId
-├── UUID v7 生成
-├── 字符串序列化
-└── 用于所有线程操作
+├── UUID v7 generate
+├── English text
+└── English text
 
 ThreadInitializationMode
-├── 用于分析
-├── 用于恢复决策
-└── 用于分叉逻辑
+├── English text
+├── English textrecoverEnglish text
+└── English text
 
 CreateThreadParams
 ├── ThreadId
@@ -575,33 +575,33 @@ CreateThreadParams
 ResumeThreadParams
 ├── ThreadId
 ├── ThreadPersistenceMetadata
-└── RolloutItem 历史
+└── RolloutItem English text
 
 AppendThreadItemsParams
 ├── ThreadId
 └── RolloutItem
 
 LiveThread
-├── ThreadStore 实现
-├── 元数据同步
-└── 生命周期管理
+├── ThreadStore implementation
+├── English textdataEnglish textstep
+└── English textmanagement
 
 ThreadStore trait
-├── 本地实现 (LocalThreadStore)
-├── 内存实现 (InMemoryThreadStore)
-└── 远程实现（可选）
+├── English textimplementation (LocalThreadStore)
+├── English textimplementation (InMemoryThreadStore)
+└── English textimplementation(English text)
 
 StoredThread
 ├── ThreadPersistenceMetadata
 ├── RolloutItem
-└── 时间戳管理
+└── timeEnglish textmanagement
 ```
 
 ---
 
-## 依赖关系图
+## English text
 
-### 全局依赖关系
+### English text
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -630,7 +630,7 @@ StoredThread
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
                           ▲
-                          │ 使用
+                          │ use
                           │
 ┌─────────────────────────┴───────────────────────────────────┐
 │                    Runtime/Storage Layer                     │
@@ -649,7 +649,7 @@ StoredThread
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
                           ▲
-                          │ 实现
+                          │ implementation
                           │
 ┌─────────────────────────┴───────────────────────────────────┐
 │                  Platform Implementation Layer               │
@@ -671,7 +671,7 @@ StoredThread
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 审批流程图
+### English textpipelineEnglish text
 
 ```
 User Request
@@ -679,18 +679,18 @@ User Request
     ▼
 AskForApproval Policy
     │
-    ├─► UnlessTrusted: 检查已知安全命令
+    ├─► UnlessTrusted: English textsafetyEnglish text
     │       │
-    │       ├─► 安全(只读) ──► Allow
-    │       └─► 其他 ──────────► 请求批准
+    │       ├─► safety(English text) ──► Allow
+    │       └─► English text ──────────► requestEnglish text
     │
-    ├─► OnFailure: 先执行，失败后请求批准(已弃用)
+    ├─► OnFailure: English text, failureEnglish textrequestEnglish text(English text)
     │
-    ├─► OnRequest: 模型决定
+    ├─► OnRequest: modelEnglish text
     │       │
-    │       └─► 需要批准 ──► ExecApprovalRequestEvent
+    │       └─► RequiredEnglish text ──► ExecApprovalRequestEvent
     │
-    ├─► Granular: 按类别细粒度控制
+    ├─► Granular: English text
     │       │
     │       ├─► sandbox_approval
     │       ├─► rules
@@ -698,32 +698,32 @@ AskForApproval Policy
     │       ├─► request_permissions
     │       └─► mcp_elicitations
     │
-    └─► Never: 拒绝所有请求
+    └─► Never: English textrequest
 
-批准请求
+English textrequest
     │
     ▼
 ApprovalsReviewer
     │
-    ├─► User: 显示给用户
+    ├─► User: English text
     │       │
     │       └─► User Decision
     │
     └─► AutoReview: GuardianAssessmentEvent
             │
-            ├─► 分析行动/上下文
-            ├─► 计算风险等级
-            ├─► 检查用户授权
-            └─► 返回 Allow/Deny
+            ├─► English text/English text
+            ├─► computeEnglish text
+            ├─► English text
+            └─► English text Allow/Deny
 
-决策应用
+English text
     │
-    ├─► ExecPolicyAmendment: 更新 execpolicy
-    ├─► NetworkPolicyAmendment: 更新网络策略
-    └─► AdditionalPermissions: 扩展权限
+    ├─► ExecPolicyAmendment: English text execpolicy
+    ├─► NetworkPolicyAmendment: English text
+    └─► AdditionalPermissions: extensionEnglish text
 ```
 
-### 沙箱应用流程图
+### English textpipelineEnglish text
 
 ```
 Request Execution
@@ -731,19 +731,19 @@ Request Execution
     ▼
 SandboxPolicy Selection
     │
-    ├─► ReadOnly (默认)
-    │       ├─► FileSystemSandboxPolicy (受限读取)
-    │       └─► NetworkSandboxPolicy (受限网络)
+    ├─► ReadOnly (default)
+    │       ├─► FileSystemSandboxPolicy (English text)
+    │       └─► NetworkSandboxPolicy (English text)
     │
     ├─► WorkspaceWrite
-    │       ├─► 写入工作区
-    │       └─► 保护元数据 (.git, .agents, .codex)
+    │       ├─► English text
+    │       └─► English textdata (.git, .agents, .codex)
     │
     ├─► ExternalSandbox
-    │       └─► 使用外部沙箱
+    │       └─► useEnglish text
     │
     └─► DangerFullAccess
-            └─► 完全访问(危险)
+            └─► English text(English text)
 
 Platform Selection
     │
@@ -752,26 +752,26 @@ Platform Selection
     │       └─► landlock (LSM)
     │
     ├─► macOS: SandboxType::MacosSeatbelt
-    │       └─► Seatbelt (SBPL 语言)
+    │       └─► Seatbelt (SBPL language)
     │
     └─► Windows: SandboxType::WindowsRestrictedToken
             └─► Restricted Token
 
 SandboxTransformRequest
     │
-    ├─► 应用文件系统权限
-    ├─► 应用网络限制
-    ├─► 注入平台特定参数
-    └─► 执行受限命令
+    ├─► English textfilesystemEnglish text
+    ├─► English text
+    ├─► English textparameter
+    └─► English text
 
 Enforcement
     │
-    ├─► 运行时拒绝访问
-    ├─► 审批请求(如果启用)
-    └─► 执行决策应用
+    ├─► runEnglish text
+    ├─► English textrequest(English text)
+    └─► English text
 ```
 
-### 线程生命周期图
+### English text
 
 ```
 Session Start
@@ -801,8 +801,8 @@ ThreadId Generation (UUID v7)
     │   ResumeThreadParams
     │       │
     │       ├─► thread_id
-    │       ├─► rollout_path (可选)
-    │       └─► history (可选)
+    │       ├─► rollout_path (English text)
+    │       └─► history (English text)
     │
     │   LiveThread::resume()
     │       │
@@ -817,7 +817,7 @@ ThreadId Generation (UUID v7)
             │
             ├─► forked_from_id = parent_thread_id
             └─► source = Fork
-        
+
         LiveThread::create()
             │
             └─► Copy parent state
@@ -840,9 +840,9 @@ LiveThread::append_items()
 
 Flush / Persist
     │
-    ├─► LiveThread::flush() ──► 立即持久化
-    ├─► LiveThread::persist() ─► 标记为持久化
-    └─► LiveThread::shutdown() ─► 关闭写入器
+    ├─► LiveThread::flush() ──► English text
+    ├─► LiveThread::persist() ─► English text
+    └─► LiveThread::shutdown() ─► English text
 
 Thread Closure
     │
@@ -853,164 +853,164 @@ Thread Closure
 
 ---
 
-## 迁移复杂性评分
+## migrationEnglish text
 
-### 总体评分: **7.5/10** (高复杂度)
+### English text: **7.5/10** (English text)
 
-### 各模块详细评分
+### English text
 
-#### 审批系统 (Approvals): **8/10** ⚠️ 高
+#### English textsystem (Approvals): **8/10** ⚠️ English text
 
-**主要复杂性因素:**
-- ✅ 相对独立的模块，数据结构清晰
-- ❌ 多层决策逻辑（策略 → 审批 → Guardian 评估 → 决策）
-- ❌ 多种审批来源（exec, network, MCP, permissions）
-- ❌ Guardian 子代理集成（需要理解 AI 驱动的审批）
-- ❌ 与执行策略系统紧密耦合（execpolicy）
+**mainEnglish text:**
+- ✅ English text, dataEnglish text
+- ❌ English text(English text → English text → Guardian evaluation → English text)
+- ❌ English textSource(exec, network, MCP, permissions)
+- ❌ Guardian English text(RequiredEnglish text AI English text)
+- ❌ English textsystemEnglish text(execpolicy)
 
-**依赖关系:**
-- Protocol: 类型定义
-- Config: AskForApproval, ApprovalsReviewer 配置
-- ExecPolicy: Decision, Policy, Rule 系统
-- Guardian: 子代理审批实现
-- Network Proxy: 网络策略管理
+**English text:**
+- Protocol: English text
+- Config: AskForApproval, ApprovalsReviewer configuration
+- ExecPolicy: Decision, Policy, Rule system
+- Guardian: English textimplementation
+- Network Proxy: English textmanagement
 
-**迁移工作量估计:**
-- 类型定义迁移: 2-3 天
-- Guardian 评估逻辑: 4-5 天
-- 决策应用逻辑: 3-4 天
-- 测试和集成: 2-3 天
-- **总计: 11-15 天**
+**migrationEnglish text:**
+- English textmigration: 2-3 English text
+- Guardian evaluationEnglish text: 4-5 English text
+- English text: 3-4 English text
+- testEnglish text: 2-3 English text
+- **English text: 11-15 English text**
 
-**关键问题需解决:**
-- 如何集成 Guardian 子代理决策逻辑
-- 执行策略系统的兼容性
-- 网络审批与代理网络管理的集成
-- MCP 审批系统的迁移
-
----
-
-#### 沙箱系统 (Sandbox): **8.5/10** ⚠️ 高
-
-**主要复杂性因素:**
-- ✅ 模块化设计，明确的权限模型
-- ❌ 平台特定实现（Linux/macOS/Windows）
-- ❌ 复杂的文件系统权限匹配逻辑
-- ❌ 多种沙箱后端（bwrap, seatbelt, landlock）
-- ❌ 受保护元数据管理
-
-**依赖关系:**
-- Protocol: FileSystemAccessMode, SandboxPolicy 定义
-- Permissions: 权限验证逻辑
-- Platform-specific: bwrap, seatbelt, landlock 库
-- Network Proxy: 网络策略应用
-- Config: SandboxMode 配置
-
-**迁移工作量估计:**
-- 权限模型迁移: 2-3 天
-- 跨平台沙箱适配: 5-7 天（需要每个平台测试）
-- 文件系统匹配逻辑: 3-4 天
-- 网络策略集成: 2-3 天
-- 测试和验证: 3-4 天
-- **总计: 15-21 天**
-
-**关键问题需解决:**
-- 如何集成现有沙箱后端（bwrap 等）
-- Neurx 中的平台检测和选择机制
-- 文件系统权限匹配算法的优化
-- 受保护元数据的强制执行
+**English text:**
+- English text Guardian English text
+- English textsystemEnglish text
+- English textmanagementEnglish text
+- MCP English textsystemEnglish textmigration
 
 ---
 
-#### 线程支持 (Threading): **7/10** 中高
+#### English textsystem (Sandbox): **8.5/10** ⚠️ English text
 
-**主要复杂性因素:**
-- ✅ 数据结构相对简洁
-- ✅ 存储接口定义清晰
-- ❌ 异步持久化机制
-- ❌ 线程恢复和分叉逻辑
-- ❌ 分布式一致性考虑（远程存储）
+**mainEnglish text:**
+- ✅ English text, English textmodel
+- ❌ English textimplementation(Linux/macOS/Windows)
+- ❌ English textfilesystemEnglish text
+- ❌ English text(bwrap, seatbelt, landlock)
+- ❌ English textdatamanagement
 
-**依赖关系:**
-- Protocol: ThreadId, 协议定义
-- Storage: Rollout 文件系统、远程存储
-- Config: 内存模式配置
-- Analytics: 线程初始化事件
+**English text:**
+- Protocol: FileSystemAccessMode, SandboxPolicy English text
+- Permissions: English text
+- Platform-specific: bwrap, seatbelt, landlock English text
+- Network Proxy: English text
+- Config: SandboxMode configuration
 
-**迁移工作量估计:**
-- ThreadId 和基础类型: 1-2 天
-- LocalThreadStore 实现: 3-4 天
-- 异步持久化逻辑: 3-4 天
-- 恢复和分叉机制: 2-3 天
-- 远程存储支持（可选）: 3-5 天
-- 测试和集成: 2-3 天
-- **总计: 14-21 天**
+**migrationEnglish text:**
+- English textmodelmigration: 2-3 English text
+- English text: 5-7 English text(RequiredEnglish texttest)
+- filesystemEnglish text: 3-4 English text
+- English text: 2-3 English text
+- testEnglish text: 3-4 English text
+- **English text: 15-21 English text**
 
-**关键问题需解决:**
-- Neurx 中的存储后端选择
-- 异步运行时集成（Tokio）
-- 分叉时的状态复制策略
-- 恢复时的一致性保证
-
----
-
-### 优先级建议
-
-**阶段 1: 基础设施 (第 1-2 周)**
-1. 迁移 `ThreadId` 和线程基础类型
-2. 实现 `LocalThreadStore`（基于内存或文件）
-3. 建立线程生命周期管理框架
-
-**阶段 2: 权限和沙箱 (第 3-4 周)**
-1. 迁移权限模型（`FileSystemAccessMode`, `FileSystemSandboxPolicy`）
-2. 实现跨平台沙箱检测和选择
-3. 移植 Linux 沙箱支持（bwrap/landlock）
-4. 测试和验证文件系统权限
-
-**阶段 3: 审批系统 (第 5-6 周)**
-1. 迁移审批基础类型（`AskForApproval`, `ApprovalsReviewer`）
-2. 实现审批请求事件处理
-3. 集成 Guardian 子代理决策
-4. 测试审批工作流
-
-**阶段 4: 集成和优化 (第 7-8 周)**
-1. 端到端集成测试
-2. 性能优化
-3. 平台特定测试（macOS, Windows）
-4. 文档和知识转移
+**English text:**
+- English text(bwrap English text)
+- Neurx English text
+- filesystemEnglish textoptimize
+- English textdataEnglish text
 
 ---
 
-### 风险评估
+#### English textsupport (Threading): **7/10** English text
 
-| 风险 | 概率 | 影响 | 缓解策略 |
+**mainEnglish text:**
+- ✅ dataEnglish text
+- ✅ English text
+- ❌ English textstepEnglish text
+- ❌ English textrecoverEnglish text
+- ❌ English text(English text)
+
+**English text:**
+- Protocol: ThreadId, English text
+- Storage: Rollout filesystem, English text
+- Config: English textconfiguration
+- Analytics: English textinitializeEnglish text
+
+**migrationEnglish text:**
+- ThreadId English text: 1-2 English text
+- LocalThreadStore implementation: 3-4 English text
+- English textstepEnglish text: 3-4 English text
+- recoverEnglish text: 2-3 English text
+- English textsupport(English text): 3-5 English text
+- testEnglish text: 2-3 English text
+- **English text: 14-21 English text**
+
+**English text:**
+- Neurx English text
+- English textsteprunEnglish text(Tokio)
+- English textstateEnglish text
+- recoverEnglish text
+
+---
+
+### English text
+
+**phase 1: English text (English text 1-2 English text)**
+1. migration `ThreadId` English text
+2. implementation `LocalThreadStore`(English textfile)
+3. English textmanagementframework
+
+**phase 2: English text (English text 3-4 English text)**
+1. migrationEnglish textmodel(`FileSystemAccessMode`, `FileSystemSandboxPolicy`)
+2. implementationEnglish text
+3. English text Linux English textsupport(bwrap/landlock)
+4. testEnglish textfilesystemEnglish text
+
+**phase 3: English textsystem (English text 5-6 English text)**
+1. migrationEnglish text(`AskForApproval`, `ApprovalsReviewer`)
+2. implementationEnglish textrequestEnglish text
+3. English text Guardian English text
+4. testEnglish text
+
+**phase 4: English textoptimize (English text 7-8 English text)**
+1. English texttest
+2. English textoptimize
+3. English texttest(macOS, Windows)
+4. English text
+
+---
+
+### English textevaluation
+
+| English text | English text | English text | English text |
 |------|------|------|--------|
-| Guardian 子代理集成 | 中 | 高 | 早期设计审查，与 Guardian 团队合作 |
-| 平台特定沙箱 | 中 | 中 | 逐个平台迁移，充分测试 |
-| 持久化一致性 | 中 | 中 | 完整的单元测试，集成测试覆盖 |
-| 性能回归 | 低 | 中 | 建立性能基准，监控 |
-| 向后兼容性 | 低 | 高 | 保持 API 契约，版本控制 |
+| Guardian English text | English text | English text | English text, English text Guardian English text |
+| English text | English text | English text | English textmigration, English texttest |
+| English text | English text | English text | completeEnglish texttest, English texttestEnglish text |
+| English text | English text | English text | English text, monitoring |
+| English text | English text | English text | English text API English text, English text |
 
 ---
 
-## 建议的代码组织结构 (Neurx)
+## English text (Neurx)
 
 ```
 neurx/src/
 ├── agent/
 │   ├── approvals/
 │   │   ├── lib.rs
-│   │   ├── models.rs          # 从 protocol/src/approvals.rs
+│   │   ├── models.rs          # English text protocol/src/approvals.rs
 │   │   ├── policies.rs         # AskForApproval, GranularApprovalConfig
-│   │   ├── reviewer.rs         # ApprovalsReviewer, Guardian 集成
-│   │   ├── request.rs          # ExecApprovalRequestEvent 等
-│   │   ├── guardian.rs         # Guardian 评估事件和动作
+│   │   ├── reviewer.rs         # ApprovalsReviewer, Guardian English text
+│   │   ├── request.rs          # ExecApprovalRequestEvent English text
+│   │   ├── guardian.rs         # Guardian evaluationEnglish text
 │   │   └── tests/
 │   │
 │   ├── sandbox/
 │   │   ├── lib.rs
-│   │   ├── models.rs           # 权限模型
-│   │   ├── policy.rs           # FileSystemSandboxPolicy 等
+│   │   ├── models.rs           # English textmodel
+│   │   ├── policy.rs           # FileSystemSandboxPolicy English text
 │   │   ├── manager.rs          # SandboxManager
 │   │   ├── platforms/
 │   │   │   ├── linux.rs        # bwrap, landlock
@@ -1023,7 +1023,7 @@ neurx/src/
 │   │   ├── id.rs               # ThreadId
 │   │   ├── store.rs            # ThreadStore trait
 │   │   ├── persistence.rs      # LocalThreadStore
-│   │   ├── lifecycle.rs        # 创建、恢复、分叉、关闭
+│   │   ├── lifecycle.rs        # English text, recover, English text, English text
 │   │   ├── memory.rs           # InMemoryThreadStore
 │   │   └── tests/
 │   │
@@ -1032,11 +1032,11 @@ neurx/src/
 
 ---
 
-## 参考文献
+## English text
 
-- Codex 源代码: `/Users/feifei/agent/codex/codex-rs/`
-- Protocol 模块: `codex-rs/protocol/src/`
-- Thread Store 模块: `codex-rs/thread-store/src/`
-- Sandboxing 模块: `codex-rs/sandboxing/src/`
-- ExecPolicy 模块: `codex-rs/execpolicy/src/`
-- Analytics 模块: `codex-rs/analytics/src/`
+- Codex English text: `/Users/feifei/agent/codex/codex-rs/`
+- Protocol English text: `codex-rs/protocol/src/`
+- Thread Store English text: `codex-rs/thread-store/src/`
+- Sandboxing English text: `codex-rs/sandboxing/src/`
+- ExecPolicy English text: `codex-rs/execpolicy/src/`
+- Analytics English text: `codex-rs/analytics/src/`

@@ -31,9 +31,9 @@ use neurx.model.llm.gpt.{
 
 struct constitutional_principle {
     string id
-    string critique_request    // 引导模型批判的提示
-    string revision_request    // 引导模型修订的提示
-    int severity               // 1-5, 违规严重度权重
+    string critique_request    // English textmodelcritiqueEnglish textprompt
+    string revision_request    // English textmodelrevisionEnglish textprompt
+    int severity               // 1-5, English textseverityweight
 }
 
 struct constitution {
@@ -41,56 +41,56 @@ struct constitution {
     int num_principles
 }
 
-// NeurX 风格的核心原则集 (helpful, harmless, honest)
+// NeurX English textprincipleEnglish text (helpful, harmless, honest)
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
 
     ps[0] = constitutional_principle {
         id: "harmlessness",
-        critique_request: "找出回复中可能有害、危险或不道德的内容。",
-        revision_request: "重写回复，移除有害内容，同时尽量保持有用。",
+        critique_request: "English textharmful, English textcontent.",
+        revision_request: "English text, English textharmfulcontent, English texthelpful.",
         severity: 5,
     }
     ps[1] = constitutional_principle {
         id: "honesty",
-        critique_request: "指出回复中不真实、误导或编造的部分。",
-        revision_request: "重写回复，确保事实准确，对不确定处明确说明。",
+        critique_request: "English texttruthful, English text.",
+        revision_request: "English text, English text, English textexplanation.",
         severity: 4,
     }
     ps[2] = constitutional_principle {
         id: "helpfulness",
-        critique_request: "找出回复中回避问题或无帮助之处。",
-        revision_request: "重写回复，使其更直接、更有帮助地回应用户需求。",
+        critique_request: "English text.",
+        revision_request: "English text, English text, English text.",
         severity: 3,
     }
     ps[3] = constitutional_principle {
         id: "non_discrimination",
-        critique_request: "找出回复中带有偏见、歧视或刻板印象的内容。",
-        revision_request: "重写回复，使其公平、包容、无偏见。",
+        critique_request: "English text, English textcontent.",
+        revision_request: "English text, English text, English text, English text.",
         severity: 5,
     }
     ps[4] = constitutional_principle {
         id: "privacy",
-        critique_request: "找出回复中泄露隐私或鼓励侵犯隐私的内容。",
-        revision_request: "重写回复，保护隐私，不泄露个人信息。",
+        critique_request: "English textprivacyEnglish textprivacyEnglish textcontent.",
+        revision_request: "English text, English textprivacy, English textinformation.",
         severity: 4,
     }
     ps[5] = constitutional_principle {
         id: "no_illegal_advice",
-        critique_request: "找出回复中提供违法行为指导的内容。",
-        revision_request: "重写回复，拒绝提供违法指导并解释原因。",
+        critique_request: "English textillegalEnglish textcontent.",
+        revision_request: "English text, English textillegalEnglish text.",
         severity: 5,
     }
     ps[6] = constitutional_principle {
         id: "child_safety",
-        critique_request: "找出回复中危害未成年人安全的内容。",
-        revision_request: "重写回复，确保完全符合未成年人保护标准。",
+        critique_request: "English textminorsafetyEnglish textcontent.",
+        revision_request: "English text, English textminorEnglish text.",
         severity: 5,
     }
     ps[7] = constitutional_principle {
         id: "transparency",
-        critique_request: "找出回复中假装为人类或隐瞒 AI 身份的内容。",
-        revision_request: "重写回复，必要时清晰表明 AI 身份。",
+        critique_request: "English text AI identityEnglish textcontent.",
+        revision_request: "English text, English text AI identity.",
         severity: 2,
     }
 
@@ -98,37 +98,37 @@ func default_constitution() constitution {
 }
 
 // ============================================================================
-// 2. 偏好对输出
+// 2. preferenceEnglish textoutput
 // ============================================================================
 
-// 一条 CAI 生成的偏好样本
+// English text CAI generateEnglish textpreferenceEnglish text
 struct cai_preference_pair {
-    []int prompt_tokens        // 原始提示
-    []int chosen_tokens        // 修订后回复 (更优)
-    []int rejected_tokens      // 原始回复 (较差)
-    string principle_id        // 触发修订的原则
+    []int prompt_tokens        // English textprompt
+    []int chosen_tokens        // revisionEnglish text (English text)
+    []int rejected_tokens      // English text (English text)
+    string principle_id        // English textrevisionEnglish textprinciple
     int severity
-    float critique_strength    // 批判信号强度 (0-1)
+    float critique_strength    // critiqueEnglish text (0-1)
 }
 
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
-    int num_revised            // 实际被修订的数量
+    int num_revised            // actualEnglish textrevisionEnglish textcount
 }
 
 // ============================================================================
-// 3. 控制 token (在真实系统中由 tokenizer 提供; 此处用保留 ID)
+// 3. English text token (English texttruthfulsystemEnglish text tokenizer English text; English text ID)
 // ============================================================================
 
-// 这些是 CAI 模板的"角色"分隔 token。生产环境中由分词器的特殊 token 给出。
+// English text CAI English text"English text"English text token.English text token English text.
 func cai_token_prompt_start() int { 50001 }
 func cai_token_response_start() int { 50002 }
 func cai_token_critique_start() int { 50003 }
 func cai_token_revision_start() int { 50004 }
 func cai_token_principle_base() int { 50100 }   // + principle index
 
-// 把若干 token 段拼接
+// English text token English text
 func cai_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
     []int out = []int{cap: n}
@@ -146,10 +146,10 @@ func cai_single(int tok) []int {
 }
 
 // ============================================================================
-// 4. 单条 CAI 循环: 生成 → 批判 → 修订
+// 4. English text CAI English text: generate → critique → revision
 // ============================================================================
 
-// 对单个提示执行完整 critique-revise 循环
+// English textpromptEnglish textcomplete critique-revise English text
 func cai_critique_revise(
     language_model model,
     []int prompt_tokens,
@@ -158,22 +158,22 @@ func cai_critique_revise(
     int max_response_tokens,
     int seed
 ) cai_preference_pair {
-    // 1. 初始回复: prompt → response
+    // 1. English text: prompt → response
     []int gen_input = cai_concat(prompt_tokens, cai_single(cai_token_response_start()))
     []int original_response = gpt_generate_topk(model, gen_input, max_response_tokens, 50, 0.8, seed)
 
-    // 2. 自我批判: [prompt][response][critique_marker][principle] → critique
+    // 2. English textcritique: [prompt][response][critique_marker][principle] → critique
     []int critique_context = cai_concat(prompt_tokens, original_response)
     critique_context = cai_concat(critique_context, cai_single(cai_token_critique_start()))
     critique_context = cai_concat(critique_context, cai_single(cai_token_principle_base() + principle_index))
     []int critique = gpt_generate_topk(model, critique_context, max_response_tokens / 2, 40, 0.7, seed + 1)
 
-    // 3. 修订: [prompt][response][critique][revision_marker] → revised response
+    // 3. revision: [prompt][response][critique][revision_marker] → revised response
     []int revision_context = cai_concat(critique_context, critique)
     revision_context = cai_concat(revision_context, cai_single(cai_token_revision_start()))
     []int revised_response = gpt_generate_topk(model, revision_context, max_response_tokens, 50, 0.7, seed + 2)
 
-    // 4. 批判强度: 用批判长度归一估计 (越长批判通常表示越多问题)
+    // 4. critiqueEnglish text: English textcritiqueEnglish text (English textcritiqueEnglish text)
     float critique_strength = cai_estimate_critique_strength(critique, max_response_tokens / 2)
 
     cai_preference_pair {
@@ -186,7 +186,7 @@ func cai_critique_revise(
     }
 }
 
-// 批判强度估计 (0=无问题, 1=严重问题)
+// critiqueEnglish text (0=English text, 1=English text)
 func cai_estimate_critique_strength([]int critique, int max_len) float {
     if max_len <= 0 {
         return 0.0
@@ -199,7 +199,7 @@ func cai_estimate_critique_strength([]int critique, int max_len) float {
 }
 
 // ============================================================================
-// 5. 批量 CAI: 对一组提示生成偏好数据
+// 5. English text CAI: English textpromptgeneratepreferencedata
 // ============================================================================
 
 func cai_generate_preferences(
@@ -215,7 +215,7 @@ func cai_generate_preferences(
 
     int i = 0
     while i < n {
-        // 轮转选择原则 (生产环境可按内容分类选择最相关原则)
+        // English textprinciple (English textcontentEnglish textprinciple)
         int pidx = i - (i / consti.num_principles) * consti.num_principles
         constitutional_principle principle = consti.principles[pidx]
 
@@ -229,7 +229,7 @@ func cai_generate_preferences(
         )
         pairs[i] = pair
 
-        // 若批判强度超过阈值，记为"已修订"
+        // English textcritiqueEnglish text, English text"English textrevision"
         if pair.critique_strength > 0.15 {
             num_revised = num_revised + 1
         }
@@ -245,10 +245,10 @@ func cai_generate_preferences(
 }
 
 // ============================================================================
-// 6. 转换为奖励模型可用的扁平偏好批次
+// 6. English textrewardmodelEnglish textpreferencebatch
 //
-//   把 cai_preference_pair 的 chosen/rejected 拼成定长 token 序列
-//   (prompt + response，padding/truncate 到 seq_len)，供 reward_model 训练。
+//   English text cai_preference_pair English text chosen/rejected English text token English text
+//   (prompt + response, padding/truncate English text seq_len), English text reward_model training.
 // ============================================================================
 
 struct cai_flat_batch {
@@ -312,7 +312,7 @@ func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch 
 }
 
 // ============================================================================
-// 7. CAI 统计 / 报告
+// 7. CAI statistics / English text
 // ============================================================================
 
 struct cai_stats {
@@ -320,7 +320,7 @@ struct cai_stats {
     int revised_count
     float revision_rate
     float avg_critique_strength
-    float weighted_severity      // 按 severity 加权的批判强度
+    float weighted_severity      // English text severity English textcritiqueEnglish text
 }
 
 func cai_compute_stats(cai_batch batch) cai_stats {
