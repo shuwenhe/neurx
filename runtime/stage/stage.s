@@ -3,7 +3,7 @@ use neurx.strings
 
 use neurx.runtime.control
 use neurx.strings
-use neurx.ad.function
+use neurx.autograd.function
 use neurx.strings
 
 struct stage_state {
@@ -647,14 +647,14 @@ func execute(stage_state state) stage_state {
 }
 
 func stage_to_transform_chain(stage_state state) transform_chain {
-    transform_chain chain = neurx.ad.function.new_transform_chain()
+    transform_chain chain = neurx.autograd.function.new_transform_chain()
     int i = 0
     while i < len(state.stages) {
         string param = neurx.strings.string_at(state.params, i)
         if param != "" {
-            chain = neurx.ad.function.transform_chain_add_step_with_param(chain, state.stages[i], param)
+            chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, state.stages[i], param)
         } else {
-            chain = neurx.ad.function.transform_chain_add_step(chain, state.stages[i])
+            chain = neurx.autograd.function.transform_chain_add_step(chain, state.stages[i])
         }
         i = i + 1
     }
@@ -664,20 +664,20 @@ func stage_to_transform_chain(stage_state state) transform_chain {
             string branch = neurx.strings.string_at(state.control_branches, j)
             string param = neurx.strings.string_at(state.control_params, j)
             if param != "" {
-                chain = neurx.ad.function.transform_chain_add_step_with_param(chain, branch, param)
+                chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, branch, param)
             } else {
-                chain = neurx.ad.function.transform_chain_add_step(chain, branch)
+                chain = neurx.autograd.function.transform_chain_add_step(chain, branch)
             }
             j = j + 1
         }
         int k = len(state.control_branches)
         while k < len(state.control_params) {
-            chain = neurx.ad.function.transform_chain_add_step_with_param(chain, "control_param", neurx.strings.string_at(state.control_params, k))
+            chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, "control_param", neurx.strings.string_at(state.control_params, k))
             k = k + 1
         }
     }
-    chain = neurx.ad.function.transform_chain_set_ready(chain, state.jit_enabled || state.lowered || state.compiled || state.executed || len(state.stages) > 0)
-    chain = neurx.ad.function.transform_chain_set_linearized(chain, state.lowered || state.compiled || state.executed)
+    chain = neurx.autograd.function.transform_chain_set_ready(chain, state.jit_enabled || state.lowered || state.compiled || state.executed || len(state.stages) > 0)
+    chain = neurx.autograd.function.transform_chain_set_linearized(chain, state.lowered || state.compiled || state.executed)
     chain
 }
 

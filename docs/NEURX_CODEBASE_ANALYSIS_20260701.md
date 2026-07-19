@@ -183,10 +183,10 @@ Total steps: 400K
 **Status**: IMPLEMENTED with architecture in place
 
 **Files**:
-- `neurx/engine/backward.s` (infrastructure)
+- `neurx/autograd/backward.s` (infrastructure)
 - `neurx/model/transformer/transformer_backward.s` (450 lines)
 - `neurx/training/mixed_precision.s` (1,200+ lines)
-- `neurx/ml/autodiff_complete.s` (1,000+ lines - automatic differentiation framework)
+- `neurx/autograd/autograd_complete.s` (1,000+ lines - automatic differentiation framework)
 
 **Backward Pass Components**:
 - ✅ Cross-entropy loss gradient computation
@@ -383,8 +383,8 @@ Total steps: 400K
 - Mixed precision backward (loss scaling) needs end-to-end validation
 
 **Files to Verify**:
-- `neurx/engine/backward.s`
-- `neurx/ml/autodiff_complete.s`
+- `neurx/autograd/backward.s`
+- `neurx/autograd/autograd_complete.s`
 - Backward rules for: softmax, layer norm, attention, FFN
 
 ---
@@ -738,7 +738,7 @@ neurx/tests/
 ### ML Framework
 ```
 neurx/ml/
-├── autodiff_complete.s (1,000+) - Automatic differentiation
+├── autograd_complete.s (1,000+) - Automatic differentiation
 ├── attention_complete.s - Attention framework
 ├── optimizer_adamw.s - AdamW variant
 └── math_ops.s - Math operations

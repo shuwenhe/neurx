@@ -1,5 +1,5 @@
 // ---- trace/graph English text ----
-use neurx.ad.tracer
+use neurx.autograd.tracer
 
 // trace -> ir_graph
 func trace_to_ir(tracer_state state, string name) ir_graph {
@@ -30,11 +30,11 @@ func hybrid_trace_graph(tracer_state state, string name, bool to_graph) any {
         }
     }
 }
-package neurx.ad.ir
+package neurx.autograd.ir
 
-use neurx.ad.function
-use neurx.ad.eqn
-use neurx.ad.tracer
+use neurx.autograd.function
+use neurx.autograd.eqn
+use neurx.autograd.tracer
 use neurx.strings
 
 struct ir_eqn {

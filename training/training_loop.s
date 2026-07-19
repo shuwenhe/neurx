@@ -1,6 +1,6 @@
 package neurx.training
 
-import "neurx.autodiff"
+import "neurx.autograd"
 import "neurx.optimizer"
 import "neurx.lf"
 import "neurx.distributed.zero"
@@ -176,19 +176,19 @@ func compute_lr(training_loop loop) float {
     loop.config.learning_rate * cos_decay
 }
 
-func train_step(training_loop loop, []autodiff.tensor batch, []int labels) float {
+func train_step(training_loop loop, []autograd.tensor batch, []int labels) float {
     if loop.config.enable_amp {
         mixed_precision_training.amp_zero_grad(loop.amp)
     } else {
-        autodiff.zero_grad(loop.model.parameters())
+        autograd.zero_grad(loop.model.parameters())
     }
     
     float total_loss = 0.0
     
     for i := 0; i < loop.config.gradient_accumulation_steps; i += 1 {
-        []autodiff.tensor inputs = batch[i*loop.config.batch_size..(i+1)*loop.config.batch_size]
+        []autograd.tensor inputs = batch[i*loop.config.batch_size..(i+1)*loop.config.batch_size]
         
-        []autodiff.tensor logits
+        []autograd.tensor logits
         if loop.config.enable_checkpointing {
             logits = gradient_checkpointing.checkpoint_wrapper(
                 loop.model.forward,
@@ -207,7 +207,7 @@ func train_step(training_loop loop, []autodiff.tensor batch, []int labels) float
         
         loss = loss / loop.config.gradient_accumulation_steps
         
-        autodiff.backward(loss)
+        autograd.backward(loss)
         
         total_loss = total_loss + loss
     }
@@ -217,7 +217,7 @@ func train_step(training_loop loop, []autodiff.tensor batch, []int labels) float
     }
     
     if loop.config.max_grad_norm > 0 {
-        autodiff.clip_grad_norm(loop.model.parameters(), loop.config.max_grad_norm)
+        autograd.clip_grad_norm(loop.model.parameters(), loop.config.max_grad_norm)
     }
     
     bool success = true
@@ -241,13 +241,13 @@ func train_step(training_loop loop, []autodiff.tensor batch, []int labels) float
     total_loss
 }
 
-func validate_step(training_loop loop, []autodiff.tensor batch, []int labels) float {
-    autodiff.disable_grad()
+func validate_step(training_loop loop, []autograd.tensor batch, []int labels) float {
+    autograd.disable_grad()
     
-    []autodiff.tensor logits = loop.model.forward(batch)
+    []autograd.tensor logits = loop.model.forward(batch)
     float loss = lf.cross_entropy_loss(logits, labels)
     
-    autodiff.enable_grad()
+    autograd.enable_grad()
     
     loss
 }
@@ -259,7 +259,7 @@ func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) tra
     int num_batches = 0
     
     while loop.state.step < loop.config.total_steps / loop.config.epochs {
-        []autodiff.tensor batch, []int labels = get_train_batch()
+        []autograd.tensor batch, []int labels = get_train_batch()
         
         float loss = train_step(loop, batch, labels)
         epoch_loss = epoch_loss + loss
@@ -297,7 +297,7 @@ func validate(training_loop loop, func get_val_batch) training_loop {
     int num_batches = 0
     
     for i := 0; i < 100; i += 1 {
-        []autodiff.tensor batch, []int labels = get_val_batch()
+        []autograd.tensor batch, []int labels = get_val_batch()
         float loss = validate_step(loop, batch, labels)
         val_loss = val_loss + loss
         num_batches = num_batches + 1

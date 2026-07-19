@@ -16,8 +16,8 @@ NeurX Architecture (Pure S Language)
 │
 ├── 1. Core Tensor & Autograd Layer
 │   ├── tensor/tensor.s              - Tensor operations
-│   ├── autodiff/autograd.s          - Automatic differentiation
-│   ├── autodiff/backward.s          - Backward pass computation
+│   ├── autograd/autograd.s          - Automatic differentiation
+│   ├── autograd/backward.s          - Backward pass computation
 │   └── nn/activation.s              - Activation functions
 │
 ├── 2. Model Architecture Layer
@@ -104,7 +104,7 @@ NeurX Architecture (Pure S Language)
 ### Phase 1: Core Foundation (Weeks 1-2) ✅ MOSTLY COMPLETE
 
 - [x] Tensor operations (tensor/tensor.s)
-- [x] Autograd system (autodiff/autograd.s)
+- [x] Autograd system (autograd/autograd.s)
 - [x] Basic optimizers (optimizer/adamw.s)
 - [x] Loss functions (cross-entropy, MSE, L1)
 - [x] Activation functions (ReLU, GELU, Tanh, LayerNorm)

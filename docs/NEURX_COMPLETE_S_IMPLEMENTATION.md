@@ -182,7 +182,7 @@ tensor/ (Tensor operations)
 
 ### Layer 2: Computation (Autograd)
 ```
-autodiff/ (Automatic differentiation)
+autograd/ (Automatic differentiation)
 ├── autograd.s         ✓ Forward mode AD
 ├── backward.s         ✓ Backward pass
 └── graph.s            ✓ Computation graph

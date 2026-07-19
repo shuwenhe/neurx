@@ -272,19 +272,19 @@ func scan_prod(control_state state, tensor value) tensor {
 }
 
 func control_to_transform_chain(control_state state) transform_chain {
-    transform_chain chain = neurx.ad.function.new_transform_chain()
+    transform_chain chain = neurx.autograd.function.new_transform_chain()
     int i = 0
     while i < len(state.branches) {
         string param = neurx.strings.string_at(state.params, i)
         if param != "" {
-            chain = neurx.ad.function.transform_chain_add_step_with_param(chain, state.branches[i], param)
+            chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, state.branches[i], param)
         } else {
-            chain = neurx.ad.function.transform_chain_add_step(chain, state.branches[i])
+            chain = neurx.autograd.function.transform_chain_add_step(chain, state.branches[i])
         }
         i = i + 1
     }
-    chain = neurx.ad.function.transform_chain_set_ready(chain, state.cond_enabled || state.loop_enabled || state.scan_enabled || len(state.branches) > 0)
-    chain = neurx.ad.function.transform_chain_set_linearized(chain, state.loop_enabled || state.scan_enabled)
+    chain = neurx.autograd.function.transform_chain_set_ready(chain, state.cond_enabled || state.loop_enabled || state.scan_enabled || len(state.branches) > 0)
+    chain = neurx.autograd.function.transform_chain_set_linearized(chain, state.loop_enabled || state.scan_enabled)
     chain
 }
 

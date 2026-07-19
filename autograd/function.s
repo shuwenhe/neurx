@@ -1,6 +1,6 @@
-package neurx.ad.function
+package neurx.autograd.function
 
-use neurx.ad.eqn
+use neurx.autograd.eqn
 use neurx.strings
 
 struct function_record {
@@ -35,7 +35,7 @@ struct backward_rule {
 }
 
 func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
-    neurx.ad.eqn.copy_eqns(values)
+    neurx.autograd.eqn.copy_eqns(values)
 }
 
 func join_strings([]string values) string {

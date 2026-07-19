@@ -219,7 +219,7 @@ model_large_pretrain.s (mainEnglish text)
 8. `observability` - English text ⚠️
 
 ### English textframework (7 English text) ⚠️ English textuse
-1. `autodiff` - English text
+1. `autograd` - English text
 2. `backends` - English text
 3. `compile` - compile
 4. `context` - English text
@@ -328,7 +328,7 @@ sbatch scripts/legacy/submit_training_job.sh
      ├─ dataload (pretrain/data)
      ├─ English text (model/llm)
      ├─ losscompute (moe/llm_moe_1t_loss.s)
-     ├─ English text (autodiff)
+     ├─ English text (autograd)
      ├─ optimizeEnglish text (optimizer)
      ├─ gradientEnglish textstep (distributed)
      ├─ checkpointsave (pretrain/checkpoint)

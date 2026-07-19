@@ -1,7 +1,7 @@
-package neurx.tensor.autograd
+package neurx.autograd.tensor
 
 use neurx.tensor.tensor
-use neurx.ad.function
+use neurx.autograd.function
 
 func tensor_backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
     tensor grad_a = neurx.tensor.tensor.tensor_backward_add_grad_a(a, upstream)
@@ -204,8 +204,8 @@ func tensor_backward_rule_sigmoid(tensor a, tensor upstream) backward_rule {
 }
 
 func tensor_transform_chain_from_op(string op) transform_chain {
-    transform_chain chain = neurx.ad.function.new_transform_chain()
-    neurx.ad.function.transform_chain_add_step(chain, op)
+    transform_chain chain = neurx.autograd.function.new_transform_chain()
+    neurx.autograd.function.transform_chain_add_step(chain, op)
 }
 
 func tensor_transform_chain_add() transform_chain {

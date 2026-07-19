@@ -1,4 +1,4 @@
-package neurx.ad.eqn
+package neurx.autograd.eqn
 
 use neurx.strings
 

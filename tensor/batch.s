@@ -1,7 +1,7 @@
 package neurx.tensor.batch
 use neurx.strings
 
-use neurx.ad.function
+use neurx.autograd.function
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings

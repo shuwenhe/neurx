@@ -257,7 +257,7 @@ cat << 'EOF'
 ║  Loss Computation (cross-entropy)                                        ║
 ║    │                                                                      ║
 ║    ▼                                                                      ║
-║  Backward Pass (autodiff)                                                ║
+║  Backward Pass (autograd)                                                ║
 ║    │                                                                      ║
 ║    ▼                                                                      ║
 ║  Gradient Computation (all layers)                                       ║

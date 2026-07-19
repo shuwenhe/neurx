@@ -1,6 +1,6 @@
-package neurx.training
+package neurx.autograd.gradient_checkpointing
 
-import "neurx.autodiff"
+import "neurx.autograd"
 
 struct checkpoint_config {
     enabled: bool
@@ -10,15 +10,15 @@ struct checkpoint_config {
 }
 
 struct checkpoint_state {
-    saved_tensors: [][]autodiff.tensor
+    saved_tensors: [][]autograd.tensor
     recomputation_count: int
     memory_saved: float
 }
 
 struct checkpoint_layer {
-    layer_fn: func([][]autodiff.tensor) [][]autodiff.tensor
-    inputs: [][]autodiff.tensor
-    outputs: [][]autodiff.tensor
+    layer_fn: func([][]autograd.tensor) [][]autograd.tensor
+    inputs: [][]autograd.tensor
+    outputs: [][]autograd.tensor
     needs_recompute: bool
 }
 
@@ -34,94 +34,94 @@ func new_checkpoint_config(bool enabled) checkpoint_config {
 
 func new_checkpoint_state() checkpoint_state {
     checkpoint_state state {
-        saved_tensors: [][]autodiff.tensor{},
+        saved_tensors: [][]autograd.tensor{},
         recomputation_count: 0,
         memory_saved: 0.0,
     }
     state
 }
 
-func checkpoint_wrapper(func layer_fn, []autodiff.tensor inputs, checkpoint_config config) []autodiff.tensor {
+func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
         return layer_fn(inputs...)
     }
     
-    autodiff.disable_grad()
+    autograd.disable_grad()
     
-    []autodiff.tensor outputs = layer_fn(inputs...)
+    []autograd.tensor outputs = layer_fn(inputs...)
     
-    autodiff.enable_grad()
+    autograd.enable_grad()
     
     for i := 0; i < len(inputs); i += 1 {
-        autodiff.retain_grad(inputs[i])
+        autograd.retain_grad(inputs[i])
     }
     
-    []autodiff.tensor detached_outputs = []autodiff.tensor{cap: len(outputs)}
+    []autograd.tensor detached_outputs = []autograd.tensor{cap: len(outputs)}
     for i := 0; i < len(outputs); i += 1 {
-        detached_outputs.push(autodiff.tensor_detach(outputs[i]))
+        detached_outputs.push(autograd.tensor_detach(outputs[i]))
     }
     
-    func backward_fn([]autodiff.tensor grads) []autodiff.tensor {
-        autodiff.enable_grad()
+    func backward_fn([]autograd.tensor grads) []autograd.tensor {
+        autograd.enable_grad()
         
-        []autodiff.tensor recomputed_outputs = layer_fn(inputs...)
+        []autograd.tensor recomputed_outputs = layer_fn(inputs...)
         
-        []autodiff.tensor result_grads = []autodiff.tensor{cap: len(inputs)}
+        []autograd.tensor result_grads = []autograd.tensor{cap: len(inputs)}
         
         for i := 0; i < len(recomputed_outputs); i += 1 {
-            autodiff.backward_with_grad(recomputed_outputs[i], grads[i])
+            autograd.backward_with_grad(recomputed_outputs[i], grads[i])
         }
         
         for i := 0; i < len(inputs); i += 1 {
             result_grads.push(inputs[i].grad)
         }
         
-        autodiff.disable_grad()
+        autograd.disable_grad()
         
         result_grads
     }
     
     for i := 0; i < len(detached_outputs); i += 1 {
-        autodiff.register_backward_hook(detached_outputs[i], backward_fn)
+        autograd.register_backward_hook(detached_outputs[i], backward_fn)
     }
     
     detached_outputs
 }
 
-func checkpoint_module(pointer module, []autodiff.tensor inputs, checkpoint_config config) []autodiff.tensor {
+func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
         return module.forward(inputs...)
     }
     
-    autodiff.disable_grad()
+    autograd.disable_grad()
     
-    []autodiff.tensor outputs = module.forward(inputs...)
+    []autograd.tensor outputs = module.forward(inputs...)
     
-    autodiff.enable_grad()
+    autograd.enable_grad()
     
     for i := 0; i < len(inputs); i += 1 {
-        autodiff.retain_grad(inputs[i])
+        autograd.retain_grad(inputs[i])
     }
     
-    []autodiff.tensor detached_outputs = []autodiff.tensor{cap: len(outputs)}
+    []autograd.tensor detached_outputs = []autograd.tensor{cap: len(outputs)}
     for i := 0; i < len(outputs); i += 1 {
-        detached_outputs.push(autodiff.tensor_detach(outputs[i]))
+        detached_outputs.push(autograd.tensor_detach(outputs[i]))
     }
     
-    func recompute_fn() []autodiff.tensor {
-        autodiff.enable_grad()
-        []autodiff.tensor result = module.forward(inputs...)
-        autodiff.disable_grad()
+    func recompute_fn() []autograd.tensor {
+        autograd.enable_grad()
+        []autograd.tensor result = module.forward(inputs...)
+        autograd.disable_grad()
         result
     }
     
     for i := 0; i < len(detached_outputs); i += 1 {
-        autodiff.register_backward_hook(detached_outputs[i], func(grads) []autodiff.tensor {
-            []autodiff.tensor recomputed = recompute_fn()
-            []autodiff.tensor input_grads = []autodiff.tensor{cap: len(inputs)}
+        autograd.register_backward_hook(detached_outputs[i], func(grads) []autograd.tensor {
+            []autograd.tensor recomputed = recompute_fn()
+            []autograd.tensor input_grads = []autograd.tensor{cap: len(inputs)}
             
             for j := 0; j < len(recomputed); j += 1 {
-                autodiff.backward_with_grad(recomputed[j], grads[j])
+                autograd.backward_with_grad(recomputed[j], grads[j])
             }
             
             for j := 0; j < len(inputs); j += 1 {
@@ -145,7 +145,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
     for i := 0; i < num_layers; i += 1 {
         pointer layer = transformer.layers[i]
         
-        func wrapped_forward([]autodiff.tensor inputs) []autodiff.tensor {
+        func wrapped_forward([]autograd.tensor inputs) []autograd.tensor {
             checkpoint_wrapper(layer.forward, inputs, config)
         }
         
@@ -157,13 +157,13 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
 
 func gradient_checkpointing_step(
     pointer model,
-    []autodiff.tensor inputs,
+    []autograd.tensor inputs,
     func loss_fn,
     checkpoint_config config,
 ) float {
-    autodiff.zero_grad(model.parameters())
+    autograd.zero_grad(model.parameters())
     
-    []autodiff.tensor outputs
+    []autograd.tensor outputs
     
     if config.enabled {
         outputs = apply_checkpointing_to_transformer(model, config).forward(inputs)
@@ -173,7 +173,7 @@ func gradient_checkpointing_step(
     
     float loss = loss_fn(outputs)
     
-    autodiff.backward(loss)
+    autograd.backward(loss)
     
     loss
 }
@@ -189,18 +189,18 @@ func estimate_memory_savings(checkpoint_config config, int num_layers, int layer
     baseline - with_checkpointing
 }
 
-func checkpoint_save_tensor(autodiff.tensor tensor, checkpoint_state state) checkpoint_state {
+func checkpoint_save_tensor(autograd.tensor tensor, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push([tensor])
     state
 }
 
-func checkpoint_save_tensors([][]autodiff.tensor tensors, checkpoint_state state) checkpoint_state {
+func checkpoint_save_tensors([][]autograd.tensor tensors, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push(tensors)
     state
 }
 
 func checkpoint_clear(checkpoint_state state) checkpoint_state {
-    state.saved_tensors = [][]autodiff.tensor{}
+    state.saved_tensors = [][]autograd.tensor{}
     state.recomputation_count = 0
     state
 }
@@ -213,46 +213,46 @@ func get_checkpoint_stats(checkpoint_state state) string {
 func create_checkpoint_layer(func layer_fn) checkpoint_layer {
     checkpoint_layer layer {
         layer_fn: layer_fn,
-        inputs: [][]autodiff.tensor{},
-        outputs: [][]autodiff.tensor{},
+        inputs: [][]autograd.tensor{},
+        outputs: [][]autograd.tensor{},
         needs_recompute: false,
     }
     layer
 }
 
-func checkpoint_layer_forward(checkpoint_layer layer, []autodiff.tensor inputs) []autodiff.tensor {
+func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) []autograd.tensor {
     layer.inputs = [inputs]
     layer.outputs = [layer.layer_fn(inputs...)]
     layer.needs_recompute = true
     
-    []autodiff.tensor detached = []autodiff.tensor{cap: len(layer.outputs[0])}
+    []autograd.tensor detached = []autograd.tensor{cap: len(layer.outputs[0])}
     for i := 0; i < len(layer.outputs[0]); i += 1 {
-        detached.push(autodiff.tensor_detach(layer.outputs[0][i]))
+        detached.push(autograd.tensor_detach(layer.outputs[0][i]))
     }
     
     detached
 }
 
-func checkpoint_layer_backward(checkpoint_layer layer, []autodiff.tensor grads) []autodiff.tensor {
+func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) []autograd.tensor {
     if !layer.needs_recompute {
-        return []autodiff.tensor{}
+        return []autograd.tensor{}
     }
     
-    autodiff.enable_grad()
+    autograd.enable_grad()
     
-    []autodiff.tensor recomputed = layer.layer_fn(layer.inputs[0]...)
+    []autograd.tensor recomputed = layer.layer_fn(layer.inputs[0]...)
     
-    []autodiff.tensor input_grads = []autodiff.tensor{cap: len(layer.inputs[0])}
+    []autograd.tensor input_grads = []autograd.tensor{cap: len(layer.inputs[0])}
     
     for i := 0; i < len(recomputed); i += 1 {
-        autodiff.backward_with_grad(recomputed[i], grads[i])
+        autograd.backward_with_grad(recomputed[i], grads[i])
     }
     
     for i := 0; i < len(layer.inputs[0]); i += 1 {
         input_grads.push(layer.inputs[0][i].grad)
     }
     
-    autodiff.disable_grad()
+    autograd.disable_grad()
     
     layer.needs_recompute = false
     

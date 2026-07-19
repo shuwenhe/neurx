@@ -1,6 +1,6 @@
 package neurx.training
 
-import "neurx.autodiff"
+import "neurx.autograd"
 import "neurx.optimizer"
 
 enum checkpoint_type {
@@ -41,7 +41,7 @@ struct checkpoint_manager {
 }
 
 struct checkpoint_data {
-    model_params: []autodiff.tensor
+    model_params: []autograd.tensor
     optimizer_state: pointer
     scheduler_state: pointer
     step: int
@@ -77,7 +77,7 @@ func new_checkpoint_manager(checkpoint_config config) checkpoint_manager {
 }
 
 func checkpoint_save_model(pointer model, string path, checkpoint_config config) int {
-    []autodiff.tensor params = model.parameters()
+    []autograd.tensor params = model.parameters()
     
     int total_size = 0
     for i := 0; i < len(params); i += 1 {
@@ -164,10 +164,10 @@ func checkpoint_save(checkpoint_manager manager, pointer model, opt.adamw_optimi
 }
 
 func checkpoint_load(string path, pointer model, opt.adamw_optimizer optimizer) bool {
-    []autodiff.tensor params = model.parameters()
+    []autograd.tensor params = model.parameters()
     
     for i := 0; i < len(params); i += 1 {
-        autodiff.tensor_fill_zero(params[i])
+        autograd.tensor_fill_zero(params[i])
     }
     
     true
@@ -285,7 +285,7 @@ func checkpoint_data_save(checkpoint_data data, string path) bool {
 
 func checkpoint_data_load(string path) checkpoint_data {
     checkpoint_data data {
-        model_params: []autodiff.tensor{},
+        model_params: []autograd.tensor{},
         optimizer_state: nil,
         scheduler_state: nil,
         step: 0,

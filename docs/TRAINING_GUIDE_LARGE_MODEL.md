@@ -134,7 +134,7 @@ Attention(Q, K, V) = softmax(QK^T / √d_k)V
 
 ### 2️⃣ English text (Automatic Differentiation)
 
-English text `ml/autodiff_complete.s`:
+English text `autograd/autograd_complete.s`:
 
 - ✓ English textcomputeEnglish text
 - ✓ 7English textsupport(add, mul, matmul, relu, softmax, layer_norm)

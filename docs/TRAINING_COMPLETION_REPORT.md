@@ -62,7 +62,7 @@ for step in range(max_steps):
     loss = cross_entropy_loss(logits, labels)
 
     # English text
-    gradients = autodiff.backward(loss)
+    gradients = autograd.backward(loss)
 
     # gradientEnglish text
     grad_norm = clip_gradients(gradients, max_norm=1.0)
@@ -94,7 +94,7 @@ for step in range(max_steps):
    - English textfunction(ReLU, GELU, Softmax)
    - English text, lossfunction
 
-2. **ml/autodiff_complete.s** (400English text)
+2. **autograd/autograd_complete.s** (400English text)
    - English textcomputeEnglish text
    - support7English text
    - English textrankingEnglish text
@@ -284,7 +284,7 @@ supportEnglish text:
 │
 ├── ml/
 │   ├── math_ops.s                      # English text
-│   ├── autodiff_complete.s             # English text
+│   ├── autograd_complete.s             # English text
 │   ├── attention_complete.s            # English text
 │   └── optimizer_adamw.s               # AdamWoptimizeEnglish text
 │

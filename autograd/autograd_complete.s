@@ -3,7 +3,7 @@
 // completeEnglish textframework - supportEnglish textTransformerEnglish text
 // =====================================================================
 
-package neurx.ml.autodiff
+package neurx.autograd.complete
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 

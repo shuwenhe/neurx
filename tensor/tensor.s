@@ -1,8 +1,8 @@
 package neurx.tensor
 
 use neurx.backends.compute_backend
-use neurx.ad.ir
-use neurx.ad.tracer
+use neurx.autograd.ir
+use neurx.autograd.tracer
 
 struct tensor {
     []float data
@@ -1122,11 +1122,11 @@ func take_along_dim(tensor a, tensor indices, int dim) tensor {
 }
 
 func trace_op(tracer_state state, string op) tracer_state {
-    neurx.ad.tracer.tracer_capture(state, op)
+    neurx.autograd.tracer.tracer_capture(state, op)
 }
 
 func trace_op_with_param(tracer_state state, string op, string param) tracer_state {
-    neurx.ad.tracer.tracer_capture_with_param(state, op, param)
+    neurx.autograd.tracer.tracer_capture_with_param(state, op, param)
 }
 
 func empty_strings() []string {
@@ -1148,88 +1148,88 @@ func pair_strings(string a, string b) []string {
 }
 
 func trace_add(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "add", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "add", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_mul(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_matmul(tracer_state state, tensor a, tensor b) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "matmul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "matmul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_sum(tracer_state state, tensor a) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sum", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_mean(tracer_state state, tensor a) tracer_state {
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mean", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_sum_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sum_dim", single_string(param), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sum_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
 
 func trace_mean_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "mean_dim", single_string(param), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mean_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
 
 func trace_relu(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "relu", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "relu", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_exp(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "exp", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "exp", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_log(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "log", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "log", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_sqrt(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sqrt", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sqrt", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_tanh(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "tanh", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "tanh", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_sigmoid(tracer_state state, tensor a) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "sigmoid", empty_strings(), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sigmoid", empty_strings(), single_string("arg0"), single_string("out0"))
 }
 
 func trace_broadcast_to(tracer_state state, tensor a, []int shape) tracer_state {
     del a
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "broadcast_to", single_string("shape=" + str(shape)), single_string("arg0"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "broadcast_to", single_string("shape=" + str(shape)), single_string("arg0"), single_string("out0"))
 }
 
 func trace_concatenate(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "concatenate", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "concatenate", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_stack(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
-    neurx.ad.tracer.tracer_add_eqn_with_io(state, "stack", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
+    neurx.autograd.tracer.tracer_add_eqn_with_io(state, "stack", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
 
 func trace_to_transform_chain(tracer_state state) transform_chain {
-    neurx.ad.tracer.tracer_to_transform_chain(state)
+    neurx.autograd.tracer.tracer_to_transform_chain(state)
 }
 
 func trace_to_jaxpr(tracer_state state, string name) ir_graph {
-    neurx.ad.ir.ir_from_tracer(state, name)
+    neurx.autograd.ir.ir_from_tracer(state, name)
 }

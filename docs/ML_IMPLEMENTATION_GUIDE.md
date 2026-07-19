@@ -56,7 +56,7 @@ func cross_entropy_loss(tensor logits, tensor targets) float
 func mse_loss(tensor predictions, tensor targets) float
 ```
 
-### 2. English textframework (`autodiff_complete.s` - 400 English text)
+### 2. English textframework (`autograd_complete.s` - 400 English text)
 
 **computeEnglish textmanagement**
 ```s
@@ -316,7 +316,7 @@ save_checkpoint(state, "model.ckpt")
 | English text | English text | English textfunctioncount |
 |------|------|------------|
 | math_ops.s | 300 | 15+ |
-| autodiff_complete.s | 400 | 20+ |
+| autograd_complete.s | 400 | 20+ |
 | attention_complete.s | 350 | 10+ |
 | optimizer_adamw.s | 350 | 15+ |
 | training_complete_integrated.s | 400 | 12+ |
@@ -385,7 +385,7 @@ checkpointsave
 /Users/feifei/shuwen/neurx/
 ├── ml/
 │   ├── math_ops.s                  # English text
-│   ├── autodiff_complete.s         # English textframework
+│   ├── autograd_complete.s         # English textframework
 │   ├── attention_complete.s        # English text
 │   └── optimizer_adamw.s           # AdamWoptimizeEnglish text
 ├── train/

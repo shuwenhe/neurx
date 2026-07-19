@@ -1,7 +1,7 @@
 package main
 
 use neurx.tensor.core
-use neurx.tensor.autograd
+use neurx.autograd.tensor
 use neurx.tensor.reduce
 
 func assert_true(bool value, string name) {
@@ -98,11 +98,11 @@ func test_broadcast_backward_rules() {
     tensor upstream = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3], "fp32", "cpu", false)
     tensor reduced = neurx.tensor.core.sum_dim(upstream, 0, false)
     tensor mean_reduced = neurx.tensor.core.mean_dim(upstream, 1, true)
-    backward_rule add_rule = neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
-    backward_rule mul_rule = neurx.tensor.autograd.tensor_backward_rule_mul(a, b, upstream)
-    backward_rule sub_rule = neurx.tensor.autograd.tensor_backward_rule_sub(a, b, upstream)
+    backward_rule add_rule = neurx.autograd.tensor.tensor_backward_rule_add(a, b, upstream)
+    backward_rule mul_rule = neurx.autograd.tensor.tensor_backward_rule_mul(a, b, upstream)
+    backward_rule sub_rule = neurx.autograd.tensor.tensor_backward_rule_sub(a, b, upstream)
     tensor div_b = neurx.tensor.core.from_data([2.0], [1], "fp32", "cpu", true)
-    backward_rule div_rule = neurx.tensor.autograd.tensor_backward_rule_div(a, div_b, neurx.tensor.core.from_data([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [2, 3], "fp32", "cpu", false))
+    backward_rule div_rule = neurx.autograd.tensor.tensor_backward_rule_div(a, div_b, neurx.tensor.core.from_data([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [2, 3], "fp32", "cpu", false))
     assert_close(add_rule.grad_a.storage[0], 5.0, "add grad a 0")
     assert_close(add_rule.grad_a.storage[1], 7.0, "add grad a 1")
     assert_close(add_rule.grad_a.storage[2], 9.0, "add grad a 2")
@@ -126,8 +126,8 @@ func test_broadcast_backward_rules() {
     tensor red_input = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3], "fp32", "cpu", true)
     tensor sum_dim_upstream = neurx.tensor.core.from_data([10.0, 20.0, 30.0], [3], "fp32", "cpu", false)
     tensor mean_dim_upstream = neurx.tensor.core.from_data([10.0, 20.0, 30.0], [1, 3], "fp32", "cpu", false)
-    backward_rule sum_dim_rule = neurx.tensor.autograd.tensor_backward_rule_sum_dim(red_input, sum_dim_upstream, 0, false)
-    backward_rule mean_dim_rule = neurx.tensor.autograd.tensor_backward_rule_mean_dim(red_input, mean_dim_upstream, 0, true)
+    backward_rule sum_dim_rule = neurx.autograd.tensor.tensor_backward_rule_sum_dim(red_input, sum_dim_upstream, 0, false)
+    backward_rule mean_dim_rule = neurx.autograd.tensor.tensor_backward_rule_mean_dim(red_input, mean_dim_upstream, 0, true)
     assert_close(sum_dim_rule.grad_a.storage[0], 10.0, "sum_dim grad a 0")
     assert_close(sum_dim_rule.grad_a.storage[1], 20.0, "sum_dim grad a 1")
     assert_close(sum_dim_rule.grad_a.storage[2], 30.0, "sum_dim grad a 2")

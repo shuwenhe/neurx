@@ -143,14 +143,14 @@ Minimum tests:
 Current canonical modules:
 
 - `ad/ad.s`
-- `ad/autodiff_minimal.s`
+- `ad/autograd_minimal.s`
 - `ad/context.s`
 - `ad/eqn.s`
 - `ad/function.s`
 - `ad/ir.s`
 - `ad/tracer.s`
-- `engine/backward.s`
-- `engine/state.s`
+- `autograd/backward.s`
+- `autograd/state.s`
 - `nn/nn.s`
 - `nn/conv.s`
 - `nn/pooling.s`

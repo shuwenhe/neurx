@@ -1,4 +1,4 @@
-package neurx.engine
+package neurx.autograd.engine
 
 use neurx.tensor.tensor
 

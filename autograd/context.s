@@ -1,4 +1,4 @@
-package neurx.ad.context
+package neurx.autograd.context
 
 struct grad_mode_state {
     bool grad_enabled

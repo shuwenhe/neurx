@@ -8,7 +8,7 @@
 ## 📋 COMPONENTS OVERVIEW
 
 ### ✅ Component 1: Autograd Backward Propagation
-**Files:** `s/autograd_engine.s` + `s/autograd_kernels_part[1-7].s`
+**Files:** `autograd/autograd_engine.s` + `autograd/autograd_kernels_part[1-7].s`
 
 What it provides:
 - Complete computation graph construction (28 node types)

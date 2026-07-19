@@ -17,7 +17,7 @@
 | 3 | `example/` → `examples/` English text | English text | 2 | ✅ English text |
 | 4 | `relative/` English text | English text | 0 | ✅ English text |
 | 5 | `legacy/` English text | English text | 0 | ✅ English text |
-| 6 | `ad/` → `autodiff/` English text | English text | 7 | ✅ English text |
+| 6 | `ad/` → `autograd/` English text | English text | 7 | ✅ English text |
 
 ### statisticsdata
 
@@ -51,7 +51,7 @@ optimizeEnglish text:
    - ❌ `legacy/` English textdirectory → ✅ English text
 
 3. **English text**
-   - ❌ `ad/` (English text) → ✅ `autodiff/` (English text)
+   - ❌ `ad/` (English text) → ✅ `autograd/` (English text)
 
 ### 🎯 English text
 
@@ -92,7 +92,7 @@ legacy/    (English textdirectory) ──English text→ ❌
 ### English textdirectory
 
 ```
-ad/        (7 English textfile) ──English text→ autodiff/ ✅
+ad/        (7 English textfile) ──English text→ autograd/ ✅
 ```
 
 ### English textdirectory
@@ -185,7 +185,7 @@ rm -rf relative/
 rm -rf legacy/
 
 # 5. English textdirectory
-mv ad/ autodiff/
+mv ad/ autograd/
 ```
 
 ### English textresult
@@ -218,7 +218,7 @@ English text, English textRequiredEnglish text:
 use neurx.script.*      → use neurx.scripts.*
 use neurx.tool.*        → use neurx.tools.*
 use neurx.example.*     → use neurx.examples.*
-use neurx.ad.*          → use neurx.autodiff.*
+use neurx.autograd.*          → use neurx.autograd.*
 ```
 
 ### CMake/English textconfiguration
@@ -291,13 +291,13 @@ ls -d /Users/feifei/shuwen/neurx/legacy/ 2>&1    # English text
 ls -d /Users/feifei/shuwen/neurx/scripts/    # English text
 ls -d /Users/feifei/shuwen/neurx/tools/      # English text
 ls -d /Users/feifei/shuwen/neurx/examples/   # English text
-ls -d /Users/feifei/shuwen/neurx/autodiff/   # English text
+ls -d /Users/feifei/shuwen/neurx/autograd/   # English text
 
 # 3. English textfileEnglish textcomplete
 ls /Users/feifei/shuwen/neurx/scripts/   | wc -l   # English text ≥ 34
 ls /Users/feifei/shuwen/neurx/tools/     | wc -l   # English text ≥ 14
 ls /Users/feifei/shuwen/neurx/examples/  | wc -l   # English text ≥ 9
-ls /Users/feifei/shuwen/neurx/autodiff/  | wc -l   # English text ≥ 7
+ls /Users/feifei/shuwen/neurx/autograd/  | wc -l   # English text ≥ 7
 
 # 4. English textcompile
 cd /Users/feifei/shuwen/neurx

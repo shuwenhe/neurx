@@ -72,7 +72,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Gradient clipping
 - [x] Double-precision gradient computation
 
-**Files**: `neurx/engine/backward.s`, `neurx/engine/autograd.s` (~2,000 lines)
+**Files**: `neurx/autograd/backward.s`, `neurx/engine/autograd.s` (~2,000 lines)
 
 #### ✅ Optimization (95%)
 - [x] AdamW optimizer

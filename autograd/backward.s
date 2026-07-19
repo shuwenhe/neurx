@@ -1,11 +1,11 @@
-package neurx.engine
+package neurx.autograd.engine
 use neurx.strings
 
-use neurx.ad.ir
+use neurx.autograd.ir
 use neurx.strings
-use neurx.ad.tracer
+use neurx.autograd.tracer
 use neurx.strings
-use neurx.tensor.autograd
+use neurx.autograd.tensor
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
@@ -70,63 +70,63 @@ func get_tag(backward_state state, int index) string {
 }
 
 func backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_add(a, b, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_add(a, b, upstream)
 }
 
 func backward_rule_mul(tensor a, tensor b, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_mul(a, b, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_mul(a, b, upstream)
 }
 
 func backward_rule_sub(tensor a, tensor b, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_sub(a, b, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_sub(a, b, upstream)
 }
 
 func backward_rule_div(tensor a, tensor b, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_div(a, b, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_div(a, b, upstream)
 }
 
 func backward_rule_matmul(tensor a, tensor b, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_matmul(a, b, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_matmul(a, b, upstream)
 }
 
 func backward_rule_sum(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_sum(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_sum(a, upstream)
 }
 
 func backward_rule_mean(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_mean(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_mean(a, upstream)
 }
 
 func backward_rule_relu(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_relu(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_relu(a, upstream)
 }
 
 func backward_rule_exp(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_exp(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_exp(a, upstream)
 }
 
 func backward_rule_log(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_log(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_log(a, upstream)
 }
 
 func backward_rule_sqrt(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_sqrt(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_sqrt(a, upstream)
 }
 
 func backward_rule_tanh(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_tanh(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_tanh(a, upstream)
 }
 
 func backward_rule_sigmoid(tensor a, tensor upstream) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_sigmoid(a, upstream)
+    neurx.autograd.tensor.tensor_backward_rule_sigmoid(a, upstream)
 }
 
 func backward_rule_sum_dim(tensor a, tensor upstream, int dim, bool keepdim) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_sum_dim(a, upstream, dim, keepdim)
+    neurx.autograd.tensor.tensor_backward_rule_sum_dim(a, upstream, dim, keepdim)
 }
 
 func backward_rule_mean_dim(tensor a, tensor upstream, int dim, bool keepdim) backward_rule {
-    neurx.tensor.autograd.tensor_backward_rule_mean_dim(a, upstream, dim, keepdim)
+    neurx.autograd.tensor.tensor_backward_rule_mean_dim(a, upstream, dim, keepdim)
 }
 
 func backward_rule_from_op(string op, tensor a, tensor b, tensor upstream) backward_rule {

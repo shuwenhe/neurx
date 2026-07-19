@@ -413,7 +413,7 @@ user$ ./bin/neurx_complete train large 32
         │ For each batch:              │
         │  Forward pass (model)        │
         │  Compute loss                │
-        │  Backward pass (autodiff)    │
+        │  Backward pass (autograd)    │
         │  Optimizer step              │
         │  Log progress                │
         │  Save checkpoint             │

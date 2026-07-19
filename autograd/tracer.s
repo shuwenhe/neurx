@@ -1,7 +1,7 @@
-package neurx.ad.tracer
+package neurx.autograd.tracer
 
-use neurx.ad.function
-use neurx.ad.eqn
+use neurx.autograd.function
+use neurx.autograd.eqn
 use neurx.strings
 
 struct tracer_state {

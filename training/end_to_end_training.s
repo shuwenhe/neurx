@@ -8,7 +8,7 @@ package neurx.training
 // 1. Data loading and batching
 // 2. Model forward pass through transformer
 // 3. Loss computation
-// 4. Backward pass (autodiff)
+// 4. Backward pass (autograd)
 // 5. Optimizer step (AdamW)
 // 6. Loss tracking and convergence verification
 // ============================================================================
@@ -63,7 +63,7 @@ struct tensor {
     shape: []int
     size: int
     
-    // Gradient tracking for autodiff
+    // Gradient tracking for autograd
     grad: []float64
     requires_grad: bool
 }

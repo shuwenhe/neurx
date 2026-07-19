@@ -1,4 +1,4 @@
-package neurx.ad
+package neurx.autograd.minimal
 
 struct grad_node {
     int id
