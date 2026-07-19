@@ -151,6 +151,9 @@ func run_wikipedia() int {
     string manifest = env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
     string docs_per_shard = env_get("DOCS_PER_SHARD", "5000")
     string max_pages = env_get("MAX_PAGES", "0")
+    string resume = env_get("NEURX_SHARD_RESUME", "1")
+    string force_rebuild = env_get("NEURX_SHARD_FORCE_REBUILD", "0")
+    string completion_file = output_dir + "/.wikipedia_shard_complete"
 
     if !runtime_file_exists(input) {
         println("Error: input file not found: " + input)
@@ -178,6 +181,8 @@ func run_wikipedia() int {
         }
     }
 
+    runtime_run_command_output("rm -f " + shell_escape(completion_file))
+
     string run_command = 
         "NEURX_HOME=" + shell_escape(root) +
         " S_COMPILER=" + shell_escape(compiler) +
@@ -188,12 +193,14 @@ func run_wikipedia() int {
         " ENWIKI_MANIFEST_FILE=" + shell_escape(manifest) +
         " DOCS_PER_SHARD=" + shell_escape(docs_per_shard) +
         " MAX_PAGES=" + shell_escape(max_pages) +
+        " NEURX_SHARD_RESUME=" + shell_escape(resume) +
+        " NEURX_SHARD_FORCE_REBUILD=" + shell_escape(force_rebuild) +
         " S_IR_RUNNER_INPUT=" + shell_escape(build_dir + "/shard_wikipedia_simple.ir") +
         " S_IR_RUNNER_ENTRY=" + shell_escape("main") +
         " " + shell_escape(runner_bin)
     println("[shard] launching runner for compiled shard IR")
     runtime_run_command_output(run_command)
-    if !runtime_file_exists(manifest) {
+    if !runtime_file_exists(manifest) || !runtime_file_exists(completion_file) {
         println("Error: shard wikipedia execution failed")
         return 1
     }

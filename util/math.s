@@ -1,19 +1,40 @@
 package neurx.util.math
 
 func exp_approx(float x) float {
-    if x > 20.0 {
-        return 485165195.0
+    if x >= 20.0 {
+        return 485165195.4097903
     }
-    if x < -20.0 {
-        return 0.0
+    if x <= -20.0 {
+        return 0.0000000020611536
     }
+
+    float reduced = x
+    int power_of_two = 0
+    while reduced > 0.34657359027997265 {
+        reduced = reduced - 0.6931471805599453
+        power_of_two = power_of_two + 1
+    }
+    while reduced < -0.34657359027997265 {
+        reduced = reduced + 0.6931471805599453
+        power_of_two = power_of_two - 1
+    }
+
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
-        term = term * x / i
+    while i <= 12 {
+        term = term * reduced / i
         result = result + term
         i = i + 1
+    }
+
+    while power_of_two > 0 {
+        result = result * 2.0
+        power_of_two = power_of_two - 1
+    }
+    while power_of_two < 0 {
+        result = result * 0.5
+        power_of_two = power_of_two + 1
     }
     result
 }
