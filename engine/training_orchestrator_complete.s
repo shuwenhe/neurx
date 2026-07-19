@@ -7,7 +7,7 @@ package neurx.engine
 // ============================================================================
 
 use neurx.model.transformer
-use neurx.training.mixed_precision
+use neurx.amp.scaler
 use neurx.distributed.nccl_backend
 use neurx.cuda.device_manager
 use neurx.optimizer.adamw

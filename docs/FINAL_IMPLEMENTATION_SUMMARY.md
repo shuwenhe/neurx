@@ -96,7 +96,7 @@ mpirun -np 8 ./bin/train_orchestrator \
 
 **For Training**:
 - `engine/training_orchestrator_complete.s` - Main training loop
-- `training/mixed_precision.s` - FP16/BF16 support
+- `amp/scaler.s` - FP16/BF16 support
 - `model/transformer/transformer.s` - Model architecture
 - `optimizer/adamw.s` - Optimizer
 

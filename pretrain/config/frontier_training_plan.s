@@ -226,7 +226,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "distributed/mixed_precision/mixed_precision.s",
+        "amp/distributed.s",
         "add FP8 amax history, loss scaling policy, and numerics monitors"
     )
     caps[6] = make_capability(

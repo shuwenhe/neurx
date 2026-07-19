@@ -5,7 +5,7 @@
 NeurXframeworkEnglish text4English textadvancedEnglish text, English textLLMtraining:
 
 1. **English text** (`neurx/ops/vectorization.s`)
-2. **English text** (`neurx/training/mixed_precision.s`)
+2. **English text** (`neurx/amp/scaler.s`)
 3. **gradientEnglish text** (`neurx/training/gradient_accumulation.s`)
 4. **English text** (`neurx/distributed/tensor_parallel.s`)
 
@@ -522,7 +522,7 @@ for epoch = 0; epoch < num_epochs; epoch++ {
 | English text | file |
 |------|------|
 | English text | `neurx/ops/vectorization.s` |
-| English text | `neurx/training/mixed_precision.s` |
+| English text | `neurx/amp/scaler.s` |
 | gradientEnglish text | `neurx/training/gradient_accumulation.s` |
 | English text | `neurx/distributed/tensor_parallel.s` |
 

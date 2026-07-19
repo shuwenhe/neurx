@@ -36,7 +36,7 @@
 | file | English text | English text | English text |
 |------|------|------|----------|
 | `distributed/collective/collective.s` | ~650 | **English text** | AllReduce(Ring+Tree), AllGather, ReduceScatter, AllToAll, P2P, Barrier |
-| `distributed/mixed_precision/mixed_precision.s` | ~450 | **English text** | BF16/FP16/FP8, Loss Scaling(English text+English text), Master Weight, English text |
+| `amp/distributed.s` | ~450 | **English text** | BF16/FP16/FP8, Loss Scaling(English text+English text), Master Weight, English text |
 | `optimizer/fsdp_optimizer.s` | ~550 | **FSDPoptimizeEnglish text** | FullShard/GradShard, Pre-Forward AllGather, Post-Backward ReduceScatter, AdamWEnglish text |
 | `distributed/tensor_parallel/tensor_parallel_v2.s` | ~700 | **English textV2** | Megatron Column/Row Linear, TP Attention(GQA), SwiGLU MLP, RoPE, RMSNorm |
 | `distributed/pipeline_parallel/pipeline_parallel_v2.s` | ~500 | **English textV2** | 1F1BEnglish text(Warmup/Steady/Cooldown), P2PEnglish text, English textcheckpointEnglish text |

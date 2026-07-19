@@ -61,7 +61,7 @@
   - [x] gradientEnglish text
   - [x] NaN/Inf English text
   - [x] English textrecoverEnglish text
-  - **file**: `neurx/training/mixed_precision.s` (1200 English text)
+  - **file**: `neurx/amp/scaler.s` (1200 English text)
 
 - [ ] **gradientcheckpoint**
   - [ ] English textsaveEnglish textrecover

@@ -1,4 +1,4 @@
-package neurx.training.mixed_precision
+package neurx.amp.scaler
 
 // 🔥 English texttrainingsystem (BF16 English text)
 // English text: NVIDIA Automatic Mixed Precision (AMP)

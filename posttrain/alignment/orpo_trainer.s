@@ -1,7 +1,7 @@
 package neurx.posttrain.alignment.orpo_trainer
 
 use neurx.distributed.collective
-use neurx.training.mixed_precision
+use neurx.amp.scaler
 
 // ════════════════════════════════════════════════════════════════════════════════
 // NEURX ORPO (Odds Ratio Preference Optimization) Trainer

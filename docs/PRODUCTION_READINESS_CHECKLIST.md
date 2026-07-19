@@ -102,7 +102,7 @@ The NeurX framework now provides **complete industrial-grade capabilities** for 
 - [x] Gradient scaling and unscaling
 - [x] Automatic precision detection
 
-**Files**: `neurx/training/mixed_precision.s` (~1,200 lines)
+**Files**: `neurx/amp/scaler.s` (~1,200 lines)
 
 ---
 

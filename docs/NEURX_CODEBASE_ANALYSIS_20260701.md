@@ -185,7 +185,7 @@ Total steps: 400K
 **Files**:
 - `neurx/autograd/backward.s` (infrastructure)
 - `neurx/model/transformer/transformer_backward.s` (450 lines)
-- `neurx/training/mixed_precision.s` (1,200+ lines)
+- `neurx/amp/scaler.s` (1,200+ lines)
 - `neurx/autograd/autograd_complete.s` (1,000+ lines - automatic differentiation framework)
 
 **Backward Pass Components**:
@@ -402,7 +402,7 @@ Total steps: 400K
 - Loss computation and logging during training
 
 **Files Present**:
-- `neurx/training/mixed_precision.s` - handles mixed precision
+- `neurx/amp/scaler.s` - handles mixed precision
 - `neurx/optimizer/adamw.s` - has optimizer
 - `neurx/scheduler/lr_scheduler.s` - has LR scheduling
 - `neurx/train_full.s` - attempts full integration but needs verification

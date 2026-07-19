@@ -62,7 +62,7 @@ neurx compile-all \
   distributed/pipeline_parallel.s \
   optimizer/zero_optimizer.s \
   alignment/rlhf_complete.s \
-  training/mixed_precision.s \
+  amp/scaler.s \
   attention/flash_attention_v3.s
 
 # output: bin/train_full bin/test_distributed_rlhf
@@ -183,7 +183,7 @@ trainingEnglish text:
 
   ✅ fileEnglish text: neurx/distributed/data_parallel.s
   ✅ fileEnglish text: neurx/alignment/rlhf_complete.s
-  ✅ fileEnglish text: neurx/training/mixed_precision.s
+  ✅ fileEnglish text: neurx/amp/scaler.s
   ✅ fileEnglish text: neurx/attention/flash_attention_v3.s
 
 ============================================================

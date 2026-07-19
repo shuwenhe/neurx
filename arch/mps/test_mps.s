@@ -3,7 +3,7 @@ package neurx.mps_test
 use neurx.tensor.{tensor, new}
 use neurx.nn.{linear, new_linear, linear_forward}
 use neurx.optimizer.optim_mvp.{sgd_optimizer, new_sgd, step_tensor}
-use neurx.train.amp.{autocast_state, new_autocast_state, autocast_enter, autocast_exit, is_autocast_enabled, grad_scaler_state, new_grad_scaler, grad_scaler_step, grad_scaler_get_scale, grad_scaler_found_inf}
+use neurx.amp.training.{autocast_state, new_autocast_state, autocast_enter, autocast_exit, is_autocast_enabled, grad_scaler_state, new_grad_scaler, grad_scaler_step, grad_scaler_get_scale, grad_scaler_found_inf}
 use neurx.train.logging.{training_logger_state, new_training_logger, training_logger_log, training_logger_flush, training_logger_is_enabled, training_logger_message_count, training_logger_last_flush_step}
 use neurx.checkpoint.{checkpoint, new_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_param_count}
 

@@ -17,7 +17,7 @@ package neurx.pretrain.neurx
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.distributed.*
-import neurx.training.mixed_precision.*
+import neurx.amp.scaler.*
 
 // ============================================================
 // English texttrainingEnglish text

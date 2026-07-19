@@ -1,8 +1,8 @@
+package neurx.amp.optimizer
+
 // Mixed Precision Training System
 // Combines BF16/FP32 for 2x speedup and 2x memory savings
 // Includes dynamic loss scaling for gradient overflow prevention
-
-module mixed_precision_training
 
 // Data types for mixed precision
 enum precision_type {

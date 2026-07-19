@@ -10,7 +10,7 @@ use neurx.distributed.nccl_backend
 use neurx.engine.training_orchestrator
 use neurx.training.industrial_gpt_training
 use neurx.model.transformer
-use neurx.training.mixed_precision
+use neurx.amp.scaler
 use neurx.optimizer.adamw
 use neurx.tokenizer.data_pipeline
 

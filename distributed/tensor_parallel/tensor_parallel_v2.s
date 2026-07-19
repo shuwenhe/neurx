@@ -27,7 +27,7 @@ package neurx.distributed.tensor_parallel_v2
 
 // ===================== Imports =====================
 // Uses: neurx.distributed.collective for AllReduce operations
-// Uses: neurx.distributed.mixed_precision for dtype handling
+// Uses: neurx.amp.distributed for dtype handling
 
 // ===================== Configuration =====================
 

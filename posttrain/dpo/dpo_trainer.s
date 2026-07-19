@@ -22,7 +22,7 @@ use neurx.loss.dpo_loss.*
 use neurx.posttrain.dpo.dpo_step.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
-use neurx.training.mixed_precision.*
+use neurx.amp.scaler.*
 use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*

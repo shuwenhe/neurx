@@ -4,9 +4,9 @@ import "neurx.autograd"
 import "neurx.optimizer"
 import "neurx.loss"
 import "neurx.distributed.zero"
-import "neurx.training.mixed_precision_training"
+import "neurx.amp.training"
 import "neurx.checkpoint.gradient"
-import "neurx.checkpoint.training"
+import "neurx.checkpoint.checkpoint_training"
 
 enum training_mode {
     TRAIN = 0
@@ -27,7 +27,7 @@ struct training_config {
     eval_interval: int
     save_interval: int
     device: string
-    dtype: mixed_precision_training.amp_dtype
+    dtype: training.amp_dtype
     enable_amp: bool
     enable_checkpointing: bool
     enable_zero: bool
@@ -64,10 +64,10 @@ struct training_loop {
     config: training_config
     state: training_state
     stats: training_stats
-    amp: mixed_precision_training.mixed_precision_model
-    checkpoint_manager: checkpoint_manager.checkpoint_manager
+    amp: training.mixed_precision_model
+    checkpoint_manager: checkpoint_training.checkpoint_manager
     zero_state: zero.zero_state
-    checkpoint_config: gradient_checkpointing.checkpoint_config
+    checkpoint_config: gradient.checkpoint_config
 }
 
 func new_training_config() training_config {
@@ -84,7 +84,7 @@ func new_training_config() training_config {
         eval_interval: 1000,
         save_interval: 1000,
         device: "cpu",
-        dtype: mixed_precision_training.amp_dtype.FP16,
+        dtype: training.amp_dtype.FP16,
         enable_amp: true,
         enable_checkpointing: true,
         enable_zero: true,
@@ -118,27 +118,27 @@ func new_training_loop(
 ) training_loop {
     training_state state = new_training_state(config)
     
-    mixed_precision_training.mixed_precision_model amp
+    training.mixed_precision_model amp
     if config.enable_amp {
-        mixed_precision_training.amp_config amp_config = mixed_precision_training.new_amp_config(config.dtype, true)
-        amp = mixed_precision_training.mixed_precision_model{
+        training.amp_config amp_config = training.new_amp_config(config.dtype, true)
+        amp = training.mixed_precision_model{
             model: model,
             amp_config: amp_config,
-            amp_state: mixed_precision_training.new_amp_state(amp_config, len(model.parameters())),
+            amp_state: training.new_amp_state(amp_config, len(model.parameters())),
             param_groups: [][model.parameters()],
         }
     }
     
-    checkpoint_manager.checkpoint_config ckpt_config = checkpoint_manager.new_checkpoint_config("./checkpoints")
+    checkpoint_training.checkpoint_config ckpt_config = checkpoint_training.new_checkpoint_config("./checkpoints")
     ckpt_config.save_interval = config.save_interval
-    checkpoint_manager.checkpoint_manager ckpt_manager = checkpoint_manager.new_checkpoint_manager(ckpt_config)
+    checkpoint_training.checkpoint_manager ckpt_manager = checkpoint_training.new_checkpoint_manager(ckpt_config)
     
     zero.zero_state zero_state
     if config.enable_zero {
         zero_state = zero.new_zero_state(config.zero_stage, len(model.parameters()))
     }
     
-    gradient_checkpointing.checkpoint_config grad_ckpt_config = gradient_checkpointing.new_checkpoint_config(config.enable_checkpointing)
+    gradient.checkpoint_config grad_ckpt_config = gradient.new_checkpoint_config(config.enable_checkpointing)
     
     training_loop loop {
         model: model,
@@ -178,7 +178,7 @@ func compute_lr(training_loop loop) float {
 
 func train_step(training_loop loop, []autograd.tensor batch, []int labels) float {
     if loop.config.enable_amp {
-        mixed_precision_training.amp_zero_grad(loop.amp)
+        training.amp_zero_grad(loop.amp)
     } else {
         autograd.zero_grad(loop.model.parameters())
     }
@@ -190,7 +190,7 @@ func train_step(training_loop loop, []autograd.tensor batch, []int labels) float
         
         []autograd.tensor logits
         if loop.config.enable_checkpointing {
-            logits = gradient_checkpointing.checkpoint_wrapper(
+            logits = gradient.checkpoint_wrapper(
                 loop.model.forward,
                 inputs,
                 loop.checkpoint_config,
@@ -202,7 +202,7 @@ func train_step(training_loop loop, []autograd.tensor batch, []int labels) float
         float loss = loss.cross_entropy_loss(logits, labels)
         
         if loop.config.enable_amp {
-            loss = mixed_precision_training.amp_scale_loss(loss, loop.amp.amp_state)
+            loss = training.amp_scale_loss(loss, loop.amp.amp_state)
         }
         
         loss = loss / loop.config.gradient_accumulation_steps
@@ -222,7 +222,7 @@ func train_step(training_loop loop, []autograd.tensor batch, []int labels) float
     
     bool success = true
     if loop.config.enable_amp {
-        success = mixed_precision_training.amp_step(loop.amp)
+        success = training.amp_step(loop.amp)
     }
     
     if success {
@@ -275,7 +275,7 @@ func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) tra
         }
         
         if loop.state.global_step % loop.config.save_interval == 0 {
-            loop.checkpoint_manager = checkpoint_manager.checkpoint_save(
+            loop.checkpoint_manager = checkpoint_training.checkpoint_save(
                 loop.checkpoint_manager,
                 loop.model,
                 loop.optimizer,
@@ -311,7 +311,7 @@ func validate(training_loop loop, func get_val_batch) training_loop {
     
     if val_loss < loop.state.best_val_loss {
         loop.state.best_val_loss = val_loss
-        loop.checkpoint_manager = checkpoint_manager.checkpoint_save(
+        loop.checkpoint_manager = checkpoint_training.checkpoint_save(
             loop.checkpoint_manager,
             loop.model,
             loop.optimizer,
@@ -333,7 +333,7 @@ func run_training(training_loop loop, func get_train_batch, func get_val_batch) 
         }
     }
     
-    loop.checkpoint_manager = checkpoint_manager.checkpoint_save_final(
+    loop.checkpoint_manager = checkpoint_training.checkpoint_save_final(
         loop.checkpoint_manager,
         loop.model,
         loop.optimizer,

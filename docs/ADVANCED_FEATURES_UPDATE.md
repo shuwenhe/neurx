@@ -50,7 +50,7 @@ The NeurX deep learning framework has been expanded with production-grade advanc
 
 ---
 
-### 2️⃣ Mixed Precision Module (`neurx/training/mixed_precision.s`)
+### 2️⃣ Mixed Precision Module (`neurx/amp/scaler.s`)
 
 **Float16/Float32 mixed precision training:**
 
@@ -247,7 +247,7 @@ for epoch in epochs:
 |----------|----------|---------|
 | Advanced Features Guide | `neurx/ADVANCED_FEATURES_GUIDE.md` | Complete API reference, examples, configuration |
 | Vectorization Examples | `neurx/ops/vectorization.s` | 50+ functions with documentation |
-| Mixed Precision Examples | `neurx/training/mixed_precision.s` | Loss scale scheduling, overflow detection |
+| Mixed Precision Examples | `neurx/amp/scaler.s` | Loss scale scheduling, overflow detection |
 | Gradient Accumulation | `neurx/training/gradient_accumulation.s` | Multi-worker support, statistics |
 | Tensor Parallelism | `neurx/distributed/tensor_parallel.s` | Communication primitives, sharding |
 | Test Suite | `neurx/tests/test_advanced_features.s` | 20+ comprehensive tests |

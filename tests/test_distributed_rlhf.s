@@ -83,7 +83,7 @@ func test_compilation() TestResult {
     string[] files = [
         "neurx/distributed/data_parallel.s",
         "neurx/alignment/rlhf_complete.s",
-        "neurx/training/mixed_precision.s",
+        "neurx/amp/scaler.s",
         "neurx/attention/flash_attention_v3.s",
     ]
 

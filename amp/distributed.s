@@ -1,4 +1,4 @@
-package neurx.distributed.mixed_precision
+package neurx.amp.distributed
 
 // ═══════════════════════════════════════════════════════════════════
 // NeurX Mixed Precision Training System

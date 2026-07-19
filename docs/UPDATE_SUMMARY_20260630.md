@@ -35,7 +35,7 @@ English text:
 ---
 
 ### 2. English texttrainingsystem ⚡
-**file**: `neurx/training/mixed_precision.s` (1,200 English text)
+**file**: `neurx/amp/scaler.s` (1,200 English text)
 
 ```
 English text:
@@ -475,7 +475,7 @@ English text:      ✅ complete
 
 ### English text
 - Transformer: `/neurx/model/gpt_transformer.s`
-- English text: `/neurx/training/mixed_precision.s`
+- English text: `/neurx/amp/scaler.s`
 - Flash Attention: `/neurx/attention/flash_attention_v3.s`
 
 ### quickEnglish text

@@ -19,7 +19,7 @@ English textrequest, English textsuccessEnglish text4English textadvancedEnglish
   - 30-50% English text
 
 ### ✅ 2. English texttraining (Mixed Precision)
-- **file**: `neurx/training/mixed_precision.s` (500+ English text)
+- **file**: `neurx/amp/scaler.s` (500+ English text)
 - **English text**:
   - Master-Compute weightmanagement
   - English textlossEnglish text (dynamic loss scaling)
@@ -193,7 +193,7 @@ English text: 1000+ GPU English textextension
 ### English text
 ```
 neurx/ops/vectorization.s               (600+ English text)
-neurx/training/mixed_precision.s        (500+ English text)
+neurx/amp/scaler.s        (500+ English text)
 neurx/training/gradient_accumulation.s  (450+ English text)
 neurx/distributed/tensor_parallel.s     (500+ English text)
 ```

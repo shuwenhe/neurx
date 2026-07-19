@@ -19,7 +19,7 @@ package neurx.posttrain.grpo.grpo_trainer
 
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
-use neurx.training.mixed_precision.*
+use neurx.amp.scaler.*
 use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*

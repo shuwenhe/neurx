@@ -72,8 +72,8 @@ English textcontent:
 ### 5. optimizeEnglish text
 
 English textfile:
-- [optimizer/mixed_precision.s](/Users/shuwen/shuwen/train/neurx/optimizer/mixed_precision.s)
-- [distributed/mixed_precision/mixed_precision.s](/Users/shuwen/shuwen/train/neurx/distributed/mixed_precision/mixed_precision.s)
+- [amp/optimizer.s](/Users/shuwen/shuwen/train/neurx/amp/optimizer.s)
+- [amp/distributed.s](/Users/shuwen/shuwen/train/neurx/amp/distributed.s)
 - [distributed/zero_gradient_reduce.s](/Users/shuwen/shuwen/train/neurx/distributed/zero_gradient_reduce.s)
 
 English textcontent:

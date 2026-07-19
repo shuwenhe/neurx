@@ -15,7 +15,7 @@
 | English text | file | English text | state | English text |
 |-----|------|------|------|------|
 | **Transformer** | model/gpt_transformer.s | 1,200 | ✅ English text | RMSNorm + ALiBi + RoPE + SwiGLU + LayerScale |
-| **English text** | training/mixed_precision.s | 1,200 | ✅ English text | BF16 + English textlossEnglish text + gradientEnglish text + English textstep |
+| **English text** | amp/scaler.s | 1,200 | ✅ English text | BF16 + English textlossEnglish text + gradientEnglish text + English textstep |
 | **inferenceoptimize** | attention/flash_attention_v3.s | 800 | ✅ English text | English textcompute + English textcache + English text + IOoptimize |
 
 #### 2. English text (2,700+ English text)
@@ -363,7 +363,7 @@ English text:        English text
 
 ### English text
 - **Transformer**: `neurx/model/gpt_transformer.s` (1,200 English text)
-- **English text**: `neurx/training/mixed_precision.s` (1,200 English text)
+- **English text**: `neurx/amp/scaler.s` (1,200 English text)
 - **Flash Attn v3**: `neurx/attention/flash_attention_v3.s` (800 English text)
 
 ### English text

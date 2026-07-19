@@ -275,7 +275,7 @@ English text        English text+English text         English text         ✅ E
 
 ### English textfile
 - **modelEnglish text**: `neurx/model/gpt_transformer.s` (1,200 English text)
-- **trainingsystem**: `neurx/training/mixed_precision.s` (1,200 English text)
+- **trainingsystem**: `neurx/amp/scaler.s` (1,200 English text)
 - **inferenceoptimize**: `neurx/attention/flash_attention_v3.s` (800 English text)
 
 ### English text

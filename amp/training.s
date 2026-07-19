@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.amp.training
 
 import "neurx.autograd"
 
@@ -33,6 +33,77 @@ struct mixed_precision_model {
     amp_config: amp_config
     amp_state: amp_state
     param_groups: [][]autograd.tensor
+}
+
+struct autocast_state {
+    bool enabled
+    int dtype
+}
+
+struct grad_scaler_state {
+    float scale
+    float growth_factor
+    float backoff_factor
+    int growth_interval
+    bool found_inf
+}
+
+func new_autocast_state(bool enabled, int dtype) autocast_state {
+    autocast_state {
+        enabled: enabled,
+        dtype: dtype,
+    }
+}
+
+func autocast_enter(autocast_state state) autocast_state {
+    autocast_state {
+        enabled: true,
+        dtype: state.dtype,
+    }
+}
+
+func autocast_exit(autocast_state state) autocast_state {
+    autocast_state {
+        enabled: false,
+        dtype: state.dtype,
+    }
+}
+
+func is_autocast_enabled(autocast_state state) bool {
+    state.enabled
+}
+
+func new_grad_scaler(float scale, float growth_factor, float backoff_factor, int growth_interval, bool enabled) grad_scaler_state {
+    grad_scaler_state {
+        scale: scale,
+        growth_factor: growth_factor,
+        backoff_factor: backoff_factor,
+        growth_interval: growth_interval,
+        found_inf: false,
+    }
+}
+
+func grad_scaler_step(grad_scaler_state scaler, float value) grad_scaler_state {
+    bool found_inf = value > 1000000000000000000000000000000000000.0 || value < -1000000000000000000000000000000000000.0 || value != value
+    float next_scale = scaler.scale
+    if found_inf {
+        next_scale = scaler.scale * scaler.backoff_factor
+    }
+    grad_scaler_state {
+        scale: next_scale,
+        growth_factor: scaler.growth_factor,
+        backoff_factor: scaler.backoff_factor,
+        growth_interval: scaler.growth_interval,
+        found_inf: found_inf,
+    }
+}
+
+func grad_scaler_get_scale(grad_scaler_state scaler) float {
+    scaler.scale
+}
+
+func grad_scaler_found_inf(grad_scaler_state scaler) bool {
+    scaler.found_inf
 }
 
 func new_amp_config(amp_dtype dtype, bool enable_grad_scaling) amp_config {

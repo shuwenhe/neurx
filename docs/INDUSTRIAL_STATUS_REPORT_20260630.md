@@ -70,7 +70,7 @@ BF16 + checkpoint     4GB          75%
 BF16 + ZeRO-2     2GB          87.5%
 ```
 
-**file**: `neurx/training/mixed_precision.s`
+**file**: `neurx/amp/scaler.s`
 
 ### 3️⃣ Flash Attention v3 inferenceoptimize (800 English text)
 

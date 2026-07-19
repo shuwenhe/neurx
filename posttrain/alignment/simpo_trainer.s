@@ -1,7 +1,7 @@
 package neurx.posttrain.alignment.simpo_trainer
 
 use neurx.distributed.collective
-use neurx.training.mixed_precision
+use neurx.amp.scaler
 
 // ════════════════════════════════════════════════════════════════════════════════
 // NEURX SimPO (Simple Preference Optimization) Trainer

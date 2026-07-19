@@ -14,7 +14,7 @@ package neurx.posttrain.alignment
 
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
-import neurx.training.mixed_precision.*
+import neurx.amp.scaler.*
 
 // ============================================================
 // alignmentconfiguration
