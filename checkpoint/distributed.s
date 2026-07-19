@@ -1,4 +1,4 @@
-package neurx.distributed.checkpoint
+package neurx.checkpoint.distributed
 
 // ═══════════════════════════════════════════════════════════════════
 // Async Distributed Checkpoint System — English textstepEnglish textcheckpointsystem

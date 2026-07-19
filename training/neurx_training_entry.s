@@ -33,7 +33,7 @@ package neurx.training
 use neurx.model.transformer.rope_scaling.*
 use neurx.attention.ring.*
 use neurx.distributed.training_3d.*
-use neurx.distributed.checkpoint.*
+use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
 

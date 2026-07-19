@@ -80,7 +80,7 @@ model_large_pretrain.s
 │  ├─ bpe_jsonl_records_to_documents()
 │  └─ English text: pretrain/tokenizer/bpe_tokenizer.s
 │
-├─ neurx.pretrain.checkpoint           ⭐ checkpoint
+├─ neurx.checkpoint.pretrain           ⭐ checkpoint
 │  ├─ pretrain_checkpoint_state
 │  ├─ new_pretrain_checkpoint_state()
 │  ├─ mark_saved()

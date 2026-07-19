@@ -1,4 +1,4 @@
-package neurx.training
+package neurx.checkpoint.training
 
 import "neurx.autograd"
 import "neurx.optimizer"

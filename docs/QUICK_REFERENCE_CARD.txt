@@ -135,7 +135,7 @@ pretrain/llm/gpt_large_pretrain.s (mainEnglish text)
   │  ├─ moe_1t_data_pipeline.s
   │  └─ dataloader
   │
-  ├─ neurx.pretrain.checkpoint             [checkpoint]
+  ├─ neurx.checkpoint.pretrain             [checkpoint]
   ├─ neurx.pretrain.config                 [configuration]
   ├─ neurx.pretrain.eval                   [evaluation]
   ├─ neurx.pretrain.loop                   [English text]

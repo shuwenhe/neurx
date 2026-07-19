@@ -30,7 +30,7 @@ English textfile:
 
 - `neurx/model/transformer/transformer.s`
 - `neurx/train/optimizer.s`
-- `neurx/train/checkpoint_manager.s`
+- `checkpoint/training.s`
 - `neurx/data/tokenizer_pipeline.s`
 
 ### 2. English text / English text / English text
@@ -204,7 +204,7 @@ English text API English text tokenizer cache, beam search, dataloader English t
 1. `neurx/model/transformer/transformer.s`
 2. `neurx/attention/attention.s`
 3. `neurx/train/optimizer.s`
-4. `neurx/train/checkpoint_manager.s`
+4. `checkpoint/training.s`
 5. `neurx/data/tokenizer_pipeline.s`
 6. `neurx/infer/text_generator.s`
 7. `neurx/infer/sampling_beam.s`

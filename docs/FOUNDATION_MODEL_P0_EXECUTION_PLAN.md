@@ -55,8 +55,8 @@ English textfile:
 
 - `train/neurx/train/sharded_checkpoint.s`
 - `train/neurx/train/checkpoint.s`
-- `train/neurx/train/checkpoint_manager.s`
-- `train/neurx/storage/checkpoint_restore.s`
+- `train/checkpoint/training.s`
+- `train/neurx/checkpoint/activation.s`
 
 mainEnglish text:
 

@@ -5,8 +5,8 @@ import "neurx.optimizer"
 import "neurx.loss"
 import "neurx.distributed.zero"
 import "neurx.training.mixed_precision_training"
-import "neurx.autograd.gradient_checkpointing"
-import "neurx.training.checkpoint_manager"
+import "neurx.checkpoint.gradient"
+import "neurx.checkpoint.training"
 
 enum training_mode {
     TRAIN = 0

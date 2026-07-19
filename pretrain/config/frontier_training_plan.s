@@ -253,7 +253,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "pretrain/checkpoint/pretrain_checkpoint.s",
+        "checkpoint/pretrain.s",
         "store model, optimizer, RNG, dataloader cursor, and topology metadata"
     )
     caps[9] = make_capability(

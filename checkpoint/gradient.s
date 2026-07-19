@@ -1,4 +1,4 @@
-package neurx.autograd.gradient_checkpointing
+package neurx.checkpoint.gradient
 
 import "neurx.autograd"
 
