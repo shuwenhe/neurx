@@ -11,7 +11,7 @@ use neurx.model.model_2t_config.{model_2t_config, new_2t_model_config, calculate
 use neurx.model.llm.gpt_large_train.{gpt_large_backward_result, transformer_backward, embedding_apply_grad, tensor_from_ints, one_hot_tensor, scale_tensor, exp_approx, ramp_tensor, zero_tensor, transformer_layer_optimizer_state, new_backbone_optimizer_states, copy_layer_optimizer_state}
 use neurx.ops.{sub, matmul, softmax_last_dim, sum_first_dim, lm_head_logits, cross_entropy, embedding_lookup}
 use neurx.optimizer.optim.{adamw_optimizer, adamw_step_output, adamw_step_state, new_adamw, clip_grad_tensor}
-use neurx.optimizer.schedulers.{cosine_scheduler_compute_lr}
+use neurx.scheduler.schedulers.{cosine_scheduler_compute_lr}
 use neurx.checkpoint.{checkpoint, new_checkpoint, save_checkpoint, load_checkpoint, checkpoint_state_dict, checkpoint_load_state_dict, checkpoint_params, checkpoint_step, checkpoint_loss}
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs}
 use neurx.tensor.tensor

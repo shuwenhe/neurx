@@ -2,7 +2,7 @@ package neurx.optimizer.optimizer
 
 use neurx.tensor.tensor
 use neurx.optimizer.optim
-use neurx.optimizer.scheduler
+use neurx.scheduler.training_scheduler
 
 struct optimizer_param_group {
     []tensor params

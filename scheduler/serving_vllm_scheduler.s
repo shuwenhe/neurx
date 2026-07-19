@@ -1,4 +1,4 @@
-package neurx.serving.vllm.scheduler
+package neurx.scheduler.serving_vllm_scheduler
 
 use neurx.serving.vllm.request_queue
 

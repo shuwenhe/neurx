@@ -11,7 +11,7 @@
 | **P0** | English text (TP) | `distributed/tensor_parallel.s` | 700+ | ✅ English text |
 | **P0** | ZeRO gradientEnglish text | `distributed/zero_gradient_reduce.s` | 650+ | ✅ English text |
 | **P0** | losscomputeEnglish text | `loss/llm_moe_1t_loss.s` | 600+ | ✅ English text |
-| **P1** | learning rateEnglish text | `optimizer/lr_scheduler_moe_1t.s` | 550+ | ✅ English text |
+| **P1** | learning rateEnglish text | `scheduler/lr_scheduler_moe_1t.s` | 550+ | ✅ English text |
 | **P1** | actualdataload | `data/moe_1t_jsonl_loader.s` | 550+ | ✅ English text |
 | **P1** | English textmonitoring | `monitoring/moe_1t_metrics.s` | 600+ | ✅ English text |
 | **P1** | English textsupport | `model/llm/long_context_32k.s` | 550+ | ✅ English text |
@@ -124,7 +124,7 @@ L_total = L_ce + 0.01 * L_aux + 0.05 * L_kl
 
 ---
 
-### 5. learning rateEnglish text (`optimizer/lr_scheduler_moe_1t.s`)
+### 5. learning rateEnglish text (`scheduler/lr_scheduler_moe_1t.s`)
 
 **English text**: Cosine annealing with warmup(+ English text)
 

@@ -140,7 +140,7 @@ English text:
 
 ### 5. learning rateEnglish text
 
-**file**: `optimizer/lr_scheduler_moe_1t.s` (422 English text)
+**file**: `scheduler/lr_scheduler_moe_1t.s` (422 English text)
 
 **supportEnglish text**:
 - ✅ English text (default): 10K stepEnglish text → 750K stepEnglish text

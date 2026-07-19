@@ -406,7 +406,7 @@ English textNeurXframeworkEnglish textcompleteEnglish text!🚀
 | English text | `distributed/tensor_parallel.s` | weightEnglish text | ✅ |
 | ZeRO gradientEnglish text | `distributed/zero_gradient_reduce.s` | parameterEnglish textoptimize | ✅ |
 | losscompute | `loss/llm_moe_1t_loss.s` | CE+MoE+KL loss | ✅ |
-| LR English text | `optimizer/lr_scheduler_moe_1t.s` | English text | ✅ |
+| LR English text | `scheduler/lr_scheduler_moe_1t.s` | English text | ✅ |
 | dataload | `data/moe_1t_jsonl_loader.s` | JSONL→BPE tokenization | ✅ |
 | monitoringsystem | `monitoring/moe_1t_metrics.s` | English textmonitoring | ✅ |
 | English text | `model/llm/long_context_32k.s` | 32K RoPE extension | ✅ |

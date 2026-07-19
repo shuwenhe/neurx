@@ -1,4 +1,4 @@
-package neurx.optimizer.lr_scheduler
+package neurx.scheduler.lr_scheduler
 
 // =====================================================================
 // Learning Rate Scheduler

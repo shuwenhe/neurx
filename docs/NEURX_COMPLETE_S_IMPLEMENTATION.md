@@ -52,7 +52,7 @@ cmd/complete-system/main.s (Master)
     │
     ├─→ training/end_to_end_training.s (Training)
     │       ├─→ optimizer/adamw.s (Optimization)
-    │       ├─→ optimizer/lr_scheduler.s (Learning Rate)
+    │       ├─→ scheduler/lr_scheduler.s (Learning Rate)
     │       ├─→ distributed/ddp/ddp.s (Distributed)
     │       └─→ data/data_pipeline.s (Data Loading)
     │

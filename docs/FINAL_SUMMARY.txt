@@ -15,7 +15,7 @@ fileEnglish text:
   ✅ distributed/tensor_parallel.s            329 English text
   ✅ distributed/zero_gradient_reduce.s       504 English text
   ✅ model/llm/gpt_moe_1t_loss.s              495 English text
-  ✅ optimizer/lr_scheduler_moe_1t.s           422 English text
+  ✅ scheduler/lr_scheduler_moe_1t.s           422 English text
   ✅ data/moe_1t_jsonl_loader.s               430 English text
   ✅ monitoring/moe_1t_metrics.s              598 English text
   ✅ model/llm/long_context_32k.s             461 English text
@@ -256,7 +256,7 @@ English text (English text):
   • distributed/tensor_parallel.s
   • distributed/zero_gradient_reduce.s
   • model/llm/gpt_moe_1t_loss.s
-  • optimizer/lr_scheduler_moe_1t.s
+  • scheduler/lr_scheduler_moe_1t.s
   • data/moe_1t_jsonl_loader.s
   • monitoring/moe_1t_metrics.s
   • model/llm/long_context_32k.s

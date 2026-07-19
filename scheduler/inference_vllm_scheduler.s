@@ -1,4 +1,4 @@
-package neurx.inference.vllm.scheduler
+package neurx.scheduler.inference_vllm_scheduler
 
 use neurx.inference.vllm.request_queue
 

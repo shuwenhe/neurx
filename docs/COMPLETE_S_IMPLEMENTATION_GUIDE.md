@@ -33,7 +33,7 @@ NeurX Architecture (Pure S Language)
 │
 ├── 3. Training Layer
 │   ├── optimizer/adamw.s                  - AdamW optimizer
-│   ├── optimizer/lr_scheduler.s           - Learning rate scheduling
+│   ├── scheduler/lr_scheduler.s           - Learning rate scheduling
 │   ├── training/train_loop.s        - Main training loop
 │   ├── training/checkpoint.s        - Checkpointing system
 │   ├── training/validator.s         - Validation pipeline
@@ -130,7 +130,7 @@ NeurX Architecture (Pure S Language)
 - [x] Training loop (training/train_loop.s)
 - [x] Checkpoint system (training/checkpoint.s)
 - [x] Validation pipeline (training/validator.s)
-- [x] Learning rate scheduling (optimizer/lr_scheduler.s)
+- [x] Learning rate scheduling (scheduler/lr_scheduler.s)
 - [x] Gradient clipping and accumulation
 - [x] Monitoring system (training/monitor.s)
 - [ ] **TODO**: Mixed precision training integration

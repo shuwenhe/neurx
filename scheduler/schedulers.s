@@ -1,4 +1,4 @@
-package neurx.optimizer.schedulers
+package neurx.scheduler.schedulers
 
 // ── math helpers ─────────────────────────────────────────────────────────────
 

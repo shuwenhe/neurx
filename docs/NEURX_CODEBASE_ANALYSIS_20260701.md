@@ -157,7 +157,7 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 - ✅ Warmup support
 - ✅ Checkpoint save/load functionality
 
-**Learning Rate Scheduler** (neurx/optimizer/lr_scheduler.s):
+**Learning Rate Scheduler** (neurx/scheduler/lr_scheduler.s):
 - ✅ Linear warmup phase
 - ✅ Cosine annealing decay
 - ✅ Linear decay variant
@@ -404,7 +404,7 @@ Total steps: 400K
 **Files Present**:
 - `neurx/training/mixed_precision.s` - handles mixed precision
 - `neurx/optimizer/adamw.s` - has optimizer
-- `neurx/optimizer/lr_scheduler.s` - has LR scheduling
+- `neurx/scheduler/lr_scheduler.s` - has LR scheduling
 - `neurx/train_full.s` - attempts full integration but needs verification
 
 **Gap**: Main training loop needs orchestration and testing with all components together

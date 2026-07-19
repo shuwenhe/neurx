@@ -24,7 +24,7 @@ Current canonical modules:
 - `serving/decode/decode.s`
 - `serving/sampling/sampling.s`
 - `serving/vllm/vllm.s`
-- `serving/vllm/scheduler.s`
+- `scheduler/serving_vllm_scheduler.s`
 - `serving/vllm/request_queue.s`
 - `serving/vllm/metrics.s`
 

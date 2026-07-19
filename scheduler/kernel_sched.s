@@ -1,4 +1,6 @@
-// kernel/sched/sched.s
+package neurx.scheduler.kernel_sched
+
+// scheduler/kernel_sched.s
 // AI task scheduler — analogue of Linux kernel/sched/core.c
 //
 // Linux maps:

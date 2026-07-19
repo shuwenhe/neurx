@@ -1,7 +1,7 @@
 package neurx.inference.vllm.vllm
 
 use neurx.inference.vllm.request_queue
-use neurx.inference.vllm.scheduler
+use neurx.scheduler.inference_vllm_scheduler
 use neurx.inference.vllm.metrics
 use neurx.inference.vllm.prefix_cache
 use neurx.attention.inference_paged

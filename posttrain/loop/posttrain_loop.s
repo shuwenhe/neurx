@@ -6,7 +6,7 @@ use neurx.posttrain.reward
 use neurx.posttrain.checkpoint
 use neurx.posttrain.eval
 use neurx.optimizer.optimizer
-use neurx.optimizer.scheduler
+use neurx.scheduler.training_scheduler
 
 struct posttrain_loop_state {
     posttrain_config cfg

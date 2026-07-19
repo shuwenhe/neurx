@@ -1,7 +1,7 @@
 package neurx.serving.vllm.vllm
 
 use neurx.serving.vllm.request_queue
-use neurx.serving.vllm.scheduler
+use neurx.scheduler.serving_vllm_scheduler
 use neurx.serving.vllm.metrics
 use neurx.serving.vllm.prefix_cache
 use neurx.attention.serving_paged
