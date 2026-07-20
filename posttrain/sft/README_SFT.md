@@ -142,7 +142,7 @@ sft_train_result result = start_sft_training(ref trainer)
 NeurX also ships a callable LoRA SFT entry for local runs and smoke tests:
 
 ```bash
-make run-lora-sft-training-s
+make posttrain
 ```
 
 It uses the same SFT data path defaults as the main SFT flow and writes LoRA checkpoints under:
